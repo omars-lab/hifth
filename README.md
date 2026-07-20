@@ -25,7 +25,12 @@ pnpm gates          # CI content gates (no-<text>, license, JS budget)
 
 ## Status
 
-**Loop 0 complete** — installable RTL PWA rendering a real Madani mushaf page (7),
+**Loop 1 complete** — tap an ayah on the page to select it (amber highlight + surah/ayah
+chip), with pan and pinch-zoom, on the real three-layer architecture. The inline-SVG
+performance verdict is deferred to an on-device measurement before Loop 4. See
+[`docs/decisions/loop-1.md`](docs/decisions/loop-1.md).
+
+_Previously:_ **Loop 0** — installable RTL PWA rendering a real Madani mushaf page (7),
 with CI gates and Cloudflare Pages deploy config. See [`docs/decisions/loop-0.md`](docs/decisions/loop-0.md).
 
 ## Docs

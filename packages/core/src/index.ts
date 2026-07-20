@@ -20,3 +20,13 @@ export {
   decodeAyahNumber,
   type AyahKey,
 } from "./keys.js";
+
+export { Resolver, type ResolvedLocation } from "./resolver.js";
+
+export {
+  Highlighter,
+  type GroupId,
+  type StyleToken,
+  type Rect,
+  type Resolved,
+} from "./highlighter.js";

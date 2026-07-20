@@ -180,7 +180,7 @@ survival test (installed vs tab) runs once in Loop 6.
 
 ## 7. The loops
 
-### Loop 0 — Skeleton on a phone (small)
+### Loop 0 — Skeleton on a phone (small) — ✅ complete ([loop-0.md](decisions/loop-0.md))
 pnpm workspace; ESLint boundaries; Vitest + Playwright mobile; CI (lint, test, **JS-budget
 gate**, **license gate** reading `SOURCES.md`); design tokens + `dir="rtl"` shell; PWA
 manifest + install-prompt scaffold; Cloudflare Pages deploy. Extract the mock's 3 pages
@@ -188,7 +188,7 @@ manifest + install-prompt scaffold; Cloudflare Pages deploy. Extract the mock's 
 quran-svg corpus completeness** and record licenses in `SOURCES.md`.
 **Exit:** deployed installable shell showing page 7; CI green with gates.
 
-### Loop 1 — Select + the performance verdict (small; de-risks everything)
+### Loop 1 — Select + the performance verdict (small; de-risks everything) — ✅ interactions complete; perf verdict deferred to on-device ([loop-1.md](decisions/loop-1.md))
 `keys.ts`, `resolver.ts` (ayah-polygon adapter over the 3 pages' `verse-N` /
 `number="SSSAAA"` attrs); `PageStage` inline SVG; @use-gesture pan/zoom with `touch-action`
 + pinch/drag disambiguation; tap polygon → highlight + `onSelect`.

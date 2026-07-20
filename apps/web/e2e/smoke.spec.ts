@@ -29,4 +29,23 @@ test.describe("Hifth shell", () => {
     // Manifest is linked.
     await expect(page.locator("link[rel='manifest']")).toHaveCount(1);
   });
+
+  // Loop 1 exit criterion: tap an ayah polygon → it selects, on a touch device.
+  test("tapping an ayah selects it and draws the highlight", async ({ page }) => {
+    await page.goto("/");
+    await expect(page.locator("svg[role='img']")).toBeVisible();
+
+    // Before any tap, the footer prompts for a selection.
+    await expect(page.getByText(/المس آية على الصفحة لتحديدها/)).toBeVisible();
+
+    // Tap a real ayah polygon on page 7 (verse-45 = 2:38 per the manifest).
+    const poly = page.locator("#verse-45");
+    await expect(poly).toHaveCount(1);
+    await poly.tap();
+
+    // The selection chip appears with the surah name + ayah ref, and the
+    // highlighter drew a selection clone into the additive overlay.
+    await expect(page.getByText(/البقرة/)).toBeVisible();
+    await expect(page.locator("#hifth-overlay .hl-sel")).toHaveCount(1);
+  });
 });

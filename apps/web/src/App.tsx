@@ -1,24 +1,40 @@
-import { useEffect, useState } from "react";
-import type { AssetManifest } from "@hifth/core";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { Resolver, type AssetManifest } from "@hifth/core";
 import { loadManifest } from "./assets";
+import { ayahLabel } from "./format";
 import { PageStage } from "./components/PageStage";
 import { InstallButton } from "./components/InstallButton";
 import styles from "./App.module.css";
 
-// Loop 0 opens on page 7 (the mock's first curated page). Page routing is Loop 3.
+// Loop 1 opens on page 7 (the mock's first curated page). Page routing is Loop 3.
 const START_PAGE = 7;
 
 export function App(): JSX.Element {
   const [manifest, setManifest] = useState<AssetManifest | null>(null);
   const [page] = useState(START_PAGE);
+  const [selectedKey, setSelectedKey] = useState<string | null>(null);
 
   useEffect(() => {
-    loadManifest().then(setManifest).catch(() => setManifest(null));
+    loadManifest()
+      .then(setManifest)
+      .catch(() => setManifest(null));
   }, []);
 
-  const edition = manifest?.edition ?? "hafs-kfqc";
+  // One Resolver per manifest — passed to the stage, reused for lookups.
+  const resolver = useMemo(
+    () => (manifest ? new Resolver(manifest) : null),
+    [manifest],
+  );
+
   const pageMeta = manifest?.pages.find((p) => p.page === page);
   const ayahCount = pageMeta?.polygons.length ?? 0;
+
+  // Tapping the same ayah again clears it (toggle); otherwise select it.
+  const handleSelect = useCallback((key: string) => {
+    setSelectedKey((prev) => (prev === key ? null : key));
+  }, []);
+
+  const selectedLabel = selectedKey ? ayahLabel(selectedKey) : null;
 
   return (
     <div className={styles.app} dir="rtl">
@@ -37,16 +53,39 @@ export function App(): JSX.Element {
       </header>
 
       <main className={styles.main}>
-        <PageStage edition={edition} page={page} label={`صفحة ${page}`} />
+        {resolver && (
+          <PageStage
+            resolver={resolver}
+            page={page}
+            label={`صفحة ${page}`}
+            selectedKey={selectedKey}
+            onSelect={handleSelect}
+          />
+        )}
       </main>
 
       <footer className={styles.trail} aria-label="المسار">
-        {/* Subha-bead trail is the Loop 2 signature; Loop 0 shows the resting strip. */}
-        <span className={styles.trailHint}>
-          {ayahCount > 0
-            ? `${ayahCount} آيات قابلة للتحديد على هذه الصفحة`
-            : "…"}
-        </span>
+        {selectedLabel ? (
+          <button
+            type="button"
+            className={styles.selection}
+            onClick={() => setSelectedKey(null)}
+            aria-live="polite"
+          >
+            <span className={styles.selectionMark} aria-hidden="true" />
+            <span className={styles.selectionLabel}>{selectedLabel}</span>
+            <span className={styles.selectionClear} aria-hidden="true">
+              ✕
+            </span>
+            <span className="sr-only">إلغاء التحديد</span>
+          </button>
+        ) : (
+          <span className={styles.trailHint}>
+            {ayahCount > 0
+              ? `المس آية على الصفحة لتحديدها · ${ayahCount} آية`
+              : "…"}
+          </span>
+        )}
       </footer>
     </div>
   );

@@ -3,6 +3,10 @@
   "compilerOptions": {
     "outDir": "./dist",
     "rootDir": "./src",
+    // The highlighter is L2's SVG owner (spec §2–§3): "framework-free" means no
+    // React, NOT no DOM. It needs SVG/DOM lib types; the ESLint boundary is what
+    // keeps React and app code out, not the absence of the DOM lib here.
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
     "types": []
   },
   "include": ["src"],

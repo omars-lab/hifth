@@ -19,6 +19,21 @@
   filter: drop-shadow(var(--shadow-2));
   border-radius: var(--radius-sm);
   background: var(--paper-raised);
+  /* Pan/zoom transform is written here imperatively (PageStage). Origin at the
+     top-left keeps the translate/scale math simple and GPU-composited. */
+  transform-origin: 0 0;
+  will-change: transform;
+}
+
+/* Glyph paths must never eat pointer events — the ayah polygons take all hits
+   (asset README + spec §3), so a tap always resolves to a verse, not a glyph. */
+.host :global(svg) :global(path) {
+  pointer-events: none;
+}
+.host :global(svg) :global(.ayahPolygon),
+.host :global(svg) :global([id^="verse-"]) {
+  pointer-events: fill;
+  cursor: pointer;
 }
 
 .host[data-status="loading"] {

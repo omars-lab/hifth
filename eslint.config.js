@@ -72,6 +72,13 @@ export default tseslint.config(
     files: ["packages/etl/**/*.{mjs,ts}", "scripts/**/*.mjs"],
     languageOptions: { globals: { ...globals.node } },
   },
+  // The perf harness is a Node script that ALSO ships browser code inside
+  // page.evaluate() callbacks — ESLint parses those bodies (they run in
+  // Chromium, not Node), so it needs both global sets.
+  {
+    files: ["apps/web/perf/**/*.mjs"],
+    languageOptions: { globals: { ...globals.node, ...globals.browser } },
+  },
   // Browser globals for the web app.
   {
     files: ["apps/web/**/*.{ts,tsx}"],

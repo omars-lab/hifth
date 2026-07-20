@@ -10,10 +10,12 @@
     "preview": "vite preview",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "vitest run",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "perf": "node perf/pan-zoom-trace.mjs"
   },
   "dependencies": {
     "@hifth/core": "workspace:*",
+    "@use-gesture/react": "^10.3.1",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"
   },

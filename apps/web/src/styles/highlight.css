@@ -1,0 +1,57 @@
+/*
+ * Highlight overlay styles (spec §3, §9).
+ *
+ * The Highlighter (in @hifth/core) clones an ayah polygon into the SVG's
+ * `#hifth-overlay` group and tags it `.hl .hl-<style>`. These clones live inside
+ * the SVG document, so their styles must be global (not CSS-module-scoped). The
+ * wash + ring is the amber "you are here" reserved by the design tokens.
+ */
+
+#hifth-overlay .hl {
+  pointer-events: none;
+}
+
+/* Selection — the amber wash. One selection at a time. */
+#hifth-overlay .hl-sel {
+  fill: var(--highlight-wash);
+  stroke: var(--highlight-ring);
+  stroke-width: 1.2;
+  stroke-linejoin: round;
+}
+
+/* Breadcrumb — where you hopped FROM. Quieter, verdigris outline (Loop 2). */
+#hifth-overlay .hl-crumb {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 1;
+  stroke-dasharray: 3 2;
+  opacity: 0.8;
+}
+
+/* Range marquee highlight (Loop 5 drag-select preview). */
+#hifth-overlay .hl-hlt {
+  fill: var(--highlight-wash);
+  stroke: none;
+}
+
+/* Pulse on landing — one orchestrated motion moment (the hop). Reduced-motion
+   collapses the animation to nothing (tokens set --dur-hop to 0). */
+#hifth-overlay .hl-sel.pulse {
+  animation: hifth-pulse var(--dur-hop) var(--ease-hop);
+}
+@keyframes hifth-pulse {
+  0% {
+    fill-opacity: 0;
+  }
+  40% {
+    fill-opacity: 1;
+  }
+  100% {
+    fill-opacity: 1;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  #hifth-overlay .hl-sel.pulse {
+    animation: none;
+  }
+}
