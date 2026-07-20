@@ -1,0 +1,40 @@
+{
+  "name": "hifth",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Hifth (حفظ) — a pure navigation instrument for huffaz",
+  "type": "module",
+  "packageManager": "pnpm@9.15.0",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "dev": "pnpm --filter @hifth/web dev",
+    "build": "pnpm --filter @hifth/core build && pnpm --filter @hifth/web build",
+    "preview": "pnpm --filter @hifth/web preview",
+    "lint": "eslint .",
+    "typecheck": "pnpm -r typecheck",
+    "test": "pnpm -r test",
+    "test:e2e": "pnpm --filter @hifth/web test:e2e",
+    "etl": "pnpm --filter @hifth/etl etl",
+    "audit:corpus": "node packages/etl/scripts/audit-corpus.mjs",
+    "gate:budget": "node scripts/gate-budget.mjs",
+    "gate:notext": "node scripts/gate-notext.mjs",
+    "gate:license": "node scripts/gate-license.mjs",
+    "gates": "pnpm gate:notext && pnpm gate:license && pnpm gate:budget"
+  },
+  "pnpm": {
+    "overrides": {
+      "vite": "^5.4.11"
+    }
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.17.0",
+    "eslint": "^9.17.0",
+    "eslint-import-resolver-typescript": "^3.7.0",
+    "eslint-plugin-import": "^2.31.0",
+    "globals": "^15.14.0",
+    "typescript": "^5.7.2",
+    "typescript-eslint": "^8.19.0"
+  }
+}

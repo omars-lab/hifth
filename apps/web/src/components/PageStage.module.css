@@ -1,0 +1,43 @@
+.stage {
+  position: relative;
+  flex: 1 1 auto;
+  display: grid;
+  place-items: center;
+  padding: var(--space-4);
+  /* The stage owns touch; Loop 1 wires @use-gesture with touch-action here. */
+  touch-action: none;
+  overflow: hidden;
+  background:
+    radial-gradient(120% 90% at 50% 0%, var(--paper-raised), var(--paper) 60%);
+}
+
+.host {
+  display: block;
+  /* Portrait mushaf aspect; the SVG scales to fit width on a phone. */
+  width: min(100%, 62vh);
+  max-width: 480px;
+  filter: drop-shadow(var(--shadow-2));
+  border-radius: var(--radius-sm);
+  background: var(--paper-raised);
+}
+
+.host[data-status="loading"] {
+  opacity: 0;
+}
+.host[data-status="ready"] {
+  opacity: 1;
+  transition: opacity var(--dur-med) var(--ease-hop);
+}
+
+.svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.hint {
+  position: absolute;
+  inset-block-end: var(--space-5);
+  color: var(--ink-soft);
+  font-size: var(--text-sm);
+}

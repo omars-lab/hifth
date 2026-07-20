@@ -1,0 +1,8 @@
+node_modules/
+dist/
+.turbo/
+*.tsbuildinfo
+apps/web/dev-dist/
+apps/web/playwright-report/
+apps/web/test-results/
+.DS_Store

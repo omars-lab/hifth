@@ -1,0 +1,33 @@
+{
+  "name": "@hifth/web",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Hifth web app — mobile-first, RTL-native, installable PWA",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -p tsconfig.json --noEmit && vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run",
+    "test:e2e": "playwright test"
+  },
+  "dependencies": {
+    "@hifth/core": "workspace:*",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.49.1",
+    "@testing-library/jest-dom": "^6.6.3",
+    "@testing-library/react": "^16.1.0",
+    "@types/react": "^18.3.18",
+    "@types/react-dom": "^18.3.5",
+    "@vitejs/plugin-react": "^4.3.4",
+    "jsdom": "^25.0.1",
+    "vite": "^5.4.11",
+    "vite-plugin-pwa": "^0.21.1",
+    "vitest": "^2.1.8",
+    "workbox-window": "^7.3.0"
+  }
+}

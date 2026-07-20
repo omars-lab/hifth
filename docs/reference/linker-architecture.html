@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Linker رابط — System Architecture</title>
+<style>
+:root{
+  --binding:#0E3A2C; --binding2:#175641; --binding3:#0A2B20;
+  --gilt:#C2A14D; --gilt2:#E7CE86; --gilt3:#8f7433;
+  --paper:#FBF8F1; --ink:#221D15; --inksoft:#6a6250;
+  --rose:#B4433A; --teal:#25756D; --blue:#2b567f;
+  --ar:"Scheherazade New","Amiri","Noto Naskh Arabic",Georgia,serif;
+  --ui:ui-sans-serif,system-ui,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  font-family:var(--ui); color:var(--paper); background:
+   radial-gradient(1100px 600px at 50% -8%, #1b6a50 0%, transparent 60%),
+   linear-gradient(165deg,var(--binding2),var(--binding) 45%,var(--binding3));
+  min-height:100vh; padding:34px 18px 60px;
+}
+.wrap{max-width:1060px;margin:0 auto}
+h1{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:6px}
+h1 .ar{font-family:var(--ar);font-weight:400;font-size:40px;color:var(--gilt2)}
+h1 .lat{font-size:13px;letter-spacing:.3em;text-transform:uppercase;color:#cfe3da}
+.sub{font-size:13px;color:#b9d3c8;max-width:640px;line-height:1.6;margin-bottom:30px}
+.sub b{color:var(--gilt2);font-weight:600}
+
+/* ---------- band scaffolding ---------- */
+.band{position:relative;margin-bottom:0}
+.bandhdr{display:flex;align-items:center;gap:12px;margin:0 0 12px}
+.bandhdr .n{
+  font-family:var(--ar);font-size:20px;color:var(--gilt2);
+  width:34px;height:34px;border-radius:50%;border:1px solid var(--gilt3);
+  display:grid;place-items:center;flex:none;background:#0c322680;
+}
+.bandhdr .t{font-size:11px;letter-spacing:.26em;text-transform:uppercase;color:var(--gilt2)}
+.bandhdr .d{font-size:11px;color:#a9c6ba;flex:1}
+.cards{display:grid;gap:10px}
+.c3{grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
+.c4{grid-template-columns:repeat(auto-fit,minmax(190px,1fr))}
+.card{
+  background:var(--paper);color:var(--ink);border-radius:10px;padding:12px 14px;
+  box-shadow:0 14px 30px -16px #000b, 0 0 0 1px #c2a14d55;
+  display:flex;flex-direction:column;gap:6px;
+}
+.card .k{font-size:12px;font-weight:700;letter-spacing:.02em;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.card .k .pill{font-size:8.5px;letter-spacing:.14em;text-transform:uppercase;padding:2px 8px;border-radius:999px;font-weight:600}
+.pill.svg{background:#e8f0ea;color:#20614c}
+.pill.data{background:#efe7cf;color:#7a651f}
+.pill.res{background:#eee;color:#777;border:1px dashed #bbb}
+.card p{font-size:11px;color:var(--inksoft);line-height:1.55}
+.card p b{color:var(--ink)}
+.card .src{font-size:10px;color:#9a8d6d;margin-top:auto;padding-top:4px;border-top:1px dashed #e5dcbf}
+.card.reserved{background:#f3f1ea;opacity:.72}
+.card.dark{
+  background:#0c3226e6;color:#e8f1ec;box-shadow:0 14px 30px -16px #000d,0 0 0 1px var(--gilt3);
+}
+.card.dark p{color:#b9d3c8}
+.card.dark p b{color:var(--gilt2)}
+.card.dark .k{color:var(--gilt2)}
+.card .mono{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:10px;background:#00000010;border-radius:5px;padding:5px 8px;color:#3d3628;line-height:1.6;white-space:pre-wrap}
+.card.dark .mono{background:#00000045;color:#cfe3d3}
+
+/* ---------- flow arrows between bands ---------- */
+.flow{display:flex;justify-content:center;padding:14px 0 16px}
+.flow svg{display:block}
+.flowlab{
+  display:flex;justify-content:center;gap:8px;align-items:center;
+  font-size:9.5px;letter-spacing:.22em;text-transform:uppercase;color:#9fc0b4;
+  margin-top:-8px;padding-bottom:14px;text-align:center;
+}
+
+/* ---------- runtime layer stack ---------- */
+.stack{display:grid;gap:0;border-radius:12px;overflow:hidden;box-shadow:0 22px 44px -18px #000d}
+.layer{display:grid;grid-template-columns:120px 1fr;border-bottom:1px solid #c2a14d44}
+.layer:last-child{border-bottom:0}
+.ltag{
+  background:#0c3226;display:flex;flex-direction:column;justify-content:center;
+  padding:14px;gap:3px;border-right:1px solid #c2a14d44;
+}
+.ltag .l{font-size:16px;font-weight:700;color:var(--gilt2)}
+.ltag .s{font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:#9fc0b4}
+.lbody{background:var(--paper);color:var(--ink);padding:12px 14px}
+.lbody .k{font-size:12px;font-weight:700;margin-bottom:4px}
+.lbody p{font-size:11px;color:var(--inksoft);line-height:1.6}
+.lbody p b{color:var(--ink)}
+.contract{
+  font-size:9.5px;letter-spacing:.2em;text-transform:uppercase;color:#9fc0b4;
+  display:flex;align-items:center;gap:10px;justify-content:center;padding:7px;
+  background:#0a2b20;border-top:1px solid #c2a14d33;border-bottom:1px solid #c2a14d33;
+}
+.contract code{font-family:ui-monospace,Menlo,monospace;font-size:10px;color:var(--gilt2);letter-spacing:0;text-transform:none}
+
+/* ---------- link-derivation legend ---------- */
+.legend{margin-top:34px}
+.ltable{display:grid;gap:8px}
+.lrow{
+  display:grid;grid-template-columns:44px 150px 1fr 190px;gap:12px;align-items:center;
+  background:var(--paper);color:var(--ink);border-radius:9px;padding:9px 13px;
+  box-shadow:0 10px 24px -14px #000a,0 0 0 1px #c2a14d44;font-size:11px;
+}
+.lrow.reserved{background:#f3f1ea;opacity:.7}
+.lrow .ic{
+  width:30px;height:30px;border-radius:50%;background:var(--gilt);color:#221d0d;
+  display:grid;place-items:center;font-weight:700;font-size:13px;
+}
+.lrow.reserved .ic{background:#a8b5ae;color:#20322a}
+.lrow .et{font-weight:700}
+.lrow .et small{display:block;font-weight:400;color:#9a8d6d;font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;margin-top:2px}
+.lrow .how{color:var(--inksoft);line-height:1.55}
+.lrow .how b{color:var(--ink)}
+.lrow .from{font-size:10px;color:#9a8d6d;line-height:1.5;text-align:right}
+.ar-inline{font-family:var(--ar);font-size:15px}
+footer{margin-top:40px;text-align:center;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:#7ea294}
+@media(max-width:760px){
+  .lrow{grid-template-columns:36px 1fr;grid-auto-rows:auto}
+  .lrow .how{grid-column:1/-1}
+  .lrow .from{grid-column:1/-1;text-align:left}
+  .layer{grid-template-columns:74px 1fr}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1><span class="ar">رَابِط</span><span class="lat">Linker · System Architecture</span></h1>
+<p class="sub">A pure navigation instrument for huffaz. Four bands: <b>sources</b> feed an
+<b>offline ETL</b> that emits <b>static data</b>, consumed by a <b>three-layer runtime</b>
+with no backend. The rule that holds it together: <b>assets are never modified</b>, and only
+one component — the Highlighter — is allowed to know what an SVG is.</p>
+
+<!-- ═══════════ BAND 1 · SOURCES ═══════════ -->
+<div class="band">
+  <div class="bandhdr"><span class="n">١</span><span class="t">Sources</span>
+    <span class="d">all external, all used as shipped — provenance shown per card</span></div>
+  <div class="cards c4">
+    <div class="card">
+      <div class="k">Mushaf SVG pages <span class="pill svg">SVG assets</span></div>
+      <p><b>quranpedia/quran-svg</b> — pages per qiraa/publisher with a built-in transparent
+      <b>ayah hit-layer</b> (<span style="font-family:monospace;font-size:10px">path.ayahPolygon [surah][ayah]</span>),
+      per-page polygon JSON + medallion centres (markers.json). Demo uses Hafs·KFQC p7/9/19.</p>
+      <p class="src">Origin: vectorised from King Fahd Glorious Quran Printing Complex (KFGQPC) print artwork · GitHub</p>
+    </div>
+    <div class="card">
+      <div class="k">Word-level SVG corpus <span class="pill svg">SVG assets</span></div>
+      <p><b>MushafDatabase ligature-based SVG</b> — 604 Madinah pages; every word an addressable
+      <b>md-word group</b>, 15 line slots, ligature/diacritic paths. Unlocks word-span hops,
+      phrase pulsing, runtime tajweed skin.</p>
+      <p class="src">Origin: Madinah Mushaf (Hafs) page geometry · GitHub</p>
+    </div>
+    <div class="card">
+      <div class="k">QUL — Quranic Universal Library <span class="pill data">data</span></div>
+      <p><b>Mushaf layout SQLite</b> (page/line/word tables — the independent cross-check for
+      anchors) · <b>mutashabihat phrase data</b> (phrases.json + phrase_verses.json with word
+      start/end ranges) · morphology · metadata.</p>
+      <p class="src">qul.tarteel.ai · per-resource licenses</p>
+    </div>
+    <div class="card">
+      <div class="k">Hifz-curated mutashabihat <span class="pill data">data</span></div>
+      <p><b>Waqar144 dataset</b> — only the pairs that actually confuse huffaz, with a
+      <b>ctx flag</b> (“show the next ayah’s opening”). The primary hop-edge source in
+      memorization use.</p>
+      <p class="src">Community, hifz-reviewed · GitHub</p>
+    </div>
+    <div class="card">
+      <div class="k">QurSim <span class="pill data">data</span></div>
+      <p><b>~7,600 related-verse pairs</b> with graded relatedness, derived from Ibn Kathir’s
+      tafsir by Leeds researchers. Becomes the secondary “related meaning” edge type.</p>
+      <p class="src">Sharaf &amp; Atwell, LREC 2012</p>
+    </div>
+    <div class="card">
+      <div class="k">Quranic Arabic Corpus <span class="pill data">data</span></div>
+      <p><b>Root / lemma / POS for 77k+ tokens.</b> Feeds the root index — the
+      <span class="ar-inline">⬡</span> lens (find words by shared triliteral root, lemma-tight
+      matches ranked first).</p>
+      <p class="src">corpus.quran.com (Dukes) + QUL morphology export</p>
+    </div>
+    <div class="card">
+      <div class="k">Tajweed rule spans <span class="pill data">data</span></div>
+      <p><b>quran/tajweed project</b> — algorithmic rule annotations (madd, ghunnah, qalqalah,
+      ikhfa…) over text positions, replicating the printed colour-tajweed mushaf schemes.</p>
+      <p class="src">quran.com open source · GitHub</p>
+    </div>
+    <div class="card reserved">
+      <div class="k">Reserved sources <span class="pill res">phase 6</span></div>
+      <p>Quran↔hadith citation mappings (Quran.com API), <b>SemanticHadith</b> KG,
+      <b>SemanticTafsir</b> (al-Ṭabarī), classical lexicons (Lane, Lisān al-ʿArab).
+      Land as new edge types — data drop only, no code change.</p>
+      <p class="src">Registered in registry.json as status:reserved</p>
+    </div>
+  </div>
+</div>
+
+<div class="flow"><svg width="40" height="46" viewBox="0 0 40 46"><path d="M20 2v32" stroke="#C2A14D" stroke-width="2.5" stroke-linecap="round"/><path d="M10 26 20 40 30 26" fill="none" stroke="#C2A14D" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+<div class="flowlab">offline · runs in CI · assets pass through untouched</div>
+
+<!-- ═══════════ BAND 2 · ETL ═══════════ -->
+<div class="band">
+  <div class="bandhdr"><span class="n">٢</span><span class="t">ETL pipeline</span>
+    <span class="d">five passes; two gates; deterministic output</span></div>
+  <div class="cards c3">
+    <div class="card dark">
+      <div class="k">① Anchor extraction</div>
+      <p>Read each asset’s <b>own metadata</b> (polygon JSON, markers, md-word IDs, QUL layout
+      DB) → resolver tables:</p>
+      <div class="mono">anchor_ayah(edition, s:a → page, element_id, bbox, marker)
+anchor_word(edition, s:a, w → page, element_id, bbox)
+concordance(edition_a ⇄ edition_b)</div>
+    </div>
+    <div class="card dark">
+      <div class="k">② Edge normalisation</div>
+      <p>Every source speaks a different addressing scheme (absolute ayah numbers, s:a pairs,
+      phrase IDs). All are rewritten to <b>canonical keys</b>
+      (<code style="font-size:10px">quran/hafs-kfqc/2:48#w6-14</code>), deduped, weighted,
+      tagged with provenance.</p>
+    </div>
+    <div class="card dark">
+      <div class="k">③ Direction annotation</div>
+      <p>For each edge, precompute <b>Δsurah, Δpage, same-juz</b> from the anchor tables. This
+      is what turns a generic “related verses” list into the hafiz-shaped buckets:
+      same surah / earlier / later / nearby.</p>
+    </div>
+    <div class="card dark">
+      <div class="k">④ Root index build</div>
+      <p>Morphology → <b>root → occurrences</b> shards with lemma sub-grouping and page
+      numbers, pre-sorted so the runtime can rank by page distance for the current reader.</p>
+    </div>
+    <div class="card dark">
+      <div class="k">⑤ Tajweed skin maps</div>
+      <p>Rule spans over text positions → mapped through anchor_word →
+      <b>element-ID → rule-class</b> JSON per page. The “colour mushaf” is a stylesheet,
+      not a second asset set.</p>
+    </div>
+    <div class="card dark">
+      <div class="k">Gates ⛨</div>
+      <p><b>Resolution gate:</b> build fails if any edge endpoint doesn’t resolve in anchors,
+      or any SVG polygon ID is missing from tables. <b>License gate:</b> every source carries
+      its license note or the build refuses it.</p>
+    </div>
+  </div>
+</div>
+
+<div class="flow"><svg width="40" height="46" viewBox="0 0 40 46"><path d="M20 2v32" stroke="#C2A14D" stroke-width="2.5" stroke-linecap="round"/><path d="M10 26 20 40 30 26" fill="none" stroke="#C2A14D" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+<div class="flowlab">emits static files only — the whole app deploys to a static host / CDN</div>
+
+<!-- ═══════════ BAND 3 · STATIC DATA ═══════════ -->
+<div class="band">
+  <div class="bandhdr"><span class="n">٣</span><span class="t">Static data (the shipped knowledge graph)</span>
+    <span class="d">property graph flattened into adjacency shards — no graph database at runtime</span></div>
+  <div class="cards c4">
+    <div class="card"><div class="k">assets/</div><p>The untouched SVG pages (+ Brotli variants) and their original metadata. Immutable; content-hashed for caching.</p></div>
+    <div class="card"><div class="k">anchors/</div><p>Resolver tables per edition. The <b>only</b> place logical keys meet physical element IDs.</p></div>
+    <div class="card"><div class="k">adj/ + roots/</div><p>Per-surah adjacency shards (typed, directed, provenance-tagged edges + <b>ext:[]</b> placeholder array) and root-occurrence shards.</p></div>
+    <div class="card"><div class="k">skins/ + registry.json</div><p>Tajweed class maps per page; the edge-type registry with <b>active and reserved</b> types that drives the hop rail.</p></div>
+  </div>
+</div>
+
+<div class="flow"><svg width="40" height="46" viewBox="0 0 40 46"><path d="M20 2v32" stroke="#C2A14D" stroke-width="2.5" stroke-linecap="round"/><path d="M10 26 20 40 30 26" fill="none" stroke="#C2A14D" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+<div class="flowlab">fetched lazily by the client, sharded by surah / page</div>
+
+<!-- ═══════════ BAND 4 · RUNTIME ═══════════ -->
+<div class="band">
+  <div class="bandhdr"><span class="n">٤</span><span class="t">Runtime — three layers, two narrow contracts</span>
+    <span class="d">L3 never touches SVG · L2 never sees edge semantics · L1 is read-only</span></div>
+  <div class="stack">
+    <div class="layer">
+      <div class="ltag"><span class="l">L3</span><span class="s">Controller + KG</span></div>
+      <div class="lbody">
+        <div class="k">Navigation controller</div>
+        <p>Reads adjacency + registry. Renders the <b>hop rail</b> (leaping-arrow chips bucketed
+        by direction), <b>diff popovers</b> (token-level, colour-coded differences — the hifz
+        payload), the <b>drag-highlight context menu</b> (merged edges of a highlighted passage),
+        the <b>subha bead trail</b>, and the <b>anchor-link router</b>
+        (<code style="font-family:monospace;font-size:10px">#/edition/2:47-2:48?via=…&amp;trail=…</code>).</p>
+      </div>
+    </div>
+    <div class="contract">contract ↕ <code>keys in · resolve/highlight/navigateTo/setSkin out · onSelect/onRangeSelect events up</code></div>
+    <div class="layer">
+      <div class="ltag"><span class="l">L2</span><span class="s">Highlighter</span></div>
+      <div class="lbody">
+        <div class="k">The intermediary — the only SVG-aware component</div>
+        <p>Translates canonical keys ⇄ element IDs via anchors. Owns pan/zoom, page loading,
+        pulse animation, highlight <b>groups</b> (selection · phrase · breadcrumb · highlight-pen —
+        independent, never clobber), the drag-vs-pan gesture split, skin class injection, and
+        state serialisation for share links. Swapping mushaf edition = swapping its resolver.</p>
+      </div>
+    </div>
+    <div class="contract">contract ↕ <code>runtime CSS classes + overlay &lt;g&gt; only — asset files never written</code></div>
+    <div class="layer">
+      <div class="ltag"><span class="l">L1</span><span class="s">Assets</span></div>
+      <div class="lbody">
+        <div class="k">Immutable mushaf pages</div>
+        <p>The sourced SVGs exactly as shipped: glyph paths (<b>pointer-events:none</b>) beneath
+        transparent hit polygons / word groups that receive every tap and drag.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ LEGEND · HOW LINKS ARE FOUND ═══════════ -->
+<div class="legend">
+  <div class="bandhdr"><span class="n">٥</span><span class="t">How links are found</span>
+    <span class="d">every edge type has a derivation method and a provenance trail</span></div>
+  <div class="ltable">
+    <div class="lrow">
+      <span class="ic">↷</span>
+      <span class="et">Mutashabih<small>similar wording</small></span>
+      <span class="how"><b>Exact / near-exact phrase repetition.</b> Word-range matches from QUL
+      phrase data give the precise shared span; the hifz-curated set filters to pairs that
+      genuinely confuse memorisers and adds the ctx (continuation) flag. Rendered as a
+      token diff: <span class="ar-inline" style="color:var(--rose)">شَفَاعَةٌ</span> ↔
+      <span class="ar-inline" style="color:var(--teal)">عَدْلٌ</span> swap made visible.</span>
+      <span class="from">QUL phrases · Waqar144</span>
+    </div>
+    <div class="lrow">
+      <span class="ic">≈</span>
+      <span class="et">Related meaning<small>secondary weight</small></span>
+      <span class="how"><b>Scholar-derived relatedness.</b> Pairs extracted from classical tafsir
+      cross-references (Ibn Kathir) with graded strength — trusted because a scholar linked
+      them, not an algorithm. Always visually subordinate to wording matches.</span>
+      <span class="from">QurSim (LREC 2012)</span>
+    </div>
+    <div class="lrow">
+      <span class="ic">⬡</span>
+      <span class="et">Shared root<small>morphology</small></span>
+      <span class="how"><b>Same triliteral root, computed from morphology.</b> Lemma-identical
+      matches rank above root-only; occurrences sort by page distance from the reader —
+      “this root recurs on the facing page” beats occurrence #214 far away.</span>
+      <span class="from">Quranic Arabic Corpus · QUL morphology</span>
+    </div>
+    <div class="lrow reserved">
+      <span class="ic">⚭</span>
+      <span class="et">Hadith citation<small>reserved</small></span>
+      <span class="how"><b>Curated citation mappings</b> (ayah referenced in a hadith), later
+      enriched from the SemanticHadith knowledge graph. Hop target is a reference card, not a
+      page — the highlighter is never involved.</span>
+      <span class="from">Quran.com API · SemanticHadith</span>
+    </div>
+    <div class="lrow reserved">
+      <span class="ic">✎</span>
+      <span class="et">Tafsir cross-ref<small>reserved</small></span>
+      <span class="how"><b>Structured exegesis links</b> from RDF tafsir graphs (verse ↔
+      commentary ↔ embedded citations), filtered to navigational value only.</span>
+      <span class="from">SemanticTafsir (al-Ṭabarī)</span>
+    </div>
+    <div class="lrow reserved">
+      <span class="ic">∿</span>
+      <span class="et">Embedding similarity<small>reserved · always secondary</small></span>
+      <span class="how"><b>ML-suggested edges</b> (transformer relatedness over QurSim-style
+      training data) — kept visually distinct from scholar-curated links, never mixed into
+      mutashabih buckets. A suggestion tier, not an authority tier.</span>
+      <span class="from">AraBERT-class models (optional)</span>
+    </div>
+  </div>
+</div>
+
+<footer>linker · رابط — assets untouched · one svg-aware layer · links carry provenance</footer>
+</div>
+</body>
+</html>

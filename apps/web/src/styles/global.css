@@ -1,0 +1,76 @@
+/* Global reset + base — mobile-first, RTL-native. */
+@import "./tokens.css";
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+html {
+  /* Prevent iOS text-size auto-inflation on rotate; lock the stage feel. */
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-chrome);
+  font-size: var(--text-md);
+  line-height: 1.5;
+  /* The stage owns gestures; stop the page itself from rubber-banding. */
+  overscroll-behavior: none;
+  -webkit-font-smoothing: antialiased;
+}
+
+#root {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+  min-height: 100dvh;
+}
+
+/* Focus is always visible — accent ring, logical offset (RTL-safe). */
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  min-height: var(--touch-min);
+  min-width: var(--touch-min);
+  border: none;
+  background: none;
+}
+
+/* Numbers (ayah/juz/page) read left-to-right even inside RTL chrome. */
+.numeric {
+  font-family: var(--font-numeric);
+  direction: ltr;
+  unicode-bidi: isolate;
+}
+
+/* Screen-reader-only utility. */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}

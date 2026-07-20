@@ -1,0 +1,19 @@
+# Cloudflare Pages (direct-upload) config for the Hifth web app.
+#
+# Two ways to deploy:
+#
+#   A) Git integration (recommended): connect the repo in the Cloudflare
+#      dashboard with these settings —
+#        Build command:        pnpm install && pnpm build
+#        Build output dir:     apps/web/dist
+#        Root directory:       /            (monorepo; build runs from repo root)
+#        Node version:         20
+#
+#   B) Direct upload from a machine that already ran `pnpm build`:
+#        cd apps/web && pnpm dlx wrangler pages deploy dist --project-name hifth
+#
+# _headers and _redirects in public/ ship into dist/ and Cloudflare applies them.
+
+name = "hifth"
+pages_build_output_dir = "dist"
+compatibility_date = "2026-07-20"

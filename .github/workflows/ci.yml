@@ -1,0 +1,82 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-test-gate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      # The extracted assets are committed, but re-run extraction and fail if it
+      # is not byte-identical — the ETL must be deterministic (PLAN §6).
+      - name: Verify asset extraction is deterministic
+        run: |
+          pnpm --filter @hifth/etl extract:pages
+          git diff --exit-code -- apps/web/public/assets \
+            || (echo "::error::extract:pages output differs from committed assets" && exit 1)
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      - name: Unit tests
+        run: pnpm test
+
+      - name: Corpus audit
+        run: pnpm audit:corpus
+
+      - name: Gate — no <text> in SVG assets
+        run: pnpm gate:notext
+
+      - name: Gate — license (SOURCES.md)
+        run: pnpm gate:license
+
+      - name: Build
+        run: pnpm build
+
+      - name: Gate — JS budget (<150KB gz)
+        run: pnpm gate:budget
+
+  e2e:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+      - name: Install
+        run: pnpm install --frozen-lockfile
+      - name: Build core
+        run: pnpm --filter @hifth/core build
+      - name: Install Playwright browsers
+        run: pnpm --filter @hifth/web exec playwright install --with-deps chromium webkit
+      - name: Build web
+        run: pnpm --filter @hifth/web build
+      - name: E2E (mobile viewports)
+        run: pnpm --filter @hifth/web test:e2e

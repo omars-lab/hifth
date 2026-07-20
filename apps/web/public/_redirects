@@ -1,0 +1,4 @@
+# SPA fallback for Cloudflare Pages. Hifth routes via the URL hash (spec §7), so
+# the path is always the app root; any non-asset path resolves to index.html
+# with a 200 so a cold deep-link boots the app, which then reads the hash.
+/*  /index.html  200

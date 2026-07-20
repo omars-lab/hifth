@@ -1,0 +1,21 @@
+{
+  "name": "@hifth/etl",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Hifth ETL — extract assets, build anchors/adjacency/roots/skins, validate (Node, offline)",
+  "type": "module",
+  "scripts": {
+    "extract:pages": "node scripts/extract-pages.mjs",
+    "audit:corpus": "node scripts/audit-corpus.mjs",
+    "etl": "node scripts/extract-pages.mjs",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run --passWithNoTests"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.5",
+    "vitest": "^2.1.8"
+  },
+  "dependencies": {
+    "@hifth/core": "workspace:*"
+  }
+}

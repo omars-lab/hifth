@@ -1,0 +1,74 @@
+.app {
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+  background: var(--paper);
+}
+
+.chrome {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-3) var(--space-4);
+  padding-block-start: max(var(--space-3), env(safe-area-inset-top));
+  border-block-end: 1px solid var(--hairline);
+  background: var(--paper);
+}
+
+.brand {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.1;
+}
+
+.mark {
+  font-size: var(--text-xl);
+  font-weight: 700;
+  color: var(--accent-strong);
+  letter-spacing: 0.02em;
+}
+
+.tagline {
+  font-size: var(--text-xs);
+  color: var(--ink-faint);
+}
+
+.pageId {
+  margin-inline-start: auto;
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  color: var(--ink-soft);
+}
+
+.pageLabel {
+  font-size: var(--text-sm);
+}
+
+.pageNum {
+  font-size: var(--text-lg);
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.main {
+  flex: 1 1 auto;
+  display: flex;
+  min-height: 0;
+}
+
+.trail {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--touch-min);
+  padding: var(--space-2) var(--space-4);
+  padding-block-end: max(var(--space-2), env(safe-area-inset-bottom));
+  border-block-start: 1px solid var(--hairline);
+  background: var(--paper-raised);
+}
+
+.trailHint {
+  font-size: var(--text-sm);
+  color: var(--ink-faint);
+}

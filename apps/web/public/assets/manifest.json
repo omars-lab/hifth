@@ -1,0 +1,181 @@
+{
+  "edition": "hafs-kfqc",
+  "editionLabel": "حفص · مجمع الملك فهد (quranpedia)",
+  "pages": [
+    {
+      "edition": "hafs-kfqc",
+      "page": 7,
+      "viewBox": "0 0 345 550",
+      "polygons": [
+        {
+          "elementId": "verse-45",
+          "number": 2038,
+          "surah": 2,
+          "ayah": 38,
+          "key": "quran/hafs-kfqc/2:38"
+        },
+        {
+          "elementId": "verse-46",
+          "number": 2039,
+          "surah": 2,
+          "ayah": 39,
+          "key": "quran/hafs-kfqc/2:39"
+        },
+        {
+          "elementId": "verse-47",
+          "number": 2040,
+          "surah": 2,
+          "ayah": 40,
+          "key": "quran/hafs-kfqc/2:40"
+        },
+        {
+          "elementId": "verse-48",
+          "number": 2041,
+          "surah": 2,
+          "ayah": 41,
+          "key": "quran/hafs-kfqc/2:41"
+        },
+        {
+          "elementId": "verse-49",
+          "number": 2042,
+          "surah": 2,
+          "ayah": 42,
+          "key": "quran/hafs-kfqc/2:42"
+        },
+        {
+          "elementId": "verse-50",
+          "number": 2043,
+          "surah": 2,
+          "ayah": 43,
+          "key": "quran/hafs-kfqc/2:43"
+        },
+        {
+          "elementId": "verse-51",
+          "number": 2044,
+          "surah": 2,
+          "ayah": 44,
+          "key": "quran/hafs-kfqc/2:44"
+        },
+        {
+          "elementId": "verse-52",
+          "number": 2045,
+          "surah": 2,
+          "ayah": 45,
+          "key": "quran/hafs-kfqc/2:45"
+        },
+        {
+          "elementId": "verse-53",
+          "number": 2046,
+          "surah": 2,
+          "ayah": 46,
+          "key": "quran/hafs-kfqc/2:46"
+        },
+        {
+          "elementId": "verse-54",
+          "number": 2047,
+          "surah": 2,
+          "ayah": 47,
+          "key": "quran/hafs-kfqc/2:47"
+        },
+        {
+          "elementId": "verse-55",
+          "number": 2048,
+          "surah": 2,
+          "ayah": 48,
+          "key": "quran/hafs-kfqc/2:48"
+        }
+      ]
+    },
+    {
+      "edition": "hafs-kfqc",
+      "page": 9,
+      "viewBox": "0 0 345 550",
+      "polygons": [
+        {
+          "elementId": "verse-65",
+          "number": 2058,
+          "surah": 2,
+          "ayah": 58,
+          "key": "quran/hafs-kfqc/2:58"
+        },
+        {
+          "elementId": "verse-66",
+          "number": 2059,
+          "surah": 2,
+          "ayah": 59,
+          "key": "quran/hafs-kfqc/2:59"
+        },
+        {
+          "elementId": "verse-67",
+          "number": 2060,
+          "surah": 2,
+          "ayah": 60,
+          "key": "quran/hafs-kfqc/2:60"
+        },
+        {
+          "elementId": "verse-68",
+          "number": 2061,
+          "surah": 2,
+          "ayah": 61,
+          "key": "quran/hafs-kfqc/2:61"
+        }
+      ]
+    },
+    {
+      "edition": "hafs-kfqc",
+      "page": 19,
+      "viewBox": "0 0 345 550",
+      "polygons": [
+        {
+          "elementId": "verse-127",
+          "number": 2120,
+          "surah": 2,
+          "ayah": 120,
+          "key": "quran/hafs-kfqc/2:120"
+        },
+        {
+          "elementId": "verse-128",
+          "number": 2121,
+          "surah": 2,
+          "ayah": 121,
+          "key": "quran/hafs-kfqc/2:121"
+        },
+        {
+          "elementId": "verse-129",
+          "number": 2122,
+          "surah": 2,
+          "ayah": 122,
+          "key": "quran/hafs-kfqc/2:122"
+        },
+        {
+          "elementId": "verse-130",
+          "number": 2123,
+          "surah": 2,
+          "ayah": 123,
+          "key": "quran/hafs-kfqc/2:123"
+        },
+        {
+          "elementId": "verse-131",
+          "number": 2124,
+          "surah": 2,
+          "ayah": 124,
+          "key": "quran/hafs-kfqc/2:124"
+        },
+        {
+          "elementId": "verse-132",
+          "number": 2125,
+          "surah": 2,
+          "ayah": 125,
+          "key": "quran/hafs-kfqc/2:125"
+        },
+        {
+          "elementId": "verse-133",
+          "number": 2126,
+          "surah": 2,
+          "ayah": 126,
+          "key": "quran/hafs-kfqc/2:126"
+        }
+      ]
+    }
+  ]
+}
