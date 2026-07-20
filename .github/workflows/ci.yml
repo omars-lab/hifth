@@ -27,6 +27,12 @@ jobs:
       - name: Install
         run: pnpm install --frozen-lockfile
 
+      # @hifth/core is consumed via its built dist/ (package exports point there),
+      # so it must be compiled before anything downstream — the ETL imports it at
+      # runtime (extraction check below) and apps/web typechecks/tests against it.
+      - name: Build core
+        run: pnpm --filter @hifth/core build
+
       # The extracted assets are committed, but re-run extraction and fail if it
       # is not byte-identical — the ETL must be deterministic (PLAN §6).
       - name: Verify asset extraction is deterministic
