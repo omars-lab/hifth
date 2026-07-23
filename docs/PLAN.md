@@ -34,7 +34,7 @@ ends by updating this section and writing `docs/decisions/loop-<N>.md`.**
 |---|---|---|---|
 | 0 — Skeleton | complete | Installable RTL shell showing page 7; CI green with gates | [loop-0.md](decisions/loop-0.md) |
 | 1 — Select + perf | complete-with-deferral | Tap-to-select on-device; RTL page-turn decided; perf verdict → follow-up ① | [loop-1.md](decisions/loop-1.md) |
-| 2 — The hop | next | Tap 2:48 → rail → popover → cross-page hop → bead back, one-handed | — |
+| 2 — The hop | complete | Tap 2:48 → rail → popover → cross-page hop → bead back, one-handed | [loop-2.md](decisions/loop-2.md) |
 | 3 — Diffs, share, a11y | pending (after 2) | Teacher link cold-open restores exact view; screen reader announces hops | — |
 | 4 — Full corpus ETL | **gated on follow-up ①** | Deterministic `pnpm etl`; every ayah navigable; TTI <2.5s mid-Android | — |
 | 5 — Highlight + roots | pending (after 4) | Drag-range → merged hop list; root lens nearest-page-first | — |
@@ -237,12 +237,17 @@ everywhere / content-visibility virtualization / raster-glyph fallback). Observe
 page-turn conventions in quran.com + Tarteel, record decision.
 **Exit:** tap-to-select on-device; written perf verdict + RTL decision in `docs/decisions/`.
 
-### Loop 2 — The hop (medium) ← the product exists after this loop
+### Loop 2 — The hop (medium) ← the product exists after this loop — ✅ complete ([loop-2.md](decisions/loop-2.md))
 Adjacency shards for the mock's curated clusters; `adjacency.ts` (dir bucketing, hifz
 popover ordering); `HopRail` (arc-arrow chips ↻◀▶ + counts); `HopPopover`; `navigateTo`
 (cross-page load, pan, pulse; only current+adjacent mounted); breadcrumb group;
 `TrailBeads`. Bottom-sheet popovers <900px; 44px targets.
 **Exit:** tap 2:48 → rail → popover → hop to 2:123 cross-page → bead back, one-handed on a phone.
+**Shipped it:** `adjacency.ts` + `view.ts` (pure math) in core; the multi-page `PageStage` with
+a single-`view` RAF hop-tween (owns the transform); `HopRail`/`HopPopover`/`TrailBeads`;
+`build-adjacency.mjs` ETL → committed surah-2 shard, deterministic in CI. Full hop tour green on
+WebKit + Chromium. Un-vendored targets surfaced-but-disabled (no ghost page). LRU-6 eviction and
+the token DiffView deferred to Loops 4 and 3 respectively.
 
 ### Loop 3 — Diffs, share links, a11y pass (medium)
 `DiffView` (token diff, twin label, ctx continuation); hash router = spec §7 via

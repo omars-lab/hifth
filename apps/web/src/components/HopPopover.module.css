@@ -1,0 +1,193 @@
+/*
+ * HopPopover — bottom sheet on phones (<900px), floating card on wide screens.
+ * The hop button carries the ↪ arc-arrow — the one place accent goes solid.
+ */
+
+.scrim {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-sheet);
+  background: rgba(38, 32, 26, 0.28);
+  animation: fade var(--dur-fast) ease;
+}
+
+.sheet {
+  position: fixed;
+  inset-inline: 0;
+  inset-block-end: 0;
+  z-index: var(--z-sheet);
+  max-block-size: 70vh;
+  overflow-y: auto;
+  padding: var(--space-3) var(--space-4) calc(var(--space-5) + env(safe-area-inset-bottom));
+  background: var(--paper-raised);
+  border-start-start-radius: var(--radius-lg);
+  border-start-end-radius: var(--radius-lg);
+  box-shadow: var(--shadow-2);
+  animation: rise var(--dur-med) var(--ease-hop);
+}
+
+.grip {
+  inline-size: 40px;
+  block-size: 4px;
+  margin: 0 auto var(--space-2);
+  border-radius: var(--radius-pill);
+  background: var(--hairline);
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding-block-end: var(--space-2);
+  border-block-end: 1px solid var(--hairline);
+}
+
+.glyph {
+  font-size: var(--text-lg);
+  color: var(--accent-strong);
+}
+
+.title {
+  flex: 1;
+  margin: 0;
+  font-size: var(--text-md);
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.close {
+  min-inline-size: var(--touch-min);
+  min-block-size: var(--touch-min);
+  border: none;
+  background: none;
+  color: var(--ink-soft);
+  font-size: var(--text-md);
+  cursor: pointer;
+}
+
+.close:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+.list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding-block: var(--space-3);
+  border-block-end: 1px solid var(--hairline);
+}
+
+.row:last-child {
+  border-block-end: none;
+}
+
+.rowText {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-inline-size: 0;
+}
+
+.rowLabel {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--text-md);
+  color: var(--ink);
+}
+
+.badge {
+  padding-inline: var(--space-2);
+  border-radius: var(--radius-pill);
+  background: var(--accent-tint);
+  color: var(--accent-strong);
+  font-size: var(--text-xs);
+}
+
+.root {
+  color: var(--ink-soft);
+  font-size: var(--text-sm);
+}
+
+.note {
+  color: var(--ink-soft);
+  font-size: var(--text-sm);
+  line-height: 1.4;
+}
+
+.unavailable {
+  color: var(--ink-faint);
+  font-size: var(--text-xs);
+}
+
+.hop {
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  min-inline-size: var(--touch-min);
+  min-block-size: var(--touch-min);
+  border: none;
+  border-radius: var(--radius-md);
+  background: var(--accent);
+  color: var(--paper-raised);
+  font-size: var(--text-lg);
+  cursor: pointer;
+  transition: transform var(--dur-fast) var(--ease-hop);
+}
+
+.hop:hover {
+  transform: scale(1.06);
+}
+
+.hop:active {
+  transform: scale(0.94);
+}
+
+.hop:disabled {
+  background: var(--paper-sunk);
+  color: var(--ink-faint);
+  cursor: not-allowed;
+}
+
+.hop:focus-visible {
+  outline: 2px solid var(--accent-strong);
+  outline-offset: 2px;
+}
+
+@media (min-width: 900px) {
+  .sheet {
+    inset-inline-start: auto;
+    inset-inline-end: var(--space-5);
+    inset-block-end: var(--space-5);
+    inline-size: 380px;
+    border-radius: var(--radius-lg);
+  }
+}
+
+@keyframes rise {
+  from {
+    transform: translateY(100%);
+  }
+}
+
+@keyframes fade {
+  from {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sheet,
+  .scrim {
+    animation: none;
+  }
+}

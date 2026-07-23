@@ -6,8 +6,9 @@
   "type": "module",
   "scripts": {
     "extract:pages": "node scripts/extract-pages.mjs",
+    "build:adjacency": "node scripts/build-adjacency.mjs",
     "audit:corpus": "node scripts/audit-corpus.mjs",
-    "etl": "node scripts/extract-pages.mjs",
+    "etl": "node scripts/extract-pages.mjs && node scripts/build-adjacency.mjs",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "vitest run --passWithNoTests"
   },

@@ -4,11 +4,20 @@
   display: grid;
   place-items: center;
   padding: var(--space-4);
-  /* The stage owns touch; Loop 1 wires @use-gesture with touch-action here. */
+  /* The stage owns touch; @use-gesture wires touch-action here. */
   touch-action: none;
   overflow: hidden;
   background:
     radial-gradient(120% 90% at 50% 0%, var(--paper-raised), var(--paper) 60%);
+}
+
+/* The layer holds one host div per mounted page; only the current one shows.
+   It fills the stage and centers its visible host. */
+.layer {
+  display: grid;
+  place-items: center;
+  inline-size: 100%;
+  block-size: 100%;
 }
 
 .host {
@@ -23,6 +32,11 @@
      top-left keeps the translate/scale math simple and GPU-composited. */
   transform-origin: 0 0;
   will-change: transform;
+}
+
+/* Multiple hosts overlap in the layer's single grid cell; only one is visible. */
+.layer > .host {
+  grid-area: 1 / 1;
 }
 
 /* Glyph paths must never eat pointer events — the ayah polygons take all hits

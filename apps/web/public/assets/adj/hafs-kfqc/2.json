@@ -1,0 +1,213 @@
+{
+  "40": {
+    "edges": [
+      {
+        "type": "mutashabih",
+        "to": "quran/hafs-kfqc/2:47",
+        "page": 7,
+        "dir": {
+          "dSurah": 0,
+          "dPage": 0,
+          "sameJuz": true
+        },
+        "ctx": true,
+        "note": "Same opening — continuation differs"
+      },
+      {
+        "type": "mutashabih",
+        "to": "quran/hafs-kfqc/2:122",
+        "page": 19,
+        "dir": {
+          "dSurah": 0,
+          "dPage": 12,
+          "sameJuz": true
+        },
+        "ctx": true,
+        "note": "Same opening — continuation differs"
+      },
+      {
+        "type": "shared-root",
+        "to": "quran/hafs-kfqc/2:47#w3",
+        "page": 7,
+        "dir": {
+          "dSurah": 0,
+          "dPage": 0,
+          "sameJuz": true
+        },
+        "root": "ذ ك ر"
+      }
+    ],
+    "ext": []
+  },
+  "45": {
+    "edges": [
+      {
+        "type": "mutashabih",
+        "to": "quran/hafs-kfqc/2:153",
+        "page": 23,
+        "dir": {
+          "dSurah": 0,
+          "dPage": 16,
+          "sameJuz": true
+        },
+        "note": "2:153 prefixes يا أيها الذين آمنوا"
+      }
+    ],
+    "ext": []
+  },
+  "47": {
+    "edges": [
+      {
+        "type": "mutashabih",
+        "to": "quran/hafs-kfqc/2:122",
+        "page": 19,
+        "dir": {
+          "dSurah": 0,
+          "dPage": 12,
+          "sameJuz": true
+        },
+        "twin": true,
+        "note": "Identical twins — surrounding ayahs differ"
+      },
+      {
+        "type": "mutashabih",
+        "to": "quran/hafs-kfqc/2:40",
+        "page": 7,
+        "dir": {
+          "dSurah": 0,
+          "dPage": 0,
+          "sameJuz": true
+        },
+        "ctx": true,
+        "note": "Same opening — continuation differs"
+      },
+      {
+        "type": "shared-root",
+        "to": "quran/hafs-kfqc/2:122#w3",
+        "page": 19,
+        "dir": {
+          "dSurah": 0,
+          "dPage": 12,
+          "sameJuz": true
+        },
+        "root": "ذ ك ر"
+      }
+    ],
+    "ext": []
+  },
+  "48": {
+    "edges": [
+      {
+        "type": "mutashabih",
+        "to": "quran/hafs-kfqc/2:123",
+        "page": 19,
+        "dir": {
+          "dSurah": 0,
+          "dPage": 12,
+          "sameJuz": true
+        },
+        "note": "شفاعة ↔ عدل order swapped; verbs differ"
+      },
+      {
+        "type": "related-meaning",
+        "to": "quran/hafs-kfqc/82:19",
+        "page": 587,
+        "dir": {
+          "dSurah": 80,
+          "dPage": 580,
+          "sameJuz": false
+        },
+        "note": "Same theme — no soul avails another"
+      }
+    ],
+    "ext": []
+  },
+  "58": {
+    "edges": [
+      {
+        "type": "mutashabih",
+        "to": "quran/hafs-kfqc/7:161",
+        "page": 171,
+        "dir": {
+          "dSurah": 5,
+          "dPage": 162,
+          "sameJuz": false
+        },
+        "note": "قولوا حطة ↔ ادخلوا الباب سجدا order swapped"
+      }
+    ],
+    "ext": []
+  },
+  "60": {
+    "edges": [
+      {
+        "type": "mutashabih",
+        "to": "quran/hafs-kfqc/7:160",
+        "page": 170,
+        "dir": {
+          "dSurah": 5,
+          "dPage": 161,
+          "sameJuz": false
+        },
+        "note": "فانفجرت ↔ فانبجست"
+      }
+    ],
+    "ext": []
+  },
+  "122": {
+    "edges": [
+      {
+        "type": "mutashabih",
+        "to": "quran/hafs-kfqc/2:47",
+        "page": 7,
+        "dir": {
+          "dSurah": 0,
+          "dPage": -12,
+          "sameJuz": true
+        },
+        "twin": true,
+        "note": "Identical twins — surrounding ayahs differ"
+      },
+      {
+        "type": "mutashabih",
+        "to": "quran/hafs-kfqc/2:40",
+        "page": 7,
+        "dir": {
+          "dSurah": 0,
+          "dPage": -12,
+          "sameJuz": true
+        },
+        "ctx": true,
+        "note": "Same opening — continuation differs"
+      },
+      {
+        "type": "shared-root",
+        "to": "quran/hafs-kfqc/2:40#w3",
+        "page": 7,
+        "dir": {
+          "dSurah": 0,
+          "dPage": -12,
+          "sameJuz": true
+        },
+        "root": "ذ ك ر"
+      }
+    ],
+    "ext": []
+  },
+  "123": {
+    "edges": [
+      {
+        "type": "mutashabih",
+        "to": "quran/hafs-kfqc/2:48",
+        "page": 7,
+        "dir": {
+          "dSurah": 0,
+          "dPage": -12,
+          "sameJuz": true
+        },
+        "note": "شفاعة ↔ عدل order swapped; verbs differ"
+      }
+    ],
+    "ext": []
+  }
+}

@@ -30,3 +30,36 @@ export {
   type Rect,
   type Resolved,
 } from "./highlighter.js";
+
+export {
+  frameBboxToView,
+  bboxToScreen,
+  clampZoom,
+  easeInOutCubic,
+  lerpView,
+  DEFAULT_HOP_ZOOM,
+  type View,
+  type FrameContext,
+} from "./view.js";
+
+export {
+  Adjacency,
+  EDGE_TYPES,
+  RAIL_GLYPH,
+  isActiveEdgeType,
+  bucketEdges,
+  orderForHifz,
+  buildShards,
+  type EdgeTypeId,
+  type EdgeStatus,
+  type EdgeType,
+  type EdgeDir,
+  type WordSpan,
+  type Edge,
+  type AyahAdjacency,
+  type AdjacencyShard,
+  type RailDirection,
+  type RailChip,
+  type CuratedEdge,
+  type CuratedAdjacency,
+} from "./adjacency.js";

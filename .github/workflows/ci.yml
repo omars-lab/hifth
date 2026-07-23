@@ -46,13 +46,16 @@ jobs:
       - name: Build core
         run: pnpm --filter @hifth/core build
 
-      # The extracted assets are committed, but re-run extraction and fail if it
-      # is not byte-identical — the ETL must be deterministic (PLAN §6).
-      - name: Verify asset extraction is deterministic
+      # The extracted assets + adjacency shards are committed, but re-run the ETL
+      # and fail if it is not byte-identical — the ETL must be deterministic
+      # (PLAN §6). Core must be built first so build:adjacency can import it.
+      - name: Verify ETL output is deterministic
         run: |
+          pnpm --filter @hifth/core build
           pnpm --filter @hifth/etl extract:pages
+          pnpm --filter @hifth/etl build:adjacency
           git diff --exit-code -- apps/web/public/assets \
-            || (echo "::error::extract:pages output differs from committed assets" && exit 1)
+            || (echo "::error::ETL output differs from committed assets" && exit 1)
 
       - name: Lint
         run: pnpm lint

@@ -52,6 +52,7 @@
 }
 
 .main {
+  position: relative; /* HopRail floats over the stage within .main */
   flex: 1 1 auto;
   display: flex;
   min-height: 0;
@@ -60,7 +61,7 @@
 .trail {
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   min-height: var(--touch-min);
   padding: var(--space-2) var(--space-4);
   padding-block-end: max(var(--space-2), env(safe-area-inset-bottom));
