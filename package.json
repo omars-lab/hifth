@@ -9,6 +9,7 @@
     "node": ">=20"
   },
   "scripts": {
+    "prepare": "git config core.hooksPath .githooks || true",
     "dev": "pnpm --filter @hifth/web dev",
     "build": "pnpm --filter @hifth/core build && pnpm --filter @hifth/web build",
     "preview": "pnpm --filter @hifth/web preview",

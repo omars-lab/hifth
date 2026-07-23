@@ -1,0 +1,30 @@
+#!/usr/bin/env sh
+# Pre-commit secret scan. Blocks a commit if gitleaks finds a secret in the
+# staged changes. Config + allowlist: .gitleaks.toml.
+#
+# Installed by `pnpm install` (the root "prepare" script points core.hooksPath
+# at .githooks/). To skip in an emergency: `git commit --no-verify` (CI still
+# runs a full-history scan, so a skipped secret is caught before it merges).
+
+if ! command -v gitleaks >/dev/null 2>&1; then
+  echo "pre-commit: gitleaks not installed — skipping secret scan."
+  echo "  install it:  brew install gitleaks   (or see github.com/gitleaks/gitleaks)"
+  echo "  the CI secrets-scan job still gates every push."
+  exit 0
+fi
+
+# `git --staged` scans only what is about to be committed (gitleaks 8.19+ —
+# the old `protect` subcommand was removed). --redact keeps any match out of
+# the terminal output. Exit 1 = leak found, 0 = clean.
+gitleaks git --staged --redact --config .gitleaks.toml
+status=$?
+
+if [ "$status" -ne 0 ]; then
+  echo ""
+  echo "pre-commit: gitleaks found a potential secret in your staged changes (above)."
+  echo "  remove it, or if it is a false positive add an allowlist entry to .gitleaks.toml."
+  echo "  to bypass this one commit:  git commit --no-verify"
+  exit 1
+fi
+
+exit 0

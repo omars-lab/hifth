@@ -1,0 +1,25 @@
+# Gitleaks configuration for Hifth.
+#
+# Extends the built-in ruleset (AWS keys, GitHub/GitLab tokens, private keys,
+# generic high-entropy secrets, etc.) and adds a narrow allowlist so the mushaf
+# SVG geometry — long strings of numbers in polygon/path coordinates — is not
+# flagged as a high-entropy secret. Everything else stays on the default rules.
+#
+# Run locally:   gitleaks detect --redact        (scans git history)
+#                gitleaks protect --staged        (scans what's about to commit)
+# The pre-commit hook runs the second form; CI runs a full history scan.
+
+title = "Hifth gitleaks config"
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Mushaf SVG assets are glyph geometry (numeric path data), not secrets."
+paths = [
+  '''apps/web/public/assets/pages/.*\.svg''',
+  # The interactive design-phase mock embeds the same SVG geometry inline.
+  '''docs/reference/linker-mock\.html''',
+  # Lockfile integrity hashes are not secrets.
+  '''pnpm-lock\.yaml''',
+]
