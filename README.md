@@ -8,14 +8,20 @@ Web app first, mobile-first, fully static — no backend.
 
 ## Quick start
 
+The `Makefile` is the front door — it wraps everyday dev, the exact CI sequence, and the
+loop workflow. `make help` lists everything.
+
 ```bash
-pnpm install        # Node 20+, pnpm 9 (via corepack)
-pnpm dev            # dev server (apps/web)
-pnpm build          # static build → apps/web/dist
-pnpm test           # unit tests (core + web)
-pnpm --filter @hifth/web test:e2e   # Playwright, iPhone + Android viewports
-pnpm gates          # CI content gates (no-<text>, license, JS budget)
+make install        # deps + gitleaks pre-commit hook (Node 20+, pnpm 9)
+make dev            # dev server (apps/web) with HMR
+make ci             # full local mirror of the CI build-test-gate job, in order
+make status         # the roadmap: Status & tracking table + open follow-ups
+make loop N=2       # print a loop's kickoff prompt + its plan section
+make phone          # build + serve on your LAN; prints the URL to open on a phone
 ```
+
+Under the hood these call pnpm (`pnpm dev`, `pnpm build`, `pnpm test`,
+`pnpm --filter @hifth/web test:e2e`, `pnpm gates`) — use those directly if you prefer.
 
 ## Layout
 

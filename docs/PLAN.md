@@ -354,3 +354,8 @@ exactly what to check on my phone.
 
 `docs/PLAN.md` is the single source the prompt points at; each loop's `docs/decisions/`
 writeup means the next loop needs no conversation memory.
+
+The `Makefile` makes this executable: `make loop N=<N>` prints the prompt above with that
+loop's plan section inlined; `make status` prints the Status & tracking table; `make ci`
+mirrors the CI gate sequence locally; `make loop-verify N=<N>` runs the full gate + e2e so
+a loop only closes green; `make phone` / `make perf` drive the on-device checks.
