@@ -24,6 +24,45 @@ whose findings became the binding design rules in §4.
 
 ---
 
+## Status & tracking
+
+This section is the **roadmap of record** — it replaces the retired external task tracker;
+statuses, gates, and open follow-ups live here and nowhere else. Convention: **every loop
+ends by updating this section and writing `docs/decisions/loop-<N>.md`.**
+
+| Loop | Status | Exit criterion (short) | Record |
+|---|---|---|---|
+| 0 — Skeleton | complete | Installable RTL shell showing page 7; CI green with gates | [loop-0.md](decisions/loop-0.md) |
+| 1 — Select + perf | complete-with-deferral | Tap-to-select on-device; RTL page-turn decided; perf verdict → follow-up ① | [loop-1.md](decisions/loop-1.md) |
+| 2 — The hop | next | Tap 2:48 → rail → popover → cross-page hop → bead back, one-handed | — |
+| 3 — Diffs, share, a11y | pending (after 2) | Teacher link cold-open restores exact view; screen reader announces hops | — |
+| 4 — Full corpus ETL | **gated on follow-up ①** | Deterministic `pnpm etl`; every ayah navigable; TTI <2.5s mid-Android | — |
+| 5 — Highlight + roots | pending (after 4) | Drag-range → merged hop list; root lens nearest-page-first | — |
+| 6 — Offline, skin, editions | pending (after 4) | Pinned juz offline after 8+ days; instant skin toggle; Lighthouse ≥90 | — |
+| 7 — Polish + beta | pending (after 3+5+6) | Hafiz revision session, zero friction notes → **web v1.0** | — |
+| Track B — Capacitor | gated on web v1.0 | Same web build wrapped for iOS/Android; Universal Links | — |
+
+### Open follow-ups
+
+1. **On-device perf verdict** (formerly external-tracker task #24) — decide
+   inline-SVG-everywhere vs content-visibility virtualization vs raster-glyph fallback.
+   The emulated baseline (~8.3 ms/frame, flat under CPU throttle) cannot see the real
+   risks: initial raster of a 170 KB inline SVG on a low-end phone, and re-raster on zoom
+   past the layer's backing store. **How to run:** `pnpm build && pnpm --filter @hifth/web
+   exec vite preview --host --port 4173`, open on a real mid/low-tier phone, pinch/pan
+   page 7, and read fps via Chrome remote DevTools / Safari Web Inspector
+   (`apps/web/perf/pan-zoom-trace.mjs` prints the same recipe). **Gates Loop 4** — must be
+   resolved before Loop 4 starts (Loops 5–6 inherit the gate through the ETL).
+2. **License confirmation** — `SOURCES.md` marks `hafs-kfqc` **PROVISIONAL**; confirm
+   quran-svg redistribution terms **before Loop 7** (public beta).
+3. Loop-assigned deferrals (already scoped in their loop sections; details in the decision
+   records): full corpus vendoring + QUL validation → Loop 4; `navigateTo` animation,
+   wheel-zoom, golden-image visual regression → Loop 2; per-polygon a11y labels + keyboard
+   path → Loop 3; marquee drag-select → Loop 5; Lighthouse CI + iOS install coach mark →
+   Loop 6.
+
+---
+
 ## 1. How we build: loops, not a waterfall
 
 The build proceeds in **vertical loops**. Each loop is a thin end-to-end slice with a
@@ -265,16 +304,36 @@ changes, per the additive-only registry design.
 - **Mobile is the acceptance device** for every loop, not a retrofit.
 - Each loop ends with: on-device demo → `docs/decisions/loop-<N>.md` → (re)scope next loop.
 
-## 9. Task tracking
+## 9. Execution convention
 
-Two levels (see the tracker for current state):
-- **Roadmap tasks** — one per loop (+ step 0 + Track B), wired with `blockedBy` so the
-  list enforces sequencing. Linear through Loop 2; Loops 3 & 4 open after Loop 2; Loops 5 &
-  6 depend on the ETL; Loop 7 (v1.0) waits on Loops 3+5+6; Track B gated on Loop 7.
-- **Execution tasks** — created fresh at the start of each loop from that loop's plan
-  section (one per deliverable), closed as they land. Exactly one roadmap task
-  `in_progress` at a time; a loop is `completed` only when its exit criterion and its
-  testing-plan tiers pass. Discovered work becomes new tasks, not silent scope creep.
+Two levels, both living in this repo (the external task tracker is retired —
+§Status & tracking is the roadmap of record):
+- **Roadmap** — the Status & tracking table. One row per loop (+ Track B); the status
+  column carries the sequencing (linear through Loop 2; Loops 3 & 4 open after Loop 2;
+  Loops 5 & 6 depend on the ETL; Loop 7 waits on 3+5+6; Track B gated on web v1.0).
+  Exactly one loop in flight; a loop flips to complete only when its exit criterion and
+  testing-plan tiers pass and both its decision record and the table are updated.
+- **Per-loop working list** — created fresh at loop start from that loop's plan section
+  (one item per deliverable), tracked in-session, closed as items land. The durable
+  residue is the loop's decision record (decided / measured / deferred), not the list.
+  Discovered work becomes a list item or an Open follow-up above — never silent scope creep.
+
+### Agent strategy per loop
+
+Guidance, not bureaucracy. Modes: **Explore** (read-only fan-out recon), **Plan**
+(implementation-plan design), **general-purpose** (multi-step research + code), and
+**Workflow** orchestration (deterministic parallel/pipeline fan-out — opt-in per run).
+
+- **Loop 2** — single-context feature work: code inline; one Plan agent for the
+  `navigateTo` cross-page mount/pan/pulse design before building.
+- **Loop 3** — inline; run the a11y audit as a separate review-style pass (Explore) over
+  the finished screens rather than mid-feature.
+- **Loop 4** — the natural **Workflow fan-out**: per-surah shard validation, cross-source
+  reconciliation vs the QUL layout DB, and golden-ayah checks parallelize cleanly; the
+  ETL pipeline code itself stays inline.
+- **Loops 5–6** — inline feature work; Loop 6's offline/eviction matrix is a manual
+  device checklist, not an agent job.
+- **Loop 7** — inline polish; the 5-page golden-image sweep is a small fan-out candidate.
 
 ## 10. Non-goals (v1)
 
