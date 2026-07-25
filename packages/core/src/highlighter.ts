@@ -23,6 +23,14 @@
 
 import { TAP_SLOP_PX } from "./gestures.js";
 import type { Resolver } from "./resolver.js";
+import {
+  TAJWEED_CLASS_PREFIX,
+  leadingRule,
+  tajweedClass,
+  tajweedMarkClass,
+  type SkinId,
+  type TajweedLookup,
+} from "./skins.js";
 
 const SVG_NS = "http://www.w3.org/2000/svg";
 const OVERLAY_ID = "hifth-overlay";
@@ -127,6 +135,9 @@ export class Highlighter {
   private readonly onPolygonKeyDown: (e: KeyboardEvent) => void;
   /** Where the current press started, so a release can tell a tap from a drag. */
   private pressAt: { x: number; y: number } | null = null;
+  /** The applied skin, and L3's rule lookup for it (spec §8; see `setSkin`). */
+  private currentSkin: SkinId = "plain";
+  private skinLookup: TajweedLookup | null = null;
 
   constructor(svg: SVGSVGElement, resolver: Resolver, page: number, opts?: { labelFor?: LabelFor }) {
     this.svg = svg;
@@ -409,10 +420,55 @@ export class Highlighter {
     };
   }
 
-  /** Skin swap = a class on the svg; geometry untouched (spec §3, §8). */
-  setSkin(skin: "plain" | "tajweed"): void {
+  /** The skin currently applied to this page. */
+  get skin(): SkinId {
+    return this.currentSkin;
+  }
+
+  /**
+   * Skin swap (spec §3, §8) — **classes only, never geometry**.
+   *
+   * Two things change: a scope class on the `<svg>` (so the stylesheet can key
+   * off the whole page at once), and, on each ayah polygon, the `tj-*` classes
+   * naming the rules on that ayah plus one `tj-mark-<rule>` for its leading
+   * rule. Nothing is added, removed or moved in the document; no attribute
+   * outside `class`/`data-tj` is written. `geometrySignature()` (skins.ts) is
+   * byte-identical across a swap, and the unit tests assert exactly that.
+   *
+   * `lookup` is L3's index over the loaded shards — the same arrangement as
+   * `labelFor`, so L2 never learns the shard format. Omit it to re-apply with
+   * whatever lookup was last supplied (which is what "a shard just landed, paint
+   * again" looks like from the app's side). Without a lookup the tajweed skin
+   * still sets its scope class but marks nothing: honest emptiness beats
+   * inventing rules.
+   *
+   * Overlay clones are unaffected on purpose — `highlight()` *replaces* a
+   * clone's class attribute, so a selection never inherits a rule colour and the
+   * amber "you are here" keeps winning under any skin.
+   */
+  setSkin(skin: SkinId, lookup?: TajweedLookup | null): void {
+    this.currentSkin = skin;
+    if (lookup !== undefined) this.skinLookup = lookup;
     this.svg.classList.toggle("skin-tajweed", skin === "tajweed");
     this.svg.classList.toggle("skin-plain", skin === "plain");
+
+    const paint = skin === "tajweed" && this.skinLookup !== null;
+    for (const poly of this.polygons()) {
+      for (const cls of (poly.getAttribute("class") ?? "").split(/\s+/)) {
+        if (cls.startsWith(TAJWEED_CLASS_PREFIX)) poly.classList.remove(cls);
+      }
+      poly.removeAttribute("data-tj");
+      if (!paint) continue;
+      const key = this.keyForElement(poly);
+      const marks = key ? this.skinLookup!(key) : [];
+      const lead = leadingRule(marks);
+      if (!lead) continue;
+      poly.classList.add(tajweedMarkClass(lead.id));
+      for (const mark of marks) poly.classList.add(tajweedClass(mark.rule.id));
+      // The machine-readable rule list, for the app's legend/inspector and for
+      // the e2e assertion that the swap actually reached the page.
+      poly.setAttribute("data-tj", marks.map((m) => m.rule.id).join(" "));
+    }
   }
 
   /** Convert a client (screen) point to SVG user coordinates. */

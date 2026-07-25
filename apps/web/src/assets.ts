@@ -7,6 +7,7 @@ import type {
   AssetManifest,
   AyahRootsShard,
   RootIndexShard,
+  TajweedShard,
 } from "@hifth/core";
 
 const BASE = import.meta.env.BASE_URL;
@@ -75,4 +76,19 @@ export function loadRootBucket(
   bucket: number,
 ): Promise<RootIndexShard | null> {
   return json<RootIndexShard>(`${BASE}assets/roots/${edition}/root/${bucket}.json`);
+}
+
+/**
+ * Fetch one surah's tajweed shard (Loop 6a). Same one-shard-per-surah shape and
+ * same quiet-on-miss stance as the root lens: the skin is an enhancement, so a
+ * missing shard means "no rules known here" and the page stays plain.
+ *
+ * Only fetched once the skin is switched on — a hafiz who never opens it pays
+ * nothing, and the shards are not in the precache list for the same reason.
+ */
+export function loadTajweedShard(
+  edition: string,
+  surah: number,
+): Promise<TajweedShard | null> {
+  return json<TajweedShard>(`${BASE}assets/skins/${edition}/tajweed/${surah}.json`);
 }

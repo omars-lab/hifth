@@ -99,6 +99,51 @@ own license); each is recorded individually rather than assumed.
 
 ---
 
+### quran-tajweed-cpfair
+
+- **Name:** quran-tajweed — tajweed rule annotations for the Qur'an (riwāyat Hafs)
+  by Collin Fair, built from ReciteQuran.com, the Dar al-Maarifah tajweed
+  masāhif "and others". The rule-span source for the tajweed skin (Loop 6a).
+  Repository is dormant and says so on its first README line.
+- **Provenance:** https://github.com/cpfair/quran-tajweed at commit
+  `496f71cd191da00fa2a37ded79dbbddb033bb0ad` (2021-10-12), path
+  `output/tajweed.hafs.uthmani-pause-sajdah.json`, retrieved 2026-07-25 →
+  `packages/etl/data/tajweed/tajweed.hafs.uthmani-pause-sajdah.json`
+  (SHA-256 `151d616a…5ebf67`, 5,578,730 bytes; full details in the adjacent
+  `PROVENANCE.md`). Byte-identity confirmed through a second transport, the
+  codeload tarball of the same pin.
+- **Shape:** JSON array, one record per ayah —
+  `{surah, ayah, annotations: [{rule, start, end}]}`, where `start`/`end` are
+  **codepoint offsets inside that ayah's own text** (Tanzil Uthmani, the frozen
+  2017 snapshot the README pins). 6,236/6,236 ayahs · 60,057 annotations ·
+  18 rule ids at pin, mapped to Hifth's 7 rule families by `build-tajweed.mjs`.
+- **License (README, verbatim; no LICENSE file):** "This data file is licensed
+  under a Creative Commons Attribution 4.0 International License, while the
+  original Tanzil.net text file linked above is made available under the
+  Tanzil.net terms of use." CC BY 4.0 permits the shards; **attribution is
+  mandatory** and ships three ways — `assets/skins/<edition>/NOTICE.txt` beside
+  the data, `SOURCES.md`, and a visible credit + link in the app's tajweed
+  legend. Note the grant is scoped to *"this data file"*: the classifier and
+  rule trees in the same repo carry no licence, so **rebuilding** the
+  annotations is not covered and would need its own clearance.
+- **Second notice — the base text the offsets address:** Tanzil.net terms of use
+  ("Permission is granted to copy and distribute verbatim copies of the Quran
+  text provided here, but changing the text is not allowed… provided that its
+  source (Tanzil Project) is clearly indicated, and a link is made to
+  tanzil.net"). Hifth vendors and ships **no Tanzil bytes** — the shards are
+  numbers, and the text on screen is KFGQPC page artwork — so the term binds
+  nothing we distribute; the source is named because the offsets are meaningless
+  without it.
+- **Known limits (recorded, and why the skin ships beta):** the ruleset omits
+  `izhar`, `izhar_shafawi`, `tafkheem`, `tarqeeq` and `madd_al_tamkeen`, so "no
+  annotation" means "no rule this source covers"; and the spans index Tanzil's
+  tokenisation while the pages are KFGQPC artwork with no letter geometry, so
+  the skin marks whole ayahs until Loop 4b's ligature corpus lands.
+- **Immutability:** bytes are vendored verbatim and never edited (PLAN §8).
+- **Status: VENDORED (Loop 6a) — rule-span source for the tajweed skin.**
+
+---
+
 ## Pending sources (not yet vendored — recorded so the gate is ready)
 
 These are named in the plan for later loops. They are listed here so their license
@@ -116,4 +161,12 @@ review is tracked from the start; no bytes are vendored until the noted loop.
   *Resolved 2026-07-25: vendored as `quranic-arabic-corpus` above. The CC-BY-SA
   note was wrong — QAC is GPL + its own terms of use. QUL morphology was rejected
   (no license stated on the resource pages, downloads login-gated).*
-- **quran.com tajweed rule spans** — tajweed skin ETL (Loop 6). License: review pending.
+- ~~**quran.com tajweed rule spans** — tajweed skin ETL (Loop 6). License: review pending.~~
+  *Resolved 2026-07-25: **rejected**, and vendored `quran-tajweed-cpfair` above
+  instead. quran.com states no licence for `text_uthmani_tajweed`, and it is not
+  an independent source anyway — enumerated over all 114 surahs its rule counts
+  match cpfair's file exactly, including the two rarest (`idgham_mutajanisayn`
+  58 = 58 and `idgham_mutaqaribayn` 13 = 13, the same 13 ayahs) and the same
+  `izhar` gap. Going through it would shed the CC BY notice, not gain a licence.
+  QUL's tajweed resources (#58/#87) were rejected on the Loop 5 grounds: no
+  licence text anywhere on the resource or credits pages, downloads login-gated.*

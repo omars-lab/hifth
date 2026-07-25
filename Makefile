@@ -44,10 +44,11 @@ preview: build ## Build, then serve the production bundle locally
 	$(WEB) preview --port $(PORT)
 
 .PHONY: etl
-etl: core ## Run the full ETL (pages + adjacency shards + root shards) into assets
+etl: core ## Run the full ETL (pages + adjacency + root + tajweed shards) into assets
 	$(ETL) extract:pages
 	$(ETL) build:adjacency
 	$(ETL) build:roots
+	$(ETL) build:tajweed
 
 .PHONY: clean
 clean: ## Remove all build output (the "clean-state" discipline — see loop-0.md)
@@ -65,7 +66,7 @@ typecheck: core ## tsc --noEmit in every package
 	$(PNPM) typecheck
 test: core ## Vitest unit/contract tests in every package
 	$(PNPM) test
-e2e: core ## Playwright mobile e2e (iPhone WebKit + Android Chromium)
+e2e: core ## Playwright mobile e2e (iPhone WebKit + Android Chromium + golden images)
 	$(WEB) build
 	$(WEB) test:e2e
 
@@ -76,6 +77,57 @@ core: ## Build @hifth/core only (needed before typecheck/test — the Loop 0 les
 .PHONY: gates
 gates: build ## The static gates: no <text> in SVG, license present, JS budget <150KB gz
 	$(PNPM) gates
+
+.PHONY: lighthouse
+lighthouse: build ## Lighthouse CI gate (all four categories ≥90) against the built app
+	@# lhci is run via `dlx`, not a devDependency: it drags in Lighthouse and a
+	@# Chrome launcher that nothing else here needs, and it runs once per push.
+	@# On macOS it cannot find Chrome by itself; point it at the app bundle.
+	CHROME_PATH="$${CHROME_PATH:-/Applications/Google Chrome.app/Contents/MacOS/Google Chrome}" \
+	  $(PNPM) dlx @lhci/cli@0.14.x autorun
+
+# ---------------------------------------------------------------------------
+# Golden images — the visual gate (PLAN §Testing plan, "golden-image diff")
+#
+# Baselines are rasterized geometry, so they are per-platform: the committed set
+# under e2e/__screenshots__/darwin is what you diff against locally, and
+# .../linux is what CI diffs against. Regenerate BOTH when a highlight's
+# geometry legitimately changes, and eyeball the diff before committing it —
+# an accepted baseline is the only place a wrong wash can hide forever.
+# ---------------------------------------------------------------------------
+
+GOLDEN_IMAGE := mcr.microsoft.com/playwright:v1.61.1-noble
+
+.PHONY: golden
+golden: core ## Run the golden-image diff on this machine (darwin baselines)
+	$(WEB) build
+	$(WEB) exec playwright test --project=golden
+
+.PHONY: golden-update
+golden-update: core ## Accept new golden baselines for THIS platform — review the diff first
+	$(WEB) build
+	$(WEB) exec playwright test --project=golden --update-snapshots
+	@echo ""
+	@echo "  Baselines rewritten. Run 'git diff --stat -- apps/web/e2e/__screenshots__'"
+	@echo "  and open the changed PNGs before committing: this is the gate agreeing"
+	@echo "  with you, not the other way round."
+
+.PHONY: golden-linux
+golden-linux: core ## Run/refresh the CI-shaped (linux) baselines in the Playwright container
+	@# The preview server stays on the host — its node_modules are built for the
+	@# host arch. Only the browser runs in the container, reaching back over
+	@# host.docker.internal; HIFTH_BASE_URL is what stops Playwright from trying
+	@# to start a second server inside it. UPDATE=1 rewrites the linux baselines.
+	$(WEB) build
+	@set -e; \
+	  trap 'pkill -f "vite preview --port $(PORT)" 2>/dev/null || true' EXIT; \
+	  $(WEB) exec vite preview --port $(PORT) --strictPort >/dev/null 2>&1 & \
+	  until curl -sf http://localhost:$(PORT)/ >/dev/null 2>&1; do sleep 1; done; \
+	  docker run --rm -v "$$PWD:/w" -w /w/apps/web \
+	    --add-host=host.docker.internal:host-gateway \
+	    -e HIFTH_BASE_URL=http://host.docker.internal:$(PORT) \
+	    $(GOLDEN_IMAGE) \
+	    npx playwright test --project=golden $(if $(UPDATE),--update-snapshots,)
 
 .PHONY: secrets
 secrets: ## Scan the working tree + history for committed secrets (gitleaks)
@@ -88,6 +140,7 @@ ci: core ## Full local mirror of the CI build-test-gate job, IN CI ORDER
 	$(ETL) extract:pages
 	$(ETL) build:adjacency
 	$(ETL) build:roots
+	$(ETL) build:tajweed
 	@git diff --quiet -- apps/web/public/assets \
 	  || { echo "::error:: ETL output differs from committed assets (run: make etl)"; exit 1; }
 	$(PNPM) lint
@@ -99,7 +152,8 @@ ci: core ## Full local mirror of the CI build-test-gate job, IN CI ORDER
 	$(CORE) build && $(WEB) build
 	$(PNPM) gate:budget
 	@echo ""
-	@echo "  ✓ build-test-gate mirror passed. (CI also runs the e2e job: make e2e)"
+	@echo "  ✓ build-test-gate mirror passed."
+	@echo "    CI also runs two more jobs: make e2e, make lighthouse."
 
 # ---------------------------------------------------------------------------
 # The loop workflow (docs/PLAN.md → executable)
@@ -128,10 +182,11 @@ loop: ## Print the kickoff prompt for a loop:  make loop N=2
 	@awk -v n="$(N)" '$$0 ~ ("^### Loop " n " ") {f=1} /^### Loop /{if(f && $$0 !~ ("^### Loop " n " ")) f=0} f' docs/PLAN.md | sed 's/^/    /'
 
 .PHONY: loop-verify
-loop-verify: ci ## Verify a loop is landable: full CI mirror + e2e (its on-device check is manual)
+loop-verify: ci ## Verify a loop is landable: CI mirror + e2e + Lighthouse (on-device check is manual)
 	@$(MAKE) e2e
+	@$(MAKE) lighthouse
 	@echo ""
-	@echo "  ✓ CI mirror + e2e green. Now do the on-device check in §Loop $(N) of PLAN.md,"
+	@echo "  ✓ CI mirror + e2e + Lighthouse green. Now do the on-device check in §Loop $(N) of PLAN.md,"
 	@echo "    then write docs/decisions/loop-$(N).md and update the Status table."
 
 # ---------------------------------------------------------------------------
@@ -158,7 +213,10 @@ help: ## List targets (this)
 	@echo ""
 	@grep -hE '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) \
 	  | sort \
-	  | awk 'BEGIN{FS=":.*?## "}{printf "  \033[36m%-14s\033[0m %s\n", $$1, $$2}'
+	  | awk 'BEGIN{FS=":.*?## "}{printf "  \033[36m%-16s\033[0m %s\n", $$1, $$2}'
 	@echo ""
 	@echo "  Loop workflow:  make status | make loop N=2 | make loop-verify N=2"
 	@echo "  On device:      make phone | make perf"
+	@echo "  Golden images:  make golden        (diff against this platform's baselines)"
+	@echo "                  make golden-update (accept new ones — review the PNG diff!)"
+	@echo "                  make golden-linux UPDATE=1  (refresh the CI/linux set)"

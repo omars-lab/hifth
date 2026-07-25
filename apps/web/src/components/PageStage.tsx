@@ -19,6 +19,8 @@ import {
   DEFAULT_HOP_ZOOM,
   type PointerIntent,
   type Resolver,
+  type SkinId,
+  type TajweedLookup,
   type View,
 } from "@hifth/core";
 import { loadPageSvg } from "../assets";
@@ -48,6 +50,17 @@ interface PageStageProps {
   labelFor: (key: string) => string;
   /** Fired with the selected ayah's on-screen bbox so the rail can position. */
   onSelectionRect?: (rect: { x: number; y: number; width: number; height: number } | null) => void;
+  /**
+   * The applied skin (Loop 6a, spec §8). L3 owns the choice; the stage owns the
+   * Highlighters, so it is the one that can apply it to every mounted page.
+   */
+  skin?: SkinId;
+  /**
+   * Rule lookup for the tajweed skin, or null while its shards are still in
+   * flight. Passing it through keeps L2 ignorant of the shard format — the
+   * highlighter takes a function, exactly like `labelFor`.
+   */
+  tajweedLookup?: TajweedLookup | null;
 }
 
 /** What App can drive imperatively on the stage. */
@@ -87,6 +100,8 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
     onSelectRange,
     labelFor,
     onSelectionRect,
+    skin = "plain",
+    tajweedLookup = null,
   },
   ref,
 ): JSX.Element {
@@ -107,6 +122,22 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
   labelForRef.current = labelFor;
   const onSelectionRectRef = useRef(onSelectionRect);
   onSelectionRectRef.current = onSelectionRect;
+  // Read by mountPage, which runs async and must not close over a stale skin.
+  const skinRef = useRef(skin);
+  skinRef.current = skin;
+  const tajweedRef = useRef(tajweedLookup);
+  tajweedRef.current = tajweedLookup;
+
+  /*
+   * The skin swap itself: classes on and classes off, on every mounted page.
+   * No geometry is read or written here — that is the whole promise of spec §8,
+   * and `geometrySignature` in @hifth/core is what holds it to it. Cheap enough
+   * to run synchronously on toggle (a page is ~15 polygons), which is what makes
+   * "instant" in the exit criterion true rather than aspirational.
+   */
+  useEffect(() => {
+    for (const mp of pagesRef.current.values()) mp.hl.setSkin(skin, tajweedLookup);
+  }, [skin, tajweedLookup]);
 
   // The one imperative transform. Gestures and the hop tween both write here.
   const view = useRef<View>({ x: 0, y: 0, z: 1 });
@@ -214,6 +245,9 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
         labelFor: (key) => labelForRef.current(key),
       });
       hl.onSelect((key) => onSelectRef.current(key));
+      // A page mounted while the skin is on must arrive wearing it, or turning a
+      // page would flash plain until the effect below caught up.
+      hl.setSkin(skinRef.current, tajweedRef.current);
       const mp: MountedPage = { host, svg: svgEl as unknown as SVGSVGElement, hl };
       pagesRef.current.set(targetPage, mp);
       return mp;

@@ -1,0 +1,303 @@
+/*
+ * SkinToggle + TajweedLegend — the skin switch in the chrome, and its key.
+ *
+ * The sheet mirrors HopPopover's geometry (bottom sheet <900px, floating card
+ * above) so every modal surface in the app behaves the same way under a thumb.
+ */
+
+.group {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.toggle {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  min-block-size: var(--touch-min);
+  padding-inline: var(--space-3);
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius-pill);
+  background: var(--paper-raised);
+  color: var(--ink-soft);
+  font: inherit;
+  font-size: var(--text-sm);
+  cursor: pointer;
+}
+
+.toggle[aria-pressed="true"] {
+  border-color: var(--accent);
+  background: var(--accent-tint);
+  color: var(--accent-strong);
+}
+
+.toggle:focus-visible,
+.legendBtn:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.label {
+  font-weight: 600;
+}
+
+/*
+ * The beta badge. Deliberately not subtle and deliberately always rendered —
+ * PLAN §6 makes hafiz sign-off the gate for this skin, so the caveat travels
+ * with the control rather than living in a settings screen nobody opens.
+ */
+.beta {
+  padding-inline: var(--space-2);
+  border-radius: var(--radius-pill);
+  background: var(--highlight-wash);
+  color: var(--ink);
+  font-size: var(--text-xs);
+  letter-spacing: 0.02em;
+}
+
+.legendBtn {
+  display: grid;
+  place-items: center;
+  min-inline-size: var(--touch-min);
+  min-block-size: var(--touch-min);
+  border: none;
+  background: none;
+  color: var(--ink-soft);
+  font-size: var(--text-md);
+  cursor: pointer;
+}
+
+/* ---- the legend sheet ---------------------------------------------------- */
+
+.scrim {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-sheet);
+  background: rgba(38, 32, 26, 0.28);
+  animation: fade var(--dur-fast) ease;
+}
+
+.sheet {
+  position: fixed;
+  inset-inline: 0;
+  inset-block-end: 0;
+  z-index: var(--z-sheet);
+  max-block-size: 78vh;
+  overflow-y: auto;
+  padding: var(--space-3) var(--space-4) calc(var(--space-5) + env(safe-area-inset-bottom));
+  background: var(--paper-raised);
+  border-start-start-radius: var(--radius-lg);
+  border-start-end-radius: var(--radius-lg);
+  box-shadow: var(--shadow-2);
+  animation: rise var(--dur-med) var(--ease-hop);
+}
+
+.grip {
+  inline-size: 40px;
+  block-size: 4px;
+  margin: 0 auto var(--space-2);
+  border-radius: var(--radius-pill);
+  background: var(--hairline);
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding-block-end: var(--space-2);
+  border-block-end: 1px solid var(--hairline);
+}
+
+.title {
+  margin: 0;
+  font-size: var(--text-md);
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.close {
+  margin-inline-start: auto;
+  min-inline-size: var(--touch-min);
+  min-block-size: var(--touch-min);
+  border: none;
+  background: none;
+  color: var(--ink-soft);
+  font-size: var(--text-md);
+  cursor: pointer;
+}
+
+.close:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+.caveat {
+  margin: var(--space-3) 0;
+  color: var(--ink-soft);
+  font-size: var(--text-sm);
+  line-height: 1.5;
+}
+
+.list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: auto auto 1fr;
+  align-items: center;
+  gap: var(--space-2) var(--space-3);
+  padding-block: var(--space-2);
+  border-block-end: 1px solid var(--hairline);
+}
+
+/* A rule with nothing on this page stays readable but recedes — the legend is
+   also a page summary, so "none here" is information, not clutter to hide.
+   Deliberately NOT `opacity` on the row: opacity blends the text toward the
+   paper and drops it under 4.5:1, and axe is right to fail that. The two things
+   that dim are the swatch and the mark, both aria-hidden decoration; the words
+   stay at full strength and merely step back a shade. */
+.row[data-empty] .swatch,
+.row[data-empty] .mark {
+  opacity: 0.45;
+}
+
+.row[data-empty] .name {
+  color: var(--ink-soft);
+}
+
+.row:last-child {
+  border-block-end: none;
+}
+
+.swatch {
+  display: block;
+  inline-size: 40px;
+}
+
+.swatchSvg {
+  display: block;
+  inline-size: 40px;
+  block-size: 12px;
+}
+
+/* Same wash + stroke the page draws, so the key matches the thing it explains. */
+.swatchShape {
+  fill-opacity: var(--tj-wash);
+  stroke-width: 1.4;
+}
+
+.mark {
+  min-inline-size: 1.6em;
+  text-align: center;
+  color: var(--ink);
+  font-size: var(--text-md);
+}
+
+.name {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  color: var(--ink);
+  font-size: var(--text-md);
+}
+
+/* --ink-soft, not --ink-faint, for the three secondary texts below. Faint is
+   2.9:1 on paper — fine for the decorative captions it was minted for, a WCAG
+   1.4.3 failure for anything a reader has to actually read. In this sheet all
+   three carry meaning: the transliteration is the rule's name for someone who
+   cannot read the Arabic one, and the credit is the licence condition. */
+.latin {
+  color: var(--ink-soft);
+  font-family: var(--font-latin);
+  font-size: var(--text-xs);
+}
+
+.count {
+  grid-column: 1 / -1;
+  color: var(--ink-soft);
+  font-size: var(--text-xs);
+}
+
+.selection {
+  margin-block-start: var(--space-4);
+  padding-block-start: var(--space-3);
+  border-block-start: 1px solid var(--hairline);
+}
+
+.subhead {
+  margin: 0 0 var(--space-2);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--ink-soft);
+}
+
+.empty {
+  margin: 0;
+  color: var(--ink-soft);
+  font-size: var(--text-sm);
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.chip {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-1) var(--space-2);
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius-pill);
+  background: var(--paper);
+  font-size: var(--text-sm);
+}
+
+.credit {
+  margin-block-start: var(--space-4);
+  color: var(--ink-soft);
+  font-size: var(--text-xs);
+  line-height: 1.5;
+}
+
+.credit a {
+  color: var(--accent-strong);
+}
+
+@media (min-width: 900px) {
+  .sheet {
+    inset-inline-start: auto;
+    inset-inline-end: var(--space-5);
+    inset-block-end: var(--space-5);
+    inline-size: 420px;
+    border-radius: var(--radius-lg);
+  }
+}
+
+@keyframes rise {
+  from {
+    transform: translateY(100%);
+  }
+}
+
+@keyframes fade {
+  from {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sheet,
+  .scrim {
+    animation: none;
+  }
+}

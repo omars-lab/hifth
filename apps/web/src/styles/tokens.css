@@ -110,3 +110,53 @@
     --dur-hop: 0ms;
   }
 }
+
+/*
+ * Tajweed skin palette (Loop 6a) — a token LAYER, exactly as PLAN §5 promised:
+ * the skin swaps custom properties and class names, never geometry and never a
+ * new asset. Kept in its own block so the base tokens above stay one readable
+ * unit.
+ *
+ * Colour-blind safety is a requirement, not a nicety: tajweed colour schemes are
+ * the one place a mushaf app routinely fails ~8% of men. The hues are the
+ * Okabe–Ito qualitative set (designed to stay separable under protanopia,
+ * deuteranopia and tritanopia), pulled toward the spec's families where the two
+ * agreed — §8 asks for "madd red, ghunnah green, qalqalah blue", and Okabe–Ito's
+ * vermillion / bluish-green / blue are exactly those, chosen for separability.
+ *
+ * Three constraints shaped the rest:
+ *  - Okabe–Ito's orange and yellow are NOT used. Amber is spoken for: it is the
+ *    selection wash ("you are here"), and a rule that reads as a selection is a
+ *    worse bug than a rule nobody can see.
+ *  - The two madd grades share the red family (as the spec asks) and separate by
+ *    LIGHTNESS + dash pattern rather than hue, which survives every form of
+ *    colour blindness.
+ *  - Colour is never the only channel. Every rule also carries a dash pattern
+ *    here, an Arabic text mark in the core registry, and a named row in the
+ *    legend. Turning the palette to greyscale must lose nothing but speed.
+ */
+:root {
+  --tj-wasl: #9c9284; /* faint grey — on every «ال»; the quietest thing on the page */
+  --tj-madd: #d55e00; /* Okabe–Ito vermillion — the spec's "red family" */
+  --tj-ghunnah: #009e73; /* Okabe–Ito bluish green — the spec's green */
+  --tj-qalqalah: #0072b2; /* Okabe–Ito blue — the spec's blue */
+  --tj-idgham: #cc79a7; /* Okabe–Ito reddish purple */
+  --tj-silent: #6e6259; /* warm grey, darker than wasl — the spec's gray */
+  --tj-madd-lazim: #8e2400; /* deep red: same family as madd, unmistakably heavier */
+
+  /* Dash patterns — the second channel, in SVG user units. Solid is reserved
+     for madd lāzim, the rule you must not miss. */
+  --tj-dash-wasl: 0.8 3;
+  --tj-dash-madd: 4 2;
+  --tj-dash-ghunnah: 1.6 1.6;
+  --tj-dash-qalqalah: 5 1.5 1 1.5;
+  --tj-dash-idgham: 2.5 2.5;
+  --tj-dash-silent: 0.8 1.6;
+  --tj-dash-madd-lazim: none;
+
+  /* How loudly the skin paints. Low by design: this is an annotation over
+     scripture, and the scripture has to stay the most legible thing on screen. */
+  --tj-wash: 0.1;
+  --tj-stroke: 0.7;
+  --tj-stroke-strong: 1.1;
+}

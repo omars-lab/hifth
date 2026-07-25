@@ -55,6 +55,7 @@ jobs:
           pnpm --filter @hifth/etl extract:pages
           pnpm --filter @hifth/etl build:adjacency
           pnpm --filter @hifth/etl build:roots
+          pnpm --filter @hifth/etl build:tajweed
           git diff --exit-code -- apps/web/public/assets \
             || (echo "::error::ETL output differs from committed assets" && exit 1)
 
@@ -101,5 +102,58 @@ jobs:
         run: pnpm --filter @hifth/web exec playwright install --with-deps chromium webkit
       - name: Build web
         run: pnpm --filter @hifth/web build
-      - name: E2E (mobile viewports)
+      # Also runs the `golden` project: the visual gate diffs pages 7/9/19 in
+      # every highlight state against the committed linux baselines
+      # (apps/web/e2e/__screenshots__/linux, refreshed with `make golden-linux`).
+      - name: E2E (mobile viewports + golden images)
         run: pnpm --filter @hifth/web test:e2e
+
+      # Failed screenshot comparisons are only readable as images.
+      - name: Upload Playwright report
+        if: failure()
+        uses: actions/upload-artifact@v5
+        with:
+          name: playwright-report
+          path: apps/web/playwright-report
+          retention-days: 7
+
+  # Lighthouse gate: all four categories ≥90 (PLAN §Loop 6a exit criterion).
+  #
+  # Its own job, deliberately, rather than a step inside build-test-gate or a
+  # `make ci` line:
+  #   - it needs Chrome and ~90s of runs (3 runs, median) — that is dead weight
+  #     bolted onto the gate everyone waits on, and it parallelises for free;
+  #   - `make ci` is documented as an exact mirror of build-test-gate, and it
+  #     should stay exactly that.
+  # It still runs on EVERY push and pull_request, at full strength: the
+  # threshold is not weakened anywhere, only moved to where it is stable.
+  # Reproduce locally with `make lighthouse`.
+  lighthouse:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+        with:
+          version: 9.15.0
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: pnpm
+      - name: Install
+        run: pnpm install --frozen-lockfile
+      - name: Build
+        run: |
+          pnpm --filter @hifth/core build
+          pnpm --filter @hifth/web build
+      # Config (URLs, run count, the ≥90 assertions) lives in .lighthouserc.json.
+      # ubuntu-latest ships Chrome, so lhci finds a browser without help.
+      - name: Lighthouse CI (categories ≥90)
+        run: pnpm dlx @lhci/cli@0.14.x autorun
+
+      - name: Upload Lighthouse reports
+        if: always()
+        uses: actions/upload-artifact@v5
+        with:
+          name: lighthouse-reports
+          path: .lighthouseci
+          retention-days: 7
