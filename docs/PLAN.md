@@ -41,7 +41,7 @@ ends by updating this section and writing `docs/decisions/loop-<N>.md`.**
 | 4a — Edge-data ETL | complete | Deterministic full-corpus edge ETL; 100% valid keys; shards <50KB gz | [loop-4a.md](decisions/loop-4a.md) |
 | 4b — Page corpus + streaming | **gated on follow-up ①** | All 604 pages vendored + QUL-checked; every ayah navigable; TTI <2.5s mid-Android | — |
 | 5 — Highlight + roots | complete (ayah granularity; word granularity needs 4b) | Drag-range → merged hop list; root lens nearest-page-first | [loop-5.md](decisions/loop-5.md) |
-| 6a — Skin, editions, wayfinding | **next** (ungated) | Instant plain⇄tajweed toggle (identical geometry); jump anywhere; visited pages survive offline; Lighthouse ≥90 | — |
+| 6a — Skin, editions, wayfinding | complete | Instant plain⇄tajweed toggle (identical geometry); jump anywhere; visited pages survive offline; Lighthouse ≥90 | [loop-6a.md](decisions/loop-6a.md) |
 | 6b — Pin-a-juz packs | **gated on 4b** (→ follow-up ①) | Airplane-mode revision of a pinned juz works after 8+ days | — |
 | 7 — Polish + beta | pending (after 3+5+6) | Hafiz revision session, zero friction notes → **web v1.0** | — |
 | Track B — Capacitor | gated on web v1.0 | Same web build wrapped for iOS/Android; Universal Links | — |
@@ -72,13 +72,13 @@ ends by updating this section and writing `docs/decisions/loop-<N>.md`.**
    check of [KFGQPC](https://qurancomplex.gov.sa)'s published terms (the repo's summary is
    secondhand).
 3. Loop-assigned deferrals (already scoped in their loop sections; details in the decision
-   records): full corpus vendoring + QUL validation → Loop 4b; **golden-image visual
-   regression → Loop 6** (moved from Loop 5, which produced the amber wash and marquee that
-   most need it — it shares a harness with the skin work); wheel-zoom → Loop 6; Lighthouse
-   CI + iOS install coach mark → Loop 6; **word-granularity roots + `?w=` UI → after 4b**;
-   **⬡ rail chip vs ⬡ root lens (same glyph, two promises) → Loop 6**. **Done:** marquee
-   drag-select (Loop 5); per-polygon a11y labels + keyboard hop path (Loop 3);
-   `navigateTo` animation (Loop 2).
+   records): full corpus vendoring + QUL validation → Loop 4b; **word-granularity roots +
+   `?w=` UI → after 4b**; **word-granularity tajweed painting → after 4b** (the spans are
+   already vendored verbatim, so it is a rendering change, not a data change); **hafiz
+   sign-off on the tajweed skin → Loop 7** (the beta label stays until then). **Done:**
+   golden-image visual regression, Lighthouse CI, and the **⬡ chip vs ⬡ lens** collision —
+   all Loop 6a ([loop-6a.md](decisions/loop-6a.md)); marquee drag-select (Loop 5);
+   per-polygon a11y labels + keyboard hop path (Loop 3); `navigateTo` animation (Loop 2).
 4. **On-device VoiceOver/TalkBack pass** (Loop 3 exit named it; automated axe + the
    keyboard hop tour cover the machine-checkable floor, both green in CI). The manual
    screen-reader gesture walkthrough on a real iOS/Android device is the remaining
@@ -99,6 +99,16 @@ ends by updating this section and writing `docs/decisions/loop-<N>.md`.**
    distribution — a static app hands the browser real copies of `assets/roots/**` — so the
    corresponding source (`build-roots.mjs` + its pinned input) must be reachable by whoever
    loads the page. **Do not publish the Cloudflare deploy while this repo is private.**
+6. **`--ink-faint` contrast sweep** — the token fails 4.5:1 wherever it carries text.
+   Automated axe passes because its traversal does not reach every surface, so the sweep is
+   repo-wide-by-hand plus an extended axe traversal. Opened by Loop 6a; **before Loop 7**.
+7. **The merge pass is a step, not a formality.** Loop 6a ran three agents into one tree and
+   the protocol held — no lost edits, no rebase — but the defect it produced was *semantic*
+   and existed only once both halves were mounted (two in-flow chrome strips, each correct
+   alone, together eating a third of a phone's stage). Composition defects are invisible
+   until the whole product runs at once, so **every parallel loop budgets a merge pass with
+   its own `make ci` + `make e2e` on the merged tree** before the decision record is written.
+   See [loop-6a.md](decisions/loop-6a.md) §The merge pass.
 
 ---
 
