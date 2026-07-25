@@ -2,6 +2,7 @@
   "name": "@hifth/etl",
   "version": "0.0.0",
   "private": true,
+  "license": "GPL-3.0-or-later",
   "description": "Hifth ETL — extract assets, build anchors/adjacency/roots/skins, validate (Node, offline)",
   "type": "module",
   "scripts": {

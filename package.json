@@ -2,6 +2,7 @@
   "name": "hifth",
   "version": "0.0.0",
   "private": true,
+  "license": "GPL-3.0-or-later",
   "description": "Hifth (حفظ) — a pure navigation instrument for huffaz",
   "type": "module",
   "packageManager": "pnpm@9.15.0",

@@ -2,6 +2,7 @@
   "name": "@hifth/core",
   "version": "0.0.0",
   "private": true,
+  "license": "GPL-3.0-or-later",
   "description": "Hifth L2 — framework-free TypeScript: keys, resolver, highlighter, router, adjacency",
   "type": "module",
   "main": "./dist/index.js",

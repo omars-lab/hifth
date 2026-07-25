@@ -2,6 +2,7 @@
   "name": "@hifth/web",
   "version": "0.0.0",
   "private": true,
+  "license": "GPL-3.0-or-later",
   "description": "Hifth web app — mobile-first, RTL-native, installable PWA",
   "type": "module",
   "scripts": {
