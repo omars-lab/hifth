@@ -99,9 +99,15 @@ ends by updating this section and writing `docs/decisions/loop-<N>.md`.**
    distribution — a static app hands the browser real copies of `assets/roots/**` — so the
    corresponding source (`build-roots.mjs` + its pinned input) must be reachable by whoever
    loads the page. **Do not publish the Cloudflare deploy while this repo is private.**
-6. **`--ink-faint` contrast sweep** — the token fails 4.5:1 wherever it carries text.
-   Automated axe passes because its traversal does not reach every surface, so the sweep is
-   repo-wide-by-hand plus an extended axe traversal. Opened by Loop 6a; **before Loop 7**.
+6. ~~**`--ink-faint` contrast sweep**~~ — **closed** (`68746bf`). The token was redefined
+   `#9c9284` → `#6b6255`, clearing 4.5:1 on all four surfaces it lands on; fixing it at the
+   token rather than across 23 call sites, since every one of them is a `color:`.
+   The sweep is not by hand and not axe: `e2e/contrast.spec.ts` opens **ten** surfaces and
+   measures each with `e2e/contrast.ts` (WCAG luminance, compositing semi-transparent layers
+   to find the colour actually behind the text). Axe could not do this job — it filed most of
+   this app's chrome under `incomplete` as `nonBmp` (every glyph control) or
+   `shortTextContent` (every hop count), and `incomplete` never fails a build. **Any new
+   sheet or popover needs a row in `SURFACES` or nothing is checking it.**
 7. **The merge pass is a step, not a formality.** Loop 6a ran three agents into one tree and
    the protocol held — no lost edits, no rebase — but the defect it produced was *semantic*
    and existed only once both halves were mounted (two in-flow chrome strips, each correct
