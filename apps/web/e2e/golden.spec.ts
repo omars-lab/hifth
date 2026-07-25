@@ -24,11 +24,22 @@ import { test, expect, type Locator, type Page } from "@playwright/test";
  */
 
 /**
- * A skin is a stylesheet swap over identical geometry (PLAN §5), and the §7
- * link grammar already carries it as `?skin=`. So the tajweed row is literally
- * `{ id: "tajweed", param: "skin=tajweed" }` once the skin ships: the matrix
+ * A skin is a stylesheet swap over identical geometry (PLAN §5). The tajweed
+ * row is literally `{ id: "tajweed", param: "skin=tajweed" }`: the matrix
  * doubles, the new baselines are new files, and every existing one still holds
  * — which is the point of asserting geometry the skin must not move.
+ *
+ * Deliberately not added yet, on two conditions that are not about this file:
+ *
+ *   1. `skin=tajweed` is not a readable link param today, and it must not
+ *      become a plain one just to satisfy a test. The skin is opt-in per
+ *      session precisely so a beta annotation layer cannot arrive via someone
+ *      else's shared link; a production-readable param re-opens that by a
+ *      different door. Gate the reader on a test-only flag.
+ *   2. The palette is beta pending a hafiz sign-off — the one event most
+ *      likely to move hue, wash opacity and dash pattern. Baselines committed
+ *      before it would make the gate's first real firing the expected,
+ *      ignorable kind, which is how a team learns to reflex-`--update-snapshots`.
  */
 const SKINS = [{ id: "plain", param: "" }] as const;
 
