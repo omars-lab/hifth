@@ -109,6 +109,13 @@ ends by updating this section and writing `docs/decisions/loop-<N>.md`.**
    until the whole product runs at once, so **every parallel loop budgets a merge pass with
    its own `make ci` + `make e2e` on the merged tree** before the decision record is written.
    See [loop-6a.md](decisions/loop-6a.md) §The merge pass.
+8. **The tajweed golden row** — the `SKINS` axis in `e2e/golden.spec.ts` is a live seam with
+   one entry. Adding tajweed is gated on **two** preconditions, both of which must hold:
+   the hafiz sign-off on the palette (or the gate's first firing is an expected wall of red
+   that teaches everyone to `--update-snapshots` past it), and a **test-only** way to drive
+   the skin — a production-readable `skin=` param would ship a shareable link that turns a
+   beta annotation layer on for a reader who never saw the badge. Opened by Loop 6a;
+   **after Loop 7's sign-off**. See [loop-6a.md](decisions/loop-6a.md) §Deferred.
 
 ---
 

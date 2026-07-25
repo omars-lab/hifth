@@ -150,7 +150,7 @@ Budget it as its own step in every parallel loop.
 | Lighthouse (3 runs) — perf / a11y / best-practices / SEO | 94 / 100 / 100 / 100 | ≥90 each |
 | JS bundle | 91.5 KB gz | <150 KB |
 | Tajweed shards | 114 surahs, largest 14.9 KB gz (`2.json`, 50.6 KB raw) | <50 KB gz |
-| Golden baselines | 23 (darwin + linux) | — |
+| Golden baselines | 20 — 10 shots × 2 platforms (darwin, linux) | — |
 | Core unit tests | 211 (14 files) | — |
 | Web unit tests | 82 (9 files) | — |
 | e2e | 88 passed, 6 skipped, 0 failed (10 specs × iPhone/Android/golden) | all green |
@@ -164,6 +164,16 @@ Budget it as its own step in every parallel loop.
 - **Hafiz sign-off on the tajweed skin** → Loop 7; the beta label stays until then.
 - **Word-granularity tajweed painting** → after 4b. The spans are already vendored verbatim,
   so this is a rendering change, not a data change.
+- **A tajweed row in the golden `SKINS` axis** → after hafiz sign-off, and only behind a
+  **test-only** skin flag. Two agents converged on refusing it, and both reasons outlive the
+  loop. First, baselines of a *beta* palette make the sign-off arrive as a wall of expected
+  red diffs — which is how a team learns to `--update-snapshots` past its own gate, and a
+  gate people walk past catches nothing. Second, the skin is React state with no URL param
+  on purpose (see *Decisions*), so making the shot drivable by adding `?skin=tajweed` would
+  ship a shareable link that switches a beta annotation layer on for a reader who never saw
+  the badge — reopening by the back door the thing the badge exists to prevent. The axis is
+  left in place as a documented seam: adding the row regenerates the matrix under new
+  filenames and invalidates zero existing baselines.
 - **A real concordance table** → whenever a second edition is vendored. The seam is code
   today, with an empty table and a fixture proving it.
 - **`--ink-faint` contrast sweep** — it fails 4.5:1 wherever it carries text. Automated axe
