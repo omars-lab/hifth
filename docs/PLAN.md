@@ -83,18 +83,22 @@ ends by updating this section and writing `docs/decisions/loop-<N>.md`.**
    keyboard hop tour cover the machine-checkable floor, both green in CI). The manual
    screen-reader gesture walkthrough on a real iOS/Android device is the remaining
    confirmation — run it alongside follow-up ① on the same phone, **before Loop 7**.
-5. **Hifth's own license — now a decision, not a deferral** (opened by Loop 5). The repo has
-   **no `LICENSE` file**. That was harmless until Loop 5 vendored the
-   [Quranic Arabic Corpus](https://corpus.quran.com/download/) morphology, which is **GPL +
-   its own terms of use** (*not* CC-BY-SA, as this plan previously said — corrected in
-   `SOURCES.md` and [loop-5.md](decisions/loop-5.md)). Under a strict reading the derived
-   root shards are a GPL-covered derivative work: we already ship their corresponding source
-   (the ETL + the pinned input), and the app *code* is not a derivative of the data, so
-   nothing is in conflict — but the project's own license must be chosen deliberately rather
-   than by default. **Decide before public beta (Loop 7);** if a permissive app license is
-   wanted alongside GPL data, the alternative is dropping QAC for a root source with
-   compatible terms, which no candidate currently offers (rejections recorded in
-   `packages/etl/data/roots/PROVENANCE.md`).
+5. ~~**Hifth's own license**~~ — **DECIDED 2026-07-25: GPL-3.0-or-later.** Opened by Loop 5,
+   which vendored the [Quranic Arabic Corpus](https://corpus.quran.com/download/) morphology
+   (**GPL + its own terms of use** — *not* CC-BY-SA, as this plan previously said; corrected
+   in `SOURCES.md` and [loop-5.md](decisions/loop-5.md)) and so made the derived root shards
+   a GPL-covered derivative work under a strict reading. The stated goal was that
+   improvements come back, so: copyleft. **The plain GPL, not the AGPL** — a fully static,
+   backend-free PWA hands the browser its whole bundle, so a modified deployment already
+   *conveys* the code and owes its users source; §13 closes a network-service hole this
+   architecture does not have. Licensing our code GPL also collapses the code/data seam, so
+   the story is "GPL, except vendored assets under their own terms". Shipped as `LICENSE`
+   (canonical gnu.org text, SHA-256 `3972dc97…b36986`) plus
+   [`LICENSES.md`](../LICENSES.md), the per-path map.
+   **One live obligation, earlier than "public beta":** publishing the site *is*
+   distribution — a static app hands the browser real copies of `assets/roots/**` — so the
+   corresponding source (`build-roots.mjs` + its pinned input) must be reachable by whoever
+   loads the page. **Do not publish the Cloudflare deploy while this repo is private.**
 
 ---
 
