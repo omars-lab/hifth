@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   Adjacency,
   Resolver,
+  Roots,
   keyToRef,
   parseAyahKey,
   refToKey,
@@ -10,11 +11,19 @@ import {
   type AssetManifest,
   type AyahRange,
   type AyahRef,
+  type AyahRootsShard,
   type Edge,
   type MergedEdge,
   type RailChip,
+  type RootHop,
+  type RootIndexShard,
 } from "@hifth/core";
-import { loadManifest, loadShard } from "./assets";
+import {
+  loadManifest,
+  loadRootAyahShard,
+  loadRootBucket,
+  loadShard,
+} from "./assets";
 import { ayahLabel } from "./format";
 import { useHashRouter } from "./useHashRouter";
 import { PageStage, type PageStageHandle } from "./components/PageStage";
@@ -25,6 +34,7 @@ import { TrailBeads, type TrailBead } from "./components/TrailBeads";
 import { ShareSheet } from "./components/ShareSheet";
 import { InstallButton } from "./components/InstallButton";
 import { LiveAnnouncer, useAnnouncer } from "./components/LiveAnnouncer";
+import { RootLens, RootLensTrigger } from "./components/RootLens";
 import styles from "./App.module.css";
 
 // The app opens on page 7 (the mock's first curated page). Full page routing is
@@ -67,6 +77,16 @@ export function App(): JSX.Element {
   const [selectedRange, setSelectedRange] = useState<readonly string[] | null>(null);
   const [trail, setTrail] = useState<TrailBead[]>([]);
   const [openDirection, setOpenDirection] = useState<RailChip["direction"] | null>(null);
+  // Root lens (Loop 5) shards, in two waves: the selection's surah tells us
+  // which roots it carries, and only then do we fetch the buckets holding those
+  // roots' corpus-wide occurrence lists. `rootsOpen` is the ⬡ sheet.
+  const [rootAyahShards, setRootAyahShards] = useState<
+    ReadonlyMap<number, AyahRootsShard>
+  >(new Map());
+  const [rootBuckets, setRootBuckets] = useState<ReadonlyMap<number, RootIndexShard>>(
+    new Map(),
+  );
+  const [rootsOpen, setRootsOpen] = useState(false);
 
   const stageRef = useRef<PageStageHandle>(null);
   const { message, announce } = useAnnouncer();
@@ -127,6 +147,64 @@ export function App(): JSX.Element {
       if (surah) ensureShard(surah);
     }
   }, [selectedRange, ensureShard]);
+
+  // The root lens over whatever root shards have landed (same rebuild-on-set
+  // pattern as `adjacency`; a missing shard just means fewer families).
+  const roots = useMemo(() => {
+    if (!manifest) return null;
+    const lens = new Roots(manifest.edition);
+    for (const [surah, shard] of rootAyahShards) lens.addAyahShard(surah, shard);
+    for (const [bucket, shard] of rootBuckets) lens.addRootShard(bucket, shard);
+    return lens;
+  }, [manifest, rootAyahShards, rootBuckets]);
+
+  const requestedRootShards = useRef(new Set<number>());
+  const requestedRootBuckets = useRef(new Set<number>());
+
+  // Wave 1 — the selection's surah shard. Cheap and always worth having: it is
+  // what tells the ⬡ trigger whether this ayah has any roots at all.
+  useEffect(() => {
+    if (!manifest || !selectedKey) return;
+    const surah = parseAyahKey(selectedKey)?.surah;
+    if (!surah || requestedRootShards.current.has(surah)) return;
+    requestedRootShards.current.add(surah);
+    void loadRootAyahShard(manifest.edition, surah).then((shard) => {
+      if (shard) setRootAyahShards((m) => new Map(m).set(surah, shard));
+    });
+  }, [manifest, selectedKey]);
+
+  // Wave 2 — the buckets, only once the sheet is actually open. A bucket is
+  // tens of KB and holds every ayah of every root in it; fetching those for a
+  // lens nobody opened would be the loop's biggest wasted byte.
+  useEffect(() => {
+    if (!manifest || !roots || !rootsOpen || !selectedKey) return;
+    for (const bucket of roots.bucketsForKey(selectedKey)) {
+      if (requestedRootBuckets.current.has(bucket)) continue;
+      requestedRootBuckets.current.add(bucket);
+      void loadRootBucket(manifest.edition, bucket).then((shard) => {
+        if (shard) setRootBuckets((m) => new Map(m).set(bucket, shard));
+      });
+    }
+  }, [manifest, roots, rootsOpen, selectedKey]);
+
+  // Distinct roots on the selection — the ⬡ trigger's count (0 hides it).
+  const rootCount = useMemo(() => {
+    if (!roots || !selectedKey) return 0;
+    return new Set(roots.rootsForKey(selectedKey).map((r) => r.r)).size;
+  }, [roots, selectedKey]);
+
+  // The open lens's families, nearest page first. Null = closed. Families whose
+  // bucket is still in flight are simply absent, hence the loading flag.
+  const rootFamilies = useMemo(
+    () => (roots && rootsOpen && selectedKey ? roots.familiesForKey(selectedKey) : null),
+    [roots, rootsOpen, selectedKey],
+  );
+  const rootsLoading = rootFamilies !== null && rootFamilies.length < rootCount;
+
+  // The lens is about one ayah: moving the selection closes it (this covers
+  // taps, hops, bead-backs and deep links in one line, without every handler
+  // having to remember).
+  useEffect(() => setRootsOpen(false), [selectedKey]);
 
   // Rail chips for the current selection (empty when nothing selected / no hops).
   const chips = useMemo(
@@ -250,6 +328,20 @@ export function App(): JSX.Element {
     setSelectedRange(null);
     announce("أُلغي التحديد");
   }, [announce]);
+
+  // A root-lens row hops like any other edge — the lens already carries the
+  // target's page and direction, so it maps straight onto the §6 Edge shape and
+  // reuses one navigation path (trail bead, pulse, announcement).
+  const handleRootHop = useCallback(
+    (hop: RootHop) =>
+      handleHop({
+        type: "shared-root",
+        to: hop.key,
+        page: hop.page,
+        dir: { dSurah: hop.dSurah, dPage: hop.dPage, sameJuz: hop.sameJuz },
+      }),
+    [handleHop],
+  );
 
   // A merged range row hops from the member that produced the edge (its diff's
   // "here"), so the trail bead points at a real ayah, not at the passage.
@@ -414,6 +506,13 @@ export function App(): JSX.Element {
               // menu would be a dead end (nothing re-opens it but a fresh drag).
               onClose={() => setSelectedRange(null)}
             />
+            <RootLens
+              families={rootFamilies}
+              loading={rootsLoading}
+              canHop={canHop}
+              onHop={handleRootHop}
+              onClose={() => setRootsOpen(false)}
+            />
           </>
         )}
       </main>
@@ -424,6 +523,11 @@ export function App(): JSX.Element {
           currentKey={selectedKey}
           onBeadBack={handleBeadBack}
           onClearCurrent={handleClearCurrent}
+        />
+        <RootLensTrigger
+          count={rootCount}
+          open={rootsOpen}
+          onToggle={() => setRootsOpen((o) => !o)}
         />
         <ShareSheet state={selectedKey ? currentState : null} hasTrail={trail.length > 0} />
         {selectedSurah && (

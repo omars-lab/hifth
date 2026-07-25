@@ -122,3 +122,19 @@ export {
   rectsIntersect,
   type ResolvedRange,
 } from "./highlighter.js";
+
+// Loop 5 — the ⬡ root lens (page-distance sort, lemma sub-groups).
+export {
+  Roots,
+  orderByPageDistance,
+  groupByLemma,
+  type RootOccurrence,
+  type RootEntry,
+  type RootIndexShard,
+  type AyahRootRef,
+  type AyahRootsShard,
+  type RootHop,
+  type LemmaGroup,
+  type RootFamily,
+  type RootLensOptions,
+} from "./roots.js";

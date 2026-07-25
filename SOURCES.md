@@ -56,6 +56,49 @@ own license); each is recorded individually rather than assumed.
 
 ---
 
+### quranic-arabic-corpus
+
+- **Name:** Quranic Arabic Corpus — morphology, version 0.4 (2011), by Kais Dukes,
+  Language Research Group, University of Leeds. Root + lemma annotation for the
+  root lens (⬡, Loop 5).
+- **Provenance:** the official distribution (https://corpus.quran.com/download/)
+  is behind an e-mail form, so the bytes are pinned from a mirror:
+  https://github.com/alstat/QuranTree.jl at commit
+  `d7a0fe9c5c7138081aec6683d18e49f9a233d0dd`, path
+  `data/quranic-corpus-morphology-0.4.txt`, retrieved 2026-07-25 →
+  `packages/etl/data/roots/quranic-corpus-morphology-0.4.txt`
+  (SHA-256 `a1d12923…5d8c46`; full details in the adjacent `PROVENANCE.md`).
+  Byte-identity confirmed against a second mirror (`cltk/arabic_morphology_quranic-corpus@b5abd4d`)
+  and the official zip; QuranTree.jl's MIT license covers its Julia package, not
+  this data.
+- **Shape:** TSV, one line per morphological segment —
+  `(surah:ayah:word:segment)`, form, tag, features (`ROOT:` / `LEM:` in the
+  corpus's Buckwalter transliteration). 128,219 segments · 6,236/6,236 ayahs ·
+  1,642 roots · 4,644 lemmas · 44,431 root↔ayah pairs at pin.
+- **License (the file's own header, also published verbatim on the download
+  page):** "Copyright (C) 2011 Kais Dukes. License: GNU General Public License…
+  Permission is granted to copy and distribute verbatim copies of this file, but
+  CHANGING IT IS NOT ALLOWED. This annotation can be used in any website or
+  application, provided its source (the Quranic Arabic Corpus) is clearly
+  indicated, and a link is made to http://corpus.quran.com to enable users to
+  keep track of changes." The site footer reads "available under the GNU public
+  license with terms of use"; https://corpus.quran.com/license.jsp is unmodified
+  GPL v3. **The two are in tension** (GPL §5 permits modification, the terms of
+  use forbid it) — Hifth satisfies both readings by vendoring the file verbatim
+  with its copyright block intact and deriving the shards at build time.
+  **Attribution is mandatory:** the app credits "Quranic Arabic Corpus" and links
+  to http://corpus.quran.com on the root-lens surface.
+- **Second notice inside the same file:** Tanzil Quran Text (Uthmani 1.0.2),
+  © 2008-2009 Tanzil.info, **CC BY-ND 3.0 Unported**, attribution + link to
+  http://tanzil.info. Our shards carry no Quran text from this file — only roots,
+  lemmas, ayah numbers and page numbers — so the ND term binds the vendored copy,
+  not the ETL output.
+- **Immutability:** bytes are vendored verbatim and never edited (PLAN §8 and the
+  terms above).
+- **Status: VENDORED (Loop 5) — root/lemma source for the root lens.**
+
+---
+
 ## Pending sources (not yet vendored — recorded so the gate is ready)
 
 These are named in the plan for later loops. They are listed here so their license
@@ -68,6 +111,9 @@ review is tracked from the start; no bytes are vendored until the noted loop.
 - **QurSim** — *demoted 2026-07-25*: semantic relatedness (Ibn Kathir-derived,
   graded pairs), not lafẓi mutashabihat, and no canonical download endpoint.
   Someday-scoped as a reserved `related` edge type; not a Loop 4 source.
-- **Quranic Arabic Corpus / QUL morphology** — root/lemma data for the root lens
-  (Loop 5). License: review pending (QAC is CC-BY-SA — attribution required).
+- ~~**Quranic Arabic Corpus / QUL morphology** — root/lemma data for the root lens
+  (Loop 5). License: review pending (QAC is CC-BY-SA — attribution required).~~
+  *Resolved 2026-07-25: vendored as `quranic-arabic-corpus` above. The CC-BY-SA
+  note was wrong — QAC is GPL + its own terms of use. QUL morphology was rejected
+  (no license stated on the resource pages, downloads login-gated).*
 - **quran.com tajweed rule spans** — tajweed skin ETL (Loop 6). License: review pending.

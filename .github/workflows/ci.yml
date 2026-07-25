@@ -54,6 +54,7 @@ jobs:
           pnpm --filter @hifth/core build
           pnpm --filter @hifth/etl extract:pages
           pnpm --filter @hifth/etl build:adjacency
+          pnpm --filter @hifth/etl build:roots
           git diff --exit-code -- apps/web/public/assets \
             || (echo "::error::ETL output differs from committed assets" && exit 1)
 

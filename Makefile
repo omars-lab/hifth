@@ -44,9 +44,10 @@ preview: build ## Build, then serve the production bundle locally
 	$(WEB) preview --port $(PORT)
 
 .PHONY: etl
-etl: core ## Run the full ETL (extract pages + build adjacency shards) into assets
+etl: core ## Run the full ETL (pages + adjacency shards + root shards) into assets
 	$(ETL) extract:pages
 	$(ETL) build:adjacency
+	$(ETL) build:roots
 
 .PHONY: clean
 clean: ## Remove all build output (the "clean-state" discipline — see loop-0.md)
@@ -86,6 +87,7 @@ secrets: ## Scan the working tree + history for committed secrets (gitleaks)
 ci: core ## Full local mirror of the CI build-test-gate job, IN CI ORDER
 	$(ETL) extract:pages
 	$(ETL) build:adjacency
+	$(ETL) build:roots
 	@git diff --quiet -- apps/web/public/assets \
 	  || { echo "::error:: ETL output differs from committed assets (run: make etl)"; exit 1; }
 	$(PNPM) lint
