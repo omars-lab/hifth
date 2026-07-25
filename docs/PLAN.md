@@ -41,7 +41,8 @@ ends by updating this section and writing `docs/decisions/loop-<N>.md`.**
 | 4a — Edge-data ETL | complete | Deterministic full-corpus edge ETL; 100% valid keys; shards <50KB gz | [loop-4a.md](decisions/loop-4a.md) |
 | 4b — Page corpus + streaming | **gated on follow-up ①** | All 604 pages vendored + QUL-checked; every ayah navigable; TTI <2.5s mid-Android | — |
 | 5 — Highlight + roots | complete (ayah granularity; word granularity needs 4b) | Drag-range → merged hop list; root lens nearest-page-first | [loop-5.md](decisions/loop-5.md) |
-| 6 — Offline, skin, editions | **next** (skin + editions ungated; pin-a-juz needs 4b) | Pinned juz offline after 8+ days; instant skin toggle; Lighthouse ≥90 | — |
+| 6a — Skin, editions, wayfinding | **next** (ungated) | Instant plain⇄tajweed toggle (identical geometry); jump anywhere; visited pages survive offline; Lighthouse ≥90 | — |
+| 6b — Pin-a-juz packs | **gated on 4b** (→ follow-up ①) | Airplane-mode revision of a pinned juz works after 8+ days | — |
 | 7 — Polish + beta | pending (after 3+5+6) | Hafiz revision session, zero friction notes → **web v1.0** | — |
 | Track B — Capacitor | gated on web v1.0 | Same web build wrapped for iOS/Android; Universal Links | — |
 
@@ -358,13 +359,29 @@ otherwise — Loop 5 can start after 4a (edges exist) and upgrade granularity wh
 **Exit:** drag 2:47–2:48 → menu → merged hop list; word/ayah → root lens nearest-page-first.
 
 ### Loop 6 — Offline + skin + editions (medium)
-Service worker: precache shell + registry; runtime-cache visited pages/shards; **pin-a-juz
-packs** (Cache Storage + IndexedDB manifest) with `persist()` + `persisted()` verification,
-graceful-denial UI, Chrome clear-on-exit detection; iOS install-prompt flow (ITP 7-day
-rule). Tajweed ETL (quran.com rule spans → element-ID class maps → `skins/`); `setSkin`
-swap; color-blind palette; "beta" flag until hafiz sign-off. `EditionPicker` + concordance.
-iOS standalone state-restoration test. Onboarding coach marks; surah/juz/ayah jumper.
-**Exit:** airplane-mode revision of a pinned juz works after 8+ days; instant plain⇄tajweed toggle (identical geometry); Lighthouse ≥90.
+
+Split for the same reason Loop 4 was: **pinning a juz is meaningless while three pages are
+vendored**, so the pack machinery inherits 4b's gate, while everything else is ungated and
+ships now.
+
+#### Loop 6a — Skin, editions, wayfinding, offline foundation (ungated)
+Tajweed ETL (rule spans → element-ID class maps → `skins/`); `setSkin` swap; color-blind
+palette; **"beta" flag until hafiz sign-off**. `EditionPicker` + concordance. Surah/juz/ayah
+jumper; onboarding coach marks; keyboard map (arrows = pages, `/` = jumper). Service worker:
+precache shell + registry, runtime-cache visited pages/shards. iOS install-prompt flow (the
+ITP 7-day rule makes install a feature, not a nicety). `navigator.storage.persist()` +
+`persisted()` with the graceful-denial UI and Chrome clear-on-exit detection — the *API
+surface and its failure paths*, which are testable today. Golden-image regression harness
+(moved from Loop 5; the amber wash and marquee need it). Lighthouse CI gate. Resolve the ⬡
+collision (rail chip = curated shared-root edges vs lens = corpus-wide roots).
+**Exit:** instant plain⇄tajweed toggle with identical geometry; jump to any surah/juz/ayah;
+visited pages survive a reload offline; Lighthouse ≥90.
+
+#### Loop 6b — Pin-a-juz packs (gated on 4b, i.e. on follow-up ①)
+Juz packs over Cache Storage + an IndexedDB manifest; eviction detection and re-pin offer;
+the **8+ day ITP offline survival test** (installed vs tab); iOS standalone
+state-restoration test.
+**Exit:** airplane-mode revision of a pinned juz works after 8+ days.
 
 ### Loop 7 — Hifz polish + beta (ongoing) → web v1.0
 5–10 huffaz/teachers; interview, don't instrument (privacy-respecting counts only). Weekly
