@@ -7,6 +7,8 @@ interface ShareSheetProps {
   state: AppState | null;
   /** Whether the current view includes a trail (offers the "share the whole walk" copy). */
   hasTrail: boolean;
+  /** What the link points at: one ayah (default) or a highlighted range (spec §7 range form). */
+  variant?: "ayah" | "range";
 }
 
 type Feedback = { kind: "copied" | "shared" | "error"; text: string } | null;
@@ -21,15 +23,20 @@ type Feedback = { kind: "copied" | "shared" | "error"; text: string } | null;
  *
  * Both paths are user-initiated (a button tap): we never auto-share.
  */
-export function ShareSheet({ state, hasTrail }: ShareSheetProps): JSX.Element | null {
+export function ShareSheet({
+  state,
+  hasTrail,
+  variant = "ayah",
+}: ShareSheetProps): JSX.Element | null {
   const [feedback, setFeedback] = useState<Feedback>(null);
+  const isRange = variant === "range";
 
   const onShare = useCallback(async () => {
     if (!state) return;
     const url = window.location.origin + window.location.pathname + serializeState(state);
     const shareData: ShareData = {
       title: "حفظ",
-      text: hasTrail ? "مسار مُتشابهات" : "آية",
+      text: hasTrail ? "مسار مُتشابهات" : isRange ? "مقطع" : "آية",
       url,
     };
     // Prefer the native share sheet; fall back to clipboard.
@@ -51,7 +58,7 @@ export function ShareSheet({ state, hasTrail }: ShareSheetProps): JSX.Element | 
     } catch {
       setFeedback({ kind: "error", text: "تعذّر النسخ" });
     }
-  }, [state, hasTrail]);
+  }, [state, hasTrail, isRange]);
 
   if (!state) return null;
 
@@ -61,7 +68,13 @@ export function ShareSheet({ state, hasTrail }: ShareSheetProps): JSX.Element | 
         type="button"
         className={styles.share}
         onClick={() => void onShare()}
-        aria-label={hasTrail ? "شارك المسار كرابط" : "شارك هذه الآية كرابط"}
+        aria-label={
+          hasTrail
+            ? "شارك المسار كرابط"
+            : isRange
+              ? "شارك هذا المقطع كرابط"
+              : "شارك هذه الآية كرابط"
+        }
       >
         <span className={styles.glyph} aria-hidden="true">
           ⇪

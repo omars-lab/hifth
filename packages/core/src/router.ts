@@ -100,7 +100,8 @@ export function serializeState(state: AppState): string {
     const page = state.page ?? 1;
     path = `#/${edition}/p${page}`;
   } else if (isRange(select)) {
-    path = `#/${edition}/${select.surah}:${select.ayah}-${select.toAyah}`;
+    // The spec's literal range form repeats the surah on both endpoints.
+    path = `#/${edition}/${select.surah}:${select.ayah}-${select.surah}:${select.toAyah}`;
   } else {
     path = `#/${edition}/${refToString(select)}`;
   }
@@ -149,10 +150,22 @@ export function parseHash(hash: string): AppState | null {
     if (!Number.isInteger(n) || n < 1) return null;
     page = n;
   } else if (target.includes("-")) {
-    const [a, b] = target.split("-");
-    const ref = a ? parseAyahRef(a) : null;
-    const toAyah = b === undefined ? NaN : Number(b);
-    if (!ref || !Number.isInteger(toAyah) || toAyah < ref.ayah) return null;
+    // Ranges come in the spec's literal form (`2:47-2:48`) and in the compact
+    // tail form (`2:47-48`) older links used; both mean the same inclusive span,
+    // and both serialize back out as the literal form. Ranges never cross surahs.
+    const dash = target.indexOf("-");
+    const ref = parseAyahRef(target.slice(0, dash));
+    if (!ref) return null;
+    const tail = target.slice(dash + 1);
+    let toAyah: number;
+    if (tail.includes(":")) {
+      const end = parseAyahRef(tail);
+      if (!end || end.surah !== ref.surah) return null;
+      toAyah = end.ayah;
+    } else {
+      toAyah = Number(tail);
+    }
+    if (!Number.isInteger(toAyah) || toAyah < ref.ayah) return null;
     select = { ...ref, toAyah };
   } else {
     select = parseAyahRef(target);

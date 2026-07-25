@@ -30,10 +30,20 @@ describe("router · spec §7 grammar", () => {
     expect(parseHash("#/hafs-kfqc/2:1?w=5")?.word).toEqual([5, 5]);
   });
 
-  it("highlighted ayah range: 2:47-2:48 style (toAyah)", () => {
+  it("highlighted ayah range: 2:47-2:48 (the spec's literal form) round-trips", () => {
+    const s = parseHash("#/hafs-kfqc/2:47-2:48");
+    expect(s?.select).toEqual({ surah: 2, ayah: 47, toAyah: 48 });
+    expect(serializeState(s!)).toBe("#/hafs-kfqc/2:47-2:48");
+  });
+
+  it("still parses the compact range tail (2:47-48) and normalizes it", () => {
     const s = parseHash("#/hafs-kfqc/2:47-48");
     expect(s?.select).toEqual({ surah: 2, ayah: 47, toAyah: 48 });
-    expect(serializeState(s!)).toBe("#/hafs-kfqc/2:47-48");
+    expect(serializeState(s!)).toBe("#/hafs-kfqc/2:47-2:48");
+  });
+
+  it("rejects a range whose endpoints are in different surahs", () => {
+    expect(parseHash("#/hafs-kfqc/2:47-3:48")).toBeNull();
   });
 
   it("with skin: ?w=3-7&skin=tajweed", () => {

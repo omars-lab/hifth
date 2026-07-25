@@ -180,7 +180,7 @@ function railDirection(edge: Edge): RailDirection {
  * page distance as a tiebreak. Stable within a rank so shard order is kept.
  * (spec §6: "same page → same juz → earlier surahs → later surahs".)
  */
-export function orderForHifz(edges: readonly Edge[]): Edge[] {
+export function orderForHifz<T extends Edge>(edges: readonly T[]): T[] {
   return edges
     .map((edge, i) => ({ edge, i, rank: hifzRank(edge) }))
     .sort(
@@ -197,6 +197,90 @@ function hifzRank(edge: Edge): number {
   if (edge.dir.sameJuz) return 1; // same juz
   if (edge.dir.dSurah < 0) return 2; // earlier surahs
   return 3; // later surahs
+}
+
+/* ------------------------------------------------------------------ */
+/* Merged range adjacency (spec §9 highlight menu).                    */
+/* ------------------------------------------------------------------ */
+
+/**
+ * One edge of a merged range list: an ordinary edge plus the range members that
+ * produced it. `sources` is what makes the merge honest — the menu can say "this
+ * hop came from ٢:٤٧" (and the diff knows which ayah to compare against) instead
+ * of pretending the whole highlighted passage links there.
+ */
+export interface MergedEdge extends Edge {
+  /** Canonical keys of the highlighted ayahs that contributed this edge, in range order. */
+  readonly sources: readonly string[];
+}
+
+/** One member of a highlighted range and its (possibly missing) adjacency. */
+export interface RangeSource {
+  readonly key: string;
+  readonly adj: AyahAdjacency | undefined;
+}
+
+/** Metadata fields that make one duplicate of an edge more useful than another. */
+const RICHNESS_FIELDS = ["note", "twin", "root", "ctx"] as const;
+
+/** How much a hafiz-facing edge tells you (spec §9's note/twin/root/ctx). */
+function richness(edge: Edge): number {
+  let n = 0;
+  for (const f of RICHNESS_FIELDS) if (edge[f] != null && edge[f] !== false) n += 1;
+  return n;
+}
+
+/** Target key without its word anchor (`…/2:122#w3` → `…/2:122`). */
+function bareTarget(to: string): string {
+  const hash = to.indexOf("#");
+  return hash === -1 ? to : to.slice(0, hash);
+}
+
+/**
+ * Merge a highlighted range's adjacency into one hop list (spec §9: "merged,
+ * deduped edges of every highlighted ayah/word").
+ *
+ * Three rules, in order:
+ * 1. **Dedupe by (target, type).** The same target reached by two different edge
+ *    types stays two rows — a look-alike and a shared root are different reasons
+ *    to leap — but the same pair seen from two ayahs of the range collapses.
+ * 2. **Richer metadata wins a collision.** The surviving row is whichever
+ *    duplicate carries more of note/twin/root/ctx (ties keep the first seen, so
+ *    the result is stable in range order); every contributor is still recorded in
+ *    `sources`. The winner is kept whole rather than field-merged: a `note` is
+ *    written about *its* source ayah and would lie if grafted onto another's.
+ * 3. **Edges pointing inside the range are dropped.** Hopping to text the reader
+ *    has already highlighted is not a hop; word anchors are ignored for this test
+ *    (`2:122#w3` counts as `2:122`).
+ *
+ * Reserved-type edges never appear (spec §5), and the result is `orderForHifz`ed
+ * so the nearest hop is first — same ordering the single-ayah popover uses.
+ */
+export function mergeRangeEdges(sources: readonly RangeSource[]): MergedEdge[] {
+  const inside = new Set(sources.map((s) => bareTarget(s.key)));
+  // (type, target) → the winning edge so far + its contributors, insertion-ordered.
+  const merged = new Map<string, { edge: Edge; sources: string[] }>();
+
+  for (const { key, adj } of sources) {
+    for (const edge of adj?.edges ?? []) {
+      if (!isActiveEdgeType(edge.type)) continue;
+      if (inside.has(bareTarget(edge.to))) continue;
+      const id = `${edge.type} ${edge.to}`;
+      const seen = merged.get(id);
+      if (!seen) {
+        merged.set(id, { edge, sources: [key] });
+        continue;
+      }
+      if (!seen.sources.includes(key)) seen.sources.push(key);
+      if (richness(edge) > richness(seen.edge)) seen.edge = edge;
+    }
+  }
+
+  const out: MergedEdge[] = [];
+  for (const { edge, sources: from } of merged.values()) {
+    out.push({ ...edge, sources: from });
+  }
+  return orderForHifz(out);
 }
 
 /* ------------------------------------------------------------------ */
@@ -243,6 +327,15 @@ export class Adjacency {
     const adj = this.forKey(key);
     if (!adj) return [];
     return orderForHifz(adj.edges.filter((e) => isActiveEdgeType(e.type)));
+  }
+
+  /**
+   * The merged hop list for a highlighted range (spec §9) — every member's
+   * active edges, deduped by (target, type) and hifz-ordered, each carrying the
+   * range members it came from. Uncovered members simply contribute nothing.
+   */
+  hopsForRange(keys: readonly string[]): MergedEdge[] {
+    return mergeRangeEdges(keys.map((key) => ({ key, adj: this.forKey(key) })));
   }
 }
 
