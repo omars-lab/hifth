@@ -2,7 +2,7 @@
  * Asset loading for the web shell. Reads the ETL-produced manifest and page
  * SVGs from public/assets. Framework-agnostic; the React layer wraps these.
  */
-import { Adjacency, type AdjacencyShard, type AssetManifest } from "@hifth/core";
+import type { AdjacencyShard, AssetManifest } from "@hifth/core";
 
 const BASE = import.meta.env.BASE_URL;
 
@@ -20,23 +20,16 @@ export async function loadPageSvg(edition: string, page: number): Promise<string
 }
 
 /**
- * Load the adjacency shards for the surahs the app currently needs and build the
- * `Adjacency` routing table. Loop 2 has one shard (surah 2); a missing shard is
- * not fatal — the ayah simply has no hops (empty rail). Loop 4 fetches shards
- * on demand as pages stream in; here we load the known set up front.
+ * Fetch one surah's adjacency shard (Loop 4a: the ETL writes all 114, so a
+ * miss is a deploy problem, not a data shape — still treated as "no hops"
+ * rather than fatal). The app fetches shards on demand and caches them in
+ * state; each shard is a few KB gzipped.
  */
-export async function loadAdjacency(
+export async function loadShard(
   edition: string,
-  surahs: readonly number[],
-): Promise<Adjacency> {
-  const adj = new Adjacency(edition);
-  await Promise.all(
-    surahs.map(async (surah) => {
-      const res = await fetch(`${BASE}assets/adj/${edition}/${surah}.json`);
-      if (!res.ok) return; // no shard for this surah → no hops, not an error
-      const shard = (await res.json()) as AdjacencyShard;
-      adj.addShard(surah, shard);
-    }),
-  );
-  return adj;
+  surah: number,
+): Promise<AdjacencyShard | null> {
+  const res = await fetch(`${BASE}assets/adj/${edition}/${surah}.json`);
+  if (!res.ok) return null; // no shard → no hops, not an error
+  return (await res.json()) as AdjacencyShard;
 }

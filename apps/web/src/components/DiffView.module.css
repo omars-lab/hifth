@@ -1,0 +1,49 @@
+/*
+ * DiffView — the token diff under a hop row. Two stacked verse readings; the
+ * divergent tokens carry a faint wash (terracotta vs verdigris) so the eye lands
+ * on exactly what differs while the shared opening stays quiet ink.
+ */
+
+.diff {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin-block-start: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md);
+  background: var(--paper-sunk);
+}
+
+.side {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.who {
+  font-size: var(--text-xs);
+  letter-spacing: 0.04em;
+  color: var(--ink-faint);
+}
+
+.verse {
+  margin: 0;
+  font-family: var(--font-arabic);
+  font-size: var(--text-md);
+  line-height: 2;
+  color: var(--ink);
+}
+
+.dA {
+  color: var(--diff-a);
+  background: var(--diff-a-wash);
+  border-radius: var(--radius-sm);
+  padding-inline: 2px;
+}
+
+.dB {
+  color: var(--diff-b);
+  background: var(--diff-b-wash);
+  border-radius: var(--radius-sm);
+  padding-inline: 2px;
+}

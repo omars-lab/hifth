@@ -27,6 +27,7 @@ export {
   Highlighter,
   type GroupId,
   type StyleToken,
+  type LabelFor,
   type Rect,
   type Resolved,
 } from "./highlighter.js";
@@ -41,6 +42,25 @@ export {
   type View,
   type FrameContext,
 } from "./view.js";
+
+export {
+  VERSE_TEXT,
+  verseTokens,
+  diffPair,
+  type DiffClass,
+  type DiffToken,
+  type DiffSide,
+} from "./verse-text.js";
+
+export {
+  serializeState,
+  parseHash,
+  refToKey,
+  keyToRef,
+  type AppState,
+  type AyahRef,
+  type AyahRange,
+} from "./router.js";
 
 export {
   Adjacency,

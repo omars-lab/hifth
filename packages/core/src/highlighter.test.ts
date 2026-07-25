@@ -130,3 +130,77 @@ describe("Highlighter", () => {
     expect(cb).not.toHaveBeenCalled();
   });
 });
+
+describe("Highlighter · keyboard a11y (Loop 3)", () => {
+  let svg: SVGSVGElement;
+  let hl: Highlighter;
+  const resolver = new Resolver(manifest);
+  const labelFor = (key: string) => `الآية ${key.slice(key.lastIndexOf("/") + 1)}`;
+
+  beforeEach(() => {
+    document.body.innerHTML = "";
+    svg = makeSvg();
+    hl = new Highlighter(svg, resolver, 7, { labelFor });
+  });
+
+  it("makes each ayah polygon a labeled, focusable button", () => {
+    for (const id of ["verse-45", "verse-46"]) {
+      const poly = svg.querySelector(`#${id}`)!;
+      expect(poly.getAttribute("role")).toBe("button");
+      expect(poly.getAttribute("tabindex")).toBe("0");
+    }
+    expect(svg.querySelector("#verse-45")!.getAttribute("aria-label")).toBe("الآية 2:38");
+    expect(svg.querySelector("#verse-46")!.getAttribute("aria-label")).toBe("الآية 2:39");
+  });
+
+  it("falls back to the key when no labelFor is supplied", () => {
+    document.body.innerHTML = "";
+    const bare = makeSvg();
+    new Highlighter(bare, resolver, 7);
+    expect(bare.querySelector("#verse-45")!.getAttribute("aria-label")).toBe("quran/hafs-kfqc/2:38");
+  });
+
+  it("Enter and Space on a focused polygon select its ayah", () => {
+    const cb = vi.fn();
+    hl.onSelect(cb);
+    const poly = svg.querySelector("#verse-46")!;
+    poly.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true }));
+    expect(cb).toHaveBeenCalledWith("quran/hafs-kfqc/2:39", "ayah");
+    cb.mockClear();
+    poly.dispatchEvent(new KeyboardEvent("keydown", { key: " ", bubbles: true }));
+    expect(cb).toHaveBeenCalledWith("quran/hafs-kfqc/2:39", "ayah");
+  });
+
+  it("Arrow keys move focus to the next / previous ayah (document order)", () => {
+    const first = svg.querySelector<SVGElement>("#verse-45")!;
+    const second = svg.querySelector<SVGElement>("#verse-46")!;
+    first.focus();
+    first.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowDown", bubbles: true }));
+    expect(document.activeElement).toBe(second);
+    // Back up; and Up past the start clamps at the first.
+    second.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowUp", bubbles: true }));
+    expect(document.activeElement).toBe(first);
+    first.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowUp", bubbles: true }));
+    expect(document.activeElement).toBe(first);
+  });
+
+  it("Home / End jump to the first / last ayah", () => {
+    const first = svg.querySelector<SVGElement>("#verse-45")!;
+    const second = svg.querySelector<SVGElement>("#verse-46")!;
+    first.focus();
+    first.dispatchEvent(new KeyboardEvent("keydown", { key: "End", bubbles: true }));
+    expect(document.activeElement).toBe(second);
+    second.dispatchEvent(new KeyboardEvent("keydown", { key: "Home", bubbles: true }));
+    expect(document.activeElement).toBe(first);
+  });
+
+  it("destroy() detaches the keyboard listener", () => {
+    const cb = vi.fn();
+    hl.onSelect(cb);
+    hl.destroy();
+    svg
+      .querySelector("#verse-45")!
+      .dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true }));
+    expect(cb).not.toHaveBeenCalled();
+  });
+});

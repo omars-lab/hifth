@@ -34,6 +34,8 @@ interface PageStageProps {
   breadcrumbKey: string | null;
   /** Fired when the user taps an ayah polygon. */
   onSelect: (key: string) => void;
+  /** Human label for an ayah key (surah name), for per-polygon aria-label. */
+  labelFor: (key: string) => string;
   /** Fired with the selected ayah's on-screen bbox so the rail can position. */
   onSelectionRect?: (rect: { x: number; y: number; width: number; height: number } | null) => void;
 }
@@ -72,6 +74,7 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
     selectedKey,
     breadcrumbKey,
     onSelect,
+    labelFor,
     onSelectionRect,
   },
   ref,
@@ -85,6 +88,8 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
   // Latest callbacks without retriggering effects.
   const onSelectRef = useRef(onSelect);
   onSelectRef.current = onSelect;
+  const labelForRef = useRef(labelFor);
+  labelForRef.current = labelFor;
   const onSelectionRectRef = useRef(onSelectionRect);
   onSelectionRectRef.current = onSelectionRect;
 
@@ -180,12 +185,16 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
       host.innerHTML = markup;
       const svgEl = host.querySelector("svg");
       if (!svgEl) return null;
-      svgEl.setAttribute("role", "img");
+      // A group, not an img: the page contains focusable ayah "buttons", and an
+      // img must be a leaf (axe: "img must not have focusable descendants").
+      svgEl.setAttribute("role", "group");
       svgEl.setAttribute("aria-labelledby", `page-label-${targetPage}`);
       svgEl.classList.add(styles.svg ?? "");
       layer.appendChild(host);
 
-      const hl = new Highlighter(svgEl as unknown as SVGSVGElement, resolver, targetPage);
+      const hl = new Highlighter(svgEl as unknown as SVGSVGElement, resolver, targetPage, {
+        labelFor: (key) => labelForRef.current(key),
+      });
       hl.onSelect((key) => onSelectRef.current(key));
       const mp: MountedPage = { host, svg: svgEl as unknown as SVGSVGElement, hl };
       pagesRef.current.set(targetPage, mp);

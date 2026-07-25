@@ -59,7 +59,12 @@ describe("App shell", () => {
       }),
     );
   });
-  afterEach(() => vi.unstubAllGlobals());
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    // The hash router writes location.hash as the view changes; jsdom shares one
+    // window across tests, so clear it or the next cold-open restores stale state.
+    window.history.replaceState(null, "", window.location.pathname);
+  });
 
   it("renders the Arabic brand mark and RTL direction", () => {
     render(<App />);
@@ -75,7 +80,7 @@ describe("App shell", () => {
   it("mounts the page SVG with an accessible role and overlay group", async () => {
     const { container } = render(<App />);
     await waitFor(() => {
-      const svg = container.querySelector("svg[role='img']");
+      const svg = container.querySelector("svg[role='group']");
       expect(svg).not.toBeNull();
     });
     expect(container.querySelector("#hifth-overlay")).not.toBeNull();

@@ -25,6 +25,12 @@ const OVERLAY_ID = "hifth-overlay";
 export type GroupId = "selection" | "phrase" | "breadcrumb" | "preview";
 export type StyleToken = "sel" | "crumb" | "hlt" | "preview";
 
+/** L3 supplies the human-readable label for a key (surah names live in L3). */
+export type LabelFor = (key: string) => string;
+
+/** Selector for the interactive ayah polygons on a page. */
+const POLYGON_SELECTOR = ".ayahPolygon, [id^='verse-']";
+
 export interface Rect {
   x: number;
   y: number;
@@ -65,26 +71,102 @@ export class Highlighter {
   private readonly selectCbs: SelectCb[] = [];
   /** group → the clones/rects currently drawn for it, so clear() is exact. */
   private readonly drawn = new Map<GroupId, SVGElement[]>();
+  private readonly labelFor: LabelFor | undefined;
   private readonly onPolygonPointerUp: (e: PointerEvent) => void;
+  private readonly onPolygonKeyDown: (e: KeyboardEvent) => void;
 
-  constructor(svg: SVGSVGElement, resolver: Resolver, page: number) {
+  constructor(svg: SVGSVGElement, resolver: Resolver, page: number, opts?: { labelFor?: LabelFor }) {
     this.svg = svg;
     this.resolver = resolver;
     this.page = page;
+    this.labelFor = opts?.labelFor;
     this.overlay = ensureOverlay(svg);
 
     // Glyph paths must not eat pointer events; polygons take all hits (asset
     // README + spec §3). Tapping a polygon fires onSelect with its ayah key.
     this.onPolygonPointerUp = (e: PointerEvent) => {
-      const target = e.target as Element | null;
-      const poly = target?.closest<SVGElement>(".ayahPolygon, [id^='verse-']");
-      if (!poly) return;
-      const id = poly.getAttribute("id");
-      const key = id ? this.resolver.keyForElement(id) : null;
+      const key = this.keyForEventTarget(e.target);
       if (!key) return;
       for (const cb of this.selectCbs) cb(key, "ayah");
     };
     svg.addEventListener("pointerup", this.onPolygonPointerUp);
+
+    // Keyboard hop path (spec §7 a11y, Loop 3): Enter/Space selects the focused
+    // ayah; Arrow/Home/End move focus along the page's ayahs in document order.
+    // The RTL reading order is handled by the caller supplying next/prev intent;
+    // here "next" = next polygon in document order (which is reading order).
+    this.onPolygonKeyDown = (e: KeyboardEvent) => {
+      const target = e.target as Element | null;
+      const poly = target?.closest<SVGElement>(POLYGON_SELECTOR);
+      if (!poly) return;
+      if (e.key === "Enter" || e.key === " " || e.key === "Spacebar") {
+        e.preventDefault();
+        const key = this.keyForElement(poly);
+        if (key) for (const cb of this.selectCbs) cb(key, "ayah");
+        return;
+      }
+      const step = arrowStep(e.key);
+      if (step === 0) return;
+      e.preventDefault();
+      this.moveFocus(poly, step);
+    };
+    svg.addEventListener("keydown", this.onPolygonKeyDown);
+
+    this.enhancePolygons();
+  }
+
+  /** The ayah key for a polygon element, via its id and the resolver. */
+  private keyForElement(poly: Element): string | null {
+    const id = poly.getAttribute("id");
+    return id ? this.resolver.keyForElement(id) : null;
+  }
+
+  /** The ayah key for an event target that is (or is inside) a polygon. */
+  private keyForEventTarget(target: EventTarget | null): string | null {
+    const el = (target as Element | null)?.closest<SVGElement>(POLYGON_SELECTOR);
+    return el ? this.keyForElement(el) : null;
+  }
+
+  /** Every interactive ayah polygon on the page, in document order. */
+  private polygons(): SVGElement[] {
+    return Array.from(this.svg.querySelectorAll<SVGElement>(POLYGON_SELECTOR));
+  }
+
+  /**
+   * Make polygons a keyboard-operable list (spec §7 a11y). Each carries
+   * `role="button"`, `tabindex="0"` (Home for the first, so the page has one
+   * tab stop that then walks with arrows — a roving-tabindex would be nicer but
+   * every-polygon-tabbable is fine for a page's worth), and an `aria-label`
+   * naming the ayah ("الآية ٢:٤٨" style, from the L3 `labelFor`). Idempotent.
+   */
+  private enhancePolygons(): void {
+    const polys = this.polygons();
+    polys.forEach((poly, i) => {
+      poly.setAttribute("role", "button");
+      // First polygon is the page's initial tab stop; the rest join the tab
+      // order too (arrows are the fast path, Tab still works for AT users).
+      poly.setAttribute("tabindex", i === 0 ? "0" : "0");
+      const key = this.keyForElement(poly);
+      if (key) {
+        const label = this.labelFor?.(key) ?? key;
+        poly.setAttribute("aria-label", label);
+      }
+    });
+  }
+
+  /** Move keyboard focus `step` polygons from `from` (clamped to the page). */
+  private moveFocus(from: SVGElement, step: number): void {
+    const polys = this.polygons();
+    const i = polys.indexOf(from);
+    if (i === -1) return;
+    let j: number;
+    if (step === Number.NEGATIVE_INFINITY) j = 0;
+    else if (step === Number.POSITIVE_INFINITY) j = polys.length - 1;
+    else j = Math.max(0, Math.min(polys.length - 1, i + step));
+    const next = polys[j];
+    if (next && typeof (next as unknown as { focus?: () => void }).focus === "function") {
+      (next as unknown as { focus: () => void }).focus();
+    }
   }
 
   /** Resolve a key to page + element ids + live bbox (null if not on this page). */
@@ -169,8 +251,33 @@ export class Highlighter {
   /** Detach listeners and remove all overlay content. */
   destroy(): void {
     this.svg.removeEventListener("pointerup", this.onPolygonPointerUp);
+    this.svg.removeEventListener("keydown", this.onPolygonKeyDown);
     for (const group of this.drawn.keys()) this.clear(group as GroupId);
     this.selectCbs.length = 0;
+  }
+}
+
+/**
+ * Map an arrow/Home/End key to a focus step. RTL note: on a mushaf page reading
+ * runs right-to-left, and the polygons are in document (= reading) order, so
+ * "move to the next ayah" is +1 regardless of physical arrow direction. We keep
+ * it intuitive: Down/Left → next ayah (+1), Up/Right → previous (−1), Home/End
+ * → first/last. 0 means "not a navigation key".
+ */
+function arrowStep(key: string): number {
+  switch (key) {
+    case "ArrowDown":
+    case "ArrowLeft":
+      return 1;
+    case "ArrowUp":
+    case "ArrowRight":
+      return -1;
+    case "Home":
+      return Number.NEGATIVE_INFINITY;
+    case "End":
+      return Number.POSITIVE_INFINITY;
+    default:
+      return 0;
   }
 }
 

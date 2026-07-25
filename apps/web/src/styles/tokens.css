@@ -34,6 +34,14 @@
   /* Feedback */
   --danger: #a23b2c;
 
+  /* Diff readings (spec §3 diff view) — the two divergent tokens in a
+     mutashabih pair. `a` reuses the danger terracotta, `b` the accent
+     verdigris, each over a faint wash so scripture stays legible. */
+  --diff-a: #a23b2c;
+  --diff-a-wash: rgba(162, 59, 44, 0.1);
+  --diff-b: #17544d;
+  --diff-b-wash: rgba(23, 84, 77, 0.1);
+
   /* Type roles (Loop 0 uses platform fonts; display face is a later decision). */
   --font-arabic: "Noto Naskh Arabic", "Geeza Pro", "Amiri", serif;
   --font-chrome: var(--font-arabic);
