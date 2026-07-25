@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
-import type { RootFamily, RootHop } from "@hifth/core";
+import type { Edge, RootFamily, RootHop } from "@hifth/core";
 import { RootLens, RootLensTrigger } from "./RootLens";
 
 const hop = (
@@ -51,6 +51,24 @@ const FAMILIES: RootFamily[] = [
 
 const noop = () => {};
 const always = () => true;
+
+/** The curated (hand-verified) shared-root edges the rail's ⬡ chip used to hold. */
+const CURATED: Edge[] = [
+  {
+    type: "shared-root",
+    to: "quran/hafs-kfqc/3:7",
+    page: 50,
+    root: "ذ ك ر",
+    note: "جذر مشترك · محقّق",
+    dir: { dSurah: 1, dPage: 43, sameJuz: false },
+  },
+  {
+    type: "shared-root",
+    to: "quran/hafs-kfqc/7:140",
+    page: 167,
+    dir: { dSurah: 5, dPage: 160, sameJuz: false },
+  },
+];
 
 describe("RootLens", () => {
   it("renders nothing when closed", () => {
@@ -133,6 +151,46 @@ describe("RootLens", () => {
     rerender(<RootLens families={[]} canHop={always} onHop={noop} onClose={noop} />);
     expect(screen.getByText("لا جذور معروفة لهذه الآية")).toBeInTheDocument();
   });
+
+  // Loop 6a — the ⬡ merge: the rail's curated shared-root chip moved in here.
+  it("pins the curated edges above the corpus families, marked hand-verified", () => {
+    const onHopEdge = vi.fn();
+    render(
+      <RootLens
+        families={FAMILIES}
+        curated={CURATED}
+        canHop={(key) => key !== "quran/hafs-kfqc/7:140"}
+        onHop={noop}
+        onHopEdge={onHopEdge}
+        onClose={noop}
+      />,
+    );
+    expect(screen.getByText("محقّقة يدويًا")).toBeInTheDocument();
+    // Curated first: a hand-verified pair outranks a corpus match.
+    const rows = screen.getAllByLabelText(/انتقل إلى/);
+    expect(rows[0]).toHaveAccessibleName(/آل عمران · ٣:٧/);
+    fireEvent.click(rows[0]!);
+    expect(onHopEdge).toHaveBeenCalledWith(
+      expect.objectContaining({ to: "quran/hafs-kfqc/3:7" }),
+    );
+    // And an un-vendored curated target is surfaced, disabled — same rule.
+    expect(screen.getByLabelText(/انتقل إلى الأعراف · ٧:١٤٠/)).toBeDisabled();
+  });
+
+  it("is not empty when the corpus knows no roots but a curated edge exists", () => {
+    render(
+      <RootLens
+        families={[]}
+        curated={CURATED}
+        canHop={always}
+        onHop={noop}
+        onHopEdge={noop}
+        onClose={noop}
+      />,
+    );
+    expect(screen.queryByText("لا جذور معروفة لهذه الآية")).not.toBeInTheDocument();
+    expect(screen.getByText("مختارة")).toBeInTheDocument();
+  });
 });
 
 describe("RootLensTrigger", () => {
@@ -150,5 +208,17 @@ describe("RootLensTrigger", () => {
     expect(button).toHaveAttribute("aria-expanded", "true");
     fireEvent.click(button);
     expect(onToggle).toHaveBeenCalled();
+  });
+
+  it("names the curated edges in its label, and appears for them alone", () => {
+    // ⬡ is now the app's only ⬡ (Loop 6a): one glyph, one place, and a label
+    // that keeps the two numbers distinguishable instead of conflating them.
+    render(<RootLensTrigger count={5} curated={2} open={false} onToggle={noop} />);
+    expect(screen.getByRole("button", { name: "الجذور · ٥ · ٢ مختارة" })).toBeInTheDocument();
+
+    // A hand-verified pair on an ayah the corpus has no roots for must still
+    // be reachable, so the trigger appears at count 0.
+    render(<RootLensTrigger count={0} curated={1} open={false} onToggle={noop} />);
+    expect(screen.getByRole("button", { name: "الجذور · ٠ · ١ مختارة" })).toBeInTheDocument();
   });
 });
