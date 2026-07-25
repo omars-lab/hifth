@@ -1,0 +1,183 @@
+import { test, expect, type Page } from "@playwright/test";
+
+/*
+ * Loop 6a, the ungated half of the exit criterion (PLAN §Loop 6a):
+ *   a page you have visited still opens when the network is gone.
+ *
+ * Pin-a-juz packs are Loop 6b (they need the corpus of Loop 4b — pinning a juz
+ * while three pages are vendored is theatre). What is testable today is the
+ * foundation and, just as importantly, its failure paths: a denied
+ * `persist()` and a browser that clears site data on close both have to render
+ * as UI rather than as a console warning nobody reads.
+ *
+ * Chromium only. Playwright's WebKit does not run our service worker against
+ * the preview server the way a real iOS Safari does, and `setOffline` does not
+ * reach WebKit's network stack — a green WebKit run here would be a lie, and a
+ * red one would be about the harness. The iOS half of offline is a device
+ * check: the 8+ day ITP survival test, which is Loop 6b's, on hardware.
+ */
+
+const PAGE_7_SVG = "/assets/pages/hafs-kfqc/7.svg";
+
+/** Resolve once the service worker is installed AND controlling this page. */
+async function awaitController(page: Page): Promise<void> {
+  await page.waitForFunction(
+    async () => {
+      const reg = await navigator.serviceWorker.ready;
+      return reg.active !== null && navigator.serviceWorker.controller !== null;
+    },
+    undefined,
+    { timeout: 30_000 },
+  );
+}
+
+/** True once `url` is in any Cache Storage bucket (precache or runtime). */
+async function awaitCached(page: Page, url: string): Promise<void> {
+  await page.waitForFunction(
+    async (needle: string) => {
+      for (const name of await caches.keys()) {
+        const cache = await caches.open(name);
+        const keys = await cache.keys();
+        if (keys.some((r) => r.url.includes(needle))) return true;
+      }
+      return false;
+    },
+    url,
+    { timeout: 30_000 },
+  );
+}
+
+test.describe("Hifth · offline", () => {
+  test.skip(
+    ({ browserName }) => browserName !== "chromium",
+    "service-worker + offline emulation is Chromium-only in Playwright",
+  );
+
+  test("a visited page still opens with the network offline", async ({ page, context }) => {
+    await page.goto("/");
+    await expect(page.locator("svg[role='group']").first()).toBeVisible();
+    await awaitController(page);
+
+    // The first visit installs the SW mid-flight, so some of its requests were
+    // already in the air uncontrolled. One online reload is the honest
+    // "you have visited this page" state: everything now goes through the SW.
+    await page.reload();
+    await expect(page.locator("svg[role='group']").first()).toBeVisible();
+    await awaitCached(page, PAGE_7_SVG);
+    await awaitCached(page, "/assets/manifest.json");
+
+    await context.setOffline(true);
+    try {
+      await page.reload();
+
+      // The shell came from the precache, the registry with it, and the mushaf
+      // page from the runtime cache — assert on real geometry, since a
+      // navigation fallback would also render *a* shell.
+      await expect(page.locator("svg[role='group']").first()).toBeVisible();
+      await expect(page.locator("#verse-54:visible")).toHaveCount(1);
+      await expect(page.locator("header .numeric")).toHaveText("7");
+
+      // …and the app is still an instrument offline, not a picture: tapping an
+      // ayah surfaces its rail, which means the adjacency shard came out of the
+      // data cache too.
+      await page.locator("#verse-54:visible").tap();
+      await expect(page.getByRole("group", { name: "روابط الآية" })).toBeVisible();
+    } finally {
+      await context.setOffline(false);
+    }
+  });
+
+  test("an offline hop lands on a page whose SVG was cached alongside it", async ({
+    page,
+    context,
+  }) => {
+    // Selecting 2:48 mounts its hop targets' pages (PLAN §4 DOM budget), which
+    // is also what fills the page cache ahead of the leap. Offline, the leap
+    // must therefore still work — this is the behaviour "visited pages survive"
+    // is actually for.
+    await page.goto("/#/hafs-kfqc/2:48");
+    await awaitController(page);
+    await page.reload();
+    await expect(page.getByRole("button", { name: /الآية الحالية البقرة · ٢:٤٨/ })).toBeVisible();
+    await awaitCached(page, "/assets/pages/hafs-kfqc/19.svg");
+
+    await context.setOffline(true);
+    try {
+      const rail = page.getByRole("group", { name: "روابط الآية" });
+      await rail.getByRole("button", { name: /متشابهات في السورة/ }).tap();
+      await page
+        .getByRole("dialog")
+        .getByRole("button", { name: /انتقل إلى البقرة · ٢:١٢٣/ })
+        .tap();
+      await expect(page.locator("header .numeric")).toHaveText("19");
+      await expect(
+        page.getByRole("button", { name: /الآية الحالية البقرة · ٢:١٢٣/ }),
+      ).toBeVisible();
+    } finally {
+      await context.setOffline(false);
+    }
+  });
+});
+
+test.describe("Hifth · storage durability, as UI", () => {
+  test.skip(
+    ({ browserName }) => browserName !== "chromium",
+    "StorageManager overrides + the notice are exercised on Chromium",
+  );
+
+  /** Replace StorageManager before any app code runs. */
+  async function stubStorage(
+    page: Page,
+    opts: { persisted: boolean; quota: number },
+  ): Promise<void> {
+    await page.addInitScript(
+      ({ persisted, quota }: { persisted: boolean; quota: number }) => {
+        Object.defineProperty(navigator, "storage", {
+          configurable: true,
+          value: {
+            persist: async () => persisted,
+            persisted: async () => persisted,
+            estimate: async () => ({ usage: 1_000_000, quota }),
+          },
+        });
+      },
+      opts,
+    );
+  }
+
+  test("a denied persist() renders a warning, not a console message", async ({ page }) => {
+    await stubStorage(page, { persisted: false, quota: 40 * 1024 * 1024 * 1024 });
+    await page.goto("/");
+    const notice = page.locator("[data-notice]");
+    await expect(notice).toHaveAttribute("data-notice", "best-effort");
+    await expect(notice).toContainText("غير مضمون");
+
+    // Dismissible, and it stays dismissed — a warning that returns every launch
+    // is a warning nobody reads.
+    await notice.getByRole("button", { name: "إخفاء التنبيه" }).click();
+    await expect(page.locator("[data-notice]")).toHaveCount(0);
+    await page.reload();
+    await expect(page.locator("svg[role='group']").first()).toBeVisible();
+    await expect(page.locator("[data-notice]")).toHaveCount(0);
+  });
+
+  test("a capped quota is called out ahead of everything else", async ({
+    page,
+  }) => {
+    // ~300 MB is Chromium's cap when "clear cookies and site data when you
+    // close all windows" is on. Note the grant is *true* here: the cap wins,
+    // because nothing survives the browser closing either way.
+    await stubStorage(page, { persisted: true, quota: 300 * 1024 * 1024 });
+    await page.goto("/");
+    const notice = page.locator("[data-notice]");
+    await expect(notice).toHaveAttribute("data-notice", "capped");
+    await expect(notice).toContainText("عند إغلاق كل النوافذ");
+  });
+
+  test("a persisted origin is told nothing at all", async ({ page }) => {
+    await stubStorage(page, { persisted: true, quota: 40 * 1024 * 1024 * 1024 });
+    await page.goto("/");
+    await expect(page.locator("svg[role='group']").first()).toBeVisible();
+    await expect(page.locator("[data-notice]")).toHaveCount(0);
+  });
+});
