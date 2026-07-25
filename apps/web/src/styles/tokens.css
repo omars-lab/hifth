@@ -18,7 +18,18 @@
   --paper-sunk: #ece4d6;
   --ink: #26201a;
   --ink-soft: #5c5347;
-  --ink-faint: #9c9284;
+  /* The quietest ink that is still ink. It shipped at #9c9284 for six loops —
+     2.43:1 on --paper-sunk, 2.67 on --paper, 2.89 on --paper-raised: under the
+     4.5:1 floor on every surface in the app, and under 3:1 as well, which is
+     the floor for a glyph control. Every one of its 23 call sites is a `color:`
+     declaration, so "faint" here has only ever meant text, and text that cannot
+     be read is not quiet — it is missing. #6b6255 is the darkest value that
+     still reads a clear step lighter than --ink-soft while clearing 4.5:1 on
+     all four surfaces it lands on (4.69 accent-tint, 4.75 sunk, 5.23 paper,
+     5.65 raised). Decoration that genuinely need not be legible — rules,
+     dividers, grips — uses --hairline, which is exempt because nobody reads it.
+     Held to that floor by e2e/contrast.spec.ts, which walks every surface. */
+  --ink-faint: #6b6255;
   --hairline: #d9cfbe;
 
   /* Navigation accent — verdigris. Used for hop affordances, focus, links. */

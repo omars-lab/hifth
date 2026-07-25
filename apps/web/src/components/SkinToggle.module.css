@@ -206,11 +206,12 @@
   font-size: var(--text-md);
 }
 
-/* --ink-soft, not --ink-faint, for the three secondary texts below. Faint is
-   2.9:1 on paper — fine for the decorative captions it was minted for, a WCAG
-   1.4.3 failure for anything a reader has to actually read. In this sheet all
-   three carry meaning: the transliteration is the rule's name for someone who
-   cannot read the Arabic one, and the credit is the licence condition. */
+/* --ink-soft, not --ink-faint, for the three secondary texts below. This was
+   once a contrast fix — faint measured 2.9:1 on paper — and the token has since
+   been corrected to clear 4.5:1 everywhere, so both are now legible. The choice
+   stands on its own terms: all three of these carry meaning rather than colour.
+   The transliteration is the rule's name for someone who cannot read the Arabic
+   one, and the credit is the licence condition. Neither is a caption. */
 .latin {
   color: var(--ink-soft);
   font-family: var(--font-latin);
