@@ -67,6 +67,14 @@ interface PageStageProps {
 export interface PageStageHandle {
   /** Pan/zoom to an ayah, mounting its page if needed. Resolves when landed. */
   navigateTo: (key: string, opts?: { pulse?: boolean; zoom?: number }) => Promise<void>;
+  /**
+   * Show a whole page, centered and unzoomed, mounting it if needed.
+   *
+   * Separate from navigateTo because a page link (`#/hafs-kfqc/p9`) names no
+   * ayah: there is nothing to frame, pulse, or select, and faking a target
+   * would land the reader mid-page on an ayah they never asked for.
+   */
+  showPage: (page: number) => Promise<void>;
 }
 
 const MIN_ZOOM = 0.8;
@@ -111,6 +119,15 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
   /** Mounts still in flight, so concurrent callers share one fetch (see ensurePage). */
   const pendingRef = useRef(new Map<number, Promise<MountedPage | null>>());
   const currentPageRef = useRef<number>(page);
+  /**
+   * Set once a navigateTo has decided which page is visible. A cold-opened deep
+   * link calls navigateTo while the initial-mount effect is still awaiting its
+   * own ensurePage, and both end in setCurrentPage — so whichever *fetch* won
+   * decided what the reader saw. That made a shared link land on page 7 or on
+   * page 9 depending on the network. navigateTo is an explicit request and the
+   * mount effect is a default, so the request wins regardless of timing.
+   */
+  const navigatedRef = useRef(false);
   const [status, setStatus] = useState<"loading" | "ready" | "error">("loading");
 
   // Latest callbacks without retriggering effects.
@@ -319,6 +336,9 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
         if (!loc) return; // unvendored target — App gates the chip, this is a no-op
         const mp = await ensurePage(loc.page);
         if (!mp) return; // page couldn't mount — no-op, no ghost page
+        // Claimed only once the target really mounted: a navigateTo that fails
+        // above must leave the initial page in charge rather than blank the stage.
+        navigatedRef.current = true;
         if (loc.page !== currentPageRef.current) setCurrentPage(loc.page);
         const bbox = mp.hl.bboxOf(loc.elementIds);
         const stage = stageRef.current;
@@ -341,8 +361,16 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
         }
         emitSelectionRect();
       },
+      async showPage(next) {
+        const mp = await ensurePage(next);
+        if (!mp) return;
+        navigatedRef.current = true;
+        if (next !== currentPageRef.current) setCurrentPage(next);
+        cancelTween();
+        centerCurrent();
+      },
     }),
-    [resolver, ensurePage, setCurrentPage, tweenTo, emitSelectionRect],
+    [resolver, ensurePage, setCurrentPage, tweenTo, emitSelectionRect, cancelTween, centerCurrent],
   );
 
   // Mount the initial page and center it.
@@ -356,8 +384,13 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
           setStatus("error");
           return;
         }
-        setCurrentPage(page);
-        centerCurrent();
+        // A deep link may have navigated while this fetch was in flight. Showing
+        // `page` now would hide the page the reader actually asked for, and
+        // re-centering would throw away the hop's framing.
+        if (!navigatedRef.current) {
+          setCurrentPage(page);
+          centerCurrent();
+        }
         setStatus("ready");
       })
       .catch(() => {

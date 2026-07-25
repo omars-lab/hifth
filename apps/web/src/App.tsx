@@ -533,7 +533,15 @@ export function App(): JSX.Element {
       if (state.select === null) {
         setSelectedKey(null);
         setSelectedRange(null);
-        if (state.page) setPage(state.page);
+        // A page link (`#/hafs-kfqc/p9`) has to move the stage, not just the
+        // header. Setting `page` alone renumbered the chrome while the reader
+        // kept looking at whatever page was already mounted — the one case
+        // where the app said one thing and showed another.
+        if (state.page) {
+          setPage(state.page);
+          announce(`${arrived} صفحة ${state.page}`);
+          void stageRef.current?.showPage(state.page);
+        }
         return;
       }
 
