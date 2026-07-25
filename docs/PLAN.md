@@ -40,8 +40,8 @@ ends by updating this section and writing `docs/decisions/loop-<N>.md`.**
 | 3 — Diffs, share, a11y | complete | Teacher link cold-open restores exact view; screen reader announces hops | [loop-3.md](decisions/loop-3.md) |
 | 4a — Edge-data ETL | complete | Deterministic full-corpus edge ETL; 100% valid keys; shards <50KB gz | [loop-4a.md](decisions/loop-4a.md) |
 | 4b — Page corpus + streaming | **gated on follow-up ①** | All 604 pages vendored + QUL-checked; every ayah navigable; TTI <2.5s mid-Android | — |
-| 5 — Highlight + roots | **next** (word granularity needs 4b) | Drag-range → merged hop list; root lens nearest-page-first | — |
-| 6 — Offline, skin, editions | pending (after 4b) | Pinned juz offline after 8+ days; instant skin toggle; Lighthouse ≥90 | — |
+| 5 — Highlight + roots | complete (ayah granularity; word granularity needs 4b) | Drag-range → merged hop list; root lens nearest-page-first | [loop-5.md](decisions/loop-5.md) |
+| 6 — Offline, skin, editions | **next** (skin + editions ungated; pin-a-juz needs 4b) | Pinned juz offline after 8+ days; instant skin toggle; Lighthouse ≥90 | — |
 | 7 — Polish + beta | pending (after 3+5+6) | Hafiz revision session, zero friction notes → **web v1.0** | — |
 | Track B — Capacitor | gated on web v1.0 | Same web build wrapped for iOS/Android; Universal Links | — |
 
@@ -71,14 +71,29 @@ ends by updating this section and writing `docs/decisions/loop-<N>.md`.**
    check of [KFGQPC](https://qurancomplex.gov.sa)'s published terms (the repo's summary is
    secondhand).
 3. Loop-assigned deferrals (already scoped in their loop sections; details in the decision
-   records): full corpus vendoring + QUL validation → Loop 4b; wheel-zoom, golden-image
-   visual regression → Loop 5; marquee drag-select → Loop 5; Lighthouse CI + iOS install
-   coach mark → Loop 6. **Done:** per-polygon a11y labels + keyboard hop path (Loop 3);
+   records): full corpus vendoring + QUL validation → Loop 4b; **golden-image visual
+   regression → Loop 6** (moved from Loop 5, which produced the amber wash and marquee that
+   most need it — it shares a harness with the skin work); wheel-zoom → Loop 6; Lighthouse
+   CI + iOS install coach mark → Loop 6; **word-granularity roots + `?w=` UI → after 4b**;
+   **⬡ rail chip vs ⬡ root lens (same glyph, two promises) → Loop 6**. **Done:** marquee
+   drag-select (Loop 5); per-polygon a11y labels + keyboard hop path (Loop 3);
    `navigateTo` animation (Loop 2).
 4. **On-device VoiceOver/TalkBack pass** (Loop 3 exit named it; automated axe + the
    keyboard hop tour cover the machine-checkable floor, both green in CI). The manual
    screen-reader gesture walkthrough on a real iOS/Android device is the remaining
    confirmation — run it alongside follow-up ① on the same phone, **before Loop 7**.
+5. **Hifth's own license — now a decision, not a deferral** (opened by Loop 5). The repo has
+   **no `LICENSE` file**. That was harmless until Loop 5 vendored the
+   [Quranic Arabic Corpus](https://corpus.quran.com/download/) morphology, which is **GPL +
+   its own terms of use** (*not* CC-BY-SA, as this plan previously said — corrected in
+   `SOURCES.md` and [loop-5.md](decisions/loop-5.md)). Under a strict reading the derived
+   root shards are a GPL-covered derivative work: we already ship their corresponding source
+   (the ETL + the pinned input), and the app *code* is not a derivative of the data, so
+   nothing is in conflict — but the project's own license must be chosen deliberately rather
+   than by default. **Decide before public beta (Loop 7);** if a permissive app license is
+   wanted alongside GPL data, the alternative is dropping QAC for a root source with
+   compatible terms, which no candidate currently offers (rejections recorded in
+   `packages/etl/data/roots/PROVENANCE.md`).
 
 ---
 
@@ -336,7 +351,8 @@ visited juz.
 ### Loop 5 — Highlight gesture + root lens (medium)
 `gestures.ts` marquee/pan split (touch-action zones + intent thresholds); amber wash;
 `HighlightMenu` (merged deduped edges of the range, range-form copy link); roots ETL
-(Quranic Arabic Corpus / QUL morphology) + `RootLens` (page-distance sort, lemma
+([Quranic Arabic Corpus](https://corpus.quran.com/download/) — **GPL + terms of use**,
+attribution mandatory; QUL morphology rejected, no license stated) + `RootLens` (page-distance sort, lemma
 sub-groups). Word-granularity if Loop 4b adopted the ligature corpus; ayah-fallback
 otherwise — Loop 5 can start after 4a (edges exist) and upgrade granularity when 4b lands.
 **Exit:** drag 2:47–2:48 → menu → merged hop list; word/ayah → root lens nearest-page-first.
