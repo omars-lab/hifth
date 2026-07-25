@@ -1,39 +1,63 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { RootFamily, RootHop } from "@hifth/core";
+import type { Edge, RootFamily, RootHop } from "@hifth/core";
 import { ayahLabel, toArabicDigits } from "../format";
 import styles from "./RootLens.module.css";
 
 interface RootLensTriggerProps {
-  /** Distinct roots on the selection; 0 renders nothing. */
+  /** Distinct roots on the selection. */
   count: number;
+  /**
+   * Curated `shared-root` edges on the selection (Loop 6a). They ride *inside*
+   * the lens, so the trigger must appear for them even on an ayah the corpus
+   * has no roots for — otherwise a hand-verified pair would be unreachable.
+   */
+  curated?: number;
   open: boolean;
   onToggle: () => void;
 }
 
 /**
- * The ⬡ trigger. It lives beside the trail rather than on the hop rail: the
- * rail's ⬡ chip is the *curated* shared-root edges (hand-picked pairs), while
- * this opens the corpus-wide lens — same glyph, different promise, so they stay
- * separate surfaces until Loop 6 decides whether to merge them.
+ * The ⬡ trigger — **the app's only ⬡** since Loop 6a.
+ *
+ * The collision it resolves: the hop rail used to carry a ⬡ chip counting the
+ * *curated* shared-root edges (a handful, hand-verified) while this button
+ * counted the *corpus-wide* root families (1,642 roots). Same glyph, two counts,
+ * and a hafiz has every reason to read one as a subset of the other — which
+ * neither the data nor the curation can promise. The rail's other three chips
+ * are directions of one edge type (↻ same surah, ◀ earlier, ▶ later); ⬡ was a
+ * *type* wearing a direction's clothes and never belonged there.
+ *
+ * So: the rail is mutashabihat by direction, full stop, and ⬡ means roots, in
+ * one place, with one number. The curated edges are not dropped — they are
+ * pinned at the top of the lens, marked as hand-verified, which is where a more
+ * trustworthy row should sit anyway.
  */
 export function RootLensTrigger({
   count,
+  curated = 0,
   open,
   onToggle,
 }: RootLensTriggerProps): JSX.Element | null {
-  if (count === 0) return null;
+  if (count === 0 && curated === 0) return null;
+  const label =
+    curated > 0
+      ? `الجذور · ${toArabicDigits(count)} · ${toArabicDigits(curated)} مختارة`
+      : `الجذور · ${toArabicDigits(count)}`;
   return (
     <button
       type="button"
       className={styles.trigger}
       aria-expanded={open}
-      aria-label={`الجذور · ${toArabicDigits(count)}`}
+      aria-label={label}
       onClick={onToggle}
     >
       <span aria-hidden="true">⬡</span>
       <span className="numeric" aria-hidden="true">
         {toArabicDigits(count)}
       </span>
+      {curated > 0 && (
+        <span className={styles.pickedDot} aria-hidden="true" />
+      )}
     </button>
   );
 }
@@ -43,10 +67,17 @@ interface RootLensProps {
   families: readonly RootFamily[] | null;
   /** True while the root shards for the selection are still in flight. */
   loading?: boolean;
+  /**
+   * Curated `shared-root` edges for the selection — the ex-rail-⬡ bucket,
+   * pinned above the corpus families (Loop 6a; see `RootLensTrigger`).
+   */
+  curated?: readonly Edge[];
   /** Whether a target's page is vendored (loadable). Unvendored → disabled. */
   canHop: (toKey: string) => boolean;
   /** Navigate to an occurrence (the hop carries its page, so L3 need not resolve). */
   onHop: (hop: RootHop) => void;
+  /** Navigate along a curated edge (same hop path; the edge carries its target). */
+  onHopEdge?: (edge: Edge) => void;
   /** Dismiss the sheet. */
   onClose: () => void;
 }
@@ -99,8 +130,10 @@ function distanceLabel(dPage: number): string {
 export function RootLens({
   families,
   loading = false,
+  curated = [],
   canHop,
   onHop,
+  onHopEdge,
   onClose,
 }: RootLensProps): JSX.Element | null {
   const sheetRef = useRef<HTMLDivElement>(null);
@@ -211,8 +244,52 @@ export function RootLens({
           </button>
         </header>
 
+        {/* The curated bucket, pinned: hand-verified pairs outrank a corpus
+            match, so they lead — and this is the ⬡ rail chip's new home. */}
+        {curated.length > 0 && (
+          <section className={styles.picked}>
+            <h3 className={styles.pickedTitle}>
+              مختارة
+              <span className={styles.pickedNote}>محقّقة يدويًا</span>
+            </h3>
+            <ul className={styles.hops}>
+              {curated.map((edge) => {
+                const enabled = canHop(edge.to);
+                const label = ayahLabel(edge.to) ?? edge.to;
+                return (
+                  <li key={edge.to} className={styles.hopRow}>
+                    <span className={styles.hopText}>
+                      <span className={styles.hopLabel}>
+                        {label}
+                        {edge.root && <span className={styles.count}>{edge.root}</span>}
+                      </span>
+                      <span className={styles.distance}>
+                        {edge.note ?? "جذر مشترك"}
+                        {!enabled && (
+                          <span className={styles.unavailable}> · غير متوفّرة بعد</span>
+                        )}
+                      </span>
+                    </span>
+                    <button
+                      type="button"
+                      className={styles.hop}
+                      disabled={!enabled || !onHopEdge}
+                      onClick={() => onHopEdge?.(edge)}
+                      aria-label={`انتقل إلى ${label}`}
+                    >
+                      <span aria-hidden="true">↪</span>
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+          </section>
+        )}
+
         {families.length === 0 ? (
-          <p className={styles.empty}>{loading ? "…" : "لا جذور معروفة لهذه الآية"}</p>
+          curated.length === 0 ? (
+            <p className={styles.empty}>{loading ? "…" : "لا جذور معروفة لهذه الآية"}</p>
+          ) : null
         ) : (
           <ul className={styles.list}>
             {families.map((family) => {

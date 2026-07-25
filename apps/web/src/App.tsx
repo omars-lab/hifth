@@ -1,8 +1,11 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   Adjacency,
+  Concordance,
   Resolver,
   Roots,
+  Tajweed,
+  appKeyAction,
   keyToRef,
   parseAyahKey,
   refToKey,
@@ -13,16 +16,20 @@ import {
   type AyahRef,
   type AyahRootsShard,
   type Edge,
+  type JumpTarget,
   type MergedEdge,
   type RailChip,
   type RootHop,
   type RootIndexShard,
+  type SkinId,
+  type TajweedShard,
 } from "@hifth/core";
 import {
   loadManifest,
   loadRootAyahShard,
   loadRootBucket,
   loadShard,
+  loadTajweedShard,
 } from "./assets";
 import { ayahLabel } from "./format";
 import { useHashRouter } from "./useHashRouter";
@@ -33,8 +40,13 @@ import { HighlightMenu } from "./components/HighlightMenu";
 import { TrailBeads, type TrailBead } from "./components/TrailBeads";
 import { ShareSheet } from "./components/ShareSheet";
 import { InstallButton } from "./components/InstallButton";
+import { OfflineNotice } from "./components/OfflineNotice";
+import { Jumper } from "./components/Jumper";
+import { EditionPicker } from "./components/EditionPicker";
+import { CoachMarks } from "./components/CoachMarks";
 import { LiveAnnouncer, useAnnouncer } from "./components/LiveAnnouncer";
 import { RootLens, RootLensTrigger } from "./components/RootLens";
+import { SkinToggle, TajweedLegend } from "./components/SkinToggle";
 import styles from "./App.module.css";
 
 // The app opens on page 7 (the mock's first curated page). Full page routing is
@@ -87,6 +99,10 @@ export function App(): JSX.Element {
     new Map(),
   );
   const [rootsOpen, setRootsOpen] = useState(false);
+  // Loop 6a wayfinding sheets: "go to" (`/` or the ⌖ button) and the mushaf
+  // picker. Both are modal, so at most one is up at a time in practice.
+  const [jumperOpen, setJumperOpen] = useState(false);
+  const [editionOpen, setEditionOpen] = useState(false);
 
   const stageRef = useRef<PageStageHandle>(null);
   const { message, announce } = useAnnouncer();
@@ -212,6 +228,18 @@ export function App(): JSX.Element {
     [adjacency, selectedKey],
   );
 
+  // Loop 6a — the ⬡ merge. The rail's other chips are *directions* of one edge
+  // type (↻ same surah, ◀ earlier, ▶ later); `root` was an edge *type* wearing a
+  // direction's clothes, and it wore the same glyph as the root lens while
+  // promising something narrower. So the rail drops it and the lens adopts it:
+  // the curated edges are pinned above the corpus families, marked as
+  // hand-verified. One glyph, one place, one count. (See `RootLensTrigger`.)
+  const railChips = useMemo(() => chips.filter((c) => c.direction !== "root"), [chips]);
+  const curatedRoots = useMemo(
+    () => chips.find((c) => c.direction === "root")?.edges ?? [],
+    [chips],
+  );
+
   // The highlighted range's merged hop list (spec §9): every member's edges,
   // deduped by (target, type), hifz-ordered, each row naming its source ayah.
   const rangeHops = useMemo(
@@ -247,6 +275,108 @@ export function App(): JSX.Element {
       for (const poly of p.polygons) ensureShard(poly.surah);
     }
   }, [manifest, mountedPages, ensureShard]);
+
+  /* ---- the tajweed skin (Loop 6a, spec §8) ------------------------------ */
+
+  // Not persisted, deliberately: the skin is labelled beta until a hafiz signs
+  // off, and a beta layer that silently restores itself on every cold start is
+  // one a reader can forget they enabled. Opting in each session is the price of
+  // shipping it early.
+  const [skin, setSkin] = useState<SkinId>("plain");
+  const [legendOpen, setLegendOpen] = useState(false);
+  const [tajweedShards, setTajweedShards] = useState<ReadonlyMap<number, TajweedShard>>(
+    new Map(),
+  );
+  const requestedTajweed = useRef(new Set<number>());
+
+  // Same rebuild-on-set pattern as `adjacency` and `roots`: a pure index over
+  // whatever has landed, so a shard arriving late re-paints the page without any
+  // imperative poke at the stage.
+  const tajweed = useMemo(() => {
+    if (!manifest) return null;
+    const lens = new Tajweed(manifest.edition);
+    for (const [surah, shard] of tajweedShards) lens.addShard(surah, shard);
+    return lens;
+  }, [manifest, tajweedShards]);
+
+  // Fetched only once the skin is actually on, and only for surahs on screen —
+  // all 114 shards are ~200KB gzipped, and a reader who never opens the skin
+  // should not pay a byte of it.
+  useEffect(() => {
+    if (!manifest || skin !== "tajweed") return;
+    for (const p of manifest.pages) {
+      if (!mountedPages.includes(p.page)) continue;
+      for (const poly of p.polygons) {
+        const surah = poly.surah;
+        if (requestedTajweed.current.has(surah)) continue;
+        requestedTajweed.current.add(surah);
+        void loadTajweedShard(manifest.edition, surah).then((shard) => {
+          if (shard) setTajweedShards((m) => new Map(m).set(surah, shard));
+        });
+      }
+    }
+  }, [manifest, mountedPages, skin]);
+
+  // Every ayah key on the page in view, so the legend can say what is actually
+  // in front of the reader rather than reciting seven colours in the abstract.
+  const tajweedCounts = useMemo(() => {
+    if (!tajweed) return new Map();
+    const keys: string[] = [];
+    for (const p of manifest?.pages ?? []) {
+      if (p.page !== page) continue;
+      for (const poly of p.polygons) keys.push(poly.key);
+    }
+    return tajweed.countsForKeys(keys);
+  }, [tajweed, manifest, page]);
+
+  // The selected ayah's rules, spelled out as text — the channel that works
+  // with no colour vision at all.
+  const tajweedSelection = useMemo(() => {
+    if (!tajweed || !selectedKey) return null;
+    return {
+      label: ayahLabel(selectedKey) ?? selectedKey,
+      marks: tajweed.marksForKey(selectedKey),
+    };
+  }, [tajweed, selectedKey]);
+
+  // Every vendored page in order, each with an anchor ayah (its first polygon).
+  // The stage navigates to *keys*, not to pages, so turning a page means asking
+  // for the first ayah on it — which is also where reading resumes.
+  const pageTurns = useMemo(() => {
+    const anchors = new Map<number, string>();
+    for (const p of manifest?.pages ?? []) {
+      const first = p.polygons[0];
+      if (first) anchors.set(p.page, first.key);
+    }
+    return { pages: [...anchors.keys()].sort((a, b) => a - b), anchors };
+  }, [manifest]);
+
+  // Arrow-key paging. "The next page" means the next page we actually have:
+  // until 4b vendors all 604, stepping past the last one would land on a blank,
+  // so it says so instead. Paging does not touch the selection — you are
+  // browsing, not moving your place.
+  const stepPage = useCallback(
+    (step: 1 | -1) => {
+      const { pages, anchors } = pageTurns;
+      if (pages.length === 0) return;
+      const at = pages.indexOf(page);
+      const i = at === -1 ? 0 : Math.min(pages.length - 1, Math.max(0, at + step));
+      const next = pages[i]!;
+      if (next === page) {
+        announce(step > 0 ? "آخر صفحة متوفّرة" : "أول صفحة متوفّرة");
+        return;
+      }
+      const anchor = anchors.get(next);
+      if (!anchor) return;
+      setOpenDirection(null);
+      setPage(next);
+      announce(`صفحة ${next}`);
+      // zoom 1 = the page as it sits, not a hop's close framing; no pulse,
+      // because nothing here was selected.
+      void stageRef.current?.navigateTo(anchor, { pulse: false, zoom: 1 });
+    },
+    [pageTurns, page, announce],
+  );
 
   // The origin ayah keeps its breadcrumb until the trail is empty.
   const breadcrumbKey = trail.length > 0 ? trail[trail.length - 1]!.key : null;
@@ -382,10 +512,13 @@ export function App(): JSX.Element {
   // Restore a parsed deep link through the SAME select/navigateTo path a live
   // hop uses (spec §7: no separate deep-link logic to drift). Rebuilds the trail
   // from `trail`+`via`, sets the selection, and pans to it.
+  // `origin` only chooses the wording of the announcement — a jump lands by the
+  // same code as a shared link, and must keep doing so.
   const restoreState = useCallback(
-    (state: AppState) => {
+    (state: AppState, origin: "link" | "jump" = "link") => {
       if (!resolver) return;
       const edition = resolver.edition;
+      const arrived = origin === "jump" ? "انتقلت إلى" : "فُتح رابط ·";
       // Rebuild the trail beads from the link's trail + via (oldest → newest).
       const chain = [...(state.trail ?? []), ...(state.via ? [state.via] : [])];
       const beads: TrailBead[] = [];
@@ -420,7 +553,7 @@ export function App(): JSX.Element {
         setSelectedKey(null);
         setSelectedRange(keys);
         setPage(head.page);
-        announce(`فُتح رابط · مقطع ${surah}:${ayah}-${toAyah} · صفحة ${head.page}`);
+        announce(`${arrived} مقطع ${surah}:${ayah}-${toAyah} · صفحة ${head.page}`);
         void stageRef.current?.navigateTo(keys[0]!, { pulse: true });
         return;
       }
@@ -437,7 +570,7 @@ export function App(): JSX.Element {
       setSelectedRange(null);
       setSelectedKey(key);
       setPage(loc.page);
-      announce(`فُتح رابط · ${ayahLabel(key) ?? key} · صفحة ${loc.page}`);
+      announce(`${arrived} ${ayahLabel(key) ?? key} · صفحة ${loc.page}`);
       void stageRef.current?.navigateTo(key, { pulse: true });
     },
     [resolver, announce],
@@ -447,7 +580,85 @@ export function App(): JSX.Element {
   // manifest loads must not be dropped (restoreState no-ops without a resolver).
   useHashRouter(currentState, restoreState, resolver !== null);
 
-  const openChip = chips.find((c) => c.direction === openDirection) ?? null;
+  // A jump lands through `restoreState` — the same path a live hop and a
+  // cold-opened link take (spec §7; Loop 3's record says why a second navigation
+  // path drifts). It also leaves a bead: "go to الكهف" is as undoable as a chip,
+  // so the chain is the existing trail plus the ayah we are leaving.
+  const handleJump = useCallback(
+    (target: JumpTarget) => {
+      if (!resolver) return;
+      const chain = [...trail.map((b) => b.key), ...(selectedKey ? [selectedKey] : [])]
+        .map(keyToRef)
+        .filter((r): r is AyahRef => r !== null);
+      const via = chain.length > 0 ? chain[chain.length - 1] : undefined;
+      const rest = chain.slice(0, -1);
+      restoreState(
+        {
+          edition: resolver.edition,
+          select: { surah: target.surah, ayah: target.ayah },
+          ...(via ? { via } : {}),
+          ...(rest.length > 0 ? { trail: rest } : {}),
+        },
+        "jump",
+      );
+    },
+    [resolver, trail, selectedKey, restoreState],
+  );
+
+  // The cross-edition mapping table. Empty today — only `hafs-kfqc` is vendored
+  // — and deliberately not filled with an identity guess: with no table, a
+  // position does not travel (spec §1 forbids cross-edition index arithmetic).
+  // The picker shows that, per row, instead of hiding the gap.
+  const concordance = useMemo(() => new Concordance(), []);
+
+  // Unreachable today (the only vendored edition is the current one, and the
+  // picker disables its own row), so this is the seam rather than a feature:
+  // when a second mushaf is vendored, this is where the switch lands, and it
+  // refuses rather than guesses while the table is missing.
+  const handleEditionSelect = useCallback(
+    (edition: string) => {
+      setEditionOpen(false);
+      const mapped = selectedKey ? concordance.map(selectedKey, edition) : null;
+      announce(mapped ? `${ayahLabel(mapped) ?? mapped}` : "لا جدول مقابلة لهذه الطبعة بعد");
+    },
+    [selectedKey, concordance, announce],
+  );
+
+  // The app-level keyboard map (arrows = pages, `/` = the jumper), applied
+  // through core's `appKeyAction` — the precedence ladder and its reasoning live
+  // there, tested, so this listener only has to describe the DOM honestly.
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      const el = document.activeElement as HTMLElement | null;
+      const action = appKeyAction({
+        key: e.key,
+        modified: e.altKey || e.ctrlKey || e.metaKey,
+        defaultPrevented: e.defaultPrevented,
+        inTextField:
+          el instanceof HTMLInputElement ||
+          el instanceof HTMLTextAreaElement ||
+          el instanceof HTMLSelectElement ||
+          el?.isContentEditable === true,
+        // Any open sheet owns the keyboard while it is up — it is modal, and its
+        // own Escape/Tab handling is the contract. Asking the DOM instead of
+        // OR-ing this loop's flags keeps that true for sheets other loops add.
+        inDialog: document.querySelector('[role="dialog"]') !== null,
+        // The polygons live inside the page <svg>; Loop 3 gives them the arrows.
+        onAyah: el?.closest?.("svg") != null,
+      });
+      if (!action) return;
+      e.preventDefault();
+      if (action.kind === "jumper") {
+        setJumperOpen(true);
+        return;
+      }
+      stepPage(action.step);
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [stepPage]);
+
+  const openChip = railChips.find((c) => c.direction === openDirection) ?? null;
   const selectedSurah = selectedKey ? parseAyahKey(selectedKey)?.surah : null;
 
   return (
@@ -463,8 +674,45 @@ export function App(): JSX.Element {
           <span className={styles.pageLabel}>صفحة</span>
           <span className={`${styles.pageNum} numeric`}>{page}</span>
         </div>
+        {/* Wayfinding lives in the chrome because it is always available: the
+            keyboard has `/`, and a touch device needs something to press. */}
+        <button
+          type="button"
+          className={styles.chromeBtn}
+          aria-label="اذهب إلى · سورة أو جزء أو آية"
+          aria-haspopup="dialog"
+          onClick={() => setJumperOpen(true)}
+        >
+          ⌖
+        </button>
+        <button
+          type="button"
+          className={styles.chromeBtn}
+          aria-label="المصحف"
+          aria-haspopup="dialog"
+          onClick={() => setEditionOpen(true)}
+        >
+          ▤
+        </button>
+        {/* The skin switch sits in the chrome, next to the other always-on
+            controls: it is a way of *reading* the page, not a per-selection
+            action, and its beta badge has to be visible before it is used. */}
+        <SkinToggle
+          skin={skin}
+          onChange={setSkin}
+          onOpenLegend={() => setLegendOpen(true)}
+        />
         <InstallButton />
       </header>
+
+      {/* Offline durability, when there is something honest to say about it:
+          a capped quota, a missing install, a denied persist(). Silent when
+          storage is persisted — the good case earns no chrome. */}
+      <OfflineNotice />
+
+      {/* The three verbs, once, in the layout rather than over the page — the
+          first tap it teaches has to land while the strip is still up. */}
+      <CoachMarks ready={resolver !== null} />
 
       <main className={styles.main}>
         {resolver && (
@@ -480,9 +728,11 @@ export function App(): JSX.Element {
               onSelect={handleSelect}
               onSelectRange={handleSelectRange}
               labelFor={(key) => `الآية ${ayahLabel(key) ?? key}`}
+              skin={skin}
+              tajweedLookup={tajweed?.lookup ?? null}
             />
             <HopRail
-              chips={chips}
+              chips={railChips}
               openDirection={openDirection}
               onOpenChip={(chip) =>
                 setOpenDirection((d) => (d === chip.direction ? null : chip.direction))
@@ -509,13 +759,43 @@ export function App(): JSX.Element {
             <RootLens
               families={rootFamilies}
               loading={rootsLoading}
+              curated={curatedRoots}
               canHop={canHop}
               onHop={handleRootHop}
+              onHopEdge={handleHop}
               onClose={() => setRootsOpen(false)}
             />
           </>
         )}
       </main>
+
+      <Jumper
+        open={jumperOpen}
+        onJump={handleJump}
+        onClose={() => setJumperOpen(false)}
+      />
+      {/* CC BY 4.0's condition, discharged where a reader can see it — the
+          licence the rule spans ship under requires the credit to travel with
+          the work, not just with the repo. */}
+      <TajweedLegend
+        open={legendOpen}
+        counts={tajweedCounts}
+        page={page}
+        selection={tajweedSelection}
+        credit={{
+          text: "أحكام التجويد مأخوذة من quran-tajweed (Collin Fair)، رخصة CC BY 4.0.",
+          href: "https://github.com/cpfair/quran-tajweed",
+        }}
+        onClose={() => setLegendOpen(false)}
+      />
+      <EditionPicker
+        open={editionOpen}
+        current={manifest?.edition ?? ""}
+        currentKey={selectedKey}
+        concordance={concordance}
+        onSelect={handleEditionSelect}
+        onClose={() => setEditionOpen(false)}
+      />
 
       <footer className={styles.trail} aria-label="المسار">
         <TrailBeads
@@ -526,6 +806,7 @@ export function App(): JSX.Element {
         />
         <RootLensTrigger
           count={rootCount}
+          curated={curatedRoots.length}
           open={rootsOpen}
           onToggle={() => setRootsOpen((o) => !o)}
         />

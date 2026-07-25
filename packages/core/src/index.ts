@@ -138,3 +138,51 @@ export {
   type RootFamily,
   type RootLensOptions,
 } from "./roots.js";
+
+// Loop 6a — the tajweed skin (spec §8): the rule registry, the shard lens, and
+// the geometry fingerprint that proves a skin swap moved nothing.
+export {
+  TAJWEED_RULES,
+  TAJWEED_CLASS_PREFIX,
+  Tajweed,
+  tajweedRule,
+  isTajweedRuleId,
+  tajweedClass,
+  tajweedMarkClass,
+  marksForAyah,
+  leadingRule,
+  geometrySignature,
+  type SkinId,
+  type TajweedRule,
+  type TajweedRuleId,
+  type TajweedShard,
+  type TajweedMark,
+  type TajweedLookup,
+} from "./skins.js";
+
+// Loop 6a — wayfinding: the jumper's query language, the app-level keyboard
+// precedence rule, and the edition registry + cross-edition concordance seam.
+export {
+  MAX_JUMP_RESULTS,
+  parseJump,
+  normalizeArabic,
+  toWesternDigits,
+  targetAyahCount,
+  type JumpTarget,
+} from "./jump.js";
+
+export {
+  JUMPER_KEY,
+  appKeyAction,
+  type KeyAction,
+  type KeyContext,
+} from "./keymap.js";
+
+export {
+  EDITIONS,
+  Concordance,
+  editionMeta,
+  type EditionMeta,
+  type EditionStatus,
+  type ConcordanceTable,
+} from "./concordance.js";

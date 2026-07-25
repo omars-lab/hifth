@@ -311,3 +311,38 @@
     transition: none;
   }
 }
+
+/* The curated bucket (Loop 6a) — the ⬡ rail chip's new home, pinned above the
+   corpus families. Marked, not merely first: "hand-verified" is a different
+   kind of claim from "the corpus says so", and the row should say which. */
+.picked {
+  margin-block: var(--space-2);
+  padding: var(--space-2);
+  border: 1px solid var(--accent-tint);
+  border-radius: var(--radius-md);
+  background: var(--accent-tint);
+}
+
+.pickedTitle {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  margin: 0 0 var(--space-1);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--accent-strong);
+}
+
+.pickedNote {
+  font-size: var(--text-xs);
+  font-weight: 400;
+  color: var(--ink-soft);
+}
+
+/* The trigger's "there are curated pairs in here too" tick. */
+.pickedDot {
+  inline-size: 5px;
+  block-size: 5px;
+  border-radius: 50%;
+  background: var(--accent-strong);
+}

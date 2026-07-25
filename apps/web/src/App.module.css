@@ -51,6 +51,33 @@
   color: var(--ink);
 }
 
+/* Chrome affordances (jumper, mushaf). Glyph-only and quiet: the page is the
+   subject, and these two are always-available doors, not actions. Deliberately
+   no `numeric` class — the header's one number is the page. */
+.chromeBtn {
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  min-inline-size: var(--touch-min);
+  min-block-size: var(--touch-min);
+  border: none;
+  border-radius: var(--radius-md);
+  background: none;
+  color: var(--ink-soft);
+  font-size: var(--text-lg);
+  cursor: pointer;
+}
+
+.chromeBtn:hover {
+  color: var(--accent-strong);
+  background: var(--accent-tint);
+}
+
+.chromeBtn:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
 .main {
   position: relative; /* HopRail floats over the stage within .main */
   flex: 1 1 auto;

@@ -8,7 +8,14 @@
 
 import { parseAyahKey } from "@hifth/core";
 
-const SURAH_NAMES_AR: readonly string[] = [
+/**
+ * The 114 surah names in mushaf order. Exported because the jumper matches
+ * against them (Loop 6a): `@hifth/core`'s `parseJump` takes the table as an
+ * argument rather than owning it, the same injection the highlighter uses for
+ * `labelFor` — names are presentation, and core stays framework- and
+ * language-table-free.
+ */
+export const SURAH_NAMES_AR: readonly string[] = [
   "الفاتحة", "البقرة", "آل عمران", "النساء", "المائدة", "الأنعام", "الأعراف",
   "الأنفال", "التوبة", "يونس", "هود", "يوسف", "الرعد", "إبراهيم", "الحجر",
   "النحل", "الإسراء", "الكهف", "مريم", "طه", "الأنبياء", "الحج", "المؤمنون",
