@@ -1,4 +1,5 @@
 import { test, expect } from "@playwright/test";
+import { tapAyah } from "./ayah";
 import AxeBuilder from "@axe-core/playwright";
 
 // Loop 3 exit criterion (PLAN §Loop 3):
@@ -43,7 +44,7 @@ test.describe("Hifth · share links (spec §7)", () => {
 
   test("selecting an ayah writes a shareable hash to the address bar", async ({ page }) => {
     await page.goto("/");
-    await page.locator("#verse-55").tap();
+    await tapAyah(page, "#verse-55");
     await expect(
       page.getByRole("button", { name: /الآية الحالية البقرة · ٢:٤٨/ }),
     ).toBeVisible();
@@ -57,7 +58,7 @@ test.describe("Hifth · share links (spec §7)", () => {
 test.describe("Hifth · diff view (spec §3)", () => {
   test("expanding a hop row reveals the token diff of the two readings", async ({ page }) => {
     await page.goto("/");
-    await page.locator("#verse-55").tap();
+    await tapAyah(page, "#verse-55");
     const loopChip = page
       .getByRole("group", { name: "روابط الآية" })
       .getByRole("button", { name: /متشابهات في السورة/ });
@@ -111,7 +112,7 @@ test.describe("Hifth · keyboard a11y", () => {
 
   test("Escape closes the popover", async ({ page }) => {
     await page.goto("/");
-    await page.locator("#verse-55").tap();
+    await tapAyah(page, "#verse-55");
     await page
       .getByRole("group", { name: "روابط الآية" })
       .getByRole("button", { name: /متشابهات في السورة/ })
@@ -138,7 +139,7 @@ test.describe("Hifth · axe automated a11y", () => {
 
   test("the open hop popover has no serious/critical axe violations", async ({ page }) => {
     await page.goto("/");
-    await page.locator("#verse-55").tap();
+    await tapAyah(page, "#verse-55");
     await page
       .getByRole("group", { name: "روابط الآية" })
       .getByRole("button", { name: /متشابهات في السورة/ })

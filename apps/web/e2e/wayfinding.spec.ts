@@ -1,4 +1,5 @@
 import { test, expect } from "@playwright/test";
+import { tapAyah } from "./ayah";
 
 /*
  * Loop 6a — wayfinding: getting anywhere, and knowing where you are.
@@ -19,7 +20,7 @@ test.describe("Hifth · wayfinding", () => {
 
     // The strip is in the layout, not over it: the ayah it talks about is
     // tappable while it is still on screen.
-    await page.locator("#verse-55").tap();
+    await tapAyah(page, "#verse-55");
     await expect(
       page.getByRole("button", { name: /الآية الحالية البقرة · ٢:٤٨/ }),
     ).toBeVisible();

@@ -1,4 +1,5 @@
 import { test, expect, type Page } from "@playwright/test";
+import { ayahTarget, tapAyah } from "./ayah";
 
 /*
  * Loop 5 — the drag-to-highlight gesture (PLAN §Loop 5, spec §9).
@@ -13,6 +14,37 @@ import { test, expect, type Page } from "@playwright/test";
  * touch point down and then move it. @use-gesture sees the same Pointer Events
  * either way, which is exactly the layer the intent split reads.
  */
+
+/**
+ * Open the app as a reader who has been here before.
+ *
+ * The gesture is the subject; first-run chrome is not. Both the coach strip and
+ * the storage notice are strips *in the layout* above the stage, so on a
+ * 412×839 phone they shorten it enough to push page 7's last ayahs below the
+ * fold, and a drag that starts below the fold lands on nothing. Seeding the
+ * returning-reader state is also the honest setup: nobody long-press-drags on
+ * the visit where they are still being told what a tap does. (`ayahTarget`
+ * catches the aim itself going wrong; this is about which screen we aim at.)
+ */
+async function openApp(page: Page): Promise<void> {
+  await page.addInitScript(() => {
+    try {
+      localStorage.setItem("hifth.coach.v1", "1"); // CoachMarks.COACH_STORAGE_KEY
+    } catch {
+      /* private mode — the strip stays hidden anyway */
+    }
+    Object.defineProperty(navigator, "storage", {
+      configurable: true,
+      value: {
+        persist: async () => true,
+        persisted: async () => true,
+        estimate: async () => ({ usage: 1_000_000, quota: 40 * 1024 * 1024 * 1024 }),
+      },
+    });
+  });
+  await page.goto("/");
+  await expect(page.locator("svg[role='group']")).toBeVisible();
+}
 
 /** Press at (x, y), hold past the long-press threshold, drag to (x2, y2), release. */
 async function longPressDrag(
@@ -33,19 +65,20 @@ async function longPressDrag(
 
 test.describe("Hifth · drag-to-highlight", () => {
   test("long-press then drag washes the ayahs the marquee crossed", async ({ page }) => {
-    await page.goto("/");
-    await expect(page.locator("svg[role='group']")).toBeVisible();
+    await openApp(page);
 
-    // Two adjacent ayahs on page 7 (2:47 and 2:48 are verse-54 / verse-55).
-    const first = await page.locator("#verse-54").boundingBox();
-    const second = await page.locator("#verse-55").boundingBox();
-    expect(first).not.toBeNull();
-    expect(second).not.toBeNull();
+    // Two adjacent ayahs near the *top* of page 7 (2:39 and 2:40 are verse-46 /
+    // verse-47). Near the top on purpose: the page is taller than any phone
+    // viewport by design — you pan it — so the last ayahs of the page are below
+    // the fold on the smaller of the two devices, and a drag is only a drag
+    // where a finger can actually go.
+    const first = await ayahTarget(page, "#verse-46");
+    const second = await ayahTarget(page, "#verse-47");
 
     await longPressDrag(
       page,
-      { x: first!.x + first!.width / 2, y: first!.y + first!.height / 2 },
-      { x: second!.x + second!.width / 2, y: second!.y + second!.height / 2 },
+      first,
+      second,
       {
         // While the finger is still down the live marquee rect is on the page.
         beforeRelease: async () => {
@@ -60,12 +93,9 @@ test.describe("Hifth · drag-to-highlight", () => {
   });
 
   test("an immediate drag still pans the page and highlights nothing", async ({ page }) => {
-    await page.goto("/");
-    await expect(page.locator("svg[role='group']")).toBeVisible();
+    await openApp(page);
 
-    const box = await page.locator("#verse-54").boundingBox();
-    expect(box).not.toBeNull();
-    const start = { x: box!.x + box!.width / 2, y: box!.y + box!.height / 2 };
+    const start = await ayahTarget(page, "#verse-46");
 
     const host = page.locator("svg[role='group']");
     const before = await host.boundingBox();
@@ -84,9 +114,8 @@ test.describe("Hifth · drag-to-highlight", () => {
   });
 
   test("tap-to-select still works alongside the marquee", async ({ page }) => {
-    await page.goto("/");
-    await expect(page.locator("svg[role='group']")).toBeVisible();
-    await page.locator("#verse-55").tap();
+    await openApp(page);
+    await tapAyah(page, "#verse-55");
     await expect(
       page.getByRole("button", { name: /الآية الحالية البقرة · ٢:٤٨/ }),
     ).toBeVisible();

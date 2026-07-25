@@ -1,4 +1,5 @@
 import { test, expect } from "@playwright/test";
+import { tapAyah } from "./ayah";
 
 // Loop 5, the range half of the exit criterion (PLAN §Loop 5):
 //   highlight 2:47–2:48 → merged, deduped hop list → leap, with the URL in the
@@ -89,7 +90,7 @@ test.describe("Hifth · the highlighted range", () => {
 
     // Scope to the visible page: hop targets keep page 19 warm, and its SVG
     // carries an element id of its own (ids are per-page, not global).
-    await page.locator("#verse-55:visible").tap();
+    await tapAyah(page, "#verse-55:visible");
     await expect(page.getByRole("group", { name: "روابط الآية" })).toBeVisible();
     await expect(page.getByRole("dialog")).toHaveCount(0);
     expect(page.url()).toContain("#/hafs-kfqc/2:48");

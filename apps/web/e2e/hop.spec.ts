@@ -1,4 +1,5 @@
 import { test, expect } from "@playwright/test";
+import { tapAyah } from "./ayah";
 
 // Loop 2 exit criterion (PLAN §Loop 2):
 //   tap 2:48 → rail → popover → hop to 2:123 cross-page → bead back, one-handed.
@@ -57,7 +58,7 @@ test.describe("Hifth · the hop", () => {
 
     // 2:48's ▶ bucket (Loop 4a data): mutashabihat 7:140 + 14:5 and the
     // related-meaning 82:19 — all on pages that are NOT vendored yet (4b).
-    await page.locator("#verse-55").tap();
+    await tapAyah(page, "#verse-55");
     const rail = page.getByRole("group", { name: "روابط الآية" });
     const laterChip = rail.getByRole("button", { name: /سور لاحقة/ });
     await expect(laterChip).toBeVisible();
