@@ -1,0 +1,32 @@
+{
+  "1": {
+    "edges": [
+      {
+        "type": "mutashabih",
+        "to": "quran/hafs-kfqc/33:25",
+        "page": 421,
+        "dir": {
+          "dSurah": -26,
+          "dPage": -124
+        }
+      }
+    ],
+    "ext": []
+  },
+  "8": {
+    "edges": [
+      {
+        "type": "mutashabih",
+        "to": "quran/hafs-kfqc/64:15",
+        "page": 557,
+        "dir": {
+          "dSurah": 5,
+          "dPage": 11,
+          "sameJuz": true
+        },
+        "ctx": true
+      }
+    ],
+    "ext": []
+  }
+}

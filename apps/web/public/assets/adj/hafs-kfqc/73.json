@@ -1,0 +1,33 @@
+{
+  "7": {
+    "edges": [
+      {
+        "type": "mutashabih",
+        "to": "quran/hafs-kfqc/76:24",
+        "page": 579,
+        "dir": {
+          "dSurah": 3,
+          "dPage": 5,
+          "sameJuz": true
+        }
+      }
+    ],
+    "ext": []
+  },
+  "18": {
+    "edges": [
+      {
+        "type": "mutashabih",
+        "to": "quran/hafs-kfqc/76:28",
+        "page": 580,
+        "dir": {
+          "dSurah": 3,
+          "dPage": 6,
+          "sameJuz": true
+        },
+        "ctx": true
+      }
+    ],
+    "ext": []
+  }
+}

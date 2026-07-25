@@ -20,7 +20,9 @@ are a gated later track (Capacitor wrap of the same web build), not a v1 concern
   below.
 
 **Research** (`docs/research/2026-07-20-mobile-svg-pwa.md`): a verified deep-research pass
-whose findings became the binding design rules in §4.
+whose findings became the binding design rules in §4. **Re-grounded 2026-07-25** with live
+source checks (data sources, licenses, storage policy, Safari status) — links inline in §4
+and §7 Loop 4; the strategy change it produced is the Loop 4a/4b split below.
 
 ---
 
@@ -35,10 +37,11 @@ ends by updating this section and writing `docs/decisions/loop-<N>.md`.**
 | 0 — Skeleton | complete | Installable RTL shell showing page 7; CI green with gates | [loop-0.md](decisions/loop-0.md) |
 | 1 — Select + perf | complete-with-deferral | Tap-to-select on-device; RTL page-turn decided; perf verdict → follow-up ① | [loop-1.md](decisions/loop-1.md) |
 | 2 — The hop | complete | Tap 2:48 → rail → popover → cross-page hop → bead back, one-handed | [loop-2.md](decisions/loop-2.md) |
-| 3 — Diffs, share, a11y | pending (after 2) | Teacher link cold-open restores exact view; screen reader announces hops | — |
-| 4 — Full corpus ETL | **gated on follow-up ①** | Deterministic `pnpm etl`; every ayah navigable; TTI <2.5s mid-Android | — |
-| 5 — Highlight + roots | pending (after 4) | Drag-range → merged hop list; root lens nearest-page-first | — |
-| 6 — Offline, skin, editions | pending (after 4) | Pinned juz offline after 8+ days; instant skin toggle; Lighthouse ≥90 | — |
+| 3 — Diffs, share, a11y | complete | Teacher link cold-open restores exact view; screen reader announces hops | [loop-3.md](decisions/loop-3.md) |
+| 4a — Edge-data ETL | complete | Deterministic full-corpus edge ETL; 100% valid keys; shards <50KB gz | [loop-4a.md](decisions/loop-4a.md) |
+| 4b — Page corpus + streaming | **gated on follow-up ①** | All 604 pages vendored + QUL-checked; every ayah navigable; TTI <2.5s mid-Android | — |
+| 5 — Highlight + roots | **next** (word granularity needs 4b) | Drag-range → merged hop list; root lens nearest-page-first | — |
+| 6 — Offline, skin, editions | pending (after 4b) | Pinned juz offline after 8+ days; instant skin toggle; Lighthouse ≥90 | — |
 | 7 — Polish + beta | pending (after 3+5+6) | Hafiz revision session, zero friction notes → **web v1.0** | — |
 | Track B — Capacitor | gated on web v1.0 | Same web build wrapped for iOS/Android; Universal Links | — |
 
@@ -51,15 +54,31 @@ ends by updating this section and writing `docs/decisions/loop-<N>.md`.**
    past the layer's backing store. **How to run:** `pnpm build && pnpm --filter @hifth/web
    exec vite preview --host --port 4173`, open on a real mid/low-tier phone, pinch/pan
    page 7, and read fps via Chrome remote DevTools / Safari Web Inspector
-   (`apps/web/perf/pan-zoom-trace.mjs` prints the same recipe). **Gates Loop 4** — must be
-   resolved before Loop 4 starts (Loops 5–6 inherit the gate through the ETL).
-2. **License confirmation** — `SOURCES.md` marks `hafs-kfqc` **PROVISIONAL**; confirm
-   quran-svg redistribution terms **before Loop 7** (public beta).
+   (`apps/web/perf/pan-zoom-trace.mjs` prints the same recipe). **Gates Loop 4b only**
+   (page vendoring + streaming — the rendering-scale decision). Loop 4a (edge data) is
+   pure data work, orthogonal to the rendering verdict, and proceeds ungated; Loop 6
+   inherits the gate through 4b.
+2. **License confirmation** — substantially resolved by the 2026-07-25 grounding pass:
+   [quranpedia/quran-svg](https://github.com/quranpedia/quran-svg) declares **CC0 1.0**
+   for its own contributions (ayah-polygon overlay + JSON metadata — "reuse freely,
+   including commercially, no attribution required") and documents KFQC's terms as free
+   use for personal/business/digital/web, with the single reservation that **printing
+   physical mushafs for commercial sale is reserved to the Complex** — which Hifth never
+   does. Caveat: the **Libyan Endowments** editions (Qalun/Warsh variants) are
+   **non-commercial only** — irrelevant to `hafs-kfqc`, but blocks vendoring those
+   editions later without approval. Remaining action before Loop 7: flip `SOURCES.md`
+   from PROVISIONAL to confirmed citing the repo's declaration, and do one primary-source
+   check of [KFGQPC](https://qurancomplex.gov.sa)'s published terms (the repo's summary is
+   secondhand).
 3. Loop-assigned deferrals (already scoped in their loop sections; details in the decision
-   records): full corpus vendoring + QUL validation → Loop 4; `navigateTo` animation,
-   wheel-zoom, golden-image visual regression → Loop 2; per-polygon a11y labels + keyboard
-   path → Loop 3; marquee drag-select → Loop 5; Lighthouse CI + iOS install coach mark →
-   Loop 6.
+   records): full corpus vendoring + QUL validation → Loop 4b; wheel-zoom, golden-image
+   visual regression → Loop 5; marquee drag-select → Loop 5; Lighthouse CI + iOS install
+   coach mark → Loop 6. **Done:** per-polygon a11y labels + keyboard hop path (Loop 3);
+   `navigateTo` animation (Loop 2).
+4. **On-device VoiceOver/TalkBack pass** (Loop 3 exit named it; automated axe + the
+   keyboard hop tour cover the machine-checkable floor, both green in CI). The manual
+   screen-reader gesture walkthrough on a real iOS/Android device is the remaining
+   confirmation — run it alongside follow-up ① on the same phone, **before Loop 7**.
 
 ---
 
@@ -148,6 +167,11 @@ Full evidence in `docs/research/2026-07-20-mobile-svg-pwa.md`. The rules:
    `content-visibility: auto` + `contain-intrinsic-size` off-screen; scope highlight
    toggles to small CSS-contained subtrees. CI check: **no asset page contains `<text>`**
    (Safari content-visibility paint bug; quran-svg uses outlined paths, so we stay safe).
+   *Re-checked 2026-07:* Safari 18+ supports `content-visibility` and mid-2026 releases
+   fixed several of its bugs (find-in-page in skipped content, visible→hidden repaint —
+   see [Safari release notes](https://releasebot.io/updates/apple/safari)), but the
+   [SVG-`<text>`-never-paints bug](https://dev.to/bryce/a-gnarly-svg-visibility-bug-2j68)
+   has no confirmed fix — the no-`<text>` CI guard stays.
 2. **Inline SVG at scale is unproven** (no major Quran app does it). Loop 1 runs a
    real-device perf spike; the architecture keeps a **raster-fallback escape hatch**
    (rasterize glyph layer, keep only the polygon hit layer as DOM) behind the unchanged
@@ -157,7 +181,13 @@ Full evidence in `docs/research/2026-07-20-mobile-svg-pwa.md`. The rules:
    prerequisite for durable offline (ITP 7-day deletion; installed apps exempt) → the
    install prompt is a first-class iOS feature. Call `persist()`, verify with
    `persisted()`, degrade gracefully. Detect Chrome's clear-on-exit ~300 MB cap. Ignore
-   obsolete "Safari 1 GB / 50 MB" numbers.
+   obsolete "Safari 1 GB / 50 MB" numbers. *Re-verified 2026-07 — still current:* the
+   7-day script-storage deletion applies to Safari-tab usage only; Home-Screen web apps
+   keep [their own days-of-use counter](https://developer.apple.com/forums/thread/710157)
+   and are exempt; [`persist()`](https://developer.mozilla.org/en-US/docs/Web/API/StorageManager/persist)
+   is still not documented to stop the ITP timer (see also this
+   [2026 iOS-PWA survey](https://www.magicbell.com/blog/pwa-ios-limitations-safari-support-complete-guide)),
+   so install — not `persist()` — remains the durable-offline mechanism on iOS.
 5. **iOS deep-links can't open an installed PWA** — shared links open in Safari tabs;
    pin-a-juz UX lives inside the app; don't promise link-into-app on iOS.
 6. **A11y floor:** WCAG 2.2 targets ≥24×24px (our 44px budget clears it); SVG exposed via
@@ -249,28 +279,66 @@ a single-`view` RAF hop-tween (owns the transform); `HopRail`/`HopPopover`/`Trai
 WebKit + Chromium. Un-vendored targets surfaced-but-disabled (no ghost page). LRU-6 eviction and
 the token DiffView deferred to Loops 4 and 3 respectively.
 
-### Loop 3 — Diffs, share links, a11y pass (medium)
+### Loop 3 — Diffs, share links, a11y pass (medium) — ✅ complete ([loop-3.md](decisions/loop-3.md))
 `DiffView` (token diff, twin label, ctx continuation); hash router = spec §7 via
 `serializeState`/`restoreState` (same path as live hops); `via`/`trail`/`w`/range forms;
-`ShareSheet` (Web Share API + clipboard fallback). A11y: `role="img"` + labels, per-polygon
-`aria-label` + keyboard hop path; VoiceOver/TalkBack on-device check.
+`ShareSheet` (Web Share API + clipboard fallback). A11y: SVG `role="group"` + labels (an `img`
+can't hold focusable ayah buttons — axe caught it), per-polygon `aria-label` + keyboard hop path;
+VoiceOver/TalkBack on-device check → deferred to follow-up ④ (automated axe + keyboard tour green).
 **Exit:** cold-opening a teacher link restores exact view incl. trail; screen reader announces ayahs and hops.
 
-### Loop 4 — Full corpus ETL (large, mostly offline work)
-`packages/etl`: anchors over all 604 pages (cross-check QUL layout DB; fail on mismatch);
-edges (Waqar144 mutashabihat primary, QUL phrase ranges, QurSim secondary) → canonical
-keys → dedupe → dir annotations → `adj/<surah>.json`; validation gates (100% resolution,
-shard <50KB gz, licenses). **Asset decision point:** evaluate the word-granular ligature
-corpus (gates word-span pulsing + true root lens) — its resolver adapter fits behind the
-same L2 API. Page streaming: fetch-on-demand, LRU ~6 pages, prefetch hop targets +
-adjacent pages; PWA caching of visited juz.
-**Exit:** `pnpm etl` deterministic in CI; every ayah navigable; first-page TTI <2.5s mid-Android.
+### Loop 4a — Edge-data ETL (medium, pure data work — **ungated**)
+*Why the split (2026-07-25 grounding):* edge data is key-space math — it never touches the
+rendering hot path, so it does not need the perf verdict (follow-up ①) that gates page
+vendoring. Sources verified live:
+
+- **Primary edges:** [Waqar144/Quran_Mutashabihat_Data](https://github.com/Waqar144/Quran_Mutashabihat_Data)
+  — `mutashabiha_data.json` with `src` (absolute ayah number or array), `muts` (matching
+  absolute ayah numbers), `ctx` (show-context flag; maps to our ctx-continuation line in
+  DiffView). License: permissive custom ("free to use as you see fit", attribution
+  appreciated) → record verbatim in `SOURCES.md` and put the credit in the app's about
+  screen. Battle-tested by the author's own
+  [quran_memorization_helper](https://github.com/Waqar144/quran_memorization_helper).
+  ETL converts absolute ayah numbers → canonical `quran/<edition>/S:A` keys via the
+  known 6236-ayah surah table (already in `keys.ts` domain).
+- **Anchor cross-check:** [QUL mushaf layouts](https://qul.tarteel.ai/resources/mushaf-layout)
+  (SQLite downloads). Three Madani KFGQPC layouts exist — **V1/1405H (id 15), V2/1421H
+  (id 10), V4/1441H (id 19)**; first 4a task is to sample-match our quran-svg pages
+  against them to pin *which print* our corpus is, then vendor that layout DB as the
+  reconciliation source. Ayah→page agreement is the gate; line-level data is not needed.
+- **Demoted: QurSim** ([LREC 2012](https://aclanthology.org/L12-1051/)) — the grounding
+  pass showed it is *semantic relatedness* (7,679 verse pairs graded 0/1/2, derived from
+  Ibn Kathir), **not** lafẓi mutashabihat, and has no canonical download endpoint. It is
+  no longer a Loop 4 source; if it ever lands it is a separate reserved edge type
+  (`related ⚯`), someday-scoped.
+
+Work: full-corpus edge ETL → canonical keys → dedupe → dir annotations →
+`adj/<surah>.json` shards for all 114 surahs; validation gates (100% of endpoints parse to
+valid keys per the surah table — full anchor resolution moves to 4b where the pages exist;
+shard <50KB gz; license entries). Edges to un-vendored pages stay surfaced-but-disabled
+(the Loop 2 behavior) until 4b vendors the corpus.
+**Exit:** `pnpm etl` deterministic in CI over the full mutashabihat dataset; every edge
+endpoint a valid canonical key; all shards within budget; hop rail live on real data for
+the 3 vendored pages.
+
+### Loop 4b — Page corpus + streaming (large — **gated on follow-up ①**)
+Vendor all 604 [quran-svg](https://github.com/quranpedia/quran-svg) Hafs/KFQC pages (CC0
+overlay + KFQC free-use terms — see follow-up ②); anchors over all 604 pages,
+cross-checked against the QUL layout DB pinned in 4a (fail on any surah/ayah/page
+mismatch); **asset decision point:** evaluate the word-granular ligature corpus
+([MushafDatabase](https://github.com/mushafdatabase/MushafDatabase-Ligature-Based-SVG) is
+a candidate) — its resolver adapter fits behind the same L2 API. Page streaming:
+fetch-on-demand, LRU ~6 pages, prefetch hop targets + adjacent pages; PWA caching of
+visited juz.
+**Exit:** every ayah navigable; 100% bidirectional anchor resolution; first-page TTI
+<2.5s mid-Android.
 
 ### Loop 5 — Highlight gesture + root lens (medium)
 `gestures.ts` marquee/pan split (touch-action zones + intent thresholds); amber wash;
 `HighlightMenu` (merged deduped edges of the range, range-form copy link); roots ETL
 (Quranic Arabic Corpus / QUL morphology) + `RootLens` (page-distance sort, lemma
-sub-groups). Word-granularity if Loop 4 adopted the ligature corpus; ayah-fallback otherwise.
+sub-groups). Word-granularity if Loop 4b adopted the ligature corpus; ayah-fallback
+otherwise — Loop 5 can start after 4a (edges exist) and upgrade granularity when 4b lands.
 **Exit:** drag 2:47–2:48 → menu → merged hop list; word/ayah → root lens nearest-page-first.
 
 ### Loop 6 — Offline + skin + editions (medium)
@@ -314,8 +382,9 @@ changes, per the additive-only registry design.
 Two levels, both living in this repo (the external task tracker is retired —
 §Status & tracking is the roadmap of record):
 - **Roadmap** — the Status & tracking table. One row per loop (+ Track B); the status
-  column carries the sequencing (linear through Loop 2; Loops 3 & 4 open after Loop 2;
-  Loops 5 & 6 depend on the ETL; Loop 7 waits on 3+5+6; Track B gated on web v1.0).
+  column carries the sequencing (linear through Loop 2; Loops 3 & 4a open after Loop 2;
+  4b gated on follow-up ①; Loop 5 after 4a; Loop 6 after 4b; Loop 7 waits on 3+5+6;
+  Track B gated on web v1.0).
   Exactly one loop in flight; a loop flips to complete only when its exit criterion and
   testing-plan tiers pass and both its decision record and the table are updated.
 - **Per-loop working list** — created fresh at loop start from that loop's plan section
@@ -333,9 +402,10 @@ Guidance, not bureaucracy. Modes: **Explore** (read-only fan-out recon), **Plan*
   `navigateTo` cross-page mount/pan/pulse design before building.
 - **Loop 3** — inline; run the a11y audit as a separate review-style pass (Explore) over
   the finished screens rather than mid-feature.
-- **Loop 4** — the natural **Workflow fan-out**: per-surah shard validation, cross-source
-  reconciliation vs the QUL layout DB, and golden-ayah checks parallelize cleanly; the
-  ETL pipeline code itself stays inline.
+- **Loop 4a** — inline ETL code; per-surah shard validation is a small fan-out candidate.
+- **Loop 4b** — the natural **Workflow fan-out**: per-surah anchor validation,
+  cross-source reconciliation vs the QUL layout DB, and golden-ayah checks parallelize
+  cleanly; the ETL pipeline code itself stays inline.
 - **Loops 5–6** — inline feature work; Loop 6's offline/eviction matrix is a manual
   device checklist, not an agent job.
 - **Loop 7** — inline polish; the 5-page golden-image sweep is a small fan-out candidate.

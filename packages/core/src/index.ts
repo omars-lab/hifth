@@ -21,6 +21,16 @@ export {
   type AyahKey,
 } from "./keys.js";
 
+export {
+  AYAH_COUNTS,
+  TOTAL_AYAHS,
+  JUZ_STARTS,
+  ayahCount,
+  toAbsoluteAyah,
+  fromAbsoluteAyah,
+  juzOf,
+} from "./quran-meta.js";
+
 export { Resolver, type ResolvedLocation } from "./resolver.js";
 
 export {

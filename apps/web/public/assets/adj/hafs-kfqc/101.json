@@ -1,0 +1,17 @@
+{
+  "6": {
+    "edges": [
+      {
+        "type": "mutashabih",
+        "to": "quran/hafs-kfqc/69:20",
+        "page": 567,
+        "dir": {
+          "dSurah": -32,
+          "dPage": -33
+        },
+        "ctx": true
+      }
+    ],
+    "ext": []
+  }
+}

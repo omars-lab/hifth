@@ -1,0 +1,26 @@
+{
+  "5": {
+    "edges": [
+      {
+        "type": "mutashabih",
+        "to": "quran/hafs-kfqc/41:7",
+        "page": 477,
+        "dir": {
+          "dSurah": -54,
+          "dPage": -120
+        }
+      },
+      {
+        "type": "mutashabih",
+        "to": "quran/hafs-kfqc/84:24",
+        "page": 589,
+        "dir": {
+          "dSurah": -11,
+          "dPage": -8,
+          "sameJuz": true
+        }
+      }
+    ],
+    "ext": []
+  }
+}

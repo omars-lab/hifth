@@ -247,7 +247,7 @@ export class Adjacency {
 }
 
 /* ------------------------------------------------------------------ */
-/* Shard building (Loop 2 seed → Loop 4 ETL replaces the source).      */
+/* Shard building (Loop 2 seed — retired from the ETL path in 4a).     */
 /* ------------------------------------------------------------------ */
 
 /** A curated edge in the mock's compact form (docs/reference/linker-mock.html). */
@@ -279,8 +279,9 @@ const CURATED_TYPE: Readonly<Record<CuratedEdge["type"], EdgeTypeId>> = {
  * bare refs → canonical keys, `dir` computed from source/target surah+page.
  * `sourcePages` maps "surah:ayah" → page so dPage can be signed correctly; a
  * source whose page is unknown gets dPage 0 (treated as same-page, harmless for
- * the curated demo where every source page is known). This is the ONE place the
- * Loop-2 seed shape is converted; Loop 4 emits spec-shape shards directly.
+ * the curated demo where every source page is known). Since Loop 4a the ETL
+ * emits spec-shape shards directly (with real page/juz tables); this compiler
+ * remains as the reference conversion for the curated fixture form (tests).
  */
 export function buildShards(
   edition: EditionId,

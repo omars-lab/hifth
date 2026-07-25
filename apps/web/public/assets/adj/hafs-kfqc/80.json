@@ -1,0 +1,45 @@
+{
+  "10": {
+    "edges": [
+      {
+        "type": "mutashabih",
+        "to": "quran/hafs-kfqc/74:53",
+        "page": 577,
+        "dir": {
+          "dSurah": -6,
+          "dPage": -8
+        }
+      }
+    ],
+    "ext": []
+  },
+  "32": {
+    "edges": [
+      {
+        "type": "mutashabih",
+        "to": "quran/hafs-kfqc/79:33",
+        "page": 584,
+        "dir": {
+          "dSurah": -1,
+          "dPage": -1,
+          "sameJuz": true
+        }
+      }
+    ],
+    "ext": []
+  },
+  "35": {
+    "edges": [
+      {
+        "type": "mutashabih",
+        "to": "quran/hafs-kfqc/70:11",
+        "page": 569,
+        "dir": {
+          "dSurah": -10,
+          "dPage": -16
+        }
+      }
+    ],
+    "ext": []
+  }
+}

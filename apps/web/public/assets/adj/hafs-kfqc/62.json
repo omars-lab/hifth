@@ -1,0 +1,49 @@
+{
+  "1": {
+    "edges": [
+      {
+        "type": "mutashabih",
+        "to": "quran/hafs-kfqc/2:128",
+        "page": 20,
+        "dir": {
+          "dSurah": -60,
+          "dPage": -533
+        }
+      },
+      {
+        "type": "mutashabih",
+        "to": "quran/hafs-kfqc/2:150",
+        "page": 23,
+        "dir": {
+          "dSurah": -60,
+          "dPage": -530
+        }
+      },
+      {
+        "type": "mutashabih",
+        "to": "quran/hafs-kfqc/3:163",
+        "page": 71,
+        "dir": {
+          "dSurah": -59,
+          "dPage": -482
+        }
+      }
+    ],
+    "ext": []
+  },
+  "6": {
+    "edges": [
+      {
+        "type": "mutashabih",
+        "to": "quran/hafs-kfqc/2:94",
+        "page": 15,
+        "dir": {
+          "dSurah": -60,
+          "dPage": -538
+        },
+        "ctx": true
+      }
+    ],
+    "ext": []
+  }
+}

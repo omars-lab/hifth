@@ -24,9 +24,35 @@ own license); each is recorded individually rather than assumed.
   **Full 604-page coverage is NOT yet vendored** — Loop 4 vendors and validates the
   complete corpus. See the Loop 0 corpus audit in `docs/decisions/loop-0.md`.
 - **License / usage:** KFGQPC mushaf artwork is distributed by the Complex under its
-  own terms; the quran-svg redistribution terms must be confirmed before public
-  beta. **Status: PROVISIONAL — confirm before Loop 7 (public beta).**
+  own terms; per the 2026-07-25 grounding pass, the
+  [quran-svg repo](https://github.com/quranpedia/quran-svg) declares **CC0 1.0** for
+  its own contributions (ayah-polygon overlay + JSON metadata) and documents KFQC's
+  terms as free use incl. digital/web, with only *printing physical mushafs for
+  commercial sale* reserved to the Complex. (Its Libyan-Endowments editions are
+  non-commercial-only — not applicable to `hafs-kfqc`.)
+  **Status: PROVISIONAL — one primary-source check of KFGQPC's published terms
+  remains before Loop 7 (the repo's summary is secondhand).**
 - **Immutability:** SVG bytes are copied verbatim and never edited (PLAN §8).
+
+---
+
+### mutashabihat-waqar144
+
+- **Name:** Quran Mutashabihat Data — curated similar-ayah (mutashabihat) edges for
+  huffaz, by Waqar Ahmed; based on the work of Qari Idrees Al-Asim (رحمه الله) and
+  the author's own hifz experience.
+- **Provenance:** https://github.com/Waqar144/Quran_Mutashabihat_Data, vendored at
+  commit `f35f6d5d6e7d07f44e6a652d868b298fcd12e318` (2026-03-09), retrieved
+  2026-07-25 → `packages/etl/data/mutashabihat/mutashabiha_data.json`
+  (SHA-256 `785d5efa…780f0`; full details in the adjacent `PROVENANCE.md`).
+- **Shape:** juz-keyed JSON; `src.ayah` / `muts[].ayah` are absolute ayah numbers
+  (1–6236), numbers or arrays (ranges); `ctx: 2` flags show-continuation entries.
+  1,344 entries · 2,448 directed edges at pin.
+- **License (README, verbatim; no LICENSE file):** "The data in this project is
+  free to use as you see fit. However, I would appreciate if you mention the use
+  of this project in your app or any other kind of work if you decide to use this
+  data." → attribution planned in the app's about/credits surface.
+- **Status: VENDORED (Loop 4a) — primary mutashabihat edge source.**
 
 ---
 
@@ -35,10 +61,13 @@ own license); each is recorded individually rather than assumed.
 These are named in the plan for later loops. They are listed here so their license
 review is tracked from the start; no bytes are vendored until the noted loop.
 
-- **Waqar144 mutashabihat dataset** — mutashabihat edges (Loop 4). License: review pending.
-- **QUL (qul.tarteel.ai) layout DB + phrase ranges** — anchor cross-check + phrase
-  edges (Loop 4). License: per-resource on QUL; review each before use.
-- **QurSim** — secondary similarity edges (Loop 4). License: review pending.
+- **QUL (qul.tarteel.ai) layout DB + phrase ranges** — ayah→page table for edge dir
+  bucketing (Loop 4a) + anchor cross-check (Loop 4b). Madani layouts: V1/1405H
+  (id 15), V2/1421H (id 10), V4/1441H (id 19) — pin the print matching quran-svg
+  in Loop 4a. License: per-resource on QUL; review each before use.
+- **QurSim** — *demoted 2026-07-25*: semantic relatedness (Ibn Kathir-derived,
+  graded pairs), not lafẓi mutashabihat, and no canonical download endpoint.
+  Someday-scoped as a reserved `related` edge type; not a Loop 4 source.
 - **Quranic Arabic Corpus / QUL morphology** — root/lemma data for the root lens
   (Loop 5). License: review pending (QAC is CC-BY-SA — attribution required).
 - **quran.com tajweed rule spans** — tajweed skin ETL (Loop 6). License: review pending.
