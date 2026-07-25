@@ -53,17 +53,17 @@ const SHOTS = [
 /**
  * Adjacent polygon pairs to drag the live marquee across.
  *
- * Page 7 only, and not for lack of ambition: the marquee is a viewport-space
- * dashed rect, so a second page would re-photograph the same code path. The
- * shot needs a page with nothing selected on it, and the only link form that
- * gives one — the bare `#/<edition>/p<N>` page — currently updates the header
- * and the mounted set but not the *visible* page (PageStage mounts the initial
- * page once and thereafter follows `navigateTo`, which the `select: null`
- * restore branch never calls). Page 7 is the page the app cold-opens on, so it
- * is the one page where the bare form happens to agree with what is on screen.
- * Worth fixing; not worth encoding the bug into a baseline.
+ * Page 7 only, and not for lack of ambition: the marquee is a dashed rect in
+ * the overlay's coordinate space, so a second page would re-photograph the same
+ * code path. The shot needs a page with nothing selected on it, which is what
+ * the bare `#/<edition>/p<N>` form gives — it used to update the header and the
+ * mounted set without moving the *visible* page, so page 7 was picked because
+ * it is the page the app cold-opens on and therefore the one page where the bug
+ * did not show. That is fixed (`showPage`, 8b39fa2) and deep-link.spec.ts holds
+ * the line, so any page would work now; page 7 stays because a second marquee
+ * baseline would cost bytes and catch nothing.
  */
-const MARQUEES = [{ page: 7, from: "#verse-54", to: "#verse-55" }] as const;
+const MARQUEES = [{ page: 7, from: "#verse-46", to: "#verse-47" }] as const;
 
 /** The visible page's SVG — the only host not `display: none` (PageStage). */
 function stage(page: Page, pageNo: number): Locator {
@@ -107,7 +107,35 @@ async function open(page: Page, hash: string, pageNo: number): Promise<Locator> 
   // harness that flakes on *arrival* teaches people to re-run it.
   await expect(svg).toBeVisible({ timeout: 20_000 });
   await page.addStyleTag({ content: '[role="dialog"] { visibility: hidden !important; }' });
+  await settle(svg);
   return svg;
+}
+
+/**
+ * Wait until the stage stops moving.
+ *
+ * Visible is not the same as still: mounting a page is followed by a centring
+ * tween, and a hop adds a pan on top of it. A shot taken during either one
+ * photographs a frame that depends on how fast the machine got here — which is
+ * how a golden gate turns into a coin flip, and how the same shot ended up
+ * framing different parts of the page on macOS and in the Linux container.
+ * Two consecutive identical boxes is the cheapest honest definition of "at
+ * rest"; the tween moves the box every frame while it runs.
+ */
+async function settle(target: Locator): Promise<void> {
+  let last = "";
+  await expect
+    .poll(
+      async () => {
+        const box = await target.boundingBox();
+        const now = JSON.stringify(box);
+        const stable = now === last;
+        last = now;
+        return stable;
+      },
+      { intervals: [100, 100, 100, 150, 200, 300], timeout: 10_000 },
+    )
+    .toBe(true);
 }
 
 /** Append a skin's query param to a link that may already carry `?via=`. */
@@ -136,14 +164,35 @@ for (const skin of SKINS) {
         expect(from).not.toBeNull();
         expect(to).not.toBeNull();
 
+        // Corner to corner, not centre to centre. The ayah polygons are
+        // line-slabs stacked vertically, so both centres share almost the same
+        // x and the marquee came out a hairline of zero width — a rectangle
+        // with no area is not a photograph of a marquee. Sweeping from the
+        // start of one line to the end of the next is also what a reader's
+        // drag actually looks like.
+        const startX = from!.x + from!.width * 0.9;
+        const endX = to!.x + to!.width * 0.1;
+
         // Hold past LONG_PRESS_MS (350 in @hifth/core) so the stroke latches as
         // a marquee, then stop mid-drag with the button still down: the live
         // dashed rect is only on screen while the finger is.
-        await page.mouse.move(from!.x + from!.width / 2, from!.y + from!.height / 2);
+        await page.mouse.move(startX, from!.y + from!.height / 2);
         await page.mouse.down();
         await page.waitForTimeout(550);
-        await page.mouse.move(to!.x + to!.width / 2, to!.y + to!.height / 2, { steps: 12 });
-        await expect(page.locator("#hifth-overlay rect.hl-marquee")).toHaveCount(1);
+        await page.mouse.move(endX, to!.y + to!.height / 2, { steps: 12 });
+
+        // Existence is not the thing being photographed. The rect is created
+        // the moment the stroke latches, with zero size, and only takes its
+        // geometry from a later pointermove — so `toHaveCount(1)` returns while
+        // there is still nothing to see. Wait for real area instead, or the
+        // baseline records whatever the machine's speed happened to allow.
+        const marquee = page.locator("#hifth-overlay rect.hl-marquee");
+        await expect
+          .poll(async () => {
+            const box = await marquee.boundingBox();
+            return box ? Math.round(box.width * box.height) : 0;
+          })
+          .toBeGreaterThan(1_000);
         await expect(host).toHaveScreenshot(`p${m.page}-marquee-${skin.id}.png`);
         await page.mouse.up();
       });

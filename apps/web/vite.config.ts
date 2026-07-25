@@ -125,4 +125,14 @@ export default defineConfig({
     target: "es2022",
     sourcemap: true,
   },
+  preview: {
+    // `make golden-linux` keeps the preview server on the host (its
+    // node_modules are host-arch) and runs only the browser in the Playwright
+    // Linux container, which reaches back over host.docker.internal. Vite's
+    // preview server rejects unknown Host headers as DNS-rebinding protection,
+    // so that one name has to be named here — the alternative, `true`, would
+    // disable the check outright. This is the preview server only; nothing here
+    // ships, and the production build is static files behind a CDN.
+    allowedHosts: ["host.docker.internal"],
+  },
 });

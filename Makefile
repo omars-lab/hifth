@@ -118,10 +118,16 @@ golden-linux: core ## Run/refresh the CI-shaped (linux) baselines in the Playwri
 	@# host arch. Only the browser runs in the container, reaching back over
 	@# host.docker.internal; HIFTH_BASE_URL is what stops Playwright from trying
 	@# to start a second server inside it. UPDATE=1 rewrites the linux baselines.
+	@#
+	@# --host 0.0.0.0 is required, not incidental: vite preview binds loopback by
+	@# default, so host.docker.internal resolves fine and then refuses the
+	@# connection. It does mean this build is reachable from the local network
+	@# for the seconds the run takes — it is a static preview of a public app,
+	@# and it dies with the trap below.
 	$(WEB) build
 	@set -e; \
 	  trap 'pkill -f "vite preview --port $(PORT)" 2>/dev/null || true' EXIT; \
-	  $(WEB) exec vite preview --port $(PORT) --strictPort >/dev/null 2>&1 & \
+	  $(WEB) exec vite preview --port $(PORT) --strictPort --host 0.0.0.0 >/dev/null 2>&1 & \
 	  until curl -sf http://localhost:$(PORT)/ >/dev/null 2>&1; do sleep 1; done; \
 	  docker run --rm -v "$$PWD:/w" -w /w/apps/web \
 	    --add-host=host.docker.internal:host-gateway \
