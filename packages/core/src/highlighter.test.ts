@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { Highlighter } from "./highlighter.js";
+import { TAP_SLOP_PX } from "./gestures.js";
+import { Highlighter, MARQUEE_MIN_SIZE, rectsIntersect } from "./highlighter.js";
 import { Resolver } from "./resolver.js";
 import type { AssetManifest } from "./types.js";
 
@@ -202,5 +203,212 @@ describe("Highlighter · keyboard a11y (Loop 3)", () => {
       .querySelector("#verse-45")!
       .dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true }));
     expect(cb).not.toHaveBeenCalled();
+  });
+});
+
+/*
+ * Loop 5 — the marquee range. The fixture here is a stack of line-slab polygons
+ * with distinct bboxes (the shape a real mushaf page has: one wide, short
+ * polygon per ayah run), so intersection actually has something to decide.
+ */
+
+const rangeManifest: AssetManifest = {
+  edition: "hafs-kfqc",
+  editionLabel: "Hafs (test)",
+  pages: [
+    {
+      edition: "hafs-kfqc",
+      page: 7,
+      viewBox: "0 0 345 550",
+      polygons: [
+        { elementId: "verse-1", number: 2041, surah: 2, ayah: 41, key: "quran/hafs-kfqc/2:41" },
+        { elementId: "verse-2", number: 2042, surah: 2, ayah: 42, key: "quran/hafs-kfqc/2:42" },
+        { elementId: "verse-3", number: 2043, surah: 2, ayah: 43, key: "quran/hafs-kfqc/2:43" },
+        { elementId: "verse-4", number: 2044, surah: 2, ayah: 44, key: "quran/hafs-kfqc/2:44" },
+      ],
+    },
+  ],
+};
+
+/** Four stacked line slabs: y = 0..20, 20..40, 40..60, 60..80, all 300 wide. */
+function makeRangeSvg(): SVGSVGElement {
+  const NS = "http://www.w3.org/2000/svg";
+  const svg = document.createElementNS(NS, "svg");
+  svg.setAttribute("viewBox", "0 0 345 550");
+  ["verse-1", "verse-2", "verse-3", "verse-4"].forEach((id, i) => {
+    const poly = document.createElementNS(NS, "polygon");
+    poly.setAttribute("id", id);
+    poly.setAttribute("class", "ayahPolygon");
+    const box = { x: 20, y: i * 20, width: 300, height: 20 } as DOMRect;
+    (poly as unknown as { getBBox: () => DOMRect }).getBBox = () => box;
+    svg.appendChild(poly);
+  });
+  document.body.appendChild(svg);
+  return svg;
+}
+
+describe("rectsIntersect", () => {
+  const a = { x: 0, y: 0, width: 10, height: 10 };
+
+  it("overlapping rects intersect", () => {
+    expect(rectsIntersect(a, { x: 5, y: 5, width: 10, height: 10 })).toBe(true);
+  });
+
+  it("a contained rect intersects (either way round)", () => {
+    const inner = { x: 2, y: 2, width: 3, height: 3 };
+    expect(rectsIntersect(a, inner)).toBe(true);
+    expect(rectsIntersect(inner, a)).toBe(true);
+  });
+
+  it("edge-sharing rects do NOT intersect — line slabs must not bleed", () => {
+    expect(rectsIntersect(a, { x: 10, y: 0, width: 10, height: 10 })).toBe(false);
+    expect(rectsIntersect(a, { x: 0, y: 10, width: 10, height: 10 })).toBe(false);
+  });
+
+  it("separated rects do not intersect", () => {
+    expect(rectsIntersect(a, { x: 11, y: 0, width: 10, height: 10 })).toBe(false);
+  });
+});
+
+describe("Highlighter · marquee range (Loop 5)", () => {
+  let svg: SVGSVGElement;
+  let hl: Highlighter;
+  const resolver = new Resolver(rangeManifest);
+
+  beforeEach(() => {
+    document.body.innerHTML = "";
+    svg = makeRangeSvg();
+    hl = new Highlighter(svg, resolver, 7);
+  });
+
+  it("resolves a sweep across two line slabs to those two ayahs", () => {
+    const range = hl.rangeFromRect({ x: 30, y: 15, width: 200, height: 15 });
+    expect(range).not.toBeNull();
+    expect(range!.fromKey).toBe("quran/hafs-kfqc/2:41");
+    expect(range!.toKey).toBe("quran/hafs-kfqc/2:42");
+    expect(range!.keys).toEqual(["quran/hafs-kfqc/2:41", "quran/hafs-kfqc/2:42"]);
+  });
+
+  it("fills the contiguous run between the endpoints", () => {
+    // A tall thin marquee down the right margin crosses all four slabs.
+    const range = hl.rangeFromRect({ x: 300, y: 5, width: 5, height: 70 });
+    expect(range!.keys).toHaveLength(4);
+    expect(range!.fromKey).toBe("quran/hafs-kfqc/2:41");
+    expect(range!.toKey).toBe("quran/hafs-kfqc/2:44");
+  });
+
+  it("a hold-and-release with no drag resolves to the single ayah under it", () => {
+    const range = hl.rangeFromRect({ x: 100, y: 50, width: 0, height: 0 });
+    expect(range).toEqual({
+      fromKey: "quran/hafs-kfqc/2:43",
+      toKey: "quran/hafs-kfqc/2:43",
+      keys: ["quran/hafs-kfqc/2:43"],
+    });
+    expect(MARQUEE_MIN_SIZE).toBeGreaterThan(0);
+  });
+
+  it("a marquee entirely in the margin resolves to nothing", () => {
+    expect(hl.rangeFromRect({ x: 0, y: 200, width: 10, height: 10 })).toBeNull();
+  });
+
+  it("a marquee grazing a slab's edge does not pick it up", () => {
+    // y = 20 is exactly where slab 1 ends and slab 2 begins.
+    const range = hl.rangeFromRect({ x: 30, y: 20, width: 100, height: 10 });
+    expect(range!.keys).toEqual(["quran/hafs-kfqc/2:42"]);
+  });
+
+  it("paints the range wash in the phrase group without touching selection", () => {
+    hl.highlight("quran/hafs-kfqc/2:41", "sel", "selection");
+    const range = hl.rangeFromRect({ x: 30, y: 5, width: 200, height: 50 })!;
+    hl.highlightRange(range.keys, "hlt", "phrase");
+    const overlay = svg.querySelector("#hifth-overlay")!;
+    expect(overlay.querySelectorAll("[data-hl-group='phrase']")).toHaveLength(3);
+    expect(overlay.querySelectorAll(".hl-hlt")).toHaveLength(3);
+    // The selection group is untouched by the wash.
+    expect(overlay.querySelectorAll("[data-hl-group='selection']")).toHaveLength(1);
+    // …and the source polygons are still pristine.
+    expect(svg.querySelectorAll("polygon[id]")).toHaveLength(4);
+  });
+
+  it("re-painting the range replaces it, and clear() removes it", () => {
+    hl.highlightRange(["quran/hafs-kfqc/2:41", "quran/hafs-kfqc/2:42"], "hlt", "phrase");
+    hl.highlightRange(["quran/hafs-kfqc/2:43"], "hlt", "phrase");
+    const overlay = svg.querySelector("#hifth-overlay")!;
+    expect(overlay.querySelectorAll("[data-hl-group='phrase']")).toHaveLength(1);
+    hl.clear("phrase");
+    expect(overlay.querySelectorAll("[data-hl-group='phrase']")).toHaveLength(0);
+  });
+
+  it("skips keys that are not on this page", () => {
+    hl.highlightRange(["quran/hafs-kfqc/2:41", "quran/hafs-kfqc/9:1"], "hlt", "phrase");
+    expect(
+      svg.querySelector("#hifth-overlay")!.querySelectorAll("[data-hl-group='phrase']"),
+    ).toHaveLength(1);
+  });
+
+  it("draws the live marquee rect into the preview group and replaces it per frame", () => {
+    hl.drawMarquee({ x: 10, y: 10, width: 100, height: 40 });
+    const overlay = svg.querySelector("#hifth-overlay")!;
+    const rect = overlay.querySelector("rect.hl-marquee")!;
+    expect(rect.getAttribute("x")).toBe("10");
+    expect(rect.getAttribute("width")).toBe("100");
+    hl.drawMarquee({ x: 12, y: 10, width: 120, height: 40 });
+    expect(overlay.querySelectorAll("rect.hl-marquee")).toHaveLength(1);
+    expect(overlay.querySelector("rect.hl-marquee")!.getAttribute("width")).toBe("120");
+    hl.clear("preview");
+    expect(overlay.querySelectorAll("rect.hl-marquee")).toHaveLength(0);
+  });
+
+  it("the marquee rect never gets a negative size attribute", () => {
+    hl.drawMarquee({ x: 10, y: 10, width: -5, height: -5 });
+    const rect = svg.querySelector("rect.hl-marquee")!;
+    expect(rect.getAttribute("width")).toBe("0");
+    expect(rect.getAttribute("height")).toBe("0");
+  });
+});
+
+describe("Highlighter · a drag release is not a tap (Loop 5)", () => {
+  let svg: SVGSVGElement;
+  let hl: Highlighter;
+  const resolver = new Resolver(rangeManifest);
+
+  beforeEach(() => {
+    document.body.innerHTML = "";
+    svg = makeRangeSvg();
+    hl = new Highlighter(svg, resolver, 7);
+  });
+
+  /** MouseEvent carries clientX/clientY; the listener only cares about the name. */
+  function press(el: Element, type: string, x: number, y: number): void {
+    el.dispatchEvent(new MouseEvent(type, { clientX: x, clientY: y, bubbles: true }));
+  }
+
+  it("selects when the finger barely moved (within the gesture slop)", () => {
+    const cb = vi.fn();
+    hl.onSelect(cb);
+    const poly = svg.querySelector("#verse-2")!;
+    press(poly, "pointerdown", 100, 100);
+    press(poly, "pointerup", 100 + TAP_SLOP_PX, 100);
+    expect(cb).toHaveBeenCalledWith("quran/hafs-kfqc/2:42", "ayah");
+  });
+
+  it("does not select when the release ends a pan or a marquee", () => {
+    const cb = vi.fn();
+    hl.onSelect(cb);
+    const poly = svg.querySelector("#verse-2")!;
+    press(poly, "pointerdown", 100, 100);
+    press(poly, "pointerup", 100 + TAP_SLOP_PX + 1, 100);
+    expect(cb).not.toHaveBeenCalled();
+  });
+
+  it("forgets the press point after a release, so the next tap is judged fresh", () => {
+    const cb = vi.fn();
+    hl.onSelect(cb);
+    const poly = svg.querySelector("#verse-2")!;
+    press(poly, "pointerdown", 100, 100);
+    press(poly, "pointerup", 400, 400); // a pan — no select
+    press(poly, "pointerup", 100, 100); // a stray release with no press
+    expect(cb).toHaveBeenCalledTimes(1);
+    expect(cb).toHaveBeenCalledWith("quran/hafs-kfqc/2:42", "ayah");
   });
 });

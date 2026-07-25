@@ -11,9 +11,13 @@ import {
   clampZoom,
   easeInOutCubic,
   frameBboxToView,
+  isViewportIntent,
   lerpView,
+  marqueeRect,
+  nextIntent,
   Highlighter,
   DEFAULT_HOP_ZOOM,
+  type PointerIntent,
   type Resolver,
   type View,
 } from "@hifth/core";
@@ -34,6 +38,12 @@ interface PageStageProps {
   breadcrumbKey: string | null;
   /** Fired when the user taps an ayah polygon. */
   onSelect: (key: string) => void;
+  /**
+   * Fired when a marquee drag releases over ayahs (spec §3 `onRangeSelect`).
+   * `keys` is the contiguous run the highlighter resolved, in reading order;
+   * `fromKey`/`toKey` are its endpoints — the range link form (spec §7).
+   */
+  onSelectRange?: (fromKey: string, toKey: string, keys: readonly string[]) => void;
   /** Human label for an ayah key (surah name), for per-polygon aria-label. */
   labelFor: (key: string) => string;
   /** Fired with the selected ayah's on-screen bbox so the rail can position. */
@@ -74,6 +84,7 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
     selectedKey,
     breadcrumbKey,
     onSelect,
+    onSelectRange,
     labelFor,
     onSelectionRect,
   },
@@ -88,6 +99,8 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
   // Latest callbacks without retriggering effects.
   const onSelectRef = useRef(onSelect);
   onSelectRef.current = onSelect;
+  const onSelectRangeRef = useRef(onSelectRange);
+  onSelectRangeRef.current = onSelectRange;
   const labelForRef = useRef(labelFor);
   labelForRef.current = labelFor;
   const onSelectionRectRef = useRef(onSelectionRect);
@@ -95,6 +108,11 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
 
   // The one imperative transform. Gestures and the hop tween both write here.
   const view = useRef<View>({ x: 0, y: 0, z: 1 });
+  // What the current stroke turned out to mean, latched by `nextIntent` (core
+  // gestures.ts), plus where a marquee started in SVG user units. Refs, not
+  // state: a gesture must never cost a render.
+  const intentRef = useRef<PointerIntent>("none");
+  const marqueeStartRef = useRef<{ x: number; y: number } | null>(null);
   const tweenRef = useRef<number | null>(null);
   const startTimeRef = useRef<number | null>(null);
 
@@ -327,8 +345,14 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
     if (status !== "ready") return;
     const cur = pagesRef.current.get(currentPageRef.current);
     if (!cur) return;
-    if (selectedKey) cur.hl.highlight(selectedKey, "sel", "selection");
-    else cur.hl.clear("selection");
+    if (selectedKey) {
+      cur.hl.highlight(selectedKey, "sel", "selection");
+      // A tap replaces a highlight (App keeps the two mutually exclusive), so
+      // the range wash goes with it — otherwise the page would show two answers.
+      cur.hl.clear("phrase");
+    } else {
+      cur.hl.clear("selection");
+    }
     emitSelectionRect();
   }, [selectedKey, status, emitSelectionRect]);
 
@@ -342,26 +366,108 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
     if (mp) mp.hl.highlight(breadcrumbKey, "crumb", "breadcrumb");
   }, [breadcrumbKey, status, resolver]);
 
-  // Pan (drag) + zoom (pinch) on one surface. Any gesture frame first cancels an
-  // in-flight hop tween so the finger cleanly takes over (single write path).
+  /**
+   * A marquee released: turn the rectangle into an ayah range, wash it, and tell
+   * L3. A drag that crossed no ayah (the margins) clears the wash and says
+   * nothing — an empty range is not a selection, it is a miss.
+   */
+  const commitMarquee = useCallback(
+    (fromPoint: { x: number; y: number }, clientX: number, clientY: number) => {
+      const cur = pagesRef.current.get(currentPageRef.current);
+      if (!cur) return;
+      cur.hl.clear("preview");
+      const toPoint = cur.hl.svgPointFromClient(clientX, clientY);
+      const range = toPoint ? cur.hl.rangeFromRect(marqueeRect(fromPoint, toPoint)) : null;
+      if (!range) {
+        cur.hl.clear("phrase");
+        return;
+      }
+      cur.hl.highlightRange(range.keys, "hlt", "phrase");
+      onSelectRangeRef.current?.(range.fromKey, range.toKey, range.keys);
+    },
+    [],
+  );
+
+  // Pan (drag) + zoom (pinch) + marquee (drag-to-highlight) on one surface. Any
+  // gesture frame first cancels an in-flight hop tween so the finger cleanly
+  // takes over (single write path).
+  //
+  // The three-way split is core's `nextIntent` (see gestures.ts for the
+  // thresholds and why): move-first pans, hold-first paints, two fingers zoom,
+  // and whichever wins owns the whole stroke. The stage only *acts* on the
+  // verdict — it must not re-decide per frame, or a stroke would change meaning
+  // mid-way. `touch-action: none` on the stage (PageStage.module.css) is what
+  // makes any of this reachable: without it the browser fires pointercancel and
+  // native-scrolls out from under the gesture (research §4).
   useGesture(
     {
-      onDrag: ({ movement: [mx, my], pinching, cancel, memo, first }) => {
+      onDrag: ({ movement: [mx, my], xy: [cx, cy], initial: [ix, iy], elapsedTime, pinching, cancel, memo, first, last }) => {
         if (pinching) {
           cancel();
           return memo;
         }
-        if (first) cancelTween();
+        if (first) {
+          cancelTween();
+          intentRef.current = "none";
+          marqueeStartRef.current = null;
+        }
+        // Capture the pan origin on the first frame whatever the intent turns
+        // out to be, so a pan that latches 8px in doesn't jump by 8px.
         const base = (memo as { x: number; y: number } | undefined) ?? {
           x: view.current.x,
           y: view.current.y,
         };
-        view.current.x = base.x + mx;
-        view.current.y = base.y + my;
-        applyTransform();
+
+        // Classify on the *raw* displacement (xy − initial), not on `movement`:
+        // @use-gesture subtracts its own tap threshold from `movement`, which is
+        // exactly what the pan transform wants (no jump when the drag latches)
+        // and exactly what the intent split must not see (it would shrink the
+        // slop radius by 3px behind our backs).
+        const intent = nextIntent(intentRef.current, {
+          pointers: 1,
+          elapsedMs: elapsedTime,
+          dx: cx - ix,
+          dy: cy - iy,
+        });
+        intentRef.current = intent;
+
+        if (intent === "marquee") {
+          const cur = pagesRef.current.get(currentPageRef.current);
+          if (!cur) return base;
+          // The page does not move during a marquee, so the CTM is stable and
+          // the start point can be resolved lazily from the press coordinates.
+          marqueeStartRef.current ??= cur.hl.svgPointFromClient(ix, iy);
+          const start = marqueeStartRef.current;
+          if (!start) return base;
+          if (last) {
+            commitMarquee(start, cx, cy);
+            marqueeStartRef.current = null;
+            return base;
+          }
+          const now = cur.hl.svgPointFromClient(cx, cy);
+          if (now) cur.hl.drawMarquee(marqueeRect(start, now));
+          return base;
+        }
+
+        // Below both thresholds this is still a tap: hold the page perfectly
+        // still so a select never nudges the page under the finger.
+        if (isViewportIntent(intent)) {
+          view.current.x = base.x + mx;
+          view.current.y = base.y + my;
+          applyTransform();
+        }
         return base;
       },
-      onDragEnd: emitSelectionRect,
+      onDragEnd: () => {
+        // An interrupted marquee (a second finger landed, the drag was
+        // cancelled) leaves its rect on the page — drop it, emit nothing.
+        if (marqueeStartRef.current) {
+          pagesRef.current.get(currentPageRef.current)?.hl.clear("preview");
+        }
+        intentRef.current = "none";
+        marqueeStartRef.current = null;
+        emitSelectionRect();
+      },
       onPinch: ({ origin: [ox, oy], movement: [ms], memo, first }) => {
         const stage = stageRef.current;
         if (!stage) return memo;
@@ -394,7 +500,13 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
   );
 
   return (
-    <div ref={stageRef} className={styles.stage}>
+    <div
+      ref={stageRef}
+      className={styles.stage}
+      // A long press IS a gesture here (it arms the marquee), so the platform's
+      // own long-press menu would fight it on every highlight.
+      onContextMenu={(e) => e.preventDefault()}
+    >
       <span id={`page-label-${page}`} className="sr-only">
         {label}
       </span>

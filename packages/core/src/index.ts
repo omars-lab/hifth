@@ -93,3 +93,32 @@ export {
   type CuratedEdge,
   type CuratedAdjacency,
 } from "./adjacency.js";
+
+// Loop 5 — merged range adjacency (spec §9 highlight menu).
+export {
+  mergeRangeEdges,
+  type MergedEdge,
+  type RangeSource,
+} from "./adjacency.js";
+
+// Loop 5 — the drag-to-highlight gesture split (pan vs marquee vs pinch) and
+// the range side of the highlighter it feeds.
+export {
+  LONG_PRESS_MS,
+  TAP_SLOP_PX,
+  PINCH_POINTER_COUNT,
+  pointerIntent,
+  nextIntent,
+  movementDistance,
+  isMarqueeIntent,
+  isViewportIntent,
+  marqueeRect,
+  type PointerIntent,
+  type PointerSample,
+} from "./gestures.js";
+
+export {
+  MARQUEE_MIN_SIZE,
+  rectsIntersect,
+  type ResolvedRange,
+} from "./highlighter.js";

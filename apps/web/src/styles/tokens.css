@@ -31,6 +31,17 @@
   --highlight-wash: rgba(232, 161, 58, 0.24);
   --highlight-ring: rgba(232, 161, 58, 0.85);
 
+  /* Range highlight (Loop 5 drag-to-highlight) — the SAME amber, one step
+     quieter than the selection wash. A range is a passage you painted, not the
+     ayah you are on; it must read as one gesture's worth of colour under a
+     selection that still has to win. The marquee is the rectangle in flight:
+     nearly no fill (scripture stays legible while the finger crosses it) and a
+     dashed ring, the universal "this is a lasso, not a result". */
+  --range-wash: rgba(232, 161, 58, 0.15);
+  --range-ring: rgba(232, 161, 58, 0.45);
+  --marquee-fill: rgba(232, 161, 58, 0.07);
+  --marquee-ring: rgba(232, 161, 58, 0.75);
+
   /* Feedback */
   --danger: #a23b2c;
 

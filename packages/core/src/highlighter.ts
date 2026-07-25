@@ -11,19 +11,42 @@
  * resolver says *which* elements carry a key, this reads *where* they are.
  *
  * Loop 1 scope: `highlight`/`clear`/`resolve` (bbox), `onSelect` on tap, and the
- * skin swap. `navigateTo` pan/zoom and range-select live with the PageStage
- * transform in L3-adjacent code for now; the pure geometry helpers they need
- * (`bboxOf`, `svgPointFromClient`) are exported here so there is still one owner
- * of SVG math.
+ * skin swap. `navigateTo` pan/zoom lives with the PageStage transform in
+ * L3-adjacent code for now; the pure geometry helpers it needs (`bboxOf`,
+ * `svgPointFromClient`) are exported here so there is still one owner of SVG math.
+ *
+ * Loop 5 adds the range side of spec §3's `onRangeSelect`: `rangeFromRect` turns
+ * a marquee rectangle into the ayahs it crossed, and `highlightRange` /
+ * `drawMarquee` paint the amber wash and the live rect — both additive, both in
+ * their own groups, both leaving source geometry untouched like everything else.
  */
 
+import { TAP_SLOP_PX } from "./gestures.js";
 import type { Resolver } from "./resolver.js";
 
 const SVG_NS = "http://www.w3.org/2000/svg";
 const OVERLAY_ID = "hifth-overlay";
 
 export type GroupId = "selection" | "phrase" | "breadcrumb" | "preview";
-export type StyleToken = "sel" | "crumb" | "hlt" | "preview";
+export type StyleToken = "sel" | "crumb" | "hlt" | "preview" | "marquee";
+
+/**
+ * A marquee that resolved to ayahs. `keys` is the contiguous run in page reading
+ * order; `fromKey`/`toKey` are its endpoints — the range form spec §7 links use.
+ */
+export interface ResolvedRange {
+  readonly fromKey: string;
+  readonly toKey: string;
+  readonly keys: readonly string[];
+}
+
+/**
+ * A press with no drag is a zero-area rect, and a zero-area rect intersects
+ * nothing. Inflate a degenerate marquee to this size (SVG user units — the
+ * Madani page is 345 wide, so this is well under a glyph) so "hold and release
+ * on one ayah" resolves to that ayah instead of to silence.
+ */
+export const MARQUEE_MIN_SIZE = 0.5;
 
 /** L3 supplies the human-readable label for a key (surah names live in L3). */
 export type LabelFor = (key: string) => string;
@@ -63,6 +86,33 @@ function unionRects(rects: readonly Rect[]): Rect | null {
   return { x: minX, y: minY, width: maxX - minX, height: maxY - minY };
 }
 
+/**
+ * Do two rects overlap with positive area? Strict on every edge: a marquee that
+ * merely grazes the boundary of the next ayah's polygon has not touched it, and
+ * on a mushaf page the polygons of neighbouring lines share edges — an inclusive
+ * test would drag in a whole extra line for a one-pixel overshoot.
+ */
+export function rectsIntersect(a: Rect, b: Rect): boolean {
+  return (
+    a.x < b.x + b.width &&
+    b.x < a.x + a.width &&
+    a.y < b.y + b.height &&
+    b.y < a.y + a.height
+  );
+}
+
+/** Grow a degenerate marquee to {@link MARQUEE_MIN_SIZE} so it can hit something. */
+function inflateDegenerate(rect: Rect): Rect {
+  const width = Math.max(rect.width, MARQUEE_MIN_SIZE);
+  const height = Math.max(rect.height, MARQUEE_MIN_SIZE);
+  return {
+    x: rect.x - (width - rect.width) / 2,
+    y: rect.y - (height - rect.height) / 2,
+    width,
+    height,
+  };
+}
+
 export class Highlighter {
   private readonly svg: SVGSVGElement;
   private readonly resolver: Resolver;
@@ -72,8 +122,11 @@ export class Highlighter {
   /** group → the clones/rects currently drawn for it, so clear() is exact. */
   private readonly drawn = new Map<GroupId, SVGElement[]>();
   private readonly labelFor: LabelFor | undefined;
+  private readonly onPolygonPointerDown: (e: PointerEvent) => void;
   private readonly onPolygonPointerUp: (e: PointerEvent) => void;
   private readonly onPolygonKeyDown: (e: KeyboardEvent) => void;
+  /** Where the current press started, so a release can tell a tap from a drag. */
+  private pressAt: { x: number; y: number } | null = null;
 
   constructor(svg: SVGSVGElement, resolver: Resolver, page: number, opts?: { labelFor?: LabelFor }) {
     this.svg = svg;
@@ -84,7 +137,27 @@ export class Highlighter {
 
     // Glyph paths must not eat pointer events; polygons take all hits (asset
     // README + spec §3). Tapping a polygon fires onSelect with its ayah key.
+    //
+    // A *tap* — not any release. The stage's pan and marquee gestures both end
+    // with a pointerup over some polygon, and this listener sits below them in
+    // the bubble path (polygon → svg → … → the document listeners @use-gesture
+    // binds), so it cannot be told after the fact to stay quiet. It measures the
+    // travel itself instead: past the gestures' own slop radius, the release
+    // belongs to a drag and selects nothing.
+    this.onPolygonPointerDown = (e: PointerEvent) => {
+      this.pressAt =
+        typeof e.clientX === "number" && typeof e.clientY === "number"
+          ? { x: e.clientX, y: e.clientY }
+          : null;
+    };
+    svg.addEventListener("pointerdown", this.onPolygonPointerDown);
+
     this.onPolygonPointerUp = (e: PointerEvent) => {
+      const press = this.pressAt;
+      this.pressAt = null;
+      if (press && typeof e.clientX === "number" && typeof e.clientY === "number") {
+        if (Math.hypot(e.clientX - press.x, e.clientY - press.y) > TAP_SLOP_PX) return;
+      }
       const key = this.keyForEventTarget(e.target);
       if (!key) return;
       for (const cb of this.selectCbs) cb(key, "ayah");
@@ -222,6 +295,111 @@ export class Highlighter {
     this.drawn.set(group, []);
   }
 
+  /**
+   * Paint several keys at once in one group — the marquee's amber wash over a
+   * whole passage (spec §9). Same additive contract as `highlight`: clones into
+   * the overlay, source geometry untouched, the group replaced not stacked.
+   * Keys not on this page are skipped (a range can't straddle a page turn).
+   */
+  highlightRange(keys: readonly string[], style: StyleToken, group: GroupId): void {
+    this.clear(group);
+    const drawn: SVGElement[] = [];
+    for (const key of keys) {
+      const loc = this.resolver.resolve(key);
+      if (!loc || loc.page !== this.page) continue;
+      for (const id of loc.elementIds) {
+        const src = this.svg.querySelector<SVGElement>(`#${cssEscape(id)}`);
+        if (!src) continue;
+        const clone = src.cloneNode(true) as SVGElement;
+        clone.removeAttribute("id");
+        clone.setAttribute("class", `hl hl-${style}`);
+        clone.setAttribute("data-hl-group", group);
+        clone.style.pointerEvents = "none";
+        this.overlay.appendChild(clone);
+        drawn.push(clone);
+      }
+    }
+    this.drawn.set(group, drawn);
+  }
+
+  /**
+   * Draw the live marquee rectangle (SVG user units) in the `preview` group —
+   * the outline the finger is dragging, replaced every frame. It is a plain
+   * `<rect>` in the overlay, so it scales with the page transform for free.
+   */
+  drawMarquee(rect: Rect): void {
+    this.clear("preview");
+    const el = document.createElementNS(SVG_NS, "rect");
+    el.setAttribute("x", String(rect.x));
+    el.setAttribute("y", String(rect.y));
+    el.setAttribute("width", String(Math.max(0, rect.width)));
+    el.setAttribute("height", String(Math.max(0, rect.height)));
+    el.setAttribute("class", "hl hl-marquee");
+    el.setAttribute("data-hl-group", "preview");
+    el.style.pointerEvents = "none";
+    this.overlay.appendChild(el);
+    this.drawn.set("preview", [el]);
+  }
+
+  /**
+   * Every ayah key whose polygon geometry the rect crosses, in page reading
+   * order. Bbox-against-bbox is the honest resolution the ayah-polygon corpus
+   * affords: polygons are line-slabs, so a sweep along a line catches that
+   * line's ayahs. Word granularity waits on Loop 4b's ligature corpus (spec §3
+   * note); until then the highlighter reports ayahs.
+   */
+  keysInRect(rect: Rect): string[] {
+    const marquee = inflateDegenerate(rect);
+    const keys: string[] = [];
+    const seen = new Set<string>();
+    for (const poly of this.polygons()) {
+      const el = poly as unknown as SVGGraphicsElement;
+      if (typeof el.getBBox !== "function") continue;
+      const b = el.getBBox();
+      if (!rectsIntersect(marquee, { x: b.x, y: b.y, width: b.width, height: b.height })) {
+        continue;
+      }
+      const key = this.keyForElement(poly);
+      if (!key || seen.has(key)) continue;
+      seen.add(key);
+      keys.push(key);
+    }
+    return keys;
+  }
+
+  /**
+   * Resolve a marquee to the ayah range it selected, or null if it crossed no
+   * ayah at all (a drag over the margins). The returned `keys` are the
+   * *contiguous* run between the endpoints in page reading order, not the raw
+   * intersection: a passage a hand swept across is a passage, and the range link
+   * form (spec §7) can only express `from..to` anyway — so a skipped ayah in the
+   * middle would be a range whose highlight and whose URL disagree.
+   */
+  rangeFromRect(rect: Rect): ResolvedRange | null {
+    const hit = this.keysInRect(rect);
+    const fromKey = hit[0];
+    const toKey = hit[hit.length - 1];
+    if (!fromKey || !toKey) return null;
+    const order = this.keysOnPage();
+    const first = order.indexOf(fromKey);
+    const last = order.indexOf(toKey);
+    const keys = first >= 0 && last >= first ? order.slice(first, last + 1) : hit;
+    return { fromKey, toKey, keys };
+  }
+
+  /** The ayah keys on this page in document (= reading) order, deduped. */
+  private keysOnPage(): string[] {
+    const keys: string[] = [];
+    const seen = new Set<string>();
+    for (const poly of this.polygons()) {
+      const key = this.keyForElement(poly);
+      if (!key || seen.has(key)) continue;
+      seen.add(key);
+      keys.push(key);
+    }
+    return keys;
+  }
+
   /** Subscribe to tap-selects. Returns an unsubscribe fn. */
   onSelect(cb: SelectCb): () => void {
     this.selectCbs.push(cb);
@@ -250,6 +428,7 @@ export class Highlighter {
 
   /** Detach listeners and remove all overlay content. */
   destroy(): void {
+    this.svg.removeEventListener("pointerdown", this.onPolygonPointerDown);
     this.svg.removeEventListener("pointerup", this.onPolygonPointerUp);
     this.svg.removeEventListener("keydown", this.onPolygonKeyDown);
     for (const group of this.drawn.keys()) this.clear(group as GroupId);

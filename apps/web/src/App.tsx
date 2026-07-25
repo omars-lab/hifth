@@ -8,7 +8,10 @@ import {
   type AdjacencyShard,
   type AppState,
   type AssetManifest,
+  type AyahRange,
+  type AyahRef,
   type Edge,
+  type MergedEdge,
   type RailChip,
 } from "@hifth/core";
 import { loadManifest, loadShard } from "./assets";
@@ -17,6 +20,7 @@ import { useHashRouter } from "./useHashRouter";
 import { PageStage, type PageStageHandle } from "./components/PageStage";
 import { HopRail } from "./components/HopRail";
 import { HopPopover } from "./components/HopPopover";
+import { HighlightMenu } from "./components/HighlightMenu";
 import { TrailBeads, type TrailBead } from "./components/TrailBeads";
 import { ShareSheet } from "./components/ShareSheet";
 import { InstallButton } from "./components/InstallButton";
@@ -27,6 +31,28 @@ import styles from "./App.module.css";
 // Loop 3; here the page follows the selection through hops.
 const START_PAGE = 7;
 
+/** `quran/…/2:47` → its spec-§7 ref, or null if it is not a bare ayah key. */
+function refOf(key: string): AyahRef | null {
+  const parsed = parseAyahKey(key);
+  return parsed ? { surah: parsed.surah, ayah: parsed.ayah } : null;
+}
+
+/**
+ * The §7 `select` for a highlighted range: first→last ayah of the range's surah
+ * (`2:47-2:48`). A one-ayah highlight degrades to the plain ayah form — there is
+ * only one canonical link for it — and members outside the opening surah are
+ * ignored, since the grammar's range form does not cross surahs.
+ */
+function rangeSelect(keys: readonly string[]): AyahRef | AyahRange | null {
+  const refs = keys.map(refOf).filter((r): r is AyahRef => r !== null);
+  if (refs.length === 0) return null;
+  const surah = refs[0]!.surah;
+  const ayahs = refs.filter((r) => r.surah === surah).map((r) => r.ayah);
+  const from = Math.min(...ayahs);
+  const to = Math.max(...ayahs);
+  return to > from ? { surah, ayah: from, toAyah: to } : { surah, ayah: from };
+}
+
 export function App(): JSX.Element {
   const [manifest, setManifest] = useState<AssetManifest | null>(null);
   // Adjacency shards, fetched on demand and cached for the session (Loop 4a:
@@ -34,6 +60,11 @@ export function App(): JSX.Element {
   const [shards, setShards] = useState<ReadonlyMap<number, AdjacencyShard>>(new Map());
   const [page, setPage] = useState(START_PAGE);
   const [selectedKey, setSelectedKey] = useState<string | null>(null);
+  // The drag-highlighted passage: its ayah keys in reading order (spec §3's
+  // `onRangeSelect` payload), or null. Mutually exclusive with `selectedKey` —
+  // a highlight replaces a selection and vice versa, so exactly one hop list
+  // can be open at a time.
+  const [selectedRange, setSelectedRange] = useState<readonly string[] | null>(null);
   const [trail, setTrail] = useState<TrailBead[]>([]);
   const [openDirection, setOpenDirection] = useState<RailChip["direction"] | null>(null);
 
@@ -87,11 +118,27 @@ export function App(): JSX.Element {
     if (surah) ensureShard(surah);
   }, [selectedKey, ensureShard]);
 
+  // …and for every surah the highlighted range touches (a range never spans
+  // surahs today, but the loop costs nothing and is honest about the shape).
+  useEffect(() => {
+    if (!selectedRange) return;
+    for (const key of selectedRange) {
+      const surah = parseAyahKey(key)?.surah;
+      if (surah) ensureShard(surah);
+    }
+  }, [selectedRange, ensureShard]);
 
   // Rail chips for the current selection (empty when nothing selected / no hops).
   const chips = useMemo(
     () => (adjacency && selectedKey ? adjacency.chipsForKey(selectedKey) : []),
     [adjacency, selectedKey],
+  );
+
+  // The highlighted range's merged hop list (spec §9): every member's edges,
+  // deduped by (target, type), hifz-ordered, each row naming its source ayah.
+  const rangeHops = useMemo(
+    () => (adjacency && selectedRange ? adjacency.hopsForRange(selectedRange) : []),
+    [adjacency, selectedRange],
   );
 
   // Whether a hop target's page is vendored (drives the disabled state, Plan Q6).
@@ -104,14 +151,13 @@ export function App(): JSX.Element {
   // targets, so a hop's tween has both endpoints ready (spec DOM budget).
   const mountedPages = useMemo(() => {
     const pages = new Set<number>([page]);
-    if (adjacency && selectedKey) {
-      for (const edge of adjacency.hopsForKey(selectedKey)) {
-        const loc = resolver?.resolve(edge.to);
-        if (loc) pages.add(loc.page);
-      }
+    const hops = adjacency && selectedKey ? adjacency.hopsForKey(selectedKey) : [];
+    for (const edge of [...hops, ...rangeHops]) {
+      const loc = resolver?.resolve(edge.to);
+      if (loc) pages.add(loc.page);
     }
     return [...pages];
-  }, [page, adjacency, selectedKey, resolver]);
+  }, [page, adjacency, selectedKey, rangeHops, resolver]);
 
   // Prefetch shards for every surah visible on a mounted page, so the rail is
   // ready the moment an ayah is tapped (4b widens this to hop targets as
@@ -134,6 +180,7 @@ export function App(): JSX.Element {
   const handleSelect = useCallback(
     (key: string) => {
       setOpenDirection(null);
+      setSelectedRange(null); // a tap replaces a highlight — never both at once
       const toggledOff = selectedKeyRef.current === key;
       setSelectedKey(toggledOff ? null : key);
       announce(toggledOff ? "أُلغي التحديد" : `حُدّدت ${ayahLabel(key) ?? key}`);
@@ -141,18 +188,39 @@ export function App(): JSX.Element {
     [announce],
   );
 
+  // A marquee released over ayahs (Loop 5). The passage replaces the selection —
+  // one open hop list at a time — and the stage keeps the amber wash while L3
+  // holds the keys the merged hop list is built from.
+  const handleSelectRange = useCallback(
+    (fromKey: string, toKey: string, keys: readonly string[]) => {
+      if (keys.length === 0) return;
+      setOpenDirection(null);
+      setSelectedKey(null);
+      setSelectedRange(keys);
+      const span =
+        fromKey === toKey
+          ? (ayahLabel(fromKey) ?? fromKey)
+          : `${ayahLabel(fromKey) ?? fromKey}–${ayahLabel(toKey) ?? toKey}`;
+      announce(`ظُلّل ${span}`);
+    },
+    [announce],
+  );
+
   // Forward hop: push the origin onto the trail, move to the target, pulse.
+  // `origin` overrides the breadcrumb source — a merged range hop leaves from the
+  // range member that actually produced the edge, not from the whole highlight.
   const handleHop = useCallback(
-    (edge: Edge) => {
+    (edge: Edge, origin?: string) => {
       if (!resolver) return;
       const toLoc = resolver.resolve(edge.to);
       if (!toLoc) return; // unvendored — the button is disabled, defensive here
-      const fromKey = selectedKey;
+      const fromKey = origin ?? selectedKey;
       const fromLoc = fromKey ? resolver.resolve(fromKey) : null;
       if (fromKey && fromLoc) {
         setTrail((t) => [...t, { key: fromKey, page: fromLoc.page }]);
       }
       setOpenDirection(null);
+      setSelectedRange(null);
       setSelectedKey(edge.to);
       setPage(toLoc.page);
       announce(`انتقلت إلى ${ayahLabel(edge.to) ?? edge.to} · صفحة ${toLoc.page}`);
@@ -179,8 +247,16 @@ export function App(): JSX.Element {
   const handleClearCurrent = useCallback(() => {
     setOpenDirection(null);
     setSelectedKey(null);
+    setSelectedRange(null);
     announce("أُلغي التحديد");
   }, [announce]);
+
+  // A merged range row hops from the member that produced the edge (its diff's
+  // "here"), so the trail bead points at a real ayah, not at the passage.
+  const handleRangeHop = useCallback(
+    (edge: MergedEdge) => handleHop(edge, edge.sources[0]),
+    [handleHop],
+  );
 
   // The current view as a spec-§7 AppState — what the URL encodes and Share
   // serializes. `via` is the immediate breadcrumb origin; `trail` is the rest of
@@ -188,11 +264,16 @@ export function App(): JSX.Element {
   const currentState = useMemo<AppState | null>(() => {
     if (!resolver) return null;
     const edition = resolver.edition;
-    if (!selectedKey) {
+    // A highlighted range serializes through the §7 range form (`2:47-2:48`);
+    // a single ayah through the plain form. Never both — they are exclusive.
+    const select = selectedRange
+      ? rangeSelect(selectedRange)
+      : selectedKey
+        ? refOf(selectedKey)
+        : null;
+    if (!select) {
       return { edition, select: null, page };
     }
-    const sel = parseAyahKey(selectedKey);
-    if (!sel) return { edition, select: null, page };
     const trailRefs = trail
       .map((b) => keyToRef(b.key))
       .filter((r): r is NonNullable<typeof r> => r !== null);
@@ -200,11 +281,11 @@ export function App(): JSX.Element {
     const rest = trailRefs.slice(0, -1);
     return {
       edition,
-      select: { surah: sel.surah, ayah: sel.ayah },
+      select,
       ...(via ? { via } : {}),
       ...(rest.length > 0 ? { trail: rest } : {}),
     };
-  }, [resolver, selectedKey, page, trail]);
+  }, [resolver, selectedKey, selectedRange, page, trail]);
 
   // Restore a parsed deep link through the SAME select/navigateTo path a live
   // hop uses (spec §7: no separate deep-link logic to drift). Rebuilds the trail
@@ -226,17 +307,42 @@ export function App(): JSX.Element {
 
       if (state.select === null) {
         setSelectedKey(null);
+        setSelectedRange(null);
         if (state.page) setPage(state.page);
         return;
       }
+
+      // A range link (`2:47-2:48`) restores the highlight + its merged menu, on
+      // the same path the gesture takes — expand it to its member keys.
+      if ("toAyah" in state.select) {
+        const { surah, ayah, toAyah } = state.select;
+        const keys: string[] = [];
+        for (let a = ayah; a <= toAyah; a++) keys.push(refToKey(edition, { surah, ayah: a }));
+        const head = resolver.resolve(keys[0]!);
+        if (!head) {
+          setSelectedKey(null);
+          setSelectedRange(null);
+          announce("المقطع المطلوب غير متوفّر بعد");
+          return;
+        }
+        setSelectedKey(null);
+        setSelectedRange(keys);
+        setPage(head.page);
+        announce(`فُتح رابط · مقطع ${surah}:${ayah}-${toAyah} · صفحة ${head.page}`);
+        void stageRef.current?.navigateTo(keys[0]!, { pulse: true });
+        return;
+      }
+
       const key = refToKey(edition, state.select);
       const loc = resolver.resolve(key);
       if (!loc) {
         // Link points at an un-vendored ayah — keep the trail, don't pan to a ghost.
         setSelectedKey(null);
+        setSelectedRange(null);
         announce("الآية المطلوبة غير متوفّرة بعد");
         return;
       }
+      setSelectedRange(null);
       setSelectedKey(key);
       setPage(loc.page);
       announce(`فُتح رابط · ${ayahLabel(key) ?? key} · صفحة ${loc.page}`);
@@ -280,6 +386,7 @@ export function App(): JSX.Element {
               selectedKey={selectedKey}
               breadcrumbKey={breadcrumbKey}
               onSelect={handleSelect}
+              onSelectRange={handleSelectRange}
               labelFor={(key) => `الآية ${ayahLabel(key) ?? key}`}
             />
             <HopRail
@@ -295,6 +402,17 @@ export function App(): JSX.Element {
               canHop={canHop}
               onHop={handleHop}
               onClose={() => setOpenDirection(null)}
+            />
+            <HighlightMenu
+              rangeKeys={selectedRange}
+              hops={rangeHops}
+              canHop={canHop}
+              onHop={handleRangeHop}
+              shareState={currentState}
+              onClear={handleClearCurrent}
+              // Dismissing the menu drops the highlight with it: a wash with no
+              // menu would be a dead end (nothing re-opens it but a fresh drag).
+              onClose={() => setSelectedRange(null)}
             />
           </>
         )}
