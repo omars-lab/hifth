@@ -464,6 +464,13 @@ Guidance, not bureaucracy. Modes: **Explore** (read-only fan-out recon), **Plan*
   device checklist, not an agent job.
 - **Loop 7** — inline polish; the 5-page golden-image sweep is a small fan-out candidate.
 
+**Several agents writing one tree at once** — the Loop 6a configuration — has its own
+protocol: [`PARALLEL-AGENTS.md`](PARALLEL-AGENTS.md). Two rules carry it (take the lock for
+anything that builds or stages; commit by explicit path, never `--no-verify`), and the
+merge pass in follow-up ⑦ is the third. Everything in that file is a Loop 6a failure
+written down, including the thirty minutes of deadlock and the composition defect that no
+single agent could see.
+
 ## 10. Non-goals (v1)
 
 Audio, translations, tafsir reading, quizzes, user accounts, server backend,

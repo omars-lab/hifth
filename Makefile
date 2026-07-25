@@ -196,6 +196,34 @@ loop-verify: ci ## Verify a loop is landable: CI mirror + e2e + Lighthouse (on-d
 	@echo "    then write docs/decisions/loop-$(N).md and update the Status table."
 
 # ---------------------------------------------------------------------------
+# Parallel agents on one tree (docs/PARALLEL-AGENTS.md)
+#
+# Several agents share this checkout and this branch. Anything that builds,
+# installs, or stages takes the lock first — two builds writing one dist/, or
+# two agents staging one index, fail as bugs in the code rather than in the
+# choreography, which is the expensive kind.
+# ---------------------------------------------------------------------------
+
+.PHONY: lock
+lock: ## Run a command holding the shared-tree lock:  make lock L=build CMD="pnpm -r test"
+	@test -n "$(CMD)" || { echo 'usage: make lock L=<label> CMD="<command>"'; exit 2; }
+	scripts/with-lock.sh "$(if $(L),$(L),make)" "$(CMD)"
+
+.PHONY: lock-status
+lock-status: ## Who holds the shared-tree lock (a live PID is contention, not a deadlock)
+	@if [ -d .git/hifth-agent.lock ]; then \
+	  echo "  held:"; sed 's/^/    /' .git/hifth-agent.lock/owner 2>/dev/null || echo "    (no owner file yet — a holder mid-acquire)"; \
+	  pid=$$(awk -F= '/^pid=/{print $$2}' .git/hifth-agent.lock/owner 2>/dev/null); \
+	  if [ -n "$$pid" ] && kill -0 "$$pid" 2>/dev/null; then \
+	    echo "    → alive. This is contention: wait, do not break it."; \
+	  elif [ -n "$$pid" ]; then \
+	    echo "    → gone. The next 'make lock' run breaks it automatically."; \
+	  fi; \
+	else \
+	  echo "  free."; \
+	fi
+
+# ---------------------------------------------------------------------------
 # On-device checks (open these on a real phone on the same Wi-Fi)
 # ---------------------------------------------------------------------------
 
@@ -226,3 +254,5 @@ help: ## List targets (this)
 	@echo "  Golden images:  make golden        (diff against this platform's baselines)"
 	@echo "                  make golden-update (accept new ones — review the PNG diff!)"
 	@echo "                  make golden-linux UPDATE=1  (refresh the CI/linux set)"
+	@echo "  Parallel work:  make lock L=build CMD=\"pnpm -r test\" | make lock-status"
+	@echo "                  the protocol: docs/PARALLEL-AGENTS.md"
