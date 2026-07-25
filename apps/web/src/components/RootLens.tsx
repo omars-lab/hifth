@@ -274,6 +274,11 @@ export function RootLens({
           <a href="http://corpus.quran.com" target="_blank" rel="noreferrer">
             Quranic Arabic Corpus
           </a>
+          {/* The corpus asks for its source to be named and linked (above) *and*
+              for its copyright notice to be reproduced in derived works — the
+              shards are one, so the line below is an obligation, not a courtesy.
+              The full block ships at assets/roots/<edition>/NOTICE.txt. */}
+          <span className={styles.copyright}>© 2011 Kais Dukes · GNU GPL</span>
         </footer>
       </div>
     </>

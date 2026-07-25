@@ -20,6 +20,13 @@ test.describe("Hifth · the highlighted range", () => {
     // mounted — assert on the first, as the share/a11y tour already does.
     await expect(page.locator("svg[role='group']").first()).toBeVisible();
 
+    // ...but each page must be mounted exactly once. A cold range link races the
+    // initial mount against navigateTo's, and both used to append their own
+    // <svg>, leaving two regions sharing one label (a duplicated landmark, and
+    // the reason this spec was flaky). PageStage now de-duplicates in-flight
+    // mounts; this is the guard.
+    await expect(page.locator('svg[aria-labelledby="page-label-7"]')).toHaveCount(1);
+
     // The menu is a modal dialog titled with the range in Arabic-Indic digits.
     const menu = page.getByRole("dialog");
     await expect(menu).toBeVisible();

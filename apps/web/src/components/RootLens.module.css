@@ -270,6 +270,17 @@
   color: var(--ink-soft);
 }
 
+/* The required copyright line — present and legible, but never competing with
+   the roots themselves. Its own line so it reads as a notice, not a byline. */
+.copyright {
+  display: block;
+  margin-block-start: var(--space-1);
+  direction: ltr;
+  text-align: end;
+  font-size: 0.85em;
+  opacity: 0.85;
+}
+
 @media (min-width: 900px) {
   .sheet {
     inset-inline-start: auto;

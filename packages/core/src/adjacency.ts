@@ -265,7 +265,7 @@ export function mergeRangeEdges(sources: readonly RangeSource[]): MergedEdge[] {
     for (const edge of adj?.edges ?? []) {
       if (!isActiveEdgeType(edge.type)) continue;
       if (inside.has(bareTarget(edge.to))) continue;
-      const id = `${edge.type} ${edge.to}`;
+      const id = `${edge.type}>${edge.to}`;
       const seen = merged.get(id);
       if (!seen) {
         merged.set(id, { edge, sources: [key] });

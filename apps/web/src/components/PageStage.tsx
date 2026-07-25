@@ -93,6 +93,8 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
   const stageRef = useRef<HTMLDivElement>(null);
   const layerRef = useRef<HTMLDivElement>(null);
   const pagesRef = useRef(new Map<number, MountedPage>());
+  /** Mounts still in flight, so concurrent callers share one fetch (see ensurePage). */
+  const pendingRef = useRef(new Map<number, Promise<MountedPage | null>>());
   const currentPageRef = useRef<number>(page);
   const [status, setStatus] = useState<"loading" | "ready" | "error">("loading");
 
@@ -184,11 +186,9 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
     [],
   );
 
-  /** Fetch + mount a page's SVG, returning its Highlighter (or null if unvendored). */
-  const ensurePage = useCallback(
+  /** The one-shot mount `ensurePage` de-duplicates. Never call it directly. */
+  const mountPage = useCallback(
     async (targetPage: number): Promise<MountedPage | null> => {
-      const existing = pagesRef.current.get(targetPage);
-      if (existing) return existing;
       const layer = layerRef.current;
       if (!layer) return null;
       let markup: string;
@@ -219,6 +219,27 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
       return mp;
     },
     [resolver],
+  );
+
+  /** Fetch + mount a page's SVG, returning its Highlighter (or null if unvendored). */
+  const ensurePage = useCallback(
+    (targetPage: number): Promise<MountedPage | null> => {
+      const existing = pagesRef.current.get(targetPage);
+      if (existing) return Promise.resolve(existing);
+      // The mount is async, so `pagesRef` is still empty while a fetch is in
+      // flight: two callers racing for the same page (the initial mount and a
+      // cold-link `navigateTo`) would each append their own <svg>, leaving two
+      // regions labelled `page-label-N` — a duplicated landmark, and the reason
+      // the range deep-link e2e had to reach for `.first()`. In-flight mounts are
+      // memoized so the second caller awaits the first instead of starting a rival.
+      const pending = pendingRef.current.get(targetPage);
+      if (pending) return pending;
+      const mount = mountPage(targetPage);
+      pendingRef.current.set(targetPage, mount);
+      void mount.finally(() => pendingRef.current.delete(targetPage));
+      return mount;
+    },
+    [mountPage],
   );
 
   /** Center the current page's content in the stage (the reset view). */
@@ -317,10 +338,14 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
   // Tear down every mounted page + its highlighter on unmount.
   useEffect(() => {
     const pages = pagesRef.current;
+    const pendingMounts = pendingRef.current;
     return () => {
       cancelTween();
       for (const mp of pages.values()) mp.hl.destroy();
       pages.clear();
+      // Drop in-flight mounts too: their hosts are appended to a layer that is
+      // going away, and a stale entry would hand a dead page to a remount.
+      pendingMounts.clear();
     };
   }, [cancelTween]);
 
