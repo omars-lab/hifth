@@ -22,7 +22,8 @@
     "gate:budget": "node scripts/gate-budget.mjs",
     "gate:notext": "node scripts/gate-notext.mjs",
     "gate:license": "node scripts/gate-license.mjs",
-    "gates": "pnpm gate:notext && pnpm gate:license && pnpm gate:budget"
+    "gate:text-sources": "node scripts/gate-text-sources.mjs",
+    "gates": "pnpm gate:text-sources && pnpm gate:notext && pnpm gate:license && pnpm gate:budget"
   },
   "pnpm": {
     "overrides": {
