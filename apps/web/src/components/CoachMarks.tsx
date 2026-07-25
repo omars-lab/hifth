@@ -1,32 +1,15 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { toArabicDigits } from "../format";
+import { COACH_STORAGE_KEY, coachDismissed, rememberDismissal } from "../coach";
 import styles from "./CoachMarks.module.css";
 
-/**
- * Where the dismissal is remembered. Versioned: teaching a *new* verb later
- * means a new key, not a silent re-show of the old marks.
- */
-export const COACH_STORAGE_KEY = "hifth.coach.v1";
-
-/** Has this device already been shown (and dismissed) the marks? */
-export function coachDismissed(): boolean {
-  try {
-    return localStorage.getItem(COACH_STORAGE_KEY) === "1";
-  } catch {
-    // Safari private mode throws on localStorage. A device we cannot remember
-    // is a device we do not teach twice in one session — better a missed lesson
-    // than a strip that returns on every reload.
-    return true;
-  }
-}
-
-function rememberDismissal(): void {
-  try {
-    localStorage.setItem(COACH_STORAGE_KEY, "1");
-  } catch {
-    /* nothing to do — see coachDismissed */
-  }
-}
+// The key and its two accessors live in `../coach` — a module with no React and
+// no CSS, so the e2e specs that seed a returning reader can import the key
+// instead of retyping it. Re-exported here because this component is where
+// callers expect to find them. Imported *and* re-exported rather than
+// `export … from`: the bare re-export creates no local binding, so the
+// `coachDismissed()` call below was a ReferenceError at render.
+export { COACH_STORAGE_KEY, coachDismissed };
 
 interface Step {
   readonly glyph: string;

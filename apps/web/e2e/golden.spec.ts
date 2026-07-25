@@ -1,4 +1,5 @@
 import { test, expect, type Locator, type Page } from "@playwright/test";
+import { COACH_STORAGE_KEY } from "../src/coach";
 
 /*
  * Golden-image regression over the highlight geometry (PLAN follow-up ③, moved
@@ -92,7 +93,7 @@ async function open(page: Page, hash: string, pageNo: number): Promise<Locator> 
   // Not cosmetic: whether it renders depends on a `beforeinstallprompt` that a
   // headless run may or may not fire, and a baseline must not depend on a race.
   // (Its own appearance is asserted in offline.spec.ts.)
-  await page.addInitScript(() => {
+  await page.addInitScript((coachKey: string) => {
     Object.defineProperty(navigator, "storage", {
       configurable: true,
       value: {
@@ -101,15 +102,15 @@ async function open(page: Page, hash: string, pageNo: number): Promise<Locator> 
         estimate: async () => ({ usage: 1_000_000, quota: 40 * 1024 * 1024 * 1024 }),
       },
     });
-    // Mark the coach marks seen (CoachMarks.COACH_STORAGE_KEY). A first-run
-    // tour on top of the stage is a fine thing to ship and a terrible thing to
-    // photograph — it is asserted by role in its own spec.
+    // Mark the coach marks seen. A first-run tour on top of the stage is a fine
+    // thing to ship and a terrible thing to photograph — it is asserted by role
+    // in its own spec.
     try {
-      localStorage.setItem("hifth.coach.v1", "1");
+      localStorage.setItem(coachKey, "1");
     } catch {
       /* private mode — nothing to seed */
     }
-  });
+  }, COACH_STORAGE_KEY);
   await page.goto(`/#/hafs-kfqc/${hash}`);
   const svg = stage(page, pageNo);
   // Generous: a deep link to a page other than the cold-open one has to fetch

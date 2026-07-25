@@ -1,5 +1,6 @@
 import { test, expect, type Page } from "@playwright/test";
 import { tapAyah } from "./ayah";
+import { COACH_STORAGE_KEY } from "../src/coach";
 
 /*
  * Loop 6a, the ungated half of the exit criterion (PLAN §Loop 6a):
@@ -140,7 +141,15 @@ test.describe("Hifth · storage durability, as UI", () => {
     opts: { persisted: boolean; quota: number },
   ): Promise<void> {
     await page.addInitScript(
-      ({ persisted, quota }: { persisted: boolean; quota: number }) => {
+      ({
+        persisted,
+        quota,
+        coachKey,
+      }: {
+        persisted: boolean;
+        quota: number;
+        coachKey: string;
+      }) => {
         Object.defineProperty(navigator, "storage", {
           configurable: true,
           value: {
@@ -150,12 +159,12 @@ test.describe("Hifth · storage durability, as UI", () => {
           },
         });
         try {
-          localStorage.setItem("hifth.coach.v1", "1"); // CoachMarks.COACH_STORAGE_KEY
+          localStorage.setItem(coachKey, "1");
         } catch {
           /* private mode — the strip does not show there either */
         }
       },
-      opts,
+      { ...opts, coachKey: COACH_STORAGE_KEY },
     );
   }
 

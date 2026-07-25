@@ -1,5 +1,6 @@
 import { test, expect, type Page } from "@playwright/test";
 import { ayahTarget, tapAyah } from "./ayah";
+import { COACH_STORAGE_KEY } from "../src/coach";
 
 /*
  * Loop 5 — the drag-to-highlight gesture (PLAN §Loop 5, spec §9).
@@ -27,9 +28,9 @@ import { ayahTarget, tapAyah } from "./ayah";
  * catches the aim itself going wrong; this is about which screen we aim at.)
  */
 async function openApp(page: Page): Promise<void> {
-  await page.addInitScript(() => {
+  await page.addInitScript((coachKey: string) => {
     try {
-      localStorage.setItem("hifth.coach.v1", "1"); // CoachMarks.COACH_STORAGE_KEY
+      localStorage.setItem(coachKey, "1");
     } catch {
       /* private mode — the strip stays hidden anyway */
     }
@@ -41,7 +42,7 @@ async function openApp(page: Page): Promise<void> {
         estimate: async () => ({ usage: 1_000_000, quota: 40 * 1024 * 1024 * 1024 }),
       },
     });
-  });
+  }, COACH_STORAGE_KEY);
   await page.goto("/");
   await expect(page.locator("svg[role='group']")).toBeVisible();
 }
