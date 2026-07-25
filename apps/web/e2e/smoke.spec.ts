@@ -8,8 +8,13 @@ test.describe("Hifth shell", () => {
     // RTL-native.
     await expect(page.locator("html")).toHaveAttribute("dir", "rtl");
 
-    // Arabic brand mark.
-    await expect(page.getByText("حفظ")).toBeVisible();
+    // Arabic brand mark. Scoped to the chrome and matched exactly: "حفظ" is the
+    // app's name, so it recurs in body copy (the install notice reads
+    // "ثبّت حفظ ليبقى معك دون إنترنت"), and an unscoped substring match is a
+    // strict-mode violation the moment any such string renders.
+    await expect(
+      page.getByRole("banner").getByText("حفظ", { exact: true }),
+    ).toBeVisible();
 
     // Page identity shows 7.
     await expect(page.locator(".numeric", { hasText: "7" }).first()).toBeVisible();
