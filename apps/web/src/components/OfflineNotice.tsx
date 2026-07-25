@@ -101,7 +101,19 @@ function pickNotice(
   return "best-effort";
 }
 
-export function OfflineNotice(): JSX.Element | null {
+interface OfflineNoticeProps {
+  /**
+   * Stay silent for now — something with a better claim on the reader is on
+   * screen. The banner is an in-flow strip, so two of them stack and take a
+   * third of a phone's stage between them; this is how the composition is
+   * resolved, in the one place that can see both (App). It suppresses the
+   * *banner* only: the read and the `persist()` request below still run, so a
+   * grant that arrives while held is already reflected when the strip lifts.
+   */
+  readonly hold?: boolean;
+}
+
+export function OfflineNotice({ hold = false }: OfflineNoticeProps): JSX.Element | null {
   // Starts at "unsupported" — the honest pre-reading state. It renders nothing
   // on its own except on iOS, where install is the right advice with or without
   // a StorageManager to ask.
@@ -170,7 +182,7 @@ export function OfflineNotice(): JSX.Element | null {
     });
   }, []);
 
-  if (!kind || dismissed) return null;
+  if (hold || !kind || dismissed) return null;
   const notice = NOTICES[kind];
 
   return (

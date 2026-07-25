@@ -43,7 +43,7 @@ import { InstallButton } from "./components/InstallButton";
 import { OfflineNotice } from "./components/OfflineNotice";
 import { Jumper } from "./components/Jumper";
 import { EditionPicker } from "./components/EditionPicker";
-import { CoachMarks } from "./components/CoachMarks";
+import { CoachMarks, coachDismissed } from "./components/CoachMarks";
 import { LiveAnnouncer, useAnnouncer } from "./components/LiveAnnouncer";
 import { RootLens, RootLensTrigger } from "./components/RootLens";
 import { SkinToggle, TajweedLegend } from "./components/SkinToggle";
@@ -103,6 +103,14 @@ export function App(): JSX.Element {
   // picker. Both are modal, so at most one is up at a time in practice.
   const [jumperOpen, setJumperOpen] = useState(false);
   const [editionOpen, setEditionOpen] = useState(false);
+  /*
+   * Is the coach strip still claiming its band of the layout? Read once, from
+   * the same storage the strip reads, so the two agree on the very first frame
+   * — a notice that appears and is then pushed down a tick later is worse than
+   * either strip alone. Private mode throws and `coachDismissed` answers true,
+   * which is the right default here too: no strip, so nothing to hold.
+   */
+  const [coachUp, setCoachUp] = useState(() => !coachDismissed());
 
   const stageRef = useRef<PageStageHandle>(null);
   const { message, announce } = useAnnouncer();
@@ -715,12 +723,20 @@ export function App(): JSX.Element {
 
       {/* Offline durability, when there is something honest to say about it:
           a capped quota, a missing install, a denied persist(). Silent when
-          storage is persisted — the good case earns no chrome. */}
-      <OfflineNotice />
+          storage is persisted — the good case earns no chrome.
+
+          Held while the coach strip is up. Both are strips in the layout, and
+          both were right to be: neither may cover an ayah. Stacked they cost
+          226px on a 412×839 phone — the stage drops from 713px to 487px, a
+          third of it, on exactly the visit where a reader is deciding what
+          this app is. So they take turns, and the teaching goes first: one
+          asks for a tap now, the other warns about eviction that may never
+          come. */}
+      <OfflineNotice hold={coachUp} />
 
       {/* The three verbs, once, in the layout rather than over the page — the
           first tap it teaches has to land while the strip is still up. */}
-      <CoachMarks ready={resolver !== null} />
+      <CoachMarks ready={resolver !== null} onDismiss={() => setCoachUp(false)} />
 
       <main className={styles.main}>
         {resolver && (

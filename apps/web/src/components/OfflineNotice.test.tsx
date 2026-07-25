@@ -88,6 +88,27 @@ describe("OfflineNotice", () => {
     expect(notice).toHaveAttribute("data-notice", "best-effort");
   });
 
+  it("stays silent while held, and says the same thing once released", async () => {
+    // Both this banner and the coach strip live *in* the layout above the
+    // stage, which is right for each of them and wrong for the pair: stacked,
+    // they took a third of a 412×839 phone's stage on exactly the visit where
+    // a reader is deciding what this app is. App holds this one back until the
+    // teaching is done. The hold is presentational — the read below still
+    // happens, so nothing is re-derived when the strip lifts.
+    stubUserAgent(ANDROID_UA);
+    stubStorage({
+      persist: async () => false,
+      persisted: async () => false,
+      estimate: async () => ({ usage: 0, quota: 40 * GB }),
+    });
+    const { container, rerender } = render(<OfflineNotice hold />);
+    await waitFor(() => expect(navigator.storage).toBeDefined());
+    expect(container.querySelector("[data-notice]")).toBeNull();
+
+    rerender(<OfflineNotice hold={false} />);
+    expect(await screen.findByRole("status")).toHaveAttribute("data-notice", "best-effort");
+  });
+
   it("dismisses once and stays dismissed on the next visit", async () => {
     stubUserAgent(IPHONE_UA);
     stubStorage({

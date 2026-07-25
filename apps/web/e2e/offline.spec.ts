@@ -1,4 +1,5 @@
 import { test, expect, type Page } from "@playwright/test";
+import { tapAyah } from "./ayah";
 
 /*
  * Loop 6a, the ungated half of the exit criterion (PLAN §Loop 6a):
@@ -80,7 +81,7 @@ test.describe("Hifth · offline", () => {
       // …and the app is still an instrument offline, not a picture: tapping an
       // ayah surfaces its rail, which means the adjacency shard came out of the
       // data cache too.
-      await page.locator("#verse-54:visible").tap();
+      await tapAyah(page, "#verse-54:visible");
       await expect(page.getByRole("group", { name: "روابط الآية" })).toBeVisible();
     } finally {
       await context.setOffline(false);
@@ -125,7 +126,15 @@ test.describe("Hifth · storage durability, as UI", () => {
     "StorageManager overrides + the notice are exercised on Chromium",
   );
 
-  /** Replace StorageManager before any app code runs. */
+  /**
+   * Replace StorageManager before any app code runs, and mark the coach marks
+   * seen. The second half is not incidental setup: the notice is *held* while
+   * the coach strip is up, because both are strips in the layout above the
+   * stage and stacked they cost a third of a phone's stage. These tests are
+   * about which sentence the banner picks, so they start where a reader is by
+   * their second visit — the case where the strips share a screen has its own
+   * test below.
+   */
   async function stubStorage(
     page: Page,
     opts: { persisted: boolean; quota: number },
@@ -140,10 +149,44 @@ test.describe("Hifth · storage durability, as UI", () => {
             estimate: async () => ({ usage: 1_000_000, quota }),
           },
         });
+        try {
+          localStorage.setItem("hifth.coach.v1", "1"); // CoachMarks.COACH_STORAGE_KEY
+        } catch {
+          /* private mode — the strip does not show there either */
+        }
       },
       opts,
     );
   }
+
+  test("the storage warning waits for the coach strip to finish teaching", async ({ page }) => {
+    // The Loop 6a merge defect, as a test. Two agents each added a strip *in*
+    // the layout above the stage, each for the same good reason — neither may
+    // cover an ayah. Together they took 226px of a 412×839 phone: the stage
+    // dropped from 713px to 487px on precisely the visit where a reader is
+    // deciding what this app is. They take turns now, teaching first.
+    await page.addInitScript(() => {
+      Object.defineProperty(navigator, "storage", {
+        configurable: true,
+        value: {
+          persist: async () => false,
+          persisted: async () => false,
+          estimate: async () => ({ usage: 1_000_000, quota: 40 * 1024 * 1024 * 1024 }),
+        },
+      });
+    });
+    await page.goto("/");
+
+    const coach = page.getByRole("region", { name: "كيف تتنقّل" });
+    await expect(coach).toBeVisible();
+    await expect(page.locator("[data-notice]")).toHaveCount(0);
+
+    await coach.getByRole("button", { name: "تخطَّ" }).click();
+    await expect(coach).toHaveCount(0);
+
+    // Held, not cancelled: the same warning is still owed once the band is free.
+    await expect(page.locator("[data-notice]")).toHaveAttribute("data-notice", "best-effort");
+  });
 
   test("a denied persist() renders a warning, not a console message", async ({ page }) => {
     await stubStorage(page, { persisted: false, quota: 40 * 1024 * 1024 * 1024 });

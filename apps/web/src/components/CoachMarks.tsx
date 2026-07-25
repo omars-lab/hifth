@@ -60,6 +60,12 @@ const STEPS: readonly Step[] = [
 interface CoachMarksProps {
   /** Render only once the app is usable (there is nothing to teach before). */
   ready: boolean;
+  /**
+   * Fired when the strip leaves for good. The strip occupies layout above the
+   * stage, so what shares that space is a question only App can answer — it
+   * holds the storage notice back until this fires.
+   */
+  onDismiss?: () => void;
 }
 
 /**
@@ -77,7 +83,7 @@ interface CoachMarksProps {
  * control, Escape skips the whole thing — and animation-free under
  * `prefers-reduced-motion` (the CSS honours it via the shared duration tokens).
  */
-export function CoachMarks({ ready }: CoachMarksProps): JSX.Element | null {
+export function CoachMarks({ ready, onDismiss }: CoachMarksProps): JSX.Element | null {
   // Read storage once, on mount: a dismissal must not re-render into view.
   const [dismissed, setDismissed] = useState(() => coachDismissed());
   const [step, setStep] = useState(0);
@@ -86,7 +92,8 @@ export function CoachMarks({ ready }: CoachMarksProps): JSX.Element | null {
   const dismiss = useCallback(() => {
     rememberDismissal();
     setDismissed(true);
-  }, []);
+    onDismiss?.();
+  }, [onDismiss]);
 
   // Escape skips from anywhere in the strip; the strip is not modal, so it only
   // listens while focus is inside it (a global Escape belongs to the sheets).

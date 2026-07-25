@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from "vitest";
+import { describe, it, expect, beforeEach, vi } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
 import { CoachMarks, COACH_STORAGE_KEY } from "./CoachMarks";
 
@@ -36,6 +36,28 @@ describe("CoachMarks", () => {
     unmount();
     render(<CoachMarks ready />);
     expect(screen.queryByRole("region", { name: "كيف تتنقّل" })).not.toBeInTheDocument();
+  });
+
+  it("announces its departure however it leaves — the band it frees is spoken for", () => {
+    // App holds the storage notice until this fires, so a path that dismisses
+    // the strip without reporting it would leave the notice suppressed for the
+    // whole session. Every exit is checked for that reason.
+    for (const leave of [
+      () => fireEvent.click(screen.getByText("تخطَّ")),
+      () => fireEvent.keyDown(screen.getByRole("region", { name: "كيف تتنقّل" }), { key: "Escape" }),
+      () => {
+        fireEvent.click(screen.getByText("التالي"));
+        fireEvent.click(screen.getByText("التالي"));
+        fireEvent.click(screen.getByText("تمّ"));
+      },
+    ]) {
+      localStorage.clear();
+      const onDismiss = vi.fn();
+      const { unmount } = render(<CoachMarks ready onDismiss={onDismiss} />);
+      leave();
+      expect(onDismiss).toHaveBeenCalledTimes(1);
+      unmount();
+    }
   });
 
   it("is skippable from the keyboard alone", () => {
