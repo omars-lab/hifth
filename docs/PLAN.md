@@ -95,14 +95,29 @@ ends by updating this section and writing `docs/decisions/loop-<N>.md`.**
    the story is "GPL, except vendored assets under their own terms". Shipped as `LICENSE`
    (canonical gnu.org text, SHA-256 `3972dc97…b36986`) plus
    [`LICENSES.md`](../LICENSES.md), the per-path map.
-   **One live obligation, earlier than "public beta":** publishing the site *is*
-   distribution — a static app hands the browser real copies of `assets/roots/**` — so the
-   corresponding source (`build-roots.mjs` + its pinned input) must be reachable by whoever
-   loads the page. **Do not publish the Cloudflare deploy while this repo is private.**
+   ~~**One live obligation, earlier than "public beta":**~~ — **discharged in the app**
+   (`74d5226`). Publishing the site *is* distribution: a static app hands the browser real
+   copies of `assets/roots/**`, so §6 owes whoever loads the page the Corresponding Source
+   **for that build**. The commit is resolved at build time (`CF_PAGES_COMMIT_SHA` →
+   `GITHUB_SHA` → `git rev-parse HEAD` → `"dev"`) and baked in through
+   [`vite.config.ts`](../apps/web/vite.config.ts) →
+   [`src/provenance.ts`](../apps/web/src/provenance.ts), so the link points at *that tree*
+   rather than at a branch that moves under the reader; with no commit to name it degrades
+   to the repository root instead of minting a link to nothing. It surfaces in
+   [`Colophon.tsx`](../apps/web/src/components/Colophon.tsx), opened from the wordmark —
+   the chrome already carries ⌖, ▤, the skin switch and the install prompt, and a fifth
+   control would cost stage height on a phone. The same sheet finally pays the three
+   attributions the vendored data has been owed since Loop 4a (corpus.quran.com's mandatory
+   link, quran-tajweed's CC BY, the mutashabihat licence's "mention in your app"), which is
+   the surface `SOURCES.md` has been promising.
+   **Still true, and now the only thing standing between us and the deploy:** the offer is
+   only real if `SOURCE_REPO` resolves. **Make the repo public before publishing the
+   Cloudflare deploy** — or repoint that one constant at wherever the source is served
+   from. Nothing else in the code changes either way.
 6. ~~**`--ink-faint` contrast sweep**~~ — **closed** (`68746bf`). The token was redefined
    `#9c9284` → `#6b6255`, clearing 4.5:1 on all four surfaces it lands on; fixing it at the
    token rather than across 23 call sites, since every one of them is a `color:`.
-   The sweep is not by hand and not axe: `e2e/contrast.spec.ts` opens **ten** surfaces and
+   The sweep is not by hand and not axe: `e2e/contrast.spec.ts` opens **eleven** surfaces and
    measures each with `e2e/contrast.ts` (WCAG luminance, compositing semi-transparent layers
    to find the colour actually behind the text). Axe could not do this job — it filed most of
    this app's chrome under `incomplete` as `nonBmp` (every glyph control) or
