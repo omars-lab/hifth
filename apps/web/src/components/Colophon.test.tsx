@@ -48,6 +48,19 @@ describe("Colophon", () => {
     expect(screen.getByText("GNU GPL")).toBeInTheDocument();
   });
 
+  it("does not claim the mushaf artwork is restricted to non-commercial use", () => {
+    // The one licence line here that is a *paraphrase* rather than a licence
+    // name, and it shipped wrong: KFQC reserves commercial *printing*, while
+    // non-commercial-only is the Libyan Endowments edition's term for an edition
+    // Hifth does not vendor. Overstating someone else's terms fails silently —
+    // it reads as caution, so no reader files a bug. This pins the negative.
+    render(<Colophon open onClose={() => {}} />);
+    const row = screen.getByText(/KFGQPC/).closest("li");
+    expect(row).not.toBeNull();
+    expect(row!.textContent).not.toMatch(/غير التجاري/);
+    expect(row!.textContent).toMatch(/الطبع التجاري محفوظ للمجمع/);
+  });
+
   it("is a modal dialog that Escape closes", () => {
     const onClose = vi.fn();
     render(<Colophon open onClose={onClose} />);

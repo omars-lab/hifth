@@ -23,15 +23,34 @@ own license); each is recorded individually rather than assumed.
 - **Coverage bundled now:** Surah 2, ayahs 38–48 (p7), 58–61 (p9), 120–126 (p19).
   **Full 604-page coverage is NOT yet vendored** — Loop 4 vendors and validates the
   complete corpus. See the Loop 0 corpus audit in `docs/decisions/loop-0.md`.
-- **License / usage:** KFGQPC mushaf artwork is distributed by the Complex under its
-  own terms; per the 2026-07-25 grounding pass, the
-  [quran-svg repo](https://github.com/quranpedia/quran-svg) declares **CC0 1.0** for
-  its own contributions (ayah-polygon overlay + JSON metadata) and documents KFQC's
-  terms as free use incl. digital/web, with only *printing physical mushafs for
-  commercial sale* reserved to the Complex. (Its Libyan-Endowments editions are
-  non-commercial-only — not applicable to `hafs-kfqc`.)
-  **Status: PROVISIONAL — one primary-source check of KFGQPC's published terms
-  remains before Loop 7 (the repo's summary is secondhand).**
+- **License / usage:** two licences, layered.
+  1. **The overlay is CC0 1.0.** Read firsthand from the
+     [quran-svg](https://github.com/quranpedia/quran-svg) README (2026-07-26): the
+     ayah-polygon overlay, the per-page JSON (`mushafs/**/json/`, `surah.json`,
+     `markers.json`) and the repo tooling are public domain — "reuse freely,
+     including commercially, no attribution required". That is the half of these
+     assets Hifth's resolver actually depends on, and it carries no obligation.
+  2. **The artwork is the Complex's, under the Complex's terms.** Per that repo's
+     [`NOTICE.md`](https://github.com/quranpedia/quran-svg/blob/main/NOTICE.md),
+     which records publishers' terms verbatim: the digital Madinah mushaf "can be
+     used for free" for personal, commercial and governmental purposes including
+     "digital publishing, media use, and use in websites, software, and other
+     similar intermediates", with physical printing for commercial sale reserved
+     to the Complex under Royal Decrees 136/8 and 9/B/46356. **Note the shape of
+     the restriction: it is on commercial *printing*, not on commercial or digital
+     use.** Hifth prints nothing. (Non-commercial-only is the *Libyan Endowments*
+     Qālūn edition's term — a different edition, not vendored here. Do not carry it
+     over to `hafs-kfqc`; an earlier reading of this entry did, and the app's
+     colophon told readers the artwork was more restricted than it is.)
+- **Status: CONFIRMED for the overlay (CC0, read at the source). The Complex's own
+  terms remain read through quran-svg's NOTICE.md rather than off
+  qurancomplex.gov.sa**, which refused connections on 2026-07-26 (`ECONNREFUSED`
+  on both `/en/` and `/en/terms/`; the Wayback mirror is not fetchable from CI
+  either). NOTICE.md quotes them and cites the decrees, so this is a strong
+  secondary source, not a guess — but the one open item before Loop 7 is to open
+  qurancomplex.gov.sa in an ordinary browser and confirm the wording is still what
+  NOTICE.md records. Nothing in the build depends on the answer; the entry moves
+  from PROVISIONAL to CONFIRMED-pending-that-glance.
 - **Immutability:** SVG bytes are copied verbatim and never edited (PLAN §8).
 
 ---

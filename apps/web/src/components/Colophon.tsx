@@ -41,7 +41,15 @@ const CREDITS: readonly Credit[] = [
   {
     what: "صفحات المصحف",
     who: "طباعة مجمع الملك فهد (KFGQPC)، عبر quran-svg / quranpedia",
-    licence: "إتاحة حرّة للاستعمال غير التجاري",
+    // Two licences layered, and only one of them constrains anyone: quran-svg's
+    // own contribution (the polygon overlay and JSON) is CC0, which asks for
+    // nothing; the Complex's terms are what a reader might need to know. Those
+    // terms permit digital, web and software use — the reservation is on
+    // printing physical masahif for commercial sale, which this app cannot do.
+    // Said plainly because the earlier wording here, "non-commercial use only",
+    // was the *Libyan Awqaf* edition's term, which Hifth does not vendor: it
+    // told every reader the artwork was more restricted than it is.
+    licence: "إتاحة حرّة للاستعمال الرقمي · الطبع التجاري محفوظ للمجمع",
     href: "https://github.com/quranpedia/quran-svg",
   },
   {
