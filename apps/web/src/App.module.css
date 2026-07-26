@@ -15,10 +15,41 @@
   background: var(--paper);
 }
 
+/* A button that has to keep looking like a wordmark: it opens the colophon, so
+   it needs a target and a focus ring, but any hover tint or border would turn
+   the app's name into a control competing with ⌖ and ▤ for attention. The
+   affordance is a focus ring and nothing else — and the box must be the one
+   the <div> here occupied, to the pixel. That is a hard requirement, not tidiness:
+   the golden baselines are element shots of the page SVG, whose crop lands over
+   the chrome, so a wordmark a few pixels off re-photographs every page.
+   `min-inline-size: min-content` is what buys it. A flex item's automatic
+   minimum size keeps a <div> from shrinking below its widest unbreakable child
+   — here the 53px wordmark — but a <button> is exempt from that rule, so it
+   shrank to the tagline's wrap width (44px) and let حفظ overflow, moving every
+   control in the row. This restores the div's floor by naming it.
+   No `min-block-size`: the brand is already the tallest thing in the header, so
+   a touch floor would only grow the header and take those pixels off the stage.
+   Refusing to spend stage height is the whole reason this opener is the wordmark
+   and not a fifth button. */
 .brand {
   display: flex;
   flex-direction: column;
+  justify-content: center;
+  align-self: stretch;
+  min-inline-size: min-content;
+  padding: 0;
+  border: none;
+  border-radius: var(--radius-md);
+  background: none;
+  font: inherit;
+  text-align: start;
   line-height: 1.1;
+  cursor: pointer;
+}
+
+.brand:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
 }
 
 .mark {

@@ -44,6 +44,7 @@ import { OfflineNotice } from "./components/OfflineNotice";
 import { Jumper } from "./components/Jumper";
 import { EditionPicker } from "./components/EditionPicker";
 import { CoachMarks, coachDismissed } from "./components/CoachMarks";
+import { Colophon } from "./components/Colophon";
 import { LiveAnnouncer, useAnnouncer } from "./components/LiveAnnouncer";
 import { RootLens, RootLensTrigger } from "./components/RootLens";
 import { SkinToggle, TajweedLegend } from "./components/SkinToggle";
@@ -103,6 +104,7 @@ export function App(): JSX.Element {
   // picker. Both are modal, so at most one is up at a time in practice.
   const [jumperOpen, setJumperOpen] = useState(false);
   const [editionOpen, setEditionOpen] = useState(false);
+  const [colophonOpen, setColophonOpen] = useState(false);
   /*
    * Is the coach strip still claiming its band of the layout? Read once, from
    * the same storage the strip reads, so the two agree on the very first frame
@@ -680,12 +682,24 @@ export function App(): JSX.Element {
   return (
     <div className={styles.app} dir="rtl">
       <header className={styles.chrome}>
-        <div className={styles.brand}>
+        {/* The wordmark is the colophon's opener. Publishing this app conveys
+            it (GPL §6), so the source offer and the four source credits have to
+            be reachable from the running page — and the chrome already carries
+            ⌖, ▤, the skin switch and the install prompt. A fifth button would
+            take thumb-width from navigation to say "about"; the wordmark was
+            decoration, and "about" is what a wordmark is always allowed to be. */}
+        <button
+          type="button"
+          className={styles.brand}
+          aria-label="عن حِفظ · الرخصة والمصادر"
+          aria-haspopup="dialog"
+          onClick={() => setColophonOpen(true)}
+        >
           <span className={styles.mark} aria-hidden="true">
             حفظ
           </span>
           <span className={styles.tagline}>مِلاحة للحُفّاظ</span>
-        </div>
+        </button>
         <div className={styles.pageId}>
           <span className={styles.pageLabel}>صفحة</span>
           <span className={`${styles.pageNum} numeric`}>{page}</span>
@@ -820,6 +834,7 @@ export function App(): JSX.Element {
         onSelect={handleEditionSelect}
         onClose={() => setEditionOpen(false)}
       />
+      <Colophon open={colophonOpen} onClose={() => setColophonOpen(false)} />
 
       <footer className={styles.trail} aria-label="المسار">
         <TrailBeads

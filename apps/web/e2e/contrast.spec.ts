@@ -120,6 +120,16 @@ const SURFACES: readonly Surface[] = [
     },
   },
   {
+    name: "the colophon — the licence offer and four credits",
+    open: async (page) => {
+      await settled(page);
+      await page.goto("/");
+      await expect(page.locator("svg[role='group']").first()).toBeVisible();
+      await page.getByRole("button", { name: /عن حِفظ/ }).tap();
+      await expect(page.getByRole("dialog", { name: "عن حِفظ" })).toBeVisible();
+    },
+  },
+  {
     name: "the tajweed legend, naming every rule family",
     open: async (page) => {
       await settled(page);

@@ -1,6 +1,34 @@
+import { execFileSync } from "node:child_process";
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import { VitePWA } from "vite-plugin-pwa";
+
+/**
+ * The commit this bundle was built from.
+ *
+ * Hifth is GPL-3.0-or-later, and publishing a static site *conveys* the program:
+ * the browser is handed real copies of the JS and of `assets/roots/**`, which
+ * are a GPL-covered derivative of the Quranic Arabic Corpus. §6 then requires
+ * the reader to be offered the Corresponding Source — and "corresponding" means
+ * *this* build, not whatever `main` happens to hold when they follow the link.
+ * A deploy that cannot name its own commit cannot make that offer, so the
+ * commit is resolved at build time and baked in.
+ *
+ * The order is deployment-first: Cloudflare Pages and GitHub Actions both hand
+ * us the SHA in the environment, and neither guarantees a usable `.git` in the
+ * build container. Local `git` is the developer's case, and "dev" is the
+ * honest answer when there is no commit to name (a dirty working tree served
+ * by `vite dev` corresponds to nothing published).
+ */
+function sourceCommit(): string {
+  const fromEnv = process.env.CF_PAGES_COMMIT_SHA ?? process.env.GITHUB_SHA;
+  if (fromEnv) return fromEnv;
+  try {
+    return execFileSync("git", ["rev-parse", "HEAD"], { encoding: "utf8" }).trim();
+  } catch {
+    return "dev";
+  }
+}
 
 // Hifth is a static, hash-routed, RTL-native PWA. No backend.
 // The SVG corpus lives in public/assets and is cached at runtime, not baked
@@ -10,6 +38,9 @@ import { VitePWA } from "vite-plugin-pwa";
 // Pin-a-juz packs are Loop 6b — they need the corpus vendored (Loop 4b) first.
 export default defineConfig({
   base: "./",
+  define: {
+    __SOURCE_COMMIT__: JSON.stringify(sourceCommit()),
+  },
   plugins: [
     react(),
     VitePWA({
