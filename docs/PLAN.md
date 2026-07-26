@@ -149,6 +149,14 @@ ends by updating this section and writing `docs/decisions/loop-<N>.md`.**
    beta annotation layer on for a reader who never saw the badge. Opened by Loop 6a;
    **after Loop 7's sign-off**. See [loop-6a.md](decisions/loop-6a.md) §Deferred.
 
+**The half of these a machine cannot run now has a register.** Follow-ups ① (the phone),
+② (the browser glance), ④ (VoiceOver/TalkBack) and ⑤ (does the source link resolve for a
+stranger) all wait on a human, and prose cannot answer "is that still true, on what device,
+and when?". Each is an entry in [`docs/validation/ledger.json`](validation/ledger.json)
+with what it blocks and what its result **tunes**; `make validate` prints what is
+outstanding, and `gate:validation` fails if the ledger starts lying about it. Recording a
+result is the `validate` skill's job, not a paragraph edit here — see §Testing plan.
+
 ---
 
 ## 1. How we build: loops, not a waterfall
@@ -307,8 +315,33 @@ wrong hop or mislabeled ayah is a product-breaking bug for this audience.
   marks, pages 1 and 604) asserted every ETL run.
 - **Edge spot-audit (human):** weekly during Loops 4–7, 20 random edges vs a printed
   mushaf; a hafiz signs off mutashabihat diffs before v1.0. Tajweed skin ships behind a
-  "beta" flag until hafiz approval.
+  "beta" flag until hafiz approval. Draw the sample with `make audit-edges N=20 SEED=1`
+  — seeded, so a round can be re-run or handed to a second reader — and record **both**
+  verdicts (`correct` *and* `wrong`) in `packages/etl/data/qa/verified-edges.json`.
 - **License gate:** build fails if any source lacks a `SOURCES.md` entry.
+
+### How a manual result becomes a permanent test
+
+The checks a machine cannot run are the expensive ones, and until now their results
+lived only as prose in decision records — which cannot answer "is that still true, on
+what device, and when?" without reading four documents. Two gates close that loop:
+
+- **`gate:verified-edges`** — every human verdict about an edge, enforced forever.
+  `correct` edges must keep shipping; **`wrong` edges must stay gone**, which is the
+  half that pays: a rejected edge nobody wrote down returns on the next data refresh
+  and costs that reader's time again, and no automated check can tell a wrong edge
+  from a right one.
+- **`gate:validation`** — the ledger at [`docs/validation/ledger.json`](validation/ledger.json):
+  every manual check, what it blocks, and what it **tunes**. It does *not* fail on
+  outstanding work (a phone nobody has held yet is a fact, not a broken build, and a
+  permanently red gate teaches everyone to ignore it); it fails when the ledger lies —
+  a `done` with no recorded result, an expired recurring check, or a check that tunes
+  nothing. `make validate` prints what the project is waiting on and what each blocks.
+
+**The rule:** a manual result must tighten something automated — a threshold, a
+fixture, or a new gate. A check that feeds nothing has to be re-run by hand forever,
+and it won't be. The full catalogue of every tier, in cost order, with the traps, is
+the `validate` skill: [`.claude/skills/validate/SKILL.md`](../.claude/skills/validate/SKILL.md).
 
 ### Device matrix (manual, each loop exit)
 
