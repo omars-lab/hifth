@@ -52,12 +52,10 @@ ends by updating this section and writing `docs/decisions/loop-<N>.md`.**
    inline-SVG-everywhere vs content-visibility virtualization vs raster-glyph fallback.
    The emulated baseline (~8.3 ms/frame, flat under CPU throttle) cannot see the real
    risks: initial raster of a 170 KB inline SVG on a low-end phone, and re-raster on zoom
-   past the layer's backing store. **How to run — `make phone-perf`.** It serves a probe
-   build to your phone; you tap ابدأ and pan, pinch, and tap ayahs for fifteen seconds,
-   and the page reports its own frame-time percentiles per segment plus paste-ready JSON
-   for the ledger. No cable and no DevTools — the old recipe (pair over USB, enable Web
-   Inspector, find the timeline) is a fair description of why this sat open for six loops,
-   and a check that expensive to run is a check that does not get run. The probe
+   past the layer's backing store. **To run it: `make validate CHECK=perf-verdict-on-device`**
+   — the phone measures itself, no cable and no DevTools. The old recipe (pair over USB,
+   enable Web Inspector, find the timeline) is a fair description of why this sat open for
+   six loops: a check that expensive to run is a check that does not get run. The probe
    ([`src/perf/probe.ts`](../apps/web/src/perf/probe.ts)) is behind a build-time flag and
    never enters a shipped bundle. **Gates Loop 4b only**
    (page vendoring + streaming — the rendering-scale decision). Loop 4a (edge data) is
@@ -73,7 +71,8 @@ ends by updating this section and writing `docs/decisions/loop-<N>.md`.**
    The primary-source glance at [qurancomplex.gov.sa](https://qurancomplex.gov.sa) is
    still owed and still trivial: the origin refused connections from this environment
    (`ECONNREFUSED`, both `/en/` and `/en/terms/`) and the Wayback mirror is not fetchable
-   here, so it needs an ordinary browser. Nothing in the build depends on the answer.
+   here, so it needs an ordinary browser — `make validate CHECK=kfgqpc-terms-primary-source`.
+   Nothing in the build depends on the answer.
    **The defect:** the colophon shipped in `74d5226` told every reader the mushaf pages
    were "إتاحة حرّة للاستعمال غير التجاري" — *non-commercial use only*. That is the
    **Libyan Endowments** edition's term, carried over to an edition we do not vendor; it
@@ -97,7 +96,8 @@ ends by updating this section and writing `docs/decisions/loop-<N>.md`.**
 4. **On-device VoiceOver/TalkBack pass** (Loop 3 exit named it; automated axe + the
    keyboard hop tour cover the machine-checkable floor, both green in CI). The manual
    screen-reader gesture walkthrough on a real iOS/Android device is the remaining
-   confirmation — run it alongside follow-up ① on the same phone, **before Loop 7**.
+   confirmation — `make validate CHECK=screen-reader-walkthrough`, run alongside
+   follow-up ① on the same phone, **before Loop 7**.
 5. ~~**Hifth's own license**~~ — **DECIDED 2026-07-25: GPL-3.0-or-later.** Opened by Loop 5,
    which vendored the [Quranic Arabic Corpus](https://corpus.quran.com/download/) morphology
    (**GPL + its own terms of use** — *not* CC-BY-SA, as this plan previously said; corrected
@@ -128,7 +128,8 @@ ends by updating this section and writing `docs/decisions/loop-<N>.md`.**
    **Still true, and now the only thing standing between us and the deploy:** the offer is
    only real if `SOURCE_REPO` resolves. **Make the repo public before publishing the
    Cloudflare deploy** — or repoint that one constant at wherever the source is served
-   from. Nothing else in the code changes either way.
+   from. Nothing else in the code changes either way; the check that it resolves for a
+   stranger is `make validate CHECK=source-offer-resolves`.
 6. ~~**`--ink-faint` contrast sweep**~~ — **closed** (`68746bf`). The token was redefined
    `#9c9284` → `#6b6255`, clearing 4.5:1 on all four surfaces it lands on; fixing it at the
    token rather than across 23 call sites, since every one of them is a `color:`.
@@ -153,13 +154,17 @@ ends by updating this section and writing `docs/decisions/loop-<N>.md`.**
    beta annotation layer on for a reader who never saw the badge. Opened by Loop 6a;
    **after Loop 7's sign-off**. See [loop-6a.md](decisions/loop-6a.md) §Deferred.
 
-**The half of these a machine cannot run now has a register.** Follow-ups ① (the phone),
-② (the browser glance), ④ (VoiceOver/TalkBack) and ⑤ (does the source link resolve for a
-stranger) all wait on a human, and prose cannot answer "is that still true, on what device,
-and when?". Each is an entry in [`docs/validation/ledger.json`](validation/ledger.json)
-with what it blocks and what its result **tunes**; `make validate` prints what is
-outstanding, and `gate:validation` fails if the ledger starts lying about it. Recording a
-result is the `validate` skill's job, not a paragraph edit here — see §Testing plan.
+**The half of these a machine cannot run now has a register — and a runbook.** Follow-ups
+① (the phone), ② (the browser glance), ④ (VoiceOver/TalkBack) and ⑤ (does the source link
+resolve for a stranger) all wait on a human, and prose cannot answer "is that still true, on
+what device, and when?". Each is an entry in
+[`docs/validation/ledger.json`](validation/ledger.json) carrying what it blocks, what its
+result **tunes**, and the steps to run it with what to expect on screen at each one. That
+runbook renders three ways — `make validate CHECK=<id>` here, `make guide` to a phone-shaped
+page served over the LAN, and the `validate` skill drives the session — so it is written
+once and cannot drift. `gate:validation` fails if the ledger starts lying, including a
+pending human check nobody could follow. Recording a result is `make record`, not a
+paragraph edit here — see §Testing plan.
 
 ---
 
@@ -336,11 +341,21 @@ what device, and when?" without reading four documents. Two gates close that loo
   and costs that reader's time again, and no automated check can tell a wrong edge
   from a right one.
 - **`gate:validation`** — the ledger at [`docs/validation/ledger.json`](validation/ledger.json):
-  every manual check, what it blocks, and what it **tunes**. It does *not* fail on
-  outstanding work (a phone nobody has held yet is a fact, not a broken build, and a
-  permanently red gate teaches everyone to ignore it); it fails when the ledger lies —
-  a `done` with no recorded result, an expired recurring check, or a check that tunes
-  nothing. `make validate` prints what the project is waiting on and what each blocks.
+  every manual check, what it blocks, what it **tunes**, and the runbook to run it. It does
+  *not* fail on outstanding work (a phone nobody has held yet is a fact, not a broken build,
+  and a permanently red gate teaches everyone to ignore it); it fails when the ledger lies —
+  a `done` with no recorded result, an expired recurring check, a check that tunes nothing,
+  or a pending human check with no runbook. `make validate` prints what the project is
+  waiting on and what each blocks.
+
+**Running one.** These checks happen with a phone in your hand, so the instructions have to
+reach the phone: `make guide` renders the ledger to
+[`docs/validation/guide.html`](validation/guide.html) and serves it over the LAN — one card
+per check, every step paired with what you should **expect** to see, checkboxes that survive
+a screen lock. `make validate CHECK=<id>` prints the same runbook here;
+`make record CHECK=<id> RESULT='…'` banks the verdict, regenerates the guide, and prints the
+`tunes` work now owed. One source, three renderers — a runbook restated anywhere else drifts
+silently, so this document deliberately names ids instead of steps.
 
 **The rule:** a manual result must tighten something automated — a threshold, a
 fixture, or a new gate. A check that feeds nothing has to be re-run by hand forever,

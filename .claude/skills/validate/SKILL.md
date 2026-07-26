@@ -30,6 +30,7 @@ fails if a check tunes nothing.
 | "is this loop landable?" | `make loop-verify` (tiers 1–5) | ~5min |
 | "are we ready to publish?" | all tiers, incl. 7 | days — tier 7 has human latency |
 | "what are we waiting on?" | `make validate` | instant |
+| "how do I actually run one?" | `make validate CHECK=<id>`, or `make guide` for the phone | instant |
 
 Run from the repo root unless a command says otherwise. `pnpm --filter @hifth/core build`
 comes first in almost everything: the other packages resolve `@hifth/core` through its
@@ -210,43 +211,59 @@ string, check it against `SOURCES.md`, and check `SOURCES.md` against the source
 
 ## Tier 7 — What a machine cannot run
 
-`docs/validation/ledger.json` is the register: every manual check, why it exists,
-how to run it, what it blocks, and — the field that matters — what it **tunes**.
+`docs/validation/ledger.json` is the register **and the runbook**: every manual
+check, why it exists, what it blocks, what it **tunes**, and — per check — a
+`runbook` of what you need, what to run, each step with the thing you should
+*expect to see*, and how to read the answer.
 
-```bash
-make validate      # list outstanding checks and what each one blocks
+That runbook is written once and rendered three ways. Never restate a check's
+steps in this file, in `PLAN.md`, or in a loop doc: a runbook that exists in two
+places drifts, and a drifted runbook fails silently because it still looks
+authoritative.
+
 ```
+docs/validation/ledger.json
+  ├── make validate CHECK=<id>   → the runbook in this terminal
+  ├── make guide                 → docs/validation/guide.html, served to the phone
+  └── this skill                 → drives the session
+```
+
+### Driving a session
+
+1. `make validate` — what is outstanding, what each one blocks.
+2. Pick one. Read it here with `make validate CHECK=<id>`.
+3. If it happens on a phone (most of them do), `make guide` and open the printed
+   LAN URL on the phone — same runbook, tickable, with the checkboxes persisted
+   so a screen lock does not lose the walkthrough. Run the check's own `setup`
+   commands (e.g. `make phone-perf`) in a second terminal.
+4. `make record CHECK=<id> RESULT='<the verdict, in words>'`. The words are the
+   artifact: a `done` with no result is indistinguishable from a check nobody ran.
+   Recording stamps the ledger, regenerates the guide, and re-runs the gate.
+5. **Do what `tunes` printed.** This is the step that makes the check worth its
+   cost: the measured fps becomes the asserted frame budget, the screen-reader
+   finding becomes an assertion in `share-a11y.spec.ts`, the edge verdicts become
+   fixture entries. A `done` that tuned nothing is a result you will have to buy
+   again.
+6. Note it in the relevant `docs/decisions/loop-<N>.md` and commit — ledger and
+   guide travel together.
+
+**If an `expect:` line does not match what the device actually shows, that is a
+bug in the runbook, not a detail to work around.** Fix the ledger, re-run
+`make guide`, then carry on — you are the last person who will be able to tell.
 
 `gate:validation` does not fail on `pending` work. A phone that has not been held
 yet is a fact about the project, not a broken build, and a permanently red gate
 just teaches everyone to ignore it. It fails when the ledger *lies*: a malformed
-entry, a `done` with no recorded result, a recurring check that has expired, or a
-check that tunes nothing.
-
-### Recording a result
-
-1. Run the check (each ledger entry has a `how`).
-2. Set `status: "done"`, add `verifiedOn` (ISO date) and `result` (the verdict, in
-   words — this is the artifact).
-3. **Do what `tunes` says.** This is the step that makes the check worth its cost:
-   the measured fps becomes the asserted frame budget, the screen-reader finding
-   becomes an assertion in `share-a11y.spec.ts`, the edge verdicts become fixture
-   entries. A `done` that tuned nothing is a result you will have to buy again.
-4. Note it in the relevant `docs/decisions/loop-<N>.md`.
+entry, a `done` with no recorded result, a recurring check that has expired, a
+check that tunes nothing, a pending human check with no runbook (nobody can run
+it, so it will sit there looking tracked), or a `guide.html` that was not
+regenerated after the ledger moved.
 
 ### The edge spot-audit — the scripture tier
 
-The one check with a dedicated tool, because it is the highest-value human input
-this project takes:
-
-```bash
-make audit-edges N=20 SEED=1     # a seeded, reproducible draw
-make audit-edges N=20 NEW=1      # skip edges already verified
-```
-
-The draw is seeded so a round can be re-run, re-checked, or handed to a second
-reader — same seed, same twenty edges, any machine. It prints the pairs to check
-and then the JSON to paste into `packages/etl/data/qa/verified-edges.json`.
+The one check with a dedicated tool (`make audit-edges`, seeded so a round can be
+re-run, re-checked, or handed to a second reader), because it is the highest-value
+human input this project takes. Steps: `make validate CHECK=edge-spot-audit`.
 
 **Record both verdicts.** `correct` means the edge must keep shipping;
 `wrong` means it must not. The negative case is the one that pays: an edge a
@@ -277,7 +294,7 @@ The suite is meant to grow as results arrive. Where a new check goes:
 | a new highlight or wash | a golden case, and both platforms' baselines |
 | a new vendored data source | a `SOURCES.md` entry + a `PROVENANCE.md` with a SHA-256 |
 | a new invariant about committed data | a `scripts/gate-*.mjs`, wired into `pnpm gates`, `make ci` and `.github/workflows/ci.yml` |
-| a check only a human can do | a `docs/validation/ledger.json` entry — with a non-empty `tunes` |
+| a check only a human can do | a `docs/validation/ledger.json` entry — non-empty `tunes`, and a `runbook` whose every step has an `expect` |
 
 New gates follow the existing shape: a header comment saying what it defends and
 *why the failure it prevents is hard to notice*, a clear failure message naming the
