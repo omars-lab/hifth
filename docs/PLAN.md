@@ -59,18 +59,29 @@ ends by updating this section and writing `docs/decisions/loop-<N>.md`.**
    (page vendoring + streaming — the rendering-scale decision). Loop 4a (edge data) is
    pure data work, orthogonal to the rendering verdict, and proceeds ungated; Loop 6
    inherits the gate through 4b.
-2. **License confirmation** — substantially resolved by the 2026-07-25 grounding pass:
-   [quranpedia/quran-svg](https://github.com/quranpedia/quran-svg) declares **CC0 1.0**
-   for its own contributions (ayah-polygon overlay + JSON metadata — "reuse freely,
-   including commercially, no attribution required") and documents KFQC's terms as free
-   use for personal/business/digital/web, with the single reservation that **printing
-   physical mushafs for commercial sale is reserved to the Complex** — which Hifth never
-   does. Caveat: the **Libyan Endowments** editions (Qalun/Warsh variants) are
-   **non-commercial only** — irrelevant to `hafs-kfqc`, but blocks vendoring those
-   editions later without approval. Remaining action before Loop 7: flip `SOURCES.md`
-   from PROVISIONAL to confirmed citing the repo's declaration, and do one primary-source
-   check of [KFGQPC](https://qurancomplex.gov.sa)'s published terms (the repo's summary is
-   secondhand).
+2. ~~**License confirmation**~~ — **substantially closed 2026-07-26**, and it caught a
+   live defect. The overlay half is now read at the source rather than summarised:
+   quran-svg's own contributions are **CC0 1.0**, which is the half the resolver depends
+   on and it carries no obligation at all. The Complex's terms are read from that repo's
+   [`NOTICE.md`](https://github.com/quranpedia/quran-svg/blob/main/NOTICE.md), which
+   quotes them verbatim and cites Royal Decrees 136/8 and 9/B/46356 — the restriction is
+   on **printing physical masahif for commercial sale**, not on digital or commercial use.
+   The primary-source glance at [qurancomplex.gov.sa](https://qurancomplex.gov.sa) is
+   still owed and still trivial: the origin refused connections from this environment
+   (`ECONNREFUSED`, both `/en/` and `/en/terms/`) and the Wayback mirror is not fetchable
+   here, so it needs an ordinary browser. Nothing in the build depends on the answer.
+   **The defect:** the colophon shipped in `74d5226` told every reader the mushaf pages
+   were "إتاحة حرّة للاستعمال غير التجاري" — *non-commercial use only*. That is the
+   **Libyan Endowments** edition's term, carried over to an edition we do not vendor; it
+   claimed a restriction on the artwork that its publisher does not impose. Corrected in
+   [`Colophon.tsx`](../apps/web/src/components/Colophon.tsx) and
+   [`SOURCES.md`](../SOURCES.md). Worth naming as a pattern: a licence *summary* written
+   into user-facing copy is a claim about someone else's terms, and the failure mode is
+   silent — a too-strict paraphrase reads as caution and nobody files a bug about it.
+   **Still live, for a later loop:** the **Libyan Endowments** editions (Qālūn/Warsh)
+   *are* non-commercial-only, and commercial use needs the Ministry's prior approval —
+   so `EditionPicker` may not grow one of those rows on the strength of `hafs-kfqc`'s
+   terms. Per-edition licence review, per the Loop 0 gate.
 3. Loop-assigned deferrals (already scoped in their loop sections; details in the decision
    records): full corpus vendoring + QUL validation → Loop 4b; **word-granularity roots +
    `?w=` UI → after 4b**; **word-granularity tajweed painting → after 4b** (the spans are
