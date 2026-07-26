@@ -52,10 +52,14 @@ ends by updating this section and writing `docs/decisions/loop-<N>.md`.**
    inline-SVG-everywhere vs content-visibility virtualization vs raster-glyph fallback.
    The emulated baseline (~8.3 ms/frame, flat under CPU throttle) cannot see the real
    risks: initial raster of a 170 KB inline SVG on a low-end phone, and re-raster on zoom
-   past the layer's backing store. **How to run:** `pnpm build && pnpm --filter @hifth/web
-   exec vite preview --host --port 4173`, open on a real mid/low-tier phone, pinch/pan
-   page 7, and read fps via Chrome remote DevTools / Safari Web Inspector
-   (`apps/web/perf/pan-zoom-trace.mjs` prints the same recipe). **Gates Loop 4b only**
+   past the layer's backing store. **How to run — `make phone-perf`.** It serves a probe
+   build to your phone; you tap ابدأ and pan, pinch, and tap ayahs for fifteen seconds,
+   and the page reports its own frame-time percentiles per segment plus paste-ready JSON
+   for the ledger. No cable and no DevTools — the old recipe (pair over USB, enable Web
+   Inspector, find the timeline) is a fair description of why this sat open for six loops,
+   and a check that expensive to run is a check that does not get run. The probe
+   ([`src/perf/probe.ts`](../apps/web/src/perf/probe.ts)) is behind a build-time flag and
+   never enters a shipped bundle. **Gates Loop 4b only**
    (page vendoring + streaming — the rendering-scale decision). Loop 4a (edge data) is
    pure data work, orthogonal to the rendering verdict, and proceeds ungated; Loop 6
    inherits the gate through 4b.

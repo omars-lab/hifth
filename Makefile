@@ -236,6 +236,27 @@ phone: build ## Serve the built app for your phone; prints the LAN URL to open
 	@echo ""
 	$(WEB) exec vite preview --host --port $(PORT)
 
+.PHONY: phone-perf
+phone-perf: ## Serve a probe build so the PHONE measures itself — the follow-up ① capture
+	@# VITE_PERF_PROBE is read at build time only (src/main.tsx), so this bundle
+	@# is a throwaway: never deploy dist/ after running this target. `make build`
+	@# or `make ci` overwrites it with a clean one.
+	$(CORE) build
+	VITE_PERF_PROBE=1 $(WEB) build
+	@echo ""
+	@echo "  On your phone (same Wi-Fi):  http://$(LAN_IP):$(PORT)"
+	@echo ""
+	@echo "  A dark bar sits at the top — tap ابدأ, then follow it for 15s:"
+	@echo "    pan with one finger · pinch in and out · tap different ayahs"
+	@echo "  Then long-press the JSON, copy it, and paste it into the"
+	@echo "  perf-verdict-on-device entry in docs/validation/ledger.json."
+	@echo ""
+	@echo "  Run it TWICE if you can: once as a browser tab, once from the Home"
+	@echo "  Screen install. Standalone gets its own compositor path, and the"
+	@echo "  JSON stamps which one you were in."
+	@echo ""
+	$(WEB) exec vite preview --host --port $(PORT)
+
 .PHONY: perf
 perf: ## Run the pan/zoom perf harness (emulated baseline; prints the on-device recipe)
 	@echo "  Follow-up ① (gates Loop 4): capture real-device fps — see the recipe this prints."

@@ -18,3 +18,16 @@ createRoot(root).render(
 );
 
 initPwa();
+
+/*
+ * The on-device perf probe (`make phone-perf`), and nothing else, mounts here.
+ *
+ * `import.meta.env.VITE_PERF_PROBE` is substituted at build time, so in every
+ * normal build this reads `if (undefined)` and Rollup drops both the branch and
+ * the dynamic import behind it — the probe's bytes never enter the bundle, and
+ * `gate:budget` confirms it. Build-time is the point: a URL parameter would let
+ * anyone with a share link turn a measurement slab on over someone's mushaf.
+ */
+if (import.meta.env.VITE_PERF_PROBE) {
+  void import("./perf/probe").then((m) => m.mountPerfProbe());
+}

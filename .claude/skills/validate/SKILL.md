@@ -156,13 +156,24 @@ how a wrong wash hides forever.
 
 ```bash
 make lighthouse    # all four categories ≥90 against the built app
-make perf          # emulated pan/zoom trace + the on-device recipe
+make perf          # emulated pan/zoom trace — the regression baseline
+make phone-perf    # the real number: the phone measures itself (Tier 7)
 ```
 
 `make perf` gives an emulated baseline (~8.3 ms/frame, flat under CPU throttle).
-**Treat that number as unvalidated.** It structurally cannot see the two risks
-that matter: initial raster of a ~170 KB inline SVG on a low-end phone, and
-re-raster on zoom past the layer's backing store. Only Tier 7 can.
+**Treat that number as unvalidated.** It writes `style.transform` in a loop, so
+it never pays for touch dispatch, hit-testing hundreds of polygons, or the
+compositor's decision to re-raster a scaled layer — which are the three costs
+the architecture verdict turns on. Use it to catch regressions, never to decide.
+
+`make phone-perf` is the one that decides. It builds a throwaway bundle carrying
+`src/perf/probe.ts`, serves it to your phone, and the page samples its own frame
+times across three separate segments (pan / pinch / tap-to-highlight) while you
+drive it with real fingers, then prints paste-ready JSON for the ledger. The
+probe is gated on a **build-time** flag and never enters a shipped bundle —
+verify with `grep -c probe apps/web/dist/assets/index-*.js` after a plain
+`make build`. Do not deploy a `dist/` produced by this target; any later
+`make build` or `make ci` overwrites it.
 
 ---
 

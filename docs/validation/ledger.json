@@ -27,7 +27,7 @@
       "id": "perf-verdict-on-device",
       "title": "On-device pan/zoom + highlight-toggle verdict",
       "why": "The emulated baseline (~8.3 ms/frame, flat under CPU throttle) structurally cannot see the two real risks: initial raster of a ~170 KB inline SVG on a low-end phone, and re-raster on zoom past the layer's backing store. The rendering-scale decision for 604 pages rests on this and nothing else.",
-      "how": "make phone → open the printed LAN URL on a real mid/low-tier Android and an older iPhone → pinch/pan the densest bundled page → read fps via Chrome remote DevTools / Safari Web Inspector. `make perf` prints the same recipe.",
+      "how": "make phone-perf → open the printed LAN URL on a real mid/low-tier Android and an older iPhone → tap ابدأ and follow the bar for 15s (pan, pinch, tap ayahs) → long-press the JSON it prints and paste it into this entry's `result`. No cable and no DevTools: the phone measures itself with a rAF sampler (apps/web/src/perf/probe.ts), because the old recipe — pair over USB, enable Web Inspector, find the timeline — is why this check sat open for six loops. Run it twice where you can, once as a browser tab and once from the Home Screen install; the JSON stamps which. The DevTools route still works if you want a flame chart: `make phone` serves the same build without the probe.",
       "decides": "inline-SVG everywhere | content-visibility virtualization | raster-glyph fallback",
       "owner": "user",
       "status": "pending",
