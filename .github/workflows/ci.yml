@@ -77,6 +77,21 @@ jobs:
       - name: Gate — license (SOURCES.md)
         run: pnpm gate:license
 
+      # The manual-validation ledger. This does NOT fail on outstanding checks —
+      # a phone that has not been held yet is a fact, not a broken build, and a
+      # permanently red gate teaches everyone to ignore it. It fails when the
+      # ledger lies: a malformed entry, a "done" with no recorded result, or a
+      # recurring check whose result has expired. Its log doubles as the answer
+      # to "what is this project actually waiting on?".
+      - name: Gate — manual-validation ledger
+        run: pnpm gate:validation
+
+      # Human verdicts about edges, enforced forever. "correct" edges must still
+      # ship; "wrong" ones must stay gone. A reader with a mushaf is the scarcest
+      # input this project has — this is what stops their time being spent twice.
+      - name: Gate — verified edges hold
+        run: pnpm gate:verified-edges
+
       - name: Build
         run: pnpm build
 

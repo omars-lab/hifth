@@ -155,6 +155,8 @@ ci: core ## Full local mirror of the CI build-test-gate job, IN CI ORDER
 	$(PNPM) audit:corpus
 	$(PNPM) gate:notext
 	$(PNPM) gate:license
+	$(PNPM) gate:validation
+	$(PNPM) gate:verified-edges
 	$(CORE) build && $(WEB) build
 	$(PNPM) gate:budget
 	@echo ""
@@ -240,6 +242,25 @@ perf: ## Run the pan/zoom perf harness (emulated baseline; prints the on-device 
 	$(WEB) perf
 
 # ---------------------------------------------------------------------------
+# Validation (the "validate" skill drives these; see .claude/skills/validate/)
+#
+# Automated tiers live above — this section is the half a machine cannot run and
+# the ledger that stops those results from evaporating into prose.
+# ---------------------------------------------------------------------------
+
+.PHONY: validate
+validate: ## What is this project waiting on? The manual-validation ledger, and what each blocks
+	@node scripts/gate-validation.mjs
+	@node scripts/gate-verified-edges.mjs
+
+.PHONY: audit-edges
+audit-edges: ## Draw a seeded sample of edges for a mushaf spot-audit:  make audit-edges N=20 SEED=1
+	@# node directly, not `pnpm sample:edges --`: pnpm forwards the separator
+	@# itself, and the extra "--" lands in argv where the flag parser sees it.
+	@node packages/etl/scripts/sample-edges.mjs \
+	  $(if $(N),--n $(N),) $(if $(SEED),--seed $(SEED),) $(if $(NEW),--skip-verified,)
+
+# ---------------------------------------------------------------------------
 
 .PHONY: help
 help: ## List targets (this)
@@ -251,6 +272,9 @@ help: ## List targets (this)
 	@echo ""
 	@echo "  Loop workflow:  make status | make loop N=2 | make loop-verify N=2"
 	@echo "  On device:      make phone | make perf"
+	@echo "  Validation:     make validate         (what are we waiting on, and what it blocks)"
+	@echo "                  make audit-edges N=20 SEED=1  (seeded draw for a mushaf spot-audit)"
+	@echo "                  the full catalogue: .claude/skills/validate/SKILL.md"
 	@echo "  Golden images:  make golden        (diff against this platform's baselines)"
 	@echo "                  make golden-update (accept new ones — review the PNG diff!)"
 	@echo "                  make golden-linux UPDATE=1  (refresh the CI/linux set)"

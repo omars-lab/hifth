@@ -1,0 +1,112 @@
+{
+  "$comment": [
+    "The manual-validation ledger: every check a machine cannot run, and where",
+    "its result went.",
+    "",
+    "Automated gates are self-recording — CI is either green or it is not. The",
+    "checks that need a phone, a mushaf, or a pair of ears have no such memory:",
+    "they get done once, written into a decision record in prose, and then nobody",
+    "can answer 'is that still true, and on what device, and when?' without",
+    "reading four documents. This file is that answer, in one place a gate can",
+    "read (scripts/gate-validation.mjs).",
+    "",
+    "The point is not bookkeeping. It is that a manual result should end up",
+    "tightening something automated — a threshold, a fixture, a new gate — so the",
+    "expensive check does not have to be repeated to stay true. That is what the",
+    "`tunes` field records: what this verdict is allowed to change. An entry whose",
+    "`tunes` is empty is a check we are paying for and not banking.",
+    "",
+    "status:  pending | done | superseded",
+    "blocks:  roadmap items that cannot proceed until this is `done`",
+    "tunes:   the automated artifact this result feeds (threshold, fixture, gate)",
+    "staleAfterDays: for repeating checks — how long a `done` result stays valid",
+    "                before the gate asks for it again. Omit for one-shot checks."
+  ],
+  "checks": [
+    {
+      "id": "perf-verdict-on-device",
+      "title": "On-device pan/zoom + highlight-toggle verdict",
+      "why": "The emulated baseline (~8.3 ms/frame, flat under CPU throttle) structurally cannot see the two real risks: initial raster of a ~170 KB inline SVG on a low-end phone, and re-raster on zoom past the layer's backing store. The rendering-scale decision for 604 pages rests on this and nothing else.",
+      "how": "make phone → open the printed LAN URL on a real mid/low-tier Android and an older iPhone → pinch/pan the densest bundled page → read fps via Chrome remote DevTools / Safari Web Inspector. `make perf` prints the same recipe.",
+      "decides": "inline-SVG everywhere | content-visibility virtualization | raster-glyph fallback",
+      "owner": "user",
+      "status": "pending",
+      "blocks": ["loop-4b", "loop-6b", "loop-7"],
+      "tunes": [
+        "apps/web/perf/pan-zoom-trace.mjs — the frame budget asserted in CI becomes the measured number, not the emulated one",
+        "docs/PLAN.md §Loop 4b — which of the three rendering strategies gets built"
+      ],
+      "record": "docs/decisions/loop-1.md → a new docs/decisions/loop-4b.md"
+    },
+    {
+      "id": "screen-reader-walkthrough",
+      "title": "VoiceOver / TalkBack gesture walkthrough",
+      "why": "axe and the keyboard hop tour cover the machine-checkable floor and are green, but neither can tell you whether a screen-reader user can actually select an ayah and hop. Per-polygon labels are a design bet that has never been heard out loud.",
+      "how": "On the same phone as perf-verdict-on-device: enable VoiceOver (iOS) / TalkBack (Android), then run the core tour by gesture alone — select an ayah, open the rail, hop, walk back along the beads.",
+      "owner": "user",
+      "status": "pending",
+      "blocks": ["loop-7"],
+      "tunes": [
+        "apps/web/e2e/share-a11y.spec.ts — any announcement that is wrong or missing becomes an assertion there",
+        "packages/core/src/highlighter.ts — the aria-label shape, if the labels read badly"
+      ],
+      "record": "docs/decisions/loop-3.md §a11y"
+    },
+    {
+      "id": "kfgqpc-terms-primary-source",
+      "title": "Read the Complex's published terms at the source",
+      "why": "SOURCES.md currently reads KFGQPC's terms through quran-svg's NOTICE.md, which quotes them verbatim and cites Royal Decrees 136/8 and 9/B/46356 — strong, but secondary. The app states those terms to every reader in the colophon, and an earlier paraphrase of them was wrong.",
+      "how": "Open qurancomplex.gov.sa in an ordinary browser. It refuses connections from this environment (ECONNREFUSED on /en/ and /en/terms/) and web.archive.org is not fetchable from the tooling. Confirm the wording still says free digital/web/software use with commercial printing reserved.",
+      "owner": "user",
+      "status": "pending",
+      "blocks": [],
+      "tunes": [
+        "SOURCES.md §hafs-kfqc — drops the 'pending-that-glance' clause from the Status line",
+        "apps/web/src/components/Colophon.tsx — the mushaf licence line, if the wording moved"
+      ],
+      "record": "SOURCES.md §hafs-kfqc"
+    },
+    {
+      "id": "source-offer-resolves",
+      "title": "The GPL §6 offer resolves for a stranger",
+      "why": "Publishing a static PWA conveys it: the browser receives real copies of the JS and of assets/roots/**, a GPL-covered derivative. The colophon links SOURCE_REPO at the exact build commit, which discharges the obligation only if that URL opens for someone who is not signed in as us.",
+      "how": "Open the colophon's source link in a private/logged-out browser window against the deployed build. It must land on real source, at a commit, not a 404.",
+      "owner": "user",
+      "status": "pending",
+      "blocks": ["public-deploy"],
+      "tunes": [
+        "apps/web/src/provenance.ts — SOURCE_REPO, if the source is served from somewhere other than the GitHub repo"
+      ],
+      "record": "docs/PLAN.md follow-up ⑤"
+    },
+    {
+      "id": "edge-spot-audit",
+      "title": "Edge spot-audit — 20 random edges against a printed mushaf",
+      "why": "The data is scripture. Every automated gate here proves the shards are well-formed; none can prove an edge is true. This is the only check that can, and it is the one whose results are worth the most per minute spent.",
+      "how": "Draw 20 edges at random from the shipped shards, look each pair up in a printed mushaf, and judge whether they are genuinely mutashabihat. Record every verdict — correct AND wrong — in packages/etl/data/qa/verified-edges.json.",
+      "owner": "user",
+      "status": "pending",
+      "blocks": ["web-v1.0"],
+      "staleAfterDays": 14,
+      "tunes": [
+        "packages/etl/data/qa/verified-edges.json — every verdict becomes a permanent gate assertion via gate:verified-edges",
+        "packages/etl/scripts/build-adjacency.mjs — a systematic class of wrong edge becomes a filter, not 20 more rejections"
+      ],
+      "record": "packages/etl/data/qa/verified-edges.json"
+    },
+    {
+      "id": "offline-survival-8-day",
+      "title": "8+ day offline survival, installed vs browser tab",
+      "why": "Safari's ITP deletes all script storage for origins untouched for 7 days of browser use, and Home-Screen-installed apps are exempt. That single asymmetry is why the install prompt is a feature and not a nicety — and it has never been observed, only read about.",
+      "how": "Pin a juz in both an installed PWA and a Safari tab. Leave both for 8+ days of normal browser use. Then go into airplane mode and try to revise the pinned juz in each.",
+      "owner": "user",
+      "status": "pending",
+      "blocks": ["loop-6b"],
+      "tunes": [
+        "apps/web/e2e/offline.spec.ts — the eviction-detection path gets asserted against what actually happened",
+        "apps/web/src/storage.ts — the re-pin offer's trigger, if eviction looks different than assumed"
+      ],
+      "record": "docs/decisions/loop-6b.md"
+    }
+  ]
+}
