@@ -270,9 +270,26 @@ perf: ## Run the pan/zoom perf harness (emulated baseline; prints the on-device 
 # ---------------------------------------------------------------------------
 
 .PHONY: validate
-validate: ## What is this project waiting on? The manual-validation ledger, and what each blocks
-	@node scripts/gate-validation.mjs
-	@node scripts/gate-verified-edges.mjs
+validate: ## Outstanding manual checks — or one check's full runbook:  make validate CHECK=<id>
+	@if [ -n "$(CHECK)" ]; then \
+	  node scripts/gate-validation.mjs --check "$(CHECK)"; \
+	else \
+	  node scripts/gate-validation.mjs; \
+	  node scripts/gate-verified-edges.mjs; \
+	fi
+
+.PHONY: guide
+guide: ## Render the runbooks to docs/validation/guide.html and serve them to your phone
+	@# The checks happen with a phone in one hand; the instructions have always
+	@# lived in a terminal the phone cannot see. Same source as `make validate`
+	@# CHECK=<id> — docs/validation/ledger.json — rendered for the device.
+	@LAN_IP="$(LAN_IP)" node scripts/build-validation-guide.mjs --serve
+
+.PHONY: record
+record: ## Bank a manual result:  make record CHECK=<id> RESULT='the verdict, in words'
+	@test -n "$(CHECK)" || { echo "usage: make record CHECK=<id> RESULT='<the verdict>'"; exit 2; }
+	@node scripts/record-validation.mjs --check "$(CHECK)" --result "$(RESULT)" \
+	  $(if $(STATUS),--status $(STATUS),) $(if $(ON),--on $(ON),)
 
 .PHONY: audit-edges
 audit-edges: ## Draw a seeded sample of edges for a mushaf spot-audit:  make audit-edges N=20 SEED=1
@@ -294,6 +311,9 @@ help: ## List targets (this)
 	@echo "  Loop workflow:  make status | make loop N=2 | make loop-verify N=2"
 	@echo "  On device:      make phone | make perf"
 	@echo "  Validation:     make validate         (what are we waiting on, and what it blocks)"
+	@echo "                  make validate CHECK=<id>      (one check's full runbook, here)"
+	@echo "                  make guide                    (the same runbooks, on your phone)"
+	@echo "                  make record CHECK=<id> RESULT='…'  (bank the verdict)"
 	@echo "                  make audit-edges N=20 SEED=1  (seeded draw for a mushaf spot-audit)"
 	@echo "                  the full catalogue: .claude/skills/validate/SKILL.md"
 	@echo "  Golden images:  make golden        (diff against this platform's baselines)"

@@ -1,32 +1,42 @@
 #!/usr/bin/env node
 /**
- * CI gate: the manual-validation ledger is well-formed, and no `done` result has
- * gone stale.
+ * CI gate: the manual-validation ledger is well-formed, every outstanding human
+ * check is actually followable, and no `done` result has gone stale.
  *
  * This gate deliberately does NOT fail on `pending` work. A pending check is a
  * fact about the project, not a broken build — failing on it would mean the tree
  * is red for weeks because someone has not held a phone yet, and a permanently
  * red gate teaches everyone to ignore it. What it fails on is the ledger lying:
  * a malformed entry, a `done` with no evidence, a recurring check whose result
- * has expired, or a check that claims to tune nothing (which means we are paying
- * a human for a result and then banking none of it).
+ * has expired, a check that claims to tune nothing (which means we are paying a
+ * human for a result and then banking none of it), or a pending human check with
+ * no runbook — a check nobody can follow is a check that will not be run, and it
+ * should not be able to sit in the register looking tracked.
  *
  * Pending work is *reported*, loudly, with what it blocks — so `pnpm gates`
  * doubles as the answer to "what is this project actually waiting on?".
+ *
+ * Also the terminal renderer for a runbook:
+ *
+ *   node scripts/gate-validation.mjs --check perf-verdict-on-device
+ *
+ * The runbook itself is never written here. It lives in the ledger, and the
+ * guide (docs/validation/guide.html) renders the same source for the phone.
  */
-import { readFileSync, existsSync } from "node:fs";
-import { join } from "node:path";
+import { readLedger, ledgerHash, guideHash, needsRunbook } from "./validation-ledger.mjs";
 
-const ROOT = new URL("..", import.meta.url).pathname;
-const LEDGER = join(ROOT, "docs", "validation", "ledger.json");
+const ledger = readLedger();
+const checks = ledger.checks ?? [];
 
-if (!existsSync(LEDGER)) {
-  console.error(`gate:validation — FAIL: ledger missing at ${LEDGER}`);
-  process.exit(1);
+const wanted = (() => {
+  const i = process.argv.indexOf("--check");
+  return i >= 0 ? process.argv[i + 1] : null;
+})();
+if (wanted) {
+  printRunbook(wanted);
+  process.exit(0);
 }
 
-const ledger = JSON.parse(readFileSync(LEDGER, "utf8"));
-const checks = ledger.checks ?? [];
 const STATUSES = new Set(["pending", "done", "superseded"]);
 const REQUIRED = ["id", "title", "why", "how", "owner", "status", "tunes"];
 
@@ -63,6 +73,25 @@ for (const check of checks) {
     );
   }
 
+  // A pending human check with no runbook is the failure this register was
+  // built to stop: it looks tracked, and it will still be pending in six loops
+  // because nobody can tell what to do with the phone in their hand.
+  if (needsRunbook(check) && !(check.runbook?.steps ?? []).length) {
+    errors.push(
+      `${where}: pending, owned by a human, and has no "runbook.steps". Write the ` +
+        `steps (do + expect) in the ledger — they render to the terminal, to ` +
+        `docs/validation/guide.html, and into the validate skill.`,
+    );
+  }
+  for (const [i, step] of (check.runbook?.steps ?? []).entries()) {
+    if (!step.do || !step.expect) {
+      errors.push(
+        `${where}: runbook.steps[${i}] needs both "do" and "expect". A step with no ` +
+          `expectation cannot be failed, so it cannot be passed either.`,
+      );
+    }
+  }
+
   if (check.status === "done") {
     if (!check.verifiedOn) errors.push(`${where}: done, but no "verifiedOn"`);
     if (!check.result) errors.push(`${where}: done, but no "result" — the verdict is the artifact`);
@@ -82,6 +111,19 @@ for (const check of checks) {
   }
 }
 
+// The guide is generated and committed, so it can drift from its source in a
+// diff that looks innocent. Same rule the ETL shards live under: a committed
+// artifact is only trustworthy if a gate proves it was regenerated.
+const want = ledgerHash(checks);
+const have = guideHash();
+if (have === null) {
+  errors.push(`docs/validation/guide.html is missing or unstamped — run: make guide`);
+} else if (have !== want) {
+  errors.push(
+    `docs/validation/guide.html is stale (built from ${have}, ledger is ${want}) — run: make guide`,
+  );
+}
+
 if (errors.length || stale.length) {
   console.error("gate:validation — FAIL\n");
   for (const e of errors) console.error(`  ${e}`);
@@ -97,6 +139,83 @@ if (pending.length) {
   for (const p of pending) {
     const blocks = (p.blocks ?? []).length ? ` → blocks ${p.blocks.join(", ")}` : "";
     console.log(`    · [${p.owner}] ${p.title}${blocks}`);
+    console.log(`      make validate CHECK=${p.id}`);
   }
-  console.log(`\n  Run them with the "validate" skill; record results in docs/validation/ledger.json.`);
+  console.log(`\n  Read one on your phone with "make guide"; record a result with "make record".`);
+}
+
+/**
+ * Print one check's runbook. Wrapped at 76 columns because this is read in a
+ * terminal beside the thing being tested, not scrolled.
+ */
+function printRunbook(id) {
+  const check = checks.find((c) => c.id === id);
+  if (!check) {
+    console.error(`\n  No check "${id}" in the ledger. Available:\n`);
+    for (const c of checks) console.error(`    ${c.id}  (${c.status})`);
+    console.error("");
+    process.exit(2);
+  }
+
+  const rb = check.runbook ?? {};
+  const rule = "  " + "─".repeat(72);
+
+  console.log(`\n  ${check.title}`);
+  console.log(`  ${check.id} · ${check.status}${check.verifiedOn ? ` · verified ${check.verifiedOn}` : ""}`);
+  if ((check.blocks ?? []).length) console.log(`  blocks: ${check.blocks.join(", ")}`);
+  if (check.staleAfterDays) console.log(`  repeats: goes stale after ${check.staleAfterDays} days`);
+  console.log(rule);
+  console.log(wrap(check.why, "  "));
+
+  section("What you need", rb.needs);
+  if ((rb.setup ?? []).length) {
+    console.log(`\n  Setup (here, on this machine)`);
+    for (const s of rb.setup) {
+      console.log(`\n    $ ${s.run}`);
+      if (s.expect) console.log(wrap(`→ ${s.expect}`, "      "));
+    }
+  }
+  if ((rb.steps ?? []).length) {
+    console.log(`\n  Steps`);
+    for (const [i, s] of rb.steps.entries()) {
+      console.log("");
+      console.log(wrap(`${String(i + 1).padStart(2)}. ${s.do}`, "    ", 8));
+      console.log(wrap(`expect: ${s.expect}`, "        "));
+    }
+  }
+  section("Reading the result", rb.reading);
+
+  console.log(`\n  Record it`);
+  console.log(`\n    ${rb.record ?? `make record CHECK=${check.id} RESULT='<the verdict>'`}`);
+  console.log(`\n  Then do what it tunes — this is the step that makes it worth the cost:`);
+  for (const t of check.tunes ?? []) console.log(wrap(`· ${t}`, "    ", 6));
+  if (check.record) console.log(`\n  Written up in: ${check.record}`);
+  console.log("");
+}
+
+function section(title, lines) {
+  if (!(lines ?? []).length) return;
+  console.log(`\n  ${title}`);
+  for (const line of lines) {
+    console.log("");
+    console.log(wrap(`· ${line}`, "    ", 6));
+  }
+}
+
+/** Word-wrap to 76 columns with a first-line indent and an optional hanging indent. */
+function wrap(text, indent, hang = indent.length) {
+  const width = 76 - indent.length;
+  const hanging = " ".repeat(hang);
+  const out = [];
+  let line = "";
+  for (const word of String(text).split(/\s+/)) {
+    if (line && line.length + 1 + word.length > width) {
+      out.push(line);
+      line = word;
+    } else {
+      line = line ? `${line} ${word}` : word;
+    }
+  }
+  if (line) out.push(line);
+  return out.map((l, i) => (i === 0 ? indent + l : hanging + l)).join("\n");
 }
