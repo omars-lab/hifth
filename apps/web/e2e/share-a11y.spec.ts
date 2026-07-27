@@ -1,6 +1,7 @@
-import { test, expect } from "@playwright/test";
+import { test, expect, type Page } from "@playwright/test";
 import { tapAyah } from "./ayah";
 import AxeBuilder from "@axe-core/playwright";
+import { COACH_STORAGE_KEY } from "../src/coach";
 
 // Loop 3 exit criterion (PLAN §Loop 3):
 //   cold-opening a teacher link restores the exact view incl. trail; the screen
@@ -121,6 +122,120 @@ test.describe("Hifth · keyboard a11y", () => {
     await expect(sheet).toBeVisible();
     await page.keyboard.press("Escape");
     await expect(sheet).toBeHidden();
+  });
+});
+
+/**
+ * The screen-reader tour, pinned as trees rather than as a list of strings.
+ *
+ * The `screen-reader-walkthrough` ledger check is eight steps of "swipe here,
+ * you should hear this". Five of those steps are asserting the accessibility
+ * *tree* — which controls exist, in what order, under what names — and a tree
+ * is a thing a machine can hold onto. So it holds onto it here, and the human
+ * check keeps only the three steps an ear can do and a runner cannot: whether
+ * «الآية البقرة · ٢:٤٨» is a phrase a person would say, whether focus can
+ * escape out of the back of a sheet, and whether the whole tour survives with
+ * the screen off.
+ *
+ * This is the ledger's rule running forwards for once. A manual result is
+ * supposed to tighten something automated; here the automation lands first, so
+ * the fifteen minutes the check costs are spent on what only they can buy.
+ *
+ * Why aria snapshots and not more `getByRole(...)` assertions: an assertion
+ * proves a control is still there, and says nothing about the four that
+ * disappeared beside it. Every regression this runbook actually fears — a
+ * glyph-only button losing its label and reading as "▤", a number badge
+ * leaking through as "circle 3", the chrome quietly dropping a control at a
+ * narrower width — is a change in the shape of the tree, and only a snapshot
+ * of the whole tree fails on it.
+ *
+ * Reviewing a diff here: these files are the runbook's `expect` lines. A
+ * changed name is a changed announcement. Regenerate with
+ * `pnpm -C apps/web exec playwright test share-a11y --update-snapshots` only
+ * after reading the new name out loud.
+ */
+test.describe("Hifth · aria snapshots (the tour the ledger describes)", () => {
+  /** A returning reader with storage settled — no coach strip, no quota notice.
+   *  First-run chrome is its own tree and its own test; mixing it in here would
+   *  make every snapshot re-record the day the coach copy changes. */
+  const settled = (page: Page) =>
+    page.addInitScript((coachKey: string) => {
+      try {
+        localStorage.setItem(coachKey, "1");
+      } catch {
+        /* private mode — the strip stays hidden anyway */
+      }
+      Object.defineProperty(navigator, "storage", {
+        configurable: true,
+        value: {
+          persist: async () => true,
+          persisted: async () => true,
+          estimate: async () => ({ usage: 1_000_000, quota: 40 * 1024 * 1024 * 1024 }),
+        },
+      });
+    }, COACH_STORAGE_KEY);
+
+  /** Select 2:48 and open its in-surah hop popover — the state steps 4–5 describe. */
+  async function openHopPopover(page: Page): Promise<void> {
+    await tapAyah(page, "#verse-55");
+    await page
+      .getByRole("group", { name: "روابط الآية" })
+      .getByRole("button", { name: /متشابهات في السورة/ })
+      .tap();
+    await expect(page.getByRole("dialog")).toBeVisible();
+  }
+
+  // Runbook step 1. The chrome is where glyph-only controls live: ⌖ and ▤ carry
+  // no text of their own, so a lost label does not degrade them, it deletes
+  // them — and the tree is where that shows up as a name reading "⌖".
+  test("the chrome announces every control by word, never by glyph", async ({ page }) => {
+    await settled(page);
+    await page.goto("/");
+    await expect(page.locator("svg[role='group']").first()).toBeVisible();
+    await expect(page.locator("header")).toMatchAriaSnapshot({ name: "chrome.aria.yml" });
+  });
+
+  // Runbook step 2. Establishes the polygon hit layer is an accessible surface
+  // at all: the page is a labelled group and every ayah under it is a button
+  // named «الآية <السورة> · <المرجع>» (enhancePolygons, packages/core).
+  test("the mushaf page is a labelled group of ayah buttons", async ({ page }) => {
+    await settled(page);
+    await page.goto("/");
+    const stage = page.locator("svg[role='group']").first();
+    await expect(stage).toBeVisible();
+    await expect(stage).toMatchAriaSnapshot({ name: "page-group.aria.yml" });
+  });
+
+  // Runbook step 4. Each chip carries a glyph and a number badge, both
+  // aria-hidden, so the label has to rebuild the meaning in words. This is the
+  // tree that fails if the badge ever leaks through as "circle 3".
+  test("the hop rail reads as words plus a count", async ({ page }) => {
+    await settled(page);
+    await page.goto("/");
+    await tapAyah(page, "#verse-55");
+    const rail = page.getByRole("group", { name: "روابط الآية" });
+    await expect(rail).toBeVisible();
+    await expect(rail).toMatchAriaSnapshot({ name: "hop-rail.aria.yml" });
+  });
+
+  // Runbook step 5, the half a machine can do: the sheet's own contents — a
+  // close control named «إغلاق» and targets named «انتقل إلى …». Whether focus
+  // can be swiped out of the back of it is still step 5's job, and still human.
+  test("the open hop popover names its close control and every target", async ({ page }) => {
+    await settled(page);
+    await page.goto("/");
+    await openHopPopover(page);
+    await expect(page.getByRole("dialog")).toMatchAriaSnapshot({ name: "hop-popover.aria.yml" });
+  });
+
+  // Runbook step 7. The trail is the only way back; if the beads do not say
+  // where they lead, the back path exists visually and nowhere else. Driven
+  // from a share link so the chain of beads is deterministic.
+  test("the trail beads say where each one leads back to", async ({ page }) => {
+    await settled(page);
+    await page.goto("/#/hafs-kfqc/2:123?trail=2:40,2:47&via=2:48");
+    await expect(page.locator("header .numeric")).toHaveText("19");
+    await expect(page.locator("footer")).toMatchAriaSnapshot({ name: "trail.aria.yml" });
   });
 });
 

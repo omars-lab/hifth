@@ -136,7 +136,7 @@
       "id": "screen-reader-walkthrough",
       "title": "VoiceOver / TalkBack gesture walkthrough",
       "why": "axe and the keyboard hop tour cover the machine-checkable floor and are green, but neither can tell you whether a screen-reader user can actually select an ayah and hop. Per-polygon labels are a design bet that has never been heard out loud.",
-      "how": "On the same phone as perf-verdict-on-device: enable VoiceOver (iOS) / TalkBack (Android), then run the core tour by gesture alone — select an ayah, open the rail, hop, walk back along the beads.",
+      "how": "On the same phone as perf-verdict-on-device: enable VoiceOver (iOS) / TalkBack (Android), then run the core tour by gesture alone. The accessibility tree — which controls exist, in what order, under what names — is pinned in apps/web/e2e/__aria__/ and re-checked on every run, so this check is now only the three things a runner cannot do: judge the phrasing by ear, try to escape a sheet by gesture, and do the whole tour without looking.",
       "owner": "user",
       "status": "pending",
       "blocks": [
@@ -145,8 +145,9 @@
       "runbook": {
         "needs": [
           "The same phone, with VoiceOver (iOS: Settings → Accessibility → VoiceOver, or triple-click the side button) or TalkBack (Android: Settings → Accessibility).",
-          "About 15 quiet minutes. You are listening, not looking — the last step asks you to stop looking entirely.",
-          "The ordinary build, not the probe build."
+          "About 8 quiet minutes. You are listening, not looking — the last step asks you to stop looking entirely.",
+          "The ordinary build, not the probe build.",
+          "Nothing to memorise. This used to be eight steps; five of them were checking that a control existed under a given name, and those are now aria snapshots in apps/web/e2e/__aria__/{iphone,android}/ that fail the build when a label changes. Reading those five files first is optional and takes a minute — they are exactly what the app should announce."
         ],
         "setup": [
           {
@@ -156,60 +157,36 @@
         ],
         "steps": [
           {
-            "do": "Turn the screen reader on, open the URL, and swipe right from the very top to walk the chrome.",
-            "expect": "In order: the wordmark as «عن حِفظ · الرخصة والمصادر», the ⌖ control as «اذهب إلى · سورة أو جزء أو آية», the ▤ control as «المصحف», and a group «مظهر الصفحة» for the skin switch. Glyph-only controls must never read as their glyph.",
-            "why": "Glyph-only controls are the classic failure: ⌖ and ▤ carry no text of their own, so a missing or wrong label does not degrade the control, it deletes it. Cheapest place in the tour to catch that."
-          },
-          {
-            "do": "Swipe into the mushaf page itself.",
-            "expect": "The page SVG is a group labelled by its page label, and every ayah is a button. Each announces «الآية <اسم السورة> · ٢:٤٨» — the word ayah, the surah name, then the reference in Arabic-Indic digits.",
-            "why": "Establishes that the polygon hit layer is an accessible surface at all, rather than decoration the screen reader walks straight past. If ayahs are not buttons here, the app has no screen-reader story below the chrome.",
+            "do": "Turn the screen reader on, open the URL, swipe into the mushaf, and listen to three or four ayah labels in a row. Judge the phrasing out loud. This is the bet under test.",
+            "expect": "«الآية البقرة · ٢:٤٨» — that the label exists and reads exactly this is already asserted by e2e/__aria__/*/page-group.aria.yml. What you are judging is whether it sounds like something you would say, and whether your voice speaks ٢:٤٨ correctly rather than as \"two colon four eight\" or as a year.",
+            "why": "The one thing no linter can check. axe proves a label exists and the snapshot proves it has not changed; only an ear can tell you the phrase is one a person would use, and only a real voice engine tells you how Arabic-Indic digits actually come out.",
             "shot": "ayah-selected"
           },
           {
-            "do": "Listen to three or four ayah labels in a row and judge the phrasing out loud. This is the bet under test.",
-            "expect": "It should sound like something you would say. «الآية البقرة · ٢:٤٨» is literally what the code emits — if it reads awkwardly, or if the digits are spoken wrongly by the voice, that is the finding, and it is a real one.",
-            "why": "The one thing no linter can check. axe can prove a label exists; only an ear can tell you whether «الآية البقرة · ٢:٤٨» is a phrase a person would actually say. The wording is a bet, and this is where it gets called."
-          },
-          {
-            "do": "Double-tap an ayah that has hops, then swipe to the rail.",
-            "expect": "Selection is announced, and the rail chips read as words plus a count — «متشابهات في السورة · ٣», «متشابهات في سور سابقة · ١», «جذر مشترك · ٢». The glyph and the number badge are aria-hidden, so nothing should read as \"circle 3\".",
-            "why": "Each chip carries a glyph and a number badge, both aria-hidden, so the label has to rebuild the meaning in words. Anything announced as \"circle 3\" means the badge leaked through.",
-            "shot": "hop-rail"
-          },
-          {
-            "do": "Double-tap a chip and walk the popover.",
-            "expect": "Focus moves into the sheet; the close control reads «إغلاق»; each target reads «انتقل إلى <سورة · ٢:١٢٣>». Swiping past the last item must not walk you into the page behind the sheet.",
-            "why": "Focus containment is what is under test. A sheet you can swipe out of the back of is a sheet a screen-reader user cannot reliably close — and no automated pass will tell you that.",
+            "do": "Double-tap an ayah with hops, open a rail chip, and try to escape the sheet: swipe past the last item, and swipe backwards past the first. Then hop to a target and immediately swipe once.",
+            "expect": "Both swipes stay inside the sheet — neither walks you into the page behind it. After the hop, the next swipe lands on something real on the new page, not on a node from the sheet that no longer exists.",
+            "why": "Focus containment and focus survival across a page change are the two failures that make hopping unusable without sight, and neither is visible to a runner: the tree is correct in both the working and the broken case. The sheet's own contents — «إغلاق», «انتقل إلى …» — are pinned in e2e/__aria__/*/hop-popover.aria.yml and are not what you are checking here.",
             "shot": "hop-popover"
           },
           {
-            "do": "Double-tap a target to hop.",
-            "expect": "The new page is announced, the landed-on ayah is findable, and focus is not left behind in a closed sheet.",
-            "why": "Cross-page navigation is where focus most often gets stranded on a node that no longer exists. Lose focus here and hopping becomes unusable without sight, which is the app's single core action."
-          },
-          {
-            "do": "Walk to the footer «المسار».",
-            "expect": "Beads read «ارجع إلى …», the current one reads «الآية الحالية … — المس للإلغاء», and double-tapping a bead takes you back.",
-            "why": "The trail is the only way back. If the beads do not announce where they lead, the back path exists visually and nowhere else.",
+            "do": "Now do the whole tour with the screen off or your eyes closed: find an ayah, hop, come back along the trail.",
+            "expect": "You can do it. Whatever you could not do — or could only do because you already knew where things were — is the result of this check.",
+            "why": "Every label can be correct and the app still unusable, because you knew where to swipe. This is the actual verdict; the two steps before it are how you find out why it failed.",
             "shot": "trail-beads"
-          },
-          {
-            "do": "Now do the whole tour again with the screen off or your eyes closed: find an ayah, hop, come back.",
-            "expect": "You can do it. Whatever you could not do — or could only do because you knew where things were — is the result of this check.",
-            "why": "Everything above can pass while the app is still unusable, because you knew where to swipe. This step is the actual verdict — the seven before it are how you find out why it failed."
           }
         ],
         "reading": [
-          "Anything announced wrongly, in the wrong order, or not at all → an assertion in apps/web/e2e/share-a11y.spec.ts, plus a label fix: polygons in packages/core/src/highlighter.ts (enhancePolygons), chrome in the component that owns it.",
-          "Focus escaping a sheet, or a hop you could not discover → an e2e assertion, not a label change.",
+          "A label that reads awkwardly, or digits your voice speaks wrongly → change the label in packages/core/src/highlighter.ts (enhancePolygons) or the component that owns it, then regenerate the aria snapshots (`pnpm -C apps/web exec playwright test share-a11y --update-snapshots`) and read the diff — it is the new announcement, written down.",
+          "Focus escaping a sheet, or stranded after a hop → an e2e assertion, not a label change. The tree is already correct in both cases, which is exactly why this half stayed human.",
+          "A control announced in the wrong order or not at all → that is a snapshot failure and should have failed CI before you picked up the phone. If it did not, the surface is missing from the aria-snapshot set — add it to apps/web/e2e/share-a11y.spec.ts.",
           "A tour you could complete but found exhausting → write that in `result` anyway. Feel is not a bug report, but it is exactly what this check can see and axe cannot.",
           "Nothing wrong at all → say which reader, which OS version, and which phone. A pass on VoiceOver 17 is not a pass on TalkBack."
         ],
         "record": "make record CHECK=screen-reader-walkthrough RESULT='VoiceOver iOS 17 on iPhone SE — full tour by gesture; ayah labels read «الآية البقرة · ٢:٤٨» (fine); rail chips read as words; one finding: <…>'"
       },
       "tunes": [
-        "apps/web/e2e/share-a11y.spec.ts — any announcement that is wrong or missing becomes an assertion there",
+        "apps/web/e2e/__aria__/ — the pinned trees. Delivered ahead of this check (2026-07-27); a phrasing verdict lands here as a regenerated snapshot, which is the announcement written down",
+        "apps/web/e2e/share-a11y.spec.ts — a surface with no snapshot yet, or a focus behaviour you could break, becomes a test there",
         "packages/core/src/highlighter.ts — the aria-label shape, if the labels read badly"
       ],
       "record": "docs/decisions/loop-3.md §a11y"

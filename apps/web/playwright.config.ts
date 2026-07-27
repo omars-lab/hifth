@@ -72,6 +72,17 @@ export default defineConfig({
   // committed macOS one (see `make golden-linux`) rather than fighting it.
   snapshotPathTemplate: "{testDir}/__screenshots__/{platform}/{arg}{ext}",
   expect: {
+    // Aria snapshots are text, not geometry — they must NOT inherit the golden
+    // images' `{platform}` path. The accessibility tree is the same tree on
+    // macOS and Linux; splitting it per platform would mean a label fixed on
+    // one and left broken on the other, with both files green.
+    //
+    // `{projectName}` instead: iPhone and Pixel are different viewports, and a
+    // control the chrome drops at a narrower width is exactly the kind of
+    // regression this is here to catch. One tree per device, no platform axis.
+    toMatchAriaSnapshot: {
+      pathTemplate: "{testDir}/__aria__/{projectName}/{arg}{ext}",
+    },
     toHaveScreenshot: {
       // Tolerance for anti-aliasing only: 0.5% of pixels, and a pixel must
       // differ meaningfully to count. A wash that moved, a clone that landed in
