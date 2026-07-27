@@ -23,7 +23,8 @@
  * The runbook itself is never written here. It lives in the ledger, and the
  * guide (docs/validation/guide.html) renders the same source for the phone.
  */
-import { readLedger, ledgerHash, guideHash, needsRunbook } from "./validation-ledger.mjs";
+import { existsSync } from "node:fs";
+import { readLedger, ledgerHash, guideHash, needsRunbook, shotPath } from "./validation-ledger.mjs";
 
 const ledger = readLedger();
 const checks = ledger.checks ?? [];
@@ -88,6 +89,20 @@ for (const check of checks) {
       errors.push(
         `${where}: runbook.steps[${i}] needs both "do" and "expect". A step with no ` +
           `expectation cannot be failed, so it cannot be passed either.`,
+      );
+    }
+    if (!step.why) {
+      errors.push(
+        `${where}: runbook.steps[${i}] has no "why". An expectation nobody can ` +
+          `justify is one a tired reader waves through — say what the step buys.`,
+      );
+    }
+    // A `shot` naming a file that is not there renders as a broken image on the
+    // phone, which reads as a broken guide. The fix is one command, so name it.
+    if (step.shot && !existsSync(shotPath(step.shot))) {
+      errors.push(
+        `${where}: runbook.steps[${i}] wants screenshot "${step.shot}", but ` +
+          `docs/validation/shots/${step.shot}.png does not exist — run: make shots`,
       );
     }
   }
@@ -181,6 +196,10 @@ function printRunbook(id) {
       console.log("");
       console.log(wrap(`${String(i + 1).padStart(2)}. ${s.do}`, "    ", 8));
       console.log(wrap(`expect: ${s.expect}`, "        "));
+      if (s.why) console.log(wrap(`why:    ${s.why}`, "        "));
+      // A path, not a picture. The terminal cannot show it; the phone can, and
+      // this is the line that tells you the phone would have been better here.
+      if (s.shot) console.log(`        see:    docs/validation/shots/${s.shot}.png  (make guide)`);
     }
   }
   section("Reading the result", rb.reading);

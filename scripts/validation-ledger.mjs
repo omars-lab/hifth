@@ -14,6 +14,12 @@ import { join } from "node:path";
 export const ROOT = new URL("..", import.meta.url).pathname;
 export const LEDGER_PATH = join(ROOT, "docs", "validation", "ledger.json");
 export const GUIDE_PATH = join(ROOT, "docs", "validation", "guide.html");
+export const SHOTS_DIR = join(ROOT, "docs", "validation", "shots");
+
+/** Where a step's `shot` id lives on disk. Written by `make shots`, never by hand. */
+export function shotPath(id) {
+  return join(SHOTS_DIR, `${id}.png`);
+}
 
 export function readLedger() {
   if (!existsSync(LEDGER_PATH)) {

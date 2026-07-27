@@ -351,8 +351,11 @@ what device, and when?" without reading four documents. Two gates close that loo
 **Running one.** These checks happen with a phone in your hand, so the instructions have to
 reach the phone: `make guide` renders the ledger to
 [`docs/validation/guide.html`](validation/guide.html) and serves it over the LAN — one card
-per check, every step paired with what you should **expect** to see, checkboxes that survive
-a screen lock. `make validate CHECK=<id>` prints the same runbook here;
+per check, every step paired with what you should **expect** to see, a screenshot of the
+screen the step is describing, and checkboxes that survive a screen lock. The screenshots
+are captured from the real build by `make shots`, never pasted in by hand — prose about a
+screen is not the screen, and a hand-cropped picture is a second copy of the UI that drifts
+silently. `make validate CHECK=<id>` prints the same runbook here;
 `make record CHECK=<id> RESULT='…'` banks the verdict, regenerates the guide, and prints the
 `tunes` work now owed. One source, three renderers — a runbook restated anywhere else drifts
 silently, so this document deliberately names ids instead of steps.

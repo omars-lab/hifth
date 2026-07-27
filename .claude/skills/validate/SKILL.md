@@ -228,6 +228,13 @@ docs/validation/ledger.json
   └── this skill                 → drives the session
 ```
 
+The pictures in the guide come from `make shots` (`apps/web/e2e/shots.spec.ts`),
+captured from the real build by the same harness that runs the e2e suite. Never
+paste a screenshot in by hand — a hand-captured picture is a second copy of the
+UI that drifts silently, which is the failure this whole shape exists to
+prevent. A step's `shot` naming a file that is not there fails `gate:validation`,
+and the fix it names is that one command.
+
 ### Driving a session
 
 1. `make validate` — what is outstanding, what each one blocks.

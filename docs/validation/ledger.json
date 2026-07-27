@@ -31,7 +31,19 @@
     "         Shape:",
     "           needs   — what you must have before starting (a device, a print, a deploy)",
     "           setup   — [{run, expect}] commands run here, on the laptop",
-    "           steps   — [{do, expect}] what to do, and what should happen if it is working",
+    "           steps   — [{do, expect, why, shot?}]",
+    "                       do     — the action",
+    "                       expect — what should happen if it is working. A step with",
+    "                                no expectation cannot be failed, so it cannot be",
+    "                                passed either.",
+    "                       why    — what this step buys. An expectation you cannot",
+    "                                justify is one a tired reader will wave through.",
+    "                       shot   — id of a screenshot in docs/validation/shots/,",
+    "                                captured from the real app by `make shots`, never",
+    "                                hand-cropped. Only where a picture answers a",
+    "                                question the prose cannot: what the screen looks",
+    "                                like before you have ever seen it. The gate fails",
+    "                                on a `shot` with no file behind it.",
     "           reading — how to turn what you saw into a verdict; one line per outcome",
     "           record  — the exact command that banks the result",
     "         A `pending` check owned by `user` with no runbook.steps fails the",
@@ -67,31 +79,41 @@
         "steps": [
           {
             "do": "Open that URL on the phone.",
-            "expect": "The mushaf page as normal, plus a dark slab pinned across the top reading «قياس الأداء على هذا الجهاز — ١٥ ثانية» with an ابدأ button. No slab means you are on an ordinary build — something else is already serving port 4173; stop it and re-run make phone-perf."
+            "expect": "The mushaf page as normal, plus a dark slab pinned across the top reading «قياس الأداء على هذا الجهاز — ١٥ ثانية» with an ابدأ button. No slab means you are on an ordinary build — something else is already serving port 4173; stop it and re-run make phone-perf.",
+            "why": "Confirms you are measuring the build that has the probe in it. An ordinary build looks completely normal, which is exactly how you would not notice — and every number below would then be a measurement of the wrong thing.",
+            "shot": "probe-idle"
           },
           {
             "do": "Tap ابدأ.",
-            "expect": "«استعد / get ready» for one second before each segment, then the segment's instruction and a countdown. The slab ignores taps while recording, so you cannot accidentally drive it instead of the page."
+            "expect": "«استعد / get ready» for one second before each segment, then the segment's instruction and a countdown. The slab ignores taps while recording, so you cannot accidentally drive it instead of the page.",
+            "why": "The one-second «استعد» beat is there so the tail of one gesture does not land in the head of the next segment. Rush it and the three numbers blur into each other, which is the one way this check can fail without looking like it failed.",
+            "shot": "probe-running"
           },
           {
             "do": "Segment 1 — «مرّر الصفحة بإصبع واحد»: pan the page with one finger, continuously, for the whole 5-second countdown.",
-            "expect": "The page moves under your finger and the counter runs 5→1. Keep moving: a still finger produces no frames and the segment will report «too few frames — not driven»."
+            "expect": "The page moves under your finger and the counter runs 5→1. Keep moving: a still finger produces no frames and the segment will report «too few frames — not driven».",
+            "why": "Pan is the cheap case: no re-raster, just compositing a layer that already exists. If pan is over budget then nothing further matters — the page is too heavy as DOM and the verdict is raster-fallback."
           },
           {
             "do": "Segment 2 — «قرّب وباعد بإصبعين»: pinch in and out, going far enough that glyph edges visibly re-sharpen.",
-            "expect": "Zoom follows the pinch. The re-sharpen moment is the one being measured — it is the layer being re-rastered."
+            "expect": "Zoom follows the pinch. The re-sharpen moment is the one being measured — it is the layer being re-rastered.",
+            "why": "This is the whole check. Zooming past the layer's backing store makes the browser re-rasterize ~170 KB of glyph paths, and that cost is structurally invisible to the emulated desktop baseline. The rendering decision for all 604 pages turns on this one number."
           },
           {
             "do": "Segment 3 — «اضغط آيات مختلفة»: tap a different ayah roughly once a second.",
-            "expect": "The amber wash lands on each ayah you tap. Different ayahs, not the same one twice — you are measuring overlay churn."
+            "expect": "The amber wash lands on each ayah you tap. Different ayahs, not the same one twice — you are measuring overlay churn.",
+            "why": "Separates rendering cost from interaction cost. If only this segment is bad the problem is overlay churn in the highlighter — a real bug, but not one that changes which rendering strategy Loop 4b builds."
           },
           {
             "do": "Read the results table, then long-press the JSON box → Select All → Copy.",
-            "expect": "«النتيجة — الصقها في ledger.json», a row per segment with mean / fps / p95 / worst / jank (over-budget cells in salmon), and a read-only JSON blob stamped with the device, dpr, cores, standalone flag, build commit, and FCP/LCP. There is no copy button on purpose: a LAN preview is plain http, so the Clipboard API does not exist here."
+            "expect": "«النتيجة — الصقها في ledger.json», a row per segment with mean / fps / p95 / worst / jank (over-budget cells in salmon), and a read-only JSON blob stamped with the device, dpr, cores, standalone flag, build commit, and FCP/LCP. There is no copy button on purpose: a LAN preview is plain http, so the Clipboard API does not exist here.",
+            "why": "The table gives you the verdict; the JSON is what makes it re-checkable a year from now. It stamps device, dpr, cores, standalone flag and build commit, so a later reader can tell whether the number still describes the phone in their hand.",
+            "shot": "probe-results"
           },
           {
             "do": "If you can, add the site to the Home Screen and run the whole thing again from there.",
-            "expect": "`\"standalone\": true` in the second JSON. Standalone gets its own compositor path on iOS, so the two runs can legitimately disagree — that difference is a result, not noise."
+            "expect": "`\"standalone\": true` in the second JSON. Standalone gets its own compositor path on iOS, so the two runs can legitimately disagree — that difference is a result, not noise.",
+            "why": "iOS gives standalone its own compositor path. If the two runs disagree, the install prompt is doing load-bearing work rather than convenience work — and that changes what Loop 6b has to guarantee."
           }
         ],
         "reading": [
@@ -135,35 +157,47 @@
         "steps": [
           {
             "do": "Turn the screen reader on, open the URL, and swipe right from the very top to walk the chrome.",
-            "expect": "In order: the wordmark as «عن حِفظ · الرخصة والمصادر», the ⌖ control as «اذهب إلى · سورة أو جزء أو آية», the ▤ control as «المصحف», and a group «مظهر الصفحة» for the skin switch. Glyph-only controls must never read as their glyph."
+            "expect": "In order: the wordmark as «عن حِفظ · الرخصة والمصادر», the ⌖ control as «اذهب إلى · سورة أو جزء أو آية», the ▤ control as «المصحف», and a group «مظهر الصفحة» for the skin switch. Glyph-only controls must never read as their glyph.",
+            "why": "Glyph-only controls are the classic failure: ⌖ and ▤ carry no text of their own, so a missing or wrong label does not degrade the control, it deletes it. Cheapest place in the tour to catch that."
           },
           {
             "do": "Swipe into the mushaf page itself.",
-            "expect": "The page SVG is a group labelled by its page label, and every ayah is a button. Each announces «الآية <اسم السورة> · ٢:٤٨» — the word ayah, the surah name, then the reference in Arabic-Indic digits."
+            "expect": "The page SVG is a group labelled by its page label, and every ayah is a button. Each announces «الآية <اسم السورة> · ٢:٤٨» — the word ayah, the surah name, then the reference in Arabic-Indic digits.",
+            "why": "Establishes that the polygon hit layer is an accessible surface at all, rather than decoration the screen reader walks straight past. If ayahs are not buttons here, the app has no screen-reader story below the chrome.",
+            "shot": "ayah-selected"
           },
           {
             "do": "Listen to three or four ayah labels in a row and judge the phrasing out loud. This is the bet under test.",
-            "expect": "It should sound like something you would say. «الآية البقرة · ٢:٤٨» is literally what the code emits — if it reads awkwardly, or if the digits are spoken wrongly by the voice, that is the finding, and it is a real one."
+            "expect": "It should sound like something you would say. «الآية البقرة · ٢:٤٨» is literally what the code emits — if it reads awkwardly, or if the digits are spoken wrongly by the voice, that is the finding, and it is a real one.",
+            "why": "The one thing no linter can check. axe can prove a label exists; only an ear can tell you whether «الآية البقرة · ٢:٤٨» is a phrase a person would actually say. The wording is a bet, and this is where it gets called."
           },
           {
             "do": "Double-tap an ayah that has hops, then swipe to the rail.",
-            "expect": "Selection is announced, and the rail chips read as words plus a count — «متشابهات في السورة · ٣», «متشابهات في سور سابقة · ١», «جذر مشترك · ٢». The glyph and the number badge are aria-hidden, so nothing should read as \"circle 3\"."
+            "expect": "Selection is announced, and the rail chips read as words plus a count — «متشابهات في السورة · ٣», «متشابهات في سور سابقة · ١», «جذر مشترك · ٢». The glyph and the number badge are aria-hidden, so nothing should read as \"circle 3\".",
+            "why": "Each chip carries a glyph and a number badge, both aria-hidden, so the label has to rebuild the meaning in words. Anything announced as \"circle 3\" means the badge leaked through.",
+            "shot": "hop-rail"
           },
           {
             "do": "Double-tap a chip and walk the popover.",
-            "expect": "Focus moves into the sheet; the close control reads «إغلاق»; each target reads «انتقل إلى <سورة · ٢:١٢٣>». Swiping past the last item must not walk you into the page behind the sheet."
+            "expect": "Focus moves into the sheet; the close control reads «إغلاق»; each target reads «انتقل إلى <سورة · ٢:١٢٣>». Swiping past the last item must not walk you into the page behind the sheet.",
+            "why": "Focus containment is what is under test. A sheet you can swipe out of the back of is a sheet a screen-reader user cannot reliably close — and no automated pass will tell you that.",
+            "shot": "hop-popover"
           },
           {
             "do": "Double-tap a target to hop.",
-            "expect": "The new page is announced, the landed-on ayah is findable, and focus is not left behind in a closed sheet."
+            "expect": "The new page is announced, the landed-on ayah is findable, and focus is not left behind in a closed sheet.",
+            "why": "Cross-page navigation is where focus most often gets stranded on a node that no longer exists. Lose focus here and hopping becomes unusable without sight, which is the app's single core action."
           },
           {
             "do": "Walk to the footer «المسار».",
-            "expect": "Beads read «ارجع إلى …», the current one reads «الآية الحالية … — المس للإلغاء», and double-tapping a bead takes you back."
+            "expect": "Beads read «ارجع إلى …», the current one reads «الآية الحالية … — المس للإلغاء», and double-tapping a bead takes you back.",
+            "why": "The trail is the only way back. If the beads do not announce where they lead, the back path exists visually and nowhere else.",
+            "shot": "trail-beads"
           },
           {
             "do": "Now do the whole tour again with the screen off or your eyes closed: find an ayah, hop, come back.",
-            "expect": "You can do it. Whatever you could not do — or could only do because you knew where things were — is the result of this check."
+            "expect": "You can do it. Whatever you could not do — or could only do because you knew where things were — is the result of this check.",
+            "why": "Everything above can pass while the app is still unusable, because you knew where to swipe. This step is the actual verdict — the seven before it are how you find out why it failed."
           }
         ],
         "reading": [
@@ -197,15 +231,19 @@
         "steps": [
           {
             "do": "Open https://qurancomplex.gov.sa/en/ and find the terms / digital publications page.",
-            "expect": "It loads. (It does not load from this repo's tooling, which is why nobody has read it yet.)"
+            "expect": "It loads. (It does not load from this repo's tooling, which is why nobody has read it yet.)",
+            "why": "The primary source, not a mirror. Every licensing claim this project makes about the glyph corpus currently rests on a third party's summary, and a summary is precisely where a restriction gets softened."
           },
           {
             "do": "Read what it says about reusing the digital mushaf.",
-            "expect": "Free use in digital, web and software contexts, with **commercial printing of physical masahif** reserved to the Complex — the same restriction quran-svg's NOTICE.md quotes, citing Royal Decrees 136/8 and 9/B/46356."
+            "expect": "Free use in digital, web and software contexts, with **commercial printing of physical masahif** reserved to the Complex — the same restriction quran-svg's NOTICE.md quotes, citing Royal Decrees 136/8 and 9/B/46356.",
+            "why": "What is at stake is whether the reserved right is commercial printing of physical masahif or something broader. Those two readings put this project in very different places."
           },
           {
             "do": "Compare that against the two places we restate it: SOURCES.md §hafs-kfqc, and the colophon in the app (tap the wordmark حِفظ → «الرخصة والمصدر»).",
-            "expect": "Both should describe free digital use with the printing restriction — and specifically NOT «إتاحة حرّة للاستعمال غير التجاري» (non-commercial only), which is a different edition's term and shipped once as a live defect."
+            "expect": "Both should describe free digital use with the printing restriction — and specifically NOT «إتاحة حرّة للاستعمال غير التجاري» (non-commercial only), which is a different edition's term and shipped once as a live defect.",
+            "why": "We restate these terms in two places a stranger can read, so a wrong restatement is a licensing claim we are making on the Complex's behalf. This exact string was wrong once and shipped.",
+            "shot": "colophon-source"
           }
         ],
         "reading": [
@@ -242,19 +280,25 @@
         "steps": [
           {
             "do": "Open the deployed site in a private window.",
-            "expect": "The app loads normally."
+            "expect": "The app loads normally.",
+            "why": "Private, because your own session hides the failure that matters: a link that resolves only because you are signed in does not resolve for the stranger the GPL offer is written for."
           },
           {
             "do": "Tap the wordmark حِفظ at the top of the chrome (it announces «عن حِفظ»).",
-            "expect": "The colophon sheet opens, with a «الرخصة والمصدر» section and a link labelled «الشيفرة المصدرية»."
+            "expect": "The colophon sheet opens, with a «الرخصة والمصدر» section and a link labelled «الشيفرة المصدرية».",
+            "why": "The offer has to be reachable from inside the running app, not just from the repository. A colophon nobody can find is an offer that is not being made.",
+            "shot": "colophon-source"
           },
           {
             "do": "Note the short commit printed beside the link, then follow the link.",
-            "expect": "Real source at that exact commit — a `/tree/<sha>` URL — not a 404, not a sign-in wall, and not a bare branch that moves under the reader. The sha is baked at build time (CF_PAGES_COMMIT_SHA → GITHUB_SHA → git rev-parse HEAD)."
+            "expect": "Real source at that exact commit — a `/tree/<sha>` URL — not a 404, not a sign-in wall, and not a bare branch that moves under the reader. The sha is baked at build time (CF_PAGES_COMMIT_SHA → GITHUB_SHA → git rev-parse HEAD).",
+            "why": "A bare branch link moves under the reader. The offer is for the source of the binary they are running, and the pinned sha is what makes it a real offer rather than a gesture."
           },
           {
             "do": "Scroll the colophon to the credits and follow one of the attribution links too.",
-            "expect": "They resolve. The mutashabihat licence asks for a mention in the app; corpus.quran.com's terms require the link."
+            "expect": "They resolve. The mutashabihat licence asks for a mention in the app; corpus.quran.com's terms require the link.",
+            "why": "Two of the corpora we build on ask for a link, not merely a mention. A dead attribution link is a licence term being quietly failed.",
+            "shot": "colophon-credits"
           }
         ],
         "reading": [
@@ -295,23 +339,29 @@
         "steps": [
           {
             "do": "Work through the twenty pairs in the print, one at a time.",
-            "expect": "Each `from` and `to` is findable at the page the draw printed. A pair you cannot locate is itself a finding — record it as wrong with a note."
+            "expect": "Each `from` and `to` is findable at the page the draw printed. A pair you cannot locate is itself a finding — record it as wrong with a note.",
+            "why": "This is the only check in the project that can say the data is true. Every other tier verifies that the app faithfully renders whatever the ETL produced — including when what it produced is wrong."
           },
           {
             "do": "For each, answer the question the tool prints — not «are these similar?» but «**would a hafiz confuse these two while reciting?**»",
-            "expect": "Most edges are obvious either way in a few seconds. The slow ones are the informative ones; note why."
+            "expect": "Most edges are obvious either way in a few seconds. The slow ones are the informative ones; note why.",
+            "why": "\"Similar\" is not the standard; a hafiz's confusion is. An edge that is textually close but never actually confused is noise in the rail, and noise is what makes a reader stop trusting the hop."
           },
           {
             "do": "Optionally open a pair in the app to see what a reader actually sees: make phone, then navigate to the ayah and open its rail.",
-            "expect": "The edge appears as a hop under the direction chip its `type` implies."
+            "expect": "The edge appears as a hop under the direction chip its `type` implies.",
+            "why": "Catches a correct edge with a wrong presentation. A real mutashabih filed under the wrong direction chip sends the reader looking in the wrong surah, which reads as bad data even though the data is fine.",
+            "shot": "hop-rail"
           },
           {
             "do": "Paste the printed JSON block into packages/etl/data/qa/verified-edges.json under `entries`, setting each `verdict` to `correct` or `wrong`, `verifiedBy` to your name, and `note` where a future reader needs the reason.",
-            "expect": "Every drawn edge gets an entry. Both verdicts are recorded, not just the failures."
+            "expect": "Every drawn edge gets an entry. Both verdicts are recorded, not just the failures.",
+            "why": "Recording the `correct` verdicts matters as much as the failures: they are what turns half an hour of reading into a permanent regression fixture instead of an anecdote."
           },
           {
             "do": "Run pnpm gate:verified-edges.",
-            "expect": "OK. Those verdicts are now enforced in both directions, forever — a `correct` edge that disappears and a `wrong` edge that returns both fail the build."
+            "expect": "OK. Those verdicts are now enforced in both directions, forever — a `correct` edge that disappears and a `wrong` edge that returns both fail the build.",
+            "why": "This is the step where manual work becomes automated. Once it is green, a `correct` edge that disappears and a `wrong` edge that returns both fail the build — forever, without anyone re-reading twenty pairs."
           }
         ],
         "reading": [
@@ -348,23 +398,28 @@
         "steps": [
           {
             "do": "On the phone, open the deployed site in a Safari tab and pin a juz.",
-            "expect": "The pack downloads and the juz is marked available offline."
+            "expect": "The pack downloads and the juz is marked available offline.",
+            "why": "The tab is the case we expect to lose. Proving it worked on day 0 is what makes a day-8 failure evidence rather than a guess."
           },
           {
             "do": "Add the site to the Home Screen, open it from there, and pin the same juz again inside the installed app.",
-            "expect": "Two independent storage buckets now hold the same pack. That is the experiment."
+            "expect": "Two independent storage buckets now hold the same pack. That is the experiment.",
+            "why": "Two buckets, same pack, same phone, same eight days. It is the only arrangement that lets you attribute a loss to the storage sweep rather than to the network, the build, or the device."
           },
           {
             "do": "Write down today's date, then use the phone normally for 8+ days. Do not open Hifth in either place.",
-            "expect": "Nothing. This step is the check."
+            "expect": "Nothing. This step is the check.",
+            "why": "ITP counts seven days of browser use, not seven days of wall clock, and it cannot be fast-forwarded. The waiting is the instrument."
           },
           {
             "do": "On day 8 or later, turn on airplane mode and open the Safari tab: try to revise the pinned juz — open pages, hop, turn pages.",
-            "expect": "The tab may have lost everything (ITP clears script storage for origins untouched for 7 days of browser use). If it has, the app should notice and offer to re-pin rather than showing broken pages."
+            "expect": "The tab may have lost everything (ITP clears script storage for origins untouched for 7 days of browser use). If it has, the app should notice and offer to re-pin rather than showing broken pages.",
+            "why": "Airplane mode is what makes this a storage test rather than a cache test: whatever still works is genuinely resident on the device."
           },
           {
             "do": "Still in airplane mode, open the installed app and do the same.",
-            "expect": "The juz is still there. Installed apps are exempt from that sweep — this asymmetry is the whole reason the install prompt is first-class."
+            "expect": "The juz is still there. Installed apps are exempt from that sweep — this asymmetry is the whole reason the install prompt is first-class.",
+            "why": "If the installed app survives and the tab does not, the install prompt stops being a nicety and becomes the feature that makes offline revision real — which is what Loop 6b has to be designed around."
           }
         ],
         "reading": [

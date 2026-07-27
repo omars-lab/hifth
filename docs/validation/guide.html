@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" data-ledger-hash="e78e3e4eb2ee">
+<html lang="en" data-ledger-hash="ada7da03e9f1">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -66,6 +66,22 @@ pre.cmd { margin: 0 0 10px; padding: 12px 14px; overflow-x: auto;
 .expect::before { content: "expect "; font: 600 11px/1 var(--mono); letter-spacing: .14em;
   text-transform: uppercase; color: var(--amber); }
 
+/* And what the step buys. Quieter than the expectation on purpose — it is the
+   line you read when you are tempted to skip the step, not on every pass. An
+   expectation nobody can justify is one a tired reader waves through. */
+.why { margin: 8px 0 0; padding-left: 14px; color: var(--dim); font-size: 14px; line-height: 1.55; }
+.why::before { content: "why "; font: 600 11px/1 var(--mono); letter-spacing: .14em;
+  text-transform: uppercase; color: var(--wait); }
+
+/* A description of a screen you have never seen cannot be checked against the
+   screen. These come from e2e/shots.spec.ts against the real build — never a
+   hand-crop, which would be a second copy of the UI, drifting silently. */
+figure.shot { margin: 10px 0 0; }
+figure.shot img { display: block; width: 100%; max-width: 300px; height: auto;
+  border: 1px solid var(--line); border-radius: 10px; background: var(--ground); }
+figure.shot figcaption { margin-top: 6px; font: 500 10px/1.4 var(--mono);
+  letter-spacing: .12em; text-transform: uppercase; color: var(--dim); opacity: .75; }
+
 ol.steps { margin: 0; padding-left: 1.4em; }
 ol.steps > li { margin: 0 0 18px; padding-left: 4px; }
 ol.steps > li::marker { color: var(--amber); font-family: var(--mono); font-size: 14px; }
@@ -91,7 +107,7 @@ label.do span { padding: 8px 0; }
   <p class="rule">Every result here must tighten something automated — a threshold, a
   fixture, a gate. That is what <b>tunes</b> is for at the foot of each card. A verdict
   that tunes nothing has to be bought again by hand, forever.</p>
-  <p class="src">Generated from <code>docs/validation/ledger.json</code> · <code>e78e3e4eb2ee</code>
+  <p class="src">Generated from <code>docs/validation/ledger.json</code> · <code>ada7da03e9f1</code>
   · never edit this file — run <code>make guide</code></p>
 </header>
 
@@ -122,30 +138,53 @@ label.do span { padding: 8px 0; }
       <li>
         <label class="do"><input type="checkbox" data-step="perf-verdict-on-device:0"><span>Open that URL on the phone.</span></label>
         <p class="expect">The mushaf page as normal, plus a dark slab pinned across the top reading «<bdi>قياس الأداء على هذا الجهاز</bdi> — <bdi>١٥ ثانية</bdi>» with an <bdi>ابدأ</bdi> button. No slab means you are on an ordinary build — something else is already serving port 4173; stop it and re-run make phone-perf.</p>
+        <figure class="shot">
+          <img src="shots/probe-idle.png" alt="Screenshot: probe-idle" loading="lazy">
+          <figcaption>from the build · a shape to recognise, not a result to match</figcaption>
+        </figure>
+        <p class="why">Confirms you are measuring the build that has the probe in it. An ordinary build looks completely normal, which is exactly how you would not notice — and every number below would then be a measurement of the wrong thing.</p>
       </li>
       <li>
         <label class="do"><input type="checkbox" data-step="perf-verdict-on-device:1"><span>Tap <bdi>ابدأ</bdi>.</span></label>
         <p class="expect">«<bdi>استعد</bdi> / get ready» for one second before each segment, then the segment's instruction and a countdown. The slab ignores taps while recording, so you cannot accidentally drive it instead of the page.</p>
+        <figure class="shot">
+          <img src="shots/probe-running.png" alt="Screenshot: probe-running" loading="lazy">
+          <figcaption>from the build · a shape to recognise, not a result to match</figcaption>
+        </figure>
+        <p class="why">The one-second «<bdi>استعد</bdi>» beat is there so the tail of one gesture does not land in the head of the next segment. Rush it and the three numbers blur into each other, which is the one way this check can fail without looking like it failed.</p>
       </li>
       <li>
         <label class="do"><input type="checkbox" data-step="perf-verdict-on-device:2"><span>Segment 1 — «<bdi>مرّر الصفحة بإصبع واحد</bdi>»: pan the page with one finger, continuously, for the whole 5-second countdown.</span></label>
         <p class="expect">The page moves under your finger and the counter runs 5→1. Keep moving: a still finger produces no frames and the segment will report «too few frames — not driven».</p>
+        
+        <p class="why">Pan is the cheap case: no re-raster, just compositing a layer that already exists. If pan is over budget then nothing further matters — the page is too heavy as DOM and the verdict is raster-fallback.</p>
       </li>
       <li>
         <label class="do"><input type="checkbox" data-step="perf-verdict-on-device:3"><span>Segment 2 — «<bdi>قرّب وباعد بإصبعين</bdi>»: pinch in and out, going far enough that glyph edges visibly re-sharpen.</span></label>
         <p class="expect">Zoom follows the pinch. The re-sharpen moment is the one being measured — it is the layer being re-rastered.</p>
+        
+        <p class="why">This is the whole check. Zooming past the layer's backing store makes the browser re-rasterize ~170 KB of glyph paths, and that cost is structurally invisible to the emulated desktop baseline. The rendering decision for all 604 pages turns on this one number.</p>
       </li>
       <li>
         <label class="do"><input type="checkbox" data-step="perf-verdict-on-device:4"><span>Segment 3 — «<bdi>اضغط آيات مختلفة</bdi>»: tap a different ayah roughly once a second.</span></label>
         <p class="expect">The amber wash lands on each ayah you tap. Different ayahs, not the same one twice — you are measuring overlay churn.</p>
+        
+        <p class="why">Separates rendering cost from interaction cost. If only this segment is bad the problem is overlay churn in the highlighter — a real bug, but not one that changes which rendering strategy Loop 4b builds.</p>
       </li>
       <li>
         <label class="do"><input type="checkbox" data-step="perf-verdict-on-device:5"><span>Read the results table, then long-press the JSON box → Select All → Copy.</span></label>
         <p class="expect">«<bdi>النتيجة</bdi> — <bdi>الصقها في</bdi> ledger.json», a row per segment with mean / fps / p95 / worst / jank (over-budget cells in salmon), and a read-only JSON blob stamped with the device, dpr, cores, standalone flag, build commit, and FCP/LCP. There is no copy button on purpose: a LAN preview is plain http, so the Clipboard API does not exist here.</p>
+        <figure class="shot">
+          <img src="shots/probe-results.png" alt="Screenshot: probe-results" loading="lazy">
+          <figcaption>from the build · a shape to recognise, not a result to match</figcaption>
+        </figure>
+        <p class="why">The table gives you the verdict; the JSON is what makes it re-checkable a year from now. It stamps device, dpr, cores, standalone flag and build commit, so a later reader can tell whether the number still describes the phone in their hand.</p>
       </li>
       <li>
         <label class="do"><input type="checkbox" data-step="perf-verdict-on-device:6"><span>If you can, add the site to the Home Screen and run the whole thing again from there.</span></label>
         <p class="expect"><code>&quot;standalone&quot;: true</code> in the second JSON. Standalone gets its own compositor path on iOS, so the two runs can legitimately disagree — that difference is a result, not noise.</p>
+        
+        <p class="why">iOS gives standalone its own compositor path. If the two runs disagree, the install prompt is doing load-bearing work rather than convenience work — and that changes what Loop 6b has to guarantee.</p>
       </li>
     </ol>
   </section>
@@ -189,34 +228,62 @@ label.do span { padding: 8px 0; }
       <li>
         <label class="do"><input type="checkbox" data-step="screen-reader-walkthrough:0"><span>Turn the screen reader on, open the URL, and swipe right from the very top to walk the chrome.</span></label>
         <p class="expect">In order: the wordmark as «<bdi>عن حِفظ</bdi> · <bdi>الرخصة والمصادر</bdi>», the ⌖ control as «<bdi>اذهب إلى</bdi> · <bdi>سورة أو جزء أو آية</bdi>», the ▤ control as «<bdi>المصحف</bdi>», and a group «<bdi>مظهر الصفحة</bdi>» for the skin switch. Glyph-only controls must never read as their glyph.</p>
+        
+        <p class="why">Glyph-only controls are the classic failure: ⌖ and ▤ carry no text of their own, so a missing or wrong label does not degrade the control, it deletes it. Cheapest place in the tour to catch that.</p>
       </li>
       <li>
         <label class="do"><input type="checkbox" data-step="screen-reader-walkthrough:1"><span>Swipe into the mushaf page itself.</span></label>
         <p class="expect">The page SVG is a group labelled by its page label, and every ayah is a button. Each announces «<bdi>الآية</bdi> &lt;<bdi>اسم السورة</bdi>&gt; · <bdi>٢</bdi>:<bdi>٤٨</bdi>» — the word ayah, the surah name, then the reference in Arabic-Indic digits.</p>
+        <figure class="shot">
+          <img src="shots/ayah-selected.png" alt="Screenshot: ayah-selected" loading="lazy">
+          <figcaption>from the build · a shape to recognise, not a result to match</figcaption>
+        </figure>
+        <p class="why">Establishes that the polygon hit layer is an accessible surface at all, rather than decoration the screen reader walks straight past. If ayahs are not buttons here, the app has no screen-reader story below the chrome.</p>
       </li>
       <li>
         <label class="do"><input type="checkbox" data-step="screen-reader-walkthrough:2"><span>Listen to three or four ayah labels in a row and judge the phrasing out loud. This is the bet under test.</span></label>
         <p class="expect">It should sound like something you would say. «<bdi>الآية البقرة</bdi> · <bdi>٢</bdi>:<bdi>٤٨</bdi>» is literally what the code emits — if it reads awkwardly, or if the digits are spoken wrongly by the voice, that is the finding, and it is a real one.</p>
+        
+        <p class="why">The one thing no linter can check. axe can prove a label exists; only an ear can tell you whether «<bdi>الآية البقرة</bdi> · <bdi>٢</bdi>:<bdi>٤٨</bdi>» is a phrase a person would actually say. The wording is a bet, and this is where it gets called.</p>
       </li>
       <li>
         <label class="do"><input type="checkbox" data-step="screen-reader-walkthrough:3"><span>Double-tap an ayah that has hops, then swipe to the rail.</span></label>
         <p class="expect">Selection is announced, and the rail chips read as words plus a count — «<bdi>متشابهات في السورة</bdi> · <bdi>٣</bdi>», «<bdi>متشابهات في سور سابقة</bdi> · <bdi>١</bdi>», «<bdi>جذر مشترك</bdi> · <bdi>٢</bdi>». The glyph and the number badge are aria-hidden, so nothing should read as &quot;circle 3&quot;.</p>
+        <figure class="shot">
+          <img src="shots/hop-rail.png" alt="Screenshot: hop-rail" loading="lazy">
+          <figcaption>from the build · a shape to recognise, not a result to match</figcaption>
+        </figure>
+        <p class="why">Each chip carries a glyph and a number badge, both aria-hidden, so the label has to rebuild the meaning in words. Anything announced as &quot;circle 3&quot; means the badge leaked through.</p>
       </li>
       <li>
         <label class="do"><input type="checkbox" data-step="screen-reader-walkthrough:4"><span>Double-tap a chip and walk the popover.</span></label>
         <p class="expect">Focus moves into the sheet; the close control reads «<bdi>إغلاق</bdi>»; each target reads «<bdi>انتقل إلى</bdi> &lt;<bdi>سورة</bdi> · <bdi>٢</bdi>:<bdi>١٢٣</bdi>&gt;». Swiping past the last item must not walk you into the page behind the sheet.</p>
+        <figure class="shot">
+          <img src="shots/hop-popover.png" alt="Screenshot: hop-popover" loading="lazy">
+          <figcaption>from the build · a shape to recognise, not a result to match</figcaption>
+        </figure>
+        <p class="why">Focus containment is what is under test. A sheet you can swipe out of the back of is a sheet a screen-reader user cannot reliably close — and no automated pass will tell you that.</p>
       </li>
       <li>
         <label class="do"><input type="checkbox" data-step="screen-reader-walkthrough:5"><span>Double-tap a target to hop.</span></label>
         <p class="expect">The new page is announced, the landed-on ayah is findable, and focus is not left behind in a closed sheet.</p>
+        
+        <p class="why">Cross-page navigation is where focus most often gets stranded on a node that no longer exists. Lose focus here and hopping becomes unusable without sight, which is the app's single core action.</p>
       </li>
       <li>
         <label class="do"><input type="checkbox" data-step="screen-reader-walkthrough:6"><span>Walk to the footer «<bdi>المسار</bdi>».</span></label>
         <p class="expect">Beads read «<bdi>ارجع إلى</bdi> …», the current one reads «<bdi>الآية الحالية</bdi> … — <bdi>المس للإلغاء</bdi>», and double-tapping a bead takes you back.</p>
+        <figure class="shot">
+          <img src="shots/trail-beads.png" alt="Screenshot: trail-beads" loading="lazy">
+          <figcaption>from the build · a shape to recognise, not a result to match</figcaption>
+        </figure>
+        <p class="why">The trail is the only way back. If the beads do not announce where they lead, the back path exists visually and nowhere else.</p>
       </li>
       <li>
         <label class="do"><input type="checkbox" data-step="screen-reader-walkthrough:7"><span>Now do the whole tour again with the screen off or your eyes closed: find an ayah, hop, come back.</span></label>
         <p class="expect">You can do it. Whatever you could not do — or could only do because you knew where things were — is the result of this check.</p>
+        
+        <p class="why">Everything above can pass while the app is still unusable, because you knew where to swipe. This step is the actual verdict — the seven before it are how you find out why it failed.</p>
       </li>
     </ol>
   </section>
@@ -256,14 +323,23 @@ label.do span { padding: 8px 0; }
       <li>
         <label class="do"><input type="checkbox" data-step="kfgqpc-terms-primary-source:0"><span>Open https://qurancomplex.gov.sa/en/ and find the terms / digital publications page.</span></label>
         <p class="expect">It loads. (It does not load from this repo's tooling, which is why nobody has read it yet.)</p>
+        
+        <p class="why">The primary source, not a mirror. Every licensing claim this project makes about the glyph corpus currently rests on a third party's summary, and a summary is precisely where a restriction gets softened.</p>
       </li>
       <li>
         <label class="do"><input type="checkbox" data-step="kfgqpc-terms-primary-source:1"><span>Read what it says about reusing the digital mushaf.</span></label>
         <p class="expect">Free use in digital, web and software contexts, with <b>commercial printing of physical masahif</b> reserved to the Complex — the same restriction quran-svg's NOTICE.md quotes, citing Royal Decrees 136/8 and 9/B/46356.</p>
+        
+        <p class="why">What is at stake is whether the reserved right is commercial printing of physical masahif or something broader. Those two readings put this project in very different places.</p>
       </li>
       <li>
         <label class="do"><input type="checkbox" data-step="kfgqpc-terms-primary-source:2"><span>Compare that against the two places we restate it: SOURCES.md §hafs-kfqc, and the colophon in the app (tap the wordmark <bdi>حِفظ</bdi> → «<bdi>الرخصة والمصدر</bdi>»).</span></label>
         <p class="expect">Both should describe free digital use with the printing restriction — and specifically NOT «<bdi>إتاحة حرّة للاستعمال غير التجاري</bdi>» (non-commercial only), which is a different edition's term and shipped once as a live defect.</p>
+        <figure class="shot">
+          <img src="shots/colophon-source.png" alt="Screenshot: colophon-source" loading="lazy">
+          <figcaption>from the build · a shape to recognise, not a result to match</figcaption>
+        </figure>
+        <p class="why">We restate these terms in two places a stranger can read, so a wrong restatement is a licensing claim we are making on the Complex's behalf. This exact string was wrong once and shipped.</p>
       </li>
     </ol>
   </section>
@@ -303,18 +379,32 @@ label.do span { padding: 8px 0; }
       <li>
         <label class="do"><input type="checkbox" data-step="source-offer-resolves:0"><span>Open the deployed site in a private window.</span></label>
         <p class="expect">The app loads normally.</p>
+        
+        <p class="why">Private, because your own session hides the failure that matters: a link that resolves only because you are signed in does not resolve for the stranger the GPL offer is written for.</p>
       </li>
       <li>
         <label class="do"><input type="checkbox" data-step="source-offer-resolves:1"><span>Tap the wordmark <bdi>حِفظ</bdi> at the top of the chrome (it announces «<bdi>عن حِفظ</bdi>»).</span></label>
         <p class="expect">The colophon sheet opens, with a «<bdi>الرخصة والمصدر</bdi>» section and a link labelled «<bdi>الشيفرة المصدرية</bdi>».</p>
+        <figure class="shot">
+          <img src="shots/colophon-source.png" alt="Screenshot: colophon-source" loading="lazy">
+          <figcaption>from the build · a shape to recognise, not a result to match</figcaption>
+        </figure>
+        <p class="why">The offer has to be reachable from inside the running app, not just from the repository. A colophon nobody can find is an offer that is not being made.</p>
       </li>
       <li>
         <label class="do"><input type="checkbox" data-step="source-offer-resolves:2"><span>Note the short commit printed beside the link, then follow the link.</span></label>
         <p class="expect">Real source at that exact commit — a <code>/tree/&lt;sha&gt;</code> URL — not a 404, not a sign-in wall, and not a bare branch that moves under the reader. The sha is baked at build time (CF_PAGES_COMMIT_SHA → GITHUB_SHA → git rev-parse HEAD).</p>
+        
+        <p class="why">A bare branch link moves under the reader. The offer is for the source of the binary they are running, and the pinned sha is what makes it a real offer rather than a gesture.</p>
       </li>
       <li>
         <label class="do"><input type="checkbox" data-step="source-offer-resolves:3"><span>Scroll the colophon to the credits and follow one of the attribution links too.</span></label>
         <p class="expect">They resolve. The mutashabihat licence asks for a mention in the app; corpus.quran.com's terms require the link.</p>
+        <figure class="shot">
+          <img src="shots/colophon-credits.png" alt="Screenshot: colophon-credits" loading="lazy">
+          <figcaption>from the build · a shape to recognise, not a result to match</figcaption>
+        </figure>
+        <p class="why">Two of the corpora we build on ask for a link, not merely a mention. A dead attribution link is a licence term being quietly failed.</p>
       </li>
     </ol>
   </section>
@@ -358,22 +448,35 @@ label.do span { padding: 8px 0; }
       <li>
         <label class="do"><input type="checkbox" data-step="edge-spot-audit:0"><span>Work through the twenty pairs in the print, one at a time.</span></label>
         <p class="expect">Each <code>from</code> and <code>to</code> is findable at the page the draw printed. A pair you cannot locate is itself a finding — record it as wrong with a note.</p>
+        
+        <p class="why">This is the only check in the project that can say the data is true. Every other tier verifies that the app faithfully renders whatever the ETL produced — including when what it produced is wrong.</p>
       </li>
       <li>
         <label class="do"><input type="checkbox" data-step="edge-spot-audit:1"><span>For each, answer the question the tool prints — not «are these similar?» but «<b>would a hafiz confuse these two while reciting?</b>»</span></label>
         <p class="expect">Most edges are obvious either way in a few seconds. The slow ones are the informative ones; note why.</p>
+        
+        <p class="why">&quot;Similar&quot; is not the standard; a hafiz's confusion is. An edge that is textually close but never actually confused is noise in the rail, and noise is what makes a reader stop trusting the hop.</p>
       </li>
       <li>
         <label class="do"><input type="checkbox" data-step="edge-spot-audit:2"><span>Optionally open a pair in the app to see what a reader actually sees: make phone, then navigate to the ayah and open its rail.</span></label>
         <p class="expect">The edge appears as a hop under the direction chip its <code>type</code> implies.</p>
+        <figure class="shot">
+          <img src="shots/hop-rail.png" alt="Screenshot: hop-rail" loading="lazy">
+          <figcaption>from the build · a shape to recognise, not a result to match</figcaption>
+        </figure>
+        <p class="why">Catches a correct edge with a wrong presentation. A real mutashabih filed under the wrong direction chip sends the reader looking in the wrong surah, which reads as bad data even though the data is fine.</p>
       </li>
       <li>
         <label class="do"><input type="checkbox" data-step="edge-spot-audit:3"><span>Paste the printed JSON block into packages/etl/data/qa/verified-edges.json under <code>entries</code>, setting each <code>verdict</code> to <code>correct</code> or <code>wrong</code>, <code>verifiedBy</code> to your name, and <code>note</code> where a future reader needs the reason.</span></label>
         <p class="expect">Every drawn edge gets an entry. Both verdicts are recorded, not just the failures.</p>
+        
+        <p class="why">Recording the <code>correct</code> verdicts matters as much as the failures: they are what turns half an hour of reading into a permanent regression fixture instead of an anecdote.</p>
       </li>
       <li>
         <label class="do"><input type="checkbox" data-step="edge-spot-audit:4"><span>Run pnpm gate:verified-edges.</span></label>
         <p class="expect">OK. Those verdicts are now enforced in both directions, forever — a <code>correct</code> edge that disappears and a <code>wrong</code> edge that returns both fail the build.</p>
+        
+        <p class="why">This is the step where manual work becomes automated. Once it is green, a <code>correct</code> edge that disappears and a <code>wrong</code> edge that returns both fail the build — forever, without anyone re-reading twenty pairs.</p>
       </li>
     </ol>
   </section>
@@ -413,22 +516,32 @@ label.do span { padding: 8px 0; }
       <li>
         <label class="do"><input type="checkbox" data-step="offline-survival-8-day:0"><span>On the phone, open the deployed site in a Safari tab and pin a juz.</span></label>
         <p class="expect">The pack downloads and the juz is marked available offline.</p>
+        
+        <p class="why">The tab is the case we expect to lose. Proving it worked on day 0 is what makes a day-8 failure evidence rather than a guess.</p>
       </li>
       <li>
         <label class="do"><input type="checkbox" data-step="offline-survival-8-day:1"><span>Add the site to the Home Screen, open it from there, and pin the same juz again inside the installed app.</span></label>
         <p class="expect">Two independent storage buckets now hold the same pack. That is the experiment.</p>
+        
+        <p class="why">Two buckets, same pack, same phone, same eight days. It is the only arrangement that lets you attribute a loss to the storage sweep rather than to the network, the build, or the device.</p>
       </li>
       <li>
         <label class="do"><input type="checkbox" data-step="offline-survival-8-day:2"><span>Write down today's date, then use the phone normally for 8+ days. Do not open Hifth in either place.</span></label>
         <p class="expect">Nothing. This step is the check.</p>
+        
+        <p class="why">ITP counts seven days of browser use, not seven days of wall clock, and it cannot be fast-forwarded. The waiting is the instrument.</p>
       </li>
       <li>
         <label class="do"><input type="checkbox" data-step="offline-survival-8-day:3"><span>On day 8 or later, turn on airplane mode and open the Safari tab: try to revise the pinned juz — open pages, hop, turn pages.</span></label>
         <p class="expect">The tab may have lost everything (ITP clears script storage for origins untouched for 7 days of browser use). If it has, the app should notice and offer to re-pin rather than showing broken pages.</p>
+        
+        <p class="why">Airplane mode is what makes this a storage test rather than a cache test: whatever still works is genuinely resident on the device.</p>
       </li>
       <li>
         <label class="do"><input type="checkbox" data-step="offline-survival-8-day:4"><span>Still in airplane mode, open the installed app and do the same.</span></label>
         <p class="expect">The juz is still there. Installed apps are exempt from that sweep — this asymmetry is the whole reason the install prompt is first-class.</p>
+        
+        <p class="why">If the installed app survives and the tab does not, the install prompt stops being a nicety and becomes the feature that makes offline revision real — which is what Loop 6b has to be designed around.</p>
       </li>
     </ol>
   </section>

@@ -291,6 +291,24 @@ record: ## Bank a manual result:  make record CHECK=<id> RESULT='the verdict, in
 	@node scripts/record-validation.mjs --check "$(CHECK)" --result "$(RESULT)" \
 	  $(if $(STATUS),--status $(STATUS),) $(if $(ON),--on $(ON),)
 
+.PHONY: shots
+shots: ## Recapture the guide's screenshots from the real app into docs/validation/shots/
+	@# Two passes, because the perf probe is a build-time flag and not a URL
+	@# param (src/main.tsx) — deliberately, so a readable param can never put a
+	@# measurement slab over someone's mushaf. So the probe shots need their own
+	@# bundle, and it is a throwaway: the plain build at the end is what stops a
+	@# probe dist being left behind for `make phone` or a deploy to pick up.
+	$(CORE) build
+	VITE_PERF_PROBE=1 $(WEB) build
+	HIFTH_SHOTS=1 $(WEB) exec playwright test --project=shots --grep @probe
+	$(WEB) build
+	HIFTH_SHOTS=1 $(WEB) exec playwright test --project=shots --grep @app
+	node scripts/build-validation-guide.mjs
+	@echo ""
+	@echo "  Screenshots refreshed. Review them before committing — they are"
+	@echo "  documentation, so a wrong one teaches a wrong expectation."
+	@echo ""
+
 .PHONY: audit-edges
 audit-edges: ## Draw a seeded sample of edges for a mushaf spot-audit:  make audit-edges N=20 SEED=1
 	@# node directly, not `pnpm sample:edges --`: pnpm forwards the separator
@@ -314,6 +332,7 @@ help: ## List targets (this)
 	@echo "                  make validate CHECK=<id>      (one check's full runbook, here)"
 	@echo "                  make guide                    (the same runbooks, on your phone)"
 	@echo "                  make record CHECK=<id> RESULT='…'  (bank the verdict)"
+	@echo "                  make shots                    (recapture the guide's screenshots)"
 	@echo "                  make audit-edges N=20 SEED=1  (seeded draw for a mushaf spot-audit)"
 	@echo "                  the full catalogue: .claude/skills/validate/SKILL.md"
 	@echo "  Golden images:  make golden        (diff against this platform's baselines)"

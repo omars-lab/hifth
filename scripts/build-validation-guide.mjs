@@ -114,6 +114,8 @@ function card(check) {
           (s, i) => `<li>
         <label class="do"><input type="checkbox" data-step="${attr(check.id)}:${i}"><span>${rich(s.do)}</span></label>
         <p class="expect">${rich(s.expect)}</p>
+        ${shot(s.shot)}
+        ${s.why ? `<p class="why">${rich(s.why)}</p>` : ""}
       </li>`,
         )
         .join("\n      ")}
@@ -132,6 +134,22 @@ function card(check) {
     ${check.record ? `<p class="expect">Written up in ${rich(check.record)}</p>` : ""}
   </section>
 </article>`;
+}
+
+/**
+ * The picture of what the step's `expect` line describes.
+ *
+ * Emitted whether or not the file is on disk. A missing shot should look
+ * broken: the alternative is that it quietly vanishes from the page and only
+ * `gate:validation` ever knows, which is how a guide ends up promising a
+ * picture in the terminal and showing none on the phone.
+ */
+function shot(id) {
+  if (!id) return "";
+  return `<figure class="shot">
+          <img src="shots/${attr(id)}.png" alt="Screenshot: ${attr(id)}" loading="lazy">
+          <figcaption>from the build · a shape to recognise, not a result to match</figcaption>
+        </figure>`;
 }
 
 function list(title, items) {
@@ -240,6 +258,22 @@ pre.cmd { margin: 0 0 10px; padding: 12px 14px; overflow-x: auto;
 .expect::before { content: "expect "; font: 600 11px/1 var(--mono); letter-spacing: .14em;
   text-transform: uppercase; color: var(--amber); }
 
+/* And what the step buys. Quieter than the expectation on purpose — it is the
+   line you read when you are tempted to skip the step, not on every pass. An
+   expectation nobody can justify is one a tired reader waves through. */
+.why { margin: 8px 0 0; padding-left: 14px; color: var(--dim); font-size: 14px; line-height: 1.55; }
+.why::before { content: "why "; font: 600 11px/1 var(--mono); letter-spacing: .14em;
+  text-transform: uppercase; color: var(--wait); }
+
+/* A description of a screen you have never seen cannot be checked against the
+   screen. These come from e2e/shots.spec.ts against the real build — never a
+   hand-crop, which would be a second copy of the UI, drifting silently. */
+figure.shot { margin: 10px 0 0; }
+figure.shot img { display: block; width: 100%; max-width: 300px; height: auto;
+  border: 1px solid var(--line); border-radius: 10px; background: var(--ground); }
+figure.shot figcaption { margin-top: 6px; font: 500 10px/1.4 var(--mono);
+  letter-spacing: .12em; text-transform: uppercase; color: var(--dim); opacity: .75; }
+
 ol.steps { margin: 0; padding-left: 1.4em; }
 ol.steps > li { margin: 0 0 18px; padding-left: 4px; }
 ol.steps > li::marker { color: var(--amber); font-family: var(--mono); font-size: 14px; }
@@ -279,7 +313,14 @@ const JS = `
 function serve() {
   const dir = join(ROOT, "docs", "validation");
   const port = Number(process.env.GUIDE_PORT || 4174);
-  const TYPES = { ".html": "text/html; charset=utf-8", ".json": "application/json; charset=utf-8" };
+  // .png is not optional: the guide's screenshots are served from this same
+  // directory, and a PNG sent as text/plain renders as a broken image on the
+  // phone — which reads as "the guide is broken", not "the MIME map is short".
+  const TYPES = {
+    ".html": "text/html; charset=utf-8",
+    ".json": "application/json; charset=utf-8",
+    ".png": "image/png",
+  };
 
   createServer((req, res) => {
     const rel = normalize(decodeURIComponent((req.url ?? "/").split("?")[0])).replace(/^(\.\.[/\\])+/, "");
