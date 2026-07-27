@@ -19,6 +19,14 @@
  *      catches the same class at runtime: without it, an upload of nothing is
  *      indistinguishable from an upload that worked, for as long as nobody
  *      needs it.
+ *   3. An upload of a dot-path also sets `include-hidden-files: true`.
+ *      upload-artifact has excluded hidden files by default since v4, so
+ *      `path: .lighthouseci` matches nothing at all. This is invariant 1's
+ *      failure — an upload that preserves nothing — reached from the other end:
+ *      the producer exists and runs, and the artifact is dropped anyway. The
+ *      registry could not see it, because the question is not "who writes this"
+ *      but "can the uploader read it". Invariant 2 turned it from a silent loss
+ *      into a red job; this turns it into a red gate, before the push.
  *
  * Adding an upload step to CI means adding its producer here. That is the
  * point — the registry is the list of things we claim to keep.
@@ -102,6 +110,17 @@ for (const name of readdirSync(WORKFLOWS).filter((f) => /\.ya?ml$/.test(f))) {
       problems.push(
         `${where}: needs "if-no-files-found: error" (found ${ifNone ?? "nothing"}). ` +
           "An upload that silently uploads nothing looks exactly like one that works.",
+      );
+    }
+
+    // Any path segment starting with a dot is hidden as far as the uploader's
+    // globber is concerned — `.lighthouseci`, but equally `apps/web/.foo`.
+    const hidden = path.split("/").some((segment) => segment.startsWith("."));
+    const includesHidden = /^\s*include-hidden-files:\s*true\s*$/m.test(step);
+    if (hidden && !includesHidden) {
+      problems.push(
+        `${where}: uploads the hidden path "${path}" without "include-hidden-files: true". ` +
+          "upload-artifact skips dot-paths by default, so this step uploads nothing at all.",
       );
     }
   }

@@ -22,6 +22,11 @@ jobs:
         uses: gitleaks/gitleaks-action@v3
         env:
           GITLEAKS_CONFIG: .gitleaks.toml
+          # Required on `pull_request` since gitleaks-action v2.3 — the action
+          # asks the API which commits the PR contains, and without a token it
+          # refuses to scan rather than scanning nothing. The default job token
+          # is enough; it needs no extra permissions.
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   build-test-gate:
     runs-on: ubuntu-latest
@@ -74,6 +79,10 @@ jobs:
       - name: Gate — no <text> in SVG assets
         run: pnpm gate:notext
 
+      # Every ayah of rendered text traces to a declared source edition.
+      - name: Gate — text sources
+        run: pnpm gate:text-sources
+
       - name: Gate — license (SOURCES.md)
         run: pnpm gate:license
 
@@ -92,6 +101,18 @@ jobs:
       - name: Gate — verified edges hold
         run: pnpm gate:verified-edges
 
+      # Both of these check CI's own workflow files, and both were written after
+      # a defect that CI itself could not see — an upload step that preserved
+      # nothing, and a visual gate whose baselines were rendered on a different
+      # machine than the one checking them. They lived in `pnpm gates` without
+      # ever being wired into a job, which is the same failure one level up: a
+      # gate nobody runs is a comment.
+      - name: Gate — CI artifacts have producers
+        run: pnpm gate:ci-artifacts
+
+      - name: Gate — golden baselines rendered and checked by one image
+        run: pnpm gate:golden-env
+
       - name: Build
         run: pnpm build
 
@@ -100,29 +121,60 @@ jobs:
 
   e2e:
     runs-on: ubuntu-latest
+    # The pinned Playwright image, and not a bare runner with
+    # `playwright install --with-deps`. Those are not the same machine, and the
+    # first CI run of this tier proved it in two ways at once:
+    #
+    #   - all ten golden diffs failed at 5–11% of pixels — orders of magnitude
+    #     past the 0.5% anti-aliasing tolerance — while the same commit passed
+    #     10/10 inside this image via `make golden-linux`;
+    #   - two Android taps timed out because a footer control and a jumper
+    #     option were physically covered by their neighbours.
+    #
+    # One cause fits both. `--with-deps` installs the browser's shared
+    # libraries; it does not install fonts. Arabic then falls back to whatever
+    # the runner happens to have, every label measures a different width, the
+    # 430px-intrinsic chrome (#63) overlaps a few pixels sooner, and the SVG
+    # lays out at a slightly different size — so every glyph edge in the golden
+    # shots lands on a different pixel. A gate that renders its baselines in one
+    # environment and checks them in another is a coin flip with a version
+    # number on it.
+    #
+    # This image is the one `make golden-linux` uses and the one
+    # e2e/__screenshots__/linux was rendered in; scripts/gate-golden-env.mjs
+    # fails the build if the two ever drift apart. Browsers are already baked
+    # in, so the install step is gone with it.
+    #
+    # `--user 1001` is Playwright's documented recipe for container jobs: the
+    # runner's workspace is owned by uid 1001, and Chromium will not start its
+    # sandbox as root.
+    container:
+      image: mcr.microsoft.com/playwright:v1.61.1-noble
+      options: --user 1001
     steps:
       - uses: actions/checkout@v7
-      - uses: pnpm/action-setup@v6
-        with:
-          version: 9.15.0
-      - uses: actions/setup-node@v7
-        with:
-          node-version: 22
-          cache: pnpm
+      # The image ships Node and corepack but no pnpm, and pnpm/action-setup
+      # wants a Node action runtime this container does not need to provide.
+      # Corepack is two lines and pins the same version as every other job.
+      - name: Enable pnpm
+        run: |
+          corepack enable
+          corepack prepare pnpm@9.15.0 --activate
       - name: Install
         run: pnpm install --frozen-lockfile
       - name: Build core
         run: pnpm --filter @hifth/core build
-      - name: Install Playwright browsers
-        # `-C`, not `--filter`: pnpm's recursive runner prints a bare `undefined`
-        # in place of the error when an `exec` fails, and a CI log is read from
-        # the bottom.
-        run: pnpm -C apps/web exec playwright install --with-deps chromium webkit
       - name: Build web
         run: pnpm --filter @hifth/web build
       # Also runs the `golden` project: the visual gate diffs pages 7/9/19 in
       # every highlight state against the committed linux baselines
       # (apps/web/e2e/__screenshots__/linux, refreshed with `make golden-linux`).
+      #
+      # The preview server starts inside this container, so the browser reaches
+      # the app on http://localhost:4173 — a secure context, which is what lets
+      # the service worker register at all. Reaching a host-side server over
+      # host.docker.internal does not, and the offline/SW specs fail there for a
+      # reason that has nothing to do with the app.
       - name: E2E (mobile viewports + golden images)
         run: pnpm --filter @hifth/web test:e2e
 
@@ -191,3 +243,11 @@ jobs:
           path: .lighthouseci
           retention-days: 7
           if-no-files-found: error
+          # lhci writes to a dot-directory, and upload-artifact has excluded
+          # hidden files by default since v4 — so this upload found nothing and,
+          # thanks to `if-no-files-found: error`, failed the job even though the
+          # ≥90 assertions had all passed. Exactly the failure mode that setting
+          # exists to surface, caught by it on the first run.
+          # scripts/gate-ci-artifacts.mjs now requires this line on any path
+          # starting with a dot.
+          include-hidden-files: true

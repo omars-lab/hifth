@@ -117,6 +117,21 @@ lighthouse: build ## Lighthouse CI gate (all four categories ≥90) against the 
 # .../linux is what CI diffs against. Regenerate BOTH when a highlight's
 # geometry legitimately changes, and eyeball the diff before committing it —
 # an accepted baseline is the only place a wrong wash can hide forever.
+#
+# "Per-platform" is not strict enough, and the first CI run of this tier is the
+# proof: the linux baselines rendered by `make golden-linux` in the container
+# below failed against a bare ubuntu-latest at 5–11% of pixels, against a 0.5%
+# tolerance. Same OS, same Playwright — different fonts, and an Arabic app with
+# no Arabic fonts lays out every line at a different width. So the axis that
+# matters is the IMAGE, not the platform: GOLDEN_IMAGE is what renders the linux
+# baselines here and what CI's e2e job runs inside, and gate:golden-env fails the
+# build if those two, or the installed @playwright/test, ever disagree.
+#
+# Which of the three tiers runs where:
+#   make golden        → golden project, this machine   → darwin baselines
+#   make golden-linux  → golden project, GOLDEN_IMAGE   → linux baselines
+#   make e2e           → iphone + android + golden, this machine
+#   CI job `e2e`       → iphone + android + golden, inside GOLDEN_IMAGE
 # ---------------------------------------------------------------------------
 
 GOLDEN_IMAGE := mcr.microsoft.com/playwright:v1.61.1-noble
@@ -177,9 +192,12 @@ ci: core ## Full local mirror of the CI build-test-gate job, IN CI ORDER
 	$(PNPM) test
 	$(PNPM) audit:corpus
 	$(PNPM) gate:notext
+	$(PNPM) gate:text-sources
 	$(PNPM) gate:license
 	$(PNPM) gate:validation
 	$(PNPM) gate:verified-edges
+	$(PNPM) gate:ci-artifacts
+	$(PNPM) gate:golden-env
 	$(CORE) build && $(WEB) build
 	$(PNPM) gate:budget
 	@echo ""
