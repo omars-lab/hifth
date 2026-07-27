@@ -38,7 +38,12 @@ export function HopRail({ chips, openDirection, onOpenChip }: HopRailProps): JSX
           data-direction={chip.direction}
           data-open={openDirection === chip.direction || undefined}
           aria-expanded={openDirection === chip.direction}
-          aria-label={`${DIRECTION_LABEL[chip.direction]} · ${chip.count}`}
+          // The badge two lines below has always been Arabic-Indic; the label
+          // was not, so a sighted reader saw ٣ and a screen-reader user heard
+          // "three" in the middle of an otherwise Arabic phrase. Found by the
+          // aria snapshot, which is the only place the two spellings sit
+          // side by side.
+          aria-label={`${DIRECTION_LABEL[chip.direction]} · ${toArabicDigits(chip.count)}`}
           onClick={() => onOpenChip(chip)}
         >
           <span className={styles.glyph} aria-hidden="true">

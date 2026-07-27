@@ -31,7 +31,7 @@ import {
   loadShard,
   loadTajweedShard,
 } from "./assets";
-import { ayahLabel } from "./format";
+import { ayahLabel, surahName, toArabicDigits } from "./format";
 import { useHashRouter } from "./useHashRouter";
 import { PageStage, type PageStageHandle } from "./components/PageStage";
 import { HopRail } from "./components/HopRail";
@@ -850,9 +850,14 @@ export function App(): JSX.Element {
           onToggle={() => setRootsOpen((o) => !o)}
         />
         <ShareSheet state={selectedKey ? currentState : null} hasTrail={trail.length > 0} />
+        {/* Screen-reader-only summary of what the rail is offering. It used to
+            read «السورة 2 · 1 روابط» — the surah as a bare number a listener has
+            no way to map back to a name, and Latin digits inside an Arabic
+            phrase. Every other label in the app says «البقرة» and «٢:٤٨»; the
+            one string nobody could see was the one that drifted. */}
         {selectedSurah && (
           <span className="sr-only">
-            {`السورة ${selectedSurah} · ${chips.length} روابط`}
+            {`${surahName(selectedSurah)} · ${toArabicDigits(chips.length)} روابط`}
           </span>
         )}
       </footer>
