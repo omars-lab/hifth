@@ -94,6 +94,14 @@ jobs:
       - name: Gate — license (SOURCES.md)
         run: pnpm gate:license
 
+      # SOURCES.md is the record; the colophon is what the reader is actually told.
+      # They once disagreed — the app credited the KFGQPC artwork as non-commercial,
+      # which is a different edition's term — and nothing failed, because only one
+      # of the two files was ever read by a machine. Now the record declares the
+      # reader-facing row and this asserts the component renders exactly it.
+      - name: Gate — the licence on screen is the licence on record
+        run: pnpm gate:license-copy
+
       # The manual-validation ledger. This does NOT fail on outstanding checks —
       # a phone that has not been held yet is a fact, not a broken build, and a
       # permanently red gate teaches everyone to ignore it. It fails when the

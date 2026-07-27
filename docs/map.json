@@ -456,8 +456,13 @@
         },
         {
           "file": "apps/web/src/components/Colophon.tsx",
-          "symbol": "Colophon",
-          "note": "What the user is shown, including the GPL corresponding-source offer. If this copy and SOURCES.md ever disagree, the user-facing one is the one that matters legally."
+          "symbol": "CREDITS",
+          "note": "What the user is actually told. Not authored here — each row is declared in its SOURCES.md ```colophon fence and this renders it, so the record and the screen cannot drift."
+        },
+        {
+          "file": "scripts/gate-license-copy.mjs",
+          "symbol": "NON_COMMERCIAL",
+          "note": "Enforces that binding, and refuses a non-commercial claim nobody recorded — the exact defect that once told every reader the KFGQPC artwork was more restricted than it is."
         },
         {
           "file": "apps/web/src/provenance.ts",
@@ -467,10 +472,11 @@
       ],
       "extend": [
         "Vendor nothing without its SOURCES.md entry in the same commit.",
-        "If you change the licence copy, change it in both places — SOURCES.md and the Colophon — and say so in the commit message.",
+        "To change what the reader is told about a licence, edit that source's ```colophon fence in SOURCES.md. The component follows; gate:license-copy fails if it does not.",
+        "A source the app should not credit still has to say so — `not-credited: <reason>` in the fence. Silence is indistinguishable from an oversight, which is why it is not allowed.",
         "A GPL-derived asset makes this repo the corresponding source. That constrains unrelated decisions, including whether binaries can live behind a metered service (see gate:golden-size)."
       ],
-      "gates": ["pnpm gate:license", "pnpm gate:text-sources", "make ci"],
+      "gates": ["pnpm gate:license", "pnpm gate:license-copy", "pnpm gate:text-sources", "make ci"],
       "seeAlso": ["editions-and-skins", "assets-and-pages", "golden-images"]
     },
 

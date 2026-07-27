@@ -388,11 +388,18 @@ New `scripts/gate-source-offer.mjs`; extend `colophon.spec.ts` to follow links a
 `make source-offer URL=<deployed>` and a `public-deploy` CI job. Flips a `pending` human check to
 automated and unblocks the one thing gating publication.
 
-**③ Licence-copy drift gate — ~1h, $0, needs no reachability.**
-New `scripts/gate-licence-copy.mjs`, wired into `pnpm gates` / `make ci` / CI per the skill's
-"Adding a validation" table. Asserts `SOURCES.md` §hafs-kfqc and `Colophon.tsx` state the same
-restriction and that neither says «غير التجاري» for that edition. Closes a hole that already
-shipped a live defect once.
+**③ Licence-copy drift gate — ✅ done, 2026-07-27.**
+`scripts/gate-license-copy.mjs`, wired into `pnpm gates`, `make ci`, CI, and the pre-commit hook
+(scoped to commits touching either file). Built one step stronger than designed: rather than
+comparing two independently-authored statements and hoping they say the same thing, each
+`SOURCES.md` entry now *declares* the reader-facing row in a ` ```colophon ` fence and the gate
+asserts `Colophon.tsx` renders exactly that set — same strings, same links, no extras, both
+directions. The colophon stops being a parallel account of the licence and becomes a renderer of
+the record, which is the same move as the ledger and the map. The «غير التجاري» check survives on
+top of it, for the case exact-matching cannot catch: both files edited to the same wrong claim.
+A source the app should not credit must say `not-credited: <reason>` — silence reads identically
+to an oversight. Verified by inducing all five failures and reverting, including a deliberately
+broken parser, which fails loudly rather than matching nothing against nothing.
 
 **④ Eviction-detection e2e — ~2h, $0.**
 Extend `offline.spec.ts` with a CDP `Storage.clearDataForOrigin` case (Chromium-only, matching the

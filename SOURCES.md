@@ -8,6 +8,17 @@ heading below.
 The design conversation's terms vary per resource (QUL resources each carry their
 own license); each is recorded individually rather than assumed.
 
+Each entry also carries a ` ```colophon ` fence: the exact row the app shows the
+reader for that source. It is written here rather than in the component because
+this is the file a licence question gets answered from, and the two once
+disagreed — the colophon called the KFGQPC page artwork non-commercial, which is
+a different edition's term, and nothing failed because only this file was ever
+read by a machine. `scripts/gate-license-copy.mjs` now asserts that
+`apps/web/src/components/Colophon.tsx` renders exactly these rows and no others,
+so the screen is a view of the record. A source the app deliberately does not
+credit says `not-credited: <reason>` in the same fence; saying nothing is not an
+option, because it reads identically to having forgotten.
+
 ---
 
 ### hafs-kfqc
@@ -42,6 +53,17 @@ own license); each is recorded individually rather than assumed.
      Qālūn edition's term — a different edition, not vendored here. Do not carry it
      over to `hafs-kfqc`; an earlier reading of this entry did, and the app's
      colophon told readers the artwork was more restricted than it is.)
+- **Colophon row.** What the app tells the reader about this source, verbatim.
+  `gate:license-copy` asserts `Colophon.tsx` shows exactly this, so the two can no
+  longer disagree — that drift is what shipped the «غير التجاري» defect above.
+
+```colophon
+what: صفحات المصحف
+who: طباعة مجمع الملك فهد (KFGQPC)، عبر quran-svg / quranpedia
+licence: إتاحة حرّة للاستعمال الرقمي · الطبع التجاري محفوظ للمجمع
+href: https://github.com/quranpedia/quran-svg
+```
+
 - **Status: CONFIRMED for the overlay (CC0, read at the source). The Complex's own
   terms remain read through quran-svg's NOTICE.md rather than off
   qurancomplex.gov.sa**, which refused connections on 2026-07-26 (`ECONNREFUSED`
@@ -71,6 +93,15 @@ own license); each is recorded individually rather than assumed.
   free to use as you see fit. However, I would appreciate if you mention the use
   of this project in your app or any other kind of work if you decide to use this
   data." → attribution planned in the app's about/credits surface.
+- **Colophon row.** Verbatim; bound to `Colophon.tsx` by `gate:license-copy`.
+
+```colophon
+what: المتشابهات
+who: Quran Mutashabihat Data · Waqar Ahmed
+licence: استعمال حرّ مع ذكر المصدر
+href: https://github.com/Waqar144/Quran_Mutashabihat_Data
+```
+
 - **Status: VENDORED (Loop 4a) — primary mutashabihat edge source.**
 
 ---
@@ -114,6 +145,17 @@ own license); each is recorded individually rather than assumed.
   not the ETL output.
 - **Immutability:** bytes are vendored verbatim and never edited (PLAN §8 and the
   terms above).
+- **Colophon row.** Verbatim; bound to `Colophon.tsx` by `gate:license-copy`. This
+  one is a licence *condition* — the source must be "clearly indicated" with a link
+  to corpus.quran.com — so the gate is the thing that keeps the condition met.
+
+```colophon
+what: الجذور والصرف
+who: Quranic Arabic Corpus · Kais Dukes، جامعة ليدز
+licence: GNU GPL
+href: http://corpus.quran.com
+```
+
 - **Status: VENDORED (Loop 5) — root/lemma source for the root lens.**
 
 ---
@@ -159,6 +201,16 @@ own license); each is recorded individually rather than assumed.
   tokenisation while the pages are KFGQPC artwork with no letter geometry, so
   the skin marks whole ayahs until Loop 4b's ligature corpus lands.
 - **Immutability:** bytes are vendored verbatim and never edited (PLAN §8).
+- **Colophon row.** Verbatim; bound to `Colophon.tsx` by `gate:license-copy`. CC BY
+  attribution travels with the work, so this row is a condition too, not a courtesy.
+
+```colophon
+what: أحكام التجويد
+who: quran-tajweed · Collin Fair
+licence: CC BY 4.0
+href: https://github.com/cpfair/quran-tajweed
+```
+
 - **Status: VENDORED (Loop 6a) — rule-span source for the tajweed skin.**
 
 ---
