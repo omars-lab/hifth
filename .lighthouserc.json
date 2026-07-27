@@ -1,0 +1,45 @@
+{
+  "//": [
+    "Lighthouse CI gate (PLAN §Loop 6a exit: Lighthouse ≥90).",
+    "Run with `make lighthouse`, or in CI via the `lighthouse` job. Invoked as",
+    "`pnpm dlx @lhci/cli autorun` — deliberately NOT a devDependency: it pulls",
+    "Lighthouse and a Chrome launcher (tens of MB) that nothing else in the",
+    "repo needs, and adding it would churn the shared lockfile for a tool that",
+    "runs once per push.",
+    "",
+    "staticDistDir serves the built app the way Cloudflare Pages does (static",
+    "files, no server), which is the only deployment shape Hifth has. Hash",
+    "routing means index.html is the entire URL surface — every view is that",
+    "one document plus fetches, so one URL really is the whole app.",
+    "",
+    "Three runs, median reported: a single headless run on a shared runner",
+    "swings several points on TBT alone, and a flaky gate is one people learn",
+    "to re-run instead of read.",
+    "",
+    "skipAudits: uses-http2 / canonical / is-crawlable are properties of the",
+    "host and of a public URL, neither of which a local static directory has;",
+    "they are the audits that would fail for the harness rather than the app.",
+    "None of them carry score weight in their categories."
+  ],
+  "ci": {
+    "collect": {
+      "staticDistDir": "apps/web/dist",
+      "numberOfRuns": 3,
+      "settings": {
+        "skipAudits": ["uses-http2", "canonical", "is-crawlable"]
+      }
+    },
+    "assert": {
+      "assertions": {
+        "categories:performance": ["error", { "minScore": 0.9 }],
+        "categories:accessibility": ["error", { "minScore": 0.9 }],
+        "categories:best-practices": ["error", { "minScore": 0.9 }],
+        "categories:seo": ["error", { "minScore": 0.9 }]
+      }
+    },
+    "upload": {
+      "target": "filesystem",
+      "outputDir": ".lighthouseci"
+    }
+  }
+}

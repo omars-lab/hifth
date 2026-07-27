@@ -2,6 +2,7 @@
   "name": "@hifth/web",
   "version": "0.0.0",
   "private": true,
+  "license": "GPL-3.0-or-later",
   "description": "Hifth web app — mobile-first, RTL-native, installable PWA",
   "type": "module",
   "scripts": {
@@ -20,6 +21,7 @@
     "react-dom": "^18.3.1"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.10.1",
     "@playwright/test": "^1.49.1",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.1.0",

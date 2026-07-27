@@ -1,0 +1,7 @@
+- dialog "متشابهات في السورة · 1":
+  - heading "متشابهات في السورة" [level=2]
+  - button "إغلاق": ✕
+  - list:
+    - listitem:
+      - button "البقرة · ٢:١٢٣ شفاعة ↔ عدل order swapped; verbs differ"
+      - button "انتقل إلى البقرة · ٢:١٢٣"

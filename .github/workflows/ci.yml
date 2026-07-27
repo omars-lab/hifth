@@ -14,6 +14,14 @@ jobs:
   # PR diff on pull_request. Config + allowlist live in .gitleaks.toml.
   secrets-scan:
     runs-on: ubuntu-latest
+    # Narrower than the repo default, not wider. On `pull_request` the action
+    # asks the API which commits the PR contains before scanning them, so a
+    # token with only `contents: read` gets a 403 and the action exits rather
+    # than scanning nothing — correct of it, and the reason both of these are
+    # spelled out here instead of inherited.
+    permissions:
+      contents: read
+      pull-requests: read
     steps:
       - uses: actions/checkout@v7
         with:
@@ -22,6 +30,11 @@ jobs:
         uses: gitleaks/gitleaks-action@v3
         env:
           GITLEAKS_CONFIG: .gitleaks.toml
+          # Required on `pull_request` since gitleaks-action v2.3 — the action
+          # asks the API which commits the PR contains, and without a token it
+          # refuses to scan rather than scanning nothing. The default job token
+          # is enough; it needs no extra permissions.
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   build-test-gate:
     runs-on: ubuntu-latest
@@ -46,13 +59,18 @@ jobs:
       - name: Build core
         run: pnpm --filter @hifth/core build
 
-      # The extracted assets are committed, but re-run extraction and fail if it
-      # is not byte-identical — the ETL must be deterministic (PLAN §6).
-      - name: Verify asset extraction is deterministic
+      # The extracted assets + adjacency shards are committed, but re-run the ETL
+      # and fail if it is not byte-identical — the ETL must be deterministic
+      # (PLAN §6). Core must be built first so build:adjacency can import it.
+      - name: Verify ETL output is deterministic
         run: |
+          pnpm --filter @hifth/core build
           pnpm --filter @hifth/etl extract:pages
+          pnpm --filter @hifth/etl build:adjacency
+          pnpm --filter @hifth/etl build:roots
+          pnpm --filter @hifth/etl build:tajweed
           git diff --exit-code -- apps/web/public/assets \
-            || (echo "::error::extract:pages output differs from committed assets" && exit 1)
+            || (echo "::error::ETL output differs from committed assets" && exit 1)
 
       - name: Lint
         run: pnpm lint
@@ -69,8 +87,51 @@ jobs:
       - name: Gate — no <text> in SVG assets
         run: pnpm gate:notext
 
+      # Every ayah of rendered text traces to a declared source edition.
+      - name: Gate — text sources
+        run: pnpm gate:text-sources
+
       - name: Gate — license (SOURCES.md)
         run: pnpm gate:license
+
+      # The manual-validation ledger. This does NOT fail on outstanding checks —
+      # a phone that has not been held yet is a fact, not a broken build, and a
+      # permanently red gate teaches everyone to ignore it. It fails when the
+      # ledger lies: a malformed entry, a "done" with no recorded result, or a
+      # recurring check whose result has expired. Its log doubles as the answer
+      # to "what is this project actually waiting on?".
+      - name: Gate — manual-validation ledger
+        run: pnpm gate:validation
+
+      # Human verdicts about edges, enforced forever. "correct" edges must still
+      # ship; "wrong" ones must stay gone. A reader with a mushaf is the scarcest
+      # input this project has — this is what stops their time being spent twice.
+      - name: Gate — verified edges hold
+        run: pnpm gate:verified-edges
+
+      # Both of these check CI's own workflow files, and both were written after
+      # a defect that CI itself could not see — an upload step that preserved
+      # nothing, and a visual gate whose baselines were rendered on a different
+      # machine than the one checking them. They lived in `pnpm gates` without
+      # ever being wired into a job, which is the same failure one level up: a
+      # gate nobody runs is a comment.
+      - name: Gate — CI artifacts have producers
+        run: pnpm gate:ci-artifacts
+
+      - name: Gate — golden baselines rendered and checked by one image
+        run: pnpm gate:golden-env
+
+      # Why the baselines are committed to git rather than Git LFS, expressed as
+      # the number at which that answer should be revisited. The gate's docblock
+      # carries the reasoning.
+      - name: Gate — golden baselines stay small enough to commit
+        run: pnpm gate:golden-size
+
+      # docs/map.json tells a newcomer where each feature starts. This checks it
+      # is still true, so it cannot rot into confident fiction. The pre-commit
+      # hook runs the same gate scoped to the staged files.
+      - name: Gate — the code map still resolves
+        run: pnpm gate:map
 
       - name: Build
         run: pnpm build
@@ -79,6 +140,107 @@ jobs:
         run: pnpm gate:budget
 
   e2e:
+    runs-on: ubuntu-latest
+    # The pinned Playwright image, and not a bare runner with
+    # `playwright install --with-deps`. Those are not the same machine, and the
+    # first CI run of this tier proved it in two ways at once:
+    #
+    #   - all ten golden diffs failed at 5–11% of pixels — orders of magnitude
+    #     past the 0.5% anti-aliasing tolerance — while the same commit passed
+    #     10/10 inside this image via `make golden-linux`;
+    #   - two Android taps timed out because a footer control and a jumper
+    #     option were physically covered by their neighbours.
+    #
+    # One cause fits both. `--with-deps` installs the browser's shared
+    # libraries; it does not install fonts. Arabic then falls back to whatever
+    # the runner happens to have, every label measures a different width, the
+    # 430px-intrinsic chrome (#63) overlaps a few pixels sooner, and the SVG
+    # lays out at a slightly different size — so every glyph edge in the golden
+    # shots lands on a different pixel. A gate that renders its baselines in one
+    # environment and checks them in another is a coin flip with a version
+    # number on it.
+    #
+    # This image is the one `make golden-linux` uses and the one
+    # e2e/__screenshots__/linux was rendered in; scripts/gate-golden-env.mjs
+    # fails the build if the two ever drift apart. Browsers are already baked
+    # in, so the install step is gone with it.
+    #
+    # `--user 1001` is Playwright's documented recipe for container jobs: the
+    # runner's workspace is owned by uid 1001, and Chromium will not start its
+    # sandbox as root.
+    container:
+      image: mcr.microsoft.com/playwright:v1.61.1-noble
+      options: --user 1001
+    steps:
+      - uses: actions/checkout@v7
+      # The image ships Node and corepack but no pnpm, and pnpm/action-setup
+      # wants a Node action runtime this container does not need to provide.
+      # Corepack pins the same version as every other job.
+      #
+      # --install-directory is not optional here: bare `corepack enable`
+      # symlinks into /usr/bin, and this job runs as uid 1001 (see above), so it
+      # dies with EACCES before installing anything. Point it at a writable dir
+      # and put that on PATH for the steps that follow.
+      - name: Enable pnpm
+        run: |
+          mkdir -p "$HOME/.local/bin"
+          corepack enable --install-directory "$HOME/.local/bin"
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+          PATH="$HOME/.local/bin:$PATH" corepack prepare pnpm@9.15.0 --activate
+      - name: Install
+        run: pnpm install --frozen-lockfile
+      - name: Build core
+        run: pnpm --filter @hifth/core build
+      - name: Build web
+        run: pnpm --filter @hifth/web build
+      # Also runs the `golden` project: the visual gate diffs pages 7/9/19 in
+      # every highlight state against the committed linux baselines
+      # (apps/web/e2e/__screenshots__/linux, refreshed with `make golden-linux`).
+      #
+      # The preview server starts inside this container, so the browser reaches
+      # the app on http://localhost:4173 — a secure context, which is what lets
+      # the service worker register at all. Reaching a host-side server over
+      # host.docker.internal does not, and the offline/SW specs fail there for a
+      # reason that has nothing to do with the app.
+      - name: E2E (mobile viewports + golden images)
+        run: pnpm --filter @hifth/web test:e2e
+
+      # A failed golden diff is three images and a timeline; neither reads as log
+      # output. The html reporter bundles them — the expected/actual/diff
+      # triptych, the failing screenshot, and the retry's trace — into one folder
+      # that opens offline once downloaded and unzipped:
+      #
+      #   gh run download <run-id> -n playwright-report && open index.html
+      #
+      # `always()`, not `failure()`: a green run's report is how a flake is
+      # caught (it lists the tests that only passed on retry), and that is
+      # invisible from a green check mark. This upload used to be `failure()`
+      # only and pointed at a directory the CI reporter never created, so the
+      # traces were discarded on exactly the runs that needed them. That is what
+      # `if-no-files-found: error` is for: an upload step that silently uploads
+      # nothing is indistinguishable from one that works, for as long as nobody
+      # needs it.
+      - name: Upload Playwright report
+        if: always()
+        uses: actions/upload-artifact@v5
+        with:
+          name: playwright-report
+          path: apps/web/playwright-report
+          retention-days: 7
+          if-no-files-found: error
+
+  # Lighthouse gate: all four categories ≥90 (PLAN §Loop 6a exit criterion).
+  #
+  # Its own job, deliberately, rather than a step inside build-test-gate or a
+  # `make ci` line:
+  #   - it needs Chrome and ~90s of runs (3 runs, median) — that is dead weight
+  #     bolted onto the gate everyone waits on, and it parallelises for free;
+  #   - `make ci` is documented as an exact mirror of build-test-gate, and it
+  #     should stay exactly that.
+  # It still runs on EVERY push and pull_request, at full strength: the
+  # threshold is not weakened anywhere, only moved to where it is stable.
+  # Reproduce locally with `make lighthouse`.
+  lighthouse:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
@@ -91,11 +253,28 @@ jobs:
           cache: pnpm
       - name: Install
         run: pnpm install --frozen-lockfile
-      - name: Build core
-        run: pnpm --filter @hifth/core build
-      - name: Install Playwright browsers
-        run: pnpm --filter @hifth/web exec playwright install --with-deps chromium webkit
-      - name: Build web
-        run: pnpm --filter @hifth/web build
-      - name: E2E (mobile viewports)
-        run: pnpm --filter @hifth/web test:e2e
+      - name: Build
+        run: |
+          pnpm --filter @hifth/core build
+          pnpm --filter @hifth/web build
+      # Config (URLs, run count, the ≥90 assertions) lives in .lighthouserc.json.
+      # ubuntu-latest ships Chrome, so lhci finds a browser without help.
+      - name: Lighthouse CI (categories ≥90)
+        run: pnpm dlx @lhci/cli@0.14.x autorun
+
+      - name: Upload Lighthouse reports
+        if: always()
+        uses: actions/upload-artifact@v5
+        with:
+          name: lighthouse-reports
+          path: .lighthouseci
+          retention-days: 7
+          if-no-files-found: error
+          # lhci writes to a dot-directory, and upload-artifact has excluded
+          # hidden files by default since v4 — so this upload found nothing and,
+          # thanks to `if-no-files-found: error`, failed the job even though the
+          # ≥90 assertions had all passed. Exactly the failure mode that setting
+          # exists to surface, caught by it on the first run.
+          # scripts/gate-ci-artifacts.mjs now requires this line on any path
+          # starting with a dot.
+          include-hidden-files: true

@@ -1,0 +1,240 @@
+/*
+ * Colophon — the same sheet furniture as EditionPicker/Jumper/HopPopover, so
+ * the one surface that is pure prose still behaves like every other modal under
+ * a thumb. Nothing here is decorative: every line is either what the app is or
+ * a licence condition being discharged, which is why none of it recedes below
+ * the reading floor (--ink / --ink-soft only; --ink-faint is for text that may
+ * be skimmed past, and a GPL offer may not be).
+ */
+
+.scrim {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-sheet);
+  background: rgba(38, 32, 26, 0.28);
+  animation: fade var(--dur-fast) ease;
+}
+
+.sheet {
+  position: fixed;
+  inset-inline: 0;
+  inset-block-end: 0;
+  z-index: var(--z-sheet);
+  max-block-size: 82vh;
+  overflow-y: auto;
+  padding: var(--space-3) var(--space-4) calc(var(--space-5) + env(safe-area-inset-bottom));
+  background: var(--paper-raised);
+  border-start-start-radius: var(--radius-lg);
+  border-start-end-radius: var(--radius-lg);
+  box-shadow: var(--shadow-2);
+  animation: rise var(--dur-med) var(--ease-hop);
+}
+
+.grip {
+  inline-size: 40px;
+  block-size: 4px;
+  margin: 0 auto var(--space-2);
+  border-radius: var(--radius-pill);
+  background: var(--hairline);
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding-block-end: var(--space-2);
+  border-block-end: 1px solid var(--hairline);
+}
+
+.glyph {
+  font-size: var(--text-lg);
+  color: var(--accent-strong);
+}
+
+.title {
+  flex: 1;
+  margin: 0;
+  font-size: var(--text-md);
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.close {
+  min-inline-size: var(--touch-min);
+  min-block-size: var(--touch-min);
+  border: none;
+  background: none;
+  color: var(--ink-soft);
+  font-size: var(--text-md);
+  cursor: pointer;
+}
+
+.close:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+.lede {
+  margin: var(--space-3) 0 0;
+  font-size: var(--text-md);
+  line-height: 1.6;
+  color: var(--ink);
+}
+
+.caveat {
+  margin: var(--space-2) 0 0;
+  font-size: var(--text-sm);
+  line-height: 1.6;
+  color: var(--ink-soft);
+}
+
+.block {
+  margin-block-start: var(--space-4);
+  padding-block-start: var(--space-3);
+  border-block-start: 1px solid var(--hairline);
+}
+
+.subhead {
+  margin: 0 0 var(--space-2);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--ink-soft);
+}
+
+.body {
+  margin: 0 0 var(--space-3);
+  font-size: var(--text-sm);
+  line-height: 1.6;
+  color: var(--ink);
+}
+
+/* The §6 offer, given the weight of a control rather than a footnote link:
+   it is the one thing on this sheet a reader is entitled to act on. */
+.source {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  min-block-size: var(--touch-min);
+  padding-inline: var(--space-3);
+  border: 1px solid var(--accent);
+  border-radius: var(--radius-md);
+  background: var(--accent-tint);
+  color: var(--accent-strong);
+  text-decoration: none;
+}
+
+.source:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.sourceLabel {
+  font-size: var(--text-md);
+  font-weight: 600;
+}
+
+/* The seven characters a human reads back to a maintainer. Latin + tabular so a
+   SHA is not reshaped by the Arabic-first chrome font. */
+.commit {
+  font-family: var(--font-latin);
+  font-size: var(--text-sm);
+  direction: ltr;
+}
+
+.note {
+  margin: var(--space-2) 0 0;
+  font-size: var(--text-xs);
+  line-height: 1.5;
+  color: var(--ink-soft);
+}
+
+.list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 2px var(--space-3);
+  padding-block: var(--space-2);
+  border-block-end: 1px solid var(--hairline);
+}
+
+.row:last-child {
+  border-block-end: none;
+}
+
+.what {
+  font-size: var(--text-md);
+  color: var(--ink);
+}
+
+/* The credited name is the link — the licences that require attribution require
+   the link too, so binding them together makes the condition one target. */
+.who {
+  grid-column: 1 / -1;
+  min-block-size: var(--touch-min);
+  display: flex;
+  align-items: center;
+  font-size: var(--text-sm);
+  color: var(--accent-strong);
+}
+
+.who:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+.licence {
+  align-self: start;
+  font-size: var(--text-xs);
+  color: var(--ink-soft);
+}
+
+.foot {
+  margin: var(--space-4) 0 0;
+  font-size: var(--text-xs);
+  line-height: 1.6;
+  color: var(--ink-soft);
+}
+
+.inline {
+  color: var(--accent-strong);
+  font-family: var(--font-latin);
+  direction: ltr;
+  unicode-bidi: isolate;
+}
+
+@media (min-width: 900px) {
+  .sheet {
+    inset-inline-start: auto;
+    inset-inline-end: var(--space-5);
+    inset-block-end: var(--space-5);
+    inline-size: 420px;
+    border-radius: var(--radius-lg);
+  }
+}
+
+@keyframes rise {
+  from {
+    transform: translateY(100%);
+  }
+}
+
+@keyframes fade {
+  from {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sheet,
+  .scrim {
+    animation: none;
+  }
+}

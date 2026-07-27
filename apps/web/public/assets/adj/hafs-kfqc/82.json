@@ -1,0 +1,17 @@
+{
+  "19": {
+    "edges": [
+      {
+        "type": "related-meaning",
+        "to": "quran/hafs-kfqc/2:48",
+        "page": 7,
+        "dir": {
+          "dSurah": -80,
+          "dPage": -580
+        },
+        "note": "Same theme — no soul avails another"
+      }
+    ],
+    "ext": []
+  }
+}

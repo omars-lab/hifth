@@ -1,0 +1,56 @@
+{
+  "42": {
+    "edges": [
+      {
+        "type": "mutashabih",
+        "to": "quran/hafs-kfqc/36:62",
+        "page": 444,
+        "dir": {
+          "dSurah": -19,
+          "dPage": -89
+        }
+      },
+      {
+        "type": "mutashabih",
+        "to": "quran/hafs-kfqc/52:13",
+        "page": 523,
+        "dir": {
+          "dSurah": -3,
+          "dPage": -10,
+          "sameJuz": true
+        }
+      }
+    ],
+    "ext": []
+  },
+  "53": {
+    "edges": [
+      {
+        "type": "mutashabih",
+        "to": "quran/hafs-kfqc/52:19",
+        "page": 524,
+        "dir": {
+          "dSurah": -3,
+          "dPage": -9,
+          "sameJuz": true
+        }
+      }
+    ],
+    "ext": []
+  },
+  "75": {
+    "edges": [
+      {
+        "type": "mutashabih",
+        "to": "quran/hafs-kfqc/52:19",
+        "page": 524,
+        "dir": {
+          "dSurah": -3,
+          "dPage": -10,
+          "sameJuz": true
+        }
+      }
+    ],
+    "ext": []
+  }
+}

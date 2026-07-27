@@ -45,5 +45,6 @@ with CI gates and Cloudflare Pages deploy config. See [`docs/decisions/loop-0.md
 - **Loop records:** [`docs/decisions/`](docs/decisions/) — what each loop decided, measured, deferred
 - **Spec of record:** [`docs/reference/linker-spec.md`](docs/reference/linker-spec.md) (design-phase codename "Linker")
 - **Data sources & licensing:** [`SOURCES.md`](SOURCES.md)
+- **Licensing map:** [`LICENSES.md`](LICENSES.md) — how our terms compose with the vendored data's
 - **Interactive mock:** [`docs/reference/linker-mock.html`](docs/reference/linker-mock.html) — open directly in a browser
 - **Architecture diagram:** [`docs/reference/linker-architecture.html`](docs/reference/linker-architecture.html)

@@ -27,4 +27,25 @@ if [ "$status" -ne 0 ]; then
   exit 1
 fi
 
+# The code map (docs/map.json) points a newcomer at the entrypoint of every
+# feature, and a map is worth reading only while it is true. This is the moment
+# to check it: you are renaming the thing right now, so you know where it went.
+# Ten minutes from now nobody does, and a year from now the map is fiction that
+# still reads like fact.
+#
+# Scoped to the staged files, so it costs nothing on a commit that touches
+# nothing mapped, and it stays silent in that case rather than printing an OK
+# nobody asked for. CI runs the whole map on every push regardless.
+staged=$(git diff --cached --name-only --diff-filter=ACMR)
+if [ -n "$staged" ] && command -v node >/dev/null 2>&1; then
+  # shellcheck disable=SC2086
+  if ! node scripts/gate-map.mjs --files $staged; then
+    echo ""
+    echo "pre-commit: docs/map.json points somewhere that no longer exists (above)."
+    echo "  fix the entry — 'make map FEATURE=<id>' shows what it currently claims."
+    echo "  to bypass this one commit:  git commit --no-verify"
+    exit 1
+  fi
+fi
+
 exit 0

@@ -5,6 +5,9 @@ dist/
 apps/web/dev-dist/
 apps/web/playwright-report/
 apps/web/test-results/
+# Lighthouse CI run artifacts (the gate's thresholds live in .lighthouserc.json,
+# which IS committed; the reports it produces are per-run noise).
+.lighthouseci/
 .DS_Store
 
 # Secrets — never commit. Enforced by gitleaks (see .gitleaks.toml + CI).
