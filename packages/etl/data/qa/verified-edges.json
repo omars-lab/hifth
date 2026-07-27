@@ -1,0 +1,54 @@
+{
+  "$schema": "./verified-edges.schema.md",
+  "$comment": [
+    "The scripture layer's regression set: edges a human has actually looked at.",
+    "",
+    "The ETL is deterministic and its gates prove the shards are well-formed, but",
+    "no gate can tell you an edge is TRUE — that 2:48 really is mutashabih with",
+    "2:123 and not with something else. Only a reader with a mushaf can say that,",
+    "and their verdict is the most expensive artifact this project produces.",
+    "So it is not left in prose: every verdict lands here and becomes permanent.",
+    "",
+    "Two verdicts, and the negative one is the point:",
+    "  correct — this edge must keep shipping. If the ETL, a source bump, or a",
+    "            dedupe change drops it, gate:verified-edges fails.",
+    "  wrong   — a reader checked it and it is not a real mutashabih. It must NOT",
+    "            ship. If it reappears, the gate fails. Without this, a rejected",
+    "            edge silently returns on the next data refresh and the human",
+    "            time spent rejecting it is spent again.",
+    "",
+    "Append after every spot-audit (PLAN §Testing plan, 'Edge spot-audit'). Never",
+    "delete an entry to make the gate pass — a failing entry means the data moved",
+    "under a verdict, which is exactly the signal this file exists to raise."
+  ],
+  "edition": "hafs-kfqc",
+  "entries": [
+    {
+      "from": "2:48",
+      "to": "2:123",
+      "type": "mutashabih",
+      "verdict": "correct",
+      "verifiedBy": "curated-mock",
+      "verifiedOn": "2026-07-20",
+      "note": "The pair the whole product was designed around — the شفاعة/عدل swap. Inherited from the design mock's hand-curated clusters and re-attested every CI run by the e2e hop tour, which names both endpoints. Not yet a hafiz sign-off."
+    },
+    {
+      "from": "2:123",
+      "to": "2:48",
+      "type": "mutashabih",
+      "verdict": "correct",
+      "verifiedBy": "curated-mock",
+      "verifiedOn": "2026-07-20",
+      "note": "The return leg. Recorded separately because the shards are directed: losing one direction is a real defect that the forward entry alone would not catch."
+    },
+    {
+      "from": "2:58",
+      "to": "7:161",
+      "type": "mutashabih",
+      "verdict": "correct",
+      "verifiedBy": "curated-mock",
+      "verifiedOn": "2026-07-20",
+      "note": "The cross-surah pair from the mock's curated set (ادخلوا هذه القرية / اسكنوا هذه القرية). Exercises the cross-page hop path."
+    }
+  ]
+}

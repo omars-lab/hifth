@@ -17,6 +17,23 @@ const MANIFEST = {
   ],
 };
 
+// A minimal adjacency shard for surah 2 so the rail has something to bucket.
+// 2:41 → 2:47 (same-surah loop, page 7).
+const ADJ_SHARD = {
+  "41": {
+    edges: [
+      {
+        type: "mutashabih",
+        to: "quran/hafs-kfqc/2:47",
+        page: 7,
+        dir: { dSurah: 0, dPage: 0 },
+        note: "test edge",
+      },
+    ],
+    ext: [],
+  },
+};
+
 // Fixture page carries one clickable polygon whose id matches the manifest, plus
 // a glyph path that must NOT be selectable.
 const PAGE_SVG =
@@ -33,13 +50,21 @@ describe("App shell", () => {
         if (url.includes("manifest.json")) {
           return Promise.resolve(new Response(JSON.stringify(MANIFEST)));
         }
+        if (url.includes("/adj/")) {
+          return Promise.resolve(new Response(JSON.stringify(ADJ_SHARD)));
+        }
         return Promise.resolve(
           new Response(PAGE_SVG, { headers: { "content-type": "image/svg+xml" } }),
         );
       }),
     );
   });
-  afterEach(() => vi.unstubAllGlobals());
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    // The hash router writes location.hash as the view changes; jsdom shares one
+    // window across tests, so clear it or the next cold-open restores stale state.
+    window.history.replaceState(null, "", window.location.pathname);
+  });
 
   it("renders the Arabic brand mark and RTL direction", () => {
     render(<App />);
@@ -55,7 +80,7 @@ describe("App shell", () => {
   it("mounts the page SVG with an accessible role and overlay group", async () => {
     const { container } = render(<App />);
     await waitFor(() => {
-      const svg = container.querySelector("svg[role='img']");
+      const svg = container.querySelector("svg[role='group']");
       expect(svg).not.toBeNull();
     });
     expect(container.querySelector("#hifth-overlay")).not.toBeNull();
@@ -88,5 +113,23 @@ describe("App shell", () => {
     });
     // And the highlighter drew a selection clone into the overlay.
     expect(container.querySelector("#hifth-overlay .hl-sel")).not.toBeNull();
+  });
+
+  it("surfaces a hop rail chip for a selected ayah that has edges", async () => {
+    const { container } = render(<App />);
+    const poly = await waitFor(() => {
+      const p = container.querySelector<SVGElement>("#verse-1");
+      expect(p).not.toBeNull();
+      return p!;
+    });
+
+    act(() => {
+      poly.dispatchEvent(new Event("pointerup", { bubbles: true }));
+    });
+
+    // 2:41 has one same-surah mutashabih → a loop chip appears on the rail.
+    await waitFor(() => {
+      expect(screen.getByRole("group", { name: "روابط الآية" })).toBeInTheDocument();
+    });
   });
 });

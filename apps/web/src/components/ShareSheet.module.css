@@ -1,0 +1,55 @@
+/*
+ * ShareSheet — a quiet verdigris pill in the footer. The one outward-facing
+ * action, so it reads as an affordance without shouting over the trail beads.
+ */
+
+.wrap {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex: none;
+}
+
+.share {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-block-size: var(--touch-min);
+  padding-inline: var(--space-3);
+  border: 1px solid var(--accent-tint);
+  border-radius: var(--radius-pill);
+  background: none;
+  color: var(--accent-strong);
+  font-family: var(--font-chrome);
+  font-size: var(--text-sm);
+  cursor: pointer;
+  transition: background var(--dur-fast) ease;
+}
+
+.share:hover {
+  background: var(--accent-tint);
+}
+
+.share:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.glyph {
+  font-size: var(--text-md);
+}
+
+.feedback {
+  font-size: var(--text-xs);
+  color: var(--ink-soft);
+}
+
+.feedback[data-kind="error"] {
+  color: var(--danger);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .share {
+    transition: none;
+  }
+}

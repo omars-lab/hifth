@@ -1,0 +1,512 @@
+{
+  "$comment": [
+    "The map: what this app is made of, and where you touch it to change each part.",
+    "",
+    "Same rule as docs/validation/ledger.json — one source, several renderers. This file",
+    "is the only place the map is written; `make map` prints it, `make map FEATURE=<id>`",
+    "prints one feature, and the /extend skill drives a session from it. Never restate a",
+    "feature's entrypoints anywhere else; point at the id.",
+    "",
+    "WHY THIS IS JSON AND NOT PROSE, and why it holds symbols instead of line numbers:",
+    "an orientation doc is only worth reading if it is true, and the usual ones rot",
+    "silently — a file gets renamed, a function moves, and the map keeps confidently",
+    "pointing at nothing. scripts/gate-map.mjs runs in CI and in the pre-commit hook: it",
+    "opens every file listed here and checks that every `symbol` still literally appears",
+    "in it. A rename fails the build on the commit that does the renaming, naming the map",
+    "entry to update. Line numbers are what rots fastest, so they are never stored — the",
+    "renderer computes them at print time, so what you read is always where it is now.",
+    "",
+    "FIELDS",
+    "  id         kebab-case, stable; what you pass to `make map FEATURE=`.",
+    "  what       one line, in the user's terms, not the code's.",
+    "  layer      L1 core | L2 web | L3 etl | gate — where this feature's weight sits.",
+    "  entry      the ordered path through the code. Read them top to bottom and you have",
+    "             the feature. `file` + `symbol` (checked) + `note` (why you'd stop here).",
+    "  extend     ordered steps for the most common change to this feature. Written as",
+    "             what to do, not what exists.",
+    "  gates      what will judge the change — run these before you believe it works.",
+    "  seeAlso    ids of features that will notice if you change this one.",
+    "",
+    "ADDING A FEATURE: add an entry here. The gate does not require one per file, and it",
+    "should not — a map that lists everything is an `ls`. List what someone arriving",
+    "cold would otherwise have to find by grep."
+  ],
+
+  "features": [
+    {
+      "id": "select-an-ayah",
+      "what": "Tap an ayah on the page, or drag a marquee across several, and see them wash amber.",
+      "layer": "L1 core",
+      "entry": [
+        {
+          "file": "packages/core/src/gestures.ts",
+          "symbol": "pointerIntent",
+          "note": "The one decision the whole surface rests on: is this pointer a pan, a pinch, a tap, or a marquee? Everything downstream is a consequence. TAP_SLOP_PX and LONG_PRESS_MS are the thresholds a finger is judged by."
+        },
+        {
+          "file": "packages/core/src/resolver.ts",
+          "symbol": "class Resolver",
+          "note": "Screen point → ayah key, via the polygon manifest. The adapter between geometry and scripture; nothing above this layer knows what a polygon is."
+        },
+        {
+          "file": "packages/core/src/highlighter.ts",
+          "symbol": "class Highlighter",
+          "note": "Owns #hifth-overlay and every wash drawn in it. Framework-free and imperative on purpose — React must not re-render the stage. If you are adding a new kind of highlight, it is a StyleToken here, not a component."
+        },
+        {
+          "file": "apps/web/src/components/PageStage.tsx",
+          "symbol": "PageStage",
+          "note": "The React boundary. Binds @use-gesture to the surface, hands events to pointerIntent, and calls the Highlighter imperatively. The only file where the two worlds touch."
+        }
+      ],
+      "extend": [
+        "Add the intent to `PointerIntent` and teach `pointerIntent`/`nextIntent` when to return it — with a unit test in gestures.test.ts first, because this is pure and cheap to pin.",
+        "If it draws something new, add a `StyleToken` and its branch in the Highlighter, then a CSS custom property in apps/web/src/styles/tokens.css.",
+        "Wire it in PageStage. Resist adding state to React that the Highlighter already owns.",
+        "Add a golden row if it changes pixels — see the `golden-images` feature."
+      ],
+      "gates": ["pnpm test", "make e2e", "make golden"],
+      "seeAlso": ["the-hop", "root-lens", "golden-images"]
+    },
+
+    {
+      "id": "the-hop",
+      "what": "From a selected ayah, jump to the mutashabihat that resemble it — the reason this app exists.",
+      "layer": "L1 core",
+      "entry": [
+        {
+          "file": "packages/core/src/adjacency.ts",
+          "symbol": "class Adjacency",
+          "note": "Loads and caches the per-surah edge shards from public/assets/adj/. Start here to understand what an edge IS."
+        },
+        {
+          "file": "packages/core/src/adjacency.ts",
+          "symbol": "bucketEdges",
+          "note": "Edges → rail chips, grouped by direction. `orderForHifz` beside it is the ranking a memoriser actually wants, which is not the ranking the data arrives in."
+        },
+        {
+          "file": "apps/web/src/components/HopRail.tsx",
+          "symbol": "HopRail",
+          "note": "The chips down the side. Arabic-Indic digits throughout, including in aria-labels — a sighted reader seeing ٣ and a screen-reader user hearing 'three' is a defect, and one the aria snapshots caught."
+        },
+        {
+          "file": "apps/web/src/components/HopPopover.tsx",
+          "symbol": "HopPopover",
+          "note": "The chip's expansion: the destinations, and the diff against the current ayah."
+        },
+        {
+          "file": "apps/web/src/components/PageStage.tsx",
+          "symbol": "async navigateTo",
+          "note": "The cross-page jump itself, and the case that is easy to get wrong: the destination is on another page, so the page must mount before the wash can land. `navigatedRef` is what stops an in-flight fetch from stomping a deep link that already arrived."
+        },
+        {
+          "file": "apps/web/src/components/TrailBeads.tsx",
+          "symbol": "TrailBeads",
+          "note": "Where you have been. The hop is only useful if you can get back."
+        }
+      ],
+      "extend": [
+        "New edge kind: add it to `EDGE_TYPES` in adjacency.ts and give it a status. `isActiveEdgeType` is what keeps a provisional kind out of the UI while its data is still being audited.",
+        "Emit it from packages/etl/scripts/build-adjacency.mjs, then re-run `make etl` — CI diffs the committed shards against a fresh ETL run, so a non-deterministic change fails the build.",
+        "If a human has ruled on specific edges, they belong in the curated set, not the dataset — gate:verified-edges enforces that a 'correct' edge still ships and a 'wrong' one stays gone, forever.",
+        "Check the shard budget in the ETL output; the largest shard is printed on every run."
+      ],
+      "gates": ["pnpm test", "pnpm gate:verified-edges", "make ci", "make e2e"],
+      "seeAlso": ["edge-data-etl", "share-links", "root-lens"]
+    },
+
+    {
+      "id": "root-lens",
+      "what": "Show every ayah sharing an Arabic root with this one — the other way ayahs rhyme.",
+      "layer": "L1 core",
+      "entry": [
+        {
+          "file": "packages/core/src/roots.ts",
+          "symbol": "class Roots",
+          "note": "Two shard families: per-ayah refs and per-root buckets. The split is what keeps a 44k-pair index inside the byte budget on a phone."
+        },
+        {
+          "file": "packages/core/src/roots.ts",
+          "symbol": "orderByPageDistance",
+          "note": "Ranking for someone holding a mushaf: near pages first, because that is how the memory is organised."
+        },
+        {
+          "file": "apps/web/src/components/RootLens.tsx",
+          "symbol": "RootLens",
+          "note": "The ⬡ surface. Note the glyph is shared with a rail chip and the two promise different things — that collision was a decided defect, not an accident."
+        }
+      ],
+      "extend": [
+        "Roots are derived, never hand-edited: change packages/etl/scripts/build-roots.mjs and re-run `make etl`.",
+        "Granularity is ayah-level today. Word-level is the open design (see the roadmap) and would change RootOccurrence, not just the UI."
+      ],
+      "gates": ["pnpm test", "make ci"],
+      "seeAlso": ["edge-data-etl", "the-hop"]
+    },
+
+    {
+      "id": "share-links",
+      "what": "Every view has a URL, and every URL restores its view — offline, from a cold start.",
+      "layer": "L1 core",
+      "entry": [
+        {
+          "file": "packages/core/src/router.ts",
+          "symbol": "serializeState",
+          "note": "State → hash. Its inverse `parseHash` must round-trip it; that pair is the whole contract and it is unit-tested as a pair."
+        },
+        {
+          "file": "packages/core/src/router.ts",
+          "symbol": "parseHash",
+          "note": "Hash → state, and the place to be forgiving: a hand-typed or truncated link should degrade to something sensible rather than a blank page."
+        },
+        {
+          "file": "apps/web/src/useHashRouter.ts",
+          "symbol": "useHashRouter",
+          "note": "The React binding. Hash routing, not history routing, because this ships as static files with no server to rewrite paths."
+        },
+        {
+          "file": "apps/web/src/components/ShareSheet.tsx",
+          "symbol": "ShareSheet",
+          "note": "Where a link leaves the app. Do not reach for the Clipboard API without a fallback — a LAN preview is plain http, so it is not a secure context and the API is simply absent."
+        }
+      ],
+      "extend": [
+        "Add the field to `AppState`, then to both serializeState and parseHash in the same commit — a round-trip test is the cheapest way to keep them honest.",
+        "Old links must keep working. Treat the hash format as a published API, because it is: it is in people's notes and messages.",
+        "Add an e2e that opens the URL cold, rather than one that clicks its way to the state — those test different things and only the first tests a link."
+      ],
+      "gates": ["pnpm test", "make e2e"],
+      "seeAlso": ["the-hop", "offline-pwa"]
+    },
+
+    {
+      "id": "wayfinding",
+      "what": "Getting to a known place: the surah/ayah jumper, the keyboard map, and the coach marks that teach the gestures once.",
+      "layer": "L2 web",
+      "entry": [
+        {
+          "file": "packages/core/src/jump.ts",
+          "symbol": "parseJump",
+          "note": "Parses what someone actually types — Arabic or Western digits, Arabic names with or without alif-lam, '2:255', 'p19'. `normalizeArabic` is the reason it tolerates real input."
+        },
+        {
+          "file": "apps/web/src/components/Jumper.tsx",
+          "symbol": "Jumper",
+          "note": "The combobox. At 412 px its input and its listbox can overlap the first option — see the open header-overflow defect before adding anything to this row."
+        },
+        {
+          "file": "packages/core/src/keymap.ts",
+          "symbol": "appKeyAction",
+          "note": "One pure function from (key, context) to action, so the keyboard map is testable without a DOM and cannot disagree with itself across components."
+        },
+        {
+          "file": "apps/web/src/components/CoachMarks.tsx",
+          "symbol": "CoachMarks",
+          "note": "Shown once, keyed in localStorage. Every e2e that is not about coach marks must suppress them in an init script, or it is testing the coach marks."
+        }
+      ],
+      "extend": [
+        "New input syntax: extend parseJump and its unit tests. Keep the UI dumb — it should render JumpTargets, not know how they were found.",
+        "New shortcut: add it to appKeyAction with a KeyContext branch, and add the row to the help surface in the same commit.",
+        "Anything added to the header row: check it at 390 px and 412 px, not just at your window's width."
+      ],
+      "gates": ["pnpm test", "make e2e"],
+      "seeAlso": ["a11y", "editions-and-skins"]
+    },
+
+    {
+      "id": "editions-and-skins",
+      "what": "Which mushaf print you are reading, and whether tajweed colouring is on.",
+      "layer": "L1 core",
+      "entry": [
+        {
+          "file": "packages/core/src/concordance.ts",
+          "symbol": "EDITIONS",
+          "note": "The registry. `EditionStatus` is what keeps an edition whose provenance is still PROVISIONAL out of the picker."
+        },
+        {
+          "file": "packages/core/src/concordance.ts",
+          "symbol": "class Concordance",
+          "note": "Maps an ayah between editions. Needed because ayah numbering is not universal and a share link must survive an edition switch."
+        },
+        {
+          "file": "packages/core/src/skins.ts",
+          "symbol": "class Tajweed",
+          "note": "Per-surah mark shards → per-ayah marks. `TAJWEED_RULES` is the rule vocabulary and the palette keys derive from it."
+        },
+        {
+          "file": "apps/web/src/components/SkinToggle.tsx",
+          "symbol": "SkinToggle",
+          "note": "The switch. Skin swap must not re-render the stage — it changes classes on existing nodes."
+        }
+      ],
+      "extend": [
+        "A new edition is a data change first: assets, a SOURCES.md entry with its licence, and a concordance. Only then a registry entry.",
+        "gate:license and gate:text-sources both read SOURCES.md — an edition whose provenance is not recorded cannot ship, by construction.",
+        "A new tajweed rule: add to TAJWEED_RULES, emit from build-tajweed.mjs, add the palette entry. The class prefix is centralised so CSS and TS cannot drift."
+      ],
+      "gates": ["pnpm test", "pnpm gate:license", "pnpm gate:text-sources", "make ci"],
+      "seeAlso": ["edge-data-etl", "provenance"]
+    },
+
+    {
+      "id": "offline-pwa",
+      "what": "Works with the phone in aeroplane mode, a week after you last opened it.",
+      "layer": "L2 web",
+      "entry": [
+        {
+          "file": "apps/web/src/pwa.ts",
+          "symbol": "initPwa",
+          "note": "Registration and update flow. Service workers need a secure context — that is why offline specs cannot pass against a plain-http LAN or container URL, and it is the harness, not the app."
+        },
+        {
+          "file": "apps/web/src/storage.ts",
+          "symbol": "requestPersistentStorage",
+          "note": "Asks the browser not to evict us. It can say no, and the honest UI for that is a notice, not silence."
+        },
+        {
+          "file": "apps/web/src/components/OfflineNotice.tsx",
+          "symbol": "OfflineNotice",
+          "note": "What the user is told about their storage. Must not stack with the coach strip — that was a real merge defect."
+        },
+        {
+          "file": "apps/web/src/components/InstallButton.tsx",
+          "symbol": "InstallButton",
+          "note": "beforeinstallprompt on Chrome; iOS has no equivalent and needs instructions instead of a button that cannot work."
+        }
+      ],
+      "extend": [
+        "Precache list and strategies live in the vite-plugin-pwa config in apps/web/vite.config.ts, not in a hand-written sw.js.",
+        "Adding to the precache costs install-time bytes on a phone. Check the entry count and size the build prints.",
+        "Test offline behaviour in an e2e that actually goes offline, over a secure context. A unit test cannot see a service worker."
+      ],
+      "gates": ["make e2e", "make lighthouse"],
+      "seeAlso": ["share-links", "assets-and-pages"]
+    },
+
+    {
+      "id": "assets-and-pages",
+      "what": "The mushaf SVG pages themselves, and the polygon metadata that makes them clickable.",
+      "layer": "L3 etl",
+      "entry": [
+        {
+          "file": "packages/etl/scripts/extract-pages.mjs",
+          "symbol": "polygonsOf",
+          "note": "Source SVG → the page asset plus its polygon manifest. Deterministic by requirement: CI re-runs it and fails on any byte of difference."
+        },
+        {
+          "file": "apps/web/src/assets.ts",
+          "symbol": "loadPage",
+          "note": "Fetch and cache a page in the browser. The one place that knows the asset URL shape."
+        },
+        {
+          "file": "packages/etl/scripts/audit-corpus.mjs",
+          "symbol": "MADANI_TOTAL_PAGES",
+          "note": "Does the corpus actually cover what we claim? Coverage assumed rather than measured is how a missing page reaches a memoriser."
+        }
+      ],
+      "extend": [
+        "Never hand-edit anything under apps/web/public/assets — it is generated, and the ETL determinism check in CI will reject it.",
+        "Change the producing script, run `make etl`, and commit the script and the regenerated output together.",
+        "gate:notext enforces that pages carry no <text> nodes: the glyphs are outlines, so rendering never depends on a font being installed."
+      ],
+      "gates": ["pnpm gate:notext", "pnpm audit:corpus", "make ci"],
+      "seeAlso": ["edge-data-etl", "golden-images"]
+    },
+
+    {
+      "id": "edge-data-etl",
+      "what": "Turning the mutashabihat dataset into the per-surah shards the app hops through.",
+      "layer": "L3 etl",
+      "entry": [
+        {
+          "file": "packages/etl/scripts/build-adjacency.mjs",
+          "symbol": "addEdge",
+          "note": "Dataset + curated edges → 114 shards. Reverse edges are generated here, so an edge stated once is navigable from both ends."
+        },
+        {
+          "file": "packages/core/src/quran-meta.ts",
+          "symbol": "toAbsoluteAyah",
+          "note": "The 6236-ayah numbering the datasets speak, and its inverse. Every off-by-one bug in this project has lived within one function of this pair."
+        },
+        {
+          "file": "packages/etl/scripts/sample-edges.mjs",
+          "symbol": "function rng",
+          "note": "Seeded sampler for the human spot-audit. Seeded so that 'the 20 edges we checked' is a reproducible set and not a story."
+        }
+      ],
+      "extend": [
+        "Vendoring a new dataset: add the SOURCES.md entry with its licence in the same commit as the data. gate:license fails otherwise, deliberately.",
+        "Every script prints a summary line — counts in, counts out, largest shard. Read it; a silent 10% drop in edges looks exactly like success.",
+        "Human verdicts on specific edges are permanent. They go in the verified-edges register, and gate:verified-edges enforces them from then on."
+      ],
+      "gates": ["pnpm gate:verified-edges", "pnpm gate:license", "make ci"],
+      "seeAlso": ["the-hop", "validation", "provenance"]
+    },
+
+    {
+      "id": "a11y",
+      "what": "Usable by someone who cannot see the page: labels on the polygons, a live region for what changed, and Arabic digits everywhere.",
+      "layer": "L1 core",
+      "entry": [
+        {
+          "file": "packages/core/src/highlighter.ts",
+          "symbol": "enhancePolygons",
+          "note": "Where an invisible polygon becomes a focusable, labelled control. If a new drawn thing should be reachable by screen reader or keyboard, it happens here."
+        },
+        {
+          "file": "apps/web/src/components/LiveAnnouncer.tsx",
+          "symbol": "LiveAnnouncer",
+          "note": "One aria-live region for the whole app. Several would race and interrupt each other."
+        },
+        {
+          "file": "apps/web/src/format.ts",
+          "symbol": "toArabicDigits",
+          "note": "Every number a user hears or reads. The bug this prevents is a badge showing ٣ while the label says 'three' — invisible until an aria snapshot puts the two side by side."
+        },
+        {
+          "file": "apps/web/e2e/share-a11y.spec.ts",
+          "symbol": "aria snapshots",
+          "note": "The accessible tree, committed as text under e2e/__aria__/. Snapshots are text, not geometry, so they are keyed by project and not by platform — a Linux runner and a Mac must produce the same tree or one of them is wrong."
+        }
+      ],
+      "extend": [
+        "Any new control: a label in Arabic, a 44px target, and a visible focus ring. The contrast spec checks the third and will fail you.",
+        "Numbers in user-facing strings go through toArabicDigits — including inside aria-labels, which is the half everyone forgets.",
+        "Update the aria snapshots deliberately (`--update-snapshots`) and read the diff. An accepted snapshot is the only place a broken tree can hide."
+      ],
+      "gates": ["make e2e", "make lighthouse"],
+      "seeAlso": ["wayfinding", "golden-images"]
+    },
+
+    {
+      "id": "golden-images",
+      "what": "The visual gate: highlight geometry the DOM cannot describe, pinned as images.",
+      "layer": "gate",
+      "entry": [
+        {
+          "file": "apps/web/playwright.config.ts",
+          "symbol": "snapshotPathTemplate",
+          "note": "Golden images are keyed by {platform} because they are rasterized geometry. The aria snapshots beside them are keyed by {projectName} because they are text — mixing the two axes is a bug in both directions."
+        },
+        {
+          "file": "Makefile",
+          "symbol": "GOLDEN_IMAGE",
+          "note": "The pinned container. The generator and the checker must be the same rasterizer or the gate is a coin flip; gate:golden-env enforces that the Makefile, the CI job, and the installed Playwright all agree."
+        },
+        {
+          "file": "scripts/gate-golden-size.mjs",
+          "symbol": "BUDGET",
+          "note": "Why the baselines are committed to git rather than LFS, and the number at which that answer should be revisited."
+        }
+      ],
+      "extend": [
+        "Adding a row means adding baselines for BOTH platforms: `make golden-update` for darwin, `make golden-linux UPDATE=1` for linux.",
+        "Open the changed PNGs before committing. An accepted baseline is the gate agreeing with you, which is worth nothing unless you looked.",
+        "Never bump Playwright without bumping GOLDEN_IMAGE and re-rendering — the failure mode is ten red diffs that look exactly like a UI regression."
+      ],
+      "gates": ["make golden", "make golden-linux", "pnpm gate:golden-env", "pnpm gate:golden-size"],
+      "seeAlso": ["select-an-ayah", "a11y"]
+    },
+
+    {
+      "id": "validation",
+      "what": "The checks a machine cannot do — a phone in a hand, a mushaf on a table — tracked so they cannot quietly not happen.",
+      "layer": "gate",
+      "entry": [
+        {
+          "file": "docs/validation/ledger.json",
+          "symbol": "runbook",
+          "note": "The only place a manual runbook is written. `make validate CHECK=<id>` prints it, `make guide` renders it for a phone, the /validate skill drives it."
+        },
+        {
+          "file": "scripts/gate-validation.mjs",
+          "symbol": "needsRunbook",
+          "note": "Does NOT fail on outstanding checks — a phone that has not been held is a fact, not a broken build. It fails when the ledger lies."
+        },
+        {
+          "file": "scripts/record-validation.mjs",
+          "symbol": "check.verifiedOn",
+          "note": "Writes the verdict back and then prints what that verdict now obliges — the standing rule is that a manual result must tighten something automated."
+        }
+      ],
+      "extend": [
+        "A new manual check is a ledger entry with a full runbook. A pending user-owned check with no steps fails the gate, because a check nobody can follow will not be run.",
+        "Edit the ledger and re-run `make guide` in the same commit — a staleness hash fails the build otherwise.",
+        "When a check comes back, record it and then do what `tunes` printed. That step is what turns a verdict into a permanent test instead of a note."
+      ],
+      "gates": ["pnpm gate:validation", "make ci"],
+      "seeAlso": ["edge-data-etl", "provenance"]
+    },
+
+    {
+      "id": "provenance",
+      "what": "Every glyph on screen traces to a named source under a named licence, and the offer to hand that source over resolves.",
+      "layer": "gate",
+      "entry": [
+        {
+          "file": "SOURCES.md",
+          "symbol": "hafs-kfqc",
+          "note": "The register of everything vendored. Not documentation — two gates parse it, so an entry is a load-bearing part of the build."
+        },
+        {
+          "file": "scripts/gate-license.mjs",
+          "symbol": "problems",
+          "note": "Fails if something is vendored without a recorded licence. The obligation is legal, so the check is mechanical."
+        },
+        {
+          "file": "apps/web/src/components/Colophon.tsx",
+          "symbol": "Colophon",
+          "note": "What the user is shown, including the GPL corresponding-source offer. If this copy and SOURCES.md ever disagree, the user-facing one is the one that matters legally."
+        },
+        {
+          "file": "apps/web/src/provenance.ts",
+          "symbol": "SOURCE_REPO",
+          "note": "Where the offer points. It has to actually resolve for a stranger — that is a real obligation, not a nice-to-have."
+        }
+      ],
+      "extend": [
+        "Vendor nothing without its SOURCES.md entry in the same commit.",
+        "If you change the licence copy, change it in both places — SOURCES.md and the Colophon — and say so in the commit message.",
+        "A GPL-derived asset makes this repo the corresponding source. That constrains unrelated decisions, including whether binaries can live behind a metered service (see gate:golden-size)."
+      ],
+      "gates": ["pnpm gate:license", "pnpm gate:text-sources", "make ci"],
+      "seeAlso": ["editions-and-skins", "assets-and-pages", "golden-images"]
+    },
+
+    {
+      "id": "ci-and-gates",
+      "what": "What judges a change, and the rule that every gate is reproducible locally.",
+      "layer": "gate",
+      "entry": [
+        {
+          "file": "Makefile",
+          "symbol": "ci:",
+          "note": "An exact mirror of the build-test-gate job, in CI order. If you add a step to one, add it to the other in the same commit — that promise is the whole value of the target."
+        },
+        {
+          "file": ".github/workflows/ci.yml",
+          "symbol": "build-test-gate",
+          "note": "Four jobs: secrets-scan, build-test-gate, e2e (containerised), lighthouse. Only the second is what `make ci` mirrors; the other three have their own make targets."
+        },
+        {
+          "file": "scripts/gate-ci-artifacts.mjs",
+          "symbol": "PRODUCERS",
+          "note": "Every artifact CI uploads is one something actually produces. Written after an upload step preserved nothing for several loops while looking green."
+        },
+        {
+          "file": "scripts/gate-map.mjs",
+          "symbol": "features",
+          "note": "This map, checked. Every symbol listed in docs/map.json must still exist, so the orientation doc cannot rot into confident fiction."
+        }
+      ],
+      "extend": [
+        "A new gate is a script in scripts/, a `gate:*` entry in package.json, a line in `make ci`, and a step in build-test-gate. All four, or it does not run.",
+        "Verify a new gate by breaking the thing it protects and watching it fail, then reverting. A gate that has never failed has never been tested.",
+        "Gates fail with the fix in the message. 'X is wrong' costs someone an afternoon; 'X is wrong, run Y' costs them a minute."
+      ],
+      "gates": ["make ci", "make gates"],
+      "seeAlso": ["validation", "golden-images"]
+    }
+  ]
+}

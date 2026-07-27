@@ -1,0 +1,126 @@
+/*
+ * Tajweed skin (spec §8, Loop 6a) — the whole visual half of the skin swap.
+ *
+ * `Highlighter.setSkin` adds `skin-tajweed` to the <svg> and, on each ayah
+ * polygon, `tj-<rule>` for every rule on that ayah plus one `tj-mark-<rule>` for
+ * its leading (most distinctive) one. That is the entire runtime contract: no
+ * element is created, moved or reshaped, so this file is the only thing standing
+ * between "plain" and "tajweed". Swapping it back is removing the classes.
+ *
+ * These selectors live in a global stylesheet, not a CSS module, for the same
+ * reason `highlight.css` does: the elements they style are inside the mushaf SVG
+ * document, which React never renders and CSS-module hashing never reaches.
+ *
+ * WHAT PAINTS TODAY (and why it is one mark per ayah, not per letter): the
+ * vendored corpus's glyphs are anonymous outlined paths — the only addressable
+ * element on a page is the ayah hit polygon. See packages/core/src/skins.ts for
+ * the full argument; the short version is that letter-level colouring needs Loop
+ * 4b's ligature corpus, and painting a whole ayah in "the colour of madd" when
+ * every ayah has a madd would be decoration pretending to be information. So an
+ * ayah is washed in the colour of its most distinctive rule, and the legend
+ * carries the full list.
+ */
+
+/* The polygons are transparent hit shapes (`fill-opacity="0"` in the asset).
+   Giving them a fill is a style change, not a geometry change — the `d` never
+   moves, which packages/core/src/skins.ts asserts byte-for-byte. */
+.skin-tajweed .ayahPolygon[class*="tj-mark-"] {
+  fill-opacity: var(--tj-wash);
+  stroke-width: var(--tj-stroke);
+  stroke-linejoin: round;
+  /* Hairline at every zoom, like the marquee: the annotation must not fatten
+     into the scripture when a hafiz pinches in on a word. */
+  vector-effect: non-scaling-stroke;
+}
+
+.skin-tajweed .tj-mark-wasl {
+  fill: var(--tj-wasl);
+  stroke: var(--tj-wasl);
+  stroke-dasharray: var(--tj-dash-wasl);
+}
+.skin-tajweed .tj-mark-madd {
+  fill: var(--tj-madd);
+  stroke: var(--tj-madd);
+  stroke-dasharray: var(--tj-dash-madd);
+}
+.skin-tajweed .tj-mark-ghunnah {
+  fill: var(--tj-ghunnah);
+  stroke: var(--tj-ghunnah);
+  stroke-dasharray: var(--tj-dash-ghunnah);
+}
+.skin-tajweed .tj-mark-qalqalah {
+  fill: var(--tj-qalqalah);
+  stroke: var(--tj-qalqalah);
+  stroke-dasharray: var(--tj-dash-qalqalah);
+}
+.skin-tajweed .tj-mark-idgham {
+  fill: var(--tj-idgham);
+  stroke: var(--tj-idgham);
+  stroke-dasharray: var(--tj-dash-idgham);
+}
+.skin-tajweed .tj-mark-silent {
+  fill: var(--tj-silent);
+  stroke: var(--tj-silent);
+  stroke-dasharray: var(--tj-dash-silent);
+}
+/* Madd lāzim: solid and heavier. It is the rarest rule and the one a reciter is
+   most often corrected on, so it is the only one allowed an unbroken line. */
+.skin-tajweed .tj-mark-madd-lazim {
+  fill: var(--tj-madd-lazim);
+  stroke: var(--tj-madd-lazim);
+  stroke-dasharray: var(--tj-dash-madd-lazim);
+  stroke-width: var(--tj-stroke-strong);
+}
+
+/* Forced-colours (Windows high contrast): drop the wash entirely rather than
+   ship colours the OS is about to override into mush. The legend's text marks
+   and the rule list still carry the information. */
+@media (forced-colors: active) {
+  .skin-tajweed .ayahPolygon[class*="tj-mark-"] {
+    fill-opacity: 0;
+    stroke: CanvasText;
+  }
+}
+
+/*
+ * Legend swatches. These live in a chrome <svg> inside the legend sheet, so
+ * CSS-module hashing cannot reach them either — and they must be drawn with the
+ * *same* fill/stroke/dash the page uses, or the key would be a lie. Same tokens,
+ * same dash arrays, one source of truth.
+ */
+.tj-legend-wasl {
+  fill: var(--tj-wasl);
+  stroke: var(--tj-wasl);
+  stroke-dasharray: var(--tj-dash-wasl);
+}
+.tj-legend-madd {
+  fill: var(--tj-madd);
+  stroke: var(--tj-madd);
+  stroke-dasharray: var(--tj-dash-madd);
+}
+.tj-legend-ghunnah {
+  fill: var(--tj-ghunnah);
+  stroke: var(--tj-ghunnah);
+  stroke-dasharray: var(--tj-dash-ghunnah);
+}
+.tj-legend-qalqalah {
+  fill: var(--tj-qalqalah);
+  stroke: var(--tj-qalqalah);
+  stroke-dasharray: var(--tj-dash-qalqalah);
+}
+.tj-legend-idgham {
+  fill: var(--tj-idgham);
+  stroke: var(--tj-idgham);
+  stroke-dasharray: var(--tj-dash-idgham);
+}
+.tj-legend-silent {
+  fill: var(--tj-silent);
+  stroke: var(--tj-silent);
+  stroke-dasharray: var(--tj-dash-silent);
+}
+.tj-legend-madd-lazim {
+  fill: var(--tj-madd-lazim);
+  stroke: var(--tj-madd-lazim);
+  stroke-dasharray: var(--tj-dash-madd-lazim);
+  stroke-width: 1.6;
+}

@@ -1,0 +1,30 @@
+{
+  "10": {
+    "edges": [
+      {
+        "type": "mutashabih",
+        "to": "quran/hafs-kfqc/11:51",
+        "page": 227,
+        "dir": {
+          "dSurah": -60,
+          "dPage": -343
+        }
+      }
+    ],
+    "ext": []
+  },
+  "11": {
+    "edges": [
+      {
+        "type": "mutashabih",
+        "to": "quran/hafs-kfqc/11:51",
+        "page": 227,
+        "dir": {
+          "dSurah": -60,
+          "dPage": -344
+        }
+      }
+    ],
+    "ext": []
+  }
+}

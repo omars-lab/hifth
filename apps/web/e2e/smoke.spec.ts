@@ -8,14 +8,19 @@ test.describe("Hifth shell", () => {
     // RTL-native.
     await expect(page.locator("html")).toHaveAttribute("dir", "rtl");
 
-    // Arabic brand mark.
-    await expect(page.getByText("حفظ")).toBeVisible();
+    // Arabic brand mark. Scoped to the chrome and matched exactly: "حفظ" is the
+    // app's name, so it recurs in body copy (the install notice reads
+    // "ثبّت حفظ ليبقى معك دون إنترنت"), and an unscoped substring match is a
+    // strict-mode violation the moment any such string renders.
+    await expect(
+      page.getByRole("banner").getByText("حفظ", { exact: true }),
+    ).toBeVisible();
 
     // Page identity shows 7.
     await expect(page.locator(".numeric", { hasText: "7" }).first()).toBeVisible();
 
     // The mushaf SVG mounts with an accessible role.
-    const svg = page.locator("svg[role='img']");
+    const svg = page.locator("svg[role='group']");
     await expect(svg).toBeVisible();
 
     // The additive overlay group exists (source geometry untouched).
@@ -33,7 +38,7 @@ test.describe("Hifth shell", () => {
   // Loop 1 exit criterion: tap an ayah polygon → it selects, on a touch device.
   test("tapping an ayah selects it and draws the highlight", async ({ page }) => {
     await page.goto("/");
-    await expect(page.locator("svg[role='img']")).toBeVisible();
+    await expect(page.locator("svg[role='group']")).toBeVisible();
 
     // Before any tap, the footer prompts for a selection.
     await expect(page.getByText(/المس آية على الصفحة لتحديدها/)).toBeVisible();
@@ -45,7 +50,9 @@ test.describe("Hifth shell", () => {
 
     // The selection chip appears with the surah name + ayah ref, and the
     // highlighter drew a selection clone into the additive overlay.
-    await expect(page.getByText(/البقرة/)).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: /الآية الحالية البقرة · ٢:٣٨/ }),
+    ).toBeVisible();
     await expect(page.locator("#hifth-overlay .hl-sel")).toHaveCount(1);
   });
 });

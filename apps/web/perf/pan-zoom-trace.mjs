@@ -121,7 +121,7 @@ async function run() {
   console.log(`  Frames > 16.7ms: ${over16} (${((100 * over16) / frames.length).toFixed(0)}% — jank budget)`);
   console.log("\n  NOTE: emulated baseline only. The architecture verdict needs");
   console.log("  real-device fps. To capture on your phone:");
-  console.log("    1) pnpm build && pnpm --filter @hifth/web exec vite preview --host --port 4173");
+  console.log("    1) pnpm build && pnpm -C apps/web exec vite preview --host --port 4173");
   console.log("    2) open http://<your-mac-LAN-IP>:4173 on the phone, pinch/pan page 7");
   console.log("    3) record with Safari Web Inspector (iOS) or Chrome DevTools remote (Android)\n");
 }

@@ -1,0 +1,116 @@
+{
+  "2": {
+    "edges": [
+      {
+        "type": "mutashabih",
+        "to": "quran/hafs-kfqc/40:63",
+        "page": 474,
+        "dir": {
+          "dSurah": -24,
+          "dPage": -82
+        }
+      }
+    ],
+    "ext": []
+  },
+  "3": {
+    "edges": [
+      {
+        "type": "mutashabih",
+        "to": "quran/hafs-kfqc/2:76",
+        "page": 11,
+        "dir": {
+          "dSurah": -62,
+          "dPage": -545
+        }
+      },
+      {
+        "type": "mutashabih",
+        "to": "quran/hafs-kfqc/11:4",
+        "page": 221,
+        "dir": {
+          "dSurah": -53,
+          "dPage": -335
+        }
+      },
+      {
+        "type": "mutashabih",
+        "to": "quran/hafs-kfqc/16:22",
+        "page": 269,
+        "dir": {
+          "dSurah": -48,
+          "dPage": -287
+        }
+      },
+      {
+        "type": "mutashabih",
+        "to": "quran/hafs-kfqc/36:75",
+        "page": 445,
+        "dir": {
+          "dSurah": -28,
+          "dPage": -111
+        }
+      }
+    ],
+    "ext": []
+  },
+  "5": {
+    "edges": [
+      {
+        "type": "mutashabih",
+        "to": "quran/hafs-kfqc/40:21",
+        "page": 469,
+        "dir": {
+          "dSurah": -24,
+          "dPage": -87
+        }
+      }
+    ],
+    "ext": []
+  },
+  "11": {
+    "edges": [
+      {
+        "type": "mutashabih",
+        "to": "quran/hafs-kfqc/5:91",
+        "page": 123,
+        "dir": {
+          "dSurah": -59,
+          "dPage": -434
+        },
+        "ctx": true
+      }
+    ],
+    "ext": []
+  },
+  "15": {
+    "edges": [
+      {
+        "type": "mutashabih",
+        "to": "quran/hafs-kfqc/59:8",
+        "page": 546,
+        "dir": {
+          "dSurah": -5,
+          "dPage": -11,
+          "sameJuz": true
+        },
+        "ctx": true
+      }
+    ],
+    "ext": []
+  },
+  "17": {
+    "edges": [
+      {
+        "type": "mutashabih",
+        "to": "quran/hafs-kfqc/32:5",
+        "page": 415,
+        "dir": {
+          "dSurah": -32,
+          "dPage": -142
+        }
+      }
+    ],
+    "ext": []
+  }
+}

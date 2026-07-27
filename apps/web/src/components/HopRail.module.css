@@ -1,0 +1,68 @@
+/*
+ * HopRail — the leaping-arc chip stack (spec §9 signature). Verdigris chips on
+ * paper, floating over the stage at the top-start corner. Quiet until touched;
+ * the open chip fills with accent to tie it to its popover.
+ */
+
+.rail {
+  position: absolute;
+  inset-block-start: var(--space-3);
+  inset-inline-start: var(--space-3);
+  z-index: var(--z-chrome);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  pointer-events: none; /* rail is chrome over the stage; chips re-enable */
+}
+
+.chip {
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  min-block-size: var(--touch-min);
+  min-inline-size: var(--touch-min);
+  padding-inline: var(--space-3);
+  border: 1px solid var(--accent);
+  border-radius: var(--radius-pill);
+  background: var(--paper-raised);
+  color: var(--accent-strong);
+  box-shadow: var(--shadow-1);
+  cursor: pointer;
+  transition: transform var(--dur-fast) var(--ease-hop),
+    background-color var(--dur-fast) ease;
+}
+
+.chip:hover {
+  transform: translateX(2px); /* leans toward the page, RTL-aware via logical flip */
+}
+
+.chip:active {
+  transform: scale(0.96);
+}
+
+.chip[data-open] {
+  background: var(--accent);
+  color: var(--paper-raised);
+  box-shadow: var(--shadow-2);
+}
+
+.chip:focus-visible {
+  outline: 2px solid var(--accent-strong);
+  outline-offset: 2px;
+}
+
+.glyph {
+  font-size: var(--text-lg);
+  line-height: 1;
+}
+
+.count {
+  font-size: var(--text-sm);
+  font-weight: 600;
+}
+
+/* The root chip reads as a distinct family — hexagon glyph, subtler weight. */
+.chip[data-direction="root"] {
+  border-style: dashed;
+}

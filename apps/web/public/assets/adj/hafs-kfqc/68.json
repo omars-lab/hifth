@@ -1,0 +1,120 @@
+{
+  "1": {
+    "edges": [
+      {
+        "type": "mutashabih",
+        "to": "quran/hafs-kfqc/52:28",
+        "page": 524,
+        "dir": {
+          "dSurah": -16,
+          "dPage": -40
+        },
+        "ctx": true
+      }
+    ],
+    "ext": []
+  },
+  "29": {
+    "edges": [
+      {
+        "type": "mutashabih",
+        "to": "quran/hafs-kfqc/37:26",
+        "page": 447,
+        "dir": {
+          "dSurah": -31,
+          "dPage": -118
+        },
+        "ctx": true
+      },
+      {
+        "type": "mutashabih",
+        "to": "quran/hafs-kfqc/37:49",
+        "page": 447,
+        "dir": {
+          "dSurah": -31,
+          "dPage": -118
+        },
+        "ctx": true
+      }
+    ],
+    "ext": []
+  },
+  "32": {
+    "edges": [
+      {
+        "type": "mutashabih",
+        "to": "quran/hafs-kfqc/38:25",
+        "page": 454,
+        "dir": {
+          "dSurah": -30,
+          "dPage": -111
+        }
+      }
+    ],
+    "ext": []
+  },
+  "42": {
+    "edges": [
+      {
+        "type": "mutashabih",
+        "to": "quran/hafs-kfqc/70:43",
+        "page": 570,
+        "dir": {
+          "dSurah": 2,
+          "dPage": 5,
+          "sameJuz": true
+        }
+      }
+    ],
+    "ext": []
+  },
+  "45": {
+    "edges": [
+      {
+        "type": "mutashabih",
+        "to": "quran/hafs-kfqc/52:39",
+        "page": 525,
+        "dir": {
+          "dSurah": -16,
+          "dPage": -41
+        },
+        "ctx": true
+      },
+      {
+        "type": "mutashabih",
+        "to": "quran/hafs-kfqc/52:40",
+        "page": 525,
+        "dir": {
+          "dSurah": -16,
+          "dPage": -41
+        },
+        "ctx": true
+      }
+    ],
+    "ext": []
+  },
+  "47": {
+    "edges": [
+      {
+        "type": "mutashabih",
+        "to": "quran/hafs-kfqc/52:47",
+        "page": 525,
+        "dir": {
+          "dSurah": -16,
+          "dPage": -41
+        }
+      },
+      {
+        "type": "mutashabih",
+        "to": "quran/hafs-kfqc/76:23",
+        "page": 579,
+        "dir": {
+          "dSurah": 8,
+          "dPage": 13,
+          "sameJuz": true
+        }
+      }
+    ],
+    "ext": []
+  }
+}

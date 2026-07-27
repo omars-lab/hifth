@@ -38,10 +38,39 @@ export async function promptInstall(): Promise<"accepted" | "dismissed" | "unava
   return outcome;
 }
 
+/**
+ * True on iPhone/iPad, where `beforeinstallprompt` does not exist and install
+ * is therefore instructional: Share → "Add to Home Screen". Every iOS browser
+ * is WebKit underneath and every one of them inherits ITP's 7-day deletion of
+ * script storage, so this is the platform where install decides whether offline
+ * is real (research §5a) — hence a coached flow rather than a hidden button.
+ *
+ * iPadOS 13+ reports a desktop-Safari UA, so it is caught by the touch-capable
+ * "Macintosh" case rather than by the device string.
+ */
+export function isIosDevice(): boolean {
+  const ua = navigator.userAgent;
+  if (/iPhone|iPad|iPod/.test(ua)) return true;
+  return /Macintosh/.test(ua) && navigator.maxTouchPoints > 1;
+}
+
+/*
+ * Known and NOT worked around (research §6): on iOS a tapped web link cannot
+ * open an installed PWA — a shared hop link opens a Safari tab, even when Hifth
+ * is on the Home Screen, and the tab is a separate storage-and-state world from
+ * the installed app. There is no script-side fix; Track B's Universal Links are
+ * the real one. The consequence for this loop is a copy rule: never promise
+ * that a shared link will open the installed app.
+ */
+
 /** True when running as an installed standalone PWA. */
 export function isStandalone(): boolean {
   return (
-    window.matchMedia("(display-mode: standalone)").matches ||
+    // A platform sniff must never be the thing that takes the app down: jsdom
+    // (and a couple of embedded webviews) ship without matchMedia, and "we
+    // can't tell" means "not installed", not a crash.
+    (typeof window.matchMedia === "function" &&
+      window.matchMedia("(display-mode: standalone)").matches) ||
     // iOS Safari non-standard flag.
     (navigator as unknown as { standalone?: boolean }).standalone === true
   );

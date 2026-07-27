@@ -28,10 +28,24 @@
   opacity: 0.8;
 }
 
-/* Range marquee highlight (Loop 5 drag-select preview). */
+/* Range wash — the passage a drag painted (Loop 5). Quieter than the selection
+   so a selection inside a range still reads as "you are here". */
 #hifth-overlay .hl-hlt {
-  fill: var(--highlight-wash);
-  stroke: none;
+  fill: var(--range-wash);
+  stroke: var(--range-ring);
+  stroke-width: 0.6;
+  stroke-linejoin: round;
+}
+
+/* The marquee rectangle while the finger is still dragging it. Dashed ring,
+   barely-there fill: the scripture underneath must stay readable, because the
+   user is reading it to decide where to stop. */
+#hifth-overlay .hl-marquee {
+  fill: var(--marquee-fill);
+  stroke: var(--marquee-ring);
+  stroke-width: 0.8;
+  stroke-dasharray: 4 2.5;
+  vector-effect: non-scaling-stroke;
 }
 
 /* Pulse on landing — one orchestrated motion moment (the hop). Reduced-motion

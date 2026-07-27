@@ -1,0 +1,602 @@
+{
+  "1": {
+    "edges": [
+      {
+        "type": "mutashabih",
+        "to": "quran/hafs-kfqc/43:2",
+        "page": 489,
+        "dir": {
+          "dSurah": 31,
+          "dPage": 254
+        },
+        "ctx": true
+      }
+    ],
+    "ext": []
+  },
+  "17": {
+    "edges": [
+      {
+        "type": "mutashabih",
+        "to": "quran/hafs-kfqc/12:82",
+        "page": 245,
+        "dir": {
+          "dSurah": 0,
+          "dPage": 8
+        }
+      }
+    ],
+    "ext": []
+  },
+  "20": {
+    "edges": [
+      {
+        "type": "mutashabih",
+        "to": "quran/hafs-kfqc/12:55",
+        "page": 242,
+        "dir": {
+          "dSurah": 0,
+          "dPage": 5
+        }
+      }
+    ],
+    "ext": []
+  },
+  "21": {
+    "edges": [
+      {
+        "type": "mutashabih",
+        "to": "quran/hafs-kfqc/12:58",
+        "page": 242,
+        "dir": {
+          "dSurah": 0,
+          "dPage": 5
+        }
+      },
+      {
+        "type": "mutashabih",
+        "to": "quran/hafs-kfqc/12:64",
+        "page": 243,
+        "dir": {
+          "dSurah": 0,
+          "dPage": 6
+        }
+      },
+      {
+        "type": "mutashabih",
+        "to": "quran/hafs-kfqc/12:67",
+        "page": 243,
+        "dir": {
+          "dSurah": 0,
+          "dPage": 6
+        }
+      },
+      {
+        "type": "mutashabih",
+        "to": "quran/hafs-kfqc/12:68",
+        "page": 243,
+        "dir": {
+          "dSurah": 0,
+          "dPage": 6
+        }
+      },
+      {
+        "type": "mutashabih",
+        "to": "quran/hafs-kfqc/12:93",
+        "page": 246,
+        "dir": {
+          "dSurah": 0,
+          "dPage": 9
+        }
+      },
+      {
+        "type": "mutashabih",
+        "to": "quran/hafs-kfqc/28:13",
+        "page": 386,
+        "dir": {
+          "dSurah": 16,
+          "dPage": 149
+        },
+        "ctx": true
+      }
+    ],
+    "ext": []
+  },
+  "39": {
+    "edges": [
+      {
+        "type": "mutashabih",
+        "to": "quran/hafs-kfqc/7:70",
+        "page": 159,
+        "dir": {
+          "dSurah": -5,
+          "dPage": -81
+        }
+      },
+      {
+        "type": "mutashabih",
+        "to": "quran/hafs-kfqc/9:35",
+        "page": 192,
+        "dir": {
+          "dSurah": -3,
+          "dPage": -48
+        }
+      },
+      {
+        "type": "mutashabih",
+        "to": "quran/hafs-kfqc/30:29",
+        "page": 407,
+        "dir": {
+          "dSurah": 18,
+          "dPage": 167
+        }
+      },
+      {
+        "type": "mutashabih",
+        "to": "quran/hafs-kfqc/53:22",
+        "page": 526,
+        "dir": {
+          "dSurah": 41,
+          "dPage": 286
+        }
+      }
+    ],
+    "ext": []
+  },
+  "55": {
+    "edges": [
+      {
+        "type": "mutashabih",
+        "to": "quran/hafs-kfqc/12:20",
+        "page": 237,
+        "dir": {
+          "dSurah": 0,
+          "dPage": -5
+        }
+      }
+    ],
+    "ext": []
+  },
+  "58": {
+    "edges": [
+      {
+        "type": "mutashabih",
+        "to": "quran/hafs-kfqc/12:21",
+        "page": 237,
+        "dir": {
+          "dSurah": 0,
+          "dPage": -5
+        }
+      },
+      {
+        "type": "mutashabih",
+        "to": "quran/hafs-kfqc/12:64",
+        "page": 243,
+        "dir": {
+          "dSurah": 0,
+          "dPage": 1,
+          "sameJuz": true
+        }
+      },
+      {
+        "type": "mutashabih",
+        "to": "quran/hafs-kfqc/12:67",
+        "page": 243,
+        "dir": {
+          "dSurah": 0,
+          "dPage": 1,
+          "sameJuz": true
+        }
+      },
+      {
+        "type": "mutashabih",
+        "to": "quran/hafs-kfqc/12:68",
+        "page": 243,
+        "dir": {
+          "dSurah": 0,
+          "dPage": 1,
+          "sameJuz": true
+        }
+      },
+      {
+        "type": "mutashabih",
+        "to": "quran/hafs-kfqc/12:93",
+        "page": 246,
+        "dir": {
+          "dSurah": 0,
+          "dPage": 4,
+          "sameJuz": true
+        }
+      }
+    ],
+    "ext": []
+  },
+  "64": {
+    "edges": [
+      {
+        "type": "mutashabih",
+        "to": "quran/hafs-kfqc/12:21",
+        "page": 237,
+        "dir": {
+          "dSurah": 0,
+          "dPage": -6
+        }
+      },
+      {
+        "type": "mutashabih",
+        "to": "quran/hafs-kfqc/12:58",
+        "page": 242,
+        "dir": {
+          "dSurah": 0,
+          "dPage": -1,
+          "sameJuz": true
+        }
+      }
+    ],
+    "ext": []
+  },
+  "66": {
+    "edges": [
+      {
+        "type": "mutashabih",
+        "to": "quran/hafs-kfqc/14:11",
+        "page": 257,
+        "dir": {
+          "dSurah": 2,
+          "dPage": 14,
+          "sameJuz": true
+        }
+      },
+      {
+        "type": "mutashabih",
+        "to": "quran/hafs-kfqc/39:37",
+        "page": 462,
+        "dir": {
+          "dSurah": 27,
+          "dPage": 219
+        }
+      }
+    ],
+    "ext": []
+  },
+  "67": {
+    "edges": [
+      {
+        "type": "mutashabih",
+        "to": "quran/hafs-kfqc/12:21",
+        "page": 237,
+        "dir": {
+          "dSurah": 0,
+          "dPage": -6
+        }
+      },
+      {
+        "type": "mutashabih",
+        "to": "quran/hafs-kfqc/12:58",
+        "page": 242,
+        "dir": {
+          "dSurah": 0,
+          "dPage": -1,
+          "sameJuz": true
+        }
+      }
+    ],
+    "ext": []
+  },
+  "68": {
+    "edges": [
+      {
+        "type": "mutashabih",
+        "to": "quran/hafs-kfqc/11:35",
+        "page": 225,
+        "dir": {
+          "dSurah": -1,
+          "dPage": -18
+        }
+      },
+      {
+        "type": "mutashabih",
+        "to": "quran/hafs-kfqc/12:21",
+        "page": 237,
+        "dir": {
+          "dSurah": 0,
+          "dPage": -6
+        }
+      },
+      {
+        "type": "mutashabih",
+        "to": "quran/hafs-kfqc/12:58",
+        "page": 242,
+        "dir": {
+          "dSurah": 0,
+          "dPage": -1,
+          "sameJuz": true
+        }
+      }
+    ],
+    "ext": []
+  },
+  "72": {
+    "edges": [
+      {
+        "type": "mutashabih",
+        "to": "quran/hafs-kfqc/12:84",
+        "page": 245,
+        "dir": {
+          "dSurah": 0,
+          "dPage": 1,
+          "sameJuz": true
+        }
+      },
+      {
+        "type": "mutashabih",
+        "to": "quran/hafs-kfqc/12:90",
+        "page": 246,
+        "dir": {
+          "dSurah": 0,
+          "dPage": 2,
+          "sameJuz": true
+        }
+      },
+      {
+        "type": "mutashabih",
+        "to": "quran/hafs-kfqc/12:94",
+        "page": 246,
+        "dir": {
+          "dSurah": 0,
+          "dPage": 2,
+          "sameJuz": true
+        }
+      }
+    ],
+    "ext": []
+  },
+  "77": {
+    "edges": [
+      {
+        "type": "mutashabih",
+        "to": "quran/hafs-kfqc/12:87",
+        "page": 246,
+        "dir": {
+          "dSurah": 0,
+          "dPage": 2,
+          "sameJuz": true
+        }
+      }
+    ],
+    "ext": []
+  },
+  "82": {
+    "edges": [
+      {
+        "type": "mutashabih",
+        "to": "quran/hafs-kfqc/12:17",
+        "page": 237,
+        "dir": {
+          "dSurah": 0,
+          "dPage": -8
+        }
+      }
+    ],
+    "ext": []
+  },
+  "84": {
+    "edges": [
+      {
+        "type": "mutashabih",
+        "to": "quran/hafs-kfqc/12:72",
+        "page": 244,
+        "dir": {
+          "dSurah": 0,
+          "dPage": -1,
+          "sameJuz": true
+        }
+      }
+    ],
+    "ext": []
+  },
+  "87": {
+    "edges": [
+      {
+        "type": "mutashabih",
+        "to": "quran/hafs-kfqc/12:77",
+        "page": 244,
+        "dir": {
+          "dSurah": 0,
+          "dPage": -2,
+          "sameJuz": true
+        }
+      }
+    ],
+    "ext": []
+  },
+  "90": {
+    "edges": [
+      {
+        "type": "mutashabih",
+        "to": "quran/hafs-kfqc/12:72",
+        "page": 244,
+        "dir": {
+          "dSurah": 0,
+          "dPage": -2,
+          "sameJuz": true
+        }
+      }
+    ],
+    "ext": []
+  },
+  "93": {
+    "edges": [
+      {
+        "type": "mutashabih",
+        "to": "quran/hafs-kfqc/12:21",
+        "page": 237,
+        "dir": {
+          "dSurah": 0,
+          "dPage": -9
+        }
+      },
+      {
+        "type": "mutashabih",
+        "to": "quran/hafs-kfqc/12:58",
+        "page": 242,
+        "dir": {
+          "dSurah": 0,
+          "dPage": -4,
+          "sameJuz": true
+        }
+      }
+    ],
+    "ext": []
+  },
+  "94": {
+    "edges": [
+      {
+        "type": "mutashabih",
+        "to": "quran/hafs-kfqc/12:72",
+        "page": 244,
+        "dir": {
+          "dSurah": 0,
+          "dPage": -2,
+          "sameJuz": true
+        }
+      }
+    ],
+    "ext": []
+  },
+  "101": {
+    "edges": [
+      {
+        "type": "mutashabih",
+        "to": "quran/hafs-kfqc/3:43",
+        "page": 55,
+        "dir": {
+          "dSurah": -9,
+          "dPage": -192
+        }
+      },
+      {
+        "type": "mutashabih",
+        "to": "quran/hafs-kfqc/11:48",
+        "page": 227,
+        "dir": {
+          "dSurah": -1,
+          "dPage": -20
+        }
+      }
+    ],
+    "ext": []
+  },
+  "108": {
+    "edges": [
+      {
+        "type": "mutashabih",
+        "to": "quran/hafs-kfqc/6:31",
+        "page": 131,
+        "dir": {
+          "dSurah": -6,
+          "dPage": -117
+        },
+        "ctx": true
+      },
+      {
+        "type": "mutashabih",
+        "to": "quran/hafs-kfqc/7:168",
+        "page": 172,
+        "dir": {
+          "dSurah": -5,
+          "dPage": -76
+        },
+        "ctx": true
+      },
+      {
+        "type": "mutashabih",
+        "to": "quran/hafs-kfqc/16:42",
+        "page": 271,
+        "dir": {
+          "dSurah": 4,
+          "dPage": 23
+        }
+      },
+      {
+        "type": "mutashabih",
+        "to": "quran/hafs-kfqc/21:6",
+        "page": 322,
+        "dir": {
+          "dSurah": 9,
+          "dPage": 74
+        }
+      },
+      {
+        "type": "mutashabih",
+        "to": "quran/hafs-kfqc/21:24",
+        "page": 323,
+        "dir": {
+          "dSurah": 9,
+          "dPage": 75
+        }
+      },
+      {
+        "type": "mutashabih",
+        "to": "quran/hafs-kfqc/22:51",
+        "page": 338,
+        "dir": {
+          "dSurah": 10,
+          "dPage": 90
+        }
+      }
+    ],
+    "ext": []
+  },
+  "109": {
+    "edges": [
+      {
+        "type": "mutashabih",
+        "to": "quran/hafs-kfqc/6:146",
+        "page": 147,
+        "dir": {
+          "dSurah": -6,
+          "dPage": -101
+        }
+      }
+    ],
+    "ext": []
+  },
+  "110": {
+    "edges": [
+      {
+        "type": "mutashabih",
+        "to": "quran/hafs-kfqc/10:36",
+        "page": 213,
+        "dir": {
+          "dSurah": -2,
+          "dPage": -35
+        }
+      }
+    ],
+    "ext": []
+  },
+  "111": {
+    "edges": [
+      {
+        "type": "mutashabih",
+        "to": "quran/hafs-kfqc/11:16",
+        "page": 223,
+        "dir": {
+          "dSurah": -1,
+          "dPage": -25
+        }
+      },
+      {
+        "type": "mutashabih",
+        "to": "quran/hafs-kfqc/40:58",
+        "page": 473,
+        "dir": {
+          "dSurah": 28,
+          "dPage": 225
+        }
+      }
+    ],
+    "ext": []
+  }
+}

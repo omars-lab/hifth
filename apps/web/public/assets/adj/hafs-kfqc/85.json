@@ -1,0 +1,17 @@
+{
+  "18": {
+    "edges": [
+      {
+        "type": "mutashabih",
+        "to": "quran/hafs-kfqc/84:21",
+        "page": 589,
+        "dir": {
+          "dSurah": -1,
+          "dPage": -1,
+          "sameJuz": true
+        }
+      }
+    ],
+    "ext": []
+  }
+}

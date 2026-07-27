@@ -1,0 +1,40 @@
+{
+  "53": {
+    "edges": [
+      {
+        "type": "mutashabih",
+        "to": "quran/hafs-kfqc/80:10",
+        "page": 585,
+        "dir": {
+          "dSurah": 6,
+          "dPage": 8
+        }
+      }
+    ],
+    "ext": []
+  },
+  "55": {
+    "edges": [
+      {
+        "type": "mutashabih",
+        "to": "quran/hafs-kfqc/76:29",
+        "page": 580,
+        "dir": {
+          "dSurah": 2,
+          "dPage": 3,
+          "sameJuz": true
+        }
+      },
+      {
+        "type": "mutashabih",
+        "to": "quran/hafs-kfqc/81:28",
+        "page": 586,
+        "dir": {
+          "dSurah": 7,
+          "dPage": 9
+        }
+      }
+    ],
+    "ext": []
+  }
+}
