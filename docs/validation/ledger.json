@@ -195,13 +195,13 @@
       "id": "kfgqpc-terms-primary-source",
       "title": "Read the Complex's published terms at the source",
       "why": "SOURCES.md currently reads KFGQPC's terms through quran-svg's NOTICE.md, which quotes them verbatim and cites Royal Decrees 136/8 and 9/B/46356 — strong, but secondary. The app states those terms to every reader in the colophon, and an earlier paraphrase of them was wrong.",
-      "how": "Open qurancomplex.gov.sa in an ordinary browser. It refuses connections from this environment (ECONNREFUSED on /en/ and /en/terms/) and web.archive.org is not fetchable from the tooling. Confirm the wording still says free digital/web/software use with commercial printing reserved.",
+      "how": "Open qurancomplex.gov.sa in an ordinary browser. The host is unreachable from automation, and this was measured rather than assumed: a GitHub-hosted runner (Azure westus2, run 30285643491, 2026-07-27) resolves the A record to 66.9.131.70 and then times out on TCP 443 — connect rc=124, and curl returns 000 under both a curl and a desktop-Chrome User-Agent. The same failure appears from the maintainer's machine. Two unrelated networks failing at the TCP layer is not a bot filter a header could talk past, and web.archive.org is not fetchable from the tooling either, so no scheduled watcher can do this. It stays a human check permanently. Confirm the wording still says free digital/web/software use with commercial printing reserved.",
       "owner": "user",
       "status": "pending",
       "blocks": [],
       "runbook": {
         "needs": [
-          "An ordinary browser, outside this environment. The origin refuses connections from the repo's tooling (ECONNREFUSED on /en/ and /en/terms/) and the Wayback mirror is not fetchable here either — that is the entire reason this is a human check.",
+          "An ordinary browser, outside this environment — ideally one on a residential connection, since two datacentre/office networks have now failed to reach the host. It resolves and then times out on TCP 443 from both a GitHub runner in Azure westus2 and the maintainer's machine, and the Wayback mirror is not fetchable from the tooling either. That is the entire reason this is a human check, and the reason no watcher will ever be built for it.",
           "About five minutes."
         ],
         "setup": [],

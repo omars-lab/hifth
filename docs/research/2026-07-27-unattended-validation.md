@@ -399,10 +399,14 @@ Extend `offline.spec.ts` with a CDP `Storage.clearDataForOrigin` case (Chromium-
 file's existing skip and its stated reason). Delivers **both** of `offline-survival-8-day`'s
 `tunes` without the eight days, and leaves the re-pin assertion slot ready for Loop 6b.
 
-**⑤ KFGQPC reachability probe — 2 minutes, $0 — do this before ⑦.**
-A throwaway GitHub Actions job that `curl`s `https://qurancomplex.gov.sa/en/` and prints the status.
-If it 000s from a GH runner too, record *that* in the ledger's `how` and stop — a watcher that
-silently fails forever is worse than an honest "unreachable from CI".
+**⑤ KFGQPC reachability probe — ✅ done, 2026-07-27. Answer: unreachable.**
+The throwaway job ran on a GitHub runner (Azure westus2, run
+[30285643491](https://github.com/omars-lab/hifth/actions/runs/30285643491)) and got the same
+result as the maintainer's machine: DNS resolves to `66.9.131.70`, TCP 443 times out
+(`connect: FAILED rc=124`), and `curl` returns `000` under both a curl and a desktop-Chrome
+User-Agent. Two unrelated networks failing at the *TCP* layer is not a bot filter that a header
+could talk its way past — the packets do not arrive. Recorded in the ledger's `how` and `needs`
+for `kfgqpc-terms-primary-source`, and the probe deleted as designed. **This kills ⑦.**
 
 **⑥ Automated on-device perf, real Android — ~1 day, $0 with your own phone.**
 New `apps/web/perf/device-trace.mjs`: `playwright._android` over adb → `device.launchBrowser()` →
@@ -413,9 +417,14 @@ CDP session → `Tracing.start` with frame categories → `synthesizeScrollGestu
 real number. Keep `make phone-perf` — the hand-driven capture still settles the architecture
 verdict; this keeps it true afterwards.
 
-**⑦ KFGQPC terms watcher — ~2h, conditional on ⑤.**
-`scripts/watch-kfgqpc-terms.mjs` + a scheduled workflow. Normalize, SHA-256, open an issue on drift.
-Never auto-edits `SOURCES.md`.
+**⑦ KFGQPC terms watcher — ❌ not building it. ⑤ came back unreachable.**
+The design was `scripts/watch-kfgqpc-terms.mjs` + a scheduled workflow: normalize, SHA-256, open an
+issue on drift, never auto-edit `SOURCES.md`. It cannot fetch the page it exists to watch. Building
+it anyway would produce a scheduled job that fails every night, which decays into a muted
+notification — and a muted watcher is worse than none, because the check it was standing in for
+now *looks* covered. The honest outcome is the one now in the ledger: a human check, permanently,
+with the measurement that proves why written beside it. Revisit only if the host ever answers from
+a runner — which is a two-minute probe to re-establish, not a standing job.
 
 **⑧ Edge-audit sampler upgrade — ~half a day, $0.**
 `packages/etl/scripts/sample-edges.mjs`: stratify by type / dPage bucket / provenance; compute and
