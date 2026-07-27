@@ -114,7 +114,10 @@ jobs:
       - name: Build core
         run: pnpm --filter @hifth/core build
       - name: Install Playwright browsers
-        run: pnpm --filter @hifth/web exec playwright install --with-deps chromium webkit
+        # `-C`, not `--filter`: pnpm's recursive runner prints a bare `undefined`
+        # in place of the error when an `exec` fails, and a CI log is read from
+        # the bottom.
+        run: pnpm -C apps/web exec playwright install --with-deps chromium webkit
       - name: Build web
         run: pnpm --filter @hifth/web build
       # Also runs the `golden` project: the visual gate diffs pages 7/9/19 in
@@ -123,14 +126,29 @@ jobs:
       - name: E2E (mobile viewports + golden images)
         run: pnpm --filter @hifth/web test:e2e
 
-      # Failed screenshot comparisons are only readable as images.
+      # A failed golden diff is three images and a timeline; neither reads as log
+      # output. The html reporter bundles them — the expected/actual/diff
+      # triptych, the failing screenshot, and the retry's trace — into one folder
+      # that opens offline once downloaded and unzipped:
+      #
+      #   gh run download <run-id> -n playwright-report && open index.html
+      #
+      # `always()`, not `failure()`: a green run's report is how a flake is
+      # caught (it lists the tests that only passed on retry), and that is
+      # invisible from a green check mark. This upload used to be `failure()`
+      # only and pointed at a directory the CI reporter never created, so the
+      # traces were discarded on exactly the runs that needed them. That is what
+      # `if-no-files-found: error` is for: an upload step that silently uploads
+      # nothing is indistinguishable from one that works, for as long as nobody
+      # needs it.
       - name: Upload Playwright report
-        if: failure()
+        if: always()
         uses: actions/upload-artifact@v5
         with:
           name: playwright-report
           path: apps/web/playwright-report
           retention-days: 7
+          if-no-files-found: error
 
   # Lighthouse gate: all four categories ≥90 (PLAN §Loop 6a exit criterion).
   #
@@ -172,3 +190,4 @@ jobs:
           name: lighthouse-reports
           path: .lighthouseci
           retention-days: 7
+          if-no-files-found: error

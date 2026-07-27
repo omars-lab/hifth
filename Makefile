@@ -12,9 +12,14 @@
 # Use pnpm everywhere; fail loudly on any pipe stage.
 SHELL := /bin/bash
 PNPM  := pnpm
-WEB   := $(PNPM) --filter @hifth/web
-CORE  := $(PNPM) --filter @hifth/core
-ETL   := $(PNPM) --filter @hifth/etl
+# `-C <dir>`, not `--filter <pkg>`. Same package, same scripts, but --filter goes
+# through pnpm's recursive runner, and that runner replaces the last thing on
+# your screen with its own banner when a command fails — for `exec` it prints a
+# bare `undefined` where the error should be. The last lines of a failing test
+# run are the ones you read. Exit codes propagate identically.
+WEB   := $(PNPM) -C apps/web
+CORE  := $(PNPM) -C packages/core
+ETL   := $(PNPM) -C packages/etl
 
 # LAN IP so the phone-preview target can print a URL you can open on a device.
 LAN_IP := $(shell ipconfig getifaddr en0 2>/dev/null || ipconfig getifaddr en1 2>/dev/null || echo "<your-lan-ip>")
@@ -69,6 +74,24 @@ test: core ## Vitest unit/contract tests in every package
 e2e: core ## Playwright mobile e2e (iPhone WebKit + Android Chromium + golden images)
 	$(WEB) build
 	$(WEB) test:e2e
+
+.PHONY: report
+report: ## Open the last e2e run's report — traces, image diffs, the failing screen
+	@# Playwright's own report, not a hand-rolled one. It answers "did the
+	@# automated tier hold, and exactly where did it break"; `make validate` and
+	@# `make guide` answer "what does a human still have to do". Neither restates
+	@# the other. Which artifact answers which question: /review-reports.
+	@#
+	@# It serves on :9323 and holds the terminal until Ctrl-C — the report embeds
+	@# the trace viewer, which is a web app and needs an origin to run in.
+	@test -f apps/web/playwright-report/index.html || { \
+	  echo ""; \
+	  echo "  No report yet — nothing has been run in this working tree."; \
+	  echo "  Run 'make e2e' first (the report is written whether it passes or fails)."; \
+	  echo ""; \
+	  exit 1; \
+	}
+	$(WEB) exec playwright show-report
 
 .PHONY: core
 core: ## Build @hifth/core only (needed before typecheck/test — the Loop 0 lesson)

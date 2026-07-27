@@ -69,6 +69,7 @@ pnpm gate:license            # every bundled edition has a SOURCES.md entry
 pnpm gate:text-sources       # no NUL byte in a tracked source file
 pnpm gate:validation         # the manual-validation ledger is honest
 pnpm gate:verified-edges     # human verdicts about edges still hold
+pnpm gate:ci-artifacts       # CI still uploads things that exist
 pnpm gates                   # all of the above + the budget (needs a build)
 ```
 
@@ -83,6 +84,12 @@ What each one is actually defending:
   blame, no `git grep`. It has got in twice, both times as a "clever" composite-key
   separator. Use `>` instead.
 - **`gate:verified-edges`** — see Tier 7. This is where human verdicts live forever.
+- **`gate:ci-artifacts`** — every `upload-artifact` path must be one something in
+  this repo writes, and must fail loudly when there is nothing to upload. The e2e
+  job spent several loops uploading `playwright-report` while the CI reporter was
+  `line`, which writes no report: green step, no artifact, traces discarded on
+  exactly the runs that needed them. An upload step is a promise about a future
+  failure, and nobody exercises it until the bad day.
 
 ---
 
@@ -110,6 +117,11 @@ cd apps/web && pnpm exec playwright test --project=iphone
 
 Projects: `iphone` (WebKit, iPhone 13), `android` (Chromium, Pixel 7), `golden`
 (visual only — see Tier 4).
+
+Every run writes a full Playwright report — the failing screen, the trace, the
+image diff. Open it with `make report`; the **`review-reports`** skill says which
+artifact answers which question and where each one lies to you. Don't diagnose a
+red line from the terminal alone.
 
 | Spec | What it holds |
 |---|---|
