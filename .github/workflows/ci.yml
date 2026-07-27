@@ -14,6 +14,14 @@ jobs:
   # PR diff on pull_request. Config + allowlist live in .gitleaks.toml.
   secrets-scan:
     runs-on: ubuntu-latest
+    # Narrower than the repo default, not wider. On `pull_request` the action
+    # asks the API which commits the PR contains before scanning them, so a
+    # token with only `contents: read` gets a 403 and the action exits rather
+    # than scanning nothing — correct of it, and the reason both of these are
+    # spelled out here instead of inherited.
+    permissions:
+      contents: read
+      pull-requests: read
     steps:
       - uses: actions/checkout@v7
         with:
@@ -155,11 +163,18 @@ jobs:
       - uses: actions/checkout@v7
       # The image ships Node and corepack but no pnpm, and pnpm/action-setup
       # wants a Node action runtime this container does not need to provide.
-      # Corepack is two lines and pins the same version as every other job.
+      # Corepack pins the same version as every other job.
+      #
+      # --install-directory is not optional here: bare `corepack enable`
+      # symlinks into /usr/bin, and this job runs as uid 1001 (see above), so it
+      # dies with EACCES before installing anything. Point it at a writable dir
+      # and put that on PATH for the steps that follow.
       - name: Enable pnpm
         run: |
-          corepack enable
-          corepack prepare pnpm@9.15.0 --activate
+          mkdir -p "$HOME/.local/bin"
+          corepack enable --install-directory "$HOME/.local/bin"
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+          PATH="$HOME/.local/bin:$PATH" corepack prepare pnpm@9.15.0 --activate
       - name: Install
         run: pnpm install --frozen-lockfile
       - name: Build core
