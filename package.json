@@ -28,10 +28,13 @@
     "gate:text-sources": "node scripts/gate-text-sources.mjs",
     "gate:ci-artifacts": "node scripts/gate-ci-artifacts.mjs",
     "gate:golden-env": "node scripts/gate-golden-env.mjs",
-    "gates": "pnpm gate:text-sources && pnpm gate:notext && pnpm gate:license && pnpm gate:validation && pnpm gate:verified-edges && pnpm gate:ci-artifacts && pnpm gate:golden-env && pnpm gate:budget",
+    "gate:golden-size": "node scripts/gate-golden-size.mjs",
+    "gate:map": "node scripts/gate-map.mjs",
+    "gates": "pnpm gate:text-sources && pnpm gate:notext && pnpm gate:license && pnpm gate:validation && pnpm gate:verified-edges && pnpm gate:ci-artifacts && pnpm gate:golden-env && pnpm gate:golden-size && pnpm gate:map && pnpm gate:budget",
     "sample:edges": "node packages/etl/scripts/sample-edges.mjs",
     "guide": "node scripts/build-validation-guide.mjs",
-    "record": "node scripts/record-validation.mjs"
+    "record": "node scripts/record-validation.mjs",
+    "map": "node scripts/gate-map.mjs --list"
   },
   "pnpm": {
     "overrides": {

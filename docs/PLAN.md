@@ -238,6 +238,16 @@ apps/web/
   public/data/                ETL output: anchors/ adj/ roots/ skins/ registry.json
 ```
 
+**This tree is the plan, not the map.** It was written before the code and says what
+was *intended*; nothing fails when the code moves away from it. For where a feature
+actually lives today — the ordered path through it, how to extend it, and which gates
+judge it — run `make map` (`make map FEATURE=<id>` for one). That reads
+[`docs/map.json`](map.json), whose every pointer is checked by `gate:map` on each push
+and by the pre-commit hook on the files you staged, so it is true or the build is red.
+The `extend` skill ([`.claude/skills/extend/SKILL.md`](../.claude/skills/extend/SKILL.md))
+drives that walkthrough. Same rule as the validation ledger: one source, N renderers, and
+this document names the command instead of restating it.
+
 Component rules:
 - React components never touch SVG internals. `PageStage` is the only one that hands a DOM
   node to the highlighter; everything else calls the highlighter and renders around the stage.

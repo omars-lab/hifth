@@ -121,6 +121,18 @@ jobs:
       - name: Gate — golden baselines rendered and checked by one image
         run: pnpm gate:golden-env
 
+      # Why the baselines are committed to git rather than Git LFS, expressed as
+      # the number at which that answer should be revisited. The gate's docblock
+      # carries the reasoning.
+      - name: Gate — golden baselines stay small enough to commit
+        run: pnpm gate:golden-size
+
+      # docs/map.json tells a newcomer where each feature starts. This checks it
+      # is still true, so it cannot rot into confident fiction. The pre-commit
+      # hook runs the same gate scoped to the staged files.
+      - name: Gate — the code map still resolves
+        run: pnpm gate:map
+
       - name: Build
         run: pnpm build
 

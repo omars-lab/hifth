@@ -198,6 +198,8 @@ ci: core ## Full local mirror of the CI build-test-gate job, IN CI ORDER
 	$(PNPM) gate:verified-edges
 	$(PNPM) gate:ci-artifacts
 	$(PNPM) gate:golden-env
+	$(PNPM) gate:golden-size
+	$(PNPM) gate:map
 	$(CORE) build && $(WEB) build
 	$(PNPM) gate:budget
 	@echo ""
@@ -309,6 +311,18 @@ perf: ## Run the pan/zoom perf harness (emulated baseline; prints the on-device 
 # Automated tiers live above — this section is the half a machine cannot run and
 # the ledger that stops those results from evaporating into prose.
 # ---------------------------------------------------------------------------
+
+.PHONY: map
+map: ## Where each feature lives:  make map  ·  make map FEATURE=<id> for the walkthrough
+	@# docs/map.json is the source; this and the /extend skill are its renderers.
+	@# It stores symbols, never line numbers — the `file:line` printed below is
+	@# computed now, so it is true now. gate:map (CI + pre-commit) fails the build
+	@# if any of it stops resolving, which is the only reason it can be trusted.
+	@if [ -n "$(FEATURE)" ]; then \
+	  node scripts/gate-map.mjs --feature "$(FEATURE)"; \
+	else \
+	  node scripts/gate-map.mjs --list; \
+	fi
 
 .PHONY: validate
 validate: ## Outstanding manual checks — or one check's full runbook:  make validate CHECK=<id>
