@@ -299,9 +299,9 @@
     },
     {
       "id": "edge-spot-audit",
-      "title": "Edge spot-audit — 20 random edges against a printed mushaf",
+      "title": "Edge spot-audit — 20 sampled pairs against a printed mushaf",
       "why": "The data is scripture. Every automated gate here proves the shards are well-formed; none can prove an edge is true. This is the only check that can, and it is the one whose results are worth the most per minute spent.",
-      "how": "Draw 20 edges at random from the shipped shards, look each pair up in a printed mushaf, and judge whether they are genuinely mutashabihat. Record every verdict — correct AND wrong — in packages/etl/data/qa/verified-edges.json.",
+      "how": "Draw 20 pairs from the shipped shards — stratified so every kind of edge gets looked at, not just the common kind — look each up in a printed mushaf, and judge whether they are genuinely mutashabihat. Record every verdict — correct AND wrong — in packages/etl/data/qa/verified-edges.json.",
       "owner": "user",
       "status": "pending",
       "blocks": [
@@ -316,15 +316,24 @@
         ],
         "setup": [
           {
+            "run": "make validate",
+            "expect": "Ends with an edge-audit coverage table: one row per class of edge (type × curated-or-dataset × page distance), each marked ✓ or ·. The · rows are the classes nobody has ever looked at — those are what this round is for."
+          },
+          {
             "run": "make audit-edges N=20 SEED=1",
-            "expect": "A header naming the edition, the seed, and the rerun command, then twenty numbered pairs (`from → to  type  p.<page>`), then a JSON block ready to paste. Use a fresh SEED per round; add NEW=1 to skip edges already verified."
+            "expect": "A header naming the edition, the seed, and the rerun command, then twenty numbered **pairs** — `from → to  type  p.<page> / p.<page>  curated|dataset  words <n>  roots <n>/<n>` — then a JSON block ready to paste. Use a fresh SEED per round; add NEW=1 to draw only from pairs no verdict has settled."
           }
         ],
         "steps": [
           {
             "do": "Work through the twenty pairs in the print, one at a time.",
-            "expect": "Each `from` and `to` is findable at the page the draw printed. A pair you cannot locate is itself a finding — record it as wrong with a note.",
+            "expect": "Each `from` and `to` is findable at the page printed beside it. A pair you cannot locate is itself a finding — record it as wrong with a note.",
             "why": "This is the only check in the project that can say the data is true. Every other tier verifies that the app faithfully renders whatever the ETL produced — including when what it produced is wrong."
+          },
+          {
+            "do": "Read `words` and `roots` beside each pair as hints, and distrust them.",
+            "expect": "`words` is the longest run of words the two ayahs share — the same score gate:edges enforces a floor on, computed by the same reader (packages/etl/scripts/morphology.mjs), so a number here can never disagree with CI. `roots` is how many of the shorter ayah's roots appear in both, in order.",
+            "why": "They point at the pairs worth slowing down on from both ends: a high `words` with a wrong verdict is a plausible-looking false edge, and a low one that is nonetheless right is the case the product exists for — 2:48 → 2:123 swaps شفاعة and عدل, scores 1, and is genuinely confused by huffaz every day."
           },
           {
             "do": "For each, answer the question the tool prints — not «are these similar?» but «**would a hafiz confuse these two while reciting?**»",
@@ -339,7 +348,7 @@
           },
           {
             "do": "Paste the printed JSON block into packages/etl/data/qa/verified-edges.json under `entries`, setting each `verdict` to `correct` or `wrong`, `verifiedBy` to your name, and `note` where a future reader needs the reason.",
-            "expect": "Every drawn edge gets an entry. Both verdicts are recorded, not just the failures.",
+            "expect": "Forty entries for twenty pairs — the block writes out both directions of each pair, because every edge in the corpus is generated in both and one reading settles both.",
             "why": "Recording the `correct` verdicts matters as much as the failures: they are what turns half an hour of reading into a permanent regression fixture instead of an anecdote."
           },
           {
@@ -352,7 +361,8 @@
           "Record BOTH verdicts. A rejected edge that is not written down comes back on the next data refresh and costs the reader's time all over again — and no automated check can tell a wrong edge from a right one.",
           "If several wrong edges share a shape — same `type`, same phrase length, same surah pair — that is a filter in packages/etl/scripts/build-adjacency.mjs, not twenty more rejections. A class of error is worth more than the twenty.",
           "If gate:verified-edges fails later, do not edit the fixture to go green: the data moved under a human verdict. Find out what moved it, and re-verify with a reader before changing a verdict.",
-          "This check goes stale after 14 days because the data keeps moving. A fresh seed each round means the coverage accumulates instead of re-checking the same twenty."
+          "This check goes stale after 14 days because the data keeps moving. A fresh seed each round means the coverage accumulates instead of re-checking the same twenty.",
+          "Aim at the · rows. The draw is stratified for a reason: 97% of the corpus is one class (dataset mutashabih, far apart), so a flat draw of twenty essentially never shows a shared-root edge, a related-meaning edge, or a pair we curated ourselves — and those are exactly the classes no automated check covers, since gate:edges deliberately does not score shared-root at all. Pass UNIFORM=1 only when the overall *rate* of bad edges is the question, and note that gate:edges already carries the rate on every commit."
         ],
         "record": "make record CHECK=edge-spot-audit RESULT='seed 1 · 20 edges · 18 correct, 2 wrong (both phrase-overlap between 2 and 3) → verified-edges.json'"
       },

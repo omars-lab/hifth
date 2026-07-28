@@ -337,11 +337,14 @@ wrong hop or mislabeled ayah is a product-breaking bug for this audience.
   disagreement fails the build with a diff report.
 - **Golden ayahs:** ~30 hand-verified ayahs (first/last of surah, juz boundaries, sajda
   marks, pages 1 and 604) asserted every ETL run.
-- **Edge spot-audit (human):** weekly during Loops 4–7, 20 random edges vs a printed
+- **Edge spot-audit (human):** weekly during Loops 4–7, 20 sampled pairs vs a printed
   mushaf; a hafiz signs off mutashabihat diffs before v1.0. Tajweed skin ships behind a
-  "beta" flag until hafiz approval. Draw the sample with `make audit-edges N=20 SEED=1`
-  — seeded, so a round can be re-run or handed to a second reader — and record **both**
-  verdicts (`correct` *and* `wrong`) in `packages/etl/data/qa/verified-edges.json`.
+  "beta" flag until hafiz approval. The runbook is `edge-spot-audit` in
+  `docs/validation/ledger.json` — read it with `make validate CHECK=edge-spot-audit`.
+  Draw with `make audit-edges N=20 SEED=1`: seeded, so a round can be re-run or handed
+  to a second reader, and **stratified** by type × provenance × page distance, because
+  97% of the corpus is one class and a flat draw of twenty essentially never shows the
+  classes no gate covers. `make validate` prints which classes have never been looked at.
 - **License gate:** build fails if any source lacks a `SOURCES.md` entry.
 
 ### How a manual result becomes a permanent test
@@ -508,7 +511,7 @@ state-restoration test.
 
 ### Loop 7 — Hifz polish + beta (ongoing) → web v1.0
 5–10 huffaz/teachers; interview, don't instrument (privacy-respecting counts only). Weekly
-data-QA (20 random edges vs printed mushaf, hafiz sign-off on diffs). Popover ordering
+data-QA (20 sampled pairs vs printed mushaf, hafiz sign-off on diffs). Popover ordering
 tuning (same page → juz → earlier → later); keyboard map (arrows=pages, `/`=jumper);
 golden-image tests on 5 pages; perf pass (shard prefetch on selection).
 **Exit:** a revision session with a hafiz produces no navigation friction notes → **web v1.0**.
