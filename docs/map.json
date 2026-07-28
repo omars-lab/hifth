@@ -457,12 +457,29 @@
           "file": "scripts/record-validation.mjs",
           "symbol": "check.verifiedOn",
           "note": "Writes the verdict back and then prints what that verdict now obliges — the standing rule is that a manual result must tighten something automated."
+        },
+        {
+          "file": "scripts/validate-auto.mjs",
+          "symbol": "records",
+          "note": "The only writer of docs/validation/evidence/. Runs each check's declared `evidence.run` and writes the real exit code; everything else only reads. Exits 0 even when a producer goes red — a reporting run, not a gate."
+        },
+        {
+          "file": "scripts/validation-ledger.mjs",
+          "symbol": "outcomeOf",
+          "note": "Exit 3 is \"could not tell\", and it is not a pass — so a producer that could not reach its subject strikes no step off a human's runbook."
+        },
+        {
+          "file": "scripts/validation-ledger.mjs",
+          "symbol": "evidencePath",
+          "note": "Derived from the check id, never stored beside it: a path written down in two places is a path that can disagree with itself."
         }
       ],
       "extend": [
         "A new manual check is a ledger entry with a full runbook. A pending user-owned check with no steps fails the gate, because a check nobody can follow will not be run.",
         "Edit the ledger and re-run `make guide` in the same commit — a staleness hash fails the build otherwise.",
-        "When a check comes back, record it and then do what `tunes` printed. That step is what turns a verdict into a permanent test instead of a note."
+        "When a check comes back, record it and then do what `tunes` printed. That step is what turns a verdict into a permanent test instead of a note.",
+        "An `evidence` block must name a `residue` — say in words what the command cannot do. The gate rejects one that does not, because an automated run naming no remainder is one claiming to have done a human's job.",
+        "`evidence.covers` points at runbook step ids, never positions, and `evidence.run` is a script rather than a make target — make flattens every failed recipe to exit 2, which would let a network timeout read as a verdict."
       ],
       "gates": ["pnpm gate:validation", "make ci"],
       "seeAlso": ["edge-data-etl", "provenance"]

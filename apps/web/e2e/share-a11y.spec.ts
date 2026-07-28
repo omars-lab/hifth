@@ -175,7 +175,7 @@ test.describe("Hifth · aria snapshots (the tour the ledger describes)", () => {
       });
     }, COACH_STORAGE_KEY);
 
-  /** Select 2:48 and open its in-surah hop popover — the state steps 4–5 describe. */
+  /** Select 2:48 and open its in-surah hop popover — the state `escape-the-sheet` starts from. */
   async function openHopPopover(page: Page): Promise<void> {
     await tapAyah(page, "#verse-55");
     await page
@@ -185,7 +185,8 @@ test.describe("Hifth · aria snapshots (the tour the ledger describes)", () => {
     await expect(page.getByRole("dialog")).toBeVisible();
   }
 
-  // Runbook step 1. The chrome is where glyph-only controls live: ⌖ and ▤ carry
+  // Was a runbook step of its own until this snapshot replaced it — hence no
+  // step id to name. The chrome is where glyph-only controls live: ⌖ and ▤ carry
   // no text of their own, so a lost label does not degrade them, it deletes
   // them — and the tree is where that shows up as a name reading "⌖".
   test("the chrome announces every control by word, never by glyph", async ({ page }) => {
@@ -195,9 +196,11 @@ test.describe("Hifth · aria snapshots (the tour the ledger describes)", () => {
     await expect(page.locator("header")).toMatchAriaSnapshot({ name: "chrome.aria.yml" });
   });
 
-  // Runbook step 2. Establishes the polygon hit layer is an accessible surface
-  // at all: the page is a labelled group and every ayah under it is a button
-  // named «الآية <السورة> · <المرجع>» (enhancePolygons, packages/core).
+  // What makes `judge-the-phrasing` a question about phrasing rather than about
+  // existence: the page is a labelled group and every ayah under it is a button
+  // named «الآية <السورة> · <المرجع>» (enhancePolygons, packages/core). The
+  // runbook step points here by name; it used to point here by position, and
+  // that pointer had been wrong since the runbook was condensed.
   test("the mushaf page is a labelled group of ayah buttons", async ({ page }) => {
     await settled(page);
     await page.goto("/");
@@ -206,7 +209,7 @@ test.describe("Hifth · aria snapshots (the tour the ledger describes)", () => {
     await expect(stage).toMatchAriaSnapshot({ name: "page-group.aria.yml" });
   });
 
-  // Runbook step 4. Each chip carries a glyph and a number badge, both
+  // Another step this snapshot retired. Each chip carries a glyph and a number badge, both
   // aria-hidden, so the label has to rebuild the meaning in words. This is the
   // tree that fails if the badge ever leaks through as "circle 3".
   test("the hop rail reads as words plus a count", async ({ page }) => {
@@ -218,9 +221,10 @@ test.describe("Hifth · aria snapshots (the tour the ledger describes)", () => {
     await expect(rail).toMatchAriaSnapshot({ name: "hop-rail.aria.yml" });
   });
 
-  // Runbook step 5, the half a machine can do: the sheet's own contents — a
-  // close control named «إغلاق» and targets named «انتقل إلى …». Whether focus
-  // can be swiped out of the back of it is still step 5's job, and still human.
+  // The half of `escape-the-sheet` a machine can do: the sheet's own contents —
+  // a close control named «إغلاق» and targets named «انتقل إلى …». Whether focus
+  // can be swiped out of the back of it is still that step's job, still human,
+  // and named as residue in the ledger rather than quietly assumed covered.
   test("the open hop popover names its close control and every target", async ({ page }) => {
     await settled(page);
     await page.goto("/");
@@ -228,7 +232,7 @@ test.describe("Hifth · aria snapshots (the tour the ledger describes)", () => {
     await expect(page.getByRole("dialog")).toMatchAriaSnapshot({ name: "hop-popover.aria.yml" });
   });
 
-  // Runbook step 7. The trail is the only way back; if the beads do not say
+  // Retired step, kept as a snapshot. The trail is the only way back; if the beads do not say
   // where they lead, the back path exists visually and nowhere else. Driven
   // from a share link so the chain of beads is deterministic.
   test("the trail beads say where each one leads back to", async ({ page }) => {

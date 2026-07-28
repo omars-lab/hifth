@@ -1,0 +1,31 @@
+{
+  "check": "source-offer-resolves",
+  "run": "node scripts/check-source-offer.mjs",
+  "ranAt": "2026-07-28T20:34:16Z",
+  "commit": "b8f12ce",
+  "on": "darwin · node v20.19.4",
+  "exit": 1,
+  "outcome": "fail",
+  "covers": [
+    "offer-link",
+    "credit-links"
+  ],
+  "residue": [
+    "Whether a reader can *get to* those links from inside the running app. The script follows URLs it reads out of the bundle; it never opens the colophon, so a source link that resolves perfectly from behind a sheet nobody can open still passes it.",
+    "Whether the deployed build is the build you think it is. Without `URL=<deployed>` the script answers about this working tree, which is a different question from the one a stranger asks."
+  ],
+  "tail": [
+    "  ✓ https://github.com/Waqar144/Quran_Mutashabihat_Data   (mutashabihat-waqar144)",
+    "  ✓ http://corpus.quran.com   (quranic-arabic-corpus)",
+    "  ✓ https://github.com/cpfair/quran-tajweed   (quran-tajweed-cpfair)",
+    "source-offer — DOES NOT RESOLVE:",
+    "  - https://github.com/omars-lab/hifth — HTTP 404 to somebody who is not signed in as us.",
+    "      The §6 offer is not discharged and the site must not be published.",
+    "      Either make the repository public, or repoint SOURCE_REPO in apps/web/src/provenance.ts",
+    "      at wherever the corresponding source is actually served.",
+    "  - https://github.com/omars-lab/hifth/tree/b8f12cea4c5d5e72bb20c33ce6e58d7ca1d65157 — HTTP 404, which follows from the repository itself not resolving.",
+    "      Nothing to fix here separately; fix the line above and re-run.",
+    "  This is the check docs/validation/ledger.json tracks as `source-offer-resolves`.",
+    "  Record the verdict with:  make record CHECK=source-offer-resolves RESULT='…'"
+  ]
+}

@@ -24,7 +24,7 @@
 import { writeFileSync, readFileSync, existsSync } from "node:fs";
 import { createServer } from "node:http";
 import { extname, join, normalize } from "node:path";
-import { readLedger, ledgerHash, GUIDE_PATH, ROOT } from "./validation-ledger.mjs";
+import { readLedger, ledgerHash, readEvidence, GUIDE_PATH, ROOT } from "./validation-ledger.mjs";
 
 /* ── rendering ─────────────────────────────────────────────────────────── */
 
@@ -71,6 +71,12 @@ function card(check) {
   const done = check.status === "done";
   const blocked = (rb.needs ?? []).some((n) => /not runnable yet/i.test(n));
 
+  // Steps a command has already discharged, on a real run with a real exit
+  // code. Only `pass` strikes — a producer that could not reach its subject
+  // (exit 3) has proved nothing, and the safeguard is that the step stays.
+  const ran = check.evidence?.run ? readEvidence(check.id) : null;
+  const struck = new Set(ran?.outcome === "pass" ? (check.evidence.covers ?? []) : []);
+
   return `<article class="card${done ? " is-done" : ""}" id="${attr(check.id)}">
   <div class="head">
     <span class="badge${done ? " ok" : blocked ? " wait" : ""}">${
@@ -89,6 +95,7 @@ function card(check) {
       : ""
   }
 
+  ${machine(check, ran, struck)}
   ${list("What you need", rb.needs)}
   ${
     (rb.setup ?? []).length
@@ -110,8 +117,16 @@ function card(check) {
     <h3>Steps — on the phone</h3>
     <ol class="steps">
       ${rb.steps
-        .map(
-          (s, i) => `<li>
+        .map((s, i) =>
+          s.id && struck.has(s.id)
+            ? // Struck, not deleted. The step is still the runbook's own account
+              // of what this check is; hiding it would leave the person on the
+              // phone unable to tell a discharged step from one nobody wrote.
+              `<li class="struck">
+        <p class="do"><s>${rich(s.do)}</s></p>
+        <p class="expect">Done by <code>${attr(check.evidence.run)}</code> on ${attr(ran.ranAt.slice(0, 10))}. Skip it.</p>
+      </li>`
+            : `<li>
         <label class="do"><input type="checkbox" data-step="${attr(check.id)}:${i}"><span>${rich(s.do)}</span></label>
         <p class="expect">${rich(s.expect)}</p>
         ${shot(s.shot)}
@@ -134,6 +149,33 @@ function card(check) {
     ${check.record ? `<p class="expect">Written up in ${rich(check.record)}</p>` : ""}
   </section>
 </article>`;
+}
+
+/**
+ * What a command already did, and — the part that matters — what it could not.
+ *
+ * This block sits above "What you need" because it changes how much of the card
+ * is yours before you read any of it. The residue is rendered as prominently as
+ * the discharge on purpose: the risk this feature introduces is a page that
+ * looks mostly struck through and reads as "nearly automated", when what is
+ * left is the whole reason the check exists.
+ */
+function machine(check, ran, struck) {
+  if (!check.evidence?.run) return "";
+  const state = !ran ? "never-run" : ran.outcome;
+  return `<section class="block machine is-${attr(state)}">
+    <h3>Already done for you</h3>
+    <pre class="cmd">${rich(check.evidence.run)}</pre>
+    <p class="expect">${
+      ran
+        ? `<b>${attr(state)}</b> · ${attr(ran.ranAt.slice(0, 10))} · ${attr(ran.commit ?? "?")} · ${attr(ran.on)} — ${
+            struck.size ? `${struck.size} step(s) below are struck through` : "nothing struck through"
+          }`
+        : `Never run on this tree. Run <code>make validate-auto</code> on the laptop, then <code>make guide</code> — until then every step below is still yours.`
+    }</p>
+    <p class="tunes-lead">What it cannot do — still yours:</p>
+    <ul class="bullets">${(check.evidence.residue ?? []).map((r) => `<li>${rich(r)}</li>`).join("")}</ul>
+  </section>`;
 }
 
 /**
@@ -283,6 +325,26 @@ label.do input { flex: none; width: 24px; height: 24px; margin: 8px 0 0; accent-
 label.do input:checked + span { color: var(--dim); text-decoration: line-through;
   text-decoration-color: var(--line); }
 label.do span { padding: 8px 0; }
+
+/* What a command already did. Bordered like a card-within-a-card because it is
+   the only block on the page that subtracts work, and the reader has to be able
+   to see at a glance which claim is doing the subtracting. The left edge is
+   green only on a real pass — a "could not tell" gets the waiting colour, since
+   an unreachable subject proves nothing and strikes nothing. */
+.machine { padding: 14px 16px; border: 1px solid var(--line); border-left-width: 3px;
+  border-radius: 0 10px 10px 0; background: #0d1219; }
+.machine.is-pass { border-left-color: var(--green); }
+.machine.is-fail { border-left-color: #e07a6a; }
+.machine.is-unknown, .machine.is-never-run { border-left-color: var(--wait); }
+.machine .expect::before { content: "ran "; }
+
+/* Struck, not hidden. A step that vanished would be indistinguishable from one
+   nobody ever wrote, and the runbook is also the description of what the check
+   is — so it stays legible, just visibly not yours. */
+ol.steps > li.struck { opacity: .62; }
+li.struck .do { margin: 0; padding: 8px 0 0; }
+li.struck s { text-decoration-color: var(--green); }
+li.struck .expect::before { content: "machine "; color: var(--green); }
 
 .record { border-top: 1px solid var(--line); padding-top: 18px; }
 .foot { max-width: 44rem; margin: 0 auto; padding: 8px 0 48px; color: var(--dim); font-size: 15px; }
