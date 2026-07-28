@@ -34,7 +34,7 @@ test.describe("Hifth · the highlighted range", () => {
     await expect(menu.getByRole("heading")).toHaveText("البقرة · ٢:٤٧–٢:٤٨");
 
     // Merged: rows from BOTH members of the range, each naming its source.
-    // 2:47 → 2:40 / 2:121 / 2:122 (+ shared root); 2:48 → 2:123 / 7:140 / 14:5 / 82:19.
+    // 2:47 → 2:40 / 2:122 / 2:123 (+ shared roots); 2:48 → 2:122 / 2:123 / 82:19.
     await expect(menu.getByText("من ٢:٤٧").first()).toBeVisible();
     await expect(menu.getByText("من ٢:٤٨").first()).toBeVisible();
     await expect(menu.getByRole("button", { name: /انتقل إلى البقرة · ٢:٤٠/ }).first()).toBeVisible();
@@ -53,8 +53,8 @@ test.describe("Hifth · the highlighted range", () => {
     const menu = page.getByRole("dialog");
     await expect(menu).toBeVisible();
 
-    // 14:5 (page 255) and 82:19 (page 587) are not vendored yet (Loop 4b).
-    await expect(menu.getByRole("button", { name: /انتقل إلى إبراهيم · ١٤:٥/ })).toBeDisabled();
+    // 82:19 (page 587) is not vendored yet (Loop 4b).
+    await expect(menu.getByRole("button", { name: /انتقل إلى الانفطار · ٨٢:١٩/ })).toBeDisabled();
     await expect(menu.getByText(/هذه الصفحة غير متوفّرة بعد/).first()).toBeVisible();
     // …while the shared-root row anchored to a word (2:122#w3) blames the right
     // thing: its page IS vendored; word granularity is what is missing.
@@ -67,14 +67,18 @@ test.describe("Hifth · the highlighted range", () => {
     await expect(menu).toBeVisible();
     await expect(page.locator("header .numeric")).toHaveText("7");
 
-    // 2:123 was contributed by 2:48 — so that is the ayah the trail remembers.
+    // 2:123 is an edge of BOTH members, so the row names both — and the leap
+    // still has to depart from exactly one ayah. It departs from the member
+    // whose edge survived the merge (mergeRangeEdges rule 2); these two tie on
+    // richness (2:47's carries `ctx`, 2:48's a note), and a tie keeps the first.
+    await expect(menu.getByRole("button", { name: "البقرة · ٢:١٢٣ من ٢:٤٧، ٢:٤٨" })).toBeVisible();
     await menu.getByRole("button", { name: /انتقل إلى البقرة · ٢:١٢٣/ }).tap();
 
     await expect(page.locator("header .numeric")).toHaveText("19");
     await expect(
       page.getByRole("button", { name: /الآية الحالية البقرة · ٢:١٢٣/ }),
     ).toBeVisible();
-    await expect(page.getByRole("button", { name: /ارجع إلى البقرة · ٢:٤٨/ })).toBeVisible();
+    await expect(page.getByRole("button", { name: /ارجع إلى البقرة · ٢:٤٧/ })).toBeVisible();
     // The highlight is gone with the leap: one hop list at a time.
     await expect(page.getByRole("dialog")).toHaveCount(0);
   });
