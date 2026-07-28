@@ -141,6 +141,12 @@ jobs:
       - name: Gate — the code map still resolves
         run: pnpm gate:map
 
+      # docs/use-cases.json says what we promise and names the test or gate that
+      # would fail if we broke it. This checks those still exist and are still
+      # tests, and that the committed docs/use-cases.md was regenerated.
+      - name: Gate — every promise still has a proof
+        run: pnpm gate:use-cases
+
       - name: Build
         run: pnpm build
 

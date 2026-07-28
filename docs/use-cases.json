@@ -1,0 +1,790 @@
+{
+  "$comment": [
+    "Who uses Hifth, what each of them is trying to do, and what proves it still works.",
+    "",
+    "This is the third document in the same family as docs/map.json and",
+    "docs/validation/ledger.json, and it answers the question neither of them does.",
+    "The map answers 'where do I change this?' — organised by feature, for someone",
+    "already inside the code. The ledger answers 'what can a machine not check?'.",
+    "This file answers 'what can a person do with this thing, and what would fail",
+    "if we broke it?' — organised by actor, in the actor's own words.",
+    "",
+    "WHY IT IS WORTH HAVING SEPARATELY FROM THE MAP: a feature list and a use-case",
+    "list disagree in the places that matter. Features are things we built; use",
+    "cases are things someone wants. 'editions-and-skins' is one feature and two",
+    "unrelated wants. 'Come back to where I was' is one want spread across the",
+    "router, the trail beads and the page stage, and it is exactly the kind of",
+    "promise that breaks without any single feature looking broken.",
+    "",
+    "WHY EVERY USE CASE CARRIES A `proof`: this is the field the whole file exists",
+    "for. A use case with no named test is a claim about the product that nobody",
+    "checks — and a document full of unchecked claims is a wish list wearing the",
+    "costume of a specification. Naming the test does three things at once: it",
+    "tells a reader how to see the behaviour for themselves, it fails the build",
+    "when the test is renamed or deleted (scripts/gate-use-cases.mjs), and it makes",
+    "an unproven promise impossible to write down quietly. When the proof is",
+    "genuinely thinner than the promise, say so in `gap` rather than overstating it",
+    "— an honest hole is a to-do, a hidden one is a lie.",
+    "",
+    "The pointers cannot rot. `code[].symbol` and `proof[].test` are checked against",
+    "real files on every push and on the commit that renames them, by the same",
+    "reader the code map uses (scripts/code-pointers.mjs). Line numbers are never",
+    "stored; the renderers compute them at read time.",
+    "",
+    "RENDERERS — one source, three ways to read it:",
+    "  make use-cases                 one line per use case, grouped by actor",
+    "  make use-cases ACTOR=<id>      one actor's full picture, with file:line",
+    "  make use-cases-doc             regenerate docs/use-cases.md (the mermaid map)",
+    "The /maintain-use-cases skill drives a session from this file. Never restate a",
+    "use case anywhere else; point at the id.",
+    "",
+    "FIELDS",
+    "  actors[]   id · name (as the actor would be named out loud) · what they are",
+    "             here to do. An actor with no use cases fails the gate — a name",
+    "             with nothing behind it is decoration.",
+    "  useCases[]",
+    "    id       kebab-case, stable, and phrased as the goal, not the mechanism.",
+    "    actor    an actor id.",
+    "    goal     one line, first person, in the actor's words. If it names a",
+    "             component or a function, it is written from the wrong side.",
+    "    feature  a feature id in docs/map.json — where to go to change it. This is",
+    "             the join between the two documents, and it is gate-checked, so a",
+    "             feature cannot be renamed out from under a use case.",
+    "    code[]   {file, symbol} — the two or three places this actually happens.",
+    "             Not the whole path through the code; the map has that.",
+    "    proof[]  {file, test} for a named test, or {gate} for a named CI gate",
+    "             (a key in package.json scripts). At least one is required.",
+    "    includes[] other use-case ids this one contains — UML <<include>>. You",
+    "             cannot hop without first selecting, so `hop` includes `select`.",
+    "    gap      optional. What the proof does NOT cover. Rendered in the doc,",
+    "             deliberately visible, so a thin proof reads as thin."
+  ],
+  "actors": [
+    {
+      "id": "hafiz",
+      "name": "الحافظ · the hafiz",
+      "what": "Someone memorising the Qur'an, holding a phone, usually mid-revision. Every gesture has to survive being made by a thumb while attention is on the page rather than the app."
+    },
+    {
+      "id": "validator",
+      "name": "the validator",
+      "what": "The person doing what a machine cannot — a phone in one hand, a printed mushaf on the table. Usually the same human as the maintainer, but with a different job and no access to a terminal while doing it."
+    },
+    {
+      "id": "maintainer",
+      "name": "the maintainer",
+      "what": "Whoever is changing the app next, including this project's own future self. Arrives cold, needs to find the right layer, and must not be able to break a promise silently."
+    },
+    {
+      "id": "ci",
+      "name": "CI",
+      "what": "The automated judge. An actor rather than scenery: several promises here are kept by a gate refusing a commit, and nothing else keeps them."
+    }
+  ],
+  "useCases": [
+    {
+      "id": "select-the-ayah-i-am-on",
+      "actor": "hafiz",
+      "goal": "Put my finger on an ayah and have the app agree that is the one I mean.",
+      "feature": "select-an-ayah",
+      "code": [
+        {
+          "file": "packages/core/src/gestures.ts",
+          "symbol": "pointerIntent"
+        },
+        {
+          "file": "packages/core/src/resolver.ts",
+          "symbol": "class Resolver"
+        },
+        {
+          "file": "packages/core/src/highlighter.ts",
+          "symbol": "class Highlighter"
+        }
+      ],
+      "proof": [
+        {
+          "file": "apps/web/e2e/smoke.spec.ts",
+          "test": "tapping an ayah selects it and draws the highlight"
+        },
+        {
+          "file": "apps/web/e2e/marquee.spec.ts",
+          "test": "tap-to-select still works alongside the marquee"
+        }
+      ]
+    },
+    {
+      "id": "select-a-whole-passage",
+      "actor": "hafiz",
+      "goal": "Drag across several ayahs, because the thing I half-remember spans more than one.",
+      "feature": "select-an-ayah",
+      "code": [
+        {
+          "file": "packages/core/src/gestures.ts",
+          "symbol": "LONG_PRESS_MS"
+        },
+        {
+          "file": "apps/web/src/components/PageStage.tsx",
+          "symbol": "PageStage"
+        }
+      ],
+      "proof": [
+        {
+          "file": "apps/web/e2e/marquee.spec.ts",
+          "test": "long-press then drag inks the ayahs the marquee crossed"
+        },
+        {
+          "file": "apps/web/e2e/marquee.spec.ts",
+          "test": "an immediate drag still pans the page and highlights nothing"
+        }
+      ],
+      "includes": [
+        "select-the-ayah-i-am-on"
+      ]
+    },
+    {
+      "id": "hop-to-something-that-resembles-it",
+      "actor": "hafiz",
+      "goal": "Show me the ayahs I keep confusing this one with — the reason I opened this app.",
+      "feature": "the-hop",
+      "code": [
+        {
+          "file": "packages/core/src/adjacency.ts",
+          "symbol": "class Adjacency"
+        },
+        {
+          "file": "packages/core/src/adjacency.ts",
+          "symbol": "bucketEdges"
+        },
+        {
+          "file": "apps/web/src/components/PageStage.tsx",
+          "symbol": "async navigateTo"
+        }
+      ],
+      "proof": [
+        {
+          "file": "apps/web/e2e/hop.spec.ts",
+          "test": "tap 2:48 → rail → popover → cross-page hop to 2:123 → bead back"
+        },
+        {
+          "file": "apps/web/e2e/hop.spec.ts",
+          "test": "un-vendored hop targets are surfaced but disabled (no ghost pages)"
+        }
+      ],
+      "includes": [
+        "select-the-ayah-i-am-on"
+      ]
+    },
+    {
+      "id": "hop-from-a-passage",
+      "actor": "hafiz",
+      "goal": "Ask the same question about a passage, and get one list rather than one per ayah.",
+      "feature": "the-hop",
+      "code": [
+        {
+          "file": "packages/core/src/adjacency.ts",
+          "symbol": "mergeRangeEdges"
+        },
+        {
+          "file": "apps/web/src/components/HighlightMenu.tsx",
+          "symbol": "HighlightMenu"
+        }
+      ],
+      "proof": [
+        {
+          "file": "apps/web/e2e/range.spec.ts",
+          "test": "a range surfaces the merged menu, and the URL keeps the range form"
+        },
+        {
+          "file": "apps/web/e2e/range.spec.ts",
+          "test": "a merged row hops from the range member that produced it"
+        }
+      ],
+      "includes": [
+        "select-a-whole-passage"
+      ]
+    },
+    {
+      "id": "see-exactly-what-differs",
+      "actor": "hafiz",
+      "goal": "Show me the words that differ between the two readings, because that is the thing I actually have to memorise.",
+      "feature": "the-hop",
+      "code": [
+        {
+          "file": "packages/core/src/verse-text.ts",
+          "symbol": "diffPair"
+        },
+        {
+          "file": "apps/web/src/components/DiffView.tsx",
+          "symbol": "DiffView"
+        }
+      ],
+      "proof": [
+        {
+          "file": "apps/web/e2e/share-a11y.spec.ts",
+          "test": "expanding a hop row reveals the token diff of the two readings"
+        }
+      ],
+      "includes": [
+        "hop-to-something-that-resembles-it"
+      ]
+    },
+    {
+      "id": "find-ayahs-sharing-a-root",
+      "actor": "hafiz",
+      "goal": "Show me every ayah built on the same Arabic root — the other way ayahs rhyme.",
+      "feature": "root-lens",
+      "code": [
+        {
+          "file": "packages/core/src/roots.ts",
+          "symbol": "class Roots"
+        },
+        {
+          "file": "packages/core/src/roots.ts",
+          "symbol": "orderByPageDistance"
+        },
+        {
+          "file": "apps/web/src/components/RootLens.tsx",
+          "symbol": "RootLens"
+        }
+      ],
+      "proof": [
+        {
+          "file": "packages/core/src/roots.test.ts",
+          "test": "orders families nearest page first, then by rarity"
+        },
+        {
+          "file": "packages/core/src/roots.test.ts",
+          "test": "sub-groups the kept hops by lemma, most-used first"
+        }
+      ],
+      "gap": "Unit tests only. Nothing drives RootLens end to end — no e2e opens the lens, so the ranking is proven and the wiring from a real tap is not. This is the thinnest proof in the file.",
+      "includes": [
+        "select-the-ayah-i-am-on"
+      ]
+    },
+    {
+      "id": "get-back-to-where-i-was",
+      "actor": "hafiz",
+      "goal": "After three hops, take me back — I came here from somewhere and I want to finish that page.",
+      "feature": "the-hop",
+      "code": [
+        {
+          "file": "apps/web/src/components/TrailBeads.tsx",
+          "symbol": "TrailBeads"
+        },
+        {
+          "file": "packages/core/src/router.ts",
+          "symbol": "serializeState"
+        }
+      ],
+      "proof": [
+        {
+          "file": "apps/web/e2e/share-a11y.spec.ts",
+          "test": "a full trail link restores the whole chain of beads"
+        }
+      ],
+      "includes": [
+        "hop-to-something-that-resembles-it"
+      ]
+    },
+    {
+      "id": "send-someone-what-i-am-looking-at",
+      "actor": "hafiz",
+      "goal": "Send this exact view to someone else, and have them see what I see.",
+      "feature": "share-links",
+      "code": [
+        {
+          "file": "packages/core/src/router.ts",
+          "symbol": "serializeState"
+        },
+        {
+          "file": "apps/web/src/components/ShareSheet.tsx",
+          "symbol": "ShareSheet"
+        }
+      ],
+      "proof": [
+        {
+          "file": "apps/web/e2e/share-a11y.spec.ts",
+          "test": "selecting an ayah writes a shareable hash to the address bar"
+        }
+      ]
+    },
+    {
+      "id": "open-a-link-someone-sent-me",
+      "actor": "hafiz",
+      "goal": "Open their link cold and land on the ayah, the page and the trail they had.",
+      "feature": "share-links",
+      "code": [
+        {
+          "file": "packages/core/src/router.ts",
+          "symbol": "parseHash"
+        },
+        {
+          "file": "apps/web/src/useHashRouter.ts",
+          "symbol": "useHashRouter"
+        }
+      ],
+      "proof": [
+        {
+          "file": "apps/web/e2e/share-a11y.spec.ts",
+          "test": "cold-opening a hop link restores the exact view (select + page + breadcrumb)"
+        },
+        {
+          "file": "apps/web/e2e/deeplink.spec.ts",
+          "test": "a bare page link moves the stage, not just the header"
+        }
+      ]
+    },
+    {
+      "id": "jump-to-a-place-i-can-name",
+      "actor": "hafiz",
+      "goal": "I know where I want to be — البقرة ٢٥٥ — take me there without turning pages.",
+      "feature": "wayfinding",
+      "code": [
+        {
+          "file": "packages/core/src/jump.ts",
+          "symbol": "parseJump"
+        },
+        {
+          "file": "apps/web/src/components/Jumper.tsx",
+          "symbol": "Jumper"
+        }
+      ],
+      "proof": [
+        {
+          "file": "apps/web/e2e/wayfinding.spec.ts",
+          "test": "`/` opens the jumper and a jump lands like a link"
+        },
+        {
+          "file": "apps/web/e2e/wayfinding.spec.ts",
+          "test": "a jump to an un-vendored ayah is refused, not faked"
+        }
+      ]
+    },
+    {
+      "id": "turn-the-page",
+      "actor": "hafiz",
+      "goal": "Move to the next page the way a mushaf moves — right to left — and be told honestly when there is no next page.",
+      "feature": "wayfinding",
+      "code": [
+        {
+          "file": "packages/core/src/keymap.ts",
+          "symbol": "appKeyAction"
+        },
+        {
+          "file": "apps/web/src/assets.ts",
+          "symbol": "loadPage"
+        }
+      ],
+      "proof": [
+        {
+          "file": "apps/web/e2e/wayfinding.spec.ts",
+          "test": "arrows turn pages, and stop honestly at the last vendored one"
+        },
+        {
+          "file": "apps/web/e2e/offline.spec.ts",
+          "test": "a page that would not load is said, not silently swapped for another"
+        }
+      ]
+    },
+    {
+      "id": "learn-the-gestures-once",
+      "actor": "hafiz",
+      "goal": "Tell me what I can do here the first time, and then never again.",
+      "feature": "wayfinding",
+      "code": [
+        {
+          "file": "apps/web/src/components/CoachMarks.tsx",
+          "symbol": "CoachMarks"
+        }
+      ],
+      "proof": [
+        {
+          "file": "apps/web/e2e/wayfinding.spec.ts",
+          "test": "the coach marks teach three verbs once, then never again"
+        }
+      ]
+    },
+    {
+      "id": "read-with-tajweed-colouring",
+      "actor": "hafiz",
+      "goal": "Colour the rules while I revise, and take the colour away again without moving a single glyph.",
+      "feature": "editions-and-skins",
+      "code": [
+        {
+          "file": "packages/core/src/skins.ts",
+          "symbol": "class Tajweed"
+        },
+        {
+          "file": "apps/web/src/components/SkinToggle.tsx",
+          "symbol": "SkinToggle"
+        }
+      ],
+      "proof": [
+        {
+          "file": "apps/web/e2e/skin.spec.ts",
+          "test": "switching on marks ayahs with their rules"
+        },
+        {
+          "file": "apps/web/e2e/skin.spec.ts",
+          "test": "plain → tajweed → plain leaves the page geometry byte-identical"
+        }
+      ]
+    },
+    {
+      "id": "read-the-print-i-memorised-from",
+      "actor": "hafiz",
+      "goal": "Use the mushaf my eyes know, and be told plainly which ones do not exist yet rather than shown a substitute.",
+      "feature": "editions-and-skins",
+      "code": [
+        {
+          "file": "packages/core/src/concordance.ts",
+          "symbol": "EDITIONS"
+        },
+        {
+          "file": "packages/core/src/concordance.ts",
+          "symbol": "class Concordance"
+        }
+      ],
+      "proof": [
+        {
+          "file": "apps/web/e2e/wayfinding.spec.ts",
+          "test": "the mushaf picker shows what exists and why the rest does not"
+        }
+      ]
+    },
+    {
+      "id": "revise-with-no-network",
+      "actor": "hafiz",
+      "goal": "Open it in a masjid basement, on a plane, a week after I last used it, and have it just work.",
+      "feature": "offline-pwa",
+      "code": [
+        {
+          "file": "apps/web/src/pwa.ts",
+          "symbol": "initPwa"
+        },
+        {
+          "file": "apps/web/src/pwa.ts",
+          "symbol": "repairShellCache"
+        },
+        {
+          "file": "apps/web/src/storage.ts",
+          "symbol": "requestPersistentStorage"
+        }
+      ],
+      "proof": [
+        {
+          "file": "apps/web/e2e/offline.spec.ts",
+          "test": "a visited page still opens with the network offline"
+        },
+        {
+          "file": "apps/web/e2e/offline.spec.ts",
+          "test": "an offline hop lands on a page whose SVG was cached alongside it"
+        },
+        {
+          "file": "apps/web/e2e/offline.spec.ts",
+          "test": "an evicted shell is rebuilt, so offline still works afterwards"
+        }
+      ],
+      "gap": "Everything here is a headless browser with the network switched off. Whether a real phone's OS evicts the cache over eight days is the one thing these cannot answer — that is docs/validation/ledger.json → offline-survival-8-day."
+    },
+    {
+      "id": "use-it-without-seeing-it",
+      "actor": "hafiz",
+      "goal": "Reach every ayah, every hop and every control with a screen reader or a keyboard, hearing words rather than glyphs.",
+      "feature": "a11y",
+      "code": [
+        {
+          "file": "packages/core/src/highlighter.ts",
+          "symbol": "enhancePolygons"
+        },
+        {
+          "file": "apps/web/src/components/LiveAnnouncer.tsx",
+          "symbol": "LiveAnnouncer"
+        },
+        {
+          "file": "apps/web/src/format.ts",
+          "symbol": "toArabicDigits"
+        }
+      ],
+      "proof": [
+        {
+          "file": "apps/web/e2e/share-a11y.spec.ts",
+          "test": "keyboard-only: focus an ayah, select with Enter, open rail, hop, land"
+        },
+        {
+          "file": "apps/web/e2e/share-a11y.spec.ts",
+          "test": "the mushaf page is a labelled group of ayah buttons"
+        },
+        {
+          "file": "apps/web/e2e/share-a11y.spec.ts",
+          "test": "the chrome announces every control by word, never by glyph"
+        },
+        {
+          "gate": "gate:notext"
+        }
+      ],
+      "gap": "axe and aria snapshots check the tree, not the experience. Whether VoiceOver's rotor actually gets a hafiz through a hop is ledger check screen-reader-walkthrough."
+    },
+    {
+      "id": "know-where-this-text-came-from",
+      "actor": "hafiz",
+      "goal": "Tell me whose mushaf this is and under what terms, without making me hunt for it.",
+      "feature": "provenance",
+      "code": [
+        {
+          "file": "apps/web/src/components/Colophon.tsx",
+          "symbol": "CREDITS"
+        },
+        {
+          "file": "apps/web/src/provenance.ts",
+          "symbol": "SOURCE_REPO"
+        }
+      ],
+      "proof": [
+        {
+          "file": "apps/web/e2e/colophon.spec.ts",
+          "test": "every source whose licence asks to be named is named, with its link"
+        },
+        {
+          "file": "apps/web/e2e/colophon.spec.ts",
+          "test": "the wordmark opens the source offer for this build"
+        },
+        {
+          "gate": "gate:license-copy"
+        }
+      ]
+    },
+    {
+      "id": "run-a-check-a-machine-cannot",
+      "actor": "validator",
+      "goal": "Do the check that needs a phone or a printed mushaf, following instructions on the device I am holding.",
+      "feature": "validation",
+      "code": [
+        {
+          "file": "docs/validation/ledger.json",
+          "symbol": "runbook"
+        },
+        {
+          "file": "scripts/build-validation-guide.mjs",
+          "symbol": "GUIDE_PATH"
+        }
+      ],
+      "proof": [
+        {
+          "gate": "gate:validation"
+        }
+      ],
+      "gap": "The gate proves every outstanding check has a followable runbook and that the phone guide was regenerated. It cannot prove the runbook's Expect lines match what the phone shows — only walking it does, which is the point of walking it."
+    },
+    {
+      "id": "bank-a-verdict-so-it-cannot-be-lost",
+      "actor": "validator",
+      "goal": "Record what I found in one line, and be told immediately what that verdict now obliges us to build.",
+      "feature": "validation",
+      "code": [
+        {
+          "file": "scripts/record-validation.mjs",
+          "symbol": "check.verifiedOn"
+        },
+        {
+          "file": "scripts/gate-validation.mjs",
+          "symbol": "needsRunbook"
+        }
+      ],
+      "proof": [
+        {
+          "gate": "gate:validation"
+        }
+      ],
+      "includes": [
+        "run-a-check-a-machine-cannot"
+      ]
+    },
+    {
+      "id": "find-where-a-feature-lives",
+      "actor": "maintainer",
+      "goal": "Arrive cold and find the entrypoint of the thing I have been asked to change, without grepping.",
+      "feature": "ci-and-gates",
+      "code": [
+        {
+          "file": "docs/map.json",
+          "symbol": "select-an-ayah"
+        },
+        {
+          "file": "scripts/gate-map.mjs",
+          "symbol": "features"
+        }
+      ],
+      "proof": [
+        {
+          "gate": "gate:map"
+        }
+      ]
+    },
+    {
+      "id": "know-what-we-promise-and-what-proves-it",
+      "actor": "maintainer",
+      "goal": "See every promise this app makes, whose promise it is, and which test would fail if I broke it.",
+      "feature": "ci-and-gates",
+      "code": [
+        {
+          "file": "scripts/gate-use-cases.mjs",
+          "symbol": "problems"
+        },
+        {
+          "file": "scripts/build-use-cases.mjs",
+          "symbol": "mermaid"
+        }
+      ],
+      "proof": [
+        {
+          "gate": "gate:use-cases"
+        }
+      ]
+    },
+    {
+      "id": "rebuild-the-hop-edges-from-the-dataset",
+      "actor": "maintainer",
+      "goal": "Regenerate the mutashabihat shards and know the output is the same as anyone else would have produced.",
+      "feature": "edge-data-etl",
+      "code": [
+        {
+          "file": "packages/etl/scripts/build-adjacency.mjs",
+          "symbol": "addEdge"
+        },
+        {
+          "file": "packages/core/src/quran-meta.ts",
+          "symbol": "toAbsoluteAyah"
+        }
+      ],
+      "proof": [
+        {
+          "gate": "gate:edges"
+        },
+        {
+          "gate": "gate:ci-artifacts"
+        }
+      ],
+      "gap": "The gate proves an edge shares words with its source — it cannot prove the pair is a mutashabih a hafiz would recognise. That is ledger check edge-spot-audit, against a printed mushaf."
+    },
+    {
+      "id": "vendor-another-mushaf-page",
+      "actor": "maintainer",
+      "goal": "Add pages to the corpus and have the polygons stay clickable and the glyphs stay outlines.",
+      "feature": "assets-and-pages",
+      "code": [
+        {
+          "file": "packages/etl/scripts/extract-pages.mjs",
+          "symbol": "polygonsOf"
+        },
+        {
+          "file": "packages/etl/scripts/audit-corpus.mjs",
+          "symbol": "MADANI_TOTAL_PAGES"
+        }
+      ],
+      "proof": [
+        {
+          "gate": "gate:notext"
+        },
+        {
+          "gate": "gate:text-sources"
+        }
+      ]
+    },
+    {
+      "id": "refuse-a-change-that-alters-the-picture",
+      "actor": "ci",
+      "goal": "Fail a commit that moves the paint on the page, including the differences no DOM assertion can see.",
+      "feature": "golden-images",
+      "code": [
+        {
+          "file": "apps/web/playwright.config.ts",
+          "symbol": "snapshotPathTemplate"
+        },
+        {
+          "file": "scripts/gate-golden-size.mjs",
+          "symbol": "BUDGET"
+        }
+      ],
+      "proof": [
+        {
+          "gate": "gate:golden-env"
+        },
+        {
+          "gate": "gate:golden-size"
+        }
+      ],
+      "gap": "The images are the gate; these two scripts only keep the harness honest (right browser, sane file sizes). The pictures themselves are judged by `make golden`, which is not a gate a script can stand in for."
+    },
+    {
+      "id": "refuse-a-change-that-loses-the-licence-trail",
+      "actor": "ci",
+      "goal": "Fail a commit where a vendored source loses its licence, or the app tells a reader something SOURCES.md does not say.",
+      "feature": "provenance",
+      "code": [
+        {
+          "file": "scripts/gate-license.mjs",
+          "symbol": "problems"
+        },
+        {
+          "file": "scripts/gate-license-copy.mjs",
+          "symbol": "NON_COMMERCIAL"
+        }
+      ],
+      "proof": [
+        {
+          "gate": "gate:license"
+        },
+        {
+          "gate": "gate:license-copy"
+        }
+      ]
+    },
+    {
+      "id": "refuse-a-doc-that-points-at-nothing",
+      "actor": "ci",
+      "goal": "Fail the commit that renames a symbol out from under a document, on the commit that does the renaming.",
+      "feature": "ci-and-gates",
+      "code": [
+        {
+          "file": "scripts/code-pointers.mjs",
+          "symbol": "locate"
+        },
+        {
+          "file": "scripts/code-pointers.mjs",
+          "symbol": "locateTest"
+        }
+      ],
+      "proof": [
+        {
+          "gate": "gate:map"
+        },
+        {
+          "gate": "gate:use-cases"
+        }
+      ]
+    },
+    {
+      "id": "refuse-a-bundle-that-would-not-load-on-a-phone",
+      "actor": "ci",
+      "goal": "Fail a commit that pushes the JS past what a mid-tier phone on a slow connection can afford.",
+      "feature": "ci-and-gates",
+      "code": [
+        {
+          "file": "scripts/gate-budget.mjs",
+          "symbol": "BUDGET_GZ"
+        },
+        {
+          "file": ".github/workflows/ci.yml",
+          "symbol": "build-test-gate"
+        }
+      ],
+      "proof": [
+        {
+          "gate": "gate:budget"
+        }
+      ]
+    }
+  ]
+}
