@@ -128,8 +128,13 @@ ends by updating this section and writing `docs/decisions/loop-<N>.md`.**
    **Still true, and now the only thing standing between us and the deploy:** the offer is
    only real if `SOURCE_REPO` resolves. **Make the repo public before publishing the
    Cloudflare deploy** — or repoint that one constant at wherever the source is served
-   from. Nothing else in the code changes either way; the check that it resolves for a
-   stranger is `make validate CHECK=source-offer-resolves`.
+   from. Nothing else in the code changes either way. **`make source-offer` now answers this
+   in seconds** — it follows the offer anonymously (no `gh`, no token, because signed in as
+   ourselves a private repo looks public) and says today, in words, that the site must not be
+   published yet. `make source-offer URL=<deployed>` additionally reads `SOURCE_REPO` and the
+   build's commit out of the deployed bundle, so it checks what a reader is handed rather than
+   what the branch declares. The half a machine cannot do — that a reader can *reach* the offer
+   from inside the running app — stays at `make validate CHECK=source-offer-resolves`.
 6. ~~**`--ink-faint` contrast sweep**~~ — **closed** (`68746bf`). The token was redefined
    `#9c9284` → `#6b6255`, clearing 4.5:1 on all four surfaces it lands on; fixing it at the
    token rather than across 23 call sites, since every one of them is a `color:`.
