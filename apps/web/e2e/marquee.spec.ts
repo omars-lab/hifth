@@ -88,7 +88,7 @@ test.describe("Hifth · drag-to-highlight", () => {
       },
     );
 
-    // Released: the rect is gone and the passage carries the amber wash.
+    // Released: the rect is gone and the passage carries the amber marks.
     await expect(page.locator("#hifth-overlay rect.hl-marquee")).toHaveCount(0);
     await expect(page.locator("#hifth-overlay .hl-hlt")).not.toHaveCount(0);
   });

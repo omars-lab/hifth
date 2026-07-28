@@ -17,11 +17,16 @@
  *
  * Loop 5 adds the range side of spec §3's `onRangeSelect`: `rangeFromRect` turns
  * a marquee rectangle into the ayahs it crossed, and `highlightRange` /
- * `drawMarquee` paint the amber wash and the live rect — both additive, both in
+ * `drawMarquee` paint the range and the live rect — both additive, both in
  * their own groups, both leaving source geometry untouched like everything else.
+ *
+ * The amber marks are marker swipes rather than filled shapes: `paint` derives
+ * them from the polygon via ink.ts, and falls back to a filled clone on any
+ * geometry ink.ts does not recognise.
  */
 
 import { TAP_SLOP_PX } from "./gestures.js";
+import { swipesFromPath } from "./ink.js";
 import type { Resolver } from "./resolver.js";
 import {
   TAJWEED_CLASS_PREFIX,
@@ -37,6 +42,14 @@ const OVERLAY_ID = "hifth-overlay";
 
 export type GroupId = "selection" | "phrase" | "breadcrumb" | "preview";
 export type StyleToken = "sel" | "crumb" | "hlt" | "preview" | "marquee";
+
+/**
+ * The styles that are ink, and so get marker swipes instead of a filled clone
+ * (see `paint`). `crumb` is deliberately absent: an outline is the grammar for
+ * "you came from here", and drawing it as ink would make provenance and
+ * selection look like the same kind of thing.
+ */
+const INKED: ReadonlySet<StyleToken> = new Set<StyleToken>(["sel", "hlt"]);
 
 /**
  * A marquee that resolved to ayahs. `keys` is the contiguous run in page reading
@@ -286,17 +299,62 @@ export class Highlighter {
     if (!loc || loc.page !== this.page) return;
     const drawn: SVGElement[] = [];
     for (const id of loc.elementIds) {
-      const src = this.svg.querySelector<SVGElement>(`#${cssEscape(id)}`);
-      if (!src) continue;
-      const clone = src.cloneNode(true) as SVGElement;
-      clone.removeAttribute("id");
-      clone.setAttribute("class", `hl hl-${style}`);
-      clone.setAttribute("data-hl-group", group);
-      clone.style.pointerEvents = "none";
-      this.overlay.appendChild(clone);
-      drawn.push(clone);
+      drawn.push(...this.paint(id, style, group));
     }
     this.drawn.set(group, drawn);
+  }
+
+  /**
+   * Render one source element into the overlay and return what it drew.
+   *
+   * Two renderings, chosen by what the mark *means*. The inked styles — the
+   * selection and the range wash — are drawn as marker swipes (see ink.ts):
+   * a band along the middle of each line, round-capped, thinner than the line
+   * box. Everything else is cloned exactly as before, because a breadcrumb is
+   * not ink: its dashed outline says "you came from here", and an outline is
+   * the right grammar for provenance in a way it is not for a highlight.
+   *
+   * The swipe path falls back to the clone whenever `swipesFromPath` declines
+   * the geometry, so an unrecognised page renders the old boxy highlight rather
+   * than nothing at all.
+   */
+  private paint(id: string, style: StyleToken, group: GroupId): SVGElement[] {
+    const src = this.svg.querySelector<SVGElement>(`#${cssEscape(id)}`);
+    if (!src) return [];
+
+    // `hl-ink` is what the stylesheet keys the marker rules off, and it is on
+    // the swipes only. Styling by `hl-sel` alone would reach the fallback clone
+    // too and turn it into a hairline outline of the polygon — a *worse* result
+    // than the box it is meant to be, and one that would only ever appear on
+    // the pages we have not seen.
+    const tag = (el: SVGElement, ink: boolean): SVGElement => {
+      el.setAttribute("class", `hl hl-${style}${ink ? " hl-ink" : ""}`);
+      el.setAttribute("data-hl-group", group);
+      el.style.pointerEvents = "none";
+      this.overlay.appendChild(el);
+      return el;
+    };
+
+    const swipes = INKED.has(style) ? swipesFromPath(src.getAttribute("d") ?? "") : null;
+    if (swipes) {
+      // One element per swipe rather than one path for the whole ayah: line
+      // heights differ between lines, and stroke-width is per element, so a
+      // single path would have to pick one thickness and be wrong on the rest.
+      // An ayah spans at most three lines, so this is at most three nodes.
+      return swipes.map((s) => {
+        const line = document.createElementNS(SVG_NS, "line");
+        line.setAttribute("x1", String(s.x1));
+        line.setAttribute("x2", String(s.x2));
+        line.setAttribute("y1", String(s.y));
+        line.setAttribute("y2", String(s.y));
+        line.setAttribute("stroke-width", String(s.width));
+        return tag(line, true);
+      });
+    }
+
+    const clone = src.cloneNode(true) as SVGElement;
+    clone.removeAttribute("id");
+    return [tag(clone, false)];
   }
 
   /** Remove every highlight drawn for a group. */
@@ -307,8 +365,8 @@ export class Highlighter {
   }
 
   /**
-   * Paint several keys at once in one group — the marquee's amber wash over a
-   * whole passage (spec §9). Same additive contract as `highlight`: clones into
+   * Paint several keys at once in one group — the marquee's amber over a whole
+   * passage (spec §9). Same additive contract as `highlight`: draws into
    * the overlay, source geometry untouched, the group replaced not stacked.
    * Keys not on this page are skipped (a range can't straddle a page turn).
    */
@@ -319,15 +377,7 @@ export class Highlighter {
       const loc = this.resolver.resolve(key);
       if (!loc || loc.page !== this.page) continue;
       for (const id of loc.elementIds) {
-        const src = this.svg.querySelector<SVGElement>(`#${cssEscape(id)}`);
-        if (!src) continue;
-        const clone = src.cloneNode(true) as SVGElement;
-        clone.removeAttribute("id");
-        clone.setAttribute("class", `hl hl-${style}`);
-        clone.setAttribute("data-hl-group", group);
-        clone.style.pointerEvents = "none";
-        this.overlay.appendChild(clone);
-        drawn.push(clone);
+        drawn.push(...this.paint(id, style, group));
       }
     }
     this.drawn.set(group, drawn);
