@@ -15,10 +15,12 @@
  * does hangs off one gesture, and that CI is an actor with promises of its own.
  *
  * Mermaid has no UML use-case diagram, so this uses `flowchart` with the UML
- * conventions transplanted: actors are square, use cases are ovals (`( )` in
- * mermaid is exactly the UML oval), one subgraph per actor, and <<include>> is
- * a dotted arrow. Close enough to read as a use-case diagram to anyone who has
- * seen one, and it renders on GitHub with no toolchain at all.
+ * conventions transplanted as closely as its shapes allow: one subgraph per
+ * actor standing in for the stick figure and its boundary box, use cases as
+ * rounded nodes standing in for the ovals, and <<include>> as a dotted arrow.
+ * Close enough to read as a use-case diagram to anyone who has seen one, and it
+ * renders on GitHub with no toolchain at all — which is the whole reason for
+ * choosing a notation mermaid does not natively have over one it does.
  *
  * The file is generated and committed, and gate-use-cases.mjs fails when the
  * committed copy was built from a different source — the same rule the ETL
