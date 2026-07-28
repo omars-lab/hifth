@@ -262,7 +262,7 @@
         {
           "file": "apps/web/src/pwa.ts",
           "symbol": "repairShellCache",
-          "note": "Eviction takes the precache and leaves the registration, so the worker never installs again and offline dies silently while every online signal still says healthy. The repair unregisters and reloads — measured, not assumed: reloads, update() and re-register all leave the precache empty."
+          "note": "Eviction takes the precache and leaves the registration, so the worker never installs again and offline dies silently while every online signal still says healthy. The repair re-registers the same sw.js under a query-suffixed URL, because only a script the registration has never seen produces an install — measured, not assumed: reloads, update(), and unregister()+register() all leave the precache empty or resurrect the old worker. It waits for that install to finish, not for index.html to reappear: the shell is the first entry written and the app's scripts are the last."
         },
         {
           "file": "apps/web/src/storage.ts",
