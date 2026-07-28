@@ -66,10 +66,19 @@
   transition: opacity var(--dur-med) var(--ease-hop);
 }
 
+/* `isolation` belongs here, on the SVG root, and nowhere else. The highlight
+   swipes inside #hifth-overlay blend with `multiply` (styles/highlight.css), and
+   a blend mode composites against everything in its stacking context. Put the
+   isolation on the overlay group and the group becomes its own context — the
+   swipes then have only each other to blend with, the scripture is no longer in
+   the backdrop, and they render as flat opaque bars over the text. Put it on
+   the root and the context holds the mushaf *and* the overlay: the ink darkens
+   the page it is drawn on, and stops at the edge of the page. */
 .svg {
   display: block;
   width: 100%;
   height: auto;
+  isolation: isolate;
 }
 
 .hint {

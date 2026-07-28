@@ -406,7 +406,7 @@ export function App(): JSX.Element {
   );
 
   // A marquee released over ayahs (Loop 5). The passage replaces the selection —
-  // one open hop list at a time — and the stage keeps the amber wash while L3
+  // one open hop list at a time — and the stage keeps the amber marks while L3
   // holds the keys the merged hop list is built from.
   const handleSelectRange = useCallback(
     (fromKey: string, toKey: string, keys: readonly string[]) => {

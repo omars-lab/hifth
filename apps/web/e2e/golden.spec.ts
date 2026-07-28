@@ -6,14 +6,20 @@ import { COACH_STORAGE_KEY } from "../src/coach";
  * here from Loop 5).
  *
  * What this covers that nothing else can: the *shape and colour of the paint*.
- * The DOM tests already assert that `.hl-sel` exists, that a range produced two
- * `.hl-hlt` clones, that the marquee rect appears and disappears. None of them
- * can see that the wash traces the ayah's polygon, that the breadcrumb's dashed
- * verdigris outline still reads as quieter than the amber selection, or that a
- * clone landed in the overlay's coordinate space rather than 3 px off it.
+ * The DOM tests already assert that `.hl-sel` exists, that a range produced
+ * `.hl-hlt` marks, that the marquee rect appears and disappears. None of them
+ * can see that a swipe lands along the middle of its line, that the breadcrumb's
+ * dashed verdigris outline still reads as quieter than the amber selection, or
+ * that a mark landed in the overlay's coordinate space rather than 3 px off it.
+ *
+ * It is also the only gate that can see a *blend*. `mix-blend-mode: multiply` is
+ * what makes the amber read as ink over scripture rather than as a slab across
+ * it, and the difference between those two is invisible to every assertion that
+ * looks at the DOM: same elements, same classes, same computed styles. Only a
+ * picture shows whether you can still read the ayah under the mark.
  *
  * Scope of a shot: the **page SVG element only** — mushaf geometry plus the
- * `#hifth-overlay` clones. Deliberately not the chrome: the rail, the sheets
+ * `#hifth-overlay` marks. Deliberately not the chrome: the rail, the sheets
  * and the trail are text, they are asserted by role and name elsewhere, and
  * they would make every baseline hostage to font rendering. The SVG corpus is
  * outlined paths with no `<text>` (the `gate:notext` CI rule guarantees it), so

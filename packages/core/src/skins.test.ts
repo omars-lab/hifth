@@ -245,11 +245,23 @@ describe("Highlighter.setSkin", () => {
     expect(svg.querySelector("#verse-45")!.getAttribute("data-tj")).toContain("qalqalah");
   });
 
-  it("never lets a rule colour leak onto a selection clone", () => {
+  it("never lets a rule colour leak onto a selection mark", () => {
     hl.setSkin("tajweed", tj.lookup);
     hl.highlight("quran/hafs-kfqc/2:38", "sel", "selection");
-    const clone = svg.querySelector('#hifth-overlay [data-hl-group="selection"]')!;
-    expect(clone.getAttribute("class")).toBe("hl hl-sel");
+    const marks = [...svg.querySelectorAll('#hifth-overlay [data-hl-group="selection"]')];
+    expect(marks.length).toBeGreaterThan(0);
+    for (const mark of marks) {
+      // The leak this guards against is a tajweed rule riding along on the mark
+      // — via `data-tj`, or via a `tj-*` class — and repainting the selection in
+      // a rule's colour. Asserted as "nothing from the skin is present" rather
+      // than as an exact class string: the mark also carries `hl-ink` when it is
+      // a marker swipe (see ink.ts), and a test that pins the whole attribute
+      // fails on every rendering change while catching no leak at all.
+      expect(mark.getAttribute("data-tj")).toBeNull();
+      expect([...mark.classList].filter((c) => c.startsWith("tj-"))).toEqual([]);
+      expect(mark.classList.contains("hl")).toBe(true);
+      expect(mark.classList.contains("hl-sel")).toBe(true);
+    }
   });
 
   it("leaves an ayah with no known rules unmarked", () => {

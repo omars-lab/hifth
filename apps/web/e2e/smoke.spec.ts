@@ -49,10 +49,18 @@ test.describe("Hifth shell", () => {
     await poly.tap();
 
     // The selection chip appears with the surah name + ayah ref, and the
-    // highlighter drew a selection clone into the additive overlay.
+    // highlighter drew the mark into the additive overlay.
     await expect(
       page.getByRole("button", { name: /الآية الحالية البقرة · ٢:٣٨/ }),
     ).toBeVisible();
-    await expect(page.locator("#hifth-overlay .hl-sel")).toHaveCount(1);
+    // One marker swipe per line the ayah occupies — 2:38 runs across two on
+    // page 7. Not asserted as a bare count: `toHaveCount(1)` passed here for
+    // six loops and would pass again on a single hairline outline, which is
+    // what a mis-styled fallback renders as. The `line.hl-ink` shape is the
+    // claim worth making.
+    const swipes = page.locator("#hifth-overlay .hl-sel");
+    await expect(swipes).toHaveCount(2);
+    await expect(swipes.locator("xpath=self::*[local-name()='line']")).toHaveCount(2);
+    await expect(page.locator("#hifth-overlay .hl-sel.hl-ink")).toHaveCount(2);
   });
 });
