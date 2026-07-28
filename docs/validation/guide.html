@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" data-ledger-hash="a51a0124b117">
+<html lang="en" data-ledger-hash="f931b6263c4c">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -107,7 +107,7 @@ label.do span { padding: 8px 0; }
   <p class="rule">Every result here must tighten something automated — a threshold, a
   fixture, a gate. That is what <b>tunes</b> is for at the foot of each card. A verdict
   that tunes nothing has to be bought again by hand, forever.</p>
-  <p class="src">Generated from <code>docs/validation/ledger.json</code> · <code>a51a0124b117</code>
+  <p class="src">Generated from <code>docs/validation/ledger.json</code> · <code>f931b6263c4c</code>
   · never edit this file — run <code>make guide</code></p>
 </header>
 
@@ -336,9 +336,13 @@ label.do span { padding: 8px 0; }
 
   <section class="block">
     <h3>What you need</h3>
-    <ul class="bullets"><li>The <b>deployed</b> build, not localhost. The question is what a stranger receives, and localhost cannot answer it.</li><li>A private / logged-out browser window — signed in as ourselves, a private repo looks public.</li><li>Two minutes.</li></ul>
+    <ul class="bullets"><li>Two minutes of network. <code>make source-offer</code> follows the same links anonymously and answers the machine half before you pick up a phone.</li><li>The <b>deployed</b> build, not localhost. The question is what a stranger receives, and localhost cannot answer it.</li><li>A private / logged-out browser window — signed in as ourselves, a private repo looks public.</li></ul>
   </section>
-  
+  <section class="block">
+    <h3>Setup — on the laptop</h3>
+    <pre class="cmd">make source-offer URL=&lt;the deployed URL&gt;</pre>
+    <p class="expect">A verdict, printed. <code>source-offer — OK</code> → every link already resolves anonymously and what is left below is confirming the *reader’s* path to them. <code>DOES NOT RESOLVE</code> → it names which link failed and why; you can stop here and fix that. <code>COULD NOT TELL</code> → the network would not answer, which is not a pass.</p>
+  </section>
 
   <section class="block">
     <h3>Steps — on the phone</h3>
@@ -347,7 +351,7 @@ label.do span { padding: 8px 0; }
         <label class="do"><input type="checkbox" data-step="source-offer-resolves:0"><span>Open the deployed site in a private window.</span></label>
         <p class="expect">The app loads normally.</p>
         
-        <p class="why">Private, because your own session hides the failure that matters: a link that resolves only because you are signed in does not resolve for the stranger the GPL offer is written for.</p>
+        <p class="why">Private, because your own session hides the failure that matters: a link that resolves only because you are signed in does not resolve for the stranger the GPL offer is written for. <code>make source-offer</code> has already followed the links with no credentials at all; what it cannot tell you is whether a reader can *get to* them from inside the running app, which is what the rest of this is for.</p>
       </li>
       <li>
         <label class="do"><input type="checkbox" data-step="source-offer-resolves:1"><span>Tap the wordmark <bdi>حِفظ</bdi> at the top of the chrome (it announces «<bdi>عن حِفظ</bdi>»).</span></label>
@@ -378,14 +382,14 @@ label.do span { padding: 8px 0; }
 
   <section class="block">
     <h3>Reading the result</h3>
-    <ul class="bullets"><li>404 or a sign-in wall → the §6 offer is not discharged and the site must not be published. Either make the repo public, or repoint SOURCE_REPO in apps/web/src/provenance.ts at wherever the source is actually served.</li><li>Lands on the repository root with no commit → the build had no sha available. The offer is weaker but not broken; fix the build environment, not the constant.</li><li>Lands on a commit that is not the deployed build → the deploy and the link disagree, which is worse than no link. Check the build-time resolution order.</li></ul>
+    <ul class="bullets"><li>404 or a sign-in wall → the §6 offer is not discharged and the site must not be published. Either make the repo public, or repoint SOURCE_REPO in apps/web/src/provenance.ts at wherever the source is actually served.</li><li>Lands on the repository root with no commit → the build had no sha available. The offer is weaker but not broken; fix the build environment, not the constant.</li><li>Lands on a commit that is not the deployed build → the deploy and the link disagree, which is worse than no link. Check the build-time resolution order.</li><li><code>make source-offer URL=&lt;deployed&gt;</code> disagrees with what you see on screen → believe the script about the links and your eyes about the path to them. It reads SOURCE_REPO and the build’s commit out of the deployed bundle, so a disagreement means the page you opened and the bundle it loaded are not the same deploy.</li></ul>
   </section>
 
   <section class="block record">
     <h3>Record it</h3>
     <pre class="cmd">make record CHECK=source-offer-resolves RESULT='private window → colophon → <bdi>الشيفرة المصدرية</bdi> resolves to &lt;repo&gt;/tree/&lt;sha&gt;, matching the deployed commit'</pre>
     <p class="tunes-lead">Then do what it tunes:</p>
-    <ul class="tunes"><li>apps/web/src/provenance.ts — SOURCE_REPO, if the source is served from somewhere other than the GitHub repo</li></ul>
+    <ul class="tunes"><li>apps/web/src/provenance.ts — SOURCE_REPO, if the source is served from somewhere other than the GitHub repo</li><li>scripts/check-source-offer.mjs — if the offer moved, or a new credited source needs its link followed</li></ul>
     <p class="expect">Written up in docs/PLAN.md follow-up ⑤</p>
   </section>
 </article>

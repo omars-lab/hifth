@@ -1,0 +1,68 @@
+# Is this build fit to publish?
+#
+# One question, asked on demand: does the GPL §6 offer resolve for a stranger?
+# Publishing a static PWA *conveys* the program — the browser receives real
+# copies of the JS and of assets/roots/**, a GPL-covered derivative of the
+# Quranic Arabic Corpus — so the reader is owed the Corresponding Source for
+# the build they are running. `docs/validation/ledger.json` tracks that as
+# `source-offer-resolves`, and it is the one thing gating publication.
+#
+# Why it is its own workflow, and not a step in ci.yml:
+#
+#   - It reaches the public internet. `ci.yml` runs on every push and pull
+#     request, and a check that can go red because GitHub or corpus.quran.com
+#     is having a bad morning teaches everyone to ignore red. The KFGQPC terms
+#     watcher was cancelled for the same reason (research ⑦).
+#   - It is red *today*, correctly: the repository is private, so the offer
+#     404s anonymously. That is task #53, not a broken build. A scheduled job
+#     announcing a known-pending decision every morning is noise; a job you run
+#     when you are about to publish is the answer to the question you are
+#     actually asking.
+#
+# `workflow_dispatch`, therefore — with an optional deployed URL. Without one it
+# checks the offer this branch declares; with one it fetches what the deployed
+# build actually serves and follows that.
+#
+# Run it: Actions → "Publishable?" → Run workflow. Locally: `make source-offer`.
+name: Publishable?
+
+on:
+  workflow_dispatch:
+    inputs:
+      url:
+        description: "Deployed site URL (optional) — checks what the deploy actually offers, not just what this branch declares"
+        required: false
+        type: string
+
+jobs:
+  source-offer:
+    runs-on: ubuntu-latest
+    # Read-only, and no token is passed to the checker. That is the point: the
+    # check has to run as somebody who is not us, or a private repo looks
+    # public and it goes green on exactly the day the offer stops resolving.
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+
+      # No `pnpm install`: the checker imports nothing outside scripts/ and
+      # reads only SOURCES.md and provenance.ts. Keeping it dependency-free is
+      # what lets this job be thirty seconds instead of three minutes.
+      - name: Does the GPL §6 offer resolve for a stranger?
+        run: |
+          node scripts/check-source-offer.mjs \
+            ${{ inputs.url && format('--url {0}', inputs.url) || '' }}
+
+      # Exit 3 means "could not tell", and the step above already failed on it.
+      # That is deliberate: a network that would not answer is not a pass, and
+      # the run log distinguishes the two verdicts in words.
+      - name: What to do with a red run
+        if: failure()
+        run: |
+          echo "::notice::A red run here is a publication blocker, not a build failure."
+          echo "::notice::Read the verdict above — 'DOES NOT RESOLVE' is an answer, 'COULD NOT TELL' is not."
+          echo "::notice::Record it: make record CHECK=source-offer-resolves RESULT='<the verdict>'"

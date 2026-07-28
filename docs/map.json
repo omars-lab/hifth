@@ -491,15 +491,27 @@
           "file": "apps/web/src/provenance.ts",
           "symbol": "SOURCE_REPO",
           "note": "Where the offer points. It has to actually resolve for a stranger — that is a real obligation, not a nice-to-have."
+        },
+        {
+          "file": "scripts/check-source-offer.mjs",
+          "symbol": "probe",
+          "note": "The offer, followed the way a stranger would follow it: anonymously, no gh and no token, because signed in as ourselves a private repo looks public. Named `check-` and not `gate-` because it reaches the public internet and is deliberately not in `pnpm gates` — it runs on demand (`make source-offer`) and from the public-deploy workflow."
         }
       ],
       "extend": [
         "Vendor nothing without its SOURCES.md entry in the same commit.",
         "To change what the reader is told about a licence, edit that source's ```colophon fence in SOURCES.md. The component follows; gate:license-copy fails if it does not.",
         "A source the app should not credit still has to say so — `not-credited: <reason>` in the fence. Silence is indistinguishable from an oversight, which is why it is not allowed.",
-        "A GPL-derived asset makes this repo the corresponding source. That constrains unrelated decisions, including whether binaries can live behind a metered service (see gate:golden-size)."
+        "A GPL-derived asset makes this repo the corresponding source. That constrains unrelated decisions, including whether binaries can live behind a metered service (see gate:golden-size).",
+        "Before publishing, run `make source-offer URL=<deployed>`. It is red today on purpose: the repository is private, so the offer 404s for everyone who is not us (task #53)."
       ],
-      "gates": ["pnpm gate:license", "pnpm gate:license-copy", "pnpm gate:text-sources", "make ci"],
+      "gates": [
+        "pnpm gate:license",
+        "pnpm gate:license-copy",
+        "pnpm gate:text-sources",
+        "make ci",
+        "make source-offer"
+      ],
       "seeAlso": ["editions-and-skins", "assets-and-pages", "golden-images"]
     },
 
