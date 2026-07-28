@@ -24,7 +24,14 @@
  * guide (docs/validation/guide.html) renders the same source for the phone.
  */
 import { existsSync } from "node:fs";
-import { readLedger, ledgerHash, guideHash, needsRunbook, shotPath } from "./validation-ledger.mjs";
+import {
+  readLedger,
+  ledgerHash,
+  guideHash,
+  needsRunbook,
+  shotPath,
+  readEvidence,
+} from "./validation-ledger.mjs";
 
 const ledger = readLedger();
 const checks = ledger.checks ?? [];
@@ -84,7 +91,14 @@ for (const check of checks) {
         `docs/validation/guide.html, and into the validate skill.`,
     );
   }
+  const stepIds = new Set();
   for (const [i, step] of (check.runbook?.steps ?? []).entries()) {
+    if (step.id) {
+      if (stepIds.has(step.id)) {
+        errors.push(`${where}: two runbook steps share the id "${step.id}"`);
+      }
+      stepIds.add(step.id);
+    }
     if (!step.do || !step.expect) {
       errors.push(
         `${where}: runbook.steps[${i}] needs both "do" and "expect". A step with no ` +
@@ -104,6 +118,42 @@ for (const check of checks) {
         `${where}: runbook.steps[${i}] wants screenshot "${step.shot}", but ` +
           `docs/validation/shots/${step.shot}.png does not exist — run: make shots`,
       );
+    }
+  }
+
+  // The evidence contract. An `evidence` block says a command discharges some
+  // of a human's steps, which is the one thing in this register that can take
+  // work *away* from the person holding the phone — so it is the one thing that
+  // has to be hardest to get wrong. A `covers` that names a step which is not
+  // there strikes nothing (or, worse, strikes the wrong line after a reorder),
+  // and an `evidence` with no `residue` is a claim to have automated a manual
+  // check entirely, which has never once been true here.
+  if (check.evidence) {
+    const ev = check.evidence;
+    if (!ev.run) errors.push(`${where}: evidence has no "run" — name the command that produces it`);
+    if (!(ev.covers ?? []).length) {
+      errors.push(
+        `${where}: evidence covers no steps. A producer that discharges nothing is a ` +
+          `command to run, not evidence — put it in runbook.setup instead.`,
+      );
+    }
+    if (!(ev.residue ?? []).length) {
+      errors.push(
+        `${where}: evidence declares no "residue". Say in words what the command ` +
+          `cannot do. Every check here still needs a human for something, and an ` +
+          `automated run that names no remainder is one claiming to have done ` +
+          `their job.`,
+      );
+    }
+    for (const id of ev.covers ?? []) {
+      if (!stepIds.has(id)) {
+        errors.push(
+          `${where}: evidence covers "${id}", which is not a runbook step id. ` +
+            `Give the step an "id" (ids, never positions — a reordered runbook ` +
+            `must not silently re-point this). Steps with ids: ` +
+            `${[...stepIds].join(", ") || "(none)"}`,
+        );
+      }
     }
   }
 
@@ -159,6 +209,37 @@ if (pending.length) {
   console.log(`\n  Read one on your phone with "make guide"; record a result with "make record".`);
 }
 
+// What the machine has already taken off those runbooks. Printed with the
+// outstanding list rather than separately because it answers the follow-up
+// question to "what is this waiting on?" — namely "and how much of it still
+// actually needs me?".
+const producers = checks.filter((c) => c.evidence?.run);
+if (producers.length) {
+  const runs = producers.map((c) => ({ check: c, ran: readEvidence(c.id) }));
+  const green = runs.filter((r) => r.ran?.outcome === "pass");
+  const claimed = producers.reduce((n, c) => n + (c.evidence.covers ?? []).length, 0);
+  const struck = green.reduce((n, r) => n + (r.check.evidence.covers ?? []).length, 0);
+  const dates = runs.map((r) => r.ran?.ranAt).filter(Boolean).sort();
+  const residues = producers.reduce((n, c) => n + (c.evidence.residue ?? []).length, 0);
+
+  console.log(
+    `\n  automated evidence: ${green.length}/${producers.length} producers green · ` +
+      `${struck}/${claimed} runbook steps discharged` +
+      (dates.length ? ` · last run ${dates[dates.length - 1].slice(0, 10)}` : "") +
+      `\n  ${residues} named residue(s) no command can reach — those stay human by design.`,
+  );
+  for (const { check, ran } of runs) {
+    if (ran?.outcome === "pass") continue;
+    const mark = !ran ? "·" : ran.outcome === "unknown" ? "?" : "✗";
+    const why = !ran ? "never run here" : `${ran.outcome} (exit ${ran.exit})`;
+    console.log(`    ${mark} ${check.id} — ${check.evidence.run} → ${why}`);
+  }
+  // One command, not two: validate-auto regenerates the guide itself, because a
+  // record it wrote and a guide nobody rebuilt is exactly the disagreement
+  // between the terminal and the phone this feature exists to prevent.
+  console.log(`\n  Refresh with "make validate-auto".`);
+}
+
 /**
  * Print one check's runbook. Wrapped at 76 columns because this is read in a
  * terminal beside the thing being tested, not scrolled.
@@ -190,11 +271,36 @@ function printRunbook(id) {
       if (s.expect) console.log(wrap(`→ ${s.expect}`, "      "));
     }
   }
+  // A step the machine has already done, on this tree, with a real exit code.
+  // Only a `pass` strikes: a producer that could not tell (exit 3) has proved
+  // nothing, and leaving the step for the human is the entire safeguard.
+  const ran = check.evidence?.run ? readEvidence(check.id) : null;
+  const struck = new Set(ran?.outcome === "pass" ? (check.evidence.covers ?? []) : []);
+  if (check.evidence?.run) {
+    console.log(`\n  Already done for you`);
+    console.log(`\n    $ ${check.evidence.run}`);
+    console.log(
+      wrap(
+        ran
+          ? `→ ${ran.outcome} · ${ran.ranAt.slice(0, 10)} · ${ran.commit ?? "?"} · ${ran.on}` +
+              (struck.size ? ` — ${struck.size} step(s) below are struck` : ` — nothing struck`)
+          : `→ never run here. Run "make validate-auto" and every step below stays yours.`,
+        "      ",
+      ),
+    );
+    for (const r of check.evidence.residue ?? []) console.log(wrap(`still yours: ${r}`, "      ", 18));
+  }
+
   if ((rb.steps ?? []).length) {
     console.log(`\n  Steps`);
     for (const [i, s] of rb.steps.entries()) {
+      const done = s.id && struck.has(s.id);
       console.log("");
-      console.log(wrap(`${String(i + 1).padStart(2)}. ${s.do}`, "    ", 8));
+      console.log(wrap(`${String(i + 1).padStart(2)}. ${done ? "[machine] " : ""}${s.do}`, "    ", 8));
+      if (done) {
+        console.log(wrap(`skip it — ${check.evidence.run} did this on ${ran.ranAt.slice(0, 10)}`, "        "));
+        continue;
+      }
       console.log(wrap(`expect: ${s.expect}`, "        "));
       if (s.why) console.log(wrap(`why:    ${s.why}`, "        "));
       // A path, not a picture. The terminal cannot show it; the phone can, and

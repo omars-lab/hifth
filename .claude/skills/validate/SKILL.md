@@ -237,6 +237,7 @@ authoritative.
 docs/validation/ledger.json
   ├── make validate CHECK=<id>   → the runbook in this terminal
   ├── make guide                 → docs/validation/guide.html, served to the phone
+  ├── make validate-auto         → runs the machine half; writes evidence/<id>.json
   └── this skill                 → drives the session
 ```
 
@@ -250,21 +251,27 @@ and the fix it names is that one command.
 ### Driving a session
 
 1. `make validate` — what is outstanding, what each one blocks.
-2. Pick one. Read it here with `make validate CHECK=<id>`.
-3. If it happens on a phone (most of them do), `make guide` and open the printed
+2. `make validate-auto` — run the machine half first, so you do not walk steps a
+   command has already walked. It regenerates the guide itself, and its summary
+   line says how many steps it struck off and how many named residues it could
+   not touch.
+3. Pick one. Read it here with `make validate CHECK=<id>`; a step a producer
+   discharged prints as `[machine] …` with the command and the date, and you skip
+   it.
+4. If it happens on a phone (most of them do), `make guide` and open the printed
    LAN URL on the phone — same runbook, tickable, with the checkboxes persisted
    so a screen lock does not lose the walkthrough. Run the check's own `setup`
    commands (e.g. `make phone-perf`) in a second terminal.
-4. `make record CHECK=<id> RESULT='<the verdict, in words>'`. The words are the
+5. `make record CHECK=<id> RESULT='<the verdict, in words>'`. The words are the
    artifact: a `done` with no result is indistinguishable from a check nobody ran.
    Recording stamps the ledger, regenerates the guide, and re-runs the gate.
-5. **Do what `tunes` printed.** This is the step that makes the check worth its
+6. **Do what `tunes` printed.** This is the step that makes the check worth its
    cost: the measured fps becomes the asserted frame budget, the screen-reader
    finding becomes an assertion in `share-a11y.spec.ts`, the edge verdicts become
    fixture entries. A `done` that tuned nothing is a result you will have to buy
    again.
-6. Note it in the relevant `docs/decisions/loop-<N>.md` and commit — ledger and
-   guide travel together.
+7. Note it in the relevant `docs/decisions/loop-<N>.md` and commit — ledger,
+   guide and evidence records travel together.
 
 **If an `expect:` line does not match what the device actually shows, that is a
 bug in the runbook, not a detail to work around.** Fix the ledger, re-run
@@ -277,6 +284,43 @@ entry, a `done` with no recorded result, a recurring check that has expired, a
 check that tunes nothing, a pending human check with no runbook (nobody can run
 it, so it will sit there looking tracked), or a `guide.html` that was not
 regenerated after the ledger moved.
+
+### `evidence` — the half a machine *can* run, written down
+
+A check may carry an `evidence` block: one command (`run`), the runbook step
+**ids** it discharges (`covers`), and the `residue` it cannot. `make validate-auto`
+runs each one and writes the real exit code into
+`docs/validation/evidence/<id>.json`; the terminal and the guide read those
+records and strike the covered steps off. Three of the six checks have one today
+— `source-offer-resolves`, `kfgqpc-terms-primary-source`, `edge-spot-audit`.
+
+Four rules, each of them load-bearing:
+
+- **A run is written, never asserted.** There is no way to mark a step discharged
+  except by running the thing on this machine at this commit. The records are
+  committed and diffed like golden images.
+- **Exit 3 strikes nothing.** `outcomeOf` (`scripts/validation-ledger.mjs`) reads
+  3 as *could not tell*, not as a pass — a check whose network would not answer
+  has proved nothing, and letting that discharge a human's step is precisely how
+  a muted watcher comes to look covered.
+- **`run` is never a `make` target.** GNU make reports every failed recipe as
+  exit 2, flattening a producer's own 1-vs-3 into one code. Name the script:
+  `node scripts/check-source-offer.mjs`, not `make source-offer`.
+- **`residue` is required, and it is the point.** `gate:validation` rejects an
+  `evidence` block that names no remainder: *"an automated run that names no
+  remainder is one claiming to have done their job."* If a command really covers
+  a whole check, the check is not a Tier 7 check.
+
+`covers` points at step **ids**, never positions — a reordered runbook must not
+silently re-point it, and the gate fails on an id that no step has. Not every
+check should have one: `screen-reader-walkthrough` deliberately has none, because
+its steps already say that the labels are asserted by `e2e/__aria__/` and ask you
+to judge whether they *sound* like something you would say. Striking those would
+delete the check.
+
+`make validate-auto` exits 0 even when a producer goes red. It is a reporting
+run; the gate fails on a ledger that lies about its evidence, never on the
+evidence being bad news.
 
 ### The GPL §6 offer — the half a machine *can* run
 

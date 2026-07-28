@@ -37,6 +37,7 @@
     "sample:edges": "node packages/etl/scripts/sample-edges.mjs",
     "guide": "node scripts/build-validation-guide.mjs",
     "record": "node scripts/record-validation.mjs",
+    "validate:auto": "node scripts/validate-auto.mjs",
     "source-offer": "node scripts/check-source-offer.mjs",
     "map": "node scripts/gate-map.mjs --list",
     "use-cases": "node scripts/gate-use-cases.mjs --list",

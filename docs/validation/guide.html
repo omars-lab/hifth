@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" data-ledger-hash="2dd54287eac9">
+<html lang="en" data-ledger-hash="ce15b5c75664">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -92,6 +92,26 @@ label.do input:checked + span { color: var(--dim); text-decoration: line-through
   text-decoration-color: var(--line); }
 label.do span { padding: 8px 0; }
 
+/* What a command already did. Bordered like a card-within-a-card because it is
+   the only block on the page that subtracts work, and the reader has to be able
+   to see at a glance which claim is doing the subtracting. The left edge is
+   green only on a real pass — a "could not tell" gets the waiting colour, since
+   an unreachable subject proves nothing and strikes nothing. */
+.machine { padding: 14px 16px; border: 1px solid var(--line); border-left-width: 3px;
+  border-radius: 0 10px 10px 0; background: #0d1219; }
+.machine.is-pass { border-left-color: var(--green); }
+.machine.is-fail { border-left-color: #e07a6a; }
+.machine.is-unknown, .machine.is-never-run { border-left-color: var(--wait); }
+.machine .expect::before { content: "ran "; }
+
+/* Struck, not hidden. A step that vanished would be indistinguishable from one
+   nobody ever wrote, and the runbook is also the description of what the check
+   is — so it stays legible, just visibly not yours. */
+ol.steps > li.struck { opacity: .62; }
+li.struck .do { margin: 0; padding: 8px 0 0; }
+li.struck s { text-decoration-color: var(--green); }
+li.struck .expect::before { content: "machine "; color: var(--green); }
+
 .record { border-top: 1px solid var(--line); padding-top: 18px; }
 .foot { max-width: 44rem; margin: 0 auto; padding: 8px 0 48px; color: var(--dim); font-size: 15px; }
 
@@ -107,7 +127,7 @@ label.do span { padding: 8px 0; }
   <p class="rule">Every result here must tighten something automated — a threshold, a
   fixture, a gate. That is what <b>tunes</b> is for at the foot of each card. A verdict
   that tunes nothing has to be bought again by hand, forever.</p>
-  <p class="src">Generated from <code>docs/validation/ledger.json</code> · <code>2dd54287eac9</code>
+  <p class="src">Generated from <code>docs/validation/ledger.json</code> · <code>ce15b5c75664</code>
   · never edit this file — run <code>make guide</code></p>
 </header>
 
@@ -122,6 +142,7 @@ label.do span { padding: 8px 0; }
   <p class="why">The emulated baseline (~8.3 ms/frame, flat under CPU throttle) structurally cannot see the two real risks: initial raster of a ~170 KB inline SVG on a low-end phone, and re-raster on zoom past the layer's backing store. The rendering-scale decision for 604 pages rests on this and nothing else.</p>
   
 
+  
   <section class="block">
     <h3>What you need</h3>
     <ul class="bullets"><li>A real phone on the same Wi-Fi as this laptop — a mid/low-tier Android and an older iPhone if you have both; either one alone still answers most of it.</li><li>No cable, no DevTools, no pairing. The page measures itself.</li><li>About 3 minutes per device.</li></ul>
@@ -212,6 +233,7 @@ label.do span { padding: 8px 0; }
   <p class="why">axe and the keyboard hop tour cover the machine-checkable floor and are green, but neither can tell you whether a screen-reader user can actually select an ayah and hop. Per-polygon labels are a design bet that has never been heard out loud.</p>
   
 
+  
   <section class="block">
     <h3>What you need</h3>
     <ul class="bullets"><li>The same phone, with VoiceOver (iOS: Settings → Accessibility → VoiceOver, or triple-click the side button) or TalkBack (Android: Settings → Accessibility).</li><li>About 8 quiet minutes. You are listening, not looking — the last step asks you to stop looking entirely.</li><li>The ordinary build, not the probe build.</li><li>Nothing to memorise. This used to be eight steps; five of them were checking that a control existed under a given name, and those are now aria snapshots in apps/web/e2e/__aria__/{iphone,android}/ that fail the build when a label changes. Reading those five files first is optional and takes a minute — they are exactly what the app should announce.</li></ul>
@@ -278,6 +300,13 @@ label.do span { padding: 8px 0; }
   <p class="why">SOURCES.md currently reads KFGQPC's terms through quran-svg's NOTICE.md, which quotes them verbatim and cites Royal Decrees 136/8 and 9/B/46356 — strong, but secondary. The app states those terms to every reader in the colophon, and an earlier paraphrase of them was wrong.</p>
   
 
+  <section class="block machine is-pass">
+    <h3>Already done for you</h3>
+    <pre class="cmd">pnpm gate:license-copy</pre>
+    <p class="expect"><b>pass</b> · 2026-07-28 · b8f12ce · darwin · node v20.19.4 — 1 step(s) below are struck through</p>
+    <p class="tunes-lead">What it cannot do — still yours:</p>
+    <ul class="bullets"><li>Reading qurancomplex.gov.sa itself. The host times out on TCP 443 from every network this project's tooling runs on (measured, twice) and the Wayback mirror is not fetchable either — that is why research ⑦ was cancelled rather than built, and why no watcher will ever cover this.</li><li>Judging whether our summary is <b>stricter</b> than the source. A gate can prove two copies match; only a reader can notice that both are wrong in the same direction, and overstating someone else's terms fails silently because it reads as caution.</li></ul>
+  </section>
   <section class="block">
     <h3>What you need</h3>
     <ul class="bullets"><li>An ordinary browser, outside this environment — ideally one on a residential connection, since two datacentre/office networks have now failed to reach the host. It resolves and then times out on TCP 443 from both a GitHub runner in Azure westus2 and the maintainer's machine, and the Wayback mirror is not fetchable from the tooling either. That is the entire reason this is a human check, and the reason no watcher will ever be built for it.</li><li>About five minutes.</li></ul>
@@ -299,8 +328,12 @@ label.do span { padding: 8px 0; }
         
         <p class="why">What is at stake is whether the reserved right is commercial printing of physical masahif or something broader. Those two readings put this project in very different places.</p>
       </li>
+      <li class="struck">
+        <p class="do"><s>Confirm our two restatements say the same thing as each other — SOURCES.md §hafs-kfqc and the colophon's «<bdi>الرخصة والمصدر</bdi>».</s></p>
+        <p class="expect">Done by <code>pnpm gate:license-copy</code> on 2026-07-28. Skip it.</p>
+      </li>
       <li>
-        <label class="do"><input type="checkbox" data-step="kfgqpc-terms-primary-source:2"><span>Compare that against the two places we restate it: SOURCES.md §hafs-kfqc, and the colophon in the app (tap the wordmark <bdi>حِفظ</bdi> → «<bdi>الرخصة والمصدر</bdi>»).</span></label>
+        <label class="do"><input type="checkbox" data-step="kfgqpc-terms-primary-source:3"><span>Compare that against the two places we restate it: SOURCES.md §hafs-kfqc, and the colophon in the app (tap the wordmark <bdi>حِفظ</bdi> → «<bdi>الرخصة والمصدر</bdi>»).</span></label>
         <p class="expect">Both should describe free digital use with the printing restriction — and specifically NOT «<bdi>إتاحة حرّة للاستعمال غير التجاري</bdi>» (non-commercial only), which is a different edition's term and shipped once as a live defect.</p>
         <figure class="shot">
           <img src="shots/colophon-source.png" alt="Screenshot: colophon-source" loading="lazy">
@@ -334,6 +367,13 @@ label.do span { padding: 8px 0; }
   <p class="why">Publishing a static PWA conveys it: the browser receives real copies of the JS and of assets/roots/**, a GPL-covered derivative. The colophon links SOURCE_REPO at the exact build commit, which discharges the obligation only if that URL opens for someone who is not signed in as us.</p>
   
 
+  <section class="block machine is-fail">
+    <h3>Already done for you</h3>
+    <pre class="cmd">node scripts/check-source-offer.mjs</pre>
+    <p class="expect"><b>fail</b> · 2026-07-28 · b8f12ce · darwin · node v20.19.4 — nothing struck through</p>
+    <p class="tunes-lead">What it cannot do — still yours:</p>
+    <ul class="bullets"><li>Whether a reader can *get to* those links from inside the running app. The script follows URLs it reads out of the bundle; it never opens the colophon, so a source link that resolves perfectly from behind a sheet nobody can open still passes it.</li><li>Whether the deployed build is the build you think it is. Without <code>URL=&lt;deployed&gt;</code> the script answers about this working tree, which is a different question from the one a stranger asks.</li></ul>
+  </section>
   <section class="block">
     <h3>What you need</h3>
     <ul class="bullets"><li>Two minutes of network. <code>make source-offer</code> follows the same links anonymously and answers the machine half before you pick up a phone.</li><li>The <b>deployed</b> build, not localhost. The question is what a stranger receives, and localhost cannot answer it.</li><li>A private / logged-out browser window — signed in as ourselves, a private repo looks public.</li></ul>
@@ -403,6 +443,13 @@ label.do span { padding: 8px 0; }
   <p class="why">The data is scripture. Every automated gate here proves the shards are well-formed; none can prove an edge is true. This is the only check that can, and it is the one whose results are worth the most per minute spent.</p>
   
 
+  <section class="block machine is-pass">
+    <h3>Already done for you</h3>
+    <pre class="cmd">pnpm gate:verified-edges</pre>
+    <p class="expect"><b>pass</b> · 2026-07-28 · b8f12ce · darwin · node v20.19.4 — 1 step(s) below are struck through</p>
+    <p class="tunes-lead">What it cannot do — still yours:</p>
+    <ul class="bullets"><li>Every pair. The gate re-checks verdicts that are already banked against the shipped corpus; it cannot look at a mushaf, and no verdict exists until someone has. This is the one check in the register that can establish the data is true, and it is human by construction.</li><li>Choosing what to look at. <code>make validate</code> prints which strata have never been audited — a class with no verdict in it is a class where a wrong pair survives every check this repo has — but pointing at the gap is not closing it.</li></ul>
+  </section>
   <section class="block">
     <h3>What you need</h3>
     <ul class="bullets"><li>A printed mushaf — the KFGQPC Hafs print the pages are photographed from, so page numbers line up.</li><li>30–45 minutes for twenty edges. A hafiz if you can get one; this is the check where a second reader is worth the most.</li><li>Nothing else — the draw runs here.</li></ul>
@@ -451,11 +498,9 @@ label.do span { padding: 8px 0; }
         
         <p class="why">Recording the <code>correct</code> verdicts matters as much as the failures: they are what turns half an hour of reading into a permanent regression fixture instead of an anecdote.</p>
       </li>
-      <li>
-        <label class="do"><input type="checkbox" data-step="edge-spot-audit:5"><span>Run pnpm gate:verified-edges.</span></label>
-        <p class="expect">OK. Those verdicts are now enforced in both directions, forever — a <code>correct</code> edge that disappears and a <code>wrong</code> edge that returns both fail the build.</p>
-        
-        <p class="why">This is the step where manual work becomes automated. Once it is green, a <code>correct</code> edge that disappears and a <code>wrong</code> edge that returns both fail the build — forever, without anyone re-reading twenty pairs.</p>
+      <li class="struck">
+        <p class="do"><s>Run pnpm gate:verified-edges.</s></p>
+        <p class="expect">Done by <code>pnpm gate:verified-edges</code> on 2026-07-28. Skip it.</p>
       </li>
     </ol>
   </section>
@@ -483,6 +528,7 @@ label.do span { padding: 8px 0; }
   <p class="why">Safari's ITP deletes all script storage for origins untouched for 7 days of browser use, and Home-Screen-installed apps are exempt. That single asymmetry is why the install prompt is a feature and not a nicety — and it has never been observed, only read about.</p>
   
 
+  
   <section class="block">
     <h3>What you need</h3>
     <ul class="bullets"><li><b>Not runnable yet.</b> Pin-a-juz ships in Loop 6b; today there is nothing to pin. What exists now — visited pages surviving a reload offline, and the app recovering from an eviction — is already asserted in apps/web/e2e/offline.spec.ts. The steps below are written so that when 6b lands, the only cost left is the waiting.</li><li><b>What the eight days no longer have to find.</b> Research ④ replaced the *eviction* half of this check with <code>Storage.clearDataForOrigin</code> over CDP, which takes the origin's caches out from under a live page exactly as a sweep does. That found two real defects (the precache never rebuilt after eviction, so one sweep ended offline support permanently; and a page that failed to fetch left the chrome claiming a page the stage was not showing). Both are fixed and asserted in the <code>Hifth · eviction</code> describe. So this check is now only about the thing no harness can supply: whether iOS actually sweeps an uninstalled origin at ~7 days and spares an installed one.</li><li>An iPhone (the ITP asymmetry is Safari's), and a deployed build.</li><li>Eight days of ordinary phone use. The clock counts days of *browser use*, not calendar days — a phone left in a drawer does not run this experiment.</li></ul>

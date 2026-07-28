@@ -31,7 +31,7 @@
     "         Shape:",
     "           needs   — what you must have before starting (a device, a print, a deploy)",
     "           setup   — [{run, expect}] commands run here, on the laptop",
-    "           steps   — [{do, expect, why, shot?}]",
+    "           steps   — [{do, expect, why, shot?, id?}]",
     "                       do     — the action",
     "                       expect — what should happen if it is working. A step with",
     "                                no expectation cannot be failed, so it cannot be",
@@ -44,11 +44,42 @@
     "                                question the prose cannot: what the screen looks",
     "                                like before you have ever seen it. The gate fails",
     "                                on a `shot` with no file behind it.",
+    "                       id     — a name for this step, so `evidence.covers` can",
+    "                                point at it. Optional: give a step an id when",
+    "                                something automated discharges it. Never a",
+    "                                position — a reordered runbook must not silently",
+    "                                re-point a claim about which step is done. (The",
+    "                                comments in e2e/share-a11y.spec.ts said 'Runbook",
+    "                                step 4' and had been wrong for two loops.)",
     "           reading — how to turn what you saw into a verdict; one line per outcome",
     "           record  — the exact command that banks the result",
     "         A `pending` check owned by `user` with no runbook.steps fails the",
     "         gate: a check nobody can follow is a check that will not be run, and",
-    "         it should not be able to sit here looking tracked."
+    "         it should not be able to sit here looking tracked.",
+    "",
+    "evidence: the machine half of this check — one command, what it discharges,",
+    "         and what it cannot. Optional, and three of the six checks here",
+    "         deliberately have none: a producer that does not exist must not be",
+    "         invented, and a runbook that already absorbed its automation into",
+    "         the step text (screen-reader-walkthrough) has nothing left to strike.",
+    "           run     — the command. NOT a `make` target: GNU make reports every",
+    "                     failed recipe as exit 2, which flattens a producer's own",
+    "                     1-vs-3 (a verdict vs 'could not tell') into one code, and",
+    "                     a timeout would then read as a finding.",
+    "           covers  — runbook step ids this run discharges. `make validate-auto`",
+    "                     runs the command and writes the real exit code to",
+    "                     docs/validation/evidence/<id>.json; the terminal and the",
+    "                     guide strike those steps ONLY on a pass. Exit 3 means",
+    "                     'could not tell' and strikes nothing — an automated run",
+    "                     that could not reach its subject has proved nothing.",
+    "           residue — what the command cannot do, in words. REQUIRED, and the",
+    "                     reason the field is safe: this is the one place in the",
+    "                     register that takes work away from a human, so it has to",
+    "                     say out loud what is left. An `evidence` with no residue",
+    "                     is a claim to have automated a manual check entirely,",
+    "                     which has never once been true here.",
+    "         The evidence record's path is derived from the check id, not stored:",
+    "         a path written down twice is a path that can disagree with itself."
   ],
   "checks": [
     {
@@ -160,19 +191,22 @@
             "do": "Turn the screen reader on, open the URL, swipe into the mushaf, and listen to three or four ayah labels in a row. Judge the phrasing out loud. This is the bet under test.",
             "expect": "«الآية البقرة · ٢:٤٨» — that the label exists and reads exactly this is already asserted by e2e/__aria__/*/page-group.aria.yml. What you are judging is whether it sounds like something you would say, and whether your voice speaks ٢:٤٨ correctly rather than as \"two colon four eight\" or as a year.",
             "why": "The one thing no linter can check. axe proves a label exists and the snapshot proves it has not changed; only an ear can tell you the phrase is one a person would use, and only a real voice engine tells you how Arabic-Indic digits actually come out.",
-            "shot": "ayah-selected"
+            "shot": "ayah-selected",
+            "id": "judge-the-phrasing"
           },
           {
             "do": "Double-tap an ayah with hops, open a rail chip, and try to escape the sheet: swipe past the last item, and swipe backwards past the first. Then hop to a target and immediately swipe once.",
             "expect": "Both swipes stay inside the sheet — neither walks you into the page behind it. After the hop, the next swipe lands on something real on the new page, not on a node from the sheet that no longer exists.",
             "why": "Focus containment and focus survival across a page change are the two failures that make hopping unusable without sight, and neither is visible to a runner: the tree is correct in both the working and the broken case. The sheet's own contents — «إغلاق», «انتقل إلى …» — are pinned in e2e/__aria__/*/hop-popover.aria.yml and are not what you are checking here.",
-            "shot": "hop-popover"
+            "shot": "hop-popover",
+            "id": "escape-the-sheet"
           },
           {
             "do": "Now do the whole tour with the screen off or your eyes closed: find an ayah, hop, come back along the trail.",
             "expect": "You can do it. Whatever you could not do — or could only do because you already knew where things were — is the result of this check.",
             "why": "Every label can be correct and the app still unusable, because you knew where to swipe. This is the actual verdict; the two steps before it are how you find out why it failed.",
-            "shot": "trail-beads"
+            "shot": "trail-beads",
+            "id": "eyes-closed"
           }
         ],
         "reading": [
@@ -209,18 +243,27 @@
           {
             "do": "Open https://qurancomplex.gov.sa/en/ and find the terms / digital publications page.",
             "expect": "It loads. (It does not load from this repo's tooling, which is why nobody has read it yet.)",
-            "why": "The primary source, not a mirror. Every licensing claim this project makes about the glyph corpus currently rests on a third party's summary, and a summary is precisely where a restriction gets softened."
+            "why": "The primary source, not a mirror. Every licensing claim this project makes about the glyph corpus currently rests on a third party's summary, and a summary is precisely where a restriction gets softened.",
+            "id": "open-source"
           },
           {
             "do": "Read what it says about reusing the digital mushaf.",
             "expect": "Free use in digital, web and software contexts, with **commercial printing of physical masahif** reserved to the Complex — the same restriction quran-svg's NOTICE.md quotes, citing Royal Decrees 136/8 and 9/B/46356.",
-            "why": "What is at stake is whether the reserved right is commercial printing of physical masahif or something broader. Those two readings put this project in very different places."
+            "why": "What is at stake is whether the reserved right is commercial printing of physical masahif or something broader. Those two readings put this project in very different places.",
+            "id": "read-terms"
+          },
+          {
+            "id": "restatements-agree",
+            "do": "Confirm our two restatements say the same thing as each other — SOURCES.md §hafs-kfqc and the colophon's «الرخصة والمصدر».",
+            "expect": "They agree on the substance. `pnpm gate:license-copy` asserts this on every commit, so you should only have to read one of them in the next step.",
+            "why": "Two copies of someone else's licence terms drift silently, and the drift is the defect: a stranger reading the app and a stranger reading the repo would be told different things about what they may do. Delegating this to a gate is what makes the next step a comparison against ONE restatement rather than a three-way diff."
           },
           {
             "do": "Compare that against the two places we restate it: SOURCES.md §hafs-kfqc, and the colophon in the app (tap the wordmark حِفظ → «الرخصة والمصدر»).",
             "expect": "Both should describe free digital use with the printing restriction — and specifically NOT «إتاحة حرّة للاستعمال غير التجاري» (non-commercial only), which is a different edition's term and shipped once as a live defect.",
             "why": "We restate these terms in two places a stranger can read, so a wrong restatement is a licensing claim we are making on the Complex's behalf. This exact string was wrong once and shipped.",
-            "shot": "colophon-source"
+            "shot": "colophon-source",
+            "id": "compare-to-ours"
           }
         ],
         "reading": [
@@ -235,7 +278,17 @@
         "SOURCES.md §hafs-kfqc — drops the 'pending-that-glance' clause from the Status line",
         "apps/web/src/components/Colophon.tsx — the mushaf licence line, if the wording moved"
       ],
-      "record": "SOURCES.md §hafs-kfqc"
+      "record": "SOURCES.md §hafs-kfqc",
+      "evidence": {
+        "run": "pnpm gate:license-copy",
+        "covers": [
+          "restatements-agree"
+        ],
+        "residue": [
+          "Reading qurancomplex.gov.sa itself. The host times out on TCP 443 from every network this project's tooling runs on (measured, twice) and the Wayback mirror is not fetchable either — that is why research ⑦ was cancelled rather than built, and why no watcher will ever cover this.",
+          "Judging whether our summary is **stricter** than the source. A gate can prove two copies match; only a reader can notice that both are wrong in the same direction, and overstating someone else's terms fails silently because it reads as caution."
+        ]
+      }
     },
     {
       "id": "source-offer-resolves",
@@ -263,24 +316,28 @@
           {
             "do": "Open the deployed site in a private window.",
             "expect": "The app loads normally.",
-            "why": "Private, because your own session hides the failure that matters: a link that resolves only because you are signed in does not resolve for the stranger the GPL offer is written for. `make source-offer` has already followed the links with no credentials at all; what it cannot tell you is whether a reader can *get to* them from inside the running app, which is what the rest of this is for."
+            "why": "Private, because your own session hides the failure that matters: a link that resolves only because you are signed in does not resolve for the stranger the GPL offer is written for. `make source-offer` has already followed the links with no credentials at all; what it cannot tell you is whether a reader can *get to* them from inside the running app, which is what the rest of this is for.",
+            "id": "private-window"
           },
           {
             "do": "Tap the wordmark حِفظ at the top of the chrome (it announces «عن حِفظ»).",
             "expect": "The colophon sheet opens, with a «الرخصة والمصدر» section and a link labelled «الشيفرة المصدرية».",
             "why": "The offer has to be reachable from inside the running app, not just from the repository. A colophon nobody can find is an offer that is not being made.",
-            "shot": "colophon-source"
+            "shot": "colophon-source",
+            "id": "reach-colophon"
           },
           {
             "do": "Note the short commit printed beside the link, then follow the link.",
             "expect": "Real source at that exact commit — a `/tree/<sha>` URL — not a 404, not a sign-in wall, and not a bare branch that moves under the reader. The sha is baked at build time (CF_PAGES_COMMIT_SHA → GITHUB_SHA → git rev-parse HEAD).",
-            "why": "A bare branch link moves under the reader. The offer is for the source of the binary they are running, and the pinned sha is what makes it a real offer rather than a gesture."
+            "why": "A bare branch link moves under the reader. The offer is for the source of the binary they are running, and the pinned sha is what makes it a real offer rather than a gesture.",
+            "id": "offer-link"
           },
           {
             "do": "Scroll the colophon to the credits and follow one of the attribution links too.",
             "expect": "They resolve. The mutashabihat licence asks for a mention in the app; corpus.quran.com's terms require the link.",
             "why": "Two of the corpora we build on ask for a link, not merely a mention. A dead attribution link is a licence term being quietly failed.",
-            "shot": "colophon-credits"
+            "shot": "colophon-credits",
+            "id": "credit-links"
           }
         ],
         "reading": [
@@ -295,7 +352,18 @@
         "apps/web/src/provenance.ts — SOURCE_REPO, if the source is served from somewhere other than the GitHub repo",
         "scripts/check-source-offer.mjs — if the offer moved, or a new credited source needs its link followed"
       ],
-      "record": "docs/PLAN.md follow-up ⑤"
+      "record": "docs/PLAN.md follow-up ⑤",
+      "evidence": {
+        "run": "node scripts/check-source-offer.mjs",
+        "covers": [
+          "offer-link",
+          "credit-links"
+        ],
+        "residue": [
+          "Whether a reader can *get to* those links from inside the running app. The script follows URLs it reads out of the bundle; it never opens the colophon, so a source link that resolves perfectly from behind a sheet nobody can open still passes it.",
+          "Whether the deployed build is the build you think it is. Without `URL=<deployed>` the script answers about this working tree, which is a different question from the one a stranger asks."
+        ]
+      }
     },
     {
       "id": "edge-spot-audit",
@@ -328,33 +396,39 @@
           {
             "do": "Work through the twenty pairs in the print, one at a time.",
             "expect": "Each `from` and `to` is findable at the page printed beside it. A pair you cannot locate is itself a finding — record it as wrong with a note.",
-            "why": "This is the only check in the project that can say the data is true. Every other tier verifies that the app faithfully renders whatever the ETL produced — including when what it produced is wrong."
+            "why": "This is the only check in the project that can say the data is true. Every other tier verifies that the app faithfully renders whatever the ETL produced — including when what it produced is wrong.",
+            "id": "read-the-pairs"
           },
           {
             "do": "Read `words` and `roots` beside each pair as hints, and distrust them.",
             "expect": "`words` is the longest run of words the two ayahs share — the same score gate:edges enforces a floor on, computed by the same reader (packages/etl/scripts/morphology.mjs), so a number here can never disagree with CI. `roots` is how many of the shorter ayah's roots appear in both, in order.",
-            "why": "They point at the pairs worth slowing down on from both ends: a high `words` with a wrong verdict is a plausible-looking false edge, and a low one that is nonetheless right is the case the product exists for — 2:48 → 2:123 swaps شفاعة and عدل, scores 1, and is genuinely confused by huffaz every day."
+            "why": "They point at the pairs worth slowing down on from both ends: a high `words` with a wrong verdict is a plausible-looking false edge, and a low one that is nonetheless right is the case the product exists for — 2:48 → 2:123 swaps شفاعة and عدل, scores 1, and is genuinely confused by huffaz every day.",
+            "id": "distrust-the-hints"
           },
           {
             "do": "For each, answer the question the tool prints — not «are these similar?» but «**would a hafiz confuse these two while reciting?**»",
             "expect": "Most edges are obvious either way in a few seconds. The slow ones are the informative ones; note why.",
-            "why": "\"Similar\" is not the standard; a hafiz's confusion is. An edge that is textually close but never actually confused is noise in the rail, and noise is what makes a reader stop trusting the hop."
+            "why": "\"Similar\" is not the standard; a hafiz's confusion is. An edge that is textually close but never actually confused is noise in the rail, and noise is what makes a reader stop trusting the hop.",
+            "id": "answer-the-question"
           },
           {
             "do": "Optionally open a pair in the app to see what a reader actually sees: make phone, then navigate to the ayah and open its rail.",
             "expect": "The edge appears as a hop under the direction chip its `type` implies.",
             "why": "Catches a correct edge with a wrong presentation. A real mutashabih filed under the wrong direction chip sends the reader looking in the wrong surah, which reads as bad data even though the data is fine.",
-            "shot": "hop-rail"
+            "shot": "hop-rail",
+            "id": "see-it-in-the-app"
           },
           {
             "do": "Paste the printed JSON block into packages/etl/data/qa/verified-edges.json under `entries`, setting each `verdict` to `correct` or `wrong`, `verifiedBy` to your name, and `note` where a future reader needs the reason.",
             "expect": "Forty entries for twenty pairs — the block writes out both directions of each pair, because every edge in the corpus is generated in both and one reading settles both.",
-            "why": "Recording the `correct` verdicts matters as much as the failures: they are what turns half an hour of reading into a permanent regression fixture instead of an anecdote."
+            "why": "Recording the `correct` verdicts matters as much as the failures: they are what turns half an hour of reading into a permanent regression fixture instead of an anecdote.",
+            "id": "bank-the-verdicts"
           },
           {
             "do": "Run pnpm gate:verified-edges.",
             "expect": "OK. Those verdicts are now enforced in both directions, forever — a `correct` edge that disappears and a `wrong` edge that returns both fail the build.",
-            "why": "This is the step where manual work becomes automated. Once it is green, a `correct` edge that disappears and a `wrong` edge that returns both fail the build — forever, without anyone re-reading twenty pairs."
+            "why": "This is the step where manual work becomes automated. Once it is green, a `correct` edge that disappears and a `wrong` edge that returns both fail the build — forever, without anyone re-reading twenty pairs.",
+            "id": "run-the-gate"
           }
         ],
         "reading": [
@@ -370,7 +444,17 @@
         "packages/etl/data/qa/verified-edges.json — every verdict becomes a permanent gate assertion via gate:verified-edges",
         "packages/etl/scripts/build-adjacency.mjs — a systematic class of wrong edge becomes a filter, not 20 more rejections"
       ],
-      "record": "packages/etl/data/qa/verified-edges.json"
+      "record": "packages/etl/data/qa/verified-edges.json",
+      "evidence": {
+        "run": "pnpm gate:verified-edges",
+        "covers": [
+          "run-the-gate"
+        ],
+        "residue": [
+          "Every pair. The gate re-checks verdicts that are already banked against the shipped corpus; it cannot look at a mushaf, and no verdict exists until someone has. This is the one check in the register that can establish the data is true, and it is human by construction.",
+          "Choosing what to look at. `make validate` prints which strata have never been audited — a class with no verdict in it is a class where a wrong pair survives every check this repo has — but pointing at the gap is not closing it."
+        ]
+      }
     },
     {
       "id": "offline-survival-8-day",

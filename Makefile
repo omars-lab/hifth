@@ -364,6 +364,20 @@ validate: ## Outstanding manual checks — or one check's full runbook:  make va
 	  node packages/etl/scripts/sample-edges.mjs --coverage; \
 	fi
 
+.PHONY: validate-auto
+validate-auto: ## Run the machine half of the manual checks:  make validate-auto [CHECK=<id>]
+	@# Runs each check's declared `evidence.run` and writes the real exit code to
+	@# docs/validation/evidence/<id>.json. Those records are what let `make
+	@# validate` and the guide strike a runbook step off — so they are produced
+	@# by the command, never hand-written, exactly like `make shots`.
+	@#
+	@# NOT in `make ci` or `pnpm gates`, and it exits 0 even when a producer goes
+	@# red. Same reasoning as `make source-offer`, which is one of the producers:
+	@# these commands reach the network and the answer is a finding, not a broken
+	@# build. `gate:validation` is what fails, and it fails on the ledger lying
+	@# about its evidence — never on the evidence being bad news.
+	@node scripts/validate-auto.mjs $(if $(CHECK),--check "$(CHECK)",)
+
 .PHONY: guide
 guide: ## Render the runbooks to docs/validation/guide.html and serve them to your phone
 	@# The checks happen with a phone in one hand; the instructions have always
@@ -441,6 +455,7 @@ help: ## List targets (this)
 	@echo "                  make use-cases ACTOR=<id>     (one actor's whole picture)"
 	@echo "  Validation:     make validate         (what are we waiting on, and what it blocks)"
 	@echo "                  make validate CHECK=<id>      (one check's full runbook, here)"
+	@echo "                  make validate-auto            (run the machine half; strikes steps off)"
 	@echo "                  make source-offer [URL=…]     (does the GPL §6 offer resolve?)"
 	@echo "                  make guide                    (the same runbooks, on your phone)"
 	@echo "                  make record CHECK=<id> RESULT='…'  (bank the verdict)"

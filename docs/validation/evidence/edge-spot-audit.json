@@ -1,0 +1,21 @@
+{
+  "check": "edge-spot-audit",
+  "run": "pnpm gate:verified-edges",
+  "ranAt": "2026-07-28T20:34:16Z",
+  "commit": "b8f12ce",
+  "on": "darwin · node v20.19.4",
+  "exit": 0,
+  "outcome": "pass",
+  "covers": [
+    "run-the-gate"
+  ],
+  "residue": [
+    "Every pair. The gate re-checks verdicts that are already banked against the shipped corpus; it cannot look at a mushaf, and no verdict exists until someone has. This is the one check in the register that can establish the data is true, and it is human by construction.",
+    "Choosing what to look at. `make validate` prints which strata have never been audited — a class with no verdict in it is a class where a wrong pair survives every check this repo has — but pointing at the gap is not closing it."
+  ],
+  "tail": [
+    "> hifth@0.0.0 gate:verified-edges /Users/omareid/Workspace/git/hifth",
+    "> node scripts/gate-verified-edges.mjs",
+    "gate:verified-edges — OK (3 verified edges still present, 0 rejected edges still absent)"
+  ]
+}
