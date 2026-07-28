@@ -101,7 +101,7 @@
           },
           {
             "do": "Segment 3 — «اضغط آيات مختلفة»: tap a different ayah roughly once a second.",
-            "expect": "The amber wash lands on each ayah you tap. Different ayahs, not the same one twice — you are measuring overlay churn.",
+            "expect": "Amber marker swipes land on each ayah you tap — one along the middle of every line it occupies, with the scripture still readable through them. Different ayahs, not the same one twice — you are measuring overlay churn.",
             "why": "Separates rendering cost from interaction cost. If only this segment is bad the problem is overlay churn in the highlighter — a real bug, but not one that changes which rendering strategy Loop 4b builds."
           },
           {

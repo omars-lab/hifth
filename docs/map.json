@@ -35,7 +35,7 @@
   "features": [
     {
       "id": "select-an-ayah",
-      "what": "Tap an ayah on the page, or drag a marquee across several, and see them wash amber.",
+      "what": "Tap an ayah on the page, or drag a marquee across several, and see amber marker swipes laid over them.",
       "layer": "L1 core",
       "entry": [
         {
@@ -51,7 +51,12 @@
         {
           "file": "packages/core/src/highlighter.ts",
           "symbol": "class Highlighter",
-          "note": "Owns #hifth-overlay and every wash drawn in it. Framework-free and imperative on purpose — React must not re-render the stage. If you are adding a new kind of highlight, it is a StyleToken here, not a component."
+          "note": "Owns #hifth-overlay and every mark drawn in it. Framework-free and imperative on purpose — React must not re-render the stage. If you are adding a new kind of highlight, it is a StyleToken here, not a component. `paint` is where a style becomes either marker swipes or a cloned shape."
+        },
+        {
+          "file": "packages/core/src/ink.ts",
+          "symbol": "swipesFromPath",
+          "note": "Why the highlight looks like a pen and not a box. Every ayah's hit area is a run of axis-aligned rectangles, one per line it occupies; this turns each into a band along the line's middle. It is a parser with a fallback, not an assumption — it returns null on any geometry it does not fully recognise and the Highlighter clones the shape instead, so an unfamiliar page from Loop 4b degrades to the old box rather than to nothing."
         },
         {
           "file": "apps/web/src/components/PageStage.tsx",
@@ -61,7 +66,7 @@
       ],
       "extend": [
         "Add the intent to `PointerIntent` and teach `pointerIntent`/`nextIntent` when to return it — with a unit test in gestures.test.ts first, because this is pure and cheap to pin.",
-        "If it draws something new, add a `StyleToken` and its branch in the Highlighter, then a CSS custom property in apps/web/src/styles/tokens.css.",
+        "If it draws something new, add a `StyleToken` and its branch in the Highlighter, then a CSS custom property in apps/web/src/styles/tokens.css. Decide whether it is ink: if so add it to `INKED` and give it an `--ink-*` token, because the ink rules blend with `multiply` and the alpha washes are tuned for compositing over — the two families are not interchangeable.",
         "Wire it in PageStage. Resist adding state to React that the Highlighter already owns.",
         "Add a golden row if it changes pixels — see the `golden-images` feature."
       ],
