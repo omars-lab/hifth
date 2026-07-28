@@ -192,7 +192,12 @@
         {
           "file": "apps/web/src/components/Jumper.tsx",
           "symbol": "Jumper",
-          "note": "The combobox. At 412 px its input and its listbox can overlap the first option — see the open header-overflow defect before adding anything to this row."
+          "note": "The combobox, opened from the one glyph in the header that is not a mode. The row it lives in has 17 px of slack on a 320 px phone — see chrome-fit before adding anything to it."
+        },
+        {
+          "file": "apps/web/e2e/chrome-fit.spec.ts",
+          "symbol": "WIDTHS",
+          "note": "The header fits every phone from 320 to 430, and is the same height at all of them. The second half is the one that bites: the stage gets what the chrome leaves, and the golden baselines are shots of the stage."
         },
         {
           "file": "packages/core/src/keymap.ts",
@@ -208,7 +213,7 @@
       "extend": [
         "New input syntax: extend parseJump and its unit tests. Keep the UI dumb — it should render JumpTargets, not know how they were found.",
         "New shortcut: add it to appKeyAction with a KeyContext branch, and add the row to the help surface in the same commit.",
-        "Anything added to the header row: check it at 390 px and 412 px, not just at your window's width."
+        "Anything added to the header row costs width the row does not have, and height the stage cannot spare. Run chrome-fit before and after, and if it needs a control, say which one it replaces."
       ],
       "gates": ["pnpm test", "make e2e"],
       "seeAlso": ["a11y", "editions-and-skins"]
@@ -272,12 +277,7 @@
         {
           "file": "apps/web/src/components/OfflineNotice.tsx",
           "symbol": "OfflineNotice",
-          "note": "What the user is told about their storage. Must not stack with the coach strip — that was a real merge defect."
-        },
-        {
-          "file": "apps/web/src/components/InstallButton.tsx",
-          "symbol": "InstallButton",
-          "note": "beforeinstallprompt on Chrome; iOS has no equivalent and needs instructions instead of a button that cannot work."
+          "note": "What the user is told about their storage — and the only place the install prompt is offered. Must not stack with the coach strip; must not move into the header, which has no width for it."
         }
       ],
       "extend": [

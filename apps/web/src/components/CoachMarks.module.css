@@ -48,11 +48,19 @@
   color: var(--ink-soft);
 }
 
+/* No `opacity` here, and that is the whole point. This read «١⁄٣» in
+   --accent-strong at 0.7, which is not a colour choice — it is 6.81:1 blended
+   down to 3.48:1 against the tint behind it, i.e. the same defect the
+   --ink-faint sweep fixed, arriving through a different door. Opacity on text
+   is contrast arithmetic nobody can see in the stylesheet.
+
+   Smallness is what makes it recede; it is already --text-xs beside --text-md
+   body copy. If it ever needs to step further back, that is another token, not
+   another 0.1 off the alpha. */
 .count {
   flex-shrink: 0;
   color: var(--accent-strong);
   font-size: var(--text-xs);
-  opacity: 0.7;
 }
 
 .next {

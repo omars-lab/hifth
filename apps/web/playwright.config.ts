@@ -108,20 +108,20 @@ export default defineConfig({
           // coordinates and lands somewhere else. Touch stays on; it is what the
           // app branches on.
           //
-          // 430×932, not 390×844, and that number is not a preference. The
-          // header's intrinsic width is 430 CSS px — wordmark, page number, ⌖, ▤
-          // and the tajweed pill, none of which shrink — so at 390 the document
-          // is 40 px wider than the viewport and every full-viewport shot comes
-          // out as a mushaf sliced down both edges. That is a real defect on a
-          // real phone and it is tracked as one; what it is not is something to
+          // 390×844, the same viewport the goldens use. It was 430 for six
+          // loops for a bad reason that is now fixed: the header's intrinsic
+          // width was a flat 430 CSS px, so at 390 the document was 40 px wider
+          // than the viewport and every full-viewport shot came out as a mushaf
+          // sliced down both edges — a real defect, but not something to
           // photograph, because a picture of it teaches the reader that a
-          // half-cut page is the expected screen. 430 is a phone the app fits on
-          // (iPhone 15 Pro Max). Drop this back to 390 when the header fits.
+          // half-cut page is the expected screen. The chrome now fits from 320
+          // up (e2e/chrome-fit.spec.ts), so the runbook can be photographed on
+          // the phone most readers are holding.
           name: "shots",
           testMatch: /shots\.spec\.ts/,
           use: {
             browserName: "chromium",
-            viewport: { width: 430, height: 932 },
+            viewport: { width: 390, height: 844 },
             deviceScaleFactor: 2,
             hasTouch: true,
           },

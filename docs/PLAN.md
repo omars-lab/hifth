@@ -120,7 +120,7 @@ ends by updating this section and writing `docs/decisions/loop-<N>.md`.**
    rather than at a branch that moves under the reader; with no commit to name it degrades
    to the repository root instead of minting a link to nothing. It surfaces in
    [`Colophon.tsx`](../apps/web/src/components/Colophon.tsx), opened from the wordmark —
-   the chrome already carries ⌖, ▤, the skin switch and the install prompt, and a fifth
+   the chrome already carries ⌖, ▤, the skin switch and its legend, and a fifth
    control would cost stage height on a phone. The same sheet finally pays the three
    attributions the vendored data has been owed since Loop 4a (corpus.quran.com's mandatory
    link, quran-tajweed's CC BY, the mutashabihat licence's "mention in your app"), which is
