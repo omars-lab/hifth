@@ -1,9 +1,9 @@
 {
-  "2": {
+  "3": {
     "edges": [
       {
         "type": "mutashabih",
-        "to": "quran/hafs-kfqc/69:33",
+        "to": "quran/hafs-kfqc/69:34",
         "page": 567,
         "dir": {
           "dSurah": -38,
@@ -12,7 +12,7 @@
       },
       {
         "type": "mutashabih",
-        "to": "quran/hafs-kfqc/69:34",
+        "to": "quran/hafs-kfqc/69:35",
         "page": 567,
         "dir": {
           "dSurah": -38,

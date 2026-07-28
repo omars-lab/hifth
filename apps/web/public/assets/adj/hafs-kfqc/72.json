@@ -1,9 +1,9 @@
 {
-  "19": {
+  "20": {
     "edges": [
       {
         "type": "mutashabih",
-        "to": "quran/hafs-kfqc/18:37",
+        "to": "quran/hafs-kfqc/18:38",
         "page": 298,
         "dir": {
           "dSurah": -54,
@@ -14,11 +14,11 @@
     ],
     "ext": []
   },
-  "23": {
+  "24": {
     "edges": [
       {
         "type": "mutashabih",
-        "to": "quran/hafs-kfqc/19:74",
+        "to": "quran/hafs-kfqc/19:75",
         "page": 310,
         "dir": {
           "dSurah": -53,
@@ -28,11 +28,11 @@
     ],
     "ext": []
   },
-  "24": {
+  "25": {
     "edges": [
       {
         "type": "mutashabih",
-        "to": "quran/hafs-kfqc/21:108",
+        "to": "quran/hafs-kfqc/21:109",
         "page": 331,
         "dir": {
           "dSurah": -51,

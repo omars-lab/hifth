@@ -123,6 +123,29 @@ const CURATED_TYPE = {
 
 const members = (a) => (Array.isArray(a) ? a : [a]);
 const first = (a) => (Array.isArray(a) ? a[0] : a);
+
+/**
+ * The dataset counts ayahs from zero; `@hifth/core` counts from one. Bridging
+ * them without this `+1` is the off-by-one that shipped in Loop 4a and made
+ * 47.8% of the hop edges point at an ayah with *no words in common* with their
+ * source — which for a mutashabihat instrument is the whole product being
+ * wrong, quietly.
+ *
+ * The upstream README says only "the absolute source ayah number in the Quran"
+ * and never states the base, so this was measured rather than read. Taking the
+ * longest shared contiguous run of words between the two ends of every edge
+ * (words reconstructed at build time from the vendored morphology file):
+ *
+ *   base as read (0 shift) → 1153/2448 edges share zero words (47.1%), mean 0.79
+ *   with this +1           →   11/2448 share zero words ( 0.4%), mean 4.74
+ *   −1 and +2              → 48.9% and 46.2% — i.e. noise, like the 0 shift
+ *
+ * Random ayah pairs share zero words 69.1% of the time with a mean run of 0.33,
+ * so the unshifted corpus was barely distinguishable from pairing at random.
+ * The dataset's own range (9..6163 over 6236 ayahs) is consistent with 0-based
+ * and cannot on its own distinguish the two.
+ */
+const datasetAbs = (n) => n + 1;
 const refToAbs = (ref) => {
   const [s, a] = ref.split(":").map(Number);
   return toAbsoluteAyah(s, a); // throws on invalid — the key-validity gate
@@ -157,12 +180,12 @@ function addEdge(fromAbs, toAbs, type, meta, { curated = false } = {}) {
 for (const [juzKeyStr, entries] of Object.entries(DATASET)) {
   const juzKey = Number(juzKeyStr);
   for (const entry of entries) {
-    const srcMembers = members(entry.src.ayah);
-    const anchor = fromAbsoluteAyah(first(entry.src.ayah));
+    const srcMembers = members(entry.src.ayah).map(datasetAbs);
+    const anchor = fromAbsoluteAyah(srcMembers[0]);
     if (juzOf(anchor.surah, anchor.ayah) !== juzKey) juzMismatches += 1;
     const ctx = entry.ctx === 2;
     for (const mut of entry.muts) {
-      const toAbs = first(mut.ayah);
+      const toAbs = datasetAbs(first(mut.ayah));
       fromAbsoluteAyah(toAbs); // validity gate on the target
       for (const fromAbs of srcMembers) {
         fromAbsoluteAyah(fromAbs); // validity gate on the source

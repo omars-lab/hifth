@@ -48,4 +48,21 @@ if [ -n "$staged" ] && command -v node >/dev/null 2>&1; then
   fi
 fi
 
+# The licence the reader is shown and the licence on record, on the one commit
+# that can still change either cheaply. Same reasoning as the map above, with a
+# sharper edge: a wrong licence line is not a stale pointer, it is a false
+# statement about someone else's rights, and it ships to every reader silently.
+# Only when the commit touches one of the two files — otherwise this is silent.
+case "$staged" in
+  *SOURCES.md* | *Colophon.tsx*)
+    if command -v node >/dev/null 2>&1 && ! node scripts/gate-license-copy.mjs; then
+      echo ""
+      echo "pre-commit: the colophon and SOURCES.md disagree about a licence (above)."
+      echo "  SOURCES.md is the source: edit the \`\`\`colophon fence, then the component."
+      echo "  to bypass this one commit:  git commit --no-verify"
+      exit 1
+    fi
+    ;;
+esac
+
 exit 0

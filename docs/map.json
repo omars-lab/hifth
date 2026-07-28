@@ -260,6 +260,11 @@
           "note": "Registration and update flow. Service workers need a secure context — that is why offline specs cannot pass against a plain-http LAN or container URL, and it is the harness, not the app."
         },
         {
+          "file": "apps/web/src/pwa.ts",
+          "symbol": "repairShellCache",
+          "note": "Eviction takes the precache and leaves the registration, so the worker never installs again and offline dies silently while every online signal still says healthy. The repair unregisters and reloads — measured, not assumed: reloads, update() and re-register all leave the precache empty."
+        },
+        {
           "file": "apps/web/src/storage.ts",
           "symbol": "requestPersistentStorage",
           "note": "Asks the browser not to evict us. It can say no, and the honest UI for that is a notice, not silence."
@@ -278,7 +283,9 @@
       "extend": [
         "Precache list and strategies live in the vite-plugin-pwa config in apps/web/vite.config.ts, not in a hand-written sw.js.",
         "Adding to the precache costs install-time bytes on a phone. Check the entry count and size the build prints.",
-        "Test offline behaviour in an e2e that actually goes offline, over a secure context. A unit test cannot see a service worker."
+        "Test offline behaviour in an e2e that actually goes offline, over a secure context. A unit test cannot see a service worker.",
+        "Eviction is a separate case from offline and has its own describe in apps/web/e2e/offline.spec.ts: CDP Storage.clearDataForOrigin with storageTypes 'cache_storage' takes the caches and leaves the worker registered, which is the state a real ITP sweep leaves behind.",
+        "Anything that can fail to load a page must say so — see PageStage's error banner. A silent failure leaves the previous page on the stage while the chrome has already announced the new number."
       ],
       "gates": ["make e2e", "make lighthouse"],
       "seeAlso": ["share-links", "assets-and-pages"]
@@ -328,6 +335,11 @@
           "file": "packages/core/src/quran-meta.ts",
           "symbol": "toAbsoluteAyah",
           "note": "The 6236-ayah numbering the datasets speak, and its inverse. Every off-by-one bug in this project has lived within one function of this pair."
+        },
+        {
+          "file": "packages/etl/scripts/build-adjacency.mjs",
+          "symbol": "datasetAbs",
+          "note": "The +1 that bridges a 0-based dataset to a 1-based core. It shipped missing, and 47.8% of the hop corpus pointed at an ayah sharing no words with its source — a mutashabihat instrument being quietly, entirely wrong. Nothing caught it: the curated Loop-2 edges are written as \"S:A\" strings and skip this conversion, so every gate and every e2e stayed green over the only edges anyone had looked at. The comment above it carries the measurement; read it before touching numbering here."
         },
         {
           "file": "packages/etl/scripts/sample-edges.mjs",
@@ -456,8 +468,13 @@
         },
         {
           "file": "apps/web/src/components/Colophon.tsx",
-          "symbol": "Colophon",
-          "note": "What the user is shown, including the GPL corresponding-source offer. If this copy and SOURCES.md ever disagree, the user-facing one is the one that matters legally."
+          "symbol": "CREDITS",
+          "note": "What the user is actually told. Not authored here — each row is declared in its SOURCES.md ```colophon fence and this renders it, so the record and the screen cannot drift."
+        },
+        {
+          "file": "scripts/gate-license-copy.mjs",
+          "symbol": "NON_COMMERCIAL",
+          "note": "Enforces that binding, and refuses a non-commercial claim nobody recorded — the exact defect that once told every reader the KFGQPC artwork was more restricted than it is."
         },
         {
           "file": "apps/web/src/provenance.ts",
@@ -467,10 +484,11 @@
       ],
       "extend": [
         "Vendor nothing without its SOURCES.md entry in the same commit.",
-        "If you change the licence copy, change it in both places — SOURCES.md and the Colophon — and say so in the commit message.",
+        "To change what the reader is told about a licence, edit that source's ```colophon fence in SOURCES.md. The component follows; gate:license-copy fails if it does not.",
+        "A source the app should not credit still has to say so — `not-credited: <reason>` in the fence. Silence is indistinguishable from an oversight, which is why it is not allowed.",
         "A GPL-derived asset makes this repo the corresponding source. That constrains unrelated decisions, including whether binaries can live behind a metered service (see gate:golden-size)."
       ],
-      "gates": ["pnpm gate:license", "pnpm gate:text-sources", "make ci"],
+      "gates": ["pnpm gate:license", "pnpm gate:license-copy", "pnpm gate:text-sources", "make ci"],
       "seeAlso": ["editions-and-skins", "assets-and-pages", "golden-images"]
     },
 

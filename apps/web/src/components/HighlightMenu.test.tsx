@@ -7,9 +7,13 @@ const ED = "hafs-kfqc";
 const k = (ref: string) => `quran/${ED}/${ref}`;
 const RANGE = [k("2:47"), k("2:48")];
 
-/** A merged edge with the fields under test; `dir` only matters for ordering. */
+/**
+ * A merged edge with the fields under test; `dir` only matters for ordering.
+ * `from` defaults to the sole contributor — pass it explicitly to model a row
+ * that several range members contributed but only one of them produced.
+ */
 function edge(p: Partial<MergedEdge> & Pick<MergedEdge, "type" | "to" | "sources">): MergedEdge {
-  return { page: 19, dir: { dSurah: 0, dPage: 12 }, ...p } as MergedEdge;
+  return { page: 19, dir: { dSurah: 0, dPage: 12 }, from: p.sources[0], ...p } as MergedEdge;
 }
 
 const HOPS: MergedEdge[] = [
@@ -81,7 +85,27 @@ describe("HighlightMenu (spec §9 — the drag-highlight menu)", () => {
     expect(screen.getByText(/البقرة · ٢:٤٧ · هنا/)).toBeInTheDocument();
   });
 
-  it("hops with the merged edge (the caller reads its `sources` for the trail)", () => {
+  it("a row both members contributed diffs against the one that produced it", () => {
+    // The real corpus has these: 2:123 is an edge of 2:47 *and* 2:48, and the
+    // surviving row is 2:48's (it carries the curated note). Naming 2:47 here —
+    // the first contributor — would caption 2:48's note with the wrong ayah.
+    renderMenu({
+      hops: [
+        edge({
+          type: "mutashabih",
+          to: k("2:122"),
+          sources: [k("2:47"), k("2:48")],
+          from: k("2:48"),
+          note: "شفاعة ↔ عدل",
+        }),
+      ],
+    });
+    expect(screen.getByText("من ٢:٤٧، ٢:٤٨")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { expanded: false }));
+    expect(screen.getByText(/البقرة · ٢:٤٨ · هنا/)).toBeInTheDocument();
+  });
+
+  it("hops with the merged edge (the caller reads its `from` for the trail)", () => {
     const { props } = renderMenu();
     fireEvent.click(screen.getByRole("button", { name: /انتقل إلى البقرة · ٢:١٢٢/ }));
     expect(props.onHop).toHaveBeenCalledWith(HOPS[0]);

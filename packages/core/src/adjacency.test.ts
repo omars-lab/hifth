@@ -183,6 +183,10 @@ describe("mergeRangeEdges (spec §9: merged, deduped edges of a highlighted rang
     // both members contributed the 2:121 row, in range order
     expect(merged[0].sources).toEqual([k("2:46"), k("2:47")]);
     expect(merged[1].sources).toEqual([k("2:47")]);
+    // …but only one of them produced the row you actually see: 2:47's carried
+    // `ctx`, so it won, and the leap must depart from *it*.
+    expect(merged[0].from).toBe(k("2:47"));
+    expect(merged[1].from).toBe(k("2:47"));
   });
 
   it("keeps the same target twice when the edge types differ (look-alike vs shared root)", () => {
@@ -211,11 +215,15 @@ describe("mergeRangeEdges (spec §9: merged, deduped edges of a highlighted rang
     expect(merged[0].twin).toBe(true);
     expect(merged[0].note).toBe("Identical twins");
     expect(merged[0].sources).toEqual([k("2:46"), k("2:47")]);
+    // The note is 2:47's, so `from` is 2:47 — not `sources[0]`. A row that reads
+    // as one ayah's note but leaps from another's is the bug this pins.
+    expect(merged[0].from).toBe(k("2:47"));
 
     // …regardless of which member the rich one came from (ties keep the first).
     const flipped = mergeRangeEdges([src("2:46", [rich]), src("2:47", [plain])]);
     expect(flipped[0].note).toBe("Identical twins");
     expect(flipped[0].sources).toEqual([k("2:46"), k("2:47")]);
+    expect(flipped[0].from).toBe(k("2:46"));
   });
 
   it("drops edges that point back inside the range (word anchors ignored)", () => {

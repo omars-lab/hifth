@@ -212,6 +212,13 @@ function hifzRank(edge: Edge): number {
 export interface MergedEdge extends Edge {
   /** Canonical keys of the highlighted ayahs that contributed this edge, in range order. */
   readonly sources: readonly string[];
+  /**
+   * The one range member whose edge survived the merge — the ayah this row's
+   * note, twin, root and diff are *about*, and therefore the ayah a leap from
+   * this row departs from. Usually `sources[0]`; it differs whenever a later
+   * member carried richer metadata and won rule 2.
+   */
+  readonly from: string;
 }
 
 /** One member of a highlighted range and its (possibly missing) adjacency. */
@@ -248,7 +255,10 @@ function bareTarget(to: string): string {
  *    duplicate carries more of note/twin/root/ctx (ties keep the first seen, so
  *    the result is stable in range order); every contributor is still recorded in
  *    `sources`. The winner is kept whole rather than field-merged: a `note` is
- *    written about *its* source ayah and would lie if grafted onto another's.
+ *    written about *its* source ayah and would lie if grafted onto another's —
+ *    which is also why `from` follows the winner rather than `sources[0]`. A row
+ *    that reads as 2:48's note but leaps from 2:47 is that same lie, one step
+ *    later.
  * 3. **Edges pointing inside the range are dropped.** Hopping to text the reader
  *    has already highlighted is not a hop; word anchors are ignored for this test
  *    (`2:122#w3` counts as `2:122`).
@@ -258,8 +268,9 @@ function bareTarget(to: string): string {
  */
 export function mergeRangeEdges(sources: readonly RangeSource[]): MergedEdge[] {
   const inside = new Set(sources.map((s) => bareTarget(s.key)));
-  // (type, target) → the winning edge so far + its contributors, insertion-ordered.
-  const merged = new Map<string, { edge: Edge; sources: string[] }>();
+  // (type, target) → the winning edge so far, whose member it came from, and
+  // every contributor, insertion-ordered.
+  const merged = new Map<string, { edge: Edge; from: string; sources: string[] }>();
 
   for (const { key, adj } of sources) {
     for (const edge of adj?.edges ?? []) {
@@ -268,17 +279,20 @@ export function mergeRangeEdges(sources: readonly RangeSource[]): MergedEdge[] {
       const id = `${edge.type}>${edge.to}`;
       const seen = merged.get(id);
       if (!seen) {
-        merged.set(id, { edge, sources: [key] });
+        merged.set(id, { edge, from: key, sources: [key] });
         continue;
       }
       if (!seen.sources.includes(key)) seen.sources.push(key);
-      if (richness(edge) > richness(seen.edge)) seen.edge = edge;
+      if (richness(edge) > richness(seen.edge)) {
+        seen.edge = edge;
+        seen.from = key;
+      }
     }
   }
 
   const out: MergedEdge[] = [];
-  for (const { edge, sources: from } of merged.values()) {
-    out.push({ ...edge, sources: from });
+  for (const { edge, from, sources: contributors } of merged.values()) {
+    out.push({ ...edge, from, sources: contributors });
   }
   return orderForHifz(out);
 }

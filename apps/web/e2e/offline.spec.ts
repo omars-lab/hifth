@@ -1,4 +1,4 @@
-import { test, expect, type Page } from "@playwright/test";
+import { test, expect, type BrowserContext, type Page } from "@playwright/test";
 import { tapAyah } from "./ayah";
 import { COACH_STORAGE_KEY } from "../src/coach";
 
@@ -115,6 +115,126 @@ test.describe("Hifth · offline", () => {
       await expect(
         page.getByRole("button", { name: /الآية الحالية البقرة · ٢:١٢٣/ }),
       ).toBeVisible();
+    } finally {
+      await context.setOffline(false);
+    }
+  });
+});
+
+/*
+ * Research follow-up ④ (docs/research/2026-07-27-unattended-validation.md §3.3).
+ *
+ * The ledger's `offline-survival-8-day` check asks a human to leave a phone
+ * alone for eight days and see whether the app is still there. The eight days
+ * are not automatable — ITP's sweep timer lives in the browser process, so
+ * `page.clock` cannot fast-forward it, and ITP Debug Mode only logs. But the
+ * eight days were never the interesting part. Both of that check's `tunes` are
+ * about the app's *reaction* to eviction, and eviction itself is one CDP call:
+ * `Storage.clearDataForOrigin` takes an origin's bytes out from under a live
+ * page, which is what a sweep does. The waiting was the only thing standing
+ * between us and the assertions.
+ *
+ * That turned out to matter, because the two tests below were both red when
+ * they were written. What they now pin:
+ *
+ *   1. Eviction is survivable at all. Workbox fills the precache in the service
+ *      worker's `install` handler; eviction takes the bytes but leaves the
+ *      registration, so the worker never installs again and the shell never
+ *      comes back. Runtime caches refill on demand, so online everything looks
+ *      fine — and the next offline launch is the browser's own error page.
+ *      Measured before the fix: three reloads and an explicit
+ *      `registration.update()` all left the precache empty.
+ *   2. The app never claims a page it is not showing. Offline with an evicted
+ *      cache is how a *vendored* page fails to fetch, which is the one case
+ *      that gets past App's resolver gate.
+ */
+test.describe("Hifth · eviction", () => {
+  test.skip(
+    ({ browserName }) => browserName !== "chromium",
+    "CDP's Storage domain is Chromium-only, as is the rest of this file",
+  );
+
+  /** Take this origin's storage, the way an ITP sweep or a quota purge would. */
+  async function evict(page: Page, context: BrowserContext): Promise<void> {
+    const cdp = await context.newCDPSession(page);
+    await cdp.send("Storage.clearDataForOrigin", {
+      origin: new URL(page.url()).origin,
+      // Not "all": that unregisters the worker too, which is a *harsher* state
+      // than eviction and one the app cannot respond to because it never boots.
+      // Taking the caches and leaving the registration is the case with a
+      // survivor in it, and the one the app is responsible for.
+      storageTypes: "cache_storage",
+    });
+  }
+
+  /** Warm the shell, the registry and page 7 into cache, SW controlling. */
+  async function warm(page: Page): Promise<void> {
+    await page.goto("/");
+    await expect(page.locator("svg[role='group']").first()).toBeVisible();
+    await awaitController(page);
+    await page.reload();
+    await expect(page.locator("svg[role='group']").first()).toBeVisible();
+    await awaitCached(page, PAGE_7_SVG);
+    await awaitCached(page, "/assets/manifest.json");
+  }
+
+  test("an evicted shell is rebuilt, so offline still works afterwards", async ({
+    page,
+    context,
+  }) => {
+    await warm(page);
+    await evict(page, context);
+
+    // Nothing is asked of the reader here — this is the repair, and the reader
+    // never knew anything was wrong. `index.html` is the assertion because it
+    // is the navigation fallback: it is exactly the entry whose absence turns
+    // an offline launch into the browser's error page.
+    await page.reload();
+    await expect(page.locator("svg[role='group']").first()).toBeVisible();
+    await awaitCached(page, "/index.html");
+    await awaitCached(page, "/assets/manifest.json");
+    // The repair replaces the worker, so wait for the new one to take control:
+    // a refilled precache in front of an uncontrolled page serves nobody, since
+    // the navigation request never reaches the worker that holds it.
+    await awaitController(page);
+
+    // The claim is not "a cache exists", it is "offline still works" — so go
+    // offline and boot cold, which is the promise Loop 6a actually made.
+    await context.setOffline(true);
+    try {
+      await page.reload();
+      await expect(page.locator("svg[role='group']").first()).toBeVisible();
+      await expect(page.locator("#verse-54:visible")).toHaveCount(1);
+      await expect(page.locator("header .numeric")).toHaveText("7");
+    } finally {
+      await context.setOffline(false);
+    }
+  });
+
+  test("a page that would not load is said, not silently swapped for another", async ({
+    page,
+    context,
+  }) => {
+    await warm(page);
+    await evict(page, context);
+    await context.setOffline(true);
+    try {
+      // Page 19 is vendored — the resolver resolves it and App's chip gating
+      // lets it through — but its bytes are gone and there is no network. The
+      // failure mode this pins: the chrome moves to ١٩, the fetch fails, and
+      // the stage keeps page 7. A reader mid-review would be told they are on
+      // 19 while looking at 7, and a screen-reader user would be told it out
+      // loud with nothing on screen to contradict it.
+      await page.evaluate(() => {
+        window.location.hash = "#/hafs-kfqc/p19";
+      });
+
+      const alert = page.getByRole("alert");
+      await expect(alert).toBeVisible();
+      await expect(alert).toContainText("تعذّر تحميل صفحة ١٩");
+
+      // And the stage still holds the page it really has, rather than a blank.
+      await expect(page.locator("svg[aria-labelledby='page-label-7']")).toBeVisible();
     } finally {
       await context.setOffline(false);
     }
