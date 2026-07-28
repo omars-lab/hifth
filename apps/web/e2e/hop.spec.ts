@@ -1,5 +1,4 @@
 import { test, expect } from "@playwright/test";
-import { tapAyah } from "./ayah";
 
 // Loop 2 exit criterion (PLAN §Loop 2):
 //   tap 2:48 → rail → popover → hop to 2:123 cross-page → bead back, one-handed.
@@ -53,26 +52,41 @@ test.describe("Hifth · the hop", () => {
   });
 
   test("un-vendored hop targets are surfaced but disabled (no ghost pages)", async ({ page }) => {
-    await page.goto("/");
-    await expect(page.locator("svg[role='group']")).toBeVisible();
+    // 2:120 on page 19 is the one ayah in the vendored corpus whose chips are
+    // *entirely* dead ends: ↻ holds only 2:145 (page 22) and ▶ only 13:37
+    // (page 254), neither vendored until Loop 4b. Two chips, so this covers the
+    // rail's promise across buckets rather than depth inside one sheet — the
+    // 47.8%-wrong corpus this used to lean on is gone, and with it any bucket
+    // that had three dead ends in it.
+    await page.goto("/#/hafs-kfqc/2:120");
+    // Both dead-end pages stay unmounted, but 2:145's page 22 does not — a hop
+    // target keeps its page warm. Name page 19 rather than taking `.first()`,
+    // which resolves to whichever <svg> is first in the DOM, warm or visible.
+    await expect(page.locator('svg[aria-labelledby="page-label-19"]')).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: /الآية الحالية البقرة · ٢:١٢٠/ }),
+    ).toBeVisible();
 
-    // 2:48's ▶ bucket (Loop 4a data): mutashabihat 7:140 + 14:5 and the
-    // related-meaning 82:19 — all on pages that are NOT vendored yet (4b).
-    await tapAyah(page, "#verse-55");
     const rail = page.getByRole("group", { name: "روابط الآية" });
-    const laterChip = rail.getByRole("button", { name: /سور لاحقة/ });
-    await expect(laterChip).toBeVisible();
-    await laterChip.tap();
+    await expect(rail).toBeVisible();
 
-    const sheet = page.getByRole("dialog");
-    // Every link is shown, but every leap is disabled — honest dead-end notes.
-    const hopBtns = sheet.getByRole("button", { name: /انتقل إلى/ });
-    await expect(hopBtns.first()).toBeVisible();
-    const count = await hopBtns.count();
-    expect(count).toBeGreaterThanOrEqual(3);
-    for (let i = 0; i < count; i++) {
-      await expect(hopBtns.nth(i)).toBeDisabled();
+    for (const chipName of [/متشابهات في السورة/, /سور لاحقة/]) {
+      const chip = rail.getByRole("button", { name: chipName });
+      await expect(chip).toBeVisible();
+      await chip.tap();
+
+      const sheet = page.getByRole("dialog");
+      // Every link is shown, but every leap is disabled — honest dead-end notes.
+      const hopBtns = sheet.getByRole("button", { name: /انتقل إلى/ });
+      await expect(hopBtns.first()).toBeVisible();
+      const count = await hopBtns.count();
+      for (let i = 0; i < count; i++) {
+        await expect(hopBtns.nth(i)).toBeDisabled();
+      }
+      await expect(sheet.getByText(/غير متوفّرة بعد/).first()).toBeVisible();
+
+      await sheet.getByRole("button", { name: "إغلاق" }).tap();
+      await expect(page.getByRole("dialog")).toHaveCount(0);
     }
-    await expect(sheet.getByText(/غير متوفّرة بعد/).first()).toBeVisible();
   });
 });

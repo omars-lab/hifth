@@ -1,23 +1,23 @@
 {
-  "10": {
+  "11": {
     "edges": [
       {
         "type": "mutashabih",
-        "to": "quran/hafs-kfqc/11:51",
+        "to": "quran/hafs-kfqc/11:52",
         "page": 227,
         "dir": {
           "dSurah": -60,
-          "dPage": -343
+          "dPage": -344
         }
       }
     ],
     "ext": []
   },
-  "11": {
+  "12": {
     "edges": [
       {
         "type": "mutashabih",
-        "to": "quran/hafs-kfqc/11:51",
+        "to": "quran/hafs-kfqc/11:52",
         "page": 227,
         "dir": {
           "dSurah": -60,

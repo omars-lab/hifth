@@ -24,6 +24,7 @@ import {
   type View,
 } from "@hifth/core";
 import { loadPageSvg } from "../assets";
+import { toArabicDigits } from "../format";
 import styles from "./PageStage.module.css";
 
 interface PageStageProps {
@@ -335,7 +336,18 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
         const loc = resolver.resolve(key);
         if (!loc) return; // unvendored target — App gates the chip, this is a no-op
         const mp = await ensurePage(loc.page);
-        if (!mp) return; // page couldn't mount — no-op, no ghost page
+        // A page that will not mount has to be *said*, not swallowed. Staying
+        // silent leaves the previous page on the stage while the chrome and the
+        // live region have already committed to the new number — the reader is
+        // then told they are on 19 while looking at 7, which for a hifz
+        // instrument is worse than showing nothing at all. See the ④ eviction
+        // probe: offline with an evicted cache is exactly how a *vendored* page
+        // fails to fetch, so App's resolver gate never catches it.
+        if (!mp) {
+          setStatus("error");
+          return; // no ghost page
+        }
+        setStatus("ready");
         // Claimed only once the target really mounted: a navigateTo that fails
         // above must leave the initial page in charge rather than blank the stage.
         navigatedRef.current = true;
@@ -363,7 +375,11 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
       },
       async showPage(next) {
         const mp = await ensurePage(next);
-        if (!mp) return;
+        if (!mp) {
+          setStatus("error"); // same contract as navigateTo above
+          return;
+        }
+        setStatus("ready");
         navigatedRef.current = true;
         if (next !== currentPageRef.current) setCurrentPage(next);
         cancelTween();
@@ -605,8 +621,12 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
       <div ref={layerRef} className={styles.layer} aria-busy={status === "loading"} />
       {status === "loading" && <div className={styles.hint}>…جاري التحميل</div>}
       {status === "error" && (
+        /* Names the page it failed on, because the chrome has already moved to
+           that number and the stage has not. Without the number the reader gets
+           "a page" failed while the header says ١٩ and page ٧ is on screen, and
+           has to guess which one they are looking at. */
         <div className={styles.hint} role="alert">
-          تعذّر تحميل الصفحة. أعد المحاولة.
+          تعذّر تحميل صفحة {toArabicDigits(page)}. أعد المحاولة.
         </div>
       )}
     </div>

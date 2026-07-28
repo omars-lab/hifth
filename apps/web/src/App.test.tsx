@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { describe, it, expect, vi, beforeAll, afterAll, afterEach } from "vitest";
 import { render, screen, waitFor, act } from "@testing-library/react";
 import { App } from "./App";
 
@@ -43,7 +43,27 @@ const PAGE_SVG =
   "</svg>";
 
 describe("App shell", () => {
-  beforeEach(() => {
+  // beforeAll/afterAll, deliberately, and not beforeEach/afterEach.
+  //
+  // The app's loading chain is longer than any one assertion: a manifest fetch
+  // resolves, that sets state, an effect runs, and only then is the selection's
+  // adjacency shard requested. A test that has already asserted what it came to
+  // assert returns while that chain is still in flight. Tearing the stub down
+  // per-test therefore removed the network from underneath a fetch the app had
+  // every right to make, and it hit Node's real `fetch` with a root-relative
+  // URL — `TypeError: Failed to parse URL from /assets/adj/hafs-kfqc/2.json`.
+  //
+  // It surfaced as an *unhandled rejection*, not a failed assertion, so the
+  // suite reported 89/89 passing and `make ci` failed only when the machine was
+  // busy enough for the continuation to land after teardown. A file-scoped stub
+  // is also the more honest model: the network does not cease to exist because
+  // a test stopped looking at it.
+  //
+  // If you are tempted to move these back: vitest.setup.ts now installs a fetch
+  // that throws by name, so the same mistake fails loudly instead of silently —
+  // but it still only fails on the runs that lose the race. The lifecycle is the
+  // fix; the guard only makes the diagnosis take minutes instead of an evening.
+  beforeAll(() => {
     vi.stubGlobal(
       "fetch",
       vi.fn((url: string) => {
@@ -59,8 +79,9 @@ describe("App shell", () => {
       }),
     );
   });
+  afterAll(() => vi.unstubAllGlobals());
+
   afterEach(() => {
-    vi.unstubAllGlobals();
     // The hash router writes location.hash as the view changes; jsdom shares one
     // window across tests, so clear it or the next cold-open restores stale state.
     window.history.replaceState(null, "", window.location.pathname);

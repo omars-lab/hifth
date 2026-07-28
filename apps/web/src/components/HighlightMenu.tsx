@@ -149,8 +149,9 @@ export function HighlightMenu({
                 : canHop(toKey)
                   ? "الربط على مستوى الكلمة يصل مع الحزمة القادمة"
                   : "هذه الصفحة غير متوفّرة بعد";
-              // The range member this row came from — also the diff's "here".
-              const fromKey = edge.sources[0]!;
+              // The range member whose edge won the merge — the ayah this row's
+              // note is about, and so the diff's "here" and the leap's origin.
+              const fromKey = edge.from;
               const diffable = diffPair(fromKey, toKey) !== null;
               const isOpen = expanded === edge.to;
               const diffId = `range-diff-${edge.to.replace(/[^\w-]/g, "-")}`;

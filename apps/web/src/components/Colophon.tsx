@@ -36,6 +36,14 @@ interface Credit {
  * The mutashabihat licence asks for a mention "in your app or any other kind of
  * work" — SOURCES.md has promised this surface since Loop 4a. The full terms,
  * pins and hashes are in SOURCES.md; this is the reader-facing half.
+ *
+ * These rows are NOT authored here. Each one is declared verbatim in its
+ * source's ```colophon fence in SOURCES.md, and `gate:license-copy` fails the
+ * build if this array is not exactly that set — same string, same link, no
+ * extras. Editing a licence line here alone will not ship; edit the fence and
+ * bring this into line with it. The binding exists because these two files once
+ * disagreed and only one of them was machine-read: the KFGQPC artwork was
+ * credited as non-commercial for several loops, and nothing anywhere went red.
  */
 const CREDITS: readonly Credit[] = [
   {

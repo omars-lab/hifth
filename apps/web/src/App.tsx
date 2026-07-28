@@ -486,7 +486,7 @@ export function App(): JSX.Element {
   // A merged range row hops from the member that produced the edge (its diff's
   // "here"), so the trail bead points at a real ayah, not at the passage.
   const handleRangeHop = useCallback(
-    (edge: MergedEdge) => handleHop(edge, edge.sources[0]),
+    (edge: MergedEdge) => handleHop(edge, edge.from),
     [handleHop],
   );
 
