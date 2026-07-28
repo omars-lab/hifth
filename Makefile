@@ -40,7 +40,7 @@ dev: ## Start the web app in dev mode (Vite HMR) — the main local dev loop
 	$(WEB) dev
 
 .PHONY: build
-build: ## Production build (core first — package exports resolve to its dist/)
+build: node-ok ## Production build (core first — package exports resolve to its dist/)
 	$(CORE) build
 	$(WEB) build
 
@@ -94,8 +94,14 @@ report: ## Open the last e2e run's report — traces, image diffs, the failing s
 	$(WEB) exec playwright show-report
 
 .PHONY: core
-core: ## Build @hifth/core only (needed before typecheck/test — the Loop 0 lesson)
+core: node-ok ## Build @hifth/core only (needed before typecheck/test — the Loop 0 lesson)
 	$(CORE) build
+
+# Everything slow hangs off `core` or `build`, so guarding those two guards the
+# lot. Cheap enough (one `node --version`) to sit in front of every one of them.
+.PHONY: node-ok
+node-ok: ## Check the running node against .nvmrc + package.json engines
+	@scripts/require-node.sh
 
 .PHONY: gates
 gates: build ## The static gates: no <text> in SVG, license present, JS budget <150KB gz
