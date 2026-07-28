@@ -227,13 +227,29 @@ export interface RangeSource {
   readonly adj: AyahAdjacency | undefined;
 }
 
-/** Metadata fields that make one duplicate of an edge more useful than another. */
-const RICHNESS_FIELDS = ["note", "twin", "root", "ctx"] as const;
+/**
+ * What each metadata field is worth when two duplicates of an edge compete.
+ *
+ * Not a count. Counting made a hand-written note tie with a bare `ctx: true`,
+ * and a tie keeps the first seen — so highlighting 2:47–2:48 dropped the curated
+ * «شفاعة ↔ عدل» in favour of a boolean, making the passage view strictly less
+ * informative than tapping 2:48 alone.
+ *
+ * The weights are ranked so each field outranks every lesser field combined: a
+ * sentence a hafiz wrote about *this* pairing beats any amount of derived
+ * flagging, `twin` (a claim these two are near-identical) beats a root and a
+ * context marker, and `ctx` — one bit saying the surroundings differ — is the
+ * tiebreak of last resort. Adding a field means placing it in this order, not
+ * appending to a list.
+ */
+const RICHNESS_WEIGHTS = { note: 8, twin: 4, root: 2, ctx: 1 } as const;
 
 /** How much a hafiz-facing edge tells you (spec §9's note/twin/root/ctx). */
 function richness(edge: Edge): number {
   let n = 0;
-  for (const f of RICHNESS_FIELDS) if (edge[f] != null && edge[f] !== false) n += 1;
+  for (const f of Object.keys(RICHNESS_WEIGHTS) as (keyof typeof RICHNESS_WEIGHTS)[]) {
+    if (edge[f] != null && edge[f] !== false) n += RICHNESS_WEIGHTS[f];
+  }
   return n;
 }
 
@@ -252,8 +268,10 @@ function bareTarget(to: string): string {
  *    types stays two rows — a look-alike and a shared root are different reasons
  *    to leap — but the same pair seen from two ayahs of the range collapses.
  * 2. **Richer metadata wins a collision.** The surviving row is whichever
- *    duplicate carries more of note/twin/root/ctx (ties keep the first seen, so
- *    the result is stable in range order); every contributor is still recorded in
+ *    duplicate scores higher on `RICHNESS_WEIGHTS` — note over twin over root
+ *    over ctx, each outranking the lesser ones combined, so a curated note is
+ *    never displaced by derived flags (ties keep the first seen, so the result
+ *    is stable in range order); every contributor is still recorded in
  *    `sources`. The winner is kept whole rather than field-merged: a `note` is
  *    written about *its* source ayah and would lie if grafted onto another's —
  *    which is also why `from` follows the winner rather than `sources[0]`. A row
