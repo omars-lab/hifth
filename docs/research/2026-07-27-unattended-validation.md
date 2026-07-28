@@ -560,9 +560,46 @@ the human would be the one assumed wrong. Roots are read from the shipped `asset
 instead, because `build-roots.mjs` already parses `ROOT:` and a second parser of it is the same
 mistake in the other direction.
 
-**⑨ The `evidence` field and `make validate-auto` — ~half a day.**
-Last, deliberately: build it once there are three or four real evidence producers to render, so the
-schema is designed against actual output rather than guessed.
+**⑨ The `evidence` field and `make validate-auto` — ✅ done, 2026-07-28. Three departures from the
+design.**
+Last, deliberately: built once there were three real evidence producers to render, so the schema
+was designed against actual output rather than guessed. `scripts/validate-auto.mjs` runs each
+check's declared `evidence.run`, writes the real exit code into `docs/validation/evidence/<id>.json`
+— it is the only writer of those files — and regenerates the guide, because the guide renders them
+and `gate:validation` is about to call it stale. Live today: 2/3 producers green, 2 of 4 claimed
+runbook steps discharged, 6 named residues still human.
+
+Designing against real output changed three things:
+
+1. **Steps got ids, not positions.** The design implied `covers: [3, 4]`. Writing it that way and
+   then reading `e2e/share-a11y.spec.ts` settled it: its comments said "Runbook step 4" and had been
+   wrong for two loops, because the runbook was condensed and nothing pointed back. `docs/map.json`
+   already refuses line numbers for the same reason. So `covers` names step ids, the gate fails on
+   an id no step has and on two steps sharing one, and the spec's six comments were rewritten to
+   name the steps they are about.
+2. **`produces` was dropped.** The design stored the evidence path beside the check. A path written
+   down in two places is a path that can disagree with itself; `evidencePath(id)` derives it.
+3. **Three of the six checks deliberately have no `evidence` block**, and one of them is the
+   interesting case. `screen-reader-walkthrough` is the check with the most machine-checkable
+   surface — `e2e/__aria__/` already asserts every label — and it gets none, because its steps
+   already say so and ask you to judge whether the label *sounds* like something you would say.
+   Striking those would not discharge the step; it would delete the check.
+
+Two things measured rather than assumed. `evidence.run` must never be a `make` target: `make
+source-offer` returns exit 2 on failure, because GNU make reports every failed recipe as 2, which
+flattens `check-source-offer.mjs`'s own 1 ("does not resolve") vs 3 ("could not tell") into one code
+and would let a network timeout read as a verdict. And `outcomeOf` treats 3 as `unknown`, which
+strikes nothing — verified by inducing a producer that exits 3 and watching the step print without
+its `[machine]` prefix.
+
+`residue` is REQUIRED, and it is the whole design. The gate rejects an `evidence` block that names
+no remainder, in those words: *an automated run that names no remainder is one claiming to have done
+their job.* That is this feature's own failure mode — the standing objection in §7, that a muted
+watcher is worse than none because the check it stood in for now looks covered — pointed at itself.
+
+`make validate-auto` exits 0 even when a producer goes red, and one is red: the GPL §6 offer 404s
+anonymously because the repository is still private. That is the correct answer, and it makes the
+outstanding task visible in `make validate` instead of living in a note.
 
 ---
 

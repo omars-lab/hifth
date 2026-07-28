@@ -1,0 +1,21 @@
+{
+  "check": "kfgqpc-terms-primary-source",
+  "run": "pnpm gate:license-copy",
+  "ranAt": "2026-07-28T20:34:12Z",
+  "commit": "b8f12ce",
+  "on": "darwin · node v20.19.4",
+  "exit": 0,
+  "outcome": "pass",
+  "covers": [
+    "restatements-agree"
+  ],
+  "residue": [
+    "Reading qurancomplex.gov.sa itself. The host times out on TCP 443 from every network this project's tooling runs on (measured, twice) and the Wayback mirror is not fetchable either — that is why research ⑦ was cancelled rather than built, and why no watcher will ever cover this.",
+    "Judging whether our summary is **stricter** than the source. A gate can prove two copies match; only a reader can notice that both are wrong in the same direction, and overstating someone else's terms fails silently because it reads as caution."
+  ],
+  "tail": [
+    "> hifth@0.0.0 gate:license-copy /Users/omareid/Workspace/git/hifth",
+    "> node scripts/gate-license-copy.mjs",
+    "gate:license-copy — OK (4 credited row(s) match SOURCES.md)"
+  ]
+}

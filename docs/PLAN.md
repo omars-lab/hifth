@@ -167,7 +167,9 @@ what device, and when?". Each is an entry in
 result **tunes**, and the steps to run it with what to expect on screen at each one. That
 runbook renders three ways — `make validate CHECK=<id>` here, `make guide` to a phone-shaped
 page served over the LAN, and the `validate` skill drives the session — so it is written
-once and cannot drift. `gate:validation` fails if the ledger starts lying, including a
+once and cannot drift. A fourth reader is also a writer: `make validate-auto` runs the half
+of those steps a command can now do and writes down what happened, so nobody walks a step a
+machine has already walked. `gate:validation` fails if the ledger starts lying, including a
 pending human check nobody could follow. Recording a result is `make record`, not a
 paragraph edit here — see §Testing plan.
 
@@ -377,6 +379,16 @@ silently. `make validate CHECK=<id>` prints the same runbook here;
 `make record CHECK=<id> RESULT='…'` banks the verdict, regenerates the guide, and prints the
 `tunes` work now owed. One source, three renderers — a runbook restated anywhere else drifts
 silently, so this document deliberately names ids instead of steps.
+
+**Run the machine half first.** Parts of these checks stopped needing a human as the
+follow-ups landed, and a check may say so: an `evidence` block naming one command, the
+runbook step **ids** it discharges, and — required — the `residue` it cannot.
+`make validate-auto` runs those commands and writes the real exit code into
+`docs/validation/evidence/`, which is what strikes a step off the terminal and the phone.
+A run is written, never asserted, and exit 3 ("could not tell") discharges nothing — a
+producer that could not reach its subject has proved nothing, and treating that as a pass
+is how an automated run comes to look like it did someone's job. The rest is the point:
+`gate:validation` rejects an `evidence` block that names no remainder.
 
 **The rule:** a manual result must tighten something automated — a threshold, a
 fixture, or a new gate. A check that feeds nothing has to be re-run by hand forever,
