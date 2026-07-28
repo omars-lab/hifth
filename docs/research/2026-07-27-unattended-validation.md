@@ -422,18 +422,31 @@ a test written to the design would have encoded a recovery that did not exist.
    uninstalled iOS origin that sweep arrives on a 7-day timer, so this was the *default* outcome,
    with Loop 6a's promise silently false and nothing anywhere going red.
 
-   Getting out of it took three measurements. Three reloads left the precache empty. An explicit
+   Getting out of it took four measurements. Three reloads left the precache empty. An explicit
    `registration.update()` did nothing — identical `sw.js` bytes mean no new worker, so no
    `install`, so no precache. `unregister()` followed by `register()` in the same page brought the
    registration straight back as `activated` with `installing` never set: the old worker was still
    controlling this client, so unregistration only takes effect once that client goes away, and
-   re-registering the same script URL resurrects it. Dropping the last client is the step that
-   makes the next registration a genuine first install — so `repairShellCache()` in
-   `apps/web/src/pwa.ts` unregisters and reloads, once per tab, only when the shell is actually
-   missing and only when online (unregistering while offline trades a broken cold start for no
-   worker at all). The integrity check is `caches.match("index.html", {ignoreSearch:true})` —
-   behavioural ("can I still boot offline?") rather than structural, so a workbox version bump
-   does not read as an eviction.
+   re-registering the same script URL resurrects it. The obvious next move — `unregister()` then
+   `location.reload()`, so the reload drops the last client — shipped, and turned out to be **a
+   coin flip**: the removal and the reloaded page's own `register()` race, and `register()` winning
+   clears the uninstalling flag and hands back the same already-activated worker. No `install`, no
+   precache, no controller. Ten repeats of the eviction e2e on one machine: five dead in exactly
+   that state, which is why the test read as flaky rather than as the product defect it was.
+
+   A URL the registration has never registered is not a race. `repairShellCache()` in
+   `apps/web/src/pwa.ts` re-registers the *same* `sw.js` — same bytes, same precache manifest, same
+   cache name — under a `?shell-repair=1` suffix, which makes `register()` mean *install* instead
+   of *acknowledge*. The install refills the shared precache, and the worker still controlling the
+   page reads it, so nothing has to be unregistered and the new worker never has to activate. It
+   then waits for that install to *finish* before doing anything else: workbox writes the entries
+   one at a time, `index.html` first and the app's scripts last, so a repair that stops when the
+   shell reappears leaves an app that boots offline to a blank page — a worse failure than the
+   empty cache, because it looks like a working app that lost its contents. Only then does it
+   reload once per tab, to bring the runtime caches back too. All of it only when the shell is
+   actually missing and only when online (there is nothing to refill from otherwise). The integrity
+   check is `caches.match("index.html", {ignoreSearch:true})` — behavioural ("can I still boot
+   offline?") rather than structural, so a workbox version bump does not read as an eviction.
 
 2. **The app claimed a page it was not showing.** Offline with an evicted cache is how a
    *vendored* page fails to fetch, which is the one case that slips past App's resolver gate.

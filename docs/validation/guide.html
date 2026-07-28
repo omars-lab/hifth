@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" data-ledger-hash="0c207d330210">
+<html lang="en" data-ledger-hash="bc44c685e75e">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -107,7 +107,7 @@ label.do span { padding: 8px 0; }
   <p class="rule">Every result here must tighten something automated — a threshold, a
   fixture, a gate. That is what <b>tunes</b> is for at the foot of each card. A verdict
   that tunes nothing has to be bought again by hand, forever.</p>
-  <p class="src">Generated from <code>docs/validation/ledger.json</code> · <code>0c207d330210</code>
+  <p class="src">Generated from <code>docs/validation/ledger.json</code> · <code>bc44c685e75e</code>
   · never edit this file — run <code>make guide</code></p>
 </header>
 
@@ -522,7 +522,7 @@ label.do span { padding: 8px 0; }
     <h3>Record it</h3>
     <pre class="cmd">make record CHECK=offline-survival-8-day RESULT='iOS &lt;ver&gt;, pinned &lt;date&gt;, checked &lt;date+8&gt; — tab: &lt;evicted|intact&gt;, installed: &lt;evicted|intact&gt;; re-pin offer &lt;appeared|did not&gt;'</pre>
     <p class="tunes-lead">Then do what it tunes:</p>
-    <ul class="tunes"><li>apps/web/e2e/offline.spec.ts — the <code>Hifth · eviction</code> describe already asserts recovery against a simulated sweep; tune it to what the phone actually did (which bucket lost what, and whether the shell repair fired before the reader noticed)</li><li>apps/web/src/pwa.ts — <code>repairShellCache()</code> reloads once to force a fresh install, because that is the only thing observed to refill an evicted precache. If iOS evicts differently — registration gone too, or storage back but stale — that trigger is what changes.</li><li>apps/web/src/storage.ts — the re-pin offer's trigger, if eviction looks different than assumed</li></ul>
+    <ul class="tunes"><li>apps/web/e2e/offline.spec.ts — the <code>Hifth · eviction</code> describe already asserts recovery against a simulated sweep; tune it to what the phone actually did (which bucket lost what, and whether the shell repair fired before the reader noticed)</li><li>apps/web/src/pwa.ts — <code>repairShellCache()</code> re-registers <code>sw.js</code> under a query-suffixed URL, because a script URL the registration has never seen is the only thing observed to force the install that refills an evicted precache. If iOS evicts differently — registration gone too, or storage back but stale — that trigger is what changes.</li><li>apps/web/src/storage.ts — the re-pin offer's trigger, if eviction looks different than assumed</li></ul>
     <p class="expect">Written up in docs/decisions/loop-6b.md</p>
   </section>
 </article>

@@ -193,9 +193,15 @@ test.describe("Hifth · eviction", () => {
     await expect(page.locator("svg[role='group']").first()).toBeVisible();
     await awaitCached(page, "/index.html");
     await awaitCached(page, "/assets/manifest.json");
-    // The repair replaces the worker, so wait for the new one to take control:
-    // a refilled precache in front of an uncontrolled page serves nobody, since
-    // the navigation request never reaches the worker that holds it.
+    await awaitCached(page, PAGE_7_SVG);
+    // Then wait for the tab to go quiet. The repair reloads itself once the
+    // refill is confirmed, and that reload is the whole precondition: going
+    // offline while the refill is still in flight tests the wreckage, not the
+    // repair — an offline boot mid-install serves `index.html` (the first entry
+    // written) and then no scripts (the last), which renders exactly nothing.
+    await page.waitForLoadState("networkidle");
+    // A refilled precache in front of an uncontrolled page serves nobody: the
+    // navigation request never reaches the worker that holds it.
     await awaitController(page);
 
     // The claim is not "a cache exists", it is "offline still works" — so go

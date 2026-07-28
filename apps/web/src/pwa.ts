@@ -102,42 +102,62 @@ export async function shellCached(): Promise<boolean> {
 }
 
 /**
- * Marks that this tab has already spent its one repair. Session-scoped on
- * purpose: the repair ends in a reload, so the only thing that can stop a boot
- * loop is a flag that survives the reload and dies with the tab.
+ * How many repairs this document has started. Only ever compared against zero;
+ * the count is here because it also supplies the distinct script URL below.
  */
-const REPAIR_FLAG = "hifth:shell-repair";
+let repairsStarted = 0;
 
-/** `true` if the flag was written and can be read back — see repairShellCache. */
-function markRepairAttempted(): boolean {
-  try {
-    sessionStorage.setItem(REPAIR_FLAG, "1");
-    return sessionStorage.getItem(REPAIR_FLAG) === "1";
-  } catch {
-    return false;
-  }
+/**
+ * Resolve once `worker` has left `installing`, `true` if it got as far as
+ * installed. Workbox writes the precache *during* install, one entry at a time,
+ * so any earlier answer is a half-filled cache: waiting on the shell alone
+ * returns on the first of ten entries and leaves the app's own scripts out.
+ */
+function awaitInstalled(worker: ServiceWorker, timeoutMs: number): Promise<boolean> {
+  const settled = (): boolean | null =>
+    worker.state === "installing" ? null : worker.state !== "redundant";
+  const now = settled();
+  if (now !== null) return Promise.resolve(now);
+
+  return new Promise((resolve) => {
+    const timer = setTimeout(() => resolve(false), timeoutMs);
+    worker.addEventListener("statechange", () => {
+      const done = settled();
+      if (done === null) return;
+      clearTimeout(timer);
+      resolve(done);
+    });
+  });
 }
 
-function repairAlreadyAttempted(): boolean {
-  try {
-    return sessionStorage.getItem(REPAIR_FLAG) === "1";
-  } catch {
-    return false;
-  }
-}
+/**
+ * Marks that this tab has already spent its one repair *reload*. Session-scoped
+ * because the thing it guards survives a reload and must die with the tab.
+ *
+ * Deliberately not a guard on the repair itself. It used to be one, and that is
+ * how a repair that silently did nothing (see below) became permanent: the flag
+ * was spent, so no later boot in that tab ever tried again. The refill is now
+ * unconditional and only the reload is rationed.
+ */
+const RELOAD_FLAG = "hifth:shell-repair";
 
-function clearRepairFlag(): void {
+/** `true` if the flag was written and can be read back. */
+function claimReload(): boolean {
   try {
-    sessionStorage.removeItem(REPAIR_FLAG);
+    if (sessionStorage.getItem(RELOAD_FLAG) === "1") return false;
+    sessionStorage.setItem(RELOAD_FLAG, "1");
+    return sessionStorage.getItem(RELOAD_FLAG) === "1";
   } catch {
-    /* nothing to clear if we could never write it */
+    // Without durable storage (private mode, storage disabled) there is nothing
+    // to break a loop with, and an app that reloads itself forever is worse than
+    // one whose mushaf refills on the next visit.
+    return false;
   }
 }
 
 /**
  * Rebuild the precache after the browser has evicted it. Returns `true` if the
- * shell is cached on return; a repair that has to reload navigates away instead
- * of returning.
+ * shell is cached on return.
  *
  * **Why this has to exist.** Workbox fills the precache in the service worker's
  * `install` handler. Eviction does not uninstall the worker — it takes the
@@ -154,53 +174,83 @@ function clearRepairFlag(): void {
  * working and Loop 6a's promise ("a page you have visited still opens when the
  * network is gone") was false with nothing anywhere going red.
  *
- * **Why the reload.** Measured, not assumed — every step below was probed
- * against a real `Storage.clearDataForOrigin` (research ④, §3.3):
+ * **Why a second script URL.** The only thing that refills a precache is an
+ * `install`, and the only thing that causes an `install` is a worker the
+ * registration has not seen. Measured against a real
+ * `Storage.clearDataForOrigin` (research ④, §3.3):
  *   • three reloads alone → precache still empty;
- *   • `registration.update()` → no new worker at all, because the `sw.js` bytes
- *     are identical, so no `install`, so no precache;
+ *   • `registration.update()` → no new worker at all: the `sw.js` bytes are
+ *     identical, so there is nothing to install;
  *   • `unregister()` then `register()` in the same page → the registration
- *     comes straight back as `activated` with `installing` never set. The old
- *     worker was still controlling this client, so unregistration only takes
- *     effect once that client goes away, and re-registering the same script URL
- *     resurrects it. Still no `install`.
- * Dropping the last client is the step that makes the next registration a
- * genuine first install, and a reload is how a page drops itself. It is a real
- * cost — one flash at startup — paid at most once per tab, only after an actual
- * eviction, and only when there is a network to refill from.
+ *     comes straight back as `activated`, `installing` never set. Unregistering
+ *     from a client the registration still controls only sets the uninstalling
+ *     flag; the removal waits for that client to go away.
+ *   • `unregister()` then `location.reload()` → **a coin flip.** The reload is
+ *     what drops the client, so the removal and the reloaded page's own
+ *     `register()` race, and `register()` winning is not harmless: it clears
+ *     the uninstalling flag and hands back the same already-activated worker.
+ *     No `install`, no precache, no controller — and since the repair had spent
+ *     its one attempt, offline stayed broken for the life of the tab. Ten runs
+ *     of the eviction e2e on one machine: five dead in exactly that state.
  *
- * Guarded on being online: unregistering is destructive, and doing it offline
- * would trade a broken cold start for no service worker at all. Offline, the
- * honest move is to leave the wreckage alone and repair on the next connected
- * boot.
+ * A URL the registration has never registered is not a race. `sw.js?…` is the
+ * same script — same bytes, same precache manifest, same cache name — under a
+ * name that makes `register()` mean *install* instead of *acknowledge*. The
+ * install refills the shared precache, which is enough on its own: the worker
+ * still controlling this page reads that cache, so the shell is back without
+ * anything being unregistered and without the new worker having to activate.
+ *
+ * **Why it still reloads afterwards.** Eviction took the runtime caches too —
+ * the mushaf pages and shards this tab has read — and nothing re-requests what
+ * is already on screen. Refilling the shell alone would leave a reader who goes
+ * offline now with an app that boots to no page. A reload re-fetches what the
+ * tab is showing, through the worker, which is what makes "a page you have
+ * visited still opens" true again of the page in front of them. It happens only
+ * after the precache is confirmed back, so it can no longer be the step that
+ * leaves the app broken, and at most once per tab.
+ *
+ * Guarded on being online, because there is nothing to refill from otherwise;
+ * offline the honest move is to leave the wreckage alone and repair on the next
+ * connected boot.
  */
 export async function repairShellCache(): Promise<boolean> {
-  if (await shellCached()) {
-    // Intact — including "intact again, because the reload below worked". This
-    // is also the only place the flag is cleared, so a *second* eviction later
-    // in the same session still gets its own repair.
-    clearRepairFlag();
-    return true;
-  }
+  if (await shellCached()) return true;
   if (!("serviceWorker" in navigator)) return false;
   // `navigator.onLine` false is a reliable "definitely offline"; true only means
   // "an interface is up". That asymmetry is the right way round here — the cost
-  // of a wrong `true` is a reload that fails to refill and is not retried.
+  // of a wrong `true` is an install that fails and is not retried until the next
+  // page load.
   if (!navigator.onLine) return false;
-  if (repairAlreadyAttempted()) return false;
+  // One per document. A repair that did not work will not work on a retry
+  // either, and the next boot gets its own attempt for free.
+  if (repairsStarted > 0) return false;
 
-  const regs = await navigator.serviceWorker.getRegistrations();
-  if (regs.length === 0) return false;
+  const reg = await navigator.serviceWorker.getRegistration();
+  // Whichever worker the registration knows about — its script URL is where the
+  // build actually put `sw.js`, which is the plugin's business rather than ours.
+  const script = reg?.active ?? reg?.waiting ?? reg?.installing;
+  if (!reg || !script) return false;
 
-  // Write the flag *before* the destructive part, and only proceed if it can be
-  // read back. Without durable storage (private mode, storage disabled) there is
-  // nothing to break the loop, and an app that reloads itself forever is worse
-  // than one that cannot boot offline.
-  if (!markRepairAttempted()) return false;
+  repairsStarted += 1;
+  const url = new URL(script.scriptURL);
+  url.searchParams.set("shell-repair", String(repairsStarted));
 
-  await Promise.all(regs.map((r) => r.unregister()));
-  location.reload();
-  return false;
+  let installing: ServiceWorker | null = null;
+  try {
+    // `register()` resolves when the job is accepted, not when the worker has
+    // finished installing, and it is the install that does the refilling — so
+    // what this waits on afterwards is the new worker, not the registration.
+    const next = await navigator.serviceWorker.register(url.href, { scope: reg.scope });
+    installing = next.installing ?? next.waiting ?? next.active;
+  } catch {
+    return false;
+  }
+  if (!installing) return false;
+  if (!(await awaitInstalled(installing, 30_000))) return false;
+
+  if (!(await shellCached())) return false;
+  if (claimReload()) location.reload();
+  return true;
 }
 
 export function initPwa(): void {

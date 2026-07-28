@@ -410,7 +410,7 @@
       },
       "tunes": [
         "apps/web/e2e/offline.spec.ts — the `Hifth · eviction` describe already asserts recovery against a simulated sweep; tune it to what the phone actually did (which bucket lost what, and whether the shell repair fired before the reader noticed)",
-        "apps/web/src/pwa.ts — `repairShellCache()` reloads once to force a fresh install, because that is the only thing observed to refill an evicted precache. If iOS evicts differently — registration gone too, or storage back but stale — that trigger is what changes.",
+        "apps/web/src/pwa.ts — `repairShellCache()` re-registers `sw.js` under a query-suffixed URL, because a script URL the registration has never seen is the only thing observed to force the install that refills an evicted precache. If iOS evicts differently — registration gone too, or storage back but stale — that trigger is what changes.",
         "apps/web/src/storage.ts — the re-pin offer's trigger, if eviction looks different than assumed"
       ],
       "record": "docs/decisions/loop-6b.md"
