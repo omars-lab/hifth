@@ -633,14 +633,21 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
   );
 });
 
-/** Restart the pulse animation on the freshly-drawn selection clone. */
+/**
+ * Restart the pulse animation on the freshly-drawn selection.
+ *
+ * Every element of the group, not the first: a selection is now one marker
+ * swipe per line the ayah occupies (@hifth/core ink.ts), so `querySelector`
+ * would fade in line one and snap the rest into place beside it — a hop landing
+ * half-animated, which reads as a dropped frame rather than as a bug.
+ */
 function pulse(svg: SVGSVGElement): void {
-  const sel = svg.querySelector<SVGElement>('[data-hl-group="selection"]');
-  if (!sel) return;
-  sel.classList.remove("pulse");
-  // Force reflow so re-adding the class restarts the keyframes.
-  void (sel as unknown as SVGGraphicsElement).getBBox?.();
-  sel.classList.add("pulse");
+  for (const sel of svg.querySelectorAll<SVGElement>('[data-hl-group="selection"]')) {
+    sel.classList.remove("pulse");
+    // Force reflow so re-adding the class restarts the keyframes.
+    void (sel as unknown as SVGGraphicsElement).getBBox?.();
+    sel.classList.add("pulse");
+  }
 }
 
 /** Read a page's viewBox width (defaults to the Madani 345). */

@@ -1,18 +1,63 @@
 /*
  * Highlight overlay styles (spec §3, §9).
  *
- * The Highlighter (in @hifth/core) clones an ayah polygon into the SVG's
- * `#hifth-overlay` group and tags it `.hl .hl-<style>`. These clones live inside
- * the SVG document, so their styles must be global (not CSS-module-scoped). The
- * wash + ring is the amber "you are here" reserved by the design tokens.
+ * The Highlighter (in @hifth/core) draws into the SVG's `#hifth-overlay` group
+ * and tags what it draws `.hl .hl-<style>`. These elements live inside the SVG
+ * document, so their styles must be global (not CSS-module-scoped).
+ *
+ * Two renderings, and the class says which. `.hl-ink` is a marker swipe — a
+ * `<line>` the highlighter derived from the polygon's rectangles (@hifth/core
+ * ink.ts). Without it the element is a filled clone of the polygon itself,
+ * which is what a breadcrumb always is and what a selection falls back to on
+ * geometry ink.ts declines to read. Both renderings are styled below and
+ * neither may borrow the other's rules: `fill: none` on a clone would leave a
+ * hairline tracing of the polygon, which looks like a bug rather than a box.
  */
 
 #hifth-overlay .hl {
   pointer-events: none;
 }
 
-/* Selection — the amber wash. One selection at a time. */
-#hifth-overlay .hl-sel {
+/* The marker rules. Everything about ink reading as ink rather than as a box
+   lives in this one block.
+
+   `mix-blend-mode: multiply` is the one that matters. An amber at 24% alpha is
+   composited *over* the glyphs, so it greys the black text — a film laid on top
+   of the page, which is the opposite of what a highlighter does. Multiply
+   darkens the paper and leaves the ink under it alone, so the scripture stays
+   black and legible at a much more confident colour than alpha ever allowed.
+   It also darkens where two swipes overlap, for free, exactly as a second pass
+   of a pen does — which is what a selection inside a range now looks like.
+
+   The stacking context that scopes the blend is `isolation: isolate` on the SVG
+   *root*, in components/PageStage.module.css — not here, on the overlay group,
+   which is where it looks like it belongs and is exactly wrong. See that rule
+   for why.
+
+   No stroke ring, and no `fill`. A ring around a region is the grammar of
+   selection UI; the round caps are the pen's edge, and that is the only edge
+   ink has. */
+#hifth-overlay .hl-ink {
+  fill: none;
+  stroke-linecap: round;
+  mix-blend-mode: multiply;
+}
+
+/* Selection — the amber swipe. One selection at a time.
+
+   Opaque, not a wash: under multiply the paper does the lightening, so the
+   token is the colour of the ink in the pen rather than the colour it happens
+   to land as. */
+#hifth-overlay .hl-sel.hl-ink {
+  stroke: var(--ink-sel);
+}
+
+/* Selection, fallback rendering: the pre-ink wash and ring, unchanged. This is
+   what an ayah gets when ink.ts does not recognise its geometry, and it is
+   deliberately still here rather than deleted — Loop 4b vendors 601 more pages
+   from the same upstream, and the failure mode for an unfamiliar one has to be
+   "looks like it did last loop", not "looks broken". */
+#hifth-overlay .hl-sel:not(.hl-ink) {
   fill: var(--highlight-wash);
   stroke: var(--highlight-ring);
   stroke-width: 1.2;
@@ -28,12 +73,28 @@
   opacity: 0.8;
 }
 
-/* Range wash — the passage a drag painted (Loop 5). Quieter than the selection
-   so a selection inside a range still reads as "you are here". */
-#hifth-overlay .hl-hlt {
+/* Range — the passage a drag painted (Loop 5). The same pen, held lighter: a
+   selection inside a range still has to read as "you are here", and under
+   multiply the way to say "one step quieter" is less ink, not a different
+   colour.
+
+   The old value here was --range-wash at 0.15 alpha, which was tuned for
+   compositing *over* the glyphs. Under multiply it is a rounding error — 0.15
+   amber multiplied into cream is very nearly cream. Halved rather than
+   quartered, because the two now stack correctly: a selected ayah inside a
+   range carries both marks, and multiply darkens where they overlap, which is
+   exactly the second pass of a pen that "you are here, inside this passage"
+   should look like. */
+#hifth-overlay .hl-hlt.hl-ink {
+  stroke: var(--ink-range);
+}
+
+/* Range, fallback rendering — the pre-ink wash and ring, for the same reason
+   the selection keeps its own. */
+#hifth-overlay .hl-hlt:not(.hl-ink) {
   fill: var(--range-wash);
   stroke: var(--range-ring);
-  stroke-width: 0.6;
+  stroke-width: 1;
   stroke-linejoin: round;
 }
 
@@ -49,19 +110,26 @@
 }
 
 /* Pulse on landing — one orchestrated motion moment (the hop). Reduced-motion
-   collapses the animation to nothing (tokens set --dur-hop to 0). */
+   collapses the animation to nothing (tokens set --dur-hop to 0).
+
+   The animated property is `opacity`, not `fill-opacity`. A swipe has no fill
+   to fade, so the old keyframes animated a property the element does not use
+   and the hop landed with no moment at all — silently, because an animation
+   that changes nothing still runs, still fires its events, and still looks
+   exactly like a working animation in the DOM. `opacity` is the one property
+   that fades both renderings, so the clone fallback keeps its pulse too. */
 #hifth-overlay .hl-sel.pulse {
   animation: hifth-pulse var(--dur-hop) var(--ease-hop);
 }
 @keyframes hifth-pulse {
   0% {
-    fill-opacity: 0;
+    opacity: 0;
   }
   40% {
-    fill-opacity: 1;
+    opacity: 1;
   }
   100% {
-    fill-opacity: 1;
+    opacity: 1;
   }
 }
 @media (prefers-reduced-motion: reduce) {

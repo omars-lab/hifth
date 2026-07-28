@@ -4,7 +4,7 @@
  * Palette philosophy: the mushaf artwork is the hero, so chrome is quiet paper
  * and ink — never pure black, never bright white. The single navigation accent
  * is a deep verdigris (mushaf cover tooling / mihrab tilework), and warm amber
- * is reserved ONLY for the selection/highlight wash ("you are here"), matching
+ * is reserved ONLY for the selection/highlight mark ("you are here"), matching
  * the spec's amber. This is deliberately not the cream/serif/terracotta default.
  *
  * Skins are token layers (PLAN §5): plain today, tajweed in Loop 6 swaps the
@@ -37,19 +37,39 @@
   --accent-strong: #17544d;
   --accent-tint: #d7e7e3;
 
-  /* Selection / highlight — warm amber wash. "You are here." */
+  /* Selection / highlight — warm amber. "You are here."
+     Wash and ring are the *composited-over* family: an alpha laid on top of
+     whatever is beneath, so they must stay faint or they grey out what they
+     cover. They dress the chrome (the selection badge, the trail beads, the
+     skin toggle) and they are also the fallback rendering on the page, for an
+     ayah whose geometry the marker parser declines. */
   --highlight: #e8a13a;
   --highlight-wash: rgba(232, 161, 58, 0.24);
   --highlight-ring: rgba(232, 161, 58, 0.85);
-
-  /* Range highlight (Loop 5 drag-to-highlight) — the SAME amber, one step
-     quieter than the selection wash. A range is a passage you painted, not the
-     ayah you are on; it must read as one gesture's worth of colour under a
-     selection that still has to win. The marquee is the rectangle in flight:
-     nearly no fill (scripture stays legible while the finger crosses it) and a
-     dashed ring, the universal "this is a lasso, not a result". */
   --range-wash: rgba(232, 161, 58, 0.15);
   --range-ring: rgba(232, 161, 58, 0.45);
+
+  /* Marker ink — the *multiplied* family, and the reason there are two.
+     These are the colour in the pen, not the colour it lands as: the swipes on
+     the page multiply against the paper (styles/highlight.css), so the paper
+     does the lightening and the token must not pre-lighten itself. Handing the
+     wash values to a multiply blend gives you nearly nothing — 0.15 amber
+     multiplied into cream is very nearly cream — which is why these are far
+     more opaque than the four above and why the two families cannot be
+     collapsed into one.
+
+     Under multiply the scripture stays black however saturated the amber gets,
+     so "quieter" is expressed as less ink rather than as a paler colour.
+     --ink-sel is --highlight at full strength: the ayah you are on wins.
+     --ink-range is the same pen held lighter, and a selection inside a range
+     carries both — multiply darkens the overlap, which is exactly what a second
+     pass of a highlighter looks like.
+
+     The marquee is the rectangle in flight, and is NOT ink: nearly no fill
+     (scripture stays legible while the finger crosses it) and a dashed ring,
+     the universal "this is a lasso, not a result". */
+  --ink-sel: #e8a13a;
+  --ink-range: rgba(232, 161, 58, 0.5);
   --marquee-fill: rgba(232, 161, 58, 0.07);
   --marquee-ring: rgba(232, 161, 58, 0.75);
 

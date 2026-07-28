@@ -21,7 +21,14 @@ const manifest: AssetManifest = {
   ],
 };
 
-/** Build a minimal fixture SVG matching the asset shape (polygons + a glyph path). */
+/**
+ * A fixture whose ayah hit areas are `<polygon>` elements with no `d` — so
+ * every test built on it exercises the *fallback* rendering, the cloned shape.
+ * That is deliberate and it is only half the story: the shipped assets are
+ * `<path>` rect runs and take the marker-swipe branch instead. The
+ * "marker swipes" block at the end of this file uses real corpus geometry to
+ * cover that side, and `makeInkSvg` below builds it.
+ */
 function makeSvg(): SVGSVGElement {
   const NS = "http://www.w3.org/2000/svg";
   const svg = document.createElementNS(NS, "svg");
@@ -410,5 +417,104 @@ describe("Highlighter · a drag release is not a tap (Loop 5)", () => {
     press(poly, "pointerup", 100, 100); // a stray release with no press
     expect(cb).toHaveBeenCalledTimes(1);
     expect(cb).toHaveBeenCalledWith("quran/hafs-kfqc/2:42", "ayah");
+  });
+});
+
+/**
+ * The rendering that actually ships. Everything above builds on `<polygon>`
+ * fixtures and therefore only ever sees the fallback clone; these use the real
+ * geometry from apps/web/public/assets/pages/hafs-kfqc/7.svg, where an ayah is
+ * a run of one axis-aligned rectangle per line it occupies.
+ */
+describe("Highlighter marker swipes", () => {
+  /** verse-45 as it is vendored: two lines. verse-46: one. */
+  const TWO_LINE = "M0 8.5h345v38H0Zm79.5 38H345v38.2H79.5Z";
+  const ONE_LINE = "M0 84.7h345v38H0Z";
+
+  const resolver = new Resolver(manifest);
+  let svg: SVGSVGElement;
+  let hl: Highlighter;
+
+  function makeInkSvg(d45: string): SVGSVGElement {
+    const NS = "http://www.w3.org/2000/svg";
+    const el = document.createElementNS(NS, "svg");
+    el.setAttribute("viewBox", "0 0 345 550");
+    for (const [id, d] of [
+      ["verse-45", d45],
+      ["verse-46", ONE_LINE],
+    ]) {
+      const path = document.createElementNS(NS, "path");
+      path.setAttribute("id", id);
+      path.setAttribute("class", "ayahPolygon");
+      path.setAttribute("d", d);
+      (path as unknown as { getBBox: () => DOMRect }).getBBox = () =>
+        ({ x: 0, y: 8.5, width: 345, height: 76.2 }) as DOMRect;
+      el.appendChild(path);
+    }
+    document.body.appendChild(el);
+    return el;
+  }
+
+  beforeEach(() => {
+    document.body.innerHTML = "";
+    svg = makeInkSvg(TWO_LINE);
+    hl = new Highlighter(svg, resolver, 7);
+  });
+
+  it("draws one line per line of the ayah, not one shape for the ayah", () => {
+    hl.highlight("quran/hafs-kfqc/2:38", "sel", "selection");
+    const marks = [...svg.querySelectorAll("#hifth-overlay .hl-sel")];
+    expect(marks).toHaveLength(2);
+    expect(marks.every((m) => m.tagName === "line")).toBe(true);
+    // Horizontal: a swipe is a band along a line, so both ends share a y.
+    for (const m of marks) expect(m.getAttribute("y1")).toBe(m.getAttribute("y2"));
+  });
+
+  it("tags swipes `hl-ink`, which is what the stylesheet keys the pen off", () => {
+    hl.highlight("quran/hafs-kfqc/2:38", "sel", "selection");
+    const marks = [...svg.querySelectorAll("#hifth-overlay .hl-sel")];
+    expect(marks.every((m) => m.classList.contains("hl-ink"))).toBe(true);
+    // Stroke width is per element precisely because line heights differ; a
+    // single shape for the whole ayah would have to pick one and be wrong.
+    expect(marks.map((m) => m.getAttribute("stroke-width"))).toEqual([
+      String(38 * 0.72),
+      String(38.2 * 0.72),
+    ]);
+  });
+
+  it("clones the source and withholds `hl-ink` when the geometry is not a rect run", () => {
+    document.body.innerHTML = "";
+    svg = makeInkSvg("M0 0L120 30L240 0Z"); // a genuine polygon — ink.ts declines
+    hl = new Highlighter(svg, resolver, 7);
+    hl.highlight("quran/hafs-kfqc/2:38", "sel", "selection");
+
+    const marks = [...svg.querySelectorAll("#hifth-overlay .hl-sel")];
+    expect(marks).toHaveLength(1);
+    expect(marks[0].tagName).toBe("path");
+    // Without this the stylesheet's `fill: none` reaches the clone and the
+    // fallback renders as a hairline tracing instead of the old box.
+    expect(marks[0].classList.contains("hl-ink")).toBe(false);
+    expect(marks[0].getAttribute("id")).toBeNull();
+  });
+
+  it("leaves the breadcrumb a clone — provenance is an outline, not ink", () => {
+    hl.highlight("quran/hafs-kfqc/2:38", "crumb", "trail");
+    const marks = [...svg.querySelectorAll("#hifth-overlay .hl-crumb")];
+    expect(marks).toHaveLength(1);
+    expect(marks[0].tagName).toBe("path");
+    expect(marks[0].classList.contains("hl-ink")).toBe(false);
+  });
+
+  it("never touches the source polygon", () => {
+    const before = svg.querySelector("#verse-45")!.outerHTML;
+    hl.highlight("quran/hafs-kfqc/2:38", "sel", "selection");
+    expect(svg.querySelector("#verse-45")!.outerHTML).toBe(before);
+  });
+
+  it("clears every swipe of a group, not just the first", () => {
+    hl.highlight("quran/hafs-kfqc/2:38", "sel", "selection");
+    expect(svg.querySelectorAll("#hifth-overlay .hl-sel").length).toBe(2);
+    hl.clear("selection");
+    expect(svg.querySelectorAll("#hifth-overlay .hl-sel")).toHaveLength(0);
   });
 });
