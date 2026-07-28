@@ -351,11 +351,17 @@ use-cases-doc: ## Re-render docs/use-cases.md (the mermaid map) from docs/use-ca
 
 .PHONY: validate
 validate: ## Outstanding manual checks — or one check's full runbook:  make validate CHECK=<id>
+	@# The edge coverage table rides along with the outstanding-checks list
+	@# because it answers the same question about the one tier no gate can
+	@# reach: not "how much has been audited" but "which kinds of edge has
+	@# nobody ever looked at". A class with no verdict in it is a class where
+	@# a wrong pair survives every check this repo has.
 	@if [ -n "$(CHECK)" ]; then \
 	  node scripts/gate-validation.mjs --check "$(CHECK)"; \
 	else \
 	  node scripts/gate-validation.mjs; \
 	  node scripts/gate-verified-edges.mjs; \
+	  node packages/etl/scripts/sample-edges.mjs --coverage; \
 	fi
 
 .PHONY: guide
@@ -409,8 +415,14 @@ source-offer: ## Follow the GPL §6 offer as a stranger would:  make source-offe
 audit-edges: ## Draw a seeded sample of edges for a mushaf spot-audit:  make audit-edges N=20 SEED=1
 	@# node directly, not `pnpm sample:edges --`: pnpm forwards the separator
 	@# itself, and the extra "--" lands in argv where the flag parser sees it.
+	@#
+	@# NEW=1 skips pairs a verdict already settles. COVERAGE=1 shows which
+	@# classes have never been looked at. UNIFORM=1 draws flat instead of
+	@# stratified — for when the *rate* of bad edges is the question, though
+	@# gate:edges already carries the rate on every commit.
 	@node packages/etl/scripts/sample-edges.mjs \
-	  $(if $(N),--n $(N),) $(if $(SEED),--seed $(SEED),) $(if $(NEW),--skip-verified,)
+	  $(if $(N),--n $(N),) $(if $(SEED),--seed $(SEED),) $(if $(NEW),--skip-verified,) \
+	  $(if $(UNIFORM),--uniform,) $(if $(COVERAGE),--coverage,)
 
 # ---------------------------------------------------------------------------
 
@@ -434,6 +446,7 @@ help: ## List targets (this)
 	@echo "                  make record CHECK=<id> RESULT='…'  (bank the verdict)"
 	@echo "                  make shots                    (recapture the guide's screenshots)"
 	@echo "                  make audit-edges N=20 SEED=1  (seeded draw for a mushaf spot-audit)"
+	@echo "                  make audit-edges NEW=1        (only pairs no verdict has settled)"
 	@echo "                  the full catalogue: .claude/skills/validate/SKILL.md"
 	@echo "  Golden images:  make golden        (diff against this platform's baselines)"
 	@echo "                  make golden-update (accept new ones — review the PNG diff!)"

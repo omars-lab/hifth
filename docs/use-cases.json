@@ -666,7 +666,7 @@
           "gate": "gate:ci-artifacts"
         }
       ],
-      "gap": "The gate proves an edge shares words with its source — it cannot prove the pair is a mutashabih a hafiz would recognise. That is ledger check edge-spot-audit, against a printed mushaf."
+      "gap": "The gate proves an edge shares words with its source — it cannot prove the pair is a mutashabih a hafiz would recognise, and it does not score shared-root edges at all. That is ledger check edge-spot-audit, against a printed mushaf; `make validate` prints which classes of edge no human has ever looked at."
     },
     {
       "id": "vendor-another-mushaf-page",
