@@ -389,6 +389,22 @@ shots: ## Recapture the guide's screenshots from the real app into docs/validati
 	@echo "  documentation, so a wrong one teaches a wrong expectation."
 	@echo ""
 
+.PHONY: source-offer
+source-offer: ## Follow the GPL §6 offer as a stranger would:  make source-offer URL=<deployed>
+	@# NOT part of `make ci` or `pnpm gates`, and the script is named `check-`
+	@# rather than `gate-` to say so: it reaches the public internet, and a check
+	@# that can go red because GitHub is having a bad morning does not belong in
+	@# front of every commit. Same reasoning that cancelled the KFGQPC watcher.
+	@#
+	@# Anonymous by construction — no gh, no token. Signed in as ourselves a
+	@# private repo looks public, which is the exact failure the manual runbook
+	@# opens a private window to avoid.
+	@#
+	@# With URL=<deployed> it also reads what the deployed bundle actually
+	@# offers, which is the only form of this question that can be answered
+	@# about a build we are not sitting next to.
+	@node scripts/check-source-offer.mjs $(if $(URL),--url $(URL),) $(if $(COMMIT),--commit $(COMMIT),)
+
 .PHONY: audit-edges
 audit-edges: ## Draw a seeded sample of edges for a mushaf spot-audit:  make audit-edges N=20 SEED=1
 	@# node directly, not `pnpm sample:edges --`: pnpm forwards the separator
@@ -413,6 +429,7 @@ help: ## List targets (this)
 	@echo "                  make use-cases ACTOR=<id>     (one actor's whole picture)"
 	@echo "  Validation:     make validate         (what are we waiting on, and what it blocks)"
 	@echo "                  make validate CHECK=<id>      (one check's full runbook, here)"
+	@echo "                  make source-offer [URL=…]     (does the GPL §6 offer resolve?)"
 	@echo "                  make guide                    (the same runbooks, on your phone)"
 	@echo "                  make record CHECK=<id> RESULT='…'  (bank the verdict)"
 	@echo "                  make shots                    (recapture the guide's screenshots)"
