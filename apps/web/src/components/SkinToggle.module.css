@@ -11,18 +11,30 @@
   gap: 2px;
 }
 
+/*
+ * Label over badge, not label beside badge. Side by side the two words made a
+ * 113px pill — wider than the wordmark and the page number put together, and
+ * the single reason the chrome could not fit a 390px phone. Stacked they cost
+ * the width of the longer word (~64px) and nothing in height: two lines at
+ * `line-height: 1.15` come to 29px inside a control whose floor is already the
+ * 44px touch target. Nothing is dropped and nothing is hidden behind a tap —
+ * the badge is still on the control, in both states, which is the requirement.
+ */
 .toggle {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: var(--space-1);
+  justify-content: center;
   min-block-size: var(--touch-min);
-  padding-inline: var(--space-3);
+  min-inline-size: var(--touch-min);
+  padding-inline: var(--space-2);
   border: 1px solid var(--hairline);
   border-radius: var(--radius-pill);
   background: var(--paper-raised);
   color: var(--ink-soft);
   font: inherit;
   font-size: var(--text-sm);
+  line-height: 1.15;
   cursor: pointer;
 }
 
@@ -48,12 +60,21 @@
  * with the control rather than living in a settings screen nobody opens.
  */
 .beta {
-  padding-inline: var(--space-2);
+  padding-inline: var(--space-1);
   border-radius: var(--radius-pill);
   background: var(--highlight-wash);
   color: var(--ink);
   font-size: var(--text-xs);
   letter-spacing: 0.02em;
+}
+
+/* Small phones: the pill gives up its side padding before anything gives up a
+   word. It keeps `min-inline-size: var(--touch-min)`, so the target never
+   shrinks — only the air around the text does. */
+@media (max-width: 400px) {
+  .toggle {
+    padding-inline: var(--space-1);
+  }
 }
 
 .legendBtn {

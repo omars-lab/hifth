@@ -5,32 +5,74 @@
   background: var(--paper);
 }
 
+/* The navigation row, and the one row in the app that cannot be allowed to
+   overflow: it is `display: flex` with no wrap, so anything that does not fit
+   is not clipped but pushed off the *start* edge — in RTL, off the left — and
+   the whole document grows a horizontal scroll. That is what happened for six
+   loops: the intrinsic width was 430px, so every phone narrower than an iPhone
+   15 Pro Max got a chrome with the skin switch half off screen and a mushaf
+   that could be panned sideways by accident.
+
+   Two rules keep it honest, and neither of them may touch the row's *height* —
+   the golden baselines are element shots of the page SVG, and the stage's
+   height is whatever the chrome leaves it (see `.brand`).
+
+   1. Spacing is the first thing to go, not content. Phones get the compact
+      scale; the roomy one is for tablets and desktops, where there is width to
+      spend.
+   2. Below 400px the row gives up its gaps as well, and drops the *word*
+      «صفحة» (visually — `.pageLabel` stays in the accessibility tree), because
+      at that width the number is unambiguous and the alternative is dropping a
+      control.
+
+   Measured after, at the ≤400px settings: 279px intrinsic, and 303px in the
+   worst case the mushaf has — page 604, the only three-digit number this field
+   ever shows. That is 17px of slack on the narrowest phone still in use (320px,
+   SE 1st gen); with the ≤400 gap left alone it was 0.9px, which is a
+   coincidence rather than a margin. e2e/chrome-fit.spec.ts holds the line from
+   320 to 430, page 604 included, in both engines. */
 .chrome {
   display: flex;
   align-items: center;
-  gap: var(--space-4);
-  padding: var(--space-3) var(--space-4);
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-3);
   padding-block-start: max(var(--space-3), env(safe-area-inset-top));
   border-block-end: 1px solid var(--hairline);
   background: var(--paper);
 }
 
+@media (min-width: 481px) {
+  .chrome {
+    gap: var(--space-4);
+    padding-inline: var(--space-4);
+  }
+}
+
 /* A button that has to keep looking like a wordmark: it opens the colophon, so
    it needs a target and a focus ring, but any hover tint or border would turn
    the app's name into a control competing with ⌖ and ▤ for attention. The
-   affordance is a focus ring and nothing else — and the box must be the one
-   the <div> here occupied, to the pixel. That is a hard requirement, not tidiness:
-   the golden baselines are element shots of the page SVG, whose crop lands over
-   the chrome, so a wordmark a few pixels off re-photographs every page.
-   `min-inline-size: min-content` is what buys it. A flex item's automatic
-   minimum size keeps a <div> from shrinking below its widest unbreakable child
-   — here the 53px wordmark — but a <button> is exempt from that rule, so it
-   shrank to the tagline's wrap width (44px) and let حفظ overflow, moving every
-   control in the row. This restores the div's floor by naming it.
-   No `min-block-size`: the brand is already the tallest thing in the header, so
-   a touch floor would only grow the header and take those pixels off the stage.
-   Refusing to spend stage height is the whole reason this opener is the wordmark
-   and not a fifth button. */
+   affordance is a focus ring and nothing else.
+
+   `min-inline-size: min-content` is what keeps it the box the <div> here once
+   occupied. A flex item's automatic minimum size keeps a <div> from shrinking
+   below its widest unbreakable child — here the 53px wordmark — but a <button>
+   is exempt from that rule, so it shrank to the tagline's wrap width (44px) and
+   let حفظ overflow, moving every control in the row.
+
+   That is a width rule with a *height* consequence, and the height is the half
+   that is easy to lose. This box is the tallest thing in the header, so it sets
+   the header's height, and the stage gets what is left — and the golden
+   baselines are element shots of the stage. Squeeze it narrower than
+   «مِلاحة للحُفّاظ» and the tagline wraps to a second line, the header grows
+   13px, and all ten baselines re-photograph. That is not hypothetical: it is
+   what the 430px chrome was doing on every phone until the row was made to fit,
+   and it is why those baselines were regenerated with this change rather than
+   preserved. e2e/chrome-fit.spec.ts now asserts the header is the same height
+   at every phone width, so the next squeeze fails a test instead of a diff.
+
+   No `min-block-size` either: a touch floor here would only grow the header and
+   take those pixels off the stage. Refusing to spend stage height is the whole
+   reason this opener is the wordmark and not a fifth button. */
 .brand {
   display: flex;
   flex-direction: column;
@@ -74,6 +116,31 @@
 
 .pageLabel {
   font-size: var(--text-sm);
+}
+
+/* Small phones. Air first: the gap drops to the tightest step, which costs the
+   row nothing a reader can name and buys the four-gap row 16px — the difference
+   between fitting page 604 on a 320px screen by 0.9px and fitting it with room
+   to spare. Then the word «صفحة» goes to the screen reader only — clipped, not
+   `display: none`, so the accessible name is untouched and the aria snapshots
+   in e2e/__aria__ still read «صفحة 7». The number keeps `.pageNum`'s size, so
+   what is lost is a label a reader of a mushaf does not need next to a number
+   that is already the only one in the chrome. */
+@media (max-width: 400px) {
+  .chrome {
+    gap: var(--space-1);
+    padding-inline: var(--space-2);
+  }
+
+  .pageLabel {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+  }
 }
 
 .pageNum {

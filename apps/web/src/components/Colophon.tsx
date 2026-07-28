@@ -96,7 +96,7 @@ const CREDITS: readonly Credit[] = [
  * whose work they are holding without cloning anything.
  *
  * Opened from the wordmark rather than a fifth header button: the chrome
- * already carries ⌖, ▤, the skin switch and the install prompt, and on a phone
+ * already carries ⌖, ▤, the skin switch and its legend, and on a phone
  * one more control would compete with navigation for the thumb. The wordmark
  * was decoration; "about" is the one thing a wordmark is always allowed to be.
  *

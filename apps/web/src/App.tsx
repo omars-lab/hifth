@@ -39,7 +39,6 @@ import { HopPopover } from "./components/HopPopover";
 import { HighlightMenu } from "./components/HighlightMenu";
 import { TrailBeads, type TrailBead } from "./components/TrailBeads";
 import { ShareSheet } from "./components/ShareSheet";
-import { InstallButton } from "./components/InstallButton";
 import { OfflineNotice } from "./components/OfflineNotice";
 import { Jumper } from "./components/Jumper";
 import { EditionPicker } from "./components/EditionPicker";
@@ -685,7 +684,7 @@ export function App(): JSX.Element {
         {/* The wordmark is the colophon's opener. Publishing this app conveys
             it (GPL §6), so the source offer and the four source credits have to
             be reachable from the running page — and the chrome already carries
-            ⌖, ▤, the skin switch and the install prompt. A fifth button would
+            ⌖, ▤, the skin switch and its legend. A fifth button would
             take thumb-width from navigation to say "about"; the wordmark was
             decoration, and "about" is what a wordmark is always allowed to be. */}
         <button
@@ -732,7 +731,14 @@ export function App(): JSX.Element {
           onChange={setSkin}
           onOpenLegend={() => setLegendOpen(true)}
         />
-        <InstallButton />
+        {/* No install button here. There used to be one, and it was a ~126px
+            text pill in a row that could not afford 126px on any phone — on
+            Android, the one platform where it ever rendered, it was the single
+            largest thing in the chrome. It also said nothing OfflineNotice does
+            not already say better: the `install-prompt` notice fires the same
+            `promptInstall()`, gives the reason (the pages you visited stay on
+            your device), and can be dismissed. A permanent navigation row is
+            the wrong lane for a promo that disappears the moment it is used. */}
       </header>
 
       {/* Offline durability, when there is something honest to say about it:

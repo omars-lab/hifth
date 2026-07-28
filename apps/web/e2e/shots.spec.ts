@@ -108,7 +108,10 @@ async function cropAround(page: Page, target: Locator, id: string, pad: number):
   await target.scrollIntoViewIfNeeded();
   const box = await target.boundingBox();
   expect(box, `${id}: nothing to photograph`).not.toBeNull();
-  const vp = page.viewportSize() ?? { width: 430, height: 932 };
+  // Mirrors the `shots` project's viewport (playwright.config.ts). It is only a
+  // fallback for a headed run with no viewport set, but a stale one would clamp
+  // clips to a screen nobody is using and truncate the pictures silently.
+  const vp = page.viewportSize() ?? { width: 390, height: 844 };
   const x = Math.max(0, box!.x - pad);
   const y = Math.max(0, box!.y - pad);
   const width = Math.min(vp.width - x, box!.width + pad * 2);

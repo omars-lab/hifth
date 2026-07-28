@@ -17,7 +17,7 @@
  * can contain it.
  */
 import { execSync } from "node:child_process";
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 
 const ROOT = new URL("..", import.meta.url).pathname;
@@ -45,7 +45,14 @@ if (files.length === 0) {
 
 const offenders = [];
 for (const rel of files) {
-  const text = readFileSync(join(ROOT, rel), "latin1");
+  // `git ls-files` lists the *index*, so a file deleted in the working tree but
+  // not yet staged is still listed and no longer on disk. Reading it blind threw
+  // an ENOENT stack trace mid-refactor — a gate crashing is indistinguishable
+  // from a gate failing, and it names the wrong problem. A file with no bytes
+  // has no NUL byte, and CI runs on a clean tree, so nothing real is skipped.
+  const abs = join(ROOT, rel);
+  if (!existsSync(abs)) continue;
+  const text = readFileSync(abs, "latin1");
   const at = text.indexOf(NUL);
   if (at === -1) continue;
   offenders.push({ rel, line: text.slice(0, at).split("\n").length });
