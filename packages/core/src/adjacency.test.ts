@@ -226,6 +226,46 @@ describe("mergeRangeEdges (spec §9: merged, deduped edges of a highlighted rang
     expect(flipped[0].from).toBe(k("2:46"));
   });
 
+  it("a curated note outranks any amount of derived flagging", () => {
+    // The corpus has exactly this: 2:47's edge to 2:123 carries `ctx`, 2:48's
+    // carries the hand-written «شفاعة ↔ عدل». Counting fields made them tie at
+    // 1–1, and a tie keeps the first — so highlighting the passage showed a
+    // boolean where tapping 2:48 alone showed the sentence. The passage view
+    // must never tell a hafiz *less* than the ayah view it contains.
+    const flagged = edge({
+      type: "mutashabih",
+      to: k("2:123"),
+      page: 19,
+      dir: { dSurah: 0, dPage: 12 },
+      ctx: true,
+    });
+    const noted = edge({
+      type: "mutashabih",
+      to: k("2:123"),
+      page: 19,
+      dir: { dSurah: 0, dPage: 12 },
+      note: "شفاعة ↔ عدل",
+    });
+    const merged = mergeRangeEdges([src("2:47", [flagged]), src("2:48", [noted])]);
+    expect(merged[0].note).toBe("شفاعة ↔ عدل");
+    expect(merged[0].from).toBe(k("2:48"));
+
+    // …and it holds against every derived field at once, not just one of them:
+    // a sentence someone wrote about *this* pairing outranks the lot.
+    const allFlags = edge({
+      type: "mutashabih",
+      to: k("2:123"),
+      page: 19,
+      dir: { dSurah: 0, dPage: 12 },
+      twin: true,
+      root: "ش ف ع",
+      ctx: true,
+    });
+    const stillNoted = mergeRangeEdges([src("2:47", [allFlags]), src("2:48", [noted])]);
+    expect(stillNoted[0].note).toBe("شفاعة ↔ عدل");
+    expect(stillNoted[0].from).toBe(k("2:48"));
+  });
+
   it("drops edges that point back inside the range (word anchors ignored)", () => {
     const merged = mergeRangeEdges([
       src("2:47", [
