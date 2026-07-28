@@ -348,20 +348,26 @@
         },
         {
           "file": "scripts/gate-edges.mjs",
-          "symbol": "longestSharedRun",
+          "symbol": "ZERO_OVERLAP_LIMIT",
           "note": "The gate that would have caught the off-by-one on day one. Every dataset-derived edge is scored by the longest contiguous run of words its two ends share, and CI fails past 10% of them sharing none. Random ayah pairs score 69% there, the broken corpus scored 48%, the corrected one 3.9% — the threshold sits in a gap, not on a tuning knob."
         },
         {
+          "file": "packages/etl/scripts/morphology.mjs",
+          "symbol": "longestSharedRun",
+          "note": "The one reader of the vendored morphology, and the one definition of 'how similar are these two ayahs'. The gate enforces a floor on this number and the sampler prints it beside each pair a human audits — computed a second time, they would eventually disagree, and the human would be the one assumed wrong."
+        },
+        {
           "file": "packages/etl/scripts/sample-edges.mjs",
-          "symbol": "function rng",
-          "note": "Seeded sampler for the human spot-audit. Seeded so that 'the 20 edges we checked' is a reproducible set and not a story."
+          "symbol": "stratumOf",
+          "note": "The spot-audit draw. Stratified by type × provenance × page distance, because 97% of the pairs are one class and a flat draw of twenty never shows the classes gate:edges cannot reach. The unit is the unordered pair, not the directed edge — the corpus generates both directions from one fact, so asking a reader about both spends the scarcest input this project has on a question already answered."
         }
       ],
       "extend": [
         "Vendoring a new dataset: add the SOURCES.md entry with its licence in the same commit as the data. gate:license fails otherwise, deliberately.",
         "Every script prints a summary line — counts in, counts out, largest shard. Read it; a silent 10% drop in edges looks exactly like success.",
         "Human verdicts on specific edges are permanent. They go in the verified-edges register, and gate:verified-edges enforces them from then on.",
-        "Data here can be structurally perfect and semantically noise; gate:edges is the only check that reads meaning. A new edge type whose promise is shared phrasing belongs in its SCORED_TYPES, or it ships unmeasured."
+        "Data here can be structurally perfect and semantically noise; gate:edges is the only check that reads meaning. A new edge type whose promise is shared phrasing belongs in its SCORED_TYPES, or it ships unmeasured.",
+        "A new edge type also becomes a new stratum in the spot-audit draw automatically, and `make validate` will show it as a class nobody has looked at until someone does."
       ],
       "gates": ["pnpm gate:verified-edges", "pnpm gate:edges", "pnpm gate:license", "make ci"],
       "seeAlso": ["the-hop", "validation", "provenance"]

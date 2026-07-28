@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" data-ledger-hash="f931b6263c4c">
+<html lang="en" data-ledger-hash="2dd54287eac9">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -107,7 +107,7 @@ label.do span { padding: 8px 0; }
   <p class="rule">Every result here must tighten something automated — a threshold, a
   fixture, a gate. That is what <b>tunes</b> is for at the foot of each card. A verdict
   that tunes nothing has to be bought again by hand, forever.</p>
-  <p class="src">Generated from <code>docs/validation/ledger.json</code> · <code>f931b6263c4c</code>
+  <p class="src">Generated from <code>docs/validation/ledger.json</code> · <code>2dd54287eac9</code>
   · never edit this file — run <code>make guide</code></p>
 </header>
 
@@ -396,7 +396,7 @@ label.do span { padding: 8px 0; }
 <article class="card" id="edge-spot-audit">
   <div class="head">
     <span class="badge">outstanding</span>
-    <h2>Edge spot-audit — 20 random edges against a printed mushaf</h2>
+    <h2>Edge spot-audit — 20 sampled pairs against a printed mushaf</h2>
     <p class="id"><code>edge-spot-audit</code> · blocks <b>web-v1.0</b> · repeats every 14 days</p>
   </div>
 
@@ -409,8 +409,10 @@ label.do span { padding: 8px 0; }
   </section>
   <section class="block">
     <h3>Setup — on the laptop</h3>
-    <pre class="cmd">make audit-edges N=20 SEED=1</pre>
-    <p class="expect">A header naming the edition, the seed, and the rerun command, then twenty numbered pairs (<code>from → to  type  p.&lt;page&gt;</code>), then a JSON block ready to paste. Use a fresh SEED per round; add NEW=1 to skip edges already verified.</p>
+    <pre class="cmd">make validate</pre>
+    <p class="expect">Ends with an edge-audit coverage table: one row per class of edge (type × curated-or-dataset × page distance), each marked ✓ or ·. The · rows are the classes nobody has ever looked at — those are what this round is for.</p>
+<pre class="cmd">make audit-edges N=20 SEED=1</pre>
+    <p class="expect">A header naming the edition, the seed, and the rerun command, then twenty numbered <b>pairs</b> — <code>from → to  type  p.&lt;page&gt; / p.&lt;page&gt;  curated|dataset  words &lt;n&gt;  roots &lt;n&gt;/&lt;n&gt;</code> — then a JSON block ready to paste. Use a fresh SEED per round; add NEW=1 to draw only from pairs no verdict has settled.</p>
   </section>
 
   <section class="block">
@@ -418,18 +420,24 @@ label.do span { padding: 8px 0; }
     <ol class="steps">
       <li>
         <label class="do"><input type="checkbox" data-step="edge-spot-audit:0"><span>Work through the twenty pairs in the print, one at a time.</span></label>
-        <p class="expect">Each <code>from</code> and <code>to</code> is findable at the page the draw printed. A pair you cannot locate is itself a finding — record it as wrong with a note.</p>
+        <p class="expect">Each <code>from</code> and <code>to</code> is findable at the page printed beside it. A pair you cannot locate is itself a finding — record it as wrong with a note.</p>
         
         <p class="why">This is the only check in the project that can say the data is true. Every other tier verifies that the app faithfully renders whatever the ETL produced — including when what it produced is wrong.</p>
       </li>
       <li>
-        <label class="do"><input type="checkbox" data-step="edge-spot-audit:1"><span>For each, answer the question the tool prints — not «are these similar?» but «<b>would a hafiz confuse these two while reciting?</b>»</span></label>
+        <label class="do"><input type="checkbox" data-step="edge-spot-audit:1"><span>Read <code>words</code> and <code>roots</code> beside each pair as hints, and distrust them.</span></label>
+        <p class="expect"><code>words</code> is the longest run of words the two ayahs share — the same score gate:edges enforces a floor on, computed by the same reader (packages/etl/scripts/morphology.mjs), so a number here can never disagree with CI. <code>roots</code> is how many of the shorter ayah's roots appear in both, in order.</p>
+        
+        <p class="why">They point at the pairs worth slowing down on from both ends: a high <code>words</code> with a wrong verdict is a plausible-looking false edge, and a low one that is nonetheless right is the case the product exists for — 2:48 → 2:123 swaps <bdi>شفاعة</bdi> and <bdi>عدل</bdi>, scores 1, and is genuinely confused by huffaz every day.</p>
+      </li>
+      <li>
+        <label class="do"><input type="checkbox" data-step="edge-spot-audit:2"><span>For each, answer the question the tool prints — not «are these similar?» but «<b>would a hafiz confuse these two while reciting?</b>»</span></label>
         <p class="expect">Most edges are obvious either way in a few seconds. The slow ones are the informative ones; note why.</p>
         
         <p class="why">&quot;Similar&quot; is not the standard; a hafiz's confusion is. An edge that is textually close but never actually confused is noise in the rail, and noise is what makes a reader stop trusting the hop.</p>
       </li>
       <li>
-        <label class="do"><input type="checkbox" data-step="edge-spot-audit:2"><span>Optionally open a pair in the app to see what a reader actually sees: make phone, then navigate to the ayah and open its rail.</span></label>
+        <label class="do"><input type="checkbox" data-step="edge-spot-audit:3"><span>Optionally open a pair in the app to see what a reader actually sees: make phone, then navigate to the ayah and open its rail.</span></label>
         <p class="expect">The edge appears as a hop under the direction chip its <code>type</code> implies.</p>
         <figure class="shot">
           <img src="shots/hop-rail.png" alt="Screenshot: hop-rail" loading="lazy">
@@ -438,13 +446,13 @@ label.do span { padding: 8px 0; }
         <p class="why">Catches a correct edge with a wrong presentation. A real mutashabih filed under the wrong direction chip sends the reader looking in the wrong surah, which reads as bad data even though the data is fine.</p>
       </li>
       <li>
-        <label class="do"><input type="checkbox" data-step="edge-spot-audit:3"><span>Paste the printed JSON block into packages/etl/data/qa/verified-edges.json under <code>entries</code>, setting each <code>verdict</code> to <code>correct</code> or <code>wrong</code>, <code>verifiedBy</code> to your name, and <code>note</code> where a future reader needs the reason.</span></label>
-        <p class="expect">Every drawn edge gets an entry. Both verdicts are recorded, not just the failures.</p>
+        <label class="do"><input type="checkbox" data-step="edge-spot-audit:4"><span>Paste the printed JSON block into packages/etl/data/qa/verified-edges.json under <code>entries</code>, setting each <code>verdict</code> to <code>correct</code> or <code>wrong</code>, <code>verifiedBy</code> to your name, and <code>note</code> where a future reader needs the reason.</span></label>
+        <p class="expect">Forty entries for twenty pairs — the block writes out both directions of each pair, because every edge in the corpus is generated in both and one reading settles both.</p>
         
         <p class="why">Recording the <code>correct</code> verdicts matters as much as the failures: they are what turns half an hour of reading into a permanent regression fixture instead of an anecdote.</p>
       </li>
       <li>
-        <label class="do"><input type="checkbox" data-step="edge-spot-audit:4"><span>Run pnpm gate:verified-edges.</span></label>
+        <label class="do"><input type="checkbox" data-step="edge-spot-audit:5"><span>Run pnpm gate:verified-edges.</span></label>
         <p class="expect">OK. Those verdicts are now enforced in both directions, forever — a <code>correct</code> edge that disappears and a <code>wrong</code> edge that returns both fail the build.</p>
         
         <p class="why">This is the step where manual work becomes automated. Once it is green, a <code>correct</code> edge that disappears and a <code>wrong</code> edge that returns both fail the build — forever, without anyone re-reading twenty pairs.</p>
@@ -454,7 +462,7 @@ label.do span { padding: 8px 0; }
 
   <section class="block">
     <h3>Reading the result</h3>
-    <ul class="bullets"><li>Record BOTH verdicts. A rejected edge that is not written down comes back on the next data refresh and costs the reader's time all over again — and no automated check can tell a wrong edge from a right one.</li><li>If several wrong edges share a shape — same <code>type</code>, same phrase length, same surah pair — that is a filter in packages/etl/scripts/build-adjacency.mjs, not twenty more rejections. A class of error is worth more than the twenty.</li><li>If gate:verified-edges fails later, do not edit the fixture to go green: the data moved under a human verdict. Find out what moved it, and re-verify with a reader before changing a verdict.</li><li>This check goes stale after 14 days because the data keeps moving. A fresh seed each round means the coverage accumulates instead of re-checking the same twenty.</li></ul>
+    <ul class="bullets"><li>Record BOTH verdicts. A rejected edge that is not written down comes back on the next data refresh and costs the reader's time all over again — and no automated check can tell a wrong edge from a right one.</li><li>If several wrong edges share a shape — same <code>type</code>, same phrase length, same surah pair — that is a filter in packages/etl/scripts/build-adjacency.mjs, not twenty more rejections. A class of error is worth more than the twenty.</li><li>If gate:verified-edges fails later, do not edit the fixture to go green: the data moved under a human verdict. Find out what moved it, and re-verify with a reader before changing a verdict.</li><li>This check goes stale after 14 days because the data keeps moving. A fresh seed each round means the coverage accumulates instead of re-checking the same twenty.</li><li>Aim at the · rows. The draw is stratified for a reason: 97% of the corpus is one class (dataset mutashabih, far apart), so a flat draw of twenty essentially never shows a shared-root edge, a related-meaning edge, or a pair we curated ourselves — and those are exactly the classes no automated check covers, since gate:edges deliberately does not score shared-root at all. Pass UNIFORM=1 only when the overall *rate* of bad edges is the question, and note that gate:edges already carries the rate on every commit.</li></ul>
   </section>
 
   <section class="block record">

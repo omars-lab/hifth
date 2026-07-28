@@ -511,10 +511,38 @@ now *looks* covered. The honest outcome is the one now in the ledger: a human ch
 with the measurement that proves why written beside it. Revisit only if the host ever answers from
 a runner — which is a two-minute probe to re-establish, not a standing job.
 
-**⑧ Edge-audit sampler upgrade — ~half a day, $0.**
-`packages/etl/scripts/sample-edges.mjs`: stratify by type / dPage bucket / provenance; compute and
-print a root-sequence similarity per pair from the already-vendored morphology; add coverage-by-type
-to `make validate`. Zero change to `verdict` semantics or to `gate-verified-edges.mjs`.
+**⑧ Edge-audit sampler upgrade — ✅ done, 2026-07-28. Built one thing that was not designed.**
+`packages/etl/scripts/sample-edges.mjs` now stratifies by type × provenance × page-distance band,
+prints a longest-shared-word-run and an in-order shared-root count per pair, and `make validate`
+ends in a coverage table. `verdict` semantics and `gate-verified-edges.mjs` are untouched, as
+designed.
+
+The undesigned part is the unit. The corpus is bidirectional — `build-adjacency.mjs` generates b→a
+from every a→b — so a draw over directed edges asks the same reader the same question twice, and it
+did: the first stratified draw came back with three reciprocal duplicates in twenty rows. Human
+minutes with a mushaf open are the scarcest input this project has. The draw now dedupes to
+unordered pairs, presents each in reading order, and writes *both* directions into the paste block,
+so one reading banks two entries. That also moved the denominator everywhere: 3002 directed edges
+are 1501 pairs, and the coverage table counts the same unit the draw does.
+
+Stratification mattered more than expected once the pair counts were in front of us. 97% of the
+pairs are one class (dataset `mutashabih`, and two thirds of those more than fifty pages apart);
+`shared-root` is 3 pairs and `related-meaning` is 1. A flat draw of twenty essentially never shows
+either — and those are precisely the classes no automated check reaches, since `gate:edges`
+deliberately does not score `shared-root` and the curated pairs are ones we wrote ourselves.
+Round-robin was the obvious construction and was wrong for the same reason: six of the eleven
+classes are curated, holding eleven pairs between them, so repeated rounds handed 55% of the audit
+to 0.7% of the corpus. The draw takes one pair from each class rarest-first, then fills uniformly.
+`--uniform` restores the flat draw for when the *rate* is the question — though `gate:edges` already
+carries the rate, on every commit.
+
+The similarity scores come from a new `packages/etl/scripts/morphology.mjs`, extracted from
+`gate-edges.mjs` rather than reimplemented. Two readers of one format drift; here the drift would
+have been *contradictory* rather than merely silent — a reader auditing a pair would see one score
+printed beside it while CI enforced a floor computed a different way, and on the first disagreement
+the human would be the one assumed wrong. Roots are read from the shipped `assets/roots/**` shards
+instead, because `build-roots.mjs` already parses `ROOT:` and a second parser of it is the same
+mistake in the other direction.
 
 **⑨ The `evidence` field and `make validate-auto` — ~half a day.**
 Last, deliberately: build it once there are three or four real evidence producers to render, so the

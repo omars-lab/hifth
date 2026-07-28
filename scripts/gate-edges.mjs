@@ -37,17 +37,15 @@
  */
 import { readFileSync, existsSync, readdirSync } from "node:fs";
 import { join } from "node:path";
+import {
+  MORPHOLOGY_PATH,
+  TOTAL_AYAHS,
+  longestSharedRun,
+  wordsByAyah as readWordsByAyah,
+} from "../packages/etl/scripts/morphology.mjs";
 
 const ROOT = new URL("..", import.meta.url).pathname;
 const ADJ = join(ROOT, "apps", "web", "public", "assets", "adj");
-const MORPHOLOGY = join(
-  ROOT,
-  "packages",
-  "etl",
-  "data",
-  "roots",
-  "quranic-corpus-morphology-0.4.txt",
-);
 
 /** Share of scored edges with no shared words at all, above which CI fails. */
 const ZERO_OVERLAP_LIMIT = 0.1;
@@ -59,87 +57,22 @@ const fail = (msg) => {
   process.exit(1);
 };
 
-for (const p of [ADJ, MORPHOLOGY]) if (!existsSync(p)) fail(`missing ${p}`);
+for (const p of [ADJ, MORPHOLOGY_PATH]) if (!existsSync(p)) fail(`missing ${p}`);
 
 /* ------------------------------------------------------------------ */
 /* Words per ayah, as a consonant skeleton.                            */
 /* ------------------------------------------------------------------ */
 
-// Buckwalter marks that carry no consonant: short vowels, tanwin, shadda,
-// sukun, the Quranic pause and small-letter annotations, and tatweel. Dropping
-// them makes the comparison robust to the recitation marks a shared phrase is
-// allowed to differ in.
-const DIACRITICS = new Set([
-  ..."FNKaui~o^#`:@\"[;,.!-+%]_",
-]);
-/** Orthographic variants a hafiz reads as the same letter. */
-const FOLD = { ">": "A", "<": "A", "{": "A", "|": "A", "`": "A", Y: "y", p: "t", "&": "w", "}": "y" };
+// Read once, from packages/etl/scripts/morphology.mjs, which `sample-edges.mjs`
+// reads too. The sampler prints this same score beside each pair it draws for a
+// human to audit, and a reader whose printed number disagreed with the number
+// CI enforces would be the one assumed wrong.
+const wordsByAyah = readWordsByAyah();
 
-/** `(s:a:w:seg)\tFORM\t…` — the only lines with a location are segment rows. */
-const LOCATION = /^\((\d+):(\d+):(\d+):\d+\)\t([^\t]*)\t/;
-
-/** "surah:ayah" → the ayah's words, in order, as consonant skeletons. */
-const wordsByAyah = new Map();
-{
-  /** The word currently being assembled, so segments concatenate in order. */
-  let atKey = null;
-  let atWord = -1;
-  let buffer = "";
-  const flush = () => {
-    if (atKey === null) return;
-    const skeleton = normalise(buffer);
-    if (skeleton) wordsByAyah.get(atKey).push(skeleton);
-  };
-  for (const line of readFileSync(MORPHOLOGY, "utf8").split("\n")) {
-    const at = LOCATION.exec(line);
-    if (!at) continue;
-    const key = `${Number(at[1])}:${Number(at[2])}`;
-    const word = Number(at[3]);
-    if (key !== atKey || word !== atWord) {
-      flush();
-      if (!wordsByAyah.has(key)) wordsByAyah.set(key, []);
-      atKey = key;
-      atWord = word;
-      buffer = "";
-    }
-    buffer += at[4];
-  }
-  flush();
-}
-
-function normalise(form) {
-  let out = "";
-  for (const ch of form) {
-    if (DIACRITICS.has(ch)) continue;
-    out += FOLD[ch] ?? ch;
-  }
-  return out;
-}
-
-if (wordsByAyah.size !== 6236) {
-  fail(`morphology covers ${wordsByAyah.size} ayahs, expected 6236 — source is incomplete`);
-}
-
-/**
- * Longest run of words present, in order and adjacent, in both ayahs.
- * Classic LCS-of-substrings over two short sequences — ayahs are tens of words,
- * so the quadratic table costs nothing and is far clearer than the alternatives.
- */
-function longestSharedRun(a, b) {
-  if (!a?.length || !b?.length) return 0;
-  let best = 0;
-  let prev = new Uint16Array(b.length + 1);
-  for (let i = 1; i <= a.length; i++) {
-    const row = new Uint16Array(b.length + 1);
-    for (let j = 1; j <= b.length; j++) {
-      if (a[i - 1] === b[j - 1]) {
-        row[j] = prev[j - 1] + 1;
-        if (row[j] > best) best = row[j];
-      }
-    }
-    prev = row;
-  }
-  return best;
+if (wordsByAyah.size !== TOTAL_AYAHS) {
+  fail(
+    `morphology covers ${wordsByAyah.size} ayahs, expected ${TOTAL_AYAHS} — source is incomplete`,
+  );
 }
 
 /* ------------------------------------------------------------------ */

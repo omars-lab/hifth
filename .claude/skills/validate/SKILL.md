@@ -307,6 +307,22 @@ The one check with a dedicated tool (`make audit-edges`, seeded so a round can b
 re-run, re-checked, or handed to a second reader), because it is the highest-value
 human input this project takes. Steps: `make validate CHECK=edge-spot-audit`.
 
+**Aim the round before drawing it.** `make validate` ends in a coverage table:
+one row per class of edge (type × curated-or-dataset × page distance), marked ✓
+or ·. The · rows are where a wrong edge survives everything — `gate:edges` does
+not score `shared-root` at all, and the curated pairs are ones we wrote
+ourselves. The draw is stratified for that reason: 97% of the corpus is a single
+class, so a flat draw of twenty never reaches the rest. `NEW=1` skips pairs a
+verdict already settles; `UNIFORM=1` returns to a flat draw, which is only the
+right question when the *rate* is — and `gate:edges` already carries the rate on
+every commit.
+
+**One row is one pair, and the paste block is twice as long.** Every edge is
+generated in both directions from one fact, so a reading settles both and the
+block writes both — forty entries for twenty pairs. `words` and `roots` beside
+each pair are hints from the same reader `gate:edges` uses, never verdicts:
+2:48 → 2:123 scores 1 and is the pair this product was designed around.
+
 **Record both verdicts.** `correct` means the edge must keep shipping;
 `wrong` means it must not. The negative case is the one that pays: an edge a
 reader rejected, if it is not written down, comes back on the next data refresh
