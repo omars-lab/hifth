@@ -383,10 +383,32 @@ both `iphone` and `android`. No new dependency. Pins every string the `screen-re
 runbook lists under `expect`, forever, and delivers the ledger's first `tunes` line before the check
 is run. Shrinks that runbook from 8 steps to 3.
 
-**② `source-offer-resolves` → a gate — ~1h, $0.**
-New `scripts/gate-source-offer.mjs`; extend `colophon.spec.ts` to follow links and compare SHAs;
-`make source-offer URL=<deployed>` and a `public-deploy` CI job. Flips a `pending` human check to
-automated and unblocks the one thing gating publication.
+**② `source-offer-resolves` → a gate — ✅ done, 2026-07-28.**
+`scripts/check-source-offer.mjs`, `make source-offer [URL=…]`, and a `public-deploy` workflow
+(`workflow_dispatch`). It follows the offer anonymously — no `gh`, no token — because signed in as
+ourselves a private repo looks public, which is the exact failure the manual runbook opens a private
+window to avoid. With `URL=<deployed>` it fetches the deployed page, follows its module scripts, and
+reads `SOURCE_REPO` and the build's 40-hex commit straight out of the bundle, so it checks what a
+reader is actually handed rather than what this branch declares.
+
+Three deviations from the proposal, each deliberate:
+
+- **`check-` not `gate-`.** Every `scripts/gate-*.mjs` runs on every commit via `pnpm gates`. This
+  one reaches the public internet and must not, so it does not carry a name that says it does.
+- **`colophon.spec.ts` was left alone.** Teaching it to follow links would put github.com on the
+  critical path of `make e2e` and of CI's e2e job — the same trap that cancelled ⑦, and the reverse
+  of the commit that stopped unit tests reaching the real network. The spec keeps asserting the
+  offer's *shape*; the network half lives in the checker, where a flaky host is a `COULD NOT TELL`
+  rather than a red build.
+- **`workflow_dispatch`, not a schedule.** The check is red today, correctly: the repository is
+  private, so the offer 404s anonymously. A scheduled job announcing a known-pending decision
+  (task #53) every morning is noise.
+
+The result is that the pending human check now has a machine half that runs in seconds, and #53
+stopped being a note in a task list: `make source-offer` says, in words, that the site must not be
+published yet and what the two fixes are. The half that still needs a person — that a reader can
+*reach* the offer from inside the running app, on a device — stays in the ledger, with the checker
+wired into its `setup` so it is answered before anyone picks up a phone.
 
 **③ Licence-copy drift gate — ✅ done, 2026-07-27.**
 `scripts/gate-license-copy.mjs`, wired into `pnpm gates`, `make ci`, CI, and the pre-commit hook

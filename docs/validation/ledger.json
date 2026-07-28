@@ -249,16 +249,21 @@
       ],
       "runbook": {
         "needs": [
+          "Two minutes of network. `make source-offer` follows the same links anonymously and answers the machine half before you pick up a phone.",
           "The **deployed** build, not localhost. The question is what a stranger receives, and localhost cannot answer it.",
-          "A private / logged-out browser window — signed in as ourselves, a private repo looks public.",
-          "Two minutes."
+          "A private / logged-out browser window — signed in as ourselves, a private repo looks public."
         ],
-        "setup": [],
+        "setup": [
+          {
+            "run": "make source-offer URL=<the deployed URL>",
+            "expect": "A verdict, printed. `source-offer — OK` → every link already resolves anonymously and what is left below is confirming the *reader’s* path to them. `DOES NOT RESOLVE` → it names which link failed and why; you can stop here and fix that. `COULD NOT TELL` → the network would not answer, which is not a pass."
+          }
+        ],
         "steps": [
           {
             "do": "Open the deployed site in a private window.",
             "expect": "The app loads normally.",
-            "why": "Private, because your own session hides the failure that matters: a link that resolves only because you are signed in does not resolve for the stranger the GPL offer is written for."
+            "why": "Private, because your own session hides the failure that matters: a link that resolves only because you are signed in does not resolve for the stranger the GPL offer is written for. `make source-offer` has already followed the links with no credentials at all; what it cannot tell you is whether a reader can *get to* them from inside the running app, which is what the rest of this is for."
           },
           {
             "do": "Tap the wordmark حِفظ at the top of the chrome (it announces «عن حِفظ»).",
@@ -281,12 +286,14 @@
         "reading": [
           "404 or a sign-in wall → the §6 offer is not discharged and the site must not be published. Either make the repo public, or repoint SOURCE_REPO in apps/web/src/provenance.ts at wherever the source is actually served.",
           "Lands on the repository root with no commit → the build had no sha available. The offer is weaker but not broken; fix the build environment, not the constant.",
-          "Lands on a commit that is not the deployed build → the deploy and the link disagree, which is worse than no link. Check the build-time resolution order."
+          "Lands on a commit that is not the deployed build → the deploy and the link disagree, which is worse than no link. Check the build-time resolution order.",
+          "`make source-offer URL=<deployed>` disagrees with what you see on screen → believe the script about the links and your eyes about the path to them. It reads SOURCE_REPO and the build’s commit out of the deployed bundle, so a disagreement means the page you opened and the bundle it loaded are not the same deploy."
         ],
         "record": "make record CHECK=source-offer-resolves RESULT='private window → colophon → الشيفرة المصدرية resolves to <repo>/tree/<sha>, matching the deployed commit'"
       },
       "tunes": [
-        "apps/web/src/provenance.ts — SOURCE_REPO, if the source is served from somewhere other than the GitHub repo"
+        "apps/web/src/provenance.ts — SOURCE_REPO, if the source is served from somewhere other than the GitHub repo",
+        "scripts/check-source-offer.mjs — if the offer moved, or a new credited source needs its link followed"
       ],
       "record": "docs/PLAN.md follow-up ⑤"
     },

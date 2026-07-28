@@ -278,6 +278,29 @@ check that tunes nothing, a pending human check with no runbook (nobody can run
 it, so it will sit there looking tracked), or a `guide.html` that was not
 regenerated after the ledger moved.
 
+### The GPL §6 offer — the half a machine *can* run
+
+`make source-offer` (`scripts/check-source-offer.mjs`) follows the offer the way
+a stranger would: anonymously, no `gh` and no token, because signed in as
+ourselves a private repo looks public and the check would go green on exactly the
+day the offer stopped resolving. `URL=<deployed>` additionally reads
+`SOURCE_REPO` and the build's commit out of the deployed bundle, so it answers
+what a reader is handed rather than what this branch declares.
+
+It is deliberately **not** in `pnpm gates`, `make ci` or the pre-commit hook, and
+is named `check-` rather than `gate-` to say so — it reaches the public internet.
+`.github/workflows/public-deploy.yml` runs it on `workflow_dispatch`, which is
+when the question is actually being asked.
+
+Three verdicts, and the middle one is the point: `OK`, `DOES NOT RESOLVE`
+(exit 1 — an answer), `COULD NOT TELL` (exit 3 — a network that would not answer,
+which is **not** a pass). It is red today for a real reason: the repository is
+private, so the offer 404s for everyone who is not us (task #53).
+
+It is wired into the check's `runbook.setup`, so it is answered before anyone
+picks up a phone. What is left for the person holding one is the part it cannot
+see: that a reader can *reach* the offer from inside the running app.
+
 ### The edge spot-audit — the scripture tier
 
 The one check with a dedicated tool (`make audit-edges`, seeded so a round can be

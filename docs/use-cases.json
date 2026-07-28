@@ -693,6 +693,32 @@
       ]
     },
     {
+      "id": "prove-the-source-offer-before-publishing",
+      "actor": "maintainer",
+      "goal": "Before publishing, know the GPL source offer resolves for a stranger — not just for me, signed in.",
+      "feature": "provenance",
+      "code": [
+        {
+          "file": "scripts/check-source-offer.mjs",
+          "symbol": "probe"
+        },
+        {
+          "file": "apps/web/src/provenance.ts",
+          "symbol": "urlFor"
+        }
+      ],
+      "proof": [
+        {
+          "gate": "source-offer"
+        },
+        {
+          "file": "apps/web/e2e/colophon.spec.ts",
+          "test": "the wordmark opens the source offer for this build"
+        }
+      ],
+      "gap": "`source-offer` is run on demand, not by CI on every commit — it reaches the public internet, and a check that can go red because GitHub is having a bad morning teaches everyone to ignore red. It is red today for a real reason: the repository is private, so the offer 404s anonymously (task #53). And nothing watches the deployed build, because there is not one yet — `--url` exists and is tested, but has never been pointed at a live deploy."
+    },
+    {
       "id": "refuse-a-change-that-alters-the-picture",
       "actor": "ci",
       "goal": "Fail a commit that moves the paint on the page, including the differences no DOM assertion can see.",
