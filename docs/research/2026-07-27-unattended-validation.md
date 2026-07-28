@@ -401,10 +401,53 @@ A source the app should not credit must say `not-credited: <reason>` — silence
 to an oversight. Verified by inducing all five failures and reverting, including a deliberately
 broken parser, which fails loudly rather than matching nothing against nothing.
 
-**④ Eviction-detection e2e — ~2h, $0.**
-Extend `offline.spec.ts` with a CDP `Storage.clearDataForOrigin` case (Chromium-only, matching the
-file's existing skip and its stated reason). Delivers **both** of `offline-survival-8-day`'s
-`tunes` without the eight days, and leaves the re-pin assertion slot ready for Loop 6b.
+**④ Eviction-detection e2e — ✅ done, 2026-07-27. Found two real defects.**
+The design held: `Storage.clearDataForOrigin` over CDP takes the origin's caches out from under a
+live page, and the app cannot tell that from an ITP sweep. What did not hold was the assumption
+underneath it — that the app already survived eviction and only needed its reaction asserted. It
+did not survive at all. Both tests were red when written; both are green now, and both were
+confirmed to fail again with their fix reverted.
+
+*Probed first, asserted second.* The design said "assert the app notices its cached pages are gone
+and does something sane". Before writing that, a throwaway spec asked what the app actually does.
+Neither answer was the expected one, which is the entire argument for probing before asserting:
+a test written to the design would have encoded a recovery that did not exist.
+
+1. **Eviction was permanent.** Workbox fills the precache in the service worker's `install`
+   handler. Eviction takes the bytes and leaves the registration, so the worker never installs
+   again and the shell never comes back. The *runtime* caches (pages, data) refill on demand, so
+   every online signal says the app is healthy — and the next offline launch is the browser's own
+   `ERR_FAILED` page, because `index.html` is gone and there is nothing to boot from. One sweep
+   ended offline support permanently, until a deploy happened to ship new `sw.js` bytes. On an
+   uninstalled iOS origin that sweep arrives on a 7-day timer, so this was the *default* outcome,
+   with Loop 6a's promise silently false and nothing anywhere going red.
+
+   Getting out of it took three measurements. Three reloads left the precache empty. An explicit
+   `registration.update()` did nothing — identical `sw.js` bytes mean no new worker, so no
+   `install`, so no precache. `unregister()` followed by `register()` in the same page brought the
+   registration straight back as `activated` with `installing` never set: the old worker was still
+   controlling this client, so unregistration only takes effect once that client goes away, and
+   re-registering the same script URL resurrects it. Dropping the last client is the step that
+   makes the next registration a genuine first install — so `repairShellCache()` in
+   `apps/web/src/pwa.ts` unregisters and reloads, once per tab, only when the shell is actually
+   missing and only when online (unregistering while offline trades a broken cold start for no
+   worker at all). The integrity check is `caches.match("index.html", {ignoreSearch:true})` —
+   behavioural ("can I still boot offline?") rather than structural, so a workbox version bump
+   does not read as an eviction.
+
+2. **The app claimed a page it was not showing.** Offline with an evicted cache is how a
+   *vendored* page fails to fetch, which is the one case that slips past App's resolver gate.
+   `PageStage`'s `navigateTo`/`showPage` bailed silently on a failed mount (`if (!mp) return`)
+   while the chrome and the live region had already committed to the new number. Probed: header
+   `١٩`, stage still `page-label-7`, and «فُتح رابط · صفحة ١٩» announced aloud. A hafiz mid-review
+   would be told they are on 19 while looking at 7, and a screen-reader user would have nothing on
+   screen to contradict it. Both entry points now set the error status, and the banner names the
+   page it failed on.
+
+The eight-day wait still belongs to a human, but it is now only about the one thing no harness can
+supply: whether iOS really sweeps an uninstalled origin at ~7 days and spares an installed one.
+Everything downstream of "the sweep happened" is asserted in `Hifth · eviction`, and the re-pin
+assertion slot is still there for Loop 6b.
 
 **⑤ KFGQPC reachability probe — ✅ done, 2026-07-27. Answer: unreachable.**
 The throwaway job ran on a GitHub runner (Azure westus2, run
