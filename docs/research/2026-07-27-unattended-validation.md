@@ -493,14 +493,30 @@ User-Agent. Two unrelated networks failing at the *TCP* layer is not a bot filte
 could talk its way past — the packets do not arrive. Recorded in the ledger's `how` and `needs`
 for `kfgqpc-terms-primary-source`, and the probe deleted as designed. **This kills ⑦.**
 
-**⑥ Automated on-device perf, real Android — ~1 day, $0 with your own phone.**
-New `apps/web/perf/device-trace.mjs`: `playwright._android` over adb → `device.launchBrowser()` →
-CDP session → `Tracing.start` with frame categories → `synthesizeScrollGesture` /
-`synthesizePinchGesture` / `synthesizeTapGesture` in three segments matching `probe.ts`'s
-`SEGMENTS`, emitting the **same JSON shape** so it drops straight into the ledger. New
-`make phone-perf-auto SERIAL=<adb-serial>`. Then tune `pan-zoom-trace.mjs`'s asserted budget to the
-real number. Keep `make phone-perf` — the hand-driven capture still settles the architecture
-verdict; this keeps it true afterwards.
+**⑥ Automated on-device perf, real Android — ⏸ not building it yet. No Android device (2026-07-28).**
+The design still stands and the API half was re-confirmed: `playwright._android.devices()` exists in
+the pinned playwright 1.61.1, so `device-trace.mjs` would be `_android` over adb →
+`device.launchBrowser()` → CDP session → `Tracing.start` with frame categories →
+`synthesizeScrollGesture` / `synthesizePinchGesture` / `synthesizeTapGesture` in three segments
+matching `probe.ts`'s `SEGMENTS`, emitting the **same JSON shape** so it drops straight into the
+ledger, behind `make phone-perf-auto SERIAL=<adb-serial>`. Then tune `pan-zoom-trace.mjs`'s asserted
+budget to the real number.
+
+What is missing is not code. It is the two things the design assumes and cannot supply: an Android
+phone with USB debugging, and `adb` (no Android platform-tools on the maintainer's machine).
+
+Writing it anyway was considered and rejected for ⑦'s reason, which applies here word for word: an
+`apps/web/perf/device-trace.mjs` and a `make phone-perf-auto` that have never once executed against
+real hardware would put a *covered-looking* check in front of the one measurement the rendering
+architecture actually turns on. Every failure mode of this script — whether the synthesized gestures
+land on the stage, whether the trace carries the frame events, whether the segment boundaries line
+up with `probe.ts` — is invisible until it runs on a device. A harness verified only against its own
+author's expectations is not a check; it is a claim.
+
+So the hand-driven `make phone-perf` remains the whole story: `probe.ts` measures the phone from
+inside the phone, needs no cable and no DevTools, and works on iOS too — which the adb route never
+will. Build ⑥ the day there is a device to point it at; the design above is the whole of what is
+owed, and the blocker is hardware, not thinking.
 
 **⑦ KFGQPC terms watcher — ❌ not building it. ⑤ came back unreachable.**
 The design was `scripts/watch-kfgqpc-terms.mjs` + a scheduled workflow: normalize, SHA-256, open an
