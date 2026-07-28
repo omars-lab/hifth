@@ -527,6 +527,11 @@
           "file": "scripts/gate-map.mjs",
           "symbol": "features",
           "note": "This map, checked. Every symbol listed in docs/map.json must still exist, so the orientation doc cannot rot into confident fiction."
+        },
+        {
+          "file": "scripts/gate-use-cases.mjs",
+          "symbol": "locateTest",
+          "note": "The promises, checked. docs/use-cases.json names the test behind each thing this app claims to do; this asserts those tests still exist and are still tests. Rename a test and the commit doing it is told which promise it was standing behind."
         }
       ],
       "extend": [

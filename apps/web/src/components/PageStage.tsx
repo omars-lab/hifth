@@ -456,7 +456,7 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
     if (selectedKey) {
       cur.hl.highlight(selectedKey, "sel", "selection");
       // A tap replaces a highlight (App keeps the two mutually exclusive), so
-      // the range wash goes with it — otherwise the page would show two answers.
+      // the range ink goes with it — otherwise the page would show two answers.
       cur.hl.clear("phrase");
     } else {
       cur.hl.clear("selection");
@@ -475,8 +475,8 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
   }, [breadcrumbKey, status, resolver]);
 
   /**
-   * A marquee released: turn the rectangle into an ayah range, wash it, and tell
-   * L3. A drag that crossed no ayah (the margins) clears the wash and says
+   * A marquee released: turn the rectangle into an ayah range, ink it, and tell
+   * L3. A drag that crossed no ayah (the margins) clears the ink and says
    * nothing — an empty range is not a selection, it is a miss.
    */
   const commitMarquee = useCallback(

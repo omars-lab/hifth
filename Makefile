@@ -208,6 +208,7 @@ ci: core ## Full local mirror of the CI build-test-gate job, IN CI ORDER
 	$(PNPM) gate:golden-env
 	$(PNPM) gate:golden-size
 	$(PNPM) gate:map
+	$(PNPM) gate:use-cases
 	$(CORE) build && $(WEB) build
 	$(PNPM) gate:budget
 	@echo ""
@@ -332,6 +333,22 @@ map: ## Where each feature lives:  make map  ·  make map FEATURE=<id> for the w
 	  node scripts/gate-map.mjs --list; \
 	fi
 
+.PHONY: use-cases
+use-cases: ## Who uses Hifth and what proves it:  make use-cases  ·  make use-cases ACTOR=<id>
+	@# docs/use-cases.json is the source. The map answers "where do I change this";
+	@# this answers "what did we promise, and what fails if we break it". Every
+	@# entry names a test or a gate — gate:use-cases refuses one that names nothing,
+	@# and refuses a pointer or a test title that has stopped resolving.
+	@if [ -n "$(ACTOR)" ]; then \
+	  node scripts/gate-use-cases.mjs --actor "$(ACTOR)"; \
+	else \
+	  node scripts/gate-use-cases.mjs --list; \
+	fi
+
+.PHONY: use-cases-doc
+use-cases-doc: ## Re-render docs/use-cases.md (the mermaid map) from docs/use-cases.json
+	@node scripts/build-use-cases.mjs
+
 .PHONY: validate
 validate: ## Outstanding manual checks — or one check's full runbook:  make validate CHECK=<id>
 	@if [ -n "$(CHECK)" ]; then \
@@ -391,6 +408,9 @@ help: ## List targets (this)
 	@echo ""
 	@echo "  Loop workflow:  make status | make loop N=2 | make loop-verify N=2"
 	@echo "  On device:      make phone | make perf"
+	@echo "  Orientation:    make map              (where does each feature live)"
+	@echo "                  make use-cases        (what did we promise, and what proves it)"
+	@echo "                  make use-cases ACTOR=<id>     (one actor's whole picture)"
 	@echo "  Validation:     make validate         (what are we waiting on, and what it blocks)"
 	@echo "                  make validate CHECK=<id>      (one check's full runbook, here)"
 	@echo "                  make guide                    (the same runbooks, on your phone)"

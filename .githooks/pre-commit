@@ -46,6 +46,18 @@ if [ -n "$staged" ] && command -v node >/dev/null 2>&1; then
     echo "  to bypass this one commit:  git commit --no-verify"
     exit 1
   fi
+
+  # Same rule, one document over: if this commit renamed a test that docs/use-
+  # cases.json cites as the proof of a promise, the promise just became unproven
+  # and nothing else would ever say so. Scoped and silent the same way.
+  # shellcheck disable=SC2086
+  if ! node scripts/gate-use-cases.mjs --files $staged; then
+    echo ""
+    echo "pre-commit: docs/use-cases.json names a symbol or a test that moved (above)."
+    echo "  fix the entry — 'make use-cases ACTOR=<id>' shows what it currently claims."
+    echo "  to bypass this one commit:  git commit --no-verify"
+    exit 1
+  fi
 fi
 
 # The licence the reader is shown and the licence on record, on the one commit

@@ -65,7 +65,7 @@ async function longPressDrag(
 }
 
 test.describe("Hifth · drag-to-highlight", () => {
-  test("long-press then drag washes the ayahs the marquee crossed", async ({ page }) => {
+  test("long-press then drag inks the ayahs the marquee crossed", async ({ page }) => {
     await openApp(page);
 
     // Two adjacent ayahs near the *top* of page 7 (2:39 and 2:40 are verse-46 /

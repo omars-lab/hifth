@@ -178,7 +178,7 @@ test.describe("@app · the screens a runbook step describes", () => {
     await page.goto("/#/hafs-kfqc/2:48");
     await stageReady(page);
     await expect(page.getByRole("button", { name: /الآية الحالية البقرة · ٢:٤٨/ })).toBeVisible();
-    // The wash has to have landed, or this photographs an unselected page.
+    // The ink has to have landed, or this photographs an unselected page.
     await expect(page.locator("#hifth-overlay .hl-sel")).not.toHaveCount(0);
     await screen(page, "ayah-selected");
 
