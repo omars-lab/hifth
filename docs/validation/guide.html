@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" data-ledger-hash="82722da1bf41">
+<html lang="en" data-ledger-hash="129a4984b5d6">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -123,11 +123,11 @@ li.struck .expect::before { content: "machine "; color: var(--green); }
 <header class="top">
   <p class="kicker">Hifth · حِفظ</p>
   <h1>Field guide</h1>
-  <p class="lede">The checks a machine cannot run. 6 of 6 outstanding.</p>
+  <p class="lede">The checks a machine cannot run. 5 of 6 outstanding.</p>
   <p class="rule">Every result here must tighten something automated — a threshold, a
   fixture, a gate. That is what <b>tunes</b> is for at the foot of each card. A verdict
   that tunes nothing has to be bought again by hand, forever.</p>
-  <p class="src">Generated from <code>docs/validation/ledger.json</code> · <code>82722da1bf41</code>
+  <p class="src">Generated from <code>docs/validation/ledger.json</code> · <code>129a4984b5d6</code>
   · never edit this file — run <code>make guide</code></p>
 </header>
 
@@ -303,7 +303,7 @@ li.struck .expect::before { content: "machine "; color: var(--green); }
   <section class="block machine is-pass">
     <h3>Already done for you</h3>
     <pre class="cmd">pnpm gate:license-copy</pre>
-    <p class="expect"><b>pass</b> · 2026-07-29 · a1f0e53 · darwin · node v20.19.4 — 1 step(s) below are struck through</p>
+    <p class="expect"><b>pass</b> · 2026-07-29 · bc365d3 · darwin · node v20.19.4 — 1 step(s) below are struck through</p>
     <p class="tunes-lead">What it cannot do — still yours:</p>
     <ul class="bullets"><li>Reading qurancomplex.gov.sa itself. The host times out on TCP 443 from every network this project's tooling runs on (measured, twice) and the Wayback mirror is not fetchable either — that is why research ⑦ was cancelled rather than built, and why no watcher will ever cover this.</li><li>Judging whether our summary is <b>stricter</b> than the source. A gate can prove two copies match; only a reader can notice that both are wrong in the same direction, and overstating someone else's terms fails silently because it reads as caution.</li></ul>
   </section>
@@ -357,20 +357,20 @@ li.struck .expect::before { content: "machine "; color: var(--green); }
     <p class="expect">Written up in SOURCES.md §hafs-kfqc</p>
   </section>
 </article>
-<article class="card" id="source-offer-resolves">
+<article class="card is-done" id="source-offer-resolves">
   <div class="head">
-    <span class="badge">outstanding</span>
+    <span class="badge ok">done</span>
     <h2>The GPL §6 offer resolves for a stranger</h2>
     <p class="id"><code>source-offer-resolves</code> · blocks <b>public-deploy</b></p>
   </div>
 
   <p class="why">Publishing a static PWA conveys it: the browser receives real copies of the JS and of assets/roots/**, a GPL-covered derivative. The colophon links SOURCE_REPO at the exact build commit, which discharges the obligation only if that URL opens for someone who is not signed in as us.</p>
-  
+  <p class="verdict"><b>Verdict 2026-07-29:</b> Repository made public 2026-07-29. Followed anonymously: the repo root, the exact build tree (bc365d3), and all 4 attribution links resolve. GPL §6 discharged; public deploy unblocked.</p>
 
-  <section class="block machine is-fail">
+  <section class="block machine is-pass">
     <h3>Already done for you</h3>
     <pre class="cmd">node scripts/check-source-offer.mjs</pre>
-    <p class="expect"><b>fail</b> · 2026-07-29 · a1f0e53 · darwin · node v20.19.4 — nothing struck through</p>
+    <p class="expect"><b>pass</b> · 2026-07-29 · bc365d3 · darwin · node v20.19.4 — 2 step(s) below are struck through</p>
     <p class="tunes-lead">What it cannot do — still yours:</p>
     <ul class="bullets"><li>Whether a reader can *get to* those links from inside the running app. The script follows URLs it reads out of the bundle; it never opens the colophon, so a source link that resolves perfectly from behind a sheet nobody can open still passes it.</li><li>Whether the deployed build is the build you think it is. Without <code>URL=&lt;deployed&gt;</code> the script answers about this working tree, which is a different question from the one a stranger asks.</li></ul>
   </section>
@@ -402,20 +402,13 @@ li.struck .expect::before { content: "machine "; color: var(--green); }
         </figure>
         <p class="why">The offer has to be reachable from inside the running app, not just from the repository. A colophon nobody can find is an offer that is not being made.</p>
       </li>
-      <li>
-        <label class="do"><input type="checkbox" data-step="source-offer-resolves:2"><span>Note the short commit printed beside the link, then follow the link.</span></label>
-        <p class="expect">Real source at that exact commit — a <code>/tree/&lt;sha&gt;</code> URL — not a 404, not a sign-in wall, and not a bare branch that moves under the reader. The sha is baked at build time (CF_PAGES_COMMIT_SHA → GITHUB_SHA → git rev-parse HEAD).</p>
-        
-        <p class="why">A bare branch link moves under the reader. The offer is for the source of the binary they are running, and the pinned sha is what makes it a real offer rather than a gesture.</p>
+      <li class="struck">
+        <p class="do"><s>Note the short commit printed beside the link, then follow the link.</s></p>
+        <p class="expect">Done by <code>node scripts/check-source-offer.mjs</code> on 2026-07-29. Skip it.</p>
       </li>
-      <li>
-        <label class="do"><input type="checkbox" data-step="source-offer-resolves:3"><span>Scroll the colophon to the credits and follow one of the attribution links too.</span></label>
-        <p class="expect">They resolve. The mutashabihat licence asks for a mention in the app; corpus.quran.com's terms require the link.</p>
-        <figure class="shot">
-          <img src="shots/colophon-credits.png" alt="Screenshot: colophon-credits" loading="lazy">
-          <figcaption>from the build · a shape to recognise, not a result to match</figcaption>
-        </figure>
-        <p class="why">Two of the corpora we build on ask for a link, not merely a mention. A dead attribution link is a licence term being quietly failed.</p>
+      <li class="struck">
+        <p class="do"><s>Scroll the colophon to the credits and follow one of the attribution links too.</s></p>
+        <p class="expect">Done by <code>node scripts/check-source-offer.mjs</code> on 2026-07-29. Skip it.</p>
       </li>
     </ol>
   </section>
@@ -446,7 +439,7 @@ li.struck .expect::before { content: "machine "; color: var(--green); }
   <section class="block machine is-pass">
     <h3>Already done for you</h3>
     <pre class="cmd">pnpm gate:verified-edges</pre>
-    <p class="expect"><b>pass</b> · 2026-07-29 · a1f0e53 · darwin · node v20.19.4 — 1 step(s) below are struck through</p>
+    <p class="expect"><b>pass</b> · 2026-07-29 · bc365d3 · darwin · node v20.19.4 — 1 step(s) below are struck through</p>
     <p class="tunes-lead">What it cannot do — still yours:</p>
     <ul class="bullets"><li>Every pair. The gate re-checks verdicts that are already banked against the shipped corpus; it cannot look at a mushaf, and no verdict exists until someone has. This is the one check in the register that can establish the data is true, and it is human by construction.</li><li>Choosing what to look at. <code>make validate</code> prints which strata have never been audited — a class with no verdict in it is a class where a wrong pair survives every check this repo has — but pointing at the gap is not closing it.</li></ul>
   </section>
