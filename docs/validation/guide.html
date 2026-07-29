@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" data-ledger-hash="ce15b5c75664">
+<html lang="en" data-ledger-hash="82722da1bf41">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -127,7 +127,7 @@ li.struck .expect::before { content: "machine "; color: var(--green); }
   <p class="rule">Every result here must tighten something automated — a threshold, a
   fixture, a gate. That is what <b>tunes</b> is for at the foot of each card. A verdict
   that tunes nothing has to be bought again by hand, forever.</p>
-  <p class="src">Generated from <code>docs/validation/ledger.json</code> · <code>ce15b5c75664</code>
+  <p class="src">Generated from <code>docs/validation/ledger.json</code> · <code>82722da1bf41</code>
   · never edit this file — run <code>make guide</code></p>
 </header>
 
@@ -303,7 +303,7 @@ li.struck .expect::before { content: "machine "; color: var(--green); }
   <section class="block machine is-pass">
     <h3>Already done for you</h3>
     <pre class="cmd">pnpm gate:license-copy</pre>
-    <p class="expect"><b>pass</b> · 2026-07-28 · b8f12ce · darwin · node v20.19.4 — 1 step(s) below are struck through</p>
+    <p class="expect"><b>pass</b> · 2026-07-29 · a1f0e53 · darwin · node v20.19.4 — 1 step(s) below are struck through</p>
     <p class="tunes-lead">What it cannot do — still yours:</p>
     <ul class="bullets"><li>Reading qurancomplex.gov.sa itself. The host times out on TCP 443 from every network this project's tooling runs on (measured, twice) and the Wayback mirror is not fetchable either — that is why research ⑦ was cancelled rather than built, and why no watcher will ever cover this.</li><li>Judging whether our summary is <b>stricter</b> than the source. A gate can prove two copies match; only a reader can notice that both are wrong in the same direction, and overstating someone else's terms fails silently because it reads as caution.</li></ul>
   </section>
@@ -330,7 +330,7 @@ li.struck .expect::before { content: "machine "; color: var(--green); }
       </li>
       <li class="struck">
         <p class="do"><s>Confirm our two restatements say the same thing as each other — SOURCES.md §hafs-kfqc and the colophon's «<bdi>الرخصة والمصدر</bdi>».</s></p>
-        <p class="expect">Done by <code>pnpm gate:license-copy</code> on 2026-07-28. Skip it.</p>
+        <p class="expect">Done by <code>pnpm gate:license-copy</code> on 2026-07-29. Skip it.</p>
       </li>
       <li>
         <label class="do"><input type="checkbox" data-step="kfgqpc-terms-primary-source:3"><span>Compare that against the two places we restate it: SOURCES.md §hafs-kfqc, and the colophon in the app (tap the wordmark <bdi>حِفظ</bdi> → «<bdi>الرخصة والمصدر</bdi>»).</span></label>
@@ -370,7 +370,7 @@ li.struck .expect::before { content: "machine "; color: var(--green); }
   <section class="block machine is-fail">
     <h3>Already done for you</h3>
     <pre class="cmd">node scripts/check-source-offer.mjs</pre>
-    <p class="expect"><b>fail</b> · 2026-07-28 · b8f12ce · darwin · node v20.19.4 — nothing struck through</p>
+    <p class="expect"><b>fail</b> · 2026-07-29 · a1f0e53 · darwin · node v20.19.4 — nothing struck through</p>
     <p class="tunes-lead">What it cannot do — still yours:</p>
     <ul class="bullets"><li>Whether a reader can *get to* those links from inside the running app. The script follows URLs it reads out of the bundle; it never opens the colophon, so a source link that resolves perfectly from behind a sheet nobody can open still passes it.</li><li>Whether the deployed build is the build you think it is. Without <code>URL=&lt;deployed&gt;</code> the script answers about this working tree, which is a different question from the one a stranger asks.</li></ul>
   </section>
@@ -446,7 +446,7 @@ li.struck .expect::before { content: "machine "; color: var(--green); }
   <section class="block machine is-pass">
     <h3>Already done for you</h3>
     <pre class="cmd">pnpm gate:verified-edges</pre>
-    <p class="expect"><b>pass</b> · 2026-07-28 · b8f12ce · darwin · node v20.19.4 — 1 step(s) below are struck through</p>
+    <p class="expect"><b>pass</b> · 2026-07-29 · a1f0e53 · darwin · node v20.19.4 — 1 step(s) below are struck through</p>
     <p class="tunes-lead">What it cannot do — still yours:</p>
     <ul class="bullets"><li>Every pair. The gate re-checks verdicts that are already banked against the shipped corpus; it cannot look at a mushaf, and no verdict exists until someone has. This is the one check in the register that can establish the data is true, and it is human by construction.</li><li>Choosing what to look at. <code>make validate</code> prints which strata have never been audited — a class with no verdict in it is a class where a wrong pair survives every check this repo has — but pointing at the gap is not closing it.</li></ul>
   </section>
@@ -500,7 +500,7 @@ li.struck .expect::before { content: "machine "; color: var(--green); }
       </li>
       <li class="struck">
         <p class="do"><s>Run pnpm gate:verified-edges.</s></p>
-        <p class="expect">Done by <code>pnpm gate:verified-edges</code> on 2026-07-28. Skip it.</p>
+        <p class="expect">Done by <code>pnpm gate:verified-edges</code> on 2026-07-29. Skip it.</p>
       </li>
     </ol>
   </section>
