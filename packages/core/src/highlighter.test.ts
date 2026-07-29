@@ -482,6 +482,41 @@ describe("Highlighter marker swipes", () => {
     ]);
   });
 
+  // The wipe (highlight.css) draws a stroke by sliding a dash in from the path's
+  // START point, so the only thing deciding which way the ink travels is which
+  // end the highlighter wrote first. A `<line>` renders identically either way,
+  // which means nothing on screen and no other test can catch this being
+  // backwards — a left-to-right wipe across Arabic would just look subtly wrong
+  // to a reader and correct to everyone else.
+  it("starts each swipe at its RIGHT end, because that is where a pen meets Arabic", () => {
+    hl.highlight("quran/hafs-kfqc/2:38", "sel", "selection");
+    const marks = [...svg.querySelectorAll("#hifth-overlay .hl-sel")];
+    for (const m of marks) {
+      expect(Number(m.getAttribute("x1"))).toBeGreaterThan(Number(m.getAttribute("x2")));
+    }
+  });
+
+  it("hands the wipe the two numbers CSS cannot work out for itself", () => {
+    hl.highlight("quran/hafs-kfqc/2:38", "sel", "selection");
+    const marks = [...svg.querySelectorAll<SVGElement>("#hifth-overlay .hl-sel")];
+
+    // How long each stroke runs. `stroke-dasharray: 100%` on a <line> resolves
+    // against the viewport, not the line, so the length has to be measured here
+    // or the dash is the wrong size on every ayah.
+    for (const m of marks) {
+      const len = Number(m.style.getPropertyValue("--hl-len"));
+      expect(len).toBeCloseTo(
+        Math.abs(Number(m.getAttribute("x2")) - Number(m.getAttribute("x1"))),
+        6,
+      );
+      expect(len).toBeGreaterThan(0);
+    }
+
+    // Which line of the ayah this is, in reading order — the stagger that makes
+    // a two-line ayah read as one pen crossing two lines rather than two pens.
+    expect(marks.map((m) => m.style.getPropertyValue("--hl-i"))).toEqual(["0", "1"]);
+  });
+
   it("clones the source and withholds `hl-ink` when the geometry is not a rect run", () => {
     document.body.innerHTML = "";
     svg = makeInkSvg("M0 0L120 30L240 0Z"); // a genuine polygon — ink.ts declines

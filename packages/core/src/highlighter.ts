@@ -341,13 +341,29 @@ export class Highlighter {
       // heights differ between lines, and stroke-width is per element, so a
       // single path would have to pick one thickness and be wrong on the rest.
       // An ayah spans at most three lines, so this is at most three nodes.
-      return swipes.map((s) => {
+      return swipes.map((s, i) => {
         const line = document.createElementNS(SVG_NS, "line");
-        line.setAttribute("x1", String(s.x1));
-        line.setAttribute("x2", String(s.x2));
+        // Drawn from the RIGHT end to the left — x1 takes the larger x. A line
+        // renders identically either way, so this is not a geometry choice; it
+        // is the only thing that decides which way the stroke-dashoffset wipe
+        // in highlight.css travels, and a pen crossing Arabic starts at the
+        // right. Reversing it here rather than in CSS is deliberate: the
+        // direction is a fact about the script, and `swipesFromPath` normalises
+        // x1 ≤ x2 for geometry's sake, so something has to put it back.
+        line.setAttribute("x1", String(s.x2));
+        line.setAttribute("x2", String(s.x1));
         line.setAttribute("y1", String(s.y));
         line.setAttribute("y2", String(s.y));
         line.setAttribute("stroke-width", String(s.width));
+        // The two numbers the wipe needs and CSS cannot compute: how far this
+        // stroke runs (a dash pattern has to be told, `100%` on a <line> is the
+        // viewport's width, not the line's), and which line of the ayah this is
+        // (so line 2 starts after line 1 — a marker crosses one line before the
+        // next, it does not paint a paragraph at once). Custom properties, not
+        // attributes, so nothing here picks a duration; the stylesheet owns
+        // that and reduced-motion can zero it.
+        line.style.setProperty("--hl-len", String(Math.abs(s.x2 - s.x1)));
+        line.style.setProperty("--hl-i", String(i));
         return tag(line, true);
       });
     }

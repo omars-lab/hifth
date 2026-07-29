@@ -43,6 +43,48 @@
   mix-blend-mode: multiply;
 }
 
+/* The wipe: the ink lays down right to left, one line after the next.
+ *
+ * A dash the exact length of the stroke, offset by that same length, is a
+ * stroke that is entirely gap — invisible. Animating the offset to zero slides
+ * the dash in from the path's start point, and because `stroke-linecap: round`
+ * is already on, the leading edge is a round cap travelling across the line:
+ * a pen tip, for free, from the property that was there to shape the ends.
+ *
+ * Which end it starts at is not decided here. It is decided by which end the
+ * highlighter put first when it wrote x1/x2 (@hifth/core highlighter.ts) — the
+ * right one, because that is where a pen crossing Arabic starts. The CSS cannot
+ * know that; a `<line>` is symmetric and the script is not.
+ *
+ * `--hl-len` and `--hl-i` come from the highlighter, per element. The fallback
+ * values are what makes this rule safe on an element that has neither: length 0
+ * means the dash covers nothing and the gap covers nothing, so the stroke draws
+ * solid and unanimated rather than vanishing. A highlight that fails to appear
+ * is the one outcome this whole feature must never produce.
+ *
+ * `backwards` fill matters for the stagger: without it, line 2 is fully drawn
+ * during line 1's stroke and then blinks out when its own delay expires. */
+#hifth-overlay .hl-ink {
+  stroke-dasharray: var(--hl-len, 0) var(--hl-len, 0);
+  animation: hifth-ink var(--dur-ink) var(--ease-ink) backwards;
+  animation-delay: calc(var(--hl-i, 0) * var(--stagger-ink));
+}
+@keyframes hifth-ink {
+  from {
+    stroke-dashoffset: var(--hl-len, 0);
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  /* Not just a zero duration — `animation: none` leaves stroke-dashoffset at
+     its initial 0, which is the fully-drawn stroke. The ink is simply there. */
+  #hifth-overlay .hl-ink {
+    animation: none;
+  }
+}
+
 /* Selection — the amber swipe. One selection at a time.
 
    Opaque, not a wash: under multiply the paper does the lightening, so the
@@ -109,16 +151,22 @@
   vector-effect: non-scaling-stroke;
 }
 
-/* Pulse on landing — one orchestrated motion moment (the hop). Reduced-motion
-   collapses the animation to nothing (tokens set --dur-hop to 0).
+/* Pulse on landing — the arrival moment for the CLONE fallback only.
+   Reduced-motion collapses it to nothing (tokens set --dur-hop to 0).
 
-   The animated property is `opacity`, not `fill-opacity`. A swipe has no fill
-   to fade, so the old keyframes animated a property the element does not use
-   and the hop landed with no moment at all — silently, because an animation
-   that changes nothing still runs, still fires its events, and still looks
-   exactly like a working animation in the DOM. `opacity` is the one property
-   that fades both renderings, so the clone fallback keeps its pulse too. */
-#hifth-overlay .hl-sel.pulse {
+   `:not(.hl-ink)` is load-bearing, and it is the second time this file has had
+   to be explicit about which of the two renderings a motion rule is for. Both
+   this and the wipe above set the `animation` shorthand, so on an inked
+   selection one of them was always going to win silently — and `.hl-sel.pulse`
+   outranks `.hl-ink`, so the wipe would have been the one to disappear, on hop
+   arrivals only, which is the hardest place to notice it missing. Scoping the
+   pulse away from ink makes the choice a decision instead of a specificity
+   accident: ink already has an arrival moment, and it is the pen.
+
+   The animated property is `opacity`, not `fill-opacity` — the clone has a fill
+   to fade, but `opacity` is what the earlier fix settled on and there is no
+   reason to narrow it back now. */
+#hifth-overlay .hl-sel.pulse:not(.hl-ink) {
   animation: hifth-pulse var(--dur-hop) var(--ease-hop);
 }
 @keyframes hifth-pulse {
