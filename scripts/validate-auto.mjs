@@ -93,7 +93,7 @@ for (const check of wanted) {
   // network timeout read as a verdict. Measured, not assumed — `make
   // source-offer` was the first thing this script ran.
   const proc = spawnSync(run, { shell: true, encoding: "utf8" });
-  const output = `${proc.stdout ?? ""}${proc.stderr ?? ""}`;
+  const output = redact(`${proc.stdout ?? ""}${proc.stderr ?? ""}`);
   process.stdout.write(indent(output));
 
   const exit = proc.status ?? 1;
@@ -159,6 +159,27 @@ console.log(
 // it does that from the records this wrote. A red producer is a real finding
 // (today `make source-offer` is red because the repo is private — that IS the
 // answer) and it belongs in a record, not in a broken build.
+
+/**
+ * Strip this checkout's absolute path out of a producer's output.
+ *
+ * pnpm prints the package directory in its own banner, so every record written
+ * on a developer's machine carried their home directory — and these records are
+ * committed, which makes the repository publish whoever ran the check last.
+ * Not a secret; just nobody else's business, and a needless diff besides, since
+ * the same run on two machines would disagree on a line that says nothing.
+ *
+ * Done here rather than by scrubbing the files, because the leak is a property
+ * of capturing stdout verbatim: fix the capture and every future record is
+ * clean, scrub the files and the next run puts it back.
+ */
+function redact(text) {
+  // Trailing slash trimmed first. `ROOT` is a URL pathname and ends in one;
+  // pnpm's banner prints the directory without one, so splitting on `ROOT` as
+  // given matches nothing at all — and matches it silently, which is how the
+  // first attempt at this passed a green run and left the path in the file.
+  return text.split(ROOT.replace(/\/$/, "")).join(".");
+}
 
 /** Last `n` non-blank lines, for the record's tail. */
 function tail(text, n) {

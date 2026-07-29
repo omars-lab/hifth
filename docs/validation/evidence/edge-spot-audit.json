@@ -1,8 +1,8 @@
 {
   "check": "edge-spot-audit",
   "run": "pnpm gate:verified-edges",
-  "ranAt": "2026-07-28T20:34:16Z",
-  "commit": "b8f12ce",
+  "ranAt": "2026-07-29T10:03:30Z",
+  "commit": "a1f0e53",
   "on": "darwin · node v20.19.4",
   "exit": 0,
   "outcome": "pass",
@@ -14,7 +14,7 @@
     "Choosing what to look at. `make validate` prints which strata have never been audited — a class with no verdict in it is a class where a wrong pair survives every check this repo has — but pointing at the gap is not closing it."
   ],
   "tail": [
-    "> hifth@0.0.0 gate:verified-edges /Users/omareid/Workspace/git/hifth",
+    "> hifth@0.0.0 gate:verified-edges .",
     "> node scripts/gate-verified-edges.mjs",
     "gate:verified-edges — OK (3 verified edges still present, 0 rejected edges still absent)"
   ]

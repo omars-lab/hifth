@@ -1,8 +1,8 @@
 {
   "check": "source-offer-resolves",
   "run": "node scripts/check-source-offer.mjs",
-  "ranAt": "2026-07-28T20:34:16Z",
-  "commit": "b8f12ce",
+  "ranAt": "2026-07-29T10:03:30Z",
+  "commit": "a1f0e53",
   "on": "darwin · node v20.19.4",
   "exit": 1,
   "outcome": "fail",
@@ -23,7 +23,7 @@
     "      The §6 offer is not discharged and the site must not be published.",
     "      Either make the repository public, or repoint SOURCE_REPO in apps/web/src/provenance.ts",
     "      at wherever the corresponding source is actually served.",
-    "  - https://github.com/omars-lab/hifth/tree/b8f12cea4c5d5e72bb20c33ce6e58d7ca1d65157 — HTTP 404, which follows from the repository itself not resolving.",
+    "  - https://github.com/omars-lab/hifth/tree/a1f0e5321ef6fd6e2ed35746a1dba618152136e8 — HTTP 404, which follows from the repository itself not resolving.",
     "      Nothing to fix here separately; fix the line above and re-run.",
     "  This is the check docs/validation/ledger.json tracks as `source-offer-resolves`.",
     "  Record the verdict with:  make record CHECK=source-offer-resolves RESULT='…'"
