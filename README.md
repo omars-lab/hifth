@@ -6,6 +6,9 @@ The knowledge graph is the routing table; the page is the interface.
 
 Web app first, mobile-first, fully static — no backend.
 
+**Live: <https://blog.bytesofpurpose.com/hifth/>** — installable; open it on a phone. Every
+push to `main` that clears all four CI jobs publishes there.
+
 ## Quick start
 
 The `Makefile` is the front door — it wraps everyday dev, the exact CI sequence, and the
@@ -19,6 +22,9 @@ make status         # the roadmap: Status & tracking table + open follow-ups
 make loop N=2       # print a loop's kickoff prompt + its plan section
 make phone          # build + serve on your LAN; prints the URL to open on a phone
 ```
+
+Deploying is automatic and needs no command — see [§Where it deploys](docs/PLAN.md#where-it-deploys)
+for how the alternative host works if that ever has to change.
 
 Under the hood these call pnpm (`pnpm dev`, `pnpm build`, `pnpm test`,
 `pnpm --filter @hifth/web test:e2e`, `pnpm gates`) — use those directly if you prefer.
