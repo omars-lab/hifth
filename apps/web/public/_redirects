@@ -1,4 +1,12 @@
 # SPA fallback for Cloudflare Pages. Hifth routes via the URL hash (spec §7), so
 # the path is always the app root; any non-asset path resolves to index.html
 # with a 200 so a cold deep-link boots the app, which then reads the hash.
+#
+# Read by Cloudflare ONLY, and — because of that first sentence — the reason the
+# default host needed no equivalent. GitHub Pages has no rewrite rules at all,
+# which rules out a history-routed SPA and would have made this deploy a code
+# change. Hash routing means a deep link like /hifth/#/hafs/p7 requests the
+# directory index and nothing else, so there is nothing to fall back *from*.
+# A convention chosen for share links (a teacher pastes one, it cold-opens on
+# the exact view) turned out to decide which hosts Hifth can be served from.
 /*  /index.html  200

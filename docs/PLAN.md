@@ -181,6 +181,32 @@ machine has already walked. `gate:validation` fails if the ledger starts lying, 
 pending human check nobody could follow. Recording a result is `make record`, not a
 paragraph edit here — see §Testing plan.
 
+### Where it deploys
+
+**GitHub Pages, at <https://blog.bytesofpurpose.com/hifth/>, on every push to `main` that
+clears all four CI jobs.** Nothing else publishes; there is no path in this repo that serves
+bytes no gate has seen. The deploy job downloads the artifact `build-test-gate` uploaded
+rather than rebuilding, so what a reader is handed is literally what the budget gate weighed
+and the ETL determinism check matched against the committed assets.
+
+Two things made this a workflow file and not a project. **Nothing in the app needed changing
+for a `/hifth/` subpath** — `base: "./"`, a `start_url` and `scope` of `"./"`, and hash
+routing were all already in place. And the hash routing in particular was chosen for share
+links (a teacher pastes one; it cold-opens on the exact view), which happens to mean a deep
+link never asks the server for a path it does not have — so GitHub Pages' total lack of
+rewrite rules, normally disqualifying for an SPA, costs nothing here. A convention adopted
+for one reason decided which hosts Hifth can live on.
+
+**Cloudflare Pages stays available and stays live**, because the host is the kind of decision
+that gets revisited and the worst moment to work out how to publish is the moment you need
+to. Same workflow, same artifact, chosen rather than automatic: Actions › CI › Run workflow ›
+`target: cloudflare`. Off CI entirely there is `make deploy-cloudflare`, which refuses on a
+dirty tree — the bundle bakes the commit its reader is offered under §6 (follow-up ⑤ above),
+and publishing uncommitted work would offer corresponding source that does not correspond.
+The one thing the alternative host has that the default does not is `public/_headers`; the
+note in that file explains why losing it costs almost nothing once a service worker is doing
+the caching.
+
 ---
 
 ## 1. How we build: loops, not a waterfall
