@@ -31,18 +31,31 @@ Under the hood these call pnpm (`pnpm dev`, `pnpm build`, `pnpm test`,
 
 ## Status
 
-**Loop 1 complete** — tap an ayah on the page to select it (amber highlight + surah/ayah
-chip), with pan and pinch-zoom, on the real three-layer architecture. The inline-SVG
-performance verdict is deferred to an on-device measurement before Loop 4. See
-[`docs/decisions/loop-1.md`](docs/decisions/loop-1.md).
+Pre-v1.0 and usable. What works today, on a phone:
 
-_Previously:_ **Loop 0** — installable RTL PWA rendering a real Madani mushaf page (7),
-with CI gates and Cloudflare Pages deploy config. See [`docs/decisions/loop-0.md`](docs/decisions/loop-0.md).
+- **Select** — tap an ayah on a real Madani mushaf page, or drag across a range; the mark is
+  laid down like a highlighter, right to left, one line at a time.
+- **Hop** — a rail of similar verses (mutashabihat) and shared roots, nearest page first;
+  tap through to another page and a bead brings you back.
+- **Read** — plain ⇄ tajweed skin with identical geometry, pan and pinch-zoom, jump to any
+  surah/juz/page, and visited pages survive going offline.
+- **Share** — a link cold-opens on someone else's phone restored to the exact view, with the
+  two verses diffed; screen readers announce the hop.
+
+Deliberately not done yet: the full 604-page corpus and pinned-juz offline packs both wait on
+one on-device rendering measurement (follow-up ①), and there is no beta.
+
+**The roadmap of record is [`docs/PLAN.md`](docs/PLAN.md) §Status & tracking** — loop
+statuses, gates and open follow-ups live there and are deliberately not restated here.
+`make status` prints it. Each loop's record is in [`docs/decisions/`](docs/decisions/).
 
 ## Docs
 
 - **Implementation plan:** [`docs/PLAN.md`](docs/PLAN.md) — built in vertical loops, each ending on a phone
 - **Loop records:** [`docs/decisions/`](docs/decisions/) — what each loop decided, measured, deferred
+- **Manual-check register:** [`docs/validation/ledger.json`](docs/validation/ledger.json) — the
+  checks no CI job can make (a phone, a screen reader, a printed mushaf), each with a runbook
+  and a recorded verdict; `make validate` in the terminal, `make guide` on the phone
 - **Spec of record:** [`docs/reference/linker-spec.md`](docs/reference/linker-spec.md) (design-phase codename "Linker")
 - **Data sources & licensing:** [`SOURCES.md`](SOURCES.md)
 - **Licensing map:** [`LICENSES.md`](LICENSES.md) — how our terms compose with the vendored data's
