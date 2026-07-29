@@ -1,4 +1,18 @@
 # Cloudflare Pages headers.
+#
+# Read by Cloudflare ONLY. Hifth's default host is GitHub Pages, which serves
+# every file at its own fixed max-age and ships this file itself as inert text.
+# So on the live site none of the below is in force — worth knowing before
+# tuning a number here and expecting it to change anything.
+#
+# That costs less than it looks. The `immutable` year on hashed assets is a
+# repeat-visit optimisation, and Hifth's repeat visits are served by the service
+# worker's precache without a request at all; the page SVGs are runtime-cached by
+# the SW for the same reason. And `no-cache` on sw.js is belt-and-braces —
+# browsers cap a service worker script's own cache at 24h and revalidate it on
+# every navigation regardless of what a header says. Kept accurate for the
+# alternative host (apps/web/wrangler.toml), not load-bearing for the default.
+#
 # Hashed build assets are immutable and cached hard. The service worker,
 # manifest, and page SVGs must revalidate so updates land promptly.
 

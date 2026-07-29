@@ -391,6 +391,37 @@ record: ## Bank a manual result:  make record CHECK=<id> RESULT='the verdict, in
 	@node scripts/record-validation.mjs --check "$(CHECK)" --result "$(RESULT)" \
 	  $(if $(STATUS),--status $(STATUS),) $(if $(ON),--on $(ON),)
 
+.PHONY: deploy-cloudflare
+deploy-cloudflare: ## Publish to Cloudflare Pages from this machine (GitHub Pages is the default; see .github/workflows/ci.yml)
+	@# Not how Hifth normally ships. A push to main that clears all four CI jobs
+	@# deploys to GitHub Pages by itself, and the same workflow will publish to
+	@# Cloudflare on request (Actions › CI › Run workflow › target: cloudflare) —
+	@# from the artifact the gates measured, which is the safer of the two.
+	@#
+	@# This target is the third door: a laptop, wrangler's own login, no CI. It
+	@# exists because the day you need it is a day GitHub is the thing that is
+	@# broken, and a documented command is worth more then than a correct one you
+	@# have to reconstruct. Kept in the front door rather than a comment so it is
+	@# read occasionally instead of discovered never.
+	@#
+	@# The dirty-tree refusal is not tidiness. Hifth is GPL-3.0-or-later and a
+	@# static deploy conveys the program, so the bundle bakes in the commit its
+	@# reader is offered (apps/web/vite.config.ts sourceCommit()). Off CI there is
+	@# no CF_PAGES_COMMIT_SHA or GITHUB_SHA, so that falls back to `git rev-parse
+	@# HEAD` — which names a commit that does not contain the uncommitted changes
+	@# being published. The colophon would then offer corresponding source that
+	@# does not correspond, which is the §6 failure this repo already spent a
+	@# follow-up closing. Cheaper to refuse than to explain.
+	@git diff --quiet && git diff --cached --quiet || { \
+	  echo "  refusing: the working tree is dirty, so the commit baked into the"; \
+	  echo "  bundle would not be the source it offers its reader. Commit first."; \
+	  exit 2; \
+	}
+	@echo "  deploying $$(git rev-parse --short HEAD) to Cloudflare Pages project 'hifth'"
+	$(CORE) build
+	$(WEB) build
+	cd apps/web && $(PNPM) dlx wrangler pages deploy dist --project-name hifth
+
 .PHONY: shots
 shots: ## Recapture the guide's screenshots from the real app into docs/validation/shots/
 	@# Two passes, because the perf probe is a build-time flag and not a URL
