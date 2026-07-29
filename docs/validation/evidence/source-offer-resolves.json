@@ -1,11 +1,11 @@
 {
   "check": "source-offer-resolves",
   "run": "node scripts/check-source-offer.mjs",
-  "ranAt": "2026-07-29T10:03:30Z",
-  "commit": "a1f0e53",
+  "ranAt": "2026-07-29T10:10:17Z",
+  "commit": "bc365d3",
   "on": "darwin · node v20.19.4",
-  "exit": 1,
-  "outcome": "fail",
+  "exit": 0,
+  "outcome": "pass",
   "covers": [
     "offer-link",
     "credit-links"
@@ -15,17 +15,13 @@
     "Whether the deployed build is the build you think it is. Without `URL=<deployed>` the script answers about this working tree, which is a different question from the one a stranger asks."
   ],
   "tail": [
+    "The GPL §6 offer, followed anonymously",
+    "  ✓ https://github.com/omars-lab/hifth",
+    "  ✓ https://github.com/omars-lab/hifth/tree/bc365d346b22b76957674b959c3f8db7b96bb01e   (git rev-parse HEAD)",
+    "  ✓ https://github.com/quranpedia/quran-svg   (hafs-kfqc)",
     "  ✓ https://github.com/Waqar144/Quran_Mutashabihat_Data   (mutashabihat-waqar144)",
     "  ✓ http://corpus.quran.com   (quranic-arabic-corpus)",
     "  ✓ https://github.com/cpfair/quran-tajweed   (quran-tajweed-cpfair)",
-    "source-offer — DOES NOT RESOLVE:",
-    "  - https://github.com/omars-lab/hifth — HTTP 404 to somebody who is not signed in as us.",
-    "      The §6 offer is not discharged and the site must not be published.",
-    "      Either make the repository public, or repoint SOURCE_REPO in apps/web/src/provenance.ts",
-    "      at wherever the corresponding source is actually served.",
-    "  - https://github.com/omars-lab/hifth/tree/a1f0e5321ef6fd6e2ed35746a1dba618152136e8 — HTTP 404, which follows from the repository itself not resolving.",
-    "      Nothing to fix here separately; fix the line above and re-run.",
-    "  This is the check docs/validation/ledger.json tracks as `source-offer-resolves`.",
-    "  Record the verdict with:  make record CHECK=source-offer-resolves RESULT='…'"
+    "source-offer — OK (https://github.com/omars-lab/hifth/tree/bc365d346b22b76957674b959c3f8db7b96bb01e and 4 attribution link(s) resolve anonymously)"
   ]
 }
