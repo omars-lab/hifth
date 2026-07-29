@@ -342,9 +342,16 @@ Full evidence in `docs/research/2026-07-20-mobile-svg-pwa.md`. The rules:
   Latin/utility companion; mushaf glyphs are geometry, never restyled.
 - **Copy:** user-side vocabulary (Hop, Trail, "Pin this juz"), active voice, one verb per
   flow end-to-end, errors say what to do next, empty states invite action. Arabic-first
-  chrome with English support.
+  chrome with English support — shipped, and the line worth keeping is where the border
+  falls: the UI language moves **chrome only**. The mus'haf, verse text, roots and the
+  licence credits stay Arabic and stay RTL in both languages, as does the page-turn
+  convention Loop 1 decided — a hafiz whose phone is set to English must not find the book
+  running backwards. `make map FEATURE=ui-language` walks it.
 - **Quality floor, unannounced:** responsive to 320px, visible focus, reduced-motion
-  respected, 44px targets, RTL-native (`dir="rtl"`, logical properties).
+  respected, 44px targets, RTL-native (`dir="rtl"`, logical properties). The logical
+  properties are what made the English chrome a one-attribute change — and what makes an
+  accidentally *inherited* flip a defect no screenshot would catch, which is why
+  `e2e/lang.spec.ts` asserts the computed direction of the stage rather than its markup.
 
 ## 6. Testing plan
 

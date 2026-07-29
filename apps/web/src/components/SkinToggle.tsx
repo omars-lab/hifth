@@ -5,7 +5,7 @@ import {
   type TajweedMark,
   type TajweedRuleId,
 } from "@hifth/core";
-import { toArabicDigits } from "../format";
+import { useT } from "../i18n";
 import styles from "./SkinToggle.module.css";
 
 interface SkinToggleProps {
@@ -32,23 +32,24 @@ interface SkinToggleProps {
  * bug that teaches a mistake.
  */
 export function SkinToggle({ skin, onChange, onOpenLegend }: SkinToggleProps): JSX.Element {
+  const { t } = useT();
   const on = skin === "tajweed";
   return (
-    <div className={styles.group} role="group" aria-label="مظهر الصفحة">
+    <div className={styles.group} role="group" aria-label={t.skinGroup}>
       <button
         type="button"
         className={styles.toggle}
         aria-pressed={on}
         onClick={() => onChange(on ? "plain" : "tajweed")}
       >
-        <span className={styles.label}>تجويد</span>
-        <span className={styles.beta}>تجريبي</span>
+        <span className={styles.label}>{t.tajweed}</span>
+        <span className={styles.beta}>{t.beta}</span>
       </button>
       <button
         type="button"
         className={styles.legendBtn}
         onClick={onOpenLegend}
-        aria-label="مفتاح ألوان التجويد"
+        aria-label={t.legendAria}
       >
         <span aria-hidden="true">ⓘ</span>
       </button>
@@ -100,6 +101,7 @@ export function TajweedLegend({
   credit,
   onClose,
 }: TajweedLegendProps): JSX.Element | null {
+  const { t, dir } = useT();
   const sheetRef = useRef<HTMLDivElement>(null);
   const restoreRef = useRef<HTMLElement | null>(null);
 
@@ -149,23 +151,27 @@ export function TajweedLegend({
         className={styles.sheet}
         role="dialog"
         aria-modal="true"
-        aria-label="مفتاح ألوان التجويد"
+        aria-label={t.legendAria}
+        dir={dir}
         tabIndex={-1}
         onKeyDown={onKeyDown}
       >
         <div className={styles.grip} aria-hidden="true" />
         <header className={styles.head}>
-          <h2 className={styles.title}>مفتاح التجويد</h2>
-          <span className={styles.beta}>تجريبي</span>
-          <button type="button" className={styles.close} onClick={onClose} aria-label="إغلاق">
+          <h2 className={styles.title}>{t.legendTitle}</h2>
+          <span className={styles.beta}>{t.beta}</span>
+          <button type="button" className={styles.close} onClick={onClose} aria-label={t.close}>
             ✕
           </button>
         </header>
 
+        {/* Split around the <strong> rather than interpolated: "beta" is
+            emphasised in both languages, and a bundle that shipped the markup
+            as a string would have to be trusted with HTML. */}
         <p className={styles.caveat}>
-          هذه الطبقة <strong>تجريبية</strong> حتى يعتمدها حافظ. وهي تُعلّم الآية كاملة
-          بأبرز حكم فيها — لا الحرف نفسه — لأنّ صفحات المصحف الحالية لا تحمل معرّفات
-          للحروف بعد.
+          {t.legendCaveat.lead}
+          <strong>{t.legendCaveat.strong}</strong>
+          {t.legendCaveat.rest}
         </p>
 
         <ul className={styles.list}>
@@ -189,17 +195,20 @@ export function TajweedLegend({
                   {rule.mark}
                 </span>
                 <span className={styles.name}>
-                  {/* The Arabic name is its own element, not a bare text node:
-                      it is the non-colour channel for rule identity, so it has
-                      to be addressable on its own by a screen reader's element
-                      navigation and by the tests that police WCAG 1.4.1. */}
-                  <span>{rule.label}</span>
-                  <span className={styles.latin}>{rule.latin}</span>
+                  {/* The rule name is its own element, not a bare text node: it
+                      is the non-colour channel for rule identity, so it has to
+                      be addressable on its own by a screen reader's element
+                      navigation and by the tests that police WCAG 1.4.1. Both
+                      spellings are always rendered — only which one leads
+                      changes, because the Arabic name is the one a teacher
+                      says and the Latin one is how it is written down. */}
+                  <span>{t.ruleName(rule.label, rule.latin).primary}</span>
+                  <span className={styles.latin}>
+                    {t.ruleName(rule.label, rule.latin).secondary}
+                  </span>
                 </span>
                 <span className={styles.count}>
-                  {n === 0
-                    ? "لا شيء في هذه الصفحة"
-                    : `${toArabicDigits(n)} آية في صفحة ${toArabicDigits(page)}`}
+                  {n === 0 ? t.legendNoneOnPage : t.legendCountOnPage(n, page)}
                 </span>
               </li>
             );
@@ -207,10 +216,10 @@ export function TajweedLegend({
         </ul>
 
         {selection && (
-          <section className={styles.selection} aria-label="أحكام الآية المحددة">
+          <section className={styles.selection} aria-label={t.legendSelection}>
             <h3 className={styles.subhead}>{selection.label}</h3>
             {selection.marks.length === 0 ? (
-              <p className={styles.empty}>لا أحكام معروفة على هذه الآية.</p>
+              <p className={styles.empty}>{t.legendNoRules}</p>
             ) : (
               <ul className={styles.chips}>
                 {selection.marks.map((mark) => (
@@ -218,8 +227,8 @@ export function TajweedLegend({
                     <span className={styles.mark} aria-hidden="true">
                       {mark.rule.mark}
                     </span>
-                    {mark.rule.label}
-                    <span className="numeric">{toArabicDigits(mark.count)}</span>
+                    {t.ruleName(mark.rule.label, mark.rule.latin).primary}
+                    <span className="numeric">{t.num(mark.count)}</span>
                   </li>
                 ))}
               </ul>

@@ -31,7 +31,7 @@ import {
   loadShard,
   loadTajweedShard,
 } from "./assets";
-import { ayahLabel, surahName, toArabicDigits } from "./format";
+import { useT } from "./i18n";
 import { useHashRouter } from "./useHashRouter";
 import { PageStage, type PageStageHandle } from "./components/PageStage";
 import { HopRail } from "./components/HopRail";
@@ -114,6 +114,7 @@ export function App(): JSX.Element {
   const [coachUp, setCoachUp] = useState(() => !coachDismissed());
 
   const stageRef = useRef<PageStageHandle>(null);
+  const { t, dir } = useT();
   const { message, announce } = useAnnouncer();
 
   // Live mirror of the selection so event handlers (which close over a render's
@@ -343,10 +344,10 @@ export function App(): JSX.Element {
   const tajweedSelection = useMemo(() => {
     if (!tajweed || !selectedKey) return null;
     return {
-      label: ayahLabel(selectedKey) ?? selectedKey,
+      label: t.ayahLabel(selectedKey) ?? selectedKey,
       marks: tajweed.marksForKey(selectedKey),
     };
-  }, [tajweed, selectedKey]);
+  }, [tajweed, selectedKey, t]);
 
   // Every vendored page in order, each with an anchor ayah (its first polygon).
   // The stage navigates to *keys*, not to pages, so turning a page means asking
@@ -372,19 +373,19 @@ export function App(): JSX.Element {
       const i = at === -1 ? 0 : Math.min(pages.length - 1, Math.max(0, at + step));
       const next = pages[i]!;
       if (next === page) {
-        announce(step > 0 ? "آخر صفحة متوفّرة" : "أول صفحة متوفّرة");
+        announce(step > 0 ? t.lastPage : t.firstPage);
         return;
       }
       const anchor = anchors.get(next);
       if (!anchor) return;
       setOpenDirection(null);
       setPage(next);
-      announce(`صفحة ${next}`);
+      announce(t.pageN(next));
       // zoom 1 = the page as it sits, not a hop's close framing; no pulse,
       // because nothing here was selected.
       void stageRef.current?.navigateTo(anchor, { pulse: false, zoom: 1 });
     },
-    [pageTurns, page, announce],
+    [pageTurns, page, announce, t],
   );
 
   // The origin ayah keeps its breadcrumb until the trail is empty.
@@ -400,9 +401,9 @@ export function App(): JSX.Element {
       setSelectedRange(null); // a tap replaces a highlight — never both at once
       const toggledOff = selectedKeyRef.current === key;
       setSelectedKey(toggledOff ? null : key);
-      announce(toggledOff ? "أُلغي التحديد" : `حُدّدت ${ayahLabel(key) ?? key}`);
+      announce(toggledOff ? t.selectionCleared : t.selected(t.ayahLabel(key) ?? key));
     },
-    [announce],
+    [announce, t],
   );
 
   // A marquee released over ayahs (Loop 5). The passage replaces the selection —
@@ -416,11 +417,11 @@ export function App(): JSX.Element {
       setSelectedRange(keys);
       const span =
         fromKey === toKey
-          ? (ayahLabel(fromKey) ?? fromKey)
-          : `${ayahLabel(fromKey) ?? fromKey}–${ayahLabel(toKey) ?? toKey}`;
-      announce(`ظُلّل ${span}`);
+          ? (t.ayahLabel(fromKey) ?? fromKey)
+          : `${t.ayahLabel(fromKey) ?? fromKey}–${t.ayahLabel(toKey) ?? toKey}`;
+      announce(t.highlighted(span));
     },
-    [announce],
+    [announce, t],
   );
 
   // Forward hop: push the origin onto the trail, move to the target, pulse.
@@ -434,16 +435,16 @@ export function App(): JSX.Element {
       const fromKey = origin ?? selectedKey;
       const fromLoc = fromKey ? resolver.resolve(fromKey) : null;
       if (fromKey && fromLoc) {
-        setTrail((t) => [...t, { key: fromKey, page: fromLoc.page }]);
+        setTrail((beads) => [...beads, { key: fromKey, page: fromLoc.page }]);
       }
       setOpenDirection(null);
       setSelectedRange(null);
       setSelectedKey(edge.to);
       setPage(toLoc.page);
-      announce(`انتقلت إلى ${ayahLabel(edge.to) ?? edge.to} · صفحة ${toLoc.page}`);
+      announce(t.hoppedTo(t.ayahLabel(edge.to) ?? edge.to, toLoc.page));
       void stageRef.current?.navigateTo(edge.to, { pulse: true });
     },
-    [resolver, selectedKey, announce],
+    [resolver, selectedKey, announce, t],
   );
 
   // Bead-back: rewind to a trail origin (pops everything after it) — same path.
@@ -451,22 +452,22 @@ export function App(): JSX.Element {
     (index: number) => {
       const target = trail[index];
       if (!target) return;
-      setTrail((t) => t.slice(0, index));
+      setTrail((beads) => beads.slice(0, index));
       setOpenDirection(null);
       setSelectedKey(target.key);
       setPage(target.page);
-      announce(`رجعت إلى ${ayahLabel(target.key) ?? target.key} · صفحة ${target.page}`);
+      announce(t.backTo(t.ayahLabel(target.key) ?? target.key, target.page));
       void stageRef.current?.navigateTo(target.key, { pulse: true });
     },
-    [trail, announce],
+    [trail, announce, t],
   );
 
   const handleClearCurrent = useCallback(() => {
     setOpenDirection(null);
     setSelectedKey(null);
     setSelectedRange(null);
-    announce("أُلغي التحديد");
-  }, [announce]);
+    announce(t.selectionCleared);
+  }, [announce, t]);
 
   // A root-lens row hops like any other edge — the lens already carries the
   // target's page and direction, so it maps straight onto the §6 Edge shape and
@@ -527,7 +528,6 @@ export function App(): JSX.Element {
     (state: AppState, origin: "link" | "jump" = "link") => {
       if (!resolver) return;
       const edition = resolver.edition;
-      const arrived = origin === "jump" ? "انتقلت إلى" : "فُتح رابط ·";
       // Rebuild the trail beads from the link's trail + via (oldest → newest).
       const chain = [...(state.trail ?? []), ...(state.via ? [state.via] : [])];
       const beads: TrailBead[] = [];
@@ -548,7 +548,7 @@ export function App(): JSX.Element {
         // where the app said one thing and showed another.
         if (state.page) {
           setPage(state.page);
-          announce(`${arrived} صفحة ${state.page}`);
+          announce(t.arrivedPage(origin, state.page));
           void stageRef.current?.showPage(state.page);
         }
         return;
@@ -564,13 +564,13 @@ export function App(): JSX.Element {
         if (!head) {
           setSelectedKey(null);
           setSelectedRange(null);
-          announce("المقطع المطلوب غير متوفّر بعد");
+          announce(t.rangeUnavailable);
           return;
         }
         setSelectedKey(null);
         setSelectedRange(keys);
         setPage(head.page);
-        announce(`${arrived} مقطع ${surah}:${ayah}-${toAyah} · صفحة ${head.page}`);
+        announce(t.arrivedRange(origin, `${surah}:${ayah}-${toAyah}`, head.page));
         void stageRef.current?.navigateTo(keys[0]!, { pulse: true });
         return;
       }
@@ -581,16 +581,16 @@ export function App(): JSX.Element {
         // Link points at an un-vendored ayah — keep the trail, don't pan to a ghost.
         setSelectedKey(null);
         setSelectedRange(null);
-        announce("الآية المطلوبة غير متوفّرة بعد");
+        announce(t.ayahUnavailable);
         return;
       }
       setSelectedRange(null);
       setSelectedKey(key);
       setPage(loc.page);
-      announce(`${arrived} ${ayahLabel(key) ?? key} · صفحة ${loc.page}`);
+      announce(t.arrivedAyah(origin, t.ayahLabel(key) ?? key, loc.page));
       void stageRef.current?.navigateTo(key, { pulse: true });
     },
-    [resolver, announce],
+    [resolver, announce, t],
   );
 
   // Gate cold-open restore on the resolver: a deep link parsed before the
@@ -636,9 +636,9 @@ export function App(): JSX.Element {
     (edition: string) => {
       setEditionOpen(false);
       const mapped = selectedKey ? concordance.map(selectedKey, edition) : null;
-      announce(mapped ? `${ayahLabel(mapped) ?? mapped}` : "لا جدول مقابلة لهذه الطبعة بعد");
+      announce(mapped ? (t.ayahLabel(mapped) ?? mapped) : t.noConcordance);
     },
-    [selectedKey, concordance, announce],
+    [selectedKey, concordance, announce, t],
   );
 
   // The app-level keyboard map (arrows = pages, `/` = the jumper), applied
@@ -679,7 +679,11 @@ export function App(): JSX.Element {
   const selectedSurah = selectedKey ? parseAyahKey(selectedKey)?.surah : null;
 
   return (
-    <div className={styles.app} dir="rtl">
+    // The chrome reads in the UI language's direction — every offset in the
+    // stylesheet is a logical property, so the flip is the whole change. What
+    // does *not* flip is below: the stage, the rail and the trail are pinned
+    // RTL because they are furniture around a mus'haf, not around a sentence.
+    <div className={styles.app} dir={dir}>
       <header className={styles.chrome}>
         {/* The wordmark is the colophon's opener. Publishing this app conveys
             it (GPL §6), so the source offer and the four source credits have to
@@ -690,17 +694,22 @@ export function App(): JSX.Element {
         <button
           type="button"
           className={styles.brand}
-          aria-label="عن حِفظ · الرخصة والمصادر"
+          aria-label={t.about}
           aria-haspopup="dialog"
           onClick={() => setColophonOpen(true)}
         >
-          <span className={styles.mark} aria-hidden="true">
+          {/* The name and the tagline stay Arabic in both languages: «حفظ» is
+              what the app is called, not a word to translate, and the pair is
+              load-bearing for the header's height in the golden images. */}
+          <span className={styles.mark} aria-hidden="true" lang="ar" dir="rtl">
             حفظ
           </span>
-          <span className={styles.tagline}>مِلاحة للحُفّاظ</span>
+          <span className={styles.tagline} lang="ar" dir="rtl">
+            مِلاحة للحُفّاظ
+          </span>
         </button>
         <div className={styles.pageId}>
-          <span className={styles.pageLabel}>صفحة</span>
+          <span className={styles.pageLabel}>{t.pageWord}</span>
           <span className={`${styles.pageNum} numeric`}>{page}</span>
         </div>
         {/* Wayfinding lives in the chrome because it is always available: the
@@ -708,7 +717,7 @@ export function App(): JSX.Element {
         <button
           type="button"
           className={styles.chromeBtn}
-          aria-label="اذهب إلى · سورة أو جزء أو آية"
+          aria-label={t.goToLong}
           aria-haspopup="dialog"
           onClick={() => setJumperOpen(true)}
         >
@@ -717,7 +726,7 @@ export function App(): JSX.Element {
         <button
           type="button"
           className={styles.chromeBtn}
-          aria-label="المصحف"
+          aria-label={t.mushaf}
           aria-haspopup="dialog"
           onClick={() => setEditionOpen(true)}
         >
@@ -758,7 +767,12 @@ export function App(): JSX.Element {
           first tap it teaches has to land while the strip is still up. */}
       <CoachMarks ready={resolver !== null} onDismiss={() => setCoachUp(false)} />
 
-      <main className={styles.main}>
+      {/* Pinned RTL, in both languages. The mus'haf is read right-to-left, the
+          page-turn convention follows it (Loop 1's decision), and the hop rail
+          anchors to `inset-inline-start` — under an LTR chrome the rail would
+          swap to the side the reader's thumb is not on and the arrow keys would
+          argue with the page. */}
+      <main className={styles.main} dir="rtl">
         {resolver && (
           <>
             <PageStage
@@ -766,12 +780,12 @@ export function App(): JSX.Element {
               resolver={resolver}
               page={page}
               mountedPages={mountedPages}
-              label={`صفحة ${page}`}
+              label={t.pageN(page)}
               selectedKey={selectedKey}
               breadcrumbKey={breadcrumbKey}
               onSelect={handleSelect}
               onSelectRange={handleSelectRange}
-              labelFor={(key) => `الآية ${ayahLabel(key) ?? key}`}
+              labelFor={(key) => t.ayahAria(t.ayahLabel(key) ?? key)}
               skin={skin}
               tajweedLookup={tajweed?.lookup ?? null}
             />
@@ -827,7 +841,7 @@ export function App(): JSX.Element {
         page={page}
         selection={tajweedSelection}
         credit={{
-          text: "أحكام التجويد مأخوذة من quran-tajweed (Collin Fair)، رخصة CC BY 4.0.",
+          text: t.tajweedCredit,
           href: "https://github.com/cpfair/quran-tajweed",
         }}
         onClose={() => setLegendOpen(false)}
@@ -842,7 +856,10 @@ export function App(): JSX.Element {
       />
       <Colophon open={colophonOpen} onClose={() => setColophonOpen(false)} />
 
-      <footer className={styles.trail} aria-label="المسار">
+      {/* Pinned RTL with the stage, and for the same reason: the trail reads
+          oldest-to-newest in the mus'haf's own direction, and its beads sit
+          under the rail they came from. */}
+      <footer className={styles.trail} aria-label={t.trail} dir="rtl">
         <TrailBeads
           trail={trail}
           currentKey={selectedKey}
@@ -863,7 +880,7 @@ export function App(): JSX.Element {
             one string nobody could see was the one that drifted. */}
         {selectedSurah && (
           <span className="sr-only">
-            {`${surahName(selectedSurah)} · ${toArabicDigits(chips.length)} روابط`}
+            {t.railSummary(t.surahName(selectedSurah), chips.length)}
           </span>
         )}
       </footer>
