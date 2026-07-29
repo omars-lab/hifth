@@ -102,6 +102,45 @@ describe("parseJump — a surah", () => {
   });
 });
 
+describe("parseJump — a romanised name table", () => {
+  // The English UI injects `SURAH_NAMES_EN`, and the jumper searches both
+  // tables regardless of which language the chrome is in. Nothing in core
+  // knows which table it was handed, so the folding has to read both.
+  const EN: readonly string[] = [
+    "Al-Fatihah", "Al-Baqarah", "Ali 'Imran", "An-Nisa", "Al-Ma'idah",
+    "Al-An'am", "Al-A'raf", "Al-Anfal", "At-Tawbah", "Yunus",
+  ];
+  const en = (q: string) => parseJump(q, EN);
+
+  it("ignores case — nobody types the capitals into a search field", () => {
+    expect(en("baqarah")).toEqual([{ kind: "surah", surah: 2, ayah: 1 }]);
+    expect(en("AL-BAQARAH")).toEqual([{ kind: "surah", surah: 2, ayah: 1 }]);
+  });
+
+  it("strips the article in every sun-letter spelling it takes", () => {
+    // "Al-" would only unprefix a quarter of the table; "At-Tawbah" needs its
+    // own, and "tawbah" has to reach it as a *prefix* match, not a substring.
+    expect(en("tawbah")).toEqual([{ kind: "surah", surah: 9, ayah: 1 }]);
+    expect(en("nisa")).toEqual([{ kind: "surah", surah: 4, ayah: 1 }]);
+  });
+
+  it("folds the apostrophes standing for ayn and hamza", () => {
+    // They are not on the first page of a phone keyboard.
+    expect(en("anam")).toEqual([{ kind: "surah", surah: 6, ayah: 1 }]);
+    expect(en("ma'idah")).toEqual([{ kind: "surah", surah: 5, ayah: 1 }]);
+  });
+
+  it("reads a romanised name plus an ayah number", () => {
+    expect(en("Al-Baqarah 255")[0]).toEqual({ kind: "ayah", surah: 2, ayah: 255 });
+  });
+
+  it("still folds the Arabic table the same way", () => {
+    // The added lowercasing and apostrophe folding are no-ops on Arabic; the
+    // Arabic suite above is the guard, and this is the direct restatement.
+    expect(jump("بقرة")).toEqual([{ kind: "surah", surah: 2, ayah: 1 }]);
+  });
+});
+
 describe("parseJump — a juz", () => {
   it("lands a juz on its first ayah", () => {
     expect(jump("جزء ٩")).toEqual([

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef } from "react";
 import { EDITIONS, type Concordance, type EditionMeta } from "@hifth/core";
-import { ayahRef } from "../format";
+import { useT, type Strings } from "../i18n";
 import styles from "./EditionPicker.module.css";
 
 interface EditionPickerProps {
@@ -38,13 +38,38 @@ function concordanceNote(
   current: string,
   currentKey: string | null,
   concordance: Concordance,
+  t: Strings,
 ): string | null {
   if (edition.id === current) return null;
   if (!currentKey) return null;
-  if (!concordance.has(current, edition.id)) return "لا جدول مقابلة بعد";
+  if (!concordance.has(current, edition.id)) return t.editionNoTable;
   const mapped = concordance.map(currentKey, edition.id);
-  if (!mapped) return "لا تقابلها آية في هذه الطبعة";
-  return `تقابلها ${ayahRef(mapped) ?? mapped}`;
+  if (!mapped) return t.editionNoCounterpart;
+  return t.editionMapsTo(t.ayahRef(mapped) ?? mapped);
+}
+
+/**
+ * An edition's proper names, in the language the chrome is speaking.
+ *
+ * Core owns the edition list — id, status, and the reason a riwayah is not
+ * vendored are facts about the build, not copy. But «حفص عن عاصم» and the
+ * publisher's name are written in core in Arabic, and an English sheet that
+ * kept them would read half-translated. So the bundle may override the three
+ * display strings and nothing else; a missing override falls back to core's
+ * own, which is what the Arabic bundle does for all four (its overrides are
+ * empty, deliberately: core's strings *are* the Arabic copy).
+ */
+function editionCopy(edition: EditionMeta, t: Strings): EditionMeta {
+  const over = t.editionCopy[edition.id];
+  if (!over) return edition;
+  return {
+    ...edition,
+    label: over.label,
+    riwayah: over.riwayah,
+    // Spread rather than assigned: an override with no `reason` must leave
+    // core's in place, not blank the line that says why a riwayah is missing.
+    ...(over.reason === undefined ? {} : { reason: over.reason }),
+  };
 }
 
 /**
@@ -73,6 +98,7 @@ export function EditionPicker({
   onSelect,
   onClose,
 }: EditionPickerProps): JSX.Element | null {
+  const { t, dir } = useT();
   const sheetRef = useRef<HTMLDivElement>(null);
   const restoreRef = useRef<HTMLElement | null>(null);
 
@@ -122,7 +148,8 @@ export function EditionPicker({
         className={styles.sheet}
         role="dialog"
         aria-modal="true"
-        aria-label="المصحف"
+        aria-label={t.mushaf}
+        dir={dir}
         tabIndex={-1}
         onKeyDown={onKeyDown}
       >
@@ -131,29 +158,30 @@ export function EditionPicker({
           <span className={styles.glyph} aria-hidden="true">
             ▤
           </span>
-          <h2 className={styles.title}>المصحف</h2>
-          <button type="button" className={styles.close} onClick={onClose} aria-label="إغلاق">
+          <h2 className={styles.title}>{t.mushaf}</h2>
+          <button type="button" className={styles.close} onClick={onClose} aria-label={t.close}>
             ✕
           </button>
         </header>
 
         <ul className={styles.list}>
-          {EDITIONS.map((edition) => {
-            const isCurrent = edition.id === current;
-            const enabled = edition.status === "vendored" && !isCurrent;
-            const note = concordanceNote(edition, current, currentKey, concordance);
+          {EDITIONS.map((raw) => {
+            const edition = editionCopy(raw, t);
+            const isCurrent = raw.id === current;
+            const enabled = raw.status === "vendored" && !isCurrent;
+            const note = concordanceNote(raw, current, currentKey, concordance, t);
             return (
-              <li key={edition.id} className={styles.row}>
+              <li key={raw.id} className={styles.row}>
                 <button
                   type="button"
                   className={styles.pick}
                   disabled={!enabled}
                   aria-current={isCurrent ? "true" : undefined}
-                  onClick={() => onSelect(edition.id)}
+                  onClick={() => onSelect(raw.id)}
                 >
                   <span className={styles.label}>
                     {edition.label}
-                    {isCurrent && <span className={styles.badge}>الحالي</span>}
+                    {isCurrent && <span className={styles.badge}>{t.editionCurrent}</span>}
                   </span>
                   <span className={styles.riwayah}>{edition.riwayah}</span>
                   {edition.reason && <span className={styles.reason}>{edition.reason}</span>}
@@ -164,9 +192,7 @@ export function EditionPicker({
           })}
         </ul>
 
-        <p className={styles.foot}>
-          كل رابط يحمل طبعته؛ الانتقال بين الطبعات يمرّ بجدول المقابلة، لا بترقيم مشترك.
-        </p>
+        <p className={styles.foot}>{t.editionFoot}</p>
       </div>
     </>
   );

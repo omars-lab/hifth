@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef } from "react";
+import { useT } from "../i18n";
 import { SOURCE_REPO, hasCommit, shortCommit, sourceUrl } from "../provenance";
 import styles from "./Colophon.module.css";
 
@@ -100,10 +101,19 @@ const CREDITS: readonly Credit[] = [
  * one more control would compete with navigation for the thumb. The wordmark
  * was decoration; "about" is the one thing a wordmark is always allowed to be.
  *
+ * The language switch lives here for the same arithmetic. `e2e/chrome-fit`
+ * holds the header inside 320px with seventeen pixels to spare, and a sixth
+ * control does not fit in seventeen pixels. This is also the right *kind* of
+ * place: the language is chosen once and then forgotten, like the mus'haf and
+ * unlike the skin. It sits at the top of the sheet rather than the bottom
+ * because a reader who opened "about" in a language they cannot read needs the
+ * switch before they need anything else on this page.
+ *
  * A11y: EditionPicker's contract — modal dialog, focus in, Tab trapped, Escape
  * closes, focus restored to the wordmark.
  */
 export function Colophon({ open, onClose }: ColophonProps): JSX.Element | null {
+  const { t, dir, lang, setLang, other } = useT();
   const sheetRef = useRef<HTMLDivElement>(null);
   const restoreRef = useRef<HTMLElement | null>(null);
 
@@ -153,7 +163,8 @@ export function Colophon({ open, onClose }: ColophonProps): JSX.Element | null {
         className={styles.sheet}
         role="dialog"
         aria-modal="true"
-        aria-label="عن حِفظ"
+        aria-label={t.aboutTitle}
+        dir={dir}
         tabIndex={-1}
         onKeyDown={onKeyDown}
       >
@@ -162,26 +173,59 @@ export function Colophon({ open, onClose }: ColophonProps): JSX.Element | null {
           <span className={styles.glyph} aria-hidden="true">
             ۞
           </span>
-          <h2 className={styles.title}>عن حِفظ</h2>
-          <button type="button" className={styles.close} onClick={onClose} aria-label="إغلاق">
+          <h2 className={styles.title}>{t.aboutTitle}</h2>
+          <button type="button" className={styles.close} onClick={onClose} aria-label={t.close}>
             ✕
           </button>
         </header>
 
-        <p className={styles.lede}>
-          حِفظ آلة ملاحة في المصحف: تختار آية فينقلك إلى متشابهاتها. لا حساب ولا خادم ولا
-          تتبّع؛ الصفحات والبيانات تُحمَّل إلى جهازك.
-        </p>
-        <p className={styles.caveat}>
-          المصحف المطبوع هو المرجع. ما يعرضه حِفظ عونٌ على المراجعة، لا بديل عنها.
-        </p>
+        {/* Two buttons rather than one toggle. A single "switch to English"
+            control is unreadable to the half of its audience that cannot read
+            the label it is currently wearing, and `aria-pressed` on a two-state
+            language control announces "pressed" for a thing that is not on or
+            off. A radio group says both options in their own script, at once,
+            and marks which one is live — which is also what makes it usable by
+            someone who opened the app in the wrong language by accident. */}
+        <section className={styles.block} aria-labelledby="colophon-lang">
+          <h3 className={styles.subhead} id="colophon-lang">
+            {t.langSectionTitle}
+          </h3>
+          <div className={styles.langRow} role="radiogroup" aria-labelledby="colophon-lang">
+            {/* Each name is written in its own language and marked as such, so
+                a screen reader switches voice for the option it is offering
+                rather than reading «العربية» through an English synthesiser. */}
+            <button
+              type="button"
+              role="radio"
+              className={styles.lang}
+              aria-checked={lang === "ar"}
+              aria-label={lang === "ar" ? undefined : t.langSwitchTo(other.langName)}
+              lang="ar"
+              onClick={() => setLang("ar")}
+            >
+              العربية
+            </button>
+            <button
+              type="button"
+              role="radio"
+              className={styles.lang}
+              aria-checked={lang === "en"}
+              aria-label={lang === "en" ? undefined : t.langSwitchTo(other.langName)}
+              lang="en"
+              onClick={() => setLang("en")}
+            >
+              English
+            </button>
+          </div>
+          <p className={styles.note}>{t.langSectionNote}</p>
+        </section>
+
+        <p className={styles.lede}>{t.aboutLede}</p>
+        <p className={styles.caveat}>{t.aboutCaveat}</p>
 
         <section className={styles.block}>
-          <h3 className={styles.subhead}>الرخصة والمصدر</h3>
-          <p className={styles.body}>
-            برنامج حرّ برخصة GNU GPL الإصدار الثالث أو ما بعده: لك أن تدرسه وتعدّله وتنشره.
-            وهذه شيفرة هذه النسخة بعينها، لا فرعٌ قد يتغيّر:
-          </p>
+          <h3 className={styles.subhead}>{t.licenceHead}</h3>
+          <p className={styles.body}>{t.licenceBody}</p>
           {/* The §6 offer itself. `rel` is belt-and-braces on a link that opens
               a code host: noopener/noreferrer cost nothing and the target is
               outside our control. */}
@@ -191,26 +235,31 @@ export function Colophon({ open, onClose }: ColophonProps): JSX.Element | null {
             target="_blank"
             rel="noopener noreferrer"
           >
-            <span className={styles.sourceLabel}>الشيفرة المصدرية</span>
+            <span className={styles.sourceLabel}>{t.sourceLink}</span>
             <span className={`${styles.commit} numeric`}>
-              {hasCommit() ? shortCommit() : "نسخة تطوير"}
+              {hasCommit() ? shortCommit() : t.devBuild}
             </span>
           </a>
           {!hasCommit() && (
             /* A dev server corresponds to a working tree, which is not a thing
                anyone can be handed. Say that, rather than link to a commit that
                does not exist — the link above falls back to the repository. */
-            <p className={styles.note}>
-              هذه نسخة تطوير محلّية، فلا تقابلها إصدارة معيّنة؛ الرابط يفتح المستودع.
-            </p>
+            <p className={styles.note}>{t.devBuildNote}</p>
           )}
         </section>
 
         <section className={styles.block}>
-          <h3 className={styles.subhead}>المصادر</h3>
+          <h3 className={styles.subhead}>{t.sourcesHead}</h3>
           <ul className={styles.list}>
+            {/* The rows stay Arabic in both languages, and pinned RTL with it.
+                They are not copy: `gate:license-copy` binds every one of them
+                byte-for-byte to a ```colophon fence in SOURCES.md, and an
+                attribution that says something different depending on who is
+                reading is an attribution nobody has actually made. So the row
+                declares the language it is written in and lets the browser
+                bidi-render the Latin names inside it, exactly as before. */}
             {CREDITS.map((credit) => (
-              <li key={credit.href} className={styles.row}>
+              <li key={credit.href} className={styles.row} lang="ar" dir="rtl">
                 <span className={styles.what}>{credit.what}</span>
                 <a
                   className={styles.who}
@@ -227,7 +276,7 @@ export function Colophon({ open, onClose }: ColophonProps): JSX.Element | null {
         </section>
 
         <p className={styles.foot}>
-          الشروط الكاملة والإصدارات المثبَّتة في ملف SOURCES.md داخل المستودع:{" "}
+          {t.aboutFoot}{" "}
           <a className={styles.inline} href={SOURCE_REPO} target="_blank" rel="noopener noreferrer">
             {SOURCE_REPO.replace("https://", "")}
           </a>

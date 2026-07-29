@@ -1,4 +1,4 @@
-import { ayahLabel } from "../format";
+import { useT } from "../i18n";
 import styles from "./TrailBeads.module.css";
 
 /** One hop origin on the trail: where you were, and its page. */
@@ -30,24 +30,27 @@ export function TrailBeads({
   onBeadBack,
   onClearCurrent,
 }: TrailBeadsProps): JSX.Element {
+  const { t } = useT();
   if (!currentKey) {
-    return <span className={styles.hint}>المس آية على الصفحة لتحديدها</span>;
+    return <span className={styles.hint}>{t.tapHint}</span>;
   }
 
-  const currentLabel = ayahLabel(currentKey) ?? currentKey;
+  const currentLabel = t.ayahLabel(currentKey) ?? currentKey;
 
   return (
-    <div className={styles.trail} aria-label="المسار">
+    // No `dir` of its own: the trail is a subha, threaded in the direction the
+    // ayat were read. Its container in App pins RTL for both languages.
+    <div className={styles.trail} aria-label={t.trail}>
       <span className={styles.string} aria-hidden="true" />
       {trail.map((bead, i) => {
-        const label = ayahLabel(bead.key) ?? bead.key;
+        const label = t.ayahLabel(bead.key) ?? bead.key;
         return (
           <button
             key={`${bead.key}-${i}`}
             type="button"
             className={styles.bead}
             onClick={() => onBeadBack(i)}
-            aria-label={`ارجع إلى ${label}`}
+            aria-label={t.beadBack(label)}
           >
             <span className={styles.beadDot} aria-hidden="true" />
             <span className={styles.beadLabel}>{label}</span>
@@ -59,7 +62,7 @@ export function TrailBeads({
         className={`${styles.bead} ${styles.beadCurrent}`}
         onClick={onClearCurrent}
         aria-current="location"
-        aria-label={`الآية الحالية ${currentLabel} — المس للإلغاء`}
+        aria-label={t.beadCurrent(currentLabel)}
       >
         <span className={styles.beadDot} aria-hidden="true" />
         <span className={styles.beadLabel}>{currentLabel}</span>

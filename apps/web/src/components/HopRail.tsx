@@ -1,5 +1,5 @@
 import type { RailChip } from "@hifth/core";
-import { toArabicDigits } from "../format";
+import { useT } from "../i18n";
 import styles from "./HopRail.module.css";
 
 interface HopRailProps {
@@ -11,14 +11,6 @@ interface HopRailProps {
   onOpenChip: (chip: RailChip) => void;
 }
 
-/** Arabic hint for each direction, announced to screen readers. */
-const DIRECTION_LABEL: Record<RailChip["direction"], string> = {
-  loop: "متشابهات في السورة",
-  earlier: "متشابهات في سور سابقة",
-  later: "متشابهات في سور لاحقة",
-  root: "جذر مشترك",
-};
-
 /**
  * HopRail — the signature affordance (spec §9, PLAN signature element). A short
  * vertical rail of direction chips beside the selected ayah: each chip is one
@@ -27,9 +19,14 @@ const DIRECTION_LABEL: Record<RailChip["direction"], string> = {
  * hop-less ayah renders nothing (quiet by default).
  */
 export function HopRail({ chips, openDirection, onOpenChip }: HopRailProps): JSX.Element | null {
+  const { t } = useT();
   if (chips.length === 0) return null;
   return (
-    <div className={styles.rail} role="group" aria-label="روابط الآية">
+    // No `dir` of its own: the rail is pinned to the mus'haf's reading-start
+    // edge by `inset-inline-start`, and `<main>` keeps that RTL in both
+    // languages. A rail that jumped to the other side of the page because the
+    // buttons are in English would be the app forgetting what it is.
+    <div className={styles.rail} role="group" aria-label={t.railGroup}>
       {chips.map((chip) => (
         <button
           key={chip.direction}
@@ -43,14 +40,14 @@ export function HopRail({ chips, openDirection, onOpenChip }: HopRailProps): JSX
           // "three" in the middle of an otherwise Arabic phrase. Found by the
           // aria snapshot, which is the only place the two spellings sit
           // side by side.
-          aria-label={`${DIRECTION_LABEL[chip.direction]} · ${toArabicDigits(chip.count)}`}
+          aria-label={t.chipAria(t.railDirection[chip.direction], chip.count)}
           onClick={() => onOpenChip(chip)}
         >
           <span className={styles.glyph} aria-hidden="true">
             {chip.glyph}
           </span>
           <span className={`${styles.count} numeric`} aria-hidden="true">
-            {toArabicDigits(chip.count)}
+            {t.num(chip.count)}
           </span>
         </button>
       ))}

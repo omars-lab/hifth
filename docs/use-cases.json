@@ -504,7 +504,7 @@
         },
         {
           "file": "apps/web/src/format.ts",
-          "symbol": "toArabicDigits"
+          "symbol": "export function digits"
         }
       ],
       "proof": [
@@ -525,6 +525,45 @@
         }
       ],
       "gap": "axe and aria snapshots check the tree, not the experience. Whether VoiceOver's rotor actually gets a hafiz through a hop is ledger check screen-reader-walkthrough."
+    },
+    {
+      "id": "read-the-chrome-in-a-language-i-read",
+      "actor": "hafiz",
+      "goal": "Let me drive the app in English if that is the language I think in — without turning the mus'haf itself into something it is not.",
+      "feature": "ui-language",
+      "code": [
+        {
+          "file": "apps/web/src/lang.ts",
+          "symbol": "detectLang"
+        },
+        {
+          "file": "apps/web/src/i18n.tsx",
+          "symbol": "LangProvider"
+        },
+        {
+          "file": "apps/web/src/components/Colophon.tsx",
+          "symbol": "langRow"
+        }
+      ],
+      "proof": [
+        {
+          "file": "apps/web/e2e/lang.spec.ts",
+          "test": "an English phone opens an English chrome"
+        },
+        {
+          "file": "apps/web/e2e/lang.spec.ts",
+          "test": "the switch is in the colophon, and the choice survives a reload"
+        },
+        {
+          "file": "apps/web/e2e/lang.spec.ts",
+          "test": "the mus'haf, the rail and the trail stay right-to-left"
+        },
+        {
+          "file": "apps/web/src/i18n.test.tsx",
+          "test": "leaves no Arabic in the English chrome"
+        }
+      ],
+      "gap": "Two languages, and the second one is the author's second language. Nothing here judges whether the English reads well to a hafiz who uses it — only that it is English, complete, and has not leaked into the places that must stay Arabic."
     },
     {
       "id": "know-where-this-text-came-from",

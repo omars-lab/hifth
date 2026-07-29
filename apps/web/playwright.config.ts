@@ -58,6 +58,15 @@ export default defineConfig({
   ],
   use: {
     baseURL: externalBase ?? "http://localhost:4173",
+    // Arabic is the suite's default because it is the app's, and because every
+    // committed aria snapshot and golden image was recorded in it. Without this
+    // the chrome's language would be the *runner's* locale: a laptop set to
+    // en-US and a CI container set to C would disagree about what the header
+    // says, and the snapshots would fail on one machine and pass on the other
+    // for a reason nothing in the diff would explain. `lang.spec.ts` overrides
+    // it per-file with `test.use({ locale: "en-US" })` — that is the one place
+    // the other language is under test, and it should have to say so.
+    locale: "ar",
     // The first attempt is not traced — `retries: 1` means a real failure always
     // gets a second, traced run, and tracing every passing test costs the whole
     // suite time for artifacts nobody opens.

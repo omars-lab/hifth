@@ -1,6 +1,8 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { App } from "./App";
+import { LangProvider } from "./i18n";
+import { applyLangToDocument, detectLang } from "./lang";
 import { initPwa } from "./pwa";
 import "./styles/global.css";
 import "./styles/highlight.css";
@@ -11,9 +13,21 @@ import "./styles/tajweed.css";
 const root = document.getElementById("root");
 if (!root) throw new Error("missing #root");
 
+/*
+ * The document's language, before the first paint.
+ *
+ * `index.html` ships `lang="ar" dir="rtl"`, which is right for the default and
+ * wrong for a reader whose phone is in English — and doing this inside a React
+ * effect would flip the whole document one frame after it is on screen. So it
+ * happens here, synchronously, and the provider below only has to keep it true.
+ */
+applyLangToDocument(detectLang());
+
 createRoot(root).render(
   <StrictMode>
-    <App />
+    <LangProvider>
+      <App />
+    </LangProvider>
   </StrictMode>,
 );
 

@@ -1,5 +1,5 @@
 import { diffPair, type DiffToken } from "@hifth/core";
-import { ayahLabel } from "../format";
+import { useT } from "../i18n";
 import styles from "./DiffView.module.css";
 
 interface DiffViewProps {
@@ -9,7 +9,13 @@ interface DiffViewProps {
   toKey: string;
 }
 
-/** Render one ayah's pre-classified tokens; divergent tokens carry a wash. */
+/**
+ * Render one ayah's pre-classified tokens; divergent tokens carry a wash.
+ *
+ * `lang="ar" dir="rtl"` is pinned and never follows the UI language: this is
+ * scripture, and it is the same text in both. The English chrome around it is a
+ * label for the reader, not a translation of what is inside.
+ */
 function TokenRow({ tokens }: { tokens: readonly DiffToken[] }): JSX.Element {
   return (
     <p className={styles.verse} lang="ar" dir="rtl">
@@ -36,15 +42,18 @@ function TokenRow({ tokens }: { tokens: readonly DiffToken[] }): JSX.Element {
  * side has no text, so the row falls back to its plain note.
  */
 export function DiffView({ fromKey, toKey }: DiffViewProps): JSX.Element | null {
+  const { t } = useT();
   const pair = diffPair(fromKey, toKey);
   if (!pair) return null;
-  const fromLabel = ayahLabel(fromKey) ?? fromKey;
-  const toLabel = ayahLabel(toKey) ?? toKey;
+  const fromLabel = t.ayahLabel(fromKey) ?? fromKey;
+  const toLabel = t.ayahLabel(toKey) ?? toKey;
 
   return (
     <div className={styles.diff}>
       <div className={styles.side}>
-        <span className={styles.who}>{fromLabel} · هنا</span>
+        <span className={styles.who}>
+          {fromLabel} · {t.hereTag}
+        </span>
         <TokenRow tokens={pair.from.tokens} />
       </div>
       <div className={styles.side}>

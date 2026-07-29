@@ -8,6 +8,7 @@ import {
   type Durability,
 } from "../storage";
 import { isIosDevice, isStandalone, onInstallAvailability, promptInstall } from "../pwa";
+import { useT } from "../i18n";
 import styles from "./OfflineNotice.module.css";
 
 /**
@@ -25,56 +26,27 @@ import styles from "./OfflineNotice.module.css";
  * that returns every launch is an offline warning nobody reads.
  */
 
+/*
+ * The four states, and the copy for each, live in `i18n`'s `notices`:
+ *
+ *   • `capped` — a small quota. It outranks everything else: no install and no
+ *     persist() grant survives it, so pointing at the install button here would
+ *     be advice that does not work. Both causes are named in the copy because
+ *     script cannot tell them apart (see storage.ts), and naming only one would
+ *     send half the readers to a setting that is not their problem.
+ *   • `install-ios` — install IS the offline mechanism on iOS, so the copy names
+ *     the benefit and the exact menu path; there is no prompt to fire (§5a).
+ *   • `install-prompt` — Android/Chromium handed us a deferred prompt, so the
+ *     action button fires the real one.
+ *   • `best-effort` — persist denied and no install path to offer. Honest, not
+ *     alarming: the pages are cached, they are simply first in line if the
+ *     device runs short.
+ *
+ * This union is declared here, where the ordering below decides between them,
+ * and the bundles' `notices` record is indexed by it — so a fifth state cannot
+ * be added without both languages growing an entry for it.
+ */
 type NoticeKind = "capped" | "install-ios" | "install-prompt" | "best-effort";
-
-interface Notice {
-  readonly kind: NoticeKind;
-  readonly title: string;
-  readonly body: string;
-  /** Label for the primary action, when there is one to offer. */
-  readonly action?: string;
-}
-
-const NOTICES: Record<NoticeKind, Notice> = {
-  // A small quota. It outranks everything else: no install and no persist()
-  // grant survives it, so pointing at the install button here would be advice
-  // that does not work. Both causes are named because script cannot tell them
-  // apart (see storage.ts), and naming only one would send half the readers to
-  // a setting that is not their problem.
-  capped: {
-    kind: "capped",
-    title: "المساحة المتاحة لحفظ لا تكفي للعمل دون إنترنت",
-    body:
-      "المتصفّح لا يمنح هذا الموقع إلا مساحة صغيرة، فقد تُحذف الصفحات المحفوظة. " +
-      "تحقّق من مساحة جهازك، ومن إعداد «مسح بيانات المواقع عند إغلاق كل النوافذ» في إعدادات الخصوصية.",
-  },
-  // iOS: install IS the offline mechanism, so the copy names the benefit and
-  // the exact menu path — there is no prompt to fire (research §5a).
-  "install-ios": {
-    kind: "install-ios",
-    title: "ثبّت حفظ ليبقى معك دون إنترنت",
-    body:
-      "من زر المشاركة في المتصفّح اختر «إضافة إلى الشاشة الرئيسية». " +
-      "بدون تثبيت يمسح سفاري الصفحات المحفوظة بعد سبعة أيام من عدم الفتح.",
-  },
-  // Android/Chromium: the browser handed us a deferred prompt, so the action
-  // button fires the real one.
-  "install-prompt": {
-    kind: "install-prompt",
-    title: "ثبّت حفظ ليعمل دون إنترنت",
-    body: "التثبيت يجعل الصفحات التي زرتها تبقى محفوظة على جهازك.",
-    action: "ثبّت",
-  },
-  // Persist denied and no install path to offer. Honest, not alarming: the
-  // pages are cached, they are simply first in line if the device runs short.
-  "best-effort": {
-    kind: "best-effort",
-    title: "الحفظ دون إنترنت غير مضمون",
-    body:
-      "لم يمنح المتصفّح تخزينًا دائمًا، فقد يحذف الصفحات المحفوظة إذا ضاقت مساحة الجهاز. " +
-      "تُحفظ الصفحة من جديد كلّما فتحتها ومعك إنترنت.",
-  },
-};
 
 /**
  * Pick the one thing worth saying. Order is by what blocks offline hardest:
@@ -114,6 +86,7 @@ interface OfflineNoticeProps {
 }
 
 export function OfflineNotice({ hold = false }: OfflineNoticeProps): JSX.Element | null {
+  const { t } = useT();
   // Starts at "unsupported" — the honest pre-reading state. It renders nothing
   // on its own except on iOS, where install is the right advice with or without
   // a StorageManager to ask.
@@ -183,7 +156,7 @@ export function OfflineNotice({ hold = false }: OfflineNoticeProps): JSX.Element
   }, []);
 
   if (hold || !kind || dismissed) return null;
-  const notice = NOTICES[kind];
+  const notice = t.notices[kind];
 
   return (
     // A plain <div>, not an <aside>: `role="status"` is the load-bearing part
@@ -205,9 +178,9 @@ export function OfflineNotice({ hold = false }: OfflineNoticeProps): JSX.Element
           type="button"
           className={styles.dismiss}
           onClick={handleDismiss}
-          aria-label="إخفاء التنبيه"
+          aria-label={t.dismissNotice}
         >
-          إخفاء
+          {t.dismiss}
         </button>
       </div>
     </div>

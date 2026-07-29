@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { diffPair, type AppState, type MergedEdge } from "@hifth/core";
-import { ayahLabel, ayahRef, rangeLabel } from "../format";
+import { useT } from "../i18n";
 import { DiffView } from "./DiffView";
 import { ShareSheet } from "./ShareSheet";
 import styles from "./HighlightMenu.module.css";
@@ -58,6 +58,7 @@ export function HighlightMenu({
   onClear,
   onClose,
 }: HighlightMenuProps): JSX.Element | null {
+  const { t, dir } = useT();
   const sheetRef = useRef<HTMLDivElement>(null);
   // The element focused before the menu opened, restored on close.
   const restoreRef = useRef<HTMLElement | null>(null);
@@ -107,7 +108,7 @@ export function HighlightMenu({
   if (!open) return null;
   const first = rangeKeys[0]!;
   const last = rangeKeys[rangeKeys.length - 1]!;
-  const title = rangeLabel(first, last) ?? `${first}–${last}`;
+  const title = t.rangeLabel(first, last) ?? `${first}–${last}`;
 
   return (
     <>
@@ -117,7 +118,8 @@ export function HighlightMenu({
         className={styles.sheet}
         role="dialog"
         aria-modal="true"
-        aria-label={`مقطع محدَّد · ${title} · ${hops.length} روابط`}
+        aria-label={t.rangeAria(title, hops.length)}
+        dir={dir}
         tabIndex={-1}
         onKeyDown={onKeyDown}
       >
@@ -126,38 +128,37 @@ export function HighlightMenu({
           <span className={styles.glyph} aria-hidden="true">
             ▬
           </span>
-          {/* Arabic label + Arabic-Indic digits: RTL text, so no `.numeric` (LTR) here. */}
+          {/* The label carries the language's own digits, so no `.numeric`
+              (LTR) treatment here — the title is a phrase, not a figure. */}
           <h2 className={styles.title}>{title}</h2>
-          <button type="button" className={styles.close} onClick={onClose} aria-label="إغلاق">
+          <button type="button" className={styles.close} onClick={onClose} aria-label={t.close}>
             ✕
           </button>
         </header>
 
         {hops.length === 0 ? (
-          <p className={styles.empty}>لا روابط في هذا المقطع بعد</p>
+          <p className={styles.empty}>{t.rangeEmpty}</p>
         ) : (
           <ul className={styles.list}>
             {hops.map((edge) => {
               const enabled = canHop(edge.to);
               const toKey = bareTarget(edge.to);
-              const label = ayahLabel(toKey) ?? edge.to;
+              const label = t.ayahLabel(toKey) ?? edge.to;
               // A word-anchored target (`…#w3`) does not resolve until the
               // word-granular corpus lands (PLAN Loop 4b) — say *that*, rather
               // than blaming the page, when the page itself is vendored.
               const blocker = enabled
                 ? null
                 : canHop(toKey)
-                  ? "الربط على مستوى الكلمة يصل مع الحزمة القادمة"
-                  : "هذه الصفحة غير متوفّرة بعد";
+                  ? t.wordLevelPending
+                  : t.pageUnavailable;
               // The range member whose edge won the merge — the ayah this row's
               // note is about, and so the diff's "here" and the leap's origin.
               const fromKey = edge.from;
               const diffable = diffPair(fromKey, toKey) !== null;
               const isOpen = expanded === edge.to;
               const diffId = `range-diff-${edge.to.replace(/[^\w-]/g, "-")}`;
-              const fromRefs = edge.sources
-                .map((k) => ayahRef(k) ?? k)
-                .join("، ");
+              const fromRefs = edge.sources.map((k) => t.ayahRef(k) ?? k).join(t.refJoin);
               return (
                 <li key={`${edge.type} ${edge.to}`} className={styles.row}>
                   <div className={styles.rowMain}>
@@ -170,8 +171,13 @@ export function HighlightMenu({
                     >
                       <span className={styles.rowLabel}>
                         {label}
-                        {edge.twin && <span className={styles.badge}>توأم</span>}
-                        {edge.root && <span className={styles.root}>{edge.root}</span>}
+                        {edge.twin && <span className={styles.badge}>{t.twin}</span>}
+                        {/* The root is the Arabic word itself, never romanised. */}
+                        {edge.root && (
+                          <span className={styles.root} lang="ar" dir="rtl">
+                            {edge.root}
+                          </span>
+                        )}
                         {diffable && (
                           <span
                             className={styles.caret}
@@ -182,8 +188,14 @@ export function HighlightMenu({
                           </span>
                         )}
                       </span>
-                      <span className={styles.from}>{`من ${fromRefs}`}</span>
-                      {edge.note && <span className={styles.note}>{edge.note}</span>}
+                      <span className={styles.from}>{t.rangeFrom(fromRefs)}</span>
+                      {/* A curated note is corpus evidence in the annotator's
+                          own Arabic, not chrome — see RootLens for the rule. */}
+                      {edge.note && (
+                        <span className={styles.note} lang="ar" dir="rtl">
+                          {edge.note}
+                        </span>
+                      )}
                       {blocker && <span className={styles.unavailable}>{blocker}</span>}
                     </button>
                     <button
@@ -191,7 +203,7 @@ export function HighlightMenu({
                       className={styles.hop}
                       disabled={!enabled}
                       onClick={() => onHop(edge)}
-                      aria-label={`انتقل إلى ${label}`}
+                      aria-label={t.hopTo(label)}
                     >
                       <span aria-hidden="true">↪</span>
                     </button>
@@ -210,7 +222,7 @@ export function HighlightMenu({
         <footer className={styles.actions}>
           <ShareSheet state={shareState} hasTrail={false} variant="range" />
           <button type="button" className={styles.clear} onClick={onClear}>
-            إلغاء التحديد
+            {t.clearSelection}
           </button>
         </footer>
       </div>
