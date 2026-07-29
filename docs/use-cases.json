@@ -388,6 +388,36 @@
       ]
     },
     {
+      "id": "move-across-the-whole-mushaf",
+      "actor": "hafiz",
+      "goal": "Get from where I am to somewhere far away in the book by dragging, and know before I let go where I will actually land.",
+      "feature": "wayfinding",
+      "code": [
+        {
+          "file": "apps/web/src/components/PageSlider.tsx",
+          "symbol": "PageSlider"
+        },
+        {
+          "file": "packages/core/src/pages.ts",
+          "symbol": "nearestPage"
+        }
+      ],
+      "proof": [
+        {
+          "file": "apps/web/e2e/pagebar.spec.ts",
+          "test": "spans the printed mus'haf and says how little of it is here"
+        },
+        {
+          "file": "apps/web/e2e/pagebar.spec.ts",
+          "test": "letting go in the gap lands on the nearest page we have, and says so"
+        },
+        {
+          "file": "apps/web/src/components/PageSlider.test.tsx",
+          "test": "commits on release, not on every value the thumb passes over"
+        }
+      ]
+    },
+    {
       "id": "learn-the-gestures-once",
       "actor": "hafiz",
       "goal": "Tell me what I can do here the first time, and then never again.",
@@ -556,7 +586,7 @@
         },
         {
           "file": "apps/web/e2e/lang.spec.ts",
-          "test": "the mus'haf, the rail and the trail stay right-to-left"
+          "test": "the mus'haf, the rail, the trail and the page bar stay right-to-left"
         },
         {
           "file": "apps/web/src/i18n.test.tsx",

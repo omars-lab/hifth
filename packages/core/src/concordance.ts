@@ -35,6 +35,16 @@ export interface EditionMeta {
   readonly riwayah: string;
   readonly status: EditionStatus;
   /**
+   * How many pages this print has — a property of the paper, not of the build.
+   *
+   * Optional on purpose. It is the length of the *book*, so it is only ever
+   * present when someone has confirmed it for that specific print; a guess here
+   * would be a slider that scrolls a hafiz past the end of a mus'haf. Absent
+   * means "we do not know", and callers must fall back to what is vendored
+   * rather than to a number that looks about right.
+   */
+  readonly pages?: number;
+  /**
    * Why an `unvendored` edition is not selectable — shown verbatim in the
    * picker. These are real blockers recorded in PLAN's follow-ups, not
    * placeholder copy; if a reason stops being true, the entry changes.
@@ -54,6 +64,11 @@ export const EDITIONS: readonly EditionMeta[] = [
     label: "حفص · مجمع الملك فهد",
     riwayah: "رواية حفص عن عاصم",
     status: "vendored",
+    // The Madani mus'haf's 604 pages — the number printed in its own corners,
+    // and the one SOURCES.md's layout match was made against. The other three
+    // entries have no `pages` because nobody here has counted them, and the
+    // IndoPak rasm in particular paginates differently from print to print.
+    pages: 604,
   },
   {
     id: "warsh-libya",

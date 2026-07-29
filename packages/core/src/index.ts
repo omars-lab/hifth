@@ -178,6 +178,10 @@ export {
   type KeyContext,
 } from "./keymap.js";
 
+// The print's pagination vs. the pages we hold — the seam a page scrubber
+// stands on.
+export { nearestPage, pageFraction } from "./pages.js";
+
 export {
   EDITIONS,
   Concordance,
