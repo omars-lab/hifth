@@ -59,6 +59,11 @@
           "note": "Why the highlight looks like a pen and not a box. Every ayah's hit area is a run of axis-aligned rectangles, one per line it occupies; this turns each into a band along the line's middle. It is a parser with a fallback, not an assumption — it returns null on any geometry it does not fully recognise and the Highlighter clones the shape instead, so an unfamiliar page from Loop 4b degrades to the old box rather than to nothing."
         },
         {
+          "file": "packages/core/src/highlighter.ts",
+          "symbol": "private paint",
+          "note": "The swipe branch is also the whole contract with the wipe animation, and none of it is visible. A `<line>` renders identically whichever end you write first, so the order of x1/x2 here is the only thing deciding which way the ink travels — right to left, because that is where a pen meets Arabic, and a backwards wipe would look subtly wrong to a reader and correct to everyone else. `--hl-len` and `--hl-i` are the two numbers CSS cannot work out for itself: a dash pattern must be told the stroke's length (`100%` on a line is the viewport, not the line) and which line of the ayah this is, so line 2 starts after line 1."
+        },
+        {
           "file": "apps/web/src/components/PageStage.tsx",
           "symbol": "PageStage",
           "note": "The React boundary. Binds @use-gesture to the surface, hands events to pointerIntent, and calls the Highlighter imperatively. The only file where the two worlds touch."
@@ -68,7 +73,8 @@
         "Add the intent to `PointerIntent` and teach `pointerIntent`/`nextIntent` when to return it — with a unit test in gestures.test.ts first, because this is pure and cheap to pin.",
         "If it draws something new, add a `StyleToken` and its branch in the Highlighter, then a CSS custom property in apps/web/src/styles/tokens.css. Decide whether it is ink: if so add it to `INKED` and give it an `--ink-*` token, because the ink rules blend with `multiply` and the alpha washes are tuned for compositing over — the two families are not interchangeable.",
         "Wire it in PageStage. Resist adding state to React that the Highlighter already owns.",
-        "Add a golden row if it changes pixels — see the `golden-images` feature."
+        "If it is inked it inherits the wipe, so it must emit `--hl-len` and `--hl-i` per element or it will draw solid and unanimated — the deliberate fallback, not a bug, but not the pen either. A motion rule that also sets the `animation` shorthand has to say which of the two renderings it is for: `.hl-sel.pulse` outranks `.hl-ink`, which is why the pulse carries `:not(.hl-ink)`.",
+        "Add a golden row if it changes pixels — see the `golden-images` feature. Note that a wipe is not pixels: Playwright fast-forwards finite animations to completion, so the goldens see the finished stroke and cannot see the wipe at all. Anything about how a mark arrives has to be a unit test on what the Highlighter wrote."
       ],
       "gates": ["pnpm test", "make e2e", "make golden"],
       "seeAlso": ["the-hop", "root-lens", "golden-images"]
