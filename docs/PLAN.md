@@ -125,13 +125,19 @@ ends by updating this section and writing `docs/decisions/loop-<N>.md`.**
    attributions the vendored data has been owed since Loop 4a (corpus.quran.com's mandatory
    link, quran-tajweed's CC BY, the mutashabihat licence's "mention in your app"), which is
    the surface `SOURCES.md` has been promising.
-   **Still true, and now the only thing standing between us and the deploy:** the offer is
-   only real if `SOURCE_REPO` resolves. **Make the repo public before publishing the
-   Cloudflare deploy** — or repoint that one constant at wherever the source is served
-   from. Nothing else in the code changes either way. **`make source-offer` now answers this
-   in seconds** — it follows the offer anonymously (no `gh`, no token, because signed in as
-   ourselves a private repo looks public) and says today, in words, that the site must not be
-   published yet. `make source-offer URL=<deployed>` additionally reads `SOURCE_REPO` and the
+   ~~**Still true, and now the only thing standing between us and the deploy:**~~ —
+   **discharged 2026-07-29.** The offer is only real if `SOURCE_REPO` resolves, and it did
+   not: the repository was private, so the colophon named an address that 404s to everyone
+   who is not us. **The repository is now public**, which was one of the two ways out —
+   repointing that one constant at wherever the source is actually served was the other, and
+   nothing else in the code changes either way. Followed anonymously, the repo root, the
+   exact build tree and all four attribution links now resolve; recorded in the ledger with
+   `make record`. **The deploy is no longer blocked on licence grounds.**
+   **`make source-offer` answers this in seconds** — it follows the offer with no `gh`, no
+   token and no credentials, deliberately, because signed in as ourselves a private repo
+   looks exactly like a public one and the check would have passed every day it was wrong.
+   That is the shape of the whole obligation: it can only be tested by ceasing to be
+   privileged. `make source-offer URL=<deployed>` additionally reads `SOURCE_REPO` and the
    build's commit out of the deployed bundle, so it checks what a reader is handed rather than
    what the branch declares. The half a machine cannot do — that a reader can *reach* the offer
    from inside the running app — stays at `make validate CHECK=source-offer-resolves`.
@@ -160,9 +166,11 @@ ends by updating this section and writing `docs/decisions/loop-<N>.md`.**
    **after Loop 7's sign-off**. See [loop-6a.md](decisions/loop-6a.md) §Deferred.
 
 **The half of these a machine cannot run now has a register — and a runbook.** Follow-ups
-① (the phone), ② (the browser glance), ④ (VoiceOver/TalkBack) and ⑤ (does the source link
-resolve for a stranger) all wait on a human, and prose cannot answer "is that still true, on
-what device, and when?". Each is an entry in
+① (the phone), ② (the browser glance) and ④ (VoiceOver/TalkBack) still wait on a human, and
+prose cannot answer "is that still true, on what device, and when?" — ⑤ (does the source
+link resolve for a stranger) was answered on 2026-07-29 and is the register's first closed
+entry, which is the point: it is *recorded*, with the commit it was true at, rather than
+remembered. Each is an entry in
 [`docs/validation/ledger.json`](validation/ledger.json) carrying what it blocks, what its
 result **tunes**, and the steps to run it with what to expect on screen at each one. That
 runbook renders three ways — `make validate CHECK=<id>` here, `make guide` to a phone-shaped

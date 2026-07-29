@@ -296,7 +296,7 @@
       "why": "Publishing a static PWA conveys it: the browser receives real copies of the JS and of assets/roots/**, a GPL-covered derivative. The colophon links SOURCE_REPO at the exact build commit, which discharges the obligation only if that URL opens for someone who is not signed in as us.",
       "how": "Open the colophon's source link in a private/logged-out browser window against the deployed build. It must land on real source, at a commit, not a 404.",
       "owner": "user",
-      "status": "pending",
+      "status": "done",
       "blocks": [
         "public-deploy"
       ],
@@ -363,7 +363,9 @@
           "Whether a reader can *get to* those links from inside the running app. The script follows URLs it reads out of the bundle; it never opens the colophon, so a source link that resolves perfectly from behind a sheet nobody can open still passes it.",
           "Whether the deployed build is the build you think it is. Without `URL=<deployed>` the script answers about this working tree, which is a different question from the one a stranger asks."
         ]
-      }
+      },
+      "verifiedOn": "2026-07-29",
+      "result": "Repository made public 2026-07-29. Followed anonymously: the repo root, the exact build tree (bc365d3), and all 4 attribution links resolve. GPL §6 discharged; public deploy unblocked."
     },
     {
       "id": "edge-spot-audit",
