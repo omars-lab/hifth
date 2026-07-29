@@ -4,6 +4,18 @@ on:
   push:
     branches: [main]
   pull_request:
+  # The publish half of this workflow. `push` to main already deploys to GitHub
+  # Pages; this is here so the *other* target can be chosen without editing a
+  # workflow file in a hurry, which is when deploys go wrong. Dispatching still
+  # runs every gate first — there is no path in this repo that publishes bytes
+  # no gate has seen.
+  workflow_dispatch:
+    inputs:
+      target:
+        description: "Where to publish once the gates pass"
+        type: choice
+        options: [pages, cloudflare]
+        default: pages
 
 concurrency:
   group: ci-${{ github.ref }}
@@ -153,6 +165,26 @@ jobs:
       - name: Gate — JS budget (<150KB gz)
         run: pnpm gate:budget
 
+      # Deliberately the last step, and deliberately an upload rather than a
+      # rebuild in the deploy job: what gets published is then *these* bytes —
+      # the ones the budget gate just weighed and the ETL determinism check just
+      # proved match the committed assets. A deploy job that runs `pnpm build`
+      # again publishes a bundle no gate ever looked at. Same reasoning as the
+      # golden-env gate one level down: rendering in one place and checking in
+      # another is a coin flip with a version number on it.
+      #
+      # It also uploads on pull_request, where nothing deploys. That is on
+      # purpose — it is how a reviewer downloads the exact artifact a merge
+      # would publish, and it means the upload path is exercised on every PR
+      # instead of first being tried on the day it matters.
+      - name: Upload the built site
+        uses: actions/upload-artifact@v5
+        with:
+          name: site
+          path: apps/web/dist
+          retention-days: 7
+          if-no-files-found: error
+
   e2e:
     runs-on: ubuntu-latest
     # The pinned Playwright image, and not a bare runner with
@@ -292,3 +324,115 @@ jobs:
           # scripts/gate-ci-artifacts.mjs now requires this line on any path
           # starting with a dot.
           include-hidden-files: true
+
+  # ---------------------------------------------------------------------------
+  # Publish.
+  #
+  # GitHub Pages is the default and the only automatic one: every push to main
+  # that clears all four gates is served at https://blog.bytesofpurpose.com/hifth/.
+  # Cloudflare Pages is kept as a live alternative — not a commented-out
+  # aspiration — because the choice of host is the kind of decision that gets
+  # revisited, and rediscovering how to publish under pressure is how a wrong
+  # bundle goes out.
+  #
+  # Both publish the SAME artifact, downloaded rather than rebuilt, so the two
+  # paths cannot drift on anything except the last step. The alternative that
+  # rots is the one whose build is a second, unexercised copy of the first.
+  #
+  # Neither job needed a single change to the app: `base: "./"`, `start_url` and
+  # `scope` of `"./"`, and hash routing mean the bundle is already indifferent
+  # to whether it is served from a domain root or a `/hifth/` subpath. The one
+  # thing GitHub Pages does not honour is public/_headers — see the note there.
+  # ---------------------------------------------------------------------------
+
+  deploy-pages:
+    needs: [secrets-scan, build-test-gate, e2e, lighthouse]
+    # `needs` on all four is the whole safety argument: this job is unreachable
+    # unless the secret scan, the gates, the e2e/golden suite and Lighthouse all
+    # passed on these exact bytes. Restricted to main in both cases — dispatching
+    # from a branch runs the gates and publishes nothing, because "what is
+    # deployed" should only ever be answerable by looking at main.
+    if: >-
+      github.ref == 'refs/heads/main' &&
+      (github.event_name == 'push' ||
+      (github.event_name == 'workflow_dispatch' && inputs.target == 'pages'))
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/download-artifact@v8
+        with:
+          name: site
+          path: site
+
+      # The lesson gate:ci-artifacts was written for, pointed the other way: an
+      # upload of nothing looks exactly like one that worked. So does a download
+      # of nothing — and unlike a lost test report, this one would go live, as a
+      # perfectly successful deploy of an empty directory over a working site.
+      - name: The artifact must actually contain a site
+        run: |
+          test -s site/index.html || {
+            echo "::error::downloaded artifact has no index.html — refusing to publish an empty site"
+            exit 1
+          }
+
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: site
+      - id: deploy
+        uses: actions/deploy-pages@v5
+
+  deploy-cloudflare:
+    needs: [secrets-scan, build-test-gate, e2e, lighthouse]
+    # Never automatic. Choosing it is the point.
+    if: >-
+      github.ref == 'refs/heads/main' &&
+      github.event_name == 'workflow_dispatch' && inputs.target == 'cloudflare'
+    runs-on: ubuntu-latest
+    steps:
+      # Only for apps/web/wrangler.toml — the project name and output dir live
+      # there, so this runs the same command the file documents for a laptop
+      # (`make deploy-cloudflare`) rather than a second spelling of it.
+      - uses: actions/checkout@v7
+      - uses: actions/download-artifact@v8
+        with:
+          name: site
+          path: apps/web/dist
+
+      - name: The artifact must actually contain a site
+        run: |
+          test -s apps/web/dist/index.html || {
+            echo "::error::downloaded artifact has no index.html — refusing to publish an empty site"
+            exit 1
+          }
+
+      # Read through env, never interpolated into the command line: `${{ secrets.X }}`
+      # in a `run:` is substituted into the script before the shell sees it, so a
+      # trace, a set -x, or an error message can echo the token back. This also
+      # turns the most likely failure — an alternative path chosen years later on
+      # a repo whose secrets were never set — into one legible line instead of a
+      # wrangler stack trace.
+      - name: Cloudflare credentials must be present
+        env:
+          TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          ACCOUNT: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          missing=""
+          [ -n "$TOKEN" ]   || missing="$missing CLOUDFLARE_API_TOKEN"
+          [ -n "$ACCOUNT" ] || missing="$missing CLOUDFLARE_ACCOUNT_ID"
+          [ -z "$missing" ] || {
+            echo "::error::this repo has no$missing — add them under Settings › Secrets › Actions"
+            exit 1
+          }
+
+      - uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: apps/web
+          command: pages deploy dist --project-name hifth

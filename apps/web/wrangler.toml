@@ -1,18 +1,32 @@
-# Cloudflare Pages (direct-upload) config for the Hifth web app.
+# Cloudflare Pages config for the Hifth web app — the ALTERNATIVE host.
 #
-# Two ways to deploy:
+# Hifth deploys to GitHub Pages by default: every push to main that clears all
+# four CI jobs is published at https://blog.bytesofpurpose.com/hifth/ by the
+# deploy-pages job in .github/workflows/ci.yml. Nothing here runs unless someone
+# chooses it. This file is kept live, not commented out, because the host is a
+# decision that gets revisited and the worst time to work out how to publish is
+# the moment you need to.
 #
-#   A) Git integration (recommended): connect the repo in the Cloudflare
-#      dashboard with these settings —
+# Three ways to use it, best first:
+#
+#   A) The same CI workflow, target: cloudflare — Actions › CI › Run workflow.
+#      Runs every gate, then publishes the artifact those gates measured. Needs
+#      CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID in the repo's secrets.
+#
+#   B) `make deploy-cloudflare` — a laptop, wrangler's own login, no CI. Runs
+#      the command below verbatim; refuses on a dirty tree, because the commit
+#      baked into the bundle is the one its reader is offered under GPL §6.
+#
+#   C) Git integration: connect the repo in the Cloudflare dashboard with —
 #        Build command:        pnpm install && pnpm build
 #        Build output dir:     apps/web/dist
 #        Root directory:       /            (monorepo; build runs from repo root)
 #        Node version:         20
+#      Convenient, and the only one of the three where Cloudflare builds bytes
+#      no gate has seen. Prefer A.
 #
-#   B) Direct upload from a machine that already ran `pnpm build`:
-#        cd apps/web && pnpm dlx wrangler pages deploy dist --project-name hifth
-#
-# _headers and _redirects in public/ ship into dist/ and Cloudflare applies them.
+# public/_headers and public/_redirects ship into dist/ and only Cloudflare
+# applies them; GitHub Pages serves them as inert files. See the note in each.
 
 name = "hifth"
 pages_build_output_dir = "dist"

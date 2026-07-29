@@ -57,6 +57,23 @@ const PRODUCERS = [
     },
   },
   {
+    // The one uploaded artifact that is not evidence about a run — it is the
+    // run's output, and both deploy jobs publish it rather than rebuilding.
+    // That makes this registry's question sharper here than anywhere else:
+    // "does anything still write this" is also "does anything still write the
+    // thing we serve to readers". An upload that silently preserved nothing
+    // would, one job later, be a successful deploy of an empty site.
+    path: "apps/web/dist",
+    producer: "vite build, via apps/web's own build script",
+    proof: {
+      file: "apps/web/package.json",
+      pattern: /"build":\s*"[^"]*vite build/,
+      missing:
+        "apps/web/package.json no longer runs `vite build`, so nothing writes " +
+        "apps/web/dist and the deploy jobs would publish an empty directory over a live site",
+    },
+  },
+  {
     path: ".lighthouseci",
     producer: "lhci autorun (@lhci/cli)",
     proof: {
