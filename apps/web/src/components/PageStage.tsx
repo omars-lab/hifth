@@ -24,7 +24,7 @@ import {
   type View,
 } from "@hifth/core";
 import { loadPageSvg } from "../assets";
-import { toArabicDigits } from "../format";
+import { useT } from "../i18n";
 import styles from "./PageStage.module.css";
 
 interface PageStageProps {
@@ -114,6 +114,7 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
   },
   ref,
 ): JSX.Element {
+  const { t } = useT();
   const stageRef = useRef<HTMLDivElement>(null);
   const layerRef = useRef<HTMLDivElement>(null);
   const pagesRef = useRef(new Map<number, MountedPage>());
@@ -619,14 +620,14 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
         {label}
       </span>
       <div ref={layerRef} className={styles.layer} aria-busy={status === "loading"} />
-      {status === "loading" && <div className={styles.hint}>…جاري التحميل</div>}
+      {status === "loading" && <div className={styles.hint}>{t.stageLoading}</div>}
       {status === "error" && (
         /* Names the page it failed on, because the chrome has already moved to
            that number and the stage has not. Without the number the reader gets
            "a page" failed while the header says ١٩ and page ٧ is on screen, and
            has to guess which one they are looking at. */
         <div className={styles.hint} role="alert">
-          تعذّر تحميل صفحة {toArabicDigits(page)}. أعد المحاولة.
+          {t.stageFailed(page)}
         </div>
       )}
     </div>

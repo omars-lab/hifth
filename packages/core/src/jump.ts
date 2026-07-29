@@ -8,8 +8,11 @@
  * surah/juz tables all live here so they can be tested without a browser.
  *
  * The 114 surah names are *not* here: they are presentation (L3 owns the name
- * table in `apps/web/src/format.ts`), so the caller injects them, exactly as the
- * highlighter takes an injected `labelFor`.
+ * tables in `apps/web/src/format.ts`), so the caller injects them, exactly as
+ * the highlighter takes an injected `labelFor`. There is now more than one such
+ * table — Arabic and romanised — and the jumper searches both regardless of the
+ * UI language, because a bilingual reader types whichever name came to mind.
+ * Nothing here knows which table it was handed; the folding below reads both.
  */
 
 import { AYAH_COUNTS, JUZ_STARTS, ayahCount } from "./quran-meta.js";
@@ -59,9 +62,33 @@ export function normalizeArabic(s: string): string {
     .trim();
 }
 
-/** Drop a leading definite article, so "بقرة" finds "البقرة". */
+/**
+ * The definite article, in both scripts a name table may be written in.
+ *
+ * Arabic writes it once ("ال"); a romanised name writes it assimilated to the
+ * sun letter that follows — "Ash-Shams", "Adh-Dhariyat", "At-Tawbah" — so a
+ * single "al-" would only unprefix a quarter of the table. Every assimilated
+ * form is listed, longest first so "adh-" is not eaten as "ad-" + "h".
+ */
+const LATIN_AL = /^a(?:dh|sh|th|l|d|n|r|s|t|z)[- ]/;
+
+/** Drop a leading definite article, so "بقرة" finds "البقرة" and "shams" finds "Ash-Shams". */
 function stripAl(s: string): string {
-  return s.startsWith("ال") ? s.slice(2) : s;
+  if (s.startsWith("ال")) return s.slice(2);
+  return s.replace(LATIN_AL, "");
+}
+
+/**
+ * Fold a name or a query to the skeleton both sides are compared on.
+ *
+ * `normalizeArabic` handles the Arabic table. A romanised table needs two more
+ * foldings, and neither one can touch Arabic text: case, because nobody types
+ * "Al-Baqarah" with the capitals into a search field, and the apostrophes that
+ * stand for ʿayn and hamza ("Al-An'am", "Ash-Shu'ara"), because they are not on
+ * the first page of a phone keyboard and a hafiz will type "anam".
+ */
+function foldName(s: string): string {
+  return stripAl(normalizeArabic(s).toLowerCase().replace(/['’ʿʾ]/g, ""));
 }
 
 /** A valid `surah:ayah` pair, or null. */
@@ -96,13 +123,13 @@ const PAIR = /^(.*?)\s*[:：/\-.\s]\s*(\d+)$/;
  * before المنافقون — the surah whose *name starts* with what was typed.
  */
 function matchNames(query: string, names: readonly string[]): number[] {
-  const q = stripAl(normalizeArabic(query));
+  const q = foldName(query);
   if (q.length === 0) return [];
   const exact: number[] = [];
   const prefix: number[] = [];
   const infix: number[] = [];
   names.forEach((raw, i) => {
-    const name = stripAl(normalizeArabic(raw));
+    const name = foldName(raw);
     if (name === q) exact.push(i + 1);
     else if (name.startsWith(q)) prefix.push(i + 1);
     else if (name.includes(q)) infix.push(i + 1);

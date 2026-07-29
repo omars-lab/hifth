@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { juzOf, parseJump, type JumpTarget } from "@hifth/core";
-import { SURAH_NAMES_AR, surahName, toArabicDigits } from "../format";
+import { MAX_JUMP_RESULTS, juzOf, parseJump, type JumpTarget } from "@hifth/core";
+import { SURAH_NAMES_AR, SURAH_NAMES_EN } from "../format";
+import { useT, type Strings } from "../i18n";
 import styles from "./Jumper.module.css";
 
 interface JumperProps {
@@ -19,28 +20,60 @@ function focusables(root: HTMLElement): HTMLElement[] {
   return Array.from(root.querySelectorAll<HTMLElement>(sel));
 }
 
+/*
+ * Both rows read through `t.ayahAt(surah, ayah)` and not `t.ayahLabel(key)`.
+ * A `JumpTarget` carries coordinates, never a canonical key, and `ayahLabel`
+ * answers null to anything that is not `quran/<edition>/2:58` — so the obvious
+ * `t.ayahLabel(\`${surah}:${ayah}\`) ?? …` falls through to its own fallback and
+ * prints the bare "2:58" with Latin digits in the middle of the Arabic UI. It
+ * looks like a label, which is why it survived a screenshot and was caught by
+ * `wayfinding.spec.ts` asserting the digits.
+ */
+
 /** The row's headline — what you are about to land on, in the app's own words. */
-function targetTitle(t: JumpTarget): string {
-  if (t.kind === "juz") return `الجزء ${toArabicDigits(t.juz!)}`;
-  if (t.kind === "ayah") {
-    return `${surahName(t.surah)} · ${toArabicDigits(t.surah)}:${toArabicDigits(t.ayah)}`;
-  }
-  return surahName(t.surah);
+function targetTitle(target: JumpTarget, t: Strings): string {
+  if (target.kind === "juz") return t.juzN(target.juz!);
+  if (target.kind === "ayah") return t.ayahAt(target.surah, target.ayah);
+  return t.surahName(target.surah);
 }
 
 /** The row's second line — where that lands, said the way a hafiz would say it. */
-function targetHint(t: JumpTarget): string {
-  const juz = `الجزء ${toArabicDigits(juzOf(t.surah, t.ayah))}`;
-  if (t.kind === "juz") {
-    return `يبدأ من ${surahName(t.surah)} · ${toArabicDigits(t.surah)}:${toArabicDigits(t.ayah)}`;
-  }
-  if (t.kind === "ayah") return juz;
-  return `سورة ${toArabicDigits(t.surah)} · ${juz}`;
+function targetHint(target: JumpTarget, t: Strings): string {
+  const juz = t.juzN(juzOf(target.surah, target.ayah));
+  if (target.kind === "juz") return t.jumpStartsAt(t.ayahAt(target.surah, target.ayah));
+  if (target.kind === "ayah") return juz;
+  return `${t.surahN(target.surah)} · ${juz}`;
 }
 
 /** A stable DOM id per row, for `aria-activedescendant`. */
 function optionId(t: JumpTarget, i: number): string {
   return `jump-opt-${i}-${t.kind}-${t.surah}-${t.ayah}`;
+}
+
+/**
+ * Every reading of the query, in both name tables, best first.
+ *
+ * A hafiz reading the English chrome still knows the surah as البقرة, and one
+ * reading the Arabic chrome may well type "baqarah" on a laptop keyboard with
+ * no Arabic layout. So the field is bilingual regardless of the UI language:
+ * the current language's table is searched first (its matches rank highest,
+ * which is the whole point of `parseJump`'s ordering), then the other one, and
+ * `push`'s identity rule inside core would have deduped — but it runs per call,
+ * so the merge de-dupes here on the same three fields.
+ *
+ * The cap is applied *after* the merge, so a query that only makes sense in the
+ * other language still fills the list.
+ */
+function parseBoth(query: string, primary: readonly string[]): JumpTarget[] {
+  const other = primary === SURAH_NAMES_AR ? SURAH_NAMES_EN : SURAH_NAMES_AR;
+  const out = parseJump(query, primary);
+  for (const target of parseJump(query, other)) {
+    const dup = out.some(
+      (o) => o.kind === target.kind && o.surah === target.surah && o.ayah === target.ayah,
+    );
+    if (!dup) out.push(target);
+  }
+  return out.slice(0, MAX_JUMP_RESULTS);
 }
 
 /**
@@ -62,13 +95,14 @@ function optionId(t: JumpTarget, i: number): string {
  * field itself is a combobox: ↑/↓ move the active option, Enter takes it.
  */
 export function Jumper({ open, onJump, onClose }: JumperProps): JSX.Element | null {
+  const { t, dir } = useT();
   const sheetRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const restoreRef = useRef<HTMLElement | null>(null);
   const [query, setQuery] = useState("");
   const [active, setActive] = useState(0);
 
-  const targets = useMemo(() => parseJump(query, SURAH_NAMES_AR), [query]);
+  const targets = useMemo(() => parseBoth(query, t.names), [query, t.names]);
 
   // Capture the trigger, focus the field, and reset the query on open; restore
   // focus on close (a jumper that reopens holding the last query would make the
@@ -149,7 +183,10 @@ export function Jumper({ open, onJump, onClose }: JumperProps): JSX.Element | nu
         className={styles.sheet}
         role="dialog"
         aria-modal="true"
-        aria-label="اذهب إلى"
+        aria-label={t.goTo}
+        // A sheet is chrome, so it reads in the UI language's direction —
+        // including the field, whose query is a place name in either script.
+        dir={dir}
         tabIndex={-1}
         onKeyDown={onKeyDown}
       >
@@ -158,8 +195,8 @@ export function Jumper({ open, onJump, onClose }: JumperProps): JSX.Element | nu
           <span className={styles.glyph} aria-hidden="true">
             ⌖
           </span>
-          <h2 className={styles.title}>اذهب إلى</h2>
-          <button type="button" className={styles.close} onClick={onClose} aria-label="إغلاق">
+          <h2 className={styles.title}>{t.goTo}</h2>
+          <button type="button" className={styles.close} onClick={onClose} aria-label={t.close}>
             ✕
           </button>
         </header>
@@ -175,8 +212,8 @@ export function Jumper({ open, onJump, onClose }: JumperProps): JSX.Element | nu
           aria-activedescendant={
             targets[active] ? optionId(targets[active]!, active) : undefined
           }
-          aria-label="اسم السورة أو رقمها، أو ٢:٢٥٥، أو جزء ٩"
-          placeholder="البقرة · ٢:٢٥٥ · جزء ٩"
+          aria-label={t.jumpInput}
+          placeholder={t.jumpPlaceholder}
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           autoComplete="off"
@@ -185,23 +222,23 @@ export function Jumper({ open, onJump, onClose }: JumperProps): JSX.Element | nu
 
         {hasQuery ? (
           targets.length === 0 ? (
-            <p className={styles.empty}>لا مكان بهذا الاسم أو الرقم</p>
+            <p className={styles.empty}>{t.jumpEmpty}</p>
           ) : (
-            <ul className={styles.list} id={listId} role="listbox" aria-label="النتائج">
-              {targets.map((t, i) => (
-                <li key={optionId(t, i)} role="presentation">
+            <ul className={styles.list} id={listId} role="listbox" aria-label={t.jumpResults}>
+              {targets.map((target, i) => (
+                <li key={optionId(target, i)} role="presentation">
                   <button
                     type="button"
-                    id={optionId(t, i)}
+                    id={optionId(target, i)}
                     role="option"
                     aria-selected={i === active}
                     className={styles.row}
                     data-active={i === active || undefined}
                     onMouseEnter={() => setActive(i)}
-                    onClick={() => take(t)}
+                    onClick={() => take(target)}
                   >
-                    <span className={styles.rowTitle}>{targetTitle(t)}</span>
-                    <span className={styles.rowHint}>{targetHint(t)}</span>
+                    <span className={styles.rowTitle}>{targetTitle(target, t)}</span>
+                    <span className={styles.rowHint}>{targetHint(target, t)}</span>
                   </button>
                 </li>
               ))}
@@ -210,16 +247,18 @@ export function Jumper({ open, onJump, onClose }: JumperProps): JSX.Element | nu
         ) : (
           // "Pick" as well as "type": on a phone the keyboard costs a third of
           // the screen, and the juz is how a hafiz schedules revision.
-          <div className={styles.juzGrid} role="group" aria-label="الأجزاء">
+          <div className={styles.juzGrid} role="group" aria-label={t.juzGroup}>
             {Array.from({ length: 30 }, (_, i) => i + 1).map((j) => (
               <button
                 key={j}
                 type="button"
                 className={styles.juz}
-                aria-label={`الجزء ${toArabicDigits(j)}`}
-                onClick={() => take(parseJump(`ج${j}`, SURAH_NAMES_AR)[0])}
+                aria-label={t.juzN(j)}
+                // The query is synthetic, not typed, so it uses the prefix form
+                // core parses in either language and never reaches a name table.
+                onClick={() => take(parseJump(`j${j}`, t.names)[0])}
               >
-                {toArabicDigits(j)}
+                {t.num(j)}
               </button>
             ))}
           </div>

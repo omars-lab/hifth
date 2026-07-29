@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { toArabicDigits } from "../format";
+import { useT } from "../i18n";
 import { COACH_STORAGE_KEY, coachDismissed, rememberDismissal } from "../coach";
 import styles from "./CoachMarks.module.css";
 
@@ -11,34 +11,15 @@ import styles from "./CoachMarks.module.css";
 // `coachDismissed()` call below was a ReferenceError at render.
 export { COACH_STORAGE_KEY, coachDismissed };
 
-interface Step {
-  readonly glyph: string;
-  readonly title: string;
-  readonly body: string;
-}
-
 /**
- * The three verbs the app actually has, in the app's own words (PLAN §5 copy
- * rules: user-side vocabulary, active voice, one verb per flow). Nothing here
- * describes a feature that does not exist yet.
+ * The three verbs the app actually has, one glyph each — select, drag, hop.
+ *
+ * The glyphs are the same three the chrome and the rail use, so they stay here
+ * while the words live in `i18n`'s `coachSteps` (PLAN §5 copy rules: user-side
+ * vocabulary, active voice, one verb per flow). Nothing here describes a
+ * feature that does not exist yet, in either language.
  */
-const STEPS: readonly Step[] = [
-  {
-    glyph: "◉",
-    title: "المس آية",
-    body: "يظهر شريط الروابط بجانبها: متشابهاتها، وعددها.",
-  },
-  {
-    glyph: "▤",
-    title: "اضغط واسحب",
-    body: "يتظلّل المقطع، وتفتح قائمته بروابط آياته مجموعة.",
-  },
-  {
-    glyph: "↪",
-    title: "المس رقاقة",
-    body: "تنتقل إلى الآية المشابهة، وتبقى خرزة في المسار للرجوع.",
-  },
-];
+const GLYPHS: readonly string[] = ["◉", "▤", "↪"];
 
 interface CoachMarksProps {
   /** Render only once the app is usable (there is nothing to teach before). */
@@ -67,6 +48,7 @@ interface CoachMarksProps {
  * `prefers-reduced-motion` (the CSS honours it via the shared duration tokens).
  */
 export function CoachMarks({ ready, onDismiss }: CoachMarksProps): JSX.Element | null {
+  const { t } = useT();
   // Read storage once, on mount: a dismissal must not re-render into view.
   const [dismissed, setDismissed] = useState(() => coachDismissed());
   const [step, setStep] = useState(0);
@@ -101,26 +83,27 @@ export function CoachMarks({ ready, onDismiss }: CoachMarksProps): JSX.Element |
 
   if (dismissed || !ready) return null;
 
-  const current = STEPS[step]!;
-  const last = step === STEPS.length - 1;
+  const steps = t.coachSteps;
+  const current = steps[step]!;
+  const last = step === steps.length - 1;
 
   return (
     <div
       ref={stripRef}
       className={styles.strip}
       role="region"
-      aria-label="كيف تتنقّل"
+      aria-label={t.coachRegion}
       onKeyDown={onKeyDown}
     >
       <span className={styles.glyph} aria-hidden="true">
-        {current.glyph}
+        {GLYPHS[step]}
       </span>
       <p className={styles.text}>
         <span className={styles.title}>{current.title}</span>
         <span className={styles.body}>{current.body}</span>
       </p>
       <span className={styles.count} aria-hidden="true">
-        {toArabicDigits(step + 1)}⁄{toArabicDigits(STEPS.length)}
+        {t.num(step + 1)}⁄{t.num(steps.length)}
       </span>
       <button
         type="button"
@@ -134,16 +117,12 @@ export function CoachMarks({ ready, onDismiss }: CoachMarksProps): JSX.Element |
           advancedRef.current = true;
           setStep((s) => s + 1);
         }}
-        aria-label={
-          last
-            ? "تمّ · إخفاء الشرح"
-            : `التالي · ${toArabicDigits(step + 2)} من ${toArabicDigits(STEPS.length)}`
-        }
+        aria-label={last ? t.coachDoneAria : t.coachNextAria(step + 2, steps.length)}
       >
-        {last ? "تمّ" : "التالي"}
+        {last ? t.coachDone : t.coachNext}
       </button>
       <button type="button" className={styles.skip} onClick={dismiss}>
-        تخطَّ
+        {t.coachSkip}
       </button>
     </div>
   );

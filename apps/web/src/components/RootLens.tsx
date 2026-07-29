@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { Edge, RootFamily, RootHop } from "@hifth/core";
-import { ayahLabel, toArabicDigits } from "../format";
+import { useT } from "../i18n";
 import styles from "./RootLens.module.css";
 
 interface RootLensTriggerProps {
@@ -38,22 +38,19 @@ export function RootLensTrigger({
   open,
   onToggle,
 }: RootLensTriggerProps): JSX.Element | null {
+  const { t } = useT();
   if (count === 0 && curated === 0) return null;
-  const label =
-    curated > 0
-      ? `الجذور · ${toArabicDigits(count)} · ${toArabicDigits(curated)} مختارة`
-      : `الجذور · ${toArabicDigits(count)}`;
   return (
     <button
       type="button"
       className={styles.trigger}
       aria-expanded={open}
-      aria-label={label}
+      aria-label={t.rootsTrigger(count, curated)}
       onClick={onToggle}
     >
       <span aria-hidden="true">⬡</span>
       <span className="numeric" aria-hidden="true">
-        {toArabicDigits(count)}
+        {t.num(count)}
       </span>
       {curated > 0 && (
         <span className={styles.pickedDot} aria-hidden="true" />
@@ -89,21 +86,6 @@ function focusables(root: HTMLElement): HTMLElement[] {
   return Array.from(root.querySelectorAll<HTMLElement>(sel));
 }
 
-/** "نفس الصفحة" / "صفحتان بعد" — page distance the way a hafiz says it. */
-function distanceLabel(dPage: number): string {
-  if (dPage === 0) return "نفس الصفحة";
-  const n = Math.abs(dPage);
-  const pages =
-    n === 1
-      ? "صفحة واحدة"
-      : n === 2
-        ? "صفحتان"
-        : n <= 10
-          ? `${toArabicDigits(n)} صفحات`
-          : `${toArabicDigits(n)} صفحة`;
-  return `${pages} ${dPage > 0 ? "بعد" : "قبل"}`;
-}
-
 /**
  * RootLens — the ⬡ family view (spec §9, PLAN §Loop 5).
  *
@@ -136,6 +118,7 @@ export function RootLens({
   onHopEdge,
   onClose,
 }: RootLensProps): JSX.Element | null {
+  const { t, dir } = useT();
   const sheetRef = useRef<HTMLDivElement>(null);
   // The element focused before the sheet opened, restored on close.
   const restoreRef = useRef<HTMLElement | null>(null);
@@ -191,21 +174,21 @@ export function RootLens({
 
   const hopRow = (hop: RootHop, key: string): JSX.Element => {
     const enabled = canHop(hop.key);
-    const label = ayahLabel(hop.key) ?? hop.key;
+    const label = t.ayahLabel(hop.key) ?? hop.key;
     return (
       <li key={key} className={styles.hopRow}>
         <span className={styles.hopText}>
           <span className={styles.hopLabel}>
             {label}
             {hop.count > 1 && (
-              <span className={styles.count} aria-label={`${toArabicDigits(hop.count)} كلمات`}>
-                ×{toArabicDigits(hop.count)}
+              <span className={styles.count} aria-label={t.rootsOccurrences(hop.count)}>
+                ×{t.num(hop.count)}
               </span>
             )}
           </span>
           <span className={styles.distance} data-near={hop.dPage === 0 || undefined}>
-            {distanceLabel(hop.dPage)}
-            {!enabled && <span className={styles.unavailable}> · غير متوفّرة بعد</span>}
+            {t.distance(hop.dPage)}
+            {!enabled && <span className={styles.unavailable}>{t.rootsUnavailable}</span>}
           </span>
         </span>
         <button
@@ -213,7 +196,7 @@ export function RootLens({
           className={styles.hop}
           disabled={!enabled}
           onClick={() => onHop(hop)}
-          aria-label={`انتقل إلى ${label}`}
+          aria-label={t.hopTo(label)}
         >
           <span aria-hidden="true">↪</span>
         </button>
@@ -229,7 +212,8 @@ export function RootLens({
         className={styles.sheet}
         role="dialog"
         aria-modal="true"
-        aria-label={`الجذور · ${toArabicDigits(families.length)}`}
+        aria-label={t.rootsAria(families.length)}
+        dir={dir}
         tabIndex={-1}
         onKeyDown={onKeyDown}
       >
@@ -238,8 +222,8 @@ export function RootLens({
           <span className={styles.glyph} aria-hidden="true">
             ⬡
           </span>
-          <h2 className={styles.title}>الجذور</h2>
-          <button type="button" className={styles.close} onClick={onClose} aria-label="إغلاق">
+          <h2 className={styles.title}>{t.rootsTitle}</h2>
+          <button type="button" className={styles.close} onClick={onClose} aria-label={t.close}>
             ✕
           </button>
         </header>
@@ -249,13 +233,13 @@ export function RootLens({
         {curated.length > 0 && (
           <section className={styles.picked}>
             <h3 className={styles.pickedTitle}>
-              مختارة
-              <span className={styles.pickedNote}>محقّقة يدويًا</span>
+              {t.rootsPicked}
+              <span className={styles.pickedNote}>{t.rootsPickedNote}</span>
             </h3>
             <ul className={styles.hops}>
               {curated.map((edge) => {
                 const enabled = canHop(edge.to);
-                const label = ayahLabel(edge.to) ?? edge.to;
+                const label = t.ayahLabel(edge.to) ?? edge.to;
                 return (
                   <li key={edge.to} className={styles.hopRow}>
                     <span className={styles.hopText}>
@@ -263,10 +247,14 @@ export function RootLens({
                         {label}
                         {edge.root && <span className={styles.count}>{edge.root}</span>}
                       </span>
-                      <span className={styles.distance}>
-                        {edge.note ?? "جذر مشترك"}
+                      {/* A curated note is corpus content, hand-written in
+                          Arabic by whoever verified the pair — it is evidence,
+                          not chrome, so it is never translated. The fallback
+                          when there is no note is chrome, and is. */}
+                      <span className={styles.distance} lang={edge.note ? "ar" : undefined}>
+                        {edge.note ?? t.rootsSharedRoot}
                         {!enabled && (
-                          <span className={styles.unavailable}> · غير متوفّرة بعد</span>
+                          <span className={styles.unavailable}>{t.rootsUnavailable}</span>
                         )}
                       </span>
                     </span>
@@ -275,7 +263,7 @@ export function RootLens({
                       className={styles.hop}
                       disabled={!enabled || !onHopEdge}
                       onClick={() => onHopEdge?.(edge)}
-                      aria-label={`انتقل إلى ${label}`}
+                      aria-label={t.hopTo(label)}
                     >
                       <span aria-hidden="true">↪</span>
                     </button>
@@ -288,7 +276,7 @@ export function RootLens({
 
         {families.length === 0 ? (
           curated.length === 0 ? (
-            <p className={styles.empty}>{loading ? "…" : "لا جذور معروفة لهذه الآية"}</p>
+            <p className={styles.empty}>{loading ? "…" : t.rootsEmpty}</p>
           ) : null
         ) : (
           <ul className={styles.list}>
@@ -306,10 +294,13 @@ export function RootLens({
                       setExpanded((r) => (r === family.root ? null : family.root))
                     }
                   >
-                    <span className={styles.root}>{family.root}</span>
-                    <span className={styles.stats}>
-                      {toArabicDigits(family.ayahs)} آية · {toArabicDigits(family.words)} كلمة
+                    {/* The root itself is Arabic in both languages — it is the
+                        word, not a name for it, and transliterating a triliteral
+                        root would be inventing data the corpus never gave. */}
+                    <span className={styles.root} lang="ar" dir="rtl">
+                      {family.root}
                     </span>
+                    <span className={styles.stats}>{t.rootsStats(family.ayahs, family.words)}</span>
                     <span className={styles.caret} data-open={isOpen || undefined} aria-hidden="true">
                       ⌄
                     </span>
@@ -318,11 +309,14 @@ export function RootLens({
                   {isOpen && (
                     <div id={panelId}>
                       {family.hops.length === 0 ? (
-                        <p className={styles.hapax}>لا تتكرّر في المصحف</p>
+                        <p className={styles.hapax}>{t.rootsHapax}</p>
                       ) : family.lemmas.length > 1 ? (
                         family.lemmas.map((group) => (
                           <section key={group.lemma} className={styles.lemma}>
-                            <h3 className={styles.lemmaTitle}>{group.lemma}</h3>
+                            {/* A lemma is a Quranic word, like the root above. */}
+                            <h3 className={styles.lemmaTitle} lang="ar" dir="rtl">
+                              {group.lemma}
+                            </h3>
                             <ul className={styles.hops}>
                               {group.hops.map((hop) => hopRow(hop, `${group.lemma}:${hop.key}`))}
                             </ul>
@@ -334,9 +328,7 @@ export function RootLens({
                         </ul>
                       )}
                       {family.truncated && (
-                        <p className={styles.more}>
-                          أقرب {toArabicDigits(family.hops.length)} مواضع فقط
-                        </p>
+                        <p className={styles.more}>{t.rootsTruncated(family.hops.length)}</p>
                       )}
                     </div>
                   )}
@@ -347,7 +339,7 @@ export function RootLens({
         )}
 
         <footer className={styles.credit}>
-          الجذور من{" "}
+          {t.rootsCredit}{" "}
           <a href="http://corpus.quran.com" target="_blank" rel="noreferrer">
             Quranic Arabic Corpus
           </a>

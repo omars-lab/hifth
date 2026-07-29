@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { orderForHifz, type Edge, type RailChip } from "@hifth/core";
-import { ayahLabel } from "../format";
+import { useT } from "../i18n";
 import { DiffView } from "./DiffView";
 import styles from "./HopPopover.module.css";
 
@@ -16,13 +16,6 @@ interface HopPopoverProps {
   /** Dismiss the sheet. */
   onClose: () => void;
 }
-
-const DIRECTION_TITLE: Record<RailChip["direction"], string> = {
-  loop: "متشابهات في السورة",
-  earlier: "في سور سابقة",
-  later: "في سور لاحقة",
-  root: "بنفس الجذر",
-};
 
 /** Focusable descendants of `root`, in tab order (excludes disabled + hidden). */
 function focusables(root: HTMLElement): HTMLElement[] {
@@ -49,6 +42,7 @@ export function HopPopover({
   onHop,
   onClose,
 }: HopPopoverProps): JSX.Element | null {
+  const { t, dir } = useT();
   const sheetRef = useRef<HTMLDivElement>(null);
   // The element focused before the sheet opened, restored on close.
   const restoreRef = useRef<HTMLElement | null>(null);
@@ -98,6 +92,7 @@ export function HopPopover({
 
   if (!chip) return null;
   const edges = orderForHifz(chip.edges);
+  const title = t.hopTitle[chip.direction];
 
   return (
     <>
@@ -107,7 +102,12 @@ export function HopPopover({
         className={styles.sheet}
         role="dialog"
         aria-modal="true"
-        aria-label={`${DIRECTION_TITLE[chip.direction]} · ${chip.count}`}
+        aria-label={t.hopSheetAria(title, chip.count)}
+        // The sheet is chrome, so it reads in the chrome's direction — unlike
+        // the rail that opened it, which stays on the mus'haf's side. Its
+        // wide-screen `inset-inline-end` resolves from this, so the card lands
+        // on the side the reader's eye ends on either way.
+        dir={dir}
         tabIndex={-1}
         onKeyDown={onKeyDown}
       >
@@ -116,8 +116,8 @@ export function HopPopover({
           <span className={styles.glyph} aria-hidden="true">
             {chip.glyph}
           </span>
-          <h2 className={styles.title}>{DIRECTION_TITLE[chip.direction]}</h2>
-          <button type="button" className={styles.close} onClick={onClose} aria-label="إغلاق">
+          <h2 className={styles.title}>{title}</h2>
+          <button type="button" className={styles.close} onClick={onClose} aria-label={t.close}>
             ✕
           </button>
         </header>
@@ -125,7 +125,7 @@ export function HopPopover({
         <ul className={styles.list}>
           {edges.map((edge) => {
             const enabled = canHop(edge.to);
-            const label = ayahLabel(edge.to) ?? edge.to;
+            const label = t.ayahLabel(edge.to) ?? edge.to;
             const isOpen = expanded === edge.to;
             const diffId = `diff-${edge.to.replace(/[^\w-]/g, "-")}`;
             return (
@@ -140,7 +140,7 @@ export function HopPopover({
                   >
                     <span className={styles.rowLabel}>
                       {label}
-                      {edge.twin && <span className={styles.badge}>توأم</span>}
+                      {edge.twin && <span className={styles.badge}>{t.twin}</span>}
                       {edge.root && <span className={styles.root}>{edge.root}</span>}
                       <span className={styles.caret} data-open={isOpen || undefined} aria-hidden="true">
                         ⌄
@@ -148,7 +148,7 @@ export function HopPopover({
                     </span>
                     {edge.note && <span className={styles.note}>{edge.note}</span>}
                     {!enabled && (
-                      <span className={styles.unavailable}>هذه الصفحة غير متوفّرة بعد</span>
+                      <span className={styles.unavailable}>{t.pageUnavailable}</span>
                     )}
                   </button>
                   <button
@@ -156,7 +156,7 @@ export function HopPopover({
                     className={styles.hop}
                     disabled={!enabled}
                     onClick={() => onHop(edge)}
-                    aria-label={`انتقل إلى ${label}`}
+                    aria-label={t.hopTo(label)}
                   >
                     <span aria-hidden="true">↪</span>
                   </button>
