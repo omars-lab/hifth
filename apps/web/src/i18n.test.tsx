@@ -1,8 +1,9 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it } from "vitest";
 import { Colophon } from "./components/Colophon";
-import { AR, EN, LangProvider, useT } from "./i18n";
-import { LANG_STORAGE_KEY, detectLang, dirOf } from "./lang";
+import { AR, EN, LangProvider, stringsFor, useT } from "./i18n";
+import { LANG_STORAGE_KEY, LOCALES, detectLang, dirOf } from "./lang";
+import { LOCALE_IDS } from "./messages/locales.gen";
 
 /** Any Arabic letter — the range that must not appear in an English string. */
 const ARABIC = /[؀-ۿ]/;
@@ -49,11 +50,22 @@ function* strings(node: unknown, path = ""): Generator<[string, string]> {
 }
 
 describe("the bundles", () => {
-  it("carries the same keys in both languages", () => {
+  it("builds a bundle for every locale that has a catalog", () => {
+    // Driven by `LOCALE_IDS`, which the message compiler derives from the files
+    // in `messages/` — so a language added tomorrow is covered by every test in
+    // this block the moment its catalog lands, without anyone remembering to
+    // widen a list here.
+    expect(LOCALE_IDS.length).toBeGreaterThan(1);
+    for (const id of LOCALE_IDS) expect(stringsFor(id)).toBeDefined();
+  });
+
+  it("carries the same keys in every language", () => {
     // TypeScript already enforces this at build time; asserting it at runtime
     // catches the one case the type cannot see — a bundle built by spreading
     // another, where a key exists but was never given its own value.
-    expect(Object.keys(EN).sort()).toEqual(Object.keys(AR).sort());
+    for (const id of LOCALE_IDS) {
+      expect(Object.keys(stringsFor(id)).sort()).toEqual(Object.keys(AR).sort());
+    }
   });
 
   it("leaves no Arabic in the English chrome", () => {
@@ -73,19 +85,52 @@ describe("the bundles", () => {
     expect(AR.surahName(2)).toBe("البقرة");
   });
 
-  it("gives each language its own digits", () => {
+  it("gives each language the digits it declared", () => {
     expect(AR.num(48)).toBe("٤٨");
     expect(EN.num(48)).toBe("48");
+    // Numerals are a property of the locale, not a per-string decision, so the
+    // registry and the bundle must agree for every language there is.
+    for (const id of LOCALE_IDS) {
+      const wantsArabic = LOCALES[id].digits === "arabic";
+      expect(ARABIC_DIGITS.test(stringsFor(id).num(48))).toBe(wantsArabic);
+    }
   });
 
-  it("spells the page number in Latin in both languages", () => {
+  it("writes counts inside aria-labels in the language's own digits", () => {
+    // The half that is easy to forget, and the half a screen reader gets wrong
+    // when it is missed: the hop rail once said «٣» to the eye and "three" to a
+    // screen reader. These two are aria-labels, nothing else.
+    expect(AR.chipAria("متشابهات", 3)).toBe("متشابهات · ٣");
+    expect(AR.rootsAria(12)).toBe("الجذور · ١٢");
+    expect(EN.chipAria("Similar", 3)).toBe("Similar · 3");
+  });
+
+  it("spells the page number in Latin in every language", () => {
     // The one figure a reader reads off the printed mus'haf's corner and types
     // back into the jumper. The aria snapshots in e2e/__aria__ record «صفحة 7»,
     // and this is the assertion that stops a well-meaning sweep from
     // "fixing" it to «صفحة ٧» and taking the snapshots with it.
     expect(AR.pageN(7)).toBe("صفحة 7");
     expect(EN.pageN(7)).toBe("Page 7");
-    expect(ARABIC_DIGITS.test(AR.pageN(7))).toBe(false);
+    for (const id of LOCALE_IDS) {
+      expect(ARABIC_DIGITS.test(stringsFor(id).pageN(7))).toBe(false);
+      expect(ARABIC_DIGITS.test(stringsFor(id).pageOfTotal(7, 604))).toBe(false);
+    }
+  });
+
+  it("agrees with the plural rules of the language, not with a ternary", () => {
+    // Arabic has six plural categories and `few` is `n % 100 = 3..10`, not
+    // `n <= 10`. The hand-written table this replaced used `n <= 10`, so it read
+    // «١٠٣ صفحة» where Arabic wants «١٠٣ صفحات» — for 41 of the 603 distances
+    // the mus'haf can produce. This is the assertion that fix is real.
+    expect(AR.distance(0)).toBe("نفس الصفحة");
+    expect(AR.distance(1)).toBe("صفحة واحدة بعد");
+    expect(AR.distance(2)).toBe("صفحتان بعد");
+    expect(AR.distance(-3)).toBe("٣ صفحات قبل");
+    expect(AR.distance(11)).toBe("١١ صفحة بعد");
+    expect(AR.distance(103)).toBe("١٠٣ صفحات بعد");
+    expect(EN.distance(1)).toBe("1 page later");
+    expect(EN.distance(-3)).toBe("3 pages earlier");
   });
 
   it("labels an ayah from coordinates without needing a canonical key", () => {
@@ -167,6 +212,9 @@ describe("LangProvider", () => {
   it("agrees with dirOf about which way each language runs", () => {
     expect(dirOf("ar")).toBe("rtl");
     expect(dirOf("en")).toBe("ltr");
+    // And every locale has *declared* a direction — there is no default, because
+    // a locale silently inheriting `ltr` is a mus'haf rendered backwards.
+    for (const id of LOCALE_IDS) expect(["rtl", "ltr"]).toContain(dirOf(id));
   });
 });
 

@@ -172,6 +172,16 @@ jobs:
       - name: Gate — the revision record never leaves the device
         run: pnpm gate:revision-privacy
 
+      # `tsc` already refuses a locale that is missing a key — every compiled
+      # catalog is declared `const messages: Catalog`, and there is no runtime
+      # lookup that could fall back to another language. This covers the four
+      # things it cannot see: generated code left stale after a catalog edit, a
+      # key the reference locale has and a translation does not, a plural that
+      # writes four of Arabic's six categories, and a translation that drops a
+      # placeholder. See docs/design/i18n.md §④.
+      - name: Gate — every locale is complete, and its plurals are its own
+        run: pnpm gate:i18n
+
       - name: Build
         run: pnpm build
 

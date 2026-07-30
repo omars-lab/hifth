@@ -1,53 +1,109 @@
 /**
- * The chrome's vocabulary, in both languages, in one place.
+ * The chrome's vocabulary: one assembler, one bundle per language.
  *
- * ## Why a hand-written table and not a library
+ * ## Why this is no longer a hand-written table
  *
- * There are no plurals to negotiate, no dates, no currencies, and exactly two
- * languages — the whole of ICU MessageFormat would be dead weight in a bundle
- * `gate:budget` measures. What this app actually needs is the thing a library
- * cannot give it: a guarantee that no string is left behind. `Strings` is an
- * interface, so an entry added to `AR` and forgotten in `EN` is a type error at
- * build time, not an Arabic sentence in the middle of an English sheet at
- * runtime. That is the only enforcement this feature needs, and TypeScript was
- * already paying for it.
+ * The module this replaced argued its own case, and the argument was correct for
+ * what it knew:
  *
- * Interpolation is by function rather than by `{placeholder}` for the same
- * reason: `hoppedTo(label, page)` cannot be called with the arguments in the
- * wrong order, and a signature change breaks both bundles at once.
+ * > There are no plurals to negotiate, no dates, no currencies, and exactly two
+ * > languages — the whole of ICU MessageFormat would be dead weight in a bundle
+ * > `gate:budget` measures.
+ *
+ * Two of those three premises did not survive contact. There *are* plurals: this
+ * file used to carry
+ *
+ *     n === 1 ? "صفحة واحدة" : n === 2 ? "صفحتان"
+ *       : n <= 10 ? `${digits(n)} صفحات` : `${digits(n)} صفحة`
+ *
+ * and Arabic's `few` is `n % 100 = 3..10`, not `n <= 10` — so 103 pages read as
+ * «١٠٣ صفحة» where Arabic wants «١٠٣ صفحات», for 41 of the 603 distances the
+ * mus'haf can produce. It compiled, it passed, and it was wrong in a way only a
+ * hafiz would notice. And "exactly two languages" was a statement about today,
+ * not about the app. Both are in docs/design/i18n.md §①–②.
+ *
+ * The bundle premise did survive, and it is the reason for the shape here. ICU
+ * MessageFormat is the notation, but it is compiled to TypeScript by
+ * `scripts/messages-compile.mjs` at build time; the parser is a devDependency and
+ * ships nothing. The runtime is `messages/plural.ts`, twelve lines over the
+ * browser's own `Intl.PluralRules` — **+180 bytes gzipped**. The whole migration
+ * measured **+1.8 KB gz** (101.2 → 103.0 against a 150 KB budget), nearly all of
+ * it the compiled catalogs. The batteries-included alternatives would have added
+ * 9.3–25.2 KB on top of those same catalogs.
+ *
+ * ## Completeness is still a build-time guarantee
+ *
+ * The old guarantee was `Strings` as an interface implemented twice: a key in
+ * `AR` missing from `EN` was a type error. That guarantee is intact and now
+ * *stricter*, one layer down. Each locale's compiled module is declared
+ * `const messages: Catalog`, so a key missing from `en.json` does not compile, an
+ * extra key does not compile, and — new — a message that interpolates an argument
+ * no locale declares does not compile either, because `Catalog` types the
+ * argument *names*, not just how many there are.
+ *
+ * There is deliberately **no lookup and no fallback chain**. A missing key cannot
+ * quietly render another language's words, because a missing key is not a
+ * runtime condition at all. English inside an Arabic sheet is the failure this
+ * whole design exists to prevent, and a fallback is that failure with a
+ * reassuring name. `gate:i18n` guards what the compiler cannot see: that the
+ * committed `.gen.ts` files match the catalogs, and that a plural covers every
+ * CLDR category its own locale actually has.
+ *
+ * ## One assembler, not one bundle per language
+ *
+ * `buildStrings` is written once and runs for every locale. That is the part that
+ * makes a third language cheap: adding Urdu is a JSON catalog plus a row in
+ * `LOCALES`, not a re-typing of 134 interface members with a chance to get one
+ * of them subtly wrong. It also means every locale is wired to `format.ts` the
+ * same way, which is how the numeral rule below stays true.
  *
  * ## Numerals are part of the language
  *
  * Every count in the Arabic UI is Arabic-Indic, *including inside aria-labels* —
  * the hop rail once said «٣» to the eye and "three" to a screen reader, and the
- * only place the two spellings ever sat side by side was an aria snapshot. So
- * the bundles carry their own `num`, and no component formats a number itself.
+ * only place the two spellings ever sat side by side was an aria snapshot. There
+ * is exactly one authority for numerals, `format.ts`'s `digits()`, and the
+ * message compiler *refuses* ICU's `#` and `{n, number}` so a second one cannot
+ * appear. Messages that count therefore take two arguments: `{n}`, the number, to
+ * choose the plural form with, and `{nText}`, the digits already rendered, to
+ * print. A bare `{page}` is a raw number and comes out in Latin digits — the
+ * deliberate exception, because a page number is read off the corner of the
+ * printed mus'haf in both languages.
  *
  * ## What is deliberately NOT here
  *
- * Scripture, licence attribution, and proper names of editions and tajweed
- * rules. See `lang.ts` for the reasoning; the short version is that translating
- * an attribution string would break `gate:license-copy`, and it should.
+ * Scripture, licence attribution, and the proper names of editions and tajweed
+ * rules. See `lang.ts` for the reasoning and `editions.ts` for where the edition
+ * names went; the short version is that translating an attribution string would
+ * break `gate:license-copy`, and it should.
+ *
+ * The long form, and the checklist for adding a language: docs/design/i18n.md.
  */
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import {
+  LOCALES,
   applyLangToDocument,
   detectLang,
   dirOf,
   rememberLang,
   type Lang,
 } from "./lang";
+import { EDITION_COPY, type EditionCopy } from "./editions";
 import {
   ayahLabel as fmtAyahLabel,
   ayahLabelAt as fmtAyahLabelAt,
   ayahRef as fmtAyahRef,
   rangeLabel as fmtRangeLabel,
   digits,
-  toArabicDigits,
+  digitsIn,
   surahName as fmtSurahName,
   surahNames,
 } from "./format";
+import type { Catalog } from "./messages/catalog.gen";
+import { CATALOGS } from "./messages/catalogs.gen";
+
+export type { EditionCopy };
 
 /** A hop rail bucket, and a root-lens/edition row. Kept structural on purpose:
  *  these unions are declared by the components that own the behaviour, and an
@@ -59,13 +115,6 @@ type NoticeKind = "capped" | "install-ios" | "install-prompt" | "best-effort";
 export interface CoachStep {
   readonly title: string;
   readonly body: string;
-}
-
-/** An edition's proper names, when the UI language spells them differently. */
-export interface EditionCopy {
-  readonly label: string;
-  readonly riwayah: string;
-  readonly reason?: string;
 }
 
 export interface Strings {
@@ -85,7 +134,8 @@ export interface Strings {
   rangeLabel(fromKey: string, toKey: string): string | null;
 
   /* ---- the language control itself ---------------------------------------- */
-  /** What this language calls itself, in itself — never translated. */
+  /** What this language calls itself, in itself — never translated, so it is not
+   *  a message. It comes from `LOCALES`, where a new locale has to declare it. */
   langName: string;
   langSectionTitle: string;
   langSectionNote: string;
@@ -352,549 +402,326 @@ export interface Strings {
 }
 
 /* ------------------------------------------------------------------------- */
-/* Arabic — the app's native tongue, and the wording every e2e aria snapshot  */
-/* in e2e/__aria__ was recorded against.                                      */
+/* The assembler                                                              */
 /* ------------------------------------------------------------------------- */
 
 /**
- * Exported for `i18n.test.tsx`, which walks both bundles looking for a string
- * that was never translated. Nothing else imports these — components read the
- * one the provider chose, never a bundle by name.
+ * Bind one locale's catalog into the shape components read.
+ *
+ * Written once for every language, which is the whole point: the old file said
+ * everything twice, so «صفحتان» and "2 pages" were two independent chances to
+ * forget a rule. Here the only per-language facts are in the catalog and in
+ * `LOCALES`, and the wiring — which formatter, which digits, which argument — is
+ * stated once and cannot disagree with itself.
+ *
+ * The argument convention, in one place because it is easy to get subtly wrong:
+ *
+ *   - `n` / `count` / `ayahs` … — the raw number, for CLDR to select on. Never
+ *     printed; the compiler rejects the `#` that would print it.
+ *   - `nText` / `countText` … — `digits(n, lang)`, the thing that appears on
+ *     screen and in the aria-label. One numeral authority, `format.ts`.
+ *   - a bare number like `page` — printed as-is, i.e. Latin digits in every
+ *     language. Only page numbers do this, and deliberately (see `pageN`).
  */
-export const AR: Strings = {
-  num: (n) => digits(n, "ar"),
-  names: surahNames("ar"),
-  surahName: (s) => fmtSurahName(s, "ar"),
-  ayahLabel: (k) => fmtAyahLabel(k, "ar"),
-  ayahAt: (s, a) => fmtAyahLabelAt(s, a, "ar"),
-  ayahRef: (k) => fmtAyahRef(k, "ar"),
-  rangeLabel: (a, b) => fmtRangeLabel(a, b, "ar"),
+export function buildStrings(lang: Lang, m: Catalog): Strings {
+  const locale = LOCALES[lang];
+  const n = (value: number) => digits(value, lang);
+  // ICU `select` cases are closed sets, so the app's own vocabulary is mapped to
+  // them here rather than in every caller. "link" is spelled `other` because ICU
+  // requires an `other` case and a second name for the same branch is a branch
+  // that can drift.
+  const via = (origin: "link" | "jump") =>
+    m.arrivedVia({ origin: origin === "jump" ? "jump" : "other" });
 
-  langName: "العربية",
-  langSectionTitle: "اللغة",
-  langSectionNote: "تتغيّر لغة الأزرار والقوائم فقط؛ المصحف ونصّ الآيات عربيّ دائمًا.",
-  langSwitchTo: (other) => `التبديل إلى ${other}`,
+  return {
+    num: n,
+    names: surahNames(lang),
+    surahName: (s) => fmtSurahName(s, lang),
+    ayahLabel: (k) => fmtAyahLabel(k, lang),
+    ayahAt: (s, a) => fmtAyahLabelAt(s, a, lang),
+    ayahRef: (k) => fmtAyahRef(k, lang),
+    rangeLabel: (a, b) => fmtRangeLabel(a, b, lang),
 
-  about: "عن حِفظ · الرخصة والمصادر",
-  pageWord: "صفحة",
-  pageN: (page) => `صفحة ${page}`,
-  goTo: "اذهب إلى",
-  goToLong: "اذهب إلى · سورة أو جزء أو آية",
-  mushaf: "المصحف",
-  close: "إغلاق",
-  trail: "المسار",
+    langName: locale.name,
+    langSectionTitle: m.langSectionTitle,
+    langSectionNote: m.langSectionNote,
+    langSwitchTo: (other) => m.langSwitchTo({ other }),
 
-  pageBar: "شريط الصفحات",
-  pageChoose: "اختيار الصفحة",
-  pageOfTotal: (page, total) => `صفحة ${page} من ${total}`,
-  // The mus'haf's own direction, not the chrome's: the next page of a mus'haf
-  // lies to the *left*, which is why ArrowLeft turns forward and why the next
-  // button sits on the left edge of the bar in both languages.
-  prevPage: "الصفحة السابقة",
-  nextPage: "الصفحة التالية",
-  pagesVendored: (have, total) =>
-    `المتوفّر ${digits(have, "ar")} من ${digits(total, "ar")} صفحة`,
+    about: m.about,
+    pageWord: m.pageWord,
+    pageN: (page) => m.pageN({ page }),
+    goTo: m.goTo,
+    goToLong: m.goToLong,
+    mushaf: m.mushaf,
+    close: m.close,
+    trail: m.trail,
 
-  firstPage: "أول صفحة متوفّرة",
-  lastPage: "آخر صفحة متوفّرة",
-  nearestPageN: (page) => `أقرب صفحة متوفّرة · صفحة ${page}`,
-  selectionCleared: "أُلغي التحديد",
-  selected: (label) => `حُدّدت ${label}`,
-  highlighted: (span) => `ظُلّل ${span}`,
-  // Page numbers here are Latin for the same reason `pageN` is — they name the
-  // page in the corner of the printed mus'haf, and the chrome shows it that way.
-  hoppedTo: (label, page) => `انتقلت إلى ${label} · صفحة ${page}`,
-  backTo: (label, page) => `رجعت إلى ${label} · صفحة ${page}`,
-  arrivedVia: (origin) => (origin === "jump" ? "انتقلت إلى" : "فُتح رابط ·"),
-  arrivedPage: (origin, page) => `${AR.arrivedVia(origin)} صفحة ${page}`,
-  arrivedRange: (origin, ref, page) => `${AR.arrivedVia(origin)} مقطع ${ref} · صفحة ${page}`,
-  arrivedAyah: (origin, label, page) => `${AR.arrivedVia(origin)} ${label} · صفحة ${page}`,
-  rangeUnavailable: "المقطع المطلوب غير متوفّر بعد",
-  ayahUnavailable: "الآية المطلوبة غير متوفّرة بعد",
-  noConcordance: "لا جدول مقابلة لهذه الطبعة بعد",
-  railSummary: (surah, links) => `${surah} · ${digits(links, "ar")} روابط`,
+    pageBar: m.pageBar,
+    pageChoose: m.pageChoose,
+    pageOfTotal: (page, total) => m.pageOfTotal({ page, total }),
+    // Not swapped for a left-to-right chrome. "Previous" and "next" here mean
+    // earlier and later in the mus'haf, and the mus'haf runs right to left in
+    // every UI language — the bar is scripture furniture, so its edges keep the
+    // book's direction. That is why this is one message and not two.
+    prevPage: m.prevPage,
+    nextPage: m.nextPage,
+    pagesVendored: (have, total) => m.pagesVendored({ haveText: n(have), totalText: n(total) }),
 
-  ayahAria: (label) => `الآية ${label}`,
-  stageLoading: "…جاري التحميل",
-  stageFailed: (page) => `تعذّر تحميل صفحة ${digits(page, "ar")}. أعد المحاولة.`,
+    firstPage: m.firstPage,
+    lastPage: m.lastPage,
+    nearestPageN: (page) => m.nearestPageN({ page }),
+    selectionCleared: m.selectionCleared,
+    selected: (label) => m.selected({ label }),
+    highlighted: (span) => m.highlighted({ span }),
+    hoppedTo: (label, page) => m.hoppedTo({ label, page }),
+    backTo: (label, page) => m.backTo({ label, page }),
+    arrivedVia: via,
+    arrivedPage: (origin, page) => m.arrivedPage({ via: via(origin), page }),
+    arrivedRange: (origin, ref, page) => m.arrivedRange({ via: via(origin), ref, page }),
+    arrivedAyah: (origin, label, page) => m.arrivedAyah({ via: via(origin), label, page }),
+    rangeUnavailable: m.rangeUnavailable,
+    ayahUnavailable: m.ayahUnavailable,
+    noConcordance: m.noConcordance,
+    railSummary: (surah, links) => m.railSummary({ surah, linksText: n(links) }),
 
-  railGroup: "روابط الآية",
-  railDirection: {
-    loop: "متشابهات في السورة",
-    earlier: "متشابهات في سور سابقة",
-    later: "متشابهات في سور لاحقة",
-    root: "جذر مشترك",
-  },
-  hopTitle: {
-    loop: "متشابهات في السورة",
-    earlier: "في سور سابقة",
-    later: "في سور لاحقة",
-    root: "بنفس الجذر",
-  },
-  chipAria: (direction, count) => `${direction} · ${digits(count, "ar")}`,
-  hopSheetAria: (title, count) => `${title} · ${count}`,
-  hopTo: (label) => `انتقل إلى ${label}`,
-  twin: "توأم",
-  pageUnavailable: "هذه الصفحة غير متوفّرة بعد",
-  wordLevelPending: "الربط على مستوى الكلمة يصل مع الحزمة القادمة",
-  hereTag: "هنا",
+    ayahAria: (label) => m.ayahAria({ label }),
+    stageLoading: m.stageLoading,
+    stageFailed: (page) => m.stageFailed({ pageText: n(page) }),
 
-  rangeAria: (title, links) => `مقطع محدَّد · ${title} · ${links} روابط`,
-  rangeEmpty: "لا روابط في هذا المقطع بعد",
-  rangeFrom: (refs) => `من ${refs}`,
-  refJoin: "، ",
-  clearSelection: "إلغاء التحديد",
-
-  tapHint: "المس آية على الصفحة لتحديدها",
-  beadBack: (label) => `ارجع إلى ${label}`,
-  beadCurrent: (label) => `الآية الحالية ${label} — المس للإلغاء`,
-  shareTitle: "حفظ",
-  shareTextTrail: "مسار مُتشابهات",
-  shareTextRange: "مقطع",
-  shareTextAyah: "آية",
-  shareAriaTrail: "شارك المسار كرابط",
-  shareAriaRange: "شارك هذا المقطع كرابط",
-  shareAriaAyah: "شارك هذه الآية كرابط",
-  shareLabel: "شارك",
-  shareLabelTrail: "شارك المسار",
-  shared: "تمت المشاركة",
-  copied: "نُسخ الرابط",
-  copyFailed: "تعذّر النسخ",
-
-  coachRegion: "كيف تتنقّل",
-  coachSteps: [
-    { title: "المس آية", body: "يظهر شريط الروابط بجانبها: متشابهاتها، وعددها." },
-    { title: "اضغط واسحب", body: "يتظلّل المقطع، وتفتح قائمته بروابط آياته مجموعة." },
-    { title: "المس رقاقة", body: "تنتقل إلى الآية المشابهة، وتبقى خرزة في المسار للرجوع." },
-  ],
-  coachNext: "التالي",
-  coachDone: "تمّ",
-  coachSkip: "تخطَّ",
-  coachDoneAria: "تمّ · إخفاء الشرح",
-  coachNextAria: (next, total) =>
-    `التالي · ${digits(next, "ar")} من ${digits(total, "ar")}`,
-
-  jumpInput: "اسم السورة أو رقمها، أو ٢:٢٥٥، أو جزء ٩",
-  jumpPlaceholder: "البقرة · ٢:٢٥٥ · جزء ٩",
-  jumpEmpty: "لا مكان بهذا الاسم أو الرقم",
-  jumpResults: "النتائج",
-  juzGroup: "الأجزاء",
-  juzN: (juz) => `الجزء ${digits(juz, "ar")}`,
-  surahN: (surah) => `سورة ${digits(surah, "ar")}`,
-  jumpStartsAt: (label) => `يبدأ من ${label}`,
-
-  editionCurrent: "الحالي",
-  editionNoTable: "لا جدول مقابلة بعد",
-  editionNoCounterpart: "لا تقابلها آية في هذه الطبعة",
-  editionMapsTo: (ref) => `تقابلها ${ref}`,
-  editionFoot: "كل رابط يحمل طبعته؛ الانتقال بين الطبعات يمرّ بجدول المقابلة، لا بترقيم مشترك.",
-  editionCopy: {},
-
-  skinGroup: "مظهر الصفحة",
-  tajweed: "تجويد",
-  beta: "تجريبي",
-  legendAria: "مفتاح ألوان التجويد",
-  legendTitle: "مفتاح التجويد",
-  legendCaveat: {
-    lead: "هذه الطبقة ",
-    strong: "تجريبية",
-    rest:
-      " حتى يعتمدها حافظ. وهي تُعلّم الآية كاملة بأبرز حكم فيها — لا الحرف نفسه — " +
-      "لأنّ صفحات المصحف الحالية لا تحمل معرّفات للحروف بعد.",
-  },
-  legendNoneOnPage: "لا شيء في هذه الصفحة",
-  legendCountOnPage: (n, page) => `${digits(n, "ar")} آية في صفحة ${digits(page, "ar")}`,
-  legendSelection: "أحكام الآية المحددة",
-  legendNoRules: "لا أحكام معروفة على هذه الآية.",
-  tajweedCredit: "أحكام التجويد مأخوذة من quran-tajweed (Collin Fair)، رخصة CC BY 4.0.",
-  ruleName: (label, latin) => ({ primary: label, secondary: latin }),
-
-  rootsTitle: "الجذور",
-  rootsAria: (count) => `الجذور · ${digits(count, "ar")}`,
-  rootsTrigger: (count, curated) =>
-    curated > 0
-      ? `الجذور · ${digits(count, "ar")} · ${digits(curated, "ar")} مختارة`
-      : `الجذور · ${digits(count, "ar")}`,
-  rootsEmpty: "لا جذور معروفة لهذه الآية",
-  rootsPicked: "مختارة",
-  rootsPickedNote: "محقّقة يدويًا",
-  rootsSharedRoot: "جذر مشترك",
-  rootsHapax: "لا تتكرّر في المصحف",
-  rootsStats: (ayahs, words) =>
-    `${digits(ayahs, "ar")} آية · ${digits(words, "ar")} كلمة`,
-  rootsTruncated: (shown) => `أقرب ${digits(shown, "ar")} مواضع فقط`,
-  rootsOccurrences: (count) => `${digits(count, "ar")} كلمات`,
-  rootsUnavailable: " · غير متوفّرة بعد",
-  rootsCredit: "الجذور من",
-  distance: (dPage) => {
-    if (dPage === 0) return "نفس الصفحة";
-    const n = Math.abs(dPage);
-    const pages =
-      n === 1
-        ? "صفحة واحدة"
-        : n === 2
-          ? "صفحتان"
-          : n <= 10
-            ? `${digits(n, "ar")} صفحات`
-            : `${digits(n, "ar")} صفحة`;
-    return `${pages} ${dPage > 0 ? "بعد" : "قبل"}`;
-  },
-
-  notices: {
-    capped: {
-      title: "المساحة المتاحة لحفظ لا تكفي للعمل دون إنترنت",
-      body:
-        "المتصفّح لا يمنح هذا الموقع إلا مساحة صغيرة، فقد تُحذف الصفحات المحفوظة. " +
-        "تحقّق من مساحة جهازك، ومن إعداد «مسح بيانات المواقع عند إغلاق كل النوافذ» في إعدادات الخصوصية.",
+    railGroup: m.railGroup,
+    railDirection: {
+      loop: m["railDirection.loop"],
+      earlier: m["railDirection.earlier"],
+      later: m["railDirection.later"],
+      root: m["railDirection.root"],
     },
-    "install-ios": {
-      title: "ثبّت حفظ ليبقى معك دون إنترنت",
-      body:
-        "من زر المشاركة في المتصفّح اختر «إضافة إلى الشاشة الرئيسية». " +
-        "بدون تثبيت يمسح سفاري الصفحات المحفوظة بعد سبعة أيام من عدم الفتح.",
+    hopTitle: {
+      loop: m["hopTitle.loop"],
+      earlier: m["hopTitle.earlier"],
+      later: m["hopTitle.later"],
+      root: m["hopTitle.root"],
     },
-    "install-prompt": {
-      title: "ثبّت حفظ ليعمل دون إنترنت",
-      body: "التثبيت يجعل الصفحات التي زرتها تبقى محفوظة على جهازك.",
-      action: "ثبّت",
+    chipAria: (direction, count) => m.chipAria({ direction, countText: n(count) }),
+    hopSheetAria: (title, count) => m.hopSheetAria({ title, count }),
+    hopTo: (label) => m.hopTo({ label }),
+    twin: m.twin,
+    pageUnavailable: m.pageUnavailable,
+    wordLevelPending: m.wordLevelPending,
+    hereTag: m.hereTag,
+
+    rangeAria: (title, links) => m.rangeAria({ title, links }),
+    rangeEmpty: m.rangeEmpty,
+    rangeFrom: (refs) => m.rangeFrom({ refs }),
+    refJoin: m.refJoin,
+    clearSelection: m.clearSelection,
+
+    tapHint: m.tapHint,
+    beadBack: (label) => m.beadBack({ label }),
+    beadCurrent: (label) => m.beadCurrent({ label }),
+    shareTitle: m.shareTitle,
+    shareTextTrail: m.shareTextTrail,
+    shareTextRange: m.shareTextRange,
+    shareTextAyah: m.shareTextAyah,
+    shareAriaTrail: m.shareAriaTrail,
+    shareAriaRange: m.shareAriaRange,
+    shareAriaAyah: m.shareAriaAyah,
+    shareLabel: m.shareLabel,
+    shareLabelTrail: m.shareLabelTrail,
+    shared: m.shared,
+    copied: m.copied,
+    copyFailed: m.copyFailed,
+
+    coachRegion: m.coachRegion,
+    // Numbered rather than an array in the catalog: a translator editing JSON
+    // has no way to see that element 2 of an array is the drag card, and a
+    // reordered array would silently pair one language's title with another's
+    // body. The numbers are the pairing.
+    coachSteps: [
+      { title: m["coachSteps.1.title"], body: m["coachSteps.1.body"] },
+      { title: m["coachSteps.2.title"], body: m["coachSteps.2.body"] },
+      { title: m["coachSteps.3.title"], body: m["coachSteps.3.body"] },
+    ],
+    coachNext: m.coachNext,
+    coachDone: m.coachDone,
+    coachSkip: m.coachSkip,
+    coachDoneAria: m.coachDoneAria,
+    coachNextAria: (next, total) => m.coachNextAria({ nextText: n(next), totalText: n(total) }),
+
+    jumpInput: m.jumpInput,
+    jumpPlaceholder: m.jumpPlaceholder,
+    jumpEmpty: m.jumpEmpty,
+    jumpResults: m.jumpResults,
+    juzGroup: m.juzGroup,
+    juzN: (juz) => m.juzN({ juzText: n(juz) }),
+    surahN: (surah) => m.surahN({ surahText: n(surah) }),
+    jumpStartsAt: (label) => m.jumpStartsAt({ label }),
+
+    editionCurrent: m.editionCurrent,
+    editionNoTable: m.editionNoTable,
+    editionNoCounterpart: m.editionNoCounterpart,
+    editionMapsTo: (ref) => m.editionMapsTo({ ref }),
+    editionFoot: m.editionFoot,
+    editionCopy: EDITION_COPY[lang],
+
+    skinGroup: m.skinGroup,
+    tajweed: m.tajweed,
+    beta: m.beta,
+    legendAria: m.legendAria,
+    legendTitle: m.legendTitle,
+    // Three messages and not one, because the middle third is inside a <strong>.
+    // Markup in a translatable string is markup a translator can break.
+    legendCaveat: {
+      lead: m["legendCaveat.lead"],
+      strong: m["legendCaveat.strong"],
+      rest: m["legendCaveat.rest"],
     },
-    "best-effort": {
-      title: "الحفظ دون إنترنت غير مضمون",
-      body:
-        "لم يمنح المتصفّح تخزينًا دائمًا، فقد يحذف الصفحات المحفوظة إذا ضاقت مساحة الجهاز. " +
-        "تُحفظ الصفحة من جديد كلّما فتحتها ومعك إنترنت.",
+    legendNoneOnPage: m.legendNoneOnPage,
+    legendCountOnPage: (count, page) =>
+      m.legendCountOnPage({ n: count, nText: n(count), pageText: n(page) }),
+    legendSelection: m.legendSelection,
+    legendNoRules: m.legendNoRules,
+    tajweedCredit: m.tajweedCredit,
+    // A rule has one name written two ways — «إدغام» and "idgham" — and both
+    // ship in both languages. Only the order changes, so this is a property of
+    // the locale and never a string to translate.
+    ruleName: (label, latin) =>
+      locale.rulePrimary === "latin"
+        ? { primary: latin, secondary: label }
+        : { primary: label, secondary: latin },
+
+    rootsTitle: m.rootsTitle,
+    rootsAria: (count) => m.rootsAria({ countText: n(count) }),
+    rootsTrigger: (count, curated) =>
+      m.rootsTrigger({
+        curated: curated > 0 ? "some" : "other",
+        countText: n(count),
+        curatedText: n(curated),
+      }),
+    rootsEmpty: m.rootsEmpty,
+    rootsPicked: m.rootsPicked,
+    rootsPickedNote: m.rootsPickedNote,
+    rootsSharedRoot: m.rootsSharedRoot,
+    rootsHapax: m.rootsHapax,
+    rootsStats: (ayahs, words) =>
+      m.rootsStats({ ayahs, words, ayahsText: n(ayahs), wordsText: n(words) }),
+    rootsTruncated: (shown) => m.rootsTruncated({ shownText: n(shown) }),
+    rootsOccurrences: (count) => m.rootsOccurrences({ count, countText: n(count) }),
+    rootsUnavailable: m.rootsUnavailable,
+    rootsCredit: m.rootsCredit,
+    // Three messages, because they are three different jobs: the zero case is a
+    // whole sentence, the count agrees with a number, and "before/after" wraps
+    // the result. Composing them here is what lets a language put the direction
+    // word first if its grammar wants to — the wrapper is a message, not a
+    // template literal in this file.
+    distance: (dPage) => {
+      if (dPage === 0) return m.distanceSame;
+      const away = Math.abs(dPage);
+      const pages = m.distancePages({ n: away, nText: n(away) });
+      return m.distanceRelative({ dir: dPage > 0 ? "later" : "other", pages });
     },
-  },
-  dismissNotice: "إخفاء التنبيه",
-  dismiss: "إخفاء",
 
-  aboutTitle: "عن حِفظ",
-  aboutLede:
-    "حِفظ آلة ملاحة في المصحف: تختار آية فينقلك إلى متشابهاتها. لا حساب ولا خادم ولا " +
-    "تتبّع؛ الصفحات والبيانات تُحمَّل إلى جهازك.",
-  aboutCaveat: "المصحف المطبوع هو المرجع. ما يعرضه حِفظ عونٌ على المراجعة، لا بديل عنها.",
-  licenceHead: "الرخصة والمصدر",
-  licenceBody:
-    "برنامج حرّ برخصة GNU GPL الإصدار الثالث أو ما بعده: لك أن تدرسه وتعدّله وتنشره. " +
-    "وهذه شيفرة هذه النسخة بعينها، لا فرعٌ قد يتغيّر:",
-  sourceLink: "الشيفرة المصدرية",
-  devBuild: "نسخة تطوير",
-  devBuildNote: "هذه نسخة تطوير محلّية، فلا تقابلها إصدارة معيّنة؛ الرابط يفتح المستودع.",
-  sourcesHead: "المصادر",
-  aboutFoot: "الشروط الكاملة والإصدارات المثبَّتة في ملف SOURCES.md داخل المستودع:",
-
-  // «ما فتحتَه» — what you opened. Not «مراجعتك»: the record cannot see a
-  // recitation, only a tap, and a title claiming otherwise would be the app
-  // stating something its data does not hold.
-  mapTitle: "ما فتحتَه من المصحف",
-  mapCaveat: "النقر دليل على أنّك فتحت الآية، لا على أنّك راجعتها.",
-  mapOpen: (page) => `صفحة ${page} · ما فتحتَه من المصحف`,
-  mapScopeGroup: "التقسيم",
-  scopePage: "صفحة",
-  scopeHizb: "حزب",
-  scopeJuz: "جزء",
-  hizbN: (hizb) => `الحزب ${digits(hizb, "ar")}`,
-  mapHeld: (have, total, scope) => {
-    const unit =
-      scope === "page" ? "صفحة" : scope === "hizb" ? (have === 1 ? "حزب" : "حزبًا") : "جزءًا";
-    return `المتوفّر ${digits(have, "ar")} من ${digits(total, "ar")} ${unit}`;
-  },
-  mapSince: (day) => `يُسجَّل منذ ${toArabicDigits(day)}`,
-  mapGrid: "خريطة المصحف",
-  mapNoStore: "لا يمكن حفظ السجلّ في هذا المتصفّح، فلا شيء هنا لعرضه.",
-  mapLoading: "جارٍ فتح السجلّ…",
-  mapLegend: "الدليل",
-  mapAbsent: "غير متوفّر في هذه النسخة",
-  mapNeverOpened: "متوفّر ولم يُفتح",
-  mapRecent: "فُتح حديثًا",
-  mapCellAbsent: (label) => `${label} · غير متوفّر في هذه النسخة`,
-  mapCellNever: (label) => `${label} · لم يُفتح`,
-  mapCellSeen: (label, days) =>
-    days <= 0
-      ? `${label} · فُتح اليوم`
-      : days === 1
-        ? `${label} · فُتح أمس`
-        : `${label} · فُتح قبل ${digits(days, "ar")} يومًا`,
-
-  facingPage: "الصفحة المقابلة",
-  facingAbsent: (page) => `صفحة ${page} ليست في هذه النسخة`,
-  keyPages: "تصفّح",
-  keyJump: "انتقال",
-};
-
-/* ------------------------------------------------------------------------- */
-/* English — the chrome only. Every proper noun that names scripture keeps its */
-/* Arabic alongside wherever there is room for both.                          */
-/* ------------------------------------------------------------------------- */
-
-export const EN: Strings = {
-  num: (n) => digits(n, "en"),
-  names: surahNames("en"),
-  surahName: (s) => fmtSurahName(s, "en"),
-  ayahLabel: (k) => fmtAyahLabel(k, "en"),
-  ayahAt: (s, a) => fmtAyahLabelAt(s, a, "en"),
-  ayahRef: (k) => fmtAyahRef(k, "en"),
-  rangeLabel: (a, b) => fmtRangeLabel(a, b, "en"),
-
-  langName: "English",
-  langSectionTitle: "Language",
-  langSectionNote:
-    "This changes the buttons and menus only. The mus'haf and the verse text are always Arabic.",
-  langSwitchTo: (other) => `Switch to ${other}`,
-
-  about: "About Hifth · licence and sources",
-  pageWord: "Page",
-  pageN: (page) => `Page ${page}`,
-  goTo: "Go to",
-  goToLong: "Go to · a surah, a juz, or an ayah",
-  mushaf: "Mus'haf",
-  close: "Close",
-  trail: "Trail",
-
-  pageBar: "Page bar",
-  pageChoose: "Choose a page",
-  pageOfTotal: (page, total) => `Page ${page} of ${total}`,
-  // Not swapped for English. "Previous" and "next" here mean earlier and later
-  // in the mus'haf, and the mus'haf runs right to left in both languages — the
-  // bar is scripture furniture, so its edges keep the book's direction.
-  prevPage: "Previous page",
-  nextPage: "Next page",
-  pagesVendored: (have, total) =>
-    `${digits(have, "en")} of ${digits(total, "en")} pages available`,
-
-  firstPage: "First available page",
-  lastPage: "Last available page",
-  nearestPageN: (page) => `Nearest available page · Page ${page}`,
-  selectionCleared: "Selection cleared",
-  selected: (label) => `Selected ${label}`,
-  highlighted: (span) => `Highlighted ${span}`,
-  hoppedTo: (label, page) => `Hopped to ${label} · page ${page}`,
-  backTo: (label, page) => `Back at ${label} · page ${page}`,
-  arrivedVia: (origin) => (origin === "jump" ? "Went to" : "Link opened ·"),
-  arrivedPage: (origin, page) => `${EN.arrivedVia(origin)} page ${page}`,
-  arrivedRange: (origin, ref, page) => `${EN.arrivedVia(origin)} passage ${ref} · page ${page}`,
-  arrivedAyah: (origin, label, page) => `${EN.arrivedVia(origin)} ${label} · page ${page}`,
-  rangeUnavailable: "That passage is not available yet",
-  ayahUnavailable: "That ayah is not available yet",
-  noConcordance: "No concordance table for that edition yet",
-  railSummary: (surah, links) => `${surah} · ${links} links`,
-
-  ayahAria: (label) => `Ayah ${label}`,
-  stageLoading: "Loading…",
-  stageFailed: (page) => `Could not load page ${page}. Try again.`,
-
-  railGroup: "Links from this ayah",
-  railDirection: {
-    loop: "Similar verses in this surah",
-    earlier: "Similar verses in earlier surahs",
-    later: "Similar verses in later surahs",
-    root: "Shared root",
-  },
-  hopTitle: {
-    loop: "Similar in this surah",
-    earlier: "In earlier surahs",
-    later: "In later surahs",
-    root: "Same root",
-  },
-  chipAria: (direction, count) => `${direction} · ${count}`,
-  hopSheetAria: (title, count) => `${title} · ${count}`,
-  hopTo: (label) => `Hop to ${label}`,
-  twin: "twin",
-  pageUnavailable: "This page is not available yet",
-  wordLevelPending: "Word-level links arrive with the next data pack",
-  hereTag: "here",
-
-  rangeAria: (title, links) => `Highlighted passage · ${title} · ${links} links`,
-  rangeEmpty: "No links in this passage yet",
-  rangeFrom: (refs) => `from ${refs}`,
-  refJoin: ", ",
-  clearSelection: "Clear highlight",
-
-  tapHint: "Tap an ayah on the page to select it",
-  beadBack: (label) => `Back to ${label}`,
-  beadCurrent: (label) => `Current ayah ${label} — tap to clear`,
-  shareTitle: "Hifth",
-  shareTextTrail: "A mutashabihat trail",
-  shareTextRange: "A passage",
-  shareTextAyah: "An ayah",
-  shareAriaTrail: "Share the trail as a link",
-  shareAriaRange: "Share this passage as a link",
-  shareAriaAyah: "Share this ayah as a link",
-  shareLabel: "Share",
-  shareLabelTrail: "Share trail",
-  shared: "Shared",
-  copied: "Link copied",
-  copyFailed: "Could not copy",
-
-  coachRegion: "How to navigate",
-  coachSteps: [
-    { title: "Tap an ayah", body: "Its rail of links opens beside it: the similar verses, and how many." },
-    { title: "Press and drag", body: "The passage is highlighted, and its links open as one merged list." },
-    { title: "Tap a chip", body: "You hop to the similar verse, and a bead on the trail brings you back." },
-  ],
-  coachNext: "Next",
-  coachDone: "Done",
-  coachSkip: "Skip",
-  coachDoneAria: "Done · hide the tips",
-  coachNextAria: (next, total) => `Next · ${next} of ${total}`,
-
-  jumpInput: "Surah name or number, or 2:255, or juz 9",
-  jumpPlaceholder: "Al-Baqarah · 2:255 · juz 9",
-  jumpEmpty: "No place by that name or number",
-  jumpResults: "Results",
-  juzGroup: "The thirty juz",
-  juzN: (juz) => `Juz ${juz}`,
-  surahN: (surah) => `Surah ${surah}`,
-  jumpStartsAt: (label) => `Starts at ${label}`,
-
-  editionCurrent: "current",
-  editionNoTable: "No concordance table yet",
-  editionNoCounterpart: "No matching ayah in that edition",
-  editionMapsTo: (ref) => `Maps to ${ref}`,
-  editionFoot:
-    "Every link carries its edition. Moving between editions goes through a concordance table, never through shared numbering.",
-  editionCopy: {
-    "hafs-kfqc": {
-      label: "Hafs · King Fahd Complex",
-      riwayah: "Riwayat Hafs 'an 'Asim",
-    },
-    "warsh-libya": {
-      label: "Warsh · Libyan Endowments",
-      riwayah: "Riwayat Warsh 'an Nafi'",
-      reason: "Licensed for non-commercial use only — needs permission first",
-    },
-    "qalun-libya": {
-      label: "Qalun · Libyan Endowments",
-      riwayah: "Riwayat Qalun 'an Nafi'",
-      reason: "Licensed for non-commercial use only — needs permission first",
-    },
-    "hafs-indopak": {
-      label: "Hafs · Indo-Pak script",
-      riwayah: "Riwayat Hafs 'an 'Asim",
-      reason: "No licensed page source yet",
-    },
-  },
-
-  skinGroup: "Page appearance",
-  tajweed: "Tajweed",
-  beta: "beta",
-  legendAria: "Tajweed colour key",
-  legendTitle: "Tajweed key",
-  legendCaveat: {
-    lead: "This layer is ",
-    strong: "in beta",
-    rest:
-      " until a hafiz signs it off. It marks the whole ayah with its most salient rule — " +
-      "not the letter itself — because the mus'haf pages vendored so far carry no letter ids.",
-  },
-  legendNoneOnPage: "None on this page",
-  legendCountOnPage: (n, page) => `${n} ${n === 1 ? "ayah" : "ayahs"} on page ${page}`,
-  legendSelection: "Rules on the selected ayah",
-  legendNoRules: "No rules known for this ayah.",
-  tajweedCredit: "Tajweed rules from quran-tajweed (Collin Fair), licensed CC BY 4.0.",
-  ruleName: (label, latin) => ({ primary: latin, secondary: label }),
-
-  rootsTitle: "Roots",
-  rootsAria: (count) => `Roots · ${count}`,
-  rootsTrigger: (count, curated) =>
-    curated > 0 ? `Roots · ${count} · ${curated} hand-picked` : `Roots · ${count}`,
-  rootsEmpty: "No roots known for this ayah",
-  rootsPicked: "Hand-picked",
-  rootsPickedNote: "verified by hand",
-  rootsSharedRoot: "Shared root",
-  rootsHapax: "Occurs nowhere else in the Qur'an",
-  rootsStats: (ayahs, words) =>
-    `${ayahs} ${ayahs === 1 ? "ayah" : "ayahs"} · ${words} ${words === 1 ? "word" : "words"}`,
-  rootsTruncated: (shown) => `Nearest ${shown} occurrences only`,
-  rootsOccurrences: (count) => `${count} ${count === 1 ? "word" : "words"}`,
-  rootsUnavailable: " · not available yet",
-  rootsCredit: "Roots from",
-  distance: (dPage) => {
-    if (dPage === 0) return "Same page";
-    const n = Math.abs(dPage);
-    const pages = n === 1 ? "1 page" : `${n} pages`;
-    return `${pages} ${dPage > 0 ? "later" : "earlier"}`;
-  },
-
-  notices: {
-    capped: {
-      title: "There is not enough room for Hifth to work offline",
-      body:
-        "The browser gives this site only a small amount of space, so saved pages may be deleted. " +
-        "Check the free space on your device, and the «clear site data when all windows are closed» setting under privacy.",
-    },
-    "install-ios": {
-      title: "Install Hifth so it stays with you offline",
-      body:
-        "From the browser's share button, choose «Add to Home Screen». " +
-        "Without installing, Safari deletes saved pages after seven days without opening the app.",
+    notices: {
+      capped: { title: m["notices.capped.title"], body: m["notices.capped.body"] },
+      "install-ios": {
+        title: m["notices.install-ios.title"],
+        body: m["notices.install-ios.body"],
       },
-    "install-prompt": {
-      title: "Install Hifth so it works offline",
-      body: "Installing keeps the pages you have visited saved on your device.",
-      action: "Install",
+      "install-prompt": {
+        title: m["notices.install-prompt.title"],
+        body: m["notices.install-prompt.body"],
+        action: m["notices.install-prompt.action"],
+      },
+      "best-effort": {
+        title: m["notices.best-effort.title"],
+        body: m["notices.best-effort.body"],
+      },
     },
-    "best-effort": {
-      title: "Offline storage is not guaranteed",
-      body:
-        "The browser did not grant persistent storage, so saved pages may be deleted if the device runs short. " +
-        "Each page is saved again whenever you open it online.",
-    },
-  },
-  dismissNotice: "Hide this notice",
-  dismiss: "Hide",
+    dismissNotice: m.dismissNotice,
+    dismiss: m.dismiss,
 
-  aboutTitle: "About Hifth",
-  aboutLede:
-    "Hifth is a navigation instrument for the mus'haf: pick an ayah and it takes you to its " +
-    "mutashabihat. No account, no server, no tracking — the pages and the data are loaded onto your device.",
-  aboutCaveat:
-    "The printed mus'haf is the reference. What Hifth shows is an aid to revision, not a substitute for it.",
-  licenceHead: "Licence and source",
-  licenceBody:
-    "Free software under the GNU GPL, version 3 or later: you may study it, change it and pass it on. " +
-    "This is the source of this exact build, not a branch that may move:",
-  sourceLink: "Source code",
-  devBuild: "dev build",
-  devBuildNote:
-    "This is a local development build, so no released version corresponds to it; the link opens the repository.",
-  sourcesHead: "Sources",
-  aboutFoot: "Full terms and pinned versions are in SOURCES.md inside the repository:",
+    aboutTitle: m.aboutTitle,
+    aboutLede: m.aboutLede,
+    aboutCaveat: m.aboutCaveat,
+    licenceHead: m.licenceHead,
+    licenceBody: m.licenceBody,
+    sourceLink: m.sourceLink,
+    devBuild: m.devBuild,
+    devBuildNote: m.devBuildNote,
+    sourcesHead: m.sourcesHead,
+    aboutFoot: m.aboutFoot,
 
-  mapTitle: "What you have opened",
-  mapCaveat: "A tap is evidence you opened an ayah, not that you revised it.",
-  mapOpen: (page) => `Page ${page} · what you have opened`,
-  mapScopeGroup: "Division",
-  scopePage: "Page",
-  scopeHizb: "Hizb",
-  scopeJuz: "Juz",
-  hizbN: (hizb) => `Hizb ${hizb}`,
-  mapHeld: (have, total, scope) =>
-    `${have} of ${total} ${scope === "page" ? "pages" : scope === "hizb" ? "hizb" : "juz"} in this build`,
-  mapSince: (day) => `Recording since ${day}`,
-  mapGrid: "Map of the mus'haf",
-  mapNoStore: "This browser cannot keep the record, so there is nothing here to show.",
-  mapLoading: "Opening the record…",
-  mapLegend: "Key",
-  mapAbsent: "Not in this build",
-  mapNeverOpened: "Here, never opened",
-  mapRecent: "Opened recently",
-  mapCellAbsent: (label) => `${label} · not in this build`,
-  mapCellNever: (label) => `${label} · never opened`,
-  mapCellSeen: (label, days) =>
-    days <= 0
-      ? `${label} · opened today`
-      : days === 1
-        ? `${label} · opened yesterday`
-        : `${label} · opened ${days} days ago`,
+    mapTitle: m.mapTitle,
+    mapCaveat: m.mapCaveat,
+    mapOpen: (page) => m.mapOpen({ page }),
+    mapScopeGroup: m.mapScopeGroup,
+    scopePage: m.scopePage,
+    scopeHizb: m.scopeHizb,
+    scopeJuz: m.scopeJuz,
+    hizbN: (hizb) => m.hizbN({ hizbText: n(hizb) }),
+    // "juz" is spelled `other` for the same reason "link" is above: ICU requires
+    // an `other` case, and a fourth case that merely repeats the third is a
+    // branch that can drift out of agreement with it.
+    mapHeld: (have, total, scope) =>
+      m.mapHeld({
+        haveText: n(have),
+        totalText: n(total),
+        scope: scope === "juz" ? "other" : scope,
+      }),
+    // The day stamp is a string with hyphens in it, not a number, which is why
+    // it goes through `digitsIn` rather than `digits` — «٢٠٢٦-٠٧-٣٠» keeps its
+    // shape and the separators survive.
+    mapSince: (day) => m.mapSince({ dayText: digitsIn(day, lang) }),
+    mapGrid: m.mapGrid,
+    mapNoStore: m.mapNoStore,
+    mapLoading: m.mapLoading,
+    mapLegend: m.mapLegend,
+    mapAbsent: m.mapAbsent,
+    mapNeverOpened: m.mapNeverOpened,
+    mapRecent: m.mapRecent,
+    mapCellAbsent: (label) => m.mapCellAbsent({ label }),
+    mapCellNever: (label) => m.mapCellNever({ label }),
+    // Not a plural: "today" and "yesterday" are not categories any CLDR rule
+    // produces, they are three different sentences. So the app's own vocabulary
+    // is mapped to a closed `select` here — the same move `via` makes above —
+    // and only the third case carries a number.
+    mapCellSeen: (label, days) =>
+      m.mapCellSeen({
+        label,
+        when: days <= 0 ? "today" : days === 1 ? "yesterday" : "other",
+        daysText: n(days),
+      }),
 
-  facingPage: "Facing page",
-  facingAbsent: (page) => `Page ${page} is not in this build`,
-  keyPages: "Pages",
-  keyJump: "Go to",
-};
+    facingPage: m.facingPage,
+    facingAbsent: (page) => m.facingAbsent({ page }),
+    keyPages: m.keyPages,
+    keyJump: m.keyJump,
+  };
+}
 
-const BUNDLES: Readonly<Record<Lang, Strings>> = { ar: AR, en: EN };
+/**
+ * Every language's bundle, built once at module load.
+ *
+ * Eager, not lazy: the constant strings are read out of the catalog here rather
+ * than on every render, and there are two of them. `CATALOGS` is generated from
+ * the files in `messages/`, so this map gains a language the moment a catalog
+ * appears — nothing here is edited to add one.
+ */
+const BUNDLES: Readonly<Record<Lang, Strings>> = Object.fromEntries(
+  Object.entries(CATALOGS).map(([id, catalog]) => [id, buildStrings(id as Lang, catalog)]),
+) as Readonly<Record<Lang, Strings>>;
+
+/**
+ * Arabic and English by name, for `i18n.test.tsx`, which walks the bundles
+ * looking for a string that was never translated. Nothing else imports these —
+ * components read the one the provider chose, never a bundle by name.
+ */
+export const AR: Strings = BUNDLES.ar;
+export const EN: Strings = BUNDLES.en;
+
+/** Every language's bundle, for tests and for the language switch. */
+export function stringsFor(lang: Lang): Strings {
+  return BUNDLES[lang];
+}
 
 /** What every component reads: the language, its strings, and the way to move. */
 export interface I18n {
@@ -924,6 +751,18 @@ const LangContext = createContext<I18n>({
   other: EN,
 });
 
+/**
+ * The language this one's switch offers.
+ *
+ * Two languages, so "the other one" is well defined and the switch is a toggle.
+ * The day there is a third this becomes a list and `I18n.other` goes with it;
+ * until then, naming the assumption in one place is cheaper than pretending it
+ * is not there. docs/design/i18n.md §⑨.
+ */
+function otherLang(lang: Lang): Lang {
+  return lang === "ar" ? "en" : "ar";
+}
+
 export function LangProvider({ children }: { children: React.ReactNode }): JSX.Element {
   const [lang, setLangState] = useState<Lang>(detectLang);
 
@@ -942,7 +781,7 @@ export function LangProvider({ children }: { children: React.ReactNode }): JSX.E
       dir: dirOf(lang),
       t: BUNDLES[lang],
       setLang,
-      other: BUNDLES[lang === "ar" ? "en" : "ar"],
+      other: BUNDLES[otherLang(lang)],
     }),
     [lang, setLang],
   );

@@ -211,6 +211,7 @@ ci: core ## Full local mirror of the CI build-test-gate job, IN CI ORDER
 	$(PNPM) gate:use-cases
 	$(PNPM) gate:quran-meta
 	$(PNPM) gate:revision-privacy
+	$(PNPM) gate:i18n
 	$(CORE) build && $(WEB) build
 	$(PNPM) gate:budget
 	@echo ""
