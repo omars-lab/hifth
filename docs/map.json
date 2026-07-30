@@ -482,15 +482,25 @@
           "file": "apps/web/src/App.test.tsx",
           "symbol": "credits the source of a hop, never the ayah the app moved them to",
           "note": "The three exclusions asserted end to end through the real UI. `revision.test.ts` and `revision-store.test.ts` can prove what a look is worth; only this file can prove App.tsx does not call `recordLook` from the three places it must not."
+        },
+        {
+          "file": "packages/core/src/quran-meta.ts",
+          "symbol": "HIZB_STARTS",
+          "note": "The boundaries a per-hizb heatmap will be labelled with — sixty vendored [surah, ayah] pairs, not thirty juz halved. Tanzil publishes no hizb element at all: the division is 240 quarters and a hizb is four of them. The shortcut agrees for 4 of 30 and misses by up to 39 ayahs, which is the whole reason this is a table."
+        },
+        {
+          "file": "scripts/gate-quran-meta.mjs",
+          "symbol": "onMidpoint",
+          "note": "What keeps the tables honest: AYAH_COUNTS, JUZ_STARTS and HIZB_STARTS are re-derived from packages/etl/data/meta/quran-data.xml on every CI run and diffed. The last check is the interesting one — if more than 4 of 30 even hizbs sit on their juz's midpoint, someone regenerated the table by halving, and the gate says so by name instead of letting sixty plausible numbers through."
         }
       ],
       "extend": [
         "Anything that reads the record is a new importer: add it to ALLOWED_IMPORTERS in the gate with a one-line reason. If it cannot state a reason it cannot see the record.",
-        "Adding a scope means adding real boundary data first. `hizb` is the standing example — the derivation is arithmetic and wrong, and no test in this repo would catch a heatmap labelled with the wrong division.",
+        "Adding a scope means adding real boundary data first. `hizb` was the standing example and is now the worked one: the arithmetic derivation is wrong, so the sixty starts are vendored from the Tanzil metadata and `gate:quran-meta` re-derives them on every run. A scope whose boundaries are guessed is a heatmap that lies about which ayahs it is colouring, and no other test here would notice.",
         "New callers of `recordLook` must justify themselves against the `RevisionEvent` doc comment. The default answer is no: the record is only worth drawing because it is not a log of everything that happened.",
         "The picture (task #91) is gated on Loop 4b — 3 of 604 pages are vendored, so a page heatmap today would draw a mostly-cold book. The recording ships first because a day not recorded is a day that does not exist later."
       ],
-      "gates": ["pnpm test", "pnpm gate:revision-privacy", "make ci"],
+      "gates": ["pnpm test", "pnpm gate:revision-privacy", "pnpm gate:quran-meta", "make ci"],
       "seeAlso": ["select-an-ayah", "offline-pwa", "validation"]
     },
 
