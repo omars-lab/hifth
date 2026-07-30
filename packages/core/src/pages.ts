@@ -55,3 +55,44 @@ export function pageFraction(page: number, total: number): number {
   const clamped = Math.min(total, Math.max(1, page));
   return (clamped - 1) / (total - 1);
 }
+
+/** The two leaves of one open spread. `null` means there is no leaf on that side. */
+export interface Spread {
+  /** The leaf on the right — the **lower** page number. Never null for a valid page. */
+  readonly right: number | null;
+  /** The leaf on the left — the next page. Null at the two ends of the book. */
+  readonly left: number | null;
+}
+
+/**
+ * The spread a page is printed on: which leaf sits right and which sits left.
+ *
+ * The mus'haf reads right to left, so within a spread the **lower** page number is
+ * on the **right** and the next page is to its left. The print pairs them
+ * (2,3), (4,5), (6,7)… — page 1 has nothing facing it, because it is the first
+ * leaf after the cover, and in an even-length book (604 for the Madani print) the
+ * last page has nothing facing it either.
+ *
+ * This is the same convention the rest of the app already encodes and must not
+ * be re-derived per component: `appKeyAction` makes ArrowLeft **+1** page, and
+ * `PageSlider` puts its next-page button on the left edge. A second, independent
+ * statement of "which way is forward" is how two of them end up disagreeing.
+ *
+ * `left: null` is a third state, and it is not the same as "the left leaf is
+ * missing from this build". Nothing is absent at the ends of the book — there is
+ * no page 0 and no page 605 — so a caller renders that side as empty furniture,
+ * not as a hole with a caption. Whether a leaf that *does* exist in the print is
+ * vendored is a separate question, and `Resolver`/the manifest answer it.
+ */
+export function spreadOf(page: number, total: number): Spread {
+  // A nonsense page gets no spread rather than a plausible-looking one: the
+  // caller is about to draw two panels, and drawing "page 0 facing page 1" would
+  // be a picture of a book that does not exist.
+  if (!Number.isFinite(page) || page < 1 || page > total) return { right: null, left: null };
+  // Page 1 is alone on the right. Every other odd page closes the spread its
+  // even predecessor opened.
+  if (page === 1) return { right: 1, left: null };
+  const right = page % 2 === 0 ? page : page - 1;
+  const left = right + 1;
+  return { right, left: left > total ? null : left };
+}

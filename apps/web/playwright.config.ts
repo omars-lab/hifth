@@ -137,11 +137,44 @@ export default defineConfig({
         },
       ]
     : [
-        { name: "iphone", use: { ...devices["iPhone 13"] }, testIgnore: /(golden|shots)\.spec\.ts/ },
+        {
+          // The one non-phone project. Mobile is still the acceptance device
+          // (PLAN §8) — this exists because the spread is the only layout in the
+          // app that no phone project can reach, and a layout nothing runs is a
+          // layout that rots.
+          //
+          // It runs `desktop.spec.ts` alone rather than joining the general
+          // sweep, and that is a deliberate limit rather than an oversight: the
+          // rest of the suite asserts against committed aria snapshots recorded
+          // per project, so adding a third project to `testIgnore` would demand
+          // a third `e2e/__aria__/` tree for trees that are not desktop's to
+          // own. What is desktop-specific is asserted here; what is not is
+          // already covered twice.
+          //
+          // 1440×900 is a MacBook Air, comfortably clear of the 1024×720
+          // breakpoint on both axes — `desktop.spec.ts` resizes down from here
+          // to test the boundary itself, so the project viewport only has to be
+          // somewhere unambiguous.
+          //
+          // No `hasTouch`, no `isMobile`. The point of the project is to be the
+          // device the app otherwise never sees: a pointer, a keyboard, and a
+          // window whose height is a real constraint.
+          name: "desktop",
+          testMatch: /desktop\.spec\.ts/,
+          use: {
+            browserName: "chromium",
+            viewport: { width: 1440, height: 900 },
+          },
+        },
+        {
+          name: "iphone",
+          use: { ...devices["iPhone 13"] },
+          testIgnore: /(golden|shots|desktop)\.spec\.ts/,
+        },
         {
           name: "android",
           use: { ...devices["Pixel 7"] },
-          testIgnore: /(golden|shots)\.spec\.ts/,
+          testIgnore: /(golden|shots|desktop)\.spec\.ts/,
         },
         {
           // The golden-image project. Its viewport is spelled out rather than
