@@ -209,6 +209,7 @@ ci: core ## Full local mirror of the CI build-test-gate job, IN CI ORDER
 	$(PNPM) gate:golden-size
 	$(PNPM) gate:map
 	$(PNPM) gate:use-cases
+	$(PNPM) gate:revision-privacy
 	$(CORE) build && $(WEB) build
 	$(PNPM) gate:budget
 	@echo ""

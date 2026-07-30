@@ -519,6 +519,50 @@
       "gap": "Everything here is a headless browser with the network switched off. Whether a real phone's OS evicts the cache over eight days is the one thing these cannot answer — that is docs/validation/ledger.json → offline-survival-8-day."
     },
     {
+      "id": "see-what-i-have-not-opened-lately",
+      "actor": "hafiz",
+      "goal": "Keep a private record of what I have actually opened, so I can tell which pages and juz have gone weeks without me.",
+      "feature": "revision-record",
+      "code": [
+        {
+          "file": "packages/core/src/revision.ts",
+          "symbol": "lastSeen"
+        },
+        {
+          "file": "packages/core/src/revision.ts",
+          "symbol": "scopesOf"
+        },
+        {
+          "file": "apps/web/src/revision-store.ts",
+          "symbol": "recordLook"
+        },
+        {
+          "file": "scripts/gate-revision-privacy.mjs",
+          "symbol": "ALLOWED_IMPORTERS"
+        }
+      ],
+      "proof": [
+        {
+          "file": "packages/core/src/revision.test.ts",
+          "test": "answers with the most recent day, whatever order the log is in"
+        },
+        {
+          "file": "apps/web/src/revision-store.test.ts",
+          "test": "knows its own age before a single look is recorded"
+        },
+        {
+          "file": "apps/web/src/App.test.tsx",
+          "test": "does not record the second tap that dismisses a selection"
+        },
+        {
+          "file": "apps/web/src/App.test.tsx",
+          "test": "credits the source of a hop, never the ayah the app moved them to"
+        }
+      ],
+      "gap": "Two holes, and the first is not closable in this repo. iOS deletes script-writable storage after seven days of no interaction, which is precisely the history this promise is about — every test here runs against fake-indexeddb in Node, where nothing evicts, so what is proven is that the record *knows how young it is* (`since`), not that it survives. Whether an installed PWA on a real iPhone keeps it is docs/validation/ledger.json → offline-survival-8-day. Second, the marquee path is proven at the store, not through the gesture: no unit test drives a real drag, so «one look, not twelve» is asserted on `recordLook` rather than on a release over twelve ayahs. And there is no picture yet — task #91 is gated on Loop 4b, because a page heatmap over 3 vendored pages of 604 draws a mostly-cold book.",
+      "includes": ["select-the-ayah-i-am-on"]
+    },
+    {
       "id": "use-it-without-seeing-it",
       "actor": "hafiz",
       "goal": "Reach every ayah, every hop and every control with a screen reader or a keyboard, hearing words rather than glyphs.",
