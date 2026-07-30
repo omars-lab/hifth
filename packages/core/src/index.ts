@@ -45,12 +45,14 @@ export {
 export {
   frameBboxToView,
   bboxToScreen,
+  clampView,
   clampZoom,
   easeInOutCubic,
   lerpView,
   DEFAULT_HOP_ZOOM,
   type View,
   type FrameContext,
+  type StageFit,
 } from "./view.js";
 
 export {

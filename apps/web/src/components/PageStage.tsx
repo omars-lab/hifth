@@ -8,6 +8,7 @@ import {
 } from "react";
 import { useGesture } from "@use-gesture/react";
 import {
+  clampView,
   clampZoom,
   easeInOutCubic,
   frameBboxToView,
@@ -20,6 +21,7 @@ import {
   type PointerIntent,
   type Resolver,
   type SkinId,
+  type StageFit,
   type TajweedLookup,
   type View,
 } from "@hifth/core";
@@ -167,10 +169,53 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
   const marqueeStartRef = useRef<{ x: number; y: number } | null>(null);
   const tweenRef = useRef<number | null>(null);
   const startTimeRef = useRef<number | null>(null);
+  /*
+   * The stage and the page inside it, last time anyone asked.
+   *
+   * Cached rather than read per frame on purpose. `clampView` needs four
+   * numbers, all four come from layout, and reading layout inside a RAF tween or
+   * a drag handler is a read straight after a write to the very element being
+   * measured — the forced-synchronous-layout shape the perf budget exists to
+   * keep out. None of the four can change without a gesture, a hop or a resize
+   * starting first, so they are measured when one does (`measureFit`) and reused
+   * for the frames in between.
+   */
+  const fitRef = useRef<StageFit | null>(null);
+
+  /**
+   * Measure the stage box and the current page's laid-out box.
+   *
+   * The *layer* is the stage box that matters, not the stage itself: the layer
+   * is the element the host is laid out in, so the layer's top-left is where
+   * `translate3d(0,0)` puts the page, and the clamp has to speak the same
+   * coordinates the transform does. The stage's own padding is outside it, which
+   * is exactly why it stays a gutter and never gets eaten by a pan.
+   */
+  const measureFit = useCallback((): StageFit | null => {
+    const layer = layerRef.current;
+    const cur = pagesRef.current.get(currentPageRef.current);
+    if (!layer || !cur) return null;
+    const box = layer.getBoundingClientRect();
+    const fit: StageFit = {
+      contentWidth: cur.host.clientWidth,
+      contentHeight: cur.host.clientHeight,
+      stageWidth: box.width,
+      stageHeight: box.height,
+    };
+    fitRef.current = fit;
+    return fit;
+  }, []);
 
   const applyTransform = useCallback(() => {
     const cur = pagesRef.current.get(currentPageRef.current);
     if (!cur) return;
+    // Every write goes through the clamp, not just the ones that compute a
+    // target. A hop that lands correctly and a drag that then shoves the page
+    // into the void is not a fixed stage; and the tween's own intermediate
+    // frames are lerped between two legal views at a zoom that is neither of
+    // theirs, which is legal for neither.
+    const fit = fitRef.current;
+    if (fit) view.current = clampView(view.current, fit);
     const { x, y, z } = view.current;
     cur.host.style.transform = `translate3d(${x}px, ${y}px, 0) scale(${z})`;
   }, []);
@@ -196,6 +241,7 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
   const tweenTo = useCallback(
     (target: View): Promise<void> => {
       cancelTween();
+      measureFit();
       const from = { ...view.current };
       const duration = hopDurationMs();
       if (duration <= 0) {
@@ -222,7 +268,7 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
         tweenRef.current = requestAnimationFrame(step);
       });
     },
-    [applyTransform, cancelTween, hopDurationMs],
+    [applyTransform, cancelTween, hopDurationMs, measureFit],
   );
 
   /** Switch the visible page: toggle host visibility, re-point the transform. */
@@ -295,16 +341,22 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
     [mountPage],
   );
 
-  /** Center the current page's content in the stage (the reset view). */
+  /**
+   * Center the current page's content in the stage (the reset view).
+   *
+   * There is no arithmetic left here: at z=1 the page is smaller than the stage
+   * on both axes, and `clampView` answers "centred" for an axis that fits — so
+   * asking for the origin and letting the clamp have it is the whole reset. The
+   * hand-rolled `(stageWidth - contentWidth) / 2` that used to live here read
+   * the *stage* rect — padding included — and translated a host the stage had
+   * already centred, so the page sat one padding to the right of centre with its
+   * far edge flush against the screen.
+   */
   const centerCurrent = useCallback(() => {
-    const stage = stageRef.current;
-    const cur = pagesRef.current.get(currentPageRef.current);
-    if (!stage || !cur) return;
-    const rect = stage.getBoundingClientRect();
-    const cw = cur.host.clientWidth || rect.width;
-    view.current = { x: (rect.width - cw) / 2, y: 0, z: 1 };
+    if (!measureFit()) return;
+    view.current = { x: 0, y: 0, z: 1 };
     applyTransform();
-  }, [applyTransform]);
+  }, [applyTransform, measureFit]);
 
   // Report the selected ayah's on-screen rect so the rail can sit beside it.
   const emitSelectionRect = useCallback(() => {
@@ -354,16 +406,11 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
         navigatedRef.current = true;
         if (loc.page !== currentPageRef.current) setCurrentPage(loc.page);
         const bbox = mp.hl.bboxOf(loc.elementIds);
-        const stage = stageRef.current;
-        if (bbox && stage) {
+        const fit = measureFit();
+        if (bbox && fit) {
           const target = frameBboxToView(
             bbox,
-            {
-              contentWidth: mp.host.clientWidth,
-              stageWidth: stage.getBoundingClientRect().width,
-              stageHeight: stage.getBoundingClientRect().height,
-              viewBoxWidth: viewBoxWidthOf(mp.svg),
-            },
+            { ...fit, viewBoxWidth: viewBoxWidthOf(mp.svg) },
             clampZoom(opts?.zoom ?? DEFAULT_HOP_ZOOM, MIN_ZOOM, MAX_ZOOM),
           );
           await tweenTo(target);
@@ -387,7 +434,16 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
         centerCurrent();
       },
     }),
-    [resolver, ensurePage, setCurrentPage, tweenTo, emitSelectionRect, cancelTween, centerCurrent],
+    [
+      resolver,
+      ensurePage,
+      setCurrentPage,
+      tweenTo,
+      emitSelectionRect,
+      cancelTween,
+      centerCurrent,
+      measureFit,
+    ],
   );
 
   // Mount the initial page and center it.
@@ -517,6 +573,10 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
         }
         if (first) {
           cancelTween();
+          // Once per stroke, before the first frame moves anything: the page's
+          // roaming range is fixed for the whole drag, and re-measuring it per
+          // frame would be a layout read between the transform writes.
+          measureFit();
           intentRef.current = "none";
           marqueeStartRef.current = null;
         }
@@ -580,7 +640,10 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
       onPinch: ({ origin: [ox, oy], movement: [ms], memo, first }) => {
         const stage = stageRef.current;
         if (!stage) return memo;
-        if (first) cancelTween();
+        if (first) {
+          cancelTween();
+          measureFit();
+        }
         const rect = stage.getBoundingClientRect();
         const base =
           (memo as { z: number; x: number; y: number } | undefined) ?? {

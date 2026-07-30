@@ -286,6 +286,8 @@ packages/core/                ← framework-free TS (architecture's L2 + shared 
   highlighter.ts              highlight/clear (grouped), navigateTo, setSkin,
                               onSelect/onRangeSelect, serializeState/restoreState (spec §3)
   gestures.ts                 pointer-event splitter: text-marquee vs margin-pan
+  view.ts                     the pan/zoom transform math — frame a bbox, and clamp the
+                              result so the stage always holds page, never blank paper
   router.ts                   hash-link grammar parse/serialize (spec §7) — same path as share
   adjacency.ts                shard loader + edge bucketing by dir (↻◀▶), popover ordering
 
@@ -379,6 +381,18 @@ Full evidence in `docs/research/2026-07-20-mobile-svg-pwa.md`. The rules:
   licence credits stay Arabic and stay RTL in both languages, as does the page-turn
   convention Loop 1 decided — a hafiz whose phone is set to English must not find the book
   running backwards. `make map FEATURE=ui-language` walks it.
+- **The mus'haf fills the stage, always.** A hop centres the ayah it is taking you to, and
+  an ayah near the foot of a page cannot be centred without dragging the page past its own
+  end — so the reader arrives looking at a fifth of a screen of blank paper, with the last
+  line of scripture sitting above it. Framing proposes, `clampView` decides, and it decides
+  on *every* write to the transform rather than only on the hop's target: a tween's
+  intermediate frames are lerped at a zoom belonging to neither end, and a pan after a
+  correct landing would otherwise undo it. The rule this cost is worth writing down: nothing
+  in this suite could see it — the ayah was selected, its marks were in the overlay, the
+  header and the trail agreed, and the golden shots are cropped to the SVG element, so the
+  one thing that was wrong was the space *around* the page. Geometry against geometry is its
+  own tier (`e2e/stage-fit.spec.ts`), and the committed baselines had been carrying the
+  defect for six loops because a picture of the page cannot show you what is beside it.
 - **Quality floor, unannounced:** responsive to 320px, visible focus, reduced-motion
   respected, 44px targets, RTL-native (`dir="rtl"`, logical properties). The logical
   properties are what made the English chrome a one-attribute change — and what makes an
@@ -409,6 +423,7 @@ wrong hop or mislabeled ayah is a product-breaking bug for this audience.
 | Component | each component from fixture data: rail counts match adjacency, popover hifz ordering, diff output for known pairs (2:48 vs 2:123 = شفاعة/عدل), reserved edges render nothing | Vitest + Testing Library | as each lands |
 | E2E core loop | scripted hop tours: tap → rail → popover → cross-page hop → bead back; drag → menu → merged hops; cold-open every §7 link and assert restored state | Playwright, iPhone + Android viewports, touch | smoke every push (Loop 2); full nightly |
 | Visual regression | golden screenshots: 5 pages × (plain, tajweed) × (selection, phrase, breadcrumb, marquee) | Playwright toHaveScreenshot | Loop 2 |
+| Stage geometry | the page measured against the stage around it: a hop to either end of a page covers the layer, no drag can uncover it, and at rest the page is centred in the stage rather than flush against an edge. Deliberately not a golden — the crop is the SVG element, so the one thing that can be wrong is outside it | Playwright bounding boxes (`e2e/stage-fit.spec.ts`) | Loop 6a defect fix |
 | Perf | Loop 1 spike in CI: trace pan/zoom + highlight-toggle on densest page, assert frame budget; TTI <2.5s throttled; JS <150KB gz; shard <50KB gz | Playwright traces + Lighthouse CI | budgets Loop 0; traces after Loop 1 |
 | A11y | axe-core on every screen; keyboard-only hop tour (tab → select → rail → hop → back); manual VoiceOver + TalkBack each loop exit | axe + Playwright + manual | Loop 3 |
 | Offline | pin a juz → offline → navigate/hop within it; simulate eviction (clear Cache, keep IndexedDB manifest) → app offers re-pin; persist() denial renders warning | Playwright offline | Loop 6 |

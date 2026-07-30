@@ -111,6 +111,16 @@
           "note": "The cross-page jump itself, and the case that is easy to get wrong: the destination is on another page, so the page must mount before the wash can land. `navigatedRef` is what stops an in-flight fetch from stomping a deep link that already arrived."
         },
         {
+          "file": "packages/core/src/view.ts",
+          "symbol": "frameBboxToView",
+          "note": "Where the hop lands. Scale SVG user units to px, put the target bbox's centre on the stage's centre — then `clampView` beside it decides whether the page may actually go there. Centring is a request, not a right: an ayah 40 px from the foot of the page can only be centred by dragging the page half a screen past its own end, and the reader is then looking at a margin. `holdAxis` is the whole rule in two regimes — a page bigger than the stage may roam over its overhang and no further; a page smaller than it has exactly one honest position, the middle."
+        },
+        {
+          "file": "apps/web/src/components/PageStage.tsx",
+          "symbol": "const applyTransform",
+          "note": "The single choke point every hop, tween, drag and pinch writes through, which is why the clamp lives here and not on the hop's target: a lerp between two legal views passes through a zoom belonging to neither, and a drag after a correct landing would otherwise shove the page into the void. `measureFit` caches the stage/page box per gesture rather than per frame — reading layout inside a RAF tween is a read straight after a write to the element being measured, the forced-synchronous-layout shape the perf budget exists to keep out."
+        },
+        {
           "file": "apps/web/src/components/TrailBeads.tsx",
           "symbol": "TrailBeads",
           "note": "Where you have been. The hop is only useful if you can get back."
@@ -120,7 +130,8 @@
         "New edge kind: add it to `EDGE_TYPES` in adjacency.ts and give it a status. `isActiveEdgeType` is what keeps a provisional kind out of the UI while its data is still being audited.",
         "Emit it from packages/etl/scripts/build-adjacency.mjs, then re-run `make etl` — CI diffs the committed shards against a fresh ETL run, so a non-deterministic change fails the build.",
         "If a human has ruled on specific edges, they belong in the curated set, not the dataset — gate:verified-edges enforces that a 'correct' edge still ships and a 'wrong' one stays gone, forever.",
-        "Check the shard budget in the ETL output; the largest shard is printed on every run."
+        "Check the shard budget in the ETL output; the largest shard is printed on every run.",
+        "Changing where a hop lands is `frameBboxToView`, and any *new* write to the host transform must go through `applyTransform` — a path that sets `host.style.transform` itself is a path the clamp cannot see. apps/web/e2e/stage-fit.spec.ts is what notices: it measures the page against the stage, which no golden shot can do because the crop is the SVG element and the defect is the space around it."
       ],
       "gates": ["pnpm test", "pnpm gate:verified-edges", "make ci", "make e2e"],
       "seeAlso": ["edge-data-etl", "share-links", "root-lens"]

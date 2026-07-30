@@ -134,7 +134,7 @@
         },
         {
           "file": "apps/web/e2e/marquee.spec.ts",
-          "test": "an immediate drag still pans the page and highlights nothing"
+          "test": "an immediate drag is a pan, and a pan paints nothing"
         }
       ],
       "includes": [
