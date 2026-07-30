@@ -295,18 +295,38 @@
       "entry": [
         {
           "file": "apps/web/src/lang.ts",
+          "symbol": "LOCALES",
+          "note": "What a locale has to declare before it can render anything: its name in itself, its chrome direction, its surah-name table, its digits, and which spelling of a tajweed rule it puts first. Keyed by a `Lang` derived from the catalogs, so dropping in messages/ur.json fails to compile until Urdu has answered all five. None of them has a defensible default — a locale silently inheriting `ltr` is a mus'haf rendered backwards."
+        },
+        {
+          "file": "apps/web/src/lang.ts",
           "symbol": "detectLang",
           "note": "The opening language: a stored choice, then the device, then Arabic. React-free and CSS-free on purpose — main.tsx calls it before mount so the document's lang/dir are right on the first paint, and e2e/lang.spec.ts imports LANG_STORAGE_KEY from here rather than retyping it."
         },
         {
+          "file": "apps/web/src/messages/ar.json",
+          "symbol": "distancePages",
+          "note": "The reason this is a framework and not a table. Arabic has six CLDR plural categories and `few` is n % 100 = 3..10, not n <= 10 — which is what the hand-written ternary said, wrongly, for 41 of the 603 distances the mus'haf can produce. ICU MessageFormat states the six forms; Intl.PluralRules picks between them. Compiled at build time by scripts/messages-compile.mjs; the parser is a devDependency and ships zero bytes."
+        },
+        {
           "file": "apps/web/src/i18n.tsx",
           "symbol": "Strings",
-          "note": "The interface both bundles satisfy. AR is the original wording; EN must implement the same shape, so a key added here fails the build until English has one too. That is the whole enforcement mechanism — there is no runtime lookup that can miss."
+          "note": "The shape every component reads, unchanged by the migration to compiled catalogs so that no call site moved. It is no longer where completeness is enforced — that is one layer down, in `const messages: Catalog` inside each messages/*.gen.ts, which is stricter because it checks argument names and not just arity. There is still no runtime lookup that can miss and no fallback chain."
+        },
+        {
+          "file": "apps/web/src/i18n.tsx",
+          "symbol": "buildStrings",
+          "note": "The assembler: one function, run for every locale, wiring a compiled catalog to format.ts's formatters and to LOCALES. Written once is the point — the old file said everything twice, so «صفحتان» and \"2 pages\" were two independent chances to bind a rule differently. It also holds the numeral convention: {n} selects a plural form, {nText} is digits(n, lang) and is what prints, and a bare {page} is a raw number, i.e. Latin digits in every language."
         },
         {
           "file": "apps/web/src/i18n.tsx",
           "symbol": "LangProvider",
           "note": "Binds the chosen bundle, the formatters and `dir` into one context. Mounted in main.tsx, not App: the default context is Arabic with an inert setter, so every component test written before this feature renders bare and still reads Arabic."
+        },
+        {
+          "file": "scripts/gate-i18n.mjs",
+          "symbol": "gate:i18n",
+          "note": "The four holes tsc cannot see: generated code left stale after a catalog edit, a key the reference locale has and a translation does not, a plural that writes four of Arabic's six categories, and a translation that drops a placeholder. Plural completeness is checked against Intl.PluralRules(locale) — the same CLDR the runtime will use, not a table in this repo. Registered in package.json, the Makefile and ci.yml; a gate in one of the three does not run."
         },
         {
           "file": "apps/web/src/format.ts",
@@ -320,12 +340,14 @@
         }
       ],
       "extend": [
-        "New user-facing copy is a key on `Strings` with a value in both AR and EN. Never a literal in a component — the compiler is what stops an English build shipping an Arabic sentence.",
+        "New user-facing copy is a key in every messages/*.json, then `pnpm i18n:build`, then a line in buildStrings. Never a literal in a component — the compiler is what stops an English build shipping an Arabic sentence, and a key missing from one locale does not compile.",
+        "Anything that counts takes two arguments: {n} for the plural to select on and {nText} for the digits that print. The emitter rejects ICU's `#` and {n, number} on purpose — they route through Intl.NumberFormat, which is a second numeral authority and disagrees with format.ts's digits().",
+        "Adding a language is a JSON catalog plus a LOCALES row; there is no union to widen and no import to add, because Lang and CATALOGS are derived from the files in messages/. The full checklist is docs/design/i18n.md §⑦.",
         "Ask whether the new text is chrome or scripture. Chrome translates and follows `dir`; anything quoting the mus'haf, a verse, a root, or a licence credit pins `lang=\"ar\" dir=\"rtl\"` and is translated by nobody.",
-        "i18n.test.tsx walks both bundles and calls every formatter, so a new key is covered the day it exists — but only if it is reachable from AR/EN. Do not add a string that is exported some other way.",
+        "i18n.test.tsx walks LOCALE_IDS and calls every formatter, so a new key is covered the day it exists and a new locale the day its catalog lands.",
         "The e2e suite is pinned to `locale: \"ar\"` in playwright.config.ts because that is what every aria snapshot and golden image was recorded in. lang.spec.ts is the one file that overrides it, and a second such file should say why."
       ],
-      "gates": ["pnpm test", "make e2e", "make ci"],
+      "gates": ["pnpm test", "pnpm gate:i18n", "make e2e", "make ci"],
       "seeAlso": ["a11y", "wayfinding", "provenance"]
     },
 
