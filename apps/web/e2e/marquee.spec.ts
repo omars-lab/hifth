@@ -93,7 +93,7 @@ test.describe("Hifth · drag-to-highlight", () => {
     await expect(page.locator("#hifth-overlay .hl-hlt")).not.toHaveCount(0);
   });
 
-  test("an immediate drag still pans the page and highlights nothing", async ({ page }) => {
+  test("an immediate drag is a pan, and a pan paints nothing", async ({ page }) => {
     await openApp(page);
 
     const start = await ayahTarget(page, "#verse-46");
@@ -108,7 +108,18 @@ test.describe("Hifth · drag-to-highlight", () => {
     await page.mouse.up();
 
     const after = await host.boundingBox();
-    expect(after!.x).not.toBeCloseTo(before!.x, 0);
+    // The page does NOT move, and that is the assertion rather than a
+    // concession. At rest the whole page is on screen — `clampView` (@hifth/core)
+    // holds a page that fits, because sliding it would only trade scripture for
+    // blank stage and leave nothing to drag it back by. This test used to demand
+    // the opposite; it was reading "the page moved" as its proxy for "the stroke
+    // latched as a pan and not as a marquee", and the proxy stopped being true
+    // when the clamp landed. The pan that *can* move is asserted where it is
+    // observable — zoomed in, in stage-fit.spec.ts.
+    expect(after!.x).toBeCloseTo(before!.x, 0);
+    expect(after!.y).toBeCloseTo(before!.y, 0);
+    // What the stroke must not have done, which is the part this file is for:
+    // no marquee ink…
     await expect(page.locator("#hifth-overlay .hl-hlt")).toHaveCount(0);
     // …and a pan that ends over an ayah must not select it either.
     await expect(page.locator("#hifth-overlay .hl-sel")).toHaveCount(0);
