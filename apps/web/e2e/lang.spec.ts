@@ -40,14 +40,19 @@ test.describe("Hifth · language", () => {
     await expect(page.locator("header")).toContainText("Page");
   });
 
-  test("the mus'haf, the rail and the trail stay right-to-left", async ({ page }) => {
+  test("the mus'haf, the rail, the trail and the page bar stay right-to-left", async ({
+    page,
+  }) => {
     await page.goto("/");
     await expect(page.locator("svg[role='group']").first()).toBeVisible();
 
     // Pinned in the markup, and — because a logical-property stylesheet reads
     // the *computed* direction — asserted as the browser resolved it, not as
-    // the attribute was written.
-    for (const selector of ["main", "footer"]) {
+    // the attribute was written. The page bar is in this list for a reason a
+    // reader would feel immediately: its track runs the length of the mus'haf,
+    // so a flip would put page 1 on the left and send every drag the wrong way
+    // through the book.
+    for (const selector of ["main", "footer", "nav[aria-label='Page bar']"]) {
       const dir = await page
         .locator(selector)
         .first()

@@ -352,6 +352,16 @@ Full evidence in `docs/research/2026-07-20-mobile-svg-pwa.md`. The rules:
   properties are what made the English chrome a one-attribute change — and what makes an
   accidentally *inherited* flip a defect no screenshot would catch, which is why
   `e2e/lang.spec.ts` asserts the computed direction of the stage rather than its markup.
+- **Say what the build actually holds.** The page bar (shipped; `make map FEATURE=wayfinding`)
+  is the standing example of the rule this project keeps re-learning: its track is the whole
+  **604-page print**, because a control that spanned the vendored inventory would quietly
+  redefine the mus'haf as whatever is in `public/assets` this week — and *because* the track
+  is longer than the build, letting go in the gap lands on the nearest vendored page and
+  **announces that it did**, above ticks and a permanent "٣ من ٦٠٤" line. Loop 4b closes the
+  gap and that caveat is deleted then, not before. The same failure this codebase has already
+  paid for twice — a licence summary that over-restricted (follow-up ②), a header claiming a
+  page the stage never loaded — is always the same shape: the UI stating something the build
+  cannot back. A gap is a to-do; a gap the interface papers over is a lie.
 
 ## 6. Testing plan
 
