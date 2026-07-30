@@ -26,14 +26,30 @@ export interface View {
   z: number;
 }
 
-/** Geometry the framing math needs — all in CSS px except `viewBoxWidth`. */
-export interface FrameContext {
-  /** Rendered content width of the host in CSS px (the mock's `matW`). */
+/**
+ * The stage and the page inside it, in CSS px. Enough to answer "may the page
+ * be here?", which is all `clampView` asks.
+ *
+ * `contentHeight` is not derivable from `contentWidth` here even though the
+ * host preserves aspect ratio: the ratio lives in the SVG's viewBox, this
+ * module is only given the viewBox *width*, and inventing the missing half from
+ * a hard-coded 550 would be a constant that silently stops being true the first
+ * time a second edition is vendored. The caller has the rendered box; it passes
+ * both sides of it.
+ */
+export interface StageFit {
+  /** Rendered content width of the host in CSS px at z=1 (the mock's `matW`). */
   contentWidth: number;
-  /** Stage viewport width in CSS px (what we center within). */
+  /** Rendered content height of the host in CSS px at z=1. */
+  contentHeight: number;
+  /** Stage viewport width in CSS px. */
   stageWidth: number;
   /** Stage viewport height in CSS px. */
   stageHeight: number;
+}
+
+/** Geometry the framing math needs — all in CSS px except `viewBoxWidth`. */
+export interface FrameContext extends StageFit {
   /** The page's viewBox width in SVG user units (345 for the Madani asset). */
   viewBoxWidth: number;
 }
@@ -42,9 +58,49 @@ export interface FrameContext {
 export const DEFAULT_HOP_ZOOM = 1.55;
 
 /**
- * Compute the `View` that centers `bbox` (SVG user units) in the stage at zoom
- * `z`. This is the mock's `focus()`: scale user→px by `s = contentWidth/vbW`,
- * take the bbox center, then translate so that center sits at the stage center.
+ * Hold one axis inside the stage.
+ *
+ * Two regimes, and the split is the whole idea. When the scaled page is *larger*
+ * than the stage the translate may roam, but only over the overhang — the page's
+ * near edge never comes inside the stage's, so the stage is always full of page.
+ * When it is *smaller* there is no roaming to do and the only honest answer is
+ * the middle; the reader cannot pan a page that already fits, and letting them
+ * would mean a page could be shoved half off the screen with nothing to drag it
+ * back by.
+ */
+function holdAxis(available: number, scaled: number, value: number): number {
+  // Not yet laid out (a host is `display: none` until it is the current page,
+  // and a hidden element measures 0). Guessing "centred" from a zero box would
+  // slam the page into the corner on the frame the measurement lands.
+  if (!(scaled > 0) || !(available > 0)) return value;
+  if (scaled <= available) return (available - scaled) / 2;
+  return Math.min(0, Math.max(available - scaled, value));
+}
+
+/**
+ * Hold a view inside the stage, so no gesture and no hop can put blank stage
+ * where the mus'haf should be.
+ *
+ * This is what makes a hop to an ayah near the foot of the page land on the
+ * *page* rather than on a band of empty paper: framing centres the ayah, and
+ * centring an ayah that is 40 px from the bottom edge asks for the page to be
+ * dragged half a screen past its own end. Framing proposes; this decides.
+ */
+export function clampView(v: View, fit: StageFit): View {
+  return {
+    z: v.z,
+    x: holdAxis(fit.stageWidth, fit.contentWidth * v.z, v.x),
+    y: holdAxis(fit.stageHeight, fit.contentHeight * v.z, v.y),
+  };
+}
+
+/**
+ * Compute the `View` that brings `bbox` (SVG user units) as close to the stage
+ * centre as the page's own edges allow, at zoom `z`. This is the mock's
+ * `focus()` — scale user→px by `s = contentWidth/vbW`, take the bbox center,
+ * translate so that center sits at the stage center — followed by `clampView`,
+ * which the mock had no equivalent of and which is the difference between a hop
+ * that lands on scripture and one that lands on the margin.
  */
 export function frameBboxToView(
   bbox: Rect,
@@ -54,11 +110,14 @@ export function frameBboxToView(
   const s = ctx.contentWidth / ctx.viewBoxWidth;
   const cx = (bbox.x + bbox.width / 2) * s;
   const cy = (bbox.y + bbox.height / 2) * s;
-  return {
-    z,
-    x: ctx.stageWidth / 2 - z * cx,
-    y: ctx.stageHeight / 2 - z * cy,
-  };
+  return clampView(
+    {
+      z,
+      x: ctx.stageWidth / 2 - z * cx,
+      y: ctx.stageHeight / 2 - z * cy,
+    },
+    ctx,
+  );
 }
 
 /**
