@@ -21,6 +21,11 @@ export default tseslint.config(
       "**/playwright-report/**",
       "**/test-results/**",
       "**/*.svg",
+      // Parallel-agent worktrees are checkouts of *other* branches living inside
+      // this one. Linting them means this branch fails on code it does not
+      // contain and cannot fix — and passes again when the worktree is removed,
+      // which is the least useful shape a CI failure can have.
+      ".claude/worktrees/**",
     ],
   },
   js.configs.recommended,

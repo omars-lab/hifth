@@ -43,12 +43,13 @@ const RECORD_MODULES = ["packages/core/src/revision.ts", "apps/web/src/revision-
 /**
  * Who may import them, and why each one is allowed to.
  *
- * `App.tsx` is the only production importer, and only because it is where a tap
- * lands. When the picture arrives (task #91) `RevisionMap.tsx` joins it — a
- * component that reads the record and renders it, with no route and no link.
+ * `App.tsx` is where a tap lands; `RevisionMap.tsx` is the picture the record
+ * exists for — it reads the record and draws it, with no route and no link, and
+ * it is the module a "share your progress" button would be added to first.
  */
 const ALLOWED_IMPORTERS = new Map([
   ["apps/web/src/App.tsx", "where a deliberate tap becomes a recorded look"],
+  ["apps/web/src/components/RevisionMap.tsx", "the picture; reads the record, sends nothing"],
   ["apps/web/src/revision-store.ts", "the store is built on the pure module"],
   ["packages/core/src/index.ts", "the barrel that exports it"],
 ]);
@@ -90,7 +91,14 @@ const failures = [];
 // Matches the module by basename rather than by resolved path: `./revision.js`,
 // `../revision-store.js` and `@hifth/core/revision.js` are the same reach, and a
 // gate that only knew one spelling would be trivially side-stepped by another.
-const IMPORTS_RECORD = /\bfrom\s+["'][^"']*\/(revision|revision-store)\.(js|ts)["']/;
+//
+// The extension is optional, and that is not a nicety: core is authored with the
+// `.js` suffix ESM requires, but the app is bundled by Vite and omits it — which
+// is how `App.tsx`, the one production importer this gate was written for, slipped
+// past the pattern meant to catch it. The gate still passed, because it passes
+// when it finds nothing. (This comment may not spell an import out: invariant 1
+// reads the file as text, and prose is text.)
+const IMPORTS_RECORD = /\bfrom\s+["'][^"']*\/(revision|revision-store)(\.(js|ts|tsx))?["']/;
 const IMPORTS_BARREL_SYMBOL =
   /\bimport\s*\{[^}]*\b(rollUp|lastSeen|scopesOf|dayOf|daysBetween|editionOf|RevisionEvent|RevisionScope|DayStamp)\b[^}]*\}\s*from\s*["']@hifth\/core["']/s;
 
