@@ -310,6 +310,12 @@ export interface Strings {
    * tell that lie — an empty map dated this morning is visibly a new record.
    */
   mapSince(day: string): string;
+  /**
+   * The grid's own name. Sixty unlabelled squares inside a dialog are sixty
+   * anonymous list items to a screen reader; naming the list is what separates
+   * the map from the legend beside it, which is also a list of cells.
+   */
+  mapGrid: string;
   /** No IndexedDB at all — a private window, or a browser that refuses. */
   mapNoStore: string;
   mapLoading: string;
@@ -573,6 +579,7 @@ export const AR: Strings = {
     return `المتوفّر ${digits(have, "ar")} من ${digits(total, "ar")} ${unit}`;
   },
   mapSince: (day) => `يُسجَّل منذ ${toArabicDigits(day)}`,
+  mapGrid: "خريطة المصحف",
   mapNoStore: "لا يمكن حفظ السجلّ في هذا المتصفّح، فلا شيء هنا لعرضه.",
   mapLoading: "جارٍ فتح السجلّ…",
   mapLegend: "الدليل",
@@ -839,6 +846,7 @@ export const EN: Strings = {
   mapHeld: (have, total, scope) =>
     `${have} of ${total} ${scope === "page" ? "pages" : scope === "hizb" ? "hizb" : "juz"} in this build`,
   mapSince: (day) => `Recording since ${day}`,
+  mapGrid: "Map of the mus'haf",
   mapNoStore: "This browser cannot keep the record, so there is nothing here to show.",
   mapLoading: "Opening the record…",
   mapLegend: "Key",

@@ -46,6 +46,7 @@ import { Jumper } from "./components/Jumper";
 import { EditionPicker } from "./components/EditionPicker";
 import { CoachMarks, coachDismissed } from "./components/CoachMarks";
 import { Colophon } from "./components/Colophon";
+import { RevisionMap } from "./components/RevisionMap";
 import { LiveAnnouncer, useAnnouncer } from "./components/LiveAnnouncer";
 import { RootLens, RootLensTrigger } from "./components/RootLens";
 import { SkinToggle, TajweedLegend } from "./components/SkinToggle";
@@ -107,6 +108,10 @@ export function App(): JSX.Element {
   const [jumperOpen, setJumperOpen] = useState(false);
   const [editionOpen, setEditionOpen] = useState(false);
   const [colophonOpen, setColophonOpen] = useState(false);
+  // The revision map, opened from the page chip. Nothing here holds the record —
+  // the sheet reads it itself, so a log of someone's worship is not sitting in
+  // this component's state for every future feature to reach into.
+  const [revisionOpen, setRevisionOpen] = useState(false);
   /*
    * Is the coach strip still claiming its band of the layout? Read once, from
    * the same storage the strip reads, so the two agree on the very first frame
@@ -770,10 +775,22 @@ export function App(): JSX.Element {
             مِلاحة للحُفّاظ
           </span>
         </button>
-        <div className={styles.pageId}>
+        {/* The chip already meant *where am I*; pressing it now also answers
+            *where have I been*. It opens the revision map rather than a sixth
+            header button because the chrome has no room for one — `e2e/chrome-fit`
+            holds this header inside 320px with seventeen pixels to spare, which
+            is the same constraint that put the colophon behind the wordmark. It
+            still shows the page, unchanged, at the same width. */}
+        <button
+          type="button"
+          className={styles.pageId}
+          aria-label={t.mapOpen(page)}
+          aria-haspopup="dialog"
+          onClick={() => setRevisionOpen(true)}
+        >
           <span className={styles.pageLabel}>{t.pageWord}</span>
           <span className={`${styles.pageNum} numeric`}>{page}</span>
-        </div>
+        </button>
         {/* Wayfinding lives in the chrome because it is always available: the
             keyboard has `/`, and a touch device needs something to press. */}
         <button
@@ -917,6 +934,13 @@ export function App(): JSX.Element {
         onClose={() => setEditionOpen(false)}
       />
       <Colophon open={colophonOpen} onClose={() => setColophonOpen(false)} />
+      <RevisionMap
+        open={revisionOpen}
+        onClose={() => setRevisionOpen(false)}
+        pages={manifest?.pages ?? []}
+        totalPages={totalPages}
+        page={page}
+      />
 
       {/* Pinned RTL with the stage, and for the same reason: the trail reads
           oldest-to-newest in the mus'haf's own direction, and its beads sit
