@@ -35,7 +35,10 @@ import {
 import { recordLook } from "./revision-store";
 import { useT } from "./i18n";
 import { useHashRouter } from "./useHashRouter";
+import { DESKTOP_QUERY, useMediaQuery } from "./useMediaQuery";
 import { PageStage, type PageStageHandle } from "./components/PageStage";
+import { PageSpread } from "./components/PageSpread";
+import { DesktopChrome } from "./components/DesktopChrome";
 import { HopRail } from "./components/HopRail";
 import { HopPopover } from "./components/HopPopover";
 import { HighlightMenu } from "./components/HighlightMenu";
@@ -122,6 +125,15 @@ export function App(): JSX.Element {
   const [coachUp, setCoachUp] = useState(() => !coachDismissed());
 
   const stageRef = useRef<PageStageHandle>(null);
+  /*
+   * Is there room for an open mus'haf? Asked in JavaScript rather than left to
+   * CSS because the answer decides a *mount*, not a style: each page is a
+   * ~170 KB inline SVG, and a `display: none` facing leaf would still fetch it,
+   * parse it and build a Highlighter for it. Desktop is where two pages are
+   * affordable; a phone is precisely where they are not (PLAN follow-up ①).
+   * The query and its arithmetic live in useMediaQuery.ts.
+   */
+  const desktop = useMediaQuery(DESKTOP_QUERY);
   const { t, dir } = useT();
   const { message, announce } = useAnnouncer();
 
@@ -819,6 +831,14 @@ export function App(): JSX.Element {
           onChange={setSkin}
           onOpenLegend={() => setLegendOpen(true)}
         />
+        {/* The controls a phone had no room for — the language switch (buried in
+            the colophon sheet because the header has seventeen pixels of slack
+            at 320px) and the keyboard map (which a phone cannot reach at all).
+            Hidden by CSS below the breakpoint, so it costs this row nothing:
+            `display: none` keeps it out of both the intrinsic width and the
+            accessibility tree, which is what chrome-fit and the aria snapshots
+            measure. See docs/decisions/desktop-vs-mobile.md rows 3 and 13. */}
+        <DesktopChrome />
         {/* No install button here. There used to be one, and it was a ~126px
             text pill in a row that could not afford 126px on any phone — on
             Android, the one platform where it ever rendered, it was the single
@@ -854,20 +874,59 @@ export function App(): JSX.Element {
       <main className={styles.main} dir="rtl">
         {resolver && (
           <>
-            <PageStage
-              ref={stageRef}
-              resolver={resolver}
+            {/* At desktop width the stage is one leaf of an open mus'haf: the
+                lower page number on the right, the next page to its left, and
+                the facing leaf drawn as *absent* when this build does not hold
+                it — which today is always, since pages 7, 9 and 19 are not
+                adjacent. Below the breakpoint this renders the stage alone and
+                nothing else changes. docs/design/desktop.md. */}
+            <PageSpread
+              enabled={desktop}
               page={page}
-              mountedPages={mountedPages}
-              label={t.pageN(page)}
-              selectedKey={selectedKey}
-              breadcrumbKey={breadcrumbKey}
-              onSelect={handleSelect}
-              onSelectRange={handleSelectRange}
-              labelFor={(key) => t.ayahAria(t.ayahLabel(key) ?? key)}
-              skin={skin}
-              tajweedLookup={tajweed?.lookup ?? null}
-            />
+              total={totalPages}
+              available={pageTurns.pages}
+              renderFacing={(facing) => (
+                /* The facing leaf gets its own stage rather than a second
+                   visible host inside the current one: PageStage's whole
+                   correctness argument is that there is exactly one imperative
+                   write path to one visible host, and two transforms inside it
+                   is a bigger change than two instances beside each other.
+                   No `ref` — the imperative handle is how App drives *the*
+                   stage, and a hop that landed on the facing leaf would have to
+                   move the reader there anyway, at which point the two swap
+                   roles through `page`. Handlers are shared so an ayah on the
+                   facing leaf is as tappable as one on this leaf. */
+                <PageStage
+                  key={facing}
+                  resolver={resolver}
+                  page={facing}
+                  mountedPages={[facing]}
+                  label={t.pageN(facing)}
+                  selectedKey={selectedKey}
+                  breadcrumbKey={breadcrumbKey}
+                  onSelect={handleSelect}
+                  onSelectRange={handleSelectRange}
+                  labelFor={(key) => t.ayahAria(t.ayahLabel(key) ?? key)}
+                  skin={skin}
+                  tajweedLookup={tajweed?.lookup ?? null}
+                />
+              )}
+            >
+              <PageStage
+                ref={stageRef}
+                resolver={resolver}
+                page={page}
+                mountedPages={mountedPages}
+                label={t.pageN(page)}
+                selectedKey={selectedKey}
+                breadcrumbKey={breadcrumbKey}
+                onSelect={handleSelect}
+                onSelectRange={handleSelectRange}
+                labelFor={(key) => t.ayahAria(t.ayahLabel(key) ?? key)}
+                skin={skin}
+                tajweedLookup={tajweed?.lookup ?? null}
+              />
+            </PageSpread>
             <HopRail
               chips={railChips}
               openDirection={openDirection}

@@ -330,6 +330,58 @@
     },
 
     {
+      "id": "desktop-spread",
+      "what": "On a wide screen the app shows an open mus'haf — two leaves and a spine — and says plainly which half it does not have.",
+      "layer": "L2 web",
+      "entry": [
+        {
+          "file": "docs/design/desktop.md",
+          "symbol": "Hifth is a navigation instrument for huffaz",
+          "note": "Read this before touching anything below. It carries the arithmetic behind the breakpoint, the governing rule for what desktop is allowed to add, and the list of what changes when Loop 4b vendors the remaining pages. docs/decisions/desktop-vs-mobile.md is the running table of individual decisions; append a row there rather than restating one here."
+        },
+        {
+          "file": "packages/core/src/pages.ts",
+          "symbol": "spreadOf",
+          "note": "Which two pages face each other. The mus'haf reads right to left, so the *lower* number is the right-hand leaf and the print pairs (2,3), (4,5)… with page 1 alone. This is pagination, not presentation, which is why it sits in core beside nearestPage and why no component re-derives it."
+        },
+        {
+          "file": "apps/web/src/useMediaQuery.ts",
+          "symbol": "DESKTOP_QUERY",
+          "note": "The one breakpoint, and the only copy of record. Two axes because a mus'haf leaf is portrait: leaf width comes from the height the chrome leaves, so a width-only query would hand a 1440x700 window less page than a 320px phone. Repeated as a literal in DesktopChrome.module.css only because CSS cannot read a custom property inside a media query; useMediaQuery.test.ts reads that stylesheet back so the two cannot drift."
+        },
+        {
+          "file": "apps/web/src/components/PageSpread.tsx",
+          "symbol": "PageSpread",
+          "note": "The two leaves. Sides are declared exactly once — right leaf first in DOM order, inside main[dir=\"rtl\"] — so there is no row-reverse or `order` that could disagree with appKeyAction's ArrowLeft = +1. `enabled` gates the *mount*, not the styling: a display:none leaf still fetches its ~170 KB SVG and builds a Highlighter."
+        },
+        {
+          "file": "apps/web/src/components/PageStage.module.css",
+          "symbol": "--stage-page-cap",
+          "note": "The whole coupling between the spread's stylesheet and the stage's. CSS modules hash their class names, so a custom property is the only way one can size the other; the default keeps the phone's 62vh heuristic untouched."
+        },
+        {
+          "file": "apps/web/src/components/DesktopChrome.tsx",
+          "symbol": "DesktopChrome",
+          "note": "The controls a phone had no room for (the language switch, two levels deep in the colophon sheet because chrome-fit holds the header inside 320px with 17px of slack) and no use for (the keyboard map). Hidden by CSS rather than unmounted, unlike the spread — these are spans, not a second mus'haf."
+        },
+        {
+          "file": "apps/web/e2e/desktop.spec.ts",
+          "symbol": "puts the lower page number on the right",
+          "note": "The assertion the unit tests cannot make. They check DOM order; DOM order only becomes *sides* once an RTL flow has run, so a flex-direction: row-reverse added by someone 'fixing' the layout passes all nine component tests and puts the mus'haf on backwards. Verified by inducing exactly that."
+        }
+      ],
+      "extend": [
+        "Before adding anything to the desktop layout, name the mobile constraint that put it out of reach. If you cannot, it is a new feature and belongs in the PLAN, not in a media query — that is the governing rule in docs/design/desktop.md §1.",
+        "A new desktop decision is a row appended to docs/decisions/desktop-vs-mobile.md: what mobile does, what desktop does, and why they differ. The design doc links to that table rather than duplicating it.",
+        "Anything mounted only at desktop width must be gated in JS via useMediaQuery, not hidden in CSS, whenever mounting it costs a fetch or a Highlighter. Anything that is only markup should be CSS-hidden so it leaves the accessibility tree and the header's intrinsic width.",
+        "A new desktop surface needs a row in e2e/contrast.spec.ts SURFACES, and that row must call page.setViewportSize — both projects running that file are phones, so without the resize the row looks like coverage and measures nothing.",
+        "When Loop 4b vendors the remaining pages, the `renderFacing` branch stops being fixture-only. Nothing about the geometry changes; see docs/design/desktop.md §4 for the table of what does."
+      ],
+      "gates": ["pnpm test", "make e2e", "pnpm gate:budget", "make ci"],
+      "seeAlso": ["wayfinding", "ui-language", "a11y", "assets-and-pages"]
+    },
+
+    {
       "id": "offline-pwa",
       "what": "Works with the phone in aeroplane mode, a week after you last opened it.",
       "layer": "L2 web",

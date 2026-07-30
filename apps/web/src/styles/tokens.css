@@ -116,6 +116,16 @@
   /* Touch — 44px minimum target (PLAN §4 a11y floor; clears WCAG 24px). */
   --touch-min: 44px;
 
+  /* The gutter — the fold of an open mus'haf, at desktop width (PageSpread).
+     Warm, like every other shadow here, and low: it is the shadow of a fold in
+     paper, not a drop shadow under a card. Two stops rather than one because a
+     spine darkens toward its centre and lifts on both sides; a single flat band
+     reads as a divider rule, which is a different and much duller object. Not a
+     `--hairline` job — that token is for rules nobody reads, and this is the one
+     mark on the page that has to look like it has depth. */
+  --gutter-shadow: rgba(38, 32, 26, 0.1);
+  --gutter-shadow-deep: rgba(38, 32, 26, 0.18);
+
   /* Elevation — warm shadows, low and soft. */
   --shadow-1: 0 1px 2px rgba(38, 32, 26, 0.08), 0 2px 8px rgba(38, 32, 26, 0.06);
   --shadow-2: 0 4px 16px rgba(38, 32, 26, 0.12);

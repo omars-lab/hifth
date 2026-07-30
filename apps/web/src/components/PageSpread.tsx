@@ -1,0 +1,152 @@
+import type { ReactNode } from "react";
+import { spreadOf } from "@hifth/core";
+import { useT } from "../i18n";
+import styles from "./PageSpread.module.css";
+
+interface PageSpreadProps {
+  /**
+   * Is the spread on? False renders `children` alone, with no wrapper of any
+   * kind — the phone layout is not "the spread with one panel hidden".
+   *
+   * L3 owns this because it owns the media query, and because the decision is a
+   * *mount* decision (see the note on weight below), not a style one.
+   */
+  enabled: boolean;
+  /** The page on the stage. Its spread is the one drawn. */
+  page: number;
+  /** How long the print is — 604 for the Madani mus'haf. Bounds the pairing. */
+  total: number;
+  /** The pages this build holds, ascending. Decides whether a leaf can render. */
+  available: readonly number[];
+  /** The live stage. Goes in whichever leaf carries `page`. */
+  children: ReactNode;
+  /**
+   * Render a *facing* leaf that this build actually vendors. Optional: with no
+   * facing pair in the build there is nothing to call it with, and a caller that
+   * cannot afford a second mount simply does not pass it — the leaf then reads
+   * as absent, which is true.
+   */
+  renderFacing?: (page: number) => ReactNode;
+}
+
+/**
+ * PageSpread — a desktop window shows an open mus'haf, not a single leaf.
+ *
+ * ## Geometry, declared exactly once
+ *
+ * The mus'haf reads right to left, so within a spread the **lower page number is
+ * on the right** and the next page is to its left; the print pairs (2,3), (4,5),
+ * (6,7)…, and page 1 sits alone on the right. `spreadOf` (@hifth/core) is the
+ * only place that arithmetic lives, beside `nearestPage` — it is pagination, not
+ * presentation.
+ *
+ * The *sides* are then declared once more, and only once: the two leaves are
+ * emitted in DOM order **right leaf first** inside the `dir="rtl"` main, and the
+ * RTL flow places them. No `row-reverse`, no `order`, no `inset-inline` tricks.
+ * Every extra statement of "which way is forward" is a statement that can drift
+ * from `appKeyAction`'s ArrowLeft = +1 and from the page bar's left-edge next
+ * button, and this app has three of them to keep in agreement already.
+ *
+ * ## Why there is no facing page today, and why that is drawn rather than hidden
+ *
+ * This build vendors pages 7, 9 and 19. They are not adjacent, so **no facing
+ * pair exists anywhere in it** — every spread here is one leaf and one hole. The
+ * hole is drawn as a hole: a recessed well, a dashed outer edge, the page it
+ * would be, and the same inventory line the page bar carries. A blank sheet in
+ * the paper colour would be a picture of a page that has nothing printed on it,
+ * which is a different and false claim — and it is the exact failure this repo
+ * has already paid for once (see `packages/core/src/pages.ts`, and the colophon's
+ * licence summary in PLAN follow-up ②). Loop 4b vendors the rest; until then the
+ * spread says what it is.
+ *
+ * The absence is *read*, not *announced*: it is visible text in a labelled
+ * region, deliberately not pushed through `LiveAnnouncer`. The live region
+ * already speaks on every page turn, and appending "…and the facing page is
+ * missing" to all of them is how a reader learns to stop listening to it. A
+ * permanent condition belongs in the document.
+ *
+ * ## Weight
+ *
+ * Each page is a ~170 KB inline SVG. Two mounted at once doubles the DOM, the
+ * raster and the re-raster on zoom — which is the app's one open performance
+ * question (PLAN follow-up ①). So `enabled` gates the *mount*: below the
+ * breakpoint this component returns its child untouched and the second leaf does
+ * not exist. `display: none` would not have done — a hidden panel still fetches,
+ * still parses, and still builds a Highlighter.
+ *
+ * ## The empty end of the book
+ *
+ * `spreadOf` answers `left: null` for page 1 and for the last page of an
+ * even-length print. That is not the same as "absent": nothing is missing at the
+ * ends of a book, so that side is blank furniture with no caption and no label.
+ * Captioning it would tell a reader that page 605 is a page we failed to vendor.
+ */
+export function PageSpread({
+  enabled,
+  page,
+  total,
+  available,
+  children,
+  renderFacing,
+}: PageSpreadProps): JSX.Element {
+  const { t } = useT();
+
+  // Below the breakpoint the stage is the whole story — no wrapper, so nothing
+  // about the phone layout depends on this component having been rendered.
+  if (!enabled) return <>{children}</>;
+
+  const { right, left } = spreadOf(page, total);
+
+  const leaf = (leafPage: number | null, side: "right" | "left"): JSX.Element => {
+    const key = side;
+    // The end of the book. Furniture, not a hole: no label, no caption, nothing
+    // for a screen reader to stop on.
+    if (leafPage === null) {
+      return <div key={key} className={styles.leaf} aria-hidden="true" />;
+    }
+    // The leaf the reader is on — the live stage, with its selection, gestures
+    // and hop rail. There is exactly one of these.
+    if (leafPage === page) {
+      return (
+        <div key={key} className={styles.leaf}>
+          {children}
+        </div>
+      );
+    }
+    // A facing leaf this build holds. Unreachable with today's three vendored
+    // pages and kept honest by a fixture manifest in the component test rather
+    // than by hope — a branch that waits for Loop 4b to be exercised is a branch
+    // Loop 4b discovers on the day it vendors 601 pages.
+    const facing = available.includes(leafPage) ? renderFacing?.(leafPage) : null;
+    if (facing) {
+      return (
+        <div key={key} className={styles.leaf}>
+          {facing}
+        </div>
+      );
+    }
+    return (
+      <section key={key} className={`${styles.leaf} ${styles.absent}`} aria-label={t.facingPage}>
+        <div className={styles.absentWell}>
+          <p className={styles.absentWhat}>{t.facingAbsent(leafPage)}</p>
+          {/* The same sentence the page bar carries, from the same string. The
+              inventory is one fact and it is said one way, or the two surfaces
+              start disagreeing about how much of the mus'haf is here. */}
+          <p className={styles.absentInventory}>{t.pagesVendored(available.length, total)}</p>
+        </div>
+      </section>
+    );
+  };
+
+  return (
+    /* Right leaf first. The RTL flow of `main` puts it on the right; see the
+       geometry note above for why that is the only place the side is decided.
+       The gutter is drawn on this element rather than on the leaves — a spine
+       belongs to the binding, not to either page. */
+    <div className={styles.spread} data-testid="page-spread">
+      {leaf(right, "right")}
+      {leaf(left, "left")}
+      <div className={styles.gutter} aria-hidden="true" />
+    </div>
+  );
+}

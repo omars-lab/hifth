@@ -1,0 +1,122 @@
+/*
+ * PageSpread — an open mus'haf at desktop width.
+ *
+ * Mounted only above the breakpoint (the component returns its child untouched
+ * below it), so nothing in this file needs a media query of its own. That is
+ * deliberate: a stylesheet that also decided when the spread exists would be a
+ * second copy of the breakpoint, and the one in `useMediaQuery.ts` is already
+ * repeated once in DesktopChrome.module.css because CSS cannot read a custom
+ * property inside a media query. Twice is a limitation held in place by a test
+ * (`useMediaQuery.test.ts` reads that stylesheet back); three times is a bug
+ * waiting for the day someone changes two of them.
+ */
+
+.spread {
+  position: relative;
+  flex: 1 1 auto;
+  display: flex;
+  min-inline-size: 0;
+  min-block-size: 0;
+
+  /* The height budget the leaf cap is derived from: header + trail + page bar +
+     the stage's own padding. Rounded *up* on purpose — the stage is
+     `overflow: hidden`, so an over-generous estimate clips scripture off the top
+     and bottom of the page, while a conservative one only leaves a little air.
+     One is a defect a reader has to notice; the other is a margin. */
+  --spread-chrome: 220px;
+
+  /* 0.627 = 345/550, the Madani page's aspect. A leaf is portrait, so its width
+     follows from the height the chrome leaves it — which is why the breakpoint
+     has a min-height at all (docs/design/desktop.md §3).
+
+     `--stage-page-cap` is PageStage's own knob, defaulted to 62vh there and
+     overridden here. A custom property is the whole coupling between the two
+     stylesheets: CSS modules hash their class names, so a spread stylesheet
+     cannot reach into a stage stylesheet, and it should not want to. */
+  --stage-page-cap: calc(0.627 * (100dvh - var(--spread-chrome)));
+}
+
+/* Both leaves share the row equally, whatever is in them. A leaf that sized
+   itself to its content would make the absent one narrow and the live one wide,
+   which draws a book with two different-sized pages — the one shape a mus'haf
+   never has. */
+.leaf {
+  position: relative;
+  flex: 1 1 0;
+  min-inline-size: 0;
+  min-block-size: 0;
+  display: flex;
+}
+
+/*
+ * The gutter — the signature, and the only place this layout spends any boldness.
+ *
+ * Drawn once on the container, not twice on the leaves: a spine belongs to the
+ * binding. The gradient falls onto *both* facing edges, which is what makes the
+ * pair read as one open book rather than two cards on a shelf. Non-interactive
+ * and aria-hidden — it is the shadow of a fold, and there is nothing to say
+ * about it.
+ */
+.gutter {
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: calc(50% - 14px);
+  inline-size: 28px;
+  pointer-events: none;
+  background: linear-gradient(
+    to right,
+    transparent 0%,
+    var(--gutter-shadow) 42%,
+    var(--gutter-shadow-deep) 50%,
+    var(--gutter-shadow) 58%,
+    transparent 100%
+  );
+}
+
+/*
+ * The absent leaf.
+ *
+ * A different treatment entirely, not a paler page: `--paper-sunk` rather than
+ * paper, and the outer edges dashed. Dashes are already this app's word for
+ * "this is not a result yet" — the marquee in flight uses them (tokens.css,
+ * --marquee-ring) — and a hole in the inventory is the same kind of statement.
+ *
+ * The *inner* edge is deliberately not dashed. That edge is the binding, and the
+ * binding is real: the book is open, the leaf is what is missing.
+ */
+.absent {
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-4);
+}
+
+.absentWell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  inline-size: min(100%, var(--stage-page-cap, 62vh));
+  max-inline-size: 480px;
+  /* Match the page host's own proportions so the hole is the shape of the leaf
+     that belongs in it, not a generic panel. */
+  aspect-ratio: 345 / 550;
+  max-block-size: 100%;
+  padding: var(--space-5);
+  border: 1px dashed var(--hairline);
+  border-radius: var(--radius-sm);
+  background: var(--paper-sunk);
+  text-align: center;
+}
+
+.absentWhat {
+  margin: 0;
+  color: var(--ink-soft);
+  font-size: var(--text-md);
+}
+
+.absentInventory {
+  margin: 0;
+  color: var(--ink-faint);
+  font-size: var(--text-sm);
+}

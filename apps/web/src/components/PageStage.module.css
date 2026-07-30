@@ -30,8 +30,19 @@
 
 .host {
   display: block;
-  /* Portrait mushaf aspect; the SVG scales to fit width on a phone. */
-  width: min(100%, 62vh);
+  /* Portrait mushaf aspect; the SVG scales to fit width on a phone.
+     62vh is a height heuristic — the page is portrait, so what actually limits
+     it is the height the chrome leaves, and this is the cheap way of saying so
+     on a device with one page on screen.
+
+     `--stage-page-cap` makes that heuristic overridable, and PageSpread is the
+     one caller that overrides it: at desktop the stage is half as wide and the
+     chrome above and below is a *fixed* bite out of the height, so 62vh
+     overshoots and the page gets clipped by `overflow: hidden`. A custom
+     property is the whole coupling between the two stylesheets — CSS modules
+     hash their class names, so a spread stylesheet cannot reach in here, and it
+     should not want to. */
+  width: min(100%, var(--stage-page-cap, 62vh));
   max-width: 480px;
   filter: drop-shadow(var(--shadow-2));
   border-radius: var(--radius-sm);

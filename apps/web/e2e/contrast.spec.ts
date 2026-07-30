@@ -181,6 +181,27 @@ const SURFACES: readonly Surface[] = [
       await expect(page.locator("[data-notice]")).toBeVisible();
     },
   },
+  {
+    // The one row that has to change the viewport. Both projects that run this
+    // file are phones, and the desktop spread is unreachable from a phone by
+    // construction — so without the resize the surface it introduces would be
+    // exactly the kind of unmeasured text this spec exists to prevent, and the
+    // row would sit here looking like coverage.
+    //
+    // The absent facing leaf is `--ink-soft` and `--ink-faint` on `--paper-sunk`,
+    // which is a pairing nothing else in the app makes: every other use of
+    // `--paper-sunk` is a control, not running text. `--ink-faint` is also the
+    // token that sat at 2.67:1 for a whole loop, and this is a new place to put
+    // it — see this file's header.
+    name: "the desktop spread — the hole where an un-vendored page would be",
+    open: async (page) => {
+      await settled(page);
+      await page.setViewportSize({ width: 1440, height: 900 });
+      await page.goto("/#/hafs-kfqc/p7");
+      await expect(page.getByTestId("page-spread")).toBeVisible();
+      await expect(page.getByRole("region", { name: "الصفحة المقابلة" })).toBeVisible();
+    },
+  },
 ];
 
 test.describe("Hifth · contrast on every surface", () => {
