@@ -164,6 +164,23 @@ ends by updating this section and writing `docs/decisions/loop-<N>.md`.**
    the skin — a production-readable `skin=` param would ship a shareable link that turns a
    beta annotation layer on for a reader who never saw the badge. Opened by Loop 6a;
    **after Loop 7's sign-off**. See [loop-6a.md](decisions/loop-6a.md) §Deferred.
+9. **The revision record** (interaction calendar — per page, per juz, and *not* per hizb).
+   Planned in [`.claude/plans/interaction-calendar.md`](../.claude/plans/interaction-calendar.md);
+   three constraints decide its shape and none is a rendering question. **Hizb does not
+   exist in this repo at all** — not a constant, not a comment — and the obvious shortcut
+   (half a juz) is wrong, because hizb boundaries are their own text division; a heatmap
+   labelled «الحزب ١٢» over the wrong ayahs is #80's off-by-one wearing a new coat, and no
+   test here would catch it. So: page + juz (`juzOf` is already exported), hizb only on
+   vendored `HIZB_STARTS`. **iOS ITP deletes script-writable storage after 7 days of no
+   interaction** (see [`storage.ts`](../apps/web/src/storage.ts)) — which is precisely the
+   history a "what have I not touched in weeks" view exists to report, deleted by the very
+   condition it reports on; the record therefore carries a `since` stamp and says how young
+   it is, because an emptied log rendered as a true one tells a hafiz they have revised
+   nothing. And **a heatmap over three vendored pages of 604** draws a mostly-cold book, so
+   the *picture* is **gated on Loop 4b** while the recording — a pure core module, an
+   IndexedDB store, and a gate forbidding the log from being imported by anything that
+   builds a URL — can ship now, since a day not recorded is a day that does not exist later.
+   A log of when a person read Qur'an never leaves the device.
 
 **The half of these a machine cannot run now has a register — and a runbook.** Follow-ups
 ① (the phone), ② (the browser glance) and ④ (VoiceOver/TalkBack) still wait on a human, and
