@@ -192,7 +192,7 @@
 
     {
       "id": "wayfinding",
-      "what": "Getting to a known place: the surah/ayah jumper, the keyboard map, and the coach marks that teach the gestures once.",
+      "what": "Getting to a known place: the surah/ayah jumper, the page bar along the bottom, the keyboard map, and the coach marks that teach the gestures once.",
       "layer": "L2 web",
       "entry": [
         {
@@ -211,6 +211,16 @@
           "note": "The header fits every phone from 320 to 430, and is the same height at all of them. The second half is the one that bites: the stage gets what the chrome leaves, and the golden baselines are shots of the stage."
         },
         {
+          "file": "packages/core/src/pages.ts",
+          "symbol": "nearestPage",
+          "note": "The seam between the book's length and this build's inventory. The track spans the print (EditionMeta.pages — 604, and absent for editions nobody has counted); the landing is whatever is in public/assets. `nearestPage` answers with what it *did*, so the caller can say so."
+        },
+        {
+          "file": "apps/web/src/components/PageSlider.tsx",
+          "symbol": "PageSlider",
+          "note": "The bottom bar: a 604-long track with a page turn on each edge, pinned RTL in both languages so page 1 sits on the right. Two traps live here — it commits on the native `change` event, not React's `onChange` (which is `input`, and would mount a 170 KB SVG per value crossed), and it takes the arrow keys itself, because a range's own step of 1-of-604 snaps straight back inside a three-page inventory."
+        },
+        {
           "file": "packages/core/src/keymap.ts",
           "symbol": "appKeyAction",
           "note": "One pure function from (key, context) to action, so the keyboard map is testable without a DOM and cannot disagree with itself across components."
@@ -224,7 +234,9 @@
       "extend": [
         "New input syntax: extend parseJump and its unit tests. Keep the UI dumb — it should render JumpTargets, not know how they were found.",
         "New shortcut: add it to appKeyAction with a KeyContext branch, and add the row to the help surface in the same commit.",
-        "Anything added to the header row costs width the row does not have, and height the stage cannot spare. Run chrome-fit before and after, and if it needs a control, say which one it replaces."
+        "Anything added to the header row costs width the row does not have, and height the stage cannot spare. Run chrome-fit before and after, and if it needs a control, say which one it replaces.",
+        "Vendoring more pages (Loop 4b): the page bar needs no change — the track is already the whole print and the ticks are drawn from the manifest. What changes is that `pagesVendored` stops being a caveat; delete it when the gap closes, not before.",
+        "The page bar is the bottom-most chrome, so it owns the home-indicator inset. If anything is ever put below it, the inset moves with it — two elements padding for it is a doubled gap, neither is a control under the indicator."
       ],
       "gates": ["pnpm test", "make e2e"],
       "seeAlso": ["a11y", "editions-and-skins"]
@@ -292,7 +304,7 @@
         },
         {
           "file": "apps/web/e2e/lang.spec.ts",
-          "symbol": "the mus'haf, the rail and the trail stay right-to-left",
+          "symbol": "the mus'haf, the rail, the trail and the page bar stay right-to-left",
           "note": "The assertion that matters most, and the one unit tests cannot reach: with an English chrome, `main` and `footer` still compute `direction: rtl`. The stylesheet is 100% logical properties, which is what makes the flip a one-line change and also what makes an accidental inherited flip move the hop rail to the wrong thumb."
         }
       ],

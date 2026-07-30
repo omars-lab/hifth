@@ -6,6 +6,7 @@ import {
   Roots,
   Tajweed,
   appKeyAction,
+  editionMeta,
   keyToRef,
   parseAyahKey,
   refToKey,
@@ -47,6 +48,7 @@ import { Colophon } from "./components/Colophon";
 import { LiveAnnouncer, useAnnouncer } from "./components/LiveAnnouncer";
 import { RootLens, RootLensTrigger } from "./components/RootLens";
 import { SkinToggle, TajweedLegend } from "./components/SkinToggle";
+import { PageSlider } from "./components/PageSlider";
 import styles from "./App.module.css";
 
 // The app opens on page 7 (the mock's first curated page). Full page routing is
@@ -361,13 +363,49 @@ export function App(): JSX.Element {
     return { pages: [...anchors.keys()].sort((a, b) => a - b), anchors };
   }, [manifest]);
 
-  // Arrow-key paging. "The next page" means the next page we actually have:
-  // until 4b vendors all 604, stepping past the last one would land on a blank,
-  // so it says so instead. Paging does not touch the selection — you are
-  // browsing, not moving your place.
+  // How long the book is, for the page bar's track. `EditionMeta.pages` is the
+  // *print's* own count (604 for the Madani mus'haf) and is absent for editions
+  // nobody has counted — in which case the bar spans what is vendored rather
+  // than a plausible-looking guess, because a track that runs past the end of a
+  // mus'haf is a worse lie than a short one.
+  const totalPages = useMemo(() => {
+    const declared = manifest ? editionMeta(manifest.edition)?.pages : undefined;
+    return declared ?? pageTurns.pages[pageTurns.pages.length - 1] ?? 1;
+  }, [manifest, pageTurns]);
+
+  // Land on a page. The single navigation path for every way of turning one —
+  // the arrow keys, the page bar's edge buttons, and letting go of its slider —
+  // so there is one place where "the stage moved" and "the header changed" can
+  // get out of step, rather than three. Paging does not touch the selection:
+  // you are browsing, not moving your place.
+  //
+  // `said` is what to announce on arrival. The slider passes a different string
+  // when it had to snap, because a landing the reader did not ask for has to be
+  // named out loud.
+  const goToPage = useCallback(
+    (next: number, said?: string) => {
+      if (next === page) return;
+      const anchor = pageTurns.anchors.get(next);
+      // No anchor means no vendored page — refuse rather than navigate to a
+      // blank stage. Callers pick from `pageTurns.pages`, so this is the belt
+      // to that braces.
+      if (!anchor) return;
+      setOpenDirection(null);
+      setPage(next);
+      announce(said ?? t.pageN(next));
+      // zoom 1 = the page as it sits, not a hop's close framing; no pulse,
+      // because nothing here was selected.
+      void stageRef.current?.navigateTo(anchor, { pulse: false, zoom: 1 });
+    },
+    [pageTurns, page, announce, t],
+  );
+
+  // One page's worth of movement. "The next page" means the next page we
+  // actually have: until 4b vendors all 604, stepping past the last one would
+  // land on a blank, so it says so instead.
   const stepPage = useCallback(
     (step: 1 | -1) => {
-      const { pages, anchors } = pageTurns;
+      const { pages } = pageTurns;
       if (pages.length === 0) return;
       const at = pages.indexOf(page);
       const i = at === -1 ? 0 : Math.min(pages.length - 1, Math.max(0, at + step));
@@ -376,16 +414,27 @@ export function App(): JSX.Element {
         announce(step > 0 ? t.lastPage : t.firstPage);
         return;
       }
-      const anchor = anchors.get(next);
-      if (!anchor) return;
-      setOpenDirection(null);
-      setPage(next);
-      announce(t.pageN(next));
-      // zoom 1 = the page as it sits, not a hop's close framing; no pulse,
-      // because nothing here was selected.
-      void stageRef.current?.navigateTo(anchor, { pulse: false, zoom: 1 });
+      goToPage(next);
     },
-    [pageTurns, page, announce, t],
+    [pageTurns, page, announce, t, goToPage],
+  );
+
+  // The slider hands back both numbers: where it landed and where the thumb was
+  // let go. They differ whenever the reader aimed into the un-vendored gap, and
+  // when they do the announcement names the page they actually got.
+  const handleScrubTo = useCallback(
+    (landed: number, asked: number) => {
+      const said = landed === asked ? undefined : t.nearestPageN(landed);
+      // Snapping back onto the page already showing moves nothing, so `goToPage`
+      // would say nothing — and silence is the wrong answer to a drag across
+      // half the mus'haf. Say where they are.
+      if (landed === page) {
+        if (said) announce(said);
+        return;
+      }
+      goToPage(landed, said);
+    },
+    [goToPage, page, announce, t],
   );
 
   // The origin ayah keeps its breadcrumb until the trail is empty.
@@ -884,6 +933,18 @@ export function App(): JSX.Element {
           </span>
         )}
       </footer>
+
+      {/* The bottom-most chrome, and the second way through the book after the
+          jumper: a track the length of the whole mus'haf with a page turn on
+          each edge. Pinned RTL like the stage and the trail — page 1 is on the
+          right, and the button that moves forward is on the left. */}
+      <PageSlider
+        total={totalPages}
+        available={pageTurns.pages}
+        page={page}
+        onStep={stepPage}
+        onGoTo={handleScrubTo}
+      />
 
       <LiveAnnouncer message={message} />
     </div>

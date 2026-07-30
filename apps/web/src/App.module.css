@@ -188,8 +188,10 @@
   align-items: center;
   justify-content: flex-start;
   min-height: var(--touch-min);
+  /* No safe-area padding here any more: the page bar sits below the trail and
+     is now the bottom-most chrome, so it is the one that has to clear the home
+     indicator. Two elements both padding for the inset would double the gap. */
   padding: var(--space-2) var(--space-4);
-  padding-block-end: max(var(--space-2), env(safe-area-inset-bottom));
   border-block-start: 1px solid var(--hairline);
   background: var(--paper-raised);
 }

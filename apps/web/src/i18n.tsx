@@ -108,9 +108,36 @@ export interface Strings {
   close: string;
   trail: string;
 
+  /* ---- the page bar ------------------------------------------------------- */
+  /** Accessible name of the bar itself — a landmark, so it can be skipped to. */
+  pageBar: string;
+  /** Accessible name of the range input inside it. */
+  pageChoose: string;
+  /**
+   * "صفحة 7 من 604" / "Page 7 of 604" — the slider's readout, and the one place
+   * the app says how long the book is. Latin digits on both numbers, following
+   * `pageN`: they are page numbers, read off the corner of the printed page.
+   */
+  pageOfTotal(page: number, total: number): string;
+  prevPage: string;
+  nextPage: string;
+  /**
+   * How much of the print is actually in this build. Loop 4b vendors the rest;
+   * until then the slider spans 604 pages of which three exist, and saying so
+   * is the difference between a limitation and a lie.
+   */
+  pagesVendored(have: number, total: number): string;
+
   /* ---- announcements (the LiveAnnouncer channel) -------------------------- */
   firstPage: string;
   lastPage: string;
+  /**
+   * Said out loud when a scrub is let go on a page this build does not have and
+   * lands on the closest one it does. It names where you *are*, not where you
+   * aimed — a silent landing on a different page is the app lying about what it
+   * did, which is the one thing the vendored-corpus gap must never become.
+   */
+  nearestPageN(page: number): string;
   selectionCleared: string;
   selected(label: string): string;
   highlighted(span: string): string;
@@ -285,8 +312,20 @@ export const AR: Strings = {
   close: "إغلاق",
   trail: "المسار",
 
+  pageBar: "شريط الصفحات",
+  pageChoose: "اختيار الصفحة",
+  pageOfTotal: (page, total) => `صفحة ${page} من ${total}`,
+  // The mus'haf's own direction, not the chrome's: the next page of a mus'haf
+  // lies to the *left*, which is why ArrowLeft turns forward and why the next
+  // button sits on the left edge of the bar in both languages.
+  prevPage: "الصفحة السابقة",
+  nextPage: "الصفحة التالية",
+  pagesVendored: (have, total) =>
+    `المتوفّر ${digits(have, "ar")} من ${digits(total, "ar")} صفحة`,
+
   firstPage: "أول صفحة متوفّرة",
   lastPage: "آخر صفحة متوفّرة",
+  nearestPageN: (page) => `أقرب صفحة متوفّرة · صفحة ${page}`,
   selectionCleared: "أُلغي التحديد",
   selected: (label) => `حُدّدت ${label}`,
   highlighted: (span) => `ظُلّل ${span}`,
@@ -502,8 +541,20 @@ export const EN: Strings = {
   close: "Close",
   trail: "Trail",
 
+  pageBar: "Page bar",
+  pageChoose: "Choose a page",
+  pageOfTotal: (page, total) => `Page ${page} of ${total}`,
+  // Not swapped for English. "Previous" and "next" here mean earlier and later
+  // in the mus'haf, and the mus'haf runs right to left in both languages — the
+  // bar is scripture furniture, so its edges keep the book's direction.
+  prevPage: "Previous page",
+  nextPage: "Next page",
+  pagesVendored: (have, total) =>
+    `${digits(have, "en")} of ${digits(total, "en")} pages available`,
+
   firstPage: "First available page",
   lastPage: "Last available page",
+  nearestPageN: (page) => `Nearest available page · Page ${page}`,
   selectionCleared: "Selection cleared",
   selected: (label) => `Selected ${label}`,
   highlighted: (span) => `Highlighted ${span}`,

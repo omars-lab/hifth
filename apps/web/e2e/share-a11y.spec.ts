@@ -241,6 +241,25 @@ test.describe("Hifth · aria snapshots (the tour the ledger describes)", () => {
     await expect(page.locator("header .numeric")).toHaveText("19");
     await expect(page.locator("footer")).toMatchAriaSnapshot({ name: "trail.aria.yml" });
   });
+
+  // The page bar is the app's second way through the book, and both its edge
+  // controls are bare glyphs — ▸ and ◂ carry no text, so a lost label does not
+  // degrade them, it deletes them. What this tree pins is the landmark, those
+  // two names, the slider's own name, and the inventory line sitting inside the
+  // bar rather than adrift somewhere in the page.
+  //
+  // What it does *not* pin: `aria-valuetext`. Playwright serialises a slider as
+  // its raw `value`, so «صفحة ٧ من ٦٠٤» never reaches this file and a snapshot
+  // claiming otherwise would be a green test guarding nothing. That assertion
+  // lives in pagebar.spec.ts, read back off the computed DOM.
+  test("the page bar names its landmark, its edges and its inventory", async ({ page }) => {
+    await settled(page);
+    await page.goto("/");
+    await expect(page.locator("svg[role='group']").first()).toBeVisible();
+    await expect(page.getByRole("navigation", { name: "شريط الصفحات" })).toMatchAriaSnapshot({
+      name: "page-bar.aria.yml",
+    });
+  });
 });
 
 test.describe("Hifth · axe automated a11y", () => {
