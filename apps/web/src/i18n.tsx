@@ -44,6 +44,7 @@ import {
   ayahRef as fmtAyahRef,
   rangeLabel as fmtRangeLabel,
   digits,
+  toArabicDigits,
   surahName as fmtSurahName,
   surahNames,
 } from "./format";
@@ -277,6 +278,50 @@ export interface Strings {
   devBuildNote: string;
   sourcesHead: string;
   aboutFoot: string;
+
+  /* ---- the revision map --------------------------------------------------- */
+  /**
+   * The sheet's title, and it is deliberately not "revision calendar". The record
+   * behind it is a log of taps; a tap is evidence someone *looked at* an ayah and
+   * not that they recited it. Naming the picture after what it can prove is the
+   * whole difference between an instrument and a flattering one.
+   */
+  mapTitle: string;
+  /** Said once, plainly, under the title. Never repeated per cell. */
+  mapCaveat: string;
+  /** The chip's accessible name — still says the page, then what it opens. */
+  mapOpen(page: number): string;
+  mapScopeGroup: string;
+  scopePage: string;
+  scopeHizb: string;
+  scopeJuz: string;
+  hizbN(hizb: number): string;
+  /**
+   * How much of the book this build actually holds, at the chosen scope. The
+   * page bar's `pagesVendored` for divisions — same fact, same honesty, counted
+   * in the unit on screen.
+   */
+  mapHeld(have: number, total: number, scope: "page" | "hizb" | "juz"): string;
+  /**
+   * "recording since 2026-07-14". The one line that keeps an emptied record from
+   * reading as an idle one: iOS deletes script-writable storage after seven days
+   * untouched, and a record that resets to empty says "you have revised nothing"
+   * to someone about their own worship. A record that says how old it is cannot
+   * tell that lie — an empty map dated this morning is visibly a new record.
+   */
+  mapSince(day: string): string;
+  /** No IndexedDB at all — a private window, or a browser that refuses. */
+  mapNoStore: string;
+  mapLoading: string;
+  /** Legend, and the three things a cell can be. */
+  mapLegend: string;
+  mapAbsent: string;
+  mapNeverOpened: string;
+  mapRecent: string;
+  /** A cell's accessible name, one per state. */
+  mapCellAbsent(label: string): string;
+  mapCellNever(label: string): string;
+  mapCellSeen(label: string, days: number): string;
 }
 
 /* ------------------------------------------------------------------------- */
@@ -510,6 +555,38 @@ export const AR: Strings = {
   devBuildNote: "هذه نسخة تطوير محلّية، فلا تقابلها إصدارة معيّنة؛ الرابط يفتح المستودع.",
   sourcesHead: "المصادر",
   aboutFoot: "الشروط الكاملة والإصدارات المثبَّتة في ملف SOURCES.md داخل المستودع:",
+
+  // «ما فتحتَه» — what you opened. Not «مراجعتك»: the record cannot see a
+  // recitation, only a tap, and a title claiming otherwise would be the app
+  // stating something its data does not hold.
+  mapTitle: "ما فتحتَه من المصحف",
+  mapCaveat: "النقر دليل على أنّك فتحت الآية، لا على أنّك راجعتها.",
+  mapOpen: (page) => `صفحة ${page} · ما فتحتَه من المصحف`,
+  mapScopeGroup: "التقسيم",
+  scopePage: "صفحة",
+  scopeHizb: "حزب",
+  scopeJuz: "جزء",
+  hizbN: (hizb) => `الحزب ${digits(hizb, "ar")}`,
+  mapHeld: (have, total, scope) => {
+    const unit =
+      scope === "page" ? "صفحة" : scope === "hizb" ? (have === 1 ? "حزب" : "حزبًا") : "جزءًا";
+    return `المتوفّر ${digits(have, "ar")} من ${digits(total, "ar")} ${unit}`;
+  },
+  mapSince: (day) => `يُسجَّل منذ ${toArabicDigits(day)}`,
+  mapNoStore: "لا يمكن حفظ السجلّ في هذا المتصفّح، فلا شيء هنا لعرضه.",
+  mapLoading: "جارٍ فتح السجلّ…",
+  mapLegend: "الدليل",
+  mapAbsent: "غير متوفّر في هذه النسخة",
+  mapNeverOpened: "متوفّر ولم يُفتح",
+  mapRecent: "فُتح حديثًا",
+  mapCellAbsent: (label) => `${label} · غير متوفّر في هذه النسخة`,
+  mapCellNever: (label) => `${label} · لم يُفتح`,
+  mapCellSeen: (label, days) =>
+    days <= 0
+      ? `${label} · فُتح اليوم`
+      : days === 1
+        ? `${label} · فُتح أمس`
+        : `${label} · فُتح قبل ${digits(days, "ar")} يومًا`,
 };
 
 /* ------------------------------------------------------------------------- */
@@ -750,6 +827,32 @@ export const EN: Strings = {
     "This is a local development build, so no released version corresponds to it; the link opens the repository.",
   sourcesHead: "Sources",
   aboutFoot: "Full terms and pinned versions are in SOURCES.md inside the repository:",
+
+  mapTitle: "What you have opened",
+  mapCaveat: "A tap is evidence you opened an ayah, not that you revised it.",
+  mapOpen: (page) => `Page ${page} · what you have opened`,
+  mapScopeGroup: "Division",
+  scopePage: "Page",
+  scopeHizb: "Hizb",
+  scopeJuz: "Juz",
+  hizbN: (hizb) => `Hizb ${hizb}`,
+  mapHeld: (have, total, scope) =>
+    `${have} of ${total} ${scope === "page" ? "pages" : scope === "hizb" ? "hizb" : "juz"} in this build`,
+  mapSince: (day) => `Recording since ${day}`,
+  mapNoStore: "This browser cannot keep the record, so there is nothing here to show.",
+  mapLoading: "Opening the record…",
+  mapLegend: "Key",
+  mapAbsent: "Not in this build",
+  mapNeverOpened: "Here, never opened",
+  mapRecent: "Opened recently",
+  mapCellAbsent: (label) => `${label} · not in this build`,
+  mapCellNever: (label) => `${label} · never opened`,
+  mapCellSeen: (label, days) =>
+    days <= 0
+      ? `${label} · opened today`
+      : days === 1
+        ? `${label} · opened yesterday`
+        : `${label} · opened ${days} days ago`,
 };
 
 const BUNDLES: Readonly<Record<Lang, Strings>> = { ar: AR, en: EN };
