@@ -190,3 +190,17 @@ export {
   type EditionStatus,
   type ConcordanceTable,
 } from "./concordance.js";
+
+// The revision record: deliberate looks, rolled up by day and by scope. Pure and
+// clockless — the time and the reader's UTC offset ride on each event.
+export {
+  dayOf,
+  daysBetween,
+  editionOf,
+  lastSeen,
+  rollUp,
+  scopesOf,
+  type DayStamp,
+  type RevisionEvent,
+  type RevisionScope,
+} from "./revision.js";

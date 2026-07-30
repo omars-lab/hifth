@@ -32,6 +32,7 @@ import {
   loadShard,
   loadTajweedShard,
 } from "./assets";
+import { recordLook } from "./revision-store";
 import { useT } from "./i18n";
 import { useHashRouter } from "./useHashRouter";
 import { PageStage, type PageStageHandle } from "./components/PageStage";
@@ -451,8 +452,15 @@ export function App(): JSX.Element {
       const toggledOff = selectedKeyRef.current === key;
       setSelectedKey(toggledOff ? null : key);
       announce(toggledOff ? t.selectionCleared : t.selected(t.ayahLabel(key) ?? key));
+      // The revision record, and the reason this sits inside the toggle branch:
+      // the second tap on the same ayah means "dismiss", and counting it as a
+      // second look would double the score of every ayah the reader changed
+      // their mind about. Fire and forget — a lost row is not worth a hitch in
+      // the gesture, and `recordLook` never rejects.
+      const loc = toggledOff ? null : resolver?.resolve(key);
+      if (loc) void recordLook({ key, page: loc.page });
     },
-    [announce, t],
+    [announce, resolver, t],
   );
 
   // A marquee released over ayahs (Loop 5). The passage replaces the selection —
@@ -469,8 +477,13 @@ export function App(): JSX.Element {
           ? (t.ayahLabel(fromKey) ?? fromKey)
           : `${t.ayahLabel(fromKey) ?? fromKey}–${t.ayahLabel(toKey) ?? toKey}`;
       announce(t.highlighted(span));
+      // One event for the whole passage, not one per ayah: a marquee across
+      // twelve ayahs is a single look, and counting it twelve times would let
+      // one drag outweigh a page read carefully.
+      const loc = resolver?.resolve(fromKey);
+      if (loc) void recordLook({ key: fromKey, endKey: toKey, page: loc.page });
     },
-    [announce, t],
+    [announce, resolver, t],
   );
 
   // Forward hop: push the origin onto the trail, move to the target, pulse.

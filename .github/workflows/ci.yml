@@ -159,6 +159,12 @@ jobs:
       - name: Gate — every promise still has a proof
         run: pnpm gate:use-cases
 
+      # The revision record is a log of when a person was reading Qur'an. This
+      # checks the closed allow-list of modules allowed to import it is still
+      # closed, and that its own modules still hold no way off the device.
+      - name: Gate — the revision record never leaves the device
+        run: pnpm gate:revision-privacy
+
       - name: Build
         run: pnpm build
 
