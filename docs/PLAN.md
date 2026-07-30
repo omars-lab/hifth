@@ -181,6 +181,21 @@ ends by updating this section and writing `docs/decisions/loop-<N>.md`.**
    IndexedDB store, and a gate forbidding the log from being imported by anything that
    builds a URL — can ship now, since a day not recorded is a day that does not exist later.
    A log of when a person read Qur'an never leaves the device.
+   **The recording shipped** (map feature [`revision-record`](map.json), gate
+   `pnpm gate:revision-privacy`): [`revision.ts`](../packages/core/src/revision.ts) is pure
+   and clockless, and each event carries the reader's UTC offset rather than taking one at
+   read time — a single offset applied when the picture is drawn silently re-files every look
+   recorded on the other side of a DST change or a flight. Two signals are wired and three are
+   deliberately not: a tap that toggles a selection *off* means «dismiss», a hop arrival
+   credits the ayah the corpus pointed at rather than the one the reader chose, and a share
+   link was somebody else's choice — record all of those evenly and the result maps app usage,
+   not revision, and the two diverge exactly where the record was meant to be useful. All
+   three exclusions are asserted through the real UI in
+   [`App.test.tsx`](../apps/web/src/App.test.tsx), because they hold by how `App.tsx` is wired
+   and nothing else would notice them being rewired. What no test here can reach is a phone:
+   ledger check `revision-record-lands-on-a-phone` covers the clock, the process killer and
+   the seven-day sweep, and **#91 must not draw a picture until it has been run** — the one
+   unacceptable outcome is an emptied log rendered as a true one.
 
 **The half of these a machine cannot run now has a register — and a runbook.** Follow-ups
 ① (the phone), ② (the browser glance) and ④ (VoiceOver/TalkBack) still wait on a human, and
