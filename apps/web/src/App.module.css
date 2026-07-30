@@ -106,12 +106,35 @@
   color: var(--ink-faint);
 }
 
+/* The page chip. It became a `<button>` when the revision map needed an opener
+   and the header had no room for a sixth control — so it carries a full reset:
+   a UA button brings its own border, background and padding, and this row's fit
+   on a 320px screen is measured in single pixels (`e2e/chrome-fit`). It stays a
+   text chip on purpose; the affordance is the focus ring and the hover, not a
+   box, because the number is a label a reader looks at far more often than they
+   press. `align-items` is baseline, so the word and the number sit on one line
+   the way they did as a div. */
 .pageId {
   margin-inline-start: auto;
   display: flex;
   align-items: baseline;
   gap: var(--space-2);
+  padding: 0;
+  border: none;
+  background: none;
+  font-family: inherit;
   color: var(--ink-soft);
+  cursor: pointer;
+}
+
+.pageId:hover {
+  color: var(--accent-strong);
+}
+
+.pageId:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+  border-radius: var(--radius-sm);
 }
 
 .pageLabel {

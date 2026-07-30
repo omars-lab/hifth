@@ -521,7 +521,7 @@
     {
       "id": "see-what-i-have-not-opened-lately",
       "actor": "hafiz",
-      "goal": "Keep a private record of what I have actually opened, so I can tell which pages and juz have gone weeks without me.",
+      "goal": "Keep a private record of what I have actually opened, and see it — which pages, hizb or juz have gone weeks without me.",
       "feature": "revision-record",
       "code": [
         {
@@ -535,6 +535,10 @@
         {
           "file": "apps/web/src/revision-store.ts",
           "symbol": "recordLook"
+        },
+        {
+          "file": "apps/web/src/components/RevisionMap.tsx",
+          "symbol": "coverage"
         },
         {
           "file": "scripts/gate-revision-privacy.mjs",
@@ -557,9 +561,21 @@
         {
           "file": "apps/web/src/App.test.tsx",
           "test": "credits the source of a hop, never the ayah the app moved them to"
+        },
+        {
+          "file": "apps/web/src/components/RevisionMap.test.tsx",
+          "test": "draws absent as a different kind of thing from cold, not a paler one"
+        },
+        {
+          "file": "apps/web/e2e/revision.spec.ts",
+          "test": "a tap on an ayah is still on the map after a reload"
+        },
+        {
+          "file": "apps/web/e2e/revision.spec.ts",
+          "test": "a wiped record reads as a young record, not as an empty one"
         }
       ],
-      "gap": "Two holes, and the first is not closable in this repo. iOS deletes script-writable storage after seven days of no interaction, which is precisely the history this promise is about — every test here runs against fake-indexeddb in Node, where nothing evicts, so what is proven is that the record *knows how young it is* (`since`), not that it survives. Whether an installed PWA on a real iPhone keeps it is docs/validation/ledger.json → offline-survival-8-day. Second, the marquee path is proven at the store, not through the gesture: no unit test drives a real drag, so «one look, not twelve» is asserted on `recordLook` rather than on a release over twelve ayahs. And there is no picture yet — task #91 is gated on Loop 4b, because a page heatmap over 3 vendored pages of 604 draws a mostly-cold book.",
+      "gap": "Two holes, and the first is not closable in this repo. iOS deletes script-writable storage after seven days of no interaction, which is precisely the history this promise is about. The e2e can take the record with one CDP call and prove the map still says how old it is, but it cannot wait eight days on a real phone — that is docs/validation/ledger.json → offline-survival-8-day. Second, the marquee path is proven at the store, not through the gesture: no unit test drives a real drag, so «one look, not twelve» is asserted on `recordLook` rather than on a release over twelve ayahs. Separately, the picture is honest about the build rather than complete: 3 of 604 pages are vendored, so the map draws two held hizb and fifty-eight absent ones, and only Loop 4b makes it a picture of a mus'haf rather than of an inventory.",
       "includes": ["select-the-ayah-i-am-on"]
     },
     {

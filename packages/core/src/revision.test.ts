@@ -81,6 +81,26 @@ describe("scopesOf", () => {
     expect(scopesOf(look({ key: key(78, 1) }), "juz")).toEqual([30]);
   });
 
+  it("credits both hizb when a passage crosses the boundary between them", () => {
+    // Same rule one division finer. Hizb 2 begins at 2:75, so a page sitting
+    // across that line colours both — twice as many boundaries as juz means a
+    // passage straddles more often, not less.
+    const across = look({ key: key(2, 74), endKey: key(2, 75) });
+    expect(scopesOf(across, "hizb")).toEqual([1, 2]);
+    expect(scopesOf(look({ key: key(2, 48) }), "hizb")).toEqual([1]);
+    expect(scopesOf(look({ key: key(87, 1) }), "hizb")).toEqual([60]);
+  });
+
+  it("does not put a hizb boundary at its juz's midpoint", () => {
+    // The one derivation that must never be used. Juz 2 runs 2:142 → 2:252; its
+    // arithmetic midpoint is 2:197, and halving would open hizb 4 there. The real
+    // division opens it at 2:203, six ayahs later — so an event at 2:197 belongs
+    // to hizb 3, and a record built on the shortcut would file it under 4.
+    expect(scopesOf(look({ key: key(2, 197) }), "juz")).toEqual([2]);
+    expect(scopesOf(look({ key: key(2, 197) }), "hizb")).toEqual([3]);
+    expect(scopesOf(look({ key: key(2, 203) }), "hizb")).toEqual([4]);
+  });
+
   it("orders the ids ascending even if the passage was dragged backwards", () => {
     const backwards = look({ key: key(2, 142), endKey: key(2, 141) });
     expect(scopesOf(backwards, "juz")).toEqual([1, 2]);

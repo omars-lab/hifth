@@ -25,12 +25,13 @@
  *
  * ## Scopes
  *
- * `page` and `juz`, and deliberately **not `hizb`**: hizb boundaries do not exist
- * anywhere in this repo, and the tempting derivation — half a juz — is wrong,
- * because a hizb is its own text division and does not fall at a juz's arithmetic
- * midpoint. A heatmap labelled «الحزب ١٢» over the wrong ayahs would be the
- * mutashabihat off-by-one all over again, and nothing here would catch it. Hizb
- * arrives when real boundaries are vendored, not before.
+ * `page`, `juz` and `hizb`. Hizb was held back until its boundaries were real:
+ * the tempting derivation — half a juz — agrees with the actual division for only
+ * 4 of 30 even hizbs and misses by up to 39 ayahs, so a heatmap labelled «الحزب
+ * ١٢» over the wrong ayahs would have been the mutashabihat off-by-one all over
+ * again, with nothing here to catch it. `HIZB_STARTS` now carries the real
+ * boundaries, read out of the vendored Tanzil quarters and held there by
+ * `gate:quran-meta`, which fails if anyone regenerates the table by halving.
  *
  * Page ids are **only comparable within one edition** — page 7 of the Madani
  * print is not page 7 of anything else. Juz ids are comparable everywhere, being
@@ -40,11 +41,11 @@
  */
 
 import { parseAyahKey } from "./keys.js";
-import { juzOf } from "./quran-meta.js";
+import { hizbOf, juzOf } from "./quran-meta.js";
 import type { EditionId } from "./types.js";
 
 /** The divisions of the book this record can colour. */
-export type RevisionScope = "page" | "juz";
+export type RevisionScope = "page" | "juz" | "hizb";
 
 /** A local calendar day, `YYYY-MM-DD`. Sorts lexicographically. */
 export type DayStamp = string;
@@ -103,25 +104,28 @@ export function editionOf(event: RevisionEvent): EditionId | null {
  * Every scope id this one event touches, ascending.
  *
  * A page always yields exactly one id: a marquee is drawn on one page's stage, so
- * a passage cannot straddle two. A juz can straddle — a page may sit across a juz
- * boundary — and when it does the event credits **both**, because the reader did
- * in fact look at both. Empty when the keys are unparseable, so a corrupt record
- * degrades to a gap in the picture rather than to a wrong colour.
+ * a passage cannot straddle two. A juz or a hizb can straddle — a page may sit
+ * across either boundary — and when it does the event credits **both**, because
+ * the reader did in fact look at both. Straddling is commoner per hizb than per
+ * juz for the obvious reason: twice as many boundaries in the same book. Empty
+ * when the keys are unparseable, so a corrupt record degrades to a gap in the
+ * picture rather than to a wrong colour.
  */
 export function scopesOf(event: RevisionEvent, scope: RevisionScope): readonly number[] {
   if (scope === "page") {
     return Number.isInteger(event.page) && event.page > 0 ? [event.page] : [];
   }
+  const divisionOf = scope === "hizb" ? hizbOf : juzOf;
   const from = parseAyahKey(event.key);
   if (!from) return [];
   const to = event.endKey ? parseAyahKey(event.endKey) : from;
   let first: number;
   let last: number;
   try {
-    first = juzOf(from.surah, from.ayah);
-    last = to ? juzOf(to.surah, to.ayah) : first;
+    first = divisionOf(from.surah, from.ayah);
+    last = to ? divisionOf(to.surah, to.ayah) : first;
   } catch {
-    // An ayah number past the end of its surah is not a juz we can name. Same
+    // An ayah number past the end of its surah is not a division we can name. Same
     // rule as an unparseable key: leave a gap, never guess.
     return [];
   }

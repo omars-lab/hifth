@@ -445,7 +445,7 @@
 
     {
       "id": "revision-record",
-      "what": "What the reader has opened, by day and by page or juz — the log a «what have I not touched in weeks» view is drawn from, and which never leaves the device.",
+      "what": "What the reader has opened, by day and by page, hizb or juz — the log, and the picture drawn from it. Never leaves the device.",
       "layer": "L1 core",
       "entry": [
         {
@@ -456,7 +456,7 @@
         {
           "file": "packages/core/src/revision.ts",
           "symbol": "scopesOf",
-          "note": "Scopes are `page` and `juz`, and deliberately not `hizb` — hizb boundaries do not exist in this repo, and the tempting derivation (half a juz) is wrong. A page yields exactly one id; a juz can straddle, and then the event credits both. Unparseable input yields `[]`, so a corrupt record is a gap in the picture rather than a wrong colour."
+          "note": "Scopes are `page`, `hizb` and `juz`. A page yields exactly one id; a hizb or a juz can straddle, and then the event credits both. Unparseable input yields `[]`, so a corrupt record is a gap in the picture rather than a wrong colour. `hizb` only exists here because HIZB_STARTS is vendored — the tempting derivation, half a juz, is wrong, and a scope whose boundaries are guessed is a heatmap that lies about which ayahs it is colouring."
         },
         {
           "file": "apps/web/src/revision-store.ts",
@@ -479,6 +479,16 @@
           "note": "A log of when someone was reading Qur'an is not a preference. This is a closed allow-list of modules permitted to import the record, plus a grep for escape hatches inside the record's own files. Deliberately not `import/no-restricted-paths`, which expresses the inverse rule and would leave every new URL-building file unguarded by default."
         },
         {
+          "file": "apps/web/src/components/RevisionMap.tsx",
+          "symbol": "coverage",
+          "note": "The picture's half of the honesty problem: 3 of 604 pages are vendored, so a division the reader cannot reach must not be drawn as one they neglected — absent is no fill and a dashed hairline, cold is the sunk paper, and the two differ in kind rather than in opacity. `coverage` answers «is there paper here» by pushing every vendored ayah through the same `scopesOf` the record uses, so «absent» and «warm» cannot drift about which hizb a page is in. The sheet opens from the page chip, not a sixth header button: `e2e/chrome-fit` holds the row inside 320px with seventeen pixels to spare."
+        },
+        {
+          "file": "apps/web/e2e/revision.spec.ts",
+          "symbol": "a tap on an ayah is still on the map after a reload",
+          "note": "The only test that can prove a tap became durable: the unit suite hands the component a record, and a store that wrote to memory would pass all of it. Note `recorded()` — the write is fired and forgotten from the tap handler, so a reload can outrun it; and it must be `expect.poll` over `evaluate`, because `waitForFunction`'s poller does not await a promise and would succeed on the first tick regardless of what the database holds."
+        },
+        {
           "file": "apps/web/src/App.test.tsx",
           "symbol": "credits the source of a hop, never the ayah the app moved them to",
           "note": "The three exclusions asserted end to end through the real UI. `revision.test.ts` and `revision-store.test.ts` can prove what a look is worth; only this file can prove App.tsx does not call `recordLook` from the three places it must not."
@@ -498,7 +508,8 @@
         "Anything that reads the record is a new importer: add it to ALLOWED_IMPORTERS in the gate with a one-line reason. If it cannot state a reason it cannot see the record.",
         "Adding a scope means adding real boundary data first. `hizb` was the standing example and is now the worked one: the arithmetic derivation is wrong, so the sixty starts are vendored from the Tanzil metadata and `gate:quran-meta` re-derives them on every run. A scope whose boundaries are guessed is a heatmap that lies about which ayahs it is colouring, and no other test here would notice.",
         "New callers of `recordLook` must justify themselves against the `RevisionEvent` doc comment. The default answer is no: the record is only worth drawing because it is not a log of everything that happened.",
-        "The picture (task #91) is gated on Loop 4b — 3 of 604 pages are vendored, so a page heatmap today would draw a mostly-cold book. The recording ships first because a day not recorded is a day that does not exist later."
+        "The warmth bands (2/7/30 days in RevisionMap.tsx) are a developer's guess and are named as one in docs/design/revision-record.md. Changing them wants a hafiz, not an argument. What is not negotiable is the axis: recency, which is why `lastSeen` exists apart from `rollUp`.",
+        "When Loop 4b vendors the other 601 pages the map needs nothing — `coverage` reads the manifest — but the e2e does: it pins hizb 3 as the first division with no paper, and the inventory as «المتوفّر ٢ من ٦٠ حزب». Both are facts about what is vendored, and both are meant to fail loudly when that changes."
       ],
       "gates": ["pnpm test", "pnpm gate:revision-privacy", "pnpm gate:quran-meta", "make ci"],
       "seeAlso": ["select-an-ayah", "offline-pwa", "validation"]

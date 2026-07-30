@@ -89,8 +89,15 @@ export function surahName(surah: number, lang: Lang): string {
   return surahNames(lang)[surah - 1] ?? "";
 }
 
-/** Render a number in Arabic-Indic digits (٠١٢…). */
-export function toArabicDigits(n: number): string {
+/**
+ * Render a number in Arabic-Indic digits (٠١٢…).
+ *
+ * Takes a string too, and transliterates every digit in it while leaving the
+ * rest alone — for the shapes that are not one number: a `YYYY-MM-DD` day stamp
+ * keeps its hyphens and becomes «٢٠٢٦-٠٧-٣٠». The alternative was a second copy
+ * of the digit table at the one call site that needed it.
+ */
+export function toArabicDigits(n: number | string): string {
   return String(n).replace(/\d/g, (d) => "٠١٢٣٤٥٦٧٨٩"[Number(d)]!);
 }
 

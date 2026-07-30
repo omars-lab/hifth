@@ -10,6 +10,12 @@ apps/web/test-results/
 .lighthouseci/
 .DS_Store
 
+# Parallel-agent worktrees: checkouts of *other* branches living inside this one.
+# Committing them would put another branch's tree into this branch's history, and
+# linting them makes this branch fail on code it does not contain (see
+# eslint.config.js `ignores`).
+.claude/worktrees/
+
 # Secrets — never commit. Enforced by gitleaks (see .gitleaks.toml + CI).
 .env
 .env.*

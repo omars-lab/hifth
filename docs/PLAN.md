@@ -199,8 +199,26 @@ ends by updating this section and writing `docs/decisions/loop-<N>.md`.**
    [`App.test.tsx`](../apps/web/src/App.test.tsx), because they hold by how `App.tsx` is wired
    and nothing else would notice them being rewired. What no test here can reach is a phone:
    ledger check `revision-record-lands-on-a-phone` covers the clock, the process killer and
-   the seven-day sweep, and **#91 must not draw a picture until it has been run** — the one
-   unacceptable outcome is an emptied log rendered as a true one.
+   the seven-day sweep. The rule written here was that **#91 must not draw a picture until it
+   has been run**, because the one unacceptable outcome is an emptied log rendered as a true
+   one.
+
+   **The picture shipped ahead of that check, and this is the argument.** The rule was
+   protecting an invariant, not a schedule, and the invariant is now enforced in code and
+   asserted where it can be: the sheet renders `since` on every open — empty record or not —
+   so a log emptied by a sweep is visibly a *young* record rather than a year of revision
+   that never happened, and [`revision.spec.ts`](../apps/web/e2e/revision.spec.ts) takes the
+   record with the same CDP call the eviction specs use and proves the map still says how old
+   it is afterwards. What the phone check still owns is the other half — whether an installed
+   PWA on real hardware keeps the record across eight days at all — and no picture drawn in
+   this repo can answer that. So the check stays open and stays blocking for
+   Loop 6b; it no longer blocks the picture, because the failure it guards against
+   is now a test rather than a promise. The map's second honesty problem is its own: 3 of 604
+   pages are vendored, so **absent** — no paper in this build — is drawn as a different kind
+   of thing from **cold**, no fill and a dashed hairline against sunk paper, and absent
+   divisions are counted out of every total. Grey at lower opacity would tell a hafiz they had
+   abandoned 99.5% of the Qur'an, which is false and entirely an artefact of the build. Design
+   note: [`revision-record.md`](design/revision-record.md).
 
 **The half of these a machine cannot run now has a register — and a runbook.** Follow-ups
 ① (the phone), ② (the browser glance) and ④ (VoiceOver/TalkBack) still wait on a human, and

@@ -1,0 +1,272 @@
+/*
+ * RevisionMap — the same sheet furniture as Colophon/EditionPicker/Jumper, so
+ * the picture behaves like every other modal under a thumb.
+ *
+ * The one rule that is this sheet's own: **absent must not read as cold.** The
+ * cheap version of that is the same grey at lower opacity, which says "neglected,
+ * a bit" — over the 601 pages this build does not vendor, that is a picture of
+ * abandonment the reader did not earn. So absent has no fill at all and a dashed
+ * hairline: an outline of paper we do not hold, obviously a different kind of
+ * thing from a filled square nobody has opened. The distinction is also carried
+ * by `aria-label`, because it is not a distinction a screen reader can see.
+ */
+
+.scrim {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-sheet);
+  background: rgba(38, 32, 26, 0.28);
+  animation: fade var(--dur-fast) ease;
+}
+
+.sheet {
+  position: fixed;
+  inset-inline: 0;
+  inset-block-end: 0;
+  z-index: var(--z-sheet);
+  max-block-size: 82vh;
+  overflow-y: auto;
+  padding: var(--space-3) var(--space-4) calc(var(--space-5) + env(safe-area-inset-bottom));
+  background: var(--paper-raised);
+  border-start-start-radius: var(--radius-lg);
+  border-start-end-radius: var(--radius-lg);
+  box-shadow: var(--shadow-2);
+  animation: rise var(--dur-med) var(--ease-hop);
+}
+
+.grip {
+  inline-size: 40px;
+  block-size: 4px;
+  margin: 0 auto var(--space-2);
+  border-radius: var(--radius-pill);
+  background: var(--hairline);
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding-block-end: var(--space-2);
+  border-block-end: 1px solid var(--hairline);
+}
+
+.glyph {
+  font-size: var(--text-lg);
+  color: var(--accent-strong);
+}
+
+.title {
+  flex: 1;
+  margin: 0;
+  font-size: var(--text-md);
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.close {
+  min-inline-size: var(--touch-min);
+  min-block-size: var(--touch-min);
+  border: none;
+  background: none;
+  color: var(--ink-soft);
+  font-size: var(--text-md);
+  cursor: pointer;
+}
+
+.close:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+/* Said once, under the title, at reading weight — not --ink-faint. A caveat that
+   recedes is a caveat that was written to be skipped. */
+.caveat {
+  margin: var(--space-3) 0 0;
+  font-size: var(--text-sm);
+  line-height: 1.6;
+  color: var(--ink-soft);
+}
+
+/* Scope switch: Colophon's language radiogroup, same control, same reasons. */
+.scopeRow {
+  display: flex;
+  gap: var(--space-2);
+  margin-block-start: var(--space-3);
+}
+
+.scope {
+  flex: 1;
+  min-block-size: var(--touch-min);
+  padding-inline: var(--space-3);
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--ink-soft);
+  font-family: inherit;
+  font-size: var(--text-md);
+  cursor: pointer;
+}
+
+/* Weight and fill, not colour alone (WCAG 1.4.1); `aria-checked` carries it on
+   the non-visual channel regardless. */
+.scope[aria-checked="true"] {
+  border-color: var(--accent);
+  background: var(--accent-tint);
+  color: var(--accent-strong);
+  font-weight: 600;
+}
+
+.scope:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.body {
+  margin: var(--space-4) 0 0;
+  font-size: var(--text-md);
+  line-height: 1.7;
+  color: var(--ink-soft);
+}
+
+/*
+ * The grid.
+ *
+ * `auto-fill` rather than a fixed column count, because the same component draws
+ * 30 cells and 604: at juz the cells want to be generous, at page they want to be
+ * dense, and one `min()` covers both without three media queries. `dir="rtl"` on
+ * the element (not inherited) puts division 1 at the top-right and runs the book
+ * leftward — the direction the mus'haf actually reads, in both UI languages.
+ */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(var(--cell), 12vw), 1fr));
+  gap: var(--space-1);
+  margin: var(--space-4) 0 0;
+  padding: 0;
+  list-style: none;
+  --cell: 26px;
+}
+
+.grid[data-scope="juz"] {
+  --cell: 40px;
+}
+
+.grid[data-scope="page"] {
+  --cell: 16px;
+  gap: 2px;
+}
+
+/*
+ * One square. The default state is `cold` — vendored, never opened — because a
+ * cell that has *paper* is the ordinary case in a finished build; absent is the
+ * exception this build happens to be full of.
+ */
+.cell {
+  aspect-ratio: 1;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  background: var(--paper-sunk);
+}
+
+/* No fill, dashed outline: the outline of a page this build does not hold. */
+.cell[data-state="absent"] {
+  border: 1px dashed var(--hairline);
+  background: none;
+}
+
+.cell[data-state="cold"] {
+  background: var(--paper-sunk);
+  border-color: var(--hairline);
+}
+
+/*
+ * Warm, in four bands. The ramp is the accent, not the highlighter amber: amber
+ * is the ink the reader lays down on the page, and reusing it here would make the
+ * map look like a page with everything selected. Each band steps in lightness by
+ * enough to survive a phone in sunlight; the ramp is redundant with the
+ * `aria-label`'s day count, which is what a reader who cannot see the ramp gets.
+ */
+.cell[data-state="seen"] {
+  border-color: transparent;
+}
+
+.cell[data-warmth="1"] {
+  background: #cfe0dc;
+}
+
+.cell[data-warmth="2"] {
+  background: #a7cac3;
+}
+
+.cell[data-warmth="3"] {
+  background: #5d9c92;
+}
+
+.cell[data-warmth="4"] {
+  background: var(--accent-strong);
+}
+
+/* Where the stage is. A ring, not a fill — the cell still has to say its own
+   state, and "here" is a second fact about it rather than a replacement one. */
+.cell[data-here] {
+  outline: 2px solid var(--highlight);
+  outline-offset: 1px;
+}
+
+.inventory {
+  margin: var(--space-3) 0 0;
+  font-size: var(--text-sm);
+  color: var(--ink-soft);
+}
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-3);
+  margin: var(--space-3) 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: var(--text-sm);
+  color: var(--ink-soft);
+}
+
+.legendRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+/* The legend's swatches are the real cells, so a colour can never be changed in
+   the grid and left stale in the key. They need an explicit size only because
+   they are not in the grid that gives the others theirs. */
+.legendRow .cell {
+  inline-size: 14px;
+  block-size: 14px;
+  flex-shrink: 0;
+}
+
+.note {
+  margin: var(--space-3) 0 0;
+  font-size: var(--text-sm);
+  color: var(--ink-soft);
+}
+
+@keyframes rise {
+  from {
+    transform: translateY(100%);
+  }
+}
+
+@keyframes fade {
+  from {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sheet,
+  .scrim {
+    animation: none;
+  }
+}

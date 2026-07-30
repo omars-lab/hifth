@@ -115,8 +115,10 @@ const SURFACES: readonly Surface[] = [
       await settled(page);
       await page.goto("/");
       await expect(page.locator("svg[role='group']").first()).toBeVisible();
-      await page.getByRole("button", { name: "المصحف" }).tap();
-      await expect(page.getByRole("dialog", { name: "المصحف" })).toBeVisible();
+      // `exact`: the page chip's name ends «… من المصحف», and a role name match
+      // is a substring match unless told otherwise.
+      await page.getByRole("button", { name: "المصحف", exact: true }).tap();
+      await expect(page.getByRole("dialog", { name: "المصحف", exact: true })).toBeVisible();
     },
   },
   {

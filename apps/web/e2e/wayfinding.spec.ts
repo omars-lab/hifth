@@ -120,8 +120,11 @@ test.describe("Hifth · wayfinding", () => {
     await page.goto("/");
     await expect(page.locator("svg[role='group']")).toBeVisible();
 
-    await page.getByRole("button", { name: "المصحف" }).tap();
-    const sheet = page.getByRole("dialog", { name: "المصحف" });
+    // `exact`, because a role name match is a substring match by default and the
+    // page chip beside this button is now «صفحة 7 · ما فتحتَه من المصحف» — which
+    // contains this whole name. Two controls in one row can share a word.
+    await page.getByRole("button", { name: "المصحف", exact: true }).tap();
+    const sheet = page.getByRole("dialog", { name: "المصحف", exact: true });
     await expect(sheet).toBeVisible();
 
     await expect(sheet.getByText("الحالي")).toBeVisible();
