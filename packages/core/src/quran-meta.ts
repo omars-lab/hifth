@@ -7,6 +7,13 @@
  * `surah:ayah` keys through this table; nothing downstream ever does index
  * arithmetic across editions (PLAN §8) — this is a property of the Hafs text
  * itself, not of any page layout.
+ *
+ * The three tables here are hand-typed constants with an upstream: the Tanzil
+ * metadata file, vendored verbatim at `packages/etl/data/meta/quran-data.xml`.
+ * They stay constants because core is framework-free and must not read a file to
+ * answer "which juz is this" — but `scripts/gate-quran-meta.mjs` re-derives all
+ * three from those bytes on every CI run and diffs them, so a typo in a number
+ * fails the build instead of quietly re-filing an ayah.
  */
 
 /** Ayah count per surah, 1-indexed by position (index 0 = Al-Fatiha). */
@@ -61,23 +68,80 @@ export const JUZ_STARTS: readonly (readonly [number, number])[] = [
   [39, 32], [41, 47], [46, 1], [51, 31], [58, 1], [67, 1], [78, 1],
 ];
 
-// Absolute ayah number of each juz start (ascending).
-const JUZ_ABS: number[] = [];
+/**
+ * Hizb start points, `[surah, ayah]` per hizb 1..60 — the same Tanzil metadata,
+ * vendored at `packages/etl/data/meta/quran-data.xml` and re-derived from it on
+ * every CI run by `scripts/gate-quran-meta.mjs`.
+ *
+ * **Not half a juz.** The arithmetic shortcut — 30 juz, split each down the
+ * middle — is the reason this table is typed out rather than computed, and it is
+ * wrong in a way that would never look wrong: only **4 of the 30** even-numbered
+ * hizbs fall on their juz's midpoint by ayah count, and the rest miss by up to
+ * **39 ayahs** (hizb 50, in juz 25). A heatmap labelled «الحزب ٥٠» colouring
+ * thirty-nine ayahs of somebody else's hizb is #80's off-by-one wearing a new
+ * coat, and no gate here would have caught it: the numbers would all be in range,
+ * ascending, and sixty of them.
+ *
+ * Tanzil publishes no hizb element at all — the division is given at its finest
+ * grain as 240 `<quarter>` (أرباع الأحزاب), and a hizb is four of them. So these
+ * are quarters 1, 5, 9, … 237.
+ *
+ * The odd-numbered entries are exactly `JUZ_STARTS` (a juz is two hizbs), which
+ * is asserted in the tests and by the gate — it is the cheapest available check
+ * that this table and that one describe the same book.
+ */
+export const HIZB_STARTS: readonly (readonly [number, number])[] = [
+  [1, 1], [2, 75], [2, 142], [2, 203], [2, 253], [3, 15],
+  [3, 93], [3, 171], [4, 24], [4, 88], [4, 148], [5, 27],
+  [5, 82], [6, 36], [6, 111], [7, 1], [7, 88], [7, 171],
+  [8, 41], [9, 34], [9, 93], [10, 26], [11, 6], [11, 84],
+  [12, 53], [13, 19], [15, 1], [16, 51], [17, 1], [17, 99],
+  [18, 75], [20, 1], [21, 1], [22, 1], [23, 1], [24, 21],
+  [25, 21], [26, 111], [27, 56], [28, 51], [29, 46], [31, 22],
+  [33, 31], [34, 24], [36, 28], [37, 145], [39, 32], [40, 41],
+  [41, 47], [43, 24], [46, 1], [48, 18], [51, 31], [55, 1],
+  [58, 1], [62, 1], [67, 1], [72, 1], [78, 1], [87, 1],
+];
 
-/** Juz (1..30) containing `surah:ayah`. */
-export function juzOf(surah: number, ayah: number): number {
-  if (JUZ_ABS.length === 0) {
-    for (const [s, a] of JUZ_STARTS) JUZ_ABS.push(toAbsoluteAyah(s, a));
+// Absolute ayah numbers of each division's starts (ascending), built once.
+const ABS_CACHE = new WeakMap<readonly (readonly [number, number])[], number[]>();
+
+/**
+ * 1-based index of the last start at or before `surah:ayah`.
+ *
+ * Shared by `juzOf` and `hizbOf` because "which division is this ayah in" is one
+ * question asked of two tables, and the binary search is the part that is easy to
+ * get subtly wrong in a second copy.
+ */
+function divisionOf(
+  starts: readonly (readonly [number, number])[],
+  surah: number,
+  ayah: number,
+): number {
+  let abs = ABS_CACHE.get(starts);
+  if (!abs) {
+    abs = starts.map(([s, a]) => toAbsoluteAyah(s, a));
+    ABS_CACHE.set(starts, abs);
   }
-  const abs = toAbsoluteAyah(surah, ayah);
+  const target = toAbsoluteAyah(surah, ayah);
   let lo = 0;
-  let hi = JUZ_ABS.length - 1;
+  let hi = abs.length - 1;
   while (lo < hi) {
     const mid = (lo + hi + 1) >> 1;
-    if (JUZ_ABS[mid]! <= abs) lo = mid;
+    if (abs[mid]! <= target) lo = mid;
     else hi = mid - 1;
   }
   return lo + 1;
+}
+
+/** Juz (1..30) containing `surah:ayah`. */
+export function juzOf(surah: number, ayah: number): number {
+  return divisionOf(JUZ_STARTS, surah, ayah);
+}
+
+/** Hizb (1..60) containing `surah:ayah`. */
+export function hizbOf(surah: number, ayah: number): number {
+  return divisionOf(HIZB_STARTS, surah, ayah);
 }
 
 /** Absolute ayah number (1..6236) → `{surah, ayah}`. Throws on out-of-range. */

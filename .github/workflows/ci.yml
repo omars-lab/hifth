@@ -159,6 +159,13 @@ jobs:
       - name: Gate — every promise still has a proof
         run: pnpm gate:use-cases
 
+      # AYAH_COUNTS, JUZ_STARTS and HIZB_STARTS are hand-typed numbers whose only
+      # symptom when wrong is an ayah quietly filed under the wrong division —
+      # in range, ascending, and false. This re-derives all three from the
+      # vendored Tanzil metadata and diffs them.
+      - name: Gate — the structural tables match their source
+        run: pnpm gate:quran-meta
+
       # The revision record is a log of when a person was reading Qur'an. This
       # checks the closed allow-list of modules allowed to import it is still
       # closed, and that its own modules still hold no way off the device.

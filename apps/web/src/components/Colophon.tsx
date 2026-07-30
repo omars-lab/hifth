@@ -30,10 +30,13 @@ interface Credit {
 
 /*
  * Every source Hifth ships bytes from, with the name and licence its terms ask
- * for. Two of these are conditions, not courtesies:
+ * for. Three of these are conditions, not courtesies:
  *   • the Quranic Arabic Corpus requires its source to be "clearly indicated"
  *     with a link to corpus.quran.com;
- *   • quran-tajweed is CC BY 4.0, whose attribution travels with the work.
+ *   • quran-tajweed is CC BY 4.0, whose attribution travels with the work;
+ *   • the Tanzil metadata is CC BY, likewise — and it is credited even though
+ *     Hifth ships none of its bytes, only numbers copied out of them, because
+ *     the numbers are the work.
  * The mutashabihat licence asks for a mention "in your app or any other kind of
  * work" — SOURCES.md has promised this surface since Loop 4a. The full terms,
  * pins and hashes are in SOURCES.md; this is the reader-facing half.
@@ -78,6 +81,12 @@ const CREDITS: readonly Credit[] = [
     who: "quran-tajweed · Collin Fair",
     licence: "CC BY 4.0",
     href: "https://github.com/cpfair/quran-tajweed",
+  },
+  {
+    what: "أقسام المصحف",
+    who: "Tanzil Project",
+    licence: "CC BY",
+    href: "https://tanzil.net",
   },
 ];
 

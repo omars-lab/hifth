@@ -6,7 +6,7 @@ import { SOURCE_REPO, isCommit, sourceUrl, urlFor } from "../provenance";
 /*
  * The colophon is the app's licence compliance, so these tests assert
  * obligations rather than markup: the GPL §6 offer resolves to a real place,
- * and the four sources whose licences ask to be named are named with their
+ * and the five sources whose licences ask to be named are named with their
  * links intact. A rendering detail may change freely; a missing credit is a
  * licence breach.
  */
@@ -30,12 +30,16 @@ describe("Colophon", () => {
     render(<Colophon open onClose={() => {}} />);
     // The Quranic Arabic Corpus requires the link, verbatim: "a link is made to
     // http://corpus.quran.com". quran-tajweed is CC BY 4.0. The mutashabihat
-    // data asks for a mention in the app itself. KFGQPC is the mushaf.
+    // data asks for a mention in the app itself. KFGQPC is the mushaf. Tanzil is
+    // CC BY too, and is credited even though no byte of it ships — what ships is
+    // the numbers copied out of it (JUZ_STARTS, HIZB_STARTS), and the numbers are
+    // the work.
     for (const href of [
       "http://corpus.quran.com",
       "https://github.com/cpfair/quran-tajweed",
       "https://github.com/Waqar144/Quran_Mutashabihat_Data",
       "https://github.com/quranpedia/quran-svg",
+      "https://tanzil.net",
     ]) {
       expect(
         screen.getAllByRole("link").some((a) => a.getAttribute("href") === href),

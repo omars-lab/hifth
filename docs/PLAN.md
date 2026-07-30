@@ -164,14 +164,19 @@ ends by updating this section and writing `docs/decisions/loop-<N>.md`.**
    the skin — a production-readable `skin=` param would ship a shareable link that turns a
    beta annotation layer on for a reader who never saw the badge. Opened by Loop 6a;
    **after Loop 7's sign-off**. See [loop-6a.md](decisions/loop-6a.md) §Deferred.
-9. **The revision record** (interaction calendar — per page, per juz, and *not* per hizb).
+9. **The revision record** (interaction calendar — per page, per juz, and now per hizb).
    Planned in [`.claude/plans/interaction-calendar.md`](../.claude/plans/interaction-calendar.md);
-   three constraints decide its shape and none is a rendering question. **Hizb does not
-   exist in this repo at all** — not a constant, not a comment — and the obvious shortcut
+   three constraints decide its shape and none is a rendering question. Hizb used not to
+   exist in this repo at all — not a constant, not a comment — and the obvious shortcut
    (half a juz) is wrong, because hizb boundaries are their own text division; a heatmap
    labelled «الحزب ١٢» over the wrong ayahs is #80's off-by-one wearing a new coat, and no
-   test here would catch it. So: page + juz (`juzOf` is already exported), hizb only on
-   vendored `HIZB_STARTS`. **iOS ITP deletes script-writable storage after 7 days of no
+   test here would catch it. **That condition is now met**: `HIZB_STARTS` is sixty vendored
+   `[surah, ayah]` pairs derived from every fourth `<quarter>` of the Tanzil metadata
+   (`packages/etl/data/meta/quran-data.xml`, CC BY), `hizbOf` is exported beside `juzOf`,
+   and `pnpm gate:quran-meta` re-derives all three tables from those bytes on every CI run
+   so a mistyped digit fails the build. The measurement that made the shortcut refusable is
+   pinned as a test: only **4 of 30** even hizbs land on their juz's arithmetic midpoint,
+   and the worst misses by **39 ayahs**. **iOS ITP deletes script-writable storage after 7 days of no
    interaction** (see [`storage.ts`](../apps/web/src/storage.ts)) — which is precisely the
    history a "what have I not touched in weeks" view exists to report, deleted by the very
    condition it reports on; the record therefore carries a `since` stamp and says how young
@@ -290,6 +295,8 @@ packages/core/                ← framework-free TS (architecture's L2 + shared 
                               result so the stage always holds page, never blank paper
   router.ts                   hash-link grammar parse/serialize (spec §7) — same path as share
   adjacency.ts                shard loader + edge bucketing by dir (↻◀▶), popover ordering
+  quran-meta.ts               ayah counts, juz and hizb starts — the divisions any per-scope
+                              view is labelled by; vendored from Tanzil, checked by a gate
 
 packages/etl/                 ← Node: extract-anchors, build-adjacency, build-roots,
                                 build-skins, validate (resolution + licensing gates)

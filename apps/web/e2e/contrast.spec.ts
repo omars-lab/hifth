@@ -120,7 +120,7 @@ const SURFACES: readonly Surface[] = [
     },
   },
   {
-    name: "the colophon — the licence offer and four credits",
+    name: "the colophon — the licence offer and five credits",
     open: async (page) => {
       await settled(page);
       await page.goto("/");

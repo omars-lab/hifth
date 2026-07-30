@@ -215,6 +215,51 @@ href: https://github.com/cpfair/quran-tajweed
 
 ---
 
+### tanzil-quran-metadata
+
+- **Name:** Tanzil Quran metadata — the structural divisions of the mus'haf
+  (sura, juz, hizb quarter, manzil, ruku, page, sajda) as one XML file. The
+  upstream for `AYAH_COUNTS`, `JUZ_STARTS` and `HIZB_STARTS` in
+  `packages/core/src/quran-meta.ts`.
+- **Provenance:** https://tanzil.net/res/text/metadata/quran-data.xml, retrieved
+  2026-07-30 → `packages/etl/data/meta/quran-data.xml` (SHA-256
+  `8867c1d8…c5c7a`, 77,234 bytes; server `Last-Modified` 2010-06-05). Full
+  details in the adjacent `PROVENANCE.md`.
+- **Shape:** one `<quran type="metadata">` root over flat elements carrying
+  `sura`/`aya` attributes — 114 `<sura>`, 30 `<juz>`, 7 `<manzil>`,
+  556 `<ruku>`, 604 `<page>`, 15 `<sajda>`, and **240 `<quarter>`**. There is no
+  `<hizb>` element: the division is published at its finest grain, the quarter
+  (أرباع الأحزاب), and a hizb is four of them — hizb *h* opens at quarter
+  `4h − 3`. The tempting arithmetic (half a juz) agrees for only 4 of 30 and
+  misses by up to 39 ayahs, which is why the table is vendored rather than
+  computed.
+- **License (root element, verbatim):** `copyright="(C) 2008-2009 Tanzil.info"
+  license="cc-by"` — CC BY, so **attribution is mandatory**, and it ships in
+  `SOURCES.md`, in `PROVENANCE.md` beside the bytes, and as a visible credit in
+  the app's colophon.
+- **What is taken, and what is not:** the numbers only — ayah counts and division
+  start points. Not the surah name strings, and **not** the `<page>` table: page
+  geometry comes from the vendored KFGQPC SVGs, and a second, differently-printed
+  page table would be a source of disagreement rather than of truth.
+- **Why the bytes are vendored and not fetched:** `scripts/gate-quran-meta.mjs`
+  re-derives all three tables from this file on every CI run and diffs them
+  against what `@hifth/core` exports, so a mistyped digit fails the build instead
+  of quietly re-filing an ayah (the shape of #80). A gate that reaches the network
+  fails when a host is down, which teaches everyone to skip it.
+- **Immutability:** bytes are vendored verbatim and never edited (PLAN §8).
+- **Colophon row.** Verbatim; bound to `Colophon.tsx` by `gate:license-copy`.
+
+```colophon
+what: أقسام المصحف
+who: Tanzil Project
+licence: CC BY
+href: https://tanzil.net
+```
+
+- **Status: VENDORED (Loop 6b prep) — structural tables for juz/hizb.**
+
+---
+
 ## Pending sources (not yet vendored — recorded so the gate is ready)
 
 These are named in the plan for later loops. They are listed here so their license
