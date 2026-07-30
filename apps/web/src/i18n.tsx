@@ -328,6 +328,27 @@ export interface Strings {
   mapCellAbsent(label: string): string;
   mapCellNever(label: string): string;
   mapCellSeen(label: string, days: number): string;
+
+  /* ---- the desktop spread and the controls a phone had no room for -------- */
+  /**
+   * The accessible name of the leaf facing the one you are reading. Structural,
+   * not a caption: the panel's own visible text says what is or is not there, so
+   * a label that repeated it would be read twice.
+   */
+  facingPage: string;
+  /**
+   * "صفحة 6 ليست في هذه النسخة" / "Page 6 is not in this build".
+   *
+   * Only pages 7, 9 and 19 are vendored and they are not adjacent, so today
+   * every spread has one of these. Latin digits, following `pageN` and
+   * `pageOfTotal`: it is a page number, read off the corner of a printed page.
+   * Said in the document rather than through `LiveAnnouncer` — see PageSpread.
+   */
+  facingAbsent(page: number): string;
+  /** What the arrow keys do. Desktop only; a phone cannot reach them at all. */
+  keyPages: string;
+  /** What `/` does. Same. */
+  keyJump: string;
 }
 
 /* ------------------------------------------------------------------------- */
@@ -594,6 +615,11 @@ export const AR: Strings = {
       : days === 1
         ? `${label} · فُتح أمس`
         : `${label} · فُتح قبل ${digits(days, "ar")} يومًا`,
+
+  facingPage: "الصفحة المقابلة",
+  facingAbsent: (page) => `صفحة ${page} ليست في هذه النسخة`,
+  keyPages: "تصفّح",
+  keyJump: "انتقال",
 };
 
 /* ------------------------------------------------------------------------- */
@@ -861,6 +887,11 @@ export const EN: Strings = {
       : days === 1
         ? `${label} · opened yesterday`
         : `${label} · opened ${days} days ago`,
+
+  facingPage: "Facing page",
+  facingAbsent: (page) => `Page ${page} is not in this build`,
+  keyPages: "Pages",
+  keyJump: "Go to",
 };
 
 const BUNDLES: Readonly<Record<Lang, Strings>> = { ar: AR, en: EN };
