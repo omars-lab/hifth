@@ -517,6 +517,72 @@
         "apps/web/src/storage.ts — the re-pin offer's trigger, if eviction looks different than assumed"
       ],
       "record": "docs/decisions/loop-6b.md"
+    },
+    {
+      "id": "revision-record-lands-on-a-phone",
+      "title": "Two days of real revision produce two days in the record",
+      "why": "The revision record is tested against fake-indexeddb in Node, where the clock is a parameter, nothing evicts, and every write lands. All three are false on a phone. Three specific things can only be seen there: whether a write inside a tap gesture survives the app being swiped away seconds later (iOS kills backgrounded tabs aggressively, and the store deliberately writes per tap rather than batching precisely because of that); whether a day boundary in the record matches the day boundary the reader lived through, since `dayOf` files by the offset captured at record time and nothing in CI has ever run under a non-UTC clock; and whether the whole log is still there a week later, given that iOS deletes script-writable storage after 7 days of no interaction — the exact condition a 'what have I not touched in weeks' view exists to report on. A record that quietly resets and says nothing is worse than no record: it tells a hafiz they have revised nothing.",
+      "how": "Revise on a phone on two different calendar days, at least one session late enough to be near midnight, swiping the app away immediately after some taps. Then read the record back and check the days, the counts and `since`.",
+      "owner": "user",
+      "status": "pending",
+      "blocks": ["loop-7"],
+      "runbook": {
+        "needs": [
+          "A phone — an iPhone if you have one, since the seven-day sweep is Safari's and it is the failure this check is mostly about.",
+          "A deployed build, and two calendar days. The second session must be on a different local day from the first; that is the whole point of the first three steps.",
+          "**There is no picture yet.** Task #91 is gated on Loop 4b, so the record is read back through the browser's own IndexedDB inspector rather than through a view in the app. Safari: connect the phone to a Mac and use Web Inspector › Storage › Indexed Databases › `hifth.revision.v1`. Chrome on Android: `chrome://inspect` from a desktop, then Application › IndexedDB. The `days` store is keyed by `YYYY-MM-DD`; the `meta` store holds one row, `since`.",
+          "**What no harness can supply.** `revision-store.test.ts` proves the retention window, the `since` stamp and per-tap durability against a real IndexedDB implementation, and `App.test.tsx` proves the three exclusions through the real UI. None of that runs under a phone's clock, a phone's storage pressure, or a phone's process killer."
+        ],
+        "setup": [],
+        "steps": [
+          {
+            "do": "Open the deployed site on the phone. Before tapping anything, look at `meta` → `since` in the storage inspector.",
+            "expect": "A row already exists, stamped with today's local date — written by opening the store, not by any tap.",
+            "why": "This is the entire defence against the seven-day sweep. A record that has existed for a month and holds nothing means the reader did not tap; one that has existed since this morning and holds nothing means we lost it. If `since` only appeared after the first tap, those two are indistinguishable forever after."
+          },
+          {
+            "do": "Tap five or six ayahs on a page, then drag a marquee across a short passage. Tap one of those ayahs a second time to dismiss it.",
+            "expect": "Under `days` → today's date: one entry per ayah you selected, exactly one entry for the whole marquee (carrying both a `key` and an `endKey`), and nothing at all for the tap that dismissed.",
+            "why": "The three exclusions are asserted in App.test.tsx, but against a synthetic pointerup on a fixture page. This is the same claim against a finger on the real gesture stack — where a marquee release and a tap are told apart by @use-gesture, not by the test calling one or the other."
+          },
+          {
+            "do": "Tap two or three more ayahs, then immediately swipe the app away from the app switcher — within a second or two, before anything could plausibly flush.",
+            "expect": "Reopen and inspect: those last taps are all present.",
+            "why": "The store writes on every tap instead of batching, which costs a rewrite of the day's array per tap. This step is what that cost is buying. A batched writer loses exactly the taps made just before the app is killed, which on a phone is most of them — and it would have looked perfect in every test in this repo."
+          },
+          {
+            "do": "If you can, do one short session within half an hour either side of local midnight, and note the wall-clock time.",
+            "expect": "Looks before midnight file under the earlier date and looks after it under the later one — by the phone's own clock, not UTC.",
+            "why": "Every clock in CI is UTC, so `dayOf` reading the offset from the event has never once been exercised against a real one. Someone revising at 23:40 in a UTC+3 city and again at 00:20 has revised on two days; if the record shows one, the offset is not riding on the event and every evening session east or west of Greenwich is mis-filed."
+          },
+          {
+            "do": "On a later calendar day, open the app again and revise for a few minutes.",
+            "expect": "`days` now holds two keys, the earlier one unchanged, and `meta` → `since` still shows the first day — it must not have moved forward.",
+            "why": "`since` moving with the record would make the log look freshly created every time it was read, which is precisely the wipe's signature. This is the cheapest way to catch that, and it cannot be caught at all in a suite that creates a new database per test."
+          },
+          {
+            "do": "Now leave the app alone for eight or more days of ordinary phone use, then open it and look at `days` and `since`.",
+            "expect": "Either the record is intact, or it is empty **and** `since` reads as today — never empty with an old `since`.",
+            "why": "This is the failure the feature is designed around and the one no harness can produce: iOS sweeping an origin nobody has touched. The two acceptable outcomes are 'the history is there' and 'the history is gone and the record admits it is one day old'. The third — empty, with a `since` from weeks ago — is the app telling someone they have not revised in a month. Note whether the phone had the site installed to the Home Screen or open as a tab; that is the same asymmetry offline-survival-8-day measures for the page cache, and this is the IndexedDB half of it."
+          }
+        ],
+        "reading": [
+          "Everything as expected → the record is real on a device. Loop 4b can proceed to task #91 (RevisionMap) on the understanding that the numbers behind the picture are true.",
+          "Taps lost after a swipe-away → per-tap durability is not enough on this OS. That is a `recordLook` problem, not a UI one, and it must be fixed before any picture is drawn from the data.",
+          "The near-midnight session filed under the wrong day → `tz` is not reaching the event. Everything else in the record is then wrong by up to a day for every reader not on UTC, which is almost all of them.",
+          "Record empty with a stale `since` → the store's own defence failed, and no view may render the record until it is fixed. Say what the storage inspector showed; the shape of what survived is the diagnosis.",
+          "Record empty with today's `since` → the sweep happened and the record told the truth about it. That is a pass for this check and a hard requirement on #91: the picture must render 'we cannot know' differently from 'you did not revise'."
+        ],
+        "record": "make record CHECK=revision-record-lands-on-a-phone RESULT='<iOS|Android> <ver>, <installed|tab>, sessions <date> + <date> — per-tap after swipe-away: <kept|lost>; midnight filing: <correct|wrong|not tested>; after 8 days: <intact|empty+fresh since|empty+stale since>'"
+      },
+      "tunes": [
+        "apps/web/src/revision-store.test.ts — the retention and `since` tests are written against a clock passed in as a parameter. Whatever the phone actually did to the log gets a case here, in the units the phone reported it in.",
+        "packages/core/src/revision.test.ts — the DST/offset cases were reasoned about, not observed. Replace the invented offsets with the real one from the near-midnight session.",
+        "packages/core/src/revision.ts — `RevisionEvent`'s doc comment lists what must not become an event. If the phone shows a gesture this repo did not anticipate producing a look, that list is what changes.",
+        "apps/web/src/revision-store.ts — if a swipe-away loses taps, the per-tap write is not sufficient and the durability comment at the top of the file is currently a claim rather than a fact.",
+        "docs/map.json → revision-record — the `extend` steps for task #91 depend on which of the two acceptable outcomes actually happens at day eight."
+      ],
+      "record": "docs/decisions/loop-7.md"
     }
   ]
 }
