@@ -73,17 +73,18 @@ test.describe("Hifth · the desktop spread", () => {
   });
 
   test("puts the lower page number on the right", async ({ page }) => {
-    // The mus'haf reads right to left. Page 7 pairs with 6, so 6 — here, the
-    // hole where 6 would be — must sit to the *right* of the page on the stage.
-    // Measured in viewport coordinates against the real RTL flow, because that
-    // is the step DOM-order assertions cannot make.
+    // The mus'haf reads right to left. Page 7 pairs with 8 — the print opens
+    // each spread on the odd page — so 7 is the earlier leaf and sits on the
+    // right, and the hole where 8 would be must sit to its *left*. Measured in
+    // viewport coordinates against the real RTL flow, because that is the step
+    // DOM-order assertions cannot make.
     await page.goto("/#/hafs-kfqc/p7");
     await expect(spread(page)).toBeVisible();
 
     const live = await boxOf(pageSvg(page, 7));
     const absent = await boxOf(page.getByRole("region", { name: "الصفحة المقابلة" }));
 
-    expect(absent.x, "the earlier page is not on the right").toBeGreaterThan(live.x + live.width);
+    expect(live.x, "the earlier page is not on the right").toBeGreaterThan(absent.x + absent.width);
 
     // And both leaves are inside the spread, side by side rather than stacked —
     // a wrap would satisfy the test above and still be two pages on top of each
@@ -99,7 +100,7 @@ test.describe("Hifth · the desktop spread", () => {
 
     // It says which page, and how much of the mus'haf is actually here — the
     // same sentence the page bar carries, from the same string.
-    await expect(absent).toContainText("صفحة 6 ليست في هذه النسخة");
+    await expect(absent).toContainText("صفحة 8 ليست في هذه النسخة");
     await expect(absent).toContainText("المتوفّر ٣ من ٦٠٤ صفحة");
 
     // The claim that it is not blank paper, made against the pixels rather than
@@ -147,9 +148,9 @@ test.describe("Hifth · the desktop spread", () => {
   test("still turns pages with the arrow keys the header advertises", async ({ page }) => {
     // The hint is a promise. ← is drawn first, on the right of the RTL row, and
     // it turns forward — the next page of a mus'haf is the one to the left.
-    // The spread must follow: 7 → 9 is the next *vendored* page, and its spread
-    // is (8,9), so the live leaf moves to the left-hand side of the same wrapper
-    // rather than the spread staying put.
+    // The spread must follow: 7 → 9 is the next *vendored* page, and 9 belongs
+    // to a different opening, so the wrapper must redraw around it rather than
+    // staying put on (7,8).
     await page.goto("/#/hafs-kfqc/p7");
     await expect(spread(page)).toBeVisible();
     const before = await boxOf(pageSvg(page, 7));
@@ -158,13 +159,14 @@ test.describe("Hifth · the desktop spread", () => {
     await expect(pageSvg(page, 9)).toBeVisible();
     await expect(spread(page)).toBeVisible();
 
-    // Page 9 is also an odd page, so it is also the left leaf, and its hole is
-    // page 8 on the right. Both vendored pages being odd is an accident of this
-    // build, so what is asserted is the relationship, not the side.
+    // Page 9 is also odd, so it too opens its spread and sits on the right,
+    // with the hole for 10 on its left. All three vendored pages being odd is
+    // an accident of this build, so what is asserted is the relationship —
+    // earlier leaf on the right — not the side the live page happens to land on.
     const after = await boxOf(pageSvg(page, 9));
     const hole = await boxOf(page.getByRole("region", { name: "الصفحة المقابلة" }));
-    expect(hole.x, "the earlier page stopped being on the right").toBeGreaterThan(
-      after.x + after.width,
+    expect(after.x, "the earlier page stopped being on the right").toBeGreaterThan(
+      hole.x + hole.width,
     );
     expect(after.width, "the leaf changed size on a page turn").toBeCloseTo(before.width, 0);
 

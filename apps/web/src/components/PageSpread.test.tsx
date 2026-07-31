@@ -47,20 +47,25 @@ describe("PageSpread", () => {
     // adds a `row-reverse` to make it "look right", this fails.
     const container = spread({ page: 7 });
     const [right, left] = leaves(container);
-    // Page 7 pairs with 6; 6 is the earlier page, so 6 is on the right.
-    expect(right!.textContent).toContain("صفحة 6 ليست في هذه النسخة");
-    expect(left!).toContainElement(screen.getByTestId("live-stage"));
+    // Page 7 pairs with 8; 7 is the earlier page, so 7 — the live one — is on
+    // the right and the hole for 8 is on the left.
+    expect(right!).toContainElement(screen.getByTestId("live-stage"));
+    expect(left!.textContent).toContain("صفحة 8 ليست في هذه النسخة");
   });
 
   it("keeps the live stage on the leaf the reader is actually on", () => {
-    // Page 9 pairs with 8. 9 is the *left* leaf; page 19 pairs with 18 and is
-    // also on the left. Both vendored pages being odd is an accident of what was
-    // vendored, not a rule — the assertion is that the stage follows `page`.
+    // All three vendored pages are odd, so under the print's real parity all
+    // three are right-hand leaves. That is an accident of what was vendored, so
+    // the even case is exercised with a fixture inventory rather than left to
+    // Loop 4b: 8 pairs with 7 and must land on the *left*.
     for (const page of [9, 19]) {
       const container = spread({ page });
-      const [, left] = leaves(container);
-      expect(left!.querySelector("[data-testid='live-stage']")).not.toBeNull();
+      const [right] = leaves(container);
+      expect(right!.querySelector("[data-testid='live-stage']")).not.toBeNull();
     }
+    const container = spread({ page: 8, available: [7, 8, 9, 19] });
+    const [, left] = leaves(container);
+    expect(left!.querySelector("[data-testid='live-stage']")).not.toBeNull();
   });
 
   it("draws the missing facing page as absent, not as blank paper", () => {
@@ -69,7 +74,7 @@ describe("PageSpread", () => {
     // is and how much of the mus'haf is here.
     spread({ page: 7 });
     const absent = screen.getByRole("region", { name: "الصفحة المقابلة" });
-    expect(absent.textContent).toContain("صفحة 6 ليست في هذه النسخة");
+    expect(absent.textContent).toContain("صفحة 8 ليست في هذه النسخة");
     expect(absent.textContent).toContain("المتوفّر ٣ من ٦٠٤ صفحة");
   });
 
@@ -86,25 +91,39 @@ describe("PageSpread", () => {
     // run for the first time is a branch Loop 4b discovers the hard way.
     const container = spread({
       page: 7,
-      available: [6, 7, 9, 19],
+      available: [7, 8, 9, 19],
       renderFacing: (p) => <div data-testid="facing-stage">{p}</div>,
     });
-    const [right] = leaves(container);
-    expect(right!.querySelector("[data-testid='facing-stage']")?.textContent).toBe("6");
+    const [, left] = leaves(container);
+    expect(left!.querySelector("[data-testid='facing-stage']")?.textContent).toBe("8");
     expect(screen.queryByRole("region", { name: "الصفحة المقابلة" })).toBeNull();
   });
 
   it("falls back to absent when the caller cannot afford a second mount", () => {
     // `renderFacing` is optional. A caller that holds the page but declines to
     // mount it gets the honest hole, not an empty leaf.
-    spread({ page: 7, available: [6, 7, 9, 19] });
+    spread({ page: 7, available: [7, 8, 9, 19] });
     expect(screen.getByRole("region", { name: "الصفحة المقابلة" })).toBeTruthy();
   });
 
-  it("leaves the far side of page 1 blank and unlabelled", () => {
-    // Nothing is missing at the ends of a book. Captioning this side would tell
-    // a reader that page 0 is a page we failed to vendor.
+  it("gives page 1 a real facing leaf, because Al-Fatiha faces Al-Baqarah", () => {
+    // Under the print's real parity page 1 is an ordinary right-hand leaf and
+    // page 2 faces it. This used to assert the opposite — blank furniture on the
+    // left — and that half-opening was the visible symptom of `spreadOf`'s wrong
+    // phase, not a fact about the book.
     const container = spread({ page: 1 });
+    const [right, left] = leaves(container);
+    expect(right!.querySelector("[data-testid='live-stage']")).not.toBeNull();
+    expect(left!.textContent).toContain("صفحة 2 ليست في هذه النسخة");
+  });
+
+  it("leaves the far side blank and unlabelled at the end of an odd-length print", () => {
+    // Nothing is missing at the end of a book. Captioning this side would tell a
+    // reader that page 604 is a page we failed to vendor. The Madani print is
+    // even and never reaches this branch, so it is exercised with an odd `total`
+    // — a branch that waits for another edition is a branch that edition finds
+    // the hard way.
+    const container = spread({ page: 603, total: 603, available: [603] });
     const [right, left] = leaves(container);
     expect(right!.querySelector("[data-testid='live-stage']")).not.toBeNull();
     expect(left!.getAttribute("aria-hidden")).toBe("true");
