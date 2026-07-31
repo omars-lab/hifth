@@ -35,10 +35,12 @@ interface PageSpreadProps {
  * ## Geometry, declared exactly once
  *
  * The mus'haf reads right to left, so within a spread the **lower page number is
- * on the right** and the next page is to its left; the print pairs (2,3), (4,5),
- * (6,7)…, and page 1 sits alone on the right. `spreadOf` (@hifth/core) is the
- * only place that arithmetic lives, beside `nearestPage` — it is pagination, not
- * presentation.
+ * on the right** and the next page is to its left; the print pairs (1,2), (3,4),
+ * (5,6)… — odd on the right — so Al-Fatiha faces the opening of Al-Baqarah, and
+ * the 604-page print divides into 302 complete openings with nothing orphaned.
+ * `spreadOf` (@hifth/core) is the only place that arithmetic lives, beside
+ * `nearestPage` — it is pagination, not presentation, and its doc comment records
+ * where the parity was observed and why the phase it used to implement was wrong.
  *
  * The *sides* are then declared once more, and only once: the two leaves are
  * emitted in DOM order **right leaf first** inside the `dir="rtl"` main, and the
@@ -76,10 +78,16 @@ interface PageSpreadProps {
  *
  * ## The empty end of the book
  *
- * `spreadOf` answers `left: null` for page 1 and for the last page of an
- * even-length print. That is not the same as "absent": nothing is missing at the
- * ends of a book, so that side is blank furniture with no caption and no label.
- * Captioning it would tell a reader that page 605 is a page we failed to vendor.
+ * `spreadOf` answers `left: null` for the last leaf of an **odd**-length print.
+ * That is not the same as "absent": nothing is missing at the end of a book, so
+ * that side is blank furniture with no caption and no label. Captioning it would
+ * tell a reader that page 605 is a page we failed to vendor.
+ *
+ * The Madani print is 604 pages and never reaches that branch — under the
+ * corrected parity every one of its 302 openings has two leaves. The branch stays
+ * because `total` is a parameter and another edition may be odd. It used to fire
+ * twice for this print, at page 1 and at page 604, and those two half-openings
+ * were the visible symptom of the wrong phase rather than a fact about the book.
  */
 export function PageSpread({
   enabled,

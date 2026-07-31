@@ -364,7 +364,7 @@
         {
           "file": "packages/core/src/pages.ts",
           "symbol": "spreadOf",
-          "note": "Which two pages face each other. The mus'haf reads right to left, so the *lower* number is the right-hand leaf and the print pairs (2,3), (4,5)… with page 1 alone. This is pagination, not presentation, which is why it sits in core beside nearestPage and why no component re-derives it."
+          "note": "Which two pages face each other. The mus'haf reads right to left, so the *lower* number is the right-hand leaf, and the print pairs (1,2), (3,4)… — odd on the right, which is why Al-Fatiha faces Al-Baqarah and why 604 pages make 302 openings with no orphan. This is pagination, not presentation, which is why it sits in core beside nearestPage and why no component re-derives it; its doc comment records where the parity was observed and why the phase it used to implement was wrong."
         },
         {
           "file": "apps/web/src/useMediaQuery.ts",
