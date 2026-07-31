@@ -9,61 +9,145 @@
  * property inside a media query. Twice is a limitation held in place by a test
  * (`useMediaQuery.test.ts` reads that stylesheet back); three times is a bug
  * waiting for the day someone changes two of them.
+ *
+ * ## Three boxes, and why there used to be two
+ *
+ *   .spread   the desk. Full width, and it draws the field.
+ *   .book     the two leaves, and only them. The gutter's element and the
+ *             fold's host.
+ *   .leaf     one page, exactly — portrait, sized by the height available.
+ *
+ * The middle one is new, and every defect this file was rewritten for came from
+ * its absence. With `.leaf` at `flex: 1 1 0` each leaf took half the *window*
+ * (720 px at 1440), while the page inside it was sized from the height the
+ * chrome left (~426 px) and then centred in that half by `holdAxis`. So:
+ *
+ *   · ~131 px of field sat between each page and the spine — the book had a gap
+ *     down the middle of it, which is the one place a book has no gap at all;
+ *   · the two leaves were not even the same width. `flex-basis: 0` floors the
+ *     *content* box at zero, so the absent leaf's `padding` was added on top of
+ *     its share and it came out 32 px wider than the live one. The gutter is
+ *     drawn at the container's 50%, so the spine missed the seam by 16 px;
+ *   · the field was painted by each `PageStage`, and only the live leaf has one
+ *     — so the right half of the desk had the radial field and the left half was
+ *     flat `--paper`, with a seam down the middle where they met.
+ *
+ * Sizing the leaf to the page it holds answers all three, and answers a fourth
+ * thing this file used to get wrong on its own terms: it retires the
+ * `--spread-chrome` estimate. See the note on `.leaf`.
  */
 
 .spread {
   position: relative;
   flex: 1 1 auto;
   display: flex;
+  /* The book sits in the middle of the desk. Everything either side of it is
+     field, which is what the desk is for. */
+  justify-content: center;
   min-inline-size: 0;
   min-block-size: 0;
 
-  /* The fold's box. A crossing band rests one width *outside* this element at
-     each end of its sweep (PageStage.module.css `.fold`), so without a clip it
-     would sit beside the open book between turns — a strip of fore-edge floating
-     in the desktop field, attached to nothing. Nothing else in here overflows:
-     the two leaves divide the row exactly, the gutter is inset, and the rail and
-     the popover are siblings of this element rather than children of it. */
-  overflow: hidden;
+  /*
+   * The field, drawn once and here.
+   *
+   * It used to live on `.stage` (PageStage.module.css), which is correct on a
+   * phone — there the stage *is* the whole window. On a spread it put one
+   * radial gradient in each leaf, so the field had two highlights and a seam,
+   * and the absent leaf had no stage and therefore no field at all. A desk is
+   * one surface. `--stage-field` tells the stages inside to stop painting their
+   * own; the gradient itself is unchanged, so the phone is untouched.
+   */
+  background: radial-gradient(120% 90% at 50% 0%, var(--paper-sunk), var(--paper) 60%);
+  --stage-field: none;
 
-  /* The height budget the leaf cap is derived from: header + trail + page bar +
-     the stage's own padding. Rounded *up* on purpose — the stage is
-     `overflow: hidden`, so an over-generous estimate clips scripture off the top
-     and bottom of the page, while a conservative one only leaves a little air.
-     One is a defect a reader has to notice; the other is a margin. */
-  --spread-chrome: 220px;
-
-  /* 0.627 = 345/550, the Madani page's aspect. A leaf is portrait, so its width
-     follows from the height the chrome leaves it — which is why the breakpoint
-     has a min-height at all (docs/design/desktop.md §3).
-
-     `--stage-page-cap` is PageStage's own knob, defaulted to 62vh there and
-     overridden here. A custom property is the whole coupling between the two
-     stylesheets: CSS modules hash their class names, so a spread stylesheet
-     cannot reach into a stage stylesheet, and it should not want to. */
-  --stage-page-cap: calc(0.627 * (100dvh - var(--spread-chrome)));
+  /*
+   * The two knobs a stage reads, both set to "fill the leaf you are given".
+   *
+   * `--stage-pad` zeroes the stage's own inset. On a phone that padding is the
+   * fore-edge margin against the screen edge, and PageStage's asymmetric rules
+   * make it a margin on the free side only. In a spread there is no screen edge
+   * to hold off from — the page's fore-edge sits on the desk, and there is
+   * plenty of desk — and any padding here would be inset *inside* the leaf's
+   * aspect box, which is the page's own shape, so it would squeeze the page out
+   * of proportion or clip its foot.
+   *
+   * `--stage-page-cap` was the height heuristic; the leaf now has the right
+   * shape by construction, so the page simply fills it. `--stage-page-max` is
+   * the 480 px reading measure, and it has to go for the same reason — on a
+   * tall window it would hold the page back from the leaf's inner edge and put
+   * the gap at the spine straight back.
+   */
+  --stage-pad: 0px;
+  --stage-page-cap: 100%;
+  --stage-page-max: 100%;
 }
 
-/* Both leaves share the row equally, whatever is in them. A leaf that sized
-   itself to its content would make the absent one narrow and the live one wide,
-   which draws a book with two different-sized pages — the one shape a mus'haf
-   never has. */
-.leaf {
+/*
+ * The open book: the two leaves, and nothing else.
+ *
+ * Separate from `.spread` because two different things wanted to be "the
+ * spread" and they are different widths. The gutter belongs at the seam of the
+ * two leaves, and the fold's band crosses *the book* (page-transition.md §3.5)
+ * — a band that swept `.spread` would start and finish out on the empty desk,
+ * which is not a picture of a leaf turning.
+ *
+ * `overflow: hidden` is the band's clip. A crossing band rests one width
+ * *outside* this element at each end of its sweep (PageStage.module.css
+ * `.fold`), so without it a strip of fore-edge would sit beside the book
+ * between turns, attached to nothing. Nothing else in here overflows: the two
+ * leaves are the width of this box by construction.
+ */
+.book {
   position: relative;
-  flex: 1 1 0;
+  display: flex;
   min-inline-size: 0;
   min-block-size: 0;
+  overflow: hidden;
+}
+
+/*
+ * A leaf is a page: portrait, `viewBox="0 0 345 550"`, and *sized by the height
+ * available to it* — which is the finding docs/design/desktop.md §3 is built on.
+ *
+ * Said here as an aspect ratio on a full-height box, rather than as
+ * `0.627 × (100dvh − 220px)`, and the difference is not stylistic. That
+ * subtraction was an estimate of the chrome above and below, and it was wrong:
+ * measured at 1440×900 the chrome is 252 px, not 220, and the stage's own 32 px
+ * of padding was inside the leaf on top of that. So the cap drew a page 426 px
+ * wide — 661 px tall — into a box 616 px tall, and the stage's `overflow:
+ * hidden` cut 29 px of scripture off the foot of every desktop page. An
+ * estimate that clips the mus'haf is not an estimate worth keeping, and there is
+ * nothing to estimate: the browser knows this box's height.
+ *
+ * `max-inline-size: 50%` is the other regime. In a window that is tall and
+ * narrow the aspect would ask for more width than half the book, so the leaf is
+ * clamped and stops being page-shaped. That direction is safe — the page inside
+ * takes the *width* and derives its height, so a clamped leaf holds a page
+ * shorter than itself, which `holdAxis` then centres. The unsafe direction, a
+ * page taller than its leaf, cannot happen from here.
+ */
+.leaf {
+  position: relative;
+  flex: 0 1 auto;
+  block-size: 100%;
+  aspect-ratio: 345 / 550;
+  max-inline-size: 50%;
+  min-inline-size: 0;
   display: flex;
 }
 
 /*
  * The gutter — the signature, and the only place this layout spends any boldness.
  *
- * Drawn once on the container, not twice on the leaves: a spine belongs to the
+ * Drawn once on the book, not twice on the leaves: a spine belongs to the
  * binding. The gradient falls onto *both* facing edges, which is what makes the
  * pair read as one open book rather than two cards on a shelf. Non-interactive
  * and aria-hidden — it is the shadow of a fold, and there is nothing to say
  * about it.
+ *
+ * `50%` is the seam because the two leaves are the same width. That is now true
+ * by construction — they are the same box with the same aspect — where before
+ * it was true only of the leaves' flex rule and not of their padding.
  */
 .gutter {
   position: absolute;
@@ -101,25 +185,25 @@
  *
  * The *inner* edge is deliberately not dashed. That edge is the binding, and the
  * binding is real: the book is open, the leaf is what is missing.
+ *
+ * It carries no padding of its own. The leaf is already the shape of the page
+ * that belongs here, so the well is that shape exactly rather than a panel
+ * inset within it — and an inset here would have been the 32 px that made the
+ * two leaves different widths.
  */
 .absent {
-  align-items: center;
-  justify-content: center;
-  padding: var(--space-4);
+  align-items: stretch;
+  justify-content: stretch;
 }
 
 .absentWell {
   display: flex;
+  flex: 1 1 auto;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: var(--space-2);
-  inline-size: min(100%, var(--stage-page-cap, 62vh));
-  max-inline-size: 480px;
-  /* Match the page host's own proportions so the hole is the shape of the leaf
-     that belongs in it, not a generic panel. */
-  aspect-ratio: 345 / 550;
-  max-block-size: 100%;
+  min-inline-size: 0;
   padding: var(--space-5);
   border: 1px dashed var(--hairline);
   border-radius: var(--radius-sm);

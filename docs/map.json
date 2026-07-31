@@ -374,12 +374,12 @@
         {
           "file": "apps/web/src/components/PageSpread.tsx",
           "symbol": "PageSpread",
-          "note": "The two leaves. Sides are declared exactly once — right leaf first in DOM order, inside main[dir=\"rtl\"] — so there is no row-reverse or `order` that could disagree with appKeyAction's ArrowLeft = +1. `enabled` gates the *mount*, not the styling: a display:none leaf still fetches its ~170 KB SVG and builds a Highlighter."
+          "note": "The two leaves. Sides are declared exactly once — right leaf first in DOM order, inside main[dir=\"rtl\"] — so there is no row-reverse or `order` that could disagree with appKeyAction's ArrowLeft = +1. `enabled` gates the *mount*, not the styling: a display:none leaf still fetches its ~170 KB SVG and builds a Highlighter. Three boxes, and the two testids are how tests tell them apart: .spread (page-spread) is the desk and runs the window's width, .book (page-book) is the two leaves and nothing else — it carries the gutter, clips the parked band, and is what the fold portals into — and .leaf is one page, sized block-size:100% + aspect-ratio 345/550 rather than flex: 1 1 0."
         },
         {
           "file": "apps/web/src/components/PageStage.module.css",
           "symbol": "--stage-page-cap",
-          "note": "The whole coupling between the spread's stylesheet and the stage's. CSS modules hash their class names, so a custom property is the only way one can size the other; the default keeps the phone's 62vh heuristic untouched."
+          "note": "One of three knobs (with --stage-field and --stage-pad) that are the whole coupling between the spread's stylesheet and the stage's. CSS modules hash their class names, so a custom property is the only way one can size the other; every fallback is the phone's own behaviour, so PageStage needed no change at all. In a spread all three are neutralised — cap 100%, field none, pad 0 — because the leaf is already exactly a page and the desk already painted the field."
         },
         {
           "file": "apps/web/src/components/DesktopChrome.tsx",

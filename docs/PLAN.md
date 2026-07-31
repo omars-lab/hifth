@@ -528,7 +528,7 @@ Full evidence in `docs/research/2026-07-20-mobile-svg-pwa.md`. The rules:
   paid for twice — a licence summary that over-restricted (follow-up ②), a header claiming a
   page the stage never loaded — is always the same shape: the UI stating something the build
   cannot back. A gap is a to-do; a gap the interface papers over is a lie.
-- **Desktop is room, not permission.** Above `1024×720` the app shows an open mus'haf —
+- **Desktop is room, not permission.** Above `1024×740` the app shows an open mus'haf —
   two leaves and a spine, the lower page number on the right, because the book reads right
   to left. The governing rule, and the thing worth carrying into any later width work: *a
   bigger screen is not a licence to add features, it is room to stop hiding the ones that
@@ -569,7 +569,7 @@ wrong hop or mislabeled ayah is a product-breaking bug for this audience.
 | Component | each component from fixture data: rail counts match adjacency, popover hifz ordering, diff output for known pairs (2:48 vs 2:123 = شفاعة/عدل), reserved edges render nothing | Vitest + Testing Library | as each lands |
 | E2E core loop | scripted hop tours: tap → rail → popover → cross-page hop → bead back; drag → menu → merged hops; cold-open every §7 link and assert restored state | Playwright, iPhone + Android viewports, touch | smoke every push (Loop 2); full nightly |
 | Visual regression | golden screenshots: 5 pages × (plain, tajweed) × (selection, phrase, breadcrumb, marquee) | Playwright toHaveScreenshot | Loop 2 |
-| Desktop layout | the one layout no phone project can reach: the spread exists above `1024×720` and does not exist below it (asserted as *absent*, not hidden — a hidden leaf has already paid its ~170 KB), the right-hand leaf carries the lower page number, and the un-vendored facing page reads as absent rather than as blank paper. Geometry against the real RTL flow, because DOM order only becomes *sides* once the flow has run — a `row-reverse` passes every component test and puts the mus'haf on backwards | Playwright `desktop` project, 1440×900 (`e2e/desktop.spec.ts`) | Loop 7 desktop work |
+| Desktop layout | the one layout no phone project can reach: the spread exists above `1024×740` and does not exist below it (asserted as *absent*, not hidden — a hidden leaf has already paid its ~170 KB), the right-hand leaf carries the lower page number, and the un-vendored facing page reads as absent rather than as blank paper. Geometry against the real RTL flow, because DOM order only becomes *sides* once the flow has run — a `row-reverse` passes every component test and puts the mus'haf on backwards | Playwright `desktop` project, 1440×900 (`e2e/desktop.spec.ts`) | Loop 7 desktop work |
 | Stage geometry | the page measured against the stage around it: a hop to either end of a page covers the layer, no drag can uncover it, and at rest the page is centred in the stage rather than flush against an edge. Deliberately not a golden — the crop is the SVG element, so the one thing that can be wrong is outside it | Playwright bounding boxes (`e2e/stage-fit.spec.ts`) | Loop 6a defect fix |
 | Perf | Loop 1 spike in CI: trace pan/zoom + highlight-toggle on densest page, assert frame budget; TTI <2.5s throttled; JS <150KB gz; shard <50KB gz | Playwright traces + Lighthouse CI | budgets Loop 0; traces after Loop 1 |
 | A11y | axe-core on every screen; keyboard-only hop tour (tab → select → rail → hop → back); manual VoiceOver + TalkBack each loop exit | axe + Playwright + manual | Loop 3 |
