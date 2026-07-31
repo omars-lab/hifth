@@ -137,7 +137,11 @@ premise, stated confidently, in the file.
 
 ### 1.3 The same root cause has two more faces
 
-**The layer is not the viewport, so part of the page cannot be reached.** `.layer` is
+**The layer is not the viewport, so part of the page cannot be reached.** *(Fixed — §3.1 ②;
+the reading below is what it was. Post-fix, `.layer` is the stage's content box on both axes
+at every viewport: measured at 320 × 568 the layer is 273.8 px tall against a 459.1 px leaf,
+so the 185.3 px of overhang is now slack the reader pans over rather than paper cut off
+behind `overflow: hidden`.)* `.layer` is
 `block-size: 100%` with no `min-block-size: 0` and no `overflow`
 (`PageStage.module.css:24-29`). A grid item's automatic minimum size is its content's
 min-content size, so when the host is taller than the stage the *layer grows past the
@@ -178,6 +182,13 @@ one transform. Measured by marking a glyph, putting the cursor exactly on it, an
 The horizontal error is the stage's 16 px padding times `k − 1` (`16 × 0.6 = 9.6`); the
 vertical error at 390 is `(16 + 26.65) × 0.6 = 25.6`, i.e. the padding **plus the
 double-centred offset**. The drift is the same bug, seen through the zoom.
+
+*(The second term is gone — §3.1 ①/② removed the double centring, and the vertical error
+should now be the padding alone, the same `16 × (k − 1)` as the horizontal. The numbers in
+that table have not been re-measured, so treat them as the pre-fix reading; §7 ⑨ is still
+open and owns re-measuring them. What does not change is the conclusion: one focal point
+computed against the stage rect, applied to a transform expressed against the layer, cannot
+anchor.)*
 
 ### 1.4 The verdict on the framing
 
@@ -449,9 +460,14 @@ has `LiveAnnouncer`/`useAnnouncer` and already announces (`App.tsx:403-436`). §
    fitting axis) is wrong because `holdAxis` also has to produce legal values for the
    *overflow* regime, which are genuinely absolute; splitting one function across two
    coordinate conventions is how this defect got here. **Layer: `packages/core` keeps
-   `holdAxis` exactly as it is; `apps/web` drops the CSS centring.** This is the whole fix.
+   `holdAxis` exactly as it is; `apps/web` drops the CSS centring.** ~~This is the whole
+   fix.~~ **Done, and that last sentence was wrong** — deleting the centring alone moves the
+   leaf 240 px *past* the layer's right edge, because the grid's default `justify-items:
+   normal` in a `dir="rtl"` subtree lays the host out flush to the inline start, which is
+   the right. `place-items: center` had been hiding that. See §7 ① for the correction and
+   the invariant that replaced it.
 2. **`.layer` gets `min-block-size: 0`** so it stops growing past the stage, and
-   `measureFit` becomes truthful without changing.
+   `measureFit` becomes truthful without changing. **Done** — §7 ①.
 3. **Drop the card.** No `border-radius`, no `filter: drop-shadow`, no `background:
    --paper-raised` on `.host`. This restores `docs/design/desktop.md:241` — it is not a new
    opinion, it is the design of record.
@@ -551,25 +567,38 @@ The hard constraint: the stage owns touch. `touch-action: none`
 
 ### 4.1 The free slot nobody noticed
 
-**At z = 1 the pan gesture is already a no-op.** `holdAxis` forces the centre for an axis
-that fits (`view.ts:76`), and at z = 1 the page fits both axes by construction. Measured: a
-150 px horizontal drag at z = 1 on 390 × 844 changes the transform by **zero**.
+**At z = 1 the *horizontal* pan gesture is already a no-op.** `holdAxis` forces the centre
+for an axis that fits (`view.ts:76`), the leaf is `width: min(100%, …)`, so at z = 1 it
+fills its layer across and there is no slack to roam over. Measured: a 150 px horizontal
+drag at z = 1 on 390 × 844 changes the transform by **zero**.
 
-So there is no conflict to resolve at fit-zoom. The horizontal-drag slot is empty, and this
-is precisely the `turn-only-at-fit-zoom` pattern §2.6 found everywhere.
+**It is only the horizontal axis, and this section used to claim both.** "At z = 1 the page
+fits both axes by construction" was written against the stage the app had mismeasured: with
+`.layer` growing to its content (§1.3), an overflowing leaf reported as fitting and the
+vertical pan was dead too — dead as a defect, not by construction. With the layer fixed, a
+390 × 844 phone overflows vertically by 47.5 px at rest and the vertical drag is a *real*
+gesture carrying the foot of the page. Whether it overflows is viewport-dependent and must
+never be assumed: a Pixel 7, taller in CSS px, does not overflow at rest and does not pan.
+`e2e/marquee.spec.ts:96` and `e2e/stage-fit.spec.ts` both branch on the measured overhang
+rather than on the device.
+
+So there is no conflict to resolve at fit-zoom **on the horizontal axis**, which is the only
+axis a turn wants. The horizontal-drag slot is empty, and this is precisely the
+`turn-only-at-fit-zoom` pattern §2.6 found everywhere. The vertical slot is *not* empty, and
+the ladder below has to say so.
 
 ### 4.2 The ladder
 
 `nextIntent` (`packages/core/src/gestures.ts:104-113`) is a **latched** classifier — the
 first verdict owns the whole stroke, so a gesture never changes meaning mid-way. Add one
-verdict, `"turn"`, and one input, `fits`:
+verdict, `"turn"`, and one input, `fitsAcross`:
 
 ```
-1.  pointers ≥ 2                                     → "pinch"      (unchanged)
-2.  held ≥ LONG_PRESS_MS before moving > TAP_SLOP_PX → "marquee"    (unchanged)
-3.  moved > TAP_SLOP_PX and fits and |dx| > 2·|dy|   → "turn"       (new)
-4.  moved > TAP_SLOP_PX                              → "pan"        (unchanged)
-5.  otherwise                                        → "tap"        (unchanged)
+1.  pointers ≥ 2                                       → "pinch"      (unchanged)
+2.  held ≥ LONG_PRESS_MS before moving > TAP_SLOP_PX   → "marquee"    (unchanged)
+3.  moved > TAP_SLOP_PX and fitsAcross and |dx|>2·|dy| → "turn"       (new)
+4.  moved > TAP_SLOP_PX                                → "pan"        (unchanged)
+5.  otherwise                                          → "tap"        (unchanged)
 ```
 
 `LONG_PRESS_MS = 350`, `TAP_SLOP_PX = 8`, `PINCH_POINTER_COUNT = 2` are unchanged
@@ -577,10 +606,25 @@ verdict, `"turn"`, and one input, `fits`:
 risk**: a hafiz who presses and holds to select is 350 ms into a hold before rule 3 can be
 consulted, and rule 3 requires movement before the hold completes.
 
-`fits` is `contentWidth * z <= stageWidth && contentHeight * z <= stageHeight` — computable
-from the `StageFit` the stage already measures once per stroke
-(`PageStage.tsx:579`). It belongs in `packages/core` beside `clampView`, as a
-`viewFits(view, fit): boolean`. **Layer: L1.**
+`fitsAcross` is `contentWidth * z <= stageWidth` — computable from the `StageFit` the stage
+already measures once per stroke (`PageStage.tsx:579`). It belongs in `packages/core` beside
+`clampView`, as a `viewFitsAcross(view, fit): boolean`. **Layer: L1.**
+
+**It must not test the vertical axis, and it was written here as if it should.** The
+predicate started life as `contentWidth * z <= stageWidth && contentHeight * z <=
+stageHeight` — both axes — because §4.1 believed the leaf fit both at z = 1. It does not
+(§4.1, corrected): a 390 × 844 phone overflows vertically by 47.5 px at rest, so the
+two-axis form is **false at fit-zoom on the acceptance device** and the `"turn"` verdict
+would never fire. The gesture would be dead on arrival, on exactly the device it is for, for
+a reason no failing test would name — the ladder would simply fall through to `"pan"` and a
+horizontal flick would go on doing nothing.
+
+The one-axis form is also the *right* predicate rather than a repair: what rule 3 needs to
+know is whether the horizontal drag slot is free, and that is a question about the
+horizontal axis alone. A leaf can overflow vertically and still have nowhere to go sideways;
+that reader has a live vertical pan **and** a free horizontal flick, and both should work.
+The test that would catch a regression here is a `"turn"` latch asserted at z = 1 at 390 ×
+844 — the viewport where the two-axis form fails and the one-axis form holds.
 
 The `|dx| > 2·|dy|` guard is a proposal, not a measurement. **The measurement that would
 settle it:** record `dx`/`dy` at the moment of latch across a set of real one-thumb strokes
@@ -608,8 +652,8 @@ starts near the **left** edge — the zone iOS 13.4+ reserves for Safari's inter
 gesture, where `preventDefault` is edge-gated (§2.6). Mitigation, in order:
 
 1. **Rule 3 requires the stroke to begin more than 24 px from either vertical screen edge.**
-   A stroke starting inside that band latches `"pan"` (a no-op at z=1) and the OS keeps its
-   gesture. This costs a thin strip on both sides and costs nothing else, because the page
+   A stroke starting inside that band latches `"pan"` (horizontally a no-op at z=1) and the
+   OS keeps its gesture. This costs a thin strip on both sides and costs nothing else, because the page
    bar's next/prev buttons remain the guaranteed path (§2.5, WCAG 2.5.1).
 2. Do **not** attempt to defeat the back gesture. An app that eats the platform back
    gesture on an offline PWA is an app the reader cannot leave.
@@ -629,7 +673,7 @@ The exception is the hop, which has its own framing (`frameBboxToView`) and must
 distinction is *turn* vs *jump*: a turn is continuous reading and should preserve the view; a
 jump to an arbitrary ayah is a relocation and should frame its target.
 
-**Layer:** L1 gets `viewFits`; L2 gets the intent wiring, the `.leaf` wrapper, and the
+**Layer:** L1 gets `viewFitsAcross`; L2 gets the intent wiring, the `.leaf` wrapper, and the
 `centerCurrent` call-site change.
 
 ### 4.6 What is *not* in the gesture model
@@ -701,11 +745,12 @@ below names the induced failure and what it would look like.
 
 | Claim | Test | Induced failure |
 | --- | --- | --- |
-| The page is centred in the stage on **every** viewport, not just phone-shaped ones | Extend `e2e/stage-fit.spec.ts` to assert `\|left − right\| ≤ 1` and `\|top − bottom\| ≤ 1` **against the stage**, and run it on the `desktop` project too (see §7 ②) | Restore `place-items: center` on `.layer`. The assertion fails at 1440 × 900 with left ≈ 246, right ≈ 0. |
-| No part of the page is unreachable | Assert `host.bottom ≤ stage.bottom + 1` at rest at 320 × 568, and that a 200 px upward drag at z=1 moves the transform by exactly 0 (because it fits) rather than by 0 (because it is stuck) — distinguish the two by asserting the host is fully inside the stage first | Remove `min-block-size: 0` from `.layer`. The assertion fails with a three-figure number of pixels below the fold — measured between 108 and 272 at this viewport depending on how much chrome is up (§1.3), which is why the assertion is written against containment rather than against a pixel count. |
-| Zoom anchors under the pointer | Mark a glyph, `ctrl`+wheel with the cursor on it, assert its client rect centre moves < 2 px | Change `onPinch`'s rect from the host's containing block back to the stage. Fails by ~9 px horizontally, ~25 px vertically on a phone. |
-| The turn gesture never eats a marquee | Existing `e2e/marquee.spec.ts` must still pass unchanged, plus a new case: press, hold 400 ms, then drag horizontally 200 px → a marquee, not a turn | Reorder the ladder so rule 3 precedes rule 2. The hold-then-drag case turns the page and the marquee never appears. |
-| The turn gesture is inert while zoomed | Zoom to 2×, drag horizontally 200 px → the page pans and the page number does not change | Drop the `fits` guard. The page turns mid-zoom and the reader loses their place. |
+| ~~The page is centred in the stage on **every** viewport~~ · **done** | `expectHeld` in `e2e/stage-fit.spec.ts` asserts `\|before − after\| ≤ 1` **against the stage** on an axis the leaf fits, and coverage of the layer on an axis it overflows; the file runs on `desktop` as well as the two phones | Restoring `place-items: center` fails it at 1440 × 900 with 261.8 px before the leaf and 15.8 after — 245.8 / −0.2 against the layer, the figures in §7 ① reproduced. Removing `justify-items: left` fails it with 384.6 / −107.0. |
+| ~~No part of the page is unreachable~~ · **done** | A 320 × 568 case that sets its own viewport: the layer is no wider than the stage, the leaf genuinely overflows (the premise, asserted so "reachable" cannot be vacuous), and a 400 px upward drag — more than the overhang has ever measured — brings the foot of the page exactly to the fold | Removing `min-block-size: 0` fails on "the layer grew past the stage" before the drag is even attempted, because layer and host become the same box. Written against containment rather than a pixel count because the overhang is a function of how much chrome is up (§1.3). |
+| Zoom anchors under the pointer | Mark a glyph, `ctrl`+wheel with the cursor on it, assert its client rect centre moves < 2 px | Change `onPinch`'s rect from the host's containing block back to the stage. Fails by ~9 px horizontally; vertically by the same ~9 px now that the double centring is gone — the ~25 px in §1.3 was the padding plus the centring term and has not been re-measured. |
+| The turn gesture never eats a marquee | `e2e/marquee.spec.ts` must still pass, plus a new case: press, hold 400 ms, then drag horizontally 200 px → a marquee, not a turn | Reorder the ladder so rule 3 precedes rule 2. The hold-then-drag case turns the page and the marquee never appears. |
+| The turn gesture is inert while zoomed | Zoom to 2×, drag horizontally 200 px → the page pans and the page number does not change | Drop the `fitsAcross` guard. The page turns mid-zoom and the reader loses their place. |
+| The turn gesture is **live** at fit-zoom on the acceptance device | At 390 × 844, z = 1, a horizontal flick latches `"turn"` — the viewport where the leaf overflows *vertically*, so a predicate that tests both axes would refuse | Restore the two-axis `fits`. The flick falls through to `"pan"`, the page never turns on a phone at rest, and nothing else in the suite notices (§4.2). |
 | Every landing is announced by number | See §7 ④ | Revert `stepPage` to announcing `pageN` for a skipped landing. The live region says "Page 9" after a turn from 7 and never mentions 8. |
 | Reduced motion removes the fade | With `prefers-reduced-motion: reduce`, sample the host `opacity` 40 ms after a turn: exactly 1 | Hard-code the duration instead of reading `--dur-fast`. The sample reads a fractional opacity. |
 
@@ -743,7 +788,28 @@ top gap, you have not failed to reproduce it — you are in the other state. Che
 guarantee (`PLAN.md:523`), and it violates the page-image-memory axiom (§1.5) because where
 the page sits depends on how much slack the viewport happens to have.
 
-**Fix:** §3.1 ①. One CSS declaration.
+**Fix:** §3.1 ①. **Done** — and it was not one CSS declaration, for a reason worth keeping.
+
+Deleting `place-items: center` on its own made it *worse*: the leaf left the layer entirely,
+sitting 240 px past its right edge at 1440 × 900. The centring had been hiding a second
+thing. `translate3d(123px, 0, 0)` is a **physical** offset — 123 px to the right — while the
+layer's grid sits inside `dir="rtl"`, where the inline **start** edge is the right one. With
+no alignment declared, the host was laid out flush right and then translated further right.
+`place-items: center` had been overriding that default and making the two conventions agree
+by accident, which is the same shape as the defect itself: a mechanism doing a job nobody had
+written down.
+
+`.layer` therefore takes `justify-items: left` — the physical keyword, not `start`, because
+the transform it has to agree with is physical — and `align-items: start`, which is the same
+argument on the block axis and additionally stops a leaf *shorter* than the stage being
+stretched by the default `stretch`, which would feed `clampView` a `host.clientHeight` the
+page does not have.
+
+The general lesson for §3.1 and for anything downstream of it: on this stage, *any* CSS that
+positions the host is a second coordinate system competing with `clampView`, and removing one
+such mechanism can uncover another that it was masking. The invariant to state instead of
+"delete the centring" is: **`.layer` places the host at its own physical top-left and does
+nothing else.**
 
 ### ② The tests that should catch ① structurally cannot · **confirmed**
 
@@ -768,7 +834,24 @@ right of the live one, and `:169` asserts only that the leaf's *width* survives 
 Neither looks at position relative to the stage, so the jammed-against-the-gutter spread
 passes.
 
-**Fix:** §6 row 1 and row 2. Rewriting the comment is part of the fix, not a nicety.
+**Fix:** §6 row 1 and row 2. Rewriting the comment is part of the fix, not a nicety. **Done**
+— all three:
+
+- `desktop`'s `testMatch` is now `/(desktop|stage-fit)\.spec\.ts/`, and `stage-fit.spec.ts`
+  carries a 320 × 568 case that sets its own viewport, so the floor is asserted on every
+  project rather than on whichever one happens to be shaped like it.
+- `expectCovers` became `expectHeld`, which asserts *both* of `holdAxis`'s regimes — centred
+  against the stage where the leaf fits, covering the layer where it does not — and measures
+  which regime the viewport is in rather than assuming it. The one-sidedness is gone: an
+  over-covering page now fails the axis it over-covers.
+- The header comment states what the layer is (the stage's content box, on both axes, at
+  every viewport) and what believing otherwise cost, so the next reader inherits the
+  correction rather than the claim.
+
+A fourth reason surfaced while fixing the third: `layerOf`/`stageOf` reached the layer as
+`[aria-busy]` on the document, which is unique today only because no spread in this build has
+two vendored leaves. They now walk up from the visible page's SVG, so the helpers survive
+Loop 4b instead of turning into a strict-mode violation on the day a facing pair lands.
 
 ### ③ Plain wheel does nothing, and a mouse-only desktop cannot zoom at all · **confirmed**
 
@@ -880,6 +963,12 @@ Fixing ① removes the grid term; the padding term needs `onPinch` to read the h
 containing block. Grouped here because it is the same root cause seen through a different
 gesture, and because a reviewer who fixes ① without fixing this will find the drift halved
 and assume it is rounding.
+
+**① is now fixed and this is not, so that reviewer is the next person to open this file.**
+The numbers above are the pre-fix reading and have not been re-taken. Expect the vertical
+error at 390 × 844 to have fallen from ~25 px to the padding term alone — the same ~9.6 px
+as the horizontal — and do not read the smaller number as success. `16 × (k − 1)` is still a
+finger that does not hold the word it is on.
 
 ### ⑩ The mounted set still has no ceiling · **suspected (confirmed by code, not by profiling)**
 
