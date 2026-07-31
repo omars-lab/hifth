@@ -97,8 +97,29 @@ centring contributes `(624 − 570.7) / 2 = 26.65`; the computed transform reads
 
 A phone escapes the horizontal case only because the host is `width: min(100%, …)` and
 100% resolves to the layer — so on a phone `host.width === layer.width`, the slack is zero,
-and zero doubled is zero. The vertical case does not escape: **on every phone the leaf is
-pushed to the bottom of the stage and the wasted air is all at the top.**
+and zero doubled is zero.
+
+**The vertical case escapes too, but only by falling into the other failure.** The table
+above was measured in a state where the stage is *taller* than the leaf — there the layer
+keeps its `block-size: 100%`, there is real vertical slack, and the slack doubles. Shorten
+the stage past the leaf's height and the layer's automatic minimum size takes over: the
+layer grows to the content, `layer.height === host.height`, the slack is zero, and the
+doubling vanishes. Nothing is fixed by that. The excess is now outside the stage and
+`overflow: hidden` cuts it, which is §1.3.
+
+An independent measurement pass, run against the same production build in a
+shorter-stage chrome state, recorded exactly that: at 390 × 844, `layer.height ===
+host.height === 570.7` against a 555.2 stage — **zero top gap, zero doubling, and 31.5 px
+clipped instead**; at 1440 × 900, `gapLeft 245.8` against `gapRight −0.2`, reproducing the
+horizontal doubling in the table above to the tenth of a pixel.
+
+So the two faces are not independent defects and they do not co-occur at full strength.
+They trade off along stage height, and **which one a given reader meets depends on how much
+chrome is showing** — the coach strip, the offline-storage notice, the page bar. Both tables
+in this section are therefore true of the state they were taken in, and neither is the
+number to quote on its own. The common root is the one thing worth carrying forward: the
+layer is not the viewport, and `holdAxis` returns an absolute where the grid has already
+placed one.
 
 This is a regression of a defect the repo has already fixed once. `centerCurrent`'s comment
 says so in as many words (`apps/web/src/components/PageStage.tsx:344-354`):
@@ -134,6 +155,14 @@ persisted):
 With the offline-storage notice showing — an ordinary first-run state, not a contrivance —
 iPhone 13 hides 94.3 px (83.5 % visible) and 320 × 568 hides 271.9 px, leaving **40.8 % of
 the leaf reachable**. On a mushaf page that is roughly the bottom six of fifteen lines.
+
+An independent pass measured **169.4 px hidden at 320 × 568 — about 37 % of the leaf — with
+a 200 px upward drag refused** (the transform read `0.0625` before and after). That sits
+between the two rows recorded here, which is the point: the hidden height is a function of
+how much chrome is up, and across the ordinary range of first-run and returning-reader
+states it spans roughly **108–272 px at 320 × 568**. No single figure characterises it. What
+does not vary is the part that matters — *whatever* is hidden cannot be dragged to, because
+`measureFit` reads the layer and the layer grew to match the content.
 
 **Zoom does not anchor where the fingers are.** `onPinch` computes its focal point against
 the **stage** rect (`PageStage.tsx:647`, `px = ox - rect.left`) while `view.x/y` are
@@ -195,9 +224,30 @@ community only), or **[inference]** (mine, no source).
 ### 2.1 The physical book and the mushaf
 
 **[cited]** The Madani mushaf is 604 pages, 15 lines per page, and **every page begins and
-ends on a complete ayah** — verified against two independent Qur'an APIs. Even page numbers
-fall on the right-hand leaf, odd on the left; every juz' begins on a right-hand page. The
-binding is RTL: the spine is on the right and the next page is reached by turning leftward.
+ends on a complete ayah** — verified against two independent Qur'an APIs. The binding is
+RTL: the spine is on the right and the next page is reached by turning leftward.
+
+**[corrected — see below]** This section previously said that even page numbers fall on the
+right-hand leaf and odd on the left, labelled **[cited]**. That label was wrong: the Qur'an
+APIs consulted return the *page number* a juz' begins on, and no API returns which side of
+an opening a leaf sits on. The side was an inference — from "every juz' begins on a
+right-hand page" plus the observation that juz' 2, 3, 4 … begin on pages 22, 42, 62, all
+even — and it was recorded as an observation.
+
+**[cited — direct observation of a physical KFGQPC Madani mushaf]** **Odd page numbers fall
+on the right-hand leaf, even on the left.** Al-Fatiha is page 1 and sits on the **right**,
+facing the first page of Al-Baqarah — page 2 — on the **left**. Openings therefore pair
+`(odd, odd + 1)` with the odd page on the right, and the whole print divides into exactly
+302 complete openings with no orphan leaf at either end. The previous phase produced two
+orphans, page 1 and page 604, which should have been the tell.
+
+Two things survive the correction unchanged, and it is worth being explicit that they do,
+because both are pinned elsewhere. **The lower page number is still on the right** — 1 faces
+2, 21 faces 22 — so `PLAN.md`'s desktop rule is untouched. And the RTL turn direction is
+untouched. What moves is only *parity*, and `spreadOf` in `packages/core/src/pages.ts`
+implements the old phase, so it is one leaf out and every spread it has ever drawn has
+paired the wrong two leaves. That is a defect, not a preference, and it is corrected
+alongside this document.
 
 **[cited]** Pages carry juz'/hizb markers in the margin and the page number at the foot.
 These are wayfinding, and they are part of the page image.
@@ -652,7 +702,7 @@ below names the induced failure and what it would look like.
 | Claim | Test | Induced failure |
 | --- | --- | --- |
 | The page is centred in the stage on **every** viewport, not just phone-shaped ones | Extend `e2e/stage-fit.spec.ts` to assert `\|left − right\| ≤ 1` and `\|top − bottom\| ≤ 1` **against the stage**, and run it on the `desktop` project too (see §7 ②) | Restore `place-items: center` on `.layer`. The assertion fails at 1440 × 900 with left ≈ 246, right ≈ 0. |
-| No part of the page is unreachable | Assert `host.bottom ≤ stage.bottom + 1` at rest at 320 × 568, and that a 200 px upward drag at z=1 moves the transform by exactly 0 (because it fits) rather than by 0 (because it is stuck) — distinguish the two by asserting the host is fully inside the stage first | Remove `min-block-size: 0` from `.layer`. The assertion fails with 108.4 px below the fold. |
+| No part of the page is unreachable | Assert `host.bottom ≤ stage.bottom + 1` at rest at 320 × 568, and that a 200 px upward drag at z=1 moves the transform by exactly 0 (because it fits) rather than by 0 (because it is stuck) — distinguish the two by asserting the host is fully inside the stage first | Remove `min-block-size: 0` from `.layer`. The assertion fails with a three-figure number of pixels below the fold — measured between 108 and 272 at this viewport depending on how much chrome is up (§1.3), which is why the assertion is written against containment rather than against a pixel count. |
 | Zoom anchors under the pointer | Mark a glyph, `ctrl`+wheel with the cursor on it, assert its client rect centre moves < 2 px | Change `onPinch`'s rect from the host's containing block back to the stage. Fails by ~9 px horizontally, ~25 px vertically on a phone. |
 | The turn gesture never eats a marquee | Existing `e2e/marquee.spec.ts` must still pass unchanged, plus a new case: press, hold 400 ms, then drag horizontally 200 px → a marquee, not a turn | Reorder the ladder so rule 3 precedes rule 2. The hold-then-drag case turns the page and the marquee never appears. |
 | The turn gesture is inert while zoomed | Zoom to 2×, drag horizontally 200 px → the page pans and the page number does not change | Drop the `fits` guard. The page turns mid-zoom and the reader loses their place. |
@@ -677,8 +727,17 @@ with the viewport and numbers given. **Suspected** = read from the code, not rep
 `place-items: center`. Both apply.
 
 **Reproduce:** open `#/hafs-kfqc/p7` at 1440 × 900; measure the host box against the layer
-box. Left gap 245.8, right gap −0.2. At 834 × 1194: left 322, top 208.9 — bottom-right
-corner. At 390 × 844: top 53.1, bottom 0.1 — flush to the bottom of the stage.
+box. Left gap 245.8, right gap −0.2 — independently reproduced twice, to the tenth of a
+pixel, and the reliable repro. At 834 × 1194: left 322, top 208.9 — bottom-right corner.
+The **horizontal** doubling is the stable one, because desktop width always leaves the host
+capped well inside the layer.
+
+The **vertical** doubling is conditional and will not reproduce on demand: it needs a stage
+taller than the leaf. At 390 × 844 it shows as top 53.1 / bottom 0.1 in a light-chrome
+state, and as nothing at all in a heavier one, where the layer has instead grown past the
+stage and §1.3 is what you are looking at. If you are reproducing this on a phone and see no
+top gap, you have not failed to reproduce it — you are in the other state. Check
+`layer.height` against `host.height` to tell them apart.
 
 **Severity:** highest. It is the visible complaint, it defeats the app's own stage-geometry
 guarantee (`PLAN.md:523`), and it violates the page-image-memory axiom (§1.5) because where
