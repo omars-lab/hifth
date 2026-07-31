@@ -155,6 +155,11 @@ golden-update: core ## Accept new golden baselines for THIS platform — review 
 	@echo "  Baselines rewritten. Run 'git diff --stat -- apps/web/e2e/__screenshots__'"
 	@echo "  and open the changed PNGs before committing: this is the gate agreeing"
 	@echo "  with you, not the other way round."
+	@echo ""
+	@echo "  THIS PLATFORM ONLY. CI runs the linux set, which is a separate"
+	@echo "  committed tree ({platform} in snapshotPathTemplate). A change that"
+	@echo "  moves geometry moves both, so run 'make golden-linux UPDATE=1' too"
+	@echo "  or CI will fail on shots that pass here."
 
 .PHONY: golden-linux
 golden-linux: core ## Run/refresh the CI-shaped (linux) baselines in the Playwright container

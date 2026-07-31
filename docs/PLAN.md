@@ -242,8 +242,16 @@ described in both files.
     exactly the two viewports where the host is as wide as its layer and the doubling is
     zero. The same root cause makes part of the page unreachable below the fold (108.4 px at
     320×568, 271.9 px with the storage notice up) and makes `ctrl`+wheel zoom drift ~9 px
-    horizontally and ~25 px vertically away from the pointer. Eleven findings, ordered by
-    severity with reproductions and file:line, are in
+    horizontally and ~25 px vertically away from the pointer. **The first two faces are
+    fixed** (§7 ①–②): `.layer` no longer centres and no longer grows past the stage, it
+    places the host at its own physical top-left and does nothing else, and
+    `e2e/stage-fit.spec.ts` now runs on `desktop` too with a 320×568 case that drags the foot
+    of the page into view. Deleting the CSS centring was *not* the whole fix, which is the
+    part worth carrying forward: the grid's default in a `dir="rtl"` subtree lays the host
+    out flush to the **right**, so a physical `translate3d` moved it 240 px further right,
+    and `place-items: center` had been masking that second mechanism all along. Zoom's
+    anchor (§7 ⑨) is still open, and its vertical error should now be the padding alone.
+    Eleven findings, ordered by severity with reproductions and file:line, are in
     [`docs/design/page-turning.md` §7](design/page-turning.md); the presentation and gesture
     proposals in §3–§4 of that document are **not** scheduled here — they wait on
     follow-up ① and on a ceiling for the mounted set
