@@ -204,7 +204,7 @@
         {
           "file": "scripts/gate-params.mjs",
           "symbol": "parseBranches",
-          "note": "Binds parseHash, serializeState and docs/query-params.md to each other. It reads the failure-mode column against the code: a branch that can `return null` rejects, one that cannot falls back."
+          "note": "Binds parseHash, serializeState and docs/query-params.md to each other. It reads the failure-mode column against the code: a branch that can `return null` rejects, one that cannot falls back. It also binds tokens.css to DEFAULT_FIELD, because the document is painted before field.css is parsed and a drift there would show on exactly one frame."
         }
       ],
       "extend": [

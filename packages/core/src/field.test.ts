@@ -35,4 +35,15 @@ describe("field · parseField never refuses", () => {
     expect(parseField("neon")).toBe(DEFAULT_FIELD);
     expect(parseField("Tan")).toBe(DEFAULT_FIELD);
   });
+
+  it("a retired field opens on the winner instead of failing", () => {
+    // `sunk`, `linen` and `slate` were candidates while the desk was an open
+    // question; `tan` won and they were removed. Any link written during that
+    // window still names an ayah, and that is the part worth keeping — this is
+    // exactly the case the tolerant parse exists for, and the reason retiring an
+    // id is a safe move while retiring a `w=` or `via=` value would not be.
+    for (const gone of ["sunk", "linen", "slate"]) {
+      expect(parseField(gone), gone).toBe(DEFAULT_FIELD);
+    }
+  });
 });

@@ -247,9 +247,14 @@ Four separate mistakes, and the reference falsifies each of them independently:
 | `background: --paper-raised` on `.host` (`:49`) *and* `--paper-raised` as the vignette's inner stop (`:19`) | field `#AF8A68` — nothing like paper | The page's top edge currently has **no contrast with the field behind it**. The only thing separating page from stage is the shadow, which is the thing that has to go. |
 | `.stage` padded equally on four sides (`:6`) | the leaf **bleeds off the screen** on its bound side (§1.2) | Air on all four sides is the single strongest "this is a card on a desk" cue. A leaf continues into a binding. |
 
-**All four are fixed, and row 3 was fixed differently than this table proposed.** The
-shadow and the four equal corners are gone; the field is `--paper-sunk`; the bound-side
-padding is zero. But `.host` **keeps** `background: --paper-raised`, and must. The vendored
+**All four are fixed, and row 3 took two goes.** The shadow and the four equal corners are
+gone and the bound-side padding is zero. The field went to `--paper-sunk` first — already in
+the palette, no contrast review needed — and that turned out to be the wrong half of the
+proposal: `--paper-sunk` falls off to `--paper`, so the far end of the wash *was* the page's
+own colour and row 3's complaint ("no contrast with the field behind it") still stood, just
+at the foot of the page instead of the top. The middle column was right the first time. The
+field is `#af8a68` — the reference's own — and §7 ④ carries the measurement. But `.host`
+**keeps** `background: --paper-raised`, and must. The vendored
 page SVGs have **no background rect** — `7.svg` is glyph paths and nothing else — so that
 background is not a card's fill painted over the paper, it *is* the paper. Dropping it (as
 `page-turning.md` §3.1 ③ proposed, and as the middle column here implies by putting
@@ -281,11 +286,11 @@ overpainted, which is the constraint `page-turning.md` §8 was protecting.
    (`#ece4d6`) and that is the right first move — it is in the palette, it needs no contrast
    review, and it stops the vignette's inner stop from being the page's own colour. The
    reference's field is a full step further out (`#AF8A68`, a saturated tan). Adopting
-   anything like it is a **colour decision**, not a layout one — and it has since been run:
-   §7 ④ carries the measurement. `#AF8A68` is shippable but not on its own terms; it holds
-   `--ink-soft` at 2.39:1 and needs full `--ink` under it. `--paper-sunk` is still the
-   default, and the alternatives now live behind `?field=` (`docs/query-params.md`) rather
-   than in this list, so the choice can be made by looking at five links instead of arguing.
+   anything like it is a **colour decision**, not a layout one — and it has since been run,
+   and won: §7 ④ carries the measurement. `--paper-sunk` was the wrong half of this proposal,
+   because its wash *ends on `--paper`* and so is not a field the page is not. `#af8a68` is
+   the default now, on its own terms, with full `--ink` under it (it holds `--ink-soft` at
+   only 2.39:1). `dark` remains behind `?field=` (`docs/query-params.md`) as a night desk.
 
 ### 2.3 Which side is free, and how the stylesheet is allowed to know
 
@@ -951,13 +956,14 @@ Three sub-questions, all needing the same hardware:
 
 Also unmeasured: **how long a stalled fold (§5.3) may hold before it reads as broken.**
 
-**④ The field colour — now instrumented, still open.** §2.2 proposes `--paper-sunk` because
-it is already in the palette. The reference's `#AF8A68` is a full step further and separates
-the leaf far more decisively. Adopting anything like it is a colour decision, and this repo
-has a specific instrument for those: `e2e/contrast.spec.ts` walks every surface with real
-luminance compositing, and **"any new sheet or popover needs a row in `SURFACES` or nothing
-is checking it"** (`PLAN.md` follow-up ⑥). The instruction was to **add the row before the
-token, not after**, and that is what happened — with two findings.
+**④ The field colour — closed. `#af8a68`, the reference's own.** §2.2 proposed
+`--paper-sunk` because it was already in the palette. The reference's `#AF8A68` is a full
+step further and separates the leaf far more decisively. Adopting anything like it is a
+colour decision, and this repo has a specific instrument for those: `e2e/contrast.spec.ts`
+walks every surface with real luminance compositing, and **"any new sheet or popover needs a
+row in `SURFACES` or nothing is checking it"** (`PLAN.md` follow-up ⑥). The instruction was
+to **add the row before the token, not after**, and that is what happened — with three
+findings, the third of which settled it.
 
 The first is that the instrument could not see this surface at all. The field is a radial
 gradient, and `backgroundOf` bailed on any `background-image`, so the one piece of text that
@@ -970,16 +976,38 @@ cannot hide a pixel that fails.
 
 The second is the answer to the question as asked. `#AF8A68` carries `--ink-soft` at
 **2.39:1**. That is not a reason to refuse the colour; it is the discovery that **a field is
-a wash *and* the ink that survives it**. So five fields ship as pairs, behind `?field=`
+a wash *and* the ink that survives it**. So five fields shipped as pairs, behind `?field=`
 (`packages/core/src/field.ts`, catalogued in `docs/query-params.md`), each with a contrast
 row: `sunk` 5.98, `linen` 5.10, `slate` 4.76, `tan` 5.11 with full `--ink`, `dark` 11.41 with
-`--paper`. `slate` is the cool control, and it was `#c9c6c0` until the instrument returned
+`--paper`. `slate` was the cool control, and it was `#c9c6c0` until the instrument returned
 4.43 — under the floor by seven hundredths, which is the kind of miss that survives a design
 review and not a gate.
 
-What remains open is the *choice*, which was never a thing measurement could settle. It is
-now a thing anyone can settle in a real window in thirty seconds, by opening the same page
-five times. When one wins it becomes the default and the table goes.
+The third came from actually looking at the five, which is what they were for. The choice
+was never a thing the *contrast* instrument could settle — it measures ink on a field, and
+the question is about the field and the **page**. So the missing number was the one nobody
+had taken: the distance from the desk to the paper. That is what decides whether a book reads
+as an object lying on a surface, and it is the literal content of §2.2 ④'s "a field the page
+is not":
+
+| candidate | vs. `--paper` @near | @far | |
+|---|---|---|---|
+| `sunk` | 1.10 | **1.00** | the field this section proposed |
+| `linen` | 1.29 | 1.10 | |
+| `slate` | 1.38 | 1.21 | |
+| `tan` | **2.75** | **1.89** | the reference print |
+| `dark` | 14.45 | 11.41 | |
+
+`--paper-sunk → --paper` ends its wash **on the paper's own colour**. At the foot of every
+page the desk *was* the leaf. No standard requires a page edge to clear a ratio, so this is
+not a contrast failure — it is a drawing failure, and it shipped for six loops because the
+only number anyone had thought to check was the one about text.
+
+`tan` is the default. `slate` lost the warm-field argument honestly — a cool desk makes the
+paper read as yellowed rather than as lit — and `linen` was real but timid, its worst
+separation exactly `sunk`'s best. All three are removed. `dark` stays, because it is not a
+competing answer to this question; it answers *reading at night*, and it is the only field
+that does. Still no picker: `dark` is reachable by link and nothing else.
 
 **⑤ Does a real fore-edge stack vary?** We have exactly one sample — page 297 of 604, drawn
 with two slivers. Whether the reference thins it near the ends of the book is unknown.

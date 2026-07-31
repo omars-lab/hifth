@@ -19,6 +19,11 @@
  *   3. Every field id in core's `FIELDS` has a CSS block, a documented row, and
  *      the same colours in both — and every block names an ink, because a field
  *      is a wash *and* the ink that survives it (packages/core/src/field.ts).
+ *   4. The token layer's own default wash *is* `DEFAULT_FIELD`'s block. The
+ *      document is painted from `tokens.css` before `field.css` is parsed, so a
+ *      drift between the two is a desk that changes colour during load — and it
+ *      would show on exactly one frame, which is to say in no test anyone runs
+ *      by hand.
  *
  * This reads the sources as text on purpose. Importing them would prove the
  * modules load, not that the doc describes them, and the CSS is not importable
@@ -31,6 +36,7 @@ import { readFileSync } from "node:fs";
 const ROUTER = "packages/core/src/router.ts";
 const FIELD_TS = "packages/core/src/field.ts";
 const FIELD_CSS = "apps/web/src/styles/field.css";
+const TOKENS = "apps/web/src/styles/tokens.css";
 const DOC = "docs/query-params.md";
 
 const problems = [];
@@ -39,6 +45,7 @@ const read = (p) => readFileSync(new URL(`../${p}`, import.meta.url), "utf8");
 const router = read(ROUTER);
 const fieldTs = read(FIELD_TS);
 const fieldCss = read(FIELD_CSS);
+const tokens = read(TOKENS);
 const doc = read(DOC);
 
 /* ---- 1. what the code reads, writes, and refuses ------------------------- */
@@ -212,6 +219,34 @@ for (const id of docFields.keys()) {
   }
 }
 
+/* ---- 4. the token layer paints the default, one frame early ---------------- */
+
+const defaultDecl = /export const DEFAULT_FIELD: FieldId = "([^"]+)"/.exec(fieldTs);
+if (!defaultDecl) {
+  problems.push(`${FIELD_TS} — could not read DEFAULT_FIELD; this gate needs it verbatim.`);
+} else if (!fields.includes(defaultDecl[1])) {
+  problems.push(`${FIELD_TS} — DEFAULT_FIELD is \`${defaultDecl[1]}\`, which is not in FIELDS.`);
+} else {
+  const dflt = cssBlocks.get(defaultDecl[1]) ?? {};
+  for (const prop of ["--field-near", "--field-far", "--ink-on-field"]) {
+    const found = [...tokens.matchAll(new RegExp(`${prop}:\\s*([^;]+);`, "g"))].map((m) => m[1].trim());
+    if (found.length !== 1) {
+      problems.push(
+        `${TOKENS} declares ${prop} ${found.length} time(s); this gate reads exactly one, ` +
+          `because the default desk has to be one colour.`,
+      );
+      continue;
+    }
+    if (dflt[prop] && found[0].toLowerCase() !== dflt[prop].toLowerCase()) {
+      problems.push(
+        `${prop}: ${TOKENS} says ${found[0]}, but \`${defaultDecl[1]}\` (DEFAULT_FIELD) says ${dflt[prop]}.\n` +
+          `      The document is painted from tokens.css before field.css is parsed, so these\n` +
+          `      disagreeing means the desk changes colour on the first frame.`,
+      );
+    }
+  }
+}
+
 if (problems.length > 0) {
   console.error("gate:params — FAIL:");
   for (const p of problems) console.error("  -", p);
@@ -221,5 +256,6 @@ if (problems.length > 0) {
 console.log(
   `gate:params — OK (${documented.size} parameter(s): ` +
     `${[...documented].map(([k, m]) => `${k}=${m === "reject" ? "strict" : "lenient"}`).join(", ")}; ` +
-    `${fields.length} field(s) in step across core, CSS and the catalog)`,
+    `${fields.length} field(s) in step across core, CSS and the catalog, ` +
+    `default \`${defaultDecl?.[1] ?? "?"}\` painted by the token layer)`,
 );

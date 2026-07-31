@@ -1,5 +1,5 @@
 /*
- * The five fields (`?field=`), one block each.
+ * The two fields (`?field=`), one block each.
  *
  * Global, not a CSS module: these set custom properties on `:root`, and the
  * document element is not something React renders — `App` writes `data-field`
@@ -9,11 +9,17 @@
  *
  * **Every block is a pair.** `--field-near`/`--field-far` are the wash;
  * `--ink-on-field` is the one ink allowed on top of it. A darker desk owes its
- * own ink — `--ink-soft` measures 2.39:1 on the reference mus'haf's `#af8a68`,
- * so shipping that field without also changing the ink would be a contrast
- * regression wearing a colour swatch. The ratios below are measured, not
- * asserted: `e2e/contrast.spec.ts` opens each field with the stage hint on
- * screen and checks the text against *both* stops of its wash.
+ * own ink — `--ink-soft` measures 2.39:1 on `tan`'s `#af8a68`, so adopting that
+ * field without also changing the ink would have been a contrast regression
+ * wearing a colour swatch. The ratios below are measured, not asserted:
+ * `e2e/contrast.spec.ts` opens each field with the stage hint on screen and
+ * checks the text against *both* stops of its wash.
+ *
+ * There were five while the desk was an open question. `tan` won it — it is the
+ * reference mus'haf's own field, and the only one where the book reads as an
+ * object lying on a desk rather than a lighter patch of the same surface —
+ * and `sunk`, `linen` and `slate` were removed with it. `dark` stayed because it
+ * is not a competing answer to that question; it answers a different one.
  *
  * The order and the ids come from `FIELDS` in packages/core/src/field.ts, which
  * is the source of truth for this file, the contrast rows, and the table in
@@ -22,34 +28,8 @@
 
 /* The default, written out rather than left implicit so this file lists every
    field it claims to. Identical to the tokens.css values, which is the point —
-   loading field.css changes nothing until a link names something else. */
-:root[data-field="sunk"] {
-  --field-near: #ece4d6;
-  --field-far: #f4efe6;
-  --ink-on-field: var(--ink-soft);
-}
-
-/* One step warmer and one step darker than the default: the same desk seen in
-   a lit room rather than a bright one. 5.10:1 at the near stop. */
-:root[data-field="linen"] {
-  --field-near: #ded3c0;
-  --field-far: #ece4d6;
-  --ink-on-field: var(--ink-soft);
-}
-
-/* The control, and the only cool field in the set. The warm-desk argument is a
-   claim that warmth reads better, and a claim with no counter-example is not
-   being tested. It was #c9c6c0 until the instrument returned 4.43:1 — under the
-   floor by seven hundredths. 4.76:1 now. */
-:root[data-field="slate"] {
-  --field-near: #d0cdc7;
-  --field-far: #dedbd5;
-  --ink-on-field: var(--ink-soft);
-}
-
-/* The reference mus'haf's own field. `--ink-soft` cannot live here (2.39:1), so
-   the hint steps up to full `--ink`: 5.11:1 at the near stop. This is the row
-   that produced the pairing rule. */
+   loading field.css changes nothing until a link names something else, and
+   `gate:params` fails if the two ever drift. 5.11:1 at the near stop. */
 :root[data-field="tan"] {
   --field-near: #af8a68;
   --field-far: #c9ab8d;
@@ -59,7 +39,8 @@
 /* A night desk. The pages stay paper — this is a lamp on a dark table, not a
    dark theme, and inverting the mus'haf is a different question with a
    different answer. The ink flips to paper and clears by a wide margin
-   (11.41:1). */
+   (11.41:1). It is reachable by link and by nothing else: one desk for one
+   occasion is not a preference the chrome should grow a control for. */
 :root[data-field="dark"] {
   --field-near: #221e1a;
   --field-far: #35302a;
