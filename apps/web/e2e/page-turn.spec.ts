@@ -123,26 +123,41 @@ test.describe("Hifth · the fold", () => {
     //
     // The sampler is armed before the tap rather than after, because the first
     // frame is the one a 16 px translate would show.
+    //
+    // It runs until the test stops it, not for a fixed window, and it records a
+    // frame at a time rather than a list per page. Both were the same mistake:
+    // a fixed 600 ms window that was enough here and not on CI, and a
+    // per-page sample count standing in for "we watched the swap happen".
+    // Neither is a claim about the product — how many frames the arriving page
+    // appears in is a fact about how fast the machine fetched its SVG. What the
+    // axiom actually says is checked below, off frames the sampler either did
+    // or did not capture the overlap in.
     await page.evaluate(() => {
+      type Rect = [number, number, number, number];
       const w = window as unknown as {
-        __rects: Record<string, Array<[number, number, number, number]>>;
+        __frames: Array<Record<string, Rect>>;
+        __stop: boolean;
       };
-      w.__rects = {};
+      w.__frames = [];
+      w.__stop = false;
       const t0 = performance.now();
       const tick = (): void => {
+        const frame: Record<string, Rect> = {};
         for (const svg of document.querySelectorAll("svg[aria-labelledby^='page-label-']")) {
           const host = svg.parentElement;
           if (!host || getComputedStyle(host).display === "none") continue;
-          const id = svg.getAttribute("aria-labelledby") ?? "?";
           const r = svg.getBoundingClientRect();
-          (w.__rects[id] ??= []).push([
+          frame[svg.getAttribute("aria-labelledby") ?? "?"] = [
             Math.round(r.x),
             Math.round(r.y),
             Math.round(r.width),
             Math.round(r.height),
-          ]);
+          ];
         }
-        if (performance.now() - t0 < 600) requestAnimationFrame(tick);
+        w.__frames.push(frame);
+        // The cap is only so a turn that never lands ends as a failed
+        // assertion rather than a page pinned at 60 fps forever.
+        if (!w.__stop && performance.now() - t0 < 10_000) requestAnimationFrame(tick);
       };
       requestAnimationFrame(tick);
     });
@@ -150,20 +165,38 @@ test.describe("Hifth · the fold", () => {
     await page.getByRole("button", { name: NEXT }).tap();
     await expect(page.locator(NUM)).toHaveText("9");
 
-    const rects = await page.evaluate(
-      () =>
-        (window as unknown as { __rects: Record<string, number[][]> }).__rects,
-    );
-    // Both pages must have been sampled: the one being left and the one
-    // arriving. A turn that sampled one page only would pass the loop below
-    // while proving nothing about the swap.
-    expect(Object.keys(rects).sort()).toEqual(["page-label-7", "page-label-9"]);
-    for (const [id, frames] of Object.entries(rects)) {
-      expect(frames.length, `${id} was sampled`).toBeGreaterThan(3);
-      for (const frame of frames) {
-        expect(frame, `${id} moved mid-turn`).toEqual(frames[0]);
+    // Stop and read in one call. Frames sampled after the turn landed are of a
+    // page that has stopped moving, so they can only strengthen the check below
+    // — the arriving page's resting box must equal the box it had while the
+    // band was still crossing it.
+    const frames = await page.evaluate(() => {
+      const w = window as unknown as {
+        __frames: Array<Record<string, number[]>>;
+        __stop: boolean;
+      };
+      w.__stop = true;
+      return w.__frames;
+    });
+
+    // The moment the axiom is about: both pages painted in the same frame. The
+    // cross-fade puts the two of them on the stage together by construction, so
+    // a turn with no such frame is either a swap that skipped the fade or a
+    // sampler that never ran — and both would leave the rest of this row
+    // asserting that one stationary page stayed where it was.
+    const together = frames.filter((f) => f["page-label-7"] && f["page-label-9"]);
+    expect(together.length, "the two pages were never on the stage at once").toBeGreaterThan(0);
+
+    // No page's box ever changed, across every frame it appeared in — the swap
+    // is a change of *which* page is painted, never of where any page sits.
+    const boxes = new Map<string, number[]>();
+    for (const frame of frames) {
+      for (const [id, rect] of Object.entries(frame)) {
+        const first = boxes.get(id);
+        if (first === undefined) boxes.set(id, rect);
+        else expect(rect, `${id} moved mid-turn`).toEqual(first);
       }
     }
+    expect([...boxes.keys()].sort()).toEqual(["page-label-7", "page-label-9"]);
   });
 
   test("two turns inside one sweep leave one band and one visible page", async ({ page }) => {
