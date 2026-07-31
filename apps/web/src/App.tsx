@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   Adjacency,
   Concordance,
+  DEFAULT_FIELD,
   Resolver,
   Roots,
   Tajweed,
@@ -17,6 +18,7 @@ import {
   type AyahRef,
   type AyahRootsShard,
   type Edge,
+  type FieldId,
   type JumpTarget,
   type MergedEdge,
   type RailChip,
@@ -32,6 +34,7 @@ import {
   loadShard,
   loadTajweedShard,
 } from "./assets";
+import { applyFieldToDocument, fieldFromHash } from "./field";
 import { recordLook } from "./revision-store";
 import { useT } from "./i18n";
 import { useHashRouter } from "./useHashRouter";
@@ -630,6 +633,23 @@ export function App(): JSX.Element {
     [handleHop],
   );
 
+  /* ---- the field (?field=) ---------------------------------------------- */
+
+  // The desk the mus'haf lies on. It comes from the link and from nowhere else
+  // — there is deliberately no control for it (packages/core/src/field.ts says
+  // why), so this is state only so that it can be *kept*: the hash is rewritten
+  // on every hop, and a field that was not re-serialized would vanish from the
+  // address bar the first time the reader touched anything.
+  //
+  // Seeded from the URL rather than the default, because `main.tsx` has already
+  // painted the document from the same reading and React must agree with what
+  // is on screen.
+  const [field, setField] = useState<FieldId>(() => fieldFromHash(window.location.hash));
+
+  useEffect(() => {
+    applyFieldToDocument(field);
+  }, [field]);
+
   // The current view as a spec-§7 AppState — what the URL encodes and Share
   // serializes. `via` is the immediate breadcrumb origin; `trail` is the rest of
   // the chain (all but the top, which is `via`) so a deep link restores both.
@@ -643,8 +663,12 @@ export function App(): JSX.Element {
       : selectedKey
         ? refOf(selectedKey)
         : null;
+    // Only when it is not the default: every link this app hands out would
+    // otherwise carry `field=sunk`, which says nothing and invites the reader to
+    // think the desk is part of the address.
+    const desk = field === DEFAULT_FIELD ? {} : { field };
     if (!select) {
-      return { edition, select: null, page };
+      return { edition, select: null, page, ...desk };
     }
     const trailRefs = trail
       .map((b) => keyToRef(b.key))
@@ -654,10 +678,11 @@ export function App(): JSX.Element {
     return {
       edition,
       select,
+      ...desk,
       ...(via ? { via } : {}),
       ...(rest.length > 0 ? { trail: rest } : {}),
     };
-  }, [resolver, selectedKey, selectedRange, page, trail]);
+  }, [resolver, selectedKey, selectedRange, page, trail, field]);
 
   // Restore a parsed deep link through the SAME select/navigateTo path a live
   // hop uses (spec §7: no separate deep-link logic to drift). Rebuilds the trail
@@ -668,6 +693,12 @@ export function App(): JSX.Element {
     (state: AppState, origin: "link" | "jump" = "link") => {
       if (!resolver) return;
       const edition = resolver.edition;
+      // A *link* says which desk it wants, and says it by omission too: pasting a
+      // plain link while sitting on a dark field puts you back on the default,
+      // because that link is a whole view and it does not include one. A *jump*
+      // is a move inside the session and inherits the desk it was made from —
+      // which is also why `handleJump` need not thread the field through.
+      if (origin === "link") setField(state.field ?? DEFAULT_FIELD);
       // Rebuild the trail beads from the link's trail + via (oldest → newest).
       const chain = [...(state.trail ?? []), ...(state.via ? [state.via] : [])];
       const beads: TrailBead[] = [];

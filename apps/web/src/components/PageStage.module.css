@@ -33,10 +33,7 @@
      painted the gradient into the right half of the desk and left the other half
      flat `--paper`, with a seam down the middle where they met. The spread
      paints this same gradient once, across the whole desk. */
-  background: var(
-    --stage-field,
-    radial-gradient(120% 90% at 50% 0%, var(--paper-sunk), var(--paper) 60%)
-  );
+  background: var(--stage-field, var(--field-wash));
 }
 
 /* The stage's padding is asymmetric, and the asymmetry is the point: a leaf is
@@ -311,9 +308,13 @@
   border-right: 1px dashed var(--hairline);
 }
 
+/* The only text in the app that ever sits on the field, which is why it reads
+   `--ink-on-field` rather than a fixed ink: a field that changes the desk under
+   this sentence has to change the sentence too. The fallback keeps it correct
+   if the token layer is ever loaded without field.css. */
 .hint {
   position: absolute;
   inset-block-end: var(--space-5);
-  color: var(--ink-soft);
+  color: var(--ink-on-field, var(--ink-soft));
   font-size: var(--text-sm);
 }

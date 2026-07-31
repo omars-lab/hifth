@@ -1,10 +1,13 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { App } from "./App";
+import { applyFieldToDocument, fieldFromHash } from "./field";
 import { LangProvider } from "./i18n";
 import { applyLangToDocument, detectLang } from "./lang";
 import { initPwa } from "./pwa";
 import "./styles/global.css";
+// Global for the same reason: it dresses `:root`, which React does not render.
+import "./styles/field.css";
 import "./styles/highlight.css";
 // Global, not a CSS module: its selectors target elements inside the mushaf SVG
 // document, which React never renders (same reason as highlight.css).
@@ -22,6 +25,11 @@ if (!root) throw new Error("missing #root");
  * happens here, synchronously, and the provider below only has to keep it true.
  */
 applyLangToDocument(detectLang());
+
+// The desk, for the same reason and one frame earlier than React could manage:
+// a link that opens on a dark field must not flash a light one first. `App`
+// takes ownership from here and keeps it true across hash changes.
+applyFieldToDocument(fieldFromHash(window.location.hash));
 
 createRoot(root).render(
   <StrictMode>

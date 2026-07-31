@@ -190,14 +190,31 @@
           "file": "apps/web/src/components/ShareSheet.tsx",
           "symbol": "ShareSheet",
           "note": "Where a link leaves the app. Do not reach for the Clipboard API without a fallback — a LAN preview is plain http, so it is not a secure context and the API is simply absent."
+        },
+        {
+          "file": "packages/core/src/field.ts",
+          "symbol": "FIELDS",
+          "note": "The one query key that does not describe the view, and the only one that falls back instead of refusing a bad value. This list is the source of truth for the CSS blocks, the contrast rows and the catalog table."
+        },
+        {
+          "file": "apps/web/src/field.ts",
+          "symbol": "applyFieldToDocument",
+          "note": "The DOM half. Called from main.tsx before React mounts, because applying a field from an effect paints the default desk for one frame first — a white flash on `?field=dark`."
+        },
+        {
+          "file": "scripts/gate-params.mjs",
+          "symbol": "parseBranches",
+          "note": "Binds parseHash, serializeState and docs/query-params.md to each other. It reads the failure-mode column against the code: a branch that can `return null` rejects, one that cannot falls back."
         }
       ],
       "extend": [
-        "Add the field to `AppState`, then to both serializeState and parseHash in the same commit — a round-trip test is the cheapest way to keep them honest.",
+        "Add the key to `AppState`, then to both serializeState and parseHash in the same commit — a round-trip test is the cheapest way to keep them honest.",
+        "Decide, in writing, whether a bad value refuses the whole link or falls back to a default. Reject is the rule; falling back needs the argument `field` makes, which is that the key does not describe the view.",
+        "Add its row to docs/query-params.md, failure mode included — `gate:params` fails on a key with no row, and on a row that disagrees with the code.",
         "Old links must keep working. Treat the hash format as a published API, because it is: it is in people's notes and messages.",
         "Add an e2e that opens the URL cold, rather than one that clicks its way to the state — those test different things and only the first tests a link."
       ],
-      "gates": ["pnpm test", "make e2e"],
+      "gates": ["pnpm test", "pnpm gate:params", "make e2e"],
       "seeAlso": ["the-hop", "offline-pwa"]
     },
 

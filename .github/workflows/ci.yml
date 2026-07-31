@@ -182,6 +182,15 @@ jobs:
       - name: Gate — every locale is complete, and its plurals are its own
         run: pnpm gate:i18n
 
+      # The URL is this app's entire state — there is no server and no session
+      # store — so the query grammar is a public interface, and "what happens
+      # when this value is wrong" is part of it. This binds parseHash,
+      # serializeState and docs/query-params.md to each other, including the
+      # failure-mode column, and keeps the five fields in step across core, the
+      # stylesheet and the catalog.
+      - name: Gate — the link grammar matches its catalog
+        run: pnpm gate:params
+
       - name: Build
         run: pnpm build
 
