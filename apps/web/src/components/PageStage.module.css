@@ -20,12 +20,49 @@
 }
 
 /* The layer holds one host div per mounted page; only the current one shows.
-   It fills the stage and centers its visible host. */
+   It fills the stage — and it does **not** centre anything.
+
+   `place-items: center` used to live here, and it was one of two mechanisms
+   doing the same job. `holdAxis` (packages/core/src/view.ts) already returns an
+   *absolute* top-left for an axis that fits, which is a centring offset; the
+   grid then centred the already-centred host and the offset landed twice.
+   Measured at 1440×900 that put the leaf 245.8 px from the left of its layer and
+   −0.2 from the right — flush against the spine of the spread — and at 834×1194
+   in the bottom-right corner of an otherwise empty field.
+
+   The fix is to delete the CSS centring rather than to make `holdAxis` return a
+   delta, and the reason is worth keeping: `holdAxis` also has to produce legal
+   values for the *overflow* regime, where they are genuinely absolute. Splitting
+   one function across two coordinate conventions is how this defect got here.
+   `clampView` is now the only thing that positions the host, which is what every
+   comment in PageStage already assumed.
+
+   `min-block-size: 0` is the other half. Without it the grid row's automatic
+   minimum size grows the layer to its content, so a leaf taller than the stage
+   made `layer.height === host.height` — `measureFit` reads the layer, so the
+   overflow it should have reported became invisible and 185 px of page (at
+   320×568) was cut by the stage's `overflow: hidden` and could not be panned to.
+
+   `justify-items: left` and `align-items: start` are what the centring was
+   quietly also doing, and they have to be said out loud once it is gone. The
+   transform is *physical* — `translate3d(123px, 0, 0)` means 123 px to the
+   right of wherever the host was laid out — while this grid sits inside
+   `dir="rtl"`, where the inline start edge is the **right** one. Dropping
+   `place-items: center` on its own therefore parked the host flush against the
+   layer's right edge and then translated it 123 px further right, off the leaf
+   entirely: measured at 1440×900, the host 240 px past the layer's right edge.
+   `left` (a physical keyword, not `start`) puts the host's origin where
+   `holdAxis` believes it is. `start` on the block axis is the same argument on
+   the other axis, and it also stops a leaf shorter than the stage being
+   stretched by `stretch` — which would inflate `host.clientHeight` and feed
+   `clampView` a content height the page does not have. */
 .layer {
   display: grid;
-  place-items: center;
+  justify-items: left;
+  align-items: start;
   inline-size: 100%;
   block-size: 100%;
+  min-block-size: 0;
 }
 
 .host {

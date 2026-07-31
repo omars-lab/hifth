@@ -160,7 +160,13 @@ export default defineConfig({
           // device the app otherwise never sees: a pointer, a keyboard, and a
           // window whose height is a real constraint.
           name: "desktop",
-          testMatch: /desktop\.spec\.ts/,
+          // `stage-fit` joins `desktop` here because the stage geometry it
+          // asserts is not a phone claim, and the two phone projects are exactly
+          // the viewports where the double centring is invisible: the host is
+          // `width: min(100%, …)`, so it fills its layer and a horizontal
+          // offset applied twice is applied to a slack of zero. At 1440 × 900
+          // the slack is real. See `docs/design/page-turning.md` §7 ②.
+          testMatch: /(desktop|stage-fit)\.spec\.ts/,
           use: {
             browserName: "chromium",
             viewport: { width: 1440, height: 900 },
