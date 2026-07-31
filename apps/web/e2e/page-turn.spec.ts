@@ -1,6 +1,7 @@
 import { test, expect, type Page } from "@playwright/test";
 import { foldBetween } from "@hifth/core";
 import { tapAyah, ayahTarget } from "./ayah";
+import { watchFolds, foldWords } from "./fold";
 
 /*
  * The fold — what a page turn draws, and everything it must not.
@@ -40,41 +41,7 @@ const NUM = "header .numeric";
 const NEXT = "الصفحة التالية";
 const PREV = "الصفحة السابقة";
 
-/**
- * Every band the app has ever inserted, in order, with the word it carried.
- *
- * A `MutationObserver` rather than a poll, because most of what this file
- * asserts is about bands that must **not** exist, and "I looked twice and saw
- * nothing" is not the same claim as "nothing was ever added". A 240 ms sweep is
- * comfortably long enough to be missed by two `expect`s and comfortably short
- * enough to be missed by one.
- */
-async function watchFolds(page: Page): Promise<void> {
-  await page.addInitScript(() => {
-    const seen: string[] = [];
-    (window as unknown as { __folds: string[] }).__folds = seen;
-    const note = (node: Node): void => {
-      if (node instanceof HTMLElement && node.hasAttribute("data-fold")) {
-        seen.push(node.getAttribute("data-fold") ?? "");
-      }
-    };
-    // `document`, not `document.documentElement`. An init script runs before
-    // the document has an element to hand — `documentElement` is null at that
-    // moment, `observe(null)` throws, and the whole recorder is silently gone
-    // while `__folds` still answers `[]`. That reads as "no band was ever
-    // inserted", which is the exact thing several rows below assert, so the
-    // wrong target here would have turned this file into a rubber stamp.
-    new MutationObserver((records) => {
-      for (const r of records) for (const n of r.addedNodes) note(n);
-    }).observe(document, { subtree: true, childList: true });
-  });
-}
-
-/** The words of every band inserted so far. */
-const foldsSeen = (page: Page): Promise<string[]> =>
-  page.evaluate(() => (window as unknown as { __folds: string[] }).__folds.slice());
-
-/** Open the app on page 7 with the fold recorder already armed. */
+/** Open the app on page 7 with the fold recorder already armed (`./fold`). */
 async function open(page: Page): Promise<void> {
   await watchFolds(page);
   await page.goto("/");
@@ -101,7 +68,7 @@ test.describe("Hifth · the fold", () => {
       await page.getByRole("slider").fill(String(from));
       await expect(page.locator(NUM)).toHaveText(String(from));
 
-      const before = (await foldsSeen(page)).length;
+      const before = (await foldWords(page)).length;
       await page.getByRole("button", { name: to > from ? NEXT : PREV }).tap();
 
       // The band is up for 240 ms. Read the attribute off it while it crosses.
@@ -110,7 +77,7 @@ test.describe("Hifth · the fold", () => {
 
       await expect(page.locator(NUM)).toHaveText(String(to));
       // One band per turn, not one per frame or one per re-render.
-      expect((await foldsSeen(page)).length - before).toBe(1);
+      expect((await foldWords(page)).length - before).toBe(1);
     }
   });
 
@@ -124,7 +91,7 @@ test.describe("Hifth · the fold", () => {
     await page.getByRole("button", { name: NEXT }).tap();
     await expect(page.locator(NUM)).toHaveText("19");
 
-    const seen = await foldsSeen(page);
+    const seen = await foldWords(page);
     expect(seen).toEqual(["hole", "hole"]);
   });
 
@@ -144,7 +111,7 @@ test.describe("Hifth · the fold", () => {
       .tap();
 
     await expect(page.locator(NUM)).toHaveText("19");
-    expect(await foldsSeen(page)).toEqual([]);
+    expect(await foldWords(page)).toEqual([]);
   });
 
   test("no glyph moves while the page turns", async ({ page }) => {
@@ -249,7 +216,7 @@ test.describe("Hifth · the fold", () => {
       await open(page);
       await page.getByRole("button", { name: NEXT }).tap();
       await expect(page.locator(NUM)).toHaveText("9");
-      expect(await foldsSeen(page)).toEqual([]);
+      expect(await foldWords(page)).toEqual([]);
     } finally {
       await context.close();
     }
@@ -310,7 +277,7 @@ test.describe("Hifth · the fold", () => {
     }
     await page.mouse.up();
 
-    expect(await foldsSeen(page)).toEqual([]);
+    expect(await foldWords(page)).toEqual([]);
     await expect(page.locator(NUM)).toHaveText("7");
   });
 });
