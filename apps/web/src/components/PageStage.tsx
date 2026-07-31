@@ -5,12 +5,15 @@ import {
   useImperativeHandle,
   useRef,
   useState,
+  type RefObject,
 } from "react";
+import { createPortal } from "react-dom";
 import { useGesture } from "@use-gesture/react";
 import {
   clampView,
   clampZoom,
   easeInOutCubic,
+  foldBetween,
   frameBboxToView,
   isViewportIntent,
   leafSideOf,
@@ -19,6 +22,7 @@ import {
   nextIntent,
   Highlighter,
   DEFAULT_HOP_ZOOM,
+  type Fold,
   type PointerIntent,
   type Resolver,
   type SkinId,
@@ -74,6 +78,20 @@ interface PageStageProps {
    * highlighter takes a function, exactly like `labelFor`.
    */
   tajweedLookup?: TajweedLookup | null;
+  /**
+   * Where to draw the fold, when this stage is one leaf of an open spread.
+   *
+   * Absent (the phone) the band is a sibling of `.layer` inside the stage and
+   * sweeps the leaf. On a desktop spread a turn that leaves the opening changes
+   * **both** panels, so the band has to sweep the whole book — and the element
+   * that is the whole book is `PageSpread`'s, not this one's. Passing the node
+   * in rather than lifting the turn out keeps the state machine in one place:
+   * the stage is the only thing that knows when a page has painted, and a fold
+   * whose timing lived elsewhere would have to be told.
+   *
+   * `docs/design/page-transition.md` §3.5, decision row 21.
+   */
+  foldTarget?: RefObject<HTMLElement | null> | null;
 }
 
 /** What App can drive imperatively on the stage. */
@@ -88,7 +106,30 @@ export interface PageStageHandle {
    * would land the reader mid-page on an ayah they never asked for.
    */
   showPage: (page: number) => Promise<void>;
+  /**
+   * **Turn** to a page: draw what is between the two, then land.
+   *
+   * Distinct from `showPage`, and the distinction is the whole point of the
+   * fold. A turn is continuous reading and the two pages have a relationship in
+   * the print — `foldBetween` says which one. A hop or a scrub is a relocation
+   * and has none, so it must not draw a band: a fold between page 19 and page 7
+   * would claim they are neighbours. Only the caller can tell the two apart,
+   * which is why this is a second verb rather than a flag on the first
+   * (`docs/design/page-transition.md` §4.1).
+   *
+   * Resolves `true` only if the page actually landed. A destination that never
+   * mounts leaves the reader where they were — the band retreats the way it
+   * came — so the caller must not move the header until this says so. Landing
+   * on an unmounted page paints sunk paper where scripture should be, and a
+   * reader who does not look closely has been shown a blank mus'haf page (§5.3).
+   */
+  turnTo: (page: number) => Promise<boolean>;
 }
+
+/** The three states of a fold that is actually drawn; `"none"` draws nothing. */
+type FoldKind = Exclude<Fold, "none">;
+/** Which way the band travels. Forward is toward the later page. */
+type TurnDir = "forward" | "back";
 
 const MIN_ZOOM = 0.8;
 const MAX_ZOOM = 5;
@@ -124,6 +165,7 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
     onSelectionRect,
     skin = "plain",
     tajweedLookup = null,
+    foldTarget = null,
   },
   ref,
 ): JSX.Element {
@@ -162,6 +204,29 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
   // Same reason: mountPage decides a leaf's free edge after an await.
   const totalRef = useRef(total);
   totalRef.current = total;
+
+  /*
+   * The fold. Its *existence* is React state — a band that is not crossing does
+   * not exist in the DOM — and everything after that is imperative, for the same
+   * reason pan and zoom are: a re-render per animation frame is a re-render of a
+   * 170 KB inline SVG's parent. Two renders per turn, one to insert and one to
+   * remove, and the 240 ms in between is a CSS transition on `transform`.
+   *
+   * `foldRef` mirrors the state for the ref callback, which runs during commit
+   * and needs to know which way the band is travelling before the effect queue.
+   * `turnRef` is the generation counter that makes interruption a *re-target*
+   * rather than a second fold: any awaiting step of an older turn sees a bumped
+   * number and drops out, leaving the newer turn the only owner of the one band
+   * (§3.4 rule 1). `armedRef` is what stops a re-target restarting the sweep
+   * from the screen edge — the band continues from wherever it is.
+   */
+  const [fold, setFold] = useState<{ kind: FoldKind; dir: TurnDir } | null>(null);
+  const foldRef = useRef<{ kind: FoldKind; dir: TurnDir } | null>(null);
+  const foldElRef = useRef<HTMLDivElement | null>(null);
+  const armedRef = useRef(false);
+  const turnRef = useRef(0);
+  const foldTargetRef = useRef(foldTarget);
+  foldTargetRef.current = foldTarget;
 
   /*
    * The skin swap itself: classes on and classes off, on every mounted page.
@@ -249,14 +314,25 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
     }
   }, []);
 
-  /** Read the hop duration from the token (0 under reduced-motion). */
-  const hopDurationMs = useCallback((): number => {
-    const raw = getComputedStyle(document.documentElement)
-      .getPropertyValue("--dur-hop")
-      .trim();
+  /**
+   * Read a duration token in ms.
+   *
+   * Every duration in this component comes through here rather than from a
+   * constant, and that is the whole of the reduced-motion story: `tokens.css`
+   * already sets `--dur-fast`, `--dur-med` and `--dur-hop` to `0ms` under
+   * `prefers-reduced-motion: reduce`, so "no fold, no fade, no tween" is one
+   * media query in one file instead of a preference read in three components.
+   * A zero here is not "animate instantly" — the callers branch on it and skip
+   * inserting the band entirely, because a band that appears and vanishes inside
+   * one frame is a flash, which is worse than nothing (§5.1).
+   */
+  const durationMs = useCallback((token: string, fallback: number): number => {
+    const raw = getComputedStyle(document.documentElement).getPropertyValue(token).trim();
     const ms = raw.endsWith("ms") ? parseFloat(raw) : parseFloat(raw) * 1000;
-    return Number.isFinite(ms) ? ms : 460;
+    return Number.isFinite(ms) ? ms : fallback;
   }, []);
+
+  const hopDurationMs = useCallback((): number => durationMs("--dur-hop", 460), [durationMs]);
 
   /** RAF-tween `view` from its current value to `target`. Interruptible. */
   const tweenTo = useCallback(
@@ -302,6 +378,83 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
     },
     [],
   );
+
+  /**
+   * Say what phase of a turn the stage is in, on the stage element itself.
+   *
+   * Written imperatively and deliberately absent from the JSX below: this is a
+   * fact about an animation in flight, and putting it in React state would cost
+   * a render at each of the four moments a turn passes through. Nothing in the
+   * app styles off it — it is here so a test can watch a turn stall or retreat,
+   * which are the two states that are otherwise invisible in a screenshot.
+   */
+  const setTurnPhase = useCallback((phase: string | null): void => {
+    const stage = stageRef.current;
+    if (!stage) return;
+    if (phase) stage.dataset.turn = phase;
+    else delete stage.dataset.turn;
+  }, []);
+
+  /**
+   * Where the band sits at the three moments of a crossing, in physical px.
+   *
+   * Physical, not logical: the band enters on the side the finger would push it
+   * from, and `loop-1.md` pins that to the *book's* direction, which does not
+   * change when the UI language does. Read off the offsetParent rather than a
+   * token so one element is correct whether it is sweeping a phone's single leaf
+   * or a desktop spread's two (§3.5).
+   */
+  const sweepOf = useCallback((el: HTMLElement, dir: TurnDir) => {
+    const span = el.parentElement?.clientWidth ?? 0;
+    const width = el.offsetWidth;
+    return {
+      enter: dir === "forward" ? -width : span,
+      exit: dir === "forward" ? span : -width,
+      middle: (span - width) / 2,
+    };
+  }, []);
+
+  /** Move the band, or place it with no transition when `ms` is 0. */
+  const moveFold = useCallback((el: HTMLElement, x: number, ms: number): void => {
+    el.style.transition = ms > 0 ? `transform ${ms}ms var(--ease-hop)` : "none";
+    el.style.transform = `translate3d(${x}px, 0, 0)`;
+  }, []);
+
+  /**
+   * Put the band in the DOM at its entry edge — on insert, and only on insert.
+   *
+   * A ref callback rather than an effect because it runs during commit, before
+   * the browser paints: an effect would let the band paint for one frame at
+   * `translateX(-100%)` of whatever width the *previous* state had. The
+   * `armedRef` guard is what makes a second turn a **re-target**: an existing
+   * band keeps its position and is simply given a new destination, which is how
+   * a turn interrupted at 100 ms continues rather than jumping back to the edge.
+   */
+  const attachFold = useCallback(
+    (el: HTMLDivElement | null): void => {
+      foldElRef.current = el;
+      if (!el) {
+        armedRef.current = false;
+        return;
+      }
+      if (armedRef.current) return;
+      const state = foldRef.current;
+      if (!state) return;
+      armedRef.current = true;
+      moveFold(el, sweepOf(el, state.dir).enter, 0);
+    },
+    [moveFold, sweepOf],
+  );
+
+  /** Wait for the band to exist and be placed, or give up after a few frames. */
+  const armedFold = useCallback(async (gen: number): Promise<HTMLDivElement | null> => {
+    for (let i = 0; i < 5; i += 1) {
+      await nextFrame();
+      if (turnRef.current !== gen) return null;
+      if (foldElRef.current && armedRef.current) return foldElRef.current;
+    }
+    return null;
+  }, []);
 
   /** The one-shot mount `ensurePage` de-duplicates. Never call it directly. */
   const mountPage = useCallback(
@@ -386,6 +539,214 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
     applyTransform();
   }, [applyTransform, measureFit]);
 
+  /**
+   * Swap the two pages *under* the band, with the fade's midpoint at its centre.
+   *
+   * The timing is the point of the whole design. A bare cross-fade between two
+   * mus'haf pages double-exposes two nearly identical grids of black script, and
+   * the moment of maximum ambiguity — t = 0.5 — is the moment the reader is
+   * looking hardest. The band covers exactly that moment, which is also why the
+   * fade can be dropped to a hard cut on a device that cannot afford two painted
+   * layers and the turn stays legible (§5.2). A bare cross-fade has no such
+   * fallback: remove its fade and there is no transition left.
+   *
+   * Every other mounted host is put to `opacity: 0` with its transition
+   * suppressed, so a held-down arrow costs one composited layer rather than one
+   * per mounted page — `pagesRef` is unbounded today (backlog ③), and a fade
+   * that touched every host would make that unbounded set a per-frame cost
+   * (§3.4 rule 3).
+   */
+  const crossFade = useCallback(
+    (from: number, to: number, ms: number): void => {
+      const incoming = pagesRef.current.get(to);
+      if (!incoming) return;
+      const outgoing = pagesRef.current.get(from);
+      for (const [p, mp] of pagesRef.current) {
+        if (p === from || p === to) continue;
+        mp.host.style.transition = "none";
+        mp.host.style.opacity = "0";
+      }
+      incoming.host.style.transition = "none";
+      incoming.host.style.opacity = "0";
+      incoming.host.style.display = "block";
+      // The incoming leaf has to arrive already wearing its transform, or it
+      // paints for one frame at the layer's origin — unclamped, top-left — and
+      // the fade shows a page sliding into place under the band.
+      currentPageRef.current = to;
+      view.current = { x: 0, y: 0, z: 1 };
+      measureFit();
+      applyTransform();
+      // Flush, so the transition has a start value to run from instead of
+      // coalescing both writes into one.
+      void incoming.host.offsetWidth;
+      incoming.host.style.transition = `opacity ${ms}ms linear`;
+      incoming.host.style.opacity = "1";
+      if (outgoing && outgoing !== incoming) {
+        outgoing.host.style.transition = `opacity ${ms}ms linear`;
+        outgoing.host.style.opacity = "0";
+      }
+    },
+    [applyTransform, measureFit],
+  );
+
+  /** End a turn on the destination page: display swapped, inline fades cleared. */
+  const land = useCallback(
+    (next: number): void => {
+      navigatedRef.current = true;
+      cancelTween();
+      setCurrentPage(next);
+      for (const mp of pagesRef.current.values()) {
+        mp.host.style.transition = "";
+        mp.host.style.opacity = "";
+      }
+      centerCurrent();
+      setStatus("ready");
+    },
+    [cancelTween, centerCurrent, setCurrentPage],
+  );
+
+  /**
+   * Abandon any turn in flight and take the band off the stage.
+   *
+   * Called by the two verbs that are *not* turns. A hop that lands mid-turn must
+   * not leave a band crossing the page it jumped to: that band asserts an
+   * adjacency, and a mutashabihat jump is precisely the proof against one.
+   */
+  const abortTurn = useCallback((): void => {
+    turnRef.current += 1;
+    armedRef.current = false;
+    foldRef.current = null;
+    setFold(null);
+    setTurnPhase(null);
+    for (const mp of pagesRef.current.values()) {
+      mp.host.style.transition = "";
+      mp.host.style.opacity = "";
+    }
+  }, [setTurnPhase]);
+
+  /**
+   * The turn itself — insert the band, sweep it, swap under it, land.
+   *
+   * Written as one linear async function rather than as a reducer because that
+   * is what it is: a sequence with four waits in it, each of which may find that
+   * a newer turn has taken over. `turnRef` is the generation, and every await is
+   * followed by the same three words — if the generation moved, this turn is no
+   * longer the one holding the band, and it must return without touching a
+   * single style. That is the whole of §3.4's "one fold, ever": there is no
+   * bookkeeping to get wrong because there is only ever one element.
+   */
+  const runTurn = useCallback(
+    async (next: number): Promise<boolean> => {
+      const from = currentPageRef.current;
+      const kind = foldBetween(from, next, totalRef.current);
+      const sweepMs = durationMs("--dur-med", 240);
+      const fadeMs = durationMs("--dur-fast", 120);
+      const gen = (turnRef.current += 1);
+      const mine = (): boolean => turnRef.current === gen;
+
+      /*
+       * When nothing is drawn at all, and the three reasons are different:
+       *
+       *  - `"none"` — not a turn. The caller got the pair wrong; land plainly.
+       *  - a zero duration — `prefers-reduced-motion`. §5.1: not inserted-and-
+       *    instant, *not inserted*. The information a fold carries is also
+       *    carried at rest, by the leaf's rounded free corner, by the fore-edge
+       *    stack, by the announcer and by the page bar — so this degrades to
+       *    nothing without lying, which is the test this design had to pass.
+       *  - a crease on a spread — §3.5. Both leaves of the opening are already
+       *    on screen and neither changed; the only thing that moves is which
+       *    leaf is live. Animating a leaf that did not turn is the failure, and
+       *    the crease between them is already drawn, permanently, by the gutter.
+       */
+      const drawn =
+        kind !== "none" && sweepMs > 0 && !(kind === "crease" && foldTargetRef.current?.current);
+      if (!drawn) {
+        const mp = await ensurePage(next);
+        if (!mine()) return false;
+        if (!mp) {
+          setStatus("error");
+          return false;
+        }
+        land(next);
+        return true;
+      }
+
+      const dir: TurnDir = next > from ? "forward" : "back";
+      // Start the fetch now, not at the swap: the sweep is 240 ms of cover for
+      // it, and a destination that arrives during the crossing never stalls.
+      const mount = ensurePage(next);
+      void mount.catch(() => null);
+
+      foldRef.current = { kind: kind as FoldKind, dir };
+      setFold(foldRef.current);
+      const el = await armedFold(gen);
+      if (!el || !mine()) return false;
+
+      const { enter, exit, middle } = sweepOf(el, dir);
+      setTurnPhase("crossing");
+      moveFold(el, exit, sweepMs);
+
+      // The swap is centred on the band's centre, so with a 240 ms sweep and a
+      // 120 ms fade it runs from 60 ms to 180 ms.
+      await sleep(Math.max(0, sweepMs / 2 - fadeMs / 2));
+      if (!mine()) return false;
+
+      if (!pagesRef.current.has(next)) {
+        /*
+         * §5.3 — the destination has not arrived. The band holds at the leaf's
+         * centre rather than landing on nothing: a fold that stops mid-crossing
+         * is honest, it says *the leaf is still coming*, which is what is
+         * happening. `.layer` already carries `aria-busy`; this is its picture.
+         */
+        setTurnPhase("stalled");
+        moveFold(el, middle, fadeMs);
+        const mp = await mount;
+        if (!mine()) return false;
+        if (!mp) {
+          // It will never arrive — offline, unvendored, a 404. Retreat the way
+          // it came and leave the reader where they were. Landing would paint
+          // sunk paper where scripture should be.
+          setTurnPhase("retreating");
+          moveFold(el, enter, fadeMs);
+          await sleep(fadeMs);
+          if (mine()) {
+            setStatus("error");
+            abortTurn();
+          }
+          return false;
+        }
+        setTurnPhase("crossing");
+        moveFold(el, exit, sweepMs / 2);
+      }
+
+      crossFade(from, next, fadeMs);
+      await sleep(fadeMs);
+      if (!mine()) return false;
+      land(next);
+
+      await sleep(Math.max(0, sweepMs / 2 - fadeMs / 2));
+      // A newer turn owning the band is not a failure of this one: the page it
+      // was asked for did land, under the band, before the hand-over.
+      if (!mine()) return true;
+      armedRef.current = false;
+      foldRef.current = null;
+      setFold(null);
+      setTurnPhase(null);
+      return true;
+    },
+    [
+      abortTurn,
+      armedFold,
+      crossFade,
+      durationMs,
+      ensurePage,
+      land,
+      moveFold,
+      setTurnPhase,
+      sweepOf,
+    ],
+  );
+
   // Report the selected ayah's on-screen rect so the rail can sit beside it.
   const emitSelectionRect = useCallback(() => {
     const emit = onSelectionRectRef.current;
@@ -416,6 +777,9 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
       async navigateTo(key, opts) {
         const loc = resolver.resolve(key);
         if (!loc) return; // unvendored target — App gates the chip, this is a no-op
+        // A hop is not a turn (§4.5), so any band still crossing belongs to a
+        // page relationship the reader has just left behind.
+        abortTurn();
         const mp = await ensurePage(loc.page);
         // A page that will not mount has to be *said*, not swallowed. Staying
         // silent leaves the previous page on the stage while the chrome and the
@@ -450,6 +814,7 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
         emitSelectionRect();
       },
       async showPage(next) {
+        abortTurn(); // a deep link is a relocation, not a turn
         const mp = await ensurePage(next);
         if (!mp) {
           setStatus("error"); // same contract as navigateTo above
@@ -461,10 +826,15 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
         cancelTween();
         centerCurrent();
       },
+      turnTo(next) {
+        return runTurn(next);
+      },
     }),
     [
       resolver,
+      abortTurn,
       ensurePage,
+      runTurn,
       setCurrentPage,
       tweenTo,
       emitSelectionRect,
@@ -509,6 +879,10 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
     const pendingMounts = pendingRef.current;
     return () => {
       cancelTween();
+      // Any turn still awaiting a timer resolves into a component that is gone.
+      // Bumping the generation is what makes those wake-ups no-ops rather than
+      // writes to detached hosts.
+      turnRef.current += 1;
       for (const mp of pages.values()) mp.hl.destroy();
       pages.clear();
       // Drop in-flight mounts too: their hosts are appended to a layer that is
@@ -699,6 +1073,18 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
     },
   );
 
+  /*
+   * The band. One div, no children, `aria-hidden` — everything it says is also
+   * said by the announcer on landing, by the leaf's own edges at rest and by the
+   * page bar's inventory, so there is nothing here for a screen reader to stop
+   * on. Rendered into the spread when there is one, so that a turn which leaves
+   * an opening sweeps the whole book rather than one of its two panels.
+   */
+  const band = fold ? (
+    <div ref={attachFold} className={styles.fold} data-fold={fold.kind} aria-hidden="true" />
+  ) : null;
+  const target = foldTarget?.current ?? null;
+
   return (
     <div
       ref={stageRef}
@@ -716,6 +1102,7 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
         {label}
       </span>
       <div ref={layerRef} className={styles.layer} aria-busy={status === "loading"} />
+      {band && (target ? createPortal(band, target) : band)}
       {status === "loading" && <div className={styles.hint}>{t.stageLoading}</div>}
       {status === "error" && (
         /* Names the page it failed on, because the chrome has already moved to
@@ -745,6 +1132,37 @@ function pulse(svg: SVGSVGElement): void {
     void (sel as unknown as SVGGraphicsElement).getBBox?.();
     sel.classList.add("pulse");
   }
+}
+
+/**
+ * Wait, in wall-clock milliseconds.
+ *
+ * The turn machine is written as a straight line of `await`s rather than as a
+ * chain of `transitionend` handlers on purpose: the band's sweep and the two
+ * hosts' cross-fade are three separate transitions on three separate elements,
+ * and the moment the design cares about — the midpoint of the sweep — is not
+ * the end of any of them. A clock that agrees with the CSS duration read from
+ * the same token is simpler than reconciling three event streams, and the one
+ * thing it can get wrong (a frame of drift) is invisible at 240 ms.
+ */
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => {
+    window.setTimeout(resolve, ms);
+  });
+}
+
+/**
+ * Wait for the next paint.
+ *
+ * Used only to find the band after React has inserted it: `setFold` schedules a
+ * render, and the element does not exist until the browser has committed it.
+ */
+function nextFrame(): Promise<void> {
+  return new Promise((resolve) => {
+    requestAnimationFrame(() => {
+      resolve();
+    });
+  });
 }
 
 /** Read a page's viewBox width (defaults to the Madani 345). */
