@@ -32,6 +32,13 @@ This section is the **roadmap of record** — it replaces the retired external t
 statuses, gates, and open follow-ups live here and nowhere else. Convention: **every loop
 ends by updating this section and writing `docs/decisions/loop-<N>.md`.**
 
+One deliberate exception, and it is a narrow one: [`backlog.md`](backlog.md) holds
+optimization work that is **not yet scheduled into a loop** — the on-device perf verdict and
+what it decides, the mounting and prefetch bounds Loop 4b will need, the asset weight nothing
+currently gates. Nothing there has a loop or a gate; the moment an item acquires one it moves
+into this section and the backlog row is deleted rather than mirrored, so no item is ever
+described in both files.
+
 | Loop | Status | Exit criterion (short) | Record |
 |---|---|---|---|
 | 0 — Skeleton | complete | Installable RTL shell showing page 7; CI green with gates | [loop-0.md](decisions/loop-0.md) |
