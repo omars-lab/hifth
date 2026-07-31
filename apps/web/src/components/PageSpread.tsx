@@ -28,7 +28,7 @@ interface PageSpreadProps {
    */
   renderFacing?: (page: number) => ReactNode;
   /**
-   * The spread's own element, handed back to the caller.
+   * The open book — the element holding the two leaves and nothing else.
    *
    * One use: a page turn's fold crosses the *whole open book*, not one leaf of
    * it (docs/design/page-transition.md §3.5), so the band has to be a child of
@@ -37,11 +37,17 @@ interface PageSpreadProps {
    * band that swept "the spread" would be sweeping the single leaf — which is
    * exactly what the stage does when it gets no target.
    *
+   * The book rather than the outermost element, because those are two different
+   * widths: the outer element is the desk and runs the width of the window. A
+   * band handed the desk would appear out on empty field, cross the book, and
+   * carry on to the far edge — a fold that starts and finishes where there is no
+   * paper is not a picture of a leaf turning.
+   *
    * A ref rather than a `renderFold` slot because the fold is not a fact about
    * the spread: the spread must not know that page turns have a picture, or it
    * acquires an opinion about animation it has no business holding.
    */
-  spreadRef?: Ref<HTMLDivElement>;
+  bookRef?: Ref<HTMLDivElement>;
 }
 
 /**
@@ -111,7 +117,7 @@ export function PageSpread({
   available,
   children,
   renderFacing,
-  spreadRef,
+  bookRef,
 }: PageSpreadProps): JSX.Element {
   const { t } = useT();
 
@@ -163,14 +169,23 @@ export function PageSpread({
   };
 
   return (
-    /* Right leaf first. The RTL flow of `main` puts it on the right; see the
+    /* Two boxes, because two different things wanted to be "the spread" and they
+       are not the same width. The outer one is the desk: it runs the width of
+       the window and draws the field. The inner one is the book — the two
+       leaves and nothing else — and it is what the gutter is drawn on and what
+       the fold's band is given, both of which are claims about the paper rather
+       than about the room it is lying in.
+
+       Right leaf first. The RTL flow of `main` puts it on the right; see the
        geometry note above for why that is the only place the side is decided.
-       The gutter is drawn on this element rather than on the leaves — a spine
+       The gutter is drawn on the book rather than on the leaves — a spine
        belongs to the binding, not to either page. */
-    <div ref={spreadRef} className={styles.spread} data-testid="page-spread">
-      {leaf(right, "right")}
-      {leaf(left, "left")}
-      <div className={styles.gutter} aria-hidden="true" />
+    <div className={styles.spread} data-testid="page-spread">
+      <div ref={bookRef} className={styles.book} data-testid="page-book">
+        {leaf(right, "right")}
+        {leaf(left, "left")}
+        <div className={styles.gutter} aria-hidden="true" />
+      </div>
     </div>
   );
 }

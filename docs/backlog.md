@@ -103,7 +103,7 @@ at the cap. Cheap, and it fails today for the right reason (there is no cap).
 
 ### ④ The desktop spread mounts two leaves, not one
 
-Above `1024×720` the app mounts both leaves of the spread — deliberately a *mount* and not a
+Above `1024×740` the app mounts both leaves of the spread — deliberately a *mount* and not a
 `display: none`, because a hidden leaf still fetches its SVG and builds a `Highlighter`
 (`docs/design/desktop.md`). Today at most one leaf is ever real, since no two vendored pages
 are adjacent. After 4b every spread is two real leaves, so any cap from ③ is a cap on

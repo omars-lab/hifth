@@ -27,13 +27,22 @@ import { watchFolds, foldsSeen } from "./fold";
  * The last two rows are about the fold. Everything the band *says* is asserted on
  * the phone projects in `page-turn.spec.ts`; what belongs here is the one claim
  * that needs a second leaf to be false — a page turn crosses the whole open book
- * (docs/design/page-transition.md §3.5), so the band is a child of the spread and
+ * (docs/design/page-transition.md §3.5), so the band is a child of the book and
  * sweeps its full width. A band confined to the live leaf would look correct in
  * every screenshot and would stop dead at the gutter.
  */
 
 /** The spread wrapper. Only exists above the breakpoint — that is the point. */
 const spread = (page: Page): Locator => page.getByTestId("page-spread");
+
+/**
+ * The open book inside it: the two leaves and nothing else.
+ *
+ * A different width from the wrapper, and the difference is the point of the two
+ * elements — `page-spread` is the desk and runs the width of the window, so a
+ * fold measured against it would be allowed to sweep empty field and still pass.
+ */
+const book = (page: Page): Locator => page.getByTestId("page-book");
 
 /** The visible page's SVG — the only host not `display: none` (PageStage). */
 const pageSvg = (page: Page, pageNo: number): Locator =>
@@ -54,10 +63,12 @@ test.describe("Hifth · the desktop spread", () => {
 
     // Below on the *height* axis alone, at a width that still qualifies. This is
     // the case a width-only breakpoint would have got wrong, and it is the one
-    // that matters: a mus'haf leaf is portrait, so in a 1440×700 window each
+    // that matters: a mus'haf leaf is portrait, so in a 1440×720 window each
     // leaf would be handed less page than a 320px phone gives (the arithmetic is
-    // in docs/design/desktop.md §3).
-    await page.setViewportSize({ width: 1440, height: 700 });
+    // in docs/design/desktop.md §3, and the row below measures it rather than
+    // trusting it). 720 rather than some obviously-small number: it is the
+    // height this breakpoint used to be, and the one an eye reads as tall enough.
+    await page.setViewportSize({ width: 1440, height: 720 });
     await expect(spread(page)).toHaveCount(0);
     // The reader keeps their page. Falling back to one leaf is a layout change,
     // not a navigation.
@@ -80,6 +91,41 @@ test.describe("Hifth · the desktop spread", () => {
     await expect(spread(page)).toBeVisible();
   });
 
+  test("never gives a leaf less scripture than the narrowest phone does", async ({ page }) => {
+    // The criterion the breakpoint exists for (docs/design/desktop.md §3): a
+    // spread that shrinks the scripture to fit two pages on screen has traded
+    // away the only thing the reader came for.
+    //
+    // Both sides measured, and both sides the *SVG* — not the leaf's box and not
+    // the stage's. The page host takes its border and its fore-edge stack out of
+    // whatever box it is given before the scripture is laid out, so comparing a
+    // leaf's box against a phone's page is comparing 14 px of furniture against
+    // none. The old derivation did exactly that and came out 33 px optimistic,
+    // which is how the corner ended up under the floor while the arithmetic in
+    // the doc said it was over it.
+    await page.goto("/#/hafs-kfqc/p7");
+    await expect(pageSvg(page, 7)).toBeVisible();
+
+    // The floor. 320 px is the narrowest window `e2e/chrome-fit.spec.ts` holds
+    // the chrome inside, so it is the narrowest page this app promises.
+    await page.setViewportSize({ width: 320, height: 568 });
+    await expect(spread(page)).toHaveCount(0);
+    const phone = await boxOf(pageSvg(page, 7));
+
+    // The tightest window the spread will claim. Nothing between here and the
+    // breakpoint is worth testing — every larger window gives a taller stage and
+    // therefore a wider leaf, so the corner is the whole of the risk.
+    await page.setViewportSize({ width: 1024, height: 740 });
+    await expect(spread(page)).toBeVisible();
+    const corner = await boxOf(pageSvg(page, 7));
+
+    expect(
+      corner.width,
+      `a leaf at the breakpoint corner gives ${Math.round(corner.width)}px of scripture, ` +
+        `less than the ${Math.round(phone.width)}px a 320px phone gives`,
+    ).toBeGreaterThanOrEqual(phone.width);
+  });
+
   test("puts the lower page number on the right", async ({ page }) => {
     // The mus'haf reads right to left. Page 7 pairs with 8 — the print opens
     // each spread on the odd page — so 7 is the earlier leaf and sits on the
@@ -99,6 +145,85 @@ test.describe("Hifth · the desktop spread", () => {
     // other.
     const vertical = Math.abs(absent.y - live.y);
     expect(vertical, "the leaves are not on the same line").toBeLessThan(absent.height);
+  });
+
+  test("closes the book: equal leaves, paper meeting at the spine, nothing clipped", async ({
+    page,
+  }) => {
+    // The three halves of one defect. Each leaf used to take half the *window*
+    // while the page inside it was sized from the height the chrome left and then
+    // centred in that half, so a 1440×900 window put ~131 px of empty field
+    // between each page and the spine — a gap down the middle of a book, which is
+    // the one place a book has no gap at all.
+    await page.goto("/#/hafs-kfqc/p7");
+    await expect(spread(page)).toBeVisible();
+    await expect(pageSvg(page, 7)).toBeVisible();
+
+    const open = await boxOf(book(page));
+    const live = await boxOf(pageSvg(page, 7));
+
+    // The two leaf boxes and the gutter's centre, read in one pass off the book's
+    // own children. The leaves are what has to be equal — measuring the page
+    // inside one against the well inside the other would compare a box that
+    // gives up 14 px to a border and a fore-edge stack against one that does not.
+    const { leaves, centre } = await book(page).evaluate((el) => {
+      const kids = Array.from(el.children);
+      const g = kids[kids.length - 1]!.getBoundingClientRect();
+      return {
+        leaves: kids.slice(0, 2).map((k) => {
+          const r = k.getBoundingClientRect();
+          return { x: r.x, width: r.width };
+        }),
+        centre: g.x + g.width / 2,
+      };
+    });
+
+    // Equal, and the seam is where the gutter is drawn. `flex: 1 1 0` floors the
+    // *content* box at zero, so the absent leaf's padding was added on top of its
+    // share and it came out 32 px wider than the live one — and the gutter, drawn
+    // at the container's 50%, then missed the real seam by half of that.
+    expect(leaves).toHaveLength(2);
+    expect(leaves[1]!.width, "the two leaves are not the same width").toBeCloseTo(
+      leaves[0]!.width,
+      0,
+    );
+    // Right leaf first in DOM order, so the seam is where the second one ends.
+    const seam = leaves[1]!.x + leaves[1]!.width;
+    expect(centre, "the gutter is not drawn where the leaves meet").toBeCloseTo(seam, 0);
+
+    // The scripture reaches the spine. Not `=== seam`: the page host carries a
+    // border, so a page flush against the binding still starts a pixel or two
+    // off it. The failure this guards against is a hundred, not a couple.
+    expect(live.x - seam, "the page floats off the spine").toBeLessThan(4);
+
+    // And the foot of the page is on the paper. `--spread-chrome: 220px` was an
+    // estimate of the chrome above and below, the real figure is 252 px, and the
+    // stage is `overflow: hidden` — so the cap drew a page 29 px taller than the
+    // box holding it and cut the last line off every desktop page. There is
+    // nothing to estimate: the browser knows the box's height.
+    expect(live.y, "the page is clipped at the head").toBeGreaterThanOrEqual(open.y - 1);
+    expect(live.y + live.height, "the page is clipped at the foot").toBeLessThanOrEqual(
+      open.y + open.height + 1,
+    );
+  });
+
+  test("the desk is one surface, painted once", async ({ page }) => {
+    // The field used to be painted by each `PageStage`, and only the live leaf
+    // has a stage — so the half of the desk under the page had the radial
+    // gradient and the other half was flat `--paper`, with a seam down the
+    // middle where they met. Two highlights on one desk is a picture of two
+    // desks. The spread paints the same gradient once, across the whole width,
+    // and `--stage-field` tells the stage inside to stop painting its own.
+    await page.goto("/#/hafs-kfqc/p7");
+    await expect(pageSvg(page, 7)).toBeVisible();
+
+    const [deskField, stageField] = await page.evaluate(() => {
+      const image = (sel: string) =>
+        getComputedStyle(document.querySelector(sel)!).backgroundImage;
+      return [image("[data-testid='page-spread']"), image("[data-leaf]")];
+    });
+    expect(deskField, "the desk has no field of its own").toContain("gradient");
+    expect(stageField, "the leaf is still painting a second field").toBe("none");
   });
 
   test("announces the missing facing page instead of showing blank paper", async ({ page }) => {
@@ -193,7 +318,7 @@ test.describe("Hifth · the desktop spread", () => {
     await page.goto("/#/hafs-kfqc/p7");
     await expect(spread(page)).toBeVisible();
 
-    const book = await boxOf(spread(page));
+    const open = await boxOf(book(page));
     const leaf = await boxOf(pageSvg(page, 7));
 
     // Sample the band on every frame for the length of a sweep, armed before the
@@ -222,8 +347,8 @@ test.describe("Hifth · the desktop spread", () => {
     // reports `host: null` here instead of quietly measuring the same.
     const seen = await foldsSeen(page);
     expect(seen).toHaveLength(1);
-    expect(seen[0]!.host, "the band was not portalled into the spread").toBe("page-spread");
-    expect(seen[0]!.hostWidth, "the band's box is not the open book").toBeCloseTo(book.width, 0);
+    expect(seen[0]!.host, "the band was not portalled into the open book").toBe("page-book");
+    expect(seen[0]!.hostWidth, "the band's box is not the open book").toBeCloseTo(open.width, 0);
 
     // And it went the whole way across. The far end is the assertion that a leaf
     // -sized sweep fails: the live page is the right-hand leaf, so a band that
@@ -234,7 +359,7 @@ test.describe("Hifth · the desktop spread", () => {
     expect(band.length, "the band was never sampled mid-sweep").toBeGreaterThan(3);
     const near = Math.min(...band.map((f) => f[0]));
     const far = Math.max(...band.map((f) => f[1]));
-    expect(near, "the band never reached the near edge").toBeLessThan(book.x + 2);
+    expect(near, "the band never reached the near edge").toBeLessThan(open.x + 2);
     // Not the exact far edge. The band is removed the moment the turn ends, so
     // the last frame a sampler can catch is a frame or two inside the sweep, and
     // an eased transition spends its slowest frames there — pinning the final
@@ -242,7 +367,7 @@ test.describe("Hifth · the desktop spread", () => {
     // the book is far past the gutter and roughly twice as far as the failure
     // this row exists for: a band confined to the live leaf stops at 0.5.
     expect(far, "the band stopped short of the far leaf").toBeGreaterThan(
-      book.x + book.width * 0.8,
+      open.x + open.width * 0.8,
     );
     expect(far - near, "the band swept one leaf, not the spread").toBeGreaterThan(leaf.width * 1.5);
   });
@@ -260,13 +385,16 @@ test.describe("Hifth · the desktop spread", () => {
     await expect(pageSvg(page, 9)).toBeVisible();
     await expect(page.locator("[data-fold]")).toHaveCount(0);
 
-    // A band at rest sits one width *outside* the spread at each end of its
+    // A band at rest sits one width *outside* the book at each end of its
     // sweep, so the clip is the only thing between a finished turn and a strip
     // of fore-edge floating in the desktop field, attached to nothing. Asserted
     // against the computed style because it is a load-bearing declaration that
     // looks like tidiness, and the next person to simplify this stylesheet will
     // read it as tidiness.
-    const clip = await spread(page).evaluate((el) => getComputedStyle(el).overflow);
+    //
+    // On the book and not the desk: the desk is the width of the window, so a
+    // clip there would let a parked band sit out on the field and still pass.
+    const clip = await book(page).evaluate((el) => getComputedStyle(el).overflow);
     expect(clip, "the open book stopped clipping the parked band").toBe("hidden");
   });
 });

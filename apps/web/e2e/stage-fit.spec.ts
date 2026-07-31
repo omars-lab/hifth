@@ -389,16 +389,28 @@ test.describe("Hifth · the stage holds page, not paper", () => {
     expectHeld(box, layer, stage, pads);
     await expectMarksBesideThePaper(svg, box, paper);
 
-    // The bound side runs off the screen and the free side keeps its margin.
-    // Asserted through the stage's own padding rather than through the leaf's
-    // position, because this is a claim about the *stage*: the leaf is centred
-    // in whatever content box it is given, so restoring symmetric padding would
-    // leave every other assertion in this file green.
+    // The bound side runs into the binding. Asserted through the stage's own
+    // padding rather than through the leaf's position, because this is a claim
+    // about the *stage*: the leaf is centred in whatever content box it is
+    // given, so restoring symmetric padding would leave every other assertion in
+    // this file green.
     const side = await hostOf(svg).getAttribute("data-leaf");
     const boundPad = side === "right" ? pads.left : pads.right;
-    const freePad = side === "right" ? pads.right : pads.left;
     expect(boundPad, "the leaf is floating on air on its bound side").toBe(0);
-    expect(freePad, "the free side lost its margin").toBeGreaterThan(0);
+
+    // And the free side is not the edge of the screen — a fore-edge with nothing
+    // beyond it is a page that has been cropped rather than laid down.
+    //
+    // Measured against the viewport rather than through `pads`, because the two
+    // layouts provide that room from different places and both are right. On a
+    // phone the stage is the whole window and its own padding is the only thing
+    // there. In a spread `--stage-pad` is zero and the room is the desk: the
+    // leaf's box is already the page's shape, so an inset *here* would come out
+    // of the page — squeezing it out of proportion or clipping its foot — while
+    // the field either side of the book is unlimited.
+    const width = page.viewportSize()!.width;
+    const free = side === "right" ? width - (box.x + box.width) : box.x;
+    expect(free, "the page's fore-edge is hard against the screen").toBeGreaterThan(0);
   });
 
   test("at 320 × 568 the foot of the page can be reached, not just cut off", async ({ page }) => {

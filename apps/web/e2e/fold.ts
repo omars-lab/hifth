@@ -21,7 +21,7 @@ export interface FoldSighting {
   /**
    * The `data-testid` of the element it was inserted into, or null for one that
    * has none. This is the whole of docs/design/page-transition.md §3.5: on a
-   * desktop spread the band belongs to the open book (`page-spread`) and on a
+   * desktop spread the band belongs to the open book (`page-book`) and on a
    * phone it belongs to the single stage, which carries `data-leaf` instead.
    */
   host: string | null;

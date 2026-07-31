@@ -120,29 +120,37 @@ pure helper rather than a library.
 
 ## 3. The breakpoint, and why it sits where it does
 
-**`(min-width: 1024px) and (min-height: 720px)`** — one query string, exported once from
+**`(min-width: 1024px) and (min-height: 740px)`** — one query string, exported once from
 `apps/web/src/useMediaQuery.ts` as `DESKTOP_QUERY` and repeated as a literal in
-`App.module.css`, because a CSS custom property cannot appear inside a media query.
+`DesktopChrome.module.css`, because a CSS custom property cannot appear inside a media query.
 
 ### The finding: the constraint is *height*, not width
 
 This is the one thing writing the arithmetic down changed. A mus'haf leaf is **portrait** —
 `viewBox="0 0 345 550"`, aspect **0.627** — so putting two of them side by side is not
-primarily a question of horizontal room. Two leaves need only ~774 px of width. What they
-need is *vertical* room, because each leaf's width is derived from the height available to
-it, and the chrome above and below the stage takes a fixed bite out of that height
-regardless of how wide the window is.
+primarily a question of horizontal room. Two leaves at the floor need only ~608 px of width,
+a figure no laptop misses. What they need is *vertical* room, because each leaf's width is
+derived from the height available to it, and the chrome above and below the stage takes a
+fixed bite out of that height regardless of how wide the window is. The 1024×900 and
+1440×900 rows of the table below say it in one line: 416 px of extra window, and not one
+pixel more scripture.
 
-Stated as arithmetic. Call the chrome allowance `C` — header (~72 px) + trail (~52 px) +
-page bar (~56 px) + the stage's own padding (~32 px) ≈ **220 px**, and deliberately
-rounded *up*, because the stage is `overflow: hidden` and an over-generous estimate clips
-the page while a conservative one merely leaves a gutter of air.
+Stated as arithmetic. The chrome above and below the stage is **252 px** — header 72 +
+trail 52 + page bar 56 + the shell's own 72. That is a *measurement*, not an allowance: the
+first version of this section estimated 220 px, and being 32 px light is what put the
+breakpoint below where the criterion below actually requires it.
 
 ```
-leaf width  =  min( available half-width , 0.627 × (viewport height − 220) )
+leaf box  =  0.627 × (viewport height − 252)
 ```
 
-The second term is almost always the smaller one, at every window a laptop has.
+There is no `min()` with a half-width term any more, and that absence is the point: a leaf
+is `block-size: 100%` plus `aspect-ratio: 345/550`, so the browser derives its width from
+the definite height it has been given. Nothing here is estimated at runtime. The formula
+above is for reasoning about the breakpoint on paper; the CSS does not contain it.
+
+Of that box, **14 px** is furniture rather than scripture — the page host's 2×2 px border
+and its 10 px `--fore-edge-stack` — so the SVG the reader actually gets is `leaf box − 14`.
 
 ### The criterion
 
@@ -150,23 +158,43 @@ The second term is almost always the smaller one, at every window a laptop has.
 > single page it replaced.** A spread that shrinks the scripture to fit two pages on screen
 > has traded away the only thing the reader came for.
 
-The floor is the 320 px phone `e2e/chrome-fit.spec.ts` supports: 320 − 32 px of stage
-padding = **288 px** of page. (An iPhone 13 at 390 px gives 358 px; a 320 px phone is the
-one the app promises to work on, so it sets the floor.)
+The floor is the 320 px phone `e2e/chrome-fit.spec.ts` supports, and it is **290 px** —
+measured, not `320 − 32`. (An iPhone at 390 px gives 360 px; a 320 px phone is the one the
+app promises to work on, so it sets the floor.)
+
+**Both sides of that comparison must be the SVG.** Comparing a leaf's *box* against a
+phone's *page* is exactly how the first derivation came out 33 px optimistic — it charged
+the phone for its furniture and let the desktop off.
 
 Solving for the two axes:
 
 | Axis | Requirement | Chosen |
 |---|---|---|
-| height | `0.627 × (H − 220) ≥ 288` ⟹ `H ≥ 679` | **720 px** |
-| width | `2 × 288 + 28 (gutter) + 32 (padding) = 636` | **1024 px** |
+| height | `0.627 × (H − 252) − 14 ≥ 290` ⟹ `H ≥ 737` | **740 px** |
+| width | `2 × 290 + 14 + 14 = 608` | **1024 px** |
 
-At the breakpoint corner (1024×720) a leaf is ~**313 px** — above the 288 px floor, below
-what a 390 px phone gives, which is the honest trade at the very edge. At a typical
-1440×900 window a leaf is ~**426 px**, comfortably wider than any phone. Width is set well
-above its own 636 px requirement because that axis is nearly free and buys room for the
-chrome desktop *adds* in §5; height is set only 41 px above its requirement because that
-axis is the scarce one and every step up excludes real laptops.
+Measured at the corner and at a typical window:
+
+| window | leaf box | scripture (the SVG) |
+|---|---|---|
+| 1024×740 (the corner) | ~306 px | ~**292 px** |
+| 1024×900 | 407 px | 393 px |
+| 1440×900 | 407 px | 393 px |
+| 320×568 phone | — | **290 px** — the floor |
+| 390×844 phone | — | 360 px |
+
+At the corner a leaf gives 292 px — two above the floor, below what a 390 px phone gives,
+which is the honest trade at the very edge. Width is set well above its own 608 px
+requirement because that axis is nearly free and buys room for the chrome desktop *adds* in
+§5; height is set only 3 px above its requirement because that axis is the scarce one and
+every step up excludes real laptops.
+
+**Height was 720 until the leaf was sized to the page it holds.** Under the old estimate the
+corner gave 280 px — ten px *under* the floor this criterion exists to hold, unnoticed
+because the number was derived rather than measured. The floor is now enforced by a test
+rather than by arithmetic in a document: `e2e/desktop.spec.ts` measures a 320 px phone's page
+and the corner's leaf in the same run and fails if the spread gives less. A future change to
+the chrome's height cannot quietly break the criterion the way a change to the estimate did.
 
 **What happens on either side of it.** Above: two panels, the live `PageStage` in the panel
 whose number matches the current page, the facing panel beside it. Below (either axis):
@@ -181,42 +209,83 @@ touch laptop has both. It is accepted because the failure is benign in both dire
 hint shown to someone with no keyboard is noise; a hint withheld costs discoverability of
 shortcuts that still work). Recorded as an open question in §8.
 
-### How the leaf cap is expressed in CSS
+### How a leaf is sized in CSS — three boxes, no estimate
 
-The height-derived cap is written out rather than hidden in a tuned magic number, so the
-next person can see which of its terms they are changing:
+The first version of this expressed the cap as arithmetic in a custom property:
 
 ```css
 --spread-chrome: 220px;                                    /* header + trail + bar + padding */
 --leaf-cap: calc(0.627 * (100dvh - var(--spread-chrome))); /* 345/550, the Madani aspect */
 ```
 
-`PageStage.module.css` already had a heuristic of exactly this kind — `width: min(100%,
-62vh)` on the page host — so the mechanism is not new; it is that heuristic made explicit
-and made overridable. The host now reads `min(100%, var(--stage-page-cap, 62vh))`, and the
-spread's leaf sets `--stage-page-cap`. A custom property is the whole coupling: CSS modules
-hash their class names, so a spread stylesheet cannot reach into a stage stylesheet, and it
-should not want to.
+**Both lines are gone.** `100dvh` is the *window*, so that `calc` was an estimate of how
+much of the window the chrome takes — and an estimate the browser does not need, because it
+has already laid the chrome out and knows the answer exactly. Three named boxes replace it:
+
+| box | what it is | how it is sized |
+|---|---|---|
+| `.spread` — `data-testid="page-spread"` | **the desk**: the full width of the window, and the only thing that paints the field | `flex: 1 1 auto` in the shell column |
+| `.book` — `data-testid="page-book"` | **the open book**: the two leaves and nothing else. Carries the gutter, is the fold's portal target, and clips the parked band | shrink-to-fit around its leaves |
+| `.leaf` | **one page** | `block-size: 100%` + `aspect-ratio: 345/550` |
+
+A stretched flex item has a *definite* block size, so `aspect-ratio` derives the inline size
+from it. The book is then as wide as its two leaves and no wider, which is what makes the
+gutter's centre and the seam between the leaves the same x — the property `desktop.spec.ts`
+asserts rather than assumes.
+
+The leaf must **not** be `flex: 1 1 0`. That floors the *content* box at zero, so padding is
+added on top of a leaf's share even under `box-sizing: border-box` — which is how the two
+leaves came to differ by 32 px, and how the live page came to float ~150 px from the crease
+while `holdAxis` obediently centred it in a stage far wider than the page.
+
+The stage inside a leaf is turned into a plain container by three custom properties it reads
+with fallbacks, so `PageStage` itself is unchanged and the phone keeps its own behaviour:
+
+```css
+--stage-field: none;        /* the desk paints the field once; a leaf must not paint a second */
+--stage-pad: 0px;           /* the desk is the room around the book, not the stage's inset */
+--stage-page-cap: 100%;     /* fill the leaf — the leaf is already exactly a page */
+--stage-page-max: 100%;
+```
+
+A custom property is the whole coupling: CSS modules hash their class names, so a spread
+stylesheet cannot reach into a stage stylesheet, and it should not want to.
+
+**This is also what dissolved the `holdAxis` conflict** recorded in
+`docs/design/page-transition.md` §2.4. Once the stage's content box *is* the page's box,
+"centred in its stage" and "flush against the spine" are the same sentence, and centring
+zero slack is a no-op. No core change was needed.
 
 ## 4. The spread
 
 ### Geometry
 
 ```
-main[dir="rtl"]  ─────────────────────────────────────────────────────────
-┌───────────────────────────────┬┬───────────────────────────────┐
-│                               ││                               │
-│      RIGHT LEAF               ││      LEFT  LEAF               │
-│      lower page number        ││      higher page number       │
-│      = page 6                 ││      = page 7                 │
-│                               ││                               │
-│      (absent in this build)   ││      the live PageStage       │
-│                               ││                               │
-└───────────────────────────────┴┴───────────────────────────────┘
-                                gutter
+.spread — the desk, full window width, paints the field once ─────────────────────
+│                                                                                │
+│        .book — the two leaves and nothing else, shrink-to-fit                   │
+│        ┌───────────────────────────────┬┬───────────────────────────────┐       │
+│        │                               ││                               │       │
+│        │      RIGHT LEAF               ││      LEFT  LEAF               │       │
+│        │      lower page number        ││      higher page number       │       │
+│        │      = page 6                 ││      = page 7                 │       │
+│        │                               ││                               │       │
+│        │      (absent in this build)   ││      the live PageStage       │       │
+│        │                               ││                               │       │
+│        └───────────────────────────────┴┴───────────────────────────────┘       │
+│                                        gutter, centred on the seam              │
+└─────────────────────────────────────────────────────────────────────────────────┘
    DOM order: right leaf first. RTL flow does the rest.
    ← ArrowLeft turns forward, toward the left leaf and beyond.
 ```
+
+Measured at 1440×900: the book runs x 313..1127 (814 wide), each leaf 407, the gutter's
+centre at 720 — which is exactly the seam. The live SVG sits 722..1115, two pixels off the
+spine, and those two pixels are the page host's border.
+
+The fold portals into **`.book`, not `.spread`**: the desk runs the width of the window, so a
+band measured against it would sweep empty field before reaching paper. `.book` also carries
+the `overflow: hidden` that keeps the parked band off-screen.
 
 The pairing is pure logic and therefore lives in **core**, not in a component:
 `spreadOf(page, total)` in `packages/core/src/pages.ts`, beside `nearestPage` and

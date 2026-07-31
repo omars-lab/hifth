@@ -24,7 +24,9 @@ function spread(over: Partial<React.ComponentProps<typeof PageSpread>> = {}) {
 
 /** The two leaves, in DOM order: right leaf first (see PageSpread's geometry note). */
 function leaves(container: HTMLElement): HTMLElement[] {
-  const root = container.querySelector("[data-testid='page-spread']");
+  // The book, not the desk around it: `page-spread` runs the width of the window
+  // and holds one child, and the leaves are inside that.
+  const root = container.querySelector("[data-testid='page-book']");
   // The gutter is the last child and is not a leaf.
   return Array.from(root?.children ?? []).slice(0, 2) as HTMLElement[];
 }
@@ -135,7 +137,7 @@ describe("PageSpread", () => {
     // It is a drawn shadow standing in for a binding. There is nothing to say
     // about it, and a screen reader stopping on the spine of the book is noise.
     const container = spread();
-    const root = container.querySelector("[data-testid='page-spread']")!;
+    const root = container.querySelector("[data-testid='page-book']")!;
     const gutter = root.lastElementChild!;
     expect(gutter.getAttribute("aria-hidden")).toBe("true");
   });

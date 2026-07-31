@@ -16,7 +16,7 @@ it is room to stop hiding the ones that already exist.* Before adding a row, nam
 mobile constraint that forced the difference. If there is no constraint — if desktop simply
 gets a nicer thing — it is a new feature and belongs in the PLAN, not in a media query.
 
-**The breakpoint is `(min-width: 1024px) and (min-height: 720px)`** (`DESKTOP_QUERY`). Two
+**The breakpoint is `(min-width: 1024px) and (min-height: 740px)`** (`DESKTOP_QUERY`). Two
 axes, because a mus'haf leaf is portrait and the scarce dimension is **height**, not width
 (design doc §3). One query, two behaviours; there is no tablet tier (design doc §7).
 
@@ -40,7 +40,7 @@ the point someone happened to write it down.
 
 | # | Decision | Mobile | Desktop | Why they differ |
 |---|---|---|---|---|
-| 7 | **How many pages are on the stage** | One | **Two — a spread**, above `1024×720` | Room, bounded by a rule: *a leaf must never be narrower than the narrowest supported phone (320 px ⇒ 288 px of page) gives the single page it replaced*. The binding axis is **height**, not width — a leaf is portrait, so its width is derived from the height the chrome leaves. Design doc §3 |
+| 7 | **How many pages are on the stage** | One | **Two — a spread**, above `1024×740` | Room, bounded by a rule: *a leaf must never be narrower than the narrowest supported phone (320 px ⇒ 290 px of page, measured) gives the single page it replaced*. The binding axis is **height**, not width — a leaf is portrait, so its width is derived from the height the chrome leaves. Design doc §3 |
 | 8 | **How the second page is gated** | — | `matchMedia` in **JS**, not `display:none` in CSS | A hidden panel still fetches ~170 KB of SVG, parses it, builds a `Highlighter` and costs the frame budget. Desktop is where two mounts are affordable; mobile is precisely where they are not (PLAN follow-up ①). `useMediaQuery.ts` |
 | 9 | **Which side the lower page number is on** | n/a (one page) | **Right** — spreads pair (1,2), (3,4), (5,6); odd on the right, so Al-Fatiha faces Al-Baqarah and no leaf is orphaned | The print's own pairing, observed on a physical KFGQPC Madani mus'haf. Encoded once, as DOM order inside `main[dir="rtl"]`, so the RTL flow places the leaves; declaring the direction twice is how two declarations eventually disagree. `spreadOf` in `packages/core/src/pages.ts` |
 | 10 | **The missing facing page** | n/a | Rendered **absent** — recessed, dashed edge, its number in the printed position, and the inventory line «المتوفّر ٣ من ٦٠٤ صفحة» | Only pages 7, 9 and 19 are vendored and they are not adjacent, so there is **no facing pair in this build**. A blank sheet impersonating paper is the exact failure the page bar was built to avoid. Design doc §4 |

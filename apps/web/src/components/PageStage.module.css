@@ -3,7 +3,12 @@
   flex: 1 1 auto;
   display: grid;
   place-items: center;
-  padding: var(--space-4);
+  /* The fore-edge margin, and the two rules below make it a margin on the free
+     side only. `--stage-pad` exists so a spread can zero it: there the stage is
+     one leaf of an open book, the leaf's box is already the page's own shape,
+     and an inset here would be taken out of that shape rather than out of the
+     field around it. */
+  padding: var(--stage-pad, var(--space-4));
   /* The stage owns touch; @use-gesture wires touch-action here. Mandatory, not
      cosmetic: without it Pointer Events fire pointercancel mid-gesture and the
      browser native-scrolls instead — preventDefault alone cannot stop it
@@ -20,9 +25,18 @@
      saying where the page stopped, and the page SVGs carry no background rect
      (glyph paths only, transparent), so there was nothing else to see. Sinking
      the field one step below the paper is what makes the leaf read as a leaf
-     lying on a surface rather than as ink floating on a tinted rectangle. */
-  background:
-    radial-gradient(120% 90% at 50% 0%, var(--paper-sunk), var(--paper) 60%);
+     lying on a surface rather than as ink floating on a tinted rectangle.
+
+     `--stage-field` lets a spread take the field away, and it has to: on a phone
+     the stage is the whole window, so a field drawn here is *the* field, but on
+     a spread there is one stage per leaf and only the live leaf has one. That
+     painted the gradient into the right half of the desk and left the other half
+     flat `--paper`, with a seam down the middle where they met. The spread
+     paints this same gradient once, across the whole desk. */
+  background: var(
+    --stage-field,
+    radial-gradient(120% 90% at 50% 0%, var(--paper-sunk), var(--paper) 60%)
+  );
 }
 
 /* The stage's padding is asymmetric, and the asymmetry is the point: a leaf is
@@ -99,7 +113,12 @@
      hash their class names, so a spread stylesheet cannot reach in here, and it
      should not want to. */
   width: min(100%, var(--stage-page-cap, 62vh));
-  max-width: 480px;
+  /* A reading measure, not a layout rule: past ~480 px a single portrait page on
+     a phone or tablet stops gaining anything and starts wasting the field. The
+     spread overrides it, because there the leaf's box *is* the page's shape and
+     a second, smaller cap would put the gap back between the page and the spine
+     — the exact defect PageSpread.module.css was rewritten to remove. */
+  max-width: var(--stage-page-max, 480px);
   /* This background IS the paper. The vendored SVGs have no background rect —
      open 7.svg and it is glyph paths and nothing else — so removing this does
      not reveal a page underneath, it deletes the page. */
