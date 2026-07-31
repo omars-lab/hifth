@@ -507,12 +507,12 @@ decided:
 
 **A turn between two facing pages animates nothing on the paper, because nothing on the
 paper changed.** Above the breakpoint the spread mounts both leaves of one `spreadOf` pair.
-A turn from 6 to 7 is a turn *within* that pair: both leaves are already on screen, both
+A turn from 7 to 8 is a turn *within* that pair: both leaves are already on screen, both
 stay, and the only thing that moves is which leaf is live — the selection, the gestures,
 the header's page number. **No fold, no cross-fade, no motion on the stage.** The crease
 between them is already drawn and is already the correct statement.
 
-A turn that leaves the pair — 7 to 8, or today 7 to 9 — changes **both** panels, so the fold
+A turn that leaves the pair — 6 to 7, or today 7 to 9 — changes **both** panels, so the fold
 sweeps the **whole spread**, not one leaf, and its appearance is resolved from the two
 *spreads*, not the two pages.
 
@@ -546,13 +546,15 @@ export type Fold = "crease" | "gap" | "hole" | "none";
  *   hole   — the print has pages between these two and this build does not.
  *   none   — not a turn at all (a hop, a scrub, the same page).
  */
-export function foldBetween(
-  from: number,
-  to: number,
-  total: number,
-  vendored: readonly number[],
-): Fold;
+export function foldBetween(from: number, to: number, total: number): Fold;
 ```
+
+**No `vendored` parameter.** It was in the first draft of this section and it was wrong:
+adjacency is a fact about the paper, not about what this build happens to hold. Whether
+7 and 9 have a leaf between them is settled by the print; the inventory only decides whether
+we can *show* that leaf, and the `hole` treatment is precisely how the band says so. A
+predicate that took the inventory would be one array away from calling 7 | 9 a gap — the exact
+lie §5 exists to prevent, moved inside the function that is supposed to prevent it.
 
 The body is four lines and every one of them defers to something already pinned:
 
@@ -569,13 +571,20 @@ passes `"none"`.
 
 Two consequences fall out for free, and both are the reason to derive rather than hard-code:
 
-- **Page 1 is handled without a special case.** `spreadOf(1) = {right: 1, left: null}` and
-  `spreadOf(2) = {right: 2, left: 3}` are different spreads, so 1 | 2 is a `"gap"` — correct,
-  because page 1 faces nothing and getting to page 2 turns a leaf.
-- **If §7 ①'s observation goes against `spreadOf`, one line in `pages.ts` fixes every crease
-  in the application.** A parity rule written into `PageStage.module.css` would have to be
-  found and corrected separately, and it would be found by somebody noticing that the folds
-  looked wrong.
+- **Page 1 is handled without a special case.** `spreadOf(1)` and `spreadOf(2)` are both
+  `{right: 1, left: 2}` under the corrected phase, so 1 | 2 is a `"crease"` — correct, and
+  arrived at without anyone writing "the book opens on Al-Fatiha" into a predicate.
+- **§7 ①'s observation did go against `spreadOf`, and one line in `pages.ts` fixed every
+  crease in the application.** A parity rule written into `PageStage.module.css` would have
+  had to be found and corrected separately, and it would have been found by somebody noticing
+  that the folds looked wrong.
+
+> **The phase, stated once, because the rest of this document was drafted before it was
+> corrected.** The print pairs (1,2), (3,4), (5,6)… — **odd on the right**. So Al-Fatiha
+> faces the opening of Al-Baqarah, 604 pages make 302 complete openings with nothing
+> orphaned, and every example below reads: **1 | 2 crease · 6 | 7 gap · 7 | 8 crease.** Any
+> example anywhere that says otherwise is a leftover from the earlier phase; `spreadOf` is
+> the authority and the code follows it.
 
 ### 4.2 What each one looks like, and what it tells the reader
 
@@ -664,8 +673,8 @@ withholds from a screen-reader user.
 
 | case | `foldBetween` | drawn | why |
 | --- | --- | --- | --- |
-| **Adjacent, facing** (6 → 7) | `crease` | 28 px gutter gradient + core hairline; no field | One opening. On desktop, *nothing animates at all* (§3.5) — both leaves are already on screen and neither changed. |
-| **Adjacent, not facing** (7 → 8) | `gap` | 30 px field between two fore-edge stacks | A leaf turned; two different openings. The cut edges are honest — they are what you would see. |
+| **Adjacent, facing** (7 → 8) | `crease` | 28 px gutter gradient + core hairline; no field | One opening. On desktop, *nothing animates at all* (§3.5) — both leaves are already on screen and neither changed. |
+| **Adjacent, not facing** (6 → 7) | `gap` | 30 px field between two fore-edge stacks | A leaf turned; two different openings. The cut edges are honest — they are what you would see. |
 | **Non-adjacent** (7 → 9, today's only case) | `hole` | 30 px `--paper-sunk`, dashed hairline each side | The print has a leaf here and this build does not. Not a wider gap: a different kind of thing, per the precedent in `PageSpread` and `revision-record.md`. |
 | **A hop to a distant page** (2:47 on p7 → its mutashabih on p19) | `none` | nothing; the hop keeps `frameBboxToView` + `--dur-hop` | It is not a turn. A fold implies a book-order relationship between the two pages, and a mutashabihat edge is precisely *not* one. |
 
@@ -789,12 +798,13 @@ is the cheapest and most valuable tier.
 
 | assertion | induced failure |
 | --- | --- |
-| `foldBetween(6, 7, 604, …) === "crease"` | Flip the comparison to `spreadOf(from).left === spreadOf(to).left`. 6\|7 becomes a gap and 7\|8 becomes a crease — the phase error of §7 ①, caught by a test rather than by a reader. |
-| `foldBetween(7, 8, 604, …) === "gap"` | Return `"crease"` for every `abs(from−to) === 1`. Consecutive-but-not-facing pages claim to share a gutter. |
-| `foldBetween(7, 9, 604, [7,9,19]) === "hole"` | Treat "consecutive in `vendored`" as adjacency. **This is the defect the whole document exists to prevent** and it is one wrong array in the predicate. |
-| `foldBetween(1, 2, …) === "gap"` | Special-case page 1 to `"crease"` on the theory that it "opens the book". It faces nothing; `spreadOf` already knows. |
+| `foldBetween(7, 8, 604) === "crease"` | Flip the comparison to `spreadOf(from).left === spreadOf(to).left`. 7\|8 becomes a gap and 6\|7 becomes a crease — the phase error of §7 ①, caught by a test rather than by a reader. |
+| `foldBetween(6, 7, 604) === "gap"` | Return `"crease"` for every `abs(from−to) === 1`. Consecutive-but-not-facing pages claim to share a gutter. |
+| `foldBetween(7, 9, 604) === "hole"` | Take the inventory as a parameter and treat "consecutive in `vendored`" as adjacency. **This is the defect the whole document exists to prevent**, and the signature is what prevents it: there is no array to get wrong. |
+| `foldBetween(1, 2, 604) === "crease"` | Special-case page 1 on the theory that it "opens the book" and faces nothing. Under the corrected phase it faces page 2, and `spreadOf` already knows — the special case is how the old phase would have been papered over. |
 | `foldBetween(p, p, …) === "none"`, and invalid pages → `"none"` | Drop the guard. A re-render at the same page inserts a fold. |
 | `foldBetween(604, 605, …) === "none"` | Drop the `total` bound. The last page turns into a hole that is off the end of the book. |
+| every consecutive pair over 1..30 agrees with `spreadOf`, and the answer is symmetric in `from`/`to` | Any of the above. This row is the one that would have caught the phase error without anyone having to pick the right example pair. |
 
 ### 6.2 e2e — `stage-fit.spec.ts` needs two rows it does not have
 
@@ -824,6 +834,33 @@ would remove the last thing watching the geometry.
 | Reduced motion inserts no fold | with `prefers-reduced-motion: reduce`, turn and assert no band element ever exists and the swap completes in one frame | Insert the band and rely on the duration token being 0. A one-frame band is a flash. |
 | A turn to an unloaded page does not land | `page.route` blocks the target SVG; turn; assert the page number is unchanged and the announcer spoke; unblock; assert it lands | Let `setCurrentPage` run before the mount resolves. The stage shows `--paper-sunk` where a page should be. |
 | The marquee is never eaten | `marquee.spec.ts` unchanged, plus press → hold 400 ms → drag 200 px horizontally → marquee, not a turn | Reorder `page-turning.md` §4.2's ladder so `"turn"` precedes `"marquee"`. |
+
+**Built, with three departures worth recording.**
+
+- **The glyph sampler runs every frame, not at five timestamps.** Sampling at 0/60/120/180/
+  240 ms assumes the defect is visible at the moment you look; a `requestAnimationFrame` loop
+  over *every* mounted page's box for the length of the turn assumes nothing, and it also
+  gets to assert that both pages were sampled — a turn that saw one page would satisfy the
+  original row while proving nothing about the swap.
+- **The never-arrives row runs in its own context with the service worker blocked.**
+  `page.route` does not intercept requests a service worker makes on the page's behalf, and
+  `vite.config.ts` runtime-caches `/assets/pages/`, so the block was a no-op and the turn
+  quietly succeeded — a green row asserting nothing. Blocking the worker is not a
+  simplification of the real failure: offline, a page never fetched is a cache miss and then
+  a network error, which is the same nothing arriving.
+- **The recorder observes `document`, not `document.documentElement`.** An init script runs
+  before the document has an element to hand, `observe(null)` throws, and the dead observer
+  still answers `[]` — which is exactly what four of these rows assert. The wrong target here
+  turns the whole file into a rubber stamp, so it is worth the sentence.
+
+One row was **added** to `desktop.spec.ts` rather than here, because it needs a second leaf to
+be false: the band is portalled into the spread and sweeps the full width of the open book
+(§3.5). A band left in the stage stops at the gutter and looks correct in every screenshot.
+Its far end is asserted at 0.8 of the book, not at the edge — the band is removed the moment
+the turn ends and an eased sweep spends its slowest frames there, so the last pixel is frame
+timing, while a leaf-confined band would stop at 0.5. A second row holds the spread's
+`overflow: hidden`, which is the only thing between a finished turn and a strip of fore-edge
+parked in the desktop field.
 
 ### 6.4 Golden images
 

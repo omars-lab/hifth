@@ -276,18 +276,28 @@ described in both files.
     the crease, because it fits its half and `holdAxis` centres what fits. Closing that gap
     means making core's centring rule conditional on being in a spread, which conflicts with
     the invariant that fixed the double-centring defect; it is tracked on its own. The
-    **fold** (§3–§4) is gated on follow-up ① and on a ceiling for the mounted set
-    ([`docs/backlog.md`](backlog.md) §2 ③). Its rule is the part worth reading: **a crease
-    means the two pages face each other in the print, a gap means a leaf turned, sunk paper
-    behind a dashed edge means the print has a leaf here and this build does not, and nothing
-    at all means it was not a turn** — resolved by `foldBetween` in `packages/core` from
-    `spreadOf` and the manifest, never by parity in a stylesheet, so a correction to the
-    print's pairing corrects every fold at once. That is not hypothetical: writing this
-    document is what caught `spreadOf` pairing the wrong two leaves, and one line in
-    `pages.ts` moved every spread at once. With three non-adjacent pages vendored, **every
-    turn in the shipped build is a hole and no crease can be drawn until Loop 4b** — which is
-    the design working, not a limitation. The visual half is the twin of follow-up ⑩'s §7 ④
-    (the turn is silent about the page it skipped) and they should land together.
+    **fold** (§3–§4) is **shipped too**. Its rule is the part worth reading: **a crease means
+    the two pages face each other in the print, a gap means a leaf turned, sunk paper behind
+    a dashed edge means the print has a leaf here and this build does not, and nothing at all
+    means it was not a turn** — resolved by `foldBetween` in `packages/core` from `spreadOf`
+    alone, never by parity in a stylesheet, so a correction to the print's pairing corrects
+    every fold at once. That is not hypothetical: writing this document is what caught
+    `spreadOf` pairing the wrong two leaves, and one line in `pages.ts` moved every spread at
+    once. The predicate takes **no inventory parameter**, and the first draft's was the
+    document's own worst idea: adjacency is a fact about the paper, and a predicate that
+    could see what we vendored would be one array away from calling 7 | 9 a gap — the exact
+    lie the section exists to prevent. With three non-adjacent pages vendored, **every turn
+    in the shipped build is a hole and no crease can be drawn until Loop 4b** — which is the
+    design working, not a limitation. One glyph never moves: the band is a third object
+    crossing two stationary pages, asserted per frame in `page-turn.spec.ts`, and under
+    `prefers-reduced-motion` it is not inserted at all rather than inserted-and-instant. Two
+    things surfaced only because the turn got tests: a failed turn was naming the page still
+    on screen rather than the one that failed, and on a desktop spread the band has to be
+    portalled into the open book or it stops at the gutter. The visual half is the twin of
+    follow-up ⑩'s §7 ④ (the turn is silent about the page it skipped) and they landed
+    together. Still open, deliberately: **drag-to-turn**. `PointerIntent` has no `"turn"`
+    verdict, so today a turn is a button, a key or the page bar — a gesture that competes
+    with pan and marquee is its own design, not a detail of this one.
 
 **The half of these a machine cannot run now has a register — and a runbook.** Follow-ups
 ① (the phone), ② (the browser glance) and ④ (VoiceOver/TalkBack) still wait on a human, and
