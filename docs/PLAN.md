@@ -249,6 +249,27 @@ described in both files.
     follow-up ① and on a ceiling for the mounted set
     ([`docs/backlog.md`](backlog.md) §2). The hardening is independent of both.
 
+11. **A page turn should say what is between the two pages, and today it says nothing.**
+    The transition effect — the leaf's edges at rest and the fold that crosses during a turn
+    — is designed in [`docs/design/page-transition.md`](design/page-transition.md), measured
+    against a reference mus'haf application at 430×932 CSS px. Two halves, sequenced apart.
+    The **resting edge system** (§2) is what actually cures the floating leaf: no drop
+    shadow, an asymmetric ≈20 px corner radius on the free side only, a 10 px fore-edge stack
+    on the free side, the bound side bled off the screen, and a field the page is not. It is
+    independent of every open gate and belongs with follow-up ⑩'s hardening list. The
+    **fold** (§3–§4) is gated on follow-up ① and on a ceiling for the mounted set
+    ([`docs/backlog.md`](backlog.md) §2 ③). Its rule is the part worth reading: **a crease
+    means the two pages face each other in the print, a gap means a leaf turned, sunk paper
+    behind a dashed edge means the print has a leaf here and this build does not, and nothing
+    at all means it was not a turn** — resolved by `foldBetween` in `packages/core` from
+    `spreadOf` and the manifest, never by parity in a stylesheet, so a correction to the
+    print's pairing corrects every fold at once. That is not hypothetical: writing this
+    document is what caught `spreadOf` pairing the wrong two leaves, and one line in
+    `pages.ts` moved every spread at once. With three non-adjacent pages vendored, **every
+    turn in the shipped build is a hole and no crease can be drawn until Loop 4b** — which is
+    the design working, not a limitation. The visual half is the twin of follow-up ⑩'s §7 ④
+    (the turn is silent about the page it skipped) and they should land together.
+
 **The half of these a machine cannot run now has a register — and a runbook.** Follow-ups
 ① (the phone), ② (the browser glance) and ④ (VoiceOver/TalkBack) still wait on a human, and
 prose cannot answer "is that still true, on what device, and when?" — ⑤ (does the source
