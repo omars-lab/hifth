@@ -77,6 +77,14 @@ export {
 } from "./router.js";
 
 export {
+  FIELDS,
+  DEFAULT_FIELD,
+  isFieldId,
+  parseField,
+  type FieldId,
+} from "./field.js";
+
+export {
   Adjacency,
   EDGE_TYPES,
   RAIL_GLYPH,

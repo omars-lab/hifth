@@ -32,6 +32,20 @@
   --ink-faint: #6b6255;
   --hairline: #d9cfbe;
 
+  /* The field — the desk the mus'haf lies on, and the largest single surface in
+     the app. It is four tokens rather than one gradient because a field is a
+     *pair*: a wash, and the ink that survives it. `--field-wash` is written
+     once here so the two places that paint the desk (PageSpread's `.spread`,
+     PageStage's `.stage`) cannot drift apart, and `--ink-on-field` is what the
+     one piece of text that ever sits on it (`.hint`) reads. The default below
+     is the field this app shipped with — paper-sunk falling off to paper — so
+     `field.css` changes nothing until a link asks it to. See
+     packages/core/src/field.ts for the table and why it is a link parameter. */
+  --field-near: var(--paper-sunk);
+  --field-far: var(--paper);
+  --field-wash: radial-gradient(120% 90% at 50% 0%, var(--field-near), var(--field-far) 60%);
+  --ink-on-field: var(--ink-soft);
+
   /* Navigation accent — verdigris. Used for hop affordances, focus, links. */
   --accent: #1f6f66;
   --accent-strong: #17544d;
