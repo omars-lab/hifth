@@ -247,6 +247,20 @@ Four separate mistakes, and the reference falsifies each of them independently:
 | `background: --paper-raised` on `.host` (`:49`) *and* `--paper-raised` as the vignette's inner stop (`:19`) | field `#AF8A68` — nothing like paper | The page's top edge currently has **no contrast with the field behind it**. The only thing separating page from stage is the shadow, which is the thing that has to go. |
 | `.stage` padded equally on four sides (`:6`) | the leaf **bleeds off the screen** on its bound side (§1.2) | Air on all four sides is the single strongest "this is a card on a desk" cue. A leaf continues into a binding. |
 
+**All four are fixed, and row 3 was fixed differently than this table proposed.** The
+shadow and the four equal corners are gone; the field is `--paper-sunk`; the bound-side
+padding is zero. But `.host` **keeps** `background: --paper-raised`, and must. The vendored
+page SVGs have **no background rect** — `7.svg` is glyph paths and nothing else — so that
+background is not a card's fill painted over the paper, it *is* the paper. Dropping it (as
+`page-turning.md` §3.1 ③ proposed, and as the middle column here implies by putting
+`--paper-raised` on trial in two places at once) would leave ink floating on the field.
+
+The row's actual complaint survives the correction intact: *"the page's top edge currently
+has no contrast with the field behind it."* That was true, and the cause was the **field**,
+not the page — the vignette's inner stop was the page's own colour. One of those two had to
+move and the field is the one that could. Verified by inducing it: put the field back to
+`--paper-raised` and the leaf's boundary is its 2 px rule and nothing else.
+
 ### 2.2 The system, and where each side comes from
 
 Four marks. Every one of them sits **beside the paper, never on it** — no glyph is
@@ -339,6 +353,24 @@ measured reference and it is labelled as one.**
 So the spread becomes: rounded outer edge with a fore-edge stack, square inner edge, crease,
 square inner edge, rounded outer edge with a fore-edge stack. That is a picture of an open
 book, and it costs two pseudo-elements and one gradient stop.
+
+**The pseudo-elements and the gradient stop shipped; the picture did not, and the missing
+piece is not on this list.** On the phone the leaf fills the stage's width, so zeroing the
+bound-side padding does put it against the screen edge. On the desktop spread it does not:
+`.leaf` is `flex: 1 1 0`, so each half is 720 px at 1440, while `--stage-page-cap` sizes the
+leaf from the *height* the chrome leaves — about 420 px. The leaf fits its half with ~300 px
+to spare, and `holdAxis`'s fitting-axis regime centres it, so ~150 px of field sits between
+the square inner edge and the crease. Measured at 1440×900: gutter centre at x≈720, leaf's
+bound edge at x≈868.
+
+Removing that gap is a **`holdAxis` question, not a padding one**, and the two rules
+genuinely conflict: `stage-fit.spec.ts` asserts a fitting leaf is *centred* in its stage
+(the invariant that fixed the double-centring defect, §6.2 row 1), and a book asserts it is
+*flush against the spine*. One of them has to become conditional on being in a spread, and
+whichever way that goes it changes the box `clampView` reasons in at zoom. Tracked
+separately rather than folded into the edge work, because it is a behavioural change to core
+with its own induced failure, and because the gap predates the edge vocabulary — the leaf
+floated in the middle of its half before any of this landed.
 
 ---
 
@@ -796,9 +828,22 @@ would remove the last thing watching the geometry.
 ### 6.4 Golden images
 
 `golden.spec.ts` shoots **the page SVG element only** and deliberately not the chrome. The
-leaf's edges, the field and the fold are all **outside** the SVG, so **no existing baseline
-changes.** That is worth stating plainly: a design that silently invalidated five committed
-baselines would be a different-sized change, and this one does not.
+leaf's edges, the field and the fold are all **outside** the SVG, so ~~**no existing
+baseline changes.**~~
+
+**Wrong, and it was wrong the moment §2.4 was written.** The premise is right — the new
+pixels are outside the shot — but the conclusion does not follow, because the shot's
+*subject changes size*. The stage hands back 16 px of bound-side padding and the leaf spends
+14 of it on a 2 px border and a 10 px fore-edge stack, so the SVG is laid out 2 CSS px wider:
+358 → 360 at the golden viewport, and 556×886 → 559×890 once hop zoom multiplies it. Every
+byte of a PNG shifts when its width does. **All ten baselines moved, on `darwin/` and
+`linux/` alike** — the two committed trees are platform-split (`snapshotPathTemplate`), a
+geometry change moves both, and regenerating only the local one turns a green `make e2e`
+into a red CI run.
+
+The lesson is worth more than the correction: "the new marks are outside the frame" and "the
+frame is unchanged" are different claims, and only the second one predicts a baseline. Any
+future row of this table has to reason about the *box*, not the paint.
 
 A *new* shot is needed for the edge system, and it has a limit worth recording: `SHOTS`
 would need one leaf of each parity, and **all three vendored pages are right-hand leaves**

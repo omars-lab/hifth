@@ -470,13 +470,22 @@ has `LiveAnnouncer`/`useAnnouncer` and already announces (`App.tsx:403-436`). §
    `measureFit` becomes truthful without changing. **Done** — §7 ①.
 3. **Drop the card.** No `border-radius`, no `filter: drop-shadow`, no `background:
    --paper-raised` on `.host`. This restores `docs/design/desktop.md:241` — it is not a new
-   opinion, it is the design of record.
+   opinion, it is the design of record. **Done, except the last clause, which was wrong.**
+   The shadow and the four equal corners went; the `--paper-raised` background stayed, and
+   had to. The vendored page SVGs carry **no background rect** — open `7.svg` and it is
+   glyph paths and nothing else — so `.host`'s background is not a card's fill sitting on
+   top of the paper, it *is* the paper. Removing it does not reveal a page underneath; it
+   leaves ink on the field. The defect this clause was aiming at is real and is fixed by ④
+   instead: the field was the page's own colour, so the leaf had no edge. See
+   `page-transition.md` §2.1.
 4. **Give the field a colour the page is not.** The stage's vignette currently starts at
    `--paper-raised`, the page's own fill. Use `--paper-sunk` (`tokens.css:18`) for the field
    so the leaf's edge is an edge. A leaf on a desk is defined by its boundary, not by its
-   shadow.
+   shadow. **Done** — and it is doing ③'s job as well as its own.
 5. **The leaf fills the field.** With centring fixed and the card gone, the remaining air is
-   the stage's 16 px padding, which is a margin, not a float.
+   the stage's 16 px padding, which is a margin, not a float. **Done, and now asymmetric**
+   — zero on the bound side, so the leaf runs into the binding rather than holding a margin
+   against it (`page-transition.md` §2.4).
 
 **Transition: a short opacity cross-fade, ~120 ms, and no slide.**
 
