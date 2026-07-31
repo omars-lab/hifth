@@ -1,44 +1,65 @@
 /**
- * The field — the surface the mus'haf lies on — and the five it is allowed to be.
+ * The field — the surface the mus'haf lies on — and the two it is allowed to be.
  *
- * ## Why this is a link parameter and not a setting
+ * ## The question, and how it was settled
  *
- * `docs/design/page-transition.md` §7 ④ left the field colour open, and named the
- * instrument that would have to answer it: this repo measures contrast on real
- * surfaces (`e2e/contrast.spec.ts`), and the rule is **add the row before the
- * token**. A colour argued about in prose is a taste fight; a colour that has to
- * pass a measurement is a decision. So the options ship behind a parameter, each
- * one carries a row, and the field is chosen by looking at all five in a real
- * window rather than by picking a hex in a document.
+ * `docs/design/page-transition.md` §7 ④ carried the field colour as an open
+ * question for six loops. It stayed open because it was being *argued*: prose
+ * against prose, with no way to see the thing. Five candidates shipped behind
+ * `?field=` so that all five could be looked at in one window, each carrying its
+ * own contrast row so that none of them could be adopted on charm alone.
  *
- * That makes this an *instrument*, not a preference. There is deliberately no
- * picker in the chrome: a reader has no reason to restyle the desk mid-session,
- * and adding a control would make an open question look like a feature. If a
- * winner is adopted it becomes the default and the rest of this table can go.
+ * Looking at them produced a measurement nobody had thought to take. The rule
+ * §2.2 ④ actually asked for was **a field the page is not** — and the field this
+ * app had been shipping (`--paper-sunk` → `--paper`) ends its wash on the paper's
+ * own colour. Separation at the far stop: **1.00:1**. At the foot of every page
+ * the desk *was* the leaf. That is not a contrast failure — no standard requires
+ * a page edge to clear a ratio — it is a drawing failure, and it had shipped
+ * unnoticed because nothing measured the distance from the desk to the paper:
  *
- * ## The pairing rule, which is the whole finding
+ * | id      | vs. paper @near | vs. paper @far |
+ * |---------|-----------------|----------------|
+ * | `sunk`  | 1.10            | **1.00**       |
+ * | `linen` | 1.29            | 1.10           |
+ * | `slate` | 1.38            | 1.21           |
+ * | `tan`   | **2.75**        | **1.89**       |
+ * | `dark`  | 14.45           | 11.41          |
  *
- * **A field is a wash *and* the ink that survives it.** The reference mus'haf's
- * field (`#af8a68`) is two full steps darker than this app's paper, and the app's
- * own `--ink-soft` measures **2.39:1** on it — the stage's one piece of text, the
- * "could not load page N" hint, becomes unreadable the moment the desk gets
- * interesting. That is not a reason to refuse the colour; it is a reason to state
- * that a darker desk owes its own ink. Every row below is a pair, and every pair
- * clears 4.5:1 against **both** ends of its wash:
+ * `tan` won, and it is the reference mus'haf's own field. It is the only warm
+ * option where the book reads as an object lying on a desk rather than as a
+ * lighter patch of the same surface. `slate` was the counter-example the set
+ * needed — the warm-field argument is a claim, and a claim with no cool option
+ * against it is not being tested — and it lost honestly: a cool desk makes the
+ * paper read as yellowed rather than as lit. `linen` was real but timid; its
+ * worst separation (1.10) is exactly `sunk`'s best.
  *
- * | id      | wash (near → far)     | ink on it        | worst ratio |
- * |---------|-----------------------|------------------|-------------|
- * | `sunk`  | `#ece4d6` → `#f4efe6` | `--ink-soft`     | 5.98        |
- * | `linen` | `#ded3c0` → `#ece4d6` | `--ink-soft`     | 5.10        |
- * | `slate` | `#d0cdc7` → `#dedbd5` | `--ink-soft`     | 4.76        |
- * | `tan`   | `#af8a68` → `#c9ab8d` | `--ink`          | 5.11        |
- * | `dark`  | `#221e1a` → `#35302a` | `--paper`        | 11.41       |
+ * ## Why `dark` survives and the other three do not
  *
- * `slate` is the control, and it earns its place by being the only cool one: the
- * warm-field argument is a claim that warmth reads better, and a claim with no
- * counter-example in the set is not being tested. It was `#c9c6c0` until the
- * measurement came back at **4.43:1** — under the floor by seven hundredths, which
- * is exactly the kind of miss that survives a design review and not a gate.
+ * `dark` is not a losing answer to the same question. It answers a different one
+ * — *reading at night* — and it is the only field that does. Keeping it costs two
+ * contrast rows and one CSS block; dropping it would mean the app has nothing to
+ * offer a reader in a dim room. `sunk`, `linen` and `slate` were candidates for
+ * «what colour is the desk», and that is decided.
+ *
+ * ## The pairing rule, which is the finding this produced
+ *
+ * **A field is a wash *and* the ink that survives it.** `#af8a68` is two full
+ * steps darker than this app's paper, and `--ink-soft` measures **2.39:1** on it
+ * — the stage's one piece of text, the "could not load page N" hint, would have
+ * become unreadable the moment the desk got interesting. That is not a reason to
+ * refuse the colour; it is a reason to say that a darker desk owes its own ink.
+ * Both rows below are pairs, and both clear 4.5:1 against **each end** of the
+ * wash:
+ *
+ * | id     | wash (near → far)     | ink on it | worst ratio |
+ * |--------|-----------------------|-----------|-------------|
+ * | `tan`  | `#af8a68` → `#c9ab8d` | `--ink`   | 5.11        |
+ * | `dark` | `#221e1a` → `#35302a` | `--paper` | 11.41       |
+ *
+ * There is still no picker. `dark` is reachable by link and by nothing else,
+ * because it is one desk for one occasion and not a preference the chrome should
+ * grow a control for. If it ever earns one, that is a decision about the chrome,
+ * made on its own evidence.
  *
  * ## Why parsing is tolerant, when the rest of the grammar is not
  *
@@ -51,8 +72,8 @@
  * which side of that line every parameter sits on.
  */
 
-/** The five fields. Ids are stable — they appear in shared links. */
-export type FieldId = "sunk" | "linen" | "slate" | "tan" | "dark";
+/** The two fields. Ids are stable — they appear in shared links. */
+export type FieldId = "tan" | "dark";
 
 /**
  * Every field, in the order they are documented and tested.
@@ -62,10 +83,16 @@ export type FieldId = "sunk" | "linen" | "slate" | "tan" | "dark";
  * `e2e/contrast.spec.ts`, and the table in `docs/query-params.md`. Two of those
  * three are checked against it by a gate.
  */
-export const FIELDS: readonly FieldId[] = ["sunk", "linen", "slate", "tan", "dark"];
+export const FIELDS: readonly FieldId[] = ["tan", "dark"];
 
-/** What ships, and what an absent or unreadable `field=` resolves to. */
-export const DEFAULT_FIELD: FieldId = "sunk";
+/**
+ * What ships, and what an absent or unreadable `field=` resolves to.
+ *
+ * `gate:params` checks that the token layer's own default wash is this field's
+ * block — otherwise the document would paint one desk before `field.css` is
+ * parsed and a different one after.
+ */
+export const DEFAULT_FIELD: FieldId = "tan";
 
 /** Whether a string names a field. Narrow, so callers can keep the literal type. */
 export function isFieldId(raw: string): raw is FieldId {

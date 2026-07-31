@@ -37,14 +37,23 @@
      *pair*: a wash, and the ink that survives it. `--field-wash` is written
      once here so the two places that paint the desk (PageSpread's `.spread`,
      PageStage's `.stage`) cannot drift apart, and `--ink-on-field` is what the
-     one piece of text that ever sits on it (`.hint`) reads. The default below
-     is the field this app shipped with — paper-sunk falling off to paper — so
-     `field.css` changes nothing until a link asks it to. See
-     packages/core/src/field.ts for the table and why it is a link parameter. */
-  --field-near: var(--paper-sunk);
-  --field-far: var(--paper);
+     one piece of text that ever sits on it (`.hint`) reads.
+
+     The default below is `tan`, the reference mus'haf's own field, and it is
+     written out here as well as in `field.css` so the document paints the right
+     desk before that sheet is parsed. The two must agree; `gate:params` checks
+     that they do. It is a raw pair rather than palette tokens because these are
+     not paper colours — the desk is deliberately not made of the same material
+     as the leaf, which is the whole point of the field.
+
+     It replaced `--paper-sunk → --paper`, whose far stop was `--paper` itself:
+     the desk ended on the page's own colour, 1.00:1, so at the foot of every
+     page there was nothing there. See packages/core/src/field.ts for how that
+     was found and why the ink steps up to full `--ink` here. */
+  --field-near: #af8a68;
+  --field-far: #c9ab8d;
   --field-wash: radial-gradient(120% 90% at 50% 0%, var(--field-near), var(--field-far) 60%);
-  --ink-on-field: var(--ink-soft);
+  --ink-on-field: var(--ink);
 
   /* Navigation accent — verdigris. Used for hop affordances, focus, links. */
   --accent: #1f6f66;
