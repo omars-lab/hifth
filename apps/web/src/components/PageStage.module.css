@@ -208,6 +208,90 @@
   isolation: isolate;
 }
 
+/*
+ * The fold — one element, no children, and it is not either of the pages.
+ *
+ * A turning leaf in a physical book is a *third* object that passes over the two
+ * you are looking at, and that is the whole reason this is a bare div rather
+ * than a transform on `.host`: during a turn **no glyph moves at all**
+ * (docs/design/page-turning.md §1.5). A translate on an ancestor of a 170 KB
+ * inline SVG moves every glyph on it, which is the one thing page-image memory
+ * cannot afford, and it is why §4.3's `.leaf` wrapper and the ≤16 px direction
+ * nudge were both withdrawn.
+ *
+ * It owns `transform` and nothing else owns it. `pointer-events: none` and
+ * `aria-hidden` because it is scenery: everything it says is also said by the
+ * announcer, by the leaf's own edges at rest, and by the page bar.
+ *
+ * The four states are a pure function of the two page numbers (`foldBetween` in
+ * @hifth/core), never parity in this file. See its doc comment for why that
+ * matters more than it looks like it does.
+ */
+.fold {
+  position: absolute;
+  inset-block: 0;
+  left: 0;
+  pointer-events: none;
+  /* Physical, like `.host`'s: the band is positioned by px written from JS, and
+     a logical property here would flip the sweep when the UI language changes
+     while the book's direction did not. */
+  transform: translate3d(-100%, 0, 0);
+  will-change: transform;
+  z-index: 2;
+}
+
+/* One opening. The same gradient `.gutter` draws permanently between two facing
+   leaves on a desktop spread — the same object, so the same stops, including the
+   1 px core that is the difference between a fold and a soft band. No field
+   colour shows anywhere in it: the two leaves are edge to edge behind it. */
+.fold[data-fold="crease"] {
+  width: var(--fold-crease-width);
+  background: linear-gradient(
+    to right,
+    transparent 0%,
+    var(--gutter-shadow) 42%,
+    var(--gutter-shadow-deep) calc(50% - 1px),
+    var(--gutter-core) calc(50% - 0.5px),
+    var(--gutter-core) calc(50% + 0.5px),
+    var(--gutter-shadow-deep) calc(50% + 1px),
+    var(--gutter-shadow) 58%,
+    transparent 100%
+  );
+}
+
+/* A leaf turned: two different openings, and what you see between them is what
+   you would actually see — the outside cut edges of both. So it is the leaf's
+   own fore-edge stack, mirrored, with the field between. Stops must be
+   non-decreasing or the browser clamps them and the bands vanish. */
+.fold[data-fold="gap"] {
+  width: var(--fold-gap-width);
+  background: linear-gradient(
+    to right,
+    var(--fore-edge-deep) 0 4px,
+    var(--hairline) 4px 5px,
+    var(--fore-edge) 5px 9px,
+    var(--hairline) 9px 10px,
+    var(--paper-sunk) 10px 20px,
+    var(--hairline) 20px 21px,
+    var(--fore-edge) 21px 25px,
+    var(--hairline) 25px 26px,
+    var(--fore-edge-deep) 26px 30px
+  );
+}
+
+/* The print has a leaf here and this build does not. A different kind of thing,
+   not a wider gap: sunk paper behind a dashed edge, which is already this app's
+   word for "not a result yet" — the marquee in flight, `PageSpread`'s absent
+   leaf, the revision map's un-vendored pages. With pages 7, 9 and 19 vendored
+   and no two of them adjacent, this is the only state today's build can reach,
+   and a reader who sees it on every turn has been told something true. */
+.fold[data-fold="hole"] {
+  width: var(--fold-gap-width);
+  background: var(--paper-sunk);
+  border-left: 1px dashed var(--hairline);
+  border-right: 1px dashed var(--hairline);
+}
+
 .hint {
   position: absolute;
   inset-block-end: var(--space-5);

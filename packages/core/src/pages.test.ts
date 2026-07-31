@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { EDITIONS } from "./concordance.js";
-import { leafSideOf, nearestPage, pageFraction, spreadOf } from "./pages.js";
+import { foldBetween, leafSideOf, nearestPage, pageFraction, spreadOf } from "./pages.js";
 
 describe("nearestPage", () => {
   const vendored = [7, 9, 19];
@@ -164,6 +164,81 @@ describe("leafSideOf", () => {
     expect(leafSideOf(0, MADANI)).toBeNull();
     expect(leafSideOf(605, MADANI)).toBeNull();
     expect(leafSideOf(Number.NaN, MADANI)).toBeNull();
+  });
+});
+
+describe("foldBetween", () => {
+  const MADANI = 604;
+  /** This build's inventory, for the rows that are about it. */
+  const VENDORED = [7, 9, 19];
+
+  it("calls two pages of one opening a crease", () => {
+    // 7 and 8 are the same leafless fact: one sheet of paper open in front of
+    // you, one gutter down the middle. Nothing turned — the eye moved.
+    expect(foldBetween(7, 8, MADANI)).toBe("crease");
+    expect(foldBetween(8, 7, MADANI)).toBe("crease");
+    expect(foldBetween(21, 22, MADANI)).toBe("crease");
+  });
+
+  it("calls consecutive pages in different openings a gap", () => {
+    // 6 closes one opening and 7 opens the next, so getting from one to the
+    // other turns exactly one leaf. Adjacent, but not facing.
+    expect(foldBetween(6, 7, MADANI)).toBe("gap");
+    expect(foldBetween(7, 6, MADANI)).toBe("gap");
+  });
+
+  it("needs no special case for page 1, and says so about page 2", () => {
+    // The check on the phase, not a curiosity: Al-Fatiha faces the opening of
+    // Al-Baqarah, so 1 | 2 is one opening. Under the pairing `spreadOf` used to
+    // implement — page 1 alone on the right — this was a gap, and a reader
+    // turning to page 2 was shown a leaf turning that does not turn.
+    expect(foldBetween(1, 2, MADANI)).toBe("crease");
+    expect(foldBetween(2, 3, MADANI)).toBe("gap");
+  });
+
+  it("refuses to call two pages neighbours because the build skipped what is between", () => {
+    // The defect the whole design exists to prevent. Pages 7 and 9 are the ones
+    // this build happens to hold next to each other; page 8 is in the print. A
+    // fold drawn between them as a gap would assert they are consecutive
+    // leaves, which is the shape of lie `PLAN.md` names — a gap the interface
+    // papers over. The inventory is not an input here precisely so that it
+    // cannot become one.
+    expect(foldBetween(7, 9, MADANI)).toBe("hole");
+    expect(foldBetween(9, 19, MADANI)).toBe("hole");
+    for (let i = 1; i < VENDORED.length; i += 1) {
+      expect(foldBetween(VENDORED[i - 1]!, VENDORED[i]!, MADANI)).toBe("hole");
+    }
+  });
+
+  it("is not a turn at all when nothing moved or the page is off the book", () => {
+    expect(foldBetween(7, 7, MADANI)).toBe("none");
+    expect(foldBetween(604, 605, MADANI)).toBe("none");
+    expect(foldBetween(0, 1, MADANI)).toBe("none");
+    expect(foldBetween(7, Number.NaN, MADANI)).toBe("none");
+    expect(foldBetween(7.5, 8, MADANI)).toBe("none");
+  });
+
+  it("says the same thing about a pair whichever way it is read", () => {
+    // A fold is a thing between two pages, not a property of travelling one
+    // way: turning back has to draw what turning forward drew, or the same
+    // sheet of paper would be a crease going one way and a gap coming back.
+    for (let from = 1; from <= 30; from += 1) {
+      for (let to = 1; to <= 30; to += 1) {
+        expect(foldBetween(from, to, MADANI)).toBe(foldBetween(to, from, MADANI));
+      }
+    }
+  });
+
+  it("agrees with spreadOf on every pair of the print, by construction", () => {
+    // The cross-check `leafSideOf` gets: the predicate is only allowed to be a
+    // reading of `spreadOf`, so a future body that re-derives parity itself
+    // fails here even if all the rows above still pass.
+    for (let from = 1; from <= MADANI; from += 1) {
+      const to = from + 1;
+      if (to > MADANI) break;
+      const facing = spreadOf(from, MADANI).right === spreadOf(to, MADANI).right;
+      expect(foldBetween(from, to, MADANI)).toBe(facing ? "crease" : "gap");
+    }
   });
 });
 

@@ -18,6 +18,14 @@
   min-inline-size: 0;
   min-block-size: 0;
 
+  /* The fold's box. A crossing band rests one width *outside* this element at
+     each end of its sweep (PageStage.module.css `.fold`), so without a clip it
+     would sit beside the open book between turns — a strip of fore-edge floating
+     in the desktop field, attached to nothing. Nothing else in here overflows:
+     the two leaves divide the row exactly, the gutter is inset, and the rail and
+     the popover are siblings of this element rather than children of it. */
+  overflow: hidden;
+
   /* The height budget the leaf cap is derived from: header + trail + page bar +
      the stage's own padding. Rounded *up* on purpose — the stage is
      `overflow: hidden`, so an over-generous estimate clips scripture off the top
