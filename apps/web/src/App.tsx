@@ -128,13 +128,15 @@ export function App(): JSX.Element {
   /*
    * The open book's own element, so a page turn's fold can be portalled into it.
    *
-   * The fold crosses the *whole spread*, not one leaf: on a desktop opening both
+   * The fold crosses the *whole book*, not one leaf: on a desktop opening both
    * leaves belong to the same sheet of paper, and a band that stopped at the
    * gutter would draw a turn of half a page (docs/design/page-transition.md
-   * §3.5). Null below the breakpoint, where `PageSpread` renders no wrapper at
-   * all and the stage sweeps its own single leaf instead.
+   * §3.5). The book and not the desk around it, either — the outer element runs
+   * the width of the window, and a band given that would appear on empty field
+   * before reaching the paper. Null below the breakpoint, where `PageSpread`
+   * renders no wrapper at all and the stage sweeps its own single leaf instead.
    */
-  const spreadRef = useRef<HTMLDivElement | null>(null);
+  const bookRef = useRef<HTMLDivElement | null>(null);
   /*
    * Is there room for an open mus'haf? Asked in JavaScript rather than left to
    * CSS because the answer decides a *mount*, not a style: each page is a
@@ -944,7 +946,7 @@ export function App(): JSX.Element {
               page={page}
               total={totalPages}
               available={pageTurns.pages}
-              spreadRef={spreadRef}
+              bookRef={bookRef}
               renderFacing={(facing) => (
                 /* The facing leaf gets its own stage rather than a second
                    visible host inside the current one: PageStage's whole
@@ -989,7 +991,7 @@ export function App(): JSX.Element {
                 tajweedLookup={tajweed?.lookup ?? null}
                 /* Only the live stage turns pages, and only on a desktop
                    spread does the fold belong to something wider than it. */
-                foldTarget={desktop ? spreadRef : null}
+                foldTarget={desktop ? bookRef : null}
               />
             </PageSpread>
             <HopRail

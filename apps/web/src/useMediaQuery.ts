@@ -10,21 +10,37 @@ import { useEffect, useState } from "react";
  *
  * The rule they are sized by: **a leaf must never be narrower than the narrowest
  * supported phone gives the single page it replaced.** `e2e/chrome-fit.spec.ts`
- * supports 320px, which leaves 288px of page after the stage's padding — so with
- * a ~220px chrome allowance, `0.627 × (H − 220) ≥ 288` gives `H ≥ 679`, and the
- * width requirement is `2×288 + 28 gutter + 32 padding = 636`.
+ * supports 320px, and there the scripture measures **290px** — the page host's
+ * border and fore-edge stack come off the stage's width before the SVG is laid
+ * out. Both sides of the comparison are the SVG, deliberately: comparing a leaf's
+ * *box* against a phone's *page* is how the old derivation came out 33px optimistic.
  *
- * 720 and 1024 are the chosen rounds. Height sits only 41px above its floor
- * because that axis is scarce and every step up excludes a real laptop; width
- * sits well above its own because that axis is nearly free and buys room for the
- * chrome desktop adds. The whole derivation is docs/design/desktop.md §3.
+ * Both terms are measured, not estimated. Chrome above and below the stage is
+ * **252px** (header 72 + trail 52 + page bar 56 + the shell's own 72), the leaf
+ * box is `0.627 × (H − 252)`, and 14px of that is border and fore-edge stack. So
+ *
+ * ```
+ * 0.627 × (H − 252) − 14 ≥ 290   ⟹   H ≥ 737
+ * ```
+ *
+ * and the width requirement is `2×290 + 14 + 14 = 608`.
+ *
+ * 740 and 1024 are the chosen rounds. Height sits 3px above its floor because
+ * that axis is scarce and every step up excludes a real laptop; width sits well
+ * above its own because that axis is nearly free and buys room for the chrome
+ * desktop adds. The whole derivation is docs/design/desktop.md §3.
+ *
+ * Height was 720 until the leaf was sized to the page it holds: the estimate it
+ * had been derived from (a 220px chrome allowance) was 32px light, and the honest
+ * arithmetic put the corner at 280px of scripture — under the floor this rule
+ * exists to hold. Verified by measurement at 1024×740, not by re-deriving it.
  *
  * Repeated as a literal in DesktopChrome.module.css, because a CSS custom
  * property cannot appear inside a media query. The two must agree; this string is
  * the copy of record, and `useMediaQuery.test.ts` pins it so a change here is at
  * least loud enough that the CSS gets changed with it.
  */
-export const DESKTOP_QUERY = "(min-width: 1024px) and (min-height: 720px)";
+export const DESKTOP_QUERY = "(min-width: 1024px) and (min-height: 740px)";
 
 /**
  * Subscribe to a CSS media query from JavaScript.
