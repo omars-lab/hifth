@@ -197,7 +197,24 @@ export default defineConfig({
         webServer: {
           command: "pnpm exec vite preview --port 4173 --strictPort",
           url: "http://localhost:4173",
-          reuseExistingServer: !process.env.CI,
+          // Never reuse, unless someone asks for it by name.
+          //
+          // `reuseExistingServer: !CI` looks like a local convenience and is
+          // actually a way to test the wrong build. Whatever answers on 4173 is
+          // adopted, and this repo routinely has something else there: another
+          // agent's worktree serving *its* `dist/`, or `make phone-perf` serving
+          // the throwaway probe build. It has already happened — a desktop run
+          // silently exercised a different checkout, and passed.
+          //
+          // With `--strictPort`, refusing to reuse turns that into a loud
+          // startup failure naming the port, which is the correct outcome: a
+          // suite that cannot say which build it ran is not a suite. The cost is
+          // ~1s per run.
+          //
+          // `HIFTH_REUSE_SERVER=1` is the escape hatch for iterating against a
+          // `vite dev` you are already watching. It is opt-in on purpose — you
+          // have to be holding the knowledge that makes it safe.
+          reuseExistingServer: !process.env.CI && process.env.HIFTH_REUSE_SERVER === "1",
           timeout: 120_000,
         },
       }),
