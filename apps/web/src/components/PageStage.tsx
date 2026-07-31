@@ -186,6 +186,16 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
    */
   const navigatedRef = useRef(false);
   const [status, setStatus] = useState<"loading" | "ready" | "error">("loading");
+  /*
+   * Which page the error banner is about, when that is not the `page` prop.
+   *
+   * A turn that never arrives deliberately leaves the reader where they were —
+   * App does not commit `page` until `turnTo` resolves true (§5.3) — so the
+   * banner would otherwise name the page still on screen and say it failed to
+   * load. Null means "the prop", which is every other error path: those all run
+   * after App has already moved the chrome.
+   */
+  const [errorPage, setErrorPage] = useState<number | null>(null);
 
   // Latest callbacks without retriggering effects.
   const onSelectRef = useRef(onSelect);
@@ -600,6 +610,7 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
         mp.host.style.opacity = "";
       }
       centerCurrent();
+      setErrorPage(null);
       setStatus("ready");
     },
     [cancelTween, centerCurrent, setCurrentPage],
@@ -664,6 +675,7 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
         const mp = await ensurePage(next);
         if (!mine()) return false;
         if (!mp) {
+          setErrorPage(next);
           setStatus("error");
           return false;
         }
@@ -710,6 +722,7 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
           moveFold(el, enter, fadeMs);
           await sleep(fadeMs);
           if (mine()) {
+            setErrorPage(next);
             setStatus("error");
             abortTurn();
           }
@@ -1105,12 +1118,14 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
       {band && (target ? createPortal(band, target) : band)}
       {status === "loading" && <div className={styles.hint}>{t.stageLoading}</div>}
       {status === "error" && (
-        /* Names the page it failed on, because the chrome has already moved to
-           that number and the stage has not. Without the number the reader gets
-           "a page" failed while the header says ١٩ and page ٧ is on screen, and
-           has to guess which one they are looking at. */
+        /* Names the page it failed on, always — the two ways of getting here
+           disagree about where the chrome is. A hop or a deep link has already
+           moved the header to the page that failed; a turn deliberately has not
+           (§5.3), so `errorPage` carries the destination the prop no longer
+           holds. Either way, "a page failed" while the header says one number
+           and another page is on screen leaves the reader guessing which. */
         <div className={styles.hint} role="alert">
-          {t.stageFailed(page)}
+          {t.stageFailed(errorPage ?? page)}
         </div>
       )}
     </div>
