@@ -126,6 +126,16 @@ export function App(): JSX.Element {
 
   const stageRef = useRef<PageStageHandle>(null);
   /*
+   * The open book's own element, so a page turn's fold can be portalled into it.
+   *
+   * The fold crosses the *whole spread*, not one leaf: on a desktop opening both
+   * leaves belong to the same sheet of paper, and a band that stopped at the
+   * gutter would draw a turn of half a page (docs/design/page-transition.md
+   * §3.5). Null below the breakpoint, where `PageSpread` renders no wrapper at
+   * all and the stage sweeps its own single leaf instead.
+   */
+  const spreadRef = useRef<HTMLDivElement | null>(null);
+  /*
    * Is there room for an open mus'haf? Asked in JavaScript rather than left to
    * CSS because the answer decides a *mount*, not a style: each page is a
    * ~170 KB inline SVG, and a `display: none` facing leaf would still fetch it,
@@ -141,6 +151,28 @@ export function App(): JSX.Element {
   // value) can read the current one without re-subscribing or an impure updater.
   const selectedKeyRef = useRef(selectedKey);
   selectedKeyRef.current = selectedKey;
+
+  /*
+   * Where the reader is, and where they are *going*.
+   *
+   * `page` is a committed fact — it changes when a page has actually landed on
+   * the stage. A turn takes 240 ms, and during those 240 ms a second arrow press
+   * must step from the page being turned to, not from the one still on screen:
+   * otherwise holding ArrowLeft oscillates between two pages instead of walking
+   * the book. `pendingPageRef` is that destination, and it is the number every
+   * page-stepping decision is made against.
+   *
+   * Both are synced from `page` rather than written at each of the seven places
+   * that call `setPage` — a deep link, a hop, a trail rewind and a scrub all
+   * settle the reader somewhere, and any of them arriving mid-turn should reset
+   * the destination to wherever they put us.
+   */
+  const pageRef = useRef(page);
+  const pendingPageRef = useRef(page);
+  useEffect(() => {
+    pageRef.current = page;
+    pendingPageRef.current = page;
+  }, [page]);
 
   useEffect(() => {
     loadManifest()
@@ -400,22 +432,46 @@ export function App(): JSX.Element {
   // `said` is what to announce on arrival. The slider passes a different string
   // when it had to snap, because a landing the reader did not ask for has to be
   // named out loud.
+  //
+  // `turn` says which of the two verbs this is. Stepping is a *turn*: one leaf's
+  // worth of movement, and the fold that crosses says what was between the two
+  // pages — a crease, a gap, or a hole where this build skipped what the print
+  // has. Everything else — a scrub across half the mus'haf, a deep link, a hop —
+  // is a *jump*, and a jump draws no fold at all, because a band crossing the
+  // page would assert an adjacency that the reader did not travel through
+  // (docs/design/page-transition.md §3.1).
   const goToPage = useCallback(
-    (next: number, said?: string) => {
-      if (next === page) return;
+    (next: number, said?: string, turn = false) => {
+      // Against the destination, not the visible page: two quick arrow presses
+      // must be two steps, and the second one arrives while the first is still
+      // in the air.
+      if (next === pendingPageRef.current) return;
       const anchor = pageTurns.anchors.get(next);
       // No anchor means no vendored page — refuse rather than navigate to a
       // blank stage. Callers pick from `pageTurns.pages`, so this is the belt
       // to that braces.
       if (!anchor) return;
       setOpenDirection(null);
-      setPage(next);
+      pendingPageRef.current = next;
       announce(said ?? t.pageN(next));
+      if (turn) {
+        // The header follows the *landing*, not the request: `page` drives the
+        // page chip, the leaf's resting edge and the announcer's next line, and
+        // a turn that stalls or never arrives must leave all three saying where
+        // the reader still is.
+        void stageRef.current?.turnTo(next).then((landed) => {
+          if (pendingPageRef.current !== next) return; // a newer turn owns it
+          if (landed) setPage(next);
+          else pendingPageRef.current = pageRef.current;
+        });
+        return;
+      }
+      setPage(next);
       // zoom 1 = the page as it sits, not a hop's close framing; no pulse,
       // because nothing here was selected.
       void stageRef.current?.navigateTo(anchor, { pulse: false, zoom: 1 });
     },
-    [pageTurns, page, announce, t],
+    [pageTurns, announce, t],
   );
 
   // One page's worth of movement. "The next page" means the next page we
@@ -425,16 +481,19 @@ export function App(): JSX.Element {
     (step: 1 | -1) => {
       const { pages } = pageTurns;
       if (pages.length === 0) return;
-      const at = pages.indexOf(page);
+      // From the destination, so a held arrow walks the book rather than
+      // bouncing off the page that has not finished turning yet.
+      const here = pendingPageRef.current;
+      const at = pages.indexOf(here);
       const i = at === -1 ? 0 : Math.min(pages.length - 1, Math.max(0, at + step));
       const next = pages[i]!;
-      if (next === page) {
+      if (next === here) {
         announce(step > 0 ? t.lastPage : t.firstPage);
         return;
       }
-      goToPage(next);
+      goToPage(next, undefined, true);
     },
-    [pageTurns, page, announce, t, goToPage],
+    [pageTurns, announce, t, goToPage],
   );
 
   // The slider hands back both numbers: where it landed and where the thumb was
@@ -885,6 +944,7 @@ export function App(): JSX.Element {
               page={page}
               total={totalPages}
               available={pageTurns.pages}
+              spreadRef={spreadRef}
               renderFacing={(facing) => (
                 /* The facing leaf gets its own stage rather than a second
                    visible host inside the current one: PageStage's whole
@@ -927,6 +987,9 @@ export function App(): JSX.Element {
                 labelFor={(key) => t.ayahAria(t.ayahLabel(key) ?? key)}
                 skin={skin}
                 tajweedLookup={tajweed?.lookup ?? null}
+                /* Only the live stage turns pages, and only on a desktop
+                   spread does the fold belong to something wider than it. */
+                foldTarget={desktop ? spreadRef : null}
               />
             </PageSpread>
             <HopRail

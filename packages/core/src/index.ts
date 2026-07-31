@@ -189,8 +189,10 @@ export {
   pageFraction,
   spreadOf,
   leafSideOf,
+  foldBetween,
   type Spread,
   type LeafSide,
+  type Fold,
 } from "./pages.js";
 
 export {

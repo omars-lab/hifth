@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import type { ReactNode, Ref } from "react";
 import { spreadOf } from "@hifth/core";
 import { useT } from "../i18n";
 import styles from "./PageSpread.module.css";
@@ -27,6 +27,21 @@ interface PageSpreadProps {
    * as absent, which is true.
    */
   renderFacing?: (page: number) => ReactNode;
+  /**
+   * The spread's own element, handed back to the caller.
+   *
+   * One use: a page turn's fold crosses the *whole open book*, not one leaf of
+   * it (docs/design/page-transition.md §3.5), so the band has to be a child of
+   * this element rather than of the stage that owns the turn. The stage portals
+   * it here. Null below the breakpoint, where there is no wrapper at all and a
+   * band that swept "the spread" would be sweeping the single leaf — which is
+   * exactly what the stage does when it gets no target.
+   *
+   * A ref rather than a `renderFold` slot because the fold is not a fact about
+   * the spread: the spread must not know that page turns have a picture, or it
+   * acquires an opinion about animation it has no business holding.
+   */
+  spreadRef?: Ref<HTMLDivElement>;
 }
 
 /**
@@ -96,6 +111,7 @@ export function PageSpread({
   available,
   children,
   renderFacing,
+  spreadRef,
 }: PageSpreadProps): JSX.Element {
   const { t } = useT();
 
@@ -151,7 +167,7 @@ export function PageSpread({
        geometry note above for why that is the only place the side is decided.
        The gutter is drawn on this element rather than on the leaves — a spine
        belongs to the binding, not to either page. */
-    <div className={styles.spread} data-testid="page-spread">
+    <div ref={spreadRef} className={styles.spread} data-testid="page-spread">
       {leaf(right, "right")}
       {leaf(left, "left")}
       <div className={styles.gutter} aria-hidden="true" />

@@ -153,3 +153,61 @@ export function leafSideOf(page: number, total: number): LeafSide | null {
   if (spread.right === null) return null;
   return spread.right === page ? "right" : "left";
 }
+
+/** What lies between two pages of the print. See `foldBetween`. */
+export type Fold = "crease" | "gap" | "hole" | "none";
+
+/**
+ * What lies between two pages, told truthfully.
+ *
+ *   crease — the two pages face each other in the print: one opening, one gutter.
+ *   gap    — consecutive in the print, but different openings: a leaf turned.
+ *   hole   — the print has pages between these two and this build does not.
+ *   none   — not a turn at all (the same page, or a page outside the print).
+ *
+ * This is the rule an animated page turn draws, and it lives here rather than as
+ * a parity check in a stylesheet for the reason `spreadOf` gives about itself:
+ * the print's phase was wrong for six loops, and correcting one line here
+ * corrects every crease in the application at once. A stylesheet that re-derived
+ * "odd means facing" would have kept the old phase alive where no unit test can
+ * reach it.
+ *
+ * The whole of it defers to `spreadOf` and to integer arithmetic, and that is
+ * deliberate — **adjacency is a fact about the paper, not about this build.** An
+ * interface that drew a bound-book crease between page 7 and page 9 would be
+ * asserting they are consecutive leaves; they are not, and `PLAN.md`'s standing
+ * rule is that a gap the interface papers over is a lie. Which pages are
+ * *vendored* is therefore not an input: it cannot change the answer for any pair
+ * a reader can actually turn between (a step lands on the next page we hold, so
+ * everything skipped is by construction unheld), and taking it would invite the
+ * one defect this function exists to prevent — treating "consecutive in the
+ * inventory" as adjacency in the book. `docs/design/page-transition.md` §4.1
+ * sketched a fourth `vendored` parameter and then used none of it; the omission
+ * is recorded there.
+ *
+ * `"none"` for a **jump** is the caller's to pass, not this function's to infer.
+ * It cannot see whether the reader pressed an arrow or tapped a hop chip, and
+ * that is exactly the distinction `page-turning.md` §4.5 draws — a turn is
+ * continuous reading, a jump is a relocation. A fold drawn across a hop from
+ * page 19 to page 7 would claim they are neighbours.
+ *
+ * Page 1 needs no special case, and the reason is a good check on the phase: it
+ * shares its opening with page 2, so 1 | 2 is a **crease**. Under the pairing
+ * `spreadOf` used to implement — page 1 alone on the right — it would have been a
+ * gap. One correction, both call sites.
+ */
+export function foldBetween(from: number, to: number, total: number): Fold {
+  // The same page is not a turn. Checked before the spread comparison, which
+  // would otherwise answer "crease" for a re-render that moved nothing.
+  if (from === to) return "none";
+  if (!Number.isInteger(from) || !Number.isInteger(to)) return "none";
+  const a = spreadOf(from, total);
+  const b = spreadOf(to, total);
+  // Either page outside the print — page 605 of a 604-page mus'haf, page 0 —
+  // and there is no fold, because one end of it is not in the book.
+  if (a.right === null || b.right === null) return "none";
+  if (a.right === b.right) return "crease";
+  // Adjacent in the print but in different openings: exactly one leaf turned.
+  if (Math.abs(from - to) === 1) return "gap";
+  return "hole";
+}

@@ -1,4 +1,5 @@
 import { test, expect, type Locator, type Page } from "@playwright/test";
+import { watchFolds, foldsSeen } from "./fold";
 
 /*
  * The desktop spread — an open mus'haf, and honest about the half it does not
@@ -18,10 +19,17 @@ import { test, expect, type Locator, type Page } from "@playwright/test";
  * the assertion has to be that the element is *absent*, not that it is invisible.
  *
  * Page 7 throughout. This build vendors 7, 9 and 19, none adjacent, so every one
- * of them is half a spread — 7 pairs with the missing 6. Once Loop 4b vendors
+ * of them is half a spread — 7 pairs with the missing 8. Once Loop 4b vendors
  * the rest, `renders a vendored facing leaf` in the component test is the one
  * that starts mattering and the hole assertions here become a statement about
  * whatever is still missing; see docs/design/desktop.md §4.
+ *
+ * The last two rows are about the fold. Everything the band *says* is asserted on
+ * the phone projects in `page-turn.spec.ts`; what belongs here is the one claim
+ * that needs a second leaf to be false — a page turn crosses the whole open book
+ * (docs/design/page-transition.md §3.5), so the band is a child of the spread and
+ * sweeps its full width. A band confined to the live leaf would look correct in
+ * every screenshot and would stop dead at the gutter.
  */
 
 /** The spread wrapper. Only exists above the breakpoint — that is the point. */
@@ -107,6 +115,12 @@ test.describe("Hifth · the desktop spread", () => {
     // the markup: the hole is a recessed well, so its background must differ
     // from the raised paper the real leaf sits on. A future restyle that quietly
     // sets both to `--paper` fails here.
+    //
+    // Wait for the live leaf first. The hole is rendered by the spread and is
+    // there immediately; the page beside it arrives over the network, and the
+    // comparison below reads both. Without this the row flakes on a null SVG —
+    // an error, not a failure, which is a worse thing for a comparison to do.
+    await expect(pageSvg(page, 7)).toBeVisible();
     const [wellBg, paperBg] = await page.evaluate(() => {
       const region = document.querySelector("section[aria-label]")!;
       const well = region.firstElementChild!;
@@ -172,5 +186,87 @@ test.describe("Hifth · the desktop spread", () => {
 
     await page.keyboard.press("ArrowRight");
     await expect(pageSvg(page, 7)).toBeVisible();
+  });
+
+  test("the fold crosses the whole open book, not the leaf that turned", async ({ page }) => {
+    await watchFolds(page);
+    await page.goto("/#/hafs-kfqc/p7");
+    await expect(spread(page)).toBeVisible();
+
+    const book = await boxOf(spread(page));
+    const leaf = await boxOf(pageSvg(page, 7));
+
+    // Sample the band on every frame for the length of a sweep, armed before the
+    // key rather than after: a band that never leaves the leaf is wrong from its
+    // first frame, and by the time an `expect` resolves it has already landed.
+    await page.evaluate(() => {
+      const w = window as unknown as { __band: Array<[number, number]> };
+      w.__band = [];
+      const t0 = performance.now();
+      const tick = (): void => {
+        const el = document.querySelector("[data-fold]");
+        if (el) {
+          const r = el.getBoundingClientRect();
+          w.__band.push([r.x, r.x + r.width]);
+        }
+        if (performance.now() - t0 < 600) requestAnimationFrame(tick);
+      };
+      requestAnimationFrame(tick);
+    });
+
+    await page.keyboard.press("ArrowLeft");
+    await expect(pageSvg(page, 9)).toBeVisible();
+
+    // It was put in the open book, not in the stage that owns the turn. The
+    // stage carries `data-leaf` and no testid, so a band that failed to portal
+    // reports `host: null` here instead of quietly measuring the same.
+    const seen = await foldsSeen(page);
+    expect(seen).toHaveLength(1);
+    expect(seen[0]!.host, "the band was not portalled into the spread").toBe("page-spread");
+    expect(seen[0]!.hostWidth, "the band's box is not the open book").toBeCloseTo(book.width, 0);
+
+    // And it went the whole way across. The far end is the assertion that a leaf
+    // -sized sweep fails: the live page is the right-hand leaf, so a band that
+    // stopped at its own leaf's edge would never reach the left of the book.
+    const band = await page.evaluate(
+      () => (window as unknown as { __band: Array<[number, number]> }).__band,
+    );
+    expect(band.length, "the band was never sampled mid-sweep").toBeGreaterThan(3);
+    const near = Math.min(...band.map((f) => f[0]));
+    const far = Math.max(...band.map((f) => f[1]));
+    expect(near, "the band never reached the near edge").toBeLessThan(book.x + 2);
+    // Not the exact far edge. The band is removed the moment the turn ends, so
+    // the last frame a sampler can catch is a frame or two inside the sweep, and
+    // an eased transition spends its slowest frames there — pinning the final
+    // pixel would be pinning frame timing, which is a flake, not a claim. 0.8 of
+    // the book is far past the gutter and roughly twice as far as the failure
+    // this row exists for: a band confined to the live leaf stops at 0.5.
+    expect(far, "the band stopped short of the far leaf").toBeGreaterThan(
+      book.x + book.width * 0.8,
+    );
+    expect(far - near, "the band swept one leaf, not the spread").toBeGreaterThan(leaf.width * 1.5);
+  });
+
+  test("no band is left resting beside the book", async ({ page }) => {
+    await watchFolds(page);
+    await page.goto("/#/hafs-kfqc/p7");
+    await expect(spread(page)).toBeVisible();
+    // The wrapper is in the document before the leaf inside it has finished
+    // arriving, and a key pressed in that window is a key the stage has nothing
+    // to turn from. Wait for the page itself, as every other row here does.
+    await expect(pageSvg(page, 7)).toBeVisible();
+
+    await page.keyboard.press("ArrowLeft");
+    await expect(pageSvg(page, 9)).toBeVisible();
+    await expect(page.locator("[data-fold]")).toHaveCount(0);
+
+    // A band at rest sits one width *outside* the spread at each end of its
+    // sweep, so the clip is the only thing between a finished turn and a strip
+    // of fore-edge floating in the desktop field, attached to nothing. Asserted
+    // against the computed style because it is a load-bearing declaration that
+    // looks like tidiness, and the next person to simplify this stylesheet will
+    // read it as tidiness.
+    const clip = await spread(page).evaluate((el) => getComputedStyle(el).overflow);
+    expect(clip, "the open book stopped clipping the parked band").toBe("hidden");
   });
 });

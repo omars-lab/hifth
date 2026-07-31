@@ -168,6 +168,23 @@
   --fore-edge-stack: calc(2 * var(--fore-edge-width) + 2px);
   --radius-leaf: 20px;
 
+  /* The fold — the band that crosses during a page turn, saying what is between
+     the two pages. Four states, three widths, and the widths are within 2 px of
+     each other on purpose: a crease and a gap are the same *size* of event, and
+     only their fill says which one happened (docs/design/page-transition.md
+     §4.2). A hole is the app's existing word for absence — sunk paper behind a
+     dashed edge, the same statement `PageSpread`'s absent leaf and the revision
+     map both make — and it is emphatically not "a wider gap", because a wider
+     gap would be inventing a distance metric the mus'haf does not have.
+
+     `--fold-gap-width` is 30 px because that is the fore-edge stack twice over
+     with 10 px of field between them, rounded from the 29.7 px measured off the
+     reference (§1.5). `--fold-crease-width` matches `.gutter`'s 28 px exactly,
+     since a crease drawn during a turn and the crease drawn permanently between
+     two facing leaves on a desktop spread must be the same object. */
+  --fold-crease-width: 28px;
+  --fold-gap-width: 30px;
+
   /* Elevation — warm shadows, low and soft. */
   --shadow-1: 0 1px 2px rgba(38, 32, 26, 0.08), 0 2px 8px rgba(38, 32, 26, 0.06);
   --shadow-2: 0 4px 16px rgba(38, 32, 26, 0.12);
