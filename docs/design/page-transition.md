@@ -354,23 +354,30 @@ So the spread becomes: rounded outer edge with a fore-edge stack, square inner e
 square inner edge, rounded outer edge with a fore-edge stack. That is a picture of an open
 book, and it costs two pseudo-elements and one gradient stop.
 
-**The pseudo-elements and the gradient stop shipped; the picture did not, and the missing
-piece is not on this list.** On the phone the leaf fills the stage's width, so zeroing the
-bound-side padding does put it against the screen edge. On the desktop spread it does not:
-`.leaf` is `flex: 1 1 0`, so each half is 720 px at 1440, while `--stage-page-cap` sizes the
-leaf from the *height* the chrome leaves — about 420 px. The leaf fits its half with ~300 px
-to spare, and `holdAxis`'s fitting-axis regime centres it, so ~150 px of field sits between
-the square inner edge and the crease. Measured at 1440×900: gutter centre at x≈720, leaf's
-bound edge at x≈868.
+**The pseudo-elements and the gradient stop shipped; the picture did not, and when this was
+written the missing piece was read as a conflict in core.** On the phone the leaf fills the
+stage's width, so zeroing the bound-side padding does put it against the screen edge. On the
+desktop spread it did not: `.leaf` was `flex: 1 1 0`, so each half was 720 px at 1440, while
+`--stage-page-cap` sized the leaf from the *height* the chrome leaves — about 420 px. The
+leaf fitted its half with ~300 px to spare, and `holdAxis`'s fitting-axis regime centred it,
+so ~150 px of field sat between the square inner edge and the crease. Measured at 1440×900:
+gutter centre at x≈720, leaf's bound edge at x≈868.
 
-Removing that gap is a **`holdAxis` question, not a padding one**, and the two rules
-genuinely conflict: `stage-fit.spec.ts` asserts a fitting leaf is *centred* in its stage
-(the invariant that fixed the double-centring defect, §6.2 row 1), and a book asserts it is
-*flush against the spine*. One of them has to become conditional on being in a spread, and
-whichever way that goes it changes the box `clampView` reasons in at zoom. Tracked
-separately rather than folded into the edge work, because it is a behavioural change to core
-with its own induced failure, and because the gap predates the edge vocabulary — the leaf
-floated in the middle of its half before any of this landed.
+This section then read the gap as a **`holdAxis` question, not a padding one**, and recorded
+two rules in genuine conflict: `stage-fit.spec.ts` asserts a fitting leaf is *centred* in its
+stage (the invariant that fixed the double-centring defect, §6.2 row 1), and a book asserts
+it is *flush against the spine*. One of them would have to become conditional on being in a
+spread, and whichever way that went it would change the box `clampView` reasons in at zoom.
+
+**It was neither. It was the leaf's box, and the conflict dissolved rather than being
+resolved.** A leaf is a *page* — `block-size: 100%` and the Madani `aspect-ratio` — not half
+a window; the stage inside it fills it, and `--stage-page-cap` stops being a height-derived
+cap — in a spread it is simply `100%`, and the `--spread-chrome` estimate it used to be
+computed from is gone. Once the stage's content box is exactly the page's box, "centred in
+the stage" and "flush against the spine" are the same sentence, and `holdAxis` centring zero
+slack is a no-op. No core change was needed, and none was made. The full account, including
+the other defects the same measurement turned up — unequal leaves, a second field painted on
+the leaf, and a page clipped at the foot — is in docs/design/desktop.md §3–4.
 
 ---
 
@@ -808,13 +815,13 @@ is the cheapest and most valuable tier.
 
 ### 6.2 e2e — `stage-fit.spec.ts` needs two rows it does not have
 
-`stage-fit.spec.ts` runs on the **`iphone` and `android` projects only** — the `desktop`
-project is `testMatch: /desktop\.spec\.ts/` and both phone projects carry
-`testIgnore: /(golden|shots|desktop)\.spec\.ts/` (`playwright.config.ts:162-178`). Those are
-exactly the two viewports where `host.width === layer.width` and the double-centring defect
-is zero. `page-turning.md` §7 ② established this; it is restated here only because §2.4
+When this was written `stage-fit.spec.ts` ran on the **`iphone` and `android` projects
+only** — exactly the two viewports where `host.width === layer.width` and the double-centring
+defect is zero. `page-turning.md` §7 ② established that; it was restated here because §2.4
 **changes the box** the spec measures, so shipping the asymmetric padding without these rows
-would remove the last thing watching the geometry.
+would have removed the last thing watching the geometry. The `desktop` project now carries
+`testMatch: /(desktop|stage-fit)\.spec\.ts/`, so the spec runs at 1440×900 as well, which is
+where the first row below is actually decided.
 
 | claim | test | induced failure |
 | --- | --- | --- |

@@ -151,7 +151,7 @@ export default defineConfig({
           // own. What is desktop-specific is asserted here; what is not is
           // already covered twice.
           //
-          // 1440×900 is a MacBook Air, comfortably clear of the 1024×720
+          // 1440×900 is a MacBook Air, comfortably clear of the 1024×740
           // breakpoint on both axes — `desktop.spec.ts` resizes down from here
           // to test the boundary itself, so the project viewport only has to be
           // somewhere unambiguous.
