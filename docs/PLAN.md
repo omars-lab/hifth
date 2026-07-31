@@ -227,6 +227,28 @@ described in both files.
    abandoned 99.5% of the Qur'an, which is false and entirely an artefact of the build. Design
    note: [`revision-record.md`](design/revision-record.md).
 
+10. **The stage's coordinate model is doubled, and the page sits in a corner.** `holdAxis`
+    returns an *absolute* top-left for an axis that fits
+    ([`view.ts:76`](../packages/core/src/view.ts)) and `.layer` is `place-items: center`
+    ([`PageStage.module.css:24-29`](../apps/web/src/components/PageStage.module.css)), so the
+    centring offset lands twice: measured at 1440×900 the leaf is 245.8 px from the left of
+    its layer and −0.2 from the right — flush against the spine of the spread — and at
+    834×1194 it sits in the bottom-right corner of an otherwise empty field. This is the
+    same defect `centerCurrent`'s own comment says was fixed in Loop 6a
+    ([`PageStage.tsx:344-354`](../apps/web/src/components/PageStage.tsx)); the fix moved the
+    arithmetic from the stage rect to the layer rect, which removed the padding term and not
+    the centring term. It is invisible to CI for a structural reason worth keeping:
+    `e2e/stage-fit.spec.ts` runs on the `iphone` and `android` projects only, and those are
+    exactly the two viewports where the host is as wide as its layer and the doubling is
+    zero. The same root cause makes part of the page unreachable below the fold (108.4 px at
+    320×568, 271.9 px with the storage notice up) and makes `ctrl`+wheel zoom drift ~9 px
+    horizontally and ~25 px vertically away from the pointer. Eleven findings, ordered by
+    severity with reproductions and file:line, are in
+    [`docs/design/page-turning.md` §7](design/page-turning.md); the presentation and gesture
+    proposals in §3–§4 of that document are **not** scheduled here — they wait on
+    follow-up ① and on a ceiling for the mounted set
+    ([`docs/backlog.md`](backlog.md) §2). The hardening is independent of both.
+
 **The half of these a machine cannot run now has a register — and a runbook.** Follow-ups
 ① (the phone), ② (the browser glance) and ④ (VoiceOver/TalkBack) still wait on a human, and
 prose cannot answer "is that still true, on what device, and when?" — ⑤ (does the source
