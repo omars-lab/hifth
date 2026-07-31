@@ -35,12 +35,14 @@
     "gate:revision-privacy": "node scripts/gate-revision-privacy.mjs",
     "gate:use-cases": "node scripts/gate-use-cases.mjs",
     "gate:quran-meta": "node scripts/gate-quran-meta.mjs",
-    "gates": "pnpm gate:text-sources && pnpm gate:notext && pnpm gate:license && pnpm gate:license-copy && pnpm gate:validation && pnpm gate:verified-edges && pnpm gate:edges && pnpm gate:ci-artifacts && pnpm gate:golden-env && pnpm gate:golden-size && pnpm gate:map && pnpm gate:use-cases && pnpm gate:quran-meta && pnpm gate:revision-privacy && pnpm gate:budget",
+    "gate:i18n": "node scripts/gate-i18n.mjs",
+    "gates": "pnpm gate:text-sources && pnpm gate:notext && pnpm gate:license && pnpm gate:license-copy && pnpm gate:validation && pnpm gate:verified-edges && pnpm gate:edges && pnpm gate:ci-artifacts && pnpm gate:golden-env && pnpm gate:golden-size && pnpm gate:map && pnpm gate:use-cases && pnpm gate:quran-meta && pnpm gate:revision-privacy && pnpm gate:i18n && pnpm gate:budget",
     "sample:edges": "node packages/etl/scripts/sample-edges.mjs",
     "guide": "node scripts/build-validation-guide.mjs",
     "record": "node scripts/record-validation.mjs",
     "validate:auto": "node scripts/validate-auto.mjs",
     "source-offer": "node scripts/check-source-offer.mjs",
+    "i18n:build": "node scripts/build-messages.mjs",
     "map": "node scripts/gate-map.mjs --list",
     "use-cases": "node scripts/gate-use-cases.mjs --list",
     "use-cases:doc": "node scripts/build-use-cases.mjs"
@@ -52,6 +54,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.17.0",
+    "@messageformat/parser": "^5",
     "eslint": "^9.17.0",
     "eslint-import-resolver-typescript": "^3.7.0",
     "eslint-plugin-import": "^2.31.0",

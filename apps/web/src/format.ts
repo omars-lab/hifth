@@ -15,7 +15,7 @@
  */
 
 import { parseAyahKey } from "@hifth/core";
-import type { Lang } from "./lang";
+import { LOCALES, type Lang } from "./lang";
 
 /**
  * The 114 surah names in mushaf order. Exported because the jumper matches
@@ -79,9 +79,12 @@ export const SURAH_NAMES_EN: readonly string[] = [
   "Al-Falaq", "An-Nas",
 ];
 
-/** The name table a language reads by. Same length, same order, both times. */
+/** The name table a language reads by. Same length, same order, both times.
+ *  Which one is `LOCALES[lang].surahNames` rather than a test for "en", so a
+ *  third locale has to say which script its reader looks for a surah in
+ *  instead of silently inheriting Arabic. */
 export function surahNames(lang: Lang): readonly string[] {
-  return lang === "en" ? SURAH_NAMES_EN : SURAH_NAMES_AR;
+  return LOCALES[lang].surahNames === "romanised" ? SURAH_NAMES_EN : SURAH_NAMES_AR;
 }
 
 /** Surah name for a 1-based surah number, or "" if out of range. */
@@ -110,7 +113,20 @@ export function toArabicDigits(n: number | string): string {
  * rule and for the same reason.
  */
 export function digits(n: number, lang: Lang): string {
-  return lang === "en" ? String(n) : toArabicDigits(n);
+  return LOCALES[lang].digits === "latin" ? String(n) : toArabicDigits(n);
+}
+
+/**
+ * The same rule, for text that *contains* numbers rather than being one.
+ *
+ * One caller today — the revision map's «يُسجَّل منذ ٢٠٢٦-٠٧-٣٠», where the
+ * argument is a `YYYY-MM-DD` day stamp and the hyphens have to survive. It is
+ * here rather than inlined there because the point of this module is that there
+ * is exactly one place that knows which digits a language reads; a second
+ * `lang === "ar" ? …` anywhere else is how the two drift.
+ */
+export function digitsIn(text: string, lang: Lang): string {
+  return LOCALES[lang].digits === "latin" ? text : toArabicDigits(text);
 }
 
 /**
