@@ -263,8 +263,19 @@ described in both files.
     against a reference mus'haf application at 430×932 CSS px. Two halves, sequenced apart.
     The **resting edge system** (§2) is what actually cures the floating leaf: no drop
     shadow, an asymmetric ≈20 px corner radius on the free side only, a 10 px fore-edge stack
-    on the free side, the bound side bled off the screen, and a field the page is not. It is
-    independent of every open gate and belongs with follow-up ⑩'s hardening list. The
+    on the free side, the bound side bled off the screen, and a field the page is not.
+    **Shipped.** `leafSideOf` in `packages/core` is the only thing that answers "which edge
+    is free" — page parity, never a stylesheet's `:nth-child` or a logical property, since
+    the free side flips with parity and logical properties flip with reading direction. Two
+    corrections came out of building it and are recorded where they were claimed: `.host`
+    **keeps** its `--paper-raised` background (the vendored SVGs have no background rect, so
+    that fill is the paper, not a card — `page-turning.md` §3.1 ③ overreached), and **every
+    golden baseline moved on both platforms**, which §6.4 had predicted would not happen —
+    the new marks are outside the shot, but the shot's subject got 2 CSS px wider. One thing
+    §2.4 describes is **not** done: on the desktop spread the leaf still floats ~150 px from
+    the crease, because it fits its half and `holdAxis` centres what fits. Closing that gap
+    means making core's centring rule conditional on being in a spread, which conflicts with
+    the invariant that fixed the double-centring defect; it is tracked on its own. The
     **fold** (§3–§4) is gated on follow-up ① and on a ceiling for the mounted set
     ([`docs/backlog.md`](backlog.md) §2 ③). Its rule is the part worth reading: **a crease
     means the two pages face each other in the print, a gap means a leaf turned, sunk paper

@@ -40,11 +40,31 @@ import { test, expect, type Locator, type Page } from "@playwright/test";
  * one-sided — over-covering satisfies "covers", so a page hanging a hundred px
  * below the fold passed it. `expectHeld` replaced it, and asserts both of
  * `holdAxis`'s regimes rather than only the one a phone happens to be in.
+ *
+ * The fifth thing this file watches is newer and is not a defect that shipped —
+ * it is the one the edge vocabulary could introduce. The leaf now carries a 2 px
+ * border and, on its free side, a 10 px fore-edge stack, and every one of those
+ * marks must sit **beside** the paper and never over it
+ * (`docs/design/page-transition.md` §2.2). Drawing the stack inside the host's
+ * padding box instead of in the padding looks identical in a screenshot and puts
+ * ten pixels of the page block on top of ten pixels of scripture, so the SVG's
+ * inset inside its host is asserted directly rather than inferred from coverage.
  */
 
 /** The visible page's SVG — the only host not `display: none` (PageStage). */
 const pageSvg = (page: Page, pageNo: number): Locator =>
   page.locator(`svg[aria-labelledby="page-label-${pageNo}"]:visible`);
+
+/**
+ * The leaf itself: the host div the SVG is mounted in.
+ *
+ * This, not the SVG, is what `clampView` positions and what `measureFit` reads
+ * (`host.offsetWidth`), so it is what the two regimes below are claims about.
+ * They were claims about the SVG until the leaf grew edges, and the two boxes
+ * were the same box exactly as long as the host was a bare wrapper with no
+ * border and no padding.
+ */
+const hostOf = (svg: Locator): Locator => svg.locator("xpath=..");
 
 /**
  * The two frames this file measures against, and why they are different.
@@ -74,11 +94,19 @@ const pageSvg = (page: Page, pageNo: number): Locator =>
  * worse than no comment: it tells the next reader the invariant is proved.
  *
  * `stageOf` is that layer's parent: the scrollport the reader actually sees, one
- * `var(--space-4)` of padding larger on every side. That padding is a gutter by
+ * `var(--space-4)` of padding larger on three sides. That padding is a gutter by
  * design and the clamp must never eat it, which is why the *overflow* regime is
  * asserted against the layer and not against this. Centring is asserted against
- * the stage — the padding is symmetric, so the two are the same claim, and the
- * stage-relative form additionally catches a layer that is not itself centred.
+ * the stage minus its own padding, which additionally catches a layer that is
+ * not itself where its stage's padding says it should be.
+ *
+ * **Three sides, not four.** The stage drops its padding on the leaf's *bound*
+ * side so the page runs off the screen into its binding (`page-transition.md`
+ * §2.4) — air on all four sides is the strongest "card on a desk" cue there is.
+ * So the padding is no longer symmetric and "centred in the stage rect" is no
+ * longer the same claim as "centred in the box the clamp works in". `padsOf`
+ * reads the padding back off the element rather than hard-coding 16, so this
+ * file states the relationship and `PageStage.module.css` states the number.
  *
  * Both are reached from the visible page's SVG rather than from the document.
  * `aria-busy` is the layer's own attribute (PageStage.tsx) and nothing else in
@@ -97,6 +125,13 @@ interface Box {
   height: number;
 }
 
+interface Pads {
+  left: number;
+  right: number;
+  top: number;
+  bottom: number;
+}
+
 /** A bounding box that is definitely there. */
 async function boxOf(target: Locator): Promise<Box> {
   const box = await target.boundingBox();
@@ -104,9 +139,38 @@ async function boxOf(target: Locator): Promise<Box> {
   return box!;
 }
 
-/** The page, the frame the clamp works in, and the frame the reader sees. */
-async function framesOf(svg: Locator): Promise<{ box: Box; layer: Box; stage: Box }> {
-  return { box: await boxOf(svg), layer: await boxOf(layerOf(svg)), stage: await boxOf(stageOf(svg)) };
+/** An element's own padding, read back rather than assumed. */
+async function padsOf(target: Locator): Promise<Pads> {
+  return target.evaluate((el) => {
+    const s = getComputedStyle(el);
+    return {
+      left: parseFloat(s.paddingLeft),
+      right: parseFloat(s.paddingRight),
+      top: parseFloat(s.paddingTop),
+      bottom: parseFloat(s.paddingBottom),
+    };
+  });
+}
+
+interface Frames {
+  /** The leaf — border, paper and fore-edge stack. What the clamp positions. */
+  box: Box;
+  /** The paper alone: the SVG, inset inside the leaf by the marks around it. */
+  paper: Box;
+  layer: Box;
+  stage: Box;
+  pads: Pads;
+}
+
+/** The leaf, the paper inside it, the frame the clamp works in, and the frame the reader sees. */
+async function framesOf(svg: Locator): Promise<Frames> {
+  return {
+    box: await boxOf(hostOf(svg)),
+    paper: await boxOf(svg),
+    layer: await boxOf(layerOf(svg)),
+    stage: await boxOf(stageOf(svg)),
+    pads: await padsOf(stageOf(svg)),
+  };
 }
 
 /**
@@ -162,14 +226,18 @@ function expectHeldOnAxis(
   axis: "horizontally" | "vertically",
   page: { start: number; size: number },
   layer: { start: number; size: number },
-  stage: { start: number; size: number },
+  stage: { start: number; size: number; padStart: number; padEnd: number },
 ): void {
   if (page.size <= layer.size + 1) {
-    const before = page.start - stage.start;
-    const after = stage.start + stage.size - (page.start + page.size);
+    // The stage's own padding comes out of the expectation rather than out of
+    // the measurement: it is asymmetric now (zero on the bound side), so the
+    // gutter the clamp must never eat is not the same number on both sides and
+    // "equal air either side of the stage rect" would be a false claim.
+    const before = page.start - (stage.start + stage.padStart);
+    const after = stage.start + stage.size - stage.padEnd - (page.start + page.size);
     expect(
       Math.abs(before - after),
-      `the page is not centred ${axis} in the stage (${before.toFixed(1)} before, ${after.toFixed(1)} after)`,
+      `the leaf is not centred ${axis} in its stage's content box (${before.toFixed(1)} before, ${after.toFixed(1)} after)`,
     ).toBeLessThanOrEqual(1);
     return;
   }
@@ -179,20 +247,65 @@ function expectHeldOnAxis(
   );
 }
 
-/** The page is held on both axes: centred where it fits, covering where it does not. */
-function expectHeld(box: Box, layer: Box, stage: Box): void {
+/** The leaf is held on both axes: centred where it fits, covering where it does not. */
+function expectHeld(box: Box, layer: Box, stage: Box, pads: Pads): void {
   expectHeldOnAxis(
     "horizontally",
     { start: box.x, size: box.width },
     { start: layer.x, size: layer.width },
-    { start: stage.x, size: stage.width },
+    { start: stage.x, size: stage.width, padStart: pads.left, padEnd: pads.right },
   );
   expectHeldOnAxis(
     "vertically",
     { start: box.y, size: box.height },
     { start: layer.y, size: layer.height },
-    { start: stage.y, size: stage.height },
+    { start: stage.y, size: stage.height, padStart: pads.top, padEnd: pads.bottom },
   );
+}
+
+/**
+ * Every mark the leaf wears is beside the paper, and none of it is over it.
+ *
+ * This is the failure the edge vocabulary introduces and that nothing else could
+ * see: draw the fore-edge stack inside the host's padding box instead of in its
+ * padding and the leaf looks correct, coverage still passes, and ten pixels of
+ * the page block sit on top of ten pixels of scripture. Screenshots cannot catch
+ * it either — the golden suite photographs the SVG element, and the SVG is the
+ * thing that would be covered.
+ *
+ * The numbers come from `tokens.css`, and the *sides* come from
+ * `leafSideOf` — which is why the leaf is asked which one it is rather than
+ * being told. All three vendored pages are odd, so `"right"` is the only branch
+ * this build can reach (`page-transition.md` §2.3); `"left"` is asserted the same
+ * way so the day Loop 4b vendors an even page, the mirror is already under test.
+ */
+const LEAF_EDGE = 2;
+const FORE_EDGE_STACK = 10;
+
+async function expectMarksBesideThePaper(svg: Locator, leaf: Box, paper: Box): Promise<void> {
+  const host = hostOf(svg);
+  const side = await host.getAttribute("data-leaf");
+  expect(side, "the leaf never said which of its edges is free").not.toBeNull();
+
+  // The marks are inside the transform, so they scale with the page and the
+  // relationship is a ratio rather than a constant. `offsetWidth` is the leaf's
+  // laid-out width — the same number `measureFit` feeds the clamp — so dividing
+  // the painted box by it recovers the zoom without reparsing the matrix.
+  const laidOut = await host.evaluate((el) => (el as HTMLElement).offsetWidth);
+  const scale = leaf.width / laidOut;
+  const free = side === "right" ? leaf.x + leaf.width - (paper.x + paper.width) : paper.x - leaf.x;
+  const bound = side === "right" ? paper.x - leaf.x : leaf.x + leaf.width - (paper.x + paper.width);
+
+  expect(
+    free / scale,
+    "the fore-edge stack is drawn over the scripture, not beside it",
+  ).toBeCloseTo(LEAF_EDGE + FORE_EDGE_STACK, 0);
+  expect(
+    bound / scale,
+    "the bound edge grew a fore-edge it has no business having",
+  ).toBeCloseTo(LEAF_EDGE, 0);
+  // No stack on the block axis — a leaf's head and foot are cut, not bound.
+  expect((paper.y - leaf.y) / scale, "the head of the leaf grew a stack").toBeCloseTo(LEAF_EDGE, 0);
 }
 
 test.describe("Hifth · the stage holds page, not paper", () => {
@@ -200,7 +313,13 @@ test.describe("Hifth · the stage holds page, not paper", () => {
     // 2:47 is the second-to-last ayah on page 7. Centring it is exactly the
     // request the page cannot grant, which is why it is the one linked here.
     const svg = await open(page, "2:47", 7);
-    const { box, layer, stage } = await framesOf(svg);
+    const { box, paper, layer, stage, pads } = await framesOf(svg);
+
+    // Every mark the leaf wears is beside the scripture, at the hop zoom as much
+    // as at rest — the stack is inside the transform, so it scales with the page
+    // and the relationship is a ratio, not a constant. Asserted where the leaf is
+    // biggest, because that is where an overlap would eat the most.
+    await expectMarksBesideThePaper(svg, box, paper);
 
     // The premise, asserted rather than assumed: at the hop zoom the page is
     // taller than the stage, so "cover it" is a demand the page can actually
@@ -209,15 +328,15 @@ test.describe("Hifth · the stage holds page, not paper", () => {
     // layer at 1.55×, and `expectHeld` is the half that knows which regime it is
     // looking at.
     expect(box.height, "the hop zoom no longer overflows the stage").toBeGreaterThan(layer.height);
-    expectHeld(box, layer, stage);
+    expectHeld(box, layer, stage, pads);
   });
 
   test("the same at the head of a page", async ({ page }) => {
     // 2:38 opens page 7. The clamp has to hold the other end too — the failure
     // there is a band of blank *above* the first line, under the header.
     const svg = await open(page, "2:38", 7);
-    const { box, layer, stage } = await framesOf(svg);
-    expectHeld(box, layer, stage);
+    const { box, layer, stage, pads } = await framesOf(svg);
+    expectHeld(box, layer, stage, pads);
   });
 
   test("no drag can shove the page off the stage", async ({ page }) => {
@@ -225,8 +344,8 @@ test.describe("Hifth · the stage holds page, not paper", () => {
     // frames and every later pan write the transform too, so the clamp lives on
     // the write and not on the target. A drag is how a reader reaches it.
     const svg = await open(page, "2:47", 7);
-    const before = await boxOf(svg);
-    const { layer, stage } = await framesOf(svg);
+    const before = await boxOf(hostOf(svg));
+    const { layer, stage, pads } = await framesOf(svg);
 
     const cx = layer.x + layer.width / 2;
     const cy = layer.y + layer.height / 2;
@@ -240,11 +359,11 @@ test.describe("Hifth · the stage holds page, not paper", () => {
     await page.mouse.up();
     await settle(svg);
 
-    const after = await boxOf(svg);
+    const after = await boxOf(hostOf(svg));
     // The drag must have done something, or the coverage assertion below is
     // vacuous — it would be re-checking the hop's own landing.
     expect(after.y, "the drag never moved the page").not.toBe(before.y);
-    expectHeld(after, layer, stage);
+    expectHeld(after, layer, stage, pads);
   });
 
   test("at rest the page sits in the middle, not flush against an edge", async ({ page }) => {
@@ -262,12 +381,24 @@ test.describe("Hifth · the stage holds page, not paper", () => {
     // is real and the leaf lands 245.8 px from the left of an otherwise empty
     // field, hard against the spine of the spread.
     const svg = await open(page, "p7", 7);
-    const { box, layer, stage } = await framesOf(svg);
+    const { box, paper, layer, stage, pads } = await framesOf(svg);
 
     expect(box.width, "the leaf no longer fits its stage horizontally").toBeLessThanOrEqual(
       layer.width + 1,
     );
-    expectHeld(box, layer, stage);
+    expectHeld(box, layer, stage, pads);
+    await expectMarksBesideThePaper(svg, box, paper);
+
+    // The bound side runs off the screen and the free side keeps its margin.
+    // Asserted through the stage's own padding rather than through the leaf's
+    // position, because this is a claim about the *stage*: the leaf is centred
+    // in whatever content box it is given, so restoring symmetric padding would
+    // leave every other assertion in this file green.
+    const side = await hostOf(svg).getAttribute("data-leaf");
+    const boundPad = side === "right" ? pads.left : pads.right;
+    const freePad = side === "right" ? pads.right : pads.left;
+    expect(boundPad, "the leaf is floating on air on its bound side").toBe(0);
+    expect(freePad, "the free side lost its margin").toBeGreaterThan(0);
   });
 
   test("at 320 × 568 the foot of the page can be reached, not just cut off", async ({ page }) => {
@@ -277,7 +408,7 @@ test.describe("Hifth · the stage holds page, not paper", () => {
     // the file used to run on.
     await page.setViewportSize({ width: 320, height: 568 });
     const svg = await open(page, "p7", 7);
-    const { box, layer, stage } = await framesOf(svg);
+    const { box, layer, stage, pads } = await framesOf(svg);
 
     // The mechanism, asserted directly rather than through its symptom. Without
     // `min-block-size: 0` the grid row's automatic minimum size grows the layer
@@ -292,7 +423,7 @@ test.describe("Hifth · the stage holds page, not paper", () => {
     // would be vacuously true and the drag below would prove nothing.
     const overhang = box.height - layer.height;
     expect(overhang, "the leaf no longer overflows at 320 × 568").toBeGreaterThan(1);
-    expectHeld(box, layer, stage);
+    expectHeld(box, layer, stage, pads);
 
     // 400 px is more than the overhang has ever measured (108–272 depending on
     // how much chrome is up), so the clamp — not the gesture — is what stops the
@@ -305,7 +436,7 @@ test.describe("Hifth · the stage holds page, not paper", () => {
     await page.mouse.up();
     await settle(svg);
 
-    const after = await boxOf(svg);
+    const after = await boxOf(hostOf(svg));
     expect(
       box.y - after.y,
       "the page did not move — the foot of it is unreachable",
@@ -313,6 +444,6 @@ test.describe("Hifth · the stage holds page, not paper", () => {
     expect(after.y + after.height, "the foot of the page never came into view").toBeLessThanOrEqual(
       layer.y + layer.height + 1,
     );
-    expectHeld(after, layer, stage);
+    expectHeld(after, layer, stage, pads);
   });
 });

@@ -13,6 +13,7 @@ import {
   easeInOutCubic,
   frameBboxToView,
   isViewportIntent,
+  leafSideOf,
   lerpView,
   marqueeRect,
   nextIntent,
@@ -33,6 +34,15 @@ interface PageStageProps {
   resolver: Resolver;
   /** The page currently shown. */
   page: number;
+  /**
+   * How many pages the print has, so a leaf can say which of its edges is free.
+   *
+   * It has to be passed rather than assumed: `leafSideOf` needs the page count
+   * to refuse a page the edition does not have, and the stage is edition-blind
+   * by design — it is handed a resolver and a number, and 604 is a fact about
+   * hafs-kfqc, not about stages.
+   */
+  total: number;
   /** Pages to keep mounted (current + hop targets), for the DOM budget. */
   mountedPages: readonly number[];
   /** Human label for the a11y region, e.g. "Page 7". */
@@ -103,6 +113,7 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
   {
     resolver,
     page,
+    total,
     mountedPages,
     label,
     selectedKey,
@@ -148,6 +159,9 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
   skinRef.current = skin;
   const tajweedRef = useRef(tajweedLookup);
   tajweedRef.current = tajweedLookup;
+  // Same reason: mountPage decides a leaf's free edge after an await.
+  const totalRef = useRef(total);
+  totalRef.current = total;
 
   /*
    * The skin swap itself: classes on and classes off, on every mounted page.
@@ -190,6 +204,13 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
    * `translate3d(0,0)` puts the page, and the clamp has to speak the same
    * coordinates the transform does. The stage's own padding is outside it, which
    * is exactly why it stays a gutter and never gets eaten by a pan.
+   *
+   * `offsetWidth`/`offsetHeight`, not `clientWidth`/`clientHeight`: the leaf now
+   * has a border (its edge — PageStage.module.css) and the transform scales the
+   * *border* box. The padding box is 2×2px smaller, so measuring it hands
+   * `clampView` a leaf smaller than the one on screen: at rest that is 2px off
+   * centre, and in the overflow regime it is 4px of scripture that slides under
+   * the fold and cannot be panned back.
    */
   const measureFit = useCallback((): StageFit | null => {
     const layer = layerRef.current;
@@ -197,8 +218,8 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
     if (!layer || !cur) return null;
     const box = layer.getBoundingClientRect();
     const fit: StageFit = {
-      contentWidth: cur.host.clientWidth,
-      contentHeight: cur.host.clientHeight,
+      contentWidth: cur.host.offsetWidth,
+      contentHeight: cur.host.offsetHeight,
       stageWidth: box.width,
       stageHeight: box.height,
     };
@@ -295,6 +316,13 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
       }
       const host = document.createElement("div");
       host.className = styles.host ?? "";
+      // Which of this leaf's edges is free. Per *mounted page*, not per visible
+      // page: several pages are mounted at once for the DOM budget, and a hop
+      // target on the other half of the spread has a different free edge than
+      // the page you are on. `null` for a page outside the print — those never
+      // get the attribute, and the rounded/fore-edge rules never match.
+      const side = leafSideOf(targetPage, totalRef.current);
+      if (side) host.dataset.leaf = side;
       host.style.display = "none";
       host.innerHTML = markup;
       const svgEl = host.querySelector("svg");
@@ -675,6 +703,11 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
     <div
       ref={stageRef}
       className={styles.stage}
+      // The stage drops its padding on the leaf's bound side so the page runs
+      // into the spine. This is the *visible* page's side — the stage has one
+      // padding, whatever else is mounted behind — which is why it is read from
+      // the prop rather than from `totalRef`/`currentPageRef` like mountPage's.
+      data-leaf={leafSideOf(page, total) ?? undefined}
       // A long press IS a gesture here (it arms the marquee), so the platform's
       // own long-press menu would fight it on every highlight.
       onContextMenu={(e) => e.preventDefault()}

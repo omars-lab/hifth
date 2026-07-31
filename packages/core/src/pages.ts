@@ -122,3 +122,34 @@ export function spreadOf(page: number, total: number): Spread {
   const left = right + 1;
   return { right, left: left > total ? null : left };
 }
+
+/** Which half of its opening a leaf is, or `null` for a page outside the print. */
+export type LeafSide = "right" | "left";
+
+/**
+ * Which side of a leaf is **free** — the fore-edge, the side you put a thumb on.
+ *
+ * A right-hand leaf is bound on its left and free on its right; a left-hand leaf
+ * is the mirror. That is the whole function, and it exists rather than being
+ * inlined at its two call sites for the reason decision row 9 gives about the
+ * spread itself: the phase of the print is stated **once**. `spreadOf` was wrong
+ * for six loops (see above) and correcting one line here fixed every spread; a
+ * stylesheet that re-derived "odd means right" would have kept the old phase
+ * alive in CSS where no unit test can reach it.
+ *
+ * It is emphatically **not** an inline-direction question, which is why nothing
+ * downstream may reach for `inline-start`/`inline-end` or a `:nth-child` parity
+ * check. The free side flips with *page parity*; logical properties flip with
+ * *reading direction*, and the UI language can change while the book cannot. A
+ * fore-edge that moved when a reader switched to English would be drawing a
+ * different book.
+ *
+ * `null` for a page the print does not have, for the same reason `spreadOf`
+ * returns two nulls: the caller is about to draw an edge, and an edge on a page
+ * that does not exist is furniture around nothing.
+ */
+export function leafSideOf(page: number, total: number): LeafSide | null {
+  const spread = spreadOf(page, total);
+  if (spread.right === null) return null;
+  return spread.right === page ? "right" : "left";
+}

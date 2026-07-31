@@ -900,6 +900,7 @@ export function App(): JSX.Element {
                   key={facing}
                   resolver={resolver}
                   page={facing}
+                  total={totalPages}
                   mountedPages={[facing]}
                   label={t.pageN(facing)}
                   selectedKey={selectedKey}
@@ -916,6 +917,7 @@ export function App(): JSX.Element {
                 ref={stageRef}
                 resolver={resolver}
                 page={page}
+                total={totalPages}
                 mountedPages={mountedPages}
                 label={t.pageN(page)}
                 selectedKey={selectedKey}
