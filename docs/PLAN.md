@@ -406,6 +406,22 @@ Full evidence in `docs/research/2026-07-20-mobile-svg-pwa.md`. The rules:
   licence credits stay Arabic and stay RTL in both languages, as does the page-turn
   convention Loop 1 decided — a hafiz whose phone is set to English must not find the book
   running backwards. `make map FEATURE=ui-language` walks it.
+- **The chrome's vocabulary is a compiled ICU catalog, not a hand-written table.** The
+  original design argued a library would be dead weight for two locales with no plurals to
+  negotiate, and it was right about the bundle and wrong about the plurals: Arabic has six
+  CLDR categories and `few` is `n % 100 = 3..10`, so the ternary it shipped read «١٠٣ صفحة»
+  for 41 of the 603 page distances — grammatical enough that nobody would file it. The fix
+  keeps the bundle argument by moving the library to the **build**: catalogs are
+  `apps/web/src/messages/*.json` in ICU MessageFormat, `pnpm i18n:build` compiles them to
+  committed TypeScript, and the only runtime is twelve lines over `Intl.PluralRules`.
+  Measured **+1.8 KB gz** end to end (101.2 → 103.0 of a 150 KB budget) against 9.3–25.2 KB
+  for a runtime ICU library. Completeness stays a **build-time** guarantee — each locale is
+  `const messages: Catalog`, so a missing key does not compile and there is no fallback
+  chain that could render English inside an Arabic sheet — with `gate:i18n` covering what
+  `tsc` cannot see. Numerals stay a property of the locale (Arabic-Indic everywhere
+  *including* aria-labels, with page numbers Latin in every language, deliberately). The
+  forward-looking document, including the checklist for adding a language, is
+  `docs/design/i18n.md`; what was decided and measured is `docs/decisions/i18n.md`.
 - **The mus'haf fills the stage, always.** A hop centres the ayah it is taking you to, and
   an ayah near the foot of a page cannot be centred without dragging the page past its own
   end — so the reader arrives looking at a fifth of a screen of blank paper, with the last

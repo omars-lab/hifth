@@ -118,8 +118,15 @@ describe("RevisionMap", () => {
   it("counts the inventory, not the book", async () => {
     // PageSlider's precedent, one division coarser: the grid spans the print and
     // the count says how much of it is actually here.
+    //
+    // «حزبًا», not «حزب», and this line used to say the latter. The counted noun
+    // agrees with «٦٠» — the total — not with the one hizb this build happens to
+    // hold, and 11–99 takes the singular accusative. The old string special-cased
+    // `have === 1` and produced «من ٦٠ حزب», which is the wrong word in the only
+    // build that would ever show it. Worth a hafiz's glance, but the totals here
+    // are 604, 60 and 30 and all three now read the same way they always did.
     draw();
-    expect(await screen.findByText("المتوفّر ١ من ٦٠ حزب")).toBeTruthy();
+    expect(await screen.findByText("المتوفّر ١ من ٦٠ حزبًا")).toBeTruthy();
   });
 
   it("says how old the record is, so an emptied one is not a damning one", async () => {

@@ -754,6 +754,99 @@
       "gap": "Two languages, and the second one is the author's second language. Nothing here judges whether the English reads well to a hafiz who uses it — only that it is English, complete, and has not leaked into the places that must stay Arabic."
     },
     {
+      "id": "hear-my-own-grammar-not-a-translation-of-it",
+      "actor": "hafiz",
+      "goal": "When the app counts something in Arabic, let it count the way Arabic counts — «صفحتان», «٣ صفحات», «١٠٣ صفحات» — instead of the nearest thing a ternary could manage.",
+      "feature": "ui-language",
+      "code": [
+        {
+          "file": "apps/web/src/messages/ar.json",
+          "symbol": "distancePages"
+        },
+        {
+          "file": "apps/web/src/messages/plural.ts",
+          "symbol": "export function plural"
+        },
+        {
+          "file": "apps/web/src/i18n.tsx",
+          "symbol": "buildStrings"
+        }
+      ],
+      "proof": [
+        {
+          "file": "apps/web/src/i18n.test.tsx",
+          "test": "agrees with the plural rules of the language, not with a ternary"
+        },
+        {
+          "file": "apps/web/src/i18n.test.tsx",
+          "test": "writes counts inside aria-labels in the language's own digits"
+        }
+      ],
+      "gap": "Only `distance` is stated as a plural. Seven other Arabic messages still write one fixed form for every count — «٣ روابط» is right, «١١ روابط» is not. They are one JSON edit each now, and each wants a hafiz's eye. docs/design/i18n.md §⑨."
+    },
+    {
+      "id": "add-a-language-without-retyping-the-chrome",
+      "actor": "maintainer",
+      "goal": "Give the app a third language by writing that language, not by re-typing 134 interface members and hoping I got the plural rules right.",
+      "feature": "ui-language",
+      "code": [
+        {
+          "file": "scripts/messages-compile.mjs",
+          "symbol": "export function compileAll"
+        },
+        {
+          "file": "apps/web/src/lang.ts",
+          "symbol": "LOCALES"
+        },
+        {
+          "file": "apps/web/src/i18n.tsx",
+          "symbol": "buildStrings"
+        }
+      ],
+      "proof": [
+        {
+          "file": "apps/web/src/i18n.test.tsx",
+          "test": "builds a bundle for every locale that has a catalog"
+        },
+        {
+          "file": "apps/web/src/i18n.test.tsx",
+          "test": "carries the same keys in every language"
+        },
+        {
+          "file": "apps/web/src/i18n.test.tsx",
+          "test": "gives each language the digits it declared"
+        }
+      ],
+      "gap": "Proven at two locales. The checklist in docs/design/i18n.md §⑦ is written for someone who has not read the conversation, but nobody has walked it end to end for a third language yet."
+    },
+    {
+      "id": "refuse-a-half-translated-build",
+      "actor": "ci",
+      "goal": "Refuse to ship a locale that is missing a key, whose plurals are incomplete, or whose generated code was never regenerated — rather than let English words appear inside an Arabic sheet.",
+      "feature": "ui-language",
+      "code": [
+        {
+          "file": "scripts/gate-i18n.mjs",
+          "symbol": "gate:i18n"
+        },
+        {
+          "file": "scripts/messages-compile.mjs",
+          "symbol": "export function emitCatalogType"
+        }
+      ],
+      "proof": [
+        {
+          "file": "apps/web/src/i18n.test.tsx",
+          "test": "carries the same keys in every language"
+        },
+        {
+          "file": "package.json",
+          "gate": "gate:i18n"
+        }
+      ],
+      "gap": "The gate checks that every category is handled, not that the words inside each category are right. «صفحتان» in the `few` slot would pass. Only a reader of the language catches that."
+    },
+    {
       "id": "know-where-this-text-came-from",
       "actor": "hafiz",
       "goal": "Tell me whose mushaf this is and under what terms, without making me hunt for it.",
