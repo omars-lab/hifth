@@ -1112,6 +1112,32 @@
       ]
     },
     {
+      "id": "refuse-a-link-the-catalog-does-not-describe",
+      "actor": "ci",
+      "goal": "Fail a commit that changes what a shared link means without saying so in the catalog a teacher's link is judged by.",
+      "feature": "share-links",
+      "code": [
+        {
+          "file": "scripts/gate-params.mjs",
+          "symbol": "parseBranches"
+        },
+        {
+          "file": "packages/core/src/field.ts",
+          "symbol": "FIELDS"
+        }
+      ],
+      "proof": [
+        {
+          "gate": "gate:params"
+        },
+        {
+          "file": "packages/core/src/router.test.ts",
+          "test": "does NOT reject an unreadable field= — the link still names the ayah"
+        }
+      ],
+      "gap": "It checks that the three renderings of the grammar agree — parsed, emitted, documented, and the documented failure mode matching what the parse branch actually does. It cannot check that the prose in the 'what it does' column is true, only that a row exists."
+    },
+    {
       "id": "refuse-a-bundle-that-would-not-load-on-a-phone",
       "actor": "ci",
       "goal": "Fail a commit that pushes the JS past what a mid-tier phone on a slow connection can afford.",

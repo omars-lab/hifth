@@ -53,6 +53,12 @@ describe("router · spec §7 grammar", () => {
     expect(serializeState(s!)).toBe("#/hafs-kfqc/2:255?w=3-7&skin=tajweed");
   });
 
+  it("the field: ?field=tan", () => {
+    const s = parseHash("#/hafs-kfqc/p7?field=tan");
+    expect(s?.field).toBe("tan");
+    expect(serializeState(s!)).toBe("#/hafs-kfqc/p7?field=tan");
+  });
+
   it("hop context (breadcrumb): ?via=2:48", () => {
     const s = parseHash("#/hafs-kfqc/2:123?via=2:48");
     expect(s?.via).toEqual({ surah: 2, ayah: 48 });
@@ -99,6 +105,25 @@ describe("router · tolerance & rejection", () => {
     expect(parseHash("#/hafs-kfqc/2:48?trail=2:40,bad")).toBeNull();
   });
 
+  it("does NOT reject an unreadable field= — the link still names the ayah", () => {
+    // The one key that falls back instead of refusing. A chat client that mangles
+    // a background colour must not cost the reader the scripture; core's field.ts
+    // and docs/query-params.md both state which side of that line every key is on.
+    for (const bad of ["neon", "", "TAN", "tan;drop"]) {
+      const s = parseHash(`#/hafs-kfqc/2:48?field=${bad}`);
+      expect(s, bad).not.toBeNull();
+      expect(s!.select, bad).toEqual({ surah: 2, ayah: 48 });
+      expect(s!.field, bad).toBeUndefined();
+    }
+  });
+
+  it("a bad field= does not take the rest of the query with it", () => {
+    const s = parseHash("#/hafs-kfqc/2:48?field=neon&w=3-7&via=2:47");
+    expect(s?.word).toEqual([3, 7]);
+    expect(s?.via).toEqual({ surah: 2, ayah: 47 });
+    expect(s?.field).toBeUndefined();
+  });
+
   it("rejects out-of-range refs and inverted ranges/spans", () => {
     expect(parseHash("#/hafs-kfqc/0:1")).toBeNull(); // surah < 1
     expect(parseHash("#/hafs-kfqc/115:1")).toBeNull(); // surah > 114
@@ -138,6 +163,7 @@ describe("router · round-trip (generative sweep)", () => {
     ];
     const words: (readonly [number, number] | undefined)[] = [undefined, [3, 7], [5, 5]];
     const skins: (AppState["skin"])[] = [undefined, "tajweed"];
+    const fields: (AppState["field"])[] = [undefined, "tan", "dark"];
     const vias: (AppState["via"])[] = [undefined, { surah: 2, ayah: 40 }];
     const trails: (AppState["trail"])[] = [
       undefined,
@@ -152,21 +178,25 @@ describe("router · round-trip (generative sweep)", () => {
     for (const select of selects)
       for (const word of words)
         for (const skin of skins)
-          for (const via of vias)
-            for (const trail of trails) {
-              const state: AppState = {
-                edition: ED,
-                select,
-                ...(word ? { word } : {}),
-                ...(skin ? { skin } : {}),
-                ...(via ? { via } : {}),
-                ...(trail ? { trail } : {}),
-              };
-              const round = parseHash(serializeState(state));
-              expect(round, serializeState(state)).toEqual(state);
-              count++;
-            }
-    expect(count).toBe(selects.length * words.length * skins.length * vias.length * trails.length);
+          for (const field of fields)
+            for (const via of vias)
+              for (const trail of trails) {
+                const state: AppState = {
+                  edition: ED,
+                  select,
+                  ...(word ? { word } : {}),
+                  ...(skin ? { skin } : {}),
+                  ...(field ? { field } : {}),
+                  ...(via ? { via } : {}),
+                  ...(trail ? { trail } : {}),
+                };
+                const round = parseHash(serializeState(state));
+                expect(round, serializeState(state)).toEqual(state);
+                count++;
+              }
+    expect(count).toBe(
+      selects.length * words.length * skins.length * fields.length * vias.length * trails.length,
+    );
   });
 
   it("bare-page states round-trip across a range of page numbers", () => {

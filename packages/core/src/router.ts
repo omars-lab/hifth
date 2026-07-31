@@ -12,6 +12,7 @@
  *   #/<edition>/<surah>:<ayah>?w=3-7           word-span pulse
  *   #/<edition>/2:47-2:48                       highlighted ayah range
  *   #/<edition>/2:255?w=3-7&skin=tajweed        with skin
+ *   #/<edition>/p7?field=tan                    on a different field
  *   #/<edition>/2:123?via=2:48                   hop context (breadcrumb)
  *   #/<edition>/2:123?trail=2:40,2:47,2:122      full hop chain
  *   #/<edition>/p7                              a bare page (no selection)
@@ -21,6 +22,7 @@
  * string ↔ state mapping and its round-trip guarantee.
  */
 
+import { isFieldId, type FieldId } from "./field.js";
 import type { EditionId } from "./types.js";
 
 /** A resolved (or resolvable) app view — what a link encodes and restores. */
@@ -38,6 +40,14 @@ export interface AppState {
   readonly word?: readonly [number, number];
   /** Runtime skin (spec §8). Absent = plain. */
   readonly skin?: "tajweed";
+  /**
+   * The surface the mus'haf lies on (`?field=`). Absent = `DEFAULT_FIELD`.
+   *
+   * The one parameter here that does not describe the *view*, and the one the
+   * codec is deliberately lenient about — see `field.ts` and the failure-mode
+   * column in `docs/query-params.md`.
+   */
+  readonly field?: FieldId;
   /** Breadcrumb origin (spec §7 `?via=`). A single hop's source ayah. */
   readonly via?: AyahRef;
   /** Full hop chain (spec §7 `?trail=`). Oldest → newest, excludes `select`. */
@@ -89,7 +99,7 @@ function refToString(ref: AyahRef): string {
 /**
  * Encode an app view to its anchor hash (leading `#/…`). The inverse of
  * `parseHash`: `parseHash(serializeState(s))` deep-equals `s` for any valid `s`.
- * Query params are emitted in a fixed order (w, skin, via, trail) so a given
+ * Query params are emitted in a fixed order (w, skin, field, via, trail) so a given
  * state has exactly one serialization — links are stable and diff-friendly.
  */
 export function serializeState(state: AppState): string {
@@ -109,6 +119,7 @@ export function serializeState(state: AppState): string {
   const q: string[] = [];
   if (state.word) q.push(`w=${spanToString(state.word)}`);
   if (state.skin) q.push(`skin=${state.skin}`);
+  if (state.field) q.push(`field=${state.field}`);
   if (state.via) q.push(`via=${refToString(state.via)}`);
   if (state.trail && state.trail.length > 0) {
     q.push(`trail=${state.trail.map(refToString).join(",")}`);
@@ -189,6 +200,7 @@ export function parseHash(hash: string): AppState | null {
     page?: number;
     word?: readonly [number, number];
     skin?: "tajweed";
+    field?: FieldId;
     via?: AyahRef;
     trail?: readonly AyahRef[];
   } = { edition, select };
@@ -202,6 +214,15 @@ export function parseHash(hash: string): AppState | null {
   if (params.has("skin")) {
     if (params.get("skin") !== "tajweed") return null;
     out.skin = "tajweed";
+  }
+  // The one key that does not reject. `w`, `skin`, `via` and `trail` all say
+  // *what you are looking at*, and half-restoring those is a lie about where the
+  // reader is; `field` says what the desk under it is painted. A link mangled in
+  // a chat client should still open the ayah, so an unreadable value is dropped
+  // and the default stands. `docs/query-params.md` states this per key.
+  if (params.has("field")) {
+    const raw = params.get("field")!;
+    if (isFieldId(raw)) out.field = raw;
   }
   if (params.has("via")) {
     const via = parseAyahRef(params.get("via")!);

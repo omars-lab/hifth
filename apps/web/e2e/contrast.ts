@@ -124,27 +124,70 @@ export async function measureContrast(page: Page): Promise<ContrastReport> {
     }
 
     /**
-     * The colour actually behind this text.
+     * The colour stops of a CSS gradient, or `null` if this is not one we can
+     * read (a `url()` image, a keyword we do not parse, a stop with alpha).
+     *
+     * The computed value of `background-image` has already resolved every
+     * `var()` and colour keyword to `rgb(…)` / `rgba(…)`, so the stops fall out
+     * of a match. Everything else in the string — the shape, the position, the
+     * percentages — is geometry, and geometry is exactly what we are refusing to
+     * reason about.
+     */
+    function gradientStops(image: string): Rgba[] | null {
+      if (!/gradient\(/.test(image)) return null;
+      const found = image.match(/rgba?\([^)]*\)/g);
+      if (!found || found.length === 0) return null;
+      const stops: Rgba[] = [];
+      for (const token of found) {
+        const c = parse(token);
+        // A translucent stop is a window onto whatever is behind it, and that is
+        // a different question from "which stop is darkest". Refuse rather than
+        // guess; the caller reports it as unmeasured.
+        if (!c || c[3] !== 1) return null;
+        stops.push(c);
+      }
+      return stops;
+    }
+
+    /**
+     * The colours that can be behind this text — plural, deliberately.
      *
      * Semi-transparent surfaces are the point: the selected hop chip paints an
      * accent at partial alpha over paper, and reading only the topmost declared
      * `background-color` reports the chip as paper — which is how text the same
      * colour as its own token measured 1.00:1 in an early pass and was believed.
      * Layers are composited outward until an opaque one is reached.
+     *
+     * **A gradient returns every one of its stops, and the caller must clear the
+     * floor against all of them.** This used to bail — "a gradient is a range of
+     * colours, not one" — and that was true but it was also the wrong conclusion:
+     * it made the field the app's largest surface and its least measured one. The
+     * mushaf's field is a radial wash, so every hint drawn on it landed in
+     * `unmeasured`, which is reported and never asserted on.
+     *
+     * Taking the worst stop is not a heuristic. sRGB interpolation moves each
+     * channel monotonically between two stops, relative luminance is increasing
+     * in each channel, so luminance along the ramp is monotone and its extremes
+     * are the stops themselves. Contrast depends only on luminance. Checking
+     * every stop therefore checks every pixel of the ramp — conservative in the
+     * one direction that is safe, since a stop that passes cannot hide a pixel
+     * that fails.
      */
-    function backgroundOf(el: Element): { color: Rgba } | { reason: string } {
+    function backgroundOf(el: Element): { colors: Rgba[] } | { reason: string } {
       const layers: Rgba[] = [];
+      const under = (base: Rgba): Rgba =>
+        layers.reduceRight((acc, over) => composite(over, acc), base);
       let node: Element | null = el;
       while (node) {
         const cs = getComputedStyle(node);
-        // A gradient or image is a range of colours, not one; guessing which
-        // pixel sits under the text is how a checker earns its false positives.
-        if (cs.backgroundImage !== "none") return { reason: `background-image on ${label(node)}` };
+        if (cs.backgroundImage !== "none") {
+          const stops = gradientStops(cs.backgroundImage);
+          if (!stops) return { reason: `background-image on ${label(node)}` };
+          return { colors: stops.map(under) };
+        }
         const bg = parse(cs.backgroundColor);
         if (bg && bg[3] > 0) {
-          if (bg[3] === 1) {
-            return { color: layers.reduceRight((under, over) => composite(over, under), bg) };
-          }
+          if (bg[3] === 1) return { colors: [under(bg)] };
           layers.push(bg);
         }
         node = node.parentElement;
@@ -201,13 +244,25 @@ export async function measureContrast(page: Page): Promise<ContrastReport> {
       const large = fontPx >= 24 || (fontPx >= 18.66 && weight >= 700);
       const required = large ? 3 : 4.5;
 
-      const value = ratio(composite(fg, bg.color), bg.color);
+      // The worst place this text can land. One candidate for a flat surface,
+      // one per stop for a gradient — and a gradient passes only if its whole
+      // ramp does, because the reader does not get to choose which end of the
+      // field the hint appears over.
+      let worst = bg.colors[0]!;
+      let value = ratio(composite(fg, worst), worst);
+      for (const candidate of bg.colors.slice(1)) {
+        const v = ratio(composite(fg, candidate), candidate);
+        if (v < value) {
+          value = v;
+          worst = candidate;
+        }
+      }
       if (value + 0.005 < required) {
         failures.push({
           ratio: Math.round(value * 100) / 100,
           required,
           foreground: cs.color,
-          background: `rgb(${bg.color.slice(0, 3).map(Math.round).join(", ")})`,
+          background: `rgb(${worst.slice(0, 3).map(Math.round).join(", ")})`,
           fontPx,
           weight,
           selector: label(el),

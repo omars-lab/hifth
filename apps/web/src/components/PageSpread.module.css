@@ -57,7 +57,7 @@
    * one surface. `--stage-field` tells the stages inside to stop painting their
    * own; the gradient itself is unchanged, so the phone is untouched.
    */
-  background: radial-gradient(120% 90% at 50% 0%, var(--paper-sunk), var(--paper) 60%);
+  background: var(--field-wash);
   --stage-field: none;
 
   /*

@@ -1,4 +1,5 @@
 import { test, expect, type Page } from "@playwright/test";
+import { FIELDS, type FieldId } from "@hifth/core";
 import { tapAyah } from "./ayah";
 import { COACH_STORAGE_KEY } from "../src/coach";
 import { formatFailures, measureContrast } from "./contrast";
@@ -52,6 +53,29 @@ async function selectAyah(page: Page): Promise<void> {
 interface Surface {
   readonly name: string;
   readonly open: (page: Page) => Promise<void>;
+}
+
+/**
+ * Put the stage's hint on screen, on a named field.
+ *
+ * The field is the largest surface in the app and, until this row existed, the
+ * only one with no text on it — which made it the one surface a colour could be
+ * chosen for by taste. It has exactly one piece of text: `.hint`, shown while a
+ * page loads and when one fails. Aborting the page assets is how a test reaches
+ * the second state deliberately, and it is also the honest state to measure —
+ * the hint that says «تعذّر تحميل صفحة ٧» is the message a reader most needs to
+ * be able to read, and the one they see when everything else has gone wrong.
+ *
+ * `contrast.ts` measures a gradient against *every* one of its stops, so a pass
+ * here is a claim about the whole wash and not about the middle of it.
+ */
+function onField(field: FieldId): Surface["open"] {
+  return async (page) => {
+    await settled(page);
+    await page.route("**/assets/pages/**", (route) => route.abort());
+    await page.goto(`/#/hafs-kfqc/p7?field=${field}`);
+    await expect(page.getByRole("alert").first()).toBeVisible();
+  };
 }
 
 const SURFACES: readonly Surface[] = [
@@ -200,6 +224,25 @@ const SURFACES: readonly Surface[] = [
       await page.goto("/#/hafs-kfqc/p7");
       await expect(page.getByTestId("page-spread")).toBeVisible();
       await expect(page.getByRole("region", { name: "الصفحة المقابلة" })).toBeVisible();
+    },
+  },
+  // One row per field, generated from `FIELDS` so a sixth option cannot ship
+  // without a measurement: the list in core is the source of truth for this
+  // file, for `styles/field.css` and for the table in docs/query-params.md.
+  ...FIELDS.map((field) => ({
+    name: `the field «${field}» — the desk, and the one sentence written on it`,
+    open: onField(field),
+  })),
+  {
+    // The same question asked of the *other* painter. On a phone the stage
+    // paints the field; on a spread `PageSpread` paints it once across the desk
+    // and tells the stages inside to stop. Two declarations reading one token is
+    // only true until someone edits one of them, so `tan` — the field whose ink
+    // had to change — is checked on both.
+    name: "the field «tan» on the desktop spread, painted by the desk not the stage",
+    open: async (page) => {
+      await page.setViewportSize({ width: 1440, height: 900 });
+      await onField("tan")(page);
     },
   },
 ];

@@ -281,8 +281,11 @@ overpainted, which is the constraint `page-turning.md` §8 was protecting.
    (`#ece4d6`) and that is the right first move — it is in the palette, it needs no contrast
    review, and it stops the vignette's inner stop from being the page's own colour. The
    reference's field is a full step further out (`#AF8A68`, a saturated tan). Adopting
-   anything like it is a **colour decision**, not a layout one, and §7 ④ names what would
-   have to be run first.
+   anything like it is a **colour decision**, not a layout one — and it has since been run:
+   §7 ④ carries the measurement. `#AF8A68` is shippable but not on its own terms; it holds
+   `--ink-soft` at 2.39:1 and needs full `--ink` under it. `--paper-sunk` is still the
+   default, and the alternatives now live behind `?field=` (`docs/query-params.md`) rather
+   than in this list, so the choice can be made by looking at five links instead of arguing.
 
 ### 2.3 Which side is free, and how the stylesheet is allowed to know
 
@@ -948,13 +951,35 @@ Three sub-questions, all needing the same hardware:
 
 Also unmeasured: **how long a stalled fold (§5.3) may hold before it reads as broken.**
 
-**④ The field colour.** §2.2 proposes `--paper-sunk` because it is already in the palette.
-The reference's `#AF8A68` is a full step further and separates the leaf far more decisively.
-Adopting anything like it is a colour decision, and this repo has a specific instrument for
-those: `e2e/contrast.spec.ts` walks eleven surfaces with real luminance compositing, and
-**"any new sheet or popover needs a row in `SURFACES` or nothing is checking it"**
-(`PLAN.md` follow-up ⑥). A darker field changes what the page bar, the coach marks and the
-hint text sit against. **Answer it by adding the row before the token, not after.**
+**④ The field colour — now instrumented, still open.** §2.2 proposes `--paper-sunk` because
+it is already in the palette. The reference's `#AF8A68` is a full step further and separates
+the leaf far more decisively. Adopting anything like it is a colour decision, and this repo
+has a specific instrument for those: `e2e/contrast.spec.ts` walks every surface with real
+luminance compositing, and **"any new sheet or popover needs a row in `SURFACES` or nothing
+is checking it"** (`PLAN.md` follow-up ⑥). The instruction was to **add the row before the
+token, not after**, and that is what happened — with two findings.
+
+The first is that the instrument could not see this surface at all. The field is a radial
+gradient, and `backgroundOf` bailed on any `background-image`, so the one piece of text that
+ever sits on the field — the stage's "could not load page N" hint — was filed under
+`unmeasured`, which is reported and never asserted on. The app's largest surface was its
+least measured one. It reads gradients now, by taking the worst of the stops: sRGB
+interpolation is per-channel linear and relative luminance is monotone in each channel, so
+luminance along the ramp is monotone and its extremes *are* the stops. A stop that passes
+cannot hide a pixel that fails.
+
+The second is the answer to the question as asked. `#AF8A68` carries `--ink-soft` at
+**2.39:1**. That is not a reason to refuse the colour; it is the discovery that **a field is
+a wash *and* the ink that survives it**. So five fields ship as pairs, behind `?field=`
+(`packages/core/src/field.ts`, catalogued in `docs/query-params.md`), each with a contrast
+row: `sunk` 5.98, `linen` 5.10, `slate` 4.76, `tan` 5.11 with full `--ink`, `dark` 11.41 with
+`--paper`. `slate` is the cool control, and it was `#c9c6c0` until the instrument returned
+4.43 — under the floor by seven hundredths, which is the kind of miss that survives a design
+review and not a gate.
+
+What remains open is the *choice*, which was never a thing measurement could settle. It is
+now a thing anyone can settle in a real window in thirty seconds, by opening the same page
+five times. When one wins it becomes the default and the table goes.
 
 **⑤ Does a real fore-edge stack vary?** We have exactly one sample — page 297 of 604, drawn
 with two slivers. Whether the reference thins it near the ends of the book is unknown.
