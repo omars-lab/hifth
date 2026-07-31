@@ -34,6 +34,15 @@
 #   4. A DEAD HOLDER BLOCKED EVERYONE UNTIL A HUMAN INTERVENED. A waiter now
 #      breaks a lock whose recorded PID is gone, and says so loudly.
 #
+#   5. IT COULD NOT RUN FROM A WORKTREE AT ALL. The lock lived at `$ROOT/.git/…`,
+#      and in a linked worktree `.git` is a *file*, not a directory — so `mkdir`
+#      failed with ENOTDIR on every single poll, forever, and the waiter sat
+#      there silently until it hit the 30-minute timeout. An agent lost ninety
+#      minutes to it. The lock now lives in the *common* git dir, which is the
+#      only correct home for it anyway: worktrees are exactly the case the lock
+#      exists to serialise, and a per-worktree lock would have serialised
+#      nothing.
+#
 # What it deliberately does NOT do: it does not touch git. Committing is the
 # caller's job, and the rule there is `git commit -F <msgfile> -- <explicit
 # paths>`. A bare `git commit` commits the whole index, which in a shared tree
@@ -42,7 +51,28 @@
 set -euo pipefail
 
 readonly ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-readonly LOCK="$ROOT/.git/hifth-agent.lock"
+
+# The one lock every checkout of this repo shares.
+#
+# `--git-common-dir` is the point: from the main worktree it is `$ROOT/.git`, and
+# from a linked worktree it is *still* the main repo's `.git` — where `$ROOT/.git`
+# would be the gitdir *file* that worktree was created with, and `mkdir` on a path
+# under a regular file fails with ENOTDIR on every poll until the timeout. It also
+# happens to be the only home that makes the lock mean anything: agents in
+# separate worktrees are precisely what it exists to serialise.
+#
+# Resolved to absolute (git answers relatively at a worktree root) and falls back
+# to `$ROOT/.git` if git is unavailable, so the script still runs somewhere the
+# repo has been exported rather than cloned.
+_common_git_dir() {
+  local d
+  d="$(git -C "$ROOT" rev-parse --git-common-dir 2>/dev/null)" || { echo "$ROOT/.git"; return; }
+  case "$d" in
+    /*) echo "$d" ;;
+    *) (cd "$ROOT/$d" && pwd) ;;
+  esac
+}
+readonly LOCK="$(_common_git_dir)/hifth-agent.lock"
 readonly OWNER="$LOCK/owner"
 
 readonly WAIT_SECONDS="${HIFTH_LOCK_WAIT:-1800}"   # give up after 30 min
