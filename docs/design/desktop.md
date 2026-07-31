@@ -77,8 +77,9 @@ blank sheet impersonating paper. See §4.
 
 ### ② The mus'haf reads right to left, and the spread pairing is fixed by the print
 
-Within a spread the **lower page number sits on the right**. Spreads pair (2,3), (4,5),
-(6,7)…, and page 1 sits alone on the right with nothing to its left. The next page is to
+Within a spread the **lower page number sits on the right**. Spreads pair (1,2), (3,4),
+(5,6)… — odd on the right — so Al-Fatiha faces the opening page of Al-Baqarah and the
+604-page print divides into 302 complete openings with no orphan leaf. The next page is to
 the **left** — which is exactly what `appKeyAction` already encodes (ArrowLeft = +1 page,
 `packages/core/src/keymap.ts`) and what `PageSlider` already draws (the next-page button on
 the left edge, `▸`/`◂` chosen because they are not `Bidi_Mirrored`).
@@ -222,10 +223,11 @@ The pairing is pure logic and therefore lives in **core**, not in a component:
 `pageFraction`, which is where the print-vs-inventory seam already lives.
 
 ```
-spreadOf(1,   604) → { right: 1,   left: null }   // page 1 sits alone on the right
-spreadOf(6,   604) → { right: 6,   left: 7   }
-spreadOf(7,   604) → { right: 6,   left: 7   }
-spreadOf(604, 604) → { right: 604, left: null }   // even-length book: the last leaf is alone
+spreadOf(1,   604) → { right: 1,   left: 2   }   // Al-Fatiha faces Al-Baqarah
+spreadOf(7,   604) → { right: 7,   left: 8   }
+spreadOf(8,   604) → { right: 7,   left: 8   }
+spreadOf(604, 604) → { right: 603, left: 604 }   // even-length book: nothing is orphaned
+spreadOf(603, 603) → { right: 603, left: null }  // odd-length print: the last leaf is alone
 ```
 
 `left: null` is a third state and not the same as "left is absent": nothing is missing at
@@ -427,8 +429,9 @@ Named, so they are not mistaken for settled.
 ## 9. Work order
 
 1. **core** — `spreadOf(page, total)` in `packages/core/src/pages.ts`, exported from
-   `index.ts`, unit-tested for: page 1 alone on the right, even/odd pairing, the last leaf
-   of an even-length book, and out-of-range input.
+   `index.ts`, unit-tested for: odd/even pairing, the same spread from either leaf, no
+   orphan in an even-length book, the last leaf of an odd-length print, and out-of-range
+   input.
 2. **web** — `useMediaQuery(query)` hook: `matchMedia`, subscribed, SSR/jsdom-safe (no
    `matchMedia` ⇒ `false` ⇒ the mobile layout, which is the safe default).
 3. **web** — `PageSpread` component + module CSS: the two panels, the gutter, the absent
