@@ -108,16 +108,29 @@ test.describe("Hifth · drag-to-highlight", () => {
     await page.mouse.up();
 
     const after = await host.boundingBox();
-    // The page does NOT move, and that is the assertion rather than a
-    // concession. At rest the whole page is on screen — `clampView` (@hifth/core)
-    // holds a page that fits, because sliding it would only trade scripture for
-    // blank stage and leave nothing to drag it back by. This test used to demand
-    // the opposite; it was reading "the page moved" as its proxy for "the stroke
-    // latched as a pan and not as a marquee", and the proxy stopped being true
-    // when the clamp landed. The pan that *can* move is asserted where it is
-    // observable — zoomed in, in stage-fit.spec.ts.
-    expect(after!.x).toBeCloseTo(before!.x, 0);
-    expect(after!.y).toBeCloseTo(before!.y, 0);
+    const layer = await page.locator("[aria-busy]").boundingBox();
+
+    // Which axis may move is `holdAxis`'s question and not this file's, and the
+    // answer is not the same on every phone. Horizontally the leaf is
+    // `width: min(100%, …)` and fills its stage, so a pan is a measured no-op.
+    // Vertically it depends on how much height the chrome leaves: an iPhone 13
+    // overflows by 47 px and pans, a Pixel 7 does not overflow and does not.
+    //
+    // Both assertions used to be `toBeCloseTo` unconditionally, under a comment
+    // explaining that at rest the whole page is on screen and sliding it would
+    // only trade scripture for blank stage. That was true of a stage the app had
+    // mismeasured: `.layer` carried no `min-block-size: 0`, so the grid row's
+    // automatic minimum size grew it to the page, and `measureFit` reported a
+    // leaf that fits while 47 px of it sat below the fold with no gesture that
+    // could bring it back. Fixing the stage made the vertical pan real where it
+    // was always supposed to be (docs/design/page-turning.md §7 ①); the same
+    // split, asserted properly on both sides, is in e2e/stage-fit.spec.ts.
+    expect(after!.x, "an axis the leaf fits must not roam").toBeCloseTo(before!.x, 0);
+    if (before!.height - layer!.height > 1) {
+      expect(before!.y - after!.y, "an axis the leaf overflows must pan").toBeGreaterThan(0);
+    } else {
+      expect(after!.y, "an axis the leaf fits must not roam").toBeCloseTo(before!.y, 0);
+    }
     // What the stroke must not have done, which is the part this file is for:
     // no marquee ink…
     await expect(page.locator("#hifth-overlay .hl-hlt")).toHaveCount(0);
