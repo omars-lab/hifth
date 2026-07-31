@@ -63,11 +63,21 @@
   inset-inline-start: calc(50% - 14px);
   inline-size: 28px;
   pointer-events: none;
+  /* The core is one pixel wide and it is the whole difference between a fold and
+     a soft band. `calc(50% - 0.5px)` → `calc(50% + 0.5px)` rather than a
+     percentage, so it stays one pixel whatever the band's width becomes.
+     Measured against a reference reader whose crease is 26.7 px with a 1.0 px
+     core at α ≈ 0.70; ours was 28 px with a deepest stop of 0.18, which is a
+     wash (docs/design/page-transition.md §1.4, §2.4). The two shoulders were
+     already within 0.02 alpha of the reference and are left alone. */
   background: linear-gradient(
     to right,
     transparent 0%,
     var(--gutter-shadow) 42%,
-    var(--gutter-shadow-deep) 50%,
+    var(--gutter-shadow-deep) calc(50% - 1px),
+    var(--gutter-core) calc(50% - 0.5px),
+    var(--gutter-core) calc(50% + 0.5px),
+    var(--gutter-shadow-deep) calc(50% + 1px),
     var(--gutter-shadow) 58%,
     transparent 100%
   );

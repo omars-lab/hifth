@@ -15,8 +15,27 @@
   -webkit-user-select: none;
   -webkit-touch-callout: none;
   overflow: hidden;
+  /* The field is *not* the paper. It used to be `--paper-raised` at the top —
+     the same colour the leaf is — so the leaf's own edge was the only thing
+     saying where the page stopped, and the page SVGs carry no background rect
+     (glyph paths only, transparent), so there was nothing else to see. Sinking
+     the field one step below the paper is what makes the leaf read as a leaf
+     lying on a surface rather than as ink floating on a tinted rectangle. */
   background:
-    radial-gradient(120% 90% at 50% 0%, var(--paper-raised), var(--paper) 60%);
+    radial-gradient(120% 90% at 50% 0%, var(--paper-sunk), var(--paper) 60%);
+}
+
+/* The stage's padding is asymmetric, and the asymmetry is the point: a leaf is
+   bound on one side and free on the other, so it must run *into* the binding and
+   hold a margin only on its fore-edge. Which side that is comes from
+   `leafSideOf` in @hifth/core — page parity, not reading direction — and is
+   written onto the stage as `data-leaf` by PageStage. See the note beside
+   `--leaf-edge` in tokens.css for why the two are not the same question. */
+.stage[data-leaf="right"] {
+  padding-left: 0;
+}
+.stage[data-leaf="left"] {
+  padding-right: 0;
 }
 
 /* The layer holds one host div per mounted page; only the current one shows.
@@ -81,13 +100,73 @@
      should not want to. */
   width: min(100%, var(--stage-page-cap, 62vh));
   max-width: 480px;
-  filter: drop-shadow(var(--shadow-2));
-  border-radius: var(--radius-sm);
+  /* This background IS the paper. The vendored SVGs have no background rect —
+     open 7.svg and it is glyph paths and nothing else — so removing this does
+     not reveal a page underneath, it deletes the page. */
   background: var(--paper-raised);
+  /* A real edge, not a shadow of one. `border` rather than `box-shadow: inset`
+     so the edge is part of the leaf's box: the transform scales it with the
+     scripture, and it stays one crisp line at every zoom instead of a ring that
+     thickens as you pinch in. It also costs `measureFit` its choice of metric —
+     `clientWidth` excludes the border, so the fit maths would be handed a leaf
+     4px narrower than the one on screen. See `offsetWidth` there. */
+  border: var(--leaf-edge-width) solid var(--leaf-edge);
+  /* `will-change: transform` already makes this a containing block, so the
+     ::after fore-edge would position against it either way. Said out loud
+     anyway: a hint someone deletes for perf reasons should not silently move
+     the fore-edge to the viewport. */
+  position: relative;
+  overflow: hidden;
   /* Pan/zoom transform is written here imperatively (PageStage). Origin at the
      top-left keeps the translate/scale math simple and GPU-composited. */
   transform-origin: 0 0;
   will-change: transform;
+}
+
+/* The leaf's two ends. A right-hand leaf is bound on its left and free on its
+   right: square and flush into the spine, rounded and thumbed on the fore-edge.
+   The padding on the free side is what keeps the fore-edge stack *beside* the
+   scripture rather than over it — the SVG lays out inside the content box, the
+   stack is drawn in the padding. */
+.host[data-leaf="right"] {
+  border-radius: 0 var(--radius-leaf) var(--radius-leaf) 0;
+  padding-right: var(--fore-edge-stack);
+}
+.host[data-leaf="left"] {
+  border-radius: var(--radius-leaf) 0 0 var(--radius-leaf);
+  padding-left: var(--fore-edge-stack);
+}
+
+/* The block of pages under the one you are reading, drawn as banded gradient
+   stops rather than stacked elements: two leaves' worth is enough to say
+   "there is a book here" and it costs one pseudo-element. Stops must be
+   non-decreasing — browsers clamp an out-of-order stop and the bands vanish. */
+.host[data-leaf]::after {
+  content: "";
+  position: absolute;
+  inset-block: 0;
+  width: var(--fore-edge-stack);
+  pointer-events: none;
+}
+.host[data-leaf="right"]::after {
+  right: 0;
+  background: linear-gradient(
+    to right,
+    var(--hairline) 0 1px,
+    var(--fore-edge) 1px 5px,
+    var(--hairline) 5px 6px,
+    var(--fore-edge-deep) 6px 10px
+  );
+}
+.host[data-leaf="left"]::after {
+  left: 0;
+  background: linear-gradient(
+    to left,
+    var(--hairline) 0 1px,
+    var(--fore-edge) 1px 5px,
+    var(--hairline) 5px 6px,
+    var(--fore-edge-deep) 6px 10px
+  );
 }
 
 /* Multiple hosts overlap in the layer's single grid cell; only one is visible. */

@@ -125,6 +125,48 @@
      mark on the page that has to look like it has depth. */
   --gutter-shadow: rgba(38, 32, 26, 0.1);
   --gutter-shadow-deep: rgba(38, 32, 26, 0.18);
+  /* One pixel at the centre of the band, ~3.5× darker than the deep stop. The
+     comment above already argues that a spine darkens toward its centre; this is
+     the pixel that makes it read as a fold rather than as a soft band, and
+     without it the gradient's darkest point is 0.18, which is a wash.
+
+     Measured off a reference mus'haf reader whose crease is 26.7 CSS px wide
+     (ours is 28) with a 1.0 px core at α ≈ 0.70 (docs/design/page-transition.md
+     §1.4, §2.4). Two independent designs landing within 1.3 px and 0.02 alpha of
+     each other is why the rest of the band was left alone. */
+  --gutter-core: rgba(38, 32, 26, 0.7);
+
+  /* The leaf's own edges — the vocabulary that makes a page read as a sheet of a
+     bound book rather than as a card floating on a desk. All four marks sit
+     *beside* the paper and never on it: no glyph is overpainted, which is the
+     constraint docs/design/page-turning.md §8 exists to protect.
+     docs/design/page-transition.md §1.1 has the reference measurements these
+     came from, and §2.2 the argument for each.
+
+     `--leaf-edge` is deliberately not `--hairline`. That token is documented
+     above as being for rules nobody reads; this is the boundary of the object
+     the whole app is about, and it is what replaces the drop shadow `.host` used
+     to wear. A shadow claims elevation, and a leaf is not elevated — it also
+     cost ~1.1 ms/frame, the app's entire measured frame headroom
+     (page-turning.md §5).
+
+     The fore-edge is the block of pages you can see under the leaf you are
+     holding, so it exists on the **free** side only and never on the bound one.
+     Two 4 px slivers stepping darker, parted by `--hairline` — which *is* a rule
+     nobody reads, and correctly so. `--fore-edge-stack` is what a caller pads by
+     to keep the slivers off the scripture; it is derived, not typed twice.
+
+     `--radius-leaf` is a role token, not a step on the `--radius-sm/md/lg`
+     scale, in the same way `--touch-min` and `--gutter-shadow` are: it is «the
+     corner of a leaf», ~20 px, and it applies to the two free corners only.
+     Rounding all four draws a loose sheet. */
+  --leaf-edge: #7f664d;
+  --leaf-edge-width: 2px;
+  --fore-edge: #e9dac3;
+  --fore-edge-deep: #d7c6ad;
+  --fore-edge-width: 4px;
+  --fore-edge-stack: calc(2 * var(--fore-edge-width) + 2px);
+  --radius-leaf: 20px;
 
   /* Elevation — warm shadows, low and soft. */
   --shadow-1: 0 1px 2px rgba(38, 32, 26, 0.08), 0 2px 8px rgba(38, 32, 26, 0.06);

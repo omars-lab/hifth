@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { EDITIONS } from "./concordance.js";
-import { nearestPage, pageFraction, spreadOf } from "./pages.js";
+import { leafSideOf, nearestPage, pageFraction, spreadOf } from "./pages.js";
 
 describe("nearestPage", () => {
   const vendored = [7, 9, 19];
@@ -124,6 +124,46 @@ describe("spreadOf", () => {
       // …and the page you asked about is always one of the two leaves.
       expect([right, left]).toContain(page);
     }
+  });
+});
+
+describe("leafSideOf", () => {
+  const MADANI = 604;
+
+  it("puts the odd page on the right and the even page on the left", () => {
+    // The three vendored pages are all odd, so this build can only ever draw the
+    // right-hand form (docs/design/page-transition.md §2.3). The even rows are
+    // here so the left-hand form is under test before Loop 4b makes it visible —
+    // an unreachable branch with no test is a branch that will be wrong when it
+    // becomes reachable.
+    expect(leafSideOf(7, MADANI)).toBe("right");
+    expect(leafSideOf(9, MADANI)).toBe("right");
+    expect(leafSideOf(19, MADANI)).toBe("right");
+    expect(leafSideOf(8, MADANI)).toBe("left");
+    expect(leafSideOf(1, MADANI)).toBe("right");
+    expect(leafSideOf(604, MADANI)).toBe("left");
+  });
+
+  it("names the side the leaf is not bound on, for every page of the print", () => {
+    // The invariant the stylesheet is allowed to lean on: exactly one of the two
+    // leaves of an opening is the right one, and the other is the left one. If
+    // `spreadOf`'s phase ever moves again, both halves of this move together and
+    // the fore-edge follows — which is the whole reason this lives in core and
+    // not in a `:nth-child` selector.
+    for (let page = 1; page <= MADANI; page += 1) {
+      const { right, left } = spreadOf(page, MADANI);
+      const side = leafSideOf(page, MADANI);
+      expect(side).toBe(page === right ? "right" : "left");
+      if (side === "left") expect(page).toBe(left);
+    }
+  });
+
+  it("refuses a page the book does not have", () => {
+    // Same reasoning as `spreadOf`: the caller is about to draw an edge, and an
+    // edge on a page that does not exist is furniture around nothing.
+    expect(leafSideOf(0, MADANI)).toBeNull();
+    expect(leafSideOf(605, MADANI)).toBeNull();
+    expect(leafSideOf(Number.NaN, MADANI)).toBeNull();
   });
 });
 
