@@ -203,13 +203,19 @@ crease is a gutter (two facing pages of one opening) and a gap is the outside of
 (two leaves belonging to different openings).** It is a genuine model of a codex flattened
 into a ribbon, and the vocabulary is the thing worth taking.
 
-**One inference that must be flagged, because §4 depends on it.** The reference draws the
-crease at **297 | 298** and the gap at **296 | 297**. It therefore pairs *(odd, even)* into a
-spread. `spreadOf` pairs *(even, odd)* — even on the right (decision row 9,
-`packages/core/src/pages.ts`, `docs/design/desktop.md` §2 ②). **The two conventions are one
-leaf out of phase and they cannot both describe the Madani print.** §7 ① names the
-observation that settles it and the argument that currently favours `spreadOf`. Nothing in
-this design hard-codes a parity; §4's whole point is that the predicate is a call into core.
+**One inference that must be flagged, because §4 depends on it — and it has since been
+settled against us.** The reference draws the crease at **297 | 298** and the gap at
+**296 | 297**. It therefore pairs *(odd, even)* into a spread. `spreadOf` paired
+*(even, odd)*, even on the right (decision row 9, `packages/core/src/pages.ts`,
+`docs/design/desktop.md` §2 ②). The two conventions were one leaf out of phase and could not
+both describe the Madani print.
+
+**The reference was right.** Open a physical KFGQPC Madani mus'haf: Al-Fatiha is page 1 and
+it sits on the right, facing the first page of Al-Baqarah on the left. `spreadOf` was wrong
+and has been corrected to pair (1,2), (3,4), (5,6)…; §7 ① records how the wrong phase got
+recorded as fact. Nothing in this design hard-codes a parity regardless — §4's whole point is
+that the predicate is a call into core, which is exactly why one line in `pages.ts` was able
+to fix every spread, crease and fold at once.
 
 ---
 
@@ -282,10 +288,16 @@ exactly the wrong tools. They would flip the fore-edge when the UI language chan
 is meaningless.
 
 **A consequence worth stating loudly, because it constrains what can be shipped and what
-can be shot as a golden.** `spreadOf(7) = {right: 6, left: 7}`; likewise 9 and 19. **All
-three vendored pages are left-hand leaves.** The right-rounded form — the reference's page
-297 — is **unreachable in this build**. Whatever is written for it cannot be seen until
-Loop 4b vendors an even page.
+can be shot as a golden.** `spreadOf(7) = {right: 7, left: 8}`; likewise 9 and 19. **All
+three vendored pages are right-hand leaves** — they are all odd, and under the print's real
+parity the odd page opens the spread (§1.6). Their bound side is the left and their free
+side is the right, so the **right**-rounded form is the only one this build can draw. The
+left-rounded form is **unreachable** until Loop 4b vendors an even page, and whatever is
+written for it cannot be seen until then.
+
+*(This paragraph said the exact opposite before `spreadOf` was corrected — it read the
+parity off the old phase. Flagged rather than silently rewritten, because "which leaf is
+reachable" is the kind of claim a stylesheet gets built against.)*
 
 ### 2.4 The bound edge, and the desktop spread
 
@@ -789,8 +801,8 @@ changes.** That is worth stating plainly: a design that silently invalidated fiv
 baselines would be a different-sized change, and this one does not.
 
 A *new* shot is needed for the edge system, and it has a limit worth recording: `SHOTS`
-would need one leaf of each parity, and **all three vendored pages are left-hand leaves**
-(§2.3). The right-rounded form cannot be shot until Loop 4b vendors an even page. Desktop
+would need one leaf of each parity, and **all three vendored pages are right-hand leaves**
+(§2.3). The left-rounded form cannot be shot until Loop 4b vendors an even page. Desktop
 has no golden baselines by policy (decision row 17) and this does not change that — the
 spread's crease is structure and `desktop.spec.ts` can assert it by attribute.
 
@@ -798,22 +810,35 @@ spread's crease is structure and `desktop.spec.ts` can assert it by attribute.
 
 ## 7. Open questions, and what would answer each
 
-**① The spread's phase — and it is the one that could make every crease in the app wrong.**
-`spreadOf` pairs (even, odd) with even on the right. The reference app pairs (odd, even)
-(§1.6). They are one leaf out of phase.
+**① The spread's phase — ANSWERED, and `spreadOf` was the one that was wrong.**
+`spreadOf` paired (even, odd) with even on the right. The reference app pairs (odd, even)
+(§1.6). They were one leaf out of phase, and this was written up as the question that could
+make every crease in the app wrong.
 
-The argument currently favouring `spreadOf`: every juz' after the first begins on pages 22,
-42, 62, 82 … — all **even** — and the well-known property is that **every juz' begins on a
-right-hand page**. Even = right ⇒ spreads are (even, odd). `page-turning.md` §2.1 records the
-same, verified against two Qur'an APIs, and `desktop.md` §2 ② and decision row 9 both pin it.
+The argument that had been favouring `spreadOf`: every juz' after the first begins on pages
+22, 42, 62, 82 … — all **even** — and the well-known property is that **every juz' begins on
+a right-hand page**. Even = right ⇒ spreads are (even, odd). `page-turning.md` §2.1 recorded
+the same and labelled it `[cited]`; `desktop.md` §2 ② and decision row 9 both pinned it. All
+four now carry the correction — `page-turning.md` §2.1 keeps the retracted claim beside it,
+which is the right shape for a document whose job is to record how a thing was believed.
 
-**That is an argument, not an observation, and it is the kind of argument this repo has
-learned to distrust.** What would settle it in ten seconds: **open a physical KFGQPC Madani
-mushaf and photograph any opening, then read the two page numbers.** If the right-hand number
-is even, `spreadOf` is right and the reference is one leaf out. If it is odd, `spreadOf` is
-wrong and one line in `pages.ts` corrects every crease, every spread and every fold at once —
-which is the payoff for §4.1's insistence that the predicate live in core. It is a **ledger
-check**, human-only, and it costs nothing.
+**That was an argument, not an observation** — and the citation was worse than absent, because
+no Qur'an API returns *which side of an opening* a leaf sits on. What the APIs actually
+return is which page a juz' begins on, which is a different fact. The observation this section
+asked for was then made directly: **open a physical KFGQPC Madani mus'haf and Al-Fatiha —
+page 1 — is on the right, facing the first page of Al-Baqarah on the left.** Odd is the
+right-hand leaf.
+
+There was a second tell available the whole time and nobody read it: the old phase left page
+1 alone on the right and page 604 alone on the left. A codex whose leaves each carry two
+pages cannot orphan exactly one page at each end of an even-length book. 604 pages is 302
+complete openings.
+
+`spreadOf` is corrected. One line in `pages.ts` moved every crease, every spread and every
+fold at once — which is the payoff §4.1 was arguing for when it insisted the predicate live
+in core. Two conventions did **not** move: the lower page number is still on the right, and
+the turn direction is still RTL, so `PLAN.md`'s desktop rule and `loop-1.md`'s convention
+stand.
 
 **② Does the fold read at all?** The claim in §3.2 — that a 28–30 px band crossing in 240 ms
 is legible as a fold and does mask the cross-fade's ambiguous midpoint — is a design
@@ -930,13 +955,15 @@ because one half is shippable now and the other is not:
 building `foldBetween` and its unit tests now — they are pure and they are where the rule
 lives — and for landing the *drawing* alongside 4b.
 
-### 9.2 Proposed `PLAN.md` follow-up
+### 9.2 The `PLAN.md` follow-up — **applied as ⑪**
 
-**This document does not edit `PLAN.md`, and the reason is a numbering collision, not
-timidity.** `main` ends at follow-up ⑨; the unmerged branch `docs/page-turning-design` adds
-**⑩**. Appending ⑩ here would conflict, and appending ⑪ on a branch where ⑩ does not exist
-would leave a hole. So the text is here, ready to paste, and it lands as **⑪** if
-`docs/page-turning-design` merges first and **⑩** if it does not.
+This section was written before `docs/page-turning-design` merged, when the number was still
+undecided: `main` ended at follow-up ⑨, that branch added **⑩**, and appending ⑩ here would
+have conflicted while appending ⑪ on a branch without ⑩ would have left a hole. That branch
+merged, so the text below is now item **11** in `PLAN.md`'s *Open follow-ups*. It is kept
+here as the argument behind the one-paragraph entry, and the entry adds one sentence this
+version could not: writing this document is what caught `spreadOf` pairing the wrong two
+leaves (§1.6, §7 ①).
 
 > ⑪. **A page turn should say what is between the two pages, and today it says nothing.**
 > The transition effect — the leaf's edges at rest and the fold that crosses during a turn —
@@ -955,15 +982,16 @@ would leave a hole. So the text is here, ready to paste, and it lands as **⑪**
 > corrects every fold at once. With three non-adjacent pages vendored, **every turn in the
 > shipped build is a hole and no crease can be drawn until Loop 4b** — which is the design
 > working, not a limitation. The visual half is the twin of follow-up ⑩'s §7 ④ (the turn is
-> silent about the page it skipped) and they should land together. One human check is opened
-> and it is ten seconds long: §7 ① — photograph any opening of a physical Madani mushaf and
-> read whether the **right-hand** page number is even. `spreadOf` says it is; the reference
-> application says it is not; one line in `pages.ts` settles it either way.
+> silent about the page it skipped) and they should land together. The one human check this
+> design opened — §7 ①, which side of an opening an odd page sits on — **has been answered**:
+> Al-Fatiha is page 1 and it is on the right. `spreadOf` had it backwards, and one line in
+> `pages.ts` moved every spread, crease and fold at once.
 
-### 9.3 Proposed rows for `docs/decisions/desktop-vs-mobile.md`
+### 9.3 Rows for `docs/decisions/desktop-vs-mobile.md` — **applied as 20–21**
 
-Same collision — `docs/page-turning-design` adds rows 18–19 — so these are proposed, not
-appended. They are 20–21 after that branch merges, 18–19 if it does not.
+Same collision, same resolution: `docs/page-turning-design` added rows 18–19 and has merged,
+so these landed as **20–21**. Kept here so the design and the index do not have to be read
+together to know why the rows say what they say.
 
 > | 20 | **What a turn between two *facing* pages does** | Cross-fades under a fold, like any other turn — one leaf is on screen and it changed | **Nothing at all** — both leaves of the `spreadOf` pair are already mounted and neither changed; only which leaf is live moves | Not a taste split and not a desktop feature: the same rule (`foldBetween`) reading a screen that already shows more of the book. A crease is drawn between facing pages, and on desktop it is drawn **permanently** by `PageSpread`'s gutter rather than transiently by a fold. Animating a leaf that did not turn is the failure. `page-transition.md` §3.5 |
 > | 21 | **What is drawn between two pages during a turn** | A 28–30 px band whose fill states the relationship: crease / gap / sunk-and-dashed / nothing | **The same band, sweeping the whole spread**, since a turn that leaves the pair changes both panels | The rule is identical; only the extent differs, and it differs because the desktop turn changes two leaves where the phone's changes one. The predicate is `foldBetween` in core at both widths — decision row 9's "encoded once" applied to the fold. `page-transition.md` §4 |
@@ -977,5 +1005,5 @@ appended. They are 20–21 after that branch merges, 18–19 if it does not.
 | The fold element and its sweep | `PLAN.md` follow-up ① (perf verdict) | Decides whether the cross-fade under it is affordable, and whether an outgoing page is even rendering. §5.2 gives the constrained fallback so the answer is a configuration, not a redesign. |
 | §3.4's one-fold-ever + one-visible-host rules | `backlog.md` §2 ③ (mounted-set ceiling) | Cheap today only because the set can never exceed three. |
 | Drawing a crease or a gap at all | **Loop 4b** | No two vendored pages are adjacent, so `"crease"` and `"gap"` have no reachable input. |
-| The golden shot of a right-hand leaf | **Loop 4b** | All three vendored pages are left-hand leaves (§2.3). |
-| §7 ①'s phase check | **a human and a physical mushaf** | Ten seconds, no hardware, and it decides whether every crease is drawn one leaf off. |
+| The golden shot of a left-hand leaf | **Loop 4b** | All three vendored pages are right-hand leaves (§2.3). |
+| §7 ①'s phase check | ~~a human and a physical mushaf~~ — **done** | Answered: odd is the right-hand leaf. `spreadOf` was one leaf off and has been corrected; see §7 ①. |
