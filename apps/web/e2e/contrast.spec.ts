@@ -226,9 +226,11 @@ const SURFACES: readonly Surface[] = [
       await expect(page.getByRole("region", { name: "الصفحة المقابلة" })).toBeVisible();
     },
   },
-  // One row per field, generated from `FIELDS` so a sixth option cannot ship
+  // One row per field, generated from `FIELDS` so a third option cannot ship
   // without a measurement: the list in core is the source of truth for this
   // file, for `styles/field.css` and for the table in docs/query-params.md.
+  // There were five while the desk was an open question — `tan` won it and
+  // `dark` stayed as a night desk (page-transition.md §7 ④).
   ...FIELDS.map((field) => ({
     name: `the field «${field}» — the desk, and the one sentence written on it`,
     open: onField(field),
@@ -237,8 +239,8 @@ const SURFACES: readonly Surface[] = [
     // The same question asked of the *other* painter. On a phone the stage
     // paints the field; on a spread `PageSpread` paints it once across the desk
     // and tells the stages inside to stop. Two declarations reading one token is
-    // only true until someone edits one of them, so `tan` — the field whose ink
-    // had to change — is checked on both.
+    // only true until someone edits one of them, so `tan` — the default, and the
+    // field whose ink had to change — is checked on both.
     name: "the field «tan» on the desktop spread, painted by the desk not the stage",
     open: async (page) => {
       await page.setViewportSize({ width: 1440, height: 900 });

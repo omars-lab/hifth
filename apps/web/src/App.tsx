@@ -664,7 +664,7 @@ export function App(): JSX.Element {
         ? refOf(selectedKey)
         : null;
     // Only when it is not the default: every link this app hands out would
-    // otherwise carry `field=sunk`, which says nothing and invites the reader to
+    // otherwise carry `field=tan`, which says nothing and invites the reader to
     // think the desk is part of the address.
     const desk = field === DEFAULT_FIELD ? {} : { field };
     if (!select) {

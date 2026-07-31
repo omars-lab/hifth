@@ -95,33 +95,61 @@ is dropped and the rest of the link stands. The reasoning is written at length i
 
 ## The fields
 
-Five options, and each one is a **wash and the ink that survives it**. That
-pairing is the finding, not a detail: the reference mus'haf's own field
-(`#af8a68`) carries this app's `--ink-soft` at 2.39:1, so a darker desk owes its
-own ink or the one sentence ever written on the field — the stage's «تعذّر تحميل
-صفحة ٧» hint — becomes unreadable.
+Two, and each one is a **wash and the ink that survives it**. That pairing is a
+finding, not a detail: `tan`'s `#af8a68` carries this app's `--ink-soft` at
+2.39:1, so a darker desk owes its own ink or the one sentence ever written on the
+field — the stage's «تعذّر تحميل صفحة ٧» hint — becomes unreadable.
 
 | id | wash (near → far) | ink on it | worst measured ratio |
 | --- | --- | --- | --- |
-| `sunk` | `#ece4d6` → `#f4efe6` | `--ink-soft` | 5.98 |
-| `linen` | `#ded3c0` → `#ece4d6` | `--ink-soft` | 5.10 |
-| `slate` | `#d0cdc7` → `#dedbd5` | `--ink-soft` | 4.76 |
 | `tan` | `#af8a68` → `#c9ab8d` | `--ink` | 5.11 |
 | `dark` | `#221e1a` → `#35302a` | `--paper` | 11.41 |
 
-`sunk` is the default. Measured, not asserted: `e2e/contrast.spec.ts` opens each
-field with the hint on screen and checks the text against **both** stops of its
-wash — a gradient passes only if its whole ramp does. Those numbers exist because
-the instrument was taught to read gradients first; before that the field was the
-app's largest surface and its least measured one. [WebAIM's contrast
+`tan` is the default, and it is the reference mus'haf's own field. Measured, not
+asserted: `e2e/contrast.spec.ts` opens each field with the hint on screen and
+checks the text against **both** stops of its wash — a gradient passes only if its
+whole ramp does. [WebAIM's contrast
 article](https://webaim.org/articles/contrast/) is the standing reference for the
 4.5:1 floor this holds to.
 
-There is deliberately **no picker**. The field is an open design question with an
-instrument attached (`docs/design/page-transition.md` §7 ④), not a preference: the
-options ship behind a link so all five can be looked at in a real window, and
-when one wins it becomes the default and the rest of the table goes. A control in
-the chrome would turn an open question into a feature.
+### How the desk was chosen
+
+Five candidates shipped behind this parameter for exactly one purpose: so that a
+question `docs/design/page-transition.md` §7 ④ had carried for six loops could be
+*looked at* instead of argued. Looking at them produced the measurement nobody
+had taken — how far the desk is from the paper, which is what decides whether the
+book reads as an object lying on a surface:
+
+(The header cell says `candidate`, not `id`, on purpose — `gate:params` reads the
+first table headed `id` as the list of shipping fields, and this one is history.)
+
+| candidate | vs. paper @near | vs. paper @far | note |
+| --- | --- | --- | --- |
+| `sunk` | 1.10 | **1.00** | the field this app shipped with |
+| `linen` | 1.29 | 1.10 | one step out, no ink change |
+| `slate` | 1.38 | 1.21 | the cool control |
+| `tan` | **2.75** | **1.89** | ← the reference print |
+| `dark` | 14.45 | 11.41 | the night desk |
+
+`sunk`'s far stop was `#f4efe6` — the paper's own colour. At the foot of every
+page the desk *was* the leaf, which is precisely what §2.2 ④ meant by asking for
+"a field the page is not". No standard requires a page edge to clear a ratio, so
+this is not a contrast failure; it is a drawing failure, and it shipped unnoticed
+because nothing measured that distance.
+
+`tan` won it. `slate` was the counter-example the set needed — the warm-field
+argument is a claim, and a claim with no cool option against it is not being
+tested — and it lost honestly: a cool desk makes the paper read as yellowed
+rather than lit. `linen` was real but timid, its worst separation exactly `sunk`'s
+best. All three were removed.
+
+`dark` stayed, because it is not a competing answer to that question. It answers
+*reading at night*, and it is the only field that does.
+
+There is still deliberately **no picker**. `dark` is reachable by link and by
+nothing else: one desk for one occasion is not a preference the chrome should
+grow a control for. If it earns one, that is a decision about the chrome, made on
+its own evidence.
 
 The id list lives in `FIELDS` (`packages/core/src/field.ts`) and is the source of
 truth for three things `gate:params` keeps in step: the blocks in
