@@ -52,32 +52,56 @@ describe("spreadOf", () => {
   const MADANI = 604;
 
   it("puts the lower page number on the right", () => {
-    // The mus'haf reads right to left, so 6 faces 7 with 6 on the right — the
+    // The mus'haf reads right to left, so 7 faces 8 with 7 on the right — the
     // same direction ArrowLeft (+1 page) and the page bar's left-edge next
     // button already encode.
-    expect(spreadOf(7, MADANI)).toEqual({ right: 6, left: 7 });
-    expect(spreadOf(6, MADANI)).toEqual({ right: 6, left: 7 });
+    expect(spreadOf(7, MADANI)).toEqual({ right: 7, left: 8 });
+    expect(spreadOf(8, MADANI)).toEqual({ right: 7, left: 8 });
+  });
+
+  it("opens each spread on the odd page", () => {
+    // The parity, stated on its own because this function had it backwards for
+    // six loops and every spread it drew paired the wrong two leaves.
+    //
+    // It is an observation, not a derivation: open a physical KFGQPC Madani
+    // mushaf and Al-Fatiha — page 1 — is on the right, facing the first page of
+    // Al-Baqarah on the left. The old phase paired (2,3), (4,5)…, inferred from
+    // "every juz' begins on a right-hand page" plus juz' 2, 3, 4 beginning on
+    // pages 22, 42, 62. The inference was recorded as though it had been seen.
+    expect(spreadOf(1, MADANI)).toEqual({ right: 1, left: 2 });
+    expect(spreadOf(2, MADANI)).toEqual({ right: 1, left: 2 });
+    expect(spreadOf(21, MADANI)).toEqual({ right: 21, left: 22 });
   });
 
   it("answers the same spread from either of its leaves", () => {
     // The property that matters: which page you ask from must not change which
     // book you are shown.
-    for (let page = 2; page < MADANI; page += 1) {
+    for (let page = 1; page <= MADANI; page += 1) {
       const here = spreadOf(page, MADANI);
-      const facing = page % 2 === 0 ? page + 1 : page - 1;
+      const facing = page % 2 === 0 ? page - 1 : page + 1;
+      if (facing < 1 || facing > MADANI) continue;
       expect(spreadOf(facing, MADANI)).toEqual(here);
     }
   });
 
-  it("leaves page 1 alone on the right", () => {
-    // Page 1 is the first leaf after the cover; there is no page 0 to face it.
-    expect(spreadOf(1, MADANI)).toEqual({ right: 1, left: null });
+  it("orphans no leaf in an even-length book", () => {
+    // The tell the old phase gave and nobody read: it left page 1 alone on the
+    // right and page 604 alone on the left. A codex whose leaves each carry two
+    // pages cannot orphan exactly one page at each end of an even-length book.
+    // 604 pages is 302 complete openings, and every one of them has two leaves.
+    for (let page = 1; page <= MADANI; page += 1) {
+      const { right, left } = spreadOf(page, MADANI);
+      expect(right).not.toBeNull();
+      expect(left).not.toBeNull();
+    }
+    expect(spreadOf(603, MADANI)).toEqual({ right: 603, left: 604 });
+    expect(spreadOf(604, MADANI)).toEqual({ right: 603, left: 604 });
   });
 
-  it("leaves the last page of an even-length book alone on the right", () => {
-    // 604 is even, so it opens a spread whose left leaf would be 605.
-    expect(spreadOf(604, MADANI)).toEqual({ right: 604, left: null });
-    expect(spreadOf(603, MADANI)).toEqual({ right: 602, left: 603 });
+  it("leaves the last page of an odd-length print alone on the right", () => {
+    // `total` is a parameter, so `left: null` is still reachable — just not by
+    // the Madani print. An edition with 603 pages ends on a half-opening.
+    expect(spreadOf(603, 603)).toEqual({ right: 603, left: null });
   });
 
   it("refuses a page the book does not have", () => {

@@ -387,7 +387,7 @@ export interface Strings {
    */
   facingPage: string;
   /**
-   * "صفحة 6 ليست في هذه النسخة" / "Page 6 is not in this build".
+   * "صفحة 8 ليست في هذه النسخة" / "Page 8 is not in this build".
    *
    * Only pages 7, 9 and 19 are vendored and they are not adjacent, so today
    * every spread has one of these. Latin digits, following `pageN` and

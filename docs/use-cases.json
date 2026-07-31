@@ -460,7 +460,7 @@
     {
       "id": "see-which-half-of-the-mushaf-is-missing",
       "actor": "hafiz",
-      "goal": "Do not show me a blank sheet of paper and let me think page 6 is empty. Tell me it is not in this build.",
+      "goal": "Do not show me a blank sheet of paper and let me think page 8 is empty. Tell me it is not in this build.",
       "feature": "desktop-spread",
       "code": [
         {
@@ -483,7 +483,7 @@
         },
         {
           "file": "apps/web/src/components/PageSpread.test.tsx",
-          "test": "leaves the far side of page 1 blank and unlabelled"
+          "test": "leaves the far side blank and unlabelled at the end of an odd-length print"
         }
       ],
       "gap": "This build vendors pages 7, 9 and 19 and none of them are adjacent, so *every* spread is one leaf and one hole — the honest-hole path is the only path a reader can currently reach, and the branch that draws a real facing leaf is exercised by a fixture inventory rather than by the app. Loop 4b (task #27) is what turns that around, and it is the commit that will find anything wrong with the other branch."
