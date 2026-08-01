@@ -159,7 +159,7 @@ whoever adds it finds the decision rather than the consequence.
 
 ## 4. Prefetch
 
-### ⑧ Shards prefetch by mounted page, not by hop target · **confirmed**
+### ⑧ Shards prefetch by mounted page, not by hop target · **fixed**
 
 `App.tsx:301` prefetches adjacency shards for every surah *visible on a mounted page*, so the
 rail is ready the instant an ayah is tapped. That is the right eager step for the tap, and it
@@ -170,6 +170,29 @@ Loop 7 names this as "perf pass (shard prefetch on selection)". The comment at `
 already says 4b widens it. Recording it here so the widening is a task rather than a comment.
 
 **How we'd know:** time from hop-chip tap to rail-populated, with a cold shard cache.
+
+**Closed by `apps/web/e2e/hop.spec.ts`** — *"the shard for where the rail can send you is
+fetched before you go"*. A second effect walks the selection's `hopsForKey` and `rangeHops`
+and calls `ensureShard` on each target's surah, beside the page-keyed loop rather than
+replacing it: the two sets are different and both are wanted.
+
+The comment that deferred this to 4b was wrong about *when*, not about *what*. Nothing here
+needed a streamed corpus — the hop list is already computed for the rail, so the widening
+costs the walk and nothing else. It was deferred because the prefetch was read as a
+page-mounting concern, which is the frame the bug lives in.
+
+Targets on unvendored pages are prefetched too, which is the one judgement call in it.
+`canHop` disables those chips today, so the shard buys nothing a reader can see this loop;
+what it buys is a truthful count on the far side the day 4b vendors the page, and filtering
+by `resolver` here would push the inventory's shape into a cache decision that should not
+know about it.
+
+**The measurement in *How we'd know* was not taken, and the test is not it.** A timing
+assertion against a cold cache is flaky by construction in a suite that runs three projects
+on one machine, so the row asserts the *cause* instead: with no chip opened and no hop taken,
+2:120's rail offers 13:37 and surah 13's shard has already been requested. It also asserts
+`< 5` shards — a rule that fetched all 114 would satisfy the first claim while being the same
+bug pointing the other way.
 
 ---
 
