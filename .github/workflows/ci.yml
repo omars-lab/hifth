@@ -159,6 +159,15 @@ jobs:
       - name: Gate — every promise still has a proof
         run: pnpm gate:use-cases
 
+      # docs/issues.json indexes every open item across PLAN.md's follow-ups,
+      # backlog.md, the design docs' open-questions sections and the validation
+      # ledger. This checks each entry still points at something, that its status
+      # agrees with the document that owns it, that "fixed" names a test that
+      # exists — and the direction the others cannot check, that no item in any
+      # of those registers is missing from the index.
+      - name: Gate — every open item is indexed, and the index still resolves
+        run: pnpm gate:issues
+
       # AYAH_COUNTS, JUZ_STARTS and HIZB_STARTS are hand-typed numbers whose only
       # symptom when wrong is an ayah quietly filed under the wrong division —
       # in range, ascending, and false. This re-derives all three from the

@@ -212,13 +212,28 @@ depend on how many times something was opened, only on when it last was.
 - **Export or sync.** Both are ways off the device, and `gate:revision-privacy`
   exists to make adding one a deliberate act rather than a convenient one.
 
-## Open questions
+## Open questions, and what would answer each
 
-- **Warmth thresholds.** The day-bands are a first guess. They want a hafiz's
-  judgment, not a developer's — this is a `docs/validation/ledger.json` candidate.
-- **What the picture should do when tapped.** Navigating to a division's first page
-  is the obvious move and is not yet built; with 601 pages absent it would fail more
-  often than it succeeded, so it waits for Loop 4b.
-- **Multi-edition records.** Page ids are only comparable within one edition; juz
-  and hizb ids are comparable everywhere. `editionOf` exists for the partition, but
-  the picture does not yet use it.
+Every design doc in this repo ends under this heading, and every item is an
+`### ⓝ … · **status**` row so `pnpm gate:issues` can read it. The vocabulary is defined once
+in [`docs/issues.json`](../issues.json).
+
+### ① Warmth thresholds · **blocked**
+
+The day-bands are a first guess. They want a hafiz's judgment, not a developer's — which
+makes this a `docs/validation/ledger.json` candidate rather than something to settle here.
+The bands decide what "cold" means, and a threshold chosen by whoever wrote the renderer is
+a claim about someone else's revision habit.
+
+### ② What the picture should do when tapped · **blocked**
+
+Navigating to a division's first page is the obvious move and is not yet built; with 601 of
+604 pages absent it would fail more often than it succeeded. Waits for Loop 4b — not because
+the interaction is hard, but because an affordance that usually refuses teaches a reader not
+to try it.
+
+### ③ Multi-edition records · **open**
+
+Page ids are only comparable within one edition; juz and hizb ids are comparable everywhere.
+`editionOf` exists for the partition, but the picture does not yet use it — so a reader who
+switches editions sees one record drawn as though it were two prints' worth.

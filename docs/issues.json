@@ -1,0 +1,543 @@
+{
+  "$comment": [
+    "The issue catalog: one index over every open item in this repo, and the",
+    "only place that knows they are the same kind of thing.",
+    "",
+    "WHY THIS EXISTS. Open work was tracked in four registers that had never been",
+    "counted together: PLAN.md's numbered follow-ups (the roadmap of record),",
+    "backlog.md (unscheduled optimization), each design doc's open-questions",
+    "section, and validation/ledger.json (the checks a machine cannot run). Each",
+    "register was internally disciplined and none could see the others. The cost",
+    "was not theoretical: page-turning.md OE9 was found only because somebody",
+    "opened that document and read to the end, and nothing anywhere would have",
+    "noticed if it had been fixed in code and left marked `confirmed` in prose.",
+    "",
+    "WHAT IT IS NOT. This file does not restate an issue. It carries no title, no",
+    "description, no reproduction — those live in the document that owns the item,",
+    "and a copy here would drift while still looking authoritative. That is the",
+    "same rule validation/ledger.json runs on and the same reason map.json points",
+    "at symbols instead of quoting them. What this file adds is the metadata no",
+    "single document can hold: severity, who owns it, what it blocks, what closed",
+    "it, and the fact that two registers are describing one item.",
+    "",
+    "HOW A SOURCE IS READ. Every design doc under docs/design/ ends with a section",
+    "headed exactly `Open questions, and what would answer each`, and backlog.md's",
+    "body is one such register. Under both, an item is a heading of the form",
+    "",
+    "    ### OEn <title> · **status**",
+    "",
+    "so scripts/gate-issues.mjs finds items without knowing anything about the",
+    "document. `status` in this file must equal the marker in that heading; the",
+    "duplication IS the gate, in the same shape as the SOURCES.md <-> Colophon.tsx",
+    "licence-copy check.",
+    "",
+    "TWO SOURCES ARE READ DIFFERENTLY, ON PURPOSE.",
+    "  validation/ledger.json is already machine-readable and already gated. Its",
+    "  checks are indexed here by id and their status is read from the ledger, not",
+    "  copied — gate-validation.mjs stays the authority on them.",
+    "",
+    "  PLAN.md's follow-ups are NOT marked. They are compound narratives whose job",
+    "  is to record how a thing was believed over time — follow-up 2 keeps its own",
+    "  retracted licence claim beside the correction, and 10 carries three",
+    "  successive re-measurements. Flattening one of those to a single word would",
+    "  destroy the thing it is for. So a PLAN follow-up is indexed by number, the",
+    "  gate checks only that the number still exists, and this file's `status` is",
+    "  the summary rather than a checksum. That is the one special case and it is",
+    "  written down rather than discovered.",
+    "",
+    "STATUS VOCABULARY. Six words, defined once, here.",
+    "  open       nobody has decided; no blocker named",
+    "  confirmed  a defect, reproduced, with the numbers in its source",
+    "  suspected  read from the code, never reproduced or profiled",
+    "  blocked    the next step is named and unavailable (hardware, a hafiz, a loop)",
+    "  answered   decided; nothing owed in code",
+    "  fixed      closed in code AND in a test that would fail if it came back.",
+    "             `closedBy` is required and the gate refuses the word without it —",
+    "             the same standing rule the ledger runs on, that a result must",
+    "             tighten something automated or it has not been banked.",
+    "",
+    "SEVERITY. Three words. `defect` — the app does something wrong today.",
+    "`question` — a decision not yet made. `risk` — something unmeasured that",
+    "could be wrong, which is the category `suspected` items live in.",
+    "",
+    "FIELDS",
+    "  id         kebab slug, stable, referenced by blockedBy",
+    "  source     {file, item} — a design/backlog OEn row, a PLAN follow-up number,",
+    "             or {ledger: <check id>}",
+    "  status     see above; must match the source marker except for ledger/PLAN",
+    "  severity   defect | question | risk",
+    "  owner      agent (doable from this machine) | user (needs a human or hardware)",
+    "  blockedBy  ids in this file, ledger check ids, or a loop name",
+    "  closedBy   required when status is `fixed`: the test or gate that notices a",
+    "             regression. A path, and the gate checks it resolves.",
+    "",
+    "make issues        the open items, grouped, worst first",
+    "make issues-doc    regenerate docs/issues.md (a gate checks it is not stale)",
+    "pnpm gate:issues   the invariants",
+    "the `issues` skill drives triage: pick, open, close"
+  ],
+
+  "issues": [
+    {
+      "id": "plain-wheel-does-nothing",
+      "source": { "file": "docs/design/page-turning.md", "item": "③" },
+      "status": "confirmed",
+      "severity": "defect",
+      "owner": "agent",
+      "note": "A mouse-only desktop has no zoom at all, in an app whose subject is 15 lines of small Arabic script. ctrl+wheel exists and is uncalibrated: two trackpad ticks go 1x to 1.44x."
+    },
+    {
+      "id": "silent-turn-across-an-absent-page",
+      "source": { "file": "docs/design/page-turning.md", "item": "④" },
+      "status": "confirmed",
+      "severity": "defect",
+      "owner": "agent",
+      "note": "With 3 of 604 pages vendored, every turn in the shipped build crosses a gap the announcement does not name. The string already exists in both catalogues."
+    },
+    {
+      "id": "ayah-focus-eats-the-page-turn-keys",
+      "source": { "file": "docs/design/page-turning.md", "item": "⑤" },
+      "status": "confirmed",
+      "severity": "defect",
+      "owner": "agent",
+      "note": "Tapping an ayah is the app's central gesture, so a hafiz reaches this state constantly and there is no unmodified key out of it. The fix touches a pinned ladder and is a proposal, not a decision."
+    },
+    {
+      "id": "dead-page-fade-css",
+      "source": { "file": "docs/design/page-turning.md", "item": "⑧" },
+      "status": "confirmed",
+      "severity": "defect",
+      "owner": "agent",
+      "note": "Still true: data-status appears only in PageStage.module.css and is never written. A trap rather than a bug — the next reader concludes the cross-fade mechanism exists."
+    },
+    {
+      "id": "mounted-set-has-no-ceiling",
+      "source": { "file": "docs/design/page-turning.md", "item": "⑩" },
+      "status": "suspected",
+      "severity": "risk",
+      "owner": "user",
+      "blockedBy": ["perf-verdict-on-device"],
+      "note": "The one item in that document never reproduced. Owned by backlog OE3; indexed twice here on purpose, because two registers describing one item is exactly what this catalog exists to make visible."
+    },
+    {
+      "id": "double-centring",
+      "source": { "file": "docs/design/page-turning.md", "item": "①" },
+      "status": "fixed",
+      "severity": "defect",
+      "owner": "agent",
+      "closedBy": "apps/web/e2e/stage-fit.spec.ts"
+    },
+    {
+      "id": "stage-fit-tests-cannot-catch-it",
+      "source": { "file": "docs/design/page-turning.md", "item": "②" },
+      "status": "fixed",
+      "severity": "defect",
+      "owner": "agent",
+      "closedBy": "apps/web/e2e/stage-fit.spec.ts"
+    },
+    {
+      "id": "drop-shadow-costs-the-frame-budget",
+      "source": { "file": "docs/design/page-turning.md", "item": "⑥" },
+      "status": "fixed",
+      "severity": "defect",
+      "owner": "agent",
+      "closedBy": "apps/web/e2e/golden.spec.ts"
+    },
+    {
+      "id": "the-rounded-corner-is-invisible",
+      "source": { "file": "docs/design/page-turning.md", "item": "⑦" },
+      "status": "fixed",
+      "severity": "defect",
+      "owner": "agent",
+      "closedBy": "apps/web/e2e/stage-fit.spec.ts"
+    },
+    {
+      "id": "zoom-anchor-coordinate-space",
+      "source": { "file": "docs/design/page-turning.md", "item": "⑨" },
+      "status": "fixed",
+      "severity": "defect",
+      "owner": "agent",
+      "closedBy": "apps/web/e2e/stage-fit.spec.ts"
+    },
+    {
+      "id": "reduced-motion-had-nothing-to-remove",
+      "source": { "file": "docs/design/page-turning.md", "item": "⑪" },
+      "status": "fixed",
+      "severity": "question",
+      "owner": "agent",
+      "closedBy": "apps/web/e2e/page-turn.spec.ts"
+    },
+
+    {
+      "id": "does-the-fold-read-at-all",
+      "source": { "file": "docs/design/page-transition.md", "item": "②" },
+      "status": "blocked",
+      "severity": "question",
+      "owner": "user",
+      "blockedBy": ["a hafiz on the acceptance phone"],
+      "note": "A design judgement with no evidence behind it. There is no cheaper instrument than putting it in front of someone and no measurement substitutes for it."
+    },
+    {
+      "id": "turn-cost-gated-on-the-perf-verdict",
+      "source": { "file": "docs/design/page-transition.md", "item": "③" },
+      "status": "blocked",
+      "severity": "risk",
+      "owner": "user",
+      "blockedBy": ["perf-verdict-on-device"]
+    },
+    {
+      "id": "does-a-real-fore-edge-stack-vary",
+      "source": { "file": "docs/design/page-transition.md", "item": "⑤" },
+      "status": "open",
+      "severity": "question",
+      "owner": "user",
+      "note": "Curiosity, not a blocker — SS4.6 fixes it constant here regardless. But if the reference does vary it, that is a design it got wrong for a memoriser."
+    },
+    {
+      "id": "the-spreads-phase",
+      "source": { "file": "docs/design/page-transition.md", "item": "①" },
+      "status": "answered",
+      "severity": "defect",
+      "owner": "agent",
+      "closedBy": "packages/core/src/pages.test.ts"
+    },
+    {
+      "id": "the-field-colour",
+      "source": { "file": "docs/design/page-transition.md", "item": "④" },
+      "status": "answered",
+      "severity": "question",
+      "owner": "agent",
+      "closedBy": "apps/web/e2e/contrast.spec.ts"
+    },
+    {
+      "id": "gesture-thresholds-inherited",
+      "source": { "file": "docs/design/page-transition.md", "item": "⑥" },
+      "status": "answered",
+      "severity": "question",
+      "owner": "agent"
+    },
+
+    {
+      "id": "arrow-turns-leaf-or-page-at-desktop",
+      "source": { "file": "docs/design/desktop.md", "item": "①" },
+      "status": "blocked",
+      "severity": "question",
+      "owner": "agent",
+      "blockedBy": ["loop-4b"]
+    },
+    {
+      "id": "do-the-two-leaves-pan-together",
+      "source": { "file": "docs/design/desktop.md", "item": "②" },
+      "status": "blocked",
+      "severity": "question",
+      "owner": "agent",
+      "blockedBy": ["loop-4b"]
+    },
+    {
+      "id": "min-width-as-a-proxy-for-a-keyboard",
+      "source": { "file": "docs/design/desktop.md", "item": "③" },
+      "status": "open",
+      "severity": "question",
+      "owner": "agent"
+    },
+    {
+      "id": "second-mount-frame-budget",
+      "source": { "file": "docs/design/desktop.md", "item": "④" },
+      "status": "blocked",
+      "severity": "risk",
+      "owner": "user",
+      "blockedBy": ["perf-verdict-on-device", "loop-4b"]
+    },
+    {
+      "id": "where-the-revision-map-sits-at-desktop",
+      "source": { "file": "docs/design/desktop.md", "item": "⑤" },
+      "status": "open",
+      "severity": "question",
+      "owner": "agent"
+    },
+
+    {
+      "id": "warmth-thresholds",
+      "source": { "file": "docs/design/revision-record.md", "item": "①" },
+      "status": "blocked",
+      "severity": "question",
+      "owner": "user",
+      "blockedBy": ["a hafiz"],
+      "note": "A ledger candidate. The bands decide what `cold` means, and a threshold chosen by whoever wrote the renderer is a claim about somebody else's revision habit."
+    },
+    {
+      "id": "what-a-tap-on-the-heatmap-does",
+      "source": { "file": "docs/design/revision-record.md", "item": "②" },
+      "status": "blocked",
+      "severity": "question",
+      "owner": "agent",
+      "blockedBy": ["loop-4b"]
+    },
+    {
+      "id": "multi-edition-revision-records",
+      "source": { "file": "docs/design/revision-record.md", "item": "③" },
+      "status": "open",
+      "severity": "defect",
+      "owner": "agent",
+      "note": "editionOf exists for the partition and the picture does not use it, so a reader who switches editions sees one record drawn as though it were two prints' worth."
+    },
+
+    {
+      "id": "arabic-number-agreement",
+      "source": { "file": "docs/design/i18n.md", "item": "①" },
+      "status": "open",
+      "severity": "defect",
+      "owner": "user",
+      "blockedBy": ["a hafiz"],
+      "note": "37 forms Arabic silently substitutes today. One JSON edit each, but the edit needs a hafiz's eye. Named in its source as a known defect, deliberately deferred."
+    },
+    {
+      "id": "i18n-other-assumes-two-languages",
+      "source": { "file": "docs/design/i18n.md", "item": "④" },
+      "status": "open",
+      "severity": "risk",
+      "owner": "agent",
+      "note": "Cheap to do, deliberately not done blind — the trigger is a third locale, which is also backlog OE7's trigger at four."
+    },
+    {
+      "id": "lang-switch-interpolates-a-locale-name",
+      "source": { "file": "docs/design/i18n.md", "item": "⑤" },
+      "status": "open",
+      "severity": "risk",
+      "owner": "agent"
+    },
+    {
+      "id": "ar-as-the-reference-locale",
+      "source": { "file": "docs/design/i18n.md", "item": "②" },
+      "status": "answered",
+      "severity": "question",
+      "owner": "agent"
+    },
+    {
+      "id": "refjoin-is-punctuation",
+      "source": { "file": "docs/design/i18n.md", "item": "③" },
+      "status": "answered",
+      "severity": "question",
+      "owner": "agent"
+    },
+
+    {
+      "id": "perf-verdict",
+      "source": { "file": "docs/backlog.md", "item": "①" },
+      "status": "blocked",
+      "severity": "risk",
+      "owner": "user",
+      "blockedBy": ["perf-verdict-on-device"],
+      "note": "The keystone. The oldest open item in the project and the one the most others inherit from."
+    },
+    {
+      "id": "perf-on-real-mid-tier-android",
+      "source": { "file": "docs/backlog.md", "item": "②" },
+      "status": "blocked",
+      "severity": "risk",
+      "owner": "user",
+      "blockedBy": ["an Android phone"],
+      "note": "The probe removed the tooling dependency for the reader and not the hardware dependency for the claim."
+    },
+    {
+      "id": "mounted-set-ceiling",
+      "source": { "file": "docs/backlog.md", "item": "③" },
+      "status": "confirmed",
+      "severity": "risk",
+      "owner": "agent",
+      "blockedBy": ["loop-4b"],
+      "note": "Never wrong today because three vendored pages cap the set at three. After 4b it is the selection's entire hop fan-out. The same item as page-turning OE10."
+    },
+    {
+      "id": "spread-mounts-two-leaves",
+      "source": { "file": "docs/backlog.md", "item": "④" },
+      "status": "blocked",
+      "severity": "risk",
+      "owner": "agent",
+      "blockedBy": ["mounted-set-ceiling"],
+      "note": "Not a defect; a multiplier to apply once the ceiling has a number."
+    },
+    {
+      "id": "bundle-headroom",
+      "source": { "file": "docs/backlog.md", "item": "⑤" },
+      "status": "open",
+      "severity": "risk",
+      "owner": "agent",
+      "note": "gate:budget notices at the cliff rather than on the slope. Printing the delta against main would make a PR that adds 9 KB read as adding 9 KB."
+    },
+    {
+      "id": "nothing-watches-the-vendored-corpus",
+      "source": { "file": "docs/backlog.md", "item": "⑥" },
+      "status": "open",
+      "severity": "risk",
+      "owner": "agent",
+      "note": "~28 MB gz of mushaf at 604 pages — two orders of magnitude past the JS bundle, and the actual weight of this application. The cheapest item in that file and the one most likely to be regretted if skipped."
+    },
+    {
+      "id": "shard-prefetch-misses-the-hop",
+      "source": { "file": "docs/backlog.md", "item": "⑧" },
+      "status": "confirmed",
+      "severity": "defect",
+      "owner": "agent",
+      "note": "A mutashabihat edge very often points into a different surah, so the shard for the place the reader is about to go is exactly the one not prefetched."
+    },
+    {
+      "id": "tti-criterion-has-no-instrument",
+      "source": { "file": "docs/backlog.md", "item": "⑨" },
+      "status": "open",
+      "severity": "risk",
+      "owner": "agent",
+      "note": "Loop 4b's exit says < 2.5 s on mid-Android; Lighthouse CI gates >=90 on a desktop runner. An exit criterion nothing evaluates is the interface-papering-over-a-gap failure this project has already paid for twice."
+    },
+    {
+      "id": "ci-frame-budget-is-emulated",
+      "source": { "file": "docs/backlog.md", "item": "⑩" },
+      "status": "blocked",
+      "severity": "risk",
+      "owner": "agent",
+      "blockedBy": ["perf-verdict-on-device"],
+      "note": "The only mechanical part of the perf verdict, listed separately so it is not forgotten once the interesting part is settled."
+    },
+    {
+      "id": "both-locales-at-first-paint",
+      "source": { "file": "docs/backlog.md", "item": "⑦" },
+      "status": "answered",
+      "severity": "question",
+      "owner": "agent",
+      "note": "Correct for two locales. The trigger to revisit is a fourth."
+    },
+
+    {
+      "id": "check-perf-verdict-on-device",
+      "source": { "ledger": "perf-verdict-on-device" },
+      "severity": "risk",
+      "owner": "user"
+    },
+    {
+      "id": "check-screen-reader-walkthrough",
+      "source": { "ledger": "screen-reader-walkthrough" },
+      "severity": "risk",
+      "owner": "user"
+    },
+    {
+      "id": "check-kfgqpc-terms",
+      "source": { "ledger": "kfgqpc-terms-primary-source" },
+      "severity": "risk",
+      "owner": "user"
+    },
+    {
+      "id": "check-source-offer-resolves",
+      "source": { "ledger": "source-offer-resolves" },
+      "severity": "risk",
+      "owner": "user"
+    },
+    {
+      "id": "check-edge-spot-audit",
+      "source": { "ledger": "edge-spot-audit" },
+      "severity": "risk",
+      "owner": "user",
+      "note": "The only check that can establish the scripture data is correct."
+    },
+    {
+      "id": "check-offline-survival",
+      "source": { "ledger": "offline-survival-8-day" },
+      "severity": "risk",
+      "owner": "user"
+    },
+    {
+      "id": "check-revision-record-on-a-phone",
+      "source": { "ledger": "revision-record-lands-on-a-phone" },
+      "severity": "risk",
+      "owner": "user"
+    },
+
+    {
+      "id": "plan-perf-verdict",
+      "source": { "file": "docs/PLAN.md", "item": "1" },
+      "status": "blocked",
+      "severity": "risk",
+      "owner": "user",
+      "blockedBy": ["perf-verdict-on-device"]
+    },
+    {
+      "id": "plan-per-edition-licence-review",
+      "source": { "file": "docs/PLAN.md", "item": "2" },
+      "status": "blocked",
+      "severity": "risk",
+      "owner": "user",
+      "blockedBy": ["kfgqpc-terms-primary-source"],
+      "note": "Substantially closed. What is still live: the Libyan Endowments editions are non-commercial-only, so EditionPicker may not grow one of those rows on the strength of hafs-kfqc's terms."
+    },
+    {
+      "id": "plan-loop-assigned-deferrals",
+      "source": { "file": "docs/PLAN.md", "item": "3" },
+      "status": "blocked",
+      "severity": "question",
+      "owner": "agent",
+      "blockedBy": ["loop-4b"]
+    },
+    {
+      "id": "plan-screen-reader-pass",
+      "source": { "file": "docs/PLAN.md", "item": "4" },
+      "status": "blocked",
+      "severity": "risk",
+      "owner": "user",
+      "blockedBy": ["screen-reader-walkthrough"]
+    },
+    {
+      "id": "plan-tajweed-golden-row",
+      "source": { "file": "docs/PLAN.md", "item": "8" },
+      "status": "blocked",
+      "severity": "question",
+      "owner": "user",
+      "blockedBy": ["a hafiz", "loop-7"],
+      "note": "Two preconditions, both of which must hold: the palette sign-off, and a test-only way to drive the skin — a production-readable skin= param would ship a shareable link that turns a beta annotation layer on for a reader who never saw the badge."
+    },
+    {
+      "id": "plan-stage-coordinate-model",
+      "source": { "file": "docs/PLAN.md", "item": "10" },
+      "status": "open",
+      "severity": "defect",
+      "owner": "agent",
+      "note": "Eleven findings. OE1 OE2 OE6 OE7 OE9 OE11 are closed; OE3 OE4 OE5 OE8 remain and are indexed individually above. This entry is the follow-up, not any one of them."
+    },
+    {
+      "id": "plan-drag-to-turn",
+      "source": { "file": "docs/PLAN.md", "item": "11" },
+      "status": "open",
+      "severity": "question",
+      "owner": "agent",
+      "note": "Still open deliberately. PointerIntent has no `turn` verdict, so today a turn is a button, a key or the page bar — a gesture that competes with pan and marquee is its own design, not a detail of this one."
+    },
+    {
+      "id": "plan-hifth-licence",
+      "source": { "file": "docs/PLAN.md", "item": "5" },
+      "status": "answered",
+      "severity": "question",
+      "owner": "agent"
+    },
+    {
+      "id": "plan-ink-faint-contrast",
+      "source": { "file": "docs/PLAN.md", "item": "6" },
+      "status": "fixed",
+      "severity": "defect",
+      "owner": "agent",
+      "closedBy": "apps/web/e2e/contrast.spec.ts"
+    },
+    {
+      "id": "plan-merge-pass-is-a-step",
+      "source": { "file": "docs/PLAN.md", "item": "7" },
+      "status": "answered",
+      "severity": "question",
+      "owner": "agent"
+    },
+    {
+      "id": "plan-revision-record",
+      "source": { "file": "docs/PLAN.md", "item": "9" },
+      "status": "fixed",
+      "severity": "question",
+      "owner": "agent",
+      "closedBy": "apps/web/e2e/revision.spec.ts"
+    }
+  ]
+}

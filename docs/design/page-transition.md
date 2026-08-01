@@ -907,7 +907,13 @@ spread's crease is structure and `desktop.spec.ts` can assert it by attribute.
 
 ## 7. Open questions, and what would answer each
 
-**① The spread's phase — ANSWERED, and `spreadOf` was the one that was wrong.**
+Every design doc in this repo ends under this heading, and every item is an
+`### ⓝ … · **status**` row so `pnpm gate:issues` can read it. The vocabulary is defined
+once in [`docs/issues.json`](../issues.json).
+
+### ① The spread's phase · **answered**
+
+**`spreadOf` was the one that was wrong.**
 `spreadOf` paired (even, odd) with even on the right. The reference app pairs (odd, even)
 (§1.6). They were one leaf out of phase, and this was written up as the question that could
 make every crease in the app wrong.
@@ -937,14 +943,17 @@ in core. Two conventions did **not** move: the lower page number is still on the
 the turn direction is still RTL, so `PLAN.md`'s desktop rule and `loop-1.md`'s convention
 stand.
 
-**② Does the fold read at all?** The claim in §3.2 — that a 28–30 px band crossing in 240 ms
+### ② Does the fold read at all? · **blocked**
+
+The claim in §3.2 — that a 28–30 px band crossing in 240 ms
 is legible as a fold and does mask the cross-fade's ambiguous midpoint — is a design
 judgement with no evidence behind it. What would answer it: build it and put it in front of a
 hafiz on the acceptance phone. There is no cheaper instrument, and no measurement substitutes
 for it.
 
-**③ Everything gated on `perf-verdict-on-device` (backlog ① / `PLAN.md` follow-up ①).**
-Three sub-questions, all needing the same hardware:
+### ③ Everything gated on `perf-verdict-on-device` · **blocked**
+
+Backlog ① / `PLAN.md` follow-up ①. Three sub-questions, all needing the same hardware:
 - Does a second painted layer for 120 ms cost anything measurable on a mid-tier Android
   beside a 170 KB inline SVG? **Measure:** a `turn` segment in `apps/web/src/perf/probe.ts`
   beside the existing `pan` / `pinch` / `highlight`, run via `make phone-perf`.
@@ -956,7 +965,9 @@ Three sub-questions, all needing the same hardware:
 
 Also unmeasured: **how long a stalled fold (§5.3) may hold before it reads as broken.**
 
-**④ The field colour — closed. `#af8a68`, the reference's own.** §2.2 proposed
+### ④ The field colour · **answered**
+
+**Closed: `tan`, `#af8a68`, the reference's own.** §2.2 proposed
 `--paper-sunk` because it was already in the palette. The reference's `#AF8A68` is a full
 step further and separates the leaf far more decisively. Adopting anything like it is a
 colour decision, and this repo has a specific instrument for those: `e2e/contrast.spec.ts`
@@ -1009,14 +1020,18 @@ separation exactly `sunk`'s best. All three are removed. `dark` stays, because i
 competing answer to this question; it answers *reading at night*, and it is the only field
 that does. Still no picker: `dark` is reachable by link and nothing else.
 
-**⑤ Does a real fore-edge stack vary?** We have exactly one sample — page 297 of 604, drawn
+### ⑤ Does a real fore-edge stack vary? · **open**
+
+We have exactly one sample — page 297 of 604, drawn
 with two slivers. Whether the reference thins it near the ends of the book is unknown.
 **Measure:** capture the same application at page 5 and page 600 and compare the stack width.
 §4.6 says it must be constant here regardless of the answer, so this is curiosity rather
 than a blocker — but if it *does* vary, that is a design the reference got wrong for a
 memoriser and worth recording as such.
 
-**⑥ Inherited, not reopened.** `page-turning.md` §4.2's `|dx| > 2·|dy|` latch ratio and
+### ⑥ The gesture thresholds are inherited, not reopened · **answered**
+
+`page-turning.md` §4.2's `|dx| > 2·|dy|` latch ratio and
 §4.3's 25 %/velocity commit thresholds are all unmeasured there and remain unmeasured here.
 They belong to the gesture, and the gesture is that document's.
 

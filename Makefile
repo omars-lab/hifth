@@ -214,6 +214,7 @@ ci: core ## Full local mirror of the CI build-test-gate job, IN CI ORDER
 	$(PNPM) gate:golden-size
 	$(PNPM) gate:map
 	$(PNPM) gate:use-cases
+	$(PNPM) gate:issues
 	$(PNPM) gate:quran-meta
 	$(PNPM) gate:revision-privacy
 	$(PNPM) gate:i18n
@@ -357,6 +358,25 @@ use-cases: ## Who uses Hifth and what proves it:  make use-cases  ·  make use-c
 .PHONY: use-cases-doc
 use-cases-doc: ## Re-render docs/use-cases.md (the mermaid map) from docs/use-cases.json
 	@node scripts/build-use-cases.mjs
+
+.PHONY: issues
+issues: ## What is still open, worst first:  make issues  ·  make issues ID=<id>
+	@# docs/issues.json is the source, and it is an index: no titles, no
+	@# descriptions, no reproductions. Those live in PLAN.md's follow-ups,
+	@# backlog.md, a design doc's open-questions section, or the validation
+	@# ledger — whichever owns the item. What this adds is what none of those can
+	@# hold: severity, owner, what blocks it, and the fact that two registers are
+	@# describing the same thing. Everything printed below is read out of the
+	@# owning document at the moment you run it.
+	@if [ -n "$(ID)" ]; then \
+	  node scripts/gate-issues.mjs --id "$(ID)"; \
+	else \
+	  node scripts/gate-issues.mjs --list; \
+	fi
+
+.PHONY: issues-doc
+issues-doc: ## Re-render docs/issues.md from docs/issues.json and its four registers
+	@node scripts/build-issues-doc.mjs
 
 .PHONY: validate
 validate: ## Outstanding manual checks — or one check's full runbook:  make validate CHECK=<id>

@@ -34,10 +34,11 @@
     "gate:map": "node scripts/gate-map.mjs",
     "gate:revision-privacy": "node scripts/gate-revision-privacy.mjs",
     "gate:use-cases": "node scripts/gate-use-cases.mjs",
+    "gate:issues": "node scripts/gate-issues.mjs",
     "gate:quran-meta": "node scripts/gate-quran-meta.mjs",
     "gate:i18n": "node scripts/gate-i18n.mjs",
     "gate:params": "node scripts/gate-params.mjs",
-    "gates": "pnpm gate:text-sources && pnpm gate:notext && pnpm gate:license && pnpm gate:license-copy && pnpm gate:validation && pnpm gate:verified-edges && pnpm gate:edges && pnpm gate:ci-artifacts && pnpm gate:golden-env && pnpm gate:golden-size && pnpm gate:map && pnpm gate:use-cases && pnpm gate:quran-meta && pnpm gate:revision-privacy && pnpm gate:i18n && pnpm gate:params && pnpm gate:budget",
+    "gates": "pnpm gate:text-sources && pnpm gate:notext && pnpm gate:license && pnpm gate:license-copy && pnpm gate:validation && pnpm gate:verified-edges && pnpm gate:edges && pnpm gate:ci-artifacts && pnpm gate:golden-env && pnpm gate:golden-size && pnpm gate:map && pnpm gate:use-cases && pnpm gate:issues && pnpm gate:quran-meta && pnpm gate:revision-privacy && pnpm gate:i18n && pnpm gate:params && pnpm gate:budget",
     "sample:edges": "node packages/etl/scripts/sample-edges.mjs",
     "guide": "node scripts/build-validation-guide.mjs",
     "record": "node scripts/record-validation.mjs",
@@ -46,7 +47,9 @@
     "i18n:build": "node scripts/build-messages.mjs",
     "map": "node scripts/gate-map.mjs --list",
     "use-cases": "node scripts/gate-use-cases.mjs --list",
-    "use-cases:doc": "node scripts/build-use-cases.mjs"
+    "use-cases:doc": "node scripts/build-use-cases.mjs",
+    "issues": "node scripts/gate-issues.mjs --list",
+    "issues:doc": "node scripts/build-issues-doc.mjs"
   },
   "pnpm": {
     "overrides": {
