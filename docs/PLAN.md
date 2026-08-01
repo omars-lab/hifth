@@ -55,6 +55,14 @@ described in both files.
 
 ### Open follow-ups
 
+These eleven are indexed in [`issues.json`](issues.json) alongside the design docs' open
+questions, `backlog.md` and the validation ledger, and `make issues` prints all four
+registers in one list. They are indexed by *number only*: unlike every other register, a
+follow-up here carries no status marker, because these are compound narratives whose job is
+to record how a thing was believed over time — ② keeps its own retracted licence claim beside
+the correction, ⑩ carries three successive re-measurements — and a single word cannot stand
+in for that. `pnpm gate:issues` checks the number still exists and reads no further.
+
 1. **On-device perf verdict** (formerly external-tracker task #24) — decide
    inline-SVG-everywhere vs content-visibility virtualization vs raster-glyph fallback.
    The emulated baseline (~8.3 ms/frame, flat under CPU throttle) cannot see the real
