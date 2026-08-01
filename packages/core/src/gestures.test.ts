@@ -1,6 +1,12 @@
 import { describe, expect, it } from "vitest";
 import {
   LONG_PRESS_MS,
+  WHEEL_GAP_MS,
+  WHEEL_TURN_PX,
+  WHEEL_TURN_REST,
+  normalizeWheelDelta,
+  nextWheelTurn,
+  type WheelTurnState,
   PINCH_POINTER_COUNT,
   TAP_SLOP_PX,
   isMarqueeIntent,
@@ -215,5 +221,91 @@ describe("marqueeRect", () => {
       width: 0,
       height: 0,
     });
+  });
+});
+
+describe("the wheel — one turn per gesture (§7 ③, page-transition §3.2 ④)", () => {
+  /** Feed a whole gesture and collect the turns it produced. */
+  const play = (
+    events: ReadonlyArray<{ deltaY: number; timeStamp: number; deltaMode?: number }>,
+    from: WheelTurnState = WHEEL_TURN_REST,
+  ): { steps: number[]; state: WheelTurnState } => {
+    let state = from;
+    const steps: number[] = [];
+    for (const e of events) {
+      const out = nextWheelTurn(state, { deltaMode: 0, ...e });
+      state = out.state;
+      if (out.step !== 0) steps.push(out.step);
+    }
+    return { steps, state };
+  };
+
+  it("turns forward on a scroll down and back on a scroll up", () => {
+    expect(play([{ deltaY: 100, timeStamp: 0 }]).steps).toEqual([1]);
+    expect(play([{ deltaY: -100, timeStamp: 0 }]).steps).toEqual([-1]);
+  });
+
+  it("ignores movement under the threshold — a resting hand drifts", () => {
+    const gentle = Array.from({ length: 5 }, (_, i) => ({ deltaY: 4, timeStamp: i * 16 }));
+    expect(play(gentle).steps).toEqual([]);
+  });
+
+  it("turns exactly one page for a trackpad flick, momentum and all", () => {
+    // The whole point of the debounce. A flick is ~15 frames of real movement
+    // followed by a decaying tail that can outlive the fingers by a second; per
+    // event this would be dozens of turns, which is the unbounded mounting
+    // §3.2 ④ rejects scroll-snap for.
+    const flick = [
+      ...Array.from({ length: 15 }, (_, i) => ({ deltaY: 12, timeStamp: i * 16 })),
+      ...Array.from({ length: 40 }, (_, i) => ({ deltaY: 12 * 0.9 ** i, timeStamp: 240 + i * 16 })),
+    ];
+    expect(play(flick).steps).toEqual([1]);
+  });
+
+  it("turns once per mouse notch, because a notch opens a gap a stream never does", () => {
+    // WHEEL_GAP_MS is the only discriminator available: a wheel event does not
+    // say which device sent it.
+    const notches = [0, 150, 300, 450].map((timeStamp) => ({ deltaY: 100, timeStamp }));
+    expect(play(notches).steps).toEqual([1, 1, 1, 1]);
+  });
+
+  it("abandons a gesture's travel at the gap instead of carrying it over", () => {
+    // Two sub-threshold nudges either side of a pause must not add up into a
+    // turn the reader never asked for.
+    const nudge = WHEEL_TURN_PX - 1;
+    expect(
+      play([
+        { deltaY: nudge, timeStamp: 0 },
+        { deltaY: nudge, timeStamp: WHEEL_GAP_MS },
+      ]).steps,
+    ).toEqual([]);
+  });
+
+  it("cannot be spent twice by one gesture, however far it goes", () => {
+    const shove = Array.from({ length: 30 }, (_, i) => ({ deltaY: 50, timeStamp: i * 16 }));
+    expect(play(shove).steps).toEqual([1]);
+  });
+
+  it("re-arms after the quiet, so a second flick turns a second page", () => {
+    const first = Array.from({ length: 10 }, (_, i) => ({ deltaY: 20, timeStamp: i * 16 }));
+    const second = first.map((e) => ({ ...e, timeStamp: e.timeStamp + 1000 }));
+    expect(play([...first, ...second]).steps).toEqual([1, 1]);
+  });
+
+  it("reads line and page deltaModes, which is how Firefox reports a notch", () => {
+    // deltaMode 1 is lines: three of them is one notch, and 3 × 40 = 120 px.
+    expect(normalizeWheelDelta({ deltaY: 3, deltaMode: 1 })).toBe(120);
+    expect(normalizeWheelDelta({ deltaY: 1, deltaMode: 2 })).toBe(800);
+    expect(normalizeWheelDelta({ deltaY: 100, deltaMode: 0 })).toBe(100);
+    // Below the threshold in its own units, over it once normalized.
+    expect(play([{ deltaY: 3, timeStamp: 0, deltaMode: 1 }]).steps).toEqual([1]);
+  });
+
+  it("starts from rest with no history to inherit", () => {
+    expect(WHEEL_TURN_REST.armed).toBe(true);
+    expect(WHEEL_TURN_REST.travel).toBe(0);
+    // A first event at timeStamp 0 must read as quiet, not as the continuation
+    // of a gesture that never happened.
+    expect(play([{ deltaY: 100, timeStamp: 0 }], WHEEL_TURN_REST).steps).toEqual([1]);
   });
 });

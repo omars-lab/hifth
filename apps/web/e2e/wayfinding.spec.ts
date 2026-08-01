@@ -99,6 +99,91 @@ test.describe("Hifth · wayfinding", () => {
     await expect(page.locator(pageNum)).toHaveText("9");
   });
 
+  test("a turn that steps over a page we do not have says where it landed", async ({ page }) => {
+    // `page-turning.md` §7 ④. Every turn in this build crosses a gap — 7 → 9
+    // steps over page 8, 9 → 19 over nine more — so a turn that announced only
+    // "Page 9" would be the interface papering over the exact thing the vendored
+    // corpus must never hide. The scrubber has said this since Loop 6a; the
+    // stepper said nothing, and that is what this row is here to keep fixed.
+    await page.goto("/");
+    await expect(page.locator("svg[role='group']")).toBeVisible();
+    const said = page.locator("[aria-live='polite']");
+
+    await page.keyboard.press("ArrowLeft");
+    await expect(page.locator(pageNum)).toHaveText("9");
+    await expect(said).toContainText("أقرب صفحة متوفّرة · صفحة 9");
+
+    // The far end, where nothing moves at all. "Last available page" on its own
+    // would tell a reader their arrow did nothing and leave them to guess where
+    // they are — with three pages of 604, a guess they will get wrong.
+    await page.keyboard.press("ArrowLeft");
+    await expect(page.locator(pageNum)).toHaveText("19");
+    await page.keyboard.press("ArrowLeft");
+    await expect(said).toContainText("آخر صفحة متوفّرة · صفحة 19");
+    await expect(page.locator(pageNum)).toHaveText("19");
+
+    // …and the near end, which is a different sentence for the same reason.
+    await page.getByRole("slider").fill("7");
+    await page.keyboard.press("ArrowRight");
+    await expect(said).toContainText("أول صفحة متوفّرة · صفحة 7");
+    await expect(page.locator(pageNum)).toHaveText("7");
+  });
+
+  test("the page keys turn from anywhere, and Escape lets go of the ayah", async ({ page }) => {
+    // `page-turning.md` §7 ⑤. Rule 5 is right — a focused ayah keeps the arrows
+    // for the ayah stepper — but tapping an ayah is this app's central gesture,
+    // so a reader spends most of their time in a state that used to have no key
+    // that turned a page and no key that got them out. Two exits, and this row
+    // is both of them.
+    await page.goto("/");
+    await expect(page.locator("svg[role='group']")).toBeVisible();
+    await page.locator("#verse-55").focus();
+
+    // The arrows still belong to the stepper: the premise, restated here so a
+    // regression that handed them to the page turn fails on the next line
+    // rather than passing by turning the page twice.
+    await page.keyboard.press("ArrowLeft");
+    await expect(page.locator(pageNum)).toHaveText("7");
+
+    // PageDown/PageUp are nobody else's. They name no direction either, so
+    // unlike the arrows they need no RTL convention to be read correctly.
+    await page.keyboard.press("PageDown");
+    await expect(page.locator(pageNum)).toHaveText("9");
+    await page.keyboard.press("PageUp");
+    await expect(page.locator(pageNum)).toHaveText("7");
+
+    // The other exit. Escape blurs the ayah, and the proof it worked is that
+    // the *arrow* turns the page on the very next press — rule 6, reached
+    // because `onAyah` is false again.
+    await page.locator("#verse-55").focus();
+    await page.keyboard.press("Escape");
+    await page.keyboard.press("ArrowLeft");
+    await expect(page.locator(pageNum)).toHaveText("9");
+  });
+
+  test("an open sheet keeps the page keys, and Escape closes it rather than blurring", async ({
+    page,
+  }) => {
+    // Rule 3 over rule 5 (`keymap.ts`). A page turn under an open sheet moves
+    // the ground the reader is standing on, and Escape with something in front
+    // of you means "close this" — a reader who pressed it twice would expect to
+    // close the sheet and then let go of the ayah, in that order.
+    await page.goto("/");
+    await expect(page.locator("svg[role='group']")).toBeVisible();
+    await page.locator("#verse-55").focus();
+    await page.keyboard.press("/");
+    const jumper = page.getByRole("dialog", { name: "اذهب إلى" });
+    await expect(jumper).toBeVisible();
+
+    await page.keyboard.press("PageDown");
+    await expect(page.locator(pageNum)).toHaveText("7");
+    await expect(jumper).toBeVisible();
+
+    await page.keyboard.press("Escape");
+    await expect(jumper).toHaveCount(0);
+    await expect(page.locator(pageNum)).toHaveText("7");
+  });
+
   test("an ayah with focus keeps the arrows; `/` still opens the jumper", async ({ page }) => {
     await page.goto("/");
     await expect(page.locator("svg[role='group']")).toBeVisible();

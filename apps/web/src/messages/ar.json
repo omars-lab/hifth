@@ -19,8 +19,8 @@
   "nextPage": "الصفحة التالية",
   "pagesVendored": "المتوفّر {haveText} من {totalText} صفحة",
 
-  "firstPage": "أول صفحة متوفّرة",
-  "lastPage": "آخر صفحة متوفّرة",
+  "firstPage": "أول صفحة متوفّرة · صفحة {page}",
+  "lastPage": "آخر صفحة متوفّرة · صفحة {page}",
   "nearestPageN": "أقرب صفحة متوفّرة · صفحة {page}",
   "selectionCleared": "أُلغي التحديد",
   "selected": "حُدّدت {label}",

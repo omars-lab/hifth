@@ -19,8 +19,8 @@
   "nextPage": "Next page",
   "pagesVendored": "{haveText} of {totalText} pages available",
 
-  "firstPage": "First available page",
-  "lastPage": "Last available page",
+  "firstPage": "First available page · Page {page}",
+  "lastPage": "Last available page · Page {page}",
   "nearestPageN": "Nearest available page · Page {page}",
   "selectionCleared": "Selection cleared",
   "selected": "Selected {label}",

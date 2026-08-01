@@ -129,6 +129,18 @@ export {
   type PointerSample,
 } from "./gestures.js";
 
+// The wheel — the desktop's page turn (`page-transition.md` §3.2 ④). Same file
+// and same shape as the pointer split: one sample in, one decision out.
+export {
+  WHEEL_GAP_MS,
+  WHEEL_TURN_PX,
+  WHEEL_TURN_REST,
+  normalizeWheelDelta,
+  nextWheelTurn,
+  type WheelSample,
+  type WheelTurnState,
+} from "./gestures.js";
+
 export {
   MARQUEE_MIN_SIZE,
   rectsIntersect,
@@ -185,6 +197,7 @@ export {
 
 export {
   JUMPER_KEY,
+  PAGE_KEYS,
   appKeyAction,
   type KeyAction,
   type KeyContext,
