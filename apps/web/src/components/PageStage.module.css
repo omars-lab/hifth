@@ -201,13 +201,14 @@
   cursor: pointer;
 }
 
-.host[data-status="loading"] {
-  opacity: 0;
-}
-.host[data-status="ready"] {
-  opacity: 1;
-  transition: opacity var(--dur-med) var(--ease-hop);
-}
+/* A `.host[data-status]` cross-fade lived here and drew nothing: no code has
+   ever written that attribute (`page-turning.md` §7 ⑧). It was left in place
+   because §3.1 of `page-transition.md` was about to need exactly this mechanism
+   — and then didn't. The fold is a third element that carries no page, and the
+   rule it settled on is that *during a turn no glyph moves at all*, so a page
+   that fades in is a page that contradicts it. The prediction was reasonable
+   and it was wrong; the rules it would have driven are gone, so the rules that
+   would have driven them are gone too. */
 
 /* `isolation` belongs here, on the SVG root, and nowhere else. The highlight
    swipes inside #hifth-overlay blend with `multiply` (styles/highlight.css), and

@@ -562,16 +562,24 @@ test.describe("Hifth · the stage holds page, not paper", () => {
     const before = await userSpaceAt(svg, anchor);
     expect(before, "could not read the SVG's screen CTM").not.toBeNull();
 
+    // One mouse notch. It was −40 while `ctrl`+wheel went through @use-gesture,
+    // whose bridge zoomed ~1.4× per notch and reached the premise below on a
+    // fraction of one; the calibrated curve (`page-turning.md` §7 ③) is 1.2× per
+    // 100 px, so the stimulus has to be a gesture a person would actually make.
+    // The `android` project is what forced the arithmetic to be written down:
+    // its wheel deltas arrive divided by the 2.625 device scale factor, so −40
+    // there is −15.2 px and zooms 1.028 — under the premise, and correctly so.
+    // At −120 the two projects land at 1.25 and 1.09, both of them a zoom.
     await page.mouse.move(anchor.x, anchor.y);
     await page.keyboard.down("Control");
-    await page.mouse.wheel(0, -40);
+    await page.mouse.wheel(0, -120);
     await page.keyboard.up("Control");
     await settle(svg);
 
-    // The premise. `ctrl`+wheel reaches `onPinch` through @use-gesture's
-    // modifier-key path, and if that ever stops being true this test would pass
-    // by never zooming at all — which is the failure mode a drift assertion is
-    // least able to notice.
+    // The premise. `ctrl`+wheel is now the stage's own listener rather than
+    // @use-gesture's modifier-key path, and if that ever stops being true this
+    // test would pass by never zooming at all — which is the failure mode a
+    // drift assertion is least able to notice.
     const zoomed = await scaleOf(svg);
     expect(zoomed, "the zoom never happened — this test proved nothing").toBeGreaterThan(1.05);
 

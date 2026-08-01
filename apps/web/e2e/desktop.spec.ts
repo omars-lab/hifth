@@ -398,3 +398,122 @@ test.describe("Hifth · the desktop spread", () => {
     expect(clip, "the open book stopped clipping the parked band").toBe("hidden");
   });
 });
+
+/*
+ * The wheel — `page-turning.md` §7 ③.
+ *
+ * Here rather than on the phone projects because a wheel is a desktop input:
+ * `desktop.md` §6 documents the keyboard and the pointer, and this is the third
+ * thing that surface has. (Mobile WebKit cannot be sent a wheel at all —
+ * `stage-fit.spec.ts` says so where it skips for the same reason.)
+ *
+ * Two claims, and they are separate on purpose. That a wheel *turns* is one line
+ * of wiring; that it turns **once per gesture** is the rule, and the rule is
+ * `nextWheelTurn` in @hifth/core, unit-tested there against flicks, tails and
+ * notches. What these rows prove is the half a unit test cannot: that the
+ * listener is on the stage, that its verdict reaches the same `stepPage` the
+ * arrow keys end in, and that `ctrl` still means zoom.
+ */
+test.describe("Hifth · the wheel", () => {
+  const NUM = "header .numeric";
+
+  /** The zoom the stage is actually at, read off the host's own matrix. */
+  const scaleOf = (page: Page, pageNo: number): Promise<number> =>
+    pageSvg(page, pageNo)
+      .locator("xpath=..")
+      .evaluate((el) => new DOMMatrix(getComputedStyle(el).transform).a);
+
+  /** Open on page 7 with the pointer resting on the leaf, where a wheel lands. */
+  async function overTheLeaf(page: Page): Promise<void> {
+    await page.goto("/#/hafs-kfqc/p7");
+    await expect(pageSvg(page, 7)).toBeVisible({ timeout: 20_000 });
+    const leaf = await boxOf(pageSvg(page, 7));
+    await page.mouse.move(leaf.x + leaf.width / 2, leaf.y + leaf.height / 2);
+  }
+
+  test("scrolling turns the page, and down is forward", async ({ page }) => {
+    await overTheLeaf(page);
+
+    // Down goes onward — the direction a reader's hand means by it on every
+    // other surface. Note this is *not* the RTL question the arrow keys had to
+    // settle: down is down in both directions of script, which is much of why
+    // the vertical axis is the one bound here.
+    await page.mouse.wheel(0, 120);
+    await expect(page.locator(NUM)).toHaveText("9");
+
+    // A pause, then the other way. The pause is the gesture boundary — 100 ms of
+    // quiet is what tells a mouse's second notch from a trackpad's next frame,
+    // and there is no other signal in a wheel event that could.
+    await page.waitForTimeout(200);
+    await page.mouse.wheel(0, -120);
+    await expect(page.locator(NUM)).toHaveText("7");
+
+    // Drift is not a gesture. A hand resting on a trackpad emits a few pixels;
+    // a page that turned on them would turn while nobody was asking.
+    await page.waitForTimeout(200);
+    await page.mouse.wheel(0, 10);
+    await page.waitForTimeout(300);
+    await expect(page.locator(NUM)).toHaveText("7");
+  });
+
+  test("a flick and its momentum tail turn exactly one page", async ({ page }) => {
+    await overTheLeaf(page);
+
+    // Dispatched in the page rather than through `mouse.wheel`, and the reason
+    // is the thing under test. A trackpad flick is ~50 events a few milliseconds
+    // apart, including the tail the OS keeps sending after the fingers have
+    // lifted; driving that over CDP would put a round-trip between each event
+    // and turn one gesture into fifty, which is precisely the bug this asserts
+    // the absence of. The trade is that these events are untrusted — the
+    // listener does not care, and the real-input path is covered by the row
+    // above.
+    await page.evaluate(() => {
+      const stage = document
+        .querySelector('svg[aria-labelledby="page-label-7"]')
+        ?.closest("[data-leaf]");
+      if (!stage) throw new Error("no stage under the visible page");
+      // 15 frames of a push, then a decaying tail — 40 more events that the
+      // hand is no longer driving. Total travel is over 400 px: eleven turns if
+      // the rule were per-event, one if it is per gesture.
+      for (let i = 0; i < 15; i += 1) {
+        stage.dispatchEvent(new WheelEvent("wheel", { deltaY: 12, bubbles: true, cancelable: true }));
+      }
+      for (let i = 0; i < 40; i += 1) {
+        stage.dispatchEvent(
+          new WheelEvent("wheel", { deltaY: 12 * Math.exp(-i / 12), bubbles: true, cancelable: true }),
+        );
+      }
+    });
+
+    await expect(page.locator(NUM)).toHaveText("9");
+    // …and it stays there. A tail that spent a second turn would land on 19.
+    await page.waitForTimeout(400);
+    await expect(page.locator(NUM)).toHaveText("9");
+  });
+
+  test("ctrl+wheel zooms by a step rather than a leap, and turns nothing", async ({ page }) => {
+    await overTheLeaf(page);
+    expect(await scaleOf(page, 7)).toBeCloseTo(1, 2);
+
+    // One notch, which in pixel mode is 100 px. @use-gesture's own wheel-to-pinch
+    // bridge made this `1 + 100/100` × the current zoom — 2.0× from one notch,
+    // and MAX_ZOOM saturated in three. The reader aiming for a comfortable read
+    // got a wall of ink before their hand stopped moving.
+    await page.keyboard.down("Control");
+    await page.mouse.wheel(0, -100);
+    await expect.poll(() => scaleOf(page, 7)).toBeGreaterThan(1.15);
+    expect(await scaleOf(page, 7), "one notch is not one step").toBeLessThan(1.25);
+
+    // Three more. Multiplicative, so this is 1.2⁴ ≈ 2.07 — the same proportion
+    // of a change each time, which is what makes the gesture learnable at either
+    // end of the range. The old bridge was at the 5× ceiling by now.
+    for (let i = 0; i < 3; i += 1) await page.mouse.wheel(0, -100);
+    await page.keyboard.up("Control");
+    await expect.poll(() => scaleOf(page, 7)).toBeGreaterThan(1.9);
+    expect(await scaleOf(page, 7), "four notches saturated the zoom").toBeLessThan(2.3);
+
+    // And the modifier is the whole difference: not one of those five events
+    // turned a leaf.
+    await expect(page.locator(NUM)).toHaveText("7");
+  });
+});

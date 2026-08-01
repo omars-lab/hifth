@@ -29,6 +29,12 @@
  * slow pan would flip to marquee the moment it paused, and a marquee would flip
  * to pan the moment it sped up — the gesture would change meaning mid-stroke.
  *
+ * A desktop adds a fourth input to the same surface — the **wheel**, which
+ * turns pages. It is not a pointer and gets its own rule at the foot of this
+ * file, but it is here rather than in a file of its own for the reason above:
+ * it is the same question (*what did that movement mean?*) asked of a different
+ * device, and the answer has to be as testable without hardware as the rest.
+ *
  * Note what is *not* an input here: `prefers-reduced-motion`. Reduced motion
  * shortens animation (tokens set `--dur-hop: 0`), but a hold is a hold and a
  * drag is a drag; changing the thresholds would change what the user's hand
@@ -119,6 +125,126 @@ export function isMarqueeIntent(intent: PointerIntent): boolean {
 /** True when the intent should drive the pan/zoom transform. */
 export function isViewportIntent(intent: PointerIntent): boolean {
   return intent === "pan" || intent === "pinch";
+}
+
+/*
+ * ---------------------------------------------------------------------------
+ * The wheel — `page-turning.md` §7 ③, shaped by `page-transition.md` §3.2 ④.
+ *
+ * Plain wheel over the stage used to do nothing at all, which on a desktop is
+ * the one input a reader reaches for without being told. It turns pages. The
+ * requirement §3.2 ④ states is *discrete and debounced — one turn per gesture,
+ * not per event*, and it rules out the obvious implementation: a scroll-snap
+ * container needs `scrollLeft`, whose sign convention under RTL is not portable
+ * (§2.6), and a momentum scroll over 604 pages would mount an unbounded number
+ * of leaves (`backlog.md` ③).
+ *
+ * So the wheel is classified the same way the hand is, and for the same reason
+ * the rest of this file exists: the rule is time and distance only, it is pure,
+ * and every boundary is a unit test rather than a trackpad in someone's hand.
+ * ---------------------------------------------------------------------------
+ */
+
+/**
+ * A quiet this long ends the gesture and re-arms the turn.
+ *
+ * This single number is what separates a mouse from a trackpad, and it is the
+ * only honest discriminator available — a `wheel` event does not say which
+ * device produced it. A trackpad (and the momentum tail that outlives the
+ * fingers) streams at frame rate, ~16 ms apart, so it never opens a gap this
+ * wide and the whole flick counts as **one** gesture. A mouse notch is a
+ * discrete flick of a finger, rarely repeated faster than this, so each notch
+ * is its own gesture and turns its own page.
+ *
+ * The failure mode if it is set too low is a momentum tail turning three pages
+ * after the hand has stopped, which is exactly the unbounded mounting §3.2 ④
+ * rejects scroll-snap for.
+ */
+export const WHEEL_GAP_MS = 100;
+
+/**
+ * Accumulated wheel movement (normalized px, see {@link normalizeWheelDelta})
+ * before a gesture turns a page.
+ *
+ * One mouse notch is 100 px in a pixel-mode browser, so a notch clears this
+ * comfortably and turns exactly one page. A trackpad crosses it a few frames
+ * into a deliberate two-finger push, and never on the stray one-pixel drift a
+ * resting hand produces.
+ */
+export const WHEEL_TURN_PX = 40;
+
+/** A wheel notch in line mode, in px. Matches @use-gesture's own constant. */
+const WHEEL_LINE_HEIGHT = 40;
+
+/** A wheel notch in page mode, in px. Matches @use-gesture's own constant. */
+const WHEEL_PAGE_HEIGHT = 800;
+
+/** One wheel event, reduced to what the turn rule may look at. */
+export interface WheelSample {
+  /** `WheelEvent.deltaY`, in whatever unit `deltaMode` names. */
+  deltaY: number;
+  /** `WheelEvent.deltaMode`: 0 = px, 1 = lines, 2 = pages. */
+  deltaMode: number;
+  /** `WheelEvent.timeStamp`, or any monotonic ms clock. */
+  timeStamp: number;
+}
+
+/** How far this event scrolled, in px, whatever unit it arrived in. */
+export function normalizeWheelDelta(sample: Pick<WheelSample, "deltaY" | "deltaMode">): number {
+  if (sample.deltaMode === 1) return sample.deltaY * WHEEL_LINE_HEIGHT;
+  if (sample.deltaMode === 2) return sample.deltaY * WHEEL_PAGE_HEIGHT;
+  return sample.deltaY;
+}
+
+/**
+ * What the wheel has accumulated so far. Opaque to callers; hand it back.
+ * {@link WHEEL_TURN_REST} is the value to start from.
+ */
+export interface WheelTurnState {
+  /** Normalized px accumulated in this gesture, signed. */
+  readonly travel: number;
+  /** `timeStamp` of the last event seen, for the gap test. */
+  readonly at: number;
+  /** False once this gesture has spent its turn; a gap re-arms it. */
+  readonly armed: boolean;
+}
+
+/** The resting state — no gesture in progress. */
+export const WHEEL_TURN_REST: WheelTurnState = { travel: 0, at: -Infinity, armed: true };
+
+/**
+ * Advance the wheel accumulator by one event and say whether to turn a page.
+ *
+ * `step` is `1` for the next page and `-1` for the previous. Scrolling **down**
+ * goes forward — the direction a reader's hand means by "onward" on every other
+ * surface they use — and note this is deliberately not the RTL question the
+ * arrow keys had to answer: down is down in both directions of script, which is
+ * a large part of why the vertical axis is the one bound here.
+ *
+ * `deltaX` is deliberately not an input. A two-finger horizontal swipe is the
+ * *browser's* back/forward gesture on macOS, and a page turn bound to it would
+ * be racing the history stack for the same fingers — the reader would sometimes
+ * leave the app instead of turning a leaf, and which one happened would depend
+ * on how far they swiped.
+ */
+export function nextWheelTurn(
+  previous: WheelTurnState,
+  sample: WheelSample,
+): { state: WheelTurnState; step: 1 | -1 | 0 } {
+  const quiet = sample.timeStamp - previous.at >= WHEEL_GAP_MS;
+  // A gap means the hand let go: whatever was accumulating is abandoned rather
+  // than added to, so two flicks in opposite directions cannot cancel out and a
+  // gesture never inherits the tail of the one before it.
+  const travel = (quiet ? 0 : previous.travel) + normalizeWheelDelta(sample);
+  const armed = quiet || previous.armed;
+  const at = sample.timeStamp;
+
+  if (!armed || Math.abs(travel) < WHEEL_TURN_PX) {
+    return { state: { travel, at, armed }, step: 0 };
+  }
+  // Spent. `travel` resets so the momentum tail accumulates against a fresh
+  // zero, but `armed` stays false until a gap, so the tail can never spend it.
+  return { state: { travel: 0, at, armed: false }, step: travel > 0 ? 1 : -1 };
 }
 
 /**
