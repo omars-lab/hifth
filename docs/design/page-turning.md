@@ -183,12 +183,12 @@ The horizontal error is the stage's 16 px padding times `k − 1` (`16 × 0.6 = 
 vertical error at 390 is `(16 + 26.65) × 0.6 = 25.6`, i.e. the padding **plus the
 double-centred offset**. The drift is the same bug, seen through the zoom.
 
-*(The second term is gone — §3.1 ①/② removed the double centring, and the vertical error
-should now be the padding alone, the same `16 × (k − 1)` as the horizontal. The numbers in
-that table have not been re-measured, so treat them as the pre-fix reading; §7 ⑨ is still
-open and owns re-measuring them. What does not change is the conclusion: one focal point
-computed against the stage rect, applied to a transform expressed against the layer, cannot
-anchor.)*
+*(Both terms are gone, and the prediction held: §3.1 ①/② removed the double centring, which
+left the vertical error at the padding alone — re-measured at −6.4 px on a 1.0 → 1.4 zoom,
+`16 × (k − 1)` exactly — and §7 ⑨ then removed that. The table above is the pre-fix reading;
+§7 ⑨ carries the after. What never changed is the conclusion the table was written to
+support: one focal point computed against the stage rect, applied to a transform expressed
+against the layer, cannot anchor.)*
 
 ### 1.4 The verdict on the framing
 
@@ -961,23 +961,42 @@ This matters beyond tidiness: **the cross-fade in §3.1 needs exactly this mecha
 someone reading the stylesheet today would reasonably conclude it already exists. Either
 wire it or delete it; leaving it is a trap.
 
-### ⑨ `onPinch` anchors in the wrong coordinate space · **confirmed**
+### ⑨ `onPinch` anchors in the wrong coordinate space · **FIXED**
 
-`PageStage.tsx:647` reads the **stage** rect while `view.x/y` are layer-relative
-(`measureFit`, `:194-207`) and the host carries an additional grid offset. Measured drift on
+`PageStage.tsx:647` read the **stage** rect while `view.x/y` are layer-relative
+(`measureFit`, `:194-207`) and the host carried an additional grid offset. Measured drift on
 a 1.0 → 1.6 zoom with the cursor on a marked glyph: −9.4, −25.2 at 390 × 844; −7.3, −9.3 at
 1440 × 900. Both decompose exactly as `(offset) × (k − 1)`.
 
-Fixing ① removes the grid term; the padding term needs `onPinch` to read the host's actual
+Fixing ① removed the grid term; the padding term needed `onPinch` to read the host's actual
 containing block. Grouped here because it is the same root cause seen through a different
-gesture, and because a reviewer who fixes ① without fixing this will find the drift halved
-and assume it is rounding.
+gesture, and because a reviewer who fixed ① without fixing this would find the drift halved
+and assume it was rounding.
 
-**① is now fixed and this is not, so that reviewer is the next person to open this file.**
-The numbers above are the pre-fix reading and have not been re-taken. Expect the vertical
-error at 390 × 844 to have fallen from ~25 px to the padding term alone — the same ~9.6 px
-as the horizontal — and do not read the smaller number as success. `16 × (k − 1)` is still a
-finger that does not hold the word it is on.
+**Both halves are now fixed, and the prediction above was right to the pixel.** Re-measured
+at a 1.0 → 1.4 zoom before the second fix — smaller than the original reading on purpose,
+because six wheel ticks drive the zoom into `MAX_ZOOM` and the clamp then contributes drift
+of its own, which is a different defect being measured by accident:
+
+| viewport | drift after ① | predicted | after ⑨ |
+| --- | --- | --- | --- |
+| 390 × 844 | (0.0, **−6.4**) | `16 × (k − 1)` = 6.4 | (0.0, 0.0) |
+| 1440 × 900 | (0.3, 0.4) | 0 | (0.3, 0.4) |
+
+Two things fell out of the re-measurement that the pre-fix reading could not show. The
+**horizontal** error is now structurally zero rather than merely small: `page-transition.md`
+§2.4 drops the stage's padding on the leaf's bound side, so on that axis the two boxes have
+the same edge. And the whole defect is **absent at 1440 × 900** — the spread neutralises
+`--stage-pad` entirely — which is the reason it survived: it was live on the acceptance
+device and gone on the one a developer is looking at.
+
+The fix is `layerRef` in place of `stageRef`, and the guard against it coming back is a row
+in `e2e/stage-fit.spec.ts` — *a zoom keeps the word under the finger under the finger* — which
+follows a point through the SVG's own user space rather than comparing bounding boxes, because
+user space is the one frame a transform does not move. It sets a 390 × 844 viewport rather than
+trusting the project's, for the reason in the table. It is skipped on `iphone`: mobile WebKit
+takes neither a wheel nor a second pointer from Playwright, so the gesture cannot be driven
+there at all.
 
 ### ⑩ The mounted set still has no ceiling · **suspected (confirmed by code, not by profiling)**
 
