@@ -229,13 +229,13 @@ for (const i of issues) {
 
 // ---- the reverse direction: nothing in a register is missing from the index
 const indexed = new Set(
-  issues.filter((i) => !i.source.ledger).map((i) => `${i.source.file} ${i.source.item}`),
+  issues.filter((i) => !i.source.ledger).map((i) => `${i.source.file}>${i.source.item}`),
 );
 for (const file of registers) {
   const items = sectionItems(file);
   if (items === null) continue; // a design doc with no open section owes nothing
   for (const [marker, it] of items) {
-    if (indexed.has(`${file} ${marker}`)) continue;
+    if (indexed.has(`${file}>${marker}`)) continue;
     problems.push(
       `${file}:${it.line} — ${marker} “${it.title}” (${it.status}) is not in docs/issues.json.\n` +
         `      An item nobody indexed is an item nobody will find. Add it, or delete the row.`,
@@ -243,7 +243,7 @@ for (const file of registers) {
   }
 }
 for (const [n, it] of planItems() ?? []) {
-  if (indexed.has(`docs/PLAN.md ${n}`)) continue;
+  if (indexed.has(`docs/PLAN.md>${n}`)) continue;
   problems.push(`docs/PLAN.md:${it.line} — follow-up ${n} “${it.title}” is not in docs/issues.json.`);
 }
 for (const c of checks) {
