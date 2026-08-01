@@ -13,11 +13,15 @@ cannot name what it would measure is not an optimization, it is a preference.** 
 therefore says how we would know it worked, and several of them say plainly that we cannot
 know yet.
 
+Every item is an `### ⓝ … · **status**` row, the same convention every design doc's open
+section uses, so `pnpm gate:issues` reads this file without a special case. The vocabulary is
+defined once in [`issues.json`](issues.json).
+
 ---
 
 ## 0. The verdict everything else waits on
 
-### ① On-device perf verdict — `perf-verdict-on-device`
+### ① On-device perf verdict — `perf-verdict-on-device` · **blocked**
 
 The keystone. It decides which of the three rendering strategies in §1 gets built, and it
 gates **Loop 4b, Loop 6b and Loop 7** (`docs/validation/ledger.json`). It is the oldest open
@@ -46,7 +50,7 @@ two things the ledger's `tunes` list names — replace the emulated frame budget
 
 **Owner: the user.** Nothing here can be done from this machine.
 
-### ② The same measurement on real mid-tier Android
+### ② The same measurement on real mid-tier Android · **blocked**
 
 `pan-zoom-trace.mjs`'s baseline is emulated — about 8.3 ms/frame and, suspiciously, flat
 under CPU throttle, which is the signature of a measurement that is not seeing the thing it
@@ -86,7 +90,7 @@ reached for casually.
 
 ## 2. Bounded mounting
 
-### ③ The mounted set has no ceiling
+### ③ The mounted set has no ceiling · **confirmed**
 
 `App.tsx:288` computes `mountedPages` as *the current page plus every vendored hop target of
 the current selection*. With three pages vendored the set can never exceed three, so this has
@@ -101,7 +105,7 @@ already evicts everything outside `keep`, so the change is one policy function, 
 **How we'd know:** a test that selects a high-degree ayah and asserts the mounted count stays
 at the cap. Cheap, and it fails today for the right reason (there is no cap).
 
-### ④ The desktop spread mounts two leaves, not one
+### ④ The desktop spread mounts two leaves, not one · **blocked**
 
 Above `1024×740` the app mounts both leaves of the spread — deliberately a *mount* and not a
 `display: none`, because a hidden leaf still fetches its SVG and builds a `Highlighter`
@@ -116,7 +120,7 @@ Not a defect; a multiplier to apply once ③ has a number.
 
 ## 3. Bytes
 
-### ⑤ Bundle headroom, and who is going to spend it
+### ⑤ Bundle headroom, and who is going to spend it · **open**
 
 **106.6 KB gz against the 150 KB budget** as of `3962fc3` — 43 KB of headroom. Loop 4b spends
 none of it (pages are assets, not bundle), but Loop 6b's pack manager and manifest, and Loop
@@ -126,7 +130,7 @@ notices at the cliff rather than on the slope.
 Worth considering: have the gate print the delta against `main` rather than only the absolute,
 so a PR that adds 9 KB is visible as *adding 9 KB* instead of as "still under budget".
 
-### ⑥ The vendored corpus is the largest thing we ship, and nothing watches it
+### ⑥ The vendored corpus is the largest thing we ship, and nothing watches it · **open**
 
 A vendored page is **~47 KB gz** (measured: 48.6 / 42.6 / 48.5 KB for pages 7, 9, 19). At 604
 pages that is roughly **28 MB gz** of mushaf — two orders of magnitude past the JS bundle,
@@ -140,7 +144,7 @@ single extra page lands. Loop 4b should not be the first time anyone measures th
 every build, failing on the cliff. It is the cheapest item on this page and the one most likely
 to be regretted if skipped.
 
-### ⑦ Both locales ship at first paint — deliberate, revisit at four
+### ⑦ Both locales ship at first paint — deliberate, revisit at four · **answered**
 
 `messages/catalogs.gen.ts` statically imports every locale, and says why: the chrome is a few
 KB and must be on screen at first paint, offline, with nothing to wait on. That reasoning is
@@ -155,7 +159,7 @@ whoever adds it finds the decision rather than the consequence.
 
 ## 4. Prefetch
 
-### ⑧ Shards prefetch by mounted page, not by hop target
+### ⑧ Shards prefetch by mounted page, not by hop target · **confirmed**
 
 `App.tsx:301` prefetches adjacency shards for every surah *visible on a mounted page*, so the
 rail is ready the instant an ayah is tapped. That is the right eager step for the tap, and it
@@ -171,7 +175,7 @@ already says 4b widens it. Recording it here so the widening is a task rather th
 
 ## 5. Measurement gaps
 
-### ⑨ TTI on mid-Android is an exit criterion with no instrument
+### ⑨ TTI on mid-Android is an exit criterion with no instrument · **open**
 
 Lighthouse CI gates ≥90 on a desktop runner. Loop 4b's exit says *< 2.5 s on mid-Android*.
 These are not the same claim, and the second one currently has nothing behind it. Either the
@@ -180,7 +184,7 @@ class of device) or it should be restated as something CI can actually assert. A
 criterion nothing evaluates is the interface-papering-over-a-gap failure this project has
 already paid for twice.
 
-### ⑩ The CI frame budget is a number from an emulator
+### ⑩ The CI frame budget is a number from an emulator · **blocked**
 
 `pan-zoom-trace.mjs` asserts against 16.7 ms with an emulated ~8.3 ms baseline. Item ① replaces
 that number with a measured one — listed separately because it is the *only* part of ① that is

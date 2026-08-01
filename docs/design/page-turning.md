@@ -769,12 +769,19 @@ than no comment, because it tells the next reader the invariant is proved.
 
 ---
 
-## 7. Hardening
+## 7. Open questions, and what would answer each
 
-Ordered by severity. **Confirmed** = reproduced against a production `vite preview` build
-with the viewport and numbers given. **Suspected** = read from the code, not reproduced.
+Hardening, ordered by severity. Every design doc in this repo ends with a section under this
+exact heading, and every item under it is an `### ⓝ … · **status**` row, so
+`pnpm gate:issues` finds both without knowing anything about the document. The status
+vocabulary is defined once in [`docs/issues.json`](../issues.json) and indexed there.
 
-### ① Double centring — the page is flush against an edge on most viewports · **confirmed**
+Two of those words are this document's own method and are worth restating where they were
+earned: **confirmed** = reproduced against a production `vite preview` build with the
+viewport and numbers given; **suspected** = read from the code, not reproduced. The
+distinction exists because ⑩ is the only item below that has never been run.
+
+### ① Double centring — the page is flush against an edge on most viewports · **fixed**
 
 `packages/core/src/view.ts:76` returns an absolute top-left coordinate for a fitting axis;
 `apps/web/src/components/PageStage.module.css:24-29` has already centred the host with
@@ -820,7 +827,7 @@ such mechanism can uncover another that it was masking. The invariant to state i
 "delete the centring" is: **`.layer` places the host at its own physical top-left and does
 nothing else.**
 
-### ② The tests that should catch ① structurally cannot · **confirmed**
+### ② The tests that should catch ① structurally cannot · **fixed**
 
 Three separate reasons, and they stack:
 
@@ -924,7 +931,7 @@ they are unambiguous under RTL because they are not directional. Optionally also
 `Escape` blur an ayah when no dialog is open. **This is a proposal, not a decision** — it
 touches a pinned ladder and should be reviewed as such.
 
-### ⑥ `filter: drop-shadow()` costs the app its entire measured frame headroom · **confirmed**
+### ⑥ `filter: drop-shadow()` costs the app its entire measured frame headroom · **fixed**
 
 Numbers in §5. ~1.1 ms/frame median over `box-shadow`, and a max frame of 22.3 ms versus
 11.6 ms — the tail is worse than the median. loop-1's emulated baseline was ~8.3 ms, which
@@ -939,7 +946,14 @@ composited primitive. §3.1 removes the shadow; if any elevation survives review
 **Caveat:** measured in headless Chromium on macOS. **The measurement that is missing** is
 the same one on a mid-tier Android (backlog ①/②), where the ratio could be worse.
 
-### ⑦ The rounded corner is not visible, and never was · **confirmed**
+**Closed** by the resting-edge system (`page-transition.md` §2): the shadow is gone rather
+than converted, and `filter: drop-shadow` now appears nowhere under `apps/web/src`. The
+elevation it was faking is carried by the fore-edge stack, which is a gradient on a
+pseudo-element and costs no per-frame recomputation at all. What would notice it coming back
+is the golden row — a shadow is exactly the kind of change a pixel diff sees and a DOM
+assertion does not.
+
+### ⑦ The rounded corner is not visible, and never was · **fixed**
 
 `.host` has `border-radius: var(--radius-sm)` and `overflow: visible`, and the child SVG's
 box exactly equals the host's box (measured: host 426.4 × 679.7, svg 426.4 × 679.7 at 1440 ×
@@ -949,6 +963,15 @@ shadow is a different shape from the thing casting it.**
 
 Cosmetic, but it is direct evidence that the card treatment was never looked at closely —
 which supports treating §3.1 ③ as removing an accident rather than overruling a decision.
+
+**Closed**, and not by rounding harder. `.host` now takes `overflow: hidden` and carries
+`padding` on its free side for the fore-edge stack
+(`PageStage.module.css:135`, `:147-154`), so the SVG lays out *inside* the content box and
+the radius clips paper rather than only the background behind it. The corner is also
+asymmetric now — `--radius-leaf` on the free side, square into the spine — which is
+`page-transition.md` §2's rule, not a bigger version of this one's. `e2e/stage-fit.spec.ts`
+holds the half that can be asserted structurally: the stack is drawn beside the scripture,
+and only on the side `leafSideOf` calls free.
 
 ### ⑧ Dead CSS: the page fade-in never runs · **confirmed**
 
@@ -961,7 +984,7 @@ This matters beyond tidiness: **the cross-fade in §3.1 needs exactly this mecha
 someone reading the stylesheet today would reasonably conclude it already exists. Either
 wire it or delete it; leaving it is a trap.
 
-### ⑨ `onPinch` anchors in the wrong coordinate space · **FIXED**
+### ⑨ `onPinch` anchors in the wrong coordinate space · **fixed**
 
 `PageStage.tsx:647` read the **stage** rect while `view.x/y` are layer-relative
 (`measureFit`, `:194-207`) and the host carried an additional grid offset. Measured drift on
@@ -998,7 +1021,7 @@ trusting the project's, for the reason in the table. It is skipped on `iphone`: 
 takes neither a wheel nor a second pointer from Playwright, so the gesture cannot be driven
 there at all.
 
-### ⑩ The mounted set still has no ceiling · **suspected (confirmed by code, not by profiling)**
+### ⑩ The mounted set still has no ceiling · **suspected**
 
 `setCurrentPage` toggles `display` (`PageStage.tsx:275-283`) and nothing removes entries from
 `pagesRef`. Every page ever visited stays mounted, with its SVG and its `Highlighter`, for
@@ -1009,13 +1032,22 @@ is backlog's.
 **The measurement that would settle it:** mount N pages on a mid-tier Android and record
 resident memory and pan frame time at N = 1, 5, 20. Nobody has taken it.
 
-### ⑪ There is no transition at all today, so reduced motion has nothing to remove · **confirmed**
+### ⑪ There is no transition at all today, so reduced motion has nothing to remove · **fixed**
 
 `ArrowLeft` swaps the two hosts' `display` inside one frame. Under
 `prefers-reduced-motion: reduce`, all three duration tokens read `0ms`
 (`tokens.css:155-159`) — correct, and currently vacuous for the turn. Noted so that whoever
 implements §3.1 knows the reduced-motion path is the *existing* behaviour and needs no new
 code, only a token read.
+
+**No longer true: the turn has a transition** (`page-transition.md` §3–§4, shipped). And the
+guess recorded above was wrong in a way worth keeping, because it is the more common mistake.
+Reading the duration token to `0ms` would have inserted the band and run it instantly — a
+one-frame flash of a fore-edge crossing the page, which is *worse* than the nothing it
+replaces, since a reader who asked for less motion gets a strobe instead of a sweep. Under
+`prefers-reduced-motion: reduce` the band is therefore **not inserted at all**, asserted in
+`e2e/page-turn.spec.ts`. Reduced motion is a question about what to build, not a duration to
+multiply by zero.
 
 ---
 

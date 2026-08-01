@@ -469,31 +469,43 @@ by a code path nothing can exercise.
   own answer to "does a leaf stay full size", and the answer at 768 px is no — so it is the
   phone layout, which is the correct layout for it.
 
-## 8. Open questions
+## 8. Open questions, and what would answer each
 
-Named, so they are not mistaken for settled.
+Named, so they are not mistaken for settled. Every design doc in this repo ends under this
+heading, and every item is an `### ⓝ … · **status**` row so `pnpm gate:issues` can read it.
+The vocabulary is defined once in [`docs/issues.json`](../issues.json).
 
-1. **Should an arrow key turn the leaf (±2) rather than the page (±1) at desktop?** §6 says
-   no for this build because `stepPage` walks a three-page inventory. After Loop 4b the
-   question is live and the answer is not obvious: a hafiz turning a physical mus'haf turns
-   a leaf, but the app's page number, URL and announcements are all per-page. Revisit with
-   4b; whatever is decided belongs in `appKeyAction`, in core, with the reasoning.
-2. **Should the two leaves pan and zoom together?** Unanswerable and untestable until a
-   facing pair is vendored. A shared `View` across two `PageStage`s is a real change to a
-   component whose correctness argument is "one write path"; do not start it speculatively.
-3. **Is `min-width` the right gate for the keyboard hints?** §3 accepts it as a proxy.
-   `(pointer: fine)` or `(any-hover: hover)` describes the reader more truthfully but
-   splits the desktop story into two media features, and a touchscreen laptop satisfies
-   both. Revisit if anyone reports the hints on a device that cannot use them.
-4. **Does the second mount actually hold the frame budget?** It cannot be measured today —
-   nothing vendors a facing pair, so the second stage never mounts a page. This inherits
-   PLAN follow-up ① and must be re-measured on the day Loop 4b lands, on the same phone,
-   with the same probe. Until then this design's weight claim is an argument, not a
-   measurement, and it is written down as such.
-5. **Where does the revision map (concurrent work) sit at desktop?** It is being wired into
-   the chrome as `styles.pageId` becomes a button. A wide window is the natural home for a
-   604-page heatmap and this design deliberately does not reach into it. Whoever lands both
-   should add the row to `desktop-vs-mobile.md`.
+### ① Should an arrow key turn the leaf (±2) rather than the page (±1) at desktop? · **blocked**
+
+§6 says no for this build because `stepPage` walks a three-page inventory. After Loop 4b the
+question is live and the answer is not obvious: a hafiz turning a physical mus'haf turns
+a leaf, but the app's page number, URL and announcements are all per-page. Revisit with
+4b; whatever is decided belongs in `appKeyAction`, in core, with the reasoning.
+
+### ② Should the two leaves pan and zoom together? · **blocked**
+
+Unanswerable and untestable until a facing pair is vendored. A shared `View` across two
+`PageStage`s is a real change to a component whose correctness argument is "one write path"; do
+not start it speculatively.
+
+### ③ Is `min-width` the right gate for the keyboard hints? · **open**
+
+§3 accepts it as a proxy. `(pointer: fine)` or `(any-hover: hover)` describes the reader more
+truthfully but splits the desktop story into two media features, and a touchscreen laptop
+satisfies both. Revisit if anyone reports the hints on a device that cannot use them.
+
+### ④ Does the second mount actually hold the frame budget? · **blocked**
+
+It cannot be measured today — nothing vendors a facing pair, so the second stage never mounts a
+page. This inherits PLAN follow-up ① and must be re-measured on the day Loop 4b lands, on the
+same phone, with the same probe. Until then this design's weight claim is an argument, not a
+measurement, and it is written down as such.
+
+### ⑤ Where does the revision map sit at desktop? · **open**
+
+It is being wired into the chrome as `styles.pageId` becomes a button. A wide window is the
+natural home for a 604-page heatmap and this design deliberately does not reach into it.
+Whoever lands both should add the row to `desktop-vs-mobile.md`.
 
 ## 9. Work order
 
