@@ -49,6 +49,14 @@ import { test, expect, type Locator, type Page } from "@playwright/test";
  * padding box instead of in the padding looks identical in a screenshot and puts
  * ten pixels of the page block on top of ten pixels of scripture, so the SVG's
  * inset inside its host is asserted directly rather than inferred from coverage.
+ *
+ * The sixth is the last face of the doubled coordinate model (`page-turning.md`
+ * §7 ⑨), and it is here because it is the same confusion as the third and fourth
+ * seen through a gesture instead of through a layout: `onPinch` anchored against
+ * the stage rect while the transform it was computing is layer-relative. Every
+ * other test in this file measures the page at rest, where that error is exactly
+ * zero — it is proportional to `(1 − k)` — so the last test drives a zoom and
+ * follows a point of scripture through it.
  */
 
 /** The visible page's SVG — the only host not `display: none` (PageStage). */
@@ -125,6 +133,12 @@ interface Box {
   height: number;
 }
 
+/** A point, in whichever frame the function taking it names. */
+interface Point {
+  x: number;
+  y: number;
+}
+
 interface Pads {
   left: number;
   right: number;
@@ -192,6 +206,48 @@ async function settle(target: Locator): Promise<void> {
       { intervals: [100, 100, 100, 150, 200, 300], timeout: 10_000 },
     )
     .toBe(true);
+}
+
+/**
+ * The two directions of the SVG's own screen CTM, and why the anchor test uses
+ * them instead of `boundingBox`.
+ *
+ * A bounding box tells you where an element is. What a zoom has to preserve is
+ * where a *point of scripture* is — and the SVG's user space is the one frame
+ * that survives the transform, so a glyph named in it stays the same glyph
+ * afterwards. `getScreenCTM` composes every transform between the SVG and the
+ * viewport, the leaf's `translate3d(…) scale(…)` included, so these two are
+ * exact rather than an approximation of the mapping the browser is using.
+ */
+async function userSpaceAt(svg: Locator, at: Point): Promise<Point | null> {
+  return svg.evaluate((el, p) => {
+    const s = el as unknown as SVGSVGElement;
+    const m = s.getScreenCTM();
+    if (!m) return null;
+    const pt = s.createSVGPoint();
+    pt.x = p.x;
+    pt.y = p.y;
+    const out = pt.matrixTransform(m.inverse());
+    return { x: out.x, y: out.y };
+  }, at);
+}
+
+async function clientPointOf(svg: Locator, at: Point): Promise<Point | null> {
+  return svg.evaluate((el, p) => {
+    const s = el as unknown as SVGSVGElement;
+    const m = s.getScreenCTM();
+    if (!m) return null;
+    const pt = s.createSVGPoint();
+    pt.x = p.x;
+    pt.y = p.y;
+    const out = pt.matrixTransform(m);
+    return { x: out.x, y: out.y };
+  }, at);
+}
+
+/** The leaf's current zoom, read off the host's transform matrix. */
+async function scaleOf(svg: Locator): Promise<number> {
+  return hostOf(svg).evaluate((el) => new DOMMatrix(getComputedStyle(el).transform).a);
 }
 
 async function open(page: Page, hash: string, pageNo: number): Promise<Locator> {
@@ -457,5 +513,74 @@ test.describe("Hifth · the stage holds page, not paper", () => {
       layer.y + layer.height + 1,
     );
     expectHeld(after, layer, stage, pads);
+  });
+
+  test("a zoom keeps the word under the finger under the finger", async ({ page, browserName }) => {
+    // Skipped on one project, and the reason is a limit of the driver rather
+    // than of the app: `mouse.wheel` throws "not supported in mobile WebKit",
+    // and a real two-finger pinch cannot be driven either — Playwright dispatches
+    // one pointer at a time on every engine. So the iPhone project has no way to
+    // reach `onPinch` at all, and the honest options were to skip it here or to
+    // assert the arithmetic against a hand-built event, which would test the test.
+    //
+    // What is lost is small and worth naming: the invariant is this app's own
+    // coordinate arithmetic, not engine behaviour, and it still runs on two
+    // projects — `desktop` at the phone viewport this test sets, and `android`
+    // at its own. What no project can reach is a pinch with two real fingers on
+    // real glass; that is the screen-reader walkthrough's neighbour in
+    // `docs/validation/ledger.json`, not something to fake here.
+    test.skip(browserName === "webkit", "mobile WebKit cannot be sent a wheel or a second pointer");
+
+    // `docs/design/page-turning.md` §7 ⑨. `onPinch` converted the gesture's
+    // origin against the **stage** rect while `view.x/y` are layer-relative, so
+    // the anchor was measured from one box into coordinates belonging to
+    // another. The gap between them is the stage's padding — a gutter that is
+    // outside the layer on purpose (`layerOf` above says why the two differ).
+    //
+    // Why it read as rounding and survived six loops: the anchor arithmetic is
+    // `px − (px − x)·k`, so an origin off by `d` lands the page off by
+    // `d·(1 − k)`. At rest that is zero. Measured at a 1.0 → 1.4 zoom before the
+    // fix: (0.0, −6.4) px, which is `16 × (k − 1)` to the pixel — one
+    // `--stage-pad`. Nothing horizontal, because §2.4 drops the padding on the
+    // leaf's bound side; nothing at all at 1440 × 900, because the spread
+    // neutralises the padding entirely. The defect was live on the acceptance
+    // device and absent on the one a developer is looking at, so this test sets
+    // a phone viewport rather than trusting the project's.
+    await page.setViewportSize({ width: 390, height: 844 });
+    const svg = await open(page, "p7", 7);
+
+    // Off both centres deliberately: an anchor in the middle of the page is the
+    // one point a wrong origin cannot move, because the error is proportional to
+    // the distance from wherever the transform's own origin is.
+    const box = await boxOf(svg);
+    const anchor = { x: box.x + box.width * 0.3, y: box.y + box.height * 0.35 };
+
+    // The scripture actually under the pointer, in the SVG's own user space —
+    // the only frame that survives a transform, which is what makes it the right
+    // thing to follow. `getScreenCTM` composes every transform between the SVG
+    // and the viewport, so this is the glyph, not an approximation of it.
+    const before = await userSpaceAt(svg, anchor);
+    expect(before, "could not read the SVG's screen CTM").not.toBeNull();
+
+    await page.mouse.move(anchor.x, anchor.y);
+    await page.keyboard.down("Control");
+    await page.mouse.wheel(0, -40);
+    await page.keyboard.up("Control");
+    await settle(svg);
+
+    // The premise. `ctrl`+wheel reaches `onPinch` through @use-gesture's
+    // modifier-key path, and if that ever stops being true this test would pass
+    // by never zooming at all — which is the failure mode a drift assertion is
+    // least able to notice.
+    const zoomed = await scaleOf(svg);
+    expect(zoomed, "the zoom never happened — this test proved nothing").toBeGreaterThan(1.05);
+
+    const now = await clientPointOf(svg, before!);
+    expect(Math.abs(now!.x - anchor.x), "the page slid horizontally under the pointer").toBeLessThan(
+      1,
+    );
+    expect(Math.abs(now!.y - anchor.y), "the page slid vertically under the pointer").toBeLessThan(
+      1,
+    );
   });
 });

@@ -1053,13 +1053,36 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
         emitSelectionRect();
       },
       onPinch: ({ origin: [ox, oy], movement: [ms], memo, first }) => {
-        const stage = stageRef.current;
-        if (!stage) return memo;
+        /*
+         * The *layer*, not the stage — `page-turning.md` §7 ⑨.
+         *
+         * `view.x/y` are layer-relative: the layer is the element the host is
+         * laid out in, so `translate3d(0,0)` puts the page at the layer's
+         * top-left and `measureFit` reads that box and no other. Converting the
+         * gesture's origin against the *stage* rect measures from one box into
+         * coordinates belonging to another, and the difference is the stage's
+         * own padding — a gutter that is deliberately outside the layer.
+         *
+         * The error is not constant, which is why it reads as rounding: the
+         * anchor arithmetic below is `px − (px − x)·k`, so an origin off by `d`
+         * lands the page off by `d·(1 − k)`. At rest it is zero. It grows with
+         * the zoom, and it grows in the direction that pulls the page out from
+         * under the finger holding it.
+         *
+         * Measured before the fix at a 1.0 → 1.4 zoom: (0.0, −6.4) px on a
+         * 390 × 844 phone — `16 × (k − 1)` to the pixel, one `--stage-pad`. Zero
+         * horizontally because §2.4 drops the padding on the leaf's bound side,
+         * and zero on both axes at 1440 × 900 because the spread neutralises the
+         * padding entirely. That is the whole reason this survived: the defect is
+         * live on the acceptance device and absent on the one a laptop shows you.
+         */
+        const layer = layerRef.current;
+        if (!layer) return memo;
         if (first) {
           cancelTween();
           measureFit();
         }
-        const rect = stage.getBoundingClientRect();
+        const rect = layer.getBoundingClientRect();
         const base =
           (memo as { z: number; x: number; y: number } | undefined) ?? {
             z: view.current.z,
