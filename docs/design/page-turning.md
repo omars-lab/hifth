@@ -554,6 +554,10 @@ already-existing behaviour made visible or made correct.
    chrome. **It must be discrete, not scroll-snap** — a snap container in RTL requires
    reading `scrollLeft`, whose sign convention is not portable (§2.6), and a momentum scroll
    over 604 pages would mount an unbounded number of them (backlog ③).
+   **Shipped as specified** (§7 ③): discrete, one turn per gesture, no snap container. The
+   part the proposal left open was how a gesture is bounded at all, since a `wheel` event
+   carries no device identity — the answer is a 100 ms quiet gap, which puts a trackpad
+   flick and its whole momentum tail on one side of the line and a mouse notch on the other.
 5. **Duration ~200 ms on desktop** if the cross-fade is adopted, per Material 1's explicit
    desktop guidance (§2.4).
 
@@ -869,7 +873,7 @@ A fourth reason surfaced while fixing the third: `layerOf`/`stageOf` reached the
 two vendored leaves. They now walk up from the visible page's SVG, so the helpers survive
 Loop 4b instead of turning into a strict-mode violation on the day a facing pair lands.
 
-### ③ Plain wheel does nothing, and a mouse-only desktop cannot zoom at all · **confirmed**
+### ③ Plain wheel does nothing, and a mouse-only desktop cannot zoom at all · **fixed**
 
 Measured at 1440 × 900: plain `wheel(0, −200)` over the stage leaves the transform
 unchanged. `ctrl`+wheel works and is uncalibrated:
@@ -891,7 +895,51 @@ whose subject is 15 lines of small Arabic script.
 **Fix:** two separate pieces of work. Calibrating `ctrl`+wheel is a bug fix. Plain
 wheel-to-turn is §3.2 ④. Both belong in `apps/web`.
 
-### ④ A turn across an absent page is silent · **confirmed**
+**The headline is overstated, and the table above is why it was believed.** A mouse user did
+*not* have "no zoom at all" — `ctrl`+wheel fired on every mouse in every browser, and the
+table is a recording of it working. What is true is the two defects underneath: the
+calibration is unusable (three notches saturate the range), and a modifier nobody is told
+about is a feature most readers will never find. Written as "no zoom at all" it reads as a
+missing capability; it was a capability nobody could aim and nobody was shown. The wrong
+sentence is left standing because it is a recognisable way to mis-summarise one's own
+evidence — the numbers directly below it contradict it.
+
+**Closed by `apps/web/e2e/desktop.spec.ts`** (`test.describe("Hifth · the wheel")`), three
+rows, and the fix is in three pieces:
+
+- **A plain wheel turns pages**, per §3.2 ④ and the user's decision — discrete, debounced,
+  one turn per gesture. The classification is L1
+  (`packages/core/src/gestures.ts`: `nextWheelTurn`, `WHEEL_GAP_MS = 100`,
+  `WHEEL_TURN_PX = 40`, unit-tested in `gestures.test.ts`), because a `wheel` event does not
+  say which device produced it and the only honest separator is time: a trackpad flick and
+  its momentum tail stream at ~16 ms and are *one* gesture; a mouse notch is rarely repeated
+  faster than 100 ms and is its own. `deltaMode` is normalised, so a Firefox line-mode wheel
+  travels the same distance as everyone else's pixels. Only `deltaY` is bound — a two-finger
+  horizontal swipe is macOS's own back/forward gesture, and taking it would be taking the
+  browser's.
+- **`ctrl`+wheel is calibrated** to `z' = z · 1.2^(−Δy/100)` — multiplicative, so the same
+  wheel travel means the same *proportion* at either end of the range. One notch is 1.2×
+  where it used to be 1.4×; four notches reach ~2.07× where three used to hit `MAX_ZOOM`.
+  This needed `pinchOnWheel: false`: @use-gesture's bridge divides by a hard-coded
+  `PINCH_WHEEL_RATIO = 100` and multiplies by the *current* zoom, and the constant is not
+  configurable. Handing the wheel back is also what left a plain wheel free to turn a page.
+- **Both zoom paths now share `zoomAbout`** in `PageStage.tsx`, which is where ⑨'s
+  layer-relative anchor arithmetic lives. A second copy of it would have been a second place
+  for the stage rect to creep back in.
+
+The calibration made ⑨'s own test fail, and the failure was informative rather than a
+setback: *"a zoom keeps the word under the finger under the finger"* pushed `wheel(0, −40)`
+and asserted the zoom had happened at all, a premise that only cleared its threshold because
+the old curve was four times too eager. On the `android` project it was worse than that —
+Playwright divides wheel deltas by the 2.625 device scale factor there, so −40 arrives as
+−15.2 px and now zooms 1.028×. The stimulus is a full −120 notch, which is what a person
+does; a threshold a fraction of a gesture could clear was measuring the bug.
+
+`docs/design/desktop.md` §6 now documents the wheel, which is the other half of the
+discoverability defect: the keymap table was the only place a reader could learn what this
+app does with a pointer, and it did not mention the wheel at all.
+
+### ④ A turn across an absent page is silent · **fixed**
 
 `stepPage` (`App.tsx:424-437`) walks `pageTurns.pages` — the *inventory*, not the print — so
 7 → 9 skips 8. `goToPage` (`:403-422`) announces `said ?? t.pageN(next)`, so the live region
@@ -911,7 +959,19 @@ available page · Page {page}".
 **Severity:** high on honesty grounds. A gap is a to-do; a gap the interface papers over is
 a lie — and with 3 of 604 pages vendored, **every** turn in the shipped build crosses a gap.
 
-### ⑤ Selecting an ayah removes the page-turn keys, with no way back · **confirmed**
+**Closed by `apps/web/e2e/wayfinding.spec.ts`** — *"a turn that steps over a page we do not
+have says where it landed"*, which asserts all three sentences: `t.nearestPageN(next)` when
+the turn lands past a gap, and `t.lastPage(here)` / `t.firstPage(here)` when it lands
+nowhere at all. No new string was needed, as predicted.
+
+The ends were the part the item under-described. It says the third press "announces 'Last
+available page' without naming which page that is" and treats that as a lesser symptom of
+the same silence. It is the worse half: a reader whose arrow did nothing is told only that
+they have run out, and with three pages of 604 they are left to guess where they stopped —
+a guess they will get wrong. Both end strings now carry the page number, which is why the
+fix touched `lastPage`/`firstPage` in both catalogues and not just the call site.
+
+### ⑤ Selecting an ayah removes the page-turn keys, with no way back · **fixed**
 
 Reproduce at 1440 × 900: click bare paper → focus stays on `BODY`, `←` turns 7 → 9. Click an
 ayah polygon (`role="button" tabindex="0"`) → focus lands on the path, so
@@ -930,6 +990,22 @@ above rule 5. They are literally the page keys, the ayah stepper does not claim 
 they are unambiguous under RTL because they are not directional. Optionally also let
 `Escape` blur an ayah when no dialog is open. **This is a proposal, not a decision** — it
 touches a pinned ladder and should be reviewed as such.
+
+**Reviewed, taken whole, and closed by `apps/web/e2e/wayfinding.spec.ts`** — two rows: *"the
+page keys turn from anywhere, and Escape lets go of the ayah"* and *"an open sheet keeps the
+page keys, and Escape closes it rather than blurring"*. The `Escape` half was not optional in
+the end: `PageDown`/`PageUp` give a reader a way to turn the page, and only `Escape` gives
+them a way back to the arrows, which is the key they will reach for first.
+
+The ladder took both without moving. `PAGE_KEYS` and the `release` branch sit between rule 6
+and rule 5, so rule 3 still wins — a page turn under an open sheet moves the ground the
+reader is standing on, and `Escape` with something in front of you means *close this*. Both
+new rules are unit-tested in `packages/core/src/keymap.test.ts`; the precedence is what those
+tests are actually about, not the key names.
+
+`release` is gated on `ctx.onAyah` and not on the key alone, so `Escape` outside an ayah
+still belongs to whoever owns that context — which is the whole reason a new claim on the
+most heavily overloaded key in the app could be added without renegotiating the ladder.
 
 ### ⑥ `filter: drop-shadow()` costs the app its entire measured frame headroom · **fixed**
 
@@ -973,16 +1049,37 @@ asymmetric now — `--radius-leaf` on the free side, square into the spine — w
 holds the half that can be asserted structurally: the stack is drawn beside the scripture,
 and only on the side `leafSideOf` calls free.
 
-### ⑧ Dead CSS: the page fade-in never runs · **confirmed**
+### ⑧ Dead CSS: the page fade-in never runs · **answered**
 
-`PageStage.module.css:72-78` styles `[data-status="loading"]` (opacity 0) and
-`[data-status="ready"]` (opacity 1 with a `--dur-med` transition). Nothing in
-`apps/web/src/` ever writes `data-status` — grep returns only these two rules. Pages
-therefore appear as a hard pop.
+`PageStage.module.css` styles `[data-status="loading"]` (opacity 0) and `[data-status="ready"]`
+(opacity 1 with a `--dur-med` transition). Nothing in `apps/web/src/` ever writes
+`data-status` — grep returns only these two rules. Pages therefore appear as a hard pop.
+(The line numbers first recorded here, `:72-78`, had already drifted to `:204-209` by the
+time the item was worked; the grep is the durable half of a citation and the line range is
+not.)
 
 This matters beyond tidiness: **the cross-fade in §3.1 needs exactly this mechanism**, and
 someone reading the stylesheet today would reasonably conclude it already exists. Either
 wire it or delete it; leaving it is a trap.
+
+**Closed by deletion**, and the prediction above is why it is worth recording rather than
+just removing. "§3.1 needs exactly this mechanism" was a reasonable read of a design doc that
+was mid-flight, and it was wrong: `page-transition.md` §3.1 withdrew the `.host` cross-fade in
+favour of the fold, whose governing rule is that **during a turn no glyph moves at all** — and
+a page that fades in is a page that contradicts it. The fold is a third element carrying no
+page precisely so that neither leaf has to animate. So the rules the cross-fade would have
+driven are gone, which is what makes the CSS that would have driven them safe to delete
+rather than wire.
+
+**`answered`, not `fixed`, and the difference is the point.** `fixed` in this repo is a claim
+the gate audits: it requires a test that would fail if the defect came back. There is no such
+test here and there should not be. A test asserting the *absence* of a CSS rule asserts
+nothing a reader needs, and the rule that displaced the cross-fade — no glyph moves during a
+turn — is already held by `e2e/page-turn.spec.ts`, which would catch a fade-in wired to a
+*leaf* but not two dead selectors re-added to a stylesheet. So the honest word is `answered`:
+decided, nothing owed in code. What stands in for the test is a comment at the spot the rules
+occupied, naming what was there and why it went, so the next reader who reaches for a
+cross-fade finds the answer instead of the trap.
 
 ### ⑨ `onPinch` anchors in the wrong coordinate space · **fixed**
 

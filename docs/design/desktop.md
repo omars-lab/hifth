@@ -430,6 +430,14 @@ whole leaf (±2), and it is wrong for this build: with three non-adjacent pages 
 no-op or an overshoot. The keyboard map is core's and is under test there; the spread does
 not get to reinterpret it from a component.
 
+`PageDown` = +1 and `PageUp` = −1 turn the page from **anywhere**, including from a focused
+ayah, where the arrows belong to the ayah stepper and always will
+(`page-turning.md` §7 ⑤). They are the right keys for it twice over: nothing else claims
+them, and unlike the arrows they name no direction, so they need no RTL convention to be
+read correctly. `Escape` on a focused ayah lets go of it — which is how a reader gets the
+arrows back, and the only reason a keyboard-only reader is not stranded by the app's own
+central gesture.
+
 The panels are not focus stops. The live `PageStage` keeps its existing per-polygon
 keyboard path (Loop 3), and the absent panel holds nothing focusable — there is nothing to
 do to it. A `region` with a label is reachable by landmark navigation, which is the correct
@@ -442,6 +450,31 @@ mouse is strictly more precise than the thing they were tuned for. **No hover-on
 affordance is added anywhere in the spread**: hover is unavailable on the acceptance
 device, and a control that only exists on desktop *and* only on hover is a control nobody
 finds.
+
+**The wheel**, which is the one input a desktop has and a phone does not, and which this
+section did not mention until `page-turning.md` §7 ③ noticed the omission:
+
+- **Plain wheel turns the page** — down forward, up back, discrete, one turn per gesture.
+  Not scroll-snap and not a continuous scroll: this app's unit is a page, and §2.2's finding
+  is that a mus'haf reader wants the page boundary preserved, not smoothed over. A `wheel`
+  event does not say what produced it, so the separator is time: events arriving inside 100 ms
+  of each other are one gesture (a trackpad flick and its momentum tail stream at ~16 ms),
+  and 40 px of accumulated travel commits the turn. A mouse notch is 100–120 px and is
+  therefore one turn, once. The classification is `packages/core/src/gestures.ts` and is unit
+  tested there, beside the pointer splitter it rhymes with.
+- **`ctrl`/`⌘`+wheel zooms**, `z' = z · 1.2^(−Δy/100)` — multiplicative, so the same wheel
+  travel is the same *proportion* at 0.8× as at 5×. The modifier split is the platform's own:
+  a trackpad pinch arrives as a synthesised `ctrl`+wheel, so honouring it is what makes a
+  laptop pinch work at all.
+- **Only `deltaY` is bound.** A two-finger horizontal swipe is the browser's back/forward
+  gesture on macOS, and taking it would be taking navigation away from the reader to do
+  something navigation already does.
+- **An open sheet keeps its own scroll** — the stage's listener returns before
+  `preventDefault` when a dialog is up, matching `keymap.ts` rule 3.
+
+The wheel rows live in `e2e/desktop.spec.ts` and not in the phone specs for a mechanical
+reason worth writing down: mobile WebKit cannot be sent a wheel event at all, so a wheel
+assertion in a shared spec would be a test that silently never runs on two of three projects.
 
 When the facing leaf is vendored (Loop 4b), it mounts a second `PageStage` with its own
 gesture surface. Two independently pannable leaves in one open book is a real question —

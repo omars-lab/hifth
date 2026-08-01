@@ -684,6 +684,12 @@ catalogues. **They are one statement in two channels and they should land togeth
 the band without the announcement and the interface tells a sighted reader something it
 withholds from a screen-reader user.
 
+They did not land together — the band shipped first and the announcement followed a loop
+later, in the change that closed §7 ④ — so for one loop this build was exactly the
+asymmetry the paragraph warns about. Both channels speak now, and the row that keeps them
+speaking is `e2e/wayfinding.spec.ts`'s *"a turn that steps over a page we do not have says
+where it landed"*.
+
 ### 4.5 The four cases the brief asks about, answered
 
 | case | `foldBetween` | drawn | why |
@@ -792,7 +798,11 @@ case rather than the exception.
   fold that stops mid-crossing is honest — it says *the leaf is still coming*, which is what
   is happening.
 - **If the fetch fails — offline, unvendored, a 404 — the fold retreats the way it came and
-  the page does not change.** The existing `t.nearestPageN` announcement speaks. It must
+  the page does not change.** The `t.nearestPageN` announcement speaks — which, when this
+  was written, it did not: the string existed in both catalogues and no page turn ever
+  reached it (`page-turning.md` §7 ④). "Existing" was read off the catalogue rather than off
+  a call site, which is the specific way a doc can be wrong about its own app while every
+  word in it is checkable. It is true now. It must
   never land: landing on an empty host paints `--paper-sunk` where scripture should be, and
   a reader who does not look closely has been shown a blank mushaf page.
 - **How long may it stall before it reads as broken?** Unknown. NN/g's 1 s "flow of thought"
