@@ -259,8 +259,15 @@ described in both files.
     of the page into view. Deleting the CSS centring was *not* the whole fix, which is the
     part worth carrying forward: the grid's default in a `dir="rtl"` subtree lays the host
     out flush to the **right**, so a physical `translate3d` moved it 240 px further right,
-    and `place-items: center` had been masking that second mechanism all along. Zoom's
-    anchor (§7 ⑨) is still open, and its vertical error should now be the padding alone.
+    and `place-items: center` had been masking that second mechanism all along. **Zoom's
+    anchor (§7 ⑨) is now closed too**, and the prediction made when it was left open — that
+    its vertical error would be the padding alone — was right to the pixel: −6.4 px on a
+    1.0 → 1.4 zoom at 390 × 844, which is `16 × (k − 1)`. Two things only the re-measurement
+    could show. The horizontal error is *structurally* zero, because
+    [`page-transition.md`](design/page-transition.md) §2.4 drops the stage's padding on the
+    leaf's bound side; and the whole defect is absent at 1440 × 900, because the spread
+    neutralises `--stage-pad`. It was live on the acceptance device and gone on the one a
+    developer looks at, which is the shape of every finding in this follow-up.
     Eleven findings, ordered by severity with reproductions and file:line, are in
     [`docs/design/page-turning.md` §7](design/page-turning.md); the presentation and gesture
     proposals in §3–§4 of that document are **not** scheduled here — they wait on
