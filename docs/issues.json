@@ -81,34 +81,37 @@
     {
       "id": "plain-wheel-does-nothing",
       "source": { "file": "docs/design/page-turning.md", "item": "③" },
-      "status": "confirmed",
+      "status": "fixed",
       "severity": "defect",
       "owner": "agent",
-      "note": "A mouse-only desktop has no zoom at all, in an app whose subject is 15 lines of small Arabic script. ctrl+wheel exists and is uncalibrated: two trackpad ticks go 1x to 1.44x."
+      "closedBy": "apps/web/e2e/desktop.spec.ts",
+      "note": "Closed as three pieces: a plain wheel turns pages (§3.2 ④), ctrl+wheel is calibrated to a multiplicative curve, and desktop.md §6 finally documents the wheel. The headline claim was overstated — ctrl+wheel always fired — and the register keeps the wrong sentence beside the correction."
     },
     {
       "id": "silent-turn-across-an-absent-page",
       "source": { "file": "docs/design/page-turning.md", "item": "④" },
-      "status": "confirmed",
+      "status": "fixed",
       "severity": "defect",
       "owner": "agent",
-      "note": "With 3 of 604 pages vendored, every turn in the shipped build crosses a gap the announcement does not name. The string already exists in both catalogues."
+      "closedBy": "apps/web/e2e/wayfinding.spec.ts",
+      "note": "No new string was needed for the skip, as the item predicted. The ends did need one: firstPage/lastPage now carry the page number, because 'last available page' alone leaves a reader guessing which of 604 they stopped at."
     },
     {
       "id": "ayah-focus-eats-the-page-turn-keys",
       "source": { "file": "docs/design/page-turning.md", "item": "⑤" },
-      "status": "confirmed",
+      "status": "fixed",
       "severity": "defect",
       "owner": "agent",
-      "note": "Tapping an ayah is the app's central gesture, so a hafiz reaches this state constantly and there is no unmodified key out of it. The fix touches a pinned ladder and is a proposal, not a decision."
+      "closedBy": "apps/web/e2e/wayfinding.spec.ts",
+      "note": "The proposal was reviewed and taken whole, Escape included — PageDown/PageUp give a way to turn, Escape gives a way back to the arrows. The ladder did not move: rule 3 still beats both, which is what keymap.test.ts is really asserting."
     },
     {
       "id": "dead-page-fade-css",
       "source": { "file": "docs/design/page-turning.md", "item": "⑧" },
-      "status": "confirmed",
+      "status": "answered",
       "severity": "defect",
       "owner": "agent",
-      "note": "Still true: data-status appears only in PageStage.module.css and is never written. A trap rather than a bug — the next reader concludes the cross-fade mechanism exists."
+      "note": "Deleted, not wired: page-transition.md §3.1 withdrew the cross-fade in favour of the fold, whose rule is that no glyph moves during a turn. 'answered' rather than 'fixed' on purpose — a test asserting the absence of a CSS rule proves nothing, so there is no test to name."
     },
     {
       "id": "mounted-set-has-no-ceiling",

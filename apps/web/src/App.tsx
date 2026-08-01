@@ -482,6 +482,16 @@ export function App(): JSX.Element {
   // One page's worth of movement. "The next page" means the next page we
   // actually have: until 4b vendors all 604, stepping past the last one would
   // land on a blank, so it says so instead.
+  //
+  // And when it *does* move, it says where it landed if that is not the page
+  // next door (`page-turning.md` §7 ④). This walks `pageTurns.pages` — the
+  // **inventory**, not the print — so 7 → 9 steps clean over page 8 and the
+  // reader hears only "Page 9". That is not a small omission: with three of 604
+  // pages vendored, every turn in the shipped build crosses a gap, so the
+  // interface would be papering over the one thing it must not. The sibling
+  // `handleScrubTo` below already got this right, and this is the same string
+  // for the same reason — a landing the reader did not ask for has to be named
+  // out loud.
   const stepPage = useCallback(
     (step: 1 | -1) => {
       const { pages } = pageTurns;
@@ -493,10 +503,12 @@ export function App(): JSX.Element {
       const i = at === -1 ? 0 : Math.min(pages.length - 1, Math.max(0, at + step));
       const next = pages[i]!;
       if (next === here) {
-        announce(step > 0 ? t.lastPage : t.firstPage);
+        // Naming the page matters most here, where nothing moved: without it
+        // the reader has an arrow that did nothing and no idea where they are.
+        announce(step > 0 ? t.lastPage(here) : t.firstPage(here));
         return;
       }
-      goToPage(next, undefined, true);
+      goToPage(next, next === here + step ? undefined : t.nearestPageN(next), true);
     },
     [pageTurns, announce, t, goToPage],
   );
@@ -840,6 +852,15 @@ export function App(): JSX.Element {
         setJumperOpen(true);
         return;
       }
+      // Escape off a focused ayah (§7 ⑤). Blur rather than move focus anywhere
+      // in particular: focus goes back to `BODY`, which is exactly the state
+      // `onAyah: false` describes, so the very next arrow reaches rule 6 and
+      // turns the page. Sending it to the stage instead would leave a focus
+      // ring on a thing the reader did not ask to select.
+      if (action.kind === "release") {
+        el?.blur?.();
+        return;
+      }
       stepPage(action.step);
     };
     window.addEventListener("keydown", onKeyDown);
@@ -1000,6 +1021,7 @@ export function App(): JSX.Element {
                   breadcrumbKey={breadcrumbKey}
                   onSelect={handleSelect}
                   onSelectRange={handleSelectRange}
+                  onWheelTurn={stepPage}
                   labelFor={(key) => t.ayahAria(t.ayahLabel(key) ?? key)}
                   skin={skin}
                   tajweedLookup={tajweed?.lookup ?? null}
@@ -1017,6 +1039,12 @@ export function App(): JSX.Element {
                 breadcrumbKey={breadcrumbKey}
                 onSelect={handleSelect}
                 onSelectRange={handleSelectRange}
+                /* The wheel ends where the arrow keys end — one `stepPage`, so a
+                   wheel turn and a keyed turn cannot drift apart. Both stages
+                   get it: on a spread the facing leaf is as much the book as
+                   this one, and a wheel over it that did nothing would read as a
+                   dead half of the page. */
+                onWheelTurn={stepPage}
                 labelFor={(key) => t.ayahAria(t.ayahLabel(key) ?? key)}
                 skin={skin}
                 tajweedLookup={tajweed?.lookup ?? null}

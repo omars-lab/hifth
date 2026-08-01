@@ -20,8 +20,12 @@ import {
   lerpView,
   marqueeRect,
   nextIntent,
+  nextWheelTurn,
+  normalizeWheelDelta,
   Highlighter,
   DEFAULT_HOP_ZOOM,
+  WHEEL_GAP_MS,
+  WHEEL_TURN_REST,
   type Fold,
   type PointerIntent,
   type Resolver,
@@ -29,6 +33,7 @@ import {
   type StageFit,
   type TajweedLookup,
   type View,
+  type WheelTurnState,
 } from "@hifth/core";
 import { loadPageSvg } from "../assets";
 import { useT } from "../i18n";
@@ -67,6 +72,18 @@ interface PageStageProps {
   labelFor: (key: string) => string;
   /** Fired with the selected ayah's on-screen bbox so the rail can position. */
   onSelectionRect?: (rect: { x: number; y: number; width: number; height: number } | null) => void;
+  /**
+   * Fired when a wheel gesture over the stage asks for a page turn: `1` for the
+   * next page, `-1` for the previous (`page-turning.md` §7 ③).
+   *
+   * The stage decides *whether a wheel meant a turn* — that is a fact about the
+   * gesture, and the stage is the only thing holding the surface it happened on
+   * — and App decides *what turning means*, because "the next page" is a fact
+   * about the inventory, which the stage does not have. Same seam the arrow keys
+   * already use: both end in `stepPage`, so a wheel turn and a keyed turn cannot
+   * drift apart.
+   */
+  onWheelTurn?: (step: 1 | -1) => void;
   /**
    * The applied skin (Loop 6a, spec §8). L3 owns the choice; the stage owns the
    * Highlighters, so it is the one that can apply it to every mounted page.
@@ -134,6 +151,24 @@ type TurnDir = "forward" | "back";
 const MIN_ZOOM = 0.8;
 const MAX_ZOOM = 5;
 
+/**
+ * How much 100 px of `ctrl`+wheel zooms — `page-turning.md` §7 ③.
+ *
+ * Multiplicative, not additive: `z' = z · RATIO^(−Δy/100)`. Zoom is perceived
+ * as a ratio, so a step that adds a constant is coarse near 1× and imperceptible
+ * near 5×, and the same wheel travel has to mean the same *proportion* of a
+ * change at either end or the reader learns the gesture twice.
+ *
+ * 1.2 per 100 px is roughly what a browser's own zoom step feels like, and one
+ * mouse notch (100 px in pixel mode) lands there exactly. What it replaces is
+ * @use-gesture's bridge, which was `1 + Δy/100` scaled by the *current* zoom:
+ * one notch was +40%, two was 2.0×, and three saturated MAX_ZOOM — a reader
+ * aiming for a comfortable read got a wall of ink in three clicks. The 100 is
+ * hard-coded in the library (`PINCH_WHEEL_RATIO`) with no option to change it,
+ * which is why this is a listener rather than a config value.
+ */
+const WHEEL_ZOOM_PER_100PX = 1.2;
+
 interface MountedPage {
   host: HTMLDivElement;
   svg: SVGSVGElement;
@@ -163,6 +198,7 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
     onSelectRange,
     labelFor,
     onSelectionRect,
+    onWheelTurn,
     skin = "plain",
     tajweedLookup = null,
     foldTarget = null,
@@ -206,6 +242,14 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
   labelForRef.current = labelFor;
   const onSelectionRectRef = useRef(onSelectionRect);
   onSelectionRectRef.current = onSelectionRect;
+  const onWheelTurnRef = useRef(onWheelTurn);
+  onWheelTurnRef.current = onWheelTurn;
+  // The wheel's accumulator (core owns the rule; this is just where it lives
+  // between events), and the two things the zoom branch needs to notice a
+  // gesture starting and ending — a wheel has no `first`/`last` of its own.
+  const wheelTurnRef = useRef<WheelTurnState>(WHEEL_TURN_REST);
+  const wheelZoomAtRef = useRef(-Infinity);
+  const wheelSettleRef = useRef<number | null>(null);
   // Read by mountPage, which runs async and must not close over a stale skin.
   const skinRef = useRef(skin);
   skinRef.current = skin;
@@ -323,6 +367,54 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
       startTimeRef.current = null;
     }
   }, []);
+
+  /**
+   * Zoom to `nz` while keeping whatever is under (`ox`, `oy`) — viewport
+   * coordinates — exactly where it is. Every zoom on this stage lands here:
+   * two-finger pinch, `ctrl`+wheel, and nothing else. That is deliberate, and
+   * it is the second half of the fix below.
+   *
+   * **The *layer*, not the stage — `page-turning.md` §7 ⑨.**
+   *
+   * `view.x/y` are layer-relative: the layer is the element the host is laid
+   * out in, so `translate3d(0,0)` puts the page at the layer's top-left and
+   * `measureFit` reads that box and no other. Converting a gesture's origin
+   * against the *stage* rect measures from one box into coordinates belonging
+   * to another, and the difference is the stage's own padding — a gutter that
+   * is deliberately outside the layer.
+   *
+   * The error is not constant, which is why it read as rounding: the anchor
+   * arithmetic is `px − (px − x)·k`, so an origin off by `d` lands the page off
+   * by `d·(1 − k)`. At rest it is zero. It grows with the zoom, and it grows in
+   * the direction that pulls the page out from under the finger holding it.
+   *
+   * Measured before the fix at a 1.0 → 1.4 zoom: (0.0, −6.4) px on a 390 × 844
+   * phone — `16 × (k − 1)` to the pixel, one `--stage-pad`. Zero horizontally
+   * because §2.4 drops the padding on the leaf's bound side, and zero on both
+   * axes at 1440 × 900 because the spread neutralises the padding entirely.
+   * That is the whole reason it survived six loops: the defect was live on the
+   * acceptance device and absent on the one a laptop shows you.
+   *
+   * Having *one* function is what keeps that fix fixed. When ctrl+wheel was
+   * taken off @use-gesture's pinch path (§7 ③) it needed the same arithmetic,
+   * and a second copy of it is a second place for the stage rect to creep back
+   * in — silently, on a phone, where nobody is looking.
+   */
+  const zoomAbout = useCallback(
+    (nz: number, ox: number, oy: number, base: { z: number; x: number; y: number }) => {
+      const layer = layerRef.current;
+      if (!layer) return;
+      const rect = layer.getBoundingClientRect();
+      const px = ox - rect.left;
+      const py = oy - rect.top;
+      const k = nz / base.z;
+      view.current.z = nz;
+      view.current.x = px - (px - base.x) * k;
+      view.current.y = py - (py - base.y) * k;
+      applyTransform();
+    },
+    [applyTransform],
+  );
 
   /**
    * Read a duration token in ms.
@@ -1052,51 +1144,23 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
         marqueeStartRef.current = null;
         emitSelectionRect();
       },
+      // Two fingers on glass. `ctrl`+wheel used to arrive here too, through
+      // @use-gesture's `pinchOnWheel`; it now has its own listener below, for
+      // the sensitivity reason given there. Both zoom through `zoomAbout`, which
+      // is where the anchor arithmetic and §7 ⑨'s fix live.
       onPinch: ({ origin: [ox, oy], movement: [ms], memo, first }) => {
-        /*
-         * The *layer*, not the stage — `page-turning.md` §7 ⑨.
-         *
-         * `view.x/y` are layer-relative: the layer is the element the host is
-         * laid out in, so `translate3d(0,0)` puts the page at the layer's
-         * top-left and `measureFit` reads that box and no other. Converting the
-         * gesture's origin against the *stage* rect measures from one box into
-         * coordinates belonging to another, and the difference is the stage's
-         * own padding — a gutter that is deliberately outside the layer.
-         *
-         * The error is not constant, which is why it reads as rounding: the
-         * anchor arithmetic below is `px − (px − x)·k`, so an origin off by `d`
-         * lands the page off by `d·(1 − k)`. At rest it is zero. It grows with
-         * the zoom, and it grows in the direction that pulls the page out from
-         * under the finger holding it.
-         *
-         * Measured before the fix at a 1.0 → 1.4 zoom: (0.0, −6.4) px on a
-         * 390 × 844 phone — `16 × (k − 1)` to the pixel, one `--stage-pad`. Zero
-         * horizontally because §2.4 drops the padding on the leaf's bound side,
-         * and zero on both axes at 1440 × 900 because the spread neutralises the
-         * padding entirely. That is the whole reason this survived: the defect is
-         * live on the acceptance device and absent on the one a laptop shows you.
-         */
-        const layer = layerRef.current;
-        if (!layer) return memo;
+        if (!layerRef.current) return memo;
         if (first) {
           cancelTween();
           measureFit();
         }
-        const rect = layer.getBoundingClientRect();
         const base =
           (memo as { z: number; x: number; y: number } | undefined) ?? {
             z: view.current.z,
             x: view.current.x,
             y: view.current.y,
           };
-        const nz = clampZoom(base.z * ms, MIN_ZOOM, MAX_ZOOM);
-        const px = ox - rect.left;
-        const py = oy - rect.top;
-        const k = nz / base.z;
-        view.current.z = nz;
-        view.current.x = px - (px - base.x) * k;
-        view.current.y = py - (py - base.y) * k;
-        applyTransform();
+        zoomAbout(clampZoom(base.z * ms, MIN_ZOOM, MAX_ZOOM), ox, oy, base);
         return base;
       },
       onPinchEnd: emitSelectionRect,
@@ -1104,10 +1168,95 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
     {
       target: stageRef,
       drag: { filterTaps: true },
-      pinch: { scaleBounds: { min: MIN_ZOOM, max: MAX_ZOOM }, rubberband: true },
+      pinch: {
+        scaleBounds: { min: MIN_ZOOM, max: MAX_ZOOM },
+        rubberband: true,
+        // Hand the wheel back. @use-gesture's wheel-to-pinch bridge divides the
+        // delta by a hard-coded 100 and multiplies by the current zoom, so one
+        // notch is +40% and three saturate MAX_ZOOM; the constant is not
+        // configurable (§7 ③). The listener below does it with a curve, and it
+        // is also what makes a *plain* wheel free to turn pages.
+        pinchOnWheel: false,
+      },
       eventOptions: { passive: false },
     },
   );
+
+  /*
+   * The wheel — the desktop's fourth gesture on the same surface, and the one a
+   * reader reaches for without being told (`page-turning.md` §7 ③).
+   *
+   * It is a raw listener rather than a `useGesture` binding because the two
+   * things it does are things @use-gesture will not do: turn a *page*, which is
+   * not a gesture it models at all, and zoom on a curve of our choosing rather
+   * than its own (see `WHEEL_ZOOM_PER_100PX`).
+   *
+   * The split is one line — `ctrl`/`meta` zooms, anything else turns — and it is
+   * not our convention. A trackpad pinch on macOS *is* a `ctrl`+wheel: the OS
+   * synthesises the modifier, so honouring it is what makes a two-finger pinch
+   * on a laptop zoom the page instead of turning four of them. `metaKey` rides
+   * along for the Cmd+scroll some pointing devices send.
+   */
+  useEffect(() => {
+    const stage = stageRef.current;
+    if (!stage) return;
+
+    const onWheel = (e: WheelEvent) => {
+      /*
+       * The same rule keydown obeys — `keymap.ts` rule 3. With a sheet open the
+       * stage is not the thing being operated, and a page turn under it would
+       * move the ground the reader is standing on. Nothing is prevented here
+       * either: a scrollable sheet (the root lens' list, the jumper's results)
+       * must keep its own scroll, and that is the whole reason this returns
+       * *before* `preventDefault` rather than after.
+       */
+      if (document.querySelector('[role="dialog"]')) return;
+
+      // Past this point the wheel is ours, and saying so is not optional: the
+      // browser's own ctrl+wheel is a full-page zoom, which would scale the
+      // chrome along with the scripture and leave `view.z` lying about it.
+      e.preventDefault();
+
+      if (e.ctrlKey || e.metaKey) {
+        // A wheel has no `first`, so quiet stands in for one — the same
+        // threshold the turn rule uses to tell one gesture from the next.
+        if (e.timeStamp - wheelZoomAtRef.current >= WHEEL_GAP_MS) {
+          cancelTween();
+          measureFit();
+        }
+        wheelZoomAtRef.current = e.timeStamp;
+        const base = { z: view.current.z, x: view.current.x, y: view.current.y };
+        const factor = Math.pow(WHEEL_ZOOM_PER_100PX, -normalizeWheelDelta(e) / 100);
+        zoomAbout(clampZoom(base.z * factor, MIN_ZOOM, MAX_ZOOM), e.clientX, e.clientY, base);
+        // …and no `last` either. The rail sits beside the selected ayah, so it
+        // has to be told where that ayah ended up, but re-resolving it on every
+        // frame of a pinch is work `onPinchEnd` deliberately avoids. A trailing
+        // timer is that end: one emit per gesture, after the wheel goes quiet.
+        if (wheelSettleRef.current !== null) window.clearTimeout(wheelSettleRef.current);
+        wheelSettleRef.current = window.setTimeout(() => {
+          wheelSettleRef.current = null;
+          emitSelectionRect();
+        }, WHEEL_GAP_MS);
+        return;
+      }
+
+      const { state, step } = nextWheelTurn(wheelTurnRef.current, {
+        deltaY: e.deltaY,
+        deltaMode: e.deltaMode,
+        timeStamp: e.timeStamp,
+      });
+      wheelTurnRef.current = state;
+      // The stage decided *whether* that was a turn; App decides what turning
+      // means, because "the next page" is a fact about the inventory.
+      if (step !== 0) onWheelTurnRef.current?.(step);
+    };
+
+    stage.addEventListener("wheel", onWheel, { passive: false });
+    return () => {
+      stage.removeEventListener("wheel", onWheel);
+      if (wheelSettleRef.current !== null) window.clearTimeout(wheelSettleRef.current);
+    };
+  }, [cancelTween, measureFit, zoomAbout, emitSelectionRect]);
 
   /*
    * The band. One div, no children, `aria-hidden` — everything it says is also

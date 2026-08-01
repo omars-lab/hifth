@@ -180,13 +180,21 @@ export interface Strings {
   pagesVendored(have: number, total: number): string;
 
   /* ---- announcements (the LiveAnnouncer channel) -------------------------- */
-  firstPage: string;
-  lastPage: string;
   /**
-   * Said out loud when a scrub is let go on a page this build does not have and
-   * lands on the closest one it does. It names where you *are*, not where you
-   * aimed — a silent landing on a different page is the app lying about what it
-   * did, which is the one thing the vendored-corpus gap must never become.
+   * The end of the road, in whichever direction. Both name the page they
+   * stopped on (`page-turning.md` §7 ④): "Last available page" alone tells a
+   * reader that an arrow did nothing, and leaves them to guess where they are —
+   * which, with three pages of 604 vendored, is a guess they will get wrong.
+   */
+  firstPage(page: number): string;
+  lastPage(page: number): string;
+  /**
+   * Said out loud when a landing is not the one that was asked for: a scrub let
+   * go on a page this build does not have, or a *turn* that stepped over one
+   * (§7 ④ — the inventory is not the print). It names where you *are*, not
+   * where you aimed — a silent landing on a different page is the app lying
+   * about what it did, which is the one thing the vendored-corpus gap must
+   * never become.
    */
   nearestPageN(page: number): string;
   selectionCleared: string;
@@ -467,8 +475,8 @@ export function buildStrings(lang: Lang, m: Catalog): Strings {
     nextPage: m.nextPage,
     pagesVendored: (have, total) => m.pagesVendored({ haveText: n(have), totalText: n(total) }),
 
-    firstPage: m.firstPage,
-    lastPage: m.lastPage,
+    firstPage: (page) => m.firstPage({ page }),
+    lastPage: (page) => m.lastPage({ page }),
     nearestPageN: (page) => m.nearestPageN({ page }),
     selectionCleared: m.selectionCleared,
     selected: (label) => m.selected({ label }),

@@ -50,7 +50,7 @@ export interface Catalog {
   readonly editionNoTable: string;
   readonly facingAbsent: (d: { readonly page: string | number }) => string;
   readonly facingPage: string;
-  readonly firstPage: string;
+  readonly firstPage: (d: { readonly page: string | number }) => string;
   readonly goTo: string;
   readonly goToLong: string;
   readonly hereTag: string;
@@ -75,7 +75,7 @@ export interface Catalog {
   readonly langSectionNote: string;
   readonly langSectionTitle: string;
   readonly langSwitchTo: (d: { readonly other: string | number }) => string;
-  readonly lastPage: string;
+  readonly lastPage: (d: { readonly page: string | number }) => string;
   readonly legendAria: string;
   readonly "legendCaveat.lead": string;
   readonly "legendCaveat.rest": string;
