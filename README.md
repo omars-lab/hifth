@@ -59,6 +59,9 @@ statuses, gates and open follow-ups live there and are deliberately not restated
 
 - **Implementation plan:** [`docs/PLAN.md`](docs/PLAN.md) — built in vertical loops, each ending on a phone
 - **Loop records:** [`docs/decisions/`](docs/decisions/) — what each loop decided, measured, deferred
+- **Open items:** [`docs/issues.md`](docs/issues.md) — everything unfinished, indexed from the four
+  registers that hold it (the plan's follow-ups, the backlog, each design doc's open questions,
+  the manual-check ledger); `make issues` prints it worst-first
 - **Manual-check register:** [`docs/validation/ledger.json`](docs/validation/ledger.json) — the
   checks no CI job can make (a phone, a screen reader, a printed mushaf), each with a runbook
   and a recorded verdict; `make validate` in the terminal, `make guide` on the phone
