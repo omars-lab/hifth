@@ -281,6 +281,26 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     proposals in §3–§4 of that document are **not** scheduled here — they wait on
     follow-up ① and on a ceiling for the mounted set
     ([`docs/backlog.md`](backlog.md) §2). The hardening is independent of both.
+    **The hardening is done.** Ten of the eleven are closed — ①② in `88cce9f`, ⑨ in
+    `21f6380`, ③④⑤⑧ in `b1c24c2`, and ⑥⑦⑪ not by work aimed at them but as consequences of
+    [`page-transition.md`](design/page-transition.md): the resting-edge system took the drop
+    shadow away and gave the corner something to clip against (§2), and the fold gave reduced
+    motion something to actually remove (§3–§4) — and the eleventh is
+    ⑩, the mounted-set ceiling, which is not part of this follow-up but the thing §3–§4 were
+    already said to be waiting on; it is indexed on its own and stays open. What holds the
+    fix is [`apps/web/e2e/stage-fit.spec.ts`](../apps/web/e2e/stage-fit.spec.ts), which
+    asserts both regimes on every axis — an axis the page *fits* must be centred, an axis it
+    *overflows* must stay covered — and runs on `desktop` as well as the two phone projects,
+    which is what the original defect needed and did not have.
+    Re-measured at `89fe3dd`, at the two viewports this entry reproduced on. At 834 × 1194,
+    where it recorded the leaf in the bottom-right corner of an otherwise empty field, the
+    480.0 × 746.9 leaf now sits in an 818.0 × 912.4 layer with **169.0 px either side and
+    82.7 / 82.8 top and bottom** — centred to a tenth of a pixel on both axes. At 1440 × 900
+    the 245.8 / −0.2 asymmetry is gone for a second reason worth writing down: the layer no
+    longer grows past its stage, so the leaf and its layer are both 406.7 px wide and the
+    horizontal slack the offset used to be applied to twice is now *zero*. The defect could
+    not recur there even if the arithmetic came back — which is exactly why the assertion
+    that guards it runs at a viewport where the slack is real.
 
 11. **A page turn should say what is between the two pages, and today it says nothing.**
     The transition effect — the leaf's edges at rest and the fold that crosses during a turn
