@@ -228,6 +228,7 @@ export {
 // The revision record: deliberate looks, rolled up by day and by scope. Pure and
 // clockless — the time and the reader's UTC offset ride on each event.
 export {
+  comparableEvents,
   dayOf,
   daysBetween,
   editionOf,

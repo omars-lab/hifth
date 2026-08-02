@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  comparableEvents,
   dayOf,
   daysBetween,
   editionOf,
@@ -209,5 +210,47 @@ describe("editionOf", () => {
     expect(editionOf(look())).toBe(EDITION);
     expect(editionOf(look({ key: "quran/other/2:48" }))).toBe("other");
     expect(editionOf(look({ key: "nonsense" }))).toBeNull();
+  });
+});
+
+describe("comparableEvents", () => {
+  // A record outlives the build that wrote it. These are the looks a reader
+  // would hold after a second edition were vendored: the same page number, in
+  // two prints, over ayahs that are not the same ayahs.
+  const mine = look({ key: key(2, 48), page: 7 });
+  const theirs = look({ key: "quran/hafs-indopak/9:20", page: 7 });
+
+  it("drops another print's looks at page scope", () => {
+    expect(comparableEvents([mine, theirs], "page", EDITION)).toEqual([mine]);
+    expect(comparableEvents([mine, theirs], "page", "hafs-indopak")).toEqual([theirs]);
+  });
+
+  it("keeps them at juz and hizb scope, which is the half that is easy to get wrong", () => {
+    // Not an oversight and not laziness: a juz is a division of the *text*, so
+    // juz 5 is juz 5 in every print on earth. Filtering here would throw away
+    // looks that genuinely land on the square being drawn — showing a hafiz
+    // less revision than they did, which is the quieter and worse failure.
+    expect(comparableEvents([mine, theirs], "juz", EDITION)).toEqual([mine, theirs]);
+    expect(comparableEvents([mine, theirs], "hizb", EDITION)).toEqual([mine, theirs]);
+  });
+
+  it("drops an unparseable key at page scope rather than guessing which print it was", () => {
+    // Same rule `scopesOf` follows: a gap in the picture is recoverable, a
+    // wrong square is not.
+    expect(comparableEvents([look({ key: "nonsense" })], "page", EDITION)).toEqual([]);
+  });
+
+  it("keeps the whole record out of the answer when nothing matches", () => {
+    // The empty-not-everything case. A filter that fell back to "return all" on
+    // no match would be invisible until the day two editions existed.
+    expect(comparableEvents([theirs], "page", EDITION)).toEqual([]);
+  });
+
+  it("is what makes lastSeen honest at page scope", () => {
+    // The end-to-end statement of the bug: without the partition, one look at
+    // another print's page 7 colours *this* print's page 7.
+    const day = lastSeen(comparableEvents([theirs], "page", EDITION), "page");
+    expect(day.get(7)).toBeUndefined();
+    expect(lastSeen([theirs], "page").get(7)).toBe("2026-03-09");
   });
 });
