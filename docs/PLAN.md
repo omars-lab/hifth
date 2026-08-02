@@ -344,6 +344,29 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     verdict, so today a turn is a button, a key or the page bar — a gesture that competes
     with pan and marquee is its own design, not a detail of this one.
 
+12. **A gate that enumerates from git has a smaller tree on the machine that writes the code
+    than on the machine that gates it.** `gate:text-sources` listed `git ls-files`, which is
+    the *index*, so a brand-new source file that had not been `git add`ed yet was outside the
+    gate entirely. Reproduced rather than reasoned: a `packages/core/src/*.ts` carrying a NUL
+    byte passed `pnpm gate:text-sources` while untracked and failed the same gate the moment
+    it was staged. The boundary was exactly `git add`, which is the wrong boundary, because
+    `make ci` is the mirror people run *before* staging — that is what it is for. CI never
+    saw the gap and structurally could not: a checkout has no untracked files, so everything
+    in the commit is tracked and the two machines disagree in the direction only the quieter
+    one can see. The cost was a round trip — write a file, `make ci` green, push, CI red —
+    for the one gate whose entire subject is a byte that makes a file unreviewable.
+    **Closed by** [`scripts/gate-text-sources.mjs`](../scripts/gate-text-sources.mjs), which
+    now lists `--cached --others --exclude-standard`: the index *and* what is on disk but
+    neither tracked nor ignored. The count on a clean tree is unchanged at 166, which is the
+    result to want — the fix adds files only when a working tree has them. One thing it also
+    cost, and the reason the exclusion list grew: `apps/web/dist/assets/index-*.js` matches
+    the source pattern, and until now the only thing keeping build output out of this gate
+    was that it is untracked. `--exclude-standard` still keeps it out, but a gate whose scope
+    is defined by `.gitignore` changes meaning when somebody edits `.gitignore` for an
+    unrelated reason, so `dist`, `coverage`, `playwright-report` and `test-results` are named
+    in the gate. This is the only gate in `scripts/` that enumerated from git; the others
+    walk the tree or read a manifest, and were never in scope.
+
 **The half of these a machine cannot run now has a register — and a runbook.** Follow-ups
 ① (the phone), ② (the browser glance) and ④ (VoiceOver/TalkBack) still wait on a human, and
 prose cannot answer "is that still true, on what device, and when?" — ⑤ (does the source

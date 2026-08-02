@@ -542,6 +542,15 @@
       "note": "Still open deliberately. PointerIntent has no `turn` verdict, so today a turn is a button, a key or the page bar — a gesture that competes with pan and marquee is its own design, not a detail of this one."
     },
     {
+      "id": "plan-gate-scope-differs-by-machine",
+      "source": { "file": "docs/PLAN.md", "item": "12" },
+      "status": "fixed",
+      "severity": "defect",
+      "owner": "agent",
+      "closedBy": "scripts/gate-text-sources.mjs",
+      "note": "Opened and closed in one change, which is the shape the close rule asks for; it is indexed anyway because the lesson outlives the fix. Reproduced before it was fixed: an untracked NUL-bearing source passed the gate and failed it once staged. CI could not have found this — a checkout has no untracked files, so the gap is only visible from the machine that has it. gate:text-sources was the only gate in scripts/ enumerating from git; if a future one does, this is the row that says what to check."
+    },
+    {
       "id": "plan-hifth-licence",
       "source": { "file": "docs/PLAN.md", "item": "5" },
       "status": "answered",
