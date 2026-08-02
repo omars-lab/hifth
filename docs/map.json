@@ -799,6 +799,11 @@
           "note": "Every artifact CI uploads is one something actually produces. Written after an upload step preserved nothing for several loops while looking green."
         },
         {
+          "file": "scripts/gate-budget.mjs",
+          "symbol": "TOLERANCE_GZ",
+          "note": "The 150 KB budget notices at the cliff; scripts/budget-baseline.json is how it notices on the slope. Every run prints a per-chunk delta and fails on a move of more than a kilobyte in either direction — a shrink too, because unrecorded headroom is headroom the next change spends unseen. The baseline is committed rather than built from main because that puts the number in the diff a reviewer is already reading instead of a CI log nobody opens, and because a merge-base build cannot run offline. Accept a move with `make budget-update`, and read the diff — an accepted baseline is the gate agreeing with you."
+        },
+        {
           "file": "scripts/gate-map.mjs",
           "symbol": "features",
           "note": "This map, checked. Every symbol listed in docs/map.json must still exist, so the orientation doc cannot rot into confident fiction."
@@ -812,7 +817,8 @@
       "extend": [
         "A new gate is a script in scripts/, a `gate:*` entry in package.json, a line in `make ci`, and a step in build-test-gate. All four, or it does not run.",
         "Verify a new gate by breaking the thing it protects and watching it fail, then reverting. A gate that has never failed has never been tested.",
-        "Gates fail with the fix in the message. 'X is wrong' costs someone an afternoon; 'X is wrong, run Y' costs them a minute."
+        "Gates fail with the fix in the message. 'X is wrong' costs someone an afternoon; 'X is wrong, run Y' costs them a minute.",
+        "A gate that guards a number with headroom needs a committed baseline as well as a ceiling, or it only speaks on the change that runs out. gate:budget is the shape: measure, commit the measurement, fail on drift, and let the baseline's diff be the report — the same trade the golden images make."
       ],
       "gates": ["make ci", "make gates"],
       "seeAlso": ["validation", "golden-images"]
