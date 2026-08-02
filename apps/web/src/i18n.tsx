@@ -738,8 +738,6 @@ export interface I18n {
   readonly dir: "rtl" | "ltr";
   readonly t: Strings;
   readonly setLang: (lang: Lang) => void;
-  /** The bundle for the language this one is not — for labelling the switch. */
-  readonly other: Strings;
 }
 
 /*
@@ -756,20 +754,7 @@ const LangContext = createContext<I18n>({
   dir: "rtl",
   t: AR,
   setLang: () => {},
-  other: EN,
 });
-
-/**
- * The language this one's switch offers.
- *
- * Two languages, so "the other one" is well defined and the switch is a toggle.
- * The day there is a third this becomes a list and `I18n.other` goes with it;
- * until then, naming the assumption in one place is cheaper than pretending it
- * is not there. docs/design/i18n.md §⑨.
- */
-function otherLang(lang: Lang): Lang {
-  return lang === "ar" ? "en" : "ar";
-}
 
 export function LangProvider({ children }: { children: React.ReactNode }): JSX.Element {
   const [lang, setLangState] = useState<Lang>(detectLang);
@@ -789,7 +774,6 @@ export function LangProvider({ children }: { children: React.ReactNode }): JSX.E
       dir: dirOf(lang),
       t: BUNDLES[lang],
       setLang,
-      other: BUNDLES[otherLang(lang)],
     }),
     [lang, setLang],
   );

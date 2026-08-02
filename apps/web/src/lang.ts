@@ -51,6 +51,11 @@ export interface Locale {
    *  not a message. A reader looking for their language finds it written the
    *  way they would write it, in a list they cannot otherwise read. */
   readonly name: string;
+  /** The compact self-name the desktop header's switch wears — «ع», "EN". The
+   *  full `name` does not fit beside five other controls, and nothing shortens
+   *  «العربية» to «ع» by rule: it is a decision a language makes about itself,
+   *  exactly like `name`. Declared rather than derived for that reason. */
+  readonly abbr: string;
   /** Writing direction of the *chrome*. The stage and the diff pin their own. */
   readonly dir: "rtl" | "ltr";
   /** Which of `format.ts`'s two surah-name tables this language reads by. Surah
@@ -73,8 +78,22 @@ export interface Locale {
  * until every catalog in `messages/` has a row here.
  */
 export const LOCALES: Readonly<Record<Lang, Locale>> = {
-  ar: { name: "العربية", dir: "rtl", surahNames: "arabic", digits: "arabic", rulePrimary: "arabic" },
-  en: { name: "English", dir: "ltr", surahNames: "romanised", digits: "latin", rulePrimary: "latin" },
+  ar: {
+    name: "العربية",
+    abbr: "ع",
+    dir: "rtl",
+    surahNames: "arabic",
+    digits: "arabic",
+    rulePrimary: "arabic",
+  },
+  en: {
+    name: "English",
+    abbr: "EN",
+    dir: "ltr",
+    surahNames: "romanised",
+    digits: "latin",
+    rulePrimary: "latin",
+  },
 };
 
 /** Versioned, like the coach key: a future third language is a new decision. */

@@ -313,7 +313,7 @@
         {
           "file": "apps/web/src/lang.ts",
           "symbol": "LOCALES",
-          "note": "What a locale has to declare before it can render anything: its name in itself, its chrome direction, its surah-name table, its digits, and which spelling of a tajweed rule it puts first. Keyed by a `Lang` derived from the catalogs, so dropping in messages/ur.json fails to compile until Urdu has answered all five. None of them has a defensible default — a locale silently inheriting `ltr` is a mus'haf rendered backwards."
+          "note": "What a locale has to declare before it can render anything: its name in itself, the abbreviation of that name the desktop header's switch wears, its chrome direction, its surah-name table, its digits, and which spelling of a tajweed rule it puts first. Keyed by a `Lang` derived from the catalogs, so dropping in messages/ur.json fails to compile until Urdu has answered all six. None of them has a defensible default — a locale silently inheriting `ltr` is a mus'haf rendered backwards, and nothing shortens «العربية» to «ع» by rule, which is why `abbr` is declared here rather than truncated at the call site."
         },
         {
           "file": "apps/web/src/lang.ts",
@@ -360,6 +360,7 @@
         "New user-facing copy is a key in every messages/*.json, then `pnpm i18n:build`, then a line in buildStrings. Never a literal in a component — the compiler is what stops an English build shipping an Arabic sentence, and a key missing from one locale does not compile.",
         "Anything that counts takes two arguments: {n} for the plural to select on and {nText} for the digits that print. The emitter rejects ICU's `#` and {n, number} on purpose — they route through Intl.NumberFormat, which is a second numeral authority and disagrees with format.ts's digits().",
         "Adding a language is a JSON catalog plus a LOCALES row; there is no union to widen and no import to add, because Lang and CATALOGS are derived from the files in messages/. The full checklist is docs/design/i18n.md §⑦.",
+    "Both language switches — Colophon's and DesktopChrome's — map LOCALE_IDS over LOCALES, so a third locale grows a third option with no edit. Do not reintroduce anything shaped like `other`: a field meaning \"the language this one is not\" is well defined at two locales and silently wrong at three, where it renders one option short and puts the same name on two buttons. The tests are written over LOCALE_IDS for that reason and will name the language the switch left out.",
         "Ask whether the new text is chrome or scripture. Chrome translates and follows `dir`; anything quoting the mus'haf, a verse, a root, or a licence credit pins `lang=\"ar\" dir=\"rtl\"` and is translated by nobody.",
         "i18n.test.tsx walks LOCALE_IDS and calls every formatter, so a new key is covered the day it exists and a new locale the day its catalog lands.",
         "The e2e suite is pinned to `locale: \"ar\"` in playwright.config.ts because that is what every aria snapshot and golden image was recorded in. lang.spec.ts is the one file that overrides it, and a second such file should say why."

@@ -219,6 +219,13 @@ describe("LangProvider", () => {
 });
 
 describe("what the English UI must not translate", () => {
+  // Every test in here renders the *English* chrome, which is only true while
+  // nothing has been stored — and one of them clicks «العربية», which stores.
+  // Without this the order of the tests decides what they assert.
+  afterEach(() => {
+    localStorage.clear();
+  });
+
   it("keeps the licence credits in Arabic, verbatim", () => {
     // `gate:license-copy` binds these rows byte-for-byte to SOURCES.md. An
     // attribution that reads differently depending on the reader is not an
@@ -248,5 +255,50 @@ describe("what the English UI must not translate", () => {
     // And the switch works from inside the sheet a reader opened to find it.
     fireEvent.click(arabic);
     expect(screen.getByRole("dialog", { name: AR.aboutTitle })).toBeInTheDocument();
+  });
+
+  /*
+   * `docs/design/i18n.md` §⑨ ④ — the switch used to be a toggle wearing a
+   * radiogroup's clothes: two hand-written buttons, and an `I18n.other` that
+   * could only mean anything while there were exactly two languages. A third
+   * catalog would have rendered two options out of three and labelled both
+   * non-current ones with the same language's name — wrong output, from code
+   * that still compiled and whose tests still passed.
+   *
+   * These two assertions are what makes that impossible. They are written over
+   * `LOCALE_IDS` rather than over «العربية» and "English" on purpose: the day
+   * `ur.json` lands they fail, and they fail saying which language the switch
+   * forgot rather than «expected 2 to be 3».
+   */
+  it("offers every language there is, not merely the one this is not", () => {
+    render(
+      <LangProvider>
+        <Colophon open onClose={() => {}} />
+      </LangProvider>,
+    );
+    const offered = screen.getAllByRole("radio").map((el) => el.getAttribute("lang"));
+    expect(offered).toEqual([...LOCALE_IDS]);
+  });
+
+  it("names each option after itself, in the language doing the offering", () => {
+    // The half `other` got wrong at three locales: every non-current button
+    // read "switch to <the other one>", which is one language's name on two
+    // buttons. Each option now carries its own.
+    render(
+      <LangProvider>
+        <Colophon open onClose={() => {}} />
+      </LangProvider>,
+    );
+    // Asked of whichever language the provider actually opened in, rather than
+    // of English by name: the assertion is about the *shape* of the labelling,
+    // and it should not start passing for the wrong reason if the default moves.
+    const here = detectLang();
+    const t = stringsFor(here);
+    for (const id of LOCALE_IDS) {
+      const live = here === id;
+      const name = live ? LOCALES[id].name : t.langSwitchTo(LOCALES[id].name);
+      const option = screen.getByRole("radio", { name });
+      expect(option).toHaveAttribute("aria-checked", String(live));
+    }
   });
 });

@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useRef } from "react";
 import { useT } from "../i18n";
+import { LOCALES } from "../lang";
+import { LOCALE_IDS } from "../messages/locales.gen";
 import { SOURCE_REPO, hasCommit, shortCommit, sourceUrl } from "../provenance";
 import styles from "./Colophon.module.css";
 
@@ -122,7 +124,7 @@ const CREDITS: readonly Credit[] = [
  * closes, focus restored to the wordmark.
  */
 export function Colophon({ open, onClose }: ColophonProps): JSX.Element | null {
-  const { t, dir, lang, setLang, other } = useT();
+  const { t, dir, lang, setLang } = useT();
   const sheetRef = useRef<HTMLDivElement>(null);
   const restoreRef = useRef<HTMLElement | null>(null);
 
@@ -188,43 +190,40 @@ export function Colophon({ open, onClose }: ColophonProps): JSX.Element | null {
           </button>
         </header>
 
-        {/* Two buttons rather than one toggle. A single "switch to English"
-            control is unreadable to the half of its audience that cannot read
-            the label it is currently wearing, and `aria-pressed` on a two-state
-            language control announces "pressed" for a thing that is not on or
-            off. A radio group says both options in their own script, at once,
-            and marks which one is live — which is also what makes it usable by
-            someone who opened the app in the wrong language by accident. */}
+        {/* One button per language rather than one toggle. A single "switch to
+            English" control is unreadable to the half of its audience that
+            cannot read the label it is currently wearing, and `aria-pressed` on
+            a two-state language control announces "pressed" for a thing that is
+            not on or off. A radio group says every option in its own script, at
+            once, and marks which one is live — which is also what makes it
+            usable by someone who opened the app in the wrong language by
+            accident. */}
         <section className={styles.block} aria-labelledby="colophon-lang">
           <h3 className={styles.subhead} id="colophon-lang">
             {t.langSectionTitle}
           </h3>
           <div className={styles.langRow} role="radiogroup" aria-labelledby="colophon-lang">
-            {/* Each name is written in its own language and marked as such, so
-                a screen reader switches voice for the option it is offering
-                rather than reading «العربية» through an English synthesiser. */}
-            <button
-              type="button"
-              role="radio"
-              className={styles.lang}
-              aria-checked={lang === "ar"}
-              aria-label={lang === "ar" ? undefined : t.langSwitchTo(other.langName)}
-              lang="ar"
-              onClick={() => setLang("ar")}
-            >
-              العربية
-            </button>
-            <button
-              type="button"
-              role="radio"
-              className={styles.lang}
-              aria-checked={lang === "en"}
-              aria-label={lang === "en" ? undefined : t.langSwitchTo(other.langName)}
-              lang="en"
-              onClick={() => setLang("en")}
-            >
-              English
-            </button>
+            {/* Driven by the registry, not by two hand-written buttons. Each
+                name is written in its own language and marked as such, so a
+                screen reader switches voice for the option it is offering
+                rather than reading «العربية» through an English synthesiser —
+                and each button names *itself* rather than "the other one",
+                which is what stops the group from being a toggle wearing a
+                radiogroup's clothes. */}
+            {LOCALE_IDS.map((id) => (
+              <button
+                key={id}
+                type="button"
+                role="radio"
+                className={styles.lang}
+                aria-checked={lang === id}
+                aria-label={lang === id ? undefined : t.langSwitchTo(LOCALES[id].name)}
+                lang={id}
+                onClick={() => setLang(id)}
+              >
+                {LOCALES[id].name}
+              </button>
+            ))}
           </div>
           <p className={styles.note}>{t.langSectionNote}</p>
         </section>

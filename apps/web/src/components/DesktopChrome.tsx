@@ -1,4 +1,6 @@
 import { useT } from "../i18n";
+import { LOCALES } from "../lang";
+import { LOCALE_IDS } from "../messages/locales.gen";
 import { JUMPER_KEY } from "@hifth/core";
 import styles from "./DesktopChrome.module.css";
 
@@ -20,7 +22,7 @@ import styles from "./DesktopChrome.module.css";
  * and will say so if this stops being true.
  */
 export function DesktopChrome(): JSX.Element {
-  const { t, lang, setLang, other } = useT();
+  const { t, lang, setLang } = useT();
 
   return (
     <div className={styles.extras}>
@@ -37,36 +39,36 @@ export function DesktopChrome(): JSX.Element {
        * It is *added* here, not moved: the sheet keeps its copy. A control that
        * relocates as the window resizes is a control the reader has to re-find.
        *
-       * Two radios rather than one toggle, for the reason Colophon spells out
-       * and which does not change with width: a single "switch to English"
-       * button is unreadable to exactly the half of its audience that cannot
-       * read the label it is currently wearing. Each option is written in its
-       * own script and marked `lang`, so a screen reader changes voice for the
-       * option it is offering.
+       * One radio per language rather than one toggle, for the reason Colophon
+       * spells out and which does not change with width: a single "switch to
+       * English" button is unreadable to exactly the half of its audience that
+       * cannot read the label it is currently wearing. Each option is written in
+       * its own script and marked `lang`, so a screen reader changes voice for
+       * the option it is offering.
+       *
+       * The visible text is `abbr` — «ع», "EN" — because the header has room for
+       * a glyph and not for «العربية». That is a declared property of a locale
+       * rather than a truncation: no rule shortens a language's name for it.
+       *
+       * The live option keeps its bare text as its accessible name, exactly as
+       * before; the aria snapshots record it. Naming it too is a separate
+       * question about this one abbreviation, not about the switch.
        */}
       <div className={styles.langRow} role="radiogroup" aria-label={t.langSectionTitle}>
-        <button
-          type="button"
-          role="radio"
-          className={styles.lang}
-          aria-checked={lang === "ar"}
-          aria-label={lang === "ar" ? undefined : t.langSwitchTo(other.langName)}
-          lang="ar"
-          onClick={() => setLang("ar")}
-        >
-          ع
-        </button>
-        <button
-          type="button"
-          role="radio"
-          className={styles.lang}
-          aria-checked={lang === "en"}
-          aria-label={lang === "en" ? undefined : t.langSwitchTo(other.langName)}
-          lang="en"
-          onClick={() => setLang("en")}
-        >
-          EN
-        </button>
+        {LOCALE_IDS.map((id) => (
+          <button
+            key={id}
+            type="button"
+            role="radio"
+            className={styles.lang}
+            aria-checked={lang === id}
+            aria-label={lang === id ? undefined : t.langSwitchTo(LOCALES[id].name)}
+            lang={id}
+            onClick={() => setLang(id)}
+          >
+            {LOCALES[id].abbr}
+          </button>
+        ))}
       </div>
 
       {/*
