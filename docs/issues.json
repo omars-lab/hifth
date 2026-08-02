@@ -379,10 +379,11 @@
     {
       "id": "shard-prefetch-misses-the-hop",
       "source": { "file": "docs/backlog.md", "item": "⑧" },
-      "status": "confirmed",
+      "status": "fixed",
       "severity": "defect",
       "owner": "agent",
-      "note": "A mutashabihat edge very often points into a different surah, so the shard for the place the reader is about to go is exactly the one not prefetched."
+      "closedBy": "apps/web/e2e/hop.spec.ts",
+      "note": "Did not need Loop 4b after all — the hop list is already computed for the rail, so prefetching its targets' surahs costs the walk and nothing else. The How-we'd-know timing was not taken: the test asserts the cause (surah 13's shard is requested from 2:120's rail before any chip is opened) plus a ceiling, because a cold-cache timing assertion is flaky by construction here."
     },
     {
       "id": "tti-criterion-has-no-instrument",

@@ -333,8 +333,7 @@ export function App(): JSX.Element {
   }, [page, adjacency, selectedKey, rangeHops, resolver]);
 
   // Prefetch shards for every surah visible on a mounted page, so the rail is
-  // ready the moment an ayah is tapped (4b widens this to hop targets as
-  // pages stream in).
+  // ready the moment an ayah is tapped.
   useEffect(() => {
     if (!manifest) return;
     for (const p of manifest.pages) {
@@ -342,6 +341,31 @@ export function App(): JSX.Element {
       for (const poly of p.polygons) ensureShard(poly.surah);
     }
   }, [manifest, mountedPages, ensureShard]);
+
+  // …and for the surahs the rail can send you to, which is a different set and
+  // the one that matters for the hop (`docs/backlog.md` ⑧). The loop above is
+  // keyed on *pages*, so it fetches what is on screen; a mutashabihat edge is
+  // by nature a resemblance across the mus'haf and usually points into another
+  // surah entirely. The shard for the place the reader is one tap from going
+  // was therefore the one shard nobody asked for, and the rail at the far end
+  // of the hop drew empty until a fetch that started on arrival came back.
+  //
+  // `hopsForKey` and `rangeHops` are already computed for the rail, so this
+  // costs the walk and nothing else; `ensureShard` is once-per-session and
+  // remembers misses, so a shard that is already in flight or already failed
+  // is not asked for twice. Targets on unvendored pages are prefetched too,
+  // deliberately: `canHop` disables the chip today, but the shard is what makes
+  // the *count* on the far side truthful the day Loop 4b vendors that page, and
+  // filtering by `resolver` here would put the inventory's shape into a cache
+  // decision where it does not belong.
+  useEffect(() => {
+    if (!adjacency) return;
+    const hops = selectedKey ? adjacency.hopsForKey(selectedKey) : [];
+    for (const edge of [...hops, ...rangeHops]) {
+      const surah = parseAyahKey(edge.to)?.surah;
+      if (surah) ensureShard(surah);
+    }
+  }, [adjacency, selectedKey, rangeHops, ensureShard]);
 
   /* ---- the tajweed skin (Loop 6a, spec §8) ------------------------------ */
 
