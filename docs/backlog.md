@@ -130,7 +130,7 @@ notices at the cliff rather than on the slope.
 Worth considering: have the gate print the delta against `main` rather than only the absolute,
 so a PR that adds 9 KB is visible as *adding 9 KB* instead of as "still under budget".
 
-### ⑥ The vendored corpus is the largest thing we ship, and nothing watches it · **open**
+### ⑥ The vendored corpus is the largest thing we ship, and nothing watches it · **fixed**
 
 A vendored page is **~47 KB gz** (measured: 48.6 / 42.6 / 48.5 KB for pages 7, 9, 19). At 604
 pages that is roughly **28 MB gz** of mushaf — two orders of magnitude past the JS bundle,
@@ -144,6 +144,40 @@ single extra page lands. Loop 4b should not be the first time anyone measures th
 every build, failing on the cliff. It is the cheapest item on this page and the one most likely
 to be regretted if skipped.
 
+**Closed by [`scripts/gate-assets.mjs`](../scripts/gate-assets.mjs)**, which prints this on
+every `make ci`:
+
+```
+   450.7 KB gz  147 files  roots/hafs-kfqc  (ceiling 768.0 KB)
+   207.7 KB gz  115 files  skins/hafs-kfqc  (ceiling 384.0 KB)
+    55.8 KB gz  114 files  adj/hafs-kfqc  (ceiling 128.0 KB)
+   136.4 KB gz    3 files  pages/hafs-kfqc  (heaviest 47.4 KB 7.svg, mean 45.5 KB)
+    26.8 MB gz  604 pages projected from that mean  (ceiling 32.0 MB)
+     0.5 KB gz    3 pages  manifest.json  → 108.7 KB gz at 604 pages (ceiling 256.0 KB)
+```
+
+Two things the proposal above got slightly wrong, both worth recording. **First, a
+per-directory ceiling is the wrong instrument for `pages/`** — it is the one kind that grows,
+so a total ceiling would have to be raised by the very change it exists to watch, and raising
+it is indistinguishable from noticing. The invariant that survives Loop 4b is *per-page* weight,
+so that is what is gated, and the whole-mus'haf figure is **projected from today's mean** rather
+than measured. Three vendored pages now say something about six hundred and four. The other
+three kinds are complete — one shard per surah, one corpus-wide root index — so for them the
+proposal's absolute ceiling is exactly right, and a breach there means the ETL started emitting
+something new rather than that the book got longer.
+
+**Second, the estimate in this entry was 15% high.** «~28 MB gz» came from averaging the three
+measured pages by hand; the gate's mean is 45.5 KB, so the projection is 26.8 MB. The direction
+of the argument is unchanged, which is the useful thing to notice about it: two orders of
+magnitude past the bundle either way.
+
+The gate also fails on an **unknown kind directory, a loose top-level file, or an edition
+directory whose `EDITIONS` status is not `vendored`.** That is not tidiness. The defect being
+closed is *bytes shipping that nothing weighs*, and a gate that quietly skips what it does not
+recognise reintroduces it one directory at a time. It reads `public/assets` and the
+`concordance.ts` **source** — never `dist/` — for the reason `gate-quran-meta.mjs` states: the
+failure must land on the commit that causes it, and in CI's gate job nothing is built.
+
 ### ⑦ Both locales ship at first paint — deliberate, revisit at four · **answered**
 
 `messages/catalogs.gen.ts` statically imports every locale, and says why: the chrome is a few
@@ -154,6 +188,29 @@ one is "a JSON catalog plus a row".
 
 Not work today. The trigger to revisit is a **fourth** locale, and this entry exists so that
 whoever adds it finds the decision rather than the consequence.
+
+### ⑪ The manifest is one whole fetch, and it grows with the book · **open**
+
+Weighing the corpus for ⑥ turned up the file that is not like the others. `manifest.json` holds
+a polygon list per page and is fetched **entire**, at
+[`assets.ts:16`](../apps/web/src/assets.ts), before the first page can be resolved — it is not
+sharded, not lazy, and not skippable. Today it is 553 bytes gz, which is 184 bytes per page.
+At 604 pages that is **~109 KB gz in front of first paint**, on a phone, offline-first, ahead of
+the page SVG it exists to locate.
+
+That is not fatal and it may well be acceptable: it is one request, it caches, and 109 KB gz is
+under the JS budget. What makes it worth an entry is that nothing about the current design will
+*tell* us — the manifest is the last remaining asset with no per-page fetch, so it converts the
+whole book into a fixed cost paid on every cold start.
+
+**How we'd know:** cold-cache time-to-first-page on the mid-tier Android of ①, with the manifest
+at full size, against the same measurement with a per-page or per-juz shard. `gate:assets`
+already prints the projection and fails past 256 KB gz, so the number is visible every build
+rather than discovered during Loop 4b.
+
+Not work today — three pages make it 553 bytes. The trigger is **Loop 4b**, which is also the
+loop that would fix it, since sharding the manifest by juz is the same work as pinning a juz
+offline (Loop 6b).
 
 ---
 

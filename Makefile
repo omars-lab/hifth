@@ -212,6 +212,7 @@ ci: core ## Full local mirror of the CI build-test-gate job, IN CI ORDER
 	$(PNPM) gate:ci-artifacts
 	$(PNPM) gate:golden-env
 	$(PNPM) gate:golden-size
+	$(PNPM) gate:assets
 	$(PNPM) gate:map
 	$(PNPM) gate:use-cases
 	$(PNPM) gate:issues
