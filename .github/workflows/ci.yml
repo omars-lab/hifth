@@ -147,6 +147,13 @@ jobs:
       - name: Gate — golden baselines stay small enough to commit
         run: pnpm gate:golden-size
 
+      # The mus'haf is two orders of magnitude heavier than the JS bundle and had
+      # nothing watching it. Reads public/assets, not dist — it must fail on the
+      # commit that vendors a heavy page, and the pages ceiling is per-page plus a
+      # 604-page projection so today's three speak about Loop 4b's whole book.
+      - name: Gate — the vendored corpus stays weighable
+        run: pnpm gate:assets
+
       # docs/map.json tells a newcomer where each feature starts. This checks it
       # is still true, so it cannot rot into confident fiction. The pre-commit
       # hook runs the same gate scoped to the staged files.

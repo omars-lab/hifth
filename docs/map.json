@@ -477,14 +477,20 @@
           "file": "packages/etl/scripts/audit-corpus.mjs",
           "symbol": "MADANI_TOTAL_PAGES",
           "note": "Does the corpus actually cover what we claim? Coverage assumed rather than measured is how a missing page reaches a memoriser."
+        },
+        {
+          "file": "scripts/gate-assets.mjs",
+          "symbol": "MAX_PAGE_GZ",
+          "note": "What the corpus weighs, and the ceilings. pages/ is gated per page plus a 604-page projection rather than by a total, because a total ceiling on the one kind that grows would have to be raised by the very change it exists to watch."
         }
       ],
       "extend": [
         "Never hand-edit anything under apps/web/public/assets — it is generated, and the ETL determinism check in CI will reject it.",
         "Change the producing script, run `make etl`, and commit the script and the regenerated output together.",
-        "gate:notext enforces that pages carry no <text> nodes: the glyphs are outlines, so rendering never depends on a font being installed."
+        "gate:notext enforces that pages carry no <text> nodes: the glyphs are outlines, so rendering never depends on a font being installed.",
+        "A new kind of asset needs a ceiling in gate-assets.mjs CEILINGS before it can land — the gate fails on a directory it does not recognise, on purpose, because silently skipping the unfamiliar is the defect it closes."
       ],
-      "gates": ["pnpm gate:notext", "pnpm audit:corpus", "make ci"],
+      "gates": ["pnpm gate:notext", "pnpm gate:assets", "pnpm audit:corpus", "make ci"],
       "seeAlso": ["edge-data-etl", "golden-images"]
     },
 

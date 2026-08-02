@@ -378,10 +378,11 @@
     {
       "id": "nothing-watches-the-vendored-corpus",
       "source": { "file": "docs/backlog.md", "item": "⑥" },
-      "status": "open",
+      "status": "fixed",
       "severity": "risk",
       "owner": "agent",
-      "note": "~28 MB gz of mushaf at 604 pages — two orders of magnitude past the JS bundle, and the actual weight of this application. The cheapest item in that file and the one most likely to be regretted if skipped."
+      "closedBy": "scripts/gate-assets.mjs",
+      "note": "850.5 KB gz today, projecting to 26.8 MB at 604 pages — the entry's hand-averaged ~28 MB was 15% high, and the argument survives it. The register's per-directory-ceiling proposal is right for adj/roots/skins, which are already complete, and wrong for pages/, which is the only kind that grows: a total ceiling there would have to be raised by the very change it watches. Gated per page plus a 604-page projection instead. Weighing the tree also turned up manifest.json, which grows with the book and is fetched whole — opened as ⑪."
     },
     {
       "id": "shard-prefetch-misses-the-hop",
@@ -416,6 +417,15 @@
       "severity": "question",
       "owner": "agent",
       "note": "Correct for two locales. The trigger to revisit is a fourth."
+    },
+    {
+      "id": "manifest-is-one-whole-fetch",
+      "source": { "file": "docs/backlog.md", "item": "⑪" },
+      "status": "open",
+      "severity": "risk",
+      "owner": "agent",
+      "blockedBy": ["loop-4b"],
+      "note": "Found by weighing the corpus for nothing-watches-the-vendored-corpus. 184 bytes gz per page, fetched entire before the first page can be resolved: ~109 KB gz in front of first paint at 604 pages. Not urgent at three pages; the loop that makes it real is also the loop that would fix it, since sharding the manifest by juz is the same work as pinning a juz offline."
     },
 
     {
