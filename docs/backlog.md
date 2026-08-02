@@ -362,6 +362,24 @@ Not blocked: the measurement is repeatable today with `make lighthouse`. It is `
 rather than `risk`-flavoured guesswork because the 71 ms is measured, from fifteen runs, and
 recorded above.
 
+**The margin is host-dependent, and the two CI runs since say so.** 71 ms is the worst case and
+it belongs to *this laptop*, whose runs are bimodal; CI has now produced ten samples across two
+pushes and every warm one landed in the lower mode:
+
+```
+PR #50   2278  2279  2281  2281   ·  2768 (TBT 344)      median 2281   219 ms of margin
+main     2273  2274  2276  2277   ·  2806 (TBT 318)      median 2276   224 ms of margin
+```
+
+Two things to take from that and one not to. The cold run is real and it is *why*
+`aggregationMethod` is `median` — it appeared once in each set, both times on the runner with
+the lowest `benchmarkIndex`, and both times it is the only sample in either set with a non-zero
+blocking time. And the honest margin on the machine that actually gates merges is closer to
+**220 ms than to 71**. What not to take from it is comfort: 220 ms is still under a tenth of the
+budget, both numbers are for three pages, and neither says anything about the run after 4b. The
+worst figure stays in this entry's title deliberately, because the entry exists to be read
+before the corpus lands rather than after.
+
 ### ⑩ The CI frame budget is a number from an emulator · **blocked**
 
 `pan-zoom-trace.mjs` asserts against 16.7 ms with an emulated ~8.3 ms baseline. Item ① replaces
