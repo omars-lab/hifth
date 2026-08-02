@@ -370,10 +370,11 @@
     {
       "id": "bundle-headroom",
       "source": { "file": "docs/backlog.md", "item": "⑤" },
-      "status": "open",
+      "status": "fixed",
       "severity": "risk",
       "owner": "agent",
-      "note": "gate:budget notices at the cliff rather than on the slope. Printing the delta against main would make a PR that adds 9 KB read as adding 9 KB."
+      "closedBy": "scripts/gate-budget.mjs",
+      "note": "The delta is measured against a committed baseline (scripts/budget-baseline.json), not against a build of main: building the merge base doubles the CI build, cannot run offline or on a detached checkout, and puts the number in a log nobody reads, whereas the baseline's own diff is where a reviewer already is. ±1 KB tolerance, because vite's chunk hash differs between this machine and CI while the gzipped size agrees to a tenth of a kilobyte. A shrink fails too — unrecorded headroom is headroom the next change spends unseen."
     },
     {
       "id": "nothing-watches-the-vendored-corpus",

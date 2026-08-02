@@ -161,6 +161,15 @@ golden-update: core ## Accept new golden baselines for THIS platform — review 
 	@echo "  moves geometry moves both, so run 'make golden-linux UPDATE=1' too"
 	@echo "  or CI will fail on shots that pass here."
 
+.PHONY: budget-update
+budget-update: core ## Accept a new JS bundle baseline — review the diff first
+	$(WEB) build
+	$(PNPM) gate:budget --update
+	@echo ""
+	@echo "  Run 'git diff -- scripts/budget-baseline.json' and read the numbers."
+	@echo "  That diff is the point: it is where 'this PR adds 9 KB' becomes visible"
+	@echo "  to a reviewer. Accepting it without reading it makes the gate decorative."
+
 .PHONY: golden-linux
 golden-linux: core ## Run/refresh the CI-shaped (linux) baselines in the Playwright container
 	@# The preview server stays on the host — its node_modules are built for the
@@ -527,5 +536,6 @@ help: ## List targets (this)
 	@echo "  Golden images:  make golden        (diff against this platform's baselines)"
 	@echo "                  make golden-update (accept new ones — review the PNG diff!)"
 	@echo "                  make golden-linux UPDATE=1  (refresh the CI/linux set)"
+	@echo "  Bundle size:    make budget-update (accept a new JS baseline — read the diff!)"
 	@echo "  Parallel work:  make lock L=build CMD=\"pnpm -r test\" | make lock-status"
 	@echo "                  the protocol: docs/PARALLEL-AGENTS.md"
