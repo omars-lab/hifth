@@ -1,7 +1,8 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { appKeyAction } from "@hifth/core";
-import { LANG_STORAGE_KEY } from "../lang";
+import { LANG_STORAGE_KEY, LOCALES } from "../lang";
+import { LOCALE_IDS } from "../messages/locales.gen";
 import { LangProvider, useT } from "../i18n";
 import { DesktopChrome } from "./DesktopChrome";
 
@@ -32,19 +33,32 @@ function chrome() {
 }
 
 describe("DesktopChrome", () => {
-  it("offers both languages by name, not one 'switch' button", () => {
+  it("offers every language there is, not one 'switch' button", () => {
     // The reason is the same one Colophon gives and it does not change with
     // width: a single "switch to English" button is unreadable to exactly the
-    // half of its audience that cannot read the label it currently wears. Two
-    // radios each written in their own script, so a screen reader changes voice
-    // for the option it is offering.
+    // half of its audience that cannot read the label it currently wears. One
+    // radio per language, each written in its own script, so a screen reader
+    // changes voice for the option it is offering.
+    //
+    // Asserted against `LOCALE_IDS` rather than against a count and two indices.
+    // The row is built from the registry now, and this is the half of that which
+    // a test can hold: drop `ur.json` into `messages/` and the switch either
+    // grows a third option or this says which language it left out.
     chrome();
     const group = screen.getByRole("radiogroup", { name: "اللغة" });
     const options = screen.getAllByRole("radio");
-    expect(options.length).toBe(2);
-    expect(group).toContainElement(options[0]!);
-    expect(options[0]!.getAttribute("lang")).toBe("ar");
-    expect(options[1]!.getAttribute("lang")).toBe("en");
+    expect(options.map((o) => o.getAttribute("lang"))).toEqual([...LOCALE_IDS]);
+    for (const option of options) expect(group).toContainElement(option);
+  });
+
+  it("wears each language's declared abbreviation, not a truncated name", () => {
+    // «العربية» does not fit beside five other controls and nothing shortens it
+    // to «ع» by rule — an abbreviation is a decision a language makes about
+    // itself, which is why `abbr` is declared in `LOCALES` next to `name`. The
+    // full name still does the talking, in the accessible label below.
+    chrome();
+    const options = screen.getAllByRole("radio");
+    expect(options.map((o) => o.textContent)).toEqual(LOCALE_IDS.map((id) => LOCALES[id].abbr));
   });
 
   it("marks the current language checked and switches to the other", () => {

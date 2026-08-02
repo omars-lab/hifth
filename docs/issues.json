@@ -302,17 +302,19 @@
     {
       "id": "i18n-other-assumes-two-languages",
       "source": { "file": "docs/design/i18n.md", "item": "④" },
-      "status": "open",
+      "status": "fixed",
       "severity": "risk",
       "owner": "agent",
-      "note": "Cheap to do, deliberately not done blind — the trigger is a third locale, which is also backlog OE7's trigger at four."
+      "closedBy": "apps/web/src/i18n.test.tsx",
+      "note": "`I18n.other` deleted; both switches now render LOCALE_IDS from LOCALES. Behaviour-preserving at two locales — the registry's order is the order the hand-written buttons were in — so it was done without a third locale to render blind at. LOCALES gained `abbr` for the header. Tests in i18n.test.tsx and DesktopChrome.test.tsx are written over LOCALE_IDS, so they fail the day ur.json lands."
     },
     {
       "id": "lang-switch-interpolates-a-locale-name",
       "source": { "file": "docs/design/i18n.md", "item": "⑤" },
-      "status": "open",
+      "status": "answered",
       "severity": "risk",
-      "owner": "agent"
+      "owner": "agent",
+      "note": "A real limit of interpolation, not a defect: the repair for a locale that inflects the inserted name is a different message, authorable only by someone who speaks the offering language. Narrowed by ④ — each button now interpolates its own name rather than `other`'s, so only the surrounding grammar is still at issue. §⑦'s checklist is where a new locale meets it."
     },
     {
       "id": "ar-as-the-reference-locale",
