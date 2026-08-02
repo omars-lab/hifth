@@ -1,9 +1,11 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
+  comparableEvents,
   dayOf,
   daysBetween,
   lastSeen,
   scopesOf,
+  type EditionId,
   type PageMeta,
   type RevisionEvent,
   type RevisionScope,
@@ -22,6 +24,16 @@ interface RevisionMapProps {
    * where the question is which *divisions* we hold paper for.
    */
   pages: readonly PageMeta[];
+  /**
+   * The edition on the stage — which *print* the page numbers below refer to.
+   *
+   * Not derived from `pages[0].edition`, though it always agrees with it. The
+   * pages say which paper this build holds; this says which paper the record is
+   * being read against, and they are two different claims that happen to have
+   * one answer while exactly one edition is vendored. Deriving it would make the
+   * distinction disappear on the day it starts to matter.
+   */
+  edition: EditionId;
   /** How long the print is — 604 for the Madani mus'haf, not what we vendored. */
   totalPages: number;
   /** The page on the stage, ringed on the map so the reader can find themselves. */
@@ -132,6 +144,7 @@ export function RevisionMap({
   open,
   onClose,
   pages,
+  edition,
   totalPages,
   page,
   today,
@@ -205,9 +218,16 @@ export function RevisionMap({
   );
 
   const held = useMemo(() => coverage(pages, scope), [pages, scope]);
+  // Through `comparableEvents`, never straight from the record. A record outlives
+  // the build that wrote it, so the day a second edition is vendored the looks
+  // already stored are another print's page numbers — and at page scope those
+  // are different ayahs wearing the same integer. Juz and hizb pass through
+  // untouched, and that is not an oversight: those divisions are the same in
+  // every print, so filtering them would drop looks that really do belong to the
+  // square. The asymmetry lives in core (`revision.ts`), not here.
   const seen = useMemo(
-    () => lastSeen(record?.events ?? [], scope),
-    [record, scope],
+    () => lastSeen(comparableEvents(record?.events ?? [], scope, edition), scope),
+    [record, scope, edition],
   );
   // The division the stage is currently showing, so the reader can find
   // themselves on a grid of sixty identical squares.

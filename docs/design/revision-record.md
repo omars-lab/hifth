@@ -232,8 +232,43 @@ Navigating to a division's first page is the obvious move and is not yet built; 
 the interaction is hard, but because an affordance that usually refuses teaches a reader not
 to try it.
 
-### ③ Multi-edition records · **open**
+### ③ Multi-edition records · **fixed**
 
 Page ids are only comparable within one edition; juz and hizb ids are comparable everywhere.
 `editionOf` exists for the partition, but the picture does not yet use it — so a reader who
 switches editions sees one record drawn as though it were two prints' worth.
+
+**It is latent, not hypothetical, and the difference matters.** Exactly one edition is
+`vendored` in `EDITIONS`, so no reader can build a mixed record today. But an IndexedDB
+record outlives the build that wrote it: the looks already stored carry `hafs-kfqc` keys and
+page numbers, and the day a second print ships they join the new print's grid without a word.
+Which means the fix could not wait for the second edition — by then the wrong squares would
+already be drawn, and there is no way to tell a wrong square from a real one after the fact.
+
+**The asymmetry is the whole of it.** Writing the filter is a line; deciding *where* it
+applies is the item. A page is a property of the paper — page 7 of the Madani print is not
+page 7 of an IndoPak one — so a look at another print's page 7 must not colour this one. A
+juz or a hizb is a division of the *text*, identical in every print, so a reader who revised
+juz 5 revised juz 5 and filtering there would throw away looks that genuinely land on the
+square being drawn. The tempting mistake is to partition uniformly, and it fails in the
+quieter and worse direction: it shows a hafiz **less** revision than they did, over a picture
+they will read as a statement about their own worship.
+
+So the rule lives in core as `comparableEvents(events, scope, edition)` — filtering at page
+scope, deliberately the identity elsewhere — rather than as a sentence in this module's doc
+comment telling callers to partition first. It was that sentence before, and the one caller
+did not. An unparseable key has no edition and is dropped at page scope, the same rule
+`scopesOf` already follows: a gap in the picture is recoverable, a wrong square is not.
+
+`RevisionMap` takes the edition as a prop rather than reading `pages[0].edition`. The pages
+say which paper this build holds; the prop says which paper the record is being read against.
+Those are two claims with one answer while a single edition is vendored, and deriving one
+from the other would erase the distinction on exactly the day it starts to matter.
+
+**Closed by** `packages/core/src/revision.test.ts` (`describe("comparableEvents")`) and
+`apps/web/src/components/RevisionMap.test.tsx` — the component pair is the one that would
+catch a regression end to end, and the two halves were verified separately by inducing each
+failure: dropping the call from `RevisionMap` fails only the page-scope test, and removing
+the `scope !== "page"` guard so it filters everywhere fails only the juz one. The fixture
+uses `quran/hafs-indopak/2:30` on purpose — an ayah inside hizb 1 and juz 1, divisions this
+build does hold paper for, so `absent` cannot answer for either assertion.

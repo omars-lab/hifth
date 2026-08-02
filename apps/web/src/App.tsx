@@ -1147,6 +1147,7 @@ export function App(): JSX.Element {
         open={revisionOpen}
         onClose={() => setRevisionOpen(false)}
         pages={manifest?.pages ?? []}
+        edition={manifest?.edition ?? ""}
         totalPages={totalPages}
         page={page}
       />

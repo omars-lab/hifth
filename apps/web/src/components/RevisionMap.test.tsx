@@ -1,6 +1,6 @@
 import "fake-indexeddb/auto";
 import { beforeEach, describe, expect, it } from "vitest";
-import { render, screen, waitFor, within } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import type { PageMeta } from "@hifth/core";
 import { forgetRecord, recordLook } from "../revision-store";
 import { RevisionMap, coverage } from "./RevisionMap";
@@ -49,6 +49,7 @@ function draw(over: Partial<React.ComponentProps<typeof RevisionMap>> = {}) {
       open
       onClose={() => {}}
       pages={[PAGE_7]}
+      edition={EDITION}
       totalPages={604}
       page={7}
       today={TODAY}
@@ -172,5 +173,55 @@ describe("RevisionMap", () => {
   it("draws nothing at all when it is closed", () => {
     draw({ open: false });
     expect(screen.queryByRole("dialog")).toBeNull();
+  });
+
+  /*
+   * Two prints, one record — `docs/design/revision-record.md` ③.
+   *
+   * A record outlives the build that wrote it, so this is not a hypothetical the
+   * day a second edition is vendored: the looks already in IndexedDB carry the
+   * old print's page numbers, and page 7 of the Madani mus'haf is not page 7 of
+   * an IndoPak one. One fixture, one foreign look, and the two scopes have to
+   * disagree about it — which is the whole content of the fix.
+   *
+   * 2:30 is chosen so the foreign look lands inside hizb 1 and juz 1, the
+   * divisions this build *does* hold paper for. A foreign ayah in an absent
+   * division would render `absent` at every scope and the test would pass
+   * without the fix.
+   */
+  const FOREIGN = { key: "quran/hafs-indopak/2:30", page: 7 };
+
+  it("does not colour this print's page with another print's look", async () => {
+    await recordLook(FOREIGN, at("2026-03-18T12:00:00Z"));
+    draw();
+    await cells();
+    fireEvent.click(screen.getByRole("radio", { name: "صفحة" }));
+
+    const pages = await cells();
+    expect(pages).toHaveLength(604);
+    // Page 7 is the one page this build holds, so it is `cold` or `seen` — never
+    // `absent`. Which means "cold" here is a real assertion and not the absent
+    // branch quietly answering for it.
+    expect(pages[6]!.getAttribute("data-state")).toBe("cold");
+    // «صفحة 7», not «الصفحة ٧». The mixed numerals in this one grid are on
+    // purpose: a page number is the figure a reader reads off the printed
+    // mus'haf's corner and types back into the jumper, so it stays Latin in
+    // every language — `i18n.test.tsx` asserts exactly that, against a sweep
+    // that would "fix" it. Hizb and juz are not printed anywhere, so they take
+    // the language's own digits.
+    expect(pages[6]!.getAttribute("aria-label")).toBe("صفحة 7 · لم يُفتح");
+  });
+
+  it("does colour this reader's juz with it, because a juz is the same in every print", async () => {
+    // The other half, and the one a filter written in a hurry would break. Juz
+    // and hizb divide the text, not the paper; dropping these looks would show a
+    // hafiz less revision than they did.
+    await recordLook(FOREIGN, at("2026-03-18T12:00:00Z"));
+    draw();
+    const grid = await cells();
+    await waitFor(() => {
+      expect(grid[0]!.getAttribute("data-state")).toBe("seen");
+    });
+    expect(grid[0]!.getAttribute("aria-label")).toBe("الحزب ١ · فُتح قبل ٢ يومًا");
   });
 });

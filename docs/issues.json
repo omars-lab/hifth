@@ -283,10 +283,11 @@
     {
       "id": "multi-edition-revision-records",
       "source": { "file": "docs/design/revision-record.md", "item": "③" },
-      "status": "open",
+      "status": "fixed",
       "severity": "defect",
       "owner": "agent",
-      "note": "editionOf exists for the partition and the picture does not use it, so a reader who switches editions sees one record drawn as though it were two prints' worth."
+      "closedBy": "packages/core/src/revision.test.ts",
+      "note": "Latent rather than hypothetical: one edition is vendored, but an IndexedDB record outlives the build, so stored page ids would join the next print's grid silently. comparableEvents partitions at page scope only — a juz is the same in every print, and filtering there would show a hafiz less revision than they did."
     },
 
     {
