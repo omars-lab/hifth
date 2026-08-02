@@ -120,7 +120,7 @@ Not a defect; a multiplier to apply once ③ has a number.
 
 ## 3. Bytes
 
-### ⑤ Bundle headroom, and who is going to spend it · **open**
+### ⑤ Bundle headroom, and who is going to spend it · **fixed**
 
 **106.6 KB gz against the 150 KB budget** as of `3962fc3` — 43 KB of headroom. Loop 4b spends
 none of it (pages are assets, not bundle), but Loop 6b's pack manager and manifest, and Loop
@@ -129,6 +129,39 @@ notices at the cliff rather than on the slope.
 
 Worth considering: have the gate print the delta against `main` rather than only the absolute,
 so a PR that adds 9 KB is visible as *adding 9 KB* instead of as "still under budget".
+
+**Closed by [`scripts/gate-budget.mjs`](../scripts/gate-budget.mjs)** and the committed
+[`budget-baseline.json`](../scripts/budget-baseline.json) beside it. Every run now prints a
+delta per chunk, and a move of more than **1 KB in either direction** fails until the baseline
+is re-accepted with `make budget-update`.
+
+**The delta is against a committed baseline, not against `main`.** The entry's phrasing was the
+obvious design and it was rejected on where the number ends up. Building the merge base gives a
+number in a CI log, which is a place nobody looks; the committed file gives
+
+```diff
+-    "assets/index.js": 100246,
++    "assets/index.js": 109458,
+```
+
+in the diff a reviewer is already reading. It also doubles the build in CI and cannot run on an
+offline or detached checkout, neither of which the log-line version was buying anything for.
+The cost is one `make budget-update` on the PRs that actually move bytes — the same trade the
+golden images make, and the same warning printed with it: an accepted baseline is the gate
+agreeing with you, which is worth nothing unless you looked.
+
+Two decisions inside that are not obvious. **A tolerance rather than an exact match**, because
+the chunk hash is not stable even where the bytes are — three builds of the app chunk, one in
+CI and two here, came out `index-CywQJkCX.js`, `index-C_PRj0XG.js` and `index-M-HaqE5a.js`, all
+97.9 KB gz. So the baseline is keyed on the name with the hash stripped, and the size is
+compared with a kilobyte of room. And **a shrink fails too**, which reads as pedantry and is not: unrecorded
+headroom is headroom the next change spends without anyone seeing it go, which is the original
+complaint with the sign flipped.
+
+Still 108.7 KB gz against 150. The entry's 106.6 KB at `3962fc3` has become 108.7 across the
+nineteen merges since — 2.1 KB, or about 110 bytes a merge. That is the slope it was worried
+about, and it is a gentle one; the value of measuring it was never the number, it was that
+until now nobody could have told you whether it was gentle.
 
 ### ⑥ The vendored corpus is the largest thing we ship, and nothing watches it · **fixed**
 
