@@ -579,11 +579,61 @@ page. This inherits PLAN follow-up ① and must be re-measured on the day Loop 4
 same phone, with the same probe. Until then this design's weight claim is an argument, not a
 measurement, and it is written down as such.
 
-### ⑤ Where does the revision map sit at desktop? · **open**
+### ⑤ Where does the revision map sit at desktop? · **fixed**
 
 It is being wired into the chrome as `styles.pageId` becomes a button. A wide window is the
 natural home for a 604-page heatmap and this design deliberately does not reach into it.
 Whoever lands both should add the row to `desktop-vs-mobile.md`.
+
+Both landed — `App.tsx`'s `styles.pageId` is a `<button aria-haspopup="dialog">` and the map
+is rendered beside it — and the answer to "where does it sit" turned out to be **nowhere in
+particular, because nobody wrote the rule**. Every other sheet in the app carries exactly one
+`@media (min-width: 900px)` block that turns the phone's full-bleed bottom sheet into a
+420–440px card: `Colophon`, `EditionPicker`, `HighlightMenu`, `HopPopover`, `Jumper`,
+`RootLens`, `SkinToggle`. `RevisionMap` shipped after that convention was set and carried
+none. On a 1440px window it was still a full-width strip pinned to the bottom edge.
+
+**The convention could not be copied, and that is the whole substance of this item.** The
+other seven hold a column of controls, which is unreadable at 1440px and correctly narrowed.
+This one holds a picture of the whole book, and narrowing it to 420px would have been the same
+mistake pointed the other way. So the wide-window rule for this sheet differs in kind, and the
+card is the *less* interesting half of it.
+
+**What actually broke was the grid, and it was measured rather than guessed.** `.grid` is
+`repeat(auto-fill, minmax(min(var(--cell), 12vw), 1fr))`, so it lays down as many tracks as it
+is given room for — and at the coarse scopes there are not many cells to lay. Counted off the
+cells' own bounding boxes on the shipped build:
+
+| scope | cells | rows at 1440px | rows at 1024px | rows at 390px |
+|---|---|---|---|---|
+| page | 604 | 8 | 11 | 31 |
+| hizb | 60 | **2** | 2 | 5 |
+| juz | 30 | **1** | 2 | 4 |
+
+Thirty juz across a desktop window is a *single line of squares*. That is not a map: it says
+nothing about where in the book you are, which is the only thing a hafiz opens this sheet to
+see. The bug was invisible on a phone because the phone's narrowness was doing the work.
+
+That is the general shape of the answer, and it is worth stating past this one sheet: **on a
+phone the window decides the layout; on a wide window nothing does, so the component has to.**
+`auto-fill` is not a layout, it is a deferral — fine while something else is binding, empty
+once nothing is. Any component that reaches desktop by relaxing a constraint should be asked
+what decides its shape when the constraint is gone.
+
+Here that means a named column count per scope, near √N so the picture stays about as tall as
+it is wide: **6×5 juz, 8×8 hizb, 25×25 page**, at fixed cell sizes rather than `1fr` — `1fr`
+at juz scope would inflate the cells into 100px slabs — centred inside a card that holds one
+620px width across all three scopes, so switching scope redraws the map without moving the
+sheet out from under the cursor.
+
+Closed by `apps/web/e2e/desktop.spec.ts` ("stays a map instead of stretching into a strip"),
+which asserts both halves: the card is bounded and centred and does not resize with the scope,
+and the grid's row count — read from the laid-out cells, not from the CSS — stays above the
+strip at juz and hizb and below a too-deep stack at page scope. Verified by inducing the
+regression in halves: with the card rule kept and only the grid rules removed, the juz row
+assertion fails on its own.
+
+The row this item owed `desktop-vs-mobile.md` is now there.
 
 ## 9. Work order
 
