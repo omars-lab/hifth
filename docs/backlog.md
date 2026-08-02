@@ -288,7 +288,7 @@ bug pointing the other way.
 
 ## 5. Measurement gaps
 
-### ⑨ TTI on mid-Android is an exit criterion with no instrument · **open**
+### ⑨ TTI on mid-Android is an exit criterion with no instrument · **fixed**
 
 Lighthouse CI gates ≥90 on a desktop runner. Loop 4b's exit says *< 2.5 s on mid-Android*.
 These are not the same claim, and the second one currently has nothing behind it. Either the
@@ -296,6 +296,71 @@ criterion acquires an instrument (a throttled Lighthouse profile chosen to stand
 class of device) or it should be restated as something CI can actually assert. An exit
 criterion nothing evaluates is the interface-papering-over-a-gap failure this project has
 already paid for twice.
+
+**Closed by the `interactive` assertion in [`.lighthouserc.json`](../.lighthouserc.json)**,
+which fails CI at a median TTI above 2500 ms.
+
+**The instrument was already running, and that is the part this entry got wrong.** The entry
+reads as though Lighthouse were profiling a desktop, and half of that is true — the *runner*
+is desktop-class hardware. But the *emulation* has been mid-Android the whole time, because
+that is Lighthouse's default and nobody had looked: a Moto G Power (2022) at 412×823, Slow 4G,
+**4× CPU slowdown**. It has been reporting TTI on every push since Loop 6a. It was reporting
+**2.27 s**.
+
+So the gap was never the profile. It was that **nothing read the number**, and the four
+category assertions structurally could not: in Lighthouse 12 the TTI audit carries **weight 0**
+and sits in the `hidden` group. A build can score a perfect 100 on performance with a TTI of
+any size. `≥90` was never making the claim we were reading into it — which is the same failure
+the entry names, one layer further in than the entry looked.
+
+Two things were needed, then, and neither was a new harness:
+
+- **Assert it.** `"interactive": ["error", { "maxNumericValue": 2500, "aggregationMethod": "median" }]`.
+- **Pin the device.** The profile is now written out in the config rather than inherited, with
+  every number copied from a report. Inherited, a Lighthouse upgrade that retunes its default
+  preset would silently change *which phone* the criterion is about — a criterion whose device
+  can move underneath it is the same shape of gap as one with no instrument at all.
+
+**What measuring it turned up.** Fifteen runs across two machines whose `benchmarkIndex` spans
+2142 to 3403 (this laptop and `ubuntu-latest`) landed inside **2266–2437 ms**, one cold CI run
+at 2794 aside. Lantern's simulation is far more host-independent than the hardware under it,
+which is what makes an emulated number worth asserting at all.
+
+It does not scatter, though — it **steps**. Nine consecutive runs of one unchanged build came
+out bimodal: three at 2279–2284, six at 2429–2437, nothing in between. The gap is 150 ms, which
+is `rttMs` to the millisecond. The LCP resource simply lands one simulated round trip later in
+some runs. `numberOfRuns` went 3 → 5 for that reason and not out of a general taste for more
+samples: a median has to come from enough runs that one step plus one cold start cannot carry it.
+
+And **TTI was identical to LCP in all nine**, because total blocking time is 0. Nothing on this
+path is compute-bound. Whatever eventually moves this number will be a network waterfall — a
+resource added in front of the largest paint — not a script that got slower. That is worth
+knowing before the first red.
+
+The reading is in ⑫, because it is not good news and it is not this entry's subject.
+
+### ⑫ The exit criterion has 71 ms of margin, on three pages · **confirmed**
+
+⑨ gave *< 2.5 s TTI on mid-Android* an instrument. The instrument says the app passes, and by
+how much: the worst honest median measured is **2429 ms against 2500** — 71 ms, or **half a
+simulated round trip**. The best is 2281. Both are passes; one of them is a pass that a single
+extra request in front of the largest paint would end.
+
+This is on **three vendored pages**. Loop 4b vendors the other 601, and ⑪ adds ~109 KB gz of
+manifest fetched whole before the first page can resolve. Neither is on the critical path
+today, and the point of writing this down now is that "not on the critical path" is a claim
+with an expiry date and no alarm on it.
+
+What would answer it: the numbers already collected are the *pre-4b* baseline, so the work is
+to look again immediately after the corpus lands rather than at the end of the loop — the
+criterion is a Loop 4b exit, and discovering a breach at the exit is discovering it too late to
+choose differently. If it does breach, the lever is the waterfall in front of LCP (TBT is 0, so
+there is nothing to make faster, only things to stop fetching first), and the honest fallback
+is to restate the criterion against real hardware — which is ② — rather than against Lantern.
+
+Not blocked: the measurement is repeatable today with `make lighthouse`. It is `confirmed`
+rather than `risk`-flavoured guesswork because the 71 ms is measured, from fifteen runs, and
+recorded above.
 
 ### ⑩ The CI frame budget is a number from an emulator · **blocked**
 

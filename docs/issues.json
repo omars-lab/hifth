@@ -397,10 +397,19 @@
     {
       "id": "tti-criterion-has-no-instrument",
       "source": { "file": "docs/backlog.md", "item": "⑨" },
-      "status": "open",
+      "status": "fixed",
       "severity": "risk",
       "owner": "agent",
-      "note": "Loop 4b's exit says < 2.5 s on mid-Android; Lighthouse CI gates >=90 on a desktop runner. An exit criterion nothing evaluates is the interface-papering-over-a-gap failure this project has already paid for twice."
+      "closedBy": ".lighthouserc.json",
+      "note": "The instrument was already running and nobody had read it: Lighthouse's default emulation is a Moto G Power (2022) on Slow 4G at 4x CPU, and it has reported TTI on every push since Loop 6a. What was missing is that the four category assertions structurally cannot see it — in Lighthouse 12 the TTI audit has weight 0 and sits in the hidden group, so a perfect 100 says nothing about it. Now asserted at a 2500 ms median, with the device profile pinned in the config rather than inherited so a Lighthouse upgrade cannot change which phone the criterion is about. The reading it produced is tracked separately as manifest-adjacent risk in tti-margin-is-half-an-rtt."
+    },
+    {
+      "id": "tti-margin-is-half-an-rtt",
+      "source": { "file": "docs/backlog.md", "item": "⑫" },
+      "status": "confirmed",
+      "severity": "risk",
+      "owner": "agent",
+      "note": "Found by building the instrument for tti-criterion-has-no-instrument. Worst honest median 2429 ms against the 2500 ms exit criterion — 71 ms, half a simulated round trip — and that is on three vendored pages, before loop-4b vendors 601 more and before manifest-is-one-whole-fetch adds ~109 KB gz in front of first paint. TTI equals LCP in every run measured (TBT is 0), so the lever is the waterfall ahead of the largest paint, not compute. Not blocked: repeatable today with `make lighthouse`. The measurements on record are the pre-4b baseline; re-read them as the corpus lands rather than at the loop's exit."
     },
     {
       "id": "ci-frame-budget-is-emulated",

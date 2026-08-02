@@ -799,6 +799,11 @@
           "note": "Every artifact CI uploads is one something actually produces. Written after an upload step preserved nothing for several loops while looking green."
         },
         {
+          "file": ".lighthouserc.json",
+          "symbol": "maxNumericValue",
+          "note": "Where Loop 4b's `< 2.5 s TTI on mid-Android` is actually evaluated. The four `categories:*` assertions cannot do it: Lighthouse 12 gives the TTI audit weight 0 in the `hidden` group, so a perfect 100 on performance promises nothing about it. The emulated device is written out in `collect.settings` rather than inherited from Lighthouse's default preset — inherited, an upgrade that retunes the preset would silently change which phone the criterion is about. Median of five runs, because the metric steps rather than scatters: it moves in whole `rttMs` units as the LCP resource lands one simulated round trip later or earlier."
+        },
+        {
           "file": "scripts/gate-budget.mjs",
           "symbol": "TOLERANCE_GZ",
           "note": "The 150 KB budget notices at the cliff; scripts/budget-baseline.json is how it notices on the slope. Every run prints a per-chunk delta and fails on a move of more than a kilobyte in either direction — a shrink too, because unrecorded headroom is headroom the next change spends unseen. The baseline is committed rather than built from main because that puts the number in the diff a reviewer is already reading instead of a CI log nobody opens, and because a merge-base build cannot run offline. Accept a move with `make budget-update`, and read the diff — an accepted baseline is the gate agreeing with you."
@@ -820,7 +825,7 @@
         "Gates fail with the fix in the message. 'X is wrong' costs someone an afternoon; 'X is wrong, run Y' costs them a minute.",
         "A gate that guards a number with headroom needs a committed baseline as well as a ceiling, or it only speaks on the change that runs out. gate:budget is the shape: measure, commit the measurement, fail on drift, and let the baseline's diff be the report — the same trade the golden images make."
       ],
-      "gates": ["make ci", "make gates"],
+      "gates": ["make ci", "make gates", "make lighthouse"],
       "seeAlso": ["validation", "golden-images"]
     }
   ]
