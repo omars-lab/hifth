@@ -34,10 +34,11 @@
  * `gate:quran-meta`, which fails if anyone regenerates the table by halving.
  *
  * Page ids are **only comparable within one edition** — page 7 of the Madani
- * print is not page 7 of anything else. Juz ids are comparable everywhere, being
- * a division of the text rather than of the paper. Callers holding more than one
- * edition's events must partition before rolling up by page; `editionOf` is here
- * for that.
+ * print is not page 7 of anything else. Juz and hizb ids are comparable
+ * everywhere, being divisions of the text rather than of the paper. That rule
+ * used to be a sentence here telling callers to partition first, and the one
+ * caller did not; `comparableEvents` is that sentence as a function, so the
+ * scope decides the partition instead of every renderer remembering to.
  */
 
 import { parseAyahKey } from "./keys.js";
@@ -98,6 +99,34 @@ export function dayOf(event: RevisionEvent): DayStamp {
 /** The edition an event was recorded in, or null if its key is not an ayah key. */
 export function editionOf(event: RevisionEvent): EditionId | null {
   return parseAyahKey(event.key)?.edition ?? null;
+}
+
+/**
+ * The events one picture may honestly roll up together, at one scope.
+ *
+ * The asymmetry is the whole point, and it is a fact about the book rather than
+ * about this codebase. A **page** is a property of the paper: page 7 of the
+ * Madani print and page 7 of an IndoPak print are different ayahs, so counting
+ * a look at one toward the other draws a square the reader never opened. A
+ * **juz** or a **hizb** is a division of the text, identical in every print, so
+ * a reader who revised juz 5 revised juz 5 — and filtering those by edition
+ * would *lose* looks that genuinely belong to the same square.
+ *
+ * So this filters at page scope and is deliberately the identity elsewhere.
+ * Both halves are load-bearing; a version that filtered everywhere would be
+ * wrong in the quieter direction, showing a hafiz less revision than they did.
+ *
+ * Events whose key does not parse have no edition and are dropped at page
+ * scope, which is the same rule `scopesOf` already follows: a gap in the picture
+ * is recoverable, a wrong square is not.
+ */
+export function comparableEvents(
+  events: readonly RevisionEvent[],
+  scope: RevisionScope,
+  edition: EditionId,
+): readonly RevisionEvent[] {
+  if (scope !== "page") return events;
+  return events.filter((event) => editionOf(event) === edition);
 }
 
 /**
