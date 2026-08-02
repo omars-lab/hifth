@@ -239,9 +239,11 @@
     {
       "id": "min-width-as-a-proxy-for-a-keyboard",
       "source": { "file": "docs/design/desktop.md", "item": "③" },
-      "status": "open",
+      "status": "fixed",
       "severity": "question",
-      "owner": "agent"
+      "closedBy": "apps/web/e2e/desktop.spec.ts",
+      "owner": "agent",
+      "note": "No. Landscape iPads (1194x834, 1080x810) clear the breakpoint on both axes and have no keyboard, so the item's trigger — wait for a bug report — was never going to fire. The hints alone gained (any-hover: none); the spread and the language switch stay on the breakpoint, because their premise really is room. any-hover over pointer:fine because iPadOS keeps touch primary with a Magic Keyboard attached. Still a proxy: no media feature reports a keyboard."
     },
     {
       "id": "second-mount-frame-budget",

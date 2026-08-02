@@ -89,6 +89,41 @@
   gap: var(--space-4);
 }
 
+/*
+ * The one control in this file with a second premise (desktop.md §8 ③).
+ *
+ * Everything else here is gated on room — a phone header has 17px of slack and
+ * a sixth control does not fit in it. The hints are gated on room *and* on a
+ * keyboard existing, and those are not the same claim. A landscape tablet has
+ * the room and not the keyboard: measured under emulation, iPad Pro 11
+ * landscape is 1194×834 and iPad gen 7 landscape is 1080×810, so both clear
+ * `DESKTOP_QUERY` on both axes. The question in §8 asked to revisit "if anyone
+ * reports the hints on a device that cannot use them"; it did not need a
+ * report, it needed the arithmetic.
+ *
+ * `any-hover`, not `pointer: fine`. iPadOS keeps touch as the *primary* pointer
+ * even with a Magic Keyboard attached, so `pointer: fine` would hide the legend
+ * from a device that literally has a keyboard and a trackpad. `any-hover` asks
+ * whether *some* input here can hover, which a mouse or trackpad can and a
+ * finger cannot — and a hovering input arrives attached to a keyboard nearly
+ * every time. It is still a proxy; there is no media feature for "a keyboard is
+ * attached". It is the proxy whose remaining false positive (a hovering stylus
+ * on a tablet with no keyboard) needs specific hardware, where `pointer: fine`
+ * fails on the common configuration.
+ *
+ * Written as `(any-hover: none)` on its own rather than folded into the
+ * breakpoint above, for two reasons. It would be the *third* copy of that
+ * literal — `PageSpread.module.css` already names three as a bug — and the
+ * condition is genuinely independent: it is about the reader's hardware at any
+ * width, not about this breakpoint. A browser too old to know `any-hover`
+ * evaluates this false and shows the hints, which is exactly today's behaviour.
+ */
+@media (any-hover: none) {
+  .keys {
+    display: none;
+  }
+}
+
 .keyGroup {
   display: inline-flex;
   align-items: center;

@@ -86,6 +86,12 @@ export function DesktopChrome(): JSX.Element {
        * does not need a visual legend read out between the wordmark and the page
        * number, and every control it names is already reachable and labelled.
        * The hint is redundancy for the eye, not a second route to the feature.
+       *
+       * It is also the one thing in this file with a *second* gate. Everything
+       * else here is hidden on a phone for want of room; this is hidden wherever
+       * nothing can hover, because a landscape tablet has the room and not the
+       * keyboard. The query and the reasoning are in `DesktopChrome.module.css`
+       * beside `.keys` (docs/design/desktop.md §8 ③).
        */}
       <div className={styles.keys} aria-hidden="true">
         <span className={styles.keyGroup}>

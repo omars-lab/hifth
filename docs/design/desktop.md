@@ -410,6 +410,11 @@ screen-reader user navigating by keyboard does not need a visual legend read alo
 the wordmark and the page number, and every control they name is already reachable and
 labelled.
 
+**They are also the one thing in this section with a second gate** (§8 ③). Everything else here
+is hidden on a phone for want of room; the hints are additionally hidden wherever
+`(any-hover: none)` holds, because a landscape iPad clears the breakpoint on both axes and has
+no keyboard. Room and a keyboard are two premises, and only this control needs the second.
+
 ### Not unlocked, and why
 
 - **A hop-results sidebar.** The rail and popover are correct at every width; a persistent
@@ -521,11 +526,51 @@ Unanswerable and untestable until a facing pair is vendored. A shared `View` acr
 `PageStage`s is a real change to a component whose correctness argument is "one write path"; do
 not start it speculatively.
 
-### ③ Is `min-width` the right gate for the keyboard hints? · **open**
+### ③ Is `min-width` the right gate for the keyboard hints? · **fixed**
 
 §3 accepts it as a proxy. `(pointer: fine)` or `(any-hover: hover)` describes the reader more
 truthfully but splits the desktop story into two media features, and a touchscreen laptop
 satisfies both. Revisit if anyone reports the hints on a device that cannot use them.
+
+**No, and it did not need a report — it needed the arithmetic.** The last sentence above was
+the mistake. It set the trigger to a bug report from a reader who would have no idea the row
+was wrong, when the counter-example is a device sitting on a lot of desks: **iPad Pro 11
+landscape is 1194×834 and iPad gen 7 landscape is 1080×810**, so both clear the 1024×740
+breakpoint *on both axes* and were being shown a legend for keys they do not have. That is the
+same shape as the height derivation in §3 — a number nobody had multiplied out — and it is
+worth noticing that a question phrased as "wait for a complaint" is a question that stops being
+looked at.
+
+**Closed by `apps/web/e2e/desktop.spec.ts`** — *"has the room for the desktop chrome but is not
+offered a keyboard"*, a `test.use({ viewport: 1194×834, hasTouch: true })` block. `.keys` gains
+`@media (any-hover: none) { display: none }` in `DesktopChrome.module.css`. Nothing else moves:
+the spread, the layout and the language switch stay on `DESKTOP_QUERY` alone, because their
+premise really is room.
+
+**The worry about "splitting the desktop story" was answerable by scope.** The second feature is
+not applied to the desktop story — it is applied to the one control whose premise is a physical
+keyboard rather than a wide window. Room and a keyboard are two claims, and the item read them
+as one. And "a touchscreen laptop satisfies both" is not a problem but the correct outcome: a
+touchscreen laptop *has* a keyboard, and should keep the hints.
+
+**`any-hover`, not `pointer: fine`, and the difference is a real device.** iPadOS keeps touch as
+the *primary* pointer even with a Magic Keyboard attached, so `pointer: fine` would hide the
+legend from a tablet that literally has a keyboard and a trackpad — a false negative on a common
+configuration. `any-hover` asks whether *some* input here can hover, and its remaining false
+positive (a hovering stylus on a keyboardless tablet) needs specific hardware. It is still a
+proxy. There is no media feature for "a keyboard is attached", and the honest close for this
+item is that we picked the proxy that fails in the rarer direction, not that we found the truth.
+
+**The `keydown` alternative was considered and is worse.** "Reveal the hints the first time a key
+is pressed" sounds like proof rather than proxy, and is not: an on-screen keyboard raises
+`keydown` too, so a tablet reader typing into the jumper would summon a legend for keys they
+still do not have — the same bug, arrived at by a longer route.
+
+**One limit the test cannot cover, named rather than left to be discovered.** Playwright's touch
+emulation *replaces* the pointer instead of adding one, so an emulated touchscreen laptop reports
+`any-hover: none` exactly as the tablet does. The real device would report `hover`. The tablet row
+therefore proves the legend went quiet; the 1440×900 row above it is what proves the legend still
+speaks where it should.
 
 ### ④ Does the second mount actually hold the frame budget? · **blocked**
 

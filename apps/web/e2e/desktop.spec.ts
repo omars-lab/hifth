@@ -276,6 +276,13 @@ test.describe("Hifth · the desktop spread", () => {
     await expect(langs).toBeVisible();
     await expect(langs.getByRole("radio")).toHaveCount(2);
 
+    // And the keyboard legend, whose mobile constraint is stronger than room:
+    // a phone has no keys to name. `aria-hidden`, so it is located by tag —
+    // `kbd` appears nowhere else in the app. The tablet block below is the
+    // other half of this claim and would be meaningless without it.
+    await expect(page.locator("kbd")).toHaveCount(3);
+    await expect(page.locator("kbd").first()).toBeVisible();
+
     // It is *added*, not moved: the sheet keeps its copy. A control that
     // relocates as the window resizes is a control the reader has to re-find.
     await page.setViewportSize({ width: 390, height: 844 });
@@ -396,6 +403,52 @@ test.describe("Hifth · the desktop spread", () => {
     // clip there would let a parked band sit out on the field and still pass.
     const clip = await book(page).evaluate((el) => getComputedStyle(el).overflow);
     expect(clip, "the open book stopped clipping the parked band").toBe("hidden");
+  });
+});
+
+/*
+ * A tablet in landscape — `desktop.md` §8 ③.
+ *
+ * The question that opened this was whether `min-width` is the right gate for
+ * the keyboard hints, and it said to revisit "if anyone reports the hints on a
+ * device that cannot use them". No report was needed. iPad Pro 11 landscape is
+ * 1194×834 and iPad gen 7 landscape is 1080×810; both clear the 1024×740
+ * breakpoint on *both* axes, so both were being shown a legend for keys they do
+ * not have. This block is that device.
+ *
+ * `hasTouch` alone is what flips it, measured rather than assumed: under
+ * Chromium emulation a touch context reports `any-hover: none` regardless of
+ * viewport, so no `isMobile` is needed here — which is welcome, since
+ * `isMobile` brings meta-viewport emulation and a layout viewport distinct from
+ * the visual one, and this file measures boxes elsewhere.
+ *
+ * One honest limit, worth naming rather than discovering later: emulation
+ * *replaces* the pointer instead of adding one, so a real touchscreen laptop —
+ * trackpad and touchscreen together, `any-hover: hover`, hints correctly shown —
+ * is not reachable from here. It reports exactly what this tablet does. So this
+ * row proves the tablet is now silent; it cannot prove the laptop still speaks,
+ * and the row above at 1440×900 is what carries that half.
+ */
+test.describe("Hifth · a tablet in landscape", () => {
+  test.use({ viewport: { width: 1194, height: 834 }, hasTouch: true });
+
+  test("has the room for the desktop chrome but is not offered a keyboard", async ({ page }) => {
+    await page.goto("/#/hafs-kfqc/p7");
+
+    // The premise: this viewport really is above the breakpoint. Without it the
+    // test would pass on a phone-sized window for the wrong reason, which is the
+    // failure mode a negative assertion is least able to notice.
+    await expect(spread(page)).toBeVisible();
+    const langs = page.getByRole("radiogroup", { name: "اللغة" });
+    await expect(langs).toBeVisible();
+
+    // The claim. Room and a keyboard are two different premises, and only the
+    // legend needs the second one. It is still rendered — `display: none` is
+    // enough, since these are three spans with no fetch behind them and the row
+    // is already `aria-hidden` — so the assertion is about being seen, not about
+    // being built.
+    await expect(page.locator("kbd")).toHaveCount(3);
+    await expect(page.locator("kbd").first()).toBeHidden();
   });
 });
 
