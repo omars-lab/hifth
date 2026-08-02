@@ -1,0 +1,16 @@
+{
+  "$comment": [
+    "What the shipped JS weighed, gzipped, the last time someone accepted it.",
+    "gate:budget fails when the total moves more than 1 KB in either direction,",
+    "so this file's diff is where a PR's effect on bundle size is read.",
+    "Keys have vite's content hash stripped; see `stable` in gate-budget.mjs.",
+    "Regenerate with `make budget-update` — and look at the diff before committing."
+  ],
+  "totalGz": 111312,
+  "chunks": {
+    "assets/index.js": 100247,
+    "assets/workbox-window.prod.es5.js": 2390,
+    "sw.js": 1098,
+    "workbox.js": 7577
+  }
+}
