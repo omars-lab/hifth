@@ -252,6 +252,55 @@
   color: var(--ink-soft);
 }
 
+/*
+ * A wide window — docs/design/desktop.md §8 ⑤, docs/decisions/desktop-vs-mobile.md.
+ *
+ * The eighth sheet to get this rule and the only one that could not copy it. The
+ * other seven hold a column of controls, so they narrow to ~420px and stop; a
+ * 604-cell picture of the whole book narrowed to 420px would be the same mistake
+ * aimed the other way. So this sheet is bounded *wider*, and the interesting half
+ * of the rule is not the card at all — it is the grid.
+ *
+ * `auto-fill` is right on a phone and wrong here. On a phone the window is the
+ * binding constraint and auto-fill honours it, which is why one `min()` covers
+ * 30 cells and 604 with no media queries at all. On a 1440px window nothing
+ * binds, and auto-fill spends every pixel it is given: measured on the shipped
+ * build, juz scope laid its 30 cells out as **one row** and hizb its 60 as two.
+ * A single line of squares is not a map — it says nothing about where in the
+ * book you are, which is the only thing this sheet is opened to see.
+ *
+ * So where the phone lets the window decide the shape, a wide window makes the
+ * map decide it itself: a named column count per scope, near √N, so the picture
+ * is about as tall as it is wide at every scope — 6×5 juz, 8×8 hizb, 25×25 page.
+ * The cells take a fixed size rather than `1fr` because `1fr` at juz scope would
+ * inflate them to 100px squares; the grid is centred in the card instead, and
+ * the card holds one width across all three scopes so switching scope redraws
+ * the map without moving the sheet under the cursor.
+ */
+@media (min-width: 900px) {
+  .sheet {
+    inset-inline: 0;
+    inline-size: min(620px, 92vw);
+    margin-inline: auto;
+    border-end-start-radius: var(--radius-lg);
+    border-end-end-radius: var(--radius-lg);
+    inset-block-end: var(--space-4);
+  }
+
+  .grid {
+    grid-template-columns: repeat(8, 44px);
+    justify-content: center;
+  }
+
+  .grid[data-scope="juz"] {
+    grid-template-columns: repeat(6, 64px);
+  }
+
+  .grid[data-scope="page"] {
+    grid-template-columns: repeat(25, 20px);
+  }
+}
+
 @keyframes rise {
   from {
     transform: translateY(100%);

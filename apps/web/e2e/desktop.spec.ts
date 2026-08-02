@@ -407,6 +407,82 @@ test.describe("Hifth · the desktop spread", () => {
 });
 
 /*
+ * The revision map on a wide window — `desktop.md` §8 ⑤.
+ *
+ * Every other sheet in the app narrows on a wide window: seven of them carry a
+ * `@media (min-width: 900px)` rule that turns the phone's full-bleed bottom
+ * sheet into a 420–440px card. The map shipped without one, and the question
+ * "where does the revision map sit at desktop?" turned out to have the answer
+ * "wherever a phone put it, because nobody wrote the rule".
+ *
+ * It is the one sheet where the convention cannot be copied verbatim, and that
+ * is why it needs its own row rather than the missing at-rule. The other seven
+ * hold a *column of controls*, which is unreadable at 1440px. This one holds a
+ * grid whose entire job is to be a picture of the whole book — narrowing it to
+ * a 440px column would be the same mistake pointing the other way.
+ *
+ * What actually breaks is the grid, not the card. `.grid` is
+ * `repeat(auto-fill, minmax(min(--cell, 12vw), 1fr))`, so the wider the sheet
+ * the more tracks it lays down — and at the coarse scopes there are not many
+ * cells to lay. 30 juz across 1440px is *one row*. A single line of squares is
+ * not a map: nothing about it says where in the book you are, which is the only
+ * thing a hafiz opens it to see.
+ */
+test.describe("Hifth · the revision map at desktop", () => {
+  test("stays a map instead of stretching into a strip", async ({ page }) => {
+    await page.goto("/#/hafs-kfqc/p7");
+    await expect(spread(page)).toBeVisible();
+
+    await page.getByRole("button", { name: /ما فتحتَه من المصحف/ }).click();
+    const sheet = page.getByRole("dialog", { name: "ما فتحتَه من المصحف" });
+    await expect(sheet).toBeVisible();
+
+    // The card first. It is bounded and centred rather than full-bleed, which is
+    // the half this shares with the other seven sheets.
+    const card = await boxOf(sheet);
+    const vw = page.viewportSize()!.width;
+    expect(card.width, "the map is still full-bleed on a wide window").toBeLessThan(vw - 100);
+    expect(
+      Math.abs(card.x + card.width / 2 - vw / 2),
+      "the map is bounded but not centred",
+    ).toBeLessThan(2);
+
+    // And the grid, which is what the width exists to serve. Rows are counted
+    // off the cells' own `y` rather than from the column count, so the assertion
+    // reads what the browser laid out instead of restating the CSS back at
+    // itself — a `repeat(6, …)` that overflows its card is still a broken map.
+    const rowsAt = async (): Promise<number> => {
+      const ys = await sheet
+        .getByRole("list", { name: "خريطة المصحف" })
+        .getByRole("listitem")
+        .evaluateAll((els) => els.map((el) => Math.round(el.getBoundingClientRect().y)));
+      return new Set(ys).size;
+    };
+
+    // Juz is the scope that failed hardest — 30 cells is the fewest the map ever
+    // draws, so it was the first to fit on one line. It was 1 row; it is now 5.
+    await sheet.getByRole("radio", { name: "جزء" }).click();
+    expect(await rowsAt(), "30 juz laid out as a strip").toBeGreaterThan(3);
+
+    // Hizb is 60, and reached the same failure a little later: 2 rows, now 8.
+    await sheet.getByRole("radio", { name: "حزب" }).click();
+    expect(await rowsAt(), "60 hizb laid out in a line or two").toBeGreaterThan(5);
+
+    // And the page scope, the one that always had rows to spare, to catch the
+    // opposite regression — a card that got narrow enough to fix juz by making
+    // the whole book unreadable.
+    await sheet.getByRole("radio", { name: "صفحة" }).click();
+    expect(await rowsAt(), "604 pages stacked too deep to read").toBeLessThan(32);
+
+    // The card's width does not move as the scope does. This is the reason the
+    // grid is centred inside a fixed card rather than the card being sized to
+    // its contents: three scopes are three widths, and a sheet that resizes
+    // under the cursor makes the radio you just pressed jump away from it.
+    expect((await boxOf(sheet)).width, "the sheet resizes when the scope does").toBe(card.width);
+  });
+});
+
+/*
  * A tablet in landscape — `desktop.md` §8 ③.
  *
  * The question that opened this was whether `min-width` is the right gate for

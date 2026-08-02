@@ -256,9 +256,11 @@
     {
       "id": "where-the-revision-map-sits-at-desktop",
       "source": { "file": "docs/design/desktop.md", "item": "⑤" },
-      "status": "open",
+      "status": "fixed",
       "severity": "question",
-      "owner": "agent"
+      "owner": "agent",
+      "closedBy": "apps/web/e2e/desktop.spec.ts",
+      "note": "Asked as a design question and answered as a defect: RevisionMap was the only one of eight sheets with no `@media (min-width: 900px)` rule, and at 1440px its auto-fill grid laid 30 juz out as a single row. Fixed with a bounded centred card plus a named column count per scope; the owed row in docs/decisions/desktop-vs-mobile.md is row 22."
     },
 
     {
