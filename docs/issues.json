@@ -527,10 +527,11 @@
     {
       "id": "plan-stage-coordinate-model",
       "source": { "file": "docs/PLAN.md", "item": "10" },
-      "status": "open",
+      "status": "fixed",
       "severity": "defect",
       "owner": "agent",
-      "note": "Eleven findings. OE1 OE2 OE6 OE7 OE9 OE11 are closed; OE3 OE4 OE5 OE8 remain and are indexed individually above. This entry is the follow-up, not any one of them."
+      "closedBy": "apps/web/e2e/stage-fit.spec.ts",
+      "note": "The follow-up, not any one of the eleven findings under it. Ten are closed and the eleventh is page-turning ⑩, the mounted-set ceiling — indexed separately, and the thing §3–§4 of that document were already waiting on rather than part of this hardening. Closed late: ③④⑤⑧ went in b1c24c2 and this row still said open, which is the failure the catalog exists to catch and caught in a sweep rather than in a gate. A gate cannot: nothing a machine can read distinguishes a follow-up that is done from one that is not."
     },
     {
       "id": "plan-drag-to-turn",
