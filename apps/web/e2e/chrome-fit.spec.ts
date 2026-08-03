@@ -84,17 +84,24 @@ test.describe("Hifth · the chrome fits a phone", () => {
   });
 
   test("still fits with the widest page number the mushaf has", async ({ page }) => {
-    await page.goto("/#/hafs-kfqc/2:47");
-    await expect(page.locator("main svg[role='group']").first()).toBeVisible();
-
-    // The corpus vendored today is three pages, so the header can only ever be
-    // driven to a one-digit number by navigation. The worst case is page 604 —
-    // the last page of the mushaf, and the widest that field ever gets — so the
-    // text is set directly. Nothing else about the row changes: this is the
-    // same span, the same font, the same flex item, two glyphs wider.
-    await page.locator("header span.numeric").evaluate((el) => {
-      el.textContent = "604";
+    // Page 604 is the last page of the mus'haf and the widest that field ever
+    // gets. This row used to reach it by writing "604" into the span, because
+    // the build carried three pages and no navigation could put three digits in
+    // the header — which meant it measured a string the app had never rendered,
+    // and would have gone on passing if the header stopped showing the page at
+    // all. Loop 4b vendored the page, so the number now arrives the way a
+    // reader's does: by going there.
+    //
+    // Named by its label, not `main svg[role='group']` first: the app boots on
+    // page 7 and the deep link mounts 604 beside it — under the DOM budget both
+    // stay, and only one of them is displayed. `.first()` is DOM order, so it
+    // resolves to page 7's hidden host about a third of the time and the row
+    // fails saying the page never arrived when it had.
+    await page.goto("/#/hafs-kfqc/p604");
+    await expect(page.locator("main svg[aria-labelledby='page-label-604']")).toBeVisible({
+      timeout: 20_000,
     });
+    await expect(page.locator("header span.numeric")).toHaveText("604");
 
     await page.setViewportSize({ width: 320, height: 844 });
     await expect.poll(async () => (await measure(page)).headerClient, { timeout: 5_000 }).toBe(320);

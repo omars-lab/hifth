@@ -1,4 +1,5 @@
 import { test, expect } from "@playwright/test";
+import { contextWithout } from "./inventory";
 
 // Loop 2 exit criterion (PLAN §Loop 2):
 //   tap 2:48 → rail → popover → hop to 2:123 cross-page → bead back, one-handed.
@@ -51,43 +52,75 @@ test.describe("Hifth · the hop", () => {
     ).toBeVisible();
   });
 
-  test("un-vendored hop targets are surfaced but disabled (no ghost pages)", async ({ page }) => {
-    // 2:120 on page 19 is the one ayah in the vendored corpus whose chips are
-    // *entirely* dead ends: ↻ holds only 2:145 (page 22) and ▶ only 13:37
-    // (page 254), neither vendored until Loop 4b. Two chips, so this covers the
-    // rail's promise across buckets rather than depth inside one sheet — the
-    // 47.8%-wrong corpus this used to lean on is gone, and with it any bucket
-    // that had three dead ends in it.
+  test("un-vendored hop targets are surfaced but disabled (no ghost pages)", async ({ browser }) => {
+    // 2:120 on page 19 is the ayah whose chips are *entirely* dead ends when the
+    // two pages behind them are absent: ↻ holds only 2:145 (page 22) and ▶ only
+    // 13:37 (page 254). Neither was vendored before Loop 4b, which made this row
+    // free; both are vendored now, so the scarcity is arranged (`./inventory`).
+    //
+    // Two chips, not one sheet's depth: the promise is about the rail's buckets.
+    // Shown-and-disabled is the whole design — a rail that hid what it could not
+    // reach would leave a hafiz believing an ayah has no mutashabihat, which is a
+    // stronger and more wrong claim than "we do not have that page".
+    const { context, page } = await contextWithout(browser, [22, 254]);
+    try {
+      await page.goto("/#/hafs-kfqc/2:120");
+      // Name page 19 rather than taking `.first()`, which resolves to whichever
+      // <svg> is first in the DOM, warm or visible.
+      await expect(page.locator('svg[aria-labelledby="page-label-19"]')).toBeVisible();
+      await expect(
+        page.getByRole("button", { name: /الآية الحالية البقرة · ٢:١٢٠/ }),
+      ).toBeVisible();
+
+      const rail = page.getByRole("group", { name: "روابط الآية" });
+      await expect(rail).toBeVisible();
+
+      for (const chipName of [/متشابهات في السورة/, /سور لاحقة/]) {
+        const chip = rail.getByRole("button", { name: chipName });
+        await expect(chip).toBeVisible();
+        await chip.tap();
+
+        const sheet = page.getByRole("dialog");
+        // Every link is shown, but every leap is disabled — honest dead-end notes.
+        const hopBtns = sheet.getByRole("button", { name: /انتقل إلى/ });
+        await expect(hopBtns.first()).toBeVisible();
+        const count = await hopBtns.count();
+        for (let i = 0; i < count; i++) {
+          await expect(hopBtns.nth(i)).toBeDisabled();
+        }
+        await expect(sheet.getByText(/غير متوفّرة بعد/).first()).toBeVisible();
+
+        await sheet.getByRole("button", { name: "إغلاق" }).tap();
+        await expect(page.getByRole("dialog")).toHaveCount(0);
+      }
+    } finally {
+      await context.close();
+    }
+  });
+
+  test("with the whole print vendored, those same chips land", async ({ page }) => {
+    // The other side of the row above, and the thing Loop 4b actually bought.
+    // Same ayah, same two chips, no fixture: 2:145 and 13:37 are now pages we
+    // have, so the leap is enabled and taking it arrives — page 22 for the ↻
+    // chip, which is a cross-page hop of the ordinary kind.
+    //
+    // Worth its own row rather than an assertion appended to the first, because
+    // the two are opposite verdicts on the same DOM and a rail that disabled
+    // everything would pass one of them perfectly.
     await page.goto("/#/hafs-kfqc/2:120");
-    // Both dead-end pages stay unmounted, but 2:145's page 22 does not — a hop
-    // target keeps its page warm. Name page 19 rather than taking `.first()`,
-    // which resolves to whichever <svg> is first in the DOM, warm or visible.
     await expect(page.locator('svg[aria-labelledby="page-label-19"]')).toBeVisible();
-    await expect(
-      page.getByRole("button", { name: /الآية الحالية البقرة · ٢:١٢٠/ }),
-    ).toBeVisible();
 
     const rail = page.getByRole("group", { name: "روابط الآية" });
-    await expect(rail).toBeVisible();
+    await rail.getByRole("button", { name: /متشابهات في السورة/ }).tap();
+    const sheet = page.getByRole("dialog");
+    const hop = sheet.getByRole("button", { name: /انتقل إلى البقرة · ٢:١٤٥/ });
+    await expect(hop).toBeEnabled();
+    await hop.tap();
 
-    for (const chipName of [/متشابهات في السورة/, /سور لاحقة/]) {
-      const chip = rail.getByRole("button", { name: chipName });
-      await expect(chip).toBeVisible();
-      await chip.tap();
-
-      const sheet = page.getByRole("dialog");
-      // Every link is shown, but every leap is disabled — honest dead-end notes.
-      const hopBtns = sheet.getByRole("button", { name: /انتقل إلى/ });
-      await expect(hopBtns.first()).toBeVisible();
-      const count = await hopBtns.count();
-      for (let i = 0; i < count; i++) {
-        await expect(hopBtns.nth(i)).toBeDisabled();
-      }
-      await expect(sheet.getByText(/غير متوفّرة بعد/).first()).toBeVisible();
-
-      await sheet.getByRole("button", { name: "إغلاق" }).tap();
-      await expect(page.getByRole("dialog")).toHaveCount(0);
-    }
+    await expect(page.locator("header .numeric")).toHaveText("22");
+    await expect(
+      page.getByRole("button", { name: /الآية الحالية البقرة · ٢:١٤٥/ }),
+    ).toBeVisible();
   });
 
   test("the shard for where the rail can send you is fetched before you go", async ({ page }) => {

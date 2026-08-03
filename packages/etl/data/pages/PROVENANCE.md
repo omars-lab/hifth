@@ -1,5 +1,12 @@
 # ayah-pages.json — provenance
 
+> **Loop 4b:** this directory now holds two things. `ayah-pages.json` is below;
+> [`quran-svg.pin.json`](./quran-svg.pin.json) is the *page corpus* — 348 MB of
+> upstream SVG is too large to vendor here the way the mutashabihat, roots and
+> tajweed inputs are, so the pin stands in for the input with a SHA-256 per
+> upstream file and per vendored byte. Its `$comment` says which half is checked
+> when and by what.
+
 **What:** the ayah→page table for the `hafs-kfqc` edition — a JSON array of 6236
 page numbers, index = absolute ayah number − 1 (Hafs/Kufan counting, see
 `@hifth/core` `quran-meta.ts`). Loop 4a uses it for edge dir bucketing
@@ -29,3 +36,17 @@ extraction and must reproduce it byte-identically.
   used for this edition.
 - **Immutability:** regenerate only by re-running the derivation against a newer
   quran-svg pin; never hand-edit.
+- **Loop 4b re-derivation — it reproduced, and from different bytes.** The table
+  above was derived from the corpus's per-page **JSON**; `extract-pages.mjs`
+  re-derives it from the vendored **SVG**, reading each polygon's `verse-<n>` id
+  out of the markup that ships. Both routes produce the same 6236 entries and the
+  file did not change. That is worth more than a re-run: it is the JSON metadata
+  and the shipped geometry agreeing, so a page whose polygons were dropped or
+  renumbered in vendoring could not pass unnoticed.
+- **Two upstream `id` defects, repaired and asserted.** Exactly two ayah polygons
+  — 19:3 on p305 and 75:5 on p577 — carry path geometry in the `id` attribute
+  where every other polygon carries `verse-<absolute ayah>`. `vendor-pages.mjs`
+  rewrites those two to the id they should have had and asserts the count is
+  **exactly two** and the ayahs are **exactly those two**, so a future pin that
+  fixes them upstream fails loudly rather than drifting. `extract-pages.mjs`
+  refuses any polygon without a well-formed id, so the repair cannot be skipped.

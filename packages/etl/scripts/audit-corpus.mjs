@@ -3,19 +3,25 @@
  * Corpus completeness audit (PLAN §4 rule 7 / research §7).
  *
  * The deep-research pass could NOT verify that the quran-svg corpus ships all
- * 604 Madani pages, so this audit runs page-by-page instead of trusting the
- * corpus wholesale. In Loop 0 only 3 pages are vendored, so the audit's job is
- * two-fold:
- *   (a) report coverage against the canonical 604-page Madani mushaf, and
+ * 604 pages, so this audit runs page-by-page instead of trusting the corpus
+ * wholesale. Its job is two-fold:
+ *   (a) report coverage against the canonical 604-page print, and
  *   (b) assert the vendored pages are internally consistent: every manifest page
  *       has a file, every file parses, every polygon has a valid number/key, and
  *       no page contains a <text> element.
  *
- * It exits non-zero on an internal-consistency failure. Missing pages (3/604)
- * are REPORTED, not failed — full vendoring is Loop 4's job. The report is the
- * artifact recorded in docs/decisions/loop-0.md.
+ * It exits non-zero on an internal-consistency failure. Missing pages are
+ * REPORTED, not failed — the audit was written when 3 of 604 were vendored and
+ * had to keep working through the gap. Loop 4b closed it (604/604), and
+ * `gate:pages` is what now *fails* on a missing page; this stays a report so it
+ * keeps its original job of describing the corpus rather than policing it.
+ *
+ * Note it reads the manifest through `expandManifest` — the shipped manifest is
+ * the compact ayah→page form, and this audit's whole value is cross-checking the
+ * expanded polygons back against the SVG bytes they claim to describe.
  */
 import { readFileSync, existsSync } from "node:fs";
+import { expandManifest, isCompactManifest } from "@hifth/core";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -32,7 +38,8 @@ function fail(msg) {
 }
 
 if (!existsSync(MANIFEST)) fail("manifest.json missing — run extract:pages first");
-const manifest = JSON.parse(readFileSync(MANIFEST, "utf8"));
+const wire = JSON.parse(readFileSync(MANIFEST, "utf8"));
+const manifest = isCompactManifest(wire) ? expandManifest(wire) : wire;
 
 const problems = [];
 let polygonCount = 0;
@@ -72,10 +79,29 @@ for (const page of manifest.pages) {
 // --- Coverage report (informational) ---
 const vendored = manifest.pages.map((p) => p.page).sort((a, b) => a - b);
 const coverage = ((vendored.length / MADANI_TOTAL_PAGES) * 100).toFixed(1);
+const missing = MADANI_TOTAL_PAGES - vendored.length;
 console.log("Corpus audit — edition:", manifest.edition);
-console.log(`  vendored pages: ${vendored.join(", ")} (${vendored.length}/${MADANI_TOTAL_PAGES}, ${coverage}%)`);
+// Listed as ranges: at 604 pages the enumeration is a wall, and what a reader
+// needs from it is where the gaps are, not the numbers in between.
+console.log(`  vendored pages: ${asRanges(vendored)} (${vendored.length}/${MADANI_TOTAL_PAGES}, ${coverage}%)`);
 console.log(`  polygons validated: ${polygonCount}`);
-console.log(`  missing: ${MADANI_TOTAL_PAGES - vendored.length} pages — full vendoring is Loop 4`);
+console.log(
+  missing === 0
+    ? `  missing: none — the print is fully vendored`
+    : `  missing: ${missing} pages — see gate:pages`,
+);
+
+/** Collapse a sorted page list to "1–604" / "7, 9, 19" / "1–3, 7–9". */
+function asRanges(pages) {
+  const out = [];
+  for (let i = 0; i < pages.length; ) {
+    let j = i;
+    while (j + 1 < pages.length && pages[j + 1] === pages[j] + 1) j++;
+    out.push(j > i ? `${pages[i]}\u2013${pages[j]}` : `${pages[i]}`);
+    i = j + 1;
+  }
+  return out.join(", ");
+}
 
 if (problems.length > 0) {
   console.error(`\naudit:corpus — ${problems.length} internal-consistency problem(s):`);

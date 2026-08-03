@@ -56,7 +56,7 @@
         {
           "file": "packages/core/src/ink.ts",
           "symbol": "swipesFromPath",
-          "note": "Why the highlight looks like a pen and not a box. Every ayah's hit area is a run of axis-aligned rectangles, one per line it occupies; this turns each into a band along the line's middle. It is a parser with a fallback, not an assumption — it returns null on any geometry it does not fully recognise and the Highlighter clones the shape instead, so an unfamiliar page from Loop 4b degrades to the old box rather than to nothing."
+          "note": "Why the highlight looks like a pen and not a box. Every ayah's hit area is a run of axis-aligned rectangles, one per line it occupies; this turns each into a band along the line's middle. It is a parser with a fallback, not an assumption — it returns null on any geometry it does not fully recognise and the Highlighter clones the shape instead, so an unfamiliar page degrades to the old box rather than to nothing. Loop 4b was the test of that: 601 pages arrived at once from the same upstream, and the fallback is still there for the edition that does not come from it."
         },
         {
           "file": "packages/core/src/highlighter.ts",
@@ -263,7 +263,7 @@
         "New input syntax: extend parseJump and its unit tests. Keep the UI dumb — it should render JumpTargets, not know how they were found.",
         "New shortcut: add it to appKeyAction with a KeyContext branch, and add the row to the help surface in the same commit.",
         "Anything added to the header row costs width the row does not have, and height the stage cannot spare. Run chrome-fit before and after, and if it needs a control, say which one it replaces.",
-        "Vendoring more pages (Loop 4b): the page bar needs no change — the track is already the whole print and the ticks are drawn from the manifest. What changes is that `pagesVendored` stops being a caveat; delete it when the gap closes, not before.",
+        "Vendoring pages: the page bar needed no change when Loop 4b filled the print — the track was already the whole print and the ticks are drawn from the manifest, so it went from «٣ من ٦٠٤» to «٦٠٤ من ٦٠٤» on its own. `pagesVendored` stays: it is not a caveat that expires, it is the bar saying what is behind it, and the next edition may carry half a mus'haf. The snap is the thing to watch — it used to fire on nearly every drag and now fires almost never, so e2e/pagebar.spec.ts trims a page out of the manifest to keep testing the branch rather than testing that it never runs.",
         "The page bar is the bottom-most chrome, so it owns the home-indicator inset. If anything is ever put below it, the inset moves with it — two elements padding for it is a doubled gap, neither is a control under the indicator."
       ],
       "gates": ["pnpm test", "make e2e"],
@@ -377,7 +377,7 @@
         {
           "file": "docs/design/desktop.md",
           "symbol": "Hifth is a navigation instrument for huffaz",
-          "note": "Read this before touching anything below. It carries the arithmetic behind the breakpoint, the governing rule for what desktop is allowed to add, and the list of what changes when Loop 4b vendors the remaining pages. docs/decisions/desktop-vs-mobile.md is the running table of individual decisions; append a row there rather than restating one here."
+          "note": "Read this before touching anything below. It carries the arithmetic behind the breakpoint, the governing rule for what desktop is allowed to add, and §4's table of what changed when the print was vendored. docs/decisions/desktop-vs-mobile.md is the running table of individual decisions; append a row there rather than restating one here."
         },
         {
           "file": "packages/core/src/pages.ts",
@@ -415,7 +415,7 @@
         "A new desktop decision is a row appended to docs/decisions/desktop-vs-mobile.md: what mobile does, what desktop does, and why they differ. The design doc links to that table rather than duplicating it.",
         "Anything mounted only at desktop width must be gated in JS via useMediaQuery, not hidden in CSS, whenever mounting it costs a fetch or a Highlighter. Anything that is only markup should be CSS-hidden so it leaves the accessibility tree and the header's intrinsic width.",
         "A new desktop surface needs a row in e2e/contrast.spec.ts SURFACES, and that row must call page.setViewportSize — both projects running that file are phones, so without the resize the row looks like coverage and measures nothing.",
-        "When Loop 4b vendors the remaining pages, the `renderFacing` branch stops being fixture-only. Nothing about the geometry changes; see docs/design/desktop.md §4 for the table of what does."
+        "Loop 4b vendored the print, so `renderFacing` is no longer fixture-only — every spread is two real leaves, and the honest hole is now reached by trimming a page out of the manifest (apps/web/e2e/inventory.ts). Nothing about the geometry changed; see docs/design/desktop.md §4 for the table of what did."
       ],
       "gates": ["pnpm test", "make e2e", "pnpm gate:budget", "make ci"],
       "seeAlso": ["wayfinding", "ui-language", "a11y", "assets-and-pages"]
@@ -472,6 +472,26 @@
           "file": "apps/web/src/assets.ts",
           "symbol": "loadPage",
           "note": "Fetch and cache a page in the browser. The one place that knows the asset URL shape."
+        },
+        {
+          "file": "packages/core/src/mounted-set.ts",
+          "symbol": "retainPages",
+          "note": "The ceiling on how many page SVGs stay in the DOM (backlog ③), and the reason vendoring 604 pages did not turn a long reading session into a leak: `MOUNTED_PAGE_CAP` mounted nodes, evicted least-recently-used, with the pages a turn is animating between pinned so the leaf being turned cannot be collected mid-flight. A spread mounts two leaves at once, so `spreadBudget` splits the same cap rather than doubling it — App.tsx passes each stage its share."
+        },
+        {
+          "file": "packages/etl/scripts/vendor-pages.mjs",
+          "symbol": "LOOP0_PAGES",
+          "note": "Loop 4b: the whole print, fetched from the pinned upstream, optimised the way Loop 0 optimised its three, and written unpadded (`8.svg`, not `008.svg`). It reproduces pages 7, 9 and 19 byte for byte before it will vendor anything else — a run that cannot rebuild what is already committed has changed the pipeline, not extended the corpus."
+        },
+        {
+          "file": "packages/core/src/manifest.ts",
+          "symbol": "expandManifest",
+          "note": "The wire form the app fetches. 604 pages of per-ayah polygons is megabytes; the compact form is one 6236-long array indexed by absolute ayah, 1.3 KB gzipped, so the manifest stayed a single eager request instead of becoming a shard. A page an edition lacks is written as `0` and skipped on expand — that zero is what every honest-hole path downstream is reading."
+        },
+        {
+          "file": "scripts/gate-pages.mjs",
+          "symbol": "PIN_FILE",
+          "note": "Cross-checks the vendored pages against the QUL V2 pin: the count, the filename shape, and the anchor ayahs on sampled pages. `audit-corpus` asks whether the manifest covers the print; this asks whether the paper under it is the print we pinned."
         },
         {
           "file": "packages/etl/scripts/audit-corpus.mjs",
@@ -607,7 +627,7 @@
         "Adding a scope means adding real boundary data first. `hizb` was the standing example and is now the worked one: the arithmetic derivation is wrong, so the sixty starts are vendored from the Tanzil metadata and `gate:quran-meta` re-derives them on every run. A scope whose boundaries are guessed is a heatmap that lies about which ayahs it is colouring, and no other test here would notice.",
         "New callers of `recordLook` must justify themselves against the `RevisionEvent` doc comment. The default answer is no: the record is only worth drawing because it is not a log of everything that happened.",
         "The warmth bands (2/7/30 days in RevisionMap.tsx) are a developer's guess and are named as one in docs/design/revision-record.md. Changing them wants a hafiz, not an argument. What is not negotiable is the axis: recency, which is why `lastSeen` exists apart from `rollUp`.",
-        "When Loop 4b vendors the other 601 pages the map needs nothing — `coverage` reads the manifest — but the e2e does: it pins hizb 3 as the first division with no paper, and the inventory as «المتوفّر ٢ من ٦٠ حزب». Both are facts about what is vendored, and both are meant to fail loudly when that changes."
+        "Loop 4b vendored the other 601 pages and the map itself needed nothing — `coverage` reads the manifest — but the e2e did, exactly as predicted: it had pinned hizb 3 as the first division with no paper and the inventory as «المتوفّر ٢ من ٦٠ حزب», and both failed loudly. It is «٦٠ من ٦٠» now, and «absent is not cold» is held by a second row that trims pages 22–31 out of the manifest. Keep that row: with a complete edition the absent treatment has no way to appear on its own, and it is what the map owes the next edition that does not carry the whole print."
       ],
       "gates": ["pnpm test", "pnpm gate:revision-privacy", "pnpm gate:quran-meta", "make ci"],
       "seeAlso": ["select-an-ayah", "offline-pwa", "validation"]

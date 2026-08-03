@@ -36,7 +36,8 @@ function page(n: number, surah: number, from: number, to: number): PageMeta {
  * A stand-in for page 7 — Al-Baqarah 2:38–2:48, which is the run the extractor
  * actually emits for it, and all of it inside hizb 1. A fixture rather than the
  * real manifest, so the inventory these tests reason about is fixed at one page
- * and does not silently change the day Loop 4b vendors the other 601.
+ * and does not silently change with what is vendored. It earned that: Loop 4b
+ * vendored the other 601 and not a line of this file moved.
  */
 const PAGE_7 = page(7, 2, 38, 48);
 
@@ -98,9 +99,9 @@ describe("coverage", () => {
 
 describe("RevisionMap", () => {
   it("draws absent as a different kind of thing from cold, not a paler one", async () => {
-    // The finding this whole component is shaped around. Three of 604 pages are
-    // vendored; if the 601 the reader cannot reach look like pages they neglected,
-    // the picture says they have abandoned the Qur'an. Absent and cold must
+    // The finding this whole component is shaped around, held here against a
+    // one-page fixture: if the pages a reader cannot reach look like pages they
+    // neglected, the picture says they have abandoned the Qur'an. Absent and cold must
     // differ in state, not in opacity — and the difference has to reach a screen
     // reader, who cannot see either treatment.
     draw();

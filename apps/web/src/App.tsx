@@ -3,6 +3,7 @@ import {
   Adjacency,
   Concordance,
   DEFAULT_FIELD,
+  MOUNTED_PAGE_CAP,
   Resolver,
   Roots,
   Tajweed,
@@ -11,6 +12,7 @@ import {
   keyToRef,
   parseAyahKey,
   refToKey,
+  spreadBudget,
   type AdjacencyShard,
   type AppState,
   type AssetManifest,
@@ -506,9 +508,12 @@ export function App(): JSX.Element {
   // Where one page's worth of movement lands, or null if it lands nowhere.
   //
   // "The next page" means the next page we actually *have*: this walks
-  // `pageTurns.pages` — the **inventory**, not the print — so 7 → 9 steps clean
-  // over page 8. That is not a small distinction: with three of 604 pages
-  // vendored, every turn in the shipped build crosses a gap.
+  // `pageTurns.pages` — the **inventory**, not the print. With 7, 9 and 19
+  // vendored that meant 7 → 9, stepping clean over page 8, and every turn in the
+  // shipped build crossed a gap. Loop 4b vendored all 604, so the inventory and
+  // the print now agree and the walk is `page ± 1` everywhere. It stays a walk
+  // because the inventory is the thing that is true — the next edition arrives
+  // partial the way this one did, and `page ± 1` would then be a guess.
   //
   // It is its own function, rather than a step inside `stepPage`, because the
   // dragged turn has to ask the question without answering it — a fold under a
@@ -1028,8 +1033,8 @@ export function App(): JSX.Element {
             {/* At desktop width the stage is one leaf of an open mus'haf: the
                 lower page number on the right, the next page to its left, and
                 the facing leaf drawn as *absent* when this build does not hold
-                it — which today is always, since pages 7, 9 and 19 are not
-                adjacent. Below the breakpoint this renders the stage alone and
+                it — which for hafs-kfqc is now never, since Loop 4b vendored all
+                604. Below the breakpoint this renders the stage alone and
                 nothing else changes. docs/design/desktop.md. */}
             <PageSpread
               enabled={desktop}
@@ -1054,6 +1059,12 @@ export function App(): JSX.Element {
                   page={facing}
                   total={totalPages}
                   mountedPages={[facing]}
+                  /* Its share of the book's DOM budget, not a budget of its
+                     own: two stages each holding the full cap is a desktop
+                     reader holding twice what a phone reader does, silently
+                     (`docs/backlog.md` ④). It asks for one page and never
+                     receives hop targets, so its share is the smaller one. */
+                  pageBudget={spreadBudget().facing}
                   label={t.pageN(facing)}
                   selectedKey={selectedKey}
                   breadcrumbKey={breadcrumbKey}
@@ -1076,6 +1087,10 @@ export function App(): JSX.Element {
                 page={page}
                 total={totalPages}
                 mountedPages={mountedPages}
+                /* Only on a spread is there a second leaf to share with; below
+                   the breakpoint this stage is the whole book, so it is the
+                   whole budget. */
+                pageBudget={desktop ? spreadBudget().reading : MOUNTED_PAGE_CAP}
                 label={t.pageN(page)}
                 selectedKey={selectedKey}
                 breadcrumbKey={breadcrumbKey}
@@ -1089,8 +1104,9 @@ export function App(): JSX.Element {
                 onTurn={stepPage}
                 /* And the drag needs to know where it *would* land before it
                    lands, so the fold under the finger is drawn for the pair the
-                   release will actually produce — the inventory's pair, which
-                   with 7/9/19 vendored is not `page ± 1`. */
+                   release will actually produce — the inventory's pair. With
+                   7/9/19 that was not `page ± 1`; with all 604 vendored it is,
+                   and this stays because the next edition will be partial. */
                 turnTargetOf={pageAfter}
                 labelFor={(key) => t.ayahAria(t.ayahLabel(key) ?? key)}
                 skin={skin}

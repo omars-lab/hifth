@@ -46,10 +46,10 @@ described in both files.
 | 2 — The hop | complete | Tap 2:48 → rail → popover → cross-page hop → bead back, one-handed | [loop-2.md](decisions/loop-2.md) |
 | 3 — Diffs, share, a11y | complete | Teacher link cold-open restores exact view; screen reader announces hops | [loop-3.md](decisions/loop-3.md) |
 | 4a — Edge-data ETL | complete | Deterministic full-corpus edge ETL; 100% valid keys; shards <50KB gz | [loop-4a.md](decisions/loop-4a.md) |
-| 4b — Page corpus + streaming | **gated on follow-up ①** | All 604 pages vendored + QUL-checked; every ayah navigable; TTI <2.5s mid-Android | — |
+| 4b — Page corpus + streaming | complete | All 604 pages vendored + QUL-checked; every ayah navigable; TTI <2.5s mid-Android | [loop-4b.md](decisions/loop-4b.md) |
 | 5 — Highlight + roots | complete (ayah granularity; word granularity needs 4b) | Drag-range → merged hop list; root lens nearest-page-first | [loop-5.md](decisions/loop-5.md) |
 | 6a — Skin, editions, wayfinding | complete | Instant plain⇄tajweed toggle (identical geometry); jump anywhere; visited pages survive offline; Lighthouse ≥90 | [loop-6a.md](decisions/loop-6a.md) |
-| 6b — Pin-a-juz packs | **gated on 4b** (→ follow-up ①) | Airplane-mode revision of a pinned juz works after 8+ days | — |
+| 6b — Pin-a-juz packs | pending (4b's gate is lifted) | Airplane-mode revision of a pinned juz works after 8+ days | — |
 | 7 — Polish + beta | pending (after 3+5+6) | Hafiz revision session, zero friction notes → **web v1.0** | — |
 | Track B — Capacitor | gated on web v1.0 | Same web build wrapped for iOS/Android; Universal Links | — |
 
@@ -101,9 +101,12 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
    so `EditionPicker` may not grow one of those rows on the strength of `hafs-kfqc`'s
    terms. Per-edition licence review, per the Loop 0 gate.
 3. Loop-assigned deferrals (already scoped in their loop sections; details in the decision
-   records): full corpus vendoring + QUL validation → Loop 4b; **word-granularity roots +
-   `?w=` UI → after 4b**; **word-granularity tajweed painting → after 4b** (the spans are
-   already vendored verbatim, so it is a rendering change, not a data change); **hafiz
+   records): full corpus vendoring + QUL validation → **done, Loop 4b**;
+   **word-granularity roots + `?w=` UI** and **word-granularity tajweed painting** — both
+   said "after 4b", and 4b's answer is that the shipped corpus has no word geometry at all,
+   so they move behind **follow-up 13** rather than behind a loop (the tajweed spans are
+   still vendored verbatim, so that one stays a rendering change once geometry exists);
+   **hafiz
    sign-off on the tajweed skin → Loop 7** (the beta label stays until then). **Done:**
    golden-image visual regression, Lighthouse CI, and the **⬡ chip vs ⬡ lens** collision —
    all Loop 6a ([loop-6a.md](decisions/loop-6a.md)); marquee drag-select (Loop 5);
@@ -394,6 +397,26 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     unrelated reason, so `dist`, `coverage`, `playwright-report` and `test-results` are named
     in the gate. This is the only gate in `scripts/` that enumerated from git; the others
     walk the tree or read a manifest, and were never in scope.
+
+13. **Word geometry is a second corpus, not a layer, and the print is the question.** Loop 4b
+    was the loop that was supposed to settle word granularity, and it settled half of it by
+    arriving: `mushafs/hafs/kfqc/json/*` — the metadata behind the 604 pages now shipping —
+    carries one polygon per **ayah** and nothing finer. So word-level selection cannot come
+    from the pages the app shows, and the candidate named in §Loop 4b,
+    [MushafDatabase-Ligature-Based-SVG](https://github.com/mushafdatabase/MushafDatabase-Ligature-Based-SVG),
+    is the only route left. Its README (read 2026-08-03) is encouraging on everything except
+    the one thing that decides it: per-ligature groups with `data-text`, 604 pages, KFGQPC
+    Hafs, a permissive Sadaqa-e-Jaria grant — **and no statement of which print**. Loop 4a's
+    finding is why that is fatal rather than untidy: V1/1405H and V2/1421H disagree on 36
+    pages, our corpus is V2, and a V1-paginated word corpus would silently invalidate
+    `ayah-pages.json`, every edge's `dPage`, and every share link already in someone's notes.
+    **What would answer it:** run 4a's own arithmetic against the candidate — check whether
+    5:77 sits on its p120 and 5:83 on its p121, the two boundaries where V1 and V2 first
+    diverge. That is an afternoon, not a loop, and it must happen before any word-granularity
+    work is scheduled, because a NO means this feature needs a different corpus and a YES
+    means it needs a second ~600-file vendoring with its own pin and gate. Blocks external
+    task #65 (word-level selection → refined mutashabihat search) and the word-granular
+    roots/tajweed painting Loops 5 and 6a left as ayah-fallback.
 
 **The half of these a machine cannot run now has a register — and a runbook.** Follow-ups
 ① (the phone), ② (the browser glance) and ④ (VoiceOver/TalkBack) still wait on a human, and
@@ -816,7 +839,7 @@ shard <50KB gz; license entries). Edges to un-vendored pages stay surfaced-but-d
 endpoint a valid canonical key; all shards within budget; hop rail live on real data for
 the 3 vendored pages.
 
-### Loop 4b — Page corpus + streaming (large — **gated on follow-up ①**)
+### Loop 4b — Page corpus + streaming (large — **complete**, [loop-4b.md](decisions/loop-4b.md))
 Vendor all 604 [quran-svg](https://github.com/quranpedia/quran-svg) Hafs/KFQC pages (CC0
 overlay + KFQC free-use terms — see follow-up ②); anchors over all 604 pages,
 cross-checked against the QUL layout DB pinned in 4a (fail on any surah/ayah/page
@@ -827,6 +850,13 @@ fetch-on-demand, LRU ~6 pages, prefetch hop targets + adjacent pages; PWA cachin
 visited juz.
 **Exit:** every ayah navigable; 100% bidirectional anchor resolution; first-page TTI
 <2.5s mid-Android.
+**Shipped 2026-08-03.** The asset decision point came out **NO for now, on evidence** — the
+vendored corpus is ayah-granular and the candidate does not state its print; follow-up 13
+carries the test that decides it. The manifest went the other way from the projection
+(1,333 B gz for the whole print, not ~109 KB), which deleted `backlog.md` ⑪ instead of
+sharding it. Streaming landed as specified plus a rule the spec did not name: the LRU keeps
+recency as well as a ceiling, and the desktop spread splits one budget between its two
+leaves rather than taking it twice (`backlog.md` ③ ④).
 
 ### Loop 5 — Highlight gesture + root lens (medium)
 `gestures.ts` marquee/pan split (touch-action zones + intent thresholds); amber wash;

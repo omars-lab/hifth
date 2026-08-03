@@ -35,6 +35,22 @@ export {
 
 export { Resolver, type ResolvedLocation } from "./resolver.js";
 
+// Loop 4b — the manifest's wire form. 604 pages of `AssetManifest` is ~109 KB
+// gzipped fetched before the first paint; the compact form is an ayah→page
+// table, ~1.1 KB, and `expandManifest` rebuilds the rest at load.
+export {
+  expandManifest,
+  compactManifest,
+  isCompactManifest,
+  type CompactManifest,
+  type WireManifest,
+} from "./manifest.js";
+
+// Loop 4b — the DOM budget. With the whole print vendored, "the current page
+// plus every vendored hop target" is no longer bounded by what we happen to
+// hold (`docs/backlog.md` ③); this is the ceiling and the recency rule.
+export { MOUNTED_PAGE_CAP, retainPages, spreadBudget } from "./mounted-set.js";
+
 export {
   Highlighter,
   type GroupId,

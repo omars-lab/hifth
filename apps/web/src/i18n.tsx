@@ -397,8 +397,10 @@ export interface Strings {
   /**
    * "صفحة 8 ليست في هذه النسخة" / "Page 8 is not in this build".
    *
-   * Only pages 7, 9 and 19 are vendored and they are not adjacent, so today
-   * every spread has one of these. Latin digits, following `pageN` and
+   * Until Loop 4b only pages 7, 9 and 19 were vendored and they are not
+   * adjacent, so every spread had one of these. All 604 now ship, so no spread
+   * in `hafs-kfqc` reaches it; the string stays for the next edition, which will
+   * arrive incomplete the way this one did. Latin digits, following `pageN` and
    * `pageOfTotal`: it is a page number, read off the corner of a printed page.
    * Said in the document rather than through `LiveAnnouncer` — see PageSpread.
    */

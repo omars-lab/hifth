@@ -809,7 +809,9 @@ vocabulary is defined once in [`docs/issues.json`](../issues.json) and indexed t
 Two of those words are this document's own method and are worth restating where they were
 earned: **confirmed** = reproduced against a production `vite preview` build with the
 viewport and numbers given; **suspected** = read from the code, not reproduced. The
-distinction exists because ⑩ is the only item below that has never been run.
+distinction exists because ⑩ was the only item below that had never been run — it carried
+**suspected** for six loops rather than borrowing a confidence it had not earned, and it was
+closed by a test rather than by the profile it asked for. Nothing here is **suspected** now.
 
 ### ① Double centring — the page is flush against an edge on most viewports · **fixed**
 
@@ -1144,7 +1146,7 @@ trusting the project's, for the reason in the table. It is skipped on `iphone`: 
 takes neither a wheel nor a second pointer from Playwright, so the gesture cannot be driven
 there at all.
 
-### ⑩ The mounted set still has no ceiling · **suspected**
+### ⑩ The mounted set still has no ceiling · **fixed**
 
 `setCurrentPage` toggles `display` (`PageStage.tsx:275-283`) and nothing removes entries from
 `pagesRef`. Every page ever visited stays mounted, with its SVG and its `Highlighter`, for
@@ -1154,6 +1156,21 @@ is backlog's.
 
 **The measurement that would settle it:** mount N pages on a mid-tier Android and record
 resident memory and pan frame time at N = 1, 5, 20. Nobody has taken it.
+
+**Closed by
+[`PageStage.budget.test.tsx`](../../apps/web/src/components/PageStage.budget.test.tsx)** — the
+eviction effect now runs [`retainPages`](../../packages/core/src/mounted-set.ts) over the
+request, and the test asserts the mounted count stays at `MOUNTED_PAGE_CAP` however large the
+fan-out. The heading above is simply no longer true, which is why this is `fixed` and not
+`answered`: there is a ceiling and a test that fails without it. This item's *other* claim —
+that §5's turn animation would make an unbounded set worse — never needed re-testing, because
+a bounded set is what the animation now runs over.
+
+**The measurement is still not taken, and it did not stop being worth taking.** What changed
+is what it decides. It was going to tell us how bad the unbounded case is; it now tunes one
+constant, `MOUNTED_PAGE_CAP`, whose value (6) is a guess from Loop 4b's spec and nothing else.
+That question is `backlog.md` ① and ②, which are `blocked` on hardware, and it does not belong
+here — this document's part of the problem is finished.
 
 ### ⑪ There is no transition at all today, so reduced motion has nothing to remove · **fixed**
 

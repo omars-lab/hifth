@@ -321,6 +321,11 @@ written for it cannot be seen until then.
 parity off the old phase. Flagged rather than silently rewritten, because "which leaf is
 reachable" is the kind of claim a stylesheet gets built against.)*
 
+*(Loop 4b vendored the print, so both forms are now drawn. The left-rounded corner and its
+fore-edge stack were right as written and needed no change — `stage-fit.spec.ts` drives them
+against a real page 8. What the even page did find was one layer down, in §2.4: the bound
+edge, unlike the corner, was not written per leaf.)*
+
 ### 2.4 The bound edge, and the desktop spread
 
 On a phone one leaf is on screen. Its bound side runs off the screen edge: **`.stage`'s
@@ -330,6 +335,25 @@ named: `stage-fit.spec.ts` documents that padding as "a gutter by design and the
 never eat it", and `measureFit` reads the **layer**, so asymmetric padding changes the box
 `clampView` reasons in. It is one declaration and one test row, not a rewrite — but it is
 not free, and §6 covers it.
+
+**The inset is the leaf's, and the stage is not — corrected in Loop 4b.** The paragraph
+above puts the inset on `.stage`, and there is one stage. §2.3 flagged that every vendored
+page was a right-hand leaf and that the left form "cannot be seen until then"; what it did
+not predict is that the *cost* named above is not only `measureFit`'s box. The moment two
+leaves of opposite parity are painted together — which is every odd→even turn, and there was
+no such turn to make until page 8 existed — one stage padding is wrong for one of them.
+`page-turn.spec.ts`'s «no glyph moves while the page turns» failed by exactly one
+`--stage-pad`: the arriving verso was painted at the recto's origin for the length of the
+cross-fade and snapped 16 px sideways when `data-leaf` flipped. §3.1's axiom is stated in
+the strongest form there is, so the padding is what yields.
+
+The fix keeps both. The stage still carries the *visible* leaf's inset, so the current
+page's host sits exactly at the layer's origin and §6's pointer arithmetic is untouched;
+each mounted host additionally carries the difference between the stage's leaf and its own,
+as the individual `translate` property (outside `applyTransform`'s `transform` string, so it
+is a flat inset at every zoom). The compensating rules and the stage attribute are the same
+style recalculation, so there is no frame in which they disagree. Two declarations in
+`PageStage.module.css`, beside the two they correct.
 
 **No fake gutter on the phone.** A shaded gutter down the bound side of a single leaf would
 assert a facing page that is not on screen. The fore-edge stack is honest — the block of

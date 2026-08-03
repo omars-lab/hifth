@@ -2,6 +2,7 @@ import { test, expect, type Page } from "@playwright/test";
 import { foldBetween } from "@hifth/core";
 import { tapAyah, ayahTarget } from "./ayah";
 import { watchFolds, foldWords } from "./fold";
+import { contextWithout } from "./inventory";
 
 /*
  * The fold — what a page turn draws, and everything it must not.
@@ -15,12 +16,20 @@ import { watchFolds, foldWords } from "./fold";
  *
  * The band's job is to say **what was between the two leaves**, and this is where
  * the file earns its place. `foldBetween` (@hifth/core) answers one of four words
- * — crease, gap, hole, none — and in *this* build every turn is a `hole`, because
- * pages 7, 9 and 19 are the only pages vendored and none of them are adjacent in
- * the print. A band drawn as a gap between 7 and 9 would be the interface
- * asserting that they are consecutive leaves. They are not; page 8 exists and we
- * do not have it. That is the exact class of lie `PLAN.md` forbids, it is one
- * wrong array away in the predicate, and this file is what would notice.
+ * — crease, gap, hole, none. Until Loop 4b every turn in this build was a `hole`,
+ * because pages 7, 9 and 19 were the only pages vendored and none of them are
+ * adjacent in the print; the suite could exercise one word and had to take the
+ * other three on trust. With all 604 pages vendored the walk below is a real
+ * walk — 7 → 8 is a `crease` (one opening, turn nothing), 8 → 9 is a `gap` (the
+ * leaf between two openings) — and the two words the print actually contains are
+ * finally asserted against the paper they describe.
+ *
+ * `hole` did not become fiction; it became *manufactured*. A band drawn as a gap
+ * over a page we do not have would be the interface asserting two leaves are
+ * consecutive when one is missing — the exact class of lie `PLAN.md` forbids, one
+ * wrong array away in the predicate. So the row that asserts it trims page 8 out
+ * of the inventory (`./inventory`) and turns 7 → 9 against a corpus that really
+ * has a hole in it, which is the shape the next partial edition will ship in.
  *
  * Nothing here re-derives the four words. The first test reads the attribute off
  * the band and compares it against core for the same pair, so a stylesheet that
@@ -34,8 +43,13 @@ import { watchFolds, foldWords } from "./fold";
 
 /** The Madani print. Same number the page bar's track spans. */
 const TOTAL = 604;
-/** This build's inventory, in reading order. `nearestPage`'s domain. */
-const VENDORED = [7, 9, 19] as const;
+/**
+ * Three consecutive leaves, which is the smallest walk that contains both words
+ * the print can produce: 7 → 8 stays inside one opening (`crease`), 8 → 9 crosses
+ * to the next (`gap`). Any other three would do; these are the ones the rest of
+ * the suite already opens on.
+ */
+const WALK = [7, 8, 9] as const;
 
 const NUM = "header .numeric";
 const NEXT = "الصفحة التالية";
@@ -67,13 +81,14 @@ test.describe("Hifth · the fold", () => {
   test("the band says exactly what core says about the pair", async ({ page }) => {
     await open(page);
 
-    // Every turn the inventory allows, both directions. Two pages is a small
-    // sweep; it is also *all* of them, which is the property that matters —
-    // this loop has no rows to add when Loop 4b vendors the rest of the print.
+    // Each step of the walk, both directions — four turns covering both words a
+    // complete corpus can produce, forwards and back. Direction matters to the
+    // predicate: 7 → 8 and 8 → 7 are the same crease, but 8 → 9 and 9 → 8 are a
+    // gap only if `foldBetween` normalises the pair rather than reading `from`.
     const turns: Array<[number, number]> = [];
-    for (let i = 0; i < VENDORED.length - 1; i += 1) {
-      turns.push([VENDORED[i]!, VENDORED[i + 1]!]);
-      turns.push([VENDORED[i + 1]!, VENDORED[i]!]);
+    for (let i = 0; i < WALK.length - 1; i += 1) {
+      turns.push([WALK[i]!, WALK[i + 1]!]);
+      turns.push([WALK[i + 1]!, WALK[i]!]);
     }
 
     for (const [from, to] of turns) {
@@ -95,27 +110,54 @@ test.describe("Hifth · the fold", () => {
     }
   });
 
-  test("in this build every turn is a hole, and never a gap or a crease", async ({ page }) => {
+  test("a complete corpus turns creases and gaps, and never a hole", async ({ page }) => {
     await open(page);
     // Stated separately from the row above, and not derived from `foldBetween`,
     // because it is a claim about *this build* rather than about the predicate:
     // if both agreed by both being wrong, the test above would still pass.
+    //
+    // It is also the claim Loop 4b bought. `hole` means "there is a leaf between
+    // these two and we do not have it"; with 604 of 604 vendored there is no such
+    // pair, so a hole appearing here says the inventory regressed — a page that
+    // failed to vendor, or a manifest that lost a column — and it says it in the
+    // one place a reader would notice, the paper between two pages.
+    await page.getByRole("button", { name: NEXT }).tap();
+    await expect(page.locator(NUM)).toHaveText("8");
     await page.getByRole("button", { name: NEXT }).tap();
     await expect(page.locator(NUM)).toHaveText("9");
-    await page.getByRole("button", { name: NEXT }).tap();
-    await expect(page.locator(NUM)).toHaveText("19");
 
     const seen = await foldWords(page);
-    expect(seen).toEqual(["hole", "hole"]);
+    expect(seen).toEqual(["crease", "gap"]);
+  });
+
+  test("an edition with a missing leaf still draws the hole", async ({ browser }) => {
+    // The other half of the same claim, and the reason `hole` is not dead code.
+    // Trimming page 8 out of the manifest (`./inventory`) puts the app back in
+    // the shape it shipped in for six loops — and the shape the next edition
+    // arrives in — without any of it being told it is under test.
+    //
+    // The distinction is the whole point of the four words: 7 → 9 here is the
+    // same two page numbers, the same single press, and it must *not* be drawn
+    // as the gap it would be if page 8 had simply been turned past.
+    const { context, page } = await contextWithout(browser, [8]);
+    try {
+      await open(page);
+      await page.getByRole("button", { name: NEXT }).tap();
+      await expect(page.locator(NUM)).toHaveText("9");
+      expect(await foldWords(page)).toEqual(["hole"]);
+    } finally {
+      await context.close();
+    }
   });
 
   test("a hop draws no fold at all", async ({ page }) => {
     await open(page);
 
-    // 2:48 on page 7 hops to 2:123 on page 19 — the same two pages a turn would
-    // put a band between, reached the other way. A mutashabihat edge is a
-    // relationship in the *text*; a fold is a relationship in the *paper*, and
-    // drawing one for the other is the whole reason §4.5's last row exists.
+    // 2:48 on page 7 hops to 2:123 on page 19 — twelve leaves away, and now that
+    // every one of them is vendored the app could describe the distance if it
+    // wanted to. It must not. A mutashabihat edge is a relationship in the
+    // *text*; a fold is a relationship in the *paper*, and drawing one for the
+    // other is the whole reason §4.5's last row exists.
     await tapAyah(page, "#verse-55");
     const rail = page.getByRole("group", { name: "روابط الآية" });
     await rail.getByRole("button", { name: /متشابهات في السورة/ }).tap();
@@ -137,6 +179,16 @@ test.describe("Hifth · the fold", () => {
     //
     // The sampler is armed before the tap rather than after, because the first
     // frame is the one a 16 px translate would show.
+    //
+    // 7 → 8 crosses parity, and until Loop 4b it could not: 7, 9 and 19 are all
+    // right-hand leaves, so every turn this row could drive was right → right
+    // and the stage's single bound-edge inset happened to fit both pages at
+    // once. With page 8 vendored this row failed by exactly one `--stage-pad` —
+    // the arriving verso painted at the recto's origin for the length of the
+    // cross-fade and snapping 16 px sideways when `data-leaf` flipped. That is
+    // the defect §2.4 could not have without §2.3's even page, and the fix is
+    // in the stylesheet beside those rules. Turning to an odd page instead
+    // would pass this row and prove nothing.
     //
     // It runs until the test stops it, not for a fixed window, and it records a
     // frame at a time rather than a list per page. Both were the same mistake:
@@ -177,7 +229,7 @@ test.describe("Hifth · the fold", () => {
     });
 
     await page.getByRole("button", { name: NEXT }).tap();
-    await expect(page.locator(NUM)).toHaveText("9");
+    await expect(page.locator(NUM)).toHaveText("8");
 
     // Stop and read in one call. Frames sampled after the turn landed are of a
     // page that has stopped moving, so they can only strengthen the check below
@@ -197,7 +249,7 @@ test.describe("Hifth · the fold", () => {
     // a turn with no such frame is either a swap that skipped the fade or a
     // sampler that never ran — and both would leave the rest of this row
     // asserting that one stationary page stayed where it was.
-    const together = frames.filter((f) => f["page-label-7"] && f["page-label-9"]);
+    const together = frames.filter((f) => f["page-label-7"] && f["page-label-8"]);
     expect(together.length, "the two pages were never on the stage at once").toBeGreaterThan(0);
 
     // No page's box ever changed, across every frame it appeared in — the swap
@@ -210,7 +262,7 @@ test.describe("Hifth · the fold", () => {
         else expect(rect, `${id} moved mid-turn`).toEqual(first);
       }
     }
-    expect([...boxes.keys()].sort()).toEqual(["page-label-7", "page-label-9"]);
+    expect([...boxes.keys()].sort()).toEqual(["page-label-7", "page-label-8"]);
   });
 
   test("two turns inside one sweep leave one band and one visible page", async ({ page }) => {
@@ -220,16 +272,20 @@ test.describe("Hifth · the fold", () => {
     // crossing rather than inserting a second one — which is why the band's
     // position is a CSS transition and not a per-turn animation.
     //
-    // Two presses, not §6.3's three: this build holds three pages, so 7 → 9 → 19
-    // is every step there is. Loop 4b makes the third press meaningful.
+    // §6.3's three presses, which this row could not make until Loop 4b: with
+    // three vendored pages 7 → 9 → 19 was every step there was, and the third
+    // press had nowhere to go. Three matters because the second press retargets
+    // a band that is *crossing* and the third retargets one that is already
+    // retargeted — the state a single reused element can most easily lose.
     const next = page.getByRole("button", { name: NEXT });
+    await next.tap();
     await next.tap();
     await next.tap();
 
     // Mid-flight: exactly one band in the document, whatever else is happening.
     expect(await page.locator("[data-fold]").count()).toBeLessThanOrEqual(1);
 
-    await expect(page.locator(NUM)).toHaveText("19");
+    await expect(page.locator(NUM)).toHaveText("10");
     await expect(page.locator("[data-fold]")).toHaveCount(0);
 
     // …and exactly one page is painted. The cross-fade writes inline opacity on
@@ -262,7 +318,7 @@ test.describe("Hifth · the fold", () => {
     try {
       await open(page);
       await page.getByRole("button", { name: NEXT }).tap();
-      await expect(page.locator(NUM)).toHaveText("9");
+      await expect(page.locator(NUM)).toHaveText("8");
       expect(await foldWords(page)).toEqual([]);
     } finally {
       await context.close();
@@ -287,20 +343,20 @@ test.describe("Hifth · the fold", () => {
       // §5.3. The failure this guards is not the fetch — it is landing anyway: a
       // stage that swapped before the mount resolved would paint sunk paper
       // where scripture belongs, under a header that had already moved on.
-      await page.route("**/assets/pages/**/9.svg", (route) => route.abort());
+      await page.route("**/assets/pages/**/8.svg", (route) => route.abort());
       await page.getByRole("button", { name: NEXT }).tap();
 
       // The band retreats the way it came, the number does not move, and the app
-      // says which page failed — page 9, not the page still on screen.
-      await expect(page.getByRole("alert")).toContainText("٩");
+      // says which page failed — page 8, not the page still on screen.
+      await expect(page.getByRole("alert")).toContainText("٨");
       await expect(page.locator(NUM)).toHaveText("7");
       await expect(page.locator("[data-fold]")).toHaveCount(0);
       await expect(page.locator("svg[aria-labelledby='page-label-7']")).toBeVisible();
 
       // Unblocked, the same press lands. The failure was a state, not a latch.
-      await page.unroute("**/assets/pages/**/9.svg");
+      await page.unroute("**/assets/pages/**/8.svg");
       await page.getByRole("button", { name: NEXT }).tap();
-      await expect(page.locator(NUM)).toHaveText("9");
+      await expect(page.locator(NUM)).toHaveText("8");
     } finally {
       await context.close();
     }
@@ -354,17 +410,19 @@ test.describe("Hifth · the fold", () => {
     await expect(page.locator("[data-turn]")).toHaveAttribute("data-turn", "tracking");
 
     await page.mouse.up();
-    await expect(page.locator(NUM)).toHaveText("9");
+    await expect(page.locator(NUM)).toHaveText("8");
     // One band for the whole gesture — the tracked band is *handed over* to the
-    // crossing rather than replaced by a second one (§3.4).
-    expect(await foldWords(page)).toEqual(["hole"]);
+    // crossing rather than replaced by a second one (§3.4). One word, too: the
+    // handover must not re-derive the pair, or a band that began as a crease
+    // would land as something else.
+    expect(await foldWords(page)).toEqual(["crease"]);
     await expect(page.locator("[data-fold]")).toHaveCount(0);
   });
 
   test("a leftward flick turns back", async ({ page }) => {
     await open(page);
     await page.getByRole("button", { name: NEXT }).tap();
-    await expect(page.locator(NUM)).toHaveText("9");
+    await expect(page.locator(NUM)).toHaveText("8");
 
     const box = await stageBox(page);
     const y = box.y + box.height / 2;
@@ -399,7 +457,7 @@ test.describe("Hifth · the fold", () => {
     await page.mouse.up();
 
     // The band was inserted — the reader saw their drag — and then removed.
-    expect(await foldWords(page)).toEqual(["hole"]);
+    expect(await foldWords(page)).toEqual(["crease"]);
     await expect(page.locator("[data-fold]")).toHaveCount(0);
     await expect(page.locator(NUM)).toHaveText("7");
   });

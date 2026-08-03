@@ -118,13 +118,20 @@ export function coverage(pages: readonly PageMeta[], scope: RevisionScope): Set<
  *
  * ## Absent is not cold
  *
- * Three of 604 pages are vendored. If the un-visitable 601 render as the same grey
- * as "here, and never opened", the picture tells a hafiz they have abandoned 99.5%
- * of the Qur'an — false, and entirely an artefact of the build. So absent is a
- * different treatment *in kind*: no fill at all, a dashed hairline, reading as "no
- * paper here" rather than "paper you neglected". Absent cells are counted out of
- * every total, and the sheet carries the inventory line the page bar established
- * («المتوفّر ٣ من ٦٠٤ صفحة»), in whatever unit is on screen.
+ * This was written when three of 604 pages were vendored: if the un-visitable 601
+ * rendered as the same grey as "here, and never opened", the picture told a hafiz
+ * they had abandoned 99.5% of the Qur'an — false, and entirely an artefact of the
+ * build. So absent is a different treatment *in kind*: no fill at all, a dashed
+ * hairline, reading as "no paper here" rather than "paper you neglected". Absent
+ * cells are counted out of every total, and the sheet carries the inventory line
+ * the page bar established («المتوفّر ٦٠٤ من ٦٠٤ صفحة»), in whatever unit is on
+ * screen.
+ *
+ * Loop 4b vendored the print, so on today's build no cell is absent — and that is
+ * exactly when this rule is easiest to lose. It is not a workaround for a partial
+ * corpus: it is what the map owes any edition that does not carry the whole
+ * mus'haf, and the next one may not. `RevisionMap.test.tsx` holds it against a
+ * fixture, and `e2e/revision.spec.ts` against a trimmed manifest.
  *
  * ## It says how old it is
  *

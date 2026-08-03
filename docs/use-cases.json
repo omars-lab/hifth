@@ -383,7 +383,7 @@
       "proof": [
         {
           "file": "apps/web/e2e/wayfinding.spec.ts",
-          "test": "arrows turn pages, and stop honestly at the last vendored one"
+          "test": "arrows turn pages, and stop honestly at the ends of the book"
         },
         {
           "file": "apps/web/e2e/page-turn.spec.ts",
@@ -413,7 +413,7 @@
       "proof": [
         {
           "file": "apps/web/e2e/pagebar.spec.ts",
-          "test": "spans the printed mus'haf and says how little of it is here"
+          "test": "spans the printed mus'haf and says how much of it is here"
         },
         {
           "file": "apps/web/e2e/pagebar.spec.ts",
@@ -492,9 +492,12 @@
         {
           "file": "apps/web/src/components/PageSpread.test.tsx",
           "test": "leaves the far side blank and unlabelled at the end of an odd-length print"
+        },
+        {
+          "file": "apps/web/e2e/desktop.spec.ts",
+          "test": "puts the lower page number on the right"
         }
-      ],
-      "gap": "This build vendors pages 7, 9 and 19 and none of them are adjacent, so *every* spread is one leaf and one hole — the honest-hole path is the only path a reader can currently reach, and the branch that draws a real facing leaf is exercised by a fixture inventory rather than by the app. Loop 4b (task #27) is what turns that around, and it is the commit that will find anything wrong with the other branch."
+      ]
     },
     {
       "id": "reach-the-settings-a-phone-had-to-hide",
@@ -681,7 +684,7 @@
           "test": "a wiped record reads as a young record, not as an empty one"
         }
       ],
-      "gap": "Two holes, and the first is not closable in this repo. iOS deletes script-writable storage after seven days of no interaction, which is precisely the history this promise is about. The e2e can take the record with one CDP call and prove the map still says how old it is, but it cannot wait eight days on a real phone — that is docs/validation/ledger.json → offline-survival-8-day. Second, the marquee path is proven at the store, not through the gesture: no unit test drives a real drag, so «one look, not twelve» is asserted on `recordLook` rather than on a release over twelve ayahs. Separately, the picture is honest about the build rather than complete: 3 of 604 pages are vendored, so the map draws two held hizb and fifty-eight absent ones, and only Loop 4b makes it a picture of a mus'haf rather than of an inventory.",
+      "gap": "Two holes, and the first is not closable in this repo. iOS deletes script-writable storage after seven days of no interaction, which is precisely the history this promise is about. The e2e can take the record with one CDP call and prove the map still says how old it is, but it cannot wait eight days on a real phone — that is docs/validation/ledger.json → offline-survival-8-day. Second, the marquee path is proven at the store, not through the gesture: no unit test drives a real drag, so «one look, not twelve» is asserted on `recordLook` rather than on a release over twelve ayahs. Loop 4b closed the third hole this entry used to carry: the map drew two held hizb and fifty-eight absent ones, so it was a picture of an inventory rather than of a mus'haf. It is sixty of sixty now, and the absent treatment is held by a trimmed manifest instead of by the build.",
       "includes": ["select-the-ayah-i-am-on"]
     },
     {

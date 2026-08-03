@@ -3,6 +3,7 @@ import { FIELDS, type FieldId } from "@hifth/core";
 import { tapAyah } from "./ayah";
 import { COACH_STORAGE_KEY } from "../src/coach";
 import { formatFailures, measureContrast } from "./contrast";
+import { contextWithout } from "./inventory";
 
 /*
  * Contrast, on every surface — PLAN follow-up ⑥.
@@ -53,6 +54,16 @@ async function selectAyah(page: Page): Promise<void> {
 interface Surface {
   readonly name: string;
   readonly open: (page: Page) => Promise<void>;
+  /**
+   * Pages to trim out of the manifest before opening (`./inventory`).
+   *
+   * Only for surfaces that exist *because* something is absent. Loop 4b vendored
+   * all 604 pages, so a row that used to be reachable by simply going to page 7
+   * — the sunk facing leaf, and the copy printed on it — now has to be arranged.
+   * A surface this spec can no longer reach is a surface nobody is checking,
+   * which is the failure this file's header is about.
+   */
+  readonly missing?: readonly number[];
 }
 
 /**
@@ -218,6 +229,7 @@ const SURFACES: readonly Surface[] = [
     // token that sat at 2.67:1 for a whole loop, and this is a new place to put
     // it — see this file's header.
     name: "the desktop spread — the hole where an un-vendored page would be",
+    missing: [8],
     open: async (page) => {
       await settled(page);
       await page.setViewportSize({ width: 1440, height: 900 });
@@ -251,16 +263,26 @@ const SURFACES: readonly Surface[] = [
 
 test.describe("Hifth · contrast on every surface", () => {
   for (const surface of SURFACES) {
-    test(`${surface.name} clears its WCAG floor`, async ({ page }) => {
-      await surface.open(page);
+    test(`${surface.name} clears its WCAG floor`, async ({ page, browser }) => {
+      // A surface that names `missing` gets its own context with those pages
+      // trimmed out; everything else runs on the shared `page` exactly as before.
+      // The measurement is identical either way — only the corpus behind it
+      // differs, which is the only thing that ever made this surface reachable.
+      const own = surface.missing ? await contextWithout(browser, surface.missing) : null;
+      const target = own?.page ?? page;
+      try {
+        await surface.open(target);
 
-      const report = await measureContrast(page);
+        const report = await measureContrast(target);
 
-      // A traversal that opens a surface and measures nothing there has failed
-      // to open it — the assertion below would pass on a blank page otherwise,
-      // which is the exact failure mode this whole spec exists to answer.
-      expect(report.measured, `${surface.name}: nothing measured`).toBeGreaterThan(3);
-      expect(report.failures, formatFailures(report)).toEqual([]);
+        // A traversal that opens a surface and measures nothing there has failed
+        // to open it — the assertion below would pass on a blank page otherwise,
+        // which is the exact failure mode this whole spec exists to answer.
+        expect(report.measured, `${surface.name}: nothing measured`).toBeGreaterThan(3);
+        expect(report.failures, formatFailures(report)).toEqual([]);
+      } finally {
+        await own?.context.close();
+      }
     });
   }
 });

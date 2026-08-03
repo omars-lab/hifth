@@ -2,7 +2,15 @@ import { describe, expect, it } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { PageSpread } from "./PageSpread";
 
-/** What this build actually holds until Loop 4b vendors the rest. */
+/**
+ * A deliberately sparse inventory — three pages of 604, and none adjacent.
+ *
+ * This was the real build until Loop 4b vendored the print, and it stays here on
+ * purpose: the hole is the branch this component exists to draw, and an
+ * inventory with no hole in it cannot reach it. Rows that need a facing leaf
+ * pass their own `available` (see «draws a vendored facing page instead of a
+ * hole»), so both verdicts are under test in one file.
+ */
 const VENDORED = [7, 9, 19];
 const TOTAL = 604;
 
@@ -56,10 +64,11 @@ describe("PageSpread", () => {
   });
 
   it("keeps the live stage on the leaf the reader is actually on", () => {
-    // All three vendored pages are odd, so under the print's real parity all
-    // three are right-hand leaves. That is an accident of what was vendored, so
-    // the even case is exercised with a fixture inventory rather than left to
-    // Loop 4b: 8 pairs with 7 and must land on the *left*.
+    // Every page in this fixture is odd, so under the print's real parity all
+    // three are right-hand leaves — which is why the even case gets an inventory
+    // of its own rather than being left for the day a verso becomes reachable:
+    // 8 pairs with 7 and must land on the *left*. (Loop 4b vendored the print,
+    // and `e2e/stage-fit.spec.ts` now drives that mirror against a real page 8.)
     for (const page of [9, 19]) {
       const container = spread({ page });
       const [right] = leaves(container);
@@ -88,9 +97,11 @@ describe("PageSpread", () => {
   });
 
   it("draws a vendored facing page instead of a hole", () => {
-    // Unreachable with today's three non-adjacent pages, so it is exercised with
-    // a fixture inventory that has a pair. A branch that waits for Loop 4b to be
-    // run for the first time is a branch Loop 4b discovers the hard way.
+    // Unreachable from the sparse inventory above — no two of its pages face
+    // each other — so it is exercised with a fixture that has a pair. This was
+    // written before Loop 4b, against the argument that a branch waiting for a
+    // vendoring run to be done for the first time is a branch that run discovers
+    // the hard way. The run happened, and it found nothing here.
     const container = spread({
       page: 7,
       available: [7, 8, 9, 19],

@@ -8,14 +8,25 @@ import type {
   AyahRootsShard,
   RootIndexShard,
   TajweedShard,
+  WireManifest,
 } from "@hifth/core";
+import { expandManifest, isCompactManifest } from "@hifth/core";
 
 const BASE = import.meta.env.BASE_URL;
 
+/**
+ * Fetch the manifest and expand it. The ETL writes the compact form (an
+ * ayah→page table, ~1.1 KB gzipped for the whole print, versus ~109 KB for the
+ * full shape — see `manifest.ts` in @hifth/core); everything downstream still
+ * gets an `AssetManifest`. The full shape is still accepted so a manifest
+ * written by an older ETL, or served from a stale service-worker cache, loads
+ * rather than throwing.
+ */
 export async function loadManifest(): Promise<AssetManifest> {
   const res = await fetch(`${BASE}assets/manifest.json`);
   if (!res.ok) throw new Error(`manifest fetch failed: ${res.status}`);
-  return (await res.json()) as AssetManifest;
+  const wire = (await res.json()) as WireManifest;
+  return isCompactManifest(wire) ? expandManifest(wire) : wire;
 }
 
 /** Fetch a page's raw SVG markup for a given edition. */

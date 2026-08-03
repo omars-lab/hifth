@@ -331,9 +331,12 @@ function expectHeld(box: Box, layer: Box, stage: Box, pads: Pads): void {
  *
  * The numbers come from `tokens.css`, and the *sides* come from
  * `leafSideOf` — which is why the leaf is asked which one it is rather than
- * being told. All three vendored pages are odd, so `"right"` is the only branch
- * this build can reach (`page-transition.md` §2.3); `"left"` is asserted the same
- * way so the day Loop 4b vendors an even page, the mirror is already under test.
+ * being told. This was written when all three vendored pages were odd, so
+ * `"right"` was the only branch the build could reach (`page-transition.md`
+ * §2.3) and `"left"` was asserted blind against the day an even page arrived.
+ * Loop 4b vendored it: the row below opens page 8 and drives the mirror for
+ * real, so both halves of this function are now exercised rather than one half
+ * being a promise.
  */
 const LEAF_EDGE = 2;
 const FORE_EDGE_STACK = 10;
@@ -467,6 +470,35 @@ test.describe("Hifth · the stage holds page, not paper", () => {
     const width = page.viewportSize()!.width;
     const free = side === "right" ? width - (box.x + box.width) : box.x;
     expect(free, "the page's fore-edge is hard against the screen").toBeGreaterThan(0);
+  });
+
+  test("an even page lays its fore-edge down the other side", async ({ page }) => {
+    // The mirror of the row above, and until Loop 4b it could not be run at all:
+    // pages 7, 9 and 19 are every one of them odd, so `leafSideOf` had a branch
+    // no test in the repo could reach and `expectMarksBesideThePaper`'s `"left"`
+    // arithmetic was written from the doc rather than from a screen.
+    //
+    // Page 8 is the left leaf of the opening that page 7 sits on the right of —
+    // a right-to-left book puts the earlier page nearer the reader's right — so
+    // its spine is on its *right* and its fore-edge stack belongs on its left.
+    // That is the exact mirror of every other row here. Swap the two and this is
+    // the only row that notices: everything else in this
+    // file is symmetric, and a leaf with its stack on the wrong side is still a
+    // leaf that is held, centred, and inside its stage.
+    const svg = await open(page, "p8", 8);
+    const { box, paper, layer, stage, pads } = await framesOf(svg);
+
+    expect(
+      await hostOf(svg).getAttribute("data-leaf"),
+      "page 8 is a verso and must be bound on its left",
+    ).toBe("left");
+
+    expectHeld(box, layer, stage, pads);
+    await expectMarksBesideThePaper(svg, box, paper);
+
+    // And the bound side is the other one, read through the stage's padding for
+    // the same reason the odd row reads it there.
+    expect(pads.right, "the verso is floating on air on its bound side").toBe(0);
   });
 
   test("at 320 × 568 the foot of the page can be reached, not just cut off", async ({ page }) => {

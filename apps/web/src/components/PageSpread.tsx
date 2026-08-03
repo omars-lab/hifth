@@ -70,17 +70,28 @@ interface PageSpreadProps {
  * from `appKeyAction`'s ArrowLeft = +1 and from the page bar's left-edge next
  * button, and this app has three of them to keep in agreement already.
  *
- * ## Why there is no facing page today, and why that is drawn rather than hidden
+ * ## The facing page that is missing, and why that is drawn rather than hidden
  *
- * This build vendors pages 7, 9 and 19. They are not adjacent, so **no facing
- * pair exists anywhere in it** — every spread here is one leaf and one hole. The
- * hole is drawn as a hole: a recessed well, a dashed outer edge, the page it
+ * **Loop 4b vendored all 604 pages, so for `hafs-kfqc` this branch no longer
+ * fires.** Every one of the print's 302 openings now has two real leaves. What
+ * follows is why the branch exists and why it stays.
+ *
+ * Until 4b this build vendored pages 7, 9 and 19. They are not adjacent, so no
+ * facing pair existed anywhere in it — every spread was one leaf and one hole.
+ * The hole is drawn as a hole: a recessed well, a dashed outer edge, the page it
  * would be, and the same inventory line the page bar carries. A blank sheet in
  * the paper colour would be a picture of a page that has nothing printed on it,
  * which is a different and false claim — and it is the exact failure this repo
  * has already paid for once (see `packages/core/src/pages.ts`, and the colophon's
- * licence summary in PLAN follow-up ②). Loop 4b vendors the rest; until then the
- * spread says what it is.
+ * licence summary in PLAN follow-up ②).
+ *
+ * `available` is still a parameter and the next edition to be vendored will
+ * arrive incomplete the way this one did, so the branch is not dead code — it is
+ * code with no live caller in the default edition. Its proof moved with it:
+ * `PageSpread.test.tsx` drives it from a fixture inventory, which is now the only
+ * place it is exercised. That is a real loss of coverage and it is written down
+ * rather than papered over — see `docs/use-cases.json`
+ * `see-which-half-of-the-mushaf-is-missing`.
  *
  * The absence is *read*, not *announced*: it is visible text in a labelled
  * region, deliberately not pushed through `LiveAnnouncer`. The live region

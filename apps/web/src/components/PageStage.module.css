@@ -49,6 +49,37 @@
   padding-right: 0;
 }
 
+/* The inset above is the *visible* leaf's, and there is only one stage — so the
+   moment two leaves of opposite parity are painted together it is wrong for one
+   of them. That is every odd→even turn, and it was unreachable until Loop 4b:
+   pages 7, 9 and 19 are all right-hand leaves, so every turn this build could
+   make was right→right and the stage's inset happened to fit both pages at once.
+   With page 8 vendored, `no glyph moves while the page turns` failed by exactly
+   `--stage-pad`: the arriving verso was painted for the length of the cross-fade
+   at the recto's origin and snapped 16 px sideways when the attribute flipped.
+   §3.1's axiom is stated in the strongest form there is — *during a turn, no
+   glyph moves at all* — so the padding is what yields.
+
+   Each host therefore carries the difference between the stage's leaf and its
+   own. The current page's host always agrees with the stage (both read `page`),
+   so it compensates by nothing and `zoomAbout`'s layer-relative origin stays
+   exactly true — the §6 defect class is untouched, because the only hosts that
+   move are ones no gesture is addressing. The other half is the timing: the
+   stage's attribute and this selector are the same style recalculation, so the
+   leaf that was at 12 px is still at 12 px in the frame the flip lands, rather
+   than in the frame after it.
+
+   The individual `translate` property, not `transform`: `applyTransform` owns
+   the host's `transform` string and rewrites it every frame. `translate` is
+   applied outside it and in the parent's coordinate space, so this is a flat
+   16 px in field pixels at every zoom — which is what an inset is. */
+.stage[data-leaf="right"] .host[data-leaf="left"] {
+  translate: var(--stage-pad, var(--space-4)) 0;
+}
+.stage[data-leaf="left"] .host[data-leaf="right"] {
+  translate: calc(-1 * var(--stage-pad, var(--space-4))) 0;
+}
+
 /* The layer holds one host div per mounted page; only the current one shows.
    It fills the stage — and it does **not** centre anything.
 
@@ -299,9 +330,11 @@
 /* The print has a leaf here and this build does not. A different kind of thing,
    not a wider gap: sunk paper behind a dashed edge, which is already this app's
    word for "not a result yet" — the marquee in flight, `PageSpread`'s absent
-   leaf, the revision map's un-vendored pages. With pages 7, 9 and 19 vendored
-   and no two of them adjacent, this is the only state today's build can reach,
-   and a reader who sees it on every turn has been told something true. */
+   leaf, the revision map's un-vendored pages. It used to be the only state this
+   build could reach — pages 7, 9 and 19, no two adjacent, so every turn was a
+   hole. Loop 4b vendored all 604, so `hafs-kfqc` now draws creases and gaps and
+   never this; the rule stays because `available` is a parameter and the next
+   edition arrives incomplete. */
 .fold[data-fold="hole"] {
   width: var(--fold-gap-width);
   background: var(--paper-sunk);

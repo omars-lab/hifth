@@ -1,5 +1,6 @@
 import { test, expect, type Locator, type Page } from "@playwright/test";
 import { watchFolds, foldsSeen } from "./fold";
+import { contextWithout } from "./inventory";
 
 /*
  * The desktop spread — an open mus'haf, and honest about the half it does not
@@ -18,18 +19,25 @@ import { watchFolds, foldsSeen } from "./fold";
  * of CSS is that a hidden leaf still costs a ~170 KB fetch and a Highlighter, so
  * the assertion has to be that the element is *absent*, not that it is invisible.
  *
- * Page 7 throughout. This build vendors 7, 9 and 19, none adjacent, so every one
- * of them is half a spread — 7 pairs with the missing 8. Once Loop 4b vendors
- * the rest, `renders a vendored facing leaf` in the component test is the one
- * that starts mattering and the hole assertions here become a statement about
- * whatever is still missing; see docs/design/desktop.md §4.
+ * Page 7 throughout, and it now faces a real page 8. This build vendored all 604
+ * (Loop 4b), so every opening is complete and the facing leaf is a second
+ * `PageStage` rather than the well that says a page is missing — which is what
+ * `renders a vendored facing leaf` in the component test was written against.
+ * The well is not gone and is not untested: an edition arrives partial the way
+ * `hafs-kfqc` was partial for six loops, so the row that asserts it drives a
+ * trimmed inventory (`./inventory`) rather than waiting for a hole to happen to
+ * be there. See docs/design/desktop.md §4.
  *
- * The last two rows are about the fold. Everything the band *says* is asserted on
- * the phone projects in `page-turn.spec.ts`; what belongs here is the one claim
- * that needs a second leaf to be false — a page turn crosses the whole open book
- * (docs/design/page-transition.md §3.5), so the band is a child of the book and
- * sweeps its full width. A band confined to the live leaf would look correct in
- * every screenshot and would stop dead at the gutter.
+ * The last rows are about the fold. Everything the band *says* is asserted on the
+ * phone projects in `page-turn.spec.ts`; what belongs here is what needs a second
+ * leaf to be false, and there are two of those. A turn *across* openings crosses
+ * the whole open book (docs/design/page-transition.md §3.5), so the band is a
+ * child of the book and sweeps its full width — a band confined to the live leaf
+ * would look correct in every screenshot and would stop dead at the gutter. And a
+ * turn *inside* one opening draws no band at all, because the crease between
+ * those two leaves is already on screen, drawn by the gutter. That second claim
+ * was unreachable before 4b: with only 7, 9 and 19 vendored, no turn this project
+ * could make was ever a crease.
  */
 
 /** The spread wrapper. Only exists above the breakpoint — that is the point. */
@@ -48,11 +56,29 @@ const book = (page: Page): Locator => page.getByTestId("page-book");
 const pageSvg = (page: Page, pageNo: number): Locator =>
   page.locator(`svg[aria-labelledby="page-label-${pageNo}"]:visible`);
 
+/** The header's page number. The one place the app says where the reader is. */
+const NUM = "header .numeric";
+
 /** A bounding box that is definitely there. */
 async function boxOf(target: Locator) {
   const box = await target.boundingBox();
   expect(box, "element has no box").not.toBeNull();
   return box!;
+}
+
+/**
+ * The box of a page, once exactly one copy of it is on screen.
+ *
+ * A complete corpus put the same page number in two places at once: the live
+ * stage cross-fades the arriving page over the leaving one while the *facing*
+ * stage is remounting around the new opening, and for a frame or two both
+ * stages hold the same number. `boundingBox()` on two matches is a strict-mode
+ * error rather than a failure, which is the least useful thing a measurement
+ * can do — so wait for the turn to settle before reading it.
+ */
+async function restingBox(page: Page, pageNo: number) {
+  await expect(pageSvg(page, pageNo)).toHaveCount(1);
+  return boxOf(pageSvg(page, pageNo));
 }
 
 test.describe("Hifth · the desktop spread", () => {
@@ -129,22 +155,28 @@ test.describe("Hifth · the desktop spread", () => {
   test("puts the lower page number on the right", async ({ page }) => {
     // The mus'haf reads right to left. Page 7 pairs with 8 — the print opens
     // each spread on the odd page — so 7 is the earlier leaf and sits on the
-    // right, and the hole where 8 would be must sit to its *left*. Measured in
-    // viewport coordinates against the real RTL flow, because that is the step
-    // DOM-order assertions cannot make.
+    // right and 8 sits to its *left*. Measured in viewport coordinates against
+    // the real RTL flow, because that is the step DOM-order assertions cannot
+    // make: the right leaf is written first in the DOM and only becomes the
+    // right leaf once an RTL flow has run over it.
+    //
+    // Both sides are scripture now. Until 4b the left of this pair was the well
+    // for the page we did not have, which measured the same and proved less —
+    // an empty box is placed by the same flow whether or not the layout can
+    // hold a real leaf.
     await page.goto("/#/hafs-kfqc/p7");
     await expect(spread(page)).toBeVisible();
 
     const live = await boxOf(pageSvg(page, 7));
-    const absent = await boxOf(page.getByRole("region", { name: "الصفحة المقابلة" }));
+    const facing = await boxOf(pageSvg(page, 8));
 
-    expect(live.x, "the earlier page is not on the right").toBeGreaterThan(absent.x + absent.width);
+    expect(live.x, "the earlier page is not on the right").toBeGreaterThan(facing.x + facing.width);
 
     // And both leaves are inside the spread, side by side rather than stacked —
     // a wrap would satisfy the test above and still be two pages on top of each
     // other.
-    const vertical = Math.abs(absent.y - live.y);
-    expect(vertical, "the leaves are not on the same line").toBeLessThan(absent.height);
+    const vertical = Math.abs(facing.y - live.y);
+    expect(vertical, "the leaves are not on the same line").toBeLessThan(facing.height);
   });
 
   test("closes the book: equal leaves, paper meeting at the spine, nothing clipped", async ({
@@ -226,42 +258,60 @@ test.describe("Hifth · the desktop spread", () => {
     expect(stageField, "the leaf is still painting a second field").toBe("none");
   });
 
-  test("announces the missing facing page instead of showing blank paper", async ({ page }) => {
-    await page.goto("/#/hafs-kfqc/p7");
-    const absent = page.getByRole("region", { name: "الصفحة المقابلة" });
-    await expect(absent).toBeVisible();
-
-    // It says which page, and how much of the mus'haf is actually here — the
-    // same sentence the page bar carries, from the same string.
-    await expect(absent).toContainText("صفحة 8 ليست في هذه النسخة");
-    await expect(absent).toContainText("المتوفّر ٣ من ٦٠٤ صفحة");
-
-    // The claim that it is not blank paper, made against the pixels rather than
-    // the markup: the hole is a recessed well, so its background must differ
-    // from the raised paper the real leaf sits on. A future restyle that quietly
-    // sets both to `--paper` fails here.
+  test("announces the missing facing page instead of showing blank paper", async ({ browser }) => {
+    // The one row here that runs against a corpus this build does not ship.
     //
-    // Wait for the live leaf first. The hole is rendered by the spread and is
-    // there immediately; the page beside it arrives over the network, and the
-    // comparison below reads both. Without this the row flakes on a null SVG —
-    // an error, not a failure, which is a worse thing for a comparison to do.
-    await expect(pageSvg(page, 7)).toBeVisible();
-    const [wellBg, paperBg] = await page.evaluate(() => {
-      const region = document.querySelector("section[aria-label]")!;
-      const well = region.firstElementChild!;
-      const host = document.querySelector("svg[aria-labelledby^='page-label-']")!.parentElement!;
-      const bg = (el: Element) => getComputedStyle(el).backgroundColor;
-      return [bg(well), bg(host)];
-    });
-    expect(wellBg, "the hole is painted like paper").not.toBe(paperBg);
+    // 4b vendored all 604, so page 7 faces a real page 8 and there is no hole
+    // left to photograph. The surface is not obsolete — it is what an edition
+    // looks like on the day it arrives partial, which is what `hafs-kfqc` was
+    // for six loops and what the next riwayah will be. Deleting the row because
+    // today's corpus is complete would leave `desktop.md` §4 promising a
+    // sentence with nothing behind it, so the scarcity is manufactured instead:
+    // `contextWithout` trims page 8 out of the manifest on the wire, and the
+    // app is told nothing.
+    const { context, page } = await contextWithout(browser, [8]);
+    try {
+      await page.goto("/#/hafs-kfqc/p7");
+      const absent = page.getByRole("region", { name: "الصفحة المقابلة" });
+      await expect(absent).toBeVisible();
 
-    // And nothing was pushed through the live region for it. The announcer
-    // already speaks on every page turn; appending "…and the facing page is
-    // missing" to all of them is how a reader learns to stop listening. A
-    // permanent condition belongs in the document, which is where it is.
-    const live = page.locator("[aria-live]");
-    if (await live.count()) {
-      await expect(live.first()).not.toContainText("ليست في هذه النسخة");
+      // It says which page, and how much of the mus'haf is actually here — the
+      // same sentence the page bar carries, from the same string. 603 of 604 is
+      // the fixture's arithmetic, and asserting it is what proves the fixture
+      // reached the app rather than being quietly bypassed.
+      await expect(absent).toContainText("صفحة 8 ليست في هذه النسخة");
+      await expect(absent).toContainText("المتوفّر ٦٠٣ من ٦٠٤ صفحة");
+
+      // The claim that it is not blank paper, made against the pixels rather
+      // than the markup: the hole is a recessed well, so its background must
+      // differ from the raised paper the real leaf sits on. A future restyle
+      // that quietly sets both to `--paper` fails here.
+      //
+      // Wait for the live leaf first. The hole is rendered by the spread and is
+      // there immediately; the page beside it arrives over the network, and the
+      // comparison below reads both. Without this the row flakes on a null SVG
+      // — an error, not a failure, which is a worse thing for a comparison to
+      // do.
+      await expect(pageSvg(page, 7)).toBeVisible();
+      const [wellBg, paperBg] = await page.evaluate(() => {
+        const region = document.querySelector("section[aria-label]")!;
+        const well = region.firstElementChild!;
+        const host = document.querySelector("svg[aria-labelledby^='page-label-']")!.parentElement!;
+        const bg = (el: Element) => getComputedStyle(el).backgroundColor;
+        return [bg(well), bg(host)];
+      });
+      expect(wellBg, "the hole is painted like paper").not.toBe(paperBg);
+
+      // And nothing was pushed through the live region for it. The announcer
+      // already speaks on every page turn; appending "…and the facing page is
+      // missing" to all of them is how a reader learns to stop listening. A
+      // permanent condition belongs in the document, which is where it is.
+      const live = page.locator("[aria-live]");
+      if (await live.count()) {
+        await expect(live.first()).not.toContainText("ليست في هذه النسخة");
+      }
+    } finally {
+      await context.close();
     }
   });
 
@@ -294,39 +344,66 @@ test.describe("Hifth · the desktop spread", () => {
   test("still turns pages with the arrow keys the header advertises", async ({ page }) => {
     // The hint is a promise. ← is drawn first, on the right of the RTL row, and
     // it turns forward — the next page of a mus'haf is the one to the left.
-    // The spread must follow: 7 → 9 is the next *vendored* page, and 9 belongs
-    // to a different opening, so the wrapper must redraw around it rather than
-    // staying put on (7,8).
+    //
+    // 7 → 8 stays inside one opening, which is the turn this project could not
+    // make until 4b: the book does not move, and the only thing that changes is
+    // which of the two leaves the reader is on. So the assertion is the
+    // relationship — the earlier page is still the one on the right — which has
+    // to hold from either leaf and is exactly what a `row-reverse` "fix" would
+    // invert.
     await page.goto("/#/hafs-kfqc/p7");
     await expect(spread(page)).toBeVisible();
     const before = await boxOf(pageSvg(page, 7));
 
     await page.keyboard.press("ArrowLeft");
-    await expect(pageSvg(page, 9)).toBeVisible();
+    await expect(page.locator(NUM)).toHaveText("8");
     await expect(spread(page)).toBeVisible();
 
-    // Page 9 is also odd, so it too opens its spread and sits on the right,
-    // with the hole for 10 on its left. All three vendored pages being odd is
-    // an accident of this build, so what is asserted is the relationship —
-    // earlier leaf on the right — not the side the live page happens to land on.
-    const after = await boxOf(pageSvg(page, 9));
-    const hole = await boxOf(page.getByRole("region", { name: "الصفحة المقابلة" }));
-    expect(after.x, "the earlier page stopped being on the right").toBeGreaterThan(
-      hole.x + hole.width,
+    const after = await restingBox(page, 8);
+    const earlier = await restingBox(page, 7);
+    expect(earlier.x, "the earlier page stopped being on the right").toBeGreaterThan(
+      after.x + after.width,
     );
     expect(after.width, "the leaf changed size on a page turn").toBeCloseTo(before.width, 0);
 
     await page.keyboard.press("ArrowRight");
+    await expect(page.locator(NUM)).toHaveText("7");
+  });
+
+  test("a turn inside one opening draws no band", async ({ page }) => {
+    // §3.5, and the row 4b made reachable. Both leaves of (7,8) are already on
+    // screen and the crease between them is already drawn — permanently, by the
+    // gutter — so sweeping a second crease across the book would be an
+    // animation of something the reader is looking at. `PageStage` suppresses
+    // it, and only on a spread: the same turn on a phone *must* draw the band,
+    // which is what `page-turn.spec.ts` asserts from the other side.
+    await watchFolds(page);
+    await page.goto("/#/hafs-kfqc/p7");
+    await expect(spread(page)).toBeVisible();
     await expect(pageSvg(page, 7)).toBeVisible();
+
+    await page.keyboard.press("ArrowLeft");
+    await expect(page.locator(NUM)).toHaveText("8");
+    expect(await foldsSeen(page), "a crease was swept across an open book").toEqual([]);
+
+    // And it still committed. "No band" is a claim about the animation, not
+    // about the turn — a spread that quietly stopped turning would satisfy the
+    // line above and be a far worse bug.
+    await expect(pageSvg(page, 8)).toBeVisible();
   });
 
   test("the fold crosses the whole open book, not the leaf that turned", async ({ page }) => {
     await watchFolds(page);
-    await page.goto("/#/hafs-kfqc/p7");
+    // From 8, not 7 — the turn has to leave the opening for a band to exist at
+    // all (the row above is the other half of that). 8 → 9 is a `gap`: the two
+    // leaves are adjacent in the print and belong to different openings, so the
+    // whole book is replaced and the band has the full width to cross.
+    await page.goto("/#/hafs-kfqc/p8");
     await expect(spread(page)).toBeVisible();
+    await expect(pageSvg(page, 8)).toBeVisible();
 
     const open = await boxOf(book(page));
-    const leaf = await boxOf(pageSvg(page, 7));
+    const leaf = await boxOf(pageSvg(page, 8));
 
     // Sample the band on every frame for the length of a sweep, armed before the
     // key rather than after: a band that never leaves the leaf is wrong from its
@@ -347,7 +424,7 @@ test.describe("Hifth · the desktop spread", () => {
     });
 
     await page.keyboard.press("ArrowLeft");
-    await expect(pageSvg(page, 9)).toBeVisible();
+    await expect(page.locator(NUM)).toHaveText("9");
 
     // It was put in the open book, not in the stage that owns the turn. The
     // stage carries `data-leaf` and no testid, so a band that failed to portal
@@ -381,15 +458,17 @@ test.describe("Hifth · the desktop spread", () => {
 
   test("no band is left resting beside the book", async ({ page }) => {
     await watchFolds(page);
-    await page.goto("/#/hafs-kfqc/p7");
+    // From 8 again: this row is about where a band ends up once it has finished,
+    // so it needs a turn that inserts one. 8 → 9 crosses openings.
+    await page.goto("/#/hafs-kfqc/p8");
     await expect(spread(page)).toBeVisible();
     // The wrapper is in the document before the leaf inside it has finished
     // arriving, and a key pressed in that window is a key the stage has nothing
     // to turn from. Wait for the page itself, as every other row here does.
-    await expect(pageSvg(page, 7)).toBeVisible();
+    await expect(pageSvg(page, 8)).toBeVisible();
 
     await page.keyboard.press("ArrowLeft");
-    await expect(pageSvg(page, 9)).toBeVisible();
+    await expect(page.locator(NUM)).toHaveText("9");
     await expect(page.locator("[data-fold]")).toHaveCount(0);
 
     // A band at rest sits one width *outside* the book at each end of its
@@ -544,8 +623,6 @@ test.describe("Hifth · a tablet in landscape", () => {
  * arrow keys end in, and that `ctrl` still means zoom.
  */
 test.describe("Hifth · the wheel", () => {
-  const NUM = "header .numeric";
-
   /** The zoom the stage is actually at, read off the host's own matrix. */
   const scaleOf = (page: Page, pageNo: number): Promise<number> =>
     pageSvg(page, pageNo)
@@ -568,7 +645,7 @@ test.describe("Hifth · the wheel", () => {
     // settle: down is down in both directions of script, which is much of why
     // the vertical axis is the one bound here.
     await page.mouse.wheel(0, 120);
-    await expect(page.locator(NUM)).toHaveText("9");
+    await expect(page.locator(NUM)).toHaveText("8");
 
     // A pause, then the other way. The pause is the gesture boundary — 100 ms of
     // quiet is what tells a mouse's second notch from a trackpad's next frame,
@@ -603,7 +680,9 @@ test.describe("Hifth · the wheel", () => {
       if (!stage) throw new Error("no stage under the visible page");
       // 15 frames of a push, then a decaying tail — 40 more events that the
       // hand is no longer driving. Total travel is over 400 px: eleven turns if
-      // the rule were per-event, one if it is per gesture.
+      // the rule were per-event, one if it is per gesture. Eleven turns is now
+      // a page eleven leaves on rather than a run off the end of the inventory,
+      // which is a *weaker* failure to see — hence the second read below.
       for (let i = 0; i < 15; i += 1) {
         stage.dispatchEvent(new WheelEvent("wheel", { deltaY: 12, bubbles: true, cancelable: true }));
       }
@@ -614,10 +693,10 @@ test.describe("Hifth · the wheel", () => {
       }
     });
 
-    await expect(page.locator(NUM)).toHaveText("9");
-    // …and it stays there. A tail that spent a second turn would land on 19.
+    await expect(page.locator(NUM)).toHaveText("8");
+    // …and it stays there. A tail that spent a second turn would land on 9.
     await page.waitForTimeout(400);
-    await expect(page.locator(NUM)).toHaveText("9");
+    await expect(page.locator(NUM)).toHaveText("8");
   });
 
   test("ctrl+wheel zooms by a step rather than a leap, and turns nothing", async ({ page }) => {
