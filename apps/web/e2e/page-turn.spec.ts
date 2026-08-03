@@ -41,6 +41,20 @@ const NUM = "header .numeric";
 const NEXT = "الصفحة التالية";
 const PREV = "الصفحة السابقة";
 
+/**
+ * The box a dragged turn is measured against — the *layer*, not the stage.
+ *
+ * `PageStage.measureFit` reads exactly this element, so a commit threshold
+ * expressed as 25% of "the stage" is 25% of this width and no other. Aiming a
+ * test at the stage instead would measure a box that includes the gutter padding
+ * and quietly drag a few per cent short of the threshold it meant to cross.
+ */
+async function stageBox(page: Page): Promise<{ x: number; y: number; width: number; height: number }> {
+  const box = await page.locator("[aria-busy]").first().boundingBox();
+  if (!box) throw new Error("the stage layer has no box");
+  return box;
+}
+
 /** Open the app on page 7 with the fold recorder already armed (`./fold`). */
 async function open(page: Page): Promise<void> {
   await watchFolds(page);
@@ -295,11 +309,13 @@ test.describe("Hifth · the fold", () => {
   test("a long horizontal drag is still a marquee, not a page turn", async ({ page }) => {
     await open(page);
 
-    // The gesture ladder's floor (`page-turning.md` §4.2). Drag-to-turn is not
-    // built — `PointerIntent` has no `"turn"` verdict — and this row is what
-    // makes adding it a deliberate act: a ladder that put `turn` above `marquee`
-    // would eat every highlight that happens to travel sideways, which on a
-    // right-to-left page is most of them.
+    // The gesture ladder's safety argument, from the other side
+    // (`page-turning.md` §4.2). Now that `"turn"` is a verdict, this row is the
+    // one that says the marquee did not pay for it: a ladder that put `turn`
+    // above `marquee` would eat every highlight that happens to travel
+    // sideways, which on a right-to-left page is most of them. Rule 2 asks
+    // about the hold *before* rule 3 asks about the axis, and 400 ms of stillness
+    // is the answer to rule 2.
     const from = await ayahTarget(page, "#verse-54");
     await page.touchscreen.tap(from.x, from.y);
     await page.mouse.move(from.x, from.y);
@@ -307,6 +323,101 @@ test.describe("Hifth · the fold", () => {
     await page.waitForTimeout(400); // past LONG_PRESS_MS (350 in @hifth/core)
     for (let i = 1; i <= 10; i += 1) {
       await page.mouse.move(from.x - i * 20, from.y);
+    }
+    await page.mouse.up();
+
+    expect(await foldWords(page)).toEqual([]);
+    await expect(page.locator(NUM)).toHaveText("7");
+  });
+
+  test("a sideways flick turns the page, and the band tracks the finger", async ({ page }) => {
+    await open(page);
+
+    // §4.1's free slot, spent. At fit-zoom a horizontal drag on this stage was a
+    // measured no-op — `holdAxis` centres an axis that fits, so the transform
+    // did not move — and this is the gesture that took the slot. Rightward is
+    // the *next* page: `loop-1.md` pins that to the book's direction, and it is
+    // the same `1` the wheel and the arrow keys mean.
+    const box = await stageBox(page);
+    const y = box.y + box.height / 2;
+    await page.mouse.move(box.x + box.width * 0.3, y);
+    await page.mouse.down();
+
+    // Mid-drag, past the commit distance but before the release: the band is on
+    // the stage and the stage says which phase it is in. `tracking` is the state
+    // that only a dragged turn can reach — a wheel turn goes straight to
+    // `crossing` — so this assertion is the whole difference between the two.
+    for (let i = 1; i <= 8; i += 1) {
+      await page.mouse.move(box.x + box.width * 0.3 + i * (box.width * 0.05), y);
+    }
+    await expect(page.locator("[data-fold]")).toHaveCount(1);
+    await expect(page.locator("[data-turn]")).toHaveAttribute("data-turn", "tracking");
+
+    await page.mouse.up();
+    await expect(page.locator(NUM)).toHaveText("9");
+    // One band for the whole gesture — the tracked band is *handed over* to the
+    // crossing rather than replaced by a second one (§3.4).
+    expect(await foldWords(page)).toEqual(["hole"]);
+    await expect(page.locator("[data-fold]")).toHaveCount(0);
+  });
+
+  test("a leftward flick turns back", async ({ page }) => {
+    await open(page);
+    await page.getByRole("button", { name: NEXT }).tap();
+    await expect(page.locator(NUM)).toHaveText("9");
+
+    const box = await stageBox(page);
+    const y = box.y + box.height / 2;
+    await page.mouse.move(box.x + box.width * 0.7, y);
+    await page.mouse.down();
+    for (let i = 1; i <= 8; i += 1) {
+      await page.mouse.move(box.x + box.width * 0.7 - i * (box.width * 0.05), y);
+    }
+    await page.mouse.up();
+
+    await expect(page.locator(NUM)).toHaveText("7");
+  });
+
+  test("a short drag springs back and turns nothing", async ({ page }) => {
+    await open(page);
+
+    // §4.3's commit rule, at the half of it that says *no*. Under 25% of the
+    // stage and released without a flick, the reader was looking rather than
+    // turning — so the band goes back the way it came and the page does not
+    // move. This is the row that would fail if the threshold were dropped to
+    // "any horizontal drag at all", which is the tempting simplification.
+    const box = await stageBox(page);
+    const y = box.y + box.height / 2;
+    const start = box.x + box.width * 0.35;
+    await page.mouse.move(start, y);
+    await page.mouse.down();
+    // 12% of the stage, in slow steps so the release velocity is not a flick.
+    for (let i = 1; i <= 6; i += 1) {
+      await page.mouse.move(start + i * (box.width * 0.02), y);
+      await page.waitForTimeout(30);
+    }
+    await page.mouse.up();
+
+    // The band was inserted — the reader saw their drag — and then removed.
+    expect(await foldWords(page)).toEqual(["hole"]);
+    await expect(page.locator("[data-fold]")).toHaveCount(0);
+    await expect(page.locator(NUM)).toHaveText("7");
+  });
+
+  test("a vertical drag pans and draws no band", async ({ page }) => {
+    await open(page);
+
+    // Rule 3 needs `|dx| > 2·|dy|`, and the reason it is a ratio rather than a
+    // sign is this gesture: on a 390×844 phone the page overflows *vertically*
+    // at rest, so a vertical pan is live at the same zoom where the horizontal
+    // slot is free. Both must work, on the same surface, with no mode.
+    const box = await stageBox(page);
+    const x = box.x + box.width / 2;
+    const startY = box.y + box.height * 0.7;
+    await page.mouse.move(x, startY);
+    await page.mouse.down();
+    for (let i = 1; i <= 8; i += 1) {
+      await page.mouse.move(x, startY - i * 20);
     }
     await page.mouse.up();
 

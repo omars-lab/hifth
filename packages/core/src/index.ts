@@ -51,6 +51,7 @@ export {
   clampZoom,
   easeInOutCubic,
   lerpView,
+  viewFitsAcross,
   DEFAULT_HOP_ZOOM,
   type View,
   type FrameContext,
@@ -127,6 +128,21 @@ export {
   marqueeRect,
   type PointerIntent,
   type PointerSample,
+} from "./gestures.js";
+
+// The fourth gesture on the same surface — drag-to-turn (`page-turning.md` §4,
+// tracking/retreating from `page-transition.md` §3.2). It is exported from the
+// same file as the other three because it is decided by the same ladder: one
+// verdict wins the stroke, and a turn is what the ladder says when a finger
+// moved sideways across a page with nowhere sideways to go.
+export {
+  TURN_AXIS_RATIO,
+  TURN_EDGE_GUARD_PX,
+  TURN_COMMIT_FRACTION,
+  TURN_FLICK_PX_PER_MS,
+  isTurnIntent,
+  turnCommit,
+  type TurnStroke,
 } from "./gestures.js";
 
 // The wheel — the desktop's page turn (`page-transition.md` §3.2 ④). Same file

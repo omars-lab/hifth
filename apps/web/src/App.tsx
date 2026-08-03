@@ -503,38 +503,52 @@ export function App(): JSX.Element {
     [pageTurns, announce, t],
   );
 
-  // One page's worth of movement. "The next page" means the next page we
-  // actually have: until 4b vendors all 604, stepping past the last one would
-  // land on a blank, so it says so instead.
+  // Where one page's worth of movement lands, or null if it lands nowhere.
   //
-  // And when it *does* move, it says where it landed if that is not the page
-  // next door (`page-turning.md` §7 ④). This walks `pageTurns.pages` — the
-  // **inventory**, not the print — so 7 → 9 steps clean over page 8 and the
-  // reader hears only "Page 9". That is not a small omission: with three of 604
-  // pages vendored, every turn in the shipped build crosses a gap, so the
-  // interface would be papering over the one thing it must not. The sibling
-  // `handleScrubTo` below already got this right, and this is the same string
-  // for the same reason — a landing the reader did not ask for has to be named
-  // out loud.
-  const stepPage = useCallback(
-    (step: 1 | -1) => {
+  // "The next page" means the next page we actually *have*: this walks
+  // `pageTurns.pages` — the **inventory**, not the print — so 7 → 9 steps clean
+  // over page 8. That is not a small distinction: with three of 604 pages
+  // vendored, every turn in the shipped build crosses a gap.
+  //
+  // It is its own function, rather than a step inside `stepPage`, because the
+  // dragged turn has to ask the question without answering it — a fold under a
+  // finger is drawn for the pair it *would* land on, and that is this walk and
+  // no other. Two implementations of "the next page we have" would be two
+  // answers the moment 4b changes the inventory, and the one the reader would
+  // notice is a fold that draws a crease and then lands on a hole.
+  const pageAfter = useCallback(
+    (step: 1 | -1): number | null => {
       const { pages } = pageTurns;
-      if (pages.length === 0) return;
+      if (pages.length === 0) return null;
       // From the destination, so a held arrow walks the book rather than
       // bouncing off the page that has not finished turning yet.
       const here = pendingPageRef.current;
       const at = pages.indexOf(here);
       const i = at === -1 ? 0 : Math.min(pages.length - 1, Math.max(0, at + step));
       const next = pages[i]!;
-      if (next === here) {
+      return next === here ? null : next;
+    },
+    [pageTurns],
+  );
+
+  // Move one page — and say where it landed if that is not the page next door
+  // (`page-turning.md` §7 ④). The sibling `handleScrubTo` below already got this
+  // right, and this is the same string for the same reason: a landing the reader
+  // did not ask for has to be named out loud.
+  const stepPage = useCallback(
+    (step: 1 | -1) => {
+      if (pageTurns.pages.length === 0) return;
+      const here = pendingPageRef.current;
+      const next = pageAfter(step);
+      if (next === null) {
         // Naming the page matters most here, where nothing moved: without it
-        // the reader has an arrow that did nothing and no idea where they are.
+        // the reader has a gesture that did nothing and no idea where they are.
         announce(step > 0 ? t.lastPage(here) : t.firstPage(here));
         return;
       }
       goToPage(next, next === here + step ? undefined : t.nearestPageN(next), true);
     },
-    [pageTurns, announce, t, goToPage],
+    [pageAfter, pageTurns, announce, t, goToPage],
   );
 
   // The slider hands back both numbers: where it landed and where the thumb was
@@ -1045,7 +1059,11 @@ export function App(): JSX.Element {
                   breadcrumbKey={breadcrumbKey}
                   onSelect={handleSelect}
                   onSelectRange={handleSelectRange}
-                  onWheelTurn={stepPage}
+                  onTurn={stepPage}
+                  /* The wheel, yes; a drag, no. Only the stage App holds a ref
+                     to can be handed a tracked band, and a second fold drawn
+                     into the same book is the one thing §3.4 forbids. */
+                  dragToTurn={false}
                   labelFor={(key) => t.ayahAria(t.ayahLabel(key) ?? key)}
                   skin={skin}
                   tajweedLookup={tajweed?.lookup ?? null}
@@ -1063,12 +1081,17 @@ export function App(): JSX.Element {
                 breadcrumbKey={breadcrumbKey}
                 onSelect={handleSelect}
                 onSelectRange={handleSelectRange}
-                /* The wheel ends where the arrow keys end — one `stepPage`, so a
-                   wheel turn and a keyed turn cannot drift apart. Both stages
-                   get it: on a spread the facing leaf is as much the book as
-                   this one, and a wheel over it that did nothing would read as a
-                   dead half of the page. */
-                onWheelTurn={stepPage}
+                /* Every turn ends where the arrow keys end — one `stepPage`, so
+                   a wheel turn, a dragged turn and a keyed turn cannot drift
+                   apart. Both stages get it: on a spread the facing leaf is as
+                   much the book as this one, and a wheel over it that did
+                   nothing would read as a dead half of the page. */
+                onTurn={stepPage}
+                /* And the drag needs to know where it *would* land before it
+                   lands, so the fold under the finger is drawn for the pair the
+                   release will actually produce — the inventory's pair, which
+                   with 7/9/19 vendored is not `page ± 1`. */
+                turnTargetOf={pageAfter}
                 labelFor={(key) => t.ayahAria(t.ayahLabel(key) ?? key)}
                 skin={skin}
                 tajweedLookup={tajweed?.lookup ?? null}
