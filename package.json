@@ -32,6 +32,7 @@
     "gate:golden-env": "node scripts/gate-golden-env.mjs",
     "gate:golden-size": "node scripts/gate-golden-size.mjs",
     "gate:assets": "node scripts/gate-assets.mjs",
+    "gate:pages": "node scripts/gate-pages.mjs",
     "gate:map": "node scripts/gate-map.mjs",
     "gate:revision-privacy": "node scripts/gate-revision-privacy.mjs",
     "gate:use-cases": "node scripts/gate-use-cases.mjs",
