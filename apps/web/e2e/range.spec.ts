@@ -1,5 +1,6 @@
 import { test, expect } from "@playwright/test";
 import { tapAyah } from "./ayah";
+import { contextWithout } from "./inventory";
 
 // Loop 5, the range half of the exit criterion (PLAN §Loop 5):
 //   highlight 2:47–2:48 → merged, deduped hop list → leap, with the URL in the
@@ -10,8 +11,14 @@ import { tapAyah } from "./ayah";
 // `selectedRange` state (spec §7 — no separate deep-link path), so this covers
 // the menu without depending on gesture timing.
 //
-// Page vendoring today is 7 / 9 / 19 only (Loop 4b vendors the rest), which is
-// what makes the disabled rows below real rather than contrived.
+// A disabled row in this menu has two possible reasons, and Loop 4b separated
+// them. «هذه الصفحة غير متوفّرة بعد» — the target's page is not in this edition —
+// used to be free, because 82:19 lives on page 587 and the build carried three
+// pages; it is now arranged (`./inventory`), because the build carries all 604.
+// «الربط على مستوى الكلمة» — the edge is anchored to a *word* and the corpus has
+// no word geometry — is unarranged and still true: Loop 4b vendored pages, not
+// words. Keeping both in one row is deliberate. A menu that collapsed the two
+// reasons into one sentence would still pass every other assertion here.
 const RANGE_LINK = "/#/hafs-kfqc/2:47-2:48";
 
 test.describe("Hifth · the highlighted range", () => {
@@ -48,17 +55,28 @@ test.describe("Hifth · the highlighted range", () => {
     expect(page.url()).toContain("#/hafs-kfqc/2:47-2:48");
   });
 
-  test("un-vendored targets stay visible but disabled, with an honest reason", async ({ page }) => {
-    await page.goto(RANGE_LINK);
-    const menu = page.getByRole("dialog");
-    await expect(menu).toBeVisible();
+  test("un-vendored targets stay visible but disabled, with an honest reason", async ({
+    browser,
+  }) => {
+    // 82:19 sits on page 587, which this edition now carries — so the row is
+    // enabled unless page 587 is taken away. Taking it away is the point: the
+    // rail's promise is to show an edge it cannot follow rather than hide it,
+    // and hiding it is what a menu built from "what we have" would do.
+    const { context, page } = await contextWithout(browser, [587]);
+    try {
+      await page.goto(RANGE_LINK);
+      const menu = page.getByRole("dialog");
+      await expect(menu).toBeVisible();
 
-    // 82:19 (page 587) is not vendored yet (Loop 4b).
-    await expect(menu.getByRole("button", { name: /انتقل إلى الانفطار · ٨٢:١٩/ })).toBeDisabled();
-    await expect(menu.getByText(/هذه الصفحة غير متوفّرة بعد/).first()).toBeVisible();
-    // …while the shared-root row anchored to a word (2:122#w3) blames the right
-    // thing: its page IS vendored; word granularity is what is missing.
-    await expect(menu.getByText(/الربط على مستوى الكلمة/).first()).toBeVisible();
+      await expect(menu.getByRole("button", { name: /انتقل إلى الانفطار · ٨٢:١٩/ })).toBeDisabled();
+      await expect(menu.getByText(/هذه الصفحة غير متوفّرة بعد/).first()).toBeVisible();
+      // …while the shared-root row anchored to a word (2:122#w3) blames the right
+      // thing, and blames it in a build where the page reason is also on screen:
+      // its page IS vendored; word granularity is what is missing.
+      await expect(menu.getByText(/الربط على مستوى الكلمة/).first()).toBeVisible();
+    } finally {
+      await context.close();
+    }
   });
 
   test("a merged row hops from the range member that produced it", async ({ page }) => {

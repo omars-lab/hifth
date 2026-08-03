@@ -80,7 +80,7 @@ test.describe("Hifth · language", () => {
     const pageNum = "header .numeric";
     await expect(page.locator(pageNum)).toHaveText("7");
     await page.keyboard.press("ArrowLeft");
-    await expect(page.locator(pageNum)).toHaveText("9");
+    await expect(page.locator(pageNum)).toHaveText("8");
     await page.keyboard.press("ArrowRight");
     await expect(page.locator(pageNum)).toHaveText("7");
   });

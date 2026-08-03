@@ -2,7 +2,15 @@ import { describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { PageSlider } from "./PageSlider";
 
-/** What this build actually holds until Loop 4b vendors the rest. */
+/**
+ * A deliberately sparse inventory — three pages of 604, and none adjacent.
+ *
+ * This was the real build until Loop 4b vendored the print, and it stays here as
+ * a fixture rather than being raised to 604: the bar's whole job is to say what
+ * is behind it, and a component test whose inventory equals its total can no
+ * longer tell a counted number from a printed one. The e2e is where the bar
+ * meets the real corpus; this is where it meets a gap.
+ */
 const VENDORED = [7, 9, 19];
 const TOTAL = 604;
 

@@ -1,5 +1,6 @@
 import { test, expect, type BrowserContext, type Page } from "@playwright/test";
 import { tapAyah } from "./ayah";
+import { contextWithout } from "./inventory";
 
 /*
  * The revision map, against a real build — task #91, under umbrella #88.
@@ -60,14 +61,41 @@ test.describe("Hifth · the revision map", () => {
 
     sheet = await openMap(page);
     await expect(hizb(sheet, /^الحزب ١ · فُتح اليوم$/)).toHaveCount(1);
-    // Hizb 3 has no vendored paper — pages 7 and 9 are in hizb 1, page 19 is in
-    // hizb 2, and nothing else is here. It must not be sitting in the same grey
-    // as a hizb the reader neglected: 601 of 604 pages are absent, and if absent
-    // read as cold the picture would tell a hafiz they had abandoned the Qur'an.
-    await expect(hizb(sheet, /^الحزب ٣ · غير متوفّر في هذه النسخة$/)).toHaveCount(1);
-    // Counted in the unit on screen, and counting only what is here — the page
-    // bar's «المتوفّر ٣ من ٦٠٤ صفحة» one division coarser.
-    await expect(sheet.getByText("المتوفّر ٢ من ٦٠ حزب")).toBeVisible();
+    // Hizb 3 is paper we now have and the reader has not opened — «لم يُفتح».
+    // That is the *cold* reading, and until Loop 4b this line said «غير متوفّر»
+    // instead. Both words have to exist and they have to be different words;
+    // this row holds one end of that and the row below holds the other.
+    await expect(hizb(sheet, /^الحزب ٣ · لم يُفتح$/)).toHaveCount(1);
+    // Counted in the unit on screen — the page bar's «المتوفّر ٦٠٤ من ٦٠٤ صفحة»
+    // one division coarser.
+    await expect(sheet.getByText("المتوفّر ٦٠ من ٦٠ حزب")).toBeVisible();
+  });
+
+  test("a hizb this edition does not carry is not drawn as a neglected one", async ({ browser }) => {
+    // Task #91's whole claim, which the corpus stopped being able to state on
+    // its own: absent must not look like cold. It was free evidence when 601 of
+    // 604 pages were missing, and free evidence is what disappears first.
+    //
+    // Hizb 3 is exactly pages 22–31 — hizb 2 ends on 21 and hizb 4 begins on 32
+    // — so trimming that band (`./inventory`) empties one cell and no other.
+    // If absent ever collapsed into cold, the picture would tell a hafiz they
+    // had abandoned a part of the Qur'an their edition simply does not include.
+    const gone = Array.from({ length: 10 }, (_, i) => 22 + i);
+    const { context, page } = await contextWithout(browser, gone);
+    try {
+      await page.goto("/");
+      await expect(page.locator("svg[role='group']").first()).toBeVisible();
+
+      const sheet = await openMap(page);
+      await expect(hizb(sheet, /^الحزب ٣ · غير متوفّر في هذه النسخة$/)).toHaveCount(1);
+      // Its neighbours are untouched and read as cold, which is what makes the
+      // line above a distinction rather than a global relabelling.
+      await expect(hizb(sheet, /^الحزب ٢ · لم يُفتح$/)).toHaveCount(1);
+      await expect(hizb(sheet, /^الحزب ٤ · لم يُفتح$/)).toHaveCount(1);
+      await expect(sheet.getByText("المتوفّر ٥٩ من ٦٠ حزب")).toBeVisible();
+    } finally {
+      await context.close();
+    }
   });
 
   test("a wiped record reads as a young record, not as an empty one", async ({

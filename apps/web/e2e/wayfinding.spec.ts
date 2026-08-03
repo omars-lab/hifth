@@ -1,13 +1,26 @@
 import { test, expect } from "@playwright/test";
 import { tapAyah } from "./ayah";
+import { contextWithout } from "./inventory";
 
 /*
  * Loop 6a — wayfinding: getting anywhere, and knowing where you are.
  *
- * Three vendored pages today (7, 9, 19 — all in البقرة), which is enough to
- * prove every claim here: paging walks the pages that exist, the jumper lands
- * through the same restore path a link uses, and a target that is not vendored
- * is refused out loud rather than faked.
+ * Written when three pages were vendored (7, 9, 19 — all in البقرة), which made
+ * every claim here cheap to prove and none of them true about the book: the ends
+ * of the "mus'haf" were page 7 and page 19, and every arrow press stepped over
+ * something. Loop 4b vendored all 604, and the rows split in two along the seam
+ * that scarcity had hidden.
+ *
+ * What the corpus now proves for real: paging walks consecutive leaves, and the
+ * arrows stop at page 1 and page 604 — the actual ends of the Madani print,
+ * which no test could reach before.
+ *
+ * What must be manufactured to stay proven: refusing a target we do not have,
+ * and naming the page a turn stepped over. Those rows trim a page out of the
+ * inventory (`./inventory`) instead of relying on one being absent by accident.
+ * The behaviour is not hypothetical — it is what every partial edition in
+ * `EditionPicker` will look like on the day it is added, and what an interrupted
+ * vendoring run would look like tomorrow.
  */
 test.describe("Hifth · wayfinding", () => {
   const pageNum = "header .numeric";
@@ -67,66 +80,104 @@ test.describe("Hifth · wayfinding", () => {
     await expect(page).toHaveURL(/2:58/);
   });
 
-  test("a jump to an un-vendored ayah is refused, not faked", async ({ page }) => {
-    await page.goto("/");
-    await expect(page.locator("svg[role='group']")).toBeVisible();
+  test("a jump to an un-vendored ayah is refused, not faked", async ({ browser }) => {
+    // الفاتحة is on page 1, and page 1 arrived with Loop 4b — so the refusal it
+    // used to demonstrate has to be manufactured now. Trimming page 1 out of the
+    // manifest (`./inventory`) puts the jumper in front of an ayah the edition
+    // does not carry, which is the only state this branch was ever for.
+    //
+    // Deleting the row instead would have been the tempting move and the wrong
+    // one: an edition that carries part of the mus'haf is the *normal* case for
+    // everything in `EditionPicker` that is not `hafs-kfqc`, and the promise the
+    // app makes there — refuse out loud, never land on paper we do not have — is
+    // exactly what would rot unwatched.
+    const { context, page } = await contextWithout(browser, [1]);
+    try {
+      await page.goto("/");
+      await expect(page.locator("svg[role='group']")).toBeVisible();
 
-    await page.getByRole("button", { name: /اذهب إلى/ }).first().tap();
-    const jumper = page.getByRole("dialog", { name: "اذهب إلى" });
-    await jumper.getByRole("combobox").fill("الفاتحة");
-    await jumper.getByRole("option").first().tap();
+      await page.getByRole("button", { name: /اذهب إلى/ }).first().tap();
+      const jumper = page.getByRole("dialog", { name: "اذهب إلى" });
+      await jumper.getByRole("combobox").fill("الفاتحة");
+      await jumper.getByRole("option").first().tap();
 
-    await expect(jumper).toHaveCount(0);
-    // Page 1 is not vendored yet: we stay put and say so.
-    await expect(page.locator(pageNum)).toHaveText("7");
-    await expect(page.locator("[aria-live='polite']")).toContainText(
-      "الآية المطلوبة غير متوفّرة بعد",
-    );
+      await expect(jumper).toHaveCount(0);
+      // We stay put and say so — no ghost page, no silent nearest-page landing.
+      await expect(page.locator(pageNum)).toHaveText("7");
+      await expect(page.locator("[aria-live='polite']")).toContainText(
+        "الآية المطلوبة غير متوفّرة بعد",
+      );
+    } finally {
+      await context.close();
+    }
   });
 
-  test("arrows turn pages, and stop honestly at the last vendored one", async ({ page }) => {
+  test("arrows turn pages, and stop honestly at the ends of the book", async ({ page }) => {
     await page.goto("/");
     await expect(page.locator("svg[role='group']")).toBeVisible();
 
-    // RTL: ArrowLeft goes forward, the way the pages turn.
+    // RTL: ArrowLeft goes forward, the way the pages turn. Consecutive leaves,
+    // which is a thing this row could not say when the inventory was 7, 9, 19.
+    await page.keyboard.press("ArrowLeft");
+    await expect(page.locator(pageNum)).toHaveText("8");
     await page.keyboard.press("ArrowLeft");
     await expect(page.locator(pageNum)).toHaveText("9");
-    await page.keyboard.press("ArrowLeft");
-    await expect(page.locator(pageNum)).toHaveText("19");
-    await page.keyboard.press("ArrowLeft");
-    await expect(page.locator(pageNum)).toHaveText("19"); // no ghost page 20
     await page.keyboard.press("ArrowRight");
-    await expect(page.locator(pageNum)).toHaveText("9");
+    await expect(page.locator(pageNum)).toHaveText("8");
+
+    // The ends are the *book's* ends now, not the inventory's. 604 is the last
+    // leaf of the Madani print and 1 is the first, and a stepper that ran off
+    // either would be asking for a page that does not exist in any edition —
+    // the clamp that used to be tested against page 19 by accident.
+    await page.getByRole("slider").fill("604");
+    await expect(page.locator(pageNum)).toHaveText("604");
+    await page.keyboard.press("ArrowLeft");
+    await expect(page.locator(pageNum)).toHaveText("604"); // no ghost page 605
+
+    await page.getByRole("slider").fill("1");
+    await expect(page.locator(pageNum)).toHaveText("1");
+    await page.keyboard.press("ArrowRight");
+    await expect(page.locator(pageNum)).toHaveText("1"); // no ghost page 0
   });
 
-  test("a turn that steps over a page we do not have says where it landed", async ({ page }) => {
-    // `page-turning.md` §7 ④. Every turn in this build crosses a gap — 7 → 9
-    // steps over page 8, 9 → 19 over nine more — so a turn that announced only
-    // "Page 9" would be the interface papering over the exact thing the vendored
-    // corpus must never hide. The scrubber has said this since Loop 6a; the
-    // stepper said nothing, and that is what this row is here to keep fixed.
-    await page.goto("/");
-    await expect(page.locator("svg[role='group']")).toBeVisible();
-    const said = page.locator("[aria-live='polite']");
+  test("a turn that steps over a page we do not have says where it landed", async ({ browser }) => {
+    // `page-turning.md` §7 ④. Every turn in the three-page build crossed a gap,
+    // so this row used to hold without arranging anything — and that was its
+    // weakness as much as its convenience: it could not tell "the stepper names
+    // the page it skipped" apart from "the stepper always says أقرب".
+    //
+    // Now the skip is the arranged thing and the plain turn is the default. With
+    // page 8 trimmed out (`./inventory`), ArrowLeft from 7 must land on 9 *and*
+    // say so; the row above, on the same key against a complete corpus, lands on
+    // 8 saying nothing of the sort. Neither sentence can be produced by an
+    // announcer that ignores the inventory.
+    const { context, page } = await contextWithout(browser, [8]);
+    try {
+      await page.goto("/");
+      await expect(page.locator("svg[role='group']")).toBeVisible();
+      const said = page.locator("[aria-live='polite']");
 
-    await page.keyboard.press("ArrowLeft");
-    await expect(page.locator(pageNum)).toHaveText("9");
-    await expect(said).toContainText("أقرب صفحة متوفّرة · صفحة 9");
+      await page.keyboard.press("ArrowLeft");
+      await expect(page.locator(pageNum)).toHaveText("9");
+      await expect(said).toContainText("أقرب صفحة متوفّرة · صفحة 9");
 
-    // The far end, where nothing moves at all. "Last available page" on its own
-    // would tell a reader their arrow did nothing and leave them to guess where
-    // they are — with three pages of 604, a guess they will get wrong.
-    await page.keyboard.press("ArrowLeft");
-    await expect(page.locator(pageNum)).toHaveText("19");
-    await page.keyboard.press("ArrowLeft");
-    await expect(said).toContainText("آخر صفحة متوفّرة · صفحة 19");
-    await expect(page.locator(pageNum)).toHaveText("19");
+      // The far end, where nothing moves at all. "Last available page" on its own
+      // would tell a reader their arrow did nothing and leave them to guess where
+      // they are, so it names the page too.
+      await page.getByRole("slider").fill("604");
+      await expect(page.locator(pageNum)).toHaveText("604");
+      await page.keyboard.press("ArrowLeft");
+      await expect(said).toContainText("آخر صفحة متوفّرة · صفحة 604");
+      await expect(page.locator(pageNum)).toHaveText("604");
 
-    // …and the near end, which is a different sentence for the same reason.
-    await page.getByRole("slider").fill("7");
-    await page.keyboard.press("ArrowRight");
-    await expect(said).toContainText("أول صفحة متوفّرة · صفحة 7");
-    await expect(page.locator(pageNum)).toHaveText("7");
+      // …and the near end, which is a different sentence for the same reason.
+      await page.getByRole("slider").fill("1");
+      await page.keyboard.press("ArrowRight");
+      await expect(said).toContainText("أول صفحة متوفّرة · صفحة 1");
+      await expect(page.locator(pageNum)).toHaveText("1");
+    } finally {
+      await context.close();
+    }
   });
 
   test("the page keys turn from anywhere, and Escape lets go of the ayah", async ({ page }) => {
@@ -148,7 +199,7 @@ test.describe("Hifth · wayfinding", () => {
     // PageDown/PageUp are nobody else's. They name no direction either, so
     // unlike the arrows they need no RTL convention to be read correctly.
     await page.keyboard.press("PageDown");
-    await expect(page.locator(pageNum)).toHaveText("9");
+    await expect(page.locator(pageNum)).toHaveText("8");
     await page.keyboard.press("PageUp");
     await expect(page.locator(pageNum)).toHaveText("7");
 
@@ -158,7 +209,7 @@ test.describe("Hifth · wayfinding", () => {
     await page.locator("#verse-55").focus();
     await page.keyboard.press("Escape");
     await page.keyboard.press("ArrowLeft");
-    await expect(page.locator(pageNum)).toHaveText("9");
+    await expect(page.locator(pageNum)).toHaveText("8");
   });
 
   test("an open sheet keeps the page keys, and Escape closes it rather than blurring", async ({
