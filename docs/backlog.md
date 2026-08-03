@@ -155,6 +155,45 @@ of recency, enough to make turning back a spread free, and everything else stays
 hops land. Below the breakpoint there is no second leaf and the reading stage takes the whole
 cap, which is why the phone number in ③ did not change.
 
+### ⑭ The page bar drew one node per vendored page · **fixed**
+
+③ and ④ are about the *pages* the DOM holds. This is the same shape one layer out, in a
+control that holds no pages at all: `PageSlider` rendered its inventory as one `<span>` per
+vendored page. At three pages that is three marks and a true picture. Loop 4b made it 604.
+
+Two costs, and the second is the one that makes it a defect rather than an untidiness:
+
+- **It stopped saying anything.** On a phone-width track, 604 marks are about half a pixel
+  apart and two pixels wide, so they overlap into a solid rail. A picture of *which pages are
+  here* became a second track — and it is drawn on the one surface whose entire argument is
+  that it never claims more of the book than the build holds.
+- **It was reconciled per value of a drag.** `setScrub` hangs off React's `onChange`, which
+  on a range input is the `input` event — every value the thumb passes over. So 604 spans
+  were diffed on each of them, in the one interaction that is a continuous drag, on the
+  component whose commit-on-release design (`docs/design/desktop.md`, and the doc-block in
+  `PageSlider.tsx`) exists precisely to avoid paying per value.
+
+Nobody wrote this down before it shipped; it was found by sweeping the code for premises that
+scarcity had made true. That is the generalisation worth keeping: **a picture whose node count
+is the size of the corpus has only ever been tested on a small corpus.** ⑬ answers the same
+question about bytes and gets a different answer, because bytes on disk are not reconciled 60
+times a second.
+
+**Closed by [`pages.test.ts`](../packages/core/src/pages.test.ts)** — the `pageRuns` block,
+whose *"draws a complete edition as one bar, not as 604 of them"* row is the one that fails if
+the per-page rendering returns — and by
+[`PageSlider.test.tsx`](../apps/web/src/components/PageSlider.test.tsx)'s *"costs one node for
+a complete edition, not 604"*, which asserts the same thing about the rendered DOM rather than
+about the helper.
+
+The fix is a new core export, `pageRuns(available)`: the inventory as contiguous **runs**
+rather than as pages, so the node count follows the number of *gaps* — which is what the
+reader is being shown — rather than the length of the book, which they can already see. A
+complete edition is one node; the pre-4b inventory is three; a corpus with two holes is three.
+It also decomposed two jobs that had been sharing one element: a run says *these pages are
+here*, and a separate mark says *you are on this one*. They only looked like the same thing
+while a single held page and a single-page run drew the identical 2 px tick.
+
 ---
 
 ## 3. Bytes

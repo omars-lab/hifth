@@ -183,8 +183,12 @@ export interface Strings {
   /**
    * The end of the road, in whichever direction. Both name the page they
    * stopped on (`page-turning.md` §7 ④): "Last available page" alone tells a
-   * reader that an arrow did nothing, and leaves them to guess where they are —
-   * which, with three pages of 604 vendored, is a guess they will get wrong.
+   * reader that an arrow did nothing, and leaves them to guess where they are.
+   * Before Loop 4b that guess was wrong almost every time, since the inventory
+   * was three scattered pages; now it is usually right, which is a worse reason
+   * to drop the number rather than a better one — the ends of the book are page
+   * 1 and page 604, and a reader who has to infer that from silence is being
+   * asked to trust an arithmetic the app already knows.
    */
   firstPage(page: number): string;
   lastPage(page: number): string;
