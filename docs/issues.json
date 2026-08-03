@@ -116,11 +116,11 @@
     {
       "id": "mounted-set-has-no-ceiling",
       "source": { "file": "docs/design/page-turning.md", "item": "⑩" },
-      "status": "suspected",
+      "status": "fixed",
       "severity": "risk",
-      "owner": "user",
-      "blockedBy": ["perf-verdict-on-device"],
-      "note": "The one item in that document never reproduced. Owned by backlog OE3; indexed twice here on purpose, because two registers describing one item is exactly what this catalog exists to make visible."
+      "owner": "agent",
+      "closedBy": "apps/web/src/components/PageStage.budget.test.tsx",
+      "note": "The one item in that document never reproduced — it carried `suspected` for six loops rather than borrowing a confidence it had not earned, and it was closed by a test rather than by the profile it asked for. Its own measurement was still never taken; what changed is that the heading's claim is now false. That measurement did not stop being worth taking, and it now tunes MOUNTED_PAGE_CAP rather than deciding whether a cap exists — which is backlog ① ②, blocked on hardware. Owned by backlog ③; indexed twice here on purpose, because two registers describing one item is exactly what this catalog exists to make visible."
     },
     {
       "id": "double-centring",
@@ -352,20 +352,20 @@
     {
       "id": "mounted-set-ceiling",
       "source": { "file": "docs/backlog.md", "item": "③" },
-      "status": "confirmed",
+      "status": "fixed",
       "severity": "risk",
       "owner": "agent",
-      "blockedBy": ["loop-4b"],
-      "note": "Never wrong today because three vendored pages cap the set at three. After 4b it is the selection's entire hop fan-out. The same item as page-turning OE10."
+      "closedBy": "apps/web/src/components/PageStage.budget.test.tsx",
+      "note": "Never wrong while three vendored pages capped the set at three; after loop-4b it is the selection's entire hop fan-out, which is why the loop that removed the cap is the loop that added the ceiling. MOUNTED_PAGE_CAP is a ceiling AND a recency rule — capping alone would have made the stage worse, because before this there was no cache at all, only a working set rebuilt on every selection. The same item as page-turning ⑩."
     },
     {
       "id": "spread-mounts-two-leaves",
       "source": { "file": "docs/backlog.md", "item": "④" },
-      "status": "blocked",
+      "status": "fixed",
       "severity": "risk",
       "owner": "agent",
-      "blockedBy": ["mounted-set-ceiling"],
-      "note": "Not a defect; a multiplier to apply once the ceiling has a number."
+      "closedBy": "packages/core/src/mounted-set.test.ts",
+      "note": "Not a defect; a multiplier to apply once the ceiling had a number. spreadBudget(6) is { reading: 4, facing: 2 } — split unevenly on purpose, because hop targets only ever arrive at the reading leaf. Proven in two halves: the arithmetic in mounted-set.test.ts, and that PageStage actually obeys a budget smaller than the cap in PageStage.budget.test.tsx. A split nothing honours is arithmetic, not a budget."
     },
     {
       "id": "bundle-headroom",
@@ -406,10 +406,11 @@
     {
       "id": "tti-margin-is-half-an-rtt",
       "source": { "file": "docs/backlog.md", "item": "⑫" },
-      "status": "confirmed",
+      "status": "fixed",
       "severity": "risk",
       "owner": "agent",
-      "note": "Found by building the instrument for tti-criterion-has-no-instrument. Worst honest median 2429 ms against the 2500 ms exit criterion — 71 ms, half a simulated round trip — and that is on three vendored pages, before loop-4b vendors 601 more and before manifest-is-one-whole-fetch adds ~109 KB gz in front of first paint. TTI equals LCP in every run measured (TBT is 0), so the lever is the waterfall ahead of the largest paint, not compute. Not blocked: repeatable today with `make lighthouse`. The measurements on record are the pre-4b baseline; re-read them as the corpus lands rather than at the loop's exit."
+      "closedBy": ".lighthouserc.json",
+      "note": "Found by building the instrument for tti-criterion-has-no-instrument. Worst honest median 2429 ms against the 2500 ms exit criterion — 71 ms, half a simulated round trip — measured on three vendored pages, before loop-4b vendored 601 more. Both feared costs missed. manifest-is-one-whole-fetch's ~109 KB never shipped, and the 604 pages are fetched one at a time on demand, never ahead of the largest paint. Re-measured the hour the corpus landed, same laptop: 2262-2268, median 2264, 236 ms of margin — and the pre-4b bimodality, a 150 ms step equal to rttMs, collapsed to a six-millisecond spread, because the smaller manifest stopped straddling a round-trip boundary. What did move is TBT, 0 to 85 ms, from expandManifest rebuilding 6236 entries at load; the claim that nothing on this path is compute-bound was true of a three-page build and is now retired in both places that carried it."
     },
     {
       "id": "ci-frame-budget-is-emulated",
@@ -431,11 +432,19 @@
     {
       "id": "manifest-is-one-whole-fetch",
       "source": { "file": "docs/backlog.md", "item": "⑪" },
-      "status": "open",
+      "status": "fixed",
       "severity": "risk",
       "owner": "agent",
-      "blockedBy": ["loop-4b"],
-      "note": "Found by weighing the corpus for nothing-watches-the-vendored-corpus. 184 bytes gz per page, fetched entire before the first page can be resolved: ~109 KB gz in front of first paint at 604 pages. Not urgent at three pages; the loop that makes it real is also the loop that would fix it, since sharding the manifest by juz is the same work as pinning a juz offline."
+      "closedBy": "packages/core/src/manifest.test.ts",
+      "note": "Found by weighing the corpus for nothing-watches-the-vendored-corpus. 184 bytes gz per page, fetched entire before the first page can be resolved: ~109 KB gz in front of first paint at 604 pages. Closed by deleting the problem rather than by the proposed remedy. The projection was right about the old shape and wrong about what to do: loop-4b ships a compact ayah-to-page wire form that is 24,471 bytes raw and 1,333 gz for the whole print — smaller than the three-page file the risk was measured against — so sharding by juz would have added thirty requests to save nothing. expandManifest rebuilds the full shape at load; compactManifest refuses a corpus where an ayah spans two pages or an id is not its own verse, because the compaction is only sound while those hold."
+    },
+    {
+      "id": "corpus-is-outlines-and-repeats",
+      "source": { "file": "docs/backlog.md", "item": "⑬" },
+      "status": "answered",
+      "severity": "question",
+      "owner": "agent",
+      "note": "Opened by loop-4b's 92 MB commit, and answered in it. 98.6% of a page is path d data, one <path> holds the whole scripture, and there is no font, use or symbol anywhere — the file is a photograph of the print, not a document. Exact-shape reuse measures 1.9x over a 51-page sample, but that is a ceiling on the bytes we have rather than in principle: svgo rounds coordinates after placement, so one ligature at two x-offsets is two strings. A glyph sprite would therefore need a second ETL that owns the typography, sitting downstream of the one guarantee worth most here — vendor-pages.mjs reproducing upstream byte-for-byte and gate:pages re-hashing all 604 offline. Git packs 92 MB to 28; LFS would keep it at 92 and make a clone need a network, which this project's whole claim is that it does not. The trigger is a second corpus (PLAN follow-up 13's ligature print, a second riwayah or layout version), or packed history past ~100 MB, or a cold clone past ~2 minutes."
     },
 
     {
@@ -550,6 +559,14 @@
       "owner": "agent",
       "closedBy": "scripts/gate-text-sources.mjs",
       "note": "Opened and closed in one change, which is the shape the close rule asks for; it is indexed anyway because the lesson outlives the fix. Reproduced before it was fixed: an untracked NUL-bearing source passed the gate and failed it once staged. CI could not have found this — a checkout has no untracked files, so the gap is only visible from the machine that has it. gate:text-sources was the only gate in scripts/ enumerating from git; if a future one does, this is the row that says what to check."
+    },
+    {
+      "id": "plan-word-geometry-is-a-second-corpus",
+      "source": { "file": "docs/PLAN.md", "item": "13" },
+      "status": "open",
+      "severity": "question",
+      "owner": "agent",
+      "note": "Opened by loop-4b, which decided it NO on evidence rather than deferring it unexamined. Half is settled: the adopted corpus carries one polygon per ayah and nothing finer, so word granularity cannot come from the pages that now ship. The other half is a print question, not a licence or a size question — the candidate ligature corpus has per-ligature groups, 604 pages, KFGQPC Hafs and a permissive licence, and its README does not say which print. loop-4a's finding is what makes that decisive: V1/1405H and V2/1421H disagree on 36 pages, and adopting a V1-paginated corpus would silently invalidate ayah-pages.json, every edge's dPage and every share link. Adopting it is a second corpus, not a layer. What would answer it is named in the follow-up and is an afternoon: run 4a's arithmetic against the candidate and check whether 5:77 sits on its p120 and 5:83 on its p121. Blocks word-level selection (task #65) and the word-granular roots and tajweed painting that Loops 5 and 6a left at ayah fallback."
     },
     {
       "id": "plan-hifth-licence",

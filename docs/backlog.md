@@ -90,7 +90,7 @@ reached for casually.
 
 ## 2. Bounded mounting
 
-### ③ The mounted set has no ceiling · **confirmed**
+### ③ The mounted set has no ceiling · **fixed**
 
 `App.tsx:288` computes `mountedPages` as *the current page plus every vendored hop target of
 the current selection*. With three pages vendored the set can never exceed three, so this has
@@ -105,7 +105,27 @@ already evicts everything outside `keep`, so the change is one policy function, 
 **How we'd know:** a test that selects a high-degree ayah and asserts the mounted count stays
 at the cap. Cheap, and it fails today for the right reason (there is no cap).
 
-### ④ The desktop spread mounts two leaves, not one · **blocked**
+**Closed by [`PageStage.budget.test.tsx`](../apps/web/src/components/PageStage.budget.test.tsx)**
+— *"holds no more than the cap however many hop targets a selection has"*, written as the
+entry specified and verified by inducing the old behaviour: with the cap removed it reports
+12 mounted where 6 are allowed. The policy is
+[`retainPages`](../packages/core/src/mounted-set.ts) in L1, called from the stage's eviction
+effect, and `MOUNTED_PAGE_CAP` is the one number the on-device verdict tunes.
+
+**It turned out to be two rules, not one, and the entry only saw the first.** A ceiling alone
+would have made the stage strictly worse at the thing it was already good at: the old effect
+kept `mountedPages ∪ current` and nothing else, so the stage has never had a *cache* — only a
+working set, torn down and rebuilt on every selection. Capping that set without adding recency
+means a reader who turns forward and back pays two fetches for a page that was in the DOM a
+second ago. So `retainPages` fills the slots the request does not use with pages already
+mounted, newest first. Both halves have their own test and each fails without the other; the
+recency one fails with *one* page mounted where three were expected.
+
+The 6 is still a guess — Loop 4b's spec said "LRU ~6 pages" before anything was measured, and
+this loop did not measure it either. What changed is that the guess is now a named constant in
+one file with a test asserting the stage obeys it, instead of an absence.
+
+### ④ The desktop spread mounts two leaves, not one · **fixed**
 
 Above `1024×740` the app mounts both leaves of the spread — deliberately a *mount* and not a
 `display: none`, because a hidden leaf still fetches its SVG and builds a `Highlighter`
@@ -115,6 +135,25 @@ are adjacent. After 4b every spread is two real leaves, so any cap from ③ is a
 reader does.
 
 Not a defect; a multiplier to apply once ③ has a number.
+
+**Closed by [`mounted-set.test.ts`](../packages/core/src/mounted-set.test.ts)** — the
+`spreadBudget` block, which asserts the two shares sum to `MOUNTED_PAGE_CAP` — and by
+[`PageStage.budget.test.tsx`](../apps/web/src/components/PageStage.budget.test.tsx)'s *"obeys a
+smaller budget than the cap"*, which is the other half: a split nothing honours is arithmetic,
+not a budget. Verified by inducing the old behaviour — pinning the stage's eviction to
+`MOUNTED_PAGE_CAP` instead of its `pageBudget` prop makes the second test report 6 mounted
+where 2 are allowed.
+
+The multiplier ③ was waiting on turned out to be exactly 2, and the remedy is to stop the cap
+being per-leaf: `spreadBudget()` splits the one number into `{ reading: 4, facing: 2 }`, and
+`App.tsx` hands each `PageStage` its share. So the book costs 6 leaves, not 12, and the
+desktop reader and the phone reader hold the same amount of paper.
+
+The split is uneven on purpose. Hop targets only ever arrive at the leaf the reader is on —
+the facing leaf is asked for exactly one page, always — so its share is one page plus one slot
+of recency, enough to make turning back a spread free, and everything else stays where the
+hops land. Below the breakpoint there is no second leaf and the reading stage takes the whole
+cap, which is why the phone number in ③ did not change.
 
 ---
 
@@ -222,7 +261,7 @@ one is "a JSON catalog plus a row".
 Not work today. The trigger to revisit is a **fourth** locale, and this entry exists so that
 whoever adds it finds the decision rather than the consequence.
 
-### ⑪ The manifest is one whole fetch, and it grows with the book · **open**
+### ⑪ The manifest is one whole fetch, and it grows with the book · **fixed**
 
 Weighing the corpus for ⑥ turned up the file that is not like the others. `manifest.json` holds
 a polygon list per page and is fetched **entire**, at
@@ -244,6 +283,79 @@ rather than discovered during Loop 4b.
 Not work today — three pages make it 553 bytes. The trigger is **Loop 4b**, which is also the
 loop that would fix it, since sharding the manifest by juz is the same work as pinning a juz
 offline (Loop 6b).
+
+**Closed by [`manifest.test.ts`](../packages/core/src/manifest.test.ts)** and the shape it
+tests — [`CompactManifest`](../packages/core/src/manifest.ts), the form the ETL now writes and
+`loadManifest` expands. `gate:assets` keeps the number honest on every build.
+
+**The projection was right and the remedy was wrong, which is the useful part.** 604 pages of
+the old shape really is ~109 KB gz. But it is 109 KB of *restated arithmetic*: the corpus has
+exactly one polygon per ayah, and every polygon's id is `verse-<absolute ayah>` — so `number`,
+`surah`, `ayah`, `key` and `elementId` are all recoverable from a position in a 6236-long
+array, and the only irreducible fact is which page each ayah sits on. The wire form is that
+array plus a viewBox and its two overrides:
+
+```
+24,471 bytes raw · 1,333 bytes gz · the whole print
+```
+
+**1.3 KB.** Sharding a 1.3 KB file by juz would add thirty requests to save nothing, so the
+entry is closed by deletion of the problem rather than by the fix it proposed — and Loop 6b's
+pin-a-juz work loses the "same work as" argument along with it. What it does instead is inherit
+a *proof*: `compactManifest` **refuses** a corpus where an ayah spans two pages or an id is not
+its own verse, and `extract-pages.mjs` re-derives the manifest from the committed SVGs on every
+CI run. The compression is not a trick; it is those two invariants written down.
+
+### ⑬ The corpus is 92 MB of outlines and 47% of it repeats · **answered**
+
+Loop 4b put **604 page SVGs, 92 MB on disk** into the tree, and the obvious question on the
+commit is whether they should be stored some other way — generated at build time, deduplicated,
+or pushed out to LFS. Measured before answering, so nobody re-derives it:
+
+| | |
+|---|---|
+| One page (p50) | 157,734 B raw · 45,971 gz · **37,117 brotli** |
+| Of that, path `d` data | 155,502 B — **98.6%** |
+| Largest single `<path>` | `d` of 138,630 B — the page's entire scripture, one element |
+| Elements per page | 28 paths; **zero** `use`, `defs`, `symbol` or `text` |
+| Exact-shape reuse, 51-page sample | 70,706 subpaths → 37,380 unique — **1.9×, 47.1% repeats** |
+| Whole corpus, git-packed | 92 MB → **28 MB** |
+
+Three readings. **The file is not a document, it is a photograph of one** — the print's glyphs
+arrive as flattened outlines with no font, no shaping and no reusable symbol, which is exactly
+why svgo cannot get it below ~46 KB gz and why there is no smaller *faithful* form lying around
+unused. **Nothing here is on the critical path**: pages are fetched one at a time on demand,
+brotli, ~37 KB each — the corpus is a repository cost, not a reader's cost, and the TTI that
+matters went *down* this loop. **And the repeats are real but not free**: every ligature in the
+book is drawn from a small alphabet, so an idealised glyph sprite (`<defs>` + `<use>`, one
+outline per distinct shape) is the obvious win — but 1.9× is the *ceiling measured on the bytes
+we actually have*, not the ceiling in principle, because svgo rounds coordinates after they have
+been placed, so the same ligature at two different x-offsets is two different strings. Recovering
+the true reuse means re-deriving glyph identity from unrounded geometry, i.e. re-running the
+outline extraction ourselves — a second ETL that owns the typography, against an upstream we
+currently only *verify*.
+
+Which is the case against doing it today, in one line: **we would be trading a pin we can prove
+for a pipeline we would have to trust.** `vendor-pages.mjs` reproduces the upstream bytes
+byte-for-byte through a pinned svgo, `quran-svg.pin.json` carries three SHA-256s per page, and
+`gate:pages` re-hashes all 604 offline on every run. That is the strongest guarantee in the repo
+about the correctness of scripture on screen. A sprite build sits *downstream* of it, so exactness
+would have to be re-established against a rendered image rather than a hash — and the day a
+rounding change silently thickens one letter, the gate that catches it is the one we deleted.
+
+**Git LFS is the wrong tool for the same reason, plus a worse one.** LFS stores blobs
+uncompressed and outside the pack, so 92 MB stays 92 MB where packed git already made it 28,
+and it converts a clone from *works offline, anywhere, forever* into a clone that needs a
+working LFS endpoint. This project's whole claim is that it survives without a network.
+
+Not work today. **The trigger is a second corpus.** One print packs to 28 MB and nobody notices;
+what changes the arithmetic is adopting a *second* set of 604 pages — the ligature-based corpus
+of PLAN follow-up 13 (needed for word granularity, external task #65), a second riwāyah, or a
+second layout version — because that is the point where the sprite stops being a compression
+trick and starts being the thing that lets two prints share one glyph table. Two concrete
+numbers to reach for instead of a feeling: **packed history past ~100 MB**, or a cold `git clone`
+past ~2 minutes on the connection someone actually contributes from. Until one of those, the
+92 MB is the price of being able to prove what we ship.
 
 ---
 
@@ -337,9 +449,18 @@ path is compute-bound. Whatever eventually moves this number will be a network w
 resource added in front of the largest paint — not a script that got slower. That is worth
 knowing before the first red.
 
+**Half of that stopped being true in Loop 4b, and the half that broke is the half that read
+like a law.** TTI is still identical to LCP, so the conclusion survives; the *reason* given for
+it does not. Blocking time is no longer 0 — `expandManifest` rebuilds 6236 entries at load and
+costs a median 85 ms of TBT, which is the first compute this path has ever carried. "Nothing
+here is compute-bound" was an observation about a build with three pages in its manifest, and
+it was written in the voice of a property of the architecture. The step it describes also
+vanished: five post-corpus runs span six milliseconds where nine pre-corpus runs straddled a
+150 ms round trip. Numbers in ⑫.
+
 The reading is in ⑫, because it is not good news and it is not this entry's subject.
 
-### ⑫ The exit criterion has 71 ms of margin, on three pages · **confirmed**
+### ⑫ The exit criterion has 71 ms of margin, on three pages · **fixed**
 
 ⑨ gave *< 2.5 s TTI on mid-Android* an instrument. The instrument says the app passes, and by
 how much: the worst honest median measured is **2429 ms against 2500** — 71 ms, or **half a
@@ -350,6 +471,13 @@ This is on **three vendored pages**. Loop 4b vendors the other 601, and ⑪ adds
 manifest fetched whole before the first page can resolve. Neither is on the critical path
 today, and the point of writing this down now is that "not on the critical path" is a claim
 with an expiry date and no alarm on it.
+
+**One of those two threats did not arrive.** ⑪'s ~109 KB was the old `AssetManifest` shape
+projected to 604 pages; Loop 4b ships the compact wire form instead, and the manifest in front
+of the first paint is **1,333 bytes gzipped for the whole print** — smaller than the
+three-page file this margin was measured against. So the fetch ahead of LCP did not grow. The
+604 pages did, and they are fetched one at a time on demand, which is the thing left to
+re-measure.
 
 What would answer it: the numbers already collected are the *pre-4b* baseline, so the work is
 to look again immediately after the corpus lands rather than at the end of the loop — the
@@ -379,6 +507,35 @@ blocking time. And the honest margin on the machine that actually gates merges i
 budget, both numbers are for three pages, and neither says anything about the run after 4b. The
 worst figure stays in this entry's title deliberately, because the entry exists to be read
 before the corpus lands rather than after.
+
+**The post-corpus reading, taken the hour the corpus landed** (2026-08-03, `make lighthouse`,
+604 pages vendored, same laptop as the 71 ms worst case). Five runs:
+
+```
+TTI   2268  2264  2262  2264  2265      median 2264      236 ms of margin
+TBT    100    85   100    84    84      median   85      was 0
+LCP  identical to TTI in all five
+```
+
+The margin did not shrink. It **widened**, on the machine that produced the worst number in
+this entry's title, from 71 ms to 236 — and the bimodality widened out of existence with it:
+nine runs of the pre-4b build stepped between 2279–2284 and 2429–2437 with nothing in between,
+and these five span **six milliseconds**. That step was one simulated round trip (`rttMs` 150,
+to the millisecond), which is what a resource landing in the next RTT window looks like; the
+manifest ahead of the first paint went from a three-page `AssetManifest` to 1,333 bytes gz, and
+it stopped straddling the boundary. So the compact wire form did not merely avoid ⑪'s 109 KB —
+it took a request off the edge of a round trip that the old one sat on.
+
+Two things not to take from that. **TBT went from 0 to 85 ms**, which is `expandManifest`
+rebuilding 6236 entries at load, and it is the first compute this path has ever had; the
+statement above and in ⑨ that "nothing here is compute-bound" is now false, and the next thing
+that moves TTI could be a script after all. And this is still Lantern on a laptop — ② is still
+the real-hardware check and is still blocked on hardware. What *is* settled is the question
+this entry was opened to ask: the 604 pages did not cost the exit criterion anything, because
+they are fetched one at a time on demand and never in front of the largest paint.
+
+Closed by `.lighthouserc.json`'s `interactive` assertion — median of five, 2500 ms, which has
+gated every push since ⑨ and now has the post-corpus distribution written beside it.
 
 ### ⑩ The CI frame budget is a number from an emulator · **blocked**
 
