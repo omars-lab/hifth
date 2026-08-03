@@ -10,6 +10,11 @@ apps/web/test-results/
 .lighthouseci/
 .DS_Store
 
+# The quran-svg fetch cache: 348 MB of upstream page SVG + per-page metadata,
+# pinned by SHA-256 in packages/etl/data/pages/quran-svg.pin.json. The pin is
+# committed; the corpus it points at is not (see vendor-pages.mjs).
+packages/etl/data/pages/.cache/
+
 # Parallel-agent worktrees: checkouts of *other* branches living inside this one.
 # Committing them would put another branch's tree into this branch's history, and
 # linting them makes this branch fail on code it does not contain (see

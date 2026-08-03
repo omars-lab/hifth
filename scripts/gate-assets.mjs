@@ -27,11 +27,13 @@
  * hotel wifi" begins. Today's three pages are therefore already speaking about
  * Loop 4b's 604, which is the point of measuring before rather than after.
  *
- * `manifest.json` is projected the same way and for a sharper reason: it is one
- * file, fetched **whole** at `apps/web/src/assets.ts:16` before anything can be
- * drawn, and it carries a polygon list per page. Its per-page cost is 184 bytes
- * gz, which is nothing until it is multiplied by 604 and sits in front of first
- * paint. See backlog ⑪ — the number below is a ceiling, not an endorsement.
+ * `manifest.json` is the one file fetched **whole** before anything can be drawn,
+ * so its ceiling is about latency, not bytes. When this gate was written it
+ * carried a polygon list per page — 184 bytes gz per page, nothing until
+ * multiplied by 604 — and the projection said 109 KB gz in front of first paint
+ * (backlog ⑪). Loop 4b made the projection moot rather than affordable: the
+ * compact manifest is an ayah→page table, 1.3 KB gz for all 604 pages, and the
+ * check below is a flat one because there is no longer anything to project.
  *
  * ── Why the shape of the tree is gated too ──────────────────────────────────
  *
@@ -76,7 +78,15 @@ const MAX_PAGE_GZ = 64 * 1024;
 /** The whole mus'haf, projected from the mean page. Today's projection: 26.8 MB. */
 const MAX_MUSHAF_GZ = 32 * 1024 * 1024;
 
-/** The manifest at full vendoring, projected per page. Today's projection: 109 KB. */
+/**
+ * The manifest, whole. Until Loop 4b this was a per-page projection (3 pages of
+ * polygon lists projected to 604 → 109 KB gz). The compact form carries the
+ * whole print in one ayah→page table, so there is nothing left to project: the
+ * file measured today already is the file at 604 pages, and the ceiling is a
+ * flat one. 256 KB is left where it was on purpose — it is the "in front of
+ * first paint" budget, and the fact that the manifest now uses 0.5% of it is
+ * the result to notice, not a reason to tighten it onto today's number.
+ */
 const MAX_MANIFEST_GZ = 256 * 1024;
 
 const problems = [];
@@ -266,23 +276,45 @@ for (const row of rows) {
 {
   const gz = gzOf(join(ASSETS, "manifest.json"));
   const manifest = JSON.parse(readFileSync(join(ASSETS, "manifest.json"), "utf8"));
-  const here = manifest.pages?.length ?? 0;
   const full = editions.get(manifest.edition)?.pages ?? null;
-  const projected = here > 0 && full ? (gz / here) * full : null;
+
+  // Two shapes, and the difference decides whether a projection means anything.
+  // The compact form (an ayah→page table, @hifth/core manifest.ts) already
+  // covers every page the edition has, so its size today IS its size at full
+  // vendoring. The full form grows per page and must be projected. Recognising
+  // neither is not an option: a gate that shrugs at an unfamiliar shape stops
+  // gating without saying so, which is the failure this whole file exists to
+  // prevent.
+  const compact = Array.isArray(manifest.ayahPages);
+  const here = compact ? new Set(manifest.ayahPages.filter(Boolean)).size : manifest.pages?.length;
+
+  if (here === undefined) {
+    problems.push(
+      "manifest.json is neither the compact shape (an `ayahPages` array) nor the full one" +
+        " (a `pages` array). This gate cannot weigh what it cannot read — teach it the new" +
+        " shape rather than letting it pass silently.",
+    );
+  }
+
+  const projected = compact ? gz : here > 0 && full ? (gz / here) * full : null;
 
   console.log(
-    `  ${kb(gz).padStart(9)} gz  ${String(here).padStart(3)} pages  manifest.json` +
-      (projected === null
-        ? ""
-        : `  → ${kb(projected)} gz at ${full} pages (ceiling ${kb(MAX_MANIFEST_GZ)})`),
+    `  ${kb(gz).padStart(9)} gz  ${String(here ?? "?").padStart(3)} pages  manifest.json` +
+      (compact
+        ? `  (whole print, ceiling ${kb(MAX_MANIFEST_GZ)})`
+        : projected === null
+          ? ""
+          : `  → ${kb(projected)} gz at ${full} pages (ceiling ${kb(MAX_MANIFEST_GZ)})`),
   );
 
   if (projected !== null && projected > MAX_MANIFEST_GZ) {
     problems.push(
-      `manifest.json projects to ${kb(projected)} gz at ${full} pages, over ${kb(MAX_MANIFEST_GZ)}.` +
-        " It is fetched whole at apps/web/src/assets.ts:16 before the first page can be drawn," +
-        " so this number is not download weight — it is time in front of first paint. Shard it" +
-        " by page or by juz rather than raising the ceiling (backlog ⑪).",
+      (compact
+        ? `manifest.json is ${kb(gz)} gz for the whole print, over ${kb(MAX_MANIFEST_GZ)}.`
+        : `manifest.json projects to ${kb(projected)} gz at ${full} pages, over ${kb(MAX_MANIFEST_GZ)}.`) +
+        " It is fetched whole by loadManifest() in apps/web/src/assets.ts before the first page" +
+        " can be drawn, so this number is not download weight — it is time in front of first" +
+        " paint. Find something else to derive rather than raising the ceiling.",
     );
   }
 }

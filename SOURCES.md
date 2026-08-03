@@ -28,12 +28,21 @@ option, because it reads identically to having forgotten.
 - **Provenance:** SVG page geometry sourced via the quranpedia / quran-svg corpus
   (`xmlns:ayah="https://quranpedia.net"`), derived from the KFGQPC digital mushaf.
   The three pages bundled in Loop 0 (7, 9, 19) were extracted verbatim from the
-  design mock `docs/reference/linker-mock.html`.
+  design mock `docs/reference/linker-mock.html`. **Loop 4b replaced that route
+  with the upstream repo itself**, pinned at commit
+  `5fbcb1d4d92b5a2972ab51472fe991b6066bb6e2` (2026-07-13), path
+  `mushafs/hafs/kfqc/{svg,json}/001..604`, retrieved 2026-07-25 —
+  `packages/etl/data/pages/quran-svg.pin.json`, with a SHA-256 for every upstream
+  file and every vendored byte. The pipeline's own self-test is that it
+  re-derives Loop 0's three pages **byte-for-byte** from the pin before it is
+  trusted with the other 601, so the mock and the repo are proven to be the same
+  bytes rather than assumed to be.
 - **Encoding:** outlined `<path>` glyphs (no `<text>`), per-ayah hit polygons
   `class="ayahPolygon"` carrying `number="SSSAAA"` and `surah`.
-- **Coverage bundled now:** Surah 2, ayahs 38–48 (p7), 58–61 (p9), 120–126 (p19).
-  **Full 604-page coverage is NOT yet vendored** — Loop 4 vendors and validates the
-  complete corpus. See the Loop 0 corpus audit in `docs/decisions/loop-0.md`.
+- **Coverage bundled now: all 604 pages** — the whole print, every ayah of the
+  6236 on exactly one page, vendored in Loop 4b. (Loops 0–4a shipped three pages:
+  Surah 2, ayahs 38–48 (p7), 58–61 (p9), 120–126 (p19); the Loop 0 corpus audit in
+  `docs/decisions/loop-0.md` is that era's record.)
 - **License / usage:** two licences, layered.
   1. **The overlay is CC0 1.0.** Read firsthand from the
      [quran-svg](https://github.com/quranpedia/quran-svg) README (2026-07-26): the
@@ -73,7 +82,15 @@ href: https://github.com/quranpedia/quran-svg
   qurancomplex.gov.sa in an ordinary browser and confirm the wording is still what
   NOTICE.md records. Nothing in the build depends on the answer; the entry moves
   from PROVISIONAL to CONFIRMED-pending-that-glance.
-- **Immutability:** SVG bytes are copied verbatim and never edited (PLAN §8).
+- **Immutability:** SVG bytes are copied verbatim and never edited (PLAN §8). Loop
+  4b applies exactly two declared transforms, both reproducible and both asserted:
+  **svgo** at the version and config recorded in the pin (the config was recovered
+  by search until it reproduced Loop 0's three pages byte-for-byte), and **two
+  `id` repairs** — 19:3 on p305 and 75:5 on p577 carry path geometry where every
+  other polygon carries `verse-<absolute ayah>`. The count is asserted to be
+  exactly two and the ayahs exactly those two, so a future pin that fixes them
+  upstream fails loudly instead of drifting silently. `pnpm gate:pages` re-checks
+  the vendored hashes offline on every CI run.
 
 ---
 

@@ -22,6 +22,8 @@ import {
   nextIntent,
   nextWheelTurn,
   normalizeWheelDelta,
+  retainPages,
+  MOUNTED_PAGE_CAP,
   turnCommit,
   viewFitsAcross,
   Highlighter,
@@ -54,8 +56,24 @@ interface PageStageProps {
    * hafs-kfqc, not about stages.
    */
   total: number;
-  /** Pages to keep mounted (current + hop targets), for the DOM budget. */
+  /**
+   * Pages to keep mounted, **most wanted first** — the current page, then the
+   * selection's hop targets in rail order, which is hifz order.
+   *
+   * A request, not an instruction: past `pageBudget` the tail is dropped
+   * (`retainPages`). The order matters because of what gets dropped — with the
+   * whole print vendored a densely connected ayah's fan-out is longer than any
+   * phone should hold, and the pages worth keeping are the ones the reader is
+   * likeliest to tap.
+   */
   mountedPages: readonly number[];
+  /**
+   * How many pages this stage may hold at once. Defaults to the whole DOM
+   * budget; a leaf of an open spread is given its share of it (`spreadBudget`),
+   * because two stages each holding the full cap is a book holding twice what a
+   * phone does. `docs/backlog.md` ③ ④.
+   */
+  pageBudget?: number;
   /** Human label for the a11y region, e.g. "Page 7". */
   label: string;
   /** The currently selected ayah key (controlled by L3), or null. */
@@ -96,10 +114,13 @@ interface PageStageProps {
    * Needed only by the *dragged* turn, and only because a fold has an appearance
    * before it has a destination. The band the finger is pushing has to be drawn
    * on the frame it appears, and what it looks like — crease, gap, hole
-   * (`foldBetween`) — is a fact about the **pair** of pages it spans. With 7, 9
-   * and 19 vendored, a forward drag from page 7 lands on 9 and must draw a
-   * `hole`; guessing `7 → 8` would draw a `crease` and then swap it for a hole at
-   * release, which is the fold contradicting itself mid-gesture.
+   * (`foldBetween`) — is a fact about the **pair** of pages it spans. When only
+   * 7, 9 and 19 were vendored, a forward drag from page 7 landed on 9 and had to
+   * draw a `hole`; guessing `7 → 8` would have drawn a `crease` and then swapped
+   * it for a hole at release, which is the fold contradicting itself mid-gesture.
+   * Loop 4b vendored all 604, so for `hafs-kfqc` the inventory's pair and
+   * `page ± 1` now agree everywhere — which makes this prop's fallback correct
+   * rather than redundant, and it stays for the next partial edition.
    *
    * The wheel never needed this because a wheel turn is decided and drawn in the
    * same instant — it asks `onTurn` and the answer comes back through `turnTo`.
@@ -233,6 +254,7 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
     page,
     total,
     mountedPages,
+    pageBudget = MOUNTED_PAGE_CAP,
     label,
     selectedKey,
     breadcrumbKey,
@@ -255,6 +277,8 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
   const pagesRef = useRef(new Map<number, MountedPage>());
   /** Mounts still in flight, so concurrent callers share one fetch (see ensurePage). */
   const pendingRef = useRef(new Map<number, Promise<MountedPage | null>>());
+  /** `pagesRef`'s keys in use order, most recent first — the LRU side of `retainPages`. */
+  const lruRef = useRef<number[]>([]);
   const currentPageRef = useRef<number>(page);
   /**
    * Set once a navigateTo has decided which page is visible. A cold-opened deep
@@ -720,8 +744,9 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
    *
    * Every other mounted host is put to `opacity: 0` with its transition
    * suppressed, so a held-down arrow costs one composited layer rather than one
-   * per mounted page — `pagesRef` is unbounded today (backlog ③), and a fade
-   * that touched every host would make that unbounded set a per-frame cost
+   * per mounted page. `pagesRef` is capped at MOUNTED_PAGE_CAP now (backlog ③),
+   * but a fade touching every host would still make the whole held set a
+   * per-frame cost, and the cap is a number the perf verdict may raise
    * (§3.4 rule 3).
    */
   const crossFade = useCallback(
@@ -1180,6 +1205,7 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
   useEffect(() => {
     const pages = pagesRef.current;
     const pendingMounts = pendingRef.current;
+    const lru = lruRef.current;
     return () => {
       cancelTween();
       // Any turn still awaiting a timer resolves into a component that is gone.
@@ -1188,27 +1214,42 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
       turnRef.current += 1;
       for (const mp of pages.values()) mp.hl.destroy();
       pages.clear();
+      lru.length = 0;
       // Drop in-flight mounts too: their hosts are appended to a layer that is
       // going away, and a stale entry would hand a dead page to a remount.
       pendingMounts.clear();
     };
   }, [cancelTween]);
 
-  // Evict pages outside the budget (keep current + requested), spec DOM budget.
+  // The DOM budget (spec §3.4, `docs/backlog.md` ③). `retainPages` decides it:
+  // the page being read, then the requested hop targets in rail order, then —
+  // in whatever slots are left — pages already mounted, newest first, so that
+  // turning back or returning from a hop costs nothing. Everything past
+  // MOUNTED_PAGE_CAP is destroyed and re-fetched if it is asked for again.
   useEffect(() => {
     if (status !== "ready") return;
-    const keep = new Set(mountedPages);
-    keep.add(currentPageRef.current);
+    // The current page leads the request: it is the one page that must never be
+    // evicted, and mountedPages is a hop fan-out that need not contain it.
+    const request = [currentPageRef.current, ...mountedPages];
+    // Recency is read back off the DOM, not trusted from the last run: a page
+    // whose fetch never landed must not hold a slot forever, and navigateTo
+    // mounts its target directly, so pagesRef can hold a page the order has
+    // never seen. Those go to the tail — newest known first, then the rest.
+    const order = lruRef.current.filter((p) => pagesRef.current.has(p));
+    const untracked = [...pagesRef.current.keys()].filter((p) => !order.includes(p));
+    const keep = retainPages(request, [...order, ...untracked], pageBudget);
+    lruRef.current = keep;
+    const held = new Set(keep);
     for (const [p, mp] of pagesRef.current) {
-      if (!keep.has(p)) {
+      if (!held.has(p)) {
         mp.hl.destroy();
         mp.host.remove();
         pagesRef.current.delete(p);
       }
     }
-    // Warm the target pages so a hop's tween has both endpoints ready.
-    for (const p of mountedPages) if (!pagesRef.current.has(p)) void ensurePage(p);
-  }, [mountedPages, status, ensurePage]);
+    // Warm what survived the cap, so a hop's tween has both endpoints ready.
+    for (const p of keep) if (!pagesRef.current.has(p)) void ensurePage(p);
+  }, [mountedPages, pageBudget, status, ensurePage]);
 
   // Reflect the controlled selection into the current page's 'selection' group.
   useEffect(() => {
@@ -1526,6 +1567,9 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
       // into the spine. This is the *visible* page's side — the stage has one
       // padding, whatever else is mounted behind — which is why it is read from
       // the prop rather than from `totalRef`/`currentPageRef` like mountPage's.
+      // A page mounted behind it whose parity disagrees compensates for the
+      // difference itself; see the pair of rules under `.stage[data-leaf]` in
+      // the stylesheet, and why an odd→even turn made that necessary.
       data-leaf={leafSideOf(page, total) ?? undefined}
       // A long press IS a gesture here (it arms the marquee), so the platform's
       // own long-press menu would fight it on every highlight.

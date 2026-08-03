@@ -80,8 +80,10 @@ function editionCopy(edition: EditionMeta, t: Strings): EditionMeta {
  * in either direction: it does not hide the other riwayat (that would imply
  * Hifth is a single-mushaf app by design), and it does not offer them (that
  * would be a ghost). They are listed, disabled, each with the actual blocker —
- * the same surfaced-but-disabled rule the hop rail applies to edges pointing at
- * pages Loop 4b has not vendored yet.
+ * the same surfaced-but-disabled rule the hop rail applies to an edge it cannot
+ * honour. (The rail's version of that used to be about pages Loop 4b had not
+ * vendored; 4b vendored all 604, and what is left there is word granularity —
+ * PLAN follow-up 13. The rule is the same; only its remaining cause moved.)
  *
  * The concordance line under each row is the seam a switch will travel on:
  * a position moves between editions through a table or not at all (spec §1
