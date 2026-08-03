@@ -44,6 +44,35 @@ describe("PageSlider", () => {
     expect(screen.getByText("المتوفّر ٣ من ٦٠٤ صفحة")).toBeTruthy();
   });
 
+  it("draws the inventory as one mark per contiguous stretch", () => {
+    // Three pages, none adjacent, so three marks — the same picture the bar drew
+    // when it rendered one node per vendored page, because at this inventory the
+    // two are the same picture.
+    slider();
+    expect(document.querySelectorAll("[data-testid='page-run']")).toHaveLength(3);
+  });
+
+  it("costs one node for a complete edition, not 604", () => {
+    // The row that fails if the per-page rendering comes back. Loop 4b vendored
+    // the whole print, and the old code answered that with 604 spans half a
+    // pixel apart and two pixels wide — a solid rail that says nothing, React
+    // reconciling all of it on every value a dragged thumb passes over, in the
+    // one interaction that is a continuous drag. The node count follows the
+    // number of *gaps*, which is what the reader is being shown; the length of
+    // the book they can already see.
+    slider({ available: Array.from({ length: TOTAL }, (_, i) => i + 1) });
+    expect(document.querySelectorAll("[data-testid='page-run']")).toHaveLength(1);
+  });
+
+  it("marks where you are separately from what is here", () => {
+    // Two facts, two elements. They shared one while a held page and a
+    // single-page run drew the same 2px mark; inside a full edition the page on
+    // the stage is *always* inside a run, and a bar that only drew runs would
+    // have stopped saying where the reader is on the day it had everything.
+    slider({ available: Array.from({ length: TOTAL }, (_, i) => i + 1), page: 300 });
+    expect(document.querySelectorAll("[data-testid='page-here']")).toHaveLength(1);
+  });
+
   it("names the page rather than reading out a bare number", () => {
     // Without `aria-valuetext` a screen reader says "9" — a number with no unit
     // in a bar made of numbers.

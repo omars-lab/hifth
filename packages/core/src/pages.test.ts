@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { EDITIONS } from "./concordance.js";
-import { foldBetween, leafSideOf, nearestPage, pageFraction, spreadOf } from "./pages.js";
+import { foldBetween, leafSideOf, nearestPage, pageFraction, pageRuns, spreadOf } from "./pages.js";
 
 describe("nearestPage", () => {
   const vendored = [7, 9, 19];
@@ -45,6 +45,88 @@ describe("pageFraction", () => {
   it("does not divide by zero on a one-page book", () => {
     expect(pageFraction(1, 1)).toBe(0);
     expect(pageFraction(1, 0)).toBe(0);
+  });
+});
+
+describe("pageRuns", () => {
+  it("has nothing to draw for an empty inventory", () => {
+    // Not one zero-width run. A build with no pages has no stretch of pages,
+    // and a caller that maps over this must render nothing at all.
+    expect(pageRuns([])).toEqual([]);
+  });
+
+  it("makes one run of a stretch and one run of a lone page", () => {
+    // The two shapes side by side, because they are the same shape: a run is
+    // inclusive at both ends, so a single page is `{from: n, to: n}` and draws
+    // the 2px mark the per-page ticks used to draw.
+    expect(pageRuns([7, 8, 9])).toEqual([{ from: 7, to: 9 }]);
+    expect(pageRuns([7])).toEqual([{ from: 7, to: 7 }]);
+  });
+
+  it("splits at every gap and nowhere else", () => {
+    // This build's inventory before Loop 4b: three pages, none adjacent, so
+    // three runs — the picture the per-page ticks drew, arrived at by counting
+    // gaps rather than pages.
+    expect(pageRuns([7, 9, 19])).toEqual([
+      { from: 7, to: 7 },
+      { from: 9, to: 9 },
+      { from: 19, to: 19 },
+    ]);
+    // …and a corpus with two holes is three runs, whatever their lengths.
+    expect(pageRuns([1, 2, 3, 10, 11, 604])).toEqual([
+      { from: 1, to: 3 },
+      { from: 10, to: 11 },
+      { from: 604, to: 604 },
+    ]);
+  });
+
+  it("does not care what order the manifest arrived in, or that it repeats", () => {
+    // `available` is a manifest read off disk, and nothing upstream promises it
+    // is sorted or deduplicated. 7,8,9 is one run however it is spelled.
+    expect(pageRuns([9, 7, 8])).toEqual([{ from: 7, to: 9 }]);
+    expect(pageRuns([9, 8, 8, 7, 9])).toEqual([{ from: 7, to: 9 }]);
+  });
+
+  it("draws a complete edition as one bar, not as 604 of them", () => {
+    // The row this function exists for. Before Loop 4b the page bar rendered one
+    // node per vendored page: three of them, three marks, a true picture. At 604
+    // of 604 the same code drew 604 spans half a pixel apart and two pixels
+    // wide, which overlap into a solid rail that says nothing — and React
+    // reconciled every one of them on every value a dragged thumb passed over.
+    // The node count has to follow the number of *gaps*, which is what the
+    // reader is being shown; the length of the book they can already see.
+    const whole = Array.from({ length: 604 }, (_, i) => i + 1);
+    expect(pageRuns(whole)).toEqual([{ from: 1, to: 604 }]);
+  });
+
+  it("covers exactly the pages it was given, for any inventory", () => {
+    // The property behind all of the above: expanding the runs must return the
+    // inventory, deduplicated and sorted, and no page that is not vendored may
+    // fall inside a run. A drawing that spans a page we do not hold is the same
+    // lie the fold code refuses to tell (`foldBetween` → "hole").
+    const inventories = [[], [7, 9, 19], [1, 2, 3, 10, 11, 604], [4, 4, 5], [604]];
+    for (const inventory of inventories) {
+      const held = new Set(inventory);
+      const covered: number[] = [];
+      for (const { from, to } of pageRuns(inventory)) {
+        expect(to).toBeGreaterThanOrEqual(from);
+        for (let page = from; page <= to; page += 1) {
+          expect(held.has(page)).toBe(true);
+          covered.push(page);
+        }
+      }
+      expect(covered).toEqual([...held].sort((a, b) => a - b));
+    }
+  });
+
+  it("never emits two runs that could have been one", () => {
+    // Adjacency is the whole definition, so a run ending at n followed by a run
+    // starting at n+1 is a bug that would still pass the coverage row above —
+    // and would put a seam in the middle of a complete edition.
+    const runs = pageRuns([1, 2, 3, 4, 5, 7, 8, 10]);
+    for (let i = 1; i < runs.length; i += 1) {
+      expect(runs[i]!.from).toBeGreaterThan(runs[i - 1]!.to + 1);
+    }
   });
 });
 
@@ -131,11 +213,14 @@ describe("leafSideOf", () => {
   const MADANI = 604;
 
   it("puts the odd page on the right and the even page on the left", () => {
-    // The three vendored pages are all odd, so this build can only ever draw the
-    // right-hand form (docs/design/page-transition.md §2.3). The even rows are
-    // here so the left-hand form is under test before Loop 4b makes it visible —
-    // an unreachable branch with no test is a branch that will be wrong when it
-    // becomes reachable.
+    // Written when pages 7, 9 and 19 were the whole build: all odd, so only the
+    // right-hand form could be drawn (docs/design/page-transition.md §2.3), and
+    // the even rows were here so the left-hand form was under test before it was
+    // reachable. Loop 4b made it reachable and the bet paid — `leafSideOf` was
+    // right, and the defect the even page found was one layer up, in the stage's
+    // bound-edge inset (`e2e/page-turn.spec.ts`, the 7 → 8 turn). An unreachable
+    // branch with no test is a branch that will be wrong when it becomes
+    // reachable; these rows stay as the record of that being worth doing.
     expect(leafSideOf(7, MADANI)).toBe("right");
     expect(leafSideOf(9, MADANI)).toBe("right");
     expect(leafSideOf(19, MADANI)).toBe("right");
