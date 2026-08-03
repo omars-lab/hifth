@@ -573,6 +573,16 @@ already-existing behaviour made visible or made correct.
 
 ## 4. The gesture model
 
+**§4.1–4.4 are shipped** (PLAN follow-up ⑪); **§4.5 is not** — `goToPage` still resets the
+view on every turn. Two departures are worth naming up front so the rest reads as built
+rather than proposed. §4.3's per-page `.leaf` wrapper is **withdrawn** — the finger drags
+the *fold*, the single band `page-transition.md` §3.1 already defined, and the pages
+themselves do not move at all; and the rule is **device-blind**, so a mouse drag on a
+desktop turns the page too (`desktop-vs-mobile.md` row 19, corrected in place — it had
+declined desktop on the grounds that a pointer drag already means marquee, which a 350 ms
+hold requirement makes false). The 2:1 axis ratio and the 25 % commit distance below shipped
+**unmeasured**, as proposals, and say so in `gestures.ts`.
+
 The hard constraint: the stage owns touch. `touch-action: none`
 (`PageStage.module.css:13`) is mandatory, not cosmetic — without it the browser fires
 `pointercancel` and native-scrolls out from under the gesture
@@ -647,16 +657,31 @@ validated here.
 
 ### 4.3 Committing a turn
 
-A latched `"turn"` stroke tracks the finger on the `.leaf` wrapper's `translateX` (bounded,
-with rubberband past the ends) and commits on release when **either**:
+A latched `"turn"` stroke tracks the finger and commits on release when **either**:
 
 - displacement ≥ 25 % of the stage width, **or**
 - velocity ≥ a flick threshold in the same direction.
 
 Otherwise it springs back. Both thresholds are conventional and **neither is measured
-here**; the honest statement is that they need a device pass on the acceptance phone.
+here**; the honest statement is that they need a device pass on the acceptance phone. That
+is still true of what shipped — `TURN_COMMIT_FRACTION` and `TURN_FLICK_PX_PER_MS` in
+`gestures.ts` carry the same admission, and `page-transition.md` §7 ⑥ already decided not to
+reopen it as a separate question.
 
-Direction follows `loop-1.md`: **finger moving rightward = next page.**
+**What it tracks is not what this section first said.** The draft above had the stroke
+moving a per-page `.leaf` wrapper's `translateX`, with rubberband past the ends. That is
+withdrawn: `page-transition.md` §3.1 established that **no glyph moves during a turn** — the
+thing that crosses the stage is the *fold*, a third element carrying no page — so the finger
+drags the band, linearly and 1:1, and the pages stay still. Two consequences fall out and
+both are why the withdrawal is an improvement rather than a compromise. There is no
+rubberband to design, because the band is clamped to the sweep it would have travelled
+anyway; and a committed turn **hands the band over** to `runTurn` rather than replacing it,
+which is what keeps `page-transition.md` §3.4's *one fold, ever* true across a gesture that
+now has two authors.
+
+Direction follows `loop-1.md`: **finger moving rightward = next page** — the same `1` the
+wheel, the arrow keys and `nextWheelTurn` mean, asserted against each other in
+`gestures.test.ts` rather than left to agree by coincidence.
 
 ### 4.4 The iOS edge hazard
 
@@ -686,8 +711,9 @@ The exception is the hop, which has its own framing (`frameBboxToView`) and must
 distinction is *turn* vs *jump*: a turn is continuous reading and should preserve the view; a
 jump to an arbitrary ayah is a relocation and should frame its target.
 
-**Layer:** L1 gets `viewFitsAcross`; L2 gets the intent wiring, the `.leaf` wrapper, and the
-`centerCurrent` call-site change.
+**Layer:** L1 gets `viewFitsAcross`; L2 gets the intent wiring, the fold-tracking states, and
+the `centerCurrent` call-site change. The first two shipped; the third has not — §4.5 above
+is still an open recommendation, and `goToPage` still resets the view on every turn.
 
 ### 4.6 What is *not* in the gesture model
 
