@@ -372,6 +372,10 @@
           "symbol": "appKeyAction"
         },
         {
+          "file": "packages/core/src/gestures.ts",
+          "symbol": "turnCommit"
+        },
+        {
           "file": "apps/web/src/assets.ts",
           "symbol": "loadPage"
         }
@@ -380,6 +384,10 @@
         {
           "file": "apps/web/e2e/wayfinding.spec.ts",
           "test": "arrows turn pages, and stop honestly at the last vendored one"
+        },
+        {
+          "file": "apps/web/e2e/page-turn.spec.ts",
+          "test": "a sideways flick turns the page, and the band tracks the finger"
         },
         {
           "file": "apps/web/e2e/offline.spec.ts",

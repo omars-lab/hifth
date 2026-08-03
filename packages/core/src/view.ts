@@ -95,6 +95,40 @@ export function clampView(v: View, fit: StageFit): View {
 }
 
 /**
+ * Does the page fit the stage *across*, with no horizontal slack to roam over?
+ *
+ * This is the predicate the turn gesture is gated on (`page-turning.md` §4.1):
+ * when it is true, a horizontal drag is a measured no-op — `holdAxis` returns
+ * the centre for an axis that fits, so the transform does not move — and the
+ * horizontal slot is free for something else to mean. When it is false the
+ * reader is panning across an overflowing page and the slot is taken.
+ *
+ * **One axis, and it has to be one axis.** The predicate started life in §4.2 as
+ * both — `contentWidth·z <= stageWidth && contentHeight·z <= stageHeight` —
+ * because that section believed the leaf fit both axes at z = 1. It does not: a
+ * 390 × 844 phone overflows *vertically* by 47.5 px at rest, so the two-axis
+ * form is false at fit-zoom on the acceptance device and the turn would have
+ * been dead on arrival, on exactly the phone it is for, falling through to a
+ * `"pan"` that does nothing. The one-axis form is also simply the right
+ * question: what the gesture needs to know is whether the *horizontal* slot is
+ * free. A reader with a vertically-overflowing page has a live vertical pan and
+ * a free horizontal flick, and both should work.
+ *
+ * The comparison is `<=`, matching `holdAxis`'s own `scaled <= available`
+ * exactly, so the predicate and the clamp cannot disagree about the boundary
+ * case — a page that is precisely stage-width is centred by one and reported as
+ * fitting by the other.
+ */
+export function viewFitsAcross(v: View, fit: StageFit): boolean {
+  // An unlaid-out host measures 0, and `holdAxis` refuses to treat that as
+  // "fits" for the same reason: a zero box is a measurement that has not
+  // happened yet, and answering "yes, it fits" would arm a turn against a page
+  // nobody has seen.
+  if (!(fit.contentWidth > 0) || !(fit.stageWidth > 0)) return false;
+  return fit.contentWidth * v.z <= fit.stageWidth;
+}
+
+/**
  * Compute the `View` that brings `bbox` (SVG user units) as close to the stage
  * centre as the page's own edges allow, at zoom `z`. This is the mock's
  * `focus()` — scale user→px by `s = contentWidth/vbW`, take the bbox center,

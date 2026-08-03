@@ -10,11 +10,17 @@ import {
   PINCH_POINTER_COUNT,
   TAP_SLOP_PX,
   isMarqueeIntent,
+  isTurnIntent,
   isViewportIntent,
   marqueeRect,
   movementDistance,
   nextIntent,
   pointerIntent,
+  TURN_AXIS_RATIO,
+  TURN_COMMIT_FRACTION,
+  TURN_EDGE_GUARD_PX,
+  TURN_FLICK_PX_PER_MS,
+  turnCommit,
   type PointerIntent,
   type PointerSample,
 } from "./gestures.js";
@@ -155,10 +161,176 @@ describe("nextIntent · latching", () => {
 });
 
 describe("intent predicates", () => {
-  it("only a marquee paints; only pan/pinch move the viewport", () => {
-    const all: PointerIntent[] = ["none", "tap", "pan", "marquee", "pinch"];
+  it("only a marquee paints; only pan/pinch move the viewport; only a turn turns", () => {
+    const all: PointerIntent[] = ["none", "tap", "pan", "marquee", "pinch", "turn"];
     expect(all.filter(isMarqueeIntent)).toEqual(["marquee"]);
     expect(all.filter(isViewportIntent)).toEqual(["pan", "pinch"]);
+    expect(all.filter(isTurnIntent)).toEqual(["turn"]);
+  });
+
+  it("a turn is NOT a viewport intent — during a turn no glyph moves", () => {
+    // The single line that keeps page-turning.md §1.5's axiom true through the
+    // fourth gesture. If `turn` ever joined this set the reader would be
+    // dragging the fold and panning the page it crosses at the same time.
+    expect(isViewportIntent("turn")).toBe(false);
+  });
+});
+
+/**
+ * A stroke that has cleared the slop radius, has not held, and is happening on
+ * a page with no horizontal slack — i.e. everything rule 3 needs *except* the
+ * axis ratio, which each test supplies.
+ */
+function turnable(over: Partial<PointerSample> = {}): PointerSample {
+  return sample({ elapsedMs: 40, fitsAcross: true, edgeDistancePx: 200, ...over });
+}
+
+describe("pointerIntent · the turn rule (page-turning.md §4.2)", () => {
+  it("a sideways stroke across a page that fits is a turn", () => {
+    expect(pointerIntent(turnable({ dx: 60, dy: 4 }))).toBe("turn");
+  });
+
+  it("the same stroke on a page with room to roam is a pan", () => {
+    // Above fit-zoom the horizontal slot is occupied by a real pan, and the page
+    // bar is the path to a turn. This is the whole gate.
+    expect(pointerIntent(turnable({ dx: 60, dy: 4, fitsAcross: false }))).toBe("pan");
+  });
+
+  it("omitting fitsAcross leaves the old three-gesture ladder exactly as it was", () => {
+    // Every caller that predates the turn — and every test above — passes
+    // neither new field. They must classify identically.
+    expect(pointerIntent(sample({ elapsedMs: 40, dx: 60 }))).toBe("pan");
+  });
+
+  it("a hold beats a turn, whatever the stroke does next", () => {
+    // The marquee-is-never-at-risk argument, asserted rather than reasoned: by
+    // the time the hold has completed, rule 2 has already answered.
+    expect(pointerIntent(turnable({ elapsedMs: LONG_PRESS_MS, dx: 200, dy: 0 }))).toBe("marquee");
+  });
+
+  it("two fingers beat a turn", () => {
+    expect(pointerIntent(turnable({ pointers: 2, dx: 200, dy: 0 }))).toBe("pinch");
+  });
+
+  it("the axis ratio: the boundary, either side of it, and both directions", () => {
+    const dy = 10;
+    const edge = TURN_AXIS_RATIO * dy;
+    // Strictly greater — exactly 2:1 is not decisive enough.
+    expect(pointerIntent(turnable({ dx: edge, dy }))).toBe("pan");
+    expect(pointerIntent(turnable({ dx: edge + 1, dy }))).toBe("turn");
+    // Direction is irrelevant to the *classification* (it decides which way to
+    // turn, not whether). Both signs of both axes.
+    expect(pointerIntent(turnable({ dx: -(edge + 1), dy }))).toBe("turn");
+    expect(pointerIntent(turnable({ dx: edge + 1, dy: -dy }))).toBe("turn");
+  });
+
+  it("a mostly-vertical stroke on a fitting page is still a pan", () => {
+    // A phone that overflows vertically has a live vertical pan at fit-zoom, and
+    // this is the case that must keep working: fitsAcross is true and the finger
+    // is carrying the foot of the page.
+    expect(pointerIntent(turnable({ dx: 10, dy: 60 }))).toBe("pan");
+  });
+
+  it("the iOS edge band declines the turn rather than fighting the OS", () => {
+    const stroke = { dx: 60, dy: 0 };
+    expect(pointerIntent(turnable({ ...stroke, edgeDistancePx: TURN_EDGE_GUARD_PX }))).toBe("pan");
+    expect(pointerIntent(turnable({ ...stroke, edgeDistancePx: TURN_EDGE_GUARD_PX + 1 }))).toBe(
+      "turn",
+    );
+  });
+
+  it("an omitted edge distance means 'not near an edge'", () => {
+    // A caller that cannot measure the screen (a spread panel, a test) must not
+    // silently lose the gesture; the guard is opt-in the same way fitsAcross is.
+    expect(pointerIntent(sample({ elapsedMs: 40, dx: 60, fitsAcross: true }))).toBe("turn");
+  });
+});
+
+describe("nextIntent · a turn is latched like the rest", () => {
+  it("a turn stays a turn once the thumb starts curving", () => {
+    // Real thumbs pivot. The axis test is applied once, at the frame the stroke
+    // clears slop; after that the reader may curve it into a hook and the app
+    // must not change its mind — a pan mid-turn is the page jumping under a
+    // finger that was moving the fold.
+    let intent = nextIntent("none", turnable({ dx: 30, dy: 2 }));
+    expect(intent).toBe("turn");
+    intent = nextIntent(intent, turnable({ elapsedMs: 200, dx: 40, dy: 90 }));
+    expect(intent).toBe("turn");
+  });
+
+  it("a turn does not become a marquee when the finger pauses mid-drag", () => {
+    let intent = nextIntent("none", turnable({ dx: 30, dy: 0 }));
+    expect(intent).toBe("turn");
+    intent = nextIntent(intent, turnable({ elapsedMs: LONG_PRESS_MS * 4, dx: 30, dy: 0 }));
+    expect(intent).toBe("turn");
+  });
+
+  it("a second finger takes over an in-flight turn", () => {
+    const turning = nextIntent("none", turnable({ dx: 30, dy: 0 }));
+    expect(nextIntent(turning, turnable({ pointers: 2, dx: 30 }))).toBe("pinch");
+  });
+
+  it("lifting every finger ends the turn", () => {
+    const turning = nextIntent("none", turnable({ dx: 30, dy: 0 }));
+    expect(nextIntent(turning, turnable({ pointers: 0, dx: 30 }))).toBe("none");
+  });
+
+  it("a latched pan is never re-opened as a turn", () => {
+    // The reader started by dragging the page vertically; the stroke is spoken
+    // for. Curving it sideways later must not turn a page under them.
+    let intent = nextIntent("none", turnable({ dx: 2, dy: 40 }));
+    expect(intent).toBe("pan");
+    intent = nextIntent(intent, turnable({ elapsedMs: 120, dx: 200, dy: 40 }));
+    expect(intent).toBe("pan");
+  });
+});
+
+describe("turnCommit · what a released stroke meant (page-turning.md §4.3)", () => {
+  const STAGE = 390;
+  const slow = (dx: number) => turnCommit({ dx, velocityX: 0, stageWidth: STAGE });
+
+  it("rightward is the next page, leftward the previous — loop-1.md's book direction", () => {
+    expect(slow(STAGE * 0.5)).toBe(1);
+    expect(slow(-STAGE * 0.5)).toBe(-1);
+  });
+
+  it("agrees with the wheel's sign convention: 1 is always the next page", () => {
+    const byWheel = nextWheelTurn(WHEEL_TURN_REST, { deltaY: 200, deltaMode: 0, timeStamp: 1000 });
+    expect(byWheel.step).toBe(1);
+    expect(slow(STAGE * 0.5)).toBe(byWheel.step);
+  });
+
+  it("the distance boundary is inclusive, and it is a fraction of the stage", () => {
+    const edge = TURN_COMMIT_FRACTION * STAGE;
+    expect(slow(edge)).toBe(1);
+    expect(slow(edge - 1)).toBe(0);
+    // Same proportion of a wider stage asks for more px, which is the point of
+    // expressing it as a fraction rather than as a distance.
+    expect(turnCommit({ dx: edge, velocityX: 0, stageWidth: 1440 })).toBe(0);
+  });
+
+  it("a short quick flick commits where a short slow drag springs back", () => {
+    const short = 20;
+    expect(slow(short)).toBe(0);
+    expect(turnCommit({ dx: short, velocityX: TURN_FLICK_PX_PER_MS, stageWidth: STAGE })).toBe(1);
+    expect(turnCommit({ dx: short, velocityX: TURN_FLICK_PX_PER_MS - 0.01, stageWidth: STAGE })).toBe(
+      0,
+    );
+  });
+
+  it("a flick that disagrees with the drag does not commit the flick's direction", () => {
+    // The reader pushed right, changed their mind, and snapped back left. The
+    // gesture they finished is 'not this one', and turning the previous page
+    // would be the app finishing a sentence they stopped saying.
+    expect(turnCommit({ dx: 30, velocityX: -2, stageWidth: STAGE })).toBe(0);
+  });
+
+  it("a long drag commits even when the finger stopped dead before release", () => {
+    expect(turnCommit({ dx: STAGE * 0.4, velocityX: 0, stageWidth: STAGE })).toBe(1);
+  });
+
+  it("a stroke with no horizontal displacement turns nothing", () => {
+    expect(turnCommit({ dx: 0, velocityX: 5, stageWidth: STAGE })).toBe(0);
   });
 });
 

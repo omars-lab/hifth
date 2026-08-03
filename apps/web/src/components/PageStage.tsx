@@ -22,6 +22,8 @@ import {
   nextIntent,
   nextWheelTurn,
   normalizeWheelDelta,
+  turnCommit,
+  viewFitsAcross,
   Highlighter,
   DEFAULT_HOP_ZOOM,
   WHEEL_GAP_MS,
@@ -73,17 +75,57 @@ interface PageStageProps {
   /** Fired with the selected ayah's on-screen bbox so the rail can position. */
   onSelectionRect?: (rect: { x: number; y: number; width: number; height: number } | null) => void;
   /**
-   * Fired when a wheel gesture over the stage asks for a page turn: `1` for the
-   * next page, `-1` for the previous (`page-turning.md` §7 ③).
+   * Fired when a gesture over the stage asks for a page turn: `1` for the next
+   * page, `-1` for the previous (`page-turning.md` §4, §7 ③).
    *
-   * The stage decides *whether a wheel meant a turn* — that is a fact about the
-   * gesture, and the stage is the only thing holding the surface it happened on
-   * — and App decides *what turning means*, because "the next page" is a fact
+   * The stage decides *whether a gesture meant a turn* — that is a fact about
+   * the gesture, and the stage is the only thing holding the surface it happened
+   * on — and App decides *what turning means*, because "the next page" is a fact
    * about the inventory, which the stage does not have. Same seam the arrow keys
-   * already use: both end in `stepPage`, so a wheel turn and a keyed turn cannot
-   * drift apart.
+   * already use: all three end in `stepPage`, so a wheel turn, a dragged turn and
+   * a keyed turn cannot drift apart.
+   *
+   * It was `onWheelTurn` until the drag gesture landed and asked the identical
+   * question. The old name described the one caller rather than the seam, and a
+   * second caller is exactly the moment that difference starts to cost.
    */
-  onWheelTurn?: (step: 1 | -1) => void;
+  onTurn?: (step: 1 | -1) => void;
+  /**
+   * Which page a turn in this direction would land on, or `null` for none.
+   *
+   * Needed only by the *dragged* turn, and only because a fold has an appearance
+   * before it has a destination. The band the finger is pushing has to be drawn
+   * on the frame it appears, and what it looks like — crease, gap, hole
+   * (`foldBetween`) — is a fact about the **pair** of pages it spans. With 7, 9
+   * and 19 vendored, a forward drag from page 7 lands on 9 and must draw a
+   * `hole`; guessing `7 → 8` would draw a `crease` and then swap it for a hole at
+   * release, which is the fold contradicting itself mid-gesture.
+   *
+   * The wheel never needed this because a wheel turn is decided and drawn in the
+   * same instant — it asks `onTurn` and the answer comes back through `turnTo`.
+   * A dragged turn is the reader holding the question open for as long as they
+   * like, and the picture has to be right for all of it.
+   *
+   * Absent, the stage falls back to `page ± 1` clamped to the print. That is the
+   * right guess for a complete edition and the wrong one for a partial inventory
+   * — so it is a fallback, not the design.
+   */
+  turnTargetOf?: (step: 1 | -1) => number | null;
+  /**
+   * May a sideways drag on *this* stage turn the page? Default yes.
+   *
+   * The one caller that says no is the facing leaf of a desktop spread, and the
+   * reason is structural rather than a preference. A tracked turn ends by handing
+   * its band to `runTurn`, and `runTurn` only runs on the stage App holds a ref
+   * to — so on the facing leaf the band would have nobody to hand to, while the
+   * live stage drew a *second* band into the same `foldTarget`. Two folds on one
+   * book is precisely what §3.4's "one fold, ever" forbids.
+   *
+   * The wheel is unaffected and stays live on both leaves: it commits in the
+   * same instant it is decided and never holds a band open, so it has no
+   * hand-over to fail.
+   */
+  dragToTurn?: boolean;
   /**
    * The applied skin (Loop 6a, spec §8). L3 owns the choice; the stage owns the
    * Highlighters, so it is the one that can apply it to every mounted page.
@@ -198,7 +240,9 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
     onSelectRange,
     labelFor,
     onSelectionRect,
-    onWheelTurn,
+    onTurn,
+    turnTargetOf,
+    dragToTurn = true,
     skin = "plain",
     tajweedLookup = null,
     foldTarget = null,
@@ -242,8 +286,12 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
   labelForRef.current = labelFor;
   const onSelectionRectRef = useRef(onSelectionRect);
   onSelectionRectRef.current = onSelectionRect;
-  const onWheelTurnRef = useRef(onWheelTurn);
-  onWheelTurnRef.current = onWheelTurn;
+  const onTurnRef = useRef(onTurn);
+  onTurnRef.current = onTurn;
+  const turnTargetOfRef = useRef(turnTargetOf);
+  turnTargetOfRef.current = turnTargetOf;
+  const dragToTurnRef = useRef(dragToTurn);
+  dragToTurnRef.current = dragToTurn;
   // The wheel's accumulator (core owns the rule; this is just where it lives
   // between events), and the two things the zoom branch needs to notice a
   // gesture starting and ending — a wheel has no `first`/`last` of its own.
@@ -281,6 +329,24 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
   const turnRef = useRef(0);
   const foldTargetRef = useRef(foldTarget);
   foldTargetRef.current = foldTarget;
+  /*
+   * The turn the finger is currently holding open (`page-transition.md` §3.2,
+   * `tracking`). Null whenever no drag has latched `"turn"`.
+   *
+   * `step` and `dir` are fixed at the frame the ladder latched and never
+   * re-derived: the classifier already decided this stroke is a turn and which
+   * way it goes, and a thumb that curves back past its own start must not flip
+   * the band around — that is the page changing its mind under a finger that is
+   * still down. `drawn` is false for the turns that are real but invisible
+   * (reduced motion, a crease on a spread), which still commit on release; the
+   * band is the picture, not the gesture.
+   */
+  const dragTurnRef = useRef<{
+    gen: number;
+    step: 1 | -1;
+    dir: TurnDir;
+    drawn: boolean;
+  } | null>(null);
 
   /*
    * The skin swap itself: classes on and classes off, on every mounted page.
@@ -718,6 +784,11 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
   const abortTurn = useCallback((): void => {
     turnRef.current += 1;
     armedRef.current = false;
+    // A hop that lands mid-*drag* is rarer than one that lands mid-turn, but it
+    // is the same sentence: whatever the finger was holding open is no longer
+    // about the page on screen. Dropping the ref here is what stops the next
+    // drag frame from moving a band this call just removed.
+    dragTurnRef.current = null;
     foldRef.current = null;
     setFold(null);
     setTurnPhase(null);
@@ -850,6 +921,133 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
       setTurnPhase,
       sweepOf,
     ],
+  );
+
+  /**
+   * Which page a turn in `step`'s direction would land on, or null for none.
+   *
+   * The prop when App supplied one; otherwise the neighbour in the print. See
+   * `turnTargetOf`'s docblock for why the fallback is a fallback.
+   */
+  const turnTarget = useCallback((step: 1 | -1): number | null => {
+    const ask = turnTargetOfRef.current;
+    if (ask) return ask(step);
+    const next = currentPageRef.current + step;
+    return next >= 1 && next <= totalRef.current ? next : null;
+  }, []);
+
+  /**
+   * Begin a tracked turn: put the band at its entry edge and hand it the finger.
+   *
+   * The one asymmetry with `runTurn` is who owns the clock. A wheel turn is a
+   * decision already made, so the band sweeps on a transition and the code waits
+   * out the milliseconds. A dragged turn has not been decided yet — the reader
+   * is *asking*, and may still say no — so nothing here animates: every later
+   * frame writes a transform with no transition on it, and the band's position
+   * is a pure function of how far the hand has travelled. That is the whole of
+   * §4.3's "linearly, 1:1, no easing", and it is why an eased tracking phase
+   * would be wrong rather than merely fancy: an ease means the paper is
+   * disagreeing with the finger about where the finger is.
+   */
+  const beginTrackedTurn = useCallback(
+    (step: 1 | -1): void => {
+      const from = currentPageRef.current;
+      const next = turnTarget(step);
+      const dir: TurnDir = step > 0 ? "forward" : "back";
+      const gen = (turnRef.current += 1);
+      // Same three reasons `runTurn` draws nothing, asked in the same order —
+      // plus a fourth this one has and it does not: there may be no page that
+      // way at all. The stroke still latches, and release still asks App, which
+      // is what makes dragging at the end of the inventory say "last page"
+      // rather than silently doing nothing.
+      const sweepMs = durationMs("--dur-med", 240);
+      const kind = next === null ? "none" : foldBetween(from, next, totalRef.current);
+      const drawn =
+        kind !== "none" && sweepMs > 0 && !(kind === "crease" && foldTargetRef.current?.current);
+      dragTurnRef.current = { gen, step, dir, drawn };
+      if (!drawn) return;
+
+      setTurnPhase("tracking");
+      foldRef.current = { kind: kind as FoldKind, dir };
+      setFold(foldRef.current);
+      // Pre-mount the destination now rather than at release. The reader is
+      // holding a picture of a page; by the time they commit, 200-odd ms of
+      // thinking time has been spent on the fetch that would otherwise stall.
+      if (next !== null) void ensurePage(next).catch(() => null);
+    },
+    [durationMs, ensurePage, setTurnPhase, turnTarget],
+  );
+
+  /**
+   * Move the band to where the hand has put it — 1:1, clamped to its own sweep.
+   *
+   * Clamped because past `exit` the band has already left the leaf: further drag
+   * would push a page-sized element off into the layout, and the reader would be
+   * dragging a thing they can no longer see while the commit rule quietly counts
+   * up behind them.
+   */
+  const trackFold = useCallback(
+    (dx: number): void => {
+      const turn = dragTurnRef.current;
+      const el = foldElRef.current;
+      if (!turn?.drawn || !el || !armedRef.current || turnRef.current !== turn.gen) return;
+      const { enter, exit } = sweepOf(el, turn.dir);
+      const at = enter + dx;
+      moveFold(el, exit > enter ? Math.min(exit, Math.max(enter, at)) : Math.max(exit, Math.min(enter, at)), 0);
+    },
+    [moveFold, sweepOf],
+  );
+
+  /** Slide the band back the way it came and take it off the stage. */
+  const retreatFold = useCallback(
+    async (gen: number, dir: TurnDir): Promise<void> => {
+      const el = foldElRef.current;
+      const mine = (): boolean => turnRef.current === gen;
+      if (el && mine()) {
+        const ms = durationMs("--dur-fast", 120);
+        setTurnPhase("retreating");
+        moveFold(el, sweepOf(el, dir).enter, ms);
+        await sleep(ms);
+      }
+      if (!mine()) return;
+      armedRef.current = false;
+      foldRef.current = null;
+      setFold(null);
+      setTurnPhase(null);
+    },
+    [durationMs, moveFold, setTurnPhase, sweepOf],
+  );
+
+  /**
+   * The finger came up. Ask the commit rule, then either hand the band over or
+   * take it back.
+   *
+   * Handing over is not a second animation: `onTurn` walks through App and back
+   * in through `turnTo`, and `runTurn` finds a band that is already armed and
+   * mid-leaf, so it re-targets it exactly the way an interrupted wheel turn does.
+   * The generation bump inside `runTurn` is synchronous, which is what makes the
+   * check below a plain comparison rather than a watchdog: if it did not move,
+   * nothing took the band and the honest thing is to give it back.
+   */
+  const releaseTrackedTurn = useCallback(
+    (dx: number, velocityX: number): void => {
+      const turn = dragTurnRef.current;
+      dragTurnRef.current = null;
+      if (!turn || turnRef.current !== turn.gen) return;
+      const stageWidth = fitRef.current?.stageWidth ?? stageRef.current?.clientWidth ?? 0;
+      const verdict = turnCommit({ dx, velocityX, stageWidth });
+      // The commit rule may only confirm or refuse the direction the ladder
+      // already latched. A stroke that ended up travelling the other way is a
+      // reader who changed their mind, and `turnCommit` returning the opposite
+      // sign is that, not a request for the opposite page.
+      if (verdict !== turn.step) {
+        if (turn.drawn) void retreatFold(turn.gen, turn.dir);
+        return;
+      }
+      onTurnRef.current?.(turn.step);
+      if (turn.drawn && turnRef.current === turn.gen) void retreatFold(turn.gen, turn.dir);
+    },
+    [retreatFold],
   );
 
   // Report the selected ayah's on-screen rect so the rail can sit beside it.
@@ -1073,7 +1271,19 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
   // native-scrolls out from under the gesture (research §4).
   useGesture(
     {
-      onDrag: ({ movement: [mx, my], xy: [cx, cy], initial: [ix, iy], elapsedTime, pinching, cancel, memo, first, last }) => {
+      onDrag: ({
+        movement: [mx, my],
+        xy: [cx, cy],
+        initial: [ix, iy],
+        velocity: [vx],
+        direction: [dirX],
+        elapsedTime,
+        pinching,
+        cancel,
+        memo,
+        first,
+        last,
+      }) => {
         if (pinching) {
           cancel();
           return memo;
@@ -1099,13 +1309,43 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
         // exactly what the pan transform wants (no jump when the drag latches)
         // and exactly what the intent split must not see (it would shrink the
         // slop radius by 3px behind our backs).
+        const dx = cx - ix;
+        const wasTurn = intentRef.current === "turn";
         const intent = nextIntent(intentRef.current, {
           pointers: 1,
           elapsedMs: elapsedTime,
-          dx: cx - ix,
+          dx,
           dy: cy - iy,
+          // The two facts the turn rule needs that the hand alone cannot supply.
+          // Both are read from values already in hand — `fitRef` was measured on
+          // the first frame of this stroke, and the press point is the gesture's
+          // own — so classifying costs no layout, which matters because this runs
+          // on every pointermove.
+          // `dragToTurn: false` opts out by simply not answering: core's ladder
+          // treats a missing/false `fitsAcross` as "the horizontal slot is
+          // taken", so the stroke falls through to the three-gesture ladder it
+          // had before. One flag, no second code path.
+          fitsAcross:
+            dragToTurnRef.current && fitRef.current
+              ? viewFitsAcross(view.current, fitRef.current)
+              : false,
+          // Distance from the *viewport* edge, not the stage's: the hazard is
+          // Safari's own back-swipe band, and Safari measures it against the
+          // screen (`page-turning.md` §4.4).
+          edgeDistancePx: Math.min(ix, window.innerWidth - ix),
         });
         intentRef.current = intent;
+
+        if (intent === "turn") {
+          // Latched this frame: fix the direction and put the band on the stage.
+          // Every frame after is the band following the hand and nothing else —
+          // in particular the page does not move, because `isViewportIntent` is
+          // false for a turn and §1.5's axiom is that no glyph moves during one.
+          if (!wasTurn) beginTrackedTurn(dx > 0 ? 1 : -1);
+          if (last) releaseTrackedTurn(dx, vx * (dirX || Math.sign(dx)));
+          else trackFold(dx);
+          return base;
+        }
 
         if (intent === "marquee") {
           const cur = pagesRef.current.get(currentPageRef.current);
@@ -1140,6 +1380,14 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
         if (marqueeStartRef.current) {
           pagesRef.current.get(currentPageRef.current)?.hl.clear("preview");
         }
+        // Same for an interrupted turn. `releaseTrackedTurn` clears this ref, so
+        // anything still here is a stroke that never got its last frame — a
+        // second finger, a `pointercancel`, the tab going away. A band left
+        // mid-leaf with no finger on it asserts a turn nobody asked for, so it
+        // goes back the way it came rather than staying where it was dropped.
+        const stranded = dragTurnRef.current;
+        dragTurnRef.current = null;
+        if (stranded?.drawn) void retreatFold(stranded.gen, stranded.dir);
         intentRef.current = "none";
         marqueeStartRef.current = null;
         emitSelectionRect();
@@ -1248,7 +1496,7 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
       wheelTurnRef.current = state;
       // The stage decided *whether* that was a turn; App decides what turning
       // means, because "the next page" is a fact about the inventory.
-      if (step !== 0) onWheelTurnRef.current?.(step);
+      if (step !== 0) onTurnRef.current?.(step);
     };
 
     stage.addEventListener("wheel", onWheel, { passive: false });

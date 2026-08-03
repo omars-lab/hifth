@@ -420,7 +420,12 @@ between visits is actively harmful* — is answered here in the strongest possib
 
 ### 3.2 The state machine
 
-Five states. Names are proposed for the `data-turn` attribute on `.stage`.
+Five states. Names are proposed for the `data-turn` attribute on `.stage`, and **all five
+now exist under those names** — `crossing`, `landing` and `stalled` shipped with the fold
+itself; `tracking` and `retreating` arrived with drag-to-turn (PLAN follow-up ⑪), which is
+the only entry point that can reach them. `e2e/page-turn.spec.ts` reads `data-turn` mid-drag
+rather than inferring the state from the band's position, so the attribute is a contract and
+not a debugging aid.
 
 ```
   rest ──drag latches "turn"──▶ tracking ──release below threshold──▶ retreating ──▶ rest
@@ -455,7 +460,9 @@ else happened, because nothing else had happened yet.
 
 **landing.** The fold is removed; `data-turn` is cleared. The view is carried across
 unchanged (`page-turning.md` §4.5 — mushaf pages are geometrically congruent, so a reader
-zoomed into line 4 stays on line 4); the existing `LiveAnnouncer` speaks.
+zoomed into line 4 stays on line 4); the existing `LiveAnnouncer` speaks. The carry is the
+one clause of this state that is **still unbuilt**: `goToPage` resets the view on every
+turn, as §4.5 there records.
 
 **The page swap happens under the fold.** The outgoing host goes to `opacity: 0` and the
 incoming to `opacity: 1` over `--dur-fast` (120 ms), timed so its midpoint coincides with

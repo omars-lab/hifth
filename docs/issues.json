@@ -536,10 +536,11 @@
     {
       "id": "plan-drag-to-turn",
       "source": { "file": "docs/PLAN.md", "item": "11" },
-      "status": "open",
+      "status": "fixed",
       "severity": "question",
       "owner": "agent",
-      "note": "Still open deliberately. PointerIntent has no `turn` verdict, so today a turn is a button, a key or the page bar — a gesture that competes with pan and marquee is its own design, not a detail of this one."
+      "closedBy": "packages/core/src/gestures.test.ts",
+      "note": "The ladder's order is the safety argument: pinch, then a completed 350ms hold, then sideways-across-a-page-that-fits. The marquee never paid for the turn. Two things the design got wrong and the build corrected: §4.3's per-page `.leaf` wrapper (the finger drags the fold, not a page — no glyph moves), and desktop-vs-mobile row 19's `Nothing`, whose stated reason (a pointer drag already means marquee) was false. The 2:1 axis ratio and 25% commit distance shipped unmeasured and say so in the code; page-transition ⑥ already declined to reopen that. §4.5 — carrying the view across a turn — is the one clause of §4 still unbuilt."
     },
     {
       "id": "plan-gate-scope-differs-by-machine",
