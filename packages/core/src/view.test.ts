@@ -7,6 +7,7 @@ import {
   easeInOutCubic,
   frameBboxToView,
   lerpView,
+  viewFitsAcross,
   type FrameContext,
   type View,
 } from "./view.js";
@@ -138,6 +139,63 @@ describe("clampView", () => {
     // fixed point or the motion would creep.
     const once = clampView({ x: -1e6, y: -1e6, z: 2 }, FIT);
     expect(clampView(once, FIT)).toEqual(once);
+  });
+});
+
+describe("viewFitsAcross", () => {
+  const FIT = {
+    contentWidth: CTX.contentWidth,
+    contentHeight: CTX.contentHeight,
+    stageWidth: CTX.stageWidth,
+    stageHeight: CTX.stageHeight,
+  };
+
+  it("is true while there is no horizontal slack to roam over", () => {
+    expect(viewFitsAcross({ x: 0, y: 0, z: 1 }, FIT)).toBe(true);
+  });
+
+  it("agrees with clampView about the boundary, exactly", () => {
+    // 320 × 1.125 = 360, precisely the stage. The predicate and the clamp both
+    // use `<=`, so the page that is exactly stage-width is centred by one and
+    // reported as fitting by the other. If they ever disagreed here, a gesture
+    // would be armed against a pan that does move, or declined against one that
+    // does not.
+    const exact = 360 / 320;
+    expect(viewFitsAcross({ x: 0, y: 0, z: exact }, FIT)).toBe(true);
+    expect(clampView({ x: -100, y: 0, z: exact }, FIT).x).toBeCloseTo(0, 6);
+
+    // A hair past it the predicate says no and the clamp stops centring: the
+    // page now roams, over an overhang of a third of a pixel. Tiny, but the two
+    // must flip on the same frame, not merely eventually.
+    const over = exact * 1.001;
+    expect(viewFitsAcross({ x: 0, y: 0, z: over }, FIT)).toBe(false);
+    expect(clampView({ x: -100, y: 0, z: over }, FIT).x).toBeCloseTo(360 - 320 * over, 6);
+  });
+
+  it("asks about one axis, because the phone it is for overflows the other", () => {
+    // The reason this is not `fits both axes`. z=1.2 puts the page inside the
+    // stage across and past it down — on the acceptance phone that is the state
+    // at *rest*, so a two-axis predicate would report "does not fit" at
+    // fit-zoom and the turn gesture would be dead on arrival on the only device
+    // it was written for.
+    const tall = { ...FIT, contentHeight: 900 };
+    expect(viewFitsAcross({ x: 0, y: 0, z: 1 }, tall)).toBe(true);
+    // …and the vertical pan it shares the surface with is genuinely live.
+    expect(clampView({ x: 0, y: -1e6, z: 1 }, tall).y).toBeCloseTo(640 - 900, 6);
+  });
+
+  it("an unmeasured page does not fit", () => {
+    // Same refusal as `holdAxis`: a zero box is a measurement that has not
+    // happened yet. Answering "yes, it fits" would arm a turn against a page
+    // nobody has seen.
+    expect(viewFitsAcross({ x: 0, y: 0, z: 1 }, { ...FIT, contentWidth: 0 })).toBe(false);
+    expect(viewFitsAcross({ x: 0, y: 0, z: 1 }, { ...FIT, stageWidth: 0 })).toBe(false);
+  });
+
+  it("ignores the translate — it is a question about size, not position", () => {
+    // A page can only be off-centre if something bypassed the clamp; even then
+    // the horizontal slot is free, because the next clamp puts it back.
+    expect(viewFitsAcross({ x: -1e6, y: 1e6, z: 1 }, FIT)).toBe(true);
   });
 });
 

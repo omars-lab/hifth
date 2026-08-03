@@ -14,15 +14,24 @@
  *   @use-gesture does not disambiguate for us (research §4): the stage checks
  *   `pinching` and cancels the drag, and this classifier says the same thing so
  *   the two never disagree.
- * - **Move first, then it's a pan.** A finger that leaves {@link TAP_SLOP_PX}
- *   before {@link LONG_PRESS_MS} has elapsed is dragging the page — the common
- *   case, and it must feel instant (no hold, no delay, no hesitation).
  * - **Hold first, then it's a marquee.** A finger still inside the slop radius
  *   for {@link LONG_PRESS_MS} has, in hand terms, stopped moving; whatever it
  *   does next paints. This is the same heuristic the platform long-press uses,
  *   which is why it feels learnable rather than arbitrary.
+ * - **Move sideways first, across a page that fits ⇒ turn.** The one rule that
+ *   needs to know something about the *page* as well as the hand; see
+ *   {@link PointerSample.fitsAcross} for why that is not a layering violation.
+ * - **Move first, otherwise ⇒ pan.** A finger that leaves {@link TAP_SLOP_PX}
+ *   before {@link LONG_PRESS_MS} has elapsed is dragging the page — the common
+ *   case, and it must feel instant (no hold, no delay, no hesitation).
  * - **Neither yet ⇒ tap.** Below both thresholds the gesture is still a tap, and
  *   releasing there is exactly the Loop-1 tap-to-select.
+ *
+ * The order of those two middle rules is the whole safety argument for adding a
+ * fourth gesture to a surface that already had three: **the marquee is never at
+ * risk.** A hafiz who presses and holds to paint is 350 ms into a hold before
+ * the turn rule is consulted at all, and the turn rule requires movement
+ * *before* the hold completes. The two cannot both be true of one stroke.
  *
  * The classification is *latched* by {@link nextIntent}: the first frame that
  * resolves to pan or marquee owns the rest of the gesture. Without latching a
@@ -62,8 +71,45 @@ export const TAP_SLOP_PX = 8;
 /** Two pointers on the stage means pinch-zoom, never pan and never marquee. */
 export const PINCH_POINTER_COUNT = 2;
 
+/**
+ * How much more horizontal than vertical a stroke must be to mean a turn.
+ *
+ * **This number is a proposal, not a measurement**, and it is the same one
+ * `page-turning.md` §4.2 states it as. 2:1 is the common default; nothing here
+ * has been checked against a hand. What would settle it: record `dx`/`dy` at the
+ * moment of latch across a set of real one-thumb strokes on a 390 px phone and
+ * pick the ratio that separates an intentional sideways flick from the diagonal
+ * drift of a thumb pivoting at the base of itself. Until then this is honest
+ * about being a guess rather than dressed up as a threshold.
+ */
+export const TURN_AXIS_RATIO = 2;
+
+/**
+ * A stroke starting this close to either side of the screen is not a turn.
+ *
+ * iOS 13.4+ edge-gates `preventDefault` on Safari's interactive back gesture:
+ * inside a ~24 px band at the screen edges the OS keeps the touch whatever the
+ * page says. Under RTL the *forward* turn begins with a rightward movement,
+ * which most naturally starts near the **left** edge — exactly that band. So a
+ * turn that began there would be racing the history stack for the same finger,
+ * and which one won would depend on how far the reader dragged
+ * (`page-turning.md` §4.4).
+ *
+ * The mitigation is to decline, not to fight: a stroke inside the band latches
+ * `"pan"` (a measured no-op horizontally at fit-zoom) and the OS keeps its
+ * gesture. An app that eats the platform back gesture on an offline PWA is an
+ * app the reader cannot leave. The cost is a thin strip down both sides, and it
+ * costs nothing else, because the page bar's next/prev buttons remain the
+ * guaranteed path (WCAG 2.5.1).
+ *
+ * Both edges, not just the left: the band is symmetric on the platform, and a
+ * rule that guarded one side would be a rule that had quietly hard-coded which
+ * direction the book runs.
+ */
+export const TURN_EDGE_GUARD_PX = 24;
+
 /** What the hand is doing on the stage right now. */
-export type PointerIntent = "none" | "tap" | "pan" | "marquee" | "pinch";
+export type PointerIntent = "none" | "tap" | "pan" | "marquee" | "pinch" | "turn";
 
 /** One frame of pointer state — everything the split is allowed to look at. */
 export interface PointerSample {
@@ -75,6 +121,29 @@ export interface PointerSample {
   dx: number;
   /** Movement from the press point, in CSS px. */
   dy: number;
+  /**
+   * Whether the page has any horizontal slack to roam over — `viewFitsAcross`
+   * in `view.ts`, measured once per stroke by the caller.
+   *
+   * This is the only thing in this file that is not purely about the hand, and
+   * it is here because the question the turn rule asks genuinely is *"is the
+   * horizontal slot free?"*. At fit-zoom a horizontal drag changes the transform
+   * by zero — measured: 150 px of drag at z = 1 on 390 × 844 moves the page not
+   * at all — so binding a turn there takes nothing away from panning. Above
+   * fit-zoom the drag is a real pan and the slot is occupied, so the turn must
+   * not fire; the page bar is the path then, and it is on screen.
+   *
+   * **Optional, and it defaults to "no".** A caller that does not pass it gets
+   * the three-gesture ladder exactly as it was, which is what keeps the wheel
+   * path and every existing test honest rather than accidentally re-classified.
+   */
+  fitsAcross?: boolean;
+  /**
+   * How far the press point was from the *nearer* left/right screen edge, in
+   * CSS px. Omitted means "not near an edge" — see {@link TURN_EDGE_GUARD_PX}
+   * for what this guards and why declining is the right answer.
+   */
+  edgeDistancePx?: number;
 }
 
 /** Straight-line movement from the press point (CSS px). */
@@ -94,7 +163,8 @@ export function pointerIntent(sample: PointerSample): PointerIntent {
   const held = sample.elapsedMs >= LONG_PRESS_MS;
   if (moved > TAP_SLOP_PX) {
     // Moved decisively: which happened first, the hold or the movement?
-    return held ? "marquee" : "pan";
+    if (held) return "marquee";
+    return isTurnStroke(sample) ? "turn" : "pan";
   }
   // Still inside the slop radius: a completed hold arms the marquee; otherwise
   // this is still a tap and could become anything.
@@ -102,10 +172,28 @@ export function pointerIntent(sample: PointerSample): PointerIntent {
 }
 
 /**
+ * The turn rule's three conditions, all of which must hold, and only ever asked
+ * of a stroke that has already moved and has not held.
+ */
+function isTurnStroke(sample: PointerSample): boolean {
+  if (!sample.fitsAcross) return false;
+  if ((sample.edgeDistancePx ?? Number.POSITIVE_INFINITY) <= TURN_EDGE_GUARD_PX) return false;
+  return Math.abs(sample.dx) > TURN_AXIS_RATIO * Math.abs(sample.dy);
+}
+
+/**
  * Advance the latched intent for a gesture: call it every move frame with the
- * previous result. `pan` and `marquee` are terminal for the gesture's lifetime
- * (a stroke never changes meaning halfway); `pinch` overrides anything the
- * moment a second finger lands, and lifting every pointer resets to `none`.
+ * previous result. `pan`, `marquee` and `turn` are terminal for the gesture's
+ * lifetime (a stroke never changes meaning halfway); `pinch` overrides anything
+ * the moment a second finger lands, and lifting every pointer resets to `none`.
+ *
+ * A latched `"turn"` is what makes the diagonal case survivable. The axis test
+ * is applied *once*, at the frame the stroke first clears the slop radius, and
+ * from then on the reader may curve the stroke however a thumb curves without
+ * the app changing its mind about what they meant. Re-deciding per frame would
+ * make a turn flicker into a pan and back mid-drag — and a pan mid-turn is not
+ * a harmless flicker, it is the page jumping under a finger that was moving the
+ * fold.
  */
 export function nextIntent(previous: PointerIntent, sample: PointerSample): PointerIntent {
   if (sample.pointers >= PINCH_POINTER_COUNT) return "pinch";
@@ -113,7 +201,7 @@ export function nextIntent(previous: PointerIntent, sample: PointerSample): Poin
   // A pinch that drops back to one finger stays a pinch: the leftover finger is
   // the tail of a zoom, not the start of a new pan across the page.
   if (previous === "pinch") return "pinch";
-  if (previous === "pan" || previous === "marquee") return previous;
+  if (previous === "pan" || previous === "marquee" || previous === "turn") return previous;
   return pointerIntent(sample);
 }
 
@@ -122,9 +210,85 @@ export function isMarqueeIntent(intent: PointerIntent): boolean {
   return intent === "marquee";
 }
 
-/** True when the intent should drive the pan/zoom transform. */
+/**
+ * True when the intent should drive the pan/zoom transform.
+ *
+ * `"turn"` is deliberately not in this set, and it is the one line that keeps
+ * `page-turning.md` §1.5's axiom true through the new gesture: during a turn no
+ * glyph moves at all. The finger is dragging the fold — a third element that
+ * carries no page — and if a turn also drove the viewport the reader would be
+ * turning a page and panning it at the same time.
+ */
 export function isViewportIntent(intent: PointerIntent): boolean {
   return intent === "pan" || intent === "pinch";
+}
+
+/** True when the finger is dragging the fold across the leaf. */
+export function isTurnIntent(intent: PointerIntent): boolean {
+  return intent === "turn";
+}
+
+/**
+ * How far across the stage a turn stroke must travel to commit on release.
+ *
+ * **Unmeasured, and `page-transition.md` §7 ⑥ answers the question of whether to
+ * reopen it here: no.** 25 % is `page-turning.md` §4.3's number and it is
+ * conventional rather than tested; what would settle it is a device pass on the
+ * acceptance phone, which is the same pass {@link TURN_AXIS_RATIO} needs. It is
+ * written as a fraction of the stage rather than as px on purpose — a 390 px
+ * phone and a 1440 px desktop should ask for the same *proportion* of a shove,
+ * not the same distance.
+ */
+export const TURN_COMMIT_FRACTION = 0.25;
+
+/**
+ * The flick that commits a turn the reader never dragged far enough for, in CSS
+ * px per millisecond.
+ *
+ * Same standing as the fraction above: conventional, unmeasured, and named here
+ * rather than buried so the device pass has something to correct. 0.5 px/ms is
+ * ~500 px/s, comfortably above a slow deliberate drag and below the speed of a
+ * dismissive flick.
+ *
+ * It exists because distance alone gets the *fast* reader wrong: a hafiz walking
+ * the book flicks short and quick, and a rule that only measured displacement
+ * would spring back on the stroke they meant most decisively.
+ */
+export const TURN_FLICK_PX_PER_MS = 0.5;
+
+/** A released turn stroke, reduced to what the commit rule may look at. */
+export interface TurnStroke {
+  /** Signed horizontal displacement from the press point at release, CSS px. */
+  dx: number;
+  /** Signed horizontal velocity at release, CSS px per ms. */
+  velocityX: number;
+  /** The stage the stroke crossed, CSS px — the fraction is taken of this. */
+  stageWidth: number;
+}
+
+/**
+ * Decide what a released turn stroke meant: `1` for the next page, `-1` for the
+ * previous, `0` to spring back and turn nothing.
+ *
+ * **Direction is `loop-1.md`'s, and it is a fact about the book:** a finger
+ * moving *rightward* advances to the next page, because in a bound mus'haf that
+ * is the direction a leaf travels when you turn it forward. It does not flip
+ * with the UI language — the same reason `sweepOf` reads physical px and not
+ * logical ones — and it agrees with `nextWheelTurn`'s sign convention, where
+ * `1` is likewise the next page.
+ *
+ * The velocity clause requires the flick to agree with the displacement. A
+ * stroke that went one way and snapped back the other at the last moment has
+ * had the reader change their mind mid-gesture; committing it in the direction
+ * of the *snap* would turn a page they were in the middle of not turning.
+ */
+export function turnCommit(stroke: TurnStroke): 1 | -1 | 0 {
+  if (stroke.dx === 0) return 0;
+  const dir: 1 | -1 = stroke.dx > 0 ? 1 : -1;
+  const far = Math.abs(stroke.dx) >= TURN_COMMIT_FRACTION * stroke.stageWidth;
+  const flicked =
+    Math.abs(stroke.velocityX) >= TURN_FLICK_PX_PER_MS && Math.sign(stroke.velocityX) === dir;
+  return far || flicked ? dir : 0;
 }
 
 /*

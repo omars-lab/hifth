@@ -340,9 +340,37 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     on screen rather than the one that failed, and on a desktop spread the band has to be
     portalled into the open book or it stops at the gutter. The visual half is the twin of
     follow-up ⑩'s §7 ④ (the turn is silent about the page it skipped) and they landed
-    together. Still open, deliberately: **drag-to-turn**. `PointerIntent` has no `"turn"`
-    verdict, so today a turn is a button, a key or the page bar — a gesture that competes
-    with pan and marquee is its own design, not a detail of this one.
+    together. **Drag-to-turn** (§4) was held back to be designed on its own rather than as a
+    detail of the visual half, and is now **shipped too**. `PointerIntent` has a `"turn"`
+    verdict, and the whole safety argument is the *order* of the ladder: two pointers ⇒
+    pinch, a completed 350 ms hold ⇒ marquee, and only then *sideways across a page that
+    fits* ⇒ turn. Rules 1–2 keep absolute precedence, so **the marquee never paid for the
+    turn** — a stroke cannot both hold for 350 ms and move before it. The slot the gesture
+    spends is the one §4.1 measured: at fit-zoom a horizontal drag moves the page by zero,
+    because `holdAxis` centres an axis that fits. `viewFitsAcross` asks that of **one axis
+    only**, and that is not a shortcut — on a 390×844 phone the leaf overflows *vertically*
+    at rest, so a two-axis predicate would report "does not fit" at fit-zoom and the gesture
+    would be dead on the one device it was written for. Two numbers in it are **guesses and
+    are labelled as such in the code**: the 2:1 axis ratio and the 25 % commit distance are
+    §4.2–4.3's proposals, unmeasured there and unmeasured here (`page-transition.md` §7 ⑥
+    already answered whether to reopen that: no). What the finger actually drags is **the
+    fold** — the same single band the wheel turn already used, moved 1:1 with no easing — so
+    §4.3's per-page `.leaf` wrapper stayed withdrawn and no glyph moves during a turn. The
+    tracked band is *handed over* rather than replaced: `runTurn` finds it armed and
+    re-targets it, which is why one gesture leaves exactly one `data-fold` in the DOM. Two
+    things came out of building it. The desktop divergence in
+    [`desktop-vs-mobile.md`](decisions/desktop-vs-mobile.md) row 19 said "Nothing" on a
+    pointer, justified by *"a pointer drag already means marquee"* — false, since a marquee
+    needs the hold; the rule is device-blind and the row is corrected in place. And a fold
+    has an appearance before it has a destination: `crease`/`gap`/`hole` must be drawn while
+    the finger is still moving, so the stage now asks its owner *which page comes next*
+    (`turnTargetOf`) instead of guessing `page ± 1`, which with 7 | 9 | 19 vendored would
+    have drawn the wrong band for the whole stroke. **Closed by**
+    [`packages/core/src/gestures.test.ts`](../packages/core/src/gestures.test.ts) for the
+    ladder and the commit rule, and
+    [`apps/web/e2e/page-turn.spec.ts`](../apps/web/e2e/page-turn.spec.ts) for the band that
+    follows a finger, the short drag that springs back, and the long horizontal drag that is
+    still a marquee.
 
 12. **A gate that enumerates from git has a smaller tree on the machine that writes the code
     than on the machine that gates it.** `gate:text-sources` listed `git ls-files`, which is
