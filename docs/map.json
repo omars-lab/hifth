@@ -457,6 +457,11 @@
           "note": "A pack lives in its own Cache Storage bucket with no expiration plugin, and assets.ts reads it before the network. Warming the service worker's hifth-pages instead would have been simpler and is wrong: that cache is a 32-entry LRU sized for a browsing trail, so pinning a juz and then reading twelve pages evicts a third of what was pinned, and nobody finds out until the plane. Bytes in Cache Storage, the claim in IndexedDB — the split is what makes a sweep detectable rather than merely silent."
         },
         {
+          "file": "apps/web/src/packs.ts",
+          "symbol": "PIN_HEADER",
+          "note": "The one thing a pin tells the service worker: this fetch is not a read for display. Both runtimeCaching routes in vite.config.ts decline anything carrying it, so a pinned file is written once instead of also landing in hifth-pages and evicting the trail it was meant to preserve (backlog ⑮). The literal is deliberately duplicated into vite.config.ts and must stay in step: workbox generateSW stringifies a route matcher, so an imported constant reaches the worker as undefined and the route silently declines nothing. Static provenance is the whole contract — the worker never learns PACK_CACHE's name, the pack's URL list, or that a register exists, so planPack can change shape without sw.js moving. See docs/decisions/pin-marker.md."
+        },
+        {
           "file": "apps/web/src/components/PackShelf.tsx",
           "symbol": "PackShelf",
           "note": "The pin control and the shelf of what is kept, inside the revision map at juz scope — the map is already the picture of the thirty, and the header has no room for a sixth button. The states are named in words, in a list, not painted as a dot on a cell: the cells already carry warmth and absence, and the meaning that would be misread is exactly the one that matters, a swept pack looking pinned."
@@ -473,6 +478,7 @@
         "Test offline behaviour in an e2e that actually goes offline, over a secure context. A unit test cannot see a service worker.",
         "Eviction is a separate case from offline and has its own describe in apps/web/e2e/offline.spec.ts: CDP Storage.clearDataForOrigin with storageTypes 'cache_storage' takes the caches and leaves the worker registered, which is the state a real ITP sweep leaves behind.",
         "Anything the reader chose to keep does not go in a runtime cache. It goes in the pack cache, and something has to be able to notice it is gone — a store with no register against it can only ever report success.",
+        "A new runtimeCaching route needs the !request.headers.has(\"X-Hifth-Pin\") clause too, or pinning starts filing duplicates in it. From a controlled page there is no fetch the worker cannot see — cache.add is routed the same way, measured — so a pin is recognised and declined rather than hidden. What the worker may know about a pack stops at that one bit; anything about the pack's shape belongs in packs.ts.",
         "Anything that can fail to load a page must say so — see PageStage's error banner. A silent failure leaves the previous page on the stage while the chrome has already announced the new number."
       ],
       "gates": ["make e2e", "make lighthouse"],

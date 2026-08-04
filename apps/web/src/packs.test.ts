@@ -2,6 +2,7 @@ import "fake-indexeddb/auto";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   PACK_CACHE,
+  PIN_HEADER,
   checkPack,
   listPacks,
   packId,
@@ -125,6 +126,23 @@ describe("pinPack", () => {
     expect(seen).toHaveLength(URLS.length);
     expect(Math.max(...seen)).toBe(URLS.length);
     expect(record!.bytes).toBeGreaterThan(0);
+  });
+
+  it("marks every fetch so the worker's routes stand aside", async () => {
+    // Without the marker the service worker files each pinned page in
+    // `hifth-pages` as well, and that 32-entry LRU spends two thirds of the
+    // reader's browsing trail on copies the pack already answers (backlog ⑮).
+    // `e2e/offline.spec.ts` proves the routes actually decline; this proves the
+    // header is still being sent, on every change to this file, without a build.
+    const spy = vi.fn(async () => new Response(BODY, { status: 200 }));
+    vi.stubGlobal("fetch", spy);
+
+    await pinPack(EDITION, 30, URLS, 0);
+
+    expect(spy).toHaveBeenCalledTimes(URLS.length);
+    for (const [, init] of spy.mock.calls as unknown as [string, RequestInit][]) {
+      expect(new Headers(init?.headers).get(PIN_HEADER)).toBe("1");
+    }
   });
 
   it("records the urls it meant to hold, not the ones it managed to get", async () => {

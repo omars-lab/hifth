@@ -50,6 +50,28 @@
 /** Where pinned bytes live. Never given an expiration plugin — see the header. */
 export const PACK_CACHE = "hifth-pack-v1";
 
+/**
+ * The one thing a pin tells the service worker: *this fetch is not a read for
+ * display*. The routes in `vite.config.ts` decline anything carrying it, so a
+ * pinned file is written once, here, instead of also landing in the 32-entry
+ * `hifth-pages` LRU and evicting the reader's own trail.
+ *
+ * Static provenance, not pack knowledge. The worker never learns this cache's
+ * name, which URLs a pack holds, or that a register exists — `planPack` can
+ * change shape forever without the worker being touched.
+ *
+ * Repeated as a literal in `vite.config.ts` rather than imported, because a
+ * workbox `generateSW` matcher is serialised with `Function.prototype.toString`
+ * (see the emitted `registerRoute(({url:e})=>…)` in `dist/sw.js`): a closure
+ * variable arrives at the worker as `undefined` and the route would silently
+ * decline nothing. `e2e/offline.spec.ts` is what holds the two copies together.
+ *
+ * A custom header on a *cross-origin* GET triggers a CORS preflight. Every pack
+ * URL is same-origin today (`base: "./"`); serving assets from a CDN subdomain
+ * would break pinning at the `OPTIONS`, so that move has to revisit this.
+ */
+export const PIN_HEADER = "X-Hifth-Pin";
+
 const DB_NAME = "hifth.packs.v1";
 const DB_VERSION = 1;
 const PACKS = "packs";
@@ -178,7 +200,7 @@ export async function pinPack(
         const url = queue.shift();
         if (url === undefined) return;
         try {
-          const res = await fetch(url);
+          const res = await fetch(url, { headers: { [PIN_HEADER]: "1" } });
           if (res.ok) {
             // Measured off a clone rather than trusting Content-Length, which a
             // compressed response does not report in the units this counts in.

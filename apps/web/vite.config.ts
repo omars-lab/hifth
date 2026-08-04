@@ -113,8 +113,19 @@ export default defineConfig({
              *    mounted, LRU ~6) — DOM nodes are expensive, cached bytes are
              *    not, so keeping a juz-ish trail of visited pages costs ~5 MB
              *    and saves every back-hop a download.
+             *
+             *    The `X-Hifth-Pin` clause says what this cache is *for*: what a
+             *    reader opened. A pin is filed by the app, in its own cache,
+             *    with its own lifetime — so it has no business here, and
+             *    storing it anyway spent 21 of these 32 entries on copies of
+             *    files the pack already answers, throwing away most of the
+             *    trail as the price of keeping a juz. The literal is duplicated
+             *    from `PIN_HEADER` in src/packs.ts; a matcher is stringified
+             *    into sw.js, so an import would arrive here as `undefined`.
+             *    e2e/offline.spec.ts fails if the two ever drift.
              */
-            urlPattern: ({ url }) => url.pathname.includes("/assets/pages/"),
+            urlPattern: ({ url, request }) =>
+              url.pathname.includes("/assets/pages/") && !request.headers.has("X-Hifth-Pin"),
             handler: "CacheFirst",
             options: {
               cacheName: "hifth-pages",
@@ -135,9 +146,17 @@ export default defineConfig({
              *    Matching by extension rather than by directory keeps this rule
              *    true for shard families that land later (skins, tajweed) with
              *    no config change.
+             *
+             *    Same `X-Hifth-Pin` clause as the pages route, for the same
+             *    reason rather than for the same cost: this cache's 400-entry
+             *    cap means a duplicated shard evicts nothing. But it is still a
+             *    copy of bytes the pack already answers, and a rule with an
+             *    exception reads worse than a rule.
              */
-            urlPattern: ({ url }) =>
-              url.pathname.includes("/assets/") && url.pathname.endsWith(".json"),
+            urlPattern: ({ url, request }) =>
+              url.pathname.includes("/assets/") &&
+              url.pathname.endsWith(".json") &&
+              !request.headers.has("X-Hifth-Pin"),
             handler: "StaleWhileRevalidate",
             options: {
               cacheName: "hifth-data",

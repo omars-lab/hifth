@@ -313,19 +313,17 @@ test.describe("Hifth · a pinned juz", () => {
   /**
    * Leave `url` in the pack and nowhere else.
    *
-   * Pinning writes the file twice, and finding that out is worth the paragraph:
-   * `pinPack` fetches through the page, the service worker sees an ordinary page
-   * request, and its `hifth-pages` route caches it as well. So a juz costs its
-   * bytes twice for a while, and a 21-page pin pushes most of the reader's
-   * browsing trail out of that 32-entry LRU on its way through. Neither breaks
-   * anything — `packedFetch` reads the pack first, and the LRU is a convenience
-   * — but the duplicate is exactly what would let this test pass without a pack
-   * at all.
+   * Pinning no longer writes a second copy — `PIN_HEADER` marks the pin's
+   * fetches and both runtime routes stand aside (backlog ⑮). This helper stays
+   * because the *reader* still puts pages in `hifth-pages`: the app opens inside
+   * juz 1, so some of the very juz being pinned is legitimately in the browsing
+   * cache from having been looked at. That copy is what would let the offline
+   * navigation below pass without a pack at all.
    *
-   * Deleting the copy is therefore not a workaround; it is the state the pack
-   * exists for. Thirty-two pages of ordinary reading evicts the trail copy on
-   * its own, and the day the reader opens the app in the air, the pack is the
-   * only thing that still has page 15.
+   * Deleting it is therefore not a workaround; it is the state the pack exists
+   * for. Thirty-two pages of ordinary reading evicts the trail copy on its own,
+   * and the day the reader opens the app in the air, the pack is the only thing
+   * that still has page 15.
    */
   async function dropOutsidePack(page: Page, url: string): Promise<void> {
     await page.evaluate(
@@ -377,12 +375,24 @@ test.describe("Hifth · a pinned juz", () => {
    * then be measuring a torn pack while claiming to measure a whole one.
    */
   async function pinJuzHere(page: Page): Promise<void> {
+    await openAndWarm(page);
+    await pinHere(page);
+  }
+
+  /**
+   * The half of `pinJuzHere` before the pin — split out so a test can stand
+   * between the two and photograph the browsing cache.
+   */
+  async function openAndWarm(page: Page): Promise<void> {
     await page.goto("/");
     await expect(page.locator("svg[role='group']").first()).toBeVisible();
     await awaitController(page);
     await page.reload();
     await expect(page.locator("svg[role='group']").first()).toBeVisible();
+  }
 
+  /** The half after: open the shelf, keep this juz, wait for `whole`, leave. */
+  async function pinHere(page: Page): Promise<void> {
     const sheet = await openShelf(page);
     // Juz scope, because a pack *is* a juz and the shelf is not rendered at the
     // other two. Pressing the radio is also the assertion that it is reachable.
@@ -402,6 +412,48 @@ test.describe("Hifth · a pinned juz", () => {
     await expect(sheet).toBeHidden();
   }
 
+  /** Every URL `name` holds right now, sorted — a set, so it can be compared. */
+  async function runtimeCacheKeys(page: Page, name: string): Promise<string[]> {
+    return await page.evaluate(async (cacheName: string) => {
+      if (!(await caches.keys()).includes(cacheName)) return [];
+      const cache = await caches.open(cacheName);
+      return (await cache.keys()).map((r) => r.url).sort();
+    }, name);
+  }
+
+  /*
+   * The regression guard on backlog ⑮, asserting the *harm* rather than the
+   * symptom.
+   *
+   * The symptom was one file in two buckets, and the assertion above catches
+   * that. The cost that reached a reader was different and worse: `hifth-pages`
+   * holds 32 entries, a juz is 21 pages, and `ExpirationPlugin` evicts at write
+   * time — so pinning spent two thirds of the browsing trail on copies of files
+   * the pack already answers. Keeping a juz for later threw away most of what
+   * was read last week, and no sweep afterwards could bring it back.
+   *
+   * Comparing the key set across the pin says that in one line, and it fails for
+   * every way the fix can rot: the `X-Hifth-Pin` literal edited in `packs.ts`
+   * but not `vite.config.ts` (or the reverse — a workbox matcher is stringified,
+   * so the two copies cannot be one), a new `runtimeCaching` entry added without
+   * the clause, or a browser that stops surfacing a custom header to the worker.
+   *
+   * One juz, not two. A second real pin is ~3 MB more in an already-90 s test,
+   * and the invariant it would prove is the one this already proves.
+   */
+  test("keeping a juz does not spend the reader's browsing cache", async ({ page }) => {
+    await seenCoachMarks(page);
+    await openAndWarm(page);
+
+    // Non-empty, or this compares two nothings and passes for free.
+    const before = await runtimeCacheKeys(page, "hifth-pages");
+    expect(before.length).toBeGreaterThan(0);
+
+    await pinHere(page);
+
+    expect(await runtimeCacheKeys(page, "hifth-pages")).toEqual(before);
+  });
+
   test("opens a page the reader has never visited, with the network gone", async ({
     page,
     context,
@@ -418,15 +470,17 @@ test.describe("Hifth · a pinned juz", () => {
 
     await pinJuzHere(page);
 
-    // In the pack, and — backlog ⑮ — in the browsing cache too, because the
-    // worker sees the pin's fetches as ordinary page requests. Asserted as an
-    // exact pair rather than waved at with `toContain`, so this line is the
-    // tripwire on ⑮: the day the double-write stops, whether by a fix here or
-    // by a browser that stops routing it, this fails and names the entry.
-    expect((await cachedIn(page, PAGE_15_SVG)).sort()).toEqual([PACK_CACHE, "hifth-pages"].sort());
-    // …and now in the pack *only*, so a green run below cannot be the browsing
-    // cache quietly covering for us. See `dropOutsidePack`: this is not a
-    // contrivance, it is where a pinned juz stands after any real reading.
+    // In the pack, and nowhere else. This line used to read `[PACK_CACHE,
+    // "hifth-pages"]` and was the tripwire on backlog ⑮; it is now the positive
+    // claim the fix makes — the pin's fetches carry `PIN_HEADER`, both runtime
+    // routes declined them, so exactly one copy was ever written. Asserted as an
+    // exact set rather than waved at with `toContain`, because the whole point
+    // is which caches *do not* hold it.
+    expect(await cachedIn(page, PAGE_15_SVG)).toEqual([PACK_CACHE]);
+    // Page 15 is outside the pages the reader looked at, so the sweep below is a
+    // no-op for it today. Kept, and asserted after, because the app opens inside
+    // this juz: pick a page nearer the start and the browsing cache would be
+    // covering for the pack. See `dropOutsidePack`.
     await dropOutsidePack(page, PAGE_15_SVG);
     expect(await cachedIn(page, PAGE_15_SVG)).toEqual([PACK_CACHE]);
 
