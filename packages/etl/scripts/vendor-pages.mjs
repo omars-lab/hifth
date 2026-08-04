@@ -22,8 +22,8 @@
  * say something stronger than it did before: the anchors that ship are provably
  * derived from the page bytes that ship.
  *
- * Immutability (PLAN §8): upstream bytes are never hand-edited. Two transforms
- * are applied, both declared, both reproducible, both asserted:
+ * Immutability (PLAN §8): upstream bytes are never hand-edited. Three
+ * transforms are applied, all declared, all reproducible, all asserted:
  *
  *   1. svgo, at the exact version and config recorded in the pin. The config is
  *      not a taste call — it was recovered by search against the three pages
@@ -38,6 +38,21 @@
  *      the id they should have had, and assert that the count is exactly two
  *      and the ayahs are exactly those two — so a future pin that fixes them
  *      upstream fails loudly instead of drifting silently.
+ *
+ *   3. Twenty-one polygon repairs across eighteen pages (PLAN follow-up 14).
+ *      Upstream gives some ayahs a tappable box that does not cover the ayah:
+ *      a page's first ayah given only its last line, two lines of scripture
+ *      under one line of polygon, a rect squashed off the line grid. The ayah
+ *      is still on the page and still readable — it simply cannot be tapped,
+ *      which for this app means it cannot be reached. Each repair carries the
+ *      exact upstream `d` it replaces, so a pin that fixes one upstream dies
+ *      rather than silently re-breaking it, and `gate:pages` re-derives the
+ *      defect from the committed bytes independently (it knows nothing of this
+ *      table — it measures ink against polygon and demands zero orphans).
+ *
+ *      Unlike (2), this runs *before* svgo: svgo rewrites path data at
+ *      floatPrecision 1, so a `from` string written against optimized output
+ *      would be matching this pipeline's own rounding rather than upstream.
  */
 import {
   readFileSync,
@@ -77,6 +92,176 @@ const LOOP0_PAGES = [7, 9, 19];
 const ID_REPAIRS = [
   { page: 305, number: 19003 },
   { page: 577, number: 75005 },
+];
+
+/**
+ * Upstream polygons that do not cover their own ayah, as {page, number(SSSAAA),
+ * from, to} — PLAN follow-up 14. `from` is the exact upstream `d`, matched
+ * before svgo touches it, so a pin that repairs one upstream fails loudly.
+ *
+ * Three shapes of defect, all measured off the page's own line pitch (the modal
+ * rect height) rather than a number chosen to make a page look right:
+ *
+ *   the abandoned leading line   an ayah flowing in from the previous page is
+ *                                given only its last line or two; the rest of
+ *                                its run has no polygon at all. The repair
+ *                                extends the first rect up to where the page's
+ *                                fifteen-line block starts.
+ *   the swallowed line           one line of polygon over two lines of ink.
+ *   the displaced rect           a rect off the line grid — squashed to 28.8
+ *                                or stretched to 46.2 where the print sets 36 —
+ *                                so its top edge cuts through a line of
+ *                                scripture. Repairing one of these moves the
+ *                                neighbouring ayah's rect too, which is why
+ *                                pages 294, 468 and 560 carry two entries: the
+ *                                strip between them belongs to exactly one of
+ *                                them, and both boxes must agree where.
+ */
+const POLYGON_REPAIRS = [
+  // p227: two 28.8-unit rects where the ink sets two lines of 35.96
+  {
+    page: 227,
+    number: "011046",
+    from: "M 0.0 24.0 L 345.0 24.0 L 345.0 52.8 L 0.0 52.8 Z M 0.0 52.8 L 345.0 52.8 L 345.0 81.61 L 0.0 81.61 Z",
+    to: "M 0.0 9.69 L 345.0 9.69 L 345.0 45.65 L 0.0 45.65 Z M 0.0 45.65 L 345.0 45.65 L 345.0 81.61 L 0.0 81.61 Z",
+  },
+  // p294: 18:5 given one rect, and 18:6 left claiming the first line
+  {
+    page: 294,
+    number: "018005",
+    from: "M 136.23 20.5 L 345.0 20.5 L 345.0 56.5 L 136.23 56.5 Z",
+    to: "M 0.0 5.99 L 345.0 5.99 L 345.0 41.8 L 0.0 41.8 Z M 136.23 41.8 L 345.0 41.8 L 345.0 77.59 L 136.23 77.59 Z",
+  },
+  {
+    page: 294,
+    number: "018006",
+    from: "M 0.0 20.5 L 136.23 20.5 L 136.23 77.59 L 0.0 77.59 Z M 31.29 77.59 L 345.0 77.59 L 345.0 113.57 L 31.29 113.57 Z",
+    to: "M 0.0 41.8 L 136.23 41.8 L 136.23 77.59 L 0.0 77.59 Z M 31.29 77.59 L 345.0 77.59 L 345.0 113.57 L 31.29 113.57 Z",
+  },
+  // p431: one line of polygon over two lines of ayah
+  {
+    page: 431,
+    number: "034023",
+    from: "M 0.0 26.0 L 345.0 26.0 L 345.0 62.0 L 0.0 62.0 Z",
+    to: "M 0.0 11.08 L 345.0 11.08 L 345.0 83.06 L 0.0 83.06 Z",
+  },
+  // p468: three lines of ink under two rects stretched to 46.22
+  {
+    page: 468,
+    number: "040008",
+    from: "M 0.0 26.5 L 345.0 26.5 L 345.0 72.72 L 0.0 72.72 Z M 249.05 72.72 L 345.0 72.72 L 345.0 118.94 L 249.05 118.94 Z",
+    to: "M 0.0 11.2 L 345.0 11.2 L 345.0 82.94 L 0.0 82.94 Z M 249.05 82.94 L 345.0 82.94 L 345.0 118.81 L 249.05 118.81 Z",
+  },
+  {
+    page: 468,
+    number: "040009",
+    from: "M 0.0 72.72 L 249.05 72.72 L 249.05 118.81 L 0.0 118.81 Z M 23.43 118.81 L 345.0 118.81 L 345.0 154.68 L 23.43 154.68 Z",
+    to: "M 0.0 82.94 L 249.05 82.94 L 249.05 118.81 L 0.0 118.81 Z M 23.43 118.81 L 345.0 118.81 L 345.0 154.68 L 23.43 154.68 Z",
+  },
+  // p542: 58:1 given only its last line
+  {
+    page: 542,
+    number: "058001",
+    from: "M 81.82 115.25 L 340.0 115.25 L 340.0 151.25 L 81.82 151.25 Z",
+    to: "M 5.0 79.25 L 340.0 79.25 L 340.0 115.25 L 5.0 115.25 Z M 81.82 115.25 L 340.0 115.25 L 340.0 151.25 L 81.82 151.25 Z",
+  },
+  // p545: 58:22 given only its last line
+  {
+    page: 545,
+    number: "058022",
+    from: "M 43.55 188.78 L 340.0 188.78 L 340.0 224.78 L 43.55 224.78 Z",
+    to: "M 5.0 8.78 L 340.0 8.78 L 340.0 188.78 L 5.0 188.78 Z M 43.55 188.78 L 340.0 188.78 L 340.0 224.78 L 43.55 224.78 Z",
+  },
+  // p549: 60:1 given only its last line
+  {
+    page: 549,
+    number: "060001",
+    from: "M 137.6 225.1 L 340.0 225.1 L 340.0 261.1 L 137.6 261.1 Z",
+    to: "M 5.0 81.54 L 340.0 81.54 L 340.0 225.1 L 5.0 225.1 Z M 137.6 225.1 L 340.0 225.1 L 340.0 261.1 L 137.6 261.1 Z",
+  },
+  // p551: 60:12 given only its last line
+  {
+    page: 551,
+    number: "060012",
+    from: "M 5.0 118.86 L 340.0 118.86 L 340.0 154.86 L 5.0 154.86 Z",
+    to: "M 5.0 10.86 L 340.0 10.86 L 340.0 118.86 L 5.0 118.86 Z M 5.0 118.86 L 340.0 118.86 L 340.0 154.86 L 5.0 154.86 Z",
+  },
+  // p554: 62:9 given only its last line
+  {
+    page: 554,
+    number: "062009",
+    from: "M 5.0 45.89 L 340.0 45.89 L 340.0 81.89 L 5.0 81.89 Z",
+    to: "M 5.0 10.05 L 340.0 10.05 L 340.0 45.89 L 5.0 45.89 Z M 5.0 45.89 L 340.0 45.89 L 340.0 81.89 L 5.0 81.89 Z",
+  },
+  // p558: 65:1 given only its last line
+  {
+    page: 558,
+    number: "065001",
+    from: "M 5.0 189.92 L 340.0 189.92 L 340.0 225.92 L 5.0 225.92 Z",
+    to: "M 5.0 81.92 L 340.0 81.92 L 340.0 225.92 L 5.0 225.92 Z",
+  },
+  // p560: 66:1 and 66:2 squashed to 29.25 and shifted down
+  {
+    page: 560,
+    number: "066001",
+    from: "M 5.0 95.5 L 340.0 95.5 L 340.0 124.75 L 5.0 124.75 Z M 246.34 124.75 L 340.0 124.75 L 340.0 154.0 L 246.34 154.0 Z",
+    to: "M 5.0 82.05 L 340.0 82.05 L 340.0 118.05 L 5.0 118.05 Z M 246.34 118.05 L 340.0 118.05 L 340.0 154.05 L 246.34 154.05 Z",
+  },
+  {
+    page: 560,
+    number: "066002",
+    from: "M 5.0 124.75 L 246.34 124.75 L 246.34 154.05 L 5.0 154.05 Z M 238.51 154.05 L 340.0 154.05 L 340.0 190.1 L 238.51 190.1 Z",
+    to: "M 5.0 118.05 L 246.34 118.05 L 246.34 154.05 L 5.0 154.05 Z M 238.51 154.05 L 340.0 154.05 L 340.0 190.1 L 238.51 190.1 Z",
+  },
+  // p564: 67:27 given only its last line
+  {
+    page: 564,
+    number: "067027",
+    from: "M 253.05 45.89 L 340.0 45.89 L 340.0 81.89 L 253.05 81.89 Z",
+    to: "M 5.0 9.89 L 340.0 9.89 L 340.0 45.89 L 5.0 45.89 Z M 253.05 45.89 L 340.0 45.89 L 340.0 81.89 L 253.05 81.89 Z",
+  },
+  // p566: 68:43 given only its last line
+  {
+    page: 566,
+    number: "068043",
+    from: "M 270.25 47.17 L 340.0 47.17 L 340.0 83.17 L 270.25 83.17 Z",
+    to: "M 5.0 11.22 L 340.0 11.22 L 340.0 47.17 L 5.0 47.17 Z M 270.25 47.17 L 340.0 47.17 L 340.0 83.17 L 270.25 83.17 Z",
+  },
+  // p575: 73:20 given only its last line
+  {
+    page: 575,
+    number: "073020",
+    from: "M 5.0 226.03 L 340.0 226.03 L 340.0 262.03 L 5.0 262.03 Z",
+    to: "M 5.0 10.03 L 340.0 10.03 L 340.0 226.03 L 5.0 226.03 Z M 5.0 226.03 L 340.0 226.03 L 340.0 262.03 L 5.0 262.03 Z",
+  },
+  // p594: 89:23 given only its last line
+  {
+    page: 594,
+    number: "089023",
+    from: "M 235.06 47.28 L 340.0 47.28 L 340.0 83.28 L 235.06 83.28 Z",
+    to: "M 5.0 11.28 L 340.0 11.28 L 340.0 47.28 L 5.0 47.28 Z M 235.06 47.28 L 340.0 47.28 L 340.0 83.28 L 235.06 83.28 Z",
+  },
+  // p599: 98:6 given only its last line
+  {
+    page: 599,
+    number: "098006",
+    from: "M 107.2 47.35 L 340.0 47.35 L 340.0 83.35 L 107.2 83.35 Z",
+    to: "M 5.0 11.35 L 340.0 11.35 L 340.0 47.35 L 5.0 47.35 Z M 107.2 47.35 L 340.0 47.35 L 340.0 83.35 L 107.2 83.35 Z",
+  },
+  // p602: 106:4 given two 4.4-unit slivers instead of two lines
+  {
+    page: 602,
+    number: "106004",
+    from: "M 5.0 180.0 L 340.0 180.0 L 340.0 184.41 L 5.0 184.41 Z M 64.1 184.41 L 340.0 184.41 L 340.0 188.81 L 64.1 188.81 Z",
+    to: "M 5.0 118.52 L 125.87 118.52 L 125.87 154.52 L 5.0 154.52 Z M 64.1 154.52 L 340.0 154.52 L 340.0 190.52 L 64.1 190.52 Z",
+  },
+  // p604: 114:6 given two 4.6-unit slivers instead of two lines
+  {
+    page: 604,
+    number: "114006",
+    from: "M 5.0 540.0 L 340.0 540.0 L 340.0 544.6 L 5.0 544.6 Z M 87.82 544.6 L 340.0 544.6 L 340.0 549.2 L 87.82 549.2 Z",
+    to: "M 5.0 477.09 L 59.08 477.09 L 59.08 512.51 L 5.0 512.51 Z M 87.82 512.51 L 340.0 512.51 L 340.0 548.51 L 87.82 548.51 Z",
+  },
 ];
 
 const sha256 = (buf) => createHash("sha256").update(buf).digest("hex");
@@ -197,6 +382,38 @@ function repairIds(svg, page) {
   return { svg: repaired, count };
 }
 
+/**
+ * Apply this page's polygon repairs to *raw upstream* markup, before svgo. Same
+ * contract as repairIds: returns the repaired string and a count, and dies on
+ * anything it did not expect rather than guessing.
+ */
+function repairPolygons(svg, page) {
+  let repaired = svg;
+  let count = 0;
+  for (const fix of POLYGON_REPAIRS) {
+    if (fix.page !== page) continue;
+    const re = new RegExp(`<path\\b[^>]*\\bclass="ayahPolygon"[^>]*\\bnumber="${fix.number}"[^>]*>`);
+    const m = re.exec(repaired);
+    if (!m) die(`page ${page}: expected an ayahPolygon with number="${fix.number}" to repair`);
+    if (m[0].includes(`d="${fix.to}"`)) {
+      die(
+        `page ${page}: number="${fix.number}" already carries the repaired geometry — ` +
+          `upstream fixed it, so drop it from POLYGON_REPAIRS`,
+      );
+    }
+    if (!m[0].includes(`d="${fix.from}"`)) {
+      die(
+        `page ${page}: number="${fix.number}" is not the polygon this repair was written ` +
+          `against. The pinned corpus moved: re-derive the repair against the new geometry ` +
+          `rather than loosening the match.`,
+      );
+    }
+    repaired = repaired.replace(m[0], m[0].replace(`d="${fix.from}"`, `d="${fix.to}"`));
+    count++;
+  }
+  return { svg: repaired, count };
+}
+
 /* --------------------------------------------------- absolute ayah numbers */
 
 /**
@@ -268,12 +485,16 @@ async function main() {
     console.log(`pin verified: ${PAGES * 2} upstream files match ${pin.commit.slice(0, 8)}`);
   }
 
-  // 2. Optimize + repair.
+  // 2. Repair polygons, optimize, repair ids. Order matters: the polygon
+  //    repairs match raw upstream `d` strings, which svgo then rewrites.
   const config = svgoConfig(pin);
   const out = [];
   let repairs = 0;
+  let polyRepairs = 0;
   for (const u of upstream) {
-    const optimized = optimize(u.svg.toString("utf8"), config).data + "\n";
+    const { svg: raw, count: polys } = repairPolygons(u.svg.toString("utf8"), u.page);
+    polyRepairs += polys;
+    const optimized = optimize(raw, config).data + "\n";
     if (/<text[\s>]/.test(optimized)) {
       // Loop 0's standing rule: outlined paths only. A <text> element trips the
       // Safari content-visibility paint bug (research §1–§2).
@@ -285,6 +506,9 @@ async function main() {
   }
   if (repairs !== ID_REPAIRS.length) {
     die(`expected exactly ${ID_REPAIRS.length} id repairs, applied ${repairs}`);
+  }
+  if (polyRepairs !== POLYGON_REPAIRS.length) {
+    die(`expected exactly ${POLYGON_REPAIRS.length} polygon repairs, applied ${polyRepairs}`);
   }
 
   // 3. The self-test: reproduce Loop 0's three pages before overwriting them.
