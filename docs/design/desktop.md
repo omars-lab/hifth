@@ -435,7 +435,10 @@ no keyboard. Room and a keyboard are two premises, and only this control needs t
   panel would compete with the mus'haf (§1).
 - **A second column of ayah metadata.** Hifth has no reader features by design (PLAN,
   app identity). Room is not a reason to acquire them.
-- **A "turn the leaf" two-page step.** See §8; it is an open question, not an omission.
+- **A "turn the leaf" two-page step.** Decided against at Loop 4b — §8 ①. It is a
+  refusal now, not an omission and no longer a question: both pages of an opening are
+  already in front of the reader, so a ±2 step would turn a leaf to reveal something they
+  can already see.
 
 ## 6. Keyboard and pointer
 
@@ -448,6 +451,13 @@ whole leaf (±2), and it is wrong for this build: with three non-adjacent pages 
 `stepPage` walks the **inventory**, not the print, and ±2 over an inventory of three is a
 no-op or an overshoot. The keyboard map is core's and is under test there; the spread does
 not get to reinterpret it from a component.
+
+> **The verdict stands; that argument for it does not.** Loop 4b vendored all 604, the
+> inventory and the print agree, and ±2 lands on a real page from anywhere in the book — so
+> the sentence above is now true of nothing. §8 ① is answered on four grounds that outlive
+> the corpus, and this paragraph is kept because "±1, because we only have three pages" and
+> "±1, because the app's unit is a page" are the same behaviour resting on different ground,
+> and only one of them was ever going to survive a complete mus'haf.
 
 `PageDown` = +1 and `PageUp` = −1 turn the page from **anywhere**, including from a focused
 ayah, where the arrows belong to the ayah stepper and always will
@@ -527,7 +537,7 @@ Named, so they are not mistaken for settled. Every design doc in this repo ends 
 heading, and every item is an `### ⓝ … · **status**` row so `pnpm gate:issues` can read it.
 The vocabulary is defined once in [`docs/issues.json`](../issues.json).
 
-### ① Should an arrow key turn the leaf (±2) rather than the page (±1) at desktop? · **open**
+### ① Should an arrow key turn the leaf (±2) rather than the page (±1) at desktop? · **answered**
 
 §6 says no for this build because `stepPage` walks a three-page inventory. After Loop 4b the
 question is live and the answer is not obvious: a hafiz turning a physical mus'haf turns
@@ -537,6 +547,51 @@ a leaf, but the app's page number, URL and announcements are all per-page. Revis
 **Loop 4b landed, so this is no longer blocked — it is unanswered.** `stepPage` now walks a
 604-page inventory, ±1 and ±2 both land somewhere real, and the question is exactly the one
 stated above with nothing standing in front of it.
+
+**Answered: ±1. The arrow turns a page, and it turns a page at every width.** The behaviour
+does not change, and the *reason* it does not change has changed completely — which is why
+this was worth answering rather than leaving to expire. §6's argument was arithmetic about
+scarcity (±2 over an inventory of three is a no-op or an overshoot) and Loop 4b deleted it.
+Four arguments survive it, and none of them is about how many pages are vendored:
+
+1. **±2 would announce a correction on every press.** `stepPage` names the landing out loud
+   whenever it is not the page next door (`page-turning.md` §7 ④, `t.nearestPageN`) — the
+   rule that exists so a reader who lands somewhere they did not ask for hears about it.
+   A ±2 step is never the page next door, so either the live region speaks a correction on
+   every single turn — the noise §7 ⑤ warns is how a reader learns to stop listening — or
+   the honesty rule acquires an exception for the commonest case in the app. An honesty rule
+   with an exception for the common case is not one.
+2. **±2 puts half the print out of the keyboard's reach.** The page number is what the URL
+   carries, what the announcer says, what the page chip shows and what the revision record
+   counts. Under ±2 a reader who starts on page 7 can make 9, 11, 13… current and never 8,
+   without leaving the arrows for the jumper — and the reader being asked to leave the
+   arrows is the one with the fewest ways back to them.
+3. **The keyboard would stop meaning what the wheel and the finger mean.** A keyed turn, a
+   wheel turn and a dragged fold all end in one `stepPage` so they cannot drift (`App.tsx`,
+   `PageStage.tsx`). ±2 on the arrows alone makes one input move twice as far as the other
+   two on the same device; ±2 on all three contradicts the fold, which draws **one** leaf
+   turning (decision row 14, `page-transition.md` §3.4).
+4. **`appKeyAction` would have to learn how wide the window is.** It is L1 and `KeyContext`
+   holds nothing about layout, deliberately. A ±2-at-desktop rule means a field describing
+   the viewport, and a key that moves a different distance after a window resize — the
+   reader's keyboard changing under them because they dragged a corner.
+
+**What made ±2 look attractive was a different defect, and it was already fixed.** The pull
+was that half the presses on a spread appear to move nothing: 7 → 8 stays inside one opening,
+so the paper does not turn. Loop 4b's crease rule settles that from the other direction —
+both leaves of the opening are *already open in front of the reader*, so there is nothing to
+turn, and `PageStage` suppresses the band rather than sweeping a fold across a book where
+nothing changed (`PageStage.tsx:855`, §3.5). Under ±2 the app would turn a leaf in order to
+show a page the reader could already see, which is the one thing a physical mus'haf never
+does. The header's page chip and the announcer carry the move; the paper is right to sit
+still.
+
+**Closed by** `apps/web/e2e/desktop.spec.ts` — *"still turns pages with the arrow keys the
+header advertises"* presses ArrowLeft on page 7 and requires the header to read **8**. Under
+±2 it reads 9 and the row fails. Its neighbour, *"a turn inside one opening draws no band"*,
+holds the other half: the step commits and no fold is swept for it. Both rows exist already;
+naming them here is the point of a `closedBy` — a decision whose only evidence is prose is a
+decision that gets quietly reversed.
 
 ### ② Should the two leaves pan and zoom together? · **open**
 
