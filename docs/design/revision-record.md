@@ -228,7 +228,7 @@ makes this a `docs/validation/ledger.json` candidate rather than something to se
 The bands decide what "cold" means, and a threshold chosen by whoever wrote the renderer is
 a claim about someone else's revision habit.
 
-### ② What the picture should do when tapped · **open**
+### ② What the picture should do when tapped · **fixed**
 
 Navigating to a division's first page is the obvious move and is not yet built; with 601 of
 604 pages absent it would fail more often than it succeeded. Waits for Loop 4b — not because
@@ -238,6 +238,64 @@ to try it.
 **Loop 4b vendored the 601, so the reason to wait is gone.** Every division's first page is in
 the build, so the tap has a destination whichever cell it lands on, and what is left is the
 design choice — which page, and what the announcer says — rather than a hole to route around.
+
+**Which page: the lowest page of that division this build holds.** Not the division's first
+page. `HIZB_STARTS` knows which *ayah* opens a hizb; it does not know which page of *this*
+print carries that ayah, or whether this build carries it at all. So the landing is read off
+the manifest, through the same `scopesOf` sweep that decides whether the cell is drawn at
+all — `coverage` became `holdings` and returns a map from division to page instead of a set,
+because the sweep that answers «is there paper here» can answer «and where» for free. A
+landing the build cannot show is then unrepresentable rather than a case to remember. Lowest
+rather than first-encountered, because nothing in `PageMeta` promises the manifest is
+ascending — the same argument that already makes the sweep run per ayah rather than per page
+span, and `holdings` has a test that hands it the manifest backwards.
+
+**What the announcer says: the division and the page, at hizb and juz scope only.** «الحزب ٣ ·
+صفحة ٢٢» — a reader who pressed a division and heard only a page number would be left to work
+out whether it was the right one. At page scope the cell and the landing are the same fact,
+so nothing extra is said and `goToPage`'s own `t.pageN` stands. The sentence is one ICU
+message rather than two strings joined in the component: `${a} · ${b}` is a word order
+decided in TypeScript.
+
+**Absent cells are not controls.** A held cell is a `<button>` inside its `<li>`; an absent
+cell stays a plain `<li>` with nothing to press. A button over a division we have no paper
+for is the same false claim as drawing it cold, made in the cursor instead of in the fill —
+and an affordance that refuses is worse than one that was never offered.
+
+**The press does not write to the record it is displaying.** `recordLook` is called only from
+the two honest signals in `App.tsx`; `goToPage` does not record. So opening a cold hizb from
+the map does not warm the cell you just pressed, and the picture never draws the reader
+looking at it.
+
+**Rejected, and why.**
+
+- *A division-start table.* The obvious source for "hizb 3 starts on page 22" is the print's
+  own division table, and it is wrong for exactly the reason this item waited two loops: it
+  describes the print, not the build. It would have been right for 604 pages and silently
+  wrong for the next edition that ships partial.
+- *`role="button"` on the `<li>`.* One element instead of two, and it destroys the list: a
+  screen reader announces «list, 604 items» because they are `<li>`s, and a `role` overwrites
+  that. The picture is an inventory before it is a set of controls.
+- *One tab stop per cell.* 604 tab stops inside a Tab-trapped dialog is a map a keyboard
+  reader cannot leave. The grid is a roving `tabindex` instead — one cell at `0`, the rest at
+  `-1`, arrows stepping over the paper we do not have, `dir="rtl"` so ArrowLeft advances
+  through the book. Which is also why `focusables()` here is no longer Colophon's verbatim
+  copy: its `button:not([disabled])` would have collected all 604 and handed the trap a
+  `last` element in the middle of the grid.
+
+**WCAG 2.5.8 is met by exception, not by size, and that is worth writing down.** Page-scope
+cells are 16px and cannot grow: a 604-cell map at 24px is no longer a map you can see at
+once, which is the only thing it is for. Hizb (26px) and juz (40px) clear the threshold
+outright. The criterion's *equivalent control* exception carries the page scope — the jumper
+in the chrome reaches any page with a text field, and it is not a hidden alternative.
+
+**Closed by** `apps/web/e2e/revision.spec.ts` (`pressing a hizb on the map opens it` — a real
+tap, a real page turn, and the announcer read out of the live region) and
+`apps/web/src/components/RevisionMap.test.tsx` (the press, the silence at page scope, the
+absent cell that is not a control, and the single tab stop). The e2e asserts page **22**
+specifically, which is the assertion that would catch a landing computed from a division table
+instead of from the pages this build holds — the row below it trims 22–31 out of the manifest,
+so the two rows check each other.
 
 ### ③ Multi-edition records · **fixed**
 
