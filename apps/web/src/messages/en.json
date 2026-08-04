@@ -181,6 +181,7 @@
   "mapCellAbsent": "{label} · not in this build",
   "mapCellNever": "{label} · never opened",
   "mapCellSeen": "{label} · {when, select, today{opened today} yesterday{opened yesterday} other{opened {daysText} days ago}}",
+  "mapWentTo": "{label} · page {page}",
 
   "facingPage": "Facing page",
   "facingAbsent": "Page {page} is not in this build",

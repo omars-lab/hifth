@@ -109,6 +109,7 @@ const messages: Catalog = {
   mapScopeGroup: "Division",
   mapSince: (d) => "Recording since " + d.dayText,
   mapTitle: "What you have opened",
+  mapWentTo: (d) => d.label + " · page " + d.page,
   mushaf: "Mus'haf",
   nearestPageN: (d) => "Nearest available page · Page " + d.page,
   nextPage: "Next page",

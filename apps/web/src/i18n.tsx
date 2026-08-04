@@ -390,6 +390,15 @@ export interface Strings {
   mapCellAbsent(label: string): string;
   mapCellNever(label: string): string;
   mapCellSeen(label: string, days: number): string;
+  /**
+   * What the announcer says when a cell on the map is pressed.
+   *
+   * A sentence rather than two strings joined in the component, because the two
+   * halves are not in the same order in every language and a `${a} · ${b}` is a
+   * word order decided in TypeScript. Latin page digits, following `pageN` — it
+   * is the figure printed on the corner of the leaf the reader is about to see.
+   */
+  mapWentTo(label: string, page: number): string;
 
   /* ---- the desktop spread and the controls a phone had no room for -------- */
   /**
@@ -704,6 +713,7 @@ export function buildStrings(lang: Lang, m: Catalog): Strings {
         when: days <= 0 ? "today" : days === 1 ? "yesterday" : "other",
         daysText: n(days),
       }),
+    mapWentTo: (label, page) => m.mapWentTo({ label, page }),
 
     facingPage: m.facingPage,
     facingAbsent: (page) => m.facingAbsent({ page }),

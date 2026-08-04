@@ -103,6 +103,7 @@ export interface Catalog {
   readonly mapScopeGroup: string;
   readonly mapSince: (d: { readonly dayText: string | number }) => string;
   readonly mapTitle: string;
+  readonly mapWentTo: (d: { readonly label: string | number; readonly page: string | number }) => string;
   readonly mushaf: string;
   readonly nearestPageN: (d: { readonly page: string | number }) => string;
   readonly nextPage: string;

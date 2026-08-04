@@ -278,10 +278,11 @@
     {
       "id": "what-a-tap-on-the-heatmap-does",
       "source": { "file": "docs/design/revision-record.md", "item": "②" },
-      "status": "open",
+      "status": "fixed",
       "severity": "question",
       "owner": "agent",
-      "note": "Unblocked by loop-4b. The question was what a tap on a cold cell should do when the page behind it might not be in the build — a navigation that lands somewhere else is the failure this repo names most often. Every page is vendored now, so the tap has a real destination, and what is left is a design choice rather than a hole to route around."
+      "closedBy": "apps/web/e2e/revision.spec.ts",
+      "note": "Answered by building it. A held cell is a button that opens its division on the lowest page of it this build holds — read off the manifest through the same scopesOf sweep that decides whether the cell is drawn, never off HIZB_STARTS, which knows the ayah and not the page of this print. coverage became holdings and returns a map instead of a set. The announcer says «الحزب ٣ · صفحة ٢٢» at hizb and juz scope and nothing extra at page scope, where the cell and the landing are one fact. An absent cell stays a plain li with no control at all. The grid is one tab stop, not 604, via a roving tabindex — and page-scope cells meet WCAG 2.5.8 by the equivalent-control exception (the jumper), not by size."
     },
     {
       "id": "multi-edition-revision-records",

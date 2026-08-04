@@ -181,6 +181,7 @@
   "mapCellAbsent": "{label} · غير متوفّر في هذه النسخة",
   "mapCellNever": "{label} · لم يُفتح",
   "mapCellSeen": "{label} · {when, select, today{فُتح اليوم} yesterday{فُتح أمس} other{فُتح قبل {daysText} يومًا}}",
+  "mapWentTo": "{label} · صفحة {page}",
 
   "facingPage": "الصفحة المقابلة",
   "facingAbsent": "صفحة {page} ليست في هذه النسخة",

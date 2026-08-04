@@ -630,7 +630,7 @@
     {
       "id": "see-what-i-have-not-opened-lately",
       "actor": "hafiz",
-      "goal": "Keep a private record of what I have actually opened, and see it — which pages, hizb or juz have gone weeks without me.",
+      "goal": "Keep a private record of what I have actually opened, see it — which pages, hizb or juz have gone weeks without me — and press the one that has waited longest to open it.",
       "feature": "revision-record",
       "code": [
         {
@@ -647,7 +647,7 @@
         },
         {
           "file": "apps/web/src/components/RevisionMap.tsx",
-          "symbol": "coverage"
+          "symbol": "holdings"
         },
         {
           "file": "scripts/gate-revision-privacy.mjs",
@@ -676,15 +676,27 @@
           "test": "draws absent as a different kind of thing from cold, not a paler one"
         },
         {
+          "file": "apps/web/src/components/RevisionMap.test.tsx",
+          "test": "opens the division when its cell is pressed, and gets out of the way"
+        },
+        {
+          "file": "apps/web/src/components/RevisionMap.test.tsx",
+          "test": "offers no control on a cell with no paper behind it"
+        },
+        {
           "file": "apps/web/e2e/revision.spec.ts",
           "test": "a tap on an ayah is still on the map after a reload"
+        },
+        {
+          "file": "apps/web/e2e/revision.spec.ts",
+          "test": "pressing a hizb on the map opens it"
         },
         {
           "file": "apps/web/e2e/revision.spec.ts",
           "test": "a wiped record reads as a young record, not as an empty one"
         }
       ],
-      "gap": "Two holes, and the first is not closable in this repo. iOS deletes script-writable storage after seven days of no interaction, which is precisely the history this promise is about. The e2e can take the record with one CDP call and prove the map still says how old it is, but it cannot wait eight days on a real phone — that is docs/validation/ledger.json → offline-survival-8-day. Second, the marquee path is proven at the store, not through the gesture: no unit test drives a real drag, so «one look, not twelve» is asserted on `recordLook` rather than on a release over twelve ayahs. Loop 4b closed the third hole this entry used to carry: the map drew two held hizb and fifty-eight absent ones, so it was a picture of an inventory rather than of a mus'haf. It is sixty of sixty now, and the absent treatment is held by a trimmed manifest instead of by the build.",
+      "gap": "Two holes, and the first is not closable in this repo. iOS deletes script-writable storage after seven days of no interaction, which is precisely the history this promise is about. The e2e can take the record with one CDP call and prove the map still says how old it is, but it cannot wait eight days on a real phone — that is docs/validation/ledger.json → offline-survival-8-day. Second, the marquee path is proven at the store, not through the gesture: no unit test drives a real drag, so «one look, not twelve» is asserted on `recordLook` rather than on a release over twelve ayahs. Loop 4b closed the third hole this entry used to carry: the map drew two held hizb and fifty-eight absent ones, so it was a picture of an inventory rather than of a mus'haf. It is sixty of sixty now, and the absent treatment is held by a trimmed manifest instead of by the build. A fourth is new with the press: the grid's ArrowUp/ArrowDown ask the browser how many cells fit on a row, and in jsdom every `offsetTop` is 0, so the unit suite proves the sideways walk and the browser proves the rest — the vertical step is asserted nowhere, and would degenerate to Home/End without failing a test.",
       "includes": ["select-the-ayah-i-am-on"]
     },
     {
