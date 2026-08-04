@@ -151,6 +151,23 @@ export function App(): JSX.Element {
    * The query and its arithmetic live in useMediaQuery.ts.
    */
   const desktop = useMediaQuery(DESKTOP_QUERY);
+  /*
+   * Is the reader past fit — reading *into* a page rather than looking at the
+   * book? Above it the spread closes to the one leaf they are on
+   * (docs/design/desktop.md §8 ②).
+   *
+   * State, and therefore a re-render, which is the one thing the stage's `view`
+   * ref exists to avoid. It is affordable because `onFitChange` fires on the
+   * *flip* and not the frame: twice a gesture, not sixty times a second. The
+   * cheaper-looking alternative — a class toggled imperatively from inside the
+   * stage — would have PageStage reaching up into the layout that contains it,
+   * and the stage does not know it is in a spread. It knows its own zoom; the
+   * spread knows what to do about it.
+   *
+   * Not reset on a page turn, because the stage already does: a turn writes
+   * `view = {x:0,y:0,z:1}` and the flip comes back through the same callback.
+   */
+  const [soloLeaf, setSoloLeaf] = useState(false);
   const { t, dir } = useT();
   const { message, announce } = useAnnouncer();
 
@@ -1042,6 +1059,12 @@ export function App(): JSX.Element {
               total={totalPages}
               available={pageTurns.pages}
               bookRef={bookRef}
+              /* `desktop &&` is belt and braces — below the breakpoint the
+                 spread renders its child alone and never reads this — but the
+                 flag itself is set by a stage that exists on a phone too, and a
+                 stale `true` surviving a resize back up to desktop width would
+                 open the book onto a single leaf for no reason. */
+              solo={desktop && soloLeaf}
               renderFacing={(facing) => (
                 /* The facing leaf gets its own stage rather than a second
                    visible host inside the current one: PageStage's whole
@@ -1114,6 +1137,11 @@ export function App(): JSX.Element {
                 /* Only the live stage turns pages, and only on a desktop
                    spread does the fold belong to something wider than it. */
                 foldTarget={desktop ? bookRef : null}
+                /* And only the live stage decides whether the book is open:
+                   the facing leaf is not the page anyone is zooming, and it
+                   never receives a hop or a gesture that could change its
+                   own scale. */
+                onFitChange={(atFit) => setSoloLeaf(!atFit)}
               />
             </PageSpread>
             <HopRail

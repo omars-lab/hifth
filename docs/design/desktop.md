@@ -593,7 +593,7 @@ holds the other half: the step commits and no fold is swept for it. Both rows ex
 naming them here is the point of a `closedBy` — a decision whose only evidence is prose is a
 decision that gets quietly reversed.
 
-### ② Should the two leaves pan and zoom together? · **open**
+### ② Should the two leaves pan and zoom together? · **fixed**
 
 Unanswerable and untestable until a facing pair is vendored. A shared `View` across two
 `PageStage`s is a real change to a component whose correctness argument is "one write path"; do
@@ -602,6 +602,99 @@ not start it speculatively.
 **Loop 4b vendored every facing pair, so the condition in the first sentence is met.** Two
 real leaves is what makes panning one and not the other either right or visibly wrong. The
 warning in the second sentence is unaffected and still the reason to answer it deliberately.
+
+**Answered: neither. Above default zoom the book closes to the one leaf being read.** The
+question offers two ways for two leaves to behave under a zoom, and the answer is that above
+fit there are not two leaves. The reader's own words, and they reframe the question rather
+than pick from it:
+
+> why should we zoom into the next page when we are zooming into one page? we should be
+> zooming into a single page / only it should be in view when we break default zoom
+
+A spread is an offer of *more of the book at once*. Zooming is the reader declining that
+offer in favour of one page, and a facing leaf that stays open beside a page under
+magnification is answering a question nobody asked.
+
+**Panning was already answered and nobody had noticed.** `holdAxis` centres any axis that
+already fits, so at z ≤ 1 a pan is a measured no-op on both leaves — there is nothing to
+drag. The whole of ② was only ever about zoom.
+
+**What the running app was actually doing, before this.** Three things, all reproducible at
+1440×900 from a clean checkout, and none of them found by reading the source:
+
+1. **A cold-opened ayah link landed the two leaves at different scales.** `#/hafs-kfqc/2:48`
+   puts the live leaf at `DEFAULT_HOP_ZOOM` (1.55) and leaves the facing leaf at 1.0, with no
+   gesture involved. The selection band ran to the edge of the page and the gutter cut it in
+   half.
+2. **Hover silently decided which page moved.** `ctrl`+wheel over the *facing* leaf zoomed
+   the facing leaf. Decision row 15 says hover is never load-bearing on this surface, and
+   here it was choosing the subject of the gesture.
+Closing the book answers both outright: at 1.55 there is one leaf, so there is no second scale
+to mismatch and no second leaf for a pointer to land on.
+
+**A third finding was claimed here and it was wrong, so it is recorded as wrong.** From the
+screenshots it looked as though any zoom pushed the fore-edge stack outside the stage's clip,
+which would have cost a magnified leaf the paper vocabulary §4 gives it. Measured, it does
+not: `.host[data-leaf]::after` is a child of the transformed element, so it scales with the
+page and travels with it, and at 2.07× on a 1440×900 desk the whole host — fore-edge included
+— sits inside the book's box (`298…1141` against `0…1440`). What it does do is *thicken*: 10
+layout px drawn at the page's scale is ~21 px at 2×. That is the same thing the leaf's border
+does, and `PageStage.module.css` argues for it deliberately. No issue filed.
+
+**Why not the shared `View`.** It was rendered rather than argued about — the live host's
+transform copied onto the facing host, which is what one `{x,y,z}` across two stages paints.
+The two pages lose their edges and read as one continuous column, which they are not: an
+opening is two sheets with a binding between them, and 8 does not continue 7 across the
+gutter the way two halves of a broadsheet continue each other. It would also force the zoom
+anchor off the pointer — undoing §7 ⑨, which exists because zoom that drifts away from what
+you aimed at is the defect readers report — and it is exactly the change to the one-write-path
+argument the original warning above says not to make speculatively.
+
+**The size argument that looked decisive and was wrong.** The first case made for closing the
+book was that the live leaf would get the whole desk to be read at. It does not. `.leaf` is
+height-bound — `aspect-ratio: 345/550` on a full-height box, §3's finding — so at 1440×900 it
+is ~398 px of page whether one leaf is on the desk or two. Collapsing the spread buys **zero**
+reading size, and a single desktop stage is capped by `--stage-page-max`'s 480 px measure in
+any case. That measurement is recorded here beside the decision it failed to support: the
+decision rests on the reader's argument, not on this one.
+
+**The gain that does survive is the viewport, not the page.** In solo the *leaf box* drops its
+aspect ratio and takes the whole book while the *page* stays height-bound, so a page at 1.55×
+(617 px wide) is seen whole instead of through a 398 px slot. That is the phone's geometry
+exactly — stage is the window, page is height-bound inside it — which is the point: above fit
+a desktop stops being a desktop and becomes a reader.
+
+**How it is built, and the two things that were nearly wrong.**
+
+- `PageStage` gained one prop, `onFitChange(atFit)`, fired from `applyTransform` — the single
+  place every view change passes through, so a wheel, a pinch, a hop's tween and a page turn's
+  reset all report the same way. On the **flip**, not the frame: `view` is a ref precisely so
+  a pan does not re-render a 170 KB inline SVG's parent, and a callback carrying `z` would
+  hand that ref straight back to React sixty times a second.
+- The threshold is `z ≤ 1 + 1e-3`, not `z > 1`. Every landing is a RAF tween and its last
+  frames arrive at 1.0000003; a bare `>` would leave the book shut on a reader who was done.
+- `solo` on `PageSpread` is **style, not mount** — the opposite of `enabled`, deliberately.
+  `enabled` decides whether a second 170 KB SVG is ever fetched on this device (§2 ④, decision
+  row 8); this decides whether it is looked at right now, and a reader zooming in and back out
+  must not pay a fetch, a parse and a `Highlighter` rebuild each way. The facing leaf stays
+  mounted at zero width, `visibility: hidden`, and `aria-hidden` — hidden from the reading
+  order in step with the eye.
+- The page stays height-bound in a box that is no longer page-shaped by turning `.book` into a
+  size container and handing down `--stage-page-cap: 62.7273cqh` (345/550 of the book's own
+  height). `.host` consumes it the same way it does on a phone, so the two stylesheets still
+  touch only through custom properties.
+- `PageStage` also gained a `ResizeObserver` on its layer. Everything else re-measures at the
+  *start* of a gesture, which was correct while only the window could change a leaf's box. It
+  stopped being correct here: the leaf widens *because of* a zoom, so the frame after the flip
+  would clamp against the box it had just stopped having. A window resize was silently in the
+  same position before, one gesture behind the truth.
+
+**Closed by** `apps/web/e2e/desktop.spec.ts` — *"a zoom past fit leaves one leaf on the desk,
+and a zoom back reopens"* (both directions of the flip, the facing leaf's `aria-hidden`, the
+live leaf taking the book's width, and the page **not** stretching to the desk) and *"a hop
+link opens on the leaf it landed in"* (finding 1, with no gesture in it).
+`PageSpread.test.tsx` holds the half jsdom can see: the reading order, and that the facing
+leaf is still mounted.
 
 ### ③ Is `min-width` the right gate for the keyboard hints? · **fixed**
 

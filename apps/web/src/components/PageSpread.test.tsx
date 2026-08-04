@@ -144,6 +144,59 @@ describe("PageSpread", () => {
     expect(screen.queryByRole("region", { name: "الصفحة المقابلة" })).toBeNull();
   });
 
+  it("takes the facing leaf out of the reading order when the book is closed", () => {
+    // Solo is the reader past fit, reading *into* one page (desktop.md §8 ②).
+    // The facing leaf goes to zero width in CSS, and the width is only half of
+    // it: a leaf a screen reader still walks into is a page the reader was told
+    // is not on screen, read out anyway. jsdom cannot see the width; it can see
+    // this, which is the half that would be silently wrong.
+    const container = spread({
+      page: 7,
+      available: [7, 8, 9, 19],
+      renderFacing: (p) => <div data-testid="facing-stage">{p}</div>,
+      solo: true,
+    });
+    const [right, left] = leaves(container);
+    expect(right!.getAttribute("data-live")).toBe("true");
+    expect(right!.getAttribute("aria-hidden")).toBeNull();
+    expect(left!.getAttribute("data-live")).toBe("false");
+    expect(left!.getAttribute("aria-hidden")).toBe("true");
+    // And the stylesheet's hook, which is where the geometry actually happens.
+    expect(container.querySelector("[data-testid='page-book']")!.getAttribute("data-solo")).toBe(
+      "true",
+    );
+  });
+
+  it("keeps the facing leaf mounted when the book closes", () => {
+    // Style, not mount — the opposite of `enabled`, and deliberately. A reader
+    // zooming in and back out must not pay a ~170 KB fetch, a parse and a
+    // Highlighter rebuild each way, so the leaf that goes to zero width is the
+    // same element that was there a frame earlier.
+    const container = spread({
+      page: 7,
+      available: [7, 8, 9, 19],
+      renderFacing: (p) => <div data-testid="facing-stage">{p}</div>,
+      solo: true,
+    });
+    expect(container.querySelector("[data-testid='facing-stage']")?.textContent).toBe("8");
+  });
+
+  it("says nothing about live leaves when the book is open", () => {
+    // The attribute is always written — the stylesheet reads it only under
+    // `[data-solo]`, and a `data-live` that appeared and vanished would be a
+    // second way to say the same thing. `aria-hidden` is the part that is
+    // conditional, because an open book has two pages the reader can read.
+    const container = spread({
+      page: 7,
+      available: [7, 8, 9, 19],
+      renderFacing: (p) => <div data-testid="facing-stage">{p}</div>,
+    });
+    const [, left] = leaves(container);
+    expect(left!.getAttribute("data-live")).toBe("false");
+    expect(left!.getAttribute("aria-hidden")).toBeNull();
+    expect(container.querySelector("[data-testid='page-book']")!.getAttribute("data-solo")).toBeNull();
+  });
+
   it("hides the gutter from the accessibility tree", () => {
     // It is a drawn shadow standing in for a binding. There is nothing to say
     // about it, and a screen reader stopping on the spine of the book is noise.

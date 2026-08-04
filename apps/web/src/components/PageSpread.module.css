@@ -176,6 +176,72 @@
 }
 
 /*
+ * Solo — the book closes to the leaf being read, above default zoom.
+ *
+ * A spread is an offer of *more of the book at once*. Zooming is the reader
+ * declining that offer in favour of one page, so the facing leaf goes away
+ * (docs/design/desktop.md §8 ②). The alternative — both leaves under one shared
+ * transform — was rendered and looked at: the two pages lose their edges and
+ * read as one continuous column, which they are not.
+ *
+ * Style, not mount. The facing `PageStage` stays where it is at zero width; see
+ * the `solo` prop's note in PageSpread.tsx for why a reader zooming in and out
+ * must not pay a fetch, a parse and a `Highlighter` rebuild each way.
+ *
+ * ## What this actually buys, since it is not reading size
+ *
+ * Not a bigger page. `.leaf` is height-bound — 345/550 of whatever the chrome
+ * leaves, ~398 px at 1440×900 — and that is the same number whether one leaf is
+ * on the desk or two. What changes is the *viewport*: the leaf drops its aspect
+ * box and takes the whole book, so a page at 1.55× (617 px wide) is seen whole
+ * instead of through a 398 px slot. That is the phone's geometry exactly — stage
+ * is the window, page is height-bound inside it — which is the point: above fit
+ * the desktop stops being a desktop and becomes a reader.
+ *
+ * The page has to stay height-bound while its box stops being page-shaped, so
+ * the cap comes back as a container query: `.book` becomes a size container and
+ * hands down 345/550 = 62.7273% of its own height. `.host` (PageStage.module.css)
+ * consumes it through `--stage-page-cap` the same way it does on a phone — the
+ * two files still touch only through custom properties.
+ *
+ * No transition on the collapse. Width is animatable and this is one wheel tick
+ * away from a re-raster of a 170 KB inline SVG, and the thing being animated
+ * would be the *facing* page — a leaf sliding shut under the reader's pointer
+ * while the page they are zooming is still moving. The cut is at the moment the
+ * reader crossed fit, which is a moment they caused.
+ */
+.book[data-solo="true"] {
+  inline-size: 100%;
+  block-size: 100%;
+  container-type: size;
+  /* 345/550 of the book's height — the page's own shape, kept while its box
+     loses it. `cqh` resolves at `.host`, against this element. */
+  --stage-page-cap: 62.7273cqh;
+}
+
+.book[data-solo="true"] > .leaf {
+  flex: 1 1 auto;
+  aspect-ratio: auto;
+  max-inline-size: none;
+}
+
+/* Gone from the eye and, via `aria-hidden` in the component, from the reading
+   order too. `visibility: hidden` rather than `display: none` so the stage
+   inside keeps its box and its observers instead of unmounting its layout. */
+.book[data-solo="true"] > .leaf[data-live="false"] {
+  flex: 0 0 0;
+  inline-size: 0;
+  visibility: hidden;
+}
+
+/* No spine, because there is no seam: one leaf has no facing edge for the
+   shadow to fall onto, and a crease down the middle of a single page is a
+   picture of a fold that is not there. */
+.book[data-solo="true"] .gutter {
+  display: none;
+}
+
+/*
  * The absent leaf.
  *
  * A different treatment entirely, not a paler page: `--paper-sunk` rather than

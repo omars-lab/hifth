@@ -148,6 +148,24 @@ interface PageStageProps {
    */
   dragToTurn?: boolean;
   /**
+   * Fired when this stage crosses between *showing the page* and *reading into
+   * it* — `true` at or below fit, `false` above. Only on a flip, never per frame.
+   *
+   * The stage is the only thing that knows its own zoom, and it must stay the
+   * only thing: `view` is a ref precisely so a pan does not re-render a 170 KB
+   * inline SVG's parent, and a callback carrying `z` would hand that ref back to
+   * React sixty times a second. A boolean that changes twice a gesture is a fact
+   * about the reading, not about the frame.
+   *
+   * The one caller is the desktop spread, which closes to a single leaf above
+   * fit (`docs/design/desktop.md` §8 ②). Below the breakpoint nobody passes it.
+   *
+   * "At or below" and not "at": zooming *out* past fit shows less of the page,
+   * not more of one page, so it is not the reader asking to be closer to
+   * anything. `MIN_ZOOM` is 0.8 and that whole range belongs on the near side.
+   */
+  onFitChange?: (atFit: boolean) => void;
+  /**
    * The applied skin (Loop 6a, spec §8). L3 owns the choice; the stage owns the
    * Highlighters, so it is the one that can apply it to every mounted page.
    */
@@ -215,6 +233,17 @@ const MIN_ZOOM = 0.8;
 const MAX_ZOOM = 5;
 
 /**
+ * How far above 1 counts as "not at fit" — see `onFitChange`.
+ *
+ * Not `> 1` exactly. Zoom is multiplicative and every landing is a RAF tween, so
+ * the last frames before a hop settles at 1 arrive as 1.0000003 and a bare `> 1`
+ * would report a reader into and back out of a zoom they never asked for. One
+ * part in a thousand is far below a wheel tick (1.2^1.2 ≈ 1.25) and far above
+ * anything a lerp leaves behind.
+ */
+const FIT_EPSILON = 1e-3;
+
+/**
  * How much 100 px of `ctrl`+wheel zooms — `page-turning.md` §7 ③.
  *
  * Multiplicative, not additive: `z' = z · RATIO^(−Δy/100)`. Zoom is perceived
@@ -265,6 +294,7 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
     onTurn,
     turnTargetOf,
     dragToTurn = true,
+    onFitChange,
     skin = "plain",
     tajweedLookup = null,
     foldTarget = null,
@@ -316,6 +346,12 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
   turnTargetOfRef.current = turnTargetOf;
   const dragToTurnRef = useRef(dragToTurn);
   dragToTurnRef.current = dragToTurn;
+  // `applyTransform` runs on every animation frame of every gesture and holds an
+  // empty dependency list to stay that cheap, so the one thing it reports out
+  // has to reach it the same way everything else does.
+  const onFitChangeRef = useRef(onFitChange);
+  onFitChangeRef.current = onFitChange;
+  const atFitRef = useRef(true);
   // The wheel's accumulator (core owns the rule; this is just where it lives
   // between events), and the two things the zoom branch needs to notice a
   // gesture starting and ending — a wheel has no `first`/`last` of its own.
@@ -452,7 +488,43 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
     if (fit) view.current = clampView(view.current, fit);
     const { x, y, z } = view.current;
     cur.host.style.transform = `translate3d(${x}px, ${y}px, 0) scale(${z})`;
+    // Reported from here rather than from the gesture handlers because this is
+    // the one place every view change passes through — a wheel, a pinch, a hop's
+    // tween and the reset a page turn does all end up writing this transform,
+    // and a fit signal that three of the four knew about would be worse than
+    // none. Guarded on the flip, so a re-render is owed twice per zoom and not
+    // once per frame.
+    const atFit = z <= 1 + FIT_EPSILON;
+    if (atFit !== atFitRef.current) {
+      atFitRef.current = atFit;
+      onFitChangeRef.current?.(atFit);
+    }
   }, []);
+
+  /*
+   * The cached fit is only as true as the box it was measured from.
+   *
+   * Everything else re-measures at the start of a gesture, which is correct
+   * while the leaf's box is something only the window can change. It stopped
+   * being that when the spread learned to close above fit: the leaf widens to
+   * the whole desk *because* of a zoom, so the frame after the flip would clamp
+   * against the narrow box it just stopped having — the page pinned to an edge
+   * that is no longer where the clamp thinks it is, until the next wheel tick
+   * happened to fix it.
+   *
+   * Observing the layer rather than reacting to the prop keeps this a fact about
+   * geometry: a window resize is the same event and was silently in the same
+   * position before, one gesture behind the truth.
+   */
+  useEffect(() => {
+    const layer = layerRef.current;
+    if (!layer || typeof ResizeObserver === "undefined") return;
+    const ro = new ResizeObserver(() => {
+      if (measureFit()) applyTransform();
+    });
+    ro.observe(layer);
+    return () => ro.disconnect();
+  }, [measureFit, applyTransform]);
 
   const cancelTween = useCallback(() => {
     if (tweenRef.current !== null) {

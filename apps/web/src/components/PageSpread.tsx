@@ -48,6 +48,23 @@ interface PageSpreadProps {
    * acquires an opinion about animation it has no business holding.
    */
   bookRef?: Ref<HTMLDivElement>;
+  /**
+   * Close the book down to the one leaf the reader is reading.
+   *
+   * True when the live stage is zoomed past fit. A spread is an offer of *more
+   * of the book at once*; zooming is the reader declining that offer in favour
+   * of one page, and a facing leaf that stays open next to a page under
+   * magnification is answering a question nobody asked. See
+   * `docs/design/desktop.md` §8 ②.
+   *
+   * Style, not mount — the opposite of `enabled`, and deliberately. `enabled` is
+   * about whether a second 170 KB SVG should ever be fetched on this device;
+   * this is about whether it should be looked at right now, and a reader zooming
+   * in and back out must not pay a fetch, a parse and a `Highlighter` rebuild
+   * each way. The facing leaf stays mounted, at zero width and hidden from the
+   * accessibility tree.
+   */
+  solo?: boolean;
 }
 
 /**
@@ -129,6 +146,7 @@ export function PageSpread({
   children,
   renderFacing,
   bookRef,
+  solo = false,
 }: PageSpreadProps): JSX.Element {
   const { t } = useT();
 
@@ -138,18 +156,34 @@ export function PageSpread({
 
   const { right, left } = spreadOf(page, total);
 
+  /*
+   * What every leaf carries, live or not.
+   *
+   * `data-live` rather than a second class because it is the *stylesheet* that
+   * needs to tell them apart and only while `solo` — a class named for a state
+   * the layout only sometimes cares about is a class that gets styled by
+   * accident. And hidden from assistive tech in step with being hidden from the
+   * eye: a zero-width leaf that a screen reader still walks into is a page the
+   * reader was told is not on screen, read out anyway.
+   */
+  const leafProps = (live: boolean) => ({
+    className: styles.leaf,
+    "data-live": live ? "true" : "false",
+    ...(solo && !live ? { "aria-hidden": true as const } : {}),
+  });
+
   const leaf = (leafPage: number | null, side: "right" | "left"): JSX.Element => {
     const key = side;
     // The end of the book. Furniture, not a hole: no label, no caption, nothing
     // for a screen reader to stop on.
     if (leafPage === null) {
-      return <div key={key} className={styles.leaf} aria-hidden="true" />;
+      return <div key={key} {...leafProps(false)} aria-hidden="true" />;
     }
     // The leaf the reader is on — the live stage, with its selection, gestures
     // and hop rail. There is exactly one of these.
     if (leafPage === page) {
       return (
-        <div key={key} className={styles.leaf}>
+        <div key={key} {...leafProps(true)}>
           {children}
         </div>
       );
@@ -161,13 +195,18 @@ export function PageSpread({
     const facing = available.includes(leafPage) ? renderFacing?.(leafPage) : null;
     if (facing) {
       return (
-        <div key={key} className={styles.leaf}>
+        <div key={key} {...leafProps(false)}>
           {facing}
         </div>
       );
     }
     return (
-      <section key={key} className={`${styles.leaf} ${styles.absent}`} aria-label={t.facingPage}>
+      <section
+        key={key}
+        {...leafProps(false)}
+        className={`${styles.leaf} ${styles.absent}`}
+        aria-label={t.facingPage}
+      >
         <div className={styles.absentWell}>
           <p className={styles.absentWhat}>{t.facingAbsent(leafPage)}</p>
           {/* The same sentence the page bar carries, from the same string. The
@@ -192,7 +231,12 @@ export function PageSpread({
        The gutter is drawn on the book rather than on the leaves — a spine
        belongs to the binding, not to either page. */
     <div className={styles.spread} data-testid="page-spread">
-      <div ref={bookRef} className={styles.book} data-testid="page-book">
+      <div
+        ref={bookRef}
+        className={styles.book}
+        data-testid="page-book"
+        data-solo={solo ? "true" : undefined}
+      >
         {leaf(right, "right")}
         {leaf(left, "left")}
         <div className={styles.gutter} aria-hidden="true" />
