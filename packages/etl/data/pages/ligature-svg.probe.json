@@ -1,0 +1,356 @@
+{
+  "$comment": "The answer to docs/PLAN.md §13, and the bytes it was read off. The candidate word-geometry corpus does not say which KFGQPC print it paginates, and V1/1405H and V2/1421H disagree on 36 pages — so adopting the wrong one would invalidate ayah-pages.json, every edge's dPage and every share link, silently. `probe-ligature-print.mjs` compares its per-word data-surah/data-aya tags against ours, page by page, and this file records the verdict plus a SHA-256 per page fetched, so a rerun against the same pin either reproduces or says loudly that upstream moved. Not a pin in quran-svg.pin.json's sense: nothing here is vendored, because nothing here is adopted. Regenerate with `pnpm probe:ligature-print --write`.",
+  "candidate": {
+    "repo": "mushafdatabase/MushafDatabase-Ligature-Based-SVG",
+    "url": "https://github.com/mushafdatabase/MushafDatabase-Ligature-Based-SVG",
+    "commit": "ae5786ab08597f8123575dec4e774f1eca195e0f",
+    "commitDate": "2026-06-13",
+    "path": "SVG V1.01",
+    "datasetVersion": "SVG V1.01 (data-md-version=\"1.01\"); the repo also carries SVG V1.0",
+    "license": "Sadaqa-e-Jaria grant in the repo's LICENSE: use, copy, modify, publish, distribute and derive, for any lawful purpose including commercial, without prior written approval; must not alter the Quranic content in a way that misrepresents it; as-is, no warranty.",
+    "sourceStatedInReadme": "KFGQPC Madinah Mushaf, Hafs 'an Asim, from the printing-use collection at https://dm.qurancomplex.gov.sa/ — the complex and the narration, but never the print revision, which is what this probe had to establish.",
+    "wordGeometry": "Per-word <g id=\"md-word-NNN\"> carrying data-surah, data-aya, data-word-index-in-ayah, data-hafs, data-imlaey, data-line-number, wrapping per-ligature groups of <path data-text>. Paths, not rects: a word's box has to be measured or precomputed, not read off an attribute.",
+    "size": "595 KB raw / 114 KB gz per page, measured over the 56 fetched. Projected over 604: 351 MB raw, 67 MB gz — 2.6x the shipped page corpus (26.2 MB gz), against a gate:assets pages ceiling of 32 MB."
+  },
+  "ranOn": "2026-08-04",
+  "verdict": "same-print",
+  "$verdict": "Every page checked carries exactly the ayahs our table puts on it, including all four bands where V1 and V2 are known to diverge. The candidate paginates KFGQPC QCF V2 / 1421H, the same print as quran-svg — so its page numbers are our page numbers, and word geometry is not blocked on the print question. What it is blocked on is coordinates: our page 120 is viewBox 0 0 345 550 under a flipping matrix, theirs is 0 0 382.68 547.09, so word boxes do not transfer without a per-page registration against the text block (theirs states one as data-rect on #md-page-inner).",
+  "pages": [
+    {
+      "page": 1,
+      "kind": "control",
+      "sha256": "1b1492b6f59d56a402ccbe883466ad5e102594fc914d00413a5c1088a7bf5273",
+      "same": true
+    },
+    {
+      "page": 2,
+      "kind": "control",
+      "sha256": "6b9380c80d11646199980a9182bd92fbf00e2a37f41ce85969f76ac5301894ab",
+      "same": true
+    },
+    {
+      "page": 119,
+      "kind": "control",
+      "sha256": "dbf6c25dd0f97945312b8c179c9bed1a789deac6921c3abe33526c2416283092",
+      "same": true
+    },
+    {
+      "page": 120,
+      "kind": "diverge",
+      "sha256": "8db5dd6903a8a26f72d8910fece8fa9bf6536d351e040c1c61c977320a8687e7",
+      "same": true
+    },
+    {
+      "page": 121,
+      "kind": "diverge",
+      "sha256": "79ccc0262123344ad7862949495e3283bbd1bc8707e62c01a68b00c6784d56f9",
+      "same": true
+    },
+    {
+      "page": 122,
+      "kind": "diverge",
+      "sha256": "efc196a259a9b447ef942abca0d50b27c708fa1b875e44884b37353d197e8b6d",
+      "same": true
+    },
+    {
+      "page": 123,
+      "kind": "diverge",
+      "sha256": "8183e8ce6b8fe9e31fa66b2332aef076dc45d3b712f38a4718f0020cf260ac9e",
+      "same": true
+    },
+    {
+      "page": 143,
+      "kind": "control",
+      "sha256": "15a0703f5336a0576dd1df17a605c211e6fb52b6469632b3563b818fc6a07587",
+      "same": true
+    },
+    {
+      "page": 144,
+      "kind": "diverge",
+      "sha256": "463a2d54ad75ee39660dfad81a30532f8b25e909ee6380044c93f4cbe6071825",
+      "same": true
+    },
+    {
+      "page": 145,
+      "kind": "diverge",
+      "sha256": "d38295d647de84c5479d39b51358a60d3f28c40092836b747bb27c2abae45297",
+      "same": true
+    },
+    {
+      "page": 146,
+      "kind": "control",
+      "sha256": "2c065d0dc30a40f75a9a163798418a80468da9c7baf4d08e4925987a1cc09ffe",
+      "same": true
+    },
+    {
+      "page": 530,
+      "kind": "control",
+      "sha256": "bd83588885d570e1c10aa39411abdd6ac6bf1be002bf1a8c5db96067fbff5c95",
+      "same": true
+    },
+    {
+      "page": 531,
+      "kind": "diverge",
+      "sha256": "bc2545b42eb1a1ebf088ddd748c35175d41ab7c0faf1ad79fcf4b10ae1086515",
+      "same": true
+    },
+    {
+      "page": 532,
+      "kind": "diverge",
+      "sha256": "34ca688b082ceffec7552ca4ccaa18e3df31a92cfa0e34ede6f8b5b09c5c7eee",
+      "same": true
+    },
+    {
+      "page": 533,
+      "kind": "diverge",
+      "sha256": "db979d5f964b9b4c567fa2e14747ec2f2709371e5529e03fd7e880faf04b9a37",
+      "same": true
+    },
+    {
+      "page": 534,
+      "kind": "diverge",
+      "sha256": "4d1d860abb3a96374557c92e09c261ab02d3dec594238ee67b31a45d6c3c90c0",
+      "same": true
+    },
+    {
+      "page": 535,
+      "kind": "control",
+      "sha256": "bb853316f1e3f0b9f3f5873ff866205b71c3d62389caf148b6d4bb38e274d146",
+      "same": true
+    },
+    {
+      "page": 564,
+      "kind": "diverge",
+      "sha256": "503a23a00704d201a85a92c2318602431930afb13de35ec7e8ccb7700efaf1f6",
+      "same": true
+    },
+    {
+      "page": 565,
+      "kind": "diverge",
+      "sha256": "421d47010eaa0adc94bfc4219181a38107e9a6fb60bc0b2a67708917cfb6c17d",
+      "same": true
+    },
+    {
+      "page": 566,
+      "kind": "diverge",
+      "sha256": "8cce5cd1ca1809db5ef58c1d55cbab67f666ce43a287efe0ef41b5dbdf518acf",
+      "same": true
+    },
+    {
+      "page": 567,
+      "kind": "diverge",
+      "sha256": "5a7545076f66c010e966aa68fb55ba7cf16d5d39593845986f939751d2e387de",
+      "same": true
+    },
+    {
+      "page": 568,
+      "kind": "diverge",
+      "sha256": "c7dbbfee7618c707915582fc6bf9feddcc5dfa76325ece78c681d9f78d479d6c",
+      "same": true
+    },
+    {
+      "page": 569,
+      "kind": "diverge",
+      "sha256": "ce36fe923840dba8ab6b14aa4b9b12e3e20a932c6cdc03d1404c9d091bf28a07",
+      "same": true
+    },
+    {
+      "page": 570,
+      "kind": "diverge",
+      "sha256": "f739d6fe3cde62da0e1d6e772c63f0ae3d4efa1ef3c422cd1cf51d2971590b2d",
+      "same": true
+    },
+    {
+      "page": 571,
+      "kind": "diverge",
+      "sha256": "268e465b481fd01b35405658223193a623d7478b1dd5f7d48da6055c22d6bfe7",
+      "same": true
+    },
+    {
+      "page": 572,
+      "kind": "diverge",
+      "sha256": "9a4e1f121c2ea63b539234724ebdbfab79936f9fb6710cd213e4c0f8d516d2c4",
+      "same": true
+    },
+    {
+      "page": 573,
+      "kind": "diverge",
+      "sha256": "d5ba79a6f852a74e0d432c04e3a2814395b531399211bc7da3efc1e7a2aec83e",
+      "same": true
+    },
+    {
+      "page": 574,
+      "kind": "diverge",
+      "sha256": "43789c2d323882c6fc5078ca877b0cf4671a75d314a0299f4aeb155526b9adfe",
+      "same": true
+    },
+    {
+      "page": 575,
+      "kind": "diverge",
+      "sha256": "91c7eb5cd30922e4bd874a7dfb346752e5b794d0bc663f2fb83910d45344d730",
+      "same": true
+    },
+    {
+      "page": 576,
+      "kind": "diverge",
+      "sha256": "1bb38250649b0a2f34f01b4ea84f6072ebe15d210ca432b7bf07e3a06c0e06bf",
+      "same": true
+    },
+    {
+      "page": 577,
+      "kind": "diverge",
+      "sha256": "a98f5aa92baf342a3c872bec0d7118080532dd3b3699d82670661fb9fa4ab83a",
+      "same": true
+    },
+    {
+      "page": 578,
+      "kind": "diverge",
+      "sha256": "f92190fee98dbeef973fdff2fac77af3805bf8c0db31f3b998f6d6f25f89abad",
+      "same": true
+    },
+    {
+      "page": 579,
+      "kind": "diverge",
+      "sha256": "2f4de53c774432529cad353a9c82df77828e46bee71cad6976ce31c6103c4d26",
+      "same": true
+    },
+    {
+      "page": 580,
+      "kind": "diverge",
+      "sha256": "f9ac43b216b8a678d8d73fb44b2e6fa3cb25d5a8db18e6b2058bd099631b7c70",
+      "same": true
+    },
+    {
+      "page": 581,
+      "kind": "diverge",
+      "sha256": "437dac1b7642971722374de2e73b9b9236cbe5f9e852bceae5aee57a63a01b1a",
+      "same": true
+    },
+    {
+      "page": 582,
+      "kind": "diverge",
+      "sha256": "ae461e061bff8eb26cda93306e38e093cdbe05034e7273f5196342be0f3b0fa2",
+      "same": true
+    },
+    {
+      "page": 583,
+      "kind": "diverge",
+      "sha256": "581f42b696a2170171cb86f692ebef0bda4e9dd0bb9bda968adba2d3afdbbd1f",
+      "same": true
+    },
+    {
+      "page": 584,
+      "kind": "diverge",
+      "sha256": "6611abeccb3728b52c88063243209a970b8f637203d055201cf50dc2270b930b",
+      "same": true
+    },
+    {
+      "page": 585,
+      "kind": "diverge",
+      "sha256": "ebb46c42046d6f594ed97321ade755c2ccbb53ef9ecbdb2b7f01a63d9be6736d",
+      "same": true
+    },
+    {
+      "page": 586,
+      "kind": "diverge",
+      "sha256": "d1efbfeed3a1fc80f2419db29fc42aba8893b706ac877d9df6051e6e7a5987f8",
+      "same": true
+    },
+    {
+      "page": 587,
+      "kind": "diverge",
+      "sha256": "ffed35cbe85bb402b1ea7159d880c86acaaef50f9d9863d9cf3c8a63ca461a7f",
+      "same": true
+    },
+    {
+      "page": 588,
+      "kind": "diverge",
+      "sha256": "21ece5642efb6cf1750b8df1040779e86912c5538dbc9b3f14f1d038e1ead91e",
+      "same": true
+    },
+    {
+      "page": 589,
+      "kind": "diverge",
+      "sha256": "1f1744ce9fc0c500087d5854085288f5515021a3f83190774edac643dc811338",
+      "same": true
+    },
+    {
+      "page": 590,
+      "kind": "diverge",
+      "sha256": "5e863de86ed597a69bdf3403791b894ac1f8877323a63c95a64d611121c0e8b5",
+      "same": true
+    },
+    {
+      "page": 591,
+      "kind": "diverge",
+      "sha256": "622b220ead25817e81ad273878620cf9cc5a358c39fdeb068052734562c20262",
+      "same": true
+    },
+    {
+      "page": 592,
+      "kind": "diverge",
+      "sha256": "97e9612e64bb4e23482836610cc6cb1a23cc993eb5d0313784191f864ef48bf4",
+      "same": true
+    },
+    {
+      "page": 593,
+      "kind": "diverge",
+      "sha256": "59a933a2666fac812fadd9c9338f42a67cef55361ecc2a1e5419b6b3fea194eb",
+      "same": true
+    },
+    {
+      "page": 594,
+      "kind": "diverge",
+      "sha256": "84263eea0b7255f68c8961394df156d3227985ea1448e896bea916b30dd3a2ea",
+      "same": true
+    },
+    {
+      "page": 595,
+      "kind": "diverge",
+      "sha256": "6fe9c13389741e951ecaebf4226ccc836d1b4db3f6c2705b981c0f565889db61",
+      "same": true
+    },
+    {
+      "page": 596,
+      "kind": "diverge",
+      "sha256": "6ae494c26307135f1fc4ac4aae7c5f72f377c557d37ad1145c0b9a1cc646424e",
+      "same": true
+    },
+    {
+      "page": 597,
+      "kind": "diverge",
+      "sha256": "87295f524659bdc22b133ef976d090a12af35877e2244368786fd3f3f460b672",
+      "same": true
+    },
+    {
+      "page": 598,
+      "kind": "diverge",
+      "sha256": "5d57fc7c2538dad33c92118de38ecb75503c979b2cc9e144690f81c98bb5d89b",
+      "same": true
+    },
+    {
+      "page": 599,
+      "kind": "diverge",
+      "sha256": "07b2bd6ecc070eee91850eb92064662c4cdce619e973e7a1f56e4c808435bbd8",
+      "same": true
+    },
+    {
+      "page": 600,
+      "kind": "diverge",
+      "sha256": "15a4a5458bab86ee960bac35f0af824be561917de34f45307ef7cc5e2438dc8b",
+      "same": true
+    },
+    {
+      "page": 601,
+      "kind": "control",
+      "sha256": "2bdba26b5edcaecb96f9bfe3ae74f4cb1f7c320aa1c8ab2ce8e2d09863c35d83",
+      "same": true
+    },
+    {
+      "page": 604,
+      "kind": "control",
+      "sha256": "0e35b401c71a6dc0783738f564f0139d7126119ceb6f6f90e657126d5db20a8b",
+      "same": true
+    }
+  ]
+}
