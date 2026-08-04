@@ -33,8 +33,27 @@ async function openMap(page: Page) {
   return sheet;
 }
 
-/** The cell for one hizb, found by the name a screen reader would hear. */
+/**
+ * The cell for one hizb we hold paper for, found by the name a screen reader
+ * would hear.
+ *
+ * A button, because a cell with a page behind it can be pressed to go there
+ * (`docs/design/revision-record.md` ②). The role is half the assertion: if a
+ * held cell ever stopped being a control, every row below would fail here rather
+ * than pass while the map quietly went back to being a picture.
+ */
 function hizb(sheet: ReturnType<Page["getByRole"]>, name: RegExp) {
+  return sheet.getByRole("list", { name: "خريطة المصحف" }).getByRole("button", { name });
+}
+
+/**
+ * The cell for a hizb this build does not carry.
+ *
+ * A plain list item, and that is the point: an absent division has no page to
+ * open, so it is not offered as a control at all. The other half of "absent is
+ * not cold" — the first half is the treatment, this is the affordance.
+ */
+function absentHizb(sheet: ReturnType<Page["getByRole"]>, name: RegExp) {
   return sheet.getByRole("list", { name: "خريطة المصحف" }).getByRole("listitem", { name });
 }
 
@@ -71,6 +90,31 @@ test.describe("Hifth · the revision map", () => {
     await expect(sheet.getByText("المتوفّر ٦٠ من ٦٠ حزب")).toBeVisible();
   });
 
+  test("pressing a hizb on the map opens it", async ({ page }) => {
+    // `docs/design/revision-record.md` ②. The map is the only surface that shows
+    // the whole mus'haf at once, and for two loops it was the one picture you
+    // could not touch — the page behind a cell might not have been in the build,
+    // and a control that lands somewhere else is the failure this repo names
+    // most often. Loop 4b vendored the print; this is the tap it unblocked.
+    await page.goto("/");
+    await expect(page.locator("svg[role='group']").first()).toBeVisible();
+
+    const sheet = await openMap(page);
+    await hizb(sheet, /^الحزب ٣ · لم يُفتح$/).tap();
+
+    // The sheet gets out of the way: the reader asked to be somewhere else.
+    await expect(sheet).toBeHidden();
+    // Hizb 3 is exactly pages 22–31 (see the row below, which trims that band),
+    // so it opens on 22 — and this is the assertion that would catch a landing
+    // computed from the *print's* division table instead of from the pages this
+    // build actually holds.
+    await expect(page.getByRole("button", { name: "صفحة 22 · ما فتحتَه من المصحف" })).toBeVisible();
+    // Said out loud, and said as a *hizb*: the reader pressed a division and
+    // arrived on a page, and a landing that only named the page would leave them
+    // to work out whether it was the right one.
+    await expect(page.locator("[aria-live='polite']")).toHaveText("الحزب ٣ · صفحة 22");
+  });
+
   test("a hizb this edition does not carry is not drawn as a neglected one", async ({ browser }) => {
     // Task #91's whole claim, which the corpus stopped being able to state on
     // its own: absent must not look like cold. It was free evidence when 601 of
@@ -87,7 +131,11 @@ test.describe("Hifth · the revision map", () => {
       await expect(page.locator("svg[role='group']").first()).toBeVisible();
 
       const sheet = await openMap(page);
-      await expect(hizb(sheet, /^الحزب ٣ · غير متوفّر في هذه النسخة$/)).toHaveCount(1);
+      await expect(absentHizb(sheet, /^الحزب ٣ · غير متوفّر في هذه النسخة$/)).toHaveCount(1);
+      // And it is not a control. A button over a division we have no paper for
+      // would be the app offering a page it cannot show — the same false claim
+      // as drawing it cold, made in the cursor instead of in the fill.
+      await expect(hizb(sheet, /^الحزب ٣ · غير متوفّر في هذه النسخة$/)).toHaveCount(0);
       // Its neighbours are untouched and read as cold, which is what makes the
       // line above a distinction rather than a global relabelling.
       await expect(hizb(sheet, /^الحزب ٢ · لم يُفتح$/)).toHaveCount(1);

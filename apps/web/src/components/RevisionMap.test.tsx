@@ -1,9 +1,9 @@
 import "fake-indexeddb/auto";
-import { beforeEach, describe, expect, it } from "vitest";
-import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import type { PageMeta } from "@hifth/core";
 import { forgetRecord, recordLook } from "../revision-store";
-import { RevisionMap, coverage } from "./RevisionMap";
+import { RevisionMap, holdings } from "./RevisionMap";
 
 /*
  * The picture is tested against the real store (fake-indexeddb runs the actual
@@ -53,6 +53,7 @@ function draw(over: Partial<React.ComponentProps<typeof RevisionMap>> = {}) {
       edition={EDITION}
       totalPages={604}
       page={7}
+      onGoToPage={() => {}}
       today={TODAY}
       {...over}
     />,
@@ -65,13 +66,25 @@ function draw(over: Partial<React.ComponentProps<typeof RevisionMap>> = {}) {
  * `waitFor` rather than a bare query because the sheet reads the store in an
  * effect and says «جارٍ فتح السجلّ…» until it lands — deliberately, so that
  * "still opening" and "opened, and empty" are not the same picture.
+ *
+ * Queried by `data-state` rather than by role, because a cell is one of two
+ * elements now: a division with paper behind it is a `<button>` inside its list
+ * item, and an absent one is the bare item (RevisionMap.tsx). Every cell carries
+ * the attribute, document order is division order either way, and a query that
+ * asked for one role would silently stop counting half the map.
  */
 function cells(): Promise<HTMLElement[]> {
   return waitFor(() => {
     // Named, not "the first list": the legend beside it is also a list of cells,
     // and a query that could pick either would pass for the wrong reason.
     const grid = screen.getByRole("list", { name: "خريطة المصحف" });
-    return within(grid).getAllByRole("listitem");
+    const drawn = Array.from(grid.querySelectorAll<HTMLElement>("[data-state]"));
+    // `waitFor` retries on a throw, and `querySelectorAll` never throws — it
+    // answers "nothing yet" with an empty list. Without this the helper would
+    // return `[]` on the first tick and every assertion after it would be made
+    // against a grid that had not been drawn.
+    if (drawn.length === 0) throw new Error("the grid has not been drawn yet");
+    return drawn;
   });
 }
 
@@ -79,21 +92,35 @@ beforeEach(async () => {
   await forgetRecord();
 });
 
-describe("coverage", () => {
+describe("holdings", () => {
   it("asks the same function the record asks", () => {
-    // Not an implementation detail — it is the whole reason `coverage` exists as
+    // Not an implementation detail — it is the whole reason `holdings` exists as
     // a pseudo-event rather than as its own page→hizb table. Page 7 sits inside
     // hizb 1 and juz 1, and `scopesOf` is what says so in both directions.
-    expect([...coverage([PAGE_7], "hizb")]).toEqual([1]);
-    expect([...coverage([PAGE_7], "juz")]).toEqual([1]);
-    expect([...coverage([PAGE_7], "page")]).toEqual([7]);
+    expect([...holdings([PAGE_7], "hizb").keys()]).toEqual([1]);
+    expect([...holdings([PAGE_7], "juz").keys()]).toEqual([1]);
+    expect([...holdings([PAGE_7], "page").keys()]).toEqual([7]);
   });
 
   it("holds both divisions when a page straddles the boundary", () => {
     // Hizb 2 opens at 2:75. A page running 2:70–2:80 is paper for both, and a
     // map that credited only the ayah it happened to look at first would draw a
     // hizb as absent that the reader can in fact reach.
-    expect([...coverage([page(13, 2, 70, 80)], "hizb")]).toEqual([1, 2]);
+    expect([...holdings([page(13, 2, 70, 80)], "hizb").keys()]).toEqual([1, 2]);
+  });
+
+  it("opens a division on the lowest page we hold for it, whatever order it was given", () => {
+    // The destination of a tap (revision-record.md ②). Hizb 1 runs from page 1,
+    // so three vendored pages of it open at the lowest — and the answer must not
+    // depend on the manifest's array order, which nothing in `PageMeta`'s type
+    // promises and no gate checks. Fed backwards on purpose: a `first one wins`
+    // implementation passes the ascending case and lands a reader at the wrong
+    // end of a juz the first time a manifest is written another way.
+    const backwards = [page(9, 2, 60, 69), page(7, 2, 38, 48), page(5, 2, 20, 29)];
+    expect(holdings(backwards, "hizb").get(1)).toBe(5);
+    expect(holdings(backwards, "juz").get(1)).toBe(5);
+    // At page scope a division *is* a page, so the cell opens itself.
+    expect(holdings(backwards, "page").get(9)).toBe(9);
   });
 });
 
@@ -174,6 +201,114 @@ describe("RevisionMap", () => {
   it("draws nothing at all when it is closed", () => {
     draw({ open: false });
     expect(screen.queryByRole("dialog")).toBeNull();
+  });
+
+  it("opens the division when its cell is pressed, and gets out of the way", async () => {
+    // revision-record.md ②. The map is the only surface that shows the whole
+    // mus'haf at once, and it was the one picture you could not touch. A press
+    // lands on the division's first vendored page, says which division it was —
+    // the reader pressed a *hizb* and arrives on a *page*, and a landing that
+    // only named the page would leave them to work out whether it is the right
+    // one — and closes the sheet, because the reader asked to be somewhere else.
+    const went = vi.fn();
+    const closed = vi.fn();
+    draw({ onGoToPage: went, onClose: closed });
+    const grid = await cells();
+    fireEvent.click(grid[0]!);
+    expect(went).toHaveBeenCalledWith(7, "الحزب ١ · صفحة 7");
+    expect(closed).toHaveBeenCalled();
+  });
+
+  it("says nothing extra at page scope, where the cell and the landing are one fact", async () => {
+    // `goToPage`'s own wording is «صفحة 7», which is already exactly right. A
+    // sentence built here would read «صفحة 7 · صفحة 7».
+    const went = vi.fn();
+    draw({ onGoToPage: went });
+    await cells();
+    fireEvent.click(screen.getByRole("radio", { name: "صفحة" }));
+    const pages = await cells();
+    fireEvent.click(pages[6]!);
+    expect(went).toHaveBeenCalledWith(7, undefined);
+  });
+
+  it("offers no control on a cell with no paper behind it", async () => {
+    // The distinction this component is built around, restated in the cursor: an
+    // affordance that refuses is worse than one that was never offered, and a
+    // button over an absent division is the app promising a page it does not
+    // have. Hizb 1 is a button; hizb 2 is a list item and nothing more.
+    const went = vi.fn();
+    draw({ onGoToPage: went });
+    const grid = await cells();
+    expect(grid[0]!.tagName).toBe("BUTTON");
+    expect(grid[1]!.tagName).toBe("LI");
+    fireEvent.click(grid[1]!);
+    expect(went).not.toHaveBeenCalled();
+  });
+
+  it("is one tab stop, not six hundred and four", async () => {
+    // A button per cell would be 604 tab stops inside a dialog that traps Tab —
+    // a keyboard reader pressing Tab for a minute to get past a picture. So the
+    // grid is a roving tabindex, and the cursor starts on the division the
+    // reader is already in rather than at the top of the book.
+    draw();
+    await cells();
+    fireEvent.click(screen.getByRole("radio", { name: "صفحة" }));
+    const pages = await cells();
+    const stops = pages.filter((cell) => cell.getAttribute("tabindex") === "0");
+    expect(stops).toHaveLength(1);
+    // Page 7 is where the stage is, and the only page this fixture vendors.
+    expect(stops[0]!.getAttribute("aria-label")).toBe("صفحة 7 · لم يُفتح");
+  });
+
+  it("steps the cursor through the book with the arrows, skipping paper we do not have", async () => {
+    // Three vendored pages, none adjacent, so «the next cell» and «the next
+    // division we hold» are different answers — which is the case an arrow key
+    // written as `id + 1` gets wrong. Left, because the grid is `dir="rtl"` and
+    // the book runs leftward.
+    draw({ pages: [page(5, 2, 20, 29), PAGE_7, page(19, 2, 130, 141)], page: 5 });
+    await cells();
+    fireEvent.click(screen.getByRole("radio", { name: "صفحة" }));
+    const grid = screen.getByRole("list", { name: "خريطة المصحف" });
+    const stop = () =>
+      grid.querySelector<HTMLElement>('[tabindex="0"]')!.getAttribute("aria-label");
+
+    expect(stop()).toBe("صفحة 5 · لم يُفتح");
+    fireEvent.keyDown(grid, { key: "ArrowLeft" });
+    expect(stop()).toBe("صفحة 7 · لم يُفتح");
+    fireEvent.keyDown(grid, { key: "ArrowLeft" });
+    expect(stop()).toBe("صفحة 19 · لم يُفتح");
+    // The end of the inventory, not the end of the print: there is nowhere
+    // further to go, so the cursor stays where it is rather than sliding onto a
+    // cell that cannot be pressed.
+    fireEvent.keyDown(grid, { key: "ArrowLeft" });
+    expect(stop()).toBe("صفحة 19 · لم يُفتح");
+    fireEvent.keyDown(grid, { key: "Home" });
+    expect(stop()).toBe("صفحة 5 · لم يُفتح");
+    fireEvent.keyDown(grid, { key: "End" });
+    expect(stop()).toBe("صفحة 19 · لم يُفتح");
+  });
+
+  it("puts the cursor back where the reader is when the scope changes", async () => {
+    // Hizb 47 and juz 47 are different places. A cursor carried across would sit
+    // somewhere the reader never put it, and the next arrow key would move from
+    // there.
+    draw({ pages: [PAGE_7, page(19, 2, 130, 141)], page: 19 });
+    await cells();
+    const grid = screen.getByRole("list", { name: "خريطة المصحف" });
+    fireEvent.keyDown(grid, { key: "Home" });
+    expect(grid.querySelector('[tabindex="0"]')!.getAttribute("aria-label")).toBe(
+      "الحزب ١ · لم يُفتح",
+    );
+    fireEvent.click(screen.getByRole("radio", { name: "صفحة" }));
+    await cells();
+    // Page 19 — where the stage is — and not page 7, which is where the cursor
+    // had been moved at the other scope.
+    expect(
+      screen
+        .getByRole("list", { name: "خريطة المصحف" })
+        .querySelector('[tabindex="0"]')!
+        .getAttribute("aria-label"),
+    ).toBe("صفحة 19 · لم يُفتح");
   });
 
   /*

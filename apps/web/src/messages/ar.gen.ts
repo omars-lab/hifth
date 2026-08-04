@@ -109,6 +109,7 @@ const messages: Catalog = {
   mapScopeGroup: "التقسيم",
   mapSince: (d) => "يُسجَّل منذ " + d.dayText,
   mapTitle: "ما فتحتَه من المصحف",
+  mapWentTo: (d) => d.label + " · صفحة " + d.page,
   mushaf: "المصحف",
   nearestPageN: (d) => "أقرب صفحة متوفّرة · صفحة " + d.page,
   nextPage: "الصفحة التالية",
