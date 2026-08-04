@@ -17,6 +17,7 @@ import type {
   RootIndexShard,
   TajweedShard,
   WireManifest,
+  WordShard,
 } from "@hifth/core";
 import { expandManifest, isCompactManifest } from "@hifth/core";
 import { packedResponse } from "./packs.js";
@@ -157,4 +158,19 @@ export function loadTajweedShard(
   surah: number,
 ): Promise<TajweedShard | null> {
   return json<TajweedShard>(`${BASE}assets/skins/${edition}/tajweed/${surah}.json`);
+}
+
+/**
+ * Fetch one *page's* word-box shard (word-C). The only loader here keyed by page
+ * rather than by surah, because that is how the geometry is stored: a word box
+ * is a position on a sheet of paper, so its shard is the sheet.
+ *
+ * Quiet on a miss, like the two above, and for a sharper reason. This is fetched
+ * the moment a reader long-presses inside their selection — the shards are
+ * ~3.6 KB each and deliberately not precached, so the first drop into words on a
+ * cold page is a network round trip. If it misses, the selection simply stays at
+ * ayah granularity: the reader loses the finer grain, not the ayah they had.
+ */
+export function loadWordShard(edition: string, page: number): Promise<WordShard | null> {
+  return json<WordShard>(`${BASE}assets/words/${edition}/${page}.json`);
 }
