@@ -150,6 +150,8 @@ export class Highlighter {
   private pressAt: { x: number; y: number } | null = null;
   /** Which ayah the current press landed on — see {@link pressedKey}. */
   private pressKey: string | null = null;
+  /** Whether the current press has been spent — see {@link consumePress}. */
+  private pressSpent = false;
   /** The applied skin, and L3's rule lookup for it (spec §8; see `setSkin`). */
   private currentSkin: SkinId = "plain";
   private skinLookup: TajweedLookup | null = null;
@@ -168,13 +170,15 @@ export class Highlighter {
     // with a pointerup over some polygon, and this listener sits below them in
     // the bubble path (polygon → svg → … → the document listeners @use-gesture
     // binds), so it cannot be told after the fact to stay quiet. It measures the
-    // travel itself instead: past the gestures' own slop radius, the release
-    // belongs to a drag and selects nothing.
+    // travel itself — past the gestures' own slop radius, the release belongs to
+    // a drag and selects nothing — and, for the strokes travel cannot see, it
+    // can be told *in advance* ({@link consumePress}).
     this.onPolygonPointerDown = (e: PointerEvent) => {
       this.pressAt =
         typeof e.clientX === "number" && typeof e.clientY === "number"
           ? { x: e.clientX, y: e.clientY }
           : null;
+      this.pressSpent = false;
       // Which ayah was under the finger, decided by the browser's own hit test
       // against the polygon's fill — see `pressedKey` for why it is recorded
       // here and not measured later.
@@ -184,7 +188,10 @@ export class Highlighter {
 
     this.onPolygonPointerUp = (e: PointerEvent) => {
       const press = this.pressAt;
+      const spent = this.pressSpent;
       this.pressAt = null;
+      this.pressSpent = false;
+      if (spent) return;
       if (press && typeof e.clientX === "number" && typeof e.clientY === "number") {
         if (Math.hypot(e.clientX - press.x, e.clientY - press.y) > TAP_SLOP_PX) return;
       }
@@ -527,6 +534,32 @@ export class Highlighter {
    */
   get pressedKey(): string | null {
     return this.pressKey;
+  }
+
+  /**
+   * Spend the current press: the release that ends it selects nothing.
+   *
+   * The tap detector on `pointerup` decides by travel — a release more than
+   * {@link TAP_SLOP_PX} from its press belongs to a drag — and that is right for
+   * every gesture whose defining feature is movement. It is wrong for the two
+   * whose defining feature is *stillness*. A hold that drops into words
+   * (`gestures.ts` `heldIntent`) can travel three pixels and mean something
+   * quite specific, and the release that ends it used to read as a second tap on
+   * the ayah already selected — which the app takes as "dismiss", so a reader
+   * who long-pressed inside their own selection and lifted lost the selection
+   * they were refining. A small marquee ended the same way.
+   *
+   * So the ladder tells the detector, rather than the detector guessing: the
+   * stage calls this on the frame a stroke latches into any intent that is not a
+   * tap. Cleared by the next `pointerdown`, so it can never mute a later press.
+   *
+   * {@link pressedKey} is deliberately *not* cleared here — it answers a
+   * question about where this stroke began, which stays true after the stroke
+   * has been spoken for.
+   */
+  consumePress(): void {
+    this.pressAt = null;
+    this.pressSpent = true;
   }
 
   /** Subscribe to tap-selects. Returns an unsubscribe fn. */

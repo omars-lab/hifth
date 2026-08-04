@@ -106,7 +106,7 @@ interface PageStageProps {
    *
    * Optional, and today nothing above the stage listens. The word grain is drawn
    * and the key is formed; what it *refines* — the mutashabihat search — waits on
-   * print-vs-QAC segmentation alignment (`docs/PLAN.md` 14). Emitting it now
+   * print-vs-QAC segmentation alignment (`docs/PLAN.md` 13). Emitting it now
    * rather than later is what keeps that wiring a one-line prop instead of a
    * second trip through this gesture.
    */
@@ -1690,6 +1690,17 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
             pagesRef.current.get(currentPageRef.current)?.hl.pressedKey === selectedKeyRef.current,
         });
         intentRef.current = intent;
+
+        // A stroke that has latched into a gesture is no longer a tap, however
+        // little the finger travelled. The highlighter's own tap detector
+        // decides by travel and cannot see that — `Highlighter.consumePress`
+        // carries the case it gets wrong, which is a hold that ends where it
+        // began. Said every frame rather than only on the latching one: it is
+        // one boolean write, and a guard here would be a second place that has
+        // to agree with `nextIntent` about which verdicts are terminal.
+        if (intent !== "tap" && intent !== "none") {
+          pagesRef.current.get(currentPageRef.current)?.hl.consumePress();
+        }
 
         if (intent === "turn") {
           // Latched this frame: fix the direction and put the band on the stage.
