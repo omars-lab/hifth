@@ -462,10 +462,11 @@
     {
       "id": "pinning-writes-every-file-twice",
       "source": { "file": "docs/backlog.md", "item": "⑮" },
-      "status": "confirmed",
+      "status": "fixed",
       "severity": "defect",
       "owner": "agent",
-      "note": "Found by the 6b-D pack e2e and by nothing else: the assertion that page 15 lives in the pack and nowhere else came back naming hifth-pages too. pinPack fetches from the page, so the service worker's CacheFirst route stores every file a second time — juz 1's ~3.1 MB paid twice, and 21 of the 32 entries in a browsing-sized LRU spent on duplicates, so keeping a juz for later throws away most of what the reader read last week. Deliberately filed rather than patched, because both candidate fixes are worse than the waste: teaching the worker to recognise a pin puts pack knowledge in the worker, and sweeping runtime caches on unpin only cleans up afterwards. Not a correctness bug — packedFetch reads the pack first and every 6b test passes either way — which is exactly why it needed a register entry instead of a memory. The trigger is a second pinned juz. The e2e tests around it via dropOutsidePack, which is also where whoever fixes it will find this."
+      "closedBy": "docs/decisions/pin-marker.md",
+      "note": "Found by the 6b-D pack e2e and by nothing else: the assertion that page 15 lives in the pack and nowhere else came back naming hifth-pages too. pinPack fetched from the page, so the service worker's CacheFirst route stored every file a second time — juz 1's ~3.1 MB paid twice, and 21 of the 32 entries in a browsing-sized LRU spent on duplicates, so keeping a juz for later threw away most of what the reader read last week. Fixed 2026-08-04: pinPack sends X-Hifth-Pin and both runtimeCaching routes decline anything carrying it. Both reasons for deferring it turned out to be wrong under measurement — sweeping on unpin cannot work at all, because ExpirationPlugin evicts at write time (31 trail entries, 11 survive a 21-page pin, still 11 after deleting all 21 duplicates), and the 'pack knowledge in the worker' cost was mispriced: the worker gains one bit of static provenance and never learns the pack cache's name, its URL list, or that a register exists. Proven by a new e2e that compares the hifth-pages key set across a pin, plus the ⑮ tripwire flipped from [PACK_CACHE, hifth-pages] to [PACK_CACHE]; negative control run and reverted. Not verified outside Chromium — if a browser hides the header from FetchEvent.request the failure mode is the old duplicate, not a broken pack, and that check sits on the offline-survival device runbook."
     },
 
     {
