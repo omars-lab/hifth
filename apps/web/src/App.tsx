@@ -1210,6 +1210,11 @@ export function App(): JSX.Element {
         onClose={() => setEditionOpen(false)}
       />
       <Colophon open={colophonOpen} onClose={() => setColophonOpen(false)} />
+      {/* `onGoToPage` is the app's own page-turner, handed over unchanged: a
+          press on a map cell is a jump, and everything a jump owes — refusing an
+          unvendored page, cancelling one in flight, saying where it landed —
+          already lives in `goToPage`. A second route to a page would be a second
+          announcer, and the two would drift. */}
       <RevisionMap
         open={revisionOpen}
         onClose={() => setRevisionOpen(false)}
@@ -1217,6 +1222,7 @@ export function App(): JSX.Element {
         edition={manifest?.edition ?? ""}
         totalPages={totalPages}
         page={page}
+        onGoToPage={goToPage}
       />
 
       {/* Pinned RTL with the stage, and for the same reason: the trail reads
