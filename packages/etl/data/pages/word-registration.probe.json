@@ -2,8 +2,8 @@
   "$comment": "Does a word box from the candidate corpus land on our page? `probe-ligature-print.mjs` established that the candidate paginates our print and closed by predicting that word boxes would need 'a per-page registration against the text block'. This probe measured it instead of assuming it, and the prediction is wrong in the useful direction: the registration is a plain axis-aligned affine `ours = s·theirs + t`, fitted on the ayah-end ornaments both corpora already tag, and its parameters are constant across the book apart from one term that takes two values by page parity. Nothing here is vendored — like the print probe this is a decision probe, recorded beside the SHA-256 of every page it read so a rerun either reproduces or says loudly that upstream moved. Regenerate with `pnpm probe:word-registration --write`.",
   "reads": "packages/etl/data/pages/ligature-svg.probe.json — the pin lives there and is not restated here, so there is one pin and not two.",
   "$method": "Both corpora mark the same physical objects: the ayah-end ornaments. Ours are <g ayah:x ayah:y> in polygon space, theirs <g id=\"md-aya-mark-NNN\" data-surah data-aya>, giving 5-20 exact point correspondences per page with no fonts, no rendering and no judgment. Least squares in x and y independently, on both sides sorted into canonical reading order first — pairing on document order fits a mirror image, which cost two wild fits (p575, p577) before it was caught. Their y is top-down like our polygons; our ink is y-flipped by the matrix the page sits under, but the polygons live outside it, which is why the fit is a positive scale and not a flip.",
-  "$verdict": "It registers, and it is not per-page work. The scale is 1.3333 in both axes on every standard page; ty is a constant near -88.6; tx takes one of two values, near -114.6 on even pages and -54.6 on odd — the recto/verso binding margin, and the same two constants already sitting in our own SVGs' transform matrices. The marker residual is a fraction of one viewBox unit, and one viewBox unit is roughly one device pixel at phone width, so the registration error is sub-pixel and the per-page fit becomes a check rather than a necessity. The residual quoted in `transform` covers the 59 standard pages only; pages 1 and 2 carry a 235x235 viewBox override, fit their own constants, and fit them badly (p1's residual is 2.72 units against a median of 0.10) — but that is a symptom of p1's polygons, not of the method. See $residue.",
-  "$residue": "Mapping every word through the fit and testing its centre against its own ayah's polygon leaves a residue, and the residue is a defect in OUR polygons rather than in the registration. 42 of 287 misses are single waqf/hizb marks — the corpus makes each its own word, they sit superscript, and their centres fall in the line above; benign, and counted separately so the rest is visible. What is left is two distinct defects in the shipped page corpus, both confirmed against word positions and both also detectable from our own SVGs alone with no download at all: (a) an ayah whose polygon covers only some of the line fragments its words occupy — 10 pages, worst is p545 where 58:22 flows across five full lines carrying no polygon and the ayah's only rect sits on line 6; and (b) pages 1 and 2, whose polygons are malformed outright — 1:4 has zero height, and 1:5, 1:6 and 2:2 carry rects running to y382 and x-19.6 inside a 235x235 viewBox. (b) is why p1 fits badly: the ayah-end markers it is fitted on are as displaced as the polygons. Both are filed in docs/backlog.md and docs/issues.json.",
+  "$verdict": "It registers, and it is not per-page work. The scale is 1.3333 in both axes on every standard page; ty is a constant near -88.6; tx takes one of two values, near -114.6 on even pages and -54.6 on odd — the recto/verso binding margin, and the same two constants already sitting in our own SVGs' transform matrices. The marker residual is a fraction of one viewBox unit, and one viewBox unit is roughly one device pixel at phone width, so the registration error is sub-pixel and the per-page fit becomes a check rather than a necessity. The residual quoted in `transform` covers the 59 standard pages only; pages 1 and 2 carry a 235x235 viewBox override, fit their own constants, and fit them badly (p1's residual is 2.72 units against a median of 0.10) — but that is a symptom of p1's frame, not of the method. (That last clause read \"a symptom of p1's polygons\" until the re-run measured them and found them sound; the override group fits sx 1.163 against sy 1.137 where every standard page is 1.3333 in both axes, and p1 offers 7 marker pairs to fit on. See $residue.)",
+  "$residue": "RE-RUN 2026-08-04, after the repair this probe's residue asked for. Defect (a) below is fixed: 21 polygon repairs across 18 pages landed as POLYGON_REPAIRS in vendor-pages.mjs, and the ordinary residue went 245 words on 12 pages to 7 words on 1 page. Defect (b) below is WITHDRAWN — pages 1 and 2 are not malformed, and the sentence claiming they are is left standing beside this correction because it was believed twice. Measured with the path parser scripts/gate-pages.mjs uses: every polygon on both pages is a well-formed closed ring inside its 235x235 frame, monotone in y; 1:4 is x[12.6,128.6] y[76.2,103.2], 27 units tall, not zero height. The claim came from a parser that assumed the axis-aligned M-h-v-H-Z rect form, which mis-reads the 11 general polygons on those two pages — and a second parser written independently, which read svgo's relative commands as absolute pairs, produced the same false positive from the other direction. Two wrong parsers agreeing is not a confirmation. What is true of p1 is that it fits worst (residual 2.72 against a median of 0.10) and carries all 7 remaining ordinary misses, and the reason is the frame and not the data: pages 1 and 2 are set as two decorated frames rather than a fifteen-line block, they fit their own constants with sx != sy (1.163 against 1.137 on the override group, where every standard page is 1.3333 in both axes), and p1 offers only 7 marker pairs to fit on. gate-pages.mjs skips both pages by name for the same reason. Also measured on the way, and not a reading defect: exactly 3 polygons in the whole 6236 overhang their frame — p187 9:9006, p429 34:34014, p515 49:49004, each 0.8-1.5 units past a 550-tall viewBox, which is about one device pixel at phone width. Filing: (a) is docs/issues.json plan-ayah-polygon-misses-its-ayah, now fixed. The claim below that both were filed in docs/backlog.md is wrong — backlog.md never carried either. Original residue follows. Mapping every word through the fit and testing its centre against its own ayah's polygon leaves a residue, and the residue is a defect in OUR polygons rather than in the registration. 42 of 287 misses are single waqf/hizb marks — the corpus makes each its own word, they sit superscript, and their centres fall in the line above; benign, and counted separately so the rest is visible. What is left is two distinct defects in the shipped page corpus, both confirmed against word positions and both also detectable from our own SVGs alone with no download at all: (a) an ayah whose polygon covers only some of the line fragments its words occupy — 10 pages, worst is p545 where 58:22 flows across five full lines carrying no polygon and the ayah's only rect sits on line 6; and (b) pages 1 and 2, whose polygons are malformed outright — 1:4 has zero height, and 1:5, 1:6 and 2:2 carry rects running to y382 and x-19.6 inside a 235x235 viewBox. (b) is why p1 fits badly: the ayah-end markers it is fitted on are as displaced as the polygons. Both are filed in docs/backlog.md and docs/issues.json.",
   "ranOn": "2026-08-04",
   "verdict": "registers",
   "transform": {
@@ -90,69 +90,14 @@
   },
   "coverage": {
     "words": 8017,
-    "missed": 287,
-    "missedWaqfOrHizb": 42,
-    "missedOrdinary": 245,
+    "missed": 33,
+    "missedWaqfOrHizb": 26,
+    "missedOrdinary": 7,
     "holes": [
       {
         "page": 1,
         "key": "1:4",
         "words": 3
-      },
-      {
-        "page": 431,
-        "key": "34:23",
-        "words": 10
-      },
-      {
-        "page": 545,
-        "key": "58:22",
-        "words": 50
-      },
-      {
-        "page": 551,
-        "key": "60:12",
-        "words": 35
-      },
-      {
-        "page": 554,
-        "key": "62:9",
-        "words": 10
-      },
-      {
-        "page": 564,
-        "key": "67:27",
-        "words": 12
-      },
-      {
-        "page": 566,
-        "key": "68:43",
-        "words": 12
-      },
-      {
-        "page": 575,
-        "key": "73:20",
-        "words": 77
-      },
-      {
-        "page": 594,
-        "key": "89:23",
-        "words": 9
-      },
-      {
-        "page": 599,
-        "key": "98:6",
-        "words": 11
-      },
-      {
-        "page": 602,
-        "key": "106:4",
-        "words": 8
-      },
-      {
-        "page": 604,
-        "key": "114:6",
-        "words": 4
       }
     ]
   },
@@ -252,7 +197,7 @@
       "markers": 9,
       "residual": 0.0884,
       "words": 155,
-      "missed": 11
+      "missed": 0
     },
     {
       "page": 530,
@@ -308,7 +253,7 @@
       "markers": 4,
       "residual": 0.0711,
       "words": 140,
-      "missed": 54
+      "missed": 0
     },
     {
       "page": 551,
@@ -316,7 +261,7 @@
       "markers": 7,
       "residual": 0.0692,
       "words": 135,
-      "missed": 36
+      "missed": 1
     },
     {
       "page": 554,
@@ -324,7 +269,7 @@
       "markers": 7,
       "residual": 0.1052,
       "words": 142,
-      "missed": 10
+      "missed": 0
     },
     {
       "page": 564,
@@ -332,7 +277,7 @@
       "markers": 20,
       "residual": 0.0794,
       "words": 135,
-      "missed": 14
+      "missed": 2
     },
     {
       "page": 565,
@@ -348,7 +293,7 @@
       "markers": 18,
       "residual": 0.0845,
       "words": 140,
-      "missed": 13
+      "missed": 1
     },
     {
       "page": 567,
@@ -420,7 +365,7 @@
       "markers": 19,
       "residual": 0.2497,
       "words": 166,
-      "missed": 87
+      "missed": 1
     },
     {
       "page": 576,
@@ -572,7 +517,7 @@
       "markers": 26,
       "residual": 0.0858,
       "words": 122,
-      "missed": 10
+      "missed": 0
     },
     {
       "page": 595,
@@ -612,7 +557,7 @@
       "markers": 16,
       "residual": 0.125,
       "words": 104,
-      "missed": 12
+      "missed": 0
     },
     {
       "page": 600,
@@ -636,7 +581,7 @@
       "markers": 14,
       "residual": 0.1072,
       "words": 57,
-      "missed": 8
+      "missed": 0
     },
     {
       "page": 604,
@@ -644,7 +589,7 @@
       "markers": 15,
       "residual": 0.4521,
       "words": 64,
-      "missed": 4
+      "missed": 0
     }
   ]
 }

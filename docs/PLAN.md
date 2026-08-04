@@ -598,6 +598,24 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     rather than a fifteen-line block and every line-pitch statement here is false of it.
     Closed.
 
+    **The re-run also explains the 2.72, and the probe's own record needed correcting.**
+    Re-running the probe against the repaired corpus and writing the result — because a
+    recorded measurement whose subject has changed will, on the next run, raise the alarm it
+    exists to raise for a reason that is not "upstream moved" — put the ordinary residue at
+    **7 of 8017** and left one hole, `1:4` on page 1. p1's residual was left "unexplained
+    again, 7 markers inside a decorative frame is a plausible cause" when (b) was withdrawn.
+    The fitted constants now say more than plausible: the override group fits **sx 1.163
+    against sy 1.137**, a scale that differs between the axes, where every one of the 59
+    standard pages fits 1.3333 in both. The decorated frames are not the fifteen-line block at
+    a different offset; they are a different geometry, which is a property of the print and not
+    a defect in anything. What did need correcting is the probe result's own `$residue`, which
+    still carried (b) as fact and claimed both defects were "filed in docs/backlog.md and
+    docs/issues.json" — backlog.md never carried either. It now records the withdrawal beside
+    the original, including the detail that makes it worth recording: the false positive was
+    produced **twice, by two independently written parsers** — one assuming the axis-aligned
+    `M…h…v…H…Z` rect form, one reading svgo's relative commands as absolute pairs — and two
+    wrong parsers agreeing is not a confirmation.
+
 **The half of these a machine cannot run now has a register — and a runbook.** Follow-ups
 ① (the phone), ② (the browser glance) and ④ (VoiceOver/TalkBack) still wait on a human, and
 prose cannot answer "is that still true, on what device, and when?" — ⑤ (does the source
