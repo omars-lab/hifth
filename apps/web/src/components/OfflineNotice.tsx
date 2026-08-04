@@ -8,6 +8,7 @@ import {
   type Durability,
 } from "../storage";
 import { isIosDevice, isStandalone, onInstallAvailability, promptInstall } from "../pwa";
+import { packStatuses } from "../packs";
 import { useT } from "../i18n";
 import styles from "./OfflineNotice.module.css";
 
@@ -41,24 +42,35 @@ import styles from "./OfflineNotice.module.css";
  *   • `best-effort` — persist denied and no install path to offer. Honest, not
  *     alarming: the pages are cached, they are simply first in line if the
  *     device runs short.
+ *   • `pack-gone` — a juz the reader deliberately kept is no longer whole. The
+ *     only one of the five that reports something that has *already happened*
+ *     rather than a risk, which is why it outranks even `capped`, and the only
+ *     one whose action opens a sheet instead of firing an install prompt.
  *
  * This union is declared here, where the ordering below decides between them,
  * and the bundles' `notices` record is indexed by it — so a fifth state cannot
  * be added without both languages growing an entry for it.
  */
-type NoticeKind = "capped" | "install-ios" | "install-prompt" | "best-effort";
+type NoticeKind = "pack-gone" | "capped" | "install-ios" | "install-prompt" | "best-effort";
 
 /**
  * Pick the one thing worth saying. Order is by what blocks offline hardest:
- * a quota cap beats a missing install, a missing install beats a denied
- * persist() (installing is usually what *earns* the grant).
+ * a loss already taken beats a quota cap, a quota cap beats a missing install,
+ * a missing install beats a denied persist() (installing is usually what
+ * *earns* the grant).
  */
 function pickNotice(
+  swept: boolean,
   durability: Durability,
   installable: boolean,
   standalone: boolean,
   ios: boolean,
 ): NoticeKind | null {
+  // First, and ahead of `capped` on purpose. Every other notice warns about
+  // storage that *may* be taken; this one says storage the reader asked for has
+  // been taken, and it is the only one where reading the mus'haf offline has
+  // already stopped working.
+  if (swept) return "pack-gone";
   if (durability === "capped") return "capped";
   if (durability === "persisted") return null;
   // An installed app already sits in the platform's durable tier — on iOS that
@@ -83,9 +95,22 @@ interface OfflineNoticeProps {
    * grant that arrives while held is already reflected when the strip lifts.
    */
   readonly hold?: boolean;
+  /**
+   * Open the shelf of what is kept — the revision map at juz scope.
+   *
+   * The `pack-gone` action deliberately does *not* re-download. A banner tap
+   * that starts a multi-megabyte fetch, with no size shown and possibly on
+   * cellular, is the shape of a thing readers learn not to press. It takes them
+   * to the place that lists each juz, its state and its size, and the re-pin
+   * button sits there beside the number it will cost.
+   */
+  readonly onShowPacks?: () => void;
 }
 
-export function OfflineNotice({ hold = false }: OfflineNoticeProps): JSX.Element | null {
+export function OfflineNotice({
+  hold = false,
+  onShowPacks,
+}: OfflineNoticeProps): JSX.Element | null {
   const { t } = useT();
   // Starts at "unsupported" — the honest pre-reading state. It renders nothing
   // on its own except on iOS, where install is the right advice with or without
@@ -95,6 +120,10 @@ export function OfflineNotice({ hold = false }: OfflineNoticeProps): JSX.Element
   // Kinds hidden for this session. The durable half of the memory lives in
   // localStorage (`isNoticeDismissed`); this set is what re-renders on dismiss.
   const [hidden, setHidden] = useState<ReadonlySet<string>>(() => new Set());
+  // Whether any pinned juz is no longer whole. Read once, on mount: a sweep
+  // happens while the tab is closed, so there is nothing to watch for — and the
+  // shelf, not this strip, is where the state is followed as it changes.
+  const [swept, setSwept] = useState(false);
 
   // Cold start: read only. `persist()` is a request, and requests made before
   // the user has done anything are the ones browsers refuse.
@@ -136,12 +165,30 @@ export function OfflineNotice({ hold = false }: OfflineNoticeProps): JSX.Element
   // heuristics are satisfied), and `appinstalled` clears it.
   useEffect(() => onInstallAvailability(setInstallable), []);
 
-  const kind = pickNotice(durability, installable, isStandalone(), isIosDevice());
-  const dismissed = kind !== null && (hidden.has(kind) || isNoticeDismissed(kind));
+  // `torn` counts as swept. A pack missing four of its twenty-three pages opens
+  // most of the juz, which is precisely why it needs saying out loud: the reader
+  // finds the hole in aeroplane mode, at the page they were revising.
+  useEffect(() => {
+    let live = true;
+    void packStatuses().then((all) => {
+      if (live) setSwept(all.some((s) => s.health !== "whole"));
+    });
+    return () => {
+      live = false;
+    };
+  }, []);
+
+  const kind = pickNotice(swept, durability, installable, isStandalone(), isIosDevice());
+  // `pack-gone` is an event, not a standing condition, so it is never written to
+  // the durable dismissal store: a reader who hid it in March would otherwise
+  // never be told about the sweep that takes the next juz. Hiding it lasts for
+  // this session, and the shelf keeps the answer for anyone who goes looking.
+  const dismissed =
+    kind !== null && (hidden.has(kind) || (kind !== "pack-gone" && isNoticeDismissed(kind)));
 
   const handleDismiss = useCallback(() => {
     if (!kind) return;
-    dismissNotice(kind);
+    if (kind !== "pack-gone") dismissNotice(kind);
     setHidden((s) => new Set(s).add(kind));
   }, [kind]);
 
@@ -170,7 +217,11 @@ export function OfflineNotice({ hold = false }: OfflineNoticeProps): JSX.Element
       </div>
       <div className={styles.actions}>
         {notice.action && (
-          <button type="button" className={styles.primary} onClick={handleInstall}>
+          <button
+            type="button"
+            className={styles.primary}
+            onClick={kind === "pack-gone" ? onShowPacks : handleInstall}
+          >
             {notice.action}
           </button>
         )}

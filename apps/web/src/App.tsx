@@ -24,6 +24,7 @@ import {
   type JumpTarget,
   type MergedEdge,
   type RailChip,
+  type RevisionScope,
   type RootHop,
   type RootIndexShard,
   type SkinId,
@@ -120,6 +121,11 @@ export function App(): JSX.Element {
   // the sheet reads it itself, so a log of someone's worship is not sitting in
   // this component's state for every future feature to reach into.
   const [revisionOpen, setRevisionOpen] = useState(false);
+  // Which scope the sheet should land on, when the opener cares. The page chip
+  // does not — it leaves the reader wherever they last were — so it stays
+  // `undefined` there; the swept-pack notice sends them to "juz", because the
+  // shelf it is pointing at is only rendered at juz scope.
+  const [revisionAt, setRevisionAt] = useState<RevisionScope | undefined>(undefined);
   /*
    * Is the coach strip still claiming its band of the layout? Read once, from
    * the same storage the strip reads, so the two agree on the very first frame
@@ -971,7 +977,10 @@ export function App(): JSX.Element {
           className={styles.pageId}
           aria-label={t.mapOpen(page)}
           aria-haspopup="dialog"
-          onClick={() => setRevisionOpen(true)}
+          onClick={() => {
+            setRevisionAt(undefined);
+            setRevisionOpen(true);
+          }}
         >
           <span className={styles.pageLabel}>{t.pageWord}</span>
           <span className={`${styles.pageNum} numeric`}>{page}</span>
@@ -1033,7 +1042,13 @@ export function App(): JSX.Element {
           this app is. So they take turns, and the teaching goes first: one
           asks for a tap now, the other warns about eviction that may never
           come. */}
-      <OfflineNotice hold={coachUp} />
+      <OfflineNotice
+        hold={coachUp}
+        onShowPacks={() => {
+          setRevisionAt("juz");
+          setRevisionOpen(true);
+        }}
+      />
 
       {/* The three verbs, once, in the layout rather than over the page — the
           first tap it teaches has to land while the strip is still up. */}
@@ -1223,6 +1238,7 @@ export function App(): JSX.Element {
         totalPages={totalPages}
         page={page}
         onGoToPage={goToPage}
+        openAt={revisionAt}
       />
 
       {/* Pinned RTL with the stage, and for the same reason: the trail reads

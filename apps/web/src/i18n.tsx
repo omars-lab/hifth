@@ -99,6 +99,7 @@ import {
   digitsIn,
   surahName as fmtSurahName,
   surahNames,
+  tenths,
 } from "./format";
 import type { Catalog } from "./messages/catalog.gen";
 import { CATALOGS } from "./messages/catalogs.gen";
@@ -109,7 +110,7 @@ export type { EditionCopy };
  *  these unions are declared by the components that own the behaviour, and an
  *  index into these records stops compiling the day one of them gains a case. */
 type Direction = "loop" | "earlier" | "later" | "root";
-type NoticeKind = "capped" | "install-ios" | "install-prompt" | "best-effort";
+type NoticeKind = "pack-gone" | "capped" | "install-ios" | "install-prompt" | "best-effort";
 
 /** One coach card: the glyph belongs to the component, the words to the language. */
 export interface CoachStep {
@@ -400,6 +401,33 @@ export interface Strings {
    */
   mapWentTo(label: string, page: number): string;
 
+  /* ---- pinned juz packs (Loop 6b) ----------------------------------------- */
+  packsHead: string;
+  /** What a pin buys, said once above the shelf: pages *and* hops. */
+  packsHint: string;
+  /** No Cache Storage or no IndexedDB — a pin has nowhere to live. */
+  packsUnsupported: string;
+  packsLoading: string;
+  packsNone: string;
+  packKeep(juz: number): string;
+  /** The in-flight line. Files, not a percentage: a count is a thing you can watch stall. */
+  packKeeping(juz: number, done: number, total: number): string;
+  packStop: string;
+  /** The good case. Size in MB, so the reader can weigh it against their phone. */
+  packWhole(juz: number, mb: number): string;
+  /**
+   * The state that matters. A partly swept pack opens most of its pages, so it
+   * is the one most likely to pass for working — it gets the count, not a hedge.
+   */
+  packTorn(juz: number, present: number, total: number): string;
+  packGone(juz: number): string;
+  packRepin: string;
+  packRemove: string;
+  /** The accessible name of the same button, which needs to say *which* juz. */
+  packRemoveJuz(juz: number): string;
+  /** What this build has no paper for, said before the download rather than after. */
+  packAbsent(ayahs: number): string;
+
   /* ---- the desktop spread and the controls a phone had no room for -------- */
   /**
    * The accessible name of the leaf facing the one you are reading. Structural,
@@ -644,6 +672,11 @@ export function buildStrings(lang: Lang, m: Catalog): Strings {
     },
 
     notices: {
+      "pack-gone": {
+        title: m["notices.pack-gone.title"],
+        body: m["notices.pack-gone.body"],
+        action: m["notices.pack-gone.action"],
+      },
       capped: { title: m["notices.capped.title"], body: m["notices.capped.body"] },
       "install-ios": {
         title: m["notices.install-ios.title"],
@@ -714,6 +747,26 @@ export function buildStrings(lang: Lang, m: Catalog): Strings {
         daysText: n(days),
       }),
     mapWentTo: (label, page) => m.mapWentTo({ label, page }),
+
+    packsHead: m.packsHead,
+    packsHint: m.packsHint,
+    packsUnsupported: m.packsUnsupported,
+    packsLoading: m.packsLoading,
+    packsNone: m.packsNone,
+    packKeep: (juz) => m.packKeep({ juzText: n(juz) }),
+    packKeeping: (juz, done, total) =>
+      m.packKeeping({ juzText: n(juz), doneText: n(done), totalText: n(total) }),
+    packStop: m.packStop,
+    // `tenths` rather than `n`: the size is the one fraction the chrome prints,
+    // and Arabic writes it «٥٫٨» with U+066B rather than with a full stop.
+    packWhole: (juz, mb) => m.packWhole({ juzText: n(juz), sizeText: tenths(mb, lang) }),
+    packTorn: (juz, present, total) =>
+      m.packTorn({ juzText: n(juz), presentText: n(present), totalText: n(total) }),
+    packGone: (juz) => m.packGone({ juzText: n(juz) }),
+    packRepin: m.packRepin,
+    packRemove: m.packRemove,
+    packRemoveJuz: (juz) => m.packRemoveJuz({ juzText: n(juz) }),
+    packAbsent: (ayahs) => m.packAbsent({ n: ayahs, nText: n(ayahs) }),
 
     facingPage: m.facingPage,
     facingAbsent: (page) => m.facingAbsent({ page }),
