@@ -206,6 +206,20 @@ let marks = 0;
 let dropped = 0; // marks that needed any drop at all
 let worstDrop = 0;
 
+/**
+ * Which page each ayah's words were found on — the check below is that the
+ * answer is one page, and stays one page.
+ *
+ * `resolver.ts` has assumed this since Loop 1 ("an ayah lives on exactly one
+ * page") and `WordIndex` now leans on it harder: it is constructed per page, so
+ * an ayah whose words were split across a break would have its selection
+ * silently truncated at the fold rather than refused. Nothing here checks the
+ * *print* — an ayah really can run over a page break, and where it does this
+ * corpus assigns all of its boxes to the page carrying its polygon. What is
+ * checked is that the corpus never says two things at once.
+ */
+const ayahPage = new Map();
+
 for (const row of pin.pages) {
   const page = row.page;
   const where = `page ${page}`;
@@ -258,6 +272,9 @@ for (const row of pin.pages) {
 
   let pageWords = 0;
   for (const key of keys) {
+    const seenOn = ayahPage.get(key);
+    if (seenOn !== undefined) fail(`${where}: ${key} also has boxes on page ${seenOn}`);
+    else ayahPage.set(key, page);
     const entry = shard.words[key];
     const { from, boxes } = entry;
     const markSet = new Set(entry.marks ?? []);
@@ -324,5 +341,6 @@ if (failures.length) {
 console.log(
   `gate:words — ${pin.pages.length} shard(s) match ${pin.source.repo}@${pin.source.commit.slice(0, 8)}; ` +
     `${words} word boxes land inside their own ayah, and all ${marks} pause marks meet theirs ` +
-    `(${dropped} needed a drop, worst ${worstDrop.toFixed(1)} of ${MARK_DROP})`,
+    `(${dropped} needed a drop, worst ${worstDrop.toFixed(1)} of ${MARK_DROP}); ` +
+    `${ayahPage.size} ayahs, each on exactly one page`,
 );

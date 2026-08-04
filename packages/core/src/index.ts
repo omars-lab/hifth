@@ -21,6 +21,21 @@ export {
   type AyahKey,
 } from "./keys.js";
 
+// word-C — the `#w3` / `#w3-7` half of the key grammar, and the shard reader
+// that gives it referents. The index inside a `#w` key is the *print's*: it
+// counts pause marks as words, and `WordIndex` is where the rule that a mark can
+// be inside a selection but never an end of one is enforced.
+export { formatWordKey, parseWordKey, ayahKeyOf, type WordKey } from "./keys.js";
+
+export {
+  WordIndex,
+  isWordShard,
+  type WireBox,
+  type WireAyahWords,
+  type WordShard,
+  type WordSpanRange,
+} from "./words.js";
+
 export {
   AYAH_COUNTS,
   TOTAL_AYAHS,
