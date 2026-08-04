@@ -538,14 +538,24 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     Pages 1 and 2 are fine. `1:4` is a clean quadrilateral 116 × 27 units; nothing on either
     page leaves its viewBox. The report above came from a scan that decomposed every polygon
     into axis-aligned rectangles, which is what the `M…h…v…H…Z` form on nearly every page
-    actually is — but **189 polygons in the corpus are general polygons**, L-shaped where an
-    ayah wraps mid-line, and 11 of those 189 are on pages 1 and 2, whose surah-frame layout
+    actually is — but **118 polygons in the corpus are general polygons**, L-shaped where an
+    ayah wraps mid-line, and 11 of those 118 are on pages 1 and 2, whose surah-frame layout
     uses almost nothing else. Bounding a general polygon by its rectangles invents area it
     does not have and edges it does not have; that is the whole of the finding. The lesson is
     in `subpaths()` in `gate-pages.mjs`, which fails on a curve command rather than guessing:
     a parser that quietly tolerates a shape it was not written for reports the shape, not the
     data. p1's 2.72 residual is unexplained again — 7 markers inside a decorative frame is a
     plausible cause, and it is not a polygon defect.
+    **That count read 189 here until 2026-08-04, and the correction is the same lesson a
+    second time.** Re-measured against the assets of the commit that first wrote it, it was
+    118 there too — so it was never drift, it was float equality. The corpus writes its
+    rectangles relative (`M80.6 153h184v36h-184Z`), 80.6 + 184 − 184 is 80.59999999999997,
+    and under `===` the closing edge of a perfectly good rectangle is neither horizontal nor
+    vertical: 71 of the 189 were rectangles that missed by 3e-14. A parser that quietly
+    tolerates a shape it was not written for reports the shape; a comparison that quietly
+    demands more precision than the data carries reports the comparison. `gate:pages` now
+    counts both figures on every run and prints them, so neither can be carried in prose
+    again.
     Rescanned with a parser that reads the polygons as polygons: **zero** zero-area subpaths,
     **zero** slivers, and three subpaths outside the viewBox by 0.8–1.5 units at the bottom
     edge (p187 `9:6`, p429 `34:14`, p515 `49:4`) — rounding at the page foot, not a defect.
