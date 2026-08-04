@@ -147,12 +147,28 @@ const TOL = 12; // units a glyph may ride outside its box — measured, see abov
 const BAND_MAX = 2.3; // line-heights of furniture: a header and a basmala, never more
 
 /**
- * Every subpath of a *polygon* `d`, as a point list. All 12 346 polygon
+ * Every subpath of a *polygon* `d`, as a point list. All 12 358 polygon
  * subpaths in the corpus are straight-line; a curve would mean the shape is no
  * longer a point list and every bounding box below would be a guess, so it
  * fails instead. (A parser that assumed the axis-aligned `M…h…v…H…Z` rect form
- * is what first reported pages 1 and 2 as malformed. 189 polygons in the corpus
- * are general polygons, 11 of them on those two pages, and all are well formed.)
+ * is what first reported pages 1 and 2 as malformed. 118 polygons in the corpus
+ * are general polygons, spread over 74 pages, 11 of them on those two, and all
+ * are well formed.)
+ *
+ * Both figures were re-measured 2026-08-04 and both moved, for different
+ * reasons. The subpath total drifts with every polygon repair — it read 12 346
+ * when this comment was written, and PLAN 14's p577 work added twelve. The 118
+ * replaces a "189" that was never right: re-measured against the assets of the
+ * commit that first wrote it, it was 118 there too, so it was not drift. It was
+ * float equality — see `isAxisRect` — and 71 of the 189 are ordinary rectangles
+ * that close 3e-14 away from where they opened. That is the more useful half of
+ * this note: the miscount was not carelessness, it was a measurement anyone
+ * re-deriving these by eye would repeat.
+ *
+ * So one number rotted and the other was born wrong, and nothing in the repo
+ * could tell — which is why `census` below now counts both on every run and
+ * prints them. A figure in a comment that no run re-derives is a figure nobody
+ * can check; these are output, and this paragraph is only their history.
  */
 function subpaths(d, where) {
   const out = [];
@@ -199,6 +215,62 @@ function subpaths(d, where) {
   }
   if (pts && pts.length > 1) out.push(pts);
   return out;
+}
+
+/**
+ * Whether a subpath is the axis-aligned rectangle nearly every ayah polygon is:
+ * four distinct corners with every edge horizontal or vertical. Anything else is
+ * a *general* polygon — an L where an ayah wraps mid-line, and the decorated
+ * frames of the opening spread.
+ *
+ * `SAME` is not fussiness. The corpus writes rectangles with *relative*
+ * commands — `M80.6 153h184v36h-184Z` — and 80.6 + 184 − 184 is
+ * 80.59999999999997, so the closing edge of a perfectly good rectangle is
+ * neither horizontal nor vertical under `===`. That is exactly the mistake the
+ * "189" recorded below was: 71 of those 189 are plain rectangles that missed by
+ * 3e-14. Page coordinates carry one decimal (svgo floatPrecision 1), so 1e-6 is
+ * four orders of magnitude below anything the print can express and cannot
+ * absorb a real corner.
+ */
+const SAME = 1e-6;
+function isAxisRect(pts) {
+  const p = pts.slice();
+  if (p.length > 1) {
+    const [ax, ay] = p[0];
+    const [bx, by] = p[p.length - 1];
+    if (Math.abs(ax - bx) < SAME && Math.abs(ay - by) < SAME) p.pop(); // explicit close
+  }
+  if (p.length !== 4) return false;
+  for (let i = 0; i < 4; i++) {
+    const [x1, y1] = p[i];
+    const [x2, y2] = p[(i + 1) % 4];
+    const h = Math.abs(y1 - y2) < SAME;
+    const v = Math.abs(x1 - x2) < SAME;
+    if (h === v) return false; // exactly one edge direction, and a real edge
+  }
+  return true;
+}
+
+/**
+ * The shape census. Not a test — every general polygon in this corpus is well
+ * formed, and the parser above already fails on the thing that would be a
+ * defect. This counts because the two figures in its docblock were carried in
+ * prose for a loop and both were wrong: one had drifted with a repair, and one
+ * was never right at all. A count that is printed on every run cannot do that.
+ */
+const shape = { polys: 0, subpaths: 0, general: 0, pages: new Set() };
+function census(page, svg) {
+  for (const m of svg.matchAll(/<path\b[^>]*\bclass="ayahPolygon"[^>]*>/g)) {
+    const d = m[0].match(/\bd="([^"]+)"/)?.[1];
+    if (!d) continue;
+    const subs = subpaths(d, `page ${page} census`);
+    shape.polys++;
+    shape.subpaths += subs.length;
+    if (subs.some((s) => !isAxisRect(s))) {
+      shape.general++;
+      shape.pages.add(page);
+    }
+  }
 }
 
 /**
@@ -414,11 +486,13 @@ let checked = 0;
 for (const entry of pin.pages) {
   const file = join(PAGES_DIR, `${entry.page}.svg`);
   if (!existsSync(file)) continue;
+  const svg = readFileSync(file, "utf8");
+  census(entry.page, svg); // every page, including the two the tests skip
   // The opening spread is set as two decorated frames, not a fifteen-line
   // block: pages 1 and 2 have their own viewBox and eleven general polygons
   // between them, and every line-pitch statement below is false of them.
   if (entry.page <= 2) continue;
-  const r = coverage(entry.page, readFileSync(file, "utf8"));
+  const r = coverage(entry.page, svg);
   if (!r) continue;
   checked++;
   if (r.tall.length) {
@@ -449,5 +523,7 @@ if (failures.length) {
 console.log(
   `gate:pages — ${verified}/${expected} page SVGs match ` +
     `${pin.repo}@${pin.commit.slice(0, 8)} via svgo ${pin.svgo.version}; ` +
-    `every glyph on ${checked} of them falls inside a tappable ayah`,
+    `every glyph on ${checked} of them falls inside a tappable ayah; ` +
+    `${shape.polys} ayah polygons in ${shape.subpaths} straight-line subpaths, ` +
+    `of which ${shape.general} are general polygons on ${shape.pages.size} pages`,
 );
