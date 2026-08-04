@@ -166,6 +166,12 @@ export {
   type PointerSample,
 } from "./gestures.js";
 
+// word-C — the fifth verdict on the same ladder. The hold that paints a marquee
+// means *words* when it began inside the ayah already selected, so this is not a
+// new gesture the reader has to learn; it is the one they already know, read
+// against one bit of context (`PointerSample.insideSelection`).
+export { isWordIntent } from "./gestures.js";
+
 // The fourth gesture on the same surface — drag-to-turn (`page-turning.md` §4,
 // tracking/retreating from `page-transition.md` §3.2). It is exported from the
 // same file as the other three because it is decided by the same ladder: one

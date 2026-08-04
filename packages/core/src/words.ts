@@ -65,6 +65,39 @@ export interface WordSpanRange {
   readonly to: number;
 }
 
+/**
+ * How much two word boxes must overlap vertically, as a fraction of the shorter
+ * one, to count as being on the same line of the print.
+ *
+ * **Measured, not chosen.** Across all 604 shipped shards, comparing each
+ * consecutive pair of *lexical* boxes (pause marks excluded — see below):
+ *
+ * - same line, worst case: **0.506** (p53, 3:24, boxes 13→14)
+ * - different lines, worst case: **0.091** (p157, 7:54, boxes 27→28)
+ *
+ * 0.25 sits between them with about a factor of two of margin on each side, so
+ * the ink would have to move a long way before a line break went unnoticed.
+ *
+ * Pause marks are excluded from the comparison because they break it outright:
+ * a mark floats *above* its line in a box ~7 units square, so it frequently
+ * overlaps its own line's words by nothing at all. Including them made the two
+ * populations overlap (worst same-line −1.77 against worst cross-line 1.00) —
+ * i.e. no threshold existed. Which line a mark belongs to is settled instead by
+ * {@link WordIndex.bandsFor}'s rule that a mark trails the word before it, which
+ * is likewise a measurement: of the 502 marks that sit at a line boundary in the
+ * shipped corpus, the preceding word is the vertically nearer one for **all
+ * 502**.
+ */
+const LINE_OVERLAP = 0.25;
+
+/** Whether two boxes share enough vertical extent to be on one line. */
+function sameLine(a: Rect, b: Rect): boolean {
+  const top = Math.max(a.y, b.y);
+  const bottom = Math.min(a.y + a.height, b.y + b.height);
+  const shorter = Math.min(a.height, b.height);
+  return shorter > 0 && (bottom - top) / shorter > LINE_OVERLAP;
+}
+
 /** Squared distance from a point to a rectangle; 0 inside it. */
 function distanceSq(r: Rect, x: number, y: number): number {
   const dx = x < r.x ? r.x - x : x > r.x + r.width ? x - r.x - r.width : 0;
@@ -169,6 +202,83 @@ export class WordIndex {
     const lo = Math.max(0, from - start);
     const hi = Math.min(rects.length - 1, to - start);
     return lo > hi ? [] : rects.slice(lo, hi + 1);
+  }
+
+  /**
+   * The same run as {@link boxesFor}, collapsed to **one rectangle per line** —
+   * the shape the ink pen wants.
+   *
+   * Per-box swipes would be wrong twice over. Word boxes are tight around their
+   * own glyphs, so their heights differ along a single line (17.5, 21.9, 29.7,
+   * 17.3, 27.7 … on one line of 2:44 alone); a band per box would be a row of
+   * rectangles of different thicknesses at different heights — a ransom note,
+   * not a pen. And each band would carry its own round caps, so the ink would
+   * bulge and pinch at every word gap instead of running.
+   *
+   * So a run of words on one line becomes one rectangle: the x-span of
+   * everything in the run (marks included, so the ink crosses a pause unbroken)
+   * and the y-span of its *words* (marks excluded, because a mark floats above
+   * the line and would drag the centreline up off the text). The result is one
+   * rectangle per line, which is exactly what an ayah polygon already parses to
+   * — see `ink.ts`, which inks both with the same pen.
+   */
+  bandsFor(key: string, from: number, to: number): Rect[] {
+    const ref = this.refOf(key);
+    const rects = this.rects.get(ref);
+    if (!rects || to < from) return [];
+    const start = this.starts.get(ref) as number;
+    const marks = this.marks.get(ref) as Set<number>;
+    const lo = Math.max(0, from - start);
+    const hi = Math.min(rects.length - 1, to - start);
+    if (lo > hi) return [];
+
+    const bands: Rect[] = [];
+    // The open run: its x-span over every box, its y-span over words only.
+    let left = 0;
+    let right = 0;
+    let top = 0;
+    let bottom = 0;
+    let open = false;
+    // The last word of the open run — what the next word is compared against,
+    // and (by being unset) the reason a leading mark joins the run that follows
+    // rather than starting one of its own.
+    let lastWord: Rect | null = null;
+
+    for (let i = lo; i <= hi; i++) {
+      const r = rects[i] as Rect;
+      const isMark = marks.has(start + i);
+      if (!isMark && lastWord && !sameLine(lastWord, r)) {
+        bands.push({ x: left, y: top, width: right - left, height: bottom - top });
+        open = false;
+        lastWord = null;
+      }
+      if (!open) {
+        left = r.x;
+        right = r.x + r.width;
+        top = r.y;
+        bottom = r.y + r.height;
+        open = true;
+      } else {
+        left = Math.min(left, r.x);
+        right = Math.max(right, r.x + r.width);
+      }
+      if (!isMark) {
+        // A word sets the band's vertical extent. The first word of a run that
+        // opened on a mark replaces the mark's extent rather than unioning with
+        // it, which is the same rule as "the y-span is the words'" applied to
+        // the one case where the mark got there first.
+        if (lastWord) {
+          top = Math.min(top, r.y);
+          bottom = Math.max(bottom, r.y + r.height);
+        } else {
+          top = r.y;
+          bottom = r.y + r.height;
+        }
+        lastWord = r;
+      }
+    }
+    if (open) bands.push({ x: left, y: top, width: right - left, height: bottom - top });
+    return bands;
   }
 
   /**
