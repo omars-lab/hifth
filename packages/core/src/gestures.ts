@@ -18,6 +18,8 @@
  *   for {@link LONG_PRESS_MS} has, in hand terms, stopped moving; whatever it
  *   does next paints. This is the same heuristic the platform long-press uses,
  *   which is why it feels learnable rather than arbitrary.
+ * - **…unless the hold began inside the ayah already selected ⇒ word.** Same
+ *   hold, one bit of context: see {@link PointerSample.insideSelection}.
  * - **Move sideways first, across a page that fits ⇒ turn.** The one rule that
  *   needs to know something about the *page* as well as the hand; see
  *   {@link PointerSample.fitsAcross} for why that is not a layering violation.
@@ -109,7 +111,7 @@ export const TURN_AXIS_RATIO = 2;
 export const TURN_EDGE_GUARD_PX = 24;
 
 /** What the hand is doing on the stage right now. */
-export type PointerIntent = "none" | "tap" | "pan" | "marquee" | "pinch" | "turn";
+export type PointerIntent = "none" | "tap" | "pan" | "marquee" | "pinch" | "turn" | "word";
 
 /** One frame of pointer state — everything the split is allowed to look at. */
 export interface PointerSample {
@@ -144,6 +146,27 @@ export interface PointerSample {
    * for what this guards and why declining is the right answer.
    */
   edgeDistancePx?: number;
+  /**
+   * Whether the press landed inside the ayah that is *already selected*.
+   *
+   * This is the one bit that separates the two things a completed hold can mean.
+   * The gesture the reader chose (`docs/decisions/word-selection.md`) is: tap
+   * selects an ayah exactly as it always did, and a second press — a hold, this
+   * time inside what is already lit — drops a level, to the word under the
+   * finger. Dragging from there extends word by word; Escape climbs back.
+   *
+   * **The honest cost, recorded rather than absorbed:** a reader can no longer
+   * begin a multi-ayah marquee *from inside the ayah they currently have
+   * selected*. The hold there now means word. Everywhere else on the page — and
+   * everywhere at all when nothing is selected — the marquee is untouched, and
+   * the workaround is the one a reader already performs without being taught it:
+   * start the sweep a few millimetres outside the lit polygon.
+   *
+   * **Optional, and it defaults to "no",** exactly like {@link fitsAcross}: a
+   * caller that never passes it gets the four-gesture ladder unchanged, which is
+   * what keeps every existing test measuring what it was written to measure.
+   */
+  insideSelection?: boolean;
 }
 
 /** Straight-line movement from the press point (CSS px). */
@@ -163,12 +186,23 @@ export function pointerIntent(sample: PointerSample): PointerIntent {
   const held = sample.elapsedMs >= LONG_PRESS_MS;
   if (moved > TAP_SLOP_PX) {
     // Moved decisively: which happened first, the hold or the movement?
-    if (held) return "marquee";
+    if (held) return heldIntent(sample);
     return isTurnStroke(sample) ? "turn" : "pan";
   }
   // Still inside the slop radius: a completed hold arms the marquee; otherwise
   // this is still a tap and could become anything.
-  return held ? "marquee" : "tap";
+  return held ? heldIntent(sample) : "tap";
+}
+
+/**
+ * What a completed hold means — the marquee, unless it began inside the ayah
+ * already selected, in which case it drops to words. One function rather than
+ * two branches so the two `held` arms above cannot drift apart: a hold that
+ * completes before the finger moves and one that completes after must mean the
+ * same thing, or a reader's stroke would depend on how still their hand was.
+ */
+function heldIntent(sample: PointerSample): PointerIntent {
+  return sample.insideSelection ? "word" : "marquee";
 }
 
 /**
@@ -201,13 +235,28 @@ export function nextIntent(previous: PointerIntent, sample: PointerSample): Poin
   // A pinch that drops back to one finger stays a pinch: the leftover finger is
   // the tail of a zoom, not the start of a new pan across the page.
   if (previous === "pinch") return "pinch";
-  if (previous === "pan" || previous === "marquee" || previous === "turn") return previous;
+  if (previous === "pan" || previous === "marquee" || previous === "turn" || previous === "word")
+    return previous;
   return pointerIntent(sample);
 }
 
 /** True when the intent paints a marquee rather than moving the page. */
 export function isMarqueeIntent(intent: PointerIntent): boolean {
   return intent === "marquee";
+}
+
+/**
+ * True when the finger is choosing words inside an ayah rather than sweeping
+ * across ayahs.
+ *
+ * Deliberately *not* folded into {@link isMarqueeIntent}. The two share a
+ * trigger and nothing else: a marquee resolves against ayah polygons the browser
+ * measures, a word selection against boxes a shard vendored, and each paints
+ * into its own highlighter group. A caller that treated them alike would ask the
+ * page for the ayahs under a rectangle that only ever covers one.
+ */
+export function isWordIntent(intent: PointerIntent): boolean {
+  return intent === "word";
 }
 
 /**
