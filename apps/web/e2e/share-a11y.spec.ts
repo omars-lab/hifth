@@ -27,6 +27,45 @@ test.describe("Hifth · share links (spec §7)", () => {
     ).toBeVisible();
     // The via origin (2:48) is on the trail — tap-to-rewind is available.
     await expect(page.getByRole("button", { name: /ارجع إلى البقرة · ٢:٤٨/ })).toBeVisible();
+    // And it is *outlined on its own page* — the third noun in this test's name
+    // and the one thing it did not check. The bead above is not evidence of it:
+    // the bead comes from the trail, the outline comes from `PageStage`, and the
+    // outline was losing a race with page 7's mount and then never arriving,
+    // because the effect that draws it is keyed on the crumb and reads the
+    // mounted set through a ref. A shared link that silently drops the mark
+    // showing where you came from is that link failing at its one job.
+    //
+    // Attached, not visible: 2:48 is on page 7 and the reader is on page 19, so
+    // the mark is waiting on the page it belongs to. Asserted against that page
+    // by name, because "some overlay somewhere holds a crumb" is exactly the
+    // claim a wrong-page bug would also satisfy.
+    await expect(
+      page.locator('svg[aria-labelledby="page-label-7"] #hifth-overlay .hl-crumb'),
+    ).toBeAttached();
+  });
+
+  test("the breadcrumb survives its page arriving late", async ({ page }) => {
+    // The test above is a witness, not a proof: on a fast machine page 7 mounts
+    // before the breadcrumb is computed, which is the order that works. The
+    // order that broke is the other one, and it is not reachable by asking
+    // nicely — so hold page 7's SVG back until the effect that draws the crumb
+    // has certainly run and found nothing to draw on.
+    //
+    // 400 ms is chosen against the assertion, not the machine: whatever the
+    // fetch would have taken, the effect fires on the render that follows the
+    // hash parse, and that is not 400 ms away. Under the bug the crumb is then
+    // gone for good — nothing re-runs the effect, because it reads the mounted
+    // set through a ref and no render is owed. This is the container failure
+    // reproduced on purpose instead of waited for.
+    await page.route("**/assets/pages/hafs-kfqc/7.svg", async (route) => {
+      await new Promise((r) => setTimeout(r, 400));
+      await route.continue();
+    });
+    await page.goto("/#/hafs-kfqc/2:123?via=2:48");
+    await expect(page.locator("header .numeric")).toHaveText("19");
+    await expect(
+      page.locator('svg[aria-labelledby="page-label-7"] #hifth-overlay .hl-crumb'),
+    ).toBeAttached();
   });
 
   test("a full trail link restores the whole chain of beads", async ({ page }) => {
