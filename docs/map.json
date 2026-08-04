@@ -77,7 +77,7 @@
         "Add a golden row if it changes pixels — see the `golden-images` feature. Note that a wipe is not pixels: Playwright fast-forwards finite animations to completion, so the goldens see the finished stroke and cannot see the wipe at all. Anything about how a mark arrives has to be a unit test on what the Highlighter wrote."
       ],
       "gates": ["pnpm test", "make e2e", "make golden"],
-      "seeAlso": ["the-hop", "root-lens", "golden-images"]
+      "seeAlso": ["the-hop", "root-lens", "word-selection", "golden-images"]
     },
 
     {
@@ -581,7 +581,48 @@
         "`gate:words` deliberately duplicates parsing and point-in-polygon. Do not refactor it to import `lib/mushaf-frame.mjs`; the duplication is the check."
       ],
       "gates": ["pnpm gate:words", "pnpm gate:assets", "pnpm probe:word-registration", "make ci"],
-      "seeAlso": ["assets-and-pages", "select-an-ayah"]
+      "seeAlso": ["assets-and-pages", "select-an-ayah", "word-selection"]
+    },
+
+    {
+      "id": "word-selection",
+      "what": "Hold inside an ayah you have already selected, and the grain gets finer: the run under your finger is words, and dragging extends it.",
+      "layer": "L1 core",
+      "entry": [
+        {
+          "file": "packages/core/src/words.ts",
+          "symbol": "class WordIndex",
+          "note": "The reader for one page's word shard, and the whole reason word selection can be a gesture rather than a lookup. `wordAt` is nearest-word *within the named ayah*, skipping pause marks — not strict containment — because a finger dragging along a line spends most of its time in the gaps between words, and a containment test would make the band flicker off between every pair. It returns null only for an ayah with no boxes on this page. `bandsFor` collapses a from→to run into one Rect per line of print, which is what makes a three-line run three swipes and not thirty."
+        },
+        {
+          "file": "packages/core/src/gestures.ts",
+          "symbol": "heldIntent",
+          "note": "The fifth verdict, and the one separated from an existing one by a single bit of context: a hold is a `word` run if it began inside the current selection and a `marquee` if it did not. That is the whole risk of the feature — a bug in reading that bit does not produce a broken word run, it produces the Loop 5 marquee vanishing — so `word.spec.ts` drives both from the same hold on the same page."
+        },
+        {
+          "file": "packages/core/src/highlighter.ts",
+          "symbol": "consumePress",
+          "note": "How the ladder tells the tap detector, in advance, that a stroke is spoken for. `onPolygonPointerUp` scores a tap by travel, and for a hold that measurement is exactly backwards: a long-press that releases where it began has travelled nothing, so it read as a second tap on the ayah already selected — and `App.handleSelect` toggles the selection *off* on a second tap. A reader refining their selection lost it. Called for any latched non-tap intent rather than for `word` alone, because a small marquee had the same shape of bug and a `word`-only guard would be a second place obliged to agree with `nextIntent` about which verdicts are terminal."
+        },
+        {
+          "file": "apps/web/src/components/PageStage.tsx",
+          "symbol": "applyWords",
+          "note": "One frame of a word stroke: put the point on a word, ink anchor→cursor into the `word` group, and on release say which words those were. The band is drawn with the `\"sel\"` style over an ayah wash that is still lit — `mix-blend-mode: multiply` is what makes the overlap read as a darker emphasis rather than a second slab, and it is the reason this feature has a golden row at all. `clearWords` is its counterweight: a range and a word run answer different questions about the same page, so only one may be on it."
+        },
+        {
+          "file": "apps/web/src/assets.ts",
+          "symbol": "loadWordShard",
+          "note": "The only loader keyed by page rather than by surah, because that is how the geometry is stored: a word box is a position on a sheet of paper, so its shard is the sheet. Fetched the moment a hold latches, ~3.6 KB, deliberately not precached — so the first drop into words on a cold page is a round trip, and quiet on a miss: the reader loses the finer grain, not the ayah they had."
+        }
+      ],
+      "extend": [
+        "Nothing above the stage listens yet. `onSelectWords` fires with a `S:A:from-to` key on release and no caller passes it — the run is paint, and that is deliberate until PLAN 13's segmentation alignment exists, because the print counts pause marks as words and the corpora that would consume a word range do not. Wire a consumer only once you can say which segmentation its indices are in.",
+        "It has no keyboard or screen-reader path, and the tree is unchanged by a word run on purpose — the overlay is decorative and must stay so. Giving words a reachable route is a design question (what does an assistive-tech reader select a *phrase* with?), not a missing `tabindex`; it is tracked as an issue rather than left to be discovered.",
+        "The e2e nudge is not decoration. `filterTaps: true` gives @use-gesture's drag a 3 px threshold, so a hold that moves 1 px produces no frame and the ladder is never consulted — a spec that presses and waits will watch the feature do nothing. Both `word.spec.ts` and the golden row carry `NUDGE_PX` and say why.",
+        "A golden that photographs a *gesture* must aim with the paint, not with a bounding box: the golden row takes the widest selection band because it is a whole line of print with both ends known, and aiming by box put the press 12 px from the window edge with the run growing off-screen."
+      ],
+      "gates": ["pnpm test", "make e2e", "make golden", "make golden-linux"],
+      "seeAlso": ["select-an-ayah", "word-geometry", "golden-images"]
     },
 
     {
@@ -767,7 +808,7 @@
         "Never bump Playwright without bumping GOLDEN_IMAGE and re-rendering — the failure mode is ten red diffs that look exactly like a UI regression."
       ],
       "gates": ["make golden", "make golden-linux", "pnpm gate:golden-env", "pnpm gate:golden-size"],
-      "seeAlso": ["select-an-ayah", "a11y"]
+      "seeAlso": ["select-an-ayah", "word-selection", "a11y"]
     },
 
     {

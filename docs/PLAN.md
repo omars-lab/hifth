@@ -47,7 +47,7 @@ described in both files.
 | 3 — Diffs, share, a11y | complete | Teacher link cold-open restores exact view; screen reader announces hops | [loop-3.md](decisions/loop-3.md) |
 | 4a — Edge-data ETL | complete | Deterministic full-corpus edge ETL; 100% valid keys; shards <50KB gz | [loop-4a.md](decisions/loop-4a.md) |
 | 4b — Page corpus + streaming | complete | All 604 pages vendored + QUL-checked; every ayah navigable; TTI <2.5s mid-Android | [loop-4b.md](decisions/loop-4b.md) |
-| 5 — Highlight + roots | complete (ayah granularity; word granularity's remaining blocker is segmentation, not geometry — see ⑬) | Drag-range → merged hop list; root lens nearest-page-first | [loop-5.md](decisions/loop-5.md) |
+| 5 — Highlight + roots | complete (a reader can now *pick* words — word-C, 2026-08-04; what a word run cannot yet do is search, and that blocker is segmentation, not geometry — see ⑬. It is also finger-only — ⑮) | Drag-range → merged hop list; root lens nearest-page-first | [loop-5.md](decisions/loop-5.md) |
 | 6a — Skin, editions, wayfinding | complete | Instant plain⇄tajweed toggle (identical geometry); jump anywhere; visited pages survive offline; Lighthouse ≥90 | [loop-6a.md](decisions/loop-6a.md) |
 | 6b — Pin-a-juz packs | complete-with-deferral (the 8-day half is a user check) | Airplane-mode revision of a pinned juz works after 8+ days | [loop-6b.md](decisions/loop-6b.md) |
 | 7 — Polish + beta | pending (after 3+5+6) | Hafiz revision session, zero friction notes → **web v1.0** | — |
@@ -55,7 +55,7 @@ described in both files.
 
 ### Open follow-ups
 
-These eleven are indexed in [`issues.json`](issues.json) alongside the design docs' open
+These fifteen are indexed in [`issues.json`](issues.json) alongside the design docs' open
 questions, `backlog.md` and the validation ledger, and `make issues` prints all four
 registers in one list. They are indexed by *number only*: unlike every other register, a
 follow-up here carries no status marker, because these are compound narratives whose job is
@@ -650,6 +650,37 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     produced **twice, by two independently written parsers** — one assuming the axis-aligned
     `M…h…v…H…Z` rect form, one reading svgo's relative commands as absolute pairs — and two
     wrong parsers agreeing is not a confirmation.
+
+15. **Word selection is finger-only, and it is the first thing this app can do that a
+    screen-reader user cannot.** Shipped 2026-08-04 with word-C (task #65). Every other way
+    of selecting has a keyboard path and an announced result: an ayah is a `role="button"`
+    named «الآية ٢:٤٨» that Tab reaches and Enter selects, and a hop announces where it
+    landed. The descent to word granularity has neither. It begins with a 350 ms press
+    *inside* an already-lit ayah — a gesture with no key that stands for it — and what it
+    produces is ink in `#hifth-overlay`, which is decorative by design and adds no node, no
+    role and no name to the tree. `e2e/word.spec.ts` asserts exactly that, before and after,
+    and the assertion is deliberately double-edged: it protects the ayah buttons from being
+    buried under overlay nodes, and it is also the proof that a reader who cannot see the
+    page gets nothing from this feature at all.
+
+    **Why it shipped anyway, rather than waiting.** Nothing above the stage consumes a word
+    run yet — `onSelectWords` has no listener, because the hop still searches at ayah
+    granularity until ⑬'s print-vs-QAC segmentation alignment lands. There is, today,
+    no *outcome* to announce; a keyboard path would reach a state that does nothing, and an
+    `aria-live` region would read out a phrase and then fall silent. Building the access
+    path before the thing it accesses would mean designing the announcement twice.
+
+    **What would answer it,** and the order matters: ⑬'s alignment first, so a word run
+    means a refined search rather than a highlight; then the two halves together — a key
+    that descends from a selected ayah (Shift+Arrow is the obvious candidate, and it is
+    already the shape a reader expects from every text field they have ever used), and an
+    announcement of what the run *is* («من «الحمد» إلى «العالمين»» — the first and last
+    word, not a count), since «٤ كلمات» tells a memoriser nothing they wanted to know. Both
+    are cheap once there is something to say. Indexed as
+    `plan-word-selection-is-finger-only` in [`issues.json`](issues.json), owned by an agent,
+    blocked by ⑬ rather than by a human.
+    [`decisions/word-selection.md`](decisions/word-selection.md) is the record of what the
+    gesture is and what proved it.
 
 **The half of these a machine cannot run now has a register — and a runbook.** Follow-ups
 ① (the phone), ② (the browser glance) and ④ (VoiceOver/TalkBack) still wait on a human, and

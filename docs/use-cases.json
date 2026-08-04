@@ -142,6 +142,47 @@
       ]
     },
     {
+      "id": "narrow-down-to-the-words-i-mean",
+      "actor": "hafiz",
+      "goal": "The ayah is not the thing I keep confusing — a phrase inside it is. Let me point at just those words.",
+      "feature": "word-selection",
+      "code": [
+        {
+          "file": "packages/core/src/words.ts",
+          "symbol": "class WordIndex"
+        },
+        {
+          "file": "packages/core/src/gestures.ts",
+          "symbol": "heldIntent"
+        },
+        {
+          "file": "apps/web/src/components/PageStage.tsx",
+          "symbol": "applyWords"
+        }
+      ],
+      "proof": [
+        {
+          "file": "apps/web/e2e/word.spec.ts",
+          "test": "a hold inside the selected ayah drops to words; a drag extends the run"
+        },
+        {
+          "file": "apps/web/e2e/word.spec.ts",
+          "test": "Escape climbs back to the whole ayah, not out of the selection"
+        },
+        {
+          "file": "apps/web/e2e/word.spec.ts",
+          "test": "the same hold outside the selection still paints a marquee"
+        },
+        {
+          "gate": "gate:words"
+        }
+      ],
+      "includes": [
+        "select-the-ayah-i-am-on"
+      ],
+      "gap": "The words can be picked and nothing is done with them yet: the hop still searches at ayah granularity, because print words and the QAC segmentation the edges are built from do not line up one-to-one (docs/PLAN.md 14). And the whole descent is finger-only — there is no keyboard or screen-reader path down to a word, so a reader who cannot see the page cannot reach this at all. Tracked, not assumed covered: docs/issues.json word-selection-has-no-keyboard-or-screen-reader-path."
+    },
+    {
       "id": "hop-to-something-that-resembles-it",
       "actor": "hafiz",
       "goal": "Show me the ayahs I keep confusing this one with — the reason I opened this app.",
