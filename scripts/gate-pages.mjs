@@ -25,13 +25,9 @@
  * that cannot be reached, and the manifest alone would not catch it — the
  * manifest is derived from whatever pages happen to be present.
  *
- * And, since PLAN follow-up 14: whether a polygon covers its own ayah. Every
- * check above is about *identity* — are these the bytes we pinned — and none of
- * them would notice a page whose bytes are exactly right and whose polygons
- * leave a line of scripture untappable. Eleven pages do. The three signatures
- * that find them are below, in `readBands`'s callers; the eleven pages are
- * listed in KNOWN, asserted exactly, so a twelfth fails loudly and a repaired
- * one fails too rather than rotting into a permanent excuse.
+ * And, since PLAN follow-up 14: whether every glyph of scripture falls inside a
+ * tappable ayah polygon. That check is the second half of this file and carries
+ * its own explanation.
  */
 import { readFileSync, existsSync, readdirSync } from "node:fs";
 import { createHash } from "node:crypto";
@@ -104,47 +100,59 @@ if (extraOnDisk.length) {
   );
 }
 
-/* ------------------------------------------- does a polygon cover its ayah? */
+/* --------------------------- does every glyph fall inside a tappable ayah? */
 
 /**
- * The eleven pages where it does not, and why — PLAN follow-up 14, found by the
- * word-registration probe and reproduced here from the committed bytes alone.
+ * Every check above is about *identity* — are these the bytes we pinned. None
+ * of them would notice a page whose bytes are exactly right and whose polygons
+ * leave a line of scripture untappable, which in this app means unreachable:
+ * there is no way to select an ayah except by touching its polygon.
  *
- *   "leading"  the page's topmost band sits a full line or more below where
- *              pages start, while the page's first polygon is mid-surah. The
- *              ayah flows in from the previous page and its first line or five
- *              carry no polygon at all: on p545, `58:22` runs across five full
- *              lines with nothing to tap; on p575, `73:20` across six.
- *   "gap"      an uncovered horizontal strip between two bands where the band
- *              below is *not* an `X:1`. A surah header leaves a 63–80 unit gap
- *              on 64 pages and that is the print, not a hole, which is why the
- *              ayah number and not the width is what separates them.
+ * So this reads the ink and the polygons out of the same committed file and
+ * asks the only question that matters: does every glyph fall inside some
+ * tappable box? The ink lives under the page's `matrix(a 0 0 d e f)`, the
+ * polygons live outside it in plain viewBox space; applying the matrix puts
+ * both in one space.
  *
- * This is an allow-list and not a baseline number on purpose: a twelfth page
- * fails, and so does a repaired one. When the repair lands, the entry comes out
- * in the same commit that changes the bytes.
+ * The one thing that is legitimately ink with no polygon is furniture — a
+ * surah header and its basmala belong to no ayah and so carry no box. Furniture
+ * is not guessed at, and it is not a list of page numbers: it is the band the
+ * polygons leave empty immediately above a surah's *first* ayah. That gives two
+ * tests, neither carrying a number invented for the occasion:
+ *
+ *   ORPHAN   a glyph outside every polygon and outside every furniture band —
+ *            a hole in the page no finger can reach.
+ *   BAND     a furniture band more than two lines tall — a header and a basmala
+ *            are two lines, so a taller band has swallowed scripture that
+ *            should have had a polygon of its own.
+ *
+ * Both demand zero, which is only honest because TOL below was measured rather
+ * than chosen: across the corpus the worst *benign* glyph sits 8.8 units
+ * outside its box (a fatha riding above the line it belongs to), while a real
+ * defect leaves glyphs a median 36 units out. Twelve separates them with room
+ * on both sides, so this can insist on zero instead of carrying a baseline
+ * count — and a baseline count is exactly what would quietly absorb the next
+ * defect.
+ *
+ * This is what closed PLAN follow-up 14. The two signatures that preceded it
+ * found eleven pages by pattern-matching the shapes already known; measuring
+ * ink against polygon across the whole corpus found seven more, including four
+ * whose first polygon is an `X:1` — which the old rule explicitly excused.
+ * `vendor-pages.mjs`'s POLYGON_REPAIRS repairs all eighteen. There is
+ * deliberately no allow-list here: this gate knows nothing of that table, so a
+ * repair that regresses and an upstream that breaks a new page fail alike.
  */
-const KNOWN = new Map([
-  [431, ["gap"]],
-  [545, ["leading"]],
-  [551, ["leading"]],
-  [554, ["leading"]],
-  [564, ["leading"]],
-  [566, ["leading"]],
-  [575, ["leading"]],
-  [594, ["leading"]],
-  [599, ["leading"]],
-  [602, ["gap"]],
-  [604, ["gap"]],
-]);
+const LINES = 15; // the print sets fifteen lines to a page
+const TOL = 12; // units a glyph may ride outside its box — measured, see above
+const BAND_MAX = 2.3; // line-heights of furniture: a header and a basmala, never more
 
 /**
- * Every subpath of `d`, as a point list. All 12 346 subpaths in the corpus are
- * straight-line polygons; a curve command would mean the shape is no longer a
- * point list and every bounding box below would be a guess, so it fails instead.
- * (A parser that assumed the axis-aligned `M…h…v…H…Z` rect form is what first
- * reported pages 1 and 2 as malformed. 189 polygons in the corpus are general
- * polygons, 11 of them on those two pages, and they are perfectly well formed.)
+ * Every subpath of a *polygon* `d`, as a point list. All 12 346 polygon
+ * subpaths in the corpus are straight-line; a curve would mean the shape is no
+ * longer a point list and every bounding box below would be a guess, so it
+ * fails instead. (A parser that assumed the axis-aligned `M…h…v…H…Z` rect form
+ * is what first reported pages 1 and 2 as malformed. 189 polygons in the corpus
+ * are general polygons, 11 of them on those two pages, and all are well formed.)
  */
 function subpaths(d, where) {
   const out = [];
@@ -193,9 +201,125 @@ function subpaths(d, where) {
   return out;
 }
 
-/** One band per subpath: the ayah it belongs to and the strip of page it covers. */
-function readBands(page, svg) {
-  const bands = [];
+/**
+ * Every subpath of an *ink* `d`. Glyph outlines are cubics and quadratics, so
+ * this understands the whole path grammar — but it flags control points as
+ * off-curve and `inkBox` drops them, because a control point can sit well
+ * outside the shape it steers and a box drawn around one would report a glyph
+ * where there is no glyph.
+ */
+function inkSubpaths(d, where) {
+  const out = [];
+  let cx = 0,
+    cy = 0,
+    sx = 0,
+    sy = 0,
+    px = 0,
+    py = 0,
+    pts = null;
+  const push = (x, y, on = true) => pts && pts.push([x, y, on]);
+  for (const tok of d.match(/[MmLlHhVvCcSsQqTtAaZz][^MmLlHhVvCcSsQqTtAaZz]*/g) ?? []) {
+    const c = tok[0];
+    const C = c.toUpperCase();
+    const n = (tok.slice(1).match(/-?\d*\.?\d+(?:e-?\d+)?/g) ?? []).map(Number);
+    const rel = c === c.toLowerCase();
+    if (C === "M") {
+      if (pts && pts.length > 1) out.push(pts);
+      cx = rel ? cx + n[0] : n[0];
+      cy = rel ? cy + n[1] : n[1];
+      sx = cx;
+      sy = cy;
+      pts = [[cx, cy, true]];
+      for (let i = 2; i + 1 < n.length; i += 2) {
+        cx = rel ? cx + n[i] : n[i];
+        cy = rel ? cy + n[i + 1] : n[i + 1];
+        push(cx, cy);
+      }
+    } else if (C === "H") {
+      for (const v of n) push((cx = rel ? cx + v : v), cy);
+    } else if (C === "V") {
+      for (const v of n) push(cx, (cy = rel ? cy + v : v));
+    } else if (C === "L") {
+      for (let i = 0; i + 1 < n.length; i += 2) {
+        cx = rel ? cx + n[i] : n[i];
+        cy = rel ? cy + n[i + 1] : n[i + 1];
+        push(cx, cy);
+      }
+    } else if (C === "C") {
+      for (let i = 0; i + 5 < n.length; i += 6) {
+        const p = [];
+        for (let k = 0; k < 6; k += 2) {
+          p.push([rel ? cx + n[i + k] : n[i + k], rel ? cy + n[i + k + 1] : n[i + k + 1]]);
+        }
+        p.forEach(([x, y], k) => push(x, y, k === 2));
+        [px, py] = p[1];
+        [cx, cy] = p[2];
+      }
+    } else if (C === "S" || C === "Q") {
+      // Both take four numbers: a control point and an endpoint. S additionally
+      // implies a first control reflected through the current point.
+      for (let i = 0; i + 3 < n.length; i += 4) {
+        const c2 = [rel ? cx + n[i] : n[i], rel ? cy + n[i + 1] : n[i + 1]];
+        const end = [rel ? cx + n[i + 2] : n[i + 2], rel ? cy + n[i + 3] : n[i + 3]];
+        if (C === "S") push(2 * cx - px, 2 * cy - py, false);
+        push(c2[0], c2[1], false);
+        push(end[0], end[1], true);
+        [px, py] = c2;
+        [cx, cy] = end;
+      }
+    } else if (C === "T") {
+      for (let i = 0; i + 1 < n.length; i += 2) {
+        const q = [2 * cx - px, 2 * cy - py];
+        const end = [rel ? cx + n[i] : n[i], rel ? cy + n[i + 1] : n[i + 1]];
+        push(q[0], q[1], false);
+        push(end[0], end[1], true);
+        [px, py] = q;
+        [cx, cy] = end;
+      }
+    } else if (C === "A") {
+      for (let i = 0; i + 6 < n.length; i += 7) {
+        cx = rel ? cx + n[i + 5] : n[i + 5];
+        cy = rel ? cy + n[i + 6] : n[i + 6];
+        push(cx, cy);
+      }
+    } else if (C === "Z") {
+      if (pts && pts.length > 1) out.push(pts);
+      pts = null;
+      cx = sx;
+      cy = sy;
+    } else {
+      fail(`${where}: ink path uses "${c}", which this gate does not understand`);
+      return [];
+    }
+    if (C !== "C" && C !== "S" && C !== "Q" && C !== "T") {
+      px = cx;
+      py = cy;
+    }
+  }
+  if (pts && pts.length > 1) out.push(pts);
+  return out;
+}
+
+/** Bounding box of a point list, ignoring off-curve control points. */
+function box(pts) {
+  const on = pts.filter((p) => p[2] !== false);
+  const use = on.length ? on : pts;
+  let x0 = Infinity,
+    y0 = Infinity,
+    x1 = -Infinity,
+    y1 = -Infinity;
+  for (const [x, y] of use) {
+    if (x < x0) x0 = x;
+    if (x > x1) x1 = x;
+    if (y < y0) y0 = y;
+    if (y > y1) y1 = y;
+  }
+  return { x0, y0, x1, y1, cx: (x0 + x1) / 2, cy: (y0 + y1) / 2 };
+}
+
+/** The ayah polygons of one page, each as its subpath bounding boxes. */
+function readPolygons(page, svg) {
+  const polys = [];
   for (const m of svg.matchAll(/<path\b[^>]*\bclass="ayahPolygon"[^>]*>/g)) {
     const tag = m[0];
     const d = tag.match(/\bd="([^"]+)"/)?.[1];
@@ -205,65 +329,114 @@ function readBands(page, svg) {
       fail(`page ${page}: an ayahPolygon is missing its d/surah/ayah`);
       continue;
     }
-    for (const pts of subpaths(d, `page ${page} ${surah}:${ayah}`)) {
-      const ys = pts.map((p) => p[1]);
-      bands.push({ surah, ayah, top: Math.min(...ys), bottom: Math.max(...ys) });
-    }
+    polys.push({ surah, ayah, boxes: subpaths(d, `page ${page} ${surah}:${ayah}`).map(box) });
   }
-  return bands.sort((a, b) => a.top - b.top);
-}
-
-const perPage = new Map();
-for (const entry of pin.pages) {
-  const file = join(PAGES_DIR, `${entry.page}.svg`);
-  if (!existsSync(file)) continue;
-  const bands = readBands(entry.page, readFileSync(file, "utf8"));
-  if (bands.length) perPage.set(entry.page, bands);
+  return polys;
 }
 
 /**
- * Where a page starts, and how tall a line is — both read off the corpus rather
- * than written down, so the thresholds move with the print instead of pinning
- * this gate to one edition's numbers.
+ * The two tests, for one page. Returns the furniture bands it inferred, the
+ * bands that are too tall to be furniture, and the glyphs no polygon covers.
  */
-const median = (xs) => [...xs].sort((a, b) => a - b)[Math.floor(xs.length / 2)];
-const pageTop = median([...perPage.values()].map((b) => b[0].top));
-const lineHeight = median([...perPage.values()].flatMap((b) => b.map((x) => x.bottom - x.top)));
-
-const found = new Map();
-const note = (page, kind) => {
-  if (!found.has(page)) found.set(page, new Set());
-  found.get(page).add(kind);
-};
-
-for (const [page, bands] of perPage) {
-  if (bands[0].ayah !== 1 && bands[0].top > pageTop + lineHeight) note(page, "leading");
-  let covered = bands[0].bottom;
-  for (const band of bands.slice(1)) {
-    if (band.top - covered > 2 && band.ayah !== 1) note(page, "gap");
-    covered = Math.max(covered, band.bottom);
+function coverage(page, svg) {
+  const vb = svg.match(/viewBox="0 0 (\d+(?:\.\d+)?) (\d+(?:\.\d+)?)"/);
+  const mx = svg.match(/matrix\(([-\d.]+) 0 0 ([-\d.]+) ([-\d.]+) ([-\d.]+)\)/);
+  if (!vb || !mx) {
+    fail(`page ${page}: no viewBox or no page transform — the ink cannot be placed`);
+    return null;
   }
+  const [w, h] = vb.slice(1).map(Number);
+  const [a, d, e, f] = mx.slice(1).map(Number);
+
+  const polys = readPolygons(page, svg);
+  const boxes = polys.flatMap((p) => p.boxes);
+  if (!boxes.length) {
+    fail(`page ${page}: no ayah polygons at all — nothing on this page can be tapped`);
+    return null;
+  }
+
+  // Line pitch is the modal rect height. Not the mean or the median: a squashed
+  // or stretched rect is itself the defect being looked for, and either of those
+  // would let the defect lead the measurement of what normal looks like.
+  const tally = new Map();
+  for (const b of boxes) {
+    const k = Math.round(b.y1 - b.y0);
+    tally.set(k, (tally.get(k) ?? 0) + 1);
+  }
+  const H = [...tally.entries()].sort((x, y) => y[1] - x[1])[0][0];
+
+  // What the polygons cover, as a union of y-intervals, and then the gaps in it.
+  // The block runs fifteen lines up from the last covered edge, so a page whose
+  // first polygon starts four lines down has a gap where those lines should be.
+  const cov = [];
+  for (const [y0, y1] of boxes.map((b) => [b.y0, b.y1]).sort((x, y) => x[0] - y[0])) {
+    if (cov.length && y0 <= cov.at(-1)[1] + 0.5) cov.at(-1)[1] = Math.max(cov.at(-1)[1], y1);
+    else cov.push([y0, y1]);
+  }
+  const gaps = [];
+  const blockTop = cov.at(-1)[1] - LINES * H;
+  if (cov[0][0] - blockTop > 0.5) gaps.push([blockTop, cov[0][0]]);
+  for (let i = 1; i < cov.length; i++) gaps.push([cov[i - 1][1], cov[i][0]]);
+
+  // A gap is furniture when a surah's first ayah picks up exactly below it.
+  const bands = [];
+  for (const [y0, y1] of gaps) {
+    const opens = polys.some(
+      (p) => p.ayah === 1 && p.boxes.some((b) => Math.abs(b.y0 - y1) < 0.5),
+    );
+    if (opens) bands.push({ y0, y1, lines: (y1 - y0) / H });
+  }
+
+  const start = svg.indexOf('<g id="content"');
+  const stop = svg.indexOf('class="ayahPolygon"');
+  const region = svg.slice(start < 0 ? 0 : start, stop < 0 ? svg.length : stop);
+  const orphans = [];
+  for (const m of region.matchAll(/\bd="([^"]+)"/g)) {
+    for (const ring of inkSubpaths(m[1], `page ${page}`)) {
+      const b = box(ring.map(([x, y, on]) => [a * x + e, d * y + f, on]));
+      // Off the page: the corpus carries a little geometry outside the viewBox
+      // (clip shapes, a stray rule) that no reader ever sees.
+      if (b.cx < 0 || b.cx > w || b.cy < 0 || b.cy > h) continue;
+      const covered = polys.some((p) =>
+        p.boxes.some(
+          (r) => b.cx >= r.x0 - TOL && b.cx <= r.x1 + TOL && b.cy >= r.y0 - TOL && b.cy <= r.y1 + TOL,
+        ),
+      );
+      if (covered) continue;
+      if (bands.some((n) => b.cy > n.y0 && b.cy < n.y1)) continue;
+      orphans.push(b);
+    }
+  }
+  return { H, bands, tall: bands.filter((n) => n.lines > BAND_MAX), orphans };
 }
 
-const same = (a, b) => a.length === b.length && a.every((x, i) => x === b[i]);
-const kindsOf = (m, p) => [...(m.get(p) ?? [])].sort();
-for (const page of new Set([...KNOWN.keys(), ...found.keys()].sort((a, b) => a - b))) {
-  const want = KNOWN.get(page) ?? [];
-  const got = kindsOf(found, page);
-  if (same(want.slice().sort(), got)) continue;
-  if (!want.length) {
+let checked = 0;
+for (const entry of pin.pages) {
+  const file = join(PAGES_DIR, `${entry.page}.svg`);
+  if (!existsSync(file)) continue;
+  // The opening spread is set as two decorated frames, not a fifteen-line
+  // block: pages 1 and 2 have their own viewBox and eleven general polygons
+  // between them, and every line-pitch statement below is false of them.
+  if (entry.page <= 2) continue;
+  const r = coverage(entry.page, readFileSync(file, "utf8"));
+  if (!r) continue;
+  checked++;
+  if (r.tall.length) {
+    const worst = r.tall.sort((x, y) => y.lines - x.lines)[0];
     fail(
-      `page ${page}: an ayah polygon does not cover its ayah (${got.join(", ")}) and this page ` +
-        `is not one of the eleven PLAN follow-up 14 recorded. Either the corpus pin moved or a ` +
-        `repair regressed — do not add it to KNOWN without saying which.`,
+      `page ${entry.page}: a band of ${worst.lines.toFixed(2)} line-heights at y ` +
+        `${worst.y0.toFixed(1)}–${worst.y1.toFixed(1)} carries no ayah polygon. A surah header ` +
+        `and its basmala are two lines; this one has swallowed scripture that should be tappable.`,
     );
-  } else if (!got.length) {
+  }
+  if (r.orphans.length) {
+    const first = r.orphans.sort((x, y) => x.cy - y.cy || x.cx - y.cx)[0];
     fail(
-      `page ${page}: KNOWN says its polygons miss their ayah (${want.join(", ")}) and they no ` +
-        `longer do. If that is the repair landing, delete the entry in this commit.`,
+      `page ${entry.page}: ${r.orphans.length} glyph(s) fall outside every ayah polygon ` +
+        `(first at ${first.cx.toFixed(1)},${first.cy.toFixed(1)}) — that scripture is printed on ` +
+        `the page and cannot be selected. Repair it in vendor-pages.mjs POLYGON_REPAIRS and ` +
+        `re-vendor; the SVG itself is never hand-edited (PLAN §8).`,
     );
-  } else {
-    fail(`page ${page}: expected ${want.join(", ")} from PLAN 14, found ${got.join(", ")}.`);
   }
 }
 
@@ -276,5 +449,5 @@ if (failures.length) {
 console.log(
   `gate:pages — ${verified}/${expected} page SVGs match ` +
     `${pin.repo}@${pin.commit.slice(0, 8)} via svgo ${pin.svgo.version}; ` +
-    `polygon coverage as recorded (${KNOWN.size} pages short of their ayah, PLAN 14)`,
+    `every glyph on ${checked} of them falls inside a tappable ayah`,
 );
