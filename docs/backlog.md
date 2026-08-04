@@ -426,9 +426,24 @@ narrower but only cleans up after the fact. **The trigger is a second pinned juz
 duplicate is 3.1 MB and annoying, but a reader who pins three has spent ~9 MB on copies and
 has no browsing cache left at all.
 
+**A third candidate was measured and does not exist — 2026-08-04.** The attractive one, the
+one that needs neither pack knowledge in the worker nor a sweep afterwards, is to write with
+`cache.add(url)` instead of `fetch` + `cache.put`: the Cache API does its own fetching, so it
+might plausibly not be the page's request at all. It is. Probed against the built app with the
+worker in control — clear both caches, `caches.open("probe").add(url)`, then ask every cache
+who holds it — and the answer is `["probe-add", "hifth-pages"]`, the same pair an ordinary
+`fetch` produces. A page-initiated `cache.add` is routed through the service worker like
+anything else.
+
+Recorded so it is not re-run, and because it settles the shape of the entry rather than just
+one attempt: **from a controlled page there is no fetch the worker cannot see.** Every fix
+therefore either tells the worker something (candidate 1) or cleans up behind it (candidate 2),
+and the choice between those two is a design question, not a search for a third door.
+
 Tested around, deliberately: `dropOutsidePack` in `e2e/offline.spec.ts` deletes the outside
 copy before the offline assertion, so the pack has to answer. That helper is where this entry
-will be found by whoever fixes it.
+will be found by whoever fixes it — and the assertion just above it now names both caches
+exactly, so the day the double-write stops the suite says so instead of quietly passing.
 
 ---
 
