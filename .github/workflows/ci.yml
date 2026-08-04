@@ -129,12 +129,26 @@ jobs:
       - name: Gate — verified edges hold
         run: pnpm gate:verified-edges
 
-      # Both of these check CI's own workflow files, and both were written after
-      # a defect that CI itself could not see — an upload step that preserved
-      # nothing, and a visual gate whose baselines were rendered on a different
-      # machine than the one checking them. They lived in `pnpm gates` without
-      # ever being wired into a job, which is the same failure one level up: a
-      # gate nobody runs is a comment.
+      # Meaning, cheaply: a hop edge must share a run of words with the ayah it
+      # departs from. The corpus shipped off-by-one for four loops and every
+      # other check stayed green, because a wrong edge is structurally perfect.
+      # This gate lived in the Makefile and in no workflow — green on the
+      # author's laptop, absent from the run that blocks the merge, which is the
+      # worse direction of the defect gate:gates below now makes impossible.
+      - name: Gate — hop edges share words with their source
+        run: pnpm gate:edges
+
+      # All three of these check the repo's own machinery, and each was written
+      # after a defect that CI itself could not see — an upload step that
+      # preserved nothing, a visual gate whose baselines were rendered on a
+      # different machine than the one checking them, and two gates that were
+      # merged and then invoked by nothing at all. The first two lived in
+      # `pnpm gates` without ever being wired into a job; the third makes that
+      # arrangement impossible to repeat, in all three directions. A gate nobody
+      # runs is a comment.
+      - name: Gate — every gate is invoked, here and in make ci
+        run: pnpm gate:gates
+
       - name: Gate — CI artifacts have producers
         run: pnpm gate:ci-artifacts
 
@@ -153,6 +167,14 @@ jobs:
       # 604-page projection so today's three speak about Loop 4b's whole book.
       - name: Gate — the vendored corpus stays weighable
         run: pnpm gate:assets
+
+      # Identity and reach, over the same 604 files gate:assets weighs: every
+      # page is byte-for-byte what vendor-pages.mjs produced from the pin, and
+      # every glyph of scripture falls inside a polygon a finger can reach. The
+      # second half is PLAN 14 and it shipped one run without this line, which is
+      # the lesson — a gate that no job invokes is a script.
+      - name: Gate — the pages are the pinned print, and all of it is tappable
+        run: pnpm gate:pages
 
       # docs/map.json tells a newcomer where each feature starts. This checks it
       # is still true, so it cannot rot into confident fiction. The pre-commit
