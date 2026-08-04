@@ -509,6 +509,41 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     polygon covers its own ayah. That gate is the deliverable; the numbers above are its
     fixtures. Blocks nothing, breaks reading today.
 
+    **(b) is withdrawn, and half of (a)'s page list with it — 2026-08-04, building the gate.**
+    Pages 1 and 2 are fine. `1:4` is a clean quadrilateral 116 × 27 units; nothing on either
+    page leaves its viewBox. The report above came from a scan that decomposed every polygon
+    into axis-aligned rectangles, which is what the `M…h…v…H…Z` form on nearly every page
+    actually is — but **189 polygons in the corpus are general polygons**, L-shaped where an
+    ayah wraps mid-line, and 11 of those 189 are on pages 1 and 2, whose surah-frame layout
+    uses almost nothing else. Bounding a general polygon by its rectangles invents area it
+    does not have and edges it does not have; that is the whole of the finding. The lesson is
+    in `subpaths()` in `gate-pages.mjs`, which fails on a curve command rather than guessing:
+    a parser that quietly tolerates a shape it was not written for reports the shape, not the
+    data. p1's 2.72 residual is unexplained again — 7 markers inside a decorative frame is a
+    plausible cause, and it is not a polygon defect.
+    Rescanned with a parser that reads the polygons as polygons: **zero** zero-area subpaths,
+    **zero** slivers, and three subpaths outside the viewBox by 0.8–1.5 units at the bottom
+    edge (p187 `9:6`, p429 `34:14`, p515 `49:4`) — rounding at the page foot, not a defect.
+    Eleven pages fail, not ten, and the (a)/(b) split was the wrong cut. The right one is by
+    **signature**, because that is what a gate can test:
+    **leading** — the topmost band sits a full line below where pages start while the first
+    polygon is mid-surah: **545, 551, 554, 564, 566, 575, 594, 599**. p545 and p575 are as
+    described above and are the two that cost a reader real ayahs.
+    **gap** — an uncovered strip between two bands where the band below is not an `X:1`:
+    **431** (21 units, `34:23`'s single band straddling two lines instead of tiling them),
+    **602** (25.5, `106:4` reduced to two 4.4-unit slivers) and **604** (27.5, `114:6`, the
+    same). A surah header leaves a 63–80 unit gap on 64 pages and that is the print; the ayah
+    number, not the width, is what separates a header from a hole.
+    Page 2 was in the list only through the withdrawn (b). It has no defect.
+    **The gate landed 2026-08-04** in `gate-pages.mjs`: the two signatures above, thresholds
+    read off the corpus (median page top 7.3, median line height 36) rather than written down,
+    and the eleven pages as an *allow-list* — a twelfth fails, and so does a page that stops
+    failing, so the repair cannot land without deleting its entry in the same commit.
+    **What is still owed:** the repair itself. It is upstream in the polygon metadata
+    `vendor-pages.mjs` reads (confirmed against `545.json` at the pinned commit: `58:22` really
+    does carry one rect there), so it needs a declared repair pass beside `ID_REPAIRS`, a
+    re-vendor, and a re-pin. Blocks nothing, breaks reading today.
+
 **The half of these a machine cannot run now has a register — and a runbook.** Follow-ups
 ① (the phone), ② (the browser glance) and ④ (VoiceOver/TalkBack) still wait on a human, and
 prose cannot answer "is that still true, on what device, and when?" — ⑤ (does the source
