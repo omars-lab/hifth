@@ -396,7 +396,7 @@ numbers to reach for instead of a feeling: **packed history past ~100 MB**, or a
 past ~2 minutes on the connection someone actually contributes from. Until one of those, the
 92 MB is the price of being able to prove what we ship.
 
-### ⑮ Pinning a juz writes every file twice · **confirmed**
+### ⑮ Pinning a juz writes every file twice · **fixed**
 
 Found while writing the pack e2e (6b-D), which is the only place it is visible: the assertion
 "page 15 is now in `hifth-pack-v1` and nowhere else" came back with `hifth-pages` in the list
@@ -444,6 +444,42 @@ Tested around, deliberately: `dropOutsidePack` in `e2e/offline.spec.ts` deletes 
 copy before the offline assertion, so the pack has to answer. That helper is where this entry
 will be found by whoever fixes it — and the assertion just above it now names both caches
 exactly, so the day the double-write stops the suite says so instead of quietly passing.
+
+**Fixed — candidate 1, and candidate 2 was never a fix.** `pinPack` sends `X-Hifth-Pin` and
+both `runtimeCaching` routes decline anything carrying it. The design work is written up in
+[`decisions/pin-marker.md`](decisions/pin-marker.md); the three measurements that decided it:
+
+- **Sweeping afterwards cannot work.** `ExpirationPlugin` evicts at *write* time
+  (`cacheDidUpdate` → `expireEntries`), so the trail is gone before any sweep can run. Probed
+  against the live worker: clear `hifth-pages`, read 32 pages → 31 entries; fetch 21 pages as a
+  pin → **11 of the 31 survive**; delete all 21 duplicates → still **11**. The evicted do not
+  come back. That retires candidate 2 on a number rather than on taste.
+- **No fetch option avoids the store**, extending this entry's own finding: `{}`,
+  `cache:"reload"`, `no-store`, `no-cache` and a marked fetch all land in `hifth-pages` under
+  today's worker. The route change is the whole fix; the marker is only how the route
+  recognises it. A request no route matches is not stored at all (`/_headers` → zero caches),
+  which is the mechanism the fix rests on.
+- **The marker survives into the worker.** Wrapping `Cache.prototype.put` inside the running
+  worker: an ordinary read files `{cache:"default", pin:null}`, a marked one
+  `{cache:"reload", pin:"1"}`. The request workbox files is the one the matcher was handed, so
+  what is visible at the write is visible at the match.
+
+The stated cost — pack knowledge in the worker — was mispriced. The worker gains one bit of
+*static provenance*, and never learns `PACK_CACHE`'s name, which URLs a pack holds, or that a
+register exists; `planPack` can change shape forever without `sw.js` moving. `unpinPack` is
+untouched: a pin now writes nothing outside its own cache, so there is nothing to sweep.
+
+`dropOutsidePack` survives, re-scoped — the app opens *inside* juz 1, so the reader's own
+trail legitimately holds part of the juz being pinned, and that copy is still what would let
+the offline assertion pass without a pack. The assertion above it is now `[PACK_CACHE]` alone,
+and a new test, *keeping a juz does not spend the reader's browsing cache*, asserts the harm
+directly: the `hifth-pages` key set is identical across a pin. Negative control run and
+reverted — with the clauses stripped, exactly those two go red.
+
+One thing this does not cover: whether WebKit and Gecko surface a custom header on
+`FetchEvent.request`. The suite is Chromium-only by construction, and the failure mode if one
+does not is exactly the old behaviour — a duplicate, not a broken pack. It belongs on the
+iPhone, in the `offline-survival-8-day` runbook.
 
 ---
 

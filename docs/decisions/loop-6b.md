@@ -138,6 +138,15 @@ the pack deleted.** `dropOutsidePack` removes the outside copy before the assert
 the pack can answer — which is also the state a pinned juz is genuinely in once ordinary
 reading pushes it out of that LRU. The workaround and the real case are the same state.
 
+**Fixed 2026-08-04 — and both reasons for deferring it were wrong.** Sweeping on unpin cannot
+work at all (`ExpirationPlugin` evicts at write time, so the trail is gone before any sweep
+runs), and "pack knowledge in the worker" overstated what a marked request costs: the worker
+gains one bit of static provenance and never learns this cache's name, its URL list, or that a
+register exists. `pinPack` sends `X-Hifth-Pin`; both routes decline it. See
+[pin-marker.md](pin-marker.md). `dropOutsidePack` survives, re-scoped — the app opens *inside*
+juz 1, so the reader's own trail still holds part of it, and the paragraph above is still why
+the helper has to exist.
+
 ## What is proven, and by which tier
 
 | claim | where |
