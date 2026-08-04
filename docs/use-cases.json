@@ -628,6 +628,49 @@
       "gap": "Everything here is a headless browser with the network switched off. Whether a real phone's OS evicts the cache over eight days is the one thing these cannot answer — that is docs/validation/ledger.json → offline-survival-8-day."
     },
     {
+      "id": "keep-a-juz-on-this-phone",
+      "actor": "hafiz",
+      "goal": "Say which juz I am revising, keep the whole of it on this phone before I leave, and be told — in words, while I still have signal — if the phone ever takes it back.",
+      "feature": "offline-pwa",
+      "code": [
+        {
+          "file": "packages/core/src/packs.ts",
+          "symbol": "planPack"
+        },
+        {
+          "file": "apps/web/src/packs.ts",
+          "symbol": "pinPack"
+        },
+        {
+          "file": "apps/web/src/packs.ts",
+          "symbol": "checkPack"
+        },
+        {
+          "file": "apps/web/src/components/PackShelf.tsx",
+          "symbol": "PackShelf"
+        }
+      ],
+      "proof": [
+        {
+          "file": "apps/web/e2e/offline.spec.ts",
+          "test": "opens a page the reader has never visited, with the network gone"
+        },
+        {
+          "file": "apps/web/e2e/offline.spec.ts",
+          "test": "a sweep is said out loud, and the juz can be put back"
+        },
+        {
+          "file": "apps/web/e2e/offline.spec.ts",
+          "test": "a pack the sweep only half took is not left looking kept"
+        },
+        {
+          "file": "apps/web/src/components/PackShelf.test.tsx",
+          "test": "a swept pack is named as incomplete, not left looking kept"
+        }
+      ],
+      "gap": "The promise is about a phone a week from now, and the tests take the storage themselves, at once, on demand. A real sweep chooses its own moment and may not take everything — docs/validation/ledger.json → offline-survival-8-day is the check that watches one happen, and it is the reason `torn` is a state rather than a rounding error."
+    },
+    {
       "id": "see-what-i-have-not-opened-lately",
       "actor": "hafiz",
       "goal": "Keep a private record of what I have actually opened, see it — which pages, hizb or juz have gone weeks without me — and press the one that has waited longest to open it.",

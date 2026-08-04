@@ -49,7 +49,7 @@ described in both files.
 | 4b — Page corpus + streaming | complete | All 604 pages vendored + QUL-checked; every ayah navigable; TTI <2.5s mid-Android | [loop-4b.md](decisions/loop-4b.md) |
 | 5 — Highlight + roots | complete (ayah granularity; word granularity needs 4b) | Drag-range → merged hop list; root lens nearest-page-first | [loop-5.md](decisions/loop-5.md) |
 | 6a — Skin, editions, wayfinding | complete | Instant plain⇄tajweed toggle (identical geometry); jump anywhere; visited pages survive offline; Lighthouse ≥90 | [loop-6a.md](decisions/loop-6a.md) |
-| 6b — Pin-a-juz packs | pending (4b's gate is lifted) | Airplane-mode revision of a pinned juz works after 8+ days | — |
+| 6b — Pin-a-juz packs | complete-with-deferral (the 8-day half is a user check) | Airplane-mode revision of a pinned juz works after 8+ days | [loop-6b.md](decisions/loop-6b.md) |
 | 7 — Polish + beta | pending (after 3+5+6) | Hafiz revision session, zero friction notes → **web v1.0** | — |
 | Track B — Capacitor | gated on web v1.0 | Same web build wrapped for iOS/Android; Universal Links | — |
 
@@ -921,11 +921,23 @@ collision (rail chip = curated shared-root edges vs lens = corpus-wide roots).
 **Exit:** instant plain⇄tajweed toggle with identical geometry; jump to any surah/juz/ayah;
 visited pages survive a reload offline; Lighthouse ≥90.
 
-#### Loop 6b — Pin-a-juz packs (gated on 4b, i.e. on follow-up ①)
+#### Loop 6b — Pin-a-juz packs (gated on 4b, i.e. on follow-up ①) — **complete-with-deferral**
 Juz packs over Cache Storage + an IndexedDB manifest; eviction detection and re-pin offer;
 the **8+ day ITP offline survival test** (installed vs tab); iOS standalone
 state-restoration test.
 **Exit:** airplane-mode revision of a pinned juz works after 8+ days.
+
+Shipped in five slices — [`loop-6b.md`](decisions/loop-6b.md) — and the exit criterion is
+split, deliberately, along the line the loop turned out to be about. *Airplane-mode revision
+of a pinned juz works* is done and proven: `e2e/offline.spec.ts` pins juz 1, deletes every
+copy outside the pack, kills the network, and opens a page the reader has never visited.
+*After 8+ days* cannot be proven by anything in this repo — only a real phone deciding on its
+own schedule can answer it, which is `offline-survival-8-day` in
+[the validation ledger](validation/ledger.json) — a check that was *unrunnable* until this
+loop, because it had no button to press, and whose runbook now names juz 1 as the thing to
+pin. What the loop added in place of waiting is the thing that makes that
+answer *legible* when it arrives: a pack that a sweep has taken is detected and said out
+loud, and a pack a sweep half took is named `torn` rather than left looking kept.
 
 ### Loop 7 — Hifz polish + beta (ongoing) → web v1.0
 5–10 huffaz/teachers; interview, don't instrument (privacy-respecting counts only). Weekly
