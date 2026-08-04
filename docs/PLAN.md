@@ -544,6 +544,60 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     does carry one rect there), so it needs a declared repair pass beside `ID_REPAIRS`, a
     re-vendor, and a re-pin. Blocks nothing, breaks reading today.
 
+    **The repair landed 2026-08-04 — and eleven pages turned out to be seven short.**
+    Writing a repair means deciding where a missing rect goes, and that number has to come
+    from the page rather than from taste. It comes from the page's **line pitch**, taken as
+    the *modal* rect height and not the median: a squashed or stretched rect is itself the
+    defect being repaired, so a median would let the defect lead the measurement. Every
+    full-size page reads back 36 units — including p227 whose rects are 28.8, p468 whose are
+    46.2 and p560 whose are 29.3 — and `(bottom − top)/36` rounds to **15 lines** on 534 of
+    602 pages, 13 on the ~40 that open with a surah header. So the top of a page's text block
+    is `lastRectBottom − 15 × pitch`, which is what a leading repair extends up to.
+    Before writing any of it the *detector* was rebuilt, on the principle that a repair
+    validated by the signatures that found the defect proves only that the signatures were
+    satisfied. The new one measures the thing itself: map every glyph through the page matrix
+    and ask whether its centre falls inside some polygon. Run across the corpus it found
+    **seven more pages**, and the reason eight of the original signatures' near-misses got
+    through is one line — `bands[0].ayah !== 1` excused any page whose first polygon is an
+    `X:1`, on the correct observation that a surah header pushes the first polygon down. It is
+    correct about headers and wrong about **542** (`58:1`, one abandoned line), **549**
+    (`60:1`, four) and **558** (`65:1`, three), which have a header *and* an abandoned run
+    above the ayah's only rect. The other four are a shape the old rule did not model at all:
+    a rect off the line grid, so its top edge cuts through a line instead of sitting between
+    two — **227**, **294**, **468**, **560**. Repairing one of those moves the neighbouring
+    ayah's rect too, since the strip between them belongs to exactly one of them and both
+    boxes must agree where; hence 21 edits across 18 pages.
+    Two things had to be learnt the hard way and are recorded so they are not re-learnt.
+    First, **the left-margin sliver**: upstream gives a surah's `X:1` polygon a ~12-unit rect
+    at the *left margin* on the line where the previous surah ended — **above** the header, not
+    below it (p106 `5:1` starts at y152.25 while its header band is 188.25–260.25). So "where
+    the ayah-1 polygon starts" is not where the surah's text starts, and a furniture window
+    anchored there measures 0.00 lines tall and invents 69–99 orphans on p106, p255, p440,
+    p467 and p515. Furniture is therefore defined as a *gap in the tiling* that some ayah-1
+    rect picks up directly below — no anchor, no page list. Second, **the tolerance is
+    measured, not chosen**: benign glyphs sit at most 8.8 units outside their box (a fatha
+    rides above the line it belongs to), real defects a median 36 out, so 12 separates them and
+    lets the gate demand **zero** rather than carry a count that would absorb the next defect.
+    Six other detector designs were tried and discarded — a span/orphan heuristic whose
+    margins were 211 against 226, a glyph-count fingerprint that did not survive the full
+    corpus, band grouping that double-counts because upstream merges consecutive full-width
+    lines into one tall rect.
+    `gate-pages.mjs` now carries two tests, ORPHAN and BAND, both demanding zero, and **no
+    allow-list at all** — it knows nothing of the repair table, so a regressed repair and a
+    newly-broken upstream fail identically. Eighteen pages before, zero after. The repairs are
+    `POLYGON_REPAIRS` in `vendor-pages.mjs`, declared as the third transform beside svgo and
+    `ID_REPAIRS`, each carrying the exact upstream `d` it replaces so a fixed upstream dies
+    loudly; they run *before* svgo, because svgo rewrites path data at `floatPrecision 1` and a
+    `from` written against optimized output would be matching our own rounding. The re-vendor
+    changed exactly those 18 files and nothing else, the Loop 0 self-test still reproduces
+    pages 7, 9 and 19 byte-for-byte, and the pin moved only in its `vendored` hashes.
+    **The proof is 13's own probe**, which is where this started: 245 ordinary words adrift
+    before, **7** after — all of them on **page 1**, the decorated Fatiha frame, the one page
+    with its own override transform and the 2.72 residual noted above as still unexplained. It
+    is also the page the coverage gate skips by name, because it is set as a decorated frame
+    rather than a fifteen-line block and every line-pitch statement here is false of it.
+    Closed.
+
 **The half of these a machine cannot run now has a register — and a runbook.** Follow-ups
 ① (the phone), ② (the browser glance) and ④ (VoiceOver/TalkBack) still wait on a human, and
 prose cannot answer "is that still true, on what device, and when?" — ⑤ (does the source
