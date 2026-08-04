@@ -528,11 +528,17 @@
           "file": "packages/etl/scripts/probe-ligature-print.mjs",
           "symbol": "BANDS",
           "note": "Asks of a corpus we have not adopted the one question adoption turns on: which print does it paginate? Reads the candidate's own `data-surah`/`data-aya` and compares each page's ayah span against `ayah-pages.json` — no fonts, no rendering, no judgment. The page set is every V1/V2 divergence band plus controls outside them, because contested pages alone cannot separate \"this corpus is V2\" from \"our table is wrong in exactly the contested places\". Named `probe-` and not `gate-`: it reaches the public internet and answers a question, and its answer lives in `ligature-svg.probe.json` beside the fetched pages' hashes."
+        },
+        {
+          "file": "packages/etl/scripts/probe-word-registration.mjs",
+          "symbol": "fit",
+          "note": "The second question about the same unadopted corpus, and the one word-level selection was blocked on: do their word boxes land on our paper? Fits a 4-parameter axis-aligned affine per page from the one landmark both corpora carry independently — the ayah-end ornament — and then checks every word centre falls inside the ayah polygon its own attributes name. The answer (`word-registration.probe.json`) is that scale is 1.3333 both axes and the offsets are the two constants already sitting in our own SVGs' transform matrices, one per page parity; residual is sub-pixel, so the per-page fit is a check rather than a necessity. Reuses `ligature-svg.probe.json`'s pin — one pin, not two — so a corpus that moves invalidates both probes at once."
         }
       ],
       "extend": [
         "Never hand-edit anything under apps/web/public/assets — it is generated, and the ETL determinism check in CI will reject it.",
         "A corpus considered and not adopted still leaves evidence: probe it against a pinned commit, hash what you fetched, and commit the verdict (`ligature-svg.probe.json`). A decision remembered instead of recorded gets re-litigated by the next loop that wants word geometry.",
+        "Two coordinate spaces live in one page SVG: the ink sits under `matrix(1.3333 0 0 -1.3333 -115|-55 640)` and is y-flipped, the ayah polygons sit outside it in plain top-down viewBox space. Anything mapping external geometry onto a polygon works in the second space and must not apply the matrix — `probe-word-registration.mjs`'s header records how that was established.",
         "Change the producing script, run `make etl`, and commit the script and the regenerated output together.",
         "gate:notext enforces that pages carry no <text> nodes: the glyphs are outlines, so rendering never depends on a font being installed.",
         "A new kind of asset needs a ceiling in gate-assets.mjs CEILINGS before it can land — the gate fails on a directory it does not recognise, on purpose, because silently skipping the unfamiliar is the defect it closes."

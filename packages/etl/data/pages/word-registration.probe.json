@@ -1,0 +1,650 @@
+{
+  "$comment": "Does a word box from the candidate corpus land on our page? `probe-ligature-print.mjs` established that the candidate paginates our print and closed by predicting that word boxes would need 'a per-page registration against the text block'. This probe measured it instead of assuming it, and the prediction is wrong in the useful direction: the registration is a plain axis-aligned affine `ours = s·theirs + t`, fitted on the ayah-end ornaments both corpora already tag, and its parameters are constant across the book apart from one term that takes two values by page parity. Nothing here is vendored — like the print probe this is a decision probe, recorded beside the SHA-256 of every page it read so a rerun either reproduces or says loudly that upstream moved. Regenerate with `pnpm probe:word-registration --write`.",
+  "reads": "packages/etl/data/pages/ligature-svg.probe.json — the pin lives there and is not restated here, so there is one pin and not two.",
+  "$method": "Both corpora mark the same physical objects: the ayah-end ornaments. Ours are <g ayah:x ayah:y> in polygon space, theirs <g id=\"md-aya-mark-NNN\" data-surah data-aya>, giving 5-20 exact point correspondences per page with no fonts, no rendering and no judgment. Least squares in x and y independently, on both sides sorted into canonical reading order first — pairing on document order fits a mirror image, which cost two wild fits (p575, p577) before it was caught. Their y is top-down like our polygons; our ink is y-flipped by the matrix the page sits under, but the polygons live outside it, which is why the fit is a positive scale and not a flip.",
+  "$verdict": "It registers, and it is not per-page work. The scale is 1.3333 in both axes on every standard page; ty is a constant near -88.6; tx takes one of two values, near -114.6 on even pages and -54.6 on odd — the recto/verso binding margin, and the same two constants already sitting in our own SVGs' transform matrices. The marker residual is a fraction of one viewBox unit, and one viewBox unit is roughly one device pixel at phone width, so the registration error is sub-pixel and the per-page fit becomes a check rather than a necessity. The residual quoted in `transform` covers the 59 standard pages only; pages 1 and 2 carry a 235x235 viewBox override, fit their own constants, and fit them badly (p1's residual is 2.72 units against a median of 0.10) — but that is a symptom of p1's polygons, not of the method. See $residue.",
+  "$residue": "Mapping every word through the fit and testing its centre against its own ayah's polygon leaves a residue, and the residue is a defect in OUR polygons rather than in the registration. 42 of 287 misses are single waqf/hizb marks — the corpus makes each its own word, they sit superscript, and their centres fall in the line above; benign, and counted separately so the rest is visible. What is left is two distinct defects in the shipped page corpus, both confirmed against word positions and both also detectable from our own SVGs alone with no download at all: (a) an ayah whose polygon covers only some of the line fragments its words occupy — 10 pages, worst is p545 where 58:22 flows across five full lines carrying no polygon and the ayah's only rect sits on line 6; and (b) pages 1 and 2, whose polygons are malformed outright — 1:4 has zero height, and 1:5, 1:6 and 2:2 carry rects running to y382 and x-19.6 inside a 235x235 viewBox. (b) is why p1 fits badly: the ayah-end markers it is fitted on are as displaced as the polygons. Both are filed in docs/backlog.md and docs/issues.json.",
+  "ranOn": "2026-08-04",
+  "verdict": "registers",
+  "transform": {
+    "groups": [
+      {
+        "name": "even",
+        "pages": 29,
+        "sx": [
+          1.33292,
+          1.33385
+        ],
+        "tx": [
+          -115.12,
+          -114.551
+        ],
+        "sy": [
+          1.33312,
+          1.33352
+        ],
+        "ty": [
+          -88.827,
+          -88.591
+        ]
+      },
+      {
+        "name": "odd",
+        "pages": 30,
+        "sx": [
+          1.33278,
+          1.33506
+        ],
+        "tx": [
+          -55.133,
+          -54.559
+        ],
+        "sy": [
+          1.33303,
+          1.33346
+        ],
+        "ty": [
+          -88.824,
+          -88.584
+        ]
+      },
+      {
+        "name": "override",
+        "pages": 2,
+        "sx": [
+          1.16257,
+          1.16489
+        ],
+        "tx": [
+          -103.845,
+          -103.734
+        ],
+        "sy": [
+          1.13673,
+          1.14302
+        ],
+        "ty": [
+          -295.523,
+          -291.736
+        ]
+      }
+    ],
+    "residualViewBoxUnits": {
+      "median": 0.104,
+      "max": 0.506
+    },
+    "residualDevicePx": {
+      "320": {
+        "median": 0.096,
+        "max": 0.47
+      },
+      "390": {
+        "median": 0.118,
+        "max": 0.572
+      },
+      "430": {
+        "median": 0.13,
+        "max": 0.631
+      }
+    }
+  },
+  "coverage": {
+    "words": 8017,
+    "missed": 287,
+    "missedWaqfOrHizb": 42,
+    "missedOrdinary": 245,
+    "holes": [
+      {
+        "page": 1,
+        "key": "1:4",
+        "words": 3
+      },
+      {
+        "page": 431,
+        "key": "34:23",
+        "words": 10
+      },
+      {
+        "page": 545,
+        "key": "58:22",
+        "words": 50
+      },
+      {
+        "page": 551,
+        "key": "60:12",
+        "words": 35
+      },
+      {
+        "page": 554,
+        "key": "62:9",
+        "words": 10
+      },
+      {
+        "page": 564,
+        "key": "67:27",
+        "words": 12
+      },
+      {
+        "page": 566,
+        "key": "68:43",
+        "words": 12
+      },
+      {
+        "page": 575,
+        "key": "73:20",
+        "words": 77
+      },
+      {
+        "page": 594,
+        "key": "89:23",
+        "words": 9
+      },
+      {
+        "page": 599,
+        "key": "98:6",
+        "words": 11
+      },
+      {
+        "page": 602,
+        "key": "106:4",
+        "words": 8
+      },
+      {
+        "page": 604,
+        "key": "114:6",
+        "words": 4
+      }
+    ]
+  },
+  "failed": [],
+  "pages": [
+    {
+      "page": 1,
+      "sha256": "1b1492b6f59d56a402ccbe883466ad5e102594fc914d00413a5c1088a7bf5273",
+      "markers": 7,
+      "residual": 2.7219,
+      "words": 31,
+      "missed": 5
+    },
+    {
+      "page": 2,
+      "sha256": "6b9380c80d11646199980a9182bd92fbf00e2a37f41ce85969f76ac5301894ab",
+      "markers": 5,
+      "residual": 0.4215,
+      "words": 45,
+      "missed": 1
+    },
+    {
+      "page": 119,
+      "sha256": "dbf6c25dd0f97945312b8c179c9bed1a789deac6921c3abe33526c2416283092",
+      "markers": 6,
+      "residual": 0.0602,
+      "words": 160,
+      "missed": 1
+    },
+    {
+      "page": 120,
+      "sha256": "8db5dd6903a8a26f72d8910fece8fa9bf6536d351e040c1c61c977320a8687e7",
+      "markers": 7,
+      "residual": 0.0692,
+      "words": 177,
+      "missed": 0
+    },
+    {
+      "page": 121,
+      "sha256": "79ccc0262123344ad7862949495e3283bbd1bc8707e62c01a68b00c6784d56f9",
+      "markers": 6,
+      "residual": 0.0878,
+      "words": 127,
+      "missed": 1
+    },
+    {
+      "page": 122,
+      "sha256": "efc196a259a9b447ef942abca0d50b27c708fa1b875e44884b37353d197e8b6d",
+      "markers": 7,
+      "residual": 0.0797,
+      "words": 148,
+      "missed": 0
+    },
+    {
+      "page": 123,
+      "sha256": "8183e8ce6b8fe9e31fa66b2332aef076dc45d3b712f38a4718f0020cf260ac9e",
+      "markers": 5,
+      "residual": 0.0244,
+      "words": 156,
+      "missed": 0
+    },
+    {
+      "page": 143,
+      "sha256": "15a0703f5336a0576dd1df17a605c211e6fb52b6469632b3563b818fc6a07587",
+      "markers": 6,
+      "residual": 0.0657,
+      "words": 154,
+      "missed": 1
+    },
+    {
+      "page": 144,
+      "sha256": "463a2d54ad75ee39660dfad81a30532f8b25e909ee6380044c93f4cbe6071825",
+      "markers": 6,
+      "residual": 0.0801,
+      "words": 138,
+      "missed": 0
+    },
+    {
+      "page": 145,
+      "sha256": "d38295d647de84c5479d39b51358a60d3f28c40092836b747bb27c2abae45297",
+      "markers": 7,
+      "residual": 0.0877,
+      "words": 137,
+      "missed": 1
+    },
+    {
+      "page": 146,
+      "sha256": "2c065d0dc30a40f75a9a163798418a80468da9c7baf4d08e4925987a1cc09ffe",
+      "markers": 5,
+      "residual": 0.3333,
+      "words": 147,
+      "missed": 0
+    },
+    {
+      "page": 431,
+      "sha256": "5a9dd58559f8a84dcfeb9d08987bcdd4eeda8944f19b671ef928459f35575322",
+      "markers": 9,
+      "residual": 0.0884,
+      "words": 155,
+      "missed": 11
+    },
+    {
+      "page": 530,
+      "sha256": "bd83588885d570e1c10aa39411abdd6ac6bf1be002bf1a8c5db96067fbff5c95",
+      "markers": 22,
+      "residual": 0.1278,
+      "words": 152,
+      "missed": 1
+    },
+    {
+      "page": 531,
+      "sha256": "bc2545b42eb1a1ebf088ddd748c35175d41ab7c0faf1ad79fcf4b10ae1086515",
+      "markers": 24,
+      "residual": 0.1113,
+      "words": 117,
+      "missed": 0
+    },
+    {
+      "page": 532,
+      "sha256": "34ca688b082ceffec7552ca4ccaa18e3df31a92cfa0e34ede6f8b5b09c5c7eee",
+      "markers": 23,
+      "residual": 0.1076,
+      "words": 137,
+      "missed": 0
+    },
+    {
+      "page": 533,
+      "sha256": "db979d5f964b9b4c567fa2e14747ec2f2709371e5529e03fd7e880faf04b9a37",
+      "markers": 28,
+      "residual": 0.1174,
+      "words": 128,
+      "missed": 0
+    },
+    {
+      "page": 534,
+      "sha256": "4d1d860abb3a96374557c92e09c261ab02d3dec594238ee67b31a45d6c3c90c0",
+      "markers": 25,
+      "residual": 0.174,
+      "words": 99,
+      "missed": 0
+    },
+    {
+      "page": 535,
+      "sha256": "bb853316f1e3f0b9f3f5873ff866205b71c3d62389caf148b6d4bb38e274d146",
+      "markers": 34,
+      "residual": 0.2934,
+      "words": 146,
+      "missed": 0
+    },
+    {
+      "page": 545,
+      "sha256": "33361e33c69d6cfd5d2e0caf944004b63ca229f508d222818f21f0a13084cd8c",
+      "markers": 4,
+      "residual": 0.0711,
+      "words": 140,
+      "missed": 54
+    },
+    {
+      "page": 551,
+      "sha256": "1b1acdaaead1ec7051e341ddefbfeea76944ebe339fc597a7f54a51aef5d7461",
+      "markers": 7,
+      "residual": 0.0692,
+      "words": 135,
+      "missed": 36
+    },
+    {
+      "page": 554,
+      "sha256": "2aa4049f696b1d7f6bf2b24a2d16a5520ebb24679c0e5d94cc9c105aff42dedb",
+      "markers": 7,
+      "residual": 0.1052,
+      "words": 142,
+      "missed": 10
+    },
+    {
+      "page": 564,
+      "sha256": "503a23a00704d201a85a92c2318602431930afb13de35ec7e8ccb7700efaf1f6",
+      "markers": 20,
+      "residual": 0.0794,
+      "words": 135,
+      "missed": 14
+    },
+    {
+      "page": 565,
+      "sha256": "421d47010eaa0adc94bfc4219181a38107e9a6fb60bc0b2a67708917cfb6c17d",
+      "markers": 26,
+      "residual": 0.0934,
+      "words": 156,
+      "missed": 0
+    },
+    {
+      "page": 566,
+      "sha256": "8cce5cd1ca1809db5ef58c1d55cbab67f666ce43a287efe0ef41b5dbdf518acf",
+      "markers": 18,
+      "residual": 0.0845,
+      "words": 140,
+      "missed": 13
+    },
+    {
+      "page": 567,
+      "sha256": "5a7545076f66c010e966aa68fb55ba7cf16d5d39593845986f939751d2e387de",
+      "markers": 27,
+      "residual": 0.0909,
+      "words": 157,
+      "missed": 0
+    },
+    {
+      "page": 568,
+      "sha256": "c7dbbfee7618c707915582fc6bf9feddcc5dfa76325ece78c681d9f78d479d6c",
+      "markers": 27,
+      "residual": 0.1023,
+      "words": 131,
+      "missed": 0
+    },
+    {
+      "page": 569,
+      "sha256": "ce36fe923840dba8ab6b14aa4b9b12e3e20a932c6cdc03d1404c9d091bf28a07",
+      "markers": 30,
+      "residual": 0.0966,
+      "words": 163,
+      "missed": 2
+    },
+    {
+      "page": 570,
+      "sha256": "f739d6fe3cde62da0e1d6e772c63f0ae3d4efa1ef3c422cd1cf51d2971590b2d",
+      "markers": 14,
+      "residual": 0.104,
+      "words": 134,
+      "missed": 1
+    },
+    {
+      "page": 571,
+      "sha256": "268e465b481fd01b35405658223193a623d7478b1dd5f7d48da6055c22d6bfe7",
+      "markers": 18,
+      "residual": 0.1081,
+      "words": 170,
+      "missed": 1
+    },
+    {
+      "page": 572,
+      "sha256": "9a4e1f121c2ea63b539234724ebdbfab79936f9fb6710cd213e4c0f8d516d2c4",
+      "markers": 13,
+      "residual": 0.0925,
+      "words": 158,
+      "missed": 0
+    },
+    {
+      "page": 573,
+      "sha256": "d5ba79a6f852a74e0d432c04e3a2814395b531399211bc7da3efc1e7a2aec83e",
+      "markers": 15,
+      "residual": 0.1107,
+      "words": 169,
+      "missed": 0
+    },
+    {
+      "page": 574,
+      "sha256": "43789c2d323882c6fc5078ca877b0cf4671a75d314a0299f4aeb155526b9adfe",
+      "markers": 19,
+      "residual": 0.0849,
+      "words": 138,
+      "missed": 1
+    },
+    {
+      "page": 575,
+      "sha256": "91c7eb5cd30922e4bd874a7dfb346752e5b794d0bc663f2fb83910d45344d730",
+      "markers": 19,
+      "residual": 0.2497,
+      "words": 166,
+      "missed": 87
+    },
+    {
+      "page": 576,
+      "sha256": "1bb38250649b0a2f34f01b4ea84f6072ebe15d210ca432b7bf07e3a06c0e06bf",
+      "markers": 29,
+      "residual": 0.1164,
+      "words": 179,
+      "missed": 1
+    },
+    {
+      "page": 577,
+      "sha256": "a98f5aa92baf342a3c872bec0d7118080532dd3b3699d82670661fb9fa4ab83a",
+      "markers": 28,
+      "residual": 0.3737,
+      "words": 137,
+      "missed": 1
+    },
+    {
+      "page": 578,
+      "sha256": "f92190fee98dbeef973fdff2fac77af3805bf8c0db31f3b998f6d6f25f89abad",
+      "markers": 26,
+      "residual": 0.1089,
+      "words": 138,
+      "missed": 0
+    },
+    {
+      "page": 579,
+      "sha256": "2f4de53c774432529cad353a9c82df77828e46bee71cad6976ce31c6103c4d26",
+      "markers": 20,
+      "residual": 0.436,
+      "words": 175,
+      "missed": 1
+    },
+    {
+      "page": 580,
+      "sha256": "f9ac43b216b8a678d8d73fb44b2e6fa3cb25d5a8db18e6b2058bd099631b7c70",
+      "markers": 25,
+      "residual": 0.0947,
+      "words": 124,
+      "missed": 2
+    },
+    {
+      "page": 581,
+      "sha256": "437dac1b7642971722374de2e73b9b9236cbe5f9e852bceae5aee57a63a01b1a",
+      "markers": 31,
+      "residual": 0.1166,
+      "words": 140,
+      "missed": 0
+    },
+    {
+      "page": 582,
+      "sha256": "ae461e061bff8eb26cda93306e38e093cdbe05034e7273f5196342be0f3b0fa2",
+      "markers": 30,
+      "residual": 0.1204,
+      "words": 121,
+      "missed": 0
+    },
+    {
+      "page": 583,
+      "sha256": "581f42b696a2170171cb86f692ebef0bda4e9dd0bb9bda968adba2d3afdbbd1f",
+      "markers": 26,
+      "residual": 0.0936,
+      "words": 134,
+      "missed": 2
+    },
+    {
+      "page": 584,
+      "sha256": "6611abeccb3728b52c88063243209a970b8f637203d055201cf50dc2270b930b",
+      "markers": 30,
+      "residual": 0.1072,
+      "words": 142,
+      "missed": 0
+    },
+    {
+      "page": 585,
+      "sha256": "ebb46c42046d6f594ed97321ade755c2ccbb53ef9ecbdb2b7f01a63d9be6736d",
+      "markers": 40,
+      "residual": 0.111,
+      "words": 145,
+      "missed": 0
+    },
+    {
+      "page": 586,
+      "sha256": "d1efbfeed3a1fc80f2419db29fc42aba8893b706ac877d9df6051e6e7a5987f8",
+      "markers": 31,
+      "residual": 0.1003,
+      "words": 128,
+      "missed": 0
+    },
+    {
+      "page": 587,
+      "sha256": "ffed35cbe85bb402b1ea7159d880c86acaaef50f9d9863d9cf3c8a63ca461a7f",
+      "markers": 23,
+      "residual": 0.0998,
+      "words": 109,
+      "missed": 0
+    },
+    {
+      "page": 588,
+      "sha256": "21ece5642efb6cf1750b8df1040779e86912c5538dbc9b3f14f1d038e1ead91e",
+      "markers": 29,
+      "residual": 0.1065,
+      "words": 147,
+      "missed": 2
+    },
+    {
+      "page": 589,
+      "sha256": "1f1744ce9fc0c500087d5854085288f5515021a3f83190774edac643dc811338",
+      "markers": 27,
+      "residual": 0.0961,
+      "words": 130,
+      "missed": 0
+    },
+    {
+      "page": 590,
+      "sha256": "5e863de86ed597a69bdf3403791b894ac1f8877323a63c95a64d611121c0e8b5",
+      "markers": 23,
+      "residual": 0.5063,
+      "words": 136,
+      "missed": 0
+    },
+    {
+      "page": 591,
+      "sha256": "622b220ead25817e81ad273878620cf9cc5a358c39fdeb068052734562c20262",
+      "markers": 27,
+      "residual": 0.0979,
+      "words": 112,
+      "missed": 0
+    },
+    {
+      "page": 592,
+      "sha256": "97e9612e64bb4e23482836610cc6cb1a23cc993eb5d0313784191f864ef48bf4",
+      "markers": 31,
+      "residual": 0.3353,
+      "words": 125,
+      "missed": 0
+    },
+    {
+      "page": 593,
+      "sha256": "59a933a2666fac812fadd9c9338f42a67cef55361ecc2a1e5419b6b3fea194eb",
+      "markers": 26,
+      "residual": 0.1127,
+      "words": 134,
+      "missed": 2
+    },
+    {
+      "page": 594,
+      "sha256": "84263eea0b7255f68c8961394df156d3227985ea1448e896bea916b30dd3a2ea",
+      "markers": 26,
+      "residual": 0.0858,
+      "words": 122,
+      "missed": 10
+    },
+    {
+      "page": 595,
+      "sha256": "6fe9c13389741e951ecaebf4226ccc836d1b4db3f6c2705b981c0f565889db61",
+      "markers": 26,
+      "residual": 0.1152,
+      "words": 115,
+      "missed": 0
+    },
+    {
+      "page": 596,
+      "sha256": "6ae494c26307135f1fc4ac4aae7c5f72f377c557d37ad1145c0b9a1cc646424e",
+      "markers": 25,
+      "residual": 0.1269,
+      "words": 108,
+      "missed": 0
+    },
+    {
+      "page": 597,
+      "sha256": "87295f524659bdc22b133ef976d090a12af35877e2244368786fd3f3f460b672",
+      "markers": 26,
+      "residual": 0.1004,
+      "words": 107,
+      "missed": 0
+    },
+    {
+      "page": 598,
+      "sha256": "5d57fc7c2538dad33c92118de38ecb75503c979b2cc9e144690f81c98bb5d89b",
+      "markers": 17,
+      "residual": 0.118,
+      "words": 118,
+      "missed": 0
+    },
+    {
+      "page": 599,
+      "sha256": "07b2bd6ecc070eee91850eb92064662c4cdce619e973e7a1f56e4c808435bbd8",
+      "markers": 16,
+      "residual": 0.125,
+      "words": 104,
+      "missed": 12
+    },
+    {
+      "page": 600,
+      "sha256": "15a4a5458bab86ee960bac35f0af824be561917de34f45307ef7cc5e2438dc8b",
+      "markers": 25,
+      "residual": 0.0973,
+      "words": 100,
+      "missed": 0
+    },
+    {
+      "page": 601,
+      "sha256": "2bdba26b5edcaecb96f9bfe3ae74f4cb1f7c320aa1c8ab2ce8e2d09863c35d83",
+      "markers": 17,
+      "residual": 0.0879,
+      "words": 78,
+      "missed": 1
+    },
+    {
+      "page": 602,
+      "sha256": "b17ba9a357aeadc3138aad91e0533962eae53c2ddbb4e019563624d29fbb9878",
+      "markers": 14,
+      "residual": 0.1072,
+      "words": 57,
+      "missed": 8
+    },
+    {
+      "page": 604,
+      "sha256": "0e35b401c71a6dc0783738f564f0139d7126119ceb6f6f90e657126d5db20a8b",
+      "markers": 15,
+      "residual": 0.4521,
+      "words": 64,
+      "missed": 4
+    }
+  ]
+}
