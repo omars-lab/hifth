@@ -351,6 +351,13 @@ test.describe("Hifth · the desktop spread", () => {
     // relationship — the earlier page is still the one on the right — which has
     // to hold from either leaf and is exactly what a `row-reverse` "fix" would
     // invert.
+    //
+    // It is also the pin on `desktop.md` §8 ①, settled at 4b: **a step is one
+    // page, at every width.** The header reading `8` and not `9` after one press
+    // is the whole of that decision, and this is the only row in the repo where
+    // ±2 would fail — core's `step: 1 | -1` stops it typechecking, but a
+    // component that decided to double the step on a spread would sail past the
+    // type and land here. The reasoning lives in `packages/core/src/keymap.ts`.
     await page.goto("/#/hafs-kfqc/p7");
     await expect(spread(page)).toBeVisible();
     const before = await boxOf(pageSvg(page, 7));
