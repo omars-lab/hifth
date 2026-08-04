@@ -459,6 +459,14 @@
       "closedBy": "packages/core/src/pages.test.ts",
       "note": "Shipped by loop-4b and not noticed in it: the page bar drew its inventory as one span per vendored page, which was three marks at three pages and 604 half-pixel-apart marks at 604 — a solid rail conveying nothing, reconciled on every value a dragged thumb passed over, on the component whose commit-on-release design exists to avoid paying per value. Found by sweeping for premises that scarcity had made true rather than by any gate; the generalisation is that a picture whose node count is the size of the corpus has only ever been tested on a small corpus. Fixed with pageRuns in core — the inventory as contiguous runs, so nodes follow gaps rather than pages — which also split two facts that had shared one element: a run says these pages are here, a separate mark says you are on this one. Same corpus-size question as corpus-is-outlines-and-repeats, opposite answer, because bytes on disk are not reconciled during a drag. Proven twice: the core helper in pages.test.ts and the rendered DOM in apps/web/src/components/PageSlider.test.tsx."
     },
+    {
+      "id": "pinning-writes-every-file-twice",
+      "source": { "file": "docs/backlog.md", "item": "⑮" },
+      "status": "confirmed",
+      "severity": "defect",
+      "owner": "agent",
+      "note": "Found by the 6b-D pack e2e and by nothing else: the assertion that page 15 lives in the pack and nowhere else came back naming hifth-pages too. pinPack fetches from the page, so the service worker's CacheFirst route stores every file a second time — juz 1's ~3.1 MB paid twice, and 21 of the 32 entries in a browsing-sized LRU spent on duplicates, so keeping a juz for later throws away most of what the reader read last week. Deliberately filed rather than patched, because both candidate fixes are worse than the waste: teaching the worker to recognise a pin puts pack knowledge in the worker, and sweeping runtime caches on unpin only cleans up afterwards. Not a correctness bug — packedFetch reads the pack first and every 6b test passes either way — which is exactly why it needed a register entry instead of a memory. The trigger is a second pinned juz. The e2e tests around it via dropOutsidePack, which is also where whoever fixes it will find this."
+    },
 
     {
       "id": "check-perf-verdict-on-device",
