@@ -105,7 +105,10 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
    **word-granularity roots + `?w=` UI** and **word-granularity tajweed painting** — both
    said "after 4b", and 4b's answer is that the shipped corpus has no word geometry at all,
    so they move behind **follow-up 13** rather than behind a loop (the tajweed spans are
-   still vendored verbatim, so that one stays a rendering change once geometry exists);
+   still vendored verbatim, so that one stays a rendering change once geometry exists).
+   13 is answered as of 2026-08-04 — the candidate corpus is our print — so what stands
+   between here and both features is no longer a corpus hunt but registering its word boxes
+   onto our page frame and vendoring the result;
    **hafiz
    sign-off on the tajweed skin → Loop 7** (the beta label stays until then). **Done:**
    golden-image visual regression, Lighthouse CI, and the **⬡ chip vs ⬡ lens** collision —
@@ -417,6 +420,34 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     means it needs a second ~600-file vendoring with its own pin and gate. Blocks external
     task #65 (word-level selection → refined mutashabihat search) and the word-granular
     roots/tajweed painting Loops 5 and 6a left as ayah-fallback.
+    **Answered 2026-08-04 — it is V2, and the blocker moved.** The arithmetic ran, wider than
+    the two boundaries proposed above: not 5:77/5:83 on two pages but every page in all four
+    known divergence bands (120–123, 144–145, 531–534, 564–600) plus controls on either side
+    of each band and at both ends of the book — 56 pages, **56/56 with an ayah span identical
+    to `ayah-pages.json`**. Two pages would have been enough to be right and not enough to
+    know it: a probe that only ever looks at contested pages cannot tell "this corpus is V2"
+    from "our own table is wrong in exactly the contested places", which is why the controls
+    are in the set. So the answer is the YES branch — a second vendoring — and it is
+    reproducible rather than remembered:
+    [`probe-ligature-print.mjs`](../packages/etl/scripts/probe-ligature-print.mjs) against a
+    pinned commit, with every fetched page's SHA-256 written to
+    [`ligature-svg.probe.json`](../packages/etl/data/pages/ligature-svg.probe.json), so a
+    rerun either reproduces or says loudly that upstream moved. Three things the probe found
+    that this entry did not predict, and they are what the next scheduling decision actually
+    turns on. **Weight:** 595 KB raw / 114 KB gz per page → **67 MB gz for 604**, 2.6× the
+    26.2 MB the whole app ships today and more than double `gate:assets`' 32 MB projection
+    ceiling. **Shape:** `<g id="md-word-NNN" data-surah data-aya data-word-index-in-ayah
+    data-hafs data-imlaey data-line-number>` wrapping per-ligature `<path data-text>` — paths,
+    not rects, so a word's box is measured or precomputed, never read off an attribute.
+    **Coordinates:** our p120 is `viewBox="0 0 345 550"` under
+    `matrix(1.3333 0 0 -1.3333 -115 640)`; theirs is `viewBox="0 0 382.68 547.09"` with
+    `data-rect="90.91,72.17,338.10,474.94"` on `#md-page-inner`. Same print, different frame —
+    a word box does not transfer without a per-page registration against the text block. Taken
+    together those point away from "vendor a second set of pictures" and toward *vendor the
+    boxes*: derive per-word rectangles in ETL, register them onto the shipped page's frame,
+    and ship a manifest beside `ayah-pages.json` rather than 604 more SVGs the app never
+    draws. The print question is closed; **the open question is now registration**, and it is
+    arithmetic on two pages the way this one looked like arithmetic on two pages.
 
 **The half of these a machine cannot run now has a register — and a runbook.** Follow-ups
 ① (the phone), ② (the browser glance) and ④ (VoiceOver/TalkBack) still wait on a human, and

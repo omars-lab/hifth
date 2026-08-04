@@ -50,3 +50,13 @@ extraction and must reproduce it byte-identically.
   **exactly two** and the ayahs are **exactly those two**, so a future pin that
   fixes them upstream fails loudly rather than drifting. `extract-pages.mjs`
   refuses any polygon without a well-formed id, so the repair cannot be skipped.
+- **This table is also the instrument that identifies other corpora.** The V1/V2
+  argument above runs in reverse: a corpus that tags its words with surah and
+  ayah declares its pagination, and comparing that against these 6236 entries
+  says which print it is without rendering a glyph. `probe-ligature-print.mjs`
+  does exactly that to the candidate word-geometry corpus
+  ([MushafDatabase-Ligature-Based-SVG](https://github.com/mushafdatabase/MushafDatabase-Ligature-Based-SVG),
+  which states no print) and the verdict — V2, over all four divergence bands
+  plus controls, 56/56 — is recorded with the fetched pages' hashes in
+  [`ligature-svg.probe.json`](ligature-svg.probe.json). Nothing from it is
+  vendored; the file is a decision record, not an input.

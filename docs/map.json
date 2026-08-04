@@ -502,10 +502,16 @@
           "file": "scripts/gate-assets.mjs",
           "symbol": "MAX_PAGE_GZ",
           "note": "What the corpus weighs, and the ceilings. pages/ is gated per page plus a 604-page projection rather than by a total, because a total ceiling on the one kind that grows would have to be raised by the very change it exists to watch."
+        },
+        {
+          "file": "packages/etl/scripts/probe-ligature-print.mjs",
+          "symbol": "BANDS",
+          "note": "Asks of a corpus we have not adopted the one question adoption turns on: which print does it paginate? Reads the candidate's own `data-surah`/`data-aya` and compares each page's ayah span against `ayah-pages.json` — no fonts, no rendering, no judgment. The page set is every V1/V2 divergence band plus controls outside them, because contested pages alone cannot separate \"this corpus is V2\" from \"our table is wrong in exactly the contested places\". Named `probe-` and not `gate-`: it reaches the public internet and answers a question, and its answer lives in `ligature-svg.probe.json` beside the fetched pages' hashes."
         }
       ],
       "extend": [
         "Never hand-edit anything under apps/web/public/assets — it is generated, and the ETL determinism check in CI will reject it.",
+        "A corpus considered and not adopted still leaves evidence: probe it against a pinned commit, hash what you fetched, and commit the verdict (`ligature-svg.probe.json`). A decision remembered instead of recorded gets re-litigated by the next loop that wants word geometry.",
         "Change the producing script, run `make etl`, and commit the script and the regenerated output together.",
         "gate:notext enforces that pages carry no <text> nodes: the glyphs are outlines, so rendering never depends on a font being installed.",
         "A new kind of asset needs a ceiling in gate-assets.mjs CEILINGS before it can land — the gate fails on a directory it does not recognise, on purpose, because silently skipping the unfamiliar is the defect it closes."
