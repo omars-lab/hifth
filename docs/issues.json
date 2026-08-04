@@ -232,10 +232,11 @@
     {
       "id": "do-the-two-leaves-pan-together",
       "source": { "file": "docs/design/desktop.md", "item": "②" },
-      "status": "open",
+      "status": "fixed",
       "severity": "question",
       "owner": "agent",
-      "note": "Unblocked by loop-4b for the same reason as arrow-turns-leaf-or-page-at-desktop: two mounted stages showing two real pages is the condition under which panning one and not the other is either right or visibly wrong, and until 4b one of them was always a hole."
+      "closedBy": "apps/web/e2e/desktop.spec.ts",
+      "note": "Neither: above default zoom the book closes to the one leaf being read. The question offered two ways for two leaves to behave under a zoom and the reader reframed it — a spread is an offer of more of the book at once, and zooming is declining that offer in favour of one page. Panning was already answered and nobody had noticed: holdAxis centres any axis that fits, so at z<=1 a pan is a measured no-op. Three defects the running app had, found by screenshotting it rather than reading it: a cold ayah link left the two leaves at different scales (1.55 vs 1.0) with the selection band cut by the gutter; ctrl+wheel over the facing leaf zoomed the facing leaf, so hover was silently choosing the subject of the gesture against decision row 15; and a third — that zoom pushed the fore-edge outside the clip — was claimed from the screenshots and is FALSE, measured: ::after is inside the transformed host and travels with it, so at 2.07x the whole host sits inside the book's box. It thickens with the page, which the border does too and PageStage.module.css argues for. No issue filed; the wrong claim is kept beside the measurement in desktop.md. The shared View was rendered rather than argued about and reads as one continuous column, which an opening is not. The size argument for closing was WRONG and is kept beside its correction: .leaf is height-bound at ~398px whether one leaf or two are on the desk, so this buys no reading size — it buys the viewport, a page at 1.55x seen whole instead of through a 398px slot. Built as onFitChange on PageStage (flip, not frame; z <= 1+1e-3 because a tween's last frames arrive at 1.0000003) plus solo on PageSpread as style and not mount, and a ResizeObserver on the stage layer because the leaf now widens because of a zoom. Decision row 23."
     },
     {
       "id": "min-width-as-a-proxy-for-a-keyboard",
