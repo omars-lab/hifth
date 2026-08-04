@@ -512,7 +512,7 @@
         {
           "file": "scripts/gate-pages.mjs",
           "symbol": "PIN_FILE",
-          "note": "Cross-checks the vendored pages against the QUL V2 pin: the count, the filename shape, and the anchor ayahs on sampled pages. `audit-corpus` asks whether the manifest covers the print; this asks whether the paper under it is the print we pinned."
+          "note": "Cross-checks the vendored pages against the QUL V2 pin: the count, the filename shape, and the anchor ayahs on sampled pages. `audit-corpus` asks whether the manifest covers the print; this asks whether the paper under it is the print we pinned. Since PLAN 14 it also asks the one question every identity check misses — whether a polygon covers its own ayah — by two signatures read off the corpus rather than written down: a page whose topmost band sits a full line below where pages start while its first polygon is mid-surah, and an uncovered strip between two bands where the band below is not an `X:1` (a surah header leaves a 63–80 unit gap on 64 pages, so the ayah number and not the width is what separates a header from a hole). The eleven pages that fail are an allow-list, not a tolerance: a twelfth fails, and so does a repaired one."
         },
         {
           "file": "packages/etl/scripts/audit-corpus.mjs",
