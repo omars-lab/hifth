@@ -277,6 +277,62 @@ href: https://tanzil.net
 
 ---
 
+### word-geometry-mushafdatabase
+
+- **Name:** MushafDatabase-Ligature-Based-SVG — a second SVG print of the same
+  KFGQPC Madani mus'haf, set per *word* rather than per page: every word is a
+  `<g>` carrying its surah, ayah and index. The source of the word boxes behind
+  word-level selection (task #65).
+- **Provenance:** https://github.com/mushafdatabase/MushafDatabase-Ligature-Based-SVG
+  at commit `ae5786ab08597f8123575dec4e774f1eca195e0f` (2026-06-13), path
+  `SVG V1.01`, read 2026-08-04. Per-page SHA-256s of exactly the bytes that were
+  read are in [`packages/etl/data/pages/word-boxes.pin.json`](packages/etl/data/pages/word-boxes.pin.json),
+  and the print identification is in
+  [`ligature-svg.probe.json`](packages/etl/data/pages/ligature-svg.probe.json).
+- **What is taken, and what is not — the whole point of this entry.** **No bytes
+  of this corpus ship.** 378 MB was read to write 2.2 MB of geometry: per word, a
+  rectangle on *our* page frame. Not the ink — our pages remain the quranpedia
+  print, unchanged, and `gate:pages` still re-hashes all 604 against it. Not the
+  text either, deliberately: see the `$segmentation` note in the pin for why this
+  print's word index is not the Quranic Arabic Corpus's, and why joining the two
+  needs an alignment rather than an assumption.
+- **How geometry from one print lands on another:** both corpora draw the same
+  page and both mark the end of every ayah with an ornament, so the ornaments are
+  a correspondence neither was built to provide. `build-words.mjs` fits
+  `ours = s·theirs + t` on them, per page, by least squares. Scale is 1.3333 in
+  both axes everywhere and the offsets are the two constants already sitting in
+  our own SVGs' transform matrices, one per page parity. Residual: median 0.089,
+  max 2.722 viewBox units. `probe-word-registration.mjs` established this before
+  a single box was vendored.
+- **License (LICENSE, a Sadaqa-e-Jaria grant):** use, copy, modify, publish,
+  distribute and derive, for any lawful purpose including commercial, without
+  prior written approval; the Quranic content must not be altered in a way that
+  misrepresents it; as-is, with no warranty. Nothing here obliges attribution —
+  the colophon row below is a courtesy, and it is in the record so that a later
+  reader does not mistake a courtesy for a condition and quietly drop it, or
+  mistake it for a condition and refuse a change it does not forbid.
+- **Second notice — the print behind the print:** the repository's README names
+  the KFGQPC Madinah mus'haf, Hafs ʿan ʿĀṣim, from the printing-use collection at
+  https://dm.qurancomplex.gov.sa/. It does not name the print *revision*, which
+  is what `probe-ligature-print.mjs` had to establish: V2/1421H, the same print
+  the pages are, confirmed on all four known V1/V2 divergence bands plus controls
+  (PLAN follow-up 13).
+- **Immutability:** nothing is vendored, so nothing can be edited. What is
+  committed is derived, and `gate:words` re-measures every box against the
+  polygon it claims on every CI run rather than trusting the hash alone.
+- **Colophon row.** Verbatim; bound to `Colophon.tsx` by `gate:license-copy`.
+
+```colophon
+what: مواضع الكلمات
+who: Mushaf Database · قاعدة بيانات المصحف
+licence: صدقة جارية · إتاحة حرّة
+href: https://github.com/mushafdatabase/MushafDatabase-Ligature-Based-SVG
+```
+
+- **Status: DERIVED (word-B) — word boxes on our frame; no upstream bytes ship.**
+
+---
+
 ## Pending sources (not yet vendored — recorded so the gate is ready)
 
 These are named in the plan for later loops. They are listed here so their license

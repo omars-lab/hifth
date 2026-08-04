@@ -58,5 +58,30 @@ extraction and must reproduce it byte-identically.
   ([MushafDatabase-Ligature-Based-SVG](https://github.com/mushafdatabase/MushafDatabase-Ligature-Based-SVG),
   which states no print) and the verdict — V2, over all four divergence bands
   plus controls, 56/56 — is recorded with the fetched pages' hashes in
-  [`ligature-svg.probe.json`](ligature-svg.probe.json). Nothing from it is
-  vendored; the file is a decision record, not an input.
+  [`ligature-svg.probe.json`](ligature-svg.probe.json).
+- **word-B: that corpus is now an input — of measurements, not of bytes.** The
+  probe answered "same print", and `probe-word-registration.mjs` then answered
+  the second question: whether a box drawn on *its* page frame lands where the
+  ink is on *ours*. It does — `ours = s·theirs + t`, fitted per page by least
+  squares on the one correspondence neither corpus was built to provide, the
+  ayah-end ornaments. So `build-words.mjs` transfers 91,451 word rectangles onto
+  our viewBox and writes them to `apps/web/public/assets/words/hafs-kfqc/`, with
+  [`word-boxes.pin.json`](word-boxes.pin.json) holding a SHA-256 per upstream
+  page and per shard.
+
+  **Still no upstream bytes ship, and that distinction is the point.** 378 MB
+  was read to write 2.2 MB of geometry. The pages remain the quranpedia print,
+  unchanged and still re-hashed by `gate:pages`; what the ligature corpus
+  contributed is a number per word. Nor is its *text* taken: its word index is
+  the print's, which disagrees with the Quranic Arabic Corpus's on 4,499 of
+  6,236 ayahs, so joining the two needs an alignment and not an assumption (see
+  the pin's `$segmentation`).
+
+  **And it repaid the reading with a defect neither this file nor `gate:pages`
+  could see.** `gate:pages` demands no orphan ink; on p577 there was none — the
+  ink of 75:5's first word *was* covered, by 75:4's polygon. Only a second,
+  independent print of the same page could say so, and it did: of 86,965
+  lexical words, exactly one landed outside its own ayah. It is repaired in
+  `vendor-pages.mjs` (the "stranded first word" shape) and the count is now
+  zero. Two witnesses see what one cannot, which is the argument for having
+  gone and fetched the second.
