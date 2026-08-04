@@ -448,6 +448,66 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     and ship a manifest beside `ayah-pages.json` rather than 604 more SVGs the app never
     draws. The print question is closed; **the open question is now registration**, and it is
     arithmetic on two pages the way this one looked like arithmetic on two pages.
+    **Registration answered 2026-08-04 — and the sentence above is wrong twice.** It is not
+    per-page, and it is not against the text block.
+    [`probe-word-registration.mjs`](../packages/etl/scripts/probe-word-registration.mjs) fits
+    `ours = s·theirs + t` and *measures* the residual rather than assuming one exists. The key
+    is a correspondence neither corpus was built to provide and both already carry: the
+    **ayah-end ornaments**. Ours are `<g ayah:x ayah:y>`, theirs `<g id="md-aya-mark-NNN"
+    data-surah data-aya>` — 5–20 exact point pairs per page, no fonts, no rendering, no
+    judgment, which is the standard the print probe held itself to. `#md-page-inner`'s
+    `data-rect` is never read. The answer over 61 pages: **scale 1.3333 in both axes
+    everywhere**, `ty` a constant near **−88.6**, and `tx` one of exactly two values — **−114.6
+    on even pages, −54.6 on odd** — which is the recto/verso binding margin, and *the same two
+    constants already sitting in our own SVGs' `matrix(1.3333 0 0 -1.3333 -115 640)` /
+    `… -55 …`*. The registration was in the repo the whole time; nobody had put the two frames
+    side by side. Marker residual **median 0.104, max 0.506 viewBox units** — at 320–430 px
+    that is 0.10–0.63 **device pixels**, so the per-page fit is a check, not a necessity, and
+    "vendor the boxes, not the pictures" survives intact with the 67 MB never fetched.
+    Two things the fit had to be taught, both recorded because both produced confident wrong
+    answers first: **document order is not reading order** (our markers come out reversed on
+    p120 and scrambled within a line on p577; pairing on emitted order fits a *mirror*, giving
+    a negative x-scale and a residual of 157 on p575), and **the polygons are not under the
+    flipping matrix** — registering against them rather than against the ink is what makes this
+    a positive scale instead of a flip. Both sides are now sorted into canonical reading order
+    before pairing. What the probe found on the way is follow-up 14, and it is a defect in
+    **our** data, not theirs.
+
+14. **An ayah polygon does not always cover the ayah.** Found by 13's registration probe, and
+    the reason to state it separately is that it is not a word-selection problem — it is wrong
+    in the app **today**, at ayah granularity, on pages a reader opens now. With the transform
+    fitted, every word on 61 pages was mapped into our frame and its centre tested against its
+    own ayah's polygon. 287 of 8017 fall outside. 42 are single waqf/hizb marks (ۖ ۗ ۚ ۛ ۞),
+    which the corpus makes separate words that sit superscript above the line so their centres
+    land in the line above — benign, counted separately, not a defect in either corpus. The
+    remaining 245 are two real defects, and **both are detectable from our own shipped SVGs
+    with nothing downloaded at all**, which is what makes them gateable:
+    **(a) Missing line fragments.** An ayah's polygon covers only some of the line bands its
+    words occupy — always the *leading* ones, always where the ayah flows in from the previous
+    page. Ten pages: 2, 431, 545, 551, 554, 564, 566, 575, 594, 599. The worst is **p545**,
+    where `58:22` runs across five full lines that carry no polygon whatsoever and the ayah's
+    only rect sits on line 6 — 50 words untappable; then **p575** (`73:20`, six lines, 77
+    words). Internally the signature is exact: the page's topmost polygon sits a line or more
+    below the median 7.3, *and* the first polygon is a mid-surah ayah rather than an `X:1`
+    (a genuine surah header also pushes the first polygon down, which is why the second half
+    of the test is needed and why a naive "top is low" scan flags 57 pages instead of 10).
+    **(b) Pages 1 and 2 are malformed outright.** `1:4` has **zero height** (y 76.2–76.2) and
+    can never be hit by anything; `1:5`, `1:6` and `2:2` carry rects running to y 382 and
+    x −19.6 inside a **235×235** viewBox. This is Al-Fatiha — the most-opened page in the book.
+    It is also why p1 is the worst fit in the probe (residual 2.72 against a median of 0.10):
+    the ornament markers it is fitted on are displaced exactly as the polygons are, so the bad
+    fit is a *symptom* and not a cause.
+    Two further scans came back clean and are recorded so nobody re-runs them: no page has a
+    missing *trailing* fragment, and the 42 uniform ~11.8-unit horizontal gaps inside line
+    bands are **ayah-end ornaments** sitting in the seam between two polygons — systematic,
+    benign, and not a hole (verified on p577, where the gap is exactly where `75:5`'s ornament
+    lands).
+    **What would answer it:** the defect is upstream in the polygon metadata
+    `vendor-pages.mjs` reads, so the fix is either a repair pass there or a re-derivation of
+    the missing fragments from the line grid — and either way the check belongs in
+    `gate:pages`, which already cross-checks the print but has never once asked whether a
+    polygon covers its own ayah. That gate is the deliverable; the numbers above are its
+    fixtures. Blocks nothing, breaks reading today.
 
 **The half of these a machine cannot run now has a register — and a runbook.** Follow-ups
 ① (the phone), ② (the browser glance) and ④ (VoiceOver/TalkBack) still wait on a human, and
