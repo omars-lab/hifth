@@ -26,7 +26,20 @@
  * highlighter then clones the source path exactly as it did before. A page whose
  * geometry is unusual gets the old boxy highlight, which is worse-looking and
  * still correct — the failure mode is never a missing highlight.
+ *
+ * ## The second caller (word-C)
+ *
+ * A word selection has no polygon to parse — the print's words are glyph paths
+ * with no structure, so its geometry arrives as rectangles from a shard rather
+ * than as a `d` from the DOM. That is a difference in *where the rectangles came
+ * from*, not in what ink is, so the parsing half and the pen half are split:
+ * {@link swipesFromRects} is the pen, and `swipesFromPath` is the parser in
+ * front of it. `WordIndex.bandsFor` hands over one rectangle per line, which is
+ * exactly the shape an ayah polygon already is — so the two selections are
+ * inked by the same code and cannot drift into looking like two different pens.
  */
+
+import type { Rect } from "./highlighter.js";
 
 /** A single marker stroke: a horizontal band along the centre of one line. */
 export interface Swipe {
@@ -49,15 +62,12 @@ export interface Swipe {
 const BAND = 0.72;
 
 /**
- * One rectangle, in the order the path grammar below produces them.
- * Width and height are always positive; the parser normalises.
+ * One rectangle, in the order the path grammar below produces them — the
+ * highlighter's own {@link Rect}, so a parsed polygon and a shard's word band
+ * are literally the same type by the time the pen sees them. Width and height
+ * are always positive; the parser normalises.
  */
-interface Rect {
-  x: number;
-  y: number;
-  w: number;
-  h: number;
-}
+type InkRect = Rect;
 
 /**
  * The one path grammar we accept: a rectangle written as a move, a horizontal
@@ -84,11 +94,11 @@ const RECT_RE =
  * happens to look plausible on some pages, so it is asserted by test rather
  * than left to inspection.
  */
-function rectsFromPath(d: string): Rect[] | null {
+function rectsFromPath(d: string): InkRect[] | null {
   const subs = d.trim().split(/(?=[Mm])/).filter(Boolean);
   if (subs.length === 0) return null;
 
-  const rects: Rect[] = [];
+  const rects: InkRect[] = [];
   let penX = 0;
   let penY = 0;
 
@@ -120,10 +130,10 @@ function rectsFromPath(d: string): Rect[] | null {
     const x2 = h2Cmd === "H" ? h2 : x1 + h2;
     if (Math.abs(x2 - x0) > 0.01) return null;
 
-    const w = Math.abs(x1 - x0);
-    const h = Math.abs(y1 - y0);
-    if (w <= 0 || h <= 0) return null;
-    rects.push({ x: Math.min(x0, x1), y: Math.min(y0, y1), w, h });
+    const width = Math.abs(x1 - x0);
+    const height = Math.abs(y1 - y0);
+    if (width <= 0 || height <= 0) return null;
+    rects.push({ x: Math.min(x0, x1), y: Math.min(y0, y1), width, height });
   }
 
   return rects;
@@ -145,9 +155,18 @@ function rectsFromPath(d: string): Rect[] | null {
  */
 export function swipesFromPath(d: string): Swipe[] | null {
   const rects = rectsFromPath(d);
-  if (!rects) return null;
+  return rects ? swipesFromRects(rects) : null;
+}
 
-  return rects.map(({ x, y, w, h }) => {
+/**
+ * The pen itself: one marker stroke per rectangle, wherever the rectangles came
+ * from — a parsed ayah polygon, or a word run's per-line bands.
+ *
+ * Total, not partial: rectangles are already the shape this file understands, so
+ * unlike `swipesFromPath` there is nothing here that can fail to be recognised.
+ */
+export function swipesFromRects(rects: readonly InkRect[]): Swipe[] {
+  return rects.map(({ x, y, width: w, height: h }) => {
     const width = h * BAND;
     const half = width / 2;
     const x1 = x + half;

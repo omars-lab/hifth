@@ -26,7 +26,7 @@
  */
 
 import { TAP_SLOP_PX } from "./gestures.js";
-import { swipesFromPath } from "./ink.js";
+import { swipesFromPath, swipesFromRects, type Swipe } from "./ink.js";
 import type { Resolver } from "./resolver.js";
 import {
   TAJWEED_CLASS_PREFIX,
@@ -40,7 +40,7 @@ import {
 const SVG_NS = "http://www.w3.org/2000/svg";
 const OVERLAY_ID = "hifth-overlay";
 
-export type GroupId = "selection" | "phrase" | "breadcrumb" | "preview";
+export type GroupId = "selection" | "phrase" | "breadcrumb" | "preview" | "word";
 export type StyleToken = "sel" | "crumb" | "hlt" | "preview" | "marquee";
 
 /**
@@ -148,6 +148,8 @@ export class Highlighter {
   private readonly onPolygonKeyDown: (e: KeyboardEvent) => void;
   /** Where the current press started, so a release can tell a tap from a drag. */
   private pressAt: { x: number; y: number } | null = null;
+  /** Which ayah the current press landed on — see {@link pressedKey}. */
+  private pressKey: string | null = null;
   /** The applied skin, and L3's rule lookup for it (spec §8; see `setSkin`). */
   private currentSkin: SkinId = "plain";
   private skinLookup: TajweedLookup | null = null;
@@ -173,6 +175,10 @@ export class Highlighter {
         typeof e.clientX === "number" && typeof e.clientY === "number"
           ? { x: e.clientX, y: e.clientY }
           : null;
+      // Which ayah was under the finger, decided by the browser's own hit test
+      // against the polygon's fill — see `pressedKey` for why it is recorded
+      // here and not measured later.
+      this.pressKey = this.keyForEventTarget(e.target);
     };
     svg.addEventListener("pointerdown", this.onPolygonPointerDown);
 
@@ -322,55 +328,81 @@ export class Highlighter {
     const src = this.svg.querySelector<SVGElement>(`#${cssEscape(id)}`);
     if (!src) return [];
 
-    // `hl-ink` is what the stylesheet keys the marker rules off, and it is on
-    // the swipes only. Styling by `hl-sel` alone would reach the fallback clone
-    // too and turn it into a hairline outline of the polygon — a *worse* result
-    // than the box it is meant to be, and one that would only ever appear on
-    // the pages we have not seen.
-    const tag = (el: SVGElement, ink: boolean): SVGElement => {
-      el.setAttribute("class", `hl hl-${style}${ink ? " hl-ink" : ""}`);
-      el.setAttribute("data-hl-group", group);
-      el.style.pointerEvents = "none";
-      this.overlay.appendChild(el);
-      return el;
-    };
-
     const swipes = INKED.has(style) ? swipesFromPath(src.getAttribute("d") ?? "") : null;
-    if (swipes) {
-      // One element per swipe rather than one path for the whole ayah: line
-      // heights differ between lines, and stroke-width is per element, so a
-      // single path would have to pick one thickness and be wrong on the rest.
-      // An ayah spans at most three lines, so this is at most three nodes.
-      return swipes.map((s, i) => {
-        const line = document.createElementNS(SVG_NS, "line");
-        // Drawn from the RIGHT end to the left — x1 takes the larger x. A line
-        // renders identically either way, so this is not a geometry choice; it
-        // is the only thing that decides which way the stroke-dashoffset wipe
-        // in highlight.css travels, and a pen crossing Arabic starts at the
-        // right. Reversing it here rather than in CSS is deliberate: the
-        // direction is a fact about the script, and `swipesFromPath` normalises
-        // x1 ≤ x2 for geometry's sake, so something has to put it back.
-        line.setAttribute("x1", String(s.x2));
-        line.setAttribute("x2", String(s.x1));
-        line.setAttribute("y1", String(s.y));
-        line.setAttribute("y2", String(s.y));
-        line.setAttribute("stroke-width", String(s.width));
-        // The two numbers the wipe needs and CSS cannot compute: how far this
-        // stroke runs (a dash pattern has to be told, `100%` on a <line> is the
-        // viewport's width, not the line's), and which line of the ayah this is
-        // (so line 2 starts after line 1 — a marker crosses one line before the
-        // next, it does not paint a paragraph at once). Custom properties, not
-        // attributes, so nothing here picks a duration; the stylesheet owns
-        // that and reduced-motion can zero it.
-        line.style.setProperty("--hl-len", String(Math.abs(s.x2 - s.x1)));
-        line.style.setProperty("--hl-i", String(i));
-        return tag(line, true);
-      });
-    }
+    if (swipes) return this.drawSwipes(swipes, style, group);
 
     const clone = src.cloneNode(true) as SVGElement;
     clone.removeAttribute("id");
-    return [tag(clone, false)];
+    return [this.tag(clone, style, group, false)];
+  }
+
+  /**
+   * Put a drawn element into the overlay and label it.
+   *
+   * `hl-ink` is what the stylesheet keys the marker rules off, and it is on the
+   * swipes only. Styling by `hl-sel` alone would reach the fallback clone too
+   * and turn it into a hairline outline of the polygon — a *worse* result than
+   * the box it is meant to be, and one that would only ever appear on the pages
+   * we have not seen.
+   */
+  private tag(el: SVGElement, style: StyleToken, group: GroupId, ink: boolean): SVGElement {
+    el.setAttribute("class", `hl hl-${style}${ink ? " hl-ink" : ""}`);
+    el.setAttribute("data-hl-group", group);
+    el.style.pointerEvents = "none";
+    this.overlay.appendChild(el);
+    return el;
+  }
+
+  /** Lay down one `<line>` per marker swipe, whatever produced the swipes. */
+  private drawSwipes(swipes: readonly Swipe[], style: StyleToken, group: GroupId): SVGElement[] {
+    // One element per swipe rather than one path for the whole ayah: line
+    // heights differ between lines, and stroke-width is per element, so a
+    // single path would have to pick one thickness and be wrong on the rest.
+    // An ayah spans at most three lines, so this is at most three nodes.
+    return swipes.map((s, i) => {
+      const line = document.createElementNS(SVG_NS, "line");
+      // Drawn from the RIGHT end to the left — x1 takes the larger x. A line
+      // renders identically either way, so this is not a geometry choice; it
+      // is the only thing that decides which way the stroke-dashoffset wipe
+      // in highlight.css travels, and a pen crossing Arabic starts at the
+      // right. Reversing it here rather than in CSS is deliberate: the
+      // direction is a fact about the script, and `swipesFromRects` normalises
+      // x1 ≤ x2 for geometry's sake, so something has to put it back.
+      line.setAttribute("x1", String(s.x2));
+      line.setAttribute("x2", String(s.x1));
+      line.setAttribute("y1", String(s.y));
+      line.setAttribute("y2", String(s.y));
+      line.setAttribute("stroke-width", String(s.width));
+      // The two numbers the wipe needs and CSS cannot compute: how far this
+      // stroke runs (a dash pattern has to be told, `100%` on a <line> is the
+      // viewport's width, not the line's), and which line of the ayah this is
+      // (so line 2 starts after line 1 — a marker crosses one line before the
+      // next, it does not paint a paragraph at once). Custom properties, not
+      // attributes, so nothing here picks a duration; the stylesheet owns
+      // that and reduced-motion can zero it.
+      line.style.setProperty("--hl-len", String(Math.abs(s.x2 - s.x1)));
+      line.style.setProperty("--hl-i", String(i));
+      return this.tag(line, style, group, true);
+    });
+  }
+
+  /**
+   * Ink a set of rectangles directly — the word selection's path onto the page.
+   *
+   * The one method here that takes geometry as an argument rather than reading
+   * it off the mounted SVG, and the header's rule about that is deliberately not
+   * being broken: a word has no element to measure. Its rectangle comes from a
+   * shard (`words.ts`), pre-collapsed by `WordIndex.bandsFor` into one rect per
+   * line — the same shape `swipesFromPath` parses a polygon into — so the two
+   * kinds of selection reach the pen as the same thing and cannot drift apart.
+   *
+   * No fallback branch, because there is nothing to fall back *to*: a rectangle
+   * cannot fail to be recognised, and there is no source element to clone.
+   */
+  highlightRects(rects: readonly Rect[], style: StyleToken, group: GroupId): void {
+    this.clear(group);
+    if (rects.length === 0) return;
+    this.drawn.set(group, this.drawSwipes(swipesFromRects(rects), style, group));
   }
 
   /** Remove every highlight drawn for a group. */
@@ -475,6 +507,26 @@ export class Highlighter {
       keys.push(key);
     }
     return keys;
+  }
+
+  /**
+   * The ayah the current press landed on, or null if it landed off the text.
+   *
+   * Set on `pointerdown` and left standing until the next one, which is what
+   * makes it readable from the middle of a drag — the question "did this stroke
+   * begin inside the ayah I have selected?" (`gestures.ts`
+   * {@link PointerSample.insideSelection}) is asked several frames after the
+   * press, once the hold has run long enough to mean something.
+   *
+   * Recorded rather than measured because the press event has already been hit
+   * tested by the browser, against the polygon's actual fill. Re-deriving it
+   * later would mean either a bounding box — which on a two-line ayah covers
+   * words belonging to its neighbours — or `isPointInFill` per polygon, which is
+   * a geometry query on the compositor's critical path for an answer the
+   * pointerdown handed us for free.
+   */
+  get pressedKey(): string | null {
+    return this.pressKey;
   }
 
   /** Subscribe to tap-selects. Returns an unsubscribe fn. */

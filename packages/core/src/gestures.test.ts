@@ -12,6 +12,7 @@ import {
   isMarqueeIntent,
   isTurnIntent,
   isViewportIntent,
+  isWordIntent,
   marqueeRect,
   movementDistance,
   nextIntent,
@@ -160,12 +161,66 @@ describe("nextIntent · latching", () => {
   });
 });
 
+describe("pointerIntent · the hold inside a selection means words", () => {
+  it("the same hold that paints a marquee chooses words when it began inside the selection", () => {
+    expect(pointerIntent(sample({ elapsedMs: LONG_PRESS_MS, insideSelection: true }))).toBe("word");
+    expect(pointerIntent(sample({ elapsedMs: LONG_PRESS_MS }))).toBe("marquee");
+  });
+
+  it("holds the same verdict whether the hold completed before or after the finger moved", () => {
+    // The one asymmetry that would be felt as flakiness: two readers performing
+    // the same gesture, one with a steadier hand, must not get different levels.
+    const still = sample({ elapsedMs: LONG_PRESS_MS + 1, insideSelection: true });
+    const moved = sample({ elapsedMs: LONG_PRESS_MS + 1, dx: 40, insideSelection: true });
+    expect(pointerIntent(still)).toBe("word");
+    expect(pointerIntent(moved)).toBe("word");
+  });
+
+  it("takes nothing from the other three: only a *completed hold* reads the flag", () => {
+    // Below the hold the flag is inert — a press inside the selection that moves
+    // first still pans, and still turns where a turn was available.
+    expect(pointerIntent(sample({ elapsedMs: 20, dx: 40, insideSelection: true }))).toBe("pan");
+    expect(pointerIntent(sample({ elapsedMs: 10, insideSelection: true }))).toBe("tap");
+    expect(pointerIntent(sample({ pointers: 2, elapsedMs: 900, insideSelection: true }))).toBe(
+      "pinch",
+    );
+    expect(pointerIntent(turnable({ dx: 60, dy: 4, insideSelection: true }))).toBe("turn");
+  });
+
+  it("omitting the flag is the four-gesture ladder exactly as it was", () => {
+    expect(pointerIntent(sample({ elapsedMs: LONG_PRESS_MS + 50, dx: 90 }))).toBe("marquee");
+    expect(pointerIntent(sample({ elapsedMs: LONG_PRESS_MS, insideSelection: false }))).toBe(
+      "marquee",
+    );
+  });
+
+  it("latches for the stroke, like every other verdict", () => {
+    let intent = nextIntent("none", sample({ elapsedMs: LONG_PRESS_MS, insideSelection: true }));
+    expect(intent).toBe("word");
+    // The finger leaves the ayah it started in: the stroke is still choosing
+    // words, because a drag that changed level mid-way is a drag that lied.
+    intent = nextIntent(intent, sample({ elapsedMs: 900, dx: 200, insideSelection: false }));
+    expect(intent).toBe("word");
+    // …and a second finger still takes it over.
+    expect(nextIntent(intent, sample({ pointers: 2, elapsedMs: 950 }))).toBe("pinch");
+  });
+});
+
 describe("intent predicates", () => {
   it("only a marquee paints; only pan/pinch move the viewport; only a turn turns", () => {
-    const all: PointerIntent[] = ["none", "tap", "pan", "marquee", "pinch", "turn"];
+    const all: PointerIntent[] = ["none", "tap", "pan", "marquee", "pinch", "turn", "word"];
     expect(all.filter(isMarqueeIntent)).toEqual(["marquee"]);
     expect(all.filter(isViewportIntent)).toEqual(["pan", "pinch"]);
     expect(all.filter(isTurnIntent)).toEqual(["turn"]);
+    expect(all.filter(isWordIntent)).toEqual(["word"]);
+  });
+
+  it("a word selection is neither a marquee nor a viewport move", () => {
+    // They share a trigger and nothing else — see isWordIntent. A caller that
+    // folded them together would ask the page for the ayahs under a rectangle
+    // that by construction covers exactly one.
+    expect(isMarqueeIntent("word")).toBe(false);
+    expect(isViewportIntent("word")).toBe(false);
   });
 
   it("a turn is NOT a viewport intent — during a turn no glyph moves", () => {

@@ -553,3 +553,110 @@ describe("Highlighter marker swipes", () => {
     expect(svg.querySelectorAll("#hifth-overlay .hl-sel")).toHaveLength(0);
   });
 });
+
+/**
+ * `highlightRects` — the same pen, handed its rectangles instead of finding them.
+ *
+ * A word selection has no element on the page to measure: the print's words are
+ * glyph paths with no structure, so the geometry arrives from a shard. These
+ * assert that taking that route changes *nothing* about the ink — same `<line>`
+ * per band, same `hl-ink` tag, same right-to-left wipe, same two custom
+ * properties — because the moment word ink and ayah ink diverge they read as two
+ * different pens on the same page.
+ */
+describe("Highlighter.highlightRects", () => {
+  const resolver = new Resolver(manifest);
+  let svg: SVGSVGElement;
+  let hl: Highlighter;
+
+  /** Two lines of a word run, the shape `WordIndex.bandsFor` emits. */
+  const BANDS = [
+    { x: 10, y: 100, width: 200, height: 30 },
+    { x: 40, y: 140, width: 120, height: 30 },
+  ];
+
+  beforeEach(() => {
+    document.body.innerHTML = "";
+    const NS = "http://www.w3.org/2000/svg";
+    svg = document.createElementNS(NS, "svg");
+    svg.setAttribute("viewBox", "0 0 345 550");
+    document.body.appendChild(svg);
+    hl = new Highlighter(svg, resolver, 7);
+  });
+
+  it("lays one swipe per band, inked, in the group it was given", () => {
+    hl.highlightRects(BANDS, "sel", "word");
+    const marks = [...svg.querySelectorAll("#hifth-overlay .hl-sel")];
+    expect(marks).toHaveLength(2);
+    expect(marks.every((m) => m.tagName === "line")).toBe(true);
+    expect(marks.every((m) => m.classList.contains("hl-ink"))).toBe(true);
+    expect(marks.map((m) => m.getAttribute("data-hl-group"))).toEqual(["word", "word"]);
+    // Band height is the pen's, not the box's — the same 0.72 an ayah gets.
+    expect(marks.map((m) => m.getAttribute("stroke-width"))).toEqual([
+      String(30 * 0.72),
+      String(30 * 0.72),
+    ]);
+  });
+
+  it("wipes right-to-left, exactly as the parsed path does", () => {
+    hl.highlightRects(BANDS, "sel", "word");
+    const marks = [...svg.querySelectorAll<SVGElement>("#hifth-overlay .hl-sel")];
+    for (const m of marks) {
+      expect(Number(m.getAttribute("x1"))).toBeGreaterThan(Number(m.getAttribute("x2")));
+      expect(m.getAttribute("y1")).toBe(m.getAttribute("y2"));
+      const len = Number(m.style.getPropertyValue("--hl-len"));
+      expect(len).toBeCloseTo(
+        Math.abs(Number(m.getAttribute("x2")) - Number(m.getAttribute("x1"))),
+        6,
+      );
+    }
+    // The stagger, so two lines of one word run read as one pen crossing both.
+    expect(marks.map((m) => m.style.getPropertyValue("--hl-i"))).toEqual(["0", "1"]);
+  });
+
+  it("insets the caps so a band stops inside its own box", () => {
+    hl.highlightRects([BANDS[0]!], "sel", "word");
+    const m = svg.querySelector<SVGElement>("#hifth-overlay .hl-sel")!;
+    const half = (30 * 0.72) / 2;
+    // Written right-to-left, so x1 is the band's right end.
+    expect(Number(m.getAttribute("x1"))).toBeCloseTo(10 + 200 - half, 6);
+    expect(Number(m.getAttribute("x2"))).toBeCloseTo(10 + half, 6);
+    expect(Number(m.getAttribute("y1"))).toBeCloseTo(115, 6);
+  });
+
+  it("draws a single word as a dot when it is narrower than the pen", () => {
+    // One short word on its own: 5 units wide against a 21.6-unit band. A real
+    // pen tapped once leaves a round mark, and that is what this must be — not
+    // a zero-length line the renderer drops.
+    hl.highlightRects([{ x: 0, y: 0, width: 5, height: 30 }], "sel", "word");
+    const m = svg.querySelector<SVGElement>("#hifth-overlay .hl-sel")!;
+    expect(Number(m.getAttribute("x1"))).toBeCloseTo(2.5, 6);
+    expect(Number(m.getAttribute("x2"))).toBeCloseTo(2.5, 6);
+    expect(m.getAttribute("stroke-width")).toBe(String(30 * 0.72));
+  });
+
+  it("replaces its group rather than stacking on it", () => {
+    hl.highlightRects(BANDS, "sel", "word");
+    hl.highlightRects([BANDS[0]!], "sel", "word");
+    expect(svg.querySelectorAll("#hifth-overlay .hl-sel")).toHaveLength(1);
+  });
+
+  it("takes an empty run as a clear — which is what Escape hands it", () => {
+    hl.highlightRects(BANDS, "sel", "word");
+    hl.highlightRects([], "sel", "word");
+    expect(svg.querySelectorAll("#hifth-overlay .hl-sel")).toHaveLength(0);
+    // And clearing the group afterwards is not a double-remove.
+    expect(() => hl.clear("word")).not.toThrow();
+  });
+
+  it("leaves every other group where it was", () => {
+    // The ayah stays lit underneath: dropping to words is a *descent* into the
+    // selection, not a replacement of it, and multiply is what makes the band
+    // read as darker ink over the wash rather than as a second colour.
+    hl.highlightRects(BANDS, "sel", "word");
+    hl.highlightRects([BANDS[0]!], "sel", "selection");
+    expect(svg.querySelectorAll('[data-hl-group="word"]')).toHaveLength(2);
+    hl.clear("word");
+    expect(svg.querySelectorAll('[data-hl-group="selection"]')).toHaveLength(1);
+  });
+});

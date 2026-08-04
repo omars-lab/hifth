@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import type { Rect } from "./highlighter.js";
 import { WordIndex, isWordShard, type WordShard } from "./words.js";
 
 /**
@@ -65,6 +66,9 @@ function centre(box: readonly [number, number, number, number]): [number, number
 
 const MARK_2_44 = PAGE_7.words["2:44"].boxes[0];
 const WORD_2_44_3 = PAGE_7.words["2:44"].boxes[2];
+const MARK_2_44_12 = PAGE_7.words["2:44"].boxes[11];
+const WORD_2_45_5 = PAGE_7.words["2:45"].boxes[4];
+const MARK_2_45_6 = PAGE_7.words["2:45"].boxes[5];
 
 describe("WordIndex", () => {
   it("indexes the page's ayahs in shard order", () => {
@@ -156,6 +160,88 @@ describe("boxesFor — marks paint, they just do not get selected", () => {
     expect(idx.boxesFor("2:44", 900, 901)).toEqual([]);
     expect(idx.boxesFor("2:44", 7, 3)).toEqual([]);
     expect(idx.boxesFor("2:99", 1, 3)).toEqual([]);
+  });
+});
+
+/**
+ * Bands come out of subtractions of wire coordinates, so `31.2` arrives as
+ * `31.19999999999999`. That is float arithmetic doing its job on numbers headed
+ * for SVG attributes, not a tolerance anyone had to choose — hence an exact
+ * comparison to 6 decimal places rather than a measured slack.
+ */
+function expectBand(actual: Rect | undefined, expected: Rect): void {
+  expect(actual).toBeDefined();
+  for (const k of ["x", "y", "width", "height"] as const) {
+    expect(actual?.[k]).toBeCloseTo(expected[k], 6);
+  }
+}
+
+describe("bandsFor — one rectangle per line, which is what the pen wants", () => {
+  it("collapses a run on one line into a single band", () => {
+    // Indices 2–4 are the whole of 2:44's first line (index 1 is the leading
+    // mark). x runs 6.5 → 146.6; the y-span is the three words', 296.5 → 327.7.
+    const bands = idx.bandsFor("2:44", 2, 4);
+    expect(bands).toHaveLength(1);
+    expectBand(bands[0], { x: 6.5, y: 296.5, width: 140.1, height: 31.2 });
+  });
+
+  it("breaks at the line, and only at the line", () => {
+    // 2–5 crosses from the end of line one into the start of line two.
+    const bands = idx.bandsFor("2:44", 2, 5);
+    expect(bands).toHaveLength(2);
+    expectBand(bands[0], { x: 6.5, y: 296.5, width: 140.1, height: 31.2 });
+    expectBand(bands[1], { x: 323.2, y: 342.4, width: 9.9, height: 17.5 });
+  });
+
+  it("runs the ink across a pause mark without breaking", () => {
+    // Index 12 is a mark sitting between words 11 and 13. One band, not three.
+    const bands = idx.bandsFor("2:44", 11, 13);
+    expect(bands).toHaveLength(1);
+    // …and the mark's own box is inside the x-span, because it is painted over.
+    expect(bands[0]?.x).toBeLessThanOrEqual(MARK_2_44_12[0]);
+  });
+
+  it("does not let a mark drag the band up off the line", () => {
+    // 2:45's mark at 6 sits at y 366.7, above *both* of its neighbours (369.5
+    // and 376.5). A band whose y-span counted marks would start there and the
+    // swipe's centreline would ride high of the text it is supposed to cross.
+    expect(MARK_2_45_6[1]).toBeLessThan(WORD_2_45_5[1]);
+    const bands = idx.bandsFor("2:45", 5, 7);
+    expect(bands).toHaveLength(1);
+    expect(bands[0]?.y).toBeCloseTo(WORD_2_45_5[1], 6);
+  });
+
+  it("a run that opens on a mark takes its height from the first word", () => {
+    // 2:44 index 1 is a leading mark. Starting there must give the same band as
+    // starting at the word after it, only wider.
+    const fromMark = idx.bandsFor("2:44", 1, 4);
+    const fromWord = idx.bandsFor("2:44", 2, 4);
+    expect(fromMark).toHaveLength(1);
+    expect(fromMark[0]?.y).toBeCloseTo(fromWord[0]?.y as number, 6);
+    expect(fromMark[0]?.height).toBeCloseTo(fromWord[0]?.height as number, 6);
+    expect(fromMark[0]?.width).toBeGreaterThan(fromWord[0]?.width as number);
+  });
+
+  it("bands a whole ayah into exactly its lines", () => {
+    // 2:44 wraps once; 2:45 is a single line of the print, which the fixture's
+    // monotonically falling x confirms (322.9 down to 25.3, no jump back right).
+    expect(idx.bandsFor("2:44", 1, 14)).toHaveLength(2);
+    expect(idx.bandsFor("2:45", 1, 12)).toHaveLength(1);
+  });
+
+  it("is empty on the same inputs boxesFor is empty on", () => {
+    expect(idx.bandsFor("2:44", 7, 3)).toEqual([]);
+    expect(idx.bandsFor("2:44", 900, 901)).toEqual([]);
+    expect(idx.bandsFor("2:99", 1, 3)).toEqual([]);
+  });
+
+  it("a lone mark still bands, from its own box", () => {
+    // Not reachable through the gesture — `wordAt` never names a mark — but a
+    // restored link can ask for anything, and returning nothing would be a
+    // selection that exists in the key and not on the page.
+    const bands = idx.bandsFor("2:44", 12, 12);
+    expect(bands).toHaveLength(1);
+    expectBand(bands[0], { x: 100.1, y: 333.1, width: 5.3, height: 6.6 });
   });
 });
 

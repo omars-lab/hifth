@@ -14,8 +14,10 @@ import {
   clampZoom,
   easeInOutCubic,
   foldBetween,
+  formatWordKey,
   frameBboxToView,
   isViewportIntent,
+  isWordShard,
   leafSideOf,
   lerpView,
   marqueeRect,
@@ -24,9 +26,11 @@ import {
   normalizeWheelDelta,
   retainPages,
   MOUNTED_PAGE_CAP,
+  parseAyahKey,
   turnCommit,
   viewFitsAcross,
   Highlighter,
+  WordIndex,
   DEFAULT_HOP_ZOOM,
   WHEEL_GAP_MS,
   WHEEL_TURN_REST,
@@ -39,7 +43,7 @@ import {
   type View,
   type WheelTurnState,
 } from "@hifth/core";
-import { loadPageSvg } from "../assets";
+import { loadPageSvg, loadWordShard } from "../assets";
 import { useT } from "../i18n";
 import styles from "./PageStage.module.css";
 
@@ -88,6 +92,25 @@ interface PageStageProps {
    * `fromKey`/`toKey` are its endpoints — the range link form (spec §7).
    */
   onSelectRange?: (fromKey: string, toKey: string, keys: readonly string[]) => void;
+  /**
+   * Fired when a word run inside the selected ayah releases (word-C): the
+   * `…/2:48#w3-7` key, and the ayah it refines.
+   *
+   * Separate from `onSelectRange` because it answers a different question with a
+   * different vocabulary — a range of *ayahs* the reader swept across, against a
+   * run of *words* inside the one they already chose — and separate from
+   * `onSelect` because the ayah has not changed: dropping to words is a descent
+   * into the current selection, not a new one, and routing it through `onSelect`
+   * would put a `#w` key into `selectedKey`, which the highlighter resolves as an
+   * ayah and would clear.
+   *
+   * Optional, and today nothing above the stage listens. The word grain is drawn
+   * and the key is formed; what it *refines* — the mutashabihat search — waits on
+   * print-vs-QAC segmentation alignment (`docs/PLAN.md` 14). Emitting it now
+   * rather than later is what keeps that wiring a one-line prop instead of a
+   * second trip through this gesture.
+   */
+  onSelectWords?: (wordKey: string, ayahKey: string) => void;
   /** Human label for an ayah key (surah name), for per-polygon aria-label. */
   labelFor: (key: string) => string;
   /** Fired with the selected ayah's on-screen bbox so the rail can position. */
@@ -268,6 +291,29 @@ interface MountedPage {
 }
 
 /**
+ * A word run being dragged out inside the selected ayah (word-C).
+ *
+ * Mutable and held in a ref rather than in state: it changes on every frame of
+ * a stroke, and a gesture must never cost a render. `anchor` is null until the
+ * page's shard has landed and the first point has been resolved to a word —
+ * which is why the *point* is carried here too, rather than being turned into an
+ * index at the moment the finger reports it.
+ */
+interface WordRun {
+  /** The ayah being refined — the canonical key, not the `#w` one. */
+  readonly key: string;
+  readonly edition: string;
+  readonly page: number;
+  /** Where the finger is now, in SVG user units. */
+  point: { x: number; y: number };
+  /** The word the hold landed on. Fixed once set; the drag moves `cursor`. */
+  anchor: number | null;
+  cursor: number | null;
+  /** Whether the finger has already lifted (see `trackWords`). */
+  done: boolean;
+}
+
+/**
  * PageStage — the multi-page SVG mount surface and the imperative pan/zoom +
  * hop-tween owner (spec L2). React owns the chrome and page *lifecycle* (fetch,
  * mount, evict per the DOM budget), but never re-renders on pan/zoom or during a
@@ -289,6 +335,7 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
     breadcrumbKey,
     onSelect,
     onSelectRange,
+    onSelectWords,
     labelFor,
     onSelectionRect,
     onTurn,
@@ -336,6 +383,10 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
   onSelectRef.current = onSelect;
   const onSelectRangeRef = useRef(onSelectRange);
   onSelectRangeRef.current = onSelectRange;
+  const onSelectWordsRef = useRef(onSelectWords);
+  onSelectWordsRef.current = onSelectWords;
+  const selectedKeyRef = useRef(selectedKey);
+  selectedKeyRef.current = selectedKey;
   const labelForRef = useRef(labelFor);
   labelForRef.current = labelFor;
   const onSelectionRectRef = useRef(onSelectionRect);
@@ -430,6 +481,25 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
   // state: a gesture must never cost a render.
   const intentRef = useRef<PointerIntent>("none");
   const marqueeStartRef = useRef<{ x: number; y: number } | null>(null);
+  /**
+   * The word run being dragged out inside the selected ayah (word-C), or null.
+   *
+   * `anchor` is the word the hold landed on and does not move; `cursor` follows
+   * the finger. Held as the *print's* indices — the same numbers the `#w` key
+   * carries — so the key is formed by naming them rather than by translating
+   * anything, and both ends stay meaningful if the drag runs backwards.
+   */
+  const wordRunRef = useRef<WordRun | null>(null);
+  /**
+   * `<edition>/<page>` → its word shard, once fetched; `null` marks a page whose
+   * shard missed, so a second long-press does not re-ask the network for a file
+   * that is not there. Kept here rather than on `MountedPage` because a shard
+   * outlives the mount: the LRU may drop a page's DOM while the reader is still
+   * hopping around it, and 3.6 KB of numbers is not worth re-fetching for that.
+   */
+  const wordShardsRef = useRef(new Map<string, WordIndex | null>());
+  /** Shard fetches in flight, so a fast second press shares the first's request. */
+  const wordPendingRef = useRef(new Map<string, Promise<WordIndex | null>>());
   const tweenRef = useRef<number | null>(null);
   const startTimeRef = useRef<number | null>(null);
   /*
@@ -1338,11 +1408,30 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
     for (const p of keep) if (!pagesRef.current.has(p)) void ensurePage(p);
   }, [mountedPages, pageBudget, status, ensurePage]);
 
+  /**
+   * Let go of the word grain: the band comes off, the ayah stays lit.
+   *
+   * Every mounted page, not just the current one, because the run is cleared
+   * from several places that do not all agree about which page is showing — a
+   * new selection, a marquee, an Escape. One group, one owner, and no page keeps
+   * a band whose ayah is no longer selected.
+   */
+  const clearWords = useCallback(() => {
+    wordRunRef.current = null;
+    for (const mp of pagesRef.current.values()) mp.hl.clear("word");
+  }, []);
+
   // Reflect the controlled selection into the current page's 'selection' group.
   useEffect(() => {
     if (status !== "ready") return;
     const cur = pagesRef.current.get(currentPageRef.current);
     if (!cur) return;
+    // Whatever the selection just became, it is not the ayah the word run was
+    // refining — a run only ever exists *inside* a selection, so the ayah
+    // changing (or going away) ends it. Cheaper than comparing keys, and it
+    // covers the case a comparison would miss: the same ayah selected again by
+    // a tap, which is a reader asking for the coarse grain back.
+    clearWords();
     if (selectedKey) {
       cur.hl.highlight(selectedKey, "sel", "selection");
       // A tap replaces a highlight (App keeps the two mutually exclusive), so
@@ -1352,7 +1441,7 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
       cur.hl.clear("selection");
     }
     emitSelectionRect();
-  }, [selectedKey, status, emitSelectionRect]);
+  }, [selectedKey, status, emitSelectionRect, clearWords]);
 
   // Draw the breadcrumb on whichever mounted page carries the origin ayah — and
   // clear it off the others, which is the half `mountPage` cannot do. Between
@@ -1385,9 +1474,135 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
       }
       cur.hl.highlightRange(range.keys, "hlt", "phrase");
       onSelectRangeRef.current?.(range.fromKey, range.toKey, range.keys);
+      // A range and a word run answer different questions about the same page,
+      // so only one of them may be on it (`clearWords` says why once).
+      clearWords();
+    },
+    [clearWords],
+  );
+
+  /**
+   * The word shard for a page, fetched at most once.
+   *
+   * Keyed by edition *and* page: the shards are per-edition directories, and a
+   * reader who switches edition is looking at different paper — page 7's boxes
+   * are not transferable. `null` is cached as firmly as a shard is, so a page
+   * whose shard is missing costs one failed request rather than one per press.
+   */
+  const ensureWords = useCallback(
+    (edition: string, page: number): Promise<WordIndex | null> => {
+      const id = `${edition}/${page}`;
+      const have = wordShardsRef.current.get(id);
+      if (have !== undefined) return Promise.resolve(have);
+      const inflight = wordPendingRef.current.get(id);
+      if (inflight) return inflight;
+      const fetching = loadWordShard(edition, page).then((shard) => {
+        const idx = shard && isWordShard(shard) ? new WordIndex(shard) : null;
+        wordShardsRef.current.set(id, idx);
+        wordPendingRef.current.delete(id);
+        return idx;
+      });
+      wordPendingRef.current.set(id, fetching);
+      return fetching;
     },
     [],
   );
+
+  /**
+   * Put the run's current point onto a word, ink from the anchor to it, and —
+   * on release — say which words those were.
+   *
+   * The anchor is set once and never re-read, so a drag that runs backwards
+   * selects backwards from where the hold landed rather than dragging the
+   * anchor along with the finger. `wordAt` is nearest-not-containing (words.ts
+   * says why), which is what lets the finger travel through the gaps between
+   * words without the band flickering off.
+   */
+  const applyWords = useCallback((idx: WordIndex, run: WordRun, commit: boolean) => {
+    const cur = pagesRef.current.get(currentPageRef.current);
+    if (!cur) return;
+    const at = idx.wordAt(run.key, run.point.x, run.point.y);
+    // Null only if this ayah has no words on this page at all — a shard that
+    // disagrees with the manifest. Leave the ayah highlight alone and say
+    // nothing rather than inventing a word.
+    if (at === null) return;
+    if (run.anchor === null) run.anchor = at;
+    run.cursor = at;
+    const from = Math.min(run.anchor, at);
+    const to = Math.max(run.anchor, at);
+    cur.hl.highlightRects(idx.bandsFor(run.key, from, to), "sel", "word");
+    if (!commit) return;
+    const parsed = parseAyahKey(run.key);
+    if (!parsed) return;
+    onSelectWordsRef.current?.(
+      formatWordKey(parsed.edition, parsed.surah, parsed.ayah, from, to),
+      run.key,
+    );
+  }, []);
+
+  /**
+   * One frame of a word stroke: where the finger is, and whether it just left.
+   *
+   * The shard is fetched on the first frame and is usually not back yet, so the
+   * point is *stored* and the paint happens whenever the numbers arrive —
+   * including after the finger has already lifted, which is the common case for
+   * a quick press-and-release on a cold page. Dropping that would make the
+   * gesture work or not work depending on the network, which is exactly the kind
+   * of thing a reader reads as the app being broken.
+   */
+  const trackWords = useCallback(
+    (point: { x: number; y: number }, commit: boolean, fresh: boolean) => {
+      const key = selectedKeyRef.current;
+      const parsed = key ? parseAyahKey(key) : null;
+      if (!key || !parsed) return;
+      const page = currentPageRef.current;
+      let run = wordRunRef.current;
+      // `fresh` is the first frame of *this* hold. Without it a second press on
+      // the same ayah would inherit the previous run's anchor and extend a
+      // selection the reader thinks they just started over.
+      if (fresh || !run || run.key !== key || run.page !== page) {
+        run = { key, edition: parsed.edition, page, point, anchor: null, cursor: null, done: commit };
+        wordRunRef.current = run;
+      } else {
+        run.point = point;
+        run.done = commit;
+      }
+      const settled = wordShardsRef.current.get(`${run.edition}/${page}`);
+      if (settled !== undefined) {
+        if (settled) applyWords(settled, run, commit);
+        return;
+      }
+      const pending = run;
+      void ensureWords(run.edition, page).then((idx) => {
+        // Only if this is still the stroke that asked. A shard landing after the
+        // reader has moved on must not paint over whatever they are doing now.
+        if (idx && wordRunRef.current === pending) applyWords(idx, pending, pending.done);
+      });
+    },
+    [applyWords, ensureWords],
+  );
+
+  /*
+   * Escape climbs one level rather than releasing everything (the ladder the
+   * design settled on: tap selects the ayah, a hold inside it drops to words).
+   *
+   * It runs *before* App's own Escape — this component's effect is registered
+   * first because children mount first — and marks the event handled, so the
+   * first Escape leaves the word run and the second releases the ayah's focus.
+   * Without a run in hand it does nothing at all, so the ordinary Escape is
+   * untouched. A sheet up owns the keyboard outright, same rule as the wheel.
+   */
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key !== "Escape" || e.defaultPrevented) return;
+      if (!wordRunRef.current) return;
+      if (document.querySelector('[role="dialog"]')) return;
+      e.preventDefault();
+      clearWords();
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [clearWords]);
 
   // Pan (drag) + zoom (pinch) + marquee (drag-to-highlight) on one surface. Any
   // gesture frame first cancels an in-flight hop tween so the finger cleanly
@@ -1442,6 +1657,7 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
         // slop radius by 3px behind our backs).
         const dx = cx - ix;
         const wasTurn = intentRef.current === "turn";
+        const wasWord = intentRef.current === "word";
         const intent = nextIntent(intentRef.current, {
           pointers: 1,
           elapsedMs: elapsedTime,
@@ -1464,6 +1680,14 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
           // Safari's own back-swipe band, and Safari measures it against the
           // screen (`page-turning.md` §4.4).
           edgeDistancePx: Math.min(ix, window.innerWidth - ix),
+          // …and the one fact the word rule needs: did this stroke start inside
+          // the ayah already selected? Read off the press the highlighter
+          // already hit tested (`Highlighter.pressedKey`) rather than measured
+          // here, so it costs nothing on a gesture that runs every pointermove.
+          // A stroke that began anywhere else is the marquee it always was.
+          insideSelection:
+            selectedKeyRef.current !== null &&
+            pagesRef.current.get(currentPageRef.current)?.hl.pressedKey === selectedKeyRef.current,
         });
         intentRef.current = intent;
 
@@ -1475,6 +1699,16 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
           if (!wasTurn) beginTrackedTurn(dx > 0 ? 1 : -1);
           if (last) releaseTrackedTurn(dx, vx * (dirX || Math.sign(dx)));
           else trackFold(dx);
+          return base;
+        }
+
+        if (intent === "word") {
+          // The finer grain: the page does not move (`isViewportIntent` is false
+          // for a word, same as for a marquee), so the CTM is stable and every
+          // frame is one client→SVG conversion and one nearest-box search.
+          const cur = pagesRef.current.get(currentPageRef.current);
+          const point = cur?.hl.svgPointFromClient(cx, cy);
+          if (point) trackWords(point, last === true, !wasWord);
           return base;
         }
 
