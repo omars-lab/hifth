@@ -90,16 +90,10 @@
   },
   "coverage": {
     "words": 8017,
-    "missed": 33,
+    "missed": 26,
     "missedWaqfOrHizb": 26,
-    "missedOrdinary": 7,
-    "holes": [
-      {
-        "page": 1,
-        "key": "1:4",
-        "words": 3
-      }
-    ]
+    "missedOrdinary": 0,
+    "holes": []
   },
   "failed": [],
   "pages": [
@@ -109,7 +103,7 @@
       "markers": 7,
       "residual": 2.7219,
       "words": 31,
-      "missed": 5
+      "missed": 0
     },
     {
       "page": 2,
@@ -117,7 +111,7 @@
       "markers": 5,
       "residual": 0.4215,
       "words": 45,
-      "missed": 1
+      "missed": 0
     },
     {
       "page": 119,
@@ -381,7 +375,7 @@
       "markers": 28,
       "residual": 0.3737,
       "words": 137,
-      "missed": 1
+      "missed": 0
     },
     {
       "page": 578,
