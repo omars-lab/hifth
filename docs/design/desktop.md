@@ -58,6 +58,12 @@ Four, and three of them are not guessable from outside the code.
 
 ### ① Only pages 7, 9 and 19 are vendored, and they are not adjacent
 
+> **No longer true.** Loop 4b vendored all 604 pages, so every spread now has two real
+> leaves. The finding is kept in the present tense it was written in — this section records
+> what constrained the design, and a finding rewritten after the fact stops explaining why
+> the design looks the way it does. §4 *What Loop 4b changes, and what it does not* is the
+> live account, including the one prediction in it that turned out wrong.
+
 `apps/web/public/assets/pages/hafs-kfqc/` holds exactly three files. Their facing pages —
 6, 8 and 18 — are all absent.
 
@@ -341,7 +347,8 @@ A different treatment entirely, per finding ①:
 
 ### When the facing leaf *is* vendored
 
-The code path exists and is real, even though no shipped asset can reach it. The facing
+**Since Loop 4b this is every leaf**, and what follows was written when it was none of them.
+The code path existed and was real before any shipped asset could reach it. The facing
 panel mounts a second `PageStage` — its own view, its own `Highlighter`, its own gestures —
 rather than teaching the existing stage to draw two pages. `PageStage` is built around one
 visible host and one imperative transform (`applyTransform` writes
@@ -355,6 +362,13 @@ that both leaves render pages. What the shipped build lacks is data, not a code 
 the distinction is worth holding onto — otherwise the branch rots until Loop 4b, and Loop
 4b discovers it on the day it vendors 601 pages.
 
+That bet was settled the way it was placed: 4b vendored the 601 and this branch was already
+under test, so the day it became every reader's path was not the day it was first run. The
+defect 4b did find on the spread was one layer down and had nothing to do with the manifest
+— an even page is a *left-hand* leaf, and the stage's bound-edge inset was on the wrong side
+of it (`e2e/page-turn.spec.ts`, the 7 → 8 turn). Fixture manifests test the branch you knew
+to write; they cannot test the geometry you never saw drawn.
+
 ### What Loop 4b changes, and what it does not
 
 A reader in six months needs to know which parts of this design were shaped by a temporary
@@ -363,7 +377,7 @@ gap. Precisely these:
 | Shaped by the gap | What Loop 4b (task #27) changes |
 |---|---|
 | The absent-leaf treatment (recessed well, dashed edge, inventory caption) | Becomes rare rather than universal — it survives, because a fetch can still fail offline with an evicted cache (`PageStage`'s `status === "error"` path exists for exactly that). It stops being the thing every reader sees. |
-| The inventory caption `t.pagesVendored(3, 604)` on the absent leaf | Reads «المتوفّر ٦٠٤ من ٦٠٤», at which point it should be dropped from this surface — the page bar keeps it. |
+| The inventory caption `t.pagesVendored(3, 604)` on the absent leaf | **The prediction here was wrong, and is left standing because it shows how it was reachable.** It read: *"Reads «المتوفّر ٦٠٤ من ٦٠٤», at which point it should be dropped from this surface."* It cannot. The branch that draws the caption is guarded by `available.includes(leafPage)` — the panel only exists when the *facing page is one we do not hold* — so at a complete inventory the caption has no surface to be on. The two cases the panel can still reach both have something true to say: a partially vendored edition, where the count is the point, and an eviction, where the count is what the reader is looking at. Nothing to drop. (The page bar's copy is a different question and was decided the other way — it stays at 604/604; `e2e/pagebar.spec.ts`.) |
 | "All vendored pages are odd, so the hole is always on the right" | Stops being true. Tests must already not depend on it (finding ②). |
 | The facing panel never fetching anything in practice | Stops being true, and the second ~170 KB mount becomes real. §3's breakpoint arithmetic is unaffected, but the frame budget claim needs re-measuring on the day — see §8. |
 
@@ -513,18 +527,26 @@ Named, so they are not mistaken for settled. Every design doc in this repo ends 
 heading, and every item is an `### ⓝ … · **status**` row so `pnpm gate:issues` can read it.
 The vocabulary is defined once in [`docs/issues.json`](../issues.json).
 
-### ① Should an arrow key turn the leaf (±2) rather than the page (±1) at desktop? · **blocked**
+### ① Should an arrow key turn the leaf (±2) rather than the page (±1) at desktop? · **open**
 
 §6 says no for this build because `stepPage` walks a three-page inventory. After Loop 4b the
 question is live and the answer is not obvious: a hafiz turning a physical mus'haf turns
 a leaf, but the app's page number, URL and announcements are all per-page. Revisit with
 4b; whatever is decided belongs in `appKeyAction`, in core, with the reasoning.
 
-### ② Should the two leaves pan and zoom together? · **blocked**
+**Loop 4b landed, so this is no longer blocked — it is unanswered.** `stepPage` now walks a
+604-page inventory, ±1 and ±2 both land somewhere real, and the question is exactly the one
+stated above with nothing standing in front of it.
+
+### ② Should the two leaves pan and zoom together? · **open**
 
 Unanswerable and untestable until a facing pair is vendored. A shared `View` across two
 `PageStage`s is a real change to a component whose correctness argument is "one write path"; do
 not start it speculatively.
+
+**Loop 4b vendored every facing pair, so the condition in the first sentence is met.** Two
+real leaves is what makes panning one and not the other either right or visibly wrong. The
+warning in the second sentence is unaffected and still the reason to answer it deliberately.
 
 ### ③ Is `min-width` the right gate for the keyboard hints? · **fixed**
 

@@ -8,7 +8,7 @@
  * Everything here is logical (`inset-inline-*`, `border-block-*`) because the
  * bar is pinned `dir="rtl"` while the chrome around it may be either — the same
  * rule the rest of the app runs on. The one physical value is `--thumb`, which
- * has to match the thumb the browser draws so the ticks line up with it.
+ * has to match the thumb the browser draws so the runs line up with it.
  */
 
 .bar {
@@ -86,12 +86,13 @@
 }
 
 /*
- * The vendored inventory, drawn over the rail. Positioned by the component at
- * each page's fraction of the book; here it only says what a tick looks like.
- * `pointer-events: none` so the ticks never eat a drag that was aimed at the
- * thumb passing under them.
+ * The vendored inventory, drawn over the rail — one bar per *run* of contiguous
+ * held pages, positioned and sized by the component from each run's fractions
+ * of the book; here it only says what a run looks like. `pointer-events: none`
+ * so the inventory never eats a drag that was aimed at the thumb passing under
+ * it.
  */
-.ticks {
+.runs {
   position: absolute;
   inset-inline: 0;
   inset-block-start: 50%;
@@ -99,10 +100,15 @@
   pointer-events: none;
 }
 
-.tick {
+/*
+ * One bar per contiguous stretch of vendored pages. A single held page is a
+ * 2px-wide bar — the same mark the per-page ticks used to draw — and a complete
+ * edition is one bar the length of the track, which is the truthful picture of
+ * "all of it is here" and costs one node instead of 604.
+ */
+.run {
   position: absolute;
   inset-block-start: -7px;
-  inline-size: 2px;
   block-size: 14px;
   border-radius: 1px;
   background: var(--ink-soft);
@@ -110,10 +116,15 @@
 }
 
 /* The page on the stage, so the bar shows where you are even when the thumb is
-   elsewhere mid-drag. */
-.tick[data-current] {
+   elsewhere mid-drag. Drawn over the run, never instead of it: inside a full
+   edition every page is on a run, and the two facts are independent. */
+.here {
+  position: absolute;
+  inset-block-start: -7px;
+  inline-size: 2px;
+  block-size: 14px;
+  border-radius: 1px;
   background: var(--accent-strong);
-  opacity: 1;
 }
 
 /*
@@ -155,10 +166,12 @@
 }
 
 /*
- * "3 of 604 pages available" — spans the whole bar under the controls. Small,
- * permanent, and deliberately not hidden behind a tap: until Loop 4b vendors
- * the rest of the corpus, a full-width slider over a three-page build would
- * otherwise imply a book that is not there.
+ * "604 of 604 pages available" — spans the whole bar under the controls. Small,
+ * permanent, and deliberately not hidden behind a tap. It was written when the
+ * count read "3 of 604" and a full-width slider over a three-page build would
+ * otherwise have implied a book that is not there; it stays now that the two
+ * numbers meet, because a line that appears only when the news is bad is a line
+ * a reader has no reason to trust when it is absent (`e2e/pagebar.spec.ts`).
  */
 .inventory {
   grid-column: 1 / -1;

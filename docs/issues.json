@@ -223,18 +223,18 @@
     {
       "id": "arrow-turns-leaf-or-page-at-desktop",
       "source": { "file": "docs/design/desktop.md", "item": "①" },
-      "status": "blocked",
+      "status": "open",
       "severity": "question",
       "owner": "agent",
-      "blockedBy": ["loop-4b"]
+      "note": "Unblocked by loop-4b: it waited on a build where a facing leaf is real, and every leaf is real now, so ±2 is a turn a reader can actually see land. Answerable today and the answer belongs in appKeyAction, in core, beside ArrowLeft = +1 — not in the spread, which must not acquire an opinion about the keyboard."
     },
     {
       "id": "do-the-two-leaves-pan-together",
       "source": { "file": "docs/design/desktop.md", "item": "②" },
-      "status": "blocked",
+      "status": "open",
       "severity": "question",
       "owner": "agent",
-      "blockedBy": ["loop-4b"]
+      "note": "Unblocked by loop-4b for the same reason as arrow-turns-leaf-or-page-at-desktop: two mounted stages showing two real pages is the condition under which panning one and not the other is either right or visibly wrong, and until 4b one of them was always a hole."
     },
     {
       "id": "min-width-as-a-proxy-for-a-keyboard",
@@ -251,7 +251,8 @@
       "status": "blocked",
       "severity": "risk",
       "owner": "user",
-      "blockedBy": ["perf-verdict-on-device", "loop-4b"]
+      "blockedBy": ["perf-verdict-on-device"],
+      "note": "loop-4b dropped off the blocker list by happening: the second mount is real on every spread now, which is what made the risk measurable rather than hypothetical. It still cannot be answered without the on-device verdict, so the chain is one link shorter and not shorter than that."
     },
     {
       "id": "where-the-revision-map-sits-at-desktop",
@@ -275,10 +276,10 @@
     {
       "id": "what-a-tap-on-the-heatmap-does",
       "source": { "file": "docs/design/revision-record.md", "item": "②" },
-      "status": "blocked",
+      "status": "open",
       "severity": "question",
       "owner": "agent",
-      "blockedBy": ["loop-4b"]
+      "note": "Unblocked by loop-4b. The question was what a tap on a cold cell should do when the page behind it might not be in the build — a navigation that lands somewhere else is the failure this repo names most often. Every page is vendored now, so the tap has a real destination, and what is left is a design choice rather than a hole to route around."
     },
     {
       "id": "multi-edition-revision-records",
@@ -446,6 +447,15 @@
       "owner": "agent",
       "note": "Opened by loop-4b's 92 MB commit, and answered in it. 98.6% of a page is path d data, one <path> holds the whole scripture, and there is no font, use or symbol anywhere — the file is a photograph of the print, not a document. Exact-shape reuse measures 1.9x over a 51-page sample, but that is a ceiling on the bytes we have rather than in principle: svgo rounds coordinates after placement, so one ligature at two x-offsets is two strings. A glyph sprite would therefore need a second ETL that owns the typography, sitting downstream of the one guarantee worth most here — vendor-pages.mjs reproducing upstream byte-for-byte and gate:pages re-hashing all 604 offline. Git packs 92 MB to 28; LFS would keep it at 92 and make a clone need a network, which this project's whole claim is that it does not. The trigger is a second corpus (PLAN follow-up 13's ligature print, a second riwayah or layout version), or packed history past ~100 MB, or a cold clone past ~2 minutes."
     },
+    {
+      "id": "page-bar-draws-one-node-per-page",
+      "source": { "file": "docs/backlog.md", "item": "⑭" },
+      "status": "fixed",
+      "severity": "defect",
+      "owner": "agent",
+      "closedBy": "packages/core/src/pages.test.ts",
+      "note": "Shipped by loop-4b and not noticed in it: the page bar drew its inventory as one span per vendored page, which was three marks at three pages and 604 half-pixel-apart marks at 604 — a solid rail conveying nothing, reconciled on every value a dragged thumb passed over, on the component whose commit-on-release design exists to avoid paying per value. Found by sweeping for premises that scarcity had made true rather than by any gate; the generalisation is that a picture whose node count is the size of the corpus has only ever been tested on a small corpus. Fixed with pageRuns in core — the inventory as contiguous runs, so nodes follow gaps rather than pages — which also split two facts that had shared one element: a run says these pages are here, a separate mark says you are on this one. Same corpus-size question as corpus-is-outlines-and-repeats, opposite answer, because bytes on disk are not reconciled during a drag. Proven twice: the core helper in pages.test.ts and the rendered DOM in apps/web/src/components/PageSlider.test.tsx."
+    },
 
     {
       "id": "check-perf-verdict-on-device",
@@ -514,7 +524,8 @@
       "status": "blocked",
       "severity": "question",
       "owner": "agent",
-      "blockedBy": ["loop-4b"]
+      "blockedBy": ["plan-word-geometry-is-a-second-corpus", "loop-7"],
+      "note": "loop-4b came and settled the half that was about vendoring; what it did not do is give the other half what it was waiting for. The word-granular items said 'after 4b' and 4b's answer is that the adopted corpus has no word geometry at all, so they now wait on plan-word-geometry-is-a-second-corpus rather than on a loop. The hafiz sign-off on the tajweed skin waits on loop-7. Re-pointed rather than closed: the blockers moved, the item did not."
     },
     {
       "id": "plan-screen-reader-pass",

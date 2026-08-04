@@ -154,10 +154,10 @@ export function PageSpread({
         </div>
       );
     }
-    // A facing leaf this build holds. Unreachable with today's three vendored
-    // pages and kept honest by a fixture manifest in the component test rather
-    // than by hope — a branch that waits for Loop 4b to be exercised is a branch
-    // Loop 4b discovers on the day it vendors 601 pages.
+    // A facing leaf this build holds — every leaf, since Loop 4b. It was
+    // unreachable for six loops and kept honest by a fixture manifest in the
+    // component test rather than by hope, which is why the day 601 pages
+    // arrived was not the day this branch was first run.
     const facing = available.includes(leafPage) ? renderFacing?.(leafPage) : null;
     if (facing) {
       return (

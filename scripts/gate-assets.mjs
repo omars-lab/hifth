@@ -18,14 +18,17 @@
  * A jump there means the ETL started emitting something new, which is a thing to
  * see on the commit that does it.
  *
- * `pages` is the one that grows, from 3 today to 604, so a total ceiling would be
- * useless in the specific way that matters: it would have to be raised by the
- * very change it exists to watch, and raising it would be indistinguishable from
- * noticing. The invariant that survives vendoring is **per-page weight**, so that
- * is what is gated — a per-file ceiling, plus the whole-mus'haf figure projected
- * from today's mean and gated against where "this does not fit on a phone over a
- * hotel wifi" begins. Today's three pages are therefore already speaking about
- * Loop 4b's 604, which is the point of measuring before rather than after.
+ * `pages` is the one that grows — it went from 3 to 604 in Loop 4b and grows
+ * again with the next edition — so a total ceiling would be useless in the
+ * specific way that matters: it would have to be raised by the very change it
+ * exists to watch, and raising it would be indistinguishable from noticing. The
+ * invariant that survives vendoring is **per-page weight**, so that is what is
+ * gated — a per-file ceiling, plus the whole-mus'haf figure projected from the
+ * mean and gated against where "this does not fit on a phone over a hotel wifi"
+ * begins. Written against three pages and already speaking about 604, which is
+ * the point of measuring before rather than after: when the 601 arrived the gate
+ * had an opinion about them already, and the projection it had been printing all
+ * along came in 15% high (`docs/backlog.md` ⑥).
  *
  * `manifest.json` is the one file fetched **whole** before anything can be drawn,
  * so its ceiling is about latency, not bytes. When this gate was written it

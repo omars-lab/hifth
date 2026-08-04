@@ -85,8 +85,11 @@ carries the inventory line in the spirit of the page bar's «المتوفّر ٣
 counted in whatever unit is on screen.
 
 This follows `PageSlider`'s precedent exactly: the track spans the **print** (604),
-the ticks and count show the **inventory** (3), and it announces out loud when the
-two differ. The gap is a limitation; saying so is what keeps it from being a lie.
+the inventory runs and the count show what the build **holds** — three when this was
+written, 604 since Loop 4b — and it announces out loud when the two differ. The gap
+is a limitation; saying so is what keeps it from being a lie. Note what did *not*
+happen when the two numbers met: the count stayed. It is not a warning that expires,
+it is the surface saying what is behind it.
 
 ### ④ Not every selection is a look
 
@@ -225,12 +228,16 @@ makes this a `docs/validation/ledger.json` candidate rather than something to se
 The bands decide what "cold" means, and a threshold chosen by whoever wrote the renderer is
 a claim about someone else's revision habit.
 
-### ② What the picture should do when tapped · **blocked**
+### ② What the picture should do when tapped · **open**
 
 Navigating to a division's first page is the obvious move and is not yet built; with 601 of
 604 pages absent it would fail more often than it succeeded. Waits for Loop 4b — not because
 the interaction is hard, but because an affordance that usually refuses teaches a reader not
 to try it.
+
+**Loop 4b vendored the 601, so the reason to wait is gone.** Every division's first page is in
+the build, so the tap has a destination whichever cell it lands on, and what is left is the
+design choice — which page, and what the announcer says — rather than a hole to route around.
 
 ### ③ Multi-edition records · **fixed**
 
