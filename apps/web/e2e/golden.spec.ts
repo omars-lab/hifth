@@ -105,6 +105,41 @@ const SHOTS = [
  */
 const MARQUEES = [{ page: 7, from: "#verse-46", to: "#verse-47" }] as const;
 
+/**
+ * Word runs to photograph (word-C, PLAN 13).
+ *
+ * This is the one paint in the app that is *the same ink laid down twice*. A
+ * word band is drawn with the `"sel"` style, in its own `word` group, on top of
+ * an ayah wash that is still lit underneath — and `mix-blend-mode: multiply` is
+ * what turns that overlap into a darker, readable emphasis instead of a second
+ * opaque slab hiding the first. Every DOM assertion in `word.spec.ts` passes
+ * identically in the world where the blend is wrong: same `line` elements, same
+ * `hl hl-sel hl-ink` classes, same `--hl-len`. Only a picture can tell whether
+ * the reader can still see which words they picked.
+ *
+ * It is also the only shot here whose frame is a *gesture's* result rather than
+ * a link's, so unlike the marquee it is taken after the release: a settled
+ * state, which is what the reader is left looking at.
+ *
+ * `sweep` is how far the finger travels, in CSS px, always leftwards: Arabic
+ * runs right to left, so the words *after* the one under the finger are to its
+ * left. 200 px of a 390 px window is a run long enough to read as a phrase and
+ * short enough to leave the line's ends visible on either side of it.
+ */
+const WORDS = [{ page: 7, link: "2:39", sweep: 200 }] as const;
+
+/**
+ * Clears @use-gesture's drag threshold and nothing else.
+ *
+ * The ladder is consulted from the drag handler, so a press that never moves is
+ * never classified — and `filterTaps: true` (PageStage) gives drag a 3 px
+ * threshold, so a 1 px nudge produces no frame to classify with. At this stage's
+ * scale (~345 viewBox units across 390 CSS px) 6 px is about 5 units, well
+ * inside one word, so the hold still lands on the word it was aimed at.
+ * `word.spec.ts` carries the same constant for the same reason.
+ */
+const NUDGE_PX = 6;
+
 /** The visible page's SVG — the only host not `display: none` (PageStage). */
 function stage(page: Page, pageNo: number): Locator {
   return page.locator(`svg[aria-labelledby="page-label-${pageNo}"]:visible`);
@@ -275,6 +310,77 @@ for (const skin of SKINS) {
           mask: chrome(page),
         });
         await page.mouse.up();
+      });
+    }
+
+    for (const w of WORDS) {
+      test(`page ${w.page} · word`, async ({ page }) => {
+        // The link does the selecting, so the gesture under test is only the
+        // descent: a hold that begins *inside* an ayah that is already lit.
+        const host = await open(page, withSkin(w.link, skin.param), w.page);
+        await expect(page.locator("#hifth-overlay [data-hl-group='selection']")).not.toHaveCount(0);
+
+        // Aim with the ayah's own paint, not with its bounding box.
+        //
+        // `e2e/ayah.ts` explains why the box is the wrong target for a *tap* —
+        // an ayah that wraps is two disjoint slabs and the box's centre falls in
+        // the gap. A drag has a second requirement the tap does not: it needs
+        // *room*, in a known direction, inside the frame. The selection is
+        // already drawn as one band per line of print, so the widest band is a
+        // whole line of this ayah with its two ends known — the one measurement
+        // that answers both questions at once.
+        //
+        // Aiming by box here is not a hypothetical mistake: it put the press at
+        // x ≈ 12 on a 390 px viewport, and the run then grew leftwards off the
+        // edge of the window. Everything asserted still passed; the picture was
+        // 15 px of ink in the corner.
+        const line = await page.evaluate(() => {
+          const rects = [
+            ...document.querySelectorAll("#hifth-overlay [data-hl-group='selection']"),
+          ].map((el) => el.getBoundingClientRect());
+          const widest = rects.sort((a, b) => b.width - a.width)[0];
+          if (!widest) throw new Error("the selection is not painted");
+          return { x: widest.x, y: widest.y, width: widest.width };
+        });
+        const view = page.viewportSize()!;
+        // The band overhangs the window on both sides (the sheet is wider than
+        // the phone), so clamp to what a finger could actually touch.
+        const startX = Math.min(line.x + line.width - 30, view.width - 40);
+        const endX = Math.max(line.x + 20, startX - w.sweep);
+        expect(startX - endX, "the sweep has room inside the window").toBeGreaterThan(80);
+
+        await page.mouse.move(startX, line.y);
+        await page.mouse.down();
+        await page.waitForTimeout(550); // past LONG_PRESS_MS (350 in @hifth/core)
+        await page.mouse.move(startX - NUDGE_PX, line.y);
+        await page.mouse.move(endX, line.y, { steps: 10 });
+
+        // The first band costs a network round trip — the page's word shard is
+        // ~3.6 KB and deliberately not precached — so "the drag finished" is not
+        // "the ink is down". Measured in painted CSS pixels rather than by
+        // counting bands, because that is the quantity the picture is of: a run
+        // that exists but is a hairline, or that grew off the edge of the frame,
+        // is a baseline of nothing.
+        await expect
+          .poll(async () =>
+            page.evaluate(() => {
+              const rects = [
+                ...document.querySelectorAll("#hifth-overlay [data-hl-group='word']"),
+              ].map((el) => el.getBoundingClientRect());
+              return rects.reduce((wide, r) => Math.max(wide, r.width), 0);
+            }),
+          )
+          .toBeGreaterThan(80);
+
+        // Released, then settled: this shot is the state the reader is left in,
+        // not a frame mid-gesture. The ayah wash must still be under the words.
+        await page.mouse.up();
+        await settle(host);
+        await expect(page.locator("#hifth-overlay [data-hl-group='selection']")).not.toHaveCount(0);
+
+        await expect(host).toHaveScreenshot(`p${w.page}-word-${skin.id}.png`, {
+          mask: chrome(page),
+        });
       });
     }
   });

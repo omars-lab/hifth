@@ -418,6 +418,51 @@ describe("Highlighter · a drag release is not a tap (Loop 5)", () => {
     expect(cb).toHaveBeenCalledTimes(1);
     expect(cb).toHaveBeenCalledWith("quran/hafs-kfqc/2:42", "ayah");
   });
+
+  /*
+   * `consumePress` — the strokes travel cannot see (word-C).
+   *
+   * Everything above measures the finger. A long-press that drops into words is
+   * the case where that measurement is exactly backwards: the gesture's defining
+   * feature is that the finger *stayed*, so it releases well inside the slop and
+   * reads as a second tap on the ayah already selected — which the app takes as
+   * "dismiss". The reader would lose the selection they were refining, and the
+   * word run with it, on every hold that ended where it began.
+   */
+  it("does not select when the ladder has already spoken for the press", () => {
+    const cb = vi.fn();
+    hl.onSelect(cb);
+    const poly = svg.querySelector("#verse-2")!;
+    press(poly, "pointerdown", 100, 100);
+    hl.consumePress(); // the stage: "this one latched into a word run"
+    press(poly, "pointerup", 100 + 2, 100); // a hold, released where it began
+    expect(cb).not.toHaveBeenCalled();
+  });
+
+  it("spends only the press it was called for", () => {
+    const cb = vi.fn();
+    hl.onSelect(cb);
+    const poly = svg.querySelector("#verse-2")!;
+    press(poly, "pointerdown", 100, 100);
+    hl.consumePress();
+    press(poly, "pointerup", 100, 100);
+
+    // The next press is a fresh one. Without the reset on `pointerdown`, one
+    // word run would mute every tap that followed it.
+    press(poly, "pointerdown", 100, 100);
+    press(poly, "pointerup", 100, 100);
+    expect(cb).toHaveBeenCalledTimes(1);
+    expect(cb).toHaveBeenCalledWith("quran/hafs-kfqc/2:42", "ayah");
+  });
+
+  it("leaves pressedKey standing, because it answers a different question", () => {
+    const poly = svg.querySelector("#verse-2")!;
+    press(poly, "pointerdown", 100, 100);
+    hl.consumePress();
+    // Where the stroke began stays true after the stroke is spoken for — this
+    // is read every frame of the drag that follows (`PointerSample.insideSelection`).
+    expect(hl.pressedKey).toBe("quran/hafs-kfqc/2:42");
+  });
 });
 
 /**
