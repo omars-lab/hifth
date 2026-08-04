@@ -418,10 +418,15 @@ test.describe("Hifth · a pinned juz", () => {
 
     await pinJuzHere(page);
 
-    expect(await cachedIn(page, PAGE_15_SVG)).toContain(PACK_CACHE);
-    // …and in the pack *only*, so a green run below cannot be the browsing cache
-    // quietly covering for us. See `dropOutsidePack`: this is not a contrivance,
-    // it is where a pinned juz stands after any real session of reading.
+    // In the pack, and — backlog ⑮ — in the browsing cache too, because the
+    // worker sees the pin's fetches as ordinary page requests. Asserted as an
+    // exact pair rather than waved at with `toContain`, so this line is the
+    // tripwire on ⑮: the day the double-write stops, whether by a fix here or
+    // by a browser that stops routing it, this fails and names the entry.
+    expect((await cachedIn(page, PAGE_15_SVG)).sort()).toEqual([PACK_CACHE, "hifth-pages"].sort());
+    // …and now in the pack *only*, so a green run below cannot be the browsing
+    // cache quietly covering for us. See `dropOutsidePack`: this is not a
+    // contrivance, it is where a pinned juz stands after any real reading.
     await dropOutsidePack(page, PAGE_15_SVG);
     expect(await cachedIn(page, PAGE_15_SVG)).toEqual([PACK_CACHE]);
 
