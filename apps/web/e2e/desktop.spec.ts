@@ -732,3 +732,83 @@ test.describe("Hifth · the wheel", () => {
     await expect(page.locator(NUM)).toHaveText("7");
   });
 });
+
+/*
+ * The book closes above fit — `desktop.md` §8 ②.
+ *
+ * A spread is an offer of *more of the book at once*, and zooming is the reader
+ * declining it in favour of one page. So past fit the facing leaf goes to zero
+ * and the live one takes the desk. Only reachable here: below the breakpoint
+ * there is one leaf and nothing to close.
+ *
+ * Three claims, and the third is the one that is easy to get wrong. That the
+ * book closes is a data attribute. That it opens again is the flip in the other
+ * direction, which a `>` on a tweened scale gets wrong at the last frame. That
+ * the page inside is *still bound by the book's height* is the geometry: the
+ * leaf drops its aspect box, so a page that took its width from the box would
+ * stretch to the width of a desk and be 2233 px tall behind a clip.
+ */
+test.describe("Hifth · the book closes above fit", () => {
+  const soloOf = (page: Page): Promise<string | null> => book(page).getAttribute("data-solo");
+
+  /** ctrl+wheel `notches` over the middle of the live leaf. Negative is closer. */
+  async function zoom(page: Page, notches: number): Promise<void> {
+    const leaf = await boxOf(pageSvg(page, 7));
+    await page.mouse.move(leaf.x + leaf.width / 2, leaf.y + leaf.height / 2);
+    await page.keyboard.down("Control");
+    for (let i = 0; i < Math.abs(notches); i += 1) {
+      await page.mouse.wheel(0, notches > 0 ? -100 : 100);
+    }
+    await page.keyboard.up("Control");
+  }
+
+  test("a zoom past fit leaves one leaf on the desk, and a zoom back reopens", async ({ page }) => {
+    await page.goto("/#/hafs-kfqc/p7");
+    await expect(pageSvg(page, 7)).toBeVisible({ timeout: 20_000 });
+
+    // At rest the book is open and both pages are readable.
+    expect(await soloOf(page)).toBeNull();
+    await expect(pageSvg(page, 8)).toBeVisible();
+    const open = await boxOf(pageSvg(page, 7));
+
+    await zoom(page, 2);
+    await expect.poll(() => soloOf(page)).toBe("true");
+
+    // Gone from the eye *and* from the reading order. A zero-width leaf a screen
+    // reader still walks into is a page the reader was told is not on screen,
+    // read out anyway.
+    await expect(pageSvg(page, 8)).toBeHidden();
+    await expect(book(page).locator('[data-live="false"]')).toHaveAttribute("aria-hidden", "true");
+
+    // The gain, and it is the viewport rather than the page: the live leaf now
+    // has the whole book to be seen through instead of half of it.
+    const leafBox = await boxOf(book(page).locator('[data-live="true"]'));
+    const bookBox = await boxOf(book(page));
+    expect(leafBox.width, "the live leaf takes the desk").toBeGreaterThan(bookBox.width * 0.9);
+
+    // …and the page inside is still the page. 1.2² ≈ 1.44 of what it was, not
+    // the width of the desk. The tolerance is loose because the exact zoom is a
+    // tween's business; what is being ruled out is a factor of three.
+    const zoomed = await boxOf(pageSvg(page, 7));
+    expect(zoomed.width).toBeGreaterThan(open.width * 1.3);
+    expect(zoomed.width, "the page stretched to the desk").toBeLessThan(open.width * 1.6);
+
+    // Back to fit, and the book opens. Not a `>` on the scale: a landing settles
+    // through a RAF tween and its last frames arrive at 1.0000003, so a bare
+    // comparison would leave the book shut on a reader who is done zooming.
+    await zoom(page, -2);
+    await expect.poll(() => soloOf(page)).toBeNull();
+    await expect(pageSvg(page, 8)).toBeVisible();
+  });
+
+  test("a hop link opens on the leaf it landed in", async ({ page }) => {
+    // No gesture involved. A shared ayah link lands at DEFAULT_HOP_ZOOM, which
+    // is past fit — and before this the facing leaf sat beside it at 1.0, so the
+    // two pages were at different scales and a selection band that ran to the
+    // edge of the page was cut in half by the gutter.
+    await page.goto("/#/hafs-kfqc/2:48");
+    await expect(pageSvg(page, 7)).toBeVisible({ timeout: 20_000 });
+    await expect.poll(() => soloOf(page)).toBe("true");
+    await expect(pageSvg(page, 8)).toBeHidden();
+  });
+});
