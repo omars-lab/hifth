@@ -396,6 +396,40 @@ numbers to reach for instead of a feeling: **packed history past ~100 MB**, or a
 past ~2 minutes on the connection someone actually contributes from. Until one of those, the
 92 MB is the price of being able to prove what we ship.
 
+### ⑮ Pinning a juz writes every file twice · **confirmed**
+
+Found while writing the pack e2e (6b-D), which is the only place it is visible: the assertion
+"page 15 is now in `hifth-pack-v1` and nowhere else" came back with `hifth-pages` in the list
+too.
+
+`pinPack` ([`packs.ts`](../apps/web/src/packs.ts)) fetches each URL with an ordinary `fetch`
+from the page. The service worker sees an ordinary page request and its `hifth-pages`
+CacheFirst route stores the response as well, so a 21-page juz lands twice. Two costs, both
+measured in the direction that matters on a phone:
+
+- **The bytes are paid twice** — juz 1's ~3.1 MB becomes ~6.2 MB until the LRU works the
+  duplicates back out. The reader was shown one number in the offer.
+- **It evicts the reader's own trail.** `hifth-pages` is capped at 32 entries (backlog ③'s
+  neighbour, and the reason `PACK_CACHE` exists at all). Pinning a juz pushes 21 of those 32
+  out — so the act of *keeping* a juz for later throws away most of what the reader was
+  reading last week.
+
+Not a correctness bug, and that is worth stating plainly: `packedFetch` reads the pack first,
+so nothing serves stale or missing bytes, and every 6b test passes with or without this. It is
+waste plus a surprise, and the surprise is the part that could reach a reader.
+
+Two candidate fixes, neither obviously right, which is why this is an entry and not a patch.
+Pin through `fetch(url, { cache: "reload" })` and have the SW's route decline requests it can
+see are a pin — a header or a URL marker, both of which put pack knowledge into the worker.
+Or let the double-write stand and have `unpinPack` sweep the runtime caches too, which is
+narrower but only cleans up after the fact. **The trigger is a second pinned juz**: one juz of
+duplicate is 3.1 MB and annoying, but a reader who pins three has spent ~9 MB on copies and
+has no browsing cache left at all.
+
+Tested around, deliberately: `dropOutsidePack` in `e2e/offline.spec.ts` deletes the outside
+copy before the offline assertion, so the pack has to answer. That helper is where this entry
+will be found by whoever fixes it.
+
 ---
 
 ## 4. Prefetch

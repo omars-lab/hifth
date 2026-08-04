@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" data-ledger-hash="2030f76d2a52">
+<html lang="en" data-ledger-hash="024c9eb7a7ef">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -127,7 +127,7 @@ li.struck .expect::before { content: "machine "; color: var(--green); }
   <p class="rule">Every result here must tighten something automated — a threshold, a
   fixture, a gate. That is what <b>tunes</b> is for at the foot of each card. A verdict
   that tunes nothing has to be bought again by hand, forever.</p>
-  <p class="src">Generated from <code>docs/validation/ledger.json</code> · <code>2030f76d2a52</code>
+  <p class="src">Generated from <code>docs/validation/ledger.json</code> · <code>024c9eb7a7ef</code>
   · never edit this file — run <code>make guide</code></p>
 </header>
 
@@ -513,7 +513,7 @@ li.struck .expect::before { content: "machine "; color: var(--green); }
 </article>
 <article class="card" id="offline-survival-8-day">
   <div class="head">
-    <span class="badge wait">blocked</span>
+    <span class="badge">outstanding</span>
     <h2>8+ day offline survival, installed vs browser tab</h2>
     <p class="id"><code>offline-survival-8-day</code> · blocks <b>loop-6b</b></p>
   </div>
@@ -524,7 +524,7 @@ li.struck .expect::before { content: "machine "; color: var(--green); }
   
   <section class="block">
     <h3>What you need</h3>
-    <ul class="bullets"><li><b>Not runnable yet.</b> Pin-a-juz ships in Loop 6b; today there is nothing to pin. What exists now — visited pages surviving a reload offline, and the app recovering from an eviction — is already asserted in apps/web/e2e/offline.spec.ts. The steps below are written so that when 6b lands, the only cost left is the waiting.</li><li><b>What the eight days no longer have to find.</b> Research ④ replaced the *eviction* half of this check with <code>Storage.clearDataForOrigin</code> over CDP, which takes the origin's caches out from under a live page exactly as a sweep does. That found two real defects (the precache never rebuilt after eviction, so one sweep ended offline support permanently; and a page that failed to fetch left the chrome claiming a page the stage was not showing). Both are fixed and asserted in the <code>Hifth · eviction</code> describe. So this check is now only about the thing no harness can supply: whether iOS actually sweeps an uninstalled origin at ~7 days and spares an installed one.</li><li>An iPhone (the ITP asymmetry is Safari's), and a deployed build.</li><li>Eight days of ordinary phone use. The clock counts days of *browser use*, not calendar days — a phone left in a drawer does not run this experiment.</li></ul>
+    <ul class="bullets"><li><b>Runnable as of Loop 6b.</b> The button exists: open the page chip in the header, the sheet «<bdi>ما فتحتَه من المصحف</bdi>», the «<bdi>جزء</bdi>» scope, then «<bdi>احفظ الجزء ١ هنا</bdi>» at the top. Pin <b>juz 1</b> in both buckets — it is what the e2e pins, so a discrepancy is comparable against something, and it is ~2.9 MB, which is small enough to re-pin over a masjid connection if the day-8 answer is bad. What is already asserted without a phone — visited pages surviving a reload offline, the app recovering from an eviction, and a pinned juz opening a never-visited page with the radio off — is in apps/web/e2e/offline.spec.ts. All that is left here is the waiting.</li><li><b>What the eight days no longer have to find.</b> Research ④ replaced the *eviction* half of this check with <code>Storage.clearDataForOrigin</code> over CDP, which takes the origin's caches out from under a live page exactly as a sweep does. That found two real defects (the precache never rebuilt after eviction, so one sweep ended offline support permanently; and a page that failed to fetch left the chrome claiming a page the stage was not showing). Both are fixed and asserted in the <code>Hifth · eviction</code> describe. So this check is now only about the thing no harness can supply: whether iOS actually sweeps an uninstalled origin at ~7 days and spares an installed one.</li><li>An iPhone (the ITP asymmetry is Safari's), and a deployed build.</li><li>Eight days of ordinary phone use. The clock counts days of *browser use*, not calendar days — a phone left in a drawer does not run this experiment.</li></ul>
   </section>
   
 
@@ -532,8 +532,8 @@ li.struck .expect::before { content: "machine "; color: var(--green); }
     <h3>Steps — on the phone</h3>
     <ol class="steps">
       <li>
-        <label class="do"><input type="checkbox" data-step="offline-survival-8-day:0"><span>On the phone, open the deployed site in a Safari tab and pin a juz.</span></label>
-        <p class="expect">The pack downloads and the juz is marked available offline.</p>
+        <label class="do"><input type="checkbox" data-step="offline-survival-8-day:0"><span>On the phone, open the deployed site in a Safari tab, tap the page chip in the header, choose «<bdi>جزء</bdi>», and press «<bdi>احفظ الجزء ١ هنا</bdi>».</span></label>
+        <p class="expect">The button becomes a count («<bdi>جارٍ حفظ الجزء ١</bdi> — <bdi>ن من ٢٤</bdi>») with «<bdi>إيقاف</bdi>» beside it, and settles into a row reading «<bdi>الجزء ١</bdi> · <bdi>٣٫١ م</bdi>.<bdi>ب</bdi>» or thereabouts — the offer disappears, because the juz is now kept. If the row instead says «<bdi>ناقص</bdi>» the pin did not finish; press «<bdi>احفظه من جديد</bdi>» before starting the clock.</p>
         
         <p class="why">The tab is the case we expect to lose. Proving it worked on day 0 is what makes a day-8 failure evidence rather than a guess.</p>
       </li>
@@ -551,7 +551,7 @@ li.struck .expect::before { content: "machine "; color: var(--green); }
       </li>
       <li>
         <label class="do"><input type="checkbox" data-step="offline-survival-8-day:3"><span>On day 8 or later, turn on airplane mode and open the Safari tab: try to revise the pinned juz — open pages, hop, turn pages.</span></label>
-        <p class="expect">The tab may have lost everything (ITP clears script storage for origins untouched for 7 days of browser use). If it has, the app should notice and offer to re-pin rather than showing broken pages.</p>
+        <p class="expect">The tab may have lost everything (ITP clears script storage for origins untouched for 7 days of browser use). If it has, the notice «<bdi>الصفحات التي حفظتها لم تعد في هذا الجهاز</bdi>» should be on screen with «<bdi>اعرض المحفوظ</bdi>» beside it, and under «<bdi>المحفوظ في هذا الجهاز</bdi>» the row for juz 1 should read «<bdi>لم يعد في هذا الجهاز</bdi>» or «<bdi>ناقص</bdi>» — not a broken page, and not a row still claiming megabytes it no longer has.</p>
         
         <p class="why">Airplane mode is what makes this a storage test rather than a cache test: whatever still works is genuinely resident on the device.</p>
       </li>

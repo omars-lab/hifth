@@ -444,7 +444,27 @@
         {
           "file": "apps/web/src/components/OfflineNotice.tsx",
           "symbol": "OfflineNotice",
-          "note": "What the user is told about their storage — and the only place the install prompt is offered. Must not stack with the coach strip; must not move into the header, which has no width for it."
+          "note": "What the user is told about their storage — and the only place the install prompt is offered. Must not stack with the coach strip; must not move into the header, which has no width for it. Loop 6b gave it a third thing to say: a pinned juz that a sweep took, which is the one storage message that arrives with a repair rather than a warning."
+        },
+        {
+          "file": "packages/core/src/packs.ts",
+          "symbol": "planPack",
+          "note": "Loop 6b: which files a pinned juz is made of. Read off the manifest's pages, never off JUZ_STARTS — the table says where a juz begins, the manifest says which paper exists, and a plan built from the first would promise pages the build has no SVG for. It counts those absent ayahs instead of hiding them, which is why the offer can say so before the reader spends the bytes."
+        },
+        {
+          "file": "apps/web/src/packs.ts",
+          "symbol": "PACK_CACHE",
+          "note": "A pack lives in its own Cache Storage bucket with no expiration plugin, and assets.ts reads it before the network. Warming the service worker's hifth-pages instead would have been simpler and is wrong: that cache is a 32-entry LRU sized for a browsing trail, so pinning a juz and then reading twelve pages evicts a third of what was pinned, and nobody finds out until the plane. Bytes in Cache Storage, the claim in IndexedDB — the split is what makes a sweep detectable rather than merely silent."
+        },
+        {
+          "file": "apps/web/src/components/PackShelf.tsx",
+          "symbol": "PackShelf",
+          "note": "The pin control and the shelf of what is kept, inside the revision map at juz scope — the map is already the picture of the thirty, and the header has no room for a sixth button. The states are named in words, in a list, not painted as a dot on a cell: the cells already carry warmth and absence, and the meaning that would be misread is exactly the one that matters, a swept pack looking pinned."
+        },
+        {
+          "file": "apps/web/e2e/offline.spec.ts",
+          "symbol": "dropOutsidePack",
+          "note": "Pinning writes every file twice — pinPack fetches through the page, so the service worker's CacheFirst route caches the same bytes — which means an offline test can pass with the pack deleted. Deleting the outside copy is not a workaround: it is the state a pinned juz is genuinely in once ordinary reading pushes it out of that LRU, and the only state in which the assertion means what it says."
         }
       ],
       "extend": [
@@ -452,6 +472,7 @@
         "Adding to the precache costs install-time bytes on a phone. Check the entry count and size the build prints.",
         "Test offline behaviour in an e2e that actually goes offline, over a secure context. A unit test cannot see a service worker.",
         "Eviction is a separate case from offline and has its own describe in apps/web/e2e/offline.spec.ts: CDP Storage.clearDataForOrigin with storageTypes 'cache_storage' takes the caches and leaves the worker registered, which is the state a real ITP sweep leaves behind.",
+        "Anything the reader chose to keep does not go in a runtime cache. It goes in the pack cache, and something has to be able to notice it is gone — a store with no register against it can only ever report success.",
         "Anything that can fail to load a page must say so — see PageStage's error banner. A silent failure leaves the previous page on the stage while the chrome has already announced the new number."
       ],
       "gates": ["make e2e", "make lighthouse"],
