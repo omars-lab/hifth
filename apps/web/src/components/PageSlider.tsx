@@ -1,13 +1,15 @@
-import { useCallback, useEffect, useRef, useState } from "react";
-import { nearestPage, pageFraction } from "@hifth/core";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { nearestPage, pageFraction, pageRuns } from "@hifth/core";
 import { useT } from "../i18n";
 import styles from "./PageSlider.module.css";
 
 interface PageSliderProps {
   /**
    * How long the book is — the printed edition's page count, not the number of
-   * pages this build vendored. A slider that spans only what is vendored tells
-   * a hafiz the mus'haf is three pages long.
+   * pages this build vendored. A slider that spans only what is vendored told a
+   * hafiz, for the six loops before 4b, that the mus'haf was three pages long.
+   * The two numbers agree for `hafs-kfqc` now and this is still two parameters,
+   * because the next edition to be vendored arrives partial the way this one did.
    */
   total: number;
   /** The pages this build actually has, ascending. Empty until the manifest lands. */
@@ -27,16 +29,23 @@ interface PageSliderProps {
  * PageSlider — the page bar: scrub the whole mus'haf, with a page turn on each
  * edge.
  *
- * ## Why the track is 604 long when we hold three pages
+ * ## Why the track is the print and not the inventory
  *
  * The two numbers here are different things and the bar shows both. The track
  * spans the *print* — 604 pages, the length of the book in the reader's hands —
  * because a control that spanned the vendored inventory would quietly redefine
- * the mus'haf as whatever happens to be in `public/assets` this week. The ticks
- * and the count beneath show the *inventory*, and releasing the thumb in a gap
- * lands on the nearest page we have and **announces that it did** (`nearestPageN`).
- * Silently landing somewhere else is the failure mode this bar is built around;
- * Loop 4b closes the gap, and until it does the bar says what it is.
+ * the mus'haf as whatever happens to be in `public/assets` this week. The runs
+ * on the track and the count beneath show the *inventory*, and releasing the
+ * thumb in a gap lands on the nearest page we have and **announces that it did**
+ * (`nearestPageN`). Silently landing somewhere else is the failure mode this bar
+ * is built around.
+ *
+ * This bar was designed against three vendored pages of 604, where the gap was
+ * everywhere and the snap fired on nearly every drag. Loop 4b filled it in, and
+ * the honest reading is not that the snap is over but that it became the
+ * exception it always should have been — reachable through an edition vendored
+ * partially, and through an eviction that takes a page back. Both parameters
+ * stayed; what changed is which value they usually hold.
  *
  * ## Direction
  *
@@ -58,10 +67,13 @@ interface PageSliderProps {
  * ## The arrow keys are ours
  *
  * A range input's own arrows step by `step`, which here is one page of a
- * 604-page track — so inside a three-page inventory every keypress would snap
+ * 604-page track — so inside a sparse inventory every keypress would snap
  * straight back to where it started. We take the arrows and step *between
- * vendored pages* instead. `appKeyAction` stands down on its own while this
- * input has focus (rule 2: focus in a text field), so nothing double-steps.
+ * vendored pages* instead. That is now ±1 for `hafs-kfqc` and identical to what
+ * the input would have done by itself, which is exactly why it is worth keeping:
+ * the two agree by coincidence of the inventory, not by construction.
+ * `appKeyAction` stands down on its own while this input has focus (rule 2:
+ * focus in a text field), so nothing double-steps.
  */
 export function PageSlider({
   total,
@@ -78,6 +90,10 @@ export function PageSlider({
 
   const empty = available.length === 0;
   const value = scrub ?? page;
+  // Memoised on the inventory, not recomputed per scrub value: `scrub` changes
+  // for every value the thumb passes over, and the inventory does not change
+  // during a drag at all.
+  const runs = useMemo(() => pageRuns(available), [available]);
   const landing = scrub === null ? null : nearestPage(available, scrub);
 
   const commit = useCallback(
@@ -180,21 +196,42 @@ export function PageSlider({
           onBlur={() => setScrub(null)}
         />
 
-        {/* The inventory, drawn on the track. Each tick sits at its page's
-            fraction of the book, offset by half the thumb so it lines up with
-            the thumb's centre rather than with the box's edge. `inset-inline-*`
-            keeps it correct without knowing which way the track runs. */}
-        <div className={styles.ticks} aria-hidden="true">
-          {available.map((p) => (
+        {/* The inventory, drawn on the track — as runs, not as pages. Each run
+            spans from its first held page's fraction of the book to its last,
+            offset by half the thumb so it lines up with the thumb's centre
+            rather than with the box's edge. `inset-inline-*` keeps it correct
+            without knowing which way the track runs.
+
+            One node per *gap*, which is what the picture is about. Drawing one
+            per page was right at three of 604 and became a lie at 604 of 604:
+            the marks are half a pixel apart there and two pixels wide, so they
+            overlapped into a second track that said nothing, while React
+            reconciled 604 spans on every value a dragged thumb passed over —
+            in the one interaction that is a continuous drag, on the component
+            whose whole design is "do not pay per value of a drag". */}
+        <div className={styles.runs} aria-hidden="true">
+          {runs.map((run) => (
             <span
-              key={p}
-              className={styles.tick}
-              data-current={p === page || undefined}
+              key={run.from}
+              className={styles.run}
+              data-testid="page-run"
               style={{
-                insetInlineStart: `calc(${pageFraction(p, total)} * (100% - var(--thumb)) + var(--thumb) / 2 - 1px)`,
+                insetInlineStart: `calc(${pageFraction(run.from, total)} * (100% - var(--thumb)) + var(--thumb) / 2 - 1px)`,
+                inlineSize: `calc(${pageFraction(run.to, total) - pageFraction(run.from, total)} * (100% - var(--thumb)) + 2px)`,
               }}
             />
           ))}
+          {/* The page on the stage. Its own element, because it is its own
+              fact: the run under it says "these pages are here" and this says
+              "you are on this one", and the two only shared a class while a
+              held page and a single-page run were the same picture. */}
+          <span
+            className={styles.here}
+            data-testid="page-here"
+            style={{
+              insetInlineStart: `calc(${pageFraction(page, total)} * (100% - var(--thumb)) + var(--thumb) / 2 - 1px)`,
+            }}
+          />
         </div>
 
         {scrub !== null && (
@@ -224,9 +261,12 @@ export function PageSlider({
         <span aria-hidden="true">◂</span>
       </button>
 
-      {/* Visible, small, and permanent until Loop 4b: how much of the book is
-          here. It is also the slider's accessible description, so the fact
-          reaches a listener who will never see the ticks. */}
+      {/* Visible, small and permanent: how much of the book is here. It reads
+          «٦٠٤ من ٦٠٤» now, and it stays — it is not a warning that disappears
+          when the news is good, it is the bar saying what is behind it, and the
+          next edition to be vendored will arrive partial (`e2e/pagebar.spec.ts`
+          holds that decision). It is also the slider's accessible description,
+          so the fact reaches a listener who will never see the runs. */}
       <span id="hifth-page-inventory" className={styles.inventory}>
         {t.pagesVendored(available.length, total)}
       </span>

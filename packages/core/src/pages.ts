@@ -8,14 +8,20 @@
  *     the KFGQPC Madani print — and it is a property of the *paper*, not of this
  *     build. It belongs on `EditionMeta`, beside the riwayah.
  *   - **The vendored inventory.** How many of those pages are in `public/assets`
- *     today. Three, until Loop 4b lands.
+ *     today. Three until Loop 4b, all 604 since, and partial again the day a
+ *     second edition starts being vendored.
  *
  * A control that scrubs pages has to show the first and honour the second: a
- * slider spanning only what is vendored tells a hafiz the mus'haf is three pages
- * long, and a slider that spans 604 and lets go on a page we do not have lands
- * on a blank. So the track is the print and the landing is the inventory —
- * `nearestPage` is the seam, and it answers with what it *did*, not with what
- * was asked, so the caller can say so out loud.
+ * slider spanning only what is vendored told a hafiz, for six loops, that the
+ * mus'haf was three pages long, and a slider that spans 604 and lets go on a
+ * page we do not have lands on a blank. So the track is the print and the
+ * landing is the inventory — `nearestPage` is the seam, and it answers with what
+ * it *did*, not with what was asked, so the caller can say so out loud.
+ *
+ * The distinction did not stop mattering when the two numbers met. It stopped
+ * being *visible*, which is the harder condition to keep code honest under:
+ * every function here still takes `available` as a parameter, and the tests
+ * still drive them from inventories that are not the shipped one.
  */
 
 /**
@@ -54,6 +60,54 @@ export function pageFraction(page: number, total: number): number {
   if (total <= 1) return 0;
   const clamped = Math.min(total, Math.max(1, page));
   return (clamped - 1) / (total - 1);
+}
+
+/** A contiguous stretch of vendored pages, inclusive at both ends. */
+export interface PageRun {
+  readonly from: number;
+  readonly to: number;
+}
+
+/**
+ * The vendored inventory as **runs** rather than as pages.
+ *
+ * The page bar draws the inventory on its track, and it used to draw one mark
+ * per page — which was right when the answer was three marks and became wrong on
+ * the day the answer was 604. At 604 marks on a phone-width track the marks are
+ * half a pixel apart and two pixels wide, so they overlap into a solid rail: the
+ * picture stops saying *which pages are here* and starts saying nothing, while
+ * still costing a DOM node per page of the book, reconciled on every value a
+ * dragged thumb passes over.
+ *
+ * Runs are the same fact drawn at the right granularity. A complete edition is
+ * one run and one node; three scattered pages are three runs and three nodes; a
+ * corpus with two holes is three runs. The node count follows the number of
+ * **gaps**, which is what a reader is actually being shown, rather than the
+ * length of the book, which they can already see.
+ *
+ * `available` may arrive in any order and may repeat; the result is ascending,
+ * disjoint, and never adjacent (7,8,9 is one run, not three). An empty inventory
+ * is an empty list — no run, not a zero-width one.
+ */
+export function pageRuns(available: readonly number[]): PageRun[] {
+  if (available.length === 0) return [];
+  const sorted = [...new Set(available)].sort((a, b) => a - b);
+  const runs: PageRun[] = [];
+  let from = sorted[0]!;
+  let previous = from;
+  for (const page of sorted.slice(1)) {
+    // Adjacent pages continue the run; anything else closes it. `> previous + 1`
+    // rather than `!== previous + 1` because duplicates are already gone and a
+    // decrease cannot happen after the sort — but the comparison that survives a
+    // future caller passing something unsorted is the one that reads as a gap.
+    if (page > previous + 1) {
+      runs.push({ from, to: previous });
+      from = page;
+    }
+    previous = page;
+  }
+  runs.push({ from, to: previous });
+  return runs;
 }
 
 /** The two leaves of one open spread. `null` means there is no leaf on that side. */

@@ -772,7 +772,8 @@ This is normally where a design has to argue that the reduced-motion path is "go
 This one does not, and the reason is §2: **the fold's information is also carried at rest.**
 The leaf's rounded side says which half of a spread you are on. The fore-edge stack says
 there is a block of pages under you. The announcer names the landing. The page bar's thumb
-and ticks show the inventory. A reader who never sees a fold has not been told less about
+and its inventory runs show what the build holds. A reader who never sees a fold has not
+been told less about
 adjacency — they have been told it by furniture that does not move, which is what
 `docs/design/revision-record.md` calls a permanent condition belonging in the document rather
 than in a live region.

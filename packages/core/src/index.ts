@@ -240,9 +240,11 @@ export {
 export {
   nearestPage,
   pageFraction,
+  pageRuns,
   spreadOf,
   leafSideOf,
   foldBetween,
+  type PageRun,
   type Spread,
   type LeafSide,
   type Fold,

@@ -642,8 +642,12 @@ Full evidence in `docs/research/2026-07-20-mobile-svg-pwa.md`. The rules:
   **604-page print**, because a control that spanned the vendored inventory would quietly
   redefine the mus'haf as whatever is in `public/assets` this week — and *because* the track
   is longer than the build, letting go in the gap lands on the nearest vendored page and
-  **announces that it did**, above ticks and a permanent "٣ من ٦٠٤" line. Loop 4b closes the
-  gap and that caveat is deleted then, not before. The same failure this codebase has already
+  **announces that it did**, above marks for the stretches it holds and a permanent
+  "٣ من ٦٠٤" line. Loop 4b closed the gap, and the line was **kept** rather than deleted —
+  the sentence this bullet used to end on ("that caveat is deleted then, not before") had the
+  wrong idea of what it is. It is not a warning that expires when the news is good; it is the
+  bar saying what is behind it, and it reads "٦٠٤ من ٦٠٤" now
+  (`apps/web/e2e/pagebar.spec.ts`). The same failure this codebase has already
   paid for twice — a licence summary that over-restricted (follow-up ②), a header claiming a
   page the stage never loaded — is always the same shape: the UI stating something the build
   cannot back. A gap is a to-do; a gap the interface papers over is a lie.
