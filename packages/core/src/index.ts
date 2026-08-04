@@ -35,6 +35,11 @@ export {
 
 export { Resolver, type ResolvedLocation } from "./resolver.js";
 
+// Loop 6b — what a pinned juz is made of. The pack's page list is read off the
+// manifest rather than off JUZ_STARTS, and its shard list follows the pages
+// rather than the juz, so a pack is closed under what it puts on screen.
+export { JUZ_COUNT, juzSpan, juzOfPage, planPack, type PackPlan } from "./packs.js";
+
 // Loop 4b — the manifest's wire form. 604 pages of `AssetManifest` is ~109 KB
 // gzipped fetched before the first paint; the compact form is an ayah→page
 // table, ~1.1 KB, and `expandManifest` rebuilds the rest at load.
