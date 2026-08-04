@@ -55,26 +55,30 @@
  * the question is asked, recorded beside the hashes of the bytes it read, so a
  * rerun against the same pin either reproduces or says loudly that upstream
  * moved. The pin itself is not restated — it is read from
- * `ligature-svg.probe.json`, so there is one pin and not two.
+ * `ligature-svg.probe.json`, so there is one pin and not two. Fetched pages land
+ * in the gitignored `.cache/words/` that `build-words.mjs` also reads, so a
+ * rerun after that build costs nothing and reads the same bytes it shipped.
  *
  * Usage:
  *   node packages/etl/scripts/probe-word-registration.mjs          # the 61 pages
  *   node packages/etl/scripts/probe-word-registration.mjs --all    # all 604
  *   node packages/etl/scripts/probe-word-registration.mjs --write  # record it
  */
-import { createHash } from "node:crypto";
 import { readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+// The geometry, the parsing and the fit moved to lib/ when build-words.mjs
+// needed them: this probe's recorded residual is only evidence about what the
+// builder ships if both run the same arithmetic. See that file's header.
+import { candidatePage, pin } from "./lib/candidate-pages.mjs";
+import { fitFrames, pointInRings, readOurs, readTheirs, WAQF } from "./lib/mushaf-frame.mjs";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const DATA = join(HERE, "..", "data", "pages");
-const PIN = join(DATA, "ligature-svg.probe.json");
 const RESULT = join(DATA, "word-registration.probe.json");
 const PAGES = join(HERE, "..", "..", "..", "apps", "web", "public", "assets", "pages", "hafs-kfqc");
 
-const pin = JSON.parse(readFileSync(PIN, "utf8"));
-const { repo, commit, path } = pin.candidate;
+const { repo, commit } = pin.candidate;
 
 /**
  * The pages worth fetching.
@@ -102,315 +106,31 @@ const all = process.argv.includes("--all");
 const write = process.argv.includes("--write");
 const wanted = all ? Array.from({ length: 604 }, (_, i) => i + 1) : DEFAULT_PAGES;
 
-// ---------------------------------------------------------------- geometry --
-
-const cub = (p0, p1, p2, p3, t) => {
-  const u = 1 - t;
-  return u * u * u * p0 + 3 * u * u * t * p1 + 3 * u * t * t * p2 + t * t * t * p3;
-};
-
-/**
- * Every extreme of one cubic coordinate: the endpoints, plus any turning point
- * strictly inside the segment. Sampling instead would understate a curved
- * word's box, and a word's box is the thing being tested.
- */
-function cubicExtrema(p0, p1, p2, p3) {
-  const out = [p0, p3];
-  const a = -p0 + 3 * p1 - 3 * p2 + p3;
-  const b = 2 * (p0 - 2 * p1 + p2);
-  const c = p1 - p0;
-  const push = (t) => {
-    if (t > 0 && t < 1) out.push(cub(p0, p1, p2, p3, t));
-  };
-  if (Math.abs(a) < 1e-12) {
-    if (Math.abs(b) > 1e-12) push(-c / b);
-  } else {
-    const disc = b * b - 4 * a * c;
-    if (disc >= 0) {
-      const r = Math.sqrt(disc);
-      push((-b + r) / (2 * a));
-      push((-b - r) / (2 * a));
-    }
-  }
-  return out;
-}
-
-const TOKEN = /[MmCcZzLlHhVv]|[-+]?(?:\d*\.\d+|\d+\.?)(?:[eE][-+]?\d+)?/g;
-
-/** Exact bbox of a path. Their glyph outlines use only M, c and z. */
-function pathBBox(d) {
-  const toks = d.match(TOKEN) ?? [];
-  let i = 0;
-  let cx = 0;
-  let cy = 0;
-  let sx = 0;
-  let sy = 0;
-  let cmd = null;
-  let minX = Infinity;
-  let minY = Infinity;
-  let maxX = -Infinity;
-  let maxY = -Infinity;
-  const hit = (x, y) => {
-    if (x < minX) minX = x;
-    if (x > maxX) maxX = x;
-    if (y < minY) minY = y;
-    if (y > maxY) maxY = y;
-  };
-  while (i < toks.length) {
-    if (/[A-Za-z]/.test(toks[i])) {
-      cmd = toks[i++];
-      if (cmd === "Z" || cmd === "z") {
-        cx = sx;
-        cy = sy;
-        continue;
-      }
-    }
-    if (cmd === "M" || cmd === "m") {
-      let x = Number(toks[i++]);
-      let y = Number(toks[i++]);
-      if (cmd === "m") {
-        x += cx;
-        y += cy;
-      }
-      cx = x;
-      cy = y;
-      sx = x;
-      sy = y;
-      hit(x, y);
-      cmd = cmd === "M" ? "L" : "l";
-    } else if (cmd === "C" || cmd === "c") {
-      const v = toks.slice(i, i + 6).map(Number);
-      i += 6;
-      const [x1, y1, x2, y2, x3, y3] =
-        cmd === "c"
-          ? [cx + v[0], cy + v[1], cx + v[2], cy + v[3], cx + v[4], cy + v[5]]
-          : v;
-      for (const x of cubicExtrema(cx, x1, x2, x3)) hit(x, cy);
-      for (const y of cubicExtrema(cy, y1, y2, y3)) hit(cx, y);
-      cx = x3;
-      cy = y3;
-      hit(x3, y3);
-    } else if (cmd === "L" || cmd === "l") {
-      let x = Number(toks[i++]);
-      let y = Number(toks[i++]);
-      if (cmd === "l") {
-        x += cx;
-        y += cy;
-      }
-      cx = x;
-      cy = y;
-      hit(x, y);
-    } else if (cmd === "H" || cmd === "h") {
-      let x = Number(toks[i++]);
-      if (cmd === "h") x += cx;
-      cx = x;
-      hit(cx, cy);
-    } else if (cmd === "V" || cmd === "v") {
-      let y = Number(toks[i++]);
-      if (cmd === "v") y += cy;
-      cy = y;
-      hit(cx, cy);
-    } else {
-      i += 1;
-    }
-  }
-  return [minX, minY, maxX, maxY];
-}
-
-const union = (bs) => [
-  Math.min(...bs.map((b) => b[0])),
-  Math.min(...bs.map((b) => b[1])),
-  Math.max(...bs.map((b) => b[2])),
-  Math.max(...bs.map((b) => b[3])),
-];
-
-/** Our own polygons: `M…h…v…H…Z` runs, each subpath one axis-aligned rect. */
-function rectsOf(d) {
-  const toks = d.match(/[MmZzHhVv]|[-+]?(?:\d*\.\d+|\d+\.?)/g) ?? [];
-  let i = 0;
-  let cx = 0;
-  let cy = 0;
-  let sx = 0;
-  let sy = 0;
-  let cmd = null;
-  let pts = [];
-  const out = [];
-  const close = () => {
-    if (pts.length) {
-      const xs = pts.map((p) => p[0]);
-      const ys = pts.map((p) => p[1]);
-      out.push([Math.min(...xs), Math.min(...ys), Math.max(...xs), Math.max(...ys)]);
-    }
-    pts = [];
-  };
-  while (i < toks.length) {
-    if (/[A-Za-z]/.test(toks[i])) {
-      cmd = toks[i++];
-      if (cmd === "Z" || cmd === "z") {
-        close();
-        cx = sx;
-        cy = sy;
-        continue;
-      }
-    }
-    if (cmd === "M" || cmd === "m") {
-      let x = Number(toks[i++]);
-      let y = Number(toks[i++]);
-      if (cmd === "m") {
-        x += cx;
-        y += cy;
-      }
-      cx = x;
-      cy = y;
-      sx = x;
-      sy = y;
-      pts = [[x, y]];
-    } else if (cmd === "H" || cmd === "h") {
-      let x = Number(toks[i++]);
-      if (cmd === "h") x += cx;
-      cx = x;
-      pts.push([cx, cy]);
-    } else if (cmd === "V" || cmd === "v") {
-      let y = Number(toks[i++]);
-      if (cmd === "v") y += cy;
-      cy = y;
-      pts.push([cx, cy]);
-    } else {
-      i += 1;
-    }
-  }
-  close();
-  return out;
-}
-
-// ------------------------------------------------------------------ parsing --
-
-const attr = (s, name) => {
-  const m = s.match(new RegExp(`${name}="([^"]*)"`));
-  return m ? m[1] : null;
-};
-
-/** Their page: the ayah-end ornaments and every word's exact box. */
-function readTheirs(svg) {
-  const marks = [];
-  const boundary = /<g id="md-(?:line|word|aya-mark|diacritic)-/;
-  for (const m of svg.matchAll(/<g id="md-aya-mark-(\d+)"([^>]*)>/g)) {
-    const rest = svg.slice(m.index + m[0].length);
-    const nxt = rest.match(boundary);
-    const seg = nxt ? rest.slice(0, nxt.index) : rest;
-    const orn = seg.match(/<g id="md-ornament-\d+-\d+">([\s\S]*?)<\/g>/);
-    const ds = [...(orn ? orn[1] : seg).matchAll(/\sd="([^"]*)"/g)].map((x) => x[1]);
-    if (!ds.length) continue;
-    marks.push({
-      surah: Number(attr(m[2], "data-surah")),
-      aya: Number(attr(m[2], "data-aya")),
-      box: union(ds.map(pathBBox)),
-    });
-  }
-  const words = [];
-  const wordBoundary = /<g id="md-(?:line|word|aya-mark)-/;
-  for (const m of svg.matchAll(/<g id="md-word-(\d+)"([^>]*)>/g)) {
-    const rest = svg.slice(m.index + m[0].length);
-    const nxt = rest.match(wordBoundary);
-    const seg = nxt ? rest.slice(0, nxt.index) : rest;
-    const ds = [...seg.matchAll(/\sd="([^"]*)"/g)].map((x) => x[1]);
-    if (!ds.length) continue;
-    words.push({
-      surah: Number(attr(m[2], "data-surah")),
-      aya: Number(attr(m[2], "data-aya")),
-      line: Number(attr(m[2], "data-line-number")),
-      idx: Number(attr(m[2], "data-word-index-in-ayah")),
-      hafs: attr(m[2], "data-hafs") ?? "",
-      box: union(ds.map(pathBBox)),
-    });
-  }
-  return { marks, words };
-}
-
-/** Our page: the ayah-end markers and one rect list per ayah. */
-function readOurs(page) {
-  const svg = readFileSync(join(PAGES, `${page}.svg`), "utf8");
-  const marks = [...svg.matchAll(/<g ayah:x="([\d.]+)" ayah:y="([\d.]+)"/g)].map((m) => [
-    Number(m[1]),
-    Number(m[2]),
-  ]);
-  const verses = new Map();
-  for (const m of svg.matchAll(
-    /<path id="verse-\d+"[^>]*d="([^"]*)"[^>]*ayah="(\d+)"[^>]*surah="(\d+)"/g,
-  )) {
-    const key = `${Number(m[3])}:${Number(m[2])}`;
-    if (!verses.has(key)) verses.set(key, []);
-    verses.get(key).push(...rectsOf(m[1]));
-  }
-  const vb = (svg.match(/viewBox="([^"]*)"/)?.[1] ?? "0 0 345 550").split(/\s+/).map(Number);
-  return { marks, verses, vb };
-}
-
-// -------------------------------------------------------------------- maths --
-
-/**
- * Down the page, then right-to-left within a band. Applied to *both* sides
- * before pairing — see the header; pairing on document order fits a mirror.
- */
-function readingOrder(pts, tol) {
-  const rows = [];
-  for (const p of [...pts].sort((a, b) => a[1] - b[1])) {
-    const last = rows.at(-1);
-    if (last && Math.abs(p[1] - last.y) <= tol) last.row.push(p);
-    else rows.push({ y: p[1], row: [p] });
-  }
-  return rows.flatMap(({ row }) => row.sort((a, b) => b[0] - a[0]));
-}
-
-/** Least squares y = a·x + b, with the residual at every point. */
-function fit(xs, ys) {
-  const n = xs.length;
-  const sx = xs.reduce((t, v) => t + v, 0);
-  const sy = ys.reduce((t, v) => t + v, 0);
-  const sxx = xs.reduce((t, v) => t + v * v, 0);
-  const sxy = xs.reduce((t, v, i) => t + v * ys[i], 0);
-  const a = (n * sxy - sx * sy) / (n * sxx - sx * sx);
-  const b = (sy - a * sx) / n;
-  return { a, b, res: xs.map((x, i) => ys[i] - (a * x + b)) };
-}
-
-const WAQF = new Set([..."ۖۗۘۙۚۛۜ۩۞"]);
-
 function analyse(page, svg) {
   const { marks, words } = readTheirs(svg);
-  const { marks: om, verses, vb } = readOurs(page);
-  const T = readingOrder(
-    marks.map((t) => [(t.box[0] + t.box[2]) / 2, (t.box[1] + t.box[3]) / 2]),
-    8,
-  );
-  const O = readingOrder(om, 11);
-  if (T.length !== O.length || T.length < 3) {
-    throw new Error(`${T.length} of their marks vs ${O.length} of ours`);
-  }
-  const fx = fit(T.map((p) => p[0]), O.map((p) => p[0]));
-  const fy = fit(T.map((p) => p[1]), O.map((p) => p[1]));
-  const residual = Math.max(...[...fx.res, ...fy.res].map(Math.abs));
+  const ours = readOurs(readFileSync(join(PAGES, `${page}.svg`), "utf8"));
+  const T = fitFrames(marks, ours.marks);
 
   const missed = [];
   for (const w of words) {
-    const cx = fx.a * ((w.box[0] + w.box[2]) / 2) + fx.b;
-    const cy = fy.a * ((w.box[1] + w.box[3]) / 2) + fy.b;
-    const rects = verses.get(`${w.surah}:${w.aya}`) ?? [];
-    const inOwn = rects.some((r) => r[0] <= cx && cx <= r[2] && r[1] <= cy && cy <= r[3]);
-    if (!inOwn) {
+    const b = T.apply(w.box);
+    const cx = (b[0] + b[2]) / 2;
+    const cy = (b[1] + b[3]) / 2;
+    const rings = ours.verses.get(`${w.surah}:${w.aya}`) ?? [];
+    if (!pointInRings(rings, cx, cy)) {
       missed.push({ key: `${w.surah}:${w.aya}`, idx: w.idx, line: w.line, hafs: w.hafs });
     }
   }
   const waqf = missed.filter((m) => [...m.hafs].every((c) => WAQF.has(c))).length;
   return {
     page,
-    viewBox: vb.join(" "),
-    markers: T.length,
-    sx: fx.a,
-    tx: fx.b,
-    sy: fy.a,
-    ty: fy.b,
-    residual,
+    viewBox: ours.vb.join(" "),
+    markers: T.markers,
+    sx: T.sx,
+    tx: T.tx,
+    sy: T.sy,
+    ty: T.ty,
+    residual: T.residual,
     words: words.length,
     missed: missed.length,
     missedWaqf: waqf,
@@ -427,15 +147,6 @@ function analyse(page, svg) {
 
 // --------------------------------------------------------------------- run --
 
-async function fetchPage(page) {
-  const file = `${String(page).padStart(3, "0")}.svg`;
-  const url = `https://raw.githubusercontent.com/${repo}/${commit}/${encodeURIComponent(path)}/${file}`;
-  const res = await fetch(url);
-  if (!res.ok) throw new Error(`${url} → ${res.status}`);
-  const body = Buffer.from(await res.arrayBuffer());
-  return { body, sha256: createHash("sha256").update(body).digest("hex") };
-}
-
 console.log(`\n  probe:word-registration — ${repo} @ ${commit.slice(0, 12)}`);
 console.log(`  ${wanted.length} page(s): fitting ours = s·theirs + t on the ayah-end ornaments\n`);
 
@@ -444,7 +155,7 @@ const failed = [];
 let bytes = 0;
 
 for (const page of wanted) {
-  const { body, sha256 } = await fetchPage(page);
+  const { body, sha256 } = await candidatePage(page);
   bytes += body.length;
   try {
     const r = analyse(page, body.toString("utf8"));
@@ -501,7 +212,7 @@ console.log(
 );
 
 const verdict = maxRes < 1 ? "registers" : "does-not-register";
-console.log(`\n  verdict: ${verdict} — (${(bytes / 1024 / 1024).toFixed(1)} MB fetched)\n`);
+console.log(`\n  verdict: ${verdict} — (${(bytes / 1024 / 1024).toFixed(1)} MB read)\n`);
 
 if (write) {
   const prior = JSON.parse(readFileSync(RESULT, "utf8"));

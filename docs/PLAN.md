@@ -47,7 +47,7 @@ described in both files.
 | 3 — Diffs, share, a11y | complete | Teacher link cold-open restores exact view; screen reader announces hops | [loop-3.md](decisions/loop-3.md) |
 | 4a — Edge-data ETL | complete | Deterministic full-corpus edge ETL; 100% valid keys; shards <50KB gz | [loop-4a.md](decisions/loop-4a.md) |
 | 4b — Page corpus + streaming | complete | All 604 pages vendored + QUL-checked; every ayah navigable; TTI <2.5s mid-Android | [loop-4b.md](decisions/loop-4b.md) |
-| 5 — Highlight + roots | complete (ayah granularity; word granularity needs 4b) | Drag-range → merged hop list; root lens nearest-page-first | [loop-5.md](decisions/loop-5.md) |
+| 5 — Highlight + roots | complete (ayah granularity; word granularity's remaining blocker is segmentation, not geometry — see ⑬) | Drag-range → merged hop list; root lens nearest-page-first | [loop-5.md](decisions/loop-5.md) |
 | 6a — Skin, editions, wayfinding | complete | Instant plain⇄tajweed toggle (identical geometry); jump anywhere; visited pages survive offline; Lighthouse ≥90 | [loop-6a.md](decisions/loop-6a.md) |
 | 6b — Pin-a-juz packs | complete-with-deferral (the 8-day half is a user check) | Airplane-mode revision of a pinned juz works after 8+ days | [loop-6b.md](decisions/loop-6b.md) |
 | 7 — Polish + beta | pending (after 3+5+6) | Hafiz revision session, zero friction notes → **web v1.0** | — |
@@ -472,6 +472,31 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     a positive scale instead of a flip. Both sides are now sorted into canonical reading order
     before pairing. What the probe found on the way is follow-up 14, and it is a defect in
     **our** data, not theirs.
+    **Closed 2026-08-04 — the boxes are vendored, and the plan held.** 378 MB was read to write
+    2.2 MB: [`build-words.mjs`](../packages/etl/scripts/build-words.mjs) transfers **91,451**
+    word rectangles onto our frame and writes them as 604 shards under
+    `apps/web/public/assets/words/hafs-kfqc/` (**886 KB gz**, ceiling 1,792 KB) with a SHA-256
+    per upstream page and per shard in
+    [`word-boxes.pin.json`](../packages/etl/data/pages/word-boxes.pin.json). The 67 MB was
+    never fetched into the repo, not one upstream byte ships, and the pages remain the
+    quranpedia print unchanged. Residual over all 604: **median 0.089, max 2.722** — the max
+    being p1, which is the override frame and a known-displaced page, so the two ceilings are
+    2.0 standard / 3.0 override, measured rather than picked. Three things worth carrying
+    forward. **One:** the fit is a *check* and not a necessity, exactly as predicted, but the
+    check earns its keep — a handful of pages cannot pair their ornaments and borrow their
+    parity group's median transform rather than guess, and they say which. **Two:** the word
+    index is the **print's**, not the Quranic Arabic Corpus's, and the two disagree on
+    **4,499 of 6,236 ayahs** because the print counts pause marks as words. Painting roots or
+    tajweed at word granularity therefore needs an alignment between the two segmentations —
+    that is now the one open piece of task #65, and it is a task, not a lookup. **Three, and
+    the reason to have fetched a second print at all:** [`gate:words`](../scripts/gate-words.mjs)
+    re-measures every box offline against the polygon it claims, with its own parser, and found
+    a defect `gate:pages` structurally could not — on p577 the ink of `75:5`'s first word *was*
+    covered by a tappable box, the **wrong ayah's**. No orphan ink, so no orphan check could
+    ever fire. Of 86,965 lexical words exactly one was misplaced; it is repaired in
+    `vendor-pages.mjs` as a fourth defect shape ("the stranded first word") and the count is
+    now zero. Two witnesses see what one cannot, which is why both gates run rather than one
+    standing in for the other.
 
 14. **An ayah polygon does not always cover the ayah.** Found by 13's registration probe, and
     the reason to state it separately is that it is not a word-selection problem — it is wrong

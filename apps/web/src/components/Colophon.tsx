@@ -31,8 +31,16 @@ interface Credit {
 }
 
 /*
- * Every source Hifth ships bytes from, with the name and licence its terms ask
- * for. Three of these are conditions, not courtesies:
+ * Every source Hifth is built on, with the name and licence its terms ask for.
+ * Most of them ship bytes; one — the ligature corpus, last row — ships none.
+ * What it gave is measurement: a rectangle per word, fitted onto our own pages
+ * by `build-words.mjs`. Its licence asks for nothing at all, and it is credited
+ * anyway, because a reader tapping a word is touching that corpus's work and a
+ * row costs us a line. The other side of that is worth saying too: a courtesy
+ * recorded as a courtesy can be changed, and one that has quietly hardened into
+ * a supposed condition cannot. SOURCES.md marks which is which.
+ *
+ * Three of these are conditions, not courtesies:
  *   • the Quranic Arabic Corpus requires its source to be "clearly indicated"
  *     with a link to corpus.quran.com;
  *   • quran-tajweed is CC BY 4.0, whose attribution travels with the work;
@@ -90,6 +98,12 @@ const CREDITS: readonly Credit[] = [
     licence: "CC BY",
     href: "https://tanzil.net",
   },
+  {
+    what: "مواضع الكلمات",
+    who: "Mushaf Database · قاعدة بيانات المصحف",
+    licence: "صدقة جارية · إتاحة حرّة",
+    href: "https://github.com/mushafdatabase/MushafDatabase-Ligature-Based-SVG",
+  },
 ];
 
 /**
@@ -103,9 +117,10 @@ const CREDITS: readonly Credit[] = [
  * A licence notice nobody can reach is not a notice, so it lives one tap from
  * every screen rather than in a README.
  *
- * It is also where the other three sources are credited. Two of their licences
- * require it and one asks for it; all four are named here so a reader can see
- * whose work they are holding without cloning anything.
+ * It is also where the other sources are credited. Two of their licences
+ * require it, one asks for it, and the rest are here by choice; all of them are
+ * named so a reader can see whose work they are holding without cloning
+ * anything.
  *
  * Opened from the wordmark rather than a fifth header button: the chrome
  * already carries ⌖, ▤, the skin switch and its legend, and on a phone
