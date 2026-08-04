@@ -176,6 +176,15 @@ jobs:
       - name: Gate — the pages are the pinned print, and all of it is tappable
         run: pnpm gate:pages
 
+      # The word boxes are geometry vendored from a second print of the same
+      # mus'haf and fitted onto our frame, so a hash alone would not prove much:
+      # this re-measures every box against the polygon it claims, with its own
+      # parser rather than the ETL's. It is the witness that found the one
+      # polygon gate:pages could not see — the ink was covered, by the wrong
+      # ayah — so the two run side by side rather than one standing in for both.
+      - name: Gate — every word box lands on the ayah it claims
+        run: pnpm gate:words
+
       # docs/map.json tells a newcomer where each feature starts. This checks it
       # is still true, so it cannot rot into confident fiction. The pre-commit
       # hook runs the same gate scoped to the staged files.

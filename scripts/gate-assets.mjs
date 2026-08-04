@@ -73,6 +73,7 @@ const CEILINGS = {
   adj: 128 * 1024, //     55.8 KB   the edge shards stopped being edge lists
   roots: 768 * 1024, //  450.7 KB   the root index started carrying text
   skins: 384 * 1024, //  207.7 KB   the tajweed shards started carrying geometry
+  words: 1792 * 1024, // 885.6 KB   the word shards started carrying text
 };
 
 /** A single page's SVG, gzipped. Today's heaviest is 47.4 KB (page 7). */

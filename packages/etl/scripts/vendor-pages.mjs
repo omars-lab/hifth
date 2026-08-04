@@ -39,7 +39,7 @@
  *      and the ayahs are exactly those two — so a future pin that fixes them
  *      upstream fails loudly instead of drifting silently.
  *
- *   3. Twenty-one polygon repairs across eighteen pages (PLAN follow-up 14).
+ *   3. Twenty-three polygon repairs across nineteen pages (PLAN follow-up 14).
  *      Upstream gives some ayahs a tappable box that does not cover the ayah:
  *      a page's first ayah given only its last line, two lines of scripture
  *      under one line of polygon, a rect squashed off the line grid. The ayah
@@ -99,8 +99,9 @@ const ID_REPAIRS = [
  * from, to} — PLAN follow-up 14. `from` is the exact upstream `d`, matched
  * before svgo touches it, so a pin that repairs one upstream fails loudly.
  *
- * Three shapes of defect, all measured off the page's own line pitch (the modal
- * rect height) rather than a number chosen to make a page look right:
+ * Four shapes of defect, all measured off the page's own geometry — its line
+ * pitch (the modal rect height), or the ink either side of a boundary — rather
+ * than a number chosen to make a page look right:
  *
  *   the abandoned leading line   an ayah flowing in from the previous page is
  *                                given only its last line or two; the rest of
@@ -116,6 +117,21 @@ const ID_REPAIRS = [
  *                                pages 294, 468 and 560 carry two entries: the
  *                                strip between them belongs to exactly one of
  *                                them, and both boxes must agree where.
+ *   the stranded first word      an ayah that begins at the far end of a line
+ *                                and runs onto the next is given only its
+ *                                next-line rect; its first word is left inside
+ *                                the previous ayah's. Page 577 is the only one,
+ *                                and it carries two entries for the same reason
+ *                                the displaced rects do.
+ *
+ * The first three shapes are the ones `gate:pages` can see: it measures ink
+ * against polygon and demands zero orphans. The fourth is invisible to it —
+ * the ink *is* covered, by the wrong ayah — and was found instead by the
+ * ligature corpus, an independent print of the same page whose per-word boxes
+ * transfer onto our frame (`build-words.mjs`). Over all 604 pages, 86,965
+ * lexical words land in their own ayah's polygon and exactly one did not:
+ * p577 75:5#1. One witness cannot see what the other can, which is the whole
+ * argument for having two.
  */
 const POLYGON_REPAIRS = [
   // p227: two 28.8-unit rects where the ink sets two lines of 35.96
@@ -233,6 +249,22 @@ const POLYGON_REPAIRS = [
     number: "073020",
     from: "M 5.0 226.03 L 340.0 226.03 L 340.0 262.03 L 5.0 262.03 Z",
     to: "M 5.0 10.03 L 340.0 10.03 L 340.0 226.03 L 5.0 226.03 Z M 5.0 226.03 L 340.0 226.03 L 340.0 262.03 L 5.0 262.03 Z",
+  },
+  // p577: 75:5 begins at the far left of 75:4's line and is given only its
+  // next-line rect, so its first word sits inside 75:4. The boundary bisects
+  // the two centres — 75:5#1 at x 12.60, 75:4's end-ornament at x 27.79 — and
+  // both rects are moved so the strip belongs to exactly one of them.
+  {
+    page: 577,
+    number: "075004",
+    from: "M 5.0 294.18 L 177.97 294.18 L 177.97 330.18 L 5.0 330.18 Z",
+    to: "M 20.2 294.18 L 177.97 294.18 L 177.97 330.18 L 20.2 330.18 Z",
+  },
+  {
+    page: 577,
+    number: "075005",
+    from: "M 185.25 330.25 L 340.0 330.25 L 340.0 363.75 L 185.25 363.75 Z",
+    to: "M 5.0 294.18 L 20.2 294.18 L 20.2 330.18 L 5.0 330.18 Z M 185.25 330.25 L 340.0 330.25 L 340.0 363.75 L 185.25 363.75 Z",
   },
   // p594: 89:23 given only its last line
   {
@@ -387,6 +419,14 @@ function repairIds(svg, page) {
  * contract as repairIds: returns the repaired string and a count, and dies on
  * anything it did not expect rather than guessing.
  */
+/**
+ * The `d` attribute is matched with its leading space — ` d="…"` — and not as
+ * the bare `d="…"`. On page 577 the two are not the same match: 75:5 is one of
+ * the two polygons whose `id` holds path geometry instead of `verse-<n>` (see
+ * ID_REPAIRS), so its element reads `id="M 185.25 …"`, and `d="M 185.25 …"` is
+ * a substring of that. A bare match would have rewritten the id and left the
+ * geometry untouched, silently — every assertion here would still have passed.
+ */
 function repairPolygons(svg, page) {
   let repaired = svg;
   let count = 0;
@@ -395,20 +435,20 @@ function repairPolygons(svg, page) {
     const re = new RegExp(`<path\\b[^>]*\\bclass="ayahPolygon"[^>]*\\bnumber="${fix.number}"[^>]*>`);
     const m = re.exec(repaired);
     if (!m) die(`page ${page}: expected an ayahPolygon with number="${fix.number}" to repair`);
-    if (m[0].includes(`d="${fix.to}"`)) {
+    if (m[0].includes(` d="${fix.to}"`)) {
       die(
         `page ${page}: number="${fix.number}" already carries the repaired geometry — ` +
           `upstream fixed it, so drop it from POLYGON_REPAIRS`,
       );
     }
-    if (!m[0].includes(`d="${fix.from}"`)) {
+    if (!m[0].includes(` d="${fix.from}"`)) {
       die(
         `page ${page}: number="${fix.number}" is not the polygon this repair was written ` +
           `against. The pinned corpus moved: re-derive the repair against the new geometry ` +
           `rather than loosening the match.`,
       );
     }
-    repaired = repaired.replace(m[0], m[0].replace(`d="${fix.from}"`, `d="${fix.to}"`));
+    repaired = repaired.replace(m[0], m[0].replace(` d="${fix.from}"`, ` d="${fix.to}"`));
     count++;
   }
   return { svg: repaired, count };

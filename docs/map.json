@@ -544,7 +544,44 @@
         "A new kind of asset needs a ceiling in gate-assets.mjs CEILINGS before it can land — the gate fails on a directory it does not recognise, on purpose, because silently skipping the unfamiliar is the defect it closes."
       ],
       "gates": ["pnpm gate:notext", "pnpm gate:assets", "pnpm audit:corpus", "make ci"],
-      "seeAlso": ["edge-data-etl", "golden-images"]
+      "seeAlso": ["edge-data-etl", "golden-images", "word-geometry"]
+    },
+
+    {
+      "id": "word-geometry",
+      "what": "A rectangle per word on the mushaf page — measured off a second print of the same mus'haf and moved onto ours.",
+      "layer": "L3 etl",
+      "entry": [
+        {
+          "file": "packages/etl/scripts/lib/mushaf-frame.mjs",
+          "symbol": "fitFrames",
+          "note": "The one copy of the arithmetic that puts two prints of the same page into one coordinate system. Both corpora mark the end of every ayah with an ornament, so the ornaments are a correspondence neither was built to provide: `readTheirs`/`readOurs` pull them out, `readingOrder` puts both lists in the same order (line bands right-to-left, which is the only ordering an RTL page can be paired in), and `fit` solves `ours = s·theirs + t` per axis by least squares. Everything else here is the plumbing that has to be exact for that to mean anything — `pathBBox` with real cubic extrema rather than control-point hulls, `ringsOf`/`pointInRings` for testing a point against a multi-subpath polygon. It is a library and not a script because three callers need identical answers; two copies of a least-squares fit that disagree in the sixth decimal are two different mus'hafs."
+        },
+        {
+          "file": "packages/etl/scripts/lib/candidate-pages.mjs",
+          "symbol": "candidatePage",
+          "note": "One fetch of the upstream corpus, cached on disk under `data/pages/.cache/words`, hashed on the way in and checked against `ligature-svg.probe.json`'s pin on the way out. 378 MB is read to produce 2.2 MB, and it is read by a probe and a builder that must see the same bytes — so `{ offline: true }` is a real mode, not a convenience: it refuses to reach the network and fails if the cache is cold, which is how a determinism re-run proves it re-derived rather than re-downloaded."
+        },
+        {
+          "file": "packages/etl/scripts/build-words.mjs",
+          "symbol": "MAX_RESIDUAL",
+          "note": "The builder: 604 shards of word boxes on our viewBox, plus `word-boxes.pin.json` (a SHA-256 per upstream page and per shard). Per page it fits the frame, transfers every `<g id=\"md-word-…\">`'s bbox through it, and asserts the fit's residual is under a ceiling — 2.0 units on the standard frame, 3.0 on the two override pages, both measured against an observed max of 2.722 rather than picked. Pause marks are separated from lexical words (`isPauseMark`) because they are the only boxes that legitimately sit outside their ayah's polygon, hanging below the line. A page whose ornaments cannot be paired borrows its parity group's median transform rather than guessing, and says which pages borrowed."
+        },
+        {
+          "file": "scripts/gate-words.mjs",
+          "symbol": "MARK_DROP",
+          "note": "Re-measures every committed box against the polygon it claims — offline, and with its own path parser rather than the ETL's, because a gate that imports the code it is checking only proves the code agrees with itself. Three checks: LEXICAL (a word's centre is inside its own ayah), MARK (a pause mark's bottom edge meets its polygon within `MARK_DROP`, 4 units — measured: 4,453 of 4,486 need nothing and the worst needs 2.9), PAIRING (shard keys and polygon keys match in both directions, 604 pages, zero either way). This is the gate that found the one defect `gate:pages` structurally cannot see: on p577 the ink of 75:5's first word *was* covered by a tappable box — the wrong ayah's. No orphan, so no orphan check could fire. Two prints of the same page can say that; one cannot."
+        }
+      ],
+      "extend": [
+        "The word index here is the *print's*, not the Quranic Arabic Corpus's — the print counts pause marks as words, and the two disagree on 4,499 of 6,236 ayahs. Joining word boxes to roots or morphology needs an alignment, and writing one is a task, not a lookup. The pin's `$segmentation` note says so at the point of use.",
+        "No upstream bytes ship and none should start. The pages stay the quranpedia print; what this area contributes is numbers. If a change would vendor their ink or their text, it is a new source and needs a SOURCES.md entry of its own, not an extension of this one.",
+        "Anything that transfers external geometry onto a page works in plain top-down viewBox space, outside the `matrix(1.3333 0 0 -1.3333 …)` the ink sits under. See assets-and-pages' note on the two coordinate spaces.",
+        "A tolerance added here is measured before it is written, and the measurement goes in the comment beside it — `MAX_RESIDUAL` and `MARK_DROP` both name the distribution they clear. A number with no distribution behind it is an allow-list wearing a constant's clothes.",
+        "`gate:words` deliberately duplicates parsing and point-in-polygon. Do not refactor it to import `lib/mushaf-frame.mjs`; the duplication is the check."
+      ],
+      "gates": ["pnpm gate:words", "pnpm gate:assets", "pnpm probe:word-registration", "make ci"],
+      "seeAlso": ["assets-and-pages", "select-an-ayah"]
     },
 
     {

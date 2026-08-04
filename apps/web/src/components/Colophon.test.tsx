@@ -9,6 +9,13 @@ import { SOURCE_REPO, isCommit, sourceUrl, urlFor } from "../provenance";
  * and the five sources whose licences ask to be named are named with their
  * links intact. A rendering detail may change freely; a missing credit is a
  * licence breach.
+ *
+ * The sixth row — the ligature corpus the word boxes were measured from — is
+ * deliberately not in the list below. Its licence asks for nothing, so its row
+ * is a courtesy, and asserting a courtesy here would file it under obligation
+ * and make it un-droppable for a reason that was never true. `gate:license-copy`
+ * still holds it to SOURCES.md byte for byte; what it is not held to is this
+ * file's promise, which is about breaches.
  */
 
 describe("Colophon", () => {
