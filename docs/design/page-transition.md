@@ -45,7 +45,9 @@ Three conventions this document inherits rather than re-decides:
   dragging the page left→right advances. §3.3 shows that the design here honours that half
   exactly and makes the other half ("the next page enters from the right") *moot* rather
   than violated — nothing enters from either side.
-- **One leaf per turn on the spread** (decision row 14). Reopens at Loop 4b, not here.
+- **One leaf per turn on the spread** (decision row 14). Reopened at Loop 4b and settled
+  there: a step is one page at every width, so the band always draws one leaf turning
+  (`desktop.md` §8 ①).
 
 Everything below is either **measured** (a number, with the source stated), **cited** (a
 file, a line, a document), or **inferred** (marked as such).

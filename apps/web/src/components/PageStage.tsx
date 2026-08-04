@@ -330,6 +330,10 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
   // Same reason: mountPage decides a leaf's free edge after an await.
   const totalRef = useRef(total);
   totalRef.current = total;
+  // And the same reason again, for the one mark that is owed to a page the
+  // reader is not on. See the breadcrumb effect below for what went wrong.
+  const breadcrumbRef = useRef(breadcrumbKey);
+  breadcrumbRef.current = breadcrumbKey;
 
   /*
    * The fold. Its *existence* is React state — a band that is not crossing does
@@ -688,6 +692,17 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
       hl.setSkin(skinRef.current, tajweedRef.current);
       const mp: MountedPage = { host, svg: svgEl as unknown as SVGSVGElement, hl };
       pagesRef.current.set(targetPage, mp);
+      // And the same for the breadcrumb, for a sharper reason than a flash. The
+      // effect below draws it over whichever page is *already* mounted; it is
+      // keyed on the crumb, not on the mounted set, and `pagesRef` is a ref, so
+      // a page that arrives after it ran does not re-run it. Lose that race once
+      // — a `?via=` deep link, where the origin page mounts alongside the target
+      // — and the crumb never appears at all, for the life of the visit. Drawing
+      // it here is the only place that knows the page has landed.
+      const crumb = breadcrumbRef.current;
+      if (crumb && resolver.resolve(crumb)?.page === targetPage) {
+        hl.highlight(crumb, "crumb", "breadcrumb");
+      }
       return mp;
     },
     [resolver],
@@ -1267,7 +1282,10 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
     emitSelectionRect();
   }, [selectedKey, status, emitSelectionRect]);
 
-  // Draw the breadcrumb on whichever mounted page carries the origin ayah.
+  // Draw the breadcrumb on whichever mounted page carries the origin ayah — and
+  // clear it off the others, which is the half `mountPage` cannot do. Between
+  // them the two halves cover both orders: the crumb changing under a mounted
+  // page (here) and a page mounting under a standing crumb (there).
   useEffect(() => {
     if (status !== "ready") return;
     for (const mp of pagesRef.current.values()) mp.hl.clear("breadcrumb");

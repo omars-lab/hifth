@@ -54,6 +54,35 @@
  * - **`/` survives ayah focus** (rule 5 guards arrows only): opening the jumper
  *   from a selected ayah is a normal thing to want, and `/` means nothing to
  *   the stepper.
+ *
+ * **A step is one page, at every width** (`docs/design/desktop.md` §8 ①, settled
+ * at Loop 4b). A desktop window shows an open mus'haf — two leaves — and the
+ * obvious question is whether an arrow should then turn the *opening*, ±2, the
+ * way a hand turns a leaf. It should not, and none of the reasons is about how
+ * many pages this build vendors:
+ *
+ *   - `stepPage` names a landing out loud whenever it is not the page next door,
+ *     because a reader who arrives somewhere they did not ask for has to be told
+ *     (`page-turning.md` §7 ④). A ±2 step is *never* the page next door, so the
+ *     rule would either speak on every turn or grow an exception for the
+ *     commonest case in the app.
+ *   - The page number is what the URL carries and what the announcer says. Under
+ *     ±2 the arrows reach only one parity from wherever they start, and the
+ *     reader asked to leave them for the jumper is the one with the fewest ways
+ *     back.
+ *   - A keyed turn, a wheel turn and a dragged fold all end in one `stepPage`.
+ *     ±2 on the arrows alone makes one input mean twice what the other two mean
+ *     on the same device.
+ *   - This function would have to know the window's width. `KeyContext` carries
+ *     nothing about layout and must not: a key that moves a different distance
+ *     after a resize is the reader's keyboard changing under them.
+ *
+ * Hence `step: 1 | -1` rather than a number — ±2 does not typecheck, which is
+ * the cheapest possible guard on a decision whose behaviour is *unchanged* and
+ * therefore invisible to anyone who reverses it. What a spread does with the
+ * step is the spread's: turning inside one opening moves the reader and not the
+ * paper, and `PageStage` draws no fold for it, because both leaves are already
+ * on screen (`docs/design/page-transition.md` §3.5).
  */
 
 /** Everything the rule needs to know about a keydown, with no DOM types. */

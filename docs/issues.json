@@ -223,10 +223,11 @@
     {
       "id": "arrow-turns-leaf-or-page-at-desktop",
       "source": { "file": "docs/design/desktop.md", "item": "①" },
-      "status": "open",
+      "status": "answered",
       "severity": "question",
       "owner": "agent",
-      "note": "Unblocked by loop-4b: it waited on a build where a facing leaf is real, and every leaf is real now, so ±2 is a turn a reader can actually see land. Answerable today and the answer belongs in appKeyAction, in core, beside ArrowLeft = +1 — not in the spread, which must not acquire an opinion about the keyboard."
+      "closedBy": "apps/web/e2e/desktop.spec.ts",
+      "note": "±1. The arrow turns a page, at every width. The behaviour is unchanged and every reason for it is new: §6 argued from scarcity (±2 over an inventory of three is a no-op) and loop-4b deleted that argument. What holds now — stepPage must name any landing that is not the page next door, so ±2 would announce a correction on every turn (page-turning.md §7 ④); ±2 reaches one parity only, putting half the print out of reach of the arrows, for the reader with the fewest ways back to them; a keyed turn, a wheel turn and a dragged fold all end in one stepPage and would stop meaning the same thing; and appKeyAction would have to learn the window's width, which KeyContext deliberately cannot see. What made ±2 attractive — half the presses on a spread move no paper — is not a defect: both leaves of the opening are already open, and PageStage:855 already suppresses the fold for it. Reasoning is in keymap.ts; the pin is desktop.spec.ts's 'still turns pages with the arrow keys the header advertises', which reads 8 after one press and would read 9 under ±2."
     },
     {
       "id": "do-the-two-leaves-pan-together",
