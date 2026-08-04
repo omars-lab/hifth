@@ -325,13 +325,37 @@ export function RevisionMap({
     };
   }, [open]);
 
+  /**
+   * Escape belongs to the document while the sheet is up, not to the sheet's own
+   * subtree.
+   *
+   * It used to live in `onKeyDown` below, which only fires when focus is inside
+   * the sheet — an assumption nothing guaranteed, and one `PackShelf` broke. It
+   * is the first thing in here that *removes the control the reader just
+   * pressed*: the pin offer disappears the moment the juz is kept. Chrome fires
+   * no `blur` when a focused element is taken away — focus simply becomes
+   * `<body>` — so there is no event to catch and pull focus back with, and from
+   * `<body>` the sheet's handler never ran again. **Escape stopped closing a
+   * modal dialog**, leaving a reader with a pointer as their only exit. Found by
+   * the pack e2e (#137), which is the only layer that can see it: nothing in
+   * jsdom takes focus away.
+   *
+   * Capture phase, and no `stopPropagation`: `App`'s window handler already
+   * stands down whenever a `[role="dialog"]` is in the DOM, so the sheet does
+   * not need to silence it — and a sheet that silenced it would be relying on
+   * the same "focus is where I think it is" reasoning that failed here.
+   */
+  useEffect(() => {
+    if (!open) return;
+    const onEscape = (e: KeyboardEvent): void => {
+      if (e.key === "Escape") onClose();
+    };
+    document.addEventListener("keydown", onEscape, true);
+    return () => document.removeEventListener("keydown", onEscape, true);
+  }, [open, onClose]);
+
   const onKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLDivElement>) => {
-      if (e.key === "Escape") {
-        e.stopPropagation();
-        onClose();
-        return;
-      }
       if (e.key !== "Tab") return;
       const sheet = sheetRef.current;
       if (!sheet) return;
