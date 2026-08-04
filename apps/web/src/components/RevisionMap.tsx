@@ -12,6 +12,7 @@ import {
 } from "@hifth/core";
 import { useT } from "../i18n";
 import { readRecord, revisionStoreSupported, type RevisionRecord } from "../revision-store";
+import { PackShelf } from "./PackShelf";
 import styles from "./RevisionMap.module.css";
 
 interface RevisionMapProps {
@@ -58,6 +59,20 @@ interface RevisionMapProps {
    * wording is already exactly right.
    */
   onGoToPage: (page: number, said?: string) => void;
+  /**
+   * Open at this scope rather than at whichever one was last used.
+   *
+   * One caller: the `pack-gone` notice, whose action is "see what is kept", and
+   * what is kept is a juz. Arriving at hizb scope would land the reader one
+   * press away from the thing the strip sent them for, on a sheet where the
+   * shelf they came for is not even rendered.
+   *
+   * It re-applies on each open rather than seeding the initial state, because
+   * this sheet stays mounted while closed — a `useState` default would only ever
+   * have fired once, on the app's first render, which is the one moment nobody
+   * has pressed anything.
+   */
+  openAt?: RevisionScope | undefined;
   /**
    * Today, in the reader's own clock. Optional: the sheet resolves it on open if
    * nobody passes one. Tests pass it, so a warmth assertion is arithmetic rather
@@ -249,6 +264,7 @@ export function RevisionMap({
   totalPages,
   page,
   onGoToPage,
+  openAt,
   today,
 }: RevisionMapProps): JSX.Element | null {
   const { t, dir } = useT();
@@ -271,6 +287,15 @@ export function RevisionMap({
   // report every division one day fresher than it is.
   const [resolvedToday, setResolvedToday] = useState<string | null>(null);
   const asOf = today ?? resolvedToday;
+
+  // A caller that asked for a scope gets it, every time the sheet opens — see
+  // `openAt`. The cursor goes with it, for the reason the scope buttons clear
+  // it: hizb 12 and juz 12 are different places.
+  useEffect(() => {
+    if (!open || openAt === undefined) return;
+    setScope(openAt);
+    setCursor(null);
+  }, [open, openAt]);
 
   useEffect(() => {
     if (!open) return;
@@ -576,6 +601,14 @@ export function RevisionMap({
             {record.since && <p className={styles.note}>{t.mapSince(record.since)}</p>}
           </>
         )}
+
+        {/* Outside the record's branch, and deliberately: what is kept on this
+            phone is a fact about Cache Storage, not about the revision record,
+            and a browser that refuses IndexedDB for the record may still hold a
+            pack perfectly well. Shown at juz scope only — a pack *is* a juz, and
+            offering to keep one under a grid of 604 pages would be offering it
+            in a unit the reader is not looking at. */}
+        {scope === "juz" && <PackShelf edition={edition} pages={pages} page={page} />}
       </div>
     </>
   );

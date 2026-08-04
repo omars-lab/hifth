@@ -1,0 +1,129 @@
+/*
+ * PackShelf — the pin control, on the revision map's juz scope.
+ *
+ * The one rule this file owns: **a torn pack must not look like a pinned one.**
+ * The list rows carry a leading edge in `--danger` when the cache no longer
+ * holds what the register claims, and the sentence beside it says so in words —
+ * because the state is invisible until aeroplane mode, which is the one moment
+ * a colour cannot be checked against anything.
+ *
+ * `whole` gets no marker at all. There is nothing to notice about a promise
+ * being kept, and a badge on the good case would make the bad one a shade
+ * quieter by comparison.
+ */
+
+.shelf {
+  margin-block-start: var(--space-4);
+  padding-block-start: var(--space-3);
+  border-block-start: 1px solid var(--hairline);
+}
+
+.head {
+  margin: 0;
+  font-size: var(--text-md);
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.note {
+  margin: var(--space-2) 0 0;
+  font-size: var(--text-sm);
+  line-height: 1.6;
+  color: var(--ink-soft);
+}
+
+.offer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  margin-block-start: var(--space-3);
+}
+
+.gap {
+  flex-basis: 100%;
+  font-size: var(--text-sm);
+  color: var(--ink-soft);
+}
+
+.primary,
+.secondary {
+  min-block-size: var(--touch-min);
+  padding-inline: var(--space-3);
+  border-radius: var(--radius-md);
+  font-family: inherit;
+  font-size: var(--text-md);
+  cursor: pointer;
+}
+
+.primary {
+  border: 1px solid var(--accent);
+  background: var(--accent-tint);
+  color: var(--accent-strong);
+  font-weight: 600;
+}
+
+.secondary {
+  border: 1px solid var(--hairline);
+  background: transparent;
+  color: var(--ink-soft);
+}
+
+.primary:disabled,
+.secondary:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.primary:focus-visible,
+.secondary:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.progress {
+  font-size: var(--text-sm);
+  color: var(--ink-soft);
+  /* The count climbs one file at a time; without this the row twitches wider
+     on every tick of a 24-file pin. */
+  font-variant-numeric: tabular-nums;
+}
+
+.list {
+  margin: var(--space-3) 0 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius-md);
+  background: var(--paper);
+}
+
+/* Not colour alone (WCAG 1.4.1): the sentence in `.label` names the state, and
+   `data-health` is on the DOM for the e2e that has to tell them apart. */
+.row[data-health="torn"],
+.row[data-health="gone"] {
+  border-inline-start: 3px solid var(--danger);
+}
+
+.label {
+  flex: 1;
+  min-inline-size: 0;
+  font-size: var(--text-md);
+  color: var(--ink);
+}
+
+.row[data-health="torn"] .label,
+.row[data-health="gone"] .label {
+  color: var(--danger);
+}
