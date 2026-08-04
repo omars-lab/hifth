@@ -130,6 +130,25 @@ export function digitsIn(text: string, lang: Lang): string {
 }
 
 /**
+ * A number to one decimal, in the digits *and the decimal mark* of the UI
+ * language: "5.8" / «٥٫٨».
+ *
+ * `digits` is for integers, and handing it a fraction would have left a Latin
+ * full stop standing inside Arabic-Indic numerals — the same half-transliterated
+ * shape the aria-labels were caught in. Arabic writes the fraction with U+066B
+ * ARABIC DECIMAL SEPARATOR, which is a different character from the full stop
+ * and not something a caller should be spelling for itself.
+ *
+ * One caller today: the size of a pinned juz, the only fraction the chrome ever
+ * prints. It is here rather than there for the reason the rest of this module
+ * exists — one place knows which numerals a language reads.
+ */
+export function tenths(n: number, lang: Lang): string {
+  const text = n.toFixed(1);
+  return LOCALES[lang].digits === "latin" ? text : toArabicDigits(text).replace(".", "٫");
+}
+
+/**
  * Human label for a surah/ayah pair: "البقرة · ٢:٤١" / "Al-Baqarah · 2:41".
  *
  * The coordinate form, for callers that already hold the numbers — the jumper's

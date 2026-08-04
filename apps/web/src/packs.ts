@@ -222,6 +222,38 @@ export async function pinPack(
   }
 }
 
+/**
+ * Fetch a torn or swept pack's files again, from the register's own list.
+ *
+ * Re-planning from the manifest would also work and would be *newer*. This
+ * restores what the reader was promised instead, which is the narrower and more
+ * honest thing: the offer on screen says "juz 30 is no longer on this phone",
+ * and the file list that answers it should be the one that went missing. It
+ * also means the offer works when the manifest itself is what got swept.
+ *
+ * Returns null when nothing claims that juz — there is then nothing to restore,
+ * and no pack to be wrong about.
+ */
+export async function repinPack(
+  edition: string,
+  juz: number,
+  options: PinOptions = {},
+): Promise<PackRecord | null> {
+  if (!packsSupported()) return null;
+  let db: IDBDatabase | null = null;
+  let existing: PackRecord | undefined;
+  try {
+    db = await openDb();
+    existing = await readOne(db, packId(edition, juz));
+  } catch {
+    return null;
+  } finally {
+    db?.close();
+  }
+  if (existing === undefined) return null;
+  return await pinPack(edition, juz, existing.urls, existing.absentAyahs, options);
+}
+
 /** Forget a pack: its bytes and its claim, in that order. */
 export async function unpinPack(edition: string, juz: number): Promise<void> {
   if (!packsSupported()) return;

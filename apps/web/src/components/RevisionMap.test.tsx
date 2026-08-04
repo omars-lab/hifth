@@ -360,4 +360,23 @@ describe("RevisionMap", () => {
     });
     expect(grid[0]!.getAttribute("aria-label")).toBe("الحزب ١ · فُتح قبل ٢ يومًا");
   });
+  it("keeps the pin shelf to juz scope, where a pack is the unit on screen", async () => {
+    draw();
+    // Opens at hizb: the shelf is not there, because "keep this hizb" is an
+    // offer the store cannot honour — a pack is a juz.
+    await waitFor(() => expect(screen.getByRole("radio", { name: "حزب" })).toBeTruthy());
+    expect(screen.queryByRole("heading", { name: "المحفوظ في هذا الجهاز" })).toBeNull();
+
+    fireEvent.click(screen.getByRole("radio", { name: "جزء" }));
+    expect(await screen.findByRole("heading", { name: "المحفوظ في هذا الجهاز" })).toBeTruthy();
+  });
+
+  it("opens at the scope its caller asked for", async () => {
+    // The swept-pack notice's action. Landing at hizb would leave the reader one
+    // press from the thing the strip sent them for, on a sheet where the shelf
+    // it named is not rendered at all.
+    draw({ openAt: "juz" });
+    expect(await screen.findByRole("heading", { name: "المحفوظ في هذا الجهاز" })).toBeTruthy();
+    expect(screen.getByRole("radio", { name: "جزء" })).toHaveAttribute("aria-checked", "true");
+  });
 });
