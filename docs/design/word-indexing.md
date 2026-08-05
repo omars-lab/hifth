@@ -347,7 +347,9 @@ done upstream* — is an argument for §11 ①'s option C rather than against it
 
 - **Shipping the word's text.** `build-words.mjs` drops `data-hafs` and that stays true. The
   alignment is *derived from* the text; it does not carry it. `gate:notext` exists to keep
-  it that way. §11 ② is the one place this bites.
+  it that way. §11 ② was the one place this looked like it would bite, and word-D answered
+  it by announcing what a run is *about* rather than what it says — so the rule has now been
+  through the one feature that had a reason to break it, and did not.
 - **Renumbering either index.** Both are upstream identifiers. Rewriting the print's would
   break every committed shard and its pin; rewriting QAC's would break `assets/roots/**`,
   `gate:edges` and the tajweed ETL. The map exists so that neither has to move.
@@ -368,46 +370,61 @@ Every design doc in this repo ends under this heading, and every item is an
 `### ⓝ … · **status**` row so `pnpm gate:issues` can read it. The vocabulary is defined once
 in [`docs/issues.json`](../issues.json).
 
-### ① Where the app reads the alignment · **open**
+### ① Where the app reads the alignment · **answered**
 
-The map is L3 today and the app cannot see it. Three placements were priced, gzipped,
-against the shards actually shipping:
+**C, shipped 2026-08-05 in word-D.** The caller this item was waiting for arrived — a word
+run that refines the hop list — and it picked C exactly as predicted, for the reason
+predicted: the app never learns that a second index exists. Nothing in L1 or L2 imports
+`Alignment`, because nothing has to; `assets/adj/**` names its spans in print indices and
+`assets/roots/**` names each root's `w` in print indices, and the print index is the only
+number a word box carries.
 
-| | placement | cost |
-|---|---|---|
-| **A** | `joins` in `assets/words/**` | 885.6 → 908.9 KB (**+23.3 KB**) |
-| **B** | its own `assets/align/**` | **+62.9 KB** over 604 new files |
-| **C** | print indices baked into `assets/roots/**` (and tajweed) | 199.2 → 208.4 KB (**+9.2 KB**) |
+Three placements were priced, gzipped, against the shards then shipping:
 
-**C is the recommendation**, on three grounds: it is the cheapest; it puts the number where
-the consumer already looks, so no component learns about a second index; and it is what §9
-says the ecosystem does — reconcile upstream, render from one index. Its cost is that a
-second consumer of the alignment would need its own baking pass.
+| | placement | cost priced | cost shipped |
+|---|---|---|---|
+| **A** | `joins` in `assets/words/**` | 885.6 → 908.9 KB (**+23.3 KB**) | not built |
+| **B** | its own `assets/align/**` | **+62.9 KB** over 604 new files | not built |
+| **C** | print indices baked into `assets/roots/**` (and the edges) | 199.2 → 208.4 KB (**+9.2 KB**) | 199.2 → 280.8 KB (**+81.6 KB**) |
 
-A and B are not wrong, and B is the only one that makes the map inspectable in the browser,
-which matters if a word-granularity bug ever needs debugging from a phone.
+**C cost 8.9× its estimate, and the gap is structural rather than an arithmetic slip.** The
+price above is the price of shipping *the map* — the 9,533 joins, the same delta the pin
+carries. What shipped is the map's *answer*: 55,345 print indices, one list per root-ayah
+pair on 44,401 of them, plus a span on each side of 2,544 edges. Restating the answer costs
+more than shipping the question, always — and buying it is the point. A consumer of `w`
+never applies a delta, never reads a pin, and cannot get the application wrong, which is
+what "no component learns about a second index" actually means once you build it. Placement
+A's number would have moved the same way for the same reason had it been chosen; the
+estimate was priced on the wrong artifact, not measured wrongly.
 
-**What would answer it:** the first app-side consumer. Nothing needs the map in the browser
-until word-granular roots or tajweed painting is actually being built, and building the
-placement before the consumer would be guessing at its access pattern. The measurement is
-banked; the decision waits for a caller.
+The full corpus cost, as `gate:assets` measures it: the roots tree 450.7 → 532.3 KB gz
+(all of it in the per-ayah shards; the reverse index stays ayah-grained), and the adjacency
+tree 55.8 → 79.5 KB gz for the spans. Both against ceilings that did not move — see
+`scripts/gate-assets.mjs`.
 
-### ② Announcing a word run needs the word's text, and nothing ships it · **open**
+What C's cost buys, and what it does not: a *second* consumer of the alignment still needs
+its own baking pass, and the tajweed shards have not had one. B remains the only placement
+that would make the map inspectable in a browser, which is still the thing to reach for if a
+word-granularity bug ever has to be debugged from a phone.
 
-[PLAN follow-up 15](../PLAN.md) wants a selected word run to announce "the first and last
-word of the run rather than counting it". The alignment unblocks the *identity* half of that
-— a box now has a QAC word, so it has a root and a lemma. It does not unblock the
-announcement, because saying which word requires the word's **text**, and §10 says this repo
-has never shipped any and `gate:notext` enforces it.
+### ② Announcing a word run needs the word's text, and nothing ships it · **answered**
 
-Three ways out, none free: announce **position** ("words 3 to 7 of ayah 2:4"), which needs
-nothing new and says least; announce **roots** (`ك-ت-ب`), which the roots shards already
-carry and which is meaningful to a hafiz but not to a screen reader's phonetics; or **ship
-the text**, which is a new vendoring with its own licence question and its own gate.
+**Answered by not naming the run at all**, 2026-08-05. The question assumed the announcement
+had to identify the words; the shipped one announces the *outcome* — «٧ مواضع مشابهة», how
+many places this run turns out to be about — which is the question the reader asked by
+selecting it. §10 holds untouched: no phrasing, no roots, no new vendoring, no licence
+question, and `gate:notext` never came into it.
 
-**What would answer it:** a screen-reader walkthrough with a hafiz, on the three phrasings.
-This is a usability question, not a technical one, and the technical answer to all three is
-already known.
+That dissolves rather than settles the original three. Reading the selection back through a
+UI string would put scripture in the interface layer, which is the one thing the word grain
+exists not to do — so the choice between position, roots and shipped text was a choice
+between three ways of doing something the design does not want done. The identity half the
+alignment unblocked is real and still available; nothing has consumed it.
+
+**What is still owed, and by whom:** a screen-reader walkthrough (validation ledger
+`screen-reader-walkthrough`, owned by a human) can still say the count is not enough for a
+memoriser. If it does, the three phrasings above are priced and the technical answer to each
+is known — but it would reopen §10, not this item.
 
 ### ③ The four exceptions are orthographic and could be folded away · **answered**
 

@@ -83,11 +83,20 @@ darwin and linux now produce identical geometry.
 
 ## What it does not do
 
+*Both of these were answered the next day, by word-D — [`word-search.md`](word-search.md).
+They are kept as written rather than corrected, because what they say about the state of the
+app on 2026-08-04 is true and is the reason the next decision took the shape it did. Each
+carries its answer underneath.*
+
 **Nothing above the stage listens.** `onSelectWords` is emitted into no handler. What a word
 run refines is the mutashabihat search, and that waits on aligning the print's word index with
 the QAC segmentation the edges are built from — they disagree on 4,499 of 6,236 ayahs, mostly
 because the print counts pause marks as words. Emitting the event now keeps that wiring a
 one-line prop; wiring a listener now would mean designing the refinement twice.
+
+> **Answered 2026-08-05.** The alignment landed, and the listener was the one-line prop this
+> paragraph promised: `App.handleSelectWords` asks `Adjacency.hopsForWords` which edges the
+> run is about. The refinement was designed once.
 
 **It is finger-only, and that is the first thing this app can do that a screen-reader user
 cannot.** There is no key that stands for the descent, and the ink goes into `#hifth-overlay`,
@@ -97,3 +106,10 @@ and it is simultaneously the proof of the gap. Opened as ⑮ and indexed as
 `plan-word-selection-is-finger-only`, blocked by ⑬ rather than by a human: until a word run
 *means* something there is no outcome to announce, and a keyboard path would reach a state
 that does nothing.
+
+> **Answered 2026-08-05, in the order this paragraph set.** ⑬ first, then the key: `Enter` on
+> an already-selected ayah descends, the arrows carry the run, `Shift` extends it, `Escape`
+> climbs one rung. The announcement is the outcome — «٧ مواضع مشابهة» — and not the words,
+> which is the one thing this paragraph got wrong and [`word-search.md`](word-search.md)
+> argues out. The tree assertion above kept both its edges: the overlay is still empty, and
+> that emptiness is no longer the proof of a gap.

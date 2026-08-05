@@ -338,19 +338,18 @@
     {
       "id": "where-the-alignment-lives",
       "source": { "file": "docs/design/word-indexing.md", "item": "①" },
-      "status": "open",
+      "status": "answered",
       "severity": "question",
       "owner": "agent",
-      "note": "The print↔QAC map is built, gated and queryable, but L3-only — the app cannot read it. Three placements priced gzipped against the shipped shards: A `joins` in assets/words/** +23.3 KB, B its own assets/align/** +62.9 KB over 604 files, C print indices baked into assets/roots/** (and tajweed) +9.2 KB. C recommended — cheapest, puts the number where the consumer already looks, and matches what QUL does upstream. Deliberately not decided ahead of the first app-side consumer, because the access pattern is what picks between them and there is no caller yet."
+      "note": "C, shipped 2026-08-05 in word-D: print indices baked into assets/adj/** and assets/roots/**, so no L1 or L2 code imports Alignment. The caller the item was waiting for arrived and picked the predicted placement for the predicted reason. It cost 8.9× its estimate (+81.6 KB gz against +9.2 KB priced) and the doc measures why — the price was for shipping the map, what shipped is the map's answer. Ceilings reviewed and left standing in scripts/gate-assets.mjs."
     },
     {
       "id": "announcing-a-run-needs-the-text",
       "source": { "file": "docs/design/word-indexing.md", "item": "②" },
-      "status": "open",
+      "status": "answered",
       "severity": "question",
-      "owner": "user",
-      "blockedBy": ["a hafiz"],
-      "note": "PLAN 15 wants a word run to announce its first and last word rather than count them. The alignment unblocks identity (a box now has a QAC word, so a root and a lemma) but not the announcement: saying which word needs the word's TEXT, which this repo has never shipped and gate:notext enforces. Three phrasings, all technically solved: position (`words 3 to 7`), roots (ك-ت-ب), or a new text vendoring with its own licence question. Which one is a usability question, and it needs a screen-reader walkthrough with a hafiz."
+      "owner": "agent",
+      "note": "Dissolved rather than settled, 2026-08-05 in word-D: the shipped announcement names the outcome («٧ مواضع مشابهة»), not the run, so none of the three phrasings had to be chosen and gate:notext never came into it. The residual is a usability question a human owns — validation ledger `screen-reader-walkthrough` can still find the count insufficient for a memoriser, which would reopen §10 rather than this item."
     },
     {
       "id": "exceptions-are-orthographic",
@@ -638,11 +637,11 @@
     {
       "id": "plan-word-selection-is-finger-only",
       "source": { "file": "docs/PLAN.md", "item": "15" },
-      "status": "blocked",
+      "status": "fixed",
       "severity": "defect",
       "owner": "agent",
-      "blockedBy": ["plan-word-geometry-is-a-second-corpus"],
-      "note": "Opened 2026-08-04 by word-C, in the same commit that shipped the feature — this is the first thing Hifth can do that a screen-reader user cannot, and it is written down rather than left to be found. The descent to word granularity is a 350 ms press inside an already-lit ayah, a gesture with no key that stands for it, and what it produces is ink in #hifth-overlay, which is decorative and adds no node, role or name to the tree. e2e/word.spec.ts asserts that emptiness before and after, deliberately double-edged: it protects the ayah buttons from being buried under overlay nodes, and it is the proof the feature is unreachable without sight. Not fixed now because nothing above the stage consumes a word run yet — onSelectWords has no listener until 13's print-vs-QAC alignment lands, so a keyboard path would reach a state that does nothing and a live region would announce a phrase and then fall silent. Order to fix: 13 first, then a key that descends from a selected ayah and an announcement naming the first and last word of the run rather than counting it. PLAN 15 carries the reasoning."
+      "closedBy": "apps/web/e2e/word.spec.ts",
+      "note": "Fixed 2026-08-05 by word-D, in the order the note below predicted and with one deliberate departure from it. The blocker went first: the alignment landed, a word run now refines the hop list, and only then did the keyboard path get built — Enter on an already-selected ayah descends, ←/→ carry the run, Shift extends it, Escape climbs one rung. The departure is the announcement. This note said it should name the run's first and last word; what shipped counts the outcome instead — «٧ مواضع مشابهة», how many places the run is about — because naming the words means putting scripture in a UI string, which is the one thing the word grain exists not to do (word-indexing.md §10, and §11 ② for the argument). The overlay stays decorative and e2e/word.spec.ts still asserts the accessibility tree is untouched, so the double-edged test kept both its edges: it protects the ayah buttons AND is no longer the proof of a gap. What is still owed is a human's: validation ledger `screen-reader-walkthrough` is the only thing that can say a count is enough for a memoriser. PLAN 15 carries the full account. Original note follows. Opened 2026-08-04 by word-C, in the same commit that shipped the feature — this is the first thing Hifth can do that a screen-reader user cannot, and it is written down rather than left to be found. The descent to word granularity is a 350 ms press inside an already-lit ayah, a gesture with no key that stands for it, and what it produces is ink in #hifth-overlay, which is decorative and adds no node, role or name to the tree. e2e/word.spec.ts asserts that emptiness before and after, deliberately double-edged: it protects the ayah buttons from being buried under overlay nodes, and it is the proof the feature is unreachable without sight. Not fixed now because nothing above the stage consumes a word run yet — onSelectWords has no listener until 13's print-vs-QAC alignment lands, so a keyboard path would reach a state that does nothing and a live region would announce a phrase and then fall silent. Order to fix: 13 first, then a key that descends from a selected ayah and an announcement naming the first and last word of the run rather than counting it. PLAN 15 carries the reasoning."
     },
     {
       "id": "plan-hifth-licence",

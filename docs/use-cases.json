@@ -158,6 +158,14 @@
         {
           "file": "apps/web/src/components/PageStage.tsx",
           "symbol": "applyWords"
+        },
+        {
+          "file": "packages/core/src/adjacency.ts",
+          "symbol": "refineByWords"
+        },
+        {
+          "file": "apps/web/src/App.tsx",
+          "symbol": "const handleSelectWords"
         }
       ],
       "proof": [
@@ -171,16 +179,27 @@
         },
         {
           "file": "apps/web/e2e/word.spec.ts",
+          "test": "Enter again descends to words; ← carries the run and Shift+← grows it"
+        },
+        {
+          "file": "apps/web/e2e/word.spec.ts",
+          "test": "a word run is announced as its outcome, not as its words"
+        },
+        {
+          "file": "apps/web/e2e/word.spec.ts",
           "test": "the same hold outside the selection still paints a marquee"
         },
         {
           "gate": "gate:words"
+        },
+        {
+          "gate": "gate:edges"
         }
       ],
       "includes": [
         "select-the-ayah-i-am-on"
       ],
-      "gap": "The words can be picked and nothing is done with them yet: the hop still searches at ayah granularity, because print words and the QAC segmentation the edges are built from do not line up one-to-one (docs/PLAN.md 13). And the whole descent is finger-only — there is no keyboard or screen-reader path down to a word, so a reader who cannot see the page cannot reach this at all. Tracked, not assumed covered: docs/issues.json plan-word-selection-is-finger-only."
+      "gap": "The refinement is spoken, not shown: a word run says how many places it is about, and the rail beside it still lists every edge the whole ayah has. So a reader is told the answer narrowed and then has to find the narrowed ones themselves. Two more things the count does not say — 15% of edges name no words at all (a span is only emitted where the longest shared run is unique on both sides), and they are reported apart rather than folded in; and the ⬡ root lens is still an ayah-wide list even though the data under it is now word-granular. Whether counting is enough for a memoriser who cannot see the page is a human's call, owed by docs/validation/ledger.json screen-reader-walkthrough."
     },
     {
       "id": "hop-to-something-that-resembles-it",

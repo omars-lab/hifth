@@ -96,6 +96,11 @@
           "note": "Edges → rail chips, grouped by direction. `orderForHifz` beside it is the ranking a memoriser actually wants, which is not the ranking the data arrives in."
         },
         {
+          "file": "packages/core/src/adjacency.ts",
+          "symbol": "refineByWords",
+          "note": "What a word run does to the edge list, and the reason it returns THREE outcomes rather than two. `about` is the edges whose span overlaps the run; `excluded` counts the ones that name words elsewhere in the ayah; `unplaced` is the edges that name no words at all — 15% of them, because a span is only emitted when the longest shared run occurs in exactly one place on both sides. Folding `unplaced` into either of the others would be a claim the data does not make. `Adjacency.hopsForWords` is the same thing keyed by a `<ayah>#w3-7` run, and it holds no root shards, so a caller who wants shared-root edges judged must pass `options.roots` — see `root-lens`."
+        },
+        {
           "file": "apps/web/src/components/HopRail.tsx",
           "symbol": "HopRail",
           "note": "The chips down the side. Arabic-Indic digits throughout, including in aria-labels — a sighted reader seeing ٣ and a screen-reader user hearing 'three' is a defect, and one the aria snapshots caught."
@@ -153,6 +158,11 @@
           "note": "Ranking for someone holding a mushaf: near pages first, because that is how the memory is organised."
         },
         {
+          "file": "packages/core/src/roots.ts",
+          "symbol": "rootsForWords",
+          "note": "Which roots a word run actually carries — the word-granular half word-D added, and the seam between the two lenses. Every per-ayah root ref now names the PRINT word indices it sits at (`w`), baked in by the ETL, so this is a filter and not a second alignment. `Adjacency` has no root shards, so this is what a caller hands it as `options.roots` before asking `hopsForWords`; skip it and every shared-root edge is reported as unplaced rather than matched."
+        },
+        {
           "file": "apps/web/src/components/RootLens.tsx",
           "symbol": "RootLens",
           "note": "The ⬡ surface. Note the glyph is shared with a rail chip and the two promise different things — that collision was a decided defect, not an accident."
@@ -160,7 +170,8 @@
       ],
       "extend": [
         "Roots are derived, never hand-edited: change packages/etl/scripts/build-roots.mjs and re-run `make etl`.",
-        "Granularity is ayah-level today. Word-level is the open design (see the roadmap) and would change RootOccurrence, not just the UI."
+        "Granularity is ayah-level in the UI and word-level in the data since word-D: each per-ayah ref carries `w`, the print word indices the root occupies, which is what `rootsForWords` reads. The ⬡ surface has not been narrowed to a run yet — that is a UI question, no longer a data one.",
+        "The `w` indices are the PRINT's, not the Quranic Arabic Corpus's, even though the roots themselves come from QAC. The ETL applies the alignment and ships the answer; nothing in L1 or L2 knows a second index exists, and re-introducing one here would undo placement C — see `word-indexing`."
       ],
       "gates": ["pnpm test", "make ci"],
       "seeAlso": ["edge-data-etl", "the-hop"]
@@ -617,7 +628,7 @@
         }
       ],
       "extend": [
-        "The map is L3 today and the app cannot read it. Where it goes for the browser is an open question with three priced options — see `docs/design/word-indexing.md` §11 ① — and it is deliberately undecided until a caller exists, because the access pattern is what picks between them.",
+        "The map stays L3 and the app still cannot read it — on purpose, and that is now a shipped answer rather than an open one. word-D chose placement C (`docs/design/word-indexing.md` §11 ①): the ETL applies the map and BAKES ITS ANSWER into `assets/adj/**` and `assets/roots/**` as print indices, so nothing in L1 or L2 imports `Alignment` and no client can get the delta application wrong. The cost of restating an answer instead of shipping a question was measured at 8.9× the estimate (+81.6 KB gz) and paid deliberately. A THIRD consumer needs its own baking pass in ETL — the tajweed shards have not had one — not a browser-side reader.",
         "The alignment is DERIVED FROM the print's text and does not carry it. `build-words.mjs` still drops `data-hafs` and `gate:notext` still enforces it. Anything that would need the word's text to work is a new vendoring with its own licence question, not an extension of this.",
         "Do not widen `fold()` to make the four exceptions go away. The fold's value is that it is measured; four named exceptions checked in two places is a smaller surface than a fold nobody can argue with. A fifth exception means measure again, not add a name.",
         "Neither index may be renumbered. Both are upstream identifiers — the print's is load-bearing for every shard and its pin, QAC's for `assets/roots/**`, `gate:edges` and the tajweed ETL. The map exists so that neither has to move.",
@@ -660,8 +671,9 @@
         }
       ],
       "extend": [
-        "Nothing above the stage listens yet. `onSelectWords` fires with a `S:A:from-to` key on release and no caller passes it — the run is paint, and that is deliberate until PLAN 13's segmentation alignment exists, because the print counts pause marks as words and the corpora that would consume a word range do not. Wire a consumer only once you can say which segmentation its indices are in.",
-        "It has no keyboard or screen-reader path, and the tree is unchanged by a word run on purpose — the overlay is decorative and must stay so. Giving words a reachable route is a design question (what does an assistive-tech reader select a *phrase* with?), not a missing `tabindex`; it is tracked as an issue rather than left to be discovered.",
+        "`onSelectWords` fires with a `<ayah>#w3-7` key on release — the ayah key with the run appended — and `App.handleSelectWords` is what hears it: `Adjacency.hopsForWords` narrows the edge list to the ones the run is about, and the count is announced. Two rules a second consumer has to keep. The key's indices are the PRINT's — the print↔QAC alignment was applied in ETL and baked into the shards, never here (see `word-indexing`). And the roots must be handed in from `Roots.rootsForWords`, because `Adjacency` holds no root shards: without them a shared-root edge lands in `unplaced` rather than silently passing, which is the honest reading and the reason the refinement returns three outcomes instead of two.",
+        "A word run announces its OUTCOME and never its words. «٧ مواضع مشابهة» is the answer the reader dragged for; naming the run would put scripture into a UI string, which is the one thing this grain exists not to do (`docs/design/word-indexing.md` §10 and §11 ②). The overlay stays decorative — `word.spec.ts` asserts the stage's accessibility tree is identical before and after a run — so anything a word run has to say goes through the app's one live region and not through a node on the stage.",
+        "The keyboard descent is claimed in the CAPTURE phase on `window`, above the highlighter's own bubble-phase listener on the SVG: `Enter` on an already-selected ayah descends, `←`/`→` carry the run, `Shift` extends it, `Escape` climbs one rung. That ordering is the whole mechanism — it needs no L1 change, and it is why the arrows do not fall through to the page-turner. `word.spec.ts` proves the page did not turn by reading the slider's `aria-valuetext`, because a page that turned and a page that never loaded look identical in the SVG.",
         "The e2e nudge is not decoration. `filterTaps: true` gives @use-gesture's drag a 3 px threshold, so a hold that moves 1 px produces no frame and the ladder is never consulted — a spec that presses and waits will watch the feature do nothing. Both `word.spec.ts` and the golden row carry `NUDGE_PX` and say why.",
         "A golden that photographs a *gesture* must aim with the paint, not with a bounding box: the golden row takes the widest selection band because it is a whole line of print with both ends known, and aiming by box put the press 12 px from the window edge with the run growing off-screen."
       ],

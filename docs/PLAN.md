@@ -47,7 +47,7 @@ described in both files.
 | 3 — Diffs, share, a11y | complete | Teacher link cold-open restores exact view; screen reader announces hops | [loop-3.md](decisions/loop-3.md) |
 | 4a — Edge-data ETL | complete | Deterministic full-corpus edge ETL; 100% valid keys; shards <50KB gz | [loop-4a.md](decisions/loop-4a.md) |
 | 4b — Page corpus + streaming | complete | All 604 pages vendored + QUL-checked; every ayah navigable; TTI <2.5s mid-Android | [loop-4b.md](decisions/loop-4b.md) |
-| 5 — Highlight + roots | complete (a reader can now *pick* words — word-C, 2026-08-04; what a word run cannot yet do is search, and that blocker is segmentation, not geometry — see ⑬. It is also finger-only — ⑮) | Drag-range → merged hop list; root lens nearest-page-first | [loop-5.md](decisions/loop-5.md) |
+| 5 — Highlight + roots | complete (a word run now *searches*, and says how many places it is about — word-D, 2026-08-05; the segmentation blocker ⑬ named is measured and mapped, and ⑮'s keyboard path is in) | Drag-range → merged hop list; root lens nearest-page-first | [loop-5.md](decisions/loop-5.md), [word-selection.md](decisions/word-selection.md), [word-search.md](decisions/word-search.md) |
 | 6a — Skin, editions, wayfinding | complete | Instant plain⇄tajweed toggle (identical geometry); jump anywhere; visited pages survive offline; Lighthouse ≥90 | [loop-6a.md](decisions/loop-6a.md) |
 | 6b — Pin-a-juz packs | complete-with-deferral (the 8-day half is a user check) | Airplane-mode revision of a pinned juz works after 8+ days | [loop-6b.md](decisions/loop-6b.md) |
 | 7 — Polish + beta | pending (after 3+5+6) | Hafiz revision session, zero friction notes → **web v1.0** | — |
@@ -701,6 +701,36 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     blocked by ⑬ rather than by a human.
     [`decisions/word-selection.md`](decisions/word-selection.md) is the record of what the
     gesture is and what proved it.
+
+    **Answered 2026-08-05 by word-D, and the prediction above is half right in a way worth
+    keeping.** The order held: ⑬'s alignment landed first (`word-alignment.pin.json`, and
+    §11 ① of [`design/word-indexing.md`](design/word-indexing.md) records where the app
+    reads it), so a word run now *means* something before it was given a key. The key is a
+    second `Enter` on the ayah that is already selected, not `Shift+Arrow` — the reasoning
+    above was that a reader expects the text-field grammar, and they do, but `Shift+Arrow`
+    is the *extend* half of that grammar, not the *enter* half, and it is what extends a run
+    here too. The rule the app teaches is instead the pointer's own: a further action on the
+    current selection means words. One sentence for both hands. `←`/`→` carry the run,
+    `Shift` grows it, `Escape` climbs exactly one rung.
+
+    **The announcement went the other way, deliberately.** This item asked for «من «الحمد»
+    إلى «العالمين»» — the first and last word — on the grounds that «٤ كلمات» tells a
+    memoriser nothing they wanted to know. That is right about the count of *words* and it
+    is why the shipped announcement does not count them: it says «٧ مواضع مشابهة» — how many
+    places in the mus'haf this run turns out to be about. The outcome, not the selection.
+    Naming the words would mean reading scripture back to the reader through a UI string,
+    which is the one thing the word grain exists not to do (§10 of the word-indexing design,
+    and `gate:notext` behind it), and the reader can already see what they selected — what
+    they cannot see is the answer. The identity half the alignment unblocked stays unspent.
+
+    **What is proven, and what is still owed.** `apps/web/e2e/word.spec.ts` drives the
+    descent from a real focus ring on both devices and asserts that the arrows never reach
+    the page-turner underneath; a second test asserts the live region says an outcome. What
+    no automated check can say is whether a count is *enough* — that is the ledger's
+    `screen-reader-walkthrough`, owned by a human, and it is the only thing that could
+    reopen the phrasing. [`decisions/word-search.md`](decisions/word-search.md) is the record
+    of what a span claims, why a run has three outcomes rather than two, and what the refined
+    search still does not do — the rail beside the page is not filtered, only counted.
 
 **The half of these a machine cannot run now has a register — and a runbook.** Follow-ups
 ① (the phone), ② (the browser glance) and ④ (VoiceOver/TalkBack) still wait on a human, and
