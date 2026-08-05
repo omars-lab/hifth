@@ -9,6 +9,18 @@
           "dSurah": -32,
           "dPage": -33
         },
+        "span": {
+          "from": [
+            1,
+            4
+          ]
+        },
+        "toSpan": {
+          "from": [
+            1,
+            4
+          ]
+        },
         "ctx": true
       }
     ],

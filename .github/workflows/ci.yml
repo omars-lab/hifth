@@ -185,6 +185,15 @@ jobs:
       - name: Gate — every word box lands on the ayah it claims
         run: pnpm gate:words
 
+      # The map between the two word indices — the print's, which every box
+      # carries, and QAC's, which the roots shards speak. It was derived from a
+      # 351 MB corpus this repo does not vendor, so CI cannot re-derive it; what
+      # it can do is APPLY it to the committed shards and check the result
+      # against the vendored morphology, which is an independent third witness.
+      # An unchecked derived artifact is what #80 was, and it cost four loops.
+      - name: Gate — the print↔QAC word map still lands where QAC says
+        run: pnpm gate:align
+
       # docs/map.json tells a newcomer where each feature starts. This checks it
       # is still true, so it cannot rot into confident fiction. The pre-commit
       # hook runs the same gate scoped to the staged files.

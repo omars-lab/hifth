@@ -645,6 +645,33 @@ export function App(): JSX.Element {
     [announce, resolver, t],
   );
 
+  /**
+   * A run of words settled inside the selected ayah (word-D) — said out loud as
+   * the *outcome*, never as the selection.
+   *
+   * "You selected «ذكر نعمتي»" would be the app reading scripture back at the
+   * reader through a UI string, which is the one thing the word feature is built
+   * not to do; "seven similar places" is the answer they dragged for. It changes
+   * no state: the band is already on the page and the ayah is still the
+   * selection, so this is a question asked and answered, not a navigation.
+   *
+   * The roots are handed in rather than looked up inside `Adjacency`, which holds
+   * no root shards — without them a shared-root edge lands in `unplaced` (nobody
+   * asked the roots) instead of silently passing, and the count would overstate
+   * what the run actually matched.
+   */
+  const handleSelectWords = useCallback(
+    (wordKey: string) => {
+      if (!adjacency) return;
+      const hops = adjacency.hopsForWords(
+        wordKey,
+        roots ? { roots: roots.rootsForWords(wordKey) } : {},
+      );
+      announce(t.wordHops(hops.about.length, hops.unplaced.length));
+    },
+    [adjacency, roots, announce, t],
+  );
+
   // Forward hop: push the origin onto the trail, move to the target, pulse.
   // `origin` overrides the breadcrumb source — a merged range hop leaves from the
   // range member that actually produced the edge, not from the whole highlight.
@@ -1108,6 +1135,10 @@ export function App(): JSX.Element {
                   breadcrumbKey={breadcrumbKey}
                   onSelect={handleSelect}
                   onSelectRange={handleSelectRange}
+                  /* Both leaves, unlike `dragToTurn`: a word run is a question
+                     about the ayah that is selected, and on a spread that ayah
+                     is as often printed on this leaf as on the other one. */
+                  onSelectWords={handleSelectWords}
                   onTurn={stepPage}
                   /* The wheel, yes; a drag, no. Only the stage App holds a ref
                      to can be handed a tracked band, and a second fold drawn
@@ -1134,6 +1165,7 @@ export function App(): JSX.Element {
                 breadcrumbKey={breadcrumbKey}
                 onSelect={handleSelect}
                 onSelectRange={handleSelectRange}
+                onSelectWords={handleSelectWords}
                 /* Every turn ends where the arrow keys end — one `stepPage`, so
                    a wheel turn, a dragged turn and a keyed turn cannot drift
                    apart. Both stages get it: on a spread the facing leaf is as

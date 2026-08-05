@@ -16,9 +16,10 @@
  * ayah of the target range) → merge curated seed → symmetrize (every a→b
  * gains b→a; generated reverses copy note/twin/ctx/root but drop word
  * anchors) → dedupe on (from,to,type) → spec-§6 Edge records with real dir
- * (dPage from the ayah-page table, sameJuz from the juz table) → one shard
- * per surah, all 114 written (empty shards included so the app's loader
- * never 404s).
+ * (dPage from the ayah-page table, sameJuz from the juz table) and, where the
+ * pair shares one unambiguous phrase, the print word range on each side (see
+ * Pass 2½) → one shard per surah, all 114 written (empty shards included so
+ * the app's loader never 404s).
  *
  * Loop 2's `buildShards` compiler is retired here — this script emits
  * spec-shape shards directly (the adjacency.ts comment foretold it).
@@ -41,6 +42,8 @@ import {
   juzOf,
   TOTAL_AYAHS,
 } from "@hifth/core";
+import { wordsByAyah, sharedRuns } from "./morphology.mjs";
+import { openAlignment } from "./lib/segmentation.mjs";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const REPO = join(HERE, "..", "..", "..");
@@ -237,6 +240,60 @@ for (const [k, meta] of [...edges]) {
 }
 
 /* ------------------------------------------------------------------ */
+/* Pass 2½ — which words the edge is about.                            */
+/* ------------------------------------------------------------------ */
+
+/**
+ * A mutashabih edge says two ayahs look alike. A `span` says *where* — the
+ * print word range a hafiz's eye should land on, on each side. Without it the
+ * hop rail can only offer the whole ayah, and word selection (Loop 5's drag,
+ * `PageStage.onSelectWords`) has nothing to filter against.
+ *
+ * The rule is a definition, not a threshold: **emit a span only when the
+ * longest shared run occurs in exactly one place on both sides.** Where it
+ * occurs twice, "which words is this pair about" has more than one true
+ * answer, and picking the first is a coin flip dressed as a claim. The
+ * alignment this rides on took the same stance — there is no score there
+ * either, so there is none here.
+ *
+ * Measured over the 2,994 shipped mutashabih edges: 2,876 share a run at all,
+ * and ambiguity falls off with length — 65.2% of 1-word runs tie for longest,
+ * 17.6% at 2, 12.8% at 3, 3.8% at 4, 1.0% at 5, and none from 6 up. So the
+ * uniqueness rule keeps 2,544 (85.0%) and needs no length floor to do it: the
+ * floor a threshold would impose is what the rule already implies.
+ *
+ * Both ends are converted from QAC word numbers to print indices through
+ * `word-alignment.pin.json`, because print indices are what a word box carries
+ * and therefore the only numbers the app can highlight. The four ayahs the
+ * alignment excepts (2:72, 12:39, 12:41, 37:130) get no span on either side of
+ * any edge; measured, they block none of the 2,544.
+ *
+ * A generated reverse needs no special case: `sharedRuns(b, a)` mirrors
+ * `sharedRuns(a, b)`, so b→a derives the same two ranges with `span` and
+ * `toSpan` swapped. `gate:edges` checks that they do.
+ */
+const qacWords = wordsByAyah();
+const align = openAlignment();
+
+/** The print range covering QAC words `first…first+len-1`, or null. */
+function printRange(key, first, len) {
+  const head = align.printWordsOf(key, first);
+  const tail = align.printWordsOf(key, first + len - 1);
+  if (!head?.length || !tail?.length) return null;
+  return [Math.min(...head), Math.max(...tail)];
+}
+
+/** `{ from, to }` print ranges for a pair, or null when there is no one answer. */
+function spansOf(srcKey, tgtKey) {
+  if (align.exception(srcKey) || align.exception(tgtKey)) return null;
+  const { len, runs } = sharedRuns(qacWords.get(srcKey), qacWords.get(tgtKey));
+  if (len === 0 || runs.length !== 1) return null;
+  const from = printRange(srcKey, runs[0].a, len);
+  const to = printRange(tgtKey, runs[0].b, len);
+  return from && to ? { from, to } : null;
+}
+
+/* ------------------------------------------------------------------ */
 /* Pass 3 — spec-shape shards with real dir annotations.               */
 /* ------------------------------------------------------------------ */
 
@@ -246,6 +303,7 @@ const TYPE_RANK = { mutashabih: 0, "related-meaning": 1, "shared-root": 2 };
 const shards = new Map();
 for (let s = 1; s <= 114; s++) shards.set(s, {});
 
+let spanned = 0;
 const flat = [...edges].map(([k, meta]) => {
   const [f, t, type] = k.split(">");
   return { fromAbs: Number(f), toAbs: Number(t), type, ...meta };
@@ -263,6 +321,15 @@ for (const e of flat) {
   const tgt = fromAbsoluteAyah(e.toAbs);
   const sameJuz = juzOf(src.surah, src.ayah) === juzOf(tgt.surah, tgt.ayah);
   const key = formatAyahKey(EDITION, tgt.surah, tgt.ayah);
+  // Only mutashabih edges: they are the type whose *definition* is shared
+  // phrasing. A shared-root edge already names its word through `root`, and a
+  // related-meaning edge is thematic — its longest run is one word (measured:
+  // mean 1.00 over the two shipped), and one word in common is not a phrase.
+  const spans =
+    e.type === "mutashabih"
+      ? spansOf(`${src.surah}:${src.ayah}`, `${tgt.surah}:${tgt.ayah}`)
+      : null;
+  if (spans) spanned += 1;
   const edge = {
     type: e.type,
     to: e.w ? `${key}#${e.w}` : key,
@@ -272,6 +339,7 @@ for (const e of flat) {
       dPage: pageOf(e.toAbs) - pageOf(e.fromAbs),
       ...(sameJuz ? { sameJuz: true } : {}),
     },
+    ...(spans ? { span: { from: spans.from }, toSpan: { from: spans.to } } : {}),
     ...(e.root ? { root: e.root } : {}),
     ...(e.twin ? { twin: true } : {}),
     ...(e.ctx ? { ctx: true } : {}),
@@ -327,4 +395,8 @@ console.log(
 );
 console.log(
   `build-adjacency — largest shard: ${maxGz.surah}.json at ${maxGz.bytes}B gz (budget ${GZ_LIMIT}B)`,
+);
+console.log(
+  `build-adjacency — ${spanned} edges carry the word range they are about ` +
+    `(the rest share their longest run in more than one place, or nothing at all)`,
 );

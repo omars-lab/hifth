@@ -8,6 +8,18 @@
         "dir": {
           "dSurah": 47,
           "dPage": 227
+        },
+        "span": {
+          "from": [
+            1,
+            5
+          ]
+        },
+        "toSpan": {
+          "from": [
+            1,
+            5
+          ]
         }
       }
     ],
@@ -36,6 +48,18 @@
         "dir": {
           "dSurah": 47,
           "dPage": 227
+        },
+        "span": {
+          "from": [
+            6,
+            6
+          ]
+        },
+        "toSpan": {
+          "from": [
+            3,
+            3
+          ]
         }
       }
     ],
@@ -50,6 +74,18 @@
         "dir": {
           "dSurah": 47,
           "dPage": 227
+        },
+        "span": {
+          "from": [
+            1,
+            3
+          ]
+        },
+        "toSpan": {
+          "from": [
+            1,
+            3
+          ]
         }
       }
     ],
@@ -64,6 +100,18 @@
         "dir": {
           "dSurah": 47,
           "dPage": 227
+        },
+        "span": {
+          "from": [
+            1,
+            3
+          ]
+        },
+        "toSpan": {
+          "from": [
+            1,
+            3
+          ]
         }
       }
     ],
@@ -78,6 +126,18 @@
         "dir": {
           "dSurah": 47,
           "dPage": 227
+        },
+        "span": {
+          "from": [
+            2,
+            2
+          ]
+        },
+        "toSpan": {
+          "from": [
+            3,
+            3
+          ]
         }
       }
     ],
@@ -92,6 +152,18 @@
         "dir": {
           "dSurah": -7,
           "dPage": -69
+        },
+        "span": {
+          "from": [
+            1,
+            10
+          ]
+        },
+        "toSpan": {
+          "from": [
+            1,
+            10
+          ]
         }
       }
     ],
@@ -107,6 +179,18 @@
           "dSurah": 17,
           "dPage": 133
         },
+        "span": {
+          "from": [
+            1,
+            6
+          ]
+        },
+        "toSpan": {
+          "from": [
+            11,
+            16
+          ]
+        },
         "ctx": true
       }
     ],
@@ -121,6 +205,18 @@
         "dir": {
           "dSurah": -16,
           "dPage": -185
+        },
+        "span": {
+          "from": [
+            3,
+            15
+          ]
+        },
+        "toSpan": {
+          "from": [
+            2,
+            14
+          ]
         }
       },
       {
@@ -130,6 +226,18 @@
         "dir": {
           "dSurah": -12,
           "dPage": -119
+        },
+        "span": {
+          "from": [
+            1,
+            6
+          ]
+        },
+        "toSpan": {
+          "from": [
+            1,
+            6
+          ]
         }
       }
     ],
@@ -144,6 +252,18 @@
         "dir": {
           "dSurah": -16,
           "dPage": -185
+        },
+        "span": {
+          "from": [
+            5,
+            6
+          ]
+        },
+        "toSpan": {
+          "from": [
+            3,
+            4
+          ]
         }
       },
       {
@@ -153,6 +273,18 @@
         "dir": {
           "dSurah": -16,
           "dPage": -185
+        },
+        "span": {
+          "from": [
+            3,
+            6
+          ]
+        },
+        "toSpan": {
+          "from": [
+            3,
+            6
+          ]
         }
       },
       {
@@ -162,6 +294,18 @@
         "dir": {
           "dSurah": -16,
           "dPage": -181
+        },
+        "span": {
+          "from": [
+            3,
+            6
+          ]
+        },
+        "toSpan": {
+          "from": [
+            4,
+            7
+          ]
         }
       },
       {
@@ -171,6 +315,18 @@
         "dir": {
           "dSurah": -12,
           "dPage": -119
+        },
+        "span": {
+          "from": [
+            3,
+            7
+          ]
+        },
+        "toSpan": {
+          "from": [
+            3,
+            7
+          ]
         }
       },
       {
@@ -181,6 +337,18 @@
           "dSurah": 0,
           "dPage": 1,
           "sameJuz": true
+        },
+        "span": {
+          "from": [
+            7,
+            11
+          ]
+        },
+        "toSpan": {
+          "from": [
+            17,
+            21
+          ]
         }
       },
       {
@@ -190,6 +358,18 @@
         "dir": {
           "dSurah": 5,
           "dPage": 47
+        },
+        "span": {
+          "from": [
+            23,
+            27
+          ]
+        },
+        "toSpan": {
+          "from": [
+            14,
+            18
+          ]
         }
       },
       {
@@ -199,6 +379,18 @@
         "dir": {
           "dSurah": 18,
           "dPage": 135
+        },
+        "span": {
+          "from": [
+            20,
+            21
+          ]
+        },
+        "toSpan": {
+          "from": [
+            19,
+            20
+          ]
         }
       }
     ],
@@ -214,6 +406,18 @@
           "dSurah": 0,
           "dPage": 1,
           "sameJuz": true
+        },
+        "span": {
+          "from": [
+            1,
+            5
+          ]
+        },
+        "toSpan": {
+          "from": [
+            1,
+            5
+          ]
         }
       }
     ],
@@ -228,6 +432,18 @@
         "dir": {
           "dSurah": -12,
           "dPage": -118
+        },
+        "span": {
+          "from": [
+            30,
+            37
+          ]
+        },
+        "toSpan": {
+          "from": [
+            7,
+            14
+          ]
         }
       },
       {
@@ -237,6 +453,18 @@
         "dir": {
           "dSurah": -12,
           "dPage": -117
+        },
+        "span": {
+          "from": [
+            16,
+            27
+          ]
+        },
+        "toSpan": {
+          "from": [
+            10,
+            21
+          ]
         }
       },
       {
@@ -261,6 +489,18 @@
         "dir": {
           "dSurah": -17,
           "dPage": -216
+        },
+        "span": {
+          "from": [
+            3,
+            6
+          ]
+        },
+        "toSpan": {
+          "from": [
+            31,
+            34
+          ]
         }
       },
       {
@@ -271,6 +511,18 @@
           "dSurah": 0,
           "dPage": 0,
           "sameJuz": true
+        },
+        "span": {
+          "from": [
+            1,
+            4
+          ]
+        },
+        "toSpan": {
+          "from": [
+            1,
+            4
+          ]
         }
       }
     ],
@@ -285,6 +537,18 @@
         "dir": {
           "dSurah": -16,
           "dPage": -186
+        },
+        "span": {
+          "from": [
+            3,
+            5
+          ]
+        },
+        "toSpan": {
+          "from": [
+            2,
+            4
+          ]
         }
       },
       {
@@ -313,6 +577,18 @@
           "dSurah": 0,
           "dPage": -1,
           "sameJuz": true
+        },
+        "span": {
+          "from": [
+            17,
+            21
+          ]
+        },
+        "toSpan": {
+          "from": [
+            7,
+            11
+          ]
         }
       }
     ],
@@ -328,6 +604,18 @@
           "dSurah": -17,
           "dPage": -213
         },
+        "span": {
+          "from": [
+            1,
+            5
+          ]
+        },
+        "toSpan": {
+          "from": [
+            3,
+            7
+          ]
+        },
         "ctx": true
       },
       {
@@ -337,6 +625,18 @@
         "dir": {
           "dSurah": 22,
           "dPage": 157
+        },
+        "span": {
+          "from": [
+            2,
+            10
+          ]
+        },
+        "toSpan": {
+          "from": [
+            4,
+            12
+          ]
         },
         "ctx": true
       }
@@ -353,6 +653,18 @@
           "dSurah": 0,
           "dPage": -1,
           "sameJuz": true
+        },
+        "span": {
+          "from": [
+            1,
+            5
+          ]
+        },
+        "toSpan": {
+          "from": [
+            1,
+            5
+          ]
         }
       },
       {
@@ -377,6 +689,18 @@
         "dir": {
           "dSurah": -17,
           "dPage": -216
+        },
+        "span": {
+          "from": [
+            3,
+            4
+          ]
+        },
+        "toSpan": {
+          "from": [
+            31,
+            32
+          ]
         }
       },
       {
@@ -387,6 +711,18 @@
           "dSurah": 0,
           "dPage": 0,
           "sameJuz": true
+        },
+        "span": {
+          "from": [
+            1,
+            4
+          ]
+        },
+        "toSpan": {
+          "from": [
+            1,
+            4
+          ]
         }
       }
     ],
@@ -401,6 +737,18 @@
         "dir": {
           "dSurah": -8,
           "dPage": -83
+        },
+        "span": {
+          "from": [
+            1,
+            8
+          ]
+        },
+        "toSpan": {
+          "from": [
+            1,
+            8
+          ]
         },
         "ctx": true
       }
@@ -417,6 +765,18 @@
           "dSurah": 11,
           "dPage": 84
         },
+        "span": {
+          "from": [
+            6,
+            12
+          ]
+        },
+        "toSpan": {
+          "from": [
+            9,
+            15
+          ]
+        },
         "ctx": true
       }
     ],
@@ -431,6 +791,18 @@
         "dir": {
           "dSurah": -2,
           "dPage": -15
+        },
+        "span": {
+          "from": [
+            3,
+            9
+          ]
+        },
+        "toSpan": {
+          "from": [
+            2,
+            8
+          ]
         }
       }
     ],
@@ -445,6 +817,18 @@
         "dir": {
           "dSurah": -2,
           "dPage": -15
+        },
+        "span": {
+          "from": [
+            2,
+            3
+          ]
+        },
+        "toSpan": {
+          "from": [
+            3,
+            4
+          ]
         }
       },
       {
@@ -454,6 +838,18 @@
         "dir": {
           "dSurah": 7,
           "dPage": 62
+        },
+        "span": {
+          "from": [
+            6,
+            10
+          ]
+        },
+        "toSpan": {
+          "from": [
+            9,
+            13
+          ]
         },
         "ctx": true
       }
@@ -484,6 +880,18 @@
           "dSurah": 0,
           "dPage": 3,
           "sameJuz": true
+        },
+        "span": {
+          "from": [
+            3,
+            6
+          ]
+        },
+        "toSpan": {
+          "from": [
+            3,
+            6
+          ]
         }
       },
       {
@@ -493,6 +901,18 @@
         "dir": {
           "dSurah": 22,
           "dPage": 155
+        },
+        "span": {
+          "from": [
+            3,
+            5
+          ]
+        },
+        "toSpan": {
+          "from": [
+            7,
+            9
+          ]
         }
       }
     ],
@@ -507,6 +927,18 @@
         "dir": {
           "dSurah": 20,
           "dPage": 149
+        },
+        "span": {
+          "from": [
+            11,
+            12
+          ]
+        },
+        "toSpan": {
+          "from": [
+            7,
+            8
+          ]
         },
         "ctx": true
       }
@@ -523,6 +955,18 @@
           "dSurah": 44,
           "dPage": 216
         },
+        "span": {
+          "from": [
+            3,
+            9
+          ]
+        },
+        "toSpan": {
+          "from": [
+            3,
+            9
+          ]
+        },
         "ctx": true
       }
     ],
@@ -538,6 +982,18 @@
           "dSurah": -6,
           "dPage": -61
         },
+        "span": {
+          "from": [
+            9,
+            10
+          ]
+        },
+        "toSpan": {
+          "from": [
+            8,
+            9
+          ]
+        },
         "ctx": true
       },
       {
@@ -547,6 +1003,18 @@
         "dir": {
           "dSurah": -6,
           "dPage": -55
+        },
+        "span": {
+          "from": [
+            9,
+            10
+          ]
+        },
+        "toSpan": {
+          "from": [
+            13,
+            14
+          ]
         },
         "ctx": true
       },
@@ -558,6 +1026,18 @@
           "dSurah": 4,
           "dPage": 36
         },
+        "span": {
+          "from": [
+            2,
+            2
+          ]
+        },
+        "toSpan": {
+          "from": [
+            5,
+            5
+          ]
+        },
         "ctx": true
       },
       {
@@ -567,6 +1047,18 @@
         "dir": {
           "dSurah": 14,
           "dPage": 99
+        },
+        "span": {
+          "from": [
+            2,
+            10
+          ]
+        },
+        "toSpan": {
+          "from": [
+            1,
+            9
+          ]
         },
         "ctx": true
       },
@@ -578,6 +1070,18 @@
           "dSurah": 14,
           "dPage": 101
         },
+        "span": {
+          "from": [
+            2,
+            9
+          ]
+        },
+        "toSpan": {
+          "from": [
+            1,
+            8
+          ]
+        },
         "ctx": true
       },
       {
@@ -587,6 +1091,18 @@
         "dir": {
           "dSurah": 33,
           "dPage": 188
+        },
+        "span": {
+          "from": [
+            3,
+            10
+          ]
+        },
+        "toSpan": {
+          "from": [
+            5,
+            12
+          ]
         },
         "ctx": true
       }
@@ -603,6 +1119,18 @@
           "dSurah": 4,
           "dPage": 36
         },
+        "span": {
+          "from": [
+            7,
+            13
+          ]
+        },
+        "toSpan": {
+          "from": [
+            7,
+            13
+          ]
+        },
         "ctx": true
       }
     ],
@@ -617,6 +1145,18 @@
         "dir": {
           "dSurah": 18,
           "dPage": 132
+        },
+        "span": {
+          "from": [
+            1,
+            4
+          ]
+        },
+        "toSpan": {
+          "from": [
+            9,
+            12
+          ]
         }
       }
     ],
@@ -631,6 +1171,18 @@
         "dir": {
           "dSurah": -16,
           "dPage": -197
+        },
+        "span": {
+          "from": [
+            1,
+            6
+          ]
+        },
+        "toSpan": {
+          "from": [
+            6,
+            11
+          ]
         }
       }
     ],
@@ -645,6 +1197,18 @@
         "dir": {
           "dSurah": -16,
           "dPage": -197
+        },
+        "span": {
+          "from": [
+            4,
+            5
+          ]
+        },
+        "toSpan": {
+          "from": [
+            8,
+            9
+          ]
         }
       },
       {
@@ -654,6 +1218,18 @@
         "dir": {
           "dSurah": -16,
           "dPage": -197
+        },
+        "span": {
+          "from": [
+            1,
+            8
+          ]
+        },
+        "toSpan": {
+          "from": [
+            1,
+            8
+          ]
         }
       }
     ],
@@ -669,6 +1245,18 @@
           "dSurah": 0,
           "dPage": -3,
           "sameJuz": true
+        },
+        "span": {
+          "from": [
+            3,
+            6
+          ]
+        },
+        "toSpan": {
+          "from": [
+            3,
+            6
+          ]
         }
       },
       {
@@ -678,6 +1266,18 @@
         "dir": {
           "dSurah": 22,
           "dPage": 152
+        },
+        "span": {
+          "from": [
+            2,
+            5
+          ]
+        },
+        "toSpan": {
+          "from": [
+            6,
+            9
+          ]
         }
       }
     ],
@@ -692,6 +1292,18 @@
         "dir": {
           "dSurah": -3,
           "dPage": -29
+        },
+        "span": {
+          "from": [
+            1,
+            4
+          ]
+        },
+        "toSpan": {
+          "from": [
+            1,
+            4
+          ]
         }
       }
     ],

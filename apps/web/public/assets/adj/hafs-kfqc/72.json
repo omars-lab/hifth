@@ -9,6 +9,18 @@
           "dSurah": -54,
           "dPage": -275
         },
+        "span": {
+          "from": [
+            4,
+            7
+          ]
+        },
+        "toSpan": {
+          "from": [
+            4,
+            7
+          ]
+        },
         "ctx": true
       }
     ],
@@ -23,6 +35,18 @@
         "dir": {
           "dSurah": -53,
           "dPage": -263
+        },
+        "span": {
+          "from": [
+            1,
+            5
+          ]
+        },
+        "toSpan": {
+          "from": [
+            11,
+            15
+          ]
         }
       }
     ],

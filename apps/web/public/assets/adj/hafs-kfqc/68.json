@@ -9,6 +9,18 @@
           "dSurah": -16,
           "dPage": -40
         },
+        "span": {
+          "from": [
+            2,
+            4
+          ]
+        },
+        "toSpan": {
+          "from": [
+            3,
+            5
+          ]
+        },
         "ctx": true
       }
     ],
@@ -24,6 +36,18 @@
           "dSurah": -31,
           "dPage": -118
         },
+        "span": {
+          "from": [
+            2,
+            4
+          ]
+        },
+        "toSpan": {
+          "from": [
+            3,
+            5
+          ]
+        },
         "ctx": true
       },
       {
@@ -33,6 +57,18 @@
         "dir": {
           "dSurah": -31,
           "dPage": -118
+        },
+        "span": {
+          "from": [
+            1,
+            4
+          ]
+        },
+        "toSpan": {
+          "from": [
+            1,
+            4
+          ]
         },
         "ctx": true
       }
@@ -63,6 +99,18 @@
           "dSurah": 2,
           "dPage": 4,
           "sameJuz": true
+        },
+        "span": {
+          "from": [
+            1,
+            4
+          ]
+        },
+        "toSpan": {
+          "from": [
+            1,
+            4
+          ]
         }
       }
     ],
@@ -77,6 +125,18 @@
         "dir": {
           "dSurah": -16,
           "dPage": -41
+        },
+        "span": {
+          "from": [
+            1,
+            7
+          ]
+        },
+        "toSpan": {
+          "from": [
+            1,
+            7
+          ]
         },
         "ctx": true
       },
@@ -102,6 +162,18 @@
         "dir": {
           "dSurah": -16,
           "dPage": -41
+        },
+        "span": {
+          "from": [
+            2,
+            3
+          ]
+        },
+        "toSpan": {
+          "from": [
+            3,
+            4
+          ]
         }
       },
       {
@@ -112,6 +184,18 @@
           "dSurah": 8,
           "dPage": 13,
           "sameJuz": true
+        },
+        "span": {
+          "from": [
+            1,
+            5
+          ]
+        },
+        "toSpan": {
+          "from": [
+            1,
+            5
+          ]
         }
       }
     ],
