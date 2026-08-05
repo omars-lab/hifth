@@ -28,6 +28,15 @@
  * that runs the code it is checking proves only that the code agrees with
  * itself. What is being checked here is the *pin*, and the reader is part of
  * what could be wrong with it.
+ *
+ * Section 5 checks the first thing shipped *through* the map: the `w` print
+ * word indices baked into `assets/roots/**`. `build-roots.mjs` converts them
+ * with `Alignment`; this gate never calls it, and asks only questions the word
+ * shards and the exception table can answer on their own — is `w` there exactly
+ * where the map is, is every index a lexical word of that ayah, is it ordered
+ * and unique, and is it at least as long as the segment count it sits beside.
+ * Same division of labour as the span checks in `gate:edges`: the producer
+ * derives, the gate witnesses, and neither borrows the other's reader.
  */
 import { readFileSync, readdirSync, existsSync } from "node:fs";
 import { join } from "node:path";
@@ -38,6 +47,7 @@ import { EXCEPTIONS } from "../packages/etl/scripts/lib/segmentation.mjs";
 const ROOT = new URL("..", import.meta.url).pathname;
 const PIN = join(ROOT, "packages/etl/data/pages/word-alignment.pin.json");
 const WORDS = join(ROOT, "apps/web/public/assets/words/hafs-kfqc");
+const ROOTS = join(ROOT, "apps/web/public/assets/roots/hafs-kfqc/ayah");
 
 const fail = [];
 const say = (m) => fail.push(m);
@@ -150,6 +160,53 @@ for (const [field, value] of Object.entries(expectedMeasured)) {
   if (m[field] !== value) say(`measured.${field} says ${m[field]}, applying the map gives ${value}`);
 }
 
+// ---- 5. the roots shards' `w` is where the map says it can be ---------------
+// `w` is the map's only shipped consequence so far; a wrong index here is a
+// highlight on the wrong word, which reads as the app being confused about the
+// mus'haf rather than about its own arithmetic.
+let placed = 0;
+let unplaced = 0;
+let wider = 0;
+if (existsSync(ROOTS)) {
+  for (const file of readdirSync(ROOTS).filter((f) => f.endsWith(".json"))) {
+    const surah = file.replace(".json", "");
+    const shard = JSON.parse(readFileSync(join(ROOTS, file), "utf8"));
+    for (const [ayah, entries] of Object.entries(shard)) {
+      const key = `${surah}:${ayah}`;
+      const lexical = new Set(print.get(key) ?? []);
+      for (const { r, n, w } of entries) {
+        const at = `${key} ${r}`;
+        if (!w) {
+          unplaced += 1;
+          // No `w` is a claim in itself: this ayah is one the map excepts.
+          if (!EXCEPTIONS[key]) say(`${at}: no w, but ${key} is not an excepted ayah`);
+          continue;
+        }
+        placed += 1;
+        if (EXCEPTIONS[key]) say(`${at}: carries w, but ${key} is excepted — the map cannot place it`);
+        if (!Array.isArray(w) || w.length === 0) {
+          say(`${at}: w is ${JSON.stringify(w)}, which is not a non-empty list`);
+          continue;
+        }
+        for (let i = 0; i < w.length; i += 1) {
+          if (!Number.isInteger(w[i])) say(`${at}: w contains ${JSON.stringify(w[i])}, which is not an index`);
+          else if (!lexical.has(w[i])) say(`${at}: w has print word ${w[i]}, which ${key} has no lexical box for`);
+          if (i > 0 && w[i] <= w[i - 1]) say(`${at}: w is ${w.join(",")} — not ascending and unique`);
+        }
+        // Measured over the 44,401 placed pairs: |w| === n on 39,136 and > n on
+        // 5,265, never less. It cannot be less — no root in the corpus sits on
+        // two rooted segments of one word (0 of 44,431), so `n` is also the
+        // number of corpus words the root occupies, and the print only ever
+        // splits one of those into more pieces, never merges two into fewer.
+        if (w.length < n) say(`${at}: w places ${w.length} words for ${n} rooted segments`);
+        if (w.length > n) wider += 1;
+      }
+    }
+  }
+} else {
+  say(`no ${ROOTS} — run \`pnpm --filter @hifth/etl build:roots\``);
+}
+
 if (fail.length) {
   console.error(`gate:align — FAIL (${fail.length})`);
   for (const line of fail.slice(0, 25)) console.error(`  ${line}`);
@@ -163,4 +220,9 @@ console.log(
   `gate:align — OK: ${checked} ayahs map print→QAC exactly ` +
     `(${printWords} print words → ${qacWords} QAC words, ${joins} joins, ${splits} splits), ` +
     `${inPin.length} named exceptions`,
+);
+console.log(
+  `gate:align — OK: ${placed} root-ayah pairs sit on lexical print words ` +
+    `(${wider} spread wider than their segment count), ` +
+    `${unplaced} unplaced and all on excepted ayahs`,
 );
