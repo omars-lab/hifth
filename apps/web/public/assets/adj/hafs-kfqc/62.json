@@ -9,6 +9,18 @@
           "dSurah": -5,
           "dPage": -16
         },
+        "span": {
+          "from": [
+            2,
+            5
+          ]
+        },
+        "toSpan": {
+          "from": [
+            2,
+            5
+          ]
+        },
         "ctx": true
       },
       {
@@ -19,6 +31,18 @@
           "dSurah": -3,
           "dPage": -8,
           "sameJuz": true
+        },
+        "span": {
+          "from": [
+            2,
+            9
+          ]
+        },
+        "toSpan": {
+          "from": [
+            2,
+            9
+          ]
         },
         "ctx": true
       },
@@ -31,6 +55,18 @@
           "dPage": -2,
           "sameJuz": true
         },
+        "span": {
+          "from": [
+            2,
+            9
+          ]
+        },
+        "toSpan": {
+          "from": [
+            2,
+            9
+          ]
+        },
         "ctx": true
       },
       {
@@ -41,6 +77,18 @@
           "dSurah": 2,
           "dPage": 3,
           "sameJuz": true
+        },
+        "span": {
+          "from": [
+            1,
+            9
+          ]
+        },
+        "toSpan": {
+          "from": [
+            1,
+            9
+          ]
         },
         "ctx": true
       }
@@ -56,6 +104,18 @@
         "dir": {
           "dSurah": -60,
           "dPage": -533
+        },
+        "span": {
+          "from": [
+            6,
+            9
+          ]
+        },
+        "toSpan": {
+          "from": [
+            5,
+            8
+          ]
         }
       },
       {
@@ -65,6 +125,18 @@
         "dir": {
           "dSurah": -60,
           "dPage": -530
+        },
+        "span": {
+          "from": [
+            15,
+            17
+          ]
+        },
+        "toSpan": {
+          "from": [
+            13,
+            15
+          ]
         }
       },
       {
@@ -74,6 +146,18 @@
         "dir": {
           "dSurah": -59,
           "dPage": -482
+        },
+        "span": {
+          "from": [
+            8,
+            25
+          ]
+        },
+        "toSpan": {
+          "from": [
+            12,
+            29
+          ]
         }
       }
     ],
@@ -88,6 +172,18 @@
         "dir": {
           "dSurah": -60,
           "dPage": -538
+        },
+        "span": {
+          "from": [
+            4,
+            12
+          ]
+        },
+        "toSpan": {
+          "from": [
+            4,
+            12
+          ]
         },
         "ctx": true
       }
