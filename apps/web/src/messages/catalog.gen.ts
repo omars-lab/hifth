@@ -193,5 +193,6 @@ export interface Catalog {
   readonly tapHint: string;
   readonly trail: string;
   readonly twin: string;
+  readonly wordHops: (d: { readonly n: number; readonly nText: string | number; readonly u: number; readonly uText: string | number }) => string;
   readonly wordLevelPending: string;
 }
