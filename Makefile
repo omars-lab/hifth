@@ -225,6 +225,7 @@ ci: core ## Full local mirror of the CI build-test-gate job, IN CI ORDER
 	$(PNPM) gate:assets
 	$(PNPM) gate:pages
 	$(PNPM) gate:words
+	$(PNPM) gate:align
 	$(PNPM) gate:map
 	$(PNPM) gate:use-cases
 	$(PNPM) gate:issues
