@@ -40,16 +40,30 @@ const ROOT_SHARD: RootIndexShard = {
   "ه د ي": { l: [], w: 1, a: [[54, 7, 1]] },
 };
 
+/*
+ * `w` is the print word index a root sits at, in the same numbering `#wN` keys
+ * and the word boxes use. ه د ي carries two indices for one segment — the
+ * |w| > n case the print produces when it writes a corpus word as two pieces
+ * (5,265 of the 44,401 shipped pairs). Ayah 72 is one of the four the alignment
+ * excepts, so none of its roots may carry `w` at all.
+ */
 const AYAH_SHARD: AyahRootsShard = {
   "40": [
-    { r: "ذ ك ر", b: 0, n: 1 },
-    { r: "ن ع م", b: 0, n: 1 },
+    { r: "ذ ك ر", b: 0, n: 1, w: [2] },
+    { r: "ن ع م", b: 0, n: 1, w: [3] },
   ],
   "47": [
-    { r: "ن ع م", b: 0, n: 1 },
+    { r: "ن ع م", b: 0, n: 1, w: [3] },
+    { r: "ذ ك ر", b: 0, n: 1, w: [2] },
+    { r: "ه د ي", b: 0, n: 1, w: [7, 8] },
+    // The same root twice on one ayah. `build-roots.mjs` dedupes before it
+    // writes, so this shape does not ship; it is here because the lens dedupes
+    // too, and the second ref's words must survive that.
+    { r: "ذ ك ر", b: 0, n: 1, w: [9] },
+  ],
+  "72": [
     { r: "ذ ك ر", b: 0, n: 1 },
-    { r: "ه د ي", b: 0, n: 1 },
-    { r: "ذ ك ر", b: 0, n: 1 }, // the same root twice on one ayah
+    { r: "ن ع م", b: 0, n: 1 },
   ],
 };
 
@@ -165,6 +179,78 @@ describe("Roots — families", () => {
     ]);
     // A root with no lemma data still produces a family, just no sub-groups.
     expect(familyOf("ه د ي", 47).lemmas).toEqual([]);
+  });
+});
+
+describe("Roots — a run of words (word-D)", () => {
+  const run = (ayah: number, w: string) => `${key(2, ayah)}#${w}`;
+
+  it("carries each root's print word indices onto its family", () => {
+    expect(familyOf("ذ ك ر", 40).at).toEqual([2]);
+    // One rooted segment, two places on the page — `at` follows the print.
+    const hdy = familyOf("ه د ي", 47);
+    expect(hdy.here).toBe(1);
+    expect(hdy.at).toEqual([7, 8]);
+  });
+
+  it("says nothing about where, on an ayah the alignment excepts", () => {
+    for (const family of lens().familiesForKey(key(2, 72))) {
+      // Absent, not empty: an empty list would claim the root is nowhere.
+      expect(family).not.toHaveProperty("at");
+    }
+  });
+
+  it("names the roots a run of words carries, in mus'haf order and deduped", () => {
+    const roots = lens();
+    expect(roots.rootsForWords(run(47, "w3"))).toEqual(["ن ع م"]);
+    expect(roots.rootsForWords(run(47, "w2-3"))).toEqual(["ن ع م", "ذ ك ر"]);
+    // Either half of a two-piece word finds it.
+    expect(roots.rootsForWords(run(47, "w7"))).toEqual(["ه د ي"]);
+    expect(roots.rootsForWords(run(47, "w8"))).toEqual(["ه د ي"]);
+    // The lens dedupes the two ذ ك ر refs; the second one's words still count.
+    expect(roots.rootsForWords(run(47, "w9"))).toEqual(["ذ ك ر"]);
+    expect(roots.rootsForWords(run(47, "w2-9"))).toEqual(["ن ع م", "ذ ك ر", "ه د ي"]);
+    // A word no root sits on is an answer, not a failure to answer.
+    expect(roots.rootsForWords(run(47, "w5"))).toEqual([]);
+  });
+
+  it("refuses a key that is not a word run", () => {
+    const roots = lens();
+    for (const bad of [key(2, 47), `quran/other-edition/2:47#w3`, "not-a-key"]) {
+      expect(roots.rootsForWords(bad)).toEqual([]);
+      expect(roots.familiesForWords(bad)).toEqual([]);
+    }
+  });
+
+  it("narrows the families to the selected words, and nothing else about them", () => {
+    const roots = lens();
+    expect(roots.familiesForWords(run(47, "w7")).map((f) => f.root)).toEqual(["ه د ي"]);
+    expect(roots.familiesForWords(run(40, "w2-3")).map((f) => f.root)).toEqual([
+      "ن ع م",
+      "ذ ك ر",
+    ]);
+    // Narrowing the source does not narrow where the family lands: ذ ك ر's hops
+    // out of 2:40 are the same four whether the whole ayah or one word asked.
+    const whole = familyOf("ذ ك ر", 40);
+    const word = roots.familiesForWords(run(40, "w2"))[0]!;
+    expect(word.hops).toEqual(whole.hops);
+    expect(word.ayahs).toBe(whole.ayahs);
+  });
+
+  it("passes the limit through, so a run truncates like an ayah", () => {
+    const capped = lens().familiesForWords(run(40, "w2"), { limit: 2 })[0]!;
+    expect(capped.hops).toHaveLength(2);
+    expect(capped.truncated).toBe(true);
+  });
+
+  it("over-answers on an excepted ayah rather than answering nothing", () => {
+    // No root here carries `w`, so the run cannot be honoured. Showing a hafiz
+    // an empty lens would claim these words have no family, which is false.
+    const roots = lens();
+    expect(roots.rootsForWords(run(72, "w1"))).toEqual(["ذ ك ر", "ن ع م"]);
+    expect(roots.familiesForWords(run(72, "w1")).map((f) => f.root)).toEqual(
+      roots.familiesForKey(key(2, 72)).map((f) => f.root),
+    );
   });
 });
 

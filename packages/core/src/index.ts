@@ -150,6 +150,16 @@ export {
   type RangeSource,
 } from "./adjacency.js";
 
+// word-D — a run of words refines the hop list. Three outcomes, not two: the
+// edges the words are about, the edges that name no words and so cannot be
+// judged by a selection, and a count of what the refinement removed.
+export {
+  refineByWords,
+  type WordRun,
+  type WordHops,
+  type WordHopOptions,
+} from "./adjacency.js";
+
 // Loop 5 — the drag-to-highlight gesture split (pan vs marquee vs pinch) and
 // the range side of the highlighter it feeds.
 export {

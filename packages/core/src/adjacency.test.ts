@@ -8,6 +8,7 @@ import {
   mergeRangeEdges,
   orderForHifz,
   RAIL_GLYPH,
+  refineByWords,
   type AdjacencyShard,
   type AyahAdjacency,
   type CuratedAdjacency,
@@ -15,6 +16,8 @@ import {
 } from "./adjacency.js";
 
 const ED = "hafs-kfqc";
+
+const k = (ref: string) => `quran/${ED}/${ref}`;
 
 /** Build an edge with sensible defaults for the field under test. */
 function edge(p: Partial<Edge> & Pick<Edge, "type" | "to" | "page">): Edge {
@@ -162,7 +165,6 @@ describe("buildShards + Adjacency (mock curated clusters → spec §6)", () => {
 });
 
 describe("mergeRangeEdges (spec §9: merged, deduped edges of a highlighted range)", () => {
-  const k = (ref: string) => `quran/${ED}/${ref}`;
   /** A range member with its edges (adjacency `ext` is never merged). */
   const src = (ref: string, edges: Edge[]) => ({
     key: k(ref),
@@ -326,5 +328,85 @@ describe("mergeRangeEdges (spec §9: merged, deduped edges of a highlighted rang
 
     expect(adj.hopsForRange([k("9:1"), k("9:2")])).toEqual([]);
     expect(adj.hopsForRange([])).toEqual([]);
+  });
+});
+
+describe("refineByWords (word-D: a run of words refines the hop list)", () => {
+  /*
+   * One ayah, five edges, chosen so every branch of the split is exercised:
+   * two look-alikes that name words (one over the run, one clear of it), a
+   * look-alike that names none, a shared root, and a related-meaning edge —
+   * which the ETL never spans, because a thematic pair's longest shared run is
+   * one word and one word in common is not a phrase.
+   */
+  // Written from 2:48, which sits on page 7 — every `dir` below is that
+  // distance, so `orderForHifz` ranks these the way it would in the app.
+  const ADJ: AyahAdjacency = {
+    edges: [
+      edge({ type: "mutashabih", to: k("2:122"), page: 19, dir: { dSurah: 0, dPage: 12 }, span: { from: [3, 7] } }),
+      edge({ type: "mutashabih", to: k("2:152"), page: 23, dir: { dSurah: 0, dPage: 16 }, span: { from: [11, 12] } }),
+      edge({ type: "mutashabih", to: k("7:35"), page: 154, dir: { dSurah: 5, dPage: 147 } }),
+      edge({ type: "shared-root", to: k("14:5"), page: 255, dir: { dSurah: 12, dPage: 248 }, root: "ذ ك ر" }),
+      edge({ type: "related-meaning", to: k("82:19"), page: 587, dir: { dSurah: 80, dPage: 580 } }),
+      // reserved types never appear, spanned or not
+      edge({ type: "tafsir-ref", to: k("3:1"), page: 50, dir: { dSurah: 1, dPage: 43 }, span: { from: [3, 4] } }),
+    ],
+    ext: [],
+  };
+
+  it("keeps the edges whose span meets the run and counts the ones it drops", () => {
+    const { about, unplaced, excluded } = refineByWords(ADJ, { from: 5, to: 6 });
+    expect(about.map((e) => e.to)).toEqual([k("2:122")]);
+    expect(excluded).toBe(1); // 2:152, which is about words 11–12
+    // A span-less edge is not evidence of anything; it is set aside, not judged.
+    expect(unplaced.map((e) => e.to)).toEqual([k("7:35"), k("14:5"), k("82:19")]);
+  });
+
+  it("treats the span as inclusive on both ends", () => {
+    for (const run of [{ from: 1, to: 3 }, { from: 7, to: 9 }]) {
+      expect(refineByWords(ADJ, run).about.map((e) => e.to)).toEqual([k("2:122")]);
+    }
+    expect(refineByWords(ADJ, { from: 8, to: 10 }).about).toEqual([]);
+  });
+
+  it("judges a shared-root edge only when the caller says which roots the words carry", () => {
+    const run = { from: 5, to: 6 };
+    const on = refineByWords(ADJ, run, { roots: ["ذ ك ر"] });
+    expect(on.about.map((e) => e.to)).toEqual([k("2:122"), k("14:5")]);
+    expect(on.unplaced.map((e) => e.to)).toEqual([k("7:35"), k("82:19")]);
+
+    // Roots supplied but this one is not among them → excluded, not unplaced:
+    // the question was asked and the answer was no.
+    const off = refineByWords(ADJ, run, { roots: ["ن ع م"] });
+    expect(off.about.map((e) => e.to)).toEqual([k("2:122")]);
+    expect(off.excluded).toBe(2);
+    expect(off.unplaced.map((e) => e.to)).toEqual([k("7:35"), k("82:19")]);
+  });
+
+  it("orders both lists the way the un-refined popover does", () => {
+    const same = edge({ type: "mutashabih", to: k("2:50"), page: 7, span: { from: [3, 3] } });
+    const far = edge({ type: "mutashabih", to: k("9:1"), page: 187, dir: { dSurah: 7, dPage: 180 }, span: { from: [4, 4] } });
+    const { about } = refineByWords({ edges: [far, same], ext: [] }, { from: 3, to: 4 });
+    expect(about.map((e) => e.to)).toEqual([k("2:50"), k("9:1")]);
+  });
+
+  it("says nothing at all for a missing ayah", () => {
+    expect(refineByWords(undefined, { from: 1, to: 3 })).toEqual({
+      about: [],
+      unplaced: [],
+      excluded: 0,
+    });
+  });
+
+  it("hopsForWords reads the run off the key, and refuses anything that is not one", () => {
+    const adj = new Adjacency(ED);
+    adj.addShard(2, { "48": ADJ });
+    expect(adj.hopsForWords(`${k("2:48")}#w3-7`).about.map((e) => e.to)).toEqual([k("2:122")]);
+    expect(adj.hopsForWords(`${k("2:48")}#w11`).about.map((e) => e.to)).toEqual([k("2:152")]);
+    // A bare ayah key is not a word run; so is a foreign edition and an ayah
+    // this shard has never heard of.
+    for (const bad of [k("2:48"), `quran/warsh-x/2:48#w3`, `${k("2:99")}#w3`, "nonsense"]) {
+      expect(adj.hopsForWords(bad)).toEqual({ about: [], unplaced: [], excluded: 0 });
+    }
   });
 });

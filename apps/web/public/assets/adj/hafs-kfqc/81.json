@@ -8,6 +8,18 @@
         "dir": {
           "dSurah": -12,
           "dPage": -18
+        },
+        "span": {
+          "from": [
+            1,
+            4
+          ]
+        },
+        "toSpan": {
+          "from": [
+            1,
+            4
+          ]
         }
       },
       {
@@ -31,6 +43,18 @@
         "dir": {
           "dSurah": -7,
           "dPage": -9
+        },
+        "span": {
+          "from": [
+            4,
+            7
+          ]
+        },
+        "toSpan": {
+          "from": [
+            4,
+            7
+          ]
         }
       },
       {
@@ -40,6 +64,18 @@
         "dir": {
           "dSurah": -5,
           "dPage": -6
+        },
+        "span": {
+          "from": [
+            1,
+            7
+          ]
+        },
+        "toSpan": {
+          "from": [
+            1,
+            7
+          ]
         }
       }
     ],

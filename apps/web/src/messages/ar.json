@@ -25,6 +25,7 @@
   "selectionCleared": "أُلغي التحديد",
   "selected": "حُدّدت {label}",
   "highlighted": "ظُلّل {span}",
+  "wordHops": "{n, plural, zero{لا مواضع مشابهة} one{موضع مشابه واحد} two{موضعان متشابهان} few{{nText} مواضع مشابهة} many{{nText} موضعًا مشابهًا} other{{nText} موضع مشابه}}{u, plural, zero{} one{، ووصلة واحدة لا تسمّي كلمات} two{، ووصلتان لا تسمّيان كلمات} few{، و{uText} وصلات لا تسمّي كلمات} many{، و{uText} وصلة لا تسمّي كلمات} other{، و{uText} وصلة لا تسمّي كلمات}}",
   "hoppedTo": "انتقلت إلى {label} · صفحة {page}",
   "backTo": "رجعت إلى {label} · صفحة {page}",
   "arrivedVia": "{origin, select, jump{انتقلت إلى} other{فُتح رابط ·}}",

@@ -1,7 +1,7 @@
 /**
  * Fetching the ligature corpus, once.
  *
- * The candidate is 595 KB of SVG per page — 351 MB for the mus'haf. It is not
+ * The candidate is 595 KB of SVG per page — 378 MB for the mus'haf. It is not
  * vendored and never will be (the whole point of word-B is that we ship the
  * boxes, not the pictures), but the probe and the builder both read it, and a
  * builder that re-downloaded a third of a gigabyte on every run would be a
@@ -30,7 +30,7 @@ const sha = (buf) => createHash("sha256").update(buf).digest("hex");
 /**
  * One page of the candidate corpus, from the cache if it is there. `offline`
  * turns a cache miss into an error rather than a download — what a caller wants
- * when it is re-running a build and a silent 351 MB fetch would be a surprise.
+ * when it is re-running a build and a silent 378 MB fetch would be a surprise.
  */
 export async function candidatePage(page, { offline = false } = {}) {
   const dest = join(CACHE, `${pad3(page)}.svg`);

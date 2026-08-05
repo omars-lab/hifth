@@ -16,12 +16,19 @@
  * member of its own roots' occurrence lists, so page distance is computed
  * without a resolver, a manifest, or an extra fetch.
  *
- * Granularity is the ayah (Loop 5's ayah-fallback). Word-level anchors need
- * the ligature corpus evaluated in Loop 4b — when that lands, the shard tuples
- * gain word indices and this API grows a `span`, nothing else changes.
+ * Granularity was the ayah, and this file used to say word anchors were waiting
+ * on the ligature corpus. They were; it landed. Every root on an ayah now
+ * carries `w`, the print word indices it sits at, so a run of selected words can
+ * ask for its own families — {@link Roots.familiesForWords} — instead of the
+ * whole ayah's. The reverse index is unchanged and still ayah-grained: "where
+ * else in the mus'haf" is answered by a page and an ayah, not by a word.
+ *
+ * On the four ayahs `word-alignment.pin.json` excepts, no root carries `w` — it
+ * is all of an ayah's roots or none, which `gate:align` enforces — and the lens
+ * falls back to the whole ayah, exactly as it did everywhere before word-D.
  */
 
-import { formatAyahKey, parseAyahKey } from "./keys.js";
+import { formatAyahKey, parseAyahKey, parseWordKey } from "./keys.js";
 import { fromAbsoluteAyah, juzOf } from "./quran-meta.js";
 import type { EditionId } from "./types.js";
 
@@ -64,6 +71,17 @@ export interface AyahRootRef {
   readonly b: number;
   /** How many words of this root this ayah carries. */
   readonly n: number;
+  /**
+   * The **print** word indices this root sits at, ascending — the same
+   * `data-word-index-in-ayah` numbers the word boxes and `#w` keys use.
+   *
+   * Absent only on the four ayahs the print↔QAC alignment excepts, and then for
+   * every root of that ayah, never some of them (`gate:align` enforces both
+   * halves). `w.length >= n` and not `=== n`: `n` counts rooted segments of the
+   * corpus, `w` counts places on the page, and the print writes some corpus
+   * words as two pieces — measured, `w.length > n` on 5,265 of 44,401.
+   */
+  readonly w?: readonly number[];
 }
 
 /** One ayah-roots shard: ayah number (as string) → its roots, in word order. */
@@ -102,6 +120,11 @@ export interface RootFamily {
   readonly root: string;
   /** Words of this root on the *current* ayah. */
   readonly here: number;
+  /**
+   * Where on the current ayah those words are, as print word indices — what the
+   * UI underlines when a family is opened. Absent on the four excepted ayahs.
+   */
+  readonly at?: readonly number[];
   /** Ayahs carrying this root corpus-wide, including the current one. */
   readonly ayahs: number;
   /** Words carrying this root corpus-wide. */
@@ -256,11 +279,74 @@ export class Roots {
     );
   }
 
+  /**
+   * The distinct roots carried by a run of words, e.g.
+   * `"quran/hafs-kfqc/2:48#w3-7"` — in the ayah's own word order and deduped,
+   * because one root can sit on several words.
+   *
+   * This is what `Adjacency.hopsForWords` wants for `options.roots`: adjacency
+   * holds no root shards, so the seam between the two lenses is one array of
+   * strings passed by the caller that holds both.
+   *
+   * On an ayah whose roots carry no `w`, the run cannot be honoured and every
+   * root of the ayah comes back — the same ayah-fallback {@link
+   * familiesForWords} takes, for the same reason.
+   */
+  rootsForWords(key: string): string[] {
+    const run = this.#parseRun(key);
+    if (!run) return [];
+    const refs = this.rootsForKey(run.ayahKey);
+    const placed = refs.some((r) => r.w);
+    const out: string[] = [];
+    for (const ref of refs) {
+      if (placed && !touches(ref.w, run.from, run.to)) continue;
+      if (!out.includes(ref.r)) out.push(ref.r);
+    }
+    return out;
+  }
+
+  /**
+   * The root families of a run of words rather than of a whole ayah (PLAN ⑮).
+   *
+   * Identical to {@link familiesForKey} but for the roots it starts from: only
+   * those sitting on a selected word. Each family's `hops` are unchanged — a
+   * root's other occurrences are wherever they are, and narrowing the *source*
+   * does not narrow where the family lands.
+   *
+   * A word run on an excepted ayah returns the whole ayah's families. That is a
+   * deliberate over-answer rather than an empty one: the alignment cannot place
+   * these roots, and showing a hafiz nothing would read as "this word has no
+   * family", which is a stronger and falser claim than showing the ayah's.
+   */
+  familiesForWords(key: string, options: RootLensOptions = {}): RootFamily[] {
+    const run = this.#parseRun(key);
+    if (!run) return [];
+    const keep = new Set(this.rootsForWords(key));
+    return this.familiesForKey(run.ayahKey, options).filter((f) => keep.has(f.root));
+  }
+
+  #parseRun(key: string): { ayahKey: string; from: number; to: number } | null {
+    const parsed = parseWordKey(key);
+    if (!parsed || parsed.edition !== this.edition) return null;
+    return {
+      ayahKey: formatAyahKey(this.edition, parsed.surah, parsed.ayah),
+      from: parsed.from,
+      to: parsed.to,
+    };
+  }
+
   #parse(key: string): { surah: number; ayah: number } | null {
     const parsed = parseAyahKey(key);
     if (!parsed || parsed.edition !== this.edition) return null;
     return { surah: parsed.surah, ayah: parsed.ayah };
   }
+}
+
+/** Does a root's print word list reach into `[from, to]` inclusive? */
+function touches(w: readonly number[] | undefined, from: number, to: number): boolean {
+  if (!w) return false;
+  for (const at of w) if (at >= from && at <= to) return true;
+  return false;
 }
 
 /** |dPage| of a family's closest hop; a hapax root sorts last. */
@@ -303,6 +389,7 @@ function family(
   return {
     root: ref.r,
     here: ref.n,
+    ...(ref.w ? { at: ref.w } : {}),
     ayahs: entry.a.length,
     words: entry.w,
     hops: kept,

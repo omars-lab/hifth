@@ -9,6 +9,18 @@
           "dSurah": -5,
           "dPage": -10,
           "sameJuz": true
+        },
+        "span": {
+          "from": [
+            1,
+            7
+          ]
+        },
+        "toSpan": {
+          "from": [
+            1,
+            7
+          ]
         }
       }
     ],
@@ -24,6 +36,18 @@
           "dSurah": -54,
           "dPage": -353
         },
+        "span": {
+          "from": [
+            7,
+            11
+          ]
+        },
+        "toSpan": {
+          "from": [
+            8,
+            12
+          ]
+        },
         "ctx": true
       },
       {
@@ -33,6 +57,18 @@
         "dir": {
           "dSurah": -54,
           "dPage": -353
+        },
+        "span": {
+          "from": [
+            7,
+            10
+          ]
+        },
+        "toSpan": {
+          "from": [
+            19,
+            22
+          ]
         },
         "ctx": true
       }

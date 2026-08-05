@@ -293,9 +293,14 @@ href: https://tanzil.net
   of this corpus ship.** 378 MB was read to write 2.2 MB of geometry: per word, a
   rectangle on *our* page frame. Not the ink — our pages remain the quranpedia
   print, unchanged, and `gate:pages` still re-hashes all 604 against it. Not the
-  text either, deliberately: see the `$segmentation` note in the pin for why this
-  print's word index is not the Quranic Arabic Corpus's, and why joining the two
-  needs an alignment rather than an assumption.
+  text either, deliberately — and that is now a load-bearing distinction rather
+  than a preference. This print's word index is not the Quranic Arabic Corpus's,
+  and the map between them is *derived from* both texts without carrying either:
+  `word-alignment.pin.json` is a delta over the geometry, 212 KB of ETL data, and
+  `gate:align` checks it offline against the vendored morphology on every push.
+  [`docs/design/word-indexing.md`](docs/design/word-indexing.md) is the record —
+  including the measurement that says the two indices are monotone, and the four
+  ayahs where they cannot be related at all.
 - **How geometry from one print lands on another:** both corpora draw the same
   page and both mark the end of every ayah with an ornament, so the ornaments are
   a correspondence neither was built to provide. `build-words.mjs` fits

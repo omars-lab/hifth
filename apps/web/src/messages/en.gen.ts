@@ -199,6 +199,7 @@ const messages: Catalog = {
   tapHint: "Tap an ayah on the page to select it",
   trail: "Trail",
   twin: "twin",
+  wordHops: (d) => plural(LC, d.n, { "0": "No similar places", one: d.nText + " similar place", other: d.nText + " similar places" }) + plural(LC, d.u, { "0": "", one: ", and " + d.uText + " link that names no words", other: ", and " + d.uText + " links that name no words" }),
   wordLevelPending: "Word-level links arrive with the next data pack",
 };
 

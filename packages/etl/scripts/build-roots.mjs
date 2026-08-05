@@ -18,12 +18,30 @@
  *     table: the selection is always in its own roots' lists, so `roots.ts`
  *     computes page distance without a resolver or a second lookup.
  *
- * Granularity is the AYAH. The corpus is word-addressed and we keep the word
- * ORDER (that is what `ayah/<surah>.json` preserves), but a hop still lands on
- * an ayah: word-level anchors need the ligature corpus Loop 4b evaluates
- * (PLAN §Loop 4b) — until then there is no stable word→polygon mapping to
- * anchor to. When it lands, the tuples gain a word index and nothing else
- * about this pipeline changes.
+ * Granularity was the AYAH, and this file used to say that word anchors were
+ * waiting on a stable word→polygon mapping. They were; it landed. Each root on
+ * an ayah now carries `w`, the **print word indices** it sits at — the same
+ * `data-word-index-in-ayah` numbers the word boxes carry, so a selected run of
+ * words can ask for its own roots and get an answer, rather than the whole
+ * ayah's. The corpus is word-addressed in its own numbering, so `w` is
+ * converted through `word-alignment.pin.json`; the four ayahs that pin excepts
+ * get no `w` and the lens falls back to the ayah, which is what it did for
+ * every ayah before this.
+ *
+ * `n` stays beside `w` rather than being implied by it. They count different
+ * things: `n` counts rooted *segments* while `w` lists *places on the page*,
+ * and where the print writes one corpus word as two pieces `w` has two entries
+ * for one occurrence. The inequality runs one way only — measured over the
+ * 44,401 root-ayah pairs that carry a `w`, `w.length === n` on 39,136 and
+ * `w.length > n` on 5,265, never less. That is not luck: no root in the corpus
+ * sits on two rooted segments of one word (0 of 44,431 pairs), so `n` is also
+ * the count of distinct corpus words the root occupies, and the print can only
+ * ever split those further. A reader who assumed `w.length === n` would be
+ * wrong on 11.9% of entries, always by undercounting.
+ *
+ * The reverse index's tuples keep ayah granularity: a root's occurrence list
+ * answers "where else in the mus'haf", and that question is answered by a page
+ * and an ayah, not by a word inside one.
  *
  * Bucketing: roots are packed into BUCKETS bins by descending occurrence
  * count, each root landing in the currently-smallest bin (greedy LPT). That
@@ -48,6 +66,7 @@ import { gzipSync } from "node:zlib";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import { toAbsoluteAyah, TOTAL_AYAHS } from "@hifth/core";
+import { openAlignment } from "./lib/segmentation.mjs";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const REPO = join(HERE, "..", "..", "..");
@@ -125,6 +144,9 @@ const MORPHOLOGY = readFileSync(
   "utf8",
 );
 
+/** The print↔corpus word map — how a corpus word number becomes a `w`. */
+const align = openAlignment();
+
 /* ------------------------------------------------------------------ */
 /* Pass 1 — segments → one root (+ lemma) per WORD.                    */
 /* ------------------------------------------------------------------ */
@@ -140,7 +162,7 @@ const LEM_FEATURE = FEATURE("LEM");
 
 /** root → { lemmas: Map<lemma, words>, words, ayahs: Map<abs, {n, lemmas:Set}> } */
 const roots = new Map();
-/** abs ayah → roots in word order (duplicates kept; the lens dedupes). */
+/** abs ayah → `{root, word}` in word order (duplicates kept; the lens dedupes). */
 const ayahRoots = new Map();
 
 const ayahsSeen = new Set();
@@ -192,8 +214,8 @@ for (const line of MORPHOLOGY.split("\n")) {
   if (lemma) occurrence.lemmas.add(lemma);
 
   const list = ayahRoots.get(abs);
-  if (list) list.push(root);
-  else ayahRoots.set(abs, [root]);
+  if (list) list.push({ root, word });
+  else ayahRoots.set(abs, [{ root, word }]);
 }
 
 if (ayahsSeen.size !== TOTAL_AYAHS) {
@@ -271,8 +293,32 @@ function write(relative, json) {
   writeFileSync(join(OUT_DIR, relative), json);
 }
 
-// --- ayah/<surah>.json: ayah → [{ r, b, n }] in word order, roots deduped.
+/**
+ * QAC word number → the print indices it is written at, for one ayah. Built
+ * once per ayah rather than per root: `Alignment.printWordsOf` walks the whole
+ * ayah on every call, and a fat ayah has more roots than words.
+ *
+ * Null where the map has nothing to say — the four excepted ayahs, and any
+ * ayah this print does not carry.
+ */
+function printByQac(key) {
+  const map = align.mapOf(key);
+  if (!map) return null;
+  const out = new Map();
+  for (const { print, qac, qacSpan } of map) {
+    for (let q = qac; q < qac + qacSpan; q += 1) {
+      const at = out.get(q);
+      if (at) at.push(print);
+      else out.set(q, [print]);
+    }
+  }
+  return out;
+}
+
+// --- ayah/<surah>.json: ayah → [{ r, b, n, w? }] in word order, roots deduped.
 let coveredAyahs = 0;
+let placedRoots = 0;
+let unplacedRoots = 0;
 for (let surah = 1; surah <= 114; surah++) {
   const shard = [];
   for (let ayah = 1; ; ayah++) {
@@ -284,11 +330,34 @@ for (let surah = 1; surah <= 114; surah++) {
     }
     const list = ayahRoots.get(abs);
     if (!list) continue; // an ayah of pure particles (huruf muqatta'at et al.)
+    // root → { n: rooted segments, words: the corpus word numbers it sits at }
     const counts = new Map();
-    for (const root of list) counts.set(root, (counts.get(root) ?? 0) + 1);
+    for (const { root, word } of list) {
+      let seen = counts.get(root);
+      if (!seen) counts.set(root, (seen = { n: 0, words: new Set() }));
+      seen.n += 1;
+      seen.words.add(word);
+    }
+    const print = printByQac(`${surah}:${ayah}`);
     shard.push([
       String(ayah),
-      [...counts].map(([r, n]) => ({ r, b: bucketOf.get(r), n })),
+      [...counts].map(([r, { n, words }]) => {
+        const entry = { r, b: bucketOf.get(r), n };
+        // All of a root's words or none of them: a partial `w` would read as
+        // the complete list of places the root occurs, and be short.
+        const at = [];
+        for (const word of words) {
+          const indices = print?.get(word);
+          if (!indices) {
+            unplacedRoots += 1;
+            return entry;
+          }
+          at.push(...indices);
+        }
+        placedRoots += 1;
+        entry.w = [...new Set(at)].sort((a, b) => a - b);
+        return entry;
+      }),
     ]);
     coveredAyahs += 1;
   }
@@ -332,4 +401,8 @@ console.log(
 console.log(
   `build-roots — 114 ayah shards + ${BUCKETS} root buckets; largest ${maxGz.file} at ` +
     `${maxGz.bytes}B gz (budget ${GZ_LIMIT}B)`,
+);
+console.log(
+  `build-roots — ${placedRoots} root-ayah pairs carry print word indices, ` +
+    `${unplacedRoots} do not (the ayahs the alignment excepts)`,
 );

@@ -13,7 +13,7 @@
  * on chips with counts").
  */
 
-import { formatAyahKey, parseAyahKey } from "./keys.js";
+import { formatAyahKey, parseAyahKey, parseWordKey } from "./keys.js";
 import type { EditionId } from "./types.js";
 
 /* ------------------------------------------------------------------ */
@@ -78,7 +78,20 @@ export interface EdgeDir {
   readonly sameJuz?: boolean;
 }
 
-/** A word range on an ayah, `[from, to]` inclusive word indices (spec §6). */
+/**
+ * A word range on an ayah, `[from, to]` inclusive word indices (spec §6).
+ *
+ * The indices are the **print's** — the same `data-word-index-in-ayah`
+ * numbering the word boxes and `#wN` keys use — so a span can be highlighted
+ * without any further conversion.
+ *
+ * `build-adjacency.mjs` emits a span only when the longest run of words the two
+ * ayahs share occurs in exactly one place on *both* sides. Where the run repeats,
+ * naming one of its occurrences would be a guess, so the edge names no words at
+ * all: 2,544 of the 2,996 shipped look-alike edges carry a span, and the rest
+ * make no claim about where they are. {@link refineByWords} is built around that
+ * silence rather than around a default.
+ */
 export interface WordSpan {
   readonly from: readonly [number, number];
 }
@@ -316,6 +329,85 @@ export function mergeRangeEdges(sources: readonly RangeSource[]): MergedEdge[] {
 }
 
 /* ------------------------------------------------------------------ */
+/* Word-run refinement (word-D, PLAN ⑮).                               */
+/* ------------------------------------------------------------------ */
+
+/** An inclusive run of print word indices inside one ayah. */
+export interface WordRun {
+  readonly from: number;
+  readonly to: number;
+}
+
+/**
+ * What a run of words has to say about an ayah's hops.
+ *
+ * Three outcomes, not two, because an edge that names no words makes no claim
+ * about them. Dropping such an edge would invent a claim the ETL refused to
+ * make; keeping it beside the edges the words really are about would say the
+ * selection matched when nobody asked. So it goes in its own list, and the UI
+ * decides how loudly to say "and these, which are about the whole ayah".
+ */
+export interface WordHops {
+  /** Edges whose span overlaps the run — the hops these words are about. */
+  readonly about: readonly Edge[];
+  /** Edges that name no words, so the run neither confirms nor excludes them. */
+  readonly unplaced: readonly Edge[];
+  /** How many edges were dropped for being about other words of this ayah. */
+  readonly excluded: number;
+}
+
+/** Options for {@link refineByWords}. */
+export interface WordHopOptions {
+  /**
+   * The roots the selected words carry, from `Roots.rootsForWords`. Adjacency
+   * holds no root shards, so a shared-root edge can only be judged when the
+   * caller — which holds both lenses — says which roots are in play. Without
+   * this, shared-root edges land in `unplaced`, which is the honest reading of
+   * "nobody asked the roots" rather than a silent pass.
+   */
+  readonly roots?: Iterable<string>;
+}
+
+/** Inclusive-range overlap, both ends in print word indices. */
+function overlaps(span: WordSpan, run: WordRun): boolean {
+  const [from, to] = span.from;
+  return from <= run.to && to >= run.from;
+}
+
+/**
+ * Split an ayah's active edges by what a run of its words is about.
+ *
+ * Both lists come back in {@link orderForHifz} order, so a refined popover reads
+ * exactly like the un-refined one — the selection changes which hops are there,
+ * never the order a hafiz scans them in.
+ */
+export function refineByWords(
+  adj: AyahAdjacency | undefined,
+  run: WordRun,
+  options: WordHopOptions = {},
+): WordHops {
+  const roots = options.roots ? new Set(options.roots) : null;
+  const about: Edge[] = [];
+  const unplaced: Edge[] = [];
+  let excluded = 0;
+
+  for (const edge of adj?.edges ?? []) {
+    if (!isActiveEdgeType(edge.type)) continue;
+    if (edge.span) {
+      if (overlaps(edge.span, run)) about.push(edge);
+      else excluded += 1;
+    } else if (edge.type === "shared-root" && edge.root && roots) {
+      if (roots.has(edge.root)) about.push(edge);
+      else excluded += 1;
+    } else {
+      unplaced.push(edge);
+    }
+  }
+
+  return { about: orderForHifz(about), unplaced: orderForHifz(unplaced), excluded };
+}
+
+/* ------------------------------------------------------------------ */
 /* Adjacency — the loaded routing table for one edition.               */
 /* ------------------------------------------------------------------ */
 
@@ -359,6 +451,21 @@ export class Adjacency {
     const adj = this.forKey(key);
     if (!adj) return [];
     return orderForHifz(adj.edges.filter((e) => isActiveEdgeType(e.type)));
+  }
+
+  /**
+   * The hops a run of selected words is about, e.g.
+   * `"quran/hafs-kfqc/2:48#w3-7"` (word-D). A key without a `#w` run is not a
+   * word selection and yields three empties, as does an uncovered ayah — the
+   * same "nothing to say" this class returns everywhere else.
+   */
+  hopsForWords(key: string, options: WordHopOptions = {}): WordHops {
+    const parsed = parseWordKey(key);
+    if (!parsed || parsed.edition !== this.edition) {
+      return { about: [], unplaced: [], excluded: 0 };
+    }
+    const adj = this.#shards.get(parsed.surah)?.[String(parsed.ayah)];
+    return refineByWords(adj, { from: parsed.from, to: parsed.to }, options);
   }
 
   /**

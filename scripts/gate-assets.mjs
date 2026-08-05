@@ -4,11 +4,11 @@
  *
  * `gate:budget` watches the JS bundle (150 KB gz). `gate:golden-size` watches the
  * committed baseline PNGs. Neither of them has ever looked at
- * `apps/web/public/assets`, which today is 850 KB gzipped and, once Loop 4b
- * vendors the rest of the mus'haf, will be roughly **twenty-seven megabytes** —
- * two orders of magnitude past the bundle, and the actual weight of Hifth. The
- * defect this gate closes (backlog ⑥) is not that the number is too big; it is
- * that nobody was going to notice which commit made it bigger.
+ * `apps/web/public/assets`, which was 850 KB gzipped when this was written and,
+ * once Loop 4b vendored the rest of the mus'haf, became **twenty-eight
+ * megabytes** — two orders of magnitude past the bundle, and the actual weight
+ * of Hifth. The defect this gate closes (backlog ⑥) is not that the number is
+ * too big; it is that nobody was going to notice which commit made it bigger.
  *
  * ── Why the ceilings are shaped differently per kind ────────────────────────
  *
@@ -64,22 +64,32 @@ const ASSETS = join(ROOT, "apps", "web", "public", "assets");
 const CONCORDANCE = join(ROOT, "packages", "core", "src", "concordance.ts");
 
 /**
- * Gzipped ceilings, in bytes. Each is roughly double today's figure — loose
- * enough that ordinary ETL churn does not trip it, tight enough that a doubling
- * has to be argued for in the commit that causes it.
+ * Gzipped ceilings, in bytes. Each was set at roughly double the figure beside
+ * it — loose enough that ordinary ETL churn does not trip it, tight enough that
+ * a doubling has to be argued for in the commit that causes it.
+ *
+ * The `today` column is remeasured whenever a change moves it, and word-D moved
+ * two of the four: `adj` gained the word span each mutashabih edge is about
+ * (+23.7 KB) and `roots` gained the print word indices every root sits at
+ * (+81.6 KB, the whole of it in the per-ayah shards — the reverse index is
+ * untouched and stays ayah-grained). Both were paid deliberately and both are
+ * on the record; what they spent is *headroom*, so the ceilings do not move
+ * with them. Restoring the 2× margin after every intended growth would turn
+ * this gate into a ratchet that can only ever be satisfied, which is the one
+ * failure mode a ceiling has.
  */
 const CEILINGS = {
   //                    today      what a breach would mean
-  adj: 128 * 1024, //     55.8 KB   the edge shards stopped being edge lists
-  roots: 768 * 1024, //  450.7 KB   the root index started carrying text
+  adj: 128 * 1024, //     79.5 KB   the edge shards stopped being edge lists
+  roots: 768 * 1024, //  532.3 KB   the root index started carrying text
   skins: 384 * 1024, //  207.7 KB   the tajweed shards started carrying geometry
   words: 1792 * 1024, // 885.6 KB   the word shards started carrying text
 };
 
-/** A single page's SVG, gzipped. Today's heaviest is 47.4 KB (page 7). */
+/** A single page's SVG, gzipped. Today's heaviest is 54.3 KB (page 567). */
 const MAX_PAGE_GZ = 64 * 1024;
 
-/** The whole mus'haf, projected from the mean page. Today's projection: 26.8 MB. */
+/** The whole mus'haf, projected from the mean page. Today's projection: 26.2 MB. */
 const MAX_MUSHAF_GZ = 32 * 1024 * 1024;
 
 /**

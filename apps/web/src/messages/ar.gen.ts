@@ -199,6 +199,7 @@ const messages: Catalog = {
   tapHint: "المس آية على الصفحة لتحديدها",
   trail: "المسار",
   twin: "توأم",
+  wordHops: (d) => plural(LC, d.n, { zero: "لا مواضع مشابهة", one: "موضع مشابه واحد", two: "موضعان متشابهان", few: d.nText + " مواضع مشابهة", many: d.nText + " موضعًا مشابهًا", other: d.nText + " موضع مشابه" }) + plural(LC, d.u, { zero: "", one: "، ووصلة واحدة لا تسمّي كلمات", two: "، ووصلتان لا تسمّيان كلمات", few: "، و" + d.uText + " وصلات لا تسمّي كلمات", many: "، و" + d.uText + " وصلة لا تسمّي كلمات", other: "، و" + d.uText + " وصلة لا تسمّي كلمات" }),
   wordLevelPending: "الربط على مستوى الكلمة يصل مع الحزمة القادمة",
 };
 

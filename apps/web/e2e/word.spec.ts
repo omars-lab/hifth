@@ -61,6 +61,25 @@ async function wordInkLength(page: Page): Promise<number> {
 }
 
 /**
+ * The rightmost edge of the word ink, in viewBox units.
+ *
+ * A position, where `wordInkLength` is a size — together they separate "the run
+ * moved" from "the run grew", which is the whole difference between an arrow key
+ * and a shifted one. Rightmost because the line runs right to left: the word a
+ * run starts at is its right edge.
+ */
+async function wordInkRight(page: Page): Promise<number> {
+  return page.evaluate(() => {
+    let right = -Infinity;
+    for (const el of document.querySelectorAll("#hifth-overlay [data-hl-group='word']")) {
+      const line = el as SVGLineElement;
+      right = Math.max(right, line.x1.baseVal.value, line.x2.baseVal.value);
+    }
+    return right;
+  });
+}
+
+/**
  * Press at `from`, hold past LONG_PRESS_MS (350 in @hifth/core), nudge, then run
  * `move` with the button still down.
  *
@@ -146,6 +165,74 @@ test.describe("Hifth · word selection", () => {
     await expect(page.locator("#hifth-overlay [data-hl-group='selection']")).not.toHaveCount(0);
   });
 
+  /*
+   * word-D4 — the keyboard's way in, which is the same sentence as the finger's.
+   *
+   * A browser is the only place this can be asserted. The descent works by
+   * running *before* the highlighter's own keydown and stopping the event, so
+   * what is really under test is capture-phase ordering between two listeners on
+   * two different nodes, plus focus actually sitting on the polygon — none of
+   * which a jsdom render reproduces faithfully.
+   */
+  test("Enter again descends to words; ← carries the run and Shift+← grows it", async ({
+    page,
+  }) => {
+    await openApp(page);
+
+    await page.locator("#verse-46").focus();
+    // The first Enter is Loop 3's: it selects the ayah, and no word ink appears.
+    await page.keyboard.press("Enter");
+    await expect(page.locator("#hifth-overlay [data-hl-group='selection']")).not.toHaveCount(0);
+    await expect(wordInk(page)).toHaveCount(0);
+
+    // The second is the keyboard's hold. The shard is a round trip away here too,
+    // so waiting for the ink asserts the fetch as well as the grammar.
+    await page.keyboard.press("Enter");
+    await expect(wordInk(page)).not.toHaveCount(0);
+    const startRight = await wordInkRight(page);
+
+    // ← is forward: the line runs right to left, and this is the mapping the ayah
+    // stepper already uses. Asserted as "the ink is somewhere else" rather than
+    // "the ink is exactly one word further left", because a run that steps over
+    // a line ending moves right and down — true of the run, awkward for a number.
+    await page.keyboard.press("ArrowLeft");
+    await expect(wordInk(page)).not.toHaveCount(0);
+    const movedRight = await wordInkRight(page);
+    const movedLength = await wordInkLength(page);
+    expect(movedRight, "a plain arrow carries the run to another word").not.toBe(startRight);
+
+    // Shift leaves the anchor standing, so the run grows instead of moving.
+    await page.keyboard.press("Shift+ArrowLeft");
+    expect(await wordInkLength(page), "Shift extends the run").toBeGreaterThan(movedLength);
+
+    // The arrows never reached the page-turner underneath: PageDown/PageUp and
+    // ←/→ are the app's page keys, and a run in hand takes the arrows off them.
+    // Read off the slider rather than the stage, because a page that turned and a
+    // page that never loaded look identical in the SVG and quite different here.
+    await expect(page.getByRole("slider")).toHaveAttribute("aria-valuetext", "صفحة 7 من 604");
+
+    // And Escape climbs exactly one rung, as it does for the finger.
+    await page.keyboard.press("Escape");
+    await expect(wordInk(page)).toHaveCount(0);
+    await expect(page.locator("#hifth-overlay [data-hl-group='selection']")).not.toHaveCount(0);
+  });
+
+  test("a word run is announced as its outcome, not as its words", async ({ page }) => {
+    await openApp(page);
+
+    await page.locator("#verse-46").focus();
+    await page.keyboard.press("Enter");
+    await page.keyboard.press("Enter");
+    await expect(wordInk(page)).not.toHaveCount(0);
+
+    // «… مواضع مشابهة» — how many places this run is about, which is the question
+    // the reader asked by selecting it. What the announcement must never contain
+    // is the selection itself: reading scripture back through a UI string is the
+    // one thing the word grain is built to avoid (`docs/design/word-indexing.md`
+    // §10 — we ship rectangles, not text).
+    await expect(page.locator("div.sr-only[role='status']")).toHaveText(/مشابه/);
+  });
+
   test("the same hold outside the selection still paints a marquee", async ({ page }) => {
     await openApp(page);
 
@@ -169,28 +256,20 @@ test.describe("Hifth · word selection", () => {
   /*
    * The one assertion here that is about what a word run does *not* do.
    *
-   * Every other tree in the app gets a committed aria snapshot (see
-   * `share-a11y.spec.ts`). A word run gets none, and that is not an omission
-   * this test papers over: word selection has no accessible surface at all —
-   * `onSelectWords` has no listener above the stage yet, so nothing announces a
-   * word run, and there is no keyboard path down to word granularity. A
-   * snapshot file would photograph that absence and read, to the next author,
-   * as coverage.
-   *
-   * What is worth pinning is the invariant that holds *because* of the absence:
-   * the overlay is decorative, so laying word ink into it must not add a node,
-   * a name or a role to the tree. If it ever does — a stray `role` on a band, a
+   * A word run now has an accessible surface — a key that reaches it and a
+   * sentence that reports it — but that surface is deliberately *spoken*, in the
+   * one live region the whole app announces through, and not *structural*. The
+   * overlay stays decorative: laying word ink into it must not add a node, a
+   * name or a role to the tree. If it ever does — a stray `role` on a band, a
    * `<title>` inside the overlay — the ayah buttons stop being the only thing a
    * screen reader finds on the page, and they stop being findable in print
-   * order. That is a regression the pixel goldens cannot see and the DOM
-   * assertions above would not notice.
+   * order. That is a regression the pixel goldens cannot see, the announcement
+   * test above would not notice, and the DOM assertions would walk straight past.
    *
    * Compared before-against-after rather than against a committed baseline, so
    * this stays a statement about the *gesture* and does not have to be
-   * re-recorded every time an unrelated ayah label changes.
-   *
-   * The missing keyboard and screen-reader path is tracked as an issue, not
-   * left here to be discovered — see docs/issues.json.
+   * re-recorded every time an unrelated ayah label changes. The live region is
+   * outside the stage subtree, so it is not in this snapshot by construction.
    */
   test("laying word ink leaves the accessibility tree untouched", async ({ page }) => {
     await openApp(page);

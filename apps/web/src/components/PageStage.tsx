@@ -104,11 +104,11 @@ interface PageStageProps {
    * would put a `#w` key into `selectedKey`, which the highlighter resolves as an
    * ayah and would clear.
    *
-   * Optional, and today nothing above the stage listens. The word grain is drawn
-   * and the key is formed; what it *refines* — the mutashabihat search — waits on
-   * print-vs-QAC segmentation alignment (`docs/PLAN.md` 13). Emitting it now
-   * rather than later is what keeps that wiring a one-line prop instead of a
-   * second trip through this gesture.
+   * Fired on every settled run, from the finger and from the keyboard alike: a
+   * drag says it once on release, an arrow key says it on each step, because each
+   * step is a finished statement about a different set of words. App answers it
+   * out loud with the *outcome* — how many places the run is about — never with
+   * the words themselves.
    */
   onSelectWords?: (wordKey: string, ayahKey: string) => void;
   /** Human label for an ayah key (surah name), for per-polygon aria-label. */
@@ -1509,23 +1509,23 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
   );
 
   /**
-   * Put the run's current point onto a word, ink from the anchor to it, and —
-   * on release — say which words those were.
+   * Put the run's cursor on one named word, ink from the anchor to it, and — on
+   * commit — say which words those were.
+   *
+   * The half the finger and the keyboard share. They disagree only about how the
+   * word is *named*: a drag arrives with a coordinate and has to ask which word
+   * that is, a key arrives already knowing. Everything after the answer — the
+   * anchor, the band, the `#w` key that goes out — is the same sentence, so it
+   * is written once here.
    *
    * The anchor is set once and never re-read, so a drag that runs backwards
-   * selects backwards from where the hold landed rather than dragging the
-   * anchor along with the finger. `wordAt` is nearest-not-containing (words.ts
-   * says why), which is what lets the finger travel through the gaps between
-   * words without the band flickering off.
+   * selects backwards from where the hold landed rather than dragging the anchor
+   * along with the finger. A plain arrow key moves the anchor itself (the caller
+   * does that before calling); Shift is what leaves it standing.
    */
-  const applyWords = useCallback((idx: WordIndex, run: WordRun, commit: boolean) => {
+  const landWords = useCallback((idx: WordIndex, run: WordRun, at: number, commit: boolean) => {
     const cur = pagesRef.current.get(currentPageRef.current);
     if (!cur) return;
-    const at = idx.wordAt(run.key, run.point.x, run.point.y);
-    // Null only if this ayah has no words on this page at all — a shard that
-    // disagrees with the manifest. Leave the ayah highlight alone and say
-    // nothing rather than inventing a word.
-    if (at === null) return;
     if (run.anchor === null) run.anchor = at;
     run.cursor = at;
     const from = Math.min(run.anchor, at);
@@ -1539,6 +1539,25 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
       run.key,
     );
   }, []);
+
+  /**
+   * The finger's way in: the word nearest where it is now.
+   *
+   * `wordAt` is nearest-not-containing (words.ts says why), which is what lets
+   * the finger travel through the gaps between words without the band flickering
+   * off.
+   */
+  const applyWords = useCallback(
+    (idx: WordIndex, run: WordRun, commit: boolean) => {
+      const at = idx.wordAt(run.key, run.point.x, run.point.y);
+      // Null only if this ayah has no words on this page at all — a shard that
+      // disagrees with the manifest. Leave the ayah highlight alone and say
+      // nothing rather than inventing a word.
+      if (at === null) return;
+      landWords(idx, run, at, commit);
+    },
+    [landWords],
+  );
 
   /**
    * One frame of a word stroke: where the finger is, and whether it just left.
@@ -1603,6 +1622,108 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [clearWords]);
+
+  /*
+   * The keyboard's way down into the word grain, and its way along it.
+   *
+   * The pointer's rule is "a second gesture inside the ayah you already picked
+   * means words" — a hold, because the tap is taken. The keyboard has no hold, so
+   * its second action is a second Enter: Tab reaches the ayah, Enter selects it,
+   * Enter again drops onto its first word, ←/→ move that word, Shift extends the
+   * run, and the Escape above climbs back out. One sentence to teach, not two.
+   *
+   * ← is *forward*: the same mapping the ayah stepper already uses, because the
+   * line runs right to left. A third Enter is not handled here and so reaches the
+   * highlighter, which reads it as re-selecting the ayah — i.e. the toggle that
+   * clears it, and with it the run. Enter, Enter, Enter is all the way out.
+   *
+   * Capture phase on `window`, which is what lets this exist without touching L1:
+   * `Highlighter`'s own keydown sits on the SVG and would read this Enter as
+   * "select the focused ayah". Running first and stopping the event is the whole
+   * mechanism — the highlighter stays a pure function of the page and never has
+   * to learn which ayah is currently selected.
+   */
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.defaultPrevented || e.ctrlKey || e.metaKey || e.altKey) return;
+      // A sheet up owns the keyboard outright — the same rule as the wheel.
+      if (document.querySelector('[role="dialog"]')) return;
+      const run = wordRunRef.current;
+
+      if (!run) {
+        if (e.key !== "Enter" && e.key !== " " && e.key !== "Spacebar") return;
+        const key = selectedKeyRef.current;
+        const parsed = key ? parseAyahKey(key) : null;
+        if (!key || !parsed) return;
+        // Only the polygon of the ayah that is *already* selected descends. The
+        // focused element is the polygon itself, so its own id is the question,
+        // and a key that is not an ayah's answers it with null — which is how
+        // Enter on a button in the chrome stays the chrome's.
+        const id = (e.target as Element | null)?.getAttribute?.("id");
+        if (!id || resolver.keyForElement(id) !== key) return;
+        // On a spread both leaves hear this keystroke and both hold the same
+        // `selectedKey`, so the polygon's identity is not enough: only the leaf
+        // the ayah is actually printed on may descend. Without this the claim
+        // would come down to which stage mounted first.
+        const page = currentPageRef.current;
+        if (resolver.resolve(key)?.page !== page) return;
+        e.preventDefault();
+        e.stopPropagation();
+        const fresh: WordRun = {
+          key,
+          edition: parsed.edition,
+          page,
+          point: { x: 0, y: 0 },
+          anchor: null,
+          cursor: null,
+          done: true,
+        };
+        wordRunRef.current = fresh;
+        void ensureWords(parsed.edition, page).then((idx) => {
+          // Only if this is still the descent that asked (same rule as a stroke's).
+          if (wordRunRef.current !== fresh) return;
+          // No shard, or an ayah this page's shard does not carry: let the run go
+          // rather than leave the reader in a word mode with no words in it.
+          if (!idx) {
+            wordRunRef.current = null;
+            return;
+          }
+          const span = idx.span(key);
+          // The first *word*, not the first index. An ayah can open with a pause
+          // mark, and a mark may sit inside a selection but never be an end of one.
+          const at = span
+            ? idx.isMark(key, span.from)
+              ? idx.step(key, span.from, 1)
+              : span.from
+            : null;
+          if (at === null) {
+            wordRunRef.current = null;
+            return;
+          }
+          landWords(idx, fresh, at, true);
+        });
+        return;
+      }
+
+      if (e.key !== "ArrowLeft" && e.key !== "ArrowRight") return;
+      // Claimed before the shard is consulted: an arrow that fell through while
+      // the numbers were still in flight would turn the page out from under a
+      // reader who is standing in the middle of an ayah.
+      e.preventDefault();
+      e.stopPropagation();
+      const idx = wordShardsRef.current.get(`${run.edition}/${run.page}`);
+      if (!idx || run.cursor === null) return;
+      const at = idx.step(run.key, run.cursor, e.key === "ArrowLeft" ? 1 : -1);
+      // Null at either end of the ayah *on this page*: stand still. Wrapping
+      // would say the ayah is a ring, and stepping into the next one would say
+      // the selection had moved, which is the ayah stepper's job, not this.
+      if (at === null) return;
+      if (!e.shiftKey) run.anchor = at;
+      landWords(idx, run, at, true);
+    };
+    window.addEventListener("keydown", onKeyDown, true);
+    return () => window.removeEventListener("keydown", onKeyDown, true);
+  }, [resolver, ensureWords, landWords]);
 
   // Pan (drag) + zoom (pinch) + marquee (drag-to-highlight) on one surface. Any
   // gesture frame first cancels an in-flight hop tween so the finger cleanly

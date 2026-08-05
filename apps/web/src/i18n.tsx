@@ -205,6 +205,18 @@ export interface Strings {
   selectionCleared: string;
   selected(label: string): string;
   highlighted(span: string): string;
+  /**
+   * What a run of words turned out to be about — the answer, not the question.
+   *
+   * Deliberately says a count and never the words: an announcement that read the
+   * selection back would put scripture into the UI layer, which the whole word
+   * feature is built to avoid (`docs/design/word-indexing.md` §10 — we ship
+   * rectangles, not text). `unjudged` is the third outcome and is why this takes
+   * two numbers: an edge that names no words neither matches the run nor is
+   * excluded by it, and rolling it into either count would invent a claim the
+   * ETL refused to make.
+   */
+  wordHops(matches: number, unjudged: number): string;
   hoppedTo(label: string, page: number): string;
   backTo(label: string, page: number): string;
   /** Prefix distinguishing "someone sent me here" from "I jumped here". */
@@ -524,6 +536,8 @@ export function buildStrings(lang: Lang, m: Catalog): Strings {
     selectionCleared: m.selectionCleared,
     selected: (label) => m.selected({ label }),
     highlighted: (span) => m.highlighted({ span }),
+    wordHops: (matches, unjudged) =>
+      m.wordHops({ n: matches, nText: n(matches), u: unjudged, uText: n(unjudged) }),
     hoppedTo: (label, page) => m.hoppedTo({ label, page }),
     backTo: (label, page) => m.backTo({ label, page }),
     arrivedVia: via,

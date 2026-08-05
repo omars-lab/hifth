@@ -25,6 +25,7 @@
   "selectionCleared": "Selection cleared",
   "selected": "Selected {label}",
   "highlighted": "Highlighted {span}",
+  "wordHops": "{n, plural, =0{No similar places} one{{nText} similar place} other{{nText} similar places}}{u, plural, =0{} one{, and {uText} link that names no words} other{, and {uText} links that name no words}}",
   "hoppedTo": "Hopped to {label} · page {page}",
   "backTo": "Back at {label} · page {page}",
   "arrivedVia": "{origin, select, jump{Went to} other{Link opened ·}}",
