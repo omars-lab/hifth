@@ -497,6 +497,26 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     `vendor-pages.mjs` as a fourth defect shape ("the stranded first word") and the count is
     now zero. Two witnesses see what one cannot, which is why both gates run rather than one
     standing in for the other.
+    **The alignment landed 2026-08-05, and it is smaller than "a task, not a lookup" implied
+    — because the two indices turned out to be monotone.** They never cross; they only group
+    differently. Block alignment on a folded consonant skeleton succeeds on **6,232 of 6,236
+    ayahs**, and the whole mus'haf reduces to three shapes: **1→1 67,853**, **2→1 9,533** (the
+    print splitting a proclitic — وَ بِ لِ فَ — off the rasm), and **1→2 exactly once**, at
+    15:7, where QAC holds `لَّوۡ` and `مَا` apart and the print writes them joined. 86,965
+    print words ↔ 77,429 QAC words. The four that do not align are **orthographic, not
+    segmentational** — 2:72, 12:39, 12:41, 37:130 — each named with its reason in two places
+    that a gate holds against each other. The hamza fold is itself measured rather than
+    assumed: without it 276 ayahs fail, every sampled one the same shape; with it, 4. Three
+    things worth carrying. **One:** the map is stored as a **delta over the shipped word
+    shards**, not a table — a table would restate the shards 86,965 times and make it possible
+    for the two to disagree, and a delta can only fail to apply. **Two:** it is checked without
+    the corpus it came from. The 380 MB upstream is not vendored, so
+    [`gate:align`](../scripts/gate-align.mjs) **applies** the delta to the committed shards and
+    compares the result against the vendored QAC morphology — a third witness neither side
+    controls. That is precisely the shape 12 lacked. **Three:** it is queryable —
+    `pnpm align 2:4 [--print N | --qac N]` answers in a second, offline. The record is
+    [`docs/design/word-indexing.md`](design/word-indexing.md); what is still open there is
+    where the *app* reads the map, and that waits for the first caller.
 
 14. **An ayah polygon does not always cover the ayah.** Found by 13's registration probe, and
     the reason to state it separately is that it is not a word-selection problem — it is wrong

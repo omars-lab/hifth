@@ -580,14 +580,52 @@
         }
       ],
       "extend": [
-        "The word index here is the *print's*, not the Quranic Arabic Corpus's — the print counts pause marks as words, and the two disagree on 4,499 of 6,236 ayahs. Joining word boxes to roots or morphology needs an alignment, and writing one is a task, not a lookup. The pin's `$segmentation` note says so at the point of use.",
+        "The word index here is the *print's*, not the Quranic Arabic Corpus's — the print counts pause marks as words, and the two disagree on 4,499 of 6,236 ayahs. That alignment now exists and is a separate feature, `word-indexing`; do not re-derive it here, and do not renumber these boxes to match QAC. The number on a box is the number the geometry arrived with, and the map is what relates it to anything else.",
         "No upstream bytes ship and none should start. The pages stay the quranpedia print; what this area contributes is numbers. If a change would vendor their ink or their text, it is a new source and needs a SOURCES.md entry of its own, not an extension of this one.",
         "Anything that transfers external geometry onto a page works in plain top-down viewBox space, outside the `matrix(1.3333 0 0 -1.3333 …)` the ink sits under. See assets-and-pages' note on the two coordinate spaces.",
         "A tolerance added here is measured before it is written, and the measurement goes in the comment beside it — `MAX_RESIDUAL` and `MARK_DROP` both name the distribution they clear. A number with no distribution behind it is an allow-list wearing a constant's clothes.",
         "`gate:words` deliberately duplicates parsing and point-in-polygon. Do not refactor it to import `lib/mushaf-frame.mjs`; the duplication is the check."
       ],
       "gates": ["pnpm gate:words", "pnpm gate:assets", "pnpm probe:word-registration", "make ci"],
-      "seeAlso": ["assets-and-pages", "select-an-ayah", "word-selection"]
+      "seeAlso": ["assets-and-pages", "select-an-ayah", "word-selection", "word-indexing"]
+    },
+
+    {
+      "id": "word-indexing",
+      "what": "One word, two numbers — the print's, which every box carries, and the Quranic Arabic Corpus's, which the roots data speaks — and the measured map between them.",
+      "layer": "L3 etl",
+      "entry": [
+        {
+          "file": "packages/etl/scripts/lib/segmentation.mjs",
+          "symbol": "alignBlocks",
+          "note": "The one copy of the alignment, in two halves: the aligner (needs the upstream corpus) and the reader (needs only this repo). `alignBlocks` is the method — both sides fold to one Buckwalter skeleton, and a block boundary can only fall where the two cumulative lengths agree, so the alignment either partitions both sequences or does not exist. There is no score and no threshold to tune, which is deliberate: a fuzzy aligner would have produced a number for all 6,236 ayahs, four of them wrong, and nothing would have said which four. `EXCEPTIONS` names those four with a reason each. `Alignment` is the reader — `mapOf`, `qacWordOf`, `printWordsOf`, `qacCount` — and it applies the delta rather than looking a table up."
+        },
+        {
+          "file": "packages/etl/scripts/build-alignment.mjs",
+          "symbol": "rebuild",
+          "note": "The driver and the report. `pnpm align --rebuild` reads all 604 cached upstream pages, aligns per ayah, and FAILS if the unaligned set is not exactly the four in `EXCEPTIONS` — the exceptions are the measurement, not a filter applied to it, and silently widening them is how an allow-list starts. Everything else is a lookup off the committed pin: `pnpm align 2:4`, `--print N`, `--qac N`. Two modes because the rebuild needs a 378 MB cache and the question a developer actually asks — which QAC word is this box? — should not."
+        },
+        {
+          "file": "packages/etl/data/pages/word-alignment.pin.json",
+          "symbol": "$method",
+          "note": "The map, as a DELTA over the shipped word shards rather than a table: `j` lists the print indices that continue the QAC word their predecessor started, `s` the one print word (15:7) that covers two, and everything else is recovered from the shards. Storing it outright would restate the shards 86,965 times and let the two disagree; a delta cannot disagree with its base, it can only fail to apply. 4,496 of 6,236 ayahs carry one. `$method` and `measured` carry the numbers a reader would otherwise have to rerun for: 6,232/6,236 aligned, 86,965 print words to 77,429 QAC words, three block shapes, and the hamza fold's own measurement (276 failures without it, 4 with)."
+        },
+        {
+          "file": "scripts/gate-align.mjs",
+          "symbol": "expectedMeasured",
+          "note": "Applies the map offline and checks it against a third witness. The pin cannot be re-derived in CI — the upstream corpus is not vendored — which is exactly the situation the mutashabihat off-by-one lived in for four loops. So this gate reads the committed shards (which print indices exist, which are marks), applies the pin's delta, and compares the resulting QAC word count against the vendored morphology, which neither the pin nor the shards control. It also holds `EXCEPTIONS` and the pin's copy against each other in both directions, and re-derives `measured` rather than trusting it."
+        }
+      ],
+      "extend": [
+        "The map is L3 today and the app cannot read it. Where it goes for the browser is an open question with three priced options — see `docs/design/word-indexing.md` §11 ① — and it is deliberately undecided until a caller exists, because the access pattern is what picks between them.",
+        "The alignment is DERIVED FROM the print's text and does not carry it. `build-words.mjs` still drops `data-hafs` and `gate:notext` still enforces it. Anything that would need the word's text to work is a new vendoring with its own licence question, not an extension of this.",
+        "Do not widen `fold()` to make the four exceptions go away. The fold's value is that it is measured; four named exceptions checked in two places is a smaller surface than a fold nobody can argue with. A fifth exception means measure again, not add a name.",
+        "Neither index may be renumbered. Both are upstream identifiers — the print's is load-bearing for every shard and its pin, QAC's for `assets/roots/**`, `gate:edges` and the tajweed ETL. The map exists so that neither has to move.",
+        "`gate:align` implements the delta application in its own ten lines rather than calling `Alignment.mapOf`. Do not refactor it to import the reader; what is being checked is the pin, and the reader is part of what could be wrong with it.",
+        "The map is per-edition by construction (`EDITION`). A second print needs its own rebuild, its own exceptions and its own measurement; nothing here generalises for free."
+      ],
+      "gates": ["pnpm gate:align", "pnpm gate:words", "pnpm gate:edges", "make ci"],
+      "seeAlso": ["word-geometry", "root-lens", "word-selection", "provenance"]
     },
 
     {

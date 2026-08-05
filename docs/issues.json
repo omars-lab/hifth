@@ -336,6 +336,40 @@
     },
 
     {
+      "id": "where-the-alignment-lives",
+      "source": { "file": "docs/design/word-indexing.md", "item": "①" },
+      "status": "open",
+      "severity": "question",
+      "owner": "agent",
+      "note": "The print↔QAC map is built, gated and queryable, but L3-only — the app cannot read it. Three placements priced gzipped against the shipped shards: A `joins` in assets/words/** +23.3 KB, B its own assets/align/** +62.9 KB over 604 files, C print indices baked into assets/roots/** (and tajweed) +9.2 KB. C recommended — cheapest, puts the number where the consumer already looks, and matches what QUL does upstream. Deliberately not decided ahead of the first app-side consumer, because the access pattern is what picks between them and there is no caller yet."
+    },
+    {
+      "id": "announcing-a-run-needs-the-text",
+      "source": { "file": "docs/design/word-indexing.md", "item": "②" },
+      "status": "open",
+      "severity": "question",
+      "owner": "user",
+      "blockedBy": ["a hafiz"],
+      "note": "PLAN 15 wants a word run to announce its first and last word rather than count them. The alignment unblocks identity (a box now has a QAC word, so a root and a lemma) but not the announcement: saying which word needs the word's TEXT, which this repo has never shipped and gate:notext enforces. Three phrasings, all technically solved: position (`words 3 to 7`), roots (ك-ت-ب), or a new text vendoring with its own licence question. Which one is a usability question, and it needs a screen-reader walkthrough with a hafiz."
+    },
+    {
+      "id": "exceptions-are-orthographic",
+      "source": { "file": "docs/design/word-indexing.md", "item": "③" },
+      "status": "answered",
+      "severity": "question",
+      "owner": "agent",
+      "note": "The four unaligned ayahs (2:72, 12:39, 12:41, 37:130) could be folded away by widening fold(), taking 4 to 1. Deliberately not: the fold's value is that it is measured — 276 failures without the hamza rule, every sampled one the same shape, is evidence, and `and also these three` is not. Four named exceptions checked in two places is a smaller surface than a fold nobody can argue with. Revisit only if a fifth appears, and by measuring."
+    },
+    {
+      "id": "no-ayah-spans-a-page",
+      "source": { "file": "docs/design/word-indexing.md", "item": "④" },
+      "status": "answered",
+      "severity": "risk",
+      "owner": "agent",
+      "note": "The map assumes it, and it holds for this corpus: 6,236 ayahs, 6,236 (page, ayah) pairs, measured. Not taken on trust — gate:align fails if any ayah appears in two shards, which is the only way the assumption breaks unnoticed. A future edition that broke it would leave the map itself intact (it is per-ayah) and cost work only in the shard reader."
+    },
+
+    {
       "id": "perf-verdict",
       "source": { "file": "docs/backlog.md", "item": "①" },
       "status": "blocked",
