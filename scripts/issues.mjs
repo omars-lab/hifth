@@ -39,7 +39,12 @@ export const SEVERITIES = ["defect", "question", "risk"];
 /** Worst first — the order `make issues` and docs/issues.md both present. */
 export const STATUS_ORDER = ["confirmed", "suspected", "open", "blocked", "answered", "fixed"];
 
-const MARKERS = "①②③④⑤⑥⑦⑧⑨⑩⑪⑫⑬⑭⑮";
+// U+2460..U+2473. The list is written out rather than built from a code-point
+// range so that a marker nobody can type is never silently legal — and it runs
+// to ⑳ rather than to whatever the largest register currently uses, because the
+// failure when it does not is a gate saying "docs/backlog.md has no ⑯ row"
+// about a row that is plainly there, which reads as a doc bug and is not one.
+const MARKERS = "①②③④⑤⑥⑦⑧⑨⑩⑪⑫⑬⑭⑮⑯⑰⑱⑲⑳";
 const ITEM = new RegExp(`^### ([${MARKERS}])\\s+(.*?)\\s+·\\s+\\*\\*(\\w+)\\*\\*\\s*$`);
 
 export function readIssues() {
