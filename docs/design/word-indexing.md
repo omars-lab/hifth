@@ -449,7 +449,7 @@ If a future edition breaks it, the map itself is unaffected (it is per-ayah, not
 what would need work is the shard reader, which currently builds one lexical run per ayah
 from one file.
 
-### ⑤ Word-granular tajweed painting needs a third text, not a second baking pass · **open**
+### ⑤ Word-granular tajweed painting needs a third text, not a second baking pass · **answered**
 
 ①'s last paragraph says a second consumer of the alignment would need its own baking pass
 and that the tajweed shards have not had one. That is true, and it is not the whole cost —
@@ -469,16 +469,55 @@ repo and there will not be"* (`morphology.mjs`). QAC's Buckwalter segments recon
 word well enough to ask whether two ayahs share phrasing and nowhere near well enough to
 count Uthmani codepoints. So the offsets currently resolve against nothing committed here.
 
-**What would answer it.** The move that answered ①, run once more and measured the same
-way. `build-words.mjs` already reads the upstream print's per-word text and drops it on
-purpose; `lib/segmentation.mjs` already folds orthography until two indices join. A probe
-that folds Tanzil-Uthmani against the print's word text would say whether each annotation's
-span falls inside one print word, and how many ayahs need named exceptions — ③'s four are
-the shape to expect. ETL-only, nothing ships from it but a number, and the number decides
-whether this is a build change or a design problem.
+**What answered it, and how the heading came out wrong.** `packages/etl/scripts/probe-tajweed-words.mjs`,
+run 2026-08-06 over all 604 cached pages and all 6,236 ayahs. It does not *find* the third
+text — that is still not here and still may not be — it **reconstructs** it, from the print's
+own per-word `data-hafs`, the string `build-words.mjs` reads and drops on purpose. That is a
+different move from the one this item predicted, and it is why the prediction is false: a
+build change with a named exception list, not a design problem.
 
-**What it does not unblock, even answered.** The beta label. The palette waits on a hafiz
+Three corrections make the reconstruction agree with Tanzil, each earned by a run that
+failed without it, and each stated by the corpus rather than guessed:
+
+| # | correction | evidence it was needed |
+|---|---|---|
+| 1 | prepend the **basmala** to ayah 1 of every surah but 1 and 9 | 2:1's offsets run to 44 against 5 codepoints; 326 annotations out of range → 0 |
+| 2 | glue the split **conjunction waw** to its successor | the print flags it itself, `data-waw-alatf="true"`, always on «وَ» |
+| 3 | **drop the pause-mark words** — the print numbers them, this text has none | the miss histogram clustered on *even* values and decayed monotonically (0 → 63.4%, +2 → 21.0%, +4 → 7.5%), the signature of one repeated two-codepoint insertion |
+
+③'s discipline applies to the result, so the fold is not trusted on its own output. Two of
+the eighteen rules name their own letter: `hamzat_wasl` must start on **ٱ**, `lam_shamsiyyah`
+on **ل**. 15,985 annotations (26.6%) can be checked that way with no reference to any word
+boundary, and that oracle — not the span arithmetic — is what decides whether the fold is
+right.
+
+| measure | result |
+|---|---|
+| oracle lands on the expected letter | **15,510 / 15,985 = 97.03%** |
+| annotations inside **one** print word | 50,233 / 60,057 = **83.64%** |
+| two **adjacent** print words | 9,818 = **16.35%** |
+| wider than two | **4** — 2:228, 12:41, 12:101, 28:83, every one `idghaam_ghunnah` |
+| past the end of the text | 2 |
+
+The 16.35% is not misalignment. Idghaam, ikhfa and iqlab are cross-word rules — the whole
+point is what happens *between* two words — and both boxes are paintable, so a two-box span
+is the correct rendering of a two-word rule rather than a failure to place a one-word one.
+
+**The residual is ③'s shape, and that is the finding.** 172 ayahs of 6,236 (2.8%) carry a
+miss. Every one of the 475 misses sits within **±3 codepoints** of the expected letter, none
+is further than ±8 away, and **166 of the 172 drift by a single constant amount** — one
+spelling difference per ayah, of one codepoint in 87% of cases. That is orthographic, not
+structural: the same class as the four exceptions `lib/segmentation.mjs` already names, at a
+larger count. It is also why paintability (99.99% within two boxes) beats alignment (97.03%):
+a one-codepoint drift inside a seven-codepoint word rarely changes which box hosts the span.
+The 172 are recorded in `tajweed-words.probe.json` and are not to be heuristised away — ③'s
+rule, unchanged.
+
+**What it does not unblock, still.** The beta label. The palette waits on a hafiz
 (`plan-tajweed-golden-row`), and painting a wrong colour per word makes it wronger, not
 righter. ① also prices the bake in advance: restating an answer costs more than shipping
 the question, so expect the tajweed tree to move the way the roots tree did — 450.7 → 532.3
-KB gz, not the estimate — and to need `gate:assets` reviewed rather than assumed.
+KB gz, not the estimate — and to need `gate:assets` reviewed rather than assumed. And the
+probe is not a gate and will not become one: it reads the gitignored 378 MB page cache, so
+on a clean checkout it has nothing to read. Re-run it before writing the bake — the numbers
+above are of one pin.

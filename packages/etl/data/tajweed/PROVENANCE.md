@@ -98,6 +98,39 @@
   indices. Until Loop 4b's ligature corpus lands, the shards keep the spans
   verbatim and the app paints one mark per ayah. See the header of
   `packages/core/src/skins.ts`.
+- **Measured 2026-08-06 — the binding above is now priced, and it is a build
+  change** (`tajweed-words.probe.json`, `pnpm probe:tajweed-words`). The
+  paragraph above was written when there was nothing on the page to attach to;
+  `assets/words/**` now holds 91,451 word boxes, so the question became whether
+  a codepoint span lands inside one of them. It cannot be asked directly — that
+  needs the Tanzil text, which this repo does not hold — so the probe
+  *reconstructs* the text from the print's own per-word `data-hafs`, under three
+  corrections each earned by a run that failed without it: the source prefixes
+  the **basmala** to ayah 1 of every surah but 1 and 9; the print **splits the
+  conjunction waw** Tanzil joins and flags the split itself
+  (`data-waw-alatf="true"`); and the print **numbers pause marks as words** while
+  this text carries none of them, so they are dropped (63.40% → 97.03%). The fold
+  is checked against an oracle rather than its own output — `hamzat_wasl` must
+  start on ٱ and `lam_shamsiyyah` on ل, 15,985 annotations that need no word
+  boundary to verify.
+
+  | measure | result |
+  |---|---|
+  | oracle on the expected letter | 15,510 / 15,985 = **97.03%** |
+  | annotations inside one print word | 50,233 / 60,057 = **83.64%** |
+  | two adjacent print words | 9,818 = **16.35%** |
+  | wider than two | **4** (2:228, 12:41, 12:101, 28:83 — all `idghaam_ghunnah`) |
+  | residual | **172 ayahs**, 475 misses, all within ±3 codepoints |
+
+  The 16.35% is the cross-word phonology — idghaam, ikhfa, iqlab — painting
+  correctly across two boxes, not a misalignment; it is also *not* the same
+  number as the 16.7% above, which is against Tanzil's own tokenisation. The
+  residual is orthographic in the sense `docs/design/word-indexing.md` ③ uses:
+  166 of the 172 ayahs drift by a single constant amount, one spelling
+  difference each. **None of this lifts the beta label** — the palette waits on a
+  hafiz (`plan-tajweed-golden-row`), and a per-word colour that is wrong is worse
+  than an ayah-wide mark that is vague. It only says the eventual bake is
+  ordinary ETL work.
 - **Rejected alternatives** (checked 2026-07-25, all for the licence gate):
   - **quran.com API `text_uthmani_tajweed`** — no grant of any kind, and it is
     not an independent path anyway: enumerated over all 114 surahs its rule
