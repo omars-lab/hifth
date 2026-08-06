@@ -512,6 +512,25 @@ audit-edges: ## Draw a seeded sample of edges for a mushaf spot-audit:  make aud
 	  $(if $(N),--n $(N),) $(if $(SEED),--seed $(SEED),) $(if $(NEW),--skip-verified,) \
 	  $(if $(UNIFORM),--uniform,) $(if $(COVERAGE),--coverage,)
 
+.PHONY: probe-reference
+probe-reference: core ## A second opinion on the print: make probe-reference [PAGES=1] [ALL=1]
+	@# Bare: which published references answer today, measured now. PAGES=1
+	@# diffs 24 sampled pages of our ayah→page table against an independently
+	@# published one; ALL=1 does all 604 and prints only what disagrees.
+	@#
+	@# NOT in `make ci` and never will be, for the reason SOURCES.md already
+	@# gives about the quran-meta tables: a gate that reaches the network fails
+	@# when a host is down, which teaches everyone to skip it. Same reasoning
+	@# that cancelled the KFGQPC watcher and named `check-source-offer.mjs`
+	@# `check-` instead of `gate-`. This one is `probe-` for the same reason.
+	@#
+	@# Verse KEYS only — no `fields` parameter, so no Quran text crosses the
+	@# wire. See .claude/skills/mushaf-reference/SKILL.md for what a reference
+	@# can settle, what it cannot, and which archive.org scans are the wrong
+	@# qira'a to compare against.
+	@node scripts/probe-reference.mjs \
+	  $(if $(PAGES)$(ALL),--page-table,) $(if $(ALL),--all --quiet,)
+
 # ---------------------------------------------------------------------------
 
 .PHONY: help
