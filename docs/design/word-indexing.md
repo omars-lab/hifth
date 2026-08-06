@@ -448,3 +448,37 @@ shards, which is the only way the assumption could break without anyone noticing
 If a future edition breaks it, the map itself is unaffected (it is per-ayah, not per-page);
 what would need work is the shard reader, which currently builds one lexical run per ayah
 from one file.
+
+### ⑤ Word-granular tajweed painting needs a third text, not a second baking pass · **open**
+
+①'s last paragraph says a second consumer of the alignment would need its own baking pass
+and that the tajweed shards have not had one. That is true, and it is not the whole cost —
+which is why this is a row rather than a sentence inside an answered item. Opened
+2026-08-06 by a sweep of the catalog, because PLAN follow-up 3 had been carrying this as
+*blocked on word geometry* since before the geometry shipped.
+
+**What is no longer in the way.** Geometry: `assets/words/**` holds 91,451 boxes on our own
+frame. Identity: the QAC ↔ print alignment shipped in word-D and is baked into
+`assets/adj/**` and `assets/roots/**`. Both walls this item used to name are gone.
+
+**What is.** `build-tajweed.mjs` emits, per ayah, `family → [start, end, …]`, and those
+numbers are **codepoint offsets into that ayah's Tanzil Uthmani text**. The alignment joins
+two *word* indices. Between a codepoint and a word sits a segmentation of a text this repo
+does not hold and has a standing rule against holding — *"There is no Quran text in this
+repo and there will not be"* (`morphology.mjs`). QAC's Buckwalter segments reconstruct a
+word well enough to ask whether two ayahs share phrasing and nowhere near well enough to
+count Uthmani codepoints. So the offsets currently resolve against nothing committed here.
+
+**What would answer it.** The move that answered ①, run once more and measured the same
+way. `build-words.mjs` already reads the upstream print's per-word text and drops it on
+purpose; `lib/segmentation.mjs` already folds orthography until two indices join. A probe
+that folds Tanzil-Uthmani against the print's word text would say whether each annotation's
+span falls inside one print word, and how many ayahs need named exceptions — ③'s four are
+the shape to expect. ETL-only, nothing ships from it but a number, and the number decides
+whether this is a build change or a design problem.
+
+**What it does not unblock, even answered.** The beta label. The palette waits on a hafiz
+(`plan-tajweed-golden-row`), and painting a wrong colour per word makes it wronger, not
+righter. ① also prices the bake in advance: restating an answer costs more than shipping
+the question, so expect the tajweed tree to move the way the roots tree did — 450.7 → 532.3
+KB gz, not the estimate — and to need `gate:assets` reviewed rather than assumed.

@@ -109,6 +109,16 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
    13 is answered as of 2026-08-04 — the candidate corpus is our print — so what stands
    between here and both features is no longer a corpus hunt but registering its word boxes
    onto our page frame and vendoring the result;
+   **and as of 2026-08-06 that registration is two loops behind us and this entry had not
+   noticed.** The boxes shipped (word-B) and so did the alignment (word-D), so
+   **word-granularity roots + `?w=` UI is done** — the param is documented in
+   [`query-params.md`](query-params.md) and the run announces its own outcome. Word-granular
+   **tajweed** painting is the half that is left, and its wall is not the one written above:
+   the annotations are codepoint offsets into a Tanzil Uthmani text this repo does not hold
+   and will not, so it needs a third segmentation joined to the two we now have. That is its
+   own row — [`word-indexing.md` ⑤](design/word-indexing.md) — because a deferral re-pointed
+   four times is a register asking to be split, and the split is what made the remaining work
+   visible instead of merely deferred;
    **hafiz
    sign-off on the tajweed skin → Loop 7** (the beta label stays until then). **Done:**
    golden-image visual regression, Lighthouse CI, and the **⬡ chip vs ⬡ lens** collision —
