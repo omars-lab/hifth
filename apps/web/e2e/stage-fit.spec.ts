@@ -52,11 +52,13 @@ import { test, expect, type Locator, type Page } from "@playwright/test";
  *
  * The sixth is the last face of the doubled coordinate model (`page-turning.md`
  * §7 ⑨), and it is here because it is the same confusion as the third and fourth
- * seen through a gesture instead of through a layout: `onPinch` anchored against
- * the stage rect while the transform it was computing is layer-relative. Every
- * other test in this file measures the page at rest, where that error is exactly
- * zero — it is proportional to `(1 − k)` — so the last test drives a zoom and
- * follows a point of scripture through it.
+ * seen through a gesture instead of through a layout: `zoomAbout` anchored
+ * against the stage rect while the transform it was computing is layer-relative.
+ * Every other test in this file measures the page at rest, where that error is
+ * exactly zero — it is proportional to `(1 − k)` — so the last test drives a zoom
+ * and follows a point of scripture through it. It drives it through the chrome's
+ * stepper now that the wheel navigates instead of magnifying, and that changed
+ * what the row can and cannot see; the row itself says which.
  */
 
 /** The visible page's SVG — the only host not `display: none` (PageStage). */
@@ -259,6 +261,46 @@ async function open(page: Page, hash: string, pageNo: number): Promise<Locator> 
 }
 
 /**
+ * The same, with the book shut first — the only way a desktop reaches a zoom.
+ *
+ * Every test below that needs the *overflow* regime needs the page to be bigger
+ * than the stage, and the only thing that made it bigger was the hop's own
+ * framing at `DEFAULT_HOP_ZOOM`. On a phone that is still what happens. On a
+ * desktop the spread now withholds it: magnification needs one page, because
+ * 1.55 on the live leaf beside 1 on the facing one is two leaves at different
+ * scales with the book open, which is the defect the whole toggle exists to
+ * remove (`docs/design/desktop.md` §8 ②).
+ *
+ * So the mode is chosen **before** the hop rather than after it. A toggle after
+ * arrival would not re-frame anything — the landing has already happened — and
+ * the test would go on measuring a page at fit while claiming to measure one
+ * that overflows.
+ *
+ * Below the breakpoint the radio is not rendered at all, and that is the whole
+ * of the phone branch: nothing to click, nothing withheld, the hop frames as it
+ * always did. Hence `count()` rather than a project name — this file sets its
+ * own viewport in places, so what matters is whether the control is *there*.
+ */
+async function openSolo(page: Page, hash: string, pageNo: number): Promise<Locator> {
+  await page.goto("/#/hafs-kfqc/p1");
+  const one = page.getByRole("radio", { name: "صفحة واحدة" });
+  if ((await one.count()) > 0) {
+    await one.click();
+    await expect(one).toHaveAttribute("aria-checked", "true");
+  }
+  // Same-document, so `page.goto` would be a no-op the router never hears. The
+  // hash *is* the route (`useHashRouter.ts`), and writing it is what a shared
+  // link does when it is pasted into a tab that is already open.
+  await page.evaluate((h) => {
+    window.location.hash = h;
+  }, `#/hafs-kfqc/${hash}`);
+  const svg = pageSvg(page, pageNo);
+  await expect(svg).toBeVisible({ timeout: 20_000 });
+  await settle(svg);
+  return svg;
+}
+
+/**
  * One axis is held where `holdAxis` (packages/core/src/view.ts) says it is.
  *
  * Two regimes, and asserting only one of them is how the double centring hid.
@@ -371,7 +413,9 @@ test.describe("Hifth · the stage holds page, not paper", () => {
   test("a hop to the foot of a page lands on scripture, not on a margin", async ({ page }) => {
     // 2:47 is the second-to-last ayah on page 7. Centring it is exactly the
     // request the page cannot grant, which is why it is the one linked here.
-    const svg = await open(page, "2:47", 7);
+    // Shut first, because on a desktop the hop's framing is the thing the spread
+    // withholds and the framing is the whole premise — see `openSolo`.
+    const svg = await openSolo(page, "2:47", 7);
     const { box, paper, layer, stage, pads } = await framesOf(svg);
 
     // Every mark the leaf wears is beside the scripture, at the hop zoom as much
@@ -402,7 +446,7 @@ test.describe("Hifth · the stage holds page, not paper", () => {
     // The hop's own target being legal is not enough: the tween's intermediate
     // frames and every later pan write the transform too, so the clamp lives on
     // the write and not on the target. A drag is how a reader reaches it.
-    const svg = await open(page, "2:47", 7);
+    const svg = await openSolo(page, "2:47", 7);
     const before = await boxOf(hostOf(svg));
     const { layer, stage, pads } = await framesOf(svg);
 
@@ -414,6 +458,10 @@ test.describe("Hifth · the stage holds page, not paper", () => {
     // stroke latches as a pan while `elapsedTime` is still nowhere near
     // LONG_PRESS_MS. A slower sweep would latch as a marquee and this test would
     // pass by never having moved the page at all.
+    //
+    // There is something to pan *because* the leaf is solo and the hop framed
+    // it: at fit the clamp pins the page in the middle and the drag assertion
+    // below would fail for the right reason on the wrong test.
     await page.mouse.move(cx + 600, cy + 900, { steps: 4 });
     await page.mouse.up();
     await settle(svg);
@@ -547,23 +595,8 @@ test.describe("Hifth · the stage holds page, not paper", () => {
     expectHeld(after, layer, stage, pads);
   });
 
-  test("a zoom keeps the word under the finger under the finger", async ({ page, browserName }) => {
-    // Skipped on one project, and the reason is a limit of the driver rather
-    // than of the app: `mouse.wheel` throws "not supported in mobile WebKit",
-    // and a real two-finger pinch cannot be driven either — Playwright dispatches
-    // one pointer at a time on every engine. So the iPhone project has no way to
-    // reach `onPinch` at all, and the honest options were to skip it here or to
-    // assert the arithmetic against a hand-built event, which would test the test.
-    //
-    // What is lost is small and worth naming: the invariant is this app's own
-    // coordinate arithmetic, not engine behaviour, and it still runs on two
-    // projects — `desktop` at the phone viewport this test sets, and `android`
-    // at its own. What no project can reach is a pinch with two real fingers on
-    // real glass; that is the screen-reader walkthrough's neighbour in
-    // `docs/validation/ledger.json`, not something to fake here.
-    test.skip(browserName === "webkit", "mobile WebKit cannot be sent a wheel or a second pointer");
-
-    // `docs/design/page-turning.md` §7 ⑨. `onPinch` converted the gesture's
+  test("a zoom holds the point it anchored on", async ({ page }) => {
+    // `docs/design/page-turning.md` §7 ⑨. `zoomAbout` converted the gesture's
     // origin against the **stage** rect while `view.x/y` are layer-relative, so
     // the anchor was measured from one box into coordinates belonging to
     // another. The gap between them is the stage's padding — a gutter that is
@@ -573,54 +606,59 @@ test.describe("Hifth · the stage holds page, not paper", () => {
     // `px − (px − x)·k`, so an origin off by `d` lands the page off by
     // `d·(1 − k)`. At rest that is zero. Measured at a 1.0 → 1.4 zoom before the
     // fix: (0.0, −6.4) px, which is `16 × (k − 1)` to the pixel — one
-    // `--stage-pad`. Nothing horizontal, because §2.4 drops the padding on the
-    // leaf's bound side; nothing at all at 1440 × 900, because the spread
-    // neutralises the padding entirely. The defect was live on the acceptance
-    // device and absent on the one a developer is looking at, so this test sets
-    // a phone viewport rather than trusting the project's.
-    await page.setViewportSize({ width: 390, height: 844 });
-    const svg = await open(page, "p7", 7);
+    // `--stage-pad`.
+    //
+    // **What this row can no longer see, said plainly.** It used to drive
+    // `ctrl`+wheel at a phone viewport, where that padding is 16 px and the drift
+    // is visible. `ctrl`+wheel no longer zooms anything — a trackpad pinch is
+    // encoded as one and the reader asked for the wheel to navigate — so the two
+    // remaining ways to zoom are a touch pinch and this stepper. Playwright
+    // dispatches one pointer at a time on every engine, so no project can send a
+    // pinch; and the stepper exists only above the breakpoint, where the spread
+    // zeroes `--stage-pad` and that particular 16 px is not there to be measured.
+    //
+    // So the *original* regression is now guarded structurally rather than here:
+    // there is exactly one `zoomAbout`, it reads `layerRef` itself, and neither
+    // caller passes it a box. What this row still catches is the wider family the
+    // original belonged to — an anchor converted against the host, the stage or
+    // the viewport instead of the layer. In a solo leaf the host sits hundreds of
+    // pixels inside its layer, so any of those lands the page visibly off. The
+    // pinch on real glass is a manual check, next to the screen-reader
+    // walkthrough in `docs/validation/ledger.json`, not something to fake here.
+    const svg = await openSolo(page, "p7", 7);
+    const zoomIn = page.getByRole("button", { name: "تكبير" });
+    test.skip(
+      (await zoomIn.count()) === 0,
+      "no stepper below the breakpoint, and no driver can send a pinch",
+    );
 
-    // Off both centres deliberately: an anchor in the middle of the page is the
-    // one point a wrong origin cannot move, because the error is proportional to
-    // the distance from wherever the transform's own origin is.
-    const box = await boxOf(svg);
-    const anchor = { x: box.x + box.width * 0.3, y: box.y + box.height * 0.35 };
+    // The stepper has no pointer, so it anchors at the middle of the layer —
+    // which makes the middle of the layer the one point this gesture promises to
+    // hold, and therefore the only honest point to follow.
+    const layer = await boxOf(layerOf(svg));
+    const anchor = { x: layer.x + layer.width / 2, y: layer.y + layer.height / 2 };
 
-    // The scripture actually under the pointer, in the SVG's own user space —
-    // the only frame that survives a transform, which is what makes it the right
+    // The scripture actually under that point, in the SVG's own user space — the
+    // only frame that survives a transform, which is what makes it the right
     // thing to follow. `getScreenCTM` composes every transform between the SVG
     // and the viewport, so this is the glyph, not an approximation of it.
     const before = await userSpaceAt(svg, anchor);
     expect(before, "could not read the SVG's screen CTM").not.toBeNull();
 
-    // One mouse notch. It was −40 while `ctrl`+wheel went through @use-gesture,
-    // whose bridge zoomed ~1.4× per notch and reached the premise below on a
-    // fraction of one; the calibrated curve (`page-turning.md` §7 ③) is 1.2× per
-    // 100 px, so the stimulus has to be a gesture a person would actually make.
-    // The `android` project is what forced the arithmetic to be written down:
-    // its wheel deltas arrive divided by the 2.625 device scale factor, so −40
-    // there is −15.2 px and zooms 1.028 — under the premise, and correctly so.
-    // At −120 the two projects land at 1.25 and 1.09, both of them a zoom.
-    await page.mouse.move(anchor.x, anchor.y);
-    await page.keyboard.down("Control");
-    await page.mouse.wheel(0, -120);
-    await page.keyboard.up("Control");
+    // One rung of the ladder: 1 → 1.25.
+    await zoomIn.click();
     await settle(svg);
 
-    // The premise. `ctrl`+wheel is now the stage's own listener rather than
-    // @use-gesture's modifier-key path, and if that ever stops being true this
-    // test would pass by never zooming at all — which is the failure mode a
-    // drift assertion is least able to notice.
+    // The premise. If the stepper ever stops reaching the stage this test would
+    // pass by never zooming at all — which is the failure mode a drift assertion
+    // is least able to notice.
     const zoomed = await scaleOf(svg);
     expect(zoomed, "the zoom never happened — this test proved nothing").toBeGreaterThan(1.05);
 
     const now = await clientPointOf(svg, before!);
-    expect(Math.abs(now!.x - anchor.x), "the page slid horizontally under the pointer").toBeLessThan(
+    expect(Math.abs(now!.x - anchor.x), "the page slid horizontally under the anchor").toBeLessThan(
       1,
     );
-    expect(Math.abs(now!.y - anchor.y), "the page slid vertically under the pointer").toBeLessThan(
-      1,
-    );
+    expect(Math.abs(now!.y - anchor.y), "the page slid vertically under the anchor").toBeLessThan(1);
   });
 });

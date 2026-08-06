@@ -1,10 +1,11 @@
-import { beforeEach, describe, expect, it } from "vitest";
-import { fireEvent, render, screen } from "@testing-library/react";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { fireEvent, render, screen, within } from "@testing-library/react";
 import { appKeyAction } from "@hifth/core";
 import { LANG_STORAGE_KEY, LOCALES } from "../lang";
+import { digits } from "../format";
 import { LOCALE_IDS } from "../messages/locales.gen";
 import { LangProvider, useT } from "../i18n";
-import { DesktopChrome } from "./DesktopChrome";
+import { DesktopChrome, type PageMode } from "./DesktopChrome";
 
 /** Reads back the language the provider actually settled on. */
 function LangProbe(): JSX.Element {
@@ -23,13 +24,41 @@ beforeEach(() => {
   localStorage.setItem(LANG_STORAGE_KEY, "ar");
 });
 
-function chrome() {
+/**
+ * The chrome is a controlled component down to the last button — it owns none of
+ * page mode and none of zoom, which is the whole point of the change that added
+ * them (docs/design/desktop.md §8 ②). So the harness supplies both, and the spies
+ * it hands back are what the assertions read: what a press *asked for*, never
+ * what the component decided on its own.
+ */
+function chrome(props: Partial<{ pageMode: PageMode; zoom: number }> = {}) {
+  const onPageMode = vi.fn();
+  const onZoom = vi.fn();
   render(
     <LangProvider>
-      <DesktopChrome />
+      <DesktopChrome
+        pageMode={props.pageMode ?? "two"}
+        onPageMode={onPageMode}
+        zoom={props.zoom ?? 1}
+        onZoom={onZoom}
+      />
       <LangProbe />
     </LangProvider>,
   );
+  return { onPageMode, onZoom };
+}
+
+/**
+ * The language switch's own radios, now that it is not the only radiogroup.
+ *
+ * Picked out by `lang`, not by the group's accessible name, and that is not
+ * fastidiousness: the name is itself translated, so a test that switches to
+ * English and looks again would be asking for «اللغة» in a chrome that has just
+ * stopped saying it. `lang` is the one attribute only these options carry, and
+ * it means the same thing in every locale.
+ */
+function langOptions() {
+  return screen.getAllByRole("radio").filter((r) => r.hasAttribute("lang"));
 }
 
 describe("DesktopChrome", () => {
@@ -46,7 +75,7 @@ describe("DesktopChrome", () => {
     // grows a third option or this says which language it left out.
     chrome();
     const group = screen.getByRole("radiogroup", { name: "اللغة" });
-    const options = screen.getAllByRole("radio");
+    const options = langOptions();
     expect(options.map((o) => o.getAttribute("lang"))).toEqual([...LOCALE_IDS]);
     for (const option of options) expect(group).toContainElement(option);
   });
@@ -57,19 +86,20 @@ describe("DesktopChrome", () => {
     // itself, which is why `abbr` is declared in `LOCALES` next to `name`. The
     // full name still does the talking, in the accessible label below.
     chrome();
-    const options = screen.getAllByRole("radio");
-    expect(options.map((o) => o.textContent)).toEqual(LOCALE_IDS.map((id) => LOCALES[id].abbr));
+    expect(langOptions().map((o) => o.textContent)).toEqual(
+      LOCALE_IDS.map((id) => LOCALES[id].abbr),
+    );
   });
 
   it("marks the current language checked and switches to the other", () => {
     chrome();
-    const [ar, en] = screen.getAllByRole("radio");
+    const [ar, en] = langOptions();
     expect(ar!.getAttribute("aria-checked")).toBe("true");
     expect(en!.getAttribute("aria-checked")).toBe("false");
 
     fireEvent.click(en!);
     expect(screen.getByTestId("lang").textContent).toBe("en");
-    expect(screen.getAllByRole("radio")[1]!.getAttribute("aria-checked")).toBe("true");
+    expect(langOptions()[1]!.getAttribute("aria-checked")).toBe("true");
   });
 
   it("names the option a reader cannot currently read", () => {
@@ -77,7 +107,7 @@ describe("DesktopChrome", () => {
     // accessible name spells the language out; the checked one needs no override
     // because it already says what it is in the language being read.
     chrome();
-    const [ar, en] = screen.getAllByRole("radio");
+    const [ar, en] = langOptions();
     expect(ar!.getAttribute("aria-label")).toBeNull();
     expect(en!.getAttribute("aria-label")).toBe("التبديل إلى English");
   });
@@ -139,5 +169,138 @@ describe("DesktopChrome", () => {
     expect(press("ArrowLeft")).toEqual({ kind: "page", step: 1 });
     expect(press("ArrowRight")).toEqual({ kind: "page", step: -1 });
     expect(press(jump!)).toEqual({ kind: "jumper" });
+  });
+});
+
+describe("DesktopChrome · one page or two", () => {
+  it("asks for the mode it is not in, and never decides for itself", () => {
+    // The control owns nothing. That is the entire point of the change that
+    // introduced it: `soloLeaf` used to be *derived* from zoom, and three
+    // distinct desyncs came out of that one derivation (desktop.md §8 ②). So the
+    // assertion is about the request, not about any state the chrome kept.
+    const { onPageMode } = chrome({ pageMode: "two" });
+    const group = screen.getByRole("radiogroup", { name: "الصفحات المعروضة" });
+    const [one, two] = within(group).getAllByRole("radio");
+
+    expect(one!.getAttribute("aria-checked")).toBe("false");
+    expect(two!.getAttribute("aria-checked")).toBe("true");
+
+    fireEvent.click(one!);
+    expect(onPageMode).toHaveBeenCalledWith("one");
+    // And still says "two", because nothing but the prop can change it.
+    expect(within(group).getAllByRole("radio")[1]!.getAttribute("aria-checked")).toBe("true");
+  });
+
+  it("shows a word and says a phrase", () => {
+    // Same trade the language switch makes beside it: the header has room for
+    // «واحدة» and not for «صفحة واحدة», and a listener loses nothing because the
+    // accessible name carries the phrase. Asserted as a pair so a future edit
+    // cannot quietly let the visible word become the accessible name.
+    chrome({ pageMode: "one" });
+    const group = screen.getByRole("radiogroup", { name: "الصفحات المعروضة" });
+    const [one, two] = within(group).getAllByRole("radio");
+    expect([one!.textContent, two!.textContent]).toEqual(["واحدة", "اثنتان"]);
+    expect([one!.getAttribute("aria-label"), two!.getAttribute("aria-label")]).toEqual([
+      "صفحة واحدة",
+      "صفحتان",
+    ]);
+  });
+
+  it("is a radiogroup, not a checkbox labelled 'two pages'", () => {
+    // Two mutually exclusive states are two radios. A single checkbox would
+    // leave a listener guessing whether *checked* means the box is ticked or the
+    // book is open — and the answer would flip with the label's wording.
+    chrome();
+    expect(screen.queryByRole("checkbox")).toBeNull();
+    expect(screen.getAllByRole("radiogroup").length).toBe(2);
+  });
+});
+
+describe("DesktopChrome · the zoom stepper", () => {
+  /** The two buttons, in the order they are drawn: out, then in. */
+  function steppers() {
+    const group = screen.getByRole("group", { name: "التكبير" });
+    return {
+      out: within(group).getByRole("button", { name: "تصغير" }),
+      into: within(group).getByRole("button", { name: "تكبير" }),
+      group,
+    };
+  }
+
+  it("steps to the next rung of the ladder, not by a multiplier", () => {
+    // A ladder, and the readout is why: repeated multiplication drifts, and
+    // «١٠٠٪» has to be true when it says so. The rungs are ZOOM_STEPS, owned by
+    // the stage — the same list the clamp is applied against.
+    const { onZoom } = chrome({ pageMode: "one", zoom: 1 });
+    const { out, into } = steppers();
+
+    fireEvent.click(into);
+    expect(onZoom).toHaveBeenLastCalledWith(1.25);
+    fireEvent.click(out);
+    expect(onZoom).toHaveBeenLastCalledWith(0.8);
+  });
+
+  it("gets a reader back onto the ladder from wherever a hop left them", () => {
+    // A hop frames its ayah at DEFAULT_HOP_ZOOM — 1.55, deliberately on no rung.
+    // Index arithmetic ("find 1.55, go one along") has no answer here; asking for
+    // the nearest rung *past* 1.55 in the direction pressed does, and it is the
+    // rung the reader expected in both directions.
+    const { onZoom } = chrome({ pageMode: "one", zoom: 1.55 });
+    const { out, into } = steppers();
+
+    fireEvent.click(out);
+    expect(onZoom).toHaveBeenLastCalledWith(1.5);
+    fireEvent.click(into);
+    expect(onZoom).toHaveBeenLastCalledWith(2);
+  });
+
+  it("stops at the floor rather than pretending to move", () => {
+    // MIN_ZOOM. The button that cannot move is disabled rather than
+    // clickable-and-inert, and it needs no tooltip because the reason it is off
+    // is already on screen beside it: the readout says 80%.
+    chrome({ pageMode: "one", zoom: 0.8 });
+    expect(steppers().out).toBeDisabled();
+    expect(steppers().into).toBeEnabled();
+    expect(steppers().out.getAttribute("title")).toBeNull();
+  });
+
+  it("stops at the ceiling too", () => {
+    // MAX_ZOOM, and the mirror of the row above. Both ends are asserted because
+    // the two are computed by the same helper walking the ladder in opposite
+    // directions, and a sign error would leave exactly one of them working.
+    chrome({ pageMode: "one", zoom: 5 });
+    expect(steppers().into).toBeDisabled();
+    expect(steppers().out).toBeEnabled();
+  });
+
+  it("is off in two-page mode, and says why on the control itself", () => {
+    // Two magnified leaves lose their edges and read as one continuous column,
+    // and a leaf in a spread is height-bound at ~398px anyway, so zoom there
+    // buys nothing (desktop.md §8 ②). The toggle beside it is the way out — and
+    // the tooltip is here rather than nowhere because this is the one of the
+    // three disabled cases whose reason is *not* visible from the control.
+    const { onZoom } = chrome({ pageMode: "two", zoom: 1 });
+    const { out, into } = steppers();
+    expect(out).toBeDisabled();
+    expect(into).toBeDisabled();
+    for (const b of [out, into]) {
+      expect(b.getAttribute("title")).toBe("التكبير يحتاج صفحة واحدة — بدّل إلى صفحة واحدة أولًا");
+    }
+    fireEvent.click(into);
+    expect(onZoom).not.toHaveBeenCalled();
+  });
+
+  it("shows the level without becoming a second announcer", () => {
+    // The readout is for the eye. The app has exactly one polite live region and
+    // a page turn already speaks through it; a second one in the header would
+    // compete with the first for the same reader at the same moment. What landed
+    // is announced at the App level instead, through `useAnnouncer` — which is
+    // also why the level is in neither button's name, where it would be re-read
+    // on every subsequent visit to either one.
+    chrome({ pageMode: "one", zoom: 1.25 });
+    const { group, out, into } = steppers();
+    expect(within(group).getByText(`${digits(125, "ar")}٪`)).toBeInTheDocument();
+    expect(group.querySelector("[aria-live]")).toBeNull();
+    for (const b of [out, into]) expect(b.textContent).not.toContain(digits(125, "ar"));
   });
 });
