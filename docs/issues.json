@@ -539,7 +539,7 @@
       "source": { "ledger": "edge-spot-audit" },
       "severity": "risk",
       "owner": "user",
-      "note": "The only check that can establish the scripture data is correct."
+      "note": "The only check that can establish the scripture data is correct. Narrowed on 2026-08-06 without being closed: scripts/probe-reference.mjs settles the arithmetic underneath it from a third party — all 604 pages of our ayah→page table against api.quran.com's, 568 agree and 36 diverge exactly where V1/1405H and V2/1421H are known to, 0 surprises — so 'is this ayah on the page we print beside it?' is no longer part of what a human is being asked. What is left is the whole of the judgement: whether an edge joins two ayahs a hafiz would actually confuse. No reachable source answers that, which is why this stays owner:user and severity:risk rather than moving. The probe is deliberately not a gate (it reaches the network) and its measurement is banked in packages/etl/data/pages/PROVENANCE.md; .claude/skills/mushaf-reference/SKILL.md names which published references can stand in for paper and which will make a correct pair look wrong."
     },
     {
       "id": "check-offline-survival",

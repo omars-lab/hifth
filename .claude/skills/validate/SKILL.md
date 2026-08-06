@@ -351,6 +351,14 @@ The one check with a dedicated tool (`make audit-edges`, seeded so a round can b
 re-run, re-checked, or handed to a second reader), because it is the highest-value
 human input this project takes. Steps: `make validate CHECK=edge-spot-audit`.
 
+**No mushaf on the table is not a reason to skip the round.** `/mushaf-reference`
+names the published scans and page tables that stand in for one, and the two traps
+that make a stand-in worse than nothing: six of archive.org's twelve KFGQPC scans
+are a different qira'a or script, and most published page tables are V1/1405H
+while our print is V2/1421H — 36 pages apart. `make probe-reference ALL=1` checks
+that divergence is still exactly the expected 36, which settles every arithmetic
+claim under this check and none of its judgement.
+
 **Aim the round before drawing it.** `make validate` ends in a coverage table:
 one row per class of edge (type × curated-or-dataset × page distance), marked ✓
 or ·. The · rows are where a wrong edge survives everything — `gate:edges` does
