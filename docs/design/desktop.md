@@ -429,6 +429,56 @@ is hidden on a phone for want of room; the hints are additionally hidden whereve
 `(any-hover: none)` holds, because a landscape iPad clears the breakpoint on both axes and has
 no keyboard. Room and a keyboard are two premises, and only this control needs the second.
 
+### One page or two, in the chrome
+
+**Mobile constraint:** the bluntest one in this section — below the breakpoint there is no
+second leaf, so a switch between one page and two would be a switch between one page and one
+page.
+
+**Desktop:** a two-radio group, «واحدة» / «اثنتان», built on the language switch's markup
+because it is the same shape of choice: two mutually exclusive states, each named in full to a
+screen reader and abbreviated to a word for the eye. A checkbox labelled "two pages" was the
+alternative and it is worse, because *checked* would have to mean both "the box is ticked" and
+"the book is open" and a listener cannot tell which one it was told.
+
+**It exists because the answer used to be derived.** Zoom past fit and the book closed itself;
+zoom back and it opened. Three separate desyncs came out of that one derivation, and the reader
+could not say "keep it closed" or "keep it open" at any magnification. §8 ② carries the whole
+account; the control is what replaced it.
+
+### The zoom stepper, in the chrome
+
+**Mobile constraint:** a phone has a pinch, and a pinch is a better magnifier than any pair of
+buttons — it is continuous, it is anchored where the reader is looking, and it costs no chrome.
+
+**Desktop:** `−` · a readout · `+`, stepping a **ladder** of nine named rungs
+(0.8, 1, 1.25, 1.5, 2, 2.5, 3, 4, 5) rather than multiplying. A ladder is what lets the readout
+be believed: «١٢٥٪» is a place the reader can return to, where 1.2ⁿ is a number that happens to
+be on screen. Pressing from an off-ladder level — a hop lands at 1.55, deliberately between two
+rungs — takes the nearest rung *past* where you are in the direction you pressed, so one press
+is always enough to get onto the ladder.
+
+A `group` and not a `spinbutton`: the ARIA role would promise arrow-key increments over a
+continuous range, and this is nine rungs and two buttons.
+
+**Why buttons at all, on the machine with the best pointer.** Because a laptop's pinch is not
+available to us: macOS encodes it as `ctrl`+wheel (§6), so the gesture everyone reaches for
+either does nothing or does something violent, and a control that says what it will do before
+it does it is the honest answer to that. Session state, not persisted — a preference surface is
+a new axis and nobody has asked for one.
+
+**It is disabled while the book is open**, with the toggle beside it as the way out, and the
+`title` says so on both buttons. Two magnified leaves lose their edges and read as one
+continuous column (§8 ②), and §3's finding is that a leaf in a spread is height-bound at
+~398 px, so magnification there buys geometry it cannot use anyway. The disabled state is a
+`:disabled` button rather than a hidden one on purpose: a control that vanishes teaches nothing,
+and this one has something to teach.
+
+**The readout is not a live region.** The app has exactly one polite announcer and a second in
+the header would compete with it for the same reader at the same moment — a page turn and a
+zoom both speak. What *landed* is announced through `useAnnouncer` at the App level, with the
+level the stage says it applied rather than the one that was asked for.
+
 ### Not unlocked, and why
 
 - **A hop-results sidebar.** The rail and popover are correct at every width; a persistent
@@ -491,13 +541,26 @@ section did not mention until `page-turning.md` §7 ③ noticed the omission:
   and 40 px of accumulated travel commits the turn. A mouse notch is 100–120 px and is
   therefore one turn, once. The classification is `packages/core/src/gestures.ts` and is unit
   tested there, beside the pointer splitter it rhymes with.
-- **`ctrl`/`⌘`+wheel zooms**, `z' = z · 1.2^(−Δy/100)` — multiplicative, so the same wheel
-  travel is the same *proportion* at 0.8× as at 5×. The modifier split is the platform's own:
-  a trackpad pinch arrives as a synthesised `ctrl`+wheel, so honouring it is what makes a
-  laptop pinch work at all.
-- **Only `deltaY` is bound.** A two-finger horizontal swipe is the browser's back/forward
-  gesture on macOS, and taking it would be taking navigation away from the reader to do
-  something navigation already does.
+- **`shift`+wheel jumps a juz** — to the nearest juz *opening page* strictly past the current
+  one in the direction of travel, which is the same question a plain wheel asks about pages
+  and is therefore the same state machine (`nextWheelTurn`, one implementation, its own rest
+  state per axis). Asked in pages rather than in juz numbers on purpose: it disposes of the
+  straddling leaf, of a juz with no vendored opening, and of "back from the middle of a juz",
+  all of which juz arithmetic would have to special-case. The reader asked for this on `ctrl`;
+  see the bullet below for why it could not have it.
+- **`ctrl`/`⌘`+wheel does nothing at all.** It used to zoom, `z' = z · 1.2^(−Δy/100)`. It is
+  now swallowed — `preventDefault`, no action — and the swallowing is the deliberate part:
+  letting it through hands the reader the *browser's* page zoom, which changes CSS px and
+  bounces the desktop breakpoint, and "I don't want zoom driven by scrolling" covers that too.
+  It cannot carry the juz jump either, for the reason the old bullet gave as a virtue: **a
+  macOS trackpad pinch is a synthesised `ctrl`+wheel**, indistinguishable from a real one, so
+  binding anything to it means every two-finger pinch on a laptop does that thing. Magnifying
+  was a defensible guess at what a pinch means; teleporting twenty pages is not.
+- **Only `deltaY` is bound, with one stated exception.** A two-finger horizontal swipe is the
+  browser's back/forward gesture on macOS, and taking it would be taking navigation away from
+  the reader to do something navigation already does. The exception is the `shift` branch,
+  which reads `deltaY || deltaX`: several browsers deliver a *shifted* wheel as `deltaX`, so a
+  branch reading only `deltaY` there would be dead on those engines rather than polite.
 - **An open sheet keeps its own scroll** — the stage's listener returns before
   `preventDefault` when a dialog is up, matching `keymap.ts` rule 3.
 
@@ -695,6 +758,48 @@ live leaf taking the book's width, and the page **not** stretching to the desk) 
 link opens on the leaf it landed in"* (finding 1, with no gesture in it).
 `PageSpread.test.tsx` holds the half jsdom can see: the reading order, and that the facing
 leaf is still mounted.
+
+**Superseded in the mechanism, upheld in the answer — "The wheel navigates, buttons magnify".**
+The paragraphs above stand as the record of what was decided and why; what follows is what
+replaced *how*. The answer they argue for is unchanged and is now stated rather than derived:
+**one magnified page, never two.** What is gone is `onFitChange`, `atFitRef` and the threshold —
+the whole derivation of page mode from zoom.
+
+It had to go because the derivation leaked three ways, all reproducible at 1440×900:
+
+1. **The facing leaf zoomed on its own.** `ctrl`+wheel over it took it to 1.549 while the live
+   leaf sat at 0.8 and the book stayed open. Finding 2 above named this and treated it as
+   *answered by* closing the book; it was not. The facing leaf mounts a complete `PageStage`
+   with its own wheel listener, so it could always reach a scale of its own — and the comment
+   at the facing stage's props saying it "never receives a hop or a gesture that could change
+   its own scale" was simply untrue, which is why nobody looked.
+2. **The mode survived a breakpoint crossing and the zoom did not.** Zoom at 1440, resize to
+   800 (the live stage unmounts and its `view` ref goes with it), resize back: `data-solo="true"`
+   over a leaf at `scale(1)` — a book closed with nothing to explain it, and no gesture that
+   undoes it except zooming in and back out.
+3. **Zooming *out* counted as being at fit.** `MIN_ZOOM` is 0.8 and the threshold was
+   `z ≤ 1 + 1e-3`, so at 0.8 the book re-opened at a size it had never closed at: a 266 px live
+   host beside a 332 px facing leaf.
+
+One cause under all three: **page mode was derived from a gesture**, so it could disagree with
+the gesture. The reader's call was to cut the derivation rather than patch its leaks —
+
+> i don't want zoom to be driven by scrolling … id rather a button to toggle between two page
+> and 1 pages mode / settings driven zoom
+
+So the reader is asked instead. §5 gains two controls: a page-mode radiogroup and a zoom
+stepper, and the stepper is **disabled while the book is open** — the toggle is the gateway to
+magnification, which is the same rule as before with the arrow of causation reversed. A hop is
+held to it too: with the book open a shared link frames its ayah at fit rather than at
+`DEFAULT_HOP_ZOOM`, because 1.55 on the live leaf beside 1 on the facing one is finding 1
+arrived at down a different path. The `ResizeObserver` in the last bullet above **stays** — its
+reason was independent of the flip and is still true.
+
+The three rows named under "Closed by" are replaced by
+*"Hifth · one page or two, and how big"* in the same file, whose five rows are the same three
+claims put to the controls: the toggle closes and opens the book, the stepper magnifies the one
+leaf and is off while there are two (defects ① and ③), crossing the breakpoint leaves the leaves
+agreeing (defect ②), and a hop link lands without magnifying half a book.
 
 ### ③ Is `min-width` the right gate for the keyboard hints? · **fixed**
 
