@@ -1,0 +1,159 @@
+{
+  "$comment": "Does a tajweed annotation land inside one print word? `docs/design/word-indexing.md` ⑤ asked exactly this and predicted the answer would be 'a third text' — a Tanzil segmentation this repo does not hold and has a standing rule against holding. It measured otherwise. The tajweed offsets are codepoint positions in each ayah's Tanzil Uthmani text, which cannot be read here, so it is reconstructed from the print's own per-word `data-hafs` — the string `build-words.mjs` reads and drops on purpose. Nothing is vendored and nothing ships from this but numbers. Regenerate with `pnpm probe:tajweed-words --write` (add `--fetch` on a machine whose `.cache/words/` is empty).",
+  "reads": "packages/etl/data/pages/ligature-svg.probe.json — the print pin lives there and is not restated here; packages/etl/data/tajweed/tajweed.hafs.uthmani-pause-sajdah.json, whose own provenance is PROVENANCE.md beside this file.",
+  "$method": "Fold the print's words into one string per ayah and ask, for every annotation, how many print words its [start, end) touches. Three corrections make the fold agree with Tanzil, and each was earned by a run that failed without it: (1) the tajweed source prefixes the BASMALA to ayah 1 of every surah but al-Fatiha and at-Tawba — without it 326 annotations run past the end of their own ayah, with it 0; (2) the print SPLITS THE CONJUNCTION WAW that Tanzil keeps joined, and flags the split itself as `data-waw-alatf=\"true\"`, so a flagged word is glued to its successor with no space; (3) the print NUMBERS PAUSE MARKS AS WORDS and the Tanzil text carries none of them, so they are dropped from the string — the evidence was a delta histogram clustered on EVEN values decaying monotonically (0 → 63.4%, +2 → 21.0%, +4 → 7.5%, +6 → 2.4%), the signature of one repeated two-codepoint insertion (a mark plus its space) rather than a scrambled text. Dropping them took the alignment from 63.40% to 97.03%. The fold is not trusted on its own output: `hamzat_wasl` must start on ٱ and `lam_shamsiyyah` on ل, which 15,985 annotations (26.6%) can be checked against independently of any word boundary. That oracle is what decides whether the fold is right; the span arithmetic only decides what follows.",
+  "$verdict": "A build change with a named residual, not a third text. 97.03% of the oracle lands on the exact expected letter, and 83.64% of all 60,057 annotations fall inside ONE print word. The 16.35% that touch two words are the cross-word phonology — idghaam, ikhfa, iqlab, rules that are two-word by nature — and both boxes are paintable, so that band is a feature of tajweed rather than a defect of the fold. Exactly 4 annotations touch more than two words (2:228, 12:41, 12:101, 28:83, all idghaam_ghunnah) and 2 run past the end. The residual is 172 ayahs of 6,236 (2.8%), and it is ORTHOGRAPHIC, not structural: every one of its 475 misses sits within ±3 codepoints of the expected letter, none is further than ±8 away, and 166 of the 172 ayahs drift by a single constant amount — one spelling difference per ayah, of one codepoint in 87% of cases. That is the same shape as the four exceptions `lib/segmentation.mjs` already names for the print↔QAC alignment, and it is why they are recorded here rather than heuristised. A drift of one codepoint inside a word of seven rarely changes which box hosts the annotation, which is why paintability is 99.99% while alignment is 97.03%.",
+  "$blindSpots": "Twelve of the eighteen rules have no characteristic letter — madd, ghunnah, qalqalah and the rest describe a manner of articulation that no single codepoint witnesses — so they are counted for paintability and inherit the oracle's verdict rather than testing it. Nothing here measures whether the COLOURS are right: the skin stays beta on a hafiz's sign-off (`plan-tajweed-golden-row`), and painting a wrong colour per word makes it wronger, not righter. And the spans are measured against the PRINT's tokenisation, which is the question asked; PROVENANCE.md's 16.7% is against Tanzil's own, and the two numbers are not the same measurement even though they nearly agree.",
+  "ranOn": "2026-08-06",
+  "verdict": "buildable",
+  "candidate": {
+    "repo": "mushafdatabase/MushafDatabase-Ligature-Based-SVG",
+    "commit": "ae5786ab08597f8123575dec4e774f1eca195e0f"
+  },
+  "ayahsRead": 6236,
+  "oracle": {
+    "hamzat_wasl": {
+      "n": 13252,
+      "hit": 12867
+    },
+    "lam_shamsiyyah": {
+      "n": 2733,
+      "hit": 2643
+    },
+    "total": {
+      "n": 15985,
+      "hit": 15510
+    }
+  },
+  "paintability": {
+    "annotations": 60057,
+    "oneWord": 50233,
+    "twoAdjacent": 9818,
+    "wider": 4,
+    "pastEnd": 2,
+    "widerRows": [
+      {
+        "key": "2:228",
+        "rule": "idghaam_ghunnah",
+        "words": 3
+      },
+      {
+        "key": "12:41",
+        "rule": "idghaam_ghunnah",
+        "words": 3
+      },
+      {
+        "key": "12:101",
+        "rule": "idghaam_ghunnah",
+        "words": 3
+      },
+      {
+        "key": "28:83",
+        "rule": "idghaam_ghunnah",
+        "words": 3
+      }
+    ]
+  },
+  "residual": {
+    "ayahs": 172,
+    "misses": 475,
+    "singleDriftAyahs": 166,
+    "distances": {
+      "1": 139,
+      "2": 40,
+      "3": 10,
+      "-1": 275,
+      "-2": 10,
+      "-3": 1
+    },
+    "worst": [
+      {
+        "key": "22:18",
+        "misses": 18,
+        "deltas": [
+          2
+        ]
+      },
+      {
+        "key": "2:213",
+        "misses": 13,
+        "deltas": [
+          1
+        ]
+      },
+      {
+        "key": "2:258",
+        "misses": 13,
+        "deltas": [
+          1,
+          2,
+          3
+        ]
+      },
+      {
+        "key": "28:30",
+        "misses": 8,
+        "deltas": [
+          1
+        ]
+      },
+      {
+        "key": "2:126",
+        "misses": 7,
+        "deltas": [
+          1
+        ]
+      },
+      {
+        "key": "2:260",
+        "misses": 7,
+        "deltas": [
+          1
+        ]
+      },
+      {
+        "key": "9:112",
+        "misses": 7,
+        "deltas": [
+          -1
+        ]
+      },
+      {
+        "key": "12:41",
+        "misses": 7,
+        "deltas": [
+          -2,
+          -1
+        ]
+      },
+      {
+        "key": "28:77",
+        "misses": 7,
+        "deltas": [
+          -1
+        ]
+      },
+      {
+        "key": "58:22",
+        "misses": 7,
+        "deltas": [
+          -1
+        ]
+      },
+      {
+        "key": "2:220",
+        "misses": 6,
+        "deltas": [
+          -1
+        ]
+      },
+      {
+        "key": "4:69",
+        "misses": 6,
+        "deltas": [
+          1
+        ]
+      }
+    ]
+  }
+}
