@@ -29,6 +29,7 @@ fails if a check tunes nothing.
 | "would CI pass?" | `make ci` (tiers 1–2) | ~90s |
 | "is this loop landable?" | `make loop-verify` (tiers 1–5) | ~5min |
 | "are we ready to publish?" | all tiers, incl. 7 | days — tier 7 has human latency |
+| "does anything outside this repo still agree with us?" | `make probe-reference ALL=1` (the probes) | ~4min |
 | "what are we waiting on?" | `make validate` | instant |
 | "how do I actually run one?" | `make validate CHECK=<id>`, or `make guide` for the phone | instant |
 
@@ -221,6 +222,54 @@ string, check it against `SOURCES.md`, and check `SOURCES.md` against the source
 
 ---
 
+## The probes — the checks that ask somebody else
+
+Deliberately unnumbered: this is not a rung on the cost ladder, it is a different
+axis, and it closes a blind spot **every tier above shares**. Tiers 1–6 check our
+bytes against our bytes and our rules against our rules. They are excellent at
+catching drift and structurally incapable of catching a *premise*: if the print we
+pinned were the wrong one, or the offer we publish resolved for nobody, every gate
+in this repo would stay green forever and say nothing. A closed system cannot
+audit its own axioms.
+
+So a handful of scripts go and ask a party outside the supply chain.
+
+| Run | Asks | Answers | Blind to |
+|---|---|---|---|
+| `make probe-reference` | api.quran.com's published page table, and five other references for reachability | *Are we still the print we say we are?* 568 agree / 36 diverge / 0 surprises, all 604 pages | resemblance, meaning, anything a reader judges |
+| `make source-offer URL=<deployed>` | the deployed site, anonymously, no `gh` and no token | *Does the GPL §6 offer resolve for a stranger?* | whether a reader can find it from inside the app |
+| `node packages/etl/scripts/probe-ligature-print.mjs` | a second corpus of the same print | *Which print is that corpus?* — V2, 56/56 with controls | whether **we** are that print (that is `probe-reference`) |
+| `node packages/etl/scripts/probe-word-registration.mjs` | the same corpus's geometry | *Does a word box drawn on its frame land on our ink?* | nothing about text or meaning |
+
+**Proves:** a claim this repo makes about the outside world still holds — the
+edition, the offer, the corpus — measured by something that has never seen our
+data. That is the only evidence here that is not self-referential.
+**Cannot see:** anything a reader judges. A probe settles *where* an ayah is,
+never whether two of them are ones a hafiz would confuse.
+
+**None of them is a gate, and none will become one.** `SOURCES.md` wrote the rule
+down for the quran-meta tables: a gate that reaches the network fails when a host
+is down, which teaches everyone to skip it — and a skipped gate is worse than no
+gate, because the build still looks green. The naming carries it: `gate-*` runs in
+`make ci` and a failure is a build failure; `check-*` and `probe-*` are opt-in and
+a red one is a finding a human reads. Research ⑦ (a KFGQPC terms watcher) was
+**cancelled** rather than deferred on exactly this reasoning.
+
+**Two things a probe still owes.** Its output is not banked until someone runs
+`make record`, and a measurement worth keeping belongs in the PROVENANCE.md of the
+data it is about — `probe-reference`'s 568/36/0 is in
+`packages/etl/data/pages/PROVENANCE.md`, beside the Loop 4a argument it
+corroborates. A number that lives only in a terminal scrollback was not a
+validation, it was a curiosity.
+
+**And a probe can narrow a tier-7 check without closing it.** That is the useful
+thing they do: `edge-spot-audit` no longer needs a human to confirm ayah *k* is on
+page *n*, so the scarce reader spends the whole half hour on the judgement only
+they can make. Narrowing is recorded in `docs/issues.json`; the check stays
+`owner: user`.
+
+---
+
 ## Tier 7 — What a machine cannot run
 
 `docs/validation/ledger.json` is the register **and the runbook**: every manual
@@ -405,6 +454,7 @@ The suite is meant to grow as results arrive. Where a new check goes:
 | a new vendored data source | a `SOURCES.md` entry + a `PROVENANCE.md` with a SHA-256 |
 | a new invariant about committed data | a `scripts/gate-*.mjs`, wired into `pnpm gates`, `make ci` and `.github/workflows/ci.yml` |
 | a check only a human can do | a `docs/validation/ledger.json` entry — non-empty `tunes`, and a `runbook` whose every step has an `expect` |
+| a claim about the world outside this repo | a `probe-*` / `check-*` script, opt-in and **never** in `pnpm gates`, whose measurement lands in the relevant `PROVENANCE.md` |
 
 New gates follow the existing shape: a header comment saying what it defends and
 *why the failure it prevents is hard to notice*, a clear failure message naming the
