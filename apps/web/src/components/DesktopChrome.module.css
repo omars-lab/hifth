@@ -81,6 +81,89 @@
   outline-offset: -2px;
 }
 
+/* ---- one page or two ----------------------------------------------------- */
+
+/*
+ * The same control as `.langRow`, and deliberately so: two mutually exclusive
+ * options welded into one segmented pill, hairline seam and all. A reader who
+ * has learned that the joined pair in this header means "pick one of these"
+ * should not have to learn it twice.
+ *
+ * It composes rather than copies — `.mode` inherits everything from `.lang`
+ * through the shared declarations below, and only the width differs, because
+ * these options are words and those are two-glyph abbreviations.
+ */
+.modeRow {
+  composes: langRow;
+}
+
+.mode {
+  composes: lang;
+  padding-inline: var(--space-3);
+}
+
+/* ---- the zoom stepper ---------------------------------------------------- */
+
+/*
+ * Not a segmented pill, and the difference is meaning rather than taste: − and +
+ * are not two states to choose between, they are two *actions* around a number
+ * that is neither. Welding them the way `.langRow` welds its radios would say
+ * "pick one", which is exactly wrong for a control you press repeatedly.
+ */
+.zoomRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.zoomBtn {
+  min-block-size: var(--touch-min);
+  min-inline-size: var(--touch-min);
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--ink-soft);
+  font-family: var(--font-latin);
+  font-size: var(--text-md);
+  line-height: 1;
+  cursor: pointer;
+}
+
+.zoomBtn:hover:not(:disabled) {
+  color: var(--accent-strong);
+  border-color: var(--accent);
+}
+
+.zoomBtn:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
+
+/* Both ends of the ladder and the whole of two-page mode land here. Stated by
+   opacity *and* by the cursor, because a greyed glyph on paper is a weak signal
+   and `disabled` alone tells a mouse nothing until it has already been clicked.
+   `--ink-faint` is contrast-exempt on a disabled control (WCAG 1.4.3), which is
+   the one place in this repo it is allowed to carry text. */
+.zoomBtn:disabled {
+  color: var(--ink-faint);
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+/*
+ * Fixed width and tabular figures, because this number changes under the
+ * reader's finger. «١٠٠٪» and «٨٠٪» are different widths in every face we ship,
+ * and a readout that shuffles the + button sideways as it counts up is a target
+ * that moves while being aimed at.
+ */
+.zoomLevel {
+  min-inline-size: 4.5ch;
+  text-align: center;
+  color: var(--ink-soft);
+  font-size: var(--text-sm);
+  font-variant-numeric: tabular-nums;
+}
+
 /* ---- the keyboard map ---------------------------------------------------- */
 
 .keys {

@@ -462,6 +462,39 @@ export interface Strings {
   keyPages: string;
   /** What `/` does. Same. */
   keyJump: string;
+  /** The one-leaf/two-leaf switch. Desktop only; a phone never opens the book. */
+  spreadSectionTitle: string;
+  /** The visible text of each option — a word, because the header has no room. */
+  spreadOne: string;
+  spreadTwo: string;
+  /** …and the name a listener gets, where "one" alone would name nothing. */
+  spreadOneAria: string;
+  spreadTwoAria: string;
+  /** The magnifier. Desktop only: on a phone the same job belongs to a pinch. */
+  zoomSectionTitle: string;
+  zoomIn: string;
+  zoomOut: string;
+  /** The readout, in the reader's own numerals. */
+  zoomLevel(percent: number): string;
+  /**
+   * The same level, said out loud after a press of the stepper.
+   *
+   * Named rather than bare — the readout can be «١٢٥٪» because it sits inside a
+   * group called «التكبير», and an announcement arrives with no such context.
+   */
+  arrivedZoom(percent: number): string;
+  /**
+   * Why the stepper is greyed out with the book open.
+   *
+   * A disabled control owes an explanation — otherwise it reads as broken rather
+   * than as not-now — and the explanation names the way out, which is the toggle
+   * sitting beside it.
+   */
+  zoomTwoPage: string;
+  /** Where a `Shift`+wheel landed: the juz, and the page it opens on. */
+  arrivedJuz(juz: number, page: number): string;
+  /** …and where it did not, because that was the first or last juz we hold. */
+  juzEdge(juz: number): string;
 }
 
 /* ------------------------------------------------------------------------- */
@@ -786,6 +819,19 @@ export function buildStrings(lang: Lang, m: Catalog): Strings {
     facingAbsent: (page) => m.facingAbsent({ page }),
     keyPages: m.keyPages,
     keyJump: m.keyJump,
+    spreadSectionTitle: m.spreadSectionTitle,
+    spreadOne: m.spreadOne,
+    spreadTwo: m.spreadTwo,
+    spreadOneAria: m.spreadOneAria,
+    spreadTwoAria: m.spreadTwoAria,
+    zoomSectionTitle: m.zoomSectionTitle,
+    zoomIn: m.zoomIn,
+    zoomOut: m.zoomOut,
+    zoomLevel: (percent) => m.zoomLevel({ pctText: n(percent) }),
+    arrivedZoom: (percent) => m.arrivedZoom({ pctText: n(percent) }),
+    zoomTwoPage: m.zoomTwoPage,
+    arrivedJuz: (juz, page) => m.arrivedJuz({ juzText: n(juz), page }),
+    juzEdge: (juz) => m.juzEdge({ juzText: n(juz) }),
   };
 }
 

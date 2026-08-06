@@ -988,7 +988,15 @@ Full evidence in `docs/research/2026-07-20-mobile-svg-pwa.md`. The rules:
   which holds what you read *before* touching a feature, as distinct from
   `docs/decisions/`, which records what a finished loop settled. The running per-decision
   table is [`docs/decisions/desktop-vs-mobile.md`](decisions/desktop-vs-mobile.md); future
-  width work appends a row there. `make map FEATURE=desktop-spread` walks the code. Note
+  width work appends a row there. One later addition is worth naming here because it is a
+  correction and not a feature: how many pages are on the desk, and how big, were briefly
+  **derived** — the book closed itself when a zoom passed fit — and that derivation leaked
+  three ways at once. Both are now explicit controls in the chrome, the wheel navigates and
+  never magnifies, and `ctrl`+wheel is bound to nothing on purpose, because on macOS a
+  trackpad pinch arrives wearing that modifier. The record is
+  [`decisions/wheel-and-zoom.md`](decisions/wheel-and-zoom.md); the general lesson is the
+  one the honesty rule above is also about — state with two owners has patches, not fixes.
+  `make map FEATURE=desktop-spread` walks the code. Note
   for Track B: the "iPad two-page spread" listed there is now largely a web concern that
   the wrapper inherits, not net-new native work.
 

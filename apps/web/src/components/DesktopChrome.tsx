@@ -2,7 +2,41 @@ import { useT } from "../i18n";
 import { LOCALES } from "../lang";
 import { LOCALE_IDS } from "../messages/locales.gen";
 import { JUMPER_KEY } from "@hifth/core";
+import { ZOOM_STEPS } from "./PageStage";
 import styles from "./DesktopChrome.module.css";
+
+/** One leaf or two. */
+export type PageMode = "one" | "two";
+
+/**
+ * The nearest rung strictly past `z` going `step`, or null at the end of the
+ * ladder.
+ *
+ * Not an index arithmetic on `indexOf`, because `z` is frequently on no rung at
+ * all: it is whatever the stage last *applied*, and a hop frames its target at
+ * `DEFAULT_HOP_ZOOM` — 1.55, deliberately between 1.5 and 2. Asking for the
+ * nearest rung past where we are gets the reader onto the ladder with their
+ * first press, in the direction they pressed, from wherever a hop left them.
+ *
+ * The epsilon is because that level has been through a clamp and a float
+ * multiply: 0.9999999 must not count as being below the rung it is standing on,
+ * or `−` would appear to do nothing.
+ */
+function rung(z: number, step: 1 | -1): number | null {
+  const ladder = step > 0 ? ZOOM_STEPS : [...ZOOM_STEPS].reverse();
+  for (const r of ladder) if (step > 0 ? r > z + 1e-3 : r < z - 1e-3) return r;
+  return null;
+}
+
+interface DesktopChromeProps {
+  /** Whether the book is open. Read, not owned — App holds the state. */
+  pageMode: PageMode;
+  onPageMode: (mode: PageMode) => void;
+  /** What the paper is magnified to, as the stage last applied it. */
+  zoom: number;
+  /** Ask for a new level. What actually lands comes back through `zoom`. */
+  onZoom: (z: number) => void;
+}
 
 /**
  * The header controls a phone has no room for, and the ones it has no *use* for.
@@ -21,11 +55,111 @@ import styles from "./DesktopChrome.module.css";
  * was ever needed. `e2e/chrome-fit.spec.ts` measures that width from 320px up
  * and will say so if this stops being true.
  */
-export function DesktopChrome(): JSX.Element {
+export function DesktopChrome({
+  pageMode,
+  onPageMode,
+  zoom,
+  onZoom,
+}: DesktopChromeProps): JSX.Element {
   const { t, lang, setLang } = useT();
+  // Two-page mode disables the stepper on top of the two ends of the ladder,
+  // and it is the one of the three that owes an explanation — see `zoomTwoPage`.
+  const spread = pageMode === "two";
+  const out = spread ? null : rung(zoom, -1);
+  const into = spread ? null : rung(zoom, 1);
 
   return (
     <div className={styles.extras}>
+      {/*
+       * One leaf or two — the control the whole desktop spread now hangs on.
+       *
+       * The mobile constraint it names is the bluntest one in this file: below
+       * the breakpoint there is no second leaf to *have*, so a switch between
+       * one page and two would be a switch between one page and one page.
+       *
+       * It exists at all because the answer used to be derived — zoom past fit
+       * and the book closed itself, zoom back and it opened. Three distinct
+       * desyncs came out of that one derivation, and the reader had no way to
+       * say "keep it closed" or "keep it open" at any magnification. Asking is
+       * the fix; the derivation is gone (docs/design/desktop.md §8 ②).
+       *
+       * A radiogroup and not a checkbox, copying `langRow` beside it down to the
+       * markup: two mutually exclusive states are two radios, and a checkbox
+       * labelled "two pages" would leave a listener guessing whether *checked*
+       * means the box is ticked or the book is open.
+       */}
+      <div
+        className={styles.modeRow}
+        role="radiogroup"
+        aria-label={t.spreadSectionTitle}
+        data-page-mode={pageMode}
+      >
+        {(["one", "two"] as const).map((mode) => (
+          <button
+            key={mode}
+            type="button"
+            role="radio"
+            className={styles.mode}
+            aria-checked={pageMode === mode}
+            /* The visible word is «واحدة» / "One" because the header has room
+               for a word and not for a phrase; the accessible name carries the
+               phrase, exactly as `langRow` carries the full language name. */
+            aria-label={mode === "one" ? t.spreadOneAria : t.spreadTwoAria}
+            onClick={() => onPageMode(mode)}
+          >
+            {mode === "one" ? t.spreadOne : t.spreadTwo}
+          </button>
+        ))}
+      </div>
+
+      {/*
+       * The magnifier, which is a button because it stopped being a wheel.
+       *
+       * The mobile constraint: a phone has a pinch, and a pinch is a better
+       * magnifier than any pair of buttons. A trackpad's pinch is not available
+       * to us — macOS encodes it as `ctrl`+wheel, indistinguishable from a real
+       * `ctrl`+scroll — so on a laptop the gesture that everyone reaches for
+       * either does nothing or does something violent, and the honest answer is
+       * a control that says what it will do before it does it.
+       *
+       * A group, not a spinbutton. `role="spinbutton"` would promise arrow-key
+       * increments across a continuous range; this is nine named rungs, and the
+       * two buttons plus a readout describe that without lying about it.
+       *
+       * The readout is plain text and not a live region, which is a correction
+       * rather than an omission: the app already has exactly one polite
+       * announcer, and a second one in the header would compete with it for the
+       * same reader at the same moment — a page turn and a zoom both speak. So
+       * what landed is announced through `useAnnouncer` at the App level, where
+       * every other outcome in this app is announced. This span is for the eye.
+       */}
+      <div className={styles.zoomRow} role="group" aria-label={t.zoomSectionTitle}>
+        <button
+          type="button"
+          className={styles.zoomBtn}
+          aria-label={t.zoomOut}
+          /* The explanation rides on the control whenever the reason it is
+             off is not visible from the control itself. At the bottom rung
+             the reason *is* visible — the readout says 80%. */
+          title={spread ? t.zoomTwoPage : undefined}
+          disabled={out === null}
+          onClick={() => out !== null && onZoom(out)}
+        >
+          −
+        </button>
+        <span className={styles.zoomLevel}>{t.zoomLevel(Math.round(zoom * 100))}</span>
+        <button
+          type="button"
+          className={styles.zoomBtn}
+          aria-label={t.zoomIn}
+          title={spread ? t.zoomTwoPage : undefined}
+          disabled={into === null}
+          onClick={() => into !== null && onZoom(into)}
+        >
+          +
+        </button>
+      </div>
+
       {/*
        * The language switch, in the header at last.
        *

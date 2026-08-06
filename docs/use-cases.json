@@ -523,7 +523,81 @@
         }
       ],
       "includes": ["turn-the-page"],
-      "gap": "Only the desktop project ever renders a spread, and it runs one file. The rest of the suite — every aria snapshot, every golden image, the axe pass — is recorded on a phone, so a regression that only shows at desktop width has exactly these four assertions standing between it and a release. Nothing checks how a spread behaves under pan and zoom, where two mounted pages share a frame budget that was measured with one."
+      "gap": "Only the desktop project ever renders a spread, and it runs one file. The rest of the suite — every aria snapshot, every golden image, the axe pass — is recorded on a phone, so a regression that only shows at desktop width has exactly these four assertions standing between it and a release. Zoom on a spread is now covered — see choose-one-page-or-two — but the frame budget is not: two mounted pages share a budget that was measured with one, which is desktop.md ④ and still blocked."
+    },
+    {
+      "id": "choose-one-page-or-two",
+      "actor": "hafiz",
+      "goal": "Let me say whether I want the opening or the one page, and let me make that page bigger, with a control I can see — not by discovering that scrolling with a key held does something.",
+      "feature": "desktop-spread",
+      "code": [
+        {
+          "file": "apps/web/src/components/DesktopChrome.tsx",
+          "symbol": "DesktopChrome"
+        },
+        {
+          "file": "apps/web/src/components/PageStage.tsx",
+          "symbol": "ZOOM_STEPS"
+        }
+      ],
+      "proof": [
+        {
+          "file": "apps/web/e2e/desktop.spec.ts",
+          "test": "the toggle closes the book and opens it again"
+        },
+        {
+          "file": "apps/web/e2e/desktop.spec.ts",
+          "test": "the stepper magnifies the one leaf, and is off while there are two"
+        },
+        {
+          "file": "apps/web/e2e/desktop.spec.ts",
+          "test": "crossing the breakpoint leaves the two leaves agreeing"
+        },
+        {
+          "file": "apps/web/src/components/DesktopChrome.test.tsx",
+          "test": "is a radiogroup, not a checkbox labelled 'two pages'"
+        },
+        {
+          "file": "apps/web/src/components/DesktopChrome.test.tsx",
+          "test": "gets a reader back onto the ladder from wherever a hop left them"
+        }
+      ],
+      "gap": "Both controls are session state: a reader who prefers one page at 150% says so again on every reload. Persisting them is a preference surface with its own storage and its own place in the colophon, deliberately deferred — decisions/wheel-and-zoom.md. And there is no equivalent below the breakpoint, by design: a phone has no second leaf to close and keeps its pinch."
+    },
+    {
+      "id": "jump-a-juz-without-leaving-the-page",
+      "actor": "hafiz",
+      "goal": "On a laptop, get to the start of the next juz with the same wheel I turn pages with — and do not teleport me twenty pages because I pinched the trackpad.",
+      "feature": "wayfinding",
+      "code": [
+        {
+          "file": "packages/core/src/packs.ts",
+          "symbol": "juzPageIndex"
+        },
+        {
+          "file": "packages/core/src/gestures.ts",
+          "symbol": "nextWheelTurn"
+        }
+      ],
+      "proof": [
+        {
+          "file": "apps/web/e2e/desktop.spec.ts",
+          "test": "shift+wheel jumps a juz, and says which one"
+        },
+        {
+          "file": "apps/web/e2e/desktop.spec.ts",
+          "test": "ctrl+wheel does nothing at all — it is somebody else's pinch"
+        },
+        {
+          "file": "apps/web/e2e/desktop.spec.ts",
+          "test": "the juz axis and the page axis do not spend each other's travel"
+        },
+        {
+          "file": "packages/core/src/packs.test.ts",
+          "test": "opens a juz on the leaf where it begins, not where the one before it ends"
+        }
+      ],
+      "gap": "A wheel is the only way in, so this affordance does not exist on a phone or for a keyboard user — the jumper (jump-to-a-place-i-can-name) is the equivalent path and reaches the same pages by name. The ctrl branch is a deliberate dead end rather than a binding: on macOS a trackpad pinch arrives as ctrl+wheel and the browser cannot tell it apart."
     },
     {
       "id": "see-which-half-of-the-mushaf-is-missing",

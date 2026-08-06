@@ -9,6 +9,8 @@ import {
   Tajweed,
   appKeyAction,
   editionMeta,
+  juzOfPage,
+  juzPageIndex,
   keyToRef,
   parseAyahKey,
   refToKey,
@@ -158,24 +160,152 @@ export function App(): JSX.Element {
    */
   const desktop = useMediaQuery(DESKTOP_QUERY);
   /*
-   * Is the reader past fit — reading *into* a page rather than looking at the
-   * book? Above it the spread closes to the one leaf they are on
-   * (docs/design/desktop.md §8 ②).
+   * One leaf or two — the reader's own answer, and the only thing the spread
+   * consults (docs/design/desktop.md §8 ②, superseded mechanism).
    *
-   * State, and therefore a re-render, which is the one thing the stage's `view`
-   * ref exists to avoid. It is affordable because `onFitChange` fires on the
-   * *flip* and not the frame: twice a gesture, not sixty times a second. The
-   * cheaper-looking alternative — a class toggled imperatively from inside the
-   * stage — would have PageStage reaching up into the layout that contains it,
-   * and the stage does not know it is in a spread. It knows its own zoom; the
-   * spread knows what to do about it.
-   *
-   * Not reset on a page turn, because the stage already does: a turn writes
-   * `view = {x:0,y:0,z:1}` and the flip comes back through the same callback.
+   * It used to be *derived*: past fit the book closed itself, and zoom lived on
+   * the wheel. Three separate desyncs came out of that one derivation — the
+   * facing leaf could be zoomed on its own, the mode survived a breakpoint
+   * crossing while the zoom did not, and zooming *out* to 0.8 counted as "at
+   * fit" and re-opened the book at a different size than it closed at. A state
+   * with no gesture behind it cannot drift from a gesture.
    */
-  const [soloLeaf, setSoloLeaf] = useState(false);
+  const [pageMode, setPageMode] = useState<"one" | "two">("two");
+  /*
+   * What the paper is magnified to, for the chrome's readout.
+   *
+   * A mirror, not the source: the stage's `view` ref is the truth, and it is a
+   * ref precisely so a pan does not re-render a 170 KB inline SVG's parent. This
+   * is written only when something has *landed* — after a turn, a hop or a press
+   * of the stepper — which is twice a gesture rather than sixty times a second,
+   * and it is written with what the stage says it applied rather than with what
+   * was asked for. See `withZoom` below for why that distinction is not
+   * pedantic.
+   */
+  const [zoom, setZoom] = useState(1);
+  /*
+   * Whether there is a second leaf on screen right now — **not** which mode is
+   * selected, and the difference is a defect this caught.
+   *
+   * `pageMode` is desktop furniture. It is real state at every width because the
+   * reader's choice must survive a resize (defect ②), but below the breakpoint
+   * nothing renders a spread, so its default of `"two"` describes a book that is
+   * not there. Reading it alone withheld the hop's magnification on every phone
+   * in the suite — a deep link landed at fit, which is exactly the reported
+   * defect this loop exists to remove, inflicted on the platform that never had
+   * it. So the question asked below is the one the rule is actually about.
+   *
+   * A live mirror rather than a dependency, because `stage` is memoised on `[]`
+   * on purpose: it is a dependency of the effects that reset the zoom, and a
+   * `stage` that changed identity with the mode would re-run them on every
+   * toggle and every breakpoint crossing.
+   */
+  const bookOpenRef = useRef(false);
+  bookOpenRef.current = desktop && pageMode === "two";
+  /*
+   * The stage's four imperative verbs, wrapped once, so that the readout above
+   * cannot drift from the paper below it.
+   *
+   * The wrapping is the point. The three landing verbs do not agree on where
+   * they leave the magnification — a turn and a deep link end at 1, a hop frames
+   * its target at `DEFAULT_HOP_ZOOM` — and none of them reliably ends where it
+   * aimed: a hop whose ayah has no box to frame does not zoom at all, and
+   * `clampView` can refuse part of what any of them asks. So the level is read
+   * back off the stage once the promise settles rather than predicted from the
+   * call. Predicting is the version of this that looks correct at all seven call
+   * sites and is wrong at three of them.
+   *
+   * Read *after* the await and not before, because a turn is 240 ms of animation
+   * and a chrome that updated at the start of it would be describing a page the
+   * reader has not arrived at yet.
+   */
+  const stage = useMemo(() => {
+    const settle = <T,>(work: Promise<T> | undefined, missing: T): Promise<T> =>
+      (work ?? Promise.resolve(missing)).then((landed) => {
+        setZoom(stageRef.current?.zoomNow() ?? 1);
+        return landed;
+      });
+    return {
+      /*
+       * A hop frames its ayah at `DEFAULT_HOP_ZOOM` — except with the book open,
+       * where it frames at fit instead.
+       *
+       * "Zoom needs one page" is a rule about the spread, not about the stepper,
+       * and a hop that magnified the live leaf to 1.55 beside a facing leaf at 1
+       * would put the two pages at different scales with the book still open —
+       * which is the shape of the original complaint, arrived at down a different
+       * path. The hop still *lands* on the ayah: `frameBboxToView` centres it
+       * either way, and only the magnification is withheld.
+       */
+      navigateTo: (key: string, opts?: { pulse?: boolean; zoom?: number }) =>
+        settle(
+          stageRef.current?.navigateTo(key, {
+            ...opts,
+            ...(bookOpenRef.current && opts?.zoom === undefined ? { zoom: 1 } : {}),
+          }),
+          undefined,
+        ),
+      showPage: (next: number) => settle(stageRef.current?.showPage(next), undefined),
+      turnTo: (next: number) => settle(stageRef.current?.turnTo(next), false),
+      // Synchronous, because this one *is* the gesture: the stepper presses and
+      // the paper has already moved by the time the handler returns.
+      setZoom: (z: number) => setZoom(stageRef.current?.setZoom(z) ?? 1),
+    };
+  }, []);
+  /*
+   * Open or close the book — and drop the magnification when opening it.
+   *
+   * Closing keeps whatever the reader was at; opening does not. §8 ② rendered
+   * two magnified leaves side by side and found they lose their edges and read
+   * as one continuous column, and §3's measurement is that a leaf in a spread is
+   * height-bound at about 398 px, so there is nothing there for a zoom to buy.
+   * The stepper is disabled in this mode for the same reason; this is the other
+   * half of that, closing the door the reader could otherwise walk back through
+   * by zooming first and opening after.
+   */
+  const handlePageMode = useCallback(
+    (mode: "one" | "two") => {
+      setPageMode(mode);
+      if (mode === "two") stage.setZoom(1);
+    },
+    [stage],
+  );
+  /*
+   * Crossing the desktop breakpoint puts the paper back at fit, so the readout
+   * goes back with it.
+   *
+   * This is defect ② of the three, and it is here rather than anywhere else
+   * because the crossing is a *resize*, not a gesture: nothing in the stage
+   * reports it, and the old code left the mode saying "closed to one leaf" while
+   * the leaf underneath had quietly returned to `scale(1)`. Asking for 1 rather
+   * than reading what happened to be there makes both sides of the question
+   * agree by construction, whether or not the stage remounted on the way.
+   */
+  useEffect(() => {
+    stage.setZoom(1);
+  }, [desktop, stage]);
   const { t, dir } = useT();
   const { message, announce } = useAnnouncer();
+  /*
+   * The stepper's press, said out loud.
+   *
+   * Only this one of the three `setZoom` callers announces, and the split is
+   * deliberate: the other two are consequences of something the reader already
+   * did — opening the book, or resizing the window — and narrating a
+   * consequence twice is how a reader learns to stop listening. A press of − or
+   * + has no other outcome to hear.
+   *
+   * It says what *landed* rather than what was asked for, because `clampView`
+   * can refuse part of a step near an edge, and a chrome that announces 250%
+   * over paper sitting at 200% is worse than one that says nothing.
+   */
+  const handleZoom = useCallback(
+    (z: number) => {
+      stage.setZoom(z);
+      announce(t.arrivedZoom(Math.round((stageRef.current?.zoomNow() ?? z) * 100)));
+    },
+    [stage, announce, t],
+  );
 
   // Live mirror of the selection so event handlers (which close over a render's
   // value) can read the current one without re-subscribing or an impure updater.
@@ -513,7 +643,7 @@ export function App(): JSX.Element {
         // page chip, the leaf's resting edge and the announcer's next line, and
         // a turn that stalls or never arrives must leave all three saying where
         // the reader still is.
-        void stageRef.current?.turnTo(next).then((landed) => {
+        void stage.turnTo(next).then((landed) => {
           if (pendingPageRef.current !== next) return; // a newer turn owns it
           if (landed) setPage(next);
           else pendingPageRef.current = pageRef.current;
@@ -523,7 +653,7 @@ export function App(): JSX.Element {
       setPage(next);
       // zoom 1 = the page as it sits, not a hop's close framing; no pulse,
       // because nothing here was selected.
-      void stageRef.current?.navigateTo(anchor, { pulse: false, zoom: 1 });
+      void stage.navigateTo(anchor, { pulse: false, zoom: 1 });
     },
     [pageTurns, announce, t],
   );
@@ -577,6 +707,59 @@ export function App(): JSX.Element {
       goToPage(next, next === here + step ? undefined : t.nearestPageN(next), true);
     },
     [pageAfter, pageTurns, announce, t, goToPage],
+  );
+
+  /*
+   * Where each juz opens in this build — thirty entries, computed once.
+   *
+   * Once, because the caller is a wheel. `juzPageIndex` walks every polygon on
+   * every page, and a reader flicking `Shift`+wheel through the book would pay
+   * that scan per flick; memoised on the manifest it is paid at load and every
+   * jump after it is an array index.
+   */
+  const juzStarts = useMemo(() => juzPageIndex(manifest?.pages ?? []), [manifest]);
+
+  /*
+   * Jump a whole juz — `Shift`+wheel over either leaf.
+   *
+   * The question is asked **in pages, not in juz numbers**: the next opening
+   * strictly past where we are, in the direction of travel. That one phrasing
+   * disposes of three special cases at once. A leaf can carry the end of one juz
+   * and the start of the next — page 22 is both juz 1's last and juz 2's first —
+   * and a jump computed as `here + 1` would land on the page it started from and
+   * do nothing, silently. A build can be missing a juz entirely (`null`), and
+   * this simply passes over it rather than dead-ending. And "back" from the
+   * middle of a juz lands on that juz's own opening, which is the rule every
+   * media player uses for a track and the one a reader already expects.
+   *
+   * A jump, not a turn: `goToPage`'s third argument stays false, so no fold is
+   * drawn. A band crossing from page 22 to page 42 would assert an adjacency the
+   * reader did not travel through (`page-transition.md` §3.1).
+   */
+  const stepJuz = useCallback(
+    (step: 1 | -1) => {
+      const at = pendingPageRef.current;
+      let want: number | null = null;
+      // `juzStarts` is ascending by construction, so the first match walking
+      // the right way is the nearest one.
+      for (let i = 0; i < juzStarts.length; i++) {
+        const juz = step > 0 ? i + 1 : juzStarts.length - i;
+        const opens = juzStarts[juz - 1];
+        if (opens === null || opens === undefined) continue;
+        if (step > 0 ? opens > at : opens < at) {
+          want = juz;
+          break;
+        }
+      }
+      if (want === null) {
+        // Nothing moved, so say where they still are — the same reason
+        // `stepPage` names the page when it refuses.
+        announce(t.juzEdge(juzOfPage(at, manifest?.pages ?? []) ?? 1));
+        return;
+      }
+      goToPage(juzStarts[want - 1]!, t.arrivedJuz(want, juzStarts[want - 1]!));
+    },
+    [juzStarts, manifest, announce, t, goToPage],
   );
 
   // The slider hands back both numbers: where it landed and where the thumb was
@@ -690,7 +873,7 @@ export function App(): JSX.Element {
       setSelectedKey(edge.to);
       setPage(toLoc.page);
       announce(t.hoppedTo(t.ayahLabel(edge.to) ?? edge.to, toLoc.page));
-      void stageRef.current?.navigateTo(edge.to, { pulse: true });
+      void stage.navigateTo(edge.to, { pulse: true });
     },
     [resolver, selectedKey, announce, t],
   );
@@ -705,7 +888,7 @@ export function App(): JSX.Element {
       setSelectedKey(target.key);
       setPage(target.page);
       announce(t.backTo(t.ayahLabel(target.key) ?? target.key, target.page));
-      void stageRef.current?.navigateTo(target.key, { pulse: true });
+      void stage.navigateTo(target.key, { pulse: true });
     },
     [trail, announce, t],
   );
@@ -825,7 +1008,7 @@ export function App(): JSX.Element {
         if (state.page) {
           setPage(state.page);
           announce(t.arrivedPage(origin, state.page));
-          void stageRef.current?.showPage(state.page);
+          void stage.showPage(state.page);
         }
         return;
       }
@@ -847,7 +1030,7 @@ export function App(): JSX.Element {
         setSelectedRange(keys);
         setPage(head.page);
         announce(t.arrivedRange(origin, `${surah}:${ayah}-${toAyah}`, head.page));
-        void stageRef.current?.navigateTo(keys[0]!, { pulse: true });
+        void stage.navigateTo(keys[0]!, { pulse: true });
         return;
       }
 
@@ -864,7 +1047,7 @@ export function App(): JSX.Element {
       setSelectedKey(key);
       setPage(loc.page);
       announce(t.arrivedAyah(origin, t.ayahLabel(key) ?? key, loc.page));
-      void stageRef.current?.navigateTo(key, { pulse: true });
+      void stage.navigateTo(key, { pulse: true });
     },
     [resolver, announce, t],
   );
@@ -1047,7 +1230,12 @@ export function App(): JSX.Element {
             `display: none` keeps it out of both the intrinsic width and the
             accessibility tree, which is what chrome-fit and the aria snapshots
             measure. See docs/decisions/desktop-vs-mobile.md rows 3 and 13. */}
-        <DesktopChrome />
+        <DesktopChrome
+          pageMode={pageMode}
+          onPageMode={handlePageMode}
+          zoom={zoom}
+          onZoom={handleZoom}
+        />
         {/* No install button here. There used to be one, and it was a ~126px
             text pill in a row that could not afford 126px on any phone — on
             Android, the one platform where it ever rendered, it was the single
@@ -1102,11 +1290,13 @@ export function App(): JSX.Element {
               available={pageTurns.pages}
               bookRef={bookRef}
               /* `desktop &&` is belt and braces — below the breakpoint the
-                 spread renders its child alone and never reads this — but the
-                 flag itself is set by a stage that exists on a phone too, and a
-                 stale `true` surviving a resize back up to desktop width would
-                 open the book onto a single leaf for no reason. */
-              solo={desktop && soloLeaf}
+                 spread renders its child alone and never reads this. It stays
+                 because the mode is now the reader's own standing answer rather
+                 than a flag a gesture sets: it survives a trip down to phone
+                 width and back, which is what an explicit control should do, and
+                 which is exactly why the guard has to be here rather than in the
+                 state. */
+              solo={desktop && pageMode === "one"}
               renderFacing={(facing) => (
                 /* The facing leaf gets its own stage rather than a second
                    visible host inside the current one: PageStage's whole
@@ -1140,6 +1330,10 @@ export function App(): JSX.Element {
                      is as often printed on this leaf as on the other one. */
                   onSelectWords={handleSelectWords}
                   onTurn={stepPage}
+                  /* Both leaves, for the same reason `onTurn` is on both: a
+                     wheel over the facing page that did nothing would read as a
+                     dead half of the book. */
+                  onJuzTurn={stepJuz}
                   /* The wheel, yes; a drag, no. Only the stage App holds a ref
                      to can be handed a tracked band, and a second fold drawn
                      into the same book is the one thing §3.4 forbids. */
@@ -1172,6 +1366,7 @@ export function App(): JSX.Element {
                    much the book as this one, and a wheel over it that did
                    nothing would read as a dead half of the page. */
                 onTurn={stepPage}
+                onJuzTurn={stepJuz}
                 /* And the drag needs to know where it *would* land before it
                    lands, so the fold under the finger is drawn for the pair the
                    release will actually produce — the inventory's pair. With
@@ -1184,11 +1379,6 @@ export function App(): JSX.Element {
                 /* Only the live stage turns pages, and only on a desktop
                    spread does the fold belong to something wider than it. */
                 foldTarget={desktop ? bookRef : null}
-                /* And only the live stage decides whether the book is open:
-                   the facing leaf is not the page anyone is zooming, and it
-                   never receives a hop or a gesture that could change its
-                   own scale. */
-                onFitChange={(atFit) => setSoloLeaf(!atFit)}
               />
             </PageSpread>
             <HopRail

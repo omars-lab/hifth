@@ -146,3 +146,35 @@ export function juzOfPage(page: number, pages: readonly PageMeta[]): number | nu
   }
   return lowest;
 }
+
+/**
+ * Where each juz starts in this build: 30 entries, `[juz - 1]` holding the
+ * lowest page that carries any of its ayahs, or `null` where the build carries
+ * none of it.
+ *
+ * **A table, not a lookup**, because the caller is a wheel. `planPack` answers
+ * the same question for one juz and walks all 604 pages and every polygon on
+ * them to do it; a reader flicking through the book would pay that per flick.
+ * This is the same walk once, and every jump after it is an array index.
+ *
+ * `null` is a real answer and not a hole to be filled with the next juz along.
+ * A partial edition — the next one, since `hafs-kfqc` is complete — can hold
+ * juz 3 and not juz 4, and a jump that silently landed on 5 would tell the
+ * reader they had reached a juz this device cannot show them.
+ *
+ * The *lowest* page, matching `juzOfPage`'s rule from the other direction: a
+ * leaf where one juz ends and the next begins belongs to the earlier one for
+ * the pin, and is where the later one begins for a jump. Both are true of the
+ * same sheet, which is what a boundary is.
+ */
+export function juzPageIndex(pages: readonly PageMeta[]): readonly (number | null)[] {
+  const first: (number | null)[] = new Array<number | null>(JUZ_COUNT).fill(null);
+  for (const meta of pages) {
+    for (const polygon of meta.polygons) {
+      const i = juzOf(polygon.surah, polygon.ayah) - 1;
+      const held = first[i];
+      if (held === null || held === undefined || meta.page < held) first[i] = meta.page;
+    }
+  }
+  return first;
+}

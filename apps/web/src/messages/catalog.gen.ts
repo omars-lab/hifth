@@ -10,9 +10,11 @@ export interface Catalog {
   readonly aboutLede: string;
   readonly aboutTitle: string;
   readonly arrivedAyah: (d: { readonly via: string | number; readonly label: string | number; readonly page: string | number }) => string;
+  readonly arrivedJuz: (d: { readonly juzText: string | number; readonly page: string | number }) => string;
   readonly arrivedPage: (d: { readonly via: string | number; readonly page: string | number }) => string;
   readonly arrivedRange: (d: { readonly via: string | number; readonly ref: string | number; readonly page: string | number }) => string;
   readonly arrivedVia: (d: { readonly origin: "jump" | "other" }) => string;
+  readonly arrivedZoom: (d: { readonly pctText: string | number }) => string;
   readonly ayahAria: (d: { readonly label: string | number }) => string;
   readonly ayahUnavailable: string;
   readonly backTo: (d: { readonly label: string | number; readonly page: string | number }) => string;
@@ -68,6 +70,7 @@ export interface Catalog {
   readonly jumpPlaceholder: string;
   readonly jumpResults: string;
   readonly jumpStartsAt: (d: { readonly label: string | number }) => string;
+  readonly juzEdge: (d: { readonly juzText: string | number }) => string;
   readonly juzGroup: string;
   readonly juzN: (d: { readonly juzText: string | number }) => string;
   readonly keyJump: string;
@@ -185,6 +188,11 @@ export interface Catalog {
   readonly skinGroup: string;
   readonly sourceLink: string;
   readonly sourcesHead: string;
+  readonly spreadOne: string;
+  readonly spreadOneAria: string;
+  readonly spreadSectionTitle: string;
+  readonly spreadTwo: string;
+  readonly spreadTwoAria: string;
   readonly stageFailed: (d: { readonly pageText: string | number }) => string;
   readonly stageLoading: string;
   readonly surahN: (d: { readonly surahText: string | number }) => string;
@@ -195,4 +203,9 @@ export interface Catalog {
   readonly twin: string;
   readonly wordHops: (d: { readonly n: number; readonly nText: string | number; readonly u: number; readonly uText: string | number }) => string;
   readonly wordLevelPending: string;
+  readonly zoomIn: string;
+  readonly zoomLevel: (d: { readonly pctText: string | number }) => string;
+  readonly zoomOut: string;
+  readonly zoomSectionTitle: string;
+  readonly zoomTwoPage: string;
 }

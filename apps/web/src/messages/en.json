@@ -2,7 +2,6 @@
   "langSectionTitle": "Language",
   "langSectionNote": "This changes the buttons and menus only. The mus'haf and the verse text are always Arabic.",
   "langSwitchTo": "Switch to {other}",
-
   "about": "About Hifth · licence and sources",
   "pageWord": "Page",
   "pageN": "Page {page}",
@@ -11,14 +10,12 @@
   "mushaf": "Mus'haf",
   "close": "Close",
   "trail": "Trail",
-
   "pageBar": "Page bar",
   "pageChoose": "Choose a page",
   "pageOfTotal": "Page {page} of {total}",
   "prevPage": "Previous page",
   "nextPage": "Next page",
   "pagesVendored": "{haveText} of {totalText} pages available",
-
   "firstPage": "First available page · Page {page}",
   "lastPage": "Last available page · Page {page}",
   "nearestPageN": "Nearest available page · Page {page}",
@@ -36,11 +33,9 @@
   "ayahUnavailable": "That ayah is not available yet",
   "noConcordance": "No concordance table for that edition yet",
   "railSummary": "{surah} · {linksText} links",
-
   "ayahAria": "Ayah {label}",
   "stageLoading": "Loading…",
   "stageFailed": "Could not load page {pageText}. Try again.",
-
   "railGroup": "Links from this ayah",
   "railDirection.loop": "Similar verses in this surah",
   "railDirection.earlier": "Similar verses in earlier surahs",
@@ -57,13 +52,11 @@
   "pageUnavailable": "This page is not available yet",
   "wordLevelPending": "Word-level links arrive with the next data pack",
   "hereTag": "here",
-
   "rangeAria": "Highlighted passage · {title} · {links} links",
   "rangeEmpty": "No links in this passage yet",
   "rangeFrom": "from {refs}",
   "refJoin": ", ",
   "clearSelection": "Clear highlight",
-
   "tapHint": "Tap an ayah on the page to select it",
   "beadBack": "Back to {label}",
   "beadCurrent": "Current ayah {label} — tap to clear",
@@ -79,7 +72,6 @@
   "shared": "Shared",
   "copied": "Link copied",
   "copyFailed": "Could not copy",
-
   "coachRegion": "How to navigate",
   "coachSteps.1.title": "Tap an ayah",
   "coachSteps.1.body": "Its rail of links opens beside it: the similar verses, and how many.",
@@ -92,7 +84,6 @@
   "coachSkip": "Skip",
   "coachDoneAria": "Done · hide the tips",
   "coachNextAria": "Next · {nextText} of {totalText}",
-
   "jumpInput": "Surah name or number, or 2:255, or juz 9",
   "jumpPlaceholder": "Al-Baqarah · 2:255 · juz 9",
   "jumpEmpty": "No place by that name or number",
@@ -101,13 +92,11 @@
   "juzN": "Juz {juzText}",
   "surahN": "Surah {surahText}",
   "jumpStartsAt": "Starts at {label}",
-
   "editionCurrent": "current",
   "editionNoTable": "No concordance table yet",
   "editionNoCounterpart": "No matching ayah in that edition",
   "editionMapsTo": "Maps to {ref}",
   "editionFoot": "Every link carries its edition. Moving between editions goes through a concordance table, never through shared numbering.",
-
   "skinGroup": "Page appearance",
   "tajweed": "Tajweed",
   "beta": "beta",
@@ -121,7 +110,6 @@
   "legendSelection": "Rules on the selected ayah",
   "legendNoRules": "No rules known for this ayah.",
   "tajweedCredit": "Tajweed rules from quran-tajweed (Collin Fair), licensed CC BY 4.0.",
-
   "rootsTitle": "Roots",
   "rootsAria": "Roots · {countText}",
   "rootsTrigger": "{curated, select, some{Roots · {countText} · {curatedText} hand-picked} other{Roots · {countText}}}",
@@ -138,7 +126,6 @@
   "distanceSame": "Same page",
   "distancePages": "{n, plural, one{1 page} other{{nText} pages}}",
   "distanceRelative": "{dir, select, later{{pages} later} other{{pages} earlier}}",
-
   "notices.capped.title": "There is not enough room for Hifth to work offline",
   "notices.capped.body": "The browser gives this site only a small amount of space, so saved pages may be deleted. Check the free space on your device, and the «clear site data when all windows are closed» setting under privacy.",
   "notices.install-ios.title": "Install Hifth so it stays with you offline",
@@ -150,7 +137,6 @@
   "notices.best-effort.body": "The browser did not grant persistent storage, so saved pages may be deleted if the device runs short. Each page is saved again whenever you open it online.",
   "dismissNotice": "Hide this notice",
   "dismiss": "Hide",
-
   "aboutTitle": "About Hifth",
   "aboutLede": "Hifth is a navigation instrument for the mus'haf: pick an ayah and it takes you to its mutashabihat. No account, no server, no tracking — the pages and the data are loaded onto your device.",
   "aboutCaveat": "The printed mus'haf is the reference. What Hifth shows is an aid to revision, not a substitute for it.",
@@ -161,7 +147,6 @@
   "devBuildNote": "This is a local development build, so no released version corresponds to it; the link opens the repository.",
   "sourcesHead": "Sources",
   "aboutFoot": "Full terms and pinned versions are in SOURCES.md inside the repository:",
-
   "mapTitle": "What you have opened",
   "mapCaveat": "A tap is evidence you opened an ayah, not that you revised it.",
   "mapOpen": "Page {page} · what you have opened",
@@ -183,7 +168,6 @@
   "mapCellNever": "{label} · never opened",
   "mapCellSeen": "{label} · {when, select, today{opened today} yesterday{opened yesterday} other{opened {daysText} days ago}}",
   "mapWentTo": "{label} · page {page}",
-
   "packsHead": "Kept on this phone",
   "packsHint": "A juz kept here opens with no connection — its pages and its hops.",
   "packsUnsupported": "This browser cannot keep a juz on this device.",
@@ -199,13 +183,24 @@
   "packRemove": "Remove",
   "packRemoveJuz": "Remove juz {juzText} from this phone",
   "packAbsent": "{n, plural, one {{nText} ayah of this juz is not in this build} other {{nText} ayahs of this juz are not in this build}}",
-
   "notices.pack-gone.title": "Pages you kept are no longer on this device",
   "notices.pack-gone.body": "The browser cleared pages you saved for reading offline. Nothing is lost from your record, and they will not open without a connection until they are saved again.",
   "notices.pack-gone.action": "See what is kept",
-
   "facingPage": "Facing page",
   "facingAbsent": "Page {page} is not in this build",
   "keyPages": "Pages",
-  "keyJump": "Go to"
+  "keyJump": "Go to",
+  "spreadSectionTitle": "Pages shown",
+  "spreadOne": "One",
+  "spreadTwo": "Two",
+  "spreadOneAria": "One page",
+  "spreadTwoAria": "Two pages",
+  "zoomSectionTitle": "Zoom",
+  "zoomIn": "Zoom in",
+  "zoomOut": "Zoom out",
+  "zoomLevel": "{pctText}%",
+  "arrivedZoom": "Zoom {pctText}%",
+  "zoomTwoPage": "Zoom needs one page — switch to one page first",
+  "arrivedJuz": "Juz {juzText} · page {page}",
+  "juzEdge": "No juz that way · juz {juzText}"
 }

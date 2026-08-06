@@ -1,163 +1,155 @@
-# The verification story: one source, three renderers
+# The wheel navigates, buttons magnify
 
 ## Context
 
-**Do we have a good verification story? Half of one.**
+**The reported bug:** on the desktop spread, the two leaves get out of sync in zoom when
+crossing between one-page and two-page modes. Reproduced in Chrome at 1440×900 against a
+local build, it is **three** distinct defects, not one:
 
-The automated half is genuinely strong and needs no rescuing: eight testing tiers, six
-`gate:*` scripts, eleven e2e specs, golden images, Lighthouse, and `make ci` mirroring CI
-exactly.
+1. **The facing leaf zooms on its own.** `ctrl`+wheel over it took it to `scale(1.549)`
+   while the live leaf sat at `0.8` and the book stayed open. The comment at
+   `App.tsx:1189` justifying why the facing stage gets no `onFitChange` — *"the facing leaf
+   … never receives a hop or a gesture that could change its own scale"* — is **false**: the
+   facing leaf mounts a complete `PageStage` with its own wheel listener and its own pinch
+   handler. That untrue comment is why this went unnoticed.
+2. **The mode survives a breakpoint crossing; the zoom does not.** Zoom in at 1440 → resize
+   to 800 (the live stage remounts, view resets to `scale(1)`) → resize back to 1440 leaves
+   `data-solo="true"` with the host at `scale(1)`: a book closed onto one leaf at fit, with
+   no zoom to explain it. Recovery requires zooming in and back out.
+3. **Zooming *out* counts as "at fit".** `atFit = z <= 1 + 1e-3` and `MIN_ZOOM = 0.8`, so at
+   `0.8` the book reopens with the live host at 266 px beside the facing leaf's 332 px.
 
-The manual half — the checks that decide the rendering architecture, the a11y floor, and
-whether the *scripture data is true* — has a register (`docs/validation/ledger.json`), a gate
-that keeps it honest (`scripts/gate-validation.mjs`), and a skill that catalogues it. What it
-does **not** have is a runbook. Each check's `how` is one sentence of prose. Nothing anywhere
-says which URL to open, what should appear on screen, what a pass looks like versus a fail,
-or what to do when it fails. And these checks happen **on a phone**, while every word of
-guidance lives in a terminal the phone cannot see.
+All three are symptoms of one thing: **`soloLeaf` is derived from zoom**, and zoom lives on
+a gesture. The user's call is to cut the derivation rather than patch its three leaks —
 
-That gap is not theoretical. Follow-up ① sat open for six loops behind four steps of DevTools
-friction; `make phone-perf` removed the friction, and the check still has no page telling the
-person holding the phone what they are looking at. Six checks are outstanding, five block a
-loop, and one of them (the edge spot-audit) is the only check that can establish the data is
-correct.
+> i don't want zoom to be driven by scrolling … id rather a button to toggle between two
+> page and 1 pages mode / settings driven zoom
 
-**Outcome:** every manual check becomes runnable by someone holding a phone with no memory of
-this conversation — commands to run, URLs to open, what to expect on screen, how to read the
-result, and one line that records it. Written once, in the ledger; rendered to the terminal,
-to a phone-readable guide, and to the skill that drives the session.
+— which also composes with the earlier request to make ctrl+scrolling flip juz.
 
-## The shape
+**Outcome:** the wheel becomes navigation-only; magnification becomes an explicit control;
+one-page/two-page becomes an explicit toggle with no derived state behind it.
 
-One source, three renderers. The rule this tier already runs on — a manual result must
-tighten something automated — extends to the instructions themselves: a runbook lives in one
-file or it drifts, and a drifted runbook is worse than none because it fails silently.
+## The three answers
 
-```
-docs/validation/ledger.json          ← the only place a runbook is written
-   │   (per check: needs · setup · steps[{do, expect}] · reading · record)
-   │
-   ├── make validate CHECK=<id>      → the runbook in the terminal
-   ├── make guide                    → docs/validation/guide.html, served to the phone
-   └── /validate skill               → drives a session: pick → run → read → record
-```
+| Fork | Answer |
+|---|---|
+| What does `ctrl`+wheel do? | **Nothing.** Swallowed (`preventDefault`, no action). Juz-flipping moves to **`Shift`+wheel** |
+| Where does zoom live? | A **− / 100% / +** stepper in the desktop chrome. Session state, not persisted |
+| Does zoom still auto-close the book? | **No.** The toggle is the sole source of truth for page mode |
+
+**Why `ctrl` cannot carry the juz jump**, even though it was asked for: a macOS trackpad
+pinch *is* a `ctrl`+wheel — the OS synthesises the modifier, and the browser cannot tell it
+from a real `ctrl`+scroll (`PageStage.tsx:1940-1943`). Binding juz to it means every
+two-finger pinch on a laptop teleports the reader ~20 pages. `Shift`+wheel is unclaimed
+here and costs nothing.
+
+**What this does not cost:** touch pinch is a separate path — `onPinch` via `@use-gesture`
+with `pinchOnWheel: false` (`PageStage.tsx:1896`, `1924`). Phones and tablets are untouched
+by every change below.
 
 ## Work
 
-### 1. `docs/validation/ledger.json` — add `runbook` to all six checks
+### A. `packages/core` — one lookup, no new arithmetic
 
-New field per check, documented in the existing `$comment` block:
+`juzPageIndex(pages)` → 30 entries, the first page of each juz, built on the existing
+`juzOf` (the repo already forbids a second membership implementation — `packs.ts:107-109`).
+Computed once and memoised at the App level, so a wheel flick is an array index rather than
+a 604-page scan. `nextWheelTurn` (`gestures.ts:443`) is reused **unchanged** for the juz
+axis with its own `WheelTurnState` ref — the state machine is already exactly right.
 
-```jsonc
-"runbook": {
-  "needs":  ["a mid/low-tier Android or an older iPhone", "same Wi-Fi as this laptop"],
-  "setup":  [{ "run": "make phone-perf",
-               "expect": "prints http://<lan-ip>:4173 and holds the terminal open" }],
-  "steps":  [{ "do": "Open that URL on the phone",
-               "expect": "a dark slab across the top: «قياس الأداء على هذا الجهاز» + an ابدأ button" },
-             { "do": "Tap ابدأ and follow the bar: pan 5s, pinch 5s, tap ayahs 5s",
-               "expect": "a per-segment countdown; the slab stops taking taps while recording" }],
-  "reading": ["p95 ≤ 16.7 ms and jank < 10% on all three → inline-SVG everywhere holds",
-              "pinch p95 far worse than pan → re-raster past the backing store → content-visibility or raster fallback",
-              "«too few frames — not driven» → that segment was never gestured; re-run it"],
-  "record": "make record CHECK=perf-verdict-on-device RESULT='<paste the JSON>'"
-}
-```
+### B. `PageStage.tsx` — the wheel loses zoom, the handle gains it
 
-All six get one, written from what the code actually does — the probe's own Arabic strings
-(`apps/web/src/perf/probe.ts`), the real label shape emitted by `enhancePolygons()`
-(`packages/core/src/highlighter.ts:236`: `role="button"`, `tabindex="0"`,
-`aria-label="الآية ٢:٤٨"`), the page SVG's `role="group"` + `aria-labelledby` set in
-`PageStage.tsx`, the colophon opening from the wordmark (`aria-label="عن حِفظ"`), and
-`make audit-edges N=20 SEED=1`'s printed output. Where a check is not yet runnable —
-`offline-survival-8-day` needs Loop 6b's pin-a-juz UI — its `needs` says so plainly instead
-of describing a button that does not exist.
+- **Wheel handler** (`1930-2004`): the `ctrl`/`meta` branch stops zooming and returns having
+  only `preventDefault`ed. Swallowing rather than passing through to the browser's own page
+  zoom is deliberate — "I don't want zoom driven by scrolling" covers browser zoom too, and
+  letting it through would bounce the desktop breakpoint as CSS px change. One line to
+  reverse if that reads wrong in the hand.
+- **New `Shift` branch → `onJuzTurn?: (step: 1 | -1) => void`.** Hazard to handle: several
+  browsers deliver `Shift`+wheel as **`deltaX`**, so this branch reads `deltaY || deltaX`.
+  §6's "only `deltaY` is bound" rule keeps its reason (the horizontal swipe is the browser's
+  back/forward) and gains this stated exception. Wired on **both** leaves, for the reason
+  §6 already gives `onTurn`: a wheel over the facing leaf that did nothing reads as a dead
+  half of the page.
+- **Handle gains `setZoom(z): number`** — clamps to `MIN_ZOOM…MAX_ZOOM`, anchors at the
+  stage centre through the existing `zoomAbout` (`639-653`), returns what it applied. No
+  second copy of the anchor arithmetic; §7 ⑨'s fix stays the only one.
+- **`onFitChange` and `atFitRef` are deleted.** The `ResizeObserver` added alongside them
+  **stays** — §8 ② records an independent reason (a window resize was one gesture behind
+  the truth).
 
-### 2. `scripts/gate-validation.mjs` — three additions
+### C. `App.tsx` — explicit state, one write path
 
-- **`--check <id>`** prints one check's full runbook, numbered, ending in the record command.
-  Backs `make validate CHECK=<id>`. No-arg behaviour is unchanged.
-- **New invariant:** a `pending`, `owner: "user"` check with no `runbook.steps` fails the
-  gate. Same reasoning as the existing `tunes` rule — a check nobody can follow will not be
-  run, and it should not be able to sit in the ledger looking tracked. Still no failure for
-  merely being `pending`.
-- **Guide staleness:** hash the ledger's runbook payload and compare against the
-  `data-ledger-hash` attribute baked into `guide.html`; a mismatch fails with "run
-  `make guide`". Mirrors the ETL determinism rule — a committed generated artifact is only
-  trustworthy if a gate proves it was regenerated.
+- `soloLeaf` → `pageMode: "one" | "two"` (default `"two"`), `solo={desktop && pageMode === "one"}`.
+- `zoom` state holds the **requested** level; the stepper calls `stageRef.current.setZoom`
+  and stores what it returns. No per-frame callback — §8 ② refused one for a good reason
+  (`view` is a ref precisely so a pan does not re-render a 170 KB SVG's parent).
+- **Every landing resets `zoom` to 1** in the same place it calls `navigateTo`/`showPage`/
+  `turnTo` — App is the sole caller of all three, so there is one place to keep in step.
+  Crossing the breakpoint resets it too, which is defect ② closed by construction.
+- Remove `onFitChange` from the live stage.
 
-### 3. `scripts/build-validation-guide.mjs` (new) → `docs/validation/guide.html`
+### D. `DesktopChrome.tsx` — two controls beside the language switch
 
-Self-contained (inline CSS, zero external requests), mobile-first, committed so it also reads
-on GitHub. Design brief — deliberately **not** the app's paper-and-ink palette; the probe set
-this precedent with its `#14110d` slab, and an operator tool that looks like the product is a
-tool someone will mistake for the product:
+- A **page-mode `radiogroup`** («صفحة واحدة» / «صفحتان»), mirroring the existing `langRow`
+  at line 57 — same markup, same keyboard behaviour, no new pattern.
+- A **zoom stepper**: `−` · readout · `+`, stepping by `1.2×` so it keeps the wheel's old
+  multiplicative feel (the same proportion at 0.8× as at 5×).
+- **The stepper is disabled in two-page mode**, with the toggle beside it as the way out.
+  §8 ② rendered two magnified leaves and found they lose their edges and read as one
+  continuous column; and §3's finding is that a leaf is height-bound at ~398 px in a spread,
+  so zoom there buys nothing anyway. The toggle is the gateway to magnification.
+- New strings in `messages/ar.json` + `en.json`, `.gen.ts` regenerated; `gate:i18n` already
+  enforces parity.
 
-- Dark field-guide look, one check per card, large type, 44px targets, `dir="ltr"` shell with
-  the Arabic UI strings quoted inline as they appear on screen.
-- Per card: what it blocks · what you need · commands in `<pre>` · numbered steps each with
-  its own **Expect** line · how to read the result · the exact `make record …` line.
-- **No copy buttons.** A LAN preview is plain `http://`, not a secure context, so the
-  Clipboard API is unavailable — the same trap the probe already hit. A dead button is worse
-  than no button.
-- Checkboxes persisted in `localStorage`, so a 15-minute walkthrough survives a screen lock.
-- Header states the standing rule (a result must tune something) and each card names what it
-  blocks, so the person holding the phone knows what their fifteen minutes unblocks.
+### E. Tests and registers
 
-`make guide` regenerates the file and serves `docs/validation/` over the LAN, printing the
-phone URL. The server is ~20 lines of `node:http` inside the same script (`--serve`), not
-`python3 -m http.server` — `python3` here resolves to a conda env and is not a dependency
-this repo should acquire. Port 4174, so it can run beside `make phone-perf` on 4173 and the
-guide and the app under test are open on the same phone.
-
-### 4. `scripts/record-validation.mjs` (new) — write the verdict back
-
-`make record CHECK=<id> RESULT='…'` sets `status: "done"`, `verifiedOn` (today), and
-`result`; refuses an unknown id; then **prints that check's `tunes` list as the work now
-owed** and re-runs the gate. Hand-editing JSON at the end of a walkthrough is exactly where
-results get lost, and the `tunes` reminder is the step that converts a verdict into a
-permanent test instead of a note.
-
-### 5. `.claude/skills/validate/SKILL.md` — Tier 7 becomes a driver
-
-Tier 7 stops restating each check's how-to (that now lives in the ledger and renders itself)
-and gains an explicit session procedure: `make validate` → pick a check → `make validate
-CHECK=<id>` or `make guide` → run it → `make record …` → do what `tunes` printed → commit.
-Tiers 0–6 are untouched.
-
-### 6. `docs/PLAN.md` — stop restating runbooks
-
-§Testing plan points at `make guide`; follow-ups ②④⑤ keep their *reasoning* and drop their
-how-to sentences in favour of the ledger id — so there is exactly one description of how to
-run each check, in the file the renderers read.
+- **`e2e/desktop.spec.ts`** — the "`ctrl`+wheel zooms by a step" test (`709`) and the whole
+  *"the book closes above fit"* describe (`751-806`) assert behaviour that is being removed;
+  they are **rewritten, not deleted**: `ctrl`+wheel now turns nothing *and* zooms nothing,
+  the toggle closes and opens the book, the stepper zooms the live leaf only, `Shift`+wheel
+  lands on the next juz's first page. Plus a new row for defect ②: zoom at 1440 → 800 →
+  1440, and assert the two leaves agree.
+- **Unit** — `juzPageIndex` in core; `PageSpread.test.tsx` unchanged in substance (`solo`
+  was always a prop); `DesktopChrome.test.tsx` gains the two controls.
+- **Docs** — `desktop.md` §8 ② is `fixed`, so it gets a superseding note rather than an
+  edit-in-place (its *outcome* survives; its *mechanism* is replaced); §6's wheel bullets
+  rewritten; §5 gains the two controls. `page-turning.md` §7 ③'s `ctrl`+wheel half is
+  superseded and says so. A row in `decisions/desktop-vs-mobile.md`, a new
+  `docs/decisions/` doc, `docs/issues.json` (+ `pnpm issues:doc`), `docs/use-cases.json`
+  (+ `make use-cases-doc`), and `docs/map.json` **hand-edited, never generated**.
 
 ### Files
 
 | File | Change |
 |---|---|
-| `docs/validation/ledger.json` | `runbook` on all six checks; `$comment` documents the field |
-| `scripts/gate-validation.mjs` | `--check`, the runbook invariant, guide-staleness hash |
-| `scripts/build-validation-guide.mjs` | new — ledger → `guide.html`, plus `--serve` |
-| `scripts/record-validation.mjs` | new — record a verdict, then name what it tunes |
-| `docs/validation/guide.html` | new, generated + committed |
-| `Makefile` | `validate CHECK=`, `guide`, `record` (beside `phone-perf`, reusing `LAN_IP`) |
-| `package.json` | `guide`, `record` scripts, so `pnpm` and `make` stay in step |
-| `.claude/skills/validate/SKILL.md` | Tier 7 → driver procedure |
-| `docs/PLAN.md` | §Testing plan + follow-ups ②④⑤ point at the ledger |
+| `packages/core/src/packs.ts` (+ test) | `juzPageIndex` |
+| `apps/web/src/components/PageStage.tsx` | wheel: −zoom, +`Shift`→juz; handle `setZoom`; −`onFitChange` |
+| `apps/web/src/App.tsx` | `pageMode` + `zoom` state, landings reset zoom, juz wiring |
+| `apps/web/src/components/DesktopChrome.tsx` (+ css, test) | mode radiogroup + zoom stepper |
+| `apps/web/src/messages/{ar,en}.json` + `.gen.ts` | the new strings |
+| `apps/web/e2e/desktop.spec.ts` | four rows rewritten, one added |
+| `docs/design/desktop.md`, `docs/design/page-turning.md` | §8 ② superseded, §6 and §7 ③ rewritten |
+| `docs/decisions/desktop-vs-mobile.md` + a new decision doc | the row and the record |
+| `docs/issues.json`, `docs/use-cases.json`, `docs/map.json` | the registers |
 
 ## Verification
 
-1. `make validate` → unchanged list. `make validate CHECK=perf-verdict-on-device` → the full
-   runbook, numbered, ending in its record command.
-2. `make guide` → open the printed URL on the phone and walk the perf card end to end against
-   `make phone-perf` in a second terminal. Every **Expect** line must match what the phone
-   actually shows; a line that does not match is a bug in the runbook, and fixing it is the
-   point of the step.
-3. **Negative tests, induced then reverted** — the pattern both existing gates were verified
-   with: strip `runbook.steps` from a pending user check → gate fails; edit a runbook without
-   running `make guide` → staleness failure naming the fix; `make record CHECK=nope` → refuses.
-4. `make record CHECK=kfgqpc-terms-primary-source RESULT='…'` against a scratch copy of the
-   ledger → status/`verifiedOn`/`result` stamped, `tunes` list printed, gate still green.
-5. `make ci` green; commit code and docs separately.
+1. `pnpm issues:doc` && `make use-cases-doc`, then `git add -A` && `make ci` green.
+2. `make e2e` — the rewritten desktop rows.
+3. **Manual, Chrome at 1440×900**, re-running the three original reproductions and asserting
+   each is gone: `ctrl`+wheel over the facing leaf changes nothing; zoom → resize to 800 →
+   resize back leaves both leaves agreeing; the stepper at its floor no longer flips the
+   book. Then `Shift`+wheel lands on a juz boundary and announces it.
+4. Commit code and docs separately.
 
-**Not doing:** publishing the guide to any external host, and any change to testing tiers 0–6.
+## Not doing
+
+- **The per-page "touch bar" strip.** Separate feature, and it has a hard blocker worth
+  stating: its colour-coded "self-reported mistakes" need a signal that does not exist —
+  `revision.ts` stores *looks* only, and its doc comment explicitly forbids quietly
+  absorbing other meanings into a `RevisionEvent`. It needs its own design pass.
+- **Persisting zoom across reloads** — a preference surface is a new axis; the stepper is
+  session state until someone asks otherwise.
+- **Any mobile change**, and **any shared `View` across the two leaves** (§8 ② rendered it
+  and rejected it).

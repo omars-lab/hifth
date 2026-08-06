@@ -81,6 +81,19 @@ async function restingBox(page: Page, pageNo: number) {
   return boxOf(pageSvg(page, pageNo));
 }
 
+/**
+ * The zoom the stage is actually at, read off the host's own matrix.
+ *
+ * The matrix rather than the chrome's readout, deliberately, because the two are
+ * exactly what a desync is *between* — the readout is a React mirror of a value
+ * that lives in a ref on the stage. The rows below assert both, side by side,
+ * for that reason.
+ */
+const scaleOf = (page: Page, pageNo: number): Promise<number> =>
+  pageSvg(page, pageNo)
+    .locator("xpath=..")
+    .evaluate((el) => new DOMMatrix(getComputedStyle(el).transform).a);
+
 test.describe("Hifth · the desktop spread", () => {
   test("appears above the breakpoint and does not exist below it", async ({ page }) => {
     await page.goto("/#/hafs-kfqc/p7");
@@ -626,16 +639,16 @@ test.describe("Hifth · a tablet in landscape", () => {
  * of wiring; that it turns **once per gesture** is the rule, and the rule is
  * `nextWheelTurn` in @hifth/core, unit-tested there against flicks, tails and
  * notches. What these rows prove is the half a unit test cannot: that the
- * listener is on the stage, that its verdict reaches the same `stepPage` the
- * arrow keys end in, and that `ctrl` still means zoom.
+ * listener is on the stage, and that its verdict reaches the same `stepPage` the
+ * arrow keys end in.
+ *
+ * The wheel navigates and nothing else now. It used to zoom under `ctrl`, and
+ * that binding is gone rather than moved: on macOS a trackpad **pinch is encoded
+ * as `ctrl`+wheel** by the OS, so anything bound there fires on a gesture the
+ * reader believes is a pinch. Magnification is a stepper in the chrome, and the
+ * modifier a wheel does answer to is `Shift`, which jumps a juz.
  */
 test.describe("Hifth · the wheel", () => {
-  /** The zoom the stage is actually at, read off the host's own matrix. */
-  const scaleOf = (page: Page, pageNo: number): Promise<number> =>
-    pageSvg(page, pageNo)
-      .locator("xpath=..")
-      .evaluate((el) => new DOMMatrix(getComputedStyle(el).transform).a);
-
   /** Open on page 7 with the pointer resting on the leaf, where a wheel lands. */
   async function overTheLeaf(page: Page): Promise<void> {
     await page.goto("/#/hafs-kfqc/p7");
@@ -706,72 +719,135 @@ test.describe("Hifth · the wheel", () => {
     await expect(page.locator(NUM)).toHaveText("8");
   });
 
-  test("ctrl+wheel zooms by a step rather than a leap, and turns nothing", async ({ page }) => {
+  test("ctrl+wheel does nothing at all — it is somebody else's pinch", async ({ page }) => {
+    // The row this replaces asserted that ctrl+wheel zoomed by a calibrated
+    // step. It did, correctly, and the binding was still wrong: **a macOS
+    // trackpad pinch arrives as a ctrl+wheel**, synthesised by the OS, and no
+    // browser exposes the difference. So every two-finger pinch on a laptop was
+    // firing a binding the reader had not chosen, and — once ctrl+wheel was
+    // proposed for the juz jump — would have teleported them twenty pages.
+    //
+    // Swallowed rather than passed through: `preventDefault` and no action. The
+    // alternative is the browser's own page zoom, which changes CSS pixels and
+    // would bounce the desktop breakpoint under the reader's hands. "I don't
+    // want zoom driven by scrolling" covers the browser's zoom too.
     await overTheLeaf(page);
     expect(await scaleOf(page, 7)).toBeCloseTo(1, 2);
 
-    // One notch, which in pixel mode is 100 px. @use-gesture's own wheel-to-pinch
-    // bridge made this `1 + 100/100` × the current zoom — 2.0× from one notch,
-    // and MAX_ZOOM saturated in three. The reader aiming for a comfortable read
-    // got a wall of ink before their hand stopped moving.
     await page.keyboard.down("Control");
-    await page.mouse.wheel(0, -100);
-    await expect.poll(() => scaleOf(page, 7)).toBeGreaterThan(1.15);
-    expect(await scaleOf(page, 7), "one notch is not one step").toBeLessThan(1.25);
-
-    // Three more. Multiplicative, so this is 1.2⁴ ≈ 2.07 — the same proportion
-    // of a change each time, which is what makes the gesture learnable at either
-    // end of the range. The old bridge was at the 5× ceiling by now.
-    for (let i = 0; i < 3; i += 1) await page.mouse.wheel(0, -100);
+    for (let i = 0; i < 4; i += 1) await page.mouse.wheel(0, -100);
     await page.keyboard.up("Control");
-    await expect.poll(() => scaleOf(page, 7)).toBeGreaterThan(1.9);
-    expect(await scaleOf(page, 7), "four notches saturated the zoom").toBeLessThan(2.3);
 
-    // And the modifier is the whole difference: not one of those five events
-    // turned a leaf.
+    // Nothing moved, and both halves are asserted because the two ways to get
+    // this wrong are opposite: leave the zoom wired and the paper grows; drop
+    // the modifier check and four notches turn four pages.
+    await page.waitForTimeout(300);
+    expect(await scaleOf(page, 7), "ctrl+wheel still zooms").toBeCloseTo(1, 2);
+    await expect(page.locator(NUM)).toHaveText("7");
+  });
+
+  test("shift+wheel jumps a juz, and says which one", async ({ page }) => {
+    // The modifier a wheel *does* answer to. Asked in pages rather than in juz
+    // numbers — the nearest juz *opening* strictly past the current page in the
+    // direction of travel — which disposes of three special cases at once: a
+    // straddling leaf (page 22 is juz 1's last and juz 2's first), a juz absent
+    // from a partial build, and "back" from the middle of a juz, which lands on
+    // that juz's own opening the way a media player's ⏮ does.
+    await overTheLeaf(page);
+    await expect(page.locator(NUM)).toHaveText("7");
+
+    // Down is forward here for the same reason it is forward unmodified: down
+    // is down in both directions of script.
+    await page.keyboard.down("Shift");
+    await page.mouse.wheel(0, 120);
+    await page.keyboard.up("Shift");
+
+    // Juz 2 opens on 22 — not 8, which is what a plain wheel would have done.
+    await expect(page.locator(NUM)).toHaveText("22");
+    await expect(page.locator("[aria-live='polite']")).toHaveText("الجزء ٢ · صفحة 22");
+
+    // And back, over the boundary rather than to the top of the leaf we are on.
+    await page.waitForTimeout(200);
+    await page.keyboard.down("Shift");
+    await page.mouse.wheel(0, -120);
+    await page.keyboard.up("Shift");
+    await expect(page.locator(NUM)).toHaveText("1");
+  });
+
+  test("the juz axis and the page axis do not spend each other's travel", async ({ page }) => {
+    // Two independent `WheelTurnState` refs, and this is what one shared ref
+    // would break: travel accumulated toward a page turn must not arrive as a
+    // juz jump when the reader presses Shift halfway through, or the other way
+    // round. Sub-threshold on each axis, so a shared accumulator would cross.
+    await overTheLeaf(page);
+
+    await page.mouse.wheel(0, 30);
+    await page.keyboard.down("Shift");
+    await page.mouse.wheel(0, 30);
+    await page.keyboard.up("Shift");
+    await page.waitForTimeout(300);
+
+    // Neither threshold reached, so nothing moved at all.
     await expect(page.locator(NUM)).toHaveText("7");
   });
 });
 
 /*
- * The book closes above fit — `desktop.md` §8 ②.
+ * The book closes when the reader says so — `desktop.md` §8 ②, second answer.
  *
- * A spread is an offer of *more of the book at once*, and zooming is the reader
- * declining it in favour of one page. So past fit the facing leaf goes to zero
- * and the live one takes the desk. Only reachable here: below the breakpoint
- * there is one leaf and nothing to close.
+ * The outcome §8 ② argued for survives: a spread is an offer of *more of the
+ * book at once*, and a reader who wants one magnified page is declining it, so
+ * past that point the facing leaf goes to zero and the live one takes the desk.
+ * What is gone is the *mechanism*. It used to be derived — zoom past fit and the
+ * book closed itself — and three separate desyncs came out of that one
+ * derivation:
  *
- * Three claims, and the third is the one that is easy to get wrong. That the
- * book closes is a data attribute. That it opens again is the flip in the other
- * direction, which a `>` on a tweened scale gets wrong at the last frame. That
- * the page inside is *still bound by the book's height* is the geometry: the
- * leaf drops its aspect box, so a page that took its width from the box would
- * stretch to the width of a desk and be 2233 px tall behind a clip.
+ *   ① the facing leaf had its own wheel listener and could be zoomed alone, so
+ *      the two leaves sat at different scales with the book still open;
+ *   ② the mode survived a breakpoint crossing and the zoom did not, leaving a
+ *      book closed onto one leaf that was sitting at fit with nothing to explain
+ *      it — unrecoverable without zooming in and back out;
+ *   ③ `atFit` was `z <= 1` and MIN_ZOOM is 0.8, so zooming *out* re-opened the
+ *      book at a size it had never been closed at.
+ *
+ * A state with no gesture behind it cannot drift from a gesture. So the reader
+ * is asked: a radiogroup in the chrome, and the zoom is a stepper beside it.
+ * These rows are the same three claims, re-put to the controls that replaced the
+ * derivation — ② by construction, and it has its own row because a resize is the
+ * one input nothing in the stage reports.
  */
-test.describe("Hifth · the book closes above fit", () => {
+test.describe("Hifth · one page or two, and how big", () => {
   const soloOf = (page: Page): Promise<string | null> => book(page).getAttribute("data-solo");
 
-  /** ctrl+wheel `notches` over the middle of the live leaf. Negative is closer. */
-  async function zoom(page: Page, notches: number): Promise<void> {
-    const leaf = await boxOf(pageSvg(page, 7));
-    await page.mouse.move(leaf.x + leaf.width / 2, leaf.y + leaf.height / 2);
-    await page.keyboard.down("Control");
-    for (let i = 0; i < Math.abs(notches); i += 1) {
-      await page.mouse.wheel(0, notches > 0 ? -100 : 100);
-    }
-    await page.keyboard.up("Control");
-  }
+  /** The chrome's page-mode radios. Desktop only — that is where the second leaf is. */
+  const modeBtn = (page: Page, which: "one" | "two"): Locator =>
+    page.getByRole("radio", { name: which === "one" ? "صفحة واحدة" : "صفحتان" });
 
-  test("a zoom past fit leaves one leaf on the desk, and a zoom back reopens", async ({ page }) => {
+  /** The stepper's two buttons. */
+  const zoomBtn = (page: Page, dir: "in" | "out"): Locator =>
+    page.getByRole("button", { name: dir === "in" ? "تكبير" : "تصغير" });
+
+  /**
+   * The level as the eye reads it, scoped to the stepper rather than to the page.
+   *
+   * A bare `getByText("١٢٥٪")` matches twice, and the second match is the point:
+   * the announcer says «التكبير ١٢٥٪», so the readout and the announcement carry
+   * the same digits by design — one for the eye and one for the ear. Scoping to
+   * the group says which of the two each assertion is about, and keeps this file
+   * from being the thing that breaks when the announcement is reworded.
+   */
+  const readout = (page: Page): Locator =>
+    page.getByRole("group", { name: "التكبير" }).locator("span");
+
+  test("the toggle closes the book and opens it again", async ({ page }) => {
     await page.goto("/#/hafs-kfqc/p7");
     await expect(pageSvg(page, 7)).toBeVisible({ timeout: 20_000 });
 
     // At rest the book is open and both pages are readable.
     expect(await soloOf(page)).toBeNull();
     await expect(pageSvg(page, 8)).toBeVisible();
-    const open = await boxOf(pageSvg(page, 7));
 
-    await zoom(page, 2);
+    await modeBtn(page, "one").click();
     await expect.poll(() => soloOf(page)).toBe("true");
 
     // Gone from the eye *and* from the reading order. A zero-width leaf a screen
@@ -786,29 +862,109 @@ test.describe("Hifth · the book closes above fit", () => {
     const bookBox = await boxOf(book(page));
     expect(leafBox.width, "the live leaf takes the desk").toBeGreaterThan(bookBox.width * 0.9);
 
-    // …and the page inside is still the page. 1.2² ≈ 1.44 of what it was, not
-    // the width of the desk. The tolerance is loose because the exact zoom is a
-    // tween's business; what is being ruled out is a factor of three.
-    const zoomed = await boxOf(pageSvg(page, 7));
-    expect(zoomed.width).toBeGreaterThan(open.width * 1.3);
-    expect(zoomed.width, "the page stretched to the desk").toBeLessThan(open.width * 1.6);
-
-    // Back to fit, and the book opens. Not a `>` on the scale: a landing settles
-    // through a RAF tween and its last frames arrive at 1.0000003, so a bare
-    // comparison would leave the book shut on a reader who is done zooming.
-    await zoom(page, -2);
+    // And back. No tween in the way now — this is what defect ③ was: the old
+    // reopen was a comparison against a scale still settling through a RAF tween,
+    // and 0.8 was on the wrong side of it.
+    await modeBtn(page, "two").click();
     await expect.poll(() => soloOf(page)).toBeNull();
     await expect(pageSvg(page, 8)).toBeVisible();
   });
 
-  test("a hop link opens on the leaf it landed in", async ({ page }) => {
-    // No gesture involved. A shared ayah link lands at DEFAULT_HOP_ZOOM, which
-    // is past fit — and before this the facing leaf sat beside it at 1.0, so the
-    // two pages were at different scales and a selection band that ran to the
-    // edge of the page was cut in half by the gutter.
+  test("the stepper magnifies the one leaf, and is off while there are two", async ({ page }) => {
+    await page.goto("/#/hafs-kfqc/p7");
+    await expect(pageSvg(page, 7)).toBeVisible({ timeout: 20_000 });
+
+    // Two magnified leaves lose their edges and read as one continuous column,
+    // and §3's measurement is that a leaf in a spread is height-bound at ~398 px
+    // anyway. So the stepper is disabled here, with the toggle as the way out.
+    await expect(zoomBtn(page, "in")).toBeDisabled();
+    await expect(zoomBtn(page, "out")).toBeDisabled();
+
+    await modeBtn(page, "one").click();
+    await expect.poll(() => soloOf(page)).toBe("true");
+    const fit = await boxOf(pageSvg(page, 7));
+    await expect(zoomBtn(page, "in")).toBeEnabled();
+
+    // One rung: 1 → 1.25. A ladder rather than a multiplier, so the readout can
+    // be believed — and it is the readout, not the matrix, that a reader reads.
+    await zoomBtn(page, "in").click();
+    await expect.poll(() => scaleOf(page, 7)).toBeCloseTo(1.25, 2);
+    await expect(readout(page)).toHaveText("١٢٥٪");
+    await expect(page.locator("[aria-live='polite']")).toHaveText("التكبير ١٢٥٪");
+
+    // The page grew, and grew by about the rung rather than to the desk.
+    const bigger = await boxOf(pageSvg(page, 7));
+    expect(bigger.width).toBeGreaterThan(fit.width * 1.15);
+    expect(bigger.width, "the page stretched past its step").toBeLessThan(fit.width * 1.35);
+
+    // Opening the book takes the magnification back with it — the other half of
+    // "zoom needs one page", closing the door a reader could otherwise walk back
+    // through by zooming first and opening after.
+    await modeBtn(page, "two").click();
+    await expect.poll(() => scaleOf(page, 7)).toBeCloseTo(1, 2);
+    await expect(readout(page)).toHaveText("١٠٠٪");
+  });
+
+  test("the ends of the ladder are stated, not discovered by clicking", async ({ page }) => {
+    await page.goto("/#/hafs-kfqc/p7");
+    await expect(pageSvg(page, 7)).toBeVisible({ timeout: 20_000 });
+    await modeBtn(page, "one").click();
+
+    // MIN_ZOOM is 0.8 and fit is 1, so exactly one press is available downward.
+    await zoomBtn(page, "out").click();
+    await expect(readout(page)).toHaveText("٨٠٪");
+    await expect(zoomBtn(page, "out")).toBeDisabled();
+    await expect(zoomBtn(page, "in")).toBeEnabled();
+  });
+
+  test("crossing the breakpoint leaves the two leaves agreeing", async ({ page }) => {
+    // Defect ②, and the only one of the three that needs a resize to reproduce.
+    // The mode is React state and survives; the stage's `view` is a ref on a
+    // component the breakpoint unmounts, so the zoom did not. The old build came
+    // back to 1440 with `data-solo="true"` over a leaf at scale(1) — a closed
+    // book with nothing to explain why — and no gesture could undo it except
+    // zooming in and back out.
+    await page.goto("/#/hafs-kfqc/p7");
+    await expect(pageSvg(page, 7)).toBeVisible({ timeout: 20_000 });
+    await modeBtn(page, "one").click();
+    await zoomBtn(page, "in").click();
+    await expect.poll(() => scaleOf(page, 7)).toBeCloseTo(1.25, 2);
+
+    // Down below the breakpoint: one leaf, no spread, no chrome.
+    await page.setViewportSize({ width: 800, height: 900 });
+    await expect(spread(page)).toHaveCount(0);
+    await expect(pageSvg(page, 7)).toBeVisible();
+
+    // …and back up. Both halves of the question are asserted, because the bug
+    // was precisely that they disagreed: the paper is at fit, and the readout
+    // says so too.
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await expect(spread(page)).toBeVisible();
+    await expect.poll(() => scaleOf(page, 7)).toBeCloseTo(1, 2);
+    await expect(readout(page)).toHaveText("١٠٠٪");
+  });
+
+  test("a hop link lands on the ayah without magnifying one half of the book", async ({ page }) => {
+    // A hop frames its target at DEFAULT_HOP_ZOOM — 1.55. Under the old rule
+    // that counted as "past fit", so a shared link closed the book on arrival.
+    // Page mode is the reader's now, so the book stays open — and *because* it
+    // stays open, the framing drops to fit: 1.55 on the live leaf beside 1 on the
+    // facing one is two pages at different scales with the book open, which is
+    // the original complaint reached down a different path.
+    //
+    // The landing itself is unaffected. `frameBboxToView` still centres the ayah;
+    // only the magnification is withheld.
     await page.goto("/#/hafs-kfqc/2:48");
     await expect(pageSvg(page, 7)).toBeVisible({ timeout: 20_000 });
-    await expect.poll(() => soloOf(page)).toBe("true");
-    await expect(pageSvg(page, 8)).toBeHidden();
+    expect(await soloOf(page)).toBeNull();
+    await expect(pageSvg(page, 8)).toBeVisible();
+    await expect.poll(() => scaleOf(page, 7)).toBeCloseTo(1, 2);
+    await expect(readout(page)).toHaveText("١٠٠٪");
+
+    // Close the book and the same link's magnification is available again — the
+    // toggle is the gateway, exactly as it is for the stepper.
+    await modeBtn(page, "one").click();
+    await zoomBtn(page, "in").click();
+    await expect.poll(() => scaleOf(page, 7)).toBeCloseTo(1.25, 2);
   });
 });
