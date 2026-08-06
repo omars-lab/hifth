@@ -509,6 +509,15 @@
       "closedBy": "docs/decisions/pin-marker.md",
       "note": "Found by the 6b-D pack e2e and by nothing else: the assertion that page 15 lives in the pack and nowhere else came back naming hifth-pages too. pinPack fetched from the page, so the service worker's CacheFirst route stored every file a second time — juz 1's ~3.1 MB paid twice, and 21 of the 32 entries in a browsing-sized LRU spent on duplicates, so keeping a juz for later threw away most of what the reader read last week. Fixed 2026-08-04: pinPack sends X-Hifth-Pin and both runtimeCaching routes decline anything carrying it. Both reasons for deferring it turned out to be wrong under measurement — sweeping on unpin cannot work at all, because ExpirationPlugin evicts at write time (31 trail entries, 11 survive a 21-page pin, still 11 after deleting all 21 duplicates), and the 'pack knowledge in the worker' cost was mispriced: the worker gains one bit of static provenance and never learns the pack cache's name, its URL list, or that a register exists. Proven by a new e2e that compares the hifth-pages key set across a pin, plus the ⑮ tripwire flipped from [PACK_CACHE, hifth-pages] to [PACK_CACHE]; negative control run and reverted. Not verified outside Chromium — if a browser hides the header from FetchEvent.request the failure mode is the old duplicate, not a broken pack, and that check sits on the offline-survival device runbook."
     },
+    {
+      "id": "site-answers-on-plain-http",
+      "source": { "file": "docs/backlog.md", "item": "⑯" },
+      "status": "blocked",
+      "severity": "defect",
+      "owner": "user",
+      "blockedBy": ["the Cloudflare zone dashboard"],
+      "note": "Reproduced 2026-08-06 with two curl lines against the deployed site: http:// returns 200 and the whole app in cleartext — not a redirect — and the https response carries no Strict-Transport-Security. The security half is ordinary; the half that made it a backlog row is that a service worker needs a secure context, so an http arrival hits pwa.ts:270's `if (!(\"serviceWorker\" in navigator)) return` and gets a mushaf that paints and hops correctly with no precache, no pinned juz and no offline, and nothing on screen to tell it apart from the build that has them — Loop 6b's whole promise, absent and unfalsifiable from the inside. Every offline check we own runs against localhost, which browsers treat as secure regardless of scheme, so the suite is green on a configuration that fails in the field: the same blind spot /validate's probes section is about. The fix is two toggles in the Cloudflare zone (Always Use HTTPS, then HSTS) and there is no token on this machine, nor should there be. Verified by curl returning 301 with an https location, and strict-transport-security on the https response; it will never be a gate, because it reaches the network and the deployed origin is not reproducible from a commit."
+    },
 
     {
       "id": "check-perf-verdict-on-device",

@@ -670,6 +670,53 @@ settled.
 
 ---
 
+## 6. Delivery
+
+### ⑯ The site answers on plain `http`, so the offline app silently isn't one · **blocked**
+
+Measured 2026-08-06 against the deployed site:
+
+```
+curl -I http://blog.bytesofpurpose.com/hifth/   → 200, text/html, served
+curl -D - https://blog.bytesofpurpose.com/hifth/ → no Strict-Transport-Security
+```
+
+Not a redirect — a **200**. An `http://` arrival is served the whole app in cleartext,
+and there is no HSTS header to stop the next visit doing the same.
+
+The security half is ordinary and needs no argument here. The half that belongs in *this*
+file is that it quietly deletes the feature three loops were spent on: **a service worker
+needs a secure context.** In an insecure one `navigator.serviceWorker` is `undefined`, so
+[`pwa.ts:270`](../apps/web/src/pwa.ts)'s `if (!("serviceWorker" in navigator)) return`
+takes the early exit and says nothing — by design, because that same branch is how the
+app tolerates a browser without service workers at all. The reader gets a mushaf that
+paints, scrolls, hops and looks entirely correct, and has **no precache, no pinned juz
+and no offline**, with nothing on screen distinguishing it from the version that does.
+Loop 6b's whole promise is absent and unfalsifiable from the inside.
+
+This is also why it cannot be gated from here. Every offline check we own —
+`e2e/offline.spec.ts`, the eviction rows, `make source-offer` — runs against
+`localhost`, which browsers treat as secure **regardless of scheme**, so the entire
+suite is green on a configuration that would fail in the field. It is a blind spot of
+exactly the kind `/validate`'s probes section describes: our bytes are fine and the
+premise is wrong.
+
+**The fix is not in this repo.** It is two toggles in the Cloudflare zone — SSL/TLS ›
+Edge Certificates › **Always Use HTTPS**, and **HSTS** once the redirect is confirmed
+working. Owner: the user; there is no token here and there should not be one.
+
+**How we'd know:** `curl -sI http://blog.bytesofpurpose.com/hifth/` returns **301** with
+a `location:` on `https://`, and the `https` response carries
+`strict-transport-security`. Both are one line and neither needs a browser, which is why
+this row states them rather than describing a dashboard.
+
+**Why it is not a gate:** it reaches the network, and the deployed origin is not
+reproducible from a commit — the same reason `probe-reference` and `source-offer` are
+`probe-`/`check-` scripts a human runs. If it earns a script it belongs beside those,
+never in `pnpm gates`.
+
+---
+
 ## Considered and deliberately not doing
 
 - **Precaching the mushaf corpus in the service worker.** Ruled out at `vite.config.ts:35` —
