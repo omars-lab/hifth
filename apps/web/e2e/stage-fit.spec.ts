@@ -278,16 +278,23 @@ async function open(page: Page, hash: string, pageNo: number): Promise<Locator> 
  *
  * Below the breakpoint the radio is not rendered at all, and that is the whole
  * of the phone branch: nothing to click, nothing withheld, the hop frames as it
- * always did. Hence `count()` rather than a project name — this file sets its
- * own viewport in places, so what matters is whether the control is *there*.
+ * always did — so a phone takes `open()` unchanged and pays for one page load,
+ * not two. The branch is decided from the **viewport** rather than from a
+ * project name or from `count()` on a rendered control: this file sets its own
+ * viewport in places, and asking the DOM would mean loading a page to find out
+ * whether the page we are about to load is the one we want. `DESKTOP_QUERY`'s
+ * two axes, duplicated here because an e2e cannot import a media query — the
+ * cost of a drift is a phone doing an extra navigation, which is why this is
+ * allowed to be a copy and `useMediaQuery.test.ts` is not.
  */
 async function openSolo(page: Page, hash: string, pageNo: number): Promise<Locator> {
+  const vp = page.viewportSize();
+  if (!vp || vp.width < 1024 || vp.height < 740) return open(page, hash, pageNo);
+
   await page.goto("/#/hafs-kfqc/p1");
   const one = page.getByRole("radio", { name: "صفحة واحدة" });
-  if ((await one.count()) > 0) {
-    await one.click();
-    await expect(one).toHaveAttribute("aria-checked", "true");
-  }
+  await one.click();
+  await expect(one).toHaveAttribute("aria-checked", "true");
   // Same-document, so `page.goto` would be a no-op the router never hears. The
   // hash *is* the route (`useHashRouter.ts`), and writing it is what a shared
   // link does when it is pasted into a tab that is already open.
