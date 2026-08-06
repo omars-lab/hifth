@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { JUZ_COUNT, juzOfPage, juzSpan, planPack } from "./packs.js";
+import { JUZ_COUNT, juzOfPage, juzPageIndex, juzSpan, planPack } from "./packs.js";
 import {
   JUZ_STARTS,
   TOTAL_AYAHS,
@@ -153,6 +153,35 @@ describe("juzOfPage", () => {
 
   it("has no opinion about a page this build does not hold", () => {
     expect(juzOfPage(999, [page(1, "1:1")])).toBeNull();
+  });
+});
+
+describe("juzPageIndex", () => {
+  it("is one entry per juz, whatever the build holds", () => {
+    expect(juzPageIndex([page(1, "1:1")])).toHaveLength(JUZ_COUNT);
+  });
+
+  it("opens a juz on the leaf where it begins, not where the one before it ends", () => {
+    // Page 22 straddles: 2:141 closes juz 1 and 2:142 opens juz 2. `juzOfPage`
+    // calls that leaf juz 1's; this calls it juz 2's start. Both are true of the
+    // same sheet, which is what a boundary is.
+    const index = juzPageIndex([page(21, "2:100"), page(22, "2:141", "2:142")]);
+    expect(index[0]).toBe(21);
+    expect(index[1]).toBe(22);
+  });
+
+  it("takes the lowest page, not the first one the manifest happens to list", () => {
+    const descending = [page(23, "2:150"), page(22, "2:142")];
+    expect(juzPageIndex(descending)[1]).toBe(22);
+  });
+
+  it("leaves a juz this build does not carry as null rather than the next one along", () => {
+    // A partial edition that holds juz 2 and not juz 3 must not send a reader
+    // asking for juz 3 to juz 4's opening and call it an arrival.
+    const index = juzPageIndex([page(22, "2:142")]);
+    expect(index[1]).toBe(22);
+    expect(index[2]).toBeNull();
+    expect(index[0]).toBeNull();
   });
 });
 

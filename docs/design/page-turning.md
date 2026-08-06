@@ -967,6 +967,29 @@ does; a threshold a fraction of a gesture could clear was measuring the bug.
 discoverability defect: the keymap table was the only place a reader could learn what this
 app does with a pointer, and it did not mention the wheel at all.
 
+**The `ctrl`+wheel half is superseded — "The wheel navigates, buttons magnify".** The
+calibrated curve shipped, worked, and was then removed on the reader's call: *"i don't want
+zoom to be driven by scrolling."* `ctrl`+wheel now zooms nothing and turns nothing; it is
+swallowed. Magnification moved to an explicit stepper in the desktop chrome
+(`desktop.md` §5, §8 ②), and the modifier the wheel answers to is `shift`, which jumps a juz.
+
+The calibration argument above is left standing because it is still correct about what it
+measured — a multiplicative curve is the right shape for a magnifier driven by travel, and it
+is what a touch pinch still does. What the record now has to add is why no wheel should have
+been carrying it: **a macOS trackpad pinch is a synthesised `ctrl`+wheel**, so `ctrl`+wheel
+was never a modifier a reader chose to press. Half the readers holding it were not holding
+anything.
+
+Two consequences worth naming rather than discovering later:
+
+- The plain-wheel-turns-pages half of this entry is **unaffected**, and `nextWheelTurn` is
+  reused verbatim for the juz axis with its own rest state.
+- ⑨'s e2e regression guard lost its driver. The row still exists and now presses the stepper,
+  but the stepper anchors at the middle of the layer and lives only above the breakpoint,
+  where `--stage-pad` is zero — so the *exact* 16 px drift ⑨ was about is no longer
+  observable from a test. The row says so itself, and `zoomAbout`'s doc comment carries the
+  warning that a second copy of that arithmetic now has nothing watching it.
+
 ### ④ A turn across an absent page is silent · **fixed**
 
 `stepPage` (`App.tsx:424-437`) walks `pageTurns.pages` — the *inventory*, not the print — so

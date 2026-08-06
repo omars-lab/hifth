@@ -413,7 +413,22 @@
         {
           "file": "apps/web/src/components/DesktopChrome.tsx",
           "symbol": "DesktopChrome",
-          "note": "The controls a phone had no room for (the language switch, two levels deep in the colophon sheet because chrome-fit holds the header inside 320px with 17px of slack) and no use for (the keyboard map). Hidden by CSS rather than unmounted, unlike the spread — these are spans, not a second mus'haf."
+          "note": "The controls a phone had no room for (the language switch, two levels deep in the colophon sheet because chrome-fit holds the header inside 320px with 17px of slack) and no use for (the keyboard map), plus the two that exist because a desktop has a second leaf to close: the page-mode radiogroup and the zoom stepper. Hidden by CSS rather than unmounted, unlike the spread — these are spans and buttons, not a second mus'haf. The chrome decides nothing: it renders `pageMode`/`zoom` and calls back. The stepper is disabled while the book is open and says why on the control itself, which is the ordering that replaced a derivation — see ZOOM_STEPS."
+        },
+        {
+          "file": "apps/web/src/components/PageStage.tsx",
+          "symbol": "ZOOM_STEPS",
+          "note": "The nine rungs the stepper climbs, exported because the chrome needs to know where the ends are — a disabled button at the floor is the ladder being stated rather than discovered by clicking. A ladder and not a multiplier because a button is pressed a countable number of times and should land on a nameable level; the spacing keeps the old wheel ratio's feel, and `rung(z, step)` takes the nearest rung STRICTLY past z, because zoom also arrives from a hop at DEFAULT_HOP_ZOOM 1.55, which is not on the ladder. Every zoom on this stage goes through zoomAbout, and setZoom anchors at the LAYER centre — never the stage, never the host. Do not write a second copy of that arithmetic; pass an origin. docs/decisions/wheel-and-zoom.md."
+        },
+        {
+          "file": "packages/core/src/packs.ts",
+          "symbol": "juzPageIndex",
+          "note": "Thirty entries, the first page of each juz, or null for a juz this build does not carry. Built on juzOfPage rather than on a second membership rule — the repo forbids a second copy of that. Memoised once at the App level because its caller is a wheel: shift+wheel is an array index, not a 604-page scan. A juz boundary page belongs to two juz at once and this deliberately disagrees with juzOfPage about page 22 — juzOfPage calls it juz 1's, this calls it juz 2's START, and both are true of the same sheet."
+        },
+        {
+          "file": "apps/web/e2e/desktop.spec.ts",
+          "symbol": "ctrl+wheel does nothing at all — it is somebody else's pinch",
+          "note": "The assertion that a binding is absent, which is the only kind that rots silently. On macOS a trackpad pinch arrives as ctrl+wheel with the modifier synthesised by the OS, so anything bound here fires on a pinch — bound to juz it teleports ~20 pages, left unbound it hands the window to browser page zoom, which changes what a CSS pixel is and bounces DESKTOP_QUERY. So it is preventDefaulted and dropped, and this row is what stops someone reclaiming it. The jump lives on shift+wheel, which reads deltaY || deltaX because several browsers deliver a shifted wheel horizontally."
         },
         {
           "file": "apps/web/e2e/desktop.spec.ts",
@@ -426,7 +441,9 @@
         "A new desktop decision is a row appended to docs/decisions/desktop-vs-mobile.md: what mobile does, what desktop does, and why they differ. The design doc links to that table rather than duplicating it.",
         "Anything mounted only at desktop width must be gated in JS via useMediaQuery, not hidden in CSS, whenever mounting it costs a fetch or a Highlighter. Anything that is only markup should be CSS-hidden so it leaves the accessibility tree and the header's intrinsic width.",
         "A new desktop surface needs a row in e2e/contrast.spec.ts SURFACES, and that row must call page.setViewportSize — both projects running that file are phones, so without the resize the row looks like coverage and measures nothing.",
-        "Loop 4b vendored the print, so `renderFacing` is no longer fixture-only — every spread is two real leaves, and the honest hole is now reached by trimming a page out of the manifest (apps/web/e2e/inventory.ts). Nothing about the geometry changed; see docs/design/desktop.md §4 for the table of what did."
+        "Loop 4b vendored the print, so `renderFacing` is no longer fixture-only — every spread is two real leaves, and the honest hole is now reached by trimming a page out of the manifest (apps/web/e2e/inventory.ts). Nothing about the geometry changed; see docs/design/desktop.md §4 for the table of what did.",
+        "The wheel navigates and buttons magnify. Do not derive page mode from zoom, or zoom from anything: that was built, and one state with two owners leaked three ways (the facing leaf zoomed alone; a breakpoint crossing kept the mode and lost the view; the range below fit read as 'at fit'). pageMode and zoom are explicit state in App, written in one place, and the chrome only asks. docs/decisions/wheel-and-zoom.md.",
+        "Anything gated on 'is the book open' must ask `desktop && pageMode === \"two\"`, never pageMode alone. pageMode is real state at every width so a resize cannot lose the reader's choice, but it defaults to \"two\" where no spread renders — reading it alone silently withheld the hop's magnification on every phone, and the golden images are what caught it."
       ],
       "gates": ["pnpm test", "make e2e", "pnpm gate:budget", "make ci"],
       "seeAlso": ["wayfinding", "ui-language", "a11y", "assets-and-pages"]
