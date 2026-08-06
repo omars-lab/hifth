@@ -380,7 +380,7 @@
       "staleAfterDays": 14,
       "runbook": {
         "needs": [
-          "A printed mushaf — the KFGQPC Hafs print the pages are photographed from, so page numbers line up.",
+          "A printed mushaf — the KFGQPC Hafs print the pages are photographed from, so page numbers line up. No paper? .claude/skills/mushaf-reference/SKILL.md names the published scans and page tables that stand in, and — more importantly — which ones are a different qira'a or a different print revision and will make a correct pair look wrong.",
           "30–45 minutes for twenty edges. A hafiz if you can get one; this is the check where a second reader is worth the most.",
           "Nothing else — the draw runs here."
         ],
@@ -438,6 +438,7 @@
           "If several wrong edges share a shape — same `type`, same phrase length, same surah pair — that is a filter in packages/etl/scripts/build-adjacency.mjs, not twenty more rejections. A class of error is worth more than the twenty.",
           "If gate:verified-edges fails later, do not edit the fixture to go green: the data moved under a human verdict. Find out what moved it, and re-verify with a reader before changing a verdict.",
           "This check goes stale after 14 days because the data keeps moving. A fresh seed each round means the coverage accumulates instead of re-checking the same twenty.",
+          "Look a pair up by KEY, not by page, in whatever reference you use. Our print is QCF V2/1421H and most published tables are V1/1405H; they place different ayahs on 36 pages, so a page-based lookup in the 583–600 band finds the wrong ayah and the pair reads as wrong data. `make probe-reference ALL=1` asserts that divergence is still exactly the expected 36 and nothing else moved — it settles the arithmetic under this check, and none of the judgement.",
           "Aim at the · rows. The draw is stratified for a reason: 97% of the corpus is one class (dataset mutashabih, far apart), so a flat draw of twenty essentially never shows a shared-root edge, a related-meaning edge, or a pair we curated ourselves — and those are exactly the classes no automated check covers, since gate:edges deliberately does not score shared-root at all. Pass UNIFORM=1 only when the overall *rate* of bad edges is the question, and note that gate:edges already carries the rate on every commit."
         ],
         "record": "make record CHECK=edge-spot-audit RESULT='seed 1 · 20 edges · 18 correct, 2 wrong (both phrase-overlap between 2 and 3) → verified-edges.json'"

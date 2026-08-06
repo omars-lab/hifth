@@ -85,3 +85,30 @@ extraction and must reproduce it byte-identically.
   `vendor-pages.mjs` (the "stranded first word" shape) and the count is now
   zero. Two witnesses see what one cannot, which is the argument for having
   gone and fetched the second.
+- **A third witness, and it had never seen us — measured 2026-08-06.** Both
+  checks above compare this table against another *corpus*: bytes someone built
+  by processing the same artwork. `scripts/probe-reference.mjs` asks a different
+  question of a different kind of source — a page table **published for readers**,
+  api.quran.com's `verses/by_page/N`, which is **V1/1405H**. That makes it useless
+  as a source, and the Loop 4a argument above is exactly what makes it valuable as
+  an *instrument*: **a pagination is a fingerprint**. A V2 corpus checked against a
+  V1 table must agree on 568 pages and differ on precisely the other 36. Both
+  halves are asserted, so agreement where the prints must differ is as much a
+  finding as difference where they must not. Over all 604 pages: **568 agree, 36
+  diverge, 0 surprises** — the divergent set is exactly `V1_V2_DIVERGENCE` in the
+  probe, which enumerates the 36 rather than expressing the four bands named above,
+  because 566, 571–574 and 577–582 sit inside "the 564–600 region" and do **not**
+  diverge. So the Loop 4a identification now also holds from outside this repo,
+  re-derived by a party with no access to the corpus it identifies.
+
+  **It is a probe and not a gate, permanently.** It reaches the public internet,
+  and `SOURCES.md` already wrote down what that costs: a gate that reaches the
+  network fails when a host is down, which teaches everyone to skip it. Same
+  reasoning that named `check-source-offer.mjs` `check-` and cancelled the KFGQPC
+  watcher. Run it with `make probe-reference ALL=1`; it asks for verse *keys* only
+  (no `fields` parameter), so no Quran text crosses the wire, and it writes
+  nothing. What it cannot do is the reason `edge-spot-audit` is still owned by a
+  human: it settles where an ayah *is*, never whether two of them are genuinely
+  confused. `.claude/skills/mushaf-reference/SKILL.md` carries the rest — which
+  published references can stand in for paper, and which are a different qira'a or
+  a different revision and will make a correct pair look wrong.

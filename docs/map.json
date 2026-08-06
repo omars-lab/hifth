@@ -918,6 +918,16 @@
           "file": "scripts/validation-ledger.mjs",
           "symbol": "evidencePath",
           "note": "Derived from the check id, never stored beside it: a path written down in two places is a path that can disagree with itself."
+        },
+        {
+          "file": "scripts/probe-reference.mjs",
+          "symbol": "V1_V2_DIVERGENCE",
+          "note": "The one part of edge-spot-audit a machine can reach: a second opinion on the print, fetched rather than held. api.quran.com publishes a V1/1405H page table and ours is V2/1421H, so the two must disagree on exactly 36 pages — which turns a useless source into a fingerprint, and makes agreement where they should differ as much a finding as the reverse. `probe-` and not `gate-` because it reaches the network, same reasoning as check-source-offer.mjs. Keys only, no `fields`, so no Quran text crosses the wire."
+        },
+        {
+          "file": ".claude/skills/mushaf-reference/SKILL.md",
+          "symbol": "name: mushaf-reference",
+          "note": "The prose half of the probe: which published references are reachable (measured), what each can and cannot settle, and the trap — six of archive.org's twelve KFGQPC scans are a different qira'a or script, so comparing against one produces confident, wrong verdicts. The symbol is the frontmatter name and not a section heading because scripts/code-pointers.mjs reads a leading `#` as a comment, so no Markdown heading can ever be a live pointer; the name is the better anchor anyway, since renaming the skill is the change that would actually strand this row."
         }
       ],
       "extend": [
@@ -925,7 +935,8 @@
         "Edit the ledger and re-run `make guide` in the same commit — a staleness hash fails the build otherwise.",
         "When a check comes back, record it and then do what `tunes` printed. That step is what turns a verdict into a permanent test instead of a note.",
         "An `evidence` block must name a `residue` — say in words what the command cannot do. The gate rejects one that does not, because an automated run naming no remainder is one claiming to have done a human's job.",
-        "`evidence.covers` points at runbook step ids, never positions, and `evidence.run` is a script rather than a make target — make flattens every failed recipe to exit 2, which would let a network timeout read as a verdict."
+        "`evidence.covers` points at runbook step ids, never positions, and `evidence.run` is a script rather than a make target — make flattens every failed recipe to exit 2, which would let a network timeout read as a verdict.",
+        "Before asking a human for a mushaf, run `make probe-reference ALL=1` and see what is left. It cannot judge whether two ayahs resemble each other — nothing on a network can — but it settles every arithmetic claim underneath that question, and it must never become a gate: a check that reaches the internet teaches everyone to skip it the first time a host is down."
       ],
       "gates": ["pnpm gate:validation", "make ci"],
       "seeAlso": ["edge-data-etl", "provenance"]

@@ -19,9 +19,22 @@
  * but the vendored mushaf pages have no ligature, letter or word elements to key
  * on (their glyphs are anonymous outlined `<path>`s; the only ids are the
  * per-ayah hit polygons). The spans are kept verbatim so the map becomes a pure
- * function of this same shard the day Loop 4b's ligature corpus lands, and the
+ * function of this same shard the day the word grain arrives, and the
  * app paints one mark per ayah until then. Collapsing the spans to a count now
  * would make the shards cheaper and the upgrade impossible.
+ *
+ * THAT DAY IS CLOSER AND NOT HERE, and the difference is worth writing down
+ * because this comment said "the day Loop 4b's ligature corpus lands" for two
+ * loops after 4b shipped. What arrived was not a ligature corpus:
+ * `assets/words/**` carries 91,451 word *boxes* on our own frame, and
+ * `word-alignment.pin.json` joins the print's word index to the Quranic Arabic
+ * Corpus's. Both were the named blockers and both are discharged. What is left
+ * is specific to this file: the annotations below are codepoint offsets into
+ * each ayah's Tanzil Uthmani text, and this repo holds no Quran text and will
+ * not (see `morphology.mjs`). Turning an offset into a word means joining a
+ * third segmentation to the two we now have. `docs/design/word-indexing.md` ⑤
+ * carries what would answer it and what it would cost — an ETL measurement,
+ * not the rendering change this comment used to promise.
  *
  * THE MAPPING is 18 source rules → 7 families (see RULES below and the table in
  * PROVENANCE.md). It is lossy on purpose — seven is what a colour-blind-safe
