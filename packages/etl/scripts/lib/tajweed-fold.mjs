@@ -118,15 +118,81 @@ export const CORRECTIONS = [
 export const ALL_CORRECTIONS = CORRECTIONS.map((c) => c.id);
 
 /**
- * The two rules that name their own letter.
+ * What each of the eighteen source rules must begin on, and why.
  *
- * Sixteen of the eighteen source rules describe a manner of articulation, which
- * no single codepoint witnesses. These two *are* a letter: hamzat wasl is the ٱ
- * and lam shamsiyyah is the assimilated ل. They are the only independent
- * evidence that the fold is right — the span arithmetic cannot be, because a
- * subtly wrong reconstruction still produces spans that land inside some word.
+ * This is the only independent evidence that the fold is right — the span
+ * arithmetic cannot be, because a subtly wrong reconstruction still produces
+ * spans that land inside *some* word. A rule that names a letter can be checked
+ * without any word boundary at all.
+ *
+ * **Every set here was written from tajweed and then measured, never read off
+ * the corpus.** That ordering is the whole method: deriving a letter set from
+ * where the offsets actually land, and then declaring that the offsets land
+ * where the set says, is circular and would pass on a broken fold. Written
+ * first, a set is a falsifiable prediction — and `qalqalah` really is exactly
+ * قطب جد, `ghunnah` really has no third letter, and there really are only two
+ * mutaqaribayn pairs. Each entry carries the tajweed reason it has the shape it
+ * has, so the next reader can disagree with the prediction rather than with a
+ * number.
+ *
+ * `near` is a window, not a slop allowance: the two rules that use it are
+ * written as a *vowel followed by a mark*, so the characteristic codepoint is
+ * one position after the span's start rather than at it. Nothing else may use
+ * it — a `near` bought to raise a hit rate is the oracle grading itself.
+ *
+ * **A high hit rate is not by itself evidence.** {ا, و, ي} covers ~12% of the
+ * corpus, so a rule restricted to it would score well on a fold that was wrong.
+ * The number that matters is {@link oracleDensity}'s complement — how much of a
+ * one-codepoint drift the rule could actually notice — and the probes report it
+ * per rule as `sensitivity`. Two of the eighteen are worth knowing about before
+ * reading any of their results: `madd_6` needs a fourteen-codepoint set and so
+ * sees only ~70% of drifts, and `madd_246`/`madd_munfasil`/`madd_muttasil` sit
+ * near 88%. The other fourteen are above 91%.
  */
-export const ORACLE = Object.freeze({ hamzat_wasl: "ٱ", lam_shamsiyyah: "ل" });
+export const ORACLE = Object.freeze({
+  // --- the two that ARE a letter, and were the whole oracle until 2026-08-07
+  hamzat_wasl: { letters: "ٱ", why: "the rule is the alef wasla; there is nothing else it can be" },
+  lam_shamsiyyah: { letters: "ل", why: "the assimilated lam the rule is named for" },
+
+  // --- closed sets, named by tajweed and short enough to state in full
+  qalqalah: { letters: "قطبجد", why: "قطب جد — the five qalqalah letters, a closed mnemonic set" },
+  ghunnah: { letters: "نم", why: "a doubled noon or meem; there is no third ghunnah letter" },
+  idghaam_shafawi: { letters: "م", why: "meem saakinah into meem — the first is a meem by definition" },
+  ikhfa_shafawi: { letters: "م", why: "meem saakinah before beh — the first is a meem by definition" },
+  idghaam_mutajanisayn: {
+    letters: "دتذثب",
+    why: "the first of each articulation-sharing pair (د→ت, ت→ط/د, ذ→ظ, ث→ذ, ب→م)",
+  },
+  idghaam_mutaqaribayn: { letters: "لق", why: "lam→reh and qaf→kaf, the only two pairs there are" },
+
+  // --- the noon family. A tanween whose noon is not pronounced plainly is
+  //     written with a DIFFERENT second mark, so the set is the noon plus those
+  //     three marks — which is why these score like a named letter and not like
+  //     a vowel.
+  ikhfa: { letters: "نٖٗٞ", why: "noon saakinah or tanween; the tanween carries its ikhfa second mark" },
+  idghaam_ghunnah: { letters: "نٖٗٞ", why: "noon saakinah or tanween before ينمو" },
+  idghaam_no_ghunnah: { letters: "نٖٗٞ", why: "noon saakinah or tanween before ل or ر" },
+  iqlab: {
+    letters: "ۭۢ",
+    near: 1,
+    why: "the meem the print writes FOR iqlab — U+06E2 high on a fatha or damma, U+06ED LOW on a kasra. The span opens on the vowel, so the meem sits at start or start+1. Missing the low form scores 85.05%: the second-largest thing this oracle has caught, and it was the oracle catching itself.",
+  },
+
+  // --- the madd family. `madd_2` is written with the small madd letters, which
+  //     are rare ink; the other three admit the full alef/waw/yeh and pay for it
+  //     in sensitivity rather than in hit rate.
+  madd_2: { letters: "ٰۥۦۧ", why: "the natural madd is written as a small madd letter in this print" },
+  madd_muttasil: { letters: "اويٰۥۦۧ", why: "a madd letter with hamza following in the same word" },
+  madd_munfasil: { letters: "اويىٰۥۦۧ", why: "a madd letter ending a word, hamza opening the next" },
+  madd_246: { letters: "اويىٰۥۦۧ", why: "madd leen and madd aarid — the same madd letters" },
+  madd_6: {
+    letters: "اويٰۥۦملسصعقنك",
+    why: "madd laazim: a madd letter, OR one of the eight muqatta'a letters whose spelt-out name is three long (نٓ, قٓ, صٓ, عٓ, سٓ, لٓ, كٓ, مٓ). The broadest set here by far, and the one to distrust: it covers 30% of the ayahs it appears in, because those ayahs are the muqatta'a openings and are almost nothing else.",
+  },
+
+  // --- the remainder
+  silent: { letters: "اوي", why: "an unpronounced alef, waw or yeh" },
+});
 
 /**
  * The respeller for one `on` set: the orthographic corrections it enables,
@@ -255,24 +321,84 @@ export function touchClass(hosts, start, end, length) {
 export const DRIFT_LIMIT = 8;
 
 /**
- * The oracle, for one annotation. `null` when the rule names no letter.
+ * Does the rule's letter sit at `i`, allowing for its `near` window?
+ *
+ * One place, so {@link oracleOf} and {@link oracleDensity} can never disagree
+ * about what counts as a hit — which matters, because `sensitivity` is only
+ * meaningful if the null is measured with the same predicate as the result.
+ */
+function satisfiedAt(cps, spec, i) {
+  for (let d = 0; d <= (spec.near ?? 0); d += 1) if (spec.set.has(cps[i + d])) return cps[i + d];
+  return null;
+}
+
+/** The `letters` string of a rule as a Set, memoised — `oracleOf` runs 60,057× per fold. */
+const SETS = new Map();
+function specOf(rule) {
+  const e = ORACLE[rule];
+  if (!e) return null;
+  if (!SETS.has(rule)) SETS.set(rule, { ...e, set: new Set(e.letters) });
+  return SETS.get(rule);
+}
+
+/**
+ * The oracle, for one annotation. `null` when the rule is not in {@link ORACLE}
+ * — which no longer happens for this source's eighteen, but a nineteenth rule
+ * in some future edition would land here rather than be silently counted right.
  *
  * `delta` is where the letter actually is, relative to where the offset says it
  * should be: `+1` means the fold ran **long** and pushed the letter one
  * codepoint later than Tanzil counts it; `-1` means the fold ran **short**.
  * `null` means the letter is not within ±8 either way, which is a different
  * finding from a large delta and is kept as its own outcome.
+ *
+ * `want` is the letter actually found — the one that matched on a hit, or the
+ * one standing at `delta` on a near miss. It is `null` only when nothing in the
+ * set is within the limit; use {@link oracleLabel} for something printable in
+ * every case, since a set of five is not a letter to name.
  */
 export function oracleOf(cps, annotation) {
-  const want = ORACLE[annotation.rule];
-  if (!want) return null;
+  const spec = specOf(annotation.rule);
+  if (!spec) return null;
   const at = annotation.start;
-  if (cps[at] === want) return { want, hit: true, delta: 0 };
+  const here = satisfiedAt(cps, spec, at);
+  if (here !== null) return { rule: annotation.rule, want: here, letters: spec.letters, hit: true, delta: 0 };
   for (let x = 1; x <= DRIFT_LIMIT; x += 1) {
-    if (cps[at - x] === want) return { want, hit: false, delta: -x };
-    if (cps[at + x] === want) return { want, hit: false, delta: x };
+    const back = satisfiedAt(cps, spec, at - x);
+    if (back !== null) return { rule: annotation.rule, want: back, letters: spec.letters, hit: false, delta: -x };
+    const fwd = satisfiedAt(cps, spec, at + x);
+    if (fwd !== null) return { rule: annotation.rule, want: fwd, letters: spec.letters, hit: false, delta: x };
   }
-  return { want, hit: false, delta: null };
+  return { rule: annotation.rule, want: null, letters: spec.letters, hit: false, delta: null };
+}
+
+/**
+ * How much of this ayah would satisfy the rule at a position picked at random —
+ * the null the hit rate has to beat.
+ *
+ * This is the number §9 ③ was missing, and it is what stopped the widening from
+ * being self-congratulation. A hit rate says the offsets land on the right
+ * letter; it does not say the check could have told you otherwise. {ا, و, ي}
+ * covers ~12% of the corpus, so `silent` at 99.86% is worth much less per
+ * annotation than `hamzat_wasl` at 99.83%, whose ٱ covers 2.8%.
+ *
+ * `1 - oracleDensity(...)` is the rule's **sensitivity**: the chance it notices
+ * a drift of one codepoint. Summed over annotations and divided by all 60,057
+ * it gives an effective coverage, which is the honest headline — the raw
+ * "100% of annotations are checked" is true and, on its own, flattering.
+ */
+export function oracleDensity(cps, rule) {
+  const spec = specOf(rule);
+  if (!spec || !cps.length) return 0;
+  let n = 0;
+  for (let i = 0; i < cps.length; i += 1) if (satisfiedAt(cps, spec, i) !== null) n += 1;
+  return n / cps.length;
+}
+
+/** What the oracle was looking for, printable: one letter, or the set as written. */
+export function oracleLabel(o) {
+  if (!o) return "";
+  return o.want ?? [...o.letters].join("/");
 }
 
 /**

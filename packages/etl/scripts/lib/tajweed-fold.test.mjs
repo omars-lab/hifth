@@ -27,6 +27,8 @@ import {
   nameOf,
   nameWindow,
   oracleOf,
+  oracleLabel,
+  oracleDensity,
   ORACLE,
   respellerFor,
   touchClass,
@@ -260,13 +262,17 @@ describe("touched / touchClass", () => {
 describe("oracleOf", () => {
   const cps = [..."بِٱلۡحَقِّ"];
 
-  it("is null for the sixteen rules that name no letter", () => {
-    expect(oracleOf(cps, { rule: "madd_2", start: 0, end: 2 })).toBeNull();
+  it("is null only for a rule the table does not name", () => {
+    // Every rule this source uses is now in ORACLE; a null means the source
+    // grew a rule nobody has written a letter set for, which is a finding.
+    expect(oracleOf(cps, { rule: "not_a_rule", start: 0, end: 2 })).toBeNull();
+    expect(oracleOf(cps, { rule: "madd_2", start: 0, end: 2 })).not.toBeNull();
   });
 
   it("hits when the expected letter is under the offset", () => {
     const at = cps.indexOf("ٱ");
-    expect(oracleOf(cps, { rule: "hamzat_wasl", start: at })).toEqual({
+    expect(oracleOf(cps, { rule: "hamzat_wasl", start: at })).toMatchObject({
+      rule: "hamzat_wasl",
       want: "ٱ",
       hit: true,
       delta: 0,
@@ -289,8 +295,57 @@ describe("oracleOf", () => {
     expect(oracleOf(far, { rule: "hamzat_wasl", start: far.length - 1 }).delta).toBeNull();
   });
 
-  it("uses only rules whose letter is not in doubt", () => {
-    expect(Object.keys(ORACLE)).toEqual(["hamzat_wasl", "lam_shamsiyyah"]);
+  it("covers every rule this source uses, and each one says why", () => {
+    // The source has eighteen; the widening is only honest if the table is
+    // exhaustive rather than a convenient subset, so this asserts the count and
+    // that nobody added a set without the tajweed reason it has that shape.
+    expect(Object.keys(ORACLE)).toHaveLength(18);
+    for (const [rule, spec] of Object.entries(ORACLE)) {
+      expect(spec.letters.length, rule).toBeGreaterThan(0);
+      expect(spec.why, rule).toMatch(/\S/);
+    }
+  });
+
+  it("accepts any letter in the set, not just the first", () => {
+    for (const letter of "\u0642\u0637\u0628\u062c\u062f") {
+      expect(oracleOf([letter], { rule: "qalqalah", start: 0 }).hit).toBe(true);
+    }
+    expect(oracleOf(["\u0633"], { rule: "qalqalah", start: 0 }).hit).toBe(false);
+  });
+
+  it("allows iqlab's meem one position late, because the span opens on the vowel", () => {
+    // U+064F DAMMA then U+06E2 SMALL HIGH MEEM: the mark that makes it iqlab is
+    // the second codepoint, so a span starting on the vowel is still a hit.
+    expect(oracleOf([..."\u064f\u06e2"], { rule: "iqlab", start: 0 }).hit).toBe(true);
+    // U+06ED SMALL LOW MEEM is the same mark under a kasra. Dropping it scored
+    // 85.05% and looked like a real defect until the low form was added.
+    expect(oracleOf([..."\u0650\u06ed"], { rule: "iqlab", start: 0 }).hit).toBe(true);
+    // The window is 1, not a slop allowance: two away is not a hit. The drift
+    // search still finds it and reports where, which is the whole point — a
+    // miss that names its distance is a lead, a bare false is not.
+    const far = oracleOf([..."\u0650\u0628\u0628\u06ed"], { rule: "iqlab", start: 0 });
+    expect(far.hit).toBe(false);
+    expect(far.delta).toBe(2);
+  });
+
+  it("prices a hit by what it could have failed at", () => {
+    // A hit is only evidence to the extent the check could have missed. This is
+    // the number that stops eighteen rules of wildly different breadth from
+    // being added up as if each were worth the same.
+    expect(oracleDensity([..."\u0642\u0633\u0633\u0633"], "qalqalah")).toBe(0.25);
+    expect(oracleDensity([..."\u0633\u0633"], "qalqalah")).toBe(0);
+    expect(oracleDensity([], "qalqalah")).toBe(0);
+    expect(oracleDensity([..."\u0642"], "not_a_rule")).toBe(0);
+  });
+
+  it("reports which letter of the set it actually found", () => {
+    expect(oracleOf([..."\u062c"], { rule: "qalqalah", start: 0 }).want).toBe("\u062c");
+    expect(oracleLabel(oracleOf([..."\u062c"], { rule: "qalqalah", start: 0 }))).toBe("\u062c");
+    // Nothing within the limit: there is no single letter to name, so the label
+    // is the set — the client prints this and must not print "undefined".
+    const none = oracleOf(Array(20).fill("\u0633"), { rule: "qalqalah", start: 0 });
+    expect(none.want).toBeNull();
+    expect(oracleLabel(none)).toBe("\u0642/\u0637/\u0628/\u062c/\u062f");
   });
 });
 
@@ -364,9 +419,11 @@ describe("naming codepoints", () => {
     expect(nameOf(undefined)).toMatch(/past the end/);
   });
 
-  it("covers the two rules' own letters, or the oracle is unreadable", () => {
-    for (const letter of Object.values(ORACLE)) {
-      expect(CODEPOINT_NAMES[letter.codePointAt(0)]).toBeTruthy();
+  it("covers every letter every rule can start on, or the oracle is unreadable", () => {
+    for (const [rule, spec] of Object.entries(ORACLE)) {
+      for (const letter of spec.letters) {
+        expect(CODEPOINT_NAMES[letter.codePointAt(0)], `${rule} ${letter}`).toBeTruthy();
+      }
     }
   });
 

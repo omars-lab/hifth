@@ -24,7 +24,7 @@
  * on a checkbox, and it means the number under the toggle is measured rather
  * than remembered.
  */
-/* global CORRECTIONS, ALL_CORRECTIONS, DRIFT_LIMIT, foldAyah, touchClass, touched, oracleOf, driftOnset, driftShape, nameOf, nameWindow, HIFTH_DATA */
+/* global CORRECTIONS, ALL_CORRECTIONS, DRIFT_LIMIT, foldAyah, touchClass, touched, oracleOf, driftOnset, driftShape, oracleLabel, oracleDensity, nameOf, nameWindow, HIFTH_DATA */
 
 const DATA = HIFTH_DATA;
 const $ = (sel, root = document) => root.querySelector(sel);
@@ -350,7 +350,7 @@ function viewAyah() {
       { id: "text", label: "what it covers", get: (r) => cps.slice(r.a.start, r.a.end).join(""), cls: () => "ar" },
       { id: "cls", label: "touches", get: (r) => r.cls },
       { id: "words", label: "print word(s)", get: (r) => r.hit.length, fmt: (r) => r.hit.map((h) => (hosts[h].print === null ? "basmala" : hosts[h].print)).join(", ") || "—" },
-      { id: "oracle", label: "oracle", get: (r) => (r.o ? (r.o.hit ? 2 : 1) : 0), fmt: (r) => (!r.o ? "— no letter" : r.o.hit ? `✓ ${r.o.want}` : `✗ ${r.o.want}`), cls: (r) => (!r.o ? "muted" : r.o.hit ? "ok" : "bad") },
+      { id: "oracle", label: "oracle", get: (r) => (r.o ? (r.o.hit ? 2 : 1) : 0), fmt: (r) => (!r.o ? "— not in ORACLE" : r.o.hit ? `✓ ${r.o.want}` : `✗ ${oracleLabel(r.o)}`), cls: (r) => (!r.o ? "muted" : r.o.hit ? "ok" : "bad") },
       { id: "delta", label: "delta", get: (r) => (r.o && !r.o.hit ? (r.o.delta ?? 99) : null), fmt: (r) => (!r.o || r.o.hit ? "" : r.o.delta === null ? `beyond ±${DRIFT_LIMIT}` : r.o.delta > 0 ? `+${r.o.delta}` : String(r.o.delta)) },
     ], annRows, (r) => {
       state.annotation = r.i;
@@ -384,15 +384,15 @@ function charDiff(cps, row) {
   const { a, o } = row;
   const box = el("section", { class: "diff" }, [el("h3", { text: `selected: ${a.rule} [${a.start}, ${a.end})` })]);
   if (!o) {
-    box.append(el("p", { class: "note", text: `${a.rule} names no characteristic letter — sixteen of the eighteen source rules describe a manner of articulation, and no single codepoint witnesses one. This annotation is counted for paintability and cannot be checked for alignment.` }));
+    box.append(el("p", { class: "note", text: `${a.rule} is not in ORACLE — every one of this source's eighteen rules is, so this annotation carries a rule the table has never seen. It is counted for paintability and cannot be checked for alignment.` }));
     return box;
   }
   box.append(el("p", {
     class: o.hit ? "verdict ok" : "verdict bad",
     text: o.hit
-      ? `Oracle hit. Offset ${a.start} lands on ${nameOf(o.want)}, which is what ${a.rule} must start on.`
+      ? `Oracle hit. Offset ${a.start} lands on ${nameOf(o.want)}, which is one of ${[...o.letters].join(" ")} — what ${a.rule} must start on. This ayah is ${(100 * oracleDensity(cps, a.rule)).toFixed(0)}% such codepoints, so the check is worth that much less than the hit alone suggests.`
       : o.delta === null
-        ? `Oracle miss. ${nameOf(o.want)} is not within ±${DRIFT_LIMIT} of offset ${a.start} in either direction — a different finding from a large drift.`
+        ? `Oracle miss. Nothing in ${oracleLabel(o)} is within ±${DRIFT_LIMIT} of offset ${a.start} in either direction — a different finding from a large drift.`
         : `Oracle miss by ${o.delta > 0 ? "+" : ""}${o.delta}. ${nameOf(o.want)} sits at ${a.start + o.delta}, so the fold ran ${o.delta > 0 ? "long" : "short"} by ${Math.abs(o.delta)} codepoint${Math.abs(o.delta) === 1 ? "" : "s"} before this letter.`,
   }));
   const win = nameWindow(cps, a.start, 5);
@@ -482,7 +482,7 @@ function viewAggregates() {
 
   out.append(el("section", {}, [
     el("h3", { text: "by rule — all eighteen the source emits" }),
-    el("p", { class: "note", text: "Rules, not the seven families build-tajweed.mjs paints in: a family is a rendering decision and this tool is about encodings. Only two rules carry an oracle obligation; the rest inherit its verdict." }),
+    el("p", { class: "note", text: "Rules, not the seven families build-tajweed.mjs paints in: a family is a rendering decision and this tool is about encodings. Every one of them carries an oracle obligation — the letter its span must open on, written from the rule and measured second. What differs is what a hit is worth: a rule admitting fifteen codepoints is satisfied by accident far more often than one admitting a single ٱ, and the sensitivity column prices that." }),
     table("byRule", [
       { id: "rule", label: "rule", get: (r) => r.rule },
       { id: "n", label: "annotations", get: (r) => r.n, fmt: (r) => num(r.n), align: "r" },

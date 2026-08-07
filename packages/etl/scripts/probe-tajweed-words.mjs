@@ -88,16 +88,31 @@
  *
  * A reconstruction that were subtly wrong would still produce spans, and every
  * span would still fall inside some word. So alignment is checked independently
- * of word boundaries, by two rules whose target letter is not in doubt:
- * `hamzat_wasl` must start on **ٱ** (U+0671) and `lam_shamsiyyah` on **ل**.
- * 15,985 annotations carry that obligation. It is the oracle that decides
- * whether the fold is right; the span arithmetic only decides what follows.
+ * of word boundaries, by asking what letter each annotation must open on.
+ * `hamzat_wasl` must start on **ٱ** (U+0671), `lam_shamsiyyah` on **ل**,
+ * `qalqalah` on one of **قطب جد**, and so on for all eighteen rules the source
+ * uses — the table is `ORACLE`, and each entry carries the tajweed reason it
+ * has the shape it has. All 60,057 annotations carry that obligation. It is the
+ * oracle that decides whether the fold is right; the span arithmetic only
+ * decides what follows.
+ *
+ * Every letter set was written from the rule first and measured second. The
+ * other order — reading a set off where the offsets happen to land, then
+ * declaring that the offsets land there — is circular, and would pass on a
+ * broken fold. `iqlab` is the record of that discipline working: written as the
+ * high meem U+06E2 it scored 85.05%, and the 84 unreachable misses all had the
+ * shape «ِۭ ب». The mark is written LOW (U+06ED) under a kasra. Adding it took
+ * the rule to 100.00% — the oracle catching its own letter set, not the fold.
  *
  * ## What it is blind to
  *
- * - **The 12 rules with no characteristic letter.** madd, ghunnah, qalqalah and
- *   the rest are counted for paintability but cannot be checked for alignment.
- *   The oracle covers 26.6% of the annotations; the rest inherit its verdict.
+ * - **How much a hit is worth.** A rule that admits fifteen codepoints is
+ *   satisfied by accident far more often than one that admits a single ٱ, so
+ *   `oracleDensity` measures, per ayah, what fraction of positions would have
+ *   satisfied the rule; `1 − density` is the chance the check would notice a
+ *   one-codepoint drift. Weighted that way the coverage is ~93.7%, not 100%,
+ *   and `madd_6` (fifteen letters, 30% of the ayahs it appears in) is the entry
+ *   to distrust. The unweighted 100% is coverage, not confidence.
  * - **Whether the colours are right.** Untouched. The skin is beta on a hafiz's
  *   sign-off (`plan-tajweed-golden-row`), and this measures geometry only.
  * - **Overfitting.** Corrections 4–7 were found by looking at what the oracle
@@ -108,7 +123,11 @@
  *   *identity* at a position the rule does not touch; and a rule that is too
  *   broad is punished immediately and visibly — the generalisation of 4 to
  *   every tatweel costs 4.5 points. A rule that fixed only the ayah that
- *   suggested it was rejected for that reason (see `NAMED`, 36:52).
+ *   suggested it was rejected for that reason (see `NAMED`, 36:52). Widening
+ *   the oracle from two rules to eighteen is the strongest check yet available:
+ *   corrections 4–7 were found against `hamzat_wasl` and `lam_shamsiyyah`, and
+ *   sixteen rules that had no vote when those corrections were chosen now score
+ *   above 99.7% each.
  * - **Its own base.** The reconstruction is *of* the print, so a two-word span
  *   here means two print words, which is exactly the question. It says nothing
  *   about Tanzil's own tokenisation, which PROVENANCE already puts at 16.7%.
@@ -138,7 +157,7 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { candidatePage, pin } from "./lib/candidate-pages.mjs";
 import { WAQF } from "./lib/mushaf-frame.mjs";
-import { ORACLE, foldAyah, oracleOf, touched } from "./lib/tajweed-fold.mjs";
+import { ORACLE, foldAyah, oracleDensity, oracleOf, touched } from "./lib/tajweed-fold.mjs";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const TAJWEED = join(HERE, "..", "data", "tajweed", "tajweed.hafs.uthmani-pause-sajdah.json");
@@ -237,7 +256,7 @@ const bytes = await readPages();
 const tajweed = JSON.parse(readFileSync(TAJWEED, "utf8"));
 const basmala = wordsOf("1:1");
 
-const oracle = Object.fromEntries(Object.keys(ORACLE).map((rule) => [rule, { n: 0, hit: 0 }]));
+const oracle = Object.fromEntries(Object.keys(ORACLE).map((rule) => [rule, { n: 0, hit: 0, sens: 0 }]));
 const drift = new Map(); // signed codepoint distance to the expected letter
 const residual = []; // one row per ayah the oracle is not perfect on
 let annotations = 0;
@@ -261,11 +280,16 @@ for (const rec of tajweed) {
     annotations += 1;
 
     // A bounded search, so "nowhere near" stays visible as its own outcome
-    // rather than folding into a large delta. `oracleOf` returns null for the
-    // sixteen rules that name no letter.
+    // rather than folding into a large delta. `oracleOf` returns null only for
+    // a rule ORACLE does not name, which this source no longer has.
     const o = oracleOf(cps, a);
     if (o) {
       oracle[a.rule].n += 1;
+      // A hit is worth what it could have failed at. `1 − density` is the
+      // chance this check would have noticed a one-codepoint drift in THIS
+      // ayah; summing it is the only honest way to add up eighteen rules whose
+      // letter sets range from one codepoint to fifteen.
+      oracle[a.rule].sens += 1 - oracleDensity(cps, a.rule);
       if (o.hit) {
         oracle[a.rule].hit += 1;
       } else {
@@ -291,18 +315,28 @@ for (const rec of tajweed) {
   }
 }
 
-const oracleN = oracle.hamzat_wasl.n + oracle.lam_shamsiyyah.n;
-const oracleHit = oracle.hamzat_wasl.hit + oracle.lam_shamsiyyah.hit;
+const oracleN = Object.values(oracle).reduce((t, o) => t + o.n, 0);
+const oracleHit = Object.values(oracle).reduce((t, o) => t + o.hit, 0);
+const oracleSens = Object.values(oracle).reduce((t, o) => t + o.sens, 0);
 const pct = (n, d) => `${((n / d) * 100).toFixed(2)}%`;
 const oneDrift = residual.filter((r) => r.deltas.length === 1).length;
 const unreachable = drift.get(null) ?? 0;
 
 console.log(`\n  ${ayahsRead}/6236 ayahs reconstructed from ${(bytes / 1024 / 1024).toFixed(0)} MB of print SVG\n`);
 console.log("── the oracle: does the fold put the right letter under the offset?");
-for (const [rule, o] of Object.entries(oracle)) {
-  console.log(`  ${rule.padEnd(15)} ${o.hit}/${o.n} = ${pct(o.hit, o.n)}`);
+console.log("  rule                  hit/n              sensitivity");
+for (const [rule, o] of Object.entries(oracle).sort((a, b) => b[1].n - a[1].n)) {
+  if (!o.n) continue;
+  const sens = `${((100 * o.sens) / o.n).toFixed(1)}%`;
+  console.log(`  ${rule.padEnd(20)} ${`${o.hit}/${o.n}`.padEnd(12)} ${pct(o.hit, o.n).padStart(7)}  ${sens.padStart(6)}`);
 }
-console.log(`  ${"together".padEnd(15)} ${oracleHit}/${oracleN} = ${pct(oracleHit, oracleN)}`);
+console.log(`  ${"together".padEnd(20)} ${`${oracleHit}/${oracleN}`.padEnd(12)} ${pct(oracleHit, oracleN).padStart(7)}`);
+// Sensitivity is what stops a hit rate from being self-congratulation: {ا,و,ي}
+// alone is ~12% of the corpus, so a rule restricted to it would score well on a
+// fold that was simply wrong. Weighting each annotation by the chance its check
+// could have failed is the number to quote.
+console.log(`  effective (sensitivity-weighted) coverage: ${pct(oracleSens, annotations)}`);
+console.log(`  coverage: ${oracleN}/${annotations} = ${pct(oracleN, annotations)} of annotations checked`);
 
 console.log("\n── paintability: how many print words does a span touch?");
 console.log(`  annotations              : ${annotations}`);

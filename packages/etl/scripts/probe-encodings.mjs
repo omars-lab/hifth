@@ -59,7 +59,7 @@ import { fileURLToPath } from "node:url";
 import { candidatePage, pin } from "./lib/candidate-pages.mjs";
 import { WAQF } from "./lib/mushaf-frame.mjs";
 import { EXCEPTIONS, lexicalIndices, openAlignment, qacSkeletons } from "./lib/segmentation.mjs";
-import { ALL_CORRECTIONS, foldAyah, oracleOf, touchClass } from "./lib/tajweed-fold.mjs";
+import { ALL_CORRECTIONS, foldAyah, oracleDensity, oracleOf, touchClass } from "./lib/tajweed-fold.mjs";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const DATA = join(HERE, "..", "data");
@@ -240,6 +240,7 @@ const touchCount = { one: 0, "two-adjacent": 0, wider: 0, "past-end": 0 };
 const drift = new Map();
 let oracleN = 0;
 let oracleHit = 0;
+let oracleSens = 0;
 let residualAyahs = 0;
 
 for (const [key, entry] of Object.entries(ayahs)) {
@@ -252,6 +253,8 @@ for (const [key, entry] of Object.entries(ayahs)) {
     const o = oracleOf(cps, { rule: rules[r], start, end });
     if (!o) continue;
     oracleN += 1;
+    // Weight each check by the chance it could have failed — see `oracleDensity`.
+    oracleSens += 1 - oracleDensity(cps, rules[r]);
     if (o.hit) oracleHit += 1;
     else {
       drift.set(o.delta, (drift.get(o.delta) ?? 0) + 1);
@@ -326,6 +329,8 @@ console.log(`  ${mapped} ayahs carry a print↔QAC map; ${Object.keys(EXCEPTIONS
 console.log(`  mark disagreements between the shards and WAQF: ${markDisagreements}`);
 console.log(`\n── the oracle, with all ${ALL_CORRECTIONS.length} corrections on`);
 console.log(`  ${oracleHit}/${oracleN} = ${pct(oracleHit, oracleN)} land on the expected letter`);
+console.log(`  ${oracleN}/${annotations} = ${pct(oracleN, annotations)} of annotations checked`);
+console.log(`  effective (sensitivity-weighted) coverage: ${pct(oracleSens, annotations)}`);
 console.log("\n── paintability");
 for (const [k, n] of Object.entries(touchCount)) {
   console.log(`  ${k.padEnd(14)} ${String(n).padStart(6)}  ${pct(n, annotations)}`);
