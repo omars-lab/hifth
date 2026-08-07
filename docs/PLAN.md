@@ -130,9 +130,10 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
    60,057 annotations inside one print word and **16.69%** across two adjacent ones — the
    cross-word phonology, paintable as a range. What is left is an ordinary bake with an
    **eleven-ayah exception list, every entry named** (three of them names the repo already
-   carries in `lib/segmentation.mjs`), not a corpus hunt; the beta label is
-   unaffected either way, because it hangs on the palette, not the geometry;
-   **hafiz
+   carries in `lib/segmentation.mjs`), not a corpus hunt. `pnpm probe:encodings`
+   ([encoding-inspector.md](design/encoding-inspector.md)) is the instrument those four
+   corrections were read off, and where an eighth would be. The beta label is unaffected
+   either way, because it hangs on the palette, not the geometry; **hafiz
    sign-off on the tajweed skin → Loop 7** (the beta label stays until then). **Done:**
    golden-image visual regression, Lighthouse CI, and the **⬡ chip vs ⬡ lens** collision —
    all Loop 6a ([loop-6a.md](decisions/loop-6a.md)); marquee drag-select (Loop 5);

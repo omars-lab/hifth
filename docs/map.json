@@ -664,7 +664,56 @@
         "The map is per-edition by construction (`EDITION`). A second print needs its own rebuild, its own exceptions and its own measurement; nothing here generalises for free."
       ],
       "gates": ["pnpm gate:align", "pnpm gate:words", "pnpm gate:edges", "make ci"],
-      "seeAlso": ["word-geometry", "root-lens", "word-selection", "provenance"]
+      "seeAlso": ["word-geometry", "root-lens", "word-selection", "provenance", "encoding-inspector"]
+    },
+
+    {
+      "id": "encoding-inspector",
+      "what": "Four descriptions of one text — the print, the ligature corpus, the QAC word index and the tajweed codepoint offsets — on one screen, with every place they disagree named. A maintainer's instrument; it ships nothing.",
+      "layer": "L3 etl",
+      "entry": [
+        {
+          "file": "docs/design/encoding-inspector.md",
+          "symbol": "Every word in this repo is described four times",
+          "note": "Read this first, and §① first of all — the print is ink, it has no letters and no words, and every other encoding exists because somebody wanted to say something about it that it could not say about itself. It is the only place that says what the four encodings are, why each PAIR of them disagrees for a different reason, why the tool is a generated file rather than a dev route in the app, and — §6 — the six things it is deliberately blind to. §7 records what the first full pass found and is deliberately kept in its dated state, with a ↳ line under each paragraph the corrected fold has since overtaken — it localised four fold corrections nothing else could have, and it also mis-attributed one finding to the source, which §9 ② now carries as the more useful record of the two."
+        },
+        {
+          "file": "packages/etl/scripts/lib/tajweed-fold.mjs",
+          "symbol": "export function foldAyah",
+          "note": "The ONE copy of the fold arithmetic — the reconstruction of the Tanzil-indexed string out of the print's per-word `data-hafs`, under the seven corrections `CORRECTIONS` names, dates and prices in evidence. Two kinds, and the `kind` field says which: three STRUCTURAL (the basmala prefix, the split conjunction waw, the pause-mark words) that change which words are folded, and four ORTHOGRAPHIC (`tatweel-carrier`, `alef-madda`, `small-madda`, `hamza-below`) that change how many codepoints a word spends — those four are pure text substitutions carried in a `respell` field and applied by `respellerFor(on)` before the fold counts, which is what keeps them checkboxes rather than edits to the arithmetic. `probe-tajweed-words.mjs` imports it and the inspector inlines it; before this module they were two readers applying the same corrections separately, which is the failure where the tool shows a clean screen for a probe that is failing. The module IMPORTS NOTHING, and that is load-bearing rather than tidy: it is what lets the generator paste its source into the report so the browser's toggles run the ETL's literal bytes. `oracleOf` owns the sign convention (delta = actual − stated; positive means the fold ran long) and `driftOnset` is the aggregate that actually localises a divergence, because offsets are cumulative and the miss is almost never where the difference is."
+        },
+        {
+          "file": "packages/etl/scripts/probe-encodings.mjs",
+          "symbol": "const foldSource",
+          "note": "The generator: reads the 378 MB gitignored cache, the vendored tajweed offsets and the committed alignment pin, and writes one self-contained HTML file. `foldSource` is the anti-duplication mechanism made literal — `tajweed-fold.mjs` read as text with `export ` stripped, so there is no second implementation to drift. It re-computes the headline in Node with the same `foldAyah` as a cross-check on the inlining, and cross-checks the shards' pause-mark set against `WAQF` on every run (0 disagreements today, reported as a number so a future one surfaces rather than silently changing a screen). The index bridge — page-global print indices to the corpus's 1-based-per-ayah — is commented as the one place the two numbering schemes meet."
+        },
+        {
+          "file": "packages/etl/scripts/lib/encoding-inspector.client.mjs",
+          "symbol": "function measure",
+          "note": "The browser half, and it never runs in Node — eslint.config.js gives `*.client.mjs` browser globals only, the same situation as apps/web/perf. `measure` is why the corrections are live checkboxes rather than a legend: one pass over all 6,236 ayahs rebuilding every aggregate in ~30 ms, so the number under a toggle is measured and not remembered. Precomputing per-combination tables was rejected as 2ⁿ in the corrections and silently stale on the day another is added — four were added within the day, which settles it. `WORD_AYAHS` is the corpus baseline that makes the drift-onset table an instrument instead of a word-frequency list — without a denominator «وَ» tops it for no reason but being «وَ»."
+        },
+        {
+          "file": "packages/etl/scripts/lib/tajweed-fold.test.mjs",
+          "symbol": "describe(\"driftOnset\"",
+          "note": "49 tests, and they are what makes the shared module safe to share. They pin the sign convention both probes now read, each of the seven corrections' effect in isolation — including a `respellerFor` block that checks each `respell` fires on its own shape and on nothing else, so deleting one fails a test rather than quietly moving an aggregate — and `driftOnset`'s refusals — it does not narrow with a hit AFTER the miss, and it reports `bounded: false` rather than pretending to a left edge it does not have. Vitest globals are imported explicitly here: the eslint test-globals block covers `**/*.test.{ts,tsx}` and this is `.mjs`."
+        },
+        {
+          "file": ".gitignore",
+          "symbol": "packages/etl/out/",
+          "note": "Where the report goes, and why the directory is ignored WHOLESALE rather than by filename. The output is full of Arabic derived at runtime from the gitignored cache; committing one would vendor the mus'haf past `gate:notext` and `gate:text-sources` through the back door. Ignoring the directory means a second output cannot be added carelessly. This is also the argument that decided the tool's shape — a file in an ignored directory cannot ship by accident, cannot move `gate:budget` and cannot be imported."
+        }
+      ],
+      "extend": [
+        "Never add this to `pnpm gates` or `make ci`. It reads `.cache/**`, which does not exist on a clean checkout, so in CI it would have nothing to read — the same reason `probe-word-registration` and `probe-tajweed-words` are named `probe-`. `gate-*` is the prefix that promises offline and deterministic.",
+        "Do not re-implement the fold. If the inspector and `probe-tajweed-words.mjs` need to agree — and they do, that agreement is the verification of both — the arithmetic goes in `lib/tajweed-fold.mjs` and both import it. Keep that module import-free: the generator pastes its source verbatim, and one `import` line makes the inlining unsound.",
+        "The report is never committed and never fetched. If a finding is worth keeping, it goes in prose in the design doc or as a measured number in a pin — the way `tajweed-words.probe.json` keeps the probe's verdict — not as an HTML artifact somebody has to trust the age of.",
+        "It works at the SOURCE rule grain, all eighteen, and does not import `build-tajweed.mjs`'s seven-family table. A family is a rendering decision; collapsing here would hide the case worth seeing, two rules of one family disagreeing about the same word. It would also mean importing a module whose body runs a build.",
+        "Do not teach it to draw the ink. The blindness in §6 is what the instrument's authority rests on — a second renderer of the mus'haf is a second chance to draw it wrong inside a tool whose only claim is about identity. If a caller genuinely needs geometry, a box OUTLINE is the bounded version; glyphs and rasters are not.",
+        "A correction added to `CORRECTIONS` must be earned by a re-run against the oracle, not argued for, and it must apply to all 6,236 ayahs rather than to the ones that motivated it. The oracle is the referee precisely because a wrong correction makes it worse rather than quietly better, and an over-broad one is punished the same way: stripping every `U+0640` instead of the two carriers `tatweel-carrier` names scores 94.48%, below applying nothing at all. That is the whole reason the seven existing ones are trustworthy.",
+        "Before filing a finding as an upstream source defect, switch corrections off and re-measure. A drift of exactly one letter reads as an off-by-one in whoever wrote the span — the most available explanation, and the one that points away from your own code. `lam-shamsiyyah-starts-on-the-wasl` in docs/issues.json is that mistake made and caught: 21 annotations across 19 ayahs on the three-correction fold, ONE on the seven."
+      ],
+      "gates": ["pnpm gate:notext", "pnpm gate:text-sources", "pnpm lint", "make ci"],
+      "seeAlso": ["word-indexing", "word-geometry", "editions-and-skins", "provenance"]
     },
 
     {
