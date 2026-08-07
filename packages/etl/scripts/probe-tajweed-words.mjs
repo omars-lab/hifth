@@ -167,7 +167,7 @@ const fetchMissing = process.argv.includes("--fetch");
 const write = process.argv.includes("--write");
 
 /**
- * The eleven ayahs the corrections do not reach, each one named. This list is
+ * The ten ayahs the corrections do not reach, each one named. This list is
  * documentation, not logic — nothing reads it — and it is here so that a future
  * run that changes the count has something to disagree with.
  *
@@ -185,7 +185,13 @@ const NAMED = {
   "13:37": "«بَعۡدَ مَا» Δ+1 — the same join",
   "2:97": "«لِّـجِبۡرِيلَ» Δ+1 — a bare tatweel carrying no mark, so rule 4 misses it",
   "17:7": "«لِيَسُـُٔواْ» Δ−2 — a bare tatweel, and ٱلۡءَاخِرَةِ spelled the long way",
-  "36:52": "«مَّرۡقَدِنَاۜ» Δ+1 — SMALL HIGH SEEN; a rule for it gains 1 annotation, 0 ayahs",
+  // 36:52 «مَّرۡقَدِنَاۜ» was here, with the note "a rule for it gains 1 annotation,
+  // 0 ayahs" — measured, and true, against an oracle that checked two of the
+  // source's eighteen rules. The eighteen-rule oracle re-weighed the same rule
+  // and it closed three ayahs, so it is correction 8 (`sakta-seen`) and 36:52
+  // is no longer a residual. Left here as a comment because the lesson is the
+  // entry, not the ayah: a rejection is only ever a rejection by the instrument
+  // that was measuring.
   "95:1": "Δ−1 — not localisable: the first oracle annotation is already drifted",
   "97:1": "Δ−1 — not localisable, the same way",
 };

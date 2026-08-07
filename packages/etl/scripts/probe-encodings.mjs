@@ -80,7 +80,7 @@ const out = argOf("--out", DEFAULT_OUT);
 // The same local attribute scan `probe-tajweed-words.mjs` uses and for the same
 // reason: `readTheirs` parses every path in the file to build geometry, which is
 // minutes of work for a question that needs no boxes, and it drops
-// `data-waw-alatf`, which one of the seven corrections is entirely about.
+// `data-waw-alatf`, which one of the eight corrections is entirely about.
 const WORD = /<g id="md-word-\d+"([^>]*)>/g;
 const attr = (s, name) => {
   const m = s.match(new RegExp(`${name}="([^"]*)"`));

@@ -129,7 +129,9 @@ describe("joinWords", () => {
     it("is off when its id is off, one correction at a time", () => {
       for (const c of CORRECTIONS.filter((x) => x.respell)) {
         const without = new Set(ALL_CORRECTIONS.filter((id) => id !== c.id));
-        const sample = c.respell[0][0].source; // the literal that rule matches
+        // The literal that rule matches. `sakta-seen` anchors with `$`, which
+        // is syntax rather than text, so it comes off before the sample is used.
+        const sample = c.respell[0][0].source.replace(/\$$/u, "");
         expect(respellerFor(without)(sample)).toBe(sample);
         expect(respellerFor(new Set([c.id]))(sample)).not.toBe(sample);
       }
@@ -162,6 +164,15 @@ describe("respellerFor", () => {
   it("6 and 7 — drop the small high madda and the hamza below", () => {
     expect(respellerFor(all)("\u0628" + CP.SMALL_MADDA)).toBe("\u0628");
     expect(respellerFor(all)("\u0628" + CP.HAMZA_BELOW)).toBe("\u0628");
+  });
+
+  it("8 — drops the small high seen only where it ends a word", () => {
+    // One codepoint, two jobs. Word-final it is the sakta and the offsets' text
+    // does not carry it; word-medial over a ص it marks the sin reading and the
+    // offsets' text does. Stripping both is a net loss — 82 misses anchored,
+    // 94 unanchored — so the `$` is the correction, not a detail of it.
+    expect(respellerFor(all)("\u0646\u0627\u06dc")).toBe("\u0646\u0627");
+    expect(respellerFor(all)("\u0628\u0635\u06dc\u06e1\u0637")).toBe("\u0628\u0635\u06dc\u06e1\u0637");
   });
 
   it("composes all four, and none of them overlaps another", () => {

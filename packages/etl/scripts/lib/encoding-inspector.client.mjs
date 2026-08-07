@@ -554,7 +554,7 @@ function viewDrift() {
   const out = el("div", {});
   out.append(el("section", {}, [
     el("h3", { text: "where the drift begins — the words between the last hit and the first miss" }),
-    el("p", { class: "note", text: "The offsets are cumulative, so one divergent codepoint pushes every later annotation in its ayah by the same amount, and the residual bears that out — almost every affected ayah carries exactly one delta throughout, whatever the correction set. So a miss says the drift exists and the last hit before it says where. Everything in between is suspect; everything outside is cleared. A word standing in dozens of those windows is not a coincidence, it is the correction: this is the table the four orthographic corrections were read off, and switching one off is how to watch it name that correction again." }),
+    el("p", { class: "note", text: "The offsets are cumulative, so one divergent codepoint pushes every later annotation in its ayah by the same amount, and the residual bears that out — almost every affected ayah carries exactly one delta throughout, whatever the correction set. So a miss says the drift exists and the last hit before it says where. Everything in between is suspect; everything outside is cleared. A word standing in dozens of those windows is not a coincidence, it is the correction: this is the table the five orthographic corrections were read off, and switching one off is how to watch it name that correction again." }),
     table("onsets", [
       { id: "text", label: "print word in the window", get: (r) => r.text, cls: () => "ar big" },
       { id: "cps", label: "codepoints", get: (r) => [...r.text].map(nameOf).join(" · ") },

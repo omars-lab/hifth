@@ -29,12 +29,16 @@
  * classifying a word as a pause mark needs `WAQF` from `lib/mushaf-frame.mjs`,
  * which is a fact about the corpus. The fold is arithmetic over that fact.
  *
- * **Every correction is a toggle.** All seven were discovered the same way — by
+ * **Every correction is a toggle.** All eight were discovered the same way — by
  * editing the fold, re-running, and watching an aggregate move — and the last
- * four were found with scratch scripts that should not have had to exist.
+ * five were found with scratch scripts that should not have had to exist.
  * Making the correction set a parameter rather than an edit is most of what the
- * inspector is for: the eighth will be found the same way, from the report.
- * `on` is a set of ids; absent means off.
+ * inspector is for. The eighth, `sakta-seen`, is the case for keeping them
+ * toggles: it was measured and REJECTED once, when the oracle checked two of
+ * the source's eighteen rules and it was worth nothing. Widening the oracle
+ * re-tried it unchanged and it was worth three ayahs. A correction is only ever
+ * rejected against the instrument of the day. `on` is a set of ids; absent
+ * means off.
  */
 
 /**
@@ -48,7 +52,7 @@
  * They come in two kinds, and the difference is not cosmetic. The **structural**
  * three are about how words are *joined*, and each is stated by the corpus
  * itself — the source's own basmala convention, `data-waw-alatf`, the WAQF set.
- * The **orthographic** four are about how a single mark is *spelled*, and none
+ * The **orthographic** five are about how a single mark is *spelled*, and none
  * is stated anywhere: each was found by bracketing a residual ayah between its
  * last correct oracle annotation and its first wrong one, and each carries a
  * `respell` — substitutions applied to every word of all 6,236 ayahs, never to
@@ -112,6 +116,15 @@ export const CORRECTIONS = [
     what: "شَٰطِيِٕ, إِيتَآيِٕ, ٱللُّؤۡلُوِٕ — the print spends one codepoint more than the offsets count. A length again, not an identity.",
     evidence: "19 → 12 ayahs, the last of the four to be found and the smallest.",
   },
+  {
+    id: "sakta-seen",
+    kind: "orthographic",
+    title: "drop the small high seen «ۜ» when it ends a word",
+    respell: [[/ۜ$/g, ""]], // U+06DC — word-FINAL only; see `what`, the anchor is the point
+    what: "One codepoint, two jobs. Word-final it is the sakta — مَنۡۜ رَاقٖ, بَلۡۜ رَانَ, مَّرۡقَدِنَاۜ — and the offsets' text does not carry it. Word-medial over a ص it marks the alternate sin reading — وَيَبۡصُۜطُ, بَصۜۡطَةٗ, ٱلۡمُصَۣيۡطِرُونَ — and the offsets' text does. Stripping both costs as much as it gains; the anchor is what makes this a correction.",
+    evidence:
+      "Rejected once, on the two-rule oracle, where it was worth 1 annotation and 0 ayahs (36:52 in probe-tajweed-words' NAMED). The eighteen-rule oracle re-tries it unchanged and it is worth 92 → 82 misses and 13 → 10 ayahs, closing 36:52, 75:27 and 83:14 with nothing anywhere regressing, because silent, qalqalah, madd_246 and idghaam_shafawi had no vote when it was first weighed. Unanchored (`/ۜ/g`) it is a net loss: it breaks 52:37 and worsens 2:245 and 7:69 while closing the same three, which is what a substitution that is right in one function and wrong in the other looks like.",
+  },
 ];
 
 /** Every correction id, in order — the default `on` set. */
@@ -169,7 +182,10 @@ export const ORACLE = Object.freeze({
   //     written with a DIFFERENT second mark, so the set is the noon plus those
   //     three marks — which is why these score like a named letter and not like
   //     a vowel.
-  ikhfa: { letters: "نٖٗٞ", why: "noon saakinah or tanween; the tanween carries its ikhfa second mark" },
+  ikhfa: {
+    letters: "نٖٗٞۨ",
+    why: "noon saakinah or tanween; the tanween carries its ikhfa second mark. U+06E8 SMALL HIGH NOON is the fifth: the print writes نُۨجِي with the hidden noon set small above the line, so the letter is there but not full-size. Added after the residual pointed at 21:88, unlike the sixteen sets written blind — the honest provenance is that this one is data-led, and it is kept because a small noon IS a noon by the rule's own terms, not because it scores.",
+  },
   idghaam_ghunnah: { letters: "نٖٗٞ", why: "noon saakinah or tanween before ينمو" },
   idghaam_no_ghunnah: { letters: "نٖٗٞ", why: "noon saakinah or tanween before ل or ر" },
   iqlab: {
@@ -191,7 +207,10 @@ export const ORACLE = Object.freeze({
   },
 
   // --- the remainder
-  silent: { letters: "اوي", why: "an unpronounced alef, waw or yeh" },
+  silent: {
+    letters: "اويص",
+    why: "a written letter that is not read. Alef, waw and yeh are the common cases; ص is the sin/sad alternate — بَصۜۡطَةٗ, وَيَبۡصُۜطُ — where the print writes ص, marks it with a small seen, and the reading is س. Added after the residual pointed at 2:245 and 7:69; it follows from the rule's own definition rather than from where the offsets fell, but the after-the-fact order is recorded because it is the difference between a prediction and a fit.",
+  },
 });
 
 /**
