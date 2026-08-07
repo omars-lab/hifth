@@ -42,14 +42,14 @@
  *    them renumbers every later word); this probe drops them only from the
  *    *string*, and their word slots stay in the span list unaddressed.
  *
- * ### Orthographic — how a single mark is spelled (4–7)
+ * ### Orthographic — how a single mark is spelled (4–8)
  *
  * Those three took the oracle to 97.03% and left 172 ayahs. That residual was
  * first recorded as unnamed "orthographic drift", which was true and useless.
  * Bracketing each ayah's drift between its last correct annotation and its
- * first wrong one narrows it to four spellings — every one a case where the two
+ * first wrong one narrows it to five spellings — every one a case where the two
  * texts render the **same printed mark** with a different number of codepoints.
- * None is a variant reading; all four are decisions about carriers.
+ * None is a variant reading; all five are decisions about carriers.
  *
  * 4. **The tatweel that carries a small high mark.** «ـۧ» (U+0640 U+06E7) and
  *    «ـۨ» (U+0640 U+06E8) — إِبۡرَٰهِـۧم, ٱلنَّبِيِّـۧنَ, نُـۨجِي. The print seats the
@@ -64,7 +64,7 @@
  *    is the *length*, not the identity: any three-codepoint substitution
  *    recovers the alignment, so the probe can prove the other text spends one
  *    more codepoint there without claiming which three it uses. The biggest
- *    single correction of the four — 143 → 60 ayahs on its own.
+ *    single correction of the five — 143 → 60 ayahs on its own.
  * 6. **The small high madda.** «ۤ» (U+06E4), written by the print and absent
  *    from the offsets' text. It clusters on the sajdah ayahs — يَسۡجُدُۤ,
  *    ٱسۡجُدُواْۤ, لِلَّهِۤ — which is a good sign rather than a coincidence: the
@@ -74,9 +74,24 @@
  *    the print writes seat + kasra + hamza-below where the offsets count two
  *    codepoints. Again a length, not an identity. 19 → 12 ayahs.
  *
- * Together: **97.03% → 99.81%**, and **172 → 11** ayahs. The eleven are not a
+ * 8. **The small high seen where it ends a word.** «ۜ» (U+06DC) in مَنۡۜ رَاقٖ,
+ *    بَلۡۜ رَانَ, مَّرۡقَدِنَاۜ — the sakta, which the offsets' text does not carry.
+ *    Word-*medially* the same codepoint is over a ص and marks the alternate sin
+ *    reading (وَيَبۡصُۜطُ, بَصۜۡطَةٗ), and that one the offsets' text does carry, so
+ *    the substitution is anchored to word-final. Unanchored it breaks 52:37.
+ *    11 → 10 ayahs, 92 → 82 misses.
+ *
+ * Together: **97.03% → 99.86%**, and **172 → 10** ayahs. The ten are not a
  * remainder — they are `NAMED`, below, and three of them the repo already names
  * in another register entirely.
+ *
+ * Correction 8 is also why these are toggles rather than edits to the
+ * arithmetic. It was measured and REJECTED once, when the oracle could witness
+ * two of the eighteen rules; re-tried unchanged against all eighteen it closes
+ * three ayahs, because `silent`, `qalqalah`, `madd_246` and `idghaam_shafawi`
+ * had no vote the first time it was weighed. A correction is only ever rejected
+ * by the instrument that was measuring — so re-run the rejects whenever the
+ * oracle widens.
  *
  * The corrections were made for alignment, and paintability moved with them
  * without being asked to: spans running past the end of their ayah went 2 → 0,

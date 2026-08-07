@@ -104,7 +104,7 @@
   `assets/words/**` now holds 91,451 word boxes, so the question became whether
   a codepoint span lands inside one of them. It cannot be asked directly — that
   needs the Tanzil text, which this repo does not hold — so the probe
-  *reconstructs* the text from the print's own per-word `data-hafs`, under seven
+  *reconstructs* the text from the print's own per-word `data-hafs`, under eight
   corrections each earned by a run that failed without it. Three are
   **structural**, and the corpus states each one: the source prefixes the
   **basmala** to ayah 1 of every surah but 1 and 9; the print **splits the

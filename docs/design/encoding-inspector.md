@@ -352,8 +352,10 @@ inferred from the arithmetic and not read.
 inference was right, so the score went **up** — 97.03% → 99.81%, 172 residual ayahs → 11 — and
 paintability moved with it unasked (past-the-end 2 → 0, wider-than-two 4 → 1), which is the
 second, independent reason to believe them. The `respell` mechanism is the general form:
-corrections 4–7 are pure text substitutions applied per word before the fold counts, so each is
-a checkbox in the report rather than an edit to the arithmetic.
+corrections 4–8 are pure text substitutions applied per word before the fold counts, so each is
+a checkbox in the report rather than an edit to the arithmetic. (The figures in this paragraph
+are of that day's pin, when the oracle witnessed two rules. A fifth orthographic correction and
+a sixteen-rule-wider oracle later, it reads 99.86% over 10 residual ayahs — §9 ③.)
 
 What kept this item honest is that the inspector did not write the correction *for* itself. The
 finding was published, the bake wrote the rule, and the instrument re-measured — which is why

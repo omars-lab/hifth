@@ -477,9 +477,9 @@ own per-word `data-hafs`, the string `build-words.mjs` reads and drops on purpos
 different move from the one this item predicted, and it is why the prediction is false: a
 build change with a named exception list, not a design problem.
 
-Seven corrections make the reconstruction agree with Tanzil, in two kinds. Each was earned
+Eight corrections make the reconstruction agree with Tanzil, in two kinds. Each was earned
 by a run that failed without it, and none was guessed — the first three are stated by the
-corpus, the last four were **found by bracketing**: for each ayah the oracle got wrong, read
+corpus, the last five were **found by bracketing**: for each ayah the oracle got wrong, read
 the reconstruction between its last *correct* annotation and its first *wrong* one, and the
 drift has to be inside that segment.
 
@@ -500,24 +500,44 @@ the **same printed mark** with a different number of codepoints. None is a varia
 | 5 | **«أٓ»** is two codepoints here, three there | ٱلۡأٓخِرَة, ٱلۡأٓيَٰت — the *length* is what is measured, not which three | 98.49% |
 | 6 | drop the **small high madda «ۤ»** | يَسۡجُدُۤ, ٱسۡجُدُواْۤ — clustered on the sajdah ayahs, which is confirmation rather than coincidence: the source is Tanzil's *pause-sajdah* edition | 99.64% |
 | 7 | drop the **hamza below «ٕ»** on a seat | شَٰطِيِٕ, إِيتَآيِٕ, ٱللُّؤۡلُوِٕ — again a length, not an identity | 99.81% |
+| 8 | drop the **small high seen «ۜ»** *where it ends a word* | مَنۡۜ رَاقٖ, بَلۡۜ رَانَ, مَّرۡقَدِنَاۜ — the sakta, which the offsets' text does not carry. Word-*medially* the same codepoint sits over a ص and marks the sin reading (وَيَبۡصُۜطُ), which it does carry — so the substitution is anchored, and unanchored it breaks 52:37 | 99.86% |
 
 **Correction 4's narrowness is measured, not chosen.** Generalised to strip *every* U+0640 it
 scores **94.48%** — worse than applying nothing. Most tatweels are in both texts; only these
 two carriers are not. That asymmetry is the standing check on overfitting here: the rules
 apply to all 6,236 ayahs rather than the ones that motivated them, the oracle tests letter
 *identity* at a position no rule touches, and a rule that reaches too far is punished at
-once. One candidate — dropping the small high seen «ۜ» — gained 1 annotation and **zero**
-ayahs, so it was rejected and 36:52 recorded as a named exception instead.
+once.
 
-③'s discipline applies to the result, so the fold is not trusted on its own output. Two of
-the eighteen rules name their own letter: `hamzat_wasl` must start on **ٱ**, `lam_shamsiyyah`
-on **ل**. 15,985 annotations (26.6%) can be checked that way with no reference to any word
-boundary, and that oracle — not the span arithmetic — is what decides whether the fold is
-right.
+**Correction 8 is why the corrections are toggles.** It is the same substitution that was
+measured and **rejected** when this section was first written — it gained 1 annotation and
+zero ayahs, and 36:52 was recorded as a named exception instead. Nothing about the
+substitution changed. What changed is the instrument: re-tried against an oracle that
+witnesses all eighteen rules rather than two, it closes three ayahs, because `silent`,
+`qalqalah`, `madd_246` and `idghaam_shafawi` had no vote the first time it was weighed. A
+correction is only ever rejected *by an instrument*. Re-run the rejects whenever the oracle
+widens — which is one line of work precisely because each correction is a flag rather than
+an edit to the arithmetic.
+
+③'s discipline applies to the result, so the fold is not trusted on its own output. **All
+eighteen** of the source's rules name a letter their annotation must open on: `hamzat_wasl`
+on **ٱ**, `lam_shamsiyyah` on **ل**, `qalqalah` on one of **قطب جد**, and so on. All 60,057
+annotations can be checked that way with no reference to any word boundary, and that oracle —
+not the span arithmetic — is what decides whether the fold is right. Every letter set was
+written from the tajweed rule *first* and measured second; reading a set off where the
+offsets land and then declaring that they land there is circular and passes on a broken fold.
+
+**Read the coverage as two numbers.** Breadth is free: a rule admitting fifteen codepoints is
+satisfied by accident far more often than one admitting a single ٱ. So each check is weighted
+by `1 − oracleDensity`, the chance it would have caught a one-codepoint drift in that ayah.
+100% of annotations are checked; **93.65%** is what that coverage is worth, and it is the
+number to quote. `madd_6` — fifteen letters, 69.6% sensitivity — says in its own `why` that
+it is the entry to distrust.
 
 | measure | result |
 |---|---|
-| oracle lands on the expected letter | **15,955 / 15,985 = 99.81%** |
+| oracle lands on the expected letter | **59,975 / 60,057 = 99.86%** |
+| annotations the oracle can check | 60,057 / 60,057 = **100%** (93.65% sensitivity-weighted) |
 | annotations inside **one** print word | 50,032 / 60,057 = **83.31%** |
 | two **adjacent** print words | 10,024 = **16.69%** |
 | wider than two | **1** — 12:41, `idghaam_ghunnah` |
@@ -527,15 +547,16 @@ The 16.69% is not misalignment. Idghaam, ikhfa and iqlab are cross-word rules �
 point is what happens *between* two words — and both boxes are paintable, so a two-box span
 is the correct rendering of a two-word rule rather than a failure to place a one-word one.
 
-Corrections 4–7 were made for *alignment*, and **paintability moved with them without being
+Corrections 4–8 were made for *alignment*, and **paintability moved with them without being
 asked to**: spans past the end went 2 → 0 and spans wider than two words went 4 → 1. That is
 the second reason to believe them. A rule that merely shifted the string to satisfy the
 oracle would have no reason to settle arithmetic the oracle cannot see.
 
-**The residual is ③'s shape, and that is the finding.** **11 ayahs of 6,236 (0.18%)** carry a
-miss, all 30 of them within ±2 codepoints, every ayah drifting by a single constant amount.
-They are not a rate — each one is **named** in `tajweed-words.probe.json` under
-`residual.named`, and three the repo already names elsewhere:
+**The residual is ③'s shape, and that is the finding.** **10 ayahs of 6,236 (0.16%)** carry a
+miss, 82 misses in all, every one but a single outlier within ±2 codepoints and 7 of the 10
+ayahs drifting by one constant amount throughout. They are not a rate — each one is **named**
+in `tajweed-words.probe.json` under `residual.named`, and three the repo already names
+elsewhere:
 
 | ayah(s) | why it drifts |
 |---|---|
@@ -543,13 +564,15 @@ They are not a rate — each one is **named** in `tajweed-words.probe.json` unde
 | 15:7 | «لَّوۡمَا» — the repo's single 1→2 alignment singularity, drifting here for the reason it drifts there |
 | 2:181, 8:6, 13:37 | «بَعۡدَ مَا» — the print splits it, the offsets' text joins it. Unlike the waw the corpus does not flag it, so it is not derivable |
 | 2:97, 17:7 | a **bare** tatweel carrying no small-high mark, which correction 4 deliberately does not reach. 17:7 also spells ٱلۡءَاخِرَةِ the long way where the same print writes أٓ elsewhere — an inconsistency inside the print itself |
-| 36:52 | «مَّرۡقَدِنَاۜ» — small high seen, the rejected rule above |
 | 95:1, 97:1 | not localisable: the *first* oracle annotation is already drifted, so there is no correct one to bracket against. Not the basmala — 112 surahs take that prefix and only these two drift |
+
+36:52 «مَّرۡقَدِنَاۜ» used to be a row here. It is not one any more: correction 8 closed it,
+along with 75:27 and 83:14.
 
 That is orthographic, not structural: the same class as `lib/segmentation.mjs`'s exceptions,
 now at a comparable count rather than a larger one. It is also why paintability (99.998%
 within two boxes) still beats alignment — a one-codepoint drift inside a seven-codepoint word
-rarely changes which box hosts the span. The eleven are recorded and are not to be
+rarely changes which box hosts the span. The ten are recorded and are not to be
 heuristised away — ③'s rule, unchanged.
 
 **What it does not unblock, still.** The beta label. The palette waits on a hafiz
