@@ -119,6 +119,16 @@
   its own output — `hamzat_wasl` must start on ٱ and `lam_shamsiyyah` on ل,
   15,985 annotations that need no word boundary to verify.
 
+  **The arithmetic below has two readers and one implementation.** The fold lives
+  in `packages/etl/scripts/lib/tajweed-fold.mjs`; `probe-tajweed-words.mjs`
+  imports it, and `probe-encodings.mjs`
+  ([encoding-inspector.md](../../../../docs/design/encoding-inspector.md)) both
+  imports it *and* inlines its source into the report it writes, so the toggles a
+  maintainer clicks in a browser run these literal bytes. Assembling the numbers
+  from the sources a second way reproduced every figure in the table below
+  exactly, which is the point of saying so here: a pin nobody can re-derive is a
+  number you are asked to trust.
+
   | measure | result |
   |---|---|
   | oracle on the expected letter | 15,955 / 15,985 = **99.81%** |
