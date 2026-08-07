@@ -48,6 +48,7 @@
     "probe:ligature-print": "node packages/etl/scripts/probe-ligature-print.mjs",
     "probe:word-registration": "node packages/etl/scripts/probe-word-registration.mjs",
     "probe:tajweed-words": "node packages/etl/scripts/probe-tajweed-words.mjs",
+    "probe:encodings": "node packages/etl/scripts/probe-encodings.mjs",
     "sample:edges": "node packages/etl/scripts/sample-edges.mjs",
     "guide": "node scripts/build-validation-guide.mjs",
     "record": "node scripts/record-validation.mjs",

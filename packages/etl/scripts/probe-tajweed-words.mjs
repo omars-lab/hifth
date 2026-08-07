@@ -119,6 +119,15 @@
  * come from the same gitignored `.cache/words/` that `build-words.mjs` fills, so
  * a run after that build costs nothing and reads the bytes it shipped.
  *
+ * ## Where the fold itself lives
+ *
+ * Not here. The corrections above are arithmetic over the print's words, and
+ * `probe-encodings.mjs` has to apply exactly the same arithmetic or its screen
+ * could be clean for a probe that was failing — so it moved to
+ * `lib/tajweed-fold.mjs`, which this file imports. The header above is still
+ * where the *why* is written; that file holds only the maths, and a correction
+ * added there appears in both readers at once.
+ *
  * Usage:
  *   node packages/etl/scripts/probe-tajweed-words.mjs            # from the cache
  *   node packages/etl/scripts/probe-tajweed-words.mjs --fetch    # fill it first
@@ -129,6 +138,7 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { candidatePage, pin } from "./lib/candidate-pages.mjs";
 import { WAQF } from "./lib/mushaf-frame.mjs";
+import { ORACLE, foldAyah, oracleOf, touched } from "./lib/tajweed-fold.mjs";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const TAJWEED = join(HERE, "..", "data", "tajweed", "tajweed.hafs.uthmani-pause-sajdah.json");
@@ -136,28 +146,6 @@ const RESULT = join(HERE, "..", "data", "tajweed", "tajweed-words.probe.json");
 
 const fetchMissing = process.argv.includes("--fetch");
 const write = process.argv.includes("--write");
-
-/**
- * The letter each rule must start on. Two of the eighteen state their own
- * target: hamzat wasl *is* the ٱ, and lam shamsiyyah *is* the assimilated ل.
- * Everything else describes a manner of articulation, which no single codepoint
- * witnesses — so those twelve rules are counted, never used as evidence.
- */
-const ORACLE = { hamzat_wasl: "ٱ", lam_shamsiyyah: "ل" };
-
-/**
- * Corrections 4–7: the same grapheme, encoded differently by the two
- * transcriptions. Applied to every word of all 6,236 ayahs, never to the ayahs
- * that motivated them. Order matters only in that none of these five overlap.
- */
-const RESPELL = [
-  [/ـۧ/g, "ۧ"], // 4 — tatweel carrying SMALL HIGH YEH   (إِبۡرَٰهِـۧمُ)
-  [/ـۨ/g, "ۨ"], // 4 — tatweel carrying SMALL HIGH NOON  (أَنجِـۨي)
-  [/أٓ/g, "ءَا"], // 5 — alef-hamza + maddah, two cp here and three there
-  [/ۤ/g, ""], // 6 — SMALL HIGH MADDA, the print's only
-  [/ٕ/g, ""], // 7 — HAMZA BELOW on a seat
-];
-const respell = (text) => RESPELL.reduce((s, [re, to]) => s.replace(re, to), text);
 
 /**
  * The eleven ayahs the corrections do not reach, each one named. This list is
@@ -200,7 +188,7 @@ const unescape = (s) =>
 /** A word that is nothing but pause/hizb marks — ink the Tanzil text does not carry. */
 const isMark = (text) => [...text].length > 0 && [...text].every((c) => WAQF.has(c));
 
-/** "surah:ayah" → Map(printIndex → { hafs, waw }), over every page read. */
+/** "surah:ayah" → Map(printIndex → { hafs, waw, mark }), over every page read. */
 const byAyah = new Map();
 
 async function readPages() {
@@ -218,7 +206,12 @@ async function readPages() {
       if (!surah || !aya || !idx || hafs == null) continue;
       const key = `${surah}:${aya}`;
       if (!byAyah.has(key)) byAyah.set(key, new Map());
-      byAyah.get(key).set(idx, { hafs: unescape(hafs), waw: attr(a, "data-waw-alatf") === "true" });
+      const text = unescape(hafs);
+      // `mark` is decided here, not in the fold: WAQF is a fact about this
+      // corpus and the fold is arithmetic over it. See lib/tajweed-fold.mjs.
+      byAyah
+        .get(key)
+        .set(idx, { hafs: text, waw: attr(a, "data-waw-alatf") === "true", mark: isMark(text) });
     }
     if (page % 100 === 0) process.stdout.write(`  … ${page}/604 pages\n`);
   }
@@ -234,36 +227,6 @@ function wordsOf(key) {
   return idxs.map((i) => m.get(i));
 }
 
-// ------------------------------------------------------------------ folding --
-
-/**
- * The seven corrections, applied. Returns the reconstructed codepoints and, per
- * print word, the `[start, end)` it occupies in them — `null` for a pause mark,
- * which owns ink on the page but no codepoints in this text. The spans are into
- * the *respelled* string, which is the one the offsets address; a word whose
- * spelling changed keeps its identity and changes its width.
- */
-function fold(words, prefix) {
-  let cps = [...prefix];
-  const spans = [];
-  for (let i = 0; i < words.length; i += 1) {
-    if (isMark(words[i].hafs)) {
-      spans.push(null);
-      continue;
-    }
-    const start = cps.length;
-    cps = cps.concat([...respell(words[i].hafs)]);
-    spans.push([start, cps.length]);
-    // A space unless this word is a split waw, and never a trailing one — the
-    // lookahead skips marks because they are not in the string to be next to.
-    const more = words.slice(i + 1).some((w) => !isMark(w.hafs));
-    if (more && !words[i].waw) cps.push(" ");
-  }
-  return { cps, spans };
-}
-
-const hasBasmala = (surah, ayah) => ayah === 1 && surah !== 1 && surah !== 9;
-
 // --------------------------------------------------------------------- run --
 
 console.log(`\n  probe:tajweed-words — ${pin.candidate.repo} @ ${pin.candidate.commit.slice(0, 12)}`);
@@ -272,9 +235,9 @@ console.log("  folding the print's per-word text against the tajweed codepoint o
 const bytes = await readPages();
 
 const tajweed = JSON.parse(readFileSync(TAJWEED, "utf8"));
-const basmala = fold(wordsOf("1:1"), []);
+const basmala = wordsOf("1:1");
 
-const oracle = { hamzat_wasl: { n: 0, hit: 0 }, lam_shamsiyyah: { n: 0, hit: 0 } };
+const oracle = Object.fromEntries(Object.keys(ORACLE).map((rule) => [rule, { n: 0, hit: 0 }]));
 const drift = new Map(); // signed codepoint distance to the expected letter
 const residual = []; // one row per ayah the oracle is not perfect on
 let annotations = 0;
@@ -291,29 +254,23 @@ for (const rec of tajweed) {
   if (!words) continue;
   ayahsRead += 1;
 
-  const prefix = hasBasmala(rec.surah, rec.ayah) ? [...basmala.cps, " "] : [];
-  const { cps, spans } = fold(words, prefix);
-  const hosts = [...(prefix.length ? basmala.spans.filter(Boolean) : []), ...spans.filter(Boolean)];
+  const { cps, hosts } = foldAyah({ surah: rec.surah, ayah: rec.ayah, words, basmala });
 
   const deltas = [];
   for (const a of rec.annotations) {
     annotations += 1;
 
-    const want = ORACLE[a.rule];
-    if (want) {
+    // A bounded search, so "nowhere near" stays visible as its own outcome
+    // rather than folding into a large delta. `oracleOf` returns null for the
+    // sixteen rules that name no letter.
+    const o = oracleOf(cps, a);
+    if (o) {
       oracle[a.rule].n += 1;
-      if (cps[a.start] === want) {
+      if (o.hit) {
         oracle[a.rule].hit += 1;
       } else {
-        // How far away is it? A bounded search, so "nowhere near" stays visible
-        // as its own outcome rather than folding into a large delta.
-        let d = null;
-        for (let x = 1; x <= 8 && d === null; x += 1) {
-          if (cps[a.start - x] === want) d = -x;
-          else if (cps[a.start + x] === want) d = x;
-        }
-        drift.set(d, (drift.get(d) ?? 0) + 1);
-        deltas.push(d);
+        drift.set(o.delta, (drift.get(o.delta) ?? 0) + 1);
+        deltas.push(o.delta);
       }
     }
 
@@ -321,15 +278,12 @@ for (const rec of tajweed) {
       pastEnd += 1;
       continue;
     }
-    const touched = [];
-    for (let i = 0; i < hosts.length; i += 1) {
-      if (a.start < hosts[i][1] && a.end > hosts[i][0]) touched.push(i);
-    }
-    if (touched.length <= 1) inOneWord += 1;
-    else if (touched.length === 2 && touched[1] === touched[0] + 1) inTwoAdjacent += 1;
+    const hit = touched(hosts, a.start, a.end);
+    if (hit.length <= 1) inOneWord += 1;
+    else if (hit.length === 2 && hit[1] === hit[0] + 1) inTwoAdjacent += 1;
     else {
       wider += 1;
-      widerRows.push({ key, rule: a.rule, words: touched.length });
+      widerRows.push({ key, rule: a.rule, words: hit.length });
     }
   }
   if (deltas.length) {
@@ -359,7 +313,11 @@ console.log(`  past the end of the text : ${pastEnd}`);
 for (const r of widerRows) console.log(`     ${r.key} ${r.rule} — ${r.words} words`);
 
 console.log(`\n── the residual: ${residual.length} ayahs the oracle is not perfect on`);
-console.log("  distance to the expected letter (negative = the fold ran long):");
+// `oracleOf` reports where the letter actually is relative to where the offset
+// says it should be, so a POSITIVE delta means the fold pushed it later than
+// the offsets count it — the fold ran long. The label said the opposite for as
+// long as it existed; `drift-label-reads-backwards` is the row that caught it.
+console.log("  distance to the expected letter (positive = the fold ran long):");
 for (const [d, n] of [...drift].sort((a, b) => (a[0] ?? 99) - (b[0] ?? 99))) {
   const label = d === null ? "  ∅" : String(d).padStart(3);
   console.log(`   ${label}  ${String(n).padStart(4)}  ${pct(n, oracleN - oracleHit)} of the misses`);
