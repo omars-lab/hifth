@@ -133,6 +133,7 @@ import { DIACRITICS, diacriticName } from "@hifth/core";
 
 import { candidatePage } from "./lib/candidate-pages.mjs";
 import { applierFromPin, readDiacritics } from "./lib/diacritics.mjs";
+import { DRAWN_NAME, align, expected, letters, pairMarks } from "./lib/mark-join.mjs";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const REPO = join(HERE, "..", "..", "..");
@@ -157,230 +158,12 @@ const only = (() => {
 const SLACK = 0.2;
 
 /**
- * A word's `data-hafs` as the letters the print draws an *outline* for, each
- * carrying the codepoints written on it: `بِسْمِ` → `[ب:[ِ], س:[ْ], م:[ِ]]`.
- *
- * Two Unicode categories are not outlines and fold into the letter before them:
- *
- * - **`\p{Mn}`**, the combining marks. Obvious, and the reason this exists.
- * - **`\p{Lm}`**, the modifier letters — and this one is the whole reason ④'s
- *   first draft disagreed. Three of them occur in this text: the tatweel
- *   `U+0640` that seats a hamza in `شَيۡـٔٗا`, and the small waw `U+06E5` and
- *   small yeh `U+06E6` of `بِهِۦ`. The text calls all three letters. The print
- *   does not: the tatweel is drawn as a tooth folded into its neighbour's
- *   ligature, and the two small letters are drawn as `data-diacritic="small
- *   waw"` and `"small yeh"` — named marks, sitting in `DIACRITICS` beside the
- *   fatha. Counting them as base letters made the partition off by one for
- *   every word containing a seated hamza.
- *
- * Both rules are Unicode's own categories rather than a codepoint list this
- * repo maintains, because a list would be a third place with an opinion about
- * Arabic marks and would drift from the other two.
- *
- * The class is `const` and shared with `align`, which has to fold a ligature's
- * `data-text` by exactly the same rule for the two to be comparable at all.
- * `FOLD` tests one character and `FOLDS` strips a run; they are the same class
- * written once, because two copies of it would be the drift this paragraph is
- * about.
+ * The join itself — `letters`, `align`, `expected`, and the conventions each
+ * encodes — lives in `lib/mark-join.mjs`, because `probe-encodings.mjs` draws
+ * the marks it resolves and the two must be the same arithmetic. ④ and ⑤ below
+ * are still where the evidence for every one of those conventions is written
+ * down; what moved is only the code.
  */
-const FOLD_CLASS = "[\\p{Mn}\\p{Lm}]";
-const FOLD = new RegExp(FOLD_CLASS, "u");
-const FOLDS = new RegExp(FOLD_CLASS, "gu");
-
-function letters(hafs) {
-  const out = [];
-  for (const c of hafs) {
-    if (FOLD.test(c) && out.length) out[out.length - 1].marks.push(c);
-    else out.push({ letter: c, marks: [] });
-  }
-  return out;
-}
-
-/**
- * A hamza form written as one codepoint, and the carrier it is written on.
- *
- * Two separate facts live here, and conflating them cost a pass of the corpus.
- *
- * **The print always draws the sign.** `أ` gets a `hamza` path, `ٱ` a `wasla`
- * path, every time, in all 9,168 and 13,476 places they occur. The ligature's
- * own spelling does *not* decide it: «أَنَّ» on p119 is drawn `[أ | ن]` and the
- * first ligature still carries `hamza` then `fatha`. Making the expectation
- * conditional on the ligature spelling the bare carrier — which a first reading
- * of «أَيۡدِيهِمۡ» seemed to show — put 151 words on seven pages into the
- * residual, and the markup dump said plainly why.
- *
- * **The spelling still matters for matching.** `align` compares a ligature's
- * `data-text` to the word's letters, and the two disagree about the carrier: a
- * ligature may spell `ا` where the word writes `أ`. So `base()` folds a hamza
- * form to its carrier for that comparison only, and never for what the print
- * is expected to draw.
- *
- * The bare hamza `ء` `U+0621` is deliberately absent: with no carrier to sit
- * on it is drawn as `data-type="text"` like any other letter, always.
- */
-const HAMZA_ON = { آ: "ا", أ: "ا", إ: "ا", ٱ: "ا", ؤ: "و", ئ: "ي" };
-
-/** The letter under a hamza form, for matching a ligature's text to the word's. */
-const base = (c) => HAMZA_ON[c] ?? c;
-
-/** A short vowel or a tanween — the thing an iqlab meem merges into. */
-const VOWEL = /[ً-ِٗٞ]/;
-
-/**
- * The iqlab meem, which the print never draws on its own beside a vowel — both
- * of the forms this text uses. `كَافِرِۭ` writes the final form `U+06ED` and
- * `رِكۡزَۢا` the isolated `U+06E2`; the print composes either with the vowel
- * before it into one `kasra iqlab` / `fatha iqlab` glyph.
- */
-const IQLAB = /[ۭۢ]/;
-
-/**
- * The tatweel. It folds like a mark, because the print does not give it a
- * ligature of its own — but unlike the small waw and small yeh it folds beside,
- * it is drawn as part of the neighbouring outline (the tooth that seats a hamza in
- * `شَيۡـٔٗا`), not as a named path. So it is invisible to the partition on both
- * sides: not a letter, and not a mark either.
- */
-const TATWEEL = "ـ";
-
-/**
- * `U+06E4`, the small high madda — which in this print is not a mark at all.
- *
- * Every word carrying it sits in a sajda ayah (13:15, 17:107, 19:58 …) and the
- * print draws it as `data-type="sajda-line"`: the overline stretched above the
- * phrase a reader prostrates at, not a diacritic over a letter. It has no
- * `data-diacritic`, so `readDiacritics` never sees it, and expecting one for it
- * was counting a rubric as a vowel.
- */
-const SAJDA_LINE = "ۤ";
-
-/**
- * `U+0653` on a `أ` — the one place the print refuses its own `maddah`.
- *
- * Every other carrier of a combining madda gets a path named `maddah`: the alef
- * of «بِمَآ», the yeh of «فِيٓ», the waw of «قَالُوٓاْ», nineteen letters in all,
- * 4,682 paths. The hamza-carrying alef gets one **277 times out of 277 and never
- * a `maddah`** — the print draws a stroke it names `fatha`, and the outline
- * bears that out: measured against an ordinary fatha on the same line it is a
- * shortened version of the same curve (median 0.89×, p5 0.72×), not the maddah's
- * hooked wave, which is drawn at one constant width throughout the corpus.
- *
- * Whether that is the madda rendered short or a fatha standing in for it is a
- * question about the print's intent, and this file does not have to answer it:
- * one codepoint, one path, and ⑤ pins which. It is given a token of its own only
- * so that the relation stays a *function*, which is what makes ⑤'s arithmetic
- * work — without it `U+0653` maps to two names and arc consistency correctly
- * reports a contradiction rather than a dictionary.
- */
-const MADDA = "ٓ";
-const MADDA_ON_HAMZA = "أ";
-
-/**
- * The *tokens* of a letter — one per named path the print is expected to draw,
- * in the order the text writes them.
- *
- * A token is usually just a codepoint, `"U+064E"`. Two carry context, because
- * the print composes and the composite has a name of its own:
- *
- * - `"U+064E+iqlab"` — `DIACRITICS` carries `fatha iqlab`, `kasra iqlab` and
- *   `damma iqlab` as names in their own right, so where the text writes a vowel
- *   followed by `ۭ` the print draws a single glyph: «كَافِرِۭ» is two paths on
- *   `فر`, not three.
- * - `"U+0653@hamza"` — see `MADDA_ON_HAMZA` above.
- *
- * The hamza or wasla sign comes first where the letter is a hamza form, because
- * that is the order the text writes it in. The print often disagrees — «أَنَّ»
- * draws `hamza` then `fatha` but «ٱلۡمَلَؤُاْ» draws `damma` then `hamza` — and
- * that disagreement is not swept up here. ④ compares counts and is blind to it;
- * ⑤ measures it directly and states the rule it follows.
- *
- * Excluded are the two codepoints the print draws by other means: the tatweel's
- * tooth, folded into a neighbour, and the sajda overline.
- */
-function expected(l) {
-  const out = [];
-  if (HAMZA_ON[l.letter]) out.push(cp(l.letter));
-  for (const m of l.marks) {
-    if (m === TATWEEL || m === SAJDA_LINE) continue;
-    if (IQLAB.test(m) && out.length && isVowel(out[out.length - 1])) {
-      out[out.length - 1] += "+iqlab";
-      continue;
-    }
-    out.push(m === MADDA && l.letter === MADDA_ON_HAMZA ? `${cp(m)}@hamza` : cp(m));
-  }
-  return out;
-}
-
-/**
- * Assign each ligature the letters it draws, or `null` if no assignment exists.
- *
- * The obvious implementation — walk the ligatures in document order, handing
- * each the next `text.length` letters — is what ④'s previous draft did, and it
- * is wrong in two ways the markup shows plainly:
- *
- * **Document order is not reading order.** «ٱلرَّحِيمِ» on p379 is drawn as
- * `[لر | حيم | ٱ]`: the alef wasla is a separate ligature emitted *last*. Six
- * letters, six drawn, so a length check passes — and then every mark is
- * assigned to the wrong letter while the totals still balance. That is the
- * failure mode this whole file exists to catch, and counting alone cannot see
- * it.
- *
- * **A letter can be drawn twice.** «فَلَا» is `[فلا | ا]` — four letters drawn
- * for a three-letter word, because the print puts the alef's stroke in a second
- * ligature. Those continuation runs carry no marks of their own, which is what
- * makes them safe to recognise: a repeat that carried marks would be a
- * different phenomenon and would still fail here.
- *
- * So this matches on **content** rather than length, over `base()` so that a
- * ligature spelling `ا` matches a word writing `أ`. A ligature may take the
- * next letters, or re-draw letters already taken if it has no marks. The search
- * is a DFS over (position, set of ligatures used) with memoisation; words have
- * a handful of ligatures, so the state space is tiny.
- *
- * Both sides are reduced the same way, which is the only thing that makes the
- * comparison meaningful: `letters` folds a `\p{Lm}` into the letter before it,
- * so a ligature's `data-text` has to be folded too. It carries the tatweel —
- * «مَـَٔابٗا» is drawn `[مـا | با]`, tatweel and all — and leaving it in made
- * ten seated-hamza words on the last two juz look unassignable when they are
- * simply spelt with the tooth the print draws them with.
- *
- * Matching on content is strictly stronger than the length check it replaces —
- * some words that used to pass the partition now fail it, and that is the point.
- */
-function align(ls, ligs) {
-  const target = ls.map((l) => base(l.letter)).join("");
-  const texts = ligs.map((l) => [...l.text.replace(FOLDS, "")].map(base));
-  const all = (1 << ligs.length) - 1;
-  const memo = new Map();
-
-  const go = (pos, used) => {
-    if (pos === target.length && used === all) return [];
-    const key = pos * (all + 1) + used;
-    if (memo.has(key)) return memo.get(key);
-    let out = null;
-    for (let i = 0; i < ligs.length && !out; i += 1) {
-      if (used & (1 << i)) continue;
-      const t = texts[i];
-      const fits = (from) => from >= 0 && t.every((c, j) => target[from + j] === c);
-      if (pos + t.length <= target.length && fits(pos)) {
-        const rest = go(pos + t.length, used | (1 << i));
-        if (rest) out = [{ lig: i, from: pos, to: pos + t.length }, ...rest];
-      }
-      if (!out && !ligs[i].marks.length && fits(pos - t.length)) {
-        const rest = go(pos, used | (1 << i));
-        if (rest) out = [{ lig: i, from: pos - t.length, to: pos, redraw: true }, ...rest];
-      }
-    }
-    memo.set(key, out);
-    return out;
-  };
-  return go(0, 0);
-}
-
-const cp = (c) => `U+${c.codePointAt(0).toString(16).toUpperCase().padStart(4, "0")}`;
-
-/** Does a token name a vowel? `parseInt` stops at the `+` or `@` of a suffix. */
-const isVowel = (token) => VOWEL.test(String.fromCodePoint(parseInt(token.slice(2), 16)));
 
 const pin = JSON.parse(readFileSync(PIN, "utf8"));
 const rows = new Map(pin.pages.map((p) => [p.page, p]));
@@ -425,6 +208,45 @@ const runs = [];
 const blame = (sig, example) => {
   const e = why.get(sig) ?? [0, example];
   why.set(sig, [e[0] + 1, e[1]]);
+};
+
+/**
+ * The one thing `pairMarks` assumes, counted.
+ *
+ * The dictionary settles a ligature outright when its tokens name distinct
+ * paths. Where two tokens name the *same* path — a `U+0653@hamza` fatha beside
+ * an ordinary one — something has to break the tie, and `lib/mark-join.mjs`
+ * breaks it with geometry: Arabic is set right to left, so among same-named
+ * paths the rightmost is the one the text writes first.
+ *
+ * That is a claim, so it is measured rather than asserted. `ties` counts the
+ * ligatures where a tie exists at all — if it is rare, the assumption is cheap
+ * whatever it is worth — and `tiesDiffer` counts where the geometric order and
+ * the print's own emission order disagree, which is the only case in which
+ * choosing between them changes a rectangle.
+ */
+let ties = 0;
+let tiesDiffer = 0;
+const tieWhere = [];
+const tie = (tokens, marks, where) => {
+  const names = tokens.map((t) => DRAWN_NAME[t.token]);
+  if (new Set(names).size === names.length) return;
+  ties += 1;
+  const doc = marks.map((_, i) => i);
+  const geom = pairMarks(tokens, marks);
+  // `doc` is document order restricted to the tied name; comparing the whole
+  // pairing against it would count the print's known reordering of the seated
+  // hamza, which is R1's business and not this one.
+  const dup = names.filter((n, i) => names.indexOf(n) !== i);
+  for (const n of new Set(dup)) {
+    const inDoc = doc.filter((i) => diacriticName(marks[i][0]) === n);
+    const inGeom = names.map((x, i) => [x, i]).filter(([x]) => x === n).map(([, i]) => geom?.[i]);
+    if (inDoc.join() !== inGeom.join()) {
+      tiesDiffer += 1;
+      if (tieWhere.length < 6) tieWhere.push(`${n} × ${inDoc.length} — ${where}`);
+      break;
+    }
+  }
 };
 
 for (const page of wanted) {
@@ -476,11 +298,11 @@ for (const page of wanted) {
           // denominator with runs that cannot disagree.
           if (step.redraw) continue;
           ligatures += 1;
-          const want = ls.slice(step.from, step.to).flatMap(expected);
-          if (want.length !== l.marks.length) {
+          const tokens = ls.slice(step.from, step.to).flatMap(expected);
+          if (tokens.length !== l.marks.length) {
             ok = false;
             blame(
-              `ligature “${l.text}” wants ${want.length} mark(s), the print draws ${l.marks.length}`,
+              `ligature “${l.text}” wants ${tokens.length} mark(s), the print draws ${l.marks.length}`,
               where,
             );
             continue;
@@ -491,7 +313,10 @@ for (const page of wanted) {
           // ligature carrying no marks at all agrees vacuously and constrains
           // nothing, so it is left out rather than counted as a run — in the
           // denominator it would only dilute ⑤'s held-out percentage.
-          if (want.length) runs.push([want, l.marks.map((m) => diacriticName(m[0])), where]);
+          if (tokens.length) {
+            runs.push([tokens.map((t) => t.token), l.marks.map((m) => diacriticName(m[0])), where]);
+            tie(tokens, l.marks, where);
+          }
         }
         bucket[ok ? "joined" : "counts"] += 1;
       }
@@ -758,6 +583,39 @@ console.log(
   `      ${dict.size} of ${may.size} tokens pinned to exactly one name; ` +
     `${open.length} still open`,
 );
+
+/**
+ * The frozen copy, checked against the run that earned it.
+ *
+ * `lib/mark-join.mjs` ships `DRAWN_NAME` so that a tool drawing one page does
+ * not have to read 380 MB to know what a `U+0651` looks like. A frozen copy of
+ * a measured result is a liability unless something re-measures it, so this is
+ * that something: every full run re-derives the dictionary from the corpus and
+ * says whether the table still describes it.
+ *
+ * Only on a full run. A subset settles fewer tokens by design — `--pages 1,2,7`
+ * has not seen enough of the corpus to pin all thirty-four — so a short run
+ * reports what it *can* confirm rather than failing for being short.
+ */
+const full = wanted.length === pin.pages.length;
+const drift = [];
+for (const [t, n] of dict) if (DRAWN_NAME[t] !== n) drift.push(`${t} → ${n}, the table says ${DRAWN_NAME[t] ?? "nothing"}`);
+if (full) for (const t of Object.keys(DRAWN_NAME)) if (!dict.has(t)) drift.push(`${t} is in the table and this run did not pin it`);
+if (drift.length) {
+  console.log(`\n      ⚠ lib/mark-join.mjs DRAWN_NAME disagrees with this run on ${drift.length}:`);
+  for (const d of drift) console.log(`        ${d}`);
+} else {
+  console.log(
+    `      lib/mark-join.mjs DRAWN_NAME agrees on ${dict.size} of them` +
+      (full ? " and carries no token this run did not pin" : " (subset run — completeness not checked)"),
+  );
+}
+
+console.log(
+  `\n      the tie the pairing does assume — ${ties} of ${runs.length} runs draw two ` +
+    `paths\n      of one name, and geometry disagrees with document order on ${tiesDiffer}`,
+);
+for (const t of tieWhere) console.log(`        ${t}`);
 if (dead.length) {
   console.log(
     `      ${dead.length} shape(s) admit no assignment at all ` +
