@@ -50,6 +50,7 @@ const state = {
   view: "ayah",
   key: "2:4",
   annotation: null,
+  context: true, // ①: draw the page's other ayahs faintly behind this one
   filter: null, // { label, keys: [ayah keys] }
   sort: {}, // table id → { col, dir }
 };
@@ -274,6 +275,161 @@ function cpCell(cps, i, hostAt, inSpan) {
   ]);
 }
 
+// ----------------------------------------------------------------- the outline --
+
+/**
+ * `el`, for SVG. A separate helper rather than a flag on `el` because
+ * `createElement("rect")` produces an HTMLUnknownElement that lays out as
+ * nothing and reports no error — the single most confusing way this section
+ * could fail, and worth one extra function to make impossible.
+ */
+const svgEl = (tag, attrs = {}, kids = []) => {
+  const n = document.createElementNS("http://www.w3.org/2000/svg", tag);
+  for (const [k, v] of Object.entries(attrs)) {
+    if (k === "text") n.textContent = v;
+    else if (k.startsWith("on")) n.addEventListener(k.slice(2), v);
+    else if (v !== null && v !== undefined) n.setAttribute(k, String(v));
+  }
+  for (const kid of [].concat(kids)) if (kid) n.append(kid);
+  return n;
+};
+
+const GEO = DATA.geometry ?? null;
+
+/** page number → the ayah keys whose boxes sit on it, for the faint context layer. */
+const PAGE_AYAHS = (() => {
+  const m = new Map();
+  if (!GEO) return m;
+  for (const [key, p] of Object.entries(GEO.page)) {
+    if (!m.has(p)) m.set(p, []);
+    m.get(p).push(key);
+  }
+  return m;
+})();
+
+/** `[width, height]` of a page's frame — pages 1 and 2 are square, the rest are not. */
+const frameOf = (page) => (GEO ? (GEO.frame.o[String(page)] ?? GEO.frame.d) : [345, 550]);
+
+/**
+ * Where this ayah's words sit on the page — outlines only, and the "only" is
+ * the whole design.
+ *
+ * The report drew nothing at all until 2026-08-07, on the argument recorded in
+ * the design doc §6.4: a tool whose authority is about *identity* should not
+ * become a second renderer of the mus'haf with a second chance to draw it
+ * wrong. That argument still holds for **ink** and this function honours it —
+ * no glyphs, no page raster, no `<path>` from `assets/pages/**`, nothing that
+ * could be mistaken for the print. What it draws is rectangles from
+ * `assets/words/**`, which are committed, `gate:words`-checked geometry, and
+ * which answer the one question the tool kept sending its reader to the app
+ * for: *which two boxes* does this 2→1 block cover.
+ *
+ * The tints are not decorative. A box carries the same even/odd tint its
+ * codepoints carry on the ④ ruler, keyed on the **host index** rather than the
+ * print index so that a dropped word is a gap in both places. That is what
+ * makes the two panels one instrument instead of two pictures: a span lit on
+ * the ruler is the same span lit on the page.
+ */
+function outline(key, f, sel) {
+  const boxes = GEO?.boxes[key];
+  if (!GEO) {
+    return el("p", { class: "note", text: "No word geometry in this report — assets/words/hafs-kfqc/ was not readable when it was generated, so the outline is off. Everything else on this page is unaffected." });
+  }
+  if (!boxes) {
+    return el("p", { class: "note", text: `No word shard covers ${key}. The boxes ship per page in assets/words/hafs-kfqc/; an ayah with none is either outside the pages this run read (--pages) or a gap in the shards, and the second would be a defect worth filing.` });
+  }
+
+  const page = GEO.page[key];
+  const [W, H] = frameOf(page);
+  const marks = new Set(GEO.marks[key] ?? []);
+
+  // The count check, restated in the browser rather than trusted from the
+  // generator. If the two descriptions of this ayah disagree on how many words
+  // it has, every label below would be off by an unknown amount — so the
+  // outline draws the boxes and refuses to number them.
+  const trusted = boxes.length === f.words.length;
+
+  // print index (1-based) → its index in `hosts`, which is what the ruler tints
+  // on. Absent for a word the fold dropped; that absence is drawn, not hidden.
+  const hostOfPrint = new Map();
+  f.hosts.forEach((h, i) => {
+    if (h.print !== null && h.print !== undefined) hostOfPrint.set(h.print, i);
+  });
+
+  const lit = new Set(
+    sel ? touched(f.hosts, sel.start, sel.end).map((i) => f.hosts[i].print).filter((p) => p != null) : [],
+  );
+
+  const svg = svgEl("svg", {
+    viewBox: `0 0 ${W} ${H}`,
+    class: "outline",
+    preserveAspectRatio: "xMidYMid meet",
+    role: "img",
+    "aria-label": `Word box outlines for ${key} on page ${page}. Geometry only — no text is drawn.`,
+  });
+  svg.append(svgEl("rect", { class: "frame", x: 0.5, y: 0.5, width: W - 1, height: H - 1 }));
+
+  // The rest of the page, faint. Without it the ayah floats in an empty
+  // rectangle and there is no way to see that it is the third line down.
+  if (state.context) {
+    for (const other of PAGE_AYAHS.get(page) ?? []) {
+      if (other === key) continue;
+      for (const [x, y, w, h] of GEO.boxes[other] ?? []) {
+        svg.append(svgEl("rect", { class: "other", x, y, width: w, height: h }));
+      }
+    }
+  }
+
+  boxes.forEach(([x, y, w, h], i) => {
+    const print = i + 1;
+    const host = hostOfPrint.get(print);
+    const isMark = marks.has(print);
+    const span = f.spans[i];
+    const cls = ["box"];
+    if (!trusted) cls.push("untrusted");
+    else {
+      cls.push(host === undefined ? "gap" : host % 2 ? "odd" : "even");
+      if (isMark) cls.push("mark");
+      if (lit.has(print)) cls.push("lit");
+    }
+    const title = trusted
+      ? `${print}. ${f.words[i].hafs}  ·  ${isMark ? "pause mark" : f.words[i].waw ? "split waw" : "word"}  ·  ${span ? `fold [${span[0]}, ${span[1]})` : "dropped by the fold"}`
+      : `box ${print} of ${boxes.length} — not numbered, see the warning above`;
+    svg.append(
+      svgEl("rect", {
+        class: cls.join(" "),
+        x,
+        y,
+        width: w,
+        height: h,
+        onclick: trusted && span
+          ? () => {
+              state.annotation = f.annotations.findIndex((a) => a.start < span[1] && a.end > span[0]);
+              render();
+            }
+          : null,
+      }, svgEl("title", { text: title })),
+    );
+  });
+
+  const wrap = el("div", { class: "outline-wrap" }, svg);
+  const bits = [];
+  if (!trusted) {
+    bits.push(el("p", { class: "warn", text: `${boxes.length} boxes but ${f.words.length} print words. Two independent descriptions of this ayah disagree on how many words it has, so the outline draws the geometry and deliberately does not label it — a guessed alignment here would be a picture that lies quietly. Worth filing.` }));
+  }
+  bits.push(wrap);
+  bits.push(el("p", { class: "note legend" }, [
+    ["even", "word"],
+    ["mark", "pause mark"],
+    ["gap", "dropped by the fold"],
+    ["lit", "touched by the selected annotation"],
+    ["other", "the rest of the page"],
+    // Each swatch and its label are one inline-flex item, so a wrap breaks
+    // between pairs rather than stranding a swatch on the line above its word.
+  ].map(([cls, label]) => el("span", { class: "item" }, [el("span", { class: `sw ${cls}` }), el("span", { text: label })]))));
+  return el("div", {}, bits);
+}
+
 // ------------------------------------------------------------- the ayah view --
 
 function viewAyah() {
@@ -298,10 +454,19 @@ function viewAyah() {
     el("p", { class: "sub", text: `page ${DATA.pages[key]} of the print · ${words.length} print words (${words.filter((w) => w.mark).length} pause marks) · ${annotations.length} tajweed annotations · ${cps.length} codepoints reconstructed${f.prefix ? ` (${f.prefix} of them the prepended basmala)` : ""}` }),
   ]));
 
-  // ① the artwork. Named, never drawn — see the design doc's blind spots.
+  // ① where the words are. Outlines from the shipped geometry — still no ink.
   out.append(el("section", {}, [
-    el("h3", { text: "① the page artwork" }),
-    el("p", { class: "note", text: `Page ${DATA.pages[key]}, in apps/web/public/assets/pages/. Anonymous outlined <path>s: no letter, no ligature, no word. This tool deliberately shows none of it — it reconciles encodings, not ink. Word boxes for this ayah ship in assets/words/hafs-kfqc/${DATA.pages[key]}.json.` }),
+    el("h3", { text: "① where this ayah sits on the page" }),
+    el("p", { class: "note" }, [
+      el("span", { text: `Page ${DATA.pages[key]}, from assets/words/hafs-kfqc/${DATA.pages[key]}.json — the committed word boxes, on the same frame the app draws them on. The artwork itself (assets/pages/, anonymous outlined <path>s with no letter, ligature or word in them) is still deliberately absent: this reconciles encodings, not ink. What the boxes add is the one question the tool used to send you to the app for — ` }),
+      el("em", { text: "which" }),
+      el("span", { text: " words a span covers. Click a box, or a row in ② below, to select the annotation over it." }),
+    ]),
+    el("div", { class: "toggles" }, el("label", {}, [
+      el("input", { type: "checkbox", checked: state.context ? "" : null, onchange: (e) => { state.context = e.target.checked; render(); } }),
+      el("span", { text: "show the rest of the page" }),
+    ])),
+    outline(key, f, sel),
   ]));
 
   // ② the print's word text.
