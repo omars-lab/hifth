@@ -115,11 +115,27 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
    [`query-params.md`](query-params.md) and the run announces its own outcome. Word-granular
    **tajweed** painting is the half that is left, and its wall is not the one written above:
    the annotations are codepoint offsets into a Tanzil Uthmani text this repo does not hold
-   and will not, so it needs a third segmentation joined to the two we now have. That is its
-   own row — [`word-indexing.md` ⑤](design/word-indexing.md) — because a deferral re-pointed
-   four times is a register asking to be split, and the split is what made the remaining work
-   visible instead of merely deferred;
-   **hafiz
+   and will not. That is its own row — [`word-indexing.md` ⑤](design/word-indexing.md) —
+   because a deferral re-pointed four times is a register asking to be split, and the split
+   is what made the remaining work visible instead of merely deferred. **⑤ is answered the
+   same day it was split, and it answered against its own prediction:** it expected a third
+   segmentation and got a build change. `pnpm probe:tajweed-words` reconstructs the Tanzil
+   string from the print's own per-word `data-hafs` — nothing vendored, the no-text rule
+   intact — under eight corrections: three **structural** ones the corpus states rather than
+   guesses (basmala prefix, the print's split conjunction waw which it flags itself, pause
+   marks the print numbers as words) and five **orthographic** ones found by bracketing each
+   failing ayah between its last correct annotation and its first wrong one — a tatweel
+   carrying a small high mark, «أٓ», the small high madda, the hamza below, and the sakta
+   seen where it ends a word. It lands **99.86%** of a character oracle on the exact expected
+   letter — over **all 60,057 annotations**, since every one of the source's eighteen rules
+   now names its letters, and **93.65%** of that once each check is weighted by the chance it
+   could have failed — with **83.31%** of annotations inside one print word and **16.69%**
+   across two adjacent ones — the cross-word phonology, paintable as a range. What is left is
+   an ordinary bake with a **ten-ayah exception list, every entry named** (three of them names
+   the repo already carries in `lib/segmentation.mjs`), not a corpus hunt. `pnpm
+   probe:encodings` ([encoding-inspector.md](design/encoding-inspector.md)) is the instrument
+   those corrections were read off, and where a ninth would be. The beta label is unaffected
+   either way, because it hangs on the palette, not the geometry; **hafiz
    sign-off on the tajweed skin → Loop 7** (the beta label stays until then). **Done:**
    golden-image visual regression, Lighthouse CI, and the **⬡ chip vs ⬡ lens** collision —
    all Loop 6a ([loop-6a.md](decisions/loop-6a.md)); marquee drag-select (Loop 5);
@@ -527,6 +543,18 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     `pnpm align 2:4 [--print N | --qac N]` answers in a second, offline. The record is
     [`docs/design/word-indexing.md`](design/word-indexing.md); what is still open there is
     where the *app* reads the map, and that waits for the first caller.
+    **Tajweed was the one consumer this alignment could not serve**, because its offsets
+    address a third text — Tanzil's — and not either index here. Measured 2026-08-06 by
+    `pnpm probe:tajweed-words`, which reconstructs that text from the print's own `data-hafs`
+    instead of vendoring it, and audited to the end on 2026-08-07: **99.86%** on a character
+    oracle covering **100% of annotations** (93.65% weighted by what each check risks),
+    **83.31%** of annotations inside one print word, **16.69%** across two adjacent
+    ones, and an orthographic residual of **ten ayahs — each one named**, one of them
+    drifting more than ±2 codepoints and the rest not. Same finding as above and for the same
+    reason — the disagreement between two Uthmani segmentations is spelling, not structure —
+    and the proof is that two of the ten are the *same* two ayahs `lib/segmentation.mjs` already
+    names for the print↔QAC alignment, reached from a third text neither of those involves.
+    So the tajweed bake is priced ETL work rather than a corpus hunt.
 
 14. **An ayah polygon does not always cover the ayah.** Found by 13's registration probe, and
     the reason to state it separately is that it is not a word-selection problem — it is wrong
