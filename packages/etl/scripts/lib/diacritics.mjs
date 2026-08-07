@@ -54,6 +54,23 @@ const BOUNDARY = /<g id="md-(?:line|word|aya-mark)-/;
 const PATHS = /<path\b[^>]*\/>/g;
 
 /**
+ * Where a ligature ends. The corpus nests one level below a word:
+ *
+ *     <g id="md-word-005" data-hafs="…" data-imlaey="ذلك">
+ *       <g id="md-ligature-005-01">
+ *         <path data-type="text" data-text="ذ" d="…"/>
+ *         <g id="md-diacritic-005-01">
+ *           <path data-type="diacritic" data-diacritic="fatha" d="…"/>
+ *
+ * so a mark is not merely *in* a word, it is drawn **on named letters** — and
+ * that is the only join in this corpus between a mark and a codepoint. The
+ * split is a lookahead rather than a close-tag match because the segment is
+ * already bounded by the word above it and `<g>` nesting is not parseable by
+ * regex; the same trade `readTheirs` makes.
+ */
+const LIGATURES = /<g id="md-ligature-\d+-(\d+)">([\s\S]*?)(?=<g id="md-ligature-|$)/g;
+
+/**
  * One attribute off a tag.
  *
  * The leading `\s` is not decoration and was not free: without it, asking for
@@ -65,21 +82,69 @@ const attr = (tag, name) => tag.match(new RegExp(`\\s${name}="([^"]*)"`))?.[1] ?
 
 const round = (n) => Math.round(n * 10) / 10;
 
+const unescapeXml = (s) =>
+  s.replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&quot;/g, '"').replace(/&amp;/g, "&");
+
+/** The marks drawn inside one ligature's group, in document order. */
+function marksIn(seg, apply) {
+  const marks = [];
+  for (const p of seg.matchAll(PATHS)) {
+    const name = attr(p[0], "data-diacritic");
+    if (name === null) continue;
+    if (!isDiacriticName(name)) {
+      // A name @hifth/core has never heard of is a corpus that grew, and the
+      // only safe response is to stop. Emitting it under a made-up id would
+      // write geometry nothing can name; skipping it would silently drop a
+      // mark from a page and look like the print simply has fewer.
+      throw new Error(
+        `data-diacritic="${name}" on ${attr(p[0], "id")} is not in DIACRITICS. ` +
+          "Append it to packages/core/src/diacritics.ts — append, never reorder, " +
+          "because an id is only meaningful against that array's order.",
+      );
+    }
+    const d = attr(p[0], "d");
+    if (d === null) continue;
+    const [x0, y0, x1, y1] = apply(pathBBox(d));
+    marks.push([diacriticId(name), round(x0), round(y0), round(x1 - x0), round(y1 - y0)]);
+  }
+  return marks;
+}
+
 /**
- * Every named mark on the page, grouped by word, in their document order.
+ * Every named mark on the page, grouped by word and by the ligature inside it.
  *
  * Returns one entry per `<g id="md-word-…">` the page carries, in the same
  * order `readTheirs().words` returns them, so a caller can zip the two without
- * a join. Each entry is `{ surah, aya, idx, marks }` where `idx` is the print's
- * `data-word-index-in-ayah` — the same index the word shards' `from` counts
- * from, and emphatically not QAC's (see `build-words.mjs` on the 4,499 ayahs
- * where the two segmentations disagree).
+ * a join. Each entry is
  *
- * `marks` is `[id, x, y, w, h]` per mark, `id` indexing `DIACRITICS`, the box
- * already through `apply` and rounded to a tenth of a viewBox unit — the same
- * precision the word boxes ship at, and the smallest mark in the corpus is
- * 1.42 × 1.64 units in their frame (≈1.9 × 2.2 in ours), so a tenth cannot
- * round one away.
+ *     { surah, aya, idx, hafs, imlaey, ligatures, marks }
+ *
+ * where `idx` is the print's `data-word-index-in-ayah` — the same index the
+ * word shards' `from` counts from, and emphatically not QAC's (see
+ * `build-words.mjs` on the 4,499 ayahs where the two segmentations disagree).
+ *
+ * A mark is `[id, x, y, w, h]`, `id` indexing `DIACRITICS`, the box already
+ * through `apply` and rounded to a tenth of a viewBox unit — the same precision
+ * the word boxes ship at, and the smallest mark in the corpus is 1.42 × 1.64
+ * units in their frame (≈1.9 × 2.2 in ours), so a tenth cannot round one away.
+ *
+ * ## Why the ligatures are returned and not just flattened
+ *
+ * `marks` is the flat concatenation and is what a shard would carry: an app
+ * painting a mark needs a rectangle and a name, not a letter. `ligatures` is
+ * for the instrument rather than the asset. Each is `{ text, marks }`, `text`
+ * being the ligature's own `data-text` — the letters it draws — and that is the
+ * **only** join this corpus offers between a mark and a codepoint. Without it a
+ * mark is a rectangle inside a word and a tajweed offset can be resolved no
+ * finer than the word; with it, a word's letters are partitioned across its
+ * ligatures and each partition carries its own marks in order.
+ *
+ * The join is measured rather than assumed — `probe-diacritics.mjs` ④ reports
+ * how often a ligature's mark count equals the mark-bearing codepoints of the
+ * letters it draws, and names what is left. Nothing here acts on it; a caller
+ * that wants the correspondence reads both fields and does its own arithmetic,
+ * because the residual is the interesting part and swallowing it inside an
+ * extractor would hide it.
  *
  * @param {string} svg   a ligature-corpus page, verbatim
  * @param {(b: number[]) => number[]} apply  their frame → ours
@@ -91,31 +156,28 @@ export function readDiacritics(svg, apply) {
     const nxt = rest.match(BOUNDARY);
     const seg = nxt ? rest.slice(0, nxt.index) : rest;
 
-    const marks = [];
-    for (const p of seg.matchAll(PATHS)) {
-      const name = attr(p[0], "data-diacritic");
-      if (name === null) continue;
-      if (!isDiacriticName(name)) {
-        // A name @hifth/core has never heard of is a corpus that grew, and the
-        // only safe response is to stop. Emitting it under a made-up id would
-        // write geometry nothing can name; skipping it would silently drop a
-        // mark from a page and look like the print simply has fewer.
-        throw new Error(
-          `data-diacritic="${name}" on ${attr(p[0], "id")} is not in DIACRITICS. ` +
-            "Append it to packages/core/src/diacritics.ts — append, never reorder, " +
-            "because an id is only meaningful against that array's order.",
-        );
-      }
-      const d = attr(p[0], "d");
-      if (d === null) continue;
-      const [x0, y0, x1, y1] = apply(pathBBox(d));
-      marks.push([diacriticId(name), round(x0), round(y0), round(x1 - x0), round(y1 - y0)]);
+    const ligatures = [];
+    for (const g of seg.matchAll(LIGATURES)) {
+      ligatures.push({
+        text: unescapeXml(attr(g[2], "data-text") ?? ""),
+        marks: marksIn(g[2], apply),
+      });
     }
+
+    // Not `ligatures.flatMap` for its own sake: a mark drawn under a word but
+    // outside every ligature group would be dropped by that, and dropping a
+    // mark silently is the one thing this file exists not to do. Scanning the
+    // whole segment keeps the flat list authoritative, and ④'s ligature check
+    // is what would notice the two disagreeing.
+    const marks = marksIn(seg, apply);
 
     out.push({
       surah: Number(attr(m[2], "data-surah")),
       aya: Number(attr(m[2], "data-aya")),
       idx: Number(attr(m[2], "data-word-index-in-ayah")),
+      hafs: unescapeXml(attr(m[2], "data-hafs") ?? ""),
+      imlaey: unescapeXml(attr(m[2], "data-imlaey") ?? ""),
+      ligatures,
       marks,
     });
   }
