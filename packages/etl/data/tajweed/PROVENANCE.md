@@ -104,33 +104,44 @@
   `assets/words/**` now holds 91,451 word boxes, so the question became whether
   a codepoint span lands inside one of them. It cannot be asked directly — that
   needs the Tanzil text, which this repo does not hold — so the probe
-  *reconstructs* the text from the print's own per-word `data-hafs`, under three
-  corrections each earned by a run that failed without it: the source prefixes
-  the **basmala** to ayah 1 of every surah but 1 and 9; the print **splits the
+  *reconstructs* the text from the print's own per-word `data-hafs`, under seven
+  corrections each earned by a run that failed without it. Three are
+  **structural**, and the corpus states each one: the source prefixes the
+  **basmala** to ayah 1 of every surah but 1 and 9; the print **splits the
   conjunction waw** Tanzil joins and flags the split itself
   (`data-waw-alatf="true"`); and the print **numbers pause marks as words** while
-  this text carries none of them, so they are dropped (63.40% → 97.03%). The fold
-  is checked against an oracle rather than its own output — `hamzat_wasl` must
-  start on ٱ and `lam_shamsiyyah` on ل, 15,985 annotations that need no word
-  boundary to verify.
+  this text carries none of them, so they are dropped (63.40% → 97.03%). Four are
+  **orthographic**, found by bracketing each residual ayah between its last
+  correct annotation and its first wrong one: a small high mark on a **tatweel
+  carrier** («ـۧ», «ـۨ») that the other text writes bare; **«أٓ»**, two codepoints
+  here and three there; the **small high madda «ۤ»**; and the **hamza below «ٕ»**
+  on a seat — 97.03% → 99.81%. The fold is checked against an oracle rather than
+  its own output — `hamzat_wasl` must start on ٱ and `lam_shamsiyyah` on ل,
+  15,985 annotations that need no word boundary to verify.
 
   | measure | result |
   |---|---|
-  | oracle on the expected letter | 15,510 / 15,985 = **97.03%** |
-  | annotations inside one print word | 50,233 / 60,057 = **83.64%** |
-  | two adjacent print words | 9,818 = **16.35%** |
-  | wider than two | **4** (2:228, 12:41, 12:101, 28:83 — all `idghaam_ghunnah`) |
-  | residual | **172 ayahs**, 475 misses, all within ±3 codepoints |
+  | oracle on the expected letter | 15,955 / 15,985 = **99.81%** |
+  | annotations inside one print word | 50,032 / 60,057 = **83.31%** |
+  | two adjacent print words | 10,024 = **16.69%** |
+  | wider than two | **1** (12:41, `idghaam_ghunnah`) |
+  | past the end of the text | **0** |
+  | residual | **11 ayahs**, 30 misses, all within ±2 codepoints, each one named |
 
-  The 16.35% is the cross-word phonology — idghaam, ikhfa, iqlab — painting
+  The 16.69% is the cross-word phonology — idghaam, ikhfa, iqlab — painting
   correctly across two boxes, not a misalignment; it is also *not* the same
   number as the 16.7% above, which is against Tanzil's own tokenisation. The
-  residual is orthographic in the sense `docs/design/word-indexing.md` ③ uses:
-  166 of the 172 ayahs drift by a single constant amount, one spelling
-  difference each. **None of this lifts the beta label** — the palette waits on a
-  hafiz (`plan-tajweed-golden-row`), and a per-word colour that is wrong is worse
-  than an ayah-wide mark that is vague. It only says the eventual bake is
-  ordinary ETL work.
+  residual is orthographic in the sense `docs/design/word-indexing.md` ③ uses,
+  and it is short enough to enumerate: every one of the eleven is named in
+  `tajweed-words.probe.json` under `residual.named`, and three of them the repo
+  already names elsewhere — 12:39 and 12:41 are two of `lib/segmentation.mjs`'s
+  four print↔QAC exceptions, and 15:7 is the single 1→2 alignment singularity.
+  The orthographic corrections were made for alignment and moved paintability
+  with them unasked (past-the-end 2 → 0, wider-than-two 4 → 1), which is the
+  second reason to believe them. **None of this lifts the beta label** — the
+  palette waits on a hafiz (`plan-tajweed-golden-row`), and a per-word colour
+  that is wrong is worse than an ayah-wide mark that is vague. It only says the
+  eventual bake is ordinary ETL work.
 - **Rejected alternatives** (checked 2026-07-25, all for the licence gate):
   - **quran.com API `text_uthmani_tajweed`** — no grant of any kind, and it is
     not an independent path anyway: enumerated over all 114 surahs its rule

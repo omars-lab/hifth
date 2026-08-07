@@ -470,20 +470,44 @@ word well enough to ask whether two ayahs share phrasing and nowhere near well e
 count Uthmani codepoints. So the offsets currently resolve against nothing committed here.
 
 **What answered it, and how the heading came out wrong.** `packages/etl/scripts/probe-tajweed-words.mjs`,
-run 2026-08-06 over all 604 cached pages and all 6,236 ayahs. It does not *find* the third
+run 2026-08-06 over all 604 cached pages and all 6,236 ayahs, and audited a second time on
+2026-08-07 until every residual ayah had a name. It does not *find* the third
 text — that is still not here and still may not be — it **reconstructs** it, from the print's
 own per-word `data-hafs`, the string `build-words.mjs` reads and drops on purpose. That is a
 different move from the one this item predicted, and it is why the prediction is false: a
 build change with a named exception list, not a design problem.
 
-Three corrections make the reconstruction agree with Tanzil, each earned by a run that
-failed without it, and each stated by the corpus rather than guessed:
+Seven corrections make the reconstruction agree with Tanzil, in two kinds. Each was earned
+by a run that failed without it, and none was guessed — the first three are stated by the
+corpus, the last four were **found by bracketing**: for each ayah the oracle got wrong, read
+the reconstruction between its last *correct* annotation and its first *wrong* one, and the
+drift has to be inside that segment.
+
+*Structural — how the words are joined:*
 
 | # | correction | evidence it was needed |
 |---|---|---|
 | 1 | prepend the **basmala** to ayah 1 of every surah but 1 and 9 | 2:1's offsets run to 44 against 5 codepoints; 326 annotations out of range → 0 |
 | 2 | glue the split **conjunction waw** to its successor | the print flags it itself, `data-waw-alatf="true"`, always on «وَ» |
 | 3 | **drop the pause-mark words** — the print numbers them, this text has none | the miss histogram clustered on *even* values and decayed monotonically (0 → 63.4%, +2 → 21.0%, +4 → 7.5%), the signature of one repeated two-codepoint insertion |
+
+*Orthographic — how one grapheme is spelled.* Every one is a case where the two texts render
+the **same printed mark** with a different number of codepoints. None is a variant reading:
+
+| # | correction | what the bracket showed | oracle after |
+|---|---|---|---|
+| 4 | a small high mark on a **tatweel carrier**, «ـۧ» and «ـۨ» → the mark alone | إِبۡرَٰهِـۧم, ٱلنَّبِيِّـۧنَ, نُـۨجِي — the print seats the mark on a stretch of baseline, the offsets count the mark | 97.56% |
+| 5 | **«أٓ»** is two codepoints here, three there | ٱلۡأٓخِرَة, ٱلۡأٓيَٰت — the *length* is what is measured, not which three | 98.49% |
+| 6 | drop the **small high madda «ۤ»** | يَسۡجُدُۤ, ٱسۡجُدُواْۤ — clustered on the sajdah ayahs, which is confirmation rather than coincidence: the source is Tanzil's *pause-sajdah* edition | 99.64% |
+| 7 | drop the **hamza below «ٕ»** on a seat | شَٰطِيِٕ, إِيتَآيِٕ, ٱللُّؤۡلُوِٕ — again a length, not an identity | 99.81% |
+
+**Correction 4's narrowness is measured, not chosen.** Generalised to strip *every* U+0640 it
+scores **94.48%** — worse than applying nothing. Most tatweels are in both texts; only these
+two carriers are not. That asymmetry is the standing check on overfitting here: the rules
+apply to all 6,236 ayahs rather than the ones that motivated them, the oracle tests letter
+*identity* at a position no rule touches, and a rule that reaches too far is punished at
+once. One candidate — dropping the small high seen «ۜ» — gained 1 annotation and **zero**
+ayahs, so it was rejected and 36:52 recorded as a named exception instead.
 
 ③'s discipline applies to the result, so the fold is not trusted on its own output. Two of
 the eighteen rules name their own letter: `hamzat_wasl` must start on **ٱ**, `lam_shamsiyyah`
@@ -493,25 +517,40 @@ right.
 
 | measure | result |
 |---|---|
-| oracle lands on the expected letter | **15,510 / 15,985 = 97.03%** |
-| annotations inside **one** print word | 50,233 / 60,057 = **83.64%** |
-| two **adjacent** print words | 9,818 = **16.35%** |
-| wider than two | **4** — 2:228, 12:41, 12:101, 28:83, every one `idghaam_ghunnah` |
-| past the end of the text | 2 |
+| oracle lands on the expected letter | **15,955 / 15,985 = 99.81%** |
+| annotations inside **one** print word | 50,032 / 60,057 = **83.31%** |
+| two **adjacent** print words | 10,024 = **16.69%** |
+| wider than two | **1** — 12:41, `idghaam_ghunnah` |
+| past the end of the text | 0 |
 
-The 16.35% is not misalignment. Idghaam, ikhfa and iqlab are cross-word rules — the whole
+The 16.69% is not misalignment. Idghaam, ikhfa and iqlab are cross-word rules — the whole
 point is what happens *between* two words — and both boxes are paintable, so a two-box span
 is the correct rendering of a two-word rule rather than a failure to place a one-word one.
 
-**The residual is ③'s shape, and that is the finding.** 172 ayahs of 6,236 (2.8%) carry a
-miss. Every one of the 475 misses sits within **±3 codepoints** of the expected letter, none
-is further than ±8 away, and **166 of the 172 drift by a single constant amount** — one
-spelling difference per ayah, of one codepoint in 87% of cases. That is orthographic, not
-structural: the same class as the four exceptions `lib/segmentation.mjs` already names, at a
-larger count. It is also why paintability (99.99% within two boxes) beats alignment (97.03%):
-a one-codepoint drift inside a seven-codepoint word rarely changes which box hosts the span.
-The 172 are recorded in `tajweed-words.probe.json` and are not to be heuristised away — ③'s
-rule, unchanged.
+Corrections 4–7 were made for *alignment*, and **paintability moved with them without being
+asked to**: spans past the end went 2 → 0 and spans wider than two words went 4 → 1. That is
+the second reason to believe them. A rule that merely shifted the string to satisfy the
+oracle would have no reason to settle arithmetic the oracle cannot see.
+
+**The residual is ③'s shape, and that is the finding.** **11 ayahs of 6,236 (0.18%)** carry a
+miss, all 30 of them within ±2 codepoints, every ayah drifting by a single constant amount.
+They are not a rate — each one is **named** in `tajweed-words.probe.json` under
+`residual.named`, and three the repo already names elsewhere:
+
+| ayah(s) | why it drifts |
+|---|---|
+| 12:39, 12:41 | «يَٰصَٰحِبَيِ» — two of the four print↔QAC exceptions `lib/segmentation.mjs` already names. A **third independent witness** to the same spelling, from a text neither of those two involves |
+| 15:7 | «لَّوۡمَا» — the repo's single 1→2 alignment singularity, drifting here for the reason it drifts there |
+| 2:181, 8:6, 13:37 | «بَعۡدَ مَا» — the print splits it, the offsets' text joins it. Unlike the waw the corpus does not flag it, so it is not derivable |
+| 2:97, 17:7 | a **bare** tatweel carrying no small-high mark, which correction 4 deliberately does not reach. 17:7 also spells ٱلۡءَاخِرَةِ the long way where the same print writes أٓ elsewhere — an inconsistency inside the print itself |
+| 36:52 | «مَّرۡقَدِنَاۜ» — small high seen, the rejected rule above |
+| 95:1, 97:1 | not localisable: the *first* oracle annotation is already drifted, so there is no correct one to bracket against. Not the basmala — 112 surahs take that prefix and only these two drift |
+
+That is orthographic, not structural: the same class as `lib/segmentation.mjs`'s exceptions,
+now at a comparable count rather than a larger one. It is also why paintability (99.998%
+within two boxes) still beats alignment — a one-codepoint drift inside a seven-codepoint word
+rarely changes which box hosts the span. The eleven are recorded and are not to be
+heuristised away — ③'s rule, unchanged.
 
 **What it does not unblock, still.** The beta label. The palette waits on a hafiz
 (`plan-tajweed-golden-row`), and painting a wrong colour per word makes it wronger, not
