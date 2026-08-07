@@ -206,10 +206,13 @@ Six things, and the last two are the ones that will eventually tempt somebody.
 1. **Whether the colours are right.** This is geometry and identity only. The tajweed skin
    stays beta until a hafiz signs off on the palette (`plan-tajweed-golden-row`), and nothing
    in this tool moves that date.
-2. **Sixteen of the eighteen rules.** Only `hamzat_wasl` and `lam_shamsiyyah` name a letter
-   whose identity is not in doubt, so only they can witness alignment independently of word
-   boundaries. That is 15,985 annotations — 26.6% — and the other 73.4% inherit their
-   verdict. A report showing 99.81% is showing 99.81% *of the checkable quarter*.
+2. ~~**Sixteen of the eighteen rules.**~~ **What a hit is worth.** *(This limitation was real
+   and is gone; ⑨ ③ is the record.)* Every rule now names its letters and all 60,057
+   annotations are checked. What remains is that breadth is free — a rule admitting fifteen
+   codepoints is satisfied by accident far more often than one admitting a single ٱ — so a
+   hit rate alone is not evidence. The report weights each check by `1 − oracleDensity`, the
+   chance it would notice a one-codepoint drift; sensitivity-weighted coverage is **93.65%**,
+   and that is the number to read, not the 100%.
 3. **Tanzil's own tokenisation.** The reconstruction is *of the print*, so "two words" here
    always means two print boxes and is never a claim about how Tanzil would count.
 4. **The ink.** No glyphs, no boxes, no page geometry. This is the temptation: the boxes are
@@ -232,9 +235,10 @@ fact shared.
 
 > **Read this section as dated.** It is the first pass, made against a fold carrying the
 > **three** structural corrections, and it is kept in that state on purpose — the point of the
-> instrument is what it could see before anyone knew the answer. Four orthographic corrections
+> instrument is what it could see before anyone knew the answer. Five orthographic corrections
 > have since been written from exactly these findings, so the residual it describes (172 ayahs,
-> 475 misses, 97.03%) is no longer the residual: it is **11 ayahs, 30 misses, 99.81%**. Where a
+> 475 misses, 97.03%) is no longer the residual: it is **10 ayahs, 82 misses, 99.86%** against
+> an oracle that now checks all eighteen rules rather than two. Where a
 > paragraph below has been overtaken, a ↳ line under it says what the corrected fold measures,
 > and §9 carries the outcome. `CORRECTIONS` in `lib/tajweed-fold.mjs` is the authority on the
 > current set.
@@ -381,7 +385,7 @@ different correction set, which is precisely what making the corrections a toggl
 Before assuming any future finding is upstream, switch corrections off and watch whether it
 grows.
 
-### ③ Whether the oracle's 26.6% coverage should be widened · **open**
+### ③ Whether the oracle's 26.6% coverage should be widened · **fixed**
 
 Only two of eighteen rules name a letter, so 73.4% of annotations inherit a verdict they
 cannot witness. Several of the remaining sixteen have *nearly* characteristic letters —
@@ -398,6 +402,41 @@ being enough to find corrections with — and §7 is four corrections' worth of 
 had not stopped. It is closer to stopping now: 11 ayahs and 30 misses is a thin seam to read an
 eighth correction out of, so the case for widening is stronger than it was when this was
 written, and the argument against it is unchanged.
+
+> **Done, and the item's own warning fired twice on the way.** All eighteen rules are in
+> `ORACLE`, each as `{letters, why, near?}`, each set written **from the tajweed rule first
+> and measured second** — the other order is circular and passes on a broken fold, so `why`
+> is a required field and a test asserts it is non-empty. Coverage is **60,057/60,057 =
+> 100.00%** of annotations; the hit rate is **59,975/60,057 = 99.863%**, 82 misses across
+> **10 ayahs, all named, none unnamed**.
+>
+> `iqlab` is the first warning. Written as the high meem U+06E2 alone it scored **85.05%** —
+> a reject by this repo's own criterion — and the 84 unreachable misses all had the shape
+> «ِۭ ب». The mark is written **LOW (U+06ED) under a kasra** and high over a fatha or
+> damma. With both: 562/562. That is the oracle catching its own letter set, which is exactly
+> what this item said widening risks.
+>
+> The second is the headline number itself. A hit rate alone is not evidence, because breadth
+> is free: {ا, و, ي} is ~12% of the corpus, so a rule restricted to it would score well on a
+> fold that was simply wrong. `oracleDensity(cps, rule)` measures what fraction of positions
+> in an ayah satisfy the rule; **1 − density** is the chance the check notices a
+> one-codepoint drift. Weighted that way, coverage is **93.65%**, not 100% — and `madd_6`
+> (fifteen letters, 30% of the ayahs it appears in, 69.6% sensitivity, 148 annotations) names
+> itself in its own `why` as the entry to distrust.
+>
+> Two sets were then corrected **by** the residual rather than the reverse: `ikhfa` gained
+> U+06E8 SMALL HIGH NOON (نُۨجِي writes the hidden noon small) and `silent` gained ص (the
+> sin/sad alternate, where the letter written is not the letter read — which is what `silent`
+> means). Both say **data-led** in their own `why`, because they were added after the residual
+> pointed at them rather than written blind like the other sixteen. That order is the
+> difference between a prediction and a fit, and the fix for a fit is to say so.
+>
+> And the widening paid a dividend this item did not predict: **correction 8, `sakta-seen`,
+> had already been measured and rejected** — worth 1 annotation and 0 ayahs on the two-rule
+> oracle (36:52, in `probe-tajweed-words`' `NAMED`). Re-tried unchanged against eighteen
+> rules it closes three ayahs, because `silent`, `qalqalah`, `madd_246` and `idghaam_shafawi`
+> had no vote when it was first weighed. §8's toggles are what made that re-try one line of
+> work. A correction is only ever rejected by the instrument that was measuring.
 
 ### ④ Whether the report should be able to show a page's boxes · **open**
 

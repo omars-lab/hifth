@@ -14,15 +14,79 @@
   "oracle": {
     "hamzat_wasl": {
       "n": 13252,
-      "hit": 13229
+      "hit": 13231
     },
     "lam_shamsiyyah": {
       "n": 2733,
-      "hit": 2726
+      "hit": 2727
+    },
+    "qalqalah": {
+      "n": 3834,
+      "hit": 3828
+    },
+    "ghunnah": {
+      "n": 4946,
+      "hit": 4939
+    },
+    "idghaam_shafawi": {
+      "n": 832,
+      "hit": 832
+    },
+    "ikhfa_shafawi": {
+      "n": 496,
+      "hit": 496
+    },
+    "idghaam_mutajanisayn": {
+      "n": 58,
+      "hit": 58
+    },
+    "idghaam_mutaqaribayn": {
+      "n": 13,
+      "hit": 13
+    },
+    "ikhfa": {
+      "n": 5301,
+      "hit": 5297
+    },
+    "idghaam_ghunnah": {
+      "n": 3933,
+      "hit": 3927
+    },
+    "idghaam_no_ghunnah": {
+      "n": 1035,
+      "hit": 1033
+    },
+    "iqlab": {
+      "n": 562,
+      "hit": 562
+    },
+    "madd_2": {
+      "n": 9028,
+      "hit": 9016
+    },
+    "madd_muttasil": {
+      "n": 1997,
+      "hit": 1995
+    },
+    "madd_munfasil": {
+      "n": 3172,
+      "hit": 3168
+    },
+    "madd_246": {
+      "n": 4543,
+      "hit": 4535
+    },
+    "madd_6": {
+      "n": 148,
+      "hit": 148
+    },
+    "silent": {
+      "n": 4174,
+      "hit": 4170
     },
     "total": {
-      "n": 15985,
-      "hit": 15955
+      "n": 60057,
+      "hit": 59975
     }
   },
   "paintability": {
@@ -40,26 +104,26 @@
     ]
   },
   "residual": {
-    "ayahs": 11,
-    "misses": 30,
-    "singleDriftAyahs": 11,
+    "ayahs": 10,
+    "misses": 82,
+    "singleDriftAyahs": 7,
     "distances": {
-      "1": 9,
-      "-1": 20,
-      "-2": 1
+      "1": 27,
+      "-1": 48,
+      "beyond": 1,
+      "-2": 6
     },
     "named": {
       "12:41": "«يَٰصَٰحِبَيِ» Δ−1 — the same word, the same exception",
       "12:39": "«يَٰصَٰحِبَيِ» Δ−1 — a named print↔QAC exception, seen a third time",
-      "95:1": "Δ−1 — not localisable: the first oracle annotation is already drifted",
-      "15:7": "«لَّوۡمَا» Δ−1 — the repo's one 1→2 alignment singularity",
-      "36:52": "«مَّرۡقَدِنَاۜ» Δ+1 — SMALL HIGH SEEN; a rule for it gains 1 annotation, 0 ayahs",
       "2:181": "«بَعۡدَ مَا» Δ+1 — the print splits, the offsets' text joins",
-      "13:37": "«بَعۡدَ مَا» Δ+1 — the same join",
       "2:97": "«لِّـجِبۡرِيلَ» Δ+1 — a bare tatweel carrying no mark, so rule 4 misses it",
-      "8:6": "«بَعۡدَ مَا» Δ+1 — the same join, uncorpus-flagged so not derivable",
+      "15:7": "«لَّوۡمَا» Δ−1 — the repo's one 1→2 alignment singularity",
       "17:7": "«لِيَسُـُٔواْ» Δ−2 — a bare tatweel, and ٱلۡءَاخِرَةِ spelled the long way",
-      "97:1": "Δ−1 — not localisable, the same way"
+      "13:37": "«بَعۡدَ مَا» Δ+1 — the same join",
+      "97:1": "Δ−1 — not localisable, the same way",
+      "95:1": "Δ−1 — not localisable: the first oracle annotation is already drifted",
+      "8:6": "«بَعۡدَ مَا» Δ+1 — the same join, uncorpus-flagged so not derivable"
     },
     "unnamed": []
   }
