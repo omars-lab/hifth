@@ -387,18 +387,39 @@ document puts 326,515 named marks inside those same words. The question is wheth
 meet: when `madd_246` opens at a codepoint, is there a `maddah` box there — and if there is,
 is highlighting *it* a truer rendering of the rule than washing the whole word?
 
-**What §⑤ changed about this.** Half of it is now arithmetic. With the codepoint→name
-dictionary pinned, "does `madd_246` open at a codepoint the print draws a `maddah` for" is a
-question the corpus answers offline, without an eye and without a guess — and that half
-should be measured before anyone looks at a screen, because it is cheap and it bounds what
-the looking is for. What §⑤ did **not** close is the second half.
+**The offline half, measured.** `pnpm probe:encodings --marks` now walks every one of the
+60,057 annotations from its Tanzil offset down to a drawn path, using `lib/mark-join.mjs` —
+the same join `probe:diacritics` ④/⑤ measured, extracted so the two cannot drift. Nothing is
+guessed on the way: a word the fold *respells* is counted as not-checkable rather than
+addressed, because an offset into the respelled string is not an offset into `data-hafs`.
 
-**What would answer the rest:** the encoding inspector (mark-B). It already reconciles the
-print, the ligature corpus, QAC and the tajweed offsets on one screen for one page; adding
-the mark boxes puts all four descriptions and the geometry in one place. Two things only an
-eye settles there: whether the box the dictionary names sits where a reader looks for that
-mark, and whether lighting *it* reads as a truer rendering of the rule than washing the
-whole word. The first is §⑦'s remaining gap; the second was never a measurement at all.
+| of 60,057 annotations, where the rule's own letter is drawn | | |
+|---|---:|---:|
+| a named path — this is the rectangle to light | **28,535** | **47.51%** |
+| a base letter with no named path | 30,943 | 51.52% |
+| the word was respelt, so the offset does not address `data-hafs` | 497 | 0.83% |
+| the oracle itself misses, so there is no position to resolve | 82 | 0.14% |
+| no host, no word, or a word the join refused | **0** | **0.00%** |
+
+**The 51.52% is an answer, not a shortfall.** Ten of the eighteen rules name a *consonant* —
+`qalqalah` opens on ق, `lam_shamsiyyah` on ل, `ghunnah` on ن or م — and the print draws a
+consonant as a letter outline, not as a named mark. Those rules land on a letter 99%+ of the
+time and there is nothing above them to light. The eight that name a mark reach one almost
+always: `hamzat_wasl` → `wasla` 98.11%, `madd_2` → `superscript alef`/`small waw`/`small
+yeh` 98.58%, `iqlab` → `small meem` or a `… iqlab` composite 99.82%, and the ikhfa/idghaam
+family → the `successive fathatan/kasratan/dammatan` the print writes for them.
+
+So the shape of the finding is a **split**, not a rate: a mark-granular highlight is
+available for the rules about marks and not for the rules about letters, and any UI built on
+this has to say which it is doing. That is a design constraint mark-C inherits, and it was
+not visible before the walk.
+
+**What is still not answered, and cannot be by arithmetic:** whether the box the dictionary
+names sits where a reader *looks* for that mark, and whether lighting it reads as a truer
+rendering of the rule than washing the whole word. The inspector now draws the boxes
+(`--marks`, §⑥ of [`encoding-inspector.md`](encoding-inspector.md)) with the selected
+annotation's own mark lit inside its word, which is the screen those two questions need. The
+first is §⑦'s remaining gap; the second was never a measurement at all.
 
 **What must not happen instead:** deriving the correspondence from the fact that both
 numbers exist. Reading a mapping off where the offsets happen to land and then declaring
