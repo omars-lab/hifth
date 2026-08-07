@@ -148,7 +148,11 @@ Six views, one ayah picker, three checkboxes.
    ⑨ ④ is the record of what moved and what did not). A box carries the same even/odd tint
    its codepoints carry on the ruler at (4), so a span lit in one panel is lit in the other;
    clicking one selects the annotation over it. If the box count and the `data-hafs` word
-   count ever disagree, the view draws the geometry and **refuses to number it**;
+   count ever disagree, the view draws the geometry and **refuses to number it**. With
+   `--marks`, each word's **named marks** are drawn as hairline rectangles inside it — the
+   name and the codepoint index on hover, and the selected annotation's own mark lit inside
+   its lit word. That is the level below a word, and
+   [`sub-word-marks.md`](sub-word-marks.md) §⑧ ① is where the arithmetic behind it lives;
 2. the print's words: `data-hafs`, codepoint count, kind (word / split waw / pause mark),
    the half-open span each occupies in the fold, and the QAC word it maps to;
 3. the print↔QAC map for the ayah: every QAC word, the folded consonant skeleton the aligner
@@ -231,7 +235,11 @@ Six things, and the last two are the ones that will eventually tempt somebody.
    authority rests on being about *identity* rather than appearance. A rectangle from a
    `gate:words`-checked shard makes no claim about how anything *looks*; it says only where
    a word the tool is already reasoning about happens to sit. The distinction is the whole
-   of what ⑨ ④ decided, and it is worth holding: outlines yes, ink no.
+   of what ⑨ ④ decided, and it is worth holding: outlines yes, ink no. `--marks` goes a
+   level finer and stays on the same side of that line — a mark's rectangle is geometry from
+   `lib/diacritics.mjs` with a name from a measured dictionary, and it still draws no stroke
+   of the print. The temptation the rule anticipates gets stronger here, because a mark's box
+   is small enough that filling it in would *look* like the mark. It must not.
 5. **QAC segment granularity.** A print word maps to a QAC *word*. PREFIX/STEM/SUFFIX is not
    in the alignment and is not shown, because the alignment does not know it.
 6. **Any other print, and any other edition of QAC.** Both are pinned. A different pin is a
@@ -327,9 +335,17 @@ count so a future disagreement surfaces as a number rather than as a wrong scree
 pnpm probe:encodings                 # from the cache, all 604 pages, ~90s
 pnpm probe:encodings --fetch         # fill the cache first
 pnpm probe:encodings --pages 30      # a fast subset while changing the client
+pnpm probe:encodings --marks         # + the level below a word
 pnpm probe:encodings --out /tmp/x.html
 open packages/etl/out/encoding-inspector.html
 ```
+
+`--marks` is opt-in rather than the default for one reason, and it is a size: it puts 326,515
+more rectangles in the payload and takes the report from 5.0 MB to **13.8 MB**. The extraction
+itself is cheap — `readDiacritics` bboxes only the mark paths, so the whole corpus costs
+about a second on top of a run that already reads all 604 pages. What is expensive is the
+page a browser then has to hold. Most questions this tool is opened for are about the four
+encodings and do not need it.
 
 `packages/etl/out/` is gitignored, and that is load-bearing rather than tidy: **there is no
 Quran text in this repo and there will not be.** The report is full of Arabic; every

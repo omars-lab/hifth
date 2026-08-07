@@ -6,9 +6,11 @@
 > document is the measurement that settles which.
 
 **Status:** design of record for the **named-mark layer**. The vocabulary and the extraction
-are built and measured over all 604 pages (§③–§⑥); **nothing ships**, on purpose (§⑥). What
-is not decided is whether a tajweed span corresponds to a mark a reader can be shown, and
-whether the shards are worth their bytes — §⑧ ① and ②.
+are built and measured over all 604 pages (§③–§⑥); **nothing ships**, on purpose (§⑥). Which
+drawn path answers to which codepoint is settled — thirty-four tokens, each pinned to one
+name by elimination, validated on 62,931 runs the propagation never saw (§⑤). What is not
+decided is whether a tajweed span corresponds to a mark a reader can be shown, and whether
+the shards are worth their bytes — §⑧ ① and ②.
 
 ## How to read this, and what it is not
 
@@ -164,6 +166,155 @@ That the residual came out as *the pause marks, exactly, plus a letter pair that
 nothing on it* is the strongest evidence here that the extraction is filing marks under the
 right words: an off-by-one would have scattered the empties.
 
+### The ligature is the join to a letter
+
+Containment (above) files a mark under the right *word*. It says nothing about which
+**letter** the mark sits on, and a tajweed rule is a `[start, end)` over codepoints — so
+without a letter-level join the app could highlight a rule no finer than the whole word,
+which for «بِسۡمِ ٱللَّهِ» is most of a line. The corpus offers exactly one join, and it is
+not the one the first attempt assumed.
+
+**The rejected attempt.** Zip a word's mark-bearing codepoints against its `data-diacritic`
+paths in document order. That gives **88.79%** count agreement and a visibly wrong pairing
+tail (U+064E → shadda, U+0650 → wasla). It fails because the paths are grouped by
+*ligature*, and `dots` and `kaf-hamza` paths interleave — so position within the word is not
+codepoint order.
+
+**What the markup actually offers** is one level below the word:
+
+```
+<g id="md-word-157" data-hafs="شَيۡـٔٗا" data-imlaey="شيئا">
+  <g id="md-ligature-157-01">
+    <path data-type="text" data-text="شيا"/>          ← the letters this run draws
+    <g id="md-diacritic-157-01">
+      <path data-type="diacritic" data-diacritic="sukun"/>   ← drawn on those letters
+```
+
+So `readDiacritics` returns the ligatures alongside the flat mark list, and
+`probe:diacritics` **④** measures whether they partition the word: split `data-hafs` into the
+letters the print outlines, walk the ligatures across that partition, compare mark counts.
+All 604 pages, 2026-08-07:
+
+| of 91,451 entries the print calls words | | |
+|---|---:|---|
+| draw no letters at all — pause marks, ۩, ۞ | 4,486 | 4.91% |
+| **of the remaining 86,965** | | |
+| join cleanly — letters partition, every mark count agrees | **86,962** | **100.00%** |
+| no assignment of ligatures to letters exists | 0 | 0.00% |
+| partition, but a ligature's mark count disagrees | 3 | 0.00% |
+
+The per-ligature figure is 159,585 of 159,588, but that is conditioned on the partition
+above, so the table states the unconditional number instead. Quoting the ligature percentage
+alone would silently condition it on a filter the reader cannot see.
+
+**Eight print conventions had to be learned to get there**, each read off a markup dump
+rather than assumed. Earlier drafts of the join read 88.79%, then 97.75%, then 99.90%; the
+number moved each time a dump explained a family, and never because a rule was added to move
+it.
+
+| the text writes | the print draws | example |
+|---|---|---|
+| a bare hamza `ء` U+0621 | an outline, like any letter — **not** a named mark | «إِسۡرَٰٓءِيلَ» |
+| `\p{Lm}` modifier letters | the tatweel as a tooth folded into its neighbour; the small waw `ۥ` and small yeh `ۦ` as *named marks* | «شَيۡـٔٗا», «بِهِۦ» |
+| a vowel then an iqlab meem `ۭ` / `ۢ` | one composite glyph, `kasra iqlab` | «كَافِرِۭ», «رِكۡزَۢا» |
+| a seated hamza `أ إ ؤ ئ`, and `ٱ` | a base outline **plus** a named `hamza` / `wasla` path — **always**, whether the ligature spells `ا` or `أ` | «أَنزَلَ», «أَنَّ» |
+| the small high madda `ۤ` U+06E4 | `data-type="sajda-line"` — the overline of a sajda ayah, not a diacritic | «خَرُّواْۤ» (19:58) |
+| one letter | sometimes **two** ligatures, the second markless; and **not in reading order** | «فَلَا» → `[فلا\|ا]`, «ٱلرَّحِيمِ» → `[لر\|حيم\|ٱ]` |
+| a combining madda `ٓ` U+0653 on any of nineteen carriers | a path named `maddah` — 4,682 of them | «بِمَآ», «فِيٓ», «قَالُوٓاْ» |
+| the same madda on a hamza-carrying alef `أ` | a stroke named **`fatha`** — **277 times of 277**, never a `maddah` | «ٱلۡأٓخِرِ», «لِأٓدَمَ» |
+
+The last two rows are one convention stated as two, and it is the only place in the corpus
+where a codepoint's drawn name depends on the letter under it. The split is by carrier and
+nothing else — `ا` 2,959, `ي` 650, `و` 583, `ى` 392, `ه` 373, `ل` 305 and thirteen more all
+take the `maddah`; `أ` takes none. Whether that is the madda drawn short or a fatha standing
+in for it is a question about the print's intent, and the geometry leans the first way: the
+suspect stroke measures **0.89× an ordinary fatha on the same line** (p5 0.72, p95 1.00),
+while the `maddah` is drawn at one constant width corpus-wide. Nothing downstream needs the
+answer — one codepoint, one path, and §⑤'s propagation pins which. It is given a token of
+its own (`U+0653@hamza`) only so the codepoint→name relation stays a *function*, which is
+what makes that propagation's arithmetic work at all.
+
+The last row is why the check is no longer a left-to-right walk. `align` matches ligature
+text to letters by **content**, as a search over which ligature draws which run, so a
+ligature emitted last is assigned the letters it actually spells. That is strictly stronger
+than the length comparison it replaced: «ٱلرَّحِيمِ» used to *pass* — six letters, six drawn
+— and then misassign every mark while the totals balanced.
+
+**Three entries remain, and all three are the corpus disagreeing with itself.** They are
+named rather than absorbed, because a rule for either would be a rule for one word:
+
+1. **«أَيۡدِيهِمۡ» at 21:28 and 22:76** — the word occurs 26 times. Twenty-four draw
+   `hamza, fatha, sukun, kasra, kasra, sukun`; these two draw the same list without the
+   `hamza`. Same spelling, same everything else.
+2. **«لِيَسُـُٔواْ» at 17:7** — the print draws a `small waw` and a `maddah` its own
+   `data-hafs` writes no codepoint for. It is the only word in the corpus where a `small
+   waw` path appears without a `U+06E5`.
+
+None of the three is an alignment error — ② already proves every mark sits inside its own
+word — and none costs anything downstream, because ② is what decides whether the geometry is
+shippable and ② is exact. What ④ bounds is how much of the corpus a *letter*-level highlight
+can be offered on, and that bound is now the whole of it.
+
+### Which mark is which, without ever assuming order
+
+④ counts. Counting says a ligature drawing three letters carries three marks; it does not say
+*which* drawn path is the tanween and which is the sukun, and a rule that wants to light the
+tanween needs exactly that. The obvious answer — pair them off left to right — is not an
+answer: it assumes the print draws marks in the order the text writes them, which is the
+thing in question. An earlier draft of this document did zip them positionally and reported
+the result as evidence the gap could not be closed; that tally was an artifact of the zip,
+and §⑦ records what replaced it.
+
+**⑤ never looks at position.** Each agreeing ligature contributes a *bag* of codepoint tokens
+beside a *bag* of drawn names, and the correspondence is recovered by elimination across the
+whole corpus. If a run wants `{sukun, أ, fatha}` and the print draws `{hamza, sukun, fatha}`,
+then two being pinned elsewhere forces the third — from set arithmetic, not from where it
+sits. The mechanism is **arc consistency over bipartite matchings**: a pairing survives
+unless *no* perfect one-to-one assignment of that run's tokens to that run's names can use
+it. Plain set intersection is the wrong operator here and was tried first — it presumes the
+relation is already a function, and drove `U+0653` to an empty candidate set, which is how
+the madda convention above got found.
+
+Every run carrying **exactly one mark is held out** of the propagation, because a one-mark
+run forces its own pairing and scoring against it would report 100% by construction. What is
+left to learn from is only the ambiguous runs. All 604 pages, 2026-08-07:
+
+| | |
+|---|---:|
+| runs whose counts agree | 152,101 |
+| held out for the test — exactly one mark | 62,931 |
+| distinct token-bag / name-bag shapes to propagate over | 2,869 |
+| passes to a fixpoint | 2 |
+| **tokens pinned to exactly one name** | **34 of 34** |
+| shapes admitting no assignment at all | 0 |
+
+And on the held-out runs, which the propagation never saw:
+
+| | | |
+|---|---:|---|
+| the dictionary predicts the drawn name | **62,931** | **100.00%** |
+| predicts a different name | 0 | 0.00% |
+| a token that never appears beside another | 0 | 0.00% |
+
+The dictionary is printed in full by the probe. It is thirty-four tokens because two carry
+context — `U+064E+iqlab`, `U+0653@hamza` — for the composition reasons the conventions table
+gives; the other thirty-two are bare codepoints.
+
+**Order is measured only afterwards**, once pairing has been settled without it. Of the
+89,170 runs carrying two marks or more, **98.64% are drawn in the order the text writes
+them**. One rule, stated before it was scored, accounts for most of the rest:
+
+> **R1** — a seated hamza's own sign is drawn *after* every other mark on its ligature,
+> though the text writes it first. «يُؤۡمِنُونَ» writes damma, hamza, sukun and draws damma,
+> sukun, hamza.
+
+R1 takes it to **99.56%**, leaving 390 runs (0.44%) — «شَيۡـٔٗا», «سَيِّـَٔاتِكُمۡ»,
+«تَسۡـَٔلُواْ» and their families, all seated-hamza words where more than the hamza moves.
+A second candidate was put up the same way and **refuted by its own score**: that a shadda is
+drawn after the vowel it shares a letter with, as «وَّ» suggests. It costs forty runs,
+because «نُّؤۡمِنَ» and its family do not swap. It is recorded here and deliberately not
+implemented — a rule the corpus contradicts is worse than no rule.
+
 ## ⑥ What it would weigh, and why nothing shipped
 
 Measured as the shard text `build-words.mjs` would actually write — a `from` and a dense
@@ -188,11 +339,37 @@ That order is also the answer the user gave when asked where the marks should ap
 
 ## ⑦ What this cannot answer
 
-Whether a mark is on the *right letter*. Nothing in this repo can settle that offline — it
-would need the print's own letter order, which the corpus expresses as ligature ids this
-does not read, and in the end a reader's eye. Containment proves a mark belongs to its word;
-it says nothing about where inside the word it belongs. That is the inspector's job, and it
-is why mark-B exists as a separate step rather than a review of mark-C.
+**This section previously said the opposite, and was wrong.** It argued that no arithmetic
+could say which drawn path belongs to which codepoint, and offered as proof that the probe's
+own tally carried 611 pairings of `U+06E1` (a sukun) with a path named `hamza` — «بِٱلۡأٓخِرَةِ»
+on p2 among them. Those 611 were an artifact of *how the tally was built*: it zipped a run's
+codepoints against its paths **by position**, so every word where the print reorders — every
+seated hamza, 1.36% of multi-mark runs — was miscounted by construction. The tally was
+measuring its own assumption. §⑤'s propagation never zips, and the pairing it recovers is
+exact and validated on 62,931 held-out runs. The paragraph is retired rather than deleted so
+that the refutation is on the record, and because it is a clean example of the failure mode
+this repo keeps finding: a check that shares a mistake with the thing it checks will agree
+with it.
+
+What survives is smaller and real: **whether the ink lands where a reader's eye goes.**
+
+§⑤ closes *identity* — that a given path is the sukun and not the hamza — and via R1 it
+predicts which box carries which name for 99.56% of multi-mark runs. Every step of that is a
+correspondence between a reconstructed text and the corpus's own attributes. None of it
+looks at the picture. A print that named its paths correctly and *placed* one of them a
+letter to the left would satisfy ①–⑤ exactly as a correct one does, because nothing here
+ever asks where the outline sits relative to the letter that wrote it.
+
+That is not a gap arithmetic can close from inside the file, and it does not need to be
+large to matter: a tanween highlight that lights the letter beside the tanween is worse than
+no highlight, because a hafiz would trust it. It is why mark-B puts the boxes on the page for
+a human before mark-C ships anything, and why mark-B is a separate step rather than a review
+of mark-C.
+
+The 390 runs R1 leaves are the concrete place to start looking — they are enumerated by
+family in the probe's output, they are almost all seated-hamza words, and if the inspector
+shows their marks sitting correctly then the residual is an ordering curiosity rather than a
+placement defect.
 
 ---
 
@@ -210,11 +387,39 @@ document puts 326,515 named marks inside those same words. The question is wheth
 meet: when `madd_246` opens at a codepoint, is there a `maddah` box there — and if there is,
 is highlighting *it* a truer rendering of the rule than washing the whole word?
 
-**What would answer it:** the encoding inspector (mark-B). It already reconciles the print,
-the ligature corpus, QAC and the tajweed offsets on one screen for one page; adding the mark
-boxes puts all four descriptions and the geometry in one place where a human can see whether
-a span and a mark coincide. Nothing offline can do this — the correspondence is between a
-codepoint in a reconstructed text and an outline on a page, and only an eye closes that gap.
+**The offline half, measured.** `pnpm probe:encodings --marks` now walks every one of the
+60,057 annotations from its Tanzil offset down to a drawn path, using `lib/mark-join.mjs` —
+the same join `probe:diacritics` ④/⑤ measured, extracted so the two cannot drift. Nothing is
+guessed on the way: a word the fold *respells* is counted as not-checkable rather than
+addressed, because an offset into the respelled string is not an offset into `data-hafs`.
+
+| of 60,057 annotations, where the rule's own letter is drawn | | |
+|---|---:|---:|
+| a named path — this is the rectangle to light | **28,535** | **47.51%** |
+| a base letter with no named path | 30,943 | 51.52% |
+| the word was respelt, so the offset does not address `data-hafs` | 497 | 0.83% |
+| the oracle itself misses, so there is no position to resolve | 82 | 0.14% |
+| no host, no word, or a word the join refused | **0** | **0.00%** |
+
+**The 51.52% is an answer, not a shortfall.** Ten of the eighteen rules name a *consonant* —
+`qalqalah` opens on ق, `lam_shamsiyyah` on ل, `ghunnah` on ن or م — and the print draws a
+consonant as a letter outline, not as a named mark. Those rules land on a letter 99%+ of the
+time and there is nothing above them to light. The eight that name a mark reach one almost
+always: `hamzat_wasl` → `wasla` 98.11%, `madd_2` → `superscript alef`/`small waw`/`small
+yeh` 98.58%, `iqlab` → `small meem` or a `… iqlab` composite 99.82%, and the ikhfa/idghaam
+family → the `successive fathatan/kasratan/dammatan` the print writes for them.
+
+So the shape of the finding is a **split**, not a rate: a mark-granular highlight is
+available for the rules about marks and not for the rules about letters, and any UI built on
+this has to say which it is doing. That is a design constraint mark-C inherits, and it was
+not visible before the walk.
+
+**What is still not answered, and cannot be by arithmetic:** whether the box the dictionary
+names sits where a reader *looks* for that mark, and whether lighting it reads as a truer
+rendering of the rule than washing the whole word. The inspector now draws the boxes
+(`--marks`, §⑥ of [`encoding-inspector.md`](encoding-inspector.md)) with the selected
+annotation's own mark lit inside its word, which is the screen those two questions need. The
+first is §⑦'s remaining gap; the second was never a measurement at all.
 
 **What must not happen instead:** deriving the correspondence from the fact that both
 numbers exist. Reading a mapping off where the offsets happen to land and then declaring
