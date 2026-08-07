@@ -259,6 +259,18 @@ export {
   type TajweedLookup,
 } from "./skins.js";
 
+// The print's own mark vocabulary — what the ligature corpus draws above and
+// below a letter, and the integer sub-word geometry calls each one by. Not the
+// tajweed rules above: these are marks the print draws, those are rules a
+// reader applies, and the two are indexed against different corpora.
+export {
+  DIACRITICS,
+  diacriticId,
+  diacriticName,
+  isDiacriticName,
+  type DiacriticName,
+} from "./diacritics.js";
+
 // Loop 6a — wayfinding: the jumper's query language, the app-level keyboard
 // precedence rule, and the edition registry + cross-edition concordance seam.
 export {
