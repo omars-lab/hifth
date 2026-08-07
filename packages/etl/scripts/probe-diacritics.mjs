@@ -54,17 +54,31 @@
  * ④ is a measurement and does not affect the exit code. It is describing a
  * property of somebody else's file, not asserting one about ours.
  *
- * ## Why ④ is not chased to 100%
+ * ## Where the residual went, and why it stops at three
  *
- * Every rule in `letters` and `expected` below was added because reading the
- * markup showed the print doing something, and each one is stated as the print's
- * convention with the word that demonstrated it. That is a bounded exercise.
- * The 85 entries still disagreeing could be driven to zero by adding rules
- * until they are, but a rule added to move a number is a rule fitted to the
- * data, and it would make ④ agree with the corpus by construction — which is
- * exactly the property that would stop it from being evidence. So the residual
- * is printed with its cause and its example and left alone. `sub-word-marks.md`
- * §⑤ names the four families it falls into.
+ * ④ was chased to 100% on request, and the interesting part is that it got
+ * there without a single rule invented to make it. Every rule in `letters`,
+ * `expected` and `align` below was added because a markup dump showed the print
+ * doing something, and each is stated with the word that demonstrated it — the
+ * seated hamza on «أَنَّ», the sajda overline on «خَرُّواْۤ», the second alef
+ * stroke of «فَلَا», the out-of-order `ٱ` in «ٱلرَّحِيمِ», the tatweel inside
+ * «مَـَٔابٗا»'s `data-text`. That order matters: a rule added to move a number
+ * would make ④ agree with the corpus by construction, which is precisely the
+ * property that would stop it from being evidence.
+ *
+ * Three of 86,965 entries remain, and they are named here rather than absorbed
+ * because neither is a convention — both are the corpus disagreeing with
+ * itself, and a rule for either would be a rule for one word:
+ *
+ * - **p324 21:28#4 and p341 22:76#4, «أَيۡدِيهِمۡ».** The word occurs 26 times.
+ *   Twenty-four draw `hamza, fatha, sukun, kasra, kasra, sukun`; these two draw
+ *   the same list without the `hamza`. Same spelling, same marks otherwise.
+ * - **p282 17:7#15, «لِيَسُـُٔواْ».** The print draws a `small waw` and a
+ *   `maddah` for which its own `data-hafs` has no codepoint. It is the only word
+ *   in the corpus where a `small waw` path appears without a `U+06E5`.
+ *
+ * Neither costs us anything downstream: ② is what decides whether the geometry
+ * is shippable, and ② is exact.
  *
  * ## What it deliberately does not check
  *
@@ -133,26 +147,52 @@ const SLACK = 0.2;
  * Both rules are Unicode's own categories rather than a codepoint list this
  * repo maintains, because a list would be a third place with an opinion about
  * Arabic marks and would drift from the other two.
+ *
+ * The class is `const` and shared with `align`, which has to fold a ligature's
+ * `data-text` by exactly the same rule for the two to be comparable at all.
+ * `FOLD` tests one character and `FOLDS` strips a run; they are the same class
+ * written once, because two copies of it would be the drift this paragraph is
+ * about.
  */
+const FOLD_CLASS = "[\\p{Mn}\\p{Lm}]";
+const FOLD = new RegExp(FOLD_CLASS, "u");
+const FOLDS = new RegExp(FOLD_CLASS, "gu");
+
 function letters(hafs) {
   const out = [];
   for (const c of hafs) {
-    if (/[\p{Mn}\p{Lm}]/u.test(c) && out.length) out[out.length - 1].marks.push(c);
+    if (FOLD.test(c) && out.length) out[out.length - 1].marks.push(c);
     else out.push({ letter: c, marks: [] });
   }
   return out;
 }
 
 /**
- * A hamza the print draws as a base outline with a separate named path on top,
- * so that one codepoint in the text is two things on the page.
+ * A hamza form written as one codepoint, and the carrier it is written on.
  *
- * The bare hamza `ء` `U+0621` is deliberately **not** here, and that was the
- * other half of ④'s first draft being wrong: it is drawn as `data-type="text"`
- * like any other letter, because it has no carrier to sit on. Its four seated
- * forms and the alef wasla do get their own path.
+ * Two separate facts live here, and conflating them cost a pass of the corpus.
+ *
+ * **The print always draws the sign.** `أ` gets a `hamza` path, `ٱ` a `wasla`
+ * path, every time, in all 9,168 and 13,476 places they occur. The ligature's
+ * own spelling does *not* decide it: «أَنَّ» on p119 is drawn `[أ | ن]` and the
+ * first ligature still carries `hamza` then `fatha`. Making the expectation
+ * conditional on the ligature spelling the bare carrier — which a first reading
+ * of «أَيۡدِيهِمۡ» seemed to show — put 151 words on seven pages into the
+ * residual, and the markup dump said plainly why.
+ *
+ * **The spelling still matters for matching.** `align` compares a ligature's
+ * `data-text` to the word's letters, and the two disagree about the carrier: a
+ * ligature may spell `ا` where the word writes `أ`. So `base()` folds a hamza
+ * form to its carrier for that comparison only, and never for what the print
+ * is expected to draw.
+ *
+ * The bare hamza `ء` `U+0621` is deliberately absent: with no carrier to sit
+ * on it is drawn as `data-type="text"` like any other letter, always.
  */
-const CARRIES_ITS_OWN = /[آأؤإئٱ]/;
+const HAMZA_ON = { آ: "ا", أ: "ا", إ: "ا", ٱ: "ا", ؤ: "و", ئ: "ي" };
+
+/** The letter under a hamza form, for matching a ligature's text to the word's. */
+const base = (c) => HAMZA_ON[c] ?? c;
 
 /** A short vowel or a tanween — the thing an iqlab meem merges into. */
 const VOWEL = /[ً-ِٗٞ]/;
@@ -175,23 +215,108 @@ const IQLAB = /[ۭۢ]/;
 const TATWEEL = "ـ";
 
 /**
+ * `U+06E4`, the small high madda — which in this print is not a mark at all.
+ *
+ * Every word carrying it sits in a sajda ayah (13:15, 17:107, 19:58 …) and the
+ * print draws it as `data-type="sajda-line"`: the overline stretched above the
+ * phrase a reader prostrates at, not a diacritic over a letter. It has no
+ * `data-diacritic`, so `readDiacritics` never sees it, and expecting one for it
+ * was counting a rubric as a vowel.
+ */
+const SAJDA_LINE = "ۤ";
+
+/**
  * Which codepoints of a letter the print draws a *named* path for, in order.
  *
- * Its marks and, for a seated hamza, itself — with one merge. `DIACRITICS`
- * carries `fatha iqlab`, `kasra iqlab` and `damma iqlab` as names in their own
- * right, so where the text writes a vowel followed by `ۭ` the print draws a
- * single composite glyph rather than two: `كَافِرِۭ` is two paths on `فر`, not
- * three. Collapsing them here is not a fudge to raise the number — it is the
- * same fact the vocabulary already states, read from the other end.
+ * The hamza or wasla sign comes first where the letter is a hamza form, because
+ * that is the order the print draws it in: «أَنَّ» is `hamza` then `fatha`. It
+ * is not universal — «ٱلۡمَلَؤُاْ» draws `damma` before the `hamza` on its `ؤ` —
+ * and ④ compares counts, so the two disagree without failing. §⑦ of
+ * `sub-word-marks.md` is about exactly that gap.
+ *
+ * The marks follow, minus the two the print draws by other means (the tatweel's
+ * tooth, the sajda overline) and with one merge: `DIACRITICS` carries `fatha
+ * iqlab`, `kasra iqlab` and `damma iqlab` as names in their own right, so where
+ * the text writes a vowel followed by `ۭ` the print draws a single composite
+ * glyph — «كَافِرِۭ» is two paths on `فر`, not three. Collapsing them is not a
+ * fudge to raise the number; it is the same fact the vocabulary already states,
+ * read from the other end.
  */
 function expected(l) {
-  const out = CARRIES_ITS_OWN.test(l.letter) ? [l.letter] : [];
+  const out = [];
+  if (HAMZA_ON[l.letter]) out.push(l.letter);
   for (const m of l.marks) {
-    if (m === TATWEEL) continue;
+    if (m === TATWEEL || m === SAJDA_LINE) continue;
     if (IQLAB.test(m) && out.length && VOWEL.test(out[out.length - 1])) continue;
     out.push(m);
   }
   return out;
+}
+
+/**
+ * Assign each ligature the letters it draws, or `null` if no assignment exists.
+ *
+ * The obvious implementation — walk the ligatures in document order, handing
+ * each the next `text.length` letters — is what ④'s previous draft did, and it
+ * is wrong in two ways the markup shows plainly:
+ *
+ * **Document order is not reading order.** «ٱلرَّحِيمِ» on p379 is drawn as
+ * `[لر | حيم | ٱ]`: the alef wasla is a separate ligature emitted *last*. Six
+ * letters, six drawn, so a length check passes — and then every mark is
+ * assigned to the wrong letter while the totals still balance. That is the
+ * failure mode this whole file exists to catch, and counting alone cannot see
+ * it.
+ *
+ * **A letter can be drawn twice.** «فَلَا» is `[فلا | ا]` — four letters drawn
+ * for a three-letter word, because the print puts the alef's stroke in a second
+ * ligature. Those continuation runs carry no marks of their own, which is what
+ * makes them safe to recognise: a repeat that carried marks would be a
+ * different phenomenon and would still fail here.
+ *
+ * So this matches on **content** rather than length, over `base()` so that a
+ * ligature spelling `ا` matches a word writing `أ`. A ligature may take the
+ * next letters, or re-draw letters already taken if it has no marks. The search
+ * is a DFS over (position, set of ligatures used) with memoisation; words have
+ * a handful of ligatures, so the state space is tiny.
+ *
+ * Both sides are reduced the same way, which is the only thing that makes the
+ * comparison meaningful: `letters` folds a `\p{Lm}` into the letter before it,
+ * so a ligature's `data-text` has to be folded too. It carries the tatweel —
+ * «مَـَٔابٗا» is drawn `[مـا | با]`, tatweel and all — and leaving it in made
+ * ten seated-hamza words on the last two juz look unassignable when they are
+ * simply spelt with the tooth the print draws them with.
+ *
+ * Matching on content is strictly stronger than the length check it replaces —
+ * some words that used to pass the partition now fail it, and that is the point.
+ */
+function align(ls, ligs) {
+  const target = ls.map((l) => base(l.letter)).join("");
+  const texts = ligs.map((l) => [...l.text.replace(FOLDS, "")].map(base));
+  const all = (1 << ligs.length) - 1;
+  const memo = new Map();
+
+  const go = (pos, used) => {
+    if (pos === target.length && used === all) return [];
+    const key = pos * (all + 1) + used;
+    if (memo.has(key)) return memo.get(key);
+    let out = null;
+    for (let i = 0; i < ligs.length && !out; i += 1) {
+      if (used & (1 << i)) continue;
+      const t = texts[i];
+      const fits = (from) => from >= 0 && t.every((c, j) => target[from + j] === c);
+      if (pos + t.length <= target.length && fits(pos)) {
+        const rest = go(pos + t.length, used | (1 << i));
+        if (rest) out = [{ lig: i, from: pos, to: pos + t.length }, ...rest];
+      }
+      if (!out && !ligs[i].marks.length && fits(pos - t.length)) {
+        const rest = go(pos, used | (1 << i));
+        if (rest) out = [{ lig: i, from: pos - t.length, to: pos, redraw: true }, ...rest];
+      }
+    }
+    memo.set(key, out);
+    return out;
+  };
+  return go(0, 0);
 }
 
 const cp = (c) => `U+${c.codePointAt(0).toString(16).toUpperCase().padStart(4, "0")}`;
@@ -265,20 +390,24 @@ for (const page of wanted) {
     } else {
       if (drawn === w.imlaey) textIsImlaey += 1;
       const ls = letters(w.hafs);
-      if (ls.length !== [...drawn].length) {
+      const plan = align(ls, w.ligatures);
+      if (!plan) {
         bucket.partition += 1;
         blame(
-          `hafs has ${ls.length} letters, its ligatures draw ${[...drawn].length}`,
+          `no assignment of ligatures to letters — hafs “${ls.map((l) => l.letter).join("")}”`,
           `${where} → [${w.ligatures.map((l) => l.text).join("|")}]`,
         );
       } else {
-        let cut = 0;
         let ok = true;
-        for (const l of w.ligatures) {
+        for (const step of plan) {
+          const l = w.ligatures[step.lig];
+          // A redraw is the second stroke of a letter already drawn. It has no
+          // marks by the rule that recognised it, so there is nothing to check
+          // and nothing to count — counting it as a ligature would inflate the
+          // denominator with runs that cannot disagree.
+          if (step.redraw) continue;
           ligatures += 1;
-          const n = [...l.text].length;
-          const want = ls.slice(cut, cut + n).flatMap(expected);
-          cut += n;
+          const want = ls.slice(step.from, step.to).flatMap(expected);
           if (want.length !== l.marks.length) {
             ok = false;
             blame(
@@ -393,7 +522,7 @@ console.log(
 );
 console.log(
   `      ${String(bucket.partition).padStart(7)}  (${pct(bucket.partition, lettered).padStart(5)}%)  ` +
-    "their ligature texts do not partition the hafs letters",
+    "no assignment of their ligatures to their letters exists",
 );
 console.log(
   `      ${String(bucket.counts).padStart(7)}  (${pct(bucket.counts, lettered).padStart(5)}%)  ` +
