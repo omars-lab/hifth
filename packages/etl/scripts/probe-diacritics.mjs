@@ -15,7 +15,7 @@
  * out whether the boxes are trustworthy before paying two megabytes to send
  * them to a phone.
  *
- * ## The four questions, and why these four
+ * ## The five questions, and why these five
  *
  * **① Does the vocabulary hold?** Every `data-diacritic` value in the corpus
  * must be one `@hifth/core` knows. `readDiacritics` throws otherwise, so this
@@ -54,6 +54,27 @@
  * ④ is a measurement and does not affect the exit code. It is describing a
  * property of somebody else's file, not asserting one about ours.
  *
+ * **⑤ Which mark is which?** ④ counts. Counting says a ligature drawing three
+ * letters carries three marks; it does not say which drawn path is the tanween
+ * and which is the sukun, and a tajweed rule that wants to light the tanween
+ * needs exactly that. The obvious answer — pair them off left to right — is not
+ * an answer at all: it *assumes* the print draws marks in the order the text
+ * writes them, which is the thing in question, and assuming it manufactures
+ * agreement out of nothing.
+ *
+ * So ⑤ never looks at position. Each agreeing ligature contributes a *bag* of
+ * codepoint tokens beside a *bag* of drawn names, and the correspondence is
+ * recovered by elimination across the whole corpus: if a run wants
+ * `{sukun, أ, fatha}` and the print draws `{hamza, sukun, fatha}`, then once
+ * two are pinned elsewhere the third follows from set arithmetic. The mechanism
+ * is arc consistency over bipartite matchings — `supported` states why that and
+ * not plain intersection.
+ *
+ * It is checked on data it was not shown. Every run carrying exactly one mark is
+ * **held out** of the propagation, because a one-mark run forces its own pairing
+ * and scoring against it would report 100% by construction. Order is measured
+ * only afterwards, once pairing is settled without it.
+ *
  * ## Where the residual went, and why it stops at three
  *
  * ④ was chased to 100% on request, and the interesting part is that it got
@@ -82,18 +103,26 @@
  *
  * ## What it deliberately does not check
  *
- * Whether a mark is on the *right* letter. ④ can show that a ligature drawing
- * three letters carries the three marks those letters call for; it cannot show
- * that the second mark is over the second letter and not the third. Counts are
- * necessary and not sufficient, and nothing offline closes that gap — it is a
- * correspondence between a codepoint in a reconstructed text and an outline on
- * a page, and only an eye closes it. That check belongs to the encoding
- * inspector (mark-B), where a human sees the boxes on the page beside the three
- * other encodings.
+ * Whether a mark is drawn where a reader would look for it. ⑤ closes *which*
+ * path is which — the token a path belongs to, and via R1 which box on the page
+ * carries it. What no count and no set arithmetic can reach is the last step:
+ * that the path so identified is physically over the letter that wrote it, and
+ * not floating a letter to its left. Everything here is a correspondence
+ * between a reconstructed text and an outline on a page, established through
+ * the corpus's own attributes; whether the ink lands where a reader's eye goes
+ * is a claim about the picture, and only an eye settles it. That check belongs
+ * to the encoding inspector (mark-B), where a human sees the boxes on the page
+ * beside the three other encodings.
  *
  * Usage:
- *   pnpm --filter @hifth/etl probe:diacritics
- *   pnpm --filter @hifth/etl probe:diacritics --pages 1,2,7
+ *   pnpm probe:diacritics                 # all 604 cached pages
+ *   pnpm probe:diacritics --pages 1,2,7   # a fast subset
+ *
+ * (from the repo root — the script is registered there, not in this package)
+ *
+ * On a subset ⑤ is reporting what those pages alone can settle: the dictionary
+ * is a corpus-scale result, and a handful of pages will leave tokens open. The
+ * numbers quoted in `docs/design/sub-word-marks.md` are the full-corpus run.
  */
 import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
@@ -226,29 +255,58 @@ const TATWEEL = "ـ";
 const SAJDA_LINE = "ۤ";
 
 /**
- * Which codepoints of a letter the print draws a *named* path for, in order.
+ * `U+0653` on a `أ` — the one place the print refuses its own `maddah`.
+ *
+ * Every other carrier of a combining madda gets a path named `maddah`: the alef
+ * of «بِمَآ», the yeh of «فِيٓ», the waw of «قَالُوٓاْ», nineteen letters in all,
+ * 4,682 paths. The hamza-carrying alef gets one **277 times out of 277 and never
+ * a `maddah`** — the print draws a stroke it names `fatha`, and the outline
+ * bears that out: measured against an ordinary fatha on the same line it is a
+ * shortened version of the same curve (median 0.89×, p5 0.72×), not the maddah's
+ * hooked wave, which is drawn at one constant width throughout the corpus.
+ *
+ * Whether that is the madda rendered short or a fatha standing in for it is a
+ * question about the print's intent, and this file does not have to answer it:
+ * one codepoint, one path, and ⑤ pins which. It is given a token of its own only
+ * so that the relation stays a *function*, which is what makes ⑤'s arithmetic
+ * work — without it `U+0653` maps to two names and arc consistency correctly
+ * reports a contradiction rather than a dictionary.
+ */
+const MADDA = "ٓ";
+const MADDA_ON_HAMZA = "أ";
+
+/**
+ * The *tokens* of a letter — one per named path the print is expected to draw,
+ * in the order the text writes them.
+ *
+ * A token is usually just a codepoint, `"U+064E"`. Two carry context, because
+ * the print composes and the composite has a name of its own:
+ *
+ * - `"U+064E+iqlab"` — `DIACRITICS` carries `fatha iqlab`, `kasra iqlab` and
+ *   `damma iqlab` as names in their own right, so where the text writes a vowel
+ *   followed by `ۭ` the print draws a single glyph: «كَافِرِۭ» is two paths on
+ *   `فر`, not three.
+ * - `"U+0653@hamza"` — see `MADDA_ON_HAMZA` above.
  *
  * The hamza or wasla sign comes first where the letter is a hamza form, because
- * that is the order the print draws it in: «أَنَّ» is `hamza` then `fatha`. It
- * is not universal — «ٱلۡمَلَؤُاْ» draws `damma` before the `hamza` on its `ؤ` —
- * and ④ compares counts, so the two disagree without failing. §⑦ of
- * `sub-word-marks.md` is about exactly that gap.
+ * that is the order the text writes it in. The print often disagrees — «أَنَّ»
+ * draws `hamza` then `fatha` but «ٱلۡمَلَؤُاْ» draws `damma` then `hamza` — and
+ * that disagreement is not swept up here. ④ compares counts and is blind to it;
+ * ⑤ measures it directly and states the rule it follows.
  *
- * The marks follow, minus the two the print draws by other means (the tatweel's
- * tooth, the sajda overline) and with one merge: `DIACRITICS` carries `fatha
- * iqlab`, `kasra iqlab` and `damma iqlab` as names in their own right, so where
- * the text writes a vowel followed by `ۭ` the print draws a single composite
- * glyph — «كَافِرِۭ» is two paths on `فر`, not three. Collapsing them is not a
- * fudge to raise the number; it is the same fact the vocabulary already states,
- * read from the other end.
+ * Excluded are the two codepoints the print draws by other means: the tatweel's
+ * tooth, folded into a neighbour, and the sajda overline.
  */
 function expected(l) {
   const out = [];
-  if (HAMZA_ON[l.letter]) out.push(l.letter);
+  if (HAMZA_ON[l.letter]) out.push(cp(l.letter));
   for (const m of l.marks) {
     if (m === TATWEEL || m === SAJDA_LINE) continue;
-    if (IQLAB.test(m) && out.length && VOWEL.test(out[out.length - 1])) continue;
-    out.push(m);
+    if (IQLAB.test(m) && out.length && isVowel(out[out.length - 1])) {
+      out[out.length - 1] += "+iqlab";
+      continue;
+    }
+    out.push(m === MADDA && l.letter === MADDA_ON_HAMZA ? `${cp(m)}@hamza` : cp(m));
   }
   return out;
 }
@@ -321,6 +379,9 @@ function align(ls, ligs) {
 
 const cp = (c) => `U+${c.codePointAt(0).toString(16).toUpperCase().padStart(4, "0")}`;
 
+/** Does a token name a vowel? `parseInt` stops at the `+` or `@` of a suffix. */
+const isVowel = (token) => VOWEL.test(String.fromCodePoint(parseInt(token.slice(2), 16)));
+
 const pin = JSON.parse(readFileSync(PIN, "utf8"));
 const rows = new Map(pin.pages.map((p) => [p.page, p]));
 const wanted = only ?? pin.pages.map((p) => p.page);
@@ -350,8 +411,16 @@ const bucket = {
 let ligatures = 0;
 let ligaturesAgree = 0;
 let textIsImlaey = 0;
-const pairs = new Map(); //   "U+0650 → kasra" → n, only where a ligature's counts agree
 const why = new Map(); //     a compact signature of a disagreement → [n, example]
+
+/**
+ * ⑤'s corpus: one entry per ligature whose counts agree, holding the tokens the
+ * text writes, the names the print drew, and where to look. The two lists are
+ * the same length and in no stated correspondence — establishing one is ⑤'s
+ * whole job, and zipping them here by position would answer the question by
+ * assuming it.
+ */
+const runs = [];
 
 const blame = (sig, example) => {
   const e = why.get(sig) ?? [0, example];
@@ -417,10 +486,12 @@ for (const page of wanted) {
             continue;
           }
           ligaturesAgree += 1;
-          for (let k = 0; k < want.length; k += 1) {
-            const p = `${cp(want[k])} ${want[k]} → ${diacriticName(l.marks[k][0])}`;
-            pairs.set(p, (pairs.get(p) ?? 0) + 1);
-          }
+          // ⑤'s raw material: a bag of tokens the text writes beside a bag of
+          // names the print drew, and no claim about which goes with which. A
+          // ligature carrying no marks at all agrees vacuously and constrains
+          // nothing, so it is left out rather than counted as a run — in the
+          // denominator it would only dilute ⑤'s held-out percentage.
+          if (want.length) runs.push([want, l.marks.map((m) => diacriticName(m[0])), where]);
         }
         bucket[ok ? "joined" : "counts"] += 1;
       }
@@ -544,9 +615,261 @@ for (const [sig, [n, example]] of [...why].sort((a, b) => b[1][0] - a[1][0]).sli
   console.log(`      ${String(n).padStart(7)}  ${sig}\n${" ".repeat(15)}e.g. ${example}`);
 }
 
-console.log("\n      codepoint → name, where a ligature's counts agree:");
-for (const [p, n] of [...pairs].sort((a, b) => b[1] - a[1]).slice(0, 20)) {
-  console.log(`      ${String(n).padStart(7)}  ${p}`);
+// ── ⑤ which mark is which ────────────────────────────────────────────────────
+
+/**
+ * The relation, one entry per token: the set of names it might be drawn as.
+ *
+ * Seeded from co-occurrence — every name any run drew beside this token — and
+ * then narrowed. The seed is deliberately generous: a token starts out able to
+ * be anything it was ever seen next to, and only elimination takes names away.
+ */
+const may = new Map();
+
+/**
+ * Every `(token, name)` pairing that *some* one-to-one assignment of this run
+ * can use, given what the relation currently allows.
+ *
+ * This is arc consistency over a bipartite matching, and the distinction from
+ * plain set intersection matters enough to state: intersection would say "this
+ * token was seen beside `{a, b}` here and `{b, c}` there, so it must be `b`",
+ * which is only valid if the relation is a function to begin with. It is not
+ * known to be one — that is what ⑤ is establishing — and assuming it drove
+ * `U+0653` to an empty candidate set on the first attempt. Here a pairing
+ * survives unless *no* perfect assignment of this run's tokens to this run's
+ * names can use it, which is a claim about the run alone and cannot be wrong.
+ *
+ * `reach[i]` is the set of name-subsets consumable by the first `i` tokens;
+ * `canFinish` asks whether the remaining tokens can consume what is left. A
+ * pairing is supported when it lies on a path through both. Runs hold at most a
+ * handful of marks, so the `2^k` masks are cheap, and both halves memoise.
+ *
+ * Returns an empty map when the run admits no assignment at all — a
+ * contradiction, which is reported rather than absorbed.
+ */
+function supported(want, got) {
+  const k = want.length;
+  const all = (1 << k) - 1;
+  const ok = (i, j) => may.get(want[i]).has(got[j]);
+  const feas = new Map();
+  const canFinish = (i, mask) => {
+    if (i === k) return mask === all;
+    const key = i * (all + 1) + mask;
+    if (feas.has(key)) return feas.get(key);
+    let v = false;
+    for (let j = 0; j < k && !v; j += 1) {
+      if (!(mask & (1 << j)) && ok(i, j)) v = canFinish(i + 1, mask | (1 << j));
+    }
+    feas.set(key, v);
+    return v;
+  };
+  const reach = Array.from({ length: k + 1 }, () => new Set());
+  reach[0].add(0);
+  const usable = new Map();
+  for (let i = 0; i < k; i += 1) {
+    for (const mask of reach[i]) {
+      for (let j = 0; j < k; j += 1) {
+        if (mask & (1 << j)) continue;
+        if (!ok(i, j) || !canFinish(i + 1, mask | (1 << j))) continue;
+        reach[i + 1].add(mask | (1 << j));
+        if (!usable.has(want[i])) usable.set(want[i], new Set());
+        usable.get(want[i]).add(got[j]);
+      }
+    }
+  }
+  return usable;
+}
+
+/**
+ * Runs with exactly one mark are **held out**, and that is the load-bearing
+ * choice in ⑤.
+ *
+ * A one-mark run forces its own pairing: one token, one name, nothing to
+ * decide. Feed it to the propagation and then "check" the dictionary against
+ * it and the answer is 100% by construction — the check would be reading back
+ * what it was told. Withheld, the same runs become a genuine test set of
+ * pairings the propagation never saw and cannot have fitted, and they are the
+ * overwhelming majority of the corpus.
+ *
+ * What the propagation learns from is therefore only the multi-mark runs, where
+ * every pairing is ambiguous on its own and can only be settled by arithmetic
+ * across runs.
+ */
+const shapes = new Map();
+let singles = 0;
+for (const [want, got, where] of runs) {
+  if (want.length < 2) {
+    singles += 1;
+    continue;
+  }
+  const k = `${want.join(",")}|${got.join(",")}`;
+  const s = shapes.get(k);
+  if (s) s.n += 1;
+  else shapes.set(k, { want, got, where, n: 1 });
+}
+
+for (const { want, got } of shapes.values()) {
+  for (const t of want) {
+    if (!may.has(t)) may.set(t, new Set());
+    for (const n of got) may.get(t).add(n);
+  }
+}
+
+const dead = [];
+let passes = 0;
+for (;;) {
+  passes += 1;
+  let cut = 0;
+  for (const sh of shapes.values()) {
+    const usable = supported(sh.want, sh.got);
+    if (!usable.size) {
+      if (!sh.dead) {
+        sh.dead = true;
+        dead.push(sh);
+      }
+      continue;
+    }
+    for (const [t, allowed] of usable) {
+      for (const n of may.get(t)) {
+        if (!allowed.has(n)) {
+          may.get(t).delete(n);
+          cut += 1;
+        }
+      }
+    }
+  }
+  if (!cut) break;
+}
+
+const dict = new Map([...may].filter(([, s]) => s.size === 1).map(([t, s]) => [t, [...s][0]]));
+const open = [...may].filter(([, s]) => s.size !== 1);
+
+console.log(
+  `\n  ⑤ which mark is which — ${runs.length} runs whose counts agree, ` +
+    `${singles} held out\n      for the test below, leaving ${shapes.size} distinct token-bag/name-bag ` +
+    `shapes\n      to propagate over; a fixpoint in ${passes} pass(es)`,
+);
+console.log(`\n      the dictionary, from set arithmetic and no assumption about order:`);
+for (const [t, s] of [...may].sort((a, b) => a[0].localeCompare(b[0]))) {
+  const rhs = s.size === 1 ? [...s][0] : `{ ${[...s].join(" | ")} }`;
+  console.log(`      ${t.padEnd(14)} → ${rhs}`);
+}
+console.log(
+  `      ${dict.size} of ${may.size} tokens pinned to exactly one name; ` +
+    `${open.length} still open`,
+);
+if (dead.length) {
+  console.log(
+    `      ${dead.length} shape(s) admit no assignment at all ` +
+      `(${dead.reduce((a, d) => a + d.n, 0)} runs) — a contradiction, not a gap:`,
+  );
+  for (const d of dead.slice(0, 6)) {
+    console.log(`      ${String(d.n).padStart(7)}  [${d.want.join(",")}] vs [${d.got.join(",")}]  ${d.where}`);
+  }
+}
+
+// The held-out test.
+let agree = 0;
+let differ = 0;
+let unseen = 0;
+const wrong = new Map();
+for (const [want, got, where] of runs) {
+  if (want.length !== 1) continue;
+  const p = dict.get(want[0]);
+  if (!p) {
+    unseen += 1;
+    continue;
+  }
+  if (p === got[0]) {
+    agree += 1;
+    continue;
+  }
+  differ += 1;
+  const k = `${want[0]} predicted ${p}, drawn ${got[0]}`;
+  const e = wrong.get(k) ?? { n: 0, where };
+  e.n += 1;
+  wrong.set(k, e);
+}
+const spct = (n) => (singles ? ((n / singles) * 100).toFixed(2) : "0.00");
+console.log(
+  `\n      the held-out test — ${singles} runs carrying exactly one mark, ` +
+    "none of which\n      the propagation was shown:",
+);
+console.log(`      ${String(agree).padStart(7)}  (${spct(agree).padStart(6)}%)  the dictionary predicts the drawn name`);
+console.log(`      ${String(differ).padStart(7)}  (${spct(differ).padStart(6)}%)  predicts a different name`);
+console.log(
+  `      ${String(unseen).padStart(7)}  (${spct(unseen).padStart(6)}%)  ` +
+    "a token that never appears beside another, so nothing was learnt",
+);
+for (const [k, e] of [...wrong].sort((a, b) => b[1].n - a[1].n).slice(0, 8)) {
+  console.log(`      ${String(e.n).padStart(7)}  ${k}\n${" ".repeat(15)}e.g. ${e.where}`);
+}
+
+/**
+ * R1 — a seated hamza's own sign is drawn *after* every other mark on its
+ * ligature, though the text writes it first. «يُؤۡمِنُونَ» writes damma, hamza,
+ * sukun and draws damma, sukun, hamza.
+ *
+ * Stated here, before it is scored, so that scoring cannot become fitting. A
+ * second candidate — that a shadda is drawn after the vowel it shares a letter
+ * with, as «وَّ» suggests — was put up the same way and **refuted**: it costs
+ * forty runs, because «نُّؤۡمِنَ» and its family do not swap. It is recorded in
+ * `docs/design/sub-word-marks.md` §⑦ and deliberately not implemented.
+ */
+const HAMZAISH = new Set(["hamza", "wasla"]);
+const r1 = (names) => [
+  ...names.filter((n) => !HAMZAISH.has(n)),
+  ...names.filter((n) => HAMZAISH.has(n)),
+];
+
+let multi = 0;
+let inOrder = 0;
+let byR1 = 0;
+let permuted = 0;
+let unresolved = 0;
+const perms = new Map();
+const same = (a, b) => a.length === b.length && a.every((x, i) => x === b[i]);
+for (const [want, got, where] of runs) {
+  if (want.length < 2) continue;
+  multi += 1;
+  const pred = want.map((t) => dict.get(t));
+  if (pred.some((p) => !p)) {
+    unresolved += 1;
+    continue;
+  }
+  if (same(pred, got)) {
+    inOrder += 1;
+    byR1 += 1;
+    continue;
+  }
+  const bag = (a) => [...a].sort().join("|");
+  if (bag(pred) !== bag(got)) {
+    unresolved += 1;
+    continue;
+  }
+  permuted += 1;
+  if (same(r1(pred), got)) byR1 += 1;
+  else {
+    const k = `${pred.join(" , ")}   drawn   ${got.join(" , ")}`;
+    const e = perms.get(k) ?? { n: 0, where };
+    e.n += 1;
+    perms.set(k, e);
+  }
+}
+const mpct = (n) => (multi ? ((n / multi) * 100).toFixed(2) : "0.00");
+console.log(
+  `\n      and only now, order — of ${multi} runs carrying two marks or more, ` +
+    "pairing\n      having been established without ever consulting position:",
+);
+console.log(`      ${String(inOrder).padStart(7)}  (${mpct(inOrder).padStart(6)}%)  drawn in the order the text writes them`);
+console.log(`      ${String(permuted).padStart(7)}  (${mpct(permuted).padStart(6)}%)  the same marks, drawn in another order`);
+console.log(`      ${String(unresolved).padStart(7)}  (${mpct(unresolved).padStart(6)}%)  unresolved`);
+console.log(
+  `      ${String(byR1).padStart(7)}  (${mpct(byR1).padStart(6)}%)  with R1 — the seated hamza drawn last`,
+);
+console.log(`\n      what R1 leaves, most common first:`);
+for (const [k, e] of [...perms].sort((a, b) => b[1].n - a[1].n).slice(0, 10)) {
+  console.log(`      ${String(e.n).padStart(7)}  ${k}\n${" ".repeat(15)}e.g. ${e.where}`);
 }
 console.log();
 
