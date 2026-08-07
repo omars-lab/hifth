@@ -420,6 +420,15 @@
     },
 
     {
+      "id": "etl-map-should-generate-itself",
+      "source": { "file": "docs/design/etl-pipeline.md", "item": "①" },
+      "status": "open",
+      "severity": "question",
+      "owner": "agent",
+      "note": "Opened 2026-08-07 with the document itself, because the objection is strong enough that writing it down was the honest alternative to pretending it does not exist. docs/map.json already names every ETL script and package.json already names every gate, so diagrams ① and ③ of etl-pipeline.md are derivable — and a hand-drawn copy of derivable facts is exactly the drift this repo gates against everywhere else. gate:map exists because orientation documents rot. What argues the other way is that the value of that page is not in the boxes: a generator would emit four correct diagrams and none of the three paragraphs under ③ — gate:edges shipped wrong for four loops, gate:pages shipped and did nothing, gate:ci-artifacts uploaded artifacts that no longer existed — and those paragraphs are the only part that would have prevented the defects they describe. The failure in each case was in the space BETWEEN checks, which is the one thing a generator over the checks cannot see. So the balance taken is: cite every script by path in prose, let gate:map's pointer validation catch a rename, and treat a script added without a mention here as the evidence the balance was wrong. Cheap to reverse in either direction, which is why it is a question and not a defect."
+    },
+
+    {
       "id": "perf-verdict",
       "source": { "file": "docs/backlog.md", "item": "①" },
       "status": "blocked",

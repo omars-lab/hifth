@@ -759,6 +759,60 @@
     },
 
     {
+      "id": "etl-pipeline",
+      "what": "The ETL as one shape, rather than fourteen scripts each documented where it lives: what runs, in what order, which of the 23 gates fences which edge, and where the wall between text and numbers sits. The orientation page you read BEFORE adding a build script, a gate or a corpus — every specific it names is owned by another document, and it links there rather than restating.",
+      "layer": "L3 etl",
+      "entry": [
+        {
+          "file": "docs/design/etl-pipeline.md",
+          "symbol": "Seven vendored inputs, seven writers, six shard trees",
+          "note": "Five diagrams: the spine, the four encodings and the three joins between them, the gates overlaid on the spine, the one-way text boundary, and the seven scripts that build nothing. Every number in it is quoted from a pin file and the pin file is named beside it — 91,451 boxes from word-boxes.pin.json, 86,965 → 77,429 words from word-alignment.pin.json, 60,057 annotations from tajweed-words.probe.json."
+        },
+        {
+          "file": "packages/etl/package.json",
+          "symbol": "\"etl\": \"node scripts/extract-pages.mjs",
+          "note": "The ordinary path, and what it deliberately omits. build-words.mjs and build-alignment.mjs are NOT in this chain because both read the gitignored ligature cache, so chaining them would make the ordinary build fail on a clean checkout. Their outputs are committed and gate:words / gate:align re-derive them from committed bytes instead — the trick that lets a cache-dependent build be checked offline."
+        },
+        {
+          "file": "packages/etl/scripts/lib/candidate-pages.mjs",
+          "symbol": "join(DATA, \".cache\", \"words\")",
+          "note": "The 380 MB that is a source and never a shard. Per-word SVG for all 604 pages, gitignored, and the only things that leave it are numbers — box geometry and a word index. It is the single reason the four probes cannot be gates, and the reason diagram ④ of the design doc reads the way it does: text may enter memory, only arithmetic may be written."
+        },
+        {
+          "file": "package.json",
+          "symbol": "\"gates\": \"pnpm gate:text-sources",
+          "note": "The 23, in the order `make ci` runs them. Diagram ③ overlays this list on the spine so it is visible which edge each gate guards — and that three of them (gate:edges, gate:gates, gate:ci-artifacts) exist because something shipped broken between two checks that both passed."
+        },
+        {
+          "file": "packages/etl/scripts/audit-corpus.mjs",
+          "symbol": "const MADANI_TOTAL_PAGES",
+          "note": "A report, not a gate, and the distinction is historical rather than stylistic: it was written when 3 of 604 pages were vendored and had to keep working through the gap, so it REPORTS a missing page. gate:pages is what fails on one now. Kept because describing the corpus and policing it are different jobs and this one still does the first."
+        },
+        {
+          "file": "packages/etl/scripts/sample-edges.mjs",
+          "symbol": "const pairKey",
+          "note": "The only output of this pipeline whose consumer is a person. Seeded so a round can be re-run, stratified so the rare edge classes gate:edges cannot score are not invisible, deduped to unordered pairs because the scarcest input this project has is a human minute with a mus'haf open."
+        }
+      ],
+      "extend": [
+        "Add a script to packages/etl/scripts/ and it must appear in at least one diagram here. That rule is the whole of what keeps this page honest — see `etl-map-should-generate-itself` in docs/issues.json for why it is a rule a human follows rather than a gate, and what evidence would overturn that.",
+        "Numbers in this document are quoted, never computed here. Every figure carries the pin file it came from, so a moved measurement shows up as a diff in the pin and a stale sentence here is findable by grepping for the number. Do not write a figure whose source you cannot name.",
+        "Do not restate. Provenance lives in each corpus's PROVENANCE.md, licences in SOURCES.md, the two hard joins in word-indexing.md and encoding-inspector.md. This page owns the SHAPE — order, ownership, and which check covers which edge — and nothing else.",
+        "A new gate goes in three places (`pnpm gates`, `make ci`, the workflow) or gate:gates fails, and then in diagram ③ so a reader can see what it fences. A gate that guards nothing visible on the spine is a sign the spine drawing is wrong, not that the diagram should be skipped."
+      ],
+      "gates": ["pnpm gate:map", "pnpm gate:issues", "pnpm gate:gates", "make ci"],
+      "seeAlso": [
+        "edge-data-etl",
+        "word-geometry",
+        "word-indexing",
+        "encoding-inspector",
+        "assets-and-pages",
+        "provenance",
+        "ci-and-gates"
+      ]
+    },
+
+    {
       "id": "edge-data-etl",
       "what": "Turning the mutashabihat dataset into the per-surah shards the app hops through.",
       "layer": "L3 etl",
