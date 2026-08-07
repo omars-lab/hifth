@@ -16,7 +16,9 @@
  * `build-words.mjs` already reads and drops on purpose. Nothing is vendored and
  * nothing is written but numbers.
  *
- * ## The three corrections, each one earned by a failed run
+ * ## The corrections, each one earned by a failed run
+ *
+ * ### Structural — how the words are joined (1–3)
  *
  * A naive join — every `data-hafs` in index order, single spaces between — puts
  * 326 annotations past the end of their own ayah. Three differences explain it,
@@ -40,6 +42,48 @@
  *    them renumbers every later word); this probe drops them only from the
  *    *string*, and their word slots stay in the span list unaddressed.
  *
+ * ### Orthographic — how a single mark is spelled (4–7)
+ *
+ * Those three took the oracle to 97.03% and left 172 ayahs. That residual was
+ * first recorded as unnamed "orthographic drift", which was true and useless.
+ * Bracketing each ayah's drift between its last correct annotation and its
+ * first wrong one narrows it to four spellings — every one a case where the two
+ * texts render the **same printed mark** with a different number of codepoints.
+ * None is a variant reading; all four are decisions about carriers.
+ *
+ * 4. **The tatweel that carries a small high mark.** «ـۧ» (U+0640 U+06E7) and
+ *    «ـۨ» (U+0640 U+06E8) — إِبۡرَٰهِـۧم, ٱلنَّبِيِّـۧنَ, نُـۨجِي. The print seats the
+ *    mark on a stretch of baseline; the offsets count the mark alone. This is
+ *    deliberately narrow, and the narrowness is measured: stripping *every*
+ *    U+0640 takes the oracle **down** to 94.48%, so most tatweels are in both
+ *    texts and only these two carriers are not. The yeh carrier is the common
+ *    one — 172 → 143 ayahs by itself; the noon carrier is rare enough that it
+ *    closes exactly one ayah, and it closes it last (12 → 11).
+ * 5. **The alef-hamza with maddah.** «أٓ» (U+0623 U+0653) in ٱلۡأٓخِرَة, ٱلۡأٓيَٰت —
+ *    two codepoints in the print, three in the offsets' text. What is measured
+ *    is the *length*, not the identity: any three-codepoint substitution
+ *    recovers the alignment, so the probe can prove the other text spends one
+ *    more codepoint there without claiming which three it uses. The biggest
+ *    single correction of the four — 143 → 60 ayahs on its own.
+ * 6. **The small high madda.** «ۤ» (U+06E4), written by the print and absent
+ *    from the offsets' text. It clusters on the sajdah ayahs — يَسۡجُدُۤ,
+ *    ٱسۡجُدُواْۤ, لِلَّهِۤ — which is a good sign rather than a coincidence: the
+ *    source text is Tanzil's *pause-sajdah* edition and marks those places its
+ *    own way. 60 → 19 ayahs.
+ * 7. **The hamza below on a seat.** «ٕ» (U+0655) in شَٰطِيِٕ, إِيتَآيِٕ, ٱللُّؤۡلُوِٕ —
+ *    the print writes seat + kasra + hamza-below where the offsets count two
+ *    codepoints. Again a length, not an identity. 19 → 12 ayahs.
+ *
+ * Together: **97.03% → 99.81%**, and **172 → 11** ayahs. The eleven are not a
+ * remainder — they are `NAMED`, below, and three of them the repo already names
+ * in another register entirely.
+ *
+ * The corrections were made for alignment, and paintability moved with them
+ * without being asked to: spans running past the end of their ayah went 2 → 0,
+ * and spans touching more than two words went 4 → 1. That is the second reason
+ * to believe them — a rule that merely shifted the string to satisfy the oracle
+ * would have no reason to also settle the arithmetic the oracle does not see.
+ *
  * ## The oracle: why this is a measurement and not a hope
  *
  * A reconstruction that were subtly wrong would still produce spans, and every
@@ -56,6 +100,15 @@
  *   The oracle covers 26.6% of the annotations; the rest inherit its verdict.
  * - **Whether the colours are right.** Untouched. The skin is beta on a hafiz's
  *   sign-off (`plan-tajweed-golden-row`), and this measures geometry only.
+ * - **Overfitting.** Corrections 4–7 were found by looking at what the oracle
+ *   got wrong, so in principle any codepoint deletion that shifts the string
+ *   could score. Three things hold that in check and none of them is taste:
+ *   each rule names a real orthographic feature and is applied to all 6,236
+ *   ayahs rather than to the ayahs that motivated it; the oracle tests letter
+ *   *identity* at a position the rule does not touch; and a rule that is too
+ *   broad is punished immediately and visibly — the generalisation of 4 to
+ *   every tatweel costs 4.5 points. A rule that fixed only the ayah that
+ *   suggested it was rejected for that reason (see `NAMED`, 36:52).
  * - **Its own base.** The reconstruction is *of* the print, so a two-word span
  *   here means two print words, which is exactly the question. It says nothing
  *   about Tanzil's own tokenisation, which PROVENANCE already puts at 16.7%.
@@ -91,6 +144,44 @@ const write = process.argv.includes("--write");
  * witnesses — so those twelve rules are counted, never used as evidence.
  */
 const ORACLE = { hamzat_wasl: "ٱ", lam_shamsiyyah: "ل" };
+
+/**
+ * Corrections 4–7: the same grapheme, encoded differently by the two
+ * transcriptions. Applied to every word of all 6,236 ayahs, never to the ayahs
+ * that motivated them. Order matters only in that none of these five overlap.
+ */
+const RESPELL = [
+  [/ـۧ/g, "ۧ"], // 4 — tatweel carrying SMALL HIGH YEH   (إِبۡرَٰهِـۧمُ)
+  [/ـۨ/g, "ۨ"], // 4 — tatweel carrying SMALL HIGH NOON  (أَنجِـۨي)
+  [/أٓ/g, "ءَا"], // 5 — alef-hamza + maddah, two cp here and three there
+  [/ۤ/g, ""], // 6 — SMALL HIGH MADDA, the print's only
+  [/ٕ/g, ""], // 7 — HAMZA BELOW on a seat
+];
+const respell = (text) => RESPELL.reduce((s, [re, to]) => s.replace(re, to), text);
+
+/**
+ * The eleven ayahs the corrections do not reach, each one named. This list is
+ * documentation, not logic — nothing reads it — and it is here so that a future
+ * run that changes the count has something to disagree with.
+ *
+ * Three of them the repo already names in a different register: 12:39 and 12:41
+ * are two of the four print↔QAC orthographic exceptions in `lib/segmentation.mjs`
+ * (a third independent witness to the same spelling), and 15:7 is the single
+ * 1→2 alignment singularity. They drift here for the reason they drift there.
+ */
+const NAMED = {
+  "12:39": "«يَٰصَٰحِبَيِ» Δ−1 — a named print↔QAC exception, seen a third time",
+  "12:41": "«يَٰصَٰحِبَيِ» Δ−1 — the same word, the same exception",
+  "15:7": "«لَّوۡمَا» Δ−1 — the repo's one 1→2 alignment singularity",
+  "2:181": "«بَعۡدَ مَا» Δ+1 — the print splits, the offsets' text joins",
+  "8:6": "«بَعۡدَ مَا» Δ+1 — the same join, uncorpus-flagged so not derivable",
+  "13:37": "«بَعۡدَ مَا» Δ+1 — the same join",
+  "2:97": "«لِّـجِبۡرِيلَ» Δ+1 — a bare tatweel carrying no mark, so rule 4 misses it",
+  "17:7": "«لِيَسُـُٔواْ» Δ−2 — a bare tatweel, and ٱلۡءَاخِرَةِ spelled the long way",
+  "36:52": "«مَّرۡقَدِنَاۜ» Δ+1 — SMALL HIGH SEEN; a rule for it gains 1 annotation, 0 ayahs",
+  "95:1": "Δ−1 — not localisable: the first oracle annotation is already drifted",
+  "97:1": "Δ−1 — not localisable, the same way",
+};
 
 // ------------------------------------------------------------------ reading --
 
@@ -146,9 +237,11 @@ function wordsOf(key) {
 // ------------------------------------------------------------------ folding --
 
 /**
- * The three corrections, applied. Returns the reconstructed codepoints and, per
+ * The seven corrections, applied. Returns the reconstructed codepoints and, per
  * print word, the `[start, end)` it occupies in them — `null` for a pause mark,
- * which owns ink on the page but no codepoints in this text.
+ * which owns ink on the page but no codepoints in this text. The spans are into
+ * the *respelled* string, which is the one the offsets address; a word whose
+ * spelling changed keeps its identity and changes its width.
  */
 function fold(words, prefix) {
   let cps = [...prefix];
@@ -159,7 +252,7 @@ function fold(words, prefix) {
       continue;
     }
     const start = cps.length;
-    cps = cps.concat([...words[i].hafs]);
+    cps = cps.concat([...respell(words[i].hafs)]);
     spans.push([start, cps.length]);
     // A space unless this word is a split waw, and never a trailing one — the
     // lookahead skips marks because they are not in the string to be next to.
@@ -276,6 +369,17 @@ console.log(
   `  ${unreachable ? `${unreachable} misses have no expected letter within ±8` : "no miss is further than ±8 away"}`,
 );
 
+// Every residual ayah should be one this run already has a name for. An unnamed
+// one is the interesting outcome: it means the print, the offsets or the
+// corrections moved, and the sweep that produced `NAMED` needs running again.
+const unnamed = residual.filter((r) => !NAMED[r.key]).map((r) => r.key);
+console.log("\n── each one, named:");
+for (const r of residual.sort((a, b) => b.misses - a.misses)) {
+  const why = NAMED[r.key] ?? "UNNAMED — no cause recorded for this one";
+  console.log(`  ${r.key.padEnd(8)} ×${String(r.misses).padStart(2)}  ${why}`);
+}
+if (unnamed.length) console.log(`\n  ⚠ ${unnamed.length} unnamed: ${unnamed.join(" ")}`);
+
 /**
  * The verdict answers ⑤'s fork and nothing else: is this a build change or a
  * design problem? A build change needs the fold to be *right* (the oracle) and
@@ -314,7 +418,10 @@ if (write) {
           misses: oracleN - oracleHit,
           singleDriftAyahs: oneDrift,
           distances: Object.fromEntries([...drift].map(([d, n]) => [d === null ? "beyond" : String(d), n])),
-          worst: residual.sort((a, b) => b.misses - a.misses).slice(0, 12),
+          named: Object.fromEntries(
+            residual.sort((a, b) => b.misses - a.misses).map((r) => [r.key, NAMED[r.key] ?? "UNNAMED"]),
+          ),
+          unnamed,
         },
       },
       null,
