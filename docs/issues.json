@@ -420,6 +420,45 @@
     },
 
     {
+      "id": "adj-shards-have-two-upstreams",
+      "source": { "file": "docs/design/track-b-native.md", "item": "①" },
+      "status": "confirmed",
+      "severity": "defect",
+      "owner": "agent",
+      "note": "LICENSES.md buckets apps/web/public/assets/adj/** under 'Free use with attribution (inherited) — Waqar144's', naming the mutashabihat dataset alone. That was true when the shards carried only edge endpoints and stopped being true when word-D1 added the spans. build-adjacency.mjs:45 imports wordsByAyah and sharedRuns from morphology.mjs, whose header states what it reads — the GPL'd Quranic Arabic Corpus morphology; spansOf (:287) calls sharedRuns and the result is written into every shard at :342 as `span` / `toSpan`. So the shipped adjacency shards carry values COMPUTED FROM GPL'd data, and under the same strict reading of 'derivative' this repo applies to itself elsewhere they are a GPL derivative with one of their two parents unnamed. Independent of Track B and wrong today, which is why it is `confirmed` rather than parked with the rest of that document's rows. It matters more inside a store binary than on the web, and the asymmetry is the point: a static site discharges GPL §4–6 by handing the browser the whole bundle, which is LICENSES.md's own argument for plain GPL over AGPL, while a wrapped binary is the thing that has to be licensed. What would answer it: correct the row to name both parents, and decide whether gate:license-copy's reach should extend to the bucket table — the drift here was introduced by a FEATURE rather than by anyone touching a licence file, so the gate that would have caught it is one that notices an asset tree gaining a new upstream."
+    },
+
+    {
+      "id": "gpl-and-the-app-store",
+      "source": { "file": "docs/design/track-b-native.md", "item": "②" },
+      "status": "open",
+      "severity": "risk",
+      "owner": "user",
+      "blockedBy": ["a licensing opinion"],
+      "note": "Track B's blocker is a licence Hifth does not own. A GPL'd binary on Apple's App Store conflicts with the per-device and DRM terms GPL §6 and §10 do not let a distributor add; the projects that ship anyway (Signal, OsmAnd) do it by having EVERY copyright holder grant an additional permission under §7. Hifth cannot assemble that grant. The Quranic Arabic Corpus header — quoted verbatim in SOURCES.md and pinned into the colophon by gate:license-copy — grants the GPL and then says copies may be distributed but 'CHANGING IT IS NOT ALLOWED'; SOURCES.md already records that tension and resolves it for a website by vendoring verbatim and deriving at build time, but a §7 additional permission IS a change to the licensing terms and only the copyright holder can grant it. quran-tajweed's CC BY 4.0 §2(a)(5)(B) separately forbids applying Effective Technological Measures, which FairPlay is — narrower, because the skin is one edition and could be omitted from a store build, where the QAC-derived data cannot (see adj-shards-have-two-upstreams). And KFGQPC's own terms are still unread by a human (board item #55), which a store submission is exactly the context that stops making deferrable. All of this is argued from licence text by a non-lawyer, and 'I read the licence' is not the standard this repo holds gates to. What would answer it: a licensing opinion from someone qualified, scoped to the three upstreams by name. Until then Track B stays gated and docs/design/track-b-native.md stays the reason."
+    },
+
+    {
+      "id": "track-b-order-is-unachievable",
+      "source": { "file": "docs/design/track-b-native.md", "item": "③" },
+      "status": "open",
+      "severity": "defect",
+      "owner": "agent",
+      "blockedBy": ["gpl-and-the-app-store"],
+      "note": "PLAN.md §Track B reads 'Capacitor iOS, then Android', with Android as a ~95%-shared-code fast-follow. On the licences this repo vendors that order inverts: the store that blocks is Apple's, so the reachable order is Android first and iOS gated on gpl-and-the-app-store. The same section carries a second, smaller error: it cites the iOS deep-link caveat as 'research §5', and §5 of docs/research/2026-07-20-mobile-svg-pwa.md is 'Offline: quota is a non-issue; eviction is the issue' — the deep-link caveat is §6. Both are one-line edits. Deliberately NOT made in the commit that introduced the scoping doc: a roadmap edit that changes a track's stated order should be its own decision with its own record, not a footnote to a document nobody has reviewed yet. Blocked on the licensing opinion for the same reason — if that opinion comes back saying the §7 route is available after all, the order it dictates changes again, and editing the roadmap twice is worse than editing it once."
+    },
+
+    {
+      "id": "track-b-payload-has-narrowed",
+      "source": { "file": "docs/design/track-b-native.md", "item": "④" },
+      "status": "open",
+      "severity": "question",
+      "owner": "user",
+      "blockedBy": ["web v1.0 and somebody using it"],
+      "note": "Track B's stated payload was: bundle the corpus offline, native share sheet, Universal Links, haptics, state restoration, iPad two-page spread, App Store review notes. Read one at a time against what the web build now does, most of it has already been delivered or dismissed. Offline-by-default is Loop 6b's pin-a-juz packs, and the whole print is 27.87 MB gz across 1,584 files measured by gate:assets — under every store threshold that would have forced staged delivery, which retires the delivery plan's On-Demand-Resources risk outright. The iPad spread is recorded at PLAN.md:1038 as having become a web concern and desktop.md shipped it. navigator.share already exists; the wrapper buys the fallback, not the feature. Haptics and state restoration are small and are not a reason. What is left is ONE load-bearing promise — Universal Links, i.e. a tapped hop link opening an installed app, which research §6 confirms is a genuine iOS platform limit — and it is on the one platform whose store is blocked. The honest remaining options: drop Track B; ship Android only and accept the asymmetry; or treat the iOS deep-link gap as a documented limitation, which onboarding already respects (research §6 says it must not promise link-into-app on iOS, and it does not). Not decidable from here: what would answer it is web v1.0 shipping and someone using it. Worth recording that the gate did its job — Track B was always gated on v1.0, and in the waiting its reason was half-dismantled by the web build itself rather than by an argument."
+    },
+
+    {
       "id": "etl-map-should-generate-itself",
       "source": { "file": "docs/design/etl-pipeline.md", "item": "①" },
       "status": "open",
