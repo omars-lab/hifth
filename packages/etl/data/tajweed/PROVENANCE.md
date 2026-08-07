@@ -98,6 +98,77 @@
   indices. Until Loop 4b's ligature corpus lands, the shards keep the spans
   verbatim and the app paints one mark per ayah. See the header of
   `packages/core/src/skins.ts`.
+- **Measured 2026-08-06 — the binding above is now priced, and it is a build
+  change** (`tajweed-words.probe.json`, `pnpm probe:tajweed-words`). The
+  paragraph above was written when there was nothing on the page to attach to;
+  `assets/words/**` now holds 91,451 word boxes, so the question became whether
+  a codepoint span lands inside one of them. It cannot be asked directly — that
+  needs the Tanzil text, which this repo does not hold — so the probe
+  *reconstructs* the text from the print's own per-word `data-hafs`, under eight
+  corrections each earned by a run that failed without it. Three are
+  **structural**, and the corpus states each one: the source prefixes the
+  **basmala** to ayah 1 of every surah but 1 and 9; the print **splits the
+  conjunction waw** Tanzil joins and flags the split itself
+  (`data-waw-alatf="true"`); and the print **numbers pause marks as words** while
+  this text carries none of them, so they are dropped (63.40% → 97.03%). Five are
+  **orthographic**, found by bracketing each residual ayah between its last
+  correct annotation and its first wrong one: a small high mark on a **tatweel
+  carrier** («ـۧ», «ـۨ») that the other text writes bare; **«أٓ»**, two codepoints
+  here and three there; the **small high madda «ۤ»**; the **hamza below «ٕ»** on a
+  seat; and the **small high seen «ۜ» where it ends a word** — the sakta, which
+  the other text does not carry, as against the same codepoint word-medially over
+  a ص, which marks the sin reading and which it does. 97.03% → 99.86%.
+
+  The fold is checked against an **oracle** rather than against its own output:
+  each annotation must open on a letter its rule names, and all eighteen of the
+  source's rules name one — `hamzat_wasl` on ٱ, `lam_shamsiyyah` on ل,
+  `qalqalah` on one of قطب جد, and so on. All 60,057 annotations are checked, and
+  no word boundary is needed to check any of them. Every letter set was written
+  from the tajweed rule first and measured second, because the other order —
+  reading a set off where the offsets land, then declaring that they land there —
+  is circular and passes on a broken fold.
+
+  **A hit rate alone would not be evidence**, because breadth is free: a rule
+  admitting fifteen codepoints is satisfied by accident far more often than one
+  admitting a single ٱ. So each check is weighted by `1 − oracleDensity`, the
+  chance it would have noticed a one-codepoint drift in that ayah. Coverage is
+  100% of annotations and **93.65% sensitivity-weighted**, and that second number
+  is the one to quote.
+
+  **The arithmetic below has two readers and one implementation.** The fold lives
+  in `packages/etl/scripts/lib/tajweed-fold.mjs`; `probe-tajweed-words.mjs`
+  imports it, and `probe-encodings.mjs`
+  ([encoding-inspector.md](../../../../docs/design/encoding-inspector.md)) both
+  imports it *and* inlines its source into the report it writes, so the toggles a
+  maintainer clicks in a browser run these literal bytes. Assembling the numbers
+  from the sources a second way reproduced every figure in the table below
+  exactly, which is the point of saying so here: a pin nobody can re-derive is a
+  number you are asked to trust.
+
+  | measure | result |
+  |---|---|
+  | oracle on the expected letter | 59,975 / 60,057 = **99.86%** |
+  | annotations the oracle can check | 60,057 / 60,057 = **100%** (93.65% sensitivity-weighted) |
+  | annotations inside one print word | 50,032 / 60,057 = **83.31%** |
+  | two adjacent print words | 10,024 = **16.69%** |
+  | wider than two | **1** (12:41, `idghaam_ghunnah`) |
+  | past the end of the text | **0** |
+  | residual | **10 ayahs**, 82 misses, all but one within ±2 codepoints, each one named |
+
+  The 16.69% is the cross-word phonology — idghaam, ikhfa, iqlab — painting
+  correctly across two boxes, not a misalignment; it is also *not* the same
+  number as the 16.7% above, which is against Tanzil's own tokenisation. The
+  residual is orthographic in the sense `docs/design/word-indexing.md` ③ uses,
+  and it is short enough to enumerate: every one of the ten is named in
+  `tajweed-words.probe.json` under `residual.named`, and three of them the repo
+  already names elsewhere — 12:39 and 12:41 are two of `lib/segmentation.mjs`'s
+  four print↔QAC exceptions, and 15:7 is the single 1→2 alignment singularity.
+  The orthographic corrections were made for alignment and moved paintability
+  with them unasked (past-the-end 2 → 0, wider-than-two 4 → 1), which is the
+  second reason to believe them. **None of this lifts the beta label** — the
+  palette waits on a hafiz (`plan-tajweed-golden-row`), and a per-word colour
+  that is wrong is worse than an ayah-wide mark that is vague. It only says the
+  eventual bake is ordinary ETL work.
 - **Rejected alternatives** (checked 2026-07-25, all for the licence gate):
   - **quran.com API `text_uthmani_tajweed`** — no grant of any kind, and it is
     not an independent path anyway: enumerated over all 114 surahs its rule

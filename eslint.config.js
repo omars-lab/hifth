@@ -84,6 +84,15 @@ export default tseslint.config(
     files: ["apps/web/perf/**/*.mjs"],
     languageOptions: { globals: { ...globals.node, ...globals.browser } },
   },
+  // The encoding inspector's client half never runs in Node: `probe-encodings.mjs`
+  // reads it as text and writes it into a generated report. Same situation as the
+  // perf harness above — browser code living in a Node package — except that here
+  // the whole file is the browser half, so it gets browser globals only. It is
+  // maintainer-only and gitignored output; nothing in it reaches the app bundle.
+  {
+    files: ["packages/etl/scripts/lib/*.client.mjs"],
+    languageOptions: { globals: { ...globals.browser } },
+  },
   // Browser globals for the web app.
   {
     files: ["apps/web/**/*.{ts,tsx}"],

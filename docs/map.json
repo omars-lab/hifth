@@ -642,10 +642,21 @@
           "file": "scripts/gate-align.mjs",
           "symbol": "expectedMeasured",
           "note": "Applies the map offline and checks it against a third witness. The pin cannot be re-derived in CI — the upstream corpus is not vendored — which is exactly the situation the mutashabihat off-by-one lived in for four loops. So this gate reads the committed shards (which print indices exist, which are marks), applies the pin's delta, and compares the resulting QAC word count against the vendored morphology, which neither the pin nor the shards control. It also holds `EXCEPTIONS` and the pin's copy against each other in both directions, and re-derives `measured` rather than trusting it."
+        },
+        {
+          "file": "packages/etl/scripts/probe-tajweed-words.mjs",
+          "symbol": "fold",
+          "note": "The third index nobody planned for: the tajweed annotations are CODEPOINT offsets into a Tanzil Uthmani text this repo does not hold, so neither word index reaches them. This probe reconstructs that text from the print's own per-word `data-hafs` and measures how many print words each annotation touches. Eight corrections make the fold agree, each earned by a failed run. Three are STRUCTURAL and the corpus states each — prepend the basmala to ayah 1 of every surah but 1 and 9, glue the `data-waw-alatf` split waw to its successor, and DROP the pause-mark words the print numbers and Tanzil does not carry (63.40% → 97.03%). Five are ORTHOGRAPHIC and live in the `respell` fields, found by bracketing each failing ayah between its last correct annotation and its first wrong one: a small high mark on a tatweel carrier, «أٓ» spelled with one codepoint more there, the small high madda, the hamza below, and the small high seen where it ENDS a word — the sakta, as against the same codepoint word-medially over a ص, which is the sin reading and which Tanzil does carry (97.03% → 99.86%). Correction 4's narrowness is measured, not chosen — stripping every U+0640 scores 94.48%, worse than nothing — and so is correction 8's anchor: unanchored it breaks 52:37. That is the standing guard against overfitting. The fold is not trusted on its own output: every one of the eighteen rules names a letter its annotation must open on, so all 60,057 annotations are checked with no reference to any word boundary, and each set was written from the tajweed rule FIRST and measured second. `NAMED` carries the ten survivors and the run prints an ⚠ for any residual ayah it does not name, so a moved pin announces itself. Named `probe-` and never a gate for the same reason as its two neighbours, plus one of its own: it reads the gitignored 378 MB cache, so on a clean checkout it has nothing to read."
+        },
+        {
+          "file": "packages/etl/data/tajweed/tajweed-words.probe.json",
+          "symbol": "$verdict",
+          "note": "What ⑤ was waiting for. The oracle lands 99.86% over ALL 60,057 annotations, 83.31% of them fall inside one print word, 16.69% touch two ADJACENT words — the cross-word phonology, idghaam and ikhfa and iqlab, which are two-word by nature and paintable on both boxes — exactly 1 touches more than two and 0 run past the end. Quote the coverage as two numbers: 100% of annotations checked, 93.65% once each check is weighted by `1 − oracleDensity`, the chance it would have caught a one-codepoint drift. The residual is TEN ayahs (0.16%) and it is orthographic rather than structural: all but one miss sits within ±2 codepoints and 7 of the 10 ayahs drift by a single constant amount. It is not a rate — `residual.named` names each one, and 12:39, 12:41 and 15:7 are exceptions `segmentation.mjs` ALREADY names for the print↔QAC alignment, reached here from a third text neither of those involves. That is the strongest evidence the class is orthographic. So ⑤'s premise is falsified: a build change with a ten-entry exception list, not a third text."
         }
       ],
       "extend": [
         "The map stays L3 and the app still cannot read it — on purpose, and that is now a shipped answer rather than an open one. word-D chose placement C (`docs/design/word-indexing.md` §11 ①): the ETL applies the map and BAKES ITS ANSWER into `assets/adj/**` and `assets/roots/**` as print indices, so nothing in L1 or L2 imports `Alignment` and no client can get the delta application wrong. The cost of restating an answer instead of shipping a question was measured at 8.9× the estimate (+81.6 KB gz) and paid deliberately. A THIRD consumer needs its own baking pass in ETL — the tajweed shards have not had one — not a browser-side reader.",
+        "The tajweed shards are the third consumer, and their bake is now PRICED but not built. `probe-tajweed-words.mjs` measured the fold ⑤ asked for: 99.86% oracle over 100% of the annotations (93.65% sensitivity-weighted), 83.31% of them inside one print word, a ten-ayah orthographic residual with every entry named. What that buys is permission to write the bake as a build change; what it does not buy is the beta label, which waits on a hafiz. Re-run the probe before writing the bake — the numbers above are of one pin, and the pin can move; the run prints ⚠ for any residual ayah `NAMED` does not cover, which is the signal that it did.",
         "The alignment is DERIVED FROM the print's text and does not carry it. `build-words.mjs` still drops `data-hafs` and `gate:notext` still enforces it. Anything that would need the word's text to work is a new vendoring with its own licence question, not an extension of this.",
         "Do not widen `fold()` to make the four exceptions go away. The fold's value is that it is measured; four named exceptions checked in two places is a smaller surface than a fold nobody can argue with. A fifth exception means measure again, not add a name.",
         "Neither index may be renumbered. Both are upstream identifiers — the print's is load-bearing for every shard and its pin, QAC's for `assets/roots/**`, `gate:edges` and the tajweed ETL. The map exists so that neither has to move.",
@@ -653,7 +664,56 @@
         "The map is per-edition by construction (`EDITION`). A second print needs its own rebuild, its own exceptions and its own measurement; nothing here generalises for free."
       ],
       "gates": ["pnpm gate:align", "pnpm gate:words", "pnpm gate:edges", "make ci"],
-      "seeAlso": ["word-geometry", "root-lens", "word-selection", "provenance"]
+      "seeAlso": ["word-geometry", "root-lens", "word-selection", "provenance", "encoding-inspector"]
+    },
+
+    {
+      "id": "encoding-inspector",
+      "what": "Four descriptions of one text — the print, the ligature corpus, the QAC word index and the tajweed codepoint offsets — on one screen, with every place they disagree named. A maintainer's instrument; it ships nothing.",
+      "layer": "L3 etl",
+      "entry": [
+        {
+          "file": "docs/design/encoding-inspector.md",
+          "symbol": "Every word in this repo is described four times",
+          "note": "Read this first, and §① first of all — the print is ink, it has no letters and no words, and every other encoding exists because somebody wanted to say something about it that it could not say about itself. It is the only place that says what the four encodings are, why each PAIR of them disagrees for a different reason, why the tool is a generated file rather than a dev route in the app, and — §6 — the six things it is deliberately blind to. §7 records what the first full pass found and is deliberately kept in its dated state, with a ↳ line under each paragraph the corrected fold has since overtaken — it localised four fold corrections nothing else could have, and it also mis-attributed one finding to the source, which §9 ② now carries as the more useful record of the two."
+        },
+        {
+          "file": "packages/etl/scripts/lib/tajweed-fold.mjs",
+          "symbol": "export function foldAyah",
+          "note": "The ONE copy of the fold arithmetic — the reconstruction of the Tanzil-indexed string out of the print's per-word `data-hafs`, under the eight corrections `CORRECTIONS` names, dates and prices in evidence. Two kinds, and the `kind` field says which: three STRUCTURAL (the basmala prefix, the split conjunction waw, the pause-mark words) that change which words are folded, and five ORTHOGRAPHIC (`tatweel-carrier`, `alef-madda`, `small-madda`, `hamza-below`, `sakta-seen`) that change how many codepoints a word spends — those five are pure text substitutions carried in a `respell` field and applied by `respellerFor(on)` before the fold counts, which is what keeps them checkboxes rather than edits to the arithmetic. `sakta-seen` is why that matters more than tidiness: it was measured and REJECTED once, against an oracle that checked two of the source's eighteen rules, and re-trying the unchanged substitution against all eighteen closed three ayahs. A correction is only ever rejected by the instrument that was measuring, so the toggle is what makes a re-try one line of work rather than an archaeology exercise. `probe-tajweed-words.mjs` imports it and the inspector inlines it; before this module they were two readers applying the same corrections separately, which is the failure where the tool shows a clean screen for a probe that is failing. The module IMPORTS NOTHING, and that is load-bearing rather than tidy: it is what lets the generator paste its source into the report so the browser's toggles run the ETL's literal bytes. `ORACLE` is the independent referee and covers ALL eighteen rules the source emits — `{letters, why, near?}` per rule, so 60,057/60,057 annotations are checked rather than the 15,985 two rules could witness. Every letter set is written from the tajweed rule FIRST and measured second; the other order is circular and passes on a broken fold, which is why `why` is a required field a test asserts is non-empty. Two entries say `data-led` in their own `why` because the residual pointed at them rather than the reverse (`ikhfa` += U+06E8, `silent` += ص) — the fix for a fit is to declare it. `oracleDensity` is the other half and the one to read: a rule admitting fifteen codepoints is satisfied by accident far more often than one admitting a single ٱ, so `1 − density` prices each hit by the chance it could have failed, and the honest headline is 93.65% sensitivity-weighted rather than the unweighted 100% coverage. `oracleOf` owns the sign convention (delta = actual − stated; positive means the fold ran long) and `driftOnset` is the aggregate that actually localises a divergence, because offsets are cumulative and the miss is almost never where the difference is."
+        },
+        {
+          "file": "packages/etl/scripts/probe-encodings.mjs",
+          "symbol": "const foldSource",
+          "note": "The generator: reads the 378 MB gitignored cache, the vendored tajweed offsets and the committed alignment pin, and writes one self-contained HTML file. `foldSource` is the anti-duplication mechanism made literal — `tajweed-fold.mjs` read as text with `export ` stripped, so there is no second implementation to drift. It re-computes the headline in Node with the same `foldAyah` as a cross-check on the inlining, and cross-checks the shards' pause-mark set against `WAQF` on every run (0 disagreements today, reported as a number so a future one surfaces rather than silently changing a screen). The index bridge — page-global print indices to the corpus's 1-based-per-ayah — is commented as the one place the two numbering schemes meet."
+        },
+        {
+          "file": "packages/etl/scripts/lib/encoding-inspector.client.mjs",
+          "symbol": "function measure",
+          "note": "The browser half, and it never runs in Node — eslint.config.js gives `*.client.mjs` browser globals only, the same situation as apps/web/perf. `measure` is why the corrections are live checkboxes rather than a legend: one pass over all 6,236 ayahs rebuilding every aggregate in ~30 ms, so the number under a toggle is measured and not remembered. Precomputing per-combination tables was rejected as 2ⁿ in the corrections and silently stale on the day another is added — four were added within the day and a fifth followed, which settles it. `WORD_AYAHS` is the corpus baseline that makes the drift-onset table an instrument instead of a word-frequency list — without a denominator «وَ» tops it for no reason but being «وَ»."
+        },
+        {
+          "file": "packages/etl/scripts/lib/tajweed-fold.test.mjs",
+          "symbol": "describe(\"driftOnset\"",
+          "note": "54 tests, and they are what makes the shared module safe to share. They pin the sign convention both probes now read, the eighteen-entry ORACLE (its size, that every entry carries the tajweed reason for its letter set, that any letter of a set counts, and that `near` is a one-position window rather than a slop allowance — `iqlab`'s meem is written high over a fatha and LOW over a kasra, and missing the low form scored 85.05%), `oracleDensity`'s pricing of a hit, each of the eight corrections' effect in isolation — including a `respellerFor` block that checks each `respell` fires on its own shape and on nothing else, so deleting one fails a test rather than quietly moving an aggregate — and `driftOnset`'s refusals — it does not narrow with a hit AFTER the miss, and it reports `bounded: false` rather than pretending to a left edge it does not have. Vitest globals are imported explicitly here: the eslint test-globals block covers `**/*.test.{ts,tsx}` and this is `.mjs`."
+        },
+        {
+          "file": ".gitignore",
+          "symbol": "packages/etl/out/",
+          "note": "Where the report goes, and why the directory is ignored WHOLESALE rather than by filename. The output is full of Arabic derived at runtime from the gitignored cache; committing one would vendor the mus'haf past `gate:notext` and `gate:text-sources` through the back door. Ignoring the directory means a second output cannot be added carelessly. This is also the argument that decided the tool's shape — a file in an ignored directory cannot ship by accident, cannot move `gate:budget` and cannot be imported."
+        }
+      ],
+      "extend": [
+        "Never add this to `pnpm gates` or `make ci`. It reads `.cache/**`, which does not exist on a clean checkout, so in CI it would have nothing to read — the same reason `probe-word-registration` and `probe-tajweed-words` are named `probe-`. `gate-*` is the prefix that promises offline and deterministic.",
+        "Do not re-implement the fold. If the inspector and `probe-tajweed-words.mjs` need to agree — and they do, that agreement is the verification of both — the arithmetic goes in `lib/tajweed-fold.mjs` and both import it. Keep that module import-free: the generator pastes its source verbatim, and one `import` line makes the inlining unsound.",
+        "The report is never committed and never fetched. If a finding is worth keeping, it goes in prose in the design doc or as a measured number in a pin — the way `tajweed-words.probe.json` keeps the probe's verdict — not as an HTML artifact somebody has to trust the age of.",
+        "It works at the SOURCE rule grain, all eighteen, and does not import `build-tajweed.mjs`'s seven-family table. A family is a rendering decision; collapsing here would hide the case worth seeing, two rules of one family disagreeing about the same word. It would also mean importing a module whose body runs a build.",
+        "Do not teach it to draw the ink. The blindness in §6 is what the instrument's authority rests on — a second renderer of the mus'haf is a second chance to draw it wrong inside a tool whose only claim is about identity. If a caller genuinely needs geometry, a box OUTLINE is the bounded version; glyphs and rasters are not.",
+        "A correction added to `CORRECTIONS` must be earned by a re-run against the oracle, not argued for, and it must apply to all 6,236 ayahs rather than to the ones that motivated it. The oracle is the referee precisely because a wrong correction makes it worse rather than quietly better, and an over-broad one is punished the same way: stripping every `U+0640` instead of the two carriers `tatweel-carrier` names scores 94.48%, below applying nothing at all. That is the whole reason the eight existing ones are trustworthy. The corollary, learned from `sakta-seen`: a correction that was measured and rejected is rejected BY AN INSTRUMENT, not for all time. Re-run the rejects whenever the oracle widens.",
+        "Before filing a finding as an upstream source defect, switch corrections off and re-measure. A drift of exactly one letter reads as an off-by-one in whoever wrote the span — the most available explanation, and the one that points away from your own code. `lam-shamsiyyah-starts-on-the-wasl` in docs/issues.json is that mistake made and caught: 21 annotations across 19 ayahs on the three-correction fold, ONE on the seven."
+      ],
+      "gates": ["pnpm gate:notext", "pnpm gate:text-sources", "pnpm lint", "make ci"],
+      "seeAlso": ["word-indexing", "word-geometry", "editions-and-skins", "provenance"]
     },
 
     {
@@ -696,6 +756,61 @@
       ],
       "gates": ["pnpm test", "make e2e", "make golden", "make golden-linux"],
       "seeAlso": ["select-an-ayah", "word-geometry", "golden-images"]
+    },
+
+    {
+      "id": "etl-pipeline",
+      "what": "The ETL as one shape, rather than fourteen scripts each documented where it lives: what runs, in what order, which of the 23 gates fences which edge, and where the wall between text and numbers sits. The orientation page you read BEFORE adding a build script, a gate or a corpus — every specific it names is owned by another document, and it links there rather than restating.",
+      "layer": "L3 etl",
+      "entry": [
+        {
+          "file": "docs/design/etl-pipeline.md",
+          "symbol": "Seven vendored inputs, seven writers, six shard trees",
+          "note": "Five diagrams: the spine, the four encodings and the three joins between them, the gates overlaid on the spine, the one-way text boundary, and the seven scripts that build nothing. Every number in it is quoted from a pin file and the pin file is named beside it — 91,451 boxes from word-boxes.pin.json, 86,965 → 77,429 words from word-alignment.pin.json, 60,057 annotations from tajweed-words.probe.json."
+        },
+        {
+          "file": "packages/etl/package.json",
+          "symbol": "\"etl\": \"node scripts/extract-pages.mjs",
+          "note": "The ordinary path, and what it deliberately omits. build-words.mjs and build-alignment.mjs are NOT in this chain because both read the gitignored ligature cache, so chaining them would make the ordinary build fail on a clean checkout. Their outputs are committed and gate:words / gate:align re-derive them from committed bytes instead — the trick that lets a cache-dependent build be checked offline."
+        },
+        {
+          "file": "packages/etl/scripts/lib/candidate-pages.mjs",
+          "symbol": "join(DATA, \".cache\", \"words\")",
+          "note": "The 380 MB that is a source and never a shard. Per-word SVG for all 604 pages, gitignored, and the only things that leave it are numbers — box geometry and a word index. It is the single reason the four probes cannot be gates, and the reason diagram ④ of the design doc reads the way it does: text may enter memory, only arithmetic may be written."
+        },
+        {
+          "file": "package.json",
+          "symbol": "\"gates\": \"pnpm gate:text-sources",
+          "note": "The 23, in the order `make ci` runs them. Diagram ③ overlays this list on the spine so it is visible which edge each gate guards — and that three of them (gate:edges, gate:gates, gate:ci-artifacts) exist because something shipped broken between two checks that both passed."
+        },
+        {
+          "file": "packages/etl/scripts/audit-corpus.mjs",
+          "symbol": "const MADANI_TOTAL_PAGES",
+          "note": "A report, not a gate, and the distinction is historical rather than stylistic: it was written when 3 of 604 pages were vendored and had to keep working through the gap, so it REPORTS a missing page. gate:pages is what fails on one now. Kept because describing the corpus and policing it are different jobs and this one still does the first."
+        },
+        {
+          "file": "packages/etl/scripts/sample-edges.mjs",
+          "symbol": "const pairKey",
+          "note": "The only output of this pipeline whose consumer is a person. Seeded so a round can be re-run, stratified so the rare edge classes gate:edges cannot score are not invisible, deduped to unordered pairs because the scarcest input this project has is a human minute with a mus'haf open."
+        }
+      ],
+      "extend": [
+        "Add a script to packages/etl/scripts/ and it must appear in at least one diagram here. That rule is the whole of what keeps this page honest — see `etl-map-should-generate-itself` in docs/issues.json for why it is a rule a human follows rather than a gate, and what evidence would overturn that.",
+        "Numbers in this document are quoted, never computed here. Every figure carries the pin file it came from, so a moved measurement shows up as a diff in the pin and a stale sentence here is findable by grepping for the number. Do not write a figure whose source you cannot name.",
+        "Do not restate. Provenance lives in each corpus's PROVENANCE.md, licences in SOURCES.md, the two hard joins in word-indexing.md and encoding-inspector.md. This page owns the SHAPE — order, ownership, and which check covers which edge — and nothing else.",
+        "A new gate goes in three places (`pnpm gates`, `make ci`, the workflow) or gate:gates fails, and then in diagram ③ so a reader can see what it fences. A gate that guards nothing visible on the spine is a sign the spine drawing is wrong, not that the diagram should be skipped.",
+        "Change a figure here and a dozen of them are also copied into a public post in another repository — see §⑧ for which ones and why nothing enforces the copy. Nothing can: the two repos share no CI and neither build may depend on the other's checkout or on the network, which is the same constraint that made four of this pipeline's own measurements probes rather than gates. Update the post in the same change, or leave it correct about an older measurement, which is what its date already claims."
+      ],
+      "gates": ["pnpm gate:map", "pnpm gate:issues", "pnpm gate:gates", "make ci"],
+      "seeAlso": [
+        "edge-data-etl",
+        "word-geometry",
+        "word-indexing",
+        "encoding-inspector",
+        "assets-and-pages",
+        "provenance",
+        "ci-and-gates"
+      ]
     },
 
     {

@@ -449,7 +449,7 @@ If a future edition breaks it, the map itself is unaffected (it is per-ayah, not
 what would need work is the shard reader, which currently builds one lexical run per ayah
 from one file.
 
-### ⑤ Word-granular tajweed painting needs a third text, not a second baking pass · **open**
+### ⑤ Word-granular tajweed painting needs a third text, not a second baking pass · **answered**
 
 ①'s last paragraph says a second consumer of the alignment would need its own baking pass
 and that the tajweed shards have not had one. That is true, and it is not the whole cost —
@@ -469,16 +469,117 @@ repo and there will not be"* (`morphology.mjs`). QAC's Buckwalter segments recon
 word well enough to ask whether two ayahs share phrasing and nowhere near well enough to
 count Uthmani codepoints. So the offsets currently resolve against nothing committed here.
 
-**What would answer it.** The move that answered ①, run once more and measured the same
-way. `build-words.mjs` already reads the upstream print's per-word text and drops it on
-purpose; `lib/segmentation.mjs` already folds orthography until two indices join. A probe
-that folds Tanzil-Uthmani against the print's word text would say whether each annotation's
-span falls inside one print word, and how many ayahs need named exceptions — ③'s four are
-the shape to expect. ETL-only, nothing ships from it but a number, and the number decides
-whether this is a build change or a design problem.
+**What answered it, and how the heading came out wrong.** `packages/etl/scripts/probe-tajweed-words.mjs`,
+run 2026-08-06 over all 604 cached pages and all 6,236 ayahs, and audited a second time on
+2026-08-07 until every residual ayah had a name. It does not *find* the third
+text — that is still not here and still may not be — it **reconstructs** it, from the print's
+own per-word `data-hafs`, the string `build-words.mjs` reads and drops on purpose. That is a
+different move from the one this item predicted, and it is why the prediction is false: a
+build change with a named exception list, not a design problem.
 
-**What it does not unblock, even answered.** The beta label. The palette waits on a hafiz
+Eight corrections make the reconstruction agree with Tanzil, in two kinds. Each was earned
+by a run that failed without it, and none was guessed — the first three are stated by the
+corpus, the last five were **found by bracketing**: for each ayah the oracle got wrong, read
+the reconstruction between its last *correct* annotation and its first *wrong* one, and the
+drift has to be inside that segment.
+
+*Structural — how the words are joined:*
+
+| # | correction | evidence it was needed |
+|---|---|---|
+| 1 | prepend the **basmala** to ayah 1 of every surah but 1 and 9 | 2:1's offsets run to 44 against 5 codepoints; 326 annotations out of range → 0 |
+| 2 | glue the split **conjunction waw** to its successor | the print flags it itself, `data-waw-alatf="true"`, always on «وَ» |
+| 3 | **drop the pause-mark words** — the print numbers them, this text has none | the miss histogram clustered on *even* values and decayed monotonically (0 → 63.4%, +2 → 21.0%, +4 → 7.5%), the signature of one repeated two-codepoint insertion |
+
+*Orthographic — how one grapheme is spelled.* Every one is a case where the two texts render
+the **same printed mark** with a different number of codepoints. None is a variant reading:
+
+| # | correction | what the bracket showed | oracle after |
+|---|---|---|---|
+| 4 | a small high mark on a **tatweel carrier**, «ـۧ» and «ـۨ» → the mark alone | إِبۡرَٰهِـۧم, ٱلنَّبِيِّـۧنَ, نُـۨجِي — the print seats the mark on a stretch of baseline, the offsets count the mark | 97.56% |
+| 5 | **«أٓ»** is two codepoints here, three there | ٱلۡأٓخِرَة, ٱلۡأٓيَٰت — the *length* is what is measured, not which three | 98.49% |
+| 6 | drop the **small high madda «ۤ»** | يَسۡجُدُۤ, ٱسۡجُدُواْۤ — clustered on the sajdah ayahs, which is confirmation rather than coincidence: the source is Tanzil's *pause-sajdah* edition | 99.64% |
+| 7 | drop the **hamza below «ٕ»** on a seat | شَٰطِيِٕ, إِيتَآيِٕ, ٱللُّؤۡلُوِٕ — again a length, not an identity | 99.81% |
+| 8 | drop the **small high seen «ۜ»** *where it ends a word* | مَنۡۜ رَاقٖ, بَلۡۜ رَانَ, مَّرۡقَدِنَاۜ — the sakta, which the offsets' text does not carry. Word-*medially* the same codepoint sits over a ص and marks the sin reading (وَيَبۡصُۜطُ), which it does carry — so the substitution is anchored, and unanchored it breaks 52:37 | 99.86% |
+
+**Correction 4's narrowness is measured, not chosen.** Generalised to strip *every* U+0640 it
+scores **94.48%** — worse than applying nothing. Most tatweels are in both texts; only these
+two carriers are not. That asymmetry is the standing check on overfitting here: the rules
+apply to all 6,236 ayahs rather than the ones that motivated them, the oracle tests letter
+*identity* at a position no rule touches, and a rule that reaches too far is punished at
+once.
+
+**Correction 8 is why the corrections are toggles.** It is the same substitution that was
+measured and **rejected** when this section was first written — it gained 1 annotation and
+zero ayahs, and 36:52 was recorded as a named exception instead. Nothing about the
+substitution changed. What changed is the instrument: re-tried against an oracle that
+witnesses all eighteen rules rather than two, it closes three ayahs, because `silent`,
+`qalqalah`, `madd_246` and `idghaam_shafawi` had no vote the first time it was weighed. A
+correction is only ever rejected *by an instrument*. Re-run the rejects whenever the oracle
+widens — which is one line of work precisely because each correction is a flag rather than
+an edit to the arithmetic.
+
+③'s discipline applies to the result, so the fold is not trusted on its own output. **All
+eighteen** of the source's rules name a letter their annotation must open on: `hamzat_wasl`
+on **ٱ**, `lam_shamsiyyah` on **ل**, `qalqalah` on one of **قطب جد**, and so on. All 60,057
+annotations can be checked that way with no reference to any word boundary, and that oracle —
+not the span arithmetic — is what decides whether the fold is right. Every letter set was
+written from the tajweed rule *first* and measured second; reading a set off where the
+offsets land and then declaring that they land there is circular and passes on a broken fold.
+
+**Read the coverage as two numbers.** Breadth is free: a rule admitting fifteen codepoints is
+satisfied by accident far more often than one admitting a single ٱ. So each check is weighted
+by `1 − oracleDensity`, the chance it would have caught a one-codepoint drift in that ayah.
+100% of annotations are checked; **93.65%** is what that coverage is worth, and it is the
+number to quote. `madd_6` — fifteen letters, 69.6% sensitivity — says in its own `why` that
+it is the entry to distrust.
+
+| measure | result |
+|---|---|
+| oracle lands on the expected letter | **59,975 / 60,057 = 99.86%** |
+| annotations the oracle can check | 60,057 / 60,057 = **100%** (93.65% sensitivity-weighted) |
+| annotations inside **one** print word | 50,032 / 60,057 = **83.31%** |
+| two **adjacent** print words | 10,024 = **16.69%** |
+| wider than two | **1** — 12:41, `idghaam_ghunnah` |
+| past the end of the text | 0 |
+
+The 16.69% is not misalignment. Idghaam, ikhfa and iqlab are cross-word rules — the whole
+point is what happens *between* two words — and both boxes are paintable, so a two-box span
+is the correct rendering of a two-word rule rather than a failure to place a one-word one.
+
+Corrections 4–8 were made for *alignment*, and **paintability moved with them without being
+asked to**: spans past the end went 2 → 0 and spans wider than two words went 4 → 1. That is
+the second reason to believe them. A rule that merely shifted the string to satisfy the
+oracle would have no reason to settle arithmetic the oracle cannot see.
+
+**The residual is ③'s shape, and that is the finding.** **10 ayahs of 6,236 (0.16%)** carry a
+miss, 82 misses in all, every one but a single outlier within ±2 codepoints and 7 of the 10
+ayahs drifting by one constant amount throughout. They are not a rate — each one is **named**
+in `tajweed-words.probe.json` under `residual.named`, and three the repo already names
+elsewhere:
+
+| ayah(s) | why it drifts |
+|---|---|
+| 12:39, 12:41 | «يَٰصَٰحِبَيِ» — two of the four print↔QAC exceptions `lib/segmentation.mjs` already names. A **third independent witness** to the same spelling, from a text neither of those two involves |
+| 15:7 | «لَّوۡمَا» — the repo's single 1→2 alignment singularity, drifting here for the reason it drifts there |
+| 2:181, 8:6, 13:37 | «بَعۡدَ مَا» — the print splits it, the offsets' text joins it. Unlike the waw the corpus does not flag it, so it is not derivable |
+| 2:97, 17:7 | a **bare** tatweel carrying no small-high mark, which correction 4 deliberately does not reach. 17:7 also spells ٱلۡءَاخِرَةِ the long way where the same print writes أٓ elsewhere — an inconsistency inside the print itself |
+| 95:1, 97:1 | not localisable: the *first* oracle annotation is already drifted, so there is no correct one to bracket against. Not the basmala — 112 surahs take that prefix and only these two drift |
+
+36:52 «مَّرۡقَدِنَاۜ» used to be a row here. It is not one any more: correction 8 closed it,
+along with 75:27 and 83:14.
+
+That is orthographic, not structural: the same class as `lib/segmentation.mjs`'s exceptions,
+now at a comparable count rather than a larger one. It is also why paintability (99.998%
+within two boxes) still beats alignment — a one-codepoint drift inside a seven-codepoint word
+rarely changes which box hosts the span. The ten are recorded and are not to be
+heuristised away — ③'s rule, unchanged.
+
+**What it does not unblock, still.** The beta label. The palette waits on a hafiz
 (`plan-tajweed-golden-row`), and painting a wrong colour per word makes it wronger, not
 righter. ① also prices the bake in advance: restating an answer costs more than shipping
 the question, so expect the tajweed tree to move the way the roots tree did — 450.7 → 532.3
-KB gz, not the estimate — and to need `gate:assets` reviewed rather than assumed.
+KB gz, not the estimate — and to need `gate:assets` reviewed rather than assumed. And the
+probe is not a gate and will not become one: it reads the gitignored 378 MB page cache, so
+on a clean checkout it has nothing to read. Re-run it before writing the bake — the numbers
+above are of one pin.
