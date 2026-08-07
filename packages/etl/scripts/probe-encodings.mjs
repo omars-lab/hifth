@@ -46,10 +46,26 @@
  * Not a gate, and never will be: no cache, nothing to read. Named `probe-` for
  * exactly the reason `probe-tajweed-words.mjs` is.
  *
+ * ## `--marks`, and why it is opt-in
+ *
+ * The level below a word. With the flag, every page is also read through
+ * `lib/diacritics.mjs` and joined by `lib/mark-join.mjs`, so each tajweed
+ * annotation can be asked a question the four encodings alone cannot answer:
+ * **does the codepoint this rule opens on have a drawn path, and which one.**
+ * That is the offline half of `sub-word-marks.md` §⑧ ①, and the boxes it finds
+ * are what the outline draws inside its word rectangles.
+ *
+ * It is a flag rather than the default for one reason: it puts 326,515 more
+ * rectangles in the payload, which roughly doubles a report that is already
+ * megabytes. The default run is the one a maintainer opens to read four
+ * encodings; `--marks` is the one they open to look at ink they are not allowed
+ * to draw.
+ *
  * Usage:
  *   node packages/etl/scripts/probe-encodings.mjs                 # from the cache
  *   node packages/etl/scripts/probe-encodings.mjs --fetch         # fill it first
  *   node packages/etl/scripts/probe-encodings.mjs --pages 40      # a fast subset
+ *   node packages/etl/scripts/probe-encodings.mjs --marks         # + the mark level
  *   node packages/etl/scripts/probe-encodings.mjs --out /tmp/x.html
  */
 import { createHash } from "node:crypto";
@@ -57,10 +73,21 @@ import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import vm from "node:vm";
+import { DIACRITICS } from "@hifth/core";
 import { candidatePage, pin } from "./lib/candidate-pages.mjs";
+import { applierFromPin, readDiacritics } from "./lib/diacritics.mjs";
+import { DRAWN_NAME, markPaths } from "./lib/mark-join.mjs";
 import { WAQF } from "./lib/mushaf-frame.mjs";
 import { EXCEPTIONS, lexicalIndices, openAlignment, qacSkeletons } from "./lib/segmentation.mjs";
-import { ALL_CORRECTIONS, foldAyah, oracleDensity, oracleOf, touchClass } from "./lib/tajweed-fold.mjs";
+import {
+  ALL_CORRECTIONS,
+  ORACLE,
+  foldAyah,
+  oracleDensity,
+  oracleOf,
+  respellerFor,
+  touchClass,
+} from "./lib/tajweed-fold.mjs";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const DATA = join(HERE, "..", "data");
@@ -73,12 +100,17 @@ const DEFAULT_OUT = join(HERE, "..", "out", "encoding-inspector.html");
 const ASSETS = join(HERE, "..", "..", "..", "apps", "web", "public", "assets");
 const WORD_SHARDS = join(ASSETS, "words", "hafs-kfqc");
 const MANIFEST = join(ASSETS, "manifest.json");
+// The per-page fit from their frame to ours, four numbers a page, committed.
+// `--marks` needs it and nothing else here does; see `lib/diacritics.mjs` on
+// why a caller reconstitutes the transform rather than re-fitting one.
+const WORD_PIN = join(DATA, "pages", "word-boxes.pin.json");
 
 const argOf = (name, fallback) => {
   const i = process.argv.indexOf(name);
   return i === -1 ? fallback : process.argv[i + 1];
 };
 const fetchMissing = process.argv.includes("--fetch");
+const wantMarks = process.argv.includes("--marks");
 const lastPage = Number(argOf("--pages", 604));
 const out = argOf("--out", DEFAULT_OUT);
 
@@ -102,11 +134,33 @@ const isMark = (text) => [...text].length > 0 && [...text].every((c) => WAQF.has
 /** "surah:ayah" → Map(1-based print index → { hafs, waw, mark }). */
 const byAyah = new Map();
 
+/**
+ * `--marks` only: "surah:ayah" → Map(print index → the word's resolved marks).
+ *
+ * Each value is {@link markPaths}'s answer — `[{ at, len, token, name, mark }]`
+ * with `at` a **codepoint** index into that word's own `data-hafs` — or `null`
+ * for a word that does not join. The null is kept rather than dropped, because
+ * "this word has no marks" and "this word could not be resolved" are different
+ * findings and the second must not be able to hide inside the first.
+ */
+const marksByAyah = new Map();
+let markRows = null;
+
 async function readPages() {
   let bytes = 0;
+  if (wantMarks) {
+    markRows = new Map(JSON.parse(readFileSync(WORD_PIN, "utf8")).pages.map((p) => [p.page, p]));
+  }
   for (let page = 1; page <= lastPage; page += 1) {
     const { body } = await candidatePage(page, { offline: !fetchMissing });
     bytes += body.length;
+    if (wantMarks && markRows.has(page)) {
+      for (const w of readDiacritics(body.toString("utf8"), applierFromPin(markRows.get(page)))) {
+        const key = `${w.surah}:${w.aya}`;
+        if (!marksByAyah.has(key)) marksByAyah.set(key, new Map());
+        marksByAyah.get(key).set(w.idx, markPaths(w));
+      }
+    }
     for (const m of body.toString("utf8").matchAll(WORD)) {
       const a = m[1];
       const surah = Number(attr(a, "data-surah"));
@@ -284,6 +338,22 @@ for (const key of byAyah.keys()) {
   } else if (EXCEPTIONS[key]) {
     entry.x = EXCEPTIONS[key];
   }
+  // `d` — the mark level, print index → `[at, len, id, x, y, w, h]` rows, or
+  // `null` for a word ④ could not join. A word that simply carries no marks is
+  // omitted rather than stored as `[]`: absent and empty mean the same thing to
+  // the outline, and 91,451 empty arrays are not free. `null` is stored,
+  // because "no answer" and "the answer is none" are not the same claim.
+  if (wantMarks) {
+    const byIdx = marksByAyah.get(key);
+    if (byIdx) {
+      const d = {};
+      for (const [i, resolved] of byIdx) {
+        if (resolved === null) d[i] = null;
+        else if (resolved.length) d[i] = resolved.map((m) => [m.at, m.len, ...m.mark]);
+      }
+      if (Object.keys(d).length) entry.d = d;
+    }
+  }
   ayahs[key] = entry;
 }
 
@@ -307,6 +377,125 @@ let oracleHit = 0;
 let oracleSens = 0;
 let residualAyahs = 0;
 
+// ------------------------------------------------------- `--marks`: the level --
+
+/**
+ * The offline half of `sub-word-marks.md` §⑧ ①, measured per annotation.
+ *
+ * ①–⑤ of `probe-diacritics.mjs` end at a word: every mark is named, joined to
+ * the codepoint the print drew it for, and inside its own word's box. What is
+ * still unmeasured is whether a *tajweed rule* can reach one — the rule speaks
+ * in Tanzil offsets, the mark answers to a `data-hafs` codepoint index, and the
+ * fold that connects them **respells** some words. So each annotation is walked
+ * all the way down and its outcome recorded, including every way down that does
+ * not arrive:
+ *
+ *   `oracle-miss`  the offset does not land on the letter its rule names, so
+ *                  there is no position to resolve; already counted above.
+ *   `basmala`      the letter is in the prefixed basmala — ink from 1:1, with
+ *                  no print index in this ayah.
+ *   `no-host`      the position falls in a space between words.
+ *   `no-word`      the corpus has no word at that print index (page not read).
+ *   `respelt`      the fold rewrote this word, so an offset into the string is
+ *                  not an offset into `data-hafs`. Counted, never guessed.
+ *   `unjoined`     `markPaths` refused the word (④'s residual).
+ *   `letter`       the codepoint is a base letter and the print drew no named
+ *                  path for it. **This is an answer, not a failure** — qalqalah
+ *                  opens on ق, and the box to light is the letter's, which the
+ *                  word shards do not carry at letter granularity.
+ *   `drawn`        the codepoint has a named path, and this is its rectangle.
+ *
+ * The predicted name is `DRAWN_NAME[cp(letter)]` and the observed one is the
+ * path's own — for a mark these agree by construction, because `pairMarks`
+ * pairs *by* name, so the comparison is not evidence and is not reported as
+ * such. What the per-rule tally is actually for is the shape of the answer:
+ * which rules land on a mark, which land on a letter, and which cannot be
+ * reached at all. `composite` is the one real disagreement — a vowel that
+ * carries an iqlab meem is drawn as one glyph, so a rule naming the bare vowel
+ * gets `fatha iqlab` where the bare-codepoint lookup says `fatha`.
+ */
+const markOutcome = {
+  "oracle-miss": 0,
+  basmala: 0,
+  "no-host": 0,
+  "no-word": 0,
+  respelt: 0,
+  unjoined: 0,
+  letter: 0,
+  drawn: 0,
+};
+const markByRule = new Map();
+const markNames = new Map();
+let markComposite = 0;
+const respell = respellerFor(on);
+const cpOf = (c) => `U+${c.codePointAt(0).toString(16).toUpperCase().padStart(4, "0")}`;
+const ORACLE_SETS = new Map(Object.entries(ORACLE).map(([r, e]) => [r, { set: new Set(e.letters), near: e.near ?? 0 }]));
+
+/** Where in `cps` the rule's letter actually sits, for a hit. `near` is re-walked, not guessed. */
+function letterAt(cps, rule, start) {
+  const spec = ORACLE_SETS.get(rule);
+  if (!spec) return -1;
+  for (let d = 0; d <= spec.near; d += 1) if (spec.set.has(cps[start + d])) return start + d;
+  return -1;
+}
+
+function markLevel(key, entry, cps, hosts) {
+  const byIdx = marksByAyah.get(key);
+  const tally = (rule, k) => {
+    if (!markByRule.has(rule)) markByRule.set(rule, { n: 0, drawn: 0, letter: 0, unreached: 0 });
+    const t = markByRule.get(rule);
+    t.n += 1;
+    if (k === "drawn") t.drawn += 1;
+    else if (k === "letter") t.letter += 1;
+    else t.unreached += 1;
+    markOutcome[k] += 1;
+  };
+
+  for (const [r, start, end] of entry.a) {
+    const rule = rules[r];
+    const o = oracleOf(cps, { rule, start, end });
+    if (!o || !o.hit) {
+      tally(rule, "oracle-miss");
+      continue;
+    }
+    const pos = letterAt(cps, rule, start);
+    const host = hosts.find((h) => pos >= h.from && pos < h.to);
+    if (pos < 0 || !host) {
+      tally(rule, "no-host");
+      continue;
+    }
+    if (host.print === null) {
+      tally(rule, "basmala");
+      continue;
+    }
+    const word = byIdx?.get(host.print);
+    const hafs = entry.w[host.print - 1];
+    if (word === undefined || hafs === undefined) {
+      tally(rule, "no-word");
+      continue;
+    }
+    if (respell(hafs) !== hafs) {
+      tally(rule, "respelt");
+      continue;
+    }
+    if (word === null) {
+      tally(rule, "unjoined");
+      continue;
+    }
+    const at = pos - host.from;
+    const hit = word.find((m) => at >= m.at && at < m.at + m.len);
+    if (!hit) {
+      tally(rule, "letter");
+      continue;
+    }
+    tally(rule, "drawn");
+    if (DRAWN_NAME[cpOf(cps[pos])] !== hit.name) markComposite += 1;
+    const seen = markNames.get(rule) ?? new Map();
+    seen.set(hit.name, (seen.get(hit.name) ?? 0) + 1);
+    markNames.set(rule, seen);
+  }
+}
+
 for (const [key, entry] of Object.entries(ayahs)) {
   const [surah, ayah] = key.split(":").map(Number);
   const words = entry.w.map((hafs, i) => ({ hafs, waw: entry.v[i] === "1", mark: entry.m[i] === "1" }));
@@ -326,6 +515,7 @@ for (const [key, entry] of Object.entries(ayahs)) {
     }
   }
   if (missed) residualAyahs += 1;
+  if (wantMarks) markLevel(key, entry, cps, hosts);
 }
 
 // ---------------------------------------------------------------- the report --
@@ -374,6 +564,9 @@ const payload = {
     megabytes: (bytes / 1024 / 1024).toFixed(0),
   },
   rules,
+  // The mark vocabulary, so a row's `id` can be named in the browser. Null
+  // without `--marks`, and the client keys the whole mark level off that.
+  diacritics: wantMarks ? DIACRITICS : null,
   surahs: surahs(),
   exceptions: EXCEPTIONS,
   pages: Object.fromEntries(Object.entries(ayahs).map(([k, e]) => [k, e.p])),
@@ -447,6 +640,31 @@ for (const [k, n] of Object.entries(touchCount)) {
 console.log(`\n── the residual: ${residualAyahs} ayahs, ${oracleN - oracleHit} misses`);
 for (const [d, n] of [...drift].sort((a, b) => (a[0] ?? 99) - (b[0] ?? 99))) {
   console.log(`   ${(d === null ? "∅" : String(d)).padStart(3)}  ${String(n).padStart(4)}  ${pct(n, oracleN - oracleHit)}`);
+}
+if (wantMarks) {
+  const total = Object.values(markOutcome).reduce((a, b) => a + b, 0);
+  console.log(`\n── the mark level — ${total} annotations walked from an offset to a drawn path`);
+  for (const [k, n] of Object.entries(markOutcome)) {
+    console.log(`  ${k.padEnd(12)} ${String(n).padStart(6)}  ${pct(n, total)}`);
+  }
+  console.log(
+    `  of the ${markOutcome.drawn} that reach a path, ${markComposite} are drawn as a composite` +
+      " — a vowel and its iqlab meem in one glyph, which the bare codepoint does not predict",
+  );
+  console.log("\n── per rule: where the rule's own letter is drawn");
+  const rows = [...markByRule].sort((a, b) => b[1].n - a[1].n);
+  for (const [rule, t] of rows) {
+    const names = [...(markNames.get(rule) ?? new Map())].sort((a, b) => b[1] - a[1]);
+    const top = names
+      .slice(0, 3)
+      .map(([n, c]) => `${n} ×${c}`)
+      .join(", ");
+    console.log(
+      `  ${rule.padEnd(16)} ${String(t.n).padStart(5)}  drawn ${pct(t.drawn, t.n).padStart(7)}` +
+        `  letter ${pct(t.letter, t.n).padStart(7)}  unreached ${pct(t.unreached, t.n).padStart(7)}` +
+        (top ? `  · ${top}${names.length > 3 ? ", …" : ""}` : ""),
+    );
+  }
 }
 console.log(`\n  wrote ${out}  (${(html.length / 1024 / 1024).toFixed(1)} MB, self-contained, gitignored)`);
 console.log("  open it with:  open " + out + "\n");

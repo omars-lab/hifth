@@ -24,7 +24,7 @@
  * on a checkbox, and it means the number under the toggle is measured rather
  * than remembered.
  */
-/* global CORRECTIONS, ALL_CORRECTIONS, DRIFT_LIMIT, foldAyah, touchClass, touched, oracleOf, driftOnset, driftShape, oracleLabel, oracleDensity, nameOf, nameWindow, HIFTH_DATA */
+/* global CORRECTIONS, ALL_CORRECTIONS, DRIFT_LIMIT, foldAyah, respellerFor, touchClass, touched, oracleOf, driftOnset, driftShape, oracleLabel, oracleDensity, nameOf, nameWindow, HIFTH_DATA */
 
 const DATA = HIFTH_DATA;
 const $ = (sel, root = document) => root.querySelector(sel);
@@ -412,18 +412,74 @@ function outline(key, f, sel) {
     );
   });
 
+  // ⑥ — the level below a word, when the report was generated with `--marks`.
+  //
+  // Drawn last so a mark paints over its own word's box rather than under the
+  // next one's, and drawn as rectangles for the same reason the words are: the
+  // rule is outlines, not ink. A mark's box is inside its word's box by
+  // construction — the word's box is the union over every path in its segment,
+  // marks included — so an escape here would be an alignment error, and seeing
+  // one is the point of drawing them at this scale.
+  const rows = DATA.diacritics ? (f.entry.d ?? null) : null;
+  let marksDrawn = 0;
+  let unjoined = 0;
+  let unaddressable = 0;
+  if (rows) {
+    const respell = respellerFor(state.on);
+    for (const [printStr, list] of Object.entries(rows)) {
+      const print = Number(printStr);
+      if (list === null) {
+        unjoined += 1;
+        continue;
+      }
+      const host = f.hosts[hostOfPrint.get(print)];
+      const hafs = f.words[print - 1]?.hafs;
+      // A respelt word spends a different number of codepoints than the string
+      // the offsets address, so `at` is not a fold offset there. Its marks are
+      // still drawn — the geometry is unaffected — and simply never lit.
+      const addressable = host !== undefined && hafs !== undefined && respell(hafs) === hafs;
+      if (!addressable) unaddressable += 1;
+      for (const [at, len, id, x, y, w, h] of list) {
+        marksDrawn += 1;
+        const from = addressable ? host.from + at : null;
+        const isLit = sel && from !== null && from < sel.end && from + len > sel.start;
+        const span = len > 1 ? `${at}–${at + len - 1}` : String(at);
+        svg.append(
+          svgEl(
+            "rect",
+            { class: `mk${isLit ? " lit" : ""}`, x, y, width: w, height: h },
+            svgEl("title", {
+              text:
+                `${DATA.diacritics[id] ?? `#${id}`}  ·  ${hafs ?? ""} codepoint ${span}  ·  ` +
+                (from === null ? "respelt here, so it has no fold offset" : `fold ${from}`),
+            }),
+          ),
+        );
+      }
+    }
+  }
+
   const wrap = el("div", { class: "outline-wrap" }, svg);
   const bits = [];
   if (!trusted) {
     bits.push(el("p", { class: "warn", text: `${boxes.length} boxes but ${f.words.length} print words. Two independent descriptions of this ayah disagree on how many words it has, so the outline draws the geometry and deliberately does not label it — a guessed alignment here would be a picture that lies quietly. Worth filing.` }));
   }
   bits.push(wrap);
+  if (rows) {
+    const parts = [`${marksDrawn} named marks drawn inside these boxes`];
+    if (unaddressable) parts.push(`${unaddressable} word(s) respelt by the fold, so their marks carry no offset and never light`);
+    if (unjoined) parts.push(`${unjoined} word(s) the ligature join could not resolve, so their marks are absent here`);
+    bits.push(el("p", { class: "note", text: `${parts.join("; ")}. Hover a mark for its name and the codepoint it was drawn for.` }));
+  } else if (DATA.diacritics === null) {
+    bits.push(el("p", { class: "note", text: "Generated without --marks, so the level below a word is not in this report. Re-run probe-encodings.mjs with --marks to draw it." }));
+  }
   bits.push(el("p", { class: "note legend" }, [
     ["even", "word"],
     ["mark", "pause mark"],
     ["gap", "dropped by the fold"],
     ["lit", "touched by the selected annotation"],
     ["other", "the rest of the page"],
+    ...(rows ? [["mk", "a named mark"]] : []),
     // Each swatch and its label are one inline-flex item, so a wrap breaks
     // between pairs rather than stranding a swatch on the line above its word.
   ].map(([cls, label]) => el("span", { class: "item" }, [el("span", { class: `sw ${cls}` }), el("span", { text: label })]))));
