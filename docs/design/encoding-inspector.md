@@ -142,7 +142,13 @@ Six views, one ayah picker, three checkboxes.
 
 **The ayah view** puts all four encodings on one ruler:
 
-1. the page artwork — **named and never drawn** (§6);
+1. where the ayah sits on the page — its **word boxes as outlines**, from `assets/words/**`,
+   on the frame the app draws them on, with the rest of the page behind them as faint
+   context. Geometry only: no glyph, no ligature, no page raster (§6.4 is still in force —
+   ⑨ ④ is the record of what moved and what did not). A box carries the same even/odd tint
+   its codepoints carry on the ruler at (4), so a span lit in one panel is lit in the other;
+   clicking one selects the annotation over it. If the box count and the `data-hafs` word
+   count ever disagree, the view draws the geometry and **refuses to number it**;
 2. the print's words: `data-hafs`, codepoint count, kind (word / split waw / pause mark),
    the half-open span each occupies in the fold, and the QAC word it maps to;
 3. the print↔QAC map for the ayah: every QAC word, the folded consonant skeleton the aligner
@@ -215,11 +221,17 @@ Six things, and the last two are the ones that will eventually tempt somebody.
    and that is the number to read, not the 100%.
 3. **Tanzil's own tokenisation.** The reconstruction is *of the print*, so "two words" here
    always means two print boxes and is never a claim about how Tanzil would count.
-4. **The ink.** No glyphs, no boxes, no page geometry. This is the temptation: the boxes are
-   right there in `assets/words/**`, and drawing them would make the tool feel complete. It
-   would also make it a second renderer of the mus'haf, with a second chance to draw it
-   wrong, in a tool whose entire authority rests on being about *identity* rather than
-   appearance. The page is named and linked; that is the whole intended relationship.
+4. ~~**The ink.** No glyphs, no boxes, no page geometry.~~ **The ink — glyphs and the page
+   raster only.** *(Half of this limitation was real and is gone; ⑨ ④ is the record.)* The
+   boxes are drawn now, because the maintainer this section predicted would come asking
+   "which two" came asking. What is still deliberately absent is every **glyph**: no
+   `<path>` from `assets/pages/**` is ever rendered, and none ever should be. That is where
+   the original argument keeps all its force — a page raster would make this a second
+   renderer of the mus'haf, with a second chance to draw it wrong, in a tool whose entire
+   authority rests on being about *identity* rather than appearance. A rectangle from a
+   `gate:words`-checked shard makes no claim about how anything *looks*; it says only where
+   a word the tool is already reasoning about happens to sit. The distinction is the whole
+   of what ⑨ ④ decided, and it is worth holding: outlines yes, ink no.
 5. **QAC segment granularity.** A print word maps to a QAC *word*. PREFIX/STEM/SUFFIX is not
    in the alignment and is not shown, because the alignment does not know it.
 6. **Any other print, and any other edition of QAC.** Both are pinned. A different pin is a
@@ -440,17 +452,48 @@ written, and the argument against it is unchanged.
 > had no vote when it was first weighed. §8's toggles are what made that re-try one line of
 > work. A correction is only ever rejected by the instrument that was measuring.
 
-### ④ Whether the report should be able to show a page's boxes · **open**
+### ④ Whether the report should be able to show a page's boxes · **answered**
 
-§6.4 says the tool draws no ink, deliberately. The counter-argument is real: a maintainer
+§6.4 said the tool draws no ink, deliberately. The counter-argument was real: a maintainer
 looking at a 2→1 block at word 3 usually wants to see *which two boxes*, and the shards are
-right there.
+right there. This item asked for a caller before spending the work, on the grounds that the
+blindness was a principle rather than an oversight.
 
-**What would answer it:** a caller. If someone using the inspector reaches for the app to
-answer "which box", the blindness is costing more than it saves and a box outline — geometry
-only, no glyphs, no page raster — is a bounded addition. Until then it is speculative work
-against a stated principle, and the principle is the reason the tool can be trusted about
-identity. Owned by whoever next uses it in anger.
+**Answered: the caller came, and the boundary moved by exactly the distance the question
+proposed.** Section ① now draws the ayah's word boxes as outlines, from `assets/words/**`,
+with the rest of the page behind them faintly. No glyph is drawn, nothing is read from
+`assets/pages/**`, and §6.4 keeps its force over the half that mattered — the ink. The line
+the principle actually protects is not "draws nothing" but "makes no claim about
+appearance"; a rectangle from a `gate:words`-checked shard makes none.
+
+Three things were settled before any of it was drawn, and each shaped the result:
+
+- **What the shards can carry.** Every one of the 6,236 ayahs has `from === 1` — an ayah's
+  boxes are never split across two shards — so print word *i* is `boxes[i - 1]`
+  unconditionally. That is asserted in `readBoxes`, not assumed, because a non-1 `from`
+  would shift every label silently.
+- **What the tints mean.** A box is tinted on its **host** index, not its print index, so a
+  word the fold dropped is a gap on the page exactly as it is a gap on the ruler. That is
+  what makes ① and ④ one instrument rather than two pictures.
+- **What happens when the two descriptions disagree.** The box list and the `data-hafs`
+  word list describe the same ayah independently. If their counts differ, the view draws the
+  geometry and refuses to number it, with a warning naming both counts — because the failure
+  it would otherwise produce is word 7's box under word 8's label, which looks entirely
+  fine. Measured over the full corpus at the time of writing: **6,236 ayahs outlined, 0
+  count mismatches.** The check stays anyway; the number is a result, not a guarantee.
+
+One defect was found by building it, and is worth recording because it was invisible: the
+report's client is *text* to `probe-encodings.mjs`, never imported, so a syntax error in it
+produced a 4.9 MB report that opened to a blank page with the whole script dead in the
+console. `probe-encodings.mjs` now compiles the concatenation the browser will parse
+(`new vm.Script`) before writing the file, and fails at generation time instead.
+
+`answered` and not `fixed`, by this repo's own definition of the stronger word: the guard
+above would catch a syntax error and `gate:words` keeps the shards honest, but nothing in CI
+would fail if section ① stopped drawing tomorrow — the report is generated, gitignored and
+never a gate, which is the whole reason it is allowed to be this cheap. Claiming a closure
+there is no test behind would misreport what is actually protecting the outline, the same way
+⑤ declined to.
 
 ### ⑤ Whether the `probe:tajweed-words` drift label reads backwards · **answered**
 

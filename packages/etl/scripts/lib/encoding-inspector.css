@@ -113,6 +113,41 @@ table.names tr.found td { color: var(--ok); font-weight: 600; }
 .cp b { font-size: 19px; font-weight: 400; line-height: 1.35; }
 .cp i { font: 9px ui-monospace, Menlo, monospace; font-style: normal; color: var(--dim); direction: ltr; height: 11px; }
 
+/* ① the word outline. Geometry only — there is deliberately no glyph and no
+   page raster here, so every rule below is about a rectangle. The fill tints
+   are the same --w-even/--w-odd the codepoint ruler uses, on purpose: a word
+   tinted one way on the page is tinted the same way on the ruler, which is what
+   makes the two panels one instrument rather than two pictures. */
+.outline-wrap {
+  background: var(--panel); border: 1px solid var(--line); border-radius: 8px;
+  padding: 10px; max-height: 68vh; display: flex; justify-content: center;
+}
+svg.outline { max-width: 100%; max-height: 66vh; height: auto; }
+svg.outline .frame { fill: none; stroke: var(--line); stroke-width: 1; }
+svg.outline .other { fill: var(--line); opacity: 0.25; }
+svg.outline .box { stroke: var(--dim); stroke-width: 0.4; cursor: pointer; }
+svg.outline .box.even { fill: var(--w-even); }
+svg.outline .box.odd { fill: var(--w-odd); }
+/* Dropped by the fold: present in the print, absent from the string the
+   annotations are measured against. Hollow, because that is what it is. */
+svg.outline .box.gap { fill: none; stroke-dasharray: 2 2; }
+svg.outline .box.mark { fill: none; stroke: var(--accent); stroke-dasharray: 1.5 1.5; }
+svg.outline .box.lit { fill: var(--span); stroke: var(--accent); stroke-width: 1; }
+svg.outline .box.untrusted { fill: none; stroke: var(--bad); stroke-width: 0.6; cursor: default; }
+svg.outline .box:hover { stroke: var(--accent); stroke-width: 1; }
+.warn {
+  color: var(--bad); font-size: 13px; max-width: 78ch;
+  border-left: 3px solid var(--bad); padding-left: 10px;
+}
+.legend { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 14px; margin-top: 8px; }
+.legend .item { display: inline-flex; align-items: center; gap: 5px; }
+.legend .sw { flex: none; width: 14px; height: 10px; border: 1px solid var(--dim); border-radius: 2px; }
+.legend .sw.even { background: var(--w-even); }
+.legend .sw.mark { border-color: var(--accent); border-style: dashed; }
+.legend .sw.gap { border-style: dashed; }
+.legend .sw.lit { background: var(--span); border-color: var(--accent); }
+.legend .sw.other { background: var(--line); opacity: 0.55; border-color: var(--line); }
+
 .diff { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 14px 16px; }
 .verdict { font-size: 14px; }
 .verdict.ok { color: var(--ok); }

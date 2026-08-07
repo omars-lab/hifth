@@ -56,6 +56,7 @@ import { createHash } from "node:crypto";
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+import vm from "node:vm";
 import { candidatePage, pin } from "./lib/candidate-pages.mjs";
 import { WAQF } from "./lib/mushaf-frame.mjs";
 import { EXCEPTIONS, lexicalIndices, openAlignment, qacSkeletons } from "./lib/segmentation.mjs";
@@ -66,6 +67,12 @@ const DATA = join(HERE, "..", "data");
 const TAJWEED = join(DATA, "tajweed", "tajweed.hafs.uthmani-pause-sajdah.json");
 const META = join(DATA, "meta", "quran-data.xml");
 const DEFAULT_OUT = join(HERE, "..", "out", "encoding-inspector.html");
+// The shipped word geometry, read for the outline (§6.4). These are *committed*
+// assets under `gate:words`, not the gitignored cache — which is the whole
+// reason the outline is affordable and the glyphs are not.
+const ASSETS = join(HERE, "..", "..", "..", "apps", "web", "public", "assets");
+const WORD_SHARDS = join(ASSETS, "words", "hafs-kfqc");
+const MANIFEST = join(ASSETS, "manifest.json");
 
 const argOf = (name, fallback) => {
   const i = process.argv.indexOf(name);
@@ -124,6 +131,63 @@ function wordsOf(key) {
   const idxs = [...m.keys()].sort((a, b) => a - b);
   for (let i = 0; i < idxs.length; i += 1) if (idxs[i] !== i + 1) return null;
   return idxs.map((i) => m.get(i));
+}
+
+/**
+ * The word boxes, from the committed shards — the outline's only input.
+ *
+ * Read separately from everything else above, and the separation is the point.
+ * The rest of this script reconciles four *encodings*; this reads one
+ * **geometry**, and it reads it from `apps/web/public/assets/words/**` rather
+ * than from the corpus, because those shards are committed, gated by
+ * `gate:words` and re-derivable offline. The tool draws where a word sits; it
+ * still does not draw the word. See the design doc §6.4 — the blindness that
+ * ended was about *position*, and the one about ink did not move.
+ *
+ * Returns `null` if the assets are not where they should be. The report is
+ * still worth generating without an outline, so this degrades rather than
+ * throws, and the client says the section is unavailable instead of drawing
+ * an empty frame that looks like a page with no words on it.
+ */
+function readBoxes(keys) {
+  let manifest;
+  try {
+    manifest = JSON.parse(readFileSync(MANIFEST, "utf8"));
+  } catch {
+    return null;
+  }
+  const want = new Set(keys);
+  const boxes = {};
+  const marks = {};
+  const page = {};
+  // One pass over the shards of the pages this run actually covers. `lastPage`
+  // is honoured so `--pages 40` stays a fast subset here too.
+  for (let p = 1; p <= lastPage; p += 1) {
+    let shard;
+    try {
+      shard = JSON.parse(readFileSync(join(WORD_SHARDS, `${p}.json`), "utf8"));
+    } catch {
+      continue;
+    }
+    for (const [key, w] of Object.entries(shard.words ?? {})) {
+      if (!want.has(key)) continue;
+      // `from` is 1 for every shard in the shipped corpus — an ayah's boxes are
+      // never split across two of them. Asserted rather than assumed, because
+      // the outline's word numbering is `boxes[i - 1]` and a non-1 `from` would
+      // silently shift every label by the offset.
+      if (w.from !== 1) continue;
+      boxes[key] = w.boxes;
+      if (w.marks?.length) marks[key] = w.marks;
+      page[key] = p;
+    }
+  }
+  const [, , dw, dh] = String(manifest.viewBox).split(" ").map(Number);
+  const overrides = {};
+  for (const [p, vb] of Object.entries(manifest.viewBoxOverrides ?? {})) {
+    const [, , w, h] = String(vb).split(" ").map(Number);
+    overrides[p] = [w, h];
+  }
+  return { boxes, marks, page, frame: { d: [dw, dh], o: overrides } };
 }
 
 /** The surah table, for names the report can put in a heading. */
@@ -266,7 +330,38 @@ for (const [key, entry] of Object.entries(ayahs)) {
 
 // ---------------------------------------------------------------- the report --
 
+/**
+ * The outline's geometry, and the one integrity claim it rests on.
+ *
+ * A box list and a word list are two independent descriptions of the same
+ * ayah — the shards were built by `build-words.mjs` off the corpus's `<g>`
+ * elements, the word list here off its `data-hafs` attributes. If they
+ * disagree on *how many*, the outline would draw word 7's box under word 8's
+ * label and look perfectly fine doing it. So the count is checked per ayah,
+ * the mismatches are counted here and named in the report, and the client
+ * refuses to number a mismatched ayah's boxes rather than guessing an
+ * alignment. Zero is the expected answer; the check exists because a silent
+ * off-by-one is exactly the defect this repo has already shipped once
+ * (PLAN 14, and the 47.8% edge corpus before it).
+ */
+const geometry = readBoxes(Object.keys(ayahs));
+let boxedAyahs = 0;
+let countMismatches = 0;
+const mismatched = [];
+if (geometry) {
+  for (const [key, entry] of Object.entries(ayahs)) {
+    const b = geometry.boxes[key];
+    if (!b) continue;
+    boxedAyahs += 1;
+    if (b.length !== entry.w.length) {
+      countMismatches += 1;
+      if (mismatched.length < 8) mismatched.push(`${key} (${b.length} boxes vs ${entry.w.length} words)`);
+    }
+  }
+}
+
 const payload = {
+  geometry,
   meta: {
     generated: new Date().toISOString().slice(0, 19).replace("T", " ") + "Z",
     pin: { repo: pin.candidate.repo, commit: pin.candidate.commit },
@@ -296,6 +391,14 @@ const read = (p) => readFileSync(join(HERE, "lib", p), "utf8");
 // cannot drift from the probe it is meant to explain.
 const foldSource = read("tajweed-fold.mjs").replace(/^export /gm, "");
 const clientSource = read("encoding-inspector.client.mjs");
+
+// Both halves are *text* to this script, never imported, so nothing here would
+// otherwise notice a syntax error in them — the report would generate, weigh
+// its usual megabytes, and open to a blank page with the whole script dead in
+// the console. That happened once while the ① outline was being written, and
+// costs nothing to make impossible: compile the concatenation the browser will
+// actually parse, and fail here instead of there.
+new vm.Script(`${foldSource}\n${clientSource}`, { filename: "encoding-inspector (fold + client)" });
 
 const html = `<!doctype html>
 <html lang="en">
@@ -327,6 +430,12 @@ const pct = (n, d) => (d ? `${((n / d) * 100).toFixed(2)}%` : "—");
 console.log(`\n  ${payload.meta.ayahs}/6236 ayahs · ${printWords} print words · ${annotations} annotations`);
 console.log(`  ${mapped} ayahs carry a print↔QAC map; ${Object.keys(EXCEPTIONS).length} named exceptions`);
 console.log(`  mark disagreements between the shards and WAQF: ${markDisagreements}`);
+if (!geometry) {
+  console.log("  word boxes: none — assets/words/hafs-kfqc/ not readable, the outline is off");
+} else {
+  console.log(`  word boxes: ${boxedAyahs} ayahs outlined · ${countMismatches} box/word count mismatches`);
+  for (const m of mismatched) console.log(`    ${m}`);
+}
 console.log(`\n── the oracle, with all ${ALL_CORRECTIONS.length} corrections on`);
 console.log(`  ${oracleHit}/${oracleN} = ${pct(oracleHit, oracleN)} land on the expected letter`);
 console.log(`  ${oracleN}/${annotations} = ${pct(oracleN, annotations)} of annotations checked`);
