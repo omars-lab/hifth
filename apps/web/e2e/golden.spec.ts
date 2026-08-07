@@ -72,8 +72,57 @@ import { COACH_STORAGE_KEY } from "../src/coach";
  */
 const SKINS = [{ id: "plain", param: "" }] as const;
 
-/** The vendored pages, with the ayahs each shot drives (see manifest.json). */
+/**
+ * The pages this file photographs, with the ayahs each shot drives (see
+ * manifest.json). **Five pages, chosen as five geometry classes** — PLAN §Loop 7
+ * asks for five, and the number is only worth anything if the fifth page can
+ * fail in a way the first four cannot.
+ *
+ * Pages 7, 9 and 19 were the whole print when this file was written: Loop 0
+ * vendored three pages, so "all of them" and "a sample" were the same set. Loop
+ * 4b vendored all 604 and turned that into a real sampling decision that nobody
+ * had to make yet. Made here, on two facts from `manifest.json` rather than on
+ * taste — and both new pages are outside al-Baqarah, where all three originals
+ * sit inside the first 3% of the book.
+ *
+ * What each page is *for*, since a shot that duplicates another's coverage is
+ * pure cost (the same reasoning that keeps MARQUEES at one page):
+ *
+ *   1   — **the page no other check can see.** Two independent reasons, and the
+ *         second is the one that earns the shot. First, it is the only viewBox
+ *         class in the print besides the default: `manifest.viewBoxOverrides`
+ *         has exactly two entries, pages 1 and 2, at `0 0 235 235` against every
+ *         other page's `0 0 345 550` — a square page in a tall window, so the
+ *         one page whose fit is *width*-bound while every other baseline here is
+ *         height-bound and would keep passing if the width branch broke.
+ *         Second, and the actual argument: `gate:pages` **skips it by name**
+ *         (`scripts/gate-pages.mjs`, `if (entry.page <= 2) continue`) because
+ *         the opening spread is two decorated frames rather than a fifteen-line
+ *         block, so every line-pitch statement that gate makes is false of it.
+ *         That skip is correct and should stay — but it leaves the corpus's most
+ *         irregular page as its least-checked one, and a golden diff is the one
+ *         instrument that does not care: a picture asserts no pitch, no band
+ *         count and no line grid, only that the frame still looks like itself.
+ *         One shot, because a wrong fit is wrong for the whole frame — a
+ *         breadcrumb and a phrase here would re-photograph the same scale.
+ *   7   — 2:38–2:48. 2:40 and 2:47 are a same-page hop pair, so the breadcrumb
+ *         and the selection are both visible in one frame.
+ *   9   — 2:58–2:61, four big polygons: a mis-scaled clone shows up here first.
+ *   19  — 2:120–2:126, the densest of the original three.
+ *   604 — the last page, and the only structural class with **surah headers on
+ *         it**: 112, 113 and 114 all begin here, so it is 15 ayahs of small
+ *         polygons interrupted by three ornamental bands. Pages 7/9/19 are all
+ *         mid-surah and contain no band at all, so nothing in this file can
+ *         currently see a header swallowed into the ayah polygon beneath it —
+ *         which is the exact shape of the defect PLAN 14 found eighteen pages of.
+ *
+ * No breadcrumb on either new page: the crumb is one dashed outline drawn by one
+ * code path, already photographed three times, and what pages 1 and 604 add is
+ * geometry, not paint.
+ */
 const SHOTS = [
+  // page 1 — al-Fatiha, the whole surah on a 235×235 page. Width-bound fit.
+  { page: 1, state: "selection", link: "1:1" },
   // page 7 — 2:38–2:48. 2:40 and 2:47 are a same-page hop pair, so the
   // breadcrumb and the selection are both visible in one frame.
   { page: 7, state: "selection", link: "2:47" },
@@ -84,10 +133,18 @@ const SHOTS = [
   { page: 9, state: "selection", link: "2:58" },
   { page: 9, state: "breadcrumb", link: "2:59?via=2:58" },
   { page: 9, state: "phrase", link: "2:58-2:59" },
-  // page 19 — 2:120–2:126, the densest of the three.
+  // page 19 — 2:120–2:126, the densest of the original three.
   { page: 19, state: "selection", link: "2:122" },
   { page: 19, state: "breadcrumb", link: "2:123?via=2:122" },
   { page: 19, state: "phrase", link: "2:121-2:122" },
+  // page 604 — an-Nas 114:1 is the first ayah *under* a surah header, so this
+  // shot is the one that can see the band get painted as part of the ayah.
+  { page: 604, state: "selection", link: "114:1" },
+  // ...and a phrase across three of the page's small polygons. Same surah on
+  // both endpoints: a range is same-surah by construction (`router.ts`), so
+  // the page's three surah boundaries are not expressible as one wash and this
+  // deliberately does not try to invent a link form that says otherwise.
+  { page: 604, state: "phrase", link: "114:1-114:3" },
 ] as const;
 
 /**

@@ -50,7 +50,7 @@ described in both files.
 | 5 — Highlight + roots | complete (a word run now *searches*, and says how many places it is about — word-D, 2026-08-05; the segmentation blocker ⑬ named is measured and mapped, and ⑮'s keyboard path is in) | Drag-range → merged hop list; root lens nearest-page-first | [loop-5.md](decisions/loop-5.md), [word-selection.md](decisions/word-selection.md), [word-search.md](decisions/word-search.md) |
 | 6a — Skin, editions, wayfinding | complete | Instant plain⇄tajweed toggle (identical geometry); jump anywhere; visited pages survive offline; Lighthouse ≥90 | [loop-6a.md](decisions/loop-6a.md) |
 | 6b — Pin-a-juz packs | complete-with-deferral (the 8-day half is a user check) | Airplane-mode revision of a pinned juz works after 8+ days | [loop-6b.md](decisions/loop-6b.md) |
-| 7 — Polish + beta | pending (after 3+5+6) | Hafiz revision session, zero friction notes → **web v1.0** | — |
+| 7 — Polish + beta | in flight — its four engineering items are all in (popover ordering, keyboard map, shard prefetch, the 5-page golden sweep, 2026-08-07); what remains is not a loop but a person | Hafiz revision session, zero friction notes → **web v1.0** | — |
 | Track B — Capacitor | gated on web v1.0 | Same web build wrapped for iOS/Android; Universal Links | — |
 
 ### Open follow-ups
@@ -1051,7 +1051,7 @@ wrong hop or mislabeled ayah is a product-breaking bug for this audience.
 | Highlighter contract | spec §3 API on fixture pages (jsdom): group isolation (breadcrumb never clobbers selection), navigateTo mounts ≤ current+adjacent, setSkin toggles classes without touching geometry, events carry correct keys/granularity | Vitest + fixtures (mock pages 7/9/19) | Loop 1 |
 | Component | each component from fixture data: rail counts match adjacency, popover hifz ordering, diff output for known pairs (2:48 vs 2:123 = شفاعة/عدل), reserved edges render nothing | Vitest + Testing Library | as each lands |
 | E2E core loop | scripted hop tours: tap → rail → popover → cross-page hop → bead back; drag → menu → merged hops; cold-open every §7 link and assert restored state | Playwright, iPhone + Android viewports, touch | smoke every push (Loop 2); full nightly |
-| Visual regression | golden screenshots: 5 pages × (plain, tajweed) × (selection, phrase, breadcrumb, marquee) | Playwright toHaveScreenshot | Loop 2 |
+| Visual regression | golden screenshots, `plain` skin: 5 pages — 1, 7, 9, 19, 604 — each in the highlight states it is *for*, plus a marquee row. Five was always the number; what Loop 7 added is that the five are five geometry classes rather than five pages (`e2e/golden.spec.ts` argues each one), so the fifth can fail in a way the first four cannot. The tajweed half of the axis is live and deliberately empty — follow-up ⑧ | Playwright toHaveScreenshot | Loop 2; the five pages Loop 7 |
 | Desktop layout | the one layout no phone project can reach: the spread exists above `1024×740` and does not exist below it (asserted as *absent*, not hidden — a hidden leaf has already paid its ~170 KB), the right-hand leaf carries the lower page number, and the un-vendored facing page reads as absent rather than as blank paper. Geometry against the real RTL flow, because DOM order only becomes *sides* once the flow has run — a `row-reverse` passes every component test and puts the mus'haf on backwards | Playwright `desktop` project, 1440×900 (`e2e/desktop.spec.ts`) | Loop 7 desktop work |
 | Stage geometry | the page measured against the stage around it: a hop to either end of a page covers the layer, no drag can uncover it, and at rest the page is centred in the stage rather than flush against an edge. Deliberately not a golden — the crop is the SVG element, so the one thing that can be wrong is outside it | Playwright bounding boxes (`e2e/stage-fit.spec.ts`) | Loop 6a defect fix |
 | Perf | Loop 1 spike in CI: trace pan/zoom + highlight-toggle on densest page, assert frame budget; TTI <2.5s throttled; JS <150KB gz; shard <50KB gz | Playwright traces + Lighthouse CI | budgets Loop 0; traces after Loop 1 |
@@ -1274,6 +1274,23 @@ data-QA (20 sampled pairs vs printed mushaf, hafiz sign-off on diffs). Popover o
 tuning (same page → juz → earlier → later); keyboard map (arrows=pages, `/`=jumper);
 golden-image tests on 5 pages; perf pass (shard prefetch on selection).
 **Exit:** a revision session with a hafiz produces no navigation friction notes → **web v1.0**.
+
+**All four engineering items are in** (2026-08-07): popover ordering is `orderForHifz` /
+`hifzRank` in [adjacency.ts](../packages/core/src/adjacency.ts); the keyboard map is
+[keymap.ts](../apps/web/src/keymap.ts); the shard prefetch reaches hop *targets*, not only
+mounted pages (backlog ⑧); and the golden sweep is five pages. The last of those was the
+only one still short — the harness had photographed 7, 9 and 19 since Loop 6a, which was
+the whole print at the time it was written and became a sample only when 4b vendored 604
+pages. Choosing the other two was therefore a decision nobody had had to make, and it was
+made on facts rather than on coverage arithmetic: **page 1** is the only viewBox class
+besides the default (`235×235` against `345×550`, so the one width-bound fit among
+height-bound baselines) *and* the page `gate:pages` skips by name — the corpus's most
+irregular page was its least-checked one, and a picture is the one instrument that asserts
+no line pitch; **page 604** is the only structural class with surah headers on it (112,
+113 and 114 all begin there), so it is the only shot that can see a band swallowed into the
+ayah polygon beneath it, which is the exact shape of the defect PLAN 14 found eighteen
+pages of. What is left of this loop is not a loop. It is a person: a hafiz, a mus'haf, and
+an hour.
 
 ### Track B (gated on stable web beta) — Capacitor iOS, then Android
 Wrap `apps/web`; bundle the full corpus in-app (offline by default); native share sheet;

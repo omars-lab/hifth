@@ -327,8 +327,10 @@ jobs:
         run: pnpm --filter @hifth/core build
       - name: Build web
         run: pnpm --filter @hifth/web build
-      # Also runs the `golden` project: the visual gate diffs pages 7/9/19 in
-      # every highlight state against the committed linux baselines
+      # Also runs the `golden` project: the visual gate diffs five pages —
+      # 1, 7, 9, 19 and 604, one per geometry class, chosen in golden.spec.ts
+      # and reasoned about there — in every highlight state that page is for,
+      # against the committed linux baselines
       # (apps/web/e2e/__screenshots__/linux, refreshed with `make golden-linux`).
       #
       # The preview server starts inside this container, so the browser reaches

@@ -988,10 +988,16 @@
           "file": "scripts/gate-golden-size.mjs",
           "symbol": "BUDGET",
           "note": "Why the baselines are committed to git rather than LFS, and the number at which that answer should be revisited."
+        },
+        {
+          "file": "apps/web/e2e/golden.spec.ts",
+          "symbol": "SHOTS",
+          "note": "Which pages are photographed and *why each one*. Five pages chosen as five geometry classes, not five pages: 1 is the only viewBox override class (235×235, so the only width-bound fit) and the page gate:pages skips by name; 7/9/19 are the original three, mid-surah, varying in density; 604 is the only page with surah header bands on it. A shot that duplicates another's coverage is pure cost, so the docblock states each page's job and the reader is expected to add to it."
         }
       ],
       "extend": [
         "Adding a row means adding baselines for BOTH platforms: `make golden-update` for darwin, `make golden-linux UPDATE=1` for linux.",
+        "Pick a page for a geometry class, not for variety: say in the SHOTS docblock what this page can fail at that no existing shot can see. If that sentence cannot be written, the shot is cost without coverage.",
         "Open the changed PNGs before committing. An accepted baseline is the gate agreeing with you, which is worth nothing unless you looked.",
         "Never bump Playwright without bumping GOLDEN_IMAGE and re-rendering — the failure mode is ten red diffs that look exactly like a UI regression."
       ],
