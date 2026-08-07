@@ -605,6 +605,26 @@
           "file": "scripts/gate-words.mjs",
           "symbol": "MARK_DROP",
           "note": "Re-measures every committed box against the polygon it claims — offline, and with its own path parser rather than the ETL's, because a gate that imports the code it is checking only proves the code agrees with itself. Three checks: LEXICAL (a word's centre is inside its own ayah), MARK (a pause mark's bottom edge meets its polygon within `MARK_DROP`, 4 units — measured: 4,453 of 4,486 need nothing and the worst needs 2.9), PAIRING (shard keys and polygon keys match in both directions, 604 pages, zero either way). This is the gate that found the one defect `gate:pages` structurally cannot see: on p577 the ink of 75:5's first word *was* covered by a tappable box — the wrong ayah's. No orphan, so no orphan check could fire. Two prints of the same page can say that; one cannot."
+        },
+        {
+          "file": "docs/design/sub-word-marks.md",
+          "symbol": "The blocker was never that the marks are anonymous",
+          "note": "The design of record for the level below a word, and the answer to \"can Hifth highlight the tanween?\". Read it before touching `skins.ts`'s ayah-granularity comment, which it demotes from a design constraint to a stale sentence (§⑧ ③). Also the place §② keeps two different things called a mark apart: the word shards' `marks` are *pause* marks and their integers are word indices, while these are drawn inside a word — which is why the asset kind would be `diacritics` and why `DIACRITICS` deliberately cannot name a waqf sign."
+        },
+        {
+          "file": "packages/core/src/diacritics.ts",
+          "symbol": "export const DIACRITICS",
+          "note": "The level below a word: the twenty-six names the ligature corpus draws above and below a letter, in the order an id means. A shard says `0`, not `\"fatha\"`, because a page carries ~540 marks and the names are the larger half of the bytes — which makes the array's *order* load-bearing in a way nothing else here is. Appending is safe; reordering silently re-labels the whole corpus and changes no geometry, so nothing downstream would notice. `diacritics.test.ts` pins six ids for that reason. Deliberately excludes the dots (`data-dots`, 105,269 paths, three values): i'jam is part of the letter's identity, not a mark a reader is told to look at. It lives in core and not in the ETL because it is the one place the vocabulary is written down — `build-tajweed.mjs`'s arrangement with `isTajweedRuleId`, for the same reason."
+        },
+        {
+          "file": "packages/etl/scripts/lib/diacritics.mjs",
+          "symbol": "export function readDiacritics",
+          "note": "A named, exact box per mark, on our frame, grouped by the word it sits on. Fits nothing: `apply` is handed in, rebuilt by `applierFromPin` from the four numbers `word-boxes.pin.json` already records, so a mark cannot end up on a second transform that disagrees with its own word's by a tenth of a unit. The invariant that makes this verifiable offline is that a word's shipped box is the union over *every* path in its segment, marks included — so containment holds by construction, and an escape can only be an alignment error, a mark filed under the wrong word. Throws on a `data-diacritic` core has never heard of rather than inventing an id, and its `attr` docblock records the regex trap that cost a corpus-wide run of `[Infinity, …, -Infinity]` boxes: the leading `\\s` is load-bearing, because `d` otherwise matches the tail of `id=\"md-path-…\"`."
+        },
+        {
+          "file": "packages/etl/scripts/probe-diacritics.mjs",
+          "symbol": "const SLACK",
+          "note": "The measurement that had to come before anything shipped, over all 604 cached pages: the vocabulary is complete (26 of 26 names drawn), every one of 326,515 marks lands inside the word box the app already ships (0 escapes, 0 unmatched, slack 0.2 — rounding, not registration), and the shard tree would weigh 7.35 MB raw / 2.28 MB gz. Containment is checked against the *committed* shards rather than boxes computed in the same pass, so the two sides cannot share a mistake and agree about it. It ships nothing on purpose: 2.28 MB of assets no caller fetches is the same waste `gate:assets` names for a non-vendored edition. What it cannot answer is whether a mark is on the right *letter* — that needs an eye, and belongs in the encoding inspector."
         }
       ],
       "extend": [

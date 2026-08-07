@@ -459,6 +459,46 @@
     },
 
     {
+      "id": "tajweed-span-to-named-mark",
+      "source": { "file": "docs/design/sub-word-marks.md", "item": "①" },
+      "status": "open",
+      "severity": "question",
+      "owner": "agent",
+      "blockedBy": ["the encoding inspector drawing the marks"],
+      "note": "Opened 2026-08-07 with mark-A. Two measurements now exist over the same words and nothing has checked whether they meet. word-indexing.md ⑪ ⑤ lands 59,975 of 60,057 tajweed annotations (99.86%) on the letter their rule names, 83.31% of them inside a single print word; sub-word-marks.md ⑤ puts 326,515 named mark boxes inside those same words, 0 of them outside. The open question is whether a span's [start,end) coincides with a mark a reader can be SHOWN — whether madd_246 opening at a codepoint means there is a maddah box there — and, if so, whether highlighting the mark is a truer rendering of the rule than washing the whole word. What would answer it: the encoding inspector (mark-B), which already reconciles the print, the ligature corpus, QAC and the tajweed offsets on one screen and would gain the mark boxes over the same frame. Nothing offline can: the correspondence is between a codepoint in a text word-indexing.md ⑪ ⑤ RECONSTRUCTS and an outline on a page, and only an eye closes that gap. What must not happen instead is deriving the correspondence from the fact that both numbers exist — reading a mapping off where the offsets happen to land and then declaring that they land there is the circularity ⑪ ⑤ names about its own oracle, and it passes on a broken answer. Note this is a rendering question and not a recitation one: DIACRITICS records what the corpus wrote in an attribute and this repo asserts nothing about how any of the twenty-six are pronounced."
+    },
+
+    {
+      "id": "diacritic-shards-need-a-caller",
+      "source": { "file": "docs/design/sub-word-marks.md", "item": "②" },
+      "status": "open",
+      "severity": "question",
+      "owner": "agent",
+      "blockedBy": ["tajweed-span-to-named-mark"],
+      "note": "Measured with mark-A and deliberately not spent: the mark tree would be 7.35 MB raw / 2.28 MB gz across 604 shards, weighed as the shard text build-words.mjs would actually write rather than estimated from a path count. It fits — gate:assets allows 32 MB gz for the mushaf and the corpus is at 27.87 MB — and it is still 2.28 MB nobody has asked for, which is precisely the waste gate:assets already names for a non-vendored edition: the download is paid for and unreachable. So mark-A ships nothing to apps/web/public/assets and this stays open until mark-B produces a caller. If the inspector shows a mark-granular highlight reads better than a word wash, mark-C spends the bytes; if it does not, this stays a probe and the corpus stays uncosted, which is a legitimate outcome. Two constraints on whoever does spend them: word-indexing.md ⑪ ① is the standing warning that shipping an ANSWER costs multiples of shipping the QUESTION (placement C cost 8.9x its estimate for exactly that reason), so a diacritics ceiling must be set from a build rather than from the 2.28 MB above; and gate:assets fails outright on an asset kind with no CEILINGS entry, so the gate is edited in the same commit or CI goes red."
+    },
+
+    {
+      "id": "skins-says-the-glyphs-are-anonymous",
+      "source": { "file": "docs/design/sub-word-marks.md", "item": "③" },
+      "status": "confirmed",
+      "severity": "defect",
+      "owner": "agent",
+      "blockedBy": ["diacritic-shards-need-a-caller"],
+      "note": "packages/core/src/skins.ts justifies ayah-granular tajweed painting with the claim that the print's glyphs are anonymous outlined <path>s. That is true of apps/web/public/assets/pages/**, which is what the app draws, and false of the ligature corpus, where every mark is drawn by <path data-type=\"diacritic\" data-diacritic=\"…\"> inside its word's group — 326,515 of them, 26 distinct names, measured over all 604 pages by pnpm probe:diacritics. The comment already names Loop 4b's ligature corpus as its own gate; the geometry arrived and nothing went back to it. Left as a defect rather than edited in place on purpose: it is load-bearing prose about why a shipped feature has the granularity it has, and rewriting it before the replacement granularity exists would leave the file claiming a capability the app does not have. Closed by mark-C, in the commit that gives the skin something finer to paint — or, if diacritic-shards-need-a-caller answers 'not worth it', by a correction saying the marks are named and measured and still not shipped, which is a different sentence from the one there now."
+    },
+
+    {
+      "id": "diacritic-ids-are-an-unversioned-wire-format",
+      "source": { "file": "docs/design/sub-word-marks.md", "item": "④" },
+      "status": "open",
+      "severity": "risk",
+      "owner": "agent",
+      "blockedBy": ["diacritic-shards-need-a-caller"],
+      "note": "A mark ships as an integer and not a name because a page carries ~540 of them and the names are the larger half of the bytes. That makes DIACRITICS's ORDER a wire format, and it is the only array in @hifth/core that is one. Appending is safe; reordering silently re-labels the whole corpus — every fatha in 604 shards becomes a kasra — while changing no geometry, so no gate that measures rectangles would notice, and readDiacritics would keep passing because it looks names up rather than positions. Today the defence is one docblock stating the rule and six ids pinned in diacritics.test.ts, both inside the package that would be doing the reordering. What would answer it: either a gate reading the committed shards and asserting the vocabulary they were written against — cheap once shards exist, meaningless before — or a decision that the test suffices because the ETL rebuilds every shard from source in one pass and a stale shard cannot survive a build. Deferred to mark-C deliberately: the risk does not exist until something is shipped that an id can be stale in."
+    },
+
+    {
       "id": "etl-map-should-generate-itself",
       "source": { "file": "docs/design/etl-pipeline.md", "item": "①" },
       "status": "open",
