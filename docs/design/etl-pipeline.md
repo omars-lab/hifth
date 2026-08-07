@@ -393,3 +393,30 @@ describe. What would answer it: `gate:map` already validates pointers in prose f
 cheap version is to cite the scripts by path here and let that gate catch a rename. If a
 script is ever added and this document does not mention it, that is the evidence the balance
 was wrong.
+
+---
+
+## ⑧ The public post derived from this document
+
+A version of this material exists for readers who do not have the repo:
+`bytesofpurpose-blog/designs/2026-08-07-mushaf-etl.mdx` in `omars-lab.github.io`, drafted
+2026-08-07 and not yet published. It carries four diagrams rather than five, no code
+pointers, and a Decisions section this document does not have. It repeats roughly a dozen
+figures from here — 604 pages, 380 MB, 91,451 boxes, 86,965 → 77,429 words, 6,232 exact,
+99.86%, 60,057 annotations, 23 gates, 47.8%, 150 KB.
+
+**This document is the record. The post is a dated snapshot of it.** That direction is the
+whole of the arrangement, and it is deliberately not enforced by anything.
+
+Nothing can enforce it. The two repositories share no CI, and neither build may depend on the
+other's checkout or on the network — the same constraint that made four of the ETL's own
+measurements probes rather than gates (⑤). So the compensating discipline is the same one the
+probes use, applied to prose: the post is **dated**, every figure it repeats is one this
+document quotes from a named pin file, and this section exists so the next person editing
+this document knows a derived copy is out there. A figure that moves here and not there
+leaves the post a correct description of an older measurement, which is what its date already
+claims it is.
+
+What that buys and what it does not: it makes staleness *legible* rather than invisible. It
+does not make it impossible. If the post is ever repeated a third time, that is the point to
+stop hand-copying figures and generate them, and ⑦ ① is where that argument already lives.
