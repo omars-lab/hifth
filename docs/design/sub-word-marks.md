@@ -164,6 +164,76 @@ That the residual came out as *the pause marks, exactly, plus a letter pair that
 nothing on it* is the strongest evidence here that the extraction is filing marks under the
 right words: an off-by-one would have scattered the empties.
 
+### The ligature is the join to a letter
+
+Containment (above) files a mark under the right *word*. It says nothing about which
+**letter** the mark sits on, and a tajweed rule is a `[start, end)` over codepoints — so
+without a letter-level join the app could highlight a rule no finer than the whole word,
+which for «بِسۡمِ ٱللَّهِ» is most of a line. The corpus offers exactly one join, and it is
+not the one the first attempt assumed.
+
+**The rejected attempt.** Zip a word's mark-bearing codepoints against its `data-diacritic`
+paths in document order. That gives **88.79%** count agreement and a visibly wrong pairing
+tail (U+064E → shadda, U+0650 → wasla). It fails because the paths are grouped by
+*ligature*, and `dots` and `kaf-hamza` paths interleave — so position within the word is not
+codepoint order.
+
+**What the markup actually offers** is one level below the word:
+
+```
+<g id="md-word-157" data-hafs="شَيۡـٔٗا" data-imlaey="شيئا">
+  <g id="md-ligature-157-01">
+    <path data-type="text" data-text="شيا"/>          ← the letters this run draws
+    <g id="md-diacritic-157-01">
+      <path data-type="diacritic" data-diacritic="sukun"/>   ← drawn on those letters
+```
+
+So `readDiacritics` returns the ligatures alongside the flat mark list, and
+`probe:diacritics` **④** measures whether they partition the word: split `data-hafs` into the
+letters the print outlines, walk the ligatures across that partition, compare mark counts.
+All 604 pages, 2026-08-07:
+
+| of 91,451 entries the print calls words | | |
+|---|---:|---|
+| draw no letters at all — pause marks, ۩, ۞ | 4,486 | 4.91% |
+| **of the remaining 86,965** | | |
+| join cleanly — letters partition, every mark count agrees | **86,880** | **99.90%** |
+| ligature texts do not partition the hafs letters | 54 | 0.06% |
+| partition, but a ligature's mark count disagrees | 31 | 0.04% |
+
+The per-ligature figure is 159,476 of 159,509 (99.98%), but that is conditioned on the
+partition above, so the table states the unconditional number instead. Quoting the ligature
+percentage alone would silently condition it on a filter the reader cannot see.
+
+**Four print conventions had to be learned to get there**, each read off the markup rather
+than assumed, and each is why an earlier draft read 97.75%:
+
+| the text writes | the print draws | example |
+|---|---|---|
+| a bare hamza `ء` U+0621 | an outline, like any letter — **not** a named mark | «إِسۡرَٰٓءِيلَ» |
+| `\p{Lm}` modifier letters | the tatweel as a tooth folded into its neighbour; the small waw `ۥ` and small yeh `ۦ` as *named marks* | «شَيۡـٔٗا», «بِهِۦ» |
+| a vowel then an iqlab meem `ۭ` / `ۢ` | one composite glyph, `kasra iqlab` | «كَافِرِۭ», «رِكۡزَۢا» |
+| a seated hamza `أ إ ؤ ئ`, and `ٱ` | a base outline **plus** a named `hamza` / `wasla` path | «أَنزَلَ» |
+
+**The remaining 85 entries are not chased to zero, deliberately.** Each rule above exists
+because reading the markup showed the print doing something; adding further rules until the
+number reads 100% would be fitting the rule to the data, and would make ④ agree with the
+corpus by construction — destroying the only property that makes it evidence. The residual
+falls into four families, all printed with an example by the probe itself:
+
+1. **An extra alef run** (~51) — «فَلَا» → `[فلا|ا]`: the print splits a final alef into its
+   own ligature the text does not have as a separate letter.
+2. **The small high madda `ۤ` U+06E4** (~20) — «خَرُّواْۤ», «لِلَّهِۤ»: merged into the glyph
+   before it, a composite this does not model.
+3. **A mark attributed across a ligature boundary** (~4) — «ٱلرَّحِيمِ» on p379 loses one from
+   `حيم` and gains one on `لر`; net zero, so the word is right and the split is not.
+4. **Contextual hamza forms** (~10) — «أَيۡدِيهِمۡ», where the carrier and its hamza are one glyph.
+
+None of these is an alignment error: ② already proves every mark sits inside its own word,
+and all four families are the print being more economical with glyphs than the text is with
+codepoints. What they bound is how much of the corpus a *letter*-level highlight can be
+offered on — 99.90% of lettered words — and that bound is the input to §⑧ ①, not its answer.
+
 ## ⑥ What it would weigh, and why nothing shipped
 
 Measured as the shard text `build-words.mjs` would actually write — a `from` and a dense
@@ -188,11 +258,21 @@ That order is also the answer the user gave when asked where the marks should ap
 
 ## ⑦ What this cannot answer
 
-Whether a mark is on the *right letter*. Nothing in this repo can settle that offline — it
-would need the print's own letter order, which the corpus expresses as ligature ids this
-does not read, and in the end a reader's eye. Containment proves a mark belongs to its word;
-it says nothing about where inside the word it belongs. That is the inspector's job, and it
-is why mark-B exists as a separate step rather than a review of mark-C.
+Whether a mark is on the *right letter*.
+
+§⑤'s ligature join narrows this and does not close it. It shows that a ligature drawing
+three letters carries the number of marks those three letters call for, 99.90% of the time —
+which is what makes a letter-level highlight arithmetically possible at all. But **counts are
+necessary and not sufficient**: agreement on three does not establish that the second mark is
+over the second letter rather than the third. A word whose marks were internally permuted
+would pass ④ exactly as a correct one does.
+
+Nothing in this repo closes that gap offline, because it is a correspondence between a
+codepoint in a reconstructed text and an outline on a page, and in the end only a reader's
+eye settles it. Containment proves a mark belongs to its word; the ligature join proves the
+counts work out per run; neither says the *k*-th mark is on the *k*-th letter. That is the
+inspector's job, and it is why mark-B exists as a separate step rather than a review of
+mark-C.
 
 ---
 
