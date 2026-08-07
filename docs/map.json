@@ -1097,6 +1097,11 @@
           "file": "scripts/check-source-offer.mjs",
           "symbol": "probe",
           "note": "The offer, followed the way a stranger would follow it: anonymously, no gh and no token, because signed in as ourselves a private repo looks public. Named `check-` and not `gate-` because it reaches the public internet and is deliberately not in `pnpm gates` — it runs on demand (`make source-offer`) and from the public-deploy workflow."
+        },
+        {
+          "file": "docs/design/track-b-native.md",
+          "symbol": "Android is reachable and the App Store is the blocked one",
+          "note": "Where the vendored licences stop being paperwork and start deciding a roadmap. Every gate above satisfies the obligations of a static site, where the browser is handed the whole bundle and GPL §4–6 are discharged by construction; none of them says anything about a store binary, which is a different distribution under the same licences. The doc is the argument that Track B's stated order is not achievable, and §⑦ ② is honest that a non-lawyer reading licence text is not the standard `gate:*` holds everything else to."
         }
       ],
       "extend": [
