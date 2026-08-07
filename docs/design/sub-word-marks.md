@@ -197,42 +197,48 @@ All 604 pages, 2026-08-07:
 |---|---:|---|
 | draw no letters at all — pause marks, ۩, ۞ | 4,486 | 4.91% |
 | **of the remaining 86,965** | | |
-| join cleanly — letters partition, every mark count agrees | **86,880** | **99.90%** |
-| ligature texts do not partition the hafs letters | 54 | 0.06% |
-| partition, but a ligature's mark count disagrees | 31 | 0.04% |
+| join cleanly — letters partition, every mark count agrees | **86,962** | **100.00%** |
+| no assignment of ligatures to letters exists | 0 | 0.00% |
+| partition, but a ligature's mark count disagrees | 3 | 0.00% |
 
-The per-ligature figure is 159,476 of 159,509 (99.98%), but that is conditioned on the
-partition above, so the table states the unconditional number instead. Quoting the ligature
-percentage alone would silently condition it on a filter the reader cannot see.
+The per-ligature figure is 159,585 of 159,588, but that is conditioned on the partition
+above, so the table states the unconditional number instead. Quoting the ligature percentage
+alone would silently condition it on a filter the reader cannot see.
 
-**Four print conventions had to be learned to get there**, each read off the markup rather
-than assumed, and each is why an earlier draft read 97.75%:
+**Six print conventions had to be learned to get there**, each read off a markup dump rather
+than assumed. Earlier drafts of the join read 88.79%, then 97.75%, then 99.90%; the number
+moved each time a dump explained a family, and never because a rule was added to move it.
 
 | the text writes | the print draws | example |
 |---|---|---|
 | a bare hamza `ء` U+0621 | an outline, like any letter — **not** a named mark | «إِسۡرَٰٓءِيلَ» |
 | `\p{Lm}` modifier letters | the tatweel as a tooth folded into its neighbour; the small waw `ۥ` and small yeh `ۦ` as *named marks* | «شَيۡـٔٗا», «بِهِۦ» |
 | a vowel then an iqlab meem `ۭ` / `ۢ` | one composite glyph, `kasra iqlab` | «كَافِرِۭ», «رِكۡزَۢا» |
-| a seated hamza `أ إ ؤ ئ`, and `ٱ` | a base outline **plus** a named `hamza` / `wasla` path | «أَنزَلَ» |
+| a seated hamza `أ إ ؤ ئ`, and `ٱ` | a base outline **plus** a named `hamza` / `wasla` path — **always**, whether the ligature spells `ا` or `أ` | «أَنزَلَ», «أَنَّ» |
+| the small high madda `ۤ` U+06E4 | `data-type="sajda-line"` — the overline of a sajda ayah, not a diacritic | «خَرُّواْۤ» (19:58) |
+| one letter | sometimes **two** ligatures, the second markless; and **not in reading order** | «فَلَا» → `[فلا\|ا]`, «ٱلرَّحِيمِ» → `[لر\|حيم\|ٱ]` |
 
-**The remaining 85 entries are not chased to zero, deliberately.** Each rule above exists
-because reading the markup showed the print doing something; adding further rules until the
-number reads 100% would be fitting the rule to the data, and would make ④ agree with the
-corpus by construction — destroying the only property that makes it evidence. The residual
-falls into four families, all printed with an example by the probe itself:
+The last row is why the check is no longer a left-to-right walk. `align` matches ligature
+text to letters by **content**, as a search over which ligature draws which run, so a
+ligature emitted last is assigned the letters it actually spells. That is strictly stronger
+than the length comparison it replaced: «ٱلرَّحِيمِ» used to *pass* — six letters, six drawn
+— and then misassign every mark while the totals balanced.
 
-1. **An extra alef run** (~51) — «فَلَا» → `[فلا|ا]`: the print splits a final alef into its
-   own ligature the text does not have as a separate letter.
-2. **The small high madda `ۤ` U+06E4** (~20) — «خَرُّواْۤ», «لِلَّهِۤ»: merged into the glyph
-   before it, a composite this does not model.
-3. **A mark attributed across a ligature boundary** (~4) — «ٱلرَّحِيمِ» on p379 loses one from
-   `حيم` and gains one on `لر`; net zero, so the word is right and the split is not.
-4. **Contextual hamza forms** (~10) — «أَيۡدِيهِمۡ», where the carrier and its hamza are one glyph.
+**Three entries remain, and all three are the corpus disagreeing with itself.** They are
+named rather than absorbed, because a rule for either would be a rule for one word:
 
-None of these is an alignment error: ② already proves every mark sits inside its own word,
-and all four families are the print being more economical with glyphs than the text is with
-codepoints. What they bound is how much of the corpus a *letter*-level highlight can be
-offered on — 99.90% of lettered words — and that bound is the input to §⑧ ①, not its answer.
+1. **«أَيۡدِيهِمۡ» at 21:28 and 22:76** — the word occurs 26 times. Twenty-four draw
+   `hamza, fatha, sukun, kasra, kasra, sukun`; these two draw the same list without the
+   `hamza`. Same spelling, same everything else.
+2. **«لِيَسُـُٔواْ» at 17:7** — the print draws a `small waw` and a `maddah` its own
+   `data-hafs` writes no codepoint for. It is the only word in the corpus where a `small
+   waw` path appears without a `U+06E5`.
+
+None of the three is an alignment error — ② already proves every mark sits inside its own
+word — and none costs anything downstream, because ② is what decides whether the geometry is
+shippable and ② is exact. What ④ bounds is how much of the corpus a *letter*-level highlight
+can be offered on, and that bound is now the whole of it. That is the input to §⑧ ①, not its
+answer: see §⑦ for what a count still cannot say.
 
 ## ⑥ What it would weigh, and why nothing shipped
 
@@ -261,11 +267,22 @@ That order is also the answer the user gave when asked where the marks should ap
 Whether a mark is on the *right letter*.
 
 §⑤'s ligature join narrows this and does not close it. It shows that a ligature drawing
-three letters carries the number of marks those three letters call for, 99.90% of the time —
-which is what makes a letter-level highlight arithmetically possible at all. But **counts are
-necessary and not sufficient**: agreement on three does not establish that the second mark is
-over the second letter rather than the third. A word whose marks were internally permuted
-would pass ④ exactly as a correct one does.
+three letters carries the number of marks those three letters call for, for all but three
+words in the corpus — which is what makes a letter-level highlight arithmetically possible
+at all. But **counts are necessary and not sufficient**: agreement on three does not
+establish that the second mark is over the second letter rather than the third. A word whose
+marks were internally permuted would pass ④ exactly as a correct one does.
+
+The probe prints the evidence for this against itself. Its `codepoint → name` tally is built
+*only* from ligatures whose counts agree, and it still carries **611 pairings of `U+06E1` (a
+sukun) with a path named `hamza`**. «بِٱلۡأٓخِرَةِ» on p2 is one of them: the run `لأ` is
+written `ۡ` then `أ` then `ٓ`, and drawn `hamza`, `sukun`, `fatha`. Three marks wanted, three
+marks drawn, ④ passes — and all three pairings are wrong, the third doubly so, since the
+print names the madda glyph `fatha`.
+
+So the tally's head is trustworthy and its tail is not, and no arithmetic distinguishes
+them. That is precisely why mark-B puts the boxes on the page for a human before mark-C
+ships anything that claims to know which letter a mark is on.
 
 Nothing in this repo closes that gap offline, because it is a correspondence between a
 codepoint in a reconstructed text and an outline on a page, and in the end only a reader's
