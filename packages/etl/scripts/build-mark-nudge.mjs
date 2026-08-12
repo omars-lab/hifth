@@ -44,7 +44,7 @@
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { planNudge, readers, windowFor } from "./lib/adjudication.mjs";
+import { planNudge, readers, selectPages, windowFor } from "./lib/adjudication.mjs";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const ETL = join(HERE, "..");
@@ -62,8 +62,40 @@ const outPath = arg("--out", join(ETL, "out", "mark-nudge.html"));
 /** How wide the panel is drawn, in pixels. One page unit is then ~21 px. */
 const PANEL = Number(arg("--panel", 460));
 
+/**
+ * A file of displacements whose pages this session must **not** ask about, and
+ * how many of what is left to ask about.
+ *
+ * Both default to nothing, which reproduces the original behaviour: every page
+ * with a measured correction is fair game. Giving `--exclude` the file the
+ * correction was fitted on is what makes a sitting out-of-sample, and it is the
+ * one thing the first sitting could not do — there was nothing held out, because
+ * a trial cannot be built for a page with no proposed move and only forty pages
+ * had one.
+ */
+const excludePath = arg("--exclude", null);
+const pagesWanted = Number(arg("--pages", 0));
+const spread = arg("--spread", "extremes");
+
 const shiftText = readFileSync(shiftPath, "utf8");
 const shift = JSON.parse(shiftText);
+
+const excludeFiles = excludePath ? excludePath.split(",").filter(Boolean) : [];
+const excluded = excludeFiles.flatMap((f) => JSON.parse(readFileSync(f, "utf8")).shifts.map((s) => s.page));
+const chosen = selectPages({ shifts: shift.shifts, exclude: excluded, pages: pagesWanted, spread });
+const byPage = new Map(shift.shifts.map((s) => [s.page, s]));
+const shifts = chosen.map((p) => byPage.get(p));
+if (excludePath || pagesWanted > 0) {
+  if (!chosen.length) {
+    process.stderr.write(`no pages left after excluding ${excluded.length} of ${shift.shifts.length}\n`);
+    process.exit(2);
+  }
+  const heldOut = excluded.filter((p) => byPage.has(p)).length;
+  process.stderr.write(
+    `pages: ${chosen.length} of ${shift.shifts.length} measured` +
+      `${heldOut ? `, ${heldOut} held out` : ""} · ${spread}\n`,
+  );
+}
 
 /**
  * A fingerprint of the displacements this session was built from — the same
@@ -209,7 +241,7 @@ function inkPaths(shapes, vx, vy, side) {
 }
 
 const t0 = Date.now();
-const { trials, repeats, skippedForInk, pages } = planNudge({ seed, count, shifts: shift.shifts });
+const { trials, repeats, skippedForInk, pages } = planNudge({ seed, count, shifts });
 
 const inks = new Map();
 for (const p of new Set(trials.map((t) => t.page))) inks.set(p, readers.inkFor(p));
@@ -252,6 +284,39 @@ const head = {
   pages,
   shiftRan: shift.ran,
   shiftFingerprint: fingerprint(shiftText),
+  /**
+   * Which pages this build was allowed to draw from, and how that list was
+   * arrived at.
+   *
+   * `of` is the list itself, and it is the load-bearing field: the scorer
+   * rebuilds the trials from the seed and the displacements, so if the builder
+   * narrowed those displacements and the scorer did not, every trial index would
+   * point at a different mark and the residuals would be a subtraction of the
+   * wrong numbers — silently, with no error to read. Replaying a recorded list
+   * cannot drift the way re-running a selection can: a later change to how pages
+   * are chosen re-scores nothing that was already answered.
+   *
+   * The rest is provenance, not machinery. `heldOutFrom` names the file whose
+   * pages were removed, which is what makes a sitting out-of-sample and is the
+   * single most important thing to be able to check afterwards.
+   */
+  select: {
+    of: chosen,
+    /**
+     * The list, in eight characters, so it can go in the browser's resume key.
+     *
+     * Two builds from the same displacements with the same seed and different
+     * pages are different sessions, and without this they would share a key: the
+     * second would resume into the first's answers and staple them onto a trial
+     * list they were never given. That is the same failure `shows` was added to
+     * this key to prevent, arriving by a second route.
+     */
+    fp: fingerprint(chosen.join(",")),
+    strategy: pagesWanted > 0 ? spread : "all",
+    heldOutFrom: excludeFiles.map((f) => f.split("/").pop()),
+    heldOut: excluded.length,
+    measured: shift.shifts.length,
+  },
   /**
    * What this build put on the screen. The forced-choice page carries the same
    * field for the same reason: a reading that assumes a question was asked when
@@ -402,7 +467,7 @@ recipe that built this page.</p>
 <script id="head" type="application/json">${JSON.stringify(head)}</script>
 <script>
 const HEAD = JSON.parse(document.getElementById("head").textContent);
-const KEY = "hifth.nudge." + HEAD.seed + "." + HEAD.shiftFingerprint + "." + HEAD.shows.join("-");
+const KEY = "hifth.nudge." + HEAD.seed + "." + HEAD.shiftFingerprint + "." + HEAD.select.fp + "." + HEAD.shows.join("-");
 const cards = [...document.querySelectorAll(".trial")];
 const work = document.getElementById("work");
 const intro = document.getElementById("intro");
@@ -603,9 +668,31 @@ else if (at >= cards.length && answers.length) render();
 mkdirSync(dirname(outPath), { recursive: true });
 writeFileSync(outPath, html);
 
+/**
+ * What this build chose, in the shape `--exclude` reads.
+ *
+ * A sitting is often more than one page: forty pages asked once each says
+ * whether the correction travels, and five pages asked four times each says how
+ * much of the spread is the page rather than the hand — and those have to be
+ * different builds, because the walk gives every page the same number of turns.
+ * The second build must not land on the first's pages or the two measure the
+ * same thing twice, so it needs to hold them out, so it needs them in a file.
+ *
+ * Same shape as a displacements file rather than a bare list of numbers, so it
+ * goes straight back in with no flag of its own and no second format to keep
+ * working. It is a record as much as a handle: the pages a session was built
+ * over, readable without opening a megabyte of HTML.
+ */
+const pagesPath = outPath.replace(/\.html$/, "") + ".pages.json";
+writeFileSync(
+  pagesPath,
+  `${JSON.stringify({ built: head.built, seed, of: shiftPath.split("/").pop(), shifts }, null, 2)}\n`,
+);
+
 process.stdout.write(
   `${trials.length} placements over ${pages} pages (${repeats} marks shown twice) · seed ${seed} · ` +
     `displacements ${shift.ran} (${head.shiftFingerprint})\n` +
     `${skippedForInk} marks passed over for too little ink under the corrected box\n` +
-    `${(html.length / 1e6).toFixed(1)} MB in ${((Date.now() - t0) / 1000).toFixed(1)}s → ${outPath}\n`,
+    `${(html.length / 1e6).toFixed(1)} MB in ${((Date.now() - t0) / 1000).toFixed(1)}s → ${outPath}\n` +
+    `the ${chosen.length} pages it was built over → ${pagesPath}\n`,
 );
