@@ -8,9 +8,11 @@
  *     codepoint span *inside that ayah's own* Tanzil Uthmani text.
  *
  * Output:
- *   - skins/<edition>/tajweed/<surah>.json — ayah → family → flat
+ *   - skins/<edition>/tajweed/<surah>.json — ayah → *source rule* → flat
  *     `[start, end, …]` spans. One shard per surah, so a page fetches at most
  *     the surahs it shows.
+ *   - skins/<edition>/tajweed/rules.json — the vocabulary: every rule id the
+ *     shards use, and which of @hifth/core's seven families it paints as.
  *   - skins/<edition>/NOTICE.txt — the CC BY 4.0 attribution, shipped beside the
  *     bytes it applies to rather than only in the repo's SOURCES.md.
  *
@@ -37,9 +39,30 @@
  * not the rendering change this comment used to promise.
  *
  * THE MAPPING is 18 source rules → 7 families (see RULES below and the table in
- * PROVENANCE.md). It is lossy on purpose — seven is what a colour-blind-safe
- * palette carries honestly — and the loss is recorded, not silent: an unknown
- * source rule is a build failure, never a dropped annotation.
+ * PROVENANCE.md), and it is applied when the page is *painted*, not when the
+ * bytes are written. That is a change: the shards used to be keyed by family,
+ * which meant a span arrived on the reader's machine having forgotten whether it
+ * was an ikhfa or a ghunnah, and no amount of work in the app could get that
+ * back. Seven is still what a colour-blind-safe palette carries honestly, so
+ * seven is still what paints — but the collapse now happens at the last possible
+ * moment, and anything that wants the finer grain (a reader colouring ikhfa
+ * differently from ghunnah; a legend that counts what it actually saw) can have
+ * it without another 604-page rebuild.
+ *
+ * WHAT IT COST, measured over the whole corpus before it was done: +36.7% raw
+ * and +17.5% gzipped (205.8 KB → 241.7 KB across the 114 shards), and the
+ * largest shard — al-Baqarah — moves 14.8 KB → 17.3 KB gz, a third of the 50 KB
+ * budget. Long repeated keys are close to free once gzipped, which is why the
+ * raw and compressed numbers are so far apart and why the honest shape was
+ * affordable.
+ *
+ * WHICH FAMILY A RULE PAINTS AS stays here rather than in @hifth/core, because
+ * it is a fact about *this source's* vocabulary and core is deliberately
+ * ignorant of that (skins.ts: "Not the raw rule list of any one source"). So the
+ * mapping ships as data, in rules.json, and L1 reads it the same way it already
+ * reads a lookup handed down from L3. A source with nineteen rules, or with a
+ * different name for the same rule, is then a rebuild rather than an edit in
+ * three packages.
  *
  * Gates enforced in-script: every (surah, ayah) resolves via toAbsoluteAyah;
  * all 6,236 ayahs present in the source; every source rule id known; every
@@ -129,7 +152,7 @@ const SOURCE = JSON.parse(
 );
 if (!Array.isArray(SOURCE)) throw new Error("tajweed source is not an array");
 
-/** abs ayah → { family → flat [start, end, …] }. */
+/** abs ayah → { source rule → flat [start, end, …] }. */
 const byAyah = new Map();
 const seenRules = new Set();
 let annotations = 0;
@@ -138,7 +161,7 @@ for (const record of SOURCE) {
   // Throws on anything outside 1..114 / the surah's ayah count — the key gate.
   const abs = toAbsoluteAyah(record.surah, record.ayah);
   if (byAyah.has(abs)) throw new Error(`duplicate record for ${record.surah}:${record.ayah}`);
-  const families = new Map();
+  const rules = new Map();
   for (const annotation of record.annotations ?? []) {
     const family = RULES[annotation.rule];
     if (!family) {
@@ -155,11 +178,11 @@ for (const record of SOURCE) {
     }
     seenRules.add(annotation.rule);
     annotations += 1;
-    const spans = families.get(family);
+    const spans = rules.get(annotation.rule);
     if (spans) spans.push([start, end]);
-    else families.set(family, [[start, end]]);
+    else rules.set(annotation.rule, [[start, end]]);
   }
-  byAyah.set(abs, families);
+  byAyah.set(abs, rules);
 }
 
 if (byAyah.size !== TOTAL_AYAHS) {
@@ -220,11 +243,33 @@ function write(relative, json) {
   writeFileSync(join(OUT_DIR, relative), json);
 }
 
-// Families in a fixed order (the table's insertion order is stable but not
-// meaningful), spans ascending by start then end: two total orders, so the
-// bytes cannot depend on the order the source happened to list annotations in.
+// Rules in a fixed order — by family, then by rule id — and spans ascending by
+// start then end: two total orders, so the bytes cannot depend on the order the
+// source happened to list annotations in. Grouping by family first is not
+// arbitrary either: it puts the rules that share a colour next to each other in
+// the file, which is what somebody diffing a shard by eye is looking for.
 const FAMILY_ORDER = [...new Set(Object.values(RULES))].sort();
+const RULE_ORDER = Object.keys(RULES).sort(
+  (a, b) => FAMILY_ORDER.indexOf(RULES[a]) - FAMILY_ORDER.indexOf(RULES[b]) || a.localeCompare(b),
+);
 
+// The vocabulary, written before the shards it describes. Every rule id the
+// shards can contain, and the family it paints as — the whole 18 → 7 collapse,
+// as data rather than as a table compiled into three packages. A reader's colour
+// choice is per rule id, so this is also the list a settings surface renders.
+writeFileSync(
+  join(OUT_DIR, "tajweed", "rules.json"),
+  `${JSON.stringify(
+    {
+      source: "cpfair/quran-tajweed@496f71cd",
+      rules: RULE_ORDER.map((id) => ({ id, family: RULES[id] })),
+    },
+    null,
+    2,
+  )}\n`,
+);
+
+const perRuleAyahs = new Map();
 const perFamilyAyahs = new Map();
 let markedAyahs = 0;
 
@@ -237,14 +282,21 @@ for (let surah = 1; surah <= 114; surah++) {
     } catch {
       break; // past the surah's last ayah
     }
-    const families = byAyah.get(abs);
-    if (!families || families.size === 0) continue; // no rule this source covers
+    const rules = byAyah.get(abs);
+    if (!rules || rules.size === 0) continue; // no rule this source covers
     const entry = {};
-    for (const family of FAMILY_ORDER) {
-      const spans = families.get(family);
+    const familiesHere = new Set();
+    for (const rule of RULE_ORDER) {
+      const spans = rules.get(rule);
       if (!spans) continue;
       spans.sort((a, b) => a[0] - b[0] || a[1] - b[1]);
-      entry[family] = spans.flat();
+      entry[rule] = spans.flat();
+      perRuleAyahs.set(rule, (perRuleAyahs.get(rule) ?? 0) + 1);
+      familiesHere.add(RULES[rule]);
+    }
+    // Per-family ayah coverage is what skins.ts grades salience by, and it is
+    // now a fold rather than a count: four madds on one ayah are one madd ayah.
+    for (const family of familiesHere) {
       perFamilyAyahs.set(family, (perFamilyAyahs.get(family) ?? 0) + 1);
     }
     shard.push([String(ayah), entry]);
@@ -257,14 +309,23 @@ for (let surah = 1; surah <= 114; surah++) {
 /* Report.                                                             */
 /* ------------------------------------------------------------------ */
 
-const coverage = FAMILY_ORDER.map(
-  (f) => `${f} ${((100 * (perFamilyAyahs.get(f) ?? 0)) / TOTAL_AYAHS).toFixed(1)}%`,
-).join(" · ");
+const pct = (n) => `${((100 * n) / TOTAL_AYAHS).toFixed(1)}%`;
+const coverage = FAMILY_ORDER.map((f) => `${f} ${pct(perFamilyAyahs.get(f) ?? 0)}`).join(" · ");
 console.log(
   `build-tajweed — ${SOURCE.length} source records / ${annotations} annotations / ` +
     `${seenRules.size} rule ids → ${markedAyahs}/${TOTAL_AYAHS} marked ayahs (edition ${EDITION})`,
 );
 console.log(`build-tajweed — ayah coverage by family: ${coverage}`);
+// The per-rule line is the one the shards can now answer and the old shape
+// could not. It is also how you see what the collapse was hiding: a family at
+// 72.9% made of one rule at 60% and three in the single digits is a different
+// picture from three rules at 30% each, and only one of those is worth a
+// reader's separate colour.
+console.log(
+  `build-tajweed — ayah coverage by rule: ${RULE_ORDER.map(
+    (r) => `${r} ${pct(perRuleAyahs.get(r) ?? 0)}`,
+  ).join(" · ")}`,
+);
 console.log(
   `build-tajweed — 114 surah shards; largest ${maxGz.file} at ${maxGz.bytes}B gz ` +
     `(budget ${GZ_LIMIT}B)`,

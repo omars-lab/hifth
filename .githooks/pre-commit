@@ -58,6 +58,23 @@ if [ -n "$staged" ] && command -v node >/dev/null 2>&1; then
     echo "  to bypass this one commit:  git commit --no-verify"
     exit 1
   fi
+
+  # Same rule, one register over, with one addition the other two do not need:
+  # a decision carries links OUT of the repo as well as into it. An open
+  # decision must name both the published page and the copy checked in beside
+  # it, and the record must reach both — otherwise the argument is about a
+  # picture the reader cannot see. That pairing is easiest to break on exactly
+  # this commit: you added the artifact link and have not committed the page
+  # yet, or renamed the page and left the link. Scoped and silent the same way.
+  # shellcheck disable=SC2086
+  if ! node scripts/gate-decisions.mjs --files $staged; then
+    echo ""
+    echo "pre-commit: docs/decisions.json has a link that does not resolve (above)."
+    echo "  an open decision needs BOTH an artifact link and the page checked in here,"
+    echo "  and its record has to link to each — 'make decisions ID=<id>' shows the row."
+    echo "  to bypass this one commit:  git commit --no-verify"
+    exit 1
+  fi
 fi
 
 # The licence the reader is shown and the licence on record, on the one commit

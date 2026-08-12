@@ -185,6 +185,50 @@ export function readDiacritics(svg, apply) {
 }
 
 /**
+ * The same marks, as the outlines that drew them, in their own frame.
+ *
+ * `readDiacritics` returns rectangles, because a rectangle is what a shard
+ * carries and what an app paints. It is also, on its own, unable to answer the
+ * one question `sub-word-marks.md` §⑦ leaves open — whether the ink a reader
+ * sees is under the rectangle — because a rectangle has no shape and the check
+ * needs one. The publisher already drew every mark; this hands that drawing
+ * back, so a caller can put the mark's own outline over the print we ship and
+ * compare the two directly.
+ *
+ * Returned flat, in the same document order as
+ * `readDiacritics(svg, …).flatMap((w) => w.marks)`, and **deliberately not**
+ * bundled into that return. Two reasons: the outlines are a hundred megabytes
+ * across the corpus and every existing caller wants none of them; and a caller
+ * that reads both can assert the two agree — same length, and each outline's own
+ * box equal to the box the other side reported — which turns "these are the same
+ * marks" from a comment into a check. `probe-mark-ink.mjs` makes exactly that
+ * assertion on every page it reads.
+ *
+ * The constants are shared with the extractor above rather than re-declared,
+ * which is the only thing that makes the assertion meaningful: two walks with
+ * two ideas of where a word ends would agree about nothing worth agreeing about.
+ *
+ * @param {string} svg a ligature-corpus page, verbatim
+ * @returns {{ name: string, d: string }[]}
+ */
+export function readMarkOutlines(svg) {
+  const out = [];
+  for (const m of svg.matchAll(/<g id="md-word-(\d+)"([^>]*)>/g)) {
+    const rest = svg.slice(m.index + m[0].length);
+    const nxt = rest.match(BOUNDARY);
+    const seg = nxt ? rest.slice(0, nxt.index) : rest;
+    for (const p of seg.matchAll(PATHS)) {
+      const name = attr(p[0], "data-diacritic");
+      if (name === null) continue;
+      const d = attr(p[0], "d");
+      if (d === null) continue;
+      out.push({ name, d });
+    }
+  }
+  return out;
+}
+
+/**
  * `ours = s·theirs + t`, rebuilt from the four numbers `word-boxes.pin.json`
  * records for a page.
  *

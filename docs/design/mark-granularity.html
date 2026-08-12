@@ -1,0 +1,654 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>One colour a verse — should Hifth colour tajweed more finely?</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Three options for how finely Hifth colours tajweed rules, drawn on a real page of the mus'haf.">
+<style>
+:root{
+  --paper:#f4efe6; --ink:#26201a; --accent:#1f6f66;
+  --tint:#ede6da; --rule:#ddd2c2; --dim:#6f6559; --card:#fbf8f2;
+  --shadow:0 1px 0 rgba(38,32,26,.05);
+}
+@media (prefers-color-scheme: dark){
+  :root{ --paper:#191612; --ink:#ece4d8; --accent:#5fbfae; --tint:#221d18;
+         --rule:#3a322a; --dim:#9a8d7d; --card:#201b16; --shadow:none; }
+}
+:root[data-theme="dark"]{ --paper:#191612; --ink:#ece4d8; --accent:#5fbfae; --tint:#221d18;
+  --rule:#3a322a; --dim:#9a8d7d; --card:#201b16; --shadow:none; }
+:root[data-theme="light"]{ --paper:#f4efe6; --ink:#26201a; --accent:#1f6f66; --tint:#ede6da;
+  --rule:#ddd2c2; --dim:#6f6559; --card:#fbf8f2; --shadow:0 1px 0 rgba(38,32,26,.05); }
+
+body{ background:var(--paper); color:var(--ink); margin:0;
+  font:16px/1.65 "Iowan Old Style","Charter","Palatino Linotype",Palatino,Georgia,serif;
+  -webkit-text-size-adjust:100%; }
+main,.head,footer{ max-width:60rem; margin:0 auto; padding:0 1.5rem; }
+h1,h2,h3,h4,.eyebrow,.tag,.n,code,table,.stats b,figcaption{
+  font-family:ui-sans-serif,"Helvetica Neue",Arial,system-ui,sans-serif; }
+h1{ font-size:clamp(1.9rem,4.6vw,3rem); line-height:1.1; letter-spacing:-.02em;
+  margin:.2em 0 .5rem; text-wrap:balance; font-weight:650; }
+h2{ font-size:1.35rem; letter-spacing:-.01em; margin:0 0 .9rem; display:flex; gap:.7rem;
+  align-items:baseline; font-weight:650; }
+h3{ font-size:1.08rem; margin:0; font-weight:650; }
+h4{ font-size:.72rem; margin:0 0 .35rem; text-transform:uppercase; letter-spacing:.09em;
+  color:var(--dim); font-weight:650; }
+p{ margin:0 0 1rem; max-width:64ch; }
+code{ font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:.86em;
+  background:var(--tint); padding:.1em .35em; border-radius:3px; }
+strong{ font-weight:650; }
+.dim{ color:var(--dim); } .small{ font-size:.85rem; }
+a{ color:var(--accent); text-underline-offset:2px; }
+a:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; border-radius:2px; }
+
+.head{ padding-top:3.5rem; padding-bottom:1rem; }
+.eyebrow{ font-size:.72rem; letter-spacing:.16em; text-transform:uppercase; color:var(--accent);
+  margin:0; font-weight:650; }
+.standfirst{ font-size:1.1rem; max-width:58ch; }
+.stats{ display:flex; flex-wrap:wrap; gap:1px; background:var(--rule); border:1px solid var(--rule);
+  border-radius:6px; overflow:hidden; margin:1.75rem 0 0; }
+.stats div{ flex:1 1 11rem; background:var(--card); padding:.9rem 1rem; }
+.stats b{ display:block; font-size:1.7rem; font-variant-numeric:tabular-nums; letter-spacing:-.02em;
+  line-height:1.1; }
+.stats span{ display:block; font-size:.8rem; color:var(--dim); margin-top:.15rem; }
+
+section{ padding:3rem 0 0; border-top:1px solid var(--rule); margin-top:3rem; }
+section:first-child{ border-top:0; }
+.num{ font-size:.72rem; color:var(--paper); background:var(--accent); width:1.5rem; height:1.5rem;
+  border-radius:50%; display:inline-grid; place-items:center; flex:0 0 auto; font-weight:650;
+  font-variant-numeric:tabular-nums; }
+.lede{ font-size:1.06rem; }
+
+.spec{ margin:1.5rem 0; }
+.win{ position:relative; width:100%; padding-top:var(--ar); overflow:hidden; background:#fdfaf4;
+  border:1px solid var(--rule); border-radius:5px; }
+@media (prefers-color-scheme: dark){ .win{ background:#f4efe6; } }
+.print{ position:absolute; display:block; max-width:none; }
+.ov{ position:absolute; inset:0; width:100%; height:100%; }
+figcaption{ font-size:.8rem; color:var(--dim); margin-top:.5rem; max-width:64ch; }
+.two{ display:grid; grid-template-columns:repeat(auto-fit,minmax(15rem,1fr)); gap:1.25rem; }
+.two .spec{ margin:0; }
+
+.opt{ border:1px solid var(--rule); border-radius:7px; overflow:hidden; margin:1.5rem 0 0;
+  background:var(--card); box-shadow:var(--shadow); }
+.opt-h{ padding:1rem 1.15rem; display:flex; flex-wrap:wrap; gap:.2rem 1rem; align-items:baseline;
+  border-bottom:1px solid var(--rule); }
+.tag{ margin:0; font-size:.78rem; color:var(--dim); letter-spacing:.02em; }
+.opt .spec{ margin:0; }
+.opt .win{ border:0; border-radius:0; border-bottom:1px solid var(--rule); }
+.cost{ display:grid; grid-template-columns:repeat(auto-fit,minmax(13rem,1fr)); }
+.cost>div{ padding:1rem 1.15rem; border-right:1px solid var(--rule); }
+.cost>div:last-child{ border-right:0; }
+.cost p{ margin:0; font-size:.9rem; }
+
+table.grid{ width:100%; border-collapse:collapse; margin:1.25rem 0 1.5rem; font-size:.88rem;
+  display:block; overflow-x:auto; }
+table.grid caption{ text-align:left; font-size:.82rem; color:var(--dim); padding-bottom:.55rem;
+  font-family:ui-sans-serif,system-ui,sans-serif; max-width:64ch; }
+.grid th{ text-align:left; font-size:.7rem; text-transform:uppercase; letter-spacing:.07em;
+  color:var(--dim); font-weight:650; padding:0 .7rem .45rem 0; border-bottom:1px solid var(--rule);
+  white-space:nowrap; }
+.grid td{ padding:.45rem .7rem .45rem 0; border-bottom:1px solid var(--rule); vertical-align:middle; }
+.grid .n{ text-align:right; font-variant-numeric:tabular-nums; white-space:nowrap; }
+.grid .k{ font-family:ui-monospace,Menlo,monospace; white-space:nowrap; }
+.bar{ width:38%; min-width:5rem; }
+.bar span{ display:block; height:.5rem; border-radius:2px; background:var(--accent); }
+
+.chip{ display:inline-block; font-size:.72rem; padding:.1rem .45rem; border-radius:99px;
+  margin:.1rem .25rem .1rem 0; border:1px solid var(--c); white-space:nowrap;
+  font-family:ui-sans-serif,system-ui,sans-serif; }
+.chip.on{ background:var(--c); color:#fff; font-weight:600; }
+.chip.off{ color:var(--dim); opacity:.75; }
+.sw{ display:inline-block; width:.7rem; height:.7rem; border-radius:2px; background:var(--c);
+  margin-right:.45rem; vertical-align:-1px; }
+.swn{ font-size:.88rem; }
+
+.note{ border-left:3px solid var(--accent); background:var(--tint); padding:1rem 1.15rem;
+  border-radius:0 5px 5px 0; margin:1.5rem 0 0; }
+.note p:last-child{ margin:0; }
+
+.pal{ display:grid; grid-template-columns:repeat(auto-fit,minmax(17rem,1fr)); gap:.15rem 1.5rem; }
+.pk{ display:grid; grid-template-columns:auto 6.5rem auto 1fr auto; gap:.6rem; align-items:center;
+  padding:.4rem 0; border-bottom:1px solid var(--rule); font-size:.85rem; }
+.pk b{ font-family:ui-sans-serif,system-ui,sans-serif; font-weight:600; }
+.chipL{ width:1.4rem; height:1.4rem; border-radius:3px; background:var(--c); }
+.dashline{ width:100%; height:6px; }
+.pk .dim{ font-size:.78rem; font-variant-numeric:tabular-nums; }
+
+/* An earlier answer, or an option left off: the claim in the term, the reason in
+   the definition. A list, not a table — these are read, not compared. */
+.prior{ margin:1.25rem 0 0; max-width:64ch; }
+.prior dt{ font-family:ui-sans-serif,"Helvetica Neue",Arial,system-ui,sans-serif; font-size:.92rem;
+  font-weight:650; margin-top:1.1rem; }
+.prior dt:first-child{ margin-top:0; }
+.prior dd{ margin:.35rem 0 0; padding-left:1rem; border-left:2px solid var(--rule);
+  font-size:.94rem; color:var(--ink); }
+
+.wch{ margin:1.25rem 0 0; padding-left:1.15rem; max-width:64ch; }
+.wch li{ margin-bottom:.7rem; }
+
+footer{ margin-top:3rem; padding-top:1.5rem; padding-bottom:4rem; border-top:1px solid var(--rule); }
+footer p{ font-size:.85rem; color:var(--dim); }
+footer strong{ color:var(--ink); }
+@media (max-width:34rem){ .cost>div{ border-right:0; border-bottom:1px solid var(--rule); } }
+</style>
+</head>
+<body>
+
+<header class="head">
+  <p class="eyebrow">Hifth · a decision, drawn on paper</p>
+  <h1>One colour a verse. The data knows five.</h1>
+  <p class="standfirst">
+    Hifth can tint each verse to flag a recitation rule inside it. It gets
+    <strong>one</strong> colour per verse — but a verse usually carries
+    <strong>3.9</strong> different kinds of rule, so most of what we know
+    is never shown. This page asks whether to colour smaller pieces than a whole verse, and shows
+    each option on a real page so you can judge it by eye.
+  </p>
+  <div class="stats">
+    <div><b>83.29%</b><span>of the rules we know about are invisible on screen</span></div>
+    <div><b>3.9</b><span>kinds of rule in a typical verse</span></div>
+    <div><b>1</b><span>gets a colour</span></div>
+  </div>
+  <div class="note plain">
+    <h4>Three words, before we start</h4>
+    <p>
+      A <strong>tajweed rule</strong> tells a reciter to do something at a particular spot — hold a
+      vowel, hum through a letter, skip one. Hifth sorts them into <strong>seven kinds</strong>
+      (madd, ghunnah, idghām, qalqalah, silent, waṣl, madd lāzim) and gives each kind a colour. A
+      <strong>mark</strong> is one of the small signs the printed mus'haf draws above or below a
+      letter. Everything below is about how big an area we tint: a whole verse, or the exact letter
+      or mark the rule is about.
+    </p>
+  </div>
+</header>
+
+<main>
+
+<section>
+  <h2><span class="num">1</span>What is being decided?</h2>
+  <p class="lede">
+    Whether Hifth should keep tinting a whole verse at a time, or start tinting the exact letter or
+    mark a rule lands on — and if it should, whether to put that on the reader's screen now or only
+    lay the groundwork for it.
+  </p>
+  <p>
+    Three answers, drawn side by side further down. <strong>A</strong>: leave it as it is, one colour
+    a verse. <strong>B</strong>: colour the exact letter or mark. <strong>C</strong>: ship the
+    measurements and the checks that keep them honest, and colour nothing yet.
+  </p>
+</section>
+
+<section>
+  <h2><span class="num">2</span>Why is this being asked now?</h2>
+  <p>
+    Because it finally got measured. Letting a reader pick out single words meant working out where
+    every word — and every small mark the printer drew above and below the letters — actually sits on
+    all 604 pages. That work is done and shipped for a different reason, and the moment it existed it
+    was possible to count something nobody had counted before: how much of what we know about
+    recitation rules never reaches the reader's eye. The number came back at
+    <strong>83.29%</strong>, and it is the reason this page exists rather than a
+    hunch that verse-sized tinting felt coarse.
+  </p>
+</section>
+
+<section>
+  <h2><span class="num">3</span>What happens if nobody decides?</h2>
+  <p>
+    Nothing breaks, and that is worth saying plainly. Option A is what the app does today, it works,
+    and no other part of Hifth is waiting behind this question — nothing is blocked, no release is
+    held up, and this can sit open for a year at no cost to a reader.
+  </p>
+  <p>
+    What it costs is quieter. The measurements exist and nothing uses them, so nothing checks them:
+    a positioning error would sit undetected until the day somebody builds on it. And
+    83.29% of what we know stays where it has always been, which is nowhere a
+    reader can see.
+  </p>
+</section>
+
+<section>
+  <h2><span class="num">4</span>What does the app colour today?</h2>
+  <p>
+    A whole verse at a time. Below is page 2 exactly as Hifth draws it: five verses,
+    five tinted shapes, each stepping across the line breaks the verse takes. When a verse carries
+    several kinds of rule, Hifth picks the <em>rarest</em> one — telling you a verse hides a silent
+    letter is worth more than telling you it has a madd, which nine verses in ten do.
+  </p>
+  <figure class="spec" style="--ar:100.0000%">
+  <div class="win">
+    <img class="print" src="../../apps/web/public/assets/pages/hafs-kfqc/2.svg" alt=""
+         style="width:100.0000%;height:100.0000%;left:0.0000%;top:0.0000%">
+    <svg class="ov" viewBox="0 0 235 235" aria-hidden="true"><path d="M206.5 46h-34.1v26.2h34Z" fill="#8e2400" fill-opacity="0.1" stroke="#8e2400" stroke-width="0.7" stroke-dasharray="none" stroke-linejoin="round" vector-effect="non-scaling-stroke"/><path d="M172.4 46H33.8v26.2l192 .2v30h-53.4V72v.2Z" fill="#cc79a7" fill-opacity="0.1" stroke="#cc79a7" stroke-width="0.7" stroke-dasharray="2.5 2.5" stroke-linejoin="round" vector-effect="non-scaling-stroke"/><path d="M172.4 72.2H12v29.5h102v32.2h114.2v-30.2h-55.8V72.4Z" fill="#6e6259" fill-opacity="0.1" stroke="#6e6259" stroke-width="0.7" stroke-dasharray="0.8 1.6" stroke-linejoin="round" vector-effect="non-scaling-stroke"/><path d="M114 101.7H11.5v58.5h217v-26.6H114z" fill="#0072b2" fill-opacity="0.1" stroke="#0072b2" stroke-width="0.7" stroke-dasharray="5 1.5 1 1.5" stroke-linejoin="round" vector-effect="non-scaling-stroke"/><path d="M200 158.5H37.7v28.6h31.7v29.1h99.5v-28H200z" fill="#6e6259" fill-opacity="0.1" stroke="#6e6259" stroke-width="0.7" stroke-dasharray="0.8 1.6" stroke-linejoin="round" vector-effect="non-scaling-stroke"/></svg>
+  </div>
+  <figcaption>Five verses, five tints. Behind them sit 34 rules — only 7 are in a colour you can see.</figcaption>
+</figure>
+  <table class="grid">
+    <caption>What each verse on this page carries. A filled chip is the kind that got the colour; a hollow one is a kind that is there and shows nothing.</caption>
+    <thead><tr><th>verse</th><th>kinds of rule present</th><th class="n">rules</th><th class="n">shown</th><th class="n">on a printed mark</th><th class="n">on a plain letter</th></tr></thead>
+    <tbody>
+<tr>
+  <td class="k">2:1</td>
+  <td><span class="chip on" style="--c:#8e2400">madd lāzim</span></td>
+  <td class="n">2</td>
+  <td class="n">2</td>
+  <td class="n">0</td>
+  <td class="n">2</td>
+</tr>
+<tr>
+  <td class="k">2:2</td>
+  <td><span class="chip off" style="--c:#d55e00">madd</span><span class="chip off" style="--c:#9c9284">waṣl</span><span class="chip on" style="--c:#cc79a7">idghām</span></td>
+  <td class="n">5</td>
+  <td class="n">1</td>
+  <td class="n">4</td>
+  <td class="n">1</td>
+</tr>
+<tr>
+  <td class="k">2:3</td>
+  <td><span class="chip off" style="--c:#d55e00">madd</span><span class="chip off" style="--c:#9c9284">waṣl</span><span class="chip off" style="--c:#009e73">ghunnah</span><span class="chip off" style="--c:#cc79a7">idghām</span><span class="chip off" style="--c:#0072b2">qalqalah</span><span class="chip on" style="--c:#6e6259">silent</span></td>
+  <td class="n">10</td>
+  <td class="n">1</td>
+  <td class="n">4</td>
+  <td class="n">6</td>
+</tr>
+<tr>
+  <td class="k">2:4</td>
+  <td><span class="chip off" style="--c:#d55e00">madd</span><span class="chip off" style="--c:#9c9284">waṣl</span><span class="chip off" style="--c:#009e73">ghunnah</span><span class="chip on" style="--c:#0072b2">qalqalah</span></td>
+  <td class="n">9</td>
+  <td class="n">1</td>
+  <td class="n">1</td>
+  <td class="n">7 <span class="dim">+1</span></td>
+</tr>
+<tr>
+  <td class="k">2:5</td>
+  <td><span class="chip off" style="--c:#d55e00">madd</span><span class="chip off" style="--c:#9c9284">waṣl</span><span class="chip off" style="--c:#cc79a7">idghām</span><span class="chip on" style="--c:#6e6259">silent</span></td>
+  <td class="n">8</td>
+  <td class="n">2</td>
+  <td class="n">4</td>
+  <td class="n">4</td>
+</tr>
+    </tbody>
+  </table>
+</section>
+
+<section>
+  <h2><span class="num">5</span>What is it leaving out?</h2>
+  <p class="lede">
+    Most of it. Across the whole mus'haf we have <strong>60,057</strong>
+    rules marked up, and <strong>50,023</strong> of them —
+    83.29% — never reach the screen. Not because we are unsure where they are.
+    Because there is only one colour to give and something else already took it.
+  </p>
+  <table class="grid">
+    <caption>How many different kinds of rule land on a single verse, across all 6,173 verses that carry any.</caption>
+    <thead><tr><th class="n">kinds</th><th class="n">verses</th><th></th><th class="n">share</th></tr></thead>
+    <tbody>
+<tr><td class="n">1</td><td class="n">369</td>
+  <td class="bar"><span style="width:5.977644581240888%"></span></td><td class="n">5.98%</td></tr>
+<tr><td class="n">2</td><td class="n">733</td>
+  <td class="bar"><span style="width:11.87429126842702%"></span></td><td class="n">11.87%</td></tr>
+<tr><td class="n">3</td><td class="n">1,197</td>
+  <td class="bar"><span style="width:19.390895836708246%"></span></td><td class="n">19.39%</td></tr>
+<tr><td class="n">4</td><td class="n">1,527</td>
+  <td class="bar"><span style="width:24.73675684432205%"></span></td><td class="n">24.74%</td></tr>
+<tr><td class="n">5</td><td class="n">1,531</td>
+  <td class="bar"><span style="width:24.80155515956585%"></span></td><td class="n">24.80%</td></tr>
+<tr><td class="n">6</td><td class="n">798</td>
+  <td class="bar"><span style="width:12.927263891138828%"></span></td><td class="n">12.93%</td></tr>
+<tr><td class="n">7</td><td class="n">18</td>
+  <td class="bar"><span style="width:0.29159241859711643%"></span></td><td class="n">0.29%</td></tr>
+    </tbody>
+  </table>
+  <p>
+    The one that loses most is the one a reciter meets most. <strong>Madd</strong> appears in
+    92.48% of verses and gets the colour in
+    2.74% of them. That is deliberate — it ranks last <em>because</em>
+    it is everywhere, which is the right call when you have one colour and the wrong one the moment
+    you have room for two.
+  </p>
+  <table class="grid">
+    <caption>Present in the verse, but beaten to the only colour going.</caption>
+    <thead><tr><th>kind</th><th class="n">verses where it loses</th><th></th><th class="n">share</th><th class="n">wins</th></tr></thead>
+    <tbody>
+<tr><td><span class="sw" style="--c:#d55e00"></span><span class="swn">madd</span></td><td class="n">5,540</td>
+  <td class="bar"><span style="width:89.74566661266807%;background:#d55e00"></span></td>
+  <td class="n">89.75%</td>
+  <td class="n dim">2.74%</td></tr>
+<tr><td><span class="sw" style="--c:#9c9284"></span><span class="swn">waṣl</span></td><td class="n">4,471</td>
+  <td class="bar"><span style="width:72.42831686376154%;background:#9c9284"></span></td>
+  <td class="n">72.43%</td>
+  <td class="n dim">4.50%</td></tr>
+<tr><td><span class="sw" style="--c:#009e73"></span><span class="swn">ghunnah</span></td><td class="n">3,966</td>
+  <td class="bar"><span style="width:64.24752956423133%;background:#009e73"></span></td>
+  <td class="n">64.25%</td>
+  <td class="n dim">9.43%</td></tr>
+<tr><td><span class="sw" style="--c:#cc79a7"></span><span class="swn">idghām</span></td><td class="n">2,726</td>
+  <td class="bar"><span style="width:44.160051838652194%;background:#cc79a7"></span></td>
+  <td class="n">44.16%</td>
+  <td class="n dim">20.98%</td></tr>
+<tr><td><span class="sw" style="--c:#0072b2"></span><span class="swn">qalqalah</span></td><td class="n">1,187</td>
+  <td class="bar"><span style="width:19.22890004859874%;background:#0072b2"></span></td>
+  <td class="n">19.23%</td>
+  <td class="n dim">23.55%</td></tr>
+<tr><td><span class="sw" style="--c:#6e6259"></span><span class="swn">silent</span></td><td class="n">40</td>
+  <td class="bar"><span style="width:0.6479831524380366%;background:#6e6259"></span></td>
+  <td class="n">0.65%</td>
+  <td class="n dim">36.72%</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section>
+  <h2><span class="num">6</span>Would colouring smaller pieces let us show more of it?</h2>
+  <p class="lede">
+    Yes — and that is the real prize, more than precision is. The problem today is not that a tint
+    is <em>coarse</em>. It is that a tint is <em>single</em>: one shape per verse means one colour
+    per verse, so 3.9 kinds compete for it and
+    2.9 lose every time. Tint the individual letters and marks
+    instead and they stop competing — each one can carry its own colour, because each one is its
+    own shape.
+  </p>
+</section>
+
+<section>
+  <h2><span class="num">7</span>What do printed mus'hafs already do about this?</h2>
+  <p class="lede">
+    They answered it the other way, decades ago, and they answered it at the letter. The
+    colour-coded printed mus'haf — the one most huffaz have already held — tints
+    <em>individual letters</em>, never whole verses.
+  </p>
+  <p>
+    In Dar al-Maarifah's colour-coded mus'haf a letter held longer is printed red, a nasalised
+    letter green, a letter that is written but not pronounced grey, and the echoing letters blue;
+    the publisher's claim is that a reader applies two dozen rules from the colours alone while
+    their attention stays on the meaning. Whatever else is true, that is a working precedent for
+    option B and none at all for option A: no printed tradition colours a whole verse to tell you
+    something about one letter inside it, because on paper it never had to.
+  </p>
+  <div class="note">
+    <h4>Why the precedent does not simply settle it</h4>
+    <p>
+      Print colours <strong>the ink of the letter itself</strong>. Hifth cannot: the page it shows
+      is a picture of the printed page, one flat drawing, with no separate letter inside it to
+      recolour. Everything on this page is a tinted shape laid <em>over</em> the print, which is a
+      different visual language — a wash behind a letter reads less precisely than a letter that is
+      simply a different colour, and no amount of accuracy in the positions changes that. So the
+      printed mus'haf tells us readers cope with letter-level colour; it does not tell us that a
+      letter-level <em>wash</em> reads the same way. Section 10 is where you judge that by eye.
+    </p>
+  </div>
+  <p class="dim small">
+    <strong>What was and was not looked up.</strong> The printed colour-coded tradition above was
+    checked against booksellers' descriptions of the Dar al-Maarifah edition
+    (<a href="https://www.amazon.com/Color-Coded-Tajweed-Quran-Hardcover/dp/9933423509">one</a>,
+    <a href="https://www.ibrahimbooks.com/product/mushaf-with-color-coded-tajweed-rules/">two</a>).
+    No survey was done of how other <em>apps</em> handle it: a search for any published account of a
+    digital mus'haf's colouring turned up sales pages and PDFs of the printed editions, and nothing
+    describing how a screen decides what to tint. Treat that as unlooked-at, not as evidence that
+    nobody has solved it.
+  </p>
+</section>
+
+<section>
+  <h2><span class="num">8</span>What have we already decided that this has to live with?</h2>
+  <p>
+    Two earlier answers shape this one, and both of them make B cheaper and narrower than it sounds.
+  </p>
+  <dl class="prior">
+    <dt>“Should a reader be able to pick single words, or only whole verses?” — answered: single words.</dt>
+    <dd>
+      This is why the measurements exist at all; B is not proposing the expensive half, it is
+      proposing to use it. It also sets a reader's expectation: the app already answers at
+      word size when you touch it, so colour is now the one thing that still only speaks in verses.
+    </dd>
+    <dt>“Can a reader turn the colouring off, jump anywhere, and reopen it with no signal?” — answered: yes, it is a layer you can switch off.</dt>
+    <dd>
+      Anything chosen here is opt-in by construction — nobody is made to look at it — and the seven
+      colours were fixed then. B does not get new colours. It gets smaller places to put the ones we
+      have, which is exactly why section 10's complaint about the two quietest ones is a live one.
+    </dd>
+  </dl>
+</section>
+
+<section>
+  <h2><span class="num">9</span>What would each option look like on a real page?</h2>
+  <p>
+    The same three lines, three times. Same size, same colours — the only thing that changes is how
+    small a piece the app is allowed to tint.
+  </p>
+
+  <div class="opt">
+    <div class="opt-h"><h3>A · Leave it as it is</h3><p class="tag">change nothing</p></div>
+    <figure class="spec" style="--ar:30.7018%">
+  <div class="win">
+    <img class="print" src="../../apps/web/public/assets/pages/hafs-kfqc/2.svg" alt=""
+         style="width:103.0702%;height:335.7143%;left:-2.6316%;top:-97.1429%">
+    <svg class="ov" viewBox="6 68 228 70" aria-hidden="true"><path d="M206.5 46h-34.1v26.2h34Z" fill="#8e2400" fill-opacity="0.1" stroke="#8e2400" stroke-width="0.7" stroke-dasharray="none" stroke-linejoin="round" vector-effect="non-scaling-stroke"/><path d="M172.4 46H33.8v26.2l192 .2v30h-53.4V72v.2Z" fill="#cc79a7" fill-opacity="0.1" stroke="#cc79a7" stroke-width="0.7" stroke-dasharray="2.5 2.5" stroke-linejoin="round" vector-effect="non-scaling-stroke"/><path d="M172.4 72.2H12v29.5h102v32.2h114.2v-30.2h-55.8V72.4Z" fill="#6e6259" fill-opacity="0.1" stroke="#6e6259" stroke-width="0.7" stroke-dasharray="0.8 1.6" stroke-linejoin="round" vector-effect="non-scaling-stroke"/><path d="M114 101.7H11.5v58.5h217v-26.6H114z" fill="#0072b2" fill-opacity="0.1" stroke="#0072b2" stroke-width="0.7" stroke-dasharray="5 1.5 1 1.5" stroke-linejoin="round" vector-effect="non-scaling-stroke"/><path d="M200 158.5H37.7v28.6h31.7v29.1h99.5v-28H200z" fill="#6e6259" fill-opacity="0.1" stroke="#6e6259" stroke-width="0.7" stroke-dasharray="0.8 1.6" stroke-linejoin="round" vector-effect="non-scaling-stroke"/></svg>
+  </div>
+  
+</figure>
+    <div class="cost">
+      <div><h4>What it takes</h4><p>Nothing. No new work, no extra data for a phone to download.</p></div>
+      <div><h4>What you get</h4><p>The app stays exactly as it is now. We already have an internal tool that can show every mark, so nothing we learned is lost — it is just not on the reader's screen.</p></div>
+      <div><h4>What it costs</h4><p>83.29% of what we know stays invisible to a reader, indefinitely.</p></div>
+    </div>
+  </div>
+
+  <div class="opt">
+    <div class="opt-h"><h3>B · Colour the exact letter or mark</h3><p class="tag">every rule gets its own colour</p></div>
+    <figure class="spec" style="--ar:30.7018%">
+  <div class="win">
+    <img class="print" src="../../apps/web/public/assets/pages/hafs-kfqc/2.svg" alt=""
+         style="width:103.0702%;height:335.7143%;left:-2.6316%;top:-97.1429%">
+    <svg class="ov" viewBox="6 68 228 70" aria-hidden="true"><rect x="185.1" y="50.5" width="16.2" height="18.8" fill="#8e2400" fill-opacity="0.1" stroke="#8e2400" stroke-width="0.7" stroke-dasharray="none" stroke-linejoin="round" vector-effect="non-scaling-stroke"/><rect x="188.2" y="78.7" width="35.7" height="19.7" fill="#d55e00" fill-opacity="0.1" stroke="#d55e00" stroke-width="0.7" stroke-dasharray="4 2" stroke-linejoin="round" vector-effect="non-scaling-stroke"/><rect x="163.3" y="56.8" width="1.8" height="5.1" fill="#d55e00" fill-opacity="0.45" stroke="#d55e00" stroke-width="0.35" rx="0.4"/><rect x="145.8" y="50.8" width="4.6" height="3.6" fill="#9c9284" fill-opacity="0.45" stroke="#9c9284" stroke-width="0.35" rx="0.4"/><rect x="117.5" y="57.5" width="1.8" height="5.1" fill="#d55e00" fill-opacity="0.45" stroke="#d55e00" stroke-width="0.35" rx="0.4"/><rect x="46.7" y="55.1" width="6.7" height="2.9" fill="#cc79a7" fill-opacity="0.45" stroke="#cc79a7" stroke-width="0.35" rx="0.4"/><rect x="13.2" y="77.6" width="32.3" height="20.3" fill="#6e6259" fill-opacity="0.1" stroke="#6e6259" stroke-width="0.7" stroke-dasharray="0.8 1.6" stroke-linejoin="round" vector-effect="non-scaling-stroke"/><rect x="202.3" y="111.1" width="18.1" height="14.1" fill="#009e73" fill-opacity="0.1" stroke="#009e73" stroke-width="0.7" stroke-dasharray="1.6 1.6" stroke-linejoin="round" vector-effect="non-scaling-stroke"/><rect x="164.3" y="109.2" width="37.2" height="25" fill="#0072b2" fill-opacity="0.1" stroke="#0072b2" stroke-width="0.7" stroke-dasharray="5 1.5 1 1.5" stroke-linejoin="round" vector-effect="non-scaling-stroke"/><rect x="129.2" y="108.8" width="34.1" height="19.4" fill="#009e73" fill-opacity="0.1" stroke="#009e73" stroke-width="0.7" stroke-dasharray="1.6 1.6" stroke-linejoin="round" vector-effect="non-scaling-stroke"/><rect x="107.5" y="77.7" width="4.6" height="3.6" fill="#9c9284" fill-opacity="0.45" stroke="#9c9284" stroke-width="0.35" rx="0.4"/><rect x="40.8" y="77.6" width="4.6" height="3.6" fill="#9c9284" fill-opacity="0.45" stroke="#9c9284" stroke-width="0.35" rx="0.4"/><rect x="20.6" y="83.9" width="1.8" height="5.1" fill="#d55e00" fill-opacity="0.45" stroke="#d55e00" stroke-width="0.35" rx="0.4"/><rect x="178.6" y="115.7" width="1.8" height="5.1" fill="#d55e00" fill-opacity="0.45" stroke="#d55e00" stroke-width="0.35" rx="0.4"/><rect x="32" y="108.7" width="19.5" height="20.3" fill="#d55e00" fill-opacity="0.1" stroke="#d55e00" stroke-width="0.7" stroke-dasharray="4 2" stroke-linejoin="round" vector-effect="non-scaling-stroke"/><rect x="12.4" y="103.1" width="19.5" height="27.7" fill="#009e73" fill-opacity="0.1" stroke="#009e73" stroke-width="0.7" stroke-dasharray="1.6 1.6" stroke-linejoin="round" vector-effect="non-scaling-stroke"/><rect x="178.5" y="135.2" width="11" height="16.3" fill="#d55e00" fill-opacity="0.1" stroke="#d55e00" stroke-width="0.7" stroke-dasharray="4 2" stroke-linejoin="round" vector-effect="non-scaling-stroke"/><rect x="161.1" y="130.6" width="16.9" height="27" fill="#009e73" fill-opacity="0.1" stroke="#009e73" stroke-width="0.7" stroke-dasharray="1.6 1.6" stroke-linejoin="round" vector-effect="non-scaling-stroke"/><rect x="146.1" y="145.1" width="14.3" height="10.1" fill="#009e73" fill-opacity="0.1" stroke="#009e73" stroke-width="0.7" stroke-dasharray="1.6 1.6" stroke-linejoin="round" vector-effect="non-scaling-stroke"/><rect x="120.7" y="136.1" width="24.1" height="19.8" fill="#0072b2" fill-opacity="0.1" stroke="#0072b2" stroke-width="0.7" stroke-dasharray="5 1.5 1 1.5" stroke-linejoin="round" vector-effect="non-scaling-stroke"/><rect x="31.5" y="138.5" width="30.6" height="17.5" fill="#d55e00" fill-opacity="0.1" stroke="#d55e00" stroke-width="0.7" stroke-dasharray="4 2" stroke-linejoin="round" vector-effect="non-scaling-stroke"/><rect x="103.5" y="108.1" width="4.6" height="3.6" fill="#9c9284" fill-opacity="0.45" stroke="#9c9284" stroke-width="0.35" rx="0.4"/><rect x="167.9" y="158.9" width="31.6" height="26.6" fill="#6e6259" fill-opacity="0.1" stroke="#6e6259" stroke-width="0.7" stroke-dasharray="0.8 1.6" stroke-linejoin="round" vector-effect="non-scaling-stroke"/><rect x="109" y="168" width="14.3" height="15.2" fill="#cc79a7" fill-opacity="0.1" stroke="#cc79a7" stroke-width="0.7" stroke-dasharray="2.5 2.5" stroke-linejoin="round" vector-effect="non-scaling-stroke"/><rect x="38.7" y="158.6" width="32.3" height="27" fill="#6e6259" fill-opacity="0.1" stroke="#6e6259" stroke-width="0.7" stroke-dasharray="0.8 1.6" stroke-linejoin="round" vector-effect="non-scaling-stroke"/><rect x="87.8" y="191.1" width="63.2" height="21.8" fill="#d55e00" fill-opacity="0.1" stroke="#d55e00" stroke-width="0.7" stroke-dasharray="4 2" stroke-linejoin="round" vector-effect="non-scaling-stroke"/><rect x="184.9" y="171.8" width="1.8" height="5.1" fill="#d55e00" fill-opacity="0.45" stroke="#d55e00" stroke-width="0.35" rx="0.4"/><rect x="133.5" y="165.3" width="7.8" height="3" fill="#cc79a7" fill-opacity="0.45" stroke="#cc79a7" stroke-width="0.35" rx="0.4"/><rect x="55.3" y="171" width="1.8" height="5.1" fill="#d55e00" fill-opacity="0.45" stroke="#d55e00" stroke-width="0.35" rx="0.4"/><rect x="146.4" y="191.1" width="4.6" height="3.6" fill="#9c9284" fill-opacity="0.45" stroke="#9c9284" stroke-width="0.35" rx="0.4"/></svg>
+  </div>
+  
+</figure>
+    <div class="cost">
+      <div><h4>What it takes</h4><p>About 5 KB more per page for a phone to download — roughly a tenth of what the page picture itself weighs. Size is not the sticking point.</p></div>
+      <div><h4>What you get</h4><p>Every kind of rule in the verse gets a colour instead of just one. On these three lines that is 34 rules shown rather than 7, and 13 of them sit on the exact mark the printer drew.</p></div>
+      <div><h4>What it costs</h4><p>Two visual languages on one line: a solid block on rules the printer drew a mark for, a tinted word for rules that land on a plain letter with nothing above it. Whether that reads as precise or as busy is what section 10 is for.</p></div>
+    </div>
+  </div>
+
+  <div class="opt">
+    <div class="opt-h"><h3>C · Prepare the ground, colour nothing yet</h3><p class="tag">ship the measurements, not the look</p></div>
+    <figure class="spec" style="--ar:30.7018%">
+  <div class="win">
+    <img class="print" src="../../apps/web/public/assets/pages/hafs-kfqc/2.svg" alt=""
+         style="width:103.0702%;height:335.7143%;left:-2.6316%;top:-97.1429%">
+    <svg class="ov" viewBox="6 68 228 70" aria-hidden="true"><rect x="185.1" y="50.5" width="16.2" height="18.8" fill="none" stroke="#a8998a" stroke-width="0.18"/><rect x="150.6" y="53.6" width="19.2" height="16.5" fill="none" stroke="#a8998a" stroke-width="0.18"/><rect x="107.2" y="50.8" width="43.2" height="19.6" fill="none" stroke="#a8998a" stroke-width="0.18"/><rect x="97.1" y="50.7" width="10" height="16.6" fill="none" stroke="#a8998a" stroke-width="0.18"/><rect x="79.1" y="54.1" width="18.6" height="16.4" fill="none" stroke="#a8998a" stroke-width="0.18"/><rect x="78.7" y="47.6" width="5.3" height="5" fill="none" stroke="#a8998a" stroke-width="0.18"/><rect x="62.9" y="56.3" width="16.9" height="14.5" fill="none" stroke="#a8998a" stroke-width="0.18"/><rect x="63.1" y="47.8" width="5.7" height="5.1" fill="none" stroke="#a8998a" stroke-width="0.18"/><rect x="37.2" y="53.6" width="24.5" height="15.5" fill="none" stroke="#a8998a" stroke-width="0.18"/><rect x="188.2" y="78.7" width="35.7" height="19.7" fill="none" stroke="#a8998a" stroke-width="0.18"/><rect x="163.3" y="56.8" width="1.8" height="5.1" fill="none" stroke="#a8998a" stroke-width="0.18"/><rect x="145.8" y="50.8" width="4.6" height="3.6" fill="none" stroke="#a8998a" stroke-width="0.18"/><rect x="117.5" y="57.5" width="1.8" height="5.1" fill="none" stroke="#a8998a" stroke-width="0.18"/><rect x="46.7" y="55.1" width="6.7" height="2.9" fill="none" stroke="#a8998a" stroke-width="0.18"/><rect x="147.1" y="76.2" width="22.8" height="23.9" fill="none" stroke="#a8998a" stroke-width="0.18"/><rect x="115.8" y="81.3" width="31" height="18.3" fill="none" stroke="#a8998a" stroke-width="0.18"/><rect x="84.7" y="77.7" width="30.3" height="24.2" fill="none" stroke="#a8998a" stroke-width="0.18"/><rect x="74.3" y="84.3" width="9.6" height="14.5" fill="none" stroke="#a8998a" stroke-width="0.18"/><rect x="45.8" y="80.2" width="33.6" height="18.7" fill="none" stroke="#a8998a" stroke-width="0.18"/><rect x="13.2" y="77.6" width="32.3" height="20.3" fill="none" stroke="#a8998a" stroke-width="0.18"/><rect x="215.2" y="111.9" width="9.7" height="15.1" fill="none" stroke="#a8998a" stroke-width="0.18"/><rect x="202.3" y="111.1" width="18.1" height="14.1" fill="none" stroke="#a8998a" stroke-width="0.18"/><rect x="164.3" y="109.2" width="37.2" height="25" fill="none" stroke="#a8998a" stroke-width="0.18"/><rect x="129.2" y="108.8" width="34.1" height="19.4" fill="none" stroke="#a8998a" stroke-width="0.18"/><rect x="107.5" y="77.7" width="4.6" height="3.6" fill="none" stroke="#a8998a" stroke-width="0.18"/><rect x="40.8" y="77.6" width="4.6" height="3.6" fill="none" stroke="#a8998a" stroke-width="0.18"/><rect x="20.6" y="83.9" width="1.8" height="5.1" fill="none" stroke="#a8998a" stroke-width="0.18"/><rect x="178.6" y="115.7" width="1.8" height="5.1" fill="none" stroke="#a8998a" stroke-width="0.18"/><rect x="102.9" y="112.3" width="9.8" height="14.5" fill="none" stroke="#a8998a" stroke-width="0.18"/><rect x="85.4" y="104.9" width="22.7" height="24" fill="none" stroke="#a8998a" stroke-width="0.18"/><rect x="52.3" y="110.9" width="32.7" height="17.5" fill="none" stroke="#a8998a" stroke-width="0.18"/><rect x="32" y="108.7" width="19.5" height="20.3" fill="none" stroke="#a8998a" stroke-width="0.18"/><rect x="12.4" y="103.1" width="19.5" height="27.7" fill="none" stroke="#a8998a" stroke-width="0.18"/><rect x="197.6" y="135.6" width="25.3" height="22.2" fill="none" stroke="#a8998a" stroke-width="0.18"/><rect x="187" y="139.4" width="9.8" height="14.7" fill="none" stroke="#a8998a" stroke-width="0.18"/><rect x="178.5" y="135.2" width="11" height="16.3" fill="none" stroke="#a8998a" stroke-width="0.18"/><rect x="161.1" y="130.6" width="16.9" height="27" fill="none" stroke="#a8998a" stroke-width="0.18"/><rect x="146.1" y="145.1" width="14.3" height="10.1" fill="none" stroke="#a8998a" stroke-width="0.18"/><rect x="120.7" y="136.1" width="24.1" height="19.8" fill="none" stroke="#a8998a" stroke-width="0.18"/><rect x="110.6" y="139.4" width="9.8" height="14.4" fill="none" stroke="#a8998a" stroke-width="0.18"/><rect x="79.1" y="135" width="34.5" height="23.1" fill="none" stroke="#a8998a" stroke-width="0.18"/><rect x="63.2" y="138" width="14" height="23.5" fill="none" stroke="#a8998a" stroke-width="0.18"/><rect x="31.5" y="138.5" width="30.6" height="17.5" fill="none" stroke="#a8998a" stroke-width="0.18"/><rect x="103.5" y="108.1" width="4.6" height="3.6" fill="none" stroke="#a8998a" stroke-width="0.18"/><rect x="167.9" y="158.9" width="31.6" height="26.6" fill="none" stroke="#a8998a" stroke-width="0.18"/><rect x="152.4" y="163.9" width="14.9" height="20" fill="none" stroke="#a8998a" stroke-width="0.18"/><rect x="124.5" y="165.3" width="26.5" height="16.3" fill="none" stroke="#a8998a" stroke-width="0.18"/><rect x="109" y="168" width="14.3" height="15.2" fill="none" stroke="#a8998a" stroke-width="0.18"/><rect x="76.1" y="165.9" width="31.2" height="21.4" fill="none" stroke="#a8998a" stroke-width="0.18"/><rect x="80" y="160.3" width="7.7" height="5.9" fill="none" stroke="#a8998a" stroke-width="0.18"/><rect x="67.6" y="168.4" width="10.4" height="14" fill="none" stroke="#a8998a" stroke-width="0.18"/><rect x="38.7" y="158.6" width="32.3" height="27" fill="none" stroke="#a8998a" stroke-width="0.18"/><rect x="149.6" y="195.8" width="18" height="15" fill="none" stroke="#a8998a" stroke-width="0.18"/><rect x="87.8" y="191.1" width="63.2" height="21.8" fill="none" stroke="#a8998a" stroke-width="0.18"/><rect x="184.9" y="171.8" width="1.8" height="5.1" fill="none" stroke="#a8998a" stroke-width="0.18"/><rect x="133.5" y="165.3" width="7.8" height="3" fill="none" stroke="#a8998a" stroke-width="0.18"/><rect x="55.3" y="171" width="1.8" height="5.1" fill="none" stroke="#a8998a" stroke-width="0.18"/><rect x="146.4" y="191.1" width="4.6" height="3.6" fill="none" stroke="#a8998a" stroke-width="0.18"/></svg>
+  </div>
+  
+</figure>
+    <div class="cost">
+      <div><h4>What it takes</h4><p>The same ~5 KB per page as B.</p></div>
+      <div><h4>What you get</h4><p>The positions get locked down and automatically checked before we commit to any look, so B can be tried, changed or abandoned later without redoing the measurement work.</p></div>
+      <div><h4>What it costs</h4><p>A reader sees option A. The faint outlines above are drawn <em>only here</em>, so you can see what would be available — the app itself would show nothing new.</p></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2><span class="num">10</span>Where do A and B actually differ?</h2>
+  <p>
+    One word makes the whole argument. Four rules land on the sixth word of verse 2:3:
+    a <em>waṣl</em> and a <em>madd</em>, which the printer drew small marks for, and an
+    <em>idghām</em> and a <em>silent</em>, which land on plain letters with nothing above them to
+    colour. Today all four come out as one grey tint over the entire verse. Here is that word at
+    about eight times its real size.
+  </p>
+  <div class="two">
+    <figure class="spec" style="--ar:68.6684%">
+  <div class="win">
+    <img class="print" src="../../apps/web/public/assets/pages/hafs-kfqc/2.svg" alt=""
+         style="width:613.5770%;height:893.5361%;left:-26.6319%;top:-283.6502%">
+    <svg class="ov" viewBox="10.2 74.6 38.3 26.3" aria-hidden="true"><path d="M206.5 46h-34.1v26.2h34Z" fill="#8e2400" fill-opacity="0.1" stroke="#8e2400" stroke-width="0.7" stroke-dasharray="none" stroke-linejoin="round" vector-effect="non-scaling-stroke"/><path d="M172.4 46H33.8v26.2l192 .2v30h-53.4V72v.2Z" fill="#cc79a7" fill-opacity="0.1" stroke="#cc79a7" stroke-width="0.7" stroke-dasharray="2.5 2.5" stroke-linejoin="round" vector-effect="non-scaling-stroke"/><path d="M172.4 72.2H12v29.5h102v32.2h114.2v-30.2h-55.8V72.4Z" fill="#6e6259" fill-opacity="0.1" stroke="#6e6259" stroke-width="0.7" stroke-dasharray="0.8 1.6" stroke-linejoin="round" vector-effect="non-scaling-stroke"/><path d="M114 101.7H11.5v58.5h217v-26.6H114z" fill="#0072b2" fill-opacity="0.1" stroke="#0072b2" stroke-width="0.7" stroke-dasharray="5 1.5 1 1.5" stroke-linejoin="round" vector-effect="non-scaling-stroke"/><path d="M200 158.5H37.7v28.6h31.7v29.1h99.5v-28H200z" fill="#6e6259" fill-opacity="0.1" stroke="#6e6259" stroke-width="0.7" stroke-dasharray="0.8 1.6" stroke-linejoin="round" vector-effect="non-scaling-stroke"/></svg>
+  </div>
+  <figcaption>A — the tint is here, and it is all of it. This close-up sits entirely inside the verse, so the flat grey <em>is</em> the signal: nothing tells you which word or letter the rule is about.</figcaption>
+</figure>
+    <figure class="spec" style="--ar:68.6684%">
+  <div class="win">
+    <img class="print" src="../../apps/web/public/assets/pages/hafs-kfqc/2.svg" alt=""
+         style="width:613.5770%;height:893.5361%;left:-26.6319%;top:-283.6502%">
+    <svg class="ov" viewBox="10.2 74.6 38.3 26.3" aria-hidden="true"><rect x="185.1" y="50.5" width="16.2" height="18.8" fill="#8e2400" fill-opacity="0.1" stroke="#8e2400" stroke-width="0.7" stroke-dasharray="none" stroke-linejoin="round" vector-effect="non-scaling-stroke"/><rect x="188.2" y="78.7" width="35.7" height="19.7" fill="#d55e00" fill-opacity="0.1" stroke="#d55e00" stroke-width="0.7" stroke-dasharray="4 2" stroke-linejoin="round" vector-effect="non-scaling-stroke"/><rect x="163.3" y="56.8" width="1.8" height="5.1" fill="#d55e00" fill-opacity="0.45" stroke="#d55e00" stroke-width="0.35" rx="0.4"/><rect x="145.8" y="50.8" width="4.6" height="3.6" fill="#9c9284" fill-opacity="0.45" stroke="#9c9284" stroke-width="0.35" rx="0.4"/><rect x="117.5" y="57.5" width="1.8" height="5.1" fill="#d55e00" fill-opacity="0.45" stroke="#d55e00" stroke-width="0.35" rx="0.4"/><rect x="46.7" y="55.1" width="6.7" height="2.9" fill="#cc79a7" fill-opacity="0.45" stroke="#cc79a7" stroke-width="0.35" rx="0.4"/><rect x="13.2" y="77.6" width="32.3" height="20.3" fill="#6e6259" fill-opacity="0.1" stroke="#6e6259" stroke-width="0.7" stroke-dasharray="0.8 1.6" stroke-linejoin="round" vector-effect="non-scaling-stroke"/><rect x="202.3" y="111.1" width="18.1" height="14.1" fill="#009e73" fill-opacity="0.1" stroke="#009e73" stroke-width="0.7" stroke-dasharray="1.6 1.6" stroke-linejoin="round" vector-effect="non-scaling-stroke"/><rect x="164.3" y="109.2" width="37.2" height="25" fill="#0072b2" fill-opacity="0.1" stroke="#0072b2" stroke-width="0.7" stroke-dasharray="5 1.5 1 1.5" stroke-linejoin="round" vector-effect="non-scaling-stroke"/><rect x="129.2" y="108.8" width="34.1" height="19.4" fill="#009e73" fill-opacity="0.1" stroke="#009e73" stroke-width="0.7" stroke-dasharray="1.6 1.6" stroke-linejoin="round" vector-effect="non-scaling-stroke"/><rect x="107.5" y="77.7" width="4.6" height="3.6" fill="#9c9284" fill-opacity="0.45" stroke="#9c9284" stroke-width="0.35" rx="0.4"/><rect x="40.8" y="77.6" width="4.6" height="3.6" fill="#9c9284" fill-opacity="0.45" stroke="#9c9284" stroke-width="0.35" rx="0.4"/><rect x="20.6" y="83.9" width="1.8" height="5.1" fill="#d55e00" fill-opacity="0.45" stroke="#d55e00" stroke-width="0.35" rx="0.4"/><rect x="178.6" y="115.7" width="1.8" height="5.1" fill="#d55e00" fill-opacity="0.45" stroke="#d55e00" stroke-width="0.35" rx="0.4"/><rect x="32" y="108.7" width="19.5" height="20.3" fill="#d55e00" fill-opacity="0.1" stroke="#d55e00" stroke-width="0.7" stroke-dasharray="4 2" stroke-linejoin="round" vector-effect="non-scaling-stroke"/><rect x="12.4" y="103.1" width="19.5" height="27.7" fill="#009e73" fill-opacity="0.1" stroke="#009e73" stroke-width="0.7" stroke-dasharray="1.6 1.6" stroke-linejoin="round" vector-effect="non-scaling-stroke"/><rect x="178.5" y="135.2" width="11" height="16.3" fill="#d55e00" fill-opacity="0.1" stroke="#d55e00" stroke-width="0.7" stroke-dasharray="4 2" stroke-linejoin="round" vector-effect="non-scaling-stroke"/><rect x="161.1" y="130.6" width="16.9" height="27" fill="#009e73" fill-opacity="0.1" stroke="#009e73" stroke-width="0.7" stroke-dasharray="1.6 1.6" stroke-linejoin="round" vector-effect="non-scaling-stroke"/><rect x="146.1" y="145.1" width="14.3" height="10.1" fill="#009e73" fill-opacity="0.1" stroke="#009e73" stroke-width="0.7" stroke-dasharray="1.6 1.6" stroke-linejoin="round" vector-effect="non-scaling-stroke"/><rect x="120.7" y="136.1" width="24.1" height="19.8" fill="#0072b2" fill-opacity="0.1" stroke="#0072b2" stroke-width="0.7" stroke-dasharray="5 1.5 1 1.5" stroke-linejoin="round" vector-effect="non-scaling-stroke"/><rect x="31.5" y="138.5" width="30.6" height="17.5" fill="#d55e00" fill-opacity="0.1" stroke="#d55e00" stroke-width="0.7" stroke-dasharray="4 2" stroke-linejoin="round" vector-effect="non-scaling-stroke"/><rect x="103.5" y="108.1" width="4.6" height="3.6" fill="#9c9284" fill-opacity="0.45" stroke="#9c9284" stroke-width="0.35" rx="0.4"/><rect x="167.9" y="158.9" width="31.6" height="26.6" fill="#6e6259" fill-opacity="0.1" stroke="#6e6259" stroke-width="0.7" stroke-dasharray="0.8 1.6" stroke-linejoin="round" vector-effect="non-scaling-stroke"/><rect x="109" y="168" width="14.3" height="15.2" fill="#cc79a7" fill-opacity="0.1" stroke="#cc79a7" stroke-width="0.7" stroke-dasharray="2.5 2.5" stroke-linejoin="round" vector-effect="non-scaling-stroke"/><rect x="38.7" y="158.6" width="32.3" height="27" fill="#6e6259" fill-opacity="0.1" stroke="#6e6259" stroke-width="0.7" stroke-dasharray="0.8 1.6" stroke-linejoin="round" vector-effect="non-scaling-stroke"/><rect x="87.8" y="191.1" width="63.2" height="21.8" fill="#d55e00" fill-opacity="0.1" stroke="#d55e00" stroke-width="0.7" stroke-dasharray="4 2" stroke-linejoin="round" vector-effect="non-scaling-stroke"/><rect x="184.9" y="171.8" width="1.8" height="5.1" fill="#d55e00" fill-opacity="0.45" stroke="#d55e00" stroke-width="0.35" rx="0.4"/><rect x="133.5" y="165.3" width="7.8" height="3" fill="#cc79a7" fill-opacity="0.45" stroke="#cc79a7" stroke-width="0.35" rx="0.4"/><rect x="55.3" y="171" width="1.8" height="5.1" fill="#d55e00" fill-opacity="0.45" stroke="#d55e00" stroke-width="0.35" rx="0.4"/><rect x="146.4" y="191.1" width="4.6" height="3.6" fill="#9c9284" fill-opacity="0.45" stroke="#9c9284" stroke-width="0.35" rx="0.4"/></svg>
+  </div>
+  <figcaption>B — the waṣl (grey box, top right) and the madd (orange bar) sit on the exact marks the printer drew, each in its own colour, over a tinted word for the two rules that have no mark.</figcaption>
+</figure>
+  </div>
+  <div class="note">
+    <h4>This word also shows the two things still unsolved</h4>
+    <p>
+      Its <em>idghām</em> and its <em>silent</em> both land on plain letters of the
+      <strong>same word</strong> — so B still has to choose between them. The competition does not
+      disappear, it just moves from verse-sized to word-sized, and we currently only know how to
+      settle it verse-sized. Second: the two colours B leans on hardest here are the faintest two we
+      have. Look at the grey waṣl box against the grey word beneath it. Both colours were picked back
+      when the smallest thing they could land on was a whole verse.
+    </p>
+  </div>
+</section>
+
+<section>
+  <h2><span class="num">11</span>What do the colours look like at the size they would be used?</h2>
+  <div class="pal">
+    <div class="pk"><span class="chipL" style="--c:#d55e00"></span>
+      <b>madd</b>
+      <code>#d55e00</code>
+      <svg viewBox="0 0 60 6" class="dashline"><line x1="1" y1="3" x2="59" y2="3" stroke="#d55e00" stroke-width="1.4" stroke-dasharray="4 2"/></svg>
+      <span class="dim">wins 2.74%</span></div>
+<div class="pk"><span class="chipL" style="--c:#9c9284"></span>
+      <b>waṣl</b>
+      <code>#9c9284</code>
+      <svg viewBox="0 0 60 6" class="dashline"><line x1="1" y1="3" x2="59" y2="3" stroke="#9c9284" stroke-width="1.4" stroke-dasharray="0.8 3"/></svg>
+      <span class="dim">wins 4.50%</span></div>
+<div class="pk"><span class="chipL" style="--c:#009e73"></span>
+      <b>ghunnah</b>
+      <code>#009e73</code>
+      <svg viewBox="0 0 60 6" class="dashline"><line x1="1" y1="3" x2="59" y2="3" stroke="#009e73" stroke-width="1.4" stroke-dasharray="1.6 1.6"/></svg>
+      <span class="dim">wins 9.43%</span></div>
+<div class="pk"><span class="chipL" style="--c:#cc79a7"></span>
+      <b>idghām</b>
+      <code>#cc79a7</code>
+      <svg viewBox="0 0 60 6" class="dashline"><line x1="1" y1="3" x2="59" y2="3" stroke="#cc79a7" stroke-width="1.4" stroke-dasharray="2.5 2.5"/></svg>
+      <span class="dim">wins 20.98%</span></div>
+<div class="pk"><span class="chipL" style="--c:#0072b2"></span>
+      <b>qalqalah</b>
+      <code>#0072b2</code>
+      <svg viewBox="0 0 60 6" class="dashline"><line x1="1" y1="3" x2="59" y2="3" stroke="#0072b2" stroke-width="1.4" stroke-dasharray="5 1.5 1 1.5"/></svg>
+      <span class="dim">wins 23.55%</span></div>
+<div class="pk"><span class="chipL" style="--c:#6e6259"></span>
+      <b>silent</b>
+      <code>#6e6259</code>
+      <svg viewBox="0 0 60 6" class="dashline"><line x1="1" y1="3" x2="59" y2="3" stroke="#6e6259" stroke-width="1.4" stroke-dasharray="0.8 1.6"/></svg>
+      <span class="dim">wins 36.72%</span></div>
+<div class="pk"><span class="chipL" style="--c:#8e2400"></span>
+      <b>madd lāzim</b>
+      <code>#8e2400</code>
+      <svg viewBox="0 0 60 6" class="dashline"><line x1="1" y1="3" x2="59" y2="3" stroke="#8e2400" stroke-width="1.4" stroke-dasharray=""/></svg>
+      <span class="dim">wins 2.07%</span></div>
+  </div>
+  <p class="dim small">
+    Colour is never the only signal — each kind also has its own dash pattern along the edge, so the
+    seven stay distinguishable in greyscale, in print, and to a colour-blind reader.
+  </p>
+</section>
+
+<section>
+  <h2><span class="num">12</span>What else could we do, and why is it not on this page?</h2>
+  <p>
+    Three ideas were considered and left off. If one of them is the answer, this is the place to say
+    so — an option list with no visible edge is asking you to trust that the edge was somewhere
+    sensible.
+  </p>
+  <dl class="prior">
+    <dt>Recolour the letters themselves, the way the printed mus'haf does.</dt>
+    <dd>
+      Not possible with the page we ship. It is one flat drawing of the whole printed page; there is
+      no separate letter in it to give a colour to. Doing this would mean redrawing the mus'haf,
+      which is a far larger undertaking than any option here and a different decision entirely.
+    </dd>
+    <dt>Let the reader choose one kind of rule and show only that.</dt>
+    <dd>
+      Pick madd, see madd. This makes the competition disappear without measuring anything, and it
+      would work at today's verse size. It is left off because it answers a different question — what
+      do <em>you</em> want to see — where this page is about what the app shows by default. It is
+      also the cheapest idea on this list, and it stays available whichever of A, B or C wins.
+    </dd>
+    <dt>Tint whole words, and never the printer's marks.</dt>
+    <dd>
+      Half of B: one visual language instead of two, and no need for the mark positions. Left off
+      because it keeps the same competition B fails to fully solve — two rules on two letters of one
+      word — while giving up the precision that was the reason to move at all. It is genuinely a
+      middle option, and if section 10 reads as busy to you, it is the one to ask for.
+    </dd>
+  </dl>
+</section>
+
+<section>
+  <h2><span class="num">13</span>What would change the answer?</h2>
+  <ul class="wch">
+    <li>
+      <strong>The two quietest colours getting louder.</strong> B's weakest moment is a pale grey
+      box on a pale grey word. That is a palette question, not a measurement one, and it can be
+      tried on this very page in an afternoon. If it fixes it, B's main objection is gone.
+    </li>
+    <li>
+      <strong>A hafiz looking at section 10 and calling it busy.</strong> One person reciting from
+      the marked-up line would settle this faster and more honestly than any count on this page.
+    </li>
+    <li>
+      <strong>Finding that two rules often land on the same letter</strong>, not just the same word.
+      That is not counted here. If it turns out common, B needs a rule for what wins that we do not
+      have, and C becomes the sensible order of work rather than a delay.
+    </li>
+    <li>
+      <strong>The positions failing their check against the print.</strong> They are measured, not
+      hand-placed, and they are checked — but on the day a check fails, B and C both stop until it
+      passes, and A is unaffected.
+    </li>
+  </ul>
+</section>
+
+<section>
+  <h2><span class="num">14</span>What is this page not settling?</h2>
+  <p>
+    Which colour each kind of rule gets — B reuses the seven that already exist. Whether a mark can
+    be touched or asked about; this is only about colour. What should happen when two rules land on
+    the exact same letter, which is not counted anywhere here. And nothing at all about where the
+    rule data came from or how good it is: that is a separate question with its own record.
+  </p>
+</section>
+
+<section>
+  <h2><span class="num">15</span>So which one should we build?</h2>
+  <p class="lede">
+    Whether to build B. A is the status quo and needs no decision; C is B's groundwork without B's
+    look, and is worth taking only if we think the look needs several tries.
+  </p>
+  <p>
+    The case for B is section 5: we already know where 60,057 rules are, and
+    83.29% of them are invisible for want of somewhere to put a second colour —
+    and section 7, where the printed tradition has been colouring letters rather than verses for
+    years. The case against is section 10: two of those colours are too quiet at this size, and one
+    word can still carry two rules that want different colours in the same place. Neither is a
+    reason not to build it — both are work that comes with it.
+  </p>
+</section>
+
+</main>
+
+<footer>
+  <p>
+    <strong>Where the pictures come from.</strong> Nothing here is a mock-up. The page is the real
+    mus'haf image the app ships; the tinted verse shapes are the same ones the app taps against; the
+    word and mark rectangles are the measured positions of the printer's own ink; and the colours are
+    read straight out of the app's stylesheet when this page is built, so it cannot drift from what
+    Hifth actually looks like. All the counts are recomputed from the rule data each time.
+  </p>
+  <p class="dim small">
+    Built by <code>scripts/build-mark-options.mjs</code> — edit that, not this. The technical write-up
+    behind it, including what is still unresolved, is <code>docs/design/sub-word-marks.md</code> §⑧.
+    The print is <code>assets/pages/hafs-kfqc/2.svg</code>: outlined shapes only, no text.
+  </p>
+</footer>

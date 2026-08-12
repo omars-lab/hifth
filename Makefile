@@ -229,7 +229,9 @@ ci: core ## Full local mirror of the CI build-test-gate job, IN CI ORDER
 	$(PNPM) gate:map
 	$(PNPM) gate:use-cases
 	$(PNPM) gate:issues
+	$(PNPM) gate:decisions
 	$(PNPM) gate:quran-meta
+	$(PNPM) gate:tajweed
 	$(PNPM) gate:revision-privacy
 	$(PNPM) gate:i18n
 	$(PNPM) gate:params
@@ -392,6 +394,23 @@ issues: ## What is still open, worst first:  make issues  ·  make issues ID=<id
 issues-doc: ## Re-render docs/issues.md from docs/issues.json and its four registers
 	@node scripts/build-issues-doc.mjs
 
+.PHONY: decisions
+decisions: ## What has been decided and what is still open:  make decisions  ·  make decisions ID=<id>
+	@# docs/decisions.json is the source, and like the issue catalog it is an
+	@# index: the only prose it stores is the question, in plain words, because
+	@# the records' own titles are sentences and nobody scans a directory of
+	@# sentences to find their question. Everything else — the title, the answer,
+	@# the argument — is read out of the record that owns it as you run this.
+	@if [ -n "$(ID)" ]; then \
+	  node scripts/gate-decisions.mjs --id "$(ID)"; \
+	else \
+	  node scripts/gate-decisions.mjs --list; \
+	fi
+
+.PHONY: decisions-doc
+decisions-doc: ## Re-render docs/decisions/README.md from docs/decisions.json
+	@node scripts/build-decisions-doc.mjs
+
 .PHONY: validate
 validate: ## Outstanding manual checks — or one check's full runbook:  make validate CHECK=<id>
 	@# The edge coverage table rides along with the outstanding-checks list
@@ -427,6 +446,32 @@ guide: ## Render the runbooks to docs/validation/guide.html and serve them to yo
 	@# lived in a terminal the phone cannot see. Same source as `make validate`
 	@# CHECK=<id> — docs/validation/ledger.json — rendered for the device.
 	@LAN_IP="$(LAN_IP)" node scripts/build-validation-guide.mjs --serve
+
+.PHONY: session
+session: ## Work one check with the answers banked as you go:  make session CHECK=<id>
+	@# `make guide` is the reading surface — every check, tickable, nothing
+	@# written down. This is the writing one: a single check, and every box you
+	@# tick and every note you type lands in a transcript under
+	@# docs/validation/sessions/ the moment you make it.
+	@#
+	@# The gap it closes is an ordering problem, not a documentation one. The
+	@# ledger's `result` has always been typed on the laptop after the walkthrough
+	@# is over, so whatever you noticed at step four survives only if you were
+	@# still holding it at step ten. Here the observation is on disk while the
+	@# step is still in front of you, and `make record` at the end summarises a
+	@# file instead of a memory.
+	@#
+	@# Resumes an unbanked transcript by default; NEW=1 starts a fresh one.
+	@test -n "$(CHECK)" || { echo "usage: make session CHECK=<id>   (ids: make validate)"; exit 2; }
+	@# `$(origin PORT)`, not `$(PORT)`. This file already defines PORT := 4173 for
+	@# the preview server, so a plain `$(if $(PORT),…)` is always true and pins
+	@# every session to the app's own port. That is not just a clash: macOS `open`
+	@# reuses an existing tab pointed at the same URL without reloading it, so a
+	@# stale preview tab from an earlier `make phone-perf` comes to the front
+	@# looking like the session, and the session is what gets blamed. Only a PORT
+	@# given on the command line counts as one the user asked for.
+	@LAN_IP="$(LAN_IP)" node scripts/session.mjs --check "$(CHECK)" \
+	  $(if $(NEW),--new,) $(if $(filter command line,$(origin PORT)),--port $(PORT),)
 
 .PHONY: record
 record: ## Bank a manual result:  make record CHECK=<id> RESULT='the verdict, in words'

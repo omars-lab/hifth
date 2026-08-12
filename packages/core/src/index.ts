@@ -250,6 +250,8 @@ export {
   tajweedMarkClass,
   marksForAyah,
   leadingRule,
+  parseTajweedVocabulary,
+  tajweedFamilyIndex,
   geometrySignature,
   type SkinId,
   type TajweedRule,
@@ -257,6 +259,8 @@ export {
   type TajweedShard,
   type TajweedMark,
   type TajweedLookup,
+  type TajweedVocabulary,
+  type TajweedVocabularyEntry,
 } from "./skins.js";
 
 // The print's own mark vocabulary — what the ligature corpus draws above and

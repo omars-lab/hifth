@@ -215,12 +215,29 @@ jobs:
       - name: Gate — every open item is indexed, and the index still resolves
         run: pnpm gate:issues
 
+      # docs/decisions.json indexes every decision record, and holds the two
+      # links that make an open one answerable by somebody who has never opened
+      # this repo: the published page and the copy checked in beside it. This
+      # checks both resolve, that neither exists without the other, that the
+      # record links to them, that the question is written in plain words rather
+      # than file names — and, the direction nothing else covers, that no record
+      # sits in docs/decisions/ with no row in the index.
+      - name: Gate — every decision is indexed, and every open one is legible
+        run: pnpm gate:decisions
+
       # AYAH_COUNTS, JUZ_STARTS and HIZB_STARTS are hand-typed numbers whose only
       # symptom when wrong is an ayah quietly filed under the wrong division —
       # in range, ascending, and false. This re-derives all three from the
       # vendored Tanzil metadata and diffs them.
       - name: Gate — the structural tables match their source
         run: pnpm gate:quran-meta
+
+      # The tajweed shards are keyed by the source's eighteen rule ids, and the
+      # file that says which colour each one paints ships beside them. A key with
+      # no entry paints nothing — no error, no blank page, just a rule that
+      # quietly stops appearing. This checks the two files agree, both ways.
+      - name: Gate — the tajweed shards and their vocabulary agree
+        run: pnpm gate:tajweed
 
       # The revision record is a log of when a person was reading Qur'an. This
       # checks the closed allow-list of modules allowed to import it is still
