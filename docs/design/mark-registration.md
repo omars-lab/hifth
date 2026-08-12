@@ -869,7 +869,9 @@ own numbers until now:
   and with that little to compare against, "exactly right" and "a fifth short" produce the same
   landings. The sitting's estimate of the correction's *scale* spans from the wrong sign to
   two and a half times too much. More trials would not fix it: the limit is the forty pages,
-  not the sixty answers.
+  not the sixty answers. **That limit has since been lifted** — the whole mus'haf has now been
+  measured, and it holds pages whose corrections differ far more widely than those forty did.
+  §⑧ says what that changes and how a sitting would have to be drawn to use it.
 
 Three explanations were tested and none of them survived, which is worth not buying a second
 time. It is **not the mark**: a separate number per mark name leaves more spread than one
@@ -886,7 +888,9 @@ of a unit spread over three hundred thousand rectangles is a move that would hav
 again the first time anybody asked how it was known. What would settle it is a second sitting
 on pages the correction was *not* fitted to, several marks on each page so the page and the
 hand can be told apart, and a second reader — whose disagreement by more than 0.03 units would
-mean this is a fact about a person and not about the print.
+mean this is a fact about a person and not about the print. **Every page that sitting needs now
+exists**, which was not true when this section was first written; what it still needs is
+somebody's half hour.
 
 The runbook is `placement-residual-by-hand` in
 [`docs/validation/ledger.json`](../validation/ledger.json); about twenty-five minutes, and it
@@ -894,27 +898,66 @@ needs no mushaf, no phone and no network either.
 
 ### ⑧ Does the correction hold on a page nobody measured · **open**
 
-The per-page correction exists for **forty pages of 604**. It was measured by sampling pages
-and requiring enough marks on each to be worth fitting, and forty was the number that sitting
-needed; the other 564 pages have no measured move at all, and the app ships rectangles on all
-of them.
+When this question was written the per-page correction existed for **forty pages of 604**. It
+had been measured by sampling pages and requiring enough marks on each to be worth fitting, and
+forty was the number that sitting needed; the other 564 pages had no measured move at all,
+while the app shipped rectangles on all of them.
 
-That is a gap in coverage, and §⑦ makes it a gap in evidence too: because a trial cannot be
+That was a gap in coverage, and §⑦ made it a gap in evidence too: because a trial cannot be
 built for a page with no proposed move, every placement a reader has ever judged came from one
-of those same forty. The correction has been checked, and it has only ever been checked where
-it was fitted. Nothing measured so far distinguishes *the print is displaced this way* from
-*these forty pages are displaced this way*.
+of those same forty. The correction had been checked, and only ever where it was fitted.
+Nothing measured then distinguished *the print is displaced this way* from *these forty pages
+are displaced this way*.
 
-The first half of the answer is arithmetic rather than judgement and needs nobody's time:
-measure all 604. The question that then decides everything after it is whether the corrections
-**vary** across the mus'haf. If they do, the size of the correction becomes measurable for the
-first time — pages needing very different moves are exactly the leverage §⑦ lacked — and a
-second sitting is worth someone's half hour. If they are all alike, one number for the whole
-print is the right model, what is left over in §⑦ is moot, and nothing more is owed.
+The first half of the answer was arithmetic rather than judgement and needed nobody's time:
+measure all 604. **That has now been done — 30,000 marks, 2026-08-12 — and the coverage half
+of this question is closed.** Six hundred pages of 604 carry a measured correction. The four
+that do not are pages 1, 2, 603 and 604, the short ornamental frames, which never carry enough
+marks to be worth fitting; they need a stated fallback rather than a silent one, and the
+average of everything else is the honest choice.
 
-The second half is a sitting on **held-out** pages: marks from pages the correction was
-measured on but which no reader has judged. That is the only thing that separates a fit from a
-finding, and it cannot be built until the first half is read.
+**The corrections do vary, and the first forty pages hid it.** Two things came out of the full
+pass, and they point in opposite directions. The forty were representative in the *middle* —
+their average correction is indistinguishable from the other 560 — which is reassuring and was
+not guaranteed. But they understated the *variation* by more than half, and worse, most of what
+variation they did show was never real: measuring those same forty pages twice, from different
+samples of their marks, disagrees by about as much as the pages differ from each other. What
+looked like forty slightly different pages was largely the same page measured noisily forty
+times, which is exactly why the sitting built on them could confirm the direction of the
+correction and never its size.
+
+Across the whole mus'haf the real variation is around a tenth of a unit — the same size as the
+leftover distance §⑦ could not settle, which is precisely why it could not be settled. And the
+variation is **not the same on both axes**: nineteen pages in twenty need a downward move
+inside the range the first forty spanned, so down behaves almost like a single number for the
+whole print. Sideways it does not. Only about half of all pages fall inside the sideways range
+the first forty covered, roughly nine pages need essentially **no** sideways move at all while
+still needing the usual downward one, and one page — 113 — wants to move the *opposite* way
+down from every other page in the book.
+
+**So the second sitting is worth someone's half hour, and it must not draw its marks at
+random.** The first forty offered about a third of a unit of difference between the largest and
+smallest move they proposed, nearly all of it noise, which is why the size came back
+undecidable. Across all 604 that span is over one and a half units. A sitting that deliberately
+takes marks from both ends of it gets several times the leverage per placement — enough to tell
+a correction that is exactly right from one that is a fifth short, which no number of
+placements on the original forty could ever have done. The handful of pages needing no sideways
+move, and page 113, are worth the most of all: they are where *one number for the whole print*
+and *a number per page* disagree most loudly, so they are where a reader's eye settles it
+fastest.
+
+The second half is still open, and it is the half only a person can answer: a sitting on
+**held-out** pages — marks from pages the correction was measured on but which no reader has
+judged. Everything a reader has judged so far came from the pages the correction was fitted to.
+That is the only thing that separates a fit from a finding, and it can be built now.
+
+One limit the full pass added rather than removed: taking each page's own displacement out
+repairs most of this error and measurably not all of it. About one mark in five is still further
+out than it should be afterwards, and the agreement reached by correcting a whole page stays
+well short of what the best placement of each individual mark would reach. Whatever that
+remainder is, it is not a per-page shift, and §⑦'s leftover distance is not the same quantity —
+that one is a further move *of* the correction, this one is scatter the correction cannot
+reach. Neither is applied.
 
 ## How can someone look at this for themselves?
 

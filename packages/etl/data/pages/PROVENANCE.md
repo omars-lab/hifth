@@ -112,25 +112,45 @@ extraction and must reproduce it byte-identically.
   confused. `.claude/skills/mushaf-reference/SKILL.md` carries the rest — which
   published references can stand in for paper, and which are a different qira'a or
   a different revision and will make a correct pair look wrong.
-- **The marks on these pages are drawn about a unit out of place, and the
-  correction covers 6.6% of them — measured 2026-08-12.** The word geometry above
-  transfers cleanly; the *diacritic* boxes carried onto this frame by the same fit
-  do not. `probe-mark-ink.mjs` scores each mark's rectangle against the ink under
-  it and against three deliberately wrong placements, and as shipped a claimed
-  placement loses to a wrong one: **separation −0.242**, only 12.70% of marks
-  beating their own null. The error is a shift of **0.79 across and 1.07 down** on
-  marks 5.6 × 3.6, the same direction on every page sampled, and taking each page's
-  own shift out lifts achievable overlap to 0.901–0.912 everywhere. A reader has
-  since confirmed the direction by hand: of 60 marks placed, **59 landed nearer the
-  corrected rectangle** than the one the app draws today (98.3%, interval
-  91.1–99.7).
-  **The number to carry away, though, is the coverage.** The probe samples marks and
-  discards any page that got too few to fit, so 4,000 sampled marks produced a
-  correction for **40 pages of 604 (6.6%)** — and because a by-eye trial cannot be
-  built for a page with no proposed move, all 60 of those placements came from the
-  same 40. Nothing measured so far separates *this print is displaced* from *these
-  forty pages are displaced*, and nothing here should be applied to the other 564
-  until a full pass exists. The unresolved remainder — a further tenth of a unit,
-  which does not clear nothing once the pages rather than the placements are
-  counted — is **not** applied. `docs/design/mark-registration.md` §⑦ and §⑧ carry
-  the reasoning, `docs/validation/rulings/` the answers the reader gave.
+- **The marks on these pages are drawn about a unit out of place, and every page
+  but four now carries its own correction — measured 2026-08-12.** The word
+  geometry above transfers cleanly; the *diacritic* boxes carried onto this frame
+  by the same fit do not. `probe-mark-ink.mjs` scores each mark's rectangle against
+  the ink under it and against three deliberately wrong placements, and as shipped
+  a claimed placement loses to a wrong one. Over **30,000 marks on all 604 pages**:
+  separation **−0.234**, only **13.50%** of marks beating their own null, 96.41%
+  sitting further than 0.75 units from their best fit, median overlap with the ink
+  **0.017** against an achievable 0.909. The error is a shift of **0.81 across and
+  1.06 down** on marks 5.6 × 3.6, the same direction everywhere.
+
+  **Taking each page's own displacement out is most of the repair, and measurably
+  not all of it.** Corrected, separation goes −0.234 → **+0.281**, marks beating
+  their null 13.5% → **75.7%**, blank rectangles 1.31% → 0.18%, median overlap
+  0.017 → 0.492. But **19.49%** of marks are still further than 0.75 units off, and
+  the corrected median overlap is 0.492 against the 0.909 a per-mark best fit
+  reaches — so a single translation per page is a good model of this error and not
+  a complete one. Whatever remains is not a page-level shift.
+
+  **Coverage: 600 pages of 604.** The probe discards any page that drew too few
+  marks to fit, and pages **1, 2, 603 and 604** — the short ornamental frames —
+  never clear that floor. They have no measured correction, and a page with no row
+  was never looked at rather than found to be right.
+
+  **The first pass covered 40 pages, and the difference is instructive.** Those 40
+  turned out to be representative in the *centre* — their mean correction is
+  indistinguishable from the other 560 (t = −0.1 across, −1.2 down) — but they badly
+  understated the *spread*: page-to-page sd 0.107/0.097 against 0.172/0.165 over the
+  rest, and scoring the same 40 pages twice from different samples disagrees by
+  about as much as those pages differ from each other. So nearly all the variation
+  visible in the first pass was measurement noise, which is why the sitting built on
+  it could confirm the correction's direction and never its size.
+
+  A reader confirmed that direction by hand: of 60 marks placed, **59 landed nearer
+  the corrected rectangle** than the one the app draws today (98.3%, interval
+  91.1–99.7). All 60 came from those same 40 pages, because a by-eye trial can only
+  be built for a page that has a proposed move — so the by-hand result is still
+  untested on a page nobody had measured. The unresolved remainder — a further tenth
+  of a unit, which does not clear nothing once the pages rather than the placements
+  are counted — is **not** applied. `docs/design/mark-registration.md` §⑦ and §⑧
+  carry the reasoning, `docs/validation/rulings/` the answers the reader gave and
+  the displacements they were given about.
