@@ -37,19 +37,33 @@ The trials are not stored in the file — only the answers, keyed by index and t
 seed is what rebuilds the trial list, so the seed is what makes an answer mean anything. A
 ruling separated from its seed is a column of numbers.
 
+The file a session hands back carries the seed in *its* name too, and a narrowed session adds
+the page fingerprint after it. That is not the naming convention above — it is what lands in a
+downloads folder before anybody renames it — and it exists because two sittings under one seed
+that asked about different pages would otherwise arrive as the same file, where the browser
+appends a number and nothing on the outside of either says which is which.
+
 The file also carries the fingerprint of the displacements it was placed against
 (`shiftFingerprint`), and both scorers refuse to read a ruling against a different set. That
 is deliberate: silently scoring yesterday's answers against today's measurement is the one
 way this could go wrong without anybody noticing.
 
-A placing session built on a **subset** of pages carries a second thing: the ordered list of
-pages it was allowed to draw from, and a fingerprint of that list (`select`). The scorer
-replays that list instead of choosing again, for the reason the seed exists at all — the trial
-list is rebuilt, not stored, and a rebuild that narrowed the pages differently would put every
-trial index against a different mark while nothing threw. It refuses on that fingerprint too,
-and refuses a third time if the displacements it is handed carry no row for a page the sitting
-used. That last check is not redundant with the first: a file can carry the right fingerprint
-and still be the wrong file for these pages, and the error message says so in those words.
+A session built on a **subset** of pages — either kind — carries a second thing: the ordered
+list of pages it was allowed to draw from, and a fingerprint of that list (`select`). The
+scorer replays that list instead of choosing again, for the reason the seed exists at all — the
+trial list is rebuilt, not stored, and a rebuild that narrowed the pages differently would put
+every trial index against a different mark while nothing threw. It refuses on that fingerprint
+too, and refuses a third time if the displacements it is handed carry no row for a page the
+sitting used. That last check is not redundant with the first: a file can carry the right
+fingerprint and still be the wrong file for these pages, and the error message says so in those
+words.
+
+Both kinds can be narrowed, and they narrow differently on purpose. A placing session wants the
+pages where the proposed move is largest and smallest, because it is estimating *how far* and
+that is bought with leverage. A forced choice only ever asks which of two rectangles is closer,
+so it takes an even walk through the print instead: it has no leverage to gain and it would
+lose the one thing its headline claims, which is that the number is about the mus'haf rather
+than about its strangest pages.
 
 ## Why some of them also name a person
 

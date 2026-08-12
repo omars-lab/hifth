@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" data-ledger-hash="b68a674c3716">
+<html lang="en" data-ledger-hash="d274d38e5199">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -127,7 +127,7 @@ li.struck .expect::before { content: "machine "; color: var(--green); }
   <p class="rule">Every result here must tighten something automated — a threshold, a
   fixture, a gate. That is what <b>tunes</b> is for at the foot of each card. A verdict
   that tunes nothing has to be bought again by hand, forever.</p>
-  <p class="src">Generated from <code>docs/validation/ledger.json</code> · <code>b68a674c3716</code>
+  <p class="src">Generated from <code>docs/validation/ledger.json</code> · <code>d274d38e5199</code>
   · never edit this file — run <code>make guide</code></p>
 </header>
 
@@ -687,7 +687,7 @@ li.struck .expect::before { content: "machine "; color: var(--green); }
     <p class="id"><code>placement-correction-by-eye</code> · blocks <b>mark-C</b></p>
   </div>
 
-  <p class="why">The measurement says nearly every mark rectangle sits about a letter away from its own ink, and that one number per page fixes it. Only arithmetic has ever said so, and it marked its own homework: the rasteriser that found the displacement is the rasteriser that scores the correction. Nobody has looked at a single verdict. Until somebody does, the thresholds in the placement record stay unenforced, and nothing that points at a mark can ship — which is the whole reason to hold three hundred thousand rectangles.</p>
+  <p class="why">The measurement says nearly every mark rectangle sits about a letter away from its own ink, and that one number per page fixes it. Only arithmetic has ever said so, and it marked its own homework: the rasteriser that found the displacement is the rasteriser that scores the correction. Nobody has looked at a single verdict. Until somebody does, the thresholds in the placement record stay unenforced, and nothing that points at a mark can ship — which is the whole reason to hold three hundred thousand rectangles. And the hundred trials are drawn from pages the correction was never fitted on, because a correction asked about the pages it was fitted to answers a question nobody needed: it will ship on all six hundred and four.</p>
   
 
   
@@ -697,59 +697,64 @@ li.struck .expect::before { content: "machine "; color: var(--green); }
   </section>
   <section class="block">
     <h3>Setup — on the laptop</h3>
-    <pre class="cmd">node packages/etl/scripts/probe-mark-ink.mjs --sample 4000 --seed 7 --pages-n 40</pre>
-    <p class="expect">About fifty seconds, ending in a failure code — that is expected, and it is the reason this check exists. It writes packages/etl/out/mark-shift.json: one measured displacement for each of forty pages. That file is the thing on trial.</p>
-<pre class="cmd">pnpm adjudicate:marks --seed 11 --count 100</pre>
-    <p class="expect">packages/etl/out/mark-adjudication.html in about a second, and a line naming the seed, how many pages the trials spread over, and a short fingerprint of the displacements. Note the fingerprint. Open the file in any browser — it needs nothing running, and it reaches no network.</p>
+    <pre class="cmd">pnpm adjudicate:marks --seed 11 --count 100 --shift docs/validation/rulings/mark-shift.604pages.c849e72d.json --exclude docs/validation/rulings/mark-shift.40pages.c8528da9.json --pages 40 --out packages/etl/out/mark-adjudication.heldout.html</pre>
+    <p class="expect">A line reading 40 of 600 measured, 40 held out · even, then a hundred trials over forty pages in about a second, and two short fingerprints — one for the corrections, one for the pages. Note both. It writes the page and a companion file of the same name ending .pages.json. Open the page in any browser: it needs nothing running and it reaches no network.</p>
   </section>
 
   <section class="block">
     <h3>Steps — on the phone</h3>
     <ol class="steps">
       <li>
-        <label class="do"><input type="checkbox" data-step="placement-correction-by-eye:0"><span>Read the five short answers the page opens with, then start. Do not read the code that built it first.</span></label>
+        <label class="do"><input type="checkbox" data-step="placement-correction-by-eye:0"><span>If you are also going to sit the placing session, sit this one first.</span></label>
+        <p class="expect">Nothing to run. It is an order, not a command.</p>
+        
+        <p class="why">The placing session shows the same rectangles and invites you to drag them onto the mark, which is the most effective possible way to learn where our correction tends to sit. Come to these hundred trials afterwards and you are answering from that lesson rather than from the ink, and the count that comes out is a measure of how well you learned it. The reverse order costs nothing: knowing which of two rectangles you preferred does not tell you where to drag anything.</p>
+        
+      </li>
+      <li>
+        <label class="do"><input type="checkbox" data-step="placement-correction-by-eye:1"><span>Read the five short answers the page opens with, then start. Do not read the code that built it first.</span></label>
         <p class="expect">A first trial: one mark, drawn twice side by side, a rectangle on each, and two keys.</p>
         
         <p class="why">The trials are built so that nothing on the screen says which rectangle is ours, and the answers exist nowhere until the scorer runs. Reading the builder first is the one way to spoil that, and there is no way to unspoil it — the session would have to be thrown away and rebuilt under a seed you had not seen.</p>
         
       </li>
       <li>
-        <label class="do"><input type="checkbox" data-step="placement-correction-by-eye:1"><span>For each trial pick the panel whose rectangle sits on the mark — A or B — or press space when you honestly cannot tell.</span></label>
+        <label class="do"><input type="checkbox" data-step="placement-correction-by-eye:2"><span>For each trial pick the panel whose rectangle sits on the mark — A or B — or press space when you honestly cannot tell.</span></label>
         <p class="expect">No feedback, ever: the next trial, and a bar creeping along. Some pairs are obvious. Most are not, and a few are the same rectangle twice, where space is the only honest answer.</p>
         
         <p class="why">Feedback would turn this into training. Within twenty trials a person who is told they were right learns which way the corrected box tends to sit and answers from that rule rather than from the ink, and the count that comes out measures how well they learned it. Space is not a wasted trial: it is left out of the arithmetic rather than counted as a miss, so guessing to keep the tally up is the one thing that would cost you.</p>
         
       </li>
       <li>
-        <label class="do"><input type="checkbox" data-step="placement-correction-by-eye:2"><span>When the mark pokes out of both rectangles, press N to say neither closes around it — and then still pick whichever of the two is closer.</span></label>
+        <label class="do"><input type="checkbox" data-step="placement-correction-by-eye:3"><span>When the mark pokes out of both rectangles, press N to say neither closes around it — and then still pick whichever of the two is closer.</span></label>
         <p class="expect">The tick lights up and clears itself on the next trial. It changes nothing else on the screen, and it never skips the trial.</p>
         
         <p class="why">A rectangle can be in the right place and still be the wrong size, and this whole session is about where they sit. Those are two faults with two different repairs, so a fourth button meaning 'wrong somehow' would blend them into one count nobody could act on — and it would eat the trials that still carry a usable answer, because which of two wrong rectangles is closer is a question you can answer. The tick is counted on its own line and the marks you tick are named, so somebody can go and look at those boxes rather than argue about whether they exist.</p>
         
       </li>
       <li>
-        <label class="do"><input type="checkbox" data-step="placement-correction-by-eye:3"><span>Stop whenever you are tiring. Close the tab and come back to the same file later.</span></label>
+        <label class="do"><input type="checkbox" data-step="placement-correction-by-eye:4"><span>Stop whenever you are tiring. Close the tab and come back to the same file later.</span></label>
         <p class="expect">It resumes on the trial you left, with the answers you already gave. Nothing reshuffles.</p>
         
         <p class="why">Pushing through a hundred trials tired means the last thirty are answered from fatigue, and in the numbers fatigue is indistinguishable from 'the correction does not help' — it would read as a finding about our data rather than about the hour.</p>
         
       </li>
       <li>
-        <label class="do"><input type="checkbox" data-step="placement-correction-by-eye:4"><span>At the end, press the button that saves the ruling, and keep the file somewhere you can name on a command line.</span></label>
-        <p class="expect">mark-ruling-11.json in your downloads. It holds your answers, the seed, and the fingerprint — and no key, because there still isn't one.</p>
+        <label class="do"><input type="checkbox" data-step="placement-correction-by-eye:5"><span>At the end, press the button that saves the ruling, and keep the file somewhere you can name on a command line.</span></label>
+        <p class="expect">mark-ruling-11.28042a4d.json in your downloads. It holds your answers, the seed, and both fingerprints — and no key, because there still isn't one. The second half of the name is the page list: two sittings under this seed that asked about different pages are different sittings, and without it they arrive in the same folder as the same file.</p>
         
         <p class="why">The ruling is deliberately worthless on its own. That is what makes it evidence: it could not have been edited towards an answer, because at the moment it was written nothing on the machine knew what the answers were.</p>
         
       </li>
       <li>
-        <label class="do"><input type="checkbox" data-step="placement-correction-by-eye:5"><span>Score it: pnpm adjudicate:score ~/Downloads/mark-ruling-11.json</span></label>
+        <label class="do"><input type="checkbox" data-step="placement-correction-by-eye:6"><span>Score it: pnpm adjudicate:score ~/Downloads/mark-ruling-11.28042a4d.json --shift docs/validation/rulings/mark-shift.604pages.c849e72d.json</span></label>
         <p class="expect">Four lines with intervals — as shipped, the decoy, the catches, twins — then, if you ticked any, how many marks poked out of both rectangles and the headline again without them. One sentence of verdict at the end. It exits 0 only when the session was valid and the corrected rectangle actually won.</p>
         
-        <p class="why">This is the first moment anyone knows what the right answers were, you included. If it refuses outright, the displacements were re-measured between building the page and scoring it: score against the file it was built from, or build a fresh session and work it again. A ruling scored against displacements it was not worked against comes out looking clean and means nothing.</p>
+        <p class="why">This is the first moment anyone knows what the right answers were, you included. The corrections have to be named because the ones sitting loose in the build directory are whatever was measured last, and this sitting was built from a particular committed file. If it refuses outright, that is the two of them disagreeing: score against the file it was built from, or build a fresh session and work it again. A ruling scored against corrections it was not worked against comes out looking clean and means nothing.</p>
         
       </li>
       <li>
-        <label class="do"><input type="checkbox" data-step="placement-correction-by-eye:6"><span>Bank the verdict with the record command below, whichever way it went.</span></label>
+        <label class="do"><input type="checkbox" data-step="placement-correction-by-eye:7"><span>Bank the verdict with the record command below, whichever way it went.</span></label>
         <p class="expect">The ledger gains the four numbers and the date, and this check stops being pending.</p>
         
         <p class="why">A refusal is worth as much here as a confirmation and is far more likely to be dropped on the floor. 'A person looked and did not prefer our correction' is the single most valuable sentence this project could learn about the mark layer, and it is unrecoverable a week later if nobody wrote the numbers down.</p>
@@ -760,12 +765,12 @@ li.struck .expect::before { content: "machine "; color: var(--green); }
 
   <section class="block">
     <h3>Reading the result</h3>
-    <ul class="bullets"><li>'The correction is supported' → adopt the per-page displacement. The two numbers per page get recorded beside the fit, and the measurement's thresholds become something a gate is allowed to enforce, which is the change this check unlocks.</li><li>'NOT supported, and the decoys say why' → the strongest result this can produce, and the reason it is worth twenty minutes. It means you could see a shift of that size perfectly well and still did not prefer ours: our correction is wrong, not the test blunt. Do not adopt it, and say so in the placement record — a rejected option with a measured reason is a settled question.</li><li>'cannot see a shift this small' → the session says nothing about the correction either way. Try once more with bigger panels (--panel 640). If the decoys still do not clear half, the difference is below what an eye resolves at this size and no number of trials will change that; the case for the correction then rests entirely on the ink arithmetic and its control, and that is what the record should say rather than pretending this was run.</li><li>'SESSION INVALID' or 'SUSPECT' → discard it and do not argue with it. The catches are rectangles a whole letter off their mark and everyone gets those right while looking; missing them means the session was worked while distracted. Rerun under a different seed, which draws different marks in a different order.</li><li>A run of 'neither box closed on it' is a second finding, and it does not change the verdict above — it starts a different question. The rectangles come from one printing and the ink from another, so a box can arrive in the right place and the wrong size, and no amount of moving it will help. If the count is more than a handful, open the named marks in the encoding inspector and compare the box against the ink before adopting anything; the repair is a re-measurement, not a displacement.</li><li>One session is one person. If the verdict is going to decide whether marks ship, a second reader under a different seed costs another twenty minutes and turns one person's eyes into a result — and two people disagreeing is itself the finding.</li></ul>
+    <ul class="bullets"><li>'The correction is supported' → adopt the per-page displacement. The two numbers per page get recorded beside the fit, and the measurement's thresholds become something a gate is allowed to enforce, which is the change this check unlocks.</li><li>'NOT supported, and the decoys say why' → the strongest result this can produce, and the reason it is worth twenty minutes. It means you could see a shift of that size perfectly well and still did not prefer ours: our correction is wrong, not the test blunt. Do not adopt it, and say so in the placement record — a rejected option with a measured reason is a settled question.</li><li>'cannot see a shift this small' → the session says nothing about the correction either way. Try once more with bigger panels (--panel 640). If the decoys still do not clear half, the difference is below what an eye resolves at this size and no number of trials will change that; the case for the correction then rests entirely on the ink arithmetic and its control, and that is what the record should say rather than pretending this was run.</li><li>'SESSION INVALID' or 'SUSPECT' → discard it and do not argue with it. The catches are rectangles a whole letter off their mark and everyone gets those right while looking; missing them means the session was worked while distracted. Rerun under a different seed, which draws different marks in a different order.</li><li>A run of 'neither box closed on it' is a second finding, and it does not change the verdict above — it starts a different question. The rectangles come from one printing and the ink from another, so a box can arrive in the right place and the wrong size, and no amount of moving it will help. If the count is more than a handful, open the named marks in the encoding inspector and compare the box against the ink before adopting anything; the repair is a re-measurement, not a displacement.</li><li>One session is one person. If the verdict is going to decide whether marks ship, a second reader under a different seed costs another twenty minutes and turns one person's eyes into a result — and two people disagreeing is itself the finding.</li><li>Whichever way it goes, it goes for the whole print and not for forty pages. Every mark here is on a page the correction was fitted without, so a 'supported' is a statement about pages nobody had looked at, which is the only kind worth having before shipping this on all six hundred and four. Write the held-out pages into the result: a reader a year from now cannot tell from a percentage which question it answered.</li></ul>
   </section>
 
   <section class="block record">
     <h3>Record it</h3>
-    <pre class="cmd">make record CHECK=placement-correction-by-eye RESULT='seed 11 · 100 trials · as shipped &lt;pct&gt; [&lt;lo&gt;–&lt;hi&gt;], decoy &lt;pct&gt;, catches &lt;pct&gt;, twins &lt;pct&gt; → &lt;supported|not supported|says nothing&gt;'</pre>
+    <pre class="cmd">make record CHECK=placement-correction-by-eye RESULT='seed 11 · 100 trials over 40 held-out pages · as shipped &lt;pct&gt; [&lt;lo&gt;–&lt;hi&gt;], decoy &lt;pct&gt;, catches &lt;pct&gt;, twins &lt;pct&gt; → &lt;supported|not supported|says nothing&gt;'</pre>
     <p class="tunes-lead">Then do what it tunes:</p>
     <ul class="tunes"><li>packages/etl/data/pages/word-boxes.pin.json — a supported correction is two more numbers per page recorded there. This is the artifact the check exists to release.</li><li>packages/etl/scripts/probe-mark-ink.mjs — its thresholds exit non-zero today and are wired into nothing. A verdict here is the named prerequisite for turning them into a gate.</li><li>docs/design/mark-registration.md §⑦ — the recommendation is provisional pending exactly this, and §⑩ ① is this question.</li><li>packages/etl/scripts/lib/adjudication.mjs — an invalid session tunes the mix of trials, not the conclusion about the marks.</li></ul>
     <p class="expect">Written up in docs/design/mark-registration.md</p>

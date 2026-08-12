@@ -739,9 +739,25 @@ named so somebody can go and look at those boxes, and the headline's denominator
 A run of them is a finding about extent, and it belongs in §④ with the residuals rather than
 here.
 
+One thing about it changed after §⑧, and it changed for a reason that had nothing to do with
+the question and everything to do with which pages could be asked about. A trial cannot be
+built for a page with no proposed move, so while the measurement covered forty pages, every
+question this session could put came from one of the forty the correction had been fitted to.
+A hundred trials would have bought a very precise answer about the pages the correction was
+made from, and the correction is going to ship on all six hundred and four. Now the trials are
+drawn from forty pages the fit has never seen, spread evenly through the print rather than
+taken from its extremes — the placing session wants the extremes because it is measuring how
+far, and this one is only ever asking which of two is closer, so what it has to lose by
+bunching at the ends is being about the mus'haf at all.
+
 The runbook is `placement-correction-by-eye` in
 [`docs/validation/ledger.json`](../validation/ledger.json); it takes about twenty minutes and
-needs no mushaf, no phone and no network.
+needs no mushaf, no phone and no network. If the same person is going to sit the placing
+session as well, this one goes first: dragging rectangles onto marks for twenty minutes is the
+most efficient way there is to learn where our correction tends to sit, and a reader who has
+learned it is answering these hundred trials from the rule rather than from the ink. The
+reverse order costs nothing, because knowing which of two rectangles you preferred does not
+tell you where to drag anything.
 
 ### ② Is there anything stopping the correction going stale · **open**
 
@@ -1056,20 +1072,30 @@ only honest answer. The scorer reports all four numbers, and refuses to score at
 displacements were re-measured after the page was built.
 
 ```
-node packages/etl/scripts/probe-mark-ink.mjs --sample 4000 --seed 7 --pages-n 40
-pnpm adjudicate:marks --seed 11 --count 100
-# work packages/etl/out/mark-adjudication.html in a browser, save the ruling it offers
+pnpm adjudicate:marks --seed 11 --count 100 \
+  --shift docs/validation/rulings/mark-shift.604pages.c849e72d.json \
+  --exclude docs/validation/rulings/mark-shift.40pages.c8528da9.json --pages 40 \
+  --out packages/etl/out/mark-adjudication.heldout.html
+# work that page in a browser, save the ruling it offers
 # then move it into docs/validation/rulings/ and score it from there
-pnpm adjudicate:score docs/validation/rulings/<the file you just moved>
+pnpm adjudicate:score docs/validation/rulings/<the file you just moved> \
+  --shift docs/validation/rulings/mark-shift.604pages.c849e72d.json
 ```
 
-**Read the first of those four lines carefully, because everything after it inherits its
-limit.** Forty pages is not a setting chosen for speed; it is the extent of the correction as
-it stood when that session was built. A session can only offer a mark on a page that has a
-proposed move, so every by-eye answer given up to that point was about those forty. §⑧ is that
-question. A fuller pass writes to its own file rather than over this one — the answers of a
-session already being worked are attached to the displacements it was built from, and both
-scorers refuse a ruling whose displacements have moved underneath it.
+**Read the middle line carefully, because everything else inherits what it decides.** A session
+can only offer a mark on a page that has a proposed move, so for as long as the correction
+covered forty pages, every by-eye answer anybody could give was about those forty — the pages
+the correction was fitted to. That is the same limit §⑧ exists to fix for the placing session,
+and it applies here just as hard: the correction is going to ship on six hundred and four
+pages, so the useful question is whether a reader prefers it on pages the fit has never seen.
+Holding out the fitted forty and keeping forty of the rest is what those two flags do.
+
+Both commands name the corrections file rather than taking whatever is loose in the build
+directory, and they name the same one. A ruling's answers belong to the displacements it was
+worked against; both scorers refuse a ruling whose displacements have moved underneath it, and
+the scorer refuses a second time if the file it is handed has no row for a page the sitting
+actually used — a file can carry the right fingerprint and still be the wrong file for these
+pages.
 
 That fuller pass has since run over all 604 pages, so a session can now be built on pages the
 correction was never checked against: the placing builder takes the pages to draw from as an
@@ -1103,8 +1129,16 @@ readable without them.
   no answer key is ever written down.
 - `packages/etl/scripts/build-mark-adjudication.mjs` — renders that session to one page,
   carrying no verdicts, no answers and a fingerprint of the displacements it was built from.
+  `--exclude` names the sittings or fits whose pages must be held out and `--pages` how many of
+  the rest to keep, both handed to `selectPages` with `even` rather than `extremes`; the list it
+  settles on goes into the page's own head with its own fingerprint, and that fingerprint is
+  folded into the resume key and the download name, because two sittings from one seed that
+  asked about different pages would otherwise share both.
 - `packages/etl/scripts/score-mark-adjudication.mjs` — rebuilds the key from the seed and
-  reports the four numbers. This is the first moment anybody knows what the answers were.
+  reports the four numbers. This is the first moment anybody knows what the answers were. It
+  replays the recorded page list rather than choosing again: the trials are rebuilt here, so a
+  session narrowed at build time and scored unnarrowed would put every trial index against a
+  different mark and throw nothing.
 - `packages/etl/scripts/lib/marks.mjs` — one reader for a page's marks, shared by the
   measurement and the session so the two cannot disagree about what a mark is.
 - `packages/etl/scripts/lib/adjudication.mjs`, `planNudge` — the placing session: which
