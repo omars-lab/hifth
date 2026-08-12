@@ -1128,7 +1128,19 @@ writeFileSync(outPath, surface());
  *
  * It lands beside the evidence page, which is not checked in. Nothing reads it
  * at build time and nothing in the app knows it exists.
+ *
+ * `coverage` is the field to read before any of the numbers under it. This file
+ * describes a SAMPLE of pages: `--sample` sets how many marks are drawn and
+ * `minMarksPerPage` throws away any page that got too few to fit, so a row here
+ * means "measured" and a page with no row means "never looked at". The default
+ * run reaches forty of six hundred and four, and until this field existed
+ * nothing downstream could tell — which mattered more than it sounds, because
+ * a by-eye trial can only be built for a page that HAS a proposed move, so both
+ * sessions asked their questions exclusively about the pages the correction was
+ * already fitted to. A reader of this file should be able to see that without
+ * being told.
  */
+const MUSHAF_PAGES = 604;
 const SHIFT_OUT = arg("--shift-out", join(dirname(outPath), "mark-shift.json"));
 writeFileSync(
   SHIFT_OUT,
@@ -1141,6 +1153,14 @@ writeFileSync(
       seed,
       sampled: nAll,
       minMarksPerPage: 20,
+      coverage: {
+        measured: perPageShift.size,
+        ofMushaf: MUSHAF_PAGES,
+        pct: Number(((100 * perPageShift.size) / MUSHAF_PAGES).toFixed(1)),
+        pagesOpened: pagesDrawn ?? report.pages,
+        pagesInCache: cached.length,
+        note: "a page with no row below has no measured correction; it was not looked at, not found to be right",
+      },
       shifts: [...perPageShift.entries()]
         .sort((a, b) => a[0] - b[0])
         .map(([page, s]) => ({ page, dx: Number(s.dx.toFixed(4)), dy: Number(s.dy.toFixed(4)), n: s.n })),
