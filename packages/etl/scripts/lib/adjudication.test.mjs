@@ -189,6 +189,42 @@ describe("planNudge", () => {
     expect(pages).toBe(shifts.length);
   });
 
+  it("carries which mark it means, so a trial is never about whichever one you picked", () => {
+    // A crop of print holds several marks and often two of the same name. If the
+    // trial cannot say which, a reader either guesses or places the rectangle on
+    // the wrong one — and a placement on the wrong mark is a whole-letter error
+    // that would be scored as a registration error. The identification has to
+    // travel with the trial, not be recoverable from it later.
+    const named = {
+      marksFor: (page) =>
+        io.marksFor(page).map((mk, k) => ({
+          ...mk,
+          lig: { text: "AB", letters: ["M0 0", "M1 1"] },
+          nth: (k % 2) + 1,
+          of: 2,
+        })),
+      inkFor: io.inkFor,
+    };
+    for (const t of planNudge({ seed: 5, count: 60, shifts, io: named }).trials) {
+      expect(t.lig).toEqual({ text: "AB", letters: ["M0 0", "M1 1"] });
+      expect(t.of).toBe(2);
+      expect([1, 2]).toContain(t.nth);
+    }
+  });
+
+  it("still says something about a mark the corpus placed inside no ligature", () => {
+    // The fixture above has none of the identification fields, which is the
+    // shape a mark drawn under a word but outside every ligature group arrives
+    // in. The page must still be buildable from it: one of one, no letters, and
+    // the builder says so in words rather than pointing at a tint that is not
+    // there.
+    for (const t of nudge().trials) {
+      expect(t.lig).toBe(null);
+      expect(t.nth).toBe(1);
+      expect(t.of).toBe(1);
+    }
+  });
+
   it("refuses rather than shortening when there are not enough marks with ink under the box", () => {
     expect(() => planNudge({ seed: 5, count: 600, shifts: shifts.slice(0, 1), io })).toThrow(/passed the ink floor/);
   });

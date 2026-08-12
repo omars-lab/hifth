@@ -185,6 +185,46 @@ export function readDiacritics(svg, apply) {
 }
 
 /**
+ * Which ligature each mark in a word segment was drawn inside, keyed by the
+ * mark's own path tag.
+ *
+ * A mark's *identity* — which of the several marks in a crop of print somebody
+ * is being asked about — is not the same question as its position, and only the
+ * ligature can answer it: the corpus draws a mark inside the group that draws
+ * the letters it sits on, and `data-text` names those letters. Without this a
+ * tool can say "a fatha, somewhere in this word" and a person looking at a word
+ * with three fathas in it has been told nothing.
+ *
+ * Keyed by the whole path tag rather than by an index. The tag carries the
+ * mark's `d`, and two marks in one word with byte-identical outlines would have
+ * to be drawn exactly on top of each other, so the key is unique in practice
+ * while an index into a document-order walk would silently mis-attribute a mark
+ * drawn under a word but outside every ligature.
+ */
+function ligaturesByMark(seg) {
+  const byTag = new Map();
+  for (const g of seg.matchAll(LIGATURES)) {
+    const letters = [];
+    const texts = [];
+    const marks = [];
+    for (const p of g[2].matchAll(PATHS)) {
+      const d = attr(p[0], "d");
+      if (d === null) continue;
+      if (attr(p[0], "data-diacritic") !== null) {
+        marks.push(p[0]);
+        continue;
+      }
+      letters.push(d);
+      const t = attr(p[0], "data-text");
+      if (t !== null) texts.push(unescapeXml(t));
+    }
+    const lig = { text: texts.join(""), letters };
+    for (const tag of marks) byTag.set(tag, lig);
+  }
+  return byTag;
+}
+
+/**
  * The same marks, as the outlines that drew them, in their own frame.
  *
  * `readDiacritics` returns rectangles, because a rectangle is what a shard
@@ -208,8 +248,15 @@ export function readDiacritics(svg, apply) {
  * which is the only thing that makes the assertion meaningful: two walks with
  * two ideas of where a word ends would agree about nothing worth agreeing about.
  *
+ * `lig` is the ligature the mark was drawn inside — the letters it sits on, and
+ * the paths that drew them — or `null` for a mark the corpus placed under a word
+ * but outside every ligature group. It is here rather than in a reader of its
+ * own because it is the same walk: a second pass looking for the letters would
+ * be a second idea of where a word ends, which is the drift this file's header
+ * is about.
+ *
  * @param {string} svg a ligature-corpus page, verbatim
- * @returns {{ name: string, d: string }[]}
+ * @returns {{ name: string, d: string, lig: { text: string, letters: string[] } | null }[]}
  */
 export function readMarkOutlines(svg) {
   const out = [];
@@ -217,12 +264,13 @@ export function readMarkOutlines(svg) {
     const rest = svg.slice(m.index + m[0].length);
     const nxt = rest.match(BOUNDARY);
     const seg = nxt ? rest.slice(0, nxt.index) : rest;
+    const ligs = ligaturesByMark(seg);
     for (const p of seg.matchAll(PATHS)) {
       const name = attr(p[0], "data-diacritic");
       if (name === null) continue;
       const d = attr(p[0], "d");
       if (d === null) continue;
-      out.push({ name, d });
+      out.push({ name, d, lig: ligs.get(p[0]) ?? null });
     }
   }
   return out;
