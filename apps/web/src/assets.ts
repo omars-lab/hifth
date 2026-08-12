@@ -16,10 +16,11 @@ import type {
   PackPlan,
   RootIndexShard,
   TajweedShard,
+  TajweedVocabulary,
   WireManifest,
   WordShard,
 } from "@hifth/core";
-import { expandManifest, isCompactManifest } from "@hifth/core";
+import { expandManifest, isCompactManifest, parseTajweedVocabulary } from "@hifth/core";
 import { packedResponse } from "./packs.js";
 
 const BASE = import.meta.env.BASE_URL;
@@ -158,6 +159,28 @@ export function loadTajweedShard(
   surah: number,
 ): Promise<TajweedShard | null> {
   return json<TajweedShard>(`${BASE}assets/skins/${edition}/tajweed/${surah}.json`);
+}
+
+/**
+ * Fetch the vocabulary the shards are written in — every rule id they can
+ * contain, and which of the seven families it paints as.
+ *
+ * Eighteen lines, fetched once per session, and nothing paints until it lands:
+ * a shard on its own is offsets keyed by strings this app has deliberately never
+ * been taught. That round trip is the price of the shards no longer carrying
+ * their own interpretation, and it buys the thing the old shape made impossible
+ * — knowing an ikhfa from a ghunnah on the far side of the build.
+ *
+ * Validated rather than cast, unlike the shards above, because it is the file
+ * everything else is interpreted through: a shard with a stray key paints one
+ * ayah oddly, a vocabulary with a stray family would paint a class nothing
+ * styles across the whole mus'haf. Quiet on a miss, like its neighbours.
+ */
+export async function loadTajweedVocabulary(
+  edition: string,
+): Promise<TajweedVocabulary | null> {
+  const raw = await json<unknown>(`${BASE}assets/skins/${edition}/tajweed/rules.json`);
+  return raw === null ? null : parseTajweedVocabulary(raw);
 }
 
 /**

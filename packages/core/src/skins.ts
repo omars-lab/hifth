@@ -128,8 +128,9 @@ export function tajweedMarkClass(id: TajweedRuleId): string {
 /* ------------------------------------------------------------------ */
 
 /**
- * One surah's tajweed shard: ayah number (as a string key) → rule id → a FLAT
- * list of `[start, end, start, end, …]` character spans, ascending by start.
+ * One surah's tajweed shard: ayah number (as a string key) → the *source's own*
+ * rule id → a FLAT list of `[start, end, start, end, …]` character spans,
+ * ascending by start.
  *
  * The offsets are codepoint offsets *within that ayah's* Uthmani text, kept
  * exactly as the source publishes them so the shard is a lossless projection of
@@ -139,18 +140,90 @@ export function tajweedMarkClass(id: TajweedRuleId): string {
  * until then the only thing read off them is how many times a rule occurs —
  * which is why they are stored anyway rather than collapsed to a count. Throwing
  * them away would make the shards cheaper to ship and impossible to grow.
+ *
+ * **The keys are the source's vocabulary, not this file's.** They used to be the
+ * seven family ids below, which meant a span reached the reader having forgotten
+ * whether it was an ikhfa or a ghunnah — a collapse that happened at build time
+ * and could not be undone on the far side of it. It now happens when the page is
+ * painted, so a reader who wants those two coloured differently can have that,
+ * and a legend can count what it actually saw. Which family a rule paints as is
+ * data, shipped beside the shards: {@link TajweedVocabulary}.
  */
 export interface TajweedShard {
   readonly [ayah: string]: { readonly [rule: string]: readonly number[] };
 }
 
-/** One rule's presence on one ayah. */
+/**
+ * The vocabulary the shards are written in: every rule id they can contain, and
+ * which of the seven families it paints as.
+ *
+ * This exists so that {@link TajweedRuleId} can stay what its comment claims —
+ * the families Hifth *colours*, and not the rule list of any one source. The ETL
+ * knows its source's vocabulary because that is its job; this file only learns
+ * it at runtime, from the same build that wrote the spans. A source that splits
+ * madd four ways and one that splits it once then differ in a data file rather
+ * than in three packages.
+ */
+export interface TajweedVocabulary {
+  /** Where the vocabulary came from, for the colophon. Never parsed. */
+  readonly source: string;
+  readonly rules: readonly TajweedVocabularyEntry[];
+}
+
+/** One rule the shards may use, and the family it is painted as. */
+export interface TajweedVocabularyEntry {
+  /** The source's own id, e.g. `idghaam_shafawi`. A shard key. */
+  readonly id: string;
+  /** The family it collapses into — what actually gets a colour. */
+  readonly family: TajweedRuleId;
+}
+
+/**
+ * Validate a fetched `rules.json` into a vocabulary, or null if it is not one.
+ *
+ * Null rather than a throw, for the reason every loader in this feature returns
+ * null: the skin is an enhancement. A vocabulary that fails to parse means the
+ * page stays plain, not that the app stops.
+ */
+export function parseTajweedVocabulary(value: unknown): TajweedVocabulary | null {
+  if (typeof value !== "object" || value === null) return null;
+  const raw = value as { source?: unknown; rules?: unknown };
+  if (typeof raw.source !== "string" || !Array.isArray(raw.rules)) return null;
+  const rules: TajweedVocabularyEntry[] = [];
+  const seen = new Set<string>();
+  for (const entry of raw.rules) {
+    if (typeof entry !== "object" || entry === null) return null;
+    const { id, family } = entry as { id?: unknown; family?: unknown };
+    if (typeof id !== "string" || id.length === 0 || seen.has(id)) return null;
+    if (typeof family !== "string" || !isTajweedRuleId(family)) return null;
+    seen.add(id);
+    rules.push({ id, family });
+  }
+  if (rules.length === 0) return null;
+  return { source: raw.source, rules };
+}
+
+/** Rule id → family, for the hot path. Built once per vocabulary. */
+export function tajweedFamilyIndex(
+  vocabulary: TajweedVocabulary,
+): ReadonlyMap<string, TajweedRuleId> {
+  return new Map(vocabulary.rules.map((r) => [r.id, r.family]));
+}
+
+/** One family's presence on one ayah — what paints, and what the legend counts. */
 export interface TajweedMark {
   readonly rule: TajweedRule;
   /** Flat `[start, end, …]` character spans carrying the rule (see {@link TajweedShard}). */
   readonly spans: readonly number[];
   /** Occurrences, i.e. `spans.length / 2` — the legend counts, the list doesn't. */
   readonly count: number;
+  /**
+   * The source rule ids that folded into this family here, in shard order.
+   * Usually one; `ghunnah` on a busy ayah can be three. This is the half the old
+   * shard shape threw away, and it is the whole reason for the widening: it is
+   * what lets a surface say "ikhfa, twice" rather than "ghunnah, twice".
+   */
+  readonly sources: readonly string[];
 }
 
 /**
@@ -166,15 +239,52 @@ export function leadingRule(marks: readonly TajweedMark[]): TajweedRule | null {
   return best;
 }
 
-/** Marks for one ayah out of a shard, in registry order. Unknown ids are dropped. */
-export function marksForAyah(shard: TajweedShard, ayah: number): TajweedMark[] {
+/**
+ * Marks for one ayah out of a shard, folded into families, in registry order.
+ *
+ * `families` maps the shard's rule ids to the seven — {@link tajweedFamilyIndex}
+ * over the vocabulary shipped beside the shards. A rule id the vocabulary does
+ * not know is **dropped**, silently and on purpose: the two files come out of
+ * one build and cannot disagree at rest, but an offline reader can hold a cached
+ * shard from one build and a vocabulary from the next, and the right behaviour
+ * there is to paint what is understood rather than to fail the page. Build time
+ * is where an unknown rule is an error, and build-tajweed.mjs throws on one.
+ *
+ * The merged spans stay ascending: each rule's own spans already are, and rules
+ * within a family are merged in shard order, which is not the same thing — so
+ * they are re-sorted as pairs rather than concatenated. A legend counting
+ * occurrences would not notice; anything that later walks the spans to light a
+ * letter would.
+ */
+export function marksForAyah(
+  shard: TajweedShard,
+  ayah: number,
+  families: ReadonlyMap<string, TajweedRuleId>,
+): TajweedMark[] {
   const entry = shard[String(ayah)];
   if (!entry) return [];
+
+  const byFamily = new Map<TajweedRuleId, { pairs: number[][]; sources: string[] }>();
+  for (const [id, spans] of Object.entries(entry)) {
+    const family = families.get(id);
+    if (!family || !spans || spans.length === 0) continue;
+    let bucket = byFamily.get(family);
+    if (!bucket) byFamily.set(family, (bucket = { pairs: [], sources: [] }));
+    for (let i = 0; i + 1 < spans.length; i += 2) bucket.pairs.push([spans[i]!, spans[i + 1]!]);
+    bucket.sources.push(id);
+  }
+
   const marks: TajweedMark[] = [];
   for (const rule of TAJWEED_RULES) {
-    const spans = entry[rule.id];
-    if (!spans || spans.length === 0) continue;
-    marks.push({ rule, spans, count: spans.length >> 1 });
+    const bucket = byFamily.get(rule.id);
+    if (!bucket || bucket.pairs.length === 0) continue;
+    bucket.pairs.sort((a, b) => a[0]! - b[0]! || a[1]! - b[1]!);
+    marks.push({
+      rule,
+      spans: bucket.pairs.flat(),
+      count: bucket.pairs.length,
+      sources: bucket.sources,
+    });
   }
   return marks;
 }
@@ -204,9 +314,35 @@ function refOf(key: string, edition: string): [number, number] | null {
 export class Tajweed {
   readonly edition: string;
   private readonly shards = new Map<number, TajweedShard>();
+  private vocabulary: TajweedVocabulary | null = null;
+  private families: ReadonlyMap<string, TajweedRuleId> = new Map();
 
-  constructor(edition: string) {
+  /**
+   * `vocabulary` may arrive later than construction — it is a fetch, like the
+   * shards — and until it does, nothing paints. That is one round trip standing
+   * in front of the first colour, and it is the price of the shards no longer
+   * carrying their own interpretation. It is paid once per session, against a
+   * file of eighteen lines, and only by a reader who turned the skin on.
+   */
+  constructor(edition: string, vocabulary?: TajweedVocabulary) {
     this.edition = edition;
+    if (vocabulary) this.setVocabulary(vocabulary);
+  }
+
+  /** Teach the lens which rule ids the shards use, and what each one paints as. */
+  setVocabulary(vocabulary: TajweedVocabulary): void {
+    this.vocabulary = vocabulary;
+    this.families = tajweedFamilyIndex(vocabulary);
+  }
+
+  /** True once the vocabulary has landed — i.e. once a shard could mean anything. */
+  get ready(): boolean {
+    return this.vocabulary !== null;
+  }
+
+  /** The rule ids the shards may use, in the order the build wrote them. */
+  get rules(): readonly TajweedVocabularyEntry[] {
+    return this.vocabulary?.rules ?? [];
   }
 
   /** Add (or replace) one surah's shard. */
@@ -224,7 +360,27 @@ export class Tajweed {
     const ref = refOf(key, this.edition);
     if (!ref) return [];
     const shard = this.shards.get(ref[0]);
-    return shard ? marksForAyah(shard, ref[1]) : [];
+    return shard ? marksForAyah(shard, ref[1], this.families) : [];
+  }
+
+  /**
+   * Rule id → how many ayahs among `keys` carry it — the same question
+   * {@link countsForKeys} answers, one grain finer.
+   *
+   * Kept separate rather than folded in, because the two answer different
+   * questions and mixing them would misinform: the family counts say what the
+   * page is *painted* in, the rule counts say what is *there*. An ayah with an
+   * ikhfa and an iqlab is one ghunnah ayah and two rule occurrences, and both
+   * numbers are correct.
+   */
+  ruleCountsForKeys(keys: readonly string[]): Map<string, number> {
+    const counts = new Map<string, number>();
+    for (const key of keys) {
+      for (const mark of this.marksForKey(key)) {
+        for (const id of mark.sources) counts.set(id, (counts.get(id) ?? 0) + 1);
+      }
+    }
+    return counts;
   }
 
   /**

@@ -1,11 +1,11 @@
 {
-"1": {"idgham":[42,43],"wasl":[41,42]},
-"2": {"wasl":[2,3]},
-"4": {"idgham":[21,26],"wasl":[34,35]},
-"6": {"ghunnah":[22,27],"qalqalah":[11,13]},
-"7": {"ghunnah":[17,22],"madd-lazim":[13,15]},
-"8": {"ghunnah":[18,23],"madd":[13,15]},
-"9": {"ghunnah":[4,7],"qalqalah":[28,30],"wasl":[9,10]},
-"10": {"ghunnah":[4,7],"idgham":[10,11],"madd":[14,16],"wasl":[9,10]},
+"1": {"lam_shamsiyyah":[42,43],"hamzat_wasl":[41,42]},
+"2": {"hamzat_wasl":[2,3]},
+"4": {"idghaam_no_ghunnah":[21,26],"hamzat_wasl":[34,35]},
+"6": {"ikhfa":[22,27],"qalqalah":[11,13]},
+"7": {"ikhfa":[17,22],"madd_6":[13,15]},
+"8": {"ikhfa":[18,23],"madd_muttasil":[13,15]},
+"9": {"ghunnah":[4,7],"qalqalah":[28,30],"hamzat_wasl":[9,10]},
+"10": {"ghunnah":[4,7],"lam_shamsiyyah":[10,11],"madd_muttasil":[14,16],"hamzat_wasl":[9,10]},
 "11": {"ghunnah":[4,7]}
 }
