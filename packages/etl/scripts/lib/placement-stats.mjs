@@ -148,3 +148,47 @@ export function spreadUnderSplit(values, labels) {
   const df = values.length - groups.size;
   return { one, many: df > 0 ? Math.sqrt(ss / df) : NaN, groups: groups.size, df };
 }
+
+/**
+ * How far apart are two readers, and is that further apart than either of them
+ * is from themselves?
+ *
+ * Everything else here measures one hand against the print, and that comparison
+ * has two readings it cannot separate: *the print is out by this much* and *this
+ * reader places rectangles this way*. They come out as the same number. Two
+ * people placing the same marks is the only thing that tells them apart.
+ *
+ * The difference is taken **per mark**, not between the two readers' averages.
+ * Two hands can average to the same place while disagreeing about every single
+ * rectangle, and an average-of-averages would report that as agreement — which
+ * would say the leftover is a property of the page at exactly the moment it is
+ * not. The interval on the per-mark difference is clustered by page for the same
+ * reason every other interval in this file is.
+ *
+ * The scale it is read against is the two hands' own wobble, added the way
+ * independent wobbles add. Two readers who each scatter by a twentieth of a unit
+ * cannot be expected to agree closer than about a fourteenth, so a gap inside
+ * that is agreement, and only a gap that clears it is a disagreement about the
+ * print rather than about nothing.
+ *
+ * @param pairs  `[{page, d: [dx, dy]}]` — one entry per mark both readers placed,
+ *               `d` being the second reader's landing minus the first's.
+ * @param floors `[a, b]` — each reader's own precision, from marks they placed
+ *               twice. A non-finite entry (nobody repeated anything) makes
+ *               `beyond` false: an unmeasured wobble is not a small one.
+ */
+export function agreementOf(pairs, floors, z = 1.96) {
+  const pages = pairs.map((p) => p.page);
+  const by = [0, 1].map((k) =>
+    clusteredCI(
+      pairs.map((p) => p.d[k]),
+      pages,
+      z,
+    ),
+  );
+  const gaps = pairs.map((p) => Math.hypot(p.d[0], p.d[1])).sort((a, b) => a - b);
+  const typical = gaps.length ? gaps[Math.floor(gaps.length / 2)] : NaN;
+  const known = floors.every((f) => Number.isFinite(f));
+  const expected = known ? Math.hypot(...floors) : NaN;
+  return { n: pairs.length, by, typical, expected, beyond: known && typical > expected };
+}

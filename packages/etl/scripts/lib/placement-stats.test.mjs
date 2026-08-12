@@ -14,7 +14,7 @@
  * explain anything.
  */
 import { describe, expect, it } from "vitest";
-import { clusteredCI, mean, meanCI, sd, slopeOf, spreadUnderSplit } from "./placement-stats.mjs";
+import { agreementOf, clusteredCI, mean, meanCI, sd, slopeOf, spreadUnderSplit } from "./placement-stats.mjs";
 
 /**
  * Ten pages, six placements each, where the value is the page's offset and
@@ -176,5 +176,75 @@ describe("spreadUnderSplit", () => {
     const out = spreadUnderSplit(values, ["a", "b", "c"]);
     expect(out.df).toBe(0);
     expect(Number.isNaN(out.many)).toBe(true);
+  });
+});
+
+/**
+ * Two readers, on data where the truth about them is a matter of construction.
+ *
+ * The thing this must not do is call a disagreement agreement. A pair of hands
+ * that place rectangles a quarter of a unit apart, consistently, is the finding
+ * that stops a global correction from being applied at all — and the shape of
+ * mistake that would hide it is comparing the two readers' *averages*, which
+ * cancels a disagreement that alternates in sign. So one fixture disagrees in
+ * one direction and one disagrees in both, and both must come out as a
+ * disagreement.
+ */
+describe("agreementOf", () => {
+  /** Ten pages, four marks each. `d` is the second reader minus the first. */
+  const paired = (d) =>
+    Array.from({ length: 40 }, (_, i) => ({ page: 100 + Math.floor(i / 4), d: d(i) }));
+
+  it("calls two hands that land alike agreement, and reports it inside their wobble", () => {
+    const out = agreementOf(
+      paired((i) => [(i % 5) * 0.002 - 0.004, (i % 3) * 0.002 - 0.002]),
+      [0.03, 0.03],
+    );
+    expect(out.n).toBe(40);
+    expect(out.typical).toBeLessThan(out.expected);
+    expect(out.beyond).toBe(false);
+    expect(out.by[1].lo).toBeLessThan(0.01);
+  });
+
+  it("calls a steady offset between two hands a disagreement", () => {
+    const out = agreementOf(
+      paired(() => [0, 0.25]),
+      [0.03, 0.03],
+    );
+    expect(out.beyond).toBe(true);
+    expect(out.by[1].m).toBeCloseTo(0.25, 6);
+    expect(out.by[1].lo).toBeGreaterThan(0);
+  });
+
+  it("does not let a disagreement that alternates in sign average itself away", () => {
+    // The two readers are a fifth of a unit apart on every single mark, but
+    // their means are identical. Anything comparing means calls this agreement.
+    const out = agreementOf(
+      paired((i) => [0, i % 2 ? 0.2 : -0.2]),
+      [0.03, 0.03],
+    );
+    expect(out.by[1].m).toBeCloseTo(0, 6);
+    expect(out.typical).toBeCloseTo(0.2, 6);
+    expect(out.beyond).toBe(true);
+  });
+
+  it("refuses to call it agreement when a hand's own wobble was never measured", () => {
+    // Nobody placed anything twice, so there is no scale. An unmeasured wobble
+    // is not a small one, and reporting agreement here would be inventing the
+    // very number the comparison is read against.
+    const out = agreementOf(
+      paired(() => [0, 0.25]),
+      [0.03, NaN],
+    );
+    expect(Number.isNaN(out.expected)).toBe(true);
+    expect(out.beyond).toBe(false);
+  });
+
+  it("clusters by page, so four marks on one page are one page's worth of evidence", () => {
+    const d = (i) => [0, [-0.3, -0.1, 0.1, 0.3][Math.floor(i / 4) % 4]];
+    const out = agreementOf(paired(d), [0.03, 0.03]);
+    const flat = meanCI(paired(d).map((p) => p.d[1]));
+    expect(out.by[1].g).toBe(10);
+    expect(out.by[1].hi - out.by[1].lo).toBeGreaterThan(flat.hi - flat.lo);
   });
 });

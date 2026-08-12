@@ -77,6 +77,27 @@ const excludePath = arg("--exclude", null);
 const pagesWanted = Number(arg("--pages", 0));
 const spread = arg("--spread", "extremes");
 
+/**
+ * Who is placing these rectangles. Metadata everywhere except two places, and
+ * both of those matter.
+ *
+ * It deliberately does **not** reach the trial plan. The one measurement a
+ * second person can make that a first cannot is *do two hands agree*, and that
+ * question only has an answer if both hands were shown the same marks in the
+ * same order from the same starting points. So a second reader is the identical
+ * build under a different name: agreement within about a twentieth of a unit
+ * says the leftover distance is a fact about the print, and a larger gap says it
+ * is a fact about whoever placed the boxes — in which case no global residual
+ * should be applied to three hundred thousand rectangles at all.
+ *
+ * Where it does reach: the browser's resume key, so two people working the same
+ * file on one machine do not resume into each other's answers, which would look
+ * exactly like one person being unusually consistent; and the name of the file
+ * the page hands back, so the second download does not arrive looking like a
+ * duplicate of the first.
+ */
+const reader = arg("--reader", "A");
+
 const shiftText = readFileSync(shiftPath, "utf8");
 const shift = JSON.parse(shiftText);
 
@@ -279,6 +300,7 @@ const head = {
   built: new Date().toISOString(),
   kind: "nudge",
   seed,
+  reader,
   count: trials.length,
   repeats,
   pages,
@@ -467,7 +489,7 @@ recipe that built this page.</p>
 <script id="head" type="application/json">${JSON.stringify(head)}</script>
 <script>
 const HEAD = JSON.parse(document.getElementById("head").textContent);
-const KEY = "hifth.nudge." + HEAD.seed + "." + HEAD.shiftFingerprint + "." + HEAD.select.fp + "." + HEAD.shows.join("-");
+const KEY = "hifth.nudge." + HEAD.seed + "." + HEAD.reader + "." + HEAD.shiftFingerprint + "." + HEAD.select.fp + "." + HEAD.shows.join("-");
 const cards = [...document.querySelectorAll(".trial")];
 const work = document.getElementById("work");
 const intro = document.getElementById("intro");
@@ -592,7 +614,7 @@ function bank() {
   if (!SINK || banked) return;
   banked = true;
   const el = document.getElementById("banked");
-  SINK.artifact("mark-placements-" + HEAD.seed + ".json",
+  SINK.artifact("mark-placements-" + HEAD.seed + "." + HEAD.reader + ".json",
                 { ...HEAD, finished: new Date().toISOString(), answers })
     .then((r) => {
       el.hidden = false;
@@ -656,7 +678,7 @@ document.getElementById("save").onclick = () => {
                         { type: "application/json" });
   const a = document.createElement("a");
   a.href = URL.createObjectURL(blob);
-  a.download = "mark-placements-" + HEAD.seed + ".json";
+  a.download = "mark-placements-" + HEAD.seed + "." + HEAD.reader + ".json";
   a.click();
   URL.revokeObjectURL(a.href);
 };
@@ -691,7 +713,7 @@ writeFileSync(
 
 process.stdout.write(
   `${trials.length} placements over ${pages} pages (${repeats} marks shown twice) · seed ${seed} · ` +
-    `displacements ${shift.ran} (${head.shiftFingerprint})\n` +
+    `reader ${reader} · displacements ${shift.ran} (${head.shiftFingerprint})\n` +
     `${skippedForInk} marks passed over for too little ink under the corrected box\n` +
     `${(html.length / 1e6).toFixed(1)} MB in ${((Date.now() - t0) / 1000).toFixed(1)}s → ${outPath}\n` +
     `the ${chosen.length} pages it was built over → ${pagesPath}\n`,
