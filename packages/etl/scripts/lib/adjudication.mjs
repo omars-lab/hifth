@@ -332,6 +332,21 @@ export function planNudge({ seed, count, shifts, io = readers }) {
     box: cand.mark.box,
     d: cand.mark.d,
     fit: cand.mark.fit,
+    // Who the trial is about, as opposed to where the answer is. The word it
+    // sits in, the letters the corpus drew it on, and which of that word's marks
+    // of this name it is, counting from the right.
+    //
+    // None of this is the answer and all of it is needed. A crop of print this
+    // size carries several marks and often two of the same name; without a way
+    // to say which one, a reader either guesses or places the rectangle on the
+    // wrong mark, and a placement on the wrong mark is a whole-letter error
+    // recorded as a registration error. The identification separates candidates
+    // a letter apart; the measurement is a fraction of a letter, and nothing
+    // here narrows that.
+    hafs: cand.mark.hafs ?? null,
+    lig: cand.mark.lig ?? null,
+    nth: cand.mark.nth ?? 1,
+    of: cand.mark.of ?? 1,
     // What the machine says the correction is, relative to the shipped box.
     // The builder strips it; only the scorer ever reads it.
     shift: [cand.shift.dx, cand.shift.dy],

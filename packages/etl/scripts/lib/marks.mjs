@@ -60,7 +60,7 @@ export function marksOf(p) {
   if (flat.length !== outlines.length) {
     throw new Error(`page ${p}: ${flat.length} marks but ${outlines.length} outlines`);
   }
-  return flat.map((e, k) => {
+  const rows = flat.map((e, k) => {
     const [id, x, y, wd, ht] = e.m;
     if (DIACRITICS[id] !== outlines[k].name) {
       throw new Error(`page ${p} mark ${k}: box says ${DIACRITICS[id]}, outline says ${outlines[k].name}`);
@@ -72,6 +72,7 @@ export function marksOf(p) {
       name: DIACRITICS[id],
       box: [x, y, wd, ht],
       d: outlines[k].d,
+      lig: outlines[k].lig,
       surah: e.w.surah,
       aya: e.w.aya,
       idx: e.w.idx,
@@ -79,4 +80,47 @@ export function marksOf(p) {
       fit: row,
     };
   });
+
+  // Where a mark stands among the ones it could be mistaken for: same ligature,
+  // same name. Counted right to left, because that is the order the letters are
+  // read in and therefore the only order a sentence naming one of them can use.
+  //
+  // This is identification and not position. A tool that shows somebody a crop of
+  // print and asks where a mark belongs has to be able to say WHICH mark, and
+  // "the fatha" is not an answer on letters carrying two of them. Saying "the
+  // second from the right" costs nothing that matters: it separates two
+  // candidates a whole letter apart, and the thing being measured is a fraction
+  // of a letter.
+  //
+  // The ligature and not the word, even though the word is the more obvious unit,
+  // because a rank is only followable over a group the reader can see all of. A
+  // word can run past the edge of a crop, and "the third of three" counted over
+  // letters half of which are off-screen is worse than saying nothing. The
+  // ligature is the group a tool can point at — it is what `lig.letters` draws —
+  // so it is the group the counting has to match. Marks the corpus drew inside no
+  // ligature fall back to their word, which is the widest group still true of
+  // them.
+  //
+  // Keyed by the ligature object itself: `ligaturesByMark` hands every mark in
+  // one ligature the same object, so identity is the grouping, with no key to
+  // spell and nothing to collide.
+  const peers = new Map();
+  for (const r of rows) {
+    const scope = r.lig ?? `${r.surah}:${r.aya}:${r.idx}`;
+    const key = `${r.name}`;
+    if (!peers.has(scope)) peers.set(scope, new Map());
+    const byName = peers.get(scope);
+    if (!byName.has(key)) byName.set(key, []);
+    byName.get(key).push(r);
+  }
+  for (const byName of peers.values()) {
+    for (const group of byName.values()) {
+      const order = [...group].sort((a, b) => b.box[0] - a.box[0]);
+      order.forEach((r, i) => {
+        r.nth = i + 1;
+        r.of = order.length;
+      });
+    }
+  }
+  return rows;
 }
