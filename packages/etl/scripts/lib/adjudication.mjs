@@ -313,8 +313,15 @@ export const REPEAT_GAP = 10;
  *                 so what is left is genuinely held out.
  * @param pages    how many to return. More than are eligible returns all of them.
  * @param spread   `"extremes"` takes from both ends of both axes — the pages that
- *                 carry the leverage. `"all"` keeps every eligible page, which is
- *                 what a coverage block wants and what the old behaviour was.
+ *                 carry the leverage, which is what an estimate of the
+ *                 correction's *size* is bought with. `"even"` walks straight
+ *                 through the print taking every k-th eligible page, which is what
+ *                 an estimate of a *rate* wants instead: there is no leverage to
+ *                 be had in a proportion, and sampling the extremes would fill a
+ *                 forced choice with the easiest and the impossible trials and
+ *                 then report the result as a fact about the mus'haf. `"all"`
+ *                 keeps every eligible page, which is what a coverage block wants
+ *                 and what the old behaviour was.
  * @returns page numbers, ascending. Ascending because it is read by people; the
  *          order is preserved into the head either way, and the shuffle inside
  *          `pool` is what actually decides who gets asked first.
@@ -324,6 +331,29 @@ export function selectPages({ shifts, exclude = [], pages, spread = "extremes" }
   const eligible = shifts.filter((s) => !drop.has(s.page));
   if (spread === "all" || !(pages > 0) || pages >= eligible.length) {
     return eligible.map((s) => s.page).sort((a, b) => a - b);
+  }
+  // `even` takes a systematic sample straight through the print — every k-th page
+  // of what is eligible — and it exists because the two sessions are estimating
+  // different kinds of thing from the same pages.
+  //
+  // A placing session estimates a slope, and a slope is measured by leverage: the
+  // pages proposing the largest and smallest moves are worth several ordinary
+  // pages each, which is what the tails below are for. A forced choice estimates a
+  // *rate* — how often a reader prefers our rectangle — and a rate has no leverage
+  // to gain and a representativeness to lose. Loading it with the extremes would
+  // fill the session with the easiest trials and the impossible ones and report
+  // the result as if it described the mus'haf.
+  //
+  // Systematic rather than random for the reason everything else here is: the same
+  // inputs must give the same list on any engine, months later, with no seed to
+  // remember. The half-step offset keeps it off both ends, and while `pages` is at
+  // most the eligible count the indices cannot collide — consecutive ones are at
+  // least one apart by construction.
+  if (spread === "even") {
+    const rows = eligible.slice().sort((a, b) => a.page - b.page);
+    const out = [];
+    for (let i = 0; i < pages; i += 1) out.push(rows[Math.floor(((i + 0.5) * rows.length) / pages)].page);
+    return out;
   }
   // Ties broken by page number throughout, so the same input always gives the
   // same list on any engine. A sort that is only *nearly* total is a
