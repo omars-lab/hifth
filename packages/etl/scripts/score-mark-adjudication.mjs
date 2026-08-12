@@ -107,7 +107,47 @@ if (fp !== ruling.shiftFingerprint) {
 }
 
 const shift = JSON.parse(shiftText);
-const { trials } = planSession({ seed: ruling.seed, count: ruling.count, shifts: shift.shifts });
+
+/**
+ * The pages this session was allowed to ask about, replayed rather than chosen
+ * again.
+ *
+ * The trials below are rebuilt from the seed and these displacements — that
+ * rebuild is what makes the answer key exist at all, and it is why nobody had to
+ * be trusted. But it also means the builder and this file must narrow the
+ * displacements identically or every trial index resolves to a different mark. It
+ * would not throw: the indices are all still there, the ids would be compared, and
+ * a mismatch would surface as an exception about one trial rather than as the
+ * fact that the whole session is being read against the wrong marks. So the
+ * builder writes its list into the head and this replays it in the recorded
+ * order.
+ *
+ * Replaying beats recomputing even though the function is right here: recomputing
+ * means a later improvement to how pages are chosen silently re-scores every
+ * ruling ever banked, and the only sign of it would be a rate that moved for a
+ * reason nobody could name.
+ *
+ * A ruling with no list predates this and took every measured page, which is what
+ * `shift.shifts` already is. The second guard is not redundant with the
+ * fingerprint above: a displacements file can carry the right fingerprint and
+ * still not be the file these pages came from.
+ */
+let shifts = shift.shifts;
+if (Array.isArray(ruling.select?.of)) {
+  const byPage = new Map(shift.shifts.map((s) => [s.page, s]));
+  const missing = ruling.select.of.filter((p) => !byPage.has(p));
+  if (missing.length) {
+    process.stderr.write(
+      `these answers were given over ${ruling.select.of.length} pages and ${shiftPath} has no ` +
+        `displacement for ${missing.length} of them (${missing.slice(0, 8).join(", ")}${missing.length > 8 ? ", …" : ""}).\n` +
+        `That is the wrong displacements file, whatever its fingerprint says.\n`,
+    );
+    process.exit(2);
+  }
+  shifts = ruling.select.of.map((p) => byPage.get(p));
+}
+
+const { trials } = planSession({ seed: ruling.seed, count: ruling.count, shifts });
 
 const byIndex = new Map(trials.map((t) => [t.i, t]));
 const buckets = { shipped: [], decoy: [], catch: [], twin: [] };

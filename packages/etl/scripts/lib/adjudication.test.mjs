@@ -307,6 +307,73 @@ describe("selectPages", () => {
 });
 
 /**
+ * The second strategy, and why it is a second one rather than a better default.
+ *
+ * A placing session regresses how far a hand moved a rectangle against how far we
+ * proposed to move it, and reads a slope. A slope is bought with leverage, so it
+ * wants the pages where the proposal is largest and smallest and does not care
+ * that they are unusual pages.
+ *
+ * A forced choice reports a *proportion* — how often a reader prefers ours — and
+ * a proportion has no leverage to gain and a representativeness to lose. Ask it
+ * only about the extremes and it fills with the easiest trials and the impossible
+ * ones, then reports the result as a fact about the mus'haf. Same pages, same
+ * function, opposite requirement; hence two names rather than one guess.
+ */
+describe("selectPages, spread across the print", () => {
+  it("does not take the ends, which is the entire reason it exists", () => {
+    // If this ever returned what `extremes` returns, every forced choice built
+    // after it would quietly be a study of the twenty strangest pages in the
+    // print, and its headline rate would still read like a rate about the print.
+    const even = selectPages({ shifts: varied, pages: 8, spread: "even" });
+    const ends = selectPages({ shifts: varied, pages: 8 });
+    expect(even).not.toEqual(ends);
+
+    // The middle is what `extremes` is built to skip and what this is built to
+    // include: a third of the print has to be able to turn up.
+    const middle = varied.slice(6, 14).map((s) => s.page);
+    expect(even.some((p) => middle.includes(p))).toBe(true);
+  });
+
+  it("steps through at a near-constant stride, so no stretch of the print is dark", () => {
+    const chosen = selectPages({ shifts: varied, pages: 8, spread: "even" });
+    const gaps = chosen.slice(1).map((p, i) => p - chosen[i]);
+    expect(Math.max(...gaps) - Math.min(...gaps)).toBeLessThanOrEqual(1);
+    // Off both ends rather than starting at the first page: the half-step offset
+    // is what keeps a systematic sample from being an "every page one apart from
+    // page 1" sample, which is a different and worse thing.
+    expect(chosen[0]).toBeGreaterThan(varied[0].page);
+    expect(chosen[chosen.length - 1]).toBeLessThan(varied[varied.length - 1].page);
+  });
+
+  it("never names the same page twice, at every size a session could ask for", () => {
+    // A duplicate would not throw. It would spend two trials on one page, and the
+    // clustered interval — which divides by the number of distinct pages — would
+    // be computed against a count that no longer matches the trials.
+    for (let n = 1; n < varied.length; n += 1) {
+      const chosen = selectPages({ shifts: varied, pages: n, spread: "even" });
+      expect(chosen).toHaveLength(n);
+      expect(new Set(chosen).size).toBe(n);
+      expect(chosen.slice().sort((a, b) => a - b)).toEqual(chosen);
+    }
+  });
+
+  it("gives the same list every time, since a banked forced choice replays it", () => {
+    const once = selectPages({ shifts: varied, pages: 6, exclude: [4, 5], spread: "even" });
+    for (let i = 0; i < 5; i += 1) {
+      expect(selectPages({ shifts: varied, pages: 6, exclude: [4, 5], spread: "even" })).toEqual(once);
+    }
+  });
+
+  it("still refuses a held-out page, because that is not a property of the strategy", () => {
+    const exclude = [1, 2, 3, 4, 5, 18, 19, 20];
+    const chosen = selectPages({ shifts: varied, pages: 6, exclude, spread: "even" });
+    expect(chosen).toHaveLength(6);
+    for (const p of chosen) expect(exclude).not.toContain(p);
+  });
+});
+
+/**
  * The precondition on comparing two readers.
  *
  * Every failure here is silent by nature. Two rulings from different builds
