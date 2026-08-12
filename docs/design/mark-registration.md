@@ -781,7 +781,7 @@ drawings out of 326,515 still match another name overall, and all five are shown
 right strokes set an unusual distance apart. It is named here only so that nobody reads this
 document's silence on it as a claim.
 
-### ⑦ How far is our correction still out · **open**
+### ⑦ How far is our correction still out · **answered**
 
 ① can only settle a preference. It offers two placements and asks which is better, so a
 correction that points the right way and falls a third short wins every single trial and
@@ -814,9 +814,52 @@ teaches the correction's direction — it points the same way on almost every pa
 twenty trials. For the same reason the two sessions should not be worked back to back by the
 same person.
 
+A third property was learned the hard way, after the first sitting. A crop of print this size
+holds several marks and often two of the same name, so a trial that only says "put the box on
+the mark" is a trial about whichever mark the reader picked. That is not a small error: a
+placement on the neighbouring mark is a whole letter out, and the residual would record a
+whole letter of registration error that has nothing to do with registration. So each trial now
+names its mark — the name, the letters it belongs to, and, when those letters carry more than
+one of that name, which of them counting from the right — and it points at those letters in
+the picture.
+
+The first attempt at pointing was a mistake worth writing down, because it would have quietly
+destroyed the measurement rather than breaking it. The letters were drawn crisply, in colour,
+over the print. But the crisp letters come from the other printing's drawing, carried onto our
+frame by exactly the fit that places the rectangle — so the visible gap between those letters
+and the ink underneath them *is* the correction being measured, about a page unit, which at
+the size these panels are worked is a finger's width on screen. A reader would have spent an
+hour looking at the answer and their landings would have been a tracing of it. The fix is to
+point softly: the letters sit under a wide blurred wash whose edge is a gradient several times
+wider than the correction, and which looks the same whether the fit is right or a unit out. It
+says *these letters* and refuses to say anything finer. The mark itself is never washed and
+never outlined.
+
 If ① and ⑦ disagree, that is the most valuable outcome either can produce and neither can
 produce alone: two instruments looking at the same rectangles from opposite directions,
 one of them wrong, and a reason to re-measure before three hundred thousand rectangles move.
+
+**What a sitting said.** Sixty marks, placed by one reader in about seven seconds each.
+Fifty-nine of the sixty landed nearer the corrected rectangle than the one the app draws
+today — 98%, and the interval around it reaches down only to 91%, so it clears half by a
+wide margin and the correction points the right way. The typical miss from today's rectangle
+was 1.15 page units and from the corrected one 0.39, which is the same statement in a second
+form. Nine marks came round twice from independent starting points and the two landings
+agreed to 0.03 units, so that is the floor.
+
+The residual is **0.13 units** — about four times that floor, and therefore real rather than
+a wobble of the hand. Broken into its parts, it is 0.07 units left and 0.11 units up; only
+the vertical part is separable from nothing at the ordinary confidence, so the honest reading
+is *the corrected rectangles sit a tenth of a unit low*. The pull of where each rectangle
+started was measured too and came out at effectively nil, which is what the evenly-spread
+starting positions were for.
+
+So the answer to this section's question is: **not out by much, but out.** Adopt the
+correction, and apply the residual on top of it. Applying it means editing the recorded
+per-page displacements, not the arithmetic that derives them — the arithmetic is not what is
+wrong, the frame it is measured against is. And it is worth saying what this does not settle:
+one reader, one sitting, sixty marks. A second hand disagreeing by more than 0.03 units would
+mean the residual is a fact about a person and not about the print.
 
 The runbook is `placement-residual-by-hand` in
 [`docs/validation/ledger.json`](../validation/ledger.json); about twenty-five minutes, and it

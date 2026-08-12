@@ -526,7 +526,9 @@
       "how": "Revise on a phone on two different calendar days, at least one session late enough to be near midnight, swiping the app away immediately after some taps. Then read the record back and check the days, the counts and `since`.",
       "owner": "user",
       "status": "pending",
-      "blocks": ["loop-7"],
+      "blocks": [
+        "loop-7"
+      ],
       "runbook": {
         "needs": [
           "A phone — an iPhone if you have one, since the seven-day sweep is Safari's and it is the failure this check is mostly about.",
@@ -685,7 +687,7 @@
       "why": "The forced-choice session can settle whether our proposed move is preferred to what ships. It cannot settle whether it is far enough, because the only two answers on offer are the two we thought of: a correction that points the right way and falls a third short wins every trial and is still wrong, and nothing in that session can say so. This asks for a placement instead of a preference, and the gap between where a reader puts a rectangle and where we wanted it is a distance in page units — a number that can be applied to the boxes rather than voted on.",
       "how": "Place about sixty rectangles by hand. Each trial shows one mark with one rectangle starting plainly displaced, and asks you to drag it onto the mark. Nothing on the screen says where we think it goes, and the correction is not in the page at all. Some marks come round a second time from a different starting point; the spread between your two goes is your own precision, and it is what everything else is read against. Save the file at the end, read it, and bank the number.",
       "owner": "user",
-      "status": "pending",
+      "status": "done",
       "blocks": [
         "mark-C"
       ],
@@ -719,15 +721,15 @@
             "id": "keep-them-apart"
           },
           {
-            "do": "Read the five short answers the page opens with, then start. Do not read the code that built it first.",
-            "expect": "A first trial: one mark, one red rectangle sitting obviously off it, and a button that will not do anything yet.",
+            "do": "Read the six short answers the page opens with, then start. Do not read the code that built it first.",
+            "expect": "A first trial: a line naming one mark, a small piece of print with that mark's letters under a soft blue wash, one red rectangle sitting obviously off it, and a button that will not do anything yet.",
             "why": "The builder knows where we think each rectangle goes, and this page deliberately does not. Reading it first is the one way to spoil that, and the session would have to be thrown away and rebuilt under a seed you had not seen.",
             "id": "start-cold-here"
           },
           {
-            "do": "Drag the rectangle onto the mark nearest to where it started, then press enter. Arrow keys nudge it if you want to be finer; hold shift for a bigger step.",
+            "do": "Read the line above the picture, find the mark it names, drag the rectangle onto that mark and press enter. Arrow keys nudge it if you want to be finer; hold shift for a bigger step.",
             "expect": "The button wakes up as soon as you move it, and nothing at all happens when you place it except the next trial. No target, no snapping, no 'close'.",
-            "why": "The rectangle always starts in the wrong place, so leaving it alone is never an answer — that is why the button stays dead until you move. And the mark nearest where it started is the one being asked about: the starting position is a random direction away from where the app draws the box today, so it points at the right mark without pointing at the right place.",
+            "why": "The rectangle always starts in the wrong place, so leaving it alone is never an answer — that is why the button stays dead until you move. And a crop this size holds several marks, often two of the same name, so the line names one and the blue wash points at the letters it belongs to: a placement on the neighbouring mark is a whole letter out and would be recorded as though the boxes were a whole letter out. The wash is deliberately too soft to line the rectangle up against, because anything crisp enough to line up against would be showing you where we think the box goes.",
             "id": "place-them"
           },
           {
@@ -784,7 +786,9 @@
         "docs/design/mark-registration.md §⑦ and §⑩ ① — §⑦'s recommendation is provisional pending a magnitude, not just a preference.",
         "packages/etl/scripts/lib/adjudication.mjs — a session whose precision swamps its residual tunes the starting radius and the number of repeated marks, not the conclusion about the boxes."
       ],
-      "record": "docs/design/mark-registration.md"
+      "record": "docs/design/mark-registration.md",
+      "verifiedOn": "2026-08-12",
+      "result": "seed 23 · 60 placements · nearer ours 98.3% [91.1–99.7] · residual (-0.073, -0.110) units against a precision of 0.03 → adopt with the residual applied; only the down component is distinguishable from nought"
     }
   ]
 }
