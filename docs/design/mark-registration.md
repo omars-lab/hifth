@@ -781,7 +781,7 @@ drawings out of 326,515 still match another name overall, and all five are shown
 right strokes set an unusual distance apart. It is named here only so that nobody reads this
 document's silence on it as a claim.
 
-### ⑦ How far is our correction still out · **answered**
+### ⑦ How far is our correction still out · **open**
 
 ① can only settle a preference. It offers two placements and asks which is better, so a
 correction that points the right way and falls a third short wins every single trial and
@@ -842,28 +842,79 @@ one of them wrong, and a reason to re-measure before three hundred thousand rect
 **What a sitting said.** Sixty marks, placed by one reader in about seven seconds each.
 Fifty-nine of the sixty landed nearer the corrected rectangle than the one the app draws
 today — 98%, and the interval around it reaches down only to 91%, so it clears half by a
-wide margin and the correction points the right way. The typical miss from today's rectangle
-was 1.15 page units and from the corrected one 0.39, which is the same statement in a second
-form. Nine marks came round twice from independent starting points and the two landings
-agreed to 0.03 units, so that is the floor.
+wide margin and **the correction points the right way**. The typical miss from today's
+rectangle was 1.15 page units and from the corrected one 0.39, which is the same statement in
+a second form. Nine marks came round twice from independent starting points and the two
+landings agreed to 0.03 units, so that is the floor everything else is read against.
 
-The residual is **0.13 units** — about four times that floor, and therefore real rather than
-a wobble of the hand. Broken into its parts, it is 0.07 units left and 0.11 units up; only
-the vertical part is separable from nothing at the ordinary confidence, so the honest reading
-is *the corrected rectangles sit a tenth of a unit low*. The pull of where each rectangle
-started was measured too and came out at effectively nil, which is what the evenly-spread
-starting positions were for.
+What is left over once our move is subtracted is 0.07 units left and 0.11 units up — about
+four times that floor, so it is bigger than the hand's own wobble. That was first read as
+*therefore real*, and it is not, for a reason that took a second look to see. The sixty
+placements sit on forty pages, and two marks on one page are not two facts about the fit: they
+share that page's frame, so whatever is wrong with it is wrong for both of them, in the same
+direction, by nearly the same amount. Counted as forty pages rather than as sixty independent
+trials, the vertical part runs from 0.23 units up to 0.01 units *down* — it no longer excludes
+nothing. It was marginal before that correction and it is not established after it. Most of
+the range still sits on one side, so this says our correction **may** be short; it does not
+say that it is.
 
-So the answer to this section's question is: **not out by much, but out.** Adopt the
-correction, and apply the residual on top of it. Applying it means editing the recorded
-per-page displacements, not the arithmetic that derives them — the arithmetic is not what is
-wrong, the frame it is measured against is. And it is worth saying what this does not settle:
-one reader, one sitting, sixty marks. A second hand disagreeing by more than 0.03 units would
-mean the residual is a fact about a person and not about the print.
+Two further limits the sitting could not see past, neither of which appeared anywhere in its
+own numbers until now:
+
+- **It was asked on its own pages.** A trial needs a proposed move to start from, and moves
+  had been measured for only forty of the mus'haf's 604 pages — so every mark placed came from
+  a page the correction had already been fitted to. Nothing here says whether it holds on a
+  page nobody has measured. That is §⑧, below.
+- **The size was never measurable.** Across those forty pages the proposed move barely varies,
+  and with that little to compare against, "exactly right" and "a fifth short" produce the same
+  landings. The sitting's estimate of the correction's *scale* spans from the wrong sign to
+  two and a half times too much. More trials would not fix it: the limit is the forty pages,
+  not the sixty answers.
+
+Three explanations were tested and none of them survived, which is worth not buying a second
+time. It is **not the mark**: a separate number per mark name leaves more spread than one
+number for all of them, over eleven names, so the rectangle is not anchored wrong inside
+particular shapes. It is **not a stretch**: what is left over does not depend on where the mark
+sits on the page, so the fit is out by a shift and not by a scale. And it is **not the starting
+point** and **not fatigue**: the pull back toward wherever each rectangle started came out at
+effectively nil, which is what the evenly-spread starting positions were for, and nothing
+drifted as the sitting wore on.
+
+So the answer to this section's question is: **the direction is settled and the distance is
+not.** Adopt the correction as measured; do not apply what is left over on top of it. A tenth
+of a unit spread over three hundred thousand rectangles is a move that would have to be bought
+again the first time anybody asked how it was known. What would settle it is a second sitting
+on pages the correction was *not* fitted to, several marks on each page so the page and the
+hand can be told apart, and a second reader — whose disagreement by more than 0.03 units would
+mean this is a fact about a person and not about the print.
 
 The runbook is `placement-residual-by-hand` in
 [`docs/validation/ledger.json`](../validation/ledger.json); about twenty-five minutes, and it
 needs no mushaf, no phone and no network either.
+
+### ⑧ Does the correction hold on a page nobody measured · **open**
+
+The per-page correction exists for **forty pages of 604**. It was measured by sampling pages
+and requiring enough marks on each to be worth fitting, and forty was the number that sitting
+needed; the other 564 pages have no measured move at all, and the app ships rectangles on all
+of them.
+
+That is a gap in coverage, and §⑦ makes it a gap in evidence too: because a trial cannot be
+built for a page with no proposed move, every placement a reader has ever judged came from one
+of those same forty. The correction has been checked, and it has only ever been checked where
+it was fitted. Nothing measured so far distinguishes *the print is displaced this way* from
+*these forty pages are displaced this way*.
+
+The first half of the answer is arithmetic rather than judgement and needs nobody's time:
+measure all 604. The question that then decides everything after it is whether the corrections
+**vary** across the mus'haf. If they do, the size of the correction becomes measurable for the
+first time — pages needing very different moves are exactly the leverage §⑦ lacked — and a
+second sitting is worth someone's half hour. If they are all alike, one number for the whole
+print is the right model, what is left over in §⑦ is moot, and nothing more is owed.
+
+The second half is a sitting on **held-out** pages: marks from pages the correction was
+measured on but which no reader has judged. That is the only thing that separates a fit from a
+finding, and it cannot be built until the first half is read.
 
 ## How can someone look at this for themselves?
 
@@ -919,11 +970,23 @@ displacements were re-measured after the page was built.
 node packages/etl/scripts/probe-mark-ink.mjs --sample 4000 --seed 7 --pages-n 40
 pnpm adjudicate:marks --seed 11 --count 100
 # work packages/etl/out/mark-adjudication.html in a browser, save the ruling it offers
-pnpm adjudicate:score ~/Downloads/mark-ruling-11.json
+# then move it into docs/validation/rulings/ and score it from there
+pnpm adjudicate:score docs/validation/rulings/<the file you just moved>
 ```
 
-Like the evidence page, it is written to the untracked output directory and never committed,
-for the same reason: it draws the mus'haf's own ink.
+**Read the first of those four lines carefully, because everything after it inherits its
+limit.** Forty pages is not a setting chosen for speed; it is the extent of the whole
+correction. A session can only offer a mark on a page that has a proposed move, so both
+by-eye instruments have only ever been able to ask about those forty. §⑧ is that question,
+and a fuller pass writes to its own file rather than over this one — the answers of a session
+already being worked are attached to the displacements it was built from, and both scorers
+refuse a ruling whose displacements have moved underneath it.
+
+Like the evidence page, that page is written to the untracked output directory and never
+committed, for the same reason: it draws the mus'haf's own ink. What a reader *answers* does
+come home, to [`docs/validation/rulings/`](../validation/rulings/) — page numbers, mark indices
+and offsets, no ink and no scripture — because a verdict whose working lives in one person's
+downloads folder is a verdict nobody else can argue with.
 
 ## Where does this live?
 
@@ -954,7 +1017,23 @@ readable without them.
   markup, no attribute and no comment on it.
 - `packages/etl/scripts/score-mark-nudge.mjs` — subtracts the proposed correction from where
   each rectangle was put and reports what is left, beside the precision of the hand that put
-  them, so a residual smaller than the wobble is called what it is.
+  them, so a residual smaller than the wobble is called what it is. It opens with **how many
+  of the 604 pages the correction covers**, and whether any placement was made on a page
+  outside them, because §⑧ is the limit every other number it prints has to be read against.
+  Each residual is reported twice, once counting every placement as its own fact and once
+  counting pages, and the verdict at the foot reads the second — see the library below. It
+  also reports whether the correction is the right *size*, with the spread of the proposed
+  moves beside it so a meaningless estimate is legible as one, and it prints what was ruled
+  out, so nobody buys those answers twice.
+- `packages/etl/scripts/lib/placement-stats.mjs` — the arithmetic, kept apart so it can be
+  tested against data whose answer is known by construction. Two marks on one page are not two
+  facts about the fit: they share that page's frame, so an interval that counts them separately
+  is narrower than the truth. The measurement above had said so about its own sampling since
+  the day it was written; the scorer was built without it, and a residual was banked as real on
+  an interval that counting pages puts across nothing.
+- `packages/etl/scripts/lib/placement-stats.test.mjs` — where that is proved rather than
+  asserted: on ten pages of six identical values the honest interval must come out about two
+  and a half times the naive one, and on values that share no page the two must agree.
 - [`docs/validation/ledger.json`](../validation/ledger.json), `placement-correction-by-eye` —
   the runbook of record for §⑩ ①, and where its verdict gets banked.
 - [`docs/validation/ledger.json`](../validation/ledger.json), `placement-residual-by-hand` —
