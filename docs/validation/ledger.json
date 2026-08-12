@@ -590,7 +590,7 @@
     {
       "id": "placement-correction-by-eye",
       "title": "Placement correction by eye — a hundred forced choices between the corrected box and the one we ship",
-      "why": "The measurement says nearly every mark rectangle sits about a letter away from its own ink, and that one number per page fixes it. Only arithmetic has ever said so, and it marked its own homework: the rasteriser that found the displacement is the rasteriser that scores the correction. Nobody has looked at a single verdict. Until somebody does, the thresholds in the placement record stay unenforced, and nothing that points at a mark can ship — which is the whole reason to hold three hundred thousand rectangles.",
+      "why": "The measurement says nearly every mark rectangle sits about a letter away from its own ink, and that one number per page fixes it. Only arithmetic has ever said so, and it marked its own homework: the rasteriser that found the displacement is the rasteriser that scores the correction. Nobody has looked at a single verdict. Until somebody does, the thresholds in the placement record stay unenforced, and nothing that points at a mark can ship — which is the whole reason to hold three hundred thousand rectangles. And the hundred trials are drawn from pages the correction was never fitted on, because a correction asked about the pages it was fitted to answers a question nobody needed: it will ship on all six hundred and four.",
       "how": "Work a hundred two-panel trials by eye. Each shows the same mark twice with one rectangle drawn on it, and asks which rectangle sits on the mark. Usually one of them is the corrected placement and the other is what the app draws today; nothing on the screen says which, and no answer key is written anywhere — the scorer rebuilds it from the seed afterwards. Save the ruling the page hands back, score it, and bank the verdict.",
       "owner": "user",
       "status": "pending",
@@ -605,21 +605,23 @@
           "Nobody has to be a hafiz for this one. It is a question about where a rectangle sits, not about what the mark says."
         ],
         "tool": {
-          "path": "packages/etl/out/mark-adjudication.html",
+          "path": "packages/etl/out/mark-adjudication.heldout.html",
           "label": "The hundred trials",
-          "note": "Built by the second setup command. Opened from here, every answer you give lands in this session's transcript as you give it; opened as a file on its own, it keeps its own copy and hands you a download at the end. Either way it says nothing about how you are doing, because it does not know."
+          "note": "Built by the setup command. Opened from here, every answer you give lands in this session's transcript as you give it; opened as a file on its own, it keeps its own copy and hands you a download at the end. Either way it says nothing about how you are doing, because it does not know."
         },
         "setup": [
           {
-            "run": "node packages/etl/scripts/probe-mark-ink.mjs --sample 4000 --seed 7 --pages-n 40",
-            "expect": "About fifty seconds, ending in a failure code — that is expected, and it is the reason this check exists. It writes packages/etl/out/mark-shift.json: one measured displacement for each of forty pages. That file is the thing on trial."
-          },
-          {
-            "run": "pnpm adjudicate:marks --seed 11 --count 100",
-            "expect": "packages/etl/out/mark-adjudication.html in about a second, and a line naming the seed, how many pages the trials spread over, and a short fingerprint of the displacements. Note the fingerprint. Open the file in any browser — it needs nothing running, and it reaches no network."
+            "run": "pnpm adjudicate:marks --seed 11 --count 100 --shift docs/validation/rulings/mark-shift.604pages.c849e72d.json --exclude docs/validation/rulings/mark-shift.40pages.c8528da9.json --pages 40 --out packages/etl/out/mark-adjudication.heldout.html",
+            "expect": "A line reading 40 of 600 measured, 40 held out · even, then a hundred trials over forty pages in about a second, and two short fingerprints — one for the corrections, one for the pages. Note both. It writes the page and a companion file of the same name ending .pages.json. Open the page in any browser: it needs nothing running and it reaches no network."
           }
         ],
         "steps": [
+          {
+            "do": "If you are also going to sit the placing session, sit this one first.",
+            "expect": "Nothing to run. It is an order, not a command.",
+            "why": "The placing session shows the same rectangles and invites you to drag them onto the mark, which is the most effective possible way to learn where our correction tends to sit. Come to these hundred trials afterwards and you are answering from that lesson rather than from the ink, and the count that comes out is a measure of how well you learned it. The reverse order costs nothing: knowing which of two rectangles you preferred does not tell you where to drag anything.",
+            "id": "this-one-first"
+          },
           {
             "do": "Read the five short answers the page opens with, then start. Do not read the code that built it first.",
             "expect": "A first trial: one mark, drawn twice side by side, a rectangle on each, and two keys.",
@@ -646,14 +648,14 @@
           },
           {
             "do": "At the end, press the button that saves the ruling, and keep the file somewhere you can name on a command line.",
-            "expect": "mark-ruling-11.json in your downloads. It holds your answers, the seed, and the fingerprint — and no key, because there still isn't one.",
+            "expect": "mark-ruling-11.28042a4d.json in your downloads. It holds your answers, the seed, and both fingerprints — and no key, because there still isn't one. The second half of the name is the page list: two sittings under this seed that asked about different pages are different sittings, and without it they arrive in the same folder as the same file.",
             "why": "The ruling is deliberately worthless on its own. That is what makes it evidence: it could not have been edited towards an answer, because at the moment it was written nothing on the machine knew what the answers were.",
             "id": "save-the-ruling"
           },
           {
-            "do": "Score it: pnpm adjudicate:score ~/Downloads/mark-ruling-11.json",
+            "do": "Score it: pnpm adjudicate:score ~/Downloads/mark-ruling-11.28042a4d.json --shift docs/validation/rulings/mark-shift.604pages.c849e72d.json",
             "expect": "Four lines with intervals — as shipped, the decoy, the catches, twins — then, if you ticked any, how many marks poked out of both rectangles and the headline again without them. One sentence of verdict at the end. It exits 0 only when the session was valid and the corrected rectangle actually won.",
-            "why": "This is the first moment anyone knows what the right answers were, you included. If it refuses outright, the displacements were re-measured between building the page and scoring it: score against the file it was built from, or build a fresh session and work it again. A ruling scored against displacements it was not worked against comes out looking clean and means nothing.",
+            "why": "This is the first moment anyone knows what the right answers were, you included. The corrections have to be named because the ones sitting loose in the build directory are whatever was measured last, and this sitting was built from a particular committed file. If it refuses outright, that is the two of them disagreeing: score against the file it was built from, or build a fresh session and work it again. A ruling scored against corrections it was not worked against comes out looking clean and means nothing.",
             "id": "score-it"
           },
           {
@@ -669,9 +671,10 @@
           "'cannot see a shift this small' → the session says nothing about the correction either way. Try once more with bigger panels (--panel 640). If the decoys still do not clear half, the difference is below what an eye resolves at this size and no number of trials will change that; the case for the correction then rests entirely on the ink arithmetic and its control, and that is what the record should say rather than pretending this was run.",
           "'SESSION INVALID' or 'SUSPECT' → discard it and do not argue with it. The catches are rectangles a whole letter off their mark and everyone gets those right while looking; missing them means the session was worked while distracted. Rerun under a different seed, which draws different marks in a different order.",
           "A run of 'neither box closed on it' is a second finding, and it does not change the verdict above — it starts a different question. The rectangles come from one printing and the ink from another, so a box can arrive in the right place and the wrong size, and no amount of moving it will help. If the count is more than a handful, open the named marks in the encoding inspector and compare the box against the ink before adopting anything; the repair is a re-measurement, not a displacement.",
-          "One session is one person. If the verdict is going to decide whether marks ship, a second reader under a different seed costs another twenty minutes and turns one person's eyes into a result — and two people disagreeing is itself the finding."
+          "One session is one person. If the verdict is going to decide whether marks ship, a second reader under a different seed costs another twenty minutes and turns one person's eyes into a result — and two people disagreeing is itself the finding.",
+          "Whichever way it goes, it goes for the whole print and not for forty pages. Every mark here is on a page the correction was fitted without, so a 'supported' is a statement about pages nobody had looked at, which is the only kind worth having before shipping this on all six hundred and four. Write the held-out pages into the result: a reader a year from now cannot tell from a percentage which question it answered."
         ],
-        "record": "make record CHECK=placement-correction-by-eye RESULT='seed 11 · 100 trials · as shipped <pct> [<lo>–<hi>], decoy <pct>, catches <pct>, twins <pct> → <supported|not supported|says nothing>'"
+        "record": "make record CHECK=placement-correction-by-eye RESULT='seed 11 · 100 trials over 40 held-out pages · as shipped <pct> [<lo>–<hi>], decoy <pct>, catches <pct>, twins <pct> → <supported|not supported|says nothing>'"
       },
       "tunes": [
         "packages/etl/data/pages/word-boxes.pin.json — a supported correction is two more numbers per page recorded there. This is the artifact the check exists to release.",
