@@ -6,6 +6,7 @@ a second time, on a different machine, months later.
 
 ```
 docs/validation/rulings/<when>-<check-id>.seed<N>.json
+docs/validation/rulings/<when>-<check-id>.seed<N>.reader<X>.json   # when two people sat it
 ```
 
 ## Why these are here and not in a downloads folder
@@ -49,6 +50,24 @@ trial index against a different mark while nothing threw. It refuses on that fin
 and refuses a third time if the displacements it is handed carry no row for a page the sitting
 used. That last check is not redundant with the first: a file can carry the right fingerprint
 and still be the wrong file for these pages, and the error message says so in those words.
+
+## Why some of them also name a person
+
+A placing session says how far a rectangle is from where somebody put it, and that number has
+two readings it cannot separate on its own: *the print is out by this much*, and *this person
+puts rectangles this way*. Only a second person working the identical session — the same marks,
+the same order, the same starting points — tells those apart, so the session records **whose
+hand it was**, and when there are two of them the name goes in the file name after the seed:
+
+```
+2026-08-13T…-placement-holds-off-its-own-pages.seed31.readerB.json
+```
+
+That is not decoration. Two people sitting the same build otherwise produce two files with the
+same name, and a half-finished sitting resumes out of whichever answers the browser saw last —
+the second reader would resume into the first one's work and never know. Scoring one against the
+other is `--against`, and it refuses two sittings that were not the same build, or two by the
+same person, which compares a hand with itself and returns a beautiful number about nothing.
 
 ## Reading one
 
