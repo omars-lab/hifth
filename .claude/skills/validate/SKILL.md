@@ -307,10 +307,12 @@ and the fix it names is that one command.
 3. Pick one. Read it here with `make validate CHECK=<id>`; a step a producer
    discharged prints as `[machine] …` with the command and the date, and you skip
    it.
-4. If it happens on a phone (most of them do), `make guide` and open the printed
-   LAN URL on the phone — same runbook, tickable, with the checkboxes persisted
-   so a screen lock does not lose the walkthrough. Run the check's own `setup`
-   commands (e.g. `make phone-perf`) in a second terminal.
+4. Open the runbook where the check actually happens. Two surfaces, same source:
+   `make guide` for the phone (every check, tickable, nothing written down), or
+   `make session CHECK=<id>` for the one you are about to work (a single check,
+   everything you tick or type banked to a transcript as you do it — see below).
+   Run the check's own `setup` commands (e.g. `make phone-perf`) in a second
+   terminal either way.
 5. `make record CHECK=<id> RESULT='<the verdict, in words>'`. The words are the
    artifact: a `done` with no result is indistinguishable from a check nobody ran.
    Recording stamps the ledger, regenerates the guide, and re-runs the gate.
@@ -334,14 +336,78 @@ check that tunes nothing, a pending human check with no runbook (nobody can run
 it, so it will sit there looking tracked), or a `guide.html` that was not
 regenerated after the ledger moved.
 
+### Co-working a check — `make session`
+
+```bash
+make session CHECK=<id>          # resume an unbanked sitting, or start one
+make session CHECK=<id> NEW=1    # start a fresh transcript regardless
+make session CHECK=<id> PORT=4180
+```
+
+One check, drawn from the same renderer the field guide uses, served on the LAN so
+the phone can hold it — and, unlike the guide, it **writes**. Every box ticked,
+every note typed, and every answer a check's own tool reports lands in
+`docs/validation/sessions/<stamp>-<id>.jsonl` at the moment it happens. At the end
+the page banks the verdict into the ledger for you (it runs `make record`), or
+prints the `make record` line pre-filled from what you wrote if you would rather
+say it yourself.
+
+The gap this closes is an ordering problem, not a documentation one. The ledger's
+`result` has always been typed after the walkthrough was over, so what you noticed
+at step four survived only if you were still holding it at step ten. Here the
+observation is on disk while the step is still in front of you.
+
+Four properties, each load-bearing:
+
+- **It cannot score.** The page shows how far through you are and whether the last
+  write landed, and nothing else. `placement-correction-by-eye` is a blind forced
+  choice whose validity rests on nobody — the worker included — knowing how it is
+  going while it is going, and a running tally would quietly turn the measurement
+  into a training exercise. `summarise()` in `scripts/lib/session-log.mjs` is
+  arithmetic only for exactly this reason.
+- **It is not a second ledger.** Nothing reads a transcript to decide whether a
+  check passed. `docs/validation/sessions/README.md` is the format; the ledger
+  stays the register.
+- **A dropped write is visible.** The client retries forever and shows an
+  unmissable "N not banked" pill while it does. A capture surface that loses
+  writes quietly is worse than the download it replaced, which at least failed
+  where you could see it.
+- **The server binds `0.0.0.0`, so every write route carries a per-run token.**
+  The URL printed in your terminal has it; a second thing on the Wi-Fi does not.
+  The integrity argument is the real one — these files are treated as evidence.
+
+**Giving a check its own tool.** A check whose work is a purpose-built page
+declares it in the ledger, beside the runbook that builds it:
+
+```json
+"runbook": {
+  "tool": { "path": "packages/etl/out/mark-adjudication.html", "label": "…", "note": "…" }
+}
+```
+
+The session serves that file with a small sink injected, and the page opts in:
+
+```js
+window.HIFTH_SESSION?.post("observation", { … });        // one answer, as it is given
+window.HIFTH_SESSION?.artifact("ruling.json", { … });    // the file, at the end
+```
+
+Both calls are optional by construction. Opened as a plain file — still supported,
+still the documented fallback — the sink is absent, the calls do nothing, and the
+tool keeps whatever offline behaviour it had. **Never send the sink anything the
+page is not supposed to know**: the adjudication tool posts *which panel was
+chosen* and never whether it was right, because the answer key does not exist
+until the scorer rebuilds it from the seed, and a reporting path is the last place
+that should be where it leaks.
+
 ### `evidence` — the half a machine *can* run, written down
 
 A check may carry an `evidence` block: one command (`run`), the runbook step
 **ids** it discharges (`covers`), and the `residue` it cannot. `make validate-auto`
 runs each one and writes the real exit code into
 `docs/validation/evidence/<id>.json`; the terminal and the guide read those
-records and strike the covered steps off. Three of the six checks have one today
-— `source-offer-resolves`, `kfgqpc-terms-primary-source`, `edge-spot-audit`.
+records and strike the covered steps off. Three checks have one today —
+`source-offer-resolves`, `kfgqpc-terms-primary-source`, `edge-spot-audit`.
 
 Four rules, each of them load-bearing:
 
@@ -438,6 +504,45 @@ verdict.
 
 If a whole *class* of edge turns out wrong, that is a filter in
 `packages/etl/scripts/build-adjacency.mjs`, not twenty more rejections.
+
+### The placement adjudication — asking without telling
+
+The second check with a dedicated tool, and the one to copy when a measurement
+here needs a person to settle it. Steps:
+`make validate CHECK=placement-correction-by-eye`.
+
+**Never show someone a verdict and ask if they agree.** They agree. The
+measurement sounds confident, the honest answer to "does this look right" is "I
+suppose so", and what comes back is the machine's own opinion with a human's name
+on it — indistinguishable from evidence, and worthless. This check exists because
+the surface that already existed (a page of worst-first verdicts, each drawn with
+the expected outline beside the claimed rectangle) is exactly that mistake, and it
+sat unworked for weeks partly because nobody could say what working it would
+prove.
+
+**The shape that does work.** A forced choice between two candidates, nothing on
+the screen saying which is ours, and — the part that makes it evidence rather
+than a promise — no answer key on disk. `pnpm adjudicate:marks` plans the session
+from a seed; `pnpm adjudicate:score` rebuilds the same session from the same seed
+afterwards and only then knows which panel was which. Nobody had to be trusted not
+to peek, because for the twenty minutes that mattered there was nothing to peek
+at. The scorer refuses outright (exit 2) if the underlying measurement moved
+between building the session and scoring it.
+
+**A session carries its own controls, and they are not optional.** An easy
+condition (a rectangle a whole letter off) so a session worked while distracted
+fails visibly instead of adding noise; an unanswerable one (the same rectangle
+twice) so a person who always picks something is caught; and a decoy displaced the
+*same distance in another direction*, which does two jobs — it measures whether an
+eye can resolve a difference that small at all, and it breaks the pattern that
+would otherwise be learnable within twenty trials. Without the decoy, "people did
+not prefer our correction" and "people cannot see a shift this small" are the same
+number, and only one of them is a finding about the data.
+
+**Bank the refusal as carefully as the confirmation.** The most valuable outcome
+this can produce is *the decoys were seen clearly and ours still lost* — our
+correction is wrong, not the test blunt — and it is the outcome most likely to be
+left in a terminal scrollback. `make record` either way.
 
 ---
 

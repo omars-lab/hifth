@@ -1,0 +1,287 @@
+{
+  "$comment": [
+    "The decision register: one row per question this project has had to answer,",
+    "and the only place that knows they are the same kind of thing.",
+    "",
+    "WHY THIS EXISTS. docs/decisions/ already held fifteen records, and there was",
+    "no way in. Their titles are sentences, not subjects — 'The grain gets finer",
+    "where the finger already is' is a good title and a useless index entry, and a",
+    "reader who has never opened this repo cannot tell from the directory listing",
+    "which file answers the question they arrived with. Worse, the running-table",
+    "habit existed but was scoped to one topic: desktop-vs-mobile.md says 'append",
+    "a row there rather than restating one here', and nothing generalised it, so",
+    "an open decision could sit in a design doc's eighth section for a month with",
+    "nothing anywhere counting it as open.",
+    "",
+    "WHAT IT IS NOT. This file does not restate a decision. It carries no summary",
+    "of the answer and no argument — those live in the record that owns them, and",
+    "a copy here would be right for a while and then quietly stop being right.",
+    "Same rule as docs/issues.json, docs/use-cases.json and the validation ledger:",
+    "an index points, it does not paraphrase. The one sentence this file does own",
+    "is `question`, because the records' own titles are not question-shaped and a",
+    "stranger scanning for their question will not find it in a title.",
+    "",
+    "WHAT IT ADDS. Status, when an open question is still open. The options, when",
+    "there are named options to choose between. And the two links that make an",
+    "option choosable by someone who is not in the weeds of this code: `artifact`,",
+    "the published page anyone can open, and `page`, the same page checked in here",
+    "so it outlives the link. gate:decisions refuses one without the other.",
+    "",
+    "THE FIELDS.",
+    "  id            kebab-case, unique. The name a task or a PR uses.",
+    "  question      one plain-language question. No file names, no symbols, no",
+    "                repo jargon — the CLAUDE.md tenet, enforced by the gate's",
+    "                identifier check. This is the only prose stored here.",
+    "  status        open      — nobody has chosen yet.",
+    "                decided   — chosen; `doc` holds the record and the reasons.",
+    "                living    — a running record that is never finished; new rows",
+    "                            get appended to it rather than a new file made.",
+    "                superseded— a later decision replaced it; `supersededBy` says",
+    "                            which, and the old record stays readable.",
+    "  options       [{id, label}] — required (2 or more) while `open`. Absent on",
+    "                the records written before this register existed: they were",
+    "                narrated, not enumerated, and inventing options after the",
+    "                fact would be fiction with a schema.",
+    "  artifact      https://claude.ai/... — the published page. Required while",
+    "                `open`: an open question with nothing to look at cannot be",
+    "                answered by anyone who is not already holding the code.",
+    "  page          the same page, checked in, so the decision survives the link",
+    "                rotting. Required whenever `artifact` is set, and vice versa.",
+    "  builtBy       the script that regenerates `page`. A checked-in page nobody",
+    "                can rebuild is a screenshot with extra steps.",
+    "  doc           the record that holds the reasons. Required, always.",
+    "  related       the ids of decisions that constrain, or are constrained by,",
+    "                this one — and the reason each does belongs in the record,",
+    "                not here. This is the one fact no single record can hold:",
+    "                relatedness is a property of a pair, and the second half is",
+    "                usually written months after the first, by which time the",
+    "                first has stopped being the thing anyone is reading. The",
+    "                gate requires it in both directions, because a link a reader",
+    "                can only follow one way is one they will not find from the",
+    "                end they happen to be standing at.",
+    "  decided       the option id that won, when options were enumerated.",
+    "  by, date      who made the call and when. Required once decided.",
+    "",
+    "Regenerate the reader's copy with `make decisions-doc`; `pnpm gate:decisions`",
+    "fails if this file and docs/decisions/README.md disagree, if a link does not",
+    "resolve, or if a record exists in docs/decisions/ with no row here."
+  ],
+  "decisions": [
+    {
+      "id": "mark-granularity",
+      "question": "Should the app colour tajweed one colour a verse, or should it colour the exact letter a rule lands on?",
+      "status": "open",
+      "options": [
+        {
+          "id": "A",
+          "label": "Leave it as it is — one colour a verse"
+        },
+        {
+          "id": "B",
+          "label": "Colour the exact letter or mark"
+        },
+        {
+          "id": "C",
+          "label": "Prepare the ground, colour nothing yet"
+        }
+      ],
+      "artifact": "https://claude.ai/code/artifact/5f230dff-e4e8-40c6-9c4e-888786eeef9b",
+      "page": "docs/design/mark-granularity.html",
+      "builtBy": "scripts/build-mark-options.mjs",
+      "doc": "docs/design/sub-word-marks.md",
+      "decided": null,
+      "by": null,
+      "date": null,
+      "related": [
+        "word-selection",
+        "loop-6a",
+        "tajweed-colours"
+      ]
+    },
+    {
+      "id": "tajweed-colours",
+      "question": "Should a reader be able to change the colours the app uses for recitation rules, and how many colours are there to change?",
+      "status": "open",
+      "options": [
+        {
+          "id": "A",
+          "label": "Leave the colours fixed"
+        },
+        {
+          "id": "B",
+          "label": "A reader recolours the seven groups"
+        },
+        {
+          "id": "C",
+          "label": "A reader recolours all eighteen rules"
+        },
+        {
+          "id": "D",
+          "label": "Offer a few ready-made schemes, no picker"
+        }
+      ],
+      "artifact": "https://claude.ai/code/artifact/74b37363-d082-45e7-9651-54c47c328844",
+      "page": "docs/design/tajweed-colours.html",
+      "builtBy": "scripts/build-palette-options.mjs",
+      "doc": "docs/decisions/tajweed-colours.md",
+      "decided": null,
+      "by": null,
+      "date": null,
+      "related": [
+        "mark-granularity",
+        "loop-6a"
+      ]
+    },
+    {
+      "id": "desktop-vs-mobile",
+      "question": "When should a wide window behave differently from a phone?",
+      "status": "living",
+      "doc": "docs/decisions/desktop-vs-mobile.md",
+      "related": [
+        "wheel-and-zoom"
+      ]
+    },
+    {
+      "id": "wheel-and-zoom",
+      "question": "Should rolling the mouse wheel magnify the page?",
+      "status": "decided",
+      "doc": "docs/decisions/wheel-and-zoom.md",
+      "by": "omar",
+      "date": "2026-08-06",
+      "related": [
+        "desktop-vs-mobile"
+      ]
+    },
+    {
+      "id": "word-search",
+      "question": "When a reader picks out a few words, what should the app go looking for?",
+      "status": "decided",
+      "doc": "docs/decisions/word-search.md",
+      "by": "omar",
+      "date": "2026-08-05",
+      "related": [
+        "word-selection",
+        "loop-4a"
+      ]
+    },
+    {
+      "id": "word-selection",
+      "question": "Should a reader be able to pick single words, or only whole verses?",
+      "status": "decided",
+      "doc": "docs/decisions/word-selection.md",
+      "by": "omar",
+      "date": "2026-08-04",
+      "related": [
+        "word-search",
+        "mark-granularity"
+      ]
+    },
+    {
+      "id": "pin-marker",
+      "question": "How does the app keep a page it was told to save without storing it twice?",
+      "status": "decided",
+      "doc": "docs/decisions/pin-marker.md",
+      "by": "omar",
+      "date": "2026-08-04",
+      "related": [
+        "loop-6b"
+      ]
+    },
+    {
+      "id": "i18n",
+      "question": "How does the app's own wording get translated, and what keeps the two languages in step?",
+      "status": "decided",
+      "doc": "docs/decisions/i18n.md",
+      "by": "omar",
+      "date": "2026-07-30"
+    },
+    {
+      "id": "loop-0",
+      "question": "Can a real page of the mus'haf be put on a phone, installed, and opened again offline?",
+      "status": "decided",
+      "doc": "docs/decisions/loop-0.md",
+      "by": "omar",
+      "date": "2026-07-20"
+    },
+    {
+      "id": "loop-1",
+      "question": "Does touching a verse on a phone answer fast enough to build the rest on?",
+      "status": "decided",
+      "doc": "docs/decisions/loop-1.md",
+      "by": "omar",
+      "date": "2026-07-20"
+    },
+    {
+      "id": "loop-2",
+      "question": "Can a reader jump from a verse to one that sounds like it, and find the way back?",
+      "status": "decided",
+      "doc": "docs/decisions/loop-2.md",
+      "by": "omar",
+      "date": "2026-07-23"
+    },
+    {
+      "id": "loop-3",
+      "question": "Can a teacher send a link that opens exactly what they were looking at?",
+      "status": "decided",
+      "doc": "docs/decisions/loop-3.md",
+      "by": "omar",
+      "date": "2026-07-25"
+    },
+    {
+      "id": "loop-4a",
+      "question": "Where does the list of look-alike verses come from, and is it the same list every time it is built?",
+      "status": "decided",
+      "doc": "docs/decisions/loop-4a.md",
+      "by": "omar",
+      "date": "2026-07-25",
+      "related": [
+        "loop-4b",
+        "word-search"
+      ]
+    },
+    {
+      "id": "loop-4b",
+      "question": "Can the app carry the whole mus'haf instead of three pages?",
+      "status": "decided",
+      "doc": "docs/decisions/loop-4b.md",
+      "by": "omar",
+      "date": "2026-08-03",
+      "related": [
+        "loop-4a"
+      ]
+    },
+    {
+      "id": "loop-5",
+      "question": "Can a reader mark a stretch of more than one verse and ask about all of it at once?",
+      "status": "decided",
+      "doc": "docs/decisions/loop-5.md",
+      "by": "omar",
+      "date": "2026-07-25"
+    },
+    {
+      "id": "loop-6a",
+      "question": "Can a reader turn the colouring off, jump anywhere in the book, and reopen it with no signal?",
+      "status": "decided",
+      "doc": "docs/decisions/loop-6a.md",
+      "by": "omar",
+      "date": "2026-07-25",
+      "related": [
+        "mark-granularity",
+        "loop-6b",
+        "tajweed-colours"
+      ]
+    },
+    {
+      "id": "loop-6b",
+      "question": "Can a reader keep one thirtieth of the book on their phone for good?",
+      "status": "decided",
+      "doc": "docs/decisions/loop-6b.md",
+      "by": "omar",
+      "date": "2026-08-04",
+      "related": [
+        "pin-marker",
+        "loop-6a"
+      ]
+    }
+  ]
+}

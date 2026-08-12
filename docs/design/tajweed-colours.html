@@ -1,0 +1,795 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Whose colours are they? — can a reader recolour Hifth's tajweed marks</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Four options for how much of Hifth's tajweed colouring a reader can change, each drawn on a real page of the mus'haf.">
+<style>
+:root{
+  --paper:#f4efe6; --ink:#26201a; --accent:#1f6f66;
+  --tint:#ede6da; --rule:#ddd2c2; --dim:#6f6559; --card:#fbf8f2;
+  --shadow:0 1px 0 rgba(38,32,26,.05);
+}
+@media (prefers-color-scheme: dark){
+  :root{ --paper:#191612; --ink:#ece4d8; --accent:#5fbfae; --tint:#221d18;
+         --rule:#3a322a; --dim:#9a8d7d; --card:#201b16; --shadow:none; }
+}
+:root[data-theme="dark"]{ --paper:#191612; --ink:#ece4d8; --accent:#5fbfae; --tint:#221d18;
+  --rule:#3a322a; --dim:#9a8d7d; --card:#201b16; --shadow:none; }
+:root[data-theme="light"]{ --paper:#f4efe6; --ink:#26201a; --accent:#1f6f66; --tint:#ede6da;
+  --rule:#ddd2c2; --dim:#6f6559; --card:#fbf8f2; --shadow:0 1px 0 rgba(38,32,26,.05); }
+
+body{ background:var(--paper); color:var(--ink); margin:0;
+  font:16px/1.65 "Iowan Old Style","Charter","Palatino Linotype",Palatino,Georgia,serif;
+  -webkit-text-size-adjust:100%; }
+main,.head,footer{ max-width:60rem; margin:0 auto; padding:0 1.5rem; }
+h1,h2,h3,h4,.eyebrow,.tag,.n,code,table,.stats b,figcaption{
+  font-family:ui-sans-serif,"Helvetica Neue",Arial,system-ui,sans-serif; }
+h1{ font-size:clamp(1.9rem,4.6vw,3rem); line-height:1.1; letter-spacing:-.02em;
+  margin:.2em 0 .5rem; text-wrap:balance; font-weight:650; }
+h2{ font-size:1.35rem; letter-spacing:-.01em; margin:0 0 .9rem; display:flex; gap:.7rem;
+  align-items:baseline; font-weight:650; }
+h3{ font-size:1.08rem; margin:0; font-weight:650; }
+h4{ font-size:.72rem; margin:0 0 .35rem; text-transform:uppercase; letter-spacing:.09em;
+  color:var(--dim); font-weight:650; }
+p{ margin:0 0 1rem; max-width:64ch; }
+code{ font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:.86em;
+  background:var(--tint); padding:.1em .35em; border-radius:3px; }
+strong{ font-weight:650; }
+.dim{ color:var(--dim); } .small{ font-size:.85rem; }
+a{ color:var(--accent); text-underline-offset:2px; }
+a:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; border-radius:2px; }
+
+.head{ padding-top:3.5rem; padding-bottom:1rem; }
+.eyebrow{ font-size:.72rem; letter-spacing:.16em; text-transform:uppercase; color:var(--accent);
+  margin:0; font-weight:650; }
+.standfirst{ font-size:1.1rem; max-width:58ch; }
+.stats{ display:flex; flex-wrap:wrap; gap:1px; background:var(--rule); border:1px solid var(--rule);
+  border-radius:6px; overflow:hidden; margin:1.75rem 0 0; }
+.stats div{ flex:1 1 11rem; background:var(--card); padding:.9rem 1rem; }
+.stats b{ display:block; font-size:1.7rem; font-variant-numeric:tabular-nums; letter-spacing:-.02em;
+  line-height:1.1; }
+.stats span{ display:block; font-size:.8rem; color:var(--dim); margin-top:.15rem; }
+
+section{ padding:3rem 0 0; border-top:1px solid var(--rule); margin-top:3rem; }
+section:first-child{ border-top:0; }
+.num{ font-size:.72rem; color:var(--paper); background:var(--accent); width:1.5rem; height:1.5rem;
+  border-radius:50%; display:inline-grid; place-items:center; flex:0 0 auto; font-weight:650;
+  font-variant-numeric:tabular-nums; }
+.lede{ font-size:1.06rem; }
+
+.spec{ margin:1.5rem 0; }
+.win{ position:relative; width:100%; padding-top:var(--ar); overflow:hidden; background:#fdfaf4;
+  border:1px solid var(--rule); border-radius:5px; }
+@media (prefers-color-scheme: dark){ .win{ background:#f4efe6; } }
+.print{ position:absolute; display:block; max-width:none; }
+.ov{ position:absolute; inset:0; width:100%; height:100%; }
+figcaption{ font-size:.8rem; color:var(--dim); margin-top:.5rem; max-width:64ch; }
+.two{ display:grid; grid-template-columns:repeat(auto-fit,minmax(15rem,1fr)); gap:1.25rem; }
+.two .spec{ margin:0; }
+
+.opt{ border:1px solid var(--rule); border-radius:7px; overflow:hidden; margin:1.5rem 0 0;
+  background:var(--card); box-shadow:var(--shadow); }
+.opt-h{ padding:1rem 1.15rem; display:flex; flex-wrap:wrap; gap:.2rem 1rem; align-items:baseline;
+  border-bottom:1px solid var(--rule); }
+.tag{ margin:0; font-size:.78rem; color:var(--dim); letter-spacing:.02em; }
+.opt .spec{ margin:0; }
+.opt .win{ border:0; border-radius:0; border-bottom:1px solid var(--rule); }
+.opt .two{ padding:1.15rem; border-bottom:1px solid var(--rule); }
+.opt .two .win{ border:1px solid var(--rule); border-radius:4px; }
+.cost{ display:grid; grid-template-columns:repeat(auto-fit,minmax(13rem,1fr)); }
+.cost>div{ padding:1rem 1.15rem; border-right:1px solid var(--rule); }
+.cost>div:last-child{ border-right:0; }
+.cost p{ margin:0; font-size:.9rem; }
+
+table.grid{ width:100%; border-collapse:collapse; margin:1.25rem 0 1.5rem; font-size:.88rem;
+  display:block; overflow-x:auto; }
+table.grid caption{ text-align:left; font-size:.82rem; color:var(--dim); padding-bottom:.55rem;
+  font-family:ui-sans-serif,system-ui,sans-serif; max-width:64ch; }
+.grid th{ text-align:left; font-size:.7rem; text-transform:uppercase; letter-spacing:.07em;
+  color:var(--dim); font-weight:650; padding:0 .7rem .45rem 0; border-bottom:1px solid var(--rule);
+  white-space:nowrap; }
+.grid td{ padding:.45rem .7rem .45rem 0; border-bottom:1px solid var(--rule); vertical-align:middle; }
+.grid .n{ text-align:right; font-variant-numeric:tabular-nums; white-space:nowrap; }
+.bar{ width:26%; min-width:4rem; }
+.bar span{ display:block; height:.5rem; border-radius:2px; background:var(--accent); }
+
+.chip{ display:inline-block; font-size:.72rem; padding:.1rem .45rem; border-radius:99px;
+  margin:.1rem .25rem .1rem 0; border:1px solid var(--c); white-space:nowrap;
+  font-family:ui-sans-serif,system-ui,sans-serif; }
+.chip.off{ color:var(--dim); opacity:.85; }
+.sw{ display:inline-block; width:.7rem; height:.7rem; border-radius:2px; background:var(--c);
+  margin-right:.45rem; vertical-align:-1px; }
+.swn{ font-size:.88rem; }
+
+.note{ border-left:3px solid var(--accent); background:var(--tint); padding:1rem 1.15rem;
+  border-radius:0 5px 5px 0; margin:1.5rem 0 0; }
+.note p:last-child{ margin:0; }
+
+.pal{ display:grid; grid-template-columns:repeat(auto-fit,minmax(19rem,1fr)); gap:.15rem 1.5rem; }
+.pk{ display:grid; grid-template-columns:1.4rem 8rem 1.2rem 1fr auto; gap:.6rem; align-items:center;
+  padding:.4rem 0; border-bottom:1px solid var(--rule); font-size:.85rem; }
+.pk b{ font-family:ui-sans-serif,system-ui,sans-serif; font-weight:600; }
+.chipL{ width:1.4rem; height:1.4rem; border-radius:3px; background:var(--c); }
+.dashline{ width:100%; height:6px; }
+.pk .dim{ font-size:.78rem; font-variant-numeric:tabular-nums; }
+.pk .mk{ font-size:1rem; }
+
+/* Option C's eighteen, shown together at legend size — the collisions are the
+   argument, so they have to sit next to each other rather than in a table. */
+.pal-chips{ padding:1rem 1.15rem; border-bottom:1px solid var(--rule); }
+.pal-chips .chip{ border:0; font-weight:600; }
+
+.schemes{ padding:0 1.15rem 1.15rem; display:grid; gap:.5rem; }
+.schemes div{ display:flex; align-items:center; gap:.5rem; flex-wrap:wrap; }
+.schemes .swn{ min-width:16rem; color:var(--dim); }
+.schemes .sw{ width:1.35rem; height:1.35rem; margin:0; border-radius:3px; }
+
+/* An earlier answer, or an option left off: the claim in the term, the reason in
+   the definition. A list, not a table — these are read, not compared. */
+.prior{ margin:1.25rem 0 0; max-width:64ch; }
+.prior dt{ font-family:ui-sans-serif,"Helvetica Neue",Arial,system-ui,sans-serif; font-size:.92rem;
+  font-weight:650; margin-top:1.1rem; }
+.prior dt:first-child{ margin-top:0; }
+.prior dd{ margin:.35rem 0 0; padding-left:1rem; border-left:2px solid var(--rule);
+  font-size:.94rem; color:var(--ink); }
+.src{ display:block; margin-top:.5rem; font-size:.8rem; color:var(--dim); }
+
+.wch{ margin:1.25rem 0 0; padding-left:1.15rem; max-width:64ch; }
+.wch li{ margin-bottom:.7rem; }
+
+footer{ margin-top:3rem; padding-top:1.5rem; padding-bottom:4rem; border-top:1px solid var(--rule); }
+footer p{ font-size:.85rem; color:var(--dim); }
+footer strong{ color:var(--ink); }
+@media (max-width:34rem){ .cost>div{ border-right:0; border-bottom:1px solid var(--rule); }
+  .schemes .swn{ min-width:0; flex:1 0 100%; } }
+</style>
+</head>
+<body>
+
+<header class="head">
+  <p class="eyebrow">Hifth · a decision, drawn on paper</p>
+  <h1>Whose colours are they?</h1>
+  <p class="standfirst">
+    Hifth tints a verse to flag a recitation rule inside it, and it uses seven colours it chose
+    itself. A reader who learned from a colour-coded printed mus'haf learned different ones. This
+    page asks whether a reader should be able to change ours — and, if so, how far down that goes:
+    the seven groups the app shows, or all
+    <strong>18</strong> rules the data underneath actually distinguishes.
+  </p>
+  <div class="stats">
+    <div><b>7</b><span>colours on screen today, fixed</span></div>
+    <div><b>18</b><span>rules the data tells apart</span></div>
+    <div><b>83.29%</b><span>of those rules are invisible at the size we colour</span></div>
+  </div>
+  <div class="note plain">
+    <h4>Four words, before we start</h4>
+    <p>
+      A <strong>tajweed rule</strong> tells a reciter to do something at a particular spot — hold a
+      vowel, hum through a letter, skip one. A <strong>madd</strong> is a held vowel; a
+      <strong>ghunnah</strong> is a hum through the nose; a <strong>qalqalah</strong> is a slight
+      echo on a stopped letter. Hifth sorts every rule into <strong>seven groups</strong> and gives
+      each group a colour, an outline pattern and a small Arabic letter, so the colour is never
+      carrying the meaning on its own.
+    </p>
+  </div>
+</header>
+
+<main>
+
+<section>
+  <h2><span class="num">1</span>What is being decided?</h2>
+  <p class="lede">
+    Whether a reader can change the tajweed colours, and how far down the change reaches.
+  </p>
+  <p>
+    Four answers, drawn side by side further down. <strong>A</strong>: leave them fixed.
+    <strong>B</strong>: a reader recolours the seven groups. <strong>C</strong>: a reader recolours
+    all 18 rules. <strong>D</strong>: no picker at all — a short list of whole
+    ready-made schemes to choose between.
+  </p>
+</section>
+
+<section>
+  <h2><span class="num">2</span>Why is this being asked now?</h2>
+  <p>
+    Because the app only just started knowing which rule it is looking at. Until this week the
+    colouring data was stored as the seven groups and the finer names were thrown away when it was
+    built — an <em>ikhfa</em> and an <em>iqlab</em> were the same thing by the time anything could
+    ask. They are now kept, all 18 of them, which cost
+    <strong>17.5%</strong> more to download and bought exactly one thing: the question on this page
+    became answerable in more than one way.
+  </p>
+  <p>
+    And because a reader arriving from a printed colour-coded mus'haf arrives with colours already
+    in their head. Ours are not wrong, but they are ours.
+  </p>
+</section>
+
+<section>
+  <h2><span class="num">3</span>What happens if nobody decides?</h2>
+  <p>
+    Nothing breaks. Option A is what the app does today: seven colours, chosen once, the same for
+    everyone. Nothing else is waiting behind this question and it can sit open indefinitely.
+  </p>
+  <p>
+    The cost is that a reader who finds our green unreadable, or who knows red as the elongation
+    colour and meets orange, has nowhere to go but switching the colouring off entirely — which is
+    the one control that does exist today, and is a blunt answer to a small complaint.
+  </p>
+</section>
+
+<section>
+  <h2><span class="num">4</span>What colours does the app use today, and where did they come from?</h2>
+  <p>
+    Seven, drawn from a palette designed to stay distinguishable to readers with the common kinds of
+    colour blindness. Each group also gets its own outline pattern and its own small Arabic letter,
+    so nothing on screen depends on telling two hues apart. Here they are on a real page — three
+    lines of the second page of the mus'haf, at about the size a phone shows them.
+  </p>
+  <figure class="spec" style="--ar:30.7018%">
+  <div class="win">
+    <img class="print" src="../../apps/web/public/assets/pages/hafs-kfqc/2.svg" alt=""
+         style="width:103.0702%;height:335.7143%;left:-2.6316%;top:-97.1429%">
+    <svg class="ov" viewBox="6 68 228 70" aria-hidden="true"><path d="M206.5 46h-34.1v26.2h34Z" fill="#8e2400" fill-opacity="0.1" stroke="#8e2400" stroke-width="0.7" stroke-dasharray="none" stroke-linejoin="round" vector-effect="non-scaling-stroke"/><path d="M172.4 46H33.8v26.2l192 .2v30h-53.4V72v.2Z" fill="#cc79a7" fill-opacity="0.1" stroke="#cc79a7" stroke-width="0.7" stroke-dasharray="2.5 2.5" stroke-linejoin="round" vector-effect="non-scaling-stroke"/><path d="M172.4 72.2H12v29.5h102v32.2h114.2v-30.2h-55.8V72.4Z" fill="#6e6259" fill-opacity="0.1" stroke="#6e6259" stroke-width="0.7" stroke-dasharray="0.8 1.6" stroke-linejoin="round" vector-effect="non-scaling-stroke"/><path d="M114 101.7H11.5v58.5h217v-26.6H114z" fill="#0072b2" fill-opacity="0.1" stroke="#0072b2" stroke-width="0.7" stroke-dasharray="5 1.5 1 1.5" stroke-linejoin="round" vector-effect="non-scaling-stroke"/><path d="M200 158.5H37.7v28.6h31.7v29.1h99.5v-28H200z" fill="#6e6259" fill-opacity="0.1" stroke="#6e6259" stroke-width="0.7" stroke-dasharray="0.8 1.6" stroke-linejoin="round" vector-effect="non-scaling-stroke"/></svg>
+  </div>
+  <figcaption>What the app draws today. One tint per verse, in the rarest kind of rule that verse carries.</figcaption>
+</figure>
+  <div class="pal"><div class="pk">
+      <span class="chipL" style="--c:#d55e00"></span>
+      <b>madd</b>
+      <span class="mk" lang="ar" dir="rtl">مـ</span>
+      <svg class="dashline" viewBox="0 0 100 6" preserveAspectRatio="none" aria-hidden="true"><line x1="0" y1="3" x2="100" y2="3" stroke="#d55e00" stroke-width="2" stroke-dasharray="4 2"/></svg>
+      <span class="dim">92.5% of verses</span>
+    </div><div class="pk">
+      <span class="chipL" style="--c:#9c9284"></span>
+      <b>hamzat wasl</b>
+      <span class="mk" lang="ar" dir="rtl">ٱ</span>
+      <svg class="dashline" viewBox="0 0 100 6" preserveAspectRatio="none" aria-hidden="true"><line x1="0" y1="3" x2="100" y2="3" stroke="#9c9284" stroke-width="2" stroke-dasharray="0.8 3"/></svg>
+      <span class="dim">76.9% of verses</span>
+    </div><div class="pk">
+      <span class="chipL" style="--c:#009e73"></span>
+      <b>ghunnah / ikhfa</b>
+      <span class="mk" lang="ar" dir="rtl">غ</span>
+      <svg class="dashline" viewBox="0 0 100 6" preserveAspectRatio="none" aria-hidden="true"><line x1="0" y1="3" x2="100" y2="3" stroke="#009e73" stroke-width="2" stroke-dasharray="1.6 1.6"/></svg>
+      <span class="dim">73.7% of verses</span>
+    </div><div class="pk">
+      <span class="chipL" style="--c:#cc79a7"></span>
+      <b>idgham</b>
+      <span class="mk" lang="ar" dir="rtl">د</span>
+      <svg class="dashline" viewBox="0 0 100 6" preserveAspectRatio="none" aria-hidden="true"><line x1="0" y1="3" x2="100" y2="3" stroke="#cc79a7" stroke-width="2" stroke-dasharray="2.5 2.5"/></svg>
+      <span class="dim">65.1% of verses</span>
+    </div><div class="pk">
+      <span class="chipL" style="--c:#0072b2"></span>
+      <b>qalqalah</b>
+      <span class="mk" lang="ar" dir="rtl">ق</span>
+      <svg class="dashline" viewBox="0 0 100 6" preserveAspectRatio="none" aria-hidden="true"><line x1="0" y1="3" x2="100" y2="3" stroke="#0072b2" stroke-width="2" stroke-dasharray="5 1.5 1 1.5"/></svg>
+      <span class="dim">42.8% of verses</span>
+    </div><div class="pk">
+      <span class="chipL" style="--c:#6e6259"></span>
+      <b>silent</b>
+      <span class="mk" lang="ar" dir="rtl">ص</span>
+      <svg class="dashline" viewBox="0 0 100 6" preserveAspectRatio="none" aria-hidden="true"><line x1="0" y1="3" x2="100" y2="3" stroke="#6e6259" stroke-width="2" stroke-dasharray="0.8 1.6"/></svg>
+      <span class="dim">37.4% of verses</span>
+    </div><div class="pk">
+      <span class="chipL" style="--c:#8e2400"></span>
+      <b>madd lazim</b>
+      <span class="mk" lang="ar" dir="rtl">مّ</span>
+      <svg class="dashline" viewBox="0 0 100 6" preserveAspectRatio="none" aria-hidden="true"><line x1="0" y1="3" x2="100" y2="3" stroke="#8e2400" stroke-width="2" stroke-dasharray="none"/></svg>
+      <span class="dim">2.1% of verses</span>
+    </div></div>
+  <p class="small dim" style="margin-top:1rem">
+    The right-hand figure is how many verses in the whole mus'haf carry that kind of rule at all —
+    not how many show it. Most of them show nothing, which is the subject of a
+    <a href="mark-granularity.html">separate question</a>.
+  </p>
+  <table class="grid">
+    <caption>How each colour stands against the paper. Anything under 3 is a colour that has to lean on its outline pattern to be found, which is exactly why the outline patterns exist.</caption>
+    <thead><tr><th>group</th><th class="n">contrast against the page</th><th></th></tr></thead>
+    <tbody>
+<tr><td><span class="sw" style="--c:#cc79a7"></span><span class="swn">idgham</span></td>
+  <td class="n">2.94</td>
+  <td class="bar"><span style="width:36.72712984561849%;background:#cc79a7"></span></td></tr>
+<tr><td><span class="sw" style="--c:#9c9284"></span><span class="swn">hamzat wasl</span></td>
+  <td class="n">2.94</td>
+  <td class="bar"><span style="width:36.73837832830805%;background:#9c9284"></span></td></tr>
+<tr><td><span class="sw" style="--c:#009e73"></span><span class="swn">ghunnah / ikhfa</span></td>
+  <td class="n">3.28</td>
+  <td class="bar"><span style="width:41.04777968789304%;background:#009e73"></span></td></tr>
+<tr><td><span class="sw" style="--c:#d55e00"></span><span class="swn">madd</span></td>
+  <td class="n">3.71</td>
+  <td class="bar"><span style="width:46.399536705754855%;background:#d55e00"></span></td></tr>
+<tr><td><span class="sw" style="--c:#0072b2"></span><span class="swn">qalqalah</span></td>
+  <td class="n">4.98</td>
+  <td class="bar"><span style="width:62.21641409626796%;background:#0072b2"></span></td></tr>
+<tr><td><span class="sw" style="--c:#6e6259"></span><span class="swn">silent</span></td>
+  <td class="n">5.67</td>
+  <td class="bar"><span style="width:70.88932767164681%;background:#6e6259"></span></td></tr>
+<tr><td><span class="sw" style="--c:#8e2400"></span><span class="swn">madd lazim</span></td>
+  <td class="n">8.39</td>
+  <td class="bar"><span style="width:100%;background:#8e2400"></span></td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section>
+  <h2><span class="num">5</span>If a reader picks two colours the same, does the page break?</h2>
+  <p class="lede">
+    No — and this is the reason a colour picker is safe to offer at all.
+  </p>
+  <p>
+    Below is the same three lines with two different kinds of rule set to the identical colour, which
+    is the worst thing a reader could do with a picker. The verses are still told apart, because the
+    outline pattern is not part of what a reader would be changing: one group is drawn with a long
+    dash, the other with a fine dot.
+  </p>
+  <figure class="spec" style="--ar:30.7018%">
+  <div class="win">
+    <img class="print" src="../../apps/web/public/assets/pages/hafs-kfqc/2.svg" alt=""
+         style="width:103.0702%;height:335.7143%;left:-2.6316%;top:-97.1429%">
+    <svg class="ov" viewBox="6 68 228 70" aria-hidden="true"><path d="M206.5 46h-34.1v26.2h34Z" fill="#8e2400" fill-opacity="0.1" stroke="#8e2400" stroke-width="0.7" stroke-dasharray="none" stroke-linejoin="round" vector-effect="non-scaling-stroke"/><path d="M172.4 46H33.8v26.2l192 .2v30h-53.4V72v.2Z" fill="#cc79a7" fill-opacity="0.1" stroke="#cc79a7" stroke-width="0.7" stroke-dasharray="2.5 2.5" stroke-linejoin="round" vector-effect="non-scaling-stroke"/><path d="M172.4 72.2H12v29.5h102v32.2h114.2v-30.2h-55.8V72.4Z" fill="#6e6259" fill-opacity="0.1" stroke="#6e6259" stroke-width="0.7" stroke-dasharray="0.8 1.6" stroke-linejoin="round" vector-effect="non-scaling-stroke"/><path d="M114 101.7H11.5v58.5h217v-26.6H114z" fill="#0072b2" fill-opacity="0.1" stroke="#0072b2" stroke-width="0.7" stroke-dasharray="5 1.5 1 1.5" stroke-linejoin="round" vector-effect="non-scaling-stroke"/><path d="M200 158.5H37.7v28.6h31.7v29.1h99.5v-28H200z" fill="#6e6259" fill-opacity="0.1" stroke="#6e6259" stroke-width="0.7" stroke-dasharray="0.8 1.6" stroke-linejoin="round" vector-effect="non-scaling-stroke"/></svg>
+  </div>
+  <figcaption>Two groups, one colour, still separable. The outline pattern and the small Arabic letter stay fixed under every option on this page.</figcaption>
+</figure>
+  <div class="note">
+    <p>
+      <strong>So the constraint is narrow.</strong> Whatever is offered, the outline patterns and the
+      letters stay ours. A reader is choosing hues, not choosing whether the page remains readable
+      without them.
+    </p>
+  </div>
+</section>
+
+<section>
+  <h2><span class="num">6</span>What do printed mus'hafs and other apps do?</h2>
+  <p>
+    <strong>We looked.</strong> The printed colour-coded mus'hafs — the Damascus edition most people
+    mean by the term, and the several editions that followed it — settle on a small number of
+    colours and hold them fixed: red for the elongations, green for the nasal sounds, blue for the
+    echoing letters, grey for letters written and not pronounced. One publisher describes covering
+    28 rules with three colour families; others run to about seven. In every case the reader gets a
+    legend at the foot of the page, not a choice.
+  </p>
+  <p>
+    Among apps, the pattern we found is a <em>switch</em>, not a palette: the colouring is turned on
+    or off in settings, and the colours themselves are the publisher's. We did not find a mus'haf
+    app that lets a reader change which colour means which rule. That is worth stating as what it
+    is — an absence in what we searched, not proof that none exists.
+  </p>
+  <dl class="prior">
+    <dt>Printed, fixed, and explained at the foot of every page.</dt>
+    <dd>
+      The colour-coded print tradition is old enough to be a convention, and the convention is that
+      the reader is taught the colours rather than asked for them. It is the strongest argument for
+      option D over B: a scheme is a thing you can learn, a hue you picked yourself is not.
+      <span class="src">Sources:
+        <a href="https://www.islamicbookstore.com/tajweed.html">Mushaf al-Tajweed, Dar al-Maarifah</a> ·
+        <a href="https://gatewaytoquran.com/color-coded-quran/">Colour-coded Qur'an, seven colours</a>
+      </span>
+    </dd>
+    <dt>In apps, the control is a toggle.</dt>
+    <dd>
+      Tajweed colours are switched on in settings and that is the whole of it; where a reader can
+      interact with a colour, it is to ask what the rule means, not to change it.
+      <span class="src">Sources:
+        <a href="https://support.muslimpro.com/hc/en-us/articles/115002005787-How-to-activate-the-coloured-Tajweed-for-Quran">Muslim Pro — turning tajweed colours on</a> ·
+        <a href="https://gtaf.org/blog/tajweed-colour-code-in-quran-app/">Greentech Apps — tajweed colour code</a> ·
+        <a href="https://github.com/quran/quran_android/issues/439">quran_android — colour-coded tajweed support</a>
+      </span>
+    </dd>
+    <dt>Where the idea of an editable palette actually comes from.</dt>
+    <dd>
+      Not from mus'hafs. From code editors and reading apps, where a colour theme is expected to be
+      the reader's and shipping a few good ones is standard. That is a real precedent, but it is a
+      precedent for <em>schemes</em> — nobody recolours a syntax highlighter one token type at a
+      time either.
+    </dd>
+  </dl>
+</section>
+
+<section>
+  <h2><span class="num">7</span>What have we already decided that ties our hands?</h2>
+  <dl class="prior">
+    <dt>The app colours a whole verse at a time — and that question is still open.</dt>
+    <dd>
+      A verse carries <strong>3.9</strong> different kinds of rule on
+      average and gets one colour, so <strong>83.29%</strong> of everything we
+      know is already invisible. This is the constraint that decides between B and C below, and it
+      is not settled: it has <a href="mark-granularity.html">its own page</a>.
+    </dd>
+    <dt>A reader can already turn the colouring off completely.</dt>
+    <dd>
+      That control exists and stays. Everything here is about what happens when it is on.
+    </dd>
+    <dt>Colour is never the only carrier.</dt>
+    <dd>
+      Every group has an outline pattern and an Arabic letter as well as a hue, so a reader who
+      cannot separate two colours has two other ways to. Section 5 is what that buys.
+    </dd>
+  </dl>
+</section>
+
+<section>
+  <h2><span class="num">8</span>How much would a reader actually see change?</h2>
+  <p class="lede">
+    For the seven groups: all of it. For the 18 rules: almost none of it, today.
+  </p>
+  <p>
+    A colour can only be seen where it is painted, and the app paints one tint per verse in whichever
+    group is rarest. So a colour given to a single rule shows up only in the verses where that rule's
+    group won — the last column below. Change the colour of the commonest elongation and
+    <strong>1.6%</strong>
+    of the verses that contain it would look any different.
+  </p>
+  <table class="grid">
+    <caption>All 18 rules in the shipped data, commonest first. The swatches are option C's colours, built by fanning each group's hue — see section 11. “Where it could show” is the share of that rule's verses in which its group also won the verse's one tint.</caption>
+    <thead><tr><th>rule</th><th>group</th><th class="n">places</th><th class="n">verses</th><th></th><th class="n">where it could show</th></tr></thead>
+    <tbody>
+<tr>
+  <td><span class="sw" style="--c:#9c9284"></span><span class="swn">hamzat wasl</span></td>
+  <td><span class="chip off" style="--c:#9c9284">hamzat wasl</span></td>
+  <td class="n">13,252</td>
+  <td class="n">4,749</td>
+  <td class="bar"><span style="width:5.853863971362392%;background:#9c9284"></span></td>
+  <td class="n">5.9%</td>
+</tr>
+<tr>
+  <td><span class="sw" style="--c:#842105"></span><span class="swn">madd 246</span></td>
+  <td><span class="chip off" style="--c:#d55e00">madd</span></td>
+  <td class="n">4,543</td>
+  <td class="n">4,543</td>
+  <td class="bar"><span style="width:2.795509575170592%;background:#d55e00"></span></td>
+  <td class="n">2.8%</td>
+</tr>
+<tr>
+  <td><span class="sw" style="--c:#b94602"></span><span class="swn">madd 2</span></td>
+  <td><span class="chip off" style="--c:#d55e00">madd</span></td>
+  <td class="n">9,028</td>
+  <td class="n">4,160</td>
+  <td class="bar"><span style="width:1.5625%;background:#d55e00"></span></td>
+  <td class="n">1.6%</td>
+</tr>
+<tr>
+  <td><span class="sw" style="--c:#034f2a"></span><span class="swn">ghunnah</span></td>
+  <td><span class="chip off" style="--c:#009e73">ghunnah / ikhfa</span></td>
+  <td class="n">4,946</td>
+  <td class="n">3,104</td>
+  <td class="bar"><span style="width:11.630154639175258%;background:#009e73"></span></td>
+  <td class="n">11.6%</td>
+</tr>
+<tr>
+  <td><span class="sw" style="--c:#028356"></span><span class="swn">ikhfa</span></td>
+  <td><span class="chip off" style="--c:#009e73">ghunnah / ikhfa</span></td>
+  <td class="n">5,301</td>
+  <td class="n">2,994</td>
+  <td class="bar"><span style="width:10.454241816967267%;background:#009e73"></span></td>
+  <td class="n">10.5%</td>
+</tr>
+<tr>
+  <td><span class="sw" style="--c:#0072b2"></span><span class="swn">qalqalah</span></td>
+  <td><span class="chip off" style="--c:#0072b2">qalqalah</span></td>
+  <td class="n">3,834</td>
+  <td class="n">2,641</td>
+  <td class="bar"><span style="width:55.054903445664515%;background:#0072b2"></span></td>
+  <td class="n">55.1%</td>
+</tr>
+<tr>
+  <td><span class="sw" style="--c:#ab4d96"></span><span class="swn">idghaam ghunnah</span></td>
+  <td><span class="chip off" style="--c:#cc79a7">idgham</span></td>
+  <td class="n">3,933</td>
+  <td class="n">2,510</td>
+  <td class="bar"><span style="width:29.40239043824701%;background:#cc79a7"></span></td>
+  <td class="n">29.4%</td>
+</tr>
+<tr>
+  <td><span class="sw" style="--c:#6e6259"></span><span class="swn">silent</span></td>
+  <td><span class="chip off" style="--c:#6e6259">silent</span></td>
+  <td class="n">4,174</td>
+  <td class="n">2,307</td>
+  <td class="bar"><span style="width:98.26614651061986%;background:#6e6259"></span></td>
+  <td class="n">98.3%</td>
+</tr>
+<tr>
+  <td><span class="sw" style="--c:#ec7a03"></span><span class="swn">madd munfasil</span></td>
+  <td><span class="chip off" style="--c:#d55e00">madd</span></td>
+  <td class="n">3,172</td>
+  <td class="n">2,120</td>
+  <td class="bar"><span style="width:0.8490566037735849%;background:#d55e00"></span></td>
+  <td class="n">0.8%</td>
+</tr>
+<tr>
+  <td><span class="sw" style="--c:#ba5d9d"></span><span class="swn">lam shamsiyyah</span></td>
+  <td><span class="chip off" style="--c:#cc79a7">idgham</span></td>
+  <td class="n">2,733</td>
+  <td class="n">2,013</td>
+  <td class="bar"><span style="width:29.359165424739196%;background:#cc79a7"></span></td>
+  <td class="n">29.4%</td>
+</tr>
+<tr>
+  <td><span class="sw" style="--c:#f7b12a"></span><span class="swn">madd muttasil</span></td>
+  <td><span class="chip off" style="--c:#d55e00">madd</span></td>
+  <td class="n">1,997</td>
+  <td class="n">1,486</td>
+  <td class="bar"><span style="width:2.826379542395693%;background:#d55e00"></span></td>
+  <td class="n">2.8%</td>
+</tr>
+<tr>
+  <td><span class="sw" style="--c:#c66fa3"></span><span class="swn">idghaam no ghunnah</span></td>
+  <td><span class="chip off" style="--c:#cc79a7">idgham</span></td>
+  <td class="n">1,035</td>
+  <td class="n">905</td>
+  <td class="bar"><span style="width:29.2817679558011%;background:#cc79a7"></span></td>
+  <td class="n">29.3%</td>
+</tr>
+<tr>
+  <td><span class="sw" style="--c:#cf85ab"></span><span class="swn">idghaam shafawi</span></td>
+  <td><span class="chip off" style="--c:#cc79a7">idgham</span></td>
+  <td class="n">832</td>
+  <td class="n">718</td>
+  <td class="bar"><span style="width:22.56267409470752%;background:#cc79a7"></span></td>
+  <td class="n">22.6%</td>
+</tr>
+<tr>
+  <td><span class="sw" style="--c:#02b592"></span><span class="swn">iqlab</span></td>
+  <td><span class="chip off" style="--c:#009e73">ghunnah / ikhfa</span></td>
+  <td class="n">562</td>
+  <td class="n">506</td>
+  <td class="bar"><span style="width:7.114624505928854%;background:#009e73"></span></td>
+  <td class="n">7.1%</td>
+</tr>
+<tr>
+  <td><span class="sw" style="--c:#08e2d6"></span><span class="swn">ikhfa shafawi</span></td>
+  <td><span class="chip off" style="--c:#009e73">ghunnah / ikhfa</span></td>
+  <td class="n">496</td>
+  <td class="n">453</td>
+  <td class="bar"><span style="width:7.28476821192053%;background:#009e73"></span></td>
+  <td class="n">7.3%</td>
+</tr>
+<tr>
+  <td><span class="sw" style="--c:#8e2400"></span><span class="swn">madd 6</span></td>
+  <td><span class="chip off" style="--c:#8e2400">madd lazim</span></td>
+  <td class="n">148</td>
+  <td class="n">128</td>
+  <td class="bar"><span style="width:100%;background:#8e2400"></span></td>
+  <td class="n">100.0%</td>
+</tr>
+<tr>
+  <td><span class="sw" style="--c:#d69db5"></span><span class="swn">idghaam mutajanisayn</span></td>
+  <td><span class="chip off" style="--c:#cc79a7">idgham</span></td>
+  <td class="n">58</td>
+  <td class="n">56</td>
+  <td class="bar"><span style="width:39.285714285714285%;background:#cc79a7"></span></td>
+  <td class="n">39.3%</td>
+</tr>
+<tr>
+  <td><span class="sw" style="--c:#ddb4c2"></span><span class="swn">idghaam mutaqaribayn</span></td>
+  <td><span class="chip off" style="--c:#cc79a7">idgham</span></td>
+  <td class="n">13</td>
+  <td class="n">13</td>
+  <td class="bar"><span style="width:61.53846153846154%;background:#cc79a7"></span></td>
+  <td class="n">61.5%</td>
+</tr>
+    </tbody>
+  </table>
+  <div class="note">
+    <p>
+      <strong>And 620 verses have no answer at all.</strong> In
+      10.0% of the 6,173 coloured verses, the winning
+      group is carried by more than one rule at once — two kinds of elongation in the same verse, say.
+      There is one tint to give and two colours that want it, and nothing in the data says which. At
+      verse size, 18 colours is not a finer picture; it is the same picture with a
+      coin toss in it.
+    </p>
+  </div>
+</section>
+
+<section>
+  <h2><span class="num">9</span>The options, drawn</h2>
+  <p>
+    All four on the same three lines, so the comparison is by eye rather than by adjective.
+  </p>
+
+  <div class="opt">
+    <div class="opt-h"><h3>A · Leave the colours fixed</h3><p class="tag">what the app does today</p></div>
+    <figure class="spec" style="--ar:30.7018%">
+  <div class="win">
+    <img class="print" src="../../apps/web/public/assets/pages/hafs-kfqc/2.svg" alt=""
+         style="width:103.0702%;height:335.7143%;left:-2.6316%;top:-97.1429%">
+    <svg class="ov" viewBox="6 68 228 70" aria-hidden="true"><path d="M206.5 46h-34.1v26.2h34Z" fill="#8e2400" fill-opacity="0.1" stroke="#8e2400" stroke-width="0.7" stroke-dasharray="none" stroke-linejoin="round" vector-effect="non-scaling-stroke"/><path d="M172.4 46H33.8v26.2l192 .2v30h-53.4V72v.2Z" fill="#cc79a7" fill-opacity="0.1" stroke="#cc79a7" stroke-width="0.7" stroke-dasharray="2.5 2.5" stroke-linejoin="round" vector-effect="non-scaling-stroke"/><path d="M172.4 72.2H12v29.5h102v32.2h114.2v-30.2h-55.8V72.4Z" fill="#6e6259" fill-opacity="0.1" stroke="#6e6259" stroke-width="0.7" stroke-dasharray="0.8 1.6" stroke-linejoin="round" vector-effect="non-scaling-stroke"/><path d="M114 101.7H11.5v58.5h217v-26.6H114z" fill="#0072b2" fill-opacity="0.1" stroke="#0072b2" stroke-width="0.7" stroke-dasharray="5 1.5 1 1.5" stroke-linejoin="round" vector-effect="non-scaling-stroke"/><path d="M200 158.5H37.7v28.6h31.7v29.1h99.5v-28H200z" fill="#6e6259" fill-opacity="0.1" stroke="#6e6259" stroke-width="0.7" stroke-dasharray="0.8 1.6" stroke-linejoin="round" vector-effect="non-scaling-stroke"/></svg>
+  </div>
+  
+</figure>
+    <div class="cost">
+      <div><h4>What a reader gets</h4><p>One set of colours, the same on every device, chosen to survive colour blindness. A legend that means the same thing to two people talking about it.</p></div>
+      <div><h4>What it costs</h4><p>A reader who finds a colour unreadable, or who learned different ones, can only switch the whole thing off.</p></div>
+      <div><h4>What it costs us</h4><p>Nothing. No new screen, no stored preference, no way for a reader to make the page worse.</p></div>
+    </div>
+  </div>
+
+  <div class="opt">
+    <div class="opt-h"><h3>B · A reader recolours the seven groups</h3><p class="tag">seven colour pickers</p></div>
+    <figure class="spec" style="--ar:30.7018%">
+  <div class="win">
+    <img class="print" src="../../apps/web/public/assets/pages/hafs-kfqc/2.svg" alt=""
+         style="width:103.0702%;height:335.7143%;left:-2.6316%;top:-97.1429%">
+    <svg class="ov" viewBox="6 68 228 70" aria-hidden="true"><path d="M206.5 46h-34.1v26.2h34Z" fill="#7f1d1d" fill-opacity="0.1" stroke="#7f1d1d" stroke-width="0.7" stroke-dasharray="none" stroke-linejoin="round" vector-effect="non-scaling-stroke"/><path d="M172.4 46H33.8v26.2l192 .2v30h-53.4V72v.2Z" fill="#7b5aa6" fill-opacity="0.1" stroke="#7b5aa6" stroke-width="0.7" stroke-dasharray="2.5 2.5" stroke-linejoin="round" vector-effect="non-scaling-stroke"/><path d="M172.4 72.2H12v29.5h102v32.2h114.2v-30.2h-55.8V72.4Z" fill="#9e9e9e" fill-opacity="0.1" stroke="#9e9e9e" stroke-width="0.7" stroke-dasharray="0.8 1.6" stroke-linejoin="round" vector-effect="non-scaling-stroke"/><path d="M114 101.7H11.5v58.5h217v-26.6H114z" fill="#4fa3d1" fill-opacity="0.1" stroke="#4fa3d1" stroke-width="0.7" stroke-dasharray="5 1.5 1 1.5" stroke-linejoin="round" vector-effect="non-scaling-stroke"/><path d="M200 158.5H37.7v28.6h31.7v29.1h99.5v-28H200z" fill="#9e9e9e" fill-opacity="0.1" stroke="#9e9e9e" stroke-width="0.7" stroke-dasharray="0.8 1.6" stroke-linejoin="round" vector-effect="non-scaling-stroke"/></svg>
+  </div>
+  <figcaption>The same three lines after a reader moved all seven towards the printed convention. Illustration — these are not proposed values.</figcaption>
+</figure>
+    <div class="cost">
+      <div><h4>What a reader gets</h4><p>Their own colours, at the only size the app actually paints. Someone who learned red elongations can have red elongations.</p></div>
+      <div><h4>What it costs</h4><p>Seven pickers is a real screen to design, and a reader can produce a palette worse than the one they started from — recoverable, since section 5 shows the page still works, and a reset returns it.</p></div>
+      <div><h4>What it costs us</h4><p>A settings surface, seven stored values, and the colours stop being something two people can assume they share.</p></div>
+    </div>
+  </div>
+
+  <div class="opt">
+    <div class="opt-h"><h3>C · A reader recolours all 18 rules</h3><p class="tag">18 colour pickers</p></div>
+    <figure class="spec" style="--ar:30.7018%">
+  <div class="win">
+    <img class="print" src="../../apps/web/public/assets/pages/hafs-kfqc/2.svg" alt=""
+         style="width:103.0702%;height:335.7143%;left:-2.6316%;top:-97.1429%">
+    <svg class="ov" viewBox="6 68 228 70" aria-hidden="true"><path d="M206.5 46h-34.1v26.2h34Z" fill="#8e2400" fill-opacity="0.1" stroke="#8e2400" stroke-width="0.7" stroke-dasharray="none" stroke-linejoin="round" vector-effect="non-scaling-stroke"/><path d="M172.4 46H33.8v26.2l192 .2v30h-53.4V72v.2Z" fill="#c66fa3" fill-opacity="0.1" stroke="#c66fa3" stroke-width="0.7" stroke-dasharray="2.5 2.5" stroke-linejoin="round" vector-effect="non-scaling-stroke"/><path d="M172.4 72.2H12v29.5h102v32.2h114.2v-30.2h-55.8V72.4Z" fill="#6e6259" fill-opacity="0.1" stroke="#6e6259" stroke-width="0.7" stroke-dasharray="0.8 1.6" stroke-linejoin="round" vector-effect="non-scaling-stroke"/><path d="M114 101.7H11.5v58.5h217v-26.6H114z" fill="#0072b2" fill-opacity="0.1" stroke="#0072b2" stroke-width="0.7" stroke-dasharray="5 1.5 1 1.5" stroke-linejoin="round" vector-effect="non-scaling-stroke"/><path d="M200 158.5H37.7v28.6h31.7v29.1h99.5v-28H200z" fill="#6e6259" fill-opacity="0.1" stroke="#6e6259" stroke-width="0.7" stroke-dasharray="0.8 1.6" stroke-linejoin="round" vector-effect="non-scaling-stroke"/></svg>
+  </div>
+  <figcaption>The same three lines with every rule given its own colour. Barely distinguishable from A, because there is still one tint per verse.</figcaption>
+</figure>
+    <div class="pal-chips"><span class="chip" style="--c:#9c9284;background:#9c9284;color:#fff;border-color:#9c9284">hamzat wasl</span><span class="chip" style="--c:#842105;background:#842105;color:#fff;border-color:#842105">madd 246</span><span class="chip" style="--c:#b94602;background:#b94602;color:#fff;border-color:#b94602">madd 2</span><span class="chip" style="--c:#034f2a;background:#034f2a;color:#fff;border-color:#034f2a">ghunnah</span><span class="chip" style="--c:#028356;background:#028356;color:#fff;border-color:#028356">ikhfa</span><span class="chip" style="--c:#0072b2;background:#0072b2;color:#fff;border-color:#0072b2">qalqalah</span><span class="chip" style="--c:#ab4d96;background:#ab4d96;color:#fff;border-color:#ab4d96">idghaam ghunnah</span><span class="chip" style="--c:#6e6259;background:#6e6259;color:#fff;border-color:#6e6259">silent</span><span class="chip" style="--c:#ec7a03;background:#ec7a03;color:#fff;border-color:#ec7a03">madd munfasil</span><span class="chip" style="--c:#ba5d9d;background:#ba5d9d;color:#fff;border-color:#ba5d9d">lam shamsiyyah</span><span class="chip" style="--c:#f7b12a;background:#f7b12a;color:#fff;border-color:#f7b12a">madd muttasil</span><span class="chip" style="--c:#c66fa3;background:#c66fa3;color:#fff;border-color:#c66fa3">idghaam no ghunnah</span><span class="chip" style="--c:#cf85ab;background:#cf85ab;color:#fff;border-color:#cf85ab">idghaam shafawi</span><span class="chip" style="--c:#02b592;background:#02b592;color:#fff;border-color:#02b592">iqlab</span><span class="chip" style="--c:#08e2d6;background:#08e2d6;color:#fff;border-color:#08e2d6">ikhfa shafawi</span><span class="chip" style="--c:#8e2400;background:#8e2400;color:#fff;border-color:#8e2400">madd 6</span><span class="chip" style="--c:#d69db5;background:#d69db5;color:#fff;border-color:#d69db5">idghaam mutajanisayn</span><span class="chip" style="--c:#ddb4c2;background:#ddb4c2;color:#fff;border-color:#ddb4c2">idghaam mutaqaribayn</span></div>
+    <div class="cost">
+      <div><h4>What a reader gets</h4><p>In principle, the full grain of the data: an ikhfa told apart from an iqlab by colour.</p></div>
+      <div><h4>What it costs</h4><p>18 colours do not fit. Fanning each group's hue out as far as it will honestly go still puts <strong>18</strong> pairs closer together than the closest pair in today's seven. And at verse size most of them never paint at all — section 8.</p></div>
+      <div><h4>What it costs us</h4><p>18 pickers, 18 names to write in two languages, and a legend nobody can hold in their head.</p></div>
+    </div>
+  </div>
+
+  <div class="opt">
+    <div class="opt-h"><h3>D · Offer a few ready-made schemes</h3><p class="tag">no picker; a short list</p></div>
+    <div class="two">
+      <figure class="spec" style="--ar:30.7018%">
+  <div class="win">
+    <img class="print" src="../../apps/web/public/assets/pages/hafs-kfqc/2.svg" alt=""
+         style="width:103.0702%;height:335.7143%;left:-2.6316%;top:-97.1429%">
+    <svg class="ov" viewBox="6 68 228 70" aria-hidden="true"><path d="M206.5 46h-34.1v26.2h34Z" fill="#8e2400" fill-opacity="0.1" stroke="#8e2400" stroke-width="0.7" stroke-dasharray="none" stroke-linejoin="round" vector-effect="non-scaling-stroke"/><path d="M172.4 46H33.8v26.2l192 .2v30h-53.4V72v.2Z" fill="#cc79a7" fill-opacity="0.1" stroke="#cc79a7" stroke-width="0.7" stroke-dasharray="2.5 2.5" stroke-linejoin="round" vector-effect="non-scaling-stroke"/><path d="M172.4 72.2H12v29.5h102v32.2h114.2v-30.2h-55.8V72.4Z" fill="#6e6259" fill-opacity="0.1" stroke="#6e6259" stroke-width="0.7" stroke-dasharray="0.8 1.6" stroke-linejoin="round" vector-effect="non-scaling-stroke"/><path d="M114 101.7H11.5v58.5h217v-26.6H114z" fill="#0072b2" fill-opacity="0.1" stroke="#0072b2" stroke-width="0.7" stroke-dasharray="5 1.5 1 1.5" stroke-linejoin="round" vector-effect="non-scaling-stroke"/><path d="M200 158.5H37.7v28.6h31.7v29.1h99.5v-28H200z" fill="#6e6259" fill-opacity="0.1" stroke="#6e6259" stroke-width="0.7" stroke-dasharray="0.8 1.6" stroke-linejoin="round" vector-effect="non-scaling-stroke"/></svg>
+  </div>
+  <figcaption>As it ships.</figcaption>
+</figure>
+      <figure class="spec" style="--ar:30.7018%">
+  <div class="win">
+    <img class="print" src="../../apps/web/public/assets/pages/hafs-kfqc/2.svg" alt=""
+         style="width:103.0702%;height:335.7143%;left:-2.6316%;top:-97.1429%">
+    <svg class="ov" viewBox="6 68 228 70" aria-hidden="true"><path d="M206.5 46h-34.1v26.2h34Z" fill="#7f1d1d" fill-opacity="0.1" stroke="#7f1d1d" stroke-width="0.7" stroke-dasharray="none" stroke-linejoin="round" vector-effect="non-scaling-stroke"/><path d="M172.4 46H33.8v26.2l192 .2v30h-53.4V72v.2Z" fill="#7b5aa6" fill-opacity="0.1" stroke="#7b5aa6" stroke-width="0.7" stroke-dasharray="2.5 2.5" stroke-linejoin="round" vector-effect="non-scaling-stroke"/><path d="M172.4 72.2H12v29.5h102v32.2h114.2v-30.2h-55.8V72.4Z" fill="#9e9e9e" fill-opacity="0.1" stroke="#9e9e9e" stroke-width="0.7" stroke-dasharray="0.8 1.6" stroke-linejoin="round" vector-effect="non-scaling-stroke"/><path d="M114 101.7H11.5v58.5h217v-26.6H114z" fill="#4fa3d1" fill-opacity="0.1" stroke="#4fa3d1" stroke-width="0.7" stroke-dasharray="5 1.5 1 1.5" stroke-linejoin="round" vector-effect="non-scaling-stroke"/><path d="M200 158.5H37.7v28.6h31.7v29.1h99.5v-28H200z" fill="#9e9e9e" fill-opacity="0.1" stroke="#9e9e9e" stroke-width="0.7" stroke-dasharray="0.8 1.6" stroke-linejoin="round" vector-effect="non-scaling-stroke"/></svg>
+  </div>
+  <figcaption>Like a printed colour-coded mus'haf. Red elongations, green nasal sounds, blue echoing letters, grey silent letters. Illustration.</figcaption>
+</figure>
+      <figure class="spec" style="--ar:30.7018%">
+  <div class="win">
+    <img class="print" src="../../apps/web/public/assets/pages/hafs-kfqc/2.svg" alt=""
+         style="width:103.0702%;height:335.7143%;left:-2.6316%;top:-97.1429%">
+    <svg class="ov" viewBox="6 68 228 70" aria-hidden="true"><path d="M206.5 46h-34.1v26.2h34Z" fill="#5c1500" fill-opacity="0.1" stroke="#5c1500" stroke-width="0.7" stroke-dasharray="none" stroke-linejoin="round" vector-effect="non-scaling-stroke"/><path d="M172.4 46H33.8v26.2l192 .2v30h-53.4V72v.2Z" fill="#8e2f6b" fill-opacity="0.1" stroke="#8e2f6b" stroke-width="0.7" stroke-dasharray="2.5 2.5" stroke-linejoin="round" vector-effect="non-scaling-stroke"/><path d="M172.4 72.2H12v29.5h102v32.2h114.2v-30.2h-55.8V72.4Z" fill="#3d352c" fill-opacity="0.1" stroke="#3d352c" stroke-width="0.7" stroke-dasharray="0.8 1.6" stroke-linejoin="round" vector-effect="non-scaling-stroke"/><path d="M114 101.7H11.5v58.5h217v-26.6H114z" fill="#00457a" fill-opacity="0.1" stroke="#00457a" stroke-width="0.7" stroke-dasharray="5 1.5 1 1.5" stroke-linejoin="round" vector-effect="non-scaling-stroke"/><path d="M200 158.5H37.7v28.6h31.7v29.1h99.5v-28H200z" fill="#3d352c" fill-opacity="0.1" stroke="#3d352c" stroke-width="0.7" stroke-dasharray="0.8 1.6" stroke-linejoin="round" vector-effect="non-scaling-stroke"/></svg>
+  </div>
+  <figcaption>Darker, for a bright room. The same seven meanings, pushed deeper so they hold up on a phone in sunlight. Illustration.</figcaption>
+</figure>
+    </div>
+    <div class="schemes">
+      <div><span class="swn">As it ships</span> <span class="sw" style="--c:#d55e00"></span><span class="sw" style="--c:#9c9284"></span><span class="sw" style="--c:#009e73"></span><span class="sw" style="--c:#cc79a7"></span><span class="sw" style="--c:#0072b2"></span><span class="sw" style="--c:#6e6259"></span><span class="sw" style="--c:#8e2400"></span></div>
+      <div><span class="swn">Like a printed colour-coded mus'haf</span> <span class="sw" style="--c:#c62828" title="madd"></span><span class="sw" style="--c:#b0a48f" title="hamzat wasl"></span><span class="sw" style="--c:#2e7d32" title="ghunnah / ikhfa"></span><span class="sw" style="--c:#7b5aa6" title="idgham"></span><span class="sw" style="--c:#4fa3d1" title="qalqalah"></span><span class="sw" style="--c:#9e9e9e" title="silent"></span><span class="sw" style="--c:#7f1d1d" title="madd lazim"></span></div>
+      <div><span class="swn">Darker, for a bright room</span> <span class="sw" style="--c:#a83200" title="madd"></span><span class="sw" style="--c:#6a5f50" title="hamzat wasl"></span><span class="sw" style="--c:#00625a" title="ghunnah / ikhfa"></span><span class="sw" style="--c:#8e2f6b" title="idgham"></span><span class="sw" style="--c:#00457a" title="qalqalah"></span><span class="sw" style="--c:#3d352c" title="silent"></span><span class="sw" style="--c:#5c1500" title="madd lazim"></span></div>
+    </div>
+    <div class="cost">
+      <div><h4>What a reader gets</h4><p>A choice that cannot go wrong, in one tap. Each scheme is designed as a whole, checked for colour blindness as a whole, and can be named — which means two people can still talk about it.</p></div>
+      <div><h4>What it costs</h4><p>Not the colours a particular reader wanted, only the nearest of three or four. Somebody has to design each scheme and stand behind it.</p></div>
+      <div><h4>What it costs us</h4><p>One stored value instead of seven, one screen with three rows on it, and no way for a reader to break their own page.</p></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2><span class="num">10</span>What else could be considered, and why is it not here?</h2>
+  <dl class="prior">
+    <dt>Let a reader choose which kinds of rule to show, rather than what colour they are.</dt>
+    <dd>
+      Show only the elongations, say. This is a different and possibly better answer to the same
+      frustration, it needs no palette at all, and — unlike C — it gets more useful the more rules
+      the data distinguishes. It is left off because it is not a colour question, and because it
+      belongs with the question of how finely we paint rather than this one. It stays available
+      whichever of A, B, C or D wins.
+    </dd>
+    <dt>One slider for how strong the colouring is, and nothing else.</dt>
+    <dd>
+      Most complaints about a wash are that it is too loud or too faint, not that it is the wrong
+      hue. This is the cheapest thing on the page and it may well be the thing actually being asked
+      for. It is left off because it does not answer "whose colours are they" — but if the answer to
+      this page is A, it is the next thing to build.
+    </dd>
+    <dt>Follow the printed convention exactly and stop.</dt>
+    <dd>
+      Change our seven to the Damascus colours and offer nothing. It is a defensible answer and it
+      is not on the list because that convention has no colour for two of our seven groups, and
+      because it would trade a palette that survives colour blindness for one that was designed for
+      ink on paper.
+    </dd>
+  </dl>
+</section>
+
+<section>
+  <h2><span class="num">11</span>What would change the answer?</h2>
+  <ul class="wch">
+    <li>
+      <strong>Colouring smaller than a whole verse.</strong> This is the big one. If the app starts
+      tinting the exact letter a rule lands on, 83.29% of the rules stop being
+      invisible, the 620 undecidable verses in section 8 stop being undecidable,
+      and C goes from pointless to plausible in a single change. That question has
+      <a href="mark-granularity.html">its own page</a> and is still open; this one should probably not
+      be answered with C before it is answered.
+    </li>
+    <li>
+      <strong>A hafiz saying our green is not their green.</strong> One person reciting from a page
+      and naming a colour that reads wrong would settle B versus D faster than anything here.
+    </li>
+    <li>
+      <strong>A reader who cannot use the palette we chose.</strong> The current seven are picked to
+      survive the common kinds of colour blindness, but "common" is doing work in that sentence. One
+      report of a pair that genuinely cannot be separated turns B from a preference into an
+      accessibility fix — and then it should not wait behind anything.
+    </li>
+    <li>
+      <strong>Somebody wanting to share a scheme.</strong> If schemes turn out to be something a
+      teacher hands to a class, D grows a name-and-a-link and B does not scale to it at all.
+    </li>
+  </ul>
+</section>
+
+<section>
+  <h2><span class="num">12</span>What is this page not settling?</h2>
+  <p>
+    How finely the app paints — that is the separate open question this page keeps pointing at.
+    Whether the colouring is on by default. What the 18 rules should be
+    <em>called</em> in Arabic and English, which becomes necessary the moment anything shows them one
+    by one. Whether a reader can ask what a colour means by touching it. And nothing at all about
+    where the rule data came from or how good it is, which has its own record.
+  </p>
+</section>
+
+<section>
+  <h2><span class="num">13</span>So what should we build?</h2>
+  <p class="lede">
+    The real choice is between <strong>B</strong> and <strong>D</strong>. A needs no decision, and
+    C is the one option this page can argue against with a picture rather than an opinion.
+  </p>
+  <p>
+    The case against C is section 8 and section 9's third card together: at the size we paint,
+    18 colours mostly cannot be seen, on 620 verses the app
+    would have to guess which one to use, and fanned as generously as they honestly can be they are
+    still 18 pairs tighter than anything we ship today. That is not an argument
+    against ever telling 18 rules apart — it is an argument that colour is the
+    wrong tool for it until we paint smaller than a verse.
+  </p>
+  <p>
+    Between B and D: B gives a reader exactly what they asked for and gives us seven ways for a page
+    to end up worse than it started. D gives a reader less, keeps the palette something designed
+    rather than assembled, and keeps it nameable — which matters more than it sounds, because a
+    colour scheme two people share is a thing they can talk about and a colour scheme one person
+    invented is not.
+  </p>
+</section>
+
+</main>
+
+<footer>
+  <p>
+    <strong>Where the pictures come from.</strong> Nothing here is a mock-up. The page is the real
+    mus'haf image the app ships and the tinted shapes are the same ones the app taps against. The
+    seven colours, their outline patterns and their Arabic letters are read out of the app's own
+    stylesheet and source when this page is built, so they cannot drift from what Hifth looks like.
+    Every count comes from the 18 rules in the shipped data, recomputed on each
+    build. The alternative palettes in options B and D are drawn to make the options visible and are
+    labelled as illustrations wherever they appear — nothing on this page proposes them.
+  </p>
+  <p class="dim small">
+    Built by <code>scripts/build-palette-options.mjs</code> — edit that, not this. The rule data is
+    <code>cpfair/quran-tajweed@496f71cd</code>; the print is
+    <code>assets/pages/hafs-kfqc/2.svg</code>, outlined shapes only, no text.
+  </p>
+</footer>
+</body>
+</html>

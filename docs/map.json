@@ -299,20 +299,42 @@
         {
           "file": "packages/core/src/skins.ts",
           "symbol": "class Tajweed",
-          "note": "Per-surah mark shards → per-ayah marks. `TAJWEED_RULES` is the rule vocabulary and the palette keys derive from it."
+          "note": "Per-surah mark shards → per-ayah marks. `TAJWEED_RULES` is the seven-colour PAINTING vocabulary — not the source's, which has eighteen entries and lives in data. Two vocabularies rather than one is the whole shape of this feature: a shard says `ikhfa_shafawi`, `rules.json` says that paints as `ghunnah`, and `marksForAyah` folds the two at read time. Core is deliberately ignorant of which source it is reading, so it validates the mapping (`parseTajweedVocabulary`) instead of hard-coding it, and paints NOTHING until the mapping lands — a shard on its own is offsets keyed by strings this layer has never been taught."
+        },
+        {
+          "file": "packages/core/src/skins.ts",
+          "symbol": "marksForAyah",
+          "note": "Where the eighteen become seven. It folds every source rule sharing a family into one mark, keeps both source names on `TajweedMark.sources`, and orders the result by `TAJWEED_RULES` so the rarest rule still wins the ayah. The fold used to happen in the build, which is why nothing downstream could tell an ikhfa from an iqlab; moving it here cost +17.5% gzipped on the shards and is what makes a finer legend — or a reader-editable palette — possible at all."
+        },
+        {
+          "file": "packages/etl/scripts/build-tajweed.mjs",
+          "symbol": "RULES",
+          "note": "The eighteen-to-seven table, and the only place it exists. It stays in L3 because it is a fact about *this source's* vocabulary rather than about tajweed: a different corpus with a different rule list would need a different table and no core code would change. The build writes it out as `tajweed/rules.json` beside the shards, so the mapping ships as data a reader can inspect rather than as a decision baked into 114 files."
         },
         {
           "file": "apps/web/src/components/SkinToggle.tsx",
           "symbol": "SkinToggle",
           "note": "The switch. Skin swap must not re-render the stage — it changes classes on existing nodes."
+        },
+        {
+          "file": "scripts/gate-tajweed.mjs",
+          "symbol": "orphans",
+          "note": "The gate the two-vocabulary shape made necessary. A shard key with no entry in `rules.json` paints NOTHING — no error, no blank page, no console warning, because painting an unplaceable rule some default colour would be worse. The symptom is a rule that quietly stops appearing on every page, and the only witness is a hafiz who noticed the ghunnah went silent. It reads the SHIPPED bytes rather than the build's table, on purpose: whether the table is right is not the question, whether the 114 files a browser will fetch agree with the file beside them is. Both directions — an id no vocabulary describes, and a vocabulary entry no shard uses — plus the two ends it is bolted to: a family core does not paint, and a family with no colour or dash pattern in tokens.css."
         }
       ],
       "extend": [
         "A new edition is a data change first: assets, a SOURCES.md entry with its licence, and a concordance. Only then a registry entry.",
         "gate:license and gate:text-sources both read SOURCES.md — an edition whose provenance is not recorded cannot ship, by construction.",
-        "A new tajweed rule: add to TAJWEED_RULES, emit from build-tajweed.mjs, add the palette entry. The class prefix is centralised so CSS and TS cannot drift."
+        "A new PAINTED family: add to TAJWEED_RULES, add the palette entry, add its label to both message catalogues. The class prefix is centralised so CSS and TS cannot drift. Seven is not arbitrary — it is the most a colour-blind-safe qualitative palette carries honestly on cream paper, so an eighth is a palette decision before it is a code change.",
+        "A new SOURCE rule is not that. It goes in build-tajweed.mjs's table pointing at a family that already exists; the build throws on an id the table does not name, so a source refresh that adds one fails loudly instead of dropping it."
       ],
-      "gates": ["pnpm test", "pnpm gate:license", "pnpm gate:text-sources", "make ci"],
+      "gates": [
+        "pnpm test",
+        "pnpm gate:license",
+        "pnpm gate:text-sources",
+        "pnpm gate:tajweed",
+        "make ci"
+      ],
       "seeAlso": ["edge-data-etl", "provenance"]
     },
 
@@ -640,14 +662,97 @@
           "file": "packages/etl/scripts/lib/mark-join.test.mjs",
           "symbol": "describe(\"markPaths\"",
           "note": "28 tests on words small enough to count by hand, and most of them assert that `markPaths` returns `null`. The probe is the measurement — 86,962 words joined, 34 tokens pinned — and it needs 380 MB of gitignored cache to say anything, which is why it is a probe; what a test can hold is the arithmetic and the refusals. Marks are written as `[diacriticId(name), x, y, w, h]` rather than pasted ids, so reordering `DIACRITICS` fails here instead of silently re-labelling what this file claims. One test earned its comment the hard way: `مَـَٔ` yields three tokens, not two — the tatweel and the sajda overline get no path, but the hamza-above on the tatweel does."
+        },
+        {
+          "file": "scripts/build-mark-options.mjs",
+          "symbol": "const BAND",
+          "note": "The mark-C decision drawn on the print instead of argued: three overlays over page 2 — what ships today, what mark granularity would paint, and geometry-only — so the choice is looked at rather than described. Its finding is the one the option cards exist to carry: at ayah granularity **50,023 of 60,057 annotations (83.29%) render as nothing**, because an ayah carries 3.90 distinct families on average and `leadingRule` paints exactly one; `madd` is annotated on 92.48% of ayahs and wins 2.74% of them. So the constraint the skin is under is not that a wash is coarse, it is that a wash is *singular*, and that is what finer selection buys. Split in two on purpose: `--extract` needs the 348 MB gitignored page cache and writes `mark-granularity.data.json`, while the default render reads only committed bytes, so any checkout reproduces the identical HTML without the cache — the same bargain `probe-diacritics.mjs` makes, one step further along. Every rectangle on it is traceable: word boxes from the shipped shard, mark boxes from `markPaths` through `applierFromPin`, ayah polygons from the page's own `verse-N` hit shapes, colours and dashes read out of `tokens.css` at build time so the picture cannot drift from the app. It references the print by relative URL rather than inlining it — 42 KB, not 256 KB, and no second copy of bytes the repo already ships. Its `attr` reader carries the same leading-`\\s` boundary `diacritics.mjs` names, and for the same reason: without it `d` matches the tail of `id=\"verse-8\"`, every ayah polygon gets `d=\"verse-8\"`, and an unparseable `d` paints nothing and reports a zero bbox — so the \"today\" layer renders empty while the `<rect>`-based mark layer draws fine, which looks exactly like a wash being subtle."
+        },
+        {
+          "file": "packages/etl/scripts/probe-mark-ink.mjs",
+          "symbol": "const eligible",
+          "note": "Asks the question nothing before it asked: does a mark's rectangle sit on the ink a reader's eye goes to? Everything earlier counted ink INSIDE the box, which the base letter satisfies — so a box a full mark-height off scored as a hit. What makes this one different is the null control: every mark is also scored one width left, one width right, and on another mark's rectangle elsewhere on the page, and a claimed placement that cannot beat a deliberately wrong one is not a measurement. It does not. As shipped, separation is **−0.242** (claimed −0.127 against wrong +0.116) and only 12.70% of marks beat their own wrong placement; the error is a shift of **0.79 across and 1.07 down** on marks 5.6 × 3.6, the same direction on all 40 sampled pages, and taking each page's own shift out lifts achievable overlap to 0.901–0.912 everywhere. The pipeline's recorded fit residual correlates 0.117 with the real error, which is why a number that looked like validation was blind to this. Exits non-zero on a breached threshold by design, and is deliberately NOT in `gates`, `make ci` or the Makefile — a probe reports, a gate refuses, and nothing should refuse until a person has worked the evidence page. Consumes the labelling verdict as its eligibility filter, so it is downstream of `probe-mark-labels.mjs` and not independent of it."
+        },
+        {
+          "file": "packages/etl/scripts/probe-mark-labels.mjs",
+          "symbol": "const TWIN",
+          "note": "The other half of the split, and the split is the point: whether a mark's rectangle is in the right PLACE and whether its NAME is right were once one number — \"51.15%, or 69.15% counting look-alikes\" — which was three unrelated effects added together. This half touches no shipped page, no fitted transform and no rectangle, so displacement cannot enter its arithmetic. A census over all 326,515 marks, so no confidence intervals: **256,948 (78.69%) match their own name · 69,562 (21.30%) match a name this print draws as the same shape · 5 anything else**, and those 5 have every stroke matching their own name at 0.83+, differing only in spacing. Genuine mislabels: zero. Three planted-label controls keep it honest — nearest wrong name flagged 100.00%, within-group 0.00%. Byte-identical across runs; exits 0."
+        },
+        {
+          "file": "packages/etl/scripts/lib/ink.mjs",
+          "symbol": "rasterise",
+          "note": "A dependency-free SVG rasteriser, written rather than depended on for reasons that were measured, not assumed: two of the three npm rasterisers fetch a binary at install (so a determinism re-run cannot prove it re-derived), one drags an 18 MB text stack, and the pure-JS one implements neither fill rule correctly — on the same 5,600-sample shape nonzero says 6,400 and evenodd says 4,800. So both rules are honoured per-shape and OR-ed. Path flattening covers the full grammar including the arc form whose flags are written unseparated, which forces a character scanner rather than a number split. Summed-area tables make a rectangle's ink O(1), which is what lets a probe score 4,000 marks in three placements each."
+        },
+        {
+          "file": "packages/etl/scripts/lib/mark-ink.mjs",
+          "symbol": "bestPlacement",
+          "note": "The scorer, and the choice of scorer is load-bearing. Product-moment correlation of two binary masks (`phi`) DECIDES; Jaccard/IoU is reported and decides nothing, because IoU cannot go negative and so cannot tell 'wrong place' from 'nothing there' — the distinction the whole null control turns on. Two-stage search, quarter-unit coarse lattice then one-sample refine, ties broken toward the smaller displacement so a search cannot manufacture a better answer by moving further. Also `wilson`/`sampleSizeFor` for the intervals, `rng` (mulberry32, one stream per purpose so adding a control does not renumber the sample), and `chooseExemplars`, medoid-by-nearest-to-mean. An earlier version reported a correlation of 5.509 where the maximum is 1 — shared area and ink counted over different regions when a displacement pushed a shape off the raster edge — and it now throws rather than printing an impossible number."
+        },
+        {
+          "file": "packages/etl/scripts/lib/mark-shape.mjs",
+          "symbol": "similarityMatrix",
+          "note": "One library of canonical examples, shared by both probes so they cannot drift into two vocabularies. `similarityMatrix` scores all 26 names against each other and `shapeGroups` joins any pair above a stated threshold — which is how the two look-alike pairs stopped being a judgement call: **fatha ~ kasra 0.968, fathatan ~ kasratan 0.914**, the largest unjoined cell 0.627, and the same grouping at every threshold from 0.70 to 0.90. `fitTo` matches width and height SEPARATELY, and that is not a detail: the comparison originally rescaled nothing, this print sizes a mark by what is under it (up to a third of its own width), and a multi-stroke mark compared against a differently-sized copy lands ink on gap and scores below zero. That produced 45 apparent mislabels which were all artefacts. The repair was chosen by competition against those 45 — ten-scale ladder 22, isotropic diagonal 32, widened window 24, separate axes **42**. `pieces`/`pieceCheck` score stroke-by-stroke, used to EXPLAIN a verdict and deliberately not to make one: arrangement is the only thing separating fathatan from successive fathatan."
+        },
+        {
+          "file": "packages/etl/scripts/lib/marks.mjs",
+          "symbol": "marksOf",
+          "note": "One page of marks, read once and cached: the ligature corpus's own `<path data-diacritic>` boxes put onto our frame through `applierFromPin`, each carrying the surah, ayah and word index of the word it was drawn inside. Extracted from `probe-mark-ink.mjs` when a second consumer appeared, for the reason every other shared reader here exists: two walks over the same 380 MB cache is two chances to disagree about what a mark is, and the disagreement would show up as a placement finding. Wants the gitignored `data/pages/.cache/words/**`, which is why nothing that imports it can be a gate."
+        },
+        {
+          "file": "packages/etl/scripts/lib/adjudication.mjs",
+          "symbol": "planSession",
+          "note": "The trial plan a person works, and the reason their answers count as evidence: it is a pure function of the seed and the measured displacements, so no key is ever written to disk — the page holds none and the scorer rebuilds the same session afterwards. Four kinds, shuffled and indistinguishable while you work: **as shipped** (the corrected rectangle against the one the app draws today — the question), **decoy** (against the same distance in another direction, at least 30° off the as-shipped bearing; it is both the yardstick for whether an eye resolves a shift this small AND what breaks the pattern, since the error points the same way on every page and twenty trials is enough to learn that), **catch** (4.5 units off — anybody looking gets these, a session that fails them is discarded), **twin** (the same rectangle twice, where \"can't tell\" is the only honest answer, which is what catches a person who always picks something). Candidates are walked page-by-page in rotation rather than shuffled flat, because a flat shuffle over 40 pages of ~540 marks yields a session about four pages and the correction is per-page. Its readers are injected, not imported at the call site, so the arithmetic — the mix, the angles, the left/right balance — is testable on invented marks without the 380 MB cache."
+        },
+        {
+          "file": "packages/etl/scripts/lib/adjudication.mjs",
+          "symbol": "planNudge",
+          "note": "The other plan, in the same module and deliberately not in the same session: no choosing, one rectangle, and a reader who drags it where it belongs. It exists because a forced choice yields at most one bit — *is ours preferred to what ships* — and a correction that points the right way and falls a third short wins every trial and is still wrong. Subtracting the machine's proposed move from the reader's landing gives the residual, which is a distance that can be applied rather than a preference that can only be counted. `START_R` puts every rectangle 3 units out in a uniformly random direction: well clear of both placements a forced choice would have offered (about 1 unit apart), so nobody lands by not moving; inside the window with the box's own half-width to spare; and evenly spread, so the pull a hand exerts toward its own starting point cancels in the average instead of being baked in as a fact about the boxes. `REPEAT_GAP` keeps a mark's two showings at least 10 trials apart, and those showings are inserted across the session rather than appended — the pair measures the reader's precision, and a precision built from the last fifteen trials measures the end of an hour. Placement cannot be offered inside a two-panel trial: dragging to fit and then comparing the landing to the two starts *is* the answer key, and offering the drag after the answer leaks the correction's direction across the session."
+        },
+        {
+          "file": "packages/etl/scripts/build-mark-adjudication.mjs",
+          "symbol": "function panel",
+          "note": "Renders the session to one self-contained page: two panels, one rectangle each, no verdict, no feedback, no answers in the payload. `panel` is its own renderer and must stay that way — the measurement's own crop draws the other printing's outline in green exactly where the corrected rectangle goes, which is the answer key in a colour. Every panel is the same fixed square window (`windowFor`) plus a small framing wobble, so a catch cannot be spotted by its zoom and the corrected box is never dead centre. Asks a second question alongside the first — a tick, `N`, for *neither rectangle closes around the mark* — and it is a tick rather than a fourth button on purpose: a box can be in the right place and the wrong size, which is a different fault with a different repair, and a single \"wrong somehow\" answer would both blend the two and eat the trials where \"which is closer\" still has an answer. `head.asks` records that the question was put, so a ruling worked before it existed scores as *not asked* rather than as nobody-complained. Fingerprints the displacement file into the page so a ruling can be refused later if the measurement moved underneath it; resumes from localStorage keyed on seed + fingerprint. Not checked in and never should be: it draws crops of the mus'haf's own artwork, and the standing rule is that no scripture is committed here."
+        },
+        {
+          "file": "packages/etl/scripts/score-mark-adjudication.mjs",
+          "symbol": "const CATCH_FLOOR",
+          "note": "Rebuilds the key from the seed and only then learns what the answers were — which is the whole defence of the result, since nobody had to be trusted not to peek at something that did not exist. Refuses (exit 2) when the displacement file no longer fingerprints to what the page was built from: answers attached to a question that has since changed come out looking clean and mean nothing. Reports four numbers with Wilson intervals and \"can't tell\" excluded from the denominator rather than counted as a miss — folding it in would punish exactly the care the session asks for. A fifth line, on its own axis and out of the headline's arithmetic, counts the trials where the reader said neither rectangle closed around the mark, and names them so somebody can go and look; the headline is then reprinted without them as a comparison, never as a stricter verdict, since dropping trials only widens the interval. Three distinguishable outcomes, and the middle one is why the decoys exist: supported · not supported *and the decoys clear half*, meaning the shift was visible and ours still lost, which is our correction being wrong rather than the test being blunt · neither clears, meaning the session says nothing either way."
+        },
+        {
+          "file": "packages/etl/scripts/build-mark-nudge.mjs",
+          "symbol": "function inkPaths",
+          "note": "The placement page: one panel, the page's own outlines, and one rectangle that always starts 3 units off. `shift` — what the measurement proposes — is on the planned trial and is never read here, so it reaches no markup, no data attribute and no comment; anybody can view source and find no target, which is the only version of that claim worth making. What the page *is* given is where the rectangle starts, a random direction from where the app draws it today, which points at the right mark without pointing at the right place. The commit button stays dead until the box is moved, because a rectangle that always starts wrong makes \"I left it alone\" a garbage datum rather than an answer. Pointer capture is on the panel and not the rectangle — a one-unit box is about twenty pixels and asking somebody to grab it exactly would make this a test of aim. Records the start alongside the landing, since the pull of a starting point on a landing can only be measured with both ends of it in the record. Same fingerprint guard, same `window.HIFTH_SESSION` sink, same localStorage resume as the forced-choice page; not checked in, for the same reason it is not — it draws crops of the mus'haf's own artwork."
+        },
+        {
+          "file": "packages/etl/scripts/score-mark-nudge.mjs",
+          "symbol": "function meanCI",
+          "note": "Turns placements into a distance. Prints the headline in the forced choice's own currency — how often a landing fell nearer our correction than the shipped box, with a Wilson interval — so the two instruments are comparable and a disagreement between them is legible as a finding rather than as arithmetic. Then the part only this can produce: the residual per axis with a normal interval (a mean of continuous displacements, not a count of successes — the two interval shapes are not interchangeable at these sample sizes), and the reader's own precision from the marks shown twice, halving the variance because two independent placements differ by √2 times one placement's wobble. A residual inside that precision is reported as *not distinguishable from the hand*, which is a result and is not the same as the correction being right. The pull of the starting point is regressed and printed rather than corrected for: correcting would be assuming a model of the hand, and this is the instrument that measures one. Refuses (exit 2) on a fingerprint mismatch or on a file that is not a placement session."
+        },
+        {
+          "file": "packages/etl/scripts/lib/adjudication.test.mjs",
+          "symbol": "describe(\"planSession\"",
+          "note": "Nine tests on twelve invented pages, asserting the properties that decide whether a worked session is worth anything rather than whether the page looks right: rebuilt byte-identically from the seed and different under another; every kind present and the counts summing; the corrected rectangle in the left panel within 12% of half the time, so pressing one key scores 50%; twins genuinely identical with a null answer; an as-shipped trial's other rectangle at exactly the origin; a decoy moved exactly the correction's magnitude and never back toward the as-shipped position (a decoy that drifted home is an as-shipped trial flattering the yardstick); both rectangles plus jitter inside the window, so no trial is answerable by counting boxes; and a refusal rather than a silently shortened session when too few marks clear the ink floor."
+        },
+        {
+          "file": "packages/etl/scripts/lib/adjudication.test.mjs",
+          "symbol": "describe(\"planNudge\"",
+          "note": "Seven more on the same invented pages, each one a way a placement session could be quietly worthless: a rectangle that could start near where it belongs (somebody lands by not moving, and \"I left it alone\" counts as agreement); starting directions that lean one way (a hand's pull toward its own start gets baked into the residual as a fact about the boxes); the two showings of a repeated mark sitting close together (the pair measures memory instead of precision, and the residual is divided by that number); a rectangle clipped at the window edge (the trial opens as a hunt); and a plan that is not reproducible from the seed, after which the residual is a subtraction of the wrong number."
         }
       ],
       "extend": [
+        "Two questions that look like one are not one. A rectangle in the wrong place and a mark with the wrong name were measured together for months and produced a single figure with an eighteen-point swing depending on how you counted — see `mark-registration.md` and `mark-labels.md`, which are two documents on purpose. Do not add a combined number back.",
+        "Any claim that a measurement here works needs a null control — the same measurement at a place the answer is known to be wrong. Without one, 'the box has ink in it' is satisfied by the base letter and a systematically displaced rectangle reads as a hit. This is how a one-unit displacement survived every check for months.",
+        "Shape cannot separate fatha from kasra, or fathatan from kasratan, and no better shape comparison will — what separates them is which side of the letter they sit on, which a centred comparison discards before it starts. Anything that colours a recitation rule naming one of those four cannot verify itself by shape.",
+        "The word boxes and the mark boxes are placed by the SAME per-page fit, recorded in `word-boxes.pin.json`. A correction to one is a correction to both, and a displacement in one is a displacement in both — it is invisible in word boxes only because a word box is a median 27.9 × 24.3 against a mark's 5.6 × 3.6.",
         "The word index here is the *print's*, not the Quranic Arabic Corpus's — the print counts pause marks as words, and the two disagree on 4,499 of 6,236 ayahs. That alignment now exists and is a separate feature, `word-indexing`; do not re-derive it here, and do not renumber these boxes to match QAC. The number on a box is the number the geometry arrived with, and the map is what relates it to anything else.",
         "No upstream bytes ship and none should start. The pages stay the quranpedia print; what this area contributes is numbers. If a change would vendor their ink or their text, it is a new source and needs a SOURCES.md entry of its own, not an extension of this one.",
         "Anything that transfers external geometry onto a page works in plain top-down viewBox space, outside the `matrix(1.3333 0 0 -1.3333 …)` the ink sits under. See assets-and-pages' note on the two coordinate spaces.",
         "A tolerance added here is measured before it is written, and the measurement goes in the comment beside it — `MAX_RESIDUAL` and `MARK_DROP` both name the distribution they clear. A number with no distribution behind it is an allow-list wearing a constant's clothes.",
-        "`gate:words` deliberately duplicates parsing and point-in-polygon. Do not refactor it to import `lib/mushaf-frame.mjs`; the duplication is the check."
+        "`gate:words` deliberately duplicates parsing and point-in-polygon. Do not refactor it to import `lib/mushaf-frame.mjs`; the duplication is the check.",
+        "A human verdict is only evidence if the answer did not exist while it was being given. Do not add a review surface that shows someone the machine's verdict and asks whether they agree — they agree, and what comes back is the machine's own opinion with a person's name on it. The adjudication tool is the shape that works: a forced choice between two candidates, nothing on screen saying which is ours, and the key rebuilt from a seed afterwards. Anything asking a person to settle a measurement here follows that shape, and carries its own controls — an easy condition to catch a session worked while distracted, an unanswerable one to catch a person who always picks something, and a same-magnitude decoy so the headline number has a yardstick to be read against.",
+        "When a reader says the instrument cannot express what they can see, widen it on a new axis — do not add an option to the existing one. The adjudication page grew a tick for \"neither rectangle closes around it\" rather than a fourth button, because a fourth button would have absorbed trials that still carried a usable preference and merged a size fault into a placement count. The test of a proposed new answer is whether it is the same question: if it is not, it gets its own line in the score and its own sentence in the record, and the headline's denominator does not move.",
+        "A preference and a magnitude are two instruments, not two readouts of one. A forced choice can only ever say whether our answer beats the one alternative we thought of, so a correction that points the right way and falls short wins every trial — which is why placement lives in its own session (`planNudge`) rather than as a drag added to the two-panel page. It cannot be added there: dragging a box to fit and then comparing the landing to the two starting positions IS the answer key, and offering the drag after the answer teaches the direction of the correction across a session, since it points the same way on almost every page. The general rule for this area: if a proposed feature would let a reader see where we think the answer is, it belongs in a different session with a different seed, and the two sessions should not be worked back to back by the same person.",
+        "A hand-measured number needs the hand's own noise measured in the same session or it means nothing. `planNudge` shows some marks twice from independent starts for exactly this, and the scorer refuses to call a residual a finding unless it exceeds that spread. Do not import a precision figure from another session, another reader or a previous run — the number is a property of a person on a screen on a day, and borrowing one is how a wandering hand comes to look like a discovery about the boxes."
       ],
       "gates": ["pnpm gate:words", "pnpm gate:assets", "pnpm probe:word-registration", "make ci"],
       "seeAlso": ["assets-and-pages", "select-an-ayah", "word-selection", "word-indexing"]
@@ -1081,6 +1186,21 @@
           "note": "Derived from the check id, never stored beside it: a path written down in two places is a path that can disagree with itself."
         },
         {
+          "file": "scripts/lib/validation-render.mjs",
+          "symbol": "card",
+          "note": "One renderer for a check, shared by the field guide and the session page, so a runbook step cannot read one way on the phone and another on the laptop. `capture` is the only difference between the two surfaces — it stamps each step with its ledger id as well as its position, the same rule `evidence.covers` lives under, so a reordered runbook cannot silently re-point a transcript."
+        },
+        {
+          "file": "scripts/session.mjs",
+          "symbol": "SHIM",
+          "note": "The writing surface: one check, served to the phone, every tick and note appended to a transcript as it happens rather than typed from memory at the end. This is the opt-in a check's own tool gets — inject a sink, and a page built for the check posts to it; opened as a plain file it finds nothing and keeps its offline behaviour. Every /api route is token-gated because the server binds 0.0.0.0 for the phone, and these files are treated as evidence."
+        },
+        {
+          "file": "scripts/lib/session-log.mjs",
+          "symbol": "summarise",
+          "note": "Arithmetic only — counts, the notes in order, the last verdict — and deliberately never a score. placement-correction-by-eye is a blind forced choice whose validity rests on nobody, the worker included, knowing how it is going while it is going; a progress bar is fine, a running tally would turn the measurement into a training exercise."
+        },
+        {
           "file": "scripts/probe-reference.mjs",
           "symbol": "V1_V2_DIVERGENCE",
           "note": "The one part of edge-spot-audit a machine can reach: a second opinion on the print, fetched rather than held. api.quran.com publishes a V1/1405H page table and ours is V2/1421H, so the two must disagree on exactly 36 pages — which turns a useless source into a fingerprint, and makes agreement where they should differ as much a finding as the reverse. `probe-` and not `gate-` because it reaches the network, same reasoning as check-source-offer.mjs. Keys only, no `fields`, so no Quran text crosses the wire."
@@ -1097,10 +1217,70 @@
         "When a check comes back, record it and then do what `tunes` printed. That step is what turns a verdict into a permanent test instead of a note.",
         "An `evidence` block must name a `residue` — say in words what the command cannot do. The gate rejects one that does not, because an automated run naming no remainder is one claiming to have done a human's job.",
         "`evidence.covers` points at runbook step ids, never positions, and `evidence.run` is a script rather than a make target — make flattens every failed recipe to exit 2, which would let a network timeout read as a verdict.",
+        "A check whose work is a purpose-built page declares it as `runbook.tool` and the page opts into `window.HIFTH_SESSION` — never send that sink anything the page is not supposed to know. The adjudication tool posts which panel was chosen and never whether it was right, because the answer key does not exist until the scorer rebuilds it from the seed.",
         "Before asking a human for a mushaf, run `make probe-reference ALL=1` and see what is left. It cannot judge whether two ayahs resemble each other — nothing on a network can — but it settles every arithmetic claim underneath that question, and it must never become a gate: a check that reaches the internet teaches everyone to skip it the first time a host is down."
       ],
       "gates": ["pnpm gate:validation", "make ci"],
       "seeAlso": ["edge-data-etl", "provenance"]
+    },
+
+    {
+      "id": "decisions",
+      "what": "Every question this project has had to answer, in words a person outside the repo can act on.",
+      "layer": "gate",
+      "entry": [
+        {
+          "file": "docs/decisions.json",
+          "symbol": "decisions",
+          "note": "The register. Fifteen records already existed in docs/decisions/ with no way in: their titles are sentences — 'The grain gets finer where the finger already is' is a good title and a useless index entry — so a reader arriving with a question could not find which file answers it. The running-table habit existed and was scoped to one topic (desktop-vs-mobile.md says 'append a row there rather than restating one here') and nothing generalised it, so an open decision could sit in a design doc's eighth section for a month with nothing counting it as open. Stores exactly one sentence of its own, the plain-language `question`, and points at the record for everything else — same anti-duplication rule as issues.json and the ledger. The exception is `related`, which is not a restatement of anything: relatedness is a property of a PAIR, so no single record can hold it, and the second half of a pair is normally written months after the first — by which time the first is not the file anybody opens. Hand-edited, never generated."
+        },
+        {
+          "file": "scripts/gate-decisions.mjs",
+          "symbol": "hasArtifact",
+          "note": "The half that is easy to skip: who a decision is FOR. An open decision must carry both an `artifact` — the published page anybody can open — and a `page`, the same picture checked in here, and the gate fails on either alone. A link with no copy dies when the host does; a copy with no link cannot be sent to anyone. Whatever is checked in names the script that rebuilds it, because a committed page nobody can regenerate is a screenshot with extra steps that starts lying the day the data moves. And the record has to link to both, or its argument is about a picture the reader cannot reach. Also carries the reverse check issues.json exists for: a record in docs/decisions/ with no row here. And `related` must be symmetric: naming a decision that does not name you back is a link invisible from the end a reader is usually standing at."
+        },
+        {
+          "file": "scripts/decisions.mjs",
+          "symbol": "plainLanguage",
+          "note": "The CLAUDE.md tenet, in characters — the only place it is more than a preference. Refuses a question or an option label that names a file, a path, a symbol, a command, a gate, or backticked code, because each of those makes a reader look something up before they can have an opinion. Deliberately does NOT check reading age, sentence length or word difficulty: those are taste, and a gate that enforces taste gets switched off. Domain words — verse, tajweed, madd, ghunnah, mus'haf — pass, and should: translating them out makes the page vaguer, not simpler."
+        },
+        {
+          "file": "scripts/build-decisions-doc.mjs",
+          "symbol": "recordLink",
+          "note": "Renders docs/decisions/README.md, open first. Every title is read out of the record at build time and none is stored — the register holds the question, the record owns the answer, and a title living in two files is right for a while and then quietly stops being right. Stamped with a hash the gate compares, the same rule as issues.md and the validation guide."
+        },
+        {
+          "file": ".githooks/pre-commit",
+          "symbol": "gate-decisions.mjs",
+          "note": "Scoped to the staged files, silent when a commit touches none of them. This pairing breaks on exactly one kind of commit — the one that adds the artifact link before committing the page, or renames the page and leaves the link — and that is the commit where the information is free, because you are moving the thing right now."
+        },
+        {
+          "file": ".claude/skills/decide/SKILL.md",
+          "symbol": "name: decide",
+          "note": "The rule applied, as a checklist: question-shaped headings, no identifiers in prose a reader must follow, a glossary for the domain words, every option drawn on real data at the size it would really be used, and what the page does NOT settle stated on the page. Not a template — the shape of an options page follows the question; what does not vary is that a reader can follow it cold. The symbol is the frontmatter name for the reason mushaf-reference gives: code-pointers.mjs reads a leading `#` as a comment, so no heading can be a live pointer."
+        },
+        {
+          "file": "scripts/build-mark-options.mjs",
+          "symbol": "ARTIFACT",
+          "note": "The worked example of what the skill asks for, and of the split every options generator wants: `--extract` reads the 348 MB gitignored page cache and writes a small JSON of findings; the default render reads only committed bytes, so the page rebuilds on a fresh clone. `--artifact` re-renders it with the print inlined once as a <symbol> and <use>d per specimen — the publishing host blocks every external request, so a relative URL does not error, it silently draws nothing, and six data: URIs would be six copies of 64 KB. That copy is gitignored: same page, roughly twice the bytes."
+        },
+        {
+          "file": "scripts/build-palette-options.mjs",
+          "symbol": "fanned",
+          "note": "The second options page, and the one that shows what a generator is FOR: its central claim is one nobody can make in a paragraph — that eighteen editable colours do not fit on cream paper — so it builds the best honest eighteen it can, fanning each family's hue in lightness and a little in hue, and then counts what that costs. Answer: **18 pairs closer together than the closest pair in today's seven**, which is the argument against option C, generated rather than asserted, and it would move on its own if the palette moved. Deliberately shares build-mark-options.mjs's stylesheet verbatim — the two pages are the same kind of document about the same seven colours, a reader will arrive at one from the other, and two option pages that do not look like siblings read as two projects. Unlike its sibling it has NO `--extract` half: every number comes from the shipped shards, `rules.json`, `tokens.css` and `skins.ts`, so there is nothing to stale. The two measurements the record turns on are computed here and nowhere else: `shown` — the share of a rule's own ayahs in which its family ALSO won the ayah's single tint, 1.6% for the commonest madd — and `ambiguous`, the 620 ayahs (10.0%) whose winning family is carried by more than one rule, where an eighteen-colour palette has no non-arbitrary answer at all. `--artifact` emits the body only, without a document shell: the publishing host wraps what it is given, and a second <html> inside the first is discarded along with the <style> it was carrying."
+        }
+      ],
+      "extend": [
+        "A new decision is a record in docs/decisions/ (or a section of the design doc that owns it), a row in docs/decisions.json, and `make decisions-doc`. The gate refuses a record with no row, which is the direction nothing else checks.",
+        "Write the question in plain words or the build says so. No file names, no symbols, no commands — the record's body is where those belong. See CLAUDE.md for why this is a tenet and not a style note.",
+        "An open decision needs two or more options and something to look at, published AND checked in. If there is nothing to look at yet, the decision is not open, it is unstarted.",
+        "Never paraphrase a decision into the register. It stores the question; the record owns the answer, and `make decisions` reads the answer out of the record as you run it.",
+        "Legible is not answerable. A page that opens with three options gives a reader the last thing they need first — so the record and the page both say why it is being asked now, what happens if nobody decides, what people outside this project already do (linked; and if you did not look, say so), what we have already decided that constrains it, what was left off the option list and why, and what would change the answer. The decide skill is that list in full.",
+        "Fill `related` in BOTH rows. One direction resolves fine and reads as complete, which is why it is the failure worth a gate.",
+        "When the call is made, set `decided`, `by` and `date` — and leave the losing options on the page. They are the reason the choice was a choice, and the next person to reopen it will want them."
+      ],
+      "gates": ["pnpm gate:decisions", "make ci"],
+      "seeAlso": ["ci-and-gates", "validation"]
     },
 
     {

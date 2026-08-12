@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" data-ledger-hash="441e9ed17034">
+<html lang="en" data-ledger-hash="7ccdaa5c6d26">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -123,11 +123,11 @@ li.struck .expect::before { content: "machine "; color: var(--green); }
 <header class="top">
   <p class="kicker">Hifth · حِفظ</p>
   <h1>Field guide</h1>
-  <p class="lede">The checks a machine cannot run. 6 of 7 outstanding.</p>
+  <p class="lede">The checks a machine cannot run. 8 of 9 outstanding.</p>
   <p class="rule">Every result here must tighten something automated — a threshold, a
   fixture, a gate. That is what <b>tunes</b> is for at the foot of each card. A verdict
   that tunes nothing has to be bought again by hand, forever.</p>
-  <p class="src">Generated from <code>docs/validation/ledger.json</code> · <code>441e9ed17034</code>
+  <p class="src">Generated from <code>docs/validation/ledger.json</code> · <code>7ccdaa5c6d26</code>
   · never edit this file — run <code>make guide</code></p>
 </header>
 
@@ -164,6 +164,7 @@ li.struck .expect::before { content: "machine "; color: var(--green); }
           <figcaption>from the build · a shape to recognise, not a result to match</figcaption>
         </figure>
         <p class="why">Confirms you are measuring the build that has the probe in it. An ordinary build looks completely normal, which is exactly how you would not notice — and every number below would then be a measurement of the wrong thing.</p>
+        
       </li>
       <li>
         <label class="do"><input type="checkbox" data-step="perf-verdict-on-device:1"><span>Tap <bdi>ابدأ</bdi>.</span></label>
@@ -173,24 +174,28 @@ li.struck .expect::before { content: "machine "; color: var(--green); }
           <figcaption>from the build · a shape to recognise, not a result to match</figcaption>
         </figure>
         <p class="why">The one-second «<bdi>استعد</bdi>» beat is there so the tail of one gesture does not land in the head of the next segment. Rush it and the three numbers blur into each other, which is the one way this check can fail without looking like it failed.</p>
+        
       </li>
       <li>
         <label class="do"><input type="checkbox" data-step="perf-verdict-on-device:2"><span>Segment 1 — «<bdi>مرّر الصفحة بإصبع واحد</bdi>»: pan the page with one finger, continuously, for the whole 5-second countdown.</span></label>
         <p class="expect">The page moves under your finger and the counter runs 5→1. Keep moving: a still finger produces no frames and the segment will report «too few frames — not driven».</p>
         
         <p class="why">Pan is the cheap case: no re-raster, just compositing a layer that already exists. If pan is over budget then nothing further matters — the page is too heavy as DOM and the verdict is raster-fallback.</p>
+        
       </li>
       <li>
         <label class="do"><input type="checkbox" data-step="perf-verdict-on-device:3"><span>Segment 2 — «<bdi>قرّب وباعد بإصبعين</bdi>»: pinch in and out, going far enough that glyph edges visibly re-sharpen.</span></label>
         <p class="expect">Zoom follows the pinch. The re-sharpen moment is the one being measured — it is the layer being re-rastered.</p>
         
         <p class="why">This is the whole check. Zooming past the layer's backing store makes the browser re-rasterize ~170 KB of glyph paths, and that cost is structurally invisible to the emulated desktop baseline. The rendering decision for all 604 pages turns on this one number.</p>
+        
       </li>
       <li>
         <label class="do"><input type="checkbox" data-step="perf-verdict-on-device:4"><span>Segment 3 — «<bdi>اضغط آيات مختلفة</bdi>»: tap a different ayah roughly once a second.</span></label>
         <p class="expect">Amber marker swipes land on each ayah you tap — one along the middle of every line it occupies, with the scripture still readable through them. Different ayahs, not the same one twice — you are measuring overlay churn.</p>
         
         <p class="why">Separates rendering cost from interaction cost. If only this segment is bad the problem is overlay churn in the highlighter — a real bug, but not one that changes which rendering strategy Loop 4b builds.</p>
+        
       </li>
       <li>
         <label class="do"><input type="checkbox" data-step="perf-verdict-on-device:5"><span>Read the results table, then long-press the JSON box → Select All → Copy.</span></label>
@@ -200,12 +205,14 @@ li.struck .expect::before { content: "machine "; color: var(--green); }
           <figcaption>from the build · a shape to recognise, not a result to match</figcaption>
         </figure>
         <p class="why">The table gives you the verdict; the JSON is what makes it re-checkable a year from now. It stamps device, dpr, cores, standalone flag and build commit, so a later reader can tell whether the number still describes the phone in their hand.</p>
+        
       </li>
       <li>
         <label class="do"><input type="checkbox" data-step="perf-verdict-on-device:6"><span>If you can, add the site to the Home Screen and run the whole thing again from there.</span></label>
         <p class="expect"><code>&quot;standalone&quot;: true</code> in the second JSON. Standalone gets its own compositor path on iOS, so the two runs can legitimately disagree — that difference is a result, not noise.</p>
         
         <p class="why">iOS gives standalone its own compositor path. If the two runs disagree, the install prompt is doing load-bearing work rather than convenience work — and that changes what Loop 6b has to guarantee.</p>
+        
       </li>
     </ol>
   </section>
@@ -255,6 +262,7 @@ li.struck .expect::before { content: "machine "; color: var(--green); }
           <figcaption>from the build · a shape to recognise, not a result to match</figcaption>
         </figure>
         <p class="why">The one thing no linter can check. axe proves a label exists and the snapshot proves it has not changed; only an ear can tell you the phrase is one a person would use, and only a real voice engine tells you how Arabic-Indic digits actually come out.</p>
+        
       </li>
       <li>
         <label class="do"><input type="checkbox" data-step="screen-reader-walkthrough:1"><span>Double-tap an ayah with hops, open a rail chip, and try to escape the sheet: swipe past the last item, and swipe backwards past the first. Then hop to a target and immediately swipe once.</span></label>
@@ -264,6 +272,7 @@ li.struck .expect::before { content: "machine "; color: var(--green); }
           <figcaption>from the build · a shape to recognise, not a result to match</figcaption>
         </figure>
         <p class="why">Focus containment and focus survival across a page change are the two failures that make hopping unusable without sight, and neither is visible to a runner: the tree is correct in both the working and the broken case. The sheet's own contents — «<bdi>إغلاق</bdi>», «<bdi>انتقل إلى</bdi> …» — are pinned in e2e/__aria__/*/hop-popover.aria.yml and are not what you are checking here.</p>
+        
       </li>
       <li>
         <label class="do"><input type="checkbox" data-step="screen-reader-walkthrough:2"><span>Now do the whole tour with the screen off or your eyes closed: find an ayah, hop, come back along the trail.</span></label>
@@ -273,6 +282,7 @@ li.struck .expect::before { content: "machine "; color: var(--green); }
           <figcaption>from the build · a shape to recognise, not a result to match</figcaption>
         </figure>
         <p class="why">Every label can be correct and the app still unusable, because you knew where to swipe. This is the actual verdict; the two steps before it are how you find out why it failed.</p>
+        
       </li>
     </ol>
   </section>
@@ -321,12 +331,14 @@ li.struck .expect::before { content: "machine "; color: var(--green); }
         <p class="expect">It loads. (It does not load from this repo's tooling, which is why nobody has read it yet.)</p>
         
         <p class="why">The primary source, not a mirror. Every licensing claim this project makes about the glyph corpus currently rests on a third party's summary, and a summary is precisely where a restriction gets softened.</p>
+        
       </li>
       <li>
         <label class="do"><input type="checkbox" data-step="kfgqpc-terms-primary-source:1"><span>Read what it says about reusing the digital mushaf.</span></label>
         <p class="expect">Free use in digital, web and software contexts, with <b>commercial printing of physical masahif</b> reserved to the Complex — the same restriction quran-svg's NOTICE.md quotes, citing Royal Decrees 136/8 and 9/B/46356.</p>
         
         <p class="why">What is at stake is whether the reserved right is commercial printing of physical masahif or something broader. Those two readings put this project in very different places.</p>
+        
       </li>
       <li class="struck">
         <p class="do"><s>Confirm our two restatements say the same thing as each other — SOURCES.md §hafs-kfqc and the colophon's «<bdi>الرخصة والمصدر</bdi>».</s></p>
@@ -340,6 +352,7 @@ li.struck .expect::before { content: "machine "; color: var(--green); }
           <figcaption>from the build · a shape to recognise, not a result to match</figcaption>
         </figure>
         <p class="why">We restate these terms in two places a stranger can read, so a wrong restatement is a licensing claim we are making on the Complex's behalf. This exact string was wrong once and shipped.</p>
+        
       </li>
     </ol>
   </section>
@@ -392,6 +405,7 @@ li.struck .expect::before { content: "machine "; color: var(--green); }
         <p class="expect">The app loads normally.</p>
         
         <p class="why">Private, because your own session hides the failure that matters: a link that resolves only because you are signed in does not resolve for the stranger the GPL offer is written for. <code>make source-offer</code> has already followed the links with no credentials at all; what it cannot tell you is whether a reader can *get to* them from inside the running app, which is what the rest of this is for.</p>
+        
       </li>
       <li>
         <label class="do"><input type="checkbox" data-step="source-offer-resolves:1"><span>Tap the wordmark <bdi>حِفظ</bdi> at the top of the chrome (it announces «<bdi>عن حِفظ</bdi>»).</span></label>
@@ -401,6 +415,7 @@ li.struck .expect::before { content: "machine "; color: var(--green); }
           <figcaption>from the build · a shape to recognise, not a result to match</figcaption>
         </figure>
         <p class="why">The offer has to be reachable from inside the running app, not just from the repository. A colophon nobody can find is an offer that is not being made.</p>
+        
       </li>
       <li class="struck">
         <p class="do"><s>Note the short commit printed beside the link, then follow the link.</s></p>
@@ -463,18 +478,21 @@ li.struck .expect::before { content: "machine "; color: var(--green); }
         <p class="expect">Each <code>from</code> and <code>to</code> is findable at the page printed beside it. A pair you cannot locate is itself a finding — record it as wrong with a note.</p>
         
         <p class="why">This is the only check in the project that can say the data is true. Every other tier verifies that the app faithfully renders whatever the ETL produced — including when what it produced is wrong.</p>
+        
       </li>
       <li>
         <label class="do"><input type="checkbox" data-step="edge-spot-audit:1"><span>Read <code>words</code> and <code>roots</code> beside each pair as hints, and distrust them.</span></label>
         <p class="expect"><code>words</code> is the longest run of words the two ayahs share — the same score gate:edges enforces a floor on, computed by the same reader (packages/etl/scripts/morphology.mjs), so a number here can never disagree with CI. <code>roots</code> is how many of the shorter ayah's roots appear in both, in order.</p>
         
         <p class="why">They point at the pairs worth slowing down on from both ends: a high <code>words</code> with a wrong verdict is a plausible-looking false edge, and a low one that is nonetheless right is the case the product exists for — 2:48 → 2:123 swaps <bdi>شفاعة</bdi> and <bdi>عدل</bdi>, scores 1, and is genuinely confused by huffaz every day.</p>
+        
       </li>
       <li>
         <label class="do"><input type="checkbox" data-step="edge-spot-audit:2"><span>For each, answer the question the tool prints — not «are these similar?» but «<b>would a hafiz confuse these two while reciting?</b>»</span></label>
         <p class="expect">Most edges are obvious either way in a few seconds. The slow ones are the informative ones; note why.</p>
         
         <p class="why">&quot;Similar&quot; is not the standard; a hafiz's confusion is. An edge that is textually close but never actually confused is noise in the rail, and noise is what makes a reader stop trusting the hop.</p>
+        
       </li>
       <li>
         <label class="do"><input type="checkbox" data-step="edge-spot-audit:3"><span>Optionally open a pair in the app to see what a reader actually sees: make phone, then navigate to the ayah and open its rail.</span></label>
@@ -484,12 +502,14 @@ li.struck .expect::before { content: "machine "; color: var(--green); }
           <figcaption>from the build · a shape to recognise, not a result to match</figcaption>
         </figure>
         <p class="why">Catches a correct edge with a wrong presentation. A real mutashabih filed under the wrong direction chip sends the reader looking in the wrong surah, which reads as bad data even though the data is fine.</p>
+        
       </li>
       <li>
         <label class="do"><input type="checkbox" data-step="edge-spot-audit:4"><span>Paste the printed JSON block into packages/etl/data/qa/verified-edges.json under <code>entries</code>, setting each <code>verdict</code> to <code>correct</code> or <code>wrong</code>, <code>verifiedBy</code> to your name, and <code>note</code> where a future reader needs the reason.</span></label>
         <p class="expect">Forty entries for twenty pairs — the block writes out both directions of each pair, because every edge in the corpus is generated in both and one reading settles both.</p>
         
         <p class="why">Recording the <code>correct</code> verdicts matters as much as the failures: they are what turns half an hour of reading into a permanent regression fixture instead of an anecdote.</p>
+        
       </li>
       <li class="struck">
         <p class="do"><s>Run pnpm gate:verified-edges.</s></p>
@@ -536,30 +556,35 @@ li.struck .expect::before { content: "machine "; color: var(--green); }
         <p class="expect">The button becomes a count («<bdi>جارٍ حفظ الجزء ١</bdi> — <bdi>ن من ٢٤</bdi>») with «<bdi>إيقاف</bdi>» beside it, and settles into a row reading «<bdi>الجزء ١</bdi> · <bdi>٣٫١ م</bdi>.<bdi>ب</bdi>» or thereabouts — the offer disappears, because the juz is now kept. If the row instead says «<bdi>ناقص</bdi>» the pin did not finish; press «<bdi>احفظه من جديد</bdi>» before starting the clock.</p>
         
         <p class="why">The tab is the case we expect to lose. Proving it worked on day 0 is what makes a day-8 failure evidence rather than a guess.</p>
+        
       </li>
       <li>
         <label class="do"><input type="checkbox" data-step="offline-survival-8-day:1"><span>Add the site to the Home Screen, open it from there, and pin the same juz again inside the installed app.</span></label>
         <p class="expect">Two independent storage buckets now hold the same pack. That is the experiment.</p>
         
         <p class="why">Two buckets, same pack, same phone, same eight days. It is the only arrangement that lets you attribute a loss to the storage sweep rather than to the network, the build, or the device.</p>
+        
       </li>
       <li>
         <label class="do"><input type="checkbox" data-step="offline-survival-8-day:2"><span>Write down today's date, then use the phone normally for 8+ days. Do not open Hifth in either place.</span></label>
         <p class="expect">Nothing. This step is the check.</p>
         
         <p class="why">ITP counts seven days of browser use, not seven days of wall clock, and it cannot be fast-forwarded. The waiting is the instrument.</p>
+        
       </li>
       <li>
         <label class="do"><input type="checkbox" data-step="offline-survival-8-day:3"><span>On day 8 or later, turn on airplane mode and open the Safari tab: try to revise the pinned juz — open pages, hop, turn pages.</span></label>
         <p class="expect">The tab may have lost everything (ITP clears script storage for origins untouched for 7 days of browser use). If it has, the notice «<bdi>الصفحات التي حفظتها لم تعد في هذا الجهاز</bdi>» should be on screen with «<bdi>اعرض المحفوظ</bdi>» beside it, and under «<bdi>المحفوظ في هذا الجهاز</bdi>» the row for juz 1 should read «<bdi>لم يعد في هذا الجهاز</bdi>» or «<bdi>ناقص</bdi>» — not a broken page, and not a row still claiming megabytes it no longer has.</p>
         
         <p class="why">Airplane mode is what makes this a storage test rather than a cache test: whatever still works is genuinely resident on the device.</p>
+        
       </li>
       <li>
         <label class="do"><input type="checkbox" data-step="offline-survival-8-day:4"><span>Still in airplane mode, open the installed app and do the same.</span></label>
         <p class="expect">The juz is still there. Installed apps are exempt from that sweep — this asymmetry is the whole reason the install prompt is first-class.</p>
         
         <p class="why">If the installed app survives and the tab does not, the install prompt stops being a nicety and becomes the feature that makes offline revision real — which is what Loop 6b has to be designed around.</p>
+        
       </li>
     </ol>
   </section>
@@ -602,36 +627,42 @@ li.struck .expect::before { content: "machine "; color: var(--green); }
         <p class="expect">A row already exists, stamped with today's local date — written by opening the store, not by any tap.</p>
         
         <p class="why">This is the entire defence against the seven-day sweep. A record that has existed for a month and holds nothing means the reader did not tap; one that has existed since this morning and holds nothing means we lost it. If <code>since</code> only appeared after the first tap, those two are indistinguishable forever after.</p>
+        
       </li>
       <li>
         <label class="do"><input type="checkbox" data-step="revision-record-lands-on-a-phone:1"><span>Tap five or six ayahs on a page, then drag a marquee across a short passage. Tap one of those ayahs a second time to dismiss it.</span></label>
         <p class="expect">Under <code>days</code> → today's date: one entry per ayah you selected, exactly one entry for the whole marquee (carrying both a <code>key</code> and an <code>endKey</code>), and nothing at all for the tap that dismissed.</p>
         
         <p class="why">The three exclusions are asserted in App.test.tsx, but against a synthetic pointerup on a fixture page. This is the same claim against a finger on the real gesture stack — where a marquee release and a tap are told apart by @use-gesture, not by the test calling one or the other.</p>
+        
       </li>
       <li>
         <label class="do"><input type="checkbox" data-step="revision-record-lands-on-a-phone:2"><span>Tap two or three more ayahs, then immediately swipe the app away from the app switcher — within a second or two, before anything could plausibly flush.</span></label>
         <p class="expect">Reopen and inspect: those last taps are all present.</p>
         
         <p class="why">The store writes on every tap instead of batching, which costs a rewrite of the day's array per tap. This step is what that cost is buying. A batched writer loses exactly the taps made just before the app is killed, which on a phone is most of them — and it would have looked perfect in every test in this repo.</p>
+        
       </li>
       <li>
         <label class="do"><input type="checkbox" data-step="revision-record-lands-on-a-phone:3"><span>If you can, do one short session within half an hour either side of local midnight, and note the wall-clock time.</span></label>
         <p class="expect">Looks before midnight file under the earlier date and looks after it under the later one — by the phone's own clock, not UTC.</p>
         
         <p class="why">Every clock in CI is UTC, so <code>dayOf</code> reading the offset from the event has never once been exercised against a real one. Someone revising at 23:40 in a UTC+3 city and again at 00:20 has revised on two days; if the record shows one, the offset is not riding on the event and every evening session east or west of Greenwich is mis-filed.</p>
+        
       </li>
       <li>
         <label class="do"><input type="checkbox" data-step="revision-record-lands-on-a-phone:4"><span>On a later calendar day, open the app again and revise for a few minutes.</span></label>
         <p class="expect"><code>days</code> now holds two keys, the earlier one unchanged, and <code>meta</code> → <code>since</code> still shows the first day — it must not have moved forward.</p>
         
         <p class="why"><code>since</code> moving with the record would make the log look freshly created every time it was read, which is precisely the wipe's signature. This is the cheapest way to catch that, and it cannot be caught at all in a suite that creates a new database per test.</p>
+        
       </li>
       <li>
         <label class="do"><input type="checkbox" data-step="revision-record-lands-on-a-phone:5"><span>Now leave the app alone for eight or more days of ordinary phone use, then open it and look at <code>days</code> and <code>since</code>.</span></label>
         <p class="expect">Either the record is intact, or it is empty <b>and</b> <code>since</code> reads as today — never empty with an old <code>since</code>.</p>
         
         <p class="why">This is the failure the feature is designed around and the one no harness can produce: iOS sweeping an origin nobody has touched. The two acceptable outcomes are 'the history is there' and 'the history is gone and the record admits it is one day old'. The third — empty, with a <code>since</code> from weeks ago — is the app telling someone they have not revised in a month. Note whether the phone had the site installed to the Home Screen or open as a tab; that is the same asymmetry offline-survival-8-day measures for the page cache, and this is the IndexedDB half of it.</p>
+        
       </li>
     </ol>
   </section>
@@ -649,11 +680,208 @@ li.struck .expect::before { content: "machine "; color: var(--green); }
     <p class="expect">Written up in docs/decisions/loop-7.md</p>
   </section>
 </article>
+<article class="card" id="placement-correction-by-eye">
+  <div class="head">
+    <span class="badge">outstanding</span>
+    <h2>Placement correction by eye — a hundred forced choices between the corrected box and the one we ship</h2>
+    <p class="id"><code>placement-correction-by-eye</code> · blocks <b>mark-C</b></p>
+  </div>
+
+  <p class="why">The measurement says nearly every mark rectangle sits about a letter away from its own ink, and that one number per page fixes it. Only arithmetic has ever said so, and it marked its own homework: the rasteriser that found the displacement is the rasteriser that scores the correction. Nobody has looked at a single verdict. Until somebody does, the thresholds in the placement record stay unenforced, and nothing that points at a mark can ship — which is the whole reason to hold three hundred thousand rectangles.</p>
+  
+
+  
+  <section class="block">
+    <h3>What you need</h3>
+    <ul class="bullets"><li>Both printings on this machine: the pages the app ships, and the gitignored ligature cache the mark boxes are read from. If the placement measurement has ever run here, they are already present; if not, the first setup command says so and stops.</li><li>About twenty minutes, in as few sittings as you can manage. A hundred trials is roughly thirteen minutes of looking; the rest is settling in.</li><li>A screen you are not squinting at, and no opinion about what the answer ought to be. Nothing else — no mushaf, no phone, no network.</li><li>Nobody has to be a hafiz for this one. It is a question about where a rectangle sits, not about what the mark says.</li></ul>
+  </section>
+  <section class="block">
+    <h3>Setup — on the laptop</h3>
+    <pre class="cmd">node packages/etl/scripts/probe-mark-ink.mjs --sample 4000 --seed 7 --pages-n 40</pre>
+    <p class="expect">About fifty seconds, ending in a failure code — that is expected, and it is the reason this check exists. It writes packages/etl/out/mark-shift.json: one measured displacement for each of forty pages. That file is the thing on trial.</p>
+<pre class="cmd">pnpm adjudicate:marks --seed 11 --count 100</pre>
+    <p class="expect">packages/etl/out/mark-adjudication.html in about a second, and a line naming the seed, how many pages the trials spread over, and a short fingerprint of the displacements. Note the fingerprint. Open the file in any browser — it needs nothing running, and it reaches no network.</p>
+  </section>
+
+  <section class="block">
+    <h3>Steps — on the phone</h3>
+    <ol class="steps">
+      <li>
+        <label class="do"><input type="checkbox" data-step="placement-correction-by-eye:0"><span>Read the five short answers the page opens with, then start. Do not read the code that built it first.</span></label>
+        <p class="expect">A first trial: one mark, drawn twice side by side, a rectangle on each, and two keys.</p>
+        
+        <p class="why">The trials are built so that nothing on the screen says which rectangle is ours, and the answers exist nowhere until the scorer runs. Reading the builder first is the one way to spoil that, and there is no way to unspoil it — the session would have to be thrown away and rebuilt under a seed you had not seen.</p>
+        
+      </li>
+      <li>
+        <label class="do"><input type="checkbox" data-step="placement-correction-by-eye:1"><span>For each trial pick the panel whose rectangle sits on the mark — A or B — or press space when you honestly cannot tell.</span></label>
+        <p class="expect">No feedback, ever: the next trial, and a bar creeping along. Some pairs are obvious. Most are not, and a few are the same rectangle twice, where space is the only honest answer.</p>
+        
+        <p class="why">Feedback would turn this into training. Within twenty trials a person who is told they were right learns which way the corrected box tends to sit and answers from that rule rather than from the ink, and the count that comes out measures how well they learned it. Space is not a wasted trial: it is left out of the arithmetic rather than counted as a miss, so guessing to keep the tally up is the one thing that would cost you.</p>
+        
+      </li>
+      <li>
+        <label class="do"><input type="checkbox" data-step="placement-correction-by-eye:2"><span>When the mark pokes out of both rectangles, press N to say neither closes around it — and then still pick whichever of the two is closer.</span></label>
+        <p class="expect">The tick lights up and clears itself on the next trial. It changes nothing else on the screen, and it never skips the trial.</p>
+        
+        <p class="why">A rectangle can be in the right place and still be the wrong size, and this whole session is about where they sit. Those are two faults with two different repairs, so a fourth button meaning 'wrong somehow' would blend them into one count nobody could act on — and it would eat the trials that still carry a usable answer, because which of two wrong rectangles is closer is a question you can answer. The tick is counted on its own line and the marks you tick are named, so somebody can go and look at those boxes rather than argue about whether they exist.</p>
+        
+      </li>
+      <li>
+        <label class="do"><input type="checkbox" data-step="placement-correction-by-eye:3"><span>Stop whenever you are tiring. Close the tab and come back to the same file later.</span></label>
+        <p class="expect">It resumes on the trial you left, with the answers you already gave. Nothing reshuffles.</p>
+        
+        <p class="why">Pushing through a hundred trials tired means the last thirty are answered from fatigue, and in the numbers fatigue is indistinguishable from 'the correction does not help' — it would read as a finding about our data rather than about the hour.</p>
+        
+      </li>
+      <li>
+        <label class="do"><input type="checkbox" data-step="placement-correction-by-eye:4"><span>At the end, press the button that saves the ruling, and keep the file somewhere you can name on a command line.</span></label>
+        <p class="expect">mark-ruling-11.json in your downloads. It holds your answers, the seed, and the fingerprint — and no key, because there still isn't one.</p>
+        
+        <p class="why">The ruling is deliberately worthless on its own. That is what makes it evidence: it could not have been edited towards an answer, because at the moment it was written nothing on the machine knew what the answers were.</p>
+        
+      </li>
+      <li>
+        <label class="do"><input type="checkbox" data-step="placement-correction-by-eye:5"><span>Score it: pnpm adjudicate:score ~/Downloads/mark-ruling-11.json</span></label>
+        <p class="expect">Four lines with intervals — as shipped, the decoy, the catches, twins — then, if you ticked any, how many marks poked out of both rectangles and the headline again without them. One sentence of verdict at the end. It exits 0 only when the session was valid and the corrected rectangle actually won.</p>
+        
+        <p class="why">This is the first moment anyone knows what the right answers were, you included. If it refuses outright, the displacements were re-measured between building the page and scoring it: score against the file it was built from, or build a fresh session and work it again. A ruling scored against displacements it was not worked against comes out looking clean and means nothing.</p>
+        
+      </li>
+      <li>
+        <label class="do"><input type="checkbox" data-step="placement-correction-by-eye:6"><span>Bank the verdict with the record command below, whichever way it went.</span></label>
+        <p class="expect">The ledger gains the four numbers and the date, and this check stops being pending.</p>
+        
+        <p class="why">A refusal is worth as much here as a confirmation and is far more likely to be dropped on the floor. 'A person looked and did not prefer our correction' is the single most valuable sentence this project could learn about the mark layer, and it is unrecoverable a week later if nobody wrote the numbers down.</p>
+        
+      </li>
+    </ol>
+  </section>
+
+  <section class="block">
+    <h3>Reading the result</h3>
+    <ul class="bullets"><li>'The correction is supported' → adopt the per-page displacement. The two numbers per page get recorded beside the fit, and the measurement's thresholds become something a gate is allowed to enforce, which is the change this check unlocks.</li><li>'NOT supported, and the decoys say why' → the strongest result this can produce, and the reason it is worth twenty minutes. It means you could see a shift of that size perfectly well and still did not prefer ours: our correction is wrong, not the test blunt. Do not adopt it, and say so in the placement record — a rejected option with a measured reason is a settled question.</li><li>'cannot see a shift this small' → the session says nothing about the correction either way. Try once more with bigger panels (--panel 640). If the decoys still do not clear half, the difference is below what an eye resolves at this size and no number of trials will change that; the case for the correction then rests entirely on the ink arithmetic and its control, and that is what the record should say rather than pretending this was run.</li><li>'SESSION INVALID' or 'SUSPECT' → discard it and do not argue with it. The catches are rectangles a whole letter off their mark and everyone gets those right while looking; missing them means the session was worked while distracted. Rerun under a different seed, which draws different marks in a different order.</li><li>A run of 'neither box closed on it' is a second finding, and it does not change the verdict above — it starts a different question. The rectangles come from one printing and the ink from another, so a box can arrive in the right place and the wrong size, and no amount of moving it will help. If the count is more than a handful, open the named marks in the encoding inspector and compare the box against the ink before adopting anything; the repair is a re-measurement, not a displacement.</li><li>One session is one person. If the verdict is going to decide whether marks ship, a second reader under a different seed costs another twenty minutes and turns one person's eyes into a result — and two people disagreeing is itself the finding.</li></ul>
+  </section>
+
+  <section class="block record">
+    <h3>Record it</h3>
+    <pre class="cmd">make record CHECK=placement-correction-by-eye RESULT='seed 11 · 100 trials · as shipped &lt;pct&gt; [&lt;lo&gt;–&lt;hi&gt;], decoy &lt;pct&gt;, catches &lt;pct&gt;, twins &lt;pct&gt; → &lt;supported|not supported|says nothing&gt;'</pre>
+    <p class="tunes-lead">Then do what it tunes:</p>
+    <ul class="tunes"><li>packages/etl/data/pages/word-boxes.pin.json — a supported correction is two more numbers per page recorded there. This is the artifact the check exists to release.</li><li>packages/etl/scripts/probe-mark-ink.mjs — its thresholds exit non-zero today and are wired into nothing. A verdict here is the named prerequisite for turning them into a gate.</li><li>docs/design/mark-registration.md §⑦ — the recommendation is provisional pending exactly this, and §⑩ ① is this question.</li><li>packages/etl/scripts/lib/adjudication.mjs — an invalid session tunes the mix of trials, not the conclusion about the marks.</li></ul>
+    <p class="expect">Written up in docs/design/mark-registration.md</p>
+  </section>
+</article>
+<article class="card" id="placement-residual-by-hand">
+  <div class="head">
+    <span class="badge">outstanding</span>
+    <h2>Placement by hand — put each rectangle where it belongs, and measure how far our correction still misses</h2>
+    <p class="id"><code>placement-residual-by-hand</code> · blocks <b>mark-C</b></p>
+  </div>
+
+  <p class="why">The forced-choice session can settle whether our proposed move is preferred to what ships. It cannot settle whether it is far enough, because the only two answers on offer are the two we thought of: a correction that points the right way and falls a third short wins every trial and is still wrong, and nothing in that session can say so. This asks for a placement instead of a preference, and the gap between where a reader puts a rectangle and where we wanted it is a distance in page units — a number that can be applied to the boxes rather than voted on.</p>
+  
+
+  
+  <section class="block">
+    <h3>What you need</h3>
+    <ul class="bullets"><li>The same two printings the forced-choice check wants: the pages the app ships, and the gitignored ligature cache the mark boxes are read from. If that check has been run here, nothing more is needed.</li><li>About twenty-five minutes. Placing is slower than choosing — around fifteen seconds a mark once you have the feel of it — and rushing shows up in the numbers as a wandering hand rather than as an answer.</li><li>A mouse or a trackpad you are comfortable with, or a touchscreen. Not a phone: the panel wants to be large, and the whole measurement is in fractions of a letter.</li><li>Nobody has to be a hafiz for this one either. It is a question about where a rectangle sits.</li></ul>
+  </section>
+  <section class="block">
+    <h3>Setup — on the laptop</h3>
+    <pre class="cmd">node packages/etl/scripts/probe-mark-ink.mjs --sample 4000 --seed 7 --pages-n 40</pre>
+    <p class="expect">About fifty seconds, ending in a failure code — expected, and the reason this check exists. It writes packages/etl/out/mark-shift.json. Skip this if you have already run it for the forced-choice check and have not touched it since; re-measuring between building a session and reading it makes both of them meaningless.</p>
+<pre class="cmd">pnpm nudge:marks --seed 23 --count 60</pre>
+    <p class="expect">packages/etl/out/mark-nudge.html in about a second, and a line naming the seed, how many marks come round twice, and a short fingerprint of the displacements. Note the fingerprint. Open the file in any browser — it needs nothing running and reaches no network.</p>
+  </section>
+
+  <section class="block">
+    <h3>Steps — on the phone</h3>
+    <ol class="steps">
+      <li>
+        <label class="do"><input type="checkbox" data-step="placement-residual-by-hand:0"><span>Work this on a different day from the forced-choice session, or before it — not straight after.</span></label>
+        <p class="expect">Nothing on the screen tells you either way. This one is on you.</p>
+        
+        <p class="why">The two sessions ask about the same rectangles from opposite directions, and each is fair on its own, but placing sixty of them by hand teaches you which way the correction tends to go. Carrying that into a forced choice means answering from the rule rather than from the ink — which is the one failure neither session can detect afterwards, because a person answering from a learned rule looks exactly like a person who can see very well.</p>
+        
+      </li>
+      <li>
+        <label class="do"><input type="checkbox" data-step="placement-residual-by-hand:1"><span>Read the five short answers the page opens with, then start. Do not read the code that built it first.</span></label>
+        <p class="expect">A first trial: one mark, one red rectangle sitting obviously off it, and a button that will not do anything yet.</p>
+        
+        <p class="why">The builder knows where we think each rectangle goes, and this page deliberately does not. Reading it first is the one way to spoil that, and the session would have to be thrown away and rebuilt under a seed you had not seen.</p>
+        
+      </li>
+      <li>
+        <label class="do"><input type="checkbox" data-step="placement-residual-by-hand:2"><span>Drag the rectangle onto the mark nearest to where it started, then press enter. Arrow keys nudge it if you want to be finer; hold shift for a bigger step.</span></label>
+        <p class="expect">The button wakes up as soon as you move it, and nothing at all happens when you place it except the next trial. No target, no snapping, no 'close'.</p>
+        
+        <p class="why">The rectangle always starts in the wrong place, so leaving it alone is never an answer — that is why the button stays dead until you move. And the mark nearest where it started is the one being asked about: the starting position is a random direction away from where the app draws the box today, so it points at the right mark without pointing at the right place.</p>
+        
+      </li>
+      <li>
+        <label class="do"><input type="checkbox" data-step="placement-residual-by-hand:3"><span>Place each one honestly and move on. Do not labour over any single rectangle, and do not try to be consistent with what you did last time you saw a mark.</span></label>
+        <p class="expect">Some marks come round a second time, starting somewhere else. You may or may not notice.</p>
+        
+        <p class="why">The pair is the scale for everything else. Two independent goes at the same mark differ by however much your hand wanders, and that spread is what tells a real offset from noise — a residual of a fifth of a unit is a finding if you are repeatable to a fiftieth and nothing at all if you wander by half. Trying to reproduce your earlier answer replaces a measurement of your hand with a measurement of your memory, and then nothing below has a scale.</p>
+        
+      </li>
+      <li>
+        <label class="do"><input type="checkbox" data-step="placement-residual-by-hand:4"><span>When the rectangle is the wrong size for its mark, place it as well as you can anyway and press S.</span></label>
+        <p class="expect">The tick lights up and clears itself on the next trial. It never costs the placement.</p>
+        
+        <p class="why">The same separation the forced-choice session keeps: where a box sits and how big it is are two faults with two repairs, and this whole session measures the first. The tick is counted on its own line and the marks are named, so somebody can go and look at those boxes instead of arguing about whether they exist.</p>
+        
+      </li>
+      <li>
+        <label class="do"><input type="checkbox" data-step="placement-residual-by-hand:5"><span>Stop whenever you are tiring. Close the tab and come back to the same file later.</span></label>
+        <p class="expect">It resumes on the placement you left, with the ones you already made. Nothing reshuffles.</p>
+        
+        <p class="why">A tired hand wanders, and a wandering hand does not read as fatigue in the output — it reads as a wide precision estimate, which quietly makes every real finding un-detectable. Better to lose the evening than to spend it widening your own error bars.</p>
+        
+      </li>
+      <li>
+        <label class="do"><input type="checkbox" data-step="placement-residual-by-hand:6"><span>At the end, press the button that saves the placements, and keep the file somewhere you can name on a command line.</span></label>
+        <p class="expect">mark-placements-23.json in your downloads. It holds where you put each rectangle and where each one started, plus the seed and the fingerprint — and nothing about where we thought they went.</p>
+        
+        <p class="why">Same property as the forced-choice ruling, for the same reason: at the moment it was written, nothing on the machine that wrote it knew the answer, so it could not have been edited toward one.</p>
+        
+      </li>
+      <li>
+        <label class="do"><input type="checkbox" data-step="placement-residual-by-hand:7"><span>Read it: pnpm nudge:score ~/Downloads/mark-placements-23.json</span></label>
+        <p class="expect">A headline in the same currency the forced choice uses — how often you landed nearer our correction than the shipped box — then the residual on each axis with an interval, your own precision from the repeated marks, and how much your landings tracked their starting points. It exits 0 only when the placements went the right way.</p>
+        
+        <p class="why">This is the first moment anyone knows what the correction was, you included. If it refuses outright, the displacements were re-measured between building the session and reading it: read it against the file it was built from, or build a fresh session and place them again.</p>
+        
+      </li>
+      <li>
+        <label class="do"><input type="checkbox" data-step="placement-residual-by-hand:8"><span>Bank the numbers with the record command below, whichever way it went.</span></label>
+        <p class="expect">The ledger gains the residual, the precision it was read against, and the date, and this check stops being pending.</p>
+        
+        <p class="why">The residual is the only number in this project that says how far the mark boxes should move, as opposed to whether they should. Unbanked it has to be bought again at twenty-five minutes of somebody's attention, and a number nobody wrote down is a number nobody will trust the second time either.</p>
+        
+      </li>
+    </ol>
+  </section>
+
+  <section class="block">
+    <h3>Reading the result</h3>
+    <ul class="bullets"><li>'the residual is inside this hand's own precision' → our correction is as close as this session can resolve. Adopt it as proposed and say in the placement record that a reader placing by hand could not distinguish it from their own wobble — which is a result, and is not the same as the correction being exactly right.</li><li>'the residual is larger than this hand's precision' → the printed pair of numbers is a further move to apply on top of what the measurement proposes. Apply it to the recorded displacements, not to the code that computes them: the arithmetic is not what is wrong, the frame it is measured against is, and burying a hand-measured constant inside a rasteriser hides that distinction from whoever reads it next.</li><li>'the correction goes the WRONG way' → stop. Do not adopt anything, and do not reach for a sign flip, which would be fitting the correction to sixty placements by one person. This contradicts the forced-choice session if that one passed, and two instruments disagreeing about the same rectangles is a finding worth more than either of them — write it in the placement record and re-measure before shipping any of it.</li><li>'no direction either way' → the placements did not separate the two positions. Look at the precision line before concluding anything: if it is large, this session measured a tired hand rather than a set of boxes, and rerunning under a different seed on a different day is the cheap answer.</li><li>'the landings track their starting points' → a hand that stopped short of where the eye said. It does not tilt the residual, because the starts are spread evenly around the shipped box, but it widens every interval above and usually means the placements were made faster than they were judged. Above about a quarter, treat the whole session as suggestive and rerun.</li><li>A run of 'the box was the wrong size' is the same second finding the forced-choice session can produce, and it belongs in the same place: the boxes come from one printing and the ink from another, so a rectangle can be in the right place and still not close around its mark. The repair is a re-measurement, not a displacement, and nothing in this check addresses it.</li><li>One session is one hand. If the residual is going to move three hundred thousand rectangles, a second person under a different seed costs another twenty-five minutes — and two hands landing in the same place is a much stronger claim than one hand landing anywhere.</li></ul>
+  </section>
+
+  <section class="block record">
+    <h3>Record it</h3>
+    <pre class="cmd">make record CHECK=placement-residual-by-hand RESULT='seed 23 · 60 placements · nearer ours &lt;pct&gt; [&lt;lo&gt;–&lt;hi&gt;] · residual (&lt;x&gt;, &lt;y&gt;) units against a precision of &lt;p&gt; → &lt;adopt as proposed|adopt with the residual applied|contradicts the forced choice|says nothing&gt;'</pre>
+    <p class="tunes-lead">Then do what it tunes:</p>
+    <ul class="tunes"><li>packages/etl/data/pages/word-boxes.pin.json — the residual is the number that changes what is recorded there, where the forced choice can only say whether to record anything at all.</li><li>packages/etl/scripts/probe-mark-ink.mjs — a residual larger than a hand's precision is a measured statement that the correction it computes is short, which is the only evidence that could justify changing what it measures against.</li><li>docs/design/mark-registration.md §⑦ and §⑩ ① — §⑦'s recommendation is provisional pending a magnitude, not just a preference.</li><li>packages/etl/scripts/lib/adjudication.mjs — a session whose precision swamps its residual tunes the starting radius and the number of repeated marks, not the conclusion about the boxes.</li></ul>
+    <p class="expect">Written up in docs/design/mark-registration.md</p>
+  </section>
+</article>
 </main>
 
 <footer class="foot">
   <p>Made it through one? <code>make record CHECK=&lt;id&gt; RESULT='…'</code> on the laptop,
-  then do what the card's <b>tunes</b> list says.</p>
+  then do what the card's <b>tunes</b> list says. To have the answers banked as you go
+  instead of typed from memory at the end: <code>make session CHECK=&lt;id&gt;</code>.</p>
 </footer>
 
 <script>
