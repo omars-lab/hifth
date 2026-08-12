@@ -34,6 +34,34 @@
  * their job. A large one means the placements are partly a record of where they
  * began, and widens what the residual can be trusted to.
  *
+ * ## Three things this file learned the hard way
+ *
+ * The first version of this script printed a residual, an interval, and a
+ * verdict, and every one of those was defensible on its own. Together they said
+ * more than the session could support, and the overstatement was banked into the
+ * registers before anybody noticed. Three things were missing, and each of them
+ * is now printed whether or not it is convenient:
+ *
+ * - **Placements are not independent.** Two marks on one page share that page's
+ *   frame error. Sixty placements over forty pages carry closer to forty pages'
+ *   worth of information than to sixty trials' worth, and the plain interval on
+ *   the residual was narrower than the truth. The verdict at the foot now reads
+ *   from the page-clustered interval; both are shown, so the difference is
+ *   visible rather than swapped in silently.
+ * - **Direction is not size.** A residual of a tenth of a unit and a proposed
+ *   move that is a tenth too large are the *same number* when every page happens
+ *   to propose the same move. So the gain is estimated, and the spread of the
+ *   proposed moves is printed next to it, because that spread is the whole
+ *   question of whether the estimate could ever have meant anything.
+ * - **A trial needs a proposed move, so it can only come from a measured page.**
+ *   Which means a placing session tests the correction on the same pages the
+ *   correction was fitted to, and says nothing whatever about the rest. That is
+ *   the largest limitation of this instrument and it now leads the report.
+ *
+ * There is also a block of negative results — the things that turn out not to
+ * explain the residual — printed for the reason negative results are usually not
+ * printed: somebody will otherwise pay to find them again.
+ *
  * Exits non-zero when the session says the correction is not going the right
  * way, so it can sit inside something larger without being read.
  *
@@ -44,9 +72,13 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { planNudge } from "./lib/adjudication.mjs";
 import { wilson } from "./lib/mark-ink.mjs";
+import { clusteredCI, mean, meanCI, sd, slopeOf, spreadUnderSplit } from "./lib/placement-stats.mjs";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const ETL = join(HERE, "..");
+
+/** The print, end to end. Every coverage number below is a fraction of this. */
+const MUSHAF_PAGES = 604;
 
 const argv = process.argv.slice(2);
 const arg = (k, d) => {
@@ -106,26 +138,35 @@ if (!rows.length) {
   process.exit(1);
 }
 
-const mean = (xs) => xs.reduce((s, v) => s + v, 0) / xs.length;
 const median = (xs) => {
   const a = xs.slice().sort((p, q) => p - q);
   return a.length ? a[Math.floor(a.length / 2)] : 0;
 };
+
+/** Which page each placement came from — the cluster every interval below uses. */
+const pageOf = rows.map((r) => r.t.page);
+
 /**
- * A normal interval on a mean, which is the right shape here and not elsewhere
- * in this check: a residual is an average of continuous displacements, where the
- * forced choice's numbers are counts of successes and get Wilson intervals. The
- * two are not interchangeable, and a count reported with one of these would be
- * wrong at exactly the small samples this check runs at.
+ * What this session is entitled to speak about.
+ *
+ * A trial cannot be built without a proposed move, and a proposed move only
+ * exists for a page the displacements were measured on. So the pages placed on
+ * are necessarily a subset of the pages measured, and a placing session is
+ * always an in-sample check: it can say the correction is right *where it was
+ * fitted*, and it is structurally incapable of saying it holds anywhere else.
+ *
+ * Printed first, and printed even when it is 604 of 604, because a limitation
+ * that only appears when it bites is one nobody reads until it has bitten.
  */
-function meanCI(xs) {
-  const m = mean(xs);
-  const n = xs.length;
-  if (n < 2) return { m, lo: -Infinity, hi: Infinity, sd: 0, n };
-  const sd = Math.sqrt(xs.reduce((s, v) => s + (v - m) ** 2, 0) / (n - 1));
-  const half = (1.96 * sd) / Math.sqrt(n);
-  return { m, lo: m - half, hi: m + half, sd, n };
-}
+const placedPages = new Set(pageOf);
+const measuredPages = new Set(shift.shifts.map((s) => s.page));
+const outside = [...placedPages].filter((p) => !measuredPages.has(p));
+const coverage = {
+  placed: placedPages.size,
+  measured: measuredPages.size,
+  pct: (100 * measuredPages.size) / MUSHAF_PAGES,
+  outside: outside.length,
+};
 
 /**
  * The reader's own precision, from the marks that came round twice.
@@ -156,6 +197,12 @@ noise.floor = twice.length ? Math.hypot(noise.sx, noise.sy) : NaN;
  * different route and without ever putting our answer on the screen, so the two
  * results are comparable — and if they disagree, one of the two instruments is
  * telling us something the other cannot see.
+ *
+ * The Wilson interval here makes the same independence assumption the residual's
+ * plain interval does, and for the same reason it is not quite right. It is left
+ * as it is and labelled: a rate this lopsided is not reachable by any clustering
+ * adjustment, so widening it would change no decision. If a future session comes
+ * back near half, this needs the treatment the residual now gets.
  */
 const nearer = rows.filter((r) => Math.hypot(...r.r) < Math.hypot(r.a.u[0], r.a.u[1]));
 const [wLo, wHi] = wilson(nearer.length, rows.length);
@@ -167,8 +214,9 @@ const head = {
   hi: 100 * wHi,
 };
 
-const rx = meanCI(rows.map((r) => r.r[0]));
-const ry = meanCI(rows.map((r) => r.r[1]));
+const resid = [rows.map((r) => r.r[0]), rows.map((r) => r.r[1])];
+const flat = [meanCI(resid[0]), meanCI(resid[1])];
+const clust = [clusteredCI(resid[0], pageOf), clusteredCI(resid[1], pageOf)];
 const toShipped = rows.map((r) => Math.hypot(r.a.u[0], r.a.u[1]));
 const toCorrected = rows.map((r) => Math.hypot(...r.r));
 
@@ -181,7 +229,7 @@ const toCorrected = rows.map((r) => Math.hypot(...r.r));
  * corrected for: a correction would be a model of the hand, and this check is
  * meant to measure the hand, not to assume one.
  */
-const slope = (k) => {
+const startPull = (k) => {
   let num = 0;
   let den = 0;
   for (const r of rows) {
@@ -190,7 +238,54 @@ const slope = (k) => {
   }
   return den ? num / den : 0;
 };
-const pull = { x: slope(0), y: slope(1) };
+const pull = { x: startPull(0), y: startPull(1) };
+
+/**
+ * Is the proposed move the right *size*, and could this session tell?
+ *
+ * Regressing where the reader put the rectangle on how far we propose to move it
+ * gives a gain: 1.00 means we propose exactly the move a reader makes, 0.80
+ * means we overshoot by a fifth, 1.20 means we fall short by one.
+ *
+ * The estimate is worthless without the second line. If every page in the sample
+ * proposes nearly the same move, the regression has nothing to lean on and the
+ * gain comes back with an interval wide enough to contain any answer anybody
+ * wanted. Worse, a constant residual and a wrong gain are then literally the
+ * same number, and no amount of further placements on these pages separates
+ * them — only pages whose corrections differ from each other can. So the spread
+ * of the proposed moves is printed beside the gain, and when it is small the
+ * report says the question was not asked rather than answering it badly.
+ */
+const gainOn = (k) =>
+  slopeOf(
+    rows.map((r) => r.t.shift[k]),
+    rows.map((r) => r.a.u[k]),
+    pageOf,
+  );
+const gain = [gainOn(0), gainOn(1)];
+const proposed = [rows.map((r) => r.t.shift[0]), rows.map((r) => r.t.shift[1])];
+/** How wide the gain's interval is, in gain units. Above ~0.4 it decided nothing. */
+const GAIN_USELESS = 0.4;
+const blind = gain.every((g) => !g || !Number.isFinite(g.se) || g.hi - g.lo > GAIN_USELESS);
+
+/**
+ * The things that turn out not to explain the residual.
+ *
+ * Printed for the reason negative results are usually not printed: each of these
+ * is an hour somebody will otherwise spend finding it again, and each of them
+ * narrows the problem. Between them they say the residual is not a property of
+ * particular glyphs, not a scale error, and not a hand getting tired — which
+ * leaves a per-page frame error, which is where the design doc already believed
+ * it was.
+ */
+const byName = [
+  spreadUnderSplit(resid[0], rows.map((r) => r.t.name)),
+  spreadUnderSplit(resid[1], rows.map((r) => r.t.name)),
+];
+const centre = (k) => rows.map((r) => r.t.box[k] + r.t.box[k + 2] / 2);
+const byPlace = [slopeOf(centre(0), resid[0], pageOf), slopeOf(centre(1), resid[1], pageOf)];
+const order = rows.map((r) => r.a.i);
+const byOrder = [slopeOf(order, resid[0], pageOf), slopeOf(order, resid[1], pageOf)];
 
 const asksSize = (ruling.asks || []).includes("size");
 const big = ruling.answers.filter((a) => a && a.wrongSize);
@@ -203,33 +298,76 @@ const u3 = (v) => `${v >= 0 ? "+" : ""}${v.toFixed(3)}`;
 const u2 = (v) => v.toFixed(2);
 const W = 30;
 const say = (label, body) => `${label.padEnd(W)} ${body}`;
+const band = (c) => `[${u3(c.lo)} – ${u3(c.hi)}]`;
+const AXIS = ["across", "down"];
+/** Both axes' t statistics on one line, since neither is interesting alone. */
+const ts = (pair) =>
+  `t = ${pair.map((p, k) => `${p && Number.isFinite(p.t) ? p.t.toFixed(1) : "?"} ${AXIS[k]}`).join(", ")}`;
+const anyBig = (pair) => pair.some((p) => p && Number.isFinite(p.t) && Math.abs(p.t) >= 2);
 
 const clears = head.lo > 50;
 const readable = Number.isFinite(noise.floor) && noise.floor > 0;
-const residual = Math.hypot(rx.m, ry.m);
+const residual = Math.hypot(flat[0].m, flat[1].m);
 const beyondNoise = readable && residual > noise.floor;
-const xReal = rx.lo > 0 || rx.hi < 0;
-const yReal = ry.lo > 0 || ry.hi < 0;
+/** Read from the clustered intervals, which are the ones the sample supports. */
+const real = clust.map((c) => Number.isFinite(c.lo) && (c.lo > 0 || c.hi < 0));
 
 const out = [
   `placements ${path}`,
   `seed ${ruling.seed} · ${rows.length} of ${ruling.count} placed · displacements ${ruling.shiftRan} (${fp})`,
   `median ${(median(ms) / 1000).toFixed(1)}s a placement`,
   "",
+  say("pages these can speak for", `${coverage.placed} placed on, of ${coverage.measured} the displacements cover`),
+  say("", `the displacements cover ${coverage.measured} of ${MUSHAF_PAGES} pages (${coverage.pct.toFixed(1)}%)`),
+  coverage.outside
+    ? say("", `${coverage.outside} placements are on unmeasured pages — that should be impossible; read the shift file`)
+    : say("", "every placement is on a page the correction was fitted to, so nothing below") +
+      "\n" +
+      say("", "says whether it holds on a page nobody has measured"),
+  "",
   `${say("landed nearer our correction", `${head.pct.toFixed(1)}%`.padStart(6))}  [${head.lo.toFixed(1)}% – ${head.hi.toFixed(1)}%]  ${head.k}/${head.n}`,
   say("typical miss, from as-shipped", `${u2(median(toShipped))} units`),
   say("typical miss, from corrected", `${u2(median(toCorrected))} units`),
   "",
-  say("what is left over, across", `x ${u3(rx.m)}  [${u3(rx.lo)} – ${u3(rx.hi)}]`),
-  say("what is left over, down", `y ${u3(ry.m)}  [${u3(ry.lo)} – ${u3(ry.hi)}]`),
+  ...[0, 1].flatMap((k) => [
+    say(`what is left over, ${AXIS[k]}`, `${"xy"[k]} ${u3(flat[k].m)}  ${band(flat[k])}  as ${flat[k].n} placements`),
+    say("  · clustered by page", `   ${" ".repeat(6)}${band(clust[k])}  as ${clust[k].g} pages — read this one`),
+  ]),
   readable
     ? say("this hand's own precision", `${u2(noise.floor)} units, from ${noise.n} marks placed twice (typical gap ${u2(noise.typical)})`)
     : "this hand's own precision: unknown — no mark was placed twice, so nothing below has a scale.",
   say("pull of the starting point", `x ${pull.x.toFixed(2)}  y ${pull.y.toFixed(2)}  (0 is none, 1 is 'never moved')`),
-  "",
   asksSize
     ? say("the box was the wrong size", `${big.length}/${ruling.answers.length}` + (big.length ? ` — ${names}` : ""))
     : "wrong-size: not asked. These placements come from a page built before the question existed, so they say nothing about how big the rectangles are.",
+  "",
+  "is the proposed move the right size?",
+  ...[0, 1].flatMap((k) =>
+    gain[k]
+      ? [
+          say(`  ${AXIS[k]}`, `the reader moved ${gain[k].b.toFixed(2)}× as far as we propose  [${gain[k].lo.toFixed(2)}× – ${gain[k].hi.toFixed(2)}×]`),
+          say("", `proposed moves span ${u3(Math.min(...proposed[k]))}…${u3(Math.max(...proposed[k]))}, sd ${sd(proposed[k]).toFixed(3)}`),
+        ]
+      : [say(`  ${AXIS[k]}`, "no estimate: the proposed move does not vary at all across these placements")],
+  ),
+  blind
+    ? "  Undecidable from this sample. These pages propose nearly the same move as each other, so\n" +
+      "  nothing here separates a correction that is exactly right from one that is a fifth short —\n" +
+      "  and on pages like these, a wrong gain and a constant residual are the same number. Pages\n" +
+      "  whose corrections differ would settle it; more placements on these pages will not."
+    : "  Decidable: the proposed moves vary enough across these pages for the gain above to mean something.",
+  "",
+  "what does not explain what is left over",
+  say(
+    "  the mark it sits on",
+    Number.isFinite(byName[1].many)
+      ? `a mean per name leaves ${byName[1].many >= byName[1].one ? "MORE spread, not less" : "less spread — worth a look"}` +
+        `\n${say("", `across ${byName[0].many.toFixed(3)} vs ${byName[0].one.toFixed(3)}, down ${byName[1].many.toFixed(3)} vs ${byName[1].one.toFixed(3)}, over ${byName[1].groups} names`)}`
+      : `too few placements per name to tell (${byName[1].groups} names over ${rows.length})`,
+  ),
+  say("  where it sits on the page", `${ts(byPlace)}${anyBig(byPlace) ? " — LOOK: this may be a scale error" : " — a translation, not a stretch"}`),
+  say("  how late in the sitting", `${ts(byOrder)}${anyBig(byOrder) ? " — LOOK: the sitting drifted" : " — no drift as it wore on"}`),
+  say("  where it started", "see the pull of the starting point above"),
   "",
   clears
     ? "the correction goes the right way: placements land nearer it than they do the shipped box, and the interval clears half"
@@ -241,21 +379,22 @@ const out = [
     : !beyondNoise
       ? `the residual (${u2(residual)} units) is inside this hand's own precision (${u2(noise.floor)}). Our correction is as close as this session can resolve — which is a result, and it is not the same as being right.`
       : `the residual is ${u2(residual)} units, larger than this hand's precision (${u2(noise.floor)}).\n` +
-        `A correction of (${u3(rx.m)}, ${u3(ry.m)}) on top of what is proposed would land where this reader puts them.\n` +
-        (xReal || yReal
-          ? `The ${[xReal ? "across" : "", yReal ? "down" : ""].filter(Boolean).join(" and ")} component${xReal && yReal ? "s are" : " is"} distinguishable from nought at 95%; anything not named here is not.`
-          : "Neither component is distinguishable from nought at 95% on its own, so treat the size as suggestive and the direction as unsettled."),
+        `The best guess at a further correction is (${u3(flat[0].m)}, ${u3(flat[1].m)}) on top of what is proposed. How much to trust it:\n` +
+        (real[0] || real[1]
+          ? `Clustered by page, the ${[real[0] ? "across" : "", real[1] ? "down" : ""].filter(Boolean).join(" and ")} component${real[0] && real[1] ? "s are" : " is"} distinguishable from nought at 95%; anything not named here is not.`
+          : "Clustered by page, neither component is distinguishable from nought at 95%. The direction is settled and the\n" +
+            "distance is not: this says our correction may be short, not that it is. Do not apply the residual on this."),
   Math.abs(pull.x) > 0.25 || Math.abs(pull.y) > 0.25
     ? `\nCaution: the landings track their starting points (x ${pull.x.toFixed(2)}, y ${pull.y.toFixed(2)}). The starts are\n` +
       "spread evenly, so this does not tilt the residual in any one direction — but it widens every interval\n" +
       "above, and a pull this size usually means the placements were made faster than they were judged."
-    : "",
+    : null,
   big.length && rows.length && big.length / rows.length > 0.15
     ? `\nAnd a second finding, which is not about placement: the rectangle was the wrong size on ${big.length} of\n` +
       `${ruling.answers.length}. That is fixed by measuring the boxes again, not by moving them, and nothing above addresses it.`
-    : "",
+    : null,
 ]
-  .filter((l) => l !== "")
+  .filter((l) => l !== null)
   .join("\n");
 
 process.stdout.write(`${out}\n`);
