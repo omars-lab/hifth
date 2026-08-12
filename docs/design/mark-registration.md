@@ -970,11 +970,32 @@ Two things about that sitting are worth saying plainly, because they are what ma
 rather than an exercise. **What it expects is written down before anybody places a rectangle**,
 in the validation register, four statements about numbers that do not exist yet, each one saying
 what its own failure would mean — a result read afterwards can always be made to sound like a
-confirmation, and one predicted beforehand can fail. And **it still cannot tell a print that is
-off by this much from one reader who places rectangles this way.** Only a second person placing
-the same rectangles can separate those. That block is designed and not built, so whatever
-leftover distance this sitting banks is one hand's leftover distance, and must be said in those
-words.
+confirmation, and one predicted beforehand can fail. And **one hand cannot tell a print that is
+off by this much from one reader who places rectangles this way.** Those two produce the
+identical number, and nothing in a single sitting's output distinguishes them.
+
+**So there is a third page now, and a second person may sit it.** It is the first block again —
+the same forty-seven rectangles, the same order, the same starting points — worked independently
+by somebody else. Only whose hand it is changes, and that is the one thing about the sitting that
+never reaches a trial: if the second person saw different marks, or the same marks from different
+starting points, the two hands would not be comparable and the whole reason for asking a second
+one would be gone. It is folded into the name of the file that comes back and into how a
+half-finished sitting resumes, because two people working the same build would otherwise share
+both, and the second would resume into the first one's answers.
+
+The two sittings are then read against each other rather than each on its own: how far the two
+hands are from each other, mark by mark — never average against average, since two people a fifth
+of a unit apart on every rectangle in alternating directions have identical averages and have
+agreed about nothing — against how far each hand is from itself, which each of them measures from
+the marks they were shown twice. There is no threshold; what two hands on this screen actually
+manage is the number that belongs there. Agreement inside their own wobble is what would make a
+further correction something that may be applied to all 604 pages. A wider gap says the leftover
+distance belongs to whoever was sitting there and may be applied to nothing — not to one of them,
+not to the average of the two.
+
+This half is optional and it is about ten minutes of a second person's time. If nobody sits it,
+whatever leftover distance the sitting banks is one hand's leftover distance, and must be
+recorded in those words.
 
 One limit the full pass added rather than removed: taking each page's own displacement out
 repairs most of this error and measurably not all of it. About one mark in five is still further
@@ -1102,7 +1123,12 @@ readable without them.
   from, in the same shape a displacements file uses, so the next sitting can exclude it with no
   second format. The pages chosen carry their own fingerprint, folded into the key the browser
   resumes from — two sittings from the same displacements and seed but different pages would
-  otherwise have stacked one's answers onto the other's trials.
+  otherwise have stacked one's answers onto the other's trials. `--reader` names whoever is
+  sitting it and is the only thing here that never reaches a trial: a second hand is only
+  evidence if it saw the same marks in the same order from the same starting points. It is
+  folded into that same resume key and into the name of the file that lands in the downloads
+  folder, for the reason the pages were — otherwise the second person resumes into the first
+  one's answers and their download arrives as a copy of it.
 - `packages/etl/scripts/score-mark-nudge.mjs` — subtracts the proposed correction from where
   each rectangle was put and reports what is left, beside the precision of the hand that put
   them, so a residual smaller than the wobble is called what it is. It opens with **how many
@@ -1112,22 +1138,39 @@ readable without them.
   counting pages, and the verdict at the foot reads the second — see the library below. It
   also reports whether the correction is the right *size*, with the spread of the proposed
   moves beside it so a meaningless estimate is legible as one, and it prints what was ruled
-  out, so nobody buys those answers twice.
+  out, so nobody buys those answers twice. Handed a second person's sitting on the identical
+  build, it also reports how far the two hands are from each other — mark by mark, against each
+  hand's own wobble, with no threshold — because that comparison is the only thing that
+  separates a print that is off by this much from one reader who places rectangles this way. It
+  refuses a second file from a different build, and refuses the same reader twice, which would
+  compare a hand with itself and come back looking like perfect agreement.
 - `packages/etl/scripts/lib/placement-stats.mjs` — the arithmetic, kept apart so it can be
   tested against data whose answer is known by construction. Two marks on one page are not two
   facts about the fit: they share that page's frame, so an interval that counts them separately
   is narrower than the truth. The measurement above had said so about its own sampling since
   the day it was written; the scorer was built without it, and a residual was banked as real on
-  an interval that counting pages puts across nothing.
+  an interval that counting pages puts across nothing. `agreementOf` is the one estimator here
+  that compares two people rather than describing one, and it takes their difference mark by
+  mark for a reason: an average against an average calls two hands that alternate either side
+  of each other perfectly agreed. If either of them repeated nothing there is no wobble to read
+  the gap against, and it says so rather than inventing one.
+- `packages/etl/scripts/lib/adjudication.mjs`, `sameBuild` — what has to match before two
+  sittings may be compared: same seed, same length, same displacements, same pages. It names
+  every mismatch rather than the first, and it refuses two sittings by the same person, which is
+  a hand compared with itself and the one failure here that nothing in the printed output would
+  betray.
 - `packages/etl/scripts/lib/placement-stats.test.mjs` — where that is proved rather than
   asserted: on ten pages of six identical values the honest interval must come out about two
-  and a half times the naive one, and on values that share no page the two must agree.
+  and a half times the naive one, and on values that share no page the two must agree. Two more
+  are built to fail the tempting implementation of the agreement number — a disagreement that
+  alternates in sign must not average itself away, and a hand whose wobble was never measured
+  must come back as *cannot say* rather than as agreement.
 - [`docs/validation/ledger.json`](../validation/ledger.json), `placement-correction-by-eye` —
   the runbook of record for §⑩ ①, and where its verdict gets banked.
 - [`docs/validation/ledger.json`](../validation/ledger.json), `placement-residual-by-hand` —
   the same, for §⑩ ⑦.
 - [`docs/validation/ledger.json`](../validation/ledger.json),
-  `placement-holds-off-its-own-pages` — the same, for §⑩ ⑧, and the one place its four
+  `placement-holds-off-its-own-pages` — the same, for §⑩ ⑧, and the one place its five
   predictions are written down before anybody places a rectangle.
 - [`docs/validation/rulings/`](../validation/rulings/) — the answers themselves, and beside
   them the two displacement files a verdict has to be scored against: the forty-page
