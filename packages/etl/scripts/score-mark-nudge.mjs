@@ -122,7 +122,43 @@ if (ruling.kind !== "nudge") {
 }
 
 const shift = JSON.parse(shiftText);
-const { trials } = planNudge({ seed: ruling.seed, count: ruling.count, shifts: shift.shifts });
+
+/**
+ * The displacements this sitting was actually built from — which is not always
+ * all of them.
+ *
+ * A session may be narrowed to a chosen set of pages: held out from the ones the
+ * correction was fitted on, and drawn from the ends of the range rather than the
+ * middle, because that is the only sample with any leverage on the correction's
+ * *size*. The trials are rebuilt here from the seed, so a narrowing the builder
+ * applied and this file did not would put every trial index against a different
+ * mark — and nothing would throw, because the indices would all still resolve.
+ * The residuals would simply be subtractions of the wrong numbers.
+ *
+ * So the builder writes its page list into the head and this replays it, in the
+ * order recorded. Replaying beats recomputing: if the scorer re-ran the
+ * selection, a later improvement to how pages are chosen would silently re-score
+ * every sitting ever banked, and the first sign of it would be a residual that
+ * moved for no reason anybody could name.
+ *
+ * A ruling with no list is a session built before this existed, and it took every
+ * measured page — which is what `shift.shifts` already is.
+ */
+let shifts = shift.shifts;
+if (Array.isArray(ruling.select?.of)) {
+  const byPage = new Map(shift.shifts.map((s) => [s.page, s]));
+  const missing = ruling.select.of.filter((p) => !byPage.has(p));
+  if (missing.length) {
+    process.stderr.write(
+      `these placements were built over ${ruling.select.of.length} pages and ${shiftPath} has no ` +
+        `displacement for ${missing.length} of them (${missing.slice(0, 8).join(", ")}${missing.length > 8 ? ", …" : ""}).\n` +
+        `That is the wrong displacements file, whatever its fingerprint says.\n`,
+    );
+    process.exit(2);
+  }
+  shifts = ruling.select.of.map((p) => byPage.get(p));
+}
+const { trials } = planNudge({ seed: ruling.seed, count: ruling.count, shifts });
 const byIndex = new Map(trials.map((t) => [t.i, t]));
 
 const rows = [];
@@ -151,12 +187,18 @@ const pageOf = rows.map((r) => r.t.page);
  *
  * A trial cannot be built without a proposed move, and a proposed move only
  * exists for a page the displacements were measured on. So the pages placed on
- * are necessarily a subset of the pages measured, and a placing session is
- * always an in-sample check: it can say the correction is right *where it was
- * fitted*, and it is structurally incapable of saying it holds anywhere else.
+ * are always a subset of the pages measured — but that is not the same as the
+ * pages the correction was *fitted* on, and the difference is the whole question.
+ * A session built over every measured page is an in-sample check: it can say the
+ * correction is right where it was fitted and is structurally incapable of saying
+ * it holds anywhere else. A session built over pages held out of an earlier
+ * measurement is the opposite, and it is the only kind that can answer *does this
+ * work where no eye has been?*
  *
- * Printed first, and printed even when it is 604 of 604, because a limitation
- * that only appears when it bites is one nobody reads until it has bitten.
+ * Which one this was is not something a scorer can infer from the answers, so it
+ * is read off the session's own record of how its pages were chosen. Printed
+ * first, and printed even when it is 604 of 604, because a limitation that only
+ * appears when it bites is one nobody reads until it has bitten.
  */
 const placedPages = new Set(pageOf);
 const measuredPages = new Set(shift.shifts.map((s) => s.page));
@@ -166,6 +208,12 @@ const coverage = {
   measured: measuredPages.size,
   pct: (100 * measuredPages.size) / MUSHAF_PAGES,
   outside: outside.length,
+  /** The files whose pages were kept out of this build, if any, and how many pages that was. */
+  heldOutFrom: [ruling.select?.heldOutFrom ?? []].flat().join(" and "),
+  heldOut: ruling.select?.heldOut ?? 0,
+  /** How the pages were picked, which is what says whether the gain below could mean anything. */
+  strategy: ruling.select?.strategy ?? "all",
+  chosen: ruling.select?.of?.length ?? measuredPages.size,
 };
 
 /**
@@ -317,13 +365,17 @@ const out = [
   `seed ${ruling.seed} · ${rows.length} of ${ruling.count} placed · displacements ${ruling.shiftRan} (${fp})`,
   `median ${(median(ms) / 1000).toFixed(1)}s a placement`,
   "",
-  say("pages these can speak for", `${coverage.placed} placed on, of ${coverage.measured} the displacements cover`),
+  say("pages these can speak for", `${coverage.placed} placed on, of ${coverage.chosen} this session was built over`),
   say("", `the displacements cover ${coverage.measured} of ${MUSHAF_PAGES} pages (${coverage.pct.toFixed(1)}%)`),
   coverage.outside
     ? say("", `${coverage.outside} placements are on unmeasured pages — that should be impossible; read the shift file`)
-    : say("", "every placement is on a page the correction was fitted to, so nothing below") +
-      "\n" +
-      say("", "says whether it holds on a page nobody has measured"),
+    : coverage.heldOut
+      ? say("", `held out from ${coverage.heldOutFrom} — ${coverage.heldOut} pages, none of them asked about here,`) +
+        "\n" +
+        say("", `so this is an out-of-sample reading. Pages picked: ${coverage.strategy}.`)
+      : say("", "every placement is on a page the correction was fitted to, so nothing below") +
+        "\n" +
+        say("", "says whether it holds on a page nobody has measured"),
   "",
   `${say("landed nearer our correction", `${head.pct.toFixed(1)}%`.padStart(6))}  [${head.lo.toFixed(1)}% – ${head.hi.toFixed(1)}%]  ${head.k}/${head.n}`,
   say("typical miss, from as-shipped", `${u2(median(toShipped))} units`),

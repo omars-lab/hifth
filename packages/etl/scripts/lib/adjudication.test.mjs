@@ -21,7 +21,7 @@
  * corpus cache the real readers want.
  */
 import { describe, expect, it } from "vitest";
-import { planNudge, planSession, REPEAT_GAP, START_R, windowFor } from "./adjudication.mjs";
+import { planNudge, planSession, REPEAT_GAP, selectPages, START_R, windowFor } from "./adjudication.mjs";
 import { shapeOf } from "./ink.mjs";
 
 /** Twelve pages of forty marks, each a plausible size, all of them solid ink. */
@@ -227,5 +227,81 @@ describe("planNudge", () => {
 
   it("refuses rather than shortening when there are not enough marks with ink under the box", () => {
     expect(() => planNudge({ seed: 5, count: 600, shifts: shifts.slice(0, 1), io })).toThrow(/passed the ink floor/);
+  });
+});
+
+/**
+ * Twenty pages whose corrections genuinely differ, which the twelve above do not
+ * — they all carry the same displacement, because what they are there to exercise
+ * is the walk. Choosing pages is arithmetic over the displacements themselves, so
+ * it needs a fixture where the displacements vary, and vary in a shape a person
+ * can check by eye: `dx` walks from -1.9 up to -0.0, and `dy` runs the other way.
+ */
+const varied = Array.from({ length: 20 }, (_, i) => ({
+  page: i + 1,
+  dx: -1.9 + i * 0.1,
+  dy: -0.2 - i * 0.1,
+  n: 40,
+}));
+
+describe("selectPages", () => {
+  it("never returns a page that was held out, which is the whole point of holding one out", () => {
+    // A sitting exists to say whether the correction works where it was not
+    // fitted. One page from the fitted set leaking in does not merely dilute
+    // that — it makes the claim untrue, and nothing downstream can detect it.
+    const exclude = [3, 4, 5, 6, 7, 8, 9, 10];
+    const got = selectPages({ shifts: varied, exclude, pages: 8 });
+    expect(got).toHaveLength(8);
+    for (const p of got) expect(exclude).not.toContain(p);
+  });
+
+  it("takes the ends rather than the middle, because the middle is the sample that already failed", () => {
+    // The first sitting could not measure the correction's *size* because the
+    // proposed move barely varied across its pages. A regression on a quantity
+    // that does not vary has no leverage, so the estimate came out ±0.68 on a
+    // number of interest around 0.1. Spanning the range is what buys it back.
+    const chosen = selectPages({ shifts: varied, pages: 8 });
+    const dx = chosen.map((p) => varied[p - 1].dx);
+    const span = Math.max(...dx) - Math.min(...dx);
+    const middle = varied.slice(6, 14).map((s) => s.dx);
+    expect(span).toBeGreaterThan(Math.max(...middle) - Math.min(...middle));
+    expect(span).toBeGreaterThan(1.5);
+  });
+
+  it("spans both axes, since a correction can be right across and wrong down", () => {
+    const chosen = selectPages({ shifts: varied, pages: 8 });
+    for (const k of ["dx", "dy"]) {
+      const v = chosen.map((p) => varied[p - 1][k]);
+      expect(Math.max(...v) - Math.min(...v)).toBeGreaterThan(1.5);
+    }
+  });
+
+  it("gives the same list every time, or a banked sitting cannot be re-scored", () => {
+    // The scorer replays the recorded list rather than re-running this, so a
+    // wobble here would not corrupt an old reading — but it would mean two
+    // builds of the "same" session were different sessions, which is the bug
+    // that is hardest to see and hardest to believe once seen.
+    const once = selectPages({ shifts: varied, pages: 7, exclude: [2, 19] });
+    for (let i = 0; i < 5; i += 1) {
+      expect(selectPages({ shifts: varied, pages: 7, exclude: [2, 19] })).toEqual(once);
+    }
+  });
+
+  it("keeps every page when nothing is asked for, which is what every session did before", () => {
+    expect(selectPages({ shifts: varied, pages: 0 })).toEqual(varied.map((s) => s.page));
+    expect(selectPages({ shifts: varied, pages: 999 })).toEqual(varied.map((s) => s.page));
+    expect(selectPages({ shifts: varied, pages: 4, spread: "all" })).toEqual(varied.map((s) => s.page));
+  });
+
+  it("narrows what planNudge may ask about, so the two agree on what a trial index means", () => {
+    // The join that makes the whole scheme work: the pages come out of here and
+    // go into the plan as its entire universe. If a page the selection excluded
+    // could still appear in a trial, the recorded list would be a description of
+    // the session rather than a definition of it, and replaying it would prove
+    // nothing.
+    const chosen = selectPages({ shifts: varied, pages: 6, exclude: [1, 20] });
+    const byPage = new Map(varied.map((s) => [s.page, s]));
+    const { trials } = planNudge({ seed: 9, count: 30, shifts: chosen.map((p) => byPage.get(p)), io });
+    expect(new Set(trials.map((t) => t.page))).toEqual(new Set(chosen));
   });
 });

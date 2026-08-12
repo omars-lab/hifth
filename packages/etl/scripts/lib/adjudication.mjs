@@ -278,6 +278,91 @@ export const START_R = 3;
 export const REPEAT_GAP = 10;
 
 /**
+ * Which pages a session is allowed to ask about.
+ *
+ * ## Why this is a separate step and not a shuffle
+ *
+ * The first placing session drew its marks from every page that had a measured
+ * correction, which at the time was forty of them — the same forty the correction
+ * had been fitted on. That made it an in-sample check by construction, and it made
+ * the *size* of the correction unmeasurable for a second reason nobody noticed
+ * until afterwards: across those forty pages the proposed move barely varied, and
+ * a regression of the residual on a quantity that does not vary has no leverage.
+ * The gain came out -0.10 ± 0.68. "Exactly right" and "a fifth short" were the
+ * same answer.
+ *
+ * Over all 604 pages the move does vary — the across component spans 1.75 units
+ * where the original forty spanned 0.31. So the two defects have one fix, and it
+ * is a choice of pages rather than a bigger session: **take pages the correction
+ * has never been checked on, and take them from the ends of the range rather than
+ * at random.** Sampling the ends is what buys the leverage; a random draw from 604
+ * pages would mostly return the middle, which is the sample that already failed.
+ *
+ * ## Why the answer is written down rather than recomputed
+ *
+ * The scorer rebuilds a session from the seed and the displacements alone. If the
+ * builder filtered those displacements and the scorer did not, every trial index
+ * would point at a different mark and the arithmetic would be confident nonsense.
+ * The scorer could re-run this function — but then a change here silently
+ * re-scores every sitting ever banked against it. So the *result* travels in the
+ * session head: an ordered list of page numbers, which the scorer replays. This
+ * function is how the list is chosen; it is not what makes the reading reproduce.
+ *
+ * @param shifts   `[{page, dx, dy}]` — every page with a measured correction.
+ * @param exclude  page numbers to drop: the pages the correction was fitted on,
+ *                 so what is left is genuinely held out.
+ * @param pages    how many to return. More than are eligible returns all of them.
+ * @param spread   `"extremes"` takes from both ends of both axes — the pages that
+ *                 carry the leverage. `"all"` keeps every eligible page, which is
+ *                 what a coverage block wants and what the old behaviour was.
+ * @returns page numbers, ascending. Ascending because it is read by people; the
+ *          order is preserved into the head either way, and the shuffle inside
+ *          `pool` is what actually decides who gets asked first.
+ */
+export function selectPages({ shifts, exclude = [], pages, spread = "extremes" }) {
+  const drop = new Set(exclude);
+  const eligible = shifts.filter((s) => !drop.has(s.page));
+  if (spread === "all" || !(pages > 0) || pages >= eligible.length) {
+    return eligible.map((s) => s.page).sort((a, b) => a - b);
+  }
+  // Ties broken by page number throughout, so the same input always gives the
+  // same list on any engine. A sort that is only *nearly* total is a
+  // reproducibility bug that shows up once, months later, on someone else's node.
+  const by = (k) => (a, b) => a[k] - b[k] || a.page - b.page;
+  const taken = new Set();
+  const take = (rows, n) => {
+    for (const r of rows) {
+      if (taken.size >= pages || n <= 0) break;
+      if (taken.has(r.page)) continue;
+      taken.add(r.page);
+      n -= 1;
+    }
+  };
+  const quarter = Math.max(1, Math.floor(pages / 4));
+  const dx = eligible.slice().sort(by("dx"));
+  take(dx, quarter);
+  take(dx.slice().reverse(), quarter);
+  const dy = eligible.slice().sort(by("dy"));
+  take(dy, quarter);
+  take(dy.slice().reverse(), quarter);
+  // Whatever is left over goes to the pages furthest from the middle of the
+  // measured cloud, which is the same principle the four tails above apply one
+  // axis at a time. Rounding is why there is a remainder at all: four quarters of
+  // an odd number do not add up, and the leftovers should not fall to the centre
+  // by default.
+  const mid = (k) => {
+    const v = eligible.map((s) => s[k]).sort((a, b) => a - b);
+    return v[Math.floor(v.length / 2)];
+  };
+  const [mx, my] = [mid("dx"), mid("dy")];
+  const far = eligible
+    .map((s) => ({ ...s, d: Math.hypot(s.dx - mx, s.dy - my) }))
+    .sort((a, b) => b.d - a.d || a.page - b.page);
+  take(far, pages - taken.size);
+  return [...taken].sort((a, b) => a - b);
+}
+
+/**
  * A session of the other kind: no choosing, only placing.
  *
  * The forced choice can say *our correction is preferred to what ships*. It can
