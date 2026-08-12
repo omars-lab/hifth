@@ -949,7 +949,32 @@ fastest.
 The second half is still open, and it is the half only a person can answer: a sitting on
 **held-out** pages — marks from pages the correction was measured on but which no reader has
 judged. Everything a reader has judged so far came from the pages the correction was fitted to.
-That is the only thing that separates a fit from a finding, and it can be built now.
+That is the only thing that separates a fit from a finding.
+
+**That sitting now exists and nobody has sat it.** It is two short blocks. The first is
+forty-seven rectangles from forty pages that were not among the original forty, drawn on purpose
+from the pages wanting the largest and the smallest moves rather than at random — which is what
+buys the leverage described above, and it does: across those forty pages the proposed moves
+differ by nearly two units sideways and over three down, against a third of a unit before. The
+second is twenty-three rectangles over five further pages, four or five on each, and it exists
+because no sitting so far has ever put enough rectangles on one page to tell how much of the
+leftover distance belongs to the page and how much to the hand holding the mouse. The five pages
+are none of the forty, so the two blocks can disagree with each other.
+
+Neither block has the correction applied to it. Applying it first would have measured the
+leftover distance on top of itself, where a genuine nought and a lucky cancellation look the
+same — and it would have built a number this project has not settled into the instrument
+meant to settle it.
+
+Two things about that sitting are worth saying plainly, because they are what make it evidence
+rather than an exercise. **What it expects is written down before anybody places a rectangle**,
+in the validation register, four statements about numbers that do not exist yet, each one saying
+what its own failure would mean — a result read afterwards can always be made to sound like a
+confirmation, and one predicted beforehand can fail. And **it still cannot tell a print that is
+off by this much from one reader who places rectangles this way.** Only a second person placing
+the same rectangles can separate those. That block is designed and not built, so whatever
+leftover distance this sitting banks is one hand's leftover distance, and must be said in those
+words.
 
 One limit the full pass added rather than removed: taking each page's own displacement out
 repairs most of this error and measurably not all of it. About one mark in five is still further
@@ -1018,12 +1043,22 @@ pnpm adjudicate:score docs/validation/rulings/<the file you just moved>
 ```
 
 **Read the first of those four lines carefully, because everything after it inherits its
-limit.** Forty pages is not a setting chosen for speed; it is the extent of the whole
-correction. A session can only offer a mark on a page that has a proposed move, so both
-by-eye instruments have only ever been able to ask about those forty. §⑧ is that question,
-and a fuller pass writes to its own file rather than over this one — the answers of a session
-already being worked are attached to the displacements it was built from, and both scorers
-refuse a ruling whose displacements have moved underneath it.
+limit.** Forty pages is not a setting chosen for speed; it is the extent of the correction as
+it stood when that session was built. A session can only offer a mark on a page that has a
+proposed move, so every by-eye answer given up to that point was about those forty. §⑧ is that
+question. A fuller pass writes to its own file rather than over this one — the answers of a
+session already being worked are attached to the displacements it was built from, and both
+scorers refuse a ruling whose displacements have moved underneath it.
+
+That fuller pass has since run over all 604 pages, so a session can now be built on pages the
+correction was never checked against: the placing builder takes the pages to draw from as an
+argument, and will hold out the pages an earlier session used by reading that session's own
+record of which pages it drew from. Its scorer replays that recorded list rather than choosing
+again, so improving how pages are picked can never quietly re-score a sitting somebody has
+already worked. It refuses on either of two fingerprints — the displacements, and the pages —
+and refuses a third time if the displacements it is handed have no row for a page the sitting
+used, because a file can carry the right fingerprint and still be the wrong file for these
+pages.
 
 Like the evidence page, that page is written to the untracked output directory and never
 committed, for the same reason: it draws the mus'haf's own ink. What a reader *answers* does
@@ -1055,9 +1090,19 @@ readable without them.
   marks, how far out each rectangle starts, and which ones come round twice. Same shape as
   the session above, and for the same reason: rebuilt from the seed, so the correction it is
   measured against is never written down anywhere the reader could reach.
+- `packages/etl/scripts/lib/adjudication.mjs`, `selectPages` — which pages a sitting may draw
+  from: hold out the ones an earlier sitting used, then take from the ends of the spread on
+  both axes rather than at random, because leverage and not sample size is what makes the size
+  of the correction readable. The pages it returns are written into the session and replayed
+  when it is scored, so changing this function cannot re-score a sitting somebody has worked.
 - `packages/etl/scripts/build-mark-nudge.mjs` — renders that session to one page. It carries
   the ink, the rectangle and where the rectangle starts; the proposed correction reaches no
-  markup, no attribute and no comment on it.
+  markup, no attribute and no comment on it. `--exclude` takes the sittings whose pages must be
+  held out, `--pages` how many to keep; it writes a companion file naming the pages it drew
+  from, in the same shape a displacements file uses, so the next sitting can exclude it with no
+  second format. The pages chosen carry their own fingerprint, folded into the key the browser
+  resumes from — two sittings from the same displacements and seed but different pages would
+  otherwise have stacked one's answers onto the other's trials.
 - `packages/etl/scripts/score-mark-nudge.mjs` — subtracts the proposed correction from where
   each rectangle was put and reports what is left, beside the precision of the hand that put
   them, so a residual smaller than the wobble is called what it is. It opens with **how many
@@ -1081,6 +1126,14 @@ readable without them.
   the runbook of record for §⑩ ①, and where its verdict gets banked.
 - [`docs/validation/ledger.json`](../validation/ledger.json), `placement-residual-by-hand` —
   the same, for §⑩ ⑦.
+- [`docs/validation/ledger.json`](../validation/ledger.json),
+  `placement-holds-off-its-own-pages` — the same, for §⑩ ⑧, and the one place its four
+  predictions are written down before anybody places a rectangle.
+- [`docs/validation/rulings/`](../validation/rulings/) — the answers themselves, and beside
+  them the two displacement files a verdict has to be scored against: the forty-page
+  measurement both earlier sittings were built from, and the full 604-page pass everything
+  built afterwards uses. Committed because a ruling that can only be re-scored by somebody who
+  can first rebuild a gitignored file is a verdict nobody else can check.
 - `packages/etl/scripts/lib/mark-shape.mjs` — the canonical examples and the shape comparison,
   shared with the naming measurement so that both use one library of examples rather than two
   that could drift apart. This document uses it only to decide which marks are eligible.

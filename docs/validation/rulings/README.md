@@ -41,6 +41,15 @@ The file also carries the fingerprint of the displacements it was placed against
 is deliberate: silently scoring yesterday's answers against today's measurement is the one
 way this could go wrong without anybody noticing.
 
+A placing session built on a **subset** of pages carries a second thing: the ordered list of
+pages it was allowed to draw from, and a fingerprint of that list (`select`). The scorer
+replays that list instead of choosing again, for the reason the seed exists at all — the trial
+list is rebuilt, not stored, and a rebuild that narrowed the pages differently would put every
+trial index against a different mark while nothing threw. It refuses on that fingerprint too,
+and refuses a third time if the displacements it is handed carry no row for a page the sitting
+used. That last check is not redundant with the first: a file can carry the right fingerprint
+and still be the wrong file for these pages, and the error message says so in those words.
+
 ## Reading one
 
 ```
