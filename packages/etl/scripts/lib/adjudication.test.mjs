@@ -21,7 +21,7 @@
  * corpus cache the real readers want.
  */
 import { describe, expect, it } from "vitest";
-import { planNudge, planSession, REPEAT_GAP, selectPages, START_R, windowFor } from "./adjudication.mjs";
+import { planNudge, planSession, REPEAT_GAP, sameBuild, selectPages, START_R, windowFor } from "./adjudication.mjs";
 import { shapeOf } from "./ink.mjs";
 
 /** Twelve pages of forty marks, each a plausible size, all of them solid ink. */
@@ -303,5 +303,49 @@ describe("selectPages", () => {
     const byPage = new Map(varied.map((s) => [s.page, s]));
     const { trials } = planNudge({ seed: 9, count: 30, shifts: chosen.map((p) => byPage.get(p)), io });
     expect(new Set(trials.map((t) => t.page))).toEqual(new Set(chosen));
+  });
+});
+
+/**
+ * The precondition on comparing two readers.
+ *
+ * Every failure here is silent by nature. Two rulings from different builds
+ * still line up by trial index, still subtract cleanly, and still print a
+ * confident number — one that says two readers disagree wildly when in truth
+ * they were asked different questions. And the reverse mistake, one reader
+ * compared with themselves, prints beautiful agreement and answers nothing.
+ * Neither is visible in the output, so both are asserted here.
+ */
+describe("sameBuild", () => {
+  const a = { kind: "nudge", seed: 31, count: 47, shiftFingerprint: "c849e72d", select: { fp: "abc123" }, reader: "A" };
+
+  it("lets two readers on the identical build be compared", () => {
+    expect(sameBuild(a, { ...a, reader: "B" })).toEqual([]);
+  });
+
+  it.each([
+    ["kind", "adjudication"],
+    ["seed", 37],
+    ["count", 23],
+    ["shiftFingerprint", "c8528da9"],
+  ])("refuses when %s differs, because it rebuilds a different trial list", (field, value) => {
+    const out = sameBuild(a, { ...a, reader: "B", [field]: value });
+    expect(out.map((d) => d.field)).toEqual([field]);
+  });
+
+  it("refuses when the two were built over different pages", () => {
+    const out = sameBuild(a, { ...a, reader: "B", select: { fp: "999999" } });
+    expect(out.map((d) => d.field)).toEqual(["select.fp"]);
+  });
+
+  it("refuses one reader compared with themselves, which would report as agreement", () => {
+    expect(sameBuild(a, { ...a }).map((d) => d.field)).toEqual(["reader"]);
+    expect(sameBuild({ ...a, reader: undefined }, { ...a, reader: undefined }).map((d) => d.field)).toEqual(["reader"]);
+  });
+
+  it("names every mismatch, not just the first, so one run fixes the whole build", () => {
+    const out = sameBuild(a, { ...a, reader: "B", seed: 37, count: 23 });
+    expect(out.map((d) => d.field)).toEqual(["seed", "count"]);
+    expect(out.every((d) => d.why.length > 0)).toBe(true);
   });
 });

@@ -34,6 +34,18 @@
  * their job. A large one means the placements are partly a record of where they
  * began, and widens what the residual can be trusted to.
  *
+ * ## What one hand cannot tell you at all
+ *
+ * Everything above is one person measured against the print, and that comparison
+ * has two readings it cannot separate: *the print is out by this much* and *this
+ * reader puts rectangles this way*. They produce the identical number. The only
+ * thing that tells them apart is a second person placing the same marks from the
+ * same starting points, so `--against` takes that second sitting and reports how
+ * far the two hands are from each other, against how far each hand is from
+ * itself. Agreement inside their own wobble is what makes a further correction
+ * something you may apply to all 604 pages; a wider gap means it belongs to
+ * whoever was sitting there and should be applied to nothing.
+ *
  * ## Three things this file learned the hard way
  *
  * The first version of this script printed a residual, an interval, and a
@@ -66,13 +78,14 @@
  * way, so it can sit inside something larger without being read.
  *
  *   node packages/etl/scripts/score-mark-nudge.mjs placements.json
+ *   node packages/etl/scripts/score-mark-nudge.mjs a.json --against b.json
  */
 import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { planNudge } from "./lib/adjudication.mjs";
+import { planNudge, sameBuild } from "./lib/adjudication.mjs";
 import { wilson } from "./lib/mark-ink.mjs";
-import { clusteredCI, mean, meanCI, sd, slopeOf, spreadUnderSplit } from "./lib/placement-stats.mjs";
+import { agreementOf, clusteredCI, mean, meanCI, sd, slopeOf, spreadUnderSplit } from "./lib/placement-stats.mjs";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const ETL = join(HERE, "..");
@@ -91,10 +104,28 @@ for (let i = 0; i < argv.length; i += 1) {
   else if (!path) path = argv[i];
 }
 if (!path) {
-  process.stderr.write("usage: score-mark-nudge.mjs <placements.json> [--shift path]\n");
+  process.stderr.write(
+    "usage: score-mark-nudge.mjs <placements.json> [--shift path] [--against other-placements.json]\n",
+  );
   process.exit(2);
 }
 const shiftPath = arg("--shift", join(ETL, "out", "mark-shift.json"));
+/**
+ * A second person's answers to the identical questions, if anybody sat them.
+ *
+ * Everything else here measures one hand against the print, and cannot tell the
+ * two apart: a leftover of a tenth of a unit is *the print is out by a tenth* and
+ * *this reader puts rectangles a tenth low* written the same way. Two hands are
+ * the only thing that separates them. Where they agree, what is left over is a
+ * property of the page and may be applied to every page; where they do not, it is
+ * a property of whoever was sitting there and must not be applied to anything.
+ *
+ * The comparison is only meaningful if both readers answered the *same* trials —
+ * same seed, same displacements, same chosen pages, same starting points — so all
+ * of that is checked before a single difference is taken, and a mismatch stops the
+ * run rather than being averaged over.
+ */
+const againstPath = arg("--against", null);
 
 const ruling = JSON.parse(readFileSync(path, "utf8"));
 const shiftText = readFileSync(shiftPath, "utf8");
@@ -225,17 +256,21 @@ const coverage = {
  * residual below is a number with no scale, and a number with no scale is an
  * opinion with decimal places.
  */
-const pairs = new Map();
-for (const row of rows) {
-  if (!pairs.has(row.t.id)) pairs.set(row.t.id, []);
-  pairs.get(row.t.id).push(row);
+function precisionOf(rs) {
+  const pairs = new Map();
+  for (const row of rs) {
+    if (!pairs.has(row.t.id)) pairs.set(row.t.id, []);
+    pairs.get(row.t.id).push(row);
+  }
+  const twice = [...pairs.values()].filter((g) => g.length >= 2).map((g) => g.slice(0, 2));
+  const gaps = twice.map(([p, q]) => Math.hypot(p.a.u[0] - q.a.u[0], p.a.u[1] - q.a.u[1]));
+  const axisNoise = (k) =>
+    twice.length ? Math.sqrt(mean(twice.map(([p, q]) => (p.a.u[k] - q.a.u[k]) ** 2)) / 2) : NaN;
+  const it = { n: twice.length, typical: median(gaps), sx: axisNoise(0), sy: axisNoise(1) };
+  it.floor = twice.length ? Math.hypot(it.sx, it.sy) : NaN;
+  return it;
 }
-const twice = [...pairs.values()].filter((g) => g.length >= 2).map((g) => g.slice(0, 2));
-const gaps = twice.map(([p, q]) => Math.hypot(p.a.u[0] - q.a.u[0], p.a.u[1] - q.a.u[1]));
-const axisNoise = (k) =>
-  twice.length ? Math.sqrt(mean(twice.map(([p, q]) => (p.a.u[k] - q.a.u[k]) ** 2)) / 2) : NaN;
-const noise = { n: twice.length, typical: median(gaps), sx: axisNoise(0), sy: axisNoise(1) };
-noise.floor = twice.length ? Math.hypot(noise.sx, noise.sy) : NaN;
+const noise = precisionOf(rows);
 
 /**
  * The headline, in the currency the forced choice already speaks.
@@ -353,6 +388,52 @@ const ts = (pair) =>
   `t = ${pair.map((p, k) => `${p && Number.isFinite(p.t) ? p.t.toFixed(1) : "?"} ${AXIS[k]}`).join(", ")}`;
 const anyBig = (pair) => pair.some((p) => p && Number.isFinite(p.t) && Math.abs(p.t) >= 2);
 
+/**
+ * Do two hands agree, mark for mark?
+ *
+ * Not *do their averages come out alike* — two readers can average to the same
+ * place while disagreeing about every rectangle, and that would say the leftover
+ * is real when it is two errors cancelling. So the difference is taken per trial,
+ * between the two landings on the same mark from the same starting point, and the
+ * interval on that difference is clustered by page for the same reason every other
+ * interval here is: two marks on one page are one page's worth of evidence.
+ *
+ * The scale to read it against is the readers' own precision. Two hands that each
+ * wobble by a twentieth of a unit cannot be expected to agree closer than that, so
+ * a disagreement inside the wobble is agreement, and only a gap that clears both
+ * hands' noise is a disagreement about the print.
+ */
+let agree = null;
+if (againstPath) {
+  const other = JSON.parse(readFileSync(againstPath, "utf8"));
+  const differs = sameBuild(ruling, other);
+  if (differs.length) {
+    process.stderr.write(
+      `${againstPath} cannot be compared with ${path}:\n` +
+        differs.map(({ field, why }) => `  ${field} — ${why}\n`).join("") +
+        "Two readers are only evidence on the identical build. Score them separately.\n",
+    );
+    process.exit(2);
+  }
+
+  const mine = new Map(rows.map((r) => [r.a.i, r]));
+  const both = [];
+  for (const b of other.answers) {
+    if (!b || !b.u) continue;
+    const a = mine.get(b.i);
+    if (!a) continue;
+    if (a.a.id !== b.id) throw new Error(`trial ${b.i} is ${a.a.id} for one reader and ${b.id} for the other`);
+    both.push({ page: a.t.page, t: a.t, d: [b.u[0] - a.a.u[0], b.u[1] - a.a.u[1]], b });
+  }
+  if (both.length) {
+    const theirs = precisionOf(both.map(({ t, b }) => ({ t, a: b })));
+    agree = {
+      reader: [ruling.reader ?? "A", other.reader ?? "B"],
+      ...agreementOf(both, [noise.floor, theirs.floor]),
+    };
+  }
+}
+
 const clears = head.lo > 50;
 const readable = Number.isFinite(noise.floor) && noise.floor > 0;
 const residual = Math.hypot(flat[0].m, flat[1].m);
@@ -362,7 +443,7 @@ const real = clust.map((c) => Number.isFinite(c.lo) && (c.lo > 0 || c.hi < 0));
 
 const out = [
   `placements ${path}`,
-  `seed ${ruling.seed} · ${rows.length} of ${ruling.count} placed · displacements ${ruling.shiftRan} (${fp})`,
+  `seed ${ruling.seed} · reader ${ruling.reader ?? "unrecorded"} · ${rows.length} of ${ruling.count} placed · displacements ${ruling.shiftRan} (${fp})`,
   `median ${(median(ms) / 1000).toFixed(1)}s a placement`,
   "",
   say("pages these can speak for", `${coverage.placed} placed on, of ${coverage.chosen} this session was built over`),
@@ -421,6 +502,32 @@ const out = [
   say("  how late in the sitting", `${ts(byOrder)}${anyBig(byOrder) ? " — LOOK: the sitting drifted" : " — no drift as it wore on"}`),
   say("  where it started", "see the pull of the starting point above"),
   "",
+  ...(agree
+    ? [
+        `is what is left over the print, or this reader? — readers ${agree.reader[0]} and ${agree.reader[1]}, ${agree.n} marks both placed`,
+        ...[0, 1].map((k) =>
+          say(
+            `  they differ, ${AXIS[k]}`,
+            `${"xy"[k]} ${u3(agree.by[k].m)}  ${band(agree.by[k])}  as ${agree.by[k].g} pages`,
+          ),
+        ),
+        say("  typical gap between them", `${u2(agree.typical)} units, against ${u2(agree.expected)} of hand wobble`),
+        agree.beyond
+          ? "  The two hands are further apart than either one's own wobble, so what is left over is at least\n" +
+            "  partly whoever is sitting there. A single further correction applied to every page would be\n" +
+            "  applying one reader's habit to the whole print — do not."
+          : "  The two hands agree to within their own wobble, so what is left over is a property of the page\n" +
+            "  and not of whoever placed it. That is what makes a single further correction applicable at all.",
+        "",
+      ]
+    : againstPath
+      ? ["is what is left over the print, or this reader? — no mark was placed by both readers", ""]
+      : [
+          "is what is left over the print, or this reader?",
+          "  Unanswerable from one hand. Everything above measures a reader against the print and cannot\n" +
+            "  say which of the two it is reading. A second person on the identical build settles it.",
+          "",
+        ]),
   clears
     ? "the correction goes the right way: placements land nearer it than they do the shipped box, and the interval clears half"
     : head.hi < 50

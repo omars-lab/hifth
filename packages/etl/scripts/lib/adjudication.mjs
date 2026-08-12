@@ -454,3 +454,40 @@ export function planNudge({ seed, count, shifts, io = readers }) {
   const trials = out.map((t, i) => ({ i, ...t }));
   return { trials, repeats, skippedForInk, pages: new Set(trials.map((t) => t.page)).size };
 }
+
+/**
+ * The four things that have to match before two sittings can be compared.
+ *
+ * A second reader is only evidence if they answered the *same* questions. The
+ * trial list is rebuilt from the seed rather than stored, so two rulings can look
+ * alike in every visible field and still be lists of different marks — and
+ * nothing would throw, because every trial index would resolve. The differences
+ * would simply be subtractions of unrelated numbers, and they would come out
+ * looking like two readers who disagree wildly.
+ *
+ * So each input to the rebuild is checked by name, and each one is reported with
+ * what it would have done, because "seed differs" is a fact and "different seeds
+ * build different trial lists" is the reason it matters.
+ *
+ * The fifth check is the opposite shape and just as load-bearing: two rulings
+ * that agree on all four but also agree on the *reader* are one person compared
+ * with themselves. That returns beautiful agreement and answers nothing, which
+ * makes it the one failure here that would never be caught by reading the output.
+ *
+ * @returns `[{field, why}]` — empty when the two may be compared.
+ */
+export function sameBuild(a, b) {
+  const out = [];
+  const check = (field, why, get = (r) => r[field]) => {
+    if (String(get(a) ?? "") !== String(get(b) ?? "")) out.push({ field, why });
+  };
+  check("kind", "these are not both placing sessions");
+  check("seed", "different seeds build different trial lists");
+  check("count", "different lengths build different trial lists");
+  check("shiftFingerprint", "these were placed against different displacements");
+  check("select.fp", "these were built over different pages", (r) => r.select?.fp);
+  if (!out.length && (a.reader ?? "A") === (b.reader ?? "A")) {
+    out.push({ field: "reader", why: "both of these are the same reader, so this compares a hand with itself" });
+  }
+  return out;
+}
