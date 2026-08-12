@@ -792,6 +792,124 @@
       "record": "docs/design/mark-registration.md",
       "verifiedOn": "2026-08-12",
       "result": "seed 23 · 60 placements over 40 pages · nearer ours 98.3% [91.1–99.7] · residual (-0.073, -0.110) units against a precision of 0.03, but clustered by the pages they came from neither component clears nought (down [-0.230, +0.009], across [-0.223, +0.077]) → adopt the correction as measured, do not apply the residual. Two further limits the sitting could not see past: the 40 pages placed on are the same 40 the correction was fitted to, so nothing here speaks for the other 564; and those pages all propose nearly the same move, so whether the correction is the right size was not measured at all. Ruled out along the way, and worth not re-buying: it is not the mark's name, not a scale error across the page, not the starting point, and not fatigue."
+    },
+    {
+      "id": "placement-holds-off-its-own-pages",
+      "title": "Placement on pages the correction has never seen — does it still land, is it the right size, and is the leftover the page or the hand?",
+      "why": "The last sitting placed sixty rectangles and answered one question decisively and three not at all. The pages placed on were the same forty the correction had been worked out from, so it could only report that the correction holds where it was already fitted — a claim nobody doubted. Those forty pages also all wanted very nearly the same move, and on pages like that a correction that is exactly right and one that is a fifth short are literally the same number, so the size was never measured. And with barely more than one rectangle per page there was no way to tell how much of the leftover distance belongs to the page and how much to the hand holding the mouse. All 604 pages have since been measured, which makes a different sitting possible: rectangles from pages no eye has ever been asked about, chosen so that the move they want is as different from page to page as the mus'haf allows.",
+      "how": "Two short sittings, built and read separately. The first is forty-seven rectangles from forty pages that were not in the original forty, deliberately drawn from the pages that want the largest and the smallest moves rather than at random. The second is twenty-three rectangles over five pages, four or five each, which is the only way to see the page and the hand apart. Both are placed the same way as before — drag the rectangle onto the mark named above it, press enter, nothing tells you how close you were. Neither sitting has the correction applied to it: the point is to measure the correction, not to sit on top of it.",
+      "owner": "user",
+      "status": "pending",
+      "blocks": [
+        "mark-C"
+      ],
+      "runbook": {
+        "needs": [
+          "The same two printings every mark check wants: the pages the app ships, and the gitignored ligature cache the mark boxes are read from. If either mark check has been run on this machine, nothing more is needed.",
+          "About twenty-five minutes for the first sitting and twelve for the second. They do not have to be the same day, and it is better if they are not.",
+          "A mouse or a trackpad you are comfortable with, or a touchscreen. Not a phone. The whole measurement is in fractions of a letter.",
+          "Nobody has to be a hafiz. It is a question about where a rectangle sits.",
+          "Ideally a second person for the third sitting, which is the only thing that can tell a print that is off by this much from one reader who places rectangles this way. That sitting is not built yet and this check does not wait on it."
+        ],
+        "tool": {
+          "path": "packages/etl/out/mark-nudge.heldout.html",
+          "label": "Forty-seven placements on pages nobody has been asked about",
+          "note": "Built by the first setup command, along with a small companion file listing which pages it drew from. The second setup command reads that companion file so the second sitting cannot land on the same pages. Both pages open from a file, need nothing running, and reach no network. Neither knows how close you were, because the correction is stripped out before the trials reach the page."
+        },
+        "setup": [
+          {
+            "run": "pnpm nudge:marks --shift docs/validation/rulings/mark-shift.604pages.c849e72d.json --exclude docs/validation/rulings/mark-shift.40pages.c8528da9.json --pages 40 --seed 31 --count 47 --out packages/etl/out/mark-nudge.heldout.html",
+            "expect": "A line reading 40 of 600 measured, 40 held out · extremes, then 47 placements over 40 pages with 7 shown twice and none dropped. It writes the page itself and a companion file of the same name ending .pages.json. Note the two fingerprints it prints — one for the displacements, one for the pages chosen — because both have to match when it is read."
+          },
+          {
+            "run": "pnpm nudge:marks --shift docs/validation/rulings/mark-shift.604pages.c849e72d.json --exclude docs/validation/rulings/mark-shift.40pages.c8528da9.json,packages/etl/out/mark-nudge.heldout.pages.json --pages 5 --seed 37 --count 23 --out packages/etl/out/mark-nudge.structure.html",
+            "expect": "5 of 600 measured, 80 held out, then 23 placements over 5 pages with 3 shown twice. Those five pages are none of the forty above and none of the original forty, so the two sittings never ask about the same page twice."
+          }
+        ],
+        "steps": [
+          {
+            "do": "Before opening anything, read the four predictions in the reading notes below and satisfy yourself they were written down first.",
+            "expect": "Four statements about numbers that do not exist yet, each one saying what it would mean if it came back wrong.",
+            "why": "The last sitting was read after the fact, and reading a result after the fact is how a session that measured nothing comes to look like a session that confirmed something. A prediction written before anybody places a rectangle can fail. One written afterwards cannot, whatever it says.",
+            "id": "read-the-prediction-first"
+          },
+          {
+            "do": "Do this on a different day from the forced-choice session, or before it — not straight after. The same goes for the previous placing session if you were the one who did it.",
+            "expect": "Nothing on the screen tells you either way. This one is on you.",
+            "why": "Placing sixty rectangles teaches a hand which way the correction tends to go, and a hand that has learned the rule answers from the rule rather than from the ink. That is the one fault none of these sessions can detect afterwards, because somebody answering from a learned rule looks exactly like somebody who can see very well. It matters more here than last time: these pages were picked because they want unusual moves, and a hand carrying last time's habit would place them all as though they wanted the usual one.",
+            "id": "keep-them-apart"
+          },
+          {
+            "do": "Open the first page. Read the short answers it opens with, then start. Do not read the code that built it first.",
+            "expect": "A line naming one mark, a small piece of print with that mark's letters under a soft blue wash, one red rectangle sitting obviously off it, and a button that will not do anything yet.",
+            "why": "The builder knows where we think each rectangle goes and the page deliberately does not. Reading it first is the one way to spoil that, and the sitting would have to be thrown away and rebuilt under a seed you had not seen.",
+            "id": "start-cold-here"
+          },
+          {
+            "do": "Read the line above the picture, find the mark it names, drag the rectangle onto that mark and press enter. Arrow keys nudge it; hold shift for a bigger step. Press S if the rectangle is plainly the wrong size for its mark, and place it as well as you can anyway.",
+            "expect": "The button wakes as soon as you move it, and nothing happens when you place it except the next trial. No target, no snapping, no 'close'. Some rectangles start further out than you may remember from last time.",
+            "why": "The rectangle always starts wrong, so leaving it alone is never an answer. A crop this size holds several marks and often two of the same name, so the line names one and the wash points at the letters it belongs to — a placement on the neighbour is a whole letter out and would be recorded as though the boxes were a whole letter out. And where a box sits and how big it is are two faults with two repairs; the tick keeps them apart, and never costs the placement.",
+            "id": "place-them"
+          },
+          {
+            "do": "Place each one honestly and move on. Do not labour over any single rectangle, and do not try to be consistent with what you did the last time you saw a mark.",
+            "expect": "Some marks come round a second time, starting somewhere else. You may or may not notice.",
+            "why": "The pair is the scale for everything else. Two independent goes at the same mark differ by however far your hand wanders, and that spread is what separates a real offset from noise. Reproducing your earlier answer replaces a measurement of your hand with a measurement of your memory, and then nothing below has a scale. The existing mechanism measured a hand to a fiftieth of a unit last time, which is why it is unchanged here.",
+            "id": "let-the-repeats-be-repeats"
+          },
+          {
+            "do": "Stop whenever you are tiring. Close the tab and come back to the same file later. Save and move the first sitting before you open the second.",
+            "expect": "It resumes on the placement you left, with the ones you already made, and nothing reshuffles. The saved file lands in your downloads; it becomes docs/validation/rulings/<when>-placement-holds-off-its-own-pages.seed31.json.",
+            "why": "A tired hand wanders, and a wandering hand does not read as fatigue in the output — it reads as a wide precision estimate, which quietly makes every real finding undetectable. And the two sittings are stored under different seeds because they answer different questions; scoring one against the other's answers is the mistake the fingerprints exist to catch, but only if the files are named apart in the first place.",
+            "id": "stop-when-tiring"
+          },
+          {
+            "do": "Do the second sitting the same way, and save it as docs/validation/rulings/<when>-placement-holds-off-its-own-pages.seed37.json.",
+            "expect": "Twenty-three placements, four or five on each of five pages. The same five pages come round repeatedly and you will start to recognise them. That is fine and it is the point.",
+            "why": "Four rectangles on one page is the only arrangement that can say how much of the leftover distance is a property of the page and how much is the hand. The previous sitting had roughly one and a half per page, which is why its clustered interval had to assume the worst and crossed nought. Recognising a page does not spoil this one, because you are still not being told where the box goes.",
+            "id": "do-the-structure-block"
+          },
+          {
+            "do": "Read each one: pnpm nudge:score docs/validation/rulings/<the file you just moved>",
+            "expect": "It opens by saying how many pages the sitting can speak for and that they were held out of the measurement, which the previous sitting could not say. Then the headline in the same currency as before, the residual with a naive and a clustered interval, your own precision from the repeats, and — this is the new part — whether the pages varied enough for the size of the correction to be readable. It should now say decidable rather than undecidable.",
+            "why": "This is the first moment anybody knows what the correction was, you included. If it refuses outright, the displacements or the page selection moved between building the sitting and reading it: read it against the files it was built from, or build a fresh sitting and place them again. It refuses on either fingerprint, and it refuses again if the displacements file has no entry for a page the sitting used — because a file can carry the right fingerprint and still be the wrong file for these pages.",
+            "id": "read-the-residual"
+          },
+          {
+            "do": "Compare what came back against the four predictions, and write down which of them failed.",
+            "expect": "Some of them will not hold. That is what they are for.",
+            "why": "A prediction that survives is worth a sentence; a prediction that fails is worth the whole sitting, because it is the only thing that can tell us we were reasoning about the wrong quantity. The reading notes say what each failure would mean before anyone has seen a number.",
+            "id": "score-the-predictions"
+          },
+          {
+            "do": "Bank the numbers with the record command below, whichever way it went.",
+            "expect": "The ledger gains the headline, the residual, the size estimate, the page-versus-hand split and the date, and this check stops being pending.",
+            "why": "Everything the mark boxes do next turns on these numbers, and a number nobody wrote down is one somebody has to buy again at half an hour of a person's attention.",
+            "id": "bank-the-numbers"
+          }
+        ],
+        "reading": [
+          "PREDICTION ONE, direction on pages never fitted: nearer ours comes back at 90% or better. This is the load-bearing one. Below about 80% and the correction is a property of the forty pages it was worked out on rather than of the print, which would stop the mark shards where they stand — every page would need its own measurement checked before it could be trusted, and the cheap global story would be dead.",
+          "PREDICTION TWO, the leftover distance: it comes back either within about six hundredths of the previous sitting's (-0.073, -0.110), or at nought within about the same. Those two outcomes are different findings and this is the first sitting able to tell them apart. Near the old number means the leftover is real and belongs to the print, and the case for applying it gets much stronger. Near nought means the old number was an artefact of the particular forty pages it was measured on, and nothing should be applied at all. Notably larger than the old number in the same direction means it was being applied to the wrong thing.",
+          "PREDICTION THREE, the size: the estimate comes back at 1.0, and its interval is roughly a fifth of a unit across and an eighth down — where the previous sitting's was two thirds and could not be read at all. This is the whole reason the pages were chosen from the extremes. If the estimate lands reliably below 1, the correction is systematically short and the repair is to scale it, not to add a constant to it — which is a different repair from anything considered so far. If the interval is still too wide to read, the extremes strategy did not buy the leverage it was supposed to and the page-picking is what needs fixing, not the sitting.",
+          "PREDICTION FOUR, page versus hand, from the second sitting only: the spread of the leftover between the five pages is larger than the spread within any one of them. If it is, the clustered interval is doing the right thing and the previous sitting was honest to widen it. If the within-page spread dominates instead, the clustering was over-conservative, the previous sitting was closer to settled than it looked, and the interval should be read again.",
+          "A fifth question this check does NOT answer: whether the leftover is a fact about the print or a fact about one reader. Only a second person placing the same rectangles can separate those, and that sitting is designed but not built. Until it exists, any leftover distance banked here is one hand's leftover distance, and the record must say so in those words.",
+          "'the correction goes the WRONG way' on pages held out → stop, and do not reach for a sign flip. It would mean the correction was fitted to its own pages and does not describe the print, which contradicts a forced-choice session that has already passed. Two instruments disagreeing about the same rectangles is worth more than either of them; write it in the placement record and re-measure before shipping anything.",
+          "'no direction either way' → look at the precision line before concluding anything. If it is large, the sitting measured a tired hand rather than a set of boxes, and running it again under a different seed on a different day is the cheap answer.",
+          "'the landings track their starting points' → a hand that stopped short of where the eye said. It does not tilt the leftover, because the starts are spread evenly around the shipped box, but it widens every interval and usually means the placements were made faster than they were judged. Above about a quarter, treat the whole sitting as suggestive and run it again.",
+          "A run of 'the box was the wrong size' is the same second finding both earlier sessions can produce, and it belongs in the same place: the boxes come from one printing and the ink from another, so a rectangle can be in the right place and still not close around its mark. The repair is a re-measurement, not a displacement, and nothing in this check addresses it.",
+          "If the two sittings disagree with each other — the first says the leftover is real and the second says it is all one page's frame error — the second is the one to believe about structure and the first about size. They were built on pages that do not overlap precisely so that they can disagree."
+        ],
+        "record": "make record CHECK=placement-holds-off-its-own-pages RESULT='seed 31 · <n> placements over <pages> held-out pages · nearer ours <pct> [<lo>–<hi>] · leftover (<x>, <y>) against a precision of <p>, clustered <intervals> · size <gain> [<lo>–<hi>], <decidable|undecidable> · seed 37 · <n> placements over 5 pages · between-page spread <a> vs within-page <b> → <the correction travels and may be applied as measured|the leftover is real and should be applied|the leftover was an artefact of the original forty|the correction is short and should be scaled, not shifted|it does not travel — stop>, and say that this is still one hand'"
+      },
+      "tunes": [
+        "packages/etl/data/pages/word-boxes.pin.json — whether the leftover distance is applied to what is recorded there, which the previous sitting was unable to decide and this one is built to decide.",
+        "packages/etl/scripts/probe-mark-ink.mjs — its page count defaulted to forty and nothing downstream could tell. If the correction travels to pages it never saw, forty was enough and the default stands; if it does not, every page needs its own measurement checked and the default is wrong.",
+        "packages/etl/scripts/score-mark-nudge.mjs — the clustered interval currently assumes the worst about how much of the spread belongs to the page, because no sitting has ever had enough rectangles on one page to know. The second block measures it, and what it measures is what that interval should assume.",
+        "packages/etl/scripts/lib/adjudication.mjs — the page-picking strategy that drew these pages from the extremes is justified only if the size estimate comes back readable. If it is still too wide, that strategy is what failed and it is what changes.",
+        "docs/design/mark-registration.md §⑦ — its recommendation is still provisional pending a magnitude, and this is the sitting that either supplies one or says the magnitude was never there."
+      ],
+      "record": "docs/design/mark-registration.md"
     }
   ]
 }
