@@ -22,6 +22,14 @@ packages/etl/data/pages/.cache/
 # ignored wholesale rather than per-file.
 packages/etl/out/
 
+# The publishable copy of a decision's options page. `--artifact` re-renders the
+# committed page with every asset inlined, because the host it is published to
+# blocks external requests — so it is the same page at roughly twice the bytes,
+# and committing both would put two copies of one picture under version control.
+# The committed one is what docs/decisions.json points at; this is a build step
+# on the way out the door.
+docs/design/*.artifact.html
+
 # Parallel-agent worktrees: checkouts of *other* branches living inside this one.
 # Committing them would put another branch's tree into this branch's history, and
 # linting them makes this branch fail on code it does not contain (see

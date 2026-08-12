@@ -31,6 +31,7 @@ import {
   type RootIndexShard,
   type SkinId,
   type TajweedShard,
+  type TajweedVocabulary,
 } from "@hifth/core";
 import {
   loadManifest,
@@ -38,6 +39,7 @@ import {
   loadRootBucket,
   loadShard,
   loadTajweedShard,
+  loadTajweedVocabulary,
 } from "./assets";
 import { applyFieldToDocument, fieldFromHash } from "./field";
 import { recordLook } from "./revision-store";
@@ -534,19 +536,34 @@ export function App(): JSX.Element {
     new Map(),
   );
   const requestedTajweed = useRef(new Set<number>());
+  // The vocabulary the shards are written in. Separate state from the shards
+  // because it is fetched once and they are fetched per surah — and because the
+  // colour settings surface needs it whether or not any shard has landed: it
+  // renders one row per rule, so it needs the rule list, not the spans.
+  const [tajweedVocabulary, setTajweedVocabulary] = useState<TajweedVocabulary | null>(null);
 
   // Same rebuild-on-set pattern as `adjacency` and `roots`: a pure index over
   // whatever has landed, so a shard arriving late re-paints the page without any
   // imperative poke at the stage.
   const tajweed = useMemo(() => {
     if (!manifest) return null;
-    const lens = new Tajweed(manifest.edition);
+    const lens = new Tajweed(manifest.edition, tajweedVocabulary ?? undefined);
     for (const [surah, shard] of tajweedShards) lens.addShard(surah, shard);
     return lens;
-  }, [manifest, tajweedShards]);
+  }, [manifest, tajweedShards, tajweedVocabulary]);
+
+  // Fetched the moment the skin goes on, ahead of any shard: a shard whose rule
+  // ids nothing can interpret paints nothing, so this is the round trip that
+  // actually gates the first colour. Once, per session, ~500 bytes.
+  useEffect(() => {
+    if (!manifest || skin !== "tajweed" || tajweedVocabulary) return;
+    void loadTajweedVocabulary(manifest.edition).then((v) => {
+      if (v) setTajweedVocabulary(v);
+    });
+  }, [manifest, skin, tajweedVocabulary]);
 
   // Fetched only once the skin is actually on, and only for surahs on screen —
-  // all 114 shards are ~200KB gzipped, and a reader who never opens the skin
+  // all 114 shards are ~240KB gzipped, and a reader who never opens the skin
   // should not pay a byte of it.
   useEffect(() => {
     if (!manifest || skin !== "tajweed") return;

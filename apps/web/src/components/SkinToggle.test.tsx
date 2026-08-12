@@ -1,15 +1,31 @@
 import { describe, it, expect, vi } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
-import { Tajweed, type TajweedRuleId, type TajweedShard } from "@hifth/core";
+import {
+  Tajweed,
+  type TajweedRuleId,
+  type TajweedShard,
+  type TajweedVocabulary,
+} from "@hifth/core";
 import { SkinToggle, TajweedLegend } from "./SkinToggle";
 
+// Shards are keyed by the *source's* rule ids, and the vocabulary is what turns
+// them into the seven painted families — so a fixture needs both halves.
+const vocabulary: TajweedVocabulary = {
+  source: "test",
+  rules: [
+    { id: "madd_2", family: "madd" },
+    { id: "madd_6", family: "madd-lazim" },
+    { id: "hamzat_wasl", family: "wasl" },
+  ],
+};
+
 const shard: TajweedShard = {
-  "38": { madd: [24, 25], "madd-lazim": [61, 63] },
-  "39": { wasl: [3, 4] },
+  "38": { madd_2: [24, 25], madd_6: [61, 63] },
+  "39": { hamzat_wasl: [3, 4] },
 };
 
 function lens(): Tajweed {
-  const tj = new Tajweed("hafs-kfqc");
+  const tj = new Tajweed("hafs-kfqc", vocabulary);
   tj.addShard(2, shard);
   return tj;
 }

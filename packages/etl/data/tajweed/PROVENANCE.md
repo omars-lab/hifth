@@ -80,6 +80,41 @@
   with its *rarest* rule rather than its first. `lam_shamsiyyah` sits under
   `idgham` because إدغام الشمسية is an idgham; `iqlab` and both `ikhfa` sit under
   `ghunnah` because all three are realised as a nasalisation.
+- **The fold happens when the page is painted, not when the bytes are written.**
+  Until 2026-08-08 the shards were keyed by the seven families above and the
+  eighteen names were discarded at build time — so nothing downstream could tell
+  an ikhfa from an iqlab, and `idghaam_mutaqaribayn` (13 occurrences in the whole
+  mus'haf) was indistinguishable from the 64.5% of ayahs carrying *some* idgham.
+  The shards now carry the source's own ids, `tajweed/rules.json` carries the
+  mapping as data, and `marksForAyah` in core applies it at read time. It costs
+  **+17.5% gzipped** across the 114 shards (205.8 → 241.7 KB; the largest, al-
+  Baqarah, moves 14.8 → 17.3 KB gz against a 50 KB budget) and it is what makes a
+  reader-editable palette and any finer legend possible at all.
+
+  | source rule | occurrences | ayahs | % of ayahs |
+  |---|---:|---:|---:|
+  | `hamzat_wasl` | 13,252 | 4,749 | 76.2% |
+  | `madd_246` | 4,543 | 4,543 | 72.9% |
+  | `madd_2` | 9,028 | 4,160 | 66.7% |
+  | `ghunnah` | 4,946 | 3,104 | 49.8% |
+  | `ikhfa` | 5,301 | 2,994 | 48.0% |
+  | `qalqalah` | 3,834 | 2,641 | 42.4% |
+  | `idghaam_ghunnah` | 3,933 | 2,510 | 40.3% |
+  | `silent` | 4,174 | 2,307 | 37.0% |
+  | `madd_munfasil` | 3,172 | 2,120 | 34.0% |
+  | `lam_shamsiyyah` | 2,733 | 2,013 | 32.3% |
+  | `madd_muttasil` | 1,997 | 1,486 | 23.8% |
+  | `idghaam_no_ghunnah` | 1,035 | 905 | 14.5% |
+  | `idghaam_shafawi` | 832 | 718 | 11.5% |
+  | `iqlab` | 562 | 506 | 8.1% |
+  | `ikhfa_shafawi` | 496 | 453 | 7.3% |
+  | `madd_6` | 148 | 128 | 2.1% |
+  | `idghaam_mutajanisayn` | 58 | 56 | 0.9% |
+  | `idghaam_mutaqaribayn` | 13 | 13 | 0.2% |
+
+  The family percentages above are **not** the sum of their rules' — an ayah with
+  four madds is one madd ayah — which is why both tables are measured rather than
+  one derived from the other.
 - **Two parsing facts worth knowing** (both handled in `build-tajweed.mjs`):
   1. **The README's rule names are wrong in two places.** It lists
      `idghaam_mutajaanisain` and `idghaam_mutaqaaribain`; the data emits

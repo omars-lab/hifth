@@ -58,7 +58,7 @@
     "         it should not be able to sit here looking tracked.",
     "",
     "evidence: the machine half of this check — one command, what it discharges,",
-    "         and what it cannot. Optional, and three of the six checks here",
+    "         and what it cannot. Optional, and most of the checks here",
     "         deliberately have none: a producer that does not exist must not be",
     "         invented, and a runbook that already absorbed its automation into",
     "         the step text (screen-reader-walkthrough) has nothing left to strike.",
@@ -584,6 +584,207 @@
         "docs/map.json → revision-record — the `extend` steps for task #91 depend on which of the two acceptable outcomes actually happens at day eight."
       ],
       "record": "docs/decisions/loop-7.md"
+    },
+    {
+      "id": "placement-correction-by-eye",
+      "title": "Placement correction by eye — a hundred forced choices between the corrected box and the one we ship",
+      "why": "The measurement says nearly every mark rectangle sits about a letter away from its own ink, and that one number per page fixes it. Only arithmetic has ever said so, and it marked its own homework: the rasteriser that found the displacement is the rasteriser that scores the correction. Nobody has looked at a single verdict. Until somebody does, the thresholds in the placement record stay unenforced, and nothing that points at a mark can ship — which is the whole reason to hold three hundred thousand rectangles.",
+      "how": "Work a hundred two-panel trials by eye. Each shows the same mark twice with one rectangle drawn on it, and asks which rectangle sits on the mark. Usually one of them is the corrected placement and the other is what the app draws today; nothing on the screen says which, and no answer key is written anywhere — the scorer rebuilds it from the seed afterwards. Save the ruling the page hands back, score it, and bank the verdict.",
+      "owner": "user",
+      "status": "pending",
+      "blocks": [
+        "mark-C"
+      ],
+      "runbook": {
+        "needs": [
+          "Both printings on this machine: the pages the app ships, and the gitignored ligature cache the mark boxes are read from. If the placement measurement has ever run here, they are already present; if not, the first setup command says so and stops.",
+          "About twenty minutes, in as few sittings as you can manage. A hundred trials is roughly thirteen minutes of looking; the rest is settling in.",
+          "A screen you are not squinting at, and no opinion about what the answer ought to be. Nothing else — no mushaf, no phone, no network.",
+          "Nobody has to be a hafiz for this one. It is a question about where a rectangle sits, not about what the mark says."
+        ],
+        "tool": {
+          "path": "packages/etl/out/mark-adjudication.html",
+          "label": "The hundred trials",
+          "note": "Built by the second setup command. Opened from here, every answer you give lands in this session's transcript as you give it; opened as a file on its own, it keeps its own copy and hands you a download at the end. Either way it says nothing about how you are doing, because it does not know."
+        },
+        "setup": [
+          {
+            "run": "node packages/etl/scripts/probe-mark-ink.mjs --sample 4000 --seed 7 --pages-n 40",
+            "expect": "About fifty seconds, ending in a failure code — that is expected, and it is the reason this check exists. It writes packages/etl/out/mark-shift.json: one measured displacement for each of forty pages. That file is the thing on trial."
+          },
+          {
+            "run": "pnpm adjudicate:marks --seed 11 --count 100",
+            "expect": "packages/etl/out/mark-adjudication.html in about a second, and a line naming the seed, how many pages the trials spread over, and a short fingerprint of the displacements. Note the fingerprint. Open the file in any browser — it needs nothing running, and it reaches no network."
+          }
+        ],
+        "steps": [
+          {
+            "do": "Read the five short answers the page opens with, then start. Do not read the code that built it first.",
+            "expect": "A first trial: one mark, drawn twice side by side, a rectangle on each, and two keys.",
+            "why": "The trials are built so that nothing on the screen says which rectangle is ours, and the answers exist nowhere until the scorer runs. Reading the builder first is the one way to spoil that, and there is no way to unspoil it — the session would have to be thrown away and rebuilt under a seed you had not seen.",
+            "id": "start-cold"
+          },
+          {
+            "do": "For each trial pick the panel whose rectangle sits on the mark — A or B — or press space when you honestly cannot tell.",
+            "expect": "No feedback, ever: the next trial, and a bar creeping along. Some pairs are obvious. Most are not, and a few are the same rectangle twice, where space is the only honest answer.",
+            "why": "Feedback would turn this into training. Within twenty trials a person who is told they were right learns which way the corrected box tends to sit and answers from that rule rather than from the ink, and the count that comes out measures how well they learned it. Space is not a wasted trial: it is left out of the arithmetic rather than counted as a miss, so guessing to keep the tally up is the one thing that would cost you.",
+            "id": "work-the-trials"
+          },
+          {
+            "do": "When the mark pokes out of both rectangles, press N to say neither closes around it — and then still pick whichever of the two is closer.",
+            "expect": "The tick lights up and clears itself on the next trial. It changes nothing else on the screen, and it never skips the trial.",
+            "why": "A rectangle can be in the right place and still be the wrong size, and this whole session is about where they sit. Those are two faults with two different repairs, so a fourth button meaning 'wrong somehow' would blend them into one count nobody could act on — and it would eat the trials that still carry a usable answer, because which of two wrong rectangles is closer is a question you can answer. The tick is counted on its own line and the marks you tick are named, so somebody can go and look at those boxes rather than argue about whether they exist.",
+            "id": "flag-the-misfits"
+          },
+          {
+            "do": "Stop whenever you are tiring. Close the tab and come back to the same file later.",
+            "expect": "It resumes on the trial you left, with the answers you already gave. Nothing reshuffles.",
+            "why": "Pushing through a hundred trials tired means the last thirty are answered from fatigue, and in the numbers fatigue is indistinguishable from 'the correction does not help' — it would read as a finding about our data rather than about the hour.",
+            "id": "stop-when-tired"
+          },
+          {
+            "do": "At the end, press the button that saves the ruling, and keep the file somewhere you can name on a command line.",
+            "expect": "mark-ruling-11.json in your downloads. It holds your answers, the seed, and the fingerprint — and no key, because there still isn't one.",
+            "why": "The ruling is deliberately worthless on its own. That is what makes it evidence: it could not have been edited towards an answer, because at the moment it was written nothing on the machine knew what the answers were.",
+            "id": "save-the-ruling"
+          },
+          {
+            "do": "Score it: pnpm adjudicate:score ~/Downloads/mark-ruling-11.json",
+            "expect": "Four lines with intervals — as shipped, the decoy, the catches, twins — then, if you ticked any, how many marks poked out of both rectangles and the headline again without them. One sentence of verdict at the end. It exits 0 only when the session was valid and the corrected rectangle actually won.",
+            "why": "This is the first moment anyone knows what the right answers were, you included. If it refuses outright, the displacements were re-measured between building the page and scoring it: score against the file it was built from, or build a fresh session and work it again. A ruling scored against displacements it was not worked against comes out looking clean and means nothing.",
+            "id": "score-it"
+          },
+          {
+            "do": "Bank the verdict with the record command below, whichever way it went.",
+            "expect": "The ledger gains the four numbers and the date, and this check stops being pending.",
+            "why": "A refusal is worth as much here as a confirmation and is far more likely to be dropped on the floor. 'A person looked and did not prefer our correction' is the single most valuable sentence this project could learn about the mark layer, and it is unrecoverable a week later if nobody wrote the numbers down.",
+            "id": "bank-the-verdict"
+          }
+        ],
+        "reading": [
+          "'The correction is supported' → adopt the per-page displacement. The two numbers per page get recorded beside the fit, and the measurement's thresholds become something a gate is allowed to enforce, which is the change this check unlocks.",
+          "'NOT supported, and the decoys say why' → the strongest result this can produce, and the reason it is worth twenty minutes. It means you could see a shift of that size perfectly well and still did not prefer ours: our correction is wrong, not the test blunt. Do not adopt it, and say so in the placement record — a rejected option with a measured reason is a settled question.",
+          "'cannot see a shift this small' → the session says nothing about the correction either way. Try once more with bigger panels (--panel 640). If the decoys still do not clear half, the difference is below what an eye resolves at this size and no number of trials will change that; the case for the correction then rests entirely on the ink arithmetic and its control, and that is what the record should say rather than pretending this was run.",
+          "'SESSION INVALID' or 'SUSPECT' → discard it and do not argue with it. The catches are rectangles a whole letter off their mark and everyone gets those right while looking; missing them means the session was worked while distracted. Rerun under a different seed, which draws different marks in a different order.",
+          "A run of 'neither box closed on it' is a second finding, and it does not change the verdict above — it starts a different question. The rectangles come from one printing and the ink from another, so a box can arrive in the right place and the wrong size, and no amount of moving it will help. If the count is more than a handful, open the named marks in the encoding inspector and compare the box against the ink before adopting anything; the repair is a re-measurement, not a displacement.",
+          "One session is one person. If the verdict is going to decide whether marks ship, a second reader under a different seed costs another twenty minutes and turns one person's eyes into a result — and two people disagreeing is itself the finding."
+        ],
+        "record": "make record CHECK=placement-correction-by-eye RESULT='seed 11 · 100 trials · as shipped <pct> [<lo>–<hi>], decoy <pct>, catches <pct>, twins <pct> → <supported|not supported|says nothing>'"
+      },
+      "tunes": [
+        "packages/etl/data/pages/word-boxes.pin.json — a supported correction is two more numbers per page recorded there. This is the artifact the check exists to release.",
+        "packages/etl/scripts/probe-mark-ink.mjs — its thresholds exit non-zero today and are wired into nothing. A verdict here is the named prerequisite for turning them into a gate.",
+        "docs/design/mark-registration.md §⑦ — the recommendation is provisional pending exactly this, and §⑩ ① is this question.",
+        "packages/etl/scripts/lib/adjudication.mjs — an invalid session tunes the mix of trials, not the conclusion about the marks."
+      ],
+      "record": "docs/design/mark-registration.md"
+    },
+    {
+      "id": "placement-residual-by-hand",
+      "title": "Placement by hand — put each rectangle where it belongs, and measure how far our correction still misses",
+      "why": "The forced-choice session can settle whether our proposed move is preferred to what ships. It cannot settle whether it is far enough, because the only two answers on offer are the two we thought of: a correction that points the right way and falls a third short wins every trial and is still wrong, and nothing in that session can say so. This asks for a placement instead of a preference, and the gap between where a reader puts a rectangle and where we wanted it is a distance in page units — a number that can be applied to the boxes rather than voted on.",
+      "how": "Place about sixty rectangles by hand. Each trial shows one mark with one rectangle starting plainly displaced, and asks you to drag it onto the mark. Nothing on the screen says where we think it goes, and the correction is not in the page at all. Some marks come round a second time from a different starting point; the spread between your two goes is your own precision, and it is what everything else is read against. Save the file at the end, read it, and bank the number.",
+      "owner": "user",
+      "status": "pending",
+      "blocks": [
+        "mark-C"
+      ],
+      "runbook": {
+        "needs": [
+          "The same two printings the forced-choice check wants: the pages the app ships, and the gitignored ligature cache the mark boxes are read from. If that check has been run here, nothing more is needed.",
+          "About twenty-five minutes. Placing is slower than choosing — around fifteen seconds a mark once you have the feel of it — and rushing shows up in the numbers as a wandering hand rather than as an answer.",
+          "A mouse or a trackpad you are comfortable with, or a touchscreen. Not a phone: the panel wants to be large, and the whole measurement is in fractions of a letter.",
+          "Nobody has to be a hafiz for this one either. It is a question about where a rectangle sits."
+        ],
+        "tool": {
+          "path": "packages/etl/out/mark-nudge.html",
+          "label": "The sixty placements",
+          "note": "Built by the second setup command. Opened from here, each placement lands in this session's transcript as you make it; opened as a file on its own it keeps its own copy and hands you a download at the end. It never tells you how close you were, because it does not know — the correction is stripped out before the trials reach the page."
+        },
+        "setup": [
+          {
+            "run": "node packages/etl/scripts/probe-mark-ink.mjs --sample 4000 --seed 7 --pages-n 40",
+            "expect": "About fifty seconds, ending in a failure code — expected, and the reason this check exists. It writes packages/etl/out/mark-shift.json. Skip this if you have already run it for the forced-choice check and have not touched it since; re-measuring between building a session and reading it makes both of them meaningless."
+          },
+          {
+            "run": "pnpm nudge:marks --seed 23 --count 60",
+            "expect": "packages/etl/out/mark-nudge.html in about a second, and a line naming the seed, how many marks come round twice, and a short fingerprint of the displacements. Note the fingerprint. Open the file in any browser — it needs nothing running and reaches no network."
+          }
+        ],
+        "steps": [
+          {
+            "do": "Work this on a different day from the forced-choice session, or before it — not straight after.",
+            "expect": "Nothing on the screen tells you either way. This one is on you.",
+            "why": "The two sessions ask about the same rectangles from opposite directions, and each is fair on its own, but placing sixty of them by hand teaches you which way the correction tends to go. Carrying that into a forced choice means answering from the rule rather than from the ink — which is the one failure neither session can detect afterwards, because a person answering from a learned rule looks exactly like a person who can see very well.",
+            "id": "keep-them-apart"
+          },
+          {
+            "do": "Read the five short answers the page opens with, then start. Do not read the code that built it first.",
+            "expect": "A first trial: one mark, one red rectangle sitting obviously off it, and a button that will not do anything yet.",
+            "why": "The builder knows where we think each rectangle goes, and this page deliberately does not. Reading it first is the one way to spoil that, and the session would have to be thrown away and rebuilt under a seed you had not seen.",
+            "id": "start-cold-here"
+          },
+          {
+            "do": "Drag the rectangle onto the mark nearest to where it started, then press enter. Arrow keys nudge it if you want to be finer; hold shift for a bigger step.",
+            "expect": "The button wakes up as soon as you move it, and nothing at all happens when you place it except the next trial. No target, no snapping, no 'close'.",
+            "why": "The rectangle always starts in the wrong place, so leaving it alone is never an answer — that is why the button stays dead until you move. And the mark nearest where it started is the one being asked about: the starting position is a random direction away from where the app draws the box today, so it points at the right mark without pointing at the right place.",
+            "id": "place-them"
+          },
+          {
+            "do": "Place each one honestly and move on. Do not labour over any single rectangle, and do not try to be consistent with what you did last time you saw a mark.",
+            "expect": "Some marks come round a second time, starting somewhere else. You may or may not notice.",
+            "why": "The pair is the scale for everything else. Two independent goes at the same mark differ by however much your hand wanders, and that spread is what tells a real offset from noise — a residual of a fifth of a unit is a finding if you are repeatable to a fiftieth and nothing at all if you wander by half. Trying to reproduce your earlier answer replaces a measurement of your hand with a measurement of your memory, and then nothing below has a scale.",
+            "id": "let-the-repeats-be-repeats"
+          },
+          {
+            "do": "When the rectangle is the wrong size for its mark, place it as well as you can anyway and press S.",
+            "expect": "The tick lights up and clears itself on the next trial. It never costs the placement.",
+            "why": "The same separation the forced-choice session keeps: where a box sits and how big it is are two faults with two repairs, and this whole session measures the first. The tick is counted on its own line and the marks are named, so somebody can go and look at those boxes instead of arguing about whether they exist.",
+            "id": "flag-wrong-size"
+          },
+          {
+            "do": "Stop whenever you are tiring. Close the tab and come back to the same file later.",
+            "expect": "It resumes on the placement you left, with the ones you already made. Nothing reshuffles.",
+            "why": "A tired hand wanders, and a wandering hand does not read as fatigue in the output — it reads as a wide precision estimate, which quietly makes every real finding un-detectable. Better to lose the evening than to spend it widening your own error bars.",
+            "id": "stop-when-tiring"
+          },
+          {
+            "do": "At the end, press the button that saves the placements, and keep the file somewhere you can name on a command line.",
+            "expect": "mark-placements-23.json in your downloads. It holds where you put each rectangle and where each one started, plus the seed and the fingerprint — and nothing about where we thought they went.",
+            "why": "Same property as the forced-choice ruling, for the same reason: at the moment it was written, nothing on the machine that wrote it knew the answer, so it could not have been edited toward one.",
+            "id": "save-the-placements"
+          },
+          {
+            "do": "Read it: pnpm nudge:score ~/Downloads/mark-placements-23.json",
+            "expect": "A headline in the same currency the forced choice uses — how often you landed nearer our correction than the shipped box — then the residual on each axis with an interval, your own precision from the repeated marks, and how much your landings tracked their starting points. It exits 0 only when the placements went the right way.",
+            "why": "This is the first moment anyone knows what the correction was, you included. If it refuses outright, the displacements were re-measured between building the session and reading it: read it against the file it was built from, or build a fresh session and place them again.",
+            "id": "read-the-residual"
+          },
+          {
+            "do": "Bank the numbers with the record command below, whichever way it went.",
+            "expect": "The ledger gains the residual, the precision it was read against, and the date, and this check stops being pending.",
+            "why": "The residual is the only number in this project that says how far the mark boxes should move, as opposed to whether they should. Unbanked it has to be bought again at twenty-five minutes of somebody's attention, and a number nobody wrote down is a number nobody will trust the second time either.",
+            "id": "bank-the-residual"
+          }
+        ],
+        "reading": [
+          "'the residual is inside this hand's own precision' → our correction is as close as this session can resolve. Adopt it as proposed and say in the placement record that a reader placing by hand could not distinguish it from their own wobble — which is a result, and is not the same as the correction being exactly right.",
+          "'the residual is larger than this hand's precision' → the printed pair of numbers is a further move to apply on top of what the measurement proposes. Apply it to the recorded displacements, not to the code that computes them: the arithmetic is not what is wrong, the frame it is measured against is, and burying a hand-measured constant inside a rasteriser hides that distinction from whoever reads it next.",
+          "'the correction goes the WRONG way' → stop. Do not adopt anything, and do not reach for a sign flip, which would be fitting the correction to sixty placements by one person. This contradicts the forced-choice session if that one passed, and two instruments disagreeing about the same rectangles is a finding worth more than either of them — write it in the placement record and re-measure before shipping any of it.",
+          "'no direction either way' → the placements did not separate the two positions. Look at the precision line before concluding anything: if it is large, this session measured a tired hand rather than a set of boxes, and rerunning under a different seed on a different day is the cheap answer.",
+          "'the landings track their starting points' → a hand that stopped short of where the eye said. It does not tilt the residual, because the starts are spread evenly around the shipped box, but it widens every interval above and usually means the placements were made faster than they were judged. Above about a quarter, treat the whole session as suggestive and rerun.",
+          "A run of 'the box was the wrong size' is the same second finding the forced-choice session can produce, and it belongs in the same place: the boxes come from one printing and the ink from another, so a rectangle can be in the right place and still not close around its mark. The repair is a re-measurement, not a displacement, and nothing in this check addresses it.",
+          "One session is one hand. If the residual is going to move three hundred thousand rectangles, a second person under a different seed costs another twenty-five minutes — and two hands landing in the same place is a much stronger claim than one hand landing anywhere."
+        ],
+        "record": "make record CHECK=placement-residual-by-hand RESULT='seed 23 · 60 placements · nearer ours <pct> [<lo>–<hi>] · residual (<x>, <y>) units against a precision of <p> → <adopt as proposed|adopt with the residual applied|contradicts the forced choice|says nothing>'"
+      },
+      "tunes": [
+        "packages/etl/data/pages/word-boxes.pin.json — the residual is the number that changes what is recorded there, where the forced choice can only say whether to record anything at all.",
+        "packages/etl/scripts/probe-mark-ink.mjs — a residual larger than a hand's precision is a measured statement that the correction it computes is short, which is the only evidence that could justify changing what it measures against.",
+        "docs/design/mark-registration.md §⑦ and §⑩ ① — §⑦'s recommendation is provisional pending a magnitude, not just a preference.",
+        "packages/etl/scripts/lib/adjudication.mjs — a session whose precision swamps its residual tunes the starting radius and the number of repeated marks, not the conclusion about the boxes."
+      ],
+      "record": "docs/design/mark-registration.md"
     }
   ]
 }

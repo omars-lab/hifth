@@ -1,0 +1,77 @@
+{
+  "source": "cpfair/quran-tajweed@496f71cd",
+  "rules": [
+    {
+      "id": "ghunnah",
+      "family": "ghunnah"
+    },
+    {
+      "id": "ikhfa",
+      "family": "ghunnah"
+    },
+    {
+      "id": "ikhfa_shafawi",
+      "family": "ghunnah"
+    },
+    {
+      "id": "iqlab",
+      "family": "ghunnah"
+    },
+    {
+      "id": "idghaam_ghunnah",
+      "family": "idgham"
+    },
+    {
+      "id": "idghaam_mutajanisayn",
+      "family": "idgham"
+    },
+    {
+      "id": "idghaam_mutaqaribayn",
+      "family": "idgham"
+    },
+    {
+      "id": "idghaam_no_ghunnah",
+      "family": "idgham"
+    },
+    {
+      "id": "idghaam_shafawi",
+      "family": "idgham"
+    },
+    {
+      "id": "lam_shamsiyyah",
+      "family": "idgham"
+    },
+    {
+      "id": "madd_2",
+      "family": "madd"
+    },
+    {
+      "id": "madd_246",
+      "family": "madd"
+    },
+    {
+      "id": "madd_munfasil",
+      "family": "madd"
+    },
+    {
+      "id": "madd_muttasil",
+      "family": "madd"
+    },
+    {
+      "id": "madd_6",
+      "family": "madd-lazim"
+    },
+    {
+      "id": "qalqalah",
+      "family": "qalqalah"
+    },
+    {
+      "id": "silent",
+      "family": "silent"
+    },
+    {
+      "id": "hamzat_wasl",
+      "family": "wasl"
+    }
+  ]
+}

@@ -414,6 +414,21 @@ available for the rules about marks and not for the rules about letters, and any
 this has to say which it is doing. That is a design constraint mark-C inherits, and it was
 not visible before the walk.
 
+**What the wash discards, which the split does not say.** The table above asks what a rule
+*could* be drawn on. It does not ask what the screen draws today, and that turns out to be
+the larger number. `leadingRule` paints one family per ayah, and an ayah carries **3.90
+distinct families** on average, so **50,023 of the 60,057 annotations — 83.29% — render as
+nothing**. `madd` is the sharpest case: annotated on 92.48% of ayahs, it wins 2.74% of them,
+because its salience is lowest *precisely* because it is everywhere, which is the right call
+for one colour and the wrong one the moment there is room for more. So the pressure on the
+skin is not that a wash is coarse; it is that a wash is **singular**, and finer selection is
+what buys a second colour. [`mark-granularity.html`](mark-granularity.html) draws all three
+options over page 2 — `node scripts/build-mark-options.mjs` rebuilds it from committed bytes
+alone. The same page, published so it can be sent to somebody who does not have this repo:
+<https://claude.ai/code/artifact/5f230dff-e4e8-40c6-9c4e-888786eeef9b>. It is the row
+`mark-granularity` in [`docs/decisions.json`](../decisions.json), and it is **open** — the
+three options are A, B and C below, and nothing has chosen between them.
+
 **What is still not answered, and cannot be by arithmetic:** whether the box the dictionary
 names sits where a reader *looks* for that mark, and whether lighting it reads as a truer
 rendering of the rule than washing the whole word. The inspector now draws the boxes

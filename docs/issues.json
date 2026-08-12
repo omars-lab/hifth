@@ -693,6 +693,20 @@
       "severity": "risk",
       "owner": "user"
     },
+    {
+      "id": "check-placement-correction-by-eye",
+      "source": { "ledger": "placement-correction-by-eye" },
+      "severity": "risk",
+      "owner": "user",
+      "note": "The runnable half of nobody-has-looked-at-the-placement-verdicts: that row is the question, this row is the twenty minutes that answers it. Built 2026-08-08 — `pnpm adjudicate:marks` renders a hundred blind two-panel trials over forty pages, and `pnpm adjudicate:score` rebuilds the key from the seed afterwards, so nothing on disk knew the answers while they were being given. Deliberately a forced choice rather than a list of verdicts with agree/disagree beside each: a person shown a machine's verdict agrees with it, and what comes back is the machine's own opinion wearing a human's name. It is a risk rather than a question because mark-C cannot ship on an uninspected correction. Wired into `make session CHECK=placement-correction-by-eye` on 2026-08-12: opened from a session the trials post each answer straight into that sitting's transcript and bank the ruling file at the end, so the twenty minutes cannot end in a download nobody can find. Still says nothing about how it is going, because it still does not know."
+    },
+    {
+      "id": "check-placement-residual-by-hand",
+      "source": { "ledger": "placement-residual-by-hand" },
+      "severity": "risk",
+      "owner": "user",
+      "note": "The other half hour, and it asks a question the first one cannot. A forced choice returns a preference — our rectangle beat the one it was shown against — and a correction that points the right way and falls a third short wins every trial while still being wrong. Built 2026-08-12: `pnpm nudge:marks` renders one rectangle per trial, starting a fixed distance out in a direction that changes every time, and the reader puts it where it belongs; `pnpm nudge:score` subtracts what the machine proposed from where it was actually put, and what is left is a magnitude in units. It reports that against the reader's OWN precision, measured in the same sitting from marks shown twice, because a residual smaller than the hand that produced it is not a finding. Deliberately a second session rather than a drag handle on the first: adjusting a rectangle inside a two-panel trial and then scoring the landing against the two starting positions IS the answer key, and adjusting after answering teaches the direction of the correction, which points the same way on nearly every page. The two should not be worked back to back by the same person. Risk rather than question because mark-C's thresholds are a claim about magnitude and only this can check one."
+    },
 
     {
       "id": "plan-perf-verdict",
@@ -820,6 +834,82 @@
       "severity": "question",
       "owner": "agent",
       "closedBy": "apps/web/e2e/revision.spec.ts"
+    },
+    {
+      "id": "spacing-is-scored-as-shape",
+      "source": { "file": "docs/design/mark-labels.md", "item": "①" },
+      "status": "open",
+      "severity": "question",
+      "owner": "agent",
+      "note": "Comparing whole pictures asks two questions in one number — are these the same strokes, and did the print set them the same distance apart. Five marks in 326,515 are charged for the second when only the first was asked. Bounded and understood, so this is a question about whether a better comparison is worth building, not a defect waiting on anyone. The naive version must not be built: arrangement is the only thing separating fathatan from successive fathatan, 3,635 marks against the 5 it would save."
+    },
+    {
+      "id": "names-never-checked-against-the-text",
+      "source": { "file": "docs/design/mark-labels.md", "item": "②" },
+      "status": "open",
+      "severity": "question",
+      "owner": "agent",
+      "note": "Everything measured so far compares a name to a drawing. Nothing has compared a name to the text the mark belongs to, which is a different question with a different blind spot — it would catch a mark that is drawn exactly as its name says and is the wrong name for that word. Cheap, and independent of both the placement and the drawing work."
+    },
+    {
+      "id": "nobody-has-looked-at-the-placement-verdicts",
+      "source": { "file": "docs/design/mark-registration.md", "item": "①" },
+      "status": "open",
+      "severity": "question",
+      "owner": "user",
+      "blockedBy": ["placement-correction-by-eye"],
+      "note": "The placement measurement has been reproduced twice and its controls hold, but no human has looked at a single verdict. Until one does, the thresholds in that document's §⑦ stay unenforced and nothing is wired into CI. The equivalent question for the naming probe WAS worked by eye, and doing so is what caught a scorer artefact that had been read as forty-five mislabelled marks — which is the argument for spending the time here too. Narrowed 2026-08-08 without being closed: the blocker was 'a person working the evidence page', and that page was the wrong instrument — it ranks the machine's own verdicts worst-first and draws the expected outline in green beside the rectangle, so a reader is being shown the answer and asked whether they agree, which is the one form of looking that cannot produce evidence. What replaced it is a forced choice between two rectangles with nothing on screen saying which is ours and no key written down until the scorer rebuilds it from the seed; it carries its own controls (obviously-wrong rectangles to catch a session worked while distracted, identical pairs to catch a person who always picks something, and same-size displacements in other directions to measure whether an eye can resolve a shift this small at all — which is what the headline number has to be read against). The runbook is `placement-correction-by-eye` in the validation ledger; this row stays open until a ruling is banked. Scoped 2026-08-12, which is a narrowing of what this row can ever deliver rather than of the work: a forced choice settles a preference and not a distance, so a-preference-does-not-say-how-far now carries the magnitude half and neither row's answer should be read as the other's."
+    },
+    {
+      "id": "a-preference-does-not-say-how-far",
+      "source": { "file": "docs/design/mark-registration.md", "item": "⑦" },
+      "status": "open",
+      "severity": "question",
+      "owner": "user",
+      "blockedBy": ["placement-residual-by-hand"],
+      "note": "Opened 2026-08-12 by building the instrument that answers it, and it is the gap the row above cannot close by any number of trials. A forced choice yields at most one bit per trial — is the proposed move preferred to the alternative it was shown against — so it can confirm a direction and is structurally incapable of confirming a distance. Every threshold in that document's §⑦ is a claim about distance. What answers it is a placing session: one rectangle, started deliberately out of position, put where a reader says it belongs, with the proposed correction subtracted from the landing afterwards. Three outcomes, and all three are useful: the residual is smaller than the reader's own measured precision (adopt as proposed, and say the precision it was adopted at); it is larger and consistent (adopt with the residual applied); or it points the OTHER way from the forced choice's verdict, which is the most valuable result of the three and the reason the two sessions are scored separately and never summed. The runbook is `placement-residual-by-hand`; this row stays open until a residual is banked."
+    },
+    {
+      "id": "the-displacement-correction-could-go-stale",
+      "source": { "file": "docs/design/mark-registration.md", "item": "②" },
+      "status": "open",
+      "severity": "risk",
+      "owner": "agent",
+      "blockedBy": ["the placement decision"],
+      "note": "Only bites if the per-page correction is adopted. It would be data derived from two printings with nothing re-deriving or re-checking it — the same shape of problem as the fit residual that looked like validation and was blind to a one-unit displacement. The answer is the one every other derived number here already gets: re-derive offline from committed bytes and fail on drift."
+    },
+    {
+      "id": "pages-are-never-counted-against-the-text",
+      "source": { "file": "docs/design/mark-registration.md", "item": "③" },
+      "status": "open",
+      "severity": "question",
+      "owner": "agent",
+      "note": "Does each page carry the number of marks of each name the text says it should, in that order? Counting is blind to geometry and geometry is blind to counting: no score in either document can see a missing or duplicated mark, because a mark that was never drawn has no box to be wrong about. Cheap next to everything else here."
+    },
+    {
+      "id": "which-printing-made-the-shipped-pages",
+      "source": { "file": "docs/design/mark-registration.md", "item": "④" },
+      "status": "open",
+      "severity": "question",
+      "owner": "agent",
+      "note": "If the shipped pages came from the publisher's per-page fonts, the smallest addressable thing in that source is a whole word, and one of the cross-checks becomes impossible in principle rather than merely awkward. The two candidates differ in a single readable number, so this is settled by looking rather than by arguing."
+    },
+    {
+      "id": "position-might-separate-the-look-alike-pairs",
+      "source": { "file": "docs/design/mark-registration.md", "item": "⑤" },
+      "status": "open",
+      "severity": "risk",
+      "owner": "agent",
+      "blockedBy": ["the placement decision"],
+      "note": "Shape does not separate fatha from kasra (0.968) or fathatan from kasratan (0.914), and no better shape comparison will — what separates them is which side of the letter they sit on, which a centred comparison discards before it starts. This is a risk rather than a question because it lands on the tajweed work: a rule that names a kasra cannot be verified by shape alone. Answerable only once placement is corrected, because it needs to know where the letter is. Carried here only — mark-labels.md §⑦ Option D points at this row rather than repeating it."
+    },
+    {
+      "id": "marks-are-drawn-with-the-strokes-of-their-own-name",
+      "source": { "file": "docs/design/mark-registration.md", "item": "⑥" },
+      "status": "answered",
+      "severity": "question",
+      "owner": "agent",
+      "note": "Answered 2026-08-08 over all 326,515 marks, with no page, no fitted transform and no rectangle in the arithmetic: no mark in the corpus is drawn with the strokes of a different name. The category is empty. Five drawings still match another name overall and all five are shown to be the right strokes at an unusual spacing — that residue is carried as spacing-is-scored-as-shape. A further 21.30% match a name this print draws as the same shape, which is a limit of the method and never counted as a disagreement — carried as position-might-separate-the-look-alike-pairs. Named in the placement document so its silence on the question is not read as a claim."
     }
   ]
 }

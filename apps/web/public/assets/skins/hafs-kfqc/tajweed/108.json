@@ -1,5 +1,5 @@
 {
-"1": {"ghunnah":[41,44],"madd":[44,46,57,58],"wasl":[61,62]},
-"2": {"wasl":[20,21]},
-"3": {"ghunnah":[2,5],"qalqalah":[26,28],"wasl":[21,22]}
+"1": {"ghunnah":[41,44],"madd_2":[57,58],"madd_munfasil":[44,46],"hamzat_wasl":[61,62]},
+"2": {"hamzat_wasl":[20,21]},
+"3": {"ghunnah":[2,5],"qalqalah":[26,28],"hamzat_wasl":[21,22]}
 }

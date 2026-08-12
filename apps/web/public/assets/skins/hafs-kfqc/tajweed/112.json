@@ -1,6 +1,6 @@
 {
-"1": {"qalqalah":[61,62],"wasl":[49,50]},
-"2": {"idgham":[9,10],"qalqalah":[15,16],"wasl":[8,9]},
+"1": {"qalqalah":[61,62],"hamzat_wasl":[49,50]},
+"2": {"lam_shamsiyyah":[9,10],"qalqalah":[15,16],"hamzat_wasl":[8,9]},
 "3": {"qalqalah":[9,11,24,26]},
-"4": {"idgham":[11,16],"madd":[18,19],"qalqalah":[32,33]}
+"4": {"idghaam_no_ghunnah":[11,16],"madd_2":[18,19],"qalqalah":[32,33]}
 }

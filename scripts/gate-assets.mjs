@@ -77,12 +77,18 @@ const CONCORDANCE = join(ROOT, "packages", "core", "src", "concordance.ts");
  * with them. Restoring the 2× margin after every intended growth would turn
  * this gate into a ratchet that can only ever be satisfied, which is the one
  * failure mode a ceiling has.
+ *
+ * `skins` moved for the same kind of reason and by the same rule: the tajweed
+ * shards stopped naming the seven colours the app paints and started naming the
+ * eighteen rules the source actually distinguishes, +37.4 KB gz across 114
+ * shards plus the one-line vocabulary that reads them. The ceiling stays at
+ * 384 KB.
  */
 const CEILINGS = {
   //                    today      what a breach would mean
   adj: 128 * 1024, //     79.5 KB   the edge shards stopped being edge lists
   roots: 768 * 1024, //  532.3 KB   the root index started carrying text
-  skins: 384 * 1024, //  207.7 KB   the tajweed shards started carrying geometry
+  skins: 384 * 1024, //  245.1 KB   the tajweed shards started carrying geometry
   words: 1792 * 1024, // 885.6 KB   the word shards started carrying text
 };
 
