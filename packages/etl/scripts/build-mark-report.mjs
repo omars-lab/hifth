@@ -623,10 +623,19 @@ svg.stage rect.mine { stroke-dasharray: 5 3; }
 .pad-row span { flex: 1; font-size: .8rem; color: var(--dim); }
 .pad-row button { min-width: 48px; min-height: 44px; font-size: 1rem; padding: .3rem; }
 .pad .step { font-size: .78rem; color: var(--dim); margin: .3rem 0 0;
-  display: flex; flex-wrap: wrap; gap: .35rem; align-items: center; }
+  display: flex; flex-wrap: wrap; gap: .35rem .5rem; align-items: center; }
+/* The size of a press gets its own line above the slider, because it is the number
+   the reader is setting and reading it out of the middle of a row of controls is
+   harder than it needs to be. */
+.pad .step label { flex: 1 0 100%; }
+/* A range input is about twenty pixels tall by default and its thumb is the whole
+   target. Forty-four on the box gives the thumb the height the rest of this pad
+   already has, and the accent is chrome on the field, not ink on the paper. */
+.pad .step input[type="range"] { flex: 1 1 9rem; min-width: 8rem; height: 44px;
+  accent-color: var(--ours); }
 /* Put it back where it was throws away every correction on this card, so it gets
    the full target and is pushed to the far end of the row rather than sitting
-   shoulder to shoulder with the button that only changes the step size. */
+   shoulder to shoulder with the control that only changes the step size. */
 .pad .step button { font-size: .78rem; padding: .3rem .7rem; min-height: 44px; }
 .pad .step #reset { margin-left: auto; }
 .hint { font-size: .82rem; color: var(--dim); margin: .45rem 0 .8rem; min-height: 2.4em; }
@@ -737,9 +746,12 @@ than one thing can be.</p>
       <button id="hM" aria-label="shorter">↓↑</button>
       <button id="hP" aria-label="taller">↑↓</button>
     </div>
-    <p class="step">Each press is <b id="stepv"></b>.
-      <button id="stepx">Finer steps</button>
-      <button id="reset">Put it back where it was</button></p>
+    <div class="step">
+      <label for="stepr">Each press is <b id="stepv"></b>.</label>
+      <input id="stepr" type="range" min="0.01" max="0.5" step="0.01" value="0.5"
+        aria-label="how far one press moves the rectangle, in units">
+      <button id="reset">Put it back where it was</button>
+    </div>
   </div>
   <p class="hint" id="hint"></p>
   <div class="acts">
@@ -807,6 +819,11 @@ function keptAt() { try { return Number(localStorage.getItem(KEY + "-at") || 0);
 // also overruling a reader who has just asked to see them again.
 function keepRead(v) { try { localStorage.setItem(KEY + "-read", v); } catch (e) { /* no store here */ } }
 function keptRead() { try { return localStorage.getItem(KEY + "-read"); } catch (e) { return null; } }
+// How big a press is survives a reload, because it is the size of every answer the
+// reader is about to bank and a silent return to the default would change that size
+// without changing anything they can see.
+function keepStep(v) { try { localStorage.setItem(KEY + "-step", String(v)); } catch (e) { /* no store here */ } }
+function keptStep() { try { return Number(localStorage.getItem(KEY + "-step")); } catch (e) { return NaN; } }
 function keepGone(v) { try { localStorage.setItem(KEY + "-gone", JSON.stringify(v)); } catch (e) { /* no store here */ } }
 function keptGone() { try { return JSON.parse(localStorage.getItem(KEY + "-gone") || "[]"); } catch (e) { return []; } }
 
@@ -1095,14 +1112,31 @@ function ask(what, then) {
  * the framing showing the whole word, where the rectangle is about a dozen pixels
  * across and there is no corner a finger could find.
  *
- * The coarse step is a seventh of a mark's height and the fine step a thirty-sixth,
- * against a per-page scatter measured at about 0.44 across and 0.34 down — so the
- * coarse step is the size of the error being corrected and the fine step is well
- * inside it. Neither is arbitrary and neither should be changed without re-reading
- * those numbers.
+ * How big a press is, was two sizes and is now a range, and the ends are where the
+ * two sizes were. Half a unit is a seventh of a mark's height, against a per-page
+ * scatter measured at about 0.44 across and 0.34 down — so the top of the range is
+ * the size of the error being corrected, and a reader lining a box up starts by
+ * covering that distance in one or two presses. A hundredth is a three-hundred-and-
+ * sixtieth of the same mark: below the width of the stroke drawing the rectangle at
+ * the close framing, which is the point at which pressing again stops changing
+ * anything the reader can see. Neither end is arbitrary and neither should be moved
+ * without re-reading those numbers.
+ *
+ * The two sizes came with a control that swapped between them, and it was the wrong
+ * shape for what readers were doing with it: the useful press is whatever is left
+ * after the first coarse move, it is different on a mark that is a hair out from one
+ * that is half a unit out, and 0.1 was simply the nearest thing on offer. A range
+ * costs the same one gesture as the swap did and does not make the reader round
+ * their intention to one of two numbers. The step lands on hundredths, so every
+ * position is a number that reads cleanly in the transcript.
  */
-const STEPS = [0.5, 0.1];
-let fine = false;
+const STEP_MIN = 0.01;
+const STEP_MAX = 0.5;
+// Anything outside the range, and anything that is not a number at all, comes back
+// as the coarse end — which is where the swap opened, so a reader who never touches
+// the slider gets exactly the sitting they got before.
+function okStep(v) { return v >= STEP_MIN && v <= STEP_MAX ? Math.round(v * 100) / 100 : STEP_MAX; }
+let step = okStep(keptStep());
 
 // The smallest rectangle a press is allowed to leave behind. A box shrunk to
 // nothing is not an answer about a mark, and it cannot be grabbed to undo.
@@ -1165,7 +1199,7 @@ function flush() {
 function nudge(dx, dy, dw, dh) {
   const c = DECK[at];
   if (pendC && pendC !== c) flush();
-  const s = fine ? STEPS[1] : STEPS[0];
+  const s = step;
   const h = c.held || [0, 0];
   const z = c.sized || [0, 0];
   // Clamped against the floor, and the burst is credited only what the clamp let
@@ -1523,8 +1557,8 @@ function render() {
   $("pad").hidden = !padOpen;
   press($("nudge"), padOpen);
   $("nudge").setAttribute("aria-expanded", String(padOpen));
-  $("stepv").textContent = (fine ? STEPS[1] : STEPS[0]) + " units";
-  $("stepx").textContent = fine ? "Coarser steps" : "Finer steps";
+  $("stepv").textContent = step + " units";
+  $("stepr").value = String(step);
   $("print").setAttribute("aria-expanded", String(oddOpen));
   $("odd").hidden = !oddOpen;
   $("prev").disabled = at === 0;
@@ -1538,9 +1572,22 @@ for (const b of [["mL", -1, 0, 0, 0], ["mR", 1, 0, 0, 0], ["mU", 0, -1, 0, 0], [
                  ["wM", 0, 0, -1, 0], ["wP", 0, 0, 1, 0], ["hM", 0, 0, 0, -1], ["hP", 0, 0, 0, 1]]) {
   $(b[0]).onclick = function () { nudge(b[1], b[2], b[3], b[4]); };
 }
-$("stepx").onclick = function () {
-  fine = !fine;
-  render();
+/**
+ * The size a press is, as the reader drags it.
+ *
+ * On every tick, not only when the thumb is let go: the number beside the slider is
+ * the only thing saying what the reader is choosing, and a slider whose readout
+ * lands after the gesture is one you have to aim twice.
+ *
+ * It writes the readout rather than calling render, for two reasons. Redrawing the
+ * card mid-drag is work nobody asked for, and render is also the thing that writes
+ * the slider's own position — which, on a browser that fires input during the drag,
+ * would put the value back under the thumb that is still moving.
+ */
+$("stepr").oninput = function () {
+  step = okStep(Number(this.value));
+  keepStep(step);
+  $("stepv").textContent = step + " units";
 };
 /**
  * Back to the rectangle that shipped, and the answers go with it.
