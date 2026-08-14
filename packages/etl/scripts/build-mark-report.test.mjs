@@ -646,3 +646,71 @@ describe.skipIf(!haveCorpus)("getting the explanation off the fold", () => {
     expect(html).not.toMatch(/<details/);
   });
 });
+
+/**
+ * How big a press is, chosen rather than picked off a list of two.
+ *
+ * The pad offered 0.5 or 0.1 and a button to swap between them. Half a unit is the
+ * size of the error being corrected and a tenth is well inside it, so as a pair they
+ * were defensible — but the useful press is whatever is left after the first coarse
+ * move, that remainder is different on every mark, and a reader with two numbers on
+ * offer rounds their intention to the nearer one. Twenty-six marks took two hundred
+ * and five nudges in the sitting already banked. A range costs the same one gesture
+ * and does not make them round.
+ *
+ * The bounds live in two places on purpose — the slider's own attributes and the
+ * clamp that guards what comes back out of storage — and the first test here is that
+ * they are still the same two numbers. Drift between them is silent: a slider that
+ * offers a value the clamp throws away sends every press back to the coarse end,
+ * which changes the size of every answer banked afterwards and shows up nowhere.
+ */
+describe.skipIf(!haveCorpus)("choosing how far one press moves the rectangle", () => {
+  const bounds = (html) => ({
+    min: Number(/const STEP_MIN = ([\d.]+);/.exec(html)[1]),
+    max: Number(/const STEP_MAX = ([\d.]+);/.exec(html)[1]),
+  });
+
+  it("offers a range, and the slider agrees with the clamp about its ends", () => {
+    const { html } = build("--set", "fallback", "--count", "5");
+    const { min, max } = bounds(html);
+    expect(min).toBe(0.01);
+    expect(max).toBe(0.5);
+    const input = /<input id="stepr"[\s\S]*?>/.exec(html);
+    expect(input).toBeTruthy();
+    expect(input[0]).toContain(`min="${min}"`);
+    expect(input[0]).toContain(`max="${max}"`);
+    // Hundredths, so every position is a number that reads cleanly in the transcript.
+    expect(input[0]).toContain('step="0.01"');
+    // And the two-position swap is gone rather than left beside its replacement.
+    expect(html).not.toContain("Finer steps");
+    expect(html).not.toContain("stepx");
+  });
+
+  it("moves the rectangle by whatever the reader chose", () => {
+    const { html } = build("--set", "fallback", "--count", "5");
+    const nudge = /\nfunction nudge\(([\s\S]*?)\n\}\n/.exec(html);
+    expect(nudge).toBeTruthy();
+    expect(nudge[1]).toContain("const s = step;");
+  });
+
+  it("remembers the size across a reload, and refuses a stored value that is not one", () => {
+    const { html } = build("--set", "fallback", "--count", "5");
+    expect(html).toContain('KEY + "-step"');
+    const { min, max } = bounds(html);
+    const src = /\nfunction okStep\(v\) \{[^\n]*\n/.exec(html);
+    expect(src).toBeTruthy();
+    const okStep = new Function("STEP_MIN", "STEP_MAX", `${src[0]}\nreturn okStep;`)(min, max);
+    // A press of nothing is not a smaller press, it is a control that has stopped
+    // working — and a reader would have no way to tell which they were looking at.
+    expect(okStep(NaN)).toBe(max);
+    expect(okStep(0)).toBe(max);
+    expect(okStep(-0.2)).toBe(max);
+    expect(okStep(max + 0.01)).toBe(max);
+    expect(okStep(min)).toBe(min);
+    expect(okStep(0.07)).toBe(0.07);
+    // Hundredths out, whatever the browser hands in: the number goes into the
+    // transcript as the size of the answer, and 0.30000000000000004 is not a size
+    // anybody chose.
+    expect(okStep(0.1 + 0.2)).toBe(0.3);
+  });
+});
