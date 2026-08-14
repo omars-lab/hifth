@@ -1,267 +1,286 @@
-# The correction is confirmed in direction and unresolved in size
+# The instrument that asks the question has to be trustworthy first
 
 ## Context
 
-Sixty marks were placed by hand on 2026-08-12 to answer §⑦ of `docs/design/mark-registration.md`
-— *how far is our correction still out*. The result was banked as:
+Sixteen sittings are about to be sat. Between them they cover all **1,851** marks the machine
+could not place from ink — every one seen, not sampled — at roughly an hour each. That is
+sixteen hours of the scarcest thing this project has.
 
-> residual (-0.073, -0.110) units against a precision of 0.03 → **adopt with the residual
-> applied; only the down component is distinguishable from nought**
+Before spending it, the page that does the asking was audited against the frontend-design
+brief, and three of its findings do not make the sitting *slower*. They make its answers
+**mean something other than what they say**:
 
-Re-interrogating the same transcript shows that second clause does not hold, and that the
-session had two structural blind spots nothing in its output mentions. None of this changes
-the headline — the correction is confirmed, decisively — but it changes what may be done with
-it, and the registers currently overstate the case.
+1. **In dark mode the rectangles are drawn in near-invisible colours.** The crop's paper is
+   deliberately never re-themed — a mus'haf page stays on white — but the two rectangle stroke
+   colours *are* re-themed, and then drawn on that white. Measured: our box 5.05:1 → **2.49:1**,
+   the reader's box 4.89:1 → **1.70:1**, at a constant 1.64px stroke. A reader who cannot see the
+   box affirms it. This finding runs in exactly the direction that looks like success.
+2. **A destructive control lands where the reader's thumb already is.** The answer list sits
+   directly above Back/Next, each answer adds a ~28px row, and the "take it back" button in that
+   row is right-aligned — into the corner Next occupied a moment earlier. Two taps of Next can
+   retract the answer just given.
+3. **Every pointer frame re-parses the page.** The drag handler rebuilds the stage from
+   `c.svg` — 2.0 / 9.2 / **23.2 KB** of path data (min/median/max) — on every `pointermove`. A
+   correction that stutters is a correction the reader gives up on and affirms instead.
 
-**Outcome:** the record says what the sitting actually established; the scorer stops making the
-assumption that produced the overstatement; the answers a person gave come home from a downloads
-folder into the repo; and the correction gets measured on all 604 pages instead of 40, which is
-the input every remaining question needs.
+Below those, four findings cost time and accuracy rather than truth: the affirm button looks
+the same pressed as unpressed; it sits at y≈842 on a 393px phone, below the fold, behind a
+~275px lede that never goes away; 91 of 115 cards carry the mark's containing word and throw it
+away, while the sentence naming the mark omits the mark's own name and is the dimmest text on
+the card; and four **destructive or load-bearing** controls are under 44px.
 
-### What the sitting established, corrected
+**Decided with the reader, 2026-08-14:** the buttons get pinned to the bottom of the screen and
+the picture keeps its own shape (nothing ever shrinks); the fixes land **before** part 1 is sat,
+which costs nothing because the sixteen parts were re-dealt and **0 of 1,851** have been
+answered on the new deal; scope is the three data-corrupting findings plus the four
+time-and-accuracy ones.
 
-| | |
+**Outcome:** all 1,851 marks are answered on one instrument, and the transcript means what it
+says.
+
+### What the audit explicitly warns against, and why
+
+- **Do not put the fault buttons behind a disclosure.** Adding a tap to reporting a fault while
+  affirming stays free biases the exact ratio the sitting exists to measure. Change weight, not
+  cost.
+- **Do not highlight the ligature's own ink in the crop.** Where the ink is, is the unknown
+  being measured. Also ruled out and not to be revisited here: centring the crop on the mark's
+  own ink; SVG resize handles on the rectangle.
+
+---
+
+## Also in scope: the scorer is reporting the wrong number
+
+`score-mark-report.mjs` (~377-387) medians the `by` field across every placement **event**. Two
+things are wrong with that, and they were verified against the banked transcript, not argued:
+
+**It medians increments, and increments cancel.** `by` is always an increment — both the nudge
+pad (`flush`) and the drag (`pointerup`) send the burst, and `to` is the running total. Of 179
+consecutive pairs on the same mark, **133** chain exactly; the other 46 are marks where the
+reader pressed *put it back where it was*, and a banked transcript has retractions already
+applied, so the superseded placements are gone and the chain legitimately restarts. Nothing is
+wrong with the field. What is wrong is medianing it: opposite-signed ±0.1 increments cancel, and
+one mark with 44 events outvotes 25 marks with one each. The scorer prints **0.000 / 0.000**.
+
+**And `to` is not the reader's hand.** `to = at + total − box`, so it is measured from the
+**shipped** box and already contains the correction the pipeline applied. Three different
+numbers, all real, currently collapsed into one wrong one:
+
+| question | across | down |
+|---|---|---|
+| what the scorer prints today | 0.000 | 0.000 |
+| where the reader put it, against what ships | −3.569 | −3.134 |
+| **how far the reader's own hand moved it** | **−2.468** | **−2.010** |
+
+The middle row is what corroborates the ink measurement: the corpus sets its text lower and
+further across than the ornament fit predicts, `dty` negative on **599 of 600** pages. Two
+instruments, same direction, same rough size. That is worth printing correctly.
+
+---
+
+## The work
+
+Fixes are ordered so each lands in one place rather than in a string another fix is about to
+rewrite. **Do them in this order.**
+
+### ① Parse the paths once per card — `build-mark-report.mjs`, `paint()` ~1084-1122
+
+Split `paint()` into `mount(c)` and `paint()`.
+
+- Module-level `let drawnFor = null, hitEl = null, boxEl = null, mineEl = null;`
+- `mount(c)` writes `stage.innerHTML` **once per card**: `c.svg` plus the `.hit`, `.grab` and a
+  hidden reader's rect; caches the three nodes; sets `drawnFor = c.id`.
+- `paint()` calls `mount(c)` only when `drawnFor !== c.id`, then `setAttribute`s x/y/width/height
+  on the cached nodes and toggles the reader's rect's `visibility`. The `viewBox` write stays.
+- The `.hit` slack `t = vb[2]/30` stays per-frame — it is unit-based and framing-dependent.
+- **Drop `sw = vb[2] / 220`** and use `vector-effect="non-scaling-stroke"` with `stroke-width` in
+  CSS pixels. That constant is 1.64px *only because* the stage is `width: 100%`; leaving it in
+  makes stroke width a function of each card's aspect the moment anything sizes the stage
+  differently. One fewer per-frame attribute write, too.
+
+This is what `crop()`'s two-viewBox design was always for — the framing toggle becomes one
+attribute write instead of a 23 KB reparse — and it has never actually delivered it.
+
+**Correction to the audit:** pointer capture is on the **stage** (`stage.setPointerCapture`,
+~1158), gated by `onRect(p)` (~1141) — not on a rect node. `docs/map.json:752` describes the
+gate. So rebuilding mid-gesture never risked capture; do this fix for the parse cost alone.
+
+### ② Keep the rectangles legible on white paper, in both themes — CSS ~514-525
+
+The rule to establish and then never break: **nothing drawn on the paper is themed.**
+
+- Add to bare `:root` **only**: `--ours-line`, `--ours-wash`, `--yours-line`, `--yours-wash`
+  (suggested `#c2410c` / `#c2410c1f` and `#15803d` / `#15803d24`).
+- Leave `--ours` / `--yours` / `--ours-fill` / `--yours-fill` exactly as they are and keep them
+  re-themed — they are **chrome** (affirm button, pressed state, focus ring, the answer list, the
+  bank panel) and sit on `--field`, so they must stay themed.
+- `mount()` draws with the four new tokens. Add one line of comment saying they join `--paper`
+  and `--ink` in the never-re-themed set, and *why*.
+- Carry the distinction independently of hue at the same time:
+  `stroke-dasharray="0.6 0.4"` on the reader's rect. Two rectangles that differ in dash as well
+  as colour survive deuteranopia, and survive anyone re-theming the palette later.
+
+Light theme comes out byte-identical. Dark theme returns to 5.05:1 and 4.89:1.
+
+### ③ Pin the buttons to the bottom — markup ~679-697, CSS
+
+Two independent halves; **③b must land whichever layout is chosen.**
+
+**③a — the dock.** Move the affirm row and the Back/Next row into one `<div class="dock">` with
+`position: sticky; bottom: 0; background: var(--field); border-top: 1px solid var(--edge);
+padding: .5rem 0 calc(.5rem + env(safe-area-inset-bottom));` and bump the main column's bottom
+padding. **Sticky, not fixed** — it keeps document flow and does not fight the iOS URL bar.
+Requires `viewport-fit=cover` on the viewport meta (~511) or `env()` resolves to zero; that is
+also the whole of the safe-area finding.
+
+The picture keeps its natural per-card shape (295–410px judging, 266–529px identifying, measured
+across all 1,851 marks). Nothing shrinks, `ptIn()` is untouched, and on the tallest cards the
+reader scrolls the picture behind a dock that never moves. **Explicitly not doing:** normalising
+the two viewBoxes to a constant aspect inside `crop()` — it either shrinks the mark or makes
+every card as tall as the tallest, and the ring clip would have to be re-ordered after the
+normalisation or the new margin comes back empty of the ink that belongs in it.
+
+**③b — get the destructive control out of the thumb corner.** In the answer list row, move "take
+it back" to the **start** of the row (button, then the kind, then the detail) so nothing tappable
+sits bottom-right, and give the list at least 44px of bottom margin. **This must ship before ⑦
+enlarges that button to 44px**, or the mis-tap target doubles.
+
+### ④ Make the affirm button look pressed — CSS ~596
+
+`button.affirm[aria-pressed="true"]` gets a solid fill: background `var(--ours)`, text
+`var(--field)`, matching border. Inverts legibly against both themes and reads as *on* without a
+second glance. Add a check glyph via `::before` on the pressed state only. **Do not change the
+label text** — that would move the fold ⑤ just fixed.
+
+*(The audit's specificity claim was off by one rule: `button.affirm` and the generic pressed rule
+are both (0,1,1) and settled by source order; the actual out-specifier is
+`button.affirm[aria-pressed="true"]` at (0,2,1). Conclusion unchanged.)*
+
+### ⑤ Get the lede off the fold without touching the fault buttons — markup ~640-646
+
+Split the lede into the full text and a one-line brief, with a quiet toggle between them. The
+brief shows once the reader has demonstrably read it: `seen > 0`, persisted through a
+`keepRead`/`keptRead` pair written **exactly** like the existing `keepSeen`/`keptSeen`
+(~733-736) — try/catch on every call, because a `file:` origin throws.
+
+Roughly 230px comes off the fold. **No answer costs a tap more than it does today**, so the
+affirm/fault ratio the sitting measures is untouched. That constraint is the whole design.
+
+### ⑥ Say which mark, properly — `identify()` ~1240-1264
+
+- The card already carries the containing word and throws it away for the 91 cards that have
+  both it and a single letter. Keep the big letters as they are, and append the word after them
+  at ~1rem, dim, `lang="ar" dir="rtl"`.
+- Put the mark's **name** into all three branches. It reaches only the `of === 1` branch today.
+- The sentence naming the mark is the question, not a footnote: `--dim` → `--text`,
+  .82rem → .9rem.
+
+### ⑦ 44px on the four — CSS
+
+All four are omissions from a convention this file already keeps elsewhere (the note pad and the
+chips are already 44/48):
+
+| control | today | why it matters |
+|---|---|---|
+| take it back | ~24px | destructive — **land ③b first** |
+| the two view toggles | ~31px | pressed constantly, both framings |
+| hand over what I have said | ~29px | the reader's safety net |
+| put it back where it was | 34px | destructive; also give it `margin-left: auto` so it is not shoulder-to-shoulder with "Finer steps" |
+
+Land **after** ⑤ and ③, since each of those moves the fold.
+
+### ⑧ The scorer — `score-mark-report.mjs` ~377-387
+
+Do 1-4 **before** 5. Steps 1-4 work on the two transcripts already on disk, which cannot be
+re-recorded; once the headline reads `to`, the rename stops being load-bearing.
+
+1. Collapse to **one row per mark** — walk in order, keep the last placement carrying a `to`.
+2. Print the reader's **hand**: `to` minus the displacement already shipped
+   (`drawnAt(r) − r.box`, both already available). Median/p90/worst of the magnitude, plus signed
+   per-axis medians. **−2.468 / −2.010** on the banked sitting.
+3. Print, under a **separately worded** sentence, where they landed **against what ships** —
+   median final `to`, **−3.569 / −3.134** — and say in the prose that this one includes the
+   correction the pipeline already applied, so no reader ever differences the two.
+4. Say *n marks*, and say how many events those marks took. 26 marks / 205 events is itself a
+   finding about the nudge pad.
+5. ~~Rename the drag's field.~~ **Dropped.** Both paths genuinely send an increment and `to` is
+   the running total, so one name is right, and a rename would only make the two transcripts
+   already on disk unreadable. (The drag path does not need `flush()`'s save-and-restore around
+   `dropVague` either: it captures the total at ~1190, before, and reassigns at ~1199, after.)
+
+---
+
+## The hazard, and the guard for it
+
+**The whole page — CSS, markup and JS — lives inside a template literal.** Backticks are
+forbidden anywhere in the emitted region *including comments*, and `${` must not appear except
+as a deliberate interpolation. This has broken the file three times.
+
+Add two assertions to `build-mark-report.test.mjs` that say so out loud: the emitted HTML
+contains no backtick and no `${`. Two lines, and they document the trap.
+
+## Tests
+
+The suite today parses the head and the cards out of the emitted HTML and string-matches the
+emitted script. Both styles extend cleanly; there is no visual coverage and none is being
+invented here.
+
+| fix | what a test would actually assert |
 |---|---|
-| the correction points the right way | **yes, decisively** — 59/60, 98.3% [91.1–99.7] |
-| the residual is a real distance | **not established** — see below |
-| the correction is the right *size* | **unmeasurable from this session** |
-| it generalises to unmeasured pages | **no evidence either way** |
+| ② **highest value** | the dark block re-themes **none** of the paper, the ink, or the four new rectangle tokens; and both rectangle line colours clear 3.0:1 against the paper. Twelve lines, no browser, and it is precisely the invariant that broke. |
+| ① | the paint function contains no `innerHTML`, and `c.svg` appears exactly once in the emitted script, inside `mount`. Coarse, in the same spirit as the existing replay test, and it catches the regression that matters. |
+| ⑥ | data, not layout: a single-letter card always carries a longer containing word — this is what makes the fix possible and what would silently stop being true. Plus that the mark's name reaches all three branches. |
+| ⑤ | the brief lede exists and the collapse is keyed off the stored flag; a regression deletes the second copy. |
+| ⑧ | in `score-mark-report.test.mjs`, which already builds synthetic transcripts and asserts on stdout: one mark nudged +0.5, −0.4, +0.4 (final `to` 0.5) and a second moved once by 0.5 — assert the printed median is **0.5, not 0.4**, and that the line says **2 marks**, not 4 events. That fixture would have caught this. |
+| ③④⑦ | not testable here beyond CSS-text presence. Fold position, per-frame cost and thumb geometry need a browser, and there is no in-repo harness for one. |
 
-**One.** The scorer treats 60 placements as 60 independent facts. They are 40 pages' worth of
-fit, and two marks on one page share that page's error — which the data confirms (page
-explains most of the across-axis spread, F ≈ 3.6 on 39,20 df). Clustering by page:
+## Registers
 
-```
-down    mean -0.110 · as scored ±0.054 [-0.215, -0.005]
-                    · clustered by page ±0.061 [-0.230, +0.009]   crosses zero
-```
+- **`docs/map.json:752`** — the `build-mark-report.mjs` note is the canonical home and already
+  records *why* each control sits where it does, including two prior interaction regressions.
+  Fixes ①②③ belong there. Hand-edited.
+- **`docs/map.json`** — `serve-sittings.mjs` has **no row anywhere in `docs/`**. It needs one;
+  it is the thing that makes an answer survive the browser losing it.
+- **`docs/validation/ledger.json` → `placement-what-kind-of-wrong`** — its 13 runbook steps
+  **are** the reader's on-screen instructions. ⑤ and ⑥ change what the reader sees; the steps
+  change with them. Then `pnpm guide`.
+- **`docs/issues.json`** — only for the findings that **distorted a measurement**, which is this
+  repo's convention for a review tool (precedent: the "wrong instrument" paragraph inside
+  `nobody-has-looked-at-the-placement-verdicts`). That is finding ② and the scorer ⑧ — not the
+  ergonomics. Then `pnpm issues:doc && pnpm gate:issues`.
+- **A design doc is not warranted yet.** `docs/design/encoding-inspector.md` is the template if
+  it ever is.
 
-It was marginal to begin with — the upper bound was −0.005 — so this is *not established at
-95%*, not *refuted*. Most of the interval still sits below zero. The 59/60 headline is
-untouched; nothing that lopsided is reachable by a clustering adjustment.
+### Owed from the sitting already completed, and still unrecorded
 
-The lesson already existed in this repo and did not travel: `probe-mark-ink.mjs:369-383` says
-in as many words that two marks on one page are not independent and that a plain interval on
-a rate is therefore narrower than the truth. The placing scorer was written without it.
-
-**Two.** `mark-shift.json` covers **40 pages of 604** (`sampled: 4000`, `minMarksPerPage: 20`,
-`--pages-n` defaulting to 40 at `probe-mark-ink.mjs:387`). A trial needs a proposed move, so
-all 60 placements necessarily came from those same 40 pages. **The session validated the
-correction on its own training pages**, and neither the shift file nor the scorer says so.
-
-**Three.** Across those 40 pages the proposed move barely varies — down spans −1.19…−0.81,
-sd 0.085 on a mean of −1.0. With that little leverage the size of the correction is
-unmeasurable: the gain came out −0.10 ± 0.68, so "exactly right" and "20% short" are
-indistinguishable, and brute force will not fix it (~710 placements even sampling only the
-extreme deciles). A ~11% gain error and a −0.11 constant are the *same number* on these pages.
-They stop being the same number on a page whose correction is a different size — which is
-precisely the 564 pages nobody has measured.
-
-The three findings are one finding: **we measured 40 pages and asked those same 40 pages.**
-
-### What was ruled out, and is worth keeping
-
-These are real negative results and they narrow the problem usefully:
-
-- **Not the mark.** Splitting the residual by mark name leaves *more* spread than a single
-  number (0.425 vs 0.415 down; 0.545 vs 0.526 across). The rectangle is not anchored wrong
-  inside particular glyphs. An early read that shadda drove the residual did not survive the
-  model comparison.
-- **Not a stretch.** No dependence on where the mark sits on the page (t = −0.5 down), so the
-  fit is off by a translation, not a scale.
-- **Not the starting point** (slope 0.00) and **not fatigue** (slope 0.000 against trial
-  order). The evenly-spread starts and the interleaved repeats both did their job.
-
-So it is a per-page frame error, which is where §⑦ already believed it was.
-
-## Code audit
-
-| where | what is wrong |
-|---|---|
-| `score-mark-nudge.mjs:122` `meanCI` | independence across placements; needs a page-clustered standard error. Used at `:168-169` for both reported components. |
-| `score-mark-nudge.mjs:161` `wilson(...)` | same assumption on the headline rate. Survives it here, but the output should say the denominator is pages-worth-of-fit, not independent trials. |
-| `score-mark-nudge.mjs` (absent) | no estimate of whether the correction is the right *size*, and no statement that the sample had no leverage to find out. A silent blind spot is worse than a wide interval. |
-| `score-mark-nudge.mjs` (absent) | never says the placements came from the same pages the correction was measured on. The largest limitation of the whole session appears nowhere in its report. |
-| `probe-mark-ink.mjs:1136-1148` shift emit | records `sampled` and `minMarksPerPage` but not page coverage. Nothing downstream can tell the file describes 6.6% of the mushaf. |
-
-Nothing is wrong with the arithmetic. Every defect is a **claim the output does not qualify**,
-which is the failure mode this project's whole validation shape exists to catch.
-
-## Work
-
-### A. `score-mark-nudge.mjs` — say what the sample can and cannot support
-
-Four additions. All reporting; the residual itself does not move.
-
-1. **Cluster the interval by page.** Keep `meanCI` for the naive number and add the clustered
-   one beside it, so the difference is visible rather than swapped in silently. The verdict
-   sentence at the foot reads from the clustered interval.
-2. **Report the gain**, by regressing the residual on the proposed move, *with* the spread of
-   the proposed moves printed next to it — that spread is what says whether the estimate could
-   ever have meant anything.
-3. **Report coverage**: how many distinct pages the placements came from, and how many of them
-   the shift file covers out of 604. One line.
-4. **Print the negative results** — by-name, by-position and by-order — because "we looked and
-   found nothing" is the part a later reader will otherwise pay to rediscover. This is where
-   the throwaway analysis behind this plan gets a permanent home.
-
-Doc comments carry the reasons, in the register the file already uses. Extend
-`lib/adjudication.test.mjs` with a case per new statistic against a hand-built fixture — the
-clustered interval must be provably wider than the naive one on clustered input.
-
-### B. Re-score, then correct the record from the scorer's own output
-
-Not from the throwaway analysis behind this plan. `pnpm nudge:score` prints the corrected
-numbers, and the registers quote what it printed.
-
-- `docs/validation/ledger.json` — the `result` line of `placement-residual-by-hand`. The check
-  stays **done**: it ran, it produced a result, and its result is the corrected reading. A done
-  check leaving its question open is a normal outcome and not a contradiction.
-- `docs/issues.json` ⑦ `a-preference-does-not-say-how-far` — back to **open**. The question is
-  literally *how far*, and the magnitude is unresolved; leaving it `answered` is exactly the
-  quiet overstatement this repo's rules exist to prevent. The note records what the sitting
-  did establish, so re-opening reads as progress rather than a reversal.
-- `docs/issues.json` — **a new row**: the correction covers 40 pages of 604 and has only ever
-  been checked on those 40. Distinct question, distinct row.
-- `docs/design/mark-registration.md` §⑦ — heading back to **open**, with the sitting's numbers,
-  the clustering correction, the three ruled-out explanations, and an explicit statement of
-  what the session could not see. §⑩ ① is untouched — the forced choice is a separate
-  instrument and its row does not move.
-
-Then `pnpm issues:doc` && `pnpm gate:issues`; `pnpm guide` after the ledger edit.
-
-### C. Measure all 604 pages
-
-No code change — `probe-mark-ink.mjs` already takes `--pages-n` and `--shift-out`, and all four
-downstream tools already take `--shift`.
-
-```
-node packages/etl/scripts/probe-mark-ink.mjs --pages-n 604 --sample <n> \
-     --shift-out packages/etl/out/mark-shift.604.json
-```
-
-- **Time a 5-page run first** and multiply. The runtime of a full pass is unknown and opening
-  a page is the expensive part.
-- **`--sample` must hold `minMarksPerPage: 20`** across 604 pages, so ≥ ~15,000 marks, up from
-  4,000. Confirm against the printed per-page counts rather than assuming.
-- **Write to `mark-shift.604.json`, never over `mark-shift.json`.** The naming follows
-  `mark-exemplars.${N}.json`. This is not tidiness: a forced-choice session is live at 5 of 100
-  answers and pinned to fingerprint `c8528da9`; rewriting the file in place makes
-  `adjudicate:score` exit 2 and throws those answers away.
-- Add page coverage to the emitted file so nothing downstream can read it without knowing.
-
-**Then stop and read it.** The one question that decides everything after: *do the per-page
-corrections vary across the full mushaf, or are they all alike?* If they vary, the size of the
-correction becomes measurable and another session is worth someone's time. If they are all
-alike, a single global number is the right model, the residual is moot, and mark-C can proceed.
-
-### D. The results live in the repo, not in `~/Downloads`
-
-The answers a person gave are the primary evidence for every number in §⑦, and they currently
-sit in one person's downloads folder where a browser will eventually clear them. The transcripts
-already come home to `docs/validation/sessions/`; the answer files do not, and nothing says
-where they should go.
-
-**New directory: `docs/validation/rulings/`** — the raw answer files both scorers read. Named
-for what the scorers themselves call them (`const ruling = ...` in both). Distinct from its two
-neighbours on purpose, and the README says which is which:
-
-| directory | what it holds |
-|---|---|
-| `sessions/*.jsonl` | the transcript — what a person did, step by step, as it happened |
-| `evidence/<id>.json` | a machine run's exit code, written by `make validate-auto` |
-| `rulings/` | **new** — the answers themselves, the input a scorer needs to reproduce a verdict |
-
-Move `~/Downloads/mark-placements-23.json` in as
-`docs/validation/rulings/2026-08-12T1650-placement-residual-by-hand.seed23.json`, pairing with
-the transcript already committed under the same stem. The seed is in the name because the seed
-is load-bearing — it is what rebuilds the answer key.
-
-Audited before proposing it: 11.9 KB, no Arabic anywhere in the file, no NUL bytes, no field
-that could carry anything personal — page numbers, mark indices, offsets and millisecond
-timings. It is the same class of artifact as the transcript beside it, which
-`sessions/README.md` already answers "yes, committed" for.
-
-**And the file it must be scored against.** `packages/etl/out/mark-shift.json` is gitignored,
-so a committed ruling still cannot be re-scored on a clean checkout — the verdict is auditable
-only by someone who can rebuild the shift file first. That is a real gap and it is worth
-closing in the same move: the shift file is 40 rows of page number and offset, derived from the
-gitignored ligature cache but containing no ink and no scripture. **Proposal: commit
-`mark-shift.604.json` from C** into `docs/validation/rulings/` beside the ruling it explains,
-so the banked verdict re-derives from committed bytes the way everything else here does.
-
-This runs against `probe-mark-ink.mjs:1129-1131`, which says the shift file "lands beside the
-evidence page, which is not checked in" — but the reason given there is that the evidence page
-draws the mus'haf's own artwork, and the shift file draws nothing. Flagged rather than assumed;
-strike it and the rulings still come home, just less useful.
-
-### E. The links
-
-- `docs/design/mark-registration.md` "Where does this live?" — `score-mark-nudge.mjs` gains the
-  clustering and coverage statements; the coverage caveat gets named where the commands are.
-- `docs/map.json` — hand-edited. The existing rows for `score-mark-nudge.mjs` and
-  `probe-mark-ink.mjs` gain the two facts a future reader needs before trusting either:
-  placements cluster by page, and the shift file describes a sample of pages.
-- `packages/etl/data/pages/PROVENANCE.md` — the coverage number belongs beside the data it is
-  about, the way `probe-reference`'s 568/36/0 already does.
-- `docs/validation/sessions/README.md` — points at `rulings/` so the pair is findable from
-  either end, the same reason `docs/decisions.json` insists a relation is stated in both rows.
-- `docs/validation/ledger.json` — the `save-the-placements` runbook step of
-  `placement-residual-by-hand` currently ends at a downloads folder. It should end in the repo,
-  or the next session's answers go the same way these nearly did.
-
-## The next session, pre-registered but not built
-
-Captured here so the design survives; **built only after C is read.**
-
-- **Block 1, coverage** — ~40 marks, one each from 40 **held-out** pages: pages with a
-  correction from the 604-pass that were not among the original 40. Answers *does it work where
-  no eye has been?*
-- **Block 2, structure** — ~20 marks over 5 pages, 4 each. Answers *how much of the spread is
-  the page and how much is the hand*, which is what the clustered interval needs and what 40
-  pages × 1.5 marks could never give.
-- **A second reader** — ~20 marks drawn from reader A's set, same build, placed independently.
-  This is the only thing that separates *the print is off by this much* from *this reader
-  places boxes this way*. Needs a reader field in the session and the scorer. Agreement within
-  ~0.05 says it is the print; a larger gap says a global residual should not be applied at all.
-- Repeats stay as they are — the existing 15% mechanism measured 0.03 and worked.
-- **The prediction goes in the ledger before the sitting**, so it can fail: applying
-  (−0.073, −0.110) should return a residual of 0 ± 0.06 with "nearer ours" ≥ 90%. The same
-  −0.11 again means it was applied to the wrong thing. +0.11 means it was fitted to one hand.
-
-## What this means for mark-C
-
-**Unblocked, with one constraint.** The per-page correction is confirmed in direction at 98.3%
-and may be applied as measured. The extra residual is **not** applied — it is unresolved, and
-0.11 units spread over 326,515 rectangles is a number that would have to be bought again.
-mark-C needs the 604-page file from C first regardless, since it ships shards for every page.
+`make record CHECK=placement-what-kind-of-wrong RESULT='…'` — sixty marks from the placed set,
+every one explicitly affirmed, no faults. Bounds visible placement error at about **5%, not at
+zero**. The caveat that must survive into the wording: the placed population is defined by a
+match of 0.55 or better and a displacement under 3 units on a mark 5.6 × 3.6, so **gross errors
+were structurally impossible on those cards**. The check also owes its `tunes` step — a manual
+result must tighten something automated, and the gate fails if it tunes nothing.
 
 ## Verification
 
-1. `pnpm nudge:score docs/validation/rulings/2026-08-12T1650-placement-residual-by-hand.seed23.json`
-   — the corrected numbers, from the shipped tool, read from the repo rather than from a
-   downloads folder. Every figure quoted into a register comes from this output, and the run
-   itself is the proof the moved file is intact.
-2. `pnpm --filter @hifth/etl test` (or the repo's vitest path) — the new statistics against the
-   fixture, including the clustered-vs-naive assertion.
-3. `pnpm issues:doc && pnpm gate:issues`, `pnpm gate:validation` after `pnpm guide`.
-4. `git add -A && make ci`.
-5. `adjudicate:score` on the live forced-choice ruling still exits without a fingerprint
-   complaint — proof the 604-pass did not disturb it.
-6. Commit code and docs separately.
+1. Rebuild all sixteen and confirm the deal is unchanged — same slice fingerprint, 1,851 marks
+   across sixteen parts, 0 answered marks re-asked:
+   `for n in 1..16; node scripts/build-mark-report.mjs --rows out/mark-rows.line-tilt.json
+   --set fallback --seed 23 --part $n/16 --answered … --out out/sit.fallback-$n-of-16.html`
+2. `pnpm --filter @hifth/etl test` — the new assertions above, including the two hazard guards.
+3. Re-run the scorer over the two banked transcripts and confirm it prints the hand and the
+   against-what-ships figures as **two** numbers under two sentences.
+4. Open part 1 on the phone over the tailnet, in **dark mode**, and confirm by eye: both boxes
+   visible on white paper; the buttons do not move between cards; the drag does not stutter on
+   the largest card; affirm is above the fold and obviously pressed when pressed.
+5. `pnpm issues:doc && pnpm gate:issues`; `pnpm guide` after the ledger edit;
+   `pnpm gate:validation`.
+6. `git add -A && make ci`. Commit code and docs **separately**.
 
 ## Operational
 
 - `cd /Users/omareid/Workspace/git/hifth && ./scripts/with-lock.sh <label> "sh -c '<cmd>'"`, and
-  re-export `PATH` inside the quoted command every time.
-- Registers are hand-edited, never generated.
-- Never `--no-verify`.
-
-## Not doing
-
-- **Applying the residual.** Unresolved, and the point of the plan.
-- **Re-running `probe-mark-ink.mjs` over `mark-shift.json`.** A live session depends on it.
-- **Building the next placing session.** Designed above, deferred until C is read.
-- **Touching the forced-choice instrument** — `score-mark-adjudication.mjs` and §⑩ ①. Its
-  headline is a rate over a lopsided count and does not depend on the assumption corrected
-  here; it gets the same clustering treatment only if its own numbers ever come out close.
+  re-export `PATH` **inside** the quoted command every time.
+- Registers are hand-edited, never generated. Never `--no-verify`.
+- `build-mark-report.mjs`, `serve-sittings.mjs`, `score-mark-report.mjs` and their tests are all
+  still **untracked** — CI does not run them today. This work arrives as part of their first
+  commit, not as a diff against a baseline.
