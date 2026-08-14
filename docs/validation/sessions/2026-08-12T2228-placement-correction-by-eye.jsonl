@@ -1,0 +1,10 @@
+{"t":"2026-08-12T22:28:02.066Z","kind":"session","check":"placement-correction-by-eye","title":"Placement correction by eye — a hundred forced choices between the corrected box and the one we ship","commit":"5020b41","on":"darwin node 20.19.4","stepsTotal":8}
+{"t":"2026-08-13T00:55:32.778Z","kind":"observation","tool":true,"payload":{"trial":1,"of":100,"i":0,"id":"p177k293","choice":1,"ms":893}}
+{"t":"2026-08-13T00:55:33.245Z","kind":"observation","tool":true,"payload":{"trial":2,"of":100,"i":1,"id":"p491k284","choice":0,"ms":468}}
+{"t":"2026-08-13T00:55:33.790Z","kind":"observation","tool":true,"payload":{"trial":3,"of":100,"i":2,"id":"p372k363","choice":0,"ms":551}}
+{"t":"2026-08-13T00:55:34.237Z","kind":"observation","tool":true,"payload":{"trial":4,"of":100,"i":3,"id":"p238k265","choice":1,"ms":446}}
+{"t":"2026-08-13T00:55:34.490Z","kind":"observation","tool":true,"payload":{"trial":5,"of":100,"i":4,"id":"p41k88","choice":1,"ms":254}}
+{"t":"2026-08-13T00:55:35.419Z","kind":"observation","tool":true,"payload":{"trial":6,"of":100,"i":5,"id":"p11k291","choice":1,"ms":926}}
+{"t":"2026-08-13T00:55:38.083Z","kind":"observation","tool":true,"payload":{"trial":7,"of":100,"i":6,"id":"p296k36","choice":1,"ms":2667}}
+{"t":"2026-08-13T00:55:39.985Z","kind":"observation","tool":true,"payload":{"trial":8,"of":100,"i":7,"id":"p461k273","choice":1,"ms":1901}}
+{"t":"2026-08-13T00:55:41.700Z","kind":"observation","tool":true,"payload":{"trial":9,"of":100,"i":8,"id":"p117k109","choice":1,"ms":1714}}

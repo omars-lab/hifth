@@ -95,7 +95,46 @@
       "related": [
         "word-selection",
         "loop-6a",
-        "tajweed-colours"
+        "tajweed-colours",
+        "mark-placement"
+      ]
+    },
+    {
+      "id": "mark-placement",
+      "question": "Should the app line up what it draws one page at a time, or one printed line at a time?",
+      "status": "open",
+      "options": [
+        {
+          "id": "A",
+          "label": "Leave the rectangles where they are"
+        },
+        {
+          "id": "B",
+          "label": "Line each page up as a whole"
+        },
+        {
+          "id": "F",
+          "label": "Line each printed line up on its own, and let it tilt"
+        },
+        {
+          "id": "G",
+          "label": "Line the marks up, and leave the words where they are"
+        },
+        {
+          "id": "H",
+          "label": "Put each mark where its own ink is, and line the rest up"
+        }
+      ],
+      "artifact": "https://claude.ai/code/artifact/7652b2f5-61a1-4072-bfab-ef3b649e55f5",
+      "page": "docs/design/mark-placement.html",
+      "builtBy": "scripts/build-placement-options.mjs",
+      "doc": "docs/design/mark-registration.md",
+      "decided": null,
+      "by": null,
+      "date": null,
+      "related": [
+        "mark-granularity",
+        "word-selection"
       ]
     },
     {
@@ -173,7 +212,8 @@
       "date": "2026-08-04",
       "related": [
         "word-search",
-        "mark-granularity"
+        "mark-granularity",
+        "mark-placement"
       ]
     },
     {

@@ -336,8 +336,9 @@ has to defend, that search still needs doing.
 - **Measurements are not gates until a person has agreed with them.** This one exits with a
   failure code when a threshold is breached so that it *could* become a check, and it is wired
   into nothing.
-- The companion document's Option B — one recorded displacement per page — is unaffected by
-  anything here, which is the useful consequence of the two being independent.
+- Whichever correction the companion document adopts is unaffected by anything here, which is
+  the useful consequence of the two being independent. Its recommendation has since moved from
+  one displacement per page to one per printed line, and nothing on this page moved with it.
 
 ## ⑦ What are the options?
 

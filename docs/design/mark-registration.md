@@ -246,11 +246,45 @@ it does so on every page. That is the finding.
 
 ### Is this a fact about the marks, or about the whole page?
 
-About the whole page. The same displacement can be recovered **without looking at a single
-mark**: rasterising the entire second printing of a page — letters and all — and sliding it
-against the entire shipped page needs the same shift, around 0.75 across and 1.00 down, with
+About the whole page's **text**. The same displacement can be recovered **without looking at a
+single mark**: rasterising the entire second printing of a page — letters and all — and sliding
+it against the entire shipped page needs the same shift, around 0.75 across and 1.00 down, with
 the two pages' total ink agreeing to within 0.05 percentage points. It is the same print,
 displaced. The marks are not wrong; the alignment between the two printings is.
+
+But "whole page" was too generous a word, and the next question says why.
+
+### Is there anything on the page that is *not* displaced?
+
+Yes, and it is the one thing we were already using. Every ayah ends with a small ornament, and
+both printings mark them — they are the only objects the two have in common, which is why the
+alignment between the printings was built out of them in the first place.
+
+So they can be asked a question nothing else on the page can answer. The alignment was fitted
+to the ornaments and knows nothing about the ink; the displacement above was measured from the
+ink and has never seen an ornament. Move the text by that displacement, and where do the
+ornaments end up?
+
+| | ornaments land this far from their partners |
+|---|---|
+| under the alignment we ship today | **0.053 units** |
+| if the text's displacement were applied to them too | **1.206 units** |
+| pages where that makes them worse | **120 of 120** |
+
+Measured on 1,305 ornament pairs across 120 pages.
+
+They were already right, and the correction would break them — by very close to the whole size
+of the correction, on every page it was asked. That is the sharpest form of the finding in this
+document: **the two printings agree about where their ornaments are and disagree about where
+they set their text.** A difference the whole page shared would have read the same on both
+lines of that table.
+
+Two things follow, and both are load-bearing. First, this is the only evidence here that does
+not come from the same well as the claim — everything else fits a rectangle to agree with ink
+and then grades it by agreement with ink, whereas the ornaments could not have been fitted to
+and were still asked. Second, whatever correction ships belongs to the *text* — the words and
+the marks — and must leave the ayah-end ornaments exactly where they are. Moving everything
+together would fix the marks by breaking the one part of the page that is currently right.
 
 ### Is the error systematic or random, and would correcting it help?
 
@@ -359,7 +393,8 @@ So 107 of the 108 are the last sixteenth of a unit of residual placement, and th
 indistinguishable from noise. **There is no evidence here that the two printings disagree about
 what any mark is.** This section was written expecting to find something and found nothing, and
 saying so plainly is the honest result rather than a wasted section — it means the entire
-measured defect in the mark layer is the displacement, and Option B below is the whole remedy.
+measured defect in the mark layer is the displacement, and the recommended option in §⑦ is the
+whole remedy.
 
 That also settles what the remaining work is. Separating fatha from kasra is a *positional*
 feature — where the mark sits relative to the letter carrying it — and not a better shape
@@ -378,11 +413,93 @@ right correction rather than a per-class one.
 
 ## ⑤ What do people outside this project do about this?
 
-Enough of the answer is surprising that it is worth stating up front: **there is no published
-precedent for validating per-mark boxes against the ink.** Two adjacent fields have most of
-the answer, and neither does quite this. The claims below were checked against primary
-sources; where something could not be established, it is named as such at the end of the
-section rather than smoothed over.
+Two different questions get asked here, and the outside world answers them very differently.
+*How should a box be scored against ink?* — **there is no published precedent for validating
+per-mark boxes against the ink**, though two adjacent fields have most of the answer. *Why were
+the boxes in the wrong place to begin with?* — that one turns out to be a **published theorem
+with a name**, in a field that has been warning about it for twenty years. The claims below were
+checked against primary sources; where something could not be established, it is named as such
+at the end of the section rather than smoothed over.
+
+### Why the boxes were wrong — somebody proved this, and it has a name
+
+**Our headline finding is a theorem.** In medical image registration, the error measured at the
+landmarks an alignment was fitted to has a name, and so does the error at the thing you actually
+care about — and Fitzpatrick's
+[*Fiducial registration error and target registration error are uncorrelated*](https://spie.org/Publications/Proceedings/Paper/10.1117/12.813601)
+(SPIE Medical Imaging 2009;
+[abstract](https://ui.adsabs.harvard.edu/abs/2009SPIE.7261E..02F/abstract),
+[Semantic Scholar](https://www.semanticscholar.org/paper/8ff408ad2d79dc5d8121bed0a702eb6d70a4e258))
+shows the two are **uncorrelated**. How well the fit closed where it was fitted tells you nothing
+about how wrong it is where it was used. Our ayah-end ornaments are the landmarks, our marks are
+the target, and the correlation of **0.117** in §④ is that result reproduced in a mus'haf.
+
+Three things follow, and they are why this is worth reading rather than merely citing.
+
+It is a **trap people keep falling into**, not an exotic case: the literature says in as many
+words that practitioners still fight the intuition that a tight fit at the landmarks means a
+good alignment, and somebody built
+[a teaching tool specifically to break that intuition](https://pmc.ncbi.nlm.nih.gov/articles/PMC7612039/).
+Three sessions of this project went into arguing about that residual. That is the trap, and we
+were in it.
+
+Worse, the residual is not merely uninformative — it is
+[weakly *anti*-correlated in theory](https://www.sciencedirect.com/science/article/abs/pii/S1361841511000028),
+because a fit can close tighter at its landmarks by absorbing their noise and be worse
+everywhere else. So "this page fits its ornaments to a tenth of a unit" was never evidence in our
+favour at all.
+
+And the remedy that field reaches for is the one §④ now uses: **hold out a target the fit never
+saw**. [SimpleITK's registration-error notebook](http://insightsoftwareconsortium.github.io/SimpleITK-Notebooks/Python_html/68_Registration_Errors.html)
+is the worked version. Turning the ornaments from the thing we fit on into the thing we check
+is that recipe, inverted.
+
+**The mechanism is a typography one, and it predicted the line before we measured it.** Two
+renderings of one text diverge because their glyph advance widths and line metrics differ, which
+slides every glyph along a line and changes where lines break and how they justify — documented
+for PDF in [inconsistent glyph width information](http://martin.hoppenheit.info/blog/2018/pdfa-validation-and-inconsistent-glyph-width-information/),
+in [how substituted metrics move line breaks and spacing](https://www.syncfusion.com/blogs/post/pdf-font-issues-javascript-pdf-viewer),
+in [line metrics as a font-development concern](https://silnrsi.github.io/FDBP/en-US/Line_Metrics.html),
+and most sharply in
+[*Story Beyond the Eye: Glyph Positions Break PDF Text Redaction*](https://arxiv.org/pdf/2206.02285),
+where per-glyph positions carry enough information to leak redacted words. Error that
+accumulates **along a line** and resets at the next one is the expected signature of two prints
+of one text. That is an argument for the printed line as the unit of the correction, and it was
+arrived at without looking at our own numbers.
+
+**It has since been tested, and it held.** That order matters more than the result: a prediction
+made from somebody else's literature, written down, and only then measured is a different kind
+of evidence from a pattern noticed in our own data and explained afterwards — the second is
+always available and is worth very little. Correcting line by line takes badly-placed rectangles
+from about one in five to about one in nineteen, and letting each line tilt is what does most of
+that, which is the specific shape the typographic argument predicts: not a constant offset a
+line, but an error that accumulates *along* it. §⑦ carries the figures and the controls.
+
+**And the standard fix is local rather than global, which is well-trodden ground.** Thin-plate
+splines pair a global part with a local warp
+([Chui & Rangarajan](https://www.cise.ufl.edu/~anand/pdf/rangarajan_cviu_si_final.pdf));
+[non-rigid registration](https://www.sciencedirect.com/topics/computer-science/nonrigid-registration)
+generally treats a good global fit as the *prerequisite* for a local stage rather than as the
+answer. For documents specifically, ICDAR 2024's
+[coarse-to-fine document image registration](https://dl.acm.org/doi/10.1007/978-3-031-70546-5_20)
+learns a global transform and then a local one, and there is a patent family on
+[line-based registration for transferring annotations between images](https://image-ppubs.uspto.gov/dirsearch-public/print/downloadPdf/10503868)
+— *annotation transfer*, which is exactly what we do with mark rectangles.
+
+**Where we looked and found nothing — said plainly, because a search that came back empty is a
+different thing from a search nobody ran.** We found nobody publishing on our actual case:
+registering two independently typeset editions of the *same* text at glyph level, where both
+sides are vector outlines with no pixels and no recognition involved. The document work we found
+is about photographs of paper, where the distortion is physical. Nor did we find a published
+version of the inversion above — *fit on the text, validate on the landmarks* — which follows
+straightforwardly from Fitzpatrick but which nobody appears to have written up as a recipe.
+Searched: non-rigid document registration and piecewise text-line alignment; Fitzpatrick's
+result; document registration and cross-image annotation transfer; justification, line breaking
+and glyph-metric differences between two renderings. **Not searched:** Arabic-script-specific
+typesetting corpora, and the Qur'anic-computing literature — either could hold something, and
+neither was opened.
+
+### How a box should be scored — the part with no precedent
 
 **Object detection has a conventional threshold, and it was set for the opposite reason.** The
 familiar 0.5 overlap comes from the PASCAL VOC challenge, whose own paper says why: *"The
@@ -521,33 +638,108 @@ touches the font.
 
 ## ⑦ What are the options?
 
-Every option below was measured on the same 4,000 marks, so the numbers are comparable.
+Every option below is measured the same way, by the same instrument, on the same marks — and
+on marks it was **not allowed to see while it was being worked out**. That last part is what
+makes these numbers comparable at all, and it is worth one plain sentence before the table.
+
+A correction is worked out by looking at where the marks actually sit and moving the rectangles
+to match. Grade it on those same marks and it will always look better, including when it has
+learnt nothing and simply memorised them — and the more elaborate the correction, the more
+flattering that is. So each page's marks are split down the middle at random: the correction is
+worked out from one half and graded on the other half, which it never saw. A correction that
+only memorises does well on the half it was given and no better than the simpler ones on the
+half it was not. Everything below is the half it was not.
+
+The numbers: 120 pages, about 63,600 marks, half of them held back — so every figure in the
+table is 31,700 marks the correction was blind to.
+
+| what it records | marks badly out | how much ink a rectangle covers | clears its control by | beats a deliberately wrong placement |
+|---|---|---|---|---|
+| A · nothing | 96.63% | 0.015 | **−0.234** — fails | 13.4% |
+| B · one move per page | 18.38% | 0.494 | +0.282 | 76.2% |
+| E · one move per printed line | 11.77% | 0.584 | +0.383 | 83.4% |
+| **F · a printed line allowed to tilt** | **5.24%** | **0.681** | **+0.491** | **90.6%** |
+
+*Badly out* means further than 0.75 units from the mark's own ink, on marks about 5.6 wide and
+3.6 tall. *How much ink a rectangle covers* runs 0 to 1 and cannot exceed **0.909** for these
+rectangles even when they are placed perfectly, so read 0.681 against 0.909 rather than against
+1. *Clears its control* is the gap between a rectangle and a deliberately wrong one; below 0.25
+nothing else in the row means anything.
+
+**The same split run over the whole book gives the same answer, and it is worth saying that it
+did.** The table above is 120 pages measured by the scorer in full, which is where the last two
+columns come from — ink overlap and control separation both need a re-score against the page's
+own ink at the corrected position, and no table of displacements can reconstruct them. The first
+column can be reconstructed, so it was, over all 604 pages and 326,515 marks on the identical
+half-and-half split: **96.44% → 18.20% → 11.84% → 4.95%**, against 96.63 → 18.38 → 11.77 → 5.24
+here. Four independent rungs, five times the pages, and nothing moves by a third of a point.
+Those are the figures the drawn page carries, because it can carry all 604 pages honestly and
+this table cannot; the two are not in conflict, they are the same measurement at two widths.
+
+The options are lettered in the order they were first written, not in order of preference — the
+table above is the order of preference, and the recommendation moved.
+
+**These options are also drawn, and the drawing is the thing to send anybody who has to choose.**
+Five of the eight — A, B, F, G and H — are rendered on a real page of the mus'haf at the size a
+phone actually draws it, each one beside the printer's own ink, because a displacement of one
+unit is a number here and a picture there, and only one of those settles anything. The page is
+[`mark-placement.html`](mark-placement.html), rebuilt by
+[`scripts/build-placement-options.mjs`](../../scripts/build-placement-options.mjs), and published
+for a reader with no repository at
+<https://claude.ai/code/artifact/7652b2f5-61a1-4072-bfab-ef3b649e55f5>. C and D are not drawn
+because there is nothing in them to look at: one is a stretch too small to see and the other puts
+these same rectangles on the page and forbids using them. E appears in the drawn page's table of
+numbers but has no picture of its own, because F is E with one thing added and drawing both would
+ask a reader to spot the difference between two nearly identical pages. The same letters mean the
+same options in both places; the register row is `mark-placement` in
+[`docs/decisions.json`](../decisions.json).
 
 ### Option A — change nothing, and do not draw marks
 
 The rectangles stay as they are and no feature is built on them. Honest, and it costs
 nothing today.
 
-Measured consequence: the mark layer is permanently unusable for pointing at anything. 97.80%
+Measured consequence: the mark layer is permanently unusable for pointing at anything. 96.63%
 of rectangles are further than 0.75 units from where their own ink is; the median rectangle
-misses its mark's ink almost entirely (overlap 0.011); and a rectangle picked at random from
+misses its mark's ink almost entirely (overlap 0.015); and a rectangle picked at random from
 elsewhere on the page describes the ink *better* than the right one does.
 
-### Option B — record one displacement per page, measured from the ink · **recommended**
+### Option B — record one displacement per page, measured from the ink · **superseded by F**
 
 Each page's fit gains a small correction, derived as the median displacement of that page's
 marks and recorded alongside the four numbers already stored per page. It is written down
 once, exactly like the fit itself, and read thereafter — so the existing rule against
 re-fitting at call sites is respected rather than broken.
 
-Measured consequence — the second column of §④'s table. Blank rectangles fall from 1.15% to
-**0.10%**; badly-placed rectangles from 97.80% to **18.27%**; the median overlap with the ink
-rises from 0.011 to 0.507; and the measure clears its own control by 0.287 where it previously
-failed it by 0.242. Two numbers per page, both derived offline from committed bytes, and the
-derivation is reproducible byte-for-byte.
+Measured consequence: badly-placed rectangles fall from 96.63% to **18.38%**, blank ones to
+0.08%, the median overlap rises from 0.015 to 0.494, and the measure clears its own control by
+0.282 where it previously failed it by 0.234. Two numbers per page, both derived offline from
+committed bytes, and the derivation is reproducible byte-for-byte.
 
-Cost: the correction is derived from the ink, so it must be re-derived if either printing
-changes — which is what a gate is for, and §⑩ ② is that gate.
+**Why this is no longer the recommendation, and it is not a close call.** Two things were
+learned after it was written, and each on its own would be enough.
+
+The first is that **it fails the threshold this very section proposes for it**. Read down to
+"What thresholds would go with this" and the number is *no more than 2% of rectangles further
+than 0.75 units*. This option delivers 18.38%, and on the very same pages it delivers 18.12% on
+the marks it was worked out from — so this was true the day it was written and nobody put the
+two figures side by side. One rectangle in five badly out is not a threshold being narrowly
+missed; it is a model the threshold refuses outright. Those two figures are worth keeping
+together for a second reason: a quarter of a percentage point between grading a model on its own
+marks and grading it on marks it never saw is what *no overfitting at all* looks like, which is
+the baseline the finer options have to be read against.
+
+The second is that **the family this option belongs to is exhausted**, which §④ measures. Every
+option that moves a whole page as one rigid thing — whether by shifting it, stretching it, or
+re-deriving it from scratch — leaves about 0.44 units of scatter across the page and 0.34 down,
+because the two printings do not disagree about the page *as a page*. They disagree about where
+each printed line of text sits. No amount of care spent on a per-page number reaches inside
+that, which is why two sessions of careful measurement moved the figure and never the problem.
+
+Cost, if it were adopted anyway: the correction is derived from the ink, so it must be
+re-derived if either printing changes — which is what a gate is for, and §⑩ ② is that gate.
+That cost is unchanged for E and F below; it is a property of correcting from the ink at all,
+not of the grain.
 
 ### Option C — re-derive the whole fit from the ink, scale and all
 
@@ -569,7 +761,166 @@ never draw a rectangle.
 Measured consequence: everything in §④ becomes irrelevant, and so does the feature. The whole
 reason to hold 326,515 rectangles is to point at one. This is Option A with extra steps.
 
-### What thresholds would go with Option B, and are they enforced?
+### Option E — record one displacement per printed line
+
+Each printed line of the page gets its own small move, recorded on top of its page's. A page
+holds fifteen lines, so this is thirty numbers a page rather than two, all of them derived the
+same way and written down once exactly as the page's own move is.
+
+**Why a line, and not something else.** This is not our own numbers suggesting it — it was
+predicted before they were looked at, and by an argument that has nothing to do with this
+project. Two printings of one text disagree because their letters are set to slightly different
+widths. Widths accumulate *along* a line and start over at the next one, so error that grows
+across a line and resets at the beginning of the following one is exactly the signature two
+independent settings of the same text produce. §⑤ carries that literature. The line is also the
+only unit here that is both meaningful and populous enough to measure: a printed line carries
+about 36 marks — thirty at the sparsest, forty-three at the densest — and a move worked out from
+36 observations is a measurement, where a move worked out from the 3.7 marks on a word would be
+a fit to noise wearing the costume of a correction.
+
+Measured consequence: badly-placed rectangles fall from 18.38% to **11.77%**, overlap rises
+0.494 → 0.584, the control gap widens 0.282 → 0.383, and the share of rectangles beating a
+deliberately wrong placement goes 76.2% → 83.4%. The tail moves too, which is the part a median
+hides: the 95th-percentile miss drops from 1.417 units to 1.008.
+
+Cost: the correction no longer fits in the four numbers a page already carries, so it needs a
+small table of its own beside them, and everything that places a rectangle has to read it. That
+is the real price of E and F both, and it is what §⑩ ⑨ is holding open.
+
+### Option F — record a printed line that is allowed to tilt · **recommended**
+
+The same as E, except that a line's move is permitted to change gradually from one end of the
+line to the other rather than being one number for the whole line. Four numbers a line instead
+of two.
+
+This is the same typographic prediction as E, taken one step further and to its actual claim.
+If the disagreement really is letters set to different widths, then it does not merely differ
+between lines — it *grows along* each one, so the far end of a line is further out than the
+near end. E can only record where a line sits on average. F records the growth, which is the
+thing the mechanism actually predicts, and it is why F was written down before it was measured
+rather than being found by trying things.
+
+Measured consequence, and it is the largest single step on the whole ladder: badly-placed
+rectangles fall from 11.77% to **5.24%**, overlap 0.584 → **0.681** against a ceiling of 0.909,
+the control gap 0.383 → **0.491**, and 90.6% of rectangles now beat a deliberately wrong
+placement. The typical miss is 0.225 units — well under a tenth of a mark's width — and the
+95th-percentile miss is 0.755, meaning nineteen rectangles in twenty now land inside the
+distance §⑦'s own error budget allows.
+
+**The control that makes this believable.** A model with sixty numbers a page can flatter itself
+in a way a two-number one cannot, so it was given a test designed to catch exactly that: every
+line was made to wear some *other* line's correction, at random. If the per-line numbers were
+absorbed noise, wearing the wrong one would be about as good as wearing the right one. Instead
+the shuffle scores **31.2% badly out** — far worse than doing nothing per-line at all, and six
+times worse than F. A line's correction is a fact about that line.
+
+Cost, and one honest reservation. The table is twice the size of E's, and a line with too few
+marks to fit a tilt has to fall back to its line's plain move and then to its page's, so what
+ships is a small ladder rather than one number — which is more machinery to get wrong. And the
+5.24% left over is **not** simply the tail of a tight scatter: a bell curve of the same width
+would leave about 3.1%, so there is a minority of rectangles still badly out for some reason of
+their own rather than every rectangle being slightly out. That difference is a real finding and
+it is deliberately not averaged into the headline: it says a further question exists, and it is
+not the question this section is answering. §⑩ ⑨ carries it.
+
+### Option G — the same, applied to the marks and not to the words
+
+The correction from F, carried onto the mark rectangles only. Word rectangles stay exactly where
+they ship today.
+
+This is a separate question wearing the same letter-shaped clothes, and it is written down as an
+option because it was quietly being assumed rather than chosen. The four numbers this whole
+document is about do not place marks; they place *everything on the page*, word rectangles
+included — a word box is derived from the same fit, in the same file, by the same line of
+arithmetic. So a correction that moves the marks and not the words is not the cheaper half of F.
+It is a decision that the two layers may drift apart, made once and then true forever.
+
+Measured consequence: **identical to F for every number in the table above**, because every
+number in the table is measured on marks. That is exactly what makes this option dangerous to
+compare — it costs nothing by the only measure on this page, and everything it costs is
+somewhere the page does not look.
+
+What it costs is elsewhere and is real: a word rectangle is what a reader's finger actually lands
+on when they pick out words, so leaving it on a fit we have now measured as about one unit wrong
+is knowingly shipping the error we just spent this document establishing, in the one layer a
+finger touches. Against that, a word box is roughly 22 units wide against a mark's 5.6, so the
+same absolute error is a far smaller fraction of it — which is an argument about priority, not
+about correctness.
+
+The reason to draw it rather than argue it: on the page, G and F are the same picture except for
+the word rectangles, and whether that difference matters is a thing to look at rather than a
+thing to reason about.
+
+Cost: two geometries fitted from one set of measurements and free to disagree, which needs a gate
+holding them to each other or it rots silently — and rebuilding the word shards is the work F
+requires anyway, so choosing G to avoid a rebuild does not avoid it.
+
+### Option H — put each mark where its own ink is, and line up the rest
+
+Instead of working out a move for a page or a line and applying it to every rectangle inside it,
+look at each mark individually, find where its own printed strokes actually are, and write that
+down. A mark whose strokes cannot be found convincingly does not get this treatment; it inherits
+its printed line's move from F. Word rectangles and verse-end circles have no such measurement of
+their own, so they inherit F as well.
+
+**This is the idea §⑧ opens by refusing, brought back with two refusals built into it**, and the
+refusals are the option. A search is trusted only where it has evidence. It is not trusted where
+the best match it found was poor — there it is chasing noise rather than finding a mark — and it
+is not trusted where the answer sits on the very edge of how far the search was allowed to look,
+because that is a search which has run out of room rather than one which has found something.
+Over the whole book those two refusals hand back **1,877 rectangles, 0.57% of the mus'haf** —
+1,210 poor matches and 730 that ran out of room — and accept **324,638, or 99.43%**.
+
+**What killed the original objection, and it is worth reading rather than taking on trust.** The
+first version of §⑧ refused this idea partly on the grounds that adjacent marks sit about as far
+apart as the error is large, so a search for the nearest ink would sometimes settle neatly onto
+the *neighbour's* — manufacturing exactly the complaint that started all of this. That was a
+guess, it was measured, and it was wrong by an order of magnitude. The nearest mark of any name
+is a median **8.32 units** away and the nearest one that looks the same is **24.80**, against a
+search reaching 3 units and an error near 1. Across all 326,515 marks the search lands nearer
+some other mark 1.08% of the time and nearer an identical-looking one **0.014%** — 47 marks in
+the whole mus'haf.
+
+Measured consequence, and the shape of it matters more than the number. Counting only the marks
+this option refuses to place from ink — the ones it hands to F — **0.42%** of the whole book is
+badly out, against F's 4.95%. On the page drawn throughout the options record it is **zero**.
+
+**And that number cannot be read the way the others can.** Every other option in this section is
+graded by holding half of each page's marks back and marking the correction on marks it never
+saw. This one has nothing to hold back: each mark carries its own two numbers, so there is no
+second half of anything, and the 99.43% it accepts score zero by construction — a zero that
+carries no information whatever, because the thing being graded and the thing grading it are the
+same measurement. That is why it is not in the table above and why its 0.42% is stated as *the
+part of it that is a model*. This is the trade the option asks for: far fewer rectangles out of
+place, and no way for this instrument to prove it.
+
+Cost, and it is the largest on the page. Two numbers for every mark in the mus'haf — a table
+bigger than the mark data it corrects, expressible in no version of the small per-page table the
+app reads today, and needing a file of its own beside it. It records rather than explains, so it
+says nothing at all about a printing nobody has measured, which is the one thing a per-line model
+does offer. And the word rectangles still move, are still rebuilt and still re-checked, exactly
+as under F — choosing H does not avoid that work.
+
+What it needs before it could ship is not another measurement. It is a person looking at a sample
+of the rectangles it places and saying whether they sit right, because that is the only witness
+that is not made of the same ink the option was measured against. §⑩ ① is the sitting; §⑩ ⑩ is
+the question of what the ones it hands back actually are.
+
+That sitting now exists, in two halves, and it is worth being exact about what each half can and
+cannot buy. Sixty rectangles are drawn from the 99.43% this option places and sixty from the
+0.57% it hands back, and they are read apart and never pooled — the two populations differ in
+size by a factor of 173, so a single rate over both would be a fact about how many of each the
+sample happened to contain. The reader answers in words rather than distances, and passing a
+rectangle is itself the answer that nothing is wrong with it, so the rate is faults over
+rectangles-looked-at and the page keeps that count for exactly that reason. **A clean sixty is
+not a zero.** Sixty rectangles with no fault in them bound the failure rate at about one in
+twenty, which over 324,638 marks is up to sixteen thousand of them — so the sitting can say *not
+more than this* and can never say *none*, and the interval rather than the percentage is the
+finding. What it can do, and nothing else here can, is notice a fault that is confidently
+identical everywhere: three or four faults in sixty is a few per cent of almost the whole book,
+which is a statement about the mus'haf, where the same share in the tail is a rounding error.
+
+### What thresholds would go with the recommended option, and are they enforced?
 
 Proposed, and deliberately **not enforced anywhere** — not in the build, not in continuous
 integration, not in any gate:
@@ -582,6 +933,47 @@ integration, not in any gate:
   of the grid — about 0.62, rounded up.
 - No more than **0.5%** of rectangles essentially blank, against a measured 0.10% after
   correction and two independent measurements agreeing on roughly 2% before it.
+
+**The second of those three is not met by any option this instrument can grade, and that has to
+be said before anything else about it.** The recommended option leaves 5.24% beyond 0.75 units
+against a threshold of 2%. The blank threshold is met with room to spare (0.03% against 0.5%) and
+so is the control threshold (0.491 against 0.25); it is the middle one, and only the middle one,
+that refuses every option including the recommended one.
+
+**Option H appears to clear it and that appearance is exactly what the threshold cannot check.**
+Its attributable figure is 0.42%, comfortably inside 2% — but the 99.43% of rectangles it places
+directly are not being tested by anything, because the number the threshold measures against is
+the number H ships. A threshold is a claim that something independent would agree; here nothing
+independent has been asked. So the honest statement is that H is untested against this threshold
+rather than that it passes it, and what would change that is a person looking, not a re-run.
+
+**Somebody has now looked at sixty of them, and it moves the statement without settling it.**
+Sixty crops drawn reproducibly from the marks H places directly, sat in one go on 2026-08-14:
+every one explicitly vouched for, no fault of any kind reported, no printing oddity raised. Read
+strictly, sixty clean answers put an upper bound of about **5%** on how often a reader would find
+something wrong there — not zero, because sixty is sixty. Read honestly, it says less than that,
+and the caveat has to travel with the number wherever it goes: those sixty are drawn from the
+population *defined by* a match of 0.55 or better and a displacement under three units on a mark
+roughly 5.6 by 3.6, so a gross error was structurally impossible on those cards before the reader
+arrived. Sixty clean answers from a population that cannot contain the fault being looked for is
+weak evidence about the fault and strong evidence about something else: that the instrument works
+and a reader can sit it. The threshold stays untested. What tests it is the other population, the
+one the correction refuses and falls back for, and all 1,851 of those are now dealt out to be
+seen rather than sampled.
+
+There is an obvious and dishonest way out, which is to notice that the 0.75 came from a budget
+whose first term was *the scatter left after the fit* — 0.46 units under a per-page model — and
+that the recommended option leaves 0.34, so the budget recomputes to about 0.50 and the
+threshold could be re-derived and then re-declared met. That would be moving the target to
+where the arrow landed, and doing it inside a document whose whole purpose is to be checkable
+by somebody who was not here. So: the threshold as written stands, it is not met, and
+re-deriving it is a decision that belongs to whoever adopts a correction — made in the open,
+with the old number and the new one both visible, and not folded into this paragraph.
+
+What the recommended option can say for itself against that threshold is narrower and true:
+nineteen rectangles in twenty land within 0.755 units, so the budget describes the *typical*
+rectangle accurately and the argument is entirely about how long a tail is tolerable when there
+are 326,515 of them. That is a judgement, and §⑩ ① is where a person makes it.
 
 The measurement exits with a failure code when a threshold is breached, so that it *could*
 become an enforced check later. It is not one today, and making it one has a named
@@ -600,6 +992,73 @@ reader place the rectangles themselves; its runbook is `placement-residual-by-ha
 answer releases these thresholds; only that one can change them.
 
 ## ⑧ What else could be considered, and why is it not here?
+
+**Unguarded per-mark local search — the version of option H that was excluded, and why the
+guarded one is not.** This entry was written first as a three-part refusal of shipping
+`bestPlacement`'s own output. One of the three parts was an assertion that had never been
+measured, and measuring it killed it. The refusal is left here rather than deleted, because the
+part that died is the reason option H exists at all.
+
+*It is unfalsifiable — this part stands.* Those per-mark displacements are the reference every
+figure in §⑦ is scored against: the residual under a correction is `(dx, dy)` minus what the
+correction proposes. Ship them and the residual is identically zero, `far` is 0%, and no
+split-half, null control or held-out page can say otherwise, because the grader and the candidate
+are the same object. Split-half is not merely inconvenient here, it is structurally impossible —
+each mark carries one observation and the model spends two parameters on it, so there is no
+half to hold back. That does **not** make the option wrong; it makes it one this instrument
+cannot rule on, which is a statement about the instrument. The check it needs is §⑩ ⑨.
+
+*It manufactures the wrong-mark symptom — this part was false.* The claim was that adjacent marks
+sit roughly a unit apart while the error is roughly a unit, so a search for the nearest ink would
+often find the neighbour's and centre a rectangle on the wrong mark. The first half was a guess and
+it was wrong by an order of magnitude. Measured over all 326,515 marks, per page, centre to centre:
+the nearest mark of *any* name is a median **8.32** units away and the nearest one bearing the
+**same** name is **24.80**, against a search that reaches 3 units and an error near 1. Counting
+landings that end up closer to another mark's centre than to their own: **1.08%** for any
+neighbour and **0.014%** — 47 marks in the whole mus'haf — for one that would look identical. The
+symptom the 2026-08-12 sitting reported is displacement being misread, exactly as §④ concluded; it
+is not this. `neighbour` in `mark-placement.data.json` carries the figures, computed in the same
+pass as everything else on the options page.
+
+*It is not a model — this part stands, and is a cost rather than a disqualification.* A per-page
+translation is two numbers, `line-tilt` about sixty a page. This is 326,515 pairs, a table larger
+than the mark data it corrects, expressible in no version of `word-boxes.pin.json`, and silent
+about every page the probe never sampled. It says nothing about *why* the prints differ, so it
+cannot generalise, which is the whole point of §④'s finding that the difference is systematic. It
+is re-derivable — the probe is deterministic and the correction rungs are fitted from the same run
+— but re-deriving it is not the same as predicting anything.
+
+What the measurement *did* refuse is narrower than the original entry and sharper. The search is
+trustworthy exactly where it has evidence, and two populations have none:
+
+- **Weak matches.** Grouped by `iouBest`, the search's departure from `line-tilt`'s answer is a
+  median 1.79 / 2.77 / 1.72 units below 0.15 / 0.15–0.35 / 0.35–0.55, throwing 44.6% / 71.7% /
+  44.3% of marks past 2 units. At `iouBest ≥ 0.55` — 325,305 marks, 99.63% — the median departure
+  is **0.21** and only **0.2%** go past 2. Below that threshold the search is chasing noise.
+- **Clamped searches.** 730 marks (0.22%) come back with a component sitting exactly on the ±3-unit
+  edge of `bestPlacement`'s window. Their `dx, dy` are not a finding about ink, they are a fact
+  about the window, and they are a caveat on those marks' figures in §⑦ since their *grading
+  target* is clamped. At this scale it is a rounding error rather than an argument for a wider
+  `RADIUS`, but the wider run is cheap and settles it.
+
+  **The first version of this bullet said 9,569 marks, and the arithmetic behind it was wrong.**
+  It asked whether the straight-line distance `hypot(dx, dy)` exceeded the radius. The search
+  slides the outline over a *square* window — ±3 in each axis, independently — so that test draws
+  a circle inside the square and condemns every corner of it. It discarded **8,358 marks whose
+  median overlap was 0.905 against an achievable 0.909**: placements sitting essentially perfectly
+  on their ink, thrown out under a label saying the search had run out of room when it had not
+  come near its edge. Distance travelled is not evidence of a bad placement. The test is per axis
+  now, and the error is left written down here because every H figure published before this
+  correction was built on it.
+
+Option H is this idea with those two refusals built in: place from ink where `iouBest ≥ 0.55` and
+neither component of the search's answer sits on its boundary, inherit `line-tilt` otherwise. That
+accepts **324,638 marks (99.43%)** from direct evidence and hands back **1,877 (0.57%)** — 1,210
+weak matches and 730 clamped. The fallback set scores 73.2% badly out under `line-tilt`, far worse
+than the corpus, which is what a set selected for having no usable ink evidence should look like.
+Since the accepted marks' zero carries no information, the only figure honestly attributable to H
+is that fallback share of the whole book: **0.42%**, against `line-tilt`'s 4.95%. On page 179, the
+page drawn throughout the options record, it is **zero**.
 
 **A borrowed overlap threshold.** The obvious method: rasterise, compute overlap, fail below
 0.5. Rejected for the two reasons in §⑤ — the conventional threshold was set to *hide* label
@@ -750,6 +1209,24 @@ taken from its extremes — the placing session wants the extremes because it is
 far, and this one is only ever asking which of two is closer, so what it has to lose by
 bunching at the ends is being about the mus'haf at all.
 
+**What "the corrected rectangle" means has moved, and it moves two things here.** When this
+section was written there was one candidate, and it moved every mark on a page by the same
+amount. The recommended one now moves each printed line by its own amount, and the two
+consequences pull in opposite directions. The first is unwelcome: the difference a reader is
+being asked to see is now typically about a fifth of a unit rather than two fifths, which is
+half the size, on a mark under four units tall — so the ceiling this session measures with its
+same-distance decoys stops being a formality and becomes the number the headline lives or dies
+by. The second is a gift, and it arrived by accident: the old worry that a reader would learn
+the rule within twenty trials rested on the error pointing the same way on every page, and it
+does not point the same way on every *line*. A learned rule is worth much less against a
+correction that changes direction down the page, which means the decoys are doing less work
+holding the session honest and more work measuring what an eye can actually resolve.
+
+Neither of those is a reason to sit it sooner. It is the opposite: a session built against the
+per-page move would be measuring a candidate nobody intends to ship, at a difference twice the
+size of the real one, and would come back more favourable than the truth. Whatever ships gets
+built into the trials first.
+
 The runbook is `placement-correction-by-eye` in
 [`docs/validation/ledger.json`](../validation/ledger.json); it takes about twenty minutes and
 needs no mushaf, no phone and no network. If the same person is going to sit the placing
@@ -761,7 +1238,7 @@ tell you where to drag anything.
 
 ### ② Is there anything stopping the correction going stale · **open**
 
-If Option B is adopted, the correction is data derived from two printings, and nothing
+If any correction in §⑦ is adopted, it is data derived from two printings, and nothing
 re-derives it or checks it. That is the same shape of problem as the fit residual in §④ — a
 recorded number nobody re-validates — and it deserves the same answer a gate gives everything
 else here: re-derive offline from committed bytes and fail on drift.
@@ -809,8 +1286,8 @@ displaced in a random direction, and the reader drags it onto the mark. Nothing 
 says where we think it goes — the proposed move is stripped out before the trials reach the
 page — so the landing is a placement rather than an agreement. Subtracting our move from it
 leaves the **residual**: a distance, in page units, that would put our rectangles where a
-reader puts them. That is a number Option B can be edited by, where ① can only say whether to
-adopt it at all.
+reader puts them. That is a number a correction can be edited by, where ① can only say whether
+to adopt it at all.
 
 A hand-measured number is worth nothing without the hand's own noise measured beside it. A
 residual of a fifth of a unit is a finding if the reader is repeatable to a fiftieth and it is
@@ -911,6 +1388,24 @@ somebody's half hour.
 The runbook is `placement-residual-by-hand` in
 [`docs/validation/ledger.json`](../validation/ledger.json); about twenty-five minutes, and it
 needs no mushaf, no phone and no network either.
+
+**What has changed since, and it changes what this sitting is for.** The sitting's own summary
+was *the direction is settled and the distance is not*, and it tested three explanations for
+the leftover distance — the mark's name, a stretch across the page, and the reader's starting
+point — and rejected all three. It could not test a fourth, because a sitting with sixty marks
+on forty pages has no way to look inside a page. The machine has since looked: the leftover is
+organised by **printed line**, and correcting line by line removes most of it. So the sitting
+was right that it is not the mark, not the reader and not a stretch of the whole page — and the
+thing it was left with is a stretch of each *line*, which is both smaller than a page and larger
+than a mark, and sits in the one place sixty trials could not reach.
+
+That does not retire this question; it sharpens what it is worth asking. Re-asking *is the
+correction far enough* about a per-page move is now spending a reader's half hour on a model
+nobody intends to ship. Asked about the correction that does ship, on pages it was never fitted
+to, it is the only instrument here that is not made of ink at all — and the leftover it would
+measure is now expected to be small, which makes the hand's own repeatability the thing that
+decides whether the sitting can say anything. That floor was 0.03 units. Whatever ships should
+be built into the trials before anybody sits them; the runbook says so in as many words.
 
 ### ⑧ Does the correction hold on a page nobody measured · **open**
 
@@ -1020,6 +1515,211 @@ well short of what the best placement of each individual mark would reach. Whate
 remainder is, it is not a per-page shift, and §⑦'s leftover distance is not the same quantity —
 that one is a further move *of* the correction, this one is scatter the correction cannot
 reach. Neither is applied.
+
+**Most of that remainder has since been named, and naming it changes what this question is
+asking.** It is not scatter. It is organised by printed line, and correcting line by line takes
+one mark in five down to one in nineteen — §⑦ carries the figures and the options. Two things
+follow for this section. The generous one: nothing above needed revising, because a page that is
+displaced is still displaced, and the finer model is applied on top of the per-page move rather
+than instead of it, so every reading here about how the pages vary from one another still holds
+exactly as measured. The uncomfortable one: **a per-line correction is many times more numbers,
+and this section's question is precisely the one that gets harder the more numbers there are.**
+Six hundred pages carrying two numbers each can be sanity-checked by looking at the spread of
+1,200 numbers. Nine thousand printed lines carrying four each cannot be eyeballed by anybody.
+
+Two of the four questions §⑦'s options are scored on exist for exactly this reason, and both
+were asked. Every figure quoted there is measured on marks the correction never saw — each
+page's marks are split down the middle at random, the move is worked out from one half and
+graded on the other — which is the only construction under which a model with more numbers can
+honestly be compared against one with fewer. And every line was made to wear another line's
+correction: that is **worse than applying no per-line correction at all**, six times worse than
+the real one, which is what a genuine per-line signal is obliged to look like and what fitting
+to noise could not have produced.
+
+What neither answers is the thing this section's title actually asks, and it should be said
+plainly rather than left to be inferred. **Splitting a page's marks in half holds out marks, not
+pages.** Every rung, including the recommended one, is still fitted on every page it is applied
+to, so no page in the mus'haf is a held-out page in the sense meant above. There is no version
+of this correction that generalises to a page it has not measured, because it has no model of a
+page — it has a table. That is not a flaw to fix; a table measured on all 604 pages is a
+perfectly good thing to ship. It does mean the four pages that carry no measurement — 1, 2, 603
+and 604 — are the whole of the generalisation question, and the fallback they get is the whole
+of the answer.
+
+### ⑨ Why the marks were ever in the wrong place, and what has to change · **open**
+
+Every question above this one asks how far out the marks are. This one asks why, and the answer
+turned out to be a single thing that explains all of it — including why two careful sittings
+moved the number and never the problem.
+
+**The alignment between the two printings was built by matching ayah-end ornaments, and then
+used to place text.** The ornaments are the only objects both printings label, so they were the
+only thing available to match on, and matching on them works: they land within a tenth of a unit
+of each other. But nothing was ever checked at the marks. On the page this document draws
+throughout, the ornaments agree to **0.09 units** while the text is out by about **a whole
+mark's height**. Across the whole book, how tightly the ornaments closed predicts almost nothing
+about how wrong the text is — and against the downward component, which is the larger half of
+the error, it predicts *nothing at all*.
+
+That one sentence accounts for every complaint the reader made when the sitting was stopped: the
+rectangle is off its mark, the wrong size, on the neighbouring mark, and biting the mark next to
+it. There is nothing between the ink and the screen except that alignment. A wrong size term
+reads as the wrong size *and* as a shift that grows toward the edge of the page; a shift larger
+than the gap between two marks reads as being on the wrong one. The count that rules out the
+alternative is elsewhere in this document: of 326,515 marks, the number whose name is genuinely
+wrong is **zero**. It is all displacement.
+
+**And this is a known trap with a name, in a field that has been falling into it for twenty
+years.** §⑤ has the citation and the mechanism. The short version is that how well an alignment
+closes at the points it was fitted to is famously uninformative about how wrong it is anywhere
+else — so "the ornaments fit to 0.09" was never the evidence in our favour we read it as, and
+three sessions spent arguing about that number were three sessions spent inside the trap.
+
+Three things are now settled, and they are what this question hands to whatever ships:
+
+- **A better whole-page alignment cannot fix it.** The best transform that could possibly be
+  fitted to a page, using the ink itself, still leaves about one mark in six badly out. Adding a
+  size term to it buys under two per cent and makes a third of pages worse. The whole-page family
+  is exhausted, and that also retires the wrong-size complaint: the size is off by about a tenth
+  of a per cent, which nobody can see.
+- **The error is organised by printed line, and correcting line by line is most of the repair.**
+  Held out — fitted on half of each page's marks and scored on the half it never saw — the share
+  of marks badly out falls from **one in five** (18.4%) to **one in eight and a half** (11.8%)
+  when each printed line gets its own move, and to **one in nineteen** (5.2%) once a line is
+  allowed to tilt along its length. Wearing another line's correction instead leaves 31.2% badly
+  out — worse than doing nothing per-line at all — which is what says these are facts about lines
+  rather than noise being absorbed. §⑦ has the full table and what each column means.
+
+  These figures were first worked out as arithmetic on the raw displacements and then measured
+  again by re-scoring every rectangle through the same instrument every other number in this
+  document comes from. The two ways of asking agree to within half a percentage point, which is
+  worth more than either on its own: the arithmetic could have been wrong about how much ink a
+  moved rectangle then covers, and it was not.
+
+- **What is left after the best correction is not simply a smaller version of the same error.**
+  A bell curve of the measured width would leave about 3.1% badly out and the measurement finds
+  5.2%, so the remainder is a minority of rectangles wrong for some reason of their own rather
+  than every rectangle being slightly out. That is a separate question from this one and it is
+  not averaged into the figures above; naming it is what stops the next session from re-measuring
+  the whole book to rediscover it.
+- **Whatever ships must move the text and leave the ornaments alone.** The question two sections
+  above measures that directly, on the one object the correction could not have been fitted to.
+
+What stays open is what to actually do about it: which correction ships, whether the word boxes
+move with the marks or the two are allowed to drift apart, and what the four pages that never
+carry enough marks to measure should fall back to. Those are a decision and not a measurement,
+and they have now been written up as one — §⑦'s options A, B, F and G, drawn on a real page in
+[`mark-placement.html`](mark-placement.html) and open in the register as `mark-placement`. The
+word-box half is option G specifically, which was the half most at risk of being settled by
+nobody: it costs nothing by any measurement on this page, because every measurement on this page
+is made on marks.
+
+### ⑩ Whether what is left over is even ours to fix · **open**
+
+Every measurement above answers in a distance: how far the rectangle is from the ink it should
+be sitting on. That is the right currency right up to the moment the correction starts placing
+most rectangles from their own ink — and then it stops being, because the rectangles that are
+left are not mostly *far* from their ink. A great many of them have no ink under them at all.
+
+The count, over the whole book. Where a rectangle was placed from its own ink, the printed
+strokes fill about a fifth of it and roughly one in eighty is effectively bare. Where the search
+found only a weak match, that falls to about a ninth, and **more than a quarter are bare**. Where
+the best match the search could find sat on the very edge of how far it was allowed to look, it
+is a twentieth, and **more than a third are bare**. So about a third of what the best correction
+leaves behind is a rectangle drawn over blank paper.
+
+A distance cannot say why. It cannot say *there is nothing in this place at all*, and it cannot
+separate a rectangle in the right place at the wrong size from one of the right size in the
+wrong place — the two have different repairs in different parts of the pipeline, and a size
+complaint written down as a displacement is a wrong number that looks like a right one. Nor can
+it say the fourth thing, which is the one this question is really about: **that the printed page
+itself does something unusual there, and nothing is wrong on our side.** We did not draw those
+pages. Counted as a placement failure, a printing oddity makes the correction look worse than it
+is; counted the other way, better. Both are wrong and nobody has ever been asked which.
+
+So the answer has to come from a reader looking at one rectangle at a time and saying which kind
+of wrong it is, in words rather than in a number — and saying more than one thing where more than
+one is true, because a reader forced to pick just one picks the most obvious and the second fault
+is never recorded by anybody. The page that asks it, and the sitting that would answer it, are in
+the validation register as *what kind of wrong*. Answers of the fourth kind — the printing, not
+us — become rows of their own in [`docs/issues.json`](../issues.json), which is the only route by
+which a reader's eye reaches the catalog at all.
+
+What would settle it: a sitting. If most of the remainder turns out to be the print, then the
+placement work is finished and this document's numbers are an overstatement of our own error by
+whatever that share is. If most of it turns out to be rectangles that could have been placed and
+were not, the search that places them is too timid and that is a change to make rather than a
+fact to accept. Until somebody sits it, both readings of the tail in ⑨ are open, and the honest
+statement is that we do not know which we are looking at.
+
+### ⑪ Whether the reader could see the rectangle they were vouching for · **fixed**
+
+The page that asks ⑩ draws a crop of the print's own artwork, and that paper is deliberately
+never re-themed: a page of the mus'haf stays on white whatever theme the reader's phone is in.
+The two rectangles drawn on top of it were themed. Under a dark theme our rectangle's line fell
+from 5.05:1 against that paper to **2.49:1**, and the reader's own rectangle from 4.89:1 to
+**1.70:1**, at a constant stroke of about one and a half pixels.
+
+That is not an ugliness finding, and the reason is the same one that made ① of this section
+worth rewriting. The commonest honest answer on that page is *nothing is wrong with this one*.
+A reader who cannot make out the rectangle at all gives exactly that answer, and it arrives in
+the transcript as an affirmation indistinguishable from one somebody looked at. The failure
+comes back looking like success, and in the direction that flatters us.
+
+What closed it is a rule rather than a colour: **nothing drawn on the paper is themed.** The
+paper, the ink, and the four colours of the two rectangles are stated once and never restated
+for a dark theme; the controls around them stay themed, because they sit on the app's own
+surface rather than on the print. The two rectangles are also told apart by a dash pattern and
+not by hue alone, so the distinction survives colour blindness and survives anybody re-theming
+the palette later. A test asserts that the dark theme redefines none of the six, and that both
+rectangle lines clear 3:1 against the paper — twelve lines, no browser, and precisely the
+invariant that broke.
+
+The caveat that has to travel with the sixty answers already banked: nothing in a transcript
+records which theme it was sat in, and nothing does now either. Those sixty were drawn from the
+population where the placement was already made from the mark's own ink, so a gross error was
+structurally impossible on those cards whatever the reader could see — but that is an argument
+about the cards, not evidence about the screen.
+
+### ⑫ Whether the placing distances were ever the reader's own hand · **fixed**
+
+The scorer that reads the placing answers printed **0.000 across and 0.000 down** for
+twenty-six marks the reader had visibly dragged. Two faults arriving as one number.
+
+**It averaged increments, and increments cancel.** Every move the page records — from the nudge
+pad or from a drag — is written down as a step, with the running total beside it. Taking the
+middle of every step across every move is arithmetic on the wrong column: a nudge one way and a
+nudge back are two steps that cancel to nothing, and one mark corrected forty-four times outvotes
+twenty-five marks corrected once.
+
+**And the total beside it is not the hand either.** It is measured from the rectangle as
+shipped, so it already contains the correction this document's own fit applied. That is a real
+quantity and worth printing — where the reader put the box, against what the app draws today —
+but it is not how far the reader themselves moved anything, which is that same total less the
+correction. Collapsed into one number it was neither.
+
+Three figures, all real, and until this was fixed the page printed the first:
+
+| question | across | down |
+|---|---|---|
+| what was printed | 0.000 | 0.000 |
+| where the reader put it, against what ships | −3.569 | −3.134 |
+| **how far the reader's own hand moved it** | **−2.468** | **−2.010** |
+
+The middle row is the one worth the trouble: it points the same way and is roughly the same size
+as the ink measurement in §④, where the print sets its text lower and further across than the
+ornament fit predicts on 599 of 600 pages. Two instruments built from different evidence,
+agreeing. A scorer printing zero said the reader's hand agreed with nothing.
+
+What closed it: one row per mark, reading only where the rectangle finally rests. The two
+distances are printed under two separately worded sentences, and the prose says outright that
+the gap between them is only the correction already applied — otherwise a reader subtracts one
+from the other and believes they have found a discrepancy. It also says how many marks, and how
+many separate goes those marks took: twenty-six marks over two hundred and five goes is a
+finding about the nudge controls rather than about the print, and it is stated as one. Distances
+and counts are never combined. The fixture that would have caught the original is now in the
+scorer's tests: one mark nudged one way, back, and out again, and a second moved once, asserting
+the printed middle is the distance and the count is two marks rather than four steps.
 
 ## How can someone look at this for themselves?
 
@@ -1219,7 +1919,7 @@ readable without them.
   drawing of each mark beside the rectangles `readDiacritics` returns, sharing the same walk so
   the two cannot drift.
 - `packages/etl/data/pages/word-boxes.pin.json` — where a per-page correction would be
-  recorded under Option B.
+  recorded. A per-line one does not fit in it and needs a table beside it; §⑩ ⑨ holds that open.
 - [`sub-word-marks.md`](sub-word-marks.md) §⑦ — the question this answers.
 - [`encoding-inspector.md`](encoding-inspector.md) — the existing surface, and why this is
   beside it rather than inside it.
