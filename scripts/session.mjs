@@ -53,12 +53,26 @@
  *   node scripts/session.mjs --check <id>          # resume an unbanked session, or start one
  *   node scripts/session.mjs --check <id> --new    # start a fresh transcript regardless
  *   node scripts/session.mjs --check <id> --port 4180
+ *   node scripts/session.mjs --check <id> --tool <repo-relative path to an .html>
+ *
+ * ── Why --tool ───────────────────────────────────────────────────────────
+ *
+ * The ledger pins one tool page per check, which is right for a check whose
+ * tool is one page. It is wrong for a check whose population was cut into
+ * parts so a person could finish it: sixteen files, one check, and the pinned
+ * path can only name one of them. Without an override the other fifteen get
+ * opened as plain files off a static server, which injects no sink — so every
+ * answer lives in that phone's browser store and nowhere else until somebody
+ * remembers to press save. The flag is what makes the phone just a screen.
+ *
+ * It overrides the path only. The check is still the check: same transcript,
+ * same ledger entry, same verdict at the end.
  */
 import { createServer } from "node:http";
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { randomBytes } from "node:crypto";
 import { spawnSync, spawn } from "node:child_process";
-import { extname, join, basename } from "node:path";
+import { extname, join, basename, resolve, sep } from "node:path";
 import { readLedger, ROOT, SHOTS_DIR } from "./validation-ledger.mjs";
 import { card, CSS, rich, attr } from "./lib/validation-render.mjs";
 import {
@@ -102,6 +116,40 @@ if (!steps.length) {
   process.exit(2);
 }
 
+/* ── which page this sitting opens ─────────────────────────────────────── */
+
+/**
+ * The one the ledger pinned, or the one named on the command line.
+ *
+ * An override keeps the pinned label and note where there are any, because the
+ * check has not changed: the same reasons still apply and they are usually the
+ * only prose saying what the page is for. Only the path moves, and both the
+ * card and the transcript say which file it moved to — otherwise sixteen
+ * sittings of one check produce sixteen identical-looking pages and sixteen
+ * transcripts that cannot say which was which, and that is not a thing anybody
+ * discovers until they are reading them months later.
+ */
+function chosenTool() {
+  const pinned = check.runbook?.tool ?? null;
+  const named = arg("tool");
+  if (!named) return pinned;
+
+  // Repo-relative and inside the repo. Not a security boundary — whoever runs
+  // this already has the shell — but the page it names is served through a
+  // route the token guards, and the guard is only worth having while this
+  // server's reach is as small as it claims. Both sides go through `resolve`
+  // because ROOT carries a trailing slash and a string comparison against it
+  // silently rejects every real path.
+  if (!resolve(ROOT, named).startsWith(resolve(ROOT) + sep) || extname(named) !== ".html") {
+    console.error(`\n  session — --tool wants a .html path inside the repo, and got "${named}".\n`);
+    process.exit(2);
+  }
+  return { ...(pinned ?? {}), path: named, from: "command line" };
+}
+
+const tool = chosenTool();
+const toolReady = tool ? existsSync(join(ROOT, tool.path)) : false;
+
 /* ── the transcript ────────────────────────────────────────────────────── */
 
 const commit =
@@ -125,15 +173,23 @@ if (resumed) {
     commit,
     on: `${process.platform} node ${process.versions.node}`,
     stepsTotal: steps.length,
+    tool: tool?.path ?? null,
   });
   console.log(`\n  new transcript → docs/validation/sessions/${basename(logPath)}`);
+}
+
+// A resumed transcript already said which page it was opened against, and a
+// resume that opens a different one has to say so or the record is wrong about
+// itself. Nothing reads this yet; it is here because the alternative is a file
+// that quietly stops describing the sitting it holds.
+if (resumed && tool?.path && resumed.events.find((e) => e.kind === "session")?.tool !== tool.path) {
+  append(logPath, { kind: "tool", path: tool.path });
+  console.log(`  now against ${tool.path}`);
 }
 
 /* ── the page ──────────────────────────────────────────────────────────── */
 
 const TOKEN = randomBytes(9).toString("base64url");
-const tool = check.runbook?.tool ?? null;
-const toolReady = tool ? existsSync(join(ROOT, tool.path)) : false;
 
 function page() {
   return `<!doctype html>
@@ -162,6 +218,7 @@ ${
     ? `<article class="card tool-card">
   <div class="head"><span class="badge">tool</span><h2>${rich(tool.label ?? "This check has its own tool")}</h2></div>
   ${tool.note ? `<p class="why">${rich(tool.note)}</p>` : ""}
+  ${tool.from ? `<p class="expect">Opening <code>${attr(tool.path)}</code> — asked for by name, not the page this check pins.</p>` : ""}
   ${
     toolReady
       ? `<p><a class="tool-open" href="/tool?t=${attr(TOKEN)}" target="_blank" rel="noopener">Open it →</a></p>
@@ -578,6 +635,7 @@ server.listen(port, "0.0.0.0", () => {
   if (lan) console.log(`  Same Wi-Fi:  http://${lan}:${port}/`);
   console.log(`\n  Ticks, notes and answers land in docs/validation/sessions/${basename(logPath)}`);
   console.log(`  as you make them. Ctrl-C when you are done — nothing is lost by stopping.\n`);
+  if (tool?.from) console.log(`  Tool:        ${tool.path}  (asked for by name)`);
   if (tool && !toolReady) {
     console.log(`  ! ${tool.path} is not built yet — run the setup commands above first.\n`);
   }

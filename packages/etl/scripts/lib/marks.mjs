@@ -76,6 +76,7 @@ export function marksOf(p) {
       surah: e.w.surah,
       aya: e.w.aya,
       idx: e.w.idx,
+      line: e.w.line,
       hafs: e.w.hafs,
       fit: row,
     };
