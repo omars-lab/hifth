@@ -143,7 +143,15 @@ export function summarise(events) {
       if (at >= 0) notes[at] = e;
       else notes.push(e);
     } else if (e.kind === "observation") observations.push(e);
-    else if (e.kind === "artifact") artifacts.push(e);
+    else if (e.kind === "report") {
+      // A sitting that names what is wrong posts `report` where the forced-choice
+      // tools post `observation`, and it can take one back. Both are answers, and
+      // counting only the older word left the page reading "0 answers" while its
+      // transcript filled up — which looks exactly like a sink that is not
+      // working, and the sink is the whole reason to open a tool from here.
+      if (e.payload?.kind === "retracted") observations.pop();
+      else observations.push(e);
+    } else if (e.kind === "artifact") artifacts.push(e);
     else if (e.kind === "verdict") verdict = e;
   }
 

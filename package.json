@@ -58,6 +58,8 @@
     "adjudicate:score": "node packages/etl/scripts/score-mark-adjudication.mjs",
     "nudge:marks": "node packages/etl/scripts/build-mark-nudge.mjs",
     "nudge:score": "node packages/etl/scripts/score-mark-nudge.mjs",
+    "report:marks": "node packages/etl/scripts/build-mark-report.mjs",
+    "report:score": "node packages/etl/scripts/score-mark-report.mjs",
     "sample:edges": "node packages/etl/scripts/sample-edges.mjs",
     "guide": "node scripts/build-validation-guide.mjs",
     "session": "node scripts/session.mjs",

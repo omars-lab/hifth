@@ -175,6 +175,11 @@ export function readDiacritics(svg, apply) {
       surah: Number(attr(m[2], "data-surah")),
       aya: Number(attr(m[2], "data-aya")),
       idx: Number(attr(m[2], "data-word-index-in-ayah")),
+      // The printed line this word was set on. Carried because justification is
+      // set per line: if the two prints break or space a line differently, every
+      // word on it slides together, so the line is the smallest group a
+      // registration correction can be measured over without fitting noise.
+      line: Number(attr(m[2], "data-line-number")),
       hafs: unescapeXml(attr(m[2], "data-hafs") ?? ""),
       imlaey: unescapeXml(attr(m[2], "data-imlaey") ?? ""),
       ligatures,
