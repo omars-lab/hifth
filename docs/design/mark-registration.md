@@ -958,7 +958,7 @@ roughly 5.6 by 3.6, so a gross error was structurally impossible on those cards 
 arrived. Sixty clean answers from a population that cannot contain the fault being looked for is
 weak evidence about the fault and strong evidence about something else: that the instrument works
 and a reader can sit it. The threshold stays untested. What tests it is the other population, the
-one the correction refuses and falls back for, and all 1,851 of those are now dealt out to be
+one the correction refuses and falls back for, and all 1,877 of those are now dealt out to be
 seen rather than sampled.
 
 There is an obvious and dishonest way out, which is to notice that the 0.75 came from a budget
@@ -1407,6 +1407,31 @@ measure is now expected to be small, which makes the hand's own repeatability th
 decides whether the sitting can say anything. That floor was 0.03 units. Whatever ships should
 be built into the trials before anybody sits them; the runbook says so in as many words.
 
+**And what the leftover is made of, which until now this section could only size.** A second
+kind of sitting asks the other half of the question: not *how far out* but *what kind of
+wrong*, one mark at a time, in words rather than in a distance. It is being sat over the marks
+the machine could not place from their own ink — 1,877 of them, every one to be seen — and 160
+have been looked at so far. **158 came back carrying a complaint.** Named: 158 said the
+rectangle is in the wrong place, 37 said it is also the wrong shape, 15 said the printed mark
+itself is odd, and 2 said nothing was wrong. On the largest single sitting the share is 99.0%
+with a 95% interval of 94.6% to 99.8%, over 101 marks once the ones that questioned the print
+are held out.
+
+**Read that as a fact about the population before reading it as a fact about the print.** These
+are by construction the marks nothing could place, so a near-total fault rate is what the set
+was selected to produce and is not news. What *is* news is the composition. Only 15 of 160 were
+called odd in the print, so the leftover here is overwhelmingly ours to fix rather than the
+printer's — the opposite of the comfortable reading. And the direction agrees with the ink:
+where the reader left those rectangles, measured from the box before any correction, runs about
+3.3 units across and 2.6 units down in medians, which is the same way and roughly the same size
+as the machine's own measurement, arrived at by an instrument made of nobody's arithmetic.
+
+**Two of the six things a reader can say were never said once**, across 564 answers: that the
+rectangle is round the wrong ink, and that something else is wrong here. A word nobody uses is
+usually a word that should go — but the first of those only became cheap to say in the same
+week the sittings resumed, when tapping the ink became the way to say it, so this is a reading
+to take again after the next few sittings rather than a licence to delete anything now.
+
 ### ⑧ Does the correction hold on a page nobody measured · **open**
 
 When this question was written the per-page correction existed for **forty pages of 604**. It
@@ -1747,9 +1772,9 @@ up, so a count that falls is never a fact about the reader.
 
 ### ⑭ Whether the marks a reader called odd are odd in the print or odd in our reading of it · **open**
 
-Fourteen marks, on fourteen separate pages, were set aside by a reader as *odd — I cannot say
+Fifteen marks, on fifteen separate pages, were set aside by a reader as *odd — I cannot say
 how*: not our rectangle in the wrong place, but something about the printed mark itself they
-could not read as ordinary. They are six fathas, three successive kasratans, two successive
+could not read as ordinary. They are six fathas, four successive kasratans, two successive
 dammatans, one damma and two hamzas — a spread across the vocabulary rather than one name
 behaving badly, which is the first thing that would have made this our problem instead.
 
@@ -1762,8 +1787,44 @@ question is settled only by holding those pages against another copy of this pri
 
 What would answer it: the pages, checked by eye against a second printing. Either the oddity is
 in the print — in which case it is a defect in vendored data and belongs upstream, and the marks
-stay out of every rate on purpose — or it is in our rendering of it, in which case fourteen marks
+stay out of every rate on purpose — or it is in our rendering of it, in which case fifteen marks
 are the visible end of something that is also silently wrong on marks nobody flagged.
+
+### ⑮ Whether an answer given by pointing is the same evidence as one given by hand · **open**
+
+The sittings held so far measured what correcting a rectangle by hand costs. Of the 160 marks
+the reader worked through, **158 were moved**, over **350 separate goes**, a median of **2.105**
+units of travel and a worst of **12.229** on a mark that is 5.6 by 3.6. Every one of those goes
+is a person doing two different jobs at once: deciding which mark is meant, which only a person
+can do, and then deciding how far across and how far down, which the print already knows.
+
+So the second job was handed back to the print. The ink inside the window is cut into its
+separate pieces, and a tap on a piece puts the rectangle round it — round both, when a mark is
+printed in two parts and the reader taps each. The rectangle moves and takes its size from the
+ink in one gesture instead of a dozen presses.
+
+**And that makes two kinds of answer that must never be pooled.** The words are the same either
+way, because the reader is saying the same thing: the rectangle belongs somewhere else, and it
+is the wrong size. What differs is who measured it. A hand-placed answer is an eye's estimate of
+where a mark sits, and its spread is partly the eye's. A pointed answer is the reader choosing
+which ink — still the judgement — with the extent taken off the printed outlines, and its spread
+is the grain the ink was cut at. Averaged together, the second tightens the first, and the
+tighter number would read as *the reader agrees with us more closely than we thought* when it
+means nothing of the kind. Every answer now records which way it was given, and a press on top
+of a pointed answer gives up the claim: the moment a reader adjusts by hand what a tap placed,
+the answer is a hand-finished one again.
+
+Two things this does not settle, and one of them is new. The marks already answered were
+answered on the older instrument, so any rate quoted across both is a fact about the mix of the
+two — the same trap this section's ⑬ is about, in a different column. And making a correction
+cheaper is a change to the one ratio these sittings exist to measure: complaining and affirming
+still cost a single tap each, which is the constraint the page is built to, but *finishing* a
+complaint no longer costs a dozen. A reader who would have shrugged and affirmed rather than
+push a rectangle across the card may now say what they actually think. That is the point of the
+change and it is also a reason the two halves are not one population.
+
+What would answer it: the same marks answered both ways, by the same reader, far enough apart
+that they are not remembering. Until then the two are read apart and never averaged.
 
 ## How can someone look at this for themselves?
 
