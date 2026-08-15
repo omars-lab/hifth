@@ -21,11 +21,43 @@
  *   mark ~540 groups a page        1 mark   manufactures the wrong-mark fault
  * ```
  *
+ * Three of the four rungs this file builds share the middle row: `line` gives
+ * each printed line one offset, `line-tilt` lets that offset slide evenly along
+ * the line, and `line-curve` lets it bend. Same thirty-six marks, asked for one
+ * number, then two, then three — so the ladder gets finer twice over without the
+ * groups ever getting thinner.
+ *
  * The line is not a guess. Two renderings of one text diverge because their
  * glyph advance widths and line metrics differ, so error accumulates *along* a
  * line and resets at the next one — which is an argument from typesetting and
  * not from our own numbers, and it predicts a tilt within each line as well as
  * an offset per line. `line-tilt` is that prediction written down.
+ *
+ * `line-curve` is the rung after it, and it was found by asking what the marks
+ * a tilt still leaves badly out have in common. The answer was: each other. More
+ * than half of them sit on the one line in fifteen that has gone wrong as a
+ * whole, and a mark at either end of a line is about twice as likely to be badly
+ * out as one in the middle — which is what accumulation looks like when it does
+ * not accumulate at a constant rate, and is not a shape a straight line has the
+ * freedom to follow. Bending it pays, measured on the half of the marks the fit
+ * was never shown: badly out 4.95% -> 4.12%, median leftover 0.224 -> 0.198
+ * units, over 326,515 rows and 8,702 printed lines. Wearing another line's bend
+ * costs 34.40%, against 18.20% for no per-line correction at all — so each
+ * line's bend is a fact about that line and not a shape absorbed from noise.
+ *
+ * The ladder stops here rather than wherever the arithmetic stops improving. A
+ * cubic was fitted the same way and rejected: better on its own training marks
+ * and worse on the held-out half, which is the signature of a term with nothing
+ * to find. It is not a rung this file builds, so that comparison is not
+ * reproducible from here — it was run once, off the ladder, and is recorded as
+ * the reason there is no fourth term rather than as a measurement to lean on.
+ *
+ * What bending does not clear: it fixes the middle of a line and barely touches
+ * the ends. The middle goes from 4.34% badly out to 2.94%, while the two ends go
+ * from 6.58% and 6.95% to 5.97% and 6.02% — so a mark at the end of a printed
+ * line is still about twice as likely to be badly out as one in the middle, and
+ * whatever is doing that is not a shape in the position along the line at all.
+ * That is left standing on purpose rather than chased with a fifth rung.
  *
  * Nothing here rasterises anything. A correction moves the rectangle, and the
  * displacement to the ink is already measured, so the residual under a candidate
@@ -36,7 +68,18 @@
  */
 
 /** The grains this file knows how to build, coarsest first. */
-export const GRAINS = ["page", "line", "line-tilt"];
+export const GRAINS = ["page", "line", "line-tilt", "line-curve"];
+
+/**
+ * How many observations a group must hold per term of the fit it is given.
+ *
+ * A tilt has two terms and a curve has three, so the same floor buys a curve
+ * two-thirds of the evidence it buys a tilt. Three per term is the point below
+ * which the extra term is reading noise, and stating it here means lowering the
+ * floor cannot quietly buy a curve nobody has the marks for.
+ */
+const PER_TERM = 3;
+const TERMS = { line: 1, "line-tilt": 2, "line-curve": 3 };
 
 /** Marks with essentially no ink under them estimate nothing and are left out. */
 const EMPTY = 0.02;
@@ -103,6 +146,89 @@ export function fitLine(obs, want) {
   return { a, b, sd: Math.sqrt(e / Math.max(1, n - 2)) };
 }
 
+/**
+ * The gentlest curve through a set of points, and how far the points sit from it.
+ *
+ * Fitted in a coordinate centred and scaled on the points themselves, and the
+ * centre and the scale are handed back with the coefficients, because a squared
+ * term in raw page units on a line that starts at 176 is three well-conditioned
+ * numbers pretending to be one badly-conditioned one. A group with no width, or
+ * too few distinct positions to bend through, has no curve in it: the fit falls
+ * back to the straight line rather than to nothing, which is the same choice
+ * this file makes everywhere a group is too thin to estimate what it was asked.
+ */
+export function fitCurve(obs, want) {
+  const n = obs.length;
+  const x0 = obs.reduce((a, b) => a + b, 0) / n;
+  const varx = obs.reduce((a, b) => a + (b - x0) ** 2, 0) / Math.max(1, n - 1);
+  const s = varx > 0 ? Math.sqrt(varx) : 1;
+  const t = obs.map((x) => (x - x0) / s);
+
+  let s1 = 0;
+  let s2 = 0;
+  let s3 = 0;
+  let s4 = 0;
+  let y0 = 0;
+  let y1 = 0;
+  let y2 = 0;
+  for (let i = 0; i < n; i += 1) {
+    const u = t[i];
+    const uu = u * u;
+    s1 += u;
+    s2 += uu;
+    s3 += uu * u;
+    s4 += uu * uu;
+    y0 += want[i];
+    y1 += u * want[i];
+    y2 += uu * want[i];
+  }
+  // The normal equations for [1, t, t²], solved by hand rather than by a matrix
+  // library this package does not have. Cramer's rule on a symmetric 3×3.
+  const m = [[n, s1, s2], [s1, s2, s3], [s2, s3, s4]];
+  const det3 = (a) =>
+    a[0][0] * (a[1][1] * a[2][2] - a[1][2] * a[2][1]) -
+    a[0][1] * (a[1][0] * a[2][2] - a[1][2] * a[2][0]) +
+    a[0][2] * (a[1][0] * a[2][1] - a[1][1] * a[2][0]);
+  const d = det3(m);
+  const sub = (col, v) => det3(m.map((row, i) => row.map((x, j) => (j === col ? v[i] : x))));
+  const scale = Math.max(1, Math.abs(n * s2 * s4));
+  if (!Number.isFinite(d) || Math.abs(d) < 1e-9 * scale) {
+    const straight = fitLine(obs, want);
+    return { c: straight.b + straight.a * x0, b: straight.a * s, a: 0, x0, s, sd: straight.sd, bent: false };
+  }
+  const v = [y0, y1, y2];
+  const c = sub(0, v) / d;
+  const b = sub(1, v) / d;
+  const a = sub(2, v) / d;
+  let e = 0;
+  for (let i = 0; i < n; i += 1) {
+    const g = want[i] - (a * t[i] * t[i] + b * t[i] + c);
+    e += g * g;
+  }
+  return { a, b, c, x0, s, sd: Math.sqrt(e / Math.max(1, n - 3)), bent: true };
+}
+
+/** Where a fitted curve says a mark at this position should move to. */
+export const atCurve = (f, x) => {
+  const t = (x - f.x0) / f.s;
+  return f.a * t * t + f.b * t + f.c;
+};
+
+/**
+ * What a line's own correction says about one mark, whichever shape it has.
+ *
+ * One copy, used by the correction and by its shuffled control alike, so a new
+ * rung cannot be right in the model and wrong in the control that is supposed to
+ * refute it — which would make the control pass by agreeing with nothing.
+ */
+function alongLine(grain, l, r) {
+  if (!l) return { dx: 0, dy: 0 };
+  if (grain === "line") return { dx: l.dx, dy: l.dy };
+  const cx = centreX(r);
+  if (grain === "line-tilt") return { dx: l.x.a * cx + l.x.b, dy: l.y.a * cx + l.y.b };
+  return { dx: atCurve(l.x, cx), dy: atCurve(l.y, cx) };
+}
+
 /** Every group a keying function names, with its rows, ink-empty rows dropped. */
 export function groupBy(rs, key) {
   const g = new Map();
@@ -157,20 +283,16 @@ export function correctionFor(grain, train, floor = FLOOR) {
   let line = new Map();
   if (grain === "line") {
     line = shiftsBy(after, lineKey, floor);
-    finer = (r) => line.get(lineKey(r)) ?? { dx: 0, dy: 0 };
-  } else if (grain === "line-tilt") {
+  } else if (grain === "line-tilt" || grain === "line-curve") {
+    const need = Math.max(floor, PER_TERM * TERMS[grain]);
+    const shape = grain === "line-tilt" ? fitLine : fitCurve;
     for (const [k, xs] of groupBy(after, lineKey)) {
-      if (xs.length < floor) continue;
+      if (xs.length < need) continue;
       const cx = xs.map(centreX);
-      line.set(k, { x: fitLine(cx, xs.map((r) => r.dx)), y: fitLine(cx, xs.map((r) => r.dy)) });
+      line.set(k, { x: shape(cx, xs.map((r) => r.dx)), y: shape(cx, xs.map((r) => r.dy)) });
     }
-    finer = (r) => {
-      const l = line.get(lineKey(r));
-      if (!l) return { dx: 0, dy: 0 };
-      const cx = centreX(r);
-      return { dx: l.x.a * cx + l.x.b, dy: l.y.a * cx + l.y.b };
-    };
   }
+  if (grain !== "page") finer = (r) => alongLine(grain, line.get(lineKey(r)), r);
 
   const apply = (r) => {
     const p = page.get(r.page);
@@ -202,9 +324,8 @@ export function shuffledCorrectionFor(grain, train, floor = FLOOR) {
     if (!p) return { dx: 0, dy: 0 };
     const l = built.lines.get(swap.get(lineKey(r)));
     if (!l) return { dx: p.dx, dy: p.dy };
-    if (grain === "line") return { dx: p.dx + l.dx, dy: p.dy + l.dy };
-    const cx = centreX(r);
-    return { dx: p.dx + l.x.a * cx + l.x.b, dy: p.dy + l.y.a * cx + l.y.b };
+    const f = alongLine(grain, l, r);
+    return { dx: p.dx + f.dx, dy: p.dy + f.dy };
   };
   return { ...built, apply };
 }
