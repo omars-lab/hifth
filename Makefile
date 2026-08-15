@@ -229,6 +229,7 @@ ci: core ## Full local mirror of the CI build-test-gate job, IN CI ORDER
 	$(PNPM) gate:map
 	$(PNPM) gate:use-cases
 	$(PNPM) gate:issues
+	$(PNPM) gate:tasks
 	$(PNPM) gate:decisions
 	$(PNPM) gate:quran-meta
 	$(PNPM) gate:tajweed
@@ -393,6 +394,20 @@ issues: ## What is still open, worst first:  make issues  ·  make issues ID=<id
 .PHONY: issues-doc
 issues-doc: ## Re-render docs/issues.md from docs/issues.json and its four registers
 	@node scripts/build-issues-doc.mjs
+
+.PHONY: tasks
+tasks: ## What is still open, by whose turn it is:  make tasks
+	@# The same facts as `make issues`, cut the other way. Worst-first is the
+	@# order you want when you are choosing what to fix; whose-turn-is-it is the
+	@# order you want when you have an hour and are asking what only you can
+	@# move. Two of the three registers it reads — the open decisions and the
+	@# checks a machine cannot run — appear in the issue index only as bare
+	@# identifiers, so this is the only page that shows them by name.
+	@node scripts/gate-tasks.mjs --list
+
+.PHONY: tasks-doc
+tasks-doc: ## Re-render docs/tasks.md from the decisions, ledger, issues and PLAN registers
+	@node scripts/build-tasks-doc.mjs
 
 .PHONY: decisions
 decisions: ## What has been decided and what is still open:  make decisions  ·  make decisions ID=<id>

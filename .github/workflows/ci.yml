@@ -215,6 +215,15 @@ jobs:
       - name: Gate — every open item is indexed, and the index still resolves
         run: pnpm gate:issues
 
+      # docs/tasks.md is the same open items cut by whose turn it is, rendered
+      # from the decision register, the validation ledger, the issue index and
+      # the roadmap at once. It is the page somebody opens to decide what to
+      # spend an hour on, so a stale row does real damage: it sends them at
+      # something already finished, or hides the thing that was waiting. This
+      # checks the committed copy was built from the registers as they stand.
+      - name: Gate — the open-work page was built from today's registers
+        run: pnpm gate:tasks
+
       # docs/decisions.json indexes every decision record, and holds the two
       # links that make an open one answerable by somebody who has never opened
       # this repo: the published page and the copy checked in beside it. This
