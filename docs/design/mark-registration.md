@@ -1826,6 +1826,41 @@ change and it is also a reason the two halves are not one population.
 What would answer it: the same marks answered both ways, by the same reader, far enough apart
 that they are not remembering. Until then the two are read apart and never averaged.
 
+### ⑯ Whether a finger resting on the rectangle was banked as a placement · **fixed**
+
+Reaching for the ink under the rectangle is the commonest gesture on that page, and until
+2026-08-15 it could bank a placement nobody made.
+
+Two boundaries, in two different units, decided what a gesture was. A tap had to end within ten
+screen pixels of where it started **and** inside 600 ms. A drag banked a placement once it had
+moved more than 0.05 page units. At the framing that shows the whole word, ten screen pixels is
+about **1.5 page units** — thirty times that floor — so the two boundaries left a gap, and a
+finger that rested for three-quarters of a second with a few pixels of tremor fell straight into
+it: too slow to be a tap, far too far to be nothing. What it banked was a placement of nearly
+half a unit, on a mark that is 5.6 by 3.6, and there is no way to see it in the file afterwards.
+A phantom placement is a well-formed placement.
+
+The repair is one boundary, in one unit, with no clock. Ten screen pixels decides, and both the
+600 ms and the page-unit floor are gone. The clock never asked anything worth knowing — a slow
+tap is still a tap, and a reader steadying their hand is not making a different statement — and
+only distance can answer whether a finger stayed still. Screen pixels rather than page units
+because a finger is the same size on every card and a page unit is not.
+
+**What this does not clear.** Every transcript banked before the fix carries whatever it
+produced, and nothing distinguishes those placements from real ones. The affected marks are the
+ones a reader reached for by tapping the ink, which is also the population ⑮ says must be read
+apart from hand-placed answers — so the same caveat covers both, and the rates quoted for the
+sittings sat before this date are quoted with it.
+
+The same audit corrected two smaller things about the same gesture. Which piece of ink a tap
+reaches was decided by area alone across everything within a fingertip of slack, so a finger
+squarely inside a large piece could be answered with a small piece it had merely come near:
+aiming at the dead centre of a piece returned a **different** piece on 3.7% of aims at the wide
+framing, and 2.3% of taps on blank paper reached past nearer ink to something smaller further
+away. Ranking landed-on above came-near takes the first to 1.2% and ends the second. And a tap
+that reaches no ink at all now says so, because saying nothing is indistinguishable from a tap
+the page never received, and a reader who cannot tell those apart stops pointing at ink.
+
 ## How can someone look at this for themselves?
 
 The measurement writes a page of evidence: the worst verdicts first, each one drawn at a size
