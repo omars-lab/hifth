@@ -2,7 +2,7 @@
 
 ## Context
 
-Sixteen sittings are about to be sat. Between them they cover all **1,851** marks the machine
+Sixteen sittings are about to be sat. Between them they cover all **1,877** marks the machine
 could not place from ink — every one seen, not sampled — at roughly an hour each. That is
 sixteen hours of the scarcest thing this project has.
 
@@ -31,11 +31,11 @@ the card; and four **destructive or load-bearing** controls are under 44px.
 
 **Decided with the reader, 2026-08-14:** the buttons get pinned to the bottom of the screen and
 the picture keeps its own shape (nothing ever shrinks); the fixes land **before** part 1 is sat,
-which costs nothing because the sixteen parts were re-dealt and **0 of 1,851** have been
+which costs nothing because the sixteen parts were re-dealt and **0 of 1,877** have been
 answered on the new deal; scope is the three data-corrupting findings plus the four
 time-and-accuracy ones.
 
-**Outcome:** all 1,851 marks are answered on one instrument, and the transcript means what it
+**Outcome:** all 1,877 marks are answered on one instrument, and the transcript means what it
 says.
 
 ### What the audit explicitly warns against, and why
@@ -134,7 +134,7 @@ Requires `viewport-fit=cover` on the viewport meta (~511) or `env()` resolves to
 also the whole of the safe-area finding.
 
 The picture keeps its natural per-card shape (295–410px judging, 266–529px identifying, measured
-across all 1,851 marks). Nothing shrinks, `ptIn()` is untouched, and on the tallest cards the
+across all 1,877 marks). Nothing shrinks, `ptIn()` is untouched, and on the tallest cards the
 reader scrolls the picture behind a dock that never moves. **Explicitly not doing:** normalising
 the two viewBoxes to a constant aspect inside `crop()` — it either shrinks the mark or makes
 every card as tall as the tallest, and the ring clip would have to be re-ordered after the
@@ -262,7 +262,7 @@ result must tighten something automated, and the gate fails if it tunes nothing.
 
 ## Verification
 
-1. Rebuild all sixteen and confirm the deal is unchanged — same slice fingerprint, 1,851 marks
+1. Rebuild all sixteen and confirm the deal is unchanged — same slice fingerprint, 1,877 marks
    across sixteen parts, 0 answered marks re-asked:
    `for n in 1..16; node scripts/build-mark-report.mjs --rows out/mark-rows.line-tilt.json
    --set fallback --seed 23 --part $n/16 --answered … --out out/sit.fallback-$n-of-16.html`

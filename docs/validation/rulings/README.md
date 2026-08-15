@@ -112,6 +112,13 @@ and the transcript stays beside it for anybody who wants to check the collapse.
 pnpm report:settle packages/etl/out/<transcript>.json --rows packages/etl/out/<displacements>.json
 ```
 
+Pass the running log the serving side keeps as well, whenever there is one. There are two ways
+an answer can leave a sitting — banked as it is given, or written into a file when the reader
+hands over — and a mark answered either way is taken off the screen for good. So an answer that
+was banked and never handed over is work nobody can see was done: on the first sitting over the
+marks we could not place from ink, that was twenty-five marks. The same answer usually arrives
+by both routes and is counted once, so nothing is inflated by reading both.
+
 Two things about the name. It carries the **population** the sitting was drawn from, because the
 marks placed from their own printed ink and the marks that fell back to the printed line are two
 different options being decided between, and a rate over both together is a fact about whichever

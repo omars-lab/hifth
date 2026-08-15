@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" data-ledger-hash="d5e61ae22fe0">
+<html lang="en" data-ledger-hash="78290e155c76">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -127,7 +127,7 @@ li.struck .expect::before { content: "machine "; color: var(--green); }
   <p class="rule">Every result here must tighten something automated — a threshold, a
   fixture, a gate. That is what <b>tunes</b> is for at the foot of each card. A verdict
   that tunes nothing has to be bought again by hand, forever.</p>
-  <p class="src">Generated from <code>docs/validation/ledger.json</code> · <code>d5e61ae22fe0</code>
+  <p class="src">Generated from <code>docs/validation/ledger.json</code> · <code>78290e155c76</code>
   · never edit this file — run <code>make guide</code></p>
 </header>
 
@@ -1066,10 +1066,10 @@ li.struck .expect::before { content: "machine "; color: var(--green); }
         
       </li>
       <li>
-        <label class="do"><input type="checkbox" data-step="placement-what-kind-of-wrong:4"><span>Drag the rectangle only when it is the right size for its mark and simply in the wrong place. Grab the rectangle itself — a drag that starts anywhere else scrolls the page.</span></label>
-        <p class="expect">It follows your finger and stops where you let go, and the answer records how far you moved it and where it ended up relative to the box that ships. There is also a pad of arrows for the last fraction of a unit, and a button that puts the rectangle back where it started if you would rather begin again — the pad and the drag record the same thing, so it does not matter which you use or how many times you change your mind. Only where it finally rests is read.</p>
+        <label class="do"><input type="checkbox" data-step="placement-what-kind-of-wrong:4"><span>When the rectangle is the right size and simply on the wrong mark, tap the mark it should be on. Tap it again to take that back, and tap the other half as well when the mark is printed in two pieces. Dragging it there by hand still works and so does the pad of arrows — grab the rectangle itself, because a drag that starts anywhere else scrolls the page.</span></label>
+        <p class="expect">A tap lights the ink you chose and puts the rectangle round it, at the size of that ink. A drag follows your finger and stops where you let go. Either way the answer records where the rectangle ended up relative to the box that ships, there is a button that puts it back where it started if you would rather begin again, and it does not matter how many times you change your mind: only where it finally rests is read.</p>
         
-        <p class="why">This is the one answer that is a distance, and it is the only one that can be applied to anything arithmetically — so it has to mean exactly one thing. A rectangle dragged because it was too small records a displacement that is really a size complaint, and that number would then be averaged in with real ones. It grabs only on the rectangle for a plainer reason: on a phone the picture is most of the screen, and a page where scrolling past it silently records a placement nobody made is worse than a page that records nothing.</p>
+        <p class="why">This is the one answer that is a distance, and it is the only one that can be applied to anything arithmetically — so it has to mean exactly one thing. A rectangle dragged because it was too small records a displacement that is really a size complaint, and that number would then be averaged in with real ones. It grabs only on the rectangle for a plainer reason: on a phone the picture is most of the screen, and a page where scrolling past it silently records a placement nobody made is worse than a page that records nothing. Tapping was added after the first sitting measured what the by-hand loop costs: 127 of the 128 rectangles were moved, over 226 separate goes, a median of two units of travel each. Choosing which mark is meant is the judgement only you can give; how far across and how far down is something the print already knows, so pointing hands that half back. What is recorded is which way you answered — and a press of the arrows on top of a tap makes it a hand-placed answer again — because the two are read apart and never averaged together.</p>
         
       </li>
       <li>
