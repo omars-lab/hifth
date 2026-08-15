@@ -7,6 +7,7 @@ a second time, on a different machine, months later.
 ```
 docs/validation/rulings/<when>-<check-id>.seed<N>.json
 docs/validation/rulings/<when>-<check-id>.seed<N>.reader<X>.json   # when two people sat it
+docs/validation/rulings/<when>-<check-id>-<population>.seed<N>.settled.json   # one row per mark
 ```
 
 ## Why these are here and not in a downloads folder
@@ -92,6 +93,34 @@ pnpm adjudicate:score docs/validation/rulings/<file>      # the forced choices
 
 Both take `--shift <path>` when the displacements they were made against are not the ones
 sitting in `packages/etl/out/`.
+
+## The settled ones, and why the route is thrown away
+
+A `.settled.json` is a third kind, and it is the only one in this directory that is not the raw
+answers. The sittings where a person can move a rectangle record every press: a mark pushed left,
+back right, left again and finally let go arrives as four statements about one mark. That list is
+the **route**. What the reader said is the **resting place**, and settling collapses one to the
+other — position and size take the last thing the reader did, the words they used gather and
+repeat once, and what the route leaves behind is kept only as a count.
+
+Reading the route instead is not a subtle error and it has already cost this project a number:
+averaging the presses says a mark never moved, and adding up their sizes says it moved twice as
+far as it did. Neither reads as wrong. So the settled file is what anything downstream quotes,
+and the transcript stays beside it for anybody who wants to check the collapse.
+
+```
+pnpm report:settle packages/etl/out/<transcript>.json --rows packages/etl/out/<displacements>.json
+```
+
+Two things about the name. It carries the **population** the sitting was drawn from, because the
+marks placed from their own printed ink and the marks that fell back to the printed line are two
+different options being decided between, and a rate over both together is a fact about whichever
+mix was drawn rather than about the print. And the date is the **sitting's**, never the day the
+settling was run — a file re-settled next month is about the same hour it was always about, and
+stamping it with today would file one hour under two dates.
+
+The `review-sitting` skill is the whole route from a handed-over transcript to this file and on
+into the registers that own what it found.
 
 ## The displacements, beside the answers that were given about them
 
