@@ -74,7 +74,7 @@
 import { readFileSync } from "node:fs";
 import { dirname, isAbsolute, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { correctionFor } from "./lib/registration-grain.mjs";
+import { asDrawn, settle } from "./lib/mark-settle.mjs";
 import { wilson } from "./lib/mark-ink.mjs";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
@@ -140,22 +140,11 @@ const allRows = Array.isArray(parsedRows) ? parsedRows : parsedRows.rows;
 
 const radius = Number(doc.radius ?? 3);
 const iouFloor = Number(doc.iouFloor ?? 0.55);
-const EPS = 1e-6;
-// Per axis, because the search window is a square — the same reasoning as the
-// builder's, and the same error this repo has already paid for once.
-const atEdge = (r) => Math.abs(Math.abs(r.dx) - radius) < EPS || Math.abs(Math.abs(r.dy) - radius) < EPS;
-const placed = (r) => r.iouBest >= iouFloor && !atEdge(r);
-const ruleOf = (r) => (placed(r) ? "ink" : "line-tilt");
-
-const byId = new Map();
-for (const r of allRows) byId.set(`${r.page}:${r.k}`, r);
-
-const { apply } = correctionFor("line-tilt", allRows);
-/** Where the sitting drew the rectangle — the builder's rule, re-run here. */
-const drawnAt = (r) => {
-  const c = placed(r) ? { dx: r.dx, dy: r.dy } : apply(r);
-  return [r.box[0] + c.dx, r.box[1] + c.dy, r.box[2], r.box[3]];
-};
+// Where the sitting drew each rectangle, and which population each mark is in. Both
+// come from lib/mark-settle.mjs so this and the settler rebuild the same picture — a
+// second copy of that arithmetic would let one sitting settle two ways, and the
+// disagreement would only show up as two documents quietly contradicting each other.
+const { byId, drawnAt, ruleOf } = asDrawn(allRows, { radius, iouFloor });
 
 const said = Array.isArray(doc.said) ? doc.said : [];
 const unknown = [];
@@ -195,7 +184,7 @@ const shown = Number(doc.shown ?? 0);
  * cards. `seen` is a count of cards passed, so the population mix of the denominator
  * is exactly the mix of the first `seen` of them.
  */
-const seen = doc.seen == null ? null : Number(doc.seen);
+const seenSaid = doc.seen == null ? null : Number(doc.seen);
 
 /**
  * The builder draws in page-then-index order, so the answers can be put back in the
@@ -216,6 +205,37 @@ const cardOrder = [...new Set(said.map((e) => e.id))].sort((a, b) => {
  * the difference between a finding and a non-finding.
  */
 const lowBound = cardOrder.length;
+
+/**
+ * You cannot have said something about a mark you never looked at, so the count of
+ * marks looked at can never be smaller than the count of marks spoken about. That is
+ * arithmetic, not a judgement about the reader, and it is the one thing this file can
+ * check about its own denominator without leaving the file.
+ *
+ * It is checked because it has already been wrong. A sitting arrived saying nineteen
+ * marks had been looked at and carrying answers about a hundred and fifteen of them;
+ * the instrument had started reporting how much of the sitting was LEFT rather than
+ * how much of it had happened. Every rate below is answers over this number, so the
+ * report read six hundred per cent, then two thousand two hundred, with intervals
+ * that were not numbers at all. A percentage over one hundred is at least visibly
+ * absurd. A denominator wrong by a third would not have been, and nothing here would
+ * have caught it.
+ *
+ * Raising it to the floor rather than refusing the file: the floor is a real,
+ * defensible reading of the transcript — the reader looked at exactly the marks they
+ * spoke about — and it is the conservative one, since it is the smallest denominator
+ * consistent with what was written, and so the largest rate. It is also the only way
+ * the transcripts already on disk stay readable, and they cannot be sat again.
+ */
+const seen = seenSaid == null ? null : Math.max(seenSaid, lowBound);
+if (seenSaid != null && seenSaid < lowBound) {
+  console.log(
+    `\n! This sitting says it looked at ${seenSaid} marks and says something about ${lowBound} of them,` +
+      "\n  which cannot both be true. Every rate below is over marks looked at, so it is being" +
+      `\n  read as ${lowBound} — the fewest consistent with the file, which makes the rates the` +
+      "\n  highest the file can support. Treat them as an upper bound and not as a measurement.",
+  );
+}
 
 /* ── the report ───────────────────────────────────────────────────────────── */
 
@@ -324,8 +344,17 @@ for (const rule of [...groups.keys()].sort()) {
   say();
   say("  Our placement is wrong on this mark — moved, wrong shape, or boxed elsewhere:");
   const gradable = (dHi || 0) - defects.size;
-  const [fLo, fHi] = wilson(faulted.size, Math.max(1, gradable));
-  say(`    ${faulted.size} of ${gradable} gradable marks — ${pct(faulted.size / Math.max(1, gradable))}, 95% ${pct(fLo)}–${pct(fHi)}`);
+  /**
+   * A mark can carry more than one word, so a mark called odd in the print can also
+   * have been moved — and most of them were, because a reader who thinks the print is
+   * wrong still puts the rectangle where they think it belongs. Taking those marks out
+   * of the denominator and leaving them in the numerator counts them as our error while
+   * refusing to count them as an opportunity for one, which is a rate that can exceed
+   * one hundred per cent and did. Both ends move together or neither does.
+   */
+  const graded = new Set([...faulted].filter((id) => !defects.has(id)));
+  const [fLo, fHi] = wilson(graded.size, Math.max(1, gradable));
+  say(`    ${graded.size} of ${gradable} gradable marks — ${pct(graded.size / Math.max(1, gradable))}, 95% ${pct(fLo)}–${pct(fHi)}`);
   if (defects.size) {
     say(`    ${defects.size} ${defects.size === 1 ? "mark is" : "marks are"} out of the denominator because the print itself was`);
     say("    called into question there — not our error, and not evidence that we are right either.");
@@ -385,16 +414,17 @@ for (const rule of [...groups.keys()].sort()) {
    * of them been dragged the better part of two units. The rectangle's final resting
    * place is the reader's statement; the route it took there is not.
    *
-   * The transcript is walked in order and the last placement carrying a total wins.
-   * A hand-over has its retractions already applied, so what survives here is only
-   * what the reader still stood behind when they handed it over.
+   * The rule itself lives in lib/mark-settle.mjs, because the settler writes the same
+   * collapse out to a file that gets committed and argued from. Two copies of it would
+   * be two answers to "what did this mark end up saying", and the disagreement would
+   * only ever be found by somebody comparing a report against a ruling by eye.
    */
+  const rows = settle(evs);
   const finals = new Map();
   let goes = 0;
-  for (const e of evs) {
-    if (e.kind !== "placement") continue;
-    goes += 1;
-    if (Array.isArray(e.to)) finals.set(e.id, e);
+  for (const row of rows.values()) {
+    goes += row.goes;
+    if (row.to) finals.set(row.id, row);
   }
   if (finals.size) {
     /**

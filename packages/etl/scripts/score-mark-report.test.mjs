@@ -232,6 +232,65 @@ describe("what counts as our error", () => {
     expect(code).toBe(0);
     expect(out).toMatch(/10 of 10 gradable marks — 100\.0%/);
   });
+
+  /**
+   * A reader who thinks the print itself is wrong still puts the rectangle where they
+   * think it belongs, so a mark carries both words at once — and most of the fourteen
+   * called odd in the real sitting also carried a move. Taking such a mark out of the
+   * denominator while leaving it in the numerator counts it as our error and refuses to
+   * count it as an opportunity for one. It produced 112.9% and an interval of NaN to
+   * NaN on a real transcript, which is at least absurd on its face; the same mistake
+   * over a third of the cards would have looked like a measurement.
+   */
+  it("keeps a mark called odd in the print out of both ends of the rate, not just one", () => {
+    const said = [
+      say(INK_IDS[0], "placement", { by: [0.4, 0.1] }),
+      // The same mark, both words. It must leave the rate entirely.
+      say(INK_IDS[1], "placement", { by: [0.2, 0.2] }),
+      say(INK_IDS[1], "print-defect", { note: "the tooth is missing here" }),
+    ];
+    const { code, out } = run(sit({ said }));
+    expect(code).toBe(0);
+    expect(out).toMatch(/1 of 9 gradable marks — 11\.1%/);
+    expect(out).not.toMatch(/NaN/);
+    // Counted in, both are faults over all ten — which is the other reading, and the
+    // gap between the two is what that sentence exists to show.
+    expect(out).toMatch(/the rate would read 20\.0%/);
+  });
+});
+
+/**
+ * The denominator is the count of marks put in front of somebody, and the sitting page
+ * is the only thing that can know it. So the scorer takes it on trust — and it was
+ * wrong once, in a way that was invisible until the percentages went over a hundred:
+ * the page started reporting how much of the sitting was LEFT rather than how much of
+ * it had happened, and a transcript arrived claiming nineteen marks looked at while
+ * carrying answers about a hundred and fifteen.
+ *
+ * There is exactly one thing the scorer can check here without leaving the file, and
+ * this is it. It is arithmetic rather than judgement, so it holds against instruments
+ * that have not been written yet.
+ */
+describe("a denominator smaller than its own numerator", () => {
+  it("is raised to the fewest marks the file can be describing, and says so", () => {
+    const said = INK_IDS.slice(0, 6).map((id) => say(id, "wrong-shape"));
+    const { code, out } = run(sit({ said, seen: 2 }));
+    expect(code).toBe(0);
+    expect(out).toMatch(/says it looked at 2 marks and says something about 6 of them/);
+    expect(out).toMatch(/6 marks looked at/);
+    expect(out).toMatch(/6 of 6 gradable marks — 100\.0%/);
+    // Read as an upper bound, because the floor is the smallest denominator the file
+    // can support and therefore the largest rate.
+    expect(out).toMatch(/upper bound and not as a measurement/);
+  });
+
+  it("says nothing when the count is merely larger than the answers, which is normal", () => {
+    const said = INK_IDS.slice(0, 6).map((id) => say(id, "wrong-shape"));
+    const { code, out } = run(sit({ said, seen: 10 }));
+    expect(code).toBe(0);
+    expect(out).not.toMatch(/cannot both be true/);
+    expect(out).toMatch(/6 of 10 gradable marks — 60\.0%/);
+  });
 });
 
 describe("saying nothing is wrong", () => {

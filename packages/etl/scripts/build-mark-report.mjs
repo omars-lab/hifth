@@ -1811,9 +1811,31 @@ function retire() {
   return went;
 }
 
+/*
+ * Two different counts wear the same word, and mixing them up is how a sitting comes
+ * back reading two thousand per cent.
+ *
+ * On the screen, how many have been looked at is a fact about what is LEFT: the deck
+ * shrinks when marks are handed over, so the number under the card has to shrink with
+ * it or it goes on counting cards the reader can no longer reach. That is the one
+ * retiring recomputes.
+ *
+ * In the file, it is a fact about the WHOLE SITTING, and it is the denominator of the
+ * only rate this instrument produces. Passing a mark without saying anything is itself
+ * a verdict — it says nothing is wrong with it — so the rate is answers over marks
+ * actually put in front of somebody, and a mark handed over an hour ago was still put
+ * in front of them. That number can only ever go up.
+ *
+ * Everything already retired was answered, so it was looked at; what survives and has
+ * been passed is the rest. The two sets do not overlap, because retiring takes its
+ * marks out of the second as it puts them into the first. Retiring runs after this,
+ * so both halves are read here as they stood when the reader pressed the button.
+ *
+ * No backticks in here — this is inside a template literal in the builder.
+ */
 function handOver(mid) {
   flush();
-  const doc = { ...HEAD, finished: new Date().toISOString(), seen: seen, said: said, whole: !mid };
+  const doc = { ...HEAD, finished: new Date().toISOString(), seen: GONE.size + seen, said: said, whole: !mid };
   const name = "mark-report-" + HEAD.set + HEAD.slice + "." + HEAD.seed + ".json";
   // Counted before the deck moves under it: this is how many answers the file
   // carries, which is every answer of the sitting and not only the new ones.
