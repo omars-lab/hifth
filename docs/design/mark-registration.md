@@ -1721,6 +1721,50 @@ and counts are never combined. The fixture that would have caught the original i
 scorer's tests: one mark nudged one way, back, and out again, and a second moved once, asserting
 the printed middle is the distance and the count is two marks rather than four steps.
 
+### ⑬ Whether a sitting counts the marks it looked at or the marks it has left · **fixed**
+
+Every rate this section reports is a count of complaints over a count of marks looked at. The
+page that asks the questions was writing the wrong number into the second one: when a reader
+handed their work over, it banked how many marks were **still to go** rather than how many they
+had been through. On the sitting that found it, 115 marks were seen and the file said 19.
+
+A denominator too small does not produce a wrong-looking number, it produces an impossible one,
+and only because it was impossible did anybody notice: the rates came out at **600.0%**,
+**2280.0%** and `NaN%`. Had the reader stopped four fifths of the way instead of at the end, the
+same defect would have produced a plausible figure — a believable error rate over a denominator
+nothing in the file admitted was wrong — and it would have been quoted.
+
+What closed it is the count being written from what was answered rather than from what was left,
+and a second guard either side of it, because a page can always be got wrong again: both readers
+of a transcript now take the number of marks actually spoken about as a floor, and when they
+raise a claimed count to it they **print the file's name while doing it**. A reader who sees that
+line is being told there is a defect in the page, not a quirk of one file. It is a warning rather
+than a refusal on purpose — the sitting's answers are still good, and throwing an hour away over
+a miscounted header would be the more expensive mistake.
+
+The direction is the thing to remember. A count of marks somebody has looked at can only ever go
+up, so a count that falls is never a fact about the reader.
+
+### ⑭ Whether the marks a reader called odd are odd in the print or odd in our reading of it · **open**
+
+Fourteen marks, on fourteen separate pages, were set aside by a reader as *odd — I cannot say
+how*: not our rectangle in the wrong place, but something about the printed mark itself they
+could not read as ordinary. They are six fathas, three successive kasratans, two successive
+dammatans, one damma and two hamzas — a spread across the vocabulary rather than one name
+behaving badly, which is the first thing that would have made this our problem instead.
+
+They are held out of the denominator of that sitting's error rate, and being held out is exactly
+what leaves them unsettled: they are neither counted against the correction nor evidence for it,
+and a category that costs nothing either way is a category that quietly grows. Nothing here can
+answer it. Every instrument in this document reads the same bytes the reader was shown, so a
+reading that is wrong about what the print contains is wrong identically in all of them, and the
+question is settled only by holding those pages against another copy of this print.
+
+What would answer it: the pages, checked by eye against a second printing. Either the oddity is
+in the print — in which case it is a defect in vendored data and belongs upstream, and the marks
+stay out of every rate on purpose — or it is in our rendering of it, in which case fourteen marks
+are the visible end of something that is also silently wrong on marks nobody flagged.
+
 ## How can someone look at this for themselves?
 
 The measurement writes a page of evidence: the worst verdicts first, each one drawn at a size
