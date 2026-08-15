@@ -57,6 +57,33 @@
  * records every file that went in, so a row can always be traced back to the hour that
  * produced it.
  *
+ * ## The running log counts too
+ *
+ * There are two routes an answer can take out of a sitting, and until this read one of
+ * them, one of them led nowhere. A reader on the served page banks every answer as they
+ * give it; handing over writes the same answers into a file. The builder has always
+ * honoured both — a mark answered either way drops out of the next deck — so a mark
+ * answered and never handed over was being taken off the screen forever and left out of
+ * every ruling. That is not a small loss: it is exactly the work nobody can see was
+ * done, and on the first fallback sitting it was twenty-five marks.
+ *
+ * So a `.jsonl` running log may be passed alongside the hand-overs. The same statement
+ * usually arrives by both routes, and it is one statement, not two: a mark answered
+ * once must not come out of this having taken two goes to settle, because how many goes
+ * it took is a finding about the controls and doubling it is a made-up finding. Copies
+ * are matched on their whole content and counted once.
+ *
+ * Everything is then ordered by when it was said — a banked answer by its own stamp, a
+ * handed-over one by the hand-over that carried it, which is the latest it can have
+ * been said. That ordering is what makes the last thing the reader did the last thing
+ * this reads.
+ *
+ * A log carries no head, so there is no fingerprint on it to check. What checks it is
+ * the same thing that checks every answer in a transcript: each one is looked up in the
+ * displacements and refused if the mark is not there or was drawn by the other rule.
+ * That is the per-answer form of the same guarantee, which is why a log may not be
+ * settled on its own — with no transcript there is no fingerprint to check at all.
+ *
  * ## What it refuses
  *
  * The same two refusals as the scorer, for the same reason: a sitting read against
@@ -93,10 +120,13 @@ for (let i = 0; i < argv.length; i += 1) {
 }
 if (!paths.length) {
   process.stderr.write(
-    "usage: settle-mark-report.mjs <transcript.json>... [--rows <rows.json>] [--out <path>] [--issues]\n",
+    "usage: settle-mark-report.mjs <transcript.json>... [<banked.jsonl>] [--rows <rows.json>]\n" +
+      "       [--out <path>] [--issues]\n",
   );
   process.exit(2);
 }
+const logPaths = paths.filter((p) => p.endsWith(".jsonl"));
+const sittingPaths = paths.filter((p) => !p.endsWith(".jsonl"));
 
 const die = (msg) => {
   process.stderr.write(`refused: ${msg}\n`);
@@ -116,13 +146,20 @@ function fingerprint(s) {
 
 /* ── the sittings, oldest first ───────────────────────────────────────────── */
 
-const docs = paths.map((p) => {
+const docs = sittingPaths.map((p) => {
   const doc = JSON.parse(readFileSync(p, "utf8"));
   if (doc.built !== "mark-report") {
     die(`${p} is not a mark-report transcript (built: ${doc.built ?? "absent"}).`);
   }
   return { path: p, doc };
 });
+if (!docs.length) {
+  die(
+    "a running log on its own has no head, so there is nothing to check it against.\n" +
+      "  Pass the hand-over from the same sitting as well: its fingerprint is what says\n" +
+      "  these answers are about the rectangles that are on disk today.",
+  );
+}
 /**
  * A sitting with no hand-over time sorts first, because the only transcripts without
  * one are older than the field, and older is exactly where they belong.
@@ -166,20 +203,120 @@ const { byId, drawnAt, ruleOf } = asDrawn(allRows, { radius, iouFloor });
 
 /* ── the answers, checked against the displacements before they are believed ─ */
 
+/**
+ * One statement, however many routes it took to get here.
+ *
+ * The page writes each answer once, as one object, and both routes carry that object
+ * unchanged — so two copies that agree on every field are one thing the reader did,
+ * arriving twice. Keys are sorted before comparing because only the values are the
+ * statement; the order they happen to be written in is not.
+ */
+const contentOf = (e) =>
+  JSON.stringify(
+    Object.keys(e)
+      .sort()
+      .map((k) => [k, e[k]]),
+  );
+
+/**
+ * Copies are counted, not merely noticed. A reader who presses the same button twice
+ * has done two things, and a log that carries both while a hand-over carries both must
+ * not come out as four — nor as one, which would quietly undo a real second press. So
+ * each source contributes only what it holds *beyond* what has already been gathered.
+ */
+const held = new Map();
+const gathered = [];
+function gather(at, list) {
+  const want = new Map();
+  const items = [];
+  for (const e of list) {
+    const key = contentOf(e);
+    want.set(key, (want.get(key) || 0) + 1);
+    items.push({ at, key, e });
+  }
+  const room = new Map();
+  for (const [key, n] of want) room.set(key, n - (held.get(key) || 0));
+  let taken = 0;
+  for (const item of items) {
+    const r = room.get(item.key);
+    if (!(r > 0)) continue;
+    room.set(item.key, r - 1);
+    gathered.push(item);
+    taken += 1;
+  }
+  for (const [key, n] of want) held.set(key, Math.max(held.get(key) || 0, n));
+  return taken;
+}
+
+/**
+ * The banked ones first, because they carry the time they were actually said. A
+ * hand-over carries no time per answer, so its statements are stamped with the moment
+ * it was handed over — the latest they can have been said, which is the honest reading
+ * and the one that leaves an unhanded-over answer sitting where it really happened.
+ */
+const logs = logPaths.map((p) => {
+  const events = [];
+  let n = 0;
+  for (const line of readFileSync(p, "utf8").split("\n")) {
+    if (!line.trim()) continue;
+    n += 1;
+    let rec;
+    try {
+      rec = JSON.parse(line);
+    } catch {
+      die(`${p} line ${n} is not JSON. A running log is one banked answer per line.`);
+    }
+    const ev = rec.payload || rec;
+    if (ev && typeof ev.id === "string") events.push({ at: String(rec.t ?? ""), ev });
+  }
+  return { path: p, lines: n, events };
+});
+for (const log of logs) {
+  for (const { at, ev } of log.events) gather(at, [ev]);
+  log.marks = new Set(log.events.map((e) => e.ev.id));
+}
+for (const { doc } of docs) {
+  gather(String(doc.finished ?? ""), Array.isArray(doc.said) ? doc.said : []);
+}
+gathered.sort((a, b) => a.at.localeCompare(b.at));
+
+/**
+ * What the hand-overs between them carry, so the log can be asked the only question
+ * worth asking of it: what is in it that no hand-over has. That difference is the
+ * measure of how much of the reader's work was invisible before this read it.
+ */
+const handedOver = new Set();
+const handedContent = new Map();
+for (const { doc } of docs) {
+  for (const e of Array.isArray(doc.said) ? doc.said : []) {
+    handedOver.add(e.id);
+    const key = contentOf(e);
+    handedContent.set(key, (handedContent.get(key) || 0) + 1);
+  }
+}
+for (const log of logs) {
+  const spare = new Map(handedContent);
+  log.added = 0;
+  for (const { ev } of log.events) {
+    const key = contentOf(ev);
+    const n = spare.get(key) || 0;
+    if (n > 0) spare.set(key, n - 1);
+    else log.added += 1;
+  }
+}
+
 const said = [];
 const unknown = [];
 const mismatched = [];
-for (const { doc } of docs) {
-  for (const e of Array.isArray(doc.said) ? doc.said : []) {
-    const r = byId.get(e.id);
-    if (!r) {
-      unknown.push(e.id);
-      continue;
-    }
-    const truth = ruleOf(r);
-    if (e.rule != null && e.rule !== truth) mismatched.push(`${e.id}: says ${e.rule}, is ${truth}`);
-    said.push({ ...e, rule: truth });
+for (const { e } of gathered) {
+  const r = byId.get(e.id);
+  if (!r) {
+    unknown.push(e.id);
+    continue;
   }
+  const truth = ruleOf(r);
+  if (e.rule != null && e.rule !== truth) mismatched.push(`${e.id}: says ${e.rule}, is ${truth}`);
+  said.push({ ...e, rule: truth });
 }
 if (unknown.length) {
   die(
@@ -278,6 +415,20 @@ const out = {
       spoke,
     };
   }),
+  /**
+   * The running log, kept apart from the sittings on purpose. It is not another hour
+   * in front of the screen — it is the same hours arriving by the other route — so
+   * putting it in `sittings` would double every denominator computed from this file.
+   * What it is worth recording is the part only it has: `added`, the statements no
+   * hand-over carried, and `only`, the marks nobody handed over at all.
+   */
+  banked: logs.map((log) => ({
+    file: basename(log.path),
+    statements: log.lines,
+    added: log.added,
+    marks: log.marks.size,
+    only: [...log.marks].filter((id) => !handedOver.has(id)).length,
+  })),
   marks: marks.length,
   faulted: faults.length,
   defects: defects.length,
@@ -314,6 +465,16 @@ say(`${outPath.replace(`${ROOT}/`, "")}`);
 say(`  ${docs.length} ${docs.length === 1 ? "sitting" : "sittings"} · ${said.length} answers · ${marks.length} marks`);
 const looked = out.sittings.reduce((a, s) => a + Number(s.looked ?? 0), 0);
 if (looked) say(`  ${looked} marks were put in front of somebody across them`);
+for (const b of out.banked) {
+  say(`  ${b.file} banked ${b.statements} answers as they were given, about ${b.marks} marks.`);
+  if (b.added) {
+    say(`    ${b.added} of them reached no hand-over, and ${b.only} of those marks are in no`);
+    say("    hand-over at all — answered, taken off the screen, and until now written down");
+    say("    nowhere. The rest arrived by both routes and are counted once.");
+  } else {
+    say("    Every one of them also reached a hand-over, so it added nothing but agreement.");
+  }
+}
 const undercounted = out.sittings.filter((s) => s.seen != null && Number(s.seen) < s.spoke);
 for (const s of undercounted) {
   say(`  ! ${s.file} says it looked at ${s.seen} and says something about ${s.spoke}, which cannot both be`);

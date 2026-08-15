@@ -353,3 +353,96 @@ describe("bad news is not a broken build", () => {
     expect(run(sit({ said })).out).not.toMatch(/a measurement of the sitting/);
   });
 });
+
+/**
+ * There are two ways out of a sitting and until recently only one of them led here.
+ * The served page banks every answer as it is given; handing over writes the same
+ * answers to a file. The builder honours both, so a mark answered and never handed
+ * over was dropped from the next deck and written down nowhere — invisible work, and
+ * the more of it a reader does the worse it gets.
+ *
+ * What these hold is the arithmetic of reading both without double-reading either.
+ */
+describe("the answers that were banked as they were given", () => {
+  /** A running log on disk: one banked answer per line, stamped when it arrived. */
+  function log(...lines) {
+    const path = join(dir, `banked-${(nth += 1)}.jsonl`);
+    writeFileSync(path, `${lines.map((l) => JSON.stringify(l)).join("\n")}\n`);
+    return path;
+  }
+  const bank = (t, payload) => ({ t, kind: "report", payload });
+
+  it("settles a mark the log heard about and no hand-over ever carried", () => {
+    const kept = ev(INK_IDS[0], "placement", { by: [-1, 0], to: [-1, 0] });
+    const lost = ev(INK_IDS[1], "placement", { by: [0, -2], to: [0, -2] });
+    const { code, ruling } = run(
+      sit({ said: [kept] }),
+      log(bank("2026-08-15T10:00:00.000Z", kept), bank("2026-08-15T11:00:00.000Z", lost)),
+    );
+    expect(code).toBe(0);
+    expect(ruling.settledMarks.map((m) => m.id)).toEqual([INK_IDS[0], INK_IDS[1]]);
+    expect(ruling.banked[0].only).toBe(1);
+    expect(ruling.banked[0].added).toBe(1);
+  });
+
+  /**
+   * The one that would have been silently wrong. How many goes a mark took is a
+   * finding about the pad, not about the mark, and a mark answered once that comes
+   * out of here having taken two goes is a finding nobody made.
+   */
+  it("counts a statement that arrived by both routes once, so a mark keeps its true number of goes", () => {
+    const said = ev(INK_IDS[0], "placement", { by: [-1, 0], to: [-1, 0] });
+    const { ruling } = run(sit({ said: [said] }), log(bank("2026-08-15T10:00:00.000Z", said)));
+    expect(ruling.answers).toBe(1);
+    expect(ruling.settledMarks[0].goes).toBe(1);
+    expect(ruling.banked[0].added).toBe(0);
+  });
+
+  /**
+   * A hand-over says only that its answers were given by the time it was handed over.
+   * A banked one says exactly when. So an answer banked after the hand-over is the
+   * later word on that mark, and it is the one that settles it.
+   */
+  it("lets an answer banked after the hand-over settle the mark", () => {
+    const id = INK_IDS[0];
+    const early = ev(id, "placement", { by: [-1, 0], to: [-1, 0] });
+    const late = ev(id, "placement", { by: [0, -2], to: [-1, -2] });
+    const { ruling } = run(
+      sit({ finished: "2026-08-15T12:00:00.000Z", said: [early] }),
+      log(bank("2026-08-15T11:00:00.000Z", early), bank("2026-08-15T13:00:00.000Z", late)),
+    );
+    expect(ruling.settledMarks[0].to).toEqual([-1, -2]);
+    expect(ruling.settledMarks[0].goes).toBe(2);
+  });
+
+  /**
+   * The log is the same hours arriving by the other route, never another hour in
+   * front of the screen. Filed among the sittings it would double every denominator
+   * anybody divides by, which is the failure this file exists to catch.
+   */
+  it("keeps the log out of the sittings, so no denominator counts the same hour twice", () => {
+    const said = ev(INK_IDS[0], "placement", { by: [-1, 0], to: [-1, 0] });
+    const { out, ruling } = run(sit({ said: [said] }), log(bank("2026-08-15T10:00:00.000Z", said)));
+    expect(ruling.sittings).toHaveLength(1);
+    expect(out).toMatch(/1 sitting · 1 answers · 1 marks/);
+    expect(out).toMatch(/10 marks were put in front of somebody/);
+  });
+
+  /** No head, no fingerprint, nothing saying these answers are about today's rectangles. */
+  it("refuses a running log with no hand-over beside it to check it against", () => {
+    const said = ev(INK_IDS[0], "placement", { by: [-1, 0], to: [-1, 0] });
+    const { code, err } = run(log(bank("2026-08-15T10:00:00.000Z", said)), "--rows", rowsPath);
+    expect(code).toBe(2);
+    expect(err).toMatch(/no head/);
+  });
+
+  /** A mark the displacements have never heard of is refused whichever route it took. */
+  it("checks a banked answer against the displacements exactly as it checks a handed-over one", () => {
+    const { code, err } = run(
+      sit({ said: [] }),
+      log(bank("2026-08-15T10:00:00.000Z", { ...ev(INK_IDS[0], "placement"), id: "1:99" })),
+    );
+    expect(code).toBe(2);
+    expect(err).toMatch(/not in the displacements/);
+  });
+});
