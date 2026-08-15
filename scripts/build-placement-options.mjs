@@ -84,7 +84,7 @@ const COPIES = [
 /** How far a rectangle may sit from its own ink before it is "badly out". */
 const FAR = 0.75;
 
-const GRAINS = ["shipped", "page", "line", "tilt"];
+const GRAINS = ["shipped", "page", "line", "tilt", "curve"];
 
 /**
  * When is the mark's own ink search allowed to place it? — option H's guard.
@@ -125,7 +125,7 @@ const atWindowEdge = (r) =>
 const trusted = (r) => r.iouBest >= TRUST.iou && !atWindowEdge(r);
 
 /** The grain names the correction builder knows, keyed by ours. */
-const GRAIN_ARG = { page: "page", line: "line", tilt: "line-tilt" };
+const GRAIN_ARG = { page: "page", line: "line", tilt: "line-tilt", curve: "line-curve" };
 
 const argOf = (name, fallback = null) => {
   const i = process.argv.indexOf(name);
@@ -185,6 +185,7 @@ async function extract() {
     page: correctionFor("page", rs),
     line: correctionFor("line", rs),
     tilt: correctionFor("line-tilt", rs),
+    curve: correctionFor("line-curve", rs),
   });
 
   // ── the corpus, one row per page, so the page we draw can be placed in it ──
@@ -361,6 +362,10 @@ async function extract() {
   // every mark, which meant the page put a trained figure next to a held-out one
   // and invited a reader to divide them.
   heldOut.shuffle = r2(splitHalfLadder(rows, "line-tilt", { shuffled: true }).heldOut.over);
+  // The same control at the bent rung, because a rung that is not controlled has
+  // not been shown to have found anything — and a bend has one more number a line
+  // to be wrong with, so it is the rung where the objection bites hardest.
+  heldOut.shuffleCurve = r2(splitHalfLadder(rows, "line-curve", { shuffled: true }).heldOut.over);
 
   // ── option H, which this instrument cannot grade and must still describe ───
   //
@@ -540,6 +545,14 @@ function palette() {
 // on which document a reader happened to open. C and D and E stay in the record
 // and are named in §⑩ below; the two that are only in the record are the ones
 // nothing would be gained by drawing.
+//
+// The ORDER below is not the letters' order, and that is deliberate. I was
+// written last and belongs beside F, because it is F with one more number a line
+// and the bar at the top of the board is meant to collapse as a reader's eye
+// travels along it. H goes last wherever it is written, because it is the only
+// card whose number does not mean what the others' numbers mean, and a reader who
+// meets it before the ladder has finished collapsing reads it as the next rung.
+
 const OPTIONS = [
   {
     id: "A",
@@ -569,6 +582,13 @@ const OPTIONS = [
     tag: "the same, for half the page's geometry",
     what: "The same per-line correction, applied only to the marks. Word rectangles stay on the fit they ship on today.",
     wordsStay: true,
+  },
+  {
+    id: "I",
+    grain: "curve",
+    title: "Line each printed line up on its own, and let it bend",
+    tag: "the strongest measured option — one more number a line than F",
+    what: "The same as F, except the amount is allowed to bend along the line rather than only grow at a steady rate. Marks and words move together.",
   },
   {
     id: "H",
@@ -641,8 +661,8 @@ const TRADEOFFS = {
     },
     risk: {
       tone: "warn",
-      head: "What is left over has changed character",
-      body: "Not just shrunk. After this correction a small minority of rectangles are badly out for some reason of their own, rather than every rectangle being slightly out — and nobody has yet looked for what that reason is.",
+      head: "Half of what is left over now has a name",
+      body: "After this correction a small minority of rectangles are badly out for a reason of their own rather than everything being slightly out. That reason was looked for: whole printed lines go wrong together, and the ends of a line are twice as bad as the middle. Option I is what came of it, and it does better on every number here.",
     },
     undo: { tone: "warn", head: "Reversible, not free", body: "Dropping the table means rebuilding everything it moved." },
   },
@@ -664,6 +684,25 @@ const TRADEOFFS = {
       body: "The marks would sit on a lining-up we measured, and the words on one we have measured as wrong — and something has to hold the two to each other from then on. The saving is real and it is one-off; the obligation is permanent.",
     },
     undo: { tone: "good", head: "Easiest to undo", body: "Nothing shipped has moved, so dropping it rebuilds nothing." },
+  },
+  I: {
+    verdict: "the strongest thing that has been measured",
+    build: {
+      tone: "warn",
+      head: "Six numbers a printed line",
+      body: "About LINES6 numbers for the whole book — the same table as the option above with one more number in each row, so it costs the same work to build and read. Nothing new has to be learnt to use it.",
+    },
+    disturbs: {
+      tone: "warn",
+      head: "Every word rectangle",
+      body: "The same as the two options above: words move with the marks, so all of them are rebuilt and re-checked and the comparison pictures may move.",
+    },
+    risk: {
+      tone: "warn",
+      head: "The ends of a line are still twice the middle",
+      body: "Bending fixes the middle of a printed line and barely touches its ends, so a rectangle at the end of a line is still about twice as likely to be badly out as one in the middle. Whatever causes that is not about where along the line a mark sits, and no further bending will reach it.",
+    },
+    undo: { tone: "warn", head: "Reversible, not free", body: "Dropping the table means rebuilding everything it moved — the same cost as the option above." },
   },
   H: {
     verdict: "the most accurate, and the least provable",
@@ -882,6 +921,7 @@ function render({ artifact: ARTIFACT, out }) {
     s
       .replace("PAGES2", (c.pages * 2).toLocaleString("en"))
       .replace("LINES4", (c.lines * 4).toLocaleString("en"))
+      .replace("LINES6", (c.lines * 6).toLocaleString("en"))
       .replace("MARKS2", (c.marks * 2).toLocaleString("en"));
 
   const boardCell = (t) =>
@@ -911,7 +951,12 @@ function render({ artifact: ARTIFACT, out }) {
     `<div class="tc lbl">${esc(label)}</div>` +
     OPTIONS.map((o) => boardCell(TRADEOFFS[o.id][pick])).join("");
 
-  const board = `<div class="board" role="group" aria-label="What each option costs">
+  // The column widths are written here rather than in the stylesheet, and only
+  // because the stylesheet cannot count the options. A hard-coded five was right
+  // until an option was added, at which point the board silently gained a column
+  // that had to be dragged into view by a reader who never knew it was there.
+  const cols = `7rem repeat(${OPTIONS.length},minmax(${(50 / OPTIONS.length).toFixed(2)}rem,1fr))`;
+  const board = `<div class="board" role="group" aria-label="What each option costs" style="grid-template-columns:${cols}">
   <div class="bh lbl"></div>
   ${OPTIONS.map(
     (o) => `<div class="bh">
@@ -969,8 +1014,8 @@ ${printDefs}
   <p class="standfirst">
     Hifth draws a rectangle over every mark and every word in the mus'haf, so it knows what your
     finger is touching. Today those rectangles sit about a mark's height away from the marks they
-    are meant to be on. There are five things we could do about it, and this page draws all five on
-    the same real page of the mus'haf, at the size you would actually see them.
+    are meant to be on. There are ${OPTIONS.length} things we could do about it, and this page draws
+    every one of them on the same real page of the mus'haf, at the size you would actually see them.
   </p>
   <div class="stats">
     <div><b>${(c.pooled.shipped.far * 100).toFixed(0)}%</b><span>of rectangles are badly out today</span></div>
@@ -1138,12 +1183,29 @@ ${printDefs}
 <section>
   <h2><span class="num">6</span>The options, drawn</h2>
   <p class="lede">
-    All five on the same page, the same crops, the same size. For the first four, the percentages
-    under each are measured on marks that option's correction was not worked out from, which is the
-    only way a finer correction cannot flatter itself. The last one, H, cannot be measured that way
-    at all, and its card says what it reports instead.
+    All ${OPTIONS.length} on the same page, the same crops, the same size. For all of them but the
+    last, the percentages under each are measured on marks that option's correction was not worked
+    out from, which is the only way a finer correction cannot flatter itself. The last one, H, cannot
+    be measured that way at all, and its card says what it reports instead.
   </p>
   ${OPTIONS.map(optionCard).join("\n")}
+  <div class="note">
+    <p>
+      <strong>F still carries the word &ldquo;recommended&rdquo; and I is the better option on every
+      number here. That is not an oversight.</strong> I was worked out after this page was written,
+      by asking what the rectangles F leaves badly out have in common — and the answer was each
+      other: more than half of them sit on the one printed line in fifteen that has gone wrong as a
+      whole, and a rectangle at either end of a line is about twice as likely to be badly out as one
+      in the middle. A correction that can only grow at a steady rate cannot follow that, because a
+      rate that splits the difference is wrong in the same direction at both ends. Letting it bend is
+      the whole of option I, and it costs one more number a line.
+    </p>
+    <p>
+      Moving the recommendation is the decision this page exists to ask for, so the page does not
+      quietly move it. What the page can do is put the two side by side and say which way the numbers
+      point, which is what section 7 does.
+    </p>
+  </div>
 </section>
 
 <section>
@@ -1168,6 +1230,7 @@ ${printDefs}
       ${ladderRow("page", "B — each page")}
       ${ladderRow("line", "E — each printed line, no tilt")}
       ${ladderRow("tilt", "F and G — each line, tilted")}
+      ${ladderRow("curve", "I — each line, bent")}
       ${markRow()}
     </tbody>
   </table>
@@ -1196,6 +1259,22 @@ ${printDefs}
       ${(ho("tilt").far - ho("tilt").trained).toFixed(1)} points, and that is the whole of the
       flattery — against a fall from ${ho("page").far.toFixed(1)}% to
       ${ho("tilt").far.toFixed(1)}% that it cannot account for.
+    </p>
+    <p>
+      <strong>The same control, run again on the bent line.</strong> A bend has one more number a
+      line to be wrong with, so it is where that objection bites hardest. Wearing another line's bend
+      leaves ${d.heldOut.shuffleCurve.toFixed(1)}% badly out — worse again than wearing another
+      line's tilt, and far worse than correcting nothing per-line at all. A shape freer still, one
+      allowed to change direction twice along a line rather than bend once, was worked out the same
+      way and refused: it does better on the marks it was worked out from and worse on the marks it
+      was not, which is what an allowance with nothing to find looks like. The ladder stops where it
+      stops being paid for.
+    </p>
+    <p>
+      <strong>And what bending does not reach, since it is the reason I is not the end of this.</strong>
+      It fixes the middle of a printed line and barely touches the ends. A rectangle at the end of a
+      line remains about twice as likely to be badly out as one in the middle, under every option on
+      this page. That is a fact with no explanation yet, and section 12 is where it waits.
     </p>
   </div>
 </section>
@@ -1235,7 +1314,7 @@ ${printDefs}
   </p>
   <div class="two">
     ${specimen(layerOrnaments("shipped"), { crop: BAND, label: "A — the circles land on themselves." })}
-    ${specimen(layerOrnaments("tilt"), { crop: BAND, label: "C — the same circles, after the recommended correction. They no longer do." })}
+    ${specimen(layerOrnaments("tilt"), { crop: BAND, label: "F — the same circles, after the recommended correction. They no longer do." })}
   </div>
   <p>
     Whether that matters depends entirely on what the circles are used for, and today they are used
@@ -1290,8 +1369,8 @@ ${printDefs}
     <dd>
       Kept in the written record as option D and not drawn here, because there is nothing to draw:
       it puts the same rectangles on the page and forbids the feature that would use them. It is
-      the honest halfway house if none of the four below is good enough, and it is a decision about
-      the app rather than about placement.
+      the honest halfway house if none of the drawn options is good enough, and it is a decision
+      about the app rather than about placement.
     </dd>
     <dt>Stretching each page rather than sliding it</dt>
     <dd>
@@ -1304,6 +1383,16 @@ ${printDefs}
       Not usable. A word carries about four marks, and an average over four marks is mostly noise;
       the correction would fit the noise and look excellent while being worse. The printed line is
       the finest grain with enough marks in it to mean anything.
+    </dd>
+    <dt>Letting a printed line bend more freely than option I bends it</dt>
+    <dd>
+      Option I lets the correction bend once along a line. A shape freer still — allowed to change
+      direction twice — was worked out the same way and refused. It does better on the marks it was
+      worked out from and worse on the marks it was not, which is what an allowance with nothing
+      left to find looks like: it is fitting the wobble in the marks it was given rather than
+      anything about the page. Each extra freedom also needs more marks on a line before the line
+      is allowed to use it, so the freer shape quietly abandons the short lines, which are already
+      the ones going worst. That is where this ladder stops.
     </dd>
     <dt>Fixing the mark names instead</dt>
     <dd>
@@ -1329,10 +1418,14 @@ ${printDefs}
       something a reader touches, section 9 stops being a free trade and becomes a real cost.
     </li>
     <li>
-      <strong>The remainder turning out to have a cause of its own.</strong> After the best
-      correction here, the rectangles that are still badly out are more concentrated than the
-      general spread predicts — a minority are badly out for a reason, rather than everything being
-      slightly out. Nobody has looked for that reason yet, and finding it could make a sixth option.
+      <strong>The half of the remainder that still has no cause.</strong> This bullet used to say
+      nobody had looked for why the rectangles still badly out are more concentrated than the general
+      spread predicts, and that finding out could make another option. Somebody looked, and it did:
+      whole printed lines go wrong together, and lines go wrong in a way a steady rate cannot follow,
+      which is option I. But that only accounts for the middle of a line. A rectangle at either
+      <em>end</em> of a printed line is still about twice as likely to be badly out as one in the
+      middle, after every correction on this page, and nothing here explains why. Whoever finds it
+      could make another option again.
     </li>
     <li>
       <strong>Somebody checking option H by eye and finding it holds.</strong> H cannot be graded
@@ -1492,11 +1585,13 @@ table.grid caption{ text-align:left; font-size:.82rem; color:var(--dim); padding
 :root[data-theme="dark"]{ --t-good:#6fbf8e; --t-warn:#d9a441; --t-bad:#e08a72; }
 :root[data-theme="light"]{ --t-good:#2f6b45; --t-warn:#8a5a12; --t-bad:#a03c28; }
 
-/* Sized so all five columns fit inside the reading column on a desktop and the
+/* Sized so every column fits inside the reading column on a desktop and the
    board only scrolls where it must. It is the one element on the page where a
    reader compares across, and a board that scrolls when it did not need to hides
-   a column from somebody who never thought to drag it. */
-.board{ display:grid; grid-template-columns:7rem repeat(5,minmax(10.4rem,1fr));
+   a column from somebody who never thought to drag it. The real column list is
+   written onto the element by the builder, which is the only thing that knows how
+   many options there are; this is the fallback if that ever fails to arrive. */
+.board{ display:grid; grid-template-columns:7rem repeat(auto-fit,minmax(8.3rem,1fr));
   gap:1px; background:var(--rule); border:1px solid var(--rule); border-radius:7px;
   overflow-x:auto; margin:1.5rem 0 0; box-shadow:var(--shadow);
   align-items:stretch; }
