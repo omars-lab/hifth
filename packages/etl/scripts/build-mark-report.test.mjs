@@ -758,3 +758,128 @@ describe.skipIf(!haveCorpus)("choosing how far one press moves the rectangle", (
     expect(okStep(0.1 + 0.2)).toBe(0.3);
   });
 });
+
+/**
+ * Pointing at the mark instead of pushing a rectangle onto it.
+ *
+ * The first sitting measured what the by-hand loop costs: 127 of the 128 rectangles
+ * a reader looked at were moved, over 226 separate presses, a median of 2.009 units
+ * of travel and a worst of 7.052. Every one of those presses is the reader doing
+ * arithmetic — deciding not only which mark is meant, which only a person can do,
+ * but also how far across and how far down, which the print already knows.
+ *
+ * So the ink of the window is cut into pieces, each piece is drawn as its own shape
+ * with a number on it, and a tap puts the rectangle round whatever the reader has
+ * pointed at. The two halves of that are tested apart: that the pieces exist and are
+ * numbered, and that the geometry a tap produces is the extent of the ink chosen.
+ */
+describe.skipIf(!haveCorpus)("pointing at the ink the rectangle belongs on", () => {
+  it("cuts every card's window into pieces a finger can point at", () => {
+    // A card with no pieces is one where the gesture silently does nothing, and the
+    // reader has no way to tell that from a tap that missed. There is no fallback
+    // for it, so it must not happen.
+    const got = build("--set", "fallback", "--count", "20");
+    expect(got.cards.length).toBeGreaterThan(0);
+    for (const c of got.cards) {
+      expect(Array.isArray(c.pieces)).toBe(true);
+      expect(c.pieces.length).toBeGreaterThan(0);
+      for (const b of c.pieces) {
+        expect(b.length).toBe(4);
+        for (const v of b) expect(Number.isFinite(v)).toBe(true);
+        expect(b[2]).toBeGreaterThan(0);
+        expect(b[3]).toBeGreaterThan(0);
+      }
+    }
+  });
+
+  it("numbers the ink it draws, so a tap can say which piece it landed on", () => {
+    // The tap looks its answer up by number, so a piece that is measured but never
+    // drawn is unreachable and a shape drawn under a number nothing measured moves
+    // the rectangle somewhere arbitrary. The two lists have to be the same list.
+    const got = build("--set", "fallback", "--count", "20");
+    for (const c of got.cards) {
+      const drawn = new Set([...c.svg.matchAll(/data-p="(\d+)"/g)].map((m) => Number(m[1])));
+      expect(drawn.size).toBe(c.pieces.length);
+      for (let i = 0; i < c.pieces.length; i += 1) expect(drawn.has(i)).toBe(true);
+    }
+  });
+
+  it("takes the extent of everything pointed at, not of the last thing pointed at", () => {
+    // Two pieces is the normal case rather than the edge: a tanween is two strokes,
+    // and a reader who pointed at one half of one has not yet said where the mark is.
+    const { html } = build("--set", "fallback", "--count", "5");
+    const src = /\nfunction unionOf\(c, ids\) \{[\s\S]*?\n\}\n/.exec(html);
+    expect(src).toBeTruthy();
+    const unionOf = new Function(`${src[0]}\nreturn unionOf;`)();
+    const c = { pieces: [[10, 10, 2, 2], [14, 11, 1, 3]] };
+    expect(unionOf(c, [0])).toEqual([10, 10, 2, 2]);
+    expect(unionOf(c, [0, 1])).toEqual([10, 10, 5, 4]);
+  });
+
+  it("forgives a fingertip, and gives the smaller of two pieces to the finger", () => {
+    // A haraka is a stroke a few screen pixels wide at the framing that shows the
+    // whole word. Exact hit-testing would mean stabbing at it and missing every
+    // time; and where the mark sits over the letter it belongs to, both answer, so
+    // the smaller has to win or the gesture always returns the letter.
+    const { html } = build("--set", "fallback", "--count", "5");
+    const src = /\nfunction pieceAt\(c, p\) \{[\s\S]*?\n\}\n/.exec(html);
+    expect(src).toBeTruthy();
+    // A window 30 units across, so the slack the page allows is exactly one unit.
+    const pieceAt = new Function("framing", `${src[0]}\nreturn pieceAt;`)(() => [0, 0, 30, 30]);
+    const c = { pieces: [[0, 0, 10, 10], [4, 4, 1, 1]] };
+    expect(pieceAt(c, [4.5, 4.5])).toBe(1);
+    expect(pieceAt(c, [5.8, 4.5])).toBe(1);
+    expect(pieceAt(c, [9, 9])).toBe(0);
+    expect(pieceAt(c, [20, 20])).toBe(null);
+    expect(pieceAt({ pieces: [] }, [0, 0])).toBe(null);
+  });
+
+  it("never lets a tap leave a rectangle too small to see", () => {
+    // The same floor a press is held to. An ink piece can be a single dot, and a
+    // rectangle the size of a dot is one the reader cannot find again to correct.
+    const { html } = build("--set", "fallback", "--count", "5");
+    const snap = /\nfunction snap\(c\) \{([\s\S]*?)\n\}\n/.exec(html);
+    expect(snap).toBeTruthy();
+    expect(snap[1]).toContain("Math.max(FLOOR,");
+  });
+
+  it("says which answers came from the ink and which came from a hand", () => {
+    // The words are the same either way, because the reader is saying the same
+    // thing. Who measured it is not the same: choosing which ink is judgement, and
+    // the extent of that ink is arithmetic this page did. Pooling the two into one
+    // distribution would report a tightness that says nothing about whether a reader
+    // can see a misplaced rectangle — so a press joining the burst must disown the
+    // ink, or a hand-finished answer would be banked claiming the print placed it.
+    const { html } = build("--set", "fallback", "--count", "5");
+    expect(html).toContain('how: "ink"');
+    const flush = /\nfunction flush\(\) \{([\s\S]*?)\n\}\n/.exec(html);
+    expect(flush[1]).toContain("const ink = pendInk;");
+    expect(flush[1]).toContain("pendInk = null;");
+    const nudge = /\nfunction nudge\(([\s\S]*?)\n\}\n/.exec(html);
+    expect(nudge[1]).toContain("pendInk = null;");
+  });
+
+  it("tints the ink the reader chose in a colour the paper never re-themes", () => {
+    // What is lit is the reader's own statement, not our guess at where the mark is
+    // — that guess is the unknown the sitting exists to measure and showing it would
+    // be handing over the answer with the question. But a statement the reader
+    // cannot see is one they cannot check, and it is drawn on paper that stays white
+    // in both themes, so it joins the set that is never re-themed.
+    const { html } = build("--set", "fallback", "--count", "5");
+    const rule = /svg\.stage path\.on \{ fill: var\(--([a-z-]+)\); \}/.exec(html);
+    expect(rule).toBeTruthy();
+    expect(NEVER_THEMED).toContain(rule[1]);
+  });
+
+  it("rebuilds what was pointed at from the transcript, rather than remembering it", () => {
+    // The rectangle is already rebuilt from the answers standing for a card rather
+    // than from anything held in the page, so the tint has to come from the same
+    // place. Remembered separately, the two part company the first time a reader
+    // takes something back: ink still lit under a rectangle that has gone home.
+    const { html } = build("--set", "fallback", "--count", "5");
+    const redraw = /\nfunction redraw\(id\) \{([\s\S]*?)\n\}\n/.exec(html);
+    expect(redraw).toBeTruthy();
+    expect(redraw[1]).toMatch(/move && move\.ink/);
+    expect(redraw[1]).toContain("c.picked =");
+  });
+});

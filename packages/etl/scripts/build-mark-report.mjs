@@ -67,7 +67,7 @@ import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { correctionFor } from "./lib/registration-grain.mjs";
-import { readPageInk } from "./lib/ink.mjs";
+import { readPageInk, rasterise } from "./lib/ink.mjs";
 import { marksOf } from "./lib/marks.mjs";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
@@ -376,6 +376,86 @@ const identFor = (r) => {
 const n2 = (v) => Math.round(v * 100) / 100;
 const n3 = (v) => Math.round(v * 1000) / 1000;
 
+/*
+ * Sixteen samples to the page unit, which is not a number chosen here.
+ *
+ * It is the resolution `probe-mark-ink.mjs` measures at, and the pieces below are
+ * what a reader points at when they say "the mark belongs on that ink". Cutting the
+ * print into pieces at a different grain from the one the search ran at would let
+ * the page offer a reader a piece of ink the measurement never had, and the answer
+ * would be about a picture nothing else in this project can see.
+ */
+const TAP_RES = 16;
+
+/**
+ * The ink of one window, cut into the pieces a finger can point at.
+ *
+ * A piece is a connected run of ink: a haraka floating over a word is one, the word
+ * body under it is another, and a dot is a third. That is the unit a reader means
+ * when they point — nobody points at half a fatha — and it is why the cut is made
+ * on connectivity rather than on the print's own paths, which are a handful of
+ * enormous outlines with no relationship at all to what a reader sees.
+ *
+ * The cut is made on a raster and then carried back onto the outlines, because
+ * connectivity between two closed rings is a question about their interiors and the
+ * rings do not know the answer. Each ring is assigned to whichever component its own
+ * boundary sits against: for an outer ring that is the ink it encloses, for a hole
+ * it is the ink around it, and both land on the same piece, which is what keeps a
+ * counter-shape with the letter it was cut out of.
+ */
+function inkPieces(shapes, vx, vy, vw, vh) {
+  const cols = Math.ceil(vw * TAP_RES);
+  const rows = Math.ceil(vh * TAP_RES);
+  const mask = rasterise(shapes, vx, vy, cols, rows, TAP_RES);
+  const lab = new Int32Array(cols * rows);
+  const stack = new Int32Array(cols * rows);
+  let n = 0;
+  // Four-connected rather than eight. The failure that matters is a haraka welded
+  // to the letter under it, because then the reader cannot point at it at all;
+  // a piece that comes apart in two is recoverable with a second tap.
+  for (let s = 0; s < mask.length; s += 1) {
+    if (!mask[s] || lab[s]) continue;
+    n += 1;
+    let sp = 0;
+    lab[s] = n;
+    stack[sp] = s;
+    sp += 1;
+    while (sp) {
+      sp -= 1;
+      const q = stack[sp];
+      const qi = q % cols;
+      const qj = (q - qi) / cols;
+      if (qi > 0 && mask[q - 1] && !lab[q - 1]) { lab[q - 1] = n; stack[sp] = q - 1; sp += 1; }
+      if (qi < cols - 1 && mask[q + 1] && !lab[q + 1]) { lab[q + 1] = n; stack[sp] = q + 1; sp += 1; }
+      if (qj > 0 && mask[q - cols] && !lab[q - cols]) { lab[q - cols] = n; stack[sp] = q - cols; sp += 1; }
+      if (qj < rows - 1 && mask[q + cols] && !lab[q + cols]) { lab[q + cols] = n; stack[sp] = q + cols; sp += 1; }
+    }
+  }
+  return {
+    /** Which component a ring's boundary sits against, or 0 if it sits against none. */
+    of(ring) {
+      const tally = new Map();
+      for (let i = 0; i < ring.length; i += 2) {
+        const ci = Math.floor((ring[i] - vx) * TAP_RES);
+        const cj = Math.floor((ring[i + 1] - vy) * TAP_RES);
+        for (let dj = -1; dj <= 1; dj += 1) {
+          for (let di = -1; di <= 1; di += 1) {
+            const a = ci + di;
+            const b = cj + dj;
+            if (a < 0 || b < 0 || a >= cols || b >= rows) continue;
+            const l = lab[b * cols + a];
+            if (l) tally.set(l, (tally.get(l) || 0) + 1);
+          }
+        }
+      }
+      let best = 0;
+      let seen = 0;
+      for (const [l, c] of tally) if (c > seen) { seen = c; best = l; }
+      return best;
+    },
+  };
+}
+
 /**
  * The mark's neighbourhood, re-emitted from the page's own outlines. Not a
  * screenshot and not a crop of one: the paths are the print's, clipped by bounding
@@ -422,9 +502,21 @@ function crop(r) {
   const vy = ay - pad;
   const vw = w + 2 * pad;
   const vh = h + 2 * pad;
+  const shapes = inkFor(r.page).shapes;
+  const cut = inkPieces(shapes, vx, vy, vw, vh);
   const parts = [];
-  for (const sh of inkFor(r.page).shapes) {
-    const ds = [];
+  // A component's number comes from wherever the flood fill happened to start, so
+  // it is renumbered on first appearance. What ships is then a function of the print
+  // and the window and nothing else, which is what makes a piece a thing a
+  // transcript can name.
+  const seen = new Map();
+  const box = [];
+  for (const sh of shapes) {
+    // One path per (outline, piece) rather than one per piece: two pieces that touch
+    // outlines with different fill rules would otherwise be filled under one rule,
+    // and a counter-shape would come back as ink. Both paths carry the same piece
+    // number, so pointing at either points at the piece.
+    const ds = new Map();
     for (const ring of sh.rings) {
       let lo = Infinity;
       let hi = -Infinity;
@@ -439,15 +531,43 @@ function crop(r) {
       if (hi < vx || lo > vx + vw || hiy < vy || loy > vy + vh) continue;
       let d = `M${n2(ring[0])} ${n2(ring[1])}`;
       for (let i = 2; i < ring.length; i += 2) d += `L${n2(ring[i])} ${n2(ring[i + 1])}`;
-      ds.push(`${d}Z`);
+      d += "Z";
+      // A ring too thin to have rasterised anything belongs to no piece. It is still
+      // the print and is still drawn; it is only not pointable, which is the honest
+      // outcome — the page must never offer a piece whose extent it had to guess.
+      const l = cut.of(ring);
+      if (!l) {
+        ds.set(-1, (ds.get(-1) || "") + d);
+        continue;
+      }
+      let p = seen.get(l);
+      if (p === undefined) {
+        p = box.length;
+        seen.set(l, p);
+        box.push([lo, loy, hi, hiy]);
+      } else {
+        const b = box[p];
+        if (lo < b[0]) b[0] = lo;
+        if (loy < b[1]) b[1] = loy;
+        if (hi > b[2]) b[2] = hi;
+        if (hiy > b[3]) b[3] = hiy;
+      }
+      ds.set(p, (ds.get(p) || "") + d);
     }
-    if (ds.length) parts.push(`<path d="${ds.join("")}" fill="var(--ink)" fill-rule="${sh.fillRule}"/>`);
+    for (const [p, d] of ds) {
+      const tag = p < 0 ? "" : ` data-p="${p}"`;
+      parts.push(`<path${tag} d="${d}" fill="var(--ink)" fill-rule="${sh.fillRule}"/>`);
+    }
   }
   return {
     rule: c.rule,
     vb: [n2(vx), n2(vy), n2(vw), n2(vh)],
     near: [n2(ax - near), n2(ay - near), n2(w + 2 * near), n2(h + 2 * near)],
     at: [n3(ax), n3(ay), n3(w), n3(h)],
+    // Where each piece is, as the outlines draw it rather than as the raster
+    // sampled it: the raster is how the pieces were told apart, and a bounding box
+    // rounded to a sixteenth would put the reader's answer a sixteenth out.
+    pieces: box.map((b) => [n2(b[0]), n2(b[1]), n2(b[2] - b[0]), n2(b[3] - b[1])]),
     svg: `<rect x="${n2(vx)}" y="${n2(vy)}" width="${n2(vw)}" height="${n2(vh)}" fill="var(--paper)"/>${parts.join("")}`,
   };
 }
@@ -476,6 +596,7 @@ const cards = pick.map((r) => {
     vb: c.vb,
     near: c.near,
     svg: c.svg,
+    pieces: c.pieces,
   };
 });
 
@@ -610,6 +731,16 @@ svg.stage.drawing rect.grab { cursor: crosshair; }
    greens, and to anyone who repaints this palette later. */
 svg.stage rect.grab, svg.stage rect.mine { stroke-width: 1.7; }
 svg.stage rect.mine { stroke-dasharray: 5 3; }
+/* The ink the reader pointed at, in the reader's own colour.
+   This is not the same thing as colouring the mark's own ink, which is ruled out
+   and stays ruled out: where the mark's ink is, is the unknown this whole sitting
+   is measuring, and tinting our guess at it would be showing the reader the answer
+   before asking the question. What is tinted here is the reader's statement — they
+   chose this ink — and it has to be visible or they cannot tell a tap that landed
+   from one that missed. It joins the paper and the ink in the never-re-themed set
+   for the same reason those are in it: it is drawn on a mus'haf page that stays on
+   white in both themes, so a themed colour would be a colour on the wrong ground. */
+svg.stage path.on { fill: var(--yours-line); }
 .view { display: flex; justify-content: flex-end; gap: .4rem; margin-top: .4rem; }
 .view button { padding: .3rem .9rem; font-size: .82rem; min-height: 44px; }
 /* Buttons rather than handles on the rectangle itself. At the framing that shows
@@ -717,7 +848,10 @@ the heading are the ones the print drew this mark on — that is the mark the re
 sitting on, and when a crop holds several of the same name, the line beside them says which.
 These marks were drawn at random, so most of them should look right — saying so is a real
 answer, and it is the one you should expect to give most often. When something is wrong, more
-than one thing can be.</p>
+than one thing can be. If the rectangle is on the wrong mark, tap the mark it should be on: the
+rectangle moves onto that ink and takes its size from it, which is quicker and steadier than
+pushing it there by hand. Tapping it again takes it back, and a mark printed in two pieces takes
+two taps.</p>
 <p class="swap"><button id="ledeSwap"></button></p>
 
 <div id="work">
@@ -1025,6 +1159,13 @@ function redraw(id) {
   }
   c.held = move ? [move.to[0] - (c.at[0] - c.box[0]), move.to[1] - (c.at[1] - c.box[1])] : null;
   c.sized = size ? [size.size[0] - c.at[2], size.size[1] - c.at[3]] : null;
+  // And which ink the reader pointed at, if that is how they answered. The
+  // rectangle is rebuilt from the answer rather than remembered, and the tint has
+  // to be rebuilt from the same place or the two would part company the first time
+  // a reader took something back — leaving ink lit under a rectangle that is no
+  // longer where the ink is.
+  const chose = (move && move.ink) || (size && size.ink) || null;
+  c.picked = chose ? chose.slice() : null;
 }
 
 function retract(i) {
@@ -1149,6 +1290,10 @@ const FLOOR = 0.6;
 let pend = null;   // [dx, dy, dw, dh] pressed but not yet said
 let pendC = null;  // the card those presses were about
 let pendT = 0;
+// The pieces of ink the reader pointed at, if that is how this burst was made.
+// Null the moment a press or a drag joins in: an answer that says it came from the
+// ink has to be one the ink alone accounts for, and a hand-finished one does not.
+let pendInk = null;
 
 /**
  * A measured answer supersedes a bare one: the reader made one observation and then
@@ -1165,10 +1310,26 @@ function flush() {
   if (pendT) { clearTimeout(pendT); pendT = 0; }
   const p = pend;
   const c = pendC;
+  const ink = pendInk;
   pend = null;
   pendC = null;
+  pendInk = null;
   if (!p || !c) return;
   const r3 = function (v) { return Math.round(v * 1000) / 1000; };
+  /*
+   * How the answer was given, and which ink it was given from.
+   *
+   * The words are the same either way — the rectangle belongs somewhere else, and
+   * it is the wrong size — because the reader is saying the same thing. What
+   * differs is who measured it. A hand-placed answer is an eye's estimate of where
+   * the mark sits; a pointed one is the reader choosing which ink and this page
+   * taking its extent off the outlines. The choosing is the judgement and the
+   * extent is arithmetic, and the two kinds must never be pooled into one
+   * distribution: the second is tighter for a reason that says nothing about
+   * whether the reader can see a misplaced rectangle. Anything scoring these has
+   * to be able to split them, and it can only do that if the page says which.
+   */
+  const how = ink ? { how: "ink", ink: ink } : {};
   if (Math.abs(p[0]) > 1e-9 || Math.abs(p[1]) > 1e-9) {
     // Shaped exactly like a drag: 'by' is this burst and 'to' is where the
     // rectangle has arrived in total. A burst and a drag are the same answer given
@@ -1182,7 +1343,7 @@ function flush() {
     const held = c.held;
     dropVague("placement", c, "to");
     c.held = held;
-    say("placement", { by: [r3(p[0]), r3(p[1])], to: to }, c);
+    say("placement", { by: [r3(p[0]), r3(p[1])], to: to, ...how }, c);
   }
   if (Math.abs(p[2]) > 1e-9 || Math.abs(p[3]) > 1e-9) {
     // A measured shape supersedes a bare one. Somebody who pressed "the rectangle
@@ -1192,7 +1353,7 @@ function flush() {
     const sized = c.sized;   // same reason as above
     dropVague("wrong-shape", c, "size");
     c.sized = sized;
-    say("wrong-shape", { by: [r3(p[2]), r3(p[3])], size: size, was: [c.at[2], c.at[3]] }, c);
+    say("wrong-shape", { by: [r3(p[2]), r3(p[3])], size: size, was: [c.at[2], c.at[3]], ...how }, c);
   }
 }
 
@@ -1209,6 +1370,10 @@ function nudge(dx, dy, dw, dh) {
   const nh = Math.max(FLOOR, c.at[3] + z[1] + dh * s) - c.at[3];
   c.held = [h[0] + dx * s, h[1] + dy * s];
   c.sized = [nw, nh];
+  // A press on top of a pointed answer makes it a hand-finished one, so the burst
+  // stops claiming the ink placed it. The tint stays: the reader is still saying
+  // that is the ink, they are only saying our extent of it was not quite right.
+  pendInk = null;
   pendC = c;
   pend = pend || [0, 0, 0, 0];
   pend[0] += dx * s;
@@ -1258,6 +1423,10 @@ function mount(c) {
   boxEl = kids[kids.length - 2];
   mineEl = kids[kids.length - 1];
   drawnFor = c.id;
+  // Writing the print throws away the tint with it, and a reader who comes back to
+  // a card they already pointed at has to see what they pointed at — otherwise the
+  // page has quietly forgotten an answer the transcript still holds.
+  tint();
 }
 
 function place(el, x, y, w, h) {
@@ -1337,8 +1506,142 @@ function onRect(p) {
          p[1] >= y - t && p[1] <= y + a[3] + z[1] + t;
 }
 
+/* ── pointing at ink ───────────────────────────────────────────────────── */
+
+/**
+ * Which piece of ink is under the finger, or null.
+ *
+ * Answered from the pieces' extents rather than by asking the browser what is
+ * under the point, and that is not an optimisation. A haraka is a stroke a few
+ * screen pixels wide at the framing that shows the whole word, so exact
+ * hit-testing would mean a reader stabbing repeatedly at a mark and missing it
+ * every time. The same fingertip of slack the rectangle allows is allowed here,
+ * and where two pieces both answer the smaller one wins — which is nearly always
+ * the mark rather than the letter it sits over, and the mark is what is being
+ * tagged.
+ */
+function pieceAt(c, p) {
+  if (!c.pieces || !c.pieces.length) return null;
+  const t = framing()[2] / 30;
+  let best = null;
+  let area = Infinity;
+  for (let i = 0; i < c.pieces.length; i += 1) {
+    const b = c.pieces[i];
+    if (p[0] < b[0] - t || p[0] > b[0] + b[2] + t) continue;
+    if (p[1] < b[1] - t || p[1] > b[1] + b[3] + t) continue;
+    const a = b[2] * b[3];
+    if (a < area) { area = a; best = i; }
+  }
+  return best;
+}
+
+/**
+ * The box around everything the reader has pointed at.
+ *
+ * More than one piece is the normal case, not an edge case: a tanween is two
+ * strokes and a dammatan is a shape with a tail, and a reader pointing at one half
+ * of either has not said where the mark is. So pointing adds rather than replaces,
+ * and what is measured is the union.
+ */
+function unionOf(c, ids) {
+  let x0 = Infinity;
+  let y0 = Infinity;
+  let x1 = -Infinity;
+  let y1 = -Infinity;
+  for (const i of ids) {
+    const b = c.pieces[i];
+    if (b[0] < x0) x0 = b[0];
+    if (b[1] < y0) y0 = b[1];
+    if (b[0] + b[2] > x1) x1 = b[0] + b[2];
+    if (b[1] + b[3] > y1) y1 = b[1] + b[3];
+  }
+  return [x0, y0, x1 - x0, y1 - y0];
+}
+
+/** Paint the pieces the reader chose, and unpaint the ones they did not. */
+function tint() {
+  const c = DECK[at];
+  if (!c) return;
+  const on = c.picked || [];
+  const paths = stage.querySelectorAll("path[data-p]");
+  for (let i = 0; i < paths.length; i += 1) {
+    paths[i].classList.toggle("on", on.indexOf(Number(paths[i].getAttribute("data-p"))) >= 0);
+  }
+}
+
+/**
+ * Put the rectangle round the chosen ink, and credit the burst with the move.
+ *
+ * The floor that stops a reader shrinking a rectangle to nothing applies here too,
+ * because a lone dot really is smaller than it — and when it bites, the box is
+ * centred on the ink rather than anchored to a corner of it. That is why the
+ * offset below is written as a difference of centres: it is exact when the extent
+ * is used as measured, and it is still the right answer when the floor overrides
+ * the extent.
+ */
+function snap(c) {
+  const u = unionOf(c, c.picked);
+  const h = c.held || [0, 0];
+  const z = c.sized || [0, 0];
+  const nz = [Math.max(FLOOR, u[2]) - c.at[2], Math.max(FLOOR, u[3]) - c.at[3]];
+  const nh = [u[0] + u[2] / 2 - (c.at[0] + c.at[2] / 2),
+              u[1] + u[3] / 2 - (c.at[1] + c.at[3] / 2)];
+  c.held = nh;
+  c.sized = nz;
+  // Banked through the same burst a nudge uses, and deliberately so. A reader
+  // adding a second piece of ink half a second after the first has made one
+  // statement about one mark, and two answers a moment apart would read
+  // downstream as a reader who could not make their mind up.
+  pendC = c;
+  pend = pend || [0, 0, 0, 0];
+  pend[0] += nh[0] - h[0];
+  pend[1] += nh[1] - h[1];
+  pend[2] += nz[0] - z[0];
+  pend[3] += nz[1] - z[1];
+  pendInk = c.picked.slice();
+  if (pendT) clearTimeout(pendT);
+  pendT = setTimeout(flush, 700);
+  paint();
+}
+
+/** A tap on a piece: point at it if it is not chosen, unpoint it if it is. */
+function tapInk(id) {
+  const c = DECK[at];
+  if (pendC && pendC !== c) flush();
+  const picked = c.picked ? c.picked.slice() : [];
+  const k = picked.indexOf(id);
+  if (k >= 0) picked.splice(k, 1);
+  else picked.push(id);
+  c.picked = picked.length ? picked : null;
+  if (!c.picked) {
+    // Unpointing the last piece is the reader taking the whole answer back, not a
+    // reader placing the rectangle at the origin. Whatever this burst had gathered
+    // is dropped rather than banked — otherwise a tap and an untap inside the same
+    // seven-tenths of a second would leave a placement in the transcript and a
+    // retraction after it, which is a record of a reader changing their mind about
+    // something they never said.
+    if (pendT) { clearTimeout(pendT); pendT = 0; }
+    pend = null;
+    pendC = null;
+    pendInk = null;
+    putBack();
+    return;
+  }
+  snap(c);
+  tint();
+}
+
+// Where and when this gesture began, in screen pixels and milliseconds. Kept for
+// every pointer-down and not only the ones that begin a move, because a tap cannot
+// be told from the start of a scroll on the way down — only on the way up, by
+// having gone nowhere. Recognising it any earlier would mean taking the gesture
+// from the page first and giving it back if it turned out to be a scroll, which no
+// phone allows.
+let tapAt = null;
+
 stage.addEventListener("pointerdown", function (e) {
   const p = ptIn(e);
+  tapAt = [e.clientX, e.clientY, Date.now()];
   if (!drawing && !onRect(p)) return;   // the page keeps this gesture
   try { stage.setPointerCapture(e.pointerId); } catch (err) { /* capture is a nicety */ }
   from = p;
@@ -1354,7 +1657,26 @@ stage.addEventListener("pointermove", function (e) {
   else moved = [p[0] - from[0], p[1] - from[1]];
   paint();
 });
-stage.addEventListener("pointerup", function () {
+stage.addEventListener("pointerup", function (e) {
+  const t = tapAt;
+  tapAt = null;
+  // A tap: down and up in the same place, quickly, and nothing banked in between.
+  // Ten screen pixels rather than a page-unit tolerance, because what is being
+  // asked is whether a finger stayed still, and a finger is the same size on every
+  // card while a page unit is not. It runs before the move is settled so that the
+  // one gesture cannot be read as both — a small drag that banked a placement is a
+  // placement, and pointing at ink on top of it would overwrite the reader's own
+  // hand with an arithmetic box they did not ask for.
+  const tap = !drawing && t && Math.abs(e.clientX - t[0]) <= 10 &&
+              Math.abs(e.clientY - t[1]) <= 10 && Date.now() - t[2] <= 600;
+  if (tap) {
+    from = null;
+    moved = null;
+    const id = pieceAt(DECK[at], ptIn(e));
+    if (id === null) { paint(); return; }
+    tapInk(id);
+    return;
+  }
   if (!from) return;
   from = null;
   const r3 = function (v) { return Math.round(v * 1000) / 1000; };
@@ -1398,6 +1720,7 @@ stage.addEventListener("pointerup", function () {
  * rectangle back at its last standing position.
  */
 stage.addEventListener("pointercancel", function () {
+  tapAt = null;
   if (!from) return;
   from = null;
   moved = null;
@@ -1501,7 +1824,7 @@ function render() {
   $("hand").parentNode.hidden = said.length === 0;
   $("hint").textContent = drawing
     ? "Drag a rectangle around the ink this mark should be sitting on."
-    : "If it is on the right mark, say so. If it is not, say that — and move it only if you can see where it belongs.";
+    : "If it is on the right mark, say so. If it is not, tap the mark it should be on and the rectangle will go round it — tap again to take it back, and tap a second piece if the mark is in two parts.";
   paint();
 
   const mine = [];
@@ -1597,7 +1920,7 @@ $("stepr").oninput = function () {
  * a placement banked and then undone by hand would still be sitting in the
  * transcript claiming this mark needed moving.
  */
-$("reset").onclick = function () {
+function putBack() {
   flush();
   const c = DECK[at];
   for (let i = said.length - 1; i >= 0; i -= 1) {
@@ -1605,8 +1928,14 @@ $("reset").onclick = function () {
   }
   c.held = null;
   c.sized = null;
+  // The ink the reader pointed at goes with it. A rectangle back where it shipped
+  // under ink still tinted would be the page showing two answers at once, and the
+  // one it is showing louder is the one that is no longer being made.
+  c.picked = null;
   render();
-};
+  tint();
+}
+$("reset").onclick = putBack;
 
 $("closer").onclick = function () {
   closer = !closer;
