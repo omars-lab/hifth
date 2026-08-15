@@ -25,75 +25,18 @@
  */
 import { writeFileSync } from "node:fs";
 import { readLedger } from "./validation-ledger.mjs";
-import {
-  readIssues,
-  sectionItems,
-  planItems,
-  issuesHash,
-  DOC_PATH,
-  STATUS_ORDER,
-  SECTION_HEADING,
-} from "./issues.mjs";
+import { readIssues, linker, issuesHash, DOC_PATH, STATUS_ORDER, SECTION_HEADING } from "./issues.mjs";
 
 const issues = readIssues();
 const checks = readLedger().checks ?? [];
 const ledgerById = new Map(checks.map((c) => [c.id, c]));
 
-// Read each register once; forty-odd entries pointing at six files should not
-// re-parse those files forty-odd times.
-const sections = new Map();
-const items = (file) => {
-  if (!sections.has(file)) sections.set(file, sectionItems(file));
-  return sections.get(file);
-};
-const plan = planItems() ?? new Map();
-
 const statusOf = (i) =>
   i.source.ledger ? (ledgerById.get(i.source.ledger)?.status ?? "?") : i.status;
 
-/**
- * A GitHub heading anchor for the row's own heading, so a reader lands on the
- * item and not merely on the file.
- *
- * Transcribed from what GitHub actually emits, because guessing gets it wrong.
- * Checked against the rendered anchors on the published copy of
- * page-turning.md, where `### ⑧ Dead CSS: the page fade-in never runs ·
- * **confirmed**` carries the id
- *
- *     -dead-css-the-page-fade-in-never-runs--confirmed
- *
- * Three things that reads out, none of them obvious:
- *   - the circled marker is DROPPED. It is Unicode category No, and github's
- *     slugger keeps only letters and decimal digits — so an anchor built on
- *     `\p{N}` (which includes No) keeps the marker and matches nothing.
- *   - stripping happens IN PLACE and spaces are hyphenated afterwards, so the
- *     space the marker left behind becomes a *leading* hyphen, and the ` · `
- *     separator becomes a double one. Trimming or collapsing breaks both.
- *   - the hyphen in "fade-in" survives; only the added ones come from spaces.
- */
-const anchor = (heading) =>
-  heading
-    .toLowerCase()
-    .replace(/[^\p{L}\p{Nd}_\- ]/gu, "")
-    .replace(/ /g, "-");
-
-function link(i) {
-  const s = i.source;
-  if (s.ledger) {
-    return [ledgerById.get(s.ledger)?.title ?? s.ledger, `validation/ledger.json`];
-  }
-  const rel = s.file.replace(/^docs\//, "");
-  if (s.file.endsWith("PLAN.md")) {
-    return [plan.get(s.item)?.title ?? "?", `${rel}#open-follow-ups`];
-  }
-  const it = items(s.file)?.get(s.item);
-  // Reassembled verbatim, separator and asterisks included: the anchor is a
-  // function of the whole heading line, and ` · ` is what produces the double
-  // hyphen before the status. Passing the parts joined by single spaces would
-  // build an anchor that is right in every character except that one.
-  const heading = `${s.item} ${it?.title ?? ""} · **${it?.status ?? ""}**`;
-  return [it?.title ?? "?", `${rel}#${anchor(heading)}`];
-}
+// Titles and hrefs are read out of the owning document — see `linker`, which
+// docs/tasks.md shares so the two pages cannot link the same item differently.
+const link = linker(ledgerById);
 
 const cell = (s) => (s ?? "").replace(/\|/g, "\\|");
 
