@@ -18,7 +18,9 @@ import { describe, expect, it } from "vitest";
 import {
   FLOOR,
   SPLIT_FLOOR,
+  atCurve,
   correctionFor,
+  fitCurve,
   fitLine,
   half,
   lineKey,
@@ -85,6 +87,19 @@ const PER_LINE_TILT = (p, line, cx) => {
   return { dx: b.dx + (cx - 170) * 0.004, dy: b.dy + (cx - 170) * 0.0012 };
 };
 
+/**
+ * The same again, except the drift does not accumulate at a constant rate.
+ *
+ * A straight fit has no freedom to follow this: whatever slope it picks is too
+ * shallow at one end of the line and too steep at the other, which is what the
+ * real corpus looks like when it is read by where along the line a mark sits.
+ */
+const PER_LINE_CURVE = (p, line, cx) => {
+  const b = PER_LINE(p, line);
+  const t = (cx - 170) / 150;
+  return { dx: b.dx + 0.55 * t * t + 0.2 * t, dy: b.dy + 0.18 * t * t };
+};
+
 describe("fitLine", () => {
   it("recovers a slope and an intercept it was given", () => {
     const xs = Array.from({ length: 30 }, (_, i) => i * 0.5);
@@ -99,6 +114,57 @@ describe("fitLine", () => {
     const out = fitLine(xs, xs.map((x, i) => x * 0.1 + (i % 2 ? 0.2 : -0.2)));
     expect(out.a).toBeCloseTo(0.1, 2);
     expect(out.sd).toBeCloseTo(0.2, 1);
+  });
+});
+
+describe("fitCurve", () => {
+  // Read through atCurve rather than off the coefficients: the fit works in a
+  // coordinate of its own making, so the coefficients are only meaningful with
+  // the centre and scale that came back beside them, and every caller reads it
+  // this way. A test that unpicked them would be testing the wrong thing.
+  const bend = (x) => 0.4 + 0.03 * x + 0.002 * x * x;
+
+  it("recovers a bend it was given", () => {
+    const xs = Array.from({ length: 30 }, (_, i) => 170 + i * 5);
+    const out = fitCurve(xs, xs.map(bend));
+    expect(out.bent).toBe(true);
+    expect(out.sd).toBeCloseTo(0, 6);
+    for (const x of [xs[0], xs[15], xs[29]]) expect(atCurve(out, x)).toBeCloseTo(bend(x), 6);
+  });
+
+  it("beats a straight fit exactly where a straight fit cannot reach — the ends", () => {
+    const xs = Array.from({ length: 30 }, (_, i) => 170 + i * 5);
+    const straight = fitLine(xs, xs.map(bend));
+    expect(fitCurve(xs, xs.map(bend)).sd).toBeLessThan(straight.sd);
+    const end = xs[29];
+    expect(Math.abs(straight.a * end + straight.b - bend(end))).toBeGreaterThan(0.5);
+  });
+
+  it("reports how far the points sit from the curve it drew", () => {
+    const xs = Array.from({ length: 40 }, (_, i) => 170 + i);
+    const out = fitCurve(xs, xs.map((x, i) => bend(x) + (i % 2 ? 0.2 : -0.2)));
+    expect(out.sd).toBeCloseTo(0.2, 1);
+  });
+
+  it("falls back to the straight line through a group with no width to bend across", () => {
+    // Every mark at the same spot: there is no bend to see, and the normal
+    // equations are singular. The answer is the straight line's, not a throw and
+    // not nothing — the same choice this file makes wherever a group is too thin
+    // for what it was asked.
+    const xs = Array.from({ length: 20 }, () => 200);
+    const out = fitCurve(xs, xs.map((_, i) => 1.5 + (i % 2 ? 0.1 : -0.1)));
+    expect(out.bent).toBe(false);
+    expect(Number.isFinite(atCurve(out, 200))).toBe(true);
+    expect(atCurve(out, 200)).toBeCloseTo(1.5, 6);
+  });
+
+  it("falls back rather than bending through two distinct positions", () => {
+    // Two positions determine a straight line and leave a quadratic a free
+    // parameter, so any bend it drew would be invented. It draws none.
+    const xs = [180, 180, 180, 320, 320, 320];
+    const out = fitCurve(xs, xs.map((x) => 0.4 + 0.01 * x));
+    expect(out.bent).toBe(false);
+    expect(atCurve(out, 250)).toBeCloseTo(0.4 + 0.01 * 250, 6);
   });
 });
 
@@ -159,12 +225,44 @@ describe("correctionFor", () => {
     }
   });
 
+  it("follows a bend along a line at both ends, where a straight fit runs out", () => {
+    const rows = corpus(PER_LINE_CURVE);
+    const one = rows.filter((r) => r.page === 3 && r.line === 9);
+    const read = (apply, r) => apply(r).dx - PER_LINE_CURVE(3, 9, r.box[0] + 2.8).dx;
+    const tilt = correctionFor("line-tilt", rows).apply;
+    const curve = correctionFor("line-curve", rows).apply;
+    const ends = [one[0], one[one.length - 1]];
+    // The straight fit is not merely less good at the ends, it is out by more
+    // than a tenth of a unit — the bar the tilt test holds itself to — because a
+    // slope that splits the difference is wrong in the same direction at both.
+    for (const r of ends) expect(Math.abs(read(tilt, r))).toBeGreaterThan(0.1);
+    for (const r of ends) expect(Math.abs(read(curve, r))).toBeLessThan(0.1);
+  });
+
   it("leaves a line with too few marks wearing its page's correction, not none", () => {
     const rows = corpus(PER_LINE).filter((r) => !(r.page === 2 && r.line === 5 && r.k % 7 !== 0));
     const { apply, lines } = correctionFor("line", rows);
     expect(lines.has(lineKey({ page: 2, line: 5 }))).toBe(false);
     const sparse = rows.find((r) => r.page === 2 && r.line === 5);
     expect(apply(sparse).dx).toBeCloseTo(PAGE_ONLY(2).dx, 1);
+  });
+
+  it("refuses a bend on a line too thin to carry three terms, where a tilt still fits", () => {
+    // Three observations per term, so the same floor buys a curve two-thirds of
+    // the evidence it buys a tilt. Seven marks is enough for a slope and not for
+    // a bend, and the floor on its own would have allowed both.
+    const all = corpus(PER_LINE_CURVE);
+    const rows = [
+      ...all.filter((r) => !(r.page === 2 && r.line === 5)),
+      ...all.filter((r) => r.page === 2 && r.line === 5).slice(0, 7),
+    ];
+    const k = lineKey({ page: 2, line: 5 });
+    expect(correctionFor("line-tilt", rows, 5).lines.has(k)).toBe(true);
+    const curve = correctionFor("line-curve", rows, 5);
+    expect(curve.lines.has(k)).toBe(false);
+    // And what it falls back to is that page's own correction, not nothing.
+    const thin = rows.at(-1);
+    expect(curve.apply(thin).dx).toBeCloseTo(correctionFor("page", rows, 5).apply(thin).dx, 6);
   });
 
   it("gives a page it never measured no correction at all, rather than a guess", () => {
@@ -234,6 +332,24 @@ describe("a per-line correction, against a corpus that has per-line structure an
     expect(tilt.heldOut.sdx).toBeLessThan(line.heldOut.sdx);
   });
 
+  it("keeps improving again on held-out marks when there is a real bend to find", () => {
+    const rows = corpus(PER_LINE_CURVE);
+    const tilt = ladder(rows, "line-tilt");
+    const curve = ladder(rows, "line-curve");
+    expect(curve.heldOut.sdx).toBeLessThan(tilt.heldOut.sdx);
+    expect(curve.heldOut.over).toBeLessThan(tilt.heldOut.over);
+  });
+
+  it("bends the wobble harder still when there is no bend, and loses for it", () => {
+    // The rung after the tilt has to face the same pair as the tilt did, or all
+    // that has been shown is that a model with more parameters fits better.
+    const page = ladder(flat, "page");
+    const tilt = ladder(flat, "line-tilt");
+    const curve = ladder(flat, "line-curve");
+    expect(curve.trained.sdx).toBeLessThan(tilt.trained.sdx);
+    expect(curve.heldOut.sdx).toBeGreaterThan(page.heldOut.sdx);
+  });
+
   it("says how many groups earned a correction, so a win cannot be a win on four lines", () => {
     const line = ladder(real, "line");
     expect(line.groups.pages).toBe(8);
@@ -256,6 +372,21 @@ describe("wearing another line's correction", () => {
     const wrong = splitHalfLadder(rows, "line", { shuffled: true });
     expect(wrong.heldOut.sdx).toBeGreaterThan(page.heldOut.sdx);
     expect(wrong.heldOut.over).toBeGreaterThan(page.heldOut.over);
+  });
+
+  it("refuses the bend too, when the bend is worn by the wrong line", () => {
+    // The control has to be run at the new rung as well, or all that has been
+    // shown is that a model with a third parameter fits better. What is *not*
+    // claimed here is that a shuffled bend hurts more than a shuffled slope: on
+    // this fixture every line bends the same way and only the offsets differ, so
+    // the wrong line's bend is mostly the right bend on the wrong intercept.
+    const rows = corpus(PER_LINE_CURVE);
+    const page = splitHalfLadder(rows, "page");
+    const right = splitHalfLadder(rows, "line-curve");
+    const wrong = splitHalfLadder(rows, "line-curve", { shuffled: true });
+    expect(wrong.heldOut.sdx).toBeGreaterThan(page.heldOut.sdx);
+    expect(wrong.heldOut.over).toBeGreaterThan(page.heldOut.over);
+    expect(wrong.heldOut.over).toBeGreaterThan(right.heldOut.over * 2);
   });
 
   it("makes almost no odds when the lines differ by nothing", () => {
