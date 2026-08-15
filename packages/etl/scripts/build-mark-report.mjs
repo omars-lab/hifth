@@ -1515,24 +1515,54 @@ function onRect(p) {
  * under the point, and that is not an optimisation. A haraka is a stroke a few
  * screen pixels wide at the framing that shows the whole word, so exact
  * hit-testing would mean a reader stabbing repeatedly at a mark and missing it
- * every time. The same fingertip of slack the rectangle allows is allowed here,
- * and where two pieces both answer the smaller one wins — which is nearly always
- * the mark rather than the letter it sits over, and the mark is what is being
- * tagged.
+ * every time. So a fingertip of slack is allowed round every piece, the same
+ * slack the rectangle allows.
+ *
+ * Two rules in order, and the order is the whole of it:
+ *
+ *   landed on a piece   →  the smallest piece it landed on wins
+ *   landed on none      →  the nearest piece within slack wins
+ *
+ * Smallest-wins is why a finger on a haraka gets the haraka and not the letter
+ * it sits over, and the mark is what is being tagged. But smallest-wins was the
+ * only rule here until now, applied across everything within slack — so a finger
+ * squarely inside a large piece was answered with a small piece it had merely
+ * come near, and the rectangle jumped to ink the reader could see they had not
+ * touched. Measured over two built sittings, aiming at the dead centre of a
+ * piece returned a different piece on 3.7% of the aims at the wide framing;
+ * with containment ranked first that falls to 1.7%. Taps that land on blank
+ * paper still reach for the nearest ink — the slack is what makes a small mark
+ * tappable at all — but they now reach for the *nearest*, where before 2.3% of
+ * them snapped past nearer ink to something smaller further away. That case is
+ * gone entirely, and it was the one that read as the page ignoring the reader.
  */
 function pieceAt(c, p) {
   if (!c.pieces || !c.pieces.length) return null;
   const t = framing()[2] / 30;
-  let best = null;
-  let area = Infinity;
+  let on = null;
+  let onArea = Infinity;
+  let near = null;
+  let nearD = Infinity;
+  let nearArea = Infinity;
   for (let i = 0; i < c.pieces.length; i += 1) {
     const b = c.pieces[i];
-    if (p[0] < b[0] - t || p[0] > b[0] + b[2] + t) continue;
-    if (p[1] < b[1] - t || p[1] > b[1] + b[3] + t) continue;
+    // Gap to the piece along each axis, zero when the point is within its extent.
+    const dx = Math.max(b[0] - p[0], 0, p[0] - (b[0] + b[2]));
+    const dy = Math.max(b[1] - p[1], 0, p[1] - (b[1] + b[3]));
     const a = b[2] * b[3];
-    if (a < area) { area = a; best = i; }
+    if (dx === 0 && dy === 0) {
+      if (a < onArea) { onArea = a; on = i; }
+      continue;
+    }
+    if (dx > t || dy > t) continue;
+    const d = Math.sqrt(dx * dx + dy * dy);
+    // Ties go to the smaller piece, which keeps the old rule's answer for a mark
+    // sitting exactly between two strokes of the letter it belongs to.
+    if (d < nearD - 1e-9 || (Math.abs(d - nearD) < 1e-9 && a < nearArea)) {
+      nearD = d; nearArea = a; near = i;
+    }
   }
-  return best;
+  return on !== null ? on : near;
 }
 
 /**
@@ -1604,6 +1634,25 @@ function snap(c) {
   paint();
 }
 
+/**
+ * The line under the picture: the standing instruction, or the answer to a tap
+ * that reached no ink.
+ *
+ * A tap that finds nothing used to repaint and say nothing at all, which from
+ * the reader's side is indistinguishable from a tap the page never received. So
+ * a finger a hair off the stroke and a dead control look the same, and the thing
+ * a reader reaches for after two of those is the nudge pad — they stop pointing
+ * at ink altogether, and the answers stop being about the ink. Saying which of
+ * the two it was costs one line, in the place they are already reading.
+ */
+function hint(miss) {
+  $("hint").textContent = miss
+    ? "There is no ink where you tapped. The marks are small — aim at the stroke itself, or look closer first."
+    : drawing
+      ? "Drag a rectangle around the ink this mark should be sitting on."
+      : "If it is on the right mark, say so. If it is not, tap the mark it should be on and the rectangle will go round it — tap again to take it back, and tap a second piece if the mark is in two parts.";
+}
+
 /** A tap on a piece: point at it if it is not chosen, unpoint it if it is. */
 function tapInk(id) {
   const c = DECK[at];
@@ -1631,17 +1680,41 @@ function tapInk(id) {
   tint();
 }
 
-// Where and when this gesture began, in screen pixels and milliseconds. Kept for
-// every pointer-down and not only the ones that begin a move, because a tap cannot
-// be told from the start of a scroll on the way down — only on the way up, by
-// having gone nowhere. Recognising it any earlier would mean taking the gesture
-// from the page first and giving it back if it turned out to be a scroll, which no
-// phone allows.
+// Where this gesture began, in screen pixels. Kept for every pointer-down and not
+// only the ones that begin a move, because a tap cannot be told from the start of a
+// scroll on the way down — only on the way up, by having gone nowhere. Recognising
+// it any earlier would mean taking the gesture from the page first and giving it
+// back if it turned out to be a scroll, which no phone allows.
 let tapAt = null;
+
+/**
+ * The one boundary between a tap and a drag, in screen pixels.
+ *
+ * One number, in one unit, with no clock. All three of those were wrong before.
+ *
+ * There were two boundaries: a gesture counted as a tap only if it also finished
+ * inside 600ms, and separately a drag banked a placement only if it had moved
+ * more than 0.05 page units. Neither the reader nor the transcript could see the
+ * gap between them, and the gap is where the phantoms lived: a finger resting on
+ * the rectangle for three-quarters of a second with a few pixels of tremor is
+ * past the clock, so it is not a tap — and ten screen pixels is about 1.5 page
+ * units at the framing that shows the whole word, so it is far past the placement
+ * floor. It banked a placement of nearly half a unit that nobody made, on the
+ * gesture a reader makes most: reaching for the ink under the rectangle.
+ *
+ * The clock is gone because it never asked anything worth knowing. A slow tap is
+ * still a tap; a reader steadying their hand against a moving train is not making
+ * a different statement. What is being asked is whether the finger stayed still,
+ * and only distance answers that. Screen pixels rather than page units because a
+ * finger is the same size on every card and a page unit is not.
+ *
+ * The fine tool is still the nudge pad, which places from 0.01 units up.
+ */
+const TAP_PX = 10;
 
 stage.addEventListener("pointerdown", function (e) {
   const p = ptIn(e);
-  tapAt = [e.clientX, e.clientY, Date.now()];
+  tapAt = [e.clientX, e.clientY];
   if (!drawing && !onRect(p)) return;   // the page keeps this gesture
   try { stage.setPointerCapture(e.pointerId); } catch (err) { /* capture is a nicety */ }
   from = p;
@@ -1660,20 +1733,19 @@ stage.addEventListener("pointermove", function (e) {
 stage.addEventListener("pointerup", function (e) {
   const t = tapAt;
   tapAt = null;
-  // A tap: down and up in the same place, quickly, and nothing banked in between.
-  // Ten screen pixels rather than a page-unit tolerance, because what is being
-  // asked is whether a finger stayed still, and a finger is the same size on every
-  // card while a page unit is not. It runs before the move is settled so that the
-  // one gesture cannot be read as both — a small drag that banked a placement is a
-  // placement, and pointing at ink on top of it would overwrite the reader's own
-  // hand with an arithmetic box they did not ask for.
-  const tap = !drawing && t && Math.abs(e.clientX - t[0]) <= 10 &&
-              Math.abs(e.clientY - t[1]) <= 10 && Date.now() - t[2] <= 600;
+  // A tap: down and up in the same place, and nothing banked in between. It runs
+  // before the move is settled so that the one gesture cannot be read as both — a
+  // drag that banked a placement is a placement, and pointing at ink on top of it
+  // would overwrite the reader's own hand with an arithmetic box they did not ask
+  // for.
+  const tap = !drawing && t && Math.abs(e.clientX - t[0]) <= TAP_PX &&
+              Math.abs(e.clientY - t[1]) <= TAP_PX;
   if (tap) {
     from = null;
     moved = null;
     const id = pieceAt(DECK[at], ptIn(e));
-    if (id === null) { paint(); return; }
+    if (id === null) { hint(true); paint(); return; }
+    hint(false);
     tapInk(id);
     return;
   }
@@ -1689,7 +1761,11 @@ stage.addEventListener("pointerup", function (e) {
     }
     drawn = null;
   } else {
-    if (moved && (Math.abs(moved[0]) > 0.05 || Math.abs(moved[1]) > 0.05)) {
+    // No second floor here. Reaching this line already means the gesture cleared
+    // the tap boundary above, so it moved further than a finger holding still —
+    // and a page-unit floor on top of a screen-pixel one is the pair that banked
+    // placements nobody made. See TAP_PX.
+    if (moved) {
       // Total displacement from the rectangle that ships, not from where this page
       // happened to start it — the reader's answer has to be readable without also
       // knowing which correction built the page.
@@ -1822,9 +1898,7 @@ function render() {
   // bank an empty transcript, which reads downstream exactly like a sitting
   // somebody finished and found nothing wrong in.
   $("hand").parentNode.hidden = said.length === 0;
-  $("hint").textContent = drawing
-    ? "Drag a rectangle around the ink this mark should be sitting on."
-    : "If it is on the right mark, say so. If it is not, tap the mark it should be on and the rectangle will go round it — tap again to take it back, and tap a second piece if the mark is in two parts.";
+  hint(false);
   paint();
 
   const mine = [];

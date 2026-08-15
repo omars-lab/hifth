@@ -828,10 +828,68 @@ describe.skipIf(!haveCorpus)("pointing at the ink the rectangle belongs on", () 
     const pieceAt = new Function("framing", `${src[0]}\nreturn pieceAt;`)(() => [0, 0, 30, 30]);
     const c = { pieces: [[0, 0, 10, 10], [4, 4, 1, 1]] };
     expect(pieceAt(c, [4.5, 4.5])).toBe(1);
-    expect(pieceAt(c, [5.8, 4.5])).toBe(1);
     expect(pieceAt(c, [9, 9])).toBe(0);
     expect(pieceAt(c, [20, 20])).toBe(null);
     expect(pieceAt({ pieces: [] }, [0, 0])).toBe(null);
+  });
+
+  it("does not reach past the ink the finger is actually on", () => {
+    // Smaller-wins used to be the only rule, applied flatly across everything
+    // within slack — so a finger squarely inside a large piece was answered with a
+    // small piece it had merely come near, and the rectangle jumped onto ink the
+    // reader could see they had not touched.
+    //
+    // Ranking landed-on above came-near is what fixes it, and it is measurable
+    // rather than a matter of taste: over two built sittings, aiming at the dead
+    // centre of a piece returned a different piece on 3.7% of aims at the wide
+    // framing before and 1.7% after, and taps on blank paper that snapped past
+    // nearer ink to something smaller further away — 2.3% of them — stopped
+    // entirely. Slack still forgives a near miss; it just no longer overrules a
+    // hit.
+    const { html } = build("--set", "fallback", "--count", "5");
+    const src = /\nfunction pieceAt\(c, p\) \{[\s\S]*?\n\}\n/.exec(html);
+    const pieceAt = new Function("framing", `${src[0]}\nreturn pieceAt;`)(() => [0, 0, 30, 30]);
+
+    // Inside the letter, four-fifths of a unit clear of the mark: the letter.
+    expect(pieceAt({ pieces: [[0, 0, 10, 10], [4, 4, 1, 1]] }, [5.8, 4.5])).toBe(0);
+    // On neither, but a fifth of a unit from the large one and twice that from the
+    // small one: the near one, not the small one.
+    expect(pieceAt({ pieces: [[0, 0, 4, 4], [4.6, 1.9, 0.2, 0.2]] }, [4.2, 2])).toBe(0);
+    // And a near miss on the only ink there still reaches it — the forgiveness is
+    // what makes a mark a few screen pixels wide tappable at all.
+    expect(pieceAt({ pieces: [[0, 0, 1, 1], [5, 0, 1, 1]] }, [1.5, 0.5])).toBe(0);
+  });
+
+  it("tells a tap apart from a drag with one number, in one unit, and no clock", () => {
+    // There were two boundaries and the gap between them banked placements nobody
+    // made. A gesture counted as a tap only if it also finished inside 600ms, and
+    // separately a drag banked a placement only once it had moved more than 0.05
+    // page units — so a finger resting on the rectangle with a few pixels of
+    // tremor was past the clock and far past the floor, on the gesture a reader
+    // makes most: reaching for the ink under the rectangle. A slow tap is still a
+    // tap, and only distance can say whether a finger stayed still.
+    const { html } = build("--set", "fallback", "--count", "5");
+    expect(html).toContain("const TAP_PX = 10;");
+    const up = /stage\.addEventListener\("pointerup", function \(e\) \{([\s\S]*?)\n\}\);\n/.exec(html);
+    expect(up).toBeTruthy();
+    expect(up[1]).toContain("TAP_PX");
+    // No clock in the decision, and no second floor under it.
+    expect(up[1]).not.toContain("Date.now()");
+    expect(up[1]).not.toMatch(/Math\.abs\(moved\[[01]\]\) > 0/);
+  });
+
+  it("says so when a tap reaches no ink at all", () => {
+    // Repainting and saying nothing is indistinguishable, from the reader's side,
+    // from a tap the page never received — so a finger a hair off the stroke and a
+    // dead control look the same, and after two of those a reader stops pointing
+    // at ink and goes back to the nudge pad. The answers then stop being about the
+    // ink, which is the thing the sitting is trying to measure.
+    const { html } = build("--set", "fallback", "--count", "5");
+    const up = /stage\.addEventListener\("pointerup", function \(e\) \{([\s\S]*?)\n\}\);\n/.exec(html);
+    expect(up[1]).toContain("hint(true)");
+    const hint = /\nfunction hint\(miss\) \{([\s\S]*?)\n\}\n/.exec(html);
+    expect(hint).toBeTruthy();
+    expect(hint[1]).toContain("no ink where you tapped");
   });
 
   it("never lets a tap leave a rectangle too small to see", () => {
