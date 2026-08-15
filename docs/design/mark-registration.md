@@ -1627,6 +1627,32 @@ Three things are now settled, and they are what this question hands to whatever 
   than every rectangle being slightly out. That is a separate question from this one and it is
   not averaged into the figures above; naming it is what stops the next session from re-measuring
   the whole book to rediscover it.
+
+  **It was asked, and half of it now has an answer.** The rectangles still badly out are not
+  scattered through the book. More than half of them sit on the one printed line in fifteen that
+  has gone wrong as a whole, so lines go wrong rather than marks going wrong here and there. And
+  a rectangle at either end of a line is about twice as likely to be badly out as one in the
+  middle. That is what a disagreement looks like when it grows along a line but does not grow at
+  a steady rate — and a correction that can only tilt has no freedom to follow it, because a
+  slope that splits the difference is wrong in the same direction at both ends.
+
+  So the correction was allowed to **bend** along a line rather than only tilt. Measured the same
+  way as everything else here, on the half of the marks the correction never saw and across the
+  whole book: badly out **4.95% → 4.12%**, and the typical miss 0.224 → **0.198** units. The same
+  control was run again and holds — a line made to wear another line's bend leaves 34.4% badly
+  out, against 18.2% for correcting nothing per-line at all — so a line's bend is a fact about
+  that line and not a shape absorbed from noise. A freer shape still — one allowed to change
+  direction twice along a line rather than bend once — was tried and refused: it is better on the
+  marks it was fitted to and worse on the marks it was not, which is what an allowance with
+  nothing to find looks like. The ladder stops where it stops being paid for, not where the
+  arithmetic stops improving.
+
+  **The other half is still unexplained, and it is the half this started from.** Bending fixes
+  the middle of a line — 4.3% badly out down to 2.9% — and barely touches the ends: 6.6% → 6.0%
+  and 7.0% → 6.0%. A rectangle at the end of a printed line is *still* about twice as likely to
+  be badly out as one in the middle, so whatever is doing that is not a shape in where along the
+  line a mark sits, and no amount of bending will reach it. That is left standing on purpose. The
+  question below this one is the other candidate for it, and it is the one a reader can settle.
 - **Whatever ships must move the text and leave the ornaments alone.** The question two sections
   above measures that directly, on the one object the correction could not have been fitted to.
 
