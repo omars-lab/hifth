@@ -683,7 +683,9 @@
         "docs/design/mark-registration.md §⑦ — the recommendation is provisional pending exactly this, and §⑩ ① is this question.",
         "packages/etl/scripts/lib/adjudication.mjs — an invalid session tunes the mix of trials, not the conclusion about the marks."
       ],
-      "record": "docs/design/mark-registration.md"
+      "record": "docs/design/mark-registration.md",
+      "verifiedOn": "2026-08-12",
+      "result": "Not sat, and recorded so the ledger stops reading as untried. Two sittings were opened on 2026-08-12 and both were abandoned — 5 of 100 trials on the first, 9 of 100 on the second — with no verdict written and no answers file handed back, so nothing here measures whether the corrected rectangle beats the shipped one. The fourteen trials do say two things, neither of them a result. On three of the first five the reader ticked that NEITHER rectangle closed around the mark at all: a forced choice between two boxes only informs when at least one is on the thing, and at that rate what is wrong is the mix of trials rather than the correction. The fallback sittings later found the same thing at scale — 100 of 101 gradable marks faulted — so expect it again and deal the trials accordingly. Second, the nine trials of the later sitting were answered in nine seconds, a median of 893 milliseconds on a judgement that needs the eye to travel between two rectangles, which reads as clicking through rather than looking; a sitting that fast is not evidence whichever way it falls. Also on the record as a process failure: two half-transcripts for one check is the outcome the transcript register names as the worst available here, and this is it — the second sitting started fresh on a different commit instead of resuming the first."
     },
     {
       "id": "placement-residual-by-hand",
