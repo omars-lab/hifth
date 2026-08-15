@@ -361,6 +361,50 @@ describe.skipIf(!haveCorpus)("giving a reader back the sitting they left", () =>
     expect(run(all, 2, 2, [])).toEqual({ went: 0, left: all, at: 2, seen: 2 });
     expect(run(["b", "c"], 0, 0, ["a"])).toEqual({ went: 0, left: ["b", "c"], at: 0, seen: 0 });
   });
+
+  /**
+   * The count under the card and the count in the file are different questions, and
+   * for one sitting they were answered with the same variable. The screen wants what
+   * is left, so it shrinks; the file wants the whole sitting, and it is the
+   * denominator of the only rate this instrument produces — one sitting came back
+   * saying nineteen marks had been looked at when a hundred and fifteen had been
+   * answered, and the scorer duly printed two thousand per cent.
+   *
+   * The invariant, and it is the whole of the fix: what the file gets can only ever
+   * go up. The test runs retiring rather than reading it, because both halves of the
+   * sum move at once and in opposite directions.
+   */
+  it("writes the whole sitting into the file even as the deck shrinks under it", () => {
+    const { html } = build("--set", "fallback", "--count", "20");
+    const over = html.slice(html.indexOf("function handOver("), html.indexOf("function handOver(") + 900);
+    expect(over).toContain("seen: GONE.size + seen");
+
+    const src = html.slice(html.indexOf("function retire()"), html.indexOf("function handOver("));
+    const noop = () => {};
+    // Retiring in place, so the two halves of the sum can be read after each round the
+    // way a hand-over reads them: what has been given away, plus what is still here
+    // and has been passed.
+    const round = (state, answers) =>
+      new Function(
+        "DECK", "GONE", "at", "seen", "said", "keepGone", "keepSeen", "keepAt", "render",
+        `${src}\nretire(); return { deck: DECK.map((c) => c.id), GONE, at, seen };`,
+      )(state.deck.map((id) => ({ id })), state.GONE, state.at, state.seen,
+        answers.map((id) => ({ id })), noop, noop, noop, noop);
+    const filed = (s) => s.GONE.size + s.seen;
+
+    let s = { deck: ["a", "b", "c", "d", "e"], GONE: new Set(), at: 5, seen: 5 };
+    expect(filed(s)).toBe(5);
+    // Two handed over. The deck loses them and the screen's count follows it down —
+    // but all five have still been looked at, and that is what the file must carry.
+    s = round(s, ["a", "c"]);
+    expect(s.seen).toBe(3);
+    expect(filed(s)).toBe(5);
+    // And again, with the answers of the first round still standing in the transcript,
+    // because the transcript is never retired with the deck. Nothing is counted twice.
+    s = round(s, ["a", "c", "d"]);
+    expect(s.seen).toBe(2);
+    expect(filed(s)).toBe(5);
+  });
 });
 
 /**
