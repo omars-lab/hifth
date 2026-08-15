@@ -676,11 +676,19 @@ here. Four independent rungs, five times the pages, and nothing moves by a third
 Those are the figures the drawn page carries, because it can carry all 604 pages honestly and
 this table cannot; the two are not in conflict, they are the same measurement at two widths.
 
+**Option I is a fifth rung on that reconstruction and deliberately not a fifth row in the table
+above.** It was worked out after the 120-page scoring run and only the first column can be
+reconstructed without re-scoring every page against its own ink, so what is known about it is
+**4.12%** badly out on the whole book, on the same held-back half — and the other three columns
+are honestly blank rather than estimated. Adding a row of dashes to a table a reader scans
+downward would read as a worse score than F rather than as an unrun measurement, so it is stated
+here in a sentence instead. The Option I section below carries the rest.
+
 The options are lettered in the order they were first written, not in order of preference — the
 table above is the order of preference, and the recommendation moved.
 
 **These options are also drawn, and the drawing is the thing to send anybody who has to choose.**
-Five of the eight — A, B, F, G and H — are rendered on a real page of the mus'haf at the size a
+Six of the nine — A, B, F, G, I and H — are rendered on a real page of the mus'haf at the size a
 phone actually draws it, each one beside the printer's own ink, because a displacement of one
 unit is a number here and a picture there, and only one of those settles anything. The page is
 [`mark-placement.html`](mark-placement.html), rebuilt by
@@ -691,7 +699,9 @@ because there is nothing in them to look at: one is a stretch too small to see a
 these same rectangles on the page and forbids using them. E appears in the drawn page's table of
 numbers but has no picture of its own, because F is E with one thing added and drawing both would
 ask a reader to spot the difference between two nearly identical pages. The same letters mean the
-same options in both places; the register row is `mark-placement` in
+same options in both places, though the drawn page puts I next to F rather than last, because the
+two differ by one thing and seeing that difference is the whole reason I is drawn at all; the
+register row is `mark-placement` in
 [`docs/decisions.json`](../decisions.json).
 
 ### Option A — change nothing, and do not draw marks
@@ -823,6 +833,13 @@ their own rather than every rectangle being slightly out. That difference is a r
 it is deliberately not averaged into the headline: it says a further question exists, and it is
 not the question this section is answering. §⑩ ⑨ carries it.
 
+That question has since been asked, and half of it has an answer: the rectangles F leaves badly
+out are concentrated on whole printed lines that have gone wrong together, and a line can go
+wrong in a way a steady change from end to end cannot follow. Option I is that finding turned
+into an option. The other half is still open — a rectangle at either *end* of a printed line
+remains about twice as likely to be badly out as one in the middle, under F and under I alike,
+and nothing here explains why.
+
 ### Option G — the same, applied to the marks and not to the words
 
 The correction from F, carried onto the mark rectangles only. Word rectangles stay exactly where
@@ -919,6 +936,50 @@ more than this* and can never say *none*, and the interval rather than the perce
 finding. What it can do, and nothing else here can, is notice a fault that is confidently
 identical everywhere: three or four faults in sixty is a few per cent of almost the whole book,
 which is a statement about the mus'haf, where the same share in the tail is a rounding error.
+
+### Option I — record a printed line that is allowed to bend
+
+The same as F, except that a line's move may bend along the line rather than only grow at a
+steady rate from one end to the other. Six numbers a line instead of four.
+
+**Where it came from matters, because it is the one option on this page that was not reasoned
+out in advance.** F was written down before it was measured, from a claim about how the two
+printings set their letters. I was not: it came from asking what F's leftover rectangles have in
+common, and the answer was each other. Of the marks F still leaves badly out, **54%** sit on the
+one printed line in fifteen that has gone wrong as a whole — 590 lines out of 8,817 — rather than
+being spread evenly over the book. Lines fail together, and a line that fails does so in a shape
+a straight change from end to end cannot follow. So this option is a fit to an observation, and
+that is a weaker kind of reason than F has. What makes it believable is not the story but the
+half of the marks it was never shown.
+
+Measured consequence, on the whole book and on the held-back half: badly out **4.95% → 4.12%**,
+and the typical miss **0.224 → 0.198** units, over 326,515 marks and 8,702 printed lines. The
+other columns of §⑦'s table are not filled in for this option, for the reason given above it.
+
+**The control, run again because a bend has more room to flatter itself than a tilt does.** Every
+line was made to wear some other line's bend, at random. That scores **34.40%** badly out —
+worse than wearing another line's tilt, and far worse than the 18.20% for no per-line correction
+at all. A line's bend is a fact about that line, not absorbed noise.
+
+**And the rung above it was refused, which is how a ladder is meant to end.** A shape freer still,
+allowed to change direction twice along a line rather than bend once, was fitted the same way and
+rejected: better on the marks it was fitted from and worse on the marks it was not, which is what
+an allowance with nothing left to find looks like. Each extra freedom also raises the number of
+marks a line needs before it may use it, so the freer shape abandons the short lines, which are
+already the ones going worst. That comparison was made off this ladder and is **not reproducible
+from what is checked in**; the four rungs above are.
+
+Cost: half as much table again as F, six numbers a printed line rather than four, and a deeper
+fallback ladder — a line too thin to carry a bend takes its tilt, then its plain move, then its
+page's. Everything F disturbs, I disturbs identically: the word rectangles move too, are rebuilt,
+and are re-checked. Nothing new has to be learnt to read it, because it is the same table shape
+with more numbers in each row.
+
+The honest reservation: **it fixes the middle of a line and barely touches the ends.** The middle
+goes from 4.34% badly out to 2.94%, while the two ends go from 6.58% and 6.95% to 5.97% and
+6.02%. So the concentration this option was built from is only half accounted for, and the half
+left standing is the half this whole enquiry started from. That is left as an open question in
+§⑩ ⑨ rather than chased with a seventh rung nobody can justify in advance.
 
 ### What thresholds would go with the recommended option, and are they enforced?
 

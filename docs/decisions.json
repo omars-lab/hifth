@@ -121,6 +121,10 @@
           "label": "Line the marks up, and leave the words where they are"
         },
         {
+          "id": "I",
+          "label": "Line each printed line up on its own, and let it bend"
+        },
+        {
           "id": "H",
           "label": "Put each mark where its own ink is, and line the rest up"
         }
