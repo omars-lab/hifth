@@ -1294,7 +1294,7 @@ an hour.
 
 ### Track B (gated on stable web beta) — Capacitor iOS, then Android
 Wrap `apps/web`; bundle the full corpus in-app (offline by default); native share sheet;
-**Universal Links** (links open the app — solves research §5 on iOS); haptics on hop-land
+**Universal Links** (links open the app — solves research §6 on iOS); haptics on hop-land
 and bead taps; state restoration; iPad two-page spread; App Store review notes lead with
 KFGQPC provenance. Android fast-follow (~95% shared code). Do not start until web v1.0.
 
