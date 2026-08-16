@@ -218,7 +218,7 @@ gap as a documented limitation the onboarding already respects (research §6 say
 on that, and the gate has done its job — a year of platform work was not spent on a wrapper
 whose reason has since been half-dismantled by the web build itself.
 
-### ⑤ The adjacency shards ship without the notice their upstream requires · **confirmed**
+### ⑤ The adjacency shards ship without the notice their upstream requires · **fixed**
 
 `LICENSES.md` names two consequences of a bucket being a GPL derivative: the corresponding
 source reaches recipients, and *the notice travels with the data*. Once ① is taken, the
@@ -237,7 +237,15 @@ quoted verbatim from the source header the way `build-roots.mjs` does it, and na
 upstreams rather than the one the file is mostly about. That is a build change and a rebuild
 of a shipped asset tree, which is why it was not folded into the licence-file correction.
 
-### ⑥ Nothing would notice the next asset tree that gains an upstream · **open**
+**Fixed 2026-08-16.** `build-adjacency.mjs` now writes the notice, and it names both parents
+— the failure available here was fixing the one-parent error in the other direction, by
+discharging the GPL half and dropping Waqar144's attribution. The corpus's copyright block is
+no longer copied: `morphology.mjs` gained `copyrightBlock()`, `build-roots.mjs` was moved onto
+it, and the two trees now reproduce one quotation rather than two copies that can drift. The
+root shards rebuilt **byte-identical**, which is what makes that extraction a refactor rather
+than a claim. `gate:notices` is the test that would fail if the notice went away.
+
+### ⑥ Nothing would notice the next asset tree that gains an upstream · **fixed**
 
 This is the general form of ① and ⑤, kept separate from both because it outlives them: ①
 corrects one row, ⑤ writes one file, and neither makes the next occurrence any more visible
@@ -259,3 +267,51 @@ gate that is wrong in a way nobody notices, which is worse than none.
 of upstreams named across them must match `LICENSES.md`'s bucket table), or the real one (the
 import trace). The cheap one would have caught ⑤ and would not have caught ①. Not obviously
 worth it either way, which is why this is a question and not a task.
+
+**Fixed 2026-08-16 — both shapes, because the cheap one alone re-runs this item.** The
+question above frames it as a choice, and building it showed the choice was false: the cheap
+half catches a missing notice and is blind to the wrong bucket row, which is the defect that
+actually happened. `gate:notices` does three ties. The table against the shipped bytes — every
+inherited row must ship a notice naming what the row names, in both directions, so a new
+inherited bucket cannot be added to the table without arriving in the gate. The names against
+`SOURCES.md`, so a renamed project fails instead of matching nothing. And the trace: each
+builder is walked through its transitive relative imports, and every vendored input the
+resulting module graph reads must carry a verdict. **An input the trace finds and the
+declaration does not mention fails the build** — so the next time a feature reaches a new
+upstream, the person who wrote the feature is the one who has to say what it means.
+
+The import trace was the half that looked too expensive to be worth it. It was not, because
+the scope that matters is small: relative imports inside one package, and string literals
+matched against the vendored files that actually exist. What it cannot see is written into the
+gate's own header rather than left to be discovered — it does not resolve dynamic paths, does
+not follow `@hifth/core`, and treats `*.pin.json` and `*.probe.json` as this project's own
+artefacts, so a builder that reaches a new upstream *only* through a pin is invisible to it.
+
+The exemption list is the part worth defending, since `gate-gates.mjs` says in as many words
+that an allow-list is how this goes wrong every time. This one cannot go quiet: a deferred
+input must name an issue id that exists in `docs/issues.json` **and is still open**, so closing
+the question breaks the build until the declaration is revisited. It found ⑦ on its first run.
+
+### ⑦ A third upstream reaches the adjacency shards · **open**
+
+Found by ⑥'s trace on the first run it did, which is the strongest thing that can be said for
+building it. `build-adjacency.mjs` reads `data/pages/ayah-pages.json` — the ayah→page table —
+and writes `page` and `dPage` into **every** edge in all 114 shards. That table is derived from
+the KFGQPC page corpus, and `LICENSES.md` buckets that corpus separately as *not ours to
+relicense*, naming terms neither of the adjacency row's two upstreams grants.
+
+So the shards may have three parents rather than two. They may equally have two: a table of
+which page each ayah falls on is arguably a fact about a printing rather than expression, and
+this repo already treats it as a measurement — the same table is used in reverse to *identify*
+which print a corpus follows, which is not a thing one does with someone else's authorship. The
+adjacency shards also carry no page image, no glyph and no text: they carry the integer.
+
+**This is not decidable here, and guessing costs more than waiting.** Naming KFGQPC on the row
+without grounds overstates what the app owes and would propagate into the notice shipped to
+every reader; leaving it unnamed understates it if the answer is the other way. Both are worse
+than an open question with the number attached.
+
+**What would answer it:** the same licensing opinion ② is already waiting on, with this added
+to its scope — it is a fourth question for a reader who is being asked three. Until then
+`gate:notices` carries the deferral explicitly and will not let it be forgotten, since the
+deferral is only valid while this item is open.

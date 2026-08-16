@@ -79,10 +79,27 @@ whole bundle, which is this file's own argument for plain GPL over AGPL. A wrapp
 binary is the thing that has to be licensed, which is why this matters more to Track B than to
 the web build — see `docs/design/track-b-native.md`.
 
-**What this does not yet settle.** The root shards ship a `NOTICE.txt` beside them so the
-notice travels with the data; the adjacency shards do not, and on this reading they should.
-That is a build change rather than a correction to this file, and it is tracked as its own
-row in `docs/issues.json`.
+The notice travels with this data too, as of 2026-08-16. `assets/adj/<edition>/NOTICE.txt` is
+written by the build beside the shards, and it names **both** parents — the way to get a
+two-parent row wrong twice is to fix it once, and a notice that discharged the GPL half while
+dropping Waqar144's attribution would have been the same one-parent mistake wearing the other
+hat. The corpus's copyright block in it is not a copy of the one beside the root shards: both
+are read out of the source file on every build by the same function, because the corpus's own
+terms ask that its notice be *reproduced*, and two readers of one quotation is precisely how a
+reproduction stops being one.
+
+Nothing had noticed any of this, which is its own finding. `gate:notices` now traces what each
+builder actually reads, in imports rather than in prose, and fails the build when a shipped
+asset tree reads a vendored input that neither this table nor the tree's notice accounts for.
+
+**What this does not yet settle.** Building that trace immediately surfaced a third candidate
+parent: every edge in every shard carries the page it lands on and the distance in pages to its
+pair, and those come from a table derived from the KFGQPC page corpus — bucketed in the row
+below under terms neither upstream here grants. Whether a table of which page an ayah falls on
+is expression that carries terms forward, or a fact about a printing, is a licensing question
+and not an engineering one. It is recorded rather than guessed, because naming a third parent
+without grounds would overstate what this app owes in a notice handed to every reader, and
+leaving it unnamed understates it if the answer runs the other way.
 
 ## The deploy trigger
 
