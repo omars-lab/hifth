@@ -35,6 +35,33 @@ export const MORPHOLOGY_PATH = join(
 /** Every ayah in the mushaf. A reader that finds fewer has an incomplete source. */
 export const TOTAL_AYAHS = 6236;
 
+/**
+ * The corpus's own copyright block, verbatim, for reproduction beside anything
+ * derived from it.
+ *
+ * The corpus's third term of use is that the copyright notice "shall be
+ * reproduced appropriately in all works derived from or containing substantial
+ * portion of this file". Two shipped asset trees are now such a work — the root
+ * shards, and the adjacency shards once they started carrying spans — so both
+ * have to reproduce it, and the only way two copies of a quotation stay the same
+ * quotation is if neither of them is a copy. It is read out of the file itself
+ * on every build, from the opening line to the last rule, so the notice cannot
+ * drift from the source it is quoting even by a space.
+ *
+ * The bound is 40 lines and the block is found by its last horizontal rule
+ * rather than by a line count, because a re-pin that adds a line to the header
+ * should extend the notice, not truncate it. A file whose rule is not where a
+ * header keeps it is not the file this parser was written against, and throwing
+ * is the honest response: a silently short notice is the failure this exists to
+ * prevent.
+ */
+export function copyrightBlock() {
+  const head = readFileSync(MORPHOLOGY_PATH, "utf8").split("\n").slice(0, 40);
+  const rule = head.findLastIndex((l) => l.startsWith("#===="));
+  if (rule < 4) throw new Error("copyright block not found at the head of the morphology file");
+  return head.slice(0, rule + 1).join("\n");
+}
+
 // Buckwalter marks that carry no consonant: short vowels, tanwin, shadda,
 // sukun, the Quranic pause and small-letter annotations, and tatweel. Dropping
 // them makes the comparison robust to the recitation marks a shared phrase is

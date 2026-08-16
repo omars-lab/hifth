@@ -114,6 +114,17 @@ jobs:
       - name: Gate — the licence on screen is the licence on record
         run: pnpm gate:license-copy
 
+      # gate:license-copy above checks that a quotation did not drift. It says
+      # nothing about whether the SET of quotations is still complete, and that
+      # is the gap the adjacency shards fell through: they were built from a
+      # second, GPL'd upstream for the whole life of the spans feature, named
+      # neither in the licence table nor beside the data, because the drift
+      # arrived as a feature and nobody edits a licence file to ship a feature.
+      # This traces each builder's imports and fails when a shipped asset tree
+      # reads a vendored input nothing has accounted for.
+      - name: Gate — every asset tree names the upstreams it was built from
+        run: pnpm gate:notices
+
       # The manual-validation ledger. This does NOT fail on outstanding checks —
       # a phone that has not been held yet is a fact, not a broken build, and a
       # permanently red gate teaches everyone to ignore it. It fails when the
