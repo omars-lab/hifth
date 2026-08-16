@@ -1399,6 +1399,16 @@
           "note": "Enforces that binding, and refuses a non-commercial claim nobody recorded — the exact defect that once told every reader the KFGQPC artwork was more restricted than it is."
         },
         {
+          "file": "scripts/gate-notices.mjs",
+          "symbol": "BUCKETS",
+          "note": "The other half of the licence question, and the one nothing was asking. gate:license-copy checks that a quotation did not drift; this checks that the SET of quotations is still complete. The adjacency shards were bucketed under one upstream for the whole life of the spans feature while build-adjacency.mjs reached the GPL'd corpus two hops out through morphology.mjs and wrote the result into 2,544 of 3,002 shipped edges — invisible because the drift arrived as a FEATURE, and nobody edits a licence file to ship a feature. Three ties, each of which could rot alone: the LICENSES.md bucket table against the shipped NOTICE.txt files in both directions; the names against SOURCES.md; and a trace of each builder's transitive relative imports against the vendored files that actually exist on disk, where an input the trace finds and BUCKETS does not mention fails the build. The trace is the one that matters — it is the only check here that reads the code rather than two documents agreeing with each other, and it is what would have caught the original. Read the header before adding a verdict: the `open:` word defers an input to an issue that must exist AND still be open, which is the property that keeps this from becoming the quiet allow-list gate-gates.mjs warns about. It found a third candidate upstream on its first run (every edge carries a page number out of a KFGQPC-derived table) and that deferral is live."
+        },
+        {
+          "file": "packages/etl/scripts/morphology.mjs",
+          "symbol": "copyrightBlock",
+          "note": "One quotation, two derived trees. The corpus's third term of use asks that its copyright notice be reproduced in works derived from it, and both assets/roots/** and assets/adj/** are such a work — so the block is read out of the source file on every build rather than copied into each builder, because two readers of one quotation is exactly how a reproduction stops being one. It finds the block by its last horizontal rule inside the first 40 lines and THROWS rather than returning a short one: a re-pin that adds a header line should extend the notice, and a silently truncated copyright block is the failure this exists to prevent. Extracted from build-roots.mjs when build-adjacency.mjs needed it; the root shards rebuilt byte-identical, which is what makes that a refactor rather than a claim about one."
+        },
+        {
           "file": "apps/web/src/provenance.ts",
           "symbol": "SOURCE_REPO",
           "note": "Where the offer points. It has to actually resolve for a stranger — that is a real obligation, not a nice-to-have."
