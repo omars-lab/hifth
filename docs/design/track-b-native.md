@@ -95,6 +95,13 @@ store binary it is the thing that has to be licensed, and the licence has a hole
 **This row should be corrected regardless of whether Track B ever happens**, because it is
 wrong today. It is ⑦ ① below.
 
+**Corrected 2026-08-15.** The row now names both parents, and `LICENSES.md` carries a section
+saying how the second one arrived. Two things the correction did not settle went to ⑦ ⑤ and
+⑦ ⑥: the adjacency shards still ship no `NOTICE.txt`, and nothing anywhere would notice the
+next asset tree that gains an upstream this way. The paragraphs above are left in the present
+tense on purpose — they are the record of what was wrong, and rewriting them into the past
+would leave this document unable to say what it caught.
+
 ## ④ What Track B was actually for, and how much of it survives
 
 The stated payload in `PLAN.md` is: bundle the corpus offline, native share sheet,
@@ -150,17 +157,24 @@ knowing before anyone budgets Track B as "wrap and ship".
 
 ## ⑦ Open questions, and what would answer each
 
-### ① `LICENSES.md` buckets `assets/adj/**` under one of its two upstreams · **confirmed**
+### ① `LICENSES.md` buckets `assets/adj/**` under one of its two upstreams · **answered**
 
 The shards carry `span` / `toSpan` values computed by `sharedRuns` out of the GPL'd QAC
 morphology (`build-adjacency.mjs:45`, `:287`, `:342`), and the row names only Waqar144's
 mutashabihat terms. Independent of Track B and wrong today.
 
-**What would answer it:** an edit to the row, naming both parents — and a decision about
-whether `gate:license-copy`'s reach should extend to `LICENSES.md`'s bucket table, since the
-drift here was introduced by a *feature* (`word-D1`, the spans) rather than by anyone
-touching a licence file. A gate that notices "an asset tree gained a new upstream" is the
-shape that would have caught it.
+**Answered 2026-08-15.** The row was corrected, and the claim it rested on was re-measured
+before anything was edited rather than taken from this document on trust: **2,544 of 3,002
+edges across 114 shipped shard files carry a span**, and 85 of the 114 files contain a
+`toSpan`. That is the common case, not an edge case, so the strict reading applies and the row
+now reads GPL-3.0 *and* free-use-with-attribution, naming both parents. `LICENSES.md` gained a
+section explaining how the second parent arrived — as a feature, with no licence file touched
+— because a two-parent row with no story behind it invites someone to simplify it back.
+
+Two things the edit did not settle, and they are not the same question, so they are split:
+the notice does not travel with the adjacency data the way it does with the root data (⑤),
+and nothing would catch the next one (⑥, which is the gate question this item originally
+carried).
 
 ### ② Whether the GPL/App-Store reading in ①–③ is right · **open**
 
@@ -178,10 +192,19 @@ upstreams by name. Until then Track B stays gated and this document stays the re
 the reachable order is Android first. `PLAN.md:1297` cites research §5 for the deep-link
 caveat, which is §6.
 
-**What would answer it:** editing both, in a change that also links here — deliberately
-*not* done in the commit that introduced this file, because a roadmap edit that changes a
-loop's stated order should be its own decision with its own record, not a footnote to a
-scoping doc.
+**The citation half is fixed, 2026-08-15.** `PLAN.md:1297` now cites §6. It was checked
+rather than trusted first: §5 of the research note is the offline finding — quota is not the
+problem, eviction is — and §6 is the iOS deep-link caveat, so the item was right about which
+number was wrong. That half was safe to take alone because it is a pointer, not a plan: it
+changes nothing about what Track B does or in what order.
+
+**The order half stands, and stays blocked on ②.** It is still `open` for that reason and
+that reason only.
+
+**What would answer it:** the licensing opinion ② is waiting on. A roadmap edit that changes
+a loop's stated order should be its own decision with its own record, and if the opinion comes
+back saying the §7 route is open after all, the order it dictates changes again — editing the
+roadmap twice is worse than editing it once.
 
 ### ④ Whether Track B should exist at all after ④ and ⑤ · **open**
 
@@ -194,3 +217,45 @@ gap as a documented limitation the onboarding already respects (research §6 say
 **What would answer it:** web v1.0 shipping and someone using it. Track B was always gated
 on that, and the gate has done its job — a year of platform work was not spent on a wrapper
 whose reason has since been half-dismantled by the web build itself.
+
+### ⑤ The adjacency shards ship without the notice their upstream requires · **confirmed**
+
+`LICENSES.md` names two consequences of a bucket being a GPL derivative: the corresponding
+source reaches recipients, and *the notice travels with the data*. Once ① is taken, the
+adjacency bucket owes both, and it discharges only the first.
+
+Measured, not assumed: `apps/web/public/assets/roots/hafs-kfqc/NOTICE.txt` and
+`apps/web/public/assets/skins/hafs-kfqc/NOTICE.txt` exist and are emitted by their builders
+(`build-roots.mjs:271`, `build-tajweed.mjs:211`); `apps/web/public/assets/adj/hafs-kfqc/`
+holds 114 shard files and nothing else. So two of the three derived trees keep the convention
+and the third never joined it — which is what makes this a defect rather than a difference of
+opinion. It was invisible for the same reason ① was: the spans arrived as a feature, and a
+feature has no reason to look at what a sibling build step writes beside its output.
+
+**What would answer it:** `build-adjacency.mjs` emitting a `NOTICE.txt` beside the shards,
+quoted verbatim from the source header the way `build-roots.mjs` does it, and naming both
+upstreams rather than the one the file is mostly about. That is a build change and a rebuild
+of a shipped asset tree, which is why it was not folded into the licence-file correction.
+
+### ⑥ Nothing would notice the next asset tree that gains an upstream · **open**
+
+This is the general form of ① and ⑤, kept separate from both because it outlives them: ①
+corrects one row, ⑤ writes one file, and neither makes the next occurrence any more visible
+than this one was. The drift here ran for the whole life of the spans feature, and every
+mechanism that could have caught it was pointed somewhere else. `gate:license-copy` pins the
+licence text quoted in `SOURCES.md` against the copy in the colophon — a strong check on
+whether a quotation drifted, and no check at all on whether the *set of things being quoted*
+is still complete. Nothing in the repo greps for `NOTICE` at all: two builders write one by
+convention and nothing verifies either.
+
+The honest difficulty is that "an asset tree gained a new upstream" is a fact about an import
+graph, not about a directory. A gate that could see it would have to trace what each builder
+reads — transitively, since `build-adjacency.mjs` never touches the morphology file itself and
+reaches it two hops out through `morphology.mjs`. That is real work and a real chance of a
+gate that is wrong in a way nobody notices, which is worse than none.
+
+**What would answer it:** deciding which of the two shapes is worth building — the cheap one
+(every directory under `assets/` that a builder writes must carry a `NOTICE.txt`, and the set
+of upstreams named across them must match `LICENSES.md`'s bucket table), or the real one (the
+import trace). The cheap one would have caught ⑤ and would not have caught ①. Not obviously
+worth it either way, which is why this is a question and not a task.

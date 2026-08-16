@@ -7,14 +7,14 @@ be inaccurate. This file is the map: which terms cover which paths, and why.
 `SOURCES.md` is the authority on every third-party source — its provenance, its verbatim
 license text, and where the notice ships. This file only says how those terms compose.
 
-## The three buckets
+## The buckets
 
 | Paths | Terms | Whose choice |
 |---|---|---|
 | `apps/web/`, `packages/core/`, `packages/etl/` (scripts), `scripts/`, `docs/`, config | **GPL-3.0-or-later** | Ours |
 | `apps/web/public/assets/roots/**` | **GPL-3.0** (inherited) | The Quranic Arabic Corpus's |
 | `apps/web/public/assets/skins/**` | **CC BY 4.0** (inherited) | quran-tajweed's |
-| `apps/web/public/assets/adj/**` | Free use with attribution (inherited) | Waqar144's |
+| `apps/web/public/assets/adj/**` | **GPL-3.0** (inherited) *and* free use with attribution (inherited) | The Quranic Arabic Corpus's *and* Waqar144's |
 | `apps/web/public/assets/pages/**`, `packages/etl/data/**` | Each source's own terms — **not ours to relicense** | KFGQPC, QAC, quran-tajweed |
 
 ## Why GPL for our code
@@ -56,6 +56,34 @@ The app *code* is not a derivative of the corpus data — it reads the shards at
 so nothing here reaches our source by way of the data. Our code is GPL because we chose
 it, not because the corpus required it.
 
+## Why the adjacency shards have two parents, and not one
+
+`apps/web/public/assets/adj/**` carried one upstream for most of this project's life, and the
+row above said so: the mutashabihat pairings are Waqar144's, free to use with attribution.
+That stopped being true when the shards started carrying **spans** — which words of an ayah
+a pairing actually shares — and nothing in a licence file moved, because nothing about the
+drift was a licence edit. It arrived as a feature.
+
+`build-adjacency.mjs` imports `sharedRuns` from `morphology.mjs`, and that module reads the
+same GPL-licensed Quranic Arabic Corpus morphology the root shards are built from. Its result
+is written into every pairing it can answer for as `span` and `toSpan`. Today that is **2,544
+of 3,002 edges across 114 shard files** — not an edge case, the common case.
+
+So under the same strict reading of *derivative* applied to the root shards above, the
+adjacency shards are a GPL derivative too, and one of their two parents was unnamed. Both are
+named now. The pairings remain Waqar144's and still owe attribution; the spans are the
+corpus's and carry GPL terms forward, with the same two consequences the root shards have.
+
+The asymmetry worth keeping in mind: a static site discharges §4–6 by handing the browser the
+whole bundle, which is this file's own argument for plain GPL over AGPL. A wrapped store
+binary is the thing that has to be licensed, which is why this matters more to Track B than to
+the web build — see `docs/design/track-b-native.md`.
+
+**What this does not yet settle.** The root shards ship a `NOTICE.txt` beside them so the
+notice travels with the data; the adjacency shards do not, and on this reading they should.
+That is a build change rather than a correction to this file, and it is tracked as its own
+row in `docs/issues.json`.
+
 ## The deploy trigger
 
 **Publishing the site is distribution.** A static app hands the browser real copies of
@@ -64,8 +92,21 @@ it, not because the corpus required it.
 corresponding source has to be reachable by anyone who loads the page.
 
 Practically: **do not publish the site while this repository is private.** Either open the
-repository, or publish the ETL script and its pinned input alongside the deployment. Today
-the repository is private and nothing is published, so no obligation has triggered.
+repository, or publish the ETL script and its pinned input alongside the deployment.
+
+**That trigger has since fired, and it is discharged.** The site is published and the
+repository is public, so the corresponding source is reachable by anyone who loads the page:
+`build-roots.mjs` and `build-adjacency.mjs` are in it, along with the pinned
+`quranic-corpus-morphology-0.4.txt` both derive from. The app also offers the source
+explicitly rather than leaving a reader to find it — `SOURCE_REPO` in `apps/web/src/provenance.ts`,
+pinned to the commit the bundle was built from, and `scripts/check-source-offer.mjs` follows
+the link so a moved repository fails a check instead of quietly breaking the offer.
+
+This paragraph said the opposite for a while after it stopped being true, which is the failure
+worth naming rather than just correcting: an obligation that triggers on an *event* — a first
+public deploy — is described in a file nobody edits on the day the event happens. If the
+repository is ever taken private again, or the site is ever served from somewhere that does
+not carry the source, this is the paragraph that has to change back.
 
 ## What we do not license
 
