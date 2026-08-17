@@ -36,12 +36,18 @@
  *
  * ## The one rule this script exists under
  *
- * **There is no Quran text in this repo and there will not be.** The report is
- * full of Arabic; every codepoint of it is read at runtime from the gitignored
- * `.cache/words/`, and the output goes to `packages/etl/out/`, which is
- * gitignored. Committing a generated report would vendor the mus'haf through
- * the back door. `gate:notext` and `gate:text-sources` are the check; the
- * output path is the reason they stay green.
+ * **Nothing this script writes is Quran text, and nothing it writes is
+ * committed.** The report is full of Arabic; every codepoint of it is read at
+ * runtime from the gitignored `.cache/words/`, and the output goes to
+ * `packages/etl/out/`, which is gitignored. Committing a generated report would
+ * vendor the mus'haf through the back door.
+ *
+ * `gate:scripture` is the check, and it is newer than this comment, which named
+ * two gates that do not do this. `gate:notext` forbids `<text>` elements in page
+ * artwork — a rendering requirement, for a Safari paint bug, wearing a name that
+ * reads like a scripture check. `gate:text-sources` asks that rendered text
+ * traces to a declared edition, which is a different question again. The output
+ * path is still the reason all three stay green.
  *
  * Not a gate, and never will be: no cache, nothing to read. Named `probe-` for
  * exactly the reason `probe-tajweed-words.mjs` is.

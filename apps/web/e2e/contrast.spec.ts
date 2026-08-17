@@ -110,10 +110,13 @@ const SURFACES: readonly Surface[] = [
         .tap();
       const sheet = page.getByRole("dialog");
       await expect(sheet).toBeVisible();
-      // Expanding the row is the point: the diff's own labels ("here" /
-      // "there", the context ellipsis) are the faintest text in the app.
+      // Expanding the row is the point: the labels naming each side of the
+      // comparison are the faintest text in the app. Waiting on the "here" one
+      // also waits out the two page loads the panel does on expand, so the
+      // measurement below runs against the finished surface rather than a
+      // half-drawn one.
       await sheet.getByRole("button", { name: /البقرة · ٢:١٢٣ شفاعة/ }).tap();
-      await expect(sheet.getByText(/عَدْلٌ/).first()).toBeVisible();
+      await expect(sheet.getByText(/٢:٤٨ · هنا/)).toBeVisible();
     },
   },
   {

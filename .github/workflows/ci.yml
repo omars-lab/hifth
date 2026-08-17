@@ -103,6 +103,13 @@ jobs:
       - name: Gate — text sources
         run: pnpm gate:text-sources
 
+      # The gate above asks where rendered text came from. This one asks whether
+      # any running scripture is in the tree at all — which is a different
+      # question, and the one nothing was asking when twelve verses were typed
+      # into a source file and shipped in the bundle.
+      - name: Gate — no running scripture in the source tree
+        run: pnpm gate:scripture
+
       - name: Gate — license (SOURCES.md)
         run: pnpm gate:license
 

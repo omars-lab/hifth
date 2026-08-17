@@ -62,7 +62,9 @@
  *
  * ## The one rule this script exists under
  *
- * **There is no Quran text in this repo and there will not be.** Marks are
+ * **Nothing this script writes is Quran text, and nothing it writes is
+ * committed** — the rule as `morphology.mjs` now states it, and as
+ * `gate:scripture` enforces it. Marks are
  * reported by page, word index and drawn name. The word's own letters are read
  * from the cache at runtime and never written to a file outside
  * `packages/etl/out/`, which is gitignored — the same arrangement

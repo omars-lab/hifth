@@ -11,8 +11,18 @@
  * computed a different way, and the first time the two disagreed the reader
  * would be the one assumed wrong.
  *
- * There is no Quran text in this repo and there will not be. What is vendored
- * is the Quranic Arabic Corpus *morphology*: one row per segment, carrying the
+ * Nothing vendored for this file, and nothing shipped from it, is Quran text.
+ *
+ * That rule was stated for years as *"there is no Quran text in this repo and
+ * there will not be"*, and the unscoped half of it was false: twelve verses had
+ * been typed into a source file and shipped in the bundle, and a pipeline test
+ * held a four-word phrase. Nothing was checking — `gate:notext` sounds as though
+ * it would and does not; it forbids `<text>` elements in page artwork, for a
+ * rendering reason. `gate:scripture` is the check the sentence was standing in
+ * for, and it fails on any run of three consecutive fully-vowelled words
+ * anywhere in the tree.
+ *
+ * What is vendored is the Quranic Arabic Corpus *morphology*: one row per segment, carrying the
  * segment's Buckwalter form and its features. Concatenating a word's segments
  * reconstructs that word — which is enough to ask "do these two ayahs share
  * phrasing" and not enough to be a mushaf. The roots live in the shipped

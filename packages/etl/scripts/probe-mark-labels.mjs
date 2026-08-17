@@ -73,9 +73,11 @@
  *
  * ## The one rule this script exists under
  *
- * **There is no Quran text in this repo and there will not be.** Marks are
- * reported by page, word index and drawn name. Nothing is written outside
- * `packages/etl/out/`, which is gitignored.
+ * **Nothing this script writes is Quran text, and nothing it writes is
+ * committed.** Marks are reported by page, word index and drawn name, and
+ * nothing is written outside `packages/etl/out/`, which is gitignored. The rule
+ * used to be stated about the whole repository, which was not true of it; see
+ * `morphology.mjs` and `gate:scripture`.
  *
  * Usage:
  *   node packages/etl/scripts/probe-mark-labels.mjs                  # every mark in the cache
