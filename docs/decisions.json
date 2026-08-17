@@ -146,7 +146,7 @@
     {
       "id": "sitting-hosting",
       "question": "When somebody sits down to check the app's rectangles against the printed page, where should those questions come from — a laptop at home, or a link they can open anywhere?",
-      "status": "open",
+      "status": "decided",
       "options": [
         {
           "id": "A",
@@ -165,9 +165,9 @@
       "page": "docs/design/sitting-hosting.html",
       "builtBy": "scripts/build-sitting-hosting-options.mjs",
       "doc": "docs/decisions/sitting-hosting.md",
-      "decided": null,
-      "by": null,
-      "date": null,
+      "decided": "A",
+      "by": "omar",
+      "date": "2026-08-17",
       "related": [
         "mark-placement"
       ]

@@ -10,9 +10,9 @@ a list of events — this rectangle was pushed left, then a little back, then ca
 the wrong shape as well, then stretched — in a file that is not checked in, in a
 format nobody reads, saying nothing anybody can quote.
 
-Turning that into something the project keeps is five steps, and **the order is not
+Turning that into something the project keeps is six steps, and **the order is not
 optional**: the first two produce the numbers, the third decides what they mean, and
-the last two are the only reason the hour was worth buying. A sitting that ends at
+the rest are the only reason the hour was worth buying. A sitting that ends at
 step two has to be re-sat by whoever needs its answer next.
 
 ```
@@ -21,6 +21,7 @@ step two has to be re-sat by whoever needs its answer next.
   read      what does it say, and what is it not saying
   route     each finding goes to the register that owns it
   rebuild   the sittings nobody has sat yet get rebuilt
+  hand back the front door is rebuilt and served, at one address
 ```
 
 ## Words this uses
@@ -229,6 +230,39 @@ look. Run it here, where the evidence is.
 
 ---
 
+## ⑥ Hand it back
+
+Everything above happens on this machine. A reader sits with a phone, and until
+somebody starts the server there is nothing for them to open — which for a long time
+was an incantation nobody had written down. It is two commands:
+
+```
+pnpm sit:index                # the front door, counted out of the sittings on disk
+pnpm sit:serve                # serves them, and writes every answer down as it arrives
+```
+
+Rebuild the front door **after** the rebuild in ⑤ and not before. It counts the marks
+out of the parts themselves and the progress out of the running log, so a door built
+against the old parts advertises a deal that is no longer there — the exact failure
+that had it claiming 1,851 marks left on a day when 1,710 were.
+
+The server prints **one address and says not to use the others**. That is not a
+stylistic preference: a browser keeps a reader's place per address, compared as text,
+so the machine's name and the machine's number are two different memories of the same
+sitting. Somebody who begins at one and returns at the other is dropped back at card
+one. Nothing is lost — the front door and every sitting ask this machine for
+everything it has heard — but the minute of thinking an hour evaporated is real, and
+the front door now says so on screen when it notices it is being read at the wrong
+spelling.
+
+Both commands take the same flags they always did, so `--dir`, `--port` and `--host`
+are still there for the cases the defaults do not cover. The default host is the
+private network rather than this machine alone, which is what makes a phone able to
+reach it at all; it is deliberately not every interface, because a sitting has a write
+endpoint on it and the network at a café is an interface too.
+
+---
+
 ## What this skill will not do for you
 
 **It will not decide whether the correction is good enough.** That is an open
@@ -248,5 +282,8 @@ them produces a document that is wrong in a way nothing downstream can detect.
 - The share the settler prints is not the rate. The scorer's is.
 - A count of marks looked at can only ever go up. If it went down, the page is wrong.
 - The registers are hand-edited. All of them. Always.
+- One address, always the same one. Two spellings of this machine are two separate
+  memories of the same sitting as far as a browser is concerned.
+- The front door is rebuilt after the parts, never before.
 - No Arabic text and no crop of the print is ever committed — the sitting pages draw
   the mus'haf's own artwork and stay in the gitignored output directory.

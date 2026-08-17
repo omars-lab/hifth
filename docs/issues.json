@@ -1008,6 +1008,33 @@
       "note": "The rebuild step of the sitting review ended in the only instruction in that routine with no command behind it — confirm the deal did not move, same parts, same total, nothing already answered coming round again — which meant sixteen files by eye at the end of an hour of somebody else's work, which meant nobody. Both failures are invisible from inside a part: a rebuild skipped or run with one hand-over left out re-asks answered questions on pages that look exactly like unseen ones, and a rebuild against a different measurement draws every rectangle from displacements that are not on disk, so every answer is about a picture nobody can reconstruct. Neither needed a person — a built part already carries what it was built from, because the reader's place is keyed on the measurements' fingerprint plus the set, slice and seed, with the answered set folded into the slice so that shrinking the pool cannot strand somebody at card ninety of a hundred and seventeen. It announces itself to anything that asks; nothing asked. `pnpm audit:sittings` asks, and eleven tests build each failure on purpose because an auditor that only passes the clean case is indistinguishable from one that always says yes. The reading of the word answered is shared with the rebuild rather than written twice, since two readings drift into a mark one drops and the other counts; the extraction left every built part byte-identical. First run found nothing wrong: 1,710 marks across 16 parts, 167 already answered, 1,877 in all, one measurement throughout — which was not knowable before and is a different claim from having assumed it. NOT A GATE and will not become one: the parts are build products and the answers accumulate on whichever machine served them, so in a clean checkout it would pass by being unable to look, which is the same reason the published-page sweep is not called one either."
     },
     {
+      "id": "the-same-nudge-twice-magnified-the-page",
+      "source": { "file": "docs/design/mark-registration.md", "item": "⑱" },
+      "status": "fixed",
+      "severity": "defect",
+      "owner": "agent",
+      "closedBy": "packages/etl/scripts/build-mark-report.test.mjs",
+      "note": "Reported from a phone mid-sitting. Two taps close together in time and space are the browser's double-tap-to-zoom, and between the same arrow twice and two arrows a centimetre apart that is most of what placing a rectangle consists of. The magnification is not the cost: the card walks off the screen mid-answer, so the next press lands somewhere the reader did not aim and the transcript records a placement nobody made — and a reader who cannot keep the rectangle still stops nudging and affirms, which biases the exact ratio the sitting exists to measure. The page had carried touch-action since the drag was wired but only on the stage, so every control in the chrome kept the default. Fixed with `manipulation` on the body — the ordinary behaviour minus that one gesture — on the body rather than per button, because two taps on adjacent buttons trigger it as readily as two on one and a per-button rule would leave the commonest case unfixed. It costs nothing: touch-action is intersected down the ancestor chain rather than inherited, so the stage's pan-y and none still win, and pan-y already excluded double-tap zoom on the print. Pinch still zooms everywhere."
+    },
+    {
+      "id": "a-sitting-was-reachable-only-from-the-machine-serving-it",
+      "source": { "file": "docs/design/mark-registration.md", "item": "⑲" },
+      "status": "fixed",
+      "severity": "defect",
+      "owner": "agent",
+      "closedBy": "packages/etl/scripts/lib/tailnet.test.mjs",
+      "note": "The serving side bound loopback by default, which is reachable from exactly the machine serving it, so every sitting ever sat on a phone depended on somebody passing a flag that was written down nowhere — not in the routine, not in a script, not in the Makefile. Underneath sits the sharper hazard: a reader's place and every rectangle they moved are kept per origin, host compared as text, so this machine's name and this machine's number are two separate memories of one sitting with nothing on screen to say so. That has already cost an hour. Fixed by one module that decides the single address, read off this machine's own interfaces rather than asked of a program (the private network draws from a range no home or office network uses, so an interface holding one IS that network); the server binds it by default — that network only, never every interface, because a sitting carries a write endpoint and a café's wifi is an interface too — and prints one address with the others named as things not to use. Two named commands and a sixth step in the sitting routine mean the incantation is no longer somebody's memory. Sees the same decision from the other side: sitting-hosting in the decision register."
+    },
+    {
+      "id": "the-front-door-could-not-say-which-sitting-you-were-in",
+      "source": { "file": "docs/design/mark-registration.md", "item": "⑳" },
+      "status": "fixed",
+      "severity": "defect",
+      "owner": "agent",
+      "closedBy": "packages/etl/scripts/build-sittings-index.test.mjs",
+      "note": "Sixteen parts drawn as sixteen bare numbered tiles, so every question a reader arrives with — where was I, which have I finished, is there any point opening number nine — could only be answered by opening parts until one looked familiar, at a megabyte and a third each on a phone. The obvious fix does not work: a rebuild drops every answered mark, so at build time every part is untouched and every bar reads zero, and the live figure exists only in the log the serving side has been appending to. So the page carries the marks each part holds, fetches what this machine has heard and counts the overlap, and names the part to carry on with — the one begun and unfinished, because a part left half-done is the only place the re-deal cannot help. Answers for marks in no part on the page are ignored rather than added: one log covers every deal there has been, and counting them again would take the remaining figure below zero. The rule for which answers still stand is not restated in the generated page — that function is written closed over nothing and its own source is inlined, and a test pulls the copy back out, evaluates it with nothing in scope and makes it agree with the module it came from."
+    },
+    {
       "id": "the-displacement-correction-could-go-stale",
       "source": { "file": "docs/design/mark-registration.md", "item": "②" },
       "status": "open",

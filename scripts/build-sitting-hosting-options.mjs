@@ -141,6 +141,18 @@ const mb = (b) => `${(b / 1024 / 1024).toFixed(1)} MB`;
 const kb = (b) => `${Math.round(b / 1024)} KB`;
 
 /**
+ * Who chose, what they chose, and when.
+ *
+ * Here rather than in the data file on purpose. The data file is what a run *measured*
+ * out of the sittings and the answer log, and a hand-edit to it would make the page lie
+ * about its own evidence — its own header says so. A choice is not a measurement; it is
+ * the editorial half of this page, so it lives with the prose it belongs to, and it is
+ * one place rather than scattered through the copy so the losing options cannot quietly
+ * stop reading as options.
+ */
+const SETTLED = { option: "A", by: "Omar", date: "2026-08-17" };
+
+/**
  * The specimen, at the size a reader actually meets it.
  *
  * Not to scale of the print — to scale of the *card*, which is what is being decided
@@ -174,10 +186,12 @@ function route(o) {
         </li>`,
     )
     .join("\n        ");
-  return `<section class="option" id="option-${o.id}">
+  const won = o.id === SETTLED.option;
+  return `<section class="option${won ? " chosen" : ""}" id="option-${o.id}">
       <header>
         <span class="tag">${o.id}</span>
         <h3>${esc(o.label)}</h3>
+        ${won ? `<span class="won">chosen</span>` : ""}
       </header>
       <p class="lede">${o.lede}</p>
       <ol class="route">
@@ -266,6 +280,8 @@ function render(d) {
     --accent: #9a3412;
     --accent-soft: #fdf1e7;
     --warn: #8a5a00;
+    --good: #3f6212;
+    --good-soft: #f2f7e8;
     --measure: 34rem;
   }
   @media (prefers-color-scheme: dark) {
@@ -278,6 +294,8 @@ function render(d) {
       --rule: #33302b;
       --accent: #e2823f;
       --accent-soft: #2a1d13;
+      --good: #a3c34a;
+      --good-soft: #1c2312;
       --warn: #d9a441;
     }
   }
@@ -291,6 +309,8 @@ function render(d) {
     --accent: #e2823f;
     --accent-soft: #2a1d13;
     --warn: #d9a441;
+    --good: #a3c34a;
+    --good-soft: #1c2312;
   }
   * { box-sizing: border-box; }
   body {
@@ -355,8 +375,30 @@ function render(d) {
   .fig b { display: block; font: 600 1.55rem/1.1 ui-sans-serif, system-ui, sans-serif; font-variant-numeric: tabular-nums; letter-spacing: -.02em; }
   .fig span { display: block; font-size: .84rem; color: var(--ink-soft); margin-top: .25rem; }
 
+  /* The answer, sitting above everything that argued for it. A settled decision read
+     top-to-bottom is a different document from an open one: the reader arrives asking
+     what was chosen, not what the choices were, and the options below only make sense
+     once they know which of them won. */
+  .verdict { background: var(--good-soft); border: 1px solid var(--good); border-radius: .6rem; padding: 1.2rem 1.4rem .4rem; margin: 1.8rem 0 0; }
+  .verdict h2 { margin: .2rem 0 .8rem; border-top: 0; padding-top: 0; font-size: clamp(1.18rem, 3vw, 1.45rem); }
+  .verdict .who { font: 500 .76rem/1.4 ui-sans-serif, system-ui, sans-serif; letter-spacing: .09em; text-transform: uppercase; color: var(--good); margin: 0; }
+  .verdict .caveat { color: var(--ink-soft); font-size: .95rem; }
+
   .option { background: var(--raised); border: 1px solid var(--rule); border-radius: .6rem; padding: 1.3rem 1.4rem; margin: 1.4rem 0; }
+  .option.chosen { border-color: var(--good); box-shadow: inset 3px 0 0 var(--good); }
   .option header { display: flex; gap: .8rem; align-items: baseline; margin-bottom: .6rem; }
+  .won {
+    flex: none;
+    margin-left: auto;
+    font: 600 .72rem/1 ui-sans-serif, system-ui, sans-serif;
+    letter-spacing: .09em;
+    text-transform: uppercase;
+    color: var(--good);
+    background: var(--good-soft);
+    border: 1px solid var(--good);
+    border-radius: .3rem;
+    padding: .3rem .45rem;
+  }
   .tag {
     flex: none;
     font: 600 .8rem/1 ui-sans-serif, system-ui, sans-serif;
@@ -394,13 +436,42 @@ function render(d) {
 </head>
 <body>
 <main>
-  <p class="stamp">A decision this project has not made</p>
+  <p class="stamp">Decided on ${esc(SETTLED.date)} — the first option</p>
   <h1>Where should the sittings live?</h1>
   <p class="standfirst">
     ${n(d.deal.pool)} marks are waiting to be looked at by a person, in ${d.deal.parts} sittings of about
-    ${d.deal.perPart} — roughly ${hours} hours of somebody's attention. Today every one of those hours needs a
-    particular laptop to be awake, in a particular house. This asks whether it should.
+    ${d.deal.perPart} — roughly ${hours} hours of somebody's attention. Every one of those hours needs a
+    particular laptop to be awake, in a particular house. This asked whether it should.
   </p>
+
+  <div class="verdict">
+    <p class="who">Answered by ${esc(SETTLED.by)} on ${esc(SETTLED.date)}</p>
+    <h2>So what was decided?</h2>
+    <p>
+      <strong>The first option.</strong> The laptop keeps handing out the sittings, and the reader reaches them
+      from a phone over the household's private network.
+    </p>
+    <p>
+      What settled it was not a fresh weighing of three routes. The one thing that option genuinely costs — the
+      reader has to be somewhere that network reaches — was judged acceptable. The two things that made it
+      <em>feel</em> worse than it is turned out to be work nobody had done rather than facts about the
+      arrangement: reaching it from a phone at all depended on remembering something written down nowhere, and
+      the machine answers to two spellings of its own name, which a browser treats as two different sittings —
+      so a reader who came back at the other one was dropped at the first question with an hour apparently gone.
+      Both are closed. There is now one address, worked out rather than typed, and the page a reader lands on
+      says so when it notices it is being read at the wrong one.
+    </p>
+    <p>
+      Two things came with the choice, because a sitting on a phone is a sitting on a phone and both were broken:
+      the way in now says which sitting you are in the middle of and how far through it you are, and pressing the
+      same nudge twice is two answers rather than a zoom.
+    </p>
+    <p class="caveat">
+      The other two options are left standing below unbeaten rather than beaten. Neither was tried; the first was
+      made good enough that neither had to be. What would reopen this is unchanged, and the cheapest of them is
+      still a sitting actually attempted away from home.
+    </p>
+  </div>
 
   <div class="glossary">
     <dl>
@@ -440,15 +511,17 @@ function render(d) {
     reason those hours do not happen.
   </p>
 
-  <h2>What happens if nobody decides?</h2>
+  <h2>What would have happened if nobody had decided?</h2>
   <p>
-    The sittings carry on exactly as they are, and the cost is real but small: they happen when the reader and the
-    laptop are in the same house, and not otherwise. Nothing else is waiting behind this. No feature is blocked,
-    no other question depends on it, and the answers already given are not at risk either way.
+    The sittings would have carried on exactly as they are, and the cost is real but small: they happen when the
+    reader and the laptop are in the same house, and not otherwise. Nothing else was waiting behind this. No
+    feature was blocked, no other question depended on it, and the answers already given were not at risk under
+    any of the three.
   </p>
   <p>
-    <strong>So this can stay open, and saying so is part of the answer.</strong> If the remaining hours are going
-    to happen at a desk at home anyway, the honest choice is the first option and no work at all.
+    <strong>Which is most of why the first option won.</strong> The remaining hours are going to happen at a desk
+    at home, so the honest choice was the one already working — and the work that went with it was spent making
+    that arrangement reach a phone properly rather than replacing it.
   </p>
 
   <h2>What does it cost today, measured?</h2>
@@ -491,10 +564,10 @@ function render(d) {
       consulted before this page was written, and the page is worse for it.
     </p>
     <p>
-      What is worth looking up specifically, if this is going to be decided rather than left: how those tools
-      handle a judgement given while the device is offline, and whether they bank each judgement as it is given
-      or in batches. That single detail is what separates the three options below, and somebody has certainly
-      measured it.
+      This was decided without it, which is worth saying plainly rather than leaving to be noticed. What is
+      worth looking up, if the question is ever reopened: how those tools handle a judgement given while the
+      device is offline, and whether they bank each judgement as it is given or in batches. That single detail
+      is what separates the three options below, and somebody has certainly measured it.
     </p>
   </div>
 
@@ -517,11 +590,13 @@ function render(d) {
     </li>
   </ul>
 
-  <h2>What are the options?</h2>
+  <h2>What were the options?</h2>
   <p>
     Each one is drawn as the journey a single answer takes, from the reader's finger to a line checked into the
-    project. The amber steps are the ones that can fail. Every option shows the reader the same card — what is
-    being decided is what happens in the seconds after they touch it.
+    project. The amber steps are the ones that can fail. Every option shows the reader the same card — what was
+    being decided is what happens in the seconds after they touch it. All three are left here as they were
+    written, the two that lost included: they are the reason the choice was a choice, and anybody reopening this
+    will want them.
   </p>
   ${OPTIONS.map(route).join("\n  ")}
 
@@ -545,7 +620,7 @@ function render(d) {
     </li>
   </ul>
 
-  <h2>What would change the answer?</h2>
+  <h2>What would reopen this?</h2>
   <ul class="reasons">
     <li>
       <strong>A sitting done away from home.</strong> If the reader tries and cannot, the first option has been

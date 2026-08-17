@@ -67,11 +67,11 @@
       "url": "https://claude.ai/code/artifact/84b4bfe6-f875-4186-9d32-c37f26ad71be",
       "title": "Where should the sittings live?",
       "published": "2026-08-17",
-      "shows": "One real question from a checking session drawn at phone size, the measured cost of the way those sessions run today, and three options each drawn as the journey a single answer takes from a reader's finger to the project.",
+      "shows": "One real question from a checking session drawn at phone size, the measured cost of the way those sessions run today, and three options each drawn as the journey a single answer takes from a reader's finger to the project — now carrying the answer, which was the first of them.",
       "decision": "sitting-hosting",
-      "page": null,
-      "builtBy": null,
-      "note": null
+      "page": "docs/design/sitting-hosting.html",
+      "builtBy": "scripts/build-sitting-hosting-options.mjs",
+      "note": "Republished on the day it was opened, once it was settled. The two options that lost are left on the page unchanged rather than trimmed away: they are why the choice was a choice, and the page is now the only place that says the choice was made without looking at what anybody outside this project does."
     },
     {
       "url": "https://claude.ai/code/artifact/9a42955e-4c2f-4dc9-8c95-a50942c46a00",
