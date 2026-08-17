@@ -653,6 +653,14 @@ main { max-width: 40rem; margin: 0 auto;
   padding: .5rem 1rem calc(.5rem + env(safe-area-inset-bottom)); }
 .dock .acts.one, .dock .nav { max-width: 38rem; margin: 0 auto; }
 .dock .nav { margin-top: .5rem; }
+/* The key that does the same thing as this button, shown only where there is a
+   keyboard to press it on. A phone has no n to offer and the hint would be a lie
+   taking up room in the one strip that cannot spare any. */
+.dock kbd { display: none; }
+@media (pointer: fine) {
+  .dock kbd { display: inline; margin-left: .4rem; font: inherit; font-size: .8em;
+    opacity: .65; border: 1px solid currentColor; border-radius: 4px; padding: 0 .3em; }
+}
 h1 { font-size: 1.1rem; margin: 0 0 .25rem; }
 .lede { color: var(--dim); font-size: .9rem; margin: 0 0 .3rem; }
 /* Seven lines of instructions are what the first card needs and what the sixtieth
@@ -889,7 +897,7 @@ two taps.</p>
     </div>
     <div class="nav">
       <button id="prev">Back</button>
-      <button id="next">Next</button>
+      <button id="next">Next<kbd>n</kbd></button>
     </div>
   </div>
 </div>
@@ -2128,6 +2136,40 @@ $("skip").onclick = function () {
 };
 $("next").onclick = function () { go(1); };
 $("prev").onclick = function () { go(-1); };
+
+/**
+ * Pressing n moves on.
+ *
+ * Every other control here is a thumb-sized target, because most of this sitting
+ * happens on a phone. This one is for the other half of it. At a desk the reader
+ * taps the ink the rectangle should have been drawn around — which banks the answer
+ * where it is tapped, nothing is owed after it — and then the only thing left is to
+ * leave, and reaching across to a button in the bottom corner is the slowest part of
+ * a card that otherwise took one gesture.
+ *
+ * Only Next, on purpose. The keys that would obviously pair with it each carry a
+ * risk this one does not: a mistyped letter that affirms a mark, or withdraws one,
+ * puts a wrong answer in the transcript with nothing on screen to show it happened,
+ * and this instrument's whole worth is that its transcript is trustworthy. Arriving
+ * somewhere banks nothing and withdraws nothing, and Back is still there, so this is
+ * the one action a slip cannot cost anything.
+ *
+ * Three things it must not fight: the note box, where n is just a letter; the step
+ * slider and any other focused control, where a key press means something already;
+ * and the browser's own shortcuts, which is why any modifier gives it up. Held keys
+ * are ignored too — leaning on n should not deal the reader through nine cards.
+ */
+document.addEventListener("keydown", function (e) {
+  if (e.key !== "n" && e.key !== "N") return;
+  if (e.repeat || e.ctrlKey || e.metaKey || e.altKey) return;
+  if ($("ask").open) return;
+  const t = e.target;
+  const tag = t && t.tagName;
+  if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") return;
+  if (t && t.isContentEditable) return;
+  e.preventDefault();
+  go(1);
+});
 $("ledeSwap").onclick = function () { chose = isBrief() ? "0" : "1"; keepRead(chose); swapLede(); };
 
 /**

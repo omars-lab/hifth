@@ -497,6 +497,62 @@ describe.skipIf(!haveCorpus)("the trap the page is built in", () => {
 });
 
 /**
+ * Moving on from the keyboard, and the three things it must not swallow.
+ *
+ * The risk in a bare letter shortcut is not that it fails to fire — a reader finds
+ * that out immediately — it is that it fires while somebody is typing a sentence
+ * about why a mark is odd, and deals them away from the card they were describing.
+ * So the guards are the part worth pinning, not the binding.
+ *
+ * Only Next is bound, and that is a claim worth holding to: a slip that moves the
+ * reader costs a press of Back, and a slip that answers for them costs a wrong row
+ * in a transcript whose whole worth is that it can be trusted.
+ */
+describe.skipIf(!haveCorpus)("moving on without reaching for the button", () => {
+  const handler = () => {
+    const { html } = build("--set", "fallback", "--count", "5");
+    const i = html.indexOf('if (e.key !== "n"');
+    expect(i).toBeGreaterThan(-1);
+    return html.slice(i, html.indexOf("});", i));
+  };
+
+  it("moves to the next card and nowhere else", () => {
+    expect(handler()).toContain("go(1);");
+    expect(handler()).not.toContain("go(-1)");
+  });
+
+  it("keeps out of the note box, where n is a letter somebody is typing", () => {
+    const h = handler();
+    expect(h).toContain('$("ask").open');
+    expect(h).toContain('tag === "TEXTAREA"');
+    expect(h).toContain('tag === "INPUT"');
+    expect(h).toContain("isContentEditable");
+  });
+
+  it("gives the key up to the browser and does not run away when it is held", () => {
+    const h = handler();
+    expect(h).toContain("e.repeat");
+    expect(h).toContain("e.ctrlKey");
+    expect(h).toContain("e.metaKey");
+    expect(h).toContain("e.altKey");
+  });
+
+  it("binds no verdict to a key, so no slip can answer for the reader", () => {
+    const { html } = build("--set", "fallback", "--count", "5");
+    const keys = html.split("keydown");
+    expect(keys.length - 1).toBe(1);
+    expect(handler()).not.toContain("toggle(");
+    expect(handler()).not.toContain("say(");
+  });
+
+  it("says which key, where there is a keyboard to press it on", () => {
+    const { html } = build("--set", "fallback", "--count", "5");
+    expect(html).toContain("<kbd>n</kbd>");
+    expect(html).toContain("@media (pointer: fine)");
+  });
+});
+
+/**
  * Nothing drawn on the paper is themed.
  *
  * The crop is a photograph of print and stays white in both themes on purpose, but
