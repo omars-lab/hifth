@@ -1,0 +1,468 @@
+<title>Hifth Decision Board</title>
+<style>
+:root {
+  /* The app's own tokens. Every other page about this app's surface borrows
+     them, and a board that invented a palette beside them would read as a
+     different project's document. */
+  --ground: #f4efe6;
+  --raised: #fbf8f2;
+  --sunk: #ece4d6;
+  --ink: #26201a;
+  --soft: #5c5347;
+  --faint: #6b6255;
+  --rule: #ded4c3;
+  --rule-soft: #eae1d2;
+  --accent: #1f6f66;
+  --accent-ink: #17544d;
+  --accent-soft: #d7e7e3;
+  --terra: #a23b2c;
+  --terra-soft: #f3ded8;
+  --serif: "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", "Hoefler Text", Georgia, serif;
+  --mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace;
+  --measure: 37rem;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --ground: #17140f;
+    --raised: #201c16;
+    --sunk: #100e0a;
+    --ink: #ece3d3;
+    --soft: #b4a893;
+    --faint: #918675;
+    --rule: #352f26;
+    --rule-soft: #262019;
+    --accent: #5fb0a3;
+    --accent-ink: #7cc4b8;
+    --accent-soft: #1c3a35;
+    --terra: #d9826c;
+    --terra-soft: #3a201a;
+  }
+}
+:root[data-theme="dark"] {
+  --ground: #17140f;
+  --raised: #201c16;
+  --sunk: #100e0a;
+  --ink: #ece3d3;
+  --soft: #b4a893;
+  --faint: #918675;
+  --rule: #352f26;
+  --rule-soft: #262019;
+  --accent: #5fb0a3;
+  --accent-ink: #7cc4b8;
+  --accent-soft: #1c3a35;
+  --terra: #d9826c;
+  --terra-soft: #3a201a;
+}
+
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--ground);
+  color: var(--ink);
+  font-family: var(--serif);
+  font-size: 17px;
+  line-height: 1.62;
+  -webkit-text-size-adjust: 100%;
+}
+.wrap { max-width: 74rem; margin: 0 auto; padding: 0 clamp(1.25rem, 4vw, 3rem) 6rem; }
+.col { max-width: var(--measure); }
+p { margin: 0 0 1.05em; text-wrap: pretty; }
+a { color: var(--accent-ink); text-underline-offset: 2px; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 2px; }
+
+header { padding: clamp(3rem, 8vw, 5.5rem) 0 0; }
+.eyebrow {
+  font-family: var(--mono); font-size: 12px; letter-spacing: 0.13em;
+  text-transform: uppercase; color: var(--faint); margin: 0 0 1.1rem;
+}
+h1 {
+  font-size: clamp(2rem, 4.6vw, 3.05rem); line-height: 1.1; margin: 0 0 1.1rem;
+  font-weight: 600; letter-spacing: -0.012em; text-wrap: balance; max-width: 22ch;
+}
+.stand { font-size: 1.16rem; color: var(--soft); max-width: var(--measure); }
+
+.tally { display: flex; flex-wrap: wrap; gap: 0 2.6rem; margin: 2.2rem 0 0; padding: 0; list-style: none; }
+.tally li { display: flex; flex-direction: column; }
+.tally .fig {
+  font-family: var(--mono); font-size: 1.9rem; line-height: 1.1;
+  font-variant-numeric: tabular-nums; letter-spacing: -0.02em;
+}
+.tally .open .fig { color: var(--terra); }
+.tally .lab { font-size: 0.86rem; color: var(--faint); }
+
+.spine { margin: 3.2rem 0 0; padding: 0; }
+.spine svg { display: block; width: 100%; height: auto; overflow: visible; }
+.axis { stroke: var(--rule); stroke-width: 1; }
+.axis-parked { stroke-dasharray: 3 4; }
+.arc { fill: none; stroke: var(--rule); stroke-width: 1.1; }
+.arc-live { stroke: var(--terra); stroke-width: 1.4; opacity: 0.65; }
+.dot { fill: var(--accent); stroke: var(--ground); stroke-width: 1.5; transition: r 0.12s ease; }
+.dot-open { fill: var(--ground); stroke: var(--terra); stroke-width: 2.2; }
+.dot-living { fill: var(--ground); stroke: var(--accent); stroke-width: 2.2; }
+.spine a:hover .dot, .spine a:focus-visible .dot { r: 8; }
+.tick {
+  font-family: var(--mono); font-size: 13px; fill: var(--faint);
+  text-anchor: middle; letter-spacing: 0.04em;
+}
+.tick-parked { fill: var(--terra); }
+figcaption { font-size: 0.94rem; color: var(--faint); max-width: 44rem; margin: 1.1rem 0 0; }
+
+section { margin: 4.4rem 0 0; }
+h2 {
+  font-size: clamp(1.4rem, 2.6vw, 1.85rem); line-height: 1.2; margin: 0 0 0.7rem;
+  font-weight: 600; letter-spacing: -0.008em; text-wrap: balance;
+}
+h2 .n {
+  display: block; font-family: var(--mono); font-size: 12px; letter-spacing: 0.13em;
+  text-transform: uppercase; color: var(--faint); margin-bottom: 0.5rem; font-weight: 400;
+}
+
+.deck { display: grid; gap: 1.1rem; margin-top: 2rem; }
+/* Cards size to their own content — one settled decision carries six options and
+   the rest carry none, and a stretched row would give the short ones a foot of
+   blank paper to explain. */
+.deck-tight { grid-template-columns: repeat(auto-fill, minmax(20rem, 1fr)); align-items: start; }
+.card {
+  background: var(--raised); border: 1px solid var(--rule); border-radius: 4px;
+  padding: 1.25rem 1.4rem 1.35rem; scroll-margin-top: 1.5rem;
+}
+.card-big { padding: 1.6rem 1.7rem 1.7rem; }
+.card-top {
+  display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between;
+  gap: 0.5rem 1rem; margin-bottom: 0.9rem;
+}
+.pill {
+  display: inline-block; padding: 0.16rem 0.62rem; border-radius: 999px;
+  border: 1px solid var(--rule); font-family: var(--mono); font-size: 11.5px;
+  letter-spacing: 0.04em; color: var(--soft); background: var(--sunk);
+}
+.pill-open { border-color: var(--terra); background: var(--terra-soft); color: var(--terra); }
+.pill-living { border-color: var(--accent); background: var(--accent-soft); color: var(--accent-ink); }
+.weight {
+  font-family: var(--mono); font-size: 11.5px; color: var(--faint);
+  font-variant-numeric: tabular-nums;
+}
+.card h3 {
+  font-size: 1.16rem; line-height: 1.34; margin: 0 0 0.7rem;
+  font-weight: 600; text-wrap: pretty;
+}
+.card-big h3 { font-size: 1.4rem; }
+.answer { font-size: 0.99rem; color: var(--soft); margin: 0 0 1rem; }
+.al {
+  display: block; font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.12em;
+  text-transform: uppercase; color: var(--faint); margin-bottom: 0.15rem;
+}
+
+.opts { list-style: none; margin: 0 0 1.05rem; padding: 0; display: grid; gap: 0.32rem; }
+.opt {
+  display: grid; grid-template-columns: 1.55rem 1fr auto; align-items: baseline; gap: 0.55rem;
+  padding: 0.42rem 0.6rem; border-radius: 3px; background: var(--sunk);
+  font-size: 0.95rem; line-height: 1.42;
+}
+.opt-key {
+  font-family: var(--mono); font-size: 11px; text-align: center; padding: 0.1rem 0;
+  border-radius: 999px; background: var(--ground); color: var(--soft);
+}
+.opt.won { background: var(--accent-soft); }
+.opt.won .opt-key { background: var(--accent); color: var(--ground); }
+.opt.won .opt-label { font-weight: 600; }
+.opt-won {
+  font-family: var(--mono); font-size: 10px; letter-spacing: 0.12em;
+  text-transform: uppercase; color: var(--accent-ink);
+}
+.no-opts { font-size: 0.93rem; color: var(--faint); margin: 0 0 1rem; }
+
+.holds { margin: 0 0 1rem; }
+.hl {
+  font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.12em;
+  text-transform: uppercase; color: var(--faint); margin: 0 0 0.4rem;
+}
+.chip-list { list-style: none; display: flex; flex-wrap: wrap; gap: 0.35rem; margin: 0; padding: 0; }
+.chip {
+  display: inline-block; padding: 0.16rem 0.6rem; border-radius: 999px;
+  border: 1px solid var(--rule); background: var(--ground);
+  font-size: 0.83rem; line-height: 1.5; color: var(--soft); text-decoration: none;
+}
+.chip:hover { border-color: var(--accent); color: var(--accent-ink); }
+.chip-open { border-color: var(--terra); color: var(--terra); }
+
+.links { margin: 0; font-size: 0.92rem; }
+.links .sep { color: var(--rule); margin: 0 0.5rem; }
+.go { font-weight: 600; }
+
+.note {
+  margin-top: 4.6rem; padding-top: 1.5rem; border-top: 1px solid var(--rule);
+  font-size: 0.9rem; color: var(--faint); max-width: 46rem;
+}
+@media (max-width: 34rem) {
+  .card-top { flex-direction: column; }
+  .opt { grid-template-columns: 1.55rem 1fr; }
+  .opt-won { grid-column: 2; }
+}
+</style>
+
+<div class="wrap">
+<header>
+  <p class="eyebrow">Hifth · the decision board</p>
+  <h1>What has been decided here, and what is still waiting on somebody?</h1>
+  <p class="stand">Every question this project has had to answer, on one page: the ones that
+  are settled, the ones nobody has chosen yet, and the lines between them that mean two
+  answers have to agree. Each card carries the question in plain words, the options as they
+  were actually put, and a way through to the drawing and to the reasons.</p>
+
+  <ul class="tally">
+    <li class="open"><span class="fig">3</span><span class="lab">still open</span></li>
+    <li><span class="fig">15</span><span class="lab">decided</span></li>
+    <li><span class="fig">1</span><span class="lab">never finished</span></li>
+    <li><span class="fig">15</span><span class="lab">constraints, across 13 of them</span></li>
+    <li><span class="fig">55.4k</span><span class="lab">words of reasons behind it</span></li>
+  </ul>
+
+  
+<figure class="spine">
+  <svg viewBox="0 0 1000 192" role="img" aria-label="Every decision on one time line, with an arc between any two that constrain each other.">
+    <line class="axis" x1="22" y1="112" x2="686" y2="112"></line>
+    <line class="axis axis-parked" x1="710" y1="112" x2="984" y2="112"></line>
+    <path class="arc arc-live" d="M387.11 112 C457.69 28 669.42 28 740 112"></path><path class="arc arc-live" d="M740 112 C769.6 47.68 858.4 47.68 888 112"></path><path class="arc arc-live" d="M740 112 C754.8 72.84 799.2 72.84 814 112"></path><path class="arc arc-live" d="M387.11 112 C472.49 28 728.62 28 814 112"></path><path class="arc arc-live" d="M660 112 C690.8 45.64 783.2 45.64 814 112"></path><path class="arc" d="M387.11 112 C441.69 28 605.42 28 660 112"></path><path class="arc" d="M159.7 124 C259.76 40 559.94 28 660 112"></path><path class="arc" d="M432.59 112 C538.47 28 856.12 28 962 112"></path><path class="arc" d="M387.11 112 C391.66 90.27 405.3 90.27 409.85 112"></path><path class="arc" d="M159.7 124 C200.64 40.41 323.44 28.41 364.37 112"></path><path class="arc" d="M159.7 124 C209.73 40 359.82 28 409.85 112"></path><path class="arc arc-live" d="M159.7 148 C275.76 64 623.94 28 740 112"></path><path class="arc" d="M159.7 148 C205.19 64 341.63 52 387.11 136"></path><path class="arc arc-live" d="M159.7 148 C305.36 64 742.34 28 888 112"></path><path class="arc" d="M387.11 136 C387.11 122 387.11 110 387.11 124"></path>
+    <a href="#d-mark-granularity"><circle class="dot dot-open" cx="740" cy="112" r="5.5"><title>Should the app colour tajweed one colour a verse, or should it colour the exact letter a rule lands on?</title></circle></a><a href="#d-mark-placement"><circle class="dot dot-open" cx="814" cy="112" r="5.5"><title>Should the app line up what it draws one page at a time, or one printed line at a time?</title></circle></a><a href="#d-comparison-crop"><circle class="dot dot-decided" cx="660" cy="112" r="5.5"><title>When the app shows a verse cut out of the printed page, what should it do about the neighbouring verses that come with it? — decided 16 August 2026</title></circle></a><a href="#d-tajweed-colours"><circle class="dot dot-open" cx="888" cy="112" r="5.5"><title>Should a reader be able to change the colours the app uses for recitation rules, and how many colours are there to change?</title></circle></a><a href="#d-desktop-vs-mobile"><circle class="dot dot-living" cx="962" cy="112" r="5.5"><title>When should a wide window behave differently from a phone?</title></circle></a><a href="#d-wheel-and-zoom"><circle class="dot dot-decided" cx="432.59" cy="112" r="5.5"><title>Should rolling the mouse wheel magnify the page? — decided 6 August 2026</title></circle></a><a href="#d-word-search"><circle class="dot dot-decided" cx="409.85" cy="112" r="5.5"><title>When a reader picks out a few words, what should the app go looking for? — decided 5 August 2026</title></circle></a><a href="#d-word-selection"><circle class="dot dot-decided" cx="387.11" cy="112" r="5.5"><title>Should a reader be able to pick single words, or only whole verses? — decided 4 August 2026</title></circle></a><a href="#d-pin-marker"><circle class="dot dot-decided" cx="387.11" cy="124" r="5.5"><title>How does the app keep a page it was told to save without storing it twice? — decided 4 August 2026</title></circle></a><a href="#d-i18n"><circle class="dot dot-decided" cx="273.41" cy="112" r="5.5"><title>How does the app's own wording get translated, and what keeps the two languages in step? — decided 30 July 2026</title></circle></a><a href="#d-loop-0"><circle class="dot dot-decided" cx="46" cy="112" r="5.5"><title>Can a real page of the mus'haf be put on a phone, installed, and opened again offline? — decided 20 July 2026</title></circle></a><a href="#d-loop-1"><circle class="dot dot-decided" cx="46" cy="124" r="5.5"><title>Does touching a verse on a phone answer fast enough to build the rest on? — decided 20 July 2026</title></circle></a><a href="#d-loop-2"><circle class="dot dot-decided" cx="114.22" cy="112" r="5.5"><title>Can a reader jump from a verse to one that sounds like it, and find the way back? — decided 23 July 2026</title></circle></a><a href="#d-loop-3"><circle class="dot dot-decided" cx="159.7" cy="112" r="5.5"><title>Can a teacher send a link that opens exactly what they were looking at? — decided 25 July 2026</title></circle></a><a href="#d-loop-4a"><circle class="dot dot-decided" cx="159.7" cy="124" r="5.5"><title>Where does the list of look-alike verses come from, and is it the same list every time it is built? — decided 25 July 2026</title></circle></a><a href="#d-loop-4b"><circle class="dot dot-decided" cx="364.37" cy="112" r="5.5"><title>Can the app carry the whole mus'haf instead of three pages? — decided 3 August 2026</title></circle></a><a href="#d-loop-5"><circle class="dot dot-decided" cx="159.7" cy="136" r="5.5"><title>Can a reader mark a stretch of more than one verse and ask about all of it at once? — decided 25 July 2026</title></circle></a><a href="#d-loop-6a"><circle class="dot dot-decided" cx="159.7" cy="148" r="5.5"><title>Can a reader turn the colouring off, jump anywhere in the book, and reopen it with no signal? — decided 25 July 2026</title></circle></a><a href="#d-loop-6b"><circle class="dot dot-decided" cx="387.11" cy="136" r="5.5"><title>Can a reader keep one thirtieth of the book on their phone for good? — decided 4 August 2026</title></circle></a>
+    <text class="tick" x="46" y="178">July</text><text class="tick" x="364.37" y="178">August</text>
+    <text class="tick tick-parked" x="851" y="178">no date — still live</text>
+  </svg>
+  <figcaption>
+    Each dot is a decision, on the day it was made. A line between two of them means one
+    holds the other up: change either and somebody has to look at both. The four to the right
+    of the break have no date because they have no answer yet — three nobody has chosen, and
+    one that is never finished by design.
+  </figcaption>
+</figure>
+</header>
+
+<section>
+  <div class="col">
+    <h2><span class="n">Waiting on you</span>What is still open?</h2>
+    <p>These are the only ones anybody can still act on. Each has its options drawn on a real
+    page of the mus'haf, at the size they would actually be used, because a wash you cannot
+    see at that size is an answer and it is one no paragraph would have given you.</p>
+    <p>Nothing here breaks while it stays open — an unanswered question is the normal state of
+    a live project. What it costs is written on each one's own page.</p>
+  </div>
+  <div class="deck">
+<article class="card card-big" id="d-mark-granularity">
+  <div class="card-top"><span class="pill pill-open">Open · nobody has chosen</span><span class="weight">4,392 words of reasons</span></div>
+  <h3>Should the app colour tajweed one colour a verse, or should it colour the exact letter a rule lands on?</h3>
+  <p class="answer"><span class="al">Written up as</span>Sub-word marks: the level below a word, and the print that already named it</p>
+  <ol class="opts"><li class="opt"><span class="opt-key">A</span><span class="opt-label">Leave it as it is — one colour a verse</span></li><li class="opt"><span class="opt-key">B</span><span class="opt-label">Colour the exact letter or mark</span></li><li class="opt"><span class="opt-key">C</span><span class="opt-label">Prepare the ground, colour nothing yet</span></li></ol>
+  <div class="holds">
+    <p class="hl">Held up by, and holding up</p>
+    <ul class="chip-list"><li><a class="chip" href="#d-word-selection" title="Should a reader be able to pick single words, or only whole verses?">The grain gets finer where the finger already is</a></li><li><a class="chip" href="#d-loop-6a" title="Can a reader turn the colouring off, jump anywhere in the book, and reopen it with no signal?">Loop 6a — Skin, editions, wayfinding, offline foundation</a></li><li><a class="chip chip-open" href="#d-tajweed-colours" title="Should a reader be able to change the colours the app uses for recitation rules, and how many colours are there to change?">Whose colours are they?</a></li><li><a class="chip chip-open" href="#d-mark-placement" title="Should the app line up what it draws one page at a time, or one printed line at a time?">Are the marks in the right place, and how would we know?</a></li></ul>
+  </div>
+  <p class="links"><a class="go" href="https://claude.ai/code/artifact/5f230dff-e4e8-40c6-9c4e-888786eeef9b">See the options drawn</a><span class="sep">·</span><a href="../../docs/design/mark-granularity.html">the same page, kept here</a><span class="sep">·</span><a href="../../docs/design/sub-word-marks.md">the reasons in full</a></p>
+</article>
+<article class="card card-big" id="d-mark-placement">
+  <div class="card-top"><span class="pill pill-open">Open · nobody has chosen</span><span class="weight">25,505 words of reasons</span></div>
+  <h3>Should the app line up what it draws one page at a time, or one printed line at a time?</h3>
+  <p class="answer"><span class="al">Written up as</span>Are the marks in the right place, and how would we know?</p>
+  <ol class="opts"><li class="opt"><span class="opt-key">A</span><span class="opt-label">Leave the rectangles where they are</span></li><li class="opt"><span class="opt-key">B</span><span class="opt-label">Line each page up as a whole</span></li><li class="opt"><span class="opt-key">F</span><span class="opt-label">Line each printed line up on its own, and let it tilt</span></li><li class="opt"><span class="opt-key">G</span><span class="opt-label">Line the marks up, and leave the words where they are</span></li><li class="opt"><span class="opt-key">I</span><span class="opt-label">Line each printed line up on its own, and let it bend</span></li><li class="opt"><span class="opt-key">H</span><span class="opt-label">Put each mark where its own ink is, and line the rest up</span></li></ol>
+  <div class="holds">
+    <p class="hl">Held up by, and holding up</p>
+    <ul class="chip-list"><li><a class="chip chip-open" href="#d-mark-granularity" title="Should the app colour tajweed one colour a verse, or should it colour the exact letter a rule lands on?">Sub-word marks: the level below a word, and the print that already named it</a></li><li><a class="chip" href="#d-word-selection" title="Should a reader be able to pick single words, or only whole verses?">The grain gets finer where the finger already is</a></li><li><a class="chip" href="#d-comparison-crop" title="When the app shows a verse cut out of the printed page, what should it do about the neighbouring verses that come with it?">What should the panel show around the ayah?</a></li></ul>
+  </div>
+  <p class="links"><a class="go" href="https://claude.ai/code/artifact/7652b2f5-61a1-4072-bfab-ef3b649e55f5">See the options drawn</a><span class="sep">·</span><a href="../../docs/design/mark-placement.html">the same page, kept here</a><span class="sep">·</span><a href="../../docs/design/mark-registration.md">the reasons in full</a></p>
+</article>
+<article class="card card-big" id="d-tajweed-colours">
+  <div class="card-top"><span class="pill pill-open">Open · nobody has chosen</span><span class="weight">1,639 words of reasons</span></div>
+  <h3>Should a reader be able to change the colours the app uses for recitation rules, and how many colours are there to change?</h3>
+  <p class="answer"><span class="al">Written up as</span>Whose colours are they?</p>
+  <ol class="opts"><li class="opt"><span class="opt-key">A</span><span class="opt-label">Leave the colours fixed</span></li><li class="opt"><span class="opt-key">B</span><span class="opt-label">A reader recolours the seven groups</span></li><li class="opt"><span class="opt-key">C</span><span class="opt-label">A reader recolours all eighteen rules</span></li><li class="opt"><span class="opt-key">D</span><span class="opt-label">Offer a few ready-made schemes, no picker</span></li></ol>
+  <div class="holds">
+    <p class="hl">Held up by, and holding up</p>
+    <ul class="chip-list"><li><a class="chip chip-open" href="#d-mark-granularity" title="Should the app colour tajweed one colour a verse, or should it colour the exact letter a rule lands on?">Sub-word marks: the level below a word, and the print that already named it</a></li><li><a class="chip" href="#d-loop-6a" title="Can a reader turn the colouring off, jump anywhere in the book, and reopen it with no signal?">Loop 6a — Skin, editions, wayfinding, offline foundation</a></li></ul>
+  </div>
+  <p class="links"><a class="go" href="https://claude.ai/code/artifact/74b37363-d082-45e7-9651-54c47c328844">See the options drawn</a><span class="sep">·</span><a href="../../docs/design/tajweed-colours.html">the same page, kept here</a><span class="sep">·</span><a href="../../docs/decisions/tajweed-colours.md">the reasons in full</a></p>
+</article></div>
+</section>
+
+<section>
+  <div class="col">
+    <h2><span class="n">Never finished</span>What gets added to rather than answered?</h2>
+    <p>One record is a running list by design. Every time a choice goes differently on a wide
+    window than on a phone, a row goes here with the reason for the difference — and the reason
+    is the column it exists for. A table of two behaviours with no reasons is a list of
+    inconsistencies.</p>
+  </div>
+  <div class="deck">
+<article class="card" id="d-desktop-vs-mobile">
+  <div class="card-top"><span class="pill pill-living">Never finished · added to as it happens</span><span class="weight">2,884 words of reasons</span></div>
+  <h3>When should a wide window behave differently from a phone?</h3>
+  <p class="answer"><span class="al">The answer, in one line</span>Desktop vs mobile — the running record</p>
+  
+  <div class="holds">
+    <p class="hl">Held up by, and holding up</p>
+    <ul class="chip-list"><li><a class="chip" href="#d-wheel-and-zoom" title="Should rolling the mouse wheel magnify the page?">The wheel navigates, buttons magnify</a></li></ul>
+  </div>
+  <p class="links"><a href="../../docs/decisions/desktop-vs-mobile.md">the reasons in full</a></p>
+</article></div>
+</section>
+
+<section>
+  <div class="col">
+    <h2><span class="n">Settled</span>What has already been answered?</h2>
+    <p>Newest first. The line under each question is the record's own title, which is the
+    answer stated in one sentence — read at build time from the record itself rather than
+    copied here, so it cannot quietly stop being true.</p>
+  </div>
+  <div class="deck deck-tight">
+<article class="card" id="d-comparison-crop">
+  <div class="card-top"><span class="pill">Decided 16 August 2026 · omar</span><span class="weight">2,091 words of reasons</span></div>
+  <h3>When the app shows a verse cut out of the printed page, what should it do about the neighbouring verses that come with it?</h3>
+  <p class="answer"><span class="al">The answer, in one line</span>What should the panel show around the ayah?</p>
+  <ol class="opts"><li class="opt"><span class="opt-key">A</span><span class="opt-label">Leave the crop as it is</span></li><li class="opt"><span class="opt-key">B</span><span class="opt-label">Cut each line down to the verse's own words</span></li><li class="opt"><span class="opt-key">C</span><span class="opt-label">Fade everything that is not this verse</span></li><li class="opt"><span class="opt-key">E</span><span class="opt-label">Mark where the verse begins and ends</span></li><li class="opt"><span class="opt-key">D</span><span class="opt-label">Mark the words the two verses share, as well as the ones they do not</span></li><li class="opt won"><span class="opt-key">F</span><span class="opt-label">Fade the neighbours, mark the shared words green and the differing words yellow</span><span class="opt-won">chosen</span></li></ol>
+  <div class="holds">
+    <p class="hl">Held up by, and holding up</p>
+    <ul class="chip-list"><li><a class="chip chip-open" href="#d-mark-placement" title="Should the app line up what it draws one page at a time, or one printed line at a time?">Are the marks in the right place, and how would we know?</a></li><li><a class="chip" href="#d-word-selection" title="Should a reader be able to pick single words, or only whole verses?">The grain gets finer where the finger already is</a></li><li><a class="chip" href="#d-loop-4a" title="Where does the list of look-alike verses come from, and is it the same list every time it is built?">Loop 4a — Edge-data ETL (full mutashabihat corpus)</a></li></ul>
+  </div>
+  <p class="links"><a class="go" href="https://claude.ai/code/artifact/b7be0f22-3ff5-45b7-a5c1-850dd73ef1f1">See the options drawn</a><span class="sep">·</span><a href="../../docs/design/comparison-crop.html">the same page, kept here</a><span class="sep">·</span><a href="../../docs/decisions/comparison-crop.md">the reasons in full</a></p>
+</article>
+<article class="card" id="d-wheel-and-zoom">
+  <div class="card-top"><span class="pill">Decided 6 August 2026 · omar</span><span class="weight">1,556 words of reasons</span></div>
+  <h3>Should rolling the mouse wheel magnify the page?</h3>
+  <p class="answer"><span class="al">The answer, in one line</span>The wheel navigates, buttons magnify</p>
+  
+  <div class="holds">
+    <p class="hl">Held up by, and holding up</p>
+    <ul class="chip-list"><li><a class="chip" href="#d-desktop-vs-mobile" title="When should a wide window behave differently from a phone?">Desktop vs mobile — the running record</a></li></ul>
+  </div>
+  <p class="links"><a href="../../docs/decisions/wheel-and-zoom.md">the reasons in full</a></p>
+</article>
+<article class="card" id="d-word-search">
+  <div class="card-top"><span class="pill">Decided 5 August 2026 · omar</span><span class="weight">1,466 words of reasons</span></div>
+  <h3>When a reader picks out a few words, what should the app go looking for?</h3>
+  <p class="answer"><span class="al">The answer, in one line</span>A run of words asks a question, and the answer is a number</p>
+  
+  <div class="holds">
+    <p class="hl">Held up by, and holding up</p>
+    <ul class="chip-list"><li><a class="chip" href="#d-word-selection" title="Should a reader be able to pick single words, or only whole verses?">The grain gets finer where the finger already is</a></li><li><a class="chip" href="#d-loop-4a" title="Where does the list of look-alike verses come from, and is it the same list every time it is built?">Loop 4a — Edge-data ETL (full mutashabihat corpus)</a></li></ul>
+  </div>
+  <p class="links"><a href="../../docs/decisions/word-search.md">the reasons in full</a></p>
+</article>
+<article class="card" id="d-word-selection">
+  <div class="card-top"><span class="pill">Decided 4 August 2026 · omar</span><span class="weight">1,203 words of reasons</span></div>
+  <h3>Should a reader be able to pick single words, or only whole verses?</h3>
+  <p class="answer"><span class="al">The answer, in one line</span>The grain gets finer where the finger already is</p>
+  
+  <div class="holds">
+    <p class="hl">Held up by, and holding up</p>
+    <ul class="chip-list"><li><a class="chip" href="#d-word-search" title="When a reader picks out a few words, what should the app go looking for?">A run of words asks a question, and the answer is a number</a></li><li><a class="chip chip-open" href="#d-mark-granularity" title="Should the app colour tajweed one colour a verse, or should it colour the exact letter a rule lands on?">Sub-word marks: the level below a word, and the print that already named it</a></li><li><a class="chip chip-open" href="#d-mark-placement" title="Should the app line up what it draws one page at a time, or one printed line at a time?">Are the marks in the right place, and how would we know?</a></li><li><a class="chip" href="#d-comparison-crop" title="When the app shows a verse cut out of the printed page, what should it do about the neighbouring verses that come with it?">What should the panel show around the ayah?</a></li></ul>
+  </div>
+  <p class="links"><a href="../../docs/decisions/word-selection.md">the reasons in full</a></p>
+</article>
+<article class="card" id="d-pin-marker">
+  <div class="card-top"><span class="pill">Decided 4 August 2026 · omar</span><span class="weight">1,430 words of reasons</span></div>
+  <h3>How does the app keep a page it was told to save without storing it twice?</h3>
+  <p class="answer"><span class="al">The answer, in one line</span>One bit of provenance, and the line it does not cross</p>
+  
+  <div class="holds">
+    <p class="hl">Held up by, and holding up</p>
+    <ul class="chip-list"><li><a class="chip" href="#d-loop-6b" title="Can a reader keep one thirtieth of the book on their phone for good?">Loop 6b — Pin-a-juz packs</a></li></ul>
+  </div>
+  <p class="links"><a href="../../docs/decisions/pin-marker.md">the reasons in full</a></p>
+</article>
+<article class="card" id="d-loop-6b">
+  <div class="card-top"><span class="pill">Decided 4 August 2026 · omar</span><span class="weight">1,853 words of reasons</span></div>
+  <h3>Can a reader keep one thirtieth of the book on their phone for good?</h3>
+  <p class="answer"><span class="al">The answer, in one line</span>Loop 6b — Pin-a-juz packs</p>
+  
+  <div class="holds">
+    <p class="hl">Held up by, and holding up</p>
+    <ul class="chip-list"><li><a class="chip" href="#d-pin-marker" title="How does the app keep a page it was told to save without storing it twice?">One bit of provenance, and the line it does not cross</a></li><li><a class="chip" href="#d-loop-6a" title="Can a reader turn the colouring off, jump anywhere in the book, and reopen it with no signal?">Loop 6a — Skin, editions, wayfinding, offline foundation</a></li></ul>
+  </div>
+  <p class="links"><a href="../../docs/decisions/loop-6b.md">the reasons in full</a></p>
+</article>
+<article class="card" id="d-loop-4b">
+  <div class="card-top"><span class="pill">Decided 3 August 2026 · omar</span><span class="weight">1,330 words of reasons</span></div>
+  <h3>Can the app carry the whole mus'haf instead of three pages?</h3>
+  <p class="answer"><span class="al">The answer, in one line</span>Loop 4b — Page corpus + streaming (all 604 pages)</p>
+  
+  <div class="holds">
+    <p class="hl">Held up by, and holding up</p>
+    <ul class="chip-list"><li><a class="chip" href="#d-loop-4a" title="Where does the list of look-alike verses come from, and is it the same list every time it is built?">Loop 4a — Edge-data ETL (full mutashabihat corpus)</a></li></ul>
+  </div>
+  <p class="links"><a href="../../docs/decisions/loop-4b.md">the reasons in full</a></p>
+</article>
+<article class="card" id="d-i18n">
+  <div class="card-top"><span class="pill">Decided 30 July 2026 · omar</span><span class="weight">962 words of reasons</span></div>
+  <h3>How does the app's own wording get translated, and what keeps the two languages in step?</h3>
+  <p class="answer"><span class="al">The answer, in one line</span>The chrome's language layer moved to a message compiler</p>
+  
+  
+  <p class="links"><a href="../../docs/decisions/i18n.md">the reasons in full</a></p>
+</article>
+<article class="card" id="d-loop-3">
+  <div class="card-top"><span class="pill">Decided 25 July 2026 · omar</span><span class="weight">1,748 words of reasons</span></div>
+  <h3>Can a teacher send a link that opens exactly what they were looking at?</h3>
+  <p class="answer"><span class="al">The answer, in one line</span>Loop 3 — Diffs, share links, a11y pass</p>
+  
+  
+  <p class="links"><a href="../../docs/decisions/loop-3.md">the reasons in full</a></p>
+</article>
+<article class="card" id="d-loop-4a">
+  <div class="card-top"><span class="pill">Decided 25 July 2026 · omar</span><span class="weight">806 words of reasons</span></div>
+  <h3>Where does the list of look-alike verses come from, and is it the same list every time it is built?</h3>
+  <p class="answer"><span class="al">The answer, in one line</span>Loop 4a — Edge-data ETL (full mutashabihat corpus)</p>
+  
+  <div class="holds">
+    <p class="hl">Held up by, and holding up</p>
+    <ul class="chip-list"><li><a class="chip" href="#d-loop-4b" title="Can the app carry the whole mus'haf instead of three pages?">Loop 4b — Page corpus + streaming (all 604 pages)</a></li><li><a class="chip" href="#d-word-search" title="When a reader picks out a few words, what should the app go looking for?">A run of words asks a question, and the answer is a number</a></li><li><a class="chip" href="#d-comparison-crop" title="When the app shows a verse cut out of the printed page, what should it do about the neighbouring verses that come with it?">What should the panel show around the ayah?</a></li></ul>
+  </div>
+  <p class="links"><a href="../../docs/decisions/loop-4a.md">the reasons in full</a></p>
+</article>
+<article class="card" id="d-loop-5">
+  <div class="card-top"><span class="pill">Decided 25 July 2026 · omar</span><span class="weight">1,731 words of reasons</span></div>
+  <h3>Can a reader mark a stretch of more than one verse and ask about all of it at once?</h3>
+  <p class="answer"><span class="al">The answer, in one line</span>Loop 5 — Highlight gesture + root lens</p>
+  
+  
+  <p class="links"><a href="../../docs/decisions/loop-5.md">the reasons in full</a></p>
+</article>
+<article class="card" id="d-loop-6a">
+  <div class="card-top"><span class="pill">Decided 25 July 2026 · omar</span><span class="weight">2,052 words of reasons</span></div>
+  <h3>Can a reader turn the colouring off, jump anywhere in the book, and reopen it with no signal?</h3>
+  <p class="answer"><span class="al">The answer, in one line</span>Loop 6a — Skin, editions, wayfinding, offline foundation</p>
+  
+  <div class="holds">
+    <p class="hl">Held up by, and holding up</p>
+    <ul class="chip-list"><li><a class="chip chip-open" href="#d-mark-granularity" title="Should the app colour tajweed one colour a verse, or should it colour the exact letter a rule lands on?">Sub-word marks: the level below a word, and the print that already named it</a></li><li><a class="chip" href="#d-loop-6b" title="Can a reader keep one thirtieth of the book on their phone for good?">Loop 6b — Pin-a-juz packs</a></li><li><a class="chip chip-open" href="#d-tajweed-colours" title="Should a reader be able to change the colours the app uses for recitation rules, and how many colours are there to change?">Whose colours are they?</a></li></ul>
+  </div>
+  <p class="links"><a href="../../docs/decisions/loop-6a.md">the reasons in full</a></p>
+</article>
+<article class="card" id="d-loop-2">
+  <div class="card-top"><span class="pill">Decided 23 July 2026 · omar</span><span class="weight">1,138 words of reasons</span></div>
+  <h3>Can a reader jump from a verse to one that sounds like it, and find the way back?</h3>
+  <p class="answer"><span class="al">The answer, in one line</span>Loop 2 — The hop</p>
+  
+  
+  <p class="links"><a href="../../docs/decisions/loop-2.md">the reasons in full</a></p>
+</article>
+<article class="card" id="d-loop-0">
+  <div class="card-top"><span class="pill">Decided 20 July 2026 · omar</span><span class="weight">666 words of reasons</span></div>
+  <h3>Can a real page of the mus'haf be put on a phone, installed, and opened again offline?</h3>
+  <p class="answer"><span class="al">The answer, in one line</span>Loop 0 — Skeleton on a phone</p>
+  
+  
+  <p class="links"><a href="../../docs/decisions/loop-0.md">the reasons in full</a></p>
+</article>
+<article class="card" id="d-loop-1">
+  <div class="card-top"><span class="pill">Decided 20 July 2026 · omar</span><span class="weight">928 words of reasons</span></div>
+  <h3>Does touching a verse on a phone answer fast enough to build the rest on?</h3>
+  <p class="answer"><span class="al">The answer, in one line</span>Loop 1 — Select + the performance question</p>
+  
+  
+  <p class="links"><a href="../../docs/decisions/loop-1.md">the reasons in full</a></p>
+</article></div>
+</section>
+
+<p class="note">Drawn from this project's decision register on every build. The questions, the
+options, the dates, the arcs and the counts are all read from it — nothing on this page is
+typed a second time, so if it ever disagrees with the register, the register is right and this
+page has not been rebuilt. Rebuild with <code>node scripts/build-decision-board.mjs</code>.</p>
+</div>
