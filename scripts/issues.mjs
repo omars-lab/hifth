@@ -39,12 +39,16 @@ export const SEVERITIES = ["defect", "question", "risk"];
 /** Worst first — the order `make issues` and docs/issues.md both present. */
 export const STATUS_ORDER = ["confirmed", "suspected", "open", "blocked", "answered", "fixed"];
 
-// U+2460..U+2473. The list is written out rather than built from a code-point
-// range so that a marker nobody can type is never silently legal — and it runs
-// to ⑳ rather than to whatever the largest register currently uses, because the
-// failure when it does not is a gate saying "docs/backlog.md has no ⑯ row"
-// about a row that is plainly there, which reads as a doc bug and is not one.
-const MARKERS = "①②③④⑤⑥⑦⑧⑨⑩⑪⑫⑬⑭⑮⑯⑰⑱⑲⑳";
+// U+2460..U+2473 for ①–⑳, then U+3251..U+325F for ㉑–㉟. The list is written out
+// rather than built from a code-point range so that a marker nobody can type is
+// never silently legal — and it runs past whatever the largest register
+// currently uses, because the failure when it does not is a gate saying
+// "docs/backlog.md has no ⑯ row" about a row that is plainly there, which reads
+// as a doc bug and is not one. Extended to ㉟ on 2026-08-17, when the mark
+// registration document reached ⑳ and hit exactly that wall: the twenty circled
+// digits are one Unicode block and the next fifteen are a different one, so the
+// ceiling was the block boundary rather than any decision anybody made.
+const MARKERS = "①②③④⑤⑥⑦⑧⑨⑩⑪⑫⑬⑭⑮⑯⑰⑱⑲⑳㉑㉒㉓㉔㉕㉖㉗㉘㉙㉚㉛㉜㉝㉞㉟";
 const ITEM = new RegExp(`^### ([${MARKERS}])\\s+(.*?)\\s+·\\s+\\*\\*(\\w+)\\*\\*\\s*$`);
 
 export function readIssues() {
