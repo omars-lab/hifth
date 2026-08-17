@@ -84,7 +84,17 @@ import { fileURLToPath } from "node:url";
 import { readMarkOutlines } from "./lib/diacritics.mjs";
 import { readPageInk, integral, rasterise } from "./lib/ink.mjs";
 import { cachedMarkPages, markPageFile as pageFile, marksOf } from "./lib/marks.mjs";
-import { bestPlacement, outlineRings, rng, sampleSizeFor, scoreAt, stamp, wilson } from "./lib/mark-ink.mjs";
+import {
+  bestPlacement,
+  outlineRings,
+  refusedItsOwnInk,
+  rng,
+  sampleSizeFor,
+  scoreAt,
+  stamp,
+  wilson,
+  withSecondLook,
+} from "./lib/mark-ink.mjs";
 import { classifier, loadExemplars, shapeGroups, similarityMatrix } from "./lib/mark-shape.mjs";
 import {
   FLOOR,
@@ -129,6 +139,47 @@ const RES = Number(arg("--res", 16));
  * answer would report every wrong box as merely unmatched.
  */
 const RADIUS = Number(arg("--radius", 3));
+
+/**
+ * How far the search may move a mark on its *second* look, and why there is one.
+ *
+ * The radius above was sized against the neighbouring letter, so that "it fits
+ * better one letter over" would land inside the search rather than be clipped by
+ * it. That reasoning is right and it has a consequence nobody drew at the time:
+ * a mark whose true ink is further away than the radius comes back not as
+ * *misplaced* but as *unmatched*, which is the one thing the docblock above says
+ * a radius must never do.
+ *
+ * It was happening to all of them. On 272 marks a reader placed by hand, the
+ * displacement they actually needed was a median of 4.292 units and 230 of the
+ * 272 exceeded 3 — the search was looking in a window smaller than the thing it
+ * was looking for, and where it hit the wall it was already heading the right
+ * way, agreeing with the reader on 92 of 100 marks across and 99 of 100 down.
+ *
+ * So the refused ones get a second, wider look. **Only the refused ones**, and
+ * that is not a performance choice. Searching everything this wide moves 4.11%
+ * of the marks that already matched by more than two units — a wider window
+ * finds a better-scoring match that is the adjacent mark's ink, and it does it
+ * confidently. Those cannot be adjudicated, because nothing knows which answer
+ * is right; escalating only where the narrow search gave up means they never
+ * arise, and every accepted mark keeps its answer bit for bit.
+ *
+ * Set to 0 to turn the second look off and get the old single-pass behaviour.
+ */
+const ESCALATE = Number(arg("--escalate", 8));
+
+/**
+ * When the first look counts as having given up.
+ *
+ * The same two tests `build-mark-report.mjs` uses to split placed from fallback,
+ * because the population this rescues has to be the same population that names
+ * it. They are different failures: hitting the radius means the answer is out of
+ * reach, while matching under the floor means the search could see it and did
+ * not like it. Only the first is a thing a wider look can fix, but both are
+ * offered it — a mark that matched badly at 3 units sometimes matched badly
+ * because the real ink was outside and it settled for whatever was inside.
+ */
+const ESC_FLOOR = Number(arg("--escalate-floor", 0.55));
 
 const wantJson = has("--json");
 const outPath = arg("--out", OUT);
@@ -175,8 +226,8 @@ if (!cached.length) {
  * what was drawn would be scored on the part of it that remained, and the part
  * of a wrong answer that stayed in view is not the wrong answer.
  */
-function windowOf(box) {
-  const pad = RADIUS + 1;
+function windowOf(box, radius = RADIUS) {
+  const pad = radius + 1;
   const padX = pad + box[2];
   const x0 = box[0] - padX;
   const y0 = box[1] - pad;
@@ -196,9 +247,9 @@ function windowOf(box) {
  *              the page and does not move when the claim does, so it is carried
  *              over and only the *distance from the claim* changes.
  */
-function scoreMark(mark, ink, lib, other, corr) {
+function scoreMark(mark, ink, lib, other, corr, radius = RADIUS) {
   const { box, fit } = mark;
-  const win = windowOf(box);
+  const win = windowOf(box, radius);
   const obs = rasterise(ink.shapes, win.x0, win.y0, win.cols, win.rows, RES);
   const sat = integral(obs, win.cols, win.rows);
   const cx0 = corr ? corr.dx : 0;
@@ -217,7 +268,7 @@ function scoreMark(mark, ink, lib, other, corr) {
   const at = scoreAt(own, obs, sat, win.cols, win.rows, 0, 0);
   const best = corr
     ? { ...corr.best, di: corr.best.di - Math.round(cx0 * RES), dj: corr.best.dj - Math.round(cy0 * RES) }
-    : bestPlacement(own, obs, sat, win.cols, win.rows, RES, RADIUS);
+    : bestPlacement(own, obs, sat, win.cols, win.rows, RES, radius);
 
   // The ink fraction of the claimed rectangle, kept because it is the statistic
   // the first look at this used and the two must be comparable.
@@ -238,7 +289,7 @@ function scoreMark(mark, ink, lib, other, corr) {
     // being moved to. Reusing this mark's window would only have shown whatever
     // sliver of the displaced outline happened to still be inside it, and a
     // sliver scores like a sliver rather than like a wrong answer.
-    const w2 = windowOf(other.box);
+    const w2 = windowOf(other.box, radius);
     const obs2 = rasterise(ink.shapes, w2.x0, w2.y0, w2.cols, w2.rows, RES);
     const sat2 = integral(obs2, w2.cols, w2.rows);
     const dx = other.box[0] + other.box[2] / 2 - (box[0] + box[2] / 2);
@@ -304,6 +355,12 @@ function scoreMark(mark, ink, lib, other, corr) {
     minePhi: mine ? mine.phi : 0,
     margin: votes[0].phi - (runnerUp ? runnerUp.phi : 0),
     sawShift: byShift[0].name,
+    // How far this particular answer was allowed to look. Equal to the ordinary
+    // radius for almost every mark; wider for the ones the first look gave up
+    // on. It travels with the row because `dx, dy` pinned at a boundary is not
+    // the same kind of number as `dx, dy` found inside one, and nothing
+    // downstream can tell which it is holding without knowing the boundary.
+    searchedAt: radius,
   };
 }
 
@@ -449,7 +506,7 @@ const skipped = [];
  * when the correction was deliberately kept away from half the marks, because
  * there the uncorrected ones are precisely the training set.
  */
-function scoreAll(corrections, onlyCorrected = false) {
+function scoreAll(corrections, onlyCorrected = false, { radius = RADIUS, only = null } = {}) {
   const out = [];
   let lastPage = null;
   let ink = null;
@@ -468,14 +525,53 @@ function scoreAll(corrections, onlyCorrected = false) {
     const other = pool.length ? pool[Math.floor(pick() * pool.length)] : null;
     const c = corrections?.get(`${m.page}:${m.k}`) ?? null;
     if (onlyCorrected && !c) continue;
-    const r = scoreMark(m, ink, lib, other, c);
+    // Filtered here rather than at the top of the loop, so that the seeded draw
+    // above has already happened. A second look at a subset then picks the same
+    // swap control the first look picked, and its `nullPhi` stays comparable
+    // with every row the first look produced.
+    if (only && !only.has(`${m.page}:${m.k}`)) continue;
+    const r = scoreMark(m, ink, lib, other, c, radius);
     if (r) out.push({ ...r, hafs: m.hafs, d: m.d, fit: m.fit });
     else if (!corrections) skipped.push(m);
   }
   return out;
 }
 
-const raw = scoreAll(null);
+/**
+ * The first look, and then a second one for whatever it gave up on.
+ *
+ * The second look replaces a row only when it actually helps — it has to both
+ * clear the floor and beat the overlap the first look managed. A wider search
+ * cannot score worse at the same offset, so in practice this only refuses the
+ * handful where a bigger window let the outline drift onto a neighbour and the
+ * arithmetic still called it worse; keeping the test explicit means the pass can
+ * never make a row worse than not running it at all.
+ *
+ * Rows the second look does not improve keep the first look's answer untouched,
+ * pinned `dx, dy` and all. They are the marks that are genuinely hard, and their
+ * refusal is the signal that says which ones are still worth a person's hour.
+ */
+const escalated = { looked: 0, took: 0 };
+
+function lookAgain(rows) {
+  if (!(ESCALATE > RADIUS)) return rows;
+  const stuck = rows.filter((r) => refusedItsOwnInk(r, RADIUS, ESC_FLOOR));
+  if (!stuck.length) return rows;
+  escalated.looked = stuck.length;
+  const only = new Set(stuck.map((r) => `${r.page}:${r.k}`));
+  const wider = scoreAll(null, false, { radius: ESCALATE, only });
+  const merged = withSecondLook(rows, wider, { radius: RADIUS, wide: ESCALATE, floor: ESC_FLOOR });
+  escalated.took = merged.took;
+  return merged.rows;
+}
+
+const raw = lookAgain(scoreAll(null));
+if (escalated.looked) {
+  console.error(
+    `  second look at ±${ESCALATE}: ${escalated.looked} marks the first look gave up on, ` +
+      `${escalated.took} placed from their own ink (${((100 * escalated.took) / escalated.looked).toFixed(0)}%)`,
+  );
+}
 
 /**
  * Which grain the corrected pass is scored at, and the correction it applies.
@@ -613,6 +709,7 @@ if (rowsOut) {
         iouBest: r.iouBest,
         phi0: r.phi0,
         nullPhi: r.nullPhi,
+        searchedAt: r.searchedAt,
       })),
     ),
   );
