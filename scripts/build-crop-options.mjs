@@ -265,7 +265,34 @@ function makeRenderer(ARTIFACT) {
     );
   };
 
-  const DRAW = { A, B, C, D, E };
+  /**
+   * F — C and D at once, with the two tints re-assigned to what they mean.
+   *
+   * The other four keep the shipped scheme, where colour says *which ayah you
+   * are looking at*: terracotta for the one you came from, verdigris for the one
+   * you hopped to. F spends that colour on the other axis — green where the two
+   * agree, yellow where they part — so a tint means the same thing on both
+   * sides of the panel and neither side is a colour of its own. That trade is
+   * the option; it is drawn rather than argued because a reader has to see both
+   * halves of the panel wearing the same two colours to judge it.
+   */
+  const F = (side) => {
+    const f = side.frame;
+    const box = (r) => `M${n(r.x)} ${n(r.y)}H${n(r.x + r.width)}V${n(r.y + r.height)}H${n(r.x)}Z`;
+    const holes = side.bands.map((b) => box({ x: b.x - 1, y: b.y - 1, width: b.width + 2, height: b.height + 2 }));
+    const band = (cls) => (r) =>
+      `<rect class="${cls}" x="${n(r.x - 0.5)}" y="${n(r.y - 0.5)}"` +
+      ` width="${n(r.width + 1)}" height="${n(r.height + 1)}" rx="1"></rect>`;
+    return (
+      `<svg class="art" viewBox="${vb(f)}" aria-hidden="true" focusable="false">${print(side.page)}` +
+      `<path class="scrim" d="${box(f)}${holes.join("")}" fill-rule="evenodd"></path>` +
+      side.shared.map(band("w-share")).join("") +
+      side.washes.map(band("w-diff")).join("") +
+      `</svg>`
+    );
+  };
+
+  const DRAW = { A, B, C, D, E, F };
 
   /** The panel exactly as the app builds it: label, crop, label, crop. */
   return (which, sides) =>
@@ -427,7 +454,33 @@ const OPTIONS = [
       "It is the only option that makes the crop busier rather than quieter.",
     ],
   },
+  {
+    id: "F",
+    family: "Do both, and change what colour means",
+    name: "Fade the neighbours, mark the shared words green and the differing words yellow",
+    lede:
+      "C and D at once — the neighbours veiled, the shared opening and the divergent ending both marked — and " +
+      "the two colours spent on what the words are rather than on which verse you are looking at. " +
+      "Green where the two agree, yellow where they part, the same on both halves of the panel.",
+    for: [
+      "Every part of the crop now says what it is. Veiled means not this verse, green means the two agree here, yellow means they part here — and nothing is left for the reader to infer.",
+      "The colour finally carries the fact the panel exists to teach. Which of the two verses you are looking at is already written above each crop in words; whether a phrase is shared or divergent is not written anywhere, and it is the thing a hafiz is trying to learn.",
+      "Green for agreement and yellow for caution are read the same way by most people before anything explains them, which is the closest this panel gets to needing no legend.",
+      "The same two colours on both halves means the eye can compare the halves directly — the yellow on top and the yellow below are the same claim, where terracotta and verdigris are two.",
+    ],
+    against: [
+      "It gives up the colour that says which verse is which. Today terracotta is the verse you came from and verdigris the one you hopped to, and that distinction now rests on the label alone.",
+      "It reopens a settled decision. The two wash colours were chosen elsewhere and this changes what they mean, not just which they are — that has to be decided deliberately, not as a side effect of this page.",
+      "Yellow is the hardest colour to put on cream paper. It has been pushed to an ochre here to be visible at all, and a reader may not accept that as yellow.",
+      "It is the busiest of the six: a veil and two tints on one small crop, and it inherits every objection to C and to D at once.",
+    ],
+  },
 ];
+
+/** Answered. The losing five stay on the page — they are why it was a choice. */
+const CHOSEN = "F";
+const DECIDED_BY = "omar";
+const DECIDED_ON = "2026-08-16";
 
 // ---------------------------------------------------------------- assembly
 
@@ -449,12 +502,38 @@ function render({ artifact: ARTIFACT, out }) {
   const twoLineMean = twoLine.reduce((a, s) => a + s.share, 0) / twoLine.length;
   const num = (v) => v.toLocaleString("en");
 
+  const chosen = OPTIONS.find((o) => o.id === CHOSEN);
+
+  /**
+   * The chosen option at roughly two and a half times the panel's real width.
+   *
+   * The specimens further down are at the size a reader actually gets, which is
+   * the honest size and the wrong one for judging two new colours against each
+   * other. Both sizes, and the caption says which is which.
+   */
+  const detail = `
+<div class="detail">
+  <figure class="blow">
+    ${panel(CHOSEN, sides)}
+    <figcaption>${esc(chosen.name)} — enlarged so the two tints can be judged against each other. At true size it is the specimen under option ${CHOSEN} below.</figcaption>
+  </figure>
+  <div class="legend">
+    <p class="wl">What the reader is being told</p>
+    <ul class="key-list">
+      <li><span class="sw sw-veil"></span><span><b>Veiled</b> — a different verse that happens to share the line. Still legible, no longer competing.</span></li>
+      <li><span class="sw sw-green"></span><span><b>Green</b> — the two verses agree here. This is the wording that makes the pair confusable.</span></li>
+      <li><span class="sw sw-yellow"></span><span><b>Yellow</b> — the two verses part here. This is the thing to memorise.</span></li>
+    </ul>
+    <p class="legend-note">The same two colours appear on both halves of the panel, because they now describe the words rather than which verse you are looking at. Which verse is which is stated in the label above each crop.</p>
+  </div>
+</div>`;
+
   const optionCard = (o) => `
-<article class="option" id="option-${o.id}">
+<article class="option${o.id === CHOSEN ? " picked" : ""}" id="option-${o.id}">
   <div class="option-head">
     <span class="key">${o.id}</span>
     <div>
-      <p class="family">${o.family}</p>
+      <p class="family">${o.family}${o.id === CHOSEN ? ' <span class="tag">chosen</span>' : ""}</p>
       <h3>${esc(o.name)}</h3>
     </div>
   </div>
@@ -581,6 +660,42 @@ h1 { font-size: clamp(1.9rem, 5.2vw, 2.65rem); line-height: 1.14; margin: 0 0 1.
   font-family: var(--mono); font-size: 12px; color: var(--soft);
 }
 .status b { color: var(--accent-ink); font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; }
+.status.decided { border-color: var(--accent); background: var(--accent-soft); }
+.status.decided span { color: var(--ink); }
+
+/* The chosen drawing, enlarged, with what its three states mean beside it. */
+.detail {
+  display: grid; gap: 2rem 2.4rem; align-items: start;
+  grid-template-columns: minmax(0, 22rem) minmax(0, 1fr);
+  margin: 1.6rem 0 1.9rem;
+}
+@media (max-width: 52rem) { .detail { grid-template-columns: 1fr; } }
+.blow { margin: 0; }
+.blow .panel { width: 100%; max-width: 22rem; padding: 12px 16px; gap: 12px; border-radius: 10px; }
+.blow .who { font-size: 14px; }
+.blow figcaption { font-size: 12.5px; line-height: 1.45; color: var(--faint); margin-top: 0.7rem; max-width: 22rem; }
+.legend { max-width: 30rem; }
+.key-list { list-style: none; margin: 0 0 1rem; padding: 0; }
+.key-list li {
+  display: grid; grid-template-columns: 1.6rem 1fr; gap: 0.7rem;
+  align-items: baseline; margin-bottom: 0.7rem; font-size: 15.5px;
+  line-height: 1.5; color: var(--soft);
+}
+.key-list b { color: var(--ink); font-weight: 600; }
+.sw {
+  display: block; width: 1.5rem; height: 0.95rem; border-radius: 2px;
+  background: #fdfbf5; box-shadow: inset 0 0 0 1px var(--rule);
+}
+.sw-veil { background: #f7f4ec; box-shadow: inset 0 0 0 1px #ded4c3; }
+.sw-green { background: rgba(63, 125, 67, 0.16); box-shadow: inset 0 0 0 1px #3f7d43; }
+.sw-yellow { background: rgba(198, 141, 20, 0.22); box-shadow: inset 0 0 0 1px #a8791d; }
+.legend-note { font-size: 14px; line-height: 1.55; color: var(--faint); margin: 0; }
+.tag {
+  display: inline-block; margin-left: 0.5rem; padding: 0.1rem 0.5rem;
+  border-radius: 999px; background: var(--accent-soft); color: var(--accent-ink);
+  letter-spacing: 0.09em;
+}
+.option.picked .key { background: var(--accent); color: var(--ground); }
 
 section { padding-top: 3.4rem; }
 h2 {
@@ -644,6 +759,13 @@ h3 { font-size: 1.16rem; margin: 0; line-height: 1.3; }
 .w-a { fill: rgba(162, 59, 44, 0.1); stroke: #a23b2c; stroke-width: 0.3; vector-effect: non-scaling-stroke; }
 .w-b { fill: rgba(23, 84, 77, 0.1); stroke: #17544d; stroke-width: 0.3; vector-effect: non-scaling-stroke; }
 .w-same { fill: rgba(38, 32, 26, 0.07); stroke: rgba(38, 32, 26, 0.28); stroke-width: 0.3; vector-effect: non-scaling-stroke; }
+/* F's pair, and both are pushed off their pure hue on purpose.
+   The green is a leaf green rather than the app's verdigris: verdigris is one of
+   the two colours F is REPLACING, and a reader seeing it again would read the
+   old meaning. The yellow is an ochre because a true yellow at this alpha is
+   invisible on cream — the wash has to survive being a fifth opaque over ink. */
+.w-share { fill: rgba(63, 125, 67, 0.16); stroke: #3f7d43; stroke-width: 0.3; vector-effect: non-scaling-stroke; }
+.w-diff { fill: rgba(198, 141, 20, 0.22); stroke: #a8791d; stroke-width: 0.3; vector-effect: non-scaling-stroke; }
 .scrim { fill: rgba(253, 251, 245, 0.74); }
 .bracket { fill: none; stroke: #1f6f66; stroke-width: 1.1; vector-effect: non-scaling-stroke; stroke-linecap: square; }
 
@@ -710,8 +832,22 @@ ${defs}
   <p class="eyebrow">Hifth · open question</p>
   <h1>What should the panel show around the ayah?</h1>
   <p class="standfirst">When you open a pair of look-alike verses, the app now cuts both of them straight out of the printed page instead of retyping them. That fixed a real problem and introduced a smaller one: a verse almost never begins and ends at the edge of a line, so the rectangle cut around it brings its neighbours along for the ride.</p>
-  <p class="status"><b>Open</b> <span>Nobody has decided. Option A is what ships today.</span></p>
+  <p class="status decided"><b>Decided</b> <span>Option ${CHOSEN}, by ${DECIDED_BY} on ${DECIDED_ON}. The other five stay below — they are why it was a choice.</span></p>
 </header>
+
+<section>
+  <div class="col">
+    <h2><span class="n">The answer</span>What was decided?</h2>
+    <p><b>Option ${CHOSEN}: fade the neighbours, and mark the shared words green and the differing words yellow.</b> It is C and D taken together — the neighbouring verses veiled so they stop competing, and both meaningful states marked so nothing is left to inference — with one further change that neither parent proposed.</p>
+    <p>The two colours change what they are <em>about</em>. Today they say which verse you are looking at: terracotta for the one you came from, verdigris for the one you hopped to. From here they say what the words are: <b>green where the two verses agree, yellow where they part</b>, identically on both halves of the panel.</p>
+    <p>That is the substantive part of the decision, and it is worth being plain about the trade. Which verse is which was already written above each crop in words, so the colour was spending itself on something the reader could already read. Whether a phrase is shared or divergent was written nowhere — and it is the one thing a hafiz is looking at the panel to learn.</p>
+  </div>
+  ${detail}
+  <div class="col">
+    <p><b>What this costs, stated rather than buried.</b> The panel's two halves no longer differ by colour, so a reader glancing at one crop without its label has lost a cue. Yellow is the hardest colour to lay on cream and has been pushed to an ochre to survive at ten per cent over ink — a reader may fairly say that is not yellow. And this is the busiest of the six drawings: it inherits the objection to C, that a veil goes over printed Quran, and the objection to D, that most of the crop ends up under colour.</p>
+    <p>It also reopens something this page had listed as settled. The two wash colours were chosen elsewhere, and this changes not merely which they are but what they mean. That is recorded as part of the decision rather than done quietly, so the earlier choice is superseded on purpose and not by accident.</p>
+  </div>
+</section>
 
 <section class="col">
   <h2><span class="n">The words on this page</span>What do these words mean?</h2>
@@ -737,9 +873,9 @@ ${defs}
 </section>
 
 <section class="col">
-  <h2><span class="n">Doing nothing</span>What happens if nobody decides?</h2>
-  <p>Option A stands, because option A is live. Nothing breaks, and the panel remains a clear improvement on what it replaced.</p>
-  <p>The risk is quiet rather than loud: a reader takes an unmarked neighbour for shared wording and memorises a difference that is not there — in an app whose entire purpose is to stop exactly that.</p>
+  <h2><span class="n">The alternative to deciding</span>What would have happened if nobody decided?</h2>
+  <p>Option A would have stood, because option A was live. Nothing breaks, and the panel remains a clear improvement on what it replaced — which is exactly why this could have gone unanswered indefinitely.</p>
+  <p>The risk was quiet rather than loud: a reader takes an unmarked neighbour for shared wording and memorises a difference that is not there — in an app whose entire purpose is to stop exactly that. Nothing would have told anybody it was happening.</p>
 </section>
 
 <section>
@@ -775,7 +911,7 @@ ${defs}
     <li><b>The standard for serving a crop of a scanned page can cut only rectangles</b> — the whole image, a square, or a box given in pixels or per cent. There is no multi-part or non-rectangular request in it. That is worth naming, because it explains <em>why</em> our crop is a rectangle: a rectangle is what the tooling hands you, not what the content is. Viewers that need a real shape draw it over the image instead of asking for it. <span class="src"><a href="https://iiif.io/api/image/3.0/">IIIF Image API 3.0, §4.1 Region</a></span></li>
     <li><b>The formats that describe scanned pages put the geometry on the line.</b> Both of the widely used ones carry a box per text line, while logical units like a paragraph are containers that group lines rather than shapes of their own. One goes further and defines an element for exactly our case, documented as describing <q>the bounding shape of a block, if it is not rectangular</q>, holding a polygon. A verse crossing three lines is that block. <span class="src"><a href="https://kba.github.io/hocr-spec/1.2/">hOCR 1.2</a> · <a href="https://github.com/altoxml/schema">ALTO 4.4 schema</a></span></li>
   </ul>
-  <p><b>What this changes.</b> Option B stops being the boldest of the five and becomes the conventional one. Its remaining objection is not correctness but appearance — none of the precedents above has to look like a page of a mus'haf — and that is a question about taste and reverence, which is exactly the sort a stranger to this code is better placed to answer than its author.</p>
+  <p><b>What this changed.</b> It moved option B from the boldest of the set to the conventional one — its only remaining objection being appearance, since none of the precedents above has to look like a page of a mus'haf. The decision went the other way, to F, and the reason is worth stating: every precedent here solves <em>where to draw</em>, and none of them solves <em>what the drawing means</em>. B removes the ambiguity by removing the neighbours; F removes it by naming all three states outright. On a page a reader is trying to memorise from, saying what a mark means beat inheriting a convention about its shape.</p>
   <div class="hollow">
     <p><b>What I could not confirm.</b> I believe a multi-line highlight in a PDF is stored as several quadrilaterals rather than one rectangle — the same convention a fifth time — but both sources I tried for that specification returned nothing, and this session's search budget was spent, so it is not counted above.</p>
     <p>I also could not open the layout or look-alike data files themselves to see whether they carry word positions. The finding about them rests on the library's own descriptions.</p>
@@ -795,16 +931,17 @@ ${defs}
 
 <section>
   <div class="col">
-    <h2><span class="n">Side by side</span>How do the five compare at a glance?</h2>
-    <p class="rail-note">The hard side of the pair — 2:123, where a little under half the crop is other verses — drawn five ways at the panel's real width. Scroll sideways. Each one is the actual printed page with the actual measured geometry over it.</p>
+    <h2><span class="n">Side by side</span>How do the six compare at a glance?</h2>
+    <p class="rail-note">The hard side of the pair — 2:123, where a little under half the crop is other verses — drawn six ways at the panel's real width. Scroll sideways. Each one is the actual printed page with the actual measured geometry over it, and the last one is the one chosen.</p>
   </div>
   ${glance}
 </section>
 
 <section>
   <div class="col">
-    <h2><span class="n">The options</span>What could be done instead?</h2>
-    <p>Five, grouped by what they actually do about the neighbours: take them away, push them back, or leave them and say plainly what the marks mean. They are not exclusive — B and D compose, and so do C and E — but each is drawn on its own so it can be judged on its own.</p>
+    <h2><span class="n">The options</span>What were the choices?</h2>
+    <p>Six, grouped by what they do about the neighbours: take them away, push them back, leave them and say plainly what the marks mean — or, in the one that was chosen, do two of those at once. They were never exclusive, and F is the proof: it is C and D composed, plus a change to what the colours are about that neither parent asked for.</p>
+    <p>The five that lost stay here in full. They are the reason the choice was a choice, and anyone reopening this will want to see what was weighed rather than take the answer on trust.</p>
   </div>
   ${OPTIONS.map(optionCard).join("")}
 </section>
@@ -820,20 +957,22 @@ ${defs}
 </section>
 
 <section class="col">
-  <h2><span class="n">Sensitivity</span>What would change the answer?</h2>
+  <h2><span class="n">Sensitivity</span>What would reopen this?</h2>
   <ul class="plain">
-    <li><b>A hafiz reading the panel and saying whether the neighbours help or hurt.</b> The case against A rests on a guess about someone else's habit — that context is a distraction rather than an aid. That guess has not been tested on a single person who memorises.</li>
-    <li><b>Whether the raggedness actually reads as broken.</b> After the prior art above, this is the only real objection left to B, and it is an appearance claim nobody has tested. Two people and fifteen minutes would settle it.</li>
-    <li><b>The panel moving out of a list row.</b> B's raggedness is only a problem in a cramped strip. On a full screen, most of the objection to it evaporates.</li>
-    <li><b>Any change to how the page is themed.</b> C is a veil in the page's own paper colour; if the artwork's ground ever moves, C moves with it.</li>
+    <li><b>A hafiz reading the panel and saying the veil gets in the way.</b> Everything against option A rested on a guess about someone else's habit — that the neighbouring verses are a distraction rather than an aid — and F acts on that guess by veiling them. It has still not been tested on a single person who memorises, and that is the assumption most likely to be wrong.</li>
+    <li><b>Green and yellow failing on the paper rather than on the screen.</b> Yellow at ten per cent over ink on cream is the hardest thing on this page, and it has only been judged at the sizes shown here. Seen on a phone in daylight it may not hold.</li>
+    <li><b>Anyone reading green and yellow as right and wrong.</b> They are meant as <em>the same</em> and <em>not the same</em>. If readers take yellow for an error rather than a difference, the colours are wrong even though the structure is right, and the fix is the palette rather than the drawing.</li>
+    <li><b>The panel moving out of a list row.</b> F is busy because the crop is small. On a full screen there is room for the veil to be lighter and the tints weaker, and the balance chosen here would want revisiting.</li>
+    <li><b>Any change to how the page is themed.</b> The veil is drawn in the printed page's own paper colour; if that ground ever moves, the veil moves with it.</li>
   </ul>
 </section>
 
 <section class="col">
   <h2><span class="n">Scope</span>What is this not settling?</h2>
   <ul class="plain">
-    <li><b>Which words get washed.</b> Read off the pair itself, verified, and correct.</li>
-    <li><b>The two colours.</b> Terracotta for the verse you are on, verdigris for the one you are looking at — settled elsewhere, and not reopened here.</li>
+    <li><b>Which words get marked.</b> Read off the pair itself, verified, and correct. F changes what the marks look like and what they mean, never which words get them.</li>
+    <li><b>The colours anywhere else in the app.</b> Terracotta and verdigris keep their jobs everywhere they already have one. What changed is confined to this panel, where they were saying something the label already said.</li>
+    <li><b>The exact green and the exact yellow.</b> Chosen here to be legible at ten per cent over ink on cream, and drawn so they can be argued with. Moving them does not reopen the decision.</li>
     <li><b>Whether the panel should exist at all.</b> It should.</li>
     <li><b>Anything about the printed page.</b> It is vendored unmodified apart from three declared transforms, and nothing here touches that.</li>
   </ul>
