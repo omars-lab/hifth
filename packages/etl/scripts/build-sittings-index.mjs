@@ -27,31 +27,41 @@
  * reading in `lib/sitting-file.mjs`, shared with the auditor — and adds them up.
  *
  * So the page cannot disagree with the sittings it links to, because it is built
- * out of them. Rebuild the sittings, rebuild this, and the two move together. If
- * a sitting is missing from disk it does not appear here — a link to a page that
- * is not there is worse than no link.
+ * out of them. If a sitting is missing from disk it does not appear here — a link
+ * to a page that is not there is worse than no link.
  *
  * The one thing it does NOT read out of them is the prose describing each band of
  * confidence. Those are editorial — "barely accepted", "where nine marks in ten
  * live" — and belong to whoever is explaining the plan, not to the data.
  *
- * ── Why it also asks the serving side, in the browser ─────────────────────
+ * ── Why the page then works all of it out again ──────────────────────────
  *
- * Everything above is true at the moment of the build, and a rebuild drops every
- * answered mark — so at the moment of the build every part is untouched and each
- * one's progress is zero. That is exactly the number a reader cannot use. What
- * they want from a front door is *which part am I in the middle of*, and that
- * question is only answerable from the answers given since the rebuild, which
- * live on the machine doing the serving.
+ * Everything above is true at the moment of the build and only then, and the
+ * things that change afterwards are precisely the things a reader came to find
+ * out. A sitting gets finished — and it kept its place in the list looking exactly
+ * as unfinished as the fifteen beside it, because being finished is a fact about
+ * the answers and the page had counted those once. A deal gets re-dealt, and the
+ * page went on describing parts that no longer held those marks. The only cure
+ * for either was somebody remembering to run this script again, and forgetting is
+ * how the hand-written page it replaced went wrong in the first place. Automating
+ * the regeneration would only move the forgetting.
  *
- * So the page asks. It knows which marks each part holds, it fetches everything
- * this machine has heard, and it counts the overlap. Marks in the log that belong
- * to no part on this page are answers from an earlier deal — already subtracted at
- * build time — and dropping them is what stops the page counting them twice.
+ * So the page asks, on every open, and works the whole thing out again: which
+ * sittings are on the disk now and what each is asking about, and everything this
+ * machine has heard anybody answer. Not a patch over the baked numbers — the same
+ * functions that drew the tiles are run again on the new listing, so no version of
+ * the page is half of one census and half of another. Finished sittings fold away
+ * as they are finished, the totals fall as the answers arrive, and a re-deal
+ * underneath an open tab says so instead of being invisible.
  *
- * The rule for *which answers still stand* is not restated here. It is one
- * function in `lib/answered.mjs`, written closed over nothing for this reason, and
- * its own source text is inlined into the page. Two runtimes, one reading.
+ * That is also why the baked half exists rather than an empty frame: a page opened
+ * off the filesystem, or served by something that only hands out files, keeps
+ * every number it was written with. Nothing listening is a normal state.
+ *
+ * Neither the rule for *which answers still stand* nor any of the counting and
+ * drawing is restated for the browser. Those are `lib/answered.mjs` and
+ * `lib/sittings-view.mjs`, both written closed over nothing for this reason, and
+ * their own source text is inlined into the page. Two runtimes, one reading.
  *
  * ── The stamp, and the address ───────────────────────────────────────────
  *
@@ -73,6 +83,22 @@ import { existsSync, readdirSync, statSync, writeFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { readAnswered, standingIds } from "./lib/answered.mjs";
 import { readSitting } from "./lib/sitting-file.mjs";
+import {
+  Word,
+  bandCopy,
+  bandsLine,
+  bandTile,
+  carryOn,
+  census,
+  doneCount,
+  esc,
+  howLong,
+  isDone,
+  num,
+  partTile,
+  sizeOf,
+  word,
+} from "./lib/sittings-view.mjs";
 import { canonicalAddress } from "./lib/tailnet.mjs";
 
 const arg = (name, fallback) => {
@@ -101,22 +127,12 @@ const BANDS = [
   ["0.95-1.01", "As close as it gets", "near-perfect matches"],
 ];
 
-const WORDS = [
-  "no", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine",
-  "ten", "eleven", "twelve", "thirteen", "fourteen", "fifteen", "sixteen",
-  "seventeen", "eighteen", "nineteen", "twenty",
-];
-const word = (n) => (n >= 0 && n < WORDS.length ? WORDS[n] : String(n));
-const Word = (n) => { const w = word(n); return w[0].toUpperCase() + w.slice(1); };
-const num = (n) => n.toLocaleString("en-US");
-
-// About how long a sitting of n marks takes, said the way a person would say it.
-function howLong(n) {
-  const mins = Math.round((n * SECONDS_PER_MARK) / 60);
-  if (mins < 45) return `about ${Math.round(mins / 5) * 5} minutes`;
-  if (mins < 80) return "about an hour";
-  return `about ${(mins / 60).toFixed(1).replace(/\.0$/, "")} hours`;
-}
+// The counting, the wording and the drawing all live in lib/sittings-view.mjs,
+// because the page has to do every one of them again in a browser against a
+// listing this script never saw. Nothing about how a tile looks or how a total
+// is reached is written here; what is written here is the editorial half above
+// and the prose below.
+const hours = (n) => howLong(n, SECONDS_PER_MARK);
 
 if (!existsSync(DIR)) {
   console.error(`  no such directory: ${DIR}`);
@@ -140,37 +156,22 @@ for (const name of readdirSync(DIR).sort()) {
   sittings.push({ name, ids: s.ids, ...s.head, mtime: statSync(join(DIR, name)).mtime });
 }
 
-const bands = sittings.filter((s) => s.band);
-const parts = sittings
-  .filter((s) => s.part)
-  .sort((a, b) => Number(a.part.split("/")[0]) - Number(b.part.split("/")[0]));
+const { bands, parts, deal, mixed, shown, answered, population, per, dealId } = census(sittings);
 
 if (!bands.length && !parts.length) {
   console.error(`  no sittings found in ${DIR} — nothing to index`);
   process.exit(1);
 }
 
-// ── The fallback census ──────────────────────────────────────────────────
-//
-// Population, already-answered and pool are properties of the DEAL, not of any one
-// part, so they are read off the first part and then checked against the rest. A
-// mismatch means the parts on disk are from two different builds, which is the one
-// state where an index would quietly mislead about how much work is left.
-const deal = parts[0] ?? null;
-const mixed = deal
-  ? parts.filter((p) => p.slice?.split("-").pop() !== deal.slice?.split("-").pop())
-  : [];
+// Parts on disk from two different builds is the one state where an index would
+// quietly mislead about how much work is left. The page, meeting the same thing
+// live, says so and carries on; a builder can simply decline to write it.
 if (mixed.length) {
   console.error(`  parts on disk are from more than one deal:`);
   for (const p of [deal, ...mixed]) console.error(`    ${p.name}  ${p.slice}`);
   console.error(`  rebuild all of them before indexing.`);
   process.exit(1);
 }
-
-const shown = parts.reduce((t, p) => t + (p.shown ?? 0), 0);
-const answered = deal?.alreadyAnswered ?? 0;
-const population = deal?.population ?? 0;
-const per = parts.length ? Math.round(shown / parts.length) : 0;
 
 /**
  * How far each part has got, as it stands on disk at this moment.
@@ -192,9 +193,6 @@ if (!answeredPaths.length) {
   if (existsSync(running)) answeredPaths.push(running);
 }
 const standing = answeredPaths.length ? readAnswered(answeredPaths) : new Set();
-const progressAt = (s) => s.ids.filter((id) => standing.has(id)).length;
-
-const esc = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
 // Local time, not UTC. The reader compares this against a file listing on the same
 // machine, and a stamp five hours off the listing reads as a stale page when the
@@ -205,47 +203,55 @@ const stamp =
   `${newest.getFullYear()}-${pad(newest.getMonth() + 1)}-${pad(newest.getDate())}` +
   ` ${pad(newest.getHours())}:${pad(newest.getMinutes())}`;
 
-// ── The page ─────────────────────────────────────────────────────────────
+// ── The page, as it is true at this moment ───────────────────────────────
+//
+// Everything below is baked through the very functions the page then re-runs in
+// the browser, so what a reader sees before the machine answers and what they see
+// after differ in their numbers and in nothing else. It is also what they keep
+// when nothing answers at all — a page opened off the filesystem, or served by
+// something that only hands out files, still shows a true picture of the moment
+// it was written rather than an empty frame waiting for a fetch that will not
+// come.
+//
+// A finished sitting is folded away rather than deleted. Removing it would make
+// the front door quietly disagree with the directory behind it, and a reader who
+// has just finished number nine wants one glance's worth of proof that it landed.
 
-const bandRows = bands
-  .map((s) => {
-    const [, title, blurb] = BANDS.find(([id]) => id === s.band) ?? [null, s.band, "a band of confidence"];
-    return `  <li><a class="sit" href="${esc(s.name)}">
-    <span class="name">${esc(title)}<small>${esc(blurb)}</small></span>
-    <span class="n">${num(s.pool ?? 0)}</span></a></li>`;
-  })
-  .join("\n");
+const sortDone = (list, tile) => {
+  const open = [];
+  const shut = [];
+  for (const [s, n] of list) (isDone(s, n) ? shut : open).push(tile(s, n));
+  return { open: open.join("\n"), shut: shut.join("\n"), left: open.length, gone: shut.length };
+};
 
-/**
- * One tile per part, carrying its own progress.
- *
- * The tiles used to be bare numbers, which meant the only thing a reader could
- * learn from sixteen of them was that there were sixteen. Every question they
- * actually arrive with — where was I, which of these have I finished, is there any
- * point opening number nine — was unanswerable from the front door, so the way to
- * find out was to open parts until one of them looked familiar.
- *
- * `data-ids` is what lets the page recount itself against the server without
- * asking this script to have been re-run. It is the marks the part holds, and it
- * is the only heavy thing on the page: about twelve bytes a mark, against a
- * megabyte-and-a-third for each of the sittings it links to.
- */
-const partRows = parts
-  .map((s) => {
-    const n = s.part.split("/")[0];
-    const done = progressAt(s);
-    const of = s.ids.length || s.shown || 0;
-    return `  <li><a class="sit part" href="${esc(s.name)}" data-part="${esc(n)}" data-of="${of}" data-ids="${esc(s.ids.join(" "))}">
-    <span class="pn">${esc(n)}</span>
-    <span class="bar"><i style="width:${of ? Math.round((done / of) * 100) : 0}%"></i></span>
-    <span class="pc">${done} of ${of}</span></a></li>`;
-  })
-  .join("\n");
+const bandRows = sortDone(
+  bands.map((s) => [s, doneCount(s, standing)]),
+  (s, n) => {
+    const { title, blurb } = bandCopy(s.band, BANDS);
+    return `  ${bandTile(s, n, title, blurb)}`;
+  },
+);
 
-const bandsSat = bands.filter((s) => (s.alreadyAnswered ?? 0) > 0).length;
-const bandCheck = bandsSat
-  ? `<strong>${Word(bandsSat)} of the ${word(bands.length)} ${bandsSat === 1 ? "has" : "have"} been started.</strong>`
-  : `<strong>Nothing has ever checked that.</strong>`;
+const partRows = sortDone(
+  parts.map((s) => [s, doneCount(s, standing)]),
+  (s, n) => `  ${partTile(s, n)}`,
+);
+
+const partsDone = parts.reduce((t, s) => t + doneCount(s, standing), 0);
+const carry = carryOn(parts, standing);
+const bandCheck = bandsLine(bands, standing);
+
+/** The line on a fold, which has to say what is behind it or nobody opens it. */
+const foldLine = (gone, one, many) =>
+  `${Word(gone)} finished ${gone === 1 ? one : many}`;
+
+const carryLine = carry
+  ? `<strong>Carry on with sitting ${esc(String(carry.sitting.part).split("/")[0])}.</strong> ` +
+    (carry.done
+      ? `You are ${carry.done} of ${carry.of} through it. `
+      : "Nothing has been answered in it yet. ") +
+    `<a href="${esc(carry.sitting.name)}">Open it</a>.`
+  : "";
 
 const WHERE = canonicalAddress();
 
@@ -375,10 +381,32 @@ const html = `<!doctype html>
     font: .74rem/1 ui-monospace, SFMono-Regular, Menlo, monospace;
     font-variant-numeric: tabular-nums; color: var(--faint);
   }
-  a.sit.part.done { background: var(--green-soft); border-color: var(--green); }
-  a.sit.part.done .bar i { background: var(--green); }
-  a.sit.part.done .pc { color: var(--green); }
+  a.sit.done { background: var(--green-soft); border-color: var(--green); }
+  a.sit.done .bar i { background: var(--green); }
+  a.sit.done .pc, a.sit.done .n { color: var(--green); }
   a.sit.part.here { border-color: var(--amber); box-shadow: inset 0 0 0 1px var(--amber); }
+
+  /* A band row is a line of text, so its bar is a short gauge beside the count
+     rather than the full-width one a numbered tile gets. */
+  a.sit.band .bar { flex: 0 0 4.5rem; align-self: center; }
+
+  /* Finished sittings fold away rather than disappearing. A reader who has just
+     finished one wants a glance's worth of proof it landed, and a front door that
+     silently drops rooms is one nobody can check against the directory. */
+  details.fold { margin-top: 12px; }
+  details.fold[hidden] { display: none; }
+  details.fold > summary {
+    cursor: pointer; list-style: none; padding: 8px 2px;
+    font: .82rem/1.4 ui-sans-serif, system-ui, -apple-system, sans-serif;
+    color: var(--green); font-weight: 600;
+  }
+  details.fold > summary::-webkit-details-marker { display: none; }
+  details.fold > summary::before { content: "▸ "; }
+  details.fold[open] > summary::before { content: "▾ "; }
+  details.fold > summary:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
+  details.fold > ul { margin-top: 8px; }
+
+  .empty { color: var(--faint); font-size: .92rem; margin: 0; }
 
   .first, .warn {
     background: var(--amber-soft); border: 1px solid var(--amber);
@@ -391,8 +419,8 @@ const html = `<!doctype html>
     word-break: break-all;
   }
   .warn a { color: inherit; }
-  #carry { display: none; }
   #carry a { color: inherit; font-weight: 600; }
+  [hidden] { display: none !important; }
 
   .stamp {
     margin-top: 3em; padding-top: 1.1em; border-top: 1px solid var(--line);
@@ -411,48 +439,69 @@ const html = `<!doctype html>
 one at a time, and asks whether the box is on the right thing. There is no score and no running
 tally — a reader who can see the score answers the score.</p>
 
-<div class="first" id="carry"><p></p></div>
+<div class="warn" id="rebuilt" hidden><p></p></div>
+
+<div class="first" id="carry"${carryLine ? "" : " hidden"}><p>${carryLine}</p></div>
 
 <h2>Does the machine know which ones it got wrong?</h2>
 
 <p>Every mark carries a number saying how well its box matched the ink underneath. The whole
 plan below rests on that number meaning something: that the marks it was least sure about really
-are the ones most likely to be wrong. ${bandCheck}</p>
+are the ones most likely to be wrong. <span id="bandcheck">${bandCheck}</span></p>
 
-<p>These ${word(bands.length)} sittings check it. Each draws ${word(bands[0]?.shown ?? 0)} marks from a
-different level of confidence. If the barely-accepted ones turn out no worse than the near-perfect
-ones, the number is not telling us where to look, and there is no point following it through the
-sittings below.</p>
+<p>These <span class="bandn">${word(bands.length)}</span> sittings check it. Each draws
+<span id="banddraw">${word(bands[0]?.shown ?? 0)}</span> marks from a different level of confidence.
+If the barely-accepted ones turn out no worse than the near-perfect ones, the number is not telling
+us where to look, and there is no point following it through the sittings below.</p>
 
-<p class="cost">${Word(bands.length)} sittings · ${num(bands[0]?.shown ?? 0)} marks each · ${howLong(bands[0]?.shown ?? 0)} each</p>
+<p class="cost" id="bandcost">${Word(bands.length)} sittings · ${num(bands[0]?.shown ?? 0)} marks each · ${hours(bands[0]?.shown ?? 0)} each</p>
 
-<div class="first"><p><strong>Start with the first one.</strong> It is the least convincing
-band — if anything is wrong anywhere, it is likeliest to be wrong here.</p></div>
+<div class="first" id="bandfirst"${bandRows.left ? "" : " hidden"}><p><strong>Start with the first
+one.</strong> It is the least convincing band — if anything is wrong anywhere, it is likeliest to
+be wrong here.</p></div>
 
-<ul>
-${bandRows}
+<ul id="bands">
+${bandRows.open}
 </ul>
+<p class="empty" id="bands-empty"${bandRows.left ? " hidden" : ""}>All of them have been sat.</p>
+
+<details class="fold" id="bands-fold"${bandRows.gone ? "" : " hidden"}>
+  <summary id="bands-fold-line">${foldLine(bandRows.gone, "check", "checks")}</summary>
+  <ul id="bands-done">
+${bandRows.shut}
+  </ul>
+</details>
 
 <h2>The marks nothing could place</h2>
 
-<p>For <strong>${num(population)} marks</strong> the machine could not find its own ink well enough
-to trust, so it fell back to putting them where the printed line said. These are the ones most
-likely to be visibly wrong, and they are few enough to look at <em>all</em> of them.</p>
+<p>For <strong><span id="population">${num(population)}</span> marks</strong> the machine could not
+find its own ink well enough to trust, so it fell back to putting them where the printed line said.
+These are the ones most likely to be visibly wrong, and they are few enough to look at <em>all</em>
+of them.</p>
 
-<p><strong id="gone">${num(answered)} ${answered === 1 ? "is" : "are"} answered and gone.</strong> What is
-left is <strong id="left">${num(shown)}</strong>, cut into ${word(parts.length)} sittings of about ${per}.
-Every mark appears in exactly one sitting, so finishing all ${word(parts.length)} means every one
-has been seen — not sampled, seen.</p>
+<p><strong id="gone">${num(answered + partsDone)} ${answered + partsDone === 1 ? "is" : "are"} answered and gone.</strong> What is
+left is <strong id="left">${num(shown - partsDone)}</strong>, cut into <span class="partn">${word(parts.length)}</span>
+sittings of about <span id="per">${per}</span>. Every mark appears in exactly one sitting, so
+finishing all <span class="partn">${word(parts.length)}</span> means every one has been seen — not
+sampled, seen.</p>
 
-<p>The ${word(parts.length)} are re-dealt each time answered marks come out, so a part is a fresh
-mix rather than the part of the same number you sat before. Nothing is asked twice and nothing is
-dropped.</p>
+<p>The <span class="partn">${word(parts.length)}</span> are re-dealt each time answered marks come
+out, so a part is a fresh mix rather than the part of the same number you sat before. Nothing is
+asked twice and nothing is dropped.</p>
 
-<p class="cost">${Word(parts.length)} sittings · about ${per} marks each · ${howLong(per)} each</p>
+<p class="cost" id="partcost">${Word(parts.length)} sittings · about ${per} marks each · ${hours(per)} each</p>
 
-<ul class="parts">
-${partRows}
+<ul class="parts" id="parts">
+${partRows.open}
 </ul>
+<p class="empty" id="parts-empty"${partRows.left ? " hidden" : ""}>Every one has been seen.</p>
+
+<details class="fold" id="parts-fold"${partRows.gone ? "" : " hidden"}>
+  <summary id="parts-fold-line">${foldLine(partRows.gone, "sitting", "sittings")}</summary>
+  <ul class="parts" id="parts-done">
+${partRows.shut}
+  </ul>
+</details>
 
 <h2>Which address should I open this at?</h2>
 
@@ -517,7 +566,8 @@ say one thing while the sittings behind the links say another. The bars on the s
 of the Mac each time this page is opened, so they are current to the second while it is
 answering — and frozen at the moment below when it is not. Timings are estimates.</p>
 
-<p class="stamp">built ${esc(stamp)} · deal ${esc(deal?.slice?.split("-").pop() ?? "?")} · ${num(shown)} of ${num(population)} left</p>
+<p class="stamp">built ${esc(stamp)} · deal <span id="stamp-deal">${esc(dealId)}</span> ·
+<span id="stamp-left">${num(shown - partsDone)} of ${num(population)}</span> left</p>
 
 <script>
 /* The one address this is meant to be read at.
@@ -540,71 +590,129 @@ var ALSO = ${JSON.stringify(WHERE.alternates)};
   box.hidden = false;
 })();
 
-/* Which marks each part is holding, so the page can count its own progress. */
-var PARTS = [].slice.call(document.querySelectorAll("a.sit.part")).map(function (el) {
-  return { el: el, n: el.dataset.part, of: Number(el.dataset.of), ids: el.dataset.ids ? el.dataset.ids.split(" ") : [] };
-});
+/* ── The live half ────────────────────────────────────────────────────────
 
-/* Inlined verbatim from lib/answered.mjs — this is that function's own source text,
-   not a restatement of it. The builder is the only thing that could put a second
-   reading of the word "answered" on this page, and it declines to. */
-${standingIds.toString()}
+   Everything above this line is true of the moment the page was written, and a
+   page that could only say that is the mistake this whole file exists to stop:
+   the sittings behind it are rebuilt and finished and re-dealt while it sits
+   there, and it had no way of noticing.
 
-var TOTAL = ${shown};
-var ALREADY = ${answered};
+   So it asks. Two questions, both answered off this machine's disk at the moment
+   they are asked — which sittings exist and what each is asking about, and
+   everything anybody has answered — and then it works the whole page out again
+   from the two. Not a patch over the baked numbers: the same functions that drew
+   the tiles above are run again here on the new listing, so there is no version
+   of this page that is half of one census and half of another.
 
-/* What was standing when this page was built, so the first paint is the same
-   arithmetic as the live one rather than a blank slate that briefly claims no work
-   has been done. Only marks that belong to a part on this page: the rest are
-   answers from earlier deals, already subtracted from the totals above, and
-   counting them again would take the remaining figure below zero. */
-var SEEN = ${JSON.stringify([...new Set(parts.flatMap((p) => p.ids.filter((id) => standing.has(id))))])};
+   Nothing listening is a normal state and not an error. A page opened off the
+   filesystem keeps every number it was built with, which is why they were baked
+   rather than left blank. */
 
-function paint(standing) {
-  var done = 0;
-  var here = null;
-  PARTS.forEach(function (p) {
-    var n = 0;
-    for (var i = 0; i < p.ids.length; i += 1) if (standing.has(p.ids[i])) n += 1;
-    done += n;
-    p.el.querySelector(".bar i").style.width = (p.of ? Math.round((n / p.of) * 100) : 0) + "%";
-    p.el.querySelector(".pc").textContent = n + " of " + p.of;
-    p.el.classList.toggle("done", p.of > 0 && n >= p.of);
-    p.el.classList.remove("here");
-    // Where to carry on: the part somebody is in the middle of. A reader who has
-    // started one wants to finish it before starting another, because a part left
-    // half-done is the only place the re-deal cannot help them.
-    if (!here && p.of > 0 && n > 0 && n < p.of) here = { p: p, n: n };
+/* Inlined verbatim from lib/answered.mjs and lib/sittings-view.mjs — these are
+   those functions' own source text, not a restatement of them. The builder is the
+   only thing that could put a second reading of "answered", or a second idea of
+   what a tile looks like, on this page, and it declines to. */
+${[standingIds, esc, word, Word, num, howLong, census, sizeOf, doneCount, isDone, bandCopy, partTile, bandTile, bandsLine, carryOn].map((f) => f.toString()).join("\n\n")}
+
+/* The editorial half, which is not derived from anything and so is passed in. */
+var BANDS = ${JSON.stringify(BANDS)};
+var SECONDS_PER_MARK = ${SECONDS_PER_MARK};
+var BUILT_DEAL = ${JSON.stringify(dealId)};
+
+var byId = function (id) { return document.getElementById(id); };
+var put = function (id, html) { var el = byId(id); if (el) el.innerHTML = html; };
+var text = function (sel, s) {
+  [].slice.call(document.querySelectorAll(sel)).forEach(function (el) { el.textContent = s; });
+};
+var show = function (id, on) { var el = byId(id); if (el) el.hidden = !on; };
+
+/* One section: the unfinished ones in the list, the finished ones in the fold. */
+function section(list, standing, tile, ids, one, many) {
+  var open = [];
+  var shut = [];
+  list.forEach(function (s) {
+    var n = doneCount(s, standing);
+    (isDone(s, n) ? shut : open).push(tile(s, n));
   });
-  if (!here) {
-    var fresh = PARTS.filter(function (p) { return p.of > 0 && !p.el.classList.contains("done"); })[0];
-    if (fresh) here = { p: fresh, n: 0 };
-  }
-  if (here) {
-    here.p.el.classList.add("here");
-    var carry = document.getElementById("carry");
-    carry.firstElementChild.innerHTML =
-      "<strong>Carry on with sitting " + here.p.n + ".</strong> " +
-      (here.n ? "You are " + here.n + " of " + here.p.of + " through it. " : "Nothing has been answered in it yet. ") +
-      "<a href=\\"" + here.p.el.getAttribute("href") + "\\">Open it</a>.";
-    carry.style.display = "block";
-  }
-  document.getElementById("left").textContent = (TOTAL - done).toLocaleString("en-US");
-  var gone = ALREADY + done;
-  document.getElementById("gone").textContent = gone.toLocaleString("en-US") + (gone === 1 ? " is" : " are") + " answered and gone.";
+  put(ids[0], open.join("\\n"));
+  put(ids[1], shut.join("\\n"));
+  show(ids[2], shut.length > 0);
+  text("#" + ids[3], Word(shut.length) + " finished " + (shut.length === 1 ? one : many));
+  show(ids[4], open.length === 0);
+  return open.length;
 }
 
-paint(new Set(SEEN));
+function draw(sittings, standing) {
+  var c = census(sittings);
 
-/* And then the live figure, if there is anything listening. A page opened off the
-   filesystem, or served by something that only hands out files, keeps the numbers
-   above — which are the ones that were true when it was built. */
+  /* Parts from two different builds. The builder refuses to write a page in this
+     state; a page that has just been handed one says so, because the alternative
+     is adding up two censuses and printing the sum as though it meant something. */
+  if (c.mixed.length) {
+    put("rebuilt", "<p><strong>The sittings on the Mac are half-rebuilt.</strong> Some of the " +
+      "numbered ones come from one deal and some from another, so the counts below cannot be " +
+      "trusted until the rest finish rebuilding. The links all still work.</p>");
+    show("rebuilt", true);
+    return;
+  }
+
+  /* Rebuilt underneath the page. Worth saying out loud rather than just quietly
+     redrawing: a reader who left the tab open overnight comes back to different
+     numbers, and the honest thing is to tell them why. */
+  if (BUILT_DEAL !== "?" && c.dealId !== "?" && c.dealId !== BUILT_DEAL) {
+    put("rebuilt", "<p><strong>The sittings have been re-dealt since this page was drawn.</strong> " +
+      "What you see below is the new set, counted just now. Reload if anything looks odd.</p>");
+    show("rebuilt", true);
+  }
+
+  var bandsLeft = section(c.bands, standing, function (b, n) {
+    var copy = bandCopy(b.band, BANDS);
+    return bandTile(b, n, copy.title, copy.blurb);
+  }, ["bands", "bands-done", "bands-fold", "bands-fold-line", "bands-empty"], "check", "checks");
+  show("bandfirst", bandsLeft > 0);
+  put("bandcheck", bandsLine(c.bands, standing));
+  text(".bandn", word(c.bands.length));
+  var draws = c.bands.length ? sizeOf(c.bands[0]) : 0;
+  text("#banddraw", word(draws));
+  text("#bandcost", Word(c.bands.length) + " sittings · " + num(draws) + " marks each · " + howLong(draws, SECONDS_PER_MARK) + " each");
+
+  section(c.parts, standing, partTile,
+    ["parts", "parts-done", "parts-fold", "parts-fold-line", "parts-empty"], "sitting", "sittings");
+
+  var done = 0;
+  c.parts.forEach(function (p) { done += doneCount(p, standing); });
+  var gone = c.answered + done;
+  text("#population", num(c.population));
+  text("#gone", num(gone) + (gone === 1 ? " is" : " are") + " answered and gone.");
+  text("#left", num(c.shown - done));
+  text(".partn", word(c.parts.length));
+  text("#per", String(c.per));
+  text("#partcost", Word(c.parts.length) + " sittings · about " + c.per + " marks each · " + howLong(c.per, SECONDS_PER_MARK) + " each");
+  text("#stamp-deal", c.dealId);
+  text("#stamp-left", num(c.shown - done) + " of " + num(c.population));
+
+  /* Where to carry on, marked on the tile as well as said in the box, because the
+     two answer the question from opposite directions: one is read, one is aimed at. */
+  var carry = carryOn(c.parts, standing);
+  if (carry) {
+    var el = document.querySelector('a.sit.part[data-part="' + String(carry.sitting.part).split("/")[0] + '"]');
+    if (el) el.classList.add("here");
+    put("carry",
+      "<p><strong>Carry on with sitting " + esc(String(carry.sitting.part).split("/")[0]) + ".</strong> " +
+      (carry.done ? "You are " + carry.done + " of " + carry.of + " through it. " : "Nothing has been answered in it yet. ") +
+      "<a href=\\"" + esc(carry.sitting.name) + "\\">Open it</a>.</p>");
+  }
+  show("carry", !!carry);
+}
+
 (function () {
   var S = window.HIFTH_SESSION;
-  if (!S || !S.answers) return;
-  S.answers("").then(function (got) {
-    if (!got || !got.ok) return;
-    paint(new Set(standingIds((got.banked || []).concat(got.log || []))));
+  if (!S || !S.answers || !S.sittings) return;
+  Promise.all([S.sittings(), S.answers("")]).then(function (got) {
+    var listing = got[0];
+    var answers = got[1];
+    if (!listing || !listing.ok || !answers || !answers.ok) return;
+    draw(listing.sittings || [], new Set(standingIds((answers.banked || []).concat(answers.log || []))));
   }).catch(function () {});
 })();
 </script>

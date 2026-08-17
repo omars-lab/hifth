@@ -41,10 +41,11 @@
  * --answered` drops every mark carrying a standing answer, so the next round is
  * built from what is genuinely left rather than from the whole pool again.
  */
-import { appendFileSync, createReadStream, existsSync, readFileSync, statSync, writeFileSync } from "node:fs";
+import { appendFileSync, createReadStream, existsSync, readFileSync, readdirSync, statSync, writeFileSync } from "node:fs";
 import { createServer } from "node:http";
 import { randomBytes } from "node:crypto";
 import { extname, join, normalize, resolve } from "node:path";
+import { readSitting } from "./lib/sitting-file.mjs";
 import { canonicalAddress } from "./lib/tailnet.mjs";
 
 const arg = (name, fallback) => {
@@ -112,6 +113,9 @@ window.HIFTH_SESSION = {
   },
   answers: function (name) {
     return fetch("/api/answers?t=${TOKEN}&name=" + encodeURIComponent(name)).then(function (r) { return r.json(); });
+  },
+  sittings: function () {
+    return fetch("/api/sittings?t=${TOKEN}").then(function (r) { return r.json(); });
   },
 };
 </script>`;
@@ -199,8 +203,48 @@ function answersFor(name) {
   return { banked, log };
 }
 
+/**
+ * Which sittings are on the disk right now, and what each is asking about.
+ *
+ * The front door used to be a photograph of this. Every tile, every total and
+ * every sentence carrying a number was worked out when the page was generated
+ * and then frozen, so finishing a sitting left it looking exactly as unfinished
+ * as the fifteen beside it, and a re-deal left the page describing a set of
+ * parts that no longer existed. Nothing on the screen could admit either, and
+ * the only cure was somebody remembering to regenerate the page.
+ *
+ * This is the listing that ends that. It walks the directory on each request
+ * rather than caching, for the same reason every other route here reads its file
+ * per request: the parts are rebuilt while this is running, routinely, and a
+ * server holding its own idea of what is on the disk would be the stale thing
+ * instead of the page. Twenty-odd files off a warm disk is not a cost worth
+ * defending against.
+ *
+ * It reads them through `lib/sitting-file.mjs` — the same reading the builder and
+ * the auditor use — so the three cannot come to different conclusions about what
+ * a sitting is. A file that is not a sitting is skipped silently; the output
+ * directory is full of them. A sitting whose card list is torn comes back with
+ * its header and its fault, because the header is what carries the counts, and
+ * listing it with a note is better than a front door that has quietly lost one.
+ */
+function sittingsOnDisk() {
+  const out = [];
+  for (const name of readdirSync(DIR).sort()) {
+    if (!name.startsWith("sit.") || !name.endsWith(".html")) continue;
+    const s = readSitting(join(DIR, name));
+    if (!s) continue;
+    out.push({ name, ids: s.ids, faults: s.faults, ...s.head });
+  }
+  return out;
+}
+
 createServer(async (req, res) => {
   const url = new URL(req.url, `http://${req.headers.host || "x"}`);
+
+  if (req.method === "GET" && url.pathname === "/api/sittings") {
+    if (url.searchParams.get("t") !== TOKEN) return json(res, 403, { ok: false, error: "not this server's page" });
+    return json(res, 200, { ok: true, sittings: sittingsOnDisk() });
+  }
 
   if (req.method === "GET" && url.pathname === "/api/answers") {
     if (url.searchParams.get("t") !== TOKEN) return json(res, 403, { ok: false, error: "not this server's page" });

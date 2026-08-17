@@ -24,6 +24,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { standingIds } from "./lib/answered.mjs";
+import * as view from "./lib/sittings-view.mjs";
 
 const SCRIPT = new URL("./build-sittings-index.mjs", import.meta.url).pathname;
 
@@ -73,8 +74,15 @@ function build(...extra) {
   };
 }
 
-const tiles = (html) => [...html.matchAll(/<span class="pc">([^<]*)<\/span>/g)].map((m) => m[1]);
-const seen = (html) => JSON.parse(/var SEEN = (\[[^\]]*\]);/.exec(html)[1]);
+// Digits, not any text: the page also carries the source of the function that
+// draws these, and its own unfilled template would otherwise count as a tile.
+const tiles = (html) => [...html.matchAll(/<span class="pc">(\d+ of \d+)<\/span>/g)].map((m) => m[1]);
+
+/** The tiles inside one list, by the part number each links to. */
+const listed = (html, id) => {
+  const m = new RegExp(`id="${id}"[^>]*>([\\s\\S]*?)</ul>`).exec(html);
+  return m ? [...m[1].matchAll(/data-part="(\d+)"/g)].map((x) => x[1]) : null;
+};
 
 beforeEach(() => {
   dir = mkdtempSync(join(tmpdir(), "hifth-front-door-"));
@@ -82,20 +90,18 @@ beforeEach(() => {
 afterEach(() => rmSync(dir, { recursive: true, force: true }));
 
 describe("counting out of the sittings rather than out of somebody's memory", () => {
-  it("draws one tile per part, each knowing which marks it holds", () => {
+  it("draws one tile per part", () => {
     deal();
     const r = build();
     expect(r.code).toBe(0);
-    expect([...r.html.matchAll(/data-ids="([^"]*)"/g)].map((m) => m[1])).toEqual(["1:1 1:2", "2:1 2:2", "3:1 3:2"]);
+    expect(listed(r.html, "parts")).toEqual(["1", "2", "3"]);
     expect(tiles(r.html)).toEqual(["0 of 2", "0 of 2", "0 of 2"]);
   });
 
   it("shows how far each part has got, from the answers on disk", () => {
     deal();
     answers(["2:1"]);
-    const r = build();
-    expect(tiles(r.html)).toEqual(["0 of 2", "1 of 2", "0 of 2"]);
-    expect(seen(r.html)).toEqual(["2:1"]);
+    expect(tiles(build().html)).toEqual(["0 of 2", "1 of 2", "0 of 2"]);
   });
 
   // The trap. One log covers every deal there has ever been, so most of what is in
@@ -105,8 +111,8 @@ describe("counting out of the sittings rather than out of somebody's memory", ()
     deal({ already: 4 });
     answers(["9:9", "8:8", "2:1"]);
     const r = build();
-    expect(seen(r.html)).toEqual(["2:1"]);
     expect(tiles(r.html)).toEqual(["0 of 2", "1 of 2", "0 of 2"]);
+    expect(/id="left">(\d+)/.exec(r.html)[1]).toBe("5");
   });
 
   it("takes a retraction back out again", () => {
@@ -115,16 +121,69 @@ describe("counting out of the sittings rather than out of somebody's memory", ()
       join(dir, "mark-answers.jsonl"),
       `${[{ kind: "placement", id: "1:1" }, { kind: "placement", id: "1:2" }, { kind: "retracted", id: "1:2" }].map((e) => JSON.stringify(e)).join("\n")}\n`,
     );
-    const r = build();
-    expect(tiles(r.html)[0]).toBe("1 of 2");
-    expect(seen(r.html)).toEqual(["1:1"]);
+    expect(tiles(build().html)[0]).toBe("1 of 2");
   });
 
   it("opens at nothing done when nobody has answered anything yet", () => {
-    deal();
-    const r = build();
-    expect(seen(r.html)).toEqual([]);
+    const r = (deal(), build());
     expect(r.out).toContain("no answers on disk");
+    expect(tiles(r.html)).toEqual(["0 of 2", "0 of 2", "0 of 2"]);
+  });
+
+  /**
+   * The page used to carry every mark id of every part — twelve bytes a mark and
+   * about fifteen kilobytes of it — because that was the only way it could recount
+   * itself against the server. It asks the server for the listing now, ids and all,
+   * so shipping a second copy would be a stale second copy.
+   */
+  it("no longer ships a copy of which marks are in which part", () => {
+    deal();
+    const html = build().html;
+    expect(html).not.toContain("data-ids");
+    expect(html).not.toContain("1:1");
+  });
+});
+
+/**
+ * The thing the front door could not do, which is why it was a photograph.
+ *
+ * Finishing a sitting is what a reader is there to do, and until this the page had
+ * no way to show it: the tile stayed in the list looking exactly as unfinished as
+ * the ones beside it. Folding rather than deleting is deliberate — a front door
+ * that silently drops rooms cannot be checked against the directory behind it, and
+ * somebody who has just finished number two wants one glance's worth of proof.
+ */
+describe("getting finished sittings out of the way", () => {
+  it("moves a finished part into the fold and leaves the rest in the list", () => {
+    deal();
+    answers(["2:1", "2:2"]);
+    const html = build().html;
+    expect(listed(html, "parts")).toEqual(["1", "3"]);
+    expect(listed(html, "parts-done")).toEqual(["2"]);
+    expect(/<summary id="parts-fold-line">([^<]*)/.exec(html)[1]).toBe("One finished sitting");
+  });
+
+  it("keeps the fold shut away entirely when nothing is finished", () => {
+    deal();
+    const html = build().html;
+    expect(listed(html, "parts-done")).toEqual([]);
+    expect(/<details class="fold" id="parts-fold" hidden>/.test(html)).toBe(true);
+  });
+
+  it("says so in place of an empty grid when every one is finished", () => {
+    deal();
+    answers(["1:1", "1:2", "2:1", "2:2", "3:1", "3:2"]);
+    const html = build().html;
+    expect(listed(html, "parts")).toEqual([]);
+    expect(listed(html, "parts-done")).toEqual(["1", "2", "3"]);
+    expect(html).toContain('id="parts-empty">Every one has been seen.');
+    expect(/id="carry" hidden/.test(html)).toBe(true);
+  });
+
+  it("points at the part somebody is in the middle of", () => {
+    deal();
+    answers(["2:1"]);
+    expect(build().html).toContain("<strong>Carry on with sitting 2.</strong>");
   });
 });
 
@@ -178,6 +237,153 @@ describe("one reading of the word answered, in two runtimes", () => {
     for (const events of cases) {
       expect(copy(events), JSON.stringify(events)).toEqual(standingIds(events));
     }
+  });
+
+  /**
+   * The same discipline, over a much bigger surface.
+   *
+   * The page now redraws itself from a listing this builder never saw, which means
+   * it has to do the counting, the wording and the drawing all over again in a
+   * browser. Every one of those is a place where a paraphrase would look right and
+   * drift — a tile drawn slightly differently after a fetch, a total reached by
+   * arithmetic that rounds the other way — so none of them is paraphrased. What
+   * ships is the source text of the functions in lib/sittings-view.mjs, and this
+   * is what makes that claim checkable rather than merely stated.
+   */
+  it("ships every view function's own source too", () => {
+    deal();
+    const html = build().html;
+    for (const [name, fn] of Object.entries(view)) {
+      expect(html, `the page carries no copy of ${name}`).toContain(fn.toString());
+    }
+  });
+
+  it("asks the serving side for the listing as well as for the answers", () => {
+    deal();
+    const html = build().html;
+    expect(html).toContain("S.sittings()");
+    expect(html).toContain('S.answers("")');
+  });
+});
+
+/**
+ * The half that only ever runs on a phone.
+ *
+ * Everything above tests the page as it is written. What a reader actually looks
+ * at is the page after it has asked the machine what is on the disk *now* and
+ * worked the whole thing out again — and that code had nothing holding it, which
+ * is the sort of gap that shows up as a front door quietly frozen at whatever it
+ * was built with.
+ *
+ * There is no jsdom here and adding one to run twenty lines of DOM writing would
+ * be a poor trade, so the page's own script is pulled out and run against a
+ * document small enough to read: elements that remember what was set on them and
+ * nothing else. That is enough, because what is being checked is which sitting
+ * ends up in which list and what the totals come to, not layout.
+ */
+describe("redrawing itself from a listing it has never seen", () => {
+  const fakeDom = () => {
+    const els = new Map();
+    const get = (id) => {
+      if (!els.has(id)) {
+        els.set(id, { id, innerHTML: "", textContent: "", hidden: false, classList: { add() {}, remove() {}, toggle() {} } });
+      }
+      return els.get(id);
+    };
+    return {
+      els,
+      get,
+      document: {
+        getElementById: get,
+        querySelector: () => null,
+        querySelectorAll: (sel) => (/^[#.]/.test(sel) ? [get(sel.replace(/^#/, ""))] : []),
+      },
+    };
+  };
+
+  /** The page's own script, run with nothing around it but that document. */
+  const load = (html) => {
+    const src = /<script>([\s\S]*?)<\/script>\s*<\/body>/.exec(html)[1];
+    const dom = fakeDom();
+    const run = new Function(
+      "document", "window", "location",
+      `${src}\nreturn { draw: draw };`,
+    )(dom.document, {}, { hostname: "elsewhere", protocol: "http:", port: "", pathname: "/" });
+    return { ...dom, draw: run.draw };
+  };
+
+  /** What the serving side would hand back for a three-part deal. */
+  const listing = () => [1, 2, 3].map((n) => ({
+    name: `sit.part-${n}.html`,
+    part: `${n}/3`,
+    slice: `-p${n}of3-aXX`,
+    pool: 6,
+    population: 6,
+    alreadyAnswered: 0,
+    shown: 2,
+    ids: [`${n}:1`, `${n}:2`],
+  }));
+
+  const partsIn = (el) => [...el.innerHTML.matchAll(/data-part="(\d+)"/g)].map((m) => m[1]);
+
+  it("folds away a sitting finished since the page was built", () => {
+    deal();
+    const page = load(build().html);
+    page.draw(listing(), new Set(["2:1", "2:2"]));
+    expect(partsIn(page.get("parts"))).toEqual(["1", "3"]);
+    expect(partsIn(page.get("parts-done"))).toEqual(["2"]);
+    expect(page.get("parts-fold").hidden).toBe(false);
+    expect(page.get("parts-fold-line").textContent).toBe("One finished sitting");
+  });
+
+  it("brings the totals down as the answers arrive", () => {
+    deal();
+    const page = load(build().html);
+    page.draw(listing(), new Set(["1:1", "2:1", "2:2"]));
+    expect(page.get("left").textContent).toBe("3");
+    expect(page.get("gone").textContent).toBe("3 are answered and gone.");
+    expect(page.get("carry").innerHTML).toContain("Carry on with sitting 1");
+    expect(page.get("carry").innerHTML).toContain("You are 1 of 2 through it");
+  });
+
+  // The listing is the truth about what is on the disk, so a part that has gone
+  // away has to go away here too. Nothing about the baked page can hold it open.
+  it("shows the set that is on the disk now, not the set it was built from", () => {
+    deal();
+    const page = load(build().html);
+    page.draw(listing().slice(0, 2), new Set());
+    expect(partsIn(page.get("parts"))).toEqual(["1", "2"]);
+    expect(page.get("left").textContent).toBe("4");
+  });
+
+  it("says so out loud when the parts have been re-dealt underneath it", () => {
+    deal();
+    const page = load(build().html);
+    page.draw(listing().map((p) => ({ ...p, slice: p.slice.replace("aXX", "aZZ") })), new Set());
+    expect(page.get("rebuilt").hidden).toBe(false);
+    expect(page.get("rebuilt").innerHTML).toContain("re-dealt");
+  });
+
+  // Half a rebuild is the one state where adding two censuses together would give
+  // a number that looks fine and means nothing.
+  it("refuses to add up parts from two different deals", () => {
+    deal();
+    const page = load(build().html);
+    const half = listing();
+    half[2] = { ...half[2], slice: "-p3of3-aZZ" };
+    page.draw(half, new Set());
+    expect(page.get("rebuilt").innerHTML).toContain("half-rebuilt");
+    expect(page.get("left").textContent).toBe("");
+  });
+
+  it("says every one has been seen when the last of them is finished", () => {
+    deal();
+    const page = load(build().html);
+    page.draw(listing(), new Set(["1:1", "1:2", "2:1", "2:2", "3:1", "3:2"]));
+    expect(partsIn(page.get("parts"))).toEqual([]);
+    expect(page.get("parts-empty").hidden).toBe(false);
+    expect(page.get("carry").hidden).toBe(true);
+    expect(page.get("left").textContent).toBe("0");
   });
 });
 
