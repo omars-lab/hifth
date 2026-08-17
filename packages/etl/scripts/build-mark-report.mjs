@@ -67,6 +67,7 @@ import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { correctionFor } from "./lib/registration-grain.mjs";
+import { answeredKey, fingerprint, readAnswered } from "./lib/answered.mjs";
 import { readPageInk, rasterise } from "./lib/ink.mjs";
 import { marksOf } from "./lib/marks.mjs";
 
@@ -136,20 +137,17 @@ if (!rowsPath) {
   process.exit(2);
 }
 
-/**
- * The same guard both other instruments carry. A report is a set of statements
- * about particular rectangles, and the rectangles are a function of the
- * displacements; read against a different measurement, every one of them is about
- * a mark that was never on the screen.
+/*
+ * `fingerprint` is the same guard both other instruments carry. A report is a set
+ * of statements about particular rectangles, and the rectangles are a function of
+ * the displacements; read against a different measurement, every one of them is
+ * about a mark that was never on the screen.
+ *
+ * It and `readAnswered` moved to lib/answered.mjs when the auditor needed to ask
+ * which marks carry a standing answer. Two readings of that word drift, and the
+ * drift is invisible: the builder drops a mark the auditor still counts, both look
+ * right, and the sitting quietly re-asks something already answered.
  */
-function fingerprint(s) {
-  let h = 0x811c9dc5;
-  for (let i = 0; i < s.length; i += 1) {
-    h ^= s.charCodeAt(i);
-    h = Math.imul(h, 0x01000193);
-  }
-  return (h >>> 0).toString(16).padStart(8, "0");
-}
 
 const rowsText = readFileSync(rowsPath, "utf8");
 const parsed = JSON.parse(rowsText);
@@ -201,44 +199,6 @@ if (band) {
   }
 }
 const inBand = (r) => !band || (r.iouBest >= lo && r.iouBest < hi);
-
-/**
- * Which marks already carry an answer somebody is still standing behind.
- *
- * Both shapes reduce to the same list of statements: the running log wraps each one
- * as it arrives, and a handed-over sitting carries them already gathered under
- * `said`. A statement names the mark it is about, and a retraction names the mark it
- * is taking back — so this is a count per mark rather than a set, and a mark whose
- * answers were all withdrawn returns to the pool exactly as if it had never been
- * seen. Anything else would quietly bury the marks a reader found hardest, which are
- * the ones worth the most.
- *
- * A file that cannot be read stops the build. The alternative is a sitting that
- * silently re-asks two hundred questions somebody has already answered, and the
- * reader has no way to tell that from a sitting that was supposed to.
- */
-function readAnswered(paths) {
-  const net = new Map();
-  const bump = (ev) => {
-    if (!ev || !ev.id) return;
-    const d = ev.kind === "retracted" ? -1 : 1;
-    net.set(ev.id, (net.get(ev.id) || 0) + d);
-  };
-  for (const p of paths) {
-    const text = readFileSync(p, "utf8");
-    if (p.endsWith(".jsonl")) {
-      for (const line of text.split("\n")) {
-        if (!line.trim()) continue;
-        const rec = JSON.parse(line);
-        bump(rec.payload || rec);
-      }
-    } else {
-      const doc = JSON.parse(text);
-      for (const ev of Array.isArray(doc) ? doc : doc.said || []) bump(ev);
-    }
-  }
-  return new Set([...net].filter(([, n]) => n > 0).map(([id]) => id));
-}
 
 const answered = answeredPaths.length ? readAnswered(answeredPaths) : new Set();
 const whole = all.filter((r) => SETS[set](r) && inBand(r));
@@ -300,7 +260,7 @@ if (band) slice = `-b${lo}_${hi}${slice}`;
  * that drops marks starts a new sitting rather than continuing the old one. The
  * answers themselves are never at risk — they were banked as they were given.
  */
-if (answered.size) slice += `-a${fingerprint([...answered].sort().join(","))}`;
+slice += answeredKey(answered);
 
 const pick = taken.slice().sort((a, b) => a.page - b.page || a.k - b.k);
 
