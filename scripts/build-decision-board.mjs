@@ -12,6 +12,16 @@
  * and the winner marked. The three that nobody has chosen yet come first,
  * because they are the only ones anybody can still act on.
  *
+ * IT ALSO CARRIES THE SHELF. The last section is docs/artifacts.json — every
+ * page this project has published to the web, which turned out to be nine when
+ * the tree knew about five. Four of them were built in a scratch directory,
+ * published, and then the directory was cleared, so the address is the only
+ * copy left. Those four lead the section rather than being tucked under it: an
+ * inventory whose worst rows are at the bottom is one nobody scrolls to. The
+ * board is where they belong because four of the nine ARE the decision pages,
+ * and because this page is the one thing that gets sent to somebody who has no
+ * repository — so it should be able to hand them everything else too.
+ *
  * NOTHING HERE IS TYPED TWICE. The question comes from the register, which is
  * the only place it is stored; the answer-in-one-line is the record's own H1,
  * read at build time for the reason decisions.mjs states beside titleOf() — a
@@ -38,6 +48,7 @@ import { ROOT } from "./code-pointers.mjs";
 import { readDecisions, titleOf, splitDoc } from "./decisions.mjs";
 
 const OUT = join(ROOT, "docs/design/decision-board.html");
+const ARTIFACTS = join(ROOT, "docs/artifacts.json");
 
 const esc = (s) =>
   String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
@@ -243,6 +254,56 @@ const card = (r, big) => `
   ${links(r)}
 </article>`;
 
+/* ── The shelf ───────────────────────────────────────────────────────────────
+ * Every page published to the web. Four of the nine belong to a decision and
+ * take their whereabouts from that decision's row rather than repeating it;
+ * one is this page; and four have no copy anywhere at all. Those four sort
+ * first, because they are the only rows on the shelf that anybody has to do
+ * something about.
+ */
+const shelf = JSON.parse(readFileSync(ARTIFACTS, "utf8")).artifacts.map((a) => {
+  const d = a.decision ? byId.get(a.decision) : null;
+  return { ...a, d, kept: Boolean(d?.page ?? a.page), page: a.page ?? d?.page ?? null };
+});
+const loose = shelf.filter((a) => !a.kept);
+const held = shelf.filter((a) => a.kept).sort((x, y) => y.published.localeCompare(x.published));
+
+/* One row on the shelf is this page. Saying "kept here too" of it, and offering
+ * a link to the file the reader already has open, is the kind of small wrongness
+ * that makes somebody distrust the rest of the list. */
+const SELF = OUT.replace(ROOT, "");
+
+const pub = (a) => {
+  const self = a.page === SELF;
+  const bits = [];
+  if (a.d) {
+    bits.push(
+      `<p class="belongs"><span class="al">Drawn for</span>` +
+        `<a href="#d-${esc(a.d.id)}">${esc(a.d.question)}</a></p>`,
+    );
+  }
+  if (a.note) bits.push(`<p class="orphan-note">${esc(a.note)}</p>`);
+  const out = [`<a class="go" href="${esc(a.url)}">${self ? "The published copy" : "Open the page"}</a>`];
+  if (a.page && !self) out.push(`<a href="../../${esc(a.page)}">the same page, kept here</a>`);
+  bits.push(`<p class="links">${out.join('<span class="sep">·</span>')}</p>`);
+  return `
+<article class="card pub${a.kept ? "" : " pub-loose"}">
+  <div class="card-top">
+    ${
+      self
+        ? `<span class="pill pill-living">You are reading it</span>`
+        : a.kept
+          ? `<span class="pill">Kept here too</span>`
+          : `<span class="pill pill-open">No copy — the link is all there is</span>`
+    }
+    <span class="weight">${longDate(a.published)}</span>
+  </div>
+  <h3><a class="pub-title" href="${esc(a.url)}">${esc(a.title)}</a></h3>
+  <p class="shows">${esc(a.shows)}</p>
+  ${bits.join("")}
+</article>`;
+};
+
 /* ── The page ─────────────────────────────────────────────────────────────── */
 
 const counts = { open: open.length, settled: settled.length, living: living.length };
@@ -441,6 +502,20 @@ h2 .n {
 .links .sep { color: var(--rule); margin: 0 0.5rem; }
 .go { font-weight: 600; }
 
+/* The shelf. A page with no copy anywhere gets the same terracotta the open
+   questions get, because it is the same kind of fact: something here needs a
+   person, and nothing will happen on its own. */
+.pub h3 { margin-bottom: 0.5rem; }
+.pub-title { text-decoration: none; }
+.pub-title:hover { text-decoration: underline; }
+.pub-loose { border-color: var(--terra); }
+.shows { font-size: 0.97rem; color: var(--soft); margin: 0 0 0.9rem; }
+.belongs { font-size: 0.92rem; margin: 0 0 0.9rem; }
+.orphan-note {
+  font-size: 0.9rem; color: var(--soft); margin: 0 0 0.9rem;
+  padding: 0.6rem 0.8rem; border-radius: 3px; background: var(--terra-soft);
+}
+
 .note {
   margin-top: 4.6rem; padding-top: 1.5rem; border-top: 1px solid var(--rule);
   font-size: 0.9rem; color: var(--faint); max-width: 46rem;
@@ -459,7 +534,9 @@ h2 .n {
   <p class="stand">Every question this project has had to answer, on one page: the ones that
   are settled, the ones nobody has chosen yet, and the lines between them that mean two
   answers have to agree. Each card carries the question in plain words, the options as they
-  were actually put, and a way through to the drawing and to the reasons.</p>
+  were actually put, and a way through to the drawing and to the reasons. The last section is
+  the shelf: every page this project has published for somebody to look at, including the ones
+  that are not attached to any decision at all.</p>
 
   <ul class="tally">
     <li class="open"><span class="fig">${counts.open}</span><span class="lab">still open</span></li>
@@ -467,6 +544,7 @@ h2 .n {
     <li><span class="fig">${counts.living}</span><span class="lab">never finished</span></li>
     <li><span class="fig">${arcs.length}</span><span class="lab">constraints, across ${linked} of them</span></li>
     <li><span class="fig">${(totalWords / 1000).toFixed(1)}k</span><span class="lab">words of reasons behind it</span></li>
+    <li class="${loose.length ? "open" : ""}"><span class="fig">${shelf.length}</span><span class="lab">pages published${loose.length ? `, ${loose.length} with no copy` : ""}</span></li>
   </ul>
 
   ${spine}
@@ -505,10 +583,28 @@ h2 .n {
   <div class="deck deck-tight">${settled.map((r) => card(r, false)).join("")}</div>
 </section>
 
+<section>
+  <div class="col">
+    <h2><span class="n">The shelf</span>What has been published, and can anybody still see it?</h2>
+    <p>Every page this project has put on the web, in one place. Of the ${shelf.length},
+    ${shelf.filter((a) => a.d).length} are the drawings the decisions above were made from; the
+    rest were made to settle something in the moment — a diagnosis, a comparison, a finding, a
+    plan — and were never attached to anything.</p>
+    <p>And ${loose.length} of them exist nowhere but at the address on the card. They were drawn
+    in a working folder, published, talked about, and the folder was later emptied. Nobody chose
+    that; it is what happens when the last step of publishing something is remembering to. They
+    come first here for the same reason the open questions do — they are the rows that need a
+    person.</p>
+  </div>
+  <div class="deck deck-tight">${loose.map(pub).join("")}</div>
+  <div class="deck deck-tight">${held.map(pub).join("")}</div>
+</section>
+
 <p class="note">Drawn from this project's decision register on every build. The questions, the
 options, the dates, the arcs and the counts are all read from it — nothing on this page is
 typed a second time, so if it ever disagrees with the register, the register is right and this
-page has not been rebuilt. Rebuild with <code>node scripts/build-decision-board.mjs</code>.</p>
+page has not been rebuilt. The shelf is read the same way from its own register. Rebuild with
+<code>node scripts/build-decision-board.mjs</code>.</p>
 </div>
 `;
 
@@ -516,5 +612,6 @@ writeFileSync(OUT, html);
 console.log(
   `${OUT.replace(ROOT, "")}  ${(html.length / 1024).toFixed(0)} KB — ` +
     `${rows.length} decisions (${counts.open} open, ${counts.settled} decided, ${counts.living} living), ` +
-    `${arcs.length} constraints across ${linked}, ${totalWords.toLocaleString("en")} words of reasons`,
+    `${arcs.length} constraints across ${linked}, ${totalWords.toLocaleString("en")} words of reasons, ` +
+    `${shelf.length} published pages (${loose.length} with no copy anywhere)`,
 );

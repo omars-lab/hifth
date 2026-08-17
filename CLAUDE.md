@@ -89,5 +89,21 @@ Same rule in each: they index, they do not restate.
 | `docs/use-cases.json` | who uses this, and what proves it? | `make use-cases` |
 | `docs/decisions.json` | what did we decide, and why? | `make decisions` · the `decide` skill |
 | `docs/validation/ledger.json` | what can only a human check? | `make validate` |
+| `docs/artifacts.json` | what have we published, and can anyone still see it? | `pnpm artifacts` |
 
 `docs/map.json` and every other JSON register is **hand-edited, never generated**.
+
+### The one register no gate can check
+
+Publishing a page mints its address on somebody else's host, and nothing writes that address
+back here. The only record that a publish happened at all is the session log it happened in,
+which lives outside this repository on one laptop — so `pnpm artifacts` can only run where the
+evidence is, and a gate would pass in CI by being unable to look. It is not called one for that
+reason. A hook runs it the moment a page is published and says what is missing, which is the
+only point at which the page, its subject and the reason for it are all still in hand.
+
+This was written after counting. Nine pages had gone out and the tree named five; the other
+four had been drawn in a scratch directory that was later emptied, so a diagnosis, a comparison
+carrying a recommendation, a plan and a finding now exist only as links. That is the failure
+the decision gate already refuses — *a link with no copy dies the day the host does* — reaching
+a page nobody had thought to attach to a decision.
