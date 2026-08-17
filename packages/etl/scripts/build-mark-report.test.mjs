@@ -497,32 +497,41 @@ describe.skipIf(!haveCorpus)("the trap the page is built in", () => {
 });
 
 /**
- * Moving on from the keyboard, and the three things it must not swallow.
+ * Two letters — move on, and say the print is odd without being able to say how —
+ * and the guards that keep them from firing when they are just letters.
  *
- * The risk in a bare letter shortcut is not that it fails to fire — a reader finds
- * that out immediately — it is that it fires while somebody is typing a sentence
+ * The risk in a bare letter shortcut is not that it fails to fire; a reader finds
+ * that out immediately. It is that it fires while somebody is typing a sentence
  * about why a mark is odd, and deals them away from the card they were describing.
  * So the guards are the part worth pinning, not the binding.
  *
- * Only Next is bound, and that is a claim worth holding to: a slip that moves the
- * reader costs a press of Back, and a slip that answers for them costs a wrong row
- * in a transcript whose whole worth is that it can be trusted.
+ * The claim these tests hold is narrower than the one the first of them held. It was
+ * *no key records anything*, which was the wrong line: what makes a binding dangerous
+ * is not recording, it is recording while the card leaves, because then the slip goes
+ * off the screen with the evidence of itself. So the rule pinned here is that no key
+ * both records and moves — the odd-print key stays on the card, lights the button it
+ * pressed, and undoes on a second press.
  */
-describe.skipIf(!haveCorpus)("moving on without reaching for the button", () => {
-  const handler = () => {
-    const { html } = build("--set", "fallback", "--count", "5");
-    const i = html.indexOf('if (e.key !== "n"');
+describe.skipIf(!haveCorpus)("answering and moving on without reaching for a button", () => {
+  const page = () => build("--set", "fallback", "--count", "5").html;
+  const handler = (html) => {
+    const i = html.indexOf('document.addEventListener("keydown"');
     expect(i).toBeGreaterThan(-1);
     return html.slice(i, html.indexOf("});", i));
   };
+  // What it does, with what it says about itself taken out. The comments here name
+  // the very things the assertions below say must not be called, and a test that
+  // cannot tell a mention from a call fails on a paragraph.
+  const code = (s) => s.split("\n").filter((l) => !l.trim().startsWith("//")).join("\n");
 
   it("moves to the next card and nowhere else", () => {
-    expect(handler()).toContain("go(1);");
-    expect(handler()).not.toContain("go(-1)");
+    const h = handler(page());
+    expect(h).toContain("go(1);");
+    expect(h).not.toContain("go(-1)");
   });
 
-  it("keeps out of the note box, where n is a letter somebody is typing", () => {
-    const h = handler();
+  it("keeps out of the note box, where these are letters somebody is typing", () => {
+    const h = handler(page());
     expect(h).toContain('$("ask").open');
     expect(h).toContain('tag === "TEXTAREA"');
     expect(h).toContain('tag === "INPUT"');
@@ -530,25 +539,52 @@ describe.skipIf(!haveCorpus)("moving on without reaching for the button", () => 
   });
 
   it("gives the key up to the browser and does not run away when it is held", () => {
-    const h = handler();
+    const h = handler(page());
     expect(h).toContain("e.repeat");
     expect(h).toContain("e.ctrlKey");
     expect(h).toContain("e.metaKey");
     expect(h).toContain("e.altKey");
   });
 
-  it("binds no verdict to a key, so no slip can answer for the reader", () => {
-    const { html } = build("--set", "fallback", "--count", "5");
-    const keys = html.split("keydown");
-    expect(keys.length - 1).toBe(1);
-    expect(handler()).not.toContain("toggle(");
-    expect(handler()).not.toContain("say(");
+  it("presses the reader's own button rather than writing an answer of its own", () => {
+    const h = code(handler(page()));
+    expect(h).toContain('$("why-" + r[0]).click()');
+    // Not a second path to the transcript. The button is the only one, so a key
+    // cannot answer in a way pressing it never would.
+    expect(h).not.toContain("say(");
+    expect(h).not.toContain("toggle(");
+  });
+
+  it("does not let the card leave on the key that records", () => {
+    const h = code(handler(page()));
+    const loop = h.slice(h.indexOf("for (const r of REASONS)"));
+    expect(loop.length).toBeGreaterThan(0);
+    expect(loop).not.toContain("go(");
+    // And it opens what it just wrote into, or the press looks like it missed.
+    expect(loop).toContain("oddOpen = true");
+  });
+
+  it("keeps every letter in one place, so nothing can bind a second one quietly", () => {
+    expect(page().split("keydown").length - 1).toBe(1);
+  });
+
+  it("gives a key to the vaguest reason only, and prints it on the button", () => {
+    const html = page();
+    const rows = html.slice(html.indexOf("const REASONS = ["), html.indexOf("];", html.indexOf("const REASONS = [")));
+    // A row with a key carries three quoted strings; one without carries two.
+    const keyed = rows.split("\n").filter((l) => (l.match(/"/g) || []).length === 6);
+    expect(keyed).toHaveLength(1);
+    expect(keyed[0]).toContain('"unsure"');
+    expect(keyed[0]).toContain('"o"');
+    expect(html).toContain('r[2] ? "<kbd>" + r[2] + "</kbd>" : ""');
   });
 
   it("says which key, where there is a keyboard to press it on", () => {
-    const { html } = build("--set", "fallback", "--count", "5");
+    const html = page();
     expect(html).toContain("<kbd>n</kbd>");
     expect(html).toContain("@media (pointer: fine)");
+    // Not scoped to the button strip any more, or the chip's own key would not show.
+    expect(html).not.toContain(".dock kbd");
   });
 });
 

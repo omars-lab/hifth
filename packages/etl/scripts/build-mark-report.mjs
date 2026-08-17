@@ -653,12 +653,13 @@ main { max-width: 40rem; margin: 0 auto;
   padding: .5rem 1rem calc(.5rem + env(safe-area-inset-bottom)); }
 .dock .acts.one, .dock .nav { max-width: 38rem; margin: 0 auto; }
 .dock .nav { margin-top: .5rem; }
-/* The key that does the same thing as this button, shown only where there is a
-   keyboard to press it on. A phone has no n to offer and the hint would be a lie
-   taking up room in the one strip that cannot spare any. */
-.dock kbd { display: none; }
+/* The key that does the same thing as the button it sits on, shown only where there
+   is a keyboard to press it on. A phone has no letters to offer and the hint would
+   be a lie taking up room the button strip cannot spare. Not scoped to one part of
+   the page: wherever a control grows a key, the key is written on it the same way. */
+kbd { display: none; }
 @media (pointer: fine) {
-  .dock kbd { display: inline; margin-left: .4rem; font: inherit; font-size: .8em;
+  kbd { display: inline; margin-left: .4rem; font: inherit; font-size: .8em;
     opacity: .65; border: 1px solid currentColor; border-radius: 4px; padding: 0 .3em; }
 }
 h1 { font-size: 1.1rem; margin: 0 0 .25rem; }
@@ -1062,6 +1063,13 @@ let padOpen = false;
  *
  * The first element is the key the transcript groups by, and it must not be edited
  * once answers exist against it; the second is what the reader reads, and can be.
+ *
+ * The third, where there is one, is a letter on the keyboard that does the same
+ * thing as pressing the button. Only the vaguest of the six has one, and that is
+ * the point: "something here is odd and I cannot say what" is the answer a reader
+ * reaches for while their eye is still on the page, and it is the one they would
+ * otherwise skip rather than go hunting for a button two rows down. The five that
+ * say something specific are worth the deliberate press it takes to find them.
  */
 const REASONS = [
   ["unfamiliar", "A mark I do not recognise"],
@@ -1069,7 +1077,7 @@ const REASONS = [
   ["malformed", "The shape itself looks wrong"],
   ["stray", "Ink that should not be there"],
   ["missing", "The mark is missing here"],
-  ["unsure", "Odd — I cannot say how"],
+  ["unsure", "Odd — I cannot say how", "o"],
 ];
 
 const $ = (id) => document.getElementById(id);
@@ -2055,7 +2063,8 @@ $("print").onclick = function () {
   render();
 };
 $("chips").innerHTML = REASONS.map(function (r) {
-  return '<button id="why-' + r[0] + '" aria-pressed="false">' + r[1] + '</button>';
+  const key = r[2] ? "<kbd>" + r[2] + "</kbd>" : "";
+  return '<button id="why-' + r[0] + '" aria-pressed="false">' + r[1] + key + "</button>";
 }).join("") + '<button id="why-other">In my own words…</button>';
 for (const r of REASONS) {
   $("why-" + r[0]).onclick = function () { toggle("print-defect", { why: r[0], note: r[1] }); };
@@ -2138,37 +2147,70 @@ $("next").onclick = function () { go(1); };
 $("prev").onclick = function () { go(-1); };
 
 /**
- * Pressing n moves on.
+ * Two letters: n moves on, o says the print is odd in a way the reader cannot name.
  *
  * Every other control here is a thumb-sized target, because most of this sitting
- * happens on a phone. This one is for the other half of it. At a desk the reader
- * taps the ink the rectangle should have been drawn around — which banks the answer
- * where it is tapped, nothing is owed after it — and then the only thing left is to
- * leave, and reaching across to a button in the bottom corner is the slowest part of
- * a card that otherwise took one gesture.
+ * happens on a phone. These are for the other half of it. At a desk the reader taps
+ * the ink the rectangle should have been drawn around — which banks the answer where
+ * it is tapped, nothing is owed after it — and then the only thing left is to leave,
+ * and reaching across to a button in the bottom corner is the slowest part of a card
+ * that otherwise took one gesture. The odd-print answer is worse than slow: it is two
+ * presses and a row that has to be opened before the answer it holds can be seen.
  *
- * Only Next, on purpose. The keys that would obviously pair with it each carry a
- * risk this one does not: a mistyped letter that affirms a mark, or withdraws one,
- * puts a wrong answer in the transcript with nothing on screen to show it happened,
- * and this instrument's whole worth is that its transcript is trustworthy. Arriving
- * somewhere banks nothing and withdraws nothing, and Back is still there, so this is
- * the one action a slip cannot cost anything.
+ * When n was added, the note here said only Next would ever get a key, because a
+ * mistyped letter that records something puts a wrong answer in a transcript whose
+ * whole worth is that it can be trusted. That was the wrong line to have drawn, and
+ * the right one is a card's width to the left of it: what makes an answer dangerous
+ * to bind is not that it records, it is that **the card can leave while it records**.
+ * Affirming moves on, so a slip takes its own evidence off the screen with it and the
+ * reader is already looking at the next mark. Pressing o moves nothing. The reasons
+ * row opens, two buttons light up, and a line appears in the list under the card with
+ * "take it back" beside it — and the same letter withdraws it, because it is the same
+ * toggle the button is. A slip announces itself and costs one more press.
  *
- * Three things it must not fight: the note box, where n is just a letter; the step
- * slider and any other focused control, where a key press means something already;
- * and the browser's own shortcuts, which is why any modifier gives it up. Held keys
- * are ignored too — leaning on n should not deal the reader through nine cards.
+ * So the rule these two share is that neither leaves anything hidden: n banks nothing
+ * and Back is beside it, o banks something and shows it. A key that both records and
+ * walks away is still not on this page, and the affirm button is why.
+ *
+ * Three things they must not fight: the note box, where they are just letters; the
+ * step slider and any other focused control, where a key press already means
+ * something; and the browser's own shortcuts, which is why any modifier gives the key
+ * up. Held keys are ignored too — leaning on n should not deal the reader through
+ * nine cards, and leaning on o should not say a thing and unsay it forty times.
  */
 document.addEventListener("keydown", function (e) {
-  if (e.key !== "n" && e.key !== "N") return;
   if (e.repeat || e.ctrlKey || e.metaKey || e.altKey) return;
   if ($("ask").open) return;
   const t = e.target;
   const tag = t && t.tagName;
   if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") return;
   if (t && t.isContentEditable) return;
-  e.preventDefault();
-  go(1);
+  const k = String(e.key).toLowerCase();
+  if (k === "n") {
+    e.preventDefault();
+    go(1);
+    return;
+  }
+  // Driven off the reasons themselves rather than spelled out here, so a letter and
+  // the button it belongs to cannot drift apart: the chip prints whatever key its own
+  // row carries, and this presses whatever button that row built.
+  for (const r of REASONS) {
+    if (r[2] === k) {
+      e.preventDefault();
+      // Opened first, then pressed. The press renders by itself and this way it is
+      // the only render — but the row has to be open by then either way, or a reader
+      // who pressed a key and saw nothing move has been told their press did not
+      // land. It stays open when the press was a second one that took the answer
+      // back, which is the whole reason to open it: the chip going dark is the only
+      // thing on screen that says so.
+      oddOpen = true;
+      // Through the button, not through toggle() directly. It is the same answer
+      // either way, and going the long way round means a key can never take a path
+      // the button does not — including whatever the button grows later.
+      $("why-" + r[0]).click();
+      return;
+    }
+  }
 });
 $("ledeSwap").onclick = function () { chose = isBrief() ? "0" : "1"; keepRead(chose); swapLede(); };
 
