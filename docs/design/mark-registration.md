@@ -1944,6 +1944,21 @@ printed ink**, and matched well enough to clear the bar — so whatever the read
 survives a successful match, and cannot be explained by the search having failed. Seventeen
 marks now, on seventeen pages, across two populations that share nothing but the print.
 
+**Fifteen more on 2026-08-17, from a full part of a hundred and six**, which is the first
+number here worth calling a rate: fourteen in every hundred marks looked at, against nine in
+the hundred and sixty sat before it. They are three fathas, two kasras, two hamzas, two
+fathatans, two successive fathatans, a shadda, a successive kasratan, a successive dammatan
+and a kasratan, on fourteen pages between 60 and 593. Thirty-two marks in all now, and the
+spread across the vocabulary has held through every sitting — still no name behaving badly,
+still no page carrying more than two.
+
+That the rate did not fall as the instrument improved is the part worth noticing. Every other
+figure from that sitting moved in the direction the fixes predicted, and this one did not
+move at all. So whatever a reader is seeing when they say *odd* is not something the page was
+doing to them, and the cost of leaving it open is now visible: at fourteen in a hundred, a
+full pass over what is left would set aside something like two hundred and forty marks on the
+grounds that nobody could say what was wrong with them.
+
 ### ⑮ Whether an answer given by pointing is the same evidence as one given by hand · **open**
 
 The sittings held so far measured what correcting a rectangle by hand costs. Of the 160 marks
@@ -2177,6 +2192,29 @@ for what a hand says, and the settler reading pointed and hand-placed answers un
 headings rather than pooling their words. Until then, the word-level counts from any sitting
 worked by pointing are not quoted, and the mark-level rate is.
 
+**A hundred and six more marks on 2026-08-17 said how big the distortion is, and it is not
+fixed.** That sitting worked the marks the correction could not place at all, where the
+rectangle starts far from the ink rather than nearly on it, and the artefact all but vanished:
+one mark in a hundred and six was filed as in the wrong place while moving less than a
+twentieth of a unit, and seven in a hundred and four were filed the wrong size while their
+size changed by less than that — against four in thirty for each of those in the bands. Two
+marks came back saying *moved* and not *wrong size*, which are the first anywhere to carry one
+word without the other and which retire the word *forever* above.
+
+So the size of the distortion is a property of **how close the rectangle already was**, not of
+the gesture. Point at ink two units away and both words are earned; point at ink a hundredth
+of a unit away and both words fire on a mark nobody would say was wrong. That sharpens the
+open question rather than closing it — the reader still made one statement and there is still
+no word for it — but it says where the damage is, and it is the opposite of where a reader
+would guess: the sittings whose numbers are least trustworthy are the ones where the
+correction was already working.
+
+Two consequences follow and are worth stating before somebody reads a rate the wrong way. The
+word-level counts from the fallback sittings can be quoted with the caveat attached, and those
+from the band sittings still cannot. And a sitting drawn from marks the correction places well
+cannot be scored on words at all — which is most of the book, and is the population any future
+sitting checking a *good* rule would have to be drawn from.
+
 ### ㉒ Whether the weakest matches go wrong by class rather than at random · **open**
 
 The correction places each mark from its own printed ink and accepts the match when the
@@ -2204,6 +2242,50 @@ on the hamza — which §④ names as the mechanism and does not test.
 What this must **not** do is become a per-class correction fitted to sixty marks. Eleven hamzas
 from two bands are enough to say *look here*; they are not enough to edit the placement of
 326,515 marks.
+
+### ㉓ Whether the marks we cannot place from ink are wrong in one way or in two · **open**
+
+A full part of a hundred and six was sat on 2026-08-17 — every mark in it one the correction
+could not place from its own ink, so the rectangle was inherited from the printed line
+instead. All hundred and six came back faulted, which is what that population is selected to
+produce and says nothing. What it did produce is a split nobody had looked for: **the two
+things a rectangle can get wrong are not going wrong on the same marks.**
+
+Across the whole sitting the reader moved the rectangle a median of 1.479 units and changed
+its size by 0.130 — an order of magnitude apart on a box about 6.3 by 3.4. The rule inherited
+from the line is getting the size very nearly right and the position badly wrong. But sorted
+by the name of the mark, that single sentence turns into three different findings:
+
+- **The single marks are misplaced and correctly sized.** Fatha, kasra, damma, shadda and
+  hamza — seventy-eight of the hundred and six — moved about a unit sideways and barely at all
+  downward, with their size left alone to within a tenth of a unit. Hamza moved least of the
+  five, which is the opposite of what the bands found in ㉒ and is the first evidence that
+  ㉒'s hamza finding belongs to the weak tail of the *placed* population rather than to hamza.
+- **The marks that sit above the letter are misplaced downward too, and by much more.** Sukun,
+  twelve of them, moved 2.280 across and 2.151 down; the two rounded zeros moved 2.079 and
+  3.043; the two maddahs 0.214 and 1.254. Every other class moved downward by less than half a
+  unit. Whatever the printed line is being used for, it carries no information about how high
+  above the letter a mark that is not a vowel sits.
+- **The doubled marks are placed nearly right and drawn far too small.** The ten tanwin and
+  successive marks moved a few tenths at most and were grown by 0.5 to 1.4 units in width and
+  height — the only marks in the sitting whose size changed by more than a fifth of a unit.
+  A doubled mark is two of something, and the box is being drawn for one.
+
+The third of those is the most actionable and the least dependent on the reader's aim: growing
+a box is a statement about extent, which the print itself can be asked about, and it does not
+need anybody's opinion of where the centre is.
+
+**Why this is not yet a fix.** Ten doubled marks and sixteen above-the-letter marks are enough
+to say *look here* and nowhere near enough to edit the placement of anything, which is the same
+line ㉒ draws for the same reason. And a hundred and six marks from one part of sixteen is one
+draw from a shuffle: this could be a property of the population or a property of these pages.
+
+**What would answer it, and none of it needs a reader.** Re-measure size against the ink for
+every doubled mark in the book, which is the whole claim of the third finding and is free.
+Then check whether the marks that sit above the letter have a different vertical relationship
+to the line than the vowels do, over all 326,515 rather than over sixteen. If either holds at
+book scale, the fallback rule needs splitting by what kind of mark it is placing rather than
+tuning; if neither does, this was one part of sixteen telling us about itself.
 
 ## How can someone look at this for themselves?
 
