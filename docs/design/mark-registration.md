@@ -2243,7 +2243,7 @@ What this must **not** do is become a per-class correction fitted to sixty marks
 from two bands are enough to say *look here*; they are not enough to edit the placement of
 326,515 marks.
 
-### ㉓ Whether the marks we cannot place from ink are wrong in one way or in two · **open**
+### ㉓ Whether the marks we cannot place from ink are wrong in one way or in two · **answered**
 
 A full part of a hundred and six was sat on 2026-08-17 — every mark in it one the correction
 could not place from its own ink, so the rectangle was inherited from the printed line
@@ -2286,6 +2286,154 @@ Then check whether the marks that sit above the letter have a different vertical
 to the line than the vowels do, over all 326,515 rather than over sixteen. If either holds at
 book scale, the fallback rule needs splitting by what kind of mark it is placing rather than
 tuning; if neither does, this was one part of sixteen telling us about itself.
+
+**Answered on 2026-08-17, and it was the second thing: this was one part of sixteen telling
+us about itself.** The two position findings are gone; the size finding survives and has moved
+to ㉖. Both halves of the test above were run, and everything above this paragraph is left
+standing on purpose, because the theory was reachable, internally consistent and wrong, and
+the next person to read a sitting will reach for it again.
+
+Fitting the line correction over all 326,515 marks and measuring what it leaves behind, class
+by class, leaves nothing anywhere:
+
+| class | n | residue across | residue down |
+| --- | ---: | ---: | ---: |
+| fatha | 121,277 | 0.011 | 0.013 |
+| sukun | 36,616 | −0.022 | −0.016 |
+| superscript alef | 9,358 | −0.032 | −0.054 |
+| successive fathatan | 2,897 | 0.001 | −0.001 |
+| every class together | 322,011 | 0.004 | 0.002 |
+
+Every class within nine hundredths of a unit of zero, on a box about 6.3 by 3.4. There is no
+per-class offset in this print, and in particular the marks that sit above the letter do not
+have a different vertical relationship to the line — the second finding above is contradicted
+directly, on 36,616 sukun against twelve.
+
+**So where did a pattern that clean come from?** From the selection, which is the general trap
+and is worth naming: **this sitting is drawn from the marks the search refused, so the first
+thing any pattern in it describes is the refusal.** A mark is refused for one of two unrelated
+reasons — the ink was further away than the search was allowed to look, or the search reached
+it and did not like the match — and those two are not evenly spread across the classes. Sorting
+that population by the name of the mark sorts it, mostly, by which of the two refusals it
+suffered. The reader's three groups are three views of the refusal rule, seen from inside it.
+
+That relocation is the useful half of this item: the fault is not in what the rectangle knows
+about each kind of mark, it is in the rule that decides a rectangle cannot be placed at all.
+㉔ and ㉕ are what was found there, and both are fixed.
+
+### ㉔ The search was not allowed to look as far as the marks actually are · **fixed**
+
+Relocated from ㉓ and then measured against the one thing that can settle it: 272 marks a
+person placed by hand.
+
+The search looks three units in each direction for the ink a rectangle should be sitting on,
+and gives up if the best it finds is out at that boundary. **The reader's answers say the
+marks it gives up on are a median of 4.292 units away, and 230 of the 272 are further out than
+three.** The search was being asked to find something it was forbidden to reach. Where it ran
+out of room it was already pointing the right way — on a hundred such marks the direction it
+was straining in agreed with the reader 92 times across and 99 times down — so it knew where
+the answer was and was stopped short of saying so.
+
+Scored against those 272 hand-placed marks, as distance from where the reader put the box:
+
+| what places the box | median | within a unit | within half |
+| --- | ---: | ---: | ---: |
+| the raw rectangle | 4.292 | — | — |
+| the printed line, as we ship it | 1.974 | 31% | 19% |
+| its own ink, searched three units | 1.816 | 40% | 28% |
+| its own ink, searched eight units | 0.099 | 84% | 83% |
+
+**Why the fix is not simply a wider search.** Widening it for every mark keeps 99.82% of them
+accepted, and moves 4.11% of the already-accepted ones — 2,722 marks — by more than two units,
+worst 13.528. A wider window finds a better-scoring match that is the *neighbouring* mark's
+ink, and does it confidently. There is no ground truth on those and there never will be, so
+they cannot be adjudicated, only avoided.
+
+**Closed by escalating instead of widening.** Search three units as before; only where that
+refuses, search again at eight. Marks the ordinary search placed keep their measured
+displacement byte for byte, so the risk to the 99.43% is not small, it is zero by construction
+— checked on 14,398 accepted marks over 28 pages, of which 14,046 came back identical and the
+other 352 were all marks the search had reported *outside* its own boundary, which is ㉕. The
+cost is near nothing, because the wide search runs on the half-percent that failed rather than
+on the book.
+
+One thing that guarantee does **not** cover, and it is worth stating rather than being found
+later. The correction is *fitted* from these measured displacements, so a mark whose
+displacement was previously pinned at the boundary was contributing a truncated number to the
+fit and now contributes a true one. That moves the fit, and therefore moves where every mark
+on that printed line is drawn — by very little, since the correction is a median over roughly
+thirty-six marks a line and this changes well under one in a hundred of them, but not by
+nothing. The bit-for-bit claim is about what the search measured. What the reader finally sees
+is that measurement plus a fit, and the fit got better inputs.
+
+**What recomputing the corpus costs, and it is not nothing.** The two rulings a person has
+already given are stamped with a fingerprint of the displacements they were given against, and
+the scorer refuses to read a ruling against a different set — correctly, because a verdict about
+where a box should go means nothing if the box has moved underneath it. Replacing the
+displacements changes that fingerprint. The old file is kept here under its own fingerprint so
+those two rulings stay scorable on this laptop, but the file is far too large to commit and
+never was committed, so on any other machine the only way back to those bytes is to check out
+the code as it stood before this fix and re-run the sweep, which is an hour and a half. The
+answers themselves are safe either way: what a person said about a mark is stored against the
+mark, not against the measurement, so a new deal inherits every answer already banked.
+
+It still refuses honestly, which is the point of keeping it: on those pages 1,227 marks are
+refused by the first look, 1,124 are placed by the second, and the 103 left over match at a
+median of 0.894 against the 0.909 a good match scores — they are marks whose ink is genuinely
+eight or more units from where the rectangle claims to be, not marks the rule has quietly
+started accepting. The refusals stay the population worth a person's hour.
+
+*Closed by `packages/etl/scripts/lib/mark-ink.test.mjs` — six assertions that a wider answer is
+taken only where the first look refused, only when the wider look does not itself refuse, and
+only when it matches better, and that a mark the first look placed is returned unchanged.*
+
+### ㉕ The search could report an answer it had never checked · **fixed**
+
+Found while fixing ㉔, and it is older and quieter than ㉔ is.
+
+The search runs in two passes: a coarse sweep of the whole allowed region, then a fine sweep
+around whatever the coarse one liked. The fine sweep was not bounded by the region — so when
+the coarse winner sat on the boundary, the refinement was free to step a quarter unit past it,
+and the answer that came back was one the search had never scored the surroundings of. It
+could not have known it was the best, because it never looked further out.
+
+The damage is not the quarter unit. It is that **the only way anything downstream can tell a
+mark ran out of room is that its offset came back sitting exactly on the boundary** — so every
+mark that slipped past became invisible as a refusal. In the shipped corpus that is 2,252
+marks, of which **1,923 were being accepted and shipped as placed from their own ink**, at a
+median match of 0.859 against the 0.909 a good match scores. Nearly three times the size of
+the edge population we were counting, and all of it counted on the wrong side.
+
+*Closed by clamping the fine sweep to the region, so an offset on the boundary means what
+everything downstream reads it as meaning, and by the same test file: four cases asserting the
+answer never exceeds the distance given, at four different distances, plus one asserting it
+lands on the boundary exactly when the ink is out of reach.*
+
+### ㉖ The doubled marks are drawn too small, and no amount of moving them will help · **confirmed**
+
+The one finding of ㉓ that survived the corpus, and it survived because it is not about
+position at all. Carried out of ㉓ so that the refuted part and the confirmed part stop
+travelling together.
+
+A doubled mark is two of something, and the rectangle is being drawn for one. That shows up
+as a mark that is refused far more often than any other and matches worse even when accepted:
+they are refused at 2.42% against a base rate of 0.45 to 0.54%, and where they are accepted
+they match at 0.889 against 0.909. Where they are refused they match at 0.457 — half of what
+a good match scores, and a number no rectangle in the right place can produce.
+
+**It is a size fault, and the evidence that it is one is that distance was never the problem.**
+These marks need 2.14 units of movement, against 4.292 for the refused population as a whole,
+and only 17% of them ever reach the search boundary. ㉔'s escalation recovers most of the
+book and recovers only 45% of these, exactly as it should: a rectangle too small to contain
+its mark caps the overlap below the floor wherever you put it, so a fix that only moves things
+cannot reach it.
+
+**What would answer it, and it does not need a reader.** Measure the extent of the ink under
+every doubled mark in the book against the width and height we draw, which the print can be
+asked about directly. If the shortfall is a consistent multiple, the box for a doubled mark is
+being computed from one component of it and the repair is arithmetic; if it varies, the extent
+has to be measured per mark. Either way this is a change to what the rectangle *is*, not to
+where it goes, and it belongs in a different part of the pipeline from ㉔.
 
 ## How can someone look at this for themselves?
 
