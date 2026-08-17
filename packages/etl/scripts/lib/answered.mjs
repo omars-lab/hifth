@@ -38,7 +38,7 @@ export function fingerprint(s) {
 }
 
 /**
- * Every mark with a standing answer across the given logs and hand-overs.
+ * The rule itself: which marks a pile of statements leaves standing.
  *
  * A statement names the mark it is about, and a retraction names the mark it is
  * taking back — so this counts per mark rather than collecting, and a mark whose
@@ -46,32 +46,49 @@ export function fingerprint(s) {
  * seen. Anything else would quietly bury the marks a reader found hardest, which are
  * the ones worth the most.
  *
+ * It is separated from the file reading above it for one reason, and the reason is
+ * the same one this module exists for. The front door has to answer this question in
+ * a **browser**, about answers it fetched from the serving side rather than read off
+ * a disk, and a browser cannot import this file. The choice was between restating
+ * three lines of arithmetic in a generated page — where it would drift, silently,
+ * and disagree with the builder about how much work is left — and shipping this
+ * function's own source into the page. So this one is written closed over nothing,
+ * and the front door inlines its text. Two runtimes, one reading, checked by a test
+ * that runs the inlined copy against this one.
+ */
+export function standingIds(events) {
+  const net = new Map();
+  for (const ev of events) {
+    if (!ev || !ev.id) continue;
+    net.set(ev.id, (net.get(ev.id) || 0) + (ev.kind === "retracted" ? -1 : 1));
+  }
+  return [...net].filter((e) => e[1] > 0).map((e) => e[0]);
+}
+
+/**
+ * Every mark with a standing answer across the given logs and hand-overs.
+ *
  * A file that cannot be read throws rather than being skipped. The alternative is a
  * sitting that silently re-asks two hundred questions somebody has already answered,
  * and neither the reader nor the auditor can tell that from a sitting that was
  * supposed to.
  */
 export function readAnswered(paths) {
-  const net = new Map();
-  const bump = (ev) => {
-    if (!ev || !ev.id) return;
-    const d = ev.kind === "retracted" ? -1 : 1;
-    net.set(ev.id, (net.get(ev.id) || 0) + d);
-  };
+  const events = [];
   for (const p of paths) {
     const text = readFileSync(p, "utf8");
     if (p.endsWith(".jsonl")) {
       for (const line of text.split("\n")) {
         if (!line.trim()) continue;
         const rec = JSON.parse(line);
-        bump(rec.payload || rec);
+        events.push(rec.payload || rec);
       }
     } else {
       const doc = JSON.parse(text);
-      for (const ev of Array.isArray(doc) ? doc : doc.said || []) bump(ev);
+      for (const ev of Array.isArray(doc) ? doc : doc.said || []) events.push(ev);
     }
   }
-  return new Set([...net].filter(([, n]) => n > 0).map(([id]) => id));
+  return new Set(standingIds(events));
 }
 
 /**

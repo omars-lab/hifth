@@ -45,14 +45,33 @@ import { appendFileSync, createReadStream, existsSync, readFileSync, statSync, w
 import { createServer } from "node:http";
 import { randomBytes } from "node:crypto";
 import { extname, join, normalize, resolve } from "node:path";
+import { canonicalAddress } from "./lib/tailnet.mjs";
 
 const arg = (name, fallback) => {
   const i = process.argv.indexOf(name);
   return i >= 0 && process.argv[i + 1] ? process.argv[i + 1] : fallback;
 };
 
+/**
+ * Where the reader actually is, which is not this machine.
+ *
+ * The default was the loopback address, and the loopback address is reachable from
+ * exactly one device: this one. Every sitting so far has therefore been started by
+ * somebody remembering to pass a flag, and the flag they remembered was not written
+ * down anywhere — not in the skill that runs the sittings, not in a script, not in
+ * the Makefile. So the arrangement this project chose deliberately worked only for
+ * whoever already knew the incantation.
+ *
+ * It now binds the private network by default, and only that: not every interface.
+ * The coffee shop's wifi is an interface too, and a sitting is a maintainer's
+ * instrument with a write endpoint on it. If the private network is not up there is
+ * nothing to bind and it falls back to loopback, which is the honest failure — the
+ * phone cannot reach this machine, and pretending otherwise by listening on the LAN
+ * would be answering a different question.
+ */
 const DIR = resolve(arg("--dir", new URL("../out", import.meta.url).pathname));
-const HOST = arg("--host", "127.0.0.1");
+const WHERE = canonicalAddress();
+const HOST = arg("--host", WHERE.ip ?? "127.0.0.1");
 const PORT = Number(arg("--port", 4180));
 const LOG = join(DIR, arg("--log", "mark-answers.jsonl"));
 
@@ -241,7 +260,24 @@ createServer(async (req, res) => {
   res.writeHead(200, { "content-type": type, "cache-control": "no-store" });
   res.end(withSink || html);
 }).listen(PORT, HOST, () => {
+  // One address, printed once, with the others named as things not to use. The
+  // banner used to print whatever was bound, which meant it printed the loopback
+  // address on the machine nobody sits at. What a person needs from this is the
+  // line they type into a phone, and there has to be exactly one of them or the
+  // browser store quietly splits in two.
+  const shown = HOST === WHERE.ip ? WHERE.host : HOST;
   console.log(`serving ${DIR}`);
-  console.log(`  http://${HOST}:${PORT}/index.html`);
+  console.log("");
+  console.log(`  open this, and only this:   http://${shown}:${PORT}/`);
+  console.log("");
+  if (WHERE.onPrivateNetwork) {
+    console.log(`  Any other spelling of this machine is a different place as far as a browser`);
+    console.log(`  is concerned, and a sitting opened at one cannot see what was answered at`);
+    console.log(`  the other. Not ${WHERE.alternates.join(", not ")}.`);
+  } else {
+    console.log(`  The private network is not up, so nothing but this machine can reach this.`);
+    console.log(`  Start it and run this again to get an address a phone can open.`);
+  }
+  console.log("");
   console.log(`  answers append to ${LOG}`);
 });

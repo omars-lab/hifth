@@ -41,6 +41,7 @@ import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { answeredKey, fingerprint, readAnswered } from "./lib/answered.mjs";
+import { readSitting } from "./lib/sitting-file.mjs";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const ETL = join(HERE, "..");
@@ -86,42 +87,21 @@ const answered = answeredPaths.length ? readAnswered(answeredPaths) : new Set();
 const wantKey = answeredKey(answered);
 
 /**
- * Read a built sitting back.
+ * Read the built sittings back.
  *
- * It is an HTML file with two JSON literals in it, which is not a format — but it is
- * the format, because the whole point of the instrument is that a part is one file a
- * reader can open from anywhere with nothing installed. Parsing it back is the price
- * of that, and it is cheap: both literals are emitted by `JSON.stringify` on one line.
+ * The reading itself is in lib/sitting-file.mjs, shared with the front door, for the
+ * reason given there: two readers of the same two literals disagree eventually, and
+ * the disagreement is a part one of them cannot see. It hands faults back rather than
+ * printing them, so they land in this run's problem list and fail the audit.
  */
-function readSitting(file) {
-  const text = readFileSync(file, "utf8");
-  const head = /^const HEAD = (\{.*\});$/m.exec(text);
-  if (!head) return null;
-  let parsed;
-  try {
-    parsed = JSON.parse(head[1]);
-  } catch {
-    return null;
-  }
-  if (parsed.built !== "mark-report") return null;
-  const cards = /^const CARDS = (\[.*\]);$/m.exec(text);
-  let ids = [];
-  if (cards) {
-    try {
-      ids = JSON.parse(cards[1]).map((c) => c.id);
-    } catch {
-      problems.push(`${file.replace(`${ETL}/`, "")}: the card list does not parse, so the marks it asks about cannot be checked`);
-    }
-  } else {
-    problems.push(`${file.replace(`${ETL}/`, "")}: no card list found, so the marks it asks about cannot be checked`);
-  }
-  return { file, head: parsed, ids };
-}
-
 const sittings = readdirSync(dir)
   .filter((n) => n.endsWith(".html"))
   .map((n) => readSitting(join(dir, n)))
   .filter(Boolean);
+
+for (const s of sittings) {
+  for (const fault of s.faults) problems.push(`${s.file.replace(`${ETL}/`, "")}: ${fault}`);
+}
 
 if (!sittings.length) {
   console.error(`audit:sittings — FAIL: no built sittings in ${dir.replace(`${ETL}/`, "")}.`);

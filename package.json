@@ -65,6 +65,8 @@
     "report:marks": "node packages/etl/scripts/build-mark-report.mjs",
     "report:score": "node packages/etl/scripts/score-mark-report.mjs",
     "report:settle": "node packages/etl/scripts/settle-mark-report.mjs",
+    "sit:index": "node packages/etl/scripts/build-sittings-index.mjs",
+    "sit:serve": "node packages/etl/scripts/serve-sittings.mjs",
     "sample:edges": "node packages/etl/scripts/sample-edges.mjs",
     "guide": "node scripts/build-validation-guide.mjs",
     "session": "node scripts/session.mjs",

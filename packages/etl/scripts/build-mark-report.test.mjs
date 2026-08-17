@@ -941,3 +941,43 @@ describe.skipIf(!haveCorpus)("pointing at the ink the rectangle belongs on", () 
     expect(redraw[1]).toContain("c.picked =");
   });
 });
+
+/**
+ * The gesture the sitting is mostly made of, which a phone was reading as zoom.
+ *
+ * Somebody sitting on a phone reported that pressing the same nudge button twice
+ * magnified the page. That is the browser's double-tap-to-zoom, and it fires on two
+ * taps anywhere near each other in time — the same arrow twice, or two arrows a
+ * centimetre apart, which between them is most of what placing a rectangle consists
+ * of. The cost is not the magnification: it is that the card walks off the screen
+ * mid-answer and the next press lands somewhere the reader did not aim, so the
+ * transcript records a placement nobody made.
+ *
+ * `manipulation` is the ordinary behaviour minus that one gesture. It buys back the
+ * control and costs a gesture that was never available on the print anyway, because
+ * the stage has carried `pan-y` since the drag was wired and `pan-y` already
+ * excludes double-tap zoom. Pinch still works everywhere.
+ */
+describe.skipIf(!haveCorpus)("two taps in a row are two taps, not a zoom", () => {
+  it("declines double-tap zoom for the whole page", () => {
+    const { html } = build("--set", "fallback", "--count", "5");
+    expect(html).toMatch(/body \{[^}]*touch-action: manipulation;/);
+  });
+
+  it("puts it on the page rather than on the buttons", () => {
+    // Two taps on *adjacent* buttons trigger it as readily as two on one button, so
+    // a rule per button would leave the commonest case — left, then up — unfixed.
+    // One declaration, and the test above says where it is.
+    const { html } = build("--set", "fallback", "--count", "5");
+    expect([...html.matchAll(/touch-action: manipulation/g)]).toHaveLength(1);
+  });
+
+  it("leaves the stage's stricter rules to win, as they must", () => {
+    // touch-action is intersected down the ancestor chain rather than inherited, so
+    // the stage keeps its pan-y and its none. If this ever became the only rule on
+    // the page, a drag on the print would start scrolling it instead.
+    const { html } = build("--set", "fallback", "--count", "5");
+    expect(html).toMatch(/svg\.stage \{[^}]*touch-action: pan-y;/);
+    expect(html).toMatch(/svg\.stage\.drawing \{[^}]*touch-action: none;/);
+  });
+});
