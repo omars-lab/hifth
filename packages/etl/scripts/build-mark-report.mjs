@@ -615,8 +615,19 @@ const html = `<!doctype html>
   }
 }
 * { box-sizing: border-box; }
+/* manipulation is auto minus double-tap-to-zoom, and it is on the body rather than
+   on the buttons because the gesture is not a property of one button. A reader
+   nudging a rectangle presses the same arrow twice in a second, or presses two
+   arrows a centimetre apart, and a phone reads either as a double tap and magnifies
+   the page under their thumb — so the card they were placing walks off the screen
+   mid-answer, and the next press lands somewhere they did not aim. Double-tap zoom
+   on the print itself was never available anyway: the stage has carried pan-y since
+   the drag was wired, and pan-y already excludes it. So this costs a gesture nobody
+   could make and buys back the one control a sitting is mostly made of. Pinch still
+   zooms, everywhere, which is the gesture a reader actually uses on the print.
+   The stage's own pan-y and none are more restrictive and keep winning. */
 body { margin: 0; background: var(--field); color: var(--text);
-  font: 16px/1.5 system-ui, -apple-system, sans-serif; }
+  font: 16px/1.5 system-ui, -apple-system, sans-serif; touch-action: manipulation; }
 main { max-width: 40rem; margin: 0 auto;
   padding: 1rem 1rem calc(11rem + env(safe-area-inset-bottom)); }
 /* The two things a reader presses on every card, in the same place on every card.

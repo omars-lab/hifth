@@ -23,7 +23,8 @@
  * Every sitting already carries its own census. `build-mark-report.mjs` writes a
  * HEAD block into each emitted page recording the population it was drawn from,
  * how many marks were already answered and so left out, how many it is showing,
- * and the fingerprint of the deal. This reads those blocks back and adds them up.
+ * and the fingerprint of the deal. This reads those blocks back — through the one
+ * reading in `lib/sitting-file.mjs`, shared with the auditor — and adds them up.
  *
  * So the page cannot disagree with the sittings it links to, because it is built
  * out of them. Rebuild the sittings, rebuild this, and the two move together. If
@@ -34,17 +35,45 @@
  * confidence. Those are editorial — "barely accepted", "where nine marks in ten
  * live" — and belong to whoever is explaining the plan, not to the data.
  *
- * ── The stamp ────────────────────────────────────────────────────────────
+ * ── Why it also asks the serving side, in the browser ─────────────────────
+ *
+ * Everything above is true at the moment of the build, and a rebuild drops every
+ * answered mark — so at the moment of the build every part is untouched and each
+ * one's progress is zero. That is exactly the number a reader cannot use. What
+ * they want from a front door is *which part am I in the middle of*, and that
+ * question is only answerable from the answers given since the rebuild, which
+ * live on the machine doing the serving.
+ *
+ * So the page asks. It knows which marks each part holds, it fetches everything
+ * this machine has heard, and it counts the overlap. Marks in the log that belong
+ * to no part on this page are answers from an earlier deal — already subtracted at
+ * build time — and dropping them is what stops the page counting them twice.
+ *
+ * The rule for *which answers still stand* is not restated here. It is one
+ * function in `lib/answered.mjs`, written closed over nothing for this reason, and
+ * its own source text is inlined into the page. Two runtimes, one reading.
+ *
+ * ── The stamp, and the address ───────────────────────────────────────────
  *
  * The page says when it was built and against which deal. That is what lets the
  * next person spot in one glance what nobody spotted for a day: a front door older
  * than the rooms behind it.
  *
+ * It also knows the one address it is meant to be reached at, and says so when it
+ * is being read at another spelling of the same machine. A browser keeps a
+ * reader's place per address, compared as text, so the name and the number are two
+ * different memories of the same sitting — a trap that has already cost this
+ * project an hour of somebody's confidence.
+ *
  * Usage:
  *   node packages/etl/scripts/build-sittings-index.mjs [--dir packages/etl/out]
+ *   node packages/etl/scripts/build-sittings-index.mjs --answered out/mark-answers.jsonl
  */
-import { existsSync, readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
+import { existsSync, readdirSync, statSync, writeFileSync } from "node:fs";
 import { join, resolve } from "node:path";
+import { readAnswered, standingIds } from "./lib/answered.mjs";
+import { readSitting } from "./lib/sitting-file.mjs";
+import { canonicalAddress } from "./lib/tailnet.mjs";
 
 const arg = (name, fallback) => {
   const i = process.argv.indexOf(name);
@@ -89,43 +118,26 @@ function howLong(n) {
   return `about ${(mins / 60).toFixed(1).replace(/\.0$/, "")} hours`;
 }
 
-// ── Read the sittings back ───────────────────────────────────────────────
-//
-// Each emitted sitting declares `const HEAD = { … }` in its script. Find the
-// declaration and walk braces rather than regexing the object out: the block
-// contains nested objects and a regex that got this right would be less readable
-// than the loop.
-function head(file) {
-  const html = readFileSync(file, "utf8");
-  const m = /const HEAD\s*=\s*\{/.exec(html);
-  if (!m) return null;
-  const start = html.indexOf("{", m.index);
-  let depth = 0, end = start;
-  for (; end < html.length; end++) {
-    if (html[end] === "{") depth++;
-    else if (html[end] === "}" && --depth === 0) { end++; break; }
-  }
-  try {
-    return JSON.parse(html.slice(start, end));
-  } catch {
-    return null;
-  }
-}
-
 if (!existsSync(DIR)) {
   console.error(`  no such directory: ${DIR}`);
   process.exit(2);
 }
 
+// ── Read the sittings back ───────────────────────────────────────────────
+
 const sittings = [];
 for (const name of readdirSync(DIR).sort()) {
   if (!name.startsWith("sit.") || !name.endsWith(".html")) continue;
-  const h = head(join(DIR, name));
-  if (!h) {
+  const s = readSitting(join(DIR, name));
+  if (!s) {
     console.error(`  ${name}: no readable header — skipped`);
     continue;
   }
-  sittings.push({ name, ...h, built: statSync(join(DIR, name)).mtime });
+  // A part whose card list is torn still gets listed, because its header carries
+  // the counts and dropping it would understate the work left. It cannot show
+  // progress, and the fault is printed so the reason is not a mystery.
+  for (const fault of s.faults) console.error(`  ${name}: ${fault}`);
+  sittings.push({ name, ids: s.ids, ...s.head, mtime: statSync(join(DIR, name)).mtime });
 }
 
 const bands = sittings.filter((s) => s.band);
@@ -160,12 +172,34 @@ const answered = deal?.alreadyAnswered ?? 0;
 const population = deal?.population ?? 0;
 const per = parts.length ? Math.round(shown / parts.length) : 0;
 
+/**
+ * How far each part has got, as it stands on disk at this moment.
+ *
+ * Defaulted, unlike the auditor's identical-looking flag, and the difference is
+ * the point of each. The auditor delivers a verdict on freshness, so a default
+ * there would let it pronounce confidently on a list it invented. This delivers a
+ * progress bar which the page re-fetches and overwrites the moment it is opened
+ * against a live server — so the cost of reading the wrong file is a number that
+ * is briefly stale, and the cost of reading nothing is a page that always opens
+ * claiming no work has been done. What it read is printed either way.
+ */
+const answeredPaths = String(arg("--answered", ""))
+  .split(",")
+  .map((p) => p.trim())
+  .filter(Boolean);
+if (!answeredPaths.length) {
+  const running = join(DIR, "mark-answers.jsonl");
+  if (existsSync(running)) answeredPaths.push(running);
+}
+const standing = answeredPaths.length ? readAnswered(answeredPaths) : new Set();
+const progressAt = (s) => s.ids.filter((id) => standing.has(id)).length;
+
 const esc = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
 // Local time, not UTC. The reader compares this against a file listing on the same
 // machine, and a stamp five hours off the listing reads as a stale page when the
 // page is fine — which is the exact confusion this line exists to prevent.
-const newest = sittings.map((s) => s.built).sort((a, b) => b - a)[0];
+const newest = sittings.map((s) => s.mtime).sort((a, b) => b - a)[0];
 const pad = (n) => String(n).padStart(2, "0");
 const stamp =
   `${newest.getFullYear()}-${pad(newest.getMonth() + 1)}-${pad(newest.getDate())}` +
@@ -182,10 +216,29 @@ const bandRows = bands
   })
   .join("\n");
 
+/**
+ * One tile per part, carrying its own progress.
+ *
+ * The tiles used to be bare numbers, which meant the only thing a reader could
+ * learn from sixteen of them was that there were sixteen. Every question they
+ * actually arrive with — where was I, which of these have I finished, is there any
+ * point opening number nine — was unanswerable from the front door, so the way to
+ * find out was to open parts until one of them looked familiar.
+ *
+ * `data-ids` is what lets the page recount itself against the server without
+ * asking this script to have been re-run. It is the marks the part holds, and it
+ * is the only heavy thing on the page: about twelve bytes a mark, against a
+ * megabyte-and-a-third for each of the sittings it links to.
+ */
 const partRows = parts
   .map((s) => {
     const n = s.part.split("/")[0];
-    return `  <li><a class="sit" href="${esc(s.name)}">${esc(n)}</a></li>`;
+    const done = progressAt(s);
+    const of = s.ids.length || s.shown || 0;
+    return `  <li><a class="sit part" href="${esc(s.name)}" data-part="${esc(n)}" data-of="${of}" data-ids="${esc(s.ids.join(" "))}">
+    <span class="pn">${esc(n)}</span>
+    <span class="bar"><i style="width:${of ? Math.round((done / of) * 100) : 0}%"></i></span>
+    <span class="pc">${done} of ${of}</span></a></li>`;
   })
   .join("\n");
 
@@ -193,6 +246,8 @@ const bandsSat = bands.filter((s) => (s.alreadyAnswered ?? 0) > 0).length;
 const bandCheck = bandsSat
   ? `<strong>${Word(bandsSat)} of the ${word(bands.length)} ${bandsSat === 1 ? "has" : "have"} been started.</strong>`
   : `<strong>Nothing has ever checked that.</strong>`;
+
+const WHERE = canonicalAddress();
 
 const html = `<!doctype html>
 <html lang="en">
@@ -211,6 +266,7 @@ const html = `<!doctype html>
     --amber: #9a6a10;
     --amber-soft: #f6efdf;
     --green: #2f6b45;
+    --green-soft: #e4efe7;
   }
   @media (prefers-color-scheme: dark) {
     :root:not([data-theme="light"]) {
@@ -223,6 +279,7 @@ const html = `<!doctype html>
       --amber: #d9a441;
       --amber-soft: #24201a;
       --green: #6bbf8e;
+      --green-soft: #16241c;
     }
   }
   :root[data-theme="dark"] {
@@ -235,6 +292,7 @@ const html = `<!doctype html>
     --amber: #d9a441;
     --amber-soft: #24201a;
     --green: #6bbf8e;
+    --green-soft: #16241c;
   }
 
   * { box-sizing: border-box; }
@@ -247,6 +305,12 @@ const html = `<!doctype html>
     max-width: 46rem;
     margin-inline: auto;
     -webkit-text-size-adjust: 100%;
+    /* Two taps in quick succession are how this page is used — a reader coming back
+       from a part and going straight into the next one — and a phone reads two taps
+       a moment apart as an instruction to magnify. manipulation is the ordinary
+       behaviour minus that one gesture; pinch still zooms, which is the gesture
+       somebody actually wants here. */
+    touch-action: manipulation;
   }
 
   h1 { font-size: 1.55rem; line-height: 1.2; margin: 0 0 .4em; text-wrap: balance; }
@@ -286,18 +350,49 @@ const html = `<!doctype html>
     color: var(--faint); white-space: nowrap;
   }
 
-  .parts { flex-direction: row; flex-wrap: wrap; gap: 8px; }
-  .parts a.sit {
-    flex: 0 0 auto; min-width: 62px; min-height: 54px;
-    justify-content: center; align-items: center;
-    font-variant-numeric: tabular-nums; font-weight: 600;
+  /* A grid rather than a row of squares, because each tile now carries a bar and a
+     count and a square cannot hold them. It reflows to one column on a narrow
+     phone without a breakpoint of its own. */
+  .parts {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(9.5rem, 1fr));
+    gap: 10px;
   }
+  a.sit.part {
+    display: grid; grid-template-columns: auto 1fr; grid-template-rows: auto auto;
+    gap: 4px 12px; align-items: center; min-height: 72px; padding: 12px 14px;
+  }
+  .pn {
+    grid-row: 1 / 3; font-variant-numeric: tabular-nums;
+    font-weight: 600; font-size: 1.5rem; line-height: 1; color: var(--ink);
+  }
+  .bar {
+    align-self: end; height: 6px; border-radius: 3px;
+    background: var(--line); overflow: hidden;
+  }
+  .bar i { display: block; height: 100%; background: var(--amber); }
+  .pc {
+    align-self: start;
+    font: .74rem/1 ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-variant-numeric: tabular-nums; color: var(--faint);
+  }
+  a.sit.part.done { background: var(--green-soft); border-color: var(--green); }
+  a.sit.part.done .bar i { background: var(--green); }
+  a.sit.part.done .pc { color: var(--green); }
+  a.sit.part.here { border-color: var(--amber); box-shadow: inset 0 0 0 1px var(--amber); }
 
-  .first {
-    background: var(--amber-soft); border-color: var(--amber);
+  .first, .warn {
+    background: var(--amber-soft); border: 1px solid var(--amber);
     border-radius: 11px; padding: 14px 16px; margin: 0 0 1.3em;
   }
-  .first p { margin: 0; color: var(--ink); font-size: .94rem; }
+  .first p, .warn p { margin: 0; color: var(--ink); font-size: .94rem; }
+  .warn { margin-bottom: 1.6em; }
+  .warn code {
+    font: .88em ui-monospace, SFMono-Regular, Menlo, monospace;
+    word-break: break-all;
+  }
+  .warn a { color: inherit; }
+  #carry { display: none; }
+  #carry a { color: inherit; font-weight: 600; }
 
   .stamp {
     margin-top: 3em; padding-top: 1.1em; border-top: 1px solid var(--line);
@@ -308,11 +403,15 @@ const html = `<!doctype html>
 </head>
 <body>
 
+<div class="warn" id="elsewhere" hidden><p></p></div>
+
 <h1>Which sitting?</h1>
 
 <p class="lede">Each one shows you a mark on a page of the mus'haf with a box drawn around it,
 one at a time, and asks whether the box is on the right thing. There is no score and no running
 tally — a reader who can see the score answers the score.</p>
+
+<div class="first" id="carry"><p></p></div>
 
 <h2>Does the machine know which ones it got wrong?</h2>
 
@@ -340,8 +439,8 @@ ${bandRows}
 to trust, so it fell back to putting them where the printed line said. These are the ones most
 likely to be visibly wrong, and they are few enough to look at <em>all</em> of them.</p>
 
-<p><strong>${num(answered)} ${answered === 1 ? "is" : "are"} answered and gone.</strong> What is
-left is <strong>${num(shown)}</strong>, cut into ${word(parts.length)} sittings of about ${per}.
+<p><strong id="gone">${num(answered)} ${answered === 1 ? "is" : "are"} answered and gone.</strong> What is
+left is <strong id="left">${num(shown)}</strong>, cut into ${word(parts.length)} sittings of about ${per}.
 Every mark appears in exactly one sitting, so finishing all ${word(parts.length)} means every one
 has been seen — not sampled, seen.</p>
 
@@ -354,6 +453,18 @@ dropped.</p>
 <ul class="parts">
 ${partRows}
 </ul>
+
+<h2>Which address should I open this at?</h2>
+
+<p>${WHERE.onPrivateNetwork
+  ? `This one: <strong>${esc(WHERE.host)}</strong>. The Mac answers to other spellings of the same
+name, and every one of them is somewhere else entirely as far as a browser is concerned — a
+sitting begun at one opens at card one at the other. Nothing is lost when that happens, because
+the Mac hands everything back, but the minute of wondering what went wrong is real. Use the same
+spelling every time and it never comes up.`
+  : `Wherever this page is being served from — the private network is not up on the Mac, so there
+is only one address and it only works on the Mac itself. A phone cannot reach these sittings until
+that network is running.`}</p>
 
 <h2>Where do your answers go?</h2>
 
@@ -402,11 +513,101 @@ far</strong> once it is awake again and the two are back in step.</p>
 <h2>Are these numbers current?</h2>
 
 <p>They are counted out of the sittings themselves rather than typed here, so this page cannot
-say one thing while the sittings behind the links say another. Timings are estimates. The newest
-sitting on this machine was built at the moment below; if that is older than the last time the
-sittings were rebuilt, this page was not rebuilt with them.</p>
+say one thing while the sittings behind the links say another. The bars on the sittings are asked
+of the Mac each time this page is opened, so they are current to the second while it is
+answering — and frozen at the moment below when it is not. Timings are estimates.</p>
 
 <p class="stamp">built ${esc(stamp)} · deal ${esc(deal?.slice?.split("-").pop() ?? "?")} · ${num(shown)} of ${num(population)} left</p>
+
+<script>
+/* The one address this is meant to be read at.
+
+   Only the spellings this machine is known to answer to raise the notice. Anything
+   else — a page opened off the filesystem, a tunnel somebody set up on purpose — is
+   not a mistake this page can diagnose, and a false alarm on a front door is worse
+   than no alarm at all. */
+var CANON = ${JSON.stringify(WHERE.onPrivateNetwork ? WHERE.host : null)};
+var ALSO = ${JSON.stringify(WHERE.alternates)};
+(function () {
+  if (!CANON || ALSO.indexOf(location.hostname) < 0) return;
+  var box = document.getElementById("elsewhere");
+  var url = location.protocol + "//" + CANON + (location.port ? ":" + location.port : "") + location.pathname;
+  box.firstElementChild.innerHTML =
+    "<strong>You are at a different address than usual.</strong> The Mac answers to " +
+    "several names and a browser treats each one as a different place, so a sitting " +
+    "begun elsewhere will look untouched here. Open <a href=\\"" + url + "\\"><code>" +
+    CANON + "</code></a> instead and everything will be where you left it.";
+  box.hidden = false;
+})();
+
+/* Which marks each part is holding, so the page can count its own progress. */
+var PARTS = [].slice.call(document.querySelectorAll("a.sit.part")).map(function (el) {
+  return { el: el, n: el.dataset.part, of: Number(el.dataset.of), ids: el.dataset.ids ? el.dataset.ids.split(" ") : [] };
+});
+
+/* Inlined verbatim from lib/answered.mjs — this is that function's own source text,
+   not a restatement of it. The builder is the only thing that could put a second
+   reading of the word "answered" on this page, and it declines to. */
+${standingIds.toString()}
+
+var TOTAL = ${shown};
+var ALREADY = ${answered};
+
+/* What was standing when this page was built, so the first paint is the same
+   arithmetic as the live one rather than a blank slate that briefly claims no work
+   has been done. Only marks that belong to a part on this page: the rest are
+   answers from earlier deals, already subtracted from the totals above, and
+   counting them again would take the remaining figure below zero. */
+var SEEN = ${JSON.stringify([...new Set(parts.flatMap((p) => p.ids.filter((id) => standing.has(id))))])};
+
+function paint(standing) {
+  var done = 0;
+  var here = null;
+  PARTS.forEach(function (p) {
+    var n = 0;
+    for (var i = 0; i < p.ids.length; i += 1) if (standing.has(p.ids[i])) n += 1;
+    done += n;
+    p.el.querySelector(".bar i").style.width = (p.of ? Math.round((n / p.of) * 100) : 0) + "%";
+    p.el.querySelector(".pc").textContent = n + " of " + p.of;
+    p.el.classList.toggle("done", p.of > 0 && n >= p.of);
+    p.el.classList.remove("here");
+    // Where to carry on: the part somebody is in the middle of. A reader who has
+    // started one wants to finish it before starting another, because a part left
+    // half-done is the only place the re-deal cannot help them.
+    if (!here && p.of > 0 && n > 0 && n < p.of) here = { p: p, n: n };
+  });
+  if (!here) {
+    var fresh = PARTS.filter(function (p) { return p.of > 0 && !p.el.classList.contains("done"); })[0];
+    if (fresh) here = { p: fresh, n: 0 };
+  }
+  if (here) {
+    here.p.el.classList.add("here");
+    var carry = document.getElementById("carry");
+    carry.firstElementChild.innerHTML =
+      "<strong>Carry on with sitting " + here.p.n + ".</strong> " +
+      (here.n ? "You are " + here.n + " of " + here.p.of + " through it. " : "Nothing has been answered in it yet. ") +
+      "<a href=\\"" + here.p.el.getAttribute("href") + "\\">Open it</a>.";
+    carry.style.display = "block";
+  }
+  document.getElementById("left").textContent = (TOTAL - done).toLocaleString("en-US");
+  var gone = ALREADY + done;
+  document.getElementById("gone").textContent = gone.toLocaleString("en-US") + (gone === 1 ? " is" : " are") + " answered and gone.";
+}
+
+paint(new Set(SEEN));
+
+/* And then the live figure, if there is anything listening. A page opened off the
+   filesystem, or served by something that only hands out files, keeps the numbers
+   above — which are the ones that were true when it was built. */
+(function () {
+  var S = window.HIFTH_SESSION;
+  if (!S || !S.answers) return;
+  S.answers("").then(function (got) {
+    if (!got || !got.ok) return;
+    paint(new Set(standingIds((got.banked || []).concat(got.log || []))));
+  }).catch(function () {});
+})();
+</script>
 
 </body>
 </html>
@@ -415,3 +616,6 @@ sittings were rebuilt, this page was not rebuilt with them.</p>
 writeFileSync(OUT, html);
 console.log(`  index → ${OUT}`);
 console.log(`  ${bands.length} band sittings · ${parts.length} parts · ${num(shown)} of ${num(population)} marks left (${num(answered)} answered)`);
+if (answeredPaths.length) console.log(`  progress read from ${answeredPaths.map((p) => p.replace(`${DIR}/`, "")).join(", ")} (${standing.size} standing)`);
+else console.log(`  no answers on disk to read progress from — every part opens at nothing done`);
+console.log(`  address baked in: ${WHERE.onPrivateNetwork ? WHERE.host : "none — the private network is not up"}`);
