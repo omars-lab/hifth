@@ -81,24 +81,57 @@ function decisionLinks() {
   return links;
 }
 
-/* Every publish this machine has a record of, newest occurrence winning for the
- * source path — a page republished from the tree after being drafted in scratch
- * has stopped being an orphan, and the last publish is the one that says so. */
+/* Every publish this machine has a record of.
+ *
+ * NOT by grepping the log. A log is full of that sentence for reasons that are
+ * not publishes: a listing of the account's pages pastes two dozen addresses
+ * into whichever session ran it, and testing this very script wrote two fake
+ * confirmations into the log of the session that tested it — which the first
+ * version of this function then reported as two unregistered pages. Quoting a
+ * receipt is not a purchase.
+ *
+ * So: parse the log, take the ids of the calls that were actually the publish
+ * tool, and read the confirmation only out of the results those calls returned.
+ * Nothing else in a transcript can forge that pairing.
+ *
+ * Newest occurrence wins for the source path — a page drafted in a scratch
+ * directory and later republished from the tree has stopped being an orphan,
+ * and the last publish is the one that says so. */
 function publishes(dir) {
   const found = new Map();
   if (!existsSync(dir)) return found;
   for (const f of readdirSync(dir).filter((n) => n.endsWith(".jsonl"))) {
-    let text;
+    let lines;
     try {
-      text = readFileSync(join(dir, f), "utf8");
+      lines = readFileSync(join(dir, f), "utf8").split("\n");
     } catch {
       continue; // a log being written while we read it is not an error here
     }
-    for (const [, path, url] of text.matchAll(PUBLISHED)) {
-      const prev = found.get(url) ?? { url, times: 0, paths: [] };
-      prev.times += 1;
-      if (!prev.paths.includes(path)) prev.paths.push(path);
-      found.set(url, prev);
+    const fromPublish = new Set();
+    for (const line of lines) {
+      if (!line.trim()) continue;
+      let ev;
+      try {
+        ev = JSON.parse(line);
+      } catch {
+        continue;
+      }
+      const content = ev?.message?.content;
+      if (!Array.isArray(content)) continue;
+      for (const part of content) {
+        if (part.type === "tool_use" && part.name === "Artifact") fromPublish.add(part.id);
+        if (part.type !== "tool_result" || !fromPublish.has(part.tool_use_id)) continue;
+        const text =
+          typeof part.content === "string"
+            ? part.content
+            : (part.content ?? []).map((c) => c.text ?? "").join("\n");
+        for (const [, path, url] of String(text).matchAll(PUBLISHED)) {
+          const prev = found.get(url) ?? { url, times: 0, paths: [] };
+          prev.times += 1;
+          if (!prev.paths.includes(path)) prev.paths.push(path);
+          found.set(url, prev);
+        }
+      }
     }
   }
   return found;
