@@ -138,7 +138,47 @@
       "date": null,
       "related": [
         "mark-granularity",
-        "word-selection"
+        "word-selection",
+        "comparison-crop"
+      ]
+    },
+    {
+      "id": "comparison-crop",
+      "question": "When the app shows a verse cut out of the printed page, what should it do about the neighbouring verses that come with it?",
+      "status": "open",
+      "options": [
+        {
+          "id": "A",
+          "label": "Leave the crop as it is"
+        },
+        {
+          "id": "B",
+          "label": "Cut each line down to the verse's own words"
+        },
+        {
+          "id": "C",
+          "label": "Fade everything that is not this verse"
+        },
+        {
+          "id": "E",
+          "label": "Mark where the verse begins and ends"
+        },
+        {
+          "id": "D",
+          "label": "Mark the words the two verses share, as well as the ones they do not"
+        }
+      ],
+      "artifact": "https://claude.ai/code/artifact/b7be0f22-3ff5-45b7-a5c1-850dd73ef1f1",
+      "page": "docs/design/comparison-crop.html",
+      "builtBy": "scripts/build-crop-options.mjs",
+      "doc": "docs/decisions/comparison-crop.md",
+      "decided": null,
+      "by": null,
+      "date": null,
+      "related": [
+        "mark-placement",
+        "word-selection",
+        "loop-4a"
       ]
     },
     {
@@ -217,7 +257,8 @@
       "related": [
         "word-search",
         "mark-granularity",
-        "mark-placement"
+        "mark-placement",
+        "comparison-crop"
       ]
     },
     {
@@ -280,7 +321,8 @@
       "date": "2026-07-25",
       "related": [
         "loop-4b",
-        "word-search"
+        "word-search",
+        "comparison-crop"
       ]
     },
     {

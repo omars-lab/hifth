@@ -270,8 +270,12 @@
       "feature": "the-hop",
       "code": [
         {
-          "file": "packages/core/src/verse-text.ts",
-          "symbol": "diffPair"
+          "file": "packages/core/src/verse-diff.ts",
+          "symbol": "wordDiff"
+        },
+        {
+          "file": "packages/core/src/verse-diff.ts",
+          "symbol": "divergentRuns"
         },
         {
           "file": "apps/web/src/components/DiffView.tsx",
@@ -281,7 +285,11 @@
       "proof": [
         {
           "file": "apps/web/e2e/share-a11y.spec.ts",
-          "test": "expanding a hop row reveals the token diff of the two readings"
+          "test": "expanding a hop row draws both ayahs from the page, with the leftover washed"
+        },
+        {
+          "file": "apps/web/src/components/DiffView.test.tsx",
+          "test": "washes the words each side does not share, on both sides"
         }
       ],
       "includes": [

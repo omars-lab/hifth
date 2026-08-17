@@ -464,8 +464,9 @@ frame. Identity: the QAC ↔ print alignment shipped in word-D and is baked into
 **What is.** `build-tajweed.mjs` emits, per ayah, `family → [start, end, …]`, and those
 numbers are **codepoint offsets into that ayah's Tanzil Uthmani text**. The alignment joins
 two *word* indices. Between a codepoint and a word sits a segmentation of a text this repo
-does not hold and has a standing rule against holding — *"There is no Quran text in this
-repo and there will not be"* (`morphology.mjs`). QAC's Buckwalter segments reconstruct a
+does not vendor and has a standing rule against vendoring — *"nothing this project vendors,
+and nothing it ships, is Quran text"* (`morphology.mjs`, enforced by `gate:scripture`).
+QAC's Buckwalter segments reconstruct a
 word well enough to ask whether two ayahs share phrasing and nowhere near well enough to
 count Uthmani codepoints. So the offsets currently resolve against nothing committed here.
 
