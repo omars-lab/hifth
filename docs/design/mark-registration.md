@@ -1948,6 +1948,50 @@ away. Ranking landed-on above came-near takes the first to 1.2% and ends the sec
 that reaches no ink at all now says so, because saying nothing is indistinguishable from a tap
 the page never received, and a reader who cannot tell those apart stops pointing at ink.
 
+### ⑰ Whether the sittings on disk are the ones anybody should still be sitting · **fixed**
+
+Rebuilding the unsat sittings after a round of answers is the step that makes the next hour
+better than the last one, and it was the only step in that whole routine that ended in an
+instruction rather than a command: *confirm the deal did not move — same number of parts, same
+total, and no mark that has been answered coming back round again.* Sixteen files, by eye, at
+the end of an hour of somebody else's work. In practice that meant nobody confirmed anything.
+
+Both ways it goes wrong are invisible from inside a sitting. If the rebuild is skipped — or run
+with one handed-over transcript left out of the list — the parts still open, still count down,
+still bank answers, and re-ask questions somebody already answered; a page you have seen before
+looks exactly like a page you have not. If the rebuild runs against a different measurement of
+where the marks sit, every rectangle in every part is drawn from displacements that are not the
+ones on disk, so every answer is about a picture nobody can reconstruct afterwards. That one is
+worse, because the answers are wrong rather than merely wasted.
+
+Neither needed a person, as it turns out. A built sitting already says what it was built from,
+because it has to: the reader's place is stored under a key made of the measurements'
+fingerprint, the set, the slice and the seed, and the set of answers already given is folded
+into that key so that shrinking the pool cannot silently strand somebody at card ninety of a
+hundred and seventeen. A part that disagrees with the tree announces itself — to anything that
+asks. Nothing asked.
+
+**Closed by** `pnpm audit:sittings`, which reads every built part back and holds it to its own
+account of itself: the measurements match the ones on disk, every part knows about every answer
+given, nothing already answered is asked again, no mark is dealt into two parts and none into
+nobody's, and the count the reader is shown describes the population it claims to. Eleven tests
+build each of those failures on purpose, because an auditor that only passes the clean case is
+indistinguishable from one that always says yes. The routine's last step now names it.
+
+The one reading of the word *answered* is shared with the rebuild rather than written twice —
+two readings of it drift, and the drift surfaces as a mark the rebuild drops and the audit still
+counts, with neither obviously wrong. Extracting it left every built part byte-identical.
+
+**What it found on the first run**, which is the answer to the question this entry opens with:
+nothing. The sixteen parts hold 1,710 marks between them, 167 already answered, 1,877 in all,
+all drawn from the same measurement now on disk. The deal had not moved. That is worth stating
+because it was not knowable before, and "we assumed so" and "we checked" are different claims.
+
+**It is not a gate and will not become one.** The parts are build products and the answers
+accumulate on whichever machine served them, so in a clean checkout it would pass by being
+unable to look — which is the failure mode this repo already refuses in the register that tracks
+what has been published. It runs where the evidence is.
+
 ## How can someone look at this for themselves?
 
 The measurement writes a page of evidence: the worst verdicts first, each one drawn at a size
