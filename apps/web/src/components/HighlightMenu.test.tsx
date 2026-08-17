@@ -3,6 +3,16 @@ import { fireEvent, render, screen, waitFor, within } from "@testing-library/rea
 import type { AppState, MergedEdge } from "@hifth/core";
 import { HighlightMenu } from "./HighlightMenu";
 
+/**
+ * The panel itself is a crop of two mus'haf pages and needs both pages' artwork
+ * and word geometry to draw anything — none of which is this file's subject.
+ * What the menu owns is *which ayah the panel is told it is standing on*, so the
+ * stub reports exactly that and `DiffView.test.tsx` covers the drawing.
+ */
+vi.mock("./DiffView", () => ({
+  DiffView: ({ fromKey }: { fromKey: string }) => <div data-here={fromKey} />,
+}));
+
 const ED = "hafs-kfqc";
 const k = (ref: string) => `quran/${ED}/${ref}`;
 const RANGE = [k("2:47"), k("2:48")];
@@ -17,13 +27,17 @@ function edge(p: Partial<MergedEdge> & Pick<MergedEdge, "type" | "to" | "sources
 }
 
 const HOPS: MergedEdge[] = [
-  // Both endpoints have vendored *text*, so this row expands into a diff.
+  // The edge names the words the pair matches on, so this row expands into a
+  // comparison. An edge that matches in more than one place names none, and
+  // that is what the second row models — no caret, nothing to expand.
   edge({
     type: "mutashabih",
     to: k("2:122"),
     sources: [k("2:47")],
     twin: true,
     note: "توأم — السياق يختلف",
+    span: { from: [1, 13] },
+    toSpan: { from: [1, 13] },
   }),
   // A target on an un-vendored page: surfaced, but the leap is disabled.
   edge({ type: "mutashabih", to: k("14:5"), page: 255, sources: [k("2:48")] }),
@@ -76,13 +90,13 @@ describe("HighlightMenu (spec §9 — the drag-highlight menu)", () => {
     expect(screen.getByText(/غير متوفّرة بعد/)).toBeInTheDocument();
   });
 
-  it("expands a row into the token diff, comparing against that row's source ayah", () => {
+  it("expands a row into the comparison, standing on that row's source ayah", () => {
     renderMenu();
     const row = screen.getByRole("button", { expanded: false });
     fireEvent.click(row);
     expect(row).toHaveAttribute("aria-expanded", "true");
-    // The diff's "here" side is 2:47 — the member that produced this edge.
-    expect(screen.getByText(/البقرة · ٢:٤٧ · هنا/)).toBeInTheDocument();
+    // The panel's "here" side is 2:47 — the member that produced this edge.
+    expect(document.querySelector(`[data-here="${k("2:47")}"]`)).toBeInTheDocument();
   });
 
   it("a row both members contributed diffs against the one that produced it", () => {
@@ -97,12 +111,14 @@ describe("HighlightMenu (spec §9 — the drag-highlight menu)", () => {
           sources: [k("2:47"), k("2:48")],
           from: k("2:48"),
           note: "شفاعة ↔ عدل",
+          span: { from: [1, 13] },
+          toSpan: { from: [1, 13] },
         }),
       ],
     });
     expect(screen.getByText("من ٢:٤٧، ٢:٤٨")).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { expanded: false }));
-    expect(screen.getByText(/البقرة · ٢:٤٨ · هنا/)).toBeInTheDocument();
+    expect(document.querySelector(`[data-here="${k("2:48")}"]`)).toBeInTheDocument();
   });
 
   it("hops with the merged edge (the caller reads its `from` for the trail)", () => {

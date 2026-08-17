@@ -18,7 +18,7 @@
  * colophon, which is a real check on whether a quotation drifted and no check at
  * all on whether the SET of quotations is still complete.
  *
- * WHAT IT CHECKS. Three things that could each drift alone, tied together:
+ * WHAT IT CHECKS. Four things that could each drift alone, tied together:
  *
  *   1. THE TABLE AGAINST THE BYTES. Every row of LICENSES.md's bucket table
  *      whose terms say "(inherited)" must be declared below, and vice versa —
@@ -37,6 +37,14 @@
  *   3. THE NAMES AGAINST SOURCES.md. Every upstream named here must resolve to
  *      a real `### <id>` entry in SOURCES.md, so a typo or a renamed project
  *      fails instead of quietly matching nothing.
+ *
+ *   4. THE DECLARATIONS AGAINST THE FOLDER. Everything that actually ships under
+ *      apps/web/public/assets/ is either an inherited bucket or a named entry
+ *      below, and LICENSES.md mentions it either way. Added 2026-08-16, because
+ *      checks 1–3 compared a declaration against a table and never looked in the
+ *      directory — so two trees that were in neither, 604 files of word geometry
+ *      and the manifest, passed this gate every time it ran. A check that reads
+ *      only what it was told about cannot report what it was not told about.
  *
  * THE VERDICT VOCABULARY. Three words, and the third is the interesting one.
  *
@@ -62,7 +70,10 @@
  * the exact shape of the original drift, a builder quietly reaching one more
  * upstream: "reads packages/etl/data/tajweed/… and gate-notices.mjs has no verdict
  * for it". Dropping Waqar144 from the bucket row: "does not name Waqar144". The
- * middle one is the one that matters; the other two are cheap.
+ * middle one is the one that matters; the other two are cheap. Check 4 was broken
+ * the same way when it was added: an empty directory under assets/ — "ships and
+ * nothing declares it" — and the declaration for the word geometry removed from
+ * LICENSES.md — "never mentions assets/words, which ships". Both restored.
  *
  * WHAT IT DOES NOT SEE, said out loud rather than discovered later. The trace
  * follows *relative* imports inside packages/etl and reads string literals; it
@@ -97,10 +108,15 @@ const BUCKETS = [
     sources: ["quranic-arabic-corpus"],
     reads: {
       "quranic-corpus-morphology-0.4.txt": "named",
-      // Every root-ayah pair is filed by ayah, never by page; the table is read
-      // here only to validate that the ayah numbering is the one this edition
-      // uses. No page number reaches a root shard.
-      "ayah-pages.json": "ours",
+      // This read was declared "ours" on the grounds that "no page number
+      // reaches a root shard". That was false, and measurably so:
+      // `build-roots.mjs` writes `pageOf(abs)` into every one of 44,431
+      // occurrence tuples. It is the same table, reaching the same kind of
+      // output, as the deferral the adjacency bucket already carries — so it
+      // defers to the same question, in the row that widened it to cover this
+      // tree. Declaring one bucket's read of a file "ours" while another
+      // bucket's read of that same file is an open question was the drift.
+      "ayah-pages.json": "open:the-pagination-question-covers-three-outputs",
     },
   },
   {
@@ -130,6 +146,37 @@ const BUCKETS = [
     },
   },
 ];
+
+/**
+ * Everything else that ships under `apps/web/public/assets/`.
+ *
+ * The buckets above are the trees whose terms are *inherited*, and until this
+ * list existed that was the only part of the folder anything read. The check was
+ * therefore blind by construction: it compared a declaration against a table,
+ * and never once asked what was actually in the directory. Two shipped trees sat
+ * outside both for months — 604 files of word geometry and a 24 KB manifest —
+ * and no file in the repository mentioned either.
+ *
+ * So every entry of that folder must now appear here or in `BUCKETS`, and every
+ * entry here must name where a reader goes to find out what it is. The verdicts
+ * are the same three words the buckets use, with the same meanings.
+ */
+const UNBUCKETED = {
+  // KFGQPC's artwork, which is not ours to relicense and is deliberately not a
+  // bucket: an inherited bucket promises a NOTICE.txt travelling with the data,
+  // and this tree's terms are the Complex's own rather than a grant we can
+  // restate. LICENSES.md says so under "What we do not license".
+  pages: { verdict: "named" },
+  // Rectangles this project measured onto its own page frame. No byte of the
+  // print they were measured from ships, and the grant behind that print obliges
+  // no attribution — so the tree carries no inherited terms and the source entry
+  // is a courtesy pointer, not a condition.
+  words: { verdict: "ours", source: "word-geometry-mushafdatabase" },
+  // Ships the whole 6,236-entry page table verbatim, which is the third of the
+  // three outputs the pagination question covers. Having a row in the licence
+  // table is what it was missing; what the row cannot yet say is settled.
+  "manifest.json": { verdict: "open:the-pagination-question-covers-three-outputs" },
+};
 
 /** Vendored third-party inputs: a real file under a data directory that has a
  *  PROVENANCE.md, excluding this project's own pins and probe results. */
@@ -295,6 +342,49 @@ for (const b of BUCKETS) {
   }
 }
 
+/* 6 ─ The folder against the declarations. Everything shipped is spoken for. */
+const shipped = existsSync(ASSETS) ? readdirSync(ASSETS) : [];
+if (shipped.length === 0) {
+  problems.push("apps/web/public/assets/ is empty or missing — the app ships no data");
+}
+for (const entry of shipped) {
+  if (declared.has(entry) || entry in UNBUCKETED) continue;
+  problems.push(
+    `apps/web/public/assets/${entry} ships and nothing declares it — it is neither an ` +
+      `inherited bucket nor a named entry in gate-notices.mjs. Say what its terms are.`,
+  );
+}
+for (const [entry, decl] of Object.entries(UNBUCKETED)) {
+  if (!existsSync(join(ASSETS, entry))) {
+    problems.push(
+      `gate-notices.mjs names apps/web/public/assets/${entry}, which does not ship — ` +
+        `a stale declaration hides the next real one`,
+    );
+    continue;
+  }
+  // The licence table is what a reader opens, so every shipped tree has to be
+  // findable there. This is the check the two undeclared trees would have failed.
+  if (!licenses.includes(`assets/${entry}`)) {
+    problems.push(`LICENSES.md never mentions assets/${entry}, which ships`);
+  }
+  if (decl.source && !documented.has(decl.source)) {
+    problems.push(`assets/${entry} names "${decl.source}", which SOURCES.md has no entry for`);
+  }
+  if (decl.verdict.startsWith("open:")) {
+    const id = decl.verdict.slice(5);
+    if (!knownIssues.has(id)) {
+      problems.push(`assets/${entry} defers to issue "${id}", which docs/issues.json does not have`);
+    } else if (!openIssues.has(id)) {
+      problems.push(
+        `assets/${entry} still defers to issue "${id}", which is now closed — ` +
+          `the question was answered, so the declaration has to say what the answer was`,
+      );
+    } else {
+      notes.push(`assets/${entry} — open, tracked as ${id}`);
+    }
+  }
+}
+
 if (problems.length) {
   console.error("gate:notices — FAIL:");
   for (const p of problems) console.error(`  - ${p}`);
@@ -305,6 +395,7 @@ const trees = BUCKETS.length;
 const traced = BUCKETS.reduce((n, b) => n + Object.keys(b.reads).length, 0);
 console.log(
   `gate:notices — OK (${trees} inherited trees, every notice shipped and naming its upstreams; ` +
-    `${traced} vendored inputs traced, all accounted for)`,
+    `${traced} vendored inputs traced, all accounted for; ` +
+    `${shipped.length} entries under assets/, each one declared)`,
 );
 for (const n of notes) console.log(`  ${n}`);

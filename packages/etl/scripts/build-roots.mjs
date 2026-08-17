@@ -83,10 +83,24 @@ const BUCKETS = 32;
 const GZ_LIMIT = 50 * 1024;
 
 /* ------------------------------------------------------------------ */
-/* Buckwalter → Arabic (corpus.quran.com/java/buckwalter.jsp, verbatim).*/
+/* Buckwalter → Arabic.                                                 */
+/*                                                                      */
+/* The scheme is Tim Buckwalter's — a one-character-per-letter Arabic    */
+/* transliteration published with the LDC's Arabic morphological         */
+/* analyser and in general use since. The rows below the letters are its */
+/* "XML-safe" variants plus the extra codepoints the Quranic Arabic      */
+/* Corpus needs for a mus'haf's pause, madd and small-letter marks,      */
+/* which its own transliteration page sets out.                          */
+/*                                                                      */
+/* This comment used to cite that page and say "verbatim", which read as */
+/* if a table had been copied out of the corpus rather than as a         */
+/* statement about which scheme is in use. What is here is a character   */
+/* correspondence — the alphabet on one side and the alphabet on the     */
+/* other — and it has to match theirs exactly or the roots come out      */
+/* wrong. See the corpus's entry in SOURCES.md for its terms.            */
 /* ------------------------------------------------------------------ */
 
-/** The corpus's own transliteration table — roots and lemmas arrive in it. */
+/** The scheme the corpus writes its roots and lemmas in, read back to Arabic. */
 const BUCKWALTER = {
   "'": "ء", ">": "أ", "&": "ؤ", "<": "إ", "}": "ئ",
   A: "ا", b: "ب", p: "ة", t: "ت", v: "ث",

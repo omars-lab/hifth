@@ -213,6 +213,7 @@ ci: core ## Full local mirror of the CI build-test-gate job, IN CI ORDER
 	$(PNPM) audit:corpus
 	$(PNPM) gate:notext
 	$(PNPM) gate:text-sources
+	$(PNPM) gate:scripture
 	$(PNPM) gate:license
 	$(PNPM) gate:license-copy
 	$(PNPM) gate:notices

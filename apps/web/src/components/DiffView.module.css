@@ -1,7 +1,13 @@
 /*
- * DiffView — the token diff under a hop row. Two stacked verse readings; the
- * divergent tokens carry a faint wash (terracotta vs verdigris) so the eye lands
- * on exactly what differs while the shared opening stays quiet ink.
+ * DiffView — the look-alike panel under a hop row. Two stacked crops of the
+ * mus'haf itself, one per ayah, with the words the pair does NOT share carrying
+ * a faint wash (terracotta vs verdigris) so the eye lands on exactly what
+ * differs while the shared opening stays quiet ink.
+ *
+ * The ink is the page's own artwork, not type: the panel used to render a
+ * transcription, in a plainer spelling than the page underneath it, so a reader
+ * comparing the two saw different letters in each. Cropping the print removes
+ * that gap by construction — there is only one set of letters now.
  */
 
 .diff {
@@ -26,24 +32,45 @@
   color: var(--ink-faint);
 }
 
-.verse {
-  margin: 0;
-  font-family: var(--font-arabic);
-  font-size: var(--text-md);
-  line-height: 2;
-  color: var(--ink);
+/*
+ * The crop keeps whatever aspect its own lines give it — an ayah of one line is
+ * a strip, one that wraps is taller. Nothing is normalised to a fixed height,
+ * because that would either shrink the ink below reading size or pad every
+ * short ayah out to the tallest.
+ */
+.crop {
+  width: 100%;
+  overflow: hidden;
+  border-radius: var(--radius-sm);
 }
 
+.page {
+  display: block;
+  width: 100%;
+  height: auto;
+  /*
+   * The mus'haf page is paper and stays paper. It is never re-themed — the same
+   * rule the stage keeps — because the artwork's ink is a fixed dark and would
+   * vanish against a dark ground.
+   */
+  background: var(--mushaf-paper, #fdfbf5);
+}
+
+/*
+ * The washes sit *under* nothing — they are appended after the page's paths, so
+ * they lie over the ink. Kept translucent for that reason: a solid fill would
+ * hide the very words it is pointing at.
+ */
 .dA {
-  color: var(--diff-a);
-  background: var(--diff-a-wash);
-  border-radius: var(--radius-sm);
-  padding-inline: 2px;
+  fill: var(--diff-a-wash);
+  stroke: var(--diff-a);
+  stroke-width: 0.3;
+  vector-effect: non-scaling-stroke;
 }
 
 .dB {
-  color: var(--diff-b);
-  background: var(--diff-b-wash);
-  border-radius: var(--radius-sm);
-  padding-inline: 2px;
+  fill: var(--diff-b-wash);
+  stroke: var(--diff-b);
+  stroke-width: 0.3;
+  vector-effect: non-scaling-stroke;
 }
