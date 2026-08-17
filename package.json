@@ -20,6 +20,7 @@
     "test:e2e": "pnpm --filter @hifth/web test:e2e",
     "etl": "pnpm --filter @hifth/etl etl",
     "audit:corpus": "node packages/etl/scripts/audit-corpus.mjs",
+    "audit:sittings": "node packages/etl/scripts/audit-mark-sittings.mjs",
     "gate:budget": "node scripts/gate-budget.mjs",
     "gate:notext": "node scripts/gate-notext.mjs",
     "gate:license": "node scripts/gate-license.mjs",
