@@ -64,6 +64,16 @@
   ],
   "artifacts": [
     {
+      "url": "https://claude.ai/code/artifact/84b4bfe6-f875-4186-9d32-c37f26ad71be",
+      "title": "Where should the sittings live?",
+      "published": "2026-08-17",
+      "shows": "One real question from a checking session drawn at phone size, the measured cost of the way those sessions run today, and three options each drawn as the journey a single answer takes from a reader's finger to the project.",
+      "decision": "sitting-hosting",
+      "page": null,
+      "builtBy": null,
+      "note": null
+    },
+    {
       "url": "https://claude.ai/code/artifact/9a42955e-4c2f-4dc9-8c95-a50942c46a00",
       "title": "Hifth Decision Board",
       "published": "2026-08-17",
