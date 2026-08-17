@@ -1,0 +1,440 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Where should the sittings live?</title>
+<style>
+  :root {
+    --ink: #1b1a17;
+    --ink-soft: #56524a;
+    --ink-faint: #8a8479;
+    --paper: #faf8f3;
+    --raised: #ffffff;
+    --rule: #e2ddd1;
+    --accent: #9a3412;
+    --accent-soft: #fdf1e7;
+    --warn: #8a5a00;
+    --measure: 34rem;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ink: #ece7dd;
+      --ink-soft: #a9a296;
+      --ink-faint: #746d62;
+      --paper: #171614;
+      --raised: #201e1b;
+      --rule: #33302b;
+      --accent: #e2823f;
+      --accent-soft: #2a1d13;
+      --warn: #d9a441;
+    }
+  }
+  :root[data-theme="dark"] {
+    --ink: #ece7dd;
+    --ink-soft: #a9a296;
+    --ink-faint: #746d62;
+    --paper: #171614;
+    --raised: #201e1b;
+    --rule: #33302b;
+    --accent: #e2823f;
+    --accent-soft: #2a1d13;
+    --warn: #d9a441;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font: 16px/1.62 ui-serif, Georgia, "Times New Roman", serif;
+    -webkit-text-size-adjust: 100%;
+  }
+  main { max-width: 52rem; margin: 0 auto; padding: clamp(1.5rem, 5vw, 4rem) clamp(1.1rem, 4vw, 2.5rem) 6rem; }
+  h1 {
+    font-size: clamp(1.9rem, 5.5vw, 2.9rem);
+    line-height: 1.1;
+    margin: 0 0 .6rem;
+    text-wrap: balance;
+    letter-spacing: -.015em;
+  }
+  .standfirst { font-size: 1.12rem; color: var(--ink-soft); max-width: var(--measure); margin: 0 0 1rem; }
+  .stamp { font: 500 .76rem/1.4 ui-sans-serif, system-ui, sans-serif; letter-spacing: .09em; text-transform: uppercase; color: var(--ink-faint); }
+  h2 {
+    font-size: clamp(1.18rem, 3vw, 1.45rem);
+    line-height: 1.25;
+    margin: 3.4rem 0 .9rem;
+    text-wrap: balance;
+    padding-top: 1.4rem;
+    border-top: 1px solid var(--rule);
+  }
+  h3 { font-size: 1.1rem; margin: 0; line-height: 1.3; text-wrap: balance; }
+  p, li { max-width: var(--measure); }
+  p { margin: 0 0 1rem; }
+  a { color: var(--accent); }
+  strong { font-weight: 600; }
+  em { font-style: italic; }
+
+  .glossary { background: var(--raised); border: 1px solid var(--rule); border-radius: .5rem; padding: 1rem 1.2rem; margin: 1.6rem 0 0; }
+  .glossary dl { margin: 0; display: grid; gap: .5rem; }
+  .glossary dt { font-weight: 600; font-size: .95rem; }
+  .glossary dd { margin: 0 0 0 0; color: var(--ink-soft); font-size: .95rem; }
+
+  figure { margin: 1.4rem 0; }
+  /* The specimen is a page of the mus'haf, and a printed page is not re-themed.
+     These four names are the page's own everywhere else on this document and they
+     flip with the reader's theme; inside the card they are pinned to the values the
+     sitting itself uses, because the ink and the paper arrive already coloured by
+     those names and a dark theme would otherwise print black on black. That is not
+     hypothetical — it is the defect this instrument was already fixed for once. */
+  .card {
+    --paper: #fdfcf9;
+    --ink: #231f20;
+    width: 100%;
+    max-width: 22rem;
+    height: auto;
+    display: block;
+    background: #fdfcf9;
+    border: 1px solid var(--rule);
+    border-radius: .4rem;
+  }
+  figcaption { font-size: .88rem; color: var(--ink-soft); margin-top: .55rem; max-width: var(--measure); }
+
+  .figures { display: grid; grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr)); gap: .8rem; margin: 1.5rem 0; }
+  .fig { background: var(--raised); border: 1px solid var(--rule); border-radius: .5rem; padding: .85rem .95rem; }
+  .fig b { display: block; font: 600 1.55rem/1.1 ui-sans-serif, system-ui, sans-serif; font-variant-numeric: tabular-nums; letter-spacing: -.02em; }
+  .fig span { display: block; font-size: .84rem; color: var(--ink-soft); margin-top: .25rem; }
+
+  .option { background: var(--raised); border: 1px solid var(--rule); border-radius: .6rem; padding: 1.3rem 1.4rem; margin: 1.4rem 0; }
+  .option header { display: flex; gap: .8rem; align-items: baseline; margin-bottom: .6rem; }
+  .tag {
+    flex: none;
+    font: 600 .8rem/1 ui-sans-serif, system-ui, sans-serif;
+    color: var(--accent);
+    background: var(--accent-soft);
+    border-radius: .3rem;
+    padding: .35rem .5rem;
+  }
+  .lede { color: var(--ink-soft); margin: 0 0 1rem; }
+
+  ol.route { list-style: none; margin: 0 0 1.1rem; padding: 0; display: grid; gap: 0; }
+  .step { display: grid; grid-template-columns: 10.5rem 1fr; gap: .8rem; padding: .5rem 0 .5rem 1.1rem; border-left: 2px solid var(--rule); position: relative; max-width: none; }
+  .step::before { content: ""; position: absolute; left: -5px; top: 1.05rem; width: 8px; height: 8px; border-radius: 50%; background: var(--rule); }
+  .step.risk { border-left-color: var(--warn); }
+  .step.risk::before { background: var(--warn); }
+  .where { font: 600 .84rem/1.5 ui-sans-serif, system-ui, sans-serif; color: var(--ink-faint); }
+  .what { font-size: .95rem; }
+  @media (max-width: 34rem) { .step { grid-template-columns: 1fr; gap: .1rem; } }
+
+  .ledger { margin: 0; display: grid; gap: .7rem; border-top: 1px solid var(--rule); padding-top: .9rem; }
+  .ledger div { display: grid; grid-template-columns: 8.5rem 1fr; gap: .8rem; }
+  .ledger dt { font: 600 .84rem/1.6 ui-sans-serif, system-ui, sans-serif; color: var(--ink-faint); }
+  .ledger dd { margin: 0; font-size: .95rem; }
+  .ledger .cost { color: var(--ink); }
+  @media (max-width: 34rem) { .ledger div { grid-template-columns: 1fr; gap: .1rem; } }
+
+  .plain { border-left: 3px solid var(--accent); padding: .1rem 0 .1rem 1rem; margin: 1.4rem 0; }
+  .plain p:last-child { margin-bottom: 0; }
+
+  ul.reasons { padding-left: 1.1rem; }
+  ul.reasons li { margin-bottom: .55rem; }
+
+  footer { margin-top: 4rem; padding-top: 1.2rem; border-top: 1px solid var(--rule); font-size: .85rem; color: var(--ink-faint); }
+</style>
+</head>
+<body>
+<main>
+  <p class="stamp">A decision this project has not made</p>
+  <h1>Where should the sittings live?</h1>
+  <p class="standfirst">
+    1,710 marks are waiting to be looked at by a person, in 16 sittings of about
+    106 — roughly 16 hours of somebody's attention. Today every one of those hours needs a
+    particular laptop to be awake, in a particular house. This asks whether it should.
+  </p>
+
+  <div class="glossary">
+    <dl>
+      <dt>Mark</dt>
+      <dd>One of the small signs printed above or below a letter — a fatha, a sukun, a madd — that tell a reader how the word is said.</dd>
+      <dt>Sitting</dt>
+      <dd>One session's worth of questions: about a hundred marks, each drawn on the real printed page, each asking whether the rectangle the app puts around it is in the right place.</dd>
+      <dt>Answer</dt>
+      <dd>What a reader says about one mark — that it looks right, that the rectangle is the wrong shape, that it is in the wrong place and here is where it should be, or that the print itself is odd here.</dd>
+    </dl>
+  </div>
+
+  <h2>What is one of these questions, actually?</h2>
+  <p>
+    This, at about the size it appears on a phone. The printed ink is the mus'haf's own; the dashed rectangle is
+    what the app has decided the mark occupies. The reader is asked whether that rectangle is right, and can move
+    it, resize it, or say the print itself is unusual here.
+  </p>
+  <figure>
+    <svg class="card" viewBox="296.75 108.36 34.3 31.4" role="img" aria-label="One question from a sitting: a mark on a printed line, with the rectangle the app draws around it.">
+      <rect x="296.75" y="108.36" width="34.3" height="31.4" fill="var(--paper)"/><path data-p="0" d="M305.26 114.81L298.72 117.35L298.59 117.35L298.32 118.28L298.46 118.28L298.99 118.01L304.99 115.75L305.12 115.61Z" fill="var(--ink)" fill-rule="evenodd"/><path data-p="1" d="M300.99 120.15L301.12 120.81L302.06 121.35L301.39 121.61L301.26 122.28L301.56 122.13L301.95 121.98L302.39 121.84L302.87 121.71L303.82 121.49L304.24 121.41L304.59 121.35L304.99 120.68L304.98 120.57L304.96 120.51L304.91 120.5L304.86 120.55L303.39 120.68L303.12 120.65L302.84 120.55L302.27 120.26L302.03 120.1L301.83 119.95L301.7 119.82L301.66 119.75L302.59 119.35L302.94 119.48L303.19 119.61L303.34 119.75L303.39 119.88L303.79 119.08L303.7 118.89L303.56 118.71L303.36 118.55L303.12 118.41L302.85 118.46L302.55 118.59L302.23 118.78L301.91 119.01L301.61 119.27L301.34 119.54L301.13 119.79L300.99 120.01Z" fill="var(--ink)" fill-rule="evenodd"/><path data-p="2" d="M303.12 123.35L302.72 124.68L302.72 125.48L303.26 128.15L305.39 138.81L305.66 136.55L305.12 132.95L304.06 127.35Z" fill="var(--ink)" fill-rule="evenodd"/><path data-p="3" d="M299.52 128.81L298.86 130.01L298.86 130.28L300.19 130.95L300.46 130.95L301.12 129.61L301.12 129.48Z" fill="var(--ink)" fill-rule="evenodd"/><path data-p="4" d="M301.39 132.55L301.26 133.08L301.12 133.75L301.12 134.28L301.52 136.01L301.47 136.19L301.32 136.31L301.07 136.39L300.72 136.41L298.72 136.01L298.9 135.79L299.02 135.51L299.1 135.19L299.12 134.81L299.1 134.61L299.02 134.55L298.9 134.61L298.72 134.81L298.65 134.96L298.58 135.1L298.5 135.24L298.41 135.38L298.32 135.51L298.22 135.64L298.12 135.77L298.01 135.89L297.9 136L297.78 136.12L297.66 136.22L297.53 136.32L297.4 136.42L297.27 136.51L297.13 136.6L296.99 136.68L296.36 136.97L295.68 137.23L294.97 137.45L294.24 137.65L293.5 137.8L292.77 137.92L292.06 137.99L291.39 138.01L290.71 138.02L290.06 138L289.45 137.94L288.88 137.85L288.35 137.72L287.88 137.56L287.46 137.35L287.09 137.11L286.78 136.83L286.54 136.5L286.36 136.14L286.25 135.73L286.22 135.27L286.26 134.76L286.38 134.21L286.59 133.61L286.62 133.41L286.59 133.35L286.49 133.41L286.32 133.61L286.02 134.26L285.79 134.88L285.62 135.46L285.52 136.01L285.49 136.53L285.52 137.01L285.62 137.46L285.79 137.88L286.1 138.34L286.52 138.73L287.03 139.06L287.62 139.31L288.28 139.51L288.98 139.64L289.71 139.72L290.46 139.75L291.41 139.71L292.43 139.61L293.49 139.44L294.56 139.18L295.58 138.83L296.53 138.4L296.97 138.14L297.37 137.86L297.73 137.55L298.06 137.21L300.19 138.01L300.48 138.06L300.74 138.06L300.98 138.03L301.19 137.95L301.38 137.83L301.54 137.66L301.68 137.46L301.79 137.21L301.85 137.06L301.9 136.9L301.94 136.74L301.99 136.59L302.03 136.43L302.07 136.27L302.1 136.11L302.13 135.94L302.15 135.78L302.17 135.62L302.19 135.45L302.2 135.29L302.21 135.13L302.21 134.96L302.21 134.8L302.21 134.63L302.2 134.47L302.19 134.3L302.17 134.14L302.15 133.98L302.13 133.82L302.1 133.65L302.07 133.49L302.03 133.33L301.99 133.17L301.94 133.01L301.9 132.86L301.85 132.7L301.79 132.55Z" fill="var(--ink)" fill-rule="evenodd"/><path data-p="5" d="M326.19 118.01L320.32 120.41L320.32 120.55L320.06 121.35L320.59 121.08L325.92 118.81Z" fill="var(--ink)" fill-rule="evenodd"/><path data-p="6" d="M324.86 121.88L324.72 122.41L324.72 123.21L324.51 123.43L324.29 123.55L324.05 123.56L323.79 123.48L323.52 122.68L323.51 122.51L323.49 122.41L323.45 122.38L323.39 122.41L323.22 122.54L323.12 122.65L323.09 122.74L323.12 122.81L323.1 123.13L323.05 123.4L322.95 123.63L322.82 123.81L322.65 123.96L322.45 124.06L322.2 124.13L321.92 124.15L321.77 124.13L321.65 124.08L321.55 124L321.49 123.88L321.45 123.73L321.45 123.55L321.47 123.33L321.52 123.08L321.51 122.88L321.46 122.81L321.37 122.88L321.26 123.08L321.15 123.49L321.08 123.85L321.06 124.17L321.09 124.45L321.16 124.67L321.28 124.85L321.45 124.99L321.66 125.08L322.1 125.01L322.49 124.81L322.83 124.48L323.12 124.01L323.4 124.24L323.69 124.38L324 124.44L324.32 124.41L324.62 124.36L324.86 124.21L325.02 123.96L325.12 123.61L325.12 121.88L324.99 121.88Z" fill="var(--ink)" fill-rule="evenodd"/><path data-p="7" d="M316.72 122.41L310.86 124.81L310.59 125.75L311.12 125.48L316.46 123.21Z" fill="var(--ink)" fill-rule="evenodd"/><path data-p="8" d="M326.46 123.08L326.32 124.41L326.32 125.21L326.86 127.88L328.06 133.35L328.59 137.61L328.6 137.76L328.62 137.81L328.66 137.76L328.72 137.61L328.89 137.12L328.99 136.58L329.02 135.99L328.99 135.35L328.46 131.75Z" fill="var(--ink)" fill-rule="evenodd"/><path data-p="9" d="M319.12 123.61L318.59 124.81L318.59 125.35L319.92 133.35L319.92 133.88L319.81 134L319.69 134.12L319.57 134.23L319.45 134.34L319.33 134.45L319.21 134.56L319.08 134.67L318.96 134.77L318.83 134.88L318.69 134.98L318.56 135.07L318.43 135.17L318.29 135.26L318.15 135.35L318.01 135.44L317.87 135.52L317.73 135.61L317.59 135.69L317.44 135.77L317.29 135.84L317.15 135.91L317 135.98L316.85 136.05L316.69 136.11L316.54 136.18L316.39 136.24L316.23 136.29L316.08 136.35L315.92 136.4L315.76 136.44L315.6 136.49L315.44 136.53L315.28 136.57L315.12 136.61L314.96 136.64L314.8 136.67L314.64 136.7L314.48 136.73L314.31 136.75L314.15 136.77L313.98 136.79L313.82 136.8L313.66 136.81L312.74 136.76L311.9 136.6L311.53 136.47L311.19 136.31L310.88 136.12L310.62 135.9L310.41 135.63L310.25 135.33L310.14 135L310.09 134.62L310.11 134.2L310.2 133.74L310.35 133.23L310.59 132.68L310.67 132.38L310.72 132.16L310.74 132.02L310.72 131.95L310.67 131.95L310.59 132.03L310.47 132.18L310.32 132.41L309.82 133.28L309.47 134.08L309.25 134.81L309.16 135.47L309.19 136.06L309.33 136.59L309.58 137.05L309.92 137.45L310.35 137.78L310.86 138.04L311.44 138.24L312.09 138.38L312.78 138.45L313.53 138.45L314.31 138.4L315.12 138.28L316.09 138.03L316.98 137.7L317.79 137.3L318.51 136.85L319.11 136.35L319.6 135.84L319.97 135.32L320.19 134.81L320.49 136.09L320.67 136.67L320.89 137.2L321.17 137.64L321.54 137.98L321.76 138.11L322 138.2L322.28 138.26L322.59 138.28L323.23 138.24L323.82 138.11L324.36 137.9L324.86 137.61L325.09 137.41L325.26 137.08L325.48 136.25L325.58 135.48L325.55 134.76L325.42 134.1L325.21 133.49L324.92 132.94L324.57 132.44L324.19 132.01L324.06 131.86L323.96 131.81L323.86 131.86L323.79 132.01L323.66 133.35L323.79 133.88L324.16 134.35L324.49 134.85L324.76 135.35L324.99 135.88L324.85 135.96L324.71 136.03L324.57 136.09L324.42 136.15L324.27 136.21L324.12 136.25L323.97 136.3L323.82 136.33L323.66 136.36L323.51 136.39L323.35 136.4L323.19 136.42L323.04 136.42L322.88 136.42L322.72 136.41L322.44 136.4L322.18 136.35L321.95 136.26L321.76 136.15L321.59 136L321.45 135.81L321.34 135.6L321.26 135.35Z" fill="var(--ink)" fill-rule="evenodd"/><path data-p="10" d="M314.72 128.15L314.24 128.77L313.86 129.45L313.57 130.17L313.39 130.95L313.41 131.2L313.46 131.41L313.54 131.6L313.66 131.75L313.81 131.86L313.99 131.95L314.21 132L314.46 132.01L315.52 132.15L315.52 132.41L315.18 132.69L314.81 132.91L314.43 133.09L314.02 133.21L313.6 133.29L313.15 133.31L312.68 133.29L312.19 133.21L312.01 133.22L311.88 133.25L311.8 133.29L311.76 133.35L311.76 133.42L311.81 133.51L311.91 133.62L312.06 133.75L312.48 133.89L312.94 134L313.42 134.08L313.91 134.1L314.39 134.05L314.85 133.91L315.28 133.69L315.66 133.35L315.85 133.16L316.04 132.9L316.21 132.59L316.34 132.26L316.43 131.93L316.46 131.6L316.43 131.31L316.32 131.08L316.03 130.85L315.69 130.68L315.3 130.58L314.86 130.55L314.49 130.48L314.19 130.28L314.15 130.09L314.16 129.91L314.21 129.75L314.32 129.61L314.72 129.21L314.99 129.21L315.26 129.48L315.52 129.48L315.92 128.55L315.92 128.01L315.66 127.88L315.39 127.61L315.02 127.81L314.72 128.15Z" fill="var(--ink)" fill-rule="evenodd"/><path data-p="11" d="M322.72 128.15L321.92 129.48L321.92 129.88L322.26 129.97L322.59 130.11L322.92 130.3L323.26 130.55L323.52 130.55L324.19 129.21L324.19 128.95Z" fill="var(--ink)" fill-rule="evenodd"/><path data-p="12" d="M327.26 140.15L327.26 140.95L328.32 141.48L327.52 141.75L327.52 142.41L330.72 141.48L331.12 140.81L331.12 140.68L329.52 140.81L329.26 140.78L328.97 140.69L328.41 140.4L328.16 140.23L327.97 140.08L327.84 139.96L327.79 139.88L328.86 139.48L329.16 139.61L329.39 139.75L329.56 139.88L329.66 140.01L330.06 139.21L330.01 139.02L329.86 138.85L329.61 138.69L329.26 138.55L329.03 138.59L328.76 138.72L328.46 138.91L328.16 139.15L327.61 139.67L327.4 139.92L327.26 140.15Z" fill="var(--ink)" fill-rule="evenodd"/>
+      <rect x="310.754" y="122.357" width="6.3" height="3.4" fill="none" stroke="#c2410c" stroke-width="0.35" stroke-dasharray="1.2 0.8" vector-effect="non-scaling-stroke"/>
+    </svg>
+    <figcaption>
+      One card from the first of the 16 sittings — a fatha on page 20,
+      line 4. There are 1,710 more.
+    </figcaption>
+  </figure>
+
+  <h2>Why is this being asked now?</h2>
+  <p>
+    Because the work is about to get long. 167 marks have been looked at, over two days,
+    on a laptop in the same room as the reader. 1,710 are left, and asking for another 16 hours
+    of the same arrangement means asking somebody to be in one place, with one machine running, every time they
+    have twenty spare minutes.
+  </p>
+  <p>
+    Nothing is broken. The arrangement works and has been made steadily harder to get wrong. The question is
+    whether it will still be the right arrangement across the next 16 hours, or whether it is quietly the
+    reason those hours do not happen.
+  </p>
+
+  <h2>What happens if nobody decides?</h2>
+  <p>
+    The sittings carry on exactly as they are, and the cost is real but small: they happen when the reader and the
+    laptop are in the same house, and not otherwise. Nothing else is waiting behind this. No feature is blocked,
+    no other question depends on it, and the answers already given are not at risk either way.
+  </p>
+  <p>
+    <strong>So this can stay open, and saying so is part of the answer.</strong> If the remaining hours are going
+    to happen at a desk at home anyway, the honest choice is the first option and no work at all.
+  </p>
+
+  <h2>What does it cost today, measured?</h2>
+  <div class="figures">
+    <div class="fig"><b>1,710</b><span>marks still to be looked at</span></div>
+    <div class="fig"><b>16</b><span>sittings, about 106 each</span></div>
+    <div class="fig"><b>167</b><span>looked at so far</span></div>
+    <div class="fig"><b>578</b><span>things said about them</span></div>
+    <div class="fig"><b>3.5</b><span>said per mark, on average</span></div>
+    <div class="fig"><b>1.3 MB</b><span>one sitting, as a single file</span></div>
+  </div>
+  <p>
+    Two of those numbers matter more than the rest. <strong>3.5 statements per mark</strong>
+    is what a reader actually does: they nudge a rectangle a step, look, nudge it again, and each nudge is a
+    separate thing said. Anything that banks answers one at a time is doing it several times a mark, not once.
+  </p>
+  <p>
+    And <strong>1.3 MB</strong> is the whole of a sitting — the questions, the printed ink around
+    each one, and the page that asks them, in one file that needs nothing else to work. That is what makes the
+    other two options possible at all: they are 1.2 MB to 1.4 MB apiece against a
+    16.0 MB ceiling, so publishing one is not a technical question.
+  </p>
+  <p>
+    What has been said so far, by kind: <strong>360</strong> placement · <strong>201</strong> wrong shape · <strong>15</strong> print defect · <strong>2</strong> looks right. Measured over the answers given between 2026-08-14 and 2026-08-15.
+  </p>
+
+  <h2>What do other people do about this?</h2>
+  <div class="plain">
+    <p>
+      <strong>Nobody looked, this time.</strong> The comparable question — how projects that ask many people to
+      judge many pictures get those judgements home safely — has a large and well-worn literature behind it, in
+      crowd-judged science, in map correction, and in the tools built for labelling images. None of it was
+      consulted before this page was written, and the page is worse for it.
+    </p>
+    <p>
+      What is worth looking up specifically, if this is going to be decided rather than left: how those tools
+      handle a judgement given while the device is offline, and whether they bank each judgement as it is given
+      or in batches. That single detail is what separates the three options below, and somebody has certainly
+      measured it.
+    </p>
+  </div>
+
+  <h2>What have we already decided that this has to live inside?</h2>
+  <ul class="reasons">
+    <li>
+      <strong>The sittings exist to answer one open question</strong> — how the app should line up what it draws
+      against the printed page. Everything here is in service of that, and if that question were settled tomorrow
+      this one would evaporate.
+    </li>
+    <li>
+      <strong>What a reader does inside the app never leaves their device.</strong> That is settled, and it is
+      about the app. A sitting is not the app: it is a maintainer's instrument, shown to a handful of people who
+      know what they are agreeing to. But the same instinct should be brought to it deliberately rather than
+      forgotten, and the third option is the one that has to answer for it.
+    </li>
+    <li>
+      <strong>An answer already given is never at risk.</strong> Whatever is chosen, the 578
+      statements already banked stay where they are, in a file that is only ever appended to.
+    </li>
+  </ul>
+
+  <h2>What are the options?</h2>
+  <p>
+    Each one is drawn as the journey a single answer takes, from the reader's finger to a line checked into the
+    project. The amber steps are the ones that can fail. Every option shows the reader the same card — what is
+    being decided is what happens in the seconds after they touch it.
+  </p>
+  <section class="option" id="option-A">
+      <header>
+        <span class="tag">A</span>
+        <h3>Leave it as it is — one laptop hands out the sittings over a private network</h3>
+      </header>
+      <p class="lede">The reader opens a sitting by its address on the household's private network. Every answer is posted back the instant it is given and appended to a file on that laptop, one line per statement — 578 lines so far.</p>
+      <ol class="route">
+        <li class="step ">
+          <span class="where">The reader's phone</span>
+          <span class="what">Opens the sitting by its address on the private network</span>
+        </li>
+        <li class="step risk">
+          <span class="where">The laptop</span>
+          <span class="what">Hands over the page and a one-off pass to post back with</span>
+        </li>
+        <li class="step ">
+          <span class="where">The reader's finger</span>
+          <span class="what">Answers; the page posts it immediately</span>
+        </li>
+        <li class="step ">
+          <span class="where">The laptop</span>
+          <span class="what">Appends one line and flushes it before replying</span>
+        </li>
+        <li class="step ">
+          <span class="where">The repository</span>
+          <span class="what">A settling run turns the lines into one row per mark</span>
+        </li>
+      </ol>
+      <dl class="ledger">
+        <div><dt>What it takes</dt><dd>The laptop awake and on the network, and the reader on the same network. Nothing installed on either.</dd></div>
+        <div><dt>What it gets</dt><dd>Every answer is banked the moment it is given, so a closed laptop or a killed terminal costs at most one statement. The count of what is left falls as the reader works. Rebuilding what nobody has sat is live immediately — the laptop re-reads the files per request.</dd></div>
+        <div><dt>What it costs</dt><dd class="cost">It is one machine, awake, on one network. Restarting it mints a fresh pass and every page a reader already has open quietly stops banking — the answers keep appearing to send and stop arriving. And the reader must be somewhere that network reaches, which is the constraint this whole question is about.</dd></div>
+      </dl>
+    </section>
+  <section class="option" id="option-B">
+      <header>
+        <span class="tag">B</span>
+        <h3>Publish each sitting as a page, and hand the answers over at the end</h3>
+      </header>
+      <p class="lede">Each sitting is already one self-contained file — 1.3 MB in the middle of the sixteen, against a 16.0 MB ceiling — so it can be published as a page and opened from a link, anywhere, with nothing running at home.</p>
+      <ol class="route">
+        <li class="step ">
+          <span class="where">The reader's phone</span>
+          <span class="what">Opens a link. No network to be on, no machine to be awake</span>
+        </li>
+        <li class="step risk">
+          <span class="where">The reader's finger</span>
+          <span class="what">Answers; the page keeps it in that browser's own store</span>
+        </li>
+        <li class="step risk">
+          <span class="where">The same browser</span>
+          <span class="what">Holds every answer until the reader reaches the end</span>
+        </li>
+        <li class="step risk">
+          <span class="where">The reader</span>
+          <span class="what">Presses hand over, and moves the file back by hand</span>
+        </li>
+        <li class="step ">
+          <span class="where">The repository</span>
+          <span class="what">A settling run turns the file into one row per mark</span>
+        </li>
+      </ol>
+      <dl class="ledger">
+        <div><dt>What it takes</dt><dd>Nothing running anywhere. One link per sitting, and a way to get the finished file back.</dd></div>
+        <div><dt>What it gets</dt><dd>The sitting can be done from any device in any place, and nobody has to keep a machine awake for it. Sixteen links is the whole of the hosting.</dd></div>
+        <div><dt>What it costs</dt><dd class="cost">This is what was in place before the laptop was taught to receive, and it cost a reader an evening twice over. A browser's store belongs to one address: the same machine reached two ways is two memories of the same sitting, and neither can see the other. Nothing is banked until the end, so a cleared browser loses the hour. The count of what is left cannot fall until a file comes back.</dd></div>
+      </dl>
+    </section>
+  <section class="option" id="option-C">
+      <header>
+        <span class="tag">C</span>
+        <h3>Publish each sitting as a page, and let it bank each answer to a hosted table</h3>
+      </header>
+      <p class="lede">The same published page, but each answer is written straight to a hosted table through the reader's own connection to it — no laptop in the path, and nothing waiting for the end of the sitting.</p>
+      <ol class="route">
+        <li class="step ">
+          <span class="where">The reader's phone</span>
+          <span class="what">Opens a link. No network to be on, no machine to be awake</span>
+        </li>
+        <li class="step ">
+          <span class="where">The reader's finger</span>
+          <span class="what">Answers; the page writes it to the table at once</span>
+        </li>
+        <li class="step risk">
+          <span class="where">The hosted table</span>
+          <span class="what">Holds it. 578 statements so far, about 193 bytes each</span>
+        </li>
+        <li class="step risk">
+          <span class="where">Someone at a keyboard</span>
+          <span class="what">Pulls the rows back down into the same running log</span>
+        </li>
+        <li class="step ">
+          <span class="where">The repository</span>
+          <span class="what">A settling run turns the log into one row per mark</span>
+        </li>
+      </ol>
+      <dl class="ledger">
+        <div><dt>What it takes</dt><dd>A table to write to, a shape agreed for what a statement looks like, and a step that pulls the rows back — none of which exists yet. The reader must have the connection to that table set up on the account they read with.</dd></div>
+        <div><dt>What it gets</dt><dd>Everything the first option gets — answers banked as they are given, at most one statement ever at risk — with none of what it costs. Any device, any place, no machine awake at home.</dd></div>
+        <div><dt>What it costs</dt><dd class="cost">The answers now live on somebody else's host, and a sitting is a scarce person's judgement about a printed page. A page that asks for that connection cannot be handed to just anybody — it is granted by the reader, per reader. It is the only option here that is not already working, and the one whose failure mode nobody has met yet.</dd></div>
+      </dl>
+    </section>
+
+  <h2>What else could be considered, and why is it not here?</h2>
+  <ul class="reasons">
+    <li>
+      <strong>Publish the page, and have it post back to the laptop.</strong> The obvious middle, and it cannot
+      work: a published page is served under a policy that blocks it from reaching any other host at all. It
+      would not fail loudly — it would simply never arrive.
+    </li>
+    <li>
+      <strong>Put the sittings on the open web with a small service behind them.</strong> A bill, an account, and
+      a thing to keep running, for an instrument that will be used by one or two people for perhaps
+      16 hours in total. This project ships static files on purpose.
+    </li>
+    <li>
+      <strong>Send the sitting as a file and get it back as a file.</strong> This already works, and it is what
+      the second option becomes when nobody publishes anything. It is not listed separately because the only
+      difference is whether the reader receives a link or an attachment, and everything that matters after that
+      point is identical.
+    </li>
+  </ul>
+
+  <h2>What would change the answer?</h2>
+  <ul class="reasons">
+    <li>
+      <strong>A sitting done away from home.</strong> If the reader tries and cannot, the first option has been
+      measured rather than assumed, and this stops being hypothetical.
+    </li>
+    <li>
+      <strong>The remaining hours not happening.</strong> If 1,710 is still 1,710 in a
+      month, the arrangement is the suspect, whatever anybody thinks of it in principle.
+    </li>
+    <li>
+      <strong>A second reader.</strong> Every option here assumes one person answering. Two people make the
+      first option awkward and the third one obvious, because two readers on one laptop's network is not an
+      arrangement anybody would choose.
+    </li>
+    <li>
+      <strong>The placement question being settled.</strong> If it is answered on the evidence already in hand,
+      the remaining marks stop being urgent and this can be closed unmade.
+    </li>
+  </ul>
+
+  <h2>What is this not settling?</h2>
+  <ul class="reasons">
+    <li>
+      <strong>Whether the rectangles are right.</strong> That is the question the sittings exist to answer, and
+      it has its own page.
+    </li>
+    <li>
+      <strong>What a hosted table would actually hold.</strong> The third option describes a shape that does not
+      exist. Choosing it is choosing to design it, not choosing a design.
+    </li>
+    <li>
+      <strong>Anything about the app itself.</strong> No option here changes a single thing a reader of the
+      mus'haf would see. This is about the instrument, not the thing it is measuring.
+    </li>
+  </ul>
+
+  <footer>
+    <p>
+      Every number on this page was counted out of the sittings and the answers themselves on
+      2026-08-17, and can be recounted. Nothing here is transcribed and nothing is a mock-up: the ink in
+      the specimen is the printed page's own.
+    </p>
+  </footer>
+</main>
+</body>
+</html>
