@@ -411,6 +411,63 @@ residue, which is a known artefact of correcting by a median rather than a mean.
 hypothesis is refuted, and refuting it is what makes the single page-wide displacement the
 right correction rather than a per-class one.
 
+### Does any mark go wrong per class in a way this measurement cannot see?
+
+The section above refutes a per-class bias using the ink search. On 2026-08-17 a reader found
+one the ink search cannot see, and the two results do not disagree — they are about different
+marks.
+
+Two sittings, thirty marks each, drawn not at random but from the **bottom of the marks the
+search accepts** — the band where our rectangle and the ink it settled on overlap between 0.55
+and 0.65, which begins exactly at the floor below which the search gives up, and the band
+immediately above it, 0.65 to 0.75. Being two rather than one is what makes them worth
+reporting: each finding below can be read twice, on marks that differ only in how sure the
+search was. Nothing here transfers to the 324,638 marks it placed confidently, and that caveat
+travels with every number.
+
+**Hamza is about a page unit across, and nothing else is.** Every hamza in both sittings was
+moved sideways in the same direction — eleven of eleven — with the size left as drawn.
+
+| | marks | sideways, median | vertical | width |
+|---|---|---|---|---|
+| overlap 0.55–0.65 | 7 | **1.077** units | 0.015 | 0.000 |
+| overlap 0.65–0.75 | 4 | **0.573** units | 0.039 | 0.000 |
+
+In the weaker band six of the seven fall between 1.04 and 1.35; in the better band all four fall
+between 0.50 and 0.81. Across every other mark in the weaker sitting the median sideways move is
+**0.002 units** — nothing at all. So this is not a page-wide shift surfacing in a small sample.
+It is one class, in one direction, at a size a reader sees without being told to look — and it
+**halves as the match improves**.
+
+A hamza is the one mark here regularly printed sitting *on* another letter, and the obvious
+mechanism is that a search matching ink against a drawing can settle on the seat rather than on
+the hamza where the two touch — which would put the rectangle a letter's width across and leave
+its size right, which is exactly what the reader corrected. That is a hypothesis, recorded as
+one; nothing here tests it.
+
+**Fatha and kasra are drawn too short, and by less when the match is better.** Both were grown
+taller with their width left alone: fatha by a median of 0.600 units in the weaker band and
+0.065 in the better one, kasra by 0.500 and 0.215, on boxes about 3.9 tall. Nine of the eleven
+marks in the weaker sitting that grew by more than 0.2 are one or the other.
+
+**Everything shrinks the same way**, which is the finding that ties the rest together. Between
+the two bands the median distance the reader moved a rectangle falls from 0.363 units to 0.276,
+and the worst from 5.877 to 2.053 — that worst being a kasra in the weaker band that ended with
+essentially no overlap at all with where we drew it. **So the overlap score is doing its job.**
+It does not predict whether a reader complains, because a reader who reaches for a mark by
+pointing at its ink files a complaint either way (㉑ below); it predicts, quite well, *how far
+out we were*.
+
+None of this contradicts the refutation above, and it is worth being exact about why. That one
+measured the residue left after correction across every mark in the book, using the ink. This
+one measured sixty marks the ink search itself flagged as doubtful, using a person. A class
+error living only in the tail the search is unsure about is invisible to an average over the
+whole book, and it is the first thing a reader looking at that tail would notice. Both readings
+are true.
+
+What to do about it is ㉒ in the open questions below, and the short version is: find out
+whether this is a property of the weak tail or a property of hamza, before touching any rule.
+
 ## ⑤ What do people outside this project do about this?
 
 Two different questions get asked here, and the outside world answers them very differently.
@@ -1877,6 +1934,16 @@ in the print — in which case it is a defect in vendored data and belongs upstr
 stay out of every rate on purpose — or it is in our rendering of it, in which case fifteen marks
 are the visible end of something that is also silently wrong on marks nobody flagged.
 
+**Two more arrived on 2026-08-17, and they matter out of proportion to their number.** A
+superscript alef on page 86 and a wasla on page 463, called odd in the same words. The first
+fifteen all came from marks the correction could not place at all, which left the cheapest
+explanation open: that a mark nothing can find the ink for and a mark that looks strange to a
+reader are the same marks for the same reason, and the oddity is downstream of whatever defeats
+the search. These two are not those. They come from marks the correction placed **from their own
+printed ink**, and matched well enough to clear the bar — so whatever the reader is seeing
+survives a successful match, and cannot be explained by the search having failed. Seventeen
+marks now, on seventeen pages, across two populations that share nothing but the print.
+
 ### ⑮ Whether an answer given by pointing is the same evidence as one given by hand · **open**
 
 The sittings held so far measured what correcting a rectangle by hand costs. Of the 160 marks
@@ -2069,6 +2136,74 @@ there is one reading of the word *answered* running in two places; a test pulls 
 out of the built page, evaluates it with nothing in scope, and makes it agree with the module it
 came from. The same discipline put the reading of a built sitting into one place shared with the
 auditor, so the front door and the audit cannot disagree about how many parts exist.
+
+### ㉑ Whether a mark reached by pointing can ever be called only one kind of wrong · **confirmed**
+
+Sixty marks were sat on 2026-08-17, in two sittings, and every one came back saying both *the
+rectangle is in the wrong place* and *the rectangle is the wrong size*. Sixty out of sixty, for
+both words, with no mark anywhere saying one without the other. That is not what the reader was
+asked and it is not what they did.
+
+Nearly all of them were answered by pointing at the ink. Pointing is one gesture and it
+sets the whole rectangle at once — it moves to the ink and takes its size from the ink in the
+same act — so afterwards both the position and the size differ from what was drawn, essentially
+always, because two rectangles fitted independently to the same ink are never identical to the
+last decimal. The page files a complaint for each of them whenever the difference is anything
+other than exactly nothing, and *exactly nothing* here means the smallest difference a
+computer can represent. So both words fire on every point, together, forever.
+
+**This is a row rather than an ergonomics note because it made a number wrong.** The
+mark-level rate is fine and stands: the reader has confirmed that every one of those taps was
+a correction they meant, so sixty of sixty marks carrying a fault is a real measurement of
+those two bands. What is not a measurement is the split between the two words. In the weaker
+band alone, four of the thirty were filed as the wrong *size* while their size changed by less
+than a twentieth of a unit, and four were filed as in the wrong *place* while moving less than
+a twentieth. Anyone reading "thirty-seven wrong-size statements" as thirty-seven marks judged
+the wrong size is reading an artefact of the gesture.
+
+**Why the fix is not a threshold.** The tempting repair is to pick a distance below which a
+change does not count, and it would be wrong twice over. It would be a number chosen rather
+than derived — the extents a point snaps to are taken from the printed outlines and are not
+rounded to any grain, so there is no natural floor to borrow. And it would still be answering
+the wrong question, because a reader who points at ink has not made two statements that we are
+failing to tell apart. They have made **one**: *the rectangle belongs around this ink.* The
+vocabulary has no word for that, so the page spends the two words it has. That is the same
+observation ⑮ makes about mixing pointed answers with hand-placed ones, one level further in:
+⑮ says the two kinds cannot share a rate, and this says the words themselves stop meaning
+different things once the answer was pointed.
+
+**What would close it:** a word for what a point actually says, with the existing two reserved
+for what a hand says, and the settler reading pointed and hand-placed answers under separate
+headings rather than pooling their words. Until then, the word-level counts from any sitting
+worked by pointing are not quoted, and the mark-level rate is.
+
+### ㉒ Whether the weakest matches go wrong by class rather than at random · **open**
+
+The correction places each mark from its own printed ink and accepts the match when the
+rectangle and the ink overlap by more than 0.55. The marks that clear that bar only just have
+never been looked at as a group, and §④ now records what happened when sixty of them were, in
+two bands of thirty: **every hamza in both, eleven of eleven, was about a page unit across in
+the same direction with its size correct** — a median of 1.077 units in the weaker band and
+0.573 in the better one, against two thousandths of a unit for every other mark. Fatha and
+kasra came back too short in both, and by less in the better one.
+
+That is a per-class error in a population where §④'s own refutation of per-class error does not
+reach, and it matters because of its shape rather than its size. A residue spread evenly over
+every class is the price of correcting by a median and there is nothing to do about it. A whole
+class in one direction is either a bug in what the search matches against or a case for a
+per-class term, and both are actionable. The halving between the two bands is the strongest
+thing here: it ties the error to how sure the search was, which is what an argument about the
+search predicts and what a fixed per-class offset does not.
+
+**What would answer it.** Two things, in order, and neither needs a reader. First, and nearly
+free: re-measure the sideways displacement for hamza alone across the whole book rather than
+across these eleven, which separates a property of the weak tail from a property of hamza. Then,
+if it is the tail, test whether the search is settling on the letter a hamza sits on rather than
+on the hamza — which §④ names as the mechanism and does not test.
+
+What this must **not** do is become a per-class correction fitted to sixty marks. Eleven hamzas
+from two bands are enough to say *look here*; they are not enough to edit the placement of
+326,515 marks.
 
 ## How can someone look at this for themselves?
 
