@@ -1,7 +1,7 @@
 # The instrument needs a house, and today it is one laptop
 
-**Status:** open. Nobody has chosen.
-**Date opened:** 2026-08-17.
+**Status:** decided — **A**, the laptop, by Omar on 2026-08-17.
+**Date opened:** 2026-08-17. **Date settled:** 2026-08-17.
 **Asked as:** *"how can we host this review in a way where we can do it from anywhere? can
 claude artifacts hold state?"*.
 **The picture:** [`docs/design/sitting-hosting.html`](../design/sitting-hosting.html), built by
@@ -25,6 +25,41 @@ answer is banked as it is given or held in the browser until the end.
 
 Each is drawn on the options page as the journey a single answer takes, from the reader's
 finger to a line checked into the repository, with the steps that can fail marked.
+
+## What was chosen, and what it commits us to
+
+**A.** The laptop keeps handing out the sittings, and the reader reaches them from a phone over
+the household's private network. Asked for in these words, the same day the question was opened:
+*"have them run locally on this laptop but remember this laptop is setup on tailscale and can
+access from phone."*
+
+Be clear about what settled it, because it was not a fresh weighing of three options. The one
+thing A costs — the reader has to be somewhere that network reaches — was judged acceptable,
+and the two costs that made A *feel* worse than it is turned out to be missing work rather than
+properties of the arrangement:
+
+- **Reaching it from the phone at all was an incantation nobody had written down.** The server
+  listened only to the machine it ran on unless someone remembered a flag, and no script,
+  routine or document anywhere recorded how to start it. It now defaults to the private network,
+  and there are two named commands, and the routine has a sixth step that names them.
+- **The machine answers to two spellings, and a browser treats them as two different sittings.**
+  Nothing said which to use, so the choice was made by whichever one got typed, and a reader who
+  came back at the other one was dropped at card one with an hour apparently gone. There is now
+  one address, derived rather than typed, printed on start with the others named as the ones not
+  to use — and the front door says so on screen when it notices it is being read at the wrong
+  spelling.
+
+Two further commitments came with the choice, because a sitting on a phone is a sitting on a
+phone and both were broken:
+
+- **A front door that says where you left off.** It counts the marks out of the sittings
+  themselves, asks this machine what it has heard, and points at the one to carry on with.
+- **Two taps in a row are two answers, not a zoom.** Pressing the same nudge twice magnified the
+  page instead of nudging it, which on a phone is most of what nudging is.
+
+B and C stay on the page unbeaten rather than beaten. Neither was tried; A was made good enough
+that neither had to be. What would reopen this is unchanged and is listed below — most cheaply,
+a sitting actually attempted away from home.
 
 ## Why it is being asked now
 

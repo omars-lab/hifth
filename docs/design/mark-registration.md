@@ -1992,6 +1992,84 @@ accumulate on whichever machine served them, so in a clean checkout it would pas
 unable to look — which is the failure mode this repo already refuses in the register that tracks
 what has been published. It runs where the evidence is.
 
+### ⑱ Whether pressing the same nudge button twice was answering or zooming · **fixed**
+
+Reported from a phone, mid-sitting: *when I click the same nudge button twice it zooms in*.
+That is the browser's double-tap-to-zoom, and it fires on any two taps close enough together
+in time and space — the same arrow twice, or two different arrows a centimetre apart. Between
+them, that is most of what placing a rectangle consists of.
+
+The magnification is not the cost. The cost is that the card walks off the screen in the middle
+of an answer, so the next press lands somewhere the reader did not aim and the transcript
+records a placement nobody made. A reader who cannot keep the rectangle still is also a reader
+who stops nudging and affirms, which biases the one ratio the sitting exists to measure.
+
+The page had been carrying `touch-action` since the drag was wired, but only on the stage: the
+crop got `pan-y`, and `none` while a selection was being drawn. The chrome — the dock, the
+buttons, the body — had none at all, so the default applied to every control on the page.
+
+**Closed by** `touch-action: manipulation` on the body, which is the ordinary behaviour minus
+that one gesture, with three tests in `build-mark-report.test.mjs`. On the body rather than on
+the buttons deliberately: two taps on *adjacent* buttons trigger it as readily as two on one
+button, so a per-button rule would leave the commonest case — left, then up — unfixed. It costs
+nothing anybody could use, because `touch-action` is intersected down the ancestor chain rather
+than inherited, so the stage's stricter values still win, and `pan-y` already excluded
+double-tap zoom on the print. Pinch still zooms everywhere, which is the gesture a reader
+actually reaches for on a page of the mus'haf.
+
+### ⑲ Whether a sitting could be reached from anything but the machine serving it · **fixed**
+
+The sittings are served from one laptop, and the serving side bound the loopback address by
+default — reachable from exactly that laptop and nothing else. Every sitting anybody has ever
+sat on a phone therefore depended on somebody remembering to pass a flag, and **the flag was
+written down nowhere**: not in the routine that runs the sittings, not in a script, not in the
+Makefile, not in any document. The arrangement this project had chosen worked only for whoever
+already knew the incantation, and that person was going to be asked to recall it in six months.
+
+Underneath it sits a sharper hazard, which is why this is a defect and not an ergonomic
+grumble. A reader's place, and every rectangle they have moved, is kept by the browser against
+an **origin** — scheme, host and port, with the host half compared as text. So the laptop
+reached by its name and the same laptop reached by its number are two separate memories of the
+same sitting, with nothing on screen to say so: the page simply opens at card one as though the
+last hour had not happened. That has already happened once, and cost an hour of somebody's
+confidence before the recovery was built.
+
+**Closed by** a module that decides the one address — `packages/etl/scripts/lib/tailnet.mjs`,
+with sixteen tests — plus two named commands, `pnpm sit:serve` and `pnpm sit:index`, and a step
+⑥ in the sitting routine that says to run them. The address is read off this machine's own
+network interfaces rather than asked of a program, because the private network hands out
+addresses from a range no home or office network uses, so an interface holding one *is* that
+network. The server now binds it by default — that network only, not every interface, because a
+sitting carries a write endpoint and the café's wifi is an interface too — and prints one
+address with the others named as things not to use. The front door says the same thing on screen
+when it notices it is being read at another spelling of this machine.
+
+### ⑳ Whether the front door could say which sitting you were in the middle of · **fixed**
+
+The front door listed sixteen parts as sixteen bare numbered tiles. Every question a reader
+actually arrives with — *where was I, which of these have I finished, is there any point
+opening number nine* — was unanswerable from it, so the way to find out was to open parts until
+one looked familiar. On a phone that is sixteen page loads of a megabyte and a third each.
+
+The reason it had never been fixed is that the obvious fix does not work. A rebuild drops every
+mark carrying a standing answer, so at the moment the front door is built every part is
+untouched and every progress bar reads zero. The only place the live figure exists is the log
+the serving side has been appending to since the first answer.
+
+**Closed by** a rewritten front door with eleven tests. Each tile carries the marks its part
+holds, the page fetches everything this machine has heard and counts the overlap, and a banner
+at the top names the part to carry on with — the one already begun and unfinished, because a
+part left half-done is the only place the re-deal cannot help. Answers in the log for marks in
+no part on the page are ignored rather than added: one log covers every deal there has ever
+been, and counting those again would take the remaining figure below zero.
+
+The rule for which answers still stand is **not** restated in the generated page. That function
+is written closed over nothing for exactly this reason and its own source text is inlined, so
+there is one reading of the word *answered* running in two places; a test pulls the copy back
+out of the built page, evaluates it with nothing in scope, and makes it agree with the module it
+came from. The same discipline put the reading of a built sitting into one place shared with the
+auditor, so the front door and the audit cannot disagree about how many parts exist.
+
 ## How can someone look at this for themselves?
 
 The measurement writes a page of evidence: the worst verdicts first, each one drawn at a size
