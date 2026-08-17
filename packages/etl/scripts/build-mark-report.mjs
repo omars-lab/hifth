@@ -69,6 +69,7 @@ import { fileURLToPath } from "node:url";
 import { correctionFor } from "./lib/registration-grain.mjs";
 import { answeredKey, fingerprint, readAnswered } from "./lib/answered.mjs";
 import { readPageInk, rasterise } from "./lib/ink.mjs";
+import { ranOutOfRoom, refusedItsOwnInk } from "./lib/mark-ink.mjs";
 import { marksOf } from "./lib/marks.mjs";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
@@ -160,9 +161,15 @@ const rowsFp = fingerprint(rowsText);
 // distance exceeded the radius inscribes a circle in that square and throws away
 // every corner of it, which is an error this repo has already made once and paid
 // for. See docs/design/mark-registration.md §⑧.
-const EPS = 1e-6;
-const atEdge = (r) => Math.abs(Math.abs(r.dx) - radius) < EPS || Math.abs(Math.abs(r.dy) - radius) < EPS;
-const placed = (r) => r.iouBest >= iouFloor && !atEdge(r);
+//
+// The test itself lives with the search that produces these rows, so that the rule
+// naming a mark a refusal and the rule rescuing one cannot drift apart. It also
+// knows something this file cannot: marks the ordinary search gave up on are looked
+// at again further out, so two rows in the same file can have been searched to
+// different distances, and testing both against one number reads a real answer at
+// 3.0 as a wall-hit.
+const atEdge = (r) => ranOutOfRoom(r, radius);
+const placed = (r) => !refusedItsOwnInk(r, radius, iouFloor);
 
 /**
  * The four populations, and the one that matters most is the one that was missing.
