@@ -111,6 +111,16 @@
           "note": "The chip's expansion: the destinations, and the diff against the current ayah."
         },
         {
+          "file": "packages/core/src/verse-diff.ts",
+          "symbol": "wordDiff",
+          "note": "Which words two look-alike ayahs share and which they do not, as arithmetic on word indices — no text anywhere in it. Read the header before changing anything here: this replaced a hand-typed table of twelve ayahs' text that shipped in the bundle, and every one of the three reasons it went matters. It was running scripture in a code repository, which is the shape takedown notices get scoped to; it was typed in a plainer spelling than the mus'haf on screen, so the panel showed the reader different letters from the page underneath it; and twelve ayahs out of six thousand is not a feature. None of it was needed, because an edge already carries the matching run on BOTH sides in the print's own word numbering — the same numbering the word boxes use — so the shared stretch is a lookup and what diverges is the leftover at either end. 2,544 of 2,996 look-alike edges carry a span; `null` for the other 452 is not a failure but the data declining to guess, since build-adjacency only emits a span where the shared run occurs in exactly ONE place on both sides. `divergentRuns` beside it returns ranges rather than indices because the caller paints them with `WordIndex.bandsFor`, which wants a run whole so it can collapse it to one rectangle per line of print."
+        },
+        {
+          "file": "apps/web/src/components/DiffView.tsx",
+          "symbol": "DiffView",
+          "note": "The panel that answers 'why do these two get confused' by drawing the mus'haf's own ink, cropped word by word out of both pages, with the divergent tails washed. The reader compares the printing rather than a transcription of it — which is the point, since a transcription is exactly what was wrong before. Costs a fetch of the TARGET's page, so it is lazy on expand: the panel lives inside a popover opened on demand, and both call sites (`HighlightMenu`, `HopPopover`) pass the page in only once it is open. Falls back to the plain note when there is no span, no shard, or no page — the same fallback the old table left for every pair it did not cover."
+        },
+        {
           "file": "apps/web/src/components/PageStage.tsx",
           "symbol": "async navigateTo",
           "note": "The cross-page jump itself, and the case that is easy to get wrong: the destination is on another page, so the page must mount before the wash can land. `navigatedRef` is what stops an in-flight fetch from stomping a deep link that already arrived."

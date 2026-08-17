@@ -107,7 +107,9 @@ These are not style preferences. Each one is a rule this repo already enforces s
    the geometry comes from the vendored KFGQPC SVGs, and a differently-printed page table
    would be "a source of disagreement rather than of truth." Check against it; do not
    import it.
-2. **No Quran text enters this repo.** The standing rule is in
+2. **Nothing we vendor and nothing we ship is Quran text.** Not the unscoped form
+   this heading used to carry — it contradicted the rule quoted directly beneath it,
+   and the tree has never satisfied it. The standing rule is in
    `packages/etl/scripts/morphology.mjs` — *"nothing this project vendors, and nothing it
    ships, is Quran text"* — and `gate:scripture` is what enforces it, failing on any run of
    three consecutive fully-vowelled words in any source file. It is not `gate:notext`, which
