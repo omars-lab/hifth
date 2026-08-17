@@ -111,6 +111,62 @@ describe("handing a sitting back its own answers", () => {
   });
 });
 
+/**
+ * The listing that lets the front door stop being a photograph.
+ *
+ * The page it feeds had every one of its numbers worked out when it was generated
+ * and then frozen, so a finished sitting stayed in the list looking unfinished and
+ * a re-deal left the page describing parts that no longer held those marks. The
+ * one thing that must be true of this route is the thing the caching would break:
+ * it reads the directory at the moment it is asked, because the sittings are
+ * rebuilt while the server runs and a server holding its own idea of what is on
+ * the disk would just be the stale thing instead of the page.
+ */
+describe("saying what is on the disk right now", () => {
+  const sitting = (name, head, ids) =>
+    writeFileSync(
+      join(dir, name),
+      [
+        "<!doctype html><html><head></head><body><script>",
+        `const HEAD = ${JSON.stringify({ built: "mark-report", ...head })};`,
+        `const CARDS = ${JSON.stringify(ids.map((id) => ({ id })))};`,
+        "</script></body></html>",
+      ].join("\n"),
+    );
+
+  const listing = async () => (await (await fetch(`${base}/api/sittings?t=${token}`)).json());
+
+  it("lists the sittings, with the marks each is asking about", async () => {
+    sitting("sit.part-1.html", { part: "1/2", slice: "-p1of2-aXX", shown: 2, pool: 4, population: 4, alreadyAnswered: 0 }, ["1:1", "1:2"]);
+    const r = await listing();
+    expect(r.ok).toBe(true);
+    const one = r.sittings.filter((s) => s.name === "sit.part-1.html")[0];
+    expect(one.part).toBe("1/2");
+    expect(one.ids).toEqual(["1:1", "1:2"]);
+  });
+
+  // The whole point. A part rebuilt under a running server has to show up on the
+  // next open of the front door, not on the next restart of this.
+  it("sees a sitting that arrived after it started", async () => {
+    const before = (await listing()).sittings.length;
+    sitting("sit.part-2.html", { part: "2/2", slice: "-p2of2-aXX", shown: 2, pool: 4, population: 4, alreadyAnswered: 0 }, ["2:1", "2:2"]);
+    expect((await listing()).sittings.length).toBe(before + 1);
+  });
+
+  // The output directory is full of pages that are not sittings, including the
+  // front door itself and the probe above.
+  it("does not list the other pages in the directory", async () => {
+    const names = (await listing()).sittings.map((s) => s.name);
+    expect(names).not.toContain("probe.html");
+    expect(names.every((n) => n.startsWith("sit."))).toBe(true);
+  });
+
+  it("will not list to a page it did not serve", async () => {
+    const r = await (await fetch(`${base}/api/sittings?t=deadbeef`)).json();
+    expect(r.ok).toBe(false);
+  });
+});
+
 describe("the script itself", () => {
   it("parses", () => {
     expect(() => execFileSync(process.execPath, ["--check", SCRIPT])).not.toThrow();
