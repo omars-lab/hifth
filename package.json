@@ -79,7 +79,9 @@
     "tasks": "node scripts/gate-tasks.mjs --list",
     "tasks:doc": "node scripts/build-tasks-doc.mjs",
     "decisions": "node scripts/gate-decisions.mjs --list",
-    "decisions:doc": "node scripts/build-decisions-doc.mjs"
+    "decisions:doc": "node scripts/build-decisions-doc.mjs",
+    "decisions:board": "node scripts/build-decision-board.mjs",
+    "artifacts": "node scripts/artifact-sweep.mjs"
   },
   "pnpm": {
     "overrides": {
