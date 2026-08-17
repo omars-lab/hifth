@@ -205,8 +205,27 @@ other. A retraction takes a mark back out of the answered set.
 request, so a rebuilt sitting is live immediately; restarting mints a new token and
 every page a reader already has open quietly stops banking answers.
 
-Confirm the deal did not move: same number of parts, same total, and no mark that
-has been answered coming back round again.
+Then confirm the deal did not move — same number of parts, same total, and no mark
+that has been answered coming back round again. **Give it the same `--answered` list
+the rebuild got**, or it will grade the rebuild against a different set of answers
+than the rebuild used and be confidently wrong in whichever direction the difference
+runs:
+
+```
+pnpm audit:sittings -- --answered packages/etl/out/mark-answers.jsonl,packages/etl/out/<transcript>.json
+```
+
+It reads each built part back and holds it to what it says about itself: that the
+rectangles came from the displacements now on disk, that every part knows about every
+answer given, that nothing already answered is asked again, that no mark is dealt into
+two parts and none into nobody's, and that the count the reader is shown describes the
+population it claims to. A clean run prints the deal in one line — how many marks
+across how many parts, how many already answered, how many in all — which is the
+number worth putting in the commit message.
+
+It is not a gate and cannot be one: the parts are build products and the answers
+accumulate on the machine doing the serving, so in CI it would pass by being unable to
+look. Run it here, where the evidence is.
 
 ---
 
