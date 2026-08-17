@@ -145,7 +145,7 @@
     {
       "id": "comparison-crop",
       "question": "When the app shows a verse cut out of the printed page, what should it do about the neighbouring verses that come with it?",
-      "status": "open",
+      "status": "decided",
       "options": [
         {
           "id": "A",
@@ -166,15 +166,19 @@
         {
           "id": "D",
           "label": "Mark the words the two verses share, as well as the ones they do not"
+        },
+        {
+          "id": "F",
+          "label": "Fade the neighbours, mark the shared words green and the differing words yellow"
         }
       ],
       "artifact": "https://claude.ai/code/artifact/b7be0f22-3ff5-45b7-a5c1-850dd73ef1f1",
       "page": "docs/design/comparison-crop.html",
       "builtBy": "scripts/build-crop-options.mjs",
       "doc": "docs/decisions/comparison-crop.md",
-      "decided": null,
-      "by": null,
-      "date": null,
+      "decided": "F",
+      "by": "omar",
+      "date": "2026-08-16",
       "related": [
         "mark-placement",
         "word-selection",

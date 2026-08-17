@@ -584,3 +584,31 @@ KB gz, not the estimate — and to need `gate:assets` reviewed rather than assum
 probe is not a gate and will not become one: it reads the gitignored 378 MB page cache, so
 on a clean checkout it has nothing to read. Re-run it before writing the bake — the numbers
 above are of one pin.
+
+### ⑥ The look-alike panel draws one rectangle where the geometry gives it several · **open**
+
+Opened 2026-08-16 by the decision `comparison-crop`, which chose how to fix it. This row
+tracks the build, not the choice — the choice is made, recorded, and drawn.
+
+`bandsFor` returns one rectangle per printed line the ayah touches. `DiffView` takes their
+union and draws that, so it also draws whatever else is printed on those lines. Measured
+across both sides of all 2,544 drawable pairs: 5,088 crops, mean 69.8% of the drawn
+rectangle is the ayah it names, 820 of them (16.1%) more neighbour than ayah, worst 10.3%.
+The wash marks the words the two ayahs do not share; nothing distinguishes an unmarked
+neighbour from unmarked shared wording, and a reader can take one for the other.
+
+**What was chosen** (option F, 2026-08-16): the neighbours veiled with a paper-coloured
+scrim over the frame minus the bands; the shared range marked green; each divergent run
+marked yellow. The two tints stop meaning *which ayah* and start meaning *what the words
+are*, identically on both halves of the panel.
+
+**What that needs**, all inside `DiffView` and its stylesheet: an evenodd path for the
+scrim, a band per shared line, a band per divergent line, and two new tokens. No new data
+and no new geometry — `divergentRuns` and `bandsFor` already return every rectangle
+involved, which is what `scripts/build-crop-options.mjs` draws the option from, so the
+geometry is proven before the component moves. Existing behaviour to preserve: no edge, no
+shard or no page still renders nothing and the hop row keeps its plain note.
+
+**What it does not settle.** Which words get marked — read off the edge's spans, verified,
+unchanged. The exact green and yellow, chosen to survive over ink on cream and open to
+argument without reopening the decision.
