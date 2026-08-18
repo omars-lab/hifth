@@ -1959,6 +1959,22 @@ doing to them, and the cost of leaving it open is now visible: at fourteen in a 
 full pass over what is left would set aside something like two hundred and forty marks on the
 grounds that nobody could say what was wrong with them.
 
+**Eleven more on 2026-08-17, and this time they are not spread across the vocabulary.** They
+are five fathas, three hamzas, two kasras and one successive dammatan, on eleven pages
+between 333 and 596, no page carrying two. Forty-three marks now. What is new is that ten of
+the eleven are marks printed as a single piece of ink, and the sitting they came from was
+half doubled marks — thirty-three doubled against twenty-eight single among the marks
+answered. So *odd* was said about roughly one single mark in three and one doubled mark in
+thirty, a difference too large to be nothing in a sitting this size.
+
+Two readings of that, and the page cannot separate them. Either single marks really do carry
+more of whatever the oddity is — or *odd* is simply the button left when a reader has no word
+for what is wrong, and a doubled mark always gives them one: its rectangle is visibly the
+wrong size, which is a complaint with a name and its own button. On that second reading the
+gap says nothing about the print and everything about which complaints were available, which
+is the same instrument fault ㉗ describes from the other end. Nothing here decides between
+them, and the check that would is unchanged: hold the pages against a second printing.
+
 ### ⑮ Whether an answer given by pointing is the same evidence as one given by hand · **open**
 
 The sittings held so far measured what correcting a rectangle by hand costs. Of the 160 marks
@@ -2434,6 +2450,124 @@ asked about directly. If the shortfall is a consistent multiple, the box for a d
 being computed from one component of it and the repair is arithmetic; if it varies, the extent
 has to be measured per mark. Either way this is a change to what the rectangle *is*, not to
 where it goes, and it belongs in a different part of the pipeline from ㉔.
+
+#### A reader answered the question above on 2026-08-17, and the answer is *it varies*
+
+Ninety of these marks were put in front of somebody, drawn from the badly-matched population
+of the recomputed corpus; sixty-one came back with a correction, thirty-three of them doubled
+marks and twenty-eight single. This is the first time this item has had ground truth rather
+than an inference from match scores, and it settles the branch above and breaks the headline.
+
+**The population claim gets stronger, not weaker.** Doubled marks are 8,554 of the 326,515
+marks in the book — 2.6% — and 160 of the 329 the search refuses for matching badly, which is
+48.6%. Nineteen times their share. The rates, one row per kind, against a base rate that is
+essentially zero for anything single:
+
+| mark | in the book | refused | rate |
+| --- | ---: | ---: | ---: |
+| successive kasratan | 1,935 | 61 | 3.15% |
+| fathatan | 734 | 21 | 2.86% |
+| kasratan | 599 | 11 | 1.84% |
+| successive fathatan | 2,901 | 45 | 1.55% |
+| successive dammatan | 1,807 | 20 | 1.11% |
+| fatha | 122,948 | 67 | 0.05% |
+| kasra | 45,970 | 25 | 0.05% |
+| sukun | 37,148 | 1 | 0.00% |
+| shadda | 22,678 | 1 | 0.00% |
+
+**The heading of this item is wrong and is left standing.** *Drawn too small* was a prediction
+from the shape of the theory — two of something, a box for one — and the reader's rectangles do
+not support it. Of the thirty-three doubled marks, fourteen were made wider and nineteen
+narrower; the middle change in width is −0.13 units while the middle change *ignoring direction*
+is 0.57. The error is four times larger than its own average, which is another way of saying
+there is no average. Height is the same shape: +0.23 against a magnitude of 0.51.
+
+So it is the second branch. **The extent is not a multiple of anything and has to be measured
+per mark**, and the arithmetic repair the paragraph above hoped for does not exist.
+
+**Where in the rectangle the fault sits, which nobody had asked.** Measure each edge separately
+and the two populations come apart cleanly. For a doubled mark the near edge is nearly right and
+the far edge is not:
+
+| | left edge | right edge | top | bottom |
+| --- | ---: | ---: | ---: | ---: |
+| doubled marks | 0.209 | 0.549 | 0.220 | 0.471 |
+| single marks | 0.672 | 0.586 | 0.211 | 0.447 |
+
+A single mark's whole box slides — both side edges move about the same distance, which is what
+a placement error looks like. A doubled mark's box is anchored where it should be and runs to
+the wrong place, its far edge wrong by two and a half times its near edge. That is an extent
+fault in the plainest form the measurement can produce, and it is the strongest evidence this
+item has. Whether the near edge is the one the reading starts from is a guess worth checking
+rather than a claim; the geometry above does not know which way the line is read.
+
+**What each kind of fix could possibly buy, scored against the rectangles the reader settled
+on.** Every row is a ceiling — three of them are built from the reader's own answer and so
+cannot be reached by any rule, which is the point: they bound what is worth building.
+
+| what we draw | doubled | single |
+| --- | ---: | ---: |
+| the printed line, as we ship it today | 0.788 | 0.623 |
+| our rectangle, given the reader's size about our centre | 0.796 | 0.722 |
+| our rectangle, moved perfectly, at our size | 0.852 | 0.744 |
+| our rectangle, given the reader's size from our near edge | **0.868** | 0.711 |
+
+Read the columns and the split is the whole finding. **For a doubled mark the best thing that
+can be done is to fix the size and leave the position alone; for a single mark it is the exact
+reverse**, and a rule that treated the refused population as one thing would spend its effort
+on the wrong half of it either way.
+
+**And the refusal itself is vindicated.** The answer the search found and rejected is *worse*
+than what we ship in its place — 0.596 against 0.715 in overlap, and its centre 1.065 units
+from the reader's against 0.664. The search is not failing to notice a good answer here. It
+looked, found nothing it liked, and said so, and the rule that draws from the printed line
+instead was right to. These are hard marks and the queue is honest.
+
+**Two theories this sitting suggested and the corpus killed, both worth naming because both
+were reachable.** The thirteen hamza in the sitting all shipped at one size, 4.00 by 3.90,
+while hamza ships twenty-one sizes across the book — which looked like a class drawn from a
+constant. It is not: that size is 16,214 of the 16,385 hamza in the book, so the sitting was
+uniform because the book is, and that size is refused at 0.43%, which is the class's own rate
+to two decimal places. The second was the same idea one level down — that some particular size
+is the one that fails. Broken out by size, nothing stands out anywhere; successive kasratan
+ships 323 distinct sizes across 1,935 marks, which is very nearly one per mark, and the sizes
+that fail worst are the ones with the fewest marks under them. Both theories were the selected
+population describing its own selection, again.
+
+**One thing this cannot say.** Every measurement here is over marks the search refused. That
+the size is noisy among *refused* doubled marks does not establish it is noisy among the
+accepted ones, and no reader can settle that — it needs the ink extent measured under all
+8,554 of them, which is the free half of the paragraph above and is still owed.
+
+### ㉗ Counting what a reader pressed stopped meaning anything when tapping the ink was added · **confirmed**
+
+The sitting above reports eighty-five presses of *the rectangle is the wrong shape*, across
+sixty of the sixty-one marks somebody answered. Read as opinions that is overwhelming, and it
+is the first thing anybody reading the summary sees.
+
+Fifty-seven of those sixty marks also carry a tap on the ink. Tapping the ink puts the
+rectangle around what was tapped, which changes its size, and a size that changed is recorded
+as the shape having been called wrong — so the press was the tap, not a second judgement.
+**Three of the sixty are a shape complaint somebody made on its own.** Ninety-two placements
+split the same way: sixty-five came from a tap and twenty-seven from the arrows.
+
+This is not a reason to distrust the sitting, and the distinction matters. The rectangles the
+reader settled on are exactly as good as they were — a tap is a statement about where the box
+goes, made faster. What is broken is the **tally**: every count of how often a fault was named
+is now a count of how often a gesture was used, and the two stopped being the same thing the
+day the tap landed. The summary printed at the end of settling says *60 were reshaped, over 85
+separate goes* and means something much weaker than it sounds.
+
+**What would answer it.** Record what the reader did *and* how they did it, and count them
+apart — a shape called wrong by hand is a different row from a size that moved because a tap
+put the box somewhere. The transcript already carries the distinction on every placement; it
+is the shape events that do not, and nothing downstream separates them.
+
+**Why this is worth an item rather than a footnote.** A count that overstates a fault by twenty
+to one is the kind of number that gets quoted into a decision, and this one very nearly was:
+the doubled-mark finding above was reached from the geometry of the corrections, but *the rate*
+at which shape was called wrong is what suggested looking there, and on its own it would have
+pointed at every mark in the sitting equally.
 
 ## How can someone look at this for themselves?
 
