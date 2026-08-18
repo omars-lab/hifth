@@ -2569,6 +2569,43 @@ the doubled-mark finding above was reached from the geometry of the corrections,
 at which shape was called wrong is what suggested looking there, and on its own it would have
 pointed at every mark in the sitting equally.
 
+### ㉘ A rule that reaches for the ink, rather than resizing toward it, was checked against the whole book · **confirmed**
+
+Item ㉖ found that doubled marks want their size fixed and their position left alone, and
+scored candidates that resize the shipped rectangle toward the reader's own. But fifty-seven
+of the sixty-one marks in that sitting were placed by the reader *tapping the ink itself* —
+which means the reader's rectangle was already close to a much simpler rule: **take the ink
+under the window, not a resized guess about it.**
+
+That rule was checked two ways. First, against what the reader actually chose: of the pieces
+of ink in each mark's window, taking every piece whose middle falls inside the shipped
+rectangle reproduces the exact set the reader tapped on 96% of the fifty-seven — 94% of the
+doubled marks, 100% of the single ones. The rectangle it draws scores 0.847 against the
+reader's own on doubled marks and 0.769 on single ones, both above what ships today (0.788 and
+0.623) and above every resized-guess candidate ㉖ scored — because this one is not guessing a
+size, it is reading one off the print.
+
+Second, against the marks nobody is arguing about: the same rule was run over every mark on
+sixty pages spread through the book — 31,805 marks, about a tenth of the corpus, of which
+31,773 are marks the ink search already places with confidence today. On those, the rule's
+answer sits a median of 0.077 units from what ships, with 99.2% moving less than half a unit —
+close enough to call it the same answer. The 791 already-accepted doubled marks among them
+show the same thing from the other side: their size barely moves (width −0.075, height −0.088,
+against the several-unit corrections the refused doubled marks needed), which is the direct
+answer to what ㉖ left owed — the accepted doubled marks were not secretly wrong all along, so
+a fix aimed at the refused eighteenth of a percent will not quietly move the rest.
+
+The 32 refused marks in the same sixty pages moved the way ㉖ predicted: a median of 1.47
+units, four in five moving more than half a unit.
+
+**What this is not.** It is not a shipped fix, and it is not scored on marks nobody has looked
+at by eye except through this rule's own selection — the check above says the rule *agrees
+with the reader where a reader has looked*, not that it is right where nobody has. It has not
+been run as an escalation (fire only where the current rule refuses) and diffed against the
+production output the way ㉔ and ㉕ were, which is the check that would make the safety claim
+about the accepted 99.9% a guarantee rather than a sample. That is the next step, tracked
+alongside the rest of this item's population split.
+
 ## How can someone look at this for themselves?
 
 The measurement writes a page of evidence: the worst verdicts first, each one drawn at a size
