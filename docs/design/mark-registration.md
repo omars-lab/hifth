@@ -2606,6 +2606,38 @@ production output the way ㉔ and ㉕ were, which is the check that would make t
 about the accepted 99.9% a guarantee rather than a sample. That is the next step, tracked
 alongside the rest of this item's population split.
 
+### ㉙ Run as an escalation over every mark the book currently refuses, the rule mostly holds up and one way it does not · **confirmed**
+
+The step ㉘ left owed. The current corpus refuses exactly 329 marks — the same population ㉖'s
+table counts, so nothing has drifted between the two — and the rule was run as an escalation:
+fired only where the shipped rule already refuses, never touching the other 326,186. That gate
+is a fact about the code, not a sample of it, so **the accepted population's answers are
+unchanged by construction**, not by having been checked and found unchanged.
+
+Of the 329, the rule finds ink to draw from for 304. The other **25 have nothing under them
+that the rule can point to** — no piece of print whose middle falls inside the rectangle we
+already ship — and would have to keep today's rectangle rather than take a guess. Eleven of
+those twenty-five are hamza, out of seventy-one hamza in the refused population; four are marks
+already named in the print-oddities list above, which is the same kind of cross-check ㉖ ran
+against its own two killed theories — the marks the rule cannot answer for are disproportionately
+the marks something is already known to be wrong with, not a random slice.
+
+**Checked against the one place a reader's own answer exists for this exact population** — the
+thirty-three doubled marks from ㉖'s sitting, matched mark for mark rather than compared as two
+separate averages. Typical agreement is close: half of the thirty-three land within 0.064 units
+of what the reader drew, on both width and height together. But five do not, and one is not a
+near miss — on one mark the reader barely touched the size (0.04, −0.20) and the rule proposes
+growing it by (4.79, 12.35), more than a whole extra mark's worth of print. That is the union
+sweeping in a piece of ink the reader did not mean to include, and nothing in the rule as
+written would have stopped it. Four more disagree by two to four units, in both directions —
+sometimes the rule grows where the reader shrank.
+
+**What this changes about shipping it.** The zero-regression claim now holds as a guarantee, not
+a sample — that part of ㉘'s open question is answered. The other part is not: the rule needs
+something that refuses a piece union that has grown implausibly large relative to what we
+already ship, the same way it already refuses to guess when it finds no ink at all, before the
+outlier above stops being a risk on every mark rather than a known one on this one.
+
 ## How can someone look at this for themselves?
 
 The measurement writes a page of evidence: the worst verdicts first, each one drawn at a size
