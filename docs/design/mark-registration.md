@@ -1450,7 +1450,9 @@ If ① and ⑦ disagree, that is the most valuable outcome either can produce an
 produce alone: two instruments looking at the same rectangles from opposite directions,
 one of them wrong, and a reason to re-measure before three hundred thousand rectangles move.
 
-**What a sitting said.** Sixty marks, placed by one reader in about seven seconds each.
+**What a sitting said**, recorded in full in
+[`docs/validation/rulings/2026-08-12T1650-placement-residual-by-hand.seed23.json`](../validation/rulings/2026-08-12T1650-placement-residual-by-hand.seed23.json).
+Sixty marks, placed by one reader in about seven seconds each.
 Fifty-nine of the sixty landed nearer the corrected rectangle than the one the app draws
 today — 98%, and the interval around it reaches down only to 91%, so it clears half by a
 wide margin and **the correction points the right way**. The typical miss from today's
@@ -2170,7 +2172,9 @@ auditor, so the front door and the audit cannot disagree about how many parts ex
 
 ### ㉑ Whether a mark reached by pointing can ever be called only one kind of wrong · **confirmed**
 
-Sixty marks were sat on 2026-08-17, in two sittings, and every one came back saying both *the
+Sixty marks were sat on 2026-08-17, in
+[two sittings](../validation/rulings/2026-08-17-placement-what-kind-of-wrong-placed.seed23.settled.json),
+and every one came back saying both *the
 rectangle is in the wrong place* and *the rectangle is the wrong size*. Sixty out of sixty, for
 both words, with no mark anywhere saying one without the other. That is not what the reader was
 asked and it is not what they did.
@@ -2208,7 +2212,8 @@ for what a hand says, and the settler reading pointed and hand-placed answers un
 headings rather than pooling their words. Until then, the word-level counts from any sitting
 worked by pointing are not quoted, and the mark-level rate is.
 
-**A hundred and six more marks on 2026-08-17 said how big the distortion is, and it is not
+**[A hundred and six more marks on 2026-08-17](../validation/rulings/2026-08-14-placement-what-kind-of-wrong-fallback.seed23.settled.json)
+said how big the distortion is, and it is not
 fixed.** That sitting worked the marks the correction could not place at all, where the
 rectangle starts far from the ink rather than nearly on it, and the artefact all but vanished:
 one mark in a hundred and six was filed as in the wrong place while moving less than a
@@ -2235,7 +2240,8 @@ sitting checking a *good* rule would have to be drawn from.
 
 The correction places each mark from its own printed ink and accepts the match when the
 rectangle and the ink overlap by more than 0.55. The marks that clear that bar only just have
-never been looked at as a group, and §④ now records what happened when sixty of them were, in
+never been looked at as a group, and §④ now records what happened when
+[sixty of them were](../validation/rulings/2026-08-17-placement-what-kind-of-wrong-placed.seed23.settled.json), in
 two bands of thirty: **every hamza in both, eleven of eleven, was about a page unit across in
 the same direction with its size correct** — a median of 1.077 units in the weaker band and
 0.573 in the better one, against two thousandths of a unit for every other mark. Fatha and
@@ -2261,7 +2267,7 @@ from two bands are enough to say *look here*; they are not enough to edit the pl
 
 ### ㉓ Whether the marks we cannot place from ink are wrong in one way or in two · **answered**
 
-A full part of a hundred and six was sat on 2026-08-17 — every mark in it one the correction
+[A full part of a hundred and six was sat on 2026-08-17](../validation/rulings/2026-08-14-placement-what-kind-of-wrong-fallback.seed23.settled.json) — every mark in it one the correction
 could not place from its own ink, so the rectangle was inherited from the printed line
 instead. All hundred and six came back faulted, which is what that population is selected to
 produce and says nothing. What it did produce is a split nobody had looked for: **the two
@@ -2453,9 +2459,11 @@ where it goes, and it belongs in a different part of the pipeline from ㉔.
 
 #### A reader answered the question above on 2026-08-17, and the answer is *it varies*
 
-Ninety of these marks were put in front of somebody, drawn from the badly-matched population
+[Ninety of these marks were put in front of somebody](../validation/rulings/2026-08-17-placement-weak-size-part1.seed23.settled.json), drawn from the badly-matched population
 of the recomputed corpus; sixty-one came back with a correction, thirty-three of them doubled
-marks and twenty-eight single. This is the first time this item has had ground truth rather
+marks and twenty-eight single. That link is the sitting in its finished, ninety-of-ninety form —
+㉚ below says what changed once it was sat the rest of the way; the sixty-one-mark counts in
+this item are left standing as they were first read, not edited to match. This is the first time this item has had ground truth rather
 than an inference from match scores, and it settles the branch above and breaks the headline.
 
 **The population claim gets stronger, not weaker.** Doubled marks are 8,554 of the 326,515
@@ -2541,7 +2549,8 @@ accepted ones, and no reader can settle that — it needs the ink extent measure
 
 ### ㉗ Counting what a reader pressed stopped meaning anything when tapping the ink was added · **confirmed**
 
-The sitting above reports eighty-five presses of *the rectangle is the wrong shape*, across
+[The sitting above](../validation/rulings/2026-08-17-placement-weak-size-part1.seed23.settled.json)
+reports eighty-five presses of *the rectangle is the wrong shape*, across
 sixty of the sixty-one marks somebody answered. Read as opinions that is overwhelming, and it
 is the first thing anybody reading the summary sees.
 
@@ -2573,7 +2582,9 @@ pointed at every mark in the sitting equally.
 
 Item ㉖ found that doubled marks want their size fixed and their position left alone, and
 scored candidates that resize the shipped rectangle toward the reader's own. But fifty-seven
-of the sixty-one marks in that sitting were placed by the reader *tapping the ink itself* —
+of the sixty-one marks in
+[that sitting](../validation/rulings/2026-08-17-placement-weak-size-part1.seed23.settled.json)
+were placed by the reader *tapping the ink itself* —
 which means the reader's rectangle was already close to a much simpler rule: **take the ink
 under the window, not a resized guess about it.**
 
@@ -2623,7 +2634,9 @@ against its own two killed theories — the marks the rule cannot answer for are
 the marks something is already known to be wrong with, not a random slice.
 
 **Checked against the one place a reader's own answer exists for this exact population** — the
-thirty-three doubled marks from ㉖'s sitting, matched mark for mark rather than compared as two
+thirty-three doubled marks from
+[㉖'s sitting](../validation/rulings/2026-08-17-placement-weak-size-part1.seed23.settled.json),
+matched mark for mark rather than compared as two
 separate averages. Typical agreement is close: half of the thirty-three land within 0.064 units
 of what the reader drew, on both width and height together. But five do not, and one is not a
 near miss — on one mark the reader barely touched the size (0.04, −0.20) and the rule proposes
@@ -2641,8 +2654,10 @@ outlier above stops being a risk on every mark rather than a known one on this o
 ### ㉚ The same sitting, sat the rest of the way, says the outlier in ㉙ was not one mark · **confirmed**
 
 The sitting behind ㉖ and ㉙ was only two thirds sat — sixty-one of its ninety marks. It has
-since been finished: the same reader, the same report, continued rather than re-dealt, ninety
-of ninety now settled. **Do not re-read ㉙'s numbers as wrong** — they were an honest count of
+since been finished: the same reader, the same report, continued rather than re-dealt,
+[ninety of ninety now settled](../validation/rulings/2026-08-17-placement-weak-size-part1.seed23.settled.json) —
+the file this paragraph names is that finished state, and everything from ㉖ through ㉙ above
+was written against the sixty-one-mark state it replaces. **Do not re-read ㉙'s numbers as wrong** — they were an honest count of
 a smaller population, and this is what the fuller count says instead.
 
 The doubled marks with a reader's answer in this population grew from thirty-three to
