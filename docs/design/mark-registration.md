@@ -2702,6 +2702,14 @@ the worst of it, is exactly what the next sitting would answer — and unlike th
 population, which is already known to be almost entirely wrong, this is a population that ships
 today as trusted and has never had a rate put on it at all.
 
+**Where the eighty answers actually are.**
+[`docs/validation/rulings/2026-08-17-placement-edge-still-placed.seed23.settled.json`](../validation/rulings/2026-08-17-placement-edge-still-placed.seed23.settled.json)
+carries all eighty, mark by mark — the box we ship, the box the reader settled on, and how far
+apart the two are. It has no ink and no scripture in it, only page numbers, mark indices and
+offsets, which is what a ruling is allowed to hold. It cannot show the rectangle sitting on the
+mark; only a page that draws the print itself could do that, and the next section says plainly
+that no such page exists yet for this document to point to.
+
 ## How can someone look at this for themselves?
 
 The measurement writes a page of evidence: the worst verdicts first, each one drawn at a size
