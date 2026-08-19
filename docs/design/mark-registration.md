@@ -2667,6 +2667,41 @@ fathatan, on four pages between 115 and 260. Folded into the running note on ite
 which they extend rather than reopen: nothing here says the answer, only that it is still being
 asked in the same shape.
 
+### ㉛ The marks that ran out of room and still shipped as placed were never looked at, until now · **confirmed**
+
+㉕ found the code bug: a mark whose search ran out of room could still slip past the check meant
+to catch that and ship as if its own ink had confidently answered. The bug is fixed, but fixing
+it never asked the question it makes askable for the first time — of the marks that still run
+out of room and still clear the bar today, are the rectangles actually right? Nothing had looked.
+That population, on the corpus as it stands today, is 339 marks.
+
+Two sittings, drawn the same way as ㉖'s and ㉙'s, forty marks each, eighty of the 339 seen so
+far. **Every one of the eighty carries a complaint.** Unlike ㉗'s tally, where a tap set both
+words at once and inflated the count, here the movement is mostly real: seventy-nine of the
+eighty moved the rectangle by half a tenth of a unit or more, seventy-three had their size
+genuinely changed, and seventy-two needed both. This is not the tap artefact ㉗ named — it is
+eighty separate readers' judgements that the box was actually wrong.
+
+**But it is a small kind of wrong, not the fallback population's kind.** The reader moved these
+by a median of 0.676 units, worst 3.231 — real, but far short of the fallback set's multi-unit
+corrections. The size change is smaller still: a median of 0.07 to 0.09 units either way on
+boxes some five units across. Nobody called a page odd in the print, and nobody banked a mark as
+unclassifiable. These are rectangles that are a little off, on almost every mark, not rectangles
+that are badly out on a few.
+
+**What this says about ㉕'s own number.** ㉕ reported that the boundary-hit marks it had been
+undercounting matched at a median of 0.859 against 0.909 for a mark the search is happy with —
+close enough to read as *nearly as good*. A reader now says that gap is not nothing: it is a
+rectangle every one of eighty checked wanted moved and reshaped, just not by much. A search
+score near the floor was never a guarantee, and this is the first direct evidence of what the
+gap between 0.859 and 0.909 actually costs a reader.
+
+**What is not yet known.** 259 of the 339 have not been sat. Whether the fault holds at the same
+rate and the same size across the rest of the population, or whether these eighty happened to be
+the worst of it, is exactly what the next sitting would answer — and unlike the fallback
+population, which is already known to be almost entirely wrong, this is a population that ships
+today as trusted and has never had a rate put on it at all.
+
 ## How can someone look at this for themselves?
 
 The measurement writes a page of evidence: the worst verdicts first, each one drawn at a size
