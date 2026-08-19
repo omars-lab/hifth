@@ -2725,6 +2725,60 @@ offsets, which is what a ruling is allowed to hold. It cannot show the rectangle
 mark; only a page that draws the print itself could do that, and the next section says plainly
 that no such page exists yet for this document to point to.
 
+### ㉜ What should refuse a piece union too large to trust · **open**
+
+**None of the rule ㉘–㉚ describe has been written yet.** Everything above was scored from a
+script that was run twice and never checked in — once as a sample, once as an escalation — so
+there is nothing today for a guard to attach to. Designing the guard means designing the whole
+rule's shape at the same time, not adding a clause to something already shipping.
+
+**Why this cannot wait for someone to feel like writing it.** ㉙ already said the rule was not
+shippable without a guard against a piece union that has grown implausibly large. ㉚ found that
+this is no longer a rare failure to watch for — it is what happens on more than a third of
+doubled marks. Of the 229 marks nobody has ever sat, this rule already answers 216 without a
+person, but every one of those answers is only as trustworthy as the guard that has not been
+designed yet. Leaving it undesigned does not leave the rule cautious; it leaves it unusable,
+because there is no way today to tell a good answer from one that swept in a neighbour's ink.
+
+**The shape of the guard.** The rule already has one refusal built into its own description: when
+no piece of ink under the search window has its middle inside the rectangle we ship today, there
+is nothing to point to, and the rule must keep that rectangle rather than guess. Twenty-five of
+the 329 marks the corpus refuses fall into exactly that case. The size guard is the same shape of
+decision, aimed at the opposite failure — a piece was found, but the box drawn around it grew far
+past anything the rectangle we ship today would suggest. When that happens, the guard should
+throw the answer away and keep the shipped rectangle, exactly as if no piece had been found at
+all, rather than let a reader see a box that swept in ink they never meant to include.
+
+**What "far past" should mean.** A fixed number of units is the wrong measure on its own, because
+a doubled mark's box and a single mark's box are not drawn at the same size to begin with — the
+same growth that is enormous on one is ordinary on the other. Measured instead as how many times
+larger the candidate's area is than the rectangle already shipping, the numbers already collected
+point at a gap rather than a line: the forty-five doubled marks with a reader's own answer agree
+with the rule at a median of 0.064 combined units when they agree at all, close enough to call the
+same box, while the worst case (`274:59`) grew from a barely-touched correction to a candidate
+(4.79, 12.35) units larger on a box some five units across — several times its own shipped area.
+Between those two there is room for a guard; where exactly in that room is not yet known, because
+the sitting behind ㉚ recorded whether each of the seventeen worst marks disagreed by two units or
+more, not the size of the candidate box itself, so the individual area ratios for anything but the
+worst case have never been pulled out and looked at.
+
+**What would confirm this or kill it.** Before this ships as a threshold rather than a shape, it
+needs checking the way ㉖'s own theories were checked, not assumed: run a candidate area-ratio
+cutoff against all forty-five doubled marks that already carry a reader's answer, and see two
+things separately — does it catch `274:59` and the other marks ㉚ counted as disagreeing by two
+units or more, and does it stay quiet on the marks that already agree closely, the ones ㉙ called
+the accepted population's safety guarantee. A cutoff that does both is a candidate to escalate the
+way ㉙ escalated the rule itself, over the full 329; a cutoff that has to choose between the two —
+catching the bad marks only by also refusing marks that were already fine — means area alone is
+not separating the two populations, and the guard needs a second measure alongside it, not a
+bigger number on the same one.
+
+**What this does not settle.** A shape and a starting number to test are not a shipped guard, and
+this item settles neither the exact cutoff nor the re-deal question left open above — whether to
+run the rule, once guarded, on the 216 of 229 never-sat marks it could answer, or to wait until
+the guard itself has been checked against ground truth first. Both remain for whoever writes and
+checks the rule this designs.
+
 ## How can someone look at this for themselves?
 
 The measurement writes a page of evidence: the worst verdicts first, each one drawn at a size
