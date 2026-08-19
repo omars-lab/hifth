@@ -1,6 +1,6 @@
 {
  "built": "mark-settled",
- "settledAt": "2026-08-18T01:01:29.907Z",
+ "settledAt": "2026-08-19T19:08:14.453Z",
  "rows": "out/mark-rows.line-tilt.json",
  "rowsFingerprint": "5442d961",
  "set": "weak",
@@ -11,21 +11,873 @@
   {
    "file": "mark-report-weak-p1of3-a8edff256.23.json",
    "slice": "-p1of3-a8edff256",
-   "finished": "2026-08-18T01:00:41.959Z",
+   "finished": "2026-08-19T19:05:06.640Z",
    "shown": 90,
    "seen": 90,
    "looked": 90,
    "whole": true,
-   "answers": 188,
-   "spoke": 61
+   "answers": 311,
+   "spoke": 90
   }
  ],
- "banked": [],
- "marks": 61,
- "faulted": 61,
- "defects": 11,
- "answers": 188,
+ "banked": [
+  {
+   "file": "mark-answers.today.jsonl",
+   "statements": 105,
+   "added": 8,
+   "marks": 29,
+   "only": 0
+  }
+ ],
+ "marks": 90,
+ "faulted": 90,
+ "defects": 15,
+ "answers": 319,
  "settledMarks": [
+  {
+   "id": "4:281",
+   "page": 4,
+   "line": 8,
+   "name": "hamza",
+   "rule": "line-tilt",
+   "words": [
+    "placement",
+    "wrong-shape"
+   ],
+   "fault": true,
+   "box": [
+    194.9,
+    263.3,
+    4,
+    3.9
+   ],
+   "drawn": [
+    193.761,
+    261.857,
+    4,
+    3.9
+   ],
+   "settled": [
+    193.255,
+    262.125,
+    4.53,
+    3.87
+   ],
+   "hand": [
+    -0.506,
+    0.268
+   ],
+   "to": [
+    -1.645,
+    -1.175
+   ],
+   "size": [
+    4.53,
+    3.87
+   ],
+   "was": [
+    4,
+    3.9
+   ],
+   "goes": 1,
+   "reshapes": 1,
+   "notes": []
+  },
+  {
+   "id": "30:465",
+   "page": 30,
+   "line": 11,
+   "name": "fathatan",
+   "rule": "line-tilt",
+   "words": [
+    "placement",
+    "wrong-shape"
+   ],
+   "fault": true,
+   "box": [
+    171.7,
+    376.6,
+    6.6,
+    5.3
+   ],
+   "drawn": [
+    171.11,
+    375.434,
+    6.6,
+    5.3
+   ],
+   "settled": [
+    171.16,
+    375.69,
+    7.2,
+    5.46
+   ],
+   "hand": [
+    0.05,
+    0.256
+   ],
+   "to": [
+    -0.54,
+    -0.91
+   ],
+   "size": [
+    7.2,
+    5.46
+   ],
+   "was": [
+    6.6,
+    5.3
+   ],
+   "goes": 1,
+   "reshapes": 1,
+   "notes": []
+  },
+  {
+   "id": "54:420",
+   "page": 54,
+   "line": 11,
+   "name": "hamza",
+   "rule": "line-tilt",
+   "words": [
+    "placement",
+    "wrong-shape"
+   ],
+   "fault": true,
+   "box": [
+    93.6,
+    386.9,
+    4,
+    3.9
+   ],
+   "drawn": [
+    92.177,
+    384.575,
+    4,
+    3.9
+   ],
+   "settled": [
+    91.525,
+    384.655,
+    5.07,
+    3.87
+   ],
+   "hand": [
+    -0.652,
+    0.08
+   ],
+   "to": [
+    -2.075,
+    -2.245
+   ],
+   "size": [
+    5.07,
+    3.87
+   ],
+   "was": [
+    4,
+    3.9
+   ],
+   "goes": 1,
+   "reshapes": 1,
+   "notes": []
+  },
+  {
+   "id": "64:377",
+   "page": 64,
+   "line": 11,
+   "name": "fatha",
+   "rule": "line-tilt",
+   "words": [
+    "placement",
+    "wrong-shape"
+   ],
+   "fault": true,
+   "box": [
+    173.2,
+    372.9,
+    6.3,
+    3.4
+   ],
+   "drawn": [
+    170.177,
+    370.655,
+    6.3,
+    3.4
+   ],
+   "settled": [
+    172.84,
+    371.435,
+    6,
+    4.93
+   ],
+   "hand": [
+    2.663,
+    0.78
+   ],
+   "to": [
+    -0.36,
+    -1.465
+   ],
+   "size": [
+    6,
+    4.93
+   ],
+   "was": [
+    6.3,
+    3.4
+   ],
+   "goes": 1,
+   "reshapes": 1,
+   "notes": []
+  },
+  {
+   "id": "70:508",
+   "page": 70,
+   "line": 14,
+   "name": "successive dammatan",
+   "rule": "line-tilt",
+   "words": [
+    "placement",
+    "wrong-shape"
+   ],
+   "fault": true,
+   "box": [
+    162.2,
+    481.9,
+    8.2,
+    6.4
+   ],
+   "drawn": [
+    161.085,
+    481.002,
+    8.2,
+    6.4
+   ],
+   "settled": [
+    161.29,
+    481.045,
+    6.82,
+    6.89
+   ],
+   "hand": [
+    0.205,
+    0.043
+   ],
+   "to": [
+    -0.91,
+    -0.855
+   ],
+   "size": [
+    6.82,
+    6.89
+   ],
+   "was": [
+    8.2,
+    6.4
+   ],
+   "goes": 1,
+   "reshapes": 1,
+   "notes": []
+  },
+  {
+   "id": "76:150",
+   "page": 76,
+   "line": 5,
+   "name": "fatha",
+   "rule": "line-tilt",
+   "words": [
+    "retracted",
+    "placement",
+    "wrong-shape"
+   ],
+   "fault": true,
+   "box": [
+    212.8,
+    160.5,
+    8.5,
+    3.9
+   ],
+   "drawn": [
+    211.64,
+    159.347,
+    8.5,
+    3.9
+   ],
+   "settled": [
+    212.57,
+    159.047,
+    8.51,
+    5.57
+   ],
+   "hand": [
+    0.93,
+    -0.3
+   ],
+   "to": [
+    -0.23,
+    -1.453
+   ],
+   "size": [
+    8.51,
+    5.57
+   ],
+   "was": [
+    8.5,
+    3.9
+   ],
+   "goes": 9,
+   "reshapes": 8,
+   "notes": []
+  },
+  {
+   "id": "76:154",
+   "page": 76,
+   "line": 5,
+   "name": "fatha",
+   "rule": "line-tilt",
+   "words": [
+    "placement",
+    "wrong-shape"
+   ],
+   "fault": true,
+   "box": [
+    179.8,
+    167.7,
+    6.3,
+    3.4
+   ],
+   "drawn": [
+    178.554,
+    166.495,
+    6.3,
+    3.4
+   ],
+   "settled": [
+    179.11,
+    166.315,
+    6,
+    4.53
+   ],
+   "hand": [
+    0.556,
+    -0.18
+   ],
+   "to": [
+    -0.69,
+    -1.385
+   ],
+   "size": [
+    6,
+    4.53
+   ],
+   "was": [
+    6.3,
+    3.4
+   ],
+   "goes": 1,
+   "reshapes": 1,
+   "notes": []
+  },
+  {
+   "id": "77:391",
+   "page": 77,
+   "line": 11,
+   "name": "fatha",
+   "rule": "line-tilt",
+   "words": [
+    "placement",
+    "wrong-shape"
+   ],
+   "fault": true,
+   "box": [
+    326.3,
+    368.9,
+    6.2,
+    3.3
+   ],
+   "drawn": [
+    325.136,
+    367.449,
+    6.2,
+    3.3
+   ],
+   "settled": [
+    325.82,
+    367.79,
+    6,
+    4.2
+   ],
+   "hand": [
+    0.684,
+    0.341
+   ],
+   "to": [
+    -0.48,
+    -1.11
+   ],
+   "size": [
+    6,
+    4.2
+   ],
+   "was": [
+    6.2,
+    3.3
+   ],
+   "goes": 1,
+   "reshapes": 1,
+   "notes": []
+  },
+  {
+   "id": "86:342",
+   "page": 86,
+   "line": 9,
+   "name": "hamza",
+   "rule": "line-tilt",
+   "words": [
+    "placement",
+    "wrong-shape"
+   ],
+   "fault": true,
+   "box": [
+    157.6,
+    299.4,
+    4,
+    3.9
+   ],
+   "drawn": [
+    156.281,
+    298.241,
+    4,
+    3.9
+   ],
+   "settled": [
+    155.79,
+    298.125,
+    4.8,
+    3.87
+   ],
+   "hand": [
+    -0.491,
+    -0.116
+   ],
+   "to": [
+    -1.81,
+    -1.275
+   ],
+   "size": [
+    4.8,
+    3.87
+   ],
+   "was": [
+    4,
+    3.9
+   ],
+   "goes": 1,
+   "reshapes": 1,
+   "notes": []
+  },
+  {
+   "id": "86:392",
+   "page": 86,
+   "line": 10,
+   "name": "fathatan",
+   "rule": "line-tilt",
+   "words": [
+    "placement",
+    "wrong-shape"
+   ],
+   "fault": true,
+   "box": [
+    75.4,
+    338.7,
+    6.8,
+    5.4
+   ],
+   "drawn": [
+    74.679,
+    337.717,
+    6.8,
+    5.4
+   ],
+   "settled": [
+    74.595,
+    337.64,
+    6.79,
+    6
+   ],
+   "hand": [
+    -0.084,
+    -0.077
+   ],
+   "to": [
+    -0.805,
+    -1.06
+   ],
+   "size": [
+    6.79,
+    6
+   ],
+   "was": [
+    6.8,
+    5.4
+   ],
+   "goes": 1,
+   "reshapes": 1,
+   "notes": []
+  },
+  {
+   "id": "112:256",
+   "page": 112,
+   "line": 8,
+   "name": "hamza",
+   "rule": "line-tilt",
+   "words": [
+    "placement",
+    "wrong-shape"
+   ],
+   "fault": true,
+   "box": [
+    308.3,
+    283.6,
+    4,
+    3.9
+   ],
+   "drawn": [
+    306.944,
+    282.079,
+    4,
+    3.9
+   ],
+   "settled": [
+    306.725,
+    282.125,
+    4.53,
+    3.87
+   ],
+   "hand": [
+    -0.219,
+    0.046
+   ],
+   "to": [
+    -1.575,
+    -1.475
+   ],
+   "size": [
+    4.53,
+    3.87
+   ],
+   "was": [
+    4,
+    3.9
+   ],
+   "goes": 1,
+   "reshapes": 1,
+   "notes": []
+  },
+  {
+   "id": "115:470",
+   "page": 115,
+   "line": 14,
+   "name": "successive dammatan",
+   "rule": "line-tilt",
+   "words": [
+    "placement",
+    "wrong-shape",
+    "print-defect"
+   ],
+   "fault": true,
+   "box": [
+    64.4,
+    476.4,
+    8.2,
+    6.4
+   ],
+   "drawn": [
+    63.395,
+    475.481,
+    8.2,
+    6.4
+   ],
+   "settled": [
+    63.745,
+    475.58,
+    7.63,
+    6.36
+   ],
+   "hand": [
+    0.35,
+    0.099
+   ],
+   "to": [
+    -0.655,
+    -0.82
+   ],
+   "size": [
+    7.63,
+    6.36
+   ],
+   "was": [
+    8.2,
+    6.4
+   ],
+   "goes": 1,
+   "reshapes": 1,
+   "notes": [
+    "Odd — I cannot say how"
+   ]
+  },
+  {
+   "id": "132:74",
+   "page": 132,
+   "line": 2,
+   "name": "kasra",
+   "rule": "line-tilt",
+   "words": [
+    "placement",
+    "wrong-shape"
+   ],
+   "fault": true,
+   "box": [
+    74.1,
+    70.5,
+    6.3,
+    3.4
+   ],
+   "drawn": [
+    71.508,
+    67.202,
+    6.3,
+    3.4
+   ],
+   "settled": [
+    73.38,
+    67.91,
+    6,
+    6.4
+   ],
+   "hand": [
+    1.872,
+    0.708
+   ],
+   "to": [
+    -0.72,
+    -2.59
+   ],
+   "size": [
+    6,
+    6.4
+   ],
+   "was": [
+    6.3,
+    3.4
+   ],
+   "goes": 1,
+   "reshapes": 1,
+   "notes": []
+  },
+  {
+   "id": "138:226",
+   "page": 138,
+   "line": 7,
+   "name": "hamza",
+   "rule": "line-tilt",
+   "words": [
+    "placement",
+    "wrong-shape",
+    "print-defect"
+   ],
+   "fault": true,
+   "box": [
+    188.2,
+    247.2,
+    4,
+    3.9
+   ],
+   "drawn": [
+    186.563,
+    245.684,
+    4,
+    3.9
+   ],
+   "settled": [
+    185.835,
+    245.195,
+    7.11,
+    3.87
+   ],
+   "hand": [
+    -0.728,
+    -0.489
+   ],
+   "to": [
+    -2.365,
+    -2.005
+   ],
+   "size": [
+    7.11,
+    3.87
+   ],
+   "was": [
+    4,
+    3.9
+   ],
+   "goes": 1,
+   "reshapes": 1,
+   "notes": [
+    "Odd — I cannot say how"
+   ]
+  },
+  {
+   "id": "143:10",
+   "page": 143,
+   "line": 1,
+   "name": "hamza",
+   "rule": "line-tilt",
+   "words": [
+    "placement",
+    "wrong-shape"
+   ],
+   "fault": true,
+   "box": [
+    256.3,
+    13.3,
+    4,
+    3.9
+   ],
+   "drawn": [
+    255.161,
+    11.648,
+    4,
+    3.9
+   ],
+   "settled": [
+    254.73,
+    10.935,
+    4.8,
+    3.87
+   ],
+   "hand": [
+    -0.431,
+    -0.713
+   ],
+   "to": [
+    -1.57,
+    -2.365
+   ],
+   "size": [
+    4.8,
+    3.87
+   ],
+   "was": [
+    4,
+    3.9
+   ],
+   "goes": 1,
+   "reshapes": 1,
+   "notes": []
+  },
+  {
+   "id": "154:252",
+   "page": 154,
+   "line": 7,
+   "name": "small yeh",
+   "rule": "line-tilt",
+   "words": [
+    "retracted",
+    "placement",
+    "wrong-shape",
+    "print-defect"
+   ],
+   "fault": true,
+   "box": [
+    316.6,
+    241.9,
+    6.4,
+    4.7
+   ],
+   "drawn": [
+    313.412,
+    239.802,
+    6.4,
+    4.7
+   ],
+   "settled": [
+    312.652,
+    238.592,
+    10.15,
+    4.66
+   ],
+   "hand": [
+    -0.76,
+    -1.21
+   ],
+   "to": [
+    -3.948,
+    -3.308
+   ],
+   "size": [
+    10.15,
+    4.66
+   ],
+   "was": [
+    6.4,
+    4.7
+   ],
+   "goes": 7,
+   "reshapes": 9,
+   "notes": [
+    "Odd — I cannot say how"
+   ]
+  },
+  {
+   "id": "157:231",
+   "page": 157,
+   "line": 7,
+   "name": "successive kasratan",
+   "rule": "line-tilt",
+   "words": [
+    "placement",
+    "wrong-shape"
+   ],
+   "fault": true,
+   "box": [
+    255.5,
+    245.8,
+    8.3,
+    6.6
+   ],
+   "drawn": [
+    254.359,
+    244.48,
+    8.3,
+    6.6
+   ],
+   "settled": [
+    254.645,
+    244.31,
+    7.07,
+    8
+   ],
+   "hand": [
+    0.286,
+    -0.17
+   ],
+   "to": [
+    -0.855,
+    -1.49
+   ],
+   "size": [
+    7.07,
+    8
+   ],
+   "was": [
+    8.3,
+    6.6
+   ],
+   "goes": 1,
+   "reshapes": 1,
+   "notes": []
+  },
   {
    "id": "158:44",
    "page": 158,
@@ -70,6 +922,447 @@
    "was": [
     4,
     3.9
+   ],
+   "goes": 1,
+   "reshapes": 1,
+   "notes": []
+  },
+  {
+   "id": "168:82",
+   "page": 168,
+   "line": 3,
+   "name": "successive kasratan",
+   "rule": "line-tilt",
+   "words": [
+    "placement",
+    "wrong-shape"
+   ],
+   "fault": true,
+   "box": [
+    158.6,
+    106,
+    7.1,
+    5.5
+   ],
+   "drawn": [
+    157.833,
+    104.641,
+    7.1,
+    5.5
+   ],
+   "settled": [
+    157.905,
+    104.13,
+    7.33,
+    5.46
+   ],
+   "hand": [
+    0.072,
+    -0.511
+   ],
+   "to": [
+    -0.695,
+    -1.87
+   ],
+   "size": [
+    7.33,
+    5.46
+   ],
+   "was": [
+    7.1,
+    5.5
+   ],
+   "goes": 1,
+   "reshapes": 1,
+   "notes": []
+  },
+  {
+   "id": "174:88",
+   "page": 174,
+   "line": 3,
+   "name": "hamza",
+   "rule": "line-tilt",
+   "words": [
+    "placement",
+    "wrong-shape"
+   ],
+   "fault": true,
+   "box": [
+    309.8,
+    107.1,
+    4,
+    3.9
+   ],
+   "drawn": [
+    307.414,
+    105.555,
+    4,
+    3.9
+   ],
+   "settled": [
+    307.585,
+    105.795,
+    4.93,
+    3.73
+   ],
+   "hand": [
+    0.171,
+    0.24
+   ],
+   "to": [
+    -2.215,
+    -1.305
+   ],
+   "size": [
+    4.93,
+    3.73
+   ],
+   "was": [
+    4,
+    3.9
+   ],
+   "goes": 1,
+   "reshapes": 1,
+   "notes": []
+  },
+  {
+   "id": "182:442",
+   "page": 182,
+   "line": 13,
+   "name": "successive fathatan",
+   "rule": "line-tilt",
+   "words": [
+    "placement",
+    "wrong-shape"
+   ],
+   "fault": true,
+   "box": [
+    66.5,
+    442.5,
+    8.6,
+    4
+   ],
+   "drawn": [
+    65.116,
+    441.225,
+    8.6,
+    4
+   ],
+   "settled": [
+    65.43,
+    441.135,
+    7.34,
+    3.87
+   ],
+   "hand": [
+    0.314,
+    -0.09
+   ],
+   "to": [
+    -1.07,
+    -1.365
+   ],
+   "size": [
+    7.34,
+    3.87
+   ],
+   "was": [
+    8.6,
+    4
+   ],
+   "goes": 2,
+   "reshapes": 2,
+   "notes": []
+  },
+  {
+   "id": "208:40",
+   "page": 208,
+   "line": 4,
+   "name": "hamza",
+   "rule": "line-tilt",
+   "words": [
+    "placement",
+    "wrong-shape"
+   ],
+   "fault": true,
+   "box": [
+    290.9,
+    142.3,
+    4,
+    3.9
+   ],
+   "drawn": [
+    289.284,
+    140.079,
+    4,
+    3.9
+   ],
+   "settled": [
+    288.83,
+    140.065,
+    4.84,
+    3.73
+   ],
+   "hand": [
+    -0.454,
+    -0.014
+   ],
+   "to": [
+    -2.07,
+    -2.235
+   ],
+   "size": [
+    4.84,
+    3.73
+   ],
+   "was": [
+    4,
+    3.9
+   ],
+   "goes": 1,
+   "reshapes": 1,
+   "notes": []
+  },
+  {
+   "id": "216:209",
+   "page": 216,
+   "line": 7,
+   "name": "kasra",
+   "rule": "line-tilt",
+   "words": [
+    "placement",
+    "wrong-shape"
+   ],
+   "fault": true,
+   "box": [
+    199.8,
+    250.3,
+    6.3,
+    3.4
+   ],
+   "drawn": [
+    197.993,
+    248.845,
+    6.3,
+    3.4
+   ],
+   "settled": [
+    199.24,
+    248.715,
+    6,
+    5.07
+   ],
+   "hand": [
+    1.247,
+    -0.13
+   ],
+   "to": [
+    -0.56,
+    -1.585
+   ],
+   "size": [
+    6,
+    5.07
+   ],
+   "was": [
+    6.3,
+    3.4
+   ],
+   "goes": 1,
+   "reshapes": 1,
+   "notes": []
+  },
+  {
+   "id": "217:248",
+   "page": 217,
+   "line": 7,
+   "name": "fatha",
+   "rule": "line-tilt",
+   "words": [
+    "placement",
+    "wrong-shape"
+   ],
+   "fault": true,
+   "box": [
+    306.3,
+    235.7,
+    6.3,
+    3.4
+   ],
+   "drawn": [
+    303.907,
+    233.467,
+    6.3,
+    3.4
+   ],
+   "settled": [
+    305.77,
+    234.18,
+    6,
+    4.8
+   ],
+   "hand": [
+    1.863,
+    0.713
+   ],
+   "to": [
+    -0.53,
+    -1.52
+   ],
+   "size": [
+    6,
+    4.8
+   ],
+   "was": [
+    6.3,
+    3.4
+   ],
+   "goes": 1,
+   "reshapes": 1,
+   "notes": []
+  },
+  {
+   "id": "218:492",
+   "page": 218,
+   "line": 13,
+   "name": "successive fathatan",
+   "rule": "line-tilt",
+   "words": [
+    "placement",
+    "wrong-shape"
+   ],
+   "fault": true,
+   "box": [
+    67.5,
+    438.8,
+    9.6,
+    3.8
+   ],
+   "drawn": [
+    66.497,
+    437.659,
+    9.6,
+    3.8
+   ],
+   "settled": [
+    66.46,
+    437.405,
+    8,
+    3.67
+   ],
+   "hand": [
+    -0.037,
+    -0.254
+   ],
+   "to": [
+    -1.04,
+    -1.395
+   ],
+   "size": [
+    8,
+    3.67
+   ],
+   "was": [
+    9.6,
+    3.8
+   ],
+   "goes": 1,
+   "reshapes": 1,
+   "notes": []
+  },
+  {
+   "id": "222:546",
+   "page": 222,
+   "line": 15,
+   "name": "successive kasratan",
+   "rule": "line-tilt",
+   "words": [
+    "placement",
+    "wrong-shape"
+   ],
+   "fault": true,
+   "box": [
+    61.1,
+    534.5,
+    8.3,
+    6.6
+   ],
+   "drawn": [
+    60.726,
+    533.833,
+    8.3,
+    6.6
+   ],
+   "settled": [
+    60.715,
+    533.705,
+    7.73,
+    6.81
+   ],
+   "hand": [
+    -0.011,
+    -0.128
+   ],
+   "to": [
+    -0.385,
+    -0.795
+   ],
+   "size": [
+    7.73,
+    6.81
+   ],
+   "was": [
+    8.3,
+    6.6
+   ],
+   "goes": 1,
+   "reshapes": 1,
+   "notes": []
+  },
+  {
+   "id": "226:326",
+   "page": 226,
+   "line": 10,
+   "name": "successive kasratan",
+   "rule": "line-tilt",
+   "words": [
+    "placement",
+    "wrong-shape"
+   ],
+   "fault": true,
+   "box": [
+    217.1,
+    362.1,
+    8,
+    6.5
+   ],
+   "drawn": [
+    215.992,
+    360.229,
+    8,
+    6.5
+   ],
+   "settled": [
+    216.26,
+    360.555,
+    7.34,
+    7.59
+   ],
+   "hand": [
+    0.268,
+    0.326
+   ],
+   "to": [
+    -0.84,
+    -1.545
+   ],
+   "size": [
+    7.34,
+    7.59
+   ],
+   "was": [
+    8,
+    6.5
    ],
    "goes": 1,
    "reshapes": 1,
@@ -123,6 +1416,156 @@
    "goes": 1,
    "reshapes": 1,
    "notes": []
+  },
+  {
+   "id": "244:132",
+   "page": 244,
+   "line": 4,
+   "name": "damma",
+   "rule": "line-tilt",
+   "words": [
+    "placement",
+    "wrong-shape"
+   ],
+   "fault": true,
+   "box": [
+    53.7,
+    117.8,
+    5.3,
+    6.6
+   ],
+   "drawn": [
+    51.732,
+    115.458,
+    5.3,
+    6.6
+   ],
+   "settled": [
+    49.287,
+    113.006,
+    5.35,
+    6.7
+   ],
+   "hand": [
+    -2.445,
+    -2.452
+   ],
+   "to": [
+    -4.413,
+    -4.794
+   ],
+   "size": [
+    5.35,
+    6.7
+   ],
+   "was": [
+    5.3,
+    6.6
+   ],
+   "goes": 5,
+   "reshapes": 3,
+   "notes": []
+  },
+  {
+   "id": "255:174",
+   "page": 255,
+   "line": 8,
+   "name": "successive kasratan",
+   "rule": "line-tilt",
+   "words": [
+    "placement",
+    "wrong-shape"
+   ],
+   "fault": true,
+   "box": [
+    200.3,
+    287.8,
+    9.5,
+    6.9
+   ],
+   "drawn": [
+    198.791,
+    286.727,
+    9.5,
+    6.9
+   ],
+   "settled": [
+    199.045,
+    286.76,
+    10.67,
+    6.8
+   ],
+   "hand": [
+    0.254,
+    0.033
+   ],
+   "to": [
+    -1.255,
+    -1.04
+   ],
+   "size": [
+    10.67,
+    6.8
+   ],
+   "was": [
+    9.5,
+    6.9
+   ],
+   "goes": 1,
+   "reshapes": 1,
+   "notes": []
+  },
+  {
+   "id": "260:248",
+   "page": 260,
+   "line": 7,
+   "name": "successive fathatan",
+   "rule": "line-tilt",
+   "words": [
+    "placement",
+    "wrong-shape",
+    "print-defect"
+   ],
+   "fault": true,
+   "box": [
+    63.2,
+    228.5,
+    8.9,
+    4
+   ],
+   "drawn": [
+    61.078,
+    224.721,
+    8.9,
+    4
+   ],
+   "settled": [
+    61.745,
+    226.075,
+    11.47,
+    7.07
+   ],
+   "hand": [
+    0.667,
+    1.354
+   ],
+   "to": [
+    -1.455,
+    -2.425
+   ],
+   "size": [
+    11.47,
+    7.07
+   ],
+   "was": [
+    8.9,
+    4
+   ],
+   "goes": 2,
+   "reshapes": 2,
+   "notes": [
+    "Odd — I cannot say how"
+   ]
   },
   {
    "id": "260:262",
@@ -820,6 +2263,7 @@
    "name": "hamza",
    "rule": "line-tilt",
    "words": [
+    "retracted",
     "placement",
     "wrong-shape",
     "print-defect"
@@ -2201,6 +3645,7 @@
    "name": "fatha",
    "rule": "line-tilt",
    "words": [
+    "retracted",
     "placement",
     "print-defect"
    ],
@@ -2644,6 +4089,7 @@
    "name": "fatha",
    "rule": "line-tilt",
    "words": [
+    "retracted",
     "placement",
     "wrong-shape",
     "print-defect"
@@ -2895,6 +4341,7 @@
    "name": "fatha",
    "rule": "line-tilt",
    "words": [
+    "retracted",
     "placement",
     "wrong-shape",
     "print-defect"
