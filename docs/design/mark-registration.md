@@ -2638,6 +2638,35 @@ something that refuses a piece union that has grown implausibly large relative t
 already ship, the same way it already refuses to guess when it finds no ink at all, before the
 outlier above stops being a risk on every mark rather than a known one on this one.
 
+### ㉚ The same sitting, sat the rest of the way, says the outlier in ㉙ was not one mark · **confirmed**
+
+The sitting behind ㉖ and ㉙ was only two thirds sat — sixty-one of its ninety marks. It has
+since been finished: the same reader, the same report, continued rather than re-dealt, ninety
+of ninety now settled. **Do not re-read ㉙'s numbers as wrong** — they were an honest count of
+a smaller population, and this is what the fuller count says instead.
+
+The doubled marks with a reader's answer in this population grew from thirty-three to
+forty-five. Matched the same way, mark for mark: the worst case is the same mark ㉙ already
+named (`274:59`, reader (0.04, −0.20) against the rule's (4.79, 12.35)) — nothing new sat
+disagreed worse than that one already on record. But it is no longer alone in the way ㉙
+suggested. Where ㉙ counted five of thirty-three disagreeing by two units or more, the finished
+count is **seventeen of forty-five** — the union sweeping in ink the reader did not draw
+happens on more than a third of doubled marks, not one in six. Single marks stayed as solid as
+before: two of forty-four disagree by that much, and the typical single mark is within half a
+unit on eighty-nine of them.
+
+**What this changes.** ㉙ already said the rule was not shippable without a guard against an
+implausibly large piece union. This does not change that conclusion — it changes how load-
+bearing the guard is. A problem on one mark in six can be shipped cautiously and watched; a
+problem on more than one mark in three cannot ship at all until the guard exists, because it is
+no longer the tail of the distribution, it is a third of it.
+
+**The same sitting also caught four more marks a reader called odd in the print** rather than
+in our rectangle — one successive dammatan, one hamza, one small yeh, one successive
+fathatan, on four pages between 115 and 260. Folded into the running note on item ⑭ above,
+which they extend rather than reopen: nothing here says the answer, only that it is still being
+asked in the same shape.
+
 ## How can someone look at this for themselves?
 
 The measurement writes a page of evidence: the worst verdicts first, each one drawn at a size
