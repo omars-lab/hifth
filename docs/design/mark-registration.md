@@ -2779,6 +2779,47 @@ run the rule, once guarded, on the 216 of 229 never-sat marks it could answer, o
 the guard itself has been checked against ground truth first. Both remain for whoever writes and
 checks the rule this designs.
 
+### ㉝ The guard ㉜ describes catches one disagreement in four; read both ways, it catches three · **confirmed**
+
+**What was run.** The piece-union script ㉜ needed but never had was rebuilt from ㉘'s own description
+rather than recovered, since nothing of the twice-run original survives, and scored against all 89 marks
+that carry a reader's settled answer from the sitting behind ㉚ — not only the 45 doubled marks ㉜ names,
+because ㉜'s own test has a second half, staying quiet on the marks that already agree, and those marks
+are not all doubled. The corpus has moved since ㉜ was written, the same drift ㉛ already found once: the
+89 split 40 doubled and 49 single, not the 45 doubled the earlier text assumed, reported as found rather
+than forced to match, the way ㉚'s own artifact reported 40 against a stated 45.
+
+Seventeen of the 89 — 16 of them single marks — have no piece of ink for the rule to point to at all, and
+are out of scope for an area-ratio cutoff by construction: nothing was united, so there is no ratio to
+take. The other 72 (39 doubled, 33 single) each carry a candidate box and a ratio against the rectangle
+already shipping.
+
+**The guard exactly as ㉜ describes it — kill.** ㉜ proposes refusing a candidate only once it has grown
+past the shipped rectangle. Tried at every ratio from 1.5 to 3, that catches at most 5 of the 20 marks
+that disagree with the reader by two combined units or more — one in four — because 15 of those 20
+disagreements are candidates that came out *smaller* than the shipped rectangle, not larger. A guard that
+only watches for growth cannot see a shrink no matter where its number is set, and most of what ㉜ needs
+caught is a shrink.
+
+**The same measure, read both ways — confirmed.** Refusing a candidate whenever its area sits far from
+the shipped area *in either direction* — grown past roughly double, or fallen under about half — catches
+15 of the 20 disagreeing marks (three in four) while wrongly refusing only 1 of the 52 marks that were
+already fine (the single false refusal is `578:260`, a fatha mark whose grown candidate the reader
+accepted anyway). Doubled and single marks hold up close to evenly: 10 of the 13 disagreeing doubled
+marks are caught, with no false refusals among the 26 doubled marks that already agreed; 5 of the 7
+disagreeing single marks are caught, against that one false refusal among the 26 singles that agreed.
+
+**What this settles, and what it does not.** ㉜'s own question is answered: area alone does separate the
+two populations, but only once the guard is symmetric rather than one-sided — the shape ㉜ proposed was
+built to catch a mark growing implausibly large, and never asked what to do with one that shrank, which
+turns out to be most of the failure. It does not pick the exact cutoff; where the ratio has to grow past
+roughly double or fall under about half is where this run's own 89 marks happen to sit a line, not a
+number checked against any wider population, and moving it trades a few points of one figure for the
+other rather than changing the picture. Nor does it touch the re-deal question ㉜ left open — whether to
+run a guarded rule on the 216 of 229 never-sat marks it could answer, or wait for the guard itself to be
+checked against ground truth first. This is that check. Running the result on the untested population is
+still someone else's call.
+
 ## How can someone look at this for themselves?
 
 The measurement writes a page of evidence: the worst verdicts first, each one drawn at a size
