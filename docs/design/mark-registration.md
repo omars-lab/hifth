@@ -2820,6 +2820,40 @@ run a guarded rule on the 216 of 229 never-sat marks it could answer, or wait fo
 checked against ground truth first. This is that check. Running the result on the untested population is
 still someone else's call.
 
+### ㉞ Doubling the ground truth moves the cutoff, not just confirms it · **confirmed**
+
+**What was run.** ㉝ scored 89 marks and said plainly its cutoff was "a line, not a number checked
+against any wider population." A second wrong-size sitting has since finished —
+[weak-size-part3](../validation/rulings/2026-08-20-placement-weak-size-part3.seed23.settled.json),
+91 more marks drawn from the same 329-mark refused/weak population weak-size-part1 itself came
+from — so this reruns ㉝'s own check against both sittings together, 181 marks with no id repeated
+between them, in place of 89. The comparison this time comes from a script committed rather than
+run once and lost — `score-piece-union-guard.mjs` — for the reason ㉜'s and ㉝'s own numbers had to
+be reconstructed from scratch-directory tables rather than rerun: the script behind them never
+survived.
+
+**The shape holds at twice the size.** 145 of 181 marks carry a candidate box; the other 36 have no
+piece to point to, the same "nothing united" case ㉜ already excludes by construction. Of the 145,
+39 disagree with the reader by two combined units or more — proportionally close to ㉝'s 20 of 72 —
+and 106 agree closer than that. At ㉝'s own cutoff (ratio ≥ 2 or ≤ 0.5) the guard catches 30 of the
+39 (77%, against ㉝'s 75%) while wrongly refusing 2 of the 106 (1.9%, against ㉝'s 1 in 52). Nothing
+about the earlier finding breaks under twice the ground truth.
+
+**But the cutoff itself was not as low as it could go.** Sweeping the same ratio from 1.5 to 4 turns
+up a number that strictly beats ㉝'s: at 1.75 (grown past three-quarters again, or fallen under
+four-sevenths) the guard catches 34 of the 39 disagreeing marks (87%) for the same 2 false refusals
+out of 106 that 2.0 costs — doubled marks 21 of 24 caught against 1 false refusal in 46, single
+marks 13 of 15 caught against 1 in 60, both a shade ahead of what 2.0 caught on the same split.
+Looser than that, 1.5 buys four more catches (38 of 39, 97%) but nearly quadruples the false
+refusals, to 7 of 106 (6.6%) — a worse trade, not a better one. 1.75 is not a guess between two
+round numbers; it is the point past which loosening further starts costing more than it buys.
+
+**What this settles, and what it does not.** The cutoff moves from ㉝'s 2/0.5 to **1.75/0.571**, on
+double the ground truth ㉝ itself asked for. It does not touch the re-deal question either item left
+open — whether to run the now-twice-checked guard on the 216 of 229 never-sat marks it could answer,
+or hold for weak-size-part2's roughly 90 still-unsat marks first, which would put a third of the
+329-mark population's own ground truth behind the number rather than a little over half.
+
 ## How can someone look at this for themselves?
 
 The measurement writes a page of evidence: the worst verdicts first, each one drawn at a size
@@ -3023,6 +3057,17 @@ readable without them.
 - [`encoding-inspector.md`](encoding-inspector.md) — the existing surface, and why this is
   beside it rather than inside it.
 - [`docs/map.json`](../map.json), feature `word-geometry` — the code pointers of record.
+- `packages/etl/scripts/probe-piece-union.mjs` — ㉘'s rule, rebuilt: unions the ink pieces whose
+  middle falls inside a mark's shipped rectangle into a candidate box, over the same search
+  window `probe-mark-ink.mjs` used. `--set refused|weak|edge|all` scores a population;
+  `--ids page:k,...` scores an explicit list, for checking the rule against a sitting's own
+  ground truth rather than whatever the corpus currently calls that population.
+- `packages/etl/scripts/score-piece-union-guard.mjs` — ㉝'s and ㉞'s check, kept runnable: reads
+  one or more settled rulings and a piece-union file, compares each mark's reader-settled size
+  change against the rule's proposed one, and reports a cutoff's recall against the marks that
+  disagree and its false-refusal rate against the marks that already agreed. `--sweep` prints
+  that pair across several candidate cutoffs at once, which is how ㉞ found 1.75 rather than
+  assumed it.
 
 Reproduce every number in this document with:
 
