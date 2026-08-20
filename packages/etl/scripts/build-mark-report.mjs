@@ -68,7 +68,7 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { correctionFor } from "./lib/registration-grain.mjs";
 import { answeredKey, fingerprint, readAnswered } from "./lib/answered.mjs";
-import { readPageInk, rasterise } from "./lib/ink.mjs";
+import { inkPieces, readPageInk } from "./lib/ink.mjs";
 import { ranOutOfRoom, refusedItsOwnInk } from "./lib/mark-ink.mjs";
 import { marksOf } from "./lib/marks.mjs";
 
@@ -342,86 +342,6 @@ const identFor = (r) => {
 
 const n2 = (v) => Math.round(v * 100) / 100;
 const n3 = (v) => Math.round(v * 1000) / 1000;
-
-/*
- * Sixteen samples to the page unit, which is not a number chosen here.
- *
- * It is the resolution `probe-mark-ink.mjs` measures at, and the pieces below are
- * what a reader points at when they say "the mark belongs on that ink". Cutting the
- * print into pieces at a different grain from the one the search ran at would let
- * the page offer a reader a piece of ink the measurement never had, and the answer
- * would be about a picture nothing else in this project can see.
- */
-const TAP_RES = 16;
-
-/**
- * The ink of one window, cut into the pieces a finger can point at.
- *
- * A piece is a connected run of ink: a haraka floating over a word is one, the word
- * body under it is another, and a dot is a third. That is the unit a reader means
- * when they point — nobody points at half a fatha — and it is why the cut is made
- * on connectivity rather than on the print's own paths, which are a handful of
- * enormous outlines with no relationship at all to what a reader sees.
- *
- * The cut is made on a raster and then carried back onto the outlines, because
- * connectivity between two closed rings is a question about their interiors and the
- * rings do not know the answer. Each ring is assigned to whichever component its own
- * boundary sits against: for an outer ring that is the ink it encloses, for a hole
- * it is the ink around it, and both land on the same piece, which is what keeps a
- * counter-shape with the letter it was cut out of.
- */
-function inkPieces(shapes, vx, vy, vw, vh) {
-  const cols = Math.ceil(vw * TAP_RES);
-  const rows = Math.ceil(vh * TAP_RES);
-  const mask = rasterise(shapes, vx, vy, cols, rows, TAP_RES);
-  const lab = new Int32Array(cols * rows);
-  const stack = new Int32Array(cols * rows);
-  let n = 0;
-  // Four-connected rather than eight. The failure that matters is a haraka welded
-  // to the letter under it, because then the reader cannot point at it at all;
-  // a piece that comes apart in two is recoverable with a second tap.
-  for (let s = 0; s < mask.length; s += 1) {
-    if (!mask[s] || lab[s]) continue;
-    n += 1;
-    let sp = 0;
-    lab[s] = n;
-    stack[sp] = s;
-    sp += 1;
-    while (sp) {
-      sp -= 1;
-      const q = stack[sp];
-      const qi = q % cols;
-      const qj = (q - qi) / cols;
-      if (qi > 0 && mask[q - 1] && !lab[q - 1]) { lab[q - 1] = n; stack[sp] = q - 1; sp += 1; }
-      if (qi < cols - 1 && mask[q + 1] && !lab[q + 1]) { lab[q + 1] = n; stack[sp] = q + 1; sp += 1; }
-      if (qj > 0 && mask[q - cols] && !lab[q - cols]) { lab[q - cols] = n; stack[sp] = q - cols; sp += 1; }
-      if (qj < rows - 1 && mask[q + cols] && !lab[q + cols]) { lab[q + cols] = n; stack[sp] = q + cols; sp += 1; }
-    }
-  }
-  return {
-    /** Which component a ring's boundary sits against, or 0 if it sits against none. */
-    of(ring) {
-      const tally = new Map();
-      for (let i = 0; i < ring.length; i += 2) {
-        const ci = Math.floor((ring[i] - vx) * TAP_RES);
-        const cj = Math.floor((ring[i + 1] - vy) * TAP_RES);
-        for (let dj = -1; dj <= 1; dj += 1) {
-          for (let di = -1; di <= 1; di += 1) {
-            const a = ci + di;
-            const b = cj + dj;
-            if (a < 0 || b < 0 || a >= cols || b >= rows) continue;
-            const l = lab[b * cols + a];
-            if (l) tally.set(l, (tally.get(l) || 0) + 1);
-          }
-        }
-      }
-      let best = 0;
-      let seen = 0;
-      for (const [l, c] of tally) if (c > seen) { seen = c; best = l; }
-      return best;
-    },
-  };
-}
 
 /**
  * The mark's neighbourhood, re-emitted from the page's own outlines. Not a
