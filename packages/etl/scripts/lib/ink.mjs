@@ -565,3 +565,77 @@ export function readPageInk(svg, tol) {
   }
   return { vb, shapes };
 }
+
+/**
+ * The ink of one window, cut into the pieces a finger can point at.
+ *
+ * A piece is a connected run of ink: a haraka floating over a word is one, the word
+ * body under it is another, and a dot is a third. That is the unit a reader means
+ * when they point — nobody points at half a fatha — and it is why the cut is made
+ * on connectivity rather than on the print's own paths, which are a handful of
+ * enormous outlines with no relationship at all to what a reader sees.
+ *
+ * The cut is made on a raster and then carried back onto the outlines, because
+ * connectivity between two closed rings is a question about their interiors and the
+ * rings do not know the answer. Each ring is assigned to whichever component its own
+ * boundary sits against: for an outer ring that is the ink it encloses, for a hole
+ * it is the ink around it, and both land on the same piece, which is what keeps a
+ * counter-shape with the letter it was cut out of.
+ *
+ * `res`, samples to the page unit, defaults to sixteen because that is the
+ * resolution `probe-mark-ink.mjs` measures at: a caller cutting pieces from a
+ * window that search ran over should cut at the same grain it ran at, or it is
+ * offering a piece the measurement never had.
+ */
+export function inkPieces(shapes, vx, vy, vw, vh, res = 16) {
+  const cols = Math.ceil(vw * res);
+  const rows = Math.ceil(vh * res);
+  const mask = rasterise(shapes, vx, vy, cols, rows, res);
+  const lab = new Int32Array(cols * rows);
+  const stack = new Int32Array(cols * rows);
+  let n = 0;
+  // Four-connected rather than eight. The failure that matters is a haraka welded
+  // to the letter under it, because then the reader cannot point at it at all;
+  // a piece that comes apart in two is recoverable with a second tap.
+  for (let s = 0; s < mask.length; s += 1) {
+    if (!mask[s] || lab[s]) continue;
+    n += 1;
+    let sp = 0;
+    lab[s] = n;
+    stack[sp] = s;
+    sp += 1;
+    while (sp) {
+      sp -= 1;
+      const q = stack[sp];
+      const qi = q % cols;
+      const qj = (q - qi) / cols;
+      if (qi > 0 && mask[q - 1] && !lab[q - 1]) { lab[q - 1] = n; stack[sp] = q - 1; sp += 1; }
+      if (qi < cols - 1 && mask[q + 1] && !lab[q + 1]) { lab[q + 1] = n; stack[sp] = q + 1; sp += 1; }
+      if (qj > 0 && mask[q - cols] && !lab[q - cols]) { lab[q - cols] = n; stack[sp] = q - cols; sp += 1; }
+      if (qj < rows - 1 && mask[q + cols] && !lab[q + cols]) { lab[q + cols] = n; stack[sp] = q + cols; sp += 1; }
+    }
+  }
+  return {
+    /** Which component a ring's boundary sits against, or 0 if it sits against none. */
+    of(ring) {
+      const tally = new Map();
+      for (let i = 0; i < ring.length; i += 2) {
+        const ci = Math.floor((ring[i] - vx) * res);
+        const cj = Math.floor((ring[i + 1] - vy) * res);
+        for (let dj = -1; dj <= 1; dj += 1) {
+          for (let di = -1; di <= 1; di += 1) {
+            const a = ci + di;
+            const b = cj + dj;
+            if (a < 0 || b < 0 || a >= cols || b >= rows) continue;
+            const l = lab[b * cols + a];
+            if (l) tally.set(l, (tally.get(l) || 0) + 1);
+          }
+        }
+      }
+      let best = 0;
+      let seen = 0;
+      for (const [l, c] of tally) if (c > seen) { seen = c; best = l; }
+      return best;
+    },
+  };
+}
