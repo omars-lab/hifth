@@ -560,6 +560,7 @@ const OPTIONS = [
     title: "Leave the rectangles where they are",
     tag: "what the app does today",
     what: "Nothing changes. The rectangle for every mark and every word stays where the fit on the verse-end circles put it.",
+    feel: "A reader sees what they see today: a highlight or a tap-target that sits noticeably off the letter it is meant to be on, on nearly every line, in the same direction every time. It does not wobble or vary page to page — it is a steady, learnable offset, which is exactly why it reads as \"the app is a bit off\" rather than as a glitch.",
   },
   {
     id: "B",
@@ -567,6 +568,7 @@ const OPTIONS = [
     title: "Line each page up as a whole",
     tag: "two more numbers a page",
     what: "Every rectangle on a page moves together, by one amount worked out from that page's own marks.",
+    feel: "The offset shrinks a lot on most lines but does not disappear, because one correction is being asked to fit every line on the page and most pages are not printed with every line in exactly the same place. A reader would likely still notice marks sitting slightly off on some lines, especially near the top or bottom of the page, even though the page as a whole looks visibly better aligned than today.",
   },
   {
     id: "F",
@@ -574,6 +576,7 @@ const OPTIONS = [
     title: "Line each printed line up on its own, and let it tilt",
     tag: "the recommendation — four more numbers a line",
     what: "Each printed line gets its own amount, and that amount is allowed to grow along the line rather than being the same at both ends. Marks and words move together.",
+    feel: "A reader tapping or reading along nearly any single line would see the highlight sit on the right letter, start to finish. The visible exceptions are concentrated: whole lines that still read as a little off, and the two ends of a line reading worse than its middle — so an occasional line, or the first/last word of a line, is where a mismatch would still show up.",
   },
   {
     id: "G",
@@ -582,6 +585,7 @@ const OPTIONS = [
     tag: "the same, for half the page's geometry",
     what: "The same per-line correction, applied only to the marks. Word rectangles stay on the fit they ship on today.",
     wordsStay: true,
+    feel: "Wherever the app highlights a single mark, it looks the same as option F — sitting on the right letter. But anything that outlines or reacts to a whole word — tapping a word, a word-level highlight — still shows today's offset, so a reader who taps a word right after seeing a mark land correctly would notice the two behaving differently.",
   },
   {
     id: "I",
@@ -589,6 +593,7 @@ const OPTIONS = [
     title: "Line each printed line up on its own, and let it bend",
     tag: "the strongest measured option — one more number a line than F",
     what: "The same as F, except the amount is allowed to bend along the line rather than only grow at a steady rate. Marks and words move together.",
+    feel: "Close to F in what a reader would see day to day — marks sitting on their letters along almost every line — with fewer of the whole-line misses F still leaves behind. The two ends of a line are still the likeliest place to notice anything off; bending the correction does not reach that particular pattern any better than tilting it does.",
   },
   {
     id: "H",
@@ -596,6 +601,7 @@ const OPTIONS = [
     title: "Put each mark where its own ink is, and line up the rest",
     tag: "the most accurate — and the one this measurement cannot grade",
     what: "Every mark whose ink was found convincingly goes exactly where it was found. The rest — and every word rectangle — get the per-line correction instead.",
+    feel: "For most marks, a reader would see the highlight sit exactly on the letter's own ink — not merely on the line, on that letter. A minority of marks (the ones the search could not place convincingly) and every word behave like option F instead, so the experience is not perfectly uniform: most of the page looks exact, and the rest looks like the recommendation above.",
   },
 ];
 
@@ -819,6 +825,18 @@ function render({ artifact: ARTIFACT, out }) {
 </figure>`;
   };
 
+  /**
+   * A drawn key, not another paragraph of prose repeating what the colours mean.
+   * Each swatch is a tiny real specimen of the exact fill/stroke/dash the pages
+   * above use, so it cannot drift out of sync with what the SVGs actually draw —
+   * there is no second copy of a colour or a dash pattern to keep in step.
+   */
+  const legend = (withInk) => `<ul class="legend">
+  <li><svg class="swatch" viewBox="0 0 22 16" aria-hidden="true"><rect x="1.5" y="2" width="19" height="12" fill="${pal.mark}" fill-opacity="0.22" stroke="${pal.mark}" stroke-width="1" rx="1.4"/></svg><span><b>a mark</b> — a single tajweed shape, like a small vowel sign</span></li>
+  <li><svg class="swatch" viewBox="0 0 22 16" aria-hidden="true"><rect x="1.5" y="2" width="19" height="12" fill="none" stroke="${pal.word}" stroke-width="1"/></svg><span><b>a word</b> — the outline around one printed word</span></li>
+  ${withInk ? `<li><svg class="swatch" viewBox="0 0 22 16" aria-hidden="true"><rect x="1.5" y="2" width="19" height="12" fill="none" stroke="${pal.ink}" stroke-width="1" stroke-dasharray="2.4 1.8" rx="1.4"/></svg><span><b>where a mark's ink really is</b> — found by searching around it; shown only in the close-ups, as the answer each option is graded against</span></li>` : ""}
+</ul>`;
+
   // ── the crops, chosen from the drawn page's own geometry ──────────────────
   //
   // A whole page shows what the reader is being asked about; a band shows three
@@ -899,10 +917,11 @@ function render({ artifact: ARTIFACT, out }) {
     <h3>${opt.id} — ${esc(opt.title)}</h3>
     <p class="tag">${esc(opt.tag)}</p>
   </header>
-  ${specimen(layer(opt, BAND), { crop: BAND })}
-  ${specimen(layer(opt, CLOSE) + layerInk(CLOSE), { crop: CLOSE, label: `The same option, close up — about ${closeMag} times the size above, on the mark this correction moves furthest. The dashed outlines are where the marks really are, so the gap you can see is the error this option leaves behind.` })}
+  ${specimen(layer(opt, BAND), { crop: BAND, label: `Where option ${opt.id} would put every rectangle on these three lines — key above.` })}
+  ${specimen(layer(opt, CLOSE) + layerInk(CLOSE), { crop: CLOSE, label: `The same option, close up — about ${closeMag} times the size above, on the mark this correction moves furthest. The filled box is still where option ${opt.id} puts the mark; the new dashed outline is where the mark really is, so the gap between the two is the error this option leaves behind.` })}
   <div class="cost">
     <div><h4>What it does</h4><p>${esc(opt.what)}</p></div>
+    <div><h4>What a reader would notice</h4><p>${esc(opt.feel)}</p></div>
     <div><h4>Rectangles badly out</h4><p><b class="big">${num}</b>${ci}<br><span class="dim small">${note}</span></p></div>
     ${near}
   </div>
@@ -1050,9 +1069,11 @@ ${printDefs}
 <section>
   <h2><span class="num">2</span>What does it look like today?</h2>
   <p class="lede">
-    This is a real page of the mus'haf with the app's own rectangles drawn on it. The filled boxes
-    are marks; the outlines are words.
+    This is a real page of the mus'haf with the app's own rectangles drawn on it. The key below
+    reads every drawing on this page — the same three shapes reappear under every option in
+    section 6.
   </p>
+  ${legend(true)}
   ${specimen(layer(OPTIONS[0], BAND), { crop: BAND, label: `Three printed lines of page ${d.page}, at about the size a phone draws them. Every filled box is where the app currently believes a mark is.` })}
   ${specimen(layer(OPTIONS[0], CLOSE) + layerInk(CLOSE), { crop: CLOSE, label: `Close up. The dashed outlines are where each mark actually is; the filled boxes are where the app puts them. That gap is the whole subject of this page.` })}
   <p>
@@ -1188,6 +1209,7 @@ ${printDefs}
     out from, which is the only way a finer correction cannot flatter itself. The last one, H, cannot
     be measured that way at all, and its card says what it reports instead.
   </p>
+  ${legend(true)}
   ${OPTIONS.map(optionCard).join("\n")}
   <div class="note">
     <p>
@@ -1537,6 +1559,11 @@ section:first-child{ border-top:0; }
   font-variant-numeric:tabular-nums; }
 .lede{ font-size:1.06rem; }
 
+.legend{ display:flex; flex-wrap:wrap; gap:.6rem 1.5rem; list-style:none; margin:0 0 1.1rem; padding:.7rem 1rem;
+  border:1px solid var(--rule); border-radius:6px; background:var(--tint); }
+.legend li{ display:flex; align-items:center; gap:.55rem; font-size:.85rem; max-width:26rem; }
+.legend .swatch{ flex:none; width:2.2rem; height:1.6rem; }
+.legend b{ font-weight:650; }
 .spec{ margin:1.5rem 0; }
 .win{ position:relative; width:100%; padding-top:var(--ar); overflow:hidden; background:#fdfaf4;
   border:1px solid var(--rule); border-radius:5px; }
