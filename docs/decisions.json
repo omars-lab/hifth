@@ -70,7 +70,7 @@
     {
       "id": "mark-granularity",
       "question": "Should the app colour tajweed one colour a verse, or should it colour the exact letter a rule lands on?",
-      "status": "open",
+      "status": "decided",
       "options": [
         {
           "id": "A",
@@ -88,10 +88,10 @@
       "artifact": "https://claude.ai/code/artifact/5f230dff-e4e8-40c6-9c4e-888786eeef9b",
       "page": "docs/design/mark-granularity.html",
       "builtBy": "scripts/build-mark-options.mjs",
-      "doc": "docs/design/sub-word-marks.md",
-      "decided": null,
-      "by": null,
-      "date": null,
+      "doc": "docs/decisions/mark-granularity.md",
+      "decided": "B",
+      "by": "omar",
+      "date": "2026-08-19",
       "related": [
         "word-selection",
         "loop-6a",
@@ -218,7 +218,7 @@
     {
       "id": "tajweed-colours",
       "question": "Should a reader be able to change the colours the app uses for recitation rules, and how many colours are there to change?",
-      "status": "open",
+      "status": "decided",
       "options": [
         {
           "id": "A",
@@ -241,9 +241,9 @@
       "page": "docs/design/tajweed-colours.html",
       "builtBy": "scripts/build-palette-options.mjs",
       "doc": "docs/decisions/tajweed-colours.md",
-      "decided": null,
-      "by": null,
-      "date": null,
+      "decided": "B",
+      "by": "omar",
+      "date": "2026-08-19",
       "related": [
         "mark-granularity",
         "loop-6a"
