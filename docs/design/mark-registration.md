@@ -2854,6 +2854,44 @@ open — whether to run the now-twice-checked guard on the 216 of 229 never-sat 
 or hold for weak-size-part2's roughly 90 still-unsat marks first, which would put a third of the
 329-mark population's own ground truth behind the number rather than a little over half.
 
+### ㉟ The re-deal, made: run the checked guard now, and record what it decides · **confirmed**
+
+**The call ㉜, ㉝ and ㉞ each left open is now made: run the guard.** Three items in a row said the
+same thing — the guard has been checked, but running its verdicts on the marks nobody has ever sat is
+"still someone else's call." That someone has answered: run it now, rather than hold for another
+wrong-size sitting first. The reasoning is the one ㉞ already put on the table and did not act on —
+the cutoff held under a *doubling* of the ground truth it was fitted on, so a third sitting would move
+it less than the second did, while it is itself a person's twenty minutes that blocks nothing else.
+Waiting buys a sliver of certainty at the cost of leaving the rule unusable, which ㉜ already called
+the worse of the two.
+
+**What running it decides, counted.** The guard was applied at 1.75/0.571 to every refused mark that
+carries a piece-union candidate and that no reader has ever sat. "Never sat" has two honest readings
+and the answer barely moves between them: counting only the wrong-size sittings drawn from this
+population, **195 marks were never sat, and the guard trusts the candidate on 142 of them (73%) and
+keeps the shipped rectangle on 53 (27%)**; counting *any* sitting that has ever touched a refused mark,
+131 were never sat, and the split is 98 to 33 (75% / 25%). The accept rate holding at roughly
+three-quarters whichever way "never sat" is read is itself the reassurance — the yield does not depend
+on where the line between sat and unsat happens to fall today.
+
+**The refusals are catching what the guard exists to catch.** Of the 53 it refuses under the first
+reading, 38 are candidates that *shrank* under 0.571× and 15 that *grew* past 1.75× — the same
+shrink-dominated shape ㉝ found, not a growth story. And the worst of them are not marginal: the five
+most extreme refused candidates carry area ratios of 29.6, 20.5, 18.2, 14.2 and 7.7 — a shadda and a
+run of fathas whose union plainly swept in a neighbour's ink, exactly the failure ㉚ named. These are
+the 53 marks where, without the guard, the rule would have drawn a box nobody meant; with it, they
+fall back to the rectangle the app ships today rather than a wrong one.
+
+**What this settles, and the one thing it deliberately does not.** It settles the re-deal: the guard
+runs, the 142 accepted marks are the corrections it endorses without a reader, the 53 refused marks
+keep their shipped rectangle, and the earlier framing — "hold for weak-size-part2" — is closed, more so
+than ㉞ knew, since far more of the population has since been sat than the two sittings ㉞ counted (209
+refused marks now carry a reader's answer, not 145). It does **not** wire these 142 corrections into
+what the app draws. That is the same act as adopting option H of the still-open `mark-placement`
+decision — putting each mark where its own ink is — and that decision is the owner's to rule, not this
+measurement's to pre-empt. This item is the evidence that ruling needs: the guard's yield, on the marks
+no human will ever check, is 73% trusted and 27% caught. Wiring waits on the ruling; the number does not.
+
 ## How can someone look at this for themselves?
 
 The measurement writes a page of evidence: the worst verdicts first, each one drawn at a size

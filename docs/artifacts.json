@@ -64,6 +64,26 @@
   ],
   "artifacts": [
     {
+      "url": "https://claude.ai/code/artifact/1d9c4cff-f0a5-4aa3-a70b-2717f0814b1a",
+      "title": "Copy your confusion map off the phone?",
+      "published": "2026-08-31",
+      "shows": "One question — whether a reader can copy their private record of where their memory slips off the phone, and by which of three means — drawn at phone size on a sample map that carries verse references only, with what each option takes, gets and costs.",
+      "decision": "confusion-map-export",
+      "page": null,
+      "builtBy": null,
+      "note": null
+    },
+    {
+      "url": "https://claude.ai/code/artifact/b0b6d0b5-5bec-4309-8dc4-701ab767e4a1",
+      "title": "Where You Slip",
+      "published": "2026-08-29",
+      "shows": "An eight-screen walkthrough, at phone size and in English, of how the app would record the exact place a reader's memory slips from one verse onto a look-alike, mark it quietly on the page for later, and let the reader compare the two and beat it — with the states a slip moves through and the four open questions the feature still holds.",
+      "decision": null,
+      "page": "docs/design/where-you-slip.html",
+      "builtBy": null,
+      "note": "The design walkthrough the confusion-points feature is being reviewed against, and the page the owner has been leaving feedback on. builtBy is null on purpose: this page is written by hand, not generated from anything, so the checked-in copy is itself the source — there is nothing to rebuild it from. Not a decision page; it draws the whole feature, and the individual questions it raises become their own decision rows as they are opened."
+    },
+    {
       "url": "https://claude.ai/code/artifact/84b4bfe6-f875-4186-9d32-c37f26ad71be",
       "title": "Where should the sittings live?",
       "published": "2026-08-17",

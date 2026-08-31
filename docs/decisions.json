@@ -68,6 +68,33 @@
   ],
   "decisions": [
     {
+      "id": "confusion-map-export",
+      "question": "Should a reader be able to copy their confusion map off the phone — and if so, by which means?",
+      "status": "open",
+      "options": [
+        {
+          "id": "A",
+          "label": "Keep it on the phone only"
+        },
+        {
+          "id": "B",
+          "label": "A file the reader saves and restores"
+        },
+        {
+          "id": "C",
+          "label": "A cloud-sync switch the reader controls"
+        }
+      ],
+      "artifact": "https://claude.ai/code/artifact/1d9c4cff-f0a5-4aa3-a70b-2717f0814b1a",
+      "page": "docs/design/confusion-map-export.html",
+      "builtBy": "scripts/build-confusion-export-options.mjs",
+      "doc": "docs/decisions/confusion-map-export.md",
+      "decided": null,
+      "by": null,
+      "date": null,
+      "related": []
+    },
+    {
       "id": "mark-granularity",
       "question": "Should the app colour tajweed one colour a verse, or should it colour the exact letter a rule lands on?",
       "status": "decided",
