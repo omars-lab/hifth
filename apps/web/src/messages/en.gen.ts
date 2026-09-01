@@ -110,7 +110,7 @@ const messages: Catalog = {
   mapOpen: (d) => "Page " + d.page + " · what you have opened",
   mapRecent: "Opened recently",
   mapScopeGroup: "Division",
-  mapSince: (d) => "Recording since " + d.dayText,
+  mapSince: (d) => "Active since " + d.dayText,
   mapTitle: "What you have opened",
   mapWentTo: (d) => d.label + " · page " + d.page,
   mushaf: "Mus'haf",

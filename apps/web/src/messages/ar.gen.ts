@@ -110,7 +110,7 @@ const messages: Catalog = {
   mapOpen: (d) => "صفحة " + d.page + " · ما فتحتَه من المصحف",
   mapRecent: "فُتح حديثًا",
   mapScopeGroup: "التقسيم",
-  mapSince: (d) => "يُسجَّل منذ " + d.dayText,
+  mapSince: (d) => "نشِط منذ " + d.dayText,
   mapTitle: "ما فتحتَه من المصحف",
   mapWentTo: (d) => d.label + " · صفحة " + d.page,
   mushaf: "المصحف",

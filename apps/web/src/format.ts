@@ -129,6 +129,62 @@ export function digitsIn(text: string, lang: Lang): string {
   return LOCALES[lang].digits === "latin" ? text : toArabicDigits(text);
 }
 
+/** Month names, in the reader's own language — Gregorian, the calendar the day
+ *  stamp is written in. "Sept" is the four-letter form on purpose: it is how the
+ *  month is abbreviated in running English prose, where the other elevens' three
+ *  letters read as abbreviations and September's "Sep" reads as a typo. */
+const MONTHS_EN = [
+  "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+  "Jul", "Aug", "Sept", "Oct", "Nov", "Dec",
+] as const;
+const MONTHS_AR = [
+  "يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو",
+  "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر",
+] as const;
+
+/** The English ordinal suffix for a day of the month: 1st, 2nd, 3rd, 4th … and
+ *  the 11th–13th exception that catches a naive "last digit" rule. */
+function ordinalEn(d: number): string {
+  const tens = d % 100;
+  if (tens >= 11 && tens <= 13) return "th";
+  switch (d % 10) {
+    case 1:
+      return "st";
+    case 2:
+      return "nd";
+    case 3:
+      return "rd";
+    default:
+      return "th";
+  }
+}
+
+/**
+ * A `YYYY-MM-DD` day stamp as a person would read it aloud: "Sept 1st, 2026" in
+ * English, «١ سبتمبر ٢٠٢٦» in Arabic. The revision map's "active since" line is
+ * the one caller — a stored ISO stamp is a fact for a computer, not a date a
+ * reader recognises as *theirs*.
+ *
+ * It parses the stamp by hand rather than through `new Date(stamp)`: that
+ * constructor reads a bare `YYYY-MM-DD` as UTC midnight, which is the day before
+ * anywhere west of Greenwich, and the whole reason the record stores its own
+ * day (`dayOf`) is to never let a timezone move a date. English writes the day
+ * with an ordinal; Arabic writes a plain cardinal, which is how the month is
+ * spoken in both. A stamp that is not three numbers is handed back untouched, so
+ * a malformed value degrades to visible rather than throwing.
+ */
+export function longDay(stamp: string, lang: Lang): string {
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(stamp);
+  if (!m) return digitsIn(stamp, lang);
+  const year = Number(m[1]);
+  const month = Number(m[2]);
+  const day = Number(m[3]);
+  if (month < 1 || month > 12) return digitsIn(stamp, lang);
+  return LOCALES[lang].digits === "latin"
+    ? `${MONTHS_EN[month - 1]} ${day}${ordinalEn(day)}, ${year}`
+    : `${toArabicDigits(day)} ${MONTHS_AR[month - 1]} ${toArabicDigits(year)}`;
+}
+
 /**
  * A number to one decimal, in the digits *and the decimal mark* of the UI
  * language: "5.8" / «٥٫٨».

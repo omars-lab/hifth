@@ -158,7 +158,7 @@
   "scopeJuz": "Juz",
   "hizbN": "Hizb {hizbText}",
   "mapHeld": "{haveText} of {totalText} {scope, select, page{pages} hizb{hizb} other{juz}} in this build",
-  "mapSince": "Recording since {dayText}",
+  "mapSince": "Active since {dayText}",
   "mapGrid": "Map of the mus'haf",
   "mapNoStore": "This browser cannot keep the record, so there is nothing here to show.",
   "mapLoading": "Opening the record…",

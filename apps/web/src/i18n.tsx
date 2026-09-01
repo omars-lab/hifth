@@ -97,6 +97,7 @@ import {
   rangeLabel as fmtRangeLabel,
   digits,
   digitsIn,
+  longDay,
   surahName as fmtSurahName,
   surahNames,
   tenths,
@@ -775,10 +776,10 @@ export function buildStrings(lang: Lang, m: Catalog): Strings {
         totalText: n(total),
         scope: scope === "juz" ? "other" : scope,
       }),
-    // The day stamp is a string with hyphens in it, not a number, which is why
-    // it goes through `digitsIn` rather than `digits` — «٢٠٢٦-٠٧-٣٠» keeps its
-    // shape and the separators survive.
-    mapSince: (day) => m.mapSince({ dayText: digitsIn(day, lang) }),
+    // The stored day is an ISO stamp — a fact for a computer. `longDay` turns it
+    // into the date a reader recognises as theirs: "Sept 1st, 2026" / «١ سبتمبر
+    // ٢٠٢٦», in the reader's own month names and digits.
+    mapSince: (day) => m.mapSince({ dayText: longDay(day, lang) }),
     mapGrid: m.mapGrid,
     mapNoStore: m.mapNoStore,
     mapLoading: m.mapLoading,

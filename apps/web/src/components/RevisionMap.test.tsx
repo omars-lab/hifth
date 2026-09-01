@@ -189,7 +189,7 @@ describe("RevisionMap", () => {
     // is visibly a *young* record.
     await recordLook({ key: `quran/${EDITION}/2:30`, page: 7 }, at("2026-03-18T12:00:00Z"));
     draw();
-    expect(await screen.findByText("يُسجَّل منذ ٢٠٢٦-٠٣-١٨")).toBeTruthy();
+    expect(await screen.findByText("نشِط منذ ١٨ مارس ٢٠٢٦")).toBeTruthy();
   });
 
   it("warms a division by when it was last opened, and says the number out loud", async () => {

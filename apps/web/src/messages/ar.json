@@ -158,7 +158,7 @@
   "scopeJuz": "جزء",
   "hizbN": "الحزب {hizbText}",
   "mapHeld": "المتوفّر {haveText} من {totalText} {scope, select, page{صفحة} hizb{حزبًا} other{جزءًا}}",
-  "mapSince": "يُسجَّل منذ {dayText}",
+  "mapSince": "نشِط منذ {dayText}",
   "mapGrid": "خريطة المصحف",
   "mapNoStore": "لا يمكن حفظ السجلّ في هذا المتصفّح، فلا شيء هنا لعرضه.",
   "mapLoading": "جارٍ فتح السجلّ…",
