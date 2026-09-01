@@ -144,6 +144,53 @@ describe("RevisionMap", () => {
     expect(hizb2.getAttribute("aria-label")).toBe("الحزب ٢ · غير متوفّر في هذه النسخة");
   });
 
+  it("keys absent on a trimmed build, and drops the row when nothing is absent", async () => {
+    // The legend is a key to what is drawn, and "no paper here" is a treatment a
+    // full edition's picture never contains. On the trimmed fixture hizb 2 is
+    // absent, so the key earns its row; on a build that holds its whole span the
+    // row would be naming a state the reader cannot find on the grid, and the one
+    // thing this component refuses is a picture claiming more than the record.
+    const trimmed = render(
+      <RevisionMap
+        open
+        onClose={() => {}}
+        pages={[PAGE_7]}
+        edition={EDITION}
+        totalPages={604}
+        page={7}
+        onGoToPage={() => {}}
+        today={TODAY}
+      />,
+    );
+    await waitFor(() => {
+      if (trimmed.container.querySelectorAll("[data-state]").length === 0)
+        throw new Error("not drawn yet");
+    });
+    expect(trimmed.queryByText("غير متوفّر في هذه النسخة")).toBeTruthy();
+    trimmed.unmount();
+
+    // A whole edition of one page: page scope, one page held, one cell, span one,
+    // so `held.size` meets the span and nothing on the grid is absent.
+    const whole = render(
+      <RevisionMap
+        open
+        onClose={() => {}}
+        openAt="page"
+        pages={[page(1, 1, 1, 7)]}
+        edition={EDITION}
+        totalPages={1}
+        page={1}
+        onGoToPage={() => {}}
+        today={TODAY}
+      />,
+    );
+    await waitFor(() => {
+      if (whole.container.querySelectorAll("[data-state]").length === 0)
+        throw new Error("not drawn yet");
+    });
+    expect(whole.queryByText("غير متوفّر في هذه النسخة")).toBeNull();
+  });
+
   it("draws each cell's number, absent ones included, in the scope's own digits", async () => {
     // The number is what ends the counting-from-a-corner a grid of identical
     // squares forces. A hizb number takes the Arabic-Indic digits of the Arabic

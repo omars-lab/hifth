@@ -625,10 +625,18 @@ export function RevisionMap({
             <p className={styles.inventory}>{t.mapHeld(held.size, span, scope)}</p>
 
             <ul className={styles.legend} aria-label={t.mapLegend}>
-              <li className={styles.legendRow}>
-                <span className={styles.cell} data-state="absent" aria-hidden="true" />
-                {t.mapAbsent}
-              </li>
+              {/* Only when the grid in fact holds an absent cell. On an edition
+                  that carries the whole mus'haf — every one shipped so far — no
+                  cell is absent, and a key for "no paper here" would be naming a
+                  treatment the picture does not contain. The whole absent
+                  contract stays (see the header note): a partial edition brings
+                  both the cell and this row back together. */}
+              {held.size < span && (
+                <li className={styles.legendRow}>
+                  <span className={styles.cell} data-state="absent" aria-hidden="true" />
+                  {t.mapAbsent}
+                </li>
+              )}
               <li className={styles.legendRow}>
                 <span className={styles.cell} data-state="cold" aria-hidden="true" />
                 {t.mapNeverOpened}
