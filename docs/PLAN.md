@@ -53,6 +53,32 @@ described in both files.
 | 7 — Polish + beta | in flight — its four engineering items are all in (popover ordering, keyboard map, shard prefetch, the 5-page golden sweep, 2026-08-07); what remains is not a loop but a person | Hafiz revision session, zero friction notes → **web v1.0** | — |
 | Track B — Capacitor | gated on web v1.0 | Same web build wrapped for iOS/Android; Universal Links | — |
 
+### Desktop UI triage — a running thread under Loop 7 (opened 2026-09-01)
+
+A hafiz using the desktop spread reported a run of paper-cuts and asked for a few new
+surfaces. These are being worked as a **task list** (the session-tracked kind, the one the
+"track the task files" commit made survive a clean open), not as loop items, because each is
+small and none blocks web v1.0. The thread, worst-first, with where its reasons live:
+
+- **Zoom the open book — done, 2026-09-01.** The magnify buttons work with two pages showing
+  and grow both leaves together, from the fold outward, so the middle gap is kept and a modest
+  step clips nothing. It reverses an earlier "disabled while open" finding, on the reader's own
+  call. Record: [`spread-zoom.md`](decisions/spread-zoom.md); the reversal is noted on
+  [`wheel-and-zoom.md`](decisions/wheel-and-zoom.md).
+- **A bookmark you drop by tapping the fold**, animating downward like a ribbon, and every
+  bookmark action written to a calendar. Needs a decision (where a bookmark is stored, what the
+  animation is) before code.
+- **An activity calendar in the menu bar** — a day's reading, interactions and pages counted —
+  and, inside it, **managing bookmarks** (clear a surah's, clear all, with a guard on the
+  destructive ones). This is the long-planned revision record reaching the chrome; the shape
+  is sketched in [`.claude/plans/interaction-calendar.md`](../.claude/plans/interaction-calendar.md).
+  Needs its own decision, and it touches the revision-privacy question.
+- **A highlighter setting** — outline vs. filled, and how see-through the fill is — reached from
+  a menu-bar icon. Needs a decision that draws each style on a real page at reading size.
+- **Start a drag anywhere on the page**, not only from the outer margins, without breaking
+  tap-to-select. A defect with a regression test owed.
+- **Ayah 10:44 does not highlight like its neighbours.** A defect with a regression test owed.
+
 ### Open follow-ups
 
 These fifteen are indexed in [`issues.json`](issues.json) alongside the design docs' open

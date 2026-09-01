@@ -282,7 +282,8 @@
       "status": "living",
       "doc": "docs/decisions/desktop-vs-mobile.md",
       "related": [
-        "wheel-and-zoom"
+        "wheel-and-zoom",
+        "spread-zoom"
       ]
     },
     {
@@ -293,6 +294,34 @@
       "by": "omar",
       "date": "2026-08-06",
       "related": [
+        "desktop-vs-mobile",
+        "spread-zoom"
+      ]
+    },
+    {
+      "id": "spread-zoom",
+      "question": "When two pages are open, should the zoom buttons enlarge both pages together?",
+      "status": "decided",
+      "options": [
+        {
+          "id": "off",
+          "label": "Leave magnifying switched off while two pages show"
+        },
+        {
+          "id": "close-first",
+          "label": "Close to one page automatically, then magnify"
+        },
+        {
+          "id": "both",
+          "label": "Magnify both pages together, to the same size"
+        }
+      ],
+      "doc": "docs/decisions/spread-zoom.md",
+      "decided": "both",
+      "by": "omar",
+      "date": "2026-09-01",
+      "related": [
+        "wheel-and-zoom",
         "desktop-vs-mobile"
       ]
     },
