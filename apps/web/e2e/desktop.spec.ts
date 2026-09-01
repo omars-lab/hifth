@@ -1341,6 +1341,69 @@ test("a juz jump keeps the two leaves level through every frame", async ({ page 
 });
 
 /*
+ * A page turn lands the two leaves level too — the jump's sibling claim.
+ *
+ * Turning a leaf crosses into the next opening and remounts the facing page, the
+ * same remount the juz jump above watches: the incoming leaf could paint for one
+ * frame at its layer's top-left, one centring-offset above the page beside it,
+ * before the landing frame corrects it. The centring on the turn's landing is
+ * what forecloses that, and this is the guard on it — reported against the back
+ * of the book ("misalignment after flipping pages", a picture of At-Takwir riding
+ * high over Abasa), so the turn is taken there rather than in Al-Baqarah where a
+ * cold page's parse cost is a different number.
+ *
+ * Same shape as the jump's guard: not a resting measurement — both leaves settle
+ * level regardless — but every frame of the turn, failing if any single one
+ * caught them more than a pixel apart. Unlike the jump, a turn *does* draw a fold,
+ * so that is asserted rather than its absence — the two claims are otherwise the
+ * same claim from the two verbs.
+ */
+test("a page turn keeps the two leaves level through every frame", async ({ page }) => {
+  await watchFolds(page);
+  // Start one opening back, so the forward turn crosses *into* At-Takwir facing
+  // Abasa (the opening the report pictured) — a within-opening step would remount
+  // nothing and draw no fold, exercising neither half of the claim.
+  await page.goto("/#/hafs-kfqc/p584");
+  await expect(pageSvg(page, 584)).toBeVisible({ timeout: 20_000 });
+  await expect(spread(page)).toBeVisible();
+  // A cursor over the book, so a wheel would have somewhere to land — the arrow
+  // does not need it, but it keeps the rig identical to the jump's above.
+  await page.mouse.move(400, 450);
+
+  const poll = page.evaluate<{ pair: boolean; gap: number }[]>(
+    () =>
+      new Promise((resolve) => {
+        const frames: { pair: boolean; gap: number }[] = [];
+        const start = performance.now();
+        const tick = () => {
+          const ys = Array.from(
+            document.querySelectorAll('svg[aria-labelledby^="page-label-"]'),
+          )
+            .filter((n) => (n as SVGElement).getClientRects().length > 0)
+            .map((n) => n.getBoundingClientRect().top);
+          frames.push({
+            pair: ys.length === 2,
+            gap: ys.length === 2 ? Math.abs(ys[0]! - ys[1]!) : 0,
+          });
+          if (performance.now() - start < 700) requestAnimationFrame(tick);
+          else resolve(frames);
+        };
+        requestAnimationFrame(tick);
+      }),
+  );
+
+  // ← turns forward, into the next opening.
+  await page.keyboard.press("ArrowLeft");
+
+  const frames = await poll;
+  expect(frames.some((f) => f.pair), "the turn never drew a second leaf").toBe(true);
+  const worst = Math.max(...frames.filter((f) => f.pair).map((f) => f.gap));
+  expect(worst, "the two leaves flashed misaligned during the page turn").toBeLessThan(1.5);
+  // And this one *is* a turn: a fold band crossed the book.
+  expect((await foldsSeen(page)).length, "a page turn drew no fold band").toBeGreaterThan(0);
+});
+
+/*
  * The live bead in the trail bar hides the string it hangs on.
  *
  * The footer's beads thread along a hairline "string" drawn behind them, and the
