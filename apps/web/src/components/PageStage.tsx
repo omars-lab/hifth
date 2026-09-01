@@ -205,6 +205,21 @@ interface PageStageProps {
   foldTarget?: RefObject<HTMLElement | null> | null;
 }
 
+/**
+ * Which point a button-driven zoom holds still as the paper grows.
+ *
+ * `"center"` is the lone-leaf answer — a single page has no reason to grow to
+ * one side. `"left"` and `"right"` name a *visual* edge of the leaf's box (not a
+ * reading side), and they are the spread answer: the leaf grows *away* from the
+ * fold. Pin each leaf at the edge its gutter is on — the right-hand leaf at its
+ * left edge, the left-hand leaf at its right edge — and the two stay joined at
+ * the seam and open outward together like one sheet, instead of each swelling
+ * from its own middle, crushing the fold while their outer margins run off the
+ * screen. A stage does not know whether it is the live or the facing leaf, so
+ * the caller — which does — names the edge.
+ */
+export type ZoomAnchor = "center" | "left" | "right";
+
 /** What App can drive imperatively on the stage. */
 export interface PageStageHandle {
   /** Pan/zoom to an ayah, mounting its page if needed. Resolves when landed. */
@@ -236,13 +251,15 @@ export interface PageStageHandle {
    */
   turnTo: (page: number) => Promise<boolean>;
   /**
-   * Magnify to `z`, anchored at the middle of the stage, and answer with what
-   * was actually applied.
+   * Magnify to `z`, anchored at `anchor` (default the middle of the stage), and
+   * answer with what was actually applied.
    *
    * Anchored at the middle because a button has no pointer to zoom about: the
    * wheel could keep the paper under the cursor still, and a control in the
    * chrome is nowhere near the paper at all. The middle is the only point the
-   * reader can predict.
+   * reader can predict — for a lone leaf. With the book open the predictable
+   * point is the fold, not each leaf's own centre, so the caller pins each leaf
+   * at its gutter edge (`ZoomAnchor`) and the opening grows outward as one.
    *
    * It **returns** rather than reports through a callback, and the returned
    * number is the one the caller must store. `clampView` runs inside the same
@@ -251,7 +268,7 @@ export interface PageStageHandle {
    * the first press against a limit, and the readout would then be describing a
    * magnification nobody is looking at.
    */
-  setZoom: (z: number) => number;
+  setZoom: (z: number, anchor?: ZoomAnchor) => number;
   /**
    * The magnification the paper is at right now.
    *
@@ -267,6 +284,46 @@ export interface PageStageHandle {
    * magnification nobody is looking at.
    */
   zoomNow: () => number;
+  /**
+   * Turn the page from a grab that this stage's own gesture cannot feel.
+   *
+   * On a desktop spread the reader turns by grabbing the book's outer edge —
+   * and one of those two edges is the *facing* leaf, a page this stage does not
+   * own and never receives a pointer from. So the grab lives on the book and
+   * drives the one stage that owns turning through these three verbs, one per
+   * phase of the drag.
+   *
+   * The grab is a **trigger, not a track**. It deliberately does not run the
+   * swipe path's finger-locked band across the spread: that band is a thin
+   * fore-edge strip built to *sweep* a leaf in a couple of hundred milliseconds,
+   * and dragging it slowly instead — 1:1 with a hand at the book's edge — draws
+   * a bar creeping over a spread whose two pages have not changed yet, which
+   * reads as a stuck line on one page rather than a page turning (see the
+   * desktop-turn decision, and #11: a faithful drag-to-peel that reveals the
+   * destination *opening* has to drive both leaves at once, which is a larger
+   * rework). Until that lands, the grab measures the drag and, on release, hands
+   * a committed turn to the ordinary animated turn — the same flip a wheel or an
+   * arrow key plays — so what the reader sees is a real transition, never a
+   * half-dragged band.
+   *
+   * `step` is +1 forward / −1 back, and it is fixed by *which edge* was grabbed,
+   * not by the drag: the outer edge of the later leaf pulls forward, the outer
+   * edge of the earlier leaf pulls back. The drag then only decides whether that
+   * latched turn commits or is dropped — a grab dragged the wrong way, or not
+   * far enough, is a reader changing their mind, and the commit rule takes it
+   * back by simply doing nothing.
+   */
+  beginEdgeTurn: (step: 1 | -1) => void;
+  /**
+   * A frame of the grab moved. The drag's distance is what the commit rule reads
+   * on release, so nothing has to be done per-frame yet — the method is kept so
+   * the rails have one verb per phase and so a later peel can hang tracking here
+   * without the rails changing. The cursor's grabbing state is the drag's only
+   * feedback for now.
+   */
+  trackEdgeTurn: (dx: number) => void;
+  /** The grab came up: if the drag committed, play the turn; otherwise nothing. */
+  releaseEdgeTurn: (dx: number, velocityX: number) => void;
 }
 
 /** The three states of a fold that is actually drawn; `"none"` draws nothing. */
@@ -452,6 +509,14 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
   const turnRef = useRef(0);
   const foldTargetRef = useRef(foldTarget);
   foldTargetRef.current = foldTarget;
+  /*
+   * The step an edge grab latched, held between the grab going down and coming
+   * up. The desktop edge grab is a trigger, not a tracked band (see the edge
+   * verbs on the handle): begin latches which way the grabbed edge turns, and
+   * release asks the commit rule whether the drag earned it. Null whenever no
+   * edge is being held.
+   */
+  const edgeStepRef = useRef<1 | -1 | null>(null);
   /*
    * The turn the finger is currently holding open (`page-transition.md` §3.2,
    * `tracking`). Null whenever no drag has latched `"turn"`.
@@ -1263,7 +1328,7 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
   useImperativeHandle(
     ref,
     (): PageStageHandle => ({
-      setZoom(z) {
+      setZoom(z, anchor = "center") {
         const layer = layerRef.current;
         if (!layer) return view.current.z;
         // The same two things a wheel gesture used to do at its first event:
@@ -1274,15 +1339,16 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
         measureFit();
         const rect = layer.getBoundingClientRect();
         const base = { z: view.current.z, x: view.current.x, y: view.current.y };
-        // The centre of the stage, because a button has no pointer to anchor to.
-        // Through `zoomAbout` rather than writing `view` directly: the anchor
-        // arithmetic §7 ⑨ fixed has one implementation and this is not a second.
-        zoomAbout(
-          clampZoom(z, MIN_ZOOM, MAX_ZOOM),
-          rect.left + rect.width / 2,
-          rect.top + rect.height / 2,
-          base,
-        );
+        // A button has no pointer to anchor to, so the caller names the point.
+        // The lone leaf grows from its own centre; an open book pins each leaf at
+        // its gutter edge (`left`/`right`) so the fold stays put and the opening
+        // grows outward as one sheet. Vertically always the middle — the fold is
+        // a vertical line, so height has no side to prefer. Through `zoomAbout`
+        // rather than writing `view` directly: the anchor arithmetic §7 ⑨ fixed
+        // has one implementation and this is not a second.
+        const ox =
+          anchor === "left" ? rect.left : anchor === "right" ? rect.right : rect.left + rect.width / 2;
+        zoomAbout(clampZoom(z, MIN_ZOOM, MAX_ZOOM), ox, rect.top + rect.height / 2, base);
         // The rail sits beside the selected ayah and has just been moved.
         emitSelectionRect();
         // What was *applied*, which is not always what was asked: `clampView`
@@ -1316,6 +1382,16 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
         // above must leave the initial page in charge rather than blank the stage.
         navigatedRef.current = true;
         if (loc.page !== currentPageRef.current) setCurrentPage(loc.page);
+        // Arrive already centred, before the tween below has a chance to yield.
+        // `setCurrentPage` has just revealed the incoming leaf (`display: block`)
+        // and a freshly mounted host wears no transform, so it sits at the layer
+        // origin — top-left, one centring-offset high. The framing below is an
+        // `await tweenTo`, whose first positioned frame is one paint away, so
+        // without this the leaf flashes at the origin for that frame — the
+        // "arrive wearing your transform" rule crossFade keeps for a turn, which
+        // a hop needs for the same reason. A zoom = 1 jump (a juz or page hop)
+        // then simply rests at this centre; a closer hop tweens out from fit.
+        centerCurrent();
         const bbox = mp.hl.bboxOf(loc.elementIds);
         const fit = measureFit();
         if (bbox && fit) {
@@ -1347,6 +1423,37 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
       },
       turnTo(next) {
         return runTurn(next);
+      },
+      beginEdgeTurn(step) {
+        // A grab does not measure the page on a first drag frame the way the
+        // gesture does, so do it here: the commit rule at release reads the
+        // stage width off `fitRef`, and a spread toggle can have changed it
+        // since the last resize without touching this surface.
+        measureFit();
+        edgeStepRef.current = step;
+      },
+      trackEdgeTurn() {
+        // Nothing per-frame: release reads the drag distance, and the grabbing
+        // cursor is the only feedback the trigger owes a slow pull. A future
+        // peel (#11) hangs here.
+      },
+      releaseEdgeTurn(dx, velocityX) {
+        const step = edgeStepRef.current;
+        edgeStepRef.current = null;
+        if (step === null) return;
+        // The same commit rule the swipe and the wheel use, so a grab, a flick
+        // and a spun wheel all agree on what counts as a turn. A drag that did
+        // not reach the threshold — or reversed past it — leaves `verdict` off
+        // `step`, and the honest answer to "did they turn the page?" is no:
+        // nothing animates, the reader stays where they were.
+        const stageWidth = fitRef.current?.stageWidth ?? stageRef.current?.clientWidth ?? 0;
+        const verdict = turnCommit({ dx, velocityX, stageWidth });
+        if (verdict !== step) return;
+        // Hand the committed turn to the ordinary animated turn — the same flip
+        // a wheel or arrow key plays (App → turnTo → runTurn). No band was ever
+        // drawn during the drag, so this is the reader's first and only sight of
+        // the turn, and it is a real one.
+        onTurnRef.current?.(step);
       },
     }),
     [

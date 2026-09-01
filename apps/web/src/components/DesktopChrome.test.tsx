@@ -273,21 +273,20 @@ describe("DesktopChrome · the zoom stepper", () => {
     expect(steppers().out).toBeEnabled();
   });
 
-  it("is off in two-page mode, and says why on the control itself", () => {
-    // Two magnified leaves lose their edges and read as one continuous column,
-    // and a leaf in a spread is height-bound at ~398px anyway, so zoom there
-    // buys nothing (desktop.md §8 ②). The toggle beside it is the way out — and
-    // the tooltip is here rather than nowhere because this is the one of the
-    // three disabled cases whose reason is *not* visible from the control.
+  it("works in two-page mode too — the spread magnifies both leaves together", () => {
+    // It used to be disabled here, on the finding that two enlarged pages lose
+    // their edges and read as one column. The reader reversed that: a spread is
+    // magnified as a pair, so the stepper is live with the book open, greyed only
+    // at the ends of the ladder, and it carries no "switch to one page" tooltip
+    // because there is nothing to switch to. App is what drives both leaves to
+    // the level a press asks for; the control just asks. (See the decision.)
     const { onZoom } = chrome({ pageMode: "two", zoom: 1 });
     const { out, into } = steppers();
-    expect(out).toBeDisabled();
-    expect(into).toBeDisabled();
-    for (const b of [out, into]) {
-      expect(b.getAttribute("title")).toBe("التكبير يحتاج صفحة واحدة — بدّل إلى صفحة واحدة أولًا");
-    }
+    expect(into).toBeEnabled();
+    expect(out).toBeEnabled(); // 1 is a rung with room below (0.8) and above (1.25)
+    for (const b of [out, into]) expect(b.getAttribute("title")).toBeNull();
     fireEvent.click(into);
-    expect(onZoom).not.toHaveBeenCalled();
+    expect(onZoom).toHaveBeenCalledWith(1.25);
   });
 
   it("shows the level without becoming a second announcer", () => {

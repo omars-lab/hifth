@@ -1,0 +1,60 @@
+/*
+ * The grab rails — the two outer fore-edges of the open book, made grabbable.
+ *
+ * Absolutely placed on `.book` (PageSpread.module.css), which is the positioning
+ * context and clips them to itself. Physical `left`/`right`, not logical: the
+ * turn direction is a fact about the hand ("drag right is forward"), not about
+ * the writing direction, so it must not flip with `dir`.
+ */
+.rail {
+  position: absolute;
+  inset-block: 0;
+  /* The widest the grab reaches — at the corners. The midline is pinched to a
+     sliver by the clip-path, so this is a ceiling, not the felt width. */
+  inline-size: 3.5rem;
+  z-index: 2;
+  /* The affordance the reader was promised: a page you can pick up. */
+  cursor: grab;
+  touch-action: none;
+  -webkit-user-select: none;
+  user-select: none;
+  /* A whisper of shading that deepens toward the fore-edge, so the grabbable
+     strip is discoverable without drawing a hard border the eye reads as chrome.
+     Invisible until hovered — between turns the book is just a book. */
+  opacity: 0;
+  transition: opacity var(--dur-fast, 120ms) ease;
+}
+
+.rail[data-side="left"] {
+  left: 0;
+  background: linear-gradient(to left, transparent, var(--gutter-shadow, rgba(0, 0, 0, 0.08)));
+  /* Full reach at the top and bottom corners, pinched to ~30% at the midline. */
+  clip-path: polygon(0% 0%, 100% 0%, 30% 50%, 100% 100%, 0% 100%);
+}
+
+.rail[data-side="right"] {
+  right: 0;
+  background: linear-gradient(to right, transparent, var(--gutter-shadow, rgba(0, 0, 0, 0.08)));
+  clip-path: polygon(100% 0%, 0% 0%, 70% 50%, 0% 100%, 100% 100%);
+}
+
+.rail:hover {
+  opacity: 1;
+}
+
+/* The closed hand while a leaf is actually being pulled — and it must win over
+   `:hover`, which is why the visible feedback is here rather than on `:active`
+   alone. Held from pointer-down to release through the component's own state, so
+   it survives the pointer leaving the strip mid-turn. */
+.rail[data-grabbing="true"] {
+  cursor: grabbing;
+  opacity: 1;
+}
+
+/* A reader who has turned off motion still gets the hand and the turn; the only
+   thing dropped is the fade-in, which appears at once instead. */
+@media (prefers-reduced-motion: reduce) {
+  .rail {
+    transition: none;
+  }
+}

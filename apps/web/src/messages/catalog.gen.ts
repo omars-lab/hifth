@@ -196,6 +196,7 @@ export interface Catalog {
   readonly stageFailed: (d: { readonly pageText: string | number }) => string;
   readonly stageLoading: string;
   readonly surahN: (d: { readonly surahText: string | number }) => string;
+  readonly tagline: string;
   readonly tajweed: string;
   readonly tajweedCredit: string;
   readonly tapHint: string;
@@ -203,9 +204,9 @@ export interface Catalog {
   readonly twin: string;
   readonly wordHops: (d: { readonly n: number; readonly nText: string | number; readonly u: number; readonly uText: string | number }) => string;
   readonly wordLevelPending: string;
+  readonly wordmark: string;
   readonly zoomIn: string;
   readonly zoomLevel: (d: { readonly pctText: string | number }) => string;
   readonly zoomOut: string;
   readonly zoomSectionTitle: string;
-  readonly zoomTwoPage: string;
 }

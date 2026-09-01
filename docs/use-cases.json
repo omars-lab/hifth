@@ -555,7 +555,7 @@
         },
         {
           "file": "apps/web/e2e/desktop.spec.ts",
-          "test": "the stepper magnifies the one leaf, and is off while there are two"
+          "test": "the stepper magnifies one leaf alone, and both leaves of a spread together"
         },
         {
           "file": "apps/web/e2e/desktop.spec.ts",

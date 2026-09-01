@@ -145,6 +145,17 @@ export interface Strings {
 
   /* ---- chrome ------------------------------------------------------------- */
   about: string;
+  /**
+   * The wordmark and its tagline in the header. These follow the UI language —
+   * «حفظ / مِلاحة للحُفّاظ» in Arabic, "Hifth / Navigation for huffaz" in English
+   * — because the wordmark is chrome, not scripture, and the note under the
+   * language switch already promises that only the mus'haf and the verse text
+   * stay Arabic. The name is a name, not a translated word; the English wordmark
+   * is its transliteration, which is what the app is called in English prose
+   * throughout (`about`, `aboutTitle`).
+   */
+  wordmark: string;
+  tagline: string;
   pageWord: string;
   /**
    * "صفحة 7" / "Page 7" — the stage's accessible name and the page-turn
@@ -483,14 +494,6 @@ export interface Strings {
    * group called «التكبير», and an announcement arrives with no such context.
    */
   arrivedZoom(percent: number): string;
-  /**
-   * Why the stepper is greyed out with the book open.
-   *
-   * A disabled control owes an explanation — otherwise it reads as broken rather
-   * than as not-now — and the explanation names the way out, which is the toggle
-   * sitting beside it.
-   */
-  zoomTwoPage: string;
   /** Where a `Shift`+wheel landed: the juz, and the page it opens on. */
   arrivedJuz(juz: number, page: number): string;
   /** …and where it did not, because that was the first or last juz we hold. */
@@ -544,6 +547,8 @@ export function buildStrings(lang: Lang, m: Catalog): Strings {
     langSwitchTo: (other) => m.langSwitchTo({ other }),
 
     about: m.about,
+    wordmark: m.wordmark,
+    tagline: m.tagline,
     pageWord: m.pageWord,
     pageN: (page) => m.pageN({ page }),
     goTo: m.goTo,
@@ -829,7 +834,6 @@ export function buildStrings(lang: Lang, m: Catalog): Strings {
     zoomOut: m.zoomOut,
     zoomLevel: (percent) => m.zoomLevel({ pctText: n(percent) }),
     arrivedZoom: (percent) => m.arrivedZoom({ pctText: n(percent) }),
-    zoomTwoPage: m.zoomTwoPage,
     arrivedJuz: (juz, page) => m.arrivedJuz({ juzText: n(juz), page }),
     juzEdge: (juz) => m.juzEdge({ juzText: n(juz) }),
   };

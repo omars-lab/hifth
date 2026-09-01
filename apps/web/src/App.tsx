@@ -48,6 +48,7 @@ import { useHashRouter } from "./useHashRouter";
 import { DESKTOP_QUERY, useMediaQuery } from "./useMediaQuery";
 import { PageStage, type PageStageHandle } from "./components/PageStage";
 import { PageSpread } from "./components/PageSpread";
+import { EdgeGrabRails, type EdgeTurnDriver } from "./components/EdgeGrabRails";
 import { DesktopChrome } from "./components/DesktopChrome";
 import { HopRail } from "./components/HopRail";
 import { HopPopover } from "./components/HopPopover";
@@ -141,6 +142,16 @@ export function App(): JSX.Element {
 
   const stageRef = useRef<PageStageHandle>(null);
   /*
+   * The facing leaf's handle — held for one reason only: magnification. When two
+   * pages are open the reader magnifies the whole opening, so the stepper drives
+   * this leaf to the same level as the live one and the two grow together. It is
+   * *not* how the book is steered: hops and turns still go through the live stage
+   * above (its ref), because a landing has to relocate the reader, and relocating
+   * onto the facing leaf swaps the two roles anyway. So this ref carries zoom and
+   * nothing else, and is null below the breakpoint, where there is no second leaf.
+   */
+  const facingStageRef = useRef<PageStageHandle>(null);
+  /*
    * The open book's own element, so a page turn's fold can be portalled into it.
    *
    * The fold crosses the *whole book*, not one leaf: on a desktop opening both
@@ -205,6 +216,24 @@ export function App(): JSX.Element {
   const bookOpenRef = useRef(false);
   bookOpenRef.current = desktop && pageMode === "two";
   /*
+   * The fore-edge grab, wired to the one stage that owns turning.
+   *
+   * The rails live on the book because one of the two edges is the facing leaf,
+   * a page the live stage never feels a pointer on (see `EdgeGrabRails`). Every
+   * verb goes to `stageRef` — the live leaf — and never to the facing one: only
+   * the live stage draws the fold, and a second band in the same book is the one
+   * thing the transition design forbids. Memoised on `[]`, since `stageRef` is
+   * stable and the verbs read `.current` at call time.
+   */
+  const edgeTurn = useMemo<EdgeTurnDriver>(
+    () => ({
+      begin: (step) => stageRef.current?.beginEdgeTurn(step),
+      track: (dx) => stageRef.current?.trackEdgeTurn(dx),
+      release: (dx, velocityX) => stageRef.current?.releaseEdgeTurn(dx, velocityX),
+    }),
+    [],
+  );
+  /*
    * The stage's four imperative verbs, wrapped once, so that the readout above
    * cannot drift from the paper below it.
    *
@@ -222,9 +251,22 @@ export function App(): JSX.Element {
    * reader has not arrived at yet.
    */
   const stage = useMemo(() => {
+    // The facing leaf carries whatever the live leaf lands at, so the opening is
+    // one magnification and never two. Read off the live stage rather than the
+    // caller's request, because a turn ends at fit and a hop with the book open
+    // ends at fit too (see `navigateTo` below) — mirroring the landed value keeps
+    // the two leaves agreeing without this having to know which verb ran.
+    // The facing leaf is the left-hand page of the opening, so its gutter is its
+    // right edge: pinned there, it grows leftward, away from the fold. (The live
+    // leaf is the right-hand page and pins at its left edge, below.) The ref is
+    // null unless the book is open, so this is a no-op on a lone leaf.
+    const mirrorFacing = (): void => {
+      facingStageRef.current?.setZoom(stageRef.current?.zoomNow() ?? 1, "right");
+    };
     const settle = <T,>(work: Promise<T> | undefined, missing: T): Promise<T> =>
       (work ?? Promise.resolve(missing)).then((landed) => {
         setZoom(stageRef.current?.zoomNow() ?? 1);
+        mirrorFacing();
         return landed;
       });
     return {
@@ -250,20 +292,34 @@ export function App(): JSX.Element {
       showPage: (next: number) => settle(stageRef.current?.showPage(next), undefined),
       turnTo: (next: number) => settle(stageRef.current?.turnTo(next), false),
       // Synchronous, because this one *is* the gesture: the stepper presses and
-      // the paper has already moved by the time the handler returns.
-      setZoom: (z: number) => setZoom(stageRef.current?.setZoom(z) ?? 1),
+      // the paper has already moved by the time the handler returns. The facing
+      // leaf gets the same asked-for level and clamps it against its own box, so
+      // both leaves land on the rung the reader pressed even where their fits
+      // differ; the readout follows the live leaf.
+      //
+      // With the book open, each leaf pins at its gutter edge so the opening
+      // grows outward from the fold as one sheet rather than each leaf swelling
+      // from its own middle — which crushed the fold and pushed the outer margins
+      // off-screen. The live leaf is the right-hand page (gutter on its left); on
+      // a lone leaf there is no fold, so it grows from its centre.
+      setZoom: (z: number) => {
+        const applied = stageRef.current?.setZoom(z, bookOpenRef.current ? "left" : "center") ?? 1;
+        facingStageRef.current?.setZoom(z, "right");
+        setZoom(applied);
+      },
     };
   }, []);
   /*
-   * Open or close the book — and drop the magnification when opening it.
+   * Open or close the book — and start the opening at fit.
    *
-   * Closing keeps whatever the reader was at; opening does not. §8 ② rendered
-   * two magnified leaves side by side and found they lose their edges and read
-   * as one continuous column, and §3's measurement is that a leaf in a spread is
-   * height-bound at about 398 px, so there is nothing there for a zoom to buy.
-   * The stepper is disabled in this mode for the same reason; this is the other
-   * half of that, closing the door the reader could otherwise walk back through
-   * by zooming first and opening after.
+   * Both leaves now magnify together (the reader asked for it, over the older
+   * finding that two enlarged pages read as one column — see the decision that
+   * reversed it). But the facing leaf mounts fresh at fit the instant the spread
+   * appears, so if the live leaf carried a leftover magnification in, the two
+   * would open at different sizes. Dropping to fit on open makes both leaves
+   * agree from the first frame; the stepper then grows them together from there.
+   * Closing keeps whatever the reader was at, because one leaf has nothing to
+   * disagree with.
    */
   const handlePageMode = useCallback(
     (mode: "one" | "two") => {
@@ -1183,15 +1239,20 @@ export function App(): JSX.Element {
           aria-haspopup="dialog"
           onClick={() => setColophonOpen(true)}
         >
-          {/* The name and the tagline stay Arabic in both languages: «حفظ» is
-              what the app is called, not a word to translate, and the pair is
-              load-bearing for the header's height in the golden images. */}
-          <span className={styles.mark} aria-hidden="true" lang="ar" dir="rtl">
-            حفظ
+          {/* The name and the tagline follow the UI language: «حفظ · مِلاحة
+              للحُفّاظ» in Arabic, "Hifth · Navigation for huffaz" in English. The
+              wordmark is chrome, not scripture — the note under the language
+              switch already promises only the mus'haf and the verse text stay
+              Arabic — and English prose throughout the app (the colophon, its
+              title) already calls it "Hifth". No `lang`/`dir` override here, so
+              each inherits the header's own direction. The golden images are
+              recorded in Arabic (playwright's default locale), so the wordmark
+              there is unchanged; `lang.spec.ts` is where the English wordmark is
+              asserted. */}
+          <span className={styles.mark} aria-hidden="true">
+            {t.wordmark}
           </span>
-          <span className={styles.tagline} lang="ar" dir="rtl">
-            مِلاحة للحُفّاظ
-          </span>
+          <span className={styles.tagline}>{t.tagline}</span>
         </button>
         {/* The chip already meant *where am I*; pressing it now also answers
             *where have I been*. It opens the revision map rather than a sixth
@@ -1314,19 +1375,27 @@ export function App(): JSX.Element {
                  which is exactly why the guard has to be here rather than in the
                  state. */
               solo={desktop && pageMode === "one"}
+              /* The grabbable fore-edges. Only above the breakpoint is there a
+                 book with two outer edges to grab; the phone still turns by
+                 swiping the leaf itself, so it gets no rails and keeps its
+                 gesture. */
+              edgeRails={desktop ? <EdgeGrabRails driver={edgeTurn} /> : undefined}
               renderFacing={(facing) => (
                 /* The facing leaf gets its own stage rather than a second
                    visible host inside the current one: PageStage's whole
                    correctness argument is that there is exactly one imperative
                    write path to one visible host, and two transforms inside it
                    is a bigger change than two instances beside each other.
-                   No `ref` — the imperative handle is how App drives *the*
-                   stage, and a hop that landed on the facing leaf would have to
-                   move the reader there anyway, at which point the two swap
-                   roles through `page`. Handlers are shared so an ayah on the
-                   facing leaf is as tappable as one on this leaf. */
+                   Its ref carries one thing only — magnification, so the opening
+                   grows as a pair (`facingStageRef`). It is still not how the
+                   book is *steered*: a hop or a turn goes through the live stage,
+                   and a landing on this leaf would relocate the reader here
+                   anyway, at which point the two swap roles through `page`.
+                   Handlers are shared so an ayah on the facing leaf is as
+                   tappable as one on this leaf. */
                 <PageStage
                   key={facing}
+                  ref={facingStageRef}
                   resolver={resolver}
                   page={facing}
                   total={totalPages}
@@ -1393,6 +1462,12 @@ export function App(): JSX.Element {
                 labelFor={(key) => t.ayahAria(t.ayahLabel(key) ?? key)}
                 skin={skin}
                 tajweedLookup={tajweed?.lookup ?? null}
+                /* On the desktop spread the page turns by its fore-edge, not by
+                   a swipe across its middle: the edge rails drive the fold, and
+                   the stage's own swipe-to-turn is off so a drag through the
+                   text is free to pan and select. The phone keeps the swipe —
+                   it has no rails and no edge to spare. */
+                dragToTurn={!desktop}
                 /* Only the live stage turns pages, and only on a desktop
                    spread does the fold belong to something wider than it. */
                 foldTarget={desktop ? bookRef : null}

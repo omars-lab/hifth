@@ -3,6 +3,8 @@
   "langSectionNote": "This changes the buttons and menus only. The mus'haf and the verse text are always Arabic.",
   "langSwitchTo": "Switch to {other}",
   "about": "About Hifth · licence and sources",
+  "wordmark": "Hifth",
+  "tagline": "Navigation for huffaz",
   "pageWord": "Page",
   "pageN": "Page {page}",
   "goTo": "Go to",
@@ -200,7 +202,6 @@
   "zoomOut": "Zoom out",
   "zoomLevel": "{pctText}%",
   "arrivedZoom": "Zoom {pctText}%",
-  "zoomTwoPage": "Zoom needs one page — switch to one page first",
   "arrivedJuz": "Juz {juzText} · page {page}",
   "juzEdge": "No juz that way · juz {juzText}"
 }

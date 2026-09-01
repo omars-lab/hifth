@@ -202,6 +202,7 @@ const messages: Catalog = {
   stageFailed: (d) => "Could not load page " + d.pageText + ". Try again.",
   stageLoading: "Loading…",
   surahN: (d) => "Surah " + d.surahText,
+  tagline: "Navigation for huffaz",
   tajweed: "Tajweed",
   tajweedCredit: "Tajweed rules from quran-tajweed (Collin Fair), licensed CC BY 4.0.",
   tapHint: "Tap an ayah on the page to select it",
@@ -209,11 +210,11 @@ const messages: Catalog = {
   twin: "twin",
   wordHops: (d) => plural(LC, d.n, { "0": "No similar places", one: d.nText + " similar place", other: d.nText + " similar places" }) + plural(LC, d.u, { "0": "", one: ", and " + d.uText + " link that names no words", other: ", and " + d.uText + " links that name no words" }),
   wordLevelPending: "Word-level links arrive with the next data pack",
+  wordmark: "Hifth",
   zoomIn: "Zoom in",
   zoomLevel: (d) => d.pctText + "%",
   zoomOut: "Zoom out",
   zoomSectionTitle: "Zoom",
-  zoomTwoPage: "Zoom needs one page — switch to one page first",
 };
 
 export default messages;

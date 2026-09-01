@@ -62,11 +62,13 @@ export function DesktopChrome({
   onZoom,
 }: DesktopChromeProps): JSX.Element {
   const { t, lang, setLang } = useT();
-  // Two-page mode disables the stepper on top of the two ends of the ladder,
-  // and it is the one of the three that owes an explanation — see `zoomTwoPage`.
-  const spread = pageMode === "two";
-  const out = spread ? null : rung(zoom, -1);
-  const into = spread ? null : rung(zoom, 1);
+  // The stepper works whether the book is open or closed: a spread magnifies
+  // both leaves together, so the only thing that greys a button out is reaching
+  // the end of the ladder. (It used to be off entirely while two pages showed;
+  // the reader asked for the opposite, and the record that reversed it names why
+  // the old finding no longer holds.)
+  const out = rung(zoom, -1);
+  const into = rung(zoom, 1);
 
   return (
     <div className={styles.extras}>
@@ -138,10 +140,6 @@ export function DesktopChrome({
           type="button"
           className={styles.zoomBtn}
           aria-label={t.zoomOut}
-          /* The explanation rides on the control whenever the reason it is
-             off is not visible from the control itself. At the bottom rung
-             the reason *is* visible — the readout says 80%. */
-          title={spread ? t.zoomTwoPage : undefined}
           disabled={out === null}
           onClick={() => out !== null && onZoom(out)}
         >
@@ -152,7 +150,6 @@ export function DesktopChrome({
           type="button"
           className={styles.zoomBtn}
           aria-label={t.zoomIn}
-          title={spread ? t.zoomTwoPage : undefined}
           disabled={into === null}
           onClick={() => into !== null && onZoom(into)}
         >

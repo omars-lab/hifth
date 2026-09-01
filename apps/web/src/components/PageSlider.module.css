@@ -13,6 +13,14 @@
 
 .bar {
   --thumb: 22px;
+  /* How wide the *controls* are allowed to get. The bar's border and background
+     stay full-bleed (it is the bottom edge of the app); only the buttons, track
+     and inventory are held to this width so a wide desktop window does not
+     stretch the native range into a hairline the length of the screen
+     (`e2e/desktop.spec.ts`). ~960px, the width the desktop mocks drew the book
+     at, so the bar reads as belonging to the book above it rather than the
+     window around it. */
+  --controls-max: 60rem;
 
   display: grid;
   grid-template-columns: auto 1fr auto;
@@ -22,6 +30,20 @@
   padding-block-end: max(var(--space-1), env(safe-area-inset-bottom));
   border-block-start: 1px solid var(--hairline);
   background: var(--paper-raised);
+}
+
+/*
+ * Desktop: hold the controls to `--controls-max`, centred, by growing the
+ * horizontal padding rather than capping the bar — the hairline and paper stay
+ * edge-to-edge (the bar is the app's bottom chrome), and only the grid's three
+ * columns are pulled in. `max(...)` keeps the phone's `--space-3` gutter as the
+ * floor, so nothing changes below the width where the window first exceeds the
+ * cap. Same 900px breakpoint the rest of the desktop chrome uses.
+ */
+@media (min-width: 900px) {
+  .bar {
+    padding-inline: max(var(--space-3), calc((100% - var(--controls-max)) / 2));
+  }
 }
 
 /*

@@ -202,6 +202,7 @@ const messages: Catalog = {
   stageFailed: (d) => "تعذّر تحميل صفحة " + d.pageText + ". أعد المحاولة.",
   stageLoading: "…جاري التحميل",
   surahN: (d) => "سورة " + d.surahText,
+  tagline: "مِلاحة للحُفّاظ",
   tajweed: "تجويد",
   tajweedCredit: "أحكام التجويد مأخوذة من quran-tajweed (Collin Fair)، رخصة CC BY 4.0.",
   tapHint: "المس آية على الصفحة لتحديدها",
@@ -209,11 +210,11 @@ const messages: Catalog = {
   twin: "توأم",
   wordHops: (d) => plural(LC, d.n, { zero: "لا مواضع مشابهة", one: "موضع مشابه واحد", two: "موضعان متشابهان", few: d.nText + " مواضع مشابهة", many: d.nText + " موضعًا مشابهًا", other: d.nText + " موضع مشابه" }) + plural(LC, d.u, { zero: "", one: "، ووصلة واحدة لا تسمّي كلمات", two: "، ووصلتان لا تسمّيان كلمات", few: "، و" + d.uText + " وصلات لا تسمّي كلمات", many: "، و" + d.uText + " وصلة لا تسمّي كلمات", other: "، و" + d.uText + " وصلة لا تسمّي كلمات" }),
   wordLevelPending: "الربط على مستوى الكلمة يصل مع الحزمة القادمة",
+  wordmark: "حفظ",
   zoomIn: "تكبير",
   zoomLevel: (d) => d.pctText + "٪",
   zoomOut: "تصغير",
   zoomSectionTitle: "التكبير",
-  zoomTwoPage: "التكبير يحتاج صفحة واحدة — بدّل إلى صفحة واحدة أولًا",
 };
 
 export default messages;
