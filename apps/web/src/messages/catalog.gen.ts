@@ -91,6 +91,7 @@ export interface Catalog {
   readonly licenceBody: string;
   readonly licenceHead: string;
   readonly mapAbsent: string;
+  readonly mapActiveIn: (d: { readonly monthText: string | number }) => string;
   readonly mapCaveat: string;
   readonly mapCellAbsent: (d: { readonly label: string | number }) => string;
   readonly mapCellNever: (d: { readonly label: string | number }) => string;
@@ -102,6 +103,10 @@ export interface Catalog {
   readonly mapNeverOpened: string;
   readonly mapNoStore: string;
   readonly mapOpen: (d: { readonly page: string | number }) => string;
+  readonly mapRangeAll: string;
+  readonly mapRangeGroup: string;
+  readonly mapRangeLastMonth: string;
+  readonly mapRangeThisMonth: string;
   readonly mapRecent: string;
   readonly mapScopeGroup: string;
   readonly mapSince: (d: { readonly dayText: string | number }) => string;

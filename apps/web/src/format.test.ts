@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { longDay } from "./format";
+import { longDay, longMonth } from "./format";
 
 // `longDay` turns the day-stamp the record is opened with into the line the map
 // shows — «Active since …». It parses the stamp by hand rather than through
@@ -37,5 +37,20 @@ describe("longDay", () => {
     expect(longDay("not-a-date", "en")).toBe("not-a-date");
     expect(longDay("2026-13-01", "en")).toBe("2026-13-01");
     expect(longDay("2026-13-01", "ar")).toBe("٢٠٢٦-١٣-٠١");
+  });
+});
+
+// `longMonth` names the calendar month the revision map's colouring is scoped to.
+describe("longMonth", () => {
+  it("names the month with its year in each language's names and digits", () => {
+    expect(longMonth(2026, 9, "en")).toBe("Sept 2026");
+    expect(longMonth(2026, 8, "ar")).toBe("أغسطس ٢٠٢٦");
+    expect(longMonth(2026, 1, "en")).toBe("Jan 2026");
+    expect(longMonth(2026, 12, "ar")).toBe("ديسمبر ٢٠٢٦");
+  });
+
+  it("returns empty rather than an out-of-range name for a bad month", () => {
+    expect(longMonth(2026, 0, "en")).toBe("");
+    expect(longMonth(2026, 13, "ar")).toBe("");
   });
 });

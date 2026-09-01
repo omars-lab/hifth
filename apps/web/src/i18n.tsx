@@ -98,6 +98,7 @@ import {
   digits,
   digitsIn,
   longDay,
+  longMonth,
   surahName as fmtSurahName,
   surahNames,
   tenths,
@@ -397,6 +398,21 @@ export interface Strings {
    * tell that lie — an empty map dated this morning is visibly a new record.
    */
   mapSince(day: string): string;
+  /** The time-range switch's accessible name, beside the division switch. */
+  mapRangeGroup: string;
+  /** Colour by every look on record. */
+  mapRangeAll: string;
+  /** Colour by this calendar month's looks only. */
+  mapRangeThisMonth: string;
+  /** Colour by the previous calendar month's looks only. */
+  mapRangeLastMonth: string;
+  /**
+   * Which month the colouring is scoped to, when it is scoped to one:
+   * "Activity in Sept 2026" / «نشاط سبتمبر ٢٠٢٦». It replaces the "active since"
+   * line under a bounded range, because that line dates the *record* and a
+   * bounded picture is dating the *window* instead. `month` is 1–12.
+   */
+  mapActiveIn(year: number, month: number): string;
   /**
    * The grid's own name. Sixty unlabelled squares inside a dialog are sixty
    * anonymous list items to a screen reader; naming the list is what separates
@@ -780,6 +796,13 @@ export function buildStrings(lang: Lang, m: Catalog): Strings {
     // into the date a reader recognises as theirs: "Sept 1st, 2026" / «١ سبتمبر
     // ٢٠٢٦», in the reader's own month names and digits.
     mapSince: (day) => m.mapSince({ dayText: longDay(day, lang) }),
+    mapRangeGroup: m.mapRangeGroup,
+    mapRangeAll: m.mapRangeAll,
+    mapRangeThisMonth: m.mapRangeThisMonth,
+    mapRangeLastMonth: m.mapRangeLastMonth,
+    // `longMonth` names the month in the reader's own month names and digits —
+    // "Sept 2026" / «سبتمبر ٢٠٢٦» — the same table `longDay` draws from.
+    mapActiveIn: (year, month) => m.mapActiveIn({ monthText: longMonth(year, month, lang) }),
     mapGrid: m.mapGrid,
     mapNoStore: m.mapNoStore,
     mapLoading: m.mapLoading,

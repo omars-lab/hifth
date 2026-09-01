@@ -252,6 +252,39 @@ describe("RevisionMap", () => {
     expect(grid[0]!.getAttribute("aria-label")).toBe("الحزب ١ · فُتح قبل ٢ يومًا");
   });
 
+  it("scopes the colouring to a calendar month, and cools what falls outside it", async () => {
+    // A look last month — TODAY is the 20th of March, so this lands in February.
+    // Under "all time" it warms hizb 1; under "this month" nothing in March
+    // opened it, so it cools; under "last month" it warms again. The squares do
+    // not move — only which looks the warmth is drawn from.
+    await recordLook({ key: `quran/${EDITION}/2:30`, page: 7 }, at("2026-02-10T12:00:00Z"));
+    draw();
+    const grid = await cells();
+    await waitFor(() => {
+      expect(grid[0]!.getAttribute("data-state")).toBe("seen");
+    });
+
+    fireEvent.click(screen.getByRole("radio", { name: "هذا الشهر" }));
+    await waitFor(() => {
+      expect(grid[0]!.getAttribute("data-state")).toBe("cold");
+    });
+    // The line no longer dates the record — it names the window the picture is of.
+    expect(screen.getByText("نشاط مارس ٢٠٢٦")).toBeTruthy();
+
+    fireEvent.click(screen.getByRole("radio", { name: "الشهر الماضي" }));
+    await waitFor(() => {
+      expect(grid[0]!.getAttribute("data-state")).toBe("seen");
+    });
+    expect(screen.getByText("نشاط فبراير ٢٠٢٦")).toBeTruthy();
+
+    // Back to the whole record, and the line dates the record again.
+    fireEvent.click(screen.getByRole("radio", { name: "كل الوقت" }));
+    await waitFor(() => {
+      expect(grid[0]!.getAttribute("data-state")).toBe("seen");
+    });
+    expect(screen.getByText(/^نشِط منذ/)).toBeTruthy();
+  });
+
   it("marks where the reader is standing without overwriting what the cell says", async () => {
     draw();
     const grid = await cells();

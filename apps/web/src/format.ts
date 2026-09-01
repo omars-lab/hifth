@@ -186,6 +186,20 @@ export function longDay(stamp: string, lang: Lang): string {
 }
 
 /**
+ * A month named with its year: "Sept 2026", «سبتمبر ٢٠٢٦». The revision map's
+ * time-range line uses it — when the colouring is scoped to one calendar month,
+ * this is the month it is scoped to. Same month names and digits as `longDay`,
+ * one fewer field. `month` is 1–12; anything else yields an empty string rather
+ * than an out-of-range name, so a bad call is visibly blank, not silently wrong.
+ */
+export function longMonth(year: number, month: number, lang: Lang): string {
+  if (!Number.isInteger(month) || month < 1 || month > 12) return "";
+  const name = LOCALES[lang].digits === "latin" ? MONTHS_EN[month - 1] : MONTHS_AR[month - 1];
+  const yearText = LOCALES[lang].digits === "latin" ? String(year) : toArabicDigits(year);
+  return `${name} ${yearText}`;
+}
+
+/**
  * A number to one decimal, in the digits *and the decimal mark* of the UI
  * language: "5.8" / «٥٫٨».
  *
