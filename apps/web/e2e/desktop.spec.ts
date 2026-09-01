@@ -391,6 +391,29 @@ test.describe("Hifth · the desktop spread", () => {
     await expect(page.locator(NUM)).toHaveText("7");
   });
 
+  test("a turn moves your place: the URL follows the page, and the highlight lets go", async ({
+    page,
+  }) => {
+    // Turning a leaf is moving your place, not browsing away from it (settled
+    // with the owner, against the older "paging does not touch the selection").
+    // So a landed turn drops the highlighted ayah, empties the hop trail, and
+    // lets the address fall back from the ayah form to the page's own anchor —
+    // the whole point being that a link copied after a turn points at the page
+    // the reader is looking at, not the ayah they left three leaves ago.
+    await page.goto("/#/hafs-kfqc/2:48");
+    await expect(pageSvg(page, 7)).toBeVisible({ timeout: 20_000 });
+    // The place is held: the current-ayah bead is up and the URL is the ayah.
+    await expect(page.getByRole("button", { name: /الآية الحالية البقرة · ٢:٤٨/ })).toBeVisible();
+    await expect.poll(() => new URL(page.url()).hash).toBe("#/hafs-kfqc/2:48");
+
+    await page.keyboard.press("ArrowLeft");
+    await expect(page.locator(NUM)).toHaveText("8");
+
+    // The leaf landed, so the place let go: no bead, and the address is the page.
+    await expect(page.getByRole("button", { name: /الآية الحالية/ })).toHaveCount(0);
+    await expect.poll(() => new URL(page.url()).hash).toBe("#/hafs-kfqc/p8");
+  });
+
   test("a turn inside one opening draws no band", async ({ page }) => {
     // §3.5, and the row 4b made reachable. Both leaves of (7,8) are already on
     // screen and the crease between them is already drawn — permanently, by the

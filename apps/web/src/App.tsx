@@ -683,8 +683,11 @@ export function App(): JSX.Element {
   // Land on a page. The single navigation path for every way of turning one —
   // the arrow keys, the page bar's edge buttons, and letting go of its slider —
   // so there is one place where "the stage moved" and "the header changed" can
-  // get out of step, rather than three. Paging does not touch the selection:
-  // you are browsing, not moving your place.
+  // get out of step, rather than three. A *turn* moves your place: the
+  // highlighted ayah and the hop trail belonged to the page you left, so a
+  // landed turn clears them and the address falls back to the page's own anchor
+  // (`p585`). A *jump* — scrub, juz, deep link — is a deliberate move to a page
+  // and never carries a selection of its own, so it needs no clearing.
   //
   // `said` is what to announce on arrival. The slider passes a different string
   // when it had to snap, because a landing the reader did not ask for has to be
@@ -718,8 +721,16 @@ export function App(): JSX.Element {
         // the reader still is.
         void stage.turnTo(next).then((landed) => {
           if (pendingPageRef.current !== next) return; // a newer turn owns it
-          if (landed) setPage(next);
-          else pendingPageRef.current = pageRef.current;
+          if (landed) {
+            setPage(next);
+            // The place you were holding was on the page you just left. Drop it
+            // as the leaf lands — atomically with the header — so the highlight,
+            // the back-beads and the ayah in the URL all leave together and the
+            // address becomes the page you are now on.
+            setSelectedKey(null);
+            setSelectedRange(null);
+            setTrail([]);
+          } else pendingPageRef.current = pageRef.current;
         });
         return;
       }
