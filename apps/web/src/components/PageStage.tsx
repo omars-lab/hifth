@@ -874,6 +874,14 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
       } catch {
         return null; // unvendored / fetch failed — caller degrades gracefully
       }
+      // A rival mount may have landed this same page while our fetch was in
+      // flight — the cold-link race the comment in `ensurePage` describes, but
+      // also StrictMode's remount after it cleared the pending map. Everything
+      // below is synchronous, so re-reading the Map here (after the last await)
+      // and yielding to the winner is airtight: the caller that sets the Map
+      // first runs straight through to its `set` before this line runs again.
+      const landed = pagesRef.current.get(targetPage);
+      if (landed) return landed;
       const host = document.createElement("div");
       host.className = styles.host ?? "";
       // Which of this leaf's edges is free. Per *mounted page*, not per visible
@@ -1381,7 +1389,16 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
         // Claimed only once the target really mounted: a navigateTo that fails
         // above must leave the initial page in charge rather than blank the stage.
         navigatedRef.current = true;
-        if (loc.page !== currentPageRef.current) setCurrentPage(loc.page);
+        // Reveal unconditionally, not `if (loc.page !== currentPageRef.current)`:
+        // on a cold open the stage mounts already numbered for its page, so a deep
+        // link to *that same* page finds `currentPageRef` matching and the guard
+        // would skip the reveal — but the host `ensurePage` just built is hidden
+        // (§ host default `display:none`), and the mount effect's own reveal is
+        // gated on `!navigatedRef`, which the line above has just falsified. The
+        // two reveal paths then race to zero: neither fires and the leaf stays
+        // blank. `setCurrentPage` is idempotent, so revealing here every time is
+        // free when the page was already shown and correct when it was not.
+        setCurrentPage(loc.page);
         // Arrive already centred, before the tween below has a chance to yield.
         // `setCurrentPage` has just revealed the incoming leaf (`display: block`)
         // and a freshly mounted host wears no transform, so it sits at the layer
@@ -1417,7 +1434,12 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
         }
         setStatus("ready");
         navigatedRef.current = true;
-        if (next !== currentPageRef.current) setCurrentPage(next);
+        // Always reveal — see `navigateTo` above for why the `next !==
+        // currentPageRef.current` guard blanked a cold-opened page link (`p7`)
+        // whose stage had mounted already numbered for 7: the guard skipped the
+        // reveal, the mount effect's reveal was gated off by `navigatedRef`, and
+        // the freshly-built hidden host was left hidden. Idempotent when already on.
+        setCurrentPage(next);
         cancelTween();
         centerCurrent();
       },
@@ -1511,7 +1533,17 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
       // Bumping the generation is what makes those wake-ups no-ops rather than
       // writes to detached hosts.
       turnRef.current += 1;
-      for (const mp of pages.values()) mp.hl.destroy();
+      // Remove each host from the layer, not only from the Map. On a real
+      // unmount the layer goes with the component, so clearing the Map would be
+      // enough — but StrictMode's dev double-invoke tears down and *reuses the
+      // same layer*, and a host left in that layer becomes an orphan the rebuilt
+      // Map no longer holds. Two overlapping copies of one page result, and zoom
+      // (which transforms only the Map's host) grows one and leaves the other —
+      // the "one leaf zooms, one stays" a reader sees in `pnpm dev`.
+      for (const mp of pages.values()) {
+        mp.hl.destroy();
+        mp.host.remove();
+      }
       pages.clear();
       lru.length = 0;
       // Drop in-flight mounts too: their hosts are appended to a layer that is

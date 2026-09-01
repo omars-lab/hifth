@@ -11,6 +11,7 @@
  * an `aria-labelledby="page-label-<n>"`, set in `ensurePage`. That is the DOM
  * cost the cap exists to bound — one inline mus'haf page is ~150 KB of paths.
  */
+import { StrictMode } from "react";
 import { describe, it, expect, vi, beforeAll, afterAll } from "vitest";
 import { render, waitFor } from "@testing-library/react";
 import { MOUNTED_PAGE_CAP, Resolver, spreadBudget, type AssetManifest } from "@hifth/core";
@@ -128,5 +129,31 @@ describe("the stage's DOM budget", () => {
       expect(mountedIn(container)).toHaveLength(spreadBudget().facing);
     });
     expect(spreadBudget().facing).toBeLessThan(MOUNTED_PAGE_CAP);
+  });
+
+  /*
+   * A leaf that magnifies while the one beside it stays put — the desktop
+   * spread's "zoom is broken" — is this defect wearing a costume. React's dev
+   * StrictMode mounts, tears down, and remounts against the *same* layer; the
+   * teardown has to remove each host from that layer, not only forget it in the
+   * Map. A host left behind is a second <div> for one page, outside the Map: a
+   * duplicated `page-label-N` landmark, and — because zoom transforms only the
+   * Map's host — an un-magnified twin sitting under the one that grew. It never
+   * reached production (StrictMode is a dev-only wrapper) but it is exactly what
+   * a reader running the dev server saw, so the guard belongs where that wrapper
+   * is real. One host per page is the whole invariant.
+   */
+  it("mounts one host per page under StrictMode's double-invoke, not a hidden twin", async () => {
+    const { container } = render(<StrictMode>{stage([PAGES[0]!])}</StrictMode>);
+    await waitFor(() => expect(mountedIn(container)).toContain(PAGES[0]));
+    // Both halves of the double-invoke have to settle before the count means
+    // anything: the twin is appended by the *second* mount, one microtask behind.
+    await waitFor(() => {
+      const mounted = mountedIn(container);
+      expect(new Set(mounted).size, "a page is mounted twice — the zoom-orphan twin").toBe(
+        mounted.length,
+      );
+      expect(mounted).toEqual([PAGES[0]]);
+    });
   });
 });
