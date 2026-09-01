@@ -249,12 +249,13 @@ export function holdings(
  * answer to the window and nothing in the DOM has it. A stride guessed from the
  * scope would be right on a desktop and quietly wrong on every phone.
  *
- * The cells are small — 16px at page scope — which is under WCAG 2.5.8's 24px
- * and is not fixable here: a map of 604 pages drawn at 24px is no longer a map
- * you can see at once, which is the only reason to open it. The criterion's
- * *equivalent control* exception is what carries it, and the equivalent is real
- * rather than argued: the jumper in the chrome goes to any page in the print,
- * with a text field. Hizb (26px) and juz (40px) clear the threshold outright.
+ * Every cell now carries its own number, so a reader names the division they
+ * mean instead of counting from a corner — and the page cells grew to 28px to
+ * hold three digits, which as a side effect brings them over WCAG 2.5.8's 24px
+ * target size, where at 16px they had leaned on the criterion's *equivalent
+ * control* exception (the jumper's text field). Hizb (30px) and juz (44px) clear
+ * it with room to spare. The map is a little less dense for it and still shows
+ * the whole book at a glance, which is the only reason to open it.
  */
 export function RevisionMap({
   open,
@@ -580,10 +581,27 @@ export function RevisionMap({
                         ? t.mapCellSeen(label(id), days)
                         : t.mapCellNever(label(id)),
                 };
+                // The division's own number, drawn in the cell. A page number is
+                // Latin in both languages — it is read off the corner of the
+                // printed page, the same rule `pageN` follows — while a hizb or
+                // juz number takes the language's digits. `aria-hidden`: the
+                // cell's `aria-label` already says the number in a full sentence,
+                // so the glyph is for the eye only and must not be read twice.
+                const num = (
+                  <span className={styles.num} aria-hidden="true">
+                    {scope === "page" ? String(id) : t.num(id)}
+                  </span>
+                );
                 // No paper behind it, so nothing to press — and no button, which
                 // is the whole distinction: a control that refuses is worse than
-                // an outline that never offered.
-                if (at === undefined) return <li key={id} className={styles.cell} {...marks} />;
+                // an outline that never offered. It still shows its number, in a
+                // fainter ink, so an absent page can be found by eye.
+                if (at === undefined)
+                  return (
+                    <li key={id} className={styles.cell} {...marks}>
+                      {num}
+                    </li>
+                  );
                 return (
                   <li key={id} className={styles.slot}>
                     <button
@@ -593,7 +611,9 @@ export function RevisionMap({
                       {...marks}
                       tabIndex={id === cursorId ? 0 : -1}
                       onClick={() => openDivision(id, at)}
-                    />
+                    >
+                      {num}
+                    </button>
                   </li>
                 );
               })}

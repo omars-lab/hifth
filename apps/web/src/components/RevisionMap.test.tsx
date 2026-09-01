@@ -144,6 +144,29 @@ describe("RevisionMap", () => {
     expect(hizb2.getAttribute("aria-label")).toBe("الحزب ٢ · غير متوفّر في هذه النسخة");
   });
 
+  it("draws each cell's number, absent ones included, in the scope's own digits", async () => {
+    // The number is what ends the counting-from-a-corner a grid of identical
+    // squares forces. A hizb number takes the Arabic-Indic digits of the Arabic
+    // chrome; an absent cell shows its number too, so an unheld division can
+    // still be found by eye. The glyph is `aria-hidden` — the cell's aria-label
+    // already says the number in a sentence — so it is read off `textContent`.
+    draw();
+    const grid = await cells();
+    expect(grid[0]!.textContent).toBe("١"); // hizb 1, present
+    expect(grid[1]!.textContent).toBe("٢"); // hizb 2, absent, still numbered
+    expect(grid[11]!.textContent).toBe("١٢"); // two Arabic-Indic digits
+  });
+
+  it("numbers page-scope cells in Latin, the way a page number is read off the corner", async () => {
+    // `pageN`'s rule, applied to the cell: a page number is Latin in both
+    // languages because it is read off the printed page's corner, unlike a hizb
+    // or juz number which follows the chrome. Page 7 is the one the fixture holds.
+    draw({ openAt: "page" });
+    const grid = await cells();
+    expect(grid[6]!.getAttribute("data-state")).toBe("cold");
+    expect(grid[6]!.textContent).toBe("7");
+  });
+
   it("counts the inventory, not the book", async () => {
     // PageSlider's precedent, one division coarser: the grid spans the print and
     // the count says how much of it is actually here.
