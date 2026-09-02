@@ -131,8 +131,15 @@ const BUCKETS = [
   {
     path: "adj",
     builder: "packages/etl/scripts/build-adjacency.mjs",
-    names: ["Quranic Arabic Corpus", "Waqar144"],
-    sources: ["quranic-arabic-corpus", "mutashabihat-waqar144"],
+    // Three parents, not two. The third arrived through `@hifth/core`, which
+    // this gate does not follow (see the header): `sameJuz` on 510 of 3,002
+    // edges is computed from core's juz table, and that table is derived from
+    // the Tanzil structural metadata (CC BY — attribution is mandatory). Named
+    // here so the row and the notice must carry it; the question of whether
+    // the trace should follow the core package stays open in
+    // what-we-depend-on.md ③.
+    names: ["Quranic Arabic Corpus", "Waqar144", "Tanzil"],
+    sources: ["quranic-arabic-corpus", "mutashabihat-waqar144", "tanzil-quran-metadata"],
     reads: {
       "mutashabiha_data.json": "named",
       // The spans. This is the one the row was missing.

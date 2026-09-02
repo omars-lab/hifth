@@ -859,6 +859,23 @@
       "note": "Fixed 2026-08-05 by word-D, in the order the note below predicted and with one deliberate departure from it. The blocker went first: the alignment landed, a word run now refines the hop list, and only then did the keyboard path get built — Enter on an already-selected ayah descends, ←/→ carry the run, Shift extends it, Escape climbs one rung. The departure is the announcement. This note said it should name the run's first and last word; what shipped counts the outcome instead — «٧ مواضع مشابهة», how many places the run is about — because naming the words means putting scripture in a UI string, which is the one thing the word grain exists not to do (word-indexing.md §10, and §11 ② for the argument). The overlay stays decorative and e2e/word.spec.ts still asserts the accessibility tree is untouched, so the double-edged test kept both its edges: it protects the ayah buttons AND is no longer the proof of a gap. What is still owed is a human's: validation ledger `screen-reader-walkthrough` is the only thing that can say a count is enough for a memoriser. PLAN 15 carries the full account. Original note follows. Opened 2026-08-04 by word-C, in the same commit that shipped the feature — this is the first thing Hifth can do that a screen-reader user cannot, and it is written down rather than left to be found. The descent to word granularity is a 350 ms press inside an already-lit ayah, a gesture with no key that stands for it, and what it produces is ink in #hifth-overlay, which is decorative and adds no node, role or name to the tree. e2e/word.spec.ts asserts that emptiness before and after, deliberately double-edged: it protects the ayah buttons from being buried under overlay nodes, and it is the proof the feature is unreachable without sight. Not fixed now because nothing above the stage consumes a word run yet — onSelectWords has no listener until 13's print-vs-QAC alignment lands, so a keyboard path would reach a state that does nothing and a live region would announce a phrase and then fall silent. Order to fix: 13 first, then a key that descends from a selected ayah and an announcement naming the first and last word of the run rather than counting it. PLAN 15 carries the reasoning."
     },
     {
+      "id": "plan-golden-baselines-predate-the-spread-triage",
+      "source": { "file": "docs/PLAN.md", "item": "16" },
+      "status": "confirmed",
+      "severity": "defect",
+      "owner": "user",
+      "note": "Reproduced 2026-09-01 on darwin, Chromium, the built app on 4173: 12 of the phone goldens fail (selection, breadcrumb and phrase on pages 1, 7, 9, 19, 604, and the page-7 marquee), from 2,624 px (0.01) to 59,475 px (0.12) different, the marquee 574 -> 575 px tall. Bisected by building one commit at a time: passes at 7d4402e, fails at b90b450 with the identical count, unchanged through ff81f8e, and the working tree adds nothing (same counts with the tree stashed). Owner-owned because the only open question is whether the post-hop framing b90b450 introduced is the wanted one; if yes, `make golden` and `make golden-linux` in one commit that says why. PLAN 16 carries the numbers and the bisection."
+    },
+    {
+      "id": "plan-two-ayah-boxes-are-cut-short-of-the-line",
+      "source": { "file": "docs/PLAN.md", "item": "17" },
+      "status": "blocked",
+      "severity": "defect",
+      "owner": "agent",
+      "blockedBy": ["the upstream page cache, a 348 MB fetch nobody starts without asking"],
+      "note": "Reproduced 2026-09-01 by the whole-book sweep: 2 of 12,350 rectangles are off the line grid, 68:3 on page 564 (27.9 on a 36 line) and 107:2 on page 602 (28.3), both a left-margin tail cut ~8 units short with the next ayah's box starting that much early. Held at 2 by gate:boxes as ceiling and floor. Agent-owned because the repair is mechanical (a vendoring repair entry, re-vendor, re-pin, lower the gate to 0); the one owner-visible part is that two pinned pages change. PLAN 17 carries the numbers and both answers."
+    },
+    {
       "id": "plan-hifth-licence",
       "source": { "file": "docs/PLAN.md", "item": "5" },
       "status": "answered",
@@ -1211,7 +1228,7 @@
     {
       "id": "notices-gate-states-a-false-fact-about-roots",
       "source": { "file": "docs/design/what-we-depend-on.md", "item": "②" },
-      "status": "confirmed",
+      "status": "answered",
       "severity": "defect",
       "owner": "agent",
       "note": "scripts/gate-notices.mjs declares data/pages/ayah-pages.json as 'ours' for the roots bucket, on the stated ground that every root-ayah pair is filed by ayah and 'No page number reaches a root shard'. Measured on the shipped tree: build-roots.mjs writes [abs, pageOf(abs), n, ...ids] and 44,431 of 44,431 occurrence tuples carry a page number, every one matching the vendored table, spanning all 604 pages. build-roots.mjs's own header says the structure 'doubles as the page table'. Written by me on 2026-08-16, one day before the audit that measured it, which is the useful part of the finding: the gate was built to catch an upstream nobody had noticed and its first hand-written declaration asserted the absence of one. A gate that states a falsehood is worse than no gate, because a reader takes it as having checked. Fix is small and needs no opinion: change the verdict to defer to the-pagination-question-covers-three-outputs the way the adjacency bucket already defers, so the exemption expires when the question closes rather than outliving it."
@@ -1219,10 +1236,10 @@
     {
       "id": "structural-metadata-reaches-the-hop-unnamed",
       "source": { "file": "docs/design/what-we-depend-on.md", "item": "③" },
-      "status": "confirmed",
-      "severity": "defect",
+      "status": "open",
+      "severity": "question",
       "owner": "agent",
-      "note": "build-adjacency.mjs computes sameJuz from juzOf in @hifth/core, whose tables derive from the CC BY structural metadata, and writes it into dir.sameJuz on 510 of 3,002 shipped edges (measured across all 114 shards). Neither the LICENSES.md row for that tree nor the NOTICE.txt shipped beside it names that upstream. The exposure itself is small — CC BY is attribution rather than copyleft, and the app already credits the source in its colophon — but the mechanism is not: gate:notices cannot see this, because it does not follow imports into @hifth/core and says so in its own header. That blind spot was declared as a known limit when the gate was written; this is the first demonstration that something real is inside it, which turns a stated limit into a measured one. Two separable pieces of work: name it in the row and the notice, and decide whether the trace should follow the core package at all — that graph is large and mostly uninteresting, so following it is a design question rather than an obvious yes."
+      "note": "HALF CLOSED 2026-09-01: named. gate-notices.mjs declares tanzil-quran-metadata and the name Tanzil for the adj bucket by hand, so the LICENSES.md row and the shipped NOTICE.txt must both carry it; build-adjacency.mjs writes a Tanzil paragraph into the notice. Only NOTICE.txt changed on rebuild. What stays open is the design half, whether the trace should follow imports into @hifth/core, so this is now a question rather than a defect. ORIGINAL: build-adjacency.mjs computes sameJuz from juzOf in @hifth/core, whose tables derive from the CC BY structural metadata, and writes it into dir.sameJuz on 510 of 3,002 shipped edges (measured across all 114 shards). Neither the LICENSES.md row for that tree nor the NOTICE.txt shipped beside it names that upstream. The exposure itself is small — CC BY is attribution rather than copyleft, and the app already credits the source in its colophon — but the mechanism is not: gate:notices cannot see this, because it does not follow imports into @hifth/core and says so in its own header. That blind spot was declared as a known limit when the gate was written; this is the first demonstration that something real is inside it, which turns a stated limit into a measured one. Two separable pieces of work: name it in the row and the notice, and decide whether the trace should follow the core package at all — that graph is large and mostly uninteresting, so following it is a design question rather than an obvious yes."
     },
     {
       "id": "the-asset-manifest-is-in-no-licence-bucket",
@@ -1293,10 +1310,10 @@
     {
       "id": "the-licence-map-describes-one-door",
       "source": { "file": "docs/design/what-we-distribute.md", "item": "①" },
-      "status": "confirmed",
+      "status": "answered",
       "severity": "defect",
       "owner": "agent",
-      "note": "LICENSES.md's bucket table is organised by path, which silently means the deployed-site channel — the derived asset trees under apps/web/public/assets. It describes neither the repository channel, which carries all 17 vendored input files verbatim at 12.3 MB and is where the copyleft obligation is actually discharged, nor a store channel. So a reader asking whether something may be distributed gets an answer without being told which distribution it answers for, and the two live channels carry almost disjoint content: the 6.3 MB morphology corpus and the 5.6 MB tajweed annotations are in the repository and reach no browser, while ~100 MB of derived assets reach every browser and are in no sense the inputs. The confusion is not hypothetical — the-asset-manifest-is-in-no-licence-bucket is a file shipped through the site channel and covered by no row, and 'the corpus never ships' is a true statement about one channel that says nothing about what the shards are made of. Fix needs no opinion: organise the map by channel and then by path, so each row states what goes out, through which door, under whose terms. Everything needed is already measured."
+      "note": "ANSWERED 2026-09-01: LICENSES.md is three tables under three doors, with what-we-distribute.md numbers in the rows. Not fixed: gate-notices still parses the rows but nothing checks the by-door organisation. ORIGINAL: LICENSES.md's bucket table is organised by path, which silently means the deployed-site channel — the derived asset trees under apps/web/public/assets. It describes neither the repository channel, which carries all 17 vendored input files verbatim at 12.3 MB and is where the copyleft obligation is actually discharged, nor a store channel. So a reader asking whether something may be distributed gets an answer without being told which distribution it answers for, and the two live channels carry almost disjoint content: the 6.3 MB morphology corpus and the 5.6 MB tajweed annotations are in the repository and reach no browser, while ~100 MB of derived assets reach every browser and are in no sense the inputs. The confusion is not hypothetical — the-asset-manifest-is-in-no-licence-bucket is a file shipped through the site channel and covered by no row, and 'the corpus never ships' is a true statement about one channel that says nothing about what the shards are made of. Fix needs no opinion: organise the map by channel and then by path, so each row states what goes out, through which door, under whose terms. Everything needed is already measured."
     },
     {
       "id": "inputs-are-not-sorted-into-ingredients-and-instruments",

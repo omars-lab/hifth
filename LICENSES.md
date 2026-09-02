@@ -7,17 +7,50 @@ be inaccurate. This file is the map: which terms cover which paths, and why.
 `SOURCES.md` is the authority on every third-party source — its provenance, its verbatim
 license text, and where the notice ships. This file only says how those terms compose.
 
-## The buckets
+## The buckets, by door
+
+Something leaves this project through three doors, and "may this be distributed?" has a
+different answer at each — so the map is organised by door first and by path second. Each row
+says what goes out, through which door, under whose terms. The doors and what goes through
+each were measured in `docs/design/what-we-distribute.md`; the numbers below are its.
+
+### Through the repository — public, cloneable
+
+The whole tree, every vendored input verbatim. This is the door the copyleft obligation is
+discharged at: the corresponding source for every derived tree below is here, and reachable.
 
 | Paths | Terms | Whose choice |
 |---|---|---|
 | `apps/web/`, `packages/core/`, `packages/etl/` (scripts), `scripts/`, `docs/`, config | **GPL-3.0-or-later** | Ours |
+| `packages/etl/data/**` — 17 vendored input files, 12.3 MB, verbatim | Each source's own terms — **not ours to relicense** | KFGQPC, QAC, quran-tajweed, Tanzil, Waqar144 |
+| `apps/web/public/assets/**` — the derived trees, checked in as built | The site door's terms, below | As below |
+
+### Through the deployed site — public, fetched by browsers
+
+Derived assets and the app bundle. No vendored input reaches a browser; what does is built
+from them, and some of it inherits their terms.
+
+| Paths | Terms | Whose choice |
+|---|---|---|
+| The app bundle, `apps/web/dist/`, about 120 KB gz | **GPL-3.0-or-later** | Ours |
 | `apps/web/public/assets/roots/**` | **GPL-3.0** (inherited) | The Quranic Arabic Corpus's |
 | `apps/web/public/assets/skins/**` | **CC BY 4.0** (inherited) | quran-tajweed's |
-| `apps/web/public/assets/adj/**` | **GPL-3.0** (inherited) *and* free use with attribution (inherited) | The Quranic Arabic Corpus's *and* Waqar144's |
+| `apps/web/public/assets/adj/**` | **GPL-3.0** (inherited) *and* free use with attribution (inherited) *and* **CC BY** (inherited) | The Quranic Arabic Corpus's *and* Waqar144's *and* Tanzil's |
 | `apps/web/public/assets/words/**` | **GPL-3.0-or-later** | Ours — rectangles we measured |
 | `apps/web/public/assets/manifest.json` | **GPL-3.0-or-later**, with one question open (below) | Ours |
-| `apps/web/public/assets/pages/**`, `packages/etl/data/**` | Each source's own terms — **not ours to relicense** | KFGQPC, QAC, quran-tajweed |
+| `apps/web/public/assets/pages/**` | KFGQPC's own terms — **not ours to relicense** | KFGQPC |
+
+### Through a store binary — no such door yet
+
+Nothing goes through it. If one is opened it would carry the site door's contents wrapped in
+an installable, and that is where two clauses in the inherited grants bite that a static site
+never trips — the technological-measures clause of CC BY 4.0, and the GPL's conveying terms on
+a binary rather than a page. `docs/design/track-b-native.md` is the record for that door.
+
+Until 2026-09-01 this file had one table, organised by path, which silently meant the site
+door: it said nothing about the repository, where every vendored corpus actually is and where
+the copyleft obligation is discharged, and nothing about a store. A reader got an answer to
+"may this be distributed?" without being told which distribution it answered for.
 
 ## Why GPL for our code
 
@@ -65,7 +98,7 @@ and shipped in the bundle for the life of a feature, having crossed no build ste
 `gate:scripture` now refuses running scripture anywhere in the tree, which is the check that
 sentence was quietly standing in for.
 
-## Why the adjacency shards have two parents, and not one
+## Why the adjacency shards have three parents, and not one
 
 `apps/web/public/assets/adj/**` carried one upstream for most of this project's life, and the
 row above said so: the mutashabihat pairings are Waqar144's, free to use with attribution.
@@ -79,9 +112,21 @@ is written into every pairing it can answer for as `span` and `toSpan`. Today th
 of 3,002 edges across 114 shard files** — not an edge case, the common case.
 
 So under the same strict reading of *derivative* applied to the root shards above, the
-adjacency shards are a GPL derivative too, and one of their two parents was unnamed. Both are
-named now. The pairings remain Waqar144's and still owe attribution; the spans are the
+adjacency shards are a GPL derivative too, and one of their two parents was unnamed. Both were
+named then. The pairings remain Waqar144's and still owe attribution; the spans are the
 corpus's and carry GPL terms forward, with the same two consequences the root shards have.
+
+A third parent was named on 2026-09-01, and it arrived the same way the second did — as a
+feature, through no licence edit. **510 of 3,002 edges** carry a flag saying whether a pairing
+stays inside one juz, computed from the juz table in the shared core package; that table is
+derived from the Tanzil structural metadata (`tanzil-quran-metadata` in `SOURCES.md`, CC BY,
+attribution mandatory). No Tanzil byte ships — the flag is a boolean — but attribution is owed
+for what was derived, so the row and the notice name Tanzil too. What made this one harder to
+see than the second: `gate:notices` traces what a builder reads through its *imports*, and by
+its own header it does not follow imports into the core package, so a builder can reach a new
+upstream through core and the trace stays green. The declaration in the gate names Tanzil by
+hand for now; whether the trace should follow core is still open, in
+`docs/design/what-we-depend-on.md` ③.
 
 The asymmetry worth keeping in mind: a static site discharges §4–6 by handing the browser the
 whole bundle, which is this file's own argument for plain GPL over AGPL. A wrapped store
@@ -92,7 +137,7 @@ The notice travels with this data too, as of 2026-08-16. `assets/adj/<edition>/N
 written by the build beside the shards, and it names **both** parents — the way to get a
 two-parent row wrong twice is to fix it once, and a notice that discharged the GPL half while
 dropping Waqar144's attribution would have been the same one-parent mistake wearing the other
-hat. The corpus's copyright block in it is not a copy of the one beside the root shards: both
+hat. Since 2026-09-01 it names all three. The corpus's copyright block in it is not a copy of the one beside the root shards: both
 are read out of the source file on every build by the same function, because the corpus's own
 terms ask that its notice be *reproduced*, and two readers of one quotation is precisely how a
 reproduction stops being one.
@@ -101,7 +146,7 @@ Nothing had noticed any of this, which is its own finding. `gate:notices` now tr
 builder actually reads, in imports rather than in prose, and fails the build when a shipped
 asset tree reads a vendored input that neither this table nor the tree's notice accounts for.
 
-**What this does not yet settle.** Building that trace immediately surfaced a third candidate
+**What this does not yet settle.** Building that trace immediately surfaced one more candidate
 parent: every edge in every shard carries the page it lands on and the distance in pages to its
 pair, and those come from a table derived from the KFGQPC page corpus — bucketed in the row
 below under terms neither upstream here grants. Whether a table of which page an ayah falls on

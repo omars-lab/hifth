@@ -381,7 +381,7 @@ The licensing opinion being awaited is the same opinion; only its scope is wrong
 rather than one. Nothing in code changes until it arrives, but the notice and the licensing
 map both understate their subject until it does.
 
-### ② The gate states a fact about the root shards that is false · **confirmed**
+### ② The gate states a fact about the root shards that is false · **answered**
 
 The notices gate declares the page table as this project's own for the root bucket, on the
 stated ground that no page number reaches a root shard. Measured: **44,431 of 44,431
@@ -393,7 +393,16 @@ A gate asserting a falsehood is worse than no gate, because it is read as having
 **What would answer it:** change the declaration to defer to ① as the adjacency bucket
 already does, so the exemption expires when the question closes. Independent of the opinion.
 
-### ③ Structural metadata reaches the adjacency shards and nothing names it · **confirmed**
+*Closed 2026-09-01, by reading the gate rather than this page.* The declaration was changed
+the day after the audit: the roots bucket's read of the page table now defers to ①, in the
+same words the adjacency bucket uses, with the false sentence quoted beside the deferral so
+the drift stays visible. This item then sat marked confirmed for two weeks, which is the
+failure the issue catalogue was built to catch and did not, because the marker and the code
+are compared by nobody. It is *answered* and not *fixed*: the deferral itself is guarded — the
+gate fails if the question it defers to closes or disappears — but nothing would fail if
+someone flipped the verdict back to "ours", and a word that claims a test has to name one.
+
+### ③ Structural metadata reaches the adjacency shards and nothing names it · **open**
 
 **510 of 3,002 shipped edges** carry a same-part flag computed from the CC BY structural
 tables. Neither the licensing map's row nor the shipped notice names that upstream. The
@@ -407,6 +416,14 @@ the core package and nothing will notice.**
 **What would answer it:** name it in the row and the notice; and decide whether the trace
 should follow the core package, which is a real design question because that graph is large
 and mostly uninteresting.
+
+*Half closed 2026-09-01.* The row and the notice now name Tanzil: the adjacency bucket in
+the notices gate declares the structural metadata as a third source by hand, so the row's
+"whose" cell and the shipped notice must both carry the name or the gate fails, and the
+adjacency builder writes a paragraph into the notice saying what the flag is derived from.
+What stays open is the other half — the trace still does not follow the core package, so the
+hand-written declaration is the only thing standing between the next upstream reached that
+way and silence. That is a design question, not a defect, and the marker says so now.
 
 ### ④ Two shipped things are covered by no row of the licensing map · **fixed**
 

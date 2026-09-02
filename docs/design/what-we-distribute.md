@@ -294,7 +294,7 @@ against that question rather than opened separately.
 
 ## Open questions, and what would answer each
 
-### ① The licensing map describes one door and is read as describing all of them · **confirmed**
+### ① The licensing map describes one door and is read as describing all of them · **answered**
 
 The map's table is organised by path, which silently means *the site door* — the derived
 asset trees. It says nothing about the repository door, which is where every vendored
@@ -309,6 +309,13 @@ sound about one door and irrelevant to the question of what the shards are made 
 **What would answer it:** a map organised by door and then by path, so each row says what
 goes out, through which channel, under whose terms. No opinion needed; it is a restatement
 of facts already established.
+
+*Closed 2026-09-01.* The licensing map is now three tables under three doors — repository,
+deployed site, store — each row saying what goes out, through which, under whose terms, with
+this document's measured numbers in it. Answered rather than fixed: the notices gate still
+parses the rows and refuses an inherited tree or a shipped path with no row, but nothing
+checks that the rows stay sorted by door, and a later edit that collapsed them back into one
+table would pass every gate.
 
 ### ② Which encumbered inputs are ingredients and which are only instruments · **open**
 
