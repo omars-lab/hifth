@@ -38,3 +38,17 @@ app either.
 
 If the ask is genuinely "open that design page", `open docs/design/<name>.html` —
 but confirm which, because "desktop UI" reads both ways.
+
+## Seeing a change — three ways a fix gets checked where it cannot fail
+
+1. **A hash-only navigation is not a reload.** The app routes on `#/…`, so pointing
+   the tab at a new `#` address keeps the old module graph running. After an edit,
+   force a real reload (`location.reload()`, or another path and back) before
+   reading the DOM. The served source can be new while the page is still old; two
+   sessions have lost turns to this.
+2. **Two servers, two truths.** `pnpm dev` (5173) wraps the tree in StrictMode and
+   double-mounts everything; `vite preview` (4173) is the built app, which strips it.
+   A fault seen on one and not the other is a dev-only artefact — say so, and do not
+   ship a fix for the built app that only the dev server needed.
+3. **e2e runs the build.** `pnpm --filter @hifth/web build` first, and free 4173
+   (`lsof -ti:4173 | xargs kill`) or Playwright refuses to start its own.

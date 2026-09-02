@@ -95,6 +95,14 @@ const scaleOf = (page: Page, pageNo: number): Promise<number> =>
     .locator("xpath=..")
     .evaluate((el) => new DOMMatrix(getComputedStyle(el).transform).a);
 
+/** The chrome's page-mode radios. Desktop only — that is where the second leaf is. */
+const modeBtn = (page: Page, which: "one" | "two"): Locator =>
+  page.getByRole("radio", { name: which === "one" ? "صفحة واحدة" : "صفحتان" });
+
+/** The stepper's two buttons. */
+const zoomBtn = (page: Page, dir: "in" | "out"): Locator =>
+  page.getByRole("button", { name: dir === "in" ? "تكبير" : "تصغير" });
+
 test.describe("Hifth · the desktop spread", () => {
   test("appears above the breakpoint and does not exist below it", async ({ page }) => {
     await page.goto("/#/hafs-kfqc/p7");
@@ -1012,14 +1020,6 @@ test.describe("Hifth · the wheel", () => {
 test.describe("Hifth · one page or two, and how big", () => {
   const soloOf = (page: Page): Promise<string | null> => book(page).getAttribute("data-solo");
 
-  /** The chrome's page-mode radios. Desktop only — that is where the second leaf is. */
-  const modeBtn = (page: Page, which: "one" | "two"): Locator =>
-    page.getByRole("radio", { name: which === "one" ? "صفحة واحدة" : "صفحتان" });
-
-  /** The stepper's two buttons. */
-  const zoomBtn = (page: Page, dir: "in" | "out"): Locator =>
-    page.getByRole("button", { name: dir === "in" ? "تكبير" : "تصغير" });
-
   /**
    * The level as the eye reads it, scoped to the stepper rather than to the page.
    *
@@ -1449,4 +1449,172 @@ test("the live trail bead is opaque, so the string cannot show through its label
     return parts.length < 4 ? 1 : parts[3]!;
   });
   expect(alpha, "the live bead's background is translucent — the string shows through it").toBe(1);
+});
+
+/*
+ * Every road onto a page lands the two leaves level — the invariant, not a verb.
+ *
+ * The jump's guard and the turn's guard above each watch one road, and that is
+ * how the thread they came from went: four leaf-placement defects (a juz jump, a
+ * turn, a tap, a zoom), each one road that had dropped or reordered the same
+ * settle step, each found by eye and fixed on its own road, none of the fixes
+ * reaching the next. The stage now runs every road through one step, and this
+ * is the guard on *that*: every road there is, driven through one measurement —
+ * through every frame the two leaves on screen sit at the same height, and at
+ * rest they meet at the spine — so the day a road stops settling, the row for
+ * that road fails, not a reader.
+ *
+ * Taken at the back of the book, where the report that started the thread was
+ * pictured (At-Takwir riding high over Abasa).
+ */
+test.describe("every road onto a page lands the leaves level", () => {
+  type Road = { name: string; drive: (page: Page) => Promise<void>; lands: number };
+  const roads: Road[] = [
+    // The cold mount. Nothing to drive: its frames are the resting frames.
+    { name: "a cold open", lands: 584, drive: async () => {} },
+    {
+      name: "a deep link to another page",
+      lands: 300,
+      drive: (page) =>
+        page.evaluate(() => {
+          location.hash = "#/hafs-kfqc/p300";
+        }),
+    },
+    {
+      name: "the page bar",
+      lands: 300,
+      drive: (page) => page.getByRole("slider").fill("300"),
+    },
+    {
+      name: "a page turn",
+      lands: 585,
+      drive: (page) => page.keyboard.press("ArrowLeft"),
+    },
+    {
+      // Back from the middle of juz 30 lands on its own opening, 582 — the ⏮ rule.
+      name: "a juz jump",
+      lands: 582,
+      drive: async (page) => {
+        await page.keyboard.down("Shift");
+        await page.mouse.wheel(0, -120);
+        await page.keyboard.up("Shift");
+      },
+    },
+    {
+      name: "a zoom step in and back out",
+      lands: 584,
+      drive: async (page) => {
+        await zoomBtn(page, "in").click();
+        await expect.poll(() => scaleOf(page, 584)).toBeCloseTo(1.25, 2);
+        await zoomBtn(page, "out").click();
+        await expect.poll(() => scaleOf(page, 584)).toBeCloseTo(1, 2);
+      },
+    },
+    {
+      name: "closing the book and opening it again",
+      lands: 584,
+      drive: async (page) => {
+        await modeBtn(page, "one").click();
+        await expect(pageSvg(page, 583)).toHaveCount(0);
+        await modeBtn(page, "two").click();
+      },
+    },
+    {
+      name: "a resize across the breakpoint and back",
+      lands: 584,
+      drive: async (page) => {
+        await page.setViewportSize({ width: 800, height: 900 });
+        await expect(spread(page)).toHaveCount(0);
+        await page.setViewportSize({ width: 1440, height: 900 });
+      },
+    },
+  ];
+
+  /**
+   * Both painted leaves, every frame for `ms`: are there two, and how far apart
+   * are their heads.
+   *
+   * Read *after* each paint, not inside the animation frame the way the two
+   * guards above do. Reopening the book taught the difference: the frame in
+   * which the spread's layout comes back has both leaves still wearing their
+   * one-leaf transforms when an animation-frame callback measures them, 313 px
+   * apart — and the stage's resize observer then corrects both before that
+   * frame is ever painted. A reader never sees it. A rig that read there would
+   * fail a road that is right, so it reads in the task after the frame, which
+   * is the first moment a reader could have. A flash that survives a paint (the
+   * jump's and the turn's, before their fixes) is still a painted frame, and is
+   * still caught. Zero-sized leaves are not leaves: the closed book keeps the
+   * facing host in the tree at no width.
+   */
+  const framesOf = (page: Page, ms: number) =>
+    page.evaluate<{ pair: boolean; gap: number }[], number>(
+      (ms) =>
+        new Promise((resolve) => {
+          const frames: { pair: boolean; gap: number }[] = [];
+          const start = performance.now();
+          const tick = () =>
+            requestAnimationFrame(() =>
+              setTimeout(() => {
+                const ys = Array.from(
+                  document.querySelectorAll('svg[aria-labelledby^="page-label-"]'),
+                )
+                  .map((n) => n.getBoundingClientRect())
+                  .filter((r) => r.width > 0 && r.height > 0)
+                  .map((r) => r.top);
+                frames.push({
+                  pair: ys.length === 2,
+                  gap: ys.length === 2 ? Math.abs(ys[0]! - ys[1]!) : 0,
+                });
+                if (performance.now() - start < ms) tick();
+                else resolve(frames);
+              }, 0),
+            );
+          tick();
+        }),
+      ms,
+    );
+
+  /** The opening at rest: how many leaves, how level, and the width of the seam between them. */
+  const atRest = (page: Page) =>
+    page.evaluate(() => {
+      const rs = Array.from(document.querySelectorAll('svg[aria-labelledby^="page-label-"]'))
+        .map((n) => n.getBoundingClientRect())
+        .filter((r) => r.width > 0 && r.height > 0)
+        .sort((a, b) => a.x - b.x);
+      const two = rs.length === 2;
+      return {
+        leaves: rs.length,
+        gap: two ? Math.abs(rs[0]!.top - rs[1]!.top) : NaN,
+        seam: two ? rs[1]!.left - rs[0]!.right : NaN,
+        height: two ? Math.abs(rs[0]!.height - rs[1]!.height) : NaN,
+      };
+    });
+
+  for (const road of roads) {
+    test(road.name, async ({ page }) => {
+      await page.goto("/#/hafs-kfqc/p584");
+      await expect(pageSvg(page, 584)).toBeVisible({ timeout: 20_000 });
+      await expect(spread(page)).toBeVisible();
+      await page.mouse.move(400, 450);
+
+      const poll = framesOf(page, 700);
+      await road.drive(page);
+      const frames = await poll;
+
+      expect(frames.some((f) => f.pair), `${road.name} never showed two leaves`).toBe(true);
+      const worst = Math.max(...frames.filter((f) => f.pair).map((f) => f.gap));
+      expect(worst, `${road.name}: the two leaves flashed misaligned`).toBeLessThan(1.5);
+
+      // And at rest, once the road has landed where it said it would.
+      await expect(pageSvg(page, road.lands)).toBeVisible({ timeout: 20_000 });
+      await expect.poll(async () => (await atRest(page)).leaves).toBe(2);
+      const rest = await atRest(page);
+      expect(rest.gap, `${road.name}: the leaves came to rest at different heights`).toBeLessThan(1.5);
+      expect(rest.height, `${road.name}: the leaves came to rest at different sizes`).toBeLessThan(
+        1.5,
+      );
+      // Two 1px leaf borders sit between the papers; a hundred did, once.
+      expect(rest.seam, `${road.name}: the leaves came to rest apart at the spine`).toBeLessThan(8);
+    });
+  }
 });

@@ -966,6 +966,38 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
   }, [applyTransform, measureFit]);
 
   /**
+   * The one settle step every road onto a page ends with.
+   *
+   * Four roads bring a leaf onto the stage — a cold open, a deep link
+   * (`showPage`), a hop (`navigateTo`) and a turn's landing (`land`) — and each
+   * of them used to re-derive the same three lines by hand: stop whatever tween
+   * is still writing the view, reveal the page, put it at fit at the layer
+   * origin. Four defects in one desktop thread were each *one road* with the
+   * step missing or mis-ordered: a juz jump whose incoming leaf flashed a
+   * centring-offset high, the same flash on a turn's landing, a tap that shifted
+   * the page, a zoom that landed off-centre — each found by eye, each fixed on
+   * its own road, none of the fixes reaching the next road. A rule kept in four
+   * places is kept in three, so it is kept here once. `crossFade` is the fifth
+   * road and cannot come through here (it reveals the incoming leaf itself,
+   * because both leaves must be visible for the fade), so it calls
+   * `centerCurrent` directly — which is the only other place that may.
+   * `PageStage.settle.test.ts` counts, and the desktop e2e "every road onto a
+   * page lands the leaves level" drives each road.
+   *
+   * `navigatedRef` is claimed here too: a page has arrived, whichever road
+   * brought it, and the cold-mount effect must not re-centre over it.
+   */
+  const arrive = useCallback(
+    (next: number): void => {
+      navigatedRef.current = true;
+      cancelTween();
+      setCurrentPage(next);
+      centerCurrent();
+    },
+    [cancelTween, centerCurrent, setCurrentPage],
+  );
+
+  /**
    * Swap the two pages *under* the band, with the fade's midpoint at its centre.
    *
    * The timing is the point of the whole design. A bare cross-fade between two
@@ -1000,9 +1032,7 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
       // paints for one frame at the layer's origin — unclamped, top-left — and
       // the fade shows a page sliding into place under the band.
       currentPageRef.current = to;
-      view.current = { x: 0, y: 0, z: 1 };
-      measureFit();
-      applyTransform();
+      centerCurrent();
       // Flush, so the transition has a start value to run from instead of
       // coalescing both writes into one.
       void incoming.host.offsetWidth;
@@ -1013,24 +1043,21 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
         outgoing.host.style.opacity = "0";
       }
     },
-    [applyTransform, measureFit],
+    [centerCurrent],
   );
 
   /** End a turn on the destination page: display swapped, inline fades cleared. */
   const land = useCallback(
     (next: number): void => {
-      navigatedRef.current = true;
-      cancelTween();
-      setCurrentPage(next);
+      arrive(next);
       for (const mp of pagesRef.current.values()) {
         mp.host.style.transition = "";
         mp.host.style.opacity = "";
       }
-      centerCurrent();
       setErrorPage(null);
       setStatus("ready");
     },
-    [cancelTween, centerCurrent, setCurrentPage],
+    [arrive],
   );
 
   /**
@@ -1386,29 +1413,26 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
           return; // no ghost page
         }
         setStatus("ready");
-        // Claimed only once the target really mounted: a navigateTo that fails
+        // Arrive only once the target really mounted: a navigateTo that fails
         // above must leave the initial page in charge rather than blank the stage.
-        navigatedRef.current = true;
-        // Reveal unconditionally, not `if (loc.page !== currentPageRef.current)`:
+        //
+        // And arrive unconditionally, not `if (loc.page !== currentPageRef.current)`:
         // on a cold open the stage mounts already numbered for its page, so a deep
-        // link to *that same* page finds `currentPageRef` matching and the guard
+        // link to *that same* page finds `currentPageRef` matching and a guard
         // would skip the reveal — but the host `ensurePage` just built is hidden
         // (§ host default `display:none`), and the mount effect's own reveal is
-        // gated on `!navigatedRef`, which the line above has just falsified. The
-        // two reveal paths then race to zero: neither fires and the leaf stays
-        // blank. `setCurrentPage` is idempotent, so revealing here every time is
-        // free when the page was already shown and correct when it was not.
-        setCurrentPage(loc.page);
-        // Arrive already centred, before the tween below has a chance to yield.
-        // `setCurrentPage` has just revealed the incoming leaf (`display: block`)
-        // and a freshly mounted host wears no transform, so it sits at the layer
-        // origin — top-left, one centring-offset high. The framing below is an
-        // `await tweenTo`, whose first positioned frame is one paint away, so
-        // without this the leaf flashes at the origin for that frame — the
-        // "arrive wearing your transform" rule crossFade keeps for a turn, which
-        // a hop needs for the same reason. A zoom = 1 jump (a juz or page hop)
-        // then simply rests at this centre; a closer hop tweens out from fit.
-        centerCurrent();
+        // gated on `!navigatedRef`, which arriving falsifies. The two reveal paths
+        // then race to zero: neither fires and the leaf stays blank. Arriving is
+        // idempotent, so doing it every time is free when the page was already
+        // shown and correct when it was not.
+        //
+        // Centred *before* the tween below has a chance to yield: a freshly
+        // mounted host wears no transform, so it sits at the layer origin —
+        // top-left, one centring-offset high — and the framing below is an
+        // `await tweenTo` whose first positioned frame is one paint away. A
+        // zoom = 1 jump (a juz or page hop) then simply rests at this centre; a
+        // closer hop tweens out from fit.
+        arrive(loc.page);
         const bbox = mp.hl.bboxOf(loc.elementIds);
         const fit = measureFit();
         if (bbox && fit) {
@@ -1433,15 +1457,10 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
           return;
         }
         setStatus("ready");
-        navigatedRef.current = true;
-        // Always reveal — see `navigateTo` above for why the `next !==
+        // Always arrive — see `navigateTo` above for why a `next !==
         // currentPageRef.current` guard blanked a cold-opened page link (`p7`)
-        // whose stage had mounted already numbered for 7: the guard skipped the
-        // reveal, the mount effect's reveal was gated off by `navigatedRef`, and
-        // the freshly-built hidden host was left hidden. Idempotent when already on.
-        setCurrentPage(next);
-        cancelTween();
-        centerCurrent();
+        // whose stage had mounted already numbered for 7. Idempotent when already on.
+        arrive(next);
       },
       turnTo(next) {
         return runTurn(next);
@@ -1507,10 +1526,7 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
         // A deep link may have navigated while this fetch was in flight. Showing
         // `page` now would hide the page the reader actually asked for, and
         // re-centering would throw away the hop's framing.
-        if (!navigatedRef.current) {
-          setCurrentPage(page);
-          centerCurrent();
-        }
+        if (!navigatedRef.current) arrive(page);
         setStatus("ready");
       })
       .catch(() => {
