@@ -967,6 +967,14 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     exactly the event the goldens are for. The linux baselines were not checked here — they
     run only in the image. Blocks nothing; the rest of the Chromium suite is green (176
     passed, 1 skipped, the iphone project not run — WebKit is not installed on this machine).
+    **Closed 2026-09-01.** The owner looked at the diff — the whole page one pixel lower,
+    every glyph edge different, the highlight bands themselves unchanged — and accepted the
+    framing. Both sets were rewritten in one commit: darwin by `make golden-update`, linux by
+    `make golden-linux UPDATE=1` in the pinned Playwright image, twelve shots each, the same
+    twelve on both platforms and nothing else. **Closed by**
+    [`apps/web/e2e/golden.spec.ts`](../apps/web/e2e/golden.spec.ts) against the new
+    baselines: the next shift of the framing fails the same twelve shots again, on both
+    platforms, which is the event these exist to make deliberate.
 
 17. **Two ayah boxes are cut short of the line, and the pen draws them thin.** Found
     2026-09-01 by the whole-book box sweep (`pnpm gate:boxes --list`), the first thing it

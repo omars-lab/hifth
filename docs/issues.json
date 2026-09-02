@@ -861,10 +861,11 @@
     {
       "id": "plan-golden-baselines-predate-the-spread-triage",
       "source": { "file": "docs/PLAN.md", "item": "16" },
-      "status": "confirmed",
+      "status": "fixed",
       "severity": "defect",
       "owner": "user",
-      "note": "Reproduced 2026-09-01 on darwin, Chromium, the built app on 4173: 12 of the phone goldens fail (selection, breadcrumb and phrase on pages 1, 7, 9, 19, 604, and the page-7 marquee), from 2,624 px (0.01) to 59,475 px (0.12) different, the marquee 574 -> 575 px tall. Bisected by building one commit at a time: passes at 7d4402e, fails at b90b450 with the identical count, unchanged through ff81f8e, and the working tree adds nothing (same counts with the tree stashed). Owner-owned because the only open question is whether the post-hop framing b90b450 introduced is the wanted one; if yes, `make golden` and `make golden-linux` in one commit that says why. PLAN 16 carries the numbers and the bisection."
+      "closedBy": "apps/web/e2e/golden.spec.ts",
+      "note": "CLOSED 2026-09-01: the owner accepted the post-hop framing (the page one pixel lower, highlights unchanged) and both baseline sets were rewritten in one commit — darwin by make golden-update, linux by make golden-linux UPDATE=1 in the pinned image — the same twelve shots on each platform and nothing else. ORIGINAL NOTE FOLLOWS. Reproduced 2026-09-01 on darwin, Chromium, the built app on 4173: 12 of the phone goldens fail (selection, breadcrumb and phrase on pages 1, 7, 9, 19, 604, and the page-7 marquee), from 2,624 px (0.01) to 59,475 px (0.12) different, the marquee 574 -> 575 px tall. Bisected by building one commit at a time: passes at 7d4402e, fails at b90b450 with the identical count, unchanged through ff81f8e, and the working tree adds nothing (same counts with the tree stashed). Owner-owned because the only open question is whether the post-hop framing b90b450 introduced is the wanted one; if yes, `make golden` and `make golden-linux` in one commit that says why. PLAN 16 carries the numbers and the bisection."
     },
     {
       "id": "plan-two-ayah-boxes-are-cut-short-of-the-line",

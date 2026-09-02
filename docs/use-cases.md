@@ -297,7 +297,7 @@ Someone memorising the Qur'an, holding a phone, usually mid-revision. Every gest
 | | |
 |---|---|
 | happens in | [`apps/web/src/components/PageSpread.tsx:152`](../apps/web/src/components/PageSpread.tsx#L152) — `PageSpread` |
-| happens in | [`apps/web/src/i18n.tsx:489`](../apps/web/src/i18n.tsx#L489) — `facingAbsent` |
+| happens in | [`apps/web/src/i18n.tsx:488`](../apps/web/src/i18n.tsx#L488) — `facingAbsent` |
 | proven by | [`apps/web/e2e/desktop.spec.ts:283`](../apps/web/e2e/desktop.spec.ts#L283) — “announces the missing facing page instead of showing blank paper” |
 | proven by | [`apps/web/src/components/PageSpread.test.tsx:82`](../apps/web/src/components/PageSpread.test.tsx#L82) — “draws the missing facing page as absent, not as blank paper” |
 | proven by | [`apps/web/src/components/PageSpread.test.tsx:133`](../apps/web/src/components/PageSpread.test.tsx#L133) — “leaves the far side blank and unlabelled at the end of an odd-length print” |
@@ -425,7 +425,7 @@ Someone memorising the Qur'an, holding a phone, usually mid-revision. Every gest
 | | |
 |---|---|
 | happens in | [`apps/web/src/lang.ts:121`](../apps/web/src/lang.ts#L121) — `detectLang` |
-| happens in | [`apps/web/src/i18n.tsx:918`](../apps/web/src/i18n.tsx#L918) — `LangProvider` |
+| happens in | [`apps/web/src/i18n.tsx:917`](../apps/web/src/i18n.tsx#L917) — `LangProvider` |
 | happens in | [`apps/web/src/components/Colophon.tsx:220`](../apps/web/src/components/Colophon.tsx#L220) — `langRow` |
 | proven by | [`apps/web/e2e/lang.spec.ts:28`](../apps/web/e2e/lang.spec.ts#L28) — “an English phone opens an English chrome” |
 | proven by | [`apps/web/e2e/lang.spec.ts:102`](../apps/web/e2e/lang.spec.ts#L102) — “the switch is in the colophon, and the choice survives a reload” |
@@ -442,7 +442,7 @@ Someone memorising the Qur'an, holding a phone, usually mid-revision. Every gest
 |---|---|
 | happens in | [`apps/web/src/messages/ar.json:129`](../apps/web/src/messages/ar.json#L129) — `distancePages` |
 | happens in | [`apps/web/src/messages/plural.ts:39`](../apps/web/src/messages/plural.ts#L39) — `export function plural` |
-| happens in | [`apps/web/src/i18n.tsx:543`](../apps/web/src/i18n.tsx#L543) — `buildStrings` |
+| happens in | [`apps/web/src/i18n.tsx:542`](../apps/web/src/i18n.tsx#L542) — `buildStrings` |
 | proven by | [`apps/web/src/i18n.test.tsx:121`](../apps/web/src/i18n.test.tsx#L121) — “agrees with the plural rules of the language, not with a ternary” |
 | proven by | [`apps/web/src/i18n.test.tsx:99`](../apps/web/src/i18n.test.tsx#L99) — “writes counts inside aria-labels in the language's own digits” |
 
@@ -498,7 +498,7 @@ Whoever is changing the app next, including this project's own future self. Arri
 |---|---|
 | happens in | [`scripts/messages-compile.mjs:378`](../scripts/messages-compile.mjs#L378) — `export function compileAll` |
 | happens in | [`apps/web/src/lang.ts:80`](../apps/web/src/lang.ts#L80) — `LOCALES` |
-| happens in | [`apps/web/src/i18n.tsx:543`](../apps/web/src/i18n.tsx#L543) — `buildStrings` |
+| happens in | [`apps/web/src/i18n.tsx:542`](../apps/web/src/i18n.tsx#L542) — `buildStrings` |
 | proven by | [`apps/web/src/i18n.test.tsx:53`](../apps/web/src/i18n.test.tsx#L53) — “builds a bundle for every locale that has a catalog” |
 | proven by | [`apps/web/src/i18n.test.tsx:62`](../apps/web/src/i18n.test.tsx#L62) — “carries the same keys in every language” |
 | proven by | [`apps/web/src/i18n.test.tsx:88`](../apps/web/src/i18n.test.tsx#L88) — “gives each language the digits it declared” |
