@@ -1,6 +1,10 @@
 # Should a reader be able to copy their confusion map off the phone?
 
-*Status: open. This record states the question and draws the options; it does not choose.*
+*Status: decided 2026-09-02 by the owner — **start with a file the reader saves and restores**
+(option B, the owner's lean throughout). The cloud copy (option C) is adopted for the day there
+is sign-in: the reader's map then lives in their own cloud file, following the
+[storage model](storage-model.md) the bookmarks and the notes also take. The options and
+reasoning below stand as drawn; the decision is gathered at the end.*
 
 **The picture:** <https://blog.bytesofpurpose.com/hifth/docs/design/confusion-map-export.html> (an earlier copy on another host: <https://claude.ai/code/artifact/1d9c4cff-f0a5-4aa3-a70b-2717f0814b1a>) — the three
 options drawn at phone size, on a sample map that carries verse references only and no scripture.
@@ -172,3 +176,14 @@ It is not settling teacher-sharing (named above and deliberately held apart). It
 the shape of the backup file, whether it is encrypted, or what it is called — those are the
 building of Option B, once B is chosen. And it is not settling anything about the cloud option's
 timing beyond "not this year," because that timing is owned by a different, unanswered question.
+
+## What was decided (2026-09-02)
+
+**Option B — a file the reader saves and restores** — is the near-term answer, exactly the
+owner's lean: the map lives in the phone's own store, and the reader can save it to a file and
+load it back, with no server and no account. **Option C, the cloud copy, is adopted for later**:
+on the day a reader can sign in, the map keeps the reader's own cloud file, and this decision
+becomes one of the records that takes the shared [storage model](storage-model.md) — so a
+reader's confusion map, bookmarks and notes all persist and travel the same way. Option A, phone
+only with no way out, is what the file replaces. Nothing in the "not settling" list moved: the
+file's shape, whether it is encrypted, and teacher-sharing are all still their own questions.

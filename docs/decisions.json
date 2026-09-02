@@ -100,7 +100,7 @@
     {
       "id": "tafseer-reading",
       "question": "Should the app show a tafseer of the selected verse, and where would it sit?",
-      "status": "open",
+      "status": "decided",
       "options": [
         {
           "id": "A",
@@ -123,9 +123,9 @@
       "page": "docs/design/tafseer-options.html",
       "builtBy": "scripts/build-tafseer-options.mjs",
       "doc": "docs/decisions/tafseer.md#where-would-a-tafseer-sit-if-anywhere",
-      "decided": null,
-      "by": null,
-      "date": null,
+      "decided": "C",
+      "by": "omar",
+      "date": "2026-09-02",
       "related": [
         "tafseer-source",
         "desktop-vs-mobile"
@@ -134,7 +134,7 @@
     {
       "id": "tafseer-source",
       "question": "Which tafseer text would the app copy, and how would a reader know what they are reading?",
-      "status": "open",
+      "status": "decided",
       "options": [
         {
           "id": "A",
@@ -153,9 +153,9 @@
       "page": "docs/design/tafseer-options.html",
       "builtBy": "scripts/build-tafseer-options.mjs",
       "doc": "docs/decisions/tafseer.md#which-text-and-how-would-a-reader-know-what-they-are-reading",
-      "decided": null,
-      "by": null,
-      "date": null,
+      "decided": "C",
+      "by": "omar",
+      "date": "2026-09-02",
       "related": [
         "tafseer-reading"
       ]
@@ -193,7 +193,7 @@
     {
       "id": "confusion-map-export",
       "question": "Should a reader be able to copy their confusion map off the phone — and if so, by which means?",
-      "status": "open",
+      "status": "decided",
       "options": [
         {
           "id": "A",
@@ -212,14 +212,27 @@
       "page": "docs/design/confusion-map-export.html",
       "builtBy": "scripts/build-confusion-export-options.mjs",
       "doc": "docs/decisions/confusion-map-export.md",
-      "decided": null,
-      "by": null,
-      "date": null,
+      "decided": "B",
+      "by": "omar",
+      "date": "2026-09-02",
       "related": [
         "mistake-note-kinds",
         "note-persistence",
         "note-export-shape",
-        "bookmark-store"
+        "bookmark-store",
+        "storage-model"
+      ]
+    },
+    {
+      "id": "storage-model",
+      "question": "Where does a reader's own record live, and when may it leave the phone?",
+      "status": "living",
+      "doc": "docs/decisions/storage-model.md",
+      "related": [
+        "bookmark-store",
+        "note-persistence",
+        "confusion-map-export",
+        "mistake-note-kinds"
       ]
     },
     {
@@ -598,8 +611,8 @@
     },
     {
       "id": "mistake-note-anchor",
-      "question": "Can a reader pin their own note to a spot on the page, and to what \u2014 a verse, a word, or a single mark?",
-      "status": "open",
+      "question": "Can a reader pin their own note to a spot on the page, and to what — a verse, a word, or a single mark?",
+      "status": "decided",
       "options": [
         {
           "id": "A",
@@ -622,9 +635,9 @@
       "page": "docs/design/mistake-marking-options.html",
       "builtBy": "scripts/build-mistake-marking-options.mjs",
       "doc": "docs/decisions/mistake-marking.md#what-can-a-reader-pin-their-own-note-to",
-      "decided": null,
-      "by": null,
-      "date": null,
+      "decided": "D",
+      "by": "omar",
+      "date": "2026-09-02",
       "related": [
         "word-selection",
         "mark-granularity",
@@ -634,7 +647,7 @@
     {
       "id": "mistake-note-kinds",
       "question": "If a reader can note the page, what kinds of note are there, and does any of them leave the phone?",
-      "status": "open",
+      "status": "decided",
       "options": [
         {
           "id": "A",
@@ -653,19 +666,20 @@
       "page": "docs/design/mistake-marking-options.html",
       "builtBy": "scripts/build-mistake-marking-options.mjs",
       "doc": "docs/decisions/mistake-marking.md#what-kinds-of-note-are-there-and-does-any-leave-the-phone",
-      "decided": null,
-      "by": null,
-      "date": null,
+      "decided": "C",
+      "by": "omar",
+      "date": "2026-09-02",
       "related": [
         "mistake-note-anchor",
         "confusion-map-export",
-        "note-persistence"
+        "note-persistence",
+        "storage-model"
       ]
     },
     {
       "id": "note-persistence",
       "question": "How does a batch of a reader's own notes leave the phone — a file, an email, or not at all?",
-      "status": "open",
+      "status": "decided",
       "options": [
         {
           "id": "A",
@@ -688,20 +702,21 @@
       "page": "docs/design/notes-export-options.html",
       "builtBy": "scripts/build-notes-export-options.mjs",
       "doc": "docs/decisions/notes-export.md#how-does-a-batch-of-a-readers-notes-leave-the-phone",
-      "decided": null,
-      "by": null,
-      "date": null,
+      "decided": "B",
+      "by": "omar",
+      "date": "2026-09-02",
       "related": [
         "confusion-map-export",
         "note-export-shape",
         "mistake-note-kinds",
-        "bookmark-store"
+        "bookmark-store",
+        "storage-model"
       ]
     },
     {
       "id": "note-export-shape",
       "question": "What does an exported batch of notes contain, so it is legible without shipping the Qur'an?",
-      "status": "open",
+      "status": "decided",
       "options": [
         {
           "id": "A",
@@ -720,9 +735,9 @@
       "page": "docs/design/notes-export-options.html",
       "builtBy": "scripts/build-notes-export-options.mjs",
       "doc": "docs/decisions/notes-export.md#what-does-an-exported-batch-contain-so-it-is-legible-without-the-quran",
-      "decided": null,
-      "by": null,
-      "date": null,
+      "decided": "C",
+      "by": "omar",
+      "date": "2026-09-02",
       "related": [
         "note-persistence",
         "confusion-map-export",
@@ -732,7 +747,7 @@
     {
       "id": "bookmark-model",
       "question": "Is a bookmark one ribbon that moves, or many the reader drops and lifts?",
-      "status": "open",
+      "status": "decided",
       "options": [
         {
           "id": "A",
@@ -751,9 +766,9 @@
       "page": "docs/design/bookmark-fold-options.html",
       "builtBy": "scripts/build-bookmark-fold-options.mjs",
       "doc": "docs/decisions/bookmark-fold.md#is-a-bookmark-one-ribbon-that-moves-or-many-the-reader-drops-and-lifts",
-      "decided": null,
-      "by": null,
-      "date": null,
+      "decided": "B",
+      "by": "omar",
+      "date": "2026-09-02",
       "related": [
         "bookmark-store",
         "pin-marker"
@@ -762,7 +777,7 @@
     {
       "id": "bookmark-store",
       "question": "Where is a bookmark kept, so tapping the fold still means something next week?",
-      "status": "open",
+      "status": "decided",
       "options": [
         {
           "id": "A",
@@ -781,19 +796,20 @@
       "page": "docs/design/bookmark-fold-options.html",
       "builtBy": "scripts/build-bookmark-fold-options.mjs",
       "doc": "docs/decisions/bookmark-fold.md#where-is-a-bookmark-kept-so-tapping-the-fold-still-means-something-next-week",
-      "decided": null,
-      "by": null,
-      "date": null,
+      "decided": "C",
+      "by": "omar",
+      "date": "2026-09-02",
       "related": [
         "bookmark-model",
         "note-persistence",
-        "confusion-map-export"
+        "confusion-map-export",
+        "storage-model"
       ]
     },
     {
       "id": "highlight-shape",
       "question": "Does a reader choose the highlight's shape — one house swipe for everyone, a swipe-or-fill choice, or swipe plus fill plus outline?",
-      "status": "open",
+      "status": "decided",
       "options": [
         {
           "id": "A",
@@ -812,9 +828,9 @@
       "page": "docs/design/highlight-style-options.html",
       "builtBy": "scripts/build-highlight-style-options.mjs",
       "doc": "docs/decisions/highlight-style.md#does-a-reader-choose-the-highlights-shape-and-among-which",
-      "decided": null,
-      "by": null,
-      "date": null,
+      "decided": "C",
+      "by": "omar",
+      "date": "2026-09-02",
       "related": [
         "highlight-strength",
         "comparison-crop"
@@ -823,7 +839,7 @@
     {
       "id": "highlight-strength",
       "question": "Does a reader tune the highlight's strength, or is it fixed as it is today?",
-      "status": "open",
+      "status": "decided",
       "options": [
         {
           "id": "A",
@@ -842,9 +858,9 @@
       "page": "docs/design/highlight-style-options.html",
       "builtBy": "scripts/build-highlight-style-options.mjs",
       "doc": "docs/decisions/highlight-style.md#does-a-reader-tune-the-marks-strength-or-is-it-fixed",
-      "decided": null,
-      "by": null,
-      "date": null,
+      "decided": "C",
+      "by": "omar",
+      "date": "2026-09-02",
       "related": [
         "highlight-shape",
         "tajweed-colours"
