@@ -369,7 +369,8 @@
         "mark-placement",
         "word-selection",
         "loop-4a",
-        "note-export-shape"
+        "note-export-shape",
+        "highlight-shape"
       ]
     },
     {
@@ -403,7 +404,8 @@
       "date": "2026-08-19",
       "related": [
         "mark-granularity",
-        "loop-6a"
+        "loop-6a",
+        "highlight-strength"
       ]
     },
     {
@@ -786,6 +788,66 @@
         "bookmark-model",
         "note-persistence",
         "confusion-map-export"
+      ]
+    },
+    {
+      "id": "highlight-shape",
+      "question": "Does a reader choose the highlight's shape — one house swipe for everyone, a swipe-or-fill choice, or swipe plus fill plus outline?",
+      "status": "open",
+      "options": [
+        {
+          "id": "A",
+          "label": "One house style, no choice"
+        },
+        {
+          "id": "B",
+          "label": "A choice of two: the swipe or a fill"
+        },
+        {
+          "id": "C",
+          "label": "A choice of three: swipe, fill, or outline"
+        }
+      ],
+      "artifact": "https://blog.bytesofpurpose.com/hifth/docs/design/highlight-style-options.html",
+      "page": "docs/design/highlight-style-options.html",
+      "builtBy": "scripts/build-highlight-style-options.mjs",
+      "doc": "docs/decisions/highlight-style.md#does-a-reader-choose-the-highlights-shape-and-among-which",
+      "decided": null,
+      "by": null,
+      "date": null,
+      "related": [
+        "highlight-strength",
+        "comparison-crop"
+      ]
+    },
+    {
+      "id": "highlight-strength",
+      "question": "Does a reader tune the highlight's strength, or is it fixed as it is today?",
+      "status": "open",
+      "options": [
+        {
+          "id": "A",
+          "label": "Fixed, as it is today"
+        },
+        {
+          "id": "B",
+          "label": "One strength control"
+        },
+        {
+          "id": "C",
+          "label": "A few named steps"
+        }
+      ],
+      "artifact": "https://blog.bytesofpurpose.com/hifth/docs/design/highlight-style-options.html",
+      "page": "docs/design/highlight-style-options.html",
+      "builtBy": "scripts/build-highlight-style-options.mjs",
+      "doc": "docs/decisions/highlight-style.md#does-a-reader-tune-the-marks-strength-or-is-it-fixed",
+      "decided": null,
+      "by": null,
+      "date": null,
+      "related": [
+        "highlight-shape",
+        "tajweed-colours"
       ]
     }
   ]
