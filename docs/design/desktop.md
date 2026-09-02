@@ -490,6 +490,29 @@ level the stage says it applied rather than the one that was asked for.
   already in front of the reader, so a ±2 step would turn a leaf to reveal something they
   can already see.
 
+### The ayah's sheets rise over the facing leaf
+
+The three sheets an ayah can raise — the hop list a rail chip opens, the highlighted
+passage's menu and the root lens — are all *about* one ayah, and on a wide screen each is the
+380px corner card of the sheet convention (§8 ⑤). Which corner followed the chrome's
+direction (`inset-inline-end`): the right in English, the left in Arabic. On a spread that is
+the wrong axis. The ayah sits on a physical side of the gutter whatever language the chrome
+reads in, so half the time the card landed on the ayah it was about — in English, every ayah
+on the right-hand page raised its options over itself, and the selection wash was the thing
+the card hid. Found on a 1440×900 render with 2:48 selected (triage item ⑤ in `PLAN.md`);
+the Arabic chrome hid the same defect on the left-hand page.
+
+So the app names the side rather than leaving it to `dir`. `App.tsx` resolves the
+selection's page — a passage's first ayah — against `spreadOf` and hands each sheet a
+`side`: the leaf the ayah is *not* on. The sheet writes it as `data-side`, and the
+stylesheet answers with physical `left`/`right` at a specificity above the logical inset.
+Below the breakpoint, or with the book closed to one leaf, no side is named and the
+chrome-direction default stands — a phone's bottom sheet has no side to be on. A passage that
+crosses the gutter has no side that is not partly under the card, and it takes the side of
+the ayah the reader started from. `desktop.spec.ts` asserts the landing in both languages,
+since the default that hid the defect in Arabic exposed it in English, and that raising a
+sheet moves neither leaf.
+
 ## 6. Keyboard and pointer
 
 The existing model is `appKeyAction` (core, tested) plus `@use-gesture` on the stage. The

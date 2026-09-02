@@ -30,6 +30,7 @@ import {
   type RootHop,
   type RootIndexShard,
   type SkinId,
+  spreadOf,
   type TajweedShard,
   type TajweedVocabulary,
 } from "@hifth/core";
@@ -1262,6 +1263,33 @@ export function App(): JSX.Element {
   }, [stepPage]);
 
   const openChip = railChips.find((c) => c.direction === openDirection) ?? null;
+  /*
+   * Which side of the desk the ayah's sheets land on, when the book is open.
+   *
+   * On a spread the three sheets (the hop list, the highlighted passage's
+   * menu, the root lens) are all *about* one ayah, and a card that rises over
+   * that ayah hides the thing the reader is working on. So the card goes over
+   * the other leaf: an ayah on the right-hand page raises its options on the
+   * left, and the reverse. The side is physical, not logical — the leaf is on a
+   * physical side of the gutter whatever language the chrome reads in — which
+   * is why this is not left to the sheets' `dir`. Below the breakpoint, or with
+   * the book closed to one leaf, there is no other leaf, and `null` lets the
+   * sheet keep its chrome-direction default (a phone's bottom sheet, or a
+   * single leaf's corner card). A range is anchored by its first ayah; a range
+   * that crosses the gutter has no side that is not partly under the card, and
+   * the head is the ayah the reader started from.
+   */
+  const sheetSide = useMemo<"left" | "right" | null>(() => {
+    if (!desktop || pageMode !== "two" || !resolver) return null;
+    const anchor = selectedRange?.[0] ?? selectedKey;
+    if (!anchor) return null;
+    const loc = resolver.resolve(anchor);
+    if (!loc) return null;
+    const { right, left } = spreadOf(page, totalPages);
+    if (loc.page === right) return "left";
+    if (loc.page === left) return "right";
+    return null;
+  }, [desktop, pageMode, resolver, selectedRange, selectedKey, page, totalPages]);
   const selectedSurah = selectedKey ? parseAyahKey(selectedKey)?.surah : null;
 
   return (
@@ -1528,6 +1556,7 @@ export function App(): JSX.Element {
             <HopPopover
               chip={openChip}
               fromKey={selectedKey}
+              side={sheetSide}
               canHop={canHop}
               onHop={handleHop}
               onClose={() => setOpenDirection(null)}
@@ -1535,6 +1564,7 @@ export function App(): JSX.Element {
             <HighlightMenu
               rangeKeys={selectedRange}
               hops={rangeHops}
+              side={sheetSide}
               canHop={canHop}
               onHop={handleRangeHop}
               shareState={currentState}
@@ -1546,6 +1576,7 @@ export function App(): JSX.Element {
             <RootLens
               families={rootFamilies}
               loading={rootsLoading}
+              side={sheetSide}
               curated={curatedRoots}
               canHop={canHop}
               onHop={handleRootHop}

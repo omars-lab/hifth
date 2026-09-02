@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { orderForHifz, type Edge, type RailChip } from "@hifth/core";
+import { orderForHifz, type Edge, type LeafSide, type RailChip } from "@hifth/core";
 import { useT } from "../i18n";
 import { DiffView } from "./DiffView";
 import styles from "./HopPopover.module.css";
@@ -15,6 +15,12 @@ interface HopPopoverProps {
   onHop: (edge: Edge) => void;
   /** Dismiss the sheet. */
   onClose: () => void;
+  /**
+   * Which physical side of a wide screen the card lands on, or null for the
+   * chrome-direction default. On a spread the app passes the side of the leaf
+   * the ayah is *not* on, so the card never covers the ayah (desktop.md §5).
+   */
+  side?: LeafSide | null;
 }
 
 /** Focusable descendants of `root`, in tab order (excludes disabled + hidden). */
@@ -42,6 +48,7 @@ export function HopPopover({
   canHop,
   onHop,
   onClose,
+  side = null,
 }: HopPopoverProps): JSX.Element | null {
   const { t, dir } = useT();
   const sheetRef = useRef<HTMLDivElement>(null);
@@ -109,6 +116,7 @@ export function HopPopover({
         // wide-screen `inset-inline-end` resolves from this, so the card lands
         // on the side the reader's eye ends on either way.
         dir={dir}
+        data-side={side ?? undefined}
         tabIndex={-1}
         onKeyDown={onKeyDown}
       >

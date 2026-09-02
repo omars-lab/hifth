@@ -204,6 +204,23 @@
     inline-size: 380px;
     border-radius: var(--radius-lg);
   }
+
+  /*
+   * On a spread the app names a side: the leaf the ayah is *not* on, so the
+   * card never covers the ayah it is about. Physical `left`/`right` on
+   * purpose — the leaf is on a physical side of the gutter whatever direction
+   * the chrome reads in, so the logical inset above (which follows `dir`) is
+   * the wrong axis here, and the attribute's specificity is what overrides it.
+   */
+  .sheet[data-side="left"] {
+    left: var(--space-5);
+    right: auto;
+  }
+
+  .sheet[data-side="right"] {
+    left: auto;
+    right: var(--space-5);
+  }
 }
 
 @keyframes rise {

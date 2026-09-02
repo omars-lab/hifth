@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { Edge, RootFamily, RootHop } from "@hifth/core";
+import type { Edge, LeafSide, RootFamily, RootHop } from "@hifth/core";
 import { useT } from "../i18n";
 import styles from "./RootLens.module.css";
 
@@ -77,6 +77,12 @@ interface RootLensProps {
   onHopEdge?: (edge: Edge) => void;
   /** Dismiss the sheet. */
   onClose: () => void;
+  /**
+   * Which physical side of a wide screen the card lands on, or null for the
+   * chrome-direction default. On a spread the app passes the side of the leaf
+   * the ayah is *not* on, so the card never covers the ayah (desktop.md §5).
+   */
+  side?: LeafSide | null;
 }
 
 /** Focusable descendants of `root`, in tab order (excludes disabled + hidden). */
@@ -117,6 +123,7 @@ export function RootLens({
   onHop,
   onHopEdge,
   onClose,
+  side = null,
 }: RootLensProps): JSX.Element | null {
   const { t, dir } = useT();
   const sheetRef = useRef<HTMLDivElement>(null);
@@ -214,6 +221,7 @@ export function RootLens({
         aria-modal="true"
         aria-label={t.rootsAria(families.length)}
         dir={dir}
+        data-side={side ?? undefined}
         tabIndex={-1}
         onKeyDown={onKeyDown}
       >
