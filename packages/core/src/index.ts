@@ -343,6 +343,7 @@ export {
   resolveMarkOnly,
   resolvePullNearby,
   resolveTapButton,
+  markerEmphasis,
   type DetentContext,
   type DetentStrategy,
   type Landing,

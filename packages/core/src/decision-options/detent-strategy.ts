@@ -68,12 +68,34 @@ export function resolveTapButton(asked: number, _ctx: DetentContext): Landing {
   return { page: asked, pulled: false, juz: null };
 }
 
+/**
+ * C's refinement (the owner's, 2026-09-02): a marker is a button, and it *grows as
+ * the pointer approaches it* — so at rest it stays small and never eats the drag,
+ * yet is easy to hit the moment you reach for it. Given the pointer's distance from
+ * a marker along the bar, in pixels, return the factor to scale that marker by: `1`
+ * at or beyond `near`, rising to `peak` under the pointer, eased (squared) so only
+ * the last stretch of the approach is felt. The growth is a *hover* effect — while a
+ * drag is under way the caller passes no proximity and every marker stays at `1`, so
+ * it cannot touch the drag. A `near` of `0` turns the growth off entirely.
+ */
+export function markerEmphasis(distPx: number, near: number, peak: number): number {
+  if (near <= 0 || !(distPx < near)) return 1;
+  var t = 1 - distPx / near;
+  return 1 + (peak - 1) * t * t;
+}
+
 /** A resolver plus how it presents itself, for the bar and the decision page. */
 export interface DetentStrategy {
   readonly id: "A" | "B" | "C";
   readonly label: string;
   /** Whether the markers themselves are tap targets (only option C). */
   readonly tappableMarkers: boolean;
+  /**
+   * C only: how a tap target grows as the pointer nears it — `near` px of reach and
+   * the `peak` factor under the pointer, fed to `markerEmphasis`. `null` where the
+   * markers do not grow (A and B).
+   */
+  readonly emphasis: { readonly near: number; readonly peak: number } | null;
   resolve(asked: number, ctx: DetentContext): Landing;
 }
 
@@ -81,6 +103,7 @@ export const markOnlyDetent: DetentStrategy = {
   id: "A",
   label: "A marker only marks",
   tappableMarkers: false,
+  emphasis: null,
   resolve: resolveMarkOnly,
 };
 
@@ -88,6 +111,7 @@ export const pullNearbyDetent: DetentStrategy = {
   id: "B",
   label: "A marker pulls, a few pages either side",
   tappableMarkers: false,
+  emphasis: null,
   resolve: resolvePullNearby,
 };
 
@@ -95,6 +119,8 @@ export const tapButtonDetent: DetentStrategy = {
   id: "C",
   label: "A marker is a button; the drag is unchanged",
   tappableMarkers: true,
+  // Small at rest, growing to ~2.4x within a fingertip's reach of the pointer.
+  emphasis: { near: 28, peak: 2.4 },
   resolve: resolveTapButton,
 };
 

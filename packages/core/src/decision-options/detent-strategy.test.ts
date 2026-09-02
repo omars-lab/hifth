@@ -7,6 +7,7 @@ import {
   resolveMarkOnly,
   resolvePullNearby,
   resolveTapButton,
+  markerEmphasis,
   type DetentContext,
 } from "./detent-strategy.js";
 
@@ -81,5 +82,38 @@ describe("the set", () => {
     for (let p = 1; p <= 604; p += 37) {
       expect(markOnlyDetent.resolve(p, ctx()).page).toBe(p);
     }
+  });
+});
+
+describe("markerEmphasis (C's grow-on-approach)", () => {
+  it("is 1 at or beyond the reach — a marker at rest keeps its plain size", () => {
+    expect(markerEmphasis(28, 28, 2.4)).toBe(1);
+    expect(markerEmphasis(40, 28, 2.4)).toBe(1);
+  });
+  it("reaches the full peak under the pointer", () => {
+    expect(markerEmphasis(0, 28, 2.4)).toBeCloseTo(2.4, 10);
+  });
+  it("grows as the pointer nears, eased so far marks barely move", () => {
+    const half = markerEmphasis(14, 28, 2.4); // t = .5, squared to .25
+    expect(half).toBeCloseTo(1 + (2.4 - 1) * 0.25, 10);
+    expect(markerEmphasis(7, 28, 2.4)).toBeGreaterThan(half); // closer is bigger
+    expect(markerEmphasis(21, 28, 2.4)).toBeLessThan(half); // farther is smaller
+  });
+  it("never grows when reach is off or the distance is unknown — a drag is never eaten", () => {
+    expect(markerEmphasis(0, 0, 2.4)).toBe(1);
+    expect(markerEmphasis(Number.NaN, 28, 2.4)).toBe(1);
+  });
+  it("is inline-safe — its source names no import/require", () => {
+    expect(markerEmphasis.toString()).not.toMatch(/\bimport\b|\brequire\b/);
+  });
+});
+
+describe("only C's markers grow on approach", () => {
+  it("A and B carry no emphasis; C carries a peak above 1", () => {
+    expect(markOnlyDetent.emphasis).toBeNull();
+    expect(pullNearbyDetent.emphasis).toBeNull();
+    expect(tapButtonDetent.emphasis).not.toBeNull();
+    expect(tapButtonDetent.emphasis?.peak).toBeGreaterThan(1);
+    expect(tapButtonDetent.emphasis?.near).toBeGreaterThan(0);
   });
 });
