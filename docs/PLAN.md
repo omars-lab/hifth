@@ -92,7 +92,7 @@ in three places: this section (the record), the session task list (the working c
   which both leaves still wear their one-leaf transforms when an animation-frame callback
   measures them, and which the resize observer corrects before it is painted. A reader never
   sees it, so the rig reads after paint; the two older guards read inside the frame and
-  pass only because their roads happen to settle earlier. In the tree, **not yet committed**.
+  pass only because their roads happen to settle earlier. `0035a4d`.
 - **A turned leaf moves the address** in the URL bar, as a jump already did. `c1d702c`.
 - **Ayah boxes drawn wrong.** 2:249's six-line middle inked as one slab, and 10:44 dropped
   to the coarse fallback because the print rounds to a tenth — with **110 other boxes**
@@ -106,7 +106,7 @@ in three places: this section (the record), the session task list (the working c
   previews in. Fixed and guarded. `ff81f8e`.
 - **The page bar redrawn**: thirty green detents, one per juz; a page-icon handle over the
   native slider (kept for its keyboard and screen-reader contract); a popover that names
-  page · juz · surah while dragging. In the tree with seven tests, **not yet committed**.
+  page · juz · surah while dragging. With seven tests, `3a9396a`.
   Two calls were made without a record — whether a detent is a landmark or a magnet, and
   which juz a boundary page belongs to — and a decision is owed for the pair.
 
@@ -215,7 +215,8 @@ next one is caught by a tool:
   decide skill follows it. The page-bar page is therefore published by merging, and the
   decisions gate is green without anything being put on another host.
 
-**Not yet committed, awaiting the owner's go-ahead** (as of 2026-09-01): the page bar
+**Landed on main 2026-09-01** as the squash of PR #88, `243b37e`, after the owner accepted
+the post-hop framing and the goldens were re-baselined on both platforms: the page bar
 redesign and its seven tests; the settle step, its unit test and the every-road e2e; the
 `run-app` recipe; the box sweep (its library, gate, page builder, the drawn page and its
 wiring into the gates, the Makefile, CI and the map); follow-ups 16 and 17 and their index
@@ -229,7 +230,7 @@ skill, the map and artifact-register notes); this section and the tasks page it 
 
 ### Open follow-ups
 
-These fifteen are indexed in [`issues.json`](issues.json) alongside the design docs' open
+Each of these is indexed in [`issues.json`](issues.json) alongside the design docs' open
 questions, `backlog.md` and the validation ledger, and `make issues` prints all four
 registers in one list. They are indexed by *number only*: unlike every other register, a
 follow-up here carries no status marker, because these are compound narratives whose job is

@@ -24,7 +24,8 @@ is public the day the page is merged.
 The bar was redesigned in one sitting: thirty markers, a page-shaped handle, and a bubble
 that names the juz under the thumb. Two things in that redesign were built one way because
 something had to be built, and each is a small decision a stranger to this code could hold
-an opinion on. The redesign is not yet committed, so this is the cheap moment to ask.
+an opinion on. The redesign landed on main on 2026-09-01 the way it was built; asking
+before anybody has learned to expect it is the cheap moment.
 
 ## What happens if nobody decides?
 
