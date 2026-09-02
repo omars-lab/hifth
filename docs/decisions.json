@@ -215,7 +215,9 @@
       "decided": null,
       "by": null,
       "date": null,
-      "related": []
+      "related": [
+        "mistake-note-kinds"
+      ]
     },
     {
       "id": "mark-granularity",
@@ -246,7 +248,8 @@
         "word-selection",
         "loop-6a",
         "tajweed-colours",
-        "mark-placement"
+        "mark-placement",
+        "mistake-note-anchor"
       ]
     },
     {
@@ -474,7 +477,8 @@
         "word-search",
         "mark-granularity",
         "mark-placement",
-        "comparison-crop"
+        "comparison-crop",
+        "mistake-note-anchor"
       ]
     },
     {
@@ -583,6 +587,71 @@
       "related": [
         "pin-marker",
         "loop-6a"
+      ]
+    },
+    {
+      "id": "mistake-note-anchor",
+      "question": "Can a reader pin their own note to a spot on the page, and to what \u2014 a verse, a word, or a single mark?",
+      "status": "open",
+      "options": [
+        {
+          "id": "A",
+          "label": "Nothing: the reader writes no note"
+        },
+        {
+          "id": "B",
+          "label": "A note on the whole verse"
+        },
+        {
+          "id": "C",
+          "label": "A note on a word or a run of words"
+        },
+        {
+          "id": "D",
+          "label": "A note on a letter, a vowel mark, or a pause sign"
+        }
+      ],
+      "artifact": "https://blog.bytesofpurpose.com/hifth/docs/design/mistake-marking-options.html",
+      "page": "docs/design/mistake-marking-options.html",
+      "builtBy": "scripts/build-mistake-marking-options.mjs",
+      "doc": "docs/decisions/mistake-marking.md#what-can-a-reader-pin-their-own-note-to",
+      "decided": null,
+      "by": null,
+      "date": null,
+      "related": [
+        "word-selection",
+        "mark-granularity",
+        "mistake-note-kinds"
+      ]
+    },
+    {
+      "id": "mistake-note-kinds",
+      "question": "If a reader can note the page, what kinds of note are there, and does any of them leave the phone?",
+      "status": "open",
+      "options": [
+        {
+          "id": "A",
+          "label": "Private notes only, kept on the phone"
+        },
+        {
+          "id": "B",
+          "label": "Private notes, plus a report the reader chooses to send"
+        },
+        {
+          "id": "C",
+          "label": "Every note is a report that syncs"
+        }
+      ],
+      "artifact": "https://blog.bytesofpurpose.com/hifth/docs/design/mistake-marking-options.html",
+      "page": "docs/design/mistake-marking-options.html",
+      "builtBy": "scripts/build-mistake-marking-options.mjs",
+      "doc": "docs/decisions/mistake-marking.md#what-kinds-of-note-are-there-and-does-any-leave-the-phone",
+      "decided": null,
+      "by": null,
+      "date": null,
+      "related": [
+        "mistake-note-anchor",
+        "confusion-map-export"
       ]
     }
   ]

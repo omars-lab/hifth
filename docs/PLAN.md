@@ -139,8 +139,14 @@ in three places: this section (the record), the session task list (the working c
 - **Comment-style mistake marking.** Zoom in, click a letter, a harakah or a marker, and
   drop a note anchored to that glyph; colour by kind (a comment, a correction, a note to the
   developers); icons shown only past a zoom threshold; hover reveals the span. A drag across
-  text must **select rather than turn the page**. Must reconcile with the mark and sitting
-  system already in the tree, not start fresh. A decision before code.
+  text must **select rather than turn the page**. Recorded as a two-question decision, each
+  option drawn on page 7 at the zoom it would be used (`docs/design/mistake-marking-options.html`):
+  first, what a note can pin to — nothing, a verse, a word or run, or a letter/mark, where the
+  last reopens the settled choice to ship the page as anonymous shapes; second, which kinds
+  there are and whether any leaves the phone. Open, for the owner: both questions reopen a
+  position the project has already taken (finer-than-word geometry is built but unshipped; a
+  private record does not leave the phone by reflex). The word-grain option inherits the
+  already-built drag-selects-not-turns gesture.
 - **Keeping marks and comments on the device, and exporting them in a batch** (a file, or
   email). Touches the revision-privacy question.
 - **A bookmark you drop by tapping the fold**, animating downward like a ribbon, and every
