@@ -148,7 +148,12 @@ in three places: this section (the record), the session task list (the working c
   private record does not leave the phone by reflex). The word-grain option inherits the
   already-built drag-selects-not-turns gesture.
 - **Keeping marks and comments on the device, and exporting them in a batch** (a file, or
-  email). Touches the revision-privacy question.
+  email). Drawn as two questions, its own decision: how a batch leaves the phone — nothing
+  leaves, a file the reader saves, an email they send, or cloud sync — and, since a note
+  points at a *spot* and not a whole verse, what an export contains so it is legible without
+  shipping the Qur'an — a plain list, a list with an outlined picture of each spot, or a
+  portable annotation file. Sibling to the confusion map's own export decision, and
+  conditional on the mistake-marking note layer existing at all.
 - **A bookmark you drop by tapping the fold**, animating downward like a ribbon, and every
   bookmark action written to a calendar. Needs a decision (where a bookmark is stored, what the
   animation is) before code.
