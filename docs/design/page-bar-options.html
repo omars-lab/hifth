@@ -52,13 +52,44 @@
   th{font-family:"SF Mono",ui-monospace,Menlo,monospace; font-size:.68rem; letter-spacing:.08em; text-transform:uppercase; color:var(--ink-2)}
   .num{font-family:"SF Mono",ui-monospace,Menlo,monospace; font-size:.88rem}
   .foot{margin-top:3rem; padding-top:1.2rem; border-top:1px solid var(--line); font-size:.82rem; color:var(--ink-2); max-width:68ch}
+
+  /* the live sections — the felt/seen options mounted as real, draggable code */
+  .live{border:1px solid var(--line); border-radius:16px; background:var(--panel); padding:1.2rem 1.3rem 1.5rem; margin-top:1.4rem}
+  .live > h3{margin:.1rem 0 .3rem; font-size:1.15rem}
+  .live .hint{font-size:.94rem; color:var(--ink-2); margin:.2rem 0 1rem; max-width:68ch}
+  .live .hint b{color:var(--ink); font-weight:600}
+  .seg{display:inline-flex; flex-wrap:wrap; border:1px solid var(--line); border-radius:999px; overflow:hidden; margin-bottom:1rem}
+  .seg button{appearance:none; border:0; background:transparent; color:var(--ink-2); font:inherit; font-size:.9rem; padding:.45rem 1rem; cursor:pointer; border-inline-start:1px solid var(--line)}
+  .seg button:first-child{border-inline-start:0}
+  .seg button[aria-pressed="true"]{background:var(--accent); color:#fff}
+  .stage{position:relative; height:118px; user-select:none; touch-action:none}
+  .track{position:absolute; left:20px; right:20px; top:70px; height:6px; border-radius:3px; background:var(--ink-2); opacity:.45}
+  .reach{position:absolute; top:60px; height:26px; border-radius:4px; background:var(--accent-soft); pointer-events:none; display:none}
+  .mark{position:absolute; top:60px; width:3px; height:26px; border-radius:1px; background:var(--accent); transform:translateX(-50%); transform-origin:50% 100%; transition:transform .1s ease-out}
+  .mark.tappable{cursor:pointer; width:7px; border-radius:2px}
+  .mark.tappable:hover{background:var(--lean)}
+  .mark.hot{background:var(--lean); box-shadow:0 0 0 3px var(--lean-soft)}
+  .handle{position:absolute; top:55px; width:30px; height:36px; margin-left:-15px; border-radius:7px; background:var(--panel); border:1.5px solid var(--accent); box-shadow:0 1px 3px rgba(0,0,0,.18); cursor:grab; touch-action:none}
+  .handle:active{cursor:grabbing}
+  .handle:focus-visible{outline:2px solid var(--lean); outline-offset:2px}
+  .handle.settle{transition:left .2s cubic-bezier(.2,.9,.3,1)}
+  .bubble{position:absolute; top:6px; transform:translateX(-50%); background:var(--ink); color:var(--panel); border-radius:6px; padding:.32rem .6rem; font-size:.82rem; white-space:nowrap; pointer-events:none}
+  .readout{font-size:.92rem; color:var(--ink-2); margin-top:.5rem; min-height:1.35em}
+  .decided{border:1px solid var(--accent); border-left:4px solid var(--accent); border-radius:10px; background:var(--accent-soft); padding:.75rem 1rem; margin:.4rem 0 1rem; font-size:.96rem; color:var(--ink)}
+  .decided b{color:var(--ink)}
+  .decided .who{color:var(--ink-2); font-size:.88rem}
+  .boundset{display:flex; gap:1rem; flex-wrap:wrap; margin-top:.4rem}
+  .bcard{border:1px solid var(--line-soft); border-radius:12px; padding:.8rem; text-align:center; background:var(--bg)}
+  .bcard .blabel{margin-top:.55rem; background:var(--ink); color:var(--panel); border-radius:6px; padding:.3rem .55rem; font-size:.82rem; display:inline-block}
+  .bcard .bpage{font-size:.76rem; color:var(--ink-2); margin-top:.35rem}
+  @media (prefers-reduced-motion: reduce){ .handle.settle{transition:none} .mark{transition:none} }
 </style>
 </head>
 <body>
 <main class="wrap">
   <p class="eyebrow">Two decisions, still open</p>
   <h1>Two questions about the page bar</h1>
-  <p class="lede">The bar along the bottom of the app is how a reader scrubs through the whole printed book. It grew thirty green marks, one where each juz begins, and a bubble that names the juz and the surah under the thumb while you drag. Two things about those marks were built one way without anyone choosing, and this page draws the choices at the size the bar is really used.</p>
+  <p class="lede">The bar along the bottom of the app is how a reader scrubs through the whole printed book. It grew thirty green marks, one where each juz begins, and a bubble that names the juz and the surah under the thumb while you drag. Two things about those marks were built one way without anyone choosing, and this page draws the choices at the size the bar is really used &mdash; and lets you <em>try</em> each one, live, running the same code that would ship, so the choice is made by hand rather than imagined.</p>
 
   <h2>A few words, defined once</h2>
   <dl class="gloss">
@@ -80,6 +111,7 @@
   <p>So a drag cannot be aimed at one page on either device, and on a phone it cannot be aimed at one juz's neighbourhood either. That number is most of the argument on this page.</p>
 
   <h2 class="q">1 · When a reader lets go near a marker, should the bar pull the page onto it?</h2>
+  <div class="decided"><b>Decided &mdash; C: a marker is a button, and it grows as you reach for it.</b> A release is left exactly under the thumb, and each marker is a button you can tap to open its juz. So it is easy to hit without ever eating the drag, the button stays small at rest and grows toward the pointer only while it hovers near &mdash; try it in the board below. <span class="who">Chosen by the owner on 2 September 2026. A and B stay drawn here because they are the reason C was a choice.</span></div>
   <p>Today it does not. The markers are drawn under the thumb and cannot be touched; a release lands on the page the thumb is over, and the bubble says which. There are three exact roads to a juz that do not involve the bar: on a laptop, the wheel with Shift held jumps a juz; the revision map has a cell per juz that opens it; and the jump box takes "juz 9". The question is whether the drag should be a fourth.</p>
   <p>Each option is drawn at the laptop width and the phone width, released at page 60 — two pages before juz 4 begins on page 62.</p>
   <div class="options">
@@ -104,10 +136,26 @@
       <div class="opt-head"><span class="opt-key">C</span><h3>A marker is a button; the drag is unchanged</h3></div>
       <div class="opt-body">
         <p class="gist">Tap or click a marker and the book opens at that juz, with the announcement the wheel already makes. A drag released beside a marker still lands where the thumb is.</p>
-        <dl><dt>takes</dt><dd>Thirty small buttons on the rail, each named, and the marker's hit area widened to the touch minimum — which on a phone overlaps its neighbours' drag space.</dd><dt>gets</dt><dd>An exact road to a juz that is visible on the bar, without changing what a release means.</dd><dt>costs</dt><dd>A 2 px mark with a 44 px hit area, thirty times, on a track where a page is 0.4 px: thirty touch targets want 1320 px of a 262 px phone track, 5.0 times what there is, so on a phone every drag starts on a button. The bar already has a keyboard road and the map already has a cell per juz.</dd></dl>
+        <dl><dt>takes</dt><dd>Thirty small buttons on the rail, each named. At rest each is only a few pixels wide, clear of its neighbours' drag space; it grows toward the pointer only as you reach for it, so it is easy to tap without ever widening into the drag.</dd><dt>gets</dt><dd>An exact road to a juz, visible on the bar, without changing what a release means — and a target easy to hit, because it grows under the pointer as you approach.</dd><dt>costs</dt><dd>The plain version's cost is the phone: a fixed 44 px hit area, thirty times, wants 1320 px of a 262 px track — 5.0 times the room — so every drag would start on a button. The chosen refinement answers exactly that: a marker is 2 px at rest, and grows toward the pointer only while it hovers near, never during a drag.</dd></dl>
         <div class="phones"><figure class="bar"><svg viewBox="0 0 1280 160" width="1280" role="img" aria-label="Marker 4 pressed: the book opens at page 62"><rect x="0" y="70" width="1280" height="80" fill="#fbf8f2"/><line x1="0" x2="1280" y1="70" y2="70" stroke="#d9cfbe"/><text x="194" y="116" text-anchor="middle" font-size="16" fill="#5c5347">▸</text><text x="1086" y="116" text-anchor="middle" font-size="16" fill="#5c5347">◂</text><rect x="235" y="103" width="810" height="14" rx="1" fill="#5c5347" opacity="0.55"/><rect x="1044" y="101" width="2" height="18" rx="1" fill="#1f6f66"/><rect x="1015.79" y="101" width="2" height="18" rx="1" fill="#1f6f66"/><rect x="988.93" y="101" width="2" height="18" rx="1" fill="#1f6f66"/><rect x="961.06" y="101" width="4" height="18" rx="1" fill="#17544d"/><rect x="935.19" y="101" width="2" height="18" rx="1" fill="#1f6f66"/><rect x="908.33" y="101" width="2" height="18" rx="1" fill="#1f6f66"/><rect x="882.81" y="101" width="2" height="18" rx="1" fill="#1f6f66"/><rect x="854.6" y="101" width="2" height="18" rx="1" fill="#1f6f66"/><rect x="827.73" y="101" width="2" height="18" rx="1" fill="#1f6f66"/><rect x="800.87" y="101" width="2" height="18" rx="1" fill="#1f6f66"/><rect x="775.34" y="101" width="2" height="18" rx="1" fill="#1f6f66"/><rect x="747.13" y="101" width="2" height="18" rx="1" fill="#1f6f66"/><rect x="720.27" y="101" width="2" height="18" rx="1" fill="#1f6f66"/><rect x="693.4" y="101" width="2" height="18" rx="1" fill="#1f6f66"/><rect x="666.54" y="101" width="2" height="18" rx="1" fill="#1f6f66"/><rect x="639.67" y="101" width="2" height="18" rx="1" fill="#1f6f66"/><rect x="612.81" y="101" width="2" height="18" rx="1" fill="#1f6f66"/><rect x="585.94" y="101" width="2" height="18" rx="1" fill="#1f6f66"/><rect x="559.07" y="101" width="2" height="18" rx="1" fill="#1f6f66"/><rect x="532.21" y="101" width="2" height="18" rx="1" fill="#1f6f66"/><rect x="505.34" y="101" width="2" height="18" rx="1" fill="#1f6f66"/><rect x="478.48" y="101" width="2" height="18" rx="1" fill="#1f6f66"/><rect x="451.61" y="101" width="2" height="18" rx="1" fill="#1f6f66"/><rect x="424.75" y="101" width="2" height="18" rx="1" fill="#1f6f66"/><rect x="397.88" y="101" width="2" height="18" rx="1" fill="#1f6f66"/><rect x="371.01" y="101" width="2" height="18" rx="1" fill="#1f6f66"/><rect x="344.15" y="101" width="2" height="18" rx="1" fill="#1f6f66"/><rect x="317.28" y="101" width="2" height="18" rx="1" fill="#1f6f66"/><rect x="290.42" y="101" width="2" height="18" rx="1" fill="#1f6f66"/><rect x="263.55" y="101" width="2" height="18" rx="1" fill="#1f6f66"/><g transform="translate(950.06 97) scale(1.08)" fill="#fbf8f2" stroke="#17544d" stroke-width="1.5" stroke-linejoin="round"><path d="M7.5 2.5H14L18 6.5V19.5A1.5 1.5 0 0 1 16.5 21H7.5A1.5 1.5 0 0 1 6 19.5V4A1.5 1.5 0 0 1 7.5 2.5Z"/><path d="M13.75 2.75V6A1 1 0 0 0 14.75 7H18" fill="none"/></g><rect x="897.06" y="31" width="132" height="31" rx="6" fill="#26201a"/><text x="963.06" y="49" text-anchor="middle" font-size="13" font-family="ui-sans-serif, system-ui, sans-serif" fill="#f4efe6" opacity="1">Juz 4 · page 62</text></svg><figcaption>Marker 4 pressed: the book opens at page 62</figcaption></figure><figure class="bar"><svg viewBox="0 0 390 160" width="390" role="img" aria-label="Marker 4 pressed: the book opens at page 62"><rect x="0" y="70" width="390" height="80" fill="#fbf8f2"/><line x1="0" x2="390" y1="70" y2="70" stroke="#d9cfbe"/><text x="34" y="116" text-anchor="middle" font-size="16" fill="#5c5347">▸</text><text x="356" y="116" text-anchor="middle" font-size="16" fill="#5c5347">◂</text><rect x="75" y="103" width="240" height="14" rx="1" fill="#5c5347" opacity="0.55"/><rect x="314" y="101" width="2" height="18" rx="1" fill="#1f6f66"/><rect x="305.64" y="101" width="2" height="18" rx="1" fill="#1f6f66"/><rect x="297.68" y="101" width="2" height="18" rx="1" fill="#1f6f66"/><rect x="288.72" y="101" width="4" height="18" rx="1" fill="#17544d"/><rect x="281.76" y="101" width="2" height="18" rx="1" fill="#1f6f66"/><rect x="273.8" y="101" width="2" height="18" rx="1" fill="#1f6f66"/><rect x="266.24" y="101" width="2" height="18" rx="1" fill="#1f6f66"/><rect x="257.88" y="101" width="2" height="18" rx="1" fill="#1f6f66"/><rect x="249.92" y="101" width="2" height="18" rx="1" fill="#1f6f66"/><rect x="241.96" y="101" width="2" height="18" rx="1" fill="#1f6f66"/><rect x="234.4" y="101" width="2" height="18" rx="1" fill="#1f6f66"/><rect x="226.04" y="101" width="2" height="18" rx="1" fill="#1f6f66"/><rect x="218.08" y="101" width="2" height="18" rx="1" fill="#1f6f66"/><rect x="210.12" y="101" width="2" height="18" rx="1" fill="#1f6f66"/><rect x="202.16" y="101" width="2" height="18" rx="1" fill="#1f6f66"/><rect x="194.2" y="101" width="2" height="18" rx="1" fill="#1f6f66"/><rect x="186.24" y="101" width="2" height="18" rx="1" fill="#1f6f66"/><rect x="178.28" y="101" width="2" height="18" rx="1" fill="#1f6f66"/><rect x="170.32" y="101" width="2" height="18" rx="1" fill="#1f6f66"/><rect x="162.36" y="101" width="2" height="18" rx="1" fill="#1f6f66"/><rect x="154.4" y="101" width="2" height="18" rx="1" fill="#1f6f66"/><rect x="146.44" y="101" width="2" height="18" rx="1" fill="#1f6f66"/><rect x="138.48" y="101" width="2" height="18" rx="1" fill="#1f6f66"/><rect x="130.52" y="101" width="2" height="18" rx="1" fill="#1f6f66"/><rect x="122.56" y="101" width="2" height="18" rx="1" fill="#1f6f66"/><rect x="114.6" y="101" width="2" height="18" rx="1" fill="#1f6f66"/><rect x="106.64" y="101" width="2" height="18" rx="1" fill="#1f6f66"/><rect x="98.68" y="101" width="2" height="18" rx="1" fill="#1f6f66"/><rect x="90.72" y="101" width="2" height="18" rx="1" fill="#1f6f66"/><rect x="82.76" y="101" width="2" height="18" rx="1" fill="#1f6f66"/><g transform="translate(277.72 97) scale(1.08)" fill="#fbf8f2" stroke="#17544d" stroke-width="1.5" stroke-linejoin="round"><path d="M7.5 2.5H14L18 6.5V19.5A1.5 1.5 0 0 1 16.5 21H7.5A1.5 1.5 0 0 1 6 19.5V4A1.5 1.5 0 0 1 7.5 2.5Z"/><path d="M13.75 2.75V6A1 1 0 0 0 14.75 7H18" fill="none"/></g><rect x="224.72" y="31" width="132" height="31" rx="6" fill="#26201a"/><text x="290.72" y="49" text-anchor="middle" font-size="13" font-family="ui-sans-serif, system-ui, sans-serif" fill="#f4efe6" opacity="1">Juz 4 · page 62</text></svg><figcaption>Marker 4 pressed: the book opens at page 62</figcaption></figure></div>
       </div>
     </section>
+  </div>
+
+  
+  <div class="live" id="live-detents">
+    <h3>Try it &mdash; let go near a marker</h3>
+    <p class="hint">Drag the page handle and let go. Switch the rule and feel the difference: <b>A</b> leaves you exactly where your thumb is; <b>B</b> pulls you onto the nearest juz when you release within 3 pages of it, and tells you before you let go; <b>C</b> leaves the drag alone but makes each marker a button that <em>grows as your pointer nears it</em>, so it is easy to hit yet never in the way of a drag. This is the real code &mdash; the rule you pick here is the one that would ship.</p>
+    <div class="seg" role="group" aria-label="What a marker does">
+      <button data-rule="A" aria-pressed="true">A &middot; marker only marks</button>
+      <button data-rule="B" aria-pressed="false">B &middot; marker pulls</button>
+      <button data-rule="C" aria-pressed="false">C &middot; marker is a button</button>
+    </div>
+    <div class="stage" id="detent-stage" aria-hidden="true">
+      <div class="reach" id="detent-reach"></div>
+      <div class="track"></div>
+    </div>
+    <p class="readout" id="detent-readout"></p>
   </div>
 
   <h2>What would change this answer?</h2>
@@ -118,6 +166,7 @@
   </ul>
 
   <h2 class="q">2 · When a juz begins partway down a page, which juz is that page in?</h2>
+  <div class="decided"><b>Decided &mdash; C: it is in both.</b> A page split by a juz seam carries the end of one juz and the start of the next, so it belongs to both and is named for both &mdash; "juz 3 &rarr; 4" &mdash; rather than being forced to pick one. <span class="who">Chosen by the owner on 2 September 2026. A and B stay drawn here because they are the reason C was a choice.</span></div>
   <p>Twenty-six of the thirty juz begin at the top of a page. Four begin partway down one, so that page carries the end of one juz and the start of the next:</p>
   
     <table>
@@ -154,6 +203,18 @@
     </section>
   </div>
 
+  
+  <div class="live" id="live-boundary">
+    <h3>Try it &mdash; switch the rule, watch the four pages</h3>
+    <p class="hint">These are the four pages where a juz begins partway down. Switch the rule and watch each page's label: <b>A</b> names the juz that opens on the page; <b>B</b> names the juz already running onto it; <b>C</b> shows both. This is the real code &mdash; the rule you pick is the one the bar would print.</p>
+    <div class="seg" role="group" aria-label="Which juz a boundary page wears">
+      <button data-brule="A" aria-pressed="true">A &middot; begins here</button>
+      <button data-brule="B" aria-pressed="false">B &middot; already running</button>
+      <button data-brule="C" aria-pressed="false">C &middot; both</button>
+    </div>
+    <div class="boundset" id="boundset"><div class="bcard" data-running="3" data-begins="4"><svg viewBox="0 0 100 150" width="100" height="150" role="img" aria-label="page 62: juz 3 above the dashed line, juz 4 below"><rect x="0" y="0" width="100" height="150" rx="3" fill="#f4efe6" stroke="#d9cfbe"/><line x1="10" x2="90" y1="8" y2="8" stroke="#5c5347" stroke-width="2" opacity="0.7"/><line x1="10" x2="90" y1="17.57" y2="17.57" stroke="#5c5347" stroke-width="2" opacity="0.7"/><line x1="10" x2="90" y1="27.14" y2="27.14" stroke="#1f6f66" stroke-width="2" opacity="0.7"/><line x1="10" x2="90" y1="36.71" y2="36.71" stroke="#1f6f66" stroke-width="2" opacity="0.7"/><line x1="10" x2="90" y1="46.29" y2="46.29" stroke="#1f6f66" stroke-width="2" opacity="0.7"/><line x1="10" x2="90" y1="55.86" y2="55.86" stroke="#1f6f66" stroke-width="2" opacity="0.7"/><line x1="10" x2="90" y1="65.43" y2="65.43" stroke="#1f6f66" stroke-width="2" opacity="0.7"/><line x1="10" x2="90" y1="75" y2="75" stroke="#1f6f66" stroke-width="2" opacity="0.7"/><line x1="10" x2="90" y1="84.57" y2="84.57" stroke="#1f6f66" stroke-width="2" opacity="0.7"/><line x1="10" x2="90" y1="94.14" y2="94.14" stroke="#1f6f66" stroke-width="2" opacity="0.7"/><line x1="10" x2="90" y1="103.71" y2="103.71" stroke="#1f6f66" stroke-width="2" opacity="0.7"/><line x1="10" x2="90" y1="113.29" y2="113.29" stroke="#1f6f66" stroke-width="2" opacity="0.7"/><line x1="10" x2="90" y1="122.86" y2="122.86" stroke="#1f6f66" stroke-width="2" opacity="0.7"/><line x1="10" x2="90" y1="132.43" y2="132.43" stroke="#1f6f66" stroke-width="2" opacity="0.7"/><line x1="10" x2="90" y1="142" y2="142" stroke="#1f6f66" stroke-width="2" opacity="0.7"/><line x1="4" x2="96" y1="22.89" y2="22.89" stroke="#17544d" stroke-width="1.5" stroke-dasharray="3 2"/></svg><div class="blabel"></div><div class="bpage">Page 62 &middot; Ali 'Imran</div></div><div class="bcard" data-running="6" data-begins="7"><svg viewBox="0 0 100 150" width="100" height="150" role="img" aria-label="page 121: juz 6 above the dashed line, juz 7 below"><rect x="0" y="0" width="100" height="150" rx="3" fill="#f4efe6" stroke="#d9cfbe"/><line x1="10" x2="90" y1="8" y2="8" stroke="#5c5347" stroke-width="2" opacity="0.7"/><line x1="10" x2="90" y1="17.57" y2="17.57" stroke="#5c5347" stroke-width="2" opacity="0.7"/><line x1="10" x2="90" y1="27.14" y2="27.14" stroke="#5c5347" stroke-width="2" opacity="0.7"/><line x1="10" x2="90" y1="36.71" y2="36.71" stroke="#5c5347" stroke-width="2" opacity="0.7"/><line x1="10" x2="90" y1="46.29" y2="46.29" stroke="#5c5347" stroke-width="2" opacity="0.7"/><line x1="10" x2="90" y1="55.86" y2="55.86" stroke="#5c5347" stroke-width="2" opacity="0.7"/><line x1="10" x2="90" y1="65.43" y2="65.43" stroke="#5c5347" stroke-width="2" opacity="0.7"/><line x1="10" x2="90" y1="75" y2="75" stroke="#5c5347" stroke-width="2" opacity="0.7"/><line x1="10" x2="90" y1="84.57" y2="84.57" stroke="#5c5347" stroke-width="2" opacity="0.7"/><line x1="10" x2="90" y1="94.14" y2="94.14" stroke="#5c5347" stroke-width="2" opacity="0.7"/><line x1="10" x2="90" y1="103.71" y2="103.71" stroke="#1f6f66" stroke-width="2" opacity="0.7"/><line x1="10" x2="90" y1="113.29" y2="113.29" stroke="#1f6f66" stroke-width="2" opacity="0.7"/><line x1="10" x2="90" y1="122.86" y2="122.86" stroke="#1f6f66" stroke-width="2" opacity="0.7"/><line x1="10" x2="90" y1="132.43" y2="132.43" stroke="#1f6f66" stroke-width="2" opacity="0.7"/><line x1="10" x2="90" y1="142" y2="142" stroke="#1f6f66" stroke-width="2" opacity="0.7"/><line x1="4" x2="96" y1="97.33" y2="97.33" stroke="#17544d" stroke-width="1.5" stroke-dasharray="3 2"/></svg><div class="blabel"></div><div class="bpage">Page 121 &middot; Al-Ma'idah</div></div><div class="bcard" data-running="10" data-begins="11"><svg viewBox="0 0 100 150" width="100" height="150" role="img" aria-label="page 201: juz 10 above the dashed line, juz 11 below"><rect x="0" y="0" width="100" height="150" rx="3" fill="#f4efe6" stroke="#d9cfbe"/><line x1="10" x2="90" y1="8" y2="8" stroke="#5c5347" stroke-width="2" opacity="0.7"/><line x1="10" x2="90" y1="17.57" y2="17.57" stroke="#5c5347" stroke-width="2" opacity="0.7"/><line x1="10" x2="90" y1="27.14" y2="27.14" stroke="#5c5347" stroke-width="2" opacity="0.7"/><line x1="10" x2="90" y1="36.71" y2="36.71" stroke="#5c5347" stroke-width="2" opacity="0.7"/><line x1="10" x2="90" y1="46.29" y2="46.29" stroke="#5c5347" stroke-width="2" opacity="0.7"/><line x1="10" x2="90" y1="55.86" y2="55.86" stroke="#5c5347" stroke-width="2" opacity="0.7"/><line x1="10" x2="90" y1="65.43" y2="65.43" stroke="#5c5347" stroke-width="2" opacity="0.7"/><line x1="10" x2="90" y1="75" y2="75" stroke="#5c5347" stroke-width="2" opacity="0.7"/><line x1="10" x2="90" y1="84.57" y2="84.57" stroke="#5c5347" stroke-width="2" opacity="0.7"/><line x1="10" x2="90" y1="94.14" y2="94.14" stroke="#5c5347" stroke-width="2" opacity="0.7"/><line x1="10" x2="90" y1="103.71" y2="103.71" stroke="#5c5347" stroke-width="2" opacity="0.7"/><line x1="10" x2="90" y1="113.29" y2="113.29" stroke="#5c5347" stroke-width="2" opacity="0.7"/><line x1="10" x2="90" y1="122.86" y2="122.86" stroke="#1f6f66" stroke-width="2" opacity="0.7"/><line x1="10" x2="90" y1="132.43" y2="132.43" stroke="#1f6f66" stroke-width="2" opacity="0.7"/><line x1="10" x2="90" y1="142" y2="142" stroke="#1f6f66" stroke-width="2" opacity="0.7"/><line x1="4" x2="96" y1="122.86" y2="122.86" stroke="#17544d" stroke-width="1.5" stroke-dasharray="3 2"/></svg><div class="blabel"></div><div class="bpage">Page 201 &middot; At-Tawbah</div></div><div class="bcard" data-running="25" data-begins="26"><svg viewBox="0 0 100 150" width="100" height="150" role="img" aria-label="page 502: juz 25 above the dashed line, juz 26 below"><rect x="0" y="0" width="100" height="150" rx="3" fill="#f4efe6" stroke="#d9cfbe"/><line x1="10" x2="90" y1="8" y2="8" stroke="#5c5347" stroke-width="2" opacity="0.7"/><line x1="10" x2="90" y1="17.57" y2="17.57" stroke="#5c5347" stroke-width="2" opacity="0.7"/><line x1="10" x2="90" y1="27.14" y2="27.14" stroke="#5c5347" stroke-width="2" opacity="0.7"/><line x1="10" x2="90" y1="36.71" y2="36.71" stroke="#5c5347" stroke-width="2" opacity="0.7"/><line x1="10" x2="90" y1="46.29" y2="46.29" stroke="#5c5347" stroke-width="2" opacity="0.7"/><line x1="10" x2="90" y1="55.86" y2="55.86" stroke="#5c5347" stroke-width="2" opacity="0.7"/><line x1="10" x2="90" y1="65.43" y2="65.43" stroke="#5c5347" stroke-width="2" opacity="0.7"/><line x1="10" x2="90" y1="75" y2="75" stroke="#1f6f66" stroke-width="2" opacity="0.7"/><line x1="10" x2="90" y1="84.57" y2="84.57" stroke="#1f6f66" stroke-width="2" opacity="0.7"/><line x1="10" x2="90" y1="94.14" y2="94.14" stroke="#1f6f66" stroke-width="2" opacity="0.7"/><line x1="10" x2="90" y1="103.71" y2="103.71" stroke="#1f6f66" stroke-width="2" opacity="0.7"/><line x1="10" x2="90" y1="113.29" y2="113.29" stroke="#1f6f66" stroke-width="2" opacity="0.7"/><line x1="10" x2="90" y1="122.86" y2="122.86" stroke="#1f6f66" stroke-width="2" opacity="0.7"/><line x1="10" x2="90" y1="132.43" y2="132.43" stroke="#1f6f66" stroke-width="2" opacity="0.7"/><line x1="10" x2="90" y1="142" y2="142" stroke="#1f6f66" stroke-width="2" opacity="0.7"/><line x1="4" x2="96" y1="75" y2="75" stroke="#17544d" stroke-width="1.5" stroke-dasharray="3 2"/></svg><div class="blabel"></div><div class="bpage">Page 502 &middot; Al-Ahqaf</div></div></div>
+  </div>
+
   <h2>What would change this answer?</h2>
   <ul>
     <li>What the printed mus'haf itself says. The Madani print names the juz in the running head of every page, and on these four pages it must have picked one; the owner has a physical copy, and nobody has yet turned to page 62 and looked. Whatever it says is the convention a hafiz already carries.</li>
@@ -168,6 +229,114 @@
   </ul>
 
   <p class="foot">Built from the vendored print's page-of-every-verse table, the juz table, and the bar's own stylesheet; every number above is recomputed when the page is rebuilt. Nothing on it is scripture — the bar is chrome, and it is drawn in the app's English mode.</p>
+  <script>
+(function(){
+  var LIVE = {"total":604,"radius":3,"startPage":60,"juzStarts":[1,22,42,62,82,102,121,142,162,182,201,222,242,262,282,302,322,342,362,382,402,422,442,462,482,502,522,542,562,582],"emphasis":{"near":28,"peak":2.4}};
+  function resolveMarkOnly(asked, _ctx) {
+    return { page: asked, pulled: false, juz: null };
+}
+  function resolvePullNearby(asked, ctx) {
+    let best = -1;
+    let bestDist = Infinity;
+    let bestJuz = null;
+    for (let j = 0; j < ctx.juzStarts.length; j++) {
+        const start = ctx.juzStarts[j];
+        if (start === null || start === undefined)
+            continue;
+        const dist = Math.abs(start - asked);
+        if (dist <= ctx.radius && dist < bestDist) {
+            best = start;
+            bestDist = dist;
+            bestJuz = j + 1;
+        }
+    }
+    if (best < 0)
+        return { page: asked, pulled: false, juz: null };
+    return { page: best, pulled: true, juz: bestJuz };
+}
+  function resolveTapButton(asked, _ctx) {
+    return { page: asked, pulled: false, juz: null };
+}
+  function markerEmphasis(distPx, near, peak) {
+    if (near <= 0 || !(distPx < near))
+        return 1;
+    const t = 1 - distPx / near;
+    return 1 + (peak - 1) * t * t;
+}
+  function labelBeginsHere(ctx) {
+    const j = ctx.beginsHere === null ? ctx.running : ctx.beginsHere;
+    return { text: String(j), juz: [j] };
+}
+  function labelRunning(ctx) {
+    return { text: String(ctx.running), juz: [ctx.running] };
+}
+  function labelBoth(ctx) {
+    if (ctx.beginsHere !== null && ctx.beginsHere !== ctx.running) {
+        return { text: ctx.running + " → " + ctx.beginsHere, juz: [ctx.running, ctx.beginsHere] };
+    }
+    return { text: String(ctx.running), juz: [ctx.running] };
+}
+  var DETENTS = { A:{resolve:resolveMarkOnly}, B:{resolve:resolvePullNearby}, C:{resolve:resolveTapButton} };
+  var RULES = { A:labelBeginsHere, B:labelRunning, C:labelBoth };
+  var JS = LIVE.juzStarts, TOTAL = LIVE.total, RADIUS = LIVE.radius;
+  var ARR = '\u2192', DOT = '\u00b7';
+  function juzAt(p){ var j=1; for(var i=0;i<JS.length;i++){ if(JS[i]<=p) j=i+1; } return j; }
+  var stage=document.getElementById('detent-stage');
+  if(stage){
+    var reachEl=document.getElementById('detent-reach');
+    var readout=document.getElementById('detent-readout');
+    var rule='A', page=LIVE.startPage, dragging=false;
+    var PAD=20;
+    function geom(){ var w=stage.clientWidth; return {right:w-PAD, travel:(w-PAD)-PAD}; }
+    function xForPage(p){ var g=geom(); return g.right-((p-1)/(TOTAL-1))*g.travel; }
+    function pageForX(x){ var g=geom(); var f=(g.right-x)/g.travel; if(f<0)f=0; if(f>1)f=1; return 1+Math.round(f*(TOTAL-1)); }
+    var marks=JS.map(function(pg,i){ var m=document.createElement('div'); m.className='mark'; m.setAttribute('title','Juz '+(i+1)+', page '+pg); stage.appendChild(m); m.addEventListener('click', function(){ if(rule!=='C')return; settleTo(pg, 'Tapped juz '+(i+1)+' '+ARR+' opens at page '+pg+'.'); }); return m; });
+    var handle=document.createElement('div'); handle.className='handle'; handle.setAttribute('role','slider'); handle.setAttribute('tabindex','0'); handle.setAttribute('aria-label','Page handle'); stage.appendChild(handle);
+    var bubble=document.createElement('div'); bubble.className='bubble'; stage.appendChild(bubble);
+    function nearestInReach(p){ var best=-1,bd=1e9,bj=-1; for(var i=0;i<JS.length;i++){ var d=Math.abs(JS[i]-p); if(d<=RADIUS && d<bd){bd=d;best=JS[i];bj=i+1;} } return best<0?null:{page:best,juz:bj}; }
+    var EMPH = LIVE.emphasis || { near: 0, peak: 1 };
+    function scaleMark(m, sc){ m.style.transform = 'translateX(-50%) scale(' + sc + ')'; }
+    function resetEmphasis(){ for(var i=0;i<marks.length;i++){ scaleMark(marks[i], 1); } }
+    // C's refinement: a marker grows as the pointer nears it — but only while hovering,
+    // never during a drag, so it is easy to hit yet never in the way of the drag.
+    function applyEmphasis(clientX){
+      if(rule!=='C' || dragging){ resetEmphasis(); return; }
+      var r=stage.getBoundingClientRect(), px=clientX-r.left;
+      for(var i=0;i<marks.length;i++){ scaleMark(marks[i], markerEmphasis(Math.abs(xForPage(JS[i])-px), EMPH.near, EMPH.peak)); }
+    }
+    function place(preview){
+      for(var i=0;i<marks.length;i++){ var m=marks[i]; m.style.left=xForPage(JS[i])+'px'; m.classList.toggle('tappable', rule==='C'); m.style.pointerEvents = rule==='C' ? 'auto':'none'; m.classList.remove('hot'); scaleMark(m, 1); }
+      handle.style.left=xForPage(page)+'px';
+      bubble.style.left=xForPage(page)+'px';
+      handle.setAttribute('aria-valuenow', page);
+      var text='Page '+page+' '+DOT+' Juz '+juzAt(page);
+      reachEl.style.display='none';
+      if(rule==='B'){ var near=nearestInReach(page); if(near){ var a=xForPage(Math.min(TOTAL,near.page+RADIUS)); var b=xForPage(Math.max(1,near.page-RADIUS)); reachEl.style.left=Math.min(a,b)+'px'; reachEl.style.width=Math.abs(b-a)+'px'; reachEl.style.display='block'; marks[near.juz-1].classList.add('hot'); if(preview) text=ARR+' Juz '+near.juz+' begins on page '+near.page; } }
+      bubble.textContent=text;
+    }
+    function settleTo(target, msg){ handle.classList.add('settle'); page=target; place(false); if(msg) readout.textContent=msg; setTimeout(function(){ handle.classList.remove('settle'); }, 240); }
+    function onDown(e){ dragging=true; handle.classList.remove('settle'); resetEmphasis(); for(var i=0;i<marks.length;i++){ marks[i].style.pointerEvents='none'; } if(handle.setPointerCapture){ try{ handle.setPointerCapture(e.pointerId); }catch(_){} } e.preventDefault(); }
+    function onMove(e){ if(!dragging)return; var r=stage.getBoundingClientRect(); page=pageForX(e.clientX-r.left); place(true); }
+    function onUp(){ if(!dragging)return; dragging=false; var asked=page; var landing=DETENTS[rule].resolve(asked,{total:TOTAL,radius:RADIUS,juzStarts:JS}); if(landing.pulled){ settleTo(landing.page, 'Released at page '+asked+' '+ARR+' pulled onto page '+landing.page+', where juz '+landing.juz+' begins.'); } else { page=landing.page; place(false); readout.textContent='Released at page '+asked+' '+ARR+' stayed on page '+landing.page+'.'; } }
+    handle.addEventListener('pointerdown', onDown);
+    window.addEventListener('pointermove', onMove);
+    window.addEventListener('pointerup', onUp);
+    handle.addEventListener('keydown', function(e){ var d=0; if(e.key==='ArrowLeft')d=1; else if(e.key==='ArrowRight')d=-1; else return; e.preventDefault(); page=Math.max(1,Math.min(TOTAL,page+d)); place(false); });
+    var segBtns=[].slice.call(document.querySelectorAll('#live-detents .seg button'));
+    segBtns.forEach(function(btn){ btn.addEventListener('click', function(){ rule=btn.getAttribute('data-rule'); segBtns.forEach(function(b){ b.setAttribute('aria-pressed', b===btn?'true':'false'); }); readout.textContent = rule==='C' ? 'Move toward a marker: it grows so it is easy to hit. Tap it to open its juz; a drag still lands under your thumb.' : ''; place(false); }); });
+    stage.addEventListener('pointermove', function(e){ if(!dragging) applyEmphasis(e.clientX); });
+    stage.addEventListener('pointerleave', resetEmphasis);
+    window.addEventListener('resize', function(){ place(false); });
+    place(false);
+  }
+  var brule='A';
+  var bcards=[].slice.call(document.querySelectorAll('#boundset .bcard'));
+  function paintB(){ bcards.forEach(function(c){ var ctx={beginsHere:Number(c.getAttribute('data-begins')), running:Number(c.getAttribute('data-running'))}; var lab=RULES[brule](ctx); c.querySelector('.blabel').textContent='Juz '+lab.text; }); }
+  var bsegs=[].slice.call(document.querySelectorAll('#live-boundary .seg button'));
+  bsegs.forEach(function(btn){ btn.addEventListener('click', function(){ brule=btn.getAttribute('data-brule'); bsegs.forEach(function(b){ b.setAttribute('aria-pressed', b===btn?'true':'false'); }); paintB(); }); });
+  paintB();
+})();
+</script>
 </main>
 </body>
 </html>

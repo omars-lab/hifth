@@ -41,6 +41,19 @@ const PAGE = join(ROOT, "docs/design/page-bar-options.html");
 // ------------------------------------------------------------------- the data
 
 const { JUZ_STARTS, AYAH_COUNTS } = await import(CORE);
+// The felt/seen options, as the real interchangeable components they are: the
+// same compiled functions the app and the unit tests use, inlined into the live
+// section below via .toString() so the reader decides by doing, not by reading.
+const {
+  resolveMarkOnly,
+  resolvePullNearby,
+  resolveTapButton,
+  markerEmphasis,
+  tapButtonDetent,
+  labelBeginsHere,
+  labelRunning,
+  labelBoth,
+} = await import(CORE);
 const manifest = JSON.parse(readFileSync(MANIFEST, "utf8"));
 const ayahPages = manifest.ayahPages;
 const TOTAL = Math.max(...ayahPages);
@@ -263,6 +276,121 @@ function render() {
   const fingerPagesDesktop = Math.round(fingerPx / d.perPage);
   const reach = 3;
 
+  // -------------------------------------------------- the live, felt options
+  // Everything the in-page script needs, derived — not typed in.
+  const liveData = {
+    total: TOTAL,
+    radius: reach,
+    startPage: releaseAt,
+    juzStarts: JUZ.map((j) => j.page),
+    emphasis: tapButtonDetent.emphasis,
+  };
+
+  const liveDetents = `
+  <div class="live" id="live-detents">
+    <h3>Try it &mdash; let go near a marker</h3>
+    <p class="hint">Drag the page handle and let go. Switch the rule and feel the difference: <b>A</b> leaves you exactly where your thumb is; <b>B</b> pulls you onto the nearest juz when you release within ${reach} pages of it, and tells you before you let go; <b>C</b> leaves the drag alone but makes each marker a button that <em>grows as your pointer nears it</em>, so it is easy to hit yet never in the way of a drag. This is the real code &mdash; the rule you pick here is the one that would ship.</p>
+    <div class="seg" role="group" aria-label="What a marker does">
+      <button data-rule="A" aria-pressed="true">A &middot; marker only marks</button>
+      <button data-rule="B" aria-pressed="false">B &middot; marker pulls</button>
+      <button data-rule="C" aria-pressed="false">C &middot; marker is a button</button>
+    </div>
+    <div class="stage" id="detent-stage" aria-hidden="true">
+      <div class="reach" id="detent-reach"></div>
+      <div class="track"></div>
+    </div>
+    <p class="readout" id="detent-readout"></p>
+  </div>`;
+
+  const boundCards = BOUNDARY.map(
+    (j) =>
+      `<div class="bcard" data-running="${j.juz - 1}" data-begins="${j.juz}">${boundaryPage(j)}<div class="blabel"></div><div class="bpage">Page ${j.page} &middot; ${esc(name(j.surah))}</div></div>`,
+  ).join("");
+
+  const liveBoundary = `
+  <div class="live" id="live-boundary">
+    <h3>Try it &mdash; switch the rule, watch the four pages</h3>
+    <p class="hint">These are the four pages where a juz begins partway down. Switch the rule and watch each page's label: <b>A</b> names the juz that opens on the page; <b>B</b> names the juz already running onto it; <b>C</b> shows both. This is the real code &mdash; the rule you pick is the one the bar would print.</p>
+    <div class="seg" role="group" aria-label="Which juz a boundary page wears">
+      <button data-brule="A" aria-pressed="true">A &middot; begins here</button>
+      <button data-brule="B" aria-pressed="false">B &middot; already running</button>
+      <button data-brule="C" aria-pressed="false">C &middot; both</button>
+    </div>
+    <div class="boundset" id="boundset">${boundCards}</div>
+  </div>`;
+
+  const liveScript = `<script>
+(function(){
+  var LIVE = ${JSON.stringify(liveData)};
+  ${resolveMarkOnly.toString()}
+  ${resolvePullNearby.toString()}
+  ${resolveTapButton.toString()}
+  ${markerEmphasis.toString()}
+  ${labelBeginsHere.toString()}
+  ${labelRunning.toString()}
+  ${labelBoth.toString()}
+  var DETENTS = { A:{resolve:resolveMarkOnly}, B:{resolve:resolvePullNearby}, C:{resolve:resolveTapButton} };
+  var RULES = { A:labelBeginsHere, B:labelRunning, C:labelBoth };
+  var JS = LIVE.juzStarts, TOTAL = LIVE.total, RADIUS = LIVE.radius;
+  var ARR = '\\u2192', DOT = '\\u00b7';
+  function juzAt(p){ var j=1; for(var i=0;i<JS.length;i++){ if(JS[i]<=p) j=i+1; } return j; }
+  var stage=document.getElementById('detent-stage');
+  if(stage){
+    var reachEl=document.getElementById('detent-reach');
+    var readout=document.getElementById('detent-readout');
+    var rule='A', page=LIVE.startPage, dragging=false;
+    var PAD=20;
+    function geom(){ var w=stage.clientWidth; return {right:w-PAD, travel:(w-PAD)-PAD}; }
+    function xForPage(p){ var g=geom(); return g.right-((p-1)/(TOTAL-1))*g.travel; }
+    function pageForX(x){ var g=geom(); var f=(g.right-x)/g.travel; if(f<0)f=0; if(f>1)f=1; return 1+Math.round(f*(TOTAL-1)); }
+    var marks=JS.map(function(pg,i){ var m=document.createElement('div'); m.className='mark'; m.setAttribute('title','Juz '+(i+1)+', page '+pg); stage.appendChild(m); m.addEventListener('click', function(){ if(rule!=='C')return; settleTo(pg, 'Tapped juz '+(i+1)+' '+ARR+' opens at page '+pg+'.'); }); return m; });
+    var handle=document.createElement('div'); handle.className='handle'; handle.setAttribute('role','slider'); handle.setAttribute('tabindex','0'); handle.setAttribute('aria-label','Page handle'); stage.appendChild(handle);
+    var bubble=document.createElement('div'); bubble.className='bubble'; stage.appendChild(bubble);
+    function nearestInReach(p){ var best=-1,bd=1e9,bj=-1; for(var i=0;i<JS.length;i++){ var d=Math.abs(JS[i]-p); if(d<=RADIUS && d<bd){bd=d;best=JS[i];bj=i+1;} } return best<0?null:{page:best,juz:bj}; }
+    var EMPH = LIVE.emphasis || { near: 0, peak: 1 };
+    function scaleMark(m, sc){ m.style.transform = 'translateX(-50%) scale(' + sc + ')'; }
+    function resetEmphasis(){ for(var i=0;i<marks.length;i++){ scaleMark(marks[i], 1); } }
+    // C's refinement: a marker grows as the pointer nears it — but only while hovering,
+    // never during a drag, so it is easy to hit yet never in the way of the drag.
+    function applyEmphasis(clientX){
+      if(rule!=='C' || dragging){ resetEmphasis(); return; }
+      var r=stage.getBoundingClientRect(), px=clientX-r.left;
+      for(var i=0;i<marks.length;i++){ scaleMark(marks[i], markerEmphasis(Math.abs(xForPage(JS[i])-px), EMPH.near, EMPH.peak)); }
+    }
+    function place(preview){
+      for(var i=0;i<marks.length;i++){ var m=marks[i]; m.style.left=xForPage(JS[i])+'px'; m.classList.toggle('tappable', rule==='C'); m.style.pointerEvents = rule==='C' ? 'auto':'none'; m.classList.remove('hot'); scaleMark(m, 1); }
+      handle.style.left=xForPage(page)+'px';
+      bubble.style.left=xForPage(page)+'px';
+      handle.setAttribute('aria-valuenow', page);
+      var text='Page '+page+' '+DOT+' Juz '+juzAt(page);
+      reachEl.style.display='none';
+      if(rule==='B'){ var near=nearestInReach(page); if(near){ var a=xForPage(Math.min(TOTAL,near.page+RADIUS)); var b=xForPage(Math.max(1,near.page-RADIUS)); reachEl.style.left=Math.min(a,b)+'px'; reachEl.style.width=Math.abs(b-a)+'px'; reachEl.style.display='block'; marks[near.juz-1].classList.add('hot'); if(preview) text=ARR+' Juz '+near.juz+' begins on page '+near.page; } }
+      bubble.textContent=text;
+    }
+    function settleTo(target, msg){ handle.classList.add('settle'); page=target; place(false); if(msg) readout.textContent=msg; setTimeout(function(){ handle.classList.remove('settle'); }, 240); }
+    function onDown(e){ dragging=true; handle.classList.remove('settle'); resetEmphasis(); for(var i=0;i<marks.length;i++){ marks[i].style.pointerEvents='none'; } if(handle.setPointerCapture){ try{ handle.setPointerCapture(e.pointerId); }catch(_){} } e.preventDefault(); }
+    function onMove(e){ if(!dragging)return; var r=stage.getBoundingClientRect(); page=pageForX(e.clientX-r.left); place(true); }
+    function onUp(){ if(!dragging)return; dragging=false; var asked=page; var landing=DETENTS[rule].resolve(asked,{total:TOTAL,radius:RADIUS,juzStarts:JS}); if(landing.pulled){ settleTo(landing.page, 'Released at page '+asked+' '+ARR+' pulled onto page '+landing.page+', where juz '+landing.juz+' begins.'); } else { page=landing.page; place(false); readout.textContent='Released at page '+asked+' '+ARR+' stayed on page '+landing.page+'.'; } }
+    handle.addEventListener('pointerdown', onDown);
+    window.addEventListener('pointermove', onMove);
+    window.addEventListener('pointerup', onUp);
+    handle.addEventListener('keydown', function(e){ var d=0; if(e.key==='ArrowLeft')d=1; else if(e.key==='ArrowRight')d=-1; else return; e.preventDefault(); page=Math.max(1,Math.min(TOTAL,page+d)); place(false); });
+    var segBtns=[].slice.call(document.querySelectorAll('#live-detents .seg button'));
+    segBtns.forEach(function(btn){ btn.addEventListener('click', function(){ rule=btn.getAttribute('data-rule'); segBtns.forEach(function(b){ b.setAttribute('aria-pressed', b===btn?'true':'false'); }); readout.textContent = rule==='C' ? 'Move toward a marker: it grows so it is easy to hit. Tap it to open its juz; a drag still lands under your thumb.' : ''; place(false); }); });
+    stage.addEventListener('pointermove', function(e){ if(!dragging) applyEmphasis(e.clientX); });
+    stage.addEventListener('pointerleave', resetEmphasis);
+    window.addEventListener('resize', function(){ place(false); });
+    place(false);
+  }
+  var brule='A';
+  var bcards=[].slice.call(document.querySelectorAll('#boundset .bcard'));
+  function paintB(){ bcards.forEach(function(c){ var ctx={beginsHere:Number(c.getAttribute('data-begins')), running:Number(c.getAttribute('data-running'))}; var lab=RULES[brule](ctx); c.querySelector('.blabel').textContent='Juz '+lab.text; }); }
+  var bsegs=[].slice.call(document.querySelectorAll('#live-boundary .seg button'));
+  bsegs.forEach(function(btn){ btn.addEventListener('click', function(){ brule=btn.getAttribute('data-brule'); bsegs.forEach(function(b){ b.setAttribute('aria-pressed', b===btn?'true':'false'); }); paintB(); }); });
+  paintB();
+})();
+</` + `script>`;
+
   const q1Options = [
     {
       key: "A",
@@ -309,9 +437,9 @@ function render() {
       title: "A marker is a button; the drag is unchanged",
       gist: "Tap or click a marker and the book opens at that juz, with the announcement the wheel already makes. A drag released beside a marker still lands where the thumb is.",
       takes:
-        "Thirty small buttons on the rail, each named, and the marker's hit area widened to the touch minimum — which on a phone overlaps its neighbours' drag space.",
-      gets: "An exact road to a juz that is visible on the bar, without changing what a release means.",
-      costs: `A ${G.detentW} px mark with a ${G.touch} px hit area, thirty times, on a track where a page is ${fx(p.perPage)} px: thirty touch targets want ${30 * G.touch} px of a ${fx(p.track)} px phone track, ${((30 * G.touch) / p.track).toFixed(1)} times what there is, so on a phone every drag starts on a button. The bar already has a keyboard road and the map already has a cell per juz.`,
+        "Thirty small buttons on the rail, each named. At rest each is only a few pixels wide, clear of its neighbours' drag space; it grows toward the pointer only as you reach for it, so it is easy to tap without ever widening into the drag.",
+      gets: "An exact road to a juz, visible on the bar, without changing what a release means — and a target easy to hit, because it grows under the pointer as you approach.",
+      costs: `The plain version's cost is the phone: a fixed ${G.touch} px hit area, thirty times, wants ${30 * G.touch} px of a ${fx(p.track)} px track — ${((30 * G.touch) / p.track).toFixed(1)} times the room — so every drag would start on a button. The chosen refinement answers exactly that: a marker is ${G.detentW} px at rest, and grows toward the pointer only while it hovers near, never during a drag.`,
       draw: (w) =>
         bar({
           width: w,
@@ -442,13 +570,44 @@ function render() {
   th{font-family:"SF Mono",ui-monospace,Menlo,monospace; font-size:.68rem; letter-spacing:.08em; text-transform:uppercase; color:var(--ink-2)}
   .num{font-family:"SF Mono",ui-monospace,Menlo,monospace; font-size:.88rem}
   .foot{margin-top:3rem; padding-top:1.2rem; border-top:1px solid var(--line); font-size:.82rem; color:var(--ink-2); max-width:68ch}
+
+  /* the live sections — the felt/seen options mounted as real, draggable code */
+  .live{border:1px solid var(--line); border-radius:16px; background:var(--panel); padding:1.2rem 1.3rem 1.5rem; margin-top:1.4rem}
+  .live > h3{margin:.1rem 0 .3rem; font-size:1.15rem}
+  .live .hint{font-size:.94rem; color:var(--ink-2); margin:.2rem 0 1rem; max-width:68ch}
+  .live .hint b{color:var(--ink); font-weight:600}
+  .seg{display:inline-flex; flex-wrap:wrap; border:1px solid var(--line); border-radius:999px; overflow:hidden; margin-bottom:1rem}
+  .seg button{appearance:none; border:0; background:transparent; color:var(--ink-2); font:inherit; font-size:.9rem; padding:.45rem 1rem; cursor:pointer; border-inline-start:1px solid var(--line)}
+  .seg button:first-child{border-inline-start:0}
+  .seg button[aria-pressed="true"]{background:var(--accent); color:#fff}
+  .stage{position:relative; height:118px; user-select:none; touch-action:none}
+  .track{position:absolute; left:20px; right:20px; top:70px; height:6px; border-radius:3px; background:var(--ink-2); opacity:.45}
+  .reach{position:absolute; top:60px; height:26px; border-radius:4px; background:var(--accent-soft); pointer-events:none; display:none}
+  .mark{position:absolute; top:60px; width:3px; height:26px; border-radius:1px; background:var(--accent); transform:translateX(-50%); transform-origin:50% 100%; transition:transform .1s ease-out}
+  .mark.tappable{cursor:pointer; width:7px; border-radius:2px}
+  .mark.tappable:hover{background:var(--lean)}
+  .mark.hot{background:var(--lean); box-shadow:0 0 0 3px var(--lean-soft)}
+  .handle{position:absolute; top:55px; width:30px; height:36px; margin-left:-15px; border-radius:7px; background:var(--panel); border:1.5px solid var(--accent); box-shadow:0 1px 3px rgba(0,0,0,.18); cursor:grab; touch-action:none}
+  .handle:active{cursor:grabbing}
+  .handle:focus-visible{outline:2px solid var(--lean); outline-offset:2px}
+  .handle.settle{transition:left .2s cubic-bezier(.2,.9,.3,1)}
+  .bubble{position:absolute; top:6px; transform:translateX(-50%); background:var(--ink); color:var(--panel); border-radius:6px; padding:.32rem .6rem; font-size:.82rem; white-space:nowrap; pointer-events:none}
+  .readout{font-size:.92rem; color:var(--ink-2); margin-top:.5rem; min-height:1.35em}
+  .decided{border:1px solid var(--accent); border-left:4px solid var(--accent); border-radius:10px; background:var(--accent-soft); padding:.75rem 1rem; margin:.4rem 0 1rem; font-size:.96rem; color:var(--ink)}
+  .decided b{color:var(--ink)}
+  .decided .who{color:var(--ink-2); font-size:.88rem}
+  .boundset{display:flex; gap:1rem; flex-wrap:wrap; margin-top:.4rem}
+  .bcard{border:1px solid var(--line-soft); border-radius:12px; padding:.8rem; text-align:center; background:var(--bg)}
+  .bcard .blabel{margin-top:.55rem; background:var(--ink); color:var(--panel); border-radius:6px; padding:.3rem .55rem; font-size:.82rem; display:inline-block}
+  .bcard .bpage{font-size:.76rem; color:var(--ink-2); margin-top:.35rem}
+  @media (prefers-reduced-motion: reduce){ .handle.settle{transition:none} .mark{transition:none} }
 </style>
 </head>
 <body>
 <main class="wrap">
   <p class="eyebrow">Two decisions, still open</p>
   <h1>Two questions about the page bar</h1>
-  <p class="lede">The bar along the bottom of the app is how a reader scrubs through the whole printed book. It grew thirty green marks, one where each juz begins, and a bubble that names the juz and the surah under the thumb while you drag. Two things about those marks were built one way without anyone choosing, and this page draws the choices at the size the bar is really used.</p>
+  <p class="lede">The bar along the bottom of the app is how a reader scrubs through the whole printed book. It grew thirty green marks, one where each juz begins, and a bubble that names the juz and the surah under the thumb while you drag. Two things about those marks were built one way without anyone choosing, and this page draws the choices at the size the bar is really used &mdash; and lets you <em>try</em> each one, live, running the same code that would ship, so the choice is made by hand rather than imagined.</p>
 
   <h2>A few words, defined once</h2>
   <dl class="gloss">
@@ -470,11 +629,14 @@ function render() {
   <p>So a drag cannot be aimed at one page on either device, and on a phone it cannot be aimed at one juz's neighbourhood either. That number is most of the argument on this page.</p>
 
   <h2 class="q">1 · When a reader lets go near a marker, should the bar pull the page onto it?</h2>
+  <div class="decided"><b>Decided &mdash; C: a marker is a button, and it grows as you reach for it.</b> A release is left exactly under the thumb, and each marker is a button you can tap to open its juz. So it is easy to hit without ever eating the drag, the button stays small at rest and grows toward the pointer only while it hovers near &mdash; try it in the board below. <span class="who">Chosen by the owner on 2 September 2026. A and B stay drawn here because they are the reason C was a choice.</span></div>
   <p>Today it does not. The markers are drawn under the thumb and cannot be touched; a release lands on the page the thumb is over, and the bubble says which. There are three exact roads to a juz that do not involve the bar: on a laptop, the wheel with Shift held jumps a juz; the revision map has a cell per juz that opens it; and the jump box takes "juz 9". The question is whether the drag should be a fourth.</p>
   <p>Each option is drawn at the laptop width and the phone width, released at page ${releaseAt} — two pages before juz ${j4.juz} begins on page ${j4.page}.</p>
   <div class="options">
     ${q1Options.map((o) => opt(o, `<div class="phones">${o.draw(DESKTOP)}${o.draw(PHONE)}</div>`)).join("")}
   </div>
+
+  ${liveDetents}
 
   <h2>What would change this answer?</h2>
   <ul>
@@ -484,6 +646,7 @@ function render() {
   </ul>
 
   <h2 class="q">2 · When a juz begins partway down a page, which juz is that page in?</h2>
+  <div class="decided"><b>Decided &mdash; C: it is in both.</b> A page split by a juz seam carries the end of one juz and the start of the next, so it belongs to both and is named for both &mdash; "juz 3 &rarr; 4" &mdash; rather than being forced to pick one. <span class="who">Chosen by the owner on 2 September 2026. A and B stay drawn here because they are the reason C was a choice.</span></div>
   <p>Twenty-six of the thirty juz begin at the top of a page. Four begin partway down one, so that page carries the end of one juz and the start of the next:</p>
   ${boundaryTable}
   <p>The app answers this two ways today. The bar's bubble says the page is the juz that <em>begins</em> on it, because that is the juz whose marker sits on that page. The offline-pack shelf and the wheel's "no juz that way" message say it is the juz that was <em>already running</em>, the lowest juz with any verse on the page. On ${TOTAL - BOUNDARY.length} pages the two agree; on these ${BOUNDARY.length} they do not.</p>
@@ -491,6 +654,8 @@ function render() {
   <div class="options">
     ${q2Options.map((o) => opt(o, bar({ width: DESKTOP, page: b62.page, bubble: o.bubble(b62), label: `Page ${b62.page} under the thumb` }))).join("")}
   </div>
+
+  ${liveBoundary}
 
   <h2>What would change this answer?</h2>
   <ul>
@@ -506,6 +671,7 @@ function render() {
   </ul>
 
   <p class="foot">Built from the vendored print's page-of-every-verse table, the juz table, and the bar's own stylesheet; every number above is recomputed when the page is rebuilt. Nothing on it is scripture — the bar is chrome, and it is drawn in the app's English mode.</p>
+  ${liveScript}
 </main>
 </body>
 </html>

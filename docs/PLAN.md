@@ -1033,6 +1033,31 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     348 MB fetch first, which nobody starts without asking. Until then the gate holds the
     count at 2 and the two tails ship as the print drew them.
 
+18. **The page-bar's two questions are answered, and the app does not yet do what they say.**
+    Both were settled by the owner on 2026-09-02, and both chose the same option. A juz marker
+    is a **button**: a tap on it jumps to that juz, and the page-drag is untouched by it — with
+    one refinement the owner asked for, that a marker **grows as the pointer nears it**, small
+    and clear of its neighbours at rest and up to about two-and-a-half times its size under the
+    thumb, so it is easy to hit yet can never eat the drag; it never grows while a drag is under
+    way. And a page that carries a juz **seam belongs to both juz** — on the four such pages
+    (62, 121, 201, 502) the bar names the juz before the seam *and* the juz after it, rather
+    than picking one. Both winners are already built as the interchangeable component the
+    live-options tenet asks for — the growth is a pure, unit-tested function and the tap-button
+    strategy carries its reach and peak — and both are mounted live on the decision page
+    (`docs/design/page-bar-options.html`), which now also records the two answers in its own
+    face. What is left is the graduation the tenet promises: wire the winning strategy and the
+    growth into the app's own bar, teach the bar to name both juz on a seam page, and **delete
+    the two losing strategies** and their live-page wiring, so nothing that lost the choice is
+    left to rot. **What would answer it:** the winning strategy adopted by the bar unchanged
+    (a pointer device gets the grow-on-approach; a touch device, which has no hover, gets the
+    plain button); the seam pages naming both juz in the bubble and the pack shelf; the losers
+    gone from the core module and the builder; and a phone-bar layout that can carry a two-juz
+    seam label where the bar is 0.4 px a page and there is no pointer to grow a marker for —
+    the one part the desktop live page cannot prove. **Held, 2026-09-02:** the app bar
+    (`PageSlider`) carries another session's uncommitted work, so the graduation waits for that
+    to land rather than two sessions editing one file. Blocks nothing shipped; the bar works
+    today, it just predates the choice.
+
 **The half of these a machine cannot run now has a register — and a runbook.** Follow-ups
 ① (the phone), ② (the browser glance) and ④ (VoiceOver/TalkBack) still wait on a human, and
 prose cannot answer "is that still true, on what device, and when?" — ⑤ (does the source

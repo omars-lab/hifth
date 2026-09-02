@@ -116,7 +116,7 @@ Someone memorising the Qur'an, holding a phone, usually mid-revision. Every gest
 | happens in | [`packages/core/src/gestures.ts:204`](../packages/core/src/gestures.ts#L204) — `heldIntent` |
 | happens in | [`apps/web/src/components/PageStage.tsx:1740`](../apps/web/src/components/PageStage.tsx#L1740) — `applyWords` |
 | happens in | [`packages/core/src/adjacency.ts:384`](../packages/core/src/adjacency.ts#L384) — `refineByWords` |
-| happens in | [`apps/web/src/App.tsx:964`](../apps/web/src/App.tsx#L964) — `const handleSelectWords` |
+| happens in | [`apps/web/src/App.tsx:965`](../apps/web/src/App.tsx#L965) — `const handleSelectWords` |
 | proven by | [`apps/web/e2e/word.spec.ts:109`](../apps/web/e2e/word.spec.ts#L109) — “a hold inside the selected ayah drops to words; a drag extends the run” |
 | proven by | [`apps/web/e2e/word.spec.ts:151`](../apps/web/e2e/word.spec.ts#L151) — “Escape climbs back to the whole ayah, not out of the selection” |
 | proven by | [`apps/web/e2e/word.spec.ts:177`](../apps/web/e2e/word.spec.ts#L177) — “Enter again descends to words; ← carries the run and Shift+← grows it” |
@@ -146,7 +146,7 @@ Someone memorising the Qur'an, holding a phone, usually mid-revision. Every gest
 | | |
 |---|---|
 | happens in | [`packages/core/src/adjacency.ts:300`](../packages/core/src/adjacency.ts#L300) — `mergeRangeEdges` |
-| happens in | [`apps/web/src/components/HighlightMenu.tsx:53`](../apps/web/src/components/HighlightMenu.tsx#L53) — `HighlightMenu` |
+| happens in | [`apps/web/src/components/HighlightMenu.tsx:59`](../apps/web/src/components/HighlightMenu.tsx#L59) — `HighlightMenu` |
 | proven by | [`apps/web/e2e/range.spec.ts:25`](../apps/web/e2e/range.spec.ts#L25) — “a range surfaces the merged menu, and the URL keeps the range form” |
 | proven by | [`apps/web/e2e/range.spec.ts:82`](../apps/web/e2e/range.spec.ts#L82) — “a merged row hops from the range member that produced it” |
 
@@ -170,7 +170,7 @@ Someone memorising the Qur'an, holding a phone, usually mid-revision. Every gest
 |---|---|
 | happens in | [`packages/core/src/roots.ts:205`](../packages/core/src/roots.ts#L205) — `class Roots` |
 | happens in | [`packages/core/src/roots.ts:161`](../packages/core/src/roots.ts#L161) — `orderByPageDistance` |
-| happens in | [`apps/web/src/components/RootLens.tsx:112`](../apps/web/src/components/RootLens.tsx#L112) — `RootLens` |
+| happens in | [`apps/web/src/components/RootLens.tsx:118`](../apps/web/src/components/RootLens.tsx#L118) — `RootLens` |
 | proven by | [`packages/core/src/roots.test.ts:154`](../packages/core/src/roots.test.ts#L154) — “orders families nearest page first, then by rarity” |
 | proven by | [`packages/core/src/roots.test.ts:175`](../packages/core/src/roots.test.ts#L175) — “sub-groups the kept hops by lemma, most-used first” |
 

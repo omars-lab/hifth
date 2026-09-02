@@ -1,11 +1,23 @@
 # Two questions about the page bar: does a juz marker pull, and whose juz is a boundary page?
 
-*Status: both open. This record states the questions and draws the options; it does not choose.*
+*Status: both decided — option C in each, chosen by the owner on 2 September 2026. This record states the questions, draws every option, and records the choice. The losing options stay drawn, because they are the reason each choice was a choice, and the reopening test below is what would bring them back.*
 
-**The picture:** <https://blog.bytesofpurpose.com/hifth/docs/design/page-bar-options.html> — `page-bar-options.html`, checked in and rebuilt by
+**The picture — and now a thing you can try:** <https://blog.bytesofpurpose.com/hifth/docs/design/page-bar-options.html> — `page-bar-options.html`, checked in and rebuilt by
 `scripts/build-page-bar-options.mjs` from the vendored print's page-of-every-verse table, the
 juz table and the bar's own stylesheet. The address is the page's own on the app's site, so it
 is public the day the page is merged.
+
+Both of these questions turn on something a still picture cannot hand you — the *snap* when
+you let go of the bar near a marker, and the way a page's label *changes* as you switch the
+rule under it — so the page draws each option and then mounts it **live**: a real handle you
+drag and release to feel the pull, and a rule switch that repaints the four boundary pages as
+you watch. The options are not a mock of the behaviour. Each is a real interchangeable
+component — one function per option, behind a shared interface — kept beside the app's own code
+(the detent strategies and the boundary-juz rules), covered by unit tests, and *inlined into
+the page from the same compiled source the app would run*. So the rule you pick by hand on the
+page is the one that ships: the winner graduates into the bar's release handler and its page
+readout, and the losing components are deleted. This follows the project's standing rule that
+an option whose difference is felt or seen in motion is built, not only drawn.
 
 ## A few words, defined once
 
@@ -46,6 +58,8 @@ page's juz will inherit whichever it copies from. Nothing else is blocked behind
 
 ## When a reader lets go near a marker, should the bar pull the page onto it?
 
+**Decided — C, with a refinement (the owner, 2 September 2026): a marker is a button that grows as you reach for it.** A release is left exactly under the thumb — the drag is not changed at all — and each marker is a button that opens its juz when tapped. The one cost that drew blood in option C below was the phone: thirty fixed 44-pixel targets want five times the room a 262-pixel track has, so every drag would start on a button. The refinement answers exactly that. At rest a marker is a few pixels wide, clear of its neighbours; it grows toward the pointer — up to about two-and-a-half times — only while the pointer hovers near it, and not at all during a drag. So it is easy to hit when you reach for it and never in the way when you do not. The growth is built, not described: it is a measured, unit-tested function mounted live on the page (move toward a marker and watch it swell), and it graduates into the bar as the way a marker sizes itself. The losing A and B stay drawn below.
+
 Today it does not. A release lands on the page under the thumb and the bubble says which;
 the marker is a landmark you steer by, not a magnet that catches you.
 
@@ -84,6 +98,8 @@ above is arithmetic on a 390 px window. A hizb layer on the map, which would mak
 on thirty marks into one on sixty.
 
 ## When a juz begins partway down a page, which juz is that page in?
+
+**Decided — C (the owner, 2 September 2026): a boundary page is in both juz.** A page cut by a juz seam carries the end of one juz above the seam and the start of the next below it, so it is genuinely in both, and the bar names it for both — "juz 3 → 4" — rather than being forced to pick one. This is a page's juz being a range, not a single number, on the four pages where a seam falls. The pack shelf and the wheel still write one juz in their own one-line sentences; naming a page for both is the bar's answer, where the seam is visible. The losing A and B stay drawn below.
 
 Twenty-six juz begin at the top of a page. Four begin partway down one — juz 4 on page 62,
 juz 7 on page 121, juz 11 on page 201, juz 26 on page 502 — so that page carries the end of
@@ -132,8 +148,16 @@ special case into a sixty-page one.
   apart from the grey inventory rail, not for either question here.
 - Which page a juz jump lands on.
 
-## So what is being decided?
+## So what was decided?
 
-Two things, separately: whether letting go near a marker should pull the page onto it (A, B
-or C above), and which juz the bar should call a page that carries a juz seam (A, B or C).
-The second has an answer waiting in a printed copy.
+Both, on 2 September 2026, by the owner, and both to option C:
+
+- Letting go near a marker does **not** pull the page — the drag is unchanged — but each
+  marker is a button that grows as the pointer nears it, so it is easy to tap without ever
+  eating the drag.
+- A page that carries a juz seam is named for **both** juz, because it is genuinely part of
+  each.
+
+What would reopen either is written under each question above: a reader who reaches for the
+bar and misses, a real phone in hand, a hizb layer — and, for the second, what the printed
+mus'haf itself says on page 62, which is still worth checking against.
