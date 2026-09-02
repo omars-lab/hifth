@@ -98,6 +98,69 @@
       ]
     },
     {
+      "id": "tafseer-reading",
+      "question": "Should the app show a tafseer of the selected verse, and where would it sit?",
+      "status": "open",
+      "options": [
+        {
+          "id": "A",
+          "label": "Nothing: the sheet stays as it is"
+        },
+        {
+          "id": "B",
+          "label": "A row in the sheet that opens the tafseer elsewhere"
+        },
+        {
+          "id": "C",
+          "label": "A tafseer section inside the sheet, under the hops"
+        },
+        {
+          "id": "D",
+          "label": "The tafseer takes the facing leaf"
+        }
+      ],
+      "artifact": "https://blog.bytesofpurpose.com/hifth/docs/design/tafseer-options.html",
+      "page": "docs/design/tafseer-options.html",
+      "builtBy": "scripts/build-tafseer-options.mjs",
+      "doc": "docs/decisions/tafseer.md#where-would-a-tafseer-sit-if-anywhere",
+      "decided": null,
+      "by": null,
+      "date": null,
+      "related": [
+        "tafseer-source",
+        "desktop-vs-mobile"
+      ]
+    },
+    {
+      "id": "tafseer-source",
+      "question": "Which tafseer text would the app copy, and how would a reader know what they are reading?",
+      "status": "open",
+      "options": [
+        {
+          "id": "A",
+          "label": "One text, in Arabic: al-Tafsir al-Muyassar, from the Tafsir Center"
+        },
+        {
+          "id": "B",
+          "label": "The same, with a choice of three Arabic texts"
+        },
+        {
+          "id": "C",
+          "label": "Look each verse up live, from the Quran Foundation's service"
+        }
+      ],
+      "artifact": "https://blog.bytesofpurpose.com/hifth/docs/design/tafseer-options.html",
+      "page": "docs/design/tafseer-options.html",
+      "builtBy": "scripts/build-tafseer-options.mjs",
+      "doc": "docs/decisions/tafseer.md#which-text-and-how-would-a-reader-know-what-they-are-reading",
+      "decided": null,
+      "by": null,
+      "date": null,
+      "related": [
+        "tafseer-reading"
+      ]
+    },
+    {
       "id": "boundary-juz",
       "question": "When a juz begins partway down a page, which juz is that page in?",
       "status": "open",
@@ -345,7 +408,8 @@
         "wheel-and-zoom",
         "spread-zoom",
         "juz-detents",
-        "boundary-juz"
+        "boundary-juz",
+        "tafseer-reading"
       ]
     },
     {

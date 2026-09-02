@@ -130,7 +130,12 @@ in three places: this section (the record), the session task list (the working c
   states, or improve the turn inside the fold vocabulary it already has. **Blocked on that
   answer.** Interim: the grab plays the current flip on release.
 - **A tafseer section** inside those options, with sourced text and its provenance checked.
-  After the facing-leaf drawer.
+  **Reopens a v1 non-goal (§10: tafsir reading), so it is a decision before it is code:**
+  `docs/decisions/tafseer.md` puts the two questions — whether and where, then which text
+  and how its provenance is shown — with every option drawn on page 7 at real size
+  (`docs/design/tafseer-options.html`) and the sources found, with licences. Open, for the
+  owner. The only openly licensed reviewed text found is Arabic al-Muyassar (Tafsir
+  Center, CC BY 4.0); every English tafseer found reserves its rights.
 - **Comment-style mistake marking.** Zoom in, click a letter, a harakah or a marker, and
   drop a note anchored to that glyph; colour by kind (a comment, a correction, a note to the
   developers); icons shown only past a zoom threshold; hover reveals the span. A drag across
