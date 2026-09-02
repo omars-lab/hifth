@@ -155,8 +155,11 @@ in three places: this section (the record), the session task list (the working c
   portable annotation file. Sibling to the confusion map's own export decision, and
   conditional on the mistake-marking note layer existing at all.
 - **A bookmark you drop by tapping the fold**, animating downward like a ribbon, and every
-  bookmark action written to a calendar. Needs a decision (where a bookmark is stored, what the
-  animation is) before code.
+  bookmark action written to a calendar. Now drawn as a two-question decision — is a bookmark
+  one ribbon that moves or many the reader drops and lifts, and where is it kept so tapping the
+  fold still means something next week (the address only, the phone's durable store, or a store
+  that can be carried off the phone). The gesture is drawn and not in question; what it persists,
+  and how much, is. Sibling to the notes-export persistence decision.
 - **An activity calendar in the menu bar** — a day's reading, interactions and pages counted —
   and, inside it, **managing bookmarks** (clear a surah's, clear all, with a guard on the
   destructive ones). This is the long-planned revision record reaching the chrome; the shape
