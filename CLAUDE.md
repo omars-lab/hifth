@@ -54,11 +54,13 @@ Adding one:
   pnpm gate:decisions                            it refuses the ways this rots
 ```
 
-An **open** decision must carry two things or the gate fails: an `artifact` — the published
-page anyone can open in a browser — and a `page`, the same thing checked into `docs/`. Both,
-always. A link with no copy dies the day the host does; a copy with no link cannot be sent to
-anybody. Whatever is checked in names the script that rebuilds it, and the record links to
-both. The `decide` skill walks the whole thing.
+An **open** decision must carry two things or the gate fails: an `artifact` — the page's own
+address on the site, which anyone can open in a browser — and a `page`, the same thing
+checked into `docs/`. Both, always, and they must agree: the address is derived from the
+path, so the gate can tell when a row says anything else. A link with no copy dies the day
+the host does; a copy with no link cannot be sent to anybody. Whatever is checked in names
+the script that rebuilds it, and the record links to both. The `decide` skill walks the whole
+thing.
 
 A row also names the decisions that constrain it, in `related` — the one part of a decision
 no single record can hold, because relatedness is a fact about a *pair* and the second half
@@ -69,7 +71,7 @@ is one they will not find from the end they happen to be standing at.
 ### What the gate actually refuses
 
 A question that is not a question · a question written in file names, paths, symbols or
-commands · an artifact link that is not an absolute `https://claude.ai/…` URL · an artifact
+commands · an artifact link that is not the checked-in page's own address on the site · an artifact
 with no checked-in page, or a page with no link · a page nobody can rebuild · a record that
 never links its own picture · an open decision with fewer than two options · a decision
 marked settled that does not say who settled it · a related decision that does not name it
@@ -77,6 +79,21 @@ back · a record in `docs/decisions/` with no row in the index · a stale `READM
 
 It does **not** refuse an open decision. Unanswered questions are the normal state of a live
 project, and a gate that failed for having one would be switched off inside a week.
+
+## Every design is public
+
+The second tenet, and the reason the first one can be held to. A page drawn to decide
+something is served from the app's own site, at the same path it has in this repository, from
+the moment it is merged: `docs/design/page-bar-options.html` in the tree is
+`https://blog.bytesofpurpose.com/hifth/docs/design/page-bar-options.html` on the web, and the
+front door to all of them is `https://blog.bytesofpurpose.com/hifth/docs/`. The build stages
+them and the app's colophon links them. Publishing a design is a merge to main and nothing else.
+
+So **a page that only exists as a link on some other host is not published; it is lost
+slowly.** A copy put elsewhere for a conversation is fine, and `docs/artifacts.json` lists
+those, but the address a record gives a reader is the one on the site, and the decision gate
+refuses any other. Nothing is hidden from the people the app is for: the reasoning is as public
+as the result, and a reader who disagrees with a choice can open the page it was made on.
 
 ## The other registers
 
@@ -106,4 +123,6 @@ This was written after counting. Nine pages had gone out and the tree named five
 four had been drawn in a scratch directory that was later emptied, so a diagnosis, a comparison
 carrying a recommendation, a plan and a finding now exist only as links. That is the failure
 the decision gate already refuses — *a link with no copy dies the day the host does* — reaching
-a page nobody had thought to attach to a decision.
+a page nobody had thought to attach to a decision. Since 2026-09-01 the build serves every
+page under `docs/` from the site, so a merged page cannot leave by that door at all; the
+register is for the copies that still do.

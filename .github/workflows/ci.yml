@@ -194,6 +194,14 @@ jobs:
       - name: Gate — the pages are the pinned print, and all of it is tappable
         run: pnpm gate:pages
 
+      # The pen that draws a selection reads each verse's box as a run of
+      # rectangles. Three of its defects were found by readers one page at a
+      # time; this sweeps all 6,236 boxes with the pen itself and holds the
+      # count it cannot draw as lines, so the next class shows as a number
+      # that moved rather than a screenshot in a message.
+      - name: Gate — every ayah box the pen cannot draw as lines is a known one
+        run: pnpm gate:boxes
+
       # The word boxes are geometry vendored from a second print of the same
       # mus'haf and fitted onto our frame, so a hash alone would not prove much:
       # this re-measures every box against the polygon it claims, with its own
@@ -512,6 +520,10 @@ jobs:
         run: |
           test -s site/index.html || {
             echo "::error::downloaded artifact has no index.html — refusing to publish an empty site"
+            exit 1
+          }
+          test -s site/docs/index.html || {
+            echo "::error::downloaded artifact has no docs/index.html — the design pages did not get staged (scripts/stage-docs.mjs)"
             exit 1
           }
 

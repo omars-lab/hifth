@@ -68,6 +68,66 @@
   ],
   "decisions": [
     {
+      "id": "juz-detents",
+      "question": "When a reader lets go of the page bar near a juz marker, should the bar pull the page onto it?",
+      "status": "open",
+      "options": [
+        {
+          "id": "A",
+          "label": "A marker only marks"
+        },
+        {
+          "id": "B",
+          "label": "A marker pulls, a few pages either side"
+        },
+        {
+          "id": "C",
+          "label": "A marker is a button; the drag is unchanged"
+        }
+      ],
+      "artifact": "https://blog.bytesofpurpose.com/hifth/docs/design/page-bar-options.html",
+      "page": "docs/design/page-bar-options.html",
+      "builtBy": "scripts/build-page-bar-options.mjs",
+      "doc": "docs/decisions/page-bar.md#when-a-reader-lets-go-near-a-marker-should-the-bar-pull-the-page-onto-it",
+      "decided": null,
+      "by": null,
+      "date": null,
+      "related": [
+        "boundary-juz",
+        "desktop-vs-mobile"
+      ]
+    },
+    {
+      "id": "boundary-juz",
+      "question": "When a juz begins partway down a page, which juz is that page in?",
+      "status": "open",
+      "options": [
+        {
+          "id": "A",
+          "label": "The juz that begins on it"
+        },
+        {
+          "id": "B",
+          "label": "The juz that was already running"
+        },
+        {
+          "id": "C",
+          "label": "Both, on those four pages"
+        }
+      ],
+      "artifact": "https://blog.bytesofpurpose.com/hifth/docs/design/page-bar-options.html",
+      "page": "docs/design/page-bar-options.html",
+      "builtBy": "scripts/build-page-bar-options.mjs",
+      "doc": "docs/decisions/page-bar.md#when-a-juz-begins-partway-down-a-page-which-juz-is-that-page-in",
+      "decided": null,
+      "by": null,
+      "date": null,
+      "related": [
+        "juz-detents",
+        "desktop-vs-mobile"
+      ]
+    },
+    {
       "id": "confusion-map-export",
       "question": "Should a reader be able to copy their confusion map off the phone — and if so, by which means?",
       "status": "open",
@@ -85,7 +145,7 @@
           "label": "A cloud-sync switch the reader controls"
         }
       ],
-      "artifact": "https://claude.ai/code/artifact/1d9c4cff-f0a5-4aa3-a70b-2717f0814b1a",
+      "artifact": "https://blog.bytesofpurpose.com/hifth/docs/design/confusion-map-export.html",
       "page": "docs/design/confusion-map-export.html",
       "builtBy": "scripts/build-confusion-export-options.mjs",
       "doc": "docs/decisions/confusion-map-export.md",
@@ -112,7 +172,7 @@
           "label": "Prepare the ground, colour nothing yet"
         }
       ],
-      "artifact": "https://claude.ai/code/artifact/5f230dff-e4e8-40c6-9c4e-888786eeef9b",
+      "artifact": "https://blog.bytesofpurpose.com/hifth/docs/design/mark-granularity.html",
       "page": "docs/design/mark-granularity.html",
       "builtBy": "scripts/build-mark-options.mjs",
       "doc": "docs/decisions/mark-granularity.md",
@@ -156,7 +216,7 @@
           "label": "Put each mark where its own ink is, and line the rest up"
         }
       ],
-      "artifact": "https://claude.ai/code/artifact/7652b2f5-61a1-4072-bfab-ef3b649e55f5",
+      "artifact": "https://blog.bytesofpurpose.com/hifth/docs/design/mark-placement.html",
       "page": "docs/design/mark-placement.html",
       "builtBy": "scripts/build-placement-options.mjs",
       "doc": "docs/design/mark-registration.md",
@@ -188,7 +248,7 @@
           "label": "Publish each sitting as a page, and let it bank each answer to a hosted table"
         }
       ],
-      "artifact": "https://claude.ai/code/artifact/84b4bfe6-f875-4186-9d32-c37f26ad71be",
+      "artifact": "https://blog.bytesofpurpose.com/hifth/docs/design/sitting-hosting.html",
       "page": "docs/design/sitting-hosting.html",
       "builtBy": "scripts/build-sitting-hosting-options.mjs",
       "doc": "docs/decisions/sitting-hosting.md",
@@ -229,7 +289,7 @@
           "label": "Fade the neighbours, mark the shared words green and the differing words yellow"
         }
       ],
-      "artifact": "https://claude.ai/code/artifact/b7be0f22-3ff5-45b7-a5c1-850dd73ef1f1",
+      "artifact": "https://blog.bytesofpurpose.com/hifth/docs/design/comparison-crop.html",
       "page": "docs/design/comparison-crop.html",
       "builtBy": "scripts/build-crop-options.mjs",
       "doc": "docs/decisions/comparison-crop.md",
@@ -264,7 +324,7 @@
           "label": "Offer a few ready-made schemes, no picker"
         }
       ],
-      "artifact": "https://claude.ai/code/artifact/74b37363-d082-45e7-9651-54c47c328844",
+      "artifact": "https://blog.bytesofpurpose.com/hifth/docs/design/tajweed-colours.html",
       "page": "docs/design/tajweed-colours.html",
       "builtBy": "scripts/build-palette-options.mjs",
       "doc": "docs/decisions/tajweed-colours.md",
@@ -283,7 +343,9 @@
       "doc": "docs/decisions/desktop-vs-mobile.md",
       "related": [
         "wheel-and-zoom",
-        "spread-zoom"
+        "spread-zoom",
+        "juz-detents",
+        "boundary-juz"
       ]
     },
     {

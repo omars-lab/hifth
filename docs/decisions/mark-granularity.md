@@ -2,7 +2,7 @@
 
 **Status:** decided — **option B**, by omar on 2026-08-19.
 
-**Picture:** <https://claude.ai/code/artifact/5f230dff-e4e8-40c6-9c4e-888786eeef9b> — three
+**Picture:** <https://blog.bytesofpurpose.com/hifth/docs/design/mark-granularity.html> (an earlier copy on another host: <https://claude.ai/code/artifact/5f230dff-e4e8-40c6-9c4e-888786eeef9b>) — three
 options drawn over a real page of the mus'haf. Checked in as `mark-granularity.html`, rebuilt
 by `node scripts/build-mark-options.mjs`.
 

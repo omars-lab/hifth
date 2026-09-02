@@ -7,7 +7,7 @@
 the colors of tajweed rules"*.
 **The picture:** [`docs/design/tajweed-colours.html`](../design/tajweed-colours.html), built by
 `scripts/build-palette-options.mjs`, published at
-<https://claude.ai/code/artifact/74b37363-d082-45e7-9651-54c47c328844>.
+<https://blog.bytesofpurpose.com/hifth/docs/design/tajweed-colours.html> (an earlier copy on another host: <https://claude.ai/code/artifact/74b37363-d082-45e7-9651-54c47c328844>).
 **Constrains and is constrained by:** [mark granularity](mark-granularity.md) — the question of
 whether the app paints a whole verse or the exact letter, decided the same day as this record,
 as **B: colour the exact letter**. That is what turns option C below from incoherent into an

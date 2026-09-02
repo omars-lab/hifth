@@ -2,7 +2,7 @@
 
 *Status: open. This record states the question and draws the options; it does not choose.*
 
-**The picture:** <https://claude.ai/code/artifact/1d9c4cff-f0a5-4aa3-a70b-2717f0814b1a> — the three
+**The picture:** <https://blog.bytesofpurpose.com/hifth/docs/design/confusion-map-export.html> (an earlier copy on another host: <https://claude.ai/code/artifact/1d9c4cff-f0a5-4aa3-a70b-2717f0814b1a>) — the three
 options drawn at phone size, on a sample map that carries verse references only and no scripture.
 Checked in as `confusion-map-export.html`, rebuilt by `scripts/build-confusion-export-options.mjs`
 from the committed data beside it.

@@ -6,7 +6,7 @@
 claude artifacts hold state?"*.
 **The picture:** [`docs/design/sitting-hosting.html`](../design/sitting-hosting.html), built by
 `node scripts/build-sitting-hosting-options.mjs`, published at
-<https://claude.ai/code/artifact/84b4bfe6-f875-4186-9d32-c37f26ad71be>.
+<https://blog.bytesofpurpose.com/hifth/docs/design/sitting-hosting.html> (an earlier copy on another host: <https://claude.ai/code/artifact/84b4bfe6-f875-4186-9d32-c37f26ad71be>).
 **Constrains and is constrained by:** [mark placement](../design/mark-registration.md) — the
 question the sittings exist to answer. If that one is settled on the evidence already in hand,
 this one evaporates.

@@ -59,6 +59,16 @@
           "note": "Why the highlight looks like a pen and not a box. Every ayah's hit area is a run of axis-aligned rectangles, one per line it occupies; this turns each into a band along the line's middle. It is a parser with a fallback, not an assumption — it returns null on any geometry it does not fully recognise and the Highlighter clones the shape instead, so an unfamiliar page degrades to the old box rather than to nothing. Loop 4b was the test of that: 601 pages arrived at once from the same upstream, and the fallback is still there for the edition that does not come from it."
         },
         {
+          "file": "scripts/gate-boxes.mjs",
+          "symbol": "FALLBACK_COUNT",
+          "note": "The pen, run over the whole book. Three highlight defects were each found by a reader on one page (2:249 fused into a slab, 10:44 dropped to a box by the print's rounding, and the 110 boxes on that same fallback the fix uncovered); each was a class visible in the corpus all along. This sweeps every ayah box with the app's own pen — imported on purpose, since the question is what the code does with the corpus, not what the corpus is — and holds two counts as both ceiling and floor: 8 boxes it cannot read as lines (all on the decorated pages 1–2) and 2 rectangles off the page's line grid (p564 68:3, p602 107:2 — PLAN 17). Fused and dot rectangles are counted and printed, not held. `--list` names every flagged box; `make box-sweep` draws them."
+        },
+        {
+          "file": "scripts/build-box-sweep.mjs",
+          "symbol": "glyphsWithin",
+          "note": "Draws each box the sweep flags on a strip of its real page, at desktop size, with the app's own swipes (or its fallback wash) over the print and the page's line grid behind — so an off-grid rectangle is seen as a thin band, not read as 0.77. Crops the page's glyph paths by a rough bounding box rather than embedding whole pages, which keeps ten strips under a megabyte; reads the app's colour tokens so the picture cannot drift from the app. Refuses to write a page carrying any Arabic codepoint or an SVG text element."
+        },
+        {
           "file": "packages/core/src/highlighter.ts",
           "symbol": "private paint",
           "note": "The swipe branch is also the whole contract with the wipe animation, and none of it is visible. A `<line>` renders identically whichever end you write first, so the order of x1/x2 here is the only thing deciding which way the ink travels — right to left, because that is where a pen meets Arabic, and a backwards wipe would look subtly wrong to a reader and correct to everyone else. `--hl-len` and `--hl-i` are the two numbers CSS cannot work out for itself: a dash pattern must be told the stroke's length (`100%` on a line is the viewport, not the line) and which line of the ayah this is, so line 2 starts after line 1."
@@ -268,6 +278,11 @@
           "file": "apps/web/src/components/PageSlider.tsx",
           "symbol": "PageSlider",
           "note": "The bottom bar: a 604-long track with a page turn on each edge, pinned RTL in both languages so page 1 sits on the right. Two traps live here — it commits on the native `change` event, not React's `onChange` (which is `input`, and would mount a 170 KB SVG per value crossed), and it takes the arrow keys itself, because a range's own step of 1-of-604 snaps straight back inside a three-page inventory."
+        },
+        {
+          "file": "scripts/build-page-bar-options.mjs",
+          "symbol": "render",
+          "note": "The bar's two open decisions, drawn: does a juz marker pull the release onto it, and which juz is a page that carries a juz seam in. Reads the manifest's page-per-verse table, core's juz table and the bar's own stylesheet, so every number on the page (1.34 px a page on a laptop, 0.4 on a phone, four seam pages) is re-derived on each run. Refuses to write a page carrying Arabic. Register rows juz-detents and boundary-juz; record docs/decisions/page-bar.md."
         },
         {
           "file": "packages/core/src/keymap.ts",
@@ -1375,6 +1390,16 @@
           "note": "The register. Fifteen records already existed in docs/decisions/ with no way in: their titles are sentences — 'The grain gets finer where the finger already is' is a good title and a useless index entry — so a reader arriving with a question could not find which file answers it. The running-table habit existed and was scoped to one topic (desktop-vs-mobile.md says 'append a row there rather than restating one here') and nothing generalised it, so an open decision could sit in a design doc's eighth section for a month with nothing counting it as open. Stores exactly one sentence of its own, the plain-language `question`, and points at the record for everything else — same anti-duplication rule as issues.json and the ledger. The exception is `related`, which is not a restatement of anything: relatedness is a property of a PAIR, so no single record can hold it, and the second half of a pair is normally written months after the first — by which time the first is not the file anybody opens. Hand-edited, never generated."
         },
         {
+          "file": "scripts/stage-docs.mjs",
+          "symbol": "rewrite",
+          "note": "The tenet that a design is public or it is not published, as a build step. Runs at the end of the web build and copies every docs/**/*.html (not the .artifact.html inlined copies) into dist/docs at the same path, so a merged page is on the site at an address derived from nothing but its path. Rewrites two kinds of relative link on the way — ../../apps/web/public/assets/… to where the site serves the same bytes, and a markdown record to where the repository host renders it — copies a checked-in file under docs/ that a page links (a screenshot) beside it, and fails the build on any other relative link, because a link that renders as a link and opens as a 404 is the failure this exists to end. Writes the front door, dist/docs/index.html, from the decision register and each page's own <title>; nothing on it is typed. vite.config.ts denylists /docs/ from the service worker's navigation fallback, or an installed app would hand a reader the shell in place of the page."
+        },
+        {
+          "file": "scripts/site.mjs",
+          "symbol": "publicUrl",
+          "note": "The site's address, once. Every open decision's public link is this plus the page's path, and gate-decisions refuses a row that says anything else — before 2026-09-01 the address was minted on another host and written back here by hand, or not."
+        },
+        {
           "file": "scripts/gate-decisions.mjs",
           "symbol": "hasArtifact",
           "note": "The half that is easy to skip: who a decision is FOR. An open decision must carry both an `artifact` — the published page anybody can open — and a `page`, the same picture checked in here, and the gate fails on either alone. A link with no copy dies when the host does; a copy with no link cannot be sent to anyone. Whatever is checked in names the script that rebuilds it, because a committed page nobody can regenerate is a screenshot with extra steps that starts lying the day the data moves. And the record has to link to both, or its argument is about a picture the reader cannot reach. Also carries the reverse check issues.json exists for: a record in docs/decisions/ with no row here. And `related` must be symmetric: naming a decision that does not name you back is a link invisible from the end a reader is usually standing at."
@@ -1393,6 +1418,11 @@
           "file": ".githooks/pre-commit",
           "symbol": "gate-decisions.mjs",
           "note": "Scoped to the staged files, silent when a commit touches none of them. This pairing breaks on exactly one kind of commit — the one that adds the artifact link before committing the page, or renames the page and leaves the link — and that is the commit where the information is free, because you are moving the thing right now."
+        },
+        {
+          "file": ".githooks/pre-commit",
+          "symbol": "render-docs",
+          "note": "The unscoped half: the use-cases, issues and tasks gates run whole on every commit, because a rendered page's hash is a function of the register and of the documents it reads titles from, so staleness cannot be predicted from the staged paths. Added 2026-09-01 after a commit edited docs/use-cases.json, passed the scoped check, and shipped with the page stale. Three hash comparisons, under a second; the message names `make render-docs`."
         },
         {
           "file": ".claude/skills/decide/SKILL.md",

@@ -2,7 +2,7 @@
 
 **Status:** decided — **option F**, by omar on 2026-08-16.
 
-**Picture:** <https://claude.ai/code/artifact/b7be0f22-3ff5-45b7-a5c1-850dd73ef1f1> — six options, each
+**Picture:** <https://blog.bytesofpurpose.com/hifth/docs/design/comparison-crop.html> (an earlier copy on another host: <https://claude.ai/code/artifact/b7be0f22-3ff5-45b7-a5c1-850dd73ef1f1>) — six options, each
 drawn on the real artwork at the panel's real width, with the chosen one drawn again enlarged. Checked
 in as `comparison-crop.html`, rebuilt by `node scripts/build-crop-options.mjs`, which writes that copy
 and the published one from the same pass.

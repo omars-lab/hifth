@@ -33,6 +33,14 @@ describe("Colophon", () => {
     expect(link.getAttribute("href")).toContain(SOURCE_REPO);
   });
 
+  it("links the designs and decisions the site serves beside the app", () => {
+    render(<Colophon open onClose={() => {}} />);
+    // Relative: the build stages docs/ next to the app, so the link holds on
+    // any host the app is served from and needs no knowledge of which.
+    const link = screen.getByRole("link", { name: /التصاميم والقرارات/ });
+    expect(link).toHaveAttribute("href", "./docs/");
+  });
+
   it("credits every source whose licence asks to be named", () => {
     render(<Colophon open onClose={() => {}} />);
     // The Quranic Arabic Corpus requires the link, verbatim: "a link is made to

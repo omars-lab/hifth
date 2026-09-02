@@ -751,7 +751,7 @@ unit is a number here and a picture there, and only one of those settles anythin
 [`mark-placement.html`](mark-placement.html), rebuilt by
 [`scripts/build-placement-options.mjs`](../../scripts/build-placement-options.mjs), and published
 for a reader with no repository at
-<https://claude.ai/code/artifact/7652b2f5-61a1-4072-bfab-ef3b649e55f5>. C and D are not drawn
+<https://blog.bytesofpurpose.com/hifth/docs/design/mark-placement.html> (an earlier copy on another host: <https://claude.ai/code/artifact/7652b2f5-61a1-4072-bfab-ef3b649e55f5>). C and D are not drawn
 because there is nothing in them to look at: one is a stretch too small to see and the other puts
 these same rectangles on the page and forbids using them. E appears in the drawn page's table of
 numbers but has no picture of its own, because F is E with one thing added and drawing both would
