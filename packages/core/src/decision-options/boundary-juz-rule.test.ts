@@ -3,7 +3,6 @@ import {
   BOUNDARY_JUZ_RULES,
   beginsHereRule,
   runningRule,
-  bothRule,
   labelBeginsHere,
   labelRunning,
   labelBoth,

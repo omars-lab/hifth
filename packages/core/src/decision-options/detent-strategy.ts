@@ -46,13 +46,13 @@ export function resolveMarkOnly(asked: number, _ctx: DetentContext): Landing {
  * a juz opening lands on that opening, ties going to the nearer marker.
  */
 export function resolvePullNearby(asked: number, ctx: DetentContext): Landing {
-  var best = -1;
-  var bestDist = Infinity;
-  var bestJuz = null;
-  for (var j = 0; j < ctx.juzStarts.length; j++) {
-    var start = ctx.juzStarts[j];
+  let best = -1;
+  let bestDist = Infinity;
+  let bestJuz: number | null = null;
+  for (let j = 0; j < ctx.juzStarts.length; j++) {
+    const start = ctx.juzStarts[j];
     if (start === null || start === undefined) continue;
-    var dist = Math.abs(start - asked);
+    const dist = Math.abs(start - asked);
     if (dist <= ctx.radius && dist < bestDist) {
       best = start;
       bestDist = dist;
@@ -80,7 +80,7 @@ export function resolveTapButton(asked: number, _ctx: DetentContext): Landing {
  */
 export function markerEmphasis(distPx: number, near: number, peak: number): number {
   if (near <= 0 || !(distPx < near)) return 1;
-  var t = 1 - distPx / near;
+  const t = 1 - distPx / near;
   return 1 + (peak - 1) * t * t;
 }
 

@@ -34,7 +34,7 @@ export interface BoundaryLabel {
 
 /** A · the page wears the juz that *begins* on it (today's readout). */
 export function labelBeginsHere(ctx: BoundaryContext): BoundaryLabel {
-  var j = ctx.beginsHere === null ? ctx.running : ctx.beginsHere;
+  const j = ctx.beginsHere === null ? ctx.running : ctx.beginsHere;
   return { text: String(j), juz: [j] };
 }
 

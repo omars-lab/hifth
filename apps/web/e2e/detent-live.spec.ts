@@ -1,4 +1,4 @@
-import { test, expect, type Locator } from "@playwright/test";
+import { test, expect, type Locator, type Page } from "@playwright/test";
 
 /*
  * The page-bar decision page (docs/design/page-bar-options.html), and the one
@@ -31,7 +31,7 @@ const scaleOf = (mark: Locator): Promise<number> =>
   });
 
 /** Move the mouse to the centre of a marker (a hover, no button down). */
-async function hoverCentre(page: import("@playwright/test").Page, mark: Locator) {
+async function hoverCentre(page: Page, mark: Locator) {
   const box = await mark.boundingBox();
   if (!box) throw new Error("marker has no box");
   await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
