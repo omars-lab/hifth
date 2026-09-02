@@ -1565,6 +1565,60 @@ KFGQPC provenance. Android fast-follow (~95% shared code). Do not start until we
 Hadith/tafsir/lexicon edges: data drop + registry `status` flip only. No UI or highlighter
 changes, per the additive-only registry design.
 
+### Someday — Post-Sign-On Use Cases
+
+Every reader-record decision that deferred an option to "the day there is sign-in" collects here,
+so the sign-on milestone has one place that lists what it unlocks rather than a promise scattered
+across five records. **None of these can be a row in `docs/use-cases.json` yet** — that register
+refuses a use case with no runnable proof, and none of these can be proven until an account and
+the per-reader cloud file behind them exist. They are recorded as wants with a named gate.
+
+**When can we work on these?** All of them wait on the same thing that does not exist today: a
+way for a reader to **sign in**, and the **per-reader cloud file** (in R2) that the
+[storage model](decisions/storage-model.md) says a reader's records live in once they do —
+written all at once whenever the reader changes something. That account system is not scheduled
+into a loop; until it is, every use case below stays here. The app's own tracks bound it: a
+personal cloud is only reachable at all from the installed phone app (**Track B**), which is
+itself gated on web v1.0 and blocked on a licensing question the project is waiting on advice
+for. So the honest answer to "when" is: **after sign-on is built, and sign-on is not yet on the
+near-term plan.** Each use case below is already decided in *shape* by the record it points at —
+what is missing is only the account and the cloud file to hang it on.
+
+- **As a reader, my bookmarks follow me across devices.** On sign-in the bookmark set keeps my
+  own cloud file, so a bookmark I dropped on one device is there on another
+  ([bookmark-store, option C](decisions/bookmark-fold.md#what-was-decided-2026-09-02)).
+- **As a reader, my notes sync to the cloud.** The notes I author survive a lost phone and appear
+  on every device, synced on sign-in
+  ([note-persistence, option D](decisions/notes-export.md#what-was-decided-2026-09-02)).
+- **As a reader, my confusion map is backed up to the cloud.** The private record of where my
+  memory slips keeps a cloud copy once I sign in, so it survives a lost phone
+  ([confusion-map-export, option C](decisions/confusion-map-export.md#what-was-decided-2026-09-02)).
+- **As a reader, my exported record can live in the cloud.** The portable annotation bundle —
+  every note, its anchor and kind, plus the bookmarks — can be kept in my own cloud file, not
+  only a file I save by hand
+  ([note-export-shape](decisions/notes-export.md#what-was-decided-2026-09-02)).
+- **As a reader, my first sign-in merges what I already have.** The set I built on the phone
+  before signing in seeds my cloud file; a conflict between two devices is a later question
+  ([bookmark-fold, folded-into-the-building](decisions/bookmark-fold.md#what-was-decided-2026-09-02)).
+- **As a reader, my private question can gather with others' and reach a scholar.** Once there
+  are accounts, similar questions across readers can be gathered and answered with references —
+  the scholar use case in the next section, which is post-sign-on for exactly this reason.
+
+### Someday — Questions a scholar could answer
+A use-case-shaped want the owner raised alongside the mistake-marking decision, recorded here
+because it is unbuilt and so cannot yet be a row in `docs/use-cases.json` — that register refuses
+a promise with no runnable proof, and this has none. As the owner put it: **as a reader, I can pin
+a *question* to a verse; and when enough readers ask a similar question, an answer from a scholar
+(with references to the text) can appear against it.** The near-term, buildable slice is already
+decided — the "question" kind of note and its anchor, in
+[`mistake-marking.md`](decisions/mistake-marking.md#what-kinds-of-note-are-there-and-does-any-leave-the-phone).
+What stays *someday* is everything past one reader's private question: gathering similar questions
+across readers (which needs the accounts and the cloud the [storage model](decisions/storage-model.md)
+waits on), a **new actor — a scholar** — with a way to answer and cite, and the surface that shows
+a reader an answer to a question they did not ask themselves. When it is built it becomes a proper
+use case: a `scholar` actor in `docs/use-cases.json`, a `hafiz` use case for asking, and a named
+test that proves a cited answer reaches the reader — none of which exists to point at today.
+
 ## 8. Cross-loop rules
 
 - **Assets are immutable** — never edited, styled only via CSS classes + the injected

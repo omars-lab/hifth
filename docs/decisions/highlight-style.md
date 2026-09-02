@@ -5,6 +5,12 @@ or a fill, and how see-through it is. This record is what that request turns int
 meets what the app already draws and what it has already settled: not one question but two,
 and neither of them is quite "box or fill".
 
+*Status: both questions decided 2026-09-02 by the owner — the full menu on each. A reader
+chooses the highlight's shape among the **swipe, a fill, or an outline** (C of the first
+question), and tunes its strength through **a few named steps** (C of the second). The page's
+own recommendation was the cheaper half only; the owner took both. The options and reasoning
+below stand as drawn; the decision is gathered at the end.*
+
 It is drawn on real ayahs of a real page, at the size a reader reads them, so the argument is
 about a picture anyone can open:
 
@@ -180,3 +186,20 @@ tune its strength**, or it stays fixed as today. The shapes and strengths are dr
 ayahs so the choice is made from the picture. The honest recommendation the page carries, for
 whoever decides: if anything is built, the cheaper and more-asked-for half is the strength
 control, and the swipe-or-fill pair is the shape choice that pairs with it.
+
+## What was decided (2026-09-02)
+
+The owner took **both full menus**, past the page's own leaner recommendation:
+
+- **Shape — C, a choice of three: swipe, fill, or outline.** The reader picks how the mark is
+  drawn, including the outline that lays nothing over the words. The cost the page named — three
+  treatments to keep honest across single and multi-line verses — is accepted.
+- **Strength — C, a few named steps.** Not a continuous slider but light / medium / firm, the
+  middle at today's strength and the ends safe by construction, so a reader cannot make the mark
+  vanish or drown the print. This is the control the tajweed-colours decision had already floated
+  once, now built for the selection mark.
+
+The recommendation was to build the strength control and pair it with a swipe-or-fill choice; the
+owner chose the wider shape menu as well. Nothing in the "not settling" list moved: this settles
+*that* a reader can change the shape and the strength and *among what*, not the exact strength
+values, the step names, or the outline's weight, which are tuning done when it is built.

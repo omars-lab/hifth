@@ -1,7 +1,13 @@
 # Should the app show a tafseer of the selected verse, and where?
 
-*Status: open, two questions. This record states them and draws the options; it does not
-choose. The first reopens a written non-goal, which only the owner can do.*
+*Status: decided 2026-09-02 by the owner, who reopened the written non-goal to do it. A
+tafseer sits in a **section inside the verse's sheet, under the hops** (C of the first
+question); on a wide window that sheet is already a card over the facing leaf, so the section
+grows there rather than at the bottom. Its text is **looked up live from the Quran Foundation's
+service** (C of the second), shown **line by line** against the verse, with a **trusted link for
+every verse** beside it — starting there, and importing our own texts only if that proves
+necessary. The options and reasoning below stand as they were when the choice was made; the
+decision and its specifics are gathered at the end.*
 
 **The picture:** <https://blog.bytesofpurpose.com/hifth/docs/design/tafseer-options.html> —
 `tafseer-options.html`, checked in and rebuilt by `scripts/build-tafseer-options.mjs` from
@@ -206,3 +212,28 @@ or on the facing leaf (D). Second, only if C or D: which text the app would copy
 would say so — al-Muyassar alone (A), three Arabic texts with a picker (B), or a live lookup
 with no copy kept (C). The first reopens a written non-goal, and that is the owner's to
 reopen.
+
+## What was decided (2026-09-02)
+
+The owner reopened the non-goal and answered both questions **C**:
+
+- **Where it sits — C, a section inside the verse's sheet, under the hops.** On a phone the
+  section opens beneath the hops as drawn; on a wide window the sheet is already a card over the
+  facing leaf, so the tafseer grows there rather than at the bottom of the screen — the reader
+  wanted the meaning on the leaf they are not reading, not under it.
+- **Which text — C, a live lookup from the Quran Foundation's service**, no copy kept. Chosen
+  as the starting point explicitly: *begin here, and import our own texts only if a reader shows
+  we need to.* So option A's single Arabic text and the offline store are not ruled out for
+  ever — they are the fallback if the live service proves too thin or too fragile.
+- **Two things the drawn options did not name, added by the owner:** the tafseer is shown
+  **line by line against the verse**, each line of commentary set beside the words it explains
+  rather than as one block under the whole verse; and **every verse carries a trusted link** to
+  the source's own page, so the reader can always reach the fuller text and see where it came
+  from — the option-B road kept as a companion to the in-sheet section, not replaced by it.
+
+**Still open, folded into the building of this:** the live service's terms and rate limit were
+never found (noted under the second question), so the exact attribution line and what shows when
+the lookup fails are settled when the section is built, not here. And "line by line" assumes the
+service returns commentary segmented to the verse's lines, which the Quran Foundation's does not
+promise — if it returns one block, the section falls back to one block under the verse, and the
+line-by-line layout waits for a source that segments.

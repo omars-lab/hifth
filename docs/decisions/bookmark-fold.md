@@ -6,6 +6,13 @@ Before that gesture can be built, two things have to be decided that the animati
 not settle: **how many bookmarks a reader can hold at once**, and **where a bookmark is kept
 so that tapping the fold still means something a week later.**
 
+*Status: both questions decided 2026-09-02 by the owner. A reader holds **many bookmarks, dropped
+and lifted** (B of the first question), each with its own name and its own timeline; and a
+bookmark is kept in **a store that can be carried off the phone** (C of the second) — the phone's
+own store today, a saved file, and the reader's own cloud file once there is sign-in, following
+the [storage model](storage-model.md) the notes and the confusion map also take. The options and
+reasoning below stand as drawn; the decision and the owner's added detail are gathered at the end.*
+
 It is drawn on a real page, at the size a phone would show it, so the argument is about a
 picture anyone can open:
 
@@ -182,3 +189,31 @@ Two things, and the gesture waits on both: **how many bookmarks a reader holds**
 that moves, many they drop and lift, or both — and **where a bookmark is kept** — in the address
 only, in the phone's durable store, or in a store that can be carried off the phone. The tap on
 the fold is drawn and not in question; what it persists, and how much of it, is.
+
+## What was decided (2026-09-02)
+
+- **How many — B, many the reader drops and lifts.** Not the single silk ribbon and not the
+  hybrid: a set the reader builds, adds to, and removes from. The cost the option named — a set
+  to manage, a way to see them all and tell them apart — is accepted, and the owner said how it
+  is paid:
+  - **Each bookmark carries a name, embroidered across the middle of the ribbon.** The reader
+    names a bookmark, and that text reads along the ribbon itself the way a title is stitched
+    into a silk marker — so a set of bookmarks is told apart on sight, on the leaf, without a
+    list to open.
+  - **Each bookmark has its own timeline.** A bookmark is not only a place; it carries the
+    reader's history with that place, so returning to one is returning to a thread, not just a
+    page. (What a timeline holds, and how it relates to the confusion map's per-place record, is
+    left to the building — noted as open below.)
+  - **Tapping a bookmark opens its own drawer**, from which the reader can update it, move it, or
+    add another — the management surface option B said it would need, given a shape here.
+- **Where it is kept — C, a store that can be carried off the phone.** The bookmarks live in the
+  phone's own store today, can be saved to a file, and — once a reader can sign in — keep the
+  reader's own cloud file, written all at once whenever the reader changes a bookmark. This is
+  the [storage model](storage-model.md); the bookmark decision is one of the records that adopts
+  it, so a reader's bookmarks, notes and confusion map all persist and travel the same way.
+
+**Still open, folded into the building:** what a bookmark's *timeline* actually records, and
+whether it shares a store with the confusion map's per-place history or stays separate (the
+storage model settles *where* it lives, not *what* it is); and the first-sign-in merge — when a
+reader who has bookmarks on the phone signs in, the phone's set seeds the cloud file, and a
+conflict between two devices is a later question, not this decision's.

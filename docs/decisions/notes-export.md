@@ -7,6 +7,15 @@ to lose, and the desktop triage asked for two things about them the note layer i
 not settle — that they survive a phone that clears its storage, and that a whole batch can
 leave the phone as a file or an email.
 
+*Status: both questions decided 2026-09-02 by the owner. A batch of notes leaves the phone as
+**a saved file** (B of the first question) and **an email the reader sends** — both now — with
+**automatic cloud sync once there is sign-in** (D), taking the [storage model](storage-model.md).
+An exported batch is **a portable annotation file** (C of the second question): a full JSON
+bundle of the reader's state — every note, its anchor and kind, plus the bookmarks — enough to
+recreate the experience, with **a separate export for usage activity** (which sessions did what).
+The options and reasoning below stand as drawn; the decision and its shape are gathered at the
+end.*
+
 It is drawn on real anchors from a real page, so the argument is about a picture anyone can
 open:
 
@@ -183,3 +192,33 @@ it before sending.
   Tuning, not the decision.
 - Any sharing between two people. Every option here is a reader moving their *own* record;
   showing it to someone else is a separate question.
+
+## What was decided (2026-09-02)
+
+- **How a batch leaves — B and C now, D on sign-in.** A reader can save the batch to **a file**
+  (B) and can **send it as an email** (C); both are deliberate, reader-initiated, off by
+  default. **Automatic cloud sync** (D) is adopted too, but it waits on the account that does
+  not exist yet — so it arrives with sign-in, through the [storage model](storage-model.md)
+  the bookmarks and the confusion map also take. The single register row records this as **B**,
+  the durable file being the near-term backbone; the email and the eventual cloud copy ride on
+  top of it, and the email's contents matter most, which is what the second question settles.
+- **What an exported batch contains — C, a portable annotation file, as the reader's whole
+  state.** Not the plain list (A) and not only the thumbnailed list (B): a machine-readable JSON
+  file that references, for each note, its verse and the exact character span it covers, whether
+  it sits on a harakah, its kind (comment, correction, note to the developers, question), and
+  whatever else that kind needs — **and the bookmarks alongside**, so the file holds all the
+  current state needed to recreate the reader's experience. A readable, thumbnailed view (B) is
+  still offered *for a teacher to read*, layered over the same data, per the option's own note
+  that the file answers backup and the readable view answers show-a-teacher.
+- **A second, separate export: usage activity.** Distinct from the state bundle, the reader can
+  export their **interaction history** — a mapping between sessions and what each session did
+  ("this bookmark was added in session such-and-such"). It is a different thing from the state:
+  the bundle is *what the reader has*, the activity export is *what the reader did*, and merging
+  them would make each harder to read. The no-Qur'an-text rule holds for both — a span is a
+  reference into the print, never the print's words.
+
+**Still open, folded into the building:** whether each note kind carries a **fixed set of
+fields** or an **open key/value bag** for "any additional data the type needs" — the schema is
+sketched (verse, character start, character end, on-a-harakah, kind), but how extensible it is
+per kind is a build decision, not settled here; and the exact bytes, filename and extension of
+either export, which the "not settling" list above already holds apart as tuning.
