@@ -216,7 +216,9 @@
       "by": null,
       "date": null,
       "related": [
-        "mistake-note-kinds"
+        "mistake-note-kinds",
+        "note-persistence",
+        "note-export-shape"
       ]
     },
     {
@@ -365,7 +367,8 @@
       "related": [
         "mark-placement",
         "word-selection",
-        "loop-4a"
+        "loop-4a",
+        "note-export-shape"
       ]
     },
     {
@@ -651,7 +654,74 @@
       "date": null,
       "related": [
         "mistake-note-anchor",
-        "confusion-map-export"
+        "confusion-map-export",
+        "note-persistence"
+      ]
+    },
+    {
+      "id": "note-persistence",
+      "question": "How does a batch of a reader's own notes leave the phone — a file, an email, or not at all?",
+      "status": "open",
+      "options": [
+        {
+          "id": "A",
+          "label": "Nothing leaves: durable on the phone only"
+        },
+        {
+          "id": "B",
+          "label": "A file the reader saves and re-imports"
+        },
+        {
+          "id": "C",
+          "label": "An email the reader sends"
+        },
+        {
+          "id": "D",
+          "label": "Automatic cloud sync"
+        }
+      ],
+      "artifact": "https://blog.bytesofpurpose.com/hifth/docs/design/notes-export-options.html",
+      "page": "docs/design/notes-export-options.html",
+      "builtBy": "scripts/build-notes-export-options.mjs",
+      "doc": "docs/decisions/notes-export.md#how-does-a-batch-of-a-readers-notes-leave-the-phone",
+      "decided": null,
+      "by": null,
+      "date": null,
+      "related": [
+        "confusion-map-export",
+        "note-export-shape",
+        "mistake-note-kinds"
+      ]
+    },
+    {
+      "id": "note-export-shape",
+      "question": "What does an exported batch of notes contain, so it is legible without shipping the Qur'an?",
+      "status": "open",
+      "options": [
+        {
+          "id": "A",
+          "label": "A plain list of references"
+        },
+        {
+          "id": "B",
+          "label": "A list with a picture of each spot"
+        },
+        {
+          "id": "C",
+          "label": "A portable annotation file"
+        }
+      ],
+      "artifact": "https://blog.bytesofpurpose.com/hifth/docs/design/notes-export-options.html",
+      "page": "docs/design/notes-export-options.html",
+      "builtBy": "scripts/build-notes-export-options.mjs",
+      "doc": "docs/decisions/notes-export.md#what-does-an-exported-batch-contain-so-it-is-legible-without-the-quran",
+      "decided": null,
+      "by": null,
+      "date": null,
+      "related": [
+        "note-persistence",
+        "confusion-map-export",
+        "comparison-crop"
       ]
     }
   ]
