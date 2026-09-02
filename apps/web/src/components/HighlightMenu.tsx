@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { diffPair, type AppState, type MergedEdge } from "@hifth/core";
+import { wordDiff, type AppState, type MergedEdge } from "@hifth/core";
 import { useT } from "../i18n";
 import { DiffView } from "./DiffView";
 import { ShareSheet } from "./ShareSheet";
@@ -40,8 +40,9 @@ function bareTarget(to: string): string {
  * Where `HopPopover` answers "where does *this ayah* go?", this answers it for a
  * whole highlighted passage: one merged list, deduped by (target, type), each
  * row naming the range member it came from so a merged hop is never anonymous.
- * Rows carry the same affordances as the popover's — expand for the token diff
- * (spec §3), 44px leap button, and an honest disabled state with "page not
+ * Rows carry the same affordances as the popover's — expand to see both ayahs
+ * cropped out of the printed page with what they do not share washed (spec §3),
+ * 44px leap button, and an honest disabled state with "page not
  * available yet" for an un-vendored target (Plan Q6). Copy-link shares the range
  * itself through the §7 range form (`#/hafs-kfqc/2:47-2:48`).
  *
@@ -155,7 +156,7 @@ export function HighlightMenu({
               // The range member whose edge won the merge — the ayah this row's
               // note is about, and so the diff's "here" and the leap's origin.
               const fromKey = edge.from;
-              const diffable = diffPair(fromKey, toKey) !== null;
+              const diffable = wordDiff(edge, fromKey) !== null;
               const isOpen = expanded === edge.to;
               const diffId = `range-diff-${edge.to.replace(/[^\w-]/g, "-")}`;
               const fromRefs = edge.sources.map((k) => t.ayahRef(k) ?? k).join(t.refJoin);
@@ -210,7 +211,7 @@ export function HighlightMenu({
                   </div>
                   {isOpen && diffable && (
                     <div id={diffId}>
-                      <DiffView fromKey={fromKey} toKey={toKey} />
+                      <DiffView edge={edge} fromKey={fromKey} />
                     </div>
                   )}
                 </li>

@@ -1,6 +1,7 @@
 import { test, expect, type Locator, type Page } from "@playwright/test";
 import { watchFolds, foldsSeen } from "./fold";
 import { contextWithout } from "./inventory";
+import { ayahTarget } from "./ayah";
 
 /*
  * The desktop spread — an open mus'haf, and honest about the half it does not
@@ -93,6 +94,14 @@ const scaleOf = (page: Page, pageNo: number): Promise<number> =>
   pageSvg(page, pageNo)
     .locator("xpath=..")
     .evaluate((el) => new DOMMatrix(getComputedStyle(el).transform).a);
+
+/** The chrome's page-mode radios. Desktop only — that is where the second leaf is. */
+const modeBtn = (page: Page, which: "one" | "two"): Locator =>
+  page.getByRole("radio", { name: which === "one" ? "صفحة واحدة" : "صفحتان" });
+
+/** The stepper's two buttons. */
+const zoomBtn = (page: Page, dir: "in" | "out"): Locator =>
+  page.getByRole("button", { name: dir === "in" ? "تكبير" : "تصغير" });
 
 test.describe("Hifth · the desktop spread", () => {
   test("appears above the breakpoint and does not exist below it", async ({ page }) => {
@@ -390,6 +399,29 @@ test.describe("Hifth · the desktop spread", () => {
     await expect(page.locator(NUM)).toHaveText("7");
   });
 
+  test("a turn moves your place: the URL follows the page, and the highlight lets go", async ({
+    page,
+  }) => {
+    // Turning a leaf is moving your place, not browsing away from it (settled
+    // with the owner, against the older "paging does not touch the selection").
+    // So a landed turn drops the highlighted ayah, empties the hop trail, and
+    // lets the address fall back from the ayah form to the page's own anchor —
+    // the whole point being that a link copied after a turn points at the page
+    // the reader is looking at, not the ayah they left three leaves ago.
+    await page.goto("/#/hafs-kfqc/2:48");
+    await expect(pageSvg(page, 7)).toBeVisible({ timeout: 20_000 });
+    // The place is held: the current-ayah bead is up and the URL is the ayah.
+    await expect(page.getByRole("button", { name: /الآية الحالية البقرة · ٢:٤٨/ })).toBeVisible();
+    await expect.poll(() => new URL(page.url()).hash).toBe("#/hafs-kfqc/2:48");
+
+    await page.keyboard.press("ArrowLeft");
+    await expect(page.locator(NUM)).toHaveText("8");
+
+    // The leaf landed, so the place let go: no bead, and the address is the page.
+    await expect(page.getByRole("button", { name: /الآية الحالية/ })).toHaveCount(0);
+    await expect.poll(() => new URL(page.url()).hash).toBe("#/hafs-kfqc/p8");
+  });
+
   test("a turn inside one opening draws no band", async ({ page }) => {
     // §3.5, and the row 4b made reachable. Both leaves of (7,8) are already on
     // screen and the crease between them is already drawn — permanently, by the
@@ -503,6 +535,111 @@ test.describe("Hifth · the desktop spread", () => {
     const clip = await book(page).evaluate((el) => getComputedStyle(el).overflow);
     expect(clip, "the open book stopped clipping the parked band").toBe("hidden");
   });
+
+  /*
+   * The fore-edge grab — turning the page the way a hand does.
+   *
+   * On the spread the swipe-across-the-middle turn is gone (a desktop reader
+   * pans and selects through the text), and the page turns by its outer edge
+   * instead. Three claims, and they are exactly the sentence the reader wrote:
+   * hovering the edge shows a hand; a drag that begins on it turns the page; a
+   * drag that begins anywhere else does not. The band is the same one every
+   * other turn draws, so its behaviour is not re-asserted here — only that the
+   * grab reaches it. The left edge pulls forward into the book, so it is driven
+   * from page 8, where forward (8 → 9) leaves the opening and a band exists to
+   * catch; a turn inside the opening draws none, which the rows above own.
+   */
+  const grabRail = (page: Page, side: "left" | "right"): Locator =>
+    page.getByTestId(`edge-grab-${side}`);
+
+  test("the fore-edge wears a hand, and a grab from it turns the page", async ({ page }) => {
+    await watchFolds(page);
+    await page.goto("/#/hafs-kfqc/p8");
+    await expect(spread(page)).toBeVisible();
+    await expect(pageSvg(page, 8)).toBeVisible();
+
+    // The affordance the reader was promised: the outer edge is a thing you can
+    // pick up. Asserted on the computed cursor, because that *is* the promise —
+    // there is nothing else on screen that says "grab here".
+    const cursor = await grabRail(page, "left").evaluate((el) => getComputedStyle(el).cursor);
+    expect(cursor, "the fore-edge did not offer a hand").toBe("grab");
+
+    // Grab the left edge near its top corner — the widest part of the strip, and
+    // the corner a hand reaches for — and sweep it across into the book. The
+    // press is close to the outer edge, where the grab region exists at every
+    // height; the middle of the fore-edge is deliberately left to the page.
+    const rail = await boxOf(grabRail(page, "left"));
+    const y = rail.y + rail.height * 0.2;
+    await page.mouse.move(rail.x + 6, y);
+    await page.mouse.down();
+    // Past a quarter of the leaf, so the commit rule keeps the turn. Several
+    // steps because it is a drag, not a teleport — but the grab is a trigger,
+    // not a tracked band: nothing is drawn while the hand moves, and the turn
+    // plays on release.
+    for (let i = 1; i <= 8; i += 1) await page.mouse.move(rail.x + 6 + i * 45, y);
+    await page.mouse.up();
+
+    // It turned, and on release it drew the same book-wide band a keyed turn
+    // does — proof the grab reached the one stage that owns turning and played
+    // the ordinary animated turn, rather than turning some second way of its own.
+    await expect(page.locator(NUM)).toHaveText("9");
+    const seen = await foldsSeen(page);
+    expect(seen.length, "the grab turned the page without drawing a fold").toBeGreaterThan(0);
+    expect(seen[0]!.host, "the grabbed turn's band was not the shared one").toBe("page-book");
+  });
+
+  test("a grab that stops short of the threshold turns nothing, and creeps no band", async ({
+    page,
+  }) => {
+    await watchFolds(page);
+    await page.goto("/#/hafs-kfqc/p8");
+    await expect(spread(page)).toBeVisible();
+    await expect(pageSvg(page, 8)).toBeVisible();
+
+    // Grab the left fore-edge and pull it a little — past the few pixels of slop
+    // that tell a click from a drag, but nowhere near the quarter-leaf the commit
+    // rule wants. This is the reader who picks the edge up, thinks better of it,
+    // and puts it down.
+    const rail = await boxOf(grabRail(page, "left"));
+    const y = rail.y + rail.height * 0.2;
+    await page.mouse.move(rail.x + 6, y);
+    await page.mouse.down();
+    for (let i = 1; i <= 6; i += 1) await page.mouse.move(rail.x + 6 + i * 12, y);
+
+    // Mid-drag, the whole point of the trigger: no band creeps across the book.
+    // A tracked band would sit here, part-way over a spread whose pages have not
+    // changed — the "vertical bar on the same page" this replaced.
+    expect(await foldsSeen(page), "a band crept across the book during the drag").toEqual([]);
+
+    await page.mouse.up();
+
+    // And releasing short commits nothing: still on 8, and no band ever drawn.
+    await expect(page.locator(NUM)).toHaveText("8");
+    expect(await foldsSeen(page), "a short grab still turned the page").toEqual([]);
+  });
+
+  test("a drag that does not start at the fore-edge does not turn the page", async ({ page }) => {
+    await watchFolds(page);
+    await page.goto("/#/hafs-kfqc/p8");
+    await expect(spread(page)).toBeVisible();
+    await expect(pageSvg(page, 8)).toBeVisible();
+
+    // The same long horizontal sweep, but begun in the middle of the page rather
+    // than on its edge. This is the half of the reader's sentence that the old
+    // swipe-to-turn would have failed: it turned from anywhere, and the point of
+    // the edge grab is that the text is now free to be dragged without turning.
+    const leaf = await boxOf(pageSvg(page, 8));
+    const cy = leaf.y + leaf.height / 2;
+    await page.mouse.move(leaf.x + leaf.width / 2, cy);
+    await page.mouse.down();
+    for (let i = 1; i <= 8; i += 1) await page.mouse.move(leaf.x + leaf.width / 2 + i * 40, cy);
+    await page.mouse.up();
+
+    // Still on 8, and no band was ever inserted — the drag through the text was
+    // not a turn at all.
+    await expect(page.locator(NUM)).toHaveText("8");
+    expect(await foldsSeen(page), "a mid-page drag turned the page").toEqual([]);
+  });
 });
 
 /*
@@ -578,6 +715,65 @@ test.describe("Hifth · the revision map at desktop", () => {
     // its contents: three scopes are three widths, and a sheet that resizes
     // under the cursor makes the radio you just pressed jump away from it.
     expect((await boxOf(sheet)).width, "the sheet resizes when the scope does").toBe(card.width);
+  });
+});
+
+/*
+ * The page bar on a wide window — `desktop.md` §8 ⑤, the same shape of defect the
+ * revision map had and one row up.
+ *
+ * The bar is the app's bottom chrome, so its hairline and paper are meant to run
+ * the full width of the window — that is what says "this is the floor of the app"
+ * rather than "this is a widget floating in a field". But the control inside it is
+ * a native `<input type=range>`, and a native range track takes every pixel its
+ * box is given: with the bar full-bleed and nothing holding the track in, a
+ * 1440px window drew the slider as a hairline the whole width of the screen, a
+ * thumb travelling four feet to cross seven pages. The fix holds the *controls* to
+ * `--controls-max` (60rem, the width the desktop mocks drew the book at) by
+ * growing the bar's side padding, and leaves the border and background full-bleed.
+ *
+ * So the claim is two-sided and both sides matter: the bar spans the window, and
+ * the track does not. A cap on the whole bar would pass the second half and lose
+ * the first — a centred pill with a moat of desk on either side, which is the
+ * opposite mistake and the reason the padding grows instead of a max-width being
+ * set. Measured against the real layout engine because the native track's
+ * greediness is exactly what jsdom does not model.
+ */
+test.describe("Hifth · the page bar at desktop", () => {
+  test("holds the slider to the book's width while the bar stays full-bleed", async ({ page }) => {
+    await page.goto("/#/hafs-kfqc/p7");
+    await expect(spread(page)).toBeVisible();
+
+    const bar = page.getByRole("navigation", { name: "شريط الصفحات" });
+    await expect(bar).toBeVisible();
+    const barBox = await boxOf(bar);
+    const slider = await boxOf(page.getByRole("slider"));
+    const vw = page.viewportSize()!.width;
+
+    // The bar is the floor: its box runs the whole window. Not `=== vw` — a
+    // scrollbar or a sub-pixel rounding is not the regression. A bar capped to
+    // the controls would come back ~960 here, less than two-thirds of the window.
+    expect(barBox.width, "the bar stopped spanning the window").toBeGreaterThan(vw - 20);
+
+    // The track does not. 60rem is 960px; the slider is the middle column inside
+    // that, minus the two edge buttons, so it lands comfortably under the cap and
+    // nowhere near the window. The failure this guards — a full-width native
+    // track — comes back ~1400 here, so the threshold has a wide margin either
+    // side of both the pass (~860) and the fail (~1400).
+    expect(slider.width, "the slider stretched to the full window width").toBeLessThan(960);
+    expect(
+      slider.width,
+      `the slider is ${Math.round(slider.width)}px of a ${vw}px window — the track was not held in`,
+    ).toBeLessThan(vw * 0.75);
+
+    // And it is centred in the window, not shoved to one side — the padding grows
+    // equally on both edges, so the book above and the controls below share an
+    // axis. A one-sided cap would satisfy the width assertions and still sit the
+    // slider against the left of the desk.
+    expect(
+      Math.abs(slider.x + slider.width / 2 - vw / 2),
+      "the slider is bounded but not centred under the book",
+    ).toBeLessThan(barBox.width * 0.1);
   });
 });
 
@@ -795,10 +991,9 @@ test.describe("Hifth · the wheel", () => {
 /*
  * The book closes when the reader says so — `desktop.md` §8 ②, second answer.
  *
- * The outcome §8 ② argued for survives: a spread is an offer of *more of the
- * book at once*, and a reader who wants one magnified page is declining it, so
- * past that point the facing leaf goes to zero and the live one takes the desk.
- * What is gone is the *mechanism*. It used to be derived — zoom past fit and the
+ * The toggle stands on its own: a reader who wants one page and the whole desk
+ * for it says so, and the facing leaf goes to zero. What is gone is the
+ * *mechanism* that used to decide the mode *for* them — zoom past fit and the
  * book closed itself — and three separate desyncs came out of that one
  * derivation:
  *
@@ -815,17 +1010,15 @@ test.describe("Hifth · the wheel", () => {
  * These rows are the same three claims, re-put to the controls that replaced the
  * derivation — ② by construction, and it has its own row because a resize is the
  * one input nothing in the stage reports.
+ *
+ * The stepper works with the book open now, and grows both leaves together — a
+ * later reversal of §8 ②'s finding, made on the reader's own call. The two
+ * leaves are kept at one magnification by construction, not by a shared view:
+ * the live stage owns the level, and the facing leaf is told to match whatever
+ * the live one lands at, so there is still only one number and nothing to desync.
  */
 test.describe("Hifth · one page or two, and how big", () => {
   const soloOf = (page: Page): Promise<string | null> => book(page).getAttribute("data-solo");
-
-  /** The chrome's page-mode radios. Desktop only — that is where the second leaf is. */
-  const modeBtn = (page: Page, which: "one" | "two"): Locator =>
-    page.getByRole("radio", { name: which === "one" ? "صفحة واحدة" : "صفحتان" });
-
-  /** The stepper's two buttons. */
-  const zoomBtn = (page: Page, dir: "in" | "out"): Locator =>
-    page.getByRole("button", { name: dir === "in" ? "تكبير" : "تصغير" });
 
   /**
    * The level as the eye reads it, scoped to the stepper rather than to the page.
@@ -870,38 +1063,88 @@ test.describe("Hifth · one page or two, and how big", () => {
     await expect(pageSvg(page, 8)).toBeVisible();
   });
 
-  test("the stepper magnifies the one leaf, and is off while there are two", async ({ page }) => {
+  test("the stepper magnifies one leaf alone, and both leaves of a spread together", async ({
+    page,
+  }) => {
     await page.goto("/#/hafs-kfqc/p7");
     await expect(pageSvg(page, 7)).toBeVisible({ timeout: 20_000 });
 
-    // Two magnified leaves lose their edges and read as one continuous column,
-    // and §3's measurement is that a leaf in a spread is height-bound at ~398 px
-    // anyway. So the stepper is disabled here, with the toggle as the way out.
-    await expect(zoomBtn(page, "in")).toBeDisabled();
-    await expect(zoomBtn(page, "out")).toBeDisabled();
-
-    await modeBtn(page, "one").click();
-    await expect.poll(() => soloOf(page)).toBe("true");
-    const fit = await boxOf(pageSvg(page, 7));
+    // Two pages open, and the stepper is live: the reader magnifies the whole
+    // opening, so one press grows *both* leaves to the same rung. This reverses
+    // the older finding that two enlarged pages read as one column — the reader
+    // asked for them to grow together, and the record that reversed it says why.
+    await expect(spread(page)).toBeVisible();
     await expect(zoomBtn(page, "in")).toBeEnabled();
+    const liveFit = await restingBox(page, 7);
+    const faceFit = await restingBox(page, 8);
 
-    // One rung: 1 → 1.25. A ladder rather than a multiplier, so the readout can
-    // be believed — and it is the readout, not the matrix, that a reader reads.
     await zoomBtn(page, "in").click();
     await expect.poll(() => scaleOf(page, 7)).toBeCloseTo(1.25, 2);
+    await expect.poll(() => scaleOf(page, 8), "the facing leaf grew with the live one").toBeCloseTo(
+      1.25,
+      2,
+    );
     await expect(readout(page)).toHaveText("١٢٥٪");
     await expect(page.locator("[aria-live='polite']")).toHaveText("التكبير ١٢٥٪");
 
-    // The page grew, and grew by about the rung rather than to the desk.
-    const bigger = await boxOf(pageSvg(page, 7));
-    expect(bigger.width).toBeGreaterThan(fit.width * 1.15);
-    expect(bigger.width, "the page stretched past its step").toBeLessThan(fit.width * 1.35);
+    // Both leaves grew, and each by about the rung rather than to the desk.
+    const liveBig = await restingBox(page, 7);
+    const faceBig = await restingBox(page, 8);
+    expect(liveBig.width, "the live leaf stretched past its step").toBeGreaterThan(
+      liveFit.width * 1.15,
+    );
+    expect(faceBig.width, "the facing leaf stretched past its step").toBeGreaterThan(
+      faceFit.width * 1.15,
+    );
 
-    // Opening the book takes the magnification back with it — the other half of
-    // "zoom needs one page", closing the door a reader could otherwise walk back
-    // through by zooming first and opening after.
+    // The opening grew as one sheet, not two swelling blobs: the fold held and the
+    // pages opened *outward* into the desk. This is the reader's report — a magnify
+    // that used to crush the middle and run the outer margins off the screen,
+    // because each leaf grew from its own centre. Now each leaf is pinned at its
+    // gutter edge, so the two inner edges that meet at the fold stay put while the
+    // two outer edges move apart. The live leaf is the right-hand page: its left
+    // edge is the fold, its right edge is the outer margin.
+    const fold = (b: { x: number; width: number }) => b.x; // right leaf: inner edge is its left
+    const faceFold = (b: { x: number; width: number }) => b.x + b.width; // left leaf: inner is its right
+    // Held to within a couple of pixels — the anchor is exact, the slack is
+    // sub-pixel rounding in the rendered box, not the leaf drifting off the fold.
+    expect(
+      Math.abs(fold(liveBig) - fold(liveFit)),
+      "the fold under the live leaf held",
+    ).toBeLessThan(3);
+    expect(
+      Math.abs(faceFold(faceBig) - faceFold(faceFit)),
+      "the fold under the facing leaf held",
+    ).toBeLessThan(3);
+    expect(liveBig.x + liveBig.width, "the live leaf grew outward, away from the fold").toBeGreaterThan(
+      liveFit.x + liveFit.width,
+    );
+    expect(faceBig.x, "the facing leaf grew outward, away from the fold").toBeLessThan(faceFit.x);
+    // And at this rung the outward growth is still inside the desk — nothing is
+    // clipped by the viewport. (The desk margin is ~325 px a side at fit; a step to
+    // 125% spends ~100 of it.) The two leaves stay level about the fold, so the
+    // opening reads as one book and not a torn one.
+    const vw = page.viewportSize()!.width;
+    expect(liveBig.x + liveBig.width, "the live leaf's outer margin is still on screen").toBeLessThan(
+      vw,
+    );
+    expect(faceBig.x, "the facing leaf's outer margin is still on screen").toBeGreaterThan(0);
+
+    // Close to one leaf. The live page takes the whole desk and keeps the level
+    // it had in the spread — closing changes how much of the book is shown, not
+    // how big it is — and the stepper keeps working on the one page that is left.
+    await modeBtn(page, "one").click();
+    await expect.poll(() => soloOf(page)).toBe("true");
+    await expect(readout(page)).toHaveText("١٢٥٪");
+    await zoomBtn(page, "in").click();
+    await expect.poll(() => scaleOf(page, 7)).toBeCloseTo(1.5, 2);
+    await expect(readout(page)).toHaveText("١٥٠٪");
+
+    // Re-open the book: it starts at fit, so the two leaves agree from the first
+    // frame rather than opening at two different sizes.
     await modeBtn(page, "two").click();
     await expect.poll(() => scaleOf(page, 7)).toBeCloseTo(1, 2);
+    await expect.poll(() => scaleOf(page, 8)).toBeCloseTo(1, 2);
     await expect(readout(page)).toHaveText("١٠٠٪");
   });
 
@@ -967,4 +1210,411 @@ test.describe("Hifth · one page or two, and how big", () => {
     await zoomBtn(page, "in").click();
     await expect.poll(() => scaleOf(page, 7)).toBeCloseTo(1.25, 2);
   });
+});
+
+/*
+ * The trail bar holds its height — selecting an ayah must not move the page.
+ *
+ * The bar at the foot of the app is quiet until you pick an ayah, and then it
+ * fills with a row of touch-sized controls: the bead you are on, the roots
+ * trigger, the share button. Each is `--touch-min` tall, and a bar sized only
+ * to `min-height: --touch-min` was 44px empty and 61px full — the controls, the
+ * bar's own block padding and its top hairline outgrew the box the moment they
+ * appeared. The stage above is `flex: 1` and centres the page in whatever height
+ * is left, so those 17px came straight off the stage and the whole mus'haf
+ * jumped upward on the first tap of a reading session. A reader aiming at a
+ * second ayah found the page had walked out from under the finger.
+ *
+ * This is the single-page layout's claim, so the window is sized below the
+ * spread's gate before it is made — on the spread the ayah's controls move onto
+ * the facing leaf instead (see the scripture-floor test above, which is the
+ * reason the bar is *not* padded taller when two leaves are open). 390×844 is a
+ * phone-shaped window; the desktop project reaches it by resizing, because it is
+ * the one project with a mouse to click an ayah where a phone would tap.
+ *
+ * So the claim is two heights, read before and after a selection, each the same
+ * number: the bar itself, and the stage above it. The stage is the outcome — it
+ * is the height the growing bar used to eat — while the bar is the mechanism, so
+ * a future layout that holds the stage still by some other means still passes.
+ * The page's own position is deliberately *not* asserted: selecting an ayah pans
+ * the view to centre it, which moves the page on purpose, and that pan is a
+ * different thing from the bar shoving the whole stage upward.
+ */
+test.describe("Hifth · the trail bar holds its height", () => {
+  test("selecting an ayah does not resize the bar or shove the page up", async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto("/#/hafs-kfqc/p7");
+    await expect(spread(page)).toHaveCount(0);
+    await expect(pageSvg(page, 7)).toBeVisible();
+
+    const bar = page.getByRole("contentinfo");
+    const stage = page.getByRole("main");
+    await expect(bar).toBeVisible();
+
+    // Nothing is selected yet: the bar shows only its hint, and no bead exists.
+    const bead = page.getByRole("button", { name: /الآية الحالية/ });
+    await expect(bead).toHaveCount(0);
+
+    const barEmpty = await boxOf(bar);
+    const stageEmpty = await boxOf(stage);
+
+    // Pick an ayah with a plain click where a finger would land (see ./ayah).
+    const { x, y } = await ayahTarget(page, "#verse-55");
+    await page.mouse.click(x, y);
+
+    // The selection landed — the bar is now populated with the current bead.
+    await expect(bead).toBeVisible();
+
+    const barFull = await boxOf(bar);
+    expect(barFull.height, "the trail bar grew when an ayah was selected").toBe(barEmpty.height);
+    expect(
+      (await boxOf(stage)).height,
+      "the growing bar ate into the stage the page reads on",
+    ).toBe(stageEmpty.height);
+  });
+});
+
+/*
+ * A juz jump lands the two leaves level — with no flash of one sitting high.
+ *
+ * A jump to another juz is not a page turn: the live leaf relocates across many
+ * openings at once, and the facing leaf remounts to the new opening's other
+ * page. The live leaf's relocation reveals its incoming page and *then* frames
+ * it, and the framing runs a frame later — so for one paint the incoming page
+ * wore no position and sat at the top-left of its leaf, one centring-offset
+ * above the facing page beside it. On a fast machine that is a single frame; on
+ * a real one the incoming ~170 KB page's parse stalls the correcting frame long
+ * enough to see and screenshot, which is how this arrived — "sometimes things
+ * aren't aligned after a juz jump", with a picture of two leaves at different
+ * heights.
+ *
+ * So the claim is not a resting measurement — both leaves settle level with or
+ * without the fix — but that they are level *at every frame* of the jump. This
+ * watches the two visible pages across the settle and fails if any single frame
+ * caught them more than a pixel apart. The offset it guards against is a whole
+ * centring gap (~9px), so the threshold is loose enough to ignore the sub-pixel
+ * rounding a live layout carries and still catch the flash.
+ */
+test("a juz jump keeps the two leaves level through every frame", async ({ page }) => {
+  await watchFolds(page);
+  await page.goto("/#/hafs-kfqc/p8");
+  await expect(pageSvg(page, 8)).toBeVisible();
+  await expect(spread(page)).toBeVisible();
+  // A cursor over the book, so the wheel's juz jump has somewhere to land.
+  await page.mouse.move(400, 450);
+
+  // Sample both visible leaves' top edges every frame while the jump settles.
+  const poll = page.evaluate<{ pair: boolean; gap: number }[]>(
+    () =>
+      new Promise((resolve) => {
+        const frames: { pair: boolean; gap: number }[] = [];
+        const start = performance.now();
+        const tick = () => {
+          const ys = Array.from(
+            document.querySelectorAll('svg[aria-labelledby^="page-label-"]'),
+          )
+            .filter((n) => (n as SVGElement).getClientRects().length > 0)
+            .map((n) => n.getBoundingClientRect().top);
+          frames.push({
+            pair: ys.length === 2,
+            gap: ys.length === 2 ? Math.abs(ys[0]! - ys[1]!) : 0,
+          });
+          if (performance.now() - start < 700) requestAnimationFrame(tick);
+          else resolve(frames);
+        };
+        requestAnimationFrame(tick);
+      }),
+  );
+
+  // Jump forward one juz (Shift + wheel is the desktop juz control).
+  await page.keyboard.down("Shift");
+  await page.mouse.wheel(0, 120);
+  await page.keyboard.up("Shift");
+
+  const frames = await poll;
+  // The jump actually happened — a second leaf was on screen at some point.
+  expect(frames.some((f) => f.pair), "the jump never drew a second leaf").toBe(true);
+  const worst = Math.max(...frames.filter((f) => f.pair).map((f) => f.gap));
+  expect(worst, "the two leaves flashed misaligned during the juz jump").toBeLessThan(1.5);
+  // And the jump was a relocation, not a turn: no fold band crosses on a hop.
+  expect((await foldsSeen(page)).length, "a juz jump drew a fold band").toBe(0);
+});
+
+/*
+ * A page turn lands the two leaves level too — the jump's sibling claim.
+ *
+ * Turning a leaf crosses into the next opening and remounts the facing page, the
+ * same remount the juz jump above watches: the incoming leaf could paint for one
+ * frame at its layer's top-left, one centring-offset above the page beside it,
+ * before the landing frame corrects it. The centring on the turn's landing is
+ * what forecloses that, and this is the guard on it — reported against the back
+ * of the book ("misalignment after flipping pages", a picture of At-Takwir riding
+ * high over Abasa), so the turn is taken there rather than in Al-Baqarah where a
+ * cold page's parse cost is a different number.
+ *
+ * Same shape as the jump's guard: not a resting measurement — both leaves settle
+ * level regardless — but every frame of the turn, failing if any single one
+ * caught them more than a pixel apart. Unlike the jump, a turn *does* draw a fold,
+ * so that is asserted rather than its absence — the two claims are otherwise the
+ * same claim from the two verbs.
+ */
+test("a page turn keeps the two leaves level through every frame", async ({ page }) => {
+  await watchFolds(page);
+  // Start one opening back, so the forward turn crosses *into* At-Takwir facing
+  // Abasa (the opening the report pictured) — a within-opening step would remount
+  // nothing and draw no fold, exercising neither half of the claim.
+  await page.goto("/#/hafs-kfqc/p584");
+  await expect(pageSvg(page, 584)).toBeVisible({ timeout: 20_000 });
+  await expect(spread(page)).toBeVisible();
+  // A cursor over the book, so a wheel would have somewhere to land — the arrow
+  // does not need it, but it keeps the rig identical to the jump's above.
+  await page.mouse.move(400, 450);
+
+  const poll = page.evaluate<{ pair: boolean; gap: number }[]>(
+    () =>
+      new Promise((resolve) => {
+        const frames: { pair: boolean; gap: number }[] = [];
+        const start = performance.now();
+        const tick = () => {
+          const ys = Array.from(
+            document.querySelectorAll('svg[aria-labelledby^="page-label-"]'),
+          )
+            .filter((n) => (n as SVGElement).getClientRects().length > 0)
+            .map((n) => n.getBoundingClientRect().top);
+          frames.push({
+            pair: ys.length === 2,
+            gap: ys.length === 2 ? Math.abs(ys[0]! - ys[1]!) : 0,
+          });
+          if (performance.now() - start < 700) requestAnimationFrame(tick);
+          else resolve(frames);
+        };
+        requestAnimationFrame(tick);
+      }),
+  );
+
+  // ← turns forward, into the next opening.
+  await page.keyboard.press("ArrowLeft");
+
+  const frames = await poll;
+  expect(frames.some((f) => f.pair), "the turn never drew a second leaf").toBe(true);
+  const worst = Math.max(...frames.filter((f) => f.pair).map((f) => f.gap));
+  expect(worst, "the two leaves flashed misaligned during the page turn").toBeLessThan(1.5);
+  // And this one *is* a turn: a fold band crossed the book.
+  expect((await foldsSeen(page)).length, "a page turn drew no fold band").toBeGreaterThan(0);
+});
+
+/*
+ * The live bead in the trail bar hides the string it hangs on.
+ *
+ * The footer's beads thread along a hairline "string" drawn behind them, and the
+ * live bead — the ayah you are on — glows amber to echo the on-page selection.
+ * That amber is deliberately translucent, the same wash the selection multiplies
+ * over scripture; drawn as the bead's only fill it let the string show straight
+ * through the label, a hairline struck through the current ayah's text. Every
+ * other bead hides the string because its paper is opaque, so the fix composites
+ * the wash over that same opaque paper.
+ *
+ * Occlusion is a fact about paint, which jsdom cannot see and a screenshot would
+ * assert too bluntly. What a real layout engine *can* answer, and what the fix
+ * turns on, is whether the bead carries an opaque layer at all: the wash alone
+ * computes to a see-through fill colour with no image behind it, while the fix
+ * leaves a fully opaque paper colour under a gradient. So the claim is the live
+ * bead's own background is opaque — the string cannot reach the glyph through it.
+ *
+ * Phone-shaped window and a mouse, the same rig as the trail-bar test above: the
+ * bead only appears once an ayah is picked, and the desktop project is the one
+ * with a pointer to pick it.
+ */
+test("the live trail bead is opaque, so the string cannot show through its label", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/#/hafs-kfqc/p7");
+  await expect(spread(page)).toHaveCount(0);
+  await expect(pageSvg(page, 7)).toBeVisible();
+
+  const { x, y } = await ayahTarget(page, "#verse-55");
+  await page.mouse.click(x, y);
+
+  const bead = page.locator('[class*="beadCurrent"]');
+  await expect(bead).toBeVisible();
+
+  // The alpha of the bead's own resting background colour. The wash-only bug left
+  // this translucent; the fix's opaque paper layer computes to alpha 1.
+  const alpha = await bead.evaluate((el) => {
+    const bg = getComputedStyle(el).backgroundColor; // rgb(...) or rgba(...)
+    const m = bg.match(/rgba?\(([^)]+)\)/);
+    if (!m) return 1;
+    const parts = m[1]!.split(",").map((s) => parseFloat(s.trim()));
+    return parts.length < 4 ? 1 : parts[3]!;
+  });
+  expect(alpha, "the live bead's background is translucent — the string shows through it").toBe(1);
+});
+
+/*
+ * Every road onto a page lands the two leaves level — the invariant, not a verb.
+ *
+ * The jump's guard and the turn's guard above each watch one road, and that is
+ * how the thread they came from went: four leaf-placement defects (a juz jump, a
+ * turn, a tap, a zoom), each one road that had dropped or reordered the same
+ * settle step, each found by eye and fixed on its own road, none of the fixes
+ * reaching the next. The stage now runs every road through one step, and this
+ * is the guard on *that*: every road there is, driven through one measurement —
+ * through every frame the two leaves on screen sit at the same height, and at
+ * rest they meet at the spine — so the day a road stops settling, the row for
+ * that road fails, not a reader.
+ *
+ * Taken at the back of the book, where the report that started the thread was
+ * pictured (At-Takwir riding high over Abasa).
+ */
+test.describe("every road onto a page lands the leaves level", () => {
+  type Road = { name: string; drive: (page: Page) => Promise<void>; lands: number };
+  const roads: Road[] = [
+    // The cold mount. Nothing to drive: its frames are the resting frames.
+    { name: "a cold open", lands: 584, drive: async () => {} },
+    {
+      name: "a deep link to another page",
+      lands: 300,
+      drive: (page) =>
+        page.evaluate(() => {
+          location.hash = "#/hafs-kfqc/p300";
+        }),
+    },
+    {
+      name: "the page bar",
+      lands: 300,
+      drive: (page) => page.getByRole("slider").fill("300"),
+    },
+    {
+      name: "a page turn",
+      lands: 585,
+      drive: (page) => page.keyboard.press("ArrowLeft"),
+    },
+    {
+      // Back from the middle of juz 30 lands on its own opening, 582 — the ⏮ rule.
+      name: "a juz jump",
+      lands: 582,
+      drive: async (page) => {
+        await page.keyboard.down("Shift");
+        await page.mouse.wheel(0, -120);
+        await page.keyboard.up("Shift");
+      },
+    },
+    {
+      name: "a zoom step in and back out",
+      lands: 584,
+      drive: async (page) => {
+        await zoomBtn(page, "in").click();
+        await expect.poll(() => scaleOf(page, 584)).toBeCloseTo(1.25, 2);
+        await zoomBtn(page, "out").click();
+        await expect.poll(() => scaleOf(page, 584)).toBeCloseTo(1, 2);
+      },
+    },
+    {
+      name: "closing the book and opening it again",
+      lands: 584,
+      drive: async (page) => {
+        await modeBtn(page, "one").click();
+        await expect(pageSvg(page, 583)).toHaveCount(0);
+        await modeBtn(page, "two").click();
+      },
+    },
+    {
+      name: "a resize across the breakpoint and back",
+      lands: 584,
+      drive: async (page) => {
+        await page.setViewportSize({ width: 800, height: 900 });
+        await expect(spread(page)).toHaveCount(0);
+        await page.setViewportSize({ width: 1440, height: 900 });
+      },
+    },
+  ];
+
+  /**
+   * Both painted leaves, every frame for `ms`: are there two, and how far apart
+   * are their heads.
+   *
+   * Read *after* each paint, not inside the animation frame the way the two
+   * guards above do. Reopening the book taught the difference: the frame in
+   * which the spread's layout comes back has both leaves still wearing their
+   * one-leaf transforms when an animation-frame callback measures them, 313 px
+   * apart — and the stage's resize observer then corrects both before that
+   * frame is ever painted. A reader never sees it. A rig that read there would
+   * fail a road that is right, so it reads in the task after the frame, which
+   * is the first moment a reader could have. A flash that survives a paint (the
+   * jump's and the turn's, before their fixes) is still a painted frame, and is
+   * still caught. Zero-sized leaves are not leaves: the closed book keeps the
+   * facing host in the tree at no width.
+   */
+  const framesOf = (page: Page, ms: number) =>
+    page.evaluate<{ pair: boolean; gap: number }[], number>(
+      (ms) =>
+        new Promise((resolve) => {
+          const frames: { pair: boolean; gap: number }[] = [];
+          const start = performance.now();
+          const tick = () =>
+            requestAnimationFrame(() =>
+              setTimeout(() => {
+                const ys = Array.from(
+                  document.querySelectorAll('svg[aria-labelledby^="page-label-"]'),
+                )
+                  .map((n) => n.getBoundingClientRect())
+                  .filter((r) => r.width > 0 && r.height > 0)
+                  .map((r) => r.top);
+                frames.push({
+                  pair: ys.length === 2,
+                  gap: ys.length === 2 ? Math.abs(ys[0]! - ys[1]!) : 0,
+                });
+                if (performance.now() - start < ms) tick();
+                else resolve(frames);
+              }, 0),
+            );
+          tick();
+        }),
+      ms,
+    );
+
+  /** The opening at rest: how many leaves, how level, and the width of the seam between them. */
+  const atRest = (page: Page) =>
+    page.evaluate(() => {
+      const rs = Array.from(document.querySelectorAll('svg[aria-labelledby^="page-label-"]'))
+        .map((n) => n.getBoundingClientRect())
+        .filter((r) => r.width > 0 && r.height > 0)
+        .sort((a, b) => a.x - b.x);
+      const two = rs.length === 2;
+      return {
+        leaves: rs.length,
+        gap: two ? Math.abs(rs[0]!.top - rs[1]!.top) : NaN,
+        seam: two ? rs[1]!.left - rs[0]!.right : NaN,
+        height: two ? Math.abs(rs[0]!.height - rs[1]!.height) : NaN,
+      };
+    });
+
+  for (const road of roads) {
+    test(road.name, async ({ page }) => {
+      await page.goto("/#/hafs-kfqc/p584");
+      await expect(pageSvg(page, 584)).toBeVisible({ timeout: 20_000 });
+      await expect(spread(page)).toBeVisible();
+      await page.mouse.move(400, 450);
+
+      const poll = framesOf(page, 700);
+      await road.drive(page);
+      const frames = await poll;
+
+      expect(frames.some((f) => f.pair), `${road.name} never showed two leaves`).toBe(true);
+      const worst = Math.max(...frames.filter((f) => f.pair).map((f) => f.gap));
+      expect(worst, `${road.name}: the two leaves flashed misaligned`).toBeLessThan(1.5);
+
+      // And at rest, once the road has landed where it said it would.
+      await expect(pageSvg(page, road.lands)).toBeVisible({ timeout: 20_000 });
+      await expect.poll(async () => (await atRest(page)).leaves).toBe(2);
+      const rest = await atRest(page);
+      expect(rest.gap, `${road.name}: the leaves came to rest at different heights`).toBeLessThan(1.5);
+      expect(rest.height, `${road.name}: the leaves came to rest at different sizes`).toBeLessThan(
+        1.5,
+      );
+      // Two 1px leaf borders sit between the papers; a hundred did, once.
+      expect(rest.seam, `${road.name}: the leaves came to rest apart at the spine`).toBeLessThan(8);
+    });
+  }
 });

@@ -219,6 +219,35 @@
   background: var(--paper-raised);
 }
 
+/*
+ * Reserve the control row even when the bar is empty — but only where there is
+ * a single page, not the spread.
+ *
+ * Picking an ayah swaps the quiet hint for a row of touch-sized controls (a
+ * bead, the roots trigger, the share button, each `--touch-min` tall). At the
+ * bare `min-height` above the empty bar is 44px and the populated one is 61px:
+ * the controls, this bar's block padding and its top hairline together outgrow
+ * the box the moment they appear (border-box). Those 17px come off the flex
+ * stage above, and the page — centred in what height is left — slides up on the
+ * first tap of a reading session, walking out from under a finger aiming at the
+ * next ayah. So the empty bar is made to reserve the same height the controls
+ * will need, and the bar stops moving the mus'haf.
+ *
+ * Why not everywhere: on the spread the facing leaf is height-constrained at the
+ * breakpoint corner, where a leaf must still give at least as much scripture as
+ * the narrowest phone (docs/design/desktop.md §3, asserted in desktop.spec.ts).
+ * That corner has no spare height to hand a taller bar, and the spread has its
+ * own answer coming — the ayah's controls move onto the opposite leaf rather
+ * than into this bar. So the reservation is scoped to the layout that has no
+ * facing page: everything below the spread's `(min-width: 1024px) and
+ * (min-height: 740px)` gate, which is also where the bug was reported.
+ */
+@media not all and (min-width: 1024px) and (min-height: 740px) {
+  .trail {
+    min-height: calc(var(--touch-min) + 2 * var(--space-2) + 1px);
+  }
+}
+
 .trailHint {
   font-size: var(--text-sm);
   color: var(--ink-faint);

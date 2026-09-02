@@ -92,6 +92,13 @@ inherited and only the landings are pinned.
 
 ## The stepper is disabled while the book is open
 
+> **Reversed on 2026-09-01.** The reader later chose to let the stepper work with the
+> book open, magnifying both leaves together. The opening grows from the fold outward, so
+> the *edges* worry this section raises is answered rather than paid — the middle gap is
+> kept and the desk margin is spent before anything clips; only the height limit at the
+> narrowest width still stands. The reasoning below is why it was disabled, and it is worth
+> keeping for that — but the app no longer disables it. See [`spread-zoom.md`](spread-zoom.md).
+
 This is where §8 ②'s answer survives its mechanism. That section rendered a magnified spread
 and found what it looks like: two pages under one transform lose their edges and read as one
 continuous column, which an opening is not. And §3 measured a leaf as **height**-bound at

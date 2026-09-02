@@ -82,15 +82,29 @@ href: https://github.com/quranpedia/quran-svg
   qurancomplex.gov.sa in an ordinary browser and confirm the wording is still what
   NOTICE.md records. Nothing in the build depends on the answer; the entry moves
   from PROVISIONAL to CONFIRMED-pending-that-glance.
-- **Immutability:** SVG bytes are copied verbatim and never edited (PLAN §8). Loop
-  4b applies exactly two declared transforms, both reproducible and both asserted:
-  **svgo** at the version and config recorded in the pin (the config was recovered
-  by search until it reproduced Loop 0's three pages byte-for-byte), and **two
-  `id` repairs** — 19:3 on p305 and 75:5 on p577 carry path geometry where every
-  other polygon carries `verse-<absolute ayah>`. The count is asserted to be
-  exactly two and the ayahs exactly those two, so a future pin that fixes them
-  upstream fails loudly instead of drifting silently. `pnpm gate:pages` re-checks
-  the vendored hashes offline on every CI run.
+- **Immutability:** SVG bytes are never hand-edited (PLAN §8). Loop 4b applies
+  **three** declared transforms, each reproducible and each asserted:
+  1. **svgo** at the version and config recorded in the pin — the config was
+     recovered by search until it reproduced Loop 0's three pages byte-for-byte.
+     It rewrites path data at a fixed coordinate precision, so the artwork that
+     ships is minified rather than byte-identical to upstream.
+  2. **Two `id` repairs** — 19:3 on p305 and 75:5 on p577 carry path geometry
+     where every other polygon carries `verse-<absolute ayah>`. The count is
+     asserted to be exactly two and the ayahs exactly those two, so a future pin
+     that fixes them upstream fails loudly instead of drifting silently.
+  3. **Twenty-three polygon repairs across nineteen pages.** Upstream gives some
+     ayahs a tappable box that does not cover the ayah — a page's first ayah given
+     only its last line, two lines under one line of polygon, a rect squashed off
+     the line grid. The ayah is readable either way; it simply cannot be *tapped*,
+     which for this app means it cannot be reached. Each repair carries the exact
+     upstream shape it replaces, so a pin that fixes one upstream dies rather than
+     silently re-breaking it, and `gate:pages` re-derives the defect from the
+     committed bytes on its own — it knows nothing of the repair table and simply
+     demands that no ink sits outside a polygon.
+
+  This entry said *two* transforms for as long as there were three; the pipeline's
+  own header is the authority and has been right throughout. `pnpm gate:pages`
+  re-checks the vendored hashes offline on every CI run.
 
 ---
 

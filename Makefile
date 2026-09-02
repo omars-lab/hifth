@@ -213,8 +213,10 @@ ci: core ## Full local mirror of the CI build-test-gate job, IN CI ORDER
 	$(PNPM) audit:corpus
 	$(PNPM) gate:notext
 	$(PNPM) gate:text-sources
+	$(PNPM) gate:scripture
 	$(PNPM) gate:license
 	$(PNPM) gate:license-copy
+	$(PNPM) gate:notices
 	$(PNPM) gate:validation
 	$(PNPM) gate:verified-edges
 	$(PNPM) gate:edges
@@ -224,11 +226,13 @@ ci: core ## Full local mirror of the CI build-test-gate job, IN CI ORDER
 	$(PNPM) gate:golden-size
 	$(PNPM) gate:assets
 	$(PNPM) gate:pages
+	$(PNPM) gate:boxes
 	$(PNPM) gate:words
 	$(PNPM) gate:align
 	$(PNPM) gate:map
 	$(PNPM) gate:use-cases
 	$(PNPM) gate:issues
+	$(PNPM) gate:tasks
 	$(PNPM) gate:decisions
 	$(PNPM) gate:quran-meta
 	$(PNPM) gate:tajweed
@@ -390,9 +394,27 @@ issues: ## What is still open, worst first:  make issues  ·  make issues ID=<id
 	  node scripts/gate-issues.mjs --list; \
 	fi
 
+.PHONY: box-sweep
+box-sweep: core ## Draw every ayah box the pen cannot draw as lines, on its page → docs/design/ayah-box-sweep.html
+	@node scripts/build-box-sweep.mjs
+
 .PHONY: issues-doc
 issues-doc: ## Re-render docs/issues.md from docs/issues.json and its four registers
 	@node scripts/build-issues-doc.mjs
+
+.PHONY: tasks
+tasks: ## What is still open, by whose turn it is:  make tasks
+	@# The same facts as `make issues`, cut the other way. Worst-first is the
+	@# order you want when you are choosing what to fix; whose-turn-is-it is the
+	@# order you want when you have an hour and are asking what only you can
+	@# move. Two of the three registers it reads — the open decisions and the
+	@# checks a machine cannot run — appear in the issue index only as bare
+	@# identifiers, so this is the only page that shows them by name.
+	@node scripts/gate-tasks.mjs --list
+
+.PHONY: tasks-doc
+tasks-doc: ## Re-render docs/tasks.md from the decisions, ledger, issues and PLAN registers
+	@node scripts/build-tasks-doc.mjs
 
 .PHONY: decisions
 decisions: ## What has been decided and what is still open:  make decisions  ·  make decisions ID=<id>
@@ -410,6 +432,9 @@ decisions: ## What has been decided and what is still open:  make decisions  · 
 .PHONY: decisions-doc
 decisions-doc: ## Re-render docs/decisions/README.md from docs/decisions.json
 	@node scripts/build-decisions-doc.mjs
+
+.PHONY: render-docs
+render-docs: use-cases-doc issues-doc tasks-doc decisions-doc ## Re-render every generated register page (the pre-commit hook refuses a stale one)
 
 .PHONY: validate
 validate: ## Outstanding manual checks — or one check's full runbook:  make validate CHECK=<id>
@@ -604,6 +629,7 @@ help: ## List targets (this)
 	@echo "  Golden images:  make golden        (diff against this platform's baselines)"
 	@echo "                  make golden-update (accept new ones — review the PNG diff!)"
 	@echo "                  make golden-linux UPDATE=1  (refresh the CI/linux set)"
+	@echo "  Registers:      make render-docs   (re-render the four generated pages the hook checks)"
 	@echo "  Bundle size:    make budget-update (accept a new JS baseline — read the diff!)"
 	@echo "  Parallel work:  make lock L=build CMD=\"pnpm -r test\" | make lock-status"
 	@echo "                  the protocol: docs/PARALLEL-AGENTS.md"

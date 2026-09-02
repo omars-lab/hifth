@@ -101,14 +101,7 @@ export {
   type StageFit,
 } from "./view.js";
 
-export {
-  VERSE_TEXT,
-  verseTokens,
-  diffPair,
-  type DiffClass,
-  type DiffToken,
-  type DiffSide,
-} from "./verse-text.js";
+export { wordDiff, divergentRuns, type DiffSide, type WordDiff } from "./verse-diff.js";
 
 export {
   serializeState,

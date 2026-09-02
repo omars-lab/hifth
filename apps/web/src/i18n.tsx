@@ -96,7 +96,8 @@ import {
   ayahRef as fmtAyahRef,
   rangeLabel as fmtRangeLabel,
   digits,
-  digitsIn,
+  longDay,
+  longMonth,
   surahName as fmtSurahName,
   surahNames,
   tenths,
@@ -145,6 +146,17 @@ export interface Strings {
 
   /* ---- chrome ------------------------------------------------------------- */
   about: string;
+  /**
+   * The wordmark and its tagline in the header. These follow the UI language —
+   * «حفظ / مِلاحة للحُفّاظ» in Arabic, "Hifth / Navigation for huffaz" in English
+   * — because the wordmark is chrome, not scripture, and the note under the
+   * language switch already promises that only the mus'haf and the verse text
+   * stay Arabic. The name is a name, not a translated word; the English wordmark
+   * is its transliteration, which is what the app is called in English prose
+   * throughout (`about`, `aboutTitle`).
+   */
+  wordmark: string;
+  tagline: string;
   pageWord: string;
   /**
    * "صفحة 7" / "Page 7" — the stage's accessible name and the page-turn
@@ -349,6 +361,7 @@ export interface Strings {
   licenceHead: string;
   licenceBody: string;
   sourceLink: string;
+  designsLink: string;
   devBuild: string;
   devBuildNote: string;
   sourcesHead: string;
@@ -385,6 +398,21 @@ export interface Strings {
    * tell that lie — an empty map dated this morning is visibly a new record.
    */
   mapSince(day: string): string;
+  /** The time-range switch's accessible name, beside the division switch. */
+  mapRangeGroup: string;
+  /** Colour by every look on record. */
+  mapRangeAll: string;
+  /** Colour by this calendar month's looks only. */
+  mapRangeThisMonth: string;
+  /** Colour by the previous calendar month's looks only. */
+  mapRangeLastMonth: string;
+  /**
+   * Which month the colouring is scoped to, when it is scoped to one:
+   * "Activity in Sept 2026" / «نشاط سبتمبر ٢٠٢٦». It replaces the "active since"
+   * line under a bounded range, because that line dates the *record* and a
+   * bounded picture is dating the *window* instead. `month` is 1–12.
+   */
+  mapActiveIn(year: number, month: number): string;
   /**
    * The grid's own name. Sixty unlabelled squares inside a dialog are sixty
    * anonymous list items to a screen reader; naming the list is what separates
@@ -483,14 +511,6 @@ export interface Strings {
    * group called «التكبير», and an announcement arrives with no such context.
    */
   arrivedZoom(percent: number): string;
-  /**
-   * Why the stepper is greyed out with the book open.
-   *
-   * A disabled control owes an explanation — otherwise it reads as broken rather
-   * than as not-now — and the explanation names the way out, which is the toggle
-   * sitting beside it.
-   */
-  zoomTwoPage: string;
   /** Where a `Shift`+wheel landed: the juz, and the page it opens on. */
   arrivedJuz(juz: number, page: number): string;
   /** …and where it did not, because that was the first or last juz we hold. */
@@ -544,6 +564,8 @@ export function buildStrings(lang: Lang, m: Catalog): Strings {
     langSwitchTo: (other) => m.langSwitchTo({ other }),
 
     about: m.about,
+    wordmark: m.wordmark,
+    tagline: m.tagline,
     pageWord: m.pageWord,
     pageN: (page) => m.pageN({ page }),
     goTo: m.goTo,
@@ -748,6 +770,7 @@ export function buildStrings(lang: Lang, m: Catalog): Strings {
     licenceHead: m.licenceHead,
     licenceBody: m.licenceBody,
     sourceLink: m.sourceLink,
+    designsLink: m.designsLink,
     devBuild: m.devBuild,
     devBuildNote: m.devBuildNote,
     sourcesHead: m.sourcesHead,
@@ -770,10 +793,17 @@ export function buildStrings(lang: Lang, m: Catalog): Strings {
         totalText: n(total),
         scope: scope === "juz" ? "other" : scope,
       }),
-    // The day stamp is a string with hyphens in it, not a number, which is why
-    // it goes through `digitsIn` rather than `digits` — «٢٠٢٦-٠٧-٣٠» keeps its
-    // shape and the separators survive.
-    mapSince: (day) => m.mapSince({ dayText: digitsIn(day, lang) }),
+    // The stored day is an ISO stamp — a fact for a computer. `longDay` turns it
+    // into the date a reader recognises as theirs: "Sept 1st, 2026" / «١ سبتمبر
+    // ٢٠٢٦», in the reader's own month names and digits.
+    mapSince: (day) => m.mapSince({ dayText: longDay(day, lang) }),
+    mapRangeGroup: m.mapRangeGroup,
+    mapRangeAll: m.mapRangeAll,
+    mapRangeThisMonth: m.mapRangeThisMonth,
+    mapRangeLastMonth: m.mapRangeLastMonth,
+    // `longMonth` names the month in the reader's own month names and digits —
+    // "Sept 2026" / «سبتمبر ٢٠٢٦» — the same table `longDay` draws from.
+    mapActiveIn: (year, month) => m.mapActiveIn({ monthText: longMonth(year, month, lang) }),
     mapGrid: m.mapGrid,
     mapNoStore: m.mapNoStore,
     mapLoading: m.mapLoading,
@@ -829,7 +859,6 @@ export function buildStrings(lang: Lang, m: Catalog): Strings {
     zoomOut: m.zoomOut,
     zoomLevel: (percent) => m.zoomLevel({ pctText: n(percent) }),
     arrivedZoom: (percent) => m.arrivedZoom({ pctText: n(percent) }),
-    zoomTwoPage: m.zoomTwoPage,
     arrivedJuz: (juz, page) => m.arrivedJuz({ juzText: n(juz), page }),
     juzEdge: (juz) => m.juzEdge({ juzText: n(juz) }),
   };

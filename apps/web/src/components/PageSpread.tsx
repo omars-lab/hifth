@@ -65,6 +65,17 @@ interface PageSpreadProps {
    * accessibility tree.
    */
   solo?: boolean;
+  /**
+   * The grabbable fore-edges, dropped into the book beside the gutter.
+   *
+   * A slot rather than a fact this component owns, for the same reason `bookRef`
+   * is: turning a page has a *picture*, and the spread must not acquire an
+   * opinion about it. What arrives here is furniture that captures a pointer on
+   * the outer edges and tells someone — it no more knows what a fold is than the
+   * gutter does. Absent below the breakpoint, where there is no book to edge and
+   * the phone turns pages by swiping the leaf itself.
+   */
+  edgeRails?: ReactNode;
 }
 
 /**
@@ -147,6 +158,7 @@ export function PageSpread({
   renderFacing,
   bookRef,
   solo = false,
+  edgeRails,
 }: PageSpreadProps): JSX.Element {
   const { t } = useT();
 
@@ -239,6 +251,13 @@ export function PageSpread({
       >
         {leaf(right, "right")}
         {leaf(left, "left")}
+        {/* Solo — the book is closed to one magnified leaf — takes the rails
+            away: there is no facing page to turn toward, and a fore-edge grab
+            over a page the reader is panning would fight the pan. Before the
+            gutter so the spine stays the book's last child — it is drawn on top
+            of nothing and the rails hug the outer edges, so paint order is free,
+            but the gutter is the book's signature furniture and reads last. */}
+        {!solo && edgeRails}
         <div className={styles.gutter} aria-hidden="true" />
       </div>
     </div>

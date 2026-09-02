@@ -31,10 +31,11 @@
  *
  * WHAT IT DOES NOT READ. `--page-table` asks api.quran.com for verse *keys* and
  * nothing else: no `fields` parameter, so no `text_uthmani`, no translation, no
- * transliteration. The repo's standing rule is "There is no Quran text in this
- * repo and there will not be" (packages/etl/scripts/morphology.mjs), and the
- * cheapest way to keep a probe honest is for the text never to cross the wire in
- * the first place. Nothing here writes a file.
+ * transliteration. The repo's standing rule is that nothing it vendors and
+ * nothing it ships is Quran text (packages/etl/scripts/morphology.mjs states it,
+ * `gate:scripture` enforces it), and the cheapest way to keep a probe honest is
+ * for the text never to cross the wire in the first place. Nothing here writes a
+ * file.
  *
  * Usage:
  *   node scripts/probe-reference.mjs                 # reachability, ~15s

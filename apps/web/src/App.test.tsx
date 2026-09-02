@@ -4,6 +4,7 @@ import "fake-indexeddb/auto";
 import { describe, it, expect, vi, beforeAll, beforeEach, afterAll, afterEach } from "vitest";
 import { render, screen, waitFor, act, within } from "@testing-library/react";
 import { App } from "./App";
+import { LangProvider } from "./i18n";
 import { forgetRecord, readRecord } from "./revision-store";
 
 const MANIFEST = {
@@ -100,6 +101,35 @@ describe("App shell", () => {
     render(<App />);
     expect(screen.getByText("حفظ")).toBeInTheDocument();
     expect(document.querySelector('[dir="rtl"]')).toBeInTheDocument();
+  });
+
+  it("renders an English wordmark when the chrome is English", () => {
+    // The wordmark follows the UI language. It was pinned to «حفظ · مِلاحة
+    // للحُفّاظ» in both languages; this reverses that, because the wordmark is
+    // chrome and only the mus'haf and the verse text stay Arabic. This is the
+    // regression that runs on every push — the English path's home is the phone
+    // e2e project (`lang.spec.ts`), which is not exercised until mobile testing
+    // is stood up, so the jsdom shell carries the assertion in the meantime.
+    //
+    // Wrapped in a real `LangProvider`, unlike the row above: a bare `<App/>`
+    // takes the context's hard-wired Arabic default (see i18n.tsx — deliberately
+    // Arabic so the pre-existing unit tests never depended on jsdom's
+    // `navigator.language`). The provider is where the language actually comes
+    // from, and `detectLang` reads the stored choice first.
+    localStorage.setItem("hifth.lang.v1", "en");
+    try {
+      render(
+        <LangProvider>
+          <App />
+        </LangProvider>,
+      );
+      expect(screen.getByText("Hifth")).toBeInTheDocument();
+      expect(screen.getByText("Navigation for huffaz")).toBeInTheDocument();
+      // Not the Arabic wordmark wearing an English chrome.
+      expect(screen.queryByText("حفظ")).not.toBeInTheDocument();
+    } finally {
+      localStorage.removeItem("hifth.lang.v1");
+    }
   });
 
   it("shows the starting page number (7)", () => {

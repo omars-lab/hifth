@@ -236,12 +236,20 @@ The pattern is the same each time: the failure was not in the check, it was in t
 
 ## ④ The one-way boundary
 
-The repo's load-bearing rule, stated once in `morphology.mjs` and enforced twice:
+The repo's load-bearing rule, stated once in `morphology.mjs`:
 
-> There is no Quran text in this repo and there will not be.
+> Nothing this project vendors, and nothing it ships, is Quran text.
 
 It survives contact with an ETL whose whole job is comparing texts, and the way it survives
 is the most interesting structural fact in the pipeline.
+
+**It used to be written unscoped** — *"there is no Quran text in this repo and there will not
+be"* — and about the repository as a whole it was false. Twelve verses were typed into a source
+file and shipped in the bundle; a pipeline test held a four-word phrase. Neither crossed this
+boundary, which is exactly why the boundary did not catch them: they arrived by being typed.
+The rule about the pipeline was true the whole time and is what the diagram below draws. The
+rule about the tree needed a check of its own, and now has one — `gate:scripture`, which fails
+on any run of three consecutive fully-vowelled words in any source file.
 
 ```mermaid
 flowchart LR

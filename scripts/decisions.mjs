@@ -15,6 +15,7 @@ import { readFileSync, existsSync, readdirSync } from "node:fs";
 import { createHash } from "node:crypto";
 import { join } from "node:path";
 import { ROOT } from "./code-pointers.mjs";
+import { publicUrl } from "./site.mjs";
 
 export const DECISIONS_PATH = join(ROOT, "docs", "decisions.json");
 export const DOC_PATH = join(ROOT, "docs", "decisions", "README.md");
@@ -27,15 +28,20 @@ export const STATUSES = ["open", "decided", "living", "superseded"];
 export const STATUS_ORDER = ["open", "living", "decided", "superseded"];
 
 /**
- * The only host an `artifact` may name.
+ * The one address an `artifact` may be: the checked-in page's own, on the site.
  *
- * Not a general URL check. A decision aid that lives on somebody's gist, or on
- * a preview deployment, or behind http, is a link that will be dead the day
- * somebody needs it — and the failure is silent, because a dead link still
- * renders as a link. Narrow on purpose: widen it when there is a second place
- * these are actually published, not in advance.
+ * Until 2026-09-01 this was a host check — the link had to be on the one host
+ * decision pages were put on — and the address was minted there, written back
+ * here by hand, and lived on a host that could go away. Now the build stages
+ * every page under docs/ onto the app's own site at the same path (see
+ * stage-docs.mjs), so the public address is a function of the path and nothing
+ * else. Derived here, and the gate refuses a row that says anything different:
+ * a link a reader can only reach through a second host is a link with a second
+ * way to die.
  */
-export const ARTIFACT_HOST = "https://claude.ai/";
+export function artifactFor(d) {
+  return d.page ? publicUrl(d.page) : null;
+}
 
 export function readDecisions() {
   if (!existsSync(DECISIONS_PATH)) {

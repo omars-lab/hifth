@@ -77,6 +77,31 @@ if [ -n "$staged" ] && command -v node >/dev/null 2>&1; then
   fi
 fi
 
+# The rendered register pages, unscoped. Four pages under docs/ are built from
+# the JSON registers and stamped with a hash of what they were built from:
+# use-cases.md, issues.md, tasks.md and decisions/README.md. The scoped checks
+# above ask whether a pointer still resolves; they do not ask whether the page
+# was re-rendered, and on 2026-09-01 a commit edited docs/use-cases.json,
+# passed this hook, and shipped with the use-cases gate red until the next full
+# `pnpm gates`. The hash is a function of the register and of the documents it
+# reads titles from (PLAN.md, the design docs), so a stale page cannot be
+# predicted from the staged paths — hence unscoped, and cheap: each check is a
+# hash comparison, well under a second for all three. The decisions README is
+# already covered above, since its hash depends only on decisions.json.
+if [ -n "$staged" ] && command -v node >/dev/null 2>&1; then
+  for gate in use-cases issues tasks; do
+    if ! out=$(node "scripts/gate-$gate.mjs" 2>&1); then
+      echo "$out"
+      echo ""
+      echo "pre-commit: a rendered register page is stale or its register is broken (above)."
+      echo "  re-render every generated page:  make render-docs"
+      echo "  then stage the page it rewrote alongside your change."
+      echo "  to bypass this one commit:  git commit --no-verify"
+      exit 1
+    fi
+  done
+fi
+
 # The licence the reader is shown and the licence on record, on the one commit
 # that can still change either cheaply. Same reasoning as the map above, with a
 # sharper edge: a wrong licence line is not a stale pointer, it is a false

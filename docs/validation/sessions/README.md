@@ -27,6 +27,14 @@ the status — and a transcript is the working underneath one entry in it, the w
 decide whether a check passed.** A person reads one when they want to know how a verdict
 was arrived at.
 
+They are also not the **answers**. A check whose tool hands back a file of what a person
+actually said puts that file in [`../rulings/`](../rulings/), named for the same sitting, and
+a scorer re-reads it to reproduce the verdict on another machine. A transcript says *a sitting
+happened and here is how it went*; a ruling says *here is what was answered*. They pair by
+stem — `2026-08-12T1650-placement-residual-by-hand.jsonl` beside
+`2026-08-12T1650-placement-residual-by-hand.seed23.json` — and the README next door says why
+a seed belongs in the name.
+
 They also carry no score. The session page shows how far through you are and whether your
 last answer was saved, and nothing else, because at least one check here —
 `placement-correction-by-eye` — is a blind forced choice whose whole validity rests on

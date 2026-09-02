@@ -91,6 +91,11 @@ export default defineConfig({
         // 604 pages × ~160 KB would make the install download the whole book.
         globIgnores: ["assets/pages/**"],
         navigateFallback: "index.html",
+        // The design pages the build stages under /docs/ (scripts/stage-docs.mjs)
+        // are real documents, not app routes: a reader with the app installed
+        // must get the page, not the shell. They are not in the precache either
+        // — the glob above runs before they are copied in.
+        navigateFallbackDenylist: [/\/docs\//],
         cleanupOutdatedCaches: true,
         // Fill the offline cache from the *first* visit rather than the second:
         // without claiming, the tab that ran the install stays uncontrolled, so

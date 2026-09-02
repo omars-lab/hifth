@@ -9,9 +9,10 @@
  * absolute rather than relative to the prefix. Every one of those is a way the
  * inspector could show a confident wrong screen.
  *
- * The words below are the ordinary ones — al-Fatiha's opening, which is also
- * the basmala the fold prepends — because a correction is easiest to read as a
- * difference in a string a reader recognises.
+ * The words below are bare letters wherever the assertion is arithmetic, and a
+ * real one only where the codepoint under test *is* the subject — a correction
+ * that fires on a small high mark cannot be tested without that mark. Keeping
+ * the two apart is what lets this file hold single specimens and no passage.
  */
 import { describe, expect, it } from "vitest";
 import {
@@ -38,8 +39,18 @@ import {
 /** `{ hafs, waw, mark }` without the ceremony. */
 const w = (hafs, extra = {}) => ({ hafs, waw: false, mark: false, ...extra });
 
-/** 1:1 — «بِسۡمِ ٱللَّهِ ٱلرَّحۡمَٰنِ ٱلرَّحِيمِ», as the print numbers it. */
-const BASMALA = [w("بِسۡمِ"), w("ٱللَّهِ"), w("ٱلرَّحۡمَٰنِ"), w("ٱلرَّحِيمِ")];
+/**
+ * A four-word stand-in for the prefix the fold prepends. Four because that is
+ * how many words the print numbers there, and the host count below asserts it.
+ *
+ * Bare letters rather than the real opening: `foldAyah` never reads a word's
+ * content when it builds the prefix — it joins, spaces, and counts — so the real
+ * text would be decoration on an arithmetic test, and `gate:scripture` refuses a
+ * running passage in source wherever it finds one. The corrections that *are*
+ * content-sensitive are tested on single words, below, where the codepoint under
+ * test is the point.
+ */
+const PREFIX = [w("ا"), w("ب"), w("ج"), w("د")];
 
 const str = (cps) => cps.join("");
 const all = new Set(ALL_CORRECTIONS);
@@ -192,11 +203,11 @@ describe("hasBasmala", () => {
 });
 
 describe("foldAyah", () => {
-  const args = { surah: 2, ayah: 1, words: [w("الٓمٓ")], basmala: BASMALA, indices: [1] };
+  const args = { surah: 2, ayah: 1, words: [w("الٓمٓ")], basmala: PREFIX, indices: [1] };
 
   it("prepends the basmala and one space when `basmala` is on", () => {
     const { cps, prefix } = foldAyah({ ...args, on: all });
-    expect(str(cps)).toBe("بِسۡمِ ٱللَّهِ ٱلرَّحۡمَٰنِ ٱلرَّحِيمِ الٓمٓ");
+    expect(str(cps)).toBe("ا ب ج د الٓمٓ");
     expect(prefix).toBe(str(cps).indexOf("الٓمٓ"));
   });
 
@@ -209,7 +220,7 @@ describe("foldAyah", () => {
   it("folds the prefix under the same corrections as the body", () => {
     // A mark inside the basmala must vanish from the prefix too, or the ayah's
     // own offsets shift by two and every span in it is wrong.
-    const basmala = [w("بِسۡمِ"), w("ۖ", { mark: true }), w("ٱللَّهِ")];
+    const basmala = [w("ا"), w("ۖ", { mark: true }), w("ب")];
     const on = new Set(ALL_CORRECTIONS);
     const withMarks = foldAyah({ ...args, basmala, on: new Set(["basmala", "waw"]) });
     const without = foldAyah({ ...args, basmala, on });

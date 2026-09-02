@@ -515,6 +515,32 @@ describe("Highlighter marker swipes", () => {
     for (const m of marks) expect(m.getAttribute("y1")).toBe(m.getAttribute("y2"));
   });
 
+  it("splits a long ayah's fused middle box into one line per line (#4, #12)", () => {
+    // 2:249 as vendored (`verse-256`, page 41): a one-line head, six full-width
+    // middle lines the print fused into one 218-unit box, and a one-line tail.
+    // Before the fix the box was drawn as a single fat band — the "blob" a
+    // reader saw instead of six lines. The line height is not in the ayah (the
+    // box is taller than any line it contains); the highlighter reads it off the
+    // page's other polygons, which are one line each.
+    document.body.innerHTML = "";
+    svg = makeInkSvg("M0 6.3h345v36H0Zm0 36h345v218.4H0Zm233.4 218.4H345v36H233.4Z");
+    hl = new Highlighter(svg, resolver, 7);
+    hl.highlight("quran/hafs-kfqc/2:38", "sel", "selection");
+
+    const marks = [...svg.querySelectorAll<SVGElement>("#hifth-overlay .hl-sel")];
+    expect(marks).toHaveLength(8);
+    // No band is a blob: every stroke is about one line thick, never the whole
+    // box. The old bug drew one stroke 218 × 0.72 ≈ 157 units wide.
+    for (const m of marks) {
+      expect(Number(m.getAttribute("stroke-width"))).toBeLessThan(36 * 1.5);
+    }
+    // The stagger runs unbroken across all eight lines, so the wipe still reads
+    // as one pen crossing the ayah top to bottom.
+    expect(marks.map((m) => m.style.getPropertyValue("--hl-i"))).toEqual([
+      "0", "1", "2", "3", "4", "5", "6", "7",
+    ]);
+  });
+
   it("tags swipes `hl-ink`, which is what the stylesheet keys the pen off", () => {
     hl.highlight("quran/hafs-kfqc/2:38", "sel", "selection");
     const marks = [...svg.querySelectorAll("#hifth-overlay .hl-sel")];

@@ -337,3 +337,21 @@ failure: dropping the call from `RevisionMap` fails only the page-scope test, an
 the `scope !== "page"` guard so it filters everywhere fails only the juz one. The fixture
 uses `quran/hafs-indopak/2:30` on purpose — an ayah inside hizb 1 and juz 1, divisions this
 build does hold paper for, so `absent` cannot answer for either assertion.
+
+### ④ Is the rule "nothing leaves the device," or "nothing leaves unless it serves the reader"? · **open**
+
+The privacy invariant and the *Export or sync* line under **Deliberately out of scope** both
+state the stance as an absolute: nothing leaves the device. Reviewing the confusion-map export
+decision, the owner sharpened it — the durable rule is not that nothing leaves, but that nothing
+leaves *unless it is in the reader's interest, and under their control*. A flat *nothing leaves*
+is a promise that breaks the first time the reader's own interest points outward — wanting a
+hard-won record to survive a lost phone — and once broken it reads as abandoned; naming the test
+instead keeps the promise. This does **not** loosen `gate:revision-privacy`: the gate exists to
+make anything leaving a *deliberate* act rather than a convenient one, and "in the reader's
+interest, under their control" is exactly the shape of a deliberate act — the gate stays, the
+sentence it defends gets the truer wording. **What would answer it:** adopting the sharper
+wording here and in the invariant's prose, so a future export/sync question is weighed by whether
+it serves the reader rather than refused by reflex. The confusion-map export decision
+(`confusion-map-export`, and open question ② in the confusion-points design) is the first place
+this is being applied; this item exists so the revision-record framing is revisited against it
+rather than left standing as an absolute the app no longer holds.

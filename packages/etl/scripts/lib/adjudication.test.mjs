@@ -21,7 +21,7 @@
  * corpus cache the real readers want.
  */
 import { describe, expect, it } from "vitest";
-import { planNudge, planSession, REPEAT_GAP, START_R, windowFor } from "./adjudication.mjs";
+import { planNudge, planSession, REPEAT_GAP, sameBuild, selectPages, START_R, windowFor } from "./adjudication.mjs";
 import { shapeOf } from "./ink.mjs";
 
 /** Twelve pages of forty marks, each a plausible size, all of them solid ink. */
@@ -189,7 +189,230 @@ describe("planNudge", () => {
     expect(pages).toBe(shifts.length);
   });
 
+  it("carries which mark it means, so a trial is never about whichever one you picked", () => {
+    // A crop of print holds several marks and often two of the same name. If the
+    // trial cannot say which, a reader either guesses or places the rectangle on
+    // the wrong one — and a placement on the wrong mark is a whole-letter error
+    // that would be scored as a registration error. The identification has to
+    // travel with the trial, not be recoverable from it later.
+    const named = {
+      marksFor: (page) =>
+        io.marksFor(page).map((mk, k) => ({
+          ...mk,
+          lig: { text: "AB", letters: ["M0 0", "M1 1"] },
+          nth: (k % 2) + 1,
+          of: 2,
+        })),
+      inkFor: io.inkFor,
+    };
+    for (const t of planNudge({ seed: 5, count: 60, shifts, io: named }).trials) {
+      expect(t.lig).toEqual({ text: "AB", letters: ["M0 0", "M1 1"] });
+      expect(t.of).toBe(2);
+      expect([1, 2]).toContain(t.nth);
+    }
+  });
+
+  it("still says something about a mark the corpus placed inside no ligature", () => {
+    // The fixture above has none of the identification fields, which is the
+    // shape a mark drawn under a word but outside every ligature group arrives
+    // in. The page must still be buildable from it: one of one, no letters, and
+    // the builder says so in words rather than pointing at a tint that is not
+    // there.
+    for (const t of nudge().trials) {
+      expect(t.lig).toBe(null);
+      expect(t.nth).toBe(1);
+      expect(t.of).toBe(1);
+    }
+  });
+
   it("refuses rather than shortening when there are not enough marks with ink under the box", () => {
     expect(() => planNudge({ seed: 5, count: 600, shifts: shifts.slice(0, 1), io })).toThrow(/passed the ink floor/);
+  });
+});
+
+/**
+ * Twenty pages whose corrections genuinely differ, which the twelve above do not
+ * — they all carry the same displacement, because what they are there to exercise
+ * is the walk. Choosing pages is arithmetic over the displacements themselves, so
+ * it needs a fixture where the displacements vary, and vary in a shape a person
+ * can check by eye: `dx` walks from -1.9 up to -0.0, and `dy` runs the other way.
+ */
+const varied = Array.from({ length: 20 }, (_, i) => ({
+  page: i + 1,
+  dx: -1.9 + i * 0.1,
+  dy: -0.2 - i * 0.1,
+  n: 40,
+}));
+
+describe("selectPages", () => {
+  it("never returns a page that was held out, which is the whole point of holding one out", () => {
+    // A sitting exists to say whether the correction works where it was not
+    // fitted. One page from the fitted set leaking in does not merely dilute
+    // that — it makes the claim untrue, and nothing downstream can detect it.
+    const exclude = [3, 4, 5, 6, 7, 8, 9, 10];
+    const got = selectPages({ shifts: varied, exclude, pages: 8 });
+    expect(got).toHaveLength(8);
+    for (const p of got) expect(exclude).not.toContain(p);
+  });
+
+  it("takes the ends rather than the middle, because the middle is the sample that already failed", () => {
+    // The first sitting could not measure the correction's *size* because the
+    // proposed move barely varied across its pages. A regression on a quantity
+    // that does not vary has no leverage, so the estimate came out ±0.68 on a
+    // number of interest around 0.1. Spanning the range is what buys it back.
+    const chosen = selectPages({ shifts: varied, pages: 8 });
+    const dx = chosen.map((p) => varied[p - 1].dx);
+    const span = Math.max(...dx) - Math.min(...dx);
+    const middle = varied.slice(6, 14).map((s) => s.dx);
+    expect(span).toBeGreaterThan(Math.max(...middle) - Math.min(...middle));
+    expect(span).toBeGreaterThan(1.5);
+  });
+
+  it("spans both axes, since a correction can be right across and wrong down", () => {
+    const chosen = selectPages({ shifts: varied, pages: 8 });
+    for (const k of ["dx", "dy"]) {
+      const v = chosen.map((p) => varied[p - 1][k]);
+      expect(Math.max(...v) - Math.min(...v)).toBeGreaterThan(1.5);
+    }
+  });
+
+  it("gives the same list every time, or a banked sitting cannot be re-scored", () => {
+    // The scorer replays the recorded list rather than re-running this, so a
+    // wobble here would not corrupt an old reading — but it would mean two
+    // builds of the "same" session were different sessions, which is the bug
+    // that is hardest to see and hardest to believe once seen.
+    const once = selectPages({ shifts: varied, pages: 7, exclude: [2, 19] });
+    for (let i = 0; i < 5; i += 1) {
+      expect(selectPages({ shifts: varied, pages: 7, exclude: [2, 19] })).toEqual(once);
+    }
+  });
+
+  it("keeps every page when nothing is asked for, which is what every session did before", () => {
+    expect(selectPages({ shifts: varied, pages: 0 })).toEqual(varied.map((s) => s.page));
+    expect(selectPages({ shifts: varied, pages: 999 })).toEqual(varied.map((s) => s.page));
+    expect(selectPages({ shifts: varied, pages: 4, spread: "all" })).toEqual(varied.map((s) => s.page));
+  });
+
+  it("narrows what planNudge may ask about, so the two agree on what a trial index means", () => {
+    // The join that makes the whole scheme work: the pages come out of here and
+    // go into the plan as its entire universe. If a page the selection excluded
+    // could still appear in a trial, the recorded list would be a description of
+    // the session rather than a definition of it, and replaying it would prove
+    // nothing.
+    const chosen = selectPages({ shifts: varied, pages: 6, exclude: [1, 20] });
+    const byPage = new Map(varied.map((s) => [s.page, s]));
+    const { trials } = planNudge({ seed: 9, count: 30, shifts: chosen.map((p) => byPage.get(p)), io });
+    expect(new Set(trials.map((t) => t.page))).toEqual(new Set(chosen));
+  });
+});
+
+/**
+ * The second strategy, and why it is a second one rather than a better default.
+ *
+ * A placing session regresses how far a hand moved a rectangle against how far we
+ * proposed to move it, and reads a slope. A slope is bought with leverage, so it
+ * wants the pages where the proposal is largest and smallest and does not care
+ * that they are unusual pages.
+ *
+ * A forced choice reports a *proportion* — how often a reader prefers ours — and
+ * a proportion has no leverage to gain and a representativeness to lose. Ask it
+ * only about the extremes and it fills with the easiest trials and the impossible
+ * ones, then reports the result as a fact about the mus'haf. Same pages, same
+ * function, opposite requirement; hence two names rather than one guess.
+ */
+describe("selectPages, spread across the print", () => {
+  it("does not take the ends, which is the entire reason it exists", () => {
+    // If this ever returned what `extremes` returns, every forced choice built
+    // after it would quietly be a study of the twenty strangest pages in the
+    // print, and its headline rate would still read like a rate about the print.
+    const even = selectPages({ shifts: varied, pages: 8, spread: "even" });
+    const ends = selectPages({ shifts: varied, pages: 8 });
+    expect(even).not.toEqual(ends);
+
+    // The middle is what `extremes` is built to skip and what this is built to
+    // include: a third of the print has to be able to turn up.
+    const middle = varied.slice(6, 14).map((s) => s.page);
+    expect(even.some((p) => middle.includes(p))).toBe(true);
+  });
+
+  it("steps through at a near-constant stride, so no stretch of the print is dark", () => {
+    const chosen = selectPages({ shifts: varied, pages: 8, spread: "even" });
+    const gaps = chosen.slice(1).map((p, i) => p - chosen[i]);
+    expect(Math.max(...gaps) - Math.min(...gaps)).toBeLessThanOrEqual(1);
+    // Off both ends rather than starting at the first page: the half-step offset
+    // is what keeps a systematic sample from being an "every page one apart from
+    // page 1" sample, which is a different and worse thing.
+    expect(chosen[0]).toBeGreaterThan(varied[0].page);
+    expect(chosen[chosen.length - 1]).toBeLessThan(varied[varied.length - 1].page);
+  });
+
+  it("never names the same page twice, at every size a session could ask for", () => {
+    // A duplicate would not throw. It would spend two trials on one page, and the
+    // clustered interval — which divides by the number of distinct pages — would
+    // be computed against a count that no longer matches the trials.
+    for (let n = 1; n < varied.length; n += 1) {
+      const chosen = selectPages({ shifts: varied, pages: n, spread: "even" });
+      expect(chosen).toHaveLength(n);
+      expect(new Set(chosen).size).toBe(n);
+      expect(chosen.slice().sort((a, b) => a - b)).toEqual(chosen);
+    }
+  });
+
+  it("gives the same list every time, since a banked forced choice replays it", () => {
+    const once = selectPages({ shifts: varied, pages: 6, exclude: [4, 5], spread: "even" });
+    for (let i = 0; i < 5; i += 1) {
+      expect(selectPages({ shifts: varied, pages: 6, exclude: [4, 5], spread: "even" })).toEqual(once);
+    }
+  });
+
+  it("still refuses a held-out page, because that is not a property of the strategy", () => {
+    const exclude = [1, 2, 3, 4, 5, 18, 19, 20];
+    const chosen = selectPages({ shifts: varied, pages: 6, exclude, spread: "even" });
+    expect(chosen).toHaveLength(6);
+    for (const p of chosen) expect(exclude).not.toContain(p);
+  });
+});
+
+/**
+ * The precondition on comparing two readers.
+ *
+ * Every failure here is silent by nature. Two rulings from different builds
+ * still line up by trial index, still subtract cleanly, and still print a
+ * confident number — one that says two readers disagree wildly when in truth
+ * they were asked different questions. And the reverse mistake, one reader
+ * compared with themselves, prints beautiful agreement and answers nothing.
+ * Neither is visible in the output, so both are asserted here.
+ */
+describe("sameBuild", () => {
+  const a = { kind: "nudge", seed: 31, count: 47, shiftFingerprint: "c849e72d", select: { fp: "abc123" }, reader: "A" };
+
+  it("lets two readers on the identical build be compared", () => {
+    expect(sameBuild(a, { ...a, reader: "B" })).toEqual([]);
+  });
+
+  it.each([
+    ["kind", "adjudication"],
+    ["seed", 37],
+    ["count", 23],
+    ["shiftFingerprint", "c8528da9"],
+  ])("refuses when %s differs, because it rebuilds a different trial list", (field, value) => {
+    const out = sameBuild(a, { ...a, reader: "B", [field]: value });
+    expect(out.map((d) => d.field)).toEqual([field]);
+  });
+
+  it("refuses when the two were built over different pages", () => {
+    const out = sameBuild(a, { ...a, reader: "B", select: { fp: "999999" } });
+    expect(out.map((d) => d.field)).toEqual(["select.fp"]);
+  });
+
+  it("refuses one reader compared with themselves, which would report as agreement", () => {
+    expect(sameBuild(a, { ...a }).map((d) => d.field)).toEqual(["reader"]);
+    expect(sameBuild({ ...a, reader: undefined }, { ...a, reader: undefined }).map((d) => d.field)).toEqual(["reader"]);
+  });
+
+  it("names every mismatch, not just the first, so one run fixes the whole build", () => {
+    const out = sameBuild(a, { ...a, reader: "B", seed: 37, count: 23 });
+    expect(out.map((d) => d.field)).toEqual(["seed", "count"]);
+    expect(out.every((d) => d.why.length > 0)).toBe(true);
   });
 });

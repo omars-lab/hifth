@@ -96,7 +96,9 @@ test.describe("Hifth · share links (spec §7)", () => {
 });
 
 test.describe("Hifth · diff view (spec §3)", () => {
-  test("expanding a hop row reveals the token diff of the two readings", async ({ page }) => {
+  test("expanding a hop row draws both ayahs from the page, with the leftover washed", async ({
+    page,
+  }) => {
     await page.goto("/");
     await tapAyah(page, "#verse-55");
     const loopChip = page
@@ -107,11 +109,23 @@ test.describe("Hifth · diff view (spec §3)", () => {
     await expect(sheet).toBeVisible();
 
     // The 2:123 row's expander (the labelled text button, not the hop button)
-    // toggles the token diff showing شفاعة (here) vs عدل (target).
+    // opens the comparison. The row's own label carries the hand-written note.
     const expander = sheet.getByRole("button", { name: /البقرة · ٢:١٢٣ شفاعة/ });
     await expander.tap();
-    await expect(sheet.getByText(/شَفَاعَةٌ/).first()).toBeVisible();
-    await expect(sheet.getByText(/عَدْلٌ/).first()).toBeVisible();
+
+    // Both ayahs are named, and the one the reader is standing on says so.
+    await expect(sheet.getByText(/٢:٤٨ · هنا/)).toBeVisible();
+    await expect(sheet.getByText(/٢:١٢٣$/).first()).toBeVisible();
+
+    // Each side is a crop of the printed page — real artwork, not a
+    // transcription — carrying at least one wash over the words it does not
+    // share. The washes are the only rounded rectangles drawn into a page root.
+    const crops = sheet.locator("svg[aria-hidden='true'][focusable='false']");
+    await expect(crops).toHaveCount(2);
+    await expect(crops.first().locator("> rect[rx='1']").first()).toBeVisible();
+    await expect(crops.last().locator("> rect[rx='1']").first()).toBeVisible();
+    // The crop is a window onto the leaf, not the whole leaf.
+    expect(await crops.first().getAttribute("viewBox")).not.toBe("0 0 235 235");
   });
 });
 

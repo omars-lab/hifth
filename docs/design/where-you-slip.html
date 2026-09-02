@@ -1,0 +1,1177 @@
+<title>Where You Slip</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Spectral:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+
+<style>
+  :root {
+    --paper:      #F1EBDC;
+    --paper-2:    #E9E1CE;
+    --raise:      #FBF7EE;
+    --ink:        #262019;
+    --ink-2:      #6A5F4B;
+    --ink-3:      #90836B;
+    --line:       #D7CDB6;
+    --line-soft:  #E3DAC5;
+    --amber:      #B0740F;
+    --amber-ink:  #7C5309;
+    --amber-soft: rgba(176,116,15,0.15);
+    --amber-line: rgba(176,116,15,0.38);
+    --teal:       #2C685C;
+    --teal-soft:  rgba(44,104,92,0.13);
+    --clay:       #A5472C;
+    --clay-soft:  rgba(165,71,44,0.12);
+    --shadow:     0 1px 2px rgba(38,32,25,.06), 0 10px 30px rgba(38,32,25,.09);
+    --shadow-sm:  0 1px 2px rgba(38,32,25,.06), 0 4px 14px rgba(38,32,25,.07);
+
+    --serif: 'Spectral', Georgia, 'Times New Roman', serif;
+    --arab:  'Amiri', 'Spectral', serif;
+    --mono:  'IBM Plex Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+
+    --measure: 66ch;
+    --gap: clamp(1.1rem, 3.5vw, 2rem);
+  }
+
+  :root:not([data-theme="light"]) {
+    @media (prefers-color-scheme: dark) {
+      --paper:      #171308;
+      --paper-2:    #1F1A0F;
+      --raise:      #241E12;
+      --ink:        #EDE5D2;
+      --ink-2:      #B0A483;
+      --ink-3:      #857A5E;
+      --line:       #362D1B;
+      --line-soft:  #2C2415;
+      --amber:      #E0A63C;
+      --amber-ink:  #F0C266;
+      --amber-soft: rgba(224,166,60,0.16);
+      --amber-line: rgba(224,166,60,0.42);
+      --teal:       #74B7A6;
+      --teal-soft:  rgba(116,183,166,0.15);
+      --clay:       #DB8261;
+      --clay-soft:  rgba(219,130,97,0.14);
+      --shadow:     0 1px 2px rgba(0,0,0,.4), 0 14px 40px rgba(0,0,0,.5);
+      --shadow-sm:  0 1px 2px rgba(0,0,0,.35), 0 5px 16px rgba(0,0,0,.4);
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper:      #171308;
+    --paper-2:    #1F1A0F;
+    --raise:      #241E12;
+    --ink:        #EDE5D2;
+    --ink-2:      #B0A483;
+    --ink-3:      #857A5E;
+    --line:       #362D1B;
+    --line-soft:  #2C2415;
+    --amber:      #E0A63C;
+    --amber-ink:  #F0C266;
+    --amber-soft: rgba(224,166,60,0.16);
+    --amber-line: rgba(224,166,60,0.42);
+    --teal:       #74B7A6;
+    --teal-soft:  rgba(116,183,166,0.15);
+    --clay:       #DB8261;
+    --clay-soft:  rgba(219,130,97,0.14);
+    --shadow:     0 1px 2px rgba(0,0,0,.4), 0 14px 40px rgba(0,0,0,.5);
+    --shadow-sm:  0 1px 2px rgba(0,0,0,.35), 0 5px 16px rgba(0,0,0,.4);
+  }
+
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--serif);
+    font-size: clamp(1.02rem, 0.62vw + 0.9rem, 1.16rem);
+    line-height: 1.62;
+    font-weight: 400;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  ::selection { background: var(--amber-soft); }
+
+  .wrap { max-width: 74rem; margin: 0 auto; padding: 0 clamp(1.1rem, 4vw, 3rem); }
+  .col { max-width: var(--measure); }
+
+  h1, h2, h3 { font-family: var(--serif); text-wrap: balance; margin: 0; }
+  a { color: var(--amber-ink); text-underline-offset: 3px; text-decoration-thickness: 1px; }
+
+  .eyebrow {
+    font-family: var(--mono);
+    font-size: .72rem;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    color: var(--amber);
+    font-weight: 500;
+    margin: 0;
+  }
+  .kicker {
+    font-family: var(--mono);
+    font-size: .7rem;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    font-weight: 500;
+  }
+
+  /* ---------- top bar ---------- */
+  .topbar {
+    display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+    padding: 1.1rem 0 .9rem;
+    border-bottom: 1px solid var(--line-soft);
+    position: sticky; top: 0; z-index: 20;
+    background: color-mix(in srgb, var(--paper) 88%, transparent);
+    backdrop-filter: blur(8px);
+  }
+  .brand { font-family: var(--mono); font-size: .78rem; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-2); display: flex; align-items: center; gap: .6rem; }
+  .brand b { color: var(--ink); font-weight: 600; }
+  .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--amber); box-shadow: 0 0 0 3px var(--amber-soft); }
+  .toggle {
+    font-family: var(--mono); font-size: .72rem; letter-spacing: .08em;
+    background: transparent; color: var(--ink-2); border: 1px solid var(--line);
+    border-radius: 999px; padding: .38rem .8rem; cursor: pointer; transition: .2s;
+  }
+  .toggle:hover { color: var(--ink); border-color: var(--ink-3); }
+  .toggle:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
+
+  /* ---------- hero ---------- */
+  .hero { padding: clamp(3rem, 9vw, 6rem) 0 clamp(2rem, 5vw, 3.4rem); }
+  .hero h1 {
+    font-weight: 600;
+    font-size: clamp(2.6rem, 7.5vw, 5.3rem);
+    line-height: .98;
+    letter-spacing: -0.02em;
+    margin: .7rem 0 0;
+  }
+  .hero h1 .slip { font-style: italic; font-weight: 500; color: var(--amber); position: relative; }
+  .hero .lede {
+    font-size: clamp(1.2rem, 1.4vw + 1rem, 1.62rem);
+    line-height: 1.45;
+    color: var(--ink);
+    max-width: 34ch;
+    margin: 1.5rem 0 0;
+    font-weight: 300;
+  }
+  .hero .sub { max-width: 52ch; color: var(--ink-2); margin: 1.4rem 0 0; }
+  .status-row { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: 2rem; }
+  .chip {
+    font-family: var(--mono); font-size: .72rem; letter-spacing: .04em;
+    padding: .4rem .7rem; border-radius: 999px; border: 1px solid var(--line);
+    color: var(--ink-2); background: var(--raise); display: inline-flex; gap: .45rem; align-items: center;
+  }
+  .chip.warn { color: var(--clay); border-color: var(--clay-soft); background: var(--clay-soft); }
+  .chip.go { color: var(--teal); border-color: var(--teal-soft); background: var(--teal-soft); }
+
+  /* ---------- generic section ---------- */
+  section { padding: clamp(2.4rem, 6vw, 4.4rem) 0; }
+  .sec-head { margin-bottom: 2rem; }
+  .sec-head h2 {
+    font-weight: 600; font-size: clamp(1.7rem, 3.2vw, 2.5rem); line-height: 1.08;
+    letter-spacing: -0.015em; margin-top: .5rem;
+  }
+  .sec-head .col { margin-top: .9rem; color: var(--ink-2); }
+  .rule { border: none; border-top: 1px solid var(--line-soft); margin: 0; }
+
+  p { margin: 0 0 1.05rem; }
+  p:last-child { margin-bottom: 0; }
+  strong { font-weight: 600; }
+  em.term { font-style: italic; color: var(--ink); }
+
+  /* ---------- glossary ---------- */
+  .gloss { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1px; background: var(--line-soft); border: 1px solid var(--line-soft); border-radius: 14px; overflow: hidden; }
+  .gloss dl { margin: 0; background: var(--paper); padding: 1.15rem 1.25rem; }
+  .gloss dt { font-family: var(--serif); font-weight: 600; font-size: 1.02rem; color: var(--ink); display: flex; align-items: baseline; gap: .5rem; }
+  .gloss dt .ar { font-family: var(--arab); font-size: 1.15rem; color: var(--amber); font-weight: 400; }
+  .gloss dd { margin: .4rem 0 0; color: var(--ink-2); font-size: .95rem; line-height: 1.5; }
+
+  /* ---------- argument ---------- */
+  .contrast { display: grid; grid-template-columns: 1fr 1fr; gap: var(--gap); margin-top: 2rem; }
+  .contrast .card { border: 1px solid var(--line); border-radius: 16px; padding: 1.5rem 1.5rem 1.6rem; background: var(--raise); box-shadow: var(--shadow-sm); }
+  .contrast .card .kicker { display: block; margin-bottom: .7rem; }
+  .contrast .card.now { }
+  .contrast .card.aim { border-color: var(--amber-line); background: linear-gradient(180deg, var(--amber-soft), transparent 60%), var(--raise); }
+  .contrast .card h3 { font-size: 1.35rem; font-weight: 600; line-height: 1.15; margin-bottom: .6rem; }
+  .contrast .card p { color: var(--ink-2); font-size: .98rem; margin: 0; }
+  .contrast .card.aim h3 { color: var(--amber-ink); }
+
+  /* ---------- device mockups ---------- */
+  .showcase { background: var(--paper-2); border-top: 1px solid var(--line-soft); border-bottom: 1px solid var(--line-soft); }
+  .stage { display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(1rem, 3vw, 2.2rem); align-items: start; margin-top: 2.4rem; }
+  .step .step-cap { margin-bottom: 1rem; }
+  .step .step-n { font-family: var(--mono); font-size: .72rem; letter-spacing: .1em; color: var(--amber); font-weight: 600; }
+  .step .step-t { font-family: var(--serif); font-weight: 600; font-size: 1.12rem; margin: .3rem 0 .35rem; line-height: 1.2; }
+  .step .step-d { color: var(--ink-2); font-size: .92rem; line-height: 1.5; }
+
+  .phone {
+    border-radius: 22px; border: 1px solid var(--line); background: var(--raise);
+    box-shadow: var(--shadow); overflow: hidden; position: relative;
+  }
+  .phone .screen {
+    position: relative; min-height: 300px; padding: 0;
+    background:
+      repeating-linear-gradient(180deg, transparent 0 30px, var(--line-soft) 30px 31px);
+  }
+  .phone .pagehint { position: absolute; inset: 0; opacity: .5; pointer-events: none; }
+  .phone .notch { height: 26px; display: flex; align-items: center; justify-content: center; border-bottom: 1px solid var(--line-soft); color: var(--ink-3); font-family: var(--mono); font-size: .62rem; letter-spacing: .12em; }
+  .screen-pad { position: relative; padding: 1rem .95rem 1.25rem; }
+
+  /* a faux line of mushaf text */
+  .ln { height: 12px; border-radius: 3px; background: var(--line); opacity: .55; margin: 0 auto .95rem; }
+  .ln.w1 { width: 92%; } .ln.w2 { width: 78%; } .ln.w3 { width: 85%; } .ln.w4 { width: 70%; }
+
+  .ayah {
+    direction: rtl; font-family: var(--arab); font-size: 1.32rem; line-height: 1.9;
+    color: var(--ink); text-align: center; padding: .55rem .7rem; border-radius: 8px;
+    margin: 0 0 .95rem;
+  }
+  .ayah.lit {
+    background: var(--amber-soft);
+    box-shadow: inset 0 0 0 1px var(--amber-line);
+    color: var(--amber-ink);
+  }
+  .ayahnum { font-family: var(--mono); font-size: .62rem; color: var(--amber); direction: ltr; display: inline-block; vertical-align: middle; }
+
+  /* the hop rail + control */
+  .rail { position: absolute; left: .8rem; bottom: .95rem; right: .8rem; display: flex; flex-direction: column; gap: .45rem; }
+  .railbtn, .slipbtn {
+    display: flex; align-items: center; justify-content: space-between; gap: .5rem;
+    padding: .55rem .7rem; border-radius: 10px; font-size: .82rem;
+    border: 1px solid var(--line); background: var(--raise); color: var(--ink-2);
+    box-shadow: var(--shadow-sm);
+  }
+  .railbtn .lbl { display: flex; align-items: center; gap: .45rem; }
+  .railbtn .ar { font-family: var(--arab); font-size: 1rem; color: var(--ink); }
+  .railbtn .n { font-family: var(--mono); font-size: .7rem; color: var(--ink-3); }
+  .slipbtn {
+    border-color: var(--amber-line); background: var(--amber-soft); color: var(--amber-ink);
+    font-weight: 500;
+  }
+  .slipbtn .ar { font-family: var(--arab); font-size: 1.05rem; }
+  .slipbtn .tag { font-family: var(--mono); font-size: .62rem; letter-spacing: .04em; opacity: .8; }
+
+  /* capture sheet */
+  .sheet .sheet-head { display: flex; align-items: center; justify-content: space-between; padding-bottom: .6rem; border-bottom: 1px solid var(--line-soft); margin-bottom: .7rem; }
+  .sheet .from { font-family: var(--serif); font-weight: 600; font-size: .95rem; color: var(--ink); }
+  .sheet .from b { color: var(--amber-ink); font-weight: 700; font-family: var(--mono); }
+  .sheet .q { font-family: var(--serif); font-style: italic; font-size: .95rem; color: var(--ink-2); margin-bottom: .7rem; }
+  .cand { display: flex; gap: .55rem; align-items: flex-start; padding: .55rem .5rem; border-radius: 9px; }
+  .cand + .cand { border-top: 1px solid var(--line-soft); border-radius: 0; }
+  .cand.top { background: var(--amber-soft); border-radius: 9px; }
+  .cand .ic { font-family: var(--mono); font-size: .82rem; color: var(--amber); flex: none; width: 1.1rem; text-align: center; margin-top: .1rem; }
+  .cand .body { flex: 1; min-width: 0; }
+  .cand .ref { font-family: var(--mono); font-size: .68rem; color: var(--ink-3); direction: ltr; }
+  .cand .txt { direction: rtl; font-family: var(--arab); font-size: 1.02rem; color: var(--ink); line-height: 1.5; }
+  .cand .txt .shared { color: var(--teal); }
+  .cand .txt .part { color: var(--clay); border-bottom: 1.5px dotted var(--clay); }
+  .cand .note { font-size: .74rem; color: var(--ink-2); margin-top: .1rem; }
+  .cand.top .ref { color: var(--amber); }
+  .exits { margin-top: .55rem; padding-top: .55rem; border-top: 1px dashed var(--line); display: flex; flex-direction: column; gap: .4rem; }
+  .exit { font-family: var(--serif); font-size: .88rem; color: var(--ink-2); display: flex; align-items: center; gap: .5rem; }
+  .exit .ic { font-family: var(--mono); font-size: .74rem; color: var(--ink-3); }
+
+  /* warning chip screen */
+  .warnbox {
+    border: 1px solid var(--clay-soft); background: var(--clay-soft); border-radius: 12px;
+    padding: .7rem .8rem; display: flex; gap: .6rem; align-items: flex-start; box-shadow: var(--shadow-sm);
+  }
+  .warnbox .wic { color: var(--clay); font-size: 1rem; flex: none; }
+  .warnbox { flex-wrap: wrap; }
+  .warnbox .wmain { font-family: var(--serif); font-size: .95rem; color: var(--ink); line-height: 1.45; }
+  .warnbox .wmain b { color: var(--clay); font-weight: 700; font-family: var(--mono); }
+  .warnbox .wmeta { font-family: var(--mono); font-size: .62rem; letter-spacing: .03em; color: var(--ink-3); margin-top: .3rem; }
+  .warn-head { display: flex; align-items: center; gap: .5rem; margin-bottom: .28rem; }
+  .taphint { text-align: center; font-family: var(--mono); font-size: .64rem; letter-spacing: .06em; color: var(--ink-3); margin-top: .8rem; }
+
+  /* ---------- seam marker (a breakpoint at the word) ---------- */
+  .seam { position: relative; }
+  .bp { display: inline-block; width: .6rem; height: .6rem; border-radius: 50%; background: var(--clay); box-shadow: 0 0 0 3px var(--clay-soft); vertical-align: .12em; margin: 0 .18rem; cursor: pointer; }
+  .bp.some { background: var(--amber); box-shadow: 0 0 0 3px var(--amber-soft); }
+  .bp.used { background: transparent; border: 2px solid var(--teal); box-shadow: none; width: .56rem; height: .56rem; }
+  .bp-pop { margin-top: .7rem; border: 1px solid var(--line); border-radius: 13px; background: var(--raise); box-shadow: var(--shadow); padding: .75rem .85rem .8rem; position: relative; }
+  .bp-pop::before { content: ""; position: absolute; top: -6px; right: 2.1rem; width: 11px; height: 11px; background: var(--raise); border-left: 1px solid var(--line); border-top: 1px solid var(--line); transform: rotate(45deg); }
+  .bp-head { display: flex; align-items: center; gap: .5rem; margin-bottom: .5rem; }
+  .bp-title { font-family: var(--mono); font-size: .62rem; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3); font-weight: 600; margin-right: auto; }
+  .bp-main { font-family: var(--serif); font-size: .95rem; color: var(--ink); line-height: 1.4; }
+  .bp-main b.ar { font-family: var(--arab); font-size: 1.05rem; color: var(--clay); font-weight: 400; }
+  .bp-main b.ref { font-family: var(--mono); color: var(--clay); font-weight: 700; }
+  .bp-meta { font-family: var(--mono); font-size: .62rem; letter-spacing: .02em; color: var(--ink-3); margin-top: .3rem; }
+  .bp-acts { display: flex; gap: .5rem; margin-top: .7rem; }
+  .bp-act { font-family: var(--serif); font-size: .8rem; color: var(--ink-2); border: 1px solid var(--line); border-radius: 999px; padding: .32rem .7rem; background: var(--paper); }
+  .bp-act.go { color: var(--teal); border-color: var(--teal-soft); background: var(--teal-soft); }
+
+  /* ---------- word press + verbs ---------- */
+  .wordgrid { display: grid; grid-template-columns: minmax(230px, 300px) 1fr; gap: clamp(1.4rem, 4vw, 2.8rem); align-items: center; margin-top: 2.2rem; }
+  .wordline { direction: rtl; text-align: center; font-family: var(--arab); font-size: 1.5rem; line-height: 2.05; margin: .3rem 0; display: flex; flex-wrap: wrap; justify-content: center; gap: .15rem .55rem; }
+  .word { padding: 0 .18rem; border-radius: 5px; color: var(--ink); }
+  .word.lit { background: var(--amber-soft); box-shadow: inset 0 0 0 1.5px var(--amber-line); color: var(--amber-ink); }
+  .wordmenu { max-width: 16rem; margin: .3rem auto .5rem; border: 1px solid var(--line); border-radius: 13px; background: var(--raise); box-shadow: var(--shadow); overflow: hidden; }
+  .wmi { display: flex; flex-direction: column; gap: .12rem; padding: .58rem .75rem; text-align: left; }
+  .wmi + .wmi { border-top: 1px solid var(--line-soft); }
+  .wmi-ar { font-family: var(--serif); font-weight: 600; font-size: .95rem; }
+  .wmi-en { font-family: var(--serif); font-size: .72rem; color: var(--ink-3); font-style: italic; }
+  .wmi.slip .wmi-ar { color: var(--clay); font-weight: 700; }
+  .wmi.jump .wmi-ar { color: var(--teal); font-weight: 700; }
+  .wmi.mark .wmi-ar { color: var(--ink-2); }
+  .press-hint { text-align: center; font-family: var(--mono); font-size: .62rem; letter-spacing: .06em; color: var(--ink-3); margin: 0 0 .1rem; }
+
+  .verbs { display: grid; gap: 1.1rem; }
+  .verb { border-radius: 14px; border: 1px solid var(--line); padding: 1.15rem 1.3rem 1.25rem; background: var(--raise); box-shadow: var(--shadow-sm); }
+  .verb.slip { border-left: 3px solid var(--clay); }
+  .verb.jump { border-left: 3px solid var(--teal); }
+  .verb-k { font-family: var(--mono); font-size: .72rem; letter-spacing: .07em; text-transform: uppercase; font-weight: 600; display: flex; align-items: baseline; gap: .5rem; }
+  .verb-k .ar { font-family: var(--arab); font-size: 1.1rem; letter-spacing: 0; text-transform: none; }
+  .verb.slip .verb-k { color: var(--clay); }
+  .verb.jump .verb-k { color: var(--teal); }
+  .verb-def { margin: .55rem 0 .7rem; font-size: .96rem; color: var(--ink); line-height: 1.5; }
+  .verb ul { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: .4rem; }
+  .verb li { font-size: .88rem; color: var(--ink-2); padding-left: 1.2rem; position: relative; line-height: 1.45; }
+  .verb li::before { content: "→"; position: absolute; left: 0; top: 0; color: var(--ink-3); }
+
+  /* ---------- walkthrough / filmstrip ---------- */
+  .film { display: flex; flex-direction: column; gap: clamp(2rem, 5vw, 3.6rem); margin-top: 2.6rem; }
+  .scene { display: grid; grid-template-columns: minmax(220px, 280px) 1fr; gap: clamp(1.4rem, 4vw, 3rem); align-items: center; scroll-margin-top: 5rem; }
+  .scene-n { font-family: var(--mono); font-size: .82rem; font-weight: 600; letter-spacing: .1em; color: var(--amber); border: 1px solid var(--amber-line); border-radius: 7px; padding: .16rem .5rem; }
+  .scene-t { font-family: var(--serif); font-weight: 600; font-size: clamp(1.25rem, 2vw, 1.6rem); line-height: 1.13; margin: .7rem 0 0; letter-spacing: -0.01em; }
+  .scene-dl { margin: 1rem 0 0; display: grid; grid-template-columns: max-content 1fr; gap: .5rem .95rem; }
+  .scene-dl dt { font-family: var(--mono); font-size: .61rem; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-3); padding-top: .2rem; white-space: nowrap; }
+  .scene-dl dd { margin: 0; font-size: .93rem; color: var(--ink-2); line-height: 1.5; }
+  .scene-dl dd b, .scene-dl dd .k { color: var(--ink); font-weight: 600; }
+  .scene-dl dd .go { color: var(--teal); font-weight: 600; } .scene-dl dd .warn { color: var(--clay); font-weight: 600; }
+
+  .since { display: flex; align-items: center; justify-content: space-between; font-family: var(--mono); font-size: .66rem; letter-spacing: .02em; color: var(--ink-2); padding-bottom: .55rem; margin-bottom: .5rem; border-bottom: 1px solid var(--line-soft); gap: .5rem; }
+  .since .weak { color: var(--clay); white-space: nowrap; }
+  .jumper { position: absolute; left: .8rem; right: .8rem; bottom: .9rem; text-align: center; font-family: var(--serif); font-size: .82rem; color: var(--ink-2); background: var(--raise); border: 1px solid var(--line); border-radius: 999px; padding: .5rem .8rem; box-shadow: var(--shadow-sm); }
+  .toast { position: absolute; left: .8rem; right: .8rem; bottom: 1rem; display: flex; align-items: center; justify-content: space-between; font-family: var(--mono); font-size: .72rem; letter-spacing: .02em; color: var(--paper); background: var(--ink); border-radius: 11px; padding: .58rem .8rem; box-shadow: var(--shadow); gap: .5rem; }
+  .toast .undo { color: var(--amber); font-size: .85rem; }
+
+  .compare { display: flex; flex-direction: column; gap: .5rem; padding-top: .3rem; }
+  .cmp-row { border: 1px solid var(--line); border-radius: 10px; padding: .6rem .7rem; background: var(--raise); }
+  .cmp-row.alt { border-color: var(--amber-line); background: var(--amber-soft); }
+  .cmp-ref { font-family: var(--mono); font-size: .64rem; color: var(--ink-3); direction: ltr; display: block; margin-bottom: .25rem; }
+  .cmp-row.alt .cmp-ref { color: var(--amber); }
+  .cmp-txt { direction: rtl; font-family: var(--arab); font-size: 1.06rem; color: var(--ink); line-height: 1.6; display: block; }
+  .cmp-vs { text-align: center; font-family: var(--serif); font-style: italic; font-size: .78rem; color: var(--ink-3); }
+  .cmp-txt .shared { color: var(--teal); }
+  .cmp-txt .part { color: var(--clay); border-bottom: 1.5px dotted var(--clay); font-weight: 700; }
+
+  .rlist { display: flex; flex-direction: column; padding-top: .2rem; }
+  .rgroup { font-family: var(--mono); font-size: .58rem; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-3); padding: .5rem .2rem .3rem; }
+  .rgroup.beat { color: var(--teal); }
+  .rrow { display: flex; align-items: center; gap: .55rem; padding: .58rem .2rem; }
+  .rrow + .rrow { border-top: 1px solid var(--line-soft); }
+  .rrow.done { opacity: .82; }
+  .rhits { flex: none; font-family: var(--mono); font-size: .72rem; font-weight: 600; color: var(--ink-2); background: var(--paper-2); border-radius: 7px; padding: .28rem .4rem; min-width: 2.1rem; text-align: center; direction: ltr; }
+  .rbody { flex: 1; min-width: 0; }
+  .rpair { font-family: var(--mono); font-size: .9rem; font-weight: 600; color: var(--ink); display: block; }
+  .rmeta { font-family: var(--serif); font-size: .78rem; color: var(--ink-3); }
+  .rrow .chev { color: var(--ink-3); font-family: var(--mono); flex: none; }
+
+  /* state pill, shared by warning + list */
+  .spill { font-family: var(--mono); font-size: .56rem; letter-spacing: .05em; text-transform: uppercase; font-weight: 600; border-radius: 999px; padding: .16rem .46rem; border: 1px solid transparent; white-space: nowrap; flex: none; }
+  .spill.every { color: var(--clay); background: var(--clay-soft); border-color: var(--clay-soft); }
+  .spill.some  { color: var(--amber-ink); background: var(--amber-soft); border-color: var(--amber-line); }
+  .spill.used  { color: var(--teal); background: var(--teal-soft); border-color: var(--teal-soft); }
+
+  .mmap { display: grid; grid-template-columns: repeat(8, 1fr); gap: 5px; padding-top: .3rem; }
+  .mcell { aspect-ratio: 1; border-radius: 3px; background: var(--line-soft); }
+  .mcell.some  { background: var(--amber-line); }
+  .mcell.every { background: var(--clay); }
+  .mcell.used  { background: var(--teal); }
+  .mlegend { display: flex; gap: .8rem; margin-top: .75rem; font-family: var(--mono); font-size: .6rem; letter-spacing: .04em; text-transform: uppercase; color: var(--ink-3); flex-wrap: wrap; }
+  .mlegend span { display: inline-flex; align-items: center; gap: .35rem; }
+  .mlegend i { width: 11px; height: 11px; border-radius: 2px; display: inline-block; }
+
+  /* ---------- the states a seam moves through ---------- */
+  .states { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: var(--gap); margin-top: 2rem; }
+  .state-c { border: 1px solid var(--line); border-top: 3px solid var(--line); border-radius: 14px; padding: 1.1rem 1.2rem 1.2rem; background: var(--raise); box-shadow: var(--shadow-sm); }
+  .state-c.every { border-top-color: var(--clay); }
+  .state-c.some  { border-top-color: var(--amber); }
+  .state-c.used  { border-top-color: var(--teal); }
+  .state-c.gone  { border-top-color: var(--ink-3); }
+  .state-c .st-tag { font-family: var(--mono); font-size: .6rem; letter-spacing: .09em; text-transform: uppercase; font-weight: 600; color: var(--ink-3); }
+  .state-c.every .st-tag { color: var(--clay); } .state-c.some .st-tag { color: var(--amber); } .state-c.used .st-tag { color: var(--teal); }
+  .state-c h3 { font-size: 1.06rem; font-weight: 600; margin: .3rem 0 .45rem; line-height: 1.15; }
+  .state-c p { font-size: .89rem; color: var(--ink-2); margin: 0; line-height: 1.5; }
+  .lifecycle { margin-top: 1.9rem; padding: 1.1rem 1.3rem; border: 1px dashed var(--line); border-radius: 13px; background: var(--paper-2); font-size: .95rem; color: var(--ink); line-height: 1.55; }
+  .lifecycle .flow { font-family: var(--mono); font-size: .74rem; letter-spacing: .02em; color: var(--ink-2); margin-top: .55rem; }
+  .lifecycle .flow b.every { color: var(--clay); } .lifecycle .flow b.some { color: var(--amber-ink); } .lifecycle .flow b.used { color: var(--teal); }
+
+  /* ---------- 'is not' guards ---------- */
+  .guards { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: var(--gap); margin-top: 1.8rem; }
+  .guard { border-left: 2px solid var(--clay); padding: .2rem 0 .2rem 1.1rem; }
+  .guard h3 { font-size: 1.05rem; font-weight: 600; margin-bottom: .35rem; }
+  .guard h3 span { color: var(--clay); font-style: italic; }
+  .guard p { font-size: .92rem; color: var(--ink-2); margin: 0; }
+
+  /* ---------- decisions ---------- */
+  .decisions { background: var(--paper-2); border-top: 1px solid var(--line-soft); }
+  .dgrid { display: flex; flex-direction: column; gap: 1.5rem; margin-top: 2.2rem; }
+  .decision {
+    border: 1px solid var(--line); border-radius: 18px; background: var(--raise);
+    box-shadow: var(--shadow-sm); overflow: hidden;
+  }
+  .decision.sharp { border-color: var(--amber-line); }
+  .decision.sharp .d-top { background: var(--amber-soft); }
+  .d-top { padding: 1.3rem clamp(1.2rem, 3vw, 1.8rem) 1.15rem; border-bottom: 1px solid var(--line-soft); }
+  .d-tagrow { display: flex; align-items: center; gap: .7rem; flex-wrap: wrap; margin-bottom: .6rem; }
+  .d-id { font-family: var(--mono); font-size: .72rem; font-weight: 600; letter-spacing: .1em; color: var(--amber); border: 1px solid var(--amber-line); border-radius: 6px; padding: .16rem .45rem; }
+  .d-badge { font-family: var(--mono); font-size: .64rem; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-3); }
+  .d-badge.sharp { color: var(--clay); }
+  .d-top h3 { font-size: clamp(1.25rem, 2.2vw, 1.6rem); font-weight: 600; line-height: 1.14; letter-spacing: -0.01em; }
+  .d-top .framing { margin-top: .7rem; color: var(--ink-2); font-size: .98rem; max-width: 62ch; }
+  .d-options { display: grid; grid-template-columns: 1fr 1fr; }
+  .opt { padding: 1.15rem clamp(1.2rem, 3vw, 1.8rem) 1.3rem; }
+  .opt:first-child { border-right: 1px solid var(--line-soft); }
+  .opt .opt-h { display: flex; align-items: baseline; gap: .55rem; margin-bottom: .6rem; }
+  .opt .opt-k { font-family: var(--mono); font-size: .72rem; font-weight: 600; color: var(--ink-3); }
+  .opt .opt-t { font-family: var(--serif); font-weight: 600; font-size: 1.06rem; line-height: 1.2; }
+  .opt ul { margin: .5rem 0 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: .4rem; }
+  .opt li { font-size: .89rem; line-height: 1.42; color: var(--ink-2); padding-left: 1.15rem; position: relative; }
+  .opt li::before { content: ""; position: absolute; left: 0; top: .55em; width: 5px; height: 5px; border-radius: 50%; }
+  .opt li.pro::before { background: var(--teal); }
+  .opt li.con::before { background: var(--clay); }
+  .opt li.pro { }
+  .d-foot { padding: 1rem clamp(1.2rem, 3vw, 1.8rem) 1.2rem; border-top: 1px solid var(--line-soft); background: var(--paper); display: flex; flex-wrap: wrap; gap: 1rem 1.5rem; align-items: baseline; justify-content: space-between; }
+  .lean { font-size: .94rem; color: var(--ink); max-width: 60ch; }
+  .lean .lean-k { font-family: var(--mono); font-size: .64rem; letter-spacing: .12em; text-transform: uppercase; color: var(--teal); font-weight: 600; margin-right: .5rem; }
+  .flip { font-size: .88rem; color: var(--ink-2); margin-top: .5rem; }
+  .flip .flip-k { font-family: var(--mono); font-size: .64rem; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-3); margin-right: .45rem; }
+  .comment-cue { font-family: var(--mono); font-size: .72rem; letter-spacing: .04em; color: var(--amber-ink); display: inline-flex; align-items: center; gap: .4rem; white-space: nowrap; }
+  .comment-cue::before { content: "»"; color: var(--amber); }
+
+  /* ---------- phases ---------- */
+  .phases { list-style: none; margin: 2rem 0 0; padding: 0; counter-reset: p; display: flex; flex-direction: column; }
+  .phase { display: grid; grid-template-columns: auto 1fr; gap: 1.1rem; padding: 1.1rem 0; border-top: 1px solid var(--line-soft); }
+  .phase:last-child { border-bottom: 1px solid var(--line-soft); }
+  .phase .pn { font-family: var(--mono); font-size: .82rem; font-weight: 600; color: var(--amber); width: 2.2rem; }
+  .phase .pt { font-weight: 600; font-size: 1.04rem; }
+  .phase .pd { color: var(--ink-2); font-size: .93rem; margin-top: .25rem; }
+  .phase .gated { font-family: var(--mono); font-size: .64rem; letter-spacing: .06em; text-transform: uppercase; color: var(--clay); margin-left: .5rem; }
+  .phase.free .pn { color: var(--teal); }
+
+  /* ---------- footer ---------- */
+  .foot { border-top: 1px solid var(--line-soft); padding: clamp(2.6rem,6vw,4rem) 0 clamp(3rem,7vw,5rem); background: var(--paper-2); }
+  .foot .cta {
+    border: 1px solid var(--amber-line); border-radius: 18px; padding: 1.6rem 1.7rem;
+    background: linear-gradient(180deg, var(--amber-soft), transparent), var(--raise);
+    display: flex; gap: 1.2rem; align-items: flex-start; flex-wrap: wrap; box-shadow: var(--shadow-sm);
+  }
+  .foot .cta .big { font-family: var(--serif); font-weight: 600; font-size: 1.3rem; line-height: 1.2; margin-bottom: .5rem; color: var(--amber-ink); }
+  .foot .cta p { color: var(--ink-2); font-size: .96rem; max-width: 60ch; margin: 0; }
+  .foot .meta { margin-top: 2rem; font-family: var(--mono); font-size: .72rem; letter-spacing: .04em; color: var(--ink-3); line-height: 1.7; }
+
+  /* reveal */
+  .reveal { opacity: 0; transform: translateY(14px); transition: opacity .7s ease, transform .7s cubic-bezier(.2,.7,.2,1); }
+  .reveal.in { opacity: 1; transform: none; }
+
+  @media (max-width: 820px) {
+    .contrast, .d-options, .wordgrid { grid-template-columns: 1fr; }
+    .opt:first-child { border-right: none; border-bottom: 1px solid var(--line-soft); }
+    .scene { grid-template-columns: 1fr; }
+    .scene-ph { max-width: 22rem; margin-inline: auto; }
+    .scene-cap { max-width: 34rem; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .reveal { transition: none; opacity: 1; transform: none; }
+    * { scroll-behavior: auto; }
+  }
+</style>
+
+<div class="wrap">
+  <div class="topbar">
+    <div class="brand"><span class="dot"></span> <span>Hifth · <b>Design review</b></span></div>
+    <button class="toggle" id="themeToggle" aria-label="Toggle light and dark theme">◐ theme</button>
+  </div>
+</div>
+
+<header class="hero wrap">
+  <p class="eyebrow">A feature for huffaz · five decisions open</p>
+  <h1>The app remembers<br>where <span class="slip">you slip</span>.</h1>
+  <p class="lede">Not which verses <em>could</em> be confused — which ones <strong>you keep confusing</strong>.</p>
+  <p class="sub col">Every memoriser has three or four seams in the whole book where their own tongue takes the wrong turn, every time, and the correction never quite sticks. That set is small, personal, and in no dataset — because it is a fact about one memory. This is the design for capturing it in a single gesture, and being warned at the seam ever after. Read it, then leave your call on the five open questions in the comments.</p>
+  <div class="status-row">
+    <span class="chip">design only · nothing built</span>
+    <span class="chip warn">5 decisions to make</span>
+    <span class="chip go">reuses what the app already carries</span>
+  </div>
+</header>
+
+<div class="wrap"><hr class="rule"></div>
+
+<!-- WHY -->
+<section class="wrap">
+  <div class="sec-head">
+    <p class="eyebrow">Why build it</p>
+    <h2 class="col">What turns a reference into something you rely on?</h2>
+    <p class="col">Today the app can already tell a hafiz which verses <em class="term">resemble</em> the one in front of them — a fact about the Qur'an, true for everyone. The thing a hafiz revising alone at night actually needs is narrower and entirely their own.</p>
+  </div>
+  <div class="contrast">
+    <div class="card now reveal">
+      <span class="kicker">What it is today</span>
+      <h3>A dictionary of resemblances</h3>
+      <p>It reads a shared corpus of look-alike verses that ships with the app and shows what resembles what. Accurate, public, the same for every reader — and silent about the one thing that would help most.</p>
+    </div>
+    <div class="card aim reveal">
+      <span class="kicker">What this makes it</span>
+      <h3>A coach who has heard you recite</h3>
+      <p>It learns where <strong>you</strong> slip and says so — quietly, before you get there. "Careful, this is the one you always miss." The sentence a teacher would say, said by the app, at the moment it matters, because you put it there weeks ago.</p>
+    </div>
+  </div>
+</section>
+
+<!-- GLOSSARY -->
+<section class="wrap">
+  <div class="sec-head"><p class="eyebrow">A few words, defined once</p></div>
+  <div class="gloss">
+    <dl><dt>Ayah</dt><dd>A verse, named by its surah and number — e.g. the 48th verse of surah 2.</dd></dl>
+    <dl><dt>Mus'haf</dt><dd>The printed Qur'an; the actual pages the app draws on the screen.</dd></dl>
+    <dl><dt>Mutashabihat <span class="ar">المتشابهات</span></dt><dd>Verses that resemble each other across the book. Two passages a page — or twenty juz — apart can open with the same words and then part.</dd></dl>
+    <dl><dt>A slip</dt><dd>An <em>involuntary</em> wrong turn — your memory runs into the wrong verse because a near-identical passage begins the same way. The error you want warned about.</dd></dl>
+    <dl><dt>A jump</dt><dd>A <em>leap</em> from one place to another, usually where the same phrase recurs. Maybe a mistake, maybe a connection you noticed — the neutral sibling of a slip.</dd></dl>
+    <dl><dt>The seam word</dt><dd>The exact word where two passages part — the last they share, or the first that differs. It's where a slip or jump actually happens.</dd></dl>
+    <dl><dt>The state of a seam</dt><dd>How live a slip is <em>right now</em>, and it changes as you drill it: one you catch <b>every pass</b>, one <b>sometimes</b>, one you <b>used to</b> and have beaten, one you've <b>dismissed</b>. A note you own — never a score.</dd></dl>
+  </div>
+</section>
+
+<!-- SHOWCASE -->
+<section class="showcase">
+  <div class="wrap">
+    <div class="sec-head">
+      <p class="eyebrow">The whole journey, screen by screen</p>
+      <h2 class="col">Where do you start, and what happens next?</h2>
+      <p class="col">Follow a single slip from the moment you open the app to the day it warns you — every screen you'd actually touch, drawn at the size you'd use it. Each screen is numbered; leave feedback on any one of them in the comments.</p>
+    </div>
+
+    <div class="film">
+
+      <!-- S1: open the app -->
+      <article class="scene reveal" id="s1">
+        <div class="scene-ph">
+          <div class="phone">
+            <div class="notch">hifth</div>
+            <div class="screen">
+              <div class="screen-pad">
+                <div class="since"><span>LAST REVISED · 2 DAYS AGO</span><span class="weak">⚠ 3 SPOTS YOU SLIP</span></div>
+                <div class="ln w1"></div><div class="ln w3"></div>
+                <div class="ayah">ذَٰلِكَ ٱلْكِتَٰبُ لَا رَيْبَ ۛ فِيهِ <span class="ayahnum">2:2</span></div>
+                <div class="ln w2"></div><div class="ln w4"></div><div class="ln w3"></div>
+              </div>
+              <div class="jumper">↕ Go to a surah or verse…</div>
+            </div>
+          </div>
+        </div>
+        <div class="scene-cap">
+          <span class="scene-n">01</span>
+          <div class="scene-t">You open the app</div>
+          <dl class="scene-dl">
+            <dt>The page</dt><dd>The <b>mus'haf, where you left off</b> — it reopens to your last place, not to a home screen or a menu.</dd>
+            <dt>You do</dt><dd>Start reciting. Nothing to set up first.</dd>
+            <dt>You see</dt><dd>One quiet line at the top: when you last revised, and <span class="warn">how many spots you've flagged as confusing</span>. A "go to…" bar waits at the bottom for when you want to jump.</dd>
+          </dl>
+        </div>
+      </article>
+
+      <!-- S2: select the verse -->
+      <article class="scene reveal" id="s2">
+        <div class="scene-ph">
+          <div class="phone">
+            <div class="notch">the page · 2</div>
+            <div class="screen">
+              <div class="screen-pad">
+                <div class="ln w1"></div><div class="ln w2"></div>
+                <div class="ayah lit">وَٱتَّقُوا۟ يَوْمًا لَّا تَجْزِى نَفْسٌ <span class="ayahnum">2:48</span></div>
+                <div class="ln w3"></div><div class="ln w4"></div>
+              </div>
+              <div class="rail">
+                <div class="railbtn"><span class="lbl">↻ Look-alikes</span><span class="n">4</span></div>
+                <div class="slipbtn"><span>⚠&nbsp; I slipped here</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="scene-cap">
+          <span class="scene-n">02</span>
+          <div class="scene-t">Your memory jumps the rails — you select the verse</div>
+          <dl class="scene-dl">
+            <dt>The page</dt><dd>Same page; the verse you were reciting is now <span class="warn">lit in amber</span>.</dd>
+            <dt>You do</dt><dd>Select it — the <b>same tap you already use</b> to read. (Or, if you know the exact word, press and hold <em>that</em> — the precise path shown just below this walkthrough.)</dd>
+            <dt>You see</dt><dd>A rail beside the verse: the look-alikes the app already knows (<b>4</b>), and one new control — <b>I slipped here</b>.</dd>
+          </dl>
+        </div>
+      </article>
+
+      <!-- S3: the capture sheet -->
+      <article class="scene reveal" id="s3">
+        <div class="scene-ph">
+          <div class="phone">
+            <div class="notch">i slipped here</div>
+            <div class="screen" style="background:none">
+              <div class="screen-pad sheet">
+                <div class="sheet-head">
+                  <div class="from">I slipped at <b>2:48</b></div>
+                  <span class="kicker">source</span>
+                </div>
+                <div class="q">My memory ran toward…</div>
+                <div class="cand top">
+                  <div class="ic">↻</div>
+                  <div class="body">
+                    <div class="ref">2:123 · identical wording</div>
+                    <div class="txt"><span class="shared">وَٱتَّقُوا۟ يَوْمًا لَّا تَجْزِى</span> … <span class="part">عَدْل</span></div>
+                    <div class="note">opens the same, parts at one word</div>
+                  </div>
+                </div>
+                <div class="cand">
+                  <div class="ic">≈</div>
+                  <div class="body">
+                    <div class="ref">2:281</div>
+                    <div class="txt">وَٱتَّقُوا۟ يَوْمًا تُرْجَعُونَ فِيهِ</div>
+                    <div class="note">opens the same, then parts</div>
+                  </div>
+                </div>
+                <div class="exits">
+                  <div class="exit"><span class="ic">✎</span> Pick another verse…</div>
+                  <div class="exit"><span class="ic">?</span> Not sure yet</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="scene-cap">
+          <span class="scene-n">03</span>
+          <div class="scene-t">You name where it went</div>
+          <dl class="scene-dl">
+            <dt>The page</dt><dd>The capture sheet, opened <b>already knowing where you started</b> (2:48).</dd>
+            <dt>You do</dt><dd>Tap the verse your memory ran toward — <b>usually already in the list</b>, because look-alikes are exactly what pulled you off course.</dd>
+            <dt>You see</dt><dd>Candidates ranked with <span class="go">identical wording first</span>; the shared opening shown, the divergence marked. Two escape hatches: pick another verse, or "not sure yet" to finish later.</dd>
+          </dl>
+        </div>
+      </article>
+
+      <!-- S4: logged, back to reciting -->
+      <article class="scene reveal" id="s4">
+        <div class="scene-ph">
+          <div class="phone">
+            <div class="notch">the page · 2</div>
+            <div class="screen">
+              <div class="screen-pad">
+                <div class="ln w1"></div><div class="ln w3"></div>
+                <div class="ayah">وَٱتَّقُوا۟ يَوْمًا لَّا تَجْزِى نَفْسٌ <span class="ayahnum">2:48</span></div>
+                <div class="ln w2"></div><div class="ln w4"></div>
+              </div>
+              <div class="toast"><span>✓ Saved · 2:48 → 2:123</span><span class="undo">Undo</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="scene-cap">
+          <span class="scene-n">04</span>
+          <div class="scene-t">It's logged — you're already reciting again</div>
+          <dl class="scene-dl">
+            <dt>The page</dt><dd>Back to the same page, <b>instantly</b>.</dd>
+            <dt>You do</dt><dd>Nothing more. Total cost so far: <b>two taps, no typing.</b></dd>
+            <dt>You see</dt><dd>A brief confirmation you can undo. Hit the same slip again next week and it <span class="go">deepens the one you have</span> — it doesn't pile up duplicates.</dd>
+          </dl>
+        </div>
+      </article>
+
+      <!-- S5: the warning, later -->
+      <article class="scene reveal" id="s5">
+        <div class="scene-ph">
+          <div class="phone">
+            <div class="notch">the page · 2</div>
+            <div class="screen">
+              <div class="screen-pad">
+                <div class="ln w1"></div><div class="ln w3"></div>
+                <div class="ayah">وَٱتَّقُوا۟ <span class="seam">يَوْمًا</span><span class="bp" role="button" aria-label="recorded slip — tap for details"></span> لَّا تَجْزِى نَفْسٌ <span class="ayahnum">2:48</span></div>
+                <div class="bp-pop">
+                  <div class="bp-head"><span class="bp"></span><span class="bp-title">recorded slip</span><span class="spill every">every pass</span></div>
+                  <div class="bp-main">You slip at <b class="ar">يَوْمًا</b> toward <b class="ref">2:123</b></div>
+                  <div class="bp-meta">5 times · last time last week</div>
+                  <div class="bp-acts"><span class="bp-act">↔ compare the seams</span><span class="bp-act go">✓ beat it</span></div>
+                </div>
+                <div class="taphint">a quiet dot rests after the word — tap it for the details above</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="scene-cap">
+          <span class="scene-n">05</span>
+          <div class="scene-t">Days later — a quiet marker at the seam, details when you want them</div>
+          <dl class="scene-dl">
+            <dt>The page</dt><dd>The same verse, on a <b>later pass</b> — the payoff for everything above, and it <b>stays out of your way</b>.</dd>
+            <dt>You do</dt><dd>Recite as usual. A small <span class="warn">breakpoint dot</span> rests right after the word you slip on; it doesn't interrupt. Tap it only when you want to dig in.</dd>
+            <dt>You see</dt><dd>On tap, the recorded slippage: where it goes (<b>2:123</b>), how often and how recently, its state badge (<span class="warn">every pass</span>), and two actions — compare the seams, or mark it <span class="go">beaten</span>. The dot's colour alone already tells you how live it is.</dd>
+          </dl>
+        </div>
+      </article>
+
+      <!-- S6: compare the seams -->
+      <article class="scene reveal" id="s6">
+        <div class="scene-ph">
+          <div class="phone">
+            <div class="notch">compare</div>
+            <div class="screen" style="background:none">
+              <div class="screen-pad">
+                <div class="cmp-vs" style="text-align:left;margin-bottom:.35rem"><span class="spill every">every pass</span></div>
+                <div class="compare">
+                  <div class="cmp-row alt">
+                    <span class="cmp-ref">2:48 · you are here</span>
+                    <span class="cmp-txt"><span class="shared">وَٱتَّقُوا۟ يَوْمًا لَّا تَجْزِى نَفْسٌ</span> … <span class="part">شَفَٰعَة</span></span>
+                  </div>
+                  <div class="cmp-vs">↕ confused with</div>
+                  <div class="cmp-row">
+                    <span class="cmp-ref">2:123</span>
+                    <span class="cmp-txt"><span class="shared">وَٱتَّقُوا۟ يَوْمًا لَّا تَجْزِى نَفْسٌ</span> … <span class="part">عَدْل</span></span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="scene-cap">
+          <span class="scene-n">06</span>
+          <div class="scene-t">You compare the two seams, deliberately</div>
+          <dl class="scene-dl">
+            <dt>The page</dt><dd>Tap <b>compare</b> in the marker's details → the two verses <b>side by side</b>.</dd>
+            <dt>You do</dt><dd>Read the seam on purpose — the long run they <span class="go">share</span>, and the <span class="warn">one word</span> where they finally part.</dd>
+            <dt>You see</dt><dd>Shared opening in one colour, the divergence marked in another — the exact correction a teacher would walk you through, drawn from links the app already carries.</dd>
+          </dl>
+        </div>
+      </article>
+
+      <!-- S7: the review list -->
+      <article class="scene reveal" id="s7">
+        <div class="scene-ph">
+          <div class="phone">
+            <div class="notch">confusion points</div>
+            <div class="screen" style="background:none">
+              <div class="screen-pad">
+                <div class="rlist">
+                  <div class="rgroup">Still live — drill these</div>
+                  <div class="rrow"><span class="rhits">×5</span><div class="rbody"><span class="rpair">2:48 → 2:123</span><span class="rmeta">slip · last week</span></div><span class="spill every">every pass</span><span class="chev">›</span></div>
+                  <div class="rrow"><span class="rhits">×3</span><div class="rbody"><span class="rpair">6:141 → 6:151</span><span class="rmeta">jump · 3 days ago</span></div><span class="spill some">sometimes</span><span class="chev">›</span></div>
+                  <div class="rrow"><span class="rhits">×1</span><div class="rbody"><span class="rpair">2:281 → 2:48</span><span class="rmeta">slip · 2 weeks ago</span></div><span class="spill some">sometimes</span><span class="chev">›</span></div>
+                  <div class="rgroup beat">Beaten — you've got these now</div>
+                  <div class="rrow done"><span class="rhits">×4</span><div class="rbody"><span class="rpair">3:7 → 3:29</span><span class="rmeta">slip · quiet 6 weeks</span></div><span class="spill used">used to</span><span class="chev">›</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="scene-cap">
+          <span class="scene-n">07</span>
+          <div class="scene-t">Before a session — your weak points at a glance</div>
+          <dl class="scene-dl">
+            <dt>The page</dt><dd>Your confusion points, reached from the app's own menu — <b>never from a shared link</b>.</dd>
+            <dt>You do</dt><dd>Glance before you start; tap any row to jump to <b>either end</b> and drill it. Tap a badge to change a seam's state — or mark one <span class="go">beaten</span> the day you stop slipping on it.</dd>
+            <dt>You see</dt><dd>Every slip and jump with its state badge — <span class="go">live seams up top</span> (every pass, then sometimes), and a <span class="go">beaten</span> group below for the ones you've conquered. Each row also says whether it was a slip or a jump, and how often you hit it.</dd>
+          </dl>
+        </div>
+      </article>
+
+      <!-- S8: the map -->
+      <article class="scene reveal" id="s8">
+        <div class="scene-ph">
+          <div class="phone">
+            <div class="notch">my map</div>
+            <div class="screen" style="background:none">
+              <div class="screen-pad">
+                <div class="mmap" id="mmap"></div>
+                <div class="mlegend"><span><i style="background:var(--line-soft)"></i>none</span><span><i style="background:var(--amber-line)"></i>sometimes</span><span><i style="background:var(--clay)"></i>every pass</span><span><i style="background:var(--teal)"></i>used to</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="scene-cap">
+          <span class="scene-n">08</span>
+          <div class="scene-t">Now and then — the map of your own seams</div>
+          <dl class="scene-dl">
+            <dt>The page</dt><dd>A picture of the <b>whole mus'haf</b>, coloured by where you slip.</dd>
+            <dt>You do</dt><dd>Notice the shape — <em>"my confusions are all in the last third,"</em> say, or that they cluster around the stories that repeat.</dd>
+            <dt>You see</dt><dd>Your weak seams as a map — the personal twin of the look-alike map the app draws for everyone. Hot where you slip <span class="warn">every pass</span>, calm <span class="go">teal where you used to</span> and have since beaten it, so the map shows your wins too. The <b>most speculative</b> surface; the warning and the list carry the feature without it.</dd>
+          </dl>
+        </div>
+      </article>
+
+    </div>
+  </div>
+</section>
+
+<!-- WORD PRESS + VERBS -->
+<section class="wrap">
+  <div class="sec-head">
+    <p class="eyebrow">A more precise way in</p>
+    <h2 class="col">What if you know the exact word?</h2>
+    <p class="col">The control in screen 02 above asks only <em>which verse</em> — the fast, discoverable path. But often you know more: the exact word where your tongue took the wrong turn, because that word <strong>is</strong> the moment it happened. Press and hold that word — reusing a gesture the app already has, so it doesn't fight the phone's own text menu — and a small menu opens where two different things you might mean finally part.</p>
+  </div>
+
+  <div class="wordgrid">
+    <div class="phone reveal">
+      <div class="notch">the page · 2</div>
+      <div class="screen">
+        <div class="screen-pad">
+          <div class="ln w1"></div>
+          <p class="press-hint">↓ press and hold the word</p>
+          <div class="wordline">
+            <span class="word">وَٱتَّقُوا۟</span>
+            <span class="word lit">يَوْمًا</span>
+            <span class="word">لَّا</span>
+            <span class="word">تَجْزِى</span>
+          </div>
+          <div class="wordmenu">
+            <div class="wmi slip"><span class="wmi-ar">⚠ I slipped here</span><span class="wmi-en">pulled onto a look-alike</span></div>
+            <div class="wmi jump"><span class="wmi-ar">↷ I jumped from here</span><span class="wmi-en">leapt to the same phrase elsewhere</span></div>
+            <div class="wmi mark"><span class="wmi-ar">✎ Mark this word</span><span class="wmi-en">decide slip or jump later</span></div>
+          </div>
+          <div class="ln w4"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="verbs">
+      <div class="verb slip reveal">
+        <span class="verb-k">Slipped</span>
+        <p class="verb-def">An <strong>involuntary</strong> wrong turn — resemblance pulled your tongue onto a look-alike verse.</p>
+        <ul>
+          <li>the sheet ranks <em>resembling</em> verses first</li>
+          <li>becomes a private <strong>warning</strong> on the page, weeks later</li>
+        </ul>
+      </div>
+      <div class="verb jump reveal">
+        <span class="verb-k">Jumped</span>
+        <p class="verb-def">A <strong>leap</strong> to another place — usually where the identical phrase recurs. Maybe a mistake, maybe just a connection you noticed.</p>
+        <ul>
+          <li>the sheet ranks the word-for-word <em>twin</em> first</li>
+          <li>a real path your memory takes — the natural candidate to become a <strong>link you can follow</strong> (decision D4)</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <p class="col" style="margin-top:1.8rem;color:var(--ink-2)">Marking the word hands the app the exact point of divergence — which is the very signal decision D3 wonders whether it must <em>build</em>. And the verb you pick isn't cosmetic: it decides how the app ranks where you went, and which surface remembers it — a warning for a slip, a path for a jump.</p>
+</section>
+
+<!-- STATES -->
+<section class="wrap">
+  <div class="sec-head">
+    <p class="eyebrow">Not every seam is equally alive</p>
+    <h2 class="col">How reliably do you slip here — and has it changed?</h2>
+    <p class="col">A flat list of everywhere you ever slipped is the wrong thing to read back. What matters is which seams are <em>still</em> catching you — and, just as much, which you've <strong>beaten</strong>, because that's the progress the feature exists to earn. So every confusion point carries a <strong>state</strong>, and it moves as you work the seam.</p>
+  </div>
+  <div class="states">
+    <div class="state-c every reveal"><span class="st-tag">every pass</span><h3>Catches you each time</h3><p>The loudest warning, top of the list, hottest on the map. The <em>this is the one you always miss</em> the feature was built to say.</p></div>
+    <div class="state-c some reveal"><span class="st-tag">sometimes</span><h3>Catches you on some passes</h3><p>A quieter warning, mid-weight on the list and map. Where most seams live — and where a new capture is born.</p></div>
+    <div class="state-c used reveal"><span class="st-tag">used to</span><h3>You've beaten it</h3><p>Stops nagging — at most a faint <em>still solid?</em> Stays visible in the calm colour, because a seam you conquered is worth seeing. The encouraging half of the whole feature: it remembers your wins, not only your weak spots.</p></div>
+    <div class="state-c gone reveal"><span class="st-tag">dismissed</span><h3>Not really a problem</h3><p>A stray flag you decide isn't a seam. It goes quiet and drops off the list — distinct from <em>used to</em>: nothing was beaten, it simply wasn't one.</p></div>
+  </div>
+  <div class="lifecycle reveal">
+    A seam moves along a natural arc — and the moment that matters most is the good one: you land on it, the warning fires, and this time you <strong>don't slip</strong>. One tap on <em>«beat it»</em> retires it.
+    <div class="flow">new capture → <b class="some">sometimes</b> → (again &amp; again) → <b class="every">every&nbsp;pass</b> → (you land, don't slip) → <b class="used">used&nbsp;to</b></div>
+  </div>
+  <p class="col" style="margin-top:1.8rem;color:var(--ink-2)"><strong>You own the state, and it's never added up.</strong> <em>Every pass</em> and <em>used to</em> are notes you set about yourself — the way a teacher writes <em>watch this</em> or <em>you've got this now</em> — not a rate the app computes, which it couldn't do honestly anyway, since it sees your captures, never your recitation. At most it <em>nudges</em>: <em>nothing here in six weeks — retire it?</em> And there is no "seams beaten: 12", no percentage, no streak across seams. The instant a state becomes a number about you, it's the score this feature refused — which is exactly decision <strong>D5</strong> below.</p>
+</section>
+
+<!-- WHAT IT IS NOT -->
+<section class="wrap">
+  <div class="sec-head">
+    <p class="eyebrow">Holding the line</p>
+    <h2 class="col">What it deliberately is <em>not</em></h2>
+    <p class="col">Hifth is a navigation instrument, not a place to write. These three guards keep the feature from drifting into an app this one refuses to be.</p>
+  </div>
+  <div class="guards">
+    <div class="guard reveal">
+      <h3>Not a <span>notebook</span></h3>
+      <p>A confusion point is two coordinates and a direction — <em>from here, toward there</em> — never a paragraph of reflection. If a screen ever invites you to write, the design has drifted.</p>
+    </div>
+    <div class="guard reveal">
+      <h3>Not a second <span>dataset</span></h3>
+      <p>It makes no claim to be the "real" look-alikes. It records exactly what one person hit — and that narrowness is the value, not a shortfall.</p>
+    </div>
+    <div class="guard reveal">
+      <h3>Not a <span>score</span></h3>
+      <p>No accuracy percentage, no streak, no "verses mastered." A number about someone's worship the data can't support is a mistake this codebase has already refused.</p>
+    </div>
+  </div>
+</section>
+
+<!-- DECISIONS -->
+<section class="decisions">
+  <div class="wrap">
+    <div class="sec-head">
+      <p class="eyebrow">Your call · comment on each</p>
+      <h2 class="col">Five decisions to make before any code</h2>
+      <p class="col">Each is a genuine fork the design does not settle. Options are weighed side by side; a leaning is offered where there is one, and the single line that would flip it. <strong>Leave your call — or your argument — as a comment on the one you want to weigh in on.</strong></p>
+    </div>
+
+    <div class="dgrid">
+
+      <!-- D1 -->
+      <article class="decision sharp">
+        <div class="d-top">
+          <div class="d-tagrow"><span class="d-id">D1</span><span class="d-badge sharp">Sharpest · settle first</span></div>
+          <h3>How safe must these memories be, when the phone quietly forgets?</h3>
+          <p class="framing">iPhones delete a web app's stored data after seven days without a visit. A glance-log of what you read can survive that as a minor loss. A confusion map is weeks of hard-won self-knowledge — losing it silently is a real harm to the exact reliance this feature exists to earn.</p>
+        </div>
+        <div class="d-options">
+          <div class="opt">
+            <div class="opt-h"><span class="opt-k">A</span><span class="opt-t">Same shelter as the reading log</span></div>
+            <ul>
+              <li class="pro">Nothing new to build; proven pattern already in the app.</li>
+              <li class="pro">An "add to Home Screen" install is the real defence, and the app already asks for it.</li>
+              <li class="con">A reader who never installs can lose months of their map with no warning.</li>
+            </ul>
+          </div>
+          <div class="opt">
+            <div class="opt-h"><span class="opt-k">B</span><span class="opt-t">Give it a backup it can be saved to</span></div>
+            <ul>
+              <li class="pro">The map survives a wipe, a new phone, a reinstall.</li>
+              <li class="con">Backup means data leaves the device — which is exactly decision D2.</li>
+              <li class="con">New surface to design and to keep private.</li>
+            </ul>
+          </div>
+        </div>
+        <div class="d-foot">
+          <div>
+            <div class="lean"><span class="lean-k">Leaning</span> This is the one feature precious enough to justify a save path — but it can't be chosen without also answering D2.</div>
+            <div class="flip"><span class="flip-k">Flips if</span> you decide a Home-Screen install is a fair price to ask of anyone who wants their map to last.</div>
+          </div>
+          <span class="comment-cue">comment your call on D1</span>
+        </div>
+      </article>
+
+      <!-- D2 -->
+      <article class="decision">
+        <div class="d-top">
+          <div class="d-tagrow"><span class="d-id">D2</span><span class="d-badge">Wants a full decision record</span></div>
+          <h3>Should a confusion map ever be allowed to leave the device?</h3>
+          <p class="framing">The app's settled stance is that anything leaving the device is a deliberate, gated act — no export, no sync. Two real pulls argue the other way here; one hard fact argues against.</p>
+        </div>
+        <div class="d-options">
+          <div class="opt">
+            <div class="opt-h"><span class="opt-k">A</span><span class="opt-t">Never — it stays on the device, always</span></div>
+            <ul>
+              <li class="pro">A record of where your memory of the Qur'an fails is intimate; keeping it sealed honours that.</li>
+              <li class="pro">Export is the first step of every privacy erosion; not building it is the safest stance.</li>
+              <li class="con">No backup (blocks D2's answer to D1), and no way to show a teacher.</li>
+            </ul>
+          </div>
+          <div class="opt">
+            <div class="opt-h"><span class="opt-k">B</span><span class="opt-t">Yes, as a deliberate, gated act</span></div>
+            <ul>
+              <li class="pro">A teacher can see a student's map and drill them on it — a genuinely valuable use.</li>
+              <li class="pro">Unlocks a backup path for D1.</li>
+              <li class="con">Blurs a private log toward the outside world; every future erosion starts here.</li>
+            </ul>
+          </div>
+        </div>
+        <div class="d-foot">
+          <div>
+            <div class="lean"><span class="lean-k">Recommendation</span> Because it's a genuine either/or with a privacy cost, this one deserves its own decision page drawn on a real mus'haf — not a snap call in a comment.</div>
+            <div class="flip"><span class="flip-k">Flips if</span> the teacher-drills-student use is judged worth more than the privacy risk it opens.</div>
+          </div>
+          <span class="comment-cue">comment your call on D2</span>
+        </div>
+      </article>
+
+      <!-- D3 -->
+      <article class="decision">
+        <div class="d-top">
+          <div class="d-tagrow"><span class="d-id">D3</span><span class="d-badge">Needs a hafiz's test</span></div>
+          <h3>Is the "already listed" suggestion good enough, or does it need new work?</h3>
+          <p class="framing">The suggested targets come free from the resemblance links the app already carries — but that corpus is hand-curated and covers only about a quarter of the book. For an uncovered verse, the sheet opens with an empty list and falls back to a manual jumper. When a slip is captured by pressing the exact word, though, the reader hands over the divergence signal directly — so option B is only ever needed for verses marked at the whole-verse level.</p>
+        </div>
+        <div class="d-options">
+          <div class="opt">
+            <div class="opt-h"><span class="opt-k">A</span><span class="opt-t">Ship with what's already there</span></div>
+            <ul>
+              <li class="pro">Free — reuses existing links, ranked identical-wording first.</li>
+              <li class="pro">The manual jumper covers the gaps; a slip is never lost.</li>
+              <li class="con">On uncovered verses it isn't the one-tap experience — you type the target.</li>
+            </ul>
+          </div>
+          <div class="opt">
+            <div class="opt-h"><span class="opt-k">B</span><span class="opt-t">Also build a shared-opening / rasm signal</span></div>
+            <ul>
+              <li class="pro">Even an uncovered verse can offer candidates; empty-list case becomes rare.</li>
+              <li class="pro">Matches how the eye and tongue actually confuse — the bare consonant skeleton.</li>
+              <li class="con">The one genuinely new piece of data work; deferrable to a later phase.</li>
+            </ul>
+          </div>
+        </div>
+        <div class="d-foot">
+          <div>
+            <div class="lean"><span class="lean-k">Leaning</span> Ship A first; let a hafiz using it on real slips tell us how often the list comes up empty before spending on B.</div>
+            <div class="flip"><span class="flip-k">Flips if</span> early use shows real slips keep landing on verses the curated corpus omits.</div>
+          </div>
+          <span class="comment-cue">comment your call on D3</span>
+        </div>
+      </article>
+
+      <!-- D4 -->
+      <article class="decision">
+        <div class="d-top">
+          <div class="d-tagrow"><span class="d-id">D4</span><span class="d-badge">Privacy &amp; provenance</span></div>
+          <h3>Should your own slips become links you can navigate, like the app's own?</h3>
+          <p class="framing">The captured pairs could appear in the hop rail as a fourth kind of link — <em>your</em> edges, beside the corpus's public ones — so the app you navigate is shaped by your own history. Appealing, and a provenance question. The slip/jump split sharpens it: a slip is an error and stays a warning; a jump is a path your memory actually takes, and far more natural to make navigable.</p>
+        </div>
+        <div class="d-options">
+          <div class="opt">
+            <div class="opt-h"><span class="opt-k">A</span><span class="opt-t">Keep them private — warning only</span></div>
+            <ul>
+              <li class="pro">A private log stays cleanly separate from public, sourced links.</li>
+              <li class="pro">The at-the-seam warning may already deliver the value without merging the two.</li>
+              <li class="con">Your history never reshapes the map you navigate.</li>
+            </ul>
+          </div>
+          <div class="opt">
+            <div class="opt-h"><span class="opt-k">B</span><span class="opt-t">Surface them as a fourth link type</span></div>
+            <ul>
+              <li class="pro">The app you move through is genuinely shaped by your own weak seams.</li>
+              <li class="con">Mixes a private log into the surface that draws public, sourced links.</li>
+              <li class="con">Cuts against the gate built to keep those two apart.</li>
+            </ul>
+          </div>
+        </div>
+        <div class="d-foot">
+          <div>
+            <div class="lean"><span class="lean-k">Leaning</span> Keep slips as warnings (A); let <em>jumps</em> — the deliberate paths — be the only thing considered for the rail. The sharper question isn't "do captures become edges," it's "do jumps."</div>
+            <div class="flip"><span class="flip-k">Flips if</span> the warning proves too easy to miss, and a rail entry is what makes it land.</div>
+          </div>
+          <span class="comment-cue">comment your call on D4</span>
+        </div>
+      </article>
+
+      <!-- D5 -->
+      <article class="decision">
+        <div class="d-top">
+          <div class="d-tagrow"><span class="d-id">D5</span><span class="d-badge sharp">Privacy &amp; the score line</span></div>
+          <h3>Who says how reliably you slip — you, or the app's guess from the data?</h3>
+          <p class="framing">Each seam's state — every pass, sometimes, used to, dismissed — has to be set by someone. The design's bet is <em>you</em> own it, because the app sees your <em>captures</em>, not your recitation: silence at a seam could mean "I beat it" or "I stopped logging," and a state the app computed would be the very score this feature refused. The counter-pull is friction — a reader who never marks a seam beaten leaves conquered seams warning forever.</p>
+        </div>
+        <div class="d-options">
+          <div class="opt">
+            <div class="opt-h"><span class="opt-k">A</span><span class="opt-t">You set it; the app never guesses</span></div>
+            <ul>
+              <li class="pro">Honest — it never claims to measure worship it cannot see.</li>
+              <li class="pro">The cleanest distance from a score.</li>
+              <li class="con">Conquered seams keep warning until you remember to retire them.</li>
+            </ul>
+          </div>
+          <div class="opt">
+            <div class="opt-h"><span class="opt-k">B</span><span class="opt-t">You set it, but the app may quietly nudge</span></div>
+            <ul>
+              <li class="pro">A gentle "nothing here in six weeks — retire it?" spares the friction.</li>
+              <li class="pro">The write itself still stays your explicit act.</li>
+              <li class="con">Any inference from capture data leans toward measuring — the line to watch.</li>
+            </ul>
+          </div>
+        </div>
+        <div class="d-foot">
+          <div>
+            <div class="lean"><span class="lean-k">Leaning</span> Reader-owned, with a quiet nudge (B) — but the line between a <em>nudge</em> and an <em>assertion</em> is the thing to settle, and it echoes the score guard directly.</div>
+            <div class="flip"><span class="flip-k">Flips if</span> even a suggestion is judged to lean too far toward putting a number on someone's recitation.</div>
+          </div>
+          <span class="comment-cue">comment your call on D5</span>
+        </div>
+      </article>
+
+    </div>
+  </div>
+</section>
+
+<!-- PHASES -->
+<section class="wrap">
+  <div class="sec-head">
+    <p class="eyebrow">If it's built</p>
+    <h2 class="col">The order it would come in</h2>
+    <p class="col">Ordered by dependency, not committed to dates. Each phase is a whole, useful thing on its own.</p>
+  </div>
+  <ol class="phases">
+    <li class="phase">
+      <span class="pn">01</span>
+      <div><span class="pt">Settle the stance</span> <span class="gated">a decision, not code</span>
+        <div class="pd">Answer D1 and D2 at least provisionally — they decide whether the store needs a save path and how strict its privacy is.</div></div>
+    </li>
+    <li class="phase free">
+      <span class="pn">02</span>
+      <div><span class="pt">Capture, from the app's own links</span>
+        <div class="pd">The private store; the ayah-level control and the hard-press word menu with the slip/jump choice; the sheet drawing candidates straight from the resemblance graph. Slips and jumps get recorded — a whole feature on its own.</div></div>
+    </li>
+    <li class="phase free">
+      <span class="pn">03</span>
+      <div><span class="pt">The warning, and the review list</span>
+        <div class="pd">The at-the-seam warning, and the list sorted by how often you hit each slip. Where capture starts paying back — arguably the real first version.</div></div>
+    </li>
+    <li class="phase">
+      <span class="pn">04</span>
+      <div><span class="pt">The personal map</span>
+        <div class="pd">A picture of the mus'haf coloured by where your slips cluster. Highest polish, lowest urgency.</div></div>
+    </li>
+    <li class="phase">
+      <span class="pn">05</span>
+      <div><span class="pt">The shared-opening signal</span> <span class="gated">gated on D3</span>
+        <div class="pd">Only if phase-2 use shows corpus-only candidates come up empty too often.</div></div>
+    </li>
+    <li class="phase">
+      <span class="pn">06</span>
+      <div><span class="pt">Export / teacher-share</span> <span class="gated">gated on D2</span>
+        <div class="pd">Only if the decision goes that way, and built as the deliberate, gated act the privacy stance demands.</div></div>
+    </li>
+  </ol>
+</section>
+
+<!-- FOOTER / CTA -->
+<footer class="foot">
+  <div class="wrap">
+    <div class="cta">
+      <div>
+        <div class="big">Weigh in where it counts.</div>
+        <p>Comment on any of the five decisions above — D1 and D2 are the ones that gate everything else, D2 is the one that likely deserves its own drawn options page before it's fixed, and D5 draws the line between a helpful note and a score. Your calls and arguments in the comments come back to shape the plan.</p>
+      </div>
+    </div>
+    <div class="meta">
+      Hifth · a navigation instrument for huffaz &nbsp;·&nbsp; Feature: personal confusion points (Tier C1) &nbsp;·&nbsp; Status: design only, nothing built<br>
+      Not settled here: the external scan of how other tools handle personal capture, and the note shape checked against the annotation model — both owed before costing.
+    </div>
+  </div>
+</footer>
+
+<script>
+  (function () {
+    var root = document.documentElement;
+    var btn = document.getElementById('themeToggle');
+    function current() {
+      var set = root.getAttribute('data-theme');
+      if (set) return set;
+      return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    }
+    btn.addEventListener('click', function () {
+      var next = current() === 'dark' ? 'light' : 'dark';
+      root.setAttribute('data-theme', next);
+    });
+
+    // personal map — cells, clustered toward the last third
+    var mmap = document.getElementById('mmap');
+    if (mmap) {
+      var hot = { 12: 'used', 18: 'some', 25: 'some', 26: 'every', 33: 'some', 34: 'every', 35: 'some', 40: 'some', 41: 'every', 42: 'used', 43: 'some', 44: 'every' };
+      for (var i = 0; i < 48; i++) {
+        var c = document.createElement('span');
+        c.className = 'mcell' + (hot[i] ? ' ' + hot[i] : '');
+        mmap.appendChild(c);
+      }
+    }
+
+    var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var els = document.querySelectorAll('.reveal');
+    if (reduce || !('IntersectionObserver' in window)) {
+      els.forEach(function (e) { e.classList.add('in'); });
+    } else {
+      var io = new IntersectionObserver(function (entries) {
+        entries.forEach(function (en) {
+          if (en.isIntersecting) { en.target.classList.add('in'); io.unobserve(en.target); }
+        });
+      }, { threshold: 0.14 });
+      els.forEach(function (e) { io.observe(e); });
+    }
+  })();
+</script>

@@ -44,7 +44,7 @@
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { planNudge, readers, windowFor } from "./lib/adjudication.mjs";
+import { planNudge, readers, selectPages, windowFor } from "./lib/adjudication.mjs";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const ETL = join(HERE, "..");
@@ -62,8 +62,61 @@ const outPath = arg("--out", join(ETL, "out", "mark-nudge.html"));
 /** How wide the panel is drawn, in pixels. One page unit is then ~21 px. */
 const PANEL = Number(arg("--panel", 460));
 
+/**
+ * A file of displacements whose pages this session must **not** ask about, and
+ * how many of what is left to ask about.
+ *
+ * Both default to nothing, which reproduces the original behaviour: every page
+ * with a measured correction is fair game. Giving `--exclude` the file the
+ * correction was fitted on is what makes a sitting out-of-sample, and it is the
+ * one thing the first sitting could not do — there was nothing held out, because
+ * a trial cannot be built for a page with no proposed move and only forty pages
+ * had one.
+ */
+const excludePath = arg("--exclude", null);
+const pagesWanted = Number(arg("--pages", 0));
+const spread = arg("--spread", "extremes");
+
+/**
+ * Who is placing these rectangles. Metadata everywhere except two places, and
+ * both of those matter.
+ *
+ * It deliberately does **not** reach the trial plan. The one measurement a
+ * second person can make that a first cannot is *do two hands agree*, and that
+ * question only has an answer if both hands were shown the same marks in the
+ * same order from the same starting points. So a second reader is the identical
+ * build under a different name: agreement within about a twentieth of a unit
+ * says the leftover distance is a fact about the print, and a larger gap says it
+ * is a fact about whoever placed the boxes — in which case no global residual
+ * should be applied to three hundred thousand rectangles at all.
+ *
+ * Where it does reach: the browser's resume key, so two people working the same
+ * file on one machine do not resume into each other's answers, which would look
+ * exactly like one person being unusually consistent; and the name of the file
+ * the page hands back, so the second download does not arrive looking like a
+ * duplicate of the first.
+ */
+const reader = arg("--reader", "A");
+
 const shiftText = readFileSync(shiftPath, "utf8");
 const shift = JSON.parse(shiftText);
+
+const excludeFiles = excludePath ? excludePath.split(",").filter(Boolean) : [];
+const excluded = excludeFiles.flatMap((f) => JSON.parse(readFileSync(f, "utf8")).shifts.map((s) => s.page));
+const chosen = selectPages({ shifts: shift.shifts, exclude: excluded, pages: pagesWanted, spread });
+const byPage = new Map(shift.shifts.map((s) => [s.page, s]));
+const shifts = chosen.map((p) => byPage.get(p));
+if (excludePath || pagesWanted > 0) {
+  if (!chosen.length) {
+    process.stderr.write(`no pages left after excluding ${excluded.length} of ${shift.shifts.length}\n`);
+    process.exit(2);
+  }
+  const heldOut = excluded.filter((p) => byPage.has(p)).length;
+  process.stderr.write(
+    `pages: ${chosen.length} of ${shift.shifts.length} measured` +
+      `${heldOut ? `, ${heldOut} held out` : ""} · ${spread}\n`,
+  );
+}
 
 /**
  * A fingerprint of the displacements this session was built from — the same
@@ -82,6 +135,105 @@ function fingerprint(s) {
 
 const n2 = (v) => Math.round(v * 100) / 100;
 const esc = (s) => String(s).replace(/[<>&"]/g, (c) => ({ "<": "&lt;", ">": "&gt;", "&": "&amp;", '"': "&quot;" })[c]);
+
+/**
+ * Which one, in words.
+ *
+ * Small numbers spelled out because they are read mid-sentence — "the 2nd of 3"
+ * is a table cell and this is a sentence somebody reads once, quickly, before
+ * looking at the ink.
+ */
+const NTH = ["", "first", "second", "third", "fourth", "fifth", "sixth", "seventh", "eighth"];
+const HOW_MANY = ["", "one", "two", "three", "four", "five", "six", "seven", "eight"];
+const nth = (n) => NTH[n] ?? `${n}th`;
+const howMany = (n) => HOW_MANY[n] ?? String(n);
+
+/**
+ * How soft the wash over the host letters is, in page units: the blur, and how
+ * far it is grown past the letter outline before blurring.
+ *
+ * These two numbers are the whole safety argument, so they are named rather than
+ * buried. The correction being measured is about one unit; the wash's edge is a
+ * gradient a good deal wider than that, so a wash drawn a unit out of place looks
+ * exactly like one drawn correctly. Shrink them and this stops being true.
+ */
+const WASH_BLUR = 0.9;
+const WASH_GROW = 1.6;
+
+/**
+ * A soft wash over the letters the mark was drawn on — which ones, and nothing
+ * about where.
+ *
+ * ## Why it is a wash and not a tint
+ *
+ * The first version of this filled the host letters in a second colour, and it
+ * was wrong in a way worth writing down, because it looked obviously safe.
+ *
+ * The ink in the panel is the **shipped** page — about fifteen paths, one per
+ * line, so there is no way to pick a word out of it. The letter outlines come
+ * from the **ligature corpus** instead, a different vendored drawing of the same
+ * print, carried onto our frame by the page's recorded fit. That fit is exactly
+ * what places the mark rectangle. So the gap between a crisply-drawn corpus
+ * letter and the shipped ink underneath it *is the correction*, drawn on the
+ * screen at about twenty-five pixels, in every panel, for an hour. A reader would
+ * not even have to notice they were copying it.
+ *
+ * A wash cannot say that. It is grown past the outline and then blurred, so its
+ * edge is a gradient several times wider than the correction; the same wash is
+ * produced whether the fit is right or a unit out. What survives is the only part
+ * we wanted — *these letters, not those* — and what is destroyed is the part that
+ * would have been an answer key.
+ *
+ * It is painted under the ink rather than over it, so the print the reader is
+ * judging against stays exactly as black and as crisp as it was.
+ *
+ * ## The mark itself
+ *
+ * Never washed, never traced, never drawn. Its position is the entire
+ * measurement. It stays as the print set it, indistinguishable from its
+ * neighbours, which is the condition under which a placement means anything.
+ */
+function hostWash(lig, fit, i) {
+  if (!lig || !lig.letters.length) return "";
+  const ds = lig.letters.map((d) => `<path d="${esc(d)}"/>`).join("");
+  // The filter sits on the outer group and the frame change on the inner one, so
+  // the blur and the growth are both in page units — the units the correction is
+  // measured in, and therefore the only units in which "wider than the thing it
+  // has to hide" means anything.
+  return (
+    `<filter id="soft${i}" x="-20%" y="-20%" width="140%" height="140%">` +
+    `<feGaussianBlur stdDeviation="${WASH_BLUR}"/></filter>` +
+    `<g class="host" filter="url(#soft${i})" opacity=".55">` +
+    `<g transform="translate(${fit.tx} ${fit.ty}) scale(${fit.sx} ${fit.sy})"` +
+    ` fill="var(--host)" stroke="var(--host)" stroke-width="${n2(WASH_GROW / fit.sx)}"` +
+    ` stroke-linejoin="round">${ds}</g></g>`
+  );
+}
+
+/**
+ * The sentence that says which mark, above the panel.
+ *
+ * Three parts, and each is there because without it a real card in this session
+ * is ambiguous: the mark's name, the letters it sits on, and — only when those
+ * letters carry more than one mark of that name — which of them, counting from
+ * the right, because that is the direction the letters are read in.
+ *
+ * The rank is counted over the washed letters and says so, rather than over the
+ * whole word. A word can run off the edge of the crop, and "the third of three"
+ * over letters the reader cannot all see is worse than saying nothing at all.
+ *
+ * A mark the corpus drew under a word but inside no ligature gets no letters and
+ * says so. That is rare and it is better said than papered over: a reader told
+ * "the fatha on ذ" when nothing is washed would spend the trial hunting for the
+ * wash rather than placing the box.
+ */
+function whichOne(t) {
+  const on = t.lig && t.lig.text ? ` on <bdi>${esc(t.lig.text)}</bdi>` : "";
+  const scope = t.lig ? "on those letters" : "in this word";
+  const rank = t.of > 1 ? ` — the ${nth(t.nth)} of ${howMany(t.of)} ${scope}, counting from the right` : "";
+  const lost = t.lig ? "" : " — this one sits under the word rather than on a letter, so nothing is washed";
+  return `<p class="who">the <b>${esc(t.name)}</b>${on}${rank}${lost}</p>`;
+}
 
 /** The page's own outlines, clipped to the window. Ink and nothing else. */
 function inkPaths(shapes, vx, vy, side) {
@@ -110,7 +262,7 @@ function inkPaths(shapes, vx, vy, side) {
 }
 
 const t0 = Date.now();
-const { trials, repeats, skippedForInk, pages } = planNudge({ seed, count, shifts: shift.shifts });
+const { trials, repeats, skippedForInk, pages } = planNudge({ seed, count, shifts });
 
 const inks = new Map();
 for (const p of new Set(trials.map((t) => t.page))) inks.set(p, readers.inkFor(p));
@@ -137,7 +289,8 @@ const cards = trials
  data-x="${n2(x)}" data-y="${n2(y)}" data-w="${n2(w)}" data-h="${n2(h)}"
  data-vx="${n2(vx)}" data-vy="${n2(vy)}" data-side="${n2(side)}"
  data-sx="${n2(sx)}" data-sy="${n2(sy)}" hidden>
-<svg viewBox="${n2(vx)} ${n2(vy)} ${n2(side)} ${n2(side)}" width="${PANEL}" height="${PANEL}" aria-hidden="true">${inkPaths(inks.get(t.page), vx, vy, side)}<rect class="hit" x="${n2(x + sx)}" y="${n2(y + sy)}" width="${n2(w)}" height="${n2(h)}" fill="none" stroke="var(--box)" stroke-width="${n2(side / 300)}"/></svg>
+${whichOne(t)}
+<svg viewBox="${n2(vx)} ${n2(vy)} ${n2(side)} ${n2(side)}" width="${PANEL}" height="${PANEL}" aria-hidden="true">${hostWash(t.lig, t.fit, t.i)}${inkPaths(inks.get(t.page), vx, vy, side)}<rect class="hit" x="${n2(x + sx)}" y="${n2(y + sy)}" width="${n2(w)}" height="${n2(h)}" fill="none" stroke="var(--box)" stroke-width="${n2(side / 300)}"/></svg>
 <p class="where">page ${t.page} · ${t.surah}:${t.aya}</p>
 </section>`;
   })
@@ -147,11 +300,45 @@ const head = {
   built: new Date().toISOString(),
   kind: "nudge",
   seed,
+  reader,
   count: trials.length,
   repeats,
   pages,
   shiftRan: shift.ran,
   shiftFingerprint: fingerprint(shiftText),
+  /**
+   * Which pages this build was allowed to draw from, and how that list was
+   * arrived at.
+   *
+   * `of` is the list itself, and it is the load-bearing field: the scorer
+   * rebuilds the trials from the seed and the displacements, so if the builder
+   * narrowed those displacements and the scorer did not, every trial index would
+   * point at a different mark and the residuals would be a subtraction of the
+   * wrong numbers — silently, with no error to read. Replaying a recorded list
+   * cannot drift the way re-running a selection can: a later change to how pages
+   * are chosen re-scores nothing that was already answered.
+   *
+   * The rest is provenance, not machinery. `heldOutFrom` names the file whose
+   * pages were removed, which is what makes a sitting out-of-sample and is the
+   * single most important thing to be able to check afterwards.
+   */
+  select: {
+    of: chosen,
+    /**
+     * The list, in eight characters, so it can go in the browser's resume key.
+     *
+     * Two builds from the same displacements with the same seed and different
+     * pages are different sessions, and without this they would share a key: the
+     * second would resume into the first's answers and staple them onto a trial
+     * list they were never given. That is the same failure `shows` was added to
+     * this key to prevent, arriving by a second route.
+     */
+    fp: fingerprint(chosen.join(",")),
+    strategy: pagesWanted > 0 ? spread : "all",
+    heldOutFrom: excludeFiles.map((f) => f.split("/").pop()),
+    heldOut: excluded.length,
+    measured: shift.shifts.length,
+  },
   /**
    * What this build put on the screen. The forced-choice page carries the same
    * field for the same reason: a reading that assumes a question was asked when
@@ -159,22 +346,49 @@ const head = {
    * feature.
    */
   asks: ["place", "size"],
+  /**
+   * What a card put in front of the reader. It is part of the browser's resume
+   * key, below, and that is the point of writing it down: a placement made on a
+   * card that never said which mark it meant is not the same measurement as one
+   * made on a card that did, and a rebuild that changes the question has to
+   * start the session over rather than quietly stack the two on top of each
+   * other. The scorer reads it for the same reason the forced-choice page's
+   * `asks` is read — so a reading cannot assume a question the page had no way
+   * to put.
+   */
+  shows: ["ink", "box", "which-mark"],
 };
 
 const html = `<!doctype html><meta charset="utf-8"><title>Hifth — put the box where it goes</title>
 <style>
-:root{color-scheme:light dark;--ink:#231f20;--box:#d33;--paper:#fff}
-@media (prefers-color-scheme:dark){:root{--ink:#e8e4de;--box:#ff6b5e;--paper:#141414}}
+:root{color-scheme:light dark;--ink:#231f20;--box:#d33;--paper:#fff;--host:#1668c4}
+@media (prefers-color-scheme:dark){:root{--ink:#e8e4de;--box:#ff6b5e;--paper:#141414;--host:#6fb2ff}}
 body{font:15px/1.55 system-ui,sans-serif;margin:0;padding:22px;max-width:1100px}
 h1{font-size:20px;margin:0 0 4px}
 .intro{max-width:56em}
 .intro h2{font-size:16px;margin:20px 0 4px}
 .intro p{margin:0 0 8px}
 .trial{display:flex;flex-direction:column;align-items:center}
+/* One trial at a time, and this line is what makes that true. The session shows
+   and hides cards with the hidden attribute, which the browser honours through a
+   rule of its own saying hidden things do not display — and any rule written
+   here beats that one outright, because an author's stylesheet wins over the
+   browser's regardless of how specific either is. So the moment .trial was given
+   a display of its own, every card became visible at once, all sixty of them
+   scrollable, while the drag still moved the rectangle on whichever card the
+   session thought was current. Restating the hidden case is the whole fix. Any
+   rule added above that sets display on something the session hides needs the
+   same treatment. */
+.trial[hidden]{display:none}
 svg{background:var(--paper);border:1px solid #8886;border-radius:6px;display:block;max-width:100%;height:auto;touch-action:none;cursor:grab}
 svg.dragging{cursor:grabbing}
 .hit{pointer-events:none}
 .where{text-align:center;color:#8a8a8a;font-size:12px;margin:10px 0 0}
+/* Which mark, above the panel rather than below it — it is read before the ink
+   is looked at, and a line under the picture is one most people read second. */
+.who{text-align:center;font-size:15px;margin:0 0 10px;max-width:30em}
+.who bdi{font-size:23px;color:var(--host);vertical-align:-2px;padding:0 2px}
+.swatch{color:var(--host);font-weight:700}
 .bar{height:6px;background:#8883;border-radius:3px;overflow:hidden;margin:0 0 16px}
 .bar i{display:block;height:100%;background:currentColor;width:0}
 .ask{text-align:center;font-weight:600;margin:0 0 12px}
@@ -198,9 +412,21 @@ kbd{font:12px ui-monospace,monospace;border:1px solid #8886;border-radius:4px;pa
 <div id="intro" class="intro">
 <h2>What are you being asked to do?</h2>
 <p>You will see a small piece of a page of the mus'haf with one red rectangle drawn on
-it. The rectangle starts in the wrong place, every time and on purpose. Drag it until it
-closes around a single vowel or mark — the one nearest to where it started — and then
+it. The rectangle starts in the wrong place, every time and on purpose. Above the picture is
+a line saying which mark it belongs to. Drag it until it closes around that mark, and then
 press <em>place it</em>.</p>
+
+<h2>Which mark is it asking about?</h2>
+<p>The one named above the picture — and the letters it belongs to sit under a
+<span class="swatch">soft blue wash</span>, so you can see at a glance which part of the word
+is meant. Where those letters carry two or three of the same mark, the line also says which of
+them, counting from the right.</p>
+<p>The wash is deliberately vague, and that is not sloppiness. Anything drawn crisply enough to
+line a box up against would be telling you where we think the box goes, and then your placement
+would be a copy of our answer rather than a check on it. So the wash says <em>these letters</em>
+and refuses to say anything finer.</p>
+<p>The mark itself is never washed and never coloured. Its position is the entire thing being
+measured here.</p>
 
 <h2>Why not just ask you whether a box looks right?</h2>
 <p>Because that question can only be answered yes or no, and the answer we actually need
@@ -239,7 +465,7 @@ nudge, hold <kbd>shift</kbd> for a bigger step, <kbd>enter</kbd> to place it,
 <main id="work" hidden>
 <div class="bar"><i id="fill"></i></div>
 <p class="count" id="count"></p>
-<p class="ask">Drag the rectangle onto the mark nearest where it started.</p>
+<p class="ask">Drag the rectangle onto the mark named below.</p>
 ${cards}
 <div class="acts">
 <button id="place" disabled>Place it <kbd>enter</kbd></button>
@@ -263,7 +489,7 @@ recipe that built this page.</p>
 <script id="head" type="application/json">${JSON.stringify(head)}</script>
 <script>
 const HEAD = JSON.parse(document.getElementById("head").textContent);
-const KEY = "hifth.nudge." + HEAD.seed + "." + HEAD.shiftFingerprint;
+const KEY = "hifth.nudge." + HEAD.seed + "." + HEAD.reader + "." + HEAD.shiftFingerprint + "." + HEAD.select.fp + "." + HEAD.shows.join("-");
 const cards = [...document.querySelectorAll(".trial")];
 const work = document.getElementById("work");
 const intro = document.getElementById("intro");
@@ -388,7 +614,7 @@ function bank() {
   if (!SINK || banked) return;
   banked = true;
   const el = document.getElementById("banked");
-  SINK.artifact("mark-placements-" + HEAD.seed + ".json",
+  SINK.artifact("mark-placements-" + HEAD.seed + "." + HEAD.reader + ".json",
                 { ...HEAD, finished: new Date().toISOString(), answers })
     .then((r) => {
       el.hidden = false;
@@ -452,7 +678,7 @@ document.getElementById("save").onclick = () => {
                         { type: "application/json" });
   const a = document.createElement("a");
   a.href = URL.createObjectURL(blob);
-  a.download = "mark-placements-" + HEAD.seed + ".json";
+  a.download = "mark-placements-" + HEAD.seed + "." + HEAD.reader + ".json";
   a.click();
   URL.revokeObjectURL(a.href);
 };
@@ -464,9 +690,31 @@ else if (at >= cards.length && answers.length) render();
 mkdirSync(dirname(outPath), { recursive: true });
 writeFileSync(outPath, html);
 
+/**
+ * What this build chose, in the shape `--exclude` reads.
+ *
+ * A sitting is often more than one page: forty pages asked once each says
+ * whether the correction travels, and five pages asked four times each says how
+ * much of the spread is the page rather than the hand — and those have to be
+ * different builds, because the walk gives every page the same number of turns.
+ * The second build must not land on the first's pages or the two measure the
+ * same thing twice, so it needs to hold them out, so it needs them in a file.
+ *
+ * Same shape as a displacements file rather than a bare list of numbers, so it
+ * goes straight back in with no flag of its own and no second format to keep
+ * working. It is a record as much as a handle: the pages a session was built
+ * over, readable without opening a megabyte of HTML.
+ */
+const pagesPath = outPath.replace(/\.html$/, "") + ".pages.json";
+writeFileSync(
+  pagesPath,
+  `${JSON.stringify({ built: head.built, seed, of: shiftPath.split("/").pop(), shifts }, null, 2)}\n`,
+);
+
 process.stdout.write(
   `${trials.length} placements over ${pages} pages (${repeats} marks shown twice) · seed ${seed} · ` +
-    `displacements ${shift.ran} (${head.shiftFingerprint})\n` +
+    `reader ${reader} · displacements ${shift.ran} (${head.shiftFingerprint})\n` +
     `${skippedForInk} marks passed over for too little ink under the corrected box\n` +
-    `${(html.length / 1e6).toFixed(1)} MB in ${((Date.now() - t0) / 1000).toFixed(1)}s → ${outPath}\n`,
+    `${(html.length / 1e6).toFixed(1)} MB in ${((Date.now() - t0) / 1000).toFixed(1)}s → ${outPath}\n` +
+    `the ${chosen.length} pages it was built over → ${pagesPath}\n`,
 );

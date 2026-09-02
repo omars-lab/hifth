@@ -7,15 +7,50 @@ be inaccurate. This file is the map: which terms cover which paths, and why.
 `SOURCES.md` is the authority on every third-party source — its provenance, its verbatim
 license text, and where the notice ships. This file only says how those terms compose.
 
-## The three buckets
+## The buckets, by door
+
+Something leaves this project through three doors, and "may this be distributed?" has a
+different answer at each — so the map is organised by door first and by path second. Each row
+says what goes out, through which door, under whose terms. The doors and what goes through
+each were measured in `docs/design/what-we-distribute.md`; the numbers below are its.
+
+### Through the repository — public, cloneable
+
+The whole tree, every vendored input verbatim. This is the door the copyleft obligation is
+discharged at: the corresponding source for every derived tree below is here, and reachable.
 
 | Paths | Terms | Whose choice |
 |---|---|---|
 | `apps/web/`, `packages/core/`, `packages/etl/` (scripts), `scripts/`, `docs/`, config | **GPL-3.0-or-later** | Ours |
+| `packages/etl/data/**` — 17 vendored input files, 12.3 MB, verbatim | Each source's own terms — **not ours to relicense** | KFGQPC, QAC, quran-tajweed, Tanzil, Waqar144 |
+| `apps/web/public/assets/**` — the derived trees, checked in as built | The site door's terms, below | As below |
+
+### Through the deployed site — public, fetched by browsers
+
+Derived assets and the app bundle. No vendored input reaches a browser; what does is built
+from them, and some of it inherits their terms.
+
+| Paths | Terms | Whose choice |
+|---|---|---|
+| The app bundle, `apps/web/dist/`, about 120 KB gz | **GPL-3.0-or-later** | Ours |
 | `apps/web/public/assets/roots/**` | **GPL-3.0** (inherited) | The Quranic Arabic Corpus's |
 | `apps/web/public/assets/skins/**` | **CC BY 4.0** (inherited) | quran-tajweed's |
-| `apps/web/public/assets/adj/**` | Free use with attribution (inherited) | Waqar144's |
-| `apps/web/public/assets/pages/**`, `packages/etl/data/**` | Each source's own terms — **not ours to relicense** | KFGQPC, QAC, quran-tajweed |
+| `apps/web/public/assets/adj/**` | **GPL-3.0** (inherited) *and* free use with attribution (inherited) *and* **CC BY** (inherited) | The Quranic Arabic Corpus's *and* Waqar144's *and* Tanzil's |
+| `apps/web/public/assets/words/**` | **GPL-3.0-or-later** | Ours — rectangles we measured |
+| `apps/web/public/assets/manifest.json` | **GPL-3.0-or-later**, with one question open (below) | Ours |
+| `apps/web/public/assets/pages/**` | KFGQPC's own terms — **not ours to relicense** | KFGQPC |
+
+### Through a store binary — no such door yet
+
+Nothing goes through it. If one is opened it would carry the site door's contents wrapped in
+an installable, and that is where two clauses in the inherited grants bite that a static site
+never trips — the technological-measures clause of CC BY 4.0, and the GPL's conveying terms on
+a binary rather than a page. `docs/design/track-b-native.md` is the record for that door.
+
+Until 2026-09-01 this file had one table, organised by path, which silently meant the site
+door: it said nothing about the repository, where every vendored corpus actually is and where
+the copyleft obligation is discharged, and nothing about a store. A reader got an answer to
+"may this be distributed?" without being told which distribution it answered for.
 
 ## Why GPL for our code
 
@@ -52,9 +87,100 @@ it; the terms say changing is not allowed). We satisfy both readings rather than
 one: the file is vendored **verbatim and never edited**, and the shards are derived from it
 at build time. `docs/decisions/loop-5.md` records the full analysis.
 
-The app *code* is not a derivative of the corpus data — it reads the shards at runtime —
-so nothing here reaches our source by way of the data. Our code is GPL because we chose
-it, not because the corpus required it.
+The app *code* does not read the corpus data at build time: every asset it touches is
+fetched by URL at runtime, and no source file imports or reads anything under
+`packages/etl/data/`. Our code is GPL because we chose it, not because the corpus required it.
+
+That is a statement about one boundary, and it used to be written as though it covered all of
+them — *"nothing here reaches our source by way of the data"*. It does not, because content
+can arrive by being **typed**, and once did: twelve verses were transcribed into a source file
+and shipped in the bundle for the life of a feature, having crossed no build step at all.
+`gate:scripture` now refuses running scripture anywhere in the tree, which is the check that
+sentence was quietly standing in for.
+
+## Why the adjacency shards have three parents, and not one
+
+`apps/web/public/assets/adj/**` carried one upstream for most of this project's life, and the
+row above said so: the mutashabihat pairings are Waqar144's, free to use with attribution.
+That stopped being true when the shards started carrying **spans** — which words of an ayah
+a pairing actually shares — and nothing in a licence file moved, because nothing about the
+drift was a licence edit. It arrived as a feature.
+
+`build-adjacency.mjs` imports `sharedRuns` from `morphology.mjs`, and that module reads the
+same GPL-licensed Quranic Arabic Corpus morphology the root shards are built from. Its result
+is written into every pairing it can answer for as `span` and `toSpan`. Today that is **2,544
+of 3,002 edges across 114 shard files** — not an edge case, the common case.
+
+So under the same strict reading of *derivative* applied to the root shards above, the
+adjacency shards are a GPL derivative too, and one of their two parents was unnamed. Both were
+named then. The pairings remain Waqar144's and still owe attribution; the spans are the
+corpus's and carry GPL terms forward, with the same two consequences the root shards have.
+
+A third parent was named on 2026-09-01, and it arrived the same way the second did — as a
+feature, through no licence edit. **510 of 3,002 edges** carry a flag saying whether a pairing
+stays inside one juz, computed from the juz table in the shared core package; that table is
+derived from the Tanzil structural metadata (`tanzil-quran-metadata` in `SOURCES.md`, CC BY,
+attribution mandatory). No Tanzil byte ships — the flag is a boolean — but attribution is owed
+for what was derived, so the row and the notice name Tanzil too. What made this one harder to
+see than the second: `gate:notices` traces what a builder reads through its *imports*, and by
+its own header it does not follow imports into the core package, so a builder can reach a new
+upstream through core and the trace stays green. The declaration in the gate names Tanzil by
+hand for now; whether the trace should follow core is still open, in
+`docs/design/what-we-depend-on.md` ③.
+
+The asymmetry worth keeping in mind: a static site discharges §4–6 by handing the browser the
+whole bundle, which is this file's own argument for plain GPL over AGPL. A wrapped store
+binary is the thing that has to be licensed, which is why this matters more to Track B than to
+the web build — see `docs/design/track-b-native.md`.
+
+The notice travels with this data too, as of 2026-08-16. `assets/adj/<edition>/NOTICE.txt` is
+written by the build beside the shards, and it names **both** parents — the way to get a
+two-parent row wrong twice is to fix it once, and a notice that discharged the GPL half while
+dropping Waqar144's attribution would have been the same one-parent mistake wearing the other
+hat. Since 2026-09-01 it names all three. The corpus's copyright block in it is not a copy of the one beside the root shards: both
+are read out of the source file on every build by the same function, because the corpus's own
+terms ask that its notice be *reproduced*, and two readers of one quotation is precisely how a
+reproduction stops being one.
+
+Nothing had noticed any of this, which is its own finding. `gate:notices` now traces what each
+builder actually reads, in imports rather than in prose, and fails the build when a shipped
+asset tree reads a vendored input that neither this table nor the tree's notice accounts for.
+
+**What this does not yet settle.** Building that trace immediately surfaced one more candidate
+parent: every edge in every shard carries the page it lands on and the distance in pages to its
+pair, and those come from a table derived from the KFGQPC page corpus — bucketed in the row
+below under terms neither upstream here grants. Whether a table of which page an ayah falls on
+is expression that carries terms forward, or a fact about a printing, is a licensing question
+and not an engineering one. It is recorded rather than guessed, because naming a third parent
+without grounds would overstate what this app owes in a notice handed to every reader, and
+leaving it unnamed understates it if the answer runs the other way.
+
+## Why the word rectangles are ours
+
+`apps/web/public/assets/words/**` is 604 files of geometry: for every word of the mus'haf,
+a rectangle on **our** page frame. It shipped for months in no row of the table above and
+under no heading in this file — not because anyone decided it needed none, but because
+nothing was reading the folder. `gate:notices` reads it now, and this is the row it asked for.
+
+The rectangles were fitted from a second SVG print of the same mus'haf, set per word rather
+than per page (`word-geometry-mushafdatabase` in `SOURCES.md`). **No byte of that print
+ships.** 378 MB was read to write 2.2 MB of numbers, and the ink stays the print we already
+had. Its grant is a Sadaqa-e-Jaria one — use, copy, modify, publish, distribute and derive,
+commercially included, with no prior approval and no attribution obliged — so the tree
+inherits nothing that has to travel with it. The colophon credits it anyway, and `SOURCES.md`
+says in as many words that the credit is a courtesy so that a later reader does not mistake it
+for a condition, or mistake a condition for a courtesy.
+
+## The manifest's one open question
+
+`apps/web/public/assets/manifest.json` is ours, and it ships one thing that is under a
+question: the complete table of which page each of the 6,236 ayahs falls on, byte-identical to
+the vendored copy the pipeline reads. That is the same table, and the same question, as the
+"what this does not yet settle" note above — whether a page table is expression that carries
+its source's terms forward, or a fact about a printing. It reaches three shipped outputs, not
+one: the adjacency shards, every root-shard occurrence, and this file. The question is tracked
+with all three attached to it rather than answered here, for the reason given above: guessing
+either way misinforms every reader who opens the colophon.
 
 ## The deploy trigger
 
@@ -64,12 +190,32 @@ it, not because the corpus required it.
 corresponding source has to be reachable by anyone who loads the page.
 
 Practically: **do not publish the site while this repository is private.** Either open the
-repository, or publish the ETL script and its pinned input alongside the deployment. Today
-the repository is private and nothing is published, so no obligation has triggered.
+repository, or publish the ETL script and its pinned input alongside the deployment.
+
+**That trigger has since fired, and it is discharged.** The site is published and the
+repository is public, so the corresponding source is reachable by anyone who loads the page:
+`build-roots.mjs` and `build-adjacency.mjs` are in it, along with the pinned
+`quranic-corpus-morphology-0.4.txt` both derive from. The app also offers the source
+explicitly rather than leaving a reader to find it — `SOURCE_REPO` in `apps/web/src/provenance.ts`,
+pinned to the commit the bundle was built from, and `scripts/check-source-offer.mjs` follows
+the link so a moved repository fails a check instead of quietly breaking the offer.
+
+This paragraph said the opposite for a while after it stopped being true, which is the failure
+worth naming rather than just correcting: an obligation that triggers on an *event* — a first
+public deploy — is described in a file nobody edits on the day the event happens. If the
+repository is ever taken private again, or the site is ever served from somewhere that does
+not carry the source, this is the paragraph that has to change back.
 
 ## What we do not license
 
 The mushaf page artwork (`assets/pages/**`) is KFGQPC's, distributed under the Complex's
-own terms, and is reproduced here unmodified. Nothing in `LICENSE` grants rights to it.
+own terms. Nothing in `LICENSE` grants rights to it.
+
+It is not *unmodified*, which this paragraph used to claim. Three transforms are applied and
+each is declared, reproducible and asserted on every build — the artwork is minified at a
+fixed coordinate precision, and a short list of malformed shapes and identifiers is repaired.
+`SOURCES.md` names all three and says how many of each there are; the pipeline's own header is
+the authority on what they do. Nothing is hand-edited, which is the promise that was actually
+being made.
 The same holds for every vendored input under `packages/etl/data/`. When in doubt, the
 per-source entry in `SOURCES.md` governs — not this file, and not `LICENSE`.

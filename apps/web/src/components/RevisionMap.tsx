@@ -5,6 +5,7 @@ import {
   daysBetween,
   lastSeen,
   scopesOf,
+  type DayStamp,
   type EditionId,
   type PageMeta,
   type RevisionEvent,
@@ -105,6 +106,33 @@ function warmth(days: number): 1 | 2 | 3 | 4 {
   if (days < BANDS[1]) return 3;
   if (days < BANDS[2]) return 2;
   return 1;
+}
+
+/**
+ * How much of the record the colouring is drawn from.
+ *
+ * The whole record by default; a single calendar month otherwise. A reader who
+ * keeps up a broad revision reads a warm map every day and cannot tell this
+ * week's work from last quarter's — so the month scopes let them ask "what did I
+ * touch *this* month" and see only that, everything else falling to cold. It is
+ * a filter on which looks count, not on the warmth ramp: a division opened
+ * inside the window is still coloured by how many days ago that was, so "opened
+ * two days ago" reads the same whichever range is chosen.
+ */
+type MapRange = "all" | "thisMonth" | "lastMonth";
+
+/** The `YYYY-MM` a day stamp falls in — its bytes, no clock consulted. */
+function monthKey(day: DayStamp): string {
+  return day.slice(0, 7);
+}
+
+/** The `YYYY-MM` of the calendar month before the one `day` falls in. */
+function prevMonthKey(day: DayStamp): string {
+  const year = Number(day.slice(0, 4));
+  const month = Number(day.slice(5, 7));
+  const py = month === 1 ? year - 1 : year;
+  const pm = month === 1 ? 12 : month - 1;
+  return `${String(py).padStart(4, "0")}-${String(pm).padStart(2, "0")}`;
 }
 
 /**
@@ -249,12 +277,13 @@ export function holdings(
  * answer to the window and nothing in the DOM has it. A stride guessed from the
  * scope would be right on a desktop and quietly wrong on every phone.
  *
- * The cells are small — 16px at page scope — which is under WCAG 2.5.8's 24px
- * and is not fixable here: a map of 604 pages drawn at 24px is no longer a map
- * you can see at once, which is the only reason to open it. The criterion's
- * *equivalent control* exception is what carries it, and the equivalent is real
- * rather than argued: the jumper in the chrome goes to any page in the print,
- * with a text field. Hizb (26px) and juz (40px) clear the threshold outright.
+ * Every cell now carries its own number, so a reader names the division they
+ * mean instead of counting from a corner — and the page cells grew to 28px to
+ * hold three digits, which as a side effect brings them over WCAG 2.5.8's 24px
+ * target size, where at 16px they had leaned on the criterion's *equivalent
+ * control* exception (the jumper's text field). Hizb (30px) and juz (44px) clear
+ * it with room to spare. The map is a little less dense for it and still shows
+ * the whole book at a glance, which is the only reason to open it.
  */
 export function RevisionMap({
   open,
@@ -272,6 +301,11 @@ export function RevisionMap({
   const gridRef = useRef<HTMLUListElement>(null);
   const restoreRef = useRef<HTMLElement | null>(null);
   const [scope, setScope] = useState<RevisionScope>("hizb");
+  // Which slice of the record the colouring is drawn from. The whole record by
+  // default; a single month otherwise. Independent of `scope` — a reader may ask
+  // "which juz this month" — so it has its own state and clears no cursor: the
+  // squares do not move, only their warmth.
+  const [range, setRange] = useState<MapRange>("all");
   // Which cell holds the grid's single tab stop, or `null` for "wherever the
   // reader is standing" — resolved at render, because `here` is not known until
   // the pages and the scope are both in hand. Cleared on a scope change: hizb 47
@@ -383,10 +417,25 @@ export function RevisionMap({
   // untouched, and that is not an oversight: those divisions are the same in
   // every print, so filtering them would drop looks that really do belong to the
   // square. The asymmetry lives in core (`revision.ts`), not here.
-  const seen = useMemo(
-    () => lastSeen(comparableEvents(record?.events ?? [], scope, edition), scope),
-    [record, scope, edition],
-  );
+  // The month the range is scoped to, or null for the whole record. Read off
+  // `asOf` — the day the sheet resolved — so "this month" is this month in the
+  // reader's own clock, the same clock the record's days were stamped in.
+  const rangeMonth = useMemo<string | null>(() => {
+    if (range === "all" || asOf === null) return null;
+    return range === "thisMonth" ? monthKey(asOf) : prevMonthKey(asOf);
+  }, [range, asOf]);
+
+  const seen = useMemo(() => {
+    const all = record?.events ?? [];
+    // Filter by the calendar month first, then by edition through
+    // `comparableEvents`: the month is a fact about the reader's clock and the
+    // edition filter a fact about the paper, and neither belongs inside the
+    // other. A look outside the month never reaches `lastSeen`, so its division
+    // is cold unless another look inside the month warmed it.
+    const within =
+      rangeMonth === null ? all : all.filter((e) => dayOf(e).startsWith(rangeMonth));
+    return lastSeen(comparableEvents(within, scope, edition), scope);
+  }, [record, scope, edition, rangeMonth]);
   // The division the stage is currently showing, so the reader can find
   // themselves on a grid of sixty identical squares.
   const here = useMemo(() => {
@@ -540,6 +589,28 @@ export function RevisionMap({
           ))}
         </div>
 
+        {/* The time-range switch, the scope switch's twin: which slice of the
+            record the colouring is drawn from. No cursor is cleared — the
+            squares stay where they are, only their warmth changes. */}
+        <div className={styles.scopeRow} role="radiogroup" aria-label={t.mapRangeGroup}>
+          {(["all", "thisMonth", "lastMonth"] as const).map((r) => (
+            <button
+              key={r}
+              type="button"
+              role="radio"
+              className={styles.scope}
+              aria-checked={range === r}
+              onClick={() => setRange(r)}
+            >
+              {r === "all"
+                ? t.mapRangeAll
+                : r === "thisMonth"
+                  ? t.mapRangeThisMonth
+                  : t.mapRangeLastMonth}
+            </button>
+          ))}
+        </div>
+
         {!revisionStoreSupported() ? (
           <p className={styles.body}>{t.mapNoStore}</p>
         ) : record === undefined ? (
@@ -580,10 +651,27 @@ export function RevisionMap({
                         ? t.mapCellSeen(label(id), days)
                         : t.mapCellNever(label(id)),
                 };
+                // The division's own number, drawn in the cell. A page number is
+                // Latin in both languages — it is read off the corner of the
+                // printed page, the same rule `pageN` follows — while a hizb or
+                // juz number takes the language's digits. `aria-hidden`: the
+                // cell's `aria-label` already says the number in a full sentence,
+                // so the glyph is for the eye only and must not be read twice.
+                const num = (
+                  <span className={styles.num} aria-hidden="true">
+                    {scope === "page" ? String(id) : t.num(id)}
+                  </span>
+                );
                 // No paper behind it, so nothing to press — and no button, which
                 // is the whole distinction: a control that refuses is worse than
-                // an outline that never offered.
-                if (at === undefined) return <li key={id} className={styles.cell} {...marks} />;
+                // an outline that never offered. It still shows its number, in a
+                // fainter ink, so an absent page can be found by eye.
+                if (at === undefined)
+                  return (
+                    <li key={id} className={styles.cell} {...marks}>
+                      {num}
+                    </li>
+                  );
                 return (
                   <li key={id} className={styles.slot}>
                     <button
@@ -593,7 +681,9 @@ export function RevisionMap({
                       {...marks}
                       tabIndex={id === cursorId ? 0 : -1}
                       onClick={() => openDivision(id, at)}
-                    />
+                    >
+                      {num}
+                    </button>
                   </li>
                 );
               })}
@@ -605,10 +695,18 @@ export function RevisionMap({
             <p className={styles.inventory}>{t.mapHeld(held.size, span, scope)}</p>
 
             <ul className={styles.legend} aria-label={t.mapLegend}>
-              <li className={styles.legendRow}>
-                <span className={styles.cell} data-state="absent" aria-hidden="true" />
-                {t.mapAbsent}
-              </li>
+              {/* Only when the grid in fact holds an absent cell. On an edition
+                  that carries the whole mus'haf — every one shipped so far — no
+                  cell is absent, and a key for "no paper here" would be naming a
+                  treatment the picture does not contain. The whole absent
+                  contract stays (see the header note): a partial edition brings
+                  both the cell and this row back together. */}
+              {held.size < span && (
+                <li className={styles.legendRow}>
+                  <span className={styles.cell} data-state="absent" aria-hidden="true" />
+                  {t.mapAbsent}
+                </li>
+              )}
               <li className={styles.legendRow}>
                 <span className={styles.cell} data-state="cold" aria-hidden="true" />
                 {t.mapNeverOpened}
@@ -619,10 +717,19 @@ export function RevisionMap({
               </li>
             </ul>
 
-            {/* Always shown, empty record or not. This is the line that keeps an
-                ITP wipe from reading as "you have revised nothing": a record
-                dated this morning is visibly a new one. */}
-            {record.since && <p className={styles.note}>{t.mapSince(record.since)}</p>}
+            {/* Under "all time" this dates the record — the line that keeps an
+                ITP wipe from reading as "you have revised nothing", since a
+                record dated this morning is visibly a new one. Under a month it
+                dates the *window* instead: the picture is no longer the whole
+                record, so saying when the record began would misname what is on
+                screen. */}
+            {rangeMonth === null ? (
+              record.since && <p className={styles.note}>{t.mapSince(record.since)}</p>
+            ) : (
+              <p className={styles.note}>
+                {t.mapActiveIn(Number(rangeMonth.slice(0, 4)), Number(rangeMonth.slice(5, 7)))}
+              </p>
+            )}
           </>
         )}
 

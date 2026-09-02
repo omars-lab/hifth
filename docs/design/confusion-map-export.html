@@ -1,0 +1,303 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Copy your confusion map off the phone?</title>
+<style>
+  :root{
+    --bg:#f6f4ef; --panel:#fffdf9; --ink:#211d17; --ink-2:#6a6156; --line:#e3ddd1;
+    --line-soft:#efeae0; --accent:#8a6d3b; --accent-soft:#f0e7d6;
+    --lean:#3f6f5f; --lean-soft:#e2efe9; --warn:#a4552e; --clay:#a4552e; --amber:#b98a34;
+    --teal:#3f6f5f; --code-bg:#f2eee6;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#17150f; --panel:#201d16; --ink:#efe9dd; --ink-2:#a79c8a; --line:#332e23;
+      --line-soft:#2a261d; --accent:#c8a565; --accent-soft:#332a1a;
+      --lean:#7fb59f; --lean-soft:#1e2b26; --warn:#d78a5f; --clay:#d78a5f; --amber:#d8b263;
+      --teal:#7fb59f; --code-bg:#26221a;
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#17150f; --panel:#201d16; --ink:#efe9dd; --ink-2:#a79c8a; --line:#332e23;
+    --line-soft:#2a261d; --accent:#c8a565; --accent-soft:#332a1a;
+    --lean:#7fb59f; --lean-soft:#1e2b26; --warn:#d78a5f; --clay:#d78a5f; --amber:#d8b263;
+    --teal:#7fb59f; --code-bg:#26221a;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; background:var(--bg); color:var(--ink);
+    font:16px/1.6 "Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:960px; margin:0 auto; padding:3rem 1.4rem 4rem}
+  .mono{font-family:"SF Mono",ui-monospace,"JetBrains Mono",Menlo,Consolas,monospace}
+  .eyebrow{
+    font-family:"SF Mono",ui-monospace,Menlo,monospace; font-size:.72rem;
+    letter-spacing:.14em; text-transform:uppercase; color:var(--accent); margin:0 0 .5rem;
+  }
+  h1{font-size:2rem; line-height:1.2; margin:0 0 .8rem; text-wrap:balance; letter-spacing:-.01em}
+  h2{font-size:1.35rem; margin:2.6rem 0 .6rem; text-wrap:balance}
+  .lede{font-size:1.12rem; color:var(--ink-2); max-width:60ch; margin:0 0 .4rem}
+  .status{
+    display:inline-block; margin-top:1rem; font-family:"SF Mono",ui-monospace,Menlo,monospace;
+    font-size:.72rem; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-2);
+    border:1px solid var(--line); border-radius:999px; padding:.3rem .8rem;
+  }
+  .col{max-width:64ch}
+  .qa{margin:1.4rem 0}
+  .qa h2{margin-bottom:.3rem}
+  .qa p{margin:.4rem 0; max-width:64ch}
+  .options{margin-top:1rem; display:flex; flex-direction:column; gap:1.4rem}
+  .opt{border:1px solid var(--line); border-radius:16px; background:var(--panel); overflow:hidden}
+  .opt.lean{border-color:var(--lean); box-shadow:0 0 0 1px var(--lean)}
+  .opt-head{display:flex; align-items:center; gap:.7rem; padding:1rem 1.2rem .2rem}
+  .opt-key{
+    font-family:"SF Mono",ui-monospace,Menlo,monospace; font-weight:700; font-size:.95rem;
+    color:#fff; background:var(--accent); width:1.7rem; height:1.7rem; border-radius:50%;
+    display:grid; place-items:center; flex:none;
+  }
+  .opt.lean .opt-key{background:var(--lean)}
+  .opt-head h3{margin:0; font-size:1.15rem}
+  .badge{
+    margin-left:auto; font-family:"SF Mono",ui-monospace,Menlo,monospace; font-size:.66rem;
+    letter-spacing:.08em; text-transform:uppercase; color:var(--lean);
+    background:var(--lean-soft); border-radius:999px; padding:.28rem .6rem; white-space:nowrap;
+  }
+  .opt-body{display:flex; gap:1.4rem; padding:1rem 1.2rem 1.4rem; flex-wrap:wrap}
+  .opt-prose{flex:1 1 300px; min-width:min(100%,300px)}
+  .gist{margin:.2rem 0 .8rem}
+  dl{margin:0; display:grid; grid-template-columns:auto 1fr; gap:.3rem .9rem}
+  dt{
+    font-family:"SF Mono",ui-monospace,Menlo,monospace; font-size:.68rem; letter-spacing:.08em;
+    text-transform:uppercase; color:var(--ink-2); padding-top:.15rem;
+  }
+  dd{margin:0}
+  /* phone mock */
+  .phone{flex:0 0 auto; width:230px; max-width:100%}
+  .pscreen{
+    border:1px solid var(--line); border-radius:22px; overflow:hidden; background:var(--bg);
+    box-shadow:0 10px 30px rgba(0,0,0,.08);
+  }
+  .pbar{
+    background:var(--accent-soft); color:var(--accent); font-size:.8rem; font-weight:600;
+    padding:.6rem .9rem; border-bottom:1px solid var(--line-soft);
+  }
+  .ppad{padding:.9rem; display:flex; flex-direction:column; gap:.55rem}
+  .seamrow{
+    display:flex; justify-content:space-between; align-items:center; gap:.5rem;
+    font-family:"SF Mono",ui-monospace,Menlo,monospace; font-size:.78rem;
+    padding:.4rem .55rem; border:1px solid var(--line-soft); border-radius:8px; background:var(--panel);
+  }
+  .sstate{font-size:.64rem; letter-spacing:.04em; padding:.12rem .45rem; border-radius:999px; white-space:nowrap}
+  .sstate.every-pass{color:#fff; background:var(--clay)}
+  .sstate.sometimes{color:var(--ink); background:var(--amber)}
+  .sstate.retired{color:var(--teal); background:var(--lean-soft); border:1px solid var(--teal)}
+  .lock{font-size:.82rem; color:var(--ink-2); padding:.3rem .1rem}
+  .hint{font-size:.74rem; color:var(--ink-2); line-height:1.45}
+  .pbtn{
+    appearance:none; border:none; border-radius:10px; padding:.6rem .8rem; font:inherit;
+    font-size:.82rem; font-weight:600; color:#fff; background:var(--accent); cursor:default; text-align:center;
+  }
+  .pbtn.ghost{background:transparent; color:var(--accent); border:1px solid var(--accent)}
+  .filecard{border:1px dashed var(--line); border-radius:10px; padding:.6rem .7rem; background:var(--panel)}
+  .fcname{font-family:"SF Mono",ui-monospace,Menlo,monospace; font-size:.76rem; margin-bottom:.2rem}
+  .fcsize{font-size:.72rem; color:var(--ink-2)}
+  .toggle{display:flex; justify-content:space-between; align-items:center; padding:.4rem .1rem}
+  .tlabel{font-size:.84rem}
+  .tsw{font-family:"SF Mono",ui-monospace,Menlo,monospace; font-size:.66rem; text-transform:uppercase; letter-spacing:.06em; padding:.2rem .5rem; border-radius:999px; background:var(--line-soft); color:var(--ink-2)}
+  .tsw.on{background:var(--lean); color:#fff}
+  .cloudline{font-size:.78rem; color:var(--ink-2)}
+  .gate{font-size:.74rem; color:var(--warn); font-weight:600}
+  /* file preview */
+  .preview{
+    margin:1rem 0 0; background:var(--code-bg); border:1px solid var(--line); border-radius:12px;
+    padding:1rem 1.1rem; overflow-x:auto;
+  }
+  .preview pre{margin:0; font-family:"SF Mono",ui-monospace,Menlo,monospace; font-size:.82rem; line-height:1.5}
+  .caption{font-size:.82rem; color:var(--ink-2); margin:.5rem 0 0}
+  ul.changes{max-width:64ch; padding-left:1.1rem}
+  ul.changes li{margin:.4rem 0}
+  .foot{margin-top:3rem; padding-top:1.2rem; border-top:1px solid var(--line); font-size:.82rem; color:var(--ink-2); max-width:64ch}
+  @media (max-width:560px){ .opt-body{flex-direction:column} .phone{width:100%; max-width:260px} }
+</style>
+</head>
+<body>
+<main class="wrap">
+  <p class="eyebrow">A decision, still open</p>
+  <h1>Should a reader be able to copy their confusion map off the phone?</h1>
+  <p class="lede">The confusion map is the private record of exactly where one reader's memory slips from a verse onto a similar-sounding one — built up, slip by slip, over months. Today it lives on the phone and nowhere else. Should there be a way to copy it off, and if so, how?</p>
+  <span class="status">Open · nobody has chosen yet</span>
+
+  <section class="qa">
+    <h2>Why is this being asked now?</h2>
+    <p class="col">Reviewing the feature, the app's owner asked that the map survive clearing the phone's browser data, "with the option of backing up to a downloaded file and re-uploading" — and, one day, saved to the cloud. Answering that sharpened the app's own rule. The rule had been read as <em>nothing leaves the phone</em>; the truer form is <em>nothing leaves unless it is in the reader's interest, and under their control</em>. So the question is not whether to break a promise — it is which ways of copying the map off actually serve the reader, and at what cost to them.</p>
+  </section>
+
+  <section class="qa">
+    <h2>What happens if nobody decides?</h2>
+    <p class="col">The map stays on the phone only. That works — but the phone can wipe it silently: on one common phone, a web app left unopened for about a week can have its stored data cleared with no warning and no way back. The map is months of a reader's work, and losing it silently is the exact harm the feature exists to avoid. Nothing else is blocked behind this, so it can wait — but every week it waits is a week a map could vanish.</p>
+  </section>
+
+  <section class="qa">
+    <h2>What does the map look like, and how big is it?</h2>
+    <p class="col">Small. The map stores where each slip goes and how it is doing — references and a few words, never the verses themselves. A backup file is plain text a reader could open and read:</p>
+    <div class="preview"><pre>{
+  "kind": "hifth-confusion-map",
+  "saved": "2026-08-29",
+  "seams": [
+    {
+      "from": "2:48",
+      "to": "2:123",
+      "kind": "slip",
+      "state": "every-pass",
+      "count": 5
+    },
+    {
+      "from": "6:141",
+      "to": "6:151",
+      "kind": "jump",
+      "state": "sometimes",
+      "count": 3
+    },
+    {
+      "from": "2:281",
+      "to": "2:48",
+      "kind": "slip",
+      "state": "sometimes",
+      "count": 1
+    },
+    {
+      "from": "3:7",
+      "to": "3:29",
+      "kind": "slip",
+      "state": "retired",
+      "count": 4
+    }
+  ]
+}</pre></div>
+    <p class="caption">An illustrative slice — a real map grows to dozens of these over a year. About 5 KB for a year of revision — smaller than a single photo.</p>
+  </section>
+
+  <h2>The options</h2>
+  <p class="col">Each drawn at phone size, showing what the reader would actually see and do.</p>
+  <div class="options">
+    
+    <article class="opt">
+      <div class="opt-head">
+        <span class="opt-key">A</span>
+        <h3>Keep it on the phone only</h3>
+        
+      </div>
+      <div class="opt-body">
+        <div class="phone">
+      <div class="pscreen">
+        <div class="pbar">Your confusion map</div>
+        <div class="ppad">
+          
+          <div class="seamrow">
+            <span class="sref">2:48 → 2:123</span>
+            <span class="sstate every-pass">every pass</span>
+          </div>
+          <div class="seamrow">
+            <span class="sref">6:141 → 6:151</span>
+            <span class="sstate sometimes">sometimes</span>
+          </div>
+          <div class="seamrow">
+            <span class="sref">2:281 → 2:48</span>
+            <span class="sstate sometimes">sometimes</span>
+          </div>
+          <div class="lock">🔒 Stays on this phone. Nothing to send.</div>
+          <div class="hint">Install to the home screen to make a silent wipe far less likely.</div>
+        </div>
+      </div></div>
+        <div class="opt-prose">
+          <p class="gist">Change nothing. The map lives in the phone's private storage and never leaves it. To make it safer, install the app to the home screen.</p>
+          <dl>
+            <dt>Takes</dt><dd>Nothing — this is what the app does today.</dd>
+            <dt>Gets</dt><dd>The strongest possible privacy: the map cannot leak, because it never exists anywhere but the one phone.</dd>
+            <dt>Costs</dt><dd>It can still be lost — to a wipe, a broken phone, a new phone — and when it is, it goes silently and completely.</dd>
+          </dl>
+        </div>
+      </div>
+    </article>
+
+    <article class="opt lean">
+      <div class="opt-head">
+        <span class="opt-key">B</span>
+        <h3>A file the reader saves and restores</h3>
+        <span class="badge">the owner's lean</span>
+      </div>
+      <div class="opt-body">
+        <div class="phone">
+      <div class="pscreen">
+        <div class="pbar">Back up your map</div>
+        <div class="ppad">
+          <button class="pbtn">⭳ Save a backup</button>
+          <button class="pbtn ghost">⭱ Restore from a backup</button>
+          <div class="filecard">
+            <div class="fcname">📄 hifth-confusion-map.json</div>
+            <div class="fcsize">About 5 KB for a year of revision — smaller than a single photo.</div>
+          </div>
+          <div class="hint">The file goes only where you put it — your downloads, your own cloud drive, a memory stick.</div>
+        </div>
+      </div></div>
+        <div class="opt-prose">
+          <p class="gist">Two plain actions: Save a backup hands the reader one file to keep wherever they like; Restore from a backup reads it back. Nothing leaves unless the reader saves the file, and only where they put it.</p>
+          <dl>
+            <dt>Takes</dt><dd>A modest, self-contained piece of work — turn the map into a file and back — with no server, no account, and no change to the app's stay-on-the-phone nature.</dd>
+            <dt>Gets</dt><dd>The map survives a lost phone and moves to a new one, while the reader keeps full control of the one copy that ever leaves.</dd>
+            <dt>Costs</dt><dd>A saved file is a file — anything the reader lets near it can read it — and a reader who never saves one is no safer than under Option A.</dd>
+          </dl>
+        </div>
+      </div>
+    </article>
+
+    <article class="opt">
+      <div class="opt-head">
+        <span class="opt-key">C</span>
+        <h3>A cloud-sync switch the reader controls</h3>
+        
+      </div>
+      <div class="opt-body">
+        <div class="phone">
+      <div class="pscreen">
+        <div class="pbar">Sync</div>
+        <div class="ppad">
+          <div class="toggle"><span class="tlabel">Keep my map in iCloud</span><span class="tsw on">on</span></div>
+          <div class="cloudline">☁ Copied automatically · on all your devices</div>
+          <div class="gate">Needs the phone app — not available this year.</div>
+          <div class="hint">Your map lives on the cloud provider's servers all the time, not only when you choose.</div>
+        </div>
+      </div></div>
+        <div class="opt-prose">
+          <p class="gist">The reader turns on a sync switch; from then on the map keeps a copy in the personal cloud built into their phone — surviving a lost phone and appearing on every device they own — with tooling to see and clear what is stored, and the copy reachable through the phone's own Files.</p>
+          <dl>
+            <dt>Takes</dt><dd>An installed phone app that does not yet exist and is blocked on a licensing question the project is waiting on advice for — plus the switch, the management tooling, and the Files access that keep it under the reader's control. Not reachable this year.</dd>
+            <dt>Gets</dt><dd>Once switched on, the map is safe without the reader remembering to do anything, and follows them across devices — the strongest protection against loss.</dd>
+            <dt>Costs</dt><dd>While the switch is on, an intimate record lives continuously on someone else's servers, not only when the reader reaches for it. Making it a switch the reader controls — not something on by default — is what keeps it inside the 'only in the reader's interest' line.</dd>
+          </dl>
+        </div>
+      </div>
+    </article>
+  </div>
+
+  <section class="qa">
+    <h2>What would change the answer?</h2>
+    <ul class="changes">
+      <li>Prior art we have not yet gathered — how faith and intimate-health apps handle export — coming back against even a reader-saved file.</li>
+<li>The licensing question that blocks the phone app being answered in the app's favour, which promotes Option C from ‘not this year’ to a live choice.</li>
+<li>Real use showing readers rarely clear their phone's data or lose the map, which shrinks the cost of doing nothing.</li>
+    </ul>
+  </section>
+
+  <section class="qa">
+    <h2>What is this not settling?</h2>
+    <p class="col">It is not settling whether a teacher could ever see a student's map — that is sending the map to another person, a larger question that deserves its own page. It is not settling the shape of the backup file, whether it is locked with a password, or what it is called — those are the building of the file option, once chosen. And it fixes the cloud option's timing no more precisely than "not this year," because that timing belongs to a different, still-unanswered question about the phone app.</p>
+  </section>
+
+  <p class="foot">This page is drawn from committed data and can be rebuilt from scratch; the reasons behind it, in full, live in the project's decision record for this question. Nothing here is chosen — it is put in front of a person so they can choose.</p>
+</main>
+</body>
+</html>

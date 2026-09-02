@@ -145,16 +145,23 @@
   margin: var(--space-4) 0 0;
   padding: 0;
   list-style: none;
-  --cell: 26px;
+  --cell: 30px;
+  --num-size: 12px;
 }
 
 .grid[data-scope="juz"] {
-  --cell: 40px;
+  --cell: 44px;
+  --num-size: 15px;
 }
 
+/* Page scope carries a three-digit number (up to 604) and once could not: the
+   cells were 16px, too small for anything but a colour. They are larger now so
+   the number fits — the map trades a little of its all-at-once density for cells
+   a reader can name without counting from a corner. Still the densest scope. */
 .grid[data-scope="page"] {
-  --cell: 16px;
-  gap: 2px;
+  --cell: 28px;
+  --num-size: 10px;
+  gap: 3px;
 }
 
 /*
@@ -181,6 +188,8 @@
  * fixed size below, and absent cells are grid items where it is a no-op.
  */
 .cell {
+  display: grid;
+  place-items: center;
   inline-size: 100%;
   aspect-ratio: 1;
   padding: 0;
@@ -188,11 +197,32 @@
   border-radius: var(--radius-sm);
   background: var(--paper-sunk);
   font: inherit;
+  overflow: hidden;
 }
 
-/* Pressable, and it says so. The cursor is the only affordance a cell this small
-   can carry — there is no room for a label, and a hover fill would collide with
-   the warmth ramp, which is the one thing the square is drawn to say. */
+/*
+ * The division's own number, centred in the cell.
+ *
+ * The cells used to be too small to carry a label — the cursor was the only
+ * affordance a 16px square could hold. The cells are larger now precisely so
+ * the number fits, because a grid of identical squares makes the reader count
+ * from a corner to name the one they mean, and the number is the thing that
+ * ends the counting. It scales with the scope: roomy at juz, tight at page.
+ *
+ * `line-height: 1` and `tabular-nums` so a three-digit page number and a
+ * one-digit one sit the same, and the glyph never pushes the cell's box around.
+ */
+.num {
+  font-size: var(--num-size, 10px);
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink-soft);
+  pointer-events: none;
+}
+
+/* Pressable, and it says so. A hover fill would collide with the warmth ramp —
+   the one thing the square is drawn to say — so the cursor and the number carry
+   the affordance instead. */
 button.cell {
   cursor: pointer;
 }
@@ -241,6 +271,27 @@ button.cell {
 
 .cell[data-warmth="4"] {
   background: var(--accent-strong);
+}
+
+/*
+ * The number's ink, per background, so it clears contrast on every square it can
+ * land on. The three lighter greens and the sunk paper take the ordinary dark
+ * ink; only the deepest band is dark enough to need a light glyph. An absent
+ * cell has no paper behind it, so its number is the faint ink that says so — the
+ * same "outline, not a neglected square" distinction the fill draws.
+ */
+.cell[data-warmth="1"] .num,
+.cell[data-warmth="2"] .num,
+.cell[data-warmth="3"] .num {
+  color: var(--ink);
+}
+
+.cell[data-warmth="4"] .num {
+  color: var(--paper-raised);
+}
+
+.cell[data-state="absent"] .num {
+  color: var(--ink-faint);
 }
 
 /* Where the stage is. A ring, not a fill — the cell still has to say its own
@@ -306,12 +357,16 @@ button.cell {
  * book you are, which is the only thing this sheet is opened to see.
  *
  * So where the phone lets the window decide the shape, a wide window makes the
- * map decide it itself: a named column count per scope, near √N, so the picture
- * is about as tall as it is wide at every scope — 6×5 juz, 8×8 hizb, 25×25 page.
- * The cells take a fixed size rather than `1fr` because `1fr` at juz scope would
- * inflate them to 100px squares; the grid is centred in the card instead, and
- * the card holds one width across all three scopes so switching scope redraws
- * the map without moving the sheet under the cursor.
+ * map decide it itself: a named column count per scope, so the picture is about
+ * as tall as it is wide — 6×5 juz, 8×8 hizb — while page scope trades a little
+ * squareness for cells wide enough to hold their own number (21 across, ~29
+ * down). The count is also bounded from below: fewer columns would stack 604
+ * pages too deep to read at a glance, the opposite of the strip this rule fixes,
+ * so `desktop.spec.ts` guards both walls. The cells take a fixed size rather
+ * than `1fr` because `1fr` at juz
+ * scope would inflate them to 100px squares; the grid is centred in the card
+ * instead, and the card holds one width across all three scopes so switching
+ * scope redraws the map without moving the sheet under the cursor.
  */
 @media (min-width: 900px) {
   .sheet {
@@ -333,7 +388,7 @@ button.cell {
   }
 
   .grid[data-scope="page"] {
-    grid-template-columns: repeat(25, 20px);
+    grid-template-columns: repeat(21, 25px);
   }
 }
 

@@ -212,6 +212,17 @@ export function scoreAt(st, obs, sat, cols, rows, di, dj) {
  * Ties go to the smaller displacement, and that rule is load-bearing: a blank
  * region scores zero everywhere, and without it the reported offset for an empty
  * box would be whichever corner of the search the loop happened to reach last.
+ *
+ * Neither pass may step outside the radius it was given, and the second one used
+ * to. It refines around the coarse winner, so a winner sitting on the boundary let
+ * the refinement reach a quarter unit past it — and an answer past the boundary is
+ * one this function never checked, because it never scored the placements further
+ * out that would have said whether it was really the best. Worse, it is invisible
+ * afterwards: the way a caller tells that a mark ran out of room is that its offset
+ * came back sitting exactly on the boundary, and 2,252 marks in the corpus came back
+ * just past it instead. 1,923 of those were being accepted as placed from their own
+ * ink, at a median match of 0.859 against the 0.909 a good match scores. Clamping
+ * puts them back on the boundary where they can be seen and looked at again.
  */
 export function bestPlacement(st, obs, sat, cols, rows, res, radius) {
   let best = { di: 0, dj: 0, phi: -2, iou: 0 };
@@ -226,10 +237,65 @@ export function bestPlacement(st, obs, sat, cols, rows, res, radius) {
   const coarse = Math.max(1, Math.round(res / 4));
   const span = Math.round(radius * res);
   for (let dj = -span; dj <= span; dj += coarse) for (let di = -span; di <= span; di += coarse) consider(di, dj);
-  const ci = best.di;
-  const cj = best.dj;
-  for (let dj = cj - coarse; dj <= cj + coarse; dj += 1) for (let di = ci - coarse; di <= ci + coarse; di += 1) consider(di, dj);
+  const lo = (c) => Math.max(-span, c - coarse);
+  const hi = (c) => Math.min(span, c + coarse);
+  const i0 = lo(best.di);
+  const i1 = hi(best.di);
+  const j0 = lo(best.dj);
+  const j1 = hi(best.dj);
+  for (let dj = j0; dj <= j1; dj += 1) for (let di = i0; di <= i1; di += 1) consider(di, dj);
   return best;
+}
+
+// ------------------------------------------------------- the second look --
+
+/**
+ * Did the search run out of room on this mark?
+ *
+ * An offset sitting exactly on the boundary is not a measurement. It is the search
+ * saying "this is as far as I was allowed to go, and it was still getting better" —
+ * which is why the direction is worth something and the distance is not. Per axis,
+ * because the region searched is a square: asking whether the straight-line distance
+ * reached the boundary inscribes a circle in that square and throws away every
+ * corner.
+ *
+ * How far a mark was allowed to look is a property of the mark, since the ones the
+ * ordinary look gave up on are looked at again further out. A row that does not say
+ * predates that and was searched like every other row of its file.
+ */
+export function ranOutOfRoom(row, radius, eps = 1e-6) {
+  const reach = row.searchedAt ?? radius;
+  return Math.abs(Math.abs(row.dx) - reach) < eps || Math.abs(Math.abs(row.dy) - reach) < eps;
+}
+
+/** The mark could not be placed from its own ink: out of room, or a poor match. */
+export function refusedItsOwnInk(row, radius, floor = 0.55) {
+  return row.iouBest < floor || ranOutOfRoom(row, radius);
+}
+
+/**
+ * Fold a wider second look back into the first look's answers.
+ *
+ * The rule is deliberately one-directional: a wider answer is taken only where the
+ * first look refused, only when the wider look does not itself refuse, and only when
+ * it matches better. Everything else keeps the answer it already had, byte for byte,
+ * so widening the search cannot move a mark that was already placed. That matters
+ * more than it sounds — searching everything wide keeps 99.82% of marks accepted but
+ * moves 4.11% of them by more than two units, onto the neighbouring mark's ink, and
+ * there is no ground truth anywhere that could tell you which of those were right.
+ */
+export function withSecondLook(first, wider, { radius, wide, floor = 0.55 } = {}) {
+  const at = (r) => `${r.page}:${r.k}`;
+  const was = new Map(first.map((r) => [at(r), r]));
+  const better = new Map();
+  for (const w of wider) {
+    const before = was.get(at(w));
+    if (!before || !refusedItsOwnInk(before, radius, floor)) continue;
+    if (refusedItsOwnInk(w, wide, floor)) continue;
+    if (!(w.iouBest > before.iouBest)) continue;
+    better.set(at(w), w);
+  }
+  return { rows: first.map((r) => better.get(at(r)) ?? r), took: better.size };
 }
 
 // -------------------------------------------------------------- templates --

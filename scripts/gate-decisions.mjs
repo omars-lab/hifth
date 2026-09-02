@@ -19,6 +19,9 @@
  *     `artifact` link anyone can open, and must carry the `page` — the same
  *     picture checked in here. Both, or the gate fails. A link with no copy
  *     dies when the host does; a copy with no link cannot be sent to anybody.
+ *     Since 2026-09-01 the link is the page's own address on the app's site,
+ *     derived from its path (decisions.mjs artifactFor), and a row that names
+ *     any other address is refused.
  *   - Whatever is checked in must be rebuildable: `builtBy` names the script,
  *     and it has to exist. A committed page nobody can regenerate is a
  *     screenshot with extra steps, and it starts lying the day the data moves.
@@ -55,7 +58,7 @@ import {
   docHash,
   STATUSES,
   STATUS_ORDER,
-  ARTIFACT_HOST,
+  artifactFor,
 } from "./decisions.mjs";
 
 const decisions = readDecisions();
@@ -184,8 +187,10 @@ for (const d of decisions) {
         " — a link with no copy dies with its host, a copy with no link cannot be sent to anyone",
     );
   }
-  if (hasArtifact && !d.artifact.startsWith(ARTIFACT_HOST)) {
-    fail.push(`${at}: artifact must be an absolute ${ARTIFACT_HOST}… link, got ${d.artifact}`);
+  if (hasArtifact && hasPage && d.artifact !== artifactFor(d)) {
+    fail.push(
+      `${at}: artifact must be the page's own address on the site, ${artifactFor(d)} — got ${d.artifact}`,
+    );
   }
   if (hasPage) {
     if (!d.page.startsWith("docs/")) fail.push(`${at}: page must live under docs/, got ${d.page}`);
@@ -201,7 +206,7 @@ for (const d of decisions) {
     const leaf = d.page.split("/").pop();
     if (!prose.includes(leaf)) fail.push(`${at}: ${splitDoc(d.doc).file} never links ${leaf}`);
     if (hasArtifact && !prose.includes(d.artifact)) {
-      fail.push(`${at}: ${splitDoc(d.doc).file} never gives the ${ARTIFACT_HOST}… link a reader could open`);
+      fail.push(`${at}: ${splitDoc(d.doc).file} never gives the site link a reader could open (${d.artifact})`);
     }
   }
 

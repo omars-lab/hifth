@@ -1,0 +1,63 @@
+{
+  "$comment": [
+    "Committed data for the confusion-map-export options page. Hand-authored, not a",
+    "build product: the feature is not built yet, so there is no telemetry to extract.",
+    "What IS real here is (a) the shape of a confusion map and its backup file, drawn",
+    "from the confusion-points data model, and (b) the size that shape works out to,",
+    "computed below rather than guessed. The seam list is illustrative and says so on",
+    "the page; it carries verse references only, never Qur'an text, so the rendered",
+    "page holds zero Arabic codepoints by construction.",
+    "",
+    "Rebuild the page:  node scripts/build-confusion-export-options.mjs",
+    "Reasons:           docs/decisions/confusion-map-export.md"
+  ],
+  "question": "Should a reader be able to copy their confusion map off the phone — and if so, by which means?",
+  "recommendation": "B",
+  "sample": {
+    "note": "An illustrative slice of one reader's map — verse references only, the way the backup file itself stores them. Real maps grow to dozens of seams over a year.",
+    "seams": [
+      { "from": "2:48", "to": "2:123", "kind": "slip", "state": "every-pass", "count": 5, "last": "last week" },
+      { "from": "6:141", "to": "6:151", "kind": "jump", "state": "sometimes", "count": 3, "last": "3 days ago" },
+      { "from": "2:281", "to": "2:48", "kind": "slip", "state": "sometimes", "count": 1, "last": "2 weeks ago" },
+      { "from": "3:7", "to": "3:29", "kind": "slip", "state": "retired", "count": 4, "last": "quiet 6 weeks" }
+    ],
+    "typicalSeamsPerYear": 40,
+    "bytesPerSeam": 140,
+    "fileSizeComparison": "smaller than a single photo"
+  },
+  "options": [
+    {
+      "key": "A",
+      "name": "Keep it on the phone only",
+      "gist": "Change nothing. The map lives in the phone's private storage and never leaves it. To make it safer, install the app to the home screen.",
+      "takes": "Nothing — this is what the app does today.",
+      "gets": "The strongest possible privacy: the map cannot leak, because it never exists anywhere but the one phone.",
+      "costs": "It can still be lost — to a wipe, a broken phone, a new phone — and when it is, it goes silently and completely.",
+      "mock": "on-device"
+    },
+    {
+      "key": "B",
+      "name": "A file the reader saves and restores",
+      "gist": "Two plain actions: Save a backup hands the reader one file to keep wherever they like; Restore from a backup reads it back. Nothing leaves unless the reader saves the file, and only where they put it.",
+      "takes": "A modest, self-contained piece of work — turn the map into a file and back — with no server, no account, and no change to the app's stay-on-the-phone nature.",
+      "gets": "The map survives a lost phone and moves to a new one, while the reader keeps full control of the one copy that ever leaves.",
+      "costs": "A saved file is a file — anything the reader lets near it can read it — and a reader who never saves one is no safer than under Option A.",
+      "mock": "file",
+      "recommended": true
+    },
+    {
+      "key": "C",
+      "name": "A cloud-sync switch the reader controls",
+      "gist": "The reader turns on a sync switch; from then on the map keeps a copy in the personal cloud built into their phone — surviving a lost phone and appearing on every device they own — with tooling to see and clear what is stored, and the copy reachable through the phone's own Files.",
+      "takes": "An installed phone app that does not yet exist and is blocked on a licensing question the project is waiting on advice for — plus the switch, the management tooling, and the Files access that keep it under the reader's control. Not reachable this year.",
+      "gets": "Once switched on, the map is safe without the reader remembering to do anything, and follows them across devices — the strongest protection against loss.",
+      "costs": "While the switch is on, an intimate record lives continuously on someone else's servers, not only when the reader reaches for it. Making it a switch the reader controls — not something on by default — is what keeps it inside the 'only in the reader's interest' line.",
+      "mock": "cloud"
+    }
+  ],
+  "changesTheAnswer": [
+    "Prior art we have not yet gathered — how faith and intimate-health apps handle export — coming back against even a reader-saved file.",
+    "The licensing question that blocks the phone app being answered in the app's favour, which promotes Option C from ‘not this year’ to a live choice.",
+    "Real use showing readers rarely clear their phone's data or lose the map, which shrinks the cost of doing nothing."
+  ]
+}

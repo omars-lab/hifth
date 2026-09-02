@@ -122,16 +122,22 @@ can rebuild it. Split the generator when the data needs something not in the rep
 findings, and a default mode that renders from **committed bytes only**. Then the page
 rebuilds on a fresh clone and the expensive half runs once.
 
-Two outputs, and the gate refuses one without the other:
+Two addresses, and the gate refuses one without the other:
 
 - **the checked-in page**, under `docs/`, a full HTML document — a fragment renders in quirks
-  mode from `file://`, which is where it is read from
-- **the published copy**, which is what a person is actually sent
+  mode from `file://`, which is where it is read from in a clone
+- **the public copy**, the same file on the app's own site at the same path,
+  `https://blog.bytesofpurpose.com/hifth/docs/…` — the build stages every page under `docs/`
+  there, so merging the page publishes it and nothing else has to happen
 
-The published copy is served under a policy that blocks every external host, so **inline
-everything**: no relative URLs, no CDN links, no external fonts. A referenced asset does not
-error, it silently renders nothing. Where the same picture repeats, define it once and
-reference it rather than embedding several copies.
+Reference the vendored artwork relatively, as `../../apps/web/public/assets/…` from
+`docs/design/`, so the page opens from a clone; the staging step rewrites those references to
+where the site serves the same files, and rewrites a link to a markdown record to where the
+repository host renders it. Any other relative link fails the build. No external hosts, no CDN
+fonts: a page that needs something the site does not carry is a page that will one day render
+nothing. Where the same picture repeats, define it once and reference it rather than embedding
+several copies. A copy put on another host for a conversation is allowed and goes in
+`docs/artifacts.json`, but it is a copy, not the address.
 
 Before publishing, check what the bytes carry. This repo ships **no Qur'an text** — a
 standing rule kept by the shipped bytes, not only by policy. A page built from mus'haf assets
@@ -153,8 +159,10 @@ The row stores **one sentence of its own**: the plain-language question. Everyth
 points at. Do not summarise the decision into the register — the record owns the answer, and a
 copy would be right for a while and then quietly stop being right.
 
-`artifact` is the published link; `page` is the same page checked in here. Both, always: a
-link with no copy dies when the host does, and a copy with no link cannot be sent to anybody.
+`artifact` is the page's address on the site — the site plus the page's path and nothing else;
+the gate derives it and refuses a row that differs. `page` is the same page checked in here.
+Both, always: a link with no copy dies when the host does, and a copy with no link cannot be
+sent to anybody.
 The record named in `doc` has to link to each, or its argument is about a picture the reader
 cannot reach.
 

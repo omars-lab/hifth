@@ -269,6 +269,19 @@ export function Colophon({ open, onClose }: ColophonProps): JSX.Element | null {
                does not exist — the link above falls back to the repository. */
             <p className={styles.note}>{t.devBuildNote}</p>
           )}
+          {/* Every page this project drew to decide something, served from this
+              site so a reader can see the reasoning and not only the result —
+              the CLAUDE.md tenet that a design is public or it is not published.
+              Relative on purpose: the build stages docs/ beside the app
+              (scripts/stage-docs.mjs), whichever host serves it. */}
+          <a
+            className={styles.source}
+            href="./docs/"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <span className={styles.sourceLabel}>{t.designsLink}</span>
+          </a>
         </section>
 
         <section className={styles.block}>

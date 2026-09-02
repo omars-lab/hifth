@@ -53,6 +53,180 @@ described in both files.
 | 7 — Polish + beta | in flight — its four engineering items are all in (popover ordering, keyboard map, shard prefetch, the 5-page golden sweep, 2026-08-07); what remains is not a loop but a person | Hafiz revision session, zero friction notes → **web v1.0** | — |
 | Track B — Capacitor | gated on web v1.0 | Same web build wrapped for iOS/Android; Universal Links | — |
 
+### Desktop UI triage — a running thread under Loop 7 (opened 2026-09-01)
+
+A hafiz using the desktop spread reported a run of paper-cuts and asked for a few new
+surfaces. These are being worked as a **task list** (the session-tracked kind, the one the
+"track the task files" commit made survive a clean open), not as loop items, because each is
+small and none blocks web v1.0. The task list is the working copy; **this section is the one
+that survives a session**, so when the two disagree, bring this one current. An audit on
+2026-09-01 found it two defects stale and eight asks short, which is how this paragraph came
+to be written.
+
+**What this thread is for.** Every paper-cut a hafiz meets on the desktop spread gets fixed
+with a guard, and the *class* of defect behind it gets a tool, so the next one of its kind is
+caught before a reader meets it. The thread is done when the open list below is empty or
+every remaining item is waiting on a decision the owner has been asked for. Its state lives
+in three places: this section (the record), the session task list (the working copy) and
+`docs/tasks.md` (the rendered page, which the gate keeps current).
+
+**Done, each with its guard** (all 2026-09-01):
+
+- **Zoom the open book.** The magnify buttons work with two pages showing and grow both
+  leaves together, from the fold outward, so the middle gap is kept and a modest step clips
+  nothing. It reverses an earlier "disabled while open" finding, on the reader's own call.
+  Record: [`spread-zoom.md`](decisions/spread-zoom.md); the reversal is noted on
+  [`wheel-and-zoom.md`](decisions/wheel-and-zoom.md).
+- **Turn a leaf by grabbing its outer fore-edge** (a hand cursor on a rail that widens at the
+  corners); a drag across the middle pans and selects, never turns. `b90b450`.
+- **The two leaves stay level** after a juz jump (`b90b450`) and after a turn (`ba436e6`).
+  Two fixes of one rule at two of its four sites — the rule now has one home, below.
+- **One home for "the leaves land level and centred."** Every road onto a page — a cold
+  open, a deep link, a hop, a turn's landing — now ends in one settle step in the stage,
+  where four had each copied its three lines by hand; the fifth copy, hidden inside the
+  fade under a turn's band, was found by looking for the other four. Two guards: a unit
+  test that counts the sites and refuses a new road that centres by hand, and a desktop
+  e2e that drives eight roads (cold open, deep link, page bar, turn, juz jump, zoom step,
+  closing and reopening the book, a resize across the breakpoint) through one measurement.
+  *A finding on the way:* that e2e first failed the reopen road by 313 px — a frame in
+  which both leaves still wear their one-leaf transforms when an animation-frame callback
+  measures them, and which the resize observer corrects before it is painted. A reader never
+  sees it, so the rig reads after paint; the two older guards read inside the frame and
+  pass only because their roads happen to settle earlier. In the tree, **not yet committed**.
+- **A turned leaf moves the address** in the URL bar, as a jump already did. `c1d702c`.
+- **Ayah boxes drawn wrong.** 2:249's six-line middle inked as one slab, and 10:44 dropped
+  to the coarse fallback because the print rounds to a tenth — with **110 other boxes**
+  silently on the same fallback. `b2ffce3`. Nothing yet sweeps the book for the next one;
+  see the follow-ups.
+- **The revision map**: a number on every cell, "not in this build" keyed only when a cell in
+  fact is, a date a person would write, and a picker for all time / last month / this month.
+  `7d4402e` `631278b` `0ab9619` `ae8d01d`.
+- **Zoom on the spread grew one leaf and left the other.** A fault of the dev server's
+  double-mount only — the built app never had it — but the dev server is what a developer
+  previews in. Fixed and guarded. `ff81f8e`.
+- **The page bar redrawn**: thirty green detents, one per juz; a page-icon handle over the
+  native slider (kept for its keyboard and screen-reader contract); a popover that names
+  page · juz · surah while dragging. In the tree with seven tests, **not yet committed**.
+  Two calls were made without a record — whether a detent is a landmark or a magnet, and
+  which juz a boundary page belongs to — and a decision is owed for the pair.
+
+**Still open, worst-first:**
+
+- **A desktop page turn that peels from the corner** — asked for, and **refused by the
+  page-transition record** (§8 ①: a curl necessarily moves the glyphs, and it cannot draw
+  the difference between a crease and a gap). The ask and the record conflict, and only the
+  owner can settle it: reopen that record with a curl drawn that expresses all four fold
+  states, or improve the turn inside the fold vocabulary it already has. **Blocked on that
+  answer.** Interim: the grab plays the current flip on release.
+- **The ayah options on the facing leaf.** On a spread, selecting on one page should raise
+  its options on the other, so the menu never covers the ayah being worked on; the phone
+  keeps its bottom sheet. Tests owed: the drawer lands opposite for either side, and the
+  stage does not move on selection.
+- **A tafseer section** inside those options, with sourced text and its provenance checked.
+  After the facing-leaf drawer.
+- **Comment-style mistake marking.** Zoom in, click a letter, a harakah or a marker, and
+  drop a note anchored to that glyph; colour by kind (a comment, a correction, a note to the
+  developers); icons shown only past a zoom threshold; hover reveals the span. A drag across
+  text must **select rather than turn the page**. Must reconcile with the mark and sitting
+  system already in the tree, not start fresh. A decision before code.
+- **Keeping marks and comments on the device, and exporting them in a batch** (a file, or
+  email). Touches the revision-privacy question.
+- **A bookmark you drop by tapping the fold**, animating downward like a ribbon, and every
+  bookmark action written to a calendar. Needs a decision (where a bookmark is stored, what the
+  animation is) before code.
+- **An activity calendar in the menu bar** — a day's reading, interactions and pages counted —
+  and, inside it, **managing bookmarks** (clear a surah's, clear all, with a guard on the
+  destructive ones). This is the long-planned revision record reaching the chrome; the shape
+  is sketched in [`.claude/plans/interaction-calendar.md`](../.claude/plans/interaction-calendar.md).
+  Needs its own decision, and it touches the revision-privacy question.
+- **A highlighter setting** — outline vs. filled, and how see-through the fill is — reached from
+  a menu-bar icon. Needs a decision that draws each style on a real page at reading size.
+
+**What the thread taught, as follow-ups** — the pattern under the paper-cuts, filed so the
+next one is caught by a tool:
+
+- **One home for "the leaves land level and centred"** — done, above.
+- **A whole-book sweep for ayah boxes** — done. Three box defects were each found by a
+  reader on one page, and the fix for one uncovered 110 more nobody had reported. Now
+  `pnpm gate:boxes` runs the app's own pen over all 6,236 boxes (12,350 rectangles) and holds
+  the count of boxes it cannot draw as lines at 8, all on the decorated pages 1–2, and the
+  count of rectangles off the page's line grid at 2 — as ceilings *and* floors, so a pen that
+  starts accepting something is as visible as one that starts refusing. It also counts, but
+  does not hold, the 582 rectangles that fuse several lines (up to 13) and the 99 one-word
+  dots. `make box-sweep` draws every flagged box on its real page at twice print size in
+  `docs/design/ayah-box-sweep.html`. The two off-grid boxes are a new class, filed as
+  follow-up 17.
+- **A recipe for seeing a change** — done: the `run-app` skill now says which server is which,
+  that a hash-only navigation is not a reload, and to rebuild before e2e. Two sessions had
+  lost turns to each.
+- **The page-bar decisions** — record and page done, publish pending. Two open rows in the
+  decision register, *juz-detents* (does a marker pull the release onto it) and *boundary-juz*
+  (which juz a page carrying a seam is in), one record `docs/decisions/page-bar.md`, one drawn
+  page `docs/design/page-bar-options.html` rebuilt by `scripts/build-page-bar-options.mjs`
+  from the manifest and the bar's own stylesheet. The bar is 1.34 px a page on a laptop and
+  0.4 px on a phone; four pages (62, 121, 201, 502) carry a juz seam, and on those the bar's
+  bubble and the pack shelf already name different juz. The decision gate is red on exactly
+  one thing — an open row with no published copy — until the owner says to publish, which
+  is a per-action ask.
+- **The goldens were stale before this thread touched them.** Verifying the settle step ran
+  the whole Chromium suite, and twelve phone goldens failed — all of them at a clean checkout
+  of the branch head, and all of them since `b90b450`, the commit that made a hop land the
+  leaves level. Almost certainly that fix reaching the phone framing; whether the new framing
+  is the wanted one is the owner's call, and only after that a re-baseline of darwin and
+  linux together. Filed as follow-up 16 under §Open follow-ups and indexed.
+- **A register went stale at a commit and nothing said so until now.** The use-cases page
+  had not been re-rendered since `b90b450`; its gate failed at a clean checkout of the branch
+  head, so that commit shipped with the gate red. Re-rendered (only line-number pointers had
+  moved). The commit had edited `docs/use-cases.json` itself, and the pre-commit hook let it
+  through: the hook ran the use-cases gate *scoped to the staged files*, which asks whether
+  each pointer still resolves and never whether the page was re-rendered. Fixed in the hook,
+  which now runs the use-cases, issues and tasks stale checks unscoped on every commit (three
+  hash comparisons, under a second) and names `make render-docs`, a new target that rebuilds
+  all four generated pages. The decisions README was already covered, since its hash depends
+  only on its register. Not a new Claude-side hook: the failure was at the commit, and that
+  is where the numbers freeze.
+- **The bundle grew 2.2 KB and the baseline now says so.** The bar redesign and the settle
+  step together moved the main bundle from 117.9 to 120.1 KB gzipped, past the 1 KB the
+  budget gate absorbs quietly; 29.9 KB of headroom remains. The baseline was re-recorded
+  so the number lands in the diff a reviewer reads.
+
+- **The adjacency tree now names its third parent.** 510 of 3,002 shipped pairings carry a
+  same-juz flag computed from the core package's juz table, which is Tanzil's structural
+  metadata under CC BY, and neither the licensing map's row nor the shipped notice said so
+  (what-we-depend-on ③). Named by hand in the notices gate's declaration, so the row and the
+  notice must both carry "Tanzil" or the gate fails; the adjacency builder writes a paragraph
+  into the notice, and a rebuild changed only that notice. The half still open is whether the
+  trace should follow imports into core, now a question rather than a defect.
+
+- **The licensing map is organised by door.** Three tables — repository, deployed site, store
+  — each row saying what goes out, through which, under whose terms, with the measured numbers
+  from the distribution audit (what-we-distribute ①, answered). Rows keep the shape the notices
+  gate parses, and every gate that reads the file is green. Answered, not fixed: nothing checks
+  that the tables stay sorted by door.
+
+- **Every design is public, on the site — a tenet now, 2026-09-01.** Asked whether there was
+  an admin page to put the designs on instead of publishing copies to another host, and the
+  owner's answer was that all of them should be public-facing, for transparency, and that this
+  should be a tenet of the repo. So: the web build now stages every page under `docs/` onto the
+  site at the same path, with a generated front door at `/docs/` and a link to it from the
+  colophon; the decision gate derives each decision's public address from its path and refuses
+  any other; the eight decision rows with a page now carry the site address, and the records
+  link it (earlier other-host copies stay named as copies); the tenet is in `CLAUDE.md` and the
+  decide skill follows it. The page-bar page is therefore published by merging, and the
+  decisions gate is green without anything being put on another host.
+
+**Not yet committed, awaiting the owner's go-ahead** (as of 2026-09-01): the page bar
+redesign and its seven tests; the settle step, its unit test and the every-road e2e; the
+`run-app` recipe; the box sweep (its library, gate, page builder, the drawn page and its
+wiring into the gates, the Makefile, CI and the map); follow-ups 16 and 17 and their index
+rows; the page-bar decision record, its drawn page, its builder and its two register rows;
+the re-rendered use-cases page; the bundle baseline; the by-door `LICENSES.md`, the adjacency notice and
+builder, the notices gate declaration, the two design-doc markers with their index rows; the
+public-designs tenet (the staging step and the site module, the build and CI wiring, the
+service-worker denylist, the derived decision addresses in the gate, the eight register rows
+and their records, the colophon link and its strings, the `CLAUDE.md` section, the decide
+skill, the map and artifact-register notes); this section and the tasks page it re-renders.
+
 ### Open follow-ups
 
 These fifteen are indexed in [`issues.json`](issues.json) alongside the design docs' open
@@ -770,6 +944,63 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     of what a span claims, why a run has three outcomes rather than two, and what the refined
     search still does not do — the rail beside the page is not filtered, only counted.
 
+16. **The golden baselines predate the spread triage, and twelve shots fail at a clean
+    checkout.** Found 2026-09-01 while verifying the settle step of the desktop-triage thread,
+    which ran the whole Chromium suite. The phone goldens (`e2e/golden.spec.ts`, Chromium; the
+    darwin baselines under `e2e/__screenshots__/darwin`) were last written in `259fde0`
+    (2026-08-07). Twelve now fail: the selection, breadcrumb and phrase states on pages 1, 7, 9,
+    19 and 604, and the page-7 marquee. The signature is one change, not twelve — the whole
+    page sits a few pixels lower after a hop, so every shot taken after a hop differs, from
+    2,624 px (0.01 of the image) on the page-9 breadcrumb to 59,475 px (0.12) on the page-7
+    selection, and the marquee shot grew one row, 574 → 575 px. Attributed by bisection, one
+    build per commit: the page-7 selection shot passes at `7d4402e` and fails at `b90b450`
+    with the identical 59,475-pixel count, and every commit since inherits it; the working tree
+    adds nothing (the same counts with the whole tree stashed at `ff81f8e`). `b90b450` is the
+    spread-triage commit that, among other things, made a hop re-centre the page so the two
+    leaves land level — so the shift is most likely that fix reaching the phone framing, which
+    is what a golden exists to make *deliberate*, not to forbid. **What would answer it:** the
+    owner looking at one diff (`npx playwright show-report` after a `--project golden` run) and
+    saying whether the new framing is the wanted one. If it is, `make golden` rewrites the
+    darwin baselines and `make golden-linux` the linux ones in the pinned image, in one commit
+    that says why; if it is not, the fix goes back into `b90b450`'s stage change. Not
+    re-baselined silently: twelve shots changing under a commit that never mentions them is
+    exactly the event the goldens are for. The linux baselines were not checked here — they
+    run only in the image. Blocks nothing; the rest of the Chromium suite is green (176
+    passed, 1 skipped, the iphone project not run — WebKit is not installed on this machine).
+    **Closed 2026-09-01.** The owner looked at the diff — the whole page one pixel lower,
+    every glyph edge different, the highlight bands themselves unchanged — and accepted the
+    framing. Both sets were rewritten in one commit: darwin by `make golden-update`, linux by
+    `make golden-linux UPDATE=1` in the pinned Playwright image, twelve shots each, the same
+    twelve on both platforms and nothing else. **Closed by**
+    [`apps/web/e2e/golden.spec.ts`](../apps/web/e2e/golden.spec.ts) against the new
+    baselines: the next shift of the framing fails the same twelve shots again, on both
+    platforms, which is the event these exist to make deliberate.
+
+17. **Two ayah boxes are cut short of the line, and the pen draws them thin.** Found
+    2026-09-01 by the whole-book box sweep (`pnpm gate:boxes --list`), the first thing it
+    flagged that no reader had reported. Of the 12,350 rectangles that make up the 6,236 ayah
+    boxes, two are not a whole number of lines tall: 68:3 on page 564 (27.9 units on a 36-unit
+    line, 0.77 of a line) and 107:2 on page 602 (28.3 units, 0.79). Both are the same shape —
+    an ayah's short tail at the left margin, where the polygon layer cut the box some 8 units
+    short of the line and started the *next* ayah's box that much early, so the two boxes
+    still tile the column but the seam is in the wrong place. The pen accepts them (they are
+    rectangles) and draws a band 0.72 of the *rectangle's* height rather than the line's, so
+    the lit tail is a little thinner and sits a little higher than its neighbours; at print
+    size in `docs/design/ayah-box-sweep.html` it is hard to see, and a reader would sooner
+    notice the next ayah's band starting above its own first word. Every other rectangle in
+    the book is on the grid within 0.2 of a line, which is what makes two worth a row: this is
+    a print quirk, not a class the pen has to learn. **What would answer it:** either a repair
+    in the vendoring step — a `POLYGON_REPAIRS` entry in `scripts/vendor-pages.mjs` that
+    stretches each tail to the line and pulls the next box back, then re-vendor and re-pin the
+    two pages — with `OFF_GRID_COUNT` in `scripts/gate-boxes.mjs` lowered to 0 in the same
+    change; or a decision to tolerate it, written here, in which case the gate keeps holding
+    2 so that a third is still an event. Not chosen here because the fix is a corpus edit, and
+    corpus edits are owner-visible in the pinned pages. Blocks nothing. **Blocked, 2026-09-01:** the repair entry has to be
+    written against the *upstream* polygon, and the upstream page cache is gone — it was a
+    symlink into a scratch directory that has since been emptied, so re-vendoring means a
+    348 MB fetch first, which nobody starts without asking. Until then the gate holds the
+    count at 2 and the two tails ship as the print drew them.
+
 **The half of these a machine cannot run now has a register — and a runbook.** Follow-ups
 ① (the phone), ② (the browser glance) and ④ (VoiceOver/TalkBack) still wait on a human, and
 prose cannot answer "is that still true, on what device, and when?" — ⑤ (does the source
@@ -1294,7 +1525,7 @@ an hour.
 
 ### Track B (gated on stable web beta) — Capacitor iOS, then Android
 Wrap `apps/web`; bundle the full corpus in-app (offline by default); native share sheet;
-**Universal Links** (links open the app — solves research §5 on iOS); haptics on hop-land
+**Universal Links** (links open the app — solves research §6 on iOS); haptics on hop-land
 and bead taps; state restoration; iPad two-page spread; App Store review notes lead with
 KFGQPC provenance. Android fast-follow (~95% shared code). Do not start until web v1.0.
 
