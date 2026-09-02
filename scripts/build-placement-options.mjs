@@ -56,6 +56,15 @@ const ROOT = new URL("..", import.meta.url).pathname;
 const DATA = join(ROOT, "docs/design/mark-placement.data.json");
 const OUT = join(ROOT, "docs/design/mark-placement.html");
 const OUT_ARTIFACT = join(ROOT, "docs/design/mark-placement.artifact.html");
+const CORE = join(ROOT, "packages/core/dist/index.js");
+
+// The live board mounts the six options as interchangeable placement rules the
+// reader flips between on one shared page of the mus'haf. `placeMark`/`placeWord`
+// are the app's own placement code, inlined into the page below via `.toString()`
+// from the same compiled source the unit tests run — so the rule the reader picks
+// by hand is the rule that would ship. See docs/decisions/mark-placement.md and
+// packages/core/src/decision-options/placement-rule.ts.
+const { placeBy, placeMark, placeWord, PLACEMENT_RULES } = await import(CORE);
 
 /**
  * Two copies, and one run writes both. They differ in exactly one thing: where
@@ -895,6 +904,120 @@ function render({ artifact: ARTIFACT, out }) {
   const MARK_W = medOf(d.marks.map((m) => m.b[2])).toFixed(1);
   const MARK_H = medOf(d.marks.map((m) => m.b[3])).toFixed(1);
 
+  // ── The live board ─────────────────────────────────────────────────────────
+  // The six options are not six pictures here; they are one page and a switch.
+  // Every rectangle is drawn once, at where it ships, and a rule the reader picks
+  // slides it to where that rule would put it — the same `placeMark`/`placeWord`
+  // the app would run, inlined below from the compiled module so the choice is
+  // made on the code, not a mock of it. Both windows (the whole band and the
+  // close-up) draw from one indexed set of rectangles, so a flip moves the same
+  // box in both at once, and the fixed dashed ink in the close-up is the letter
+  // each box is sliding toward — the gap that stays is the error that option leaves.
+  const inBandLive = inCrop(BAND);
+  const inCloseLive = inCrop(CLOSE);
+  // The grains an option can ask for. `line` is never an option on its own and
+  // `shipped` moves nothing, so neither needs to travel to the browser.
+  const LIVE_GRAINS = ["page", "tilt", "curve", "mark"];
+  const packRect = (r) => ({
+    b: r.b.map((n) => +n.toFixed(1)),
+    o: Object.fromEntries(LIVE_GRAINS.filter((g) => r.o[g]).map((g) => [g, r.o[g].map((n) => +n.toFixed(3))])),
+  });
+  const liveMarks = d.marks.filter((m) => inBandLive(m.b) || inCloseLive(m.b));
+  const liveWords = d.words.filter((w) => inBandLive(w.b) || inCloseLive(w.b));
+  const packedMarks = liveMarks.map(packRect);
+  const packedWords = liveWords.map(packRect);
+  // A rectangle that carries its index home, so the script can find it in either
+  // window and move it. It starts at where it ships (option A); the script does
+  // the rest, so the board reads correctly even if the script never runs.
+  const liveRect = (r, i, k, attrs) =>
+    `<rect class="livebox" data-k="${k}" data-i="${i}" x="${r.b[0].toFixed(2)}" y="${r.b[1].toFixed(2)}" width="${r.b[2].toFixed(2)}" height="${r.b[3].toFixed(2)}" ${attrs}/>`;
+  const liveLayer = (keep) =>
+    liveWords.map((w, i) => (keep(w.b) ? liveRect(w, i, "w", wordAttrs) : "")).join("") +
+    liveMarks.map((m, i) => (keep(m.b) ? liveRect(m, i, "m", markAttrs) : "")).join("");
+  const liveSpecimen = (inner, { crop, label, id }) => {
+    const [vx, vy, vw, vh] = crop.split(/\s+/).map(Number);
+    const pc = (n) => `${(n * 100).toFixed(4)}%`;
+    const print2 = ARTIFACT ? `<use href="#print" x="0" y="0" width="${pw}" height="${ph}"/>` : "";
+    return `<figure class="spec" style="--ar:${((vh / vw) * 100).toFixed(4)}%">
+  <div class="win">
+    ${ARTIFACT ? "" : `<img class="print" src="${esc(print)}" alt=""
+         style="width:${pc(pw / vw)};height:${pc(ph / vh)};left:${pc(-vx / vw)};top:${pc(-vy / vh)}">`}
+    <svg id="${id}" class="ov" viewBox="${esc(crop)}" aria-hidden="true">${print2}${inner}</svg>
+  </div>
+  ${label ? `<figcaption>${label}</figcaption>` : ""}
+</figure>`;
+  };
+  // What the running caption says under each option — the one sentence a reader
+  // most needs while the boxes are still settling. Kept short; the full "what a
+  // reader would notice" lives on each option's own card in section 6.
+  const LIVE_CAPS = {
+    A: "Every box sits where the app puts it today — noticeably off the letter, the same way on nearly every line.",
+    B: "One correction for the whole page. Most boxes tighten; the top and bottom lines stay a little off.",
+    F: "The recommendation. Each line lined up on its own and allowed to tilt — boxes sit on their letters, start to finish.",
+    G: "The marks move like F; the word outlines stay on today's fit — so a mark lands right while its word does not.",
+    I: "Like F, but each line's correction may bend. A shade fewer whole-line misses; the ends of a line are still the weak spot.",
+    H: "Each mark the ink search placed goes onto its own ink — watch a box land exactly on the dashed outline. The rest fall back to F.",
+  };
+  const liveRules = PLACEMENT_RULES.map((r) => ({ id: r.id, grain: r.grain, wordsStay: r.wordsStay, label: r.label }));
+  const segButtons = liveRules
+    .map((r) => `<button type="button" data-id="${r.id}" aria-pressed="${r.id === "A" ? "true" : "false"}"><b>${r.id}</b> ${esc(r.label)}</button>`)
+    .join("");
+  // The placement rule inlined into the page, verbatim from the compiled module.
+  // No backticks or ${'$'}{ } in here: this string is dropped whole into the HTML
+  // below, and either would be read by the outer template instead of the browser.
+  const liveScript =
+    "<script>(function(){\n" +
+    "  var RULES = " + JSON.stringify(liveRules) + ";\n" +
+    "  var MARKS = " + JSON.stringify(packedMarks) + ";\n" +
+    "  var WORDS = " + JSON.stringify(packedWords) + ";\n" +
+    "  var CAPS = " + JSON.stringify(LIVE_CAPS) + ";\n" +
+    "  " + placeBy.toString() + "\n" +
+    "  " + placeMark.toString() + "\n" +
+    "  " + placeWord.toString() + "\n" +
+    "  var board = document.getElementById('live-board'); if(!board) return;\n" +
+    "  var CUR = RULES[0];\n" +
+    "  function moveSet(list, kind){\n" +
+    "    for(var i=0;i<list.length;i++){\n" +
+    "      var r = list[i];\n" +
+    "      var placed = kind==='m' ? placeMark(r, CUR.grain) : placeWord(r, CUR.grain, CUR.wordsStay);\n" +
+    "      var dx = (placed[0]-r.b[0]).toFixed(3), dy = (placed[1]-r.b[1]).toFixed(3);\n" +
+    "      var els = board.querySelectorAll('[data-k=\"'+kind+'\"][data-i=\"'+i+'\"]');\n" +
+    "      for(var j=0;j<els.length;j++){ els[j].style.transform = 'translate('+dx+'px,'+dy+'px)'; }\n" +
+    "    }\n" +
+    "  }\n" +
+    "  function pick(id){\n" +
+    "    for(var k=0;k<RULES.length;k++){ if(RULES[k].id===id){ CUR = RULES[k]; } }\n" +
+    "    moveSet(MARKS,'m'); moveSet(WORDS,'w');\n" +
+    "    var btns = board.querySelectorAll('.live-seg button');\n" +
+    "    for(var b=0;b<btns.length;b++){ btns[b].setAttribute('aria-pressed', btns[b].getAttribute('data-id')===id ? 'true':'false'); }\n" +
+    "    var cap = document.getElementById('live-cap'); if(cap){ cap.textContent = CAPS[id]||''; }\n" +
+    "  }\n" +
+    "  var btns = board.querySelectorAll('.live-seg button');\n" +
+    "  for(var i=0;i<btns.length;i++){ (function(bn){ bn.addEventListener('click', function(){ pick(bn.getAttribute('data-id')); }); })(btns[i]); }\n" +
+    "  pick('A');\n" +
+    "})();</" + "script>";
+  const liveBoard = `<section id="live-board">
+  <h2><span class="num">2·5</span>Try every option on this page</h2>
+  <p class="lede">
+    Below is the same page, once. Pick an option and every rectangle on it slides to
+    where that option would put it — this is the switch you are actually being asked to
+    throw, not a drawing of it. The code doing the moving is the code the app would ship.
+  </p>
+  <div class="live-seg" role="group" aria-label="Placement option">${segButtons}</div>
+  <div class="live-two">
+    ${liveSpecimen(liveLayer(inBandLive), { crop: BAND, label: `Three printed lines of page ${d.page}, at about the size a phone draws them.` })}
+    ${liveSpecimen(layerInk(CLOSE) + liveLayer(inCloseLive), { crop: CLOSE, label: `The furthest-moved mark, close up — about ${closeMag} times the size beside it. The dashed outline is where the mark's own ink is; a filled box on top of it is a box on the right letter.` })}
+  </div>
+  <p id="live-cap" class="live-cap">${esc(LIVE_CAPS.A)}</p>
+  <p class="dim small">
+    Every option here is a real interchangeable component kept beside the app's own code,
+    covered by unit tests, and inlined into this page from the same compiled source the app
+    would run — so the option you settle on by hand is the one that ships. This follows the
+    project's rule that an option whose difference is seen in motion is built, not only drawn.
+  </p>
+  ${liveScript}
+</section>`;
+
   const optionCard = (opt) => {
     const h = ho(opt.grain);
     const perMark = opt.grain === "mark";
@@ -1097,6 +1220,8 @@ ${printDefs}
     rectangle on nearly every page, all sliding the same way.
   </p>
 </section>
+
+${liveBoard}
 
 <section>
   <h2><span class="num">3</span>Why are they out at all?</h2>
@@ -1582,6 +1707,18 @@ figcaption{ font-size:.8rem; color:var(--dim); margin-top:.5rem; max-width:64ch;
 .opt .spec{ margin:0; }
 .opt .win{ border:0; border-radius:0; border-bottom:1px solid var(--rule); }
 .opt figcaption{ padding:.5rem 1.15rem 0; margin:0; }
+.live-seg{ display:flex; flex-wrap:wrap; gap:.4rem; margin:1rem 0 1.25rem; }
+.live-seg button{ font:inherit; font-size:.9rem; padding:.45rem .7rem; border:1px solid var(--rule);
+  border-radius:.5rem; background:var(--card); color:var(--ink); cursor:pointer; line-height:1.25; }
+.live-seg button b{ color:var(--accent); }
+.live-seg button[aria-pressed="true"]{ background:var(--accent); border-color:var(--accent); color:#fff; }
+.live-seg button[aria-pressed="true"] b{ color:#fff; }
+.live-seg button:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; }
+.live-two{ display:grid; grid-template-columns:1fr; gap:1rem; }
+@media (min-width:40rem){ .live-two{ grid-template-columns:1fr 1fr; } }
+.livebox{ transition:transform .55s cubic-bezier(.4,0,.2,1); }
+@media (prefers-reduced-motion: reduce){ .livebox{ transition:none; } }
+.live-cap{ margin:.75rem 0 .25rem; min-height:2.6em; }
 .cost{ display:grid; grid-template-columns:repeat(auto-fit,minmax(13rem,1fr)); border-top:1px solid var(--rule); }
 .cost>div{ padding:1rem 1.15rem; border-right:1px solid var(--rule); }
 .cost>div:last-child{ border-right:0; }

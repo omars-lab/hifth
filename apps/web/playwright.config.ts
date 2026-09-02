@@ -166,7 +166,12 @@ export default defineConfig({
           // `width: min(100%, …)`, so it fills its layer and a horizontal
           // offset applied twice is applied to a slack of zero. At 1440 × 900
           // the slack is real. See `docs/design/page-turning.md` §7 ②.
-          testMatch: /(desktop|stage-fit)\.spec\.ts/,
+          //
+          // `detent-live` joins for a different reason: it drives the page-bar
+          // decision page's option C — a juz marker that grows as the *pointer*
+          // nears it — and a hover-near-without-dragging is a thing only a device
+          // with a pointer has. The two phone projects `testIgnore` it below.
+          testMatch: /(desktop|stage-fit|detent-live)\.spec\.ts/,
           use: {
             browserName: "chromium",
             viewport: { width: 1440, height: 900 },
@@ -175,12 +180,12 @@ export default defineConfig({
         {
           name: "iphone",
           use: { ...devices["iPhone 13"] },
-          testIgnore: /(golden|shots|desktop)\.spec\.ts/,
+          testIgnore: /(golden|shots|desktop|detent-live)\.spec\.ts/,
         },
         {
           name: "android",
           use: { ...devices["Pixel 7"] },
-          testIgnore: /(golden|shots|desktop)\.spec\.ts/,
+          testIgnore: /(golden|shots|desktop|detent-live)\.spec\.ts/,
         },
         {
           // The golden-image project. Its viewport is spelled out rather than

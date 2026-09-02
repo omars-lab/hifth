@@ -1441,6 +1441,14 @@
       "severity": "question",
       "owner": "user",
       "note": "The app's privacy stance is written in two places as an absolute — the revision-record 'Export or sync' out-of-scope line and the gate:revision-privacy invariant both read as 'nothing leaves the device'. OWNER DIRECTION 2026-08-31 (on the confusion-map-export decision page): 'nothing leaves the phone' is the wrong stance; 'nothing leaves unless it is in the user's interest, and under their control' is the right one. A flat 'nothing leaves' breaks the first time the reader's own interest points outward (wanting a hard-won record to survive a lost phone) and then reads as a promise abandoned; naming the test keeps the promise. This does NOT loosen gate:revision-privacy — the gate makes leaving a deliberate act, and 'in the reader's interest, under their control' is the shape of a deliberate act; the gate stays, the sentence it defends gets the truer wording. What would answer it: adopting the sharper wording in this doc and the invariant's prose so a future export/sync question is weighed by whether it serves the reader rather than refused by reflex. Already applied in decision confusion-map-export; this row exists so the app-wide framing (revision-record especially) is revisited against it. Related: should-a-confusion-map-leave-the-device."
+    },
+    {
+      "id": "plan-graduate-page-bar-winners",
+      "source": { "file": "docs/PLAN.md", "item": "18" },
+      "status": "open",
+      "severity": "question",
+      "owner": "agent",
+      "note": "The page-bar's two questions were both decided C on 2026-09-02 (decisions juz-detents and boundary-juz): a juz marker is a tap-to-open button that grows as the pointer nears it (never during a drag, never eating the drag), and a page carrying a juz seam belongs to both juz. Winners are built, unit-tested and mounted live on docs/design/page-bar-options.html; graduation is wiring the winning strategy and the growth into the app bar, naming both juz on the four seam pages (62, 121, 201, 502), and deleting the two losing strategies and their live-page wiring. Genuinely-open sub-question: the phone bar is 0.4px a page with no pointer to grow a marker, so a two-juz seam label there needs a layout the desktop live page cannot prove. HELD 2026-09-02: PageSlider carries another session's uncommitted work; graduation waits for that to land rather than two sessions editing one file. Blocks nothing shipped."
     }
   ]
 }

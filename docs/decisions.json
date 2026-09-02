@@ -70,7 +70,7 @@
     {
       "id": "juz-detents",
       "question": "When a reader lets go of the page bar near a juz marker, should the bar pull the page onto it?",
-      "status": "open",
+      "status": "decided",
       "options": [
         {
           "id": "A",
@@ -89,9 +89,9 @@
       "page": "docs/design/page-bar-options.html",
       "builtBy": "scripts/build-page-bar-options.mjs",
       "doc": "docs/decisions/page-bar.md#when-a-reader-lets-go-near-a-marker-should-the-bar-pull-the-page-onto-it",
-      "decided": null,
-      "by": null,
-      "date": null,
+      "decided": "C",
+      "by": "omar",
+      "date": "2026-09-02",
       "related": [
         "boundary-juz",
         "desktop-vs-mobile"
@@ -163,7 +163,7 @@
     {
       "id": "boundary-juz",
       "question": "When a juz begins partway down a page, which juz is that page in?",
-      "status": "open",
+      "status": "decided",
       "options": [
         {
           "id": "A",
@@ -182,9 +182,9 @@
       "page": "docs/design/page-bar-options.html",
       "builtBy": "scripts/build-page-bar-options.mjs",
       "doc": "docs/decisions/page-bar.md#when-a-juz-begins-partway-down-a-page-which-juz-is-that-page-in",
-      "decided": null,
-      "by": null,
-      "date": null,
+      "decided": "C",
+      "by": "omar",
+      "date": "2026-09-02",
       "related": [
         "juz-detents",
         "desktop-vs-mobile"
