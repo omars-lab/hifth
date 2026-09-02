@@ -2,6 +2,12 @@
   "//": [
     "Lighthouse CI gate (PLAN §Loop 6a exit: Lighthouse ≥90; Loop 4b exit: TTI < 2.5 s",
     "on mid-Android). Run with `make lighthouse`, or in CI via the `lighthouse` job.",
+    "",
+    "`url` pins the audit to the app. Without it lhci audits every .html it finds in",
+    "the dist, and since 2026-09-01 the build stages every design page under docs/",
+    "into dist/docs/ (scripts/stage-docs.mjs) — documents, not the app, and not what",
+    "the ≥90 criterion is about. The port in that URL is replaced with the static",
+    "server's; the path is what matters.",
     "Invoked as `pnpm dlx @lhci/cli autorun` — deliberately NOT a devDependency: it",
     "pulls Lighthouse and a Chrome launcher (tens of MB) that nothing else in the repo",
     "needs, and adding it would churn the shared lockfile for a tool that runs once",
@@ -54,6 +60,7 @@
         "step plus one cold start cannot carry it."
       ],
       "staticDistDir": "apps/web/dist",
+      "url": ["http://localhost/index.html"],
       "numberOfRuns": 5,
       "settings": {
         "formFactor": "mobile",

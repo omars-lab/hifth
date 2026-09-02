@@ -96,7 +96,6 @@ import {
   ayahRef as fmtAyahRef,
   rangeLabel as fmtRangeLabel,
   digits,
-  digitsIn,
   longDay,
   longMonth,
   surahName as fmtSurahName,

@@ -328,7 +328,7 @@ function render() {
 const html = render();
 
 // This repo ships no Qur'an text. The page is built to carry none; verify before writing.
-const arabic = html.match(/[؀-ۿݐ-ݿﭐ-﷿ﹰ-﻿]/g);
+const arabic = html.match(/[\u0600-\u06FF\u0750-\u077F\uFB50-\uFDFF\uFE70-\uFEFF]/g);
 if (arabic) {
   console.error(`refusing to write — page carries ${arabic.length} Arabic codepoint(s): ${[...new Set(arabic)].join(" ")}`);
   process.exit(1);
