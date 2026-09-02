@@ -230,7 +230,7 @@ skill, the map and artifact-register notes); this section and the tasks page it 
 
 ### Open follow-ups
 
-These fifteen are indexed in [`issues.json`](issues.json) alongside the design docs' open
+Each of these is indexed in [`issues.json`](issues.json) alongside the design docs' open
 questions, `backlog.md` and the validation ledger, and `make issues` prints all four
 registers in one list. They are indexed by *number only*: unlike every other register, a
 follow-up here carries no status marker, because these are compound narratives whose job is
