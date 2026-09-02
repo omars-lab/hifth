@@ -218,7 +218,8 @@
       "related": [
         "mistake-note-kinds",
         "note-persistence",
-        "note-export-shape"
+        "note-export-shape",
+        "bookmark-store"
       ]
     },
     {
@@ -492,7 +493,8 @@
       "by": "omar",
       "date": "2026-08-04",
       "related": [
-        "loop-6b"
+        "loop-6b",
+        "bookmark-model"
       ]
     },
     {
@@ -690,7 +692,8 @@
       "related": [
         "confusion-map-export",
         "note-export-shape",
-        "mistake-note-kinds"
+        "mistake-note-kinds",
+        "bookmark-store"
       ]
     },
     {
@@ -722,6 +725,67 @@
         "note-persistence",
         "confusion-map-export",
         "comparison-crop"
+      ]
+    },
+    {
+      "id": "bookmark-model",
+      "question": "Is a bookmark one ribbon that moves, or many the reader drops and lifts?",
+      "status": "open",
+      "options": [
+        {
+          "id": "A",
+          "label": "One ribbon that moves"
+        },
+        {
+          "id": "B",
+          "label": "Many the reader drops and lifts"
+        },
+        {
+          "id": "C",
+          "label": "Both: one that follows you, several you pin"
+        }
+      ],
+      "artifact": "https://blog.bytesofpurpose.com/hifth/docs/design/bookmark-fold-options.html",
+      "page": "docs/design/bookmark-fold-options.html",
+      "builtBy": "scripts/build-bookmark-fold-options.mjs",
+      "doc": "docs/decisions/bookmark-fold.md#is-a-bookmark-one-ribbon-that-moves-or-many-the-reader-drops-and-lifts",
+      "decided": null,
+      "by": null,
+      "date": null,
+      "related": [
+        "bookmark-store",
+        "pin-marker"
+      ]
+    },
+    {
+      "id": "bookmark-store",
+      "question": "Where is a bookmark kept, so tapping the fold still means something next week?",
+      "status": "open",
+      "options": [
+        {
+          "id": "A",
+          "label": "In the address only"
+        },
+        {
+          "id": "B",
+          "label": "In the phone's durable store"
+        },
+        {
+          "id": "C",
+          "label": "In a store that can be carried off the phone"
+        }
+      ],
+      "artifact": "https://blog.bytesofpurpose.com/hifth/docs/design/bookmark-fold-options.html",
+      "page": "docs/design/bookmark-fold-options.html",
+      "builtBy": "scripts/build-bookmark-fold-options.mjs",
+      "doc": "docs/decisions/bookmark-fold.md#where-is-a-bookmark-kept-so-tapping-the-fold-still-means-something-next-week",
+      "decided": null,
+      "by": null,
+      "date": null,
+      "related": [
+        "bookmark-model",
+        "note-persistence",
+        "confusion-map-export"
       ]
     }
   ]
