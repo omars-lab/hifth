@@ -159,21 +159,20 @@ next one is caught by a tool:
 - **A recipe for seeing a change** — done: the `run-app` skill now says which server is which,
   that a hash-only navigation is not a reload, and to rebuild before e2e. Two sessions had
   lost turns to each.
-- **The page-bar decisions** — record and page done, publish pending. Two open rows in the
+- **The page-bar decisions** — record and page done, and public on the site since the merge. Two open rows in the
   decision register, *juz-detents* (does a marker pull the release onto it) and *boundary-juz*
   (which juz a page carrying a seam is in), one record `docs/decisions/page-bar.md`, one drawn
   page `docs/design/page-bar-options.html` rebuilt by `scripts/build-page-bar-options.mjs`
   from the manifest and the bar's own stylesheet. The bar is 1.34 px a page on a laptop and
   0.4 px on a phone; four pages (62, 121, 201, 502) carry a juz seam, and on those the bar's
-  bubble and the pack shelf already name different juz. The decision gate is red on exactly
-  one thing — an open row with no published copy — until the owner says to publish, which
-  is a per-action ask.
+  bubble and the pack shelf already name different juz. The page's address is its own on
+  the site, so the decision gate is green and the two rows wait only on the owner's answers.
 - **The goldens were stale before this thread touched them.** Verifying the settle step ran
   the whole Chromium suite, and twelve phone goldens failed — all of them at a clean checkout
   of the branch head, and all of them since `b90b450`, the commit that made a hop land the
-  leaves level. Almost certainly that fix reaching the phone framing; whether the new framing
-  is the wanted one is the owner's call, and only after that a re-baseline of darwin and
-  linux together. Filed as follow-up 16 under §Open follow-ups and indexed.
+  leaves level. That fix reaching the phone framing, one pixel lower; the owner looked at
+  the diff, accepted it, and darwin and linux were re-baselined together in `75db3cd`.
+  Follow-up 16 under §Open follow-ups, closed.
 - **A register went stale at a commit and nothing said so until now.** The use-cases page
   had not been re-rendered since `b90b450`; its gate failed at a clean checkout of the branch
   head, so that commit shipped with the gate red. Re-rendered (only line-number pointers had
