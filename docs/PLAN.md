@@ -165,8 +165,14 @@ in three places: this section (the record), the session task list (the working c
   destructive ones). This is the long-planned revision record reaching the chrome; the shape
   is sketched in [`.claude/plans/interaction-calendar.md`](../.claude/plans/interaction-calendar.md).
   Needs its own decision, and it touches the revision-privacy question.
-- **A highlighter setting** — outline vs. filled, and how see-through the fill is — reached from
-  a menu-bar icon. Needs a decision that draws each style on a real page at reading size.
+- **A highlighter setting** — outline vs. filled, and how see-through the fill is. Now drawn as
+  a two-question decision on real ayahs at reading size: whether a reader chooses the mark's
+  *shape* (the marker swipe the app draws today, a translucent fill, or an outline — never a box
+  around a whole multi-line run, which the per-line grammar already rules out), and whether a
+  reader tunes its *strength* or it stays fixed. The picture makes the point a paragraph would
+  hide — at the app's real strength a fill is much fainter than the swipe, which is why the swipe
+  exists — so the two questions are coupled. Constrained by the settled per-line grammar; the
+  strength control is the same idea the tajweed-colour decision already set aside once.
 
 **What the thread taught, as follow-ups** — the pattern under the paper-cuts, filed so the
 next one is caught by a tool:
