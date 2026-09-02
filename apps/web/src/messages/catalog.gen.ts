@@ -38,6 +38,7 @@ export interface Catalog {
   readonly "coachSteps.3.title": string;
   readonly copied: string;
   readonly copyFailed: string;
+  readonly designsLink: string;
   readonly devBuild: string;
   readonly devBuildNote: string;
   readonly dismiss: string;

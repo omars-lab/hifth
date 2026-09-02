@@ -362,6 +362,7 @@ export interface Strings {
   licenceHead: string;
   licenceBody: string;
   sourceLink: string;
+  designsLink: string;
   devBuild: string;
   devBuildNote: string;
   sourcesHead: string;
@@ -770,6 +771,7 @@ export function buildStrings(lang: Lang, m: Catalog): Strings {
     licenceHead: m.licenceHead,
     licenceBody: m.licenceBody,
     sourceLink: m.sourceLink,
+    designsLink: m.designsLink,
     devBuild: m.devBuild,
     devBuildNote: m.devBuildNote,
     sourcesHead: m.sourcesHead,

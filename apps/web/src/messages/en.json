@@ -145,6 +145,7 @@
   "licenceHead": "Licence and source",
   "licenceBody": "Free software under the GNU GPL, version 3 or later: you may study it, change it and pass it on. This is the source of this exact build, not a branch that may move:",
   "sourceLink": "Source code",
+  "designsLink": "Designs and decisions",
   "devBuild": "dev build",
   "devBuildNote": "This is a local development build, so no released version corresponds to it; the link opens the repository.",
   "sourcesHead": "Sources",

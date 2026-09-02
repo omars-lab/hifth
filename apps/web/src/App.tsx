@@ -680,6 +680,18 @@ export function App(): JSX.Element {
     return declared ?? pageTurns.pages[pageTurns.pages.length - 1] ?? 1;
   }, [manifest, pageTurns]);
 
+  // The surah at each page's head — its anchor ayah's surah, the same
+  // `polygons[0]` the turn anchors above use — built once so a drag, which asks
+  // per value, reads a map rather than re-scanning the manifest each time.
+  const surahByPage = useMemo(() => {
+    const byPage = new Map<number, number>();
+    for (const pm of manifest?.pages ?? []) {
+      const surah = pm.polygons[0]?.surah;
+      if (surah !== undefined) byPage.set(pm.page, surah);
+    }
+    return byPage;
+  }, [manifest]);
+
   // Land on a page. The single navigation path for every way of turning one —
   // the arrow keys, the page bar's edge buttons, and letting go of its slider —
   // so there is one place where "the stage moved" and "the header changed" can
@@ -802,6 +814,28 @@ export function App(): JSX.Element {
    * jump after it is an array index.
    */
   const juzStarts = useMemo(() => juzPageIndex(manifest?.pages ?? []), [manifest]);
+
+  // Where a page sits in the book, for the page bar's scrub readout: its surah
+  // (above) and its juz. The juz is read off the openings — the highest one at
+  // or before the page — so a page carrying a boundary reads as the juz that
+  // *opens* on it, which is the juz its detent marks. `juzOfPage` would answer
+  // the lowest juz with any ayah there instead; the two differ only on the page
+  // a boundary falls, and the detent's reading is the one that matches the bar.
+  // A juz no page vendored is `null` here and simply skipped — its number never
+  // becomes the answer, and the next opening below the page wins.
+  const pageContext = useCallback(
+    (p: number): { juz: number; surah: number } | null => {
+      const surah = surahByPage.get(p);
+      if (surah === undefined) return null;
+      let juz = 1;
+      for (let i = 0; i < juzStarts.length; i++) {
+        const opening = juzStarts[i];
+        if (opening != null && opening <= p) juz = i + 1;
+      }
+      return { juz, surah };
+    },
+    [surahByPage, juzStarts],
+  );
 
   /*
    * Jump a whole juz — `Shift`+wheel over either leaf.
@@ -1605,6 +1639,8 @@ export function App(): JSX.Element {
         page={page}
         onStep={stepPage}
         onGoTo={handleScrubTo}
+        juzStarts={juzStarts}
+        pageContext={pageContext}
       />
 
       <LiveAnnouncer message={message} />

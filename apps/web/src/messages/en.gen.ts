@@ -44,6 +44,7 @@ const messages: Catalog = {
   "coachSteps.3.title": "Tap a chip",
   copied: "Link copied",
   copyFailed: "Could not copy",
+  designsLink: "Designs and decisions",
   devBuild: "dev build",
   devBuildNote: "This is a local development build, so no released version corresponds to it; the link opens the repository.",
   dismiss: "Hide",

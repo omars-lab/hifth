@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { fireEvent, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { PageSlider } from "./PageSlider";
 
 /**
@@ -169,5 +169,72 @@ describe("PageSlider", () => {
     fireEvent.change(input, { target: { value: "1" } });
     expect(onGoTo).not.toHaveBeenCalled();
     for (const button of screen.getAllByRole("button")) expect(button).toBeDisabled();
+  });
+
+  // ---- the juz detents, the page-icon handle and the landmark popover ----
+
+  const JUZ = (starts: readonly (number | null)[]) => starts;
+
+  it("draws one green detent per juz it can place, numbered by position", () => {
+    // A juz no page vendored is a null slot, not a missing slot: the detent
+    // drawn after it must still know it is juz 3, or every gap in the inventory
+    // would renumber the whole book behind it.
+    slider({ juzStarts: JUZ([1, null, 42, 62]) });
+    const detents = document.querySelectorAll("[data-testid='juz-detent']");
+    expect(detents).toHaveLength(3);
+    expect([...detents].map((d) => d.getAttribute("data-juz"))).toEqual(["1", "3", "4"]);
+  });
+
+  it("draws no detent rail when no juz can be placed", () => {
+    // All-null and empty are the same picture — the plain scrubber — and the
+    // rail node itself should not be there to reserve a layer for nothing.
+    slider({ juzStarts: JUZ([null, null, null]) });
+    expect(document.querySelectorAll("[data-testid='juz-detent']")).toHaveLength(0);
+    cleanup();
+    slider();
+    expect(document.querySelectorAll("[data-testid='juz-detent']")).toHaveLength(0);
+  });
+
+  it("hands the reader a page to grab, drawn over the native thumb", () => {
+    // The handle is paint over the input, never a second control: the range
+    // keeps the role, the value text and the keyboard; the leaf is aria-hidden.
+    slider();
+    const handle = document.querySelector("[data-testid='page-handle']");
+    expect(handle).not.toBeNull();
+    expect(handle!.getAttribute("aria-hidden")).toBe("true");
+    expect(handle!.querySelector("svg")).not.toBeNull();
+    expect(screen.getAllByRole("slider")).toHaveLength(1);
+  });
+
+  it("floats no handle over a dead track", () => {
+    slider({ available: [] });
+    expect(document.querySelector("[data-testid='page-handle']")).toBeNull();
+  });
+
+  it("moves the handle with the drag, not only on release", () => {
+    // Mid-drag the leaf sits where the thumb is, so what the reader is holding
+    // and what they see under their finger are the same page.
+    const input = slider();
+    const at = () =>
+      (document.querySelector("[data-testid='page-handle']") as HTMLElement).style.insetInlineStart;
+    const rest = at();
+    fireEvent.input(input, { target: { value: "300" } });
+    expect(at()).not.toBe(rest);
+  });
+
+  it("names the juz and the surah under the thumb while dragging", () => {
+    const input = slider({ pageContext: () => ({ juz: 5, surah: 4 }) });
+    fireEvent.input(input, { target: { value: "300" } });
+    const line = screen.getByText(/النساء/);
+    expect(line.textContent).toMatch(/5|٥/);
+  });
+
+  it("leaves the landmarks off when the page cannot be placed", () => {
+    // Off the vendored inventory the caller answers null, and the popover says
+    // the page number and nothing it would have to guess.
+    const input = slider({ pageContext: () => null });
+    fireEvent.input(input, { target: { value: "300" } });
+    expect(screen.getByText("صفحة 300 من 604")).toBeTruthy();
+    expect(screen.queryByText(/النساء/)).toBeNull();
   });
 });

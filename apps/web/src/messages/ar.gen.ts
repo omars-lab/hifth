@@ -44,6 +44,7 @@ const messages: Catalog = {
   "coachSteps.3.title": "المس رقاقة",
   copied: "نُسخ الرابط",
   copyFailed: "تعذّر النسخ",
+  designsLink: "التصاميم والقرارات",
   devBuild: "نسخة تطوير",
   devBuildNote: "هذه نسخة تطوير محلّية، فلا تقابلها إصدارة معيّنة؛ الرابط يفتح المستودع.",
   dismiss: "إخفاء",
