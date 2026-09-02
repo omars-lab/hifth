@@ -2,5 +2,18 @@
   "plansDirectory": ".claude/plans",
   "enabledPlugins": {
     "frontend-design@claude-plugins-official": true
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Artifact",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR/scripts/hook-artifact.sh\""
+          }
+        ]
+      }
+    ]
   }
 }

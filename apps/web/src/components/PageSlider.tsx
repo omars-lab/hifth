@@ -23,6 +23,51 @@ interface PageSliderProps {
    * thumb was let go, so the caller can say so when the two differ.
    */
   onGoTo: (landed: number, asked: number) => void;
+  /**
+   * The page each of the 30 juz opens on — the green detents drawn along the
+   * track, the coarse landmarks a hafiz reads the book by. One slot per juz in
+   * order, and `null` for a juz no vendored page carries, so the drawn detent
+   * still knows its own juz number by position. Optional: an empty (or all-null)
+   * list draws no detents, and the bar is the plain page scrubber it was.
+   */
+  juzStarts?: readonly (number | null)[];
+  /**
+   * Where a page sits in the book — its juz and the surah at its head — for the
+   * scrub readout. A function, not a table, because the caller owns the mapping:
+   * it holds the manifest, the bar does not. `null` for a page it cannot place
+   * (outside the vendored inventory), which just leaves that line off the popover.
+   */
+  pageContext?: (page: number) => { juz: number; surah: number } | null;
+}
+
+/**
+ * The handle, drawn as a leaf of the mus'haf rather than a browser puck. It is
+ * painted *over* the native thumb (which is kept, sized, and made invisible), so
+ * the reader grabs a page while the range input underneath keeps every scrap of
+ * its keyboard and assistive-technology behaviour. `currentColor` is the track's
+ * accent, `--paper` the page — a small card the colour of the book above it.
+ */
+function PageHandleIcon(): JSX.Element {
+  return (
+    <svg className={styles.handleIcon} viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <path
+        d="M7.5 2.5H14L18 6.5V19.5A1.5 1.5 0 0 1 16.5 21H7.5A1.5 1.5 0 0 1 6 19.5V4A1.5 1.5 0 0 1 7.5 2.5Z"
+        fill="var(--paper)"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M13.75 2.75V6A1 1 0 0 0 14.75 7H18"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinejoin="round"
+      />
+      <line x1="8.75" y1="12" x2="15.25" y2="12" stroke="currentColor" strokeWidth="1.3" opacity="0.55" />
+      <line x1="8.75" y1="15" x2="15.25" y2="15" stroke="currentColor" strokeWidth="1.3" opacity="0.55" />
+    </svg>
+  );
 }
 
 /**
@@ -81,6 +126,8 @@ export function PageSlider({
   page,
   onStep,
   onGoTo,
+  juzStarts = [],
+  pageContext,
 }: PageSliderProps): JSX.Element {
   const { t } = useT();
   const inputRef = useRef<HTMLInputElement>(null);
@@ -95,6 +142,11 @@ export function PageSlider({
   // during a drag at all.
   const runs = useMemo(() => pageRuns(available), [available]);
   const landing = scrub === null ? null : nearestPage(available, scrub);
+  // Where the thumb is over the book — its juz and the surah at that page's head
+  // — named in the popover so a scrub is read in the book's own landmarks, not
+  // only in a page number. Null off the vendored inventory, which just drops the
+  // line rather than guessing.
+  const context = scrub === null || !pageContext ? null : pageContext(scrub);
 
   const commit = useCallback(
     (wanted: number) => {
@@ -234,6 +286,49 @@ export function PageSlider({
           />
         </div>
 
+        {/* The 30 juz, one green detent each, at the page each opens on. These are
+            the coarse landmarks a hafiz navigates by — the book is thirty parts
+            before it is 604 pages — so they sit above the inventory rail as their
+            own layer. Decorative to a screen reader: the input already speaks its
+            value, and the juz is named in the popover a listener cannot see.
+            `pointer-events: none` so a detent never eats a drag aimed at the
+            thumb crossing it. */}
+        {juzStarts.some((start) => start !== null) && (
+          <div className={styles.juzRail} aria-hidden="true">
+            {juzStarts.map((start, i) =>
+              start === null ? null : (
+                <span
+                  key={start}
+                  className={styles.juz}
+                  data-testid="juz-detent"
+                  data-juz={i + 1}
+                  style={{
+                    insetInlineStart: `calc(${pageFraction(start, total)} * (100% - var(--thumb)) + var(--thumb) / 2 - 1px)`,
+                  }}
+                />
+              ),
+            )}
+          </div>
+        )}
+
+        {/* The handle, a page rather than a puck, painted over the invisible
+            native thumb at the same value — see `PageHandleIcon`. Hidden while
+            the bar is inert (no inventory), so no lone leaf floats over a dead
+            track. Follows the drag: `value` is the scrub value mid-drag, the
+            loaded page at rest. */}
+        {!empty && (
+          <span
+            className={styles.handle}
+            data-testid="page-handle"
+            aria-hidden="true"
+            style={{
+              insetInlineStart: `calc(${pageFraction(value, total)} * (100% - var(--thumb)) + var(--thumb) / 2)`,
+            }}
+          >
+            <PageHandleIcon />
+          </span>
+        )}
+
         {scrub !== null && (
           <output
             className={styles.bubble}
@@ -242,6 +337,14 @@ export function PageSlider({
             }}
           >
             <span className="numeric">{t.pageOfTotal(scrub, total)}</span>
+            {/* The book's own landmarks for the page under the thumb: which juz,
+                and the surah at its head. Only when the caller can place the page
+                — off the vendored inventory the line is left off rather than guessed. */}
+            {context !== null && (
+              <span className={styles.context}>
+                {t.juzN(context.juz)} · {t.surahName(context.surah)}
+              </span>
+            )}
             {/* Said before you let go, not only after. The drag is the moment
                 the reader can still aim somewhere else. */}
             {landing !== null && landing !== scrub && (

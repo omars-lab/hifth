@@ -62,7 +62,9 @@
  *
  * ## The one rule this script exists under
  *
- * **There is no Quran text in this repo and there will not be.** Marks are
+ * **Nothing this script writes is Quran text, and nothing it writes is
+ * committed** — the rule as `morphology.mjs` now states it, and as
+ * `gate:scripture` enforces it. Marks are
  * reported by page, word index and drawn name. The word's own letters are read
  * from the cache at runtime and never written to a file outside
  * `packages/etl/out/`, which is gitignored — the same arrangement
@@ -82,8 +84,28 @@ import { fileURLToPath } from "node:url";
 import { readMarkOutlines } from "./lib/diacritics.mjs";
 import { readPageInk, integral, rasterise } from "./lib/ink.mjs";
 import { cachedMarkPages, markPageFile as pageFile, marksOf } from "./lib/marks.mjs";
-import { bestPlacement, outlineRings, rng, sampleSizeFor, scoreAt, stamp, wilson } from "./lib/mark-ink.mjs";
+import {
+  bestPlacement,
+  outlineRings,
+  refusedItsOwnInk,
+  rng,
+  sampleSizeFor,
+  scoreAt,
+  stamp,
+  wilson,
+  withSecondLook,
+} from "./lib/mark-ink.mjs";
 import { classifier, loadExemplars, shapeGroups, similarityMatrix } from "./lib/mark-shape.mjs";
+import {
+  FLOOR,
+  GRAINS,
+  SPLIT_FLOOR,
+  correctionFor,
+  fitLine,
+  half,
+  pageKey,
+  shiftsBy,
+} from "./lib/registration-grain.mjs";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(HERE, "..", "..", "..");
@@ -117,6 +139,47 @@ const RES = Number(arg("--res", 16));
  * answer would report every wrong box as merely unmatched.
  */
 const RADIUS = Number(arg("--radius", 3));
+
+/**
+ * How far the search may move a mark on its *second* look, and why there is one.
+ *
+ * The radius above was sized against the neighbouring letter, so that "it fits
+ * better one letter over" would land inside the search rather than be clipped by
+ * it. That reasoning is right and it has a consequence nobody drew at the time:
+ * a mark whose true ink is further away than the radius comes back not as
+ * *misplaced* but as *unmatched*, which is the one thing the docblock above says
+ * a radius must never do.
+ *
+ * It was happening to all of them. On 272 marks a reader placed by hand, the
+ * displacement they actually needed was a median of 4.292 units and 230 of the
+ * 272 exceeded 3 — the search was looking in a window smaller than the thing it
+ * was looking for, and where it hit the wall it was already heading the right
+ * way, agreeing with the reader on 92 of 100 marks across and 99 of 100 down.
+ *
+ * So the refused ones get a second, wider look. **Only the refused ones**, and
+ * that is not a performance choice. Searching everything this wide moves 4.11%
+ * of the marks that already matched by more than two units — a wider window
+ * finds a better-scoring match that is the adjacent mark's ink, and it does it
+ * confidently. Those cannot be adjudicated, because nothing knows which answer
+ * is right; escalating only where the narrow search gave up means they never
+ * arise, and every accepted mark keeps its answer bit for bit.
+ *
+ * Set to 0 to turn the second look off and get the old single-pass behaviour.
+ */
+const ESCALATE = Number(arg("--escalate", 8));
+
+/**
+ * When the first look counts as having given up.
+ *
+ * The same two tests `build-mark-report.mjs` uses to split placed from fallback,
+ * because the population this rescues has to be the same population that names
+ * it. They are different failures: hitting the radius means the answer is out of
+ * reach, while matching under the floor means the search could see it and did
+ * not like it. Only the first is a thing a wider look can fix, but both are
+ * offered it — a mark that matched badly at 3 units sometimes matched badly
+ * because the real ink was outside and it settled for whatever was inside.
+ */
+const ESC_FLOOR = Number(arg("--escalate-floor", 0.55));
 
 const wantJson = has("--json");
 const outPath = arg("--out", OUT);
@@ -163,8 +226,8 @@ if (!cached.length) {
  * what was drawn would be scored on the part of it that remained, and the part
  * of a wrong answer that stayed in view is not the wrong answer.
  */
-function windowOf(box) {
-  const pad = RADIUS + 1;
+function windowOf(box, radius = RADIUS) {
+  const pad = radius + 1;
   const padX = pad + box[2];
   const x0 = box[0] - padX;
   const y0 = box[1] - pad;
@@ -184,9 +247,9 @@ function windowOf(box) {
  *              the page and does not move when the claim does, so it is carried
  *              over and only the *distance from the claim* changes.
  */
-function scoreMark(mark, ink, lib, other, corr) {
+function scoreMark(mark, ink, lib, other, corr, radius = RADIUS) {
   const { box, fit } = mark;
-  const win = windowOf(box);
+  const win = windowOf(box, radius);
   const obs = rasterise(ink.shapes, win.x0, win.y0, win.cols, win.rows, RES);
   const sat = integral(obs, win.cols, win.rows);
   const cx0 = corr ? corr.dx : 0;
@@ -205,7 +268,7 @@ function scoreMark(mark, ink, lib, other, corr) {
   const at = scoreAt(own, obs, sat, win.cols, win.rows, 0, 0);
   const best = corr
     ? { ...corr.best, di: corr.best.di - Math.round(cx0 * RES), dj: corr.best.dj - Math.round(cy0 * RES) }
-    : bestPlacement(own, obs, sat, win.cols, win.rows, RES, RADIUS);
+    : bestPlacement(own, obs, sat, win.cols, win.rows, RES, radius);
 
   // The ink fraction of the claimed rectangle, kept because it is the statistic
   // the first look at this used and the two must be comparable.
@@ -226,7 +289,7 @@ function scoreMark(mark, ink, lib, other, corr) {
     // being moved to. Reusing this mark's window would only have shown whatever
     // sliver of the displaced outline happened to still be inside it, and a
     // sliver scores like a sliver rather than like a wrong answer.
-    const w2 = windowOf(other.box);
+    const w2 = windowOf(other.box, radius);
     const obs2 = rasterise(ink.shapes, w2.x0, w2.y0, w2.cols, w2.rows, RES);
     const sat2 = integral(obs2, w2.cols, w2.rows);
     const dx = other.box[0] + other.box[2] / 2 - (box[0] + box[2] / 2);
@@ -275,6 +338,7 @@ function scoreMark(mark, ink, lib, other, corr) {
     surah: mark.surah,
     aya: mark.aya,
     idx: mark.idx,
+    line: mark.line,
     box: [box[0] + cx0, box[1] + cy0, box[2], box[3]],
     best,
     ink: inkFrac,
@@ -291,6 +355,12 @@ function scoreMark(mark, ink, lib, other, corr) {
     minePhi: mine ? mine.phi : 0,
     margin: votes[0].phi - (runnerUp ? runnerUp.phi : 0),
     sawShift: byShift[0].name,
+    // How far this particular answer was allowed to look. Equal to the ordinary
+    // radius for almost every mark; wider for the ones the first look gave up
+    // on. It travels with the row because `dx, dy` pinned at a boundary is not
+    // the same kind of number as `dx, dy` found inside one, and nothing
+    // downstream can tell which it is holding without knowing the boundary.
+    searchedAt: radius,
   };
 }
 
@@ -428,8 +498,15 @@ const skipped = [];
  * would claim if each page's whole-page displacement were taken out. Running it
  * twice rather than reasoning about the first pass's numbers is the difference
  * between predicting the correction would work and showing that it does.
+ *
+ * `onlyCorrected` drops any mark the correction has nothing to say about, rather
+ * than scoring it uncorrected alongside the ones that moved. That is wrong for
+ * the ordinary run — a handful of pages carry too few marks to be corrected at
+ * all, and they are part of what ships — and it is the only honest thing to do
+ * when the correction was deliberately kept away from half the marks, because
+ * there the uncorrected ones are precisely the training set.
  */
-function scoreAll(corrections) {
+function scoreAll(corrections, onlyCorrected = false, { radius = RADIUS, only = null } = {}) {
   const out = [];
   let lastPage = null;
   let ink = null;
@@ -447,33 +524,110 @@ function scoreAll(corrections) {
     const pool = pageMarks.filter((o) => o.k !== m.k && o.name !== m.name);
     const other = pool.length ? pool[Math.floor(pick() * pool.length)] : null;
     const c = corrections?.get(`${m.page}:${m.k}`) ?? null;
-    const r = scoreMark(m, ink, lib, other, c);
+    if (onlyCorrected && !c) continue;
+    // Filtered here rather than at the top of the loop, so that the seeded draw
+    // above has already happened. A second look at a subset then picks the same
+    // swap control the first look picked, and its `nullPhi` stays comparable
+    // with every row the first look produced.
+    if (only && !only.has(`${m.page}:${m.k}`)) continue;
+    const r = scoreMark(m, ink, lib, other, c, radius);
     if (r) out.push({ ...r, hafs: m.hafs, d: m.d, fit: m.fit });
     else if (!corrections) skipped.push(m);
   }
   return out;
 }
 
-const raw = scoreAll(null);
+/**
+ * The first look, and then a second one for whatever it gave up on.
+ *
+ * The second look replaces a row only when it actually helps — it has to both
+ * clear the floor and beat the overlap the first look managed. A wider search
+ * cannot score worse at the same offset, so in practice this only refuses the
+ * handful where a bigger window let the outline drift onto a neighbour and the
+ * arithmetic still called it worse; keeping the test explicit means the pass can
+ * never make a row worse than not running it at all.
+ *
+ * Rows the second look does not improve keep the first look's answer untouched,
+ * pinned `dx, dy` and all. They are the marks that are genuinely hard, and their
+ * refusal is the signal that says which ones are still worth a person's hour.
+ */
+const escalated = { looked: 0, took: 0 };
+
+function lookAgain(rows) {
+  if (!(ESCALATE > RADIUS)) return rows;
+  const stuck = rows.filter((r) => refusedItsOwnInk(r, RADIUS, ESC_FLOOR));
+  if (!stuck.length) return rows;
+  escalated.looked = stuck.length;
+  const only = new Set(stuck.map((r) => `${r.page}:${r.k}`));
+  const wider = scoreAll(null, false, { radius: ESCALATE, only });
+  const merged = withSecondLook(rows, wider, { radius: RADIUS, wide: ESCALATE, floor: ESC_FLOOR });
+  escalated.took = merged.took;
+  return merged.rows;
+}
+
+const raw = lookAgain(scoreAll(null));
+if (escalated.looked) {
+  console.error(
+    `  second look at ±${ESCALATE}: ${escalated.looked} marks the first look gave up on, ` +
+      `${escalated.took} placed from their own ink (${((100 * escalated.took) / escalated.looked).toFixed(0)}%)`,
+  );
+}
 
 /**
- * Each page's own displacement, as the median of its marks'.
+ * Which grain the corrected pass is scored at, and the correction it applies.
  *
- * The median rather than the mean, because the thing being estimated is what the
- * page as a whole does, and a handful of marks that really are on the wrong
- * letter would drag a mean. Pages with too few marks to estimate anything are
- * left alone rather than corrected by a number built from four observations.
+ * The page is the default because it is what ships, and because leaving it as
+ * the default means the corrected numbers in every earlier run still mean the
+ * same thing.
+ *
+ * The models themselves live in `lib/registration-grain.mjs` rather than here.
+ * They are arithmetic on displacements the rasteriser has already measured, so a
+ * search over grains can run in seconds outside this probe — and they are the
+ * one part of this file whose answer can be checked against a corpus we built
+ * ourselves, which is what `registration-grain.test.mjs` does. What cannot be
+ * checked that way, and is why the winning grain still comes back through here,
+ * is how much ink a rectangle covers once it has moved: overlap is not linear in
+ * the displacement and cannot be predicted from it.
  */
-const perPageShift = new Map();
-for (const p of new Set(raw.map((r) => r.page))) {
-  const rs = raw.filter((r) => r.page === p && r.ink >= 0.02);
-  if (rs.length < 20) continue;
-  perPageShift.set(p, {
-    dx: q(rs.map((r) => r.dx), 0.5),
-    dy: q(rs.map((r) => r.dy), 0.5),
-    n: rs.length,
-  });
+const GRAIN = arg("--grain", "page");
+if (!GRAINS.includes(GRAIN)) {
+  console.error(`--grain must be ${GRAINS.join(", ")}; got ${GRAIN}`);
+  process.exit(2);
 }
+
+/**
+ * Whether the correction is allowed to see the marks it is then graded on.
+ *
+ * A correction is fitted to make the rectangles agree with the ink and is then
+ * scored by how well the rectangles agree with the ink, so a model with more
+ * parameters wins every time — including when what it is fitting is the noise in
+ * this particular sample. There is exactly one way to tell those apart, and it
+ * is to grade on marks the model never saw.
+ *
+ * Off by default, because the corrected block in every earlier run means "what
+ * would these same marks look like if we corrected them", and quietly changing
+ * what a printed number means is worse than making somebody ask for the other
+ * one. On, it is the number to quote when comparing grains: a finer grain that
+ * wins here has found something about the print, and a finer grain that wins
+ * only with this off has found something about these marks.
+ */
+const SPLIT_HALF = process.argv.includes("--split-half");
+
+const perPageShift = shiftsBy(raw, pageKey);
+const corrections = new Map();
+/** The fitted correction itself, kept so `--shift-out` can write it down. */
+let fitted;
+{
+  const train = SPLIT_HALF ? raw.filter((r) => half(r) === 0) : raw;
+  const graded = SPLIT_HALF ? raw.filter((r) => half(r) === 1) : raw;
+  fitted = correctionFor(GRAIN, train, SPLIT_HALF ? SPLIT_FLOOR : FLOOR);
+  for (const r of graded) {
+    if (!perPageShift.has(r.page)) continue;
+    const c = fitted.apply(r);
+    corrections.set(`${r.page}:${r.k}`, { dx: c.dx, dy: c.dy, best: r.best });
+  }
+}
+
 /**
  * What the fit between the two prints would have been if it had been fitted to
  * the ink instead of to the ornaments.
@@ -486,38 +640,21 @@ for (const p of new Set(raw.map((r) => r.page))) {
  * transform from a few hundred observations spread over the whole page rather
  * than from a handful of ornaments clustered on it.
  *
- * Reported, not applied. It is evidence about the fit, and what to do about the
- * fit is a decision — this only has to make the decision possible by saying how
- * far off it is and in which direction.
+ * Reported, not applied. A whole-corpus read of it said the scale term is real
+ * and worth about two per cent of the scatter it would have to remove, which is
+ * how the search moved off the four-number family and onto the grain question
+ * above — so this stays as evidence, and the correction that ships comes from
+ * `correctionFor`.
  */
 function refit(rs, fit) {
-  const ls = (obs, want) => {
-    const n = obs.length;
-    const mx = obs.reduce((a, b) => a + b, 0) / n;
-    const my = want.reduce((a, b) => a + b, 0) / n;
-    let sxy = 0;
-    let sxx = 0;
-    for (let i = 0; i < n; i += 1) {
-      sxy += (obs[i] - mx) * (want[i] - my);
-      sxx += (obs[i] - mx) * (obs[i] - mx);
-    }
-    const a = sxx > 0 ? sxy / sxx : 1;
-    const b = my - a * mx;
-    let e = 0;
-    for (let i = 0; i < n; i += 1) {
-      const d = want[i] - (a * obs[i] + b);
-      e += d * d;
-    }
-    return { a, b, sd: Math.sqrt(e / Math.max(1, n - 2)) };
-  };
   // Back out the corpus-frame centre the pinned fit was applied to, then ask
   // what transform would have carried it to where the ink actually is.
   const theirsX = rs.map((r) => (r.box[0] + r.box[2] / 2 - fit.tx) / fit.sx);
   const theirsY = rs.map((r) => (r.box[1] + r.box[3] / 2 - fit.ty) / fit.sy);
   const oursX = rs.map((r, i) => fit.sx * theirsX[i] + fit.tx + r.dx);
   const oursY = rs.map((r, i) => fit.sy * theirsY[i] + fit.ty + r.dy);
-  const fx = ls(theirsX, oursX);
-  const fy = ls(theirsY, oursY);
+  const fx = fitLine(theirsX, oursX);
+  const fy = fitLine(theirsY, oursY);
   return {
     n: rs.length,
     sx: fx.a,
@@ -533,17 +670,50 @@ function refit(rs, fit) {
   };
 }
 
-const corrections = new Map();
-for (const r of raw) {
-  const s = perPageShift.get(r.page);
-  if (s) corrections.set(`${r.page}:${r.k}`, { dx: s.dx, dy: s.dy, best: r.best });
-}
-const fixed = corrections.size ? scoreAll(corrections) : raw;
+const fixed = corrections.size ? scoreAll(corrections, SPLIT_HALF) : raw;
 
 // Everything below reports the boxes as they are. The corrected pass is
 // reported alongside it, never instead of it: what ships today is the first
 // number, and the second is what a change would buy.
 const rows = raw;
+
+/**
+ * Every scored mark, one row, for a grain search to be run outside this script.
+ *
+ * Searching for the right grain does not need the rasteriser. A correction moves
+ * the rectangle, and `dx, dy` already says where the ink is relative to where the
+ * rectangle claims to be — so the residual under any candidate correction is
+ * arithmetic on these rows, and a search over grains costs seconds instead of a
+ * pass a rung. The winning grain still comes back through `scoreAll`, which is
+ * the only thing that reports overlap, because overlap is not linear in the
+ * displacement and cannot be predicted from it.
+ *
+ * Off by default and written only where asked. It carries no text: page, mark,
+ * printed line, the mark's own name, the rectangle, and numbers.
+ */
+const rowsOut = arg("--rows-out", null);
+if (rowsOut) {
+  writeFileSync(
+    rowsOut,
+    JSON.stringify(
+      rows.map((r) => ({
+        page: r.page,
+        k: r.k,
+        line: r.line,
+        name: r.name,
+        box: r.box,
+        ink: r.ink,
+        dx: r.dx,
+        dy: r.dy,
+        iou0: r.iou0,
+        iouBest: r.iouBest,
+        phi0: r.phi0,
+        nullPhi: r.nullPhi,
+        searchedAt: r.searchedAt,
+      })),
+    ),
+  );
+}
 
 // ------------------------------------------------------------ aggregation --
 
@@ -658,6 +828,10 @@ const report = {
   ran: new Date().toISOString().slice(0, 10),
   res: RES,
   radius: RADIUS,
+  // Which grain the `corrected` block below was scored at. Without it, two runs
+  // of this script produce the same field names for two different models.
+  grain: GRAIN,
+  splitHalf: SPLIT_HALF,
   seed: pageArg ? null : seed,
   pages: [...new Set(rows.map((r) => r.page))].length,
   pagesDrawn,
@@ -1128,7 +1302,84 @@ writeFileSync(outPath, surface());
  *
  * It lands beside the evidence page, which is not checked in. Nothing reads it
  * at build time and nothing in the app knows it exists.
+ *
+ * `coverage` is the field to read before any of the numbers under it. This file
+ * describes a SAMPLE of pages: `--sample` sets how many marks are drawn and
+ * `minMarksPerPage` throws away any page that got too few to fit, so a row here
+ * means "measured" and a page with no row means "never looked at". The default
+ * run reaches forty of six hundred and four, and until this field existed
+ * nothing downstream could tell — which mattered more than it sounds, because
+ * a by-eye trial can only be built for a page that HAS a proposed move, so both
+ * sessions asked their questions exclusively about the pages the correction was
+ * already fitted to. A reader of this file should be able to see that without
+ * being told.
+ *
+ * `shifts` is always the per-page median and always means the same thing, so a
+ * run at any grain still writes the file the two by-eye scorers already read.
+ * A run at a FINER grain adds `perLine` beside it, and that block is the whole
+ * point of measuring a grain at all: the per-page family was measured to be
+ * exhausted, so whatever ships is a table the four pinned numbers cannot hold,
+ * and a table nobody wrote down is a finding rather than a correction. It is
+ * additive on purpose — a page-grain run writes byte-identical output to the
+ * one before this field existed, which is what keeps the committed rulings and
+ * their fingerprints valid.
+ *
+ * The two grains store different things because they ARE different things. A
+ * per-line grain stores one displacement a line, on top of its page's. A tilted
+ * one stores a line through the marks of that line, so it needs two numbers an
+ * axis — read them as `dx = ax·cx + bx`, where `cx` is the centre of the mark
+ * across the page, which is the whole reason the model exists: a difference in
+ * glyph advances accumulates ALONG a line rather than sitting constant on it.
  */
+const MUSHAF_PAGES = 604;
+
+/**
+ * The finer-than-a-page half of the correction, or nothing at all.
+ *
+ * Spread into the object below, so a page-grain run adds no key and the file
+ * stays what it was. `fitted.lines` is keyed `page:line` by the model, and it
+ * is unpacked back into two fields here rather than shipped as a joined string,
+ * because whatever reads this has a page and a line and should not have to
+ * know how this file happened to spell them together.
+ */
+function finerGrain() {
+  if (GRAIN === "page" || !fitted?.lines?.size) return {};
+  const rows = [...fitted.lines.entries()]
+    .map(([k, v]) => {
+      const [page, line] = k.split(":").map(Number);
+      return { page, line, v };
+    })
+    .sort((a, b) => a.page - b.page || a.line - b.line);
+  return {
+    grain: GRAIN,
+    perLine: {
+      how:
+        GRAIN === "line"
+          ? "one further displacement for every printed line, applied ON TOP of that page's row above"
+          : "a straight line through the marks of one printed line, applied ON TOP of that page's row above: dx = ax·cx + bx, where cx is the centre of the mark across the page",
+      floor: SPLIT_HALF ? SPLIT_FLOOR : FLOOR,
+      note: "a line with no row here was not measured; leave it on its page's displacement rather than guessing one",
+      lines:
+        GRAIN === "line"
+          ? rows.map(({ page, line, v }) => ({
+              page,
+              line,
+              dx: Number(v.dx.toFixed(4)),
+              dy: Number(v.dy.toFixed(4)),
+              n: v.n,
+            }))
+          : rows.map(({ page, line, v }) => ({
+              page,
+              line,
+              ax: Number(v.x.a.toFixed(6)),
+              bx: Number(v.x.b.toFixed(4)),
+              ay: Number(v.y.a.toFixed(6)),
+              by: Number(v.y.b.toFixed(4)),
+            })),
+    },
+  };
+}
+
 const SHIFT_OUT = arg("--shift-out", join(dirname(outPath), "mark-shift.json"));
 writeFileSync(
   SHIFT_OUT,
@@ -1141,9 +1392,18 @@ writeFileSync(
       seed,
       sampled: nAll,
       minMarksPerPage: 20,
+      coverage: {
+        measured: perPageShift.size,
+        ofMushaf: MUSHAF_PAGES,
+        pct: Number(((100 * perPageShift.size) / MUSHAF_PAGES).toFixed(1)),
+        pagesOpened: pagesDrawn ?? report.pages,
+        pagesInCache: cached.length,
+        note: "a page with no row below has no measured correction; it was not looked at, not found to be right",
+      },
       shifts: [...perPageShift.entries()]
         .sort((a, b) => a[0] - b[0])
         .map(([page, s]) => ({ page, dx: Number(s.dx.toFixed(4)), dy: Number(s.dy.toFixed(4)), n: s.n })),
+      ...finerGrain(),
     },
     null,
     2,

@@ -62,6 +62,9 @@ statuses, gates and open follow-ups live there and are deliberately not restated
 - **Open items:** [`docs/issues.md`](docs/issues.md) — everything unfinished, indexed from the four
   registers that hold it (the plan's follow-ups, the backlog, each design doc's open questions,
   the manual-check ledger); `make issues` prints it worst-first
+- **Whose turn is it:** [`docs/tasks.md`](docs/tasks.md) — the same items ordered by who has to move
+  them, and the only page that names the open decisions and the human-only checks rather than
+  pointing at them by identifier; `make tasks` prints the counts
 - **Manual-check register:** [`docs/validation/ledger.json`](docs/validation/ledger.json) — the
   checks no CI job can make (a phone, a screen reader, a printed mushaf), each with a runbook
   and a recorded verdict; `make validate` in the terminal, `make guide` on the phone

@@ -26,7 +26,7 @@
  */
 
 import { TAP_SLOP_PX } from "./gestures.js";
-import { swipesFromPath, swipesFromRects, type Swipe } from "./ink.js";
+import { pageLineHeight, swipesFromPath, swipesFromRects, type Swipe } from "./ink.js";
 import type { Resolver } from "./resolver.js";
 import {
   TAJWEED_CLASS_PREFIX,
@@ -155,6 +155,13 @@ export class Highlighter {
   /** The applied skin, and L3's rule lookup for it (spec §8; see `setSkin`). */
   private currentSkin: SkinId = "plain";
   private skinLookup: TajweedLookup | null = null;
+  /**
+   * The page's line height in SVG units, computed once from its polygons and
+   * cached — the pen needs it to split a merged multi-line rectangle back into
+   * lines (see ink.ts). `undefined` means "not computed yet"; the computation
+   * itself may land on `null` (nothing parsed), which is a valid, cached answer.
+   */
+  private lineHeightCache: number | null | undefined;
 
   constructor(svg: SVGSVGElement, resolver: Resolver, page: number, opts?: { labelFor?: LabelFor }) {
     this.svg = svg;
@@ -240,6 +247,21 @@ export class Highlighter {
   /** Every interactive ayah polygon on the page, in document order. */
   private polygons(): SVGElement[] {
     return Array.from(this.svg.querySelectorAll<SVGElement>(POLYGON_SELECTOR));
+  }
+
+  /**
+   * The page's line height, computed from its polygons the first time the pen
+   * needs it and cached for the life of the page (a page's geometry does not
+   * change under it). Read through the pen's split; see {@link pageLineHeight}.
+   */
+  private inkLineHeight(): number | undefined {
+    if (this.lineHeightCache === undefined) {
+      const ds = this.polygons()
+        .map((p) => p.getAttribute("d"))
+        .filter((d): d is string => d !== null);
+      this.lineHeightCache = pageLineHeight(ds);
+    }
+    return this.lineHeightCache ?? undefined;
   }
 
   /**
@@ -335,7 +357,9 @@ export class Highlighter {
     const src = this.svg.querySelector<SVGElement>(`#${cssEscape(id)}`);
     if (!src) return [];
 
-    const swipes = INKED.has(style) ? swipesFromPath(src.getAttribute("d") ?? "") : null;
+    const swipes = INKED.has(style)
+      ? swipesFromPath(src.getAttribute("d") ?? "", this.inkLineHeight())
+      : null;
     if (swipes) return this.drawSwipes(swipes, style, group);
 
     const clone = src.cloneNode(true) as SVGElement;
@@ -365,7 +389,8 @@ export class Highlighter {
     // One element per swipe rather than one path for the whole ayah: line
     // heights differ between lines, and stroke-width is per element, so a
     // single path would have to pick one thickness and be wrong on the rest.
-    // An ayah spans at most three lines, so this is at most three nodes.
+    // One node per line the ayah occupies — usually a handful, more for the
+    // long ayahs the print fuses into one tall box and the pen splits back.
     return swipes.map((s, i) => {
       const line = document.createElementNS(SVG_NS, "line");
       // Drawn from the RIGHT end to the left — x1 takes the larger x. A line
@@ -409,7 +434,10 @@ export class Highlighter {
   highlightRects(rects: readonly Rect[], style: StyleToken, group: GroupId): void {
     this.clear(group);
     if (rects.length === 0) return;
-    this.drawn.set(group, this.drawSwipes(swipesFromRects(rects), style, group));
+    this.drawn.set(
+      group,
+      this.drawSwipes(swipesFromRects(rects, this.inkLineHeight()), style, group),
+    );
   }
 
   /** Remove every highlight drawn for a group. */

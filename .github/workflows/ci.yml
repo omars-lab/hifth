@@ -103,6 +103,13 @@ jobs:
       - name: Gate — text sources
         run: pnpm gate:text-sources
 
+      # The gate above asks where rendered text came from. This one asks whether
+      # any running scripture is in the tree at all — which is a different
+      # question, and the one nothing was asking when twelve verses were typed
+      # into a source file and shipped in the bundle.
+      - name: Gate — no running scripture in the source tree
+        run: pnpm gate:scripture
+
       - name: Gate — license (SOURCES.md)
         run: pnpm gate:license
 
@@ -113,6 +120,17 @@ jobs:
       # reader-facing row and this asserts the component renders exactly it.
       - name: Gate — the licence on screen is the licence on record
         run: pnpm gate:license-copy
+
+      # gate:license-copy above checks that a quotation did not drift. It says
+      # nothing about whether the SET of quotations is still complete, and that
+      # is the gap the adjacency shards fell through: they were built from a
+      # second, GPL'd upstream for the whole life of the spans feature, named
+      # neither in the licence table nor beside the data, because the drift
+      # arrived as a feature and nobody edits a licence file to ship a feature.
+      # This traces each builder's imports and fails when a shipped asset tree
+      # reads a vendored input nothing has accounted for.
+      - name: Gate — every asset tree names the upstreams it was built from
+        run: pnpm gate:notices
 
       # The manual-validation ledger. This does NOT fail on outstanding checks —
       # a phone that has not been held yet is a fact, not a broken build, and a
@@ -176,6 +194,14 @@ jobs:
       - name: Gate — the pages are the pinned print, and all of it is tappable
         run: pnpm gate:pages
 
+      # The pen that draws a selection reads each verse's box as a run of
+      # rectangles. Three of its defects were found by readers one page at a
+      # time; this sweeps all 6,236 boxes with the pen itself and holds the
+      # count it cannot draw as lines, so the next class shows as a number
+      # that moved rather than a screenshot in a message.
+      - name: Gate — every ayah box the pen cannot draw as lines is a known one
+        run: pnpm gate:boxes
+
       # The word boxes are geometry vendored from a second print of the same
       # mus'haf and fitted onto our frame, so a hash alone would not prove much:
       # this re-measures every box against the polygon it claims, with its own
@@ -214,6 +240,15 @@ jobs:
       # of those registers is missing from the index.
       - name: Gate — every open item is indexed, and the index still resolves
         run: pnpm gate:issues
+
+      # docs/tasks.md is the same open items cut by whose turn it is, rendered
+      # from the decision register, the validation ledger, the issue index and
+      # the roadmap at once. It is the page somebody opens to decide what to
+      # spend an hour on, so a stale row does real damage: it sends them at
+      # something already finished, or hides the thing that was waiting. This
+      # checks the committed copy was built from the registers as they stand.
+      - name: Gate — the open-work page was built from today's registers
+        run: pnpm gate:tasks
 
       # docs/decisions.json indexes every decision record, and holds the two
       # links that make an open one answerable by somebody who has never opened
@@ -485,6 +520,10 @@ jobs:
         run: |
           test -s site/index.html || {
             echo "::error::downloaded artifact has no index.html — refusing to publish an empty site"
+            exit 1
+          }
+          test -s site/docs/index.html || {
+            echo "::error::downloaded artifact has no docs/index.html — the design pages did not get staged (scripts/stage-docs.mjs)"
             exit 1
           }
 

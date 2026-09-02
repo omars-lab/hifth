@@ -1,6 +1,13 @@
 # Loop 3 — Diffs, share links, a11y pass
 
 **Status:** complete. **Date:** 2026-07-25.
+**Superseded in one part, 2026-08-16.** What this record calls the *token diff* — a table of
+twelve ayahs typed out by hand and split into shared and unshared pieces — no longer exists. The
+comparison it describes is still there and is better, but it is now drawn out of the printed page
+itself rather than from typed text, so it covers 2,544 look-alike pairs instead of twelve and
+shows the reader the same letters the page under it shows. The typed table was also the largest
+of the two places in this project holding running scripture, which is the reason it went. Nothing
+else in this record moved; it is left as written because it says what shipped that day.
 **Exit criterion (PLAN §Loop 3):** cold-opening a teacher link restores the exact view incl.
 trail; the screen reader announces ayahs and hops.
 **Result:** every spec-§7 link form cold-opens through the *same* select/navigateTo path a live

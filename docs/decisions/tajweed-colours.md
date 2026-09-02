@@ -1,15 +1,17 @@
 # Whose colours are they?
 
-**Status:** open. Nobody has chosen.
+**Status:** decided — **option B, with C offered behind an advanced setting**, by omar on
+2026-08-19.
 **Date opened:** 2026-08-08.
 **Asked as:** *"can we also enable a tajweed rule color coding page where readers can change
 the colors of tajweed rules"*.
 **The picture:** [`docs/design/tajweed-colours.html`](../design/tajweed-colours.html), built by
 `scripts/build-palette-options.mjs`, published at
-<https://claude.ai/code/artifact/74b37363-d082-45e7-9651-54c47c328844>.
-**Constrains and is constrained by:** [mark granularity](../design/sub-word-marks.md) — the
-question of whether the app paints a whole verse or the exact letter. That one decides how much
-of this one is even visible, and it is also open.
+<https://blog.bytesofpurpose.com/hifth/docs/design/tajweed-colours.html> (an earlier copy on another host: <https://claude.ai/code/artifact/74b37363-d082-45e7-9651-54c47c328844>).
+**Constrains and is constrained by:** [mark granularity](mark-granularity.md) — the question of
+whether the app paints a whole verse or the exact letter, decided the same day as this record,
+as **B: colour the exact letter**. That is what turns option C below from incoherent into an
+advanced surface rather than the default one; see "What decided it".
 
 ## The question
 
@@ -113,11 +115,10 @@ readable the day the generator does.
 
 ## What we have already decided that constrains it
 
-- **Mark granularity is open, and it dominates.** The app paints one tint per verse. Until that
-  changes, eighteen colours are mostly unpaintable and 620 verses have no answer. If that
-  question is settled as "colour the exact letter", C stops being a bad idea and becomes a
-  plausible one in a single change. Answering *this* record with C before that one is answered
-  would be building a picker for colours nobody can see.
+- **Mark granularity is decided, as of this same day, as "colour the exact letter."** The app
+  still paints one tint per verse until `mark-C` on the task board ships that. Until it does, C
+  stays an advanced setting a reader can turn on without yet seeing much from it — the ordering
+  this record settles, not a reason to have waited for `mark-C` to land first.
 - **Loop 6a settled that the colouring can be turned off entirely.** That control stays;
   everything here is about what happens when it is on.
 - **Colour is never the only carrier** (WCAG 1.4.1). Every group has a dash pattern and an
@@ -125,9 +126,36 @@ readable the day the generator does.
   two groups set to the identical colour and they are still separable, because the dash patterns
   and the marks are not part of what a reader would be editing. Whatever wins, they stay ours.
 
+## What decided it
+
+Not a fifth option — B and C both, at different depths. A reader gets a picker for the seven
+groups by default (B); the eighteen-rule picker (C) is there too, reached through an advanced
+or expert setting rather than offered as the first thing shown.
+
+Two of the four arguments against C below survive the granularity decision unchanged: the
+colours themselves do not fit — eighteen hues fanned as generously as is honest still produce
+pairs closer together than the closest pair in today's seven — and eighteen rule names in two
+languages is real weight to hand every reader by default. Those are why C is not the default.
+
+The other two do not survive it. "Most of them cannot be painted" and "620 verses have no
+answer" were both a fact about painting at verse granularity, where a colour has to win an
+entire ayah against whichever other rule is in it. Once the app paints at letter granularity —
+decided the same day, in [mark-granularity.md](mark-granularity.md) — a rule's colour shows
+wherever its own letter is, not wherever it happens to win a tie for the verse. The specific
+per-rule reach numbers in the table above stop being the right measure of C once that ships;
+they were never a measure of B, which is why B was never in question.
+
+So: B ships as the surface most readers see. C ships behind a setting most will never open,
+for the reader who already knows what `idghaam_mutajanisayn` is and wants to see it named. That
+reader exists — printed colour-coded mus'hafs teach a legend for exactly this — and hiding the
+control costs them nothing an advanced setting can't answer, while showing it to everyone by
+default would hand the majority eighteen names for a distinction most will never look for.
+Lands as `tj-5` on the task board; the eighteen-rule picker itself is unscoped until then.
+
 ## Why C is the one option this page argues against
 
-Not by preference — by picture and by arithmetic:
+Not by preference — by picture and by arithmetic. Written before mark granularity was decided;
+"What decided it" above says which of these four survive that.
 
 1. **The colours do not fit.** Fanning each family's hue in lightness and a little in hue, as
    generously as is honest, still produces **18 pairs closer together than the closest pair in
@@ -157,9 +185,7 @@ wrong instrument for it until the app paints smaller than a verse.
 
 ## What would change the answer
 
-- **Mark granularity settling as "colour the exact letter."** The big one — it is what makes C
-  coherent and what makes B's stakes higher.
-- **A hafiz naming one of our seven as wrong.** Would settle B versus D faster than anything on
+- **A hafiz naming one of our seven as wrong.** Would reopen B versus D faster than anything on
   the page.
 - **One report of a pair that genuinely cannot be separated.** That turns B from a preference
   into an accessibility fix, and then it should not wait behind anything.

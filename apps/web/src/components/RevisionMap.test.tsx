@@ -144,6 +144,76 @@ describe("RevisionMap", () => {
     expect(hizb2.getAttribute("aria-label")).toBe("الحزب ٢ · غير متوفّر في هذه النسخة");
   });
 
+  it("keys absent on a trimmed build, and drops the row when nothing is absent", async () => {
+    // The legend is a key to what is drawn, and "no paper here" is a treatment a
+    // full edition's picture never contains. On the trimmed fixture hizb 2 is
+    // absent, so the key earns its row; on a build that holds its whole span the
+    // row would be naming a state the reader cannot find on the grid, and the one
+    // thing this component refuses is a picture claiming more than the record.
+    const trimmed = render(
+      <RevisionMap
+        open
+        onClose={() => {}}
+        pages={[PAGE_7]}
+        edition={EDITION}
+        totalPages={604}
+        page={7}
+        onGoToPage={() => {}}
+        today={TODAY}
+      />,
+    );
+    await waitFor(() => {
+      if (trimmed.container.querySelectorAll("[data-state]").length === 0)
+        throw new Error("not drawn yet");
+    });
+    expect(trimmed.queryByText("غير متوفّر في هذه النسخة")).toBeTruthy();
+    trimmed.unmount();
+
+    // A whole edition of one page: page scope, one page held, one cell, span one,
+    // so `held.size` meets the span and nothing on the grid is absent.
+    const whole = render(
+      <RevisionMap
+        open
+        onClose={() => {}}
+        openAt="page"
+        pages={[page(1, 1, 1, 7)]}
+        edition={EDITION}
+        totalPages={1}
+        page={1}
+        onGoToPage={() => {}}
+        today={TODAY}
+      />,
+    );
+    await waitFor(() => {
+      if (whole.container.querySelectorAll("[data-state]").length === 0)
+        throw new Error("not drawn yet");
+    });
+    expect(whole.queryByText("غير متوفّر في هذه النسخة")).toBeNull();
+  });
+
+  it("draws each cell's number, absent ones included, in the scope's own digits", async () => {
+    // The number is what ends the counting-from-a-corner a grid of identical
+    // squares forces. A hizb number takes the Arabic-Indic digits of the Arabic
+    // chrome; an absent cell shows its number too, so an unheld division can
+    // still be found by eye. The glyph is `aria-hidden` — the cell's aria-label
+    // already says the number in a sentence — so it is read off `textContent`.
+    draw();
+    const grid = await cells();
+    expect(grid[0]!.textContent).toBe("١"); // hizb 1, present
+    expect(grid[1]!.textContent).toBe("٢"); // hizb 2, absent, still numbered
+    expect(grid[11]!.textContent).toBe("١٢"); // two Arabic-Indic digits
+  });
+
+  it("numbers page-scope cells in Latin, the way a page number is read off the corner", async () => {
+    // `pageN`'s rule, applied to the cell: a page number is Latin in both
+    // languages because it is read off the printed page's corner, unlike a hizb
+    // or juz number which follows the chrome. Page 7 is the one the fixture holds.
+    draw({ openAt: "page" });
+    const grid = await cells();
+    expect(grid[6]!.getAttribute("data-state")).toBe("cold");
+    expect(grid[6]!.textContent).toBe("7");
+  });
+
   it("counts the inventory, not the book", async () => {
     // PageSlider's precedent, one division coarser: the grid spans the print and
     // the count says how much of it is actually here.
@@ -166,7 +236,7 @@ describe("RevisionMap", () => {
     // is visibly a *young* record.
     await recordLook({ key: `quran/${EDITION}/2:30`, page: 7 }, at("2026-03-18T12:00:00Z"));
     draw();
-    expect(await screen.findByText("يُسجَّل منذ ٢٠٢٦-٠٣-١٨")).toBeTruthy();
+    expect(await screen.findByText("نشِط منذ ١٨ مارس ٢٠٢٦")).toBeTruthy();
   });
 
   it("warms a division by when it was last opened, and says the number out loud", async () => {
@@ -180,6 +250,39 @@ describe("RevisionMap", () => {
     // label because the ramp is not available to a screen reader.
     expect(grid[0]!.getAttribute("data-warmth")).toBe("3");
     expect(grid[0]!.getAttribute("aria-label")).toBe("الحزب ١ · فُتح قبل ٢ يومًا");
+  });
+
+  it("scopes the colouring to a calendar month, and cools what falls outside it", async () => {
+    // A look last month — TODAY is the 20th of March, so this lands in February.
+    // Under "all time" it warms hizb 1; under "this month" nothing in March
+    // opened it, so it cools; under "last month" it warms again. The squares do
+    // not move — only which looks the warmth is drawn from.
+    await recordLook({ key: `quran/${EDITION}/2:30`, page: 7 }, at("2026-02-10T12:00:00Z"));
+    draw();
+    const grid = await cells();
+    await waitFor(() => {
+      expect(grid[0]!.getAttribute("data-state")).toBe("seen");
+    });
+
+    fireEvent.click(screen.getByRole("radio", { name: "هذا الشهر" }));
+    await waitFor(() => {
+      expect(grid[0]!.getAttribute("data-state")).toBe("cold");
+    });
+    // The line no longer dates the record — it names the window the picture is of.
+    expect(screen.getByText("نشاط مارس ٢٠٢٦")).toBeTruthy();
+
+    fireEvent.click(screen.getByRole("radio", { name: "الشهر الماضي" }));
+    await waitFor(() => {
+      expect(grid[0]!.getAttribute("data-state")).toBe("seen");
+    });
+    expect(screen.getByText("نشاط فبراير ٢٠٢٦")).toBeTruthy();
+
+    // Back to the whole record, and the line dates the record again.
+    fireEvent.click(screen.getByRole("radio", { name: "كل الوقت" }));
+    await waitFor(() => {
+      expect(grid[0]!.getAttribute("data-state")).toBe("seen");
+    });
+    expect(screen.getByText(/^نشِط منذ/)).toBeTruthy();
   });
 
   it("marks where the reader is standing without overwriting what the cell says", async () => {

@@ -39,12 +39,16 @@ export const SEVERITIES = ["defect", "question", "risk"];
 /** Worst first — the order `make issues` and docs/issues.md both present. */
 export const STATUS_ORDER = ["confirmed", "suspected", "open", "blocked", "answered", "fixed"];
 
-// U+2460..U+2473. The list is written out rather than built from a code-point
-// range so that a marker nobody can type is never silently legal — and it runs
-// to ⑳ rather than to whatever the largest register currently uses, because the
-// failure when it does not is a gate saying "docs/backlog.md has no ⑯ row"
-// about a row that is plainly there, which reads as a doc bug and is not one.
-const MARKERS = "①②③④⑤⑥⑦⑧⑨⑩⑪⑫⑬⑭⑮⑯⑰⑱⑲⑳";
+// U+2460..U+2473 for ①–⑳, then U+3251..U+325F for ㉑–㉟. The list is written out
+// rather than built from a code-point range so that a marker nobody can type is
+// never silently legal — and it runs past whatever the largest register
+// currently uses, because the failure when it does not is a gate saying
+// "docs/backlog.md has no ⑯ row" about a row that is plainly there, which reads
+// as a doc bug and is not one. Extended to ㉟ on 2026-08-17, when the mark
+// registration document reached ⑳ and hit exactly that wall: the twenty circled
+// digits are one Unicode block and the next fifteen are a different one, so the
+// ceiling was the block boundary rather than any decision anybody made.
+const MARKERS = "①②③④⑤⑥⑦⑧⑨⑩⑪⑫⑬⑭⑮⑯⑰⑱⑲⑳㉑㉒㉓㉔㉕㉖㉗㉘㉙㉚㉛㉜㉝㉞㉟";
 const ITEM = new RegExp(`^### ([${MARKERS}])\\s+(.*?)\\s+·\\s+\\*\\*(\\w+)\\*\\*\\s*$`);
 
 export function readIssues() {
@@ -122,6 +126,76 @@ export function planItems() {
     items.set(m[1], { title, line: i + 1 });
   }
   return items;
+}
+
+/**
+ * A GitHub heading anchor for a register item's own heading, so a reader lands
+ * on the item and not merely on the file.
+ *
+ * Transcribed from what GitHub actually emits, because guessing gets it wrong.
+ * Checked against the rendered anchors on the published copy of
+ * page-turning.md, where `### ⑧ Dead CSS: the page fade-in never runs ·
+ * **confirmed**` carries the id
+ *
+ *     -dead-css-the-page-fade-in-never-runs--confirmed
+ *
+ * Three things that reads out, none of them obvious:
+ *   - the circled marker is DROPPED. It is Unicode category No, and github's
+ *     slugger keeps only letters and decimal digits — so an anchor built on
+ *     `\p{N}` (which includes No) keeps the marker and matches nothing.
+ *   - stripping happens IN PLACE and spaces are hyphenated afterwards, so the
+ *     space the marker left behind becomes a *leading* hyphen, and the ` · `
+ *     separator becomes a double one. Trimming or collapsing breaks both.
+ *   - the hyphen in "fade-in" survives; only the added ones come from spaces.
+ *
+ * This lives here rather than in a renderer because two pages now link the same
+ * items, and three lines of Unicode-class trivia reproduced in two files is a
+ * pair that agrees today and silently stops agreeing the day GitHub changes.
+ */
+export const anchor = (heading) =>
+  heading
+    .toLowerCase()
+    .replace(/[^\p{L}\p{Nd}_\- ]/gu, "")
+    .replace(/ /g, "-");
+
+/**
+ * Builds the title-and-href resolver every rendered page uses: given an entry,
+ * where does a reader go to read the thing itself, and what is it called?
+ *
+ * The title is never stored in issues.json — it is read out of the owning
+ * document at build time, which is the whole discipline of the catalog. Pass
+ * the ledger's checks keyed by id so a check's title comes from the ledger
+ * rather than from its bare identifier.
+ *
+ * Hrefs are relative to `docs/`, because every page that calls this is written
+ * there. Each register file is parsed once per build however many entries point
+ * into it.
+ */
+export function linker(ledgerById = new Map()) {
+  const sections = new Map();
+  const items = (file) => {
+    if (!sections.has(file)) sections.set(file, sectionItems(file));
+    return sections.get(file);
+  };
+  const plan = planItems() ?? new Map();
+
+  return function link(i) {
+    const s = i.source;
+    if (s.ledger) {
+      return [ledgerById.get(s.ledger)?.title ?? s.ledger, `validation/ledger.json`];
+    }
+    const rel = s.file.replace(/^docs\//, "");
+    if (s.file.endsWith("PLAN.md")) {
+      return [plan.get(s.item)?.title ?? "?", `${rel}#open-follow-ups`];
+    }
+    const it = items(s.file)?.get(s.item);
+    // Reassembled verbatim, separator and asterisks included: the anchor is a
+    // function of the whole heading line, and ` · ` is what produces the double
+    // hyphen before the status. Passing the parts joined by single spaces would
+    // build an anchor that is right in every character except that one.
+    const heading = `${s.item} ${it?.title ?? ""} · **${it?.status ?? ""}**`;
+    return [it?.title ?? "?", `${rel}#${anchor(heading)}`];
+  };
 }
 
 /** Where an entry points, as a display string. */

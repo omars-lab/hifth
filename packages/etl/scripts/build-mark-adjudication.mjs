@@ -26,14 +26,27 @@
  * ## Running it
  *
  *   node packages/etl/scripts/build-mark-adjudication.mjs [--count 100] [--seed 11]
+ *   … [--shift <file>] [--exclude <file,file>] [--pages <n>]
  *
  * Then open the page it names, work it, and save the ruling it offers at the
  * end. Score it with `score-mark-adjudication.mjs`.
+ *
+ * ## Why it can be narrowed to a set of pages
+ *
+ * A trial cannot be built for a page with no proposed move, so for as long as the
+ * measurement covered forty pages, every question this page could ask came from
+ * one of the forty the correction was fitted to. A hundred of those is a very
+ * precise answer about training pages, and it is the same limitation that turned
+ * out to be the largest one over on the placing session — which is where
+ * `selectPages` was written, and this is the second consumer it was written for.
+ * `--exclude` holds out the pages an earlier fit or an earlier sitting used and
+ * `--pages` says how many of the rest to keep; both default to nothing, which is
+ * exactly the behaviour every session banked before them.
  */
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { planSession, readers, windowFor } from "./lib/adjudication.mjs";
+import { planSession, readers, selectPages, windowFor } from "./lib/adjudication.mjs";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const ETL = join(HERE, "..");
@@ -51,8 +64,42 @@ const outPath = arg("--out", join(ETL, "out", "mark-adjudication.html"));
 /** How wide a panel is drawn, in pixels. Big enough that a unit is not a hair. */
 const PANEL = Number(arg("--panel", 420));
 
+/**
+ * Which pages this session may ask about: hold some out, keep this many of what
+ * is left.
+ *
+ * `--spread` is passed through rather than fixed because the two sessions want
+ * different things from the same function. The placing session wants the ends of
+ * the range, since leverage on the correction's *size* is the only thing that
+ * makes a residual mean anything. This one only ever asks which of two rectangles
+ * is closer, so nothing here is estimated from how far apart the proposed moves
+ * are — what it wants is pages nobody has looked at, spread across the print
+ * rather than bunched at its extremes. Hence `even` by default, and the flag for
+ * anyone who wants to argue with that.
+ */
+const excludePath = arg("--exclude", null);
+const pagesWanted = Number(arg("--pages", 0));
+const spread = arg("--spread", "even");
+
 const shiftText = readFileSync(shiftPath, "utf8");
 const shift = JSON.parse(shiftText);
+
+const excludeFiles = excludePath ? excludePath.split(",").filter(Boolean) : [];
+const excluded = excludeFiles.flatMap((f) => JSON.parse(readFileSync(f, "utf8")).shifts.map((s) => s.page));
+const chosen = selectPages({ shifts: shift.shifts, exclude: excluded, pages: pagesWanted, spread });
+const byPage = new Map(shift.shifts.map((s) => [s.page, s]));
+const shifts = chosen.map((p) => byPage.get(p));
+if (excludePath || pagesWanted > 0) {
+  if (!chosen.length) {
+    process.stderr.write(`no pages left after excluding ${excluded.length} of ${shift.shifts.length}\n`);
+    process.exit(2);
+  }
+  const heldOut = excluded.filter((p) => byPage.has(p)).length;
+  process.stderr.write(
+    `pages: ${chosen.length} of ${shift.shifts.length} measured` +
+      `${heldOut ? `, ${heldOut} held out` : ""} · ${spread}\n`,
+  );
+}
 
 /**
  * A fingerprint of the displacements this session was built from.
@@ -120,7 +167,7 @@ function panel(trial, shapes, slot) {
 }
 
 const t0 = Date.now();
-const { trials, skippedForInk, pages } = planSession({ seed, count, shifts: shift.shifts });
+const { trials, skippedForInk, pages } = planSession({ seed, count, shifts });
 
 const inks = new Map();
 for (const p of new Set(trials.map((t) => t.page))) inks.set(p, readers.inkFor(p));
@@ -151,6 +198,33 @@ const head = {
   pages,
   shiftRan: shift.ran,
   shiftFingerprint: fingerprint(shiftText),
+  /**
+   * Which pages this build was allowed to ask about, and how that list was
+   * arrived at. Same field, same shape and the same load-bearing part as the
+   * placing session's: `of` is what the scorer replays.
+   *
+   * The scorer rebuilds every trial from the seed and the displacements. Narrow
+   * the displacements in one and not the other and each trial index lands on a
+   * different mark — the answers still resolve, the rates still print, and every
+   * one of them is about a question nobody was asked. There is no error to read,
+   * which is why the list travels rather than the recipe: replaying cannot drift
+   * the way re-running a selection can, and a later improvement to how pages are
+   * chosen must not re-score an hour somebody already sat.
+   *
+   * `heldOutFrom` is provenance rather than machinery, and it is the thing worth
+   * being able to check afterwards: it names the file whose pages were removed,
+   * which is the whole difference between a session that tests the correction and
+   * one that admires it.
+   */
+  select: {
+    of: chosen,
+    /** The list in eight characters, so it can go in the browser's resume key. */
+    fp: fingerprint(chosen.join(",")),
+    strategy: pagesWanted > 0 ? spread : "all",
+    heldOutFrom: excludeFiles.map((f) => f.split("/").pop()),
+    heldOut: excluded.length,
+    measured: shift.shifts.length,
+  },
   /**
    * What this build of the page asked for, so a ruling can say which questions it
    * was in a position to answer.
@@ -270,7 +344,18 @@ that built this page.</p>
 <script id="head" type="application/json">${JSON.stringify(head)}</script>
 <script>
 const HEAD = JSON.parse(document.getElementById("head").textContent);
-const KEY = "hifth.adjudication." + HEAD.seed + "." + HEAD.shiftFingerprint;
+// The pages are in the key alongside the seed and the displacements, because two
+// builds that agree on those two and disagree on which pages they drew from are
+// different sessions with the same name. Sharing a key means the second resumes
+// into the first's answers and staples them onto a trial list nobody was shown.
+const KEY = "hifth.adjudication." + HEAD.seed + "." + HEAD.shiftFingerprint + "." + HEAD.select.fp;
+// And in the file name, for the milder version of the same problem. Two narrowed
+// sittings under one seed both arrive in a downloads folder called the same thing,
+// where the browser quietly appends a number and the person is left holding two
+// files that differ in a way nothing on the outside of them shows. A sitting that
+// took every measured page keeps the old plain name, because it is the old thing.
+const NAME = "mark-ruling-" + HEAD.seed
+  + (HEAD.select.strategy === "all" ? "" : "." + HEAD.select.fp) + ".json";
 const cards = [...document.querySelectorAll(".trial")];
 const work = document.getElementById("work");
 const intro = document.getElementById("intro");
@@ -362,7 +447,7 @@ function bank() {
   if (!SINK || banked) return;
   banked = true;
   const el = document.getElementById("banked");
-  SINK.artifact("mark-ruling-" + HEAD.seed + ".json",
+  SINK.artifact(NAME,
                 { ...HEAD, finished: new Date().toISOString(), answers })
     .then((r) => {
       el.hidden = false;
@@ -395,7 +480,7 @@ document.getElementById("save").onclick = () => {
                         { type: "application/json" });
   const a = document.createElement("a");
   a.href = URL.createObjectURL(blob);
-  a.download = "mark-ruling-" + HEAD.seed + ".json";
+  a.download = NAME;
   a.click();
   URL.revokeObjectURL(a.href);
 };
@@ -407,8 +492,24 @@ else if (at >= cards.length && answers.length) render();
 mkdirSync(dirname(outPath), { recursive: true });
 writeFileSync(outPath, html);
 
+/**
+ * What this build chose, in the shape `--exclude` reads — the same companion the
+ * placing page writes, for the same two reasons.
+ *
+ * A later session has to be able to hold these pages out, and the only way to
+ * hold out a set of pages is to have them in a file. And it is a record in its
+ * own right: which pages an hour of somebody's attention was spent on, readable
+ * without opening a megabyte of HTML that is mostly ink.
+ */
+const pagesPath = outPath.replace(/\.html$/, "") + ".pages.json";
+writeFileSync(
+  pagesPath,
+  `${JSON.stringify({ built: head.built, seed, of: shiftPath.split("/").pop(), shifts }, null, 2)}\n`,
+);
+
 process.stdout.write(
   `${trials.length} trials over ${pages} pages · seed ${seed} · displacements ${shift.ran} (${head.shiftFingerprint})\n` +
     `${skippedForInk} marks passed over for too little ink under the corrected box\n` +
-    `${(html.length / 1e6).toFixed(1)} MB in ${((Date.now() - t0) / 1000).toFixed(1)}s → ${outPath}\n`,
+    `${(html.length / 1e6).toFixed(1)} MB in ${((Date.now() - t0) / 1000).toFixed(1)}s → ${outPath}\n` +
+    `the ${chosen.length} pages it was built over → ${pagesPath}\n`,
 );

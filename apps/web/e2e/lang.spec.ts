@@ -38,6 +38,20 @@ test.describe("Hifth · language", () => {
     await expect(page.getByRole("button", { name: /About Hifth/ })).toBeVisible();
     await expect(page.getByRole("button", { name: /^Go to/ })).toBeVisible();
     await expect(page.locator("header")).toContainText("Page");
+
+    // The wordmark speaks English too. It used to be pinned to «حفظ · مِلاحة
+    // للحُفّاظ» in both languages — a decision this feature reverses, because the
+    // wordmark is chrome and the note under the language switch already promises
+    // only the mus'haf and the verse text stay Arabic. The name is a name, so
+    // the English is its transliteration — the same "Hifth" the colophon uses in
+    // prose — not a translation. `.mark` is `aria-hidden`, so it is reached by
+    // text rather than by role; the About button above already carries the name
+    // to a screen reader.
+    const brand = page.getByRole("button", { name: /About Hifth/ });
+    await expect(brand).toContainText("Hifth");
+    await expect(brand).toContainText("Navigation for huffaz");
+    // And it is not the Arabic wordmark hiding behind an English chrome.
+    await expect(page.locator("header")).not.toContainText("حفظ");
   });
 
   test("the mus'haf, the rail, the trail and the page bar stay right-to-left", async ({

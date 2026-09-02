@@ -1,0 +1,62 @@
+{"t":"2026-08-13T21:06:45.323Z","kind":"session","check":"placement-what-kind-of-wrong","title":"What kind of wrong — the marks nothing can place, named one at a time instead of counted","commit":"5020b41","on":"darwin node 20.19.4","stepsTotal":13}
+{"t":"2026-08-13T21:45:25.486Z","kind":"report","tool":true,"payload":{"kind":"looks-right","id":"7:575","page":7,"line":15,"name":"successive dammatan","rule":"ink"}}
+{"t":"2026-08-13T21:45:28.960Z","kind":"report","tool":true,"payload":{"kind":"looks-right","id":"10:509","page":10,"line":15,"name":"hamza","rule":"ink"}}
+{"t":"2026-08-13T21:45:31.980Z","kind":"report","tool":true,"payload":{"kind":"looks-right","id":"19:382","page":19,"line":10,"name":"kasra","rule":"ink"}}
+{"t":"2026-08-13T21:45:34.733Z","kind":"report","tool":true,"payload":{"kind":"looks-right","id":"20:12","page":20,"line":1,"name":"superscript alef","rule":"ink"}}
+{"t":"2026-08-13T21:45:35.995Z","kind":"report","tool":true,"payload":{"kind":"looks-right","id":"20:74","page":20,"line":2,"name":"sukun","rule":"ink"}}
+{"t":"2026-08-13T21:45:36.838Z","kind":"report","tool":true,"payload":{"kind":"looks-right","id":"23:337","page":23,"line":10,"name":"sukun","rule":"ink"}}
+{"t":"2026-08-13T21:45:39.982Z","kind":"report","tool":true,"payload":{"kind":"looks-right","id":"29:502","page":29,"line":14,"name":"shadda","rule":"ink"}}
+{"t":"2026-08-13T21:45:41.038Z","kind":"report","tool":true,"payload":{"kind":"looks-right","id":"39:66","page":39,"line":2,"name":"kasra","rule":"ink"}}
+{"t":"2026-08-13T21:45:42.930Z","kind":"report","tool":true,"payload":{"kind":"looks-right","id":"53:462","page":53,"line":13,"name":"wasla","rule":"ink"}}
+{"t":"2026-08-13T21:45:43.837Z","kind":"report","tool":true,"payload":{"kind":"looks-right","id":"74:340","page":74,"line":10,"name":"fatha","rule":"ink"}}
+{"t":"2026-08-13T21:45:44.727Z","kind":"report","tool":true,"payload":{"kind":"looks-right","id":"84:182","page":84,"line":6,"name":"successive fathatan","rule":"ink"}}
+{"t":"2026-08-13T21:45:45.425Z","kind":"report","tool":true,"payload":{"kind":"looks-right","id":"102:539","page":102,"line":15,"name":"fatha","rule":"ink"}}
+{"t":"2026-08-13T21:45:46.834Z","kind":"report","tool":true,"payload":{"kind":"looks-right","id":"106:215","page":106,"line":8,"name":"sukun","rule":"ink"}}
+{"t":"2026-08-13T21:45:48.378Z","kind":"report","tool":true,"payload":{"kind":"looks-right","id":"108:323","page":108,"line":10,"name":"fatha","rule":"ink"}}
+{"t":"2026-08-13T21:45:49.416Z","kind":"report","tool":true,"payload":{"kind":"looks-right","id":"115:92","page":115,"line":3,"name":"kasra","rule":"ink"}}
+{"t":"2026-08-13T21:45:50.308Z","kind":"report","tool":true,"payload":{"kind":"looks-right","id":"126:305","page":126,"line":9,"name":"fatha","rule":"ink"}}
+{"t":"2026-08-13T21:45:50.949Z","kind":"report","tool":true,"payload":{"kind":"looks-right","id":"135:251","page":135,"line":7,"name":"fatha","rule":"ink"}}
+{"t":"2026-08-13T21:45:52.022Z","kind":"report","tool":true,"payload":{"kind":"looks-right","id":"154:215","page":154,"line":6,"name":"wasla","rule":"ink"}}
+{"t":"2026-08-13T21:45:53.097Z","kind":"report","tool":true,"payload":{"kind":"looks-right","id":"161:21","page":161,"line":1,"name":"damma","rule":"ink"}}
+{"t":"2026-08-13T21:45:54.311Z","kind":"report","tool":true,"payload":{"kind":"looks-right","id":"162:301","page":162,"line":8,"name":"sukun","rule":"ink"}}
+{"t":"2026-08-13T21:45:56.450Z","kind":"report","tool":true,"payload":{"kind":"looks-right","id":"221:481","page":221,"line":15,"name":"damma","rule":"ink"}}
+{"t":"2026-08-13T21:45:57.445Z","kind":"report","tool":true,"payload":{"kind":"looks-right","id":"232:509","page":232,"line":15,"name":"sukun","rule":"ink"}}
+{"t":"2026-08-13T21:45:58.683Z","kind":"report","tool":true,"payload":{"kind":"looks-right","id":"241:308","page":241,"line":8,"name":"small meem","rule":"ink"}}
+{"t":"2026-08-13T21:45:59.868Z","kind":"report","tool":true,"payload":{"kind":"looks-right","id":"249:43","page":249,"line":4,"name":"superscript alef","rule":"ink"}}
+{"t":"2026-08-13T21:46:00.966Z","kind":"report","tool":true,"payload":{"kind":"looks-right","id":"250:414","page":250,"line":12,"name":"wasla","rule":"ink"}}
+{"t":"2026-08-13T21:46:01.784Z","kind":"report","tool":true,"payload":{"kind":"looks-right","id":"252:512","page":252,"line":13,"name":"fatha","rule":"ink"}}
+{"t":"2026-08-13T21:46:02.521Z","kind":"report","tool":true,"payload":{"kind":"looks-right","id":"256:295","page":256,"line":10,"name":"fatha","rule":"ink"}}
+{"t":"2026-08-13T21:46:03.104Z","kind":"report","tool":true,"payload":{"kind":"looks-right","id":"267:217","page":267,"line":9,"name":"kasra","rule":"ink"}}
+{"t":"2026-08-13T21:46:03.868Z","kind":"report","tool":true,"payload":{"kind":"looks-right","id":"287:283","page":287,"line":8,"name":"fatha","rule":"ink"}}
+{"t":"2026-08-13T21:46:04.686Z","kind":"report","tool":true,"payload":{"kind":"looks-right","id":"301:359","page":301,"line":10,"name":"sukun","rule":"ink"}}
+{"t":"2026-08-13T21:46:06.844Z","kind":"report","tool":true,"payload":{"kind":"looks-right","id":"320:74","page":320,"line":3,"name":"hamza","rule":"ink"}}
+{"t":"2026-08-13T21:46:07.783Z","kind":"report","tool":true,"payload":{"kind":"looks-right","id":"323:51","page":323,"line":2,"name":"fatha","rule":"ink"}}
+{"t":"2026-08-13T21:46:08.565Z","kind":"report","tool":true,"payload":{"kind":"looks-right","id":"338:442","page":338,"line":12,"name":"kasra","rule":"ink"}}
+{"t":"2026-08-13T21:46:09.575Z","kind":"report","tool":true,"payload":{"kind":"looks-right","id":"370:329","page":370,"line":10,"name":"sukun","rule":"ink"}}
+{"t":"2026-08-13T21:46:10.284Z","kind":"report","tool":true,"payload":{"kind":"looks-right","id":"371:164","page":371,"line":5,"name":"sukun","rule":"ink"}}
+{"t":"2026-08-13T21:46:11.300Z","kind":"report","tool":true,"payload":{"kind":"looks-right","id":"383:96","page":383,"line":3,"name":"superscript alef","rule":"ink"}}
+{"t":"2026-08-13T21:46:12.521Z","kind":"report","tool":true,"payload":{"kind":"looks-right","id":"390:70","page":390,"line":2,"name":"fatha","rule":"ink"}}
+{"t":"2026-08-13T21:46:13.680Z","kind":"report","tool":true,"payload":{"kind":"looks-right","id":"407:280","page":407,"line":8,"name":"hamza","rule":"ink"}}
+{"t":"2026-08-13T21:46:15.080Z","kind":"report","tool":true,"payload":{"kind":"looks-right","id":"420:396","page":420,"line":10,"name":"fatha","rule":"ink"}}
+{"t":"2026-08-13T21:46:16.278Z","kind":"report","tool":true,"payload":{"kind":"looks-right","id":"423:589","page":423,"line":15,"name":"successive fathatan","rule":"ink"}}
+{"t":"2026-08-13T21:46:17.254Z","kind":"report","tool":true,"payload":{"kind":"looks-right","id":"425:349","page":425,"line":10,"name":"fatha","rule":"ink"}}
+{"t":"2026-08-13T21:46:18.268Z","kind":"report","tool":true,"payload":{"kind":"looks-right","id":"435:2","page":435,"line":1,"name":"kasra","rule":"ink"}}
+{"t":"2026-08-13T21:46:19.472Z","kind":"report","tool":true,"payload":{"kind":"looks-right","id":"437:270","page":437,"line":8,"name":"fatha","rule":"ink"}}
+{"t":"2026-08-13T21:46:20.263Z","kind":"report","tool":true,"payload":{"kind":"looks-right","id":"454:441","page":454,"line":11,"name":"damma","rule":"ink"}}
+{"t":"2026-08-13T21:46:21.245Z","kind":"report","tool":true,"payload":{"kind":"looks-right","id":"494:348","page":494,"line":10,"name":"shadda","rule":"ink"}}
+{"t":"2026-08-13T21:46:23.418Z","kind":"report","tool":true,"payload":{"kind":"looks-right","id":"499:337","page":499,"line":10,"name":"damma","rule":"ink"}}
+{"t":"2026-08-13T21:46:24.608Z","kind":"report","tool":true,"payload":{"kind":"looks-right","id":"512:27","page":512,"line":1,"name":"fatha","rule":"ink"}}
+{"t":"2026-08-13T21:46:26.060Z","kind":"report","tool":true,"payload":{"kind":"looks-right","id":"512:67","page":512,"line":2,"name":"fatha","rule":"ink"}}
+{"t":"2026-08-13T21:46:27.093Z","kind":"report","tool":true,"payload":{"kind":"looks-right","id":"519:452","page":519,"line":12,"name":"fatha","rule":"ink"}}
+{"t":"2026-08-13T21:46:28.313Z","kind":"report","tool":true,"payload":{"kind":"looks-right","id":"525:519","page":525,"line":15,"name":"damma","rule":"ink"}}
+{"t":"2026-08-13T21:46:29.295Z","kind":"report","tool":true,"payload":{"kind":"looks-right","id":"535:326","page":535,"line":10,"name":"fatha","rule":"ink"}}
+{"t":"2026-08-13T21:46:30.208Z","kind":"report","tool":true,"payload":{"kind":"looks-right","id":"538:65","page":538,"line":2,"name":"fatha","rule":"ink"}}
+{"t":"2026-08-13T21:46:31.046Z","kind":"report","tool":true,"payload":{"kind":"looks-right","id":"546:50","page":546,"line":2,"name":"sukun","rule":"ink"}}
+{"t":"2026-08-13T21:46:32.005Z","kind":"report","tool":true,"payload":{"kind":"looks-right","id":"551:5","page":551,"line":1,"name":"shadda","rule":"ink"}}
+{"t":"2026-08-13T21:46:33.063Z","kind":"report","tool":true,"payload":{"kind":"looks-right","id":"561:445","page":561,"line":13,"name":"kasra","rule":"ink"}}
+{"t":"2026-08-13T21:46:33.689Z","kind":"report","tool":true,"payload":{"kind":"looks-right","id":"570:302","page":570,"line":10,"name":"fatha","rule":"ink"}}
+{"t":"2026-08-13T21:46:35.913Z","kind":"report","tool":true,"payload":{"kind":"looks-right","id":"584:320","page":584,"line":9,"name":"damma","rule":"ink"}}
+{"t":"2026-08-13T21:46:36.935Z","kind":"report","tool":true,"payload":{"kind":"looks-right","id":"586:356","page":586,"line":13,"name":"fatha","rule":"ink"}}
+{"t":"2026-08-13T21:46:37.834Z","kind":"report","tool":true,"payload":{"kind":"looks-right","id":"591:36","page":591,"line":3,"name":"kasra","rule":"ink"}}
+{"t":"2026-08-13T21:46:38.634Z","kind":"report","tool":true,"payload":{"kind":"looks-right","id":"591:43","page":591,"line":4,"name":"fatha","rule":"ink"}}
+{"t":"2026-08-13T21:46:39.975Z","kind":"artifact","name":"mark-report-placed.23.json","path":"packages/etl/out/mark-report-placed.23.json"}

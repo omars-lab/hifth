@@ -13,6 +13,14 @@
 
 .bar {
   --thumb: 22px;
+  /* How wide the *controls* are allowed to get. The bar's border and background
+     stay full-bleed (it is the bottom edge of the app); only the buttons, track
+     and inventory are held to this width so a wide desktop window does not
+     stretch the native range into a hairline the length of the screen
+     (`e2e/desktop.spec.ts`). ~960px, the width the desktop mocks drew the book
+     at, so the bar reads as belonging to the book above it rather than the
+     window around it. */
+  --controls-max: 60rem;
 
   display: grid;
   grid-template-columns: auto 1fr auto;
@@ -22,6 +30,20 @@
   padding-block-end: max(var(--space-1), env(safe-area-inset-bottom));
   border-block-start: 1px solid var(--hairline);
   background: var(--paper-raised);
+}
+
+/*
+ * Desktop: hold the controls to `--controls-max`, centred, by growing the
+ * horizontal padding rather than capping the bar — the hairline and paper stay
+ * edge-to-edge (the bar is the app's bottom chrome), and only the grid's three
+ * columns are pulled in. `max(...)` keeps the phone's `--space-3` gutter as the
+ * floor, so nothing changes below the width where the window first exceeds the
+ * cap. Same 900px breakpoint the rest of the desktop chrome uses.
+ */
+@media (min-width: 900px) {
+  .bar {
+    padding-inline: max(var(--space-3), calc((100% - var(--controls-max)) / 2));
+  }
 }
 
 /*
@@ -86,6 +108,30 @@
 }
 
 /*
+ * The native thumb is kept for its whole keyboard and assistive-technology
+ * contract, but not for its paint: the visible handle is the page icon drawn
+ * over it (`.handle`). So the thumb keeps the `--thumb` hit target the runs are
+ * measured against and turns transparent, and the reader grabs a leaf of the
+ * book instead of a browser puck. Both engines, because each names the thumb its
+ * own way and a rule for one is silently ignored by the other.
+ */
+.range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  inline-size: var(--thumb);
+  block-size: var(--thumb);
+  background: transparent;
+  border: none;
+}
+
+.range::-moz-range-thumb {
+  inline-size: var(--thumb);
+  block-size: var(--thumb);
+  background: transparent;
+  border: none;
+}
+
+/*
  * The vendored inventory, drawn over the rail — one bar per *run* of contiguous
  * held pages, positioned and sized by the component from each run's fractions
  * of the book; here it only says what a run looks like. `pointer-events: none`
@@ -128,6 +174,61 @@
 }
 
 /*
+ * The 30 juz, drawn as green detents — the coarse layer of the bar. Their own
+ * container, positioned like the inventory's, and taller than a run so the two
+ * layers read apart: the grey rail says which pages are here, the green ticks
+ * say which part of the book each stretch is. `pointer-events: none` so they
+ * never intercept a drag (the whole rail belongs to the thumb underneath).
+ */
+.juzRail {
+  position: absolute;
+  inset-inline: 0;
+  inset-block-start: 50%;
+  block-size: 0;
+  pointer-events: none;
+}
+
+.juz {
+  position: absolute;
+  inset-block-start: -9px;
+  inline-size: 2px;
+  block-size: 18px;
+  border-radius: 1px;
+  background: var(--accent);
+  opacity: 0.65;
+}
+
+/*
+ * The handle: a page icon over the invisible native thumb, centred on the same
+ * value. `pointer-events: none` so the drag stays the input's — the handle is
+ * paint, not a second control. Sized a touch beyond the thumb so the leaf reads
+ * clearly; a soft shadow lifts it off the rail and the ticks beneath it.
+ */
+.handle {
+  position: absolute;
+  inset-block-start: 50%;
+  inline-size: 26px;
+  block-size: 26px;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  color: var(--accent-strong);
+  filter: drop-shadow(0 1px 1px rgb(0 0 0 / 0.25));
+}
+
+/* Centring is a physical shift: `translateX(-50%)` moves left in both writing
+   directions, correct under LTR and half a handle adrift under RTL. The bar is
+   always RTL, but stating both keeps the rule visible if that ever changes. */
+.bar[dir="rtl"] .handle {
+  transform: translate(50%, -50%);
+}
+
+.handleIcon {
+  display: block;
+  inline-size: 100%;
+  block-size: 100%;
+}
+
+/*
  * The scrub readout. It floats above the thumb rather than sitting in the
  * header, because the header must keep naming the page the stage has actually
  * loaded — a header that follows the thumb claims a page that is not on screen,
@@ -157,6 +258,15 @@
    ever changes. */
 .bar[dir="rtl"] .bubble {
   transform: translateX(50%);
+}
+
+/* The juz · surah line — the book's landmarks for the page under the thumb. A
+   step down from the page number it sits under, and a hair dimmer, so the popover
+   reads as "page, then where that page is" rather than three equal facts. */
+.context {
+  color: var(--paper);
+  font-size: var(--text-xs);
+  opacity: 0.9;
 }
 
 .snap {

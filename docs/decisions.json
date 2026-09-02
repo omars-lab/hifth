@@ -68,9 +68,96 @@
   ],
   "decisions": [
     {
+      "id": "juz-detents",
+      "question": "When a reader lets go of the page bar near a juz marker, should the bar pull the page onto it?",
+      "status": "open",
+      "options": [
+        {
+          "id": "A",
+          "label": "A marker only marks"
+        },
+        {
+          "id": "B",
+          "label": "A marker pulls, a few pages either side"
+        },
+        {
+          "id": "C",
+          "label": "A marker is a button; the drag is unchanged"
+        }
+      ],
+      "artifact": "https://blog.bytesofpurpose.com/hifth/docs/design/page-bar-options.html",
+      "page": "docs/design/page-bar-options.html",
+      "builtBy": "scripts/build-page-bar-options.mjs",
+      "doc": "docs/decisions/page-bar.md#when-a-reader-lets-go-near-a-marker-should-the-bar-pull-the-page-onto-it",
+      "decided": null,
+      "by": null,
+      "date": null,
+      "related": [
+        "boundary-juz",
+        "desktop-vs-mobile"
+      ]
+    },
+    {
+      "id": "boundary-juz",
+      "question": "When a juz begins partway down a page, which juz is that page in?",
+      "status": "open",
+      "options": [
+        {
+          "id": "A",
+          "label": "The juz that begins on it"
+        },
+        {
+          "id": "B",
+          "label": "The juz that was already running"
+        },
+        {
+          "id": "C",
+          "label": "Both, on those four pages"
+        }
+      ],
+      "artifact": "https://blog.bytesofpurpose.com/hifth/docs/design/page-bar-options.html",
+      "page": "docs/design/page-bar-options.html",
+      "builtBy": "scripts/build-page-bar-options.mjs",
+      "doc": "docs/decisions/page-bar.md#when-a-juz-begins-partway-down-a-page-which-juz-is-that-page-in",
+      "decided": null,
+      "by": null,
+      "date": null,
+      "related": [
+        "juz-detents",
+        "desktop-vs-mobile"
+      ]
+    },
+    {
+      "id": "confusion-map-export",
+      "question": "Should a reader be able to copy their confusion map off the phone — and if so, by which means?",
+      "status": "open",
+      "options": [
+        {
+          "id": "A",
+          "label": "Keep it on the phone only"
+        },
+        {
+          "id": "B",
+          "label": "A file the reader saves and restores"
+        },
+        {
+          "id": "C",
+          "label": "A cloud-sync switch the reader controls"
+        }
+      ],
+      "artifact": "https://blog.bytesofpurpose.com/hifth/docs/design/confusion-map-export.html",
+      "page": "docs/design/confusion-map-export.html",
+      "builtBy": "scripts/build-confusion-export-options.mjs",
+      "doc": "docs/decisions/confusion-map-export.md",
+      "decided": null,
+      "by": null,
+      "date": null,
+      "related": []
+    },
+    {
       "id": "mark-granularity",
       "question": "Should the app colour tajweed one colour a verse, or should it colour the exact letter a rule lands on?",
-      "status": "open",
+      "status": "decided",
       "options": [
         {
           "id": "A",
@@ -85,23 +172,140 @@
           "label": "Prepare the ground, colour nothing yet"
         }
       ],
-      "artifact": "https://claude.ai/code/artifact/5f230dff-e4e8-40c6-9c4e-888786eeef9b",
+      "artifact": "https://blog.bytesofpurpose.com/hifth/docs/design/mark-granularity.html",
       "page": "docs/design/mark-granularity.html",
       "builtBy": "scripts/build-mark-options.mjs",
-      "doc": "docs/design/sub-word-marks.md",
+      "doc": "docs/decisions/mark-granularity.md",
+      "decided": "B",
+      "by": "omar",
+      "date": "2026-08-19",
+      "related": [
+        "word-selection",
+        "loop-6a",
+        "tajweed-colours",
+        "mark-placement"
+      ]
+    },
+    {
+      "id": "mark-placement",
+      "question": "Should the app line up what it draws one page at a time, or one printed line at a time?",
+      "status": "open",
+      "options": [
+        {
+          "id": "A",
+          "label": "Leave the rectangles where they are"
+        },
+        {
+          "id": "B",
+          "label": "Line each page up as a whole"
+        },
+        {
+          "id": "F",
+          "label": "Line each printed line up on its own, and let it tilt"
+        },
+        {
+          "id": "G",
+          "label": "Line the marks up, and leave the words where they are"
+        },
+        {
+          "id": "I",
+          "label": "Line each printed line up on its own, and let it bend"
+        },
+        {
+          "id": "H",
+          "label": "Put each mark where its own ink is, and line the rest up"
+        }
+      ],
+      "artifact": "https://blog.bytesofpurpose.com/hifth/docs/design/mark-placement.html",
+      "page": "docs/design/mark-placement.html",
+      "builtBy": "scripts/build-placement-options.mjs",
+      "doc": "docs/design/mark-registration.md",
       "decided": null,
       "by": null,
       "date": null,
       "related": [
+        "mark-granularity",
         "word-selection",
-        "loop-6a",
-        "tajweed-colours"
+        "comparison-crop",
+        "sitting-hosting"
+      ]
+    },
+    {
+      "id": "sitting-hosting",
+      "question": "When somebody sits down to check the app's rectangles against the printed page, where should those questions come from — a laptop at home, or a link they can open anywhere?",
+      "status": "decided",
+      "options": [
+        {
+          "id": "A",
+          "label": "Leave it as it is — one laptop hands out the sittings over a private network"
+        },
+        {
+          "id": "B",
+          "label": "Publish each sitting as a page, and hand the answers over at the end"
+        },
+        {
+          "id": "C",
+          "label": "Publish each sitting as a page, and let it bank each answer to a hosted table"
+        }
+      ],
+      "artifact": "https://blog.bytesofpurpose.com/hifth/docs/design/sitting-hosting.html",
+      "page": "docs/design/sitting-hosting.html",
+      "builtBy": "scripts/build-sitting-hosting-options.mjs",
+      "doc": "docs/decisions/sitting-hosting.md",
+      "decided": "A",
+      "by": "omar",
+      "date": "2026-08-17",
+      "related": [
+        "mark-placement"
+      ]
+    },
+    {
+      "id": "comparison-crop",
+      "question": "When the app shows a verse cut out of the printed page, what should it do about the neighbouring verses that come with it?",
+      "status": "decided",
+      "options": [
+        {
+          "id": "A",
+          "label": "Leave the crop as it is"
+        },
+        {
+          "id": "B",
+          "label": "Cut each line down to the verse's own words"
+        },
+        {
+          "id": "C",
+          "label": "Fade everything that is not this verse"
+        },
+        {
+          "id": "E",
+          "label": "Mark where the verse begins and ends"
+        },
+        {
+          "id": "D",
+          "label": "Mark the words the two verses share, as well as the ones they do not"
+        },
+        {
+          "id": "F",
+          "label": "Fade the neighbours, mark the shared words green and the differing words yellow"
+        }
+      ],
+      "artifact": "https://blog.bytesofpurpose.com/hifth/docs/design/comparison-crop.html",
+      "page": "docs/design/comparison-crop.html",
+      "builtBy": "scripts/build-crop-options.mjs",
+      "doc": "docs/decisions/comparison-crop.md",
+      "decided": "F",
+      "by": "omar",
+      "date": "2026-08-16",
+      "related": [
+        "mark-placement",
+        "word-selection",
+        "loop-4a"
       ]
     },
     {
       "id": "tajweed-colours",
       "question": "Should a reader be able to change the colours the app uses for recitation rules, and how many colours are there to change?",
-      "status": "open",
+      "status": "decided",
       "options": [
         {
           "id": "A",
@@ -120,13 +324,13 @@
           "label": "Offer a few ready-made schemes, no picker"
         }
       ],
-      "artifact": "https://claude.ai/code/artifact/74b37363-d082-45e7-9651-54c47c328844",
+      "artifact": "https://blog.bytesofpurpose.com/hifth/docs/design/tajweed-colours.html",
       "page": "docs/design/tajweed-colours.html",
       "builtBy": "scripts/build-palette-options.mjs",
       "doc": "docs/decisions/tajweed-colours.md",
-      "decided": null,
-      "by": null,
-      "date": null,
+      "decided": "B",
+      "by": "omar",
+      "date": "2026-08-19",
       "related": [
         "mark-granularity",
         "loop-6a"
@@ -138,7 +342,10 @@
       "status": "living",
       "doc": "docs/decisions/desktop-vs-mobile.md",
       "related": [
-        "wheel-and-zoom"
+        "wheel-and-zoom",
+        "spread-zoom",
+        "juz-detents",
+        "boundary-juz"
       ]
     },
     {
@@ -149,6 +356,34 @@
       "by": "omar",
       "date": "2026-08-06",
       "related": [
+        "desktop-vs-mobile",
+        "spread-zoom"
+      ]
+    },
+    {
+      "id": "spread-zoom",
+      "question": "When two pages are open, should the zoom buttons enlarge both pages together?",
+      "status": "decided",
+      "options": [
+        {
+          "id": "off",
+          "label": "Leave magnifying switched off while two pages show"
+        },
+        {
+          "id": "close-first",
+          "label": "Close to one page automatically, then magnify"
+        },
+        {
+          "id": "both",
+          "label": "Magnify both pages together, to the same size"
+        }
+      ],
+      "doc": "docs/decisions/spread-zoom.md",
+      "decided": "both",
+      "by": "omar",
+      "date": "2026-09-01",
+      "related": [
+        "wheel-and-zoom",
         "desktop-vs-mobile"
       ]
     },
@@ -173,7 +408,9 @@
       "date": "2026-08-04",
       "related": [
         "word-search",
-        "mark-granularity"
+        "mark-granularity",
+        "mark-placement",
+        "comparison-crop"
       ]
     },
     {
@@ -236,7 +473,8 @@
       "date": "2026-07-25",
       "related": [
         "loop-4b",
-        "word-search"
+        "word-search",
+        "comparison-crop"
       ]
     },
     {

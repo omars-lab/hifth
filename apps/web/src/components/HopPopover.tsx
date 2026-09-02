@@ -27,8 +27,9 @@ function focusables(root: HTMLElement): HTMLElement[] {
 /**
  * HopPopover — the bottom-sheet hop list (spec §9). Opened by a rail chip, it
  * lists that bucket's edges hifz-ordered (nearest first), each row a "hop there"
- * arc-arrow that expands to a token diff (spec §3) showing *why* the pair is
- * confusable. An un-vendored target shows its link + note but the leap is
+ * arc-arrow that expands to show *why* the pair is confusable (spec §3): both
+ * ayahs cropped out of the printed page, with the words they do not share
+ * washed. An un-vendored target shows its link + note but the leap is
  * disabled with an honest "page not available yet" (Plan Q6).
  *
  * A11y (Loop 3): a real modal dialog — focus moves in on open, Tab is trapped,
@@ -163,7 +164,7 @@ export function HopPopover({
                 </div>
                 {isOpen && fromKey && (
                   <div id={diffId}>
-                    <DiffView fromKey={fromKey} toKey={edge.to} />
+                    <DiffView edge={edge} fromKey={fromKey} />
                   </div>
                 )}
               </li>

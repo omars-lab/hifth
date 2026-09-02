@@ -32,8 +32,9 @@
  * `word-alignment.pin.json` joins the print's word index to the Quranic Arabic
  * Corpus's. Both were the named blockers and both are discharged. What is left
  * is specific to this file: the annotations below are codepoint offsets into
- * each ayah's Tanzil Uthmani text, and this repo holds no Quran text and will
- * not (see `morphology.mjs`). Turning an offset into a word means joining a
+ * each ayah's Tanzil Uthmani text, and nothing vendored here is that text (see
+ * `morphology.mjs` for the rule and `gate:scripture` for the check). Turning an
+ * offset into a word means joining a
  * third segmentation to the two we now have. `docs/design/word-indexing.md` ⑤
  * carries what would answer it and what it would cost — an ETL measurement,
  * not the rendering change this comment used to promise.

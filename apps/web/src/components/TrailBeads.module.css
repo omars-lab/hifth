@@ -10,7 +10,12 @@
   align-items: center;
   gap: var(--space-2);
   overflow-x: auto;
-  padding-block: var(--space-1);
+  /* No block padding. The beads are already `--touch-min` tall, and the footer
+     that holds this string reserves exactly that row plus its own block padding
+     (see App.module.css `.trail`). Adding padding here made this string taller
+     than the bead — 52px against 44px — so the populated bar outgrew the height
+     the empty bar reserves and the mus'haf jumped up on the first selection.
+     The footer's padding is the breathing room; this row just holds the beads. */
   padding-inline: var(--space-2);
   scrollbar-width: none;
 }
@@ -72,10 +77,18 @@
   white-space: nowrap;
 }
 
-/* The live bead — current ayah, amber like the on-page selection wash. */
+/* The live bead — current ayah, amber like the on-page selection wash.
+
+   The wash is deliberately translucent (it echoes the on-page selection, which
+   multiplies over scripture), and a translucent bead let the string behind it
+   show straight through the label — a hairline struck through the current
+   ayah's text. The other beads never showed it because their paper is opaque.
+   So the wash is composited over that same opaque paper here: the amber tint is
+   unchanged, but the bead now occludes the thread the way every other bead
+   does. A solid amber would have lost the wash's kinship with the selection. */
 .beadCurrent {
   border-color: var(--highlight-ring);
-  background: var(--highlight-wash);
+  background: linear-gradient(var(--highlight-wash), var(--highlight-wash)), var(--paper-raised);
   color: var(--ink);
 }
 

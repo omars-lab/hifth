@@ -185,7 +185,7 @@ test.describe("Hifth · the revision map", () => {
     // week. What it does pin is the invariant that makes that case survivable —
     // the map never renders an empty picture without saying how long it has been
     // recording.
-    await expect(sheet.getByText(/^يُسجَّل منذ ٢٠[٠-٩]{2}-[٠-٩]{2}-[٠-٩]{2}$/)).toBeVisible();
+    await expect(sheet.getByText(/^نشِط منذ [٠-٩]{1,2} \S+ ٢٠[٠-٩]{2}$/)).toBeVisible();
   });
 });
 
