@@ -109,6 +109,17 @@ in three places: this section (the record), the session task list (the working c
   page · juz · surah while dragging. With seven tests, `3a9396a`.
   Two calls were made without a record — whether a detent is a landmark or a magnet, and
   which juz a boundary page belongs to — and a decision is owed for the pair.
+- **The ayah's options rise over the facing leaf.** On a spread, each of the three sheets an
+  ayah can raise — the hop list, the highlighted passage's menu, the root lens — lands over
+  the leaf the ayah is *not* on, in either chrome language; a phone keeps its bottom sheet
+  and a book closed to one leaf keeps its corner card. Found by rendering rather than
+  reading: the card followed the chrome's direction, so in English every ayah on the
+  right-hand page raised its options over its own highlight, and the Arabic chrome hid the
+  same defect on the left-hand page. Guard: four rows in
+  [`desktop.spec.ts`](../apps/web/e2e/desktop.spec.ts) — the hop list and the passage menu
+  each land opposite the ayah for either leaf in both languages, neither leaf moves when a
+  sheet rises, and no side is named with one leaf or below the breakpoint. The rule is
+  written up in [`desktop.md`](design/desktop.md) §5.
 
 **Still open, worst-first:**
 
@@ -118,10 +129,6 @@ in three places: this section (the record), the session task list (the working c
   owner can settle it: reopen that record with a curl drawn that expresses all four fold
   states, or improve the turn inside the fold vocabulary it already has. **Blocked on that
   answer.** Interim: the grab plays the current flip on release.
-- **The ayah options on the facing leaf.** On a spread, selecting on one page should raise
-  its options on the other, so the menu never covers the ayah being worked on; the phone
-  keeps its bottom sheet. Tests owed: the drawer lands opposite for either side, and the
-  stage does not move on selection.
 - **A tafseer section** inside those options, with sourced text and its provenance checked.
   After the facing-leaf drawer.
 - **Comment-style mistake marking.** Zoom in, click a letter, a harakah or a marker, and

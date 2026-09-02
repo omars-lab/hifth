@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { wordDiff, type AppState, type MergedEdge } from "@hifth/core";
+import { wordDiff, type AppState, type LeafSide, type MergedEdge } from "@hifth/core";
 import { useT } from "../i18n";
 import { DiffView } from "./DiffView";
 import { ShareSheet } from "./ShareSheet";
@@ -20,6 +20,12 @@ interface HighlightMenuProps {
   onClear: () => void;
   /** Dismiss the menu, keeping the highlight. */
   onClose: () => void;
+  /**
+   * Which physical side of a wide screen the card lands on, or null for the
+   * chrome-direction default. On a spread the app passes the side of the leaf
+   * the ayah is *not* on, so the card never covers the ayah (desktop.md §5).
+   */
+  side?: LeafSide | null;
 }
 
 /** Focusable descendants of `root`, in tab order (excludes disabled + hidden). */
@@ -58,6 +64,7 @@ export function HighlightMenu({
   shareState,
   onClear,
   onClose,
+  side = null,
 }: HighlightMenuProps): JSX.Element | null {
   const { t, dir } = useT();
   const sheetRef = useRef<HTMLDivElement>(null);
@@ -121,6 +128,7 @@ export function HighlightMenu({
         aria-modal="true"
         aria-label={t.rangeAria(title, hops.length)}
         dir={dir}
+        data-side={side ?? undefined}
         tabIndex={-1}
         onKeyDown={onKeyDown}
       >

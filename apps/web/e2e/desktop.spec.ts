@@ -1275,6 +1275,127 @@ test.describe("Hifth · the trail bar holds its height", () => {
 });
 
 /*
+ * The ayah's sheets rise over the facing leaf.
+ *
+ * All three sheets an ayah can raise — the hop list a rail chip opens, the
+ * highlighted passage's menu, the root lens — are *about* one ayah, and on a
+ * wide screen each is a card pinned to a bottom corner. Which corner used to
+ * follow the chrome's direction (inline-end: the right in English, the left in
+ * Arabic). On a spread that is the wrong axis. The ayah sits on a physical side
+ * of the gutter whatever language the chrome reads in, and half the time the
+ * card landed on top of it — in English, every ayah on the right-hand page
+ * raised its options over itself, and the selection wash was the thing the card
+ * hid (triage item ⑤; docs/design/desktop.md §5). So the app names the side:
+ * the leaf the ayah is *not* on.
+ *
+ * Asserted in both languages, because the default that hid the defect in
+ * Arabic exposed it in English; and on geometry against the open book rather
+ * than on the attribute alone, since the attribute is only a claim about where
+ * the stylesheet will put the card.
+ */
+test.describe("Hifth · the ayah's sheets rise over the facing leaf", () => {
+  /** `LANG_STORAGE_KEY` in src/i18n.ts — set before the app boots. */
+  const LANG_KEY = "hifth.lang.v1";
+  /** Any rail chip; the hop list it opens is the sheet under test. */
+  const chip = (page: Page): Locator => page.locator("button[data-direction]").first();
+  const sheet = (page: Page): Locator => page.getByRole("dialog");
+
+  /** Which side of the gutter a box's centre falls on. */
+  async function sideOf(page: Page, target: Locator): Promise<"left" | "right"> {
+    const open = await boxOf(book(page));
+    const box = await boxOf(target);
+    return box.x + box.width / 2 < open.x + open.width / 2 ? "left" : "right";
+  }
+
+  for (const lang of ["ar", "en"] as const) {
+    test(`the hop list lands opposite the ayah, with the chrome in ${lang}`, async ({ page }) => {
+      await page.addInitScript((a) => localStorage.setItem(a.key, a.lang), { key: LANG_KEY, lang });
+      // 2:48 is the last ayah of page 7 — the right-hand leaf of the opening (7, 8).
+      await page.goto("/#/hafs-kfqc/2:48");
+      await expect(pageSvg(page, 7)).toBeVisible({ timeout: 20_000 });
+      await chip(page).click();
+      await expect(sheet(page)).toBeVisible();
+      expect(
+        await sideOf(page, sheet(page)),
+        "an ayah on the right leaf raises its sheet over the left one",
+      ).toBe("left");
+      expect(await sheet(page).getAttribute("data-side")).toBe("left");
+      await page.keyboard.press("Escape");
+      await expect(sheet(page)).toHaveCount(0);
+
+      // 2:49 opens page 8 — the left-hand leaf of the same opening.
+      await page.goto("/#/hafs-kfqc/2:49");
+      await expect(pageSvg(page, 8)).toBeVisible({ timeout: 20_000 });
+      await expect(page.locator(NUM)).toHaveText("8");
+      await chip(page).click();
+      await expect(sheet(page)).toBeVisible();
+      expect(
+        await sideOf(page, sheet(page)),
+        "an ayah on the left leaf raises its sheet over the right one",
+      ).toBe("right");
+      expect(await sheet(page).getAttribute("data-side")).toBe("right");
+    });
+
+    test(`the passage's menu lands opposite the passage, with the chrome in ${lang}`, async ({
+      page,
+    }) => {
+      await page.addInitScript((a) => localStorage.setItem(a.key, a.lang), { key: LANG_KEY, lang });
+      // A range link opens the menu on arrival (range.spec.ts), so no drag is needed.
+      await page.goto("/#/hafs-kfqc/2:47-2:48");
+      await expect(pageSvg(page, 7)).toBeVisible({ timeout: 20_000 });
+      await expect(sheet(page)).toBeVisible();
+      expect(await sideOf(page, sheet(page)), "a passage on the right leaf").toBe("left");
+
+      await page.goto("/#/hafs-kfqc/2:52-2:53");
+      await expect(page.locator(NUM)).toHaveText("8");
+      await expect(sheet(page)).toBeVisible();
+      expect(await sideOf(page, sheet(page)), "a passage on the left leaf").toBe("right");
+    });
+  }
+
+  test("raising a sheet moves neither leaf", async ({ page }) => {
+    // The card is fixed, not in flow, so the paper under it must not shift by a
+    // pixel when it rises — on either leaf, since the facing stage is a second
+    // layout the card could just as well have pushed.
+    await page.goto("/#/hafs-kfqc/2:48");
+    await expect(pageSvg(page, 7)).toBeVisible({ timeout: 20_000 });
+    const live = await restingBox(page, 7);
+    const facing = await restingBox(page, 8);
+    await chip(page).click();
+    await expect(sheet(page)).toBeVisible();
+    expect(await restingBox(page, 7), "the live leaf moved when the sheet rose").toEqual(live);
+    expect(await restingBox(page, 8), "the facing leaf moved when the sheet rose").toEqual(facing);
+  });
+
+  test("with one leaf, or on a phone, no side is named and the default stands", async ({
+    page,
+  }) => {
+    // Closed to one leaf there is no other leaf to land on; the card keeps the
+    // chrome-direction corner it always had (Arabic chrome here: the left).
+    await page.goto("/#/hafs-kfqc/2:48");
+    await expect(pageSvg(page, 7)).toBeVisible({ timeout: 20_000 });
+    await modeBtn(page, "one").click();
+    await expect(pageSvg(page, 8)).toHaveCount(0);
+    await chip(page).click();
+    await expect(sheet(page)).toBeVisible();
+    expect(await sheet(page).getAttribute("data-side")).toBeNull();
+    await page.keyboard.press("Escape");
+    await expect(sheet(page)).toHaveCount(0);
+
+    // Below the breakpoint the sheet is the phone's full-bleed bottom sheet,
+    // and a side would be a claim about a book that is not there.
+    await page.setViewportSize({ width: 390, height: 844 });
+    await expect(spread(page)).toHaveCount(0);
+    await chip(page).click();
+    await expect(sheet(page)).toBeVisible();
+    expect(await sheet(page).getAttribute("data-side")).toBeNull();
+    const box = await boxOf(sheet(page));
+    expect(box.x, "the phone sheet is full-bleed").toBe(0);
+    expect(box.width).toBe(390);
+  });
+});
+
+/*
  * A juz jump lands the two leaves level — with no flash of one sitting high.
  *
  * A jump to another juz is not a page turn: the live leaf relocates across many
