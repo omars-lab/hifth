@@ -1,8 +1,14 @@
 # Should a reader be able to pin their own note to a spot on the page, and to what?
 
-*Status: open, two questions. This record states them and draws the options; it does not
-choose. Both questions reopen a position the project has already taken, which only the owner
-can do.*
+*Status: both questions decided 2026-09-02 by the owner, who reopened the two positions to do
+it. A reader can pin a note down to **a single spot or mark** (D of the first question) — and,
+past what the options drew, to a **line, a page, or a structural break** (a juz's start, a
+hizb-quarter) as well. Notes are **aggregated into one file and shareable by default**, synced
+to the reader's cloud once there is sign-in (C of the second question, taking the
+[storage model](storage-model.md)). A **fourth kind of note — a question for scholars — is
+added** to the comment, the correction and the note to the developers. The options and reasoning
+below stand as drawn; the decision, the structural axis the options did not draw, and the new
+kind are gathered at the end.*
 
 **The picture:** <https://blog.bytesofpurpose.com/hifth/docs/design/mistake-marking-options.html> —
 `mistake-marking-options.html`, checked in and rebuilt by
@@ -190,3 +196,44 @@ a note layer is added: which kinds there are and whether any leaves the phone �
 (A), private plus a report the reader sends (B), or everything synced (C). The finer anchor and
 the note that leaves the phone are the two the app has already taken a position on, so both are
 the owner's to reopen.
+
+## What was decided (2026-09-02)
+
+The owner reopened both positions and answered.
+
+- **What a note pins to — D, the finest spot, and a structural axis the options did not draw.**
+  A reader can pin a note to a single mark — a pause sign now, from the mark boxes the word data
+  already flags; a letter or a harakah once the finer corpus ships, which the mark-granularity
+  decision already committed to *when the geometry exists*, so this inherits that timing rather
+  than reopening it. The owner then went past the drawn options: a note should also pin to **a
+  whole line, a whole page, and a structural break** — a note about a juz sits on that juz's
+  start, a note about a hizb-quarter on its own break. That is a second axis the options page
+  (verse → word → mark, all *inside* the text) never drew, and it is the honest gap in this
+  decision: *that* these anchor scopes exist is decided; what the marker for a page-level or a
+  juz-break note looks like, and where it sits so it does not crowd the text, is a new open
+  question, noted below.
+- **What kinds, and whether any leaves the phone — C, shareable by default.** Every note is
+  aggregated into one client-side file and is shareable rather than sealed to the one phone;
+  when a reader can sign in, that file syncs to their own cloud. This takes the
+  [storage model](storage-model.md), the same as the bookmarks and the confusion map — so C
+  here is not the original "always-on server sync" but the phased model: one local aggregate
+  now, the reader's cloud file on sign-in.
+- **A fourth kind of note: a question for scholars.** Alongside the comment, the correction and
+  the note to the developers, a reader can pin a **question** to a spot — something they want
+  answered about the verse, not a mistake they are recording. It is drawn the same way and
+  anchored the same way; what makes it its own kind is where it is *meant to go*. The near-term
+  build is only the kind and its anchor. The farther aim — that when enough readers pin a
+  similar question, a scholar's answer with references can appear against the verse — is a whole
+  feature of its own, recorded in the roadmap under *Someday*, not settled here.
+
+**Still open, folded into the building:**
+
+- **The structural-anchor marker.** A note on a line or inside a verse sits in the margin beside
+  the text, as drawn. A note on a whole page, a juz's start or a hizb-quarter has no single spot
+  in the text to sit beside — so where its marker goes (at the break itself, in a gutter, on the
+  page's edge) and how it reads as *about the whole page* rather than one line of it is undrawn,
+  and is the first thing the building has to draw.
+- **Whether the four kinds share one store and one anchor model** or the question-kind needs its
+  own — the anchor is shared; whether a question that is meant to travel to a scholar is kept
+  and synced exactly as a private correction is a privacy question the storage model frames but
+  does not answer.
