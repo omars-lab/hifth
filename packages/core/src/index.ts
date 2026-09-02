@@ -325,3 +325,61 @@ export {
   type RevisionEvent,
   type RevisionScope,
 } from "./revision.js";
+
+// Open decisions, built as interchangeable components (the "felt, so built"
+// tenet). Each option is a real, self-contained strategy the decision page mounts
+// live; the winner graduates into the app and the losers are deleted. Kept in
+// their own folder so it is obvious they are provisional — a choice not yet made,
+// not a settled part of the app.
+//
+// juz-detents: when a reader releases the page bar near a juz marker, does the bar
+// pull the release onto the juz, leave it under the thumb, or make the marker a
+// button? (docs/decisions/page-bar.md)
+export {
+  DETENT_STRATEGIES,
+  markOnlyDetent,
+  pullNearbyDetent,
+  tapButtonDetent,
+  resolveMarkOnly,
+  resolvePullNearby,
+  resolveTapButton,
+  type DetentContext,
+  type DetentStrategy,
+  type Landing,
+} from "./decision-options/detent-strategy.js";
+
+// boundary-juz: a boundary page carries the end of one juz and the start of the
+// next; which juz number does it wear — the one beginning, the one running, or
+// both? (docs/decisions/page-bar.md)
+export {
+  BOUNDARY_JUZ_RULES,
+  beginsHereRule,
+  runningRule,
+  bothRule,
+  labelBeginsHere,
+  labelRunning,
+  labelBoth,
+  type BoundaryContext,
+  type BoundaryJuzRule,
+  type BoundaryLabel,
+} from "./decision-options/boundary-juz-rule.js";
+
+// mark-placement: every mark's rectangle ships a little off the letter it belongs
+// to; which correction ships — none, per-page, per-line (tilt or bend), marks-only,
+// or each mark on its own found ink? (docs/decisions/mark-placement.md)
+export {
+  PLACEMENT_RULES,
+  leaveAsIsRule,
+  perPageRule,
+  perLineTiltRule,
+  marksOnlyRule,
+  perLineBendRule,
+  onOwnInkRule,
+  placeBy,
+  placeMark,
+  placeWord,
+  type Grain,
+  type PlaceableRect,
+  type PlacedRect,
+  type PlacementRule,
+} from "./decision-options/placement-rule.js";

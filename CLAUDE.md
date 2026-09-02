@@ -23,6 +23,17 @@ never opened this repository.** Concretely:
   mus'haf, at the size it would actually be used. A wash you cannot see at that size is an
   answer, and it is one no paragraph would have given you.
 
+- **If the difference is felt, it is built, not drawn.** Some options differ in something a
+  still picture cannot carry — a snap when you let go of a control, a printed line that tilts
+  as it corrects, a wash that only reads once your own thumb is moving it. An option like that
+  is built as an interchangeable component — one per option, behind a shared interface,
+  `OptionA` through `OptionN` — and mounted **live** on the decision page, so the reader
+  chooses by doing it rather than by imagining it. The component that wins graduates into the
+  app and the losers are deleted, so nothing was throwaway that the choice did not need. An
+  option whose difference is purely structural or policy — which of two labels a page carries —
+  may still be drawn. The test is whether a reader could be *wrong* about the option from a
+  picture and *right* about it from a hand on it; where that is true, drawing it is not enough.
+
 ### Legible is not the same as answerable
 
 The second failure is quieter than the first: a page anyone can read, which still nobody can

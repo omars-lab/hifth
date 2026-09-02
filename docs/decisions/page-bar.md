@@ -2,10 +2,22 @@
 
 *Status: both open. This record states the questions and draws the options; it does not choose.*
 
-**The picture:** <https://blog.bytesofpurpose.com/hifth/docs/design/page-bar-options.html> — `page-bar-options.html`, checked in and rebuilt by
+**The picture — and now a thing you can try:** <https://blog.bytesofpurpose.com/hifth/docs/design/page-bar-options.html> — `page-bar-options.html`, checked in and rebuilt by
 `scripts/build-page-bar-options.mjs` from the vendored print's page-of-every-verse table, the
 juz table and the bar's own stylesheet. The address is the page's own on the app's site, so it
 is public the day the page is merged.
+
+Both of these questions turn on something a still picture cannot hand you — the *snap* when
+you let go of the bar near a marker, and the way a page's label *changes* as you switch the
+rule under it — so the page draws each option and then mounts it **live**: a real handle you
+drag and release to feel the pull, and a rule switch that repaints the four boundary pages as
+you watch. The options are not a mock of the behaviour. Each is a real interchangeable
+component — one function per option, behind a shared interface — kept beside the app's own code
+(the detent strategies and the boundary-juz rules), covered by unit tests, and *inlined into
+the page from the same compiled source the app would run*. So the rule you pick by hand on the
+page is the one that ships: the winner graduates into the bar's release handler and its page
+readout, and the losing components are deleted. This follows the project's standing rule that
+an option whose difference is felt or seen in motion is built, not only drawn.
 
 ## A few words, defined once
 

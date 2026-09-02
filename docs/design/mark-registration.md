@@ -761,6 +761,19 @@ two differ by one thing and seeing that difference is the whole reason I is draw
 register row is `mark-placement` in
 [`docs/decisions.json`](../decisions.json).
 
+**And now the six are not only drawn — they are one page and a switch.** The difference between
+these options is a *move*: how far every rectangle on a real page slides, and where it lands. A
+still picture of each option cannot show the move, and the move is what separates the options a
+reader cares about from the ones that look the same standing still. So near the top the page now
+mounts all six **live** on a single page of the mus'haf: pick an option and every mark and word
+box slides to where that option would put it, over the printer's own ink, so a box landing exactly
+on the dashed outline is a box on the right letter. It is not a mock of the behaviour — each option
+is a real interchangeable placement rule kept beside the app's own code (in the core package's
+decision-options), covered by unit tests, and *inlined into the page from the same compiled source
+the app would run*, so the rule chosen by hand on the page is the one that ships: the winner
+graduates into how the app places its rectangles, and the losing rules are deleted. This follows the
+project's standing rule that an option whose difference is seen in motion is built, not only drawn.
+
 ### Option A — change nothing, and do not draw marks
 
 The rectangles stay as they are and no feature is built on them. Honest, and it costs
