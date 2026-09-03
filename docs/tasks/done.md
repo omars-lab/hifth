@@ -239,3 +239,22 @@ sheds the copyleft dependency. The row stays `open`, but its blocker is no longe
 probe is committed beside build-adjacency and mapped under the edge-data feature, so the 2,580 can be
 re-derived rather than trusted; it reads the gitignored ligature cache, which is why it is a probe
 and never a gate.
+
+## #57 — Bank the fired falsification test into etl-pipeline ① + repair §⑤ census
+
+**Done:** 2026-09-03, commit `cebdfe7` "The hand-kept script census had rotted, so ⑤ now points at the map".
+
+The etl orientation document held an open question — should it be generated rather than
+written by hand? — and that question named its own test: if a script is ever added and the
+document does not mention it, the balance was wrong. This session ran that test and it
+failed. The scripts directory now holds thirty-three; the document enumerates about fourteen,
+draws four probes where twelve exist, and names an entire mark-registration family — a dozen
+build-, probe- and score- scripts — nowhere at all. The drift accrued unseen because the map
+gate only checks that the pointers already written down still resolve; it has no way to notice
+a script that was never written down, so the single check the hand-maintained census leaned on
+could never have caught this. The section that carried the count was rewritten to state a
+definition and point at the map as the authoritative census instead, so it cannot rot the same
+way again, and the four probes it still draws are named as the etl core rather than the whole
+set. The open question keeps its status: whether the diagrams themselves should be generated so
+no hand copy of derivable facts survives is the owner's ruling to make, and the measured drift
+is now attached to the record as the evidence it was waiting for.
