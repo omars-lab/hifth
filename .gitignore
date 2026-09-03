@@ -15,6 +15,13 @@ apps/web/test-results/
 # committed; the corpus it points at is not (see vendor-pages.mjs).
 packages/etl/data/pages/.cache/
 
+# QUL "ruler" caches: datasets downloaded once from qul.tarteel.ai to MEASURE our
+# derived numbers against, never to ship. QUL carries Quran text/metadata under
+# per-resource licences (see SOURCES.md / qul-licensing memory); only the numbers-only
+# *.probe.json pins derived from these are committed. Ignored wholesale so a stray
+# download can never vendor the mus'haf through the back door.
+packages/etl/data/**/.cache/qul*/
+
 # Maintainer reports built out of that cache — probe-encodings.mjs writes a
 # self-contained HTML file here, and it is full of Arabic derived from the print.
 # There is no Quran text in this repo and there will not be; a committed report
