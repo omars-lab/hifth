@@ -258,3 +258,27 @@ way again, and the four probes it still draws are named as the etl core rather t
 set. The open question keeps its status: whether the diagrams themselves should be generated so
 no hand copy of derivable facts survives is the owner's ruling to make, and the measured drift
 is now attached to the record as the evidence it was waiting for.
+
+## #58 — Corroborate the shipped page table against an independent page-per-ayah source (what-we-depend-on ⑨)
+
+**Done:** 2026-09-03, commit `53868c6` "Corroborate the page table against an outside witness; ⑨ answered".
+
+The table that says which leaf each verse sits on reaches three shipped outputs and had never
+been checked against anything outside this project — it is read straight off the printed
+artwork's own geometry, one shape per verse, so nothing could have caught a verse quietly filed
+on the wrong leaf. A new probe read a page-per-verse table compiled by an entirely different
+route, expanded it to all 6,236 verses, and compared. 6,180 match. The 56 that do not are the
+finding, not a fault: every one is off by exactly one leaf, and every one lands inside the four
+short stretches where the earlier and later printings of this mus'haf are already known to break
+their pages differently — none outside them. So the two tables agree everywhere the two
+printings agree and part company only, and exactly, where the printings themselves do. The
+outside table follows the earlier printing; ours follows the later one the artwork is drawn
+from — which is a second, independent confirmation of which printing this app ships, from a
+different measurement than the one that first settled it. The outside source is read once at
+build time only to check a number, never kept or shipped, so its licence never bites; its answer
+is pinned beside the table because the check needs the internet and cannot run on a fresh clone.
+One thing the run surfaced on its own: the public-domain source the audit had named for this had
+vanished in the year since — its home gone, its one surviving copy placed under a share-alike,
+no-commercial-use licence — which is quiet evidence for the still-open question of whether a
+freely-usable replacement for the pagination even exists. The correctness half of ⑨ is closed;
+that permissive-replacement half stays with the question that owns it.
