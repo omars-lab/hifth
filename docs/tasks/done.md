@@ -368,3 +368,22 @@ licence stated, so nothing ships, and its only use is as a build-time ruler read
 to check a number we derived ourselves. Names the Mutashabihat resource 73 used for the hop's
 recall (#61) and cross-links ⑪, so the precedent sits in the file a licence question is answered
 from.
+
+## #62 — Build an on-site "how we earned your trust" validation page
+
+**Done:** 2026-09-03, commit `14f7bb8` "A page that shows a stranger how the app earned their
+trust" — page [`how-we-earned-your-trust.html`](../validation/how-we-earned-your-trust.html) and
+its companion record [`how-we-earned-your-trust.md`](../validation/how-we-earned-your-trust.md).
+
+A shareable page for a hafiz who has never opened this repository: it gathers the independent-
+witness checks scattered across the design records — the page a verse sits on (568/604, the 36 the
+printings themselves split on), the look-alikes (a deliberate 41% subset of a larger catalogue,
+framed as divergence not shortfall), the recitation colours (99.80% against a text-free engine,
+with the false second witness named and not double-counted), the print identity (56/56 incl. the
+divergence-band controls), the fixed numbers of the book (318 re-derived every build), the small
+marks (86,962/86,965) — and tells each as a question a reader arrives holding, with no file names
+or item numbers in the prose. It draws the checking loop as a hand-authored SVG so it renders
+offline like every docs page, states the four honest gaps still owed to a human, and links every
+outside source it measured against. The companion record carries the mermaid source and maps each
+figure back to the register that owns it. Served from the site at its own path on merge; the
+front-door link is the canonical site address so it survives being sent to anybody.
