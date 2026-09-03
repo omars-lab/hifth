@@ -910,10 +910,10 @@
     {
       "id": "spacing-is-scored-as-shape",
       "source": { "file": "docs/design/mark-labels.md", "item": "①" },
-      "status": "open",
+      "status": "answered",
       "severity": "question",
       "owner": "agent",
-      "note": "Comparing whole pictures asks two questions in one number — are these the same strokes, and did the print set them the same distance apart. Five marks in 326,515 are charged for the second when only the first was asked. Bounded and understood, so this is a question about whether a better comparison is worth building, not a defect waiting on anyone. The naive version must not be built: arrangement is the only thing separating fathatan from successive fathatan, 3,635 marks against the 5 it would save."
+      "note": "Comparing whole pictures asks two questions in one number — are these the same strokes, and did the print set them the same distance apart. Five marks in 326,515 are charged for the second when only the first was asked. Bounded and understood, so this is a question about whether a better comparison is worth building, not a defect waiting on anyone. The naive version must not be built: arrangement is the only thing separating fathatan from successive fathatan, 3,635 marks against the 5 it would save. ANSWERED 2026-09-03: not worth building. The prize is five marks and nothing depends on them; the naive comparison would stop scoring arrangement as shape and so corrupt the 3,635 fathatan/successive-fathatan marks to rescue the 5. A careful two-number version (strokes and arrangement scored apart) would avoid the harm but a second comparison axis to maintain is not earned by five explained marks — status quo stands, one whole-picture score with the five named afterward. Reopens only if the five grow into a class that matters, or a recitation-rule colouring makes the iqlab/doubled-vowel marks load-bearing, at which point a TARGETED (never the naive) two-number comparison is a new item."
     },
     {
       "id": "names-never-checked-against-the-text",
