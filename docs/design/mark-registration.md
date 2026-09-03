@@ -1405,12 +1405,28 @@ either alone.
 **Answered by** `packages/etl/scripts/probe-mark-counts.mjs` (`pnpm probe:mark-counts`), which
 writes the evidence page and exits non-zero on any page short a mark or long one.
 
-### ④ Which of the two printings' fonts produced the pages · **open**
+### ④ Which of the two printings' fonts produced the pages · **answered**
 
 If the shipped pages came from the publisher's per-page fonts, the smallest thing addressable
 in that source is a whole word, and one of the cross-checks in §⑧ is impossible in principle
 rather than merely awkward. The two candidate sources differ in a single readable number, so
 this is settled by looking, not by arguing.
+
+**Answered by** looking. The shipped pages are not per-page word fonts at all: every one of the
+604 `apps/web/public/assets/pages/hafs-kfqc/*.svg` files is flattened, ayah-tagged vector artwork
+whose finest addressable unit is the whole ayah — each carries `surah`, `ayah` and `number`
+attributes on its ayah polygons (6,236 of each across the book, one per ayah) plus `ayah:x`/`ayah:y`
+anchors, and nothing per-word, per-glyph or per-ligature: no `<text>`, no `<use>`, no `font-family`,
+no `@font-face`. Word geometry is not read from these pages at all; it comes from a *separate*
+per-ligature `<path data-text>` corpus (`MushafDatabase-Ligature-Based-SVG`, SVG V1.01), which is
+measurable outline geometry, not a font. Both sources are the **V2 / 1421H** printing, and that is
+the single readable number settled by looking: the pagination cross-check runs the four bands
+where V1/1405H and V2/1421H diverge plus controls and lands 56/56
+(`packages/etl/data/pages/ligature-svg.probe.json`, verdict `same-print`;
+`packages/etl/scripts/probe-ligature-print.mjs`). So the §⑧ “ask the font, not the picture”
+cross-check is not merely awkward against the shipped pages — it has no font to ask; it stays
+rejected on its own independent grounds (shadda-merged marks share no separate glyph, and
+contextual-variant outlines).
 
 ### ⑤ What separates the look-alike pairs · **open**
 
