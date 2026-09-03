@@ -52,6 +52,8 @@
   "hopTo": "Hop to {label}",
   "twin": "twin",
   "pageUnavailable": "This page is not available yet",
+  "openOnQul": "Quran Library",
+  "openOnQulAria": "Open {label} on the Quran Library (opens a new tab)",
   "wordLevelPending": "Word-level links arrive with the next data pack",
   "hereTag": "here",
   "rangeAria": "Highlighted passage · {title} · {links} links",

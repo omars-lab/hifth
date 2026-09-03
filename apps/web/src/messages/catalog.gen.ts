@@ -130,6 +130,8 @@ export interface Catalog {
   readonly "notices.pack-gone.action": string;
   readonly "notices.pack-gone.body": string;
   readonly "notices.pack-gone.title": string;
+  readonly openOnQul: string;
+  readonly openOnQulAria: (d: { readonly label: string | number }) => string;
   readonly packAbsent: (d: { readonly n: number; readonly nText: string | number }) => string;
   readonly packGone: (d: { readonly juzText: string | number }) => string;
   readonly packKeep: (d: { readonly juzText: string | number }) => string;

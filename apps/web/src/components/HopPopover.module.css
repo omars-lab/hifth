@@ -196,6 +196,39 @@
   outline-offset: 2px;
 }
 
+/* The outbound link that stands in for a leap we cannot make — a target whose
+   page we do not carry. Outlined, not filled: it is a way out of the app, not
+   the primary in-app hop, so it reads as secondary to the accent hop button. */
+.qul {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2xs, 0.25rem);
+  min-block-size: var(--touch-min);
+  padding-inline: var(--space-sm, 0.5rem);
+  border: 1px solid var(--accent);
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--accent);
+  font-size: var(--text-xs);
+  text-decoration: none;
+  cursor: pointer;
+  transition: background var(--dur-fast) var(--ease-hop);
+}
+
+.qul:hover {
+  background: var(--paper-sunk);
+}
+
+.qul:focus-visible {
+  outline: 2px solid var(--accent-strong);
+  outline-offset: 2px;
+}
+
+.qulLabel {
+  white-space: nowrap;
+}
+
 @media (min-width: 900px) {
   .sheet {
     inset-inline-start: auto;
