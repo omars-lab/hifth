@@ -303,7 +303,7 @@
     {
       "id": "mark-placement",
       "question": "Should the app line up what it draws one page at a time, or one printed line at a time?",
-      "status": "open",
+      "status": "decided",
       "options": [
         {
           "id": "A",
@@ -334,9 +334,9 @@
       "page": "docs/design/mark-placement.html",
       "builtBy": "scripts/build-placement-options.mjs",
       "doc": "docs/design/mark-registration.md",
-      "decided": null,
-      "by": null,
-      "date": null,
+      "decided": "H",
+      "by": "omar",
+      "date": "2026-09-03",
       "related": [
         "mark-granularity",
         "word-selection",
