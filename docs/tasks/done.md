@@ -291,3 +291,23 @@ The lesson is the reason the next task exists: before going out to ask the world
 agrees with us, look first at whether we already asked it. The repo centralises every
 outside-witness check in one place and records each answer beside the data it is about; a new one
 almost always belongs there as another reference, not as a parallel script.
+
+## #59 — Create/enhance a skill for independent-witness validation (corroborate a derived artifact against an outside source)
+
+**Done:** 2026-09-03, commit `81cfd33` "validate skill: guard against building a probe the repo already runs".
+
+The request came out of the ⑨ run above: there should be a skill for the "does the world still
+agree with our X?" kind of validation, and it should be enhanced rather than started fresh. It
+already existed — the validation skill has a whole section on the checks that ask somebody
+outside the supply chain, what they prove, and why none of them is allowed to be a build gate.
+What it lacked was the one guardrail the ⑨ run showed it needed: a reminder to look before you
+build. So the skill now fires on the phrase a person would actually use — corroborate something
+against an outside source — and carries a short checklist to run before writing any new
+outside-witness check: read the list of probes that already exist, read the record kept beside
+the data you mean to check, and prefer adding a new outside source as one more reference to the
+single probe that already asks the world, rather than as a parallel script nobody will
+rediscover. It also draws the line the same run blurred: reading an outside source to check a
+number is a different thing from adopting it, and a source being free enough to check against
+does not make it free enough to depend on. The concrete incident — a duplicate page-table probe
+written and then reverted because the check already existed — is named in the skill as the
+reason the guardrail is there, so the lesson stays attached to the mistake that earned it.
