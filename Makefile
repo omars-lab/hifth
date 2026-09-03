@@ -235,6 +235,7 @@ ci: core ## Full local mirror of the CI build-test-gate job, IN CI ORDER
 	$(PNPM) gate:issues
 	$(PNPM) gate:tasks
 	$(PNPM) gate:decisions
+	$(PNPM) gate:etl-scripts
 	$(PNPM) gate:quran-meta
 	$(PNPM) gate:tajweed
 	$(PNPM) gate:revision-privacy
@@ -417,6 +418,10 @@ tasks: ## What is still open, by whose turn it is:  make tasks
 tasks-doc: ## Re-render docs/tasks.md from the decisions, ledger, issues and PLAN registers
 	@node scripts/build-tasks-doc.mjs
 
+.PHONY: etl-scripts-doc
+etl-scripts-doc: ## Re-render docs/design/etl-scripts.md from the scripts on disk and the code map
+	@node scripts/build-etl-scripts.mjs
+
 .PHONY: decisions
 decisions: ## What has been decided and what is still open:  make decisions  ·  make decisions ID=<id>
 	@# docs/decisions.json is the source, and like the issue catalog it is an
@@ -435,7 +440,7 @@ decisions-doc: ## Re-render docs/decisions/README.md from docs/decisions.json
 	@node scripts/build-decisions-doc.mjs
 
 .PHONY: render-docs
-render-docs: use-cases-doc issues-doc tasks-doc decisions-doc ## Re-render every generated register page (the pre-commit hook refuses a stale one)
+render-docs: use-cases-doc issues-doc tasks-doc decisions-doc etl-scripts-doc ## Re-render every generated register page (the pre-commit hook refuses a stale one)
 
 .PHONY: validate
 validate: ## Outstanding manual checks — or one check's full runbook:  make validate CHECK=<id>

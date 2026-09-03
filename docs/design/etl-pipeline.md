@@ -296,10 +296,12 @@ the *residue*. Every script here reads more than it writes, and the difference i
 
 Diagram ① is the whole of what writes `assets/**`. Most scripts in
 `packages/etl/scripts/` never do — they measure, report, or are read *by* the ones that
-build. Their outputs are pins, reports and a human's afternoon. The authoritative census of
-them is `docs/map.json`, not a count kept here; the diagram below draws the ETL core, and a
-second family — the mark-registration harness that scores a reader's marks into the
-validation ledger — grew up beside it and is enumerated in that map rather than redrawn here.
+build. Their outputs are pins, reports and a human's afternoon. The authoritative census of them
+is [`etl-scripts.md`](etl-scripts.md), generated straight off the filesystem so it cannot go
+short the way a hand-kept count did (see ⑦①); the diagram below draws only the ETL core, as an
+illustration and not a tally, and a second family — the mark-registration harness that scores a
+reader's marks into the validation ledger — grew up beside it and is listed in that generated
+census rather than redrawn here.
 
 ```mermaid
 flowchart LR
@@ -392,7 +394,7 @@ regeneration.
 
 ## ⑦ Open questions, and what would answer each
 
-### ① Whether this document should be generated rather than written · **open**
+### ① Whether this document should be generated rather than written · **answered**
 
 `docs/map.json` already knows every script, and `package.json` already knows every gate.
 Diagrams ① and ③ are therefore derivable, and a hand-drawn copy of derivable facts is
@@ -411,11 +413,24 @@ holds 33 scripts; this document enumerates about fourteen and draws four probes 
 are twelve, and an entire mark-registration family — a dozen build-, probe- and score-
 scripts — is named nowhere in it. It drifted with nothing noticing, because `gate:map`
 validates the pointers that *exist*: it cannot see a script that is *absent*, so the one
-check the balance leaned on could never have caught this. §⑤ has been repaired to state a
-definition and point at the map instead of carrying a count, so the census cannot rot the
-same way again — but that only fixes the census. Whether the diagrams themselves should be
-generated from the map, so no hand-drawn copy of derivable facts survives here at all, is the
-decision this question still holds open, and the drift is now the evidence for it.
+check the balance leaned on could never have caught this. §⑤ was first repaired to state a
+definition rather than carry a count, and now points at a generated census — but that only
+settles the list. Whether the diagrams themselves should be generated from the map, so no
+hand-drawn copy of derivable facts survives here at all, is what this question came down to,
+and the drift is the evidence that decided it.
+
+**Answered 2026-09-03: the census is generated; the diagrams and the prose are not.** The
+list of scripts now lives in [`etl-scripts.md`](etl-scripts.md), built straight from the files
+on disk — not from `docs/map.json`, which had itself gone short by nine — and checked by its own
+gate on every commit, so a script added without a mention moves a stamped hash and the commit is
+refused. The drift measured above cannot recur, because the check now reads the directory rather
+than the register, and a directory cannot be missing a file it contains. What stays hand-written
+is everything no register holds: the flow diagrams, whose edges are recorded nowhere, and the
+three paragraphs under ③, which are the only part that would have prevented the defects they
+describe. Generating those would first mean inventing an edge-map to derive them from — another
+hand-maintained thing that drifts, the cure carrying the disease. So the split is by what is
+actually derivable: the list is, and is now generated and gated; the topology and the reasons
+are not, and stay written.
 
 ---
 

@@ -269,6 +269,15 @@ jobs:
       - name: Gate — every decision is indexed, and every open one is legible
         run: pnpm gate:decisions
 
+      # docs/design/etl-pipeline.md used to list the pipeline's scripts by hand
+      # and drifted — it named a third of them and missed a whole family. The
+      # census now lives in docs/design/etl-scripts.md, generated from the files
+      # on disk and the code map. This checks the committed copy still matches
+      # the scripts as they stand, which a gate over the register could not — a
+      # file absent from the register is invisible to it; the directory is not.
+      - name: Gate — the ETL script census was built from the scripts on disk
+        run: pnpm gate:etl-scripts
+
       # AYAH_COUNTS, JUZ_STARTS and HIZB_STARTS are hand-typed numbers whose only
       # symptom when wrong is an ayah quietly filed under the wrong division —
       # in range, ascending, and false. This re-derives all three from the
