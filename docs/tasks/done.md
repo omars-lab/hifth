@@ -212,3 +212,30 @@ common lean, not about the hamza. No class leans on its own, which is what §④
 `answered`, not `fixed` — a measurement banks no code, so nothing is owed a regression guard; the
 finding lives in the ㉒ record and the index note. The whole-book scored rows it rests on are the
 ones a fresh run of the ink scorer reproduces mark-for-mark (checked on a page: zero difference).
+
+## #56 — Measure spans kept if adjacency runs are computed over the print's own words (what-we-depend-on ⑦)
+
+**Done:** 2026-09-03, commit `8fad8db` "The print-native hop is drawable now: it trades 114 spans for 150".
+
+The look-alike hop paints, on each of two similar verses, the exact run of words they share, and
+today that run is found over a copyleft-licensed morphology corpus and then converted into the
+print's own word numbering. ⑦ asked whether the run could be found over the print's words directly —
+which would drop the copyleft dependency and delete the conversion step — but the record set its own
+gate: until somebody knew how many of the shipped spans survive that change, the option had no cost
+attached and could not honestly be drawn on an options page. The print splits proclitics the corpus
+joins, so the shared runs come out at different lengths and the rule that keeps a span only where the
+run is unique keeps a different set. A probe replays the shipped edge set through that same
+uniqueness rule but over print words, holding the corpus side as a control that must reproduce the
+shipped 2,544 — and it does, exactly, which is what makes the print number trustworthy. The print
+keeps 2,580. Net +36, but the two sets are not nested: 2,430 are common, 150 are new, and 114 a
+reader can currently land on would vanish. The mechanism is the split itself — a shared phrase is
+never fewer print words than corpus words and is often more (longer on 1,414 of the shared pairs,
+the same on 1,130, shorter on none), so some runs grow long enough to break a uniqueness tie while
+repeated common proclitics forge new ties elsewhere. The four verses whose two printings cannot be
+aligned take no part in the churn, so this is the ordinary behaviour of the rule and not an artefact
+of the hard cases. So the cost is churn, not a free gain: adopting it trades 114 spans for 150 and
+sheds the copyleft dependency. The row stays `open`, but its blocker is no longer the missing number
+— it is a decision-register ruling weighing that trade, with both span sets drawn on real pages. The
+probe is committed beside build-adjacency and mapped under the edge-data feature, so the 2,580 can be
+re-derived rather than trusted; it reads the gitignored ligature cache, which is why it is a probe
+and never a gate.
