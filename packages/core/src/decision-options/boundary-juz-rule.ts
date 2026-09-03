@@ -1,15 +1,16 @@
 /**
- * boundary-juz (open decision, docs/decisions/page-bar.md §"Which juz does a
- * boundary page belong to?"): a handful of pages carry the end of one juz and the
+ * boundary-juz (decided C on 2026-09-02, docs/decisions/page-bar.md §"Which juz does
+ * a boundary page belong to?"): a handful of pages carry the end of one juz and the
  * start of the next. When such a page is shown — in the bar's readout, on the page
- * itself — which juz number does it wear?
+ * itself — which juz number does it wear? The owner chose C — both, shown as a hand-off.
  *
  * The difference is *seen*, not merely policy: the reader looks at the number on the
  * page and it is either the juz that is ending, the juz that is opening, or both. So
  * the three options are built as interchangeable rules and mounted live on the
  * decision page (docs/design/page-bar-options.html), each rendering the actual label
- * it would print on the four real boundary pages. The winning rule graduates into the
- * app's page readout; the losers are deleted.
+ * it would print on the four real boundary pages. The winning rule (C) graduates into
+ * the app's page readout; the losers (A and B) stay — here and on the decision page —
+ * kept by the graduation-losers decision (option A) so the choice stays reopenable.
  *
  * Every `labelFor` is a **standalone, self-contained** function — it reads only its
  * argument — so the same compiled source runs in the app, the unit test, and the

@@ -188,14 +188,34 @@
   pointer-events: none;
 }
 
+/* A marker is now a button (graduated option C), so it carries a button reset —
+   but it must still draw as the plain 2px tick it was. It takes the pointer (the
+   rail around it does not), grows from its own centre under the effect that
+   scales it, and eases that growth so the swell is felt rather than snapped. */
 .juz {
   position: absolute;
   inset-block-start: -9px;
   inline-size: 2px;
   block-size: 18px;
+  padding: 0;
+  border: 0;
   border-radius: 1px;
   background: var(--accent);
   opacity: 0.65;
+  pointer-events: auto;
+  cursor: pointer;
+  transform-origin: center;
+  transition: transform 90ms ease-out;
+}
+
+.juz:hover {
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .juz {
+    transition: none;
+  }
 }
 
 /*

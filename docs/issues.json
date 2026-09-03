@@ -1445,10 +1445,11 @@
     {
       "id": "plan-graduate-page-bar-winners",
       "source": { "file": "docs/PLAN.md", "item": "18" },
-      "status": "open",
+      "status": "blocked",
       "severity": "question",
-      "owner": "agent",
-      "note": "The page-bar's two questions were both decided C on 2026-09-02 (decisions juz-detents and boundary-juz): a juz marker is a tap-to-open button that grows as the pointer nears it (never during a drag, never eating the drag), and a page carrying a juz seam belongs to both juz. Winners are built, unit-tested and mounted live on docs/design/page-bar-options.html; graduation is wiring the winning strategy and the growth into the app bar, naming both juz on the four seam pages (62, 121, 201, 502), and deleting the two losing strategies and their live-page wiring. Genuinely-open sub-question: the phone bar is 0.4px a page with no pointer to grow a marker, so a two-juz seam label there needs a layout the desktop live page cannot prove. HELD 2026-09-02: PageSlider carries another session's uncommitted work; graduation waits for that to land rather than two sessions editing one file. Blocks nothing shipped."
+      "owner": "user",
+      "blockedBy": ["a phone or a WebKit run"],
+      "note": "The page-bar's two questions were both decided C on 2026-09-02 (decisions juz-detents and boundary-juz): a juz marker is a tap-to-open button that grows as the pointer nears it (never during a drag, never eating the drag), and a page carrying a juz seam belongs to both juz. GRADUATED 2026-09-02: the app bar now imports only the winner — each marker is a button that jumps to its juz and, on a fine pointer, grows as the pointer nears it; the thumb bubble names both juz on a seam page, scoped to the bubble alone (shelf and wheel keep one juz each, per boundary-juz). Per graduation-losers (option A) the two losing strategies and their live-page wiring STAY in the core module and on docs/design/page-bar-options.html — they are not deleted — so a reader can still feel why the winner won; the bar reaches only the winner. Covered by a desktop e2e against the real corpus (apps/web/e2e/pagebar-detents.spec.ts) and by PageSlider component tests; the desktop project and gate:i18n/gate:decisions are green. What keeps this row open is the one sub-question the desktop live page cannot prove: the phone bar is ~0.4px a page with no pointer to grow a marker, so a two-juz seam label there needs a layout that must be judged on the owner's phone (or a WebKit run local darwin cannot launch). Blocks nothing shipped."
     }
   ]
 }

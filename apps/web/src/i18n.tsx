@@ -303,6 +303,13 @@ export interface Strings {
   jumpResults: string;
   juzGroup: string;
   juzN(juz: number): string;
+  /**
+   * Both juz a boundary page belongs to, shown as a hand-off — "Juz 3 → 4",
+   * the arrow flipping to "الجزء ٣ ← ٤" in Arabic so it still points from the
+   * juz ending to the one opening. The bar's answer on the four seam pages; the
+   * `boundary-juz` decision keeps the shelf and the wheel on a single juz each.
+   */
+  juzBoth(running: number, beginsHere: number): string;
   surahN(surah: number): string;
   jumpStartsAt(label: string): string;
 
@@ -673,6 +680,7 @@ export function buildStrings(lang: Lang, m: Catalog): Strings {
     jumpResults: m.jumpResults,
     juzGroup: m.juzGroup,
     juzN: (juz) => m.juzN({ juzText: n(juz) }),
+    juzBoth: (running, beginsHere) => m.juzBoth({ aText: n(running), bText: n(beginsHere) }),
     surahN: (surah) => m.surahN({ surahText: n(surah) }),
     jumpStartsAt: (label) => m.jumpStartsAt({ label }),
 

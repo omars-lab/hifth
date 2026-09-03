@@ -92,6 +92,7 @@
   "jumpResults": "النتائج",
   "juzGroup": "الأجزاء",
   "juzN": "الجزء {juzText}",
+  "juzBoth": "الجزء {aText} ← {bText}",
   "surahN": "سورة {surahText}",
   "jumpStartsAt": "يبدأ من {label}",
   "editionCurrent": "الحالي",

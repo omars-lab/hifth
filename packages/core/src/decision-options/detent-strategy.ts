@@ -1,13 +1,15 @@
 /**
- * juz-detents (open decision, docs/decisions/page-bar.md §"When a reader lets go
- * near a marker"): when a reader releases the page bar near a juz marker, does the
- * bar pull the released page onto that juz's opening, or land under the thumb?
+ * juz-detents (decided C on 2026-09-02, docs/decisions/page-bar.md §"When a reader
+ * lets go near a marker"): when a reader releases the page bar near a juz marker,
+ * does the bar pull the released page onto that juz's opening, or land under the
+ * thumb? The owner chose C — a marker is a button; the drag is unchanged.
  *
  * Three interchangeable strategies, one per drawn option. They are real code, not a
- * mock: the winner graduates into `PageSlider`'s release handler (`commit()`) and
- * the losers are deleted — nothing throwaway the choice did not need. Until the
- * owner chooses, all three are mounted **live** on the decision page
- * (docs/design/page-bar-options.html), so the snap is felt rather than imagined.
+ * mock: the winner (C) graduates into `PageSlider`'s release handler (`commit()`);
+ * the losers (A and B) stay — here and mounted **live** on the decision page
+ * (docs/design/page-bar-options.html) — because the graduation-losers decision
+ * (option A) keeps every option a felt choice drew, so the snap can still be felt
+ * rather than imagined and the choice stays reopenable. The bar imports only C.
  *
  * Each `resolve` is a **standalone, self-contained** function: it reads only its
  * arguments and touches no module-scope symbol, so the very same compiled source

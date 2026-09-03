@@ -94,7 +94,8 @@
       "date": "2026-09-02",
       "related": [
         "boundary-juz",
-        "desktop-vs-mobile"
+        "desktop-vs-mobile",
+        "graduation-losers"
       ]
     },
     {
@@ -187,8 +188,39 @@
       "date": "2026-09-02",
       "related": [
         "juz-detents",
-        "desktop-vs-mobile"
+        "desktop-vs-mobile",
+        "graduation-losers"
       ]
+    },
+    {
+      "id": "graduation-losers",
+      "question": "When a choice is made by letting people try each option on a page, what happens to the options that lost?",
+      "status": "decided",
+      "options": [
+        {
+          "id": "A",
+          "label": "Keep every option, still there to try"
+        },
+        {
+          "id": "B",
+          "label": "Keep only the winner; leave a written note"
+        },
+        {
+          "id": "C",
+          "label": "Keep them tryable, but wall them off from the app"
+        }
+      ],
+      "artifact": "https://blog.bytesofpurpose.com/hifth/docs/design/graduation-losers-options.html",
+      "page": "docs/design/graduation-losers-options.html",
+      "builtBy": "scripts/build-graduation-options.mjs",
+      "doc": "docs/decisions/graduation-losers.md#what-is-being-decided",
+      "related": [
+        "juz-detents",
+        "boundary-juz"
+      ],
+      "decided": "A",
+      "by": "omar",
+      "date": "2026-09-02"
     },
     {
       "id": "confusion-map-export",
