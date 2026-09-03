@@ -432,3 +432,20 @@ built from a different source. The gate is wired into all three sites `gate:gate
 `make render-docs`. A script added, renamed or re-described now moves a stamped hash and the
 commit is refused; a directory cannot be missing a file it contains, which is the guarantee the
 old map-pointer balance could not give. 69 scripts on disk, 59 named in the map.
+
+## #70 — Settle whether a spacing-aware comparison is worth building (mark-labels ①)
+
+**Done:** 2026-09-03, commit `66aa610` — the open question in
+[`mark-labels.md`](../design/mark-labels.md) §⑩① flipped open → answered, index row in
+[`issues.json`](../issues.json) set to answered.
+
+Settled by the numbers already on the page, no reader owed: the whole prize is five marks of
+326,515 — the right strokes at an unusual distance apart — and nothing in the app depends on
+them. The naive spacing-aware comparison §⑧ warns against would stop reading arrangement as part
+of the shape, and arrangement is the only thing separating a *fathatan* from two successive
+*fathatas* — a distinction carrying 3,635 marks. Building it would corrupt 3,635 to rescue 5. A
+careful two-number version (strokes and arrangement scored apart) would avoid the harm, but a
+second comparison axis to maintain forever is not earned by five already-explained marks, so the
+status quo stands. Reopens only if the five grow into a class that matters, or a recitation-rule
+colouring makes the iqlab and doubled-vowel marks load-bearing — at which point a *targeted* (never
+the naive) two-number comparison becomes a new item, not this one reopening.
