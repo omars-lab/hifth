@@ -1157,6 +1157,11 @@
           "file": "packages/etl/scripts/sample-edges.mjs",
           "symbol": "stratumOf",
           "note": "The spot-audit draw. Stratified by type × provenance × page distance, because 97% of the pairs are one class and a flat draw of twenty never shows the classes gate:edges cannot reach. The unit is the unordered pair, not the directed edge — the corpus generates both directions from one fact, so asking a reader about both spends the scarcest input this project has on a question already answered."
+        },
+        {
+          "file": "packages/etl/scripts/probe-print-spans.mjs",
+          "symbol": "printKeepsSpan",
+          "note": "Prices the-hop-could-be-computed-from-the-print (what-we-depend-on ⑦): if the uniqueness rule ran over the print's own words instead of the morphology's, how many shipped spans survive? It replicates build-adjacency's edge set exactly — dataset plus the same curated seed, symmetrized — and computes both sides in one pass, so the QAC side is a control: it MUST reproduce the shipped 2,544 or the print number is not to be trusted, and it does. Over the print words (read offline from the ligature cache the way build-alignment does, folded through segmentation's `skeleton` to the one Buckwalter alphabet both sides already share) the rule keeps **2,580** — net +36 but not a superset: 2,430 shared, 150 new, 114 of today's dropped. The print run of a shared phrase is never shorter than the corpus run and is often longer (1,414 longer, 1,130 the same, 0 shorter of the 2,544), which is the whole mechanism — proclitic splits lengthen some runs past a uniqueness tie while repeated common proclitics forge new ties elsewhere; the four verses whose two printings cannot be aligned take no part in the churn. Wants the gitignored `data/pages/.cache/words/**`, which is why it is a probe and never a gate; ships nothing, prints one JSON tally, exits clean."
         }
       ],
       "extend": [
