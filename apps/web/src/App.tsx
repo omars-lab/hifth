@@ -9,6 +9,7 @@ import {
   Tajweed,
   appKeyAction,
   editionMeta,
+  juzOf,
   juzOfPage,
   juzPageIndex,
   keyToRef,
@@ -693,6 +694,26 @@ export function App(): JSX.Element {
     return byPage;
   }, [manifest]);
 
+  // The juz already *running* onto each page — the lowest juz with any ayah on
+  // it — computed once, the same reason `juzStarts` is a table and not a lookup:
+  // the caller is the page bar's scrub readout, asked for every value a dragged
+  // thumb passes over, and `juzOfPage` walks every polygon on a page to answer.
+  // Paid at load, an index per scrub after. On the four pages a juz seam cuts,
+  // this is the juz *above* the seam; the juz that opens *below* it is
+  // `juzStarts`, and naming a boundary page for both is the bar's decided answer.
+  const runningByPage = useMemo(() => {
+    const byPage = new Map<number, number>();
+    for (const pm of manifest?.pages ?? []) {
+      let lowest: number | null = null;
+      for (const poly of pm.polygons) {
+        const juz = juzOf(poly.surah, poly.ayah);
+        if (lowest === null || juz < lowest) lowest = juz;
+      }
+      if (lowest !== null) byPage.set(pm.page, lowest);
+    }
+    return byPage;
+  }, [manifest]);
+
   // Land on a page. The single navigation path for every way of turning one —
   // the arrow keys, the page bar's edge buttons, and letting go of its slider —
   // so there is one place where "the stage moved" and "the header changed" can
@@ -817,25 +838,45 @@ export function App(): JSX.Element {
   const juzStarts = useMemo(() => juzPageIndex(manifest?.pages ?? []), [manifest]);
 
   // Where a page sits in the book, for the page bar's scrub readout: its surah
-  // (above) and its juz. The juz is read off the openings — the highest one at
-  // or before the page — so a page carrying a boundary reads as the juz that
-  // *opens* on it, which is the juz its detent marks. `juzOfPage` would answer
-  // the lowest juz with any ayah there instead; the two differ only on the page
-  // a boundary falls, and the detent's reading is the one that matches the bar.
-  // A juz no page vendored is `null` here and simply skipped — its number never
-  // becomes the answer, and the next opening below the page wins.
+  // (above), the juz already *running* onto it, and the juz that *begins* on it
+  // if one does. The bar names a boundary page for both — "juz 3 → 4" — which is
+  // the decided answer (docs/decisions/page-bar.md §"which juz is a boundary
+  // page"), so it is handed both numbers and lets the shared boundary rule
+  // (`labelBoth`) decide when to show one and when to show two. On the 600 pages
+  // no seam cuts, `beginsHere` is `null` unless the juz opens at the very top, in
+  // which case it equals `running` and the rule collapses to one number anyway.
+  // A juz no page vendored never appears: `runningByPage` skips a page with no
+  // ayahs, and `beginsHere` is only set from an opening this build actually holds.
   const pageContext = useCallback(
-    (p: number): { juz: number; surah: number } | null => {
+    (p: number): { surah: number; running: number; beginsHere: number | null } | null => {
       const surah = surahByPage.get(p);
-      if (surah === undefined) return null;
-      let juz = 1;
+      const running = runningByPage.get(p);
+      if (surah === undefined || running === undefined) return null;
+      let beginsHere: number | null = null;
       for (let i = 0; i < juzStarts.length; i++) {
-        const opening = juzStarts[i];
-        if (opening != null && opening <= p) juz = i + 1;
+        if (juzStarts[i] === p) {
+          beginsHere = i + 1;
+          break;
+        }
       }
-      return { juz, surah };
+      return { surah, running, beginsHere };
     },
-    [surahByPage, juzStarts],
+    [surahByPage, runningByPage, juzStarts],
+  );
+
+  // Open a juz from its marker: a tap on the bar's detent jumps to the page that
+  // juz opens on and says so, exactly as the juz jump and the map cell do. A
+  // jump, not a turn — `goToPage`'s third argument stays false, so no fold is
+  // drawn across a move the reader did not travel page by page. A juz this build
+  // did not vendor has no opening and no marker, so this is only ever asked of a
+  // juz that has one; the guard is the belt to that brace.
+  const goToJuz = useCallback(
+    (juz: number) => {
+      const opens = juzStarts[juz - 1];
+      if (opens === null || opens === undefined) return;
+      goToPage(opens, t.arrivedJuz(juz, opens));
+    },
+    [juzStarts, t, goToPage],
   );
 
   /*
@@ -1670,6 +1711,7 @@ export function App(): JSX.Element {
         page={page}
         onStep={stepPage}
         onGoTo={handleScrubTo}
+        onJuzTap={goToJuz}
         juzStarts={juzStarts}
         pageContext={pageContext}
       />

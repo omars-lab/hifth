@@ -77,6 +77,7 @@ const messages: Catalog = {
   jumpPlaceholder: "البقرة · ٢:٢٥٥ · جزء ٩",
   jumpResults: "النتائج",
   jumpStartsAt: (d) => "يبدأ من " + d.label,
+  juzBoth: (d) => "الجزء " + d.aText + " ← " + d.bText,
   juzEdge: (d) => "لا جزء في هذا الاتجاه · الجزء " + d.juzText,
   juzGroup: "الأجزاء",
   juzN: (d) => "الجزء " + d.juzText,

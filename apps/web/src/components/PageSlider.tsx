@@ -1,7 +1,15 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { nearestPage, pageFraction, pageRuns } from "@hifth/core";
+import { labelBoth, markerEmphasis, nearestPage, pageFraction, pageRuns, tapButtonDetent } from "@hifth/core";
 import { useT } from "../i18n";
+import { useMediaQuery } from "../useMediaQuery";
 import styles from "./PageSlider.module.css";
+
+// The winning detent strategy, graduated (docs/decisions/page-bar.md §"when a
+// reader lets go near a marker"): a marker is a button, the drag is untouched,
+// and the marker grows as the pointer nears it. The bar imports only C — the
+// losing strategies stay in the core module, kept tryable on the decision page
+// by the graduation-losers decision (option A), and never reached from here.
+const EMPHASIS = tapButtonDetent.emphasis ?? { near: 0, peak: 1 };
 
 interface PageSliderProps {
   /**
@@ -32,12 +40,22 @@ interface PageSliderProps {
    */
   juzStarts?: readonly (number | null)[];
   /**
-   * Where a page sits in the book — its juz and the surah at its head — for the
-   * scrub readout. A function, not a table, because the caller owns the mapping:
-   * it holds the manifest, the bar does not. `null` for a page it cannot place
-   * (outside the vendored inventory), which just leaves that line off the popover.
+   * Where a page sits in the book, for the scrub readout: the surah at its head,
+   * the juz already *running* onto it, and the juz that *begins* on it when one
+   * does (`null` otherwise). The bar names a boundary page for both juz — the
+   * decided answer — so it takes both numbers and lets the shared boundary rule
+   * pick one or a hand-off. A function, not a table, because the caller owns the
+   * mapping: it holds the manifest, the bar does not. `null` for a page it cannot
+   * place (outside the vendored inventory), which leaves that line off the popover.
    */
-  pageContext?: (page: number) => { juz: number; surah: number } | null;
+  pageContext?: (page: number) => { surah: number; running: number; beginsHere: number | null } | null;
+  /**
+   * Open the juz a marker stands for — the graduated tap-button (option C). A tap
+   * on a detent asks the caller to jump to that juz's opening; the drag is not
+   * touched. Optional: without it the detents draw but do nothing, the plain
+   * landmarks they were before the decision.
+   */
+  onJuzTap?: (juz: number) => void;
 }
 
 /**
@@ -128,12 +146,27 @@ export function PageSlider({
   onGoTo,
   juzStarts = [],
   pageContext,
+  onJuzTap,
 }: PageSliderProps): JSX.Element {
   const { t } = useT();
   const inputRef = useRef<HTMLInputElement>(null);
+  const trackRef = useRef<HTMLDivElement>(null);
+  const railRef = useRef<HTMLDivElement>(null);
+  // True from the pointerdown that starts a drag until its release. The marker
+  // growth reads this: it must never fire mid-drag, or a swollen button would
+  // sit under a thumb that is only passing through — the one thing option C's
+  // refinement promised it would not do.
+  const draggingRef = useRef(false);
   // Non-null only mid-drag: where the thumb is, before anything has been asked
   // of the stage.
   const [scrub, setScrub] = useState<number | null>(null);
+
+  // Whether this pointer can hover — a mouse or trackpad, not a finger. The
+  // grow-on-approach is a hover effect; a touch device has no "near without
+  // pressing", so there the markers stay their plain size and are simply tapped.
+  // This is exactly the split the decision named: the refinement answers the
+  // phone's fixed-target cost, and the phone is the device it does not run on.
+  const finePointer = useMediaQuery("(hover: hover) and (pointer: fine)");
 
   const empty = available.length === 0;
   const value = scrub ?? page;
@@ -147,6 +180,19 @@ export function PageSlider({
   // only in a page number. Null off the vendored inventory, which just drops the
   // line rather than guessing.
   const context = scrub === null || !pageContext ? null : pageContext(scrub);
+  // Which juz to name, and how. The shared boundary rule (`labelBoth`, option C
+  // graduated) takes the page's two juz and returns one number on the 600 clean
+  // pages, both on the four a seam cuts; i18n turns that into "Juz 3" or the
+  // "Juz 3 → 4" hand-off in the reader's language — the arrow flipping for Arabic.
+  const juzLabel =
+    context === null
+      ? null
+      : (() => {
+          const both = labelBoth({ running: context.running, beginsHere: context.beginsHere });
+          return both.juz.length === 2 && context.beginsHere !== null
+            ? t.juzBoth(context.running, context.beginsHere)
+            : t.juzN(context.running);
+        })();
 
   const commit = useCallback(
     (wanted: number) => {
@@ -168,6 +214,60 @@ export function PageSlider({
     el.addEventListener("change", handle);
     return () => el.removeEventListener("change", handle);
   }, [commit]);
+
+  // Option C's refinement, graduated: on a pointer that can hover, each marker
+  // grows as the pointer nears it and settles back as it leaves — but never
+  // while a drag is under way. The scale is read live off each marker's own box,
+  // so it is right whichever way the RTL track runs and whatever the marker's
+  // rest size, and the growth is symmetric about the marker's centre so reading
+  // that centre off an already-scaled box stays exact. Only a fine pointer runs
+  // this; a finger has no hover to grow toward, and there the markers are tapped
+  // at their plain size (the phone layout the decision left for a real device).
+  useEffect(() => {
+    if (!finePointer) return;
+    const track = trackRef.current;
+    if (!track) return;
+    const marks = (): HTMLElement[] =>
+      Array.from(railRef.current?.querySelectorAll<HTMLElement>("[data-testid='juz-detent']") ?? []);
+    const scaleAll = (px: number | null): void => {
+      for (const m of marks()) {
+        if (px === null) {
+          m.style.transform = "";
+          continue;
+        }
+        const box = m.getBoundingClientRect();
+        const centre = box.left + box.width / 2;
+        m.style.transform = `scale(${markerEmphasis(Math.abs(centre - px), EMPHASIS.near, EMPHASIS.peak)})`;
+      }
+    };
+    const onMove = (e: PointerEvent): void => {
+      if (draggingRef.current) return;
+      scaleAll(e.clientX);
+    };
+    const onLeave = (): void => scaleAll(null);
+    // A drag begins on the range input under the rail; from its first press
+    // until release every marker is pinned to its plain size, so a passing thumb
+    // never meets a grown button.
+    const onDown = (): void => {
+      draggingRef.current = true;
+      scaleAll(null);
+    };
+    const onUp = (): void => {
+      draggingRef.current = false;
+    };
+    const input = inputRef.current;
+    track.addEventListener("pointermove", onMove);
+    track.addEventListener("pointerleave", onLeave);
+    input?.addEventListener("pointerdown", onDown);
+    window.addEventListener("pointerup", onUp);
+    return () => {
+      track.removeEventListener("pointermove", onMove);
+      track.removeEventListener("pointerleave", onLeave);
+      input?.removeEventListener("pointerdown", onDown);
+      window.removeEventListener("pointerup", onUp);
+      scaleAll(null);
+    };
+  }, [finePointer, juzStarts]);
 
   const onKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -228,7 +328,7 @@ export function PageSlider({
         <span aria-hidden="true">▸</span>
       </button>
 
-      <div className={styles.track}>
+      <div className={styles.track} ref={trackRef}>
         <input
           ref={inputRef}
           type="range"
@@ -286,22 +386,32 @@ export function PageSlider({
           />
         </div>
 
-        {/* The 30 juz, one green detent each, at the page each opens on. These are
-            the coarse landmarks a hafiz navigates by — the book is thirty parts
-            before it is 604 pages — so they sit above the inventory rail as their
-            own layer. Decorative to a screen reader: the input already speaks its
-            value, and the juz is named in the popover a listener cannot see.
-            `pointer-events: none` so a detent never eats a drag aimed at the
-            thumb crossing it. */}
+        {/* The 30 juz, one green detent each, at the page each opens on. These
+            are the coarse landmarks a hafiz navigates by — the book is thirty
+            parts before it is 604 pages — so they sit above the inventory rail
+            as their own layer. Each is now a *button* (the graduated option C):
+            a tap opens that juz, and on a pointer that can hover it grows as the
+            pointer nears it (the effect above) so it is easy to hit yet never in
+            the way of a drag. The rail itself keeps `pointer-events: none`; only
+            the buttons take the pointer, so a drag through the gaps between them
+            still reaches the thumb. Kept out of the tab order and hidden from a
+            screen reader (the input already speaks its value and the juz is named
+            in the popover): the marker is a pointer affordance, and the exact
+            roads to a juz for a keyboard or a listener are the jump box, the map
+            cell and the wheel, unchanged. */}
         {juzStarts.some((start) => start !== null) && (
-          <div className={styles.juzRail} aria-hidden="true">
+          <div className={styles.juzRail} aria-hidden="true" ref={railRef}>
             {juzStarts.map((start, i) =>
               start === null ? null : (
-                <span
+                <button
                   key={start}
+                  type="button"
+                  tabIndex={-1}
                   className={styles.juz}
                   data-testid="juz-detent"
                   data-juz={i + 1}
+                  title={t.juzN(i + 1)}
+                  onClick={() => onJuzTap?.(i + 1)}
                   style={{
                     insetInlineStart: `calc(${pageFraction(start, total)} * (100% - var(--thumb)) + var(--thumb) / 2 - 1px)`,
                   }}
@@ -342,7 +452,7 @@ export function PageSlider({
                 — off the vendored inventory the line is left off rather than guessed. */}
             {context !== null && (
               <span className={styles.context}>
-                {t.juzN(context.juz)} · {t.surahName(context.surah)}
+                {juzLabel} · {t.surahName(context.surah)}
               </span>
             )}
             {/* Said before you let go, not only after. The drag is the moment

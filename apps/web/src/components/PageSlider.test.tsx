@@ -223,10 +223,33 @@ describe("PageSlider", () => {
   });
 
   it("names the juz and the surah under the thumb while dragging", () => {
-    const input = slider({ pageContext: () => ({ juz: 5, surah: 4 }) });
+    // A clean page: one juz runs onto it and none begins on it, so the readout
+    // names a single juz.
+    const input = slider({ pageContext: () => ({ surah: 4, running: 5, beginsHere: 5 }) });
     fireEvent.input(input, { target: { value: "300" } });
     const line = screen.getByText(/النساء/);
     expect(line.textContent).toMatch(/5|٥/);
+  });
+
+  it("names both juz on a page a seam cuts — the hand-off", () => {
+    // Juz 3 runs onto the page and juz 4 begins partway down it, so the bar
+    // names both, shown as a hand-off — the arrow flips leftward for Arabic.
+    const input = slider({ pageContext: () => ({ surah: 4, running: 3, beginsHere: 4 }) });
+    fireEvent.input(input, { target: { value: "300" } });
+    const line = screen.getByText(/النساء/);
+    expect(line.textContent).toMatch(/٣/);
+    expect(line.textContent).toMatch(/٤/);
+    expect(line.textContent).toContain("←");
+  });
+
+  it("opens a juz when its marker is tapped", () => {
+    // The third *drawn* marker is juz 4 — the null slot for juz 2 is skipped but
+    // does not renumber what follows it.
+    const onJuzTap = vi.fn();
+    slider({ juzStarts: JUZ([1, null, 42, 62]), onJuzTap });
+    const detents = document.querySelectorAll("[data-testid='juz-detent']");
+    fireEvent.click(detents[2]!);
+    expect(onJuzTap).toHaveBeenCalledWith(4);
   });
 
   it("leaves the landmarks off when the page cannot be placed", () => {

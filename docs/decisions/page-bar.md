@@ -16,8 +16,10 @@ component — one function per option, behind a shared interface — kept beside
 (the detent strategies and the boundary-juz rules), covered by unit tests, and *inlined into
 the page from the same compiled source the app would run*. So the rule you pick by hand on the
 page is the one that ships: the winner graduates into the bar's release handler and its page
-readout, and the losing components are deleted. This follows the project's standing rule that
-an option whose difference is felt or seen in motion is built, not only drawn.
+readout, and the losing components *stay* — kept here and on the decision page by the
+[`graduation-losers`](./graduation-losers.md) decision (option A), so the snap and the label
+each loser drew can still be felt by whoever reopens the choice. This follows the project's
+standing rule that an option whose difference is felt or seen in motion is built, not only drawn.
 
 ## A few words, defined once
 

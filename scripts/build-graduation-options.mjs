@@ -1,0 +1,312 @@
+#!/usr/bin/env node
+/**
+ * Builds docs/design/graduation-losers-options.html — the drawn options for the
+ * decision "graduation-losers": when a design question is settled by letting people
+ * try each option on a page, what happens to the options that lost?
+ *
+ * The difference between the options is structural — a policy about where the losing
+ * components live once one has won — so a reader can be right about each option from a
+ * picture. Per the project tenet, an option like that may be *drawn* rather than mounted
+ * live. This page draws each policy as the shape it would leave on the page-bar decision,
+ * whose two questions were just settled (a marker is a button; a boundary page names both
+ * juz), so the reader sees the policy applied to a real, freshly-decided page rather than
+ * an abstraction.
+ *
+ * The page is self-contained: no external fonts, no CDN, no relative assets, and — since
+ * it is built from the mus'haf-app world — zero Arabic codepoints. Rebuild:
+ *   node scripts/build-graduation-options.mjs
+ */
+
+import { writeFileSync } from "node:fs";
+import { fileURLToPath } from "node:url";
+import { dirname, resolve } from "node:path";
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const OUT = resolve(__dirname, "../docs/design/graduation-losers-options.html");
+
+// The app's own palette (apps/web/src/styles/tokens.css), inlined so the page needs nothing.
+const C = {
+  paper: "#f4efe6",
+  raised: "#fbf8f2",
+  sunk: "#ece4d6",
+  ink: "#26201a",
+  inkSoft: "#5c5347",
+  inkFaint: "#6b6255",
+  accent: "#1f6f66",
+  accentStrong: "#17544d",
+  accentTint: "#d7e7e3",
+  gold: "#e8a13a",
+};
+
+/** The three policies, each drawn as what it leaves on a just-decided page. */
+const OPTIONS = [
+  {
+    id: "A",
+    name: "Keep every option, still there to try",
+    gist:
+      "The decision page stays exactly as it was the day the choice was made: the winner " +
+      "wears its badge, and the options it beat are still on the page, still tryable. " +
+      "Nothing is deleted; the code the page tries and the code the app ships are the same code.",
+    // A drawn schematic: three option cards, all live, one chosen.
+    cards: [
+      { label: "A marker only marks", state: "live" },
+      { label: "A marker pulls nearby", state: "live" },
+      { label: "A marker is a button", state: "won" },
+    ],
+    footnote: "page-only components: none · shared with the app: all three",
+    keeps:
+      "A year from now, whoever reopens this can put a thumb back on each losing option and " +
+      "feel why it lost — the reason a felt choice was a choice survives intact.",
+    costs:
+      "The losing code lives on in the shared place the app and the page both build from. A " +
+      "reader of the code finds three ways to do one job where one shipped, and nothing but " +
+      "care stops a later edit from wiring a loser into the product by mistake.",
+  },
+  {
+    id: "B",
+    name: "Keep only the winner; leave a written note",
+    gist:
+      "Once the choice is made, the losing components are deleted. The page shows the winner " +
+      "and a line of prose naming what it beat and why. The code shows exactly one way to do " +
+      "the job — the way that shipped.",
+    cards: [
+      { label: "A marker is a button", state: "won" },
+      { label: "A and B were tried and lost — see the record", state: "note" },
+    ],
+    footnote: "page-only components: none · shared with the app: the winner only",
+    keeps:
+      "The code is honest about what runs: one job, one implementation, nothing dead to trip " +
+      "over. The smallest thing to keep true over time.",
+    costs:
+      "A felt option cannot be re-felt from a sentence. The next person to reopen this has to " +
+      "rebuild what lost before they can weigh it — so in practice the choice is much harder to " +
+      "reopen than the note makes it look.",
+  },
+  {
+    id: "C",
+    name: "Keep them tryable, but wall them off from the app",
+    gist:
+      "The page keeps all the options live to try. But the losing components are moved to a " +
+      "page-only place the shipped app cannot import, and the app is wired to reach the winner " +
+      "alone. The reader still feels every option; the product can only ever run the one that won.",
+    cards: [
+      { label: "A marker only marks", state: "live", fenced: true },
+      { label: "A marker pulls nearby", state: "live", fenced: true },
+      { label: "A marker is a button", state: "won" },
+    ],
+    footnote: "page-only components: the two losers · shared with the app: the winner only",
+    keeps:
+      "Both things at once: the felt options stay felt for whoever reopens the choice, and a " +
+      "loser cannot reach the product by an accidental import — the seam enforces it, not care.",
+    costs:
+      "A seam has to be drawn and kept: which folder is page-only, which is shipped, and a check " +
+      "that the shipped side never imports the page-only one. A small structural rule, but one " +
+      "that has to hold to be worth anything.",
+  },
+];
+
+const esc = (s) =>
+  String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+/** One drawn option-card, as it would sit on the decision page's compare strip. */
+function drawCard(card) {
+  const cls = ["ocard", card.state, card.fenced ? "fenced" : ""].filter(Boolean).join(" ");
+  const badge =
+    card.state === "won"
+      ? `<span class="pill won">chosen</span>`
+      : card.state === "note"
+        ? ""
+        : card.fenced
+          ? `<span class="pill fence">page&#8209;only</span>`
+          : `<span class="pill try">try it</span>`;
+  const handle = card.state === "note" ? "" : `<span class="handle" aria-hidden="true"></span>`;
+  return `<div class="${cls}"><span class="olabel">${esc(card.label)}</span>${badge}${handle}</div>`;
+}
+
+/** One full option column. */
+function drawOption(o) {
+  return `
+  <section class="opt" id="opt-${o.id}">
+    <header class="opt-head">
+      <span class="tag">Option ${o.id}</span>
+      <h3>${esc(o.name)}</h3>
+    </header>
+    <p class="gist">${esc(o.gist)}</p>
+    <div class="strip" role="img" aria-label="The page-bar decision page under option ${o.id}: ${esc(
+      o.cards.map((c) => c.label).join("; "),
+    )}">
+      <div class="strip-title">The page-bar decision, once it is settled</div>
+      ${o.cards.map(drawCard).join("\n      ")}
+      <div class="foot">${esc(o.footnote)}</div>
+    </div>
+    <dl class="tradeoff">
+      <dt>What it keeps</dt><dd>${esc(o.keeps)}</dd>
+      <dt>What it costs</dt><dd>${esc(o.costs)}</dd>
+    </dl>
+  </section>`;
+}
+
+const html = `<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>What happens to the options that lost?</title>
+<style>
+  :root{
+    --paper:${C.paper}; --raised:${C.raised}; --sunk:${C.sunk};
+    --ink:${C.ink}; --ink-soft:${C.inkSoft}; --ink-faint:${C.inkFaint};
+    --accent:${C.accent}; --accent-strong:${C.accentStrong}; --accent-tint:${C.accentTint};
+    --gold:${C.gold};
+  }
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{
+    margin:0; background:var(--paper); color:var(--ink);
+    font:16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    padding:2.5rem 1.25rem 4rem;
+  }
+  .wrap{max-width:1040px; margin:0 auto}
+  header.page{margin-bottom:2rem}
+  h1{font-size:1.9rem; line-height:1.2; margin:0 0 .5rem; text-wrap:balance}
+  .status{color:var(--ink-soft); font-size:.95rem; margin:0 0 .25rem}
+  .lede{color:var(--ink-soft); max-width:62ch}
+  h2{font-size:1.25rem; margin:2.4rem 0 .6rem; text-wrap:balance}
+  h2 .q{color:var(--accent-strong)}
+  p,li{max-width:68ch}
+  a{color:var(--accent-strong)}
+  .gloss{background:var(--raised); border:1px solid var(--sunk); border-radius:12px; padding:1rem 1.25rem; margin:1rem 0}
+  .gloss dl{margin:0; display:grid; grid-template-columns:auto 1fr; gap:.35rem 1rem}
+  .gloss dt{font-weight:650; color:var(--accent-strong)}
+  .gloss dd{margin:0; color:var(--ink-soft)}
+  .options{display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:1.25rem; margin-top:1rem}
+  .opt{background:var(--raised); border:1px solid var(--sunk); border-radius:14px; padding:1.1rem 1.15rem 1.35rem; display:flex; flex-direction:column}
+  .opt-head{display:flex; align-items:baseline; gap:.6rem; flex-wrap:wrap}
+  .tag{font-size:.72rem; letter-spacing:.08em; text-transform:uppercase; color:#fff; background:var(--accent); border-radius:999px; padding:.15rem .55rem}
+  .opt h3{font-size:1.08rem; margin:.1rem 0 .5rem; line-height:1.25}
+  .gist{color:var(--ink-soft); font-size:.95rem; margin:.1rem 0 .9rem}
+  .strip{background:var(--paper); border:1px solid var(--sunk); border-radius:10px; padding:.7rem .75rem .55rem}
+  .strip-title{font-size:.72rem; letter-spacing:.04em; text-transform:uppercase; color:var(--ink-faint); margin-bottom:.55rem}
+  .ocard{display:flex; align-items:center; gap:.5rem; background:var(--raised); border:1px solid var(--sunk); border-radius:8px; padding:.45rem .6rem; margin-bottom:.4rem; position:relative}
+  .ocard .olabel{font-size:.9rem; flex:1}
+  .ocard.won{border-color:var(--accent); box-shadow:inset 0 0 0 1px var(--accent)}
+  .ocard.note{border-style:dashed; background:transparent; color:var(--ink-faint); font-style:italic}
+  .ocard.fenced{background:repeating-linear-gradient(135deg,var(--raised),var(--raised) 7px,var(--sunk) 7px,var(--sunk) 8px)}
+  .pill{font-size:.68rem; letter-spacing:.03em; border-radius:999px; padding:.1rem .5rem; white-space:nowrap}
+  .pill.won{background:var(--accent); color:#fff}
+  .pill.try{background:var(--accent-tint); color:var(--accent-strong)}
+  .pill.fence{background:var(--gold); color:#3a2a08}
+  .handle{width:22px; height:14px; border-radius:4px; background:var(--sunk); border:1px solid var(--ink-faint); flex:0 0 auto}
+  .ocard.won .handle{background:var(--accent-tint); border-color:var(--accent)}
+  .foot{font-size:.74rem; color:var(--ink-faint); margin-top:.45rem; border-top:1px dotted var(--sunk); padding-top:.4rem}
+  .tradeoff{margin:.9rem 0 0; display:grid; gap:.15rem}
+  .tradeoff dt{font-size:.72rem; letter-spacing:.06em; text-transform:uppercase; color:var(--accent-strong); margin-top:.5rem}
+  .tradeoff dd{margin:0; font-size:.9rem; color:var(--ink-soft)}
+  .note-block{background:var(--accent-tint); border:1px solid var(--accent); border-radius:12px; padding:1rem 1.25rem; margin:1.4rem 0}
+  .note-block strong{color:var(--accent-strong)}
+  footer{margin-top:3rem; color:var(--ink-faint); font-size:.85rem; border-top:1px solid var(--sunk); padding-top:1rem}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="page">
+  <p class="status">Open decision &middot; nobody has chosen yet</p>
+  <h1>When a choice is made by letting people try each option on a page, what happens to the options that lost?</h1>
+  <p class="lede">The page bar just settled two questions this way: a reader dragged three
+  behaviours and picked one, and switched a label between three rules and picked one. The
+  winners are ready to move into the app. This page is about the ones that lost — and it is a
+  rule that will apply to every choice made this way from here on, not only these two.</p>
+</header>
+
+<section class="gloss">
+  <h2 style="margin-top:0"><span class="q">A few words, defined once</span></h2>
+  <dl>
+    <dt>The decision page</dt><dd>A page built to make one choice, that draws each option and — when the difference is felt — lets you try it with your own hand.</dd>
+    <dt>An option you can try</dt><dd>A small, self-contained piece built so it can be mounted on the decision page and, if it wins, moved into the app unchanged.</dd>
+    <dt>The winner</dt><dd>The option the owner chose. It moves into the app and does the job for real.</dd>
+    <dt>The app</dt><dd>The shipped product people use — as opposed to the decision page, which exists only to make the choice.</dd>
+  </dl>
+</section>
+
+<h2><span class="q">Why is this being asked now?</span></h2>
+<p>Two page-bar questions were just decided, and each was decided by <em>trying</em> the options,
+not by reading about them. That is the first time this project has a choice whose losing options
+are working code sitting next to the app, rather than pictures on a page. Two of our own rules
+now point in opposite directions about that code, and the winners cannot move into the app until
+we know which rule holds.</p>
+
+<div class="note-block">
+<p><strong>The two rules that disagree.</strong> One says: when a felt option wins, the losers are
+<em>deleted</em> — nothing throwaway the choice did not need. The other says: the losing options
+<em>stay on the page</em>, because they are the reason the choice was a choice, and whoever reopens
+it will want them. Both are ours, both are right about something, and for a <em>felt</em> option
+they collide: the only way to keep a felt loser is to keep its code, and the only way to delete
+its code is to lose the ability to show what lost.</p>
+</div>
+
+<h2><span class="q">What happens if nobody decides?</span></h2>
+<p>The two page-bar winners cannot move into the app cleanly, because moving them means touching
+the shared place their losing siblings also live, with no agreed rule for what to do with those
+siblings. Nothing already shipped is wrong; the bar works today. But the graduation — the one
+piece of work waiting on this — stays parked until the rule is set. The cost is small and it is
+a blockage, not a defect.</p>
+
+<h2><span class="q">What do people outside this project do about this?</span></h2>
+<p>This is a question about our own workshop, not about the reader's screen, so the prior art is
+software practice rather than mus'haf tradition. The common patterns are a <em>component catalog</em>
+that keeps every variant tryable long after one ships, and a <em>deprecation shelf</em> that keeps
+old code reachable-but-marked so nothing imports it by accident. Option C below is those two ideas
+put together. <strong>I did not survey specific tools for this</strong> — I reasoned from the general
+practice, because the decision is about how we keep our own record, and no other app's answer would
+transfer without knowing how it draws its choices.</p>
+
+<h2><span class="q">What have we already decided that touches this?</span></h2>
+<p>The two page-bar decisions this governs — <em>does a juz marker pull?</em> (won: a marker is a
+button) and <em>whose juz is a boundary page?</em> (won: both, on the four seam pages). Their record
+already states the standing rule that an option whose difference is felt is <em>built, not only
+drawn</em>. That rule is exactly what makes this question sharp: it is why the losers are code, and
+code is the thing this decision is about.</p>
+
+<h2><span class="q">So what are the options?</span></h2>
+<p>Each drawn as the shape it would leave on the page-bar decision, now that it is settled.</p>
+<div class="options">
+${OPTIONS.map(drawOption).join("\n")}
+</div>
+
+<h2><span class="q">What else could be considered, and why is it not here?</span></h2>
+<p>A fourth path — <em>delete the losers, but keep a recording</em> (a short screen capture of each
+losing option in motion, embedded in the record) — was left off. It answers the same need as C
+(re-feel what lost) but with a video instead of live code, and a video cannot be dragged, resized,
+or checked against a later change to the app. It is a fallback for a losing option that was felt but
+whose code genuinely cannot be kept, not a general rule.</p>
+
+<h2><span class="q">What would change the answer?</span></h2>
+<p>If keeping the losing code turned out to cost the app real size or speed — if a page-only option
+pulled weight into the shipped bundle — the balance would tip toward B. It does not today: the
+losing strategies are a few pure functions. If the project stopped making felt choices and went
+back to drawn-only ones, the whole question would dissolve, and A and B would be indistinguishable.</p>
+
+<h2><span class="q">What is this not settling?</span></h2>
+<p>Not <em>how</em> a wall between page-only and shipped code is drawn or checked, if C wins — that is
+a build detail for the graduation to work out. Not the two page-bar choices themselves; those are
+made. Only this: once a choice is made by hand, what becomes of the hands-on options it beat.</p>
+
+<footer>
+  <p>Drawn from the two just-settled page-bar questions. Rebuild with the page's builder; the page
+  carries no scripture and no external assets. This is a decision page in the project's own register —
+  open the register to see where it sits among the others.</p>
+</footer>
+</div>
+</body>
+</html>
+`;
+
+// Standing rule: a page built from the mus'haf-app world ships zero Arabic codepoints.
+const arabic = html.match(/[؀-ۿݐ-ݿﭐ-﷿ﹰ-﻿]/g);
+if (arabic) {
+  console.error(`Refusing to write: ${arabic.length} Arabic codepoint(s) found.`);
+  process.exit(1);
+}
+
+writeFileSync(OUT, html);
+console.log(`Wrote ${OUT} (${html.length} bytes)`);

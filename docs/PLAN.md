@@ -1033,7 +1033,7 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     348 MB fetch first, which nobody starts without asking. Until then the gate holds the
     count at 2 and the two tails ship as the print drew them.
 
-18. **The page-bar's two questions are answered, and the app does not yet do what they say.**
+18. **The page-bar's two questions are answered, and the app now does what they say — save one phone-only corner.**
     Both were settled by the owner on 2026-09-02, and both chose the same option. A juz marker
     is a **button**: a tap on it jumps to that juz, and the page-drag is untouched by it — with
     one refinement the owner asked for, that a marker **grows as the pointer nears it**, small
@@ -1045,18 +1045,23 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     live-options tenet asks for — the growth is a pure, unit-tested function and the tap-button
     strategy carries its reach and peak — and both are mounted live on the decision page
     (`docs/design/page-bar-options.html`), which now also records the two answers in its own
-    face. What is left is the graduation the tenet promises: wire the winning strategy and the
-    growth into the app's own bar, teach the bar to name both juz on a seam page, and **delete
-    the two losing strategies** and their live-page wiring, so nothing that lost the choice is
-    left to rot. **What would answer it:** the winning strategy adopted by the bar unchanged
-    (a pointer device gets the grow-on-approach; a touch device, which has no hover, gets the
-    plain button); the seam pages naming both juz in the bubble and the pack shelf; the losers
-    gone from the core module and the builder; and a phone-bar layout that can carry a two-juz
-    seam label where the bar is 0.4 px a page and there is no pointer to grow a marker for —
-    the one part the desktop live page cannot prove. **Held, 2026-09-02:** the app bar
-    (`PageSlider`) carries another session's uncommitted work, so the graduation waits for that
-    to land rather than two sessions editing one file. Blocks nothing shipped; the bar works
-    today, it just predates the choice.
+    face. **Graduated, 2026-09-02:** the app's own bar now carries the winner. Each marker is a
+    button that jumps to its juz; on a pointer device it grows as the pointer nears it and never
+    while a drag is under way (a touch device, which has no hover, gets the plain button); and
+    the bubble under the thumb names both juz on a seam page — the pack shelf and the wheel keep
+    one juz each, exactly as the `boundary-juz` decision scopes it, so "both" is the bar's answer
+    only where the seam is visible and nothing else has to widen its sentence. Per the
+    `graduation-losers` decision (option A) the two losing strategies and their live-page wiring
+    stay in the core module and on the decision page, so a reader can still feel why the winner
+    won; the bar imports only the winner. The tap-to-navigate and the growth are covered by a
+    desktop end-to-end spec against the real corpus and by the component tests, and the whole
+    desktop suite and both decision gates are green.
+    **What is left:** the one part the desktop live page cannot prove — a
+    phone-bar layout that can carry a two-juz
+    seam label where the bar is 0.4 px a page and there is no pointer to grow a marker for. It
+    needs the owner's phone (or a WebKit run local darwin cannot launch), so it stays open as a
+    device-bound check rather than something drawn here. Blocks nothing shipped; the bar works
+    today.
 
 **The half of these a machine cannot run now has a register — and a runbook.** Follow-ups
 ① (the phone), ② (the browser glance) and ④ (VoiceOver/TalkBack) still wait on a human, and

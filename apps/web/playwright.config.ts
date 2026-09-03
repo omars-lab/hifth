@@ -171,7 +171,13 @@ export default defineConfig({
           // decision page's option C — a juz marker that grows as the *pointer*
           // nears it — and a hover-near-without-dragging is a thing only a device
           // with a pointer has. The two phone projects `testIgnore` it below.
-          testMatch: /(desktop|stage-fit|detent-live)\.spec\.ts/,
+          //
+          // `pagebar-detents` joins for the same pointer reason, one layer on:
+          // it is that grown marker once option C graduated onto the *app* bar
+          // over the real corpus, where a hover swells the real tick and a tap
+          // turns the book to the juz. The growth is gated on a fine pointer, so
+          // it too is a desktop-only claim.
+          testMatch: /(desktop|stage-fit|detent-live|pagebar-detents)\.spec\.ts/,
           use: {
             browserName: "chromium",
             viewport: { width: 1440, height: 900 },
@@ -180,12 +186,12 @@ export default defineConfig({
         {
           name: "iphone",
           use: { ...devices["iPhone 13"] },
-          testIgnore: /(golden|shots|desktop|detent-live)\.spec\.ts/,
+          testIgnore: /(golden|shots|desktop|detent-live|pagebar-detents)\.spec\.ts/,
         },
         {
           name: "android",
           use: { ...devices["Pixel 7"] },
-          testIgnore: /(golden|shots|desktop|detent-live)\.spec\.ts/,
+          testIgnore: /(golden|shots|desktop|detent-live|pagebar-detents)\.spec\.ts/,
         },
         {
           // The golden-image project. Its viewport is spelled out rather than

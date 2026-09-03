@@ -71,6 +71,7 @@ export interface Catalog {
   readonly jumpPlaceholder: string;
   readonly jumpResults: string;
   readonly jumpStartsAt: (d: { readonly label: string | number }) => string;
+  readonly juzBoth: (d: { readonly aText: string | number; readonly bText: string | number }) => string;
   readonly juzEdge: (d: { readonly juzText: string | number }) => string;
   readonly juzGroup: string;
   readonly juzN: (d: { readonly juzText: string | number }) => string;

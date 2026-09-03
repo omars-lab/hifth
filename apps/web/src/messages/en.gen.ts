@@ -77,6 +77,7 @@ const messages: Catalog = {
   jumpPlaceholder: "Al-Baqarah · 2:255 · juz 9",
   jumpResults: "Results",
   jumpStartsAt: (d) => "Starts at " + d.label,
+  juzBoth: (d) => "Juz " + d.aText + " → " + d.bText,
   juzEdge: (d) => "No juz that way · juz " + d.juzText,
   juzGroup: "The thirty juz",
   juzN: (d) => "Juz " + d.juzText,

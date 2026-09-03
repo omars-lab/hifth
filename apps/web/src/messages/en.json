@@ -92,6 +92,7 @@
   "jumpResults": "Results",
   "juzGroup": "The thirty juz",
   "juzN": "Juz {juzText}",
+  "juzBoth": "Juz {aText} → {bText}",
   "surahN": "Surah {surahText}",
   "jumpStartsAt": "Starts at {label}",
   "editionCurrent": "current",
