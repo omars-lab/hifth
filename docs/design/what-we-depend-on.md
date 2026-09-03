@@ -516,6 +516,13 @@ holds open.
 improvement against the 114 spans it would cost, with both span sets drawn on real pages so
 a reader can see for themselves what is gained and what is lost.
 
+**Now drawn (2026-09-03):** that ruling is registered as the decision `adjacency-span-source`,
+and its page draws all three buckets — the 2,430 agreed, the 150 gained and the 114 lost —
+each washed on the real mus'haf page it sits on, built from committed findings by
+`scripts/build-adjacency-span-source.mjs` and served at `docs/design/adjacency-span-source.html`.
+What stays open is the owner's choice between the two ways, not any missing measurement or
+picture; this row waits on that decision.
+
 ### ⑧ Whether the tajweed spans should move to a pause-aware engine · **open**
 
 An MIT engine with a corpus-free core would mean vendoring no annotation data and no Quran

@@ -1,0 +1,307 @@
+<title>Which words the app lines look-alikes up on</title>
+<style>
+:root {
+  --ground: #f4efe6;
+  --raised: #fbf8f2;
+  --sunk: #ece4d6;
+  --ink: #26201a;
+  --soft: #5c5347;
+  --faint: #6b6255;
+  --rule: #ded4c3;
+  --rule-soft: #eae1d2;
+  --accent: #1f6f66;
+  --accent-ink: #17544d;
+  --accent-soft: #d7e7e3;
+  --gain: #1f6f66;
+  --gain-soft: #cfe6e1;
+  --loss: #a23b2c;
+  --loss-soft: #f0d8ce;
+  --agreed: #7a6f5c;
+  --agreed-soft: #e4dccb;
+  --run: rgba(31, 111, 102, 0.30);
+  --run-line: rgba(23, 84, 77, 0.75);
+  --serif: "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", "Hoefler Text", Georgia, serif;
+  --sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace;
+  --measure: 37rem;
+}
+:root:not([data-theme="light"]) {
+  @media (prefers-color-scheme: dark) {
+    --ground: #1a1712; --raised: #221e18; --sunk: #14110d;
+    --ink: #ece3d4; --soft: #b3a793; --faint: #8f836f;
+    --rule: #3a3227; --rule-soft: #2c261d;
+    --accent: #6fc3b7; --accent-ink: #9fd8cf; --accent-soft: #21332f;
+    --gain: #6fc3b7; --gain-soft: #21332f;
+    --loss: #e0876f; --loss-soft: #3a2620;
+    --agreed: #b6a98f; --agreed-soft: #2e281f;
+    --run: rgba(111, 195, 183, 0.28); --run-line: rgba(159, 216, 207, 0.8);
+  }
+}
+:root[data-theme="dark"] {
+  --ground: #1a1712; --raised: #221e18; --sunk: #14110d;
+  --ink: #ece3d4; --soft: #b3a793; --faint: #8f836f;
+  --rule: #3a3227; --rule-soft: #2c261d;
+  --accent: #6fc3b7; --accent-ink: #9fd8cf; --accent-soft: #21332f;
+  --gain: #6fc3b7; --gain-soft: #21332f;
+  --loss: #e0876f; --loss-soft: #3a2620;
+  --agreed: #b6a98f; --agreed-soft: #2e281f;
+  --run: rgba(111, 195, 183, 0.28); --run-line: rgba(159, 216, 207, 0.8);
+}
+
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--ground); color: var(--ink);
+  font-family: var(--sans); line-height: 1.6; }
+.wrap { max-width: 62rem; margin: 0 auto; padding: 3rem 1.5rem 5rem; }
+h1, h2, h3 { font-family: var(--serif); font-weight: 600; text-wrap: balance; line-height: 1.2; }
+h1 { font-size: clamp(1.7rem, 4.5vw, 2.5rem); margin: 0 0 0.5rem; }
+h2 { font-size: 1.45rem; margin: 0 0 0.9rem; }
+h3 { font-size: 1.1rem; margin: 0 0 0.3rem; }
+p { max-width: var(--measure); }
+a { color: var(--accent-ink); }
+.sub { color: var(--soft); font-size: 1.05rem; max-width: var(--measure); margin: 0 0 1.4rem; }
+.status { display: inline-flex; gap: 0.5rem; align-items: baseline;
+  font-family: var(--mono); font-size: 0.8rem; letter-spacing: 0.03em;
+  text-transform: uppercase; color: var(--soft);
+  border: 1px solid var(--rule); border-radius: 999px; padding: 0.3rem 0.8rem; }
+.status b { color: var(--accent-ink); }
+.picture { font-size: 0.95rem; color: var(--soft); border-left: 2px solid var(--rule);
+  padding: 0.2rem 0 0.2rem 1rem; margin: 1.4rem 0 0; max-width: var(--measure); }
+
+section { margin-top: 3rem; }
+section > h2 .n { display: block; font-family: var(--mono); font-size: 0.72rem;
+  letter-spacing: 0.12em; text-transform: uppercase; color: var(--faint);
+  font-weight: 400; margin-bottom: 0.35rem; }
+
+dl.gloss { display: grid; grid-template-columns: max-content 1fr; gap: 0.35rem 1.1rem;
+  background: var(--raised); border: 1px solid var(--rule); border-radius: 12px;
+  padding: 1.1rem 1.3rem; margin: 1.5rem 0 0; max-width: var(--measure); }
+dl.gloss dt { font-weight: 600; color: var(--accent-ink); font-family: var(--serif); }
+dl.gloss dd { margin: 0; color: var(--soft); font-size: 0.96rem; }
+
+.figures { display: grid; grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
+  gap: 0.9rem; margin: 1.6rem 0 0; }
+.tile { background: var(--raised); border: 1px solid var(--rule); border-radius: 12px;
+  padding: 1.1rem 1.2rem; }
+.tile .big { font-family: var(--serif); font-size: 2.1rem; font-weight: 600;
+  line-height: 1; font-variant-numeric: tabular-nums; }
+.tile.gain .big { color: var(--gain); }
+.tile.loss .big { color: var(--loss); }
+.tile .cap { color: var(--soft); font-size: 0.88rem; margin-top: 0.45rem; }
+
+.propbar { display: flex; height: 2.6rem; border-radius: 8px; overflow: hidden;
+  border: 1px solid var(--rule); margin: 1.6rem 0 0.7rem; font-size: 0.8rem; }
+.propbar .seg { display: flex; align-items: center; justify-content: center; gap: 0.3rem;
+  color: #fff; white-space: nowrap; overflow: hidden; padding: 0 0.4rem; }
+.propbar .seg b { font-variant-numeric: tabular-nums; }
+.seg.agreed { background: var(--agreed); }
+.seg.gain { background: var(--gain); }
+.seg.loss { background: var(--loss); }
+.propkey { display: flex; flex-wrap: wrap; gap: 0.4rem 1.3rem; color: var(--soft);
+  font-size: 0.85rem; }
+.propkey span { display: inline-flex; align-items: center; gap: 0.4rem; }
+.sw { width: 0.85rem; height: 0.85rem; border-radius: 3px; display: inline-block; }
+.sw.agreed { background: var(--agreed); }
+.sw.gain { background: var(--gain); }
+.sw.loss { background: var(--loss); }
+
+table.cost { border-collapse: collapse; margin: 1.4rem 0 0; font-size: 0.95rem;
+  min-width: min(100%, 28rem); }
+table.cost td { padding: 0.4rem 1rem 0.4rem 0; border-bottom: 1px solid var(--rule-soft); }
+table.cost td.v { text-align: right; font-variant-numeric: tabular-nums; font-weight: 600;
+  font-family: var(--mono); }
+
+.buckets { margin-top: 1.8rem; display: grid; gap: 2.2rem; }
+.bucket h3 { color: var(--ink); }
+.bucket .lead { color: var(--soft); font-size: 0.97rem; margin: 0 0 1rem; }
+.specimens { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 22rem), 1fr));
+  gap: 1.1rem; }
+.pair { display: flex; align-items: center; gap: 0.5rem; background: var(--raised);
+  border: 1px solid var(--rule); border-radius: 12px; padding: 0.8rem; }
+.pair .tie { color: var(--faint); font-size: 1.3rem; flex: none; }
+.crop { flex: 1; margin: 0; min-width: 0; }
+.crop .art { width: 100%; height: auto; display: block; background: var(--sunk);
+  border-radius: 6px; border: 1px solid var(--rule-soft); }
+.crop figcaption { font-family: var(--mono); font-size: 0.78rem; color: var(--soft);
+  margin-top: 0.4rem; display: flex; justify-content: space-between; gap: 0.5rem; }
+.crop figcaption .pg { color: var(--faint); }
+.run { fill: var(--run); stroke: var(--run-line); stroke-width: 1; }
+rect { paint-order: stroke; }
+
+.opts { border-collapse: collapse; width: 100%; margin-top: 1.4rem; font-size: 0.97rem; }
+.opts th, .opts td { text-align: left; vertical-align: top; padding: 0.7rem 0.9rem;
+  border-bottom: 1px solid var(--rule); }
+.opts th { font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.08em;
+  text-transform: uppercase; color: var(--faint); font-weight: 400; }
+.opts td.k { font-family: var(--serif); font-weight: 600; color: var(--accent-ink);
+  white-space: nowrap; }
+.opts td.lab { font-weight: 600; }
+
+ul.plain { max-width: var(--measure); padding-left: 1.1rem; }
+ul.plain li { margin-bottom: 0.7rem; }
+ul.plain li b { color: var(--ink); }
+.vault { position: absolute; width: 0; height: 0; overflow: hidden; }
+
+@media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }
+</style>
+
+<div class="wrap">
+<header>
+  <h1>Which words does the app line look-alikes up on?</h1>
+  <p class="sub">When two verses open the same way, the app washes the phrase they share so the
+    eye is taught the seam. To wash it, the app must know that phrase word for word — and it can
+    count those words two ways. This page draws what the choice between them keeps and drops, on
+    the real pages where they differ.</p>
+  <span class="status">Status <b>Open</b> · asked 2026-09-03</span>
+  <p class="picture">This is the picture the decision record points at. Every run below is drawn
+    on the printed page it actually sits on, washed exactly as the look-alike panel washes it.
+    Rebuilt from committed findings — no scripture travels in this page.</p>
+</header>
+
+<section>
+  <h2><span class="n">Words this page uses</span>The three words to have first</h2>
+  <dl class="gloss">
+    <dt>look-alikes</dt><dd>Two verses that begin with the same phrase and then diverge — the
+      pairs a hafiz most often slips between. Known in the tradition as <em>mutashabihat</em>.</dd>
+    <dt>shared run</dt><dd>The stretch of words a look-alike pair has in common, taken as the
+      longest run they share and kept only where it sits in exactly one place on each side.</dd>
+    <dt>the page's words vs. the corpus's</dt><dd>The printed mus'haf has its own words; a
+      separate word-by-word reference we carry has its own count of the same verse. The two
+      mostly agree, but the printed page splits some short joining particles the reference writes
+      joined — so a phrase is often more words on the page, never fewer.</dd>
+  </dl>
+</section>
+
+<section>
+  <h2><span class="n">The question</span>What is being decided?</h2>
+  <p>The shared runs are worked out once when the app is built. The question here is only which
+    set of words they are counted in: <b>the printed page's own words</b>, or <b>the separate
+    word-by-word reference we carry today</b>. Nothing else about the look-alike panel changes —
+    only which words of an agreed pair get washed.</p>
+  <p>It is asked now because the reference we count in today comes under a share-alike licence
+    that reaches whatever the app builds from it, and the printed page's words — already carried,
+    already read — do not. Counting the runs in the page's own words would take the whole
+    look-alike feature out from under that licence and delete a conversion step besides. The
+    catch is that it does not keep the same runs.</p>
+</section>
+
+<section>
+  <h2><span class="n">The cost of leaving it</span>What does each way keep, measured?</h2>
+  <p>The same rule, run over each set of words on 2026-09-03. The two results are not one inside
+    the other — the page finds runs the reference misses, and misses runs the reference finds:</p>
+  <div class="figures">
+    <div class="tile"><div class="big">2,544</div>
+      <div class="cap">runs kept today, counted in the reference</div></div>
+    <div class="tile"><div class="big">2,580</div>
+      <div class="cap">runs kept if counted in the page's own words</div></div>
+    <div class="tile gain"><div class="big">+150</div>
+      <div class="cap">new runs only the page finds</div></div>
+    <div class="tile loss"><div class="big">−114</div>
+      <div class="cap">runs the page loses that the reference keeps</div></div>
+  </div>
+  <div class="propbar" role="img" aria-label="Of 2694 runs, 2430 are found both ways, 150 only by the printed page, 114 only by the corpus."><span class="seg agreed" style="width:90.2%"><b>2430</b> both agree</span><span class="seg gain" style="width:5.57%" title="only the printed page finds these"><b>+150</b></span><span class="seg loss" style="width:4.23%" title="only the corpus finds these"><b>−114</b></span></div><div class="propkey"><span><i class="sw agreed"></i>found both ways</span><span><i class="sw gain"></i>only the printed page — new</span><span><i class="sw loss"></i>only the corpus — lost on the page</span></div>
+  <table class="cost">
+    <tr><td>runs both ways agree on</td><td class="v">2,430</td></tr>
+    <tr><td>runs only the printed page finds</td><td class="v">150</td></tr>
+    <tr><td>runs only the reference finds, lost on the page</td><td class="v">114</td></tr>
+    <tr><td>shared phrases that are more words on the page</td><td class="v">1,414</td></tr>
+    <tr><td>the same length either way</td><td class="v">1,130</td></tr>
+    <tr><td>fewer words on the page</td><td class="v">0</td></tr>
+  </table>
+  <p>The churn is the split itself. Because a phrase is never fewer page-words, some runs grow
+    long enough to become the single place they occur — a new run appears — while a short joining
+    particle that repeats across the page forges a fresh tie elsewhere and dissolves a run that
+    used to be unique. So the trade is bounded, and it <em>is</em> a trade:
+    <b>114 runs a reader can land on today disappear, 150 new ones appear,
+    and the feature stops being a share-alike derivative.</b></p>
+</section>
+
+<section>
+  <h2><span class="n">What the two sets look like</span>The runs, drawn on the page</h2>
+  <p>Every panel below is a real look-alike pair, each verse cropped from the page it sits on,
+    with the run washed the way the app washes it. Read across the three groups: what both ways
+    keep, what only the page adds, and what only the reference keeps and the page would lose.</p>
+  <div class="buckets">
+    <div class="bucket"><h3>Runs both ways agree on</h3><p class="lead">These the choice does not touch — counted either way, the same words are washed. The overwhelming majority of runs are here.</p><div class="specimens"><div class="pair"><figure class="crop"><svg class="art" viewBox="0 357 343.4 124.1" aria-hidden="true" focusable="false"><image href="../../apps/web/public/assets/pages/hafs-kfqc/85.svg" x="0" y="0" width="345" height="550"></image><rect class="run" x="5" y="366.5" width="213.4" height="36.9" rx="1.5"></rect><rect class="run" x="5" y="401.3" width="328.4" height="33" rx="1.5"></rect><rect class="run" x="5.5" y="437.3" width="328.4" height="34.3" rx="1.5"></rect></svg><figcaption>4:43<span class="pg">page 85</span></figcaption></figure><span class="tie" aria-hidden="true">≈</span><figure class="crop"><svg class="art" viewBox="0 108.6 344 123.4" aria-hidden="true" focusable="false"><image href="../../apps/web/public/assets/pages/hafs-kfqc/108.svg" x="0" y="0" width="345" height="550"></image><rect class="run" x="8.5" y="118.1" width="325.9" height="34.8" rx="1.5"></rect><rect class="run" x="8.5" y="153.2" width="326" height="31.6" rx="1.5"></rect><rect class="run" x="93.3" y="188.6" width="241.1" height="33.9" rx="1.5"></rect></svg><figcaption>5:6<span class="pg">page 108</span></figcaption></figure></div><div class="pair"><figure class="crop"><svg class="art" viewBox="0 72.8 345 88.4" aria-hidden="true" focusable="false"><image href="../../apps/web/public/assets/pages/hafs-kfqc/234.svg" x="0" y="0" width="345" height="550"></image><rect class="run" x="7.5" y="82.3" width="328" height="29" rx="1.5"></rect><rect class="run" x="27" y="118" width="308.6" height="33.7" rx="1.5"></rect></svg><figcaption>11:110<span class="pg">page 234</span></figcaption></figure><span class="tie" aria-hidden="true">≈</span><figure class="crop"><svg class="art" viewBox="0 394.4 341.9 124.1" aria-hidden="true" focusable="false"><image href="../../apps/web/public/assets/pages/hafs-kfqc/481.svg" x="0" y="0" width="345" height="550"></image><rect class="run" x="6.5" y="403.9" width="149.7" height="28.6" rx="1.5"></rect><rect class="run" x="6.5" y="440.9" width="325.9" height="31.6" rx="1.5"></rect><rect class="run" x="128.8" y="476.3" width="203.6" height="32.7" rx="1.5"></rect></svg><figcaption>41:45<span class="pg">page 481</span></figcaption></figure></div></div></div>
+    <div class="bucket"><h3>Runs only the printed page finds — the 150 gained</h3><p class="lead">A phrase splits into enough page-words that it becomes the single place it occurs, and a new run appears. The app would start washing these.</p><div class="specimens"><div class="pair"><figure class="crop"><svg class="art" viewBox="163.9 463.1 131.6 51.5" aria-hidden="true" focusable="false"><image href="../../apps/web/public/assets/pages/hafs-kfqc/281.svg" x="0" y="0" width="345" height="550"></image><rect class="run" x="173.4" y="472.6" width="112.6" height="32.5" rx="1.5"></rect></svg><figcaption>16:127<span class="pg">page 281</span></figcaption></figure><span class="tie" aria-hidden="true">≈</span><figure class="crop"><svg class="art" viewBox="208.5 286.8 133.8 49.9" aria-hidden="true" focusable="false"><image href="../../apps/web/public/assets/pages/hafs-kfqc/383.svg" x="0" y="0" width="345" height="550"></image><rect class="run" x="218" y="296.3" width="114.8" height="30.9" rx="1.5"></rect></svg><figcaption>27:70<span class="pg">page 383</span></figcaption></figure></div><div class="pair"><figure class="crop"><svg class="art" viewBox="22.1 501.7 286.9 48.3" aria-hidden="true" focusable="false"><image href="../../apps/web/public/assets/pages/hafs-kfqc/268.svg" x="0" y="0" width="345" height="550"></image><rect class="run" x="31.6" y="511.2" width="267.9" height="31.7" rx="1.5"></rect></svg><figcaption>16:14<span class="pg">page 268</span></figcaption></figure><span class="tie" aria-hidden="true">≈</span><figure class="crop"><svg class="art" viewBox="0 74.1 342.9 81.7" aria-hidden="true" focusable="false"><image href="../../apps/web/public/assets/pages/hafs-kfqc/436.svg" x="0" y="0" width="345" height="550"></image><rect class="run" x="9.4" y="83.6" width="95.9" height="27.2" rx="1.5"></rect><rect class="run" x="192.2" y="115.7" width="141.2" height="30.6" rx="1.5"></rect></svg><figcaption>35:12<span class="pg">page 436</span></figcaption></figure></div><div class="pair"><figure class="crop"><svg class="art" viewBox="139.1 213.5 204.4 49.4" aria-hidden="true" focusable="false"><image href="../../apps/web/public/assets/pages/hafs-kfqc/466.svg" x="0" y="0" width="345" height="550"></image><rect class="run" x="148.6" y="223" width="185.4" height="30.4" rx="1.5"></rect></svg><figcaption>39:71<span class="pg">page 466</span></figcaption></figure><span class="tie" aria-hidden="true">≈</span><figure class="crop"><svg class="art" viewBox="0 393.3 202.5 48.8" aria-hidden="true" focusable="false"><image href="../../apps/web/public/assets/pages/hafs-kfqc/466.svg" x="0" y="0" width="345" height="550"></image><rect class="run" x="8.9" y="402.8" width="184.1" height="29.8" rx="1.5"></rect></svg><figcaption>39:73<span class="pg">page 466</span></figcaption></figure></div><div class="pair"><figure class="crop"><svg class="art" viewBox="0 70 341.8 88.3" aria-hidden="true" focusable="false"><image href="../../apps/web/public/assets/pages/hafs-kfqc/123.svg" x="0" y="0" width="345" height="550"></image><rect class="run" x="6.6" y="79.5" width="131.9" height="33.2" rx="1.5"></rect><rect class="run" x="288.4" y="121" width="43.9" height="27.8" rx="1.5"></rect></svg><figcaption>5:92<span class="pg">page 123</span></figcaption></figure><span class="tie" aria-hidden="true">≈</span><figure class="crop"><svg class="art" viewBox="0 106.4 340.5 87.1" aria-hidden="true" focusable="false"><image href="../../apps/web/public/assets/pages/hafs-kfqc/557.svg" x="0" y="0" width="345" height="550"></image><rect class="run" x="8" y="115.9" width="85.7" height="31.1" rx="1.5"></rect><rect class="run" x="222.3" y="150.8" width="108.7" height="33.2" rx="1.5"></rect></svg><figcaption>64:12<span class="pg">page 557</span></figcaption></figure></div></div></div>
+    <div class="bucket"><h3>Runs only the reference finds — the 114 lost</h3><p class="lead">Washed today, but on the page's own words the run either splits or is no longer unique, so it drops out. These are what the switch costs a reader.</p><div class="specimens"><div class="pair"><figure class="crop"><svg class="art" viewBox="92.1 0 227.5 58.9" aria-hidden="true" focusable="false"><image href="../../apps/web/public/assets/pages/hafs-kfqc/393.svg" x="0" y="0" width="345" height="550"></image><rect class="run" x="101.6" y="9.1" width="208.5" height="40.3" rx="1.5"></rect></svg><figcaption>28:60<span class="pg">page 393</span></figcaption></figure><span class="tie" aria-hidden="true">≈</span><figure class="crop"><svg class="art" viewBox="0 102.7 343 87.5" aria-hidden="true" focusable="false"><image href="../../apps/web/public/assets/pages/hafs-kfqc/487.svg" x="0" y="0" width="345" height="550"></image><rect class="run" x="5.5" y="112.2" width="104.8" height="39.6" rx="1.5"></rect><rect class="run" x="263" y="151.9" width="70.5" height="28.8" rx="1.5"></rect></svg><figcaption>42:36<span class="pg">page 487</span></figcaption></figure></div><div class="pair"><figure class="crop"><svg class="art" viewBox="190 392 151.6 50" aria-hidden="true" focusable="false"><image href="../../apps/web/public/assets/pages/hafs-kfqc/403.svg" x="0" y="0" width="345" height="550"></image><rect class="run" x="199.5" y="401.5" width="132.6" height="31" rx="1.5"></rect></svg><figcaption>29:61<span class="pg">page 403</span></figcaption></figure><span class="tie" aria-hidden="true">≈</span><figure class="crop"><svg class="art" viewBox="191.6 463 150.9 49.1" aria-hidden="true" focusable="false"><image href="../../apps/web/public/assets/pages/hafs-kfqc/495.svg" x="0" y="0" width="345" height="550"></image><rect class="run" x="201.1" y="472.5" width="131.9" height="30.1" rx="1.5"></rect></svg><figcaption>43:87<span class="pg">page 495</span></figcaption></figure></div><div class="pair"><figure class="crop"><svg class="art" viewBox="0 284.1 219.3 51.7" aria-hidden="true" focusable="false"><image href="../../apps/web/public/assets/pages/hafs-kfqc/105.svg" x="0" y="0" width="345" height="550"></image><rect class="run" x="6.7" y="293.6" width="203.1" height="32.7" rx="1.5"></rect></svg><figcaption>4:173<span class="pg">page 105</span></figcaption></figure><span class="tie" aria-hidden="true">≈</span><figure class="crop"><svg class="art" viewBox="0 213.6 343.9 85.8" aria-hidden="true" focusable="false"><image href="../../apps/web/public/assets/pages/hafs-kfqc/486.svg" x="0" y="0" width="345" height="550"></image><rect class="run" x="8.5" y="223.1" width="139.9" height="31.3" rx="1.5"></rect><rect class="run" x="271.6" y="262.7" width="62.8" height="27.2" rx="1.5"></rect></svg><figcaption>42:26<span class="pg">page 486</span></figcaption></figure></div><div class="pair"><figure class="crop"><svg class="art" viewBox="63.7 0 109.9 53.4" aria-hidden="true" focusable="false"><image href="../../apps/web/public/assets/pages/hafs-kfqc/225.svg" x="0" y="0" width="345" height="550"></image><rect class="run" x="73.2" y="9.3" width="90.9" height="34.6" rx="1.5"></rect></svg><figcaption>11:29<span class="pg">page 225</span></figcaption></figure><span class="tie" aria-hidden="true">≈</span><figure class="crop"><svg class="art" viewBox="191.4 355.8 122.3 53.5" aria-hidden="true" focusable="false"><image href="../../apps/web/public/assets/pages/hafs-kfqc/227.svg" x="0" y="0" width="345" height="550"></image><rect class="run" x="200.9" y="365.3" width="103.3" height="34.5" rx="1.5"></rect></svg><figcaption>11:51<span class="pg">page 227</span></figcaption></figure></div></div></div>
+  </div>
+</section>
+
+<section>
+  <h2><span class="n">What already decides part of this</span>What constrains it?</h2>
+  <ul class="plain">
+    <li><b>What the app is allowed to give away, by channel.</b> The look-alike tree is
+      <em>computed into</em> something the app ships, not merely read to check it, so the licence
+      under the reference reaches the reader. On the web served today that costs nothing anyone
+      must act on; in a channel where a store forbids share-alike terms it would, and that is the
+      case this option is insurance against.</li>
+    <li><b>What the look-alike panel draws.</b> It washes its colours off exactly these runs.
+      That decision took the runs as given and correct and did not reopen them — this is where
+      they are reopened, so the two must be read together. If the page's words win,
+      114 pairs lose the run they land on and 150 gain one.</li>
+  </ul>
+</section>
+
+<section>
+  <h2><span class="n">Prior art</span>What do others do about this?</h2>
+  <p>I did not look outside the project for this one, and should say so plainly. The choice is
+    internal: which of two things <em>we already hold</em> to count a run in, both vendored here
+    with their licences known. The public Qur'an-data libraries publish look-alike lists and
+    word-by-word references as separate resources and leave the joining to whoever uses them —
+    which is why this project had to compute the runs itself in the first place. There is no
+    upstream that has made this particular choice for us to follow.</p>
+</section>
+
+<section>
+  <h2><span class="n">The options</span>So which words?</h2>
+  <table class="opts">
+    <tr><th>#</th><th>Option</th><th>What it gets, what it costs</th></tr>
+    <tr><td class="k">A</td><td class="lab">Keep counting in the reference's words</td>
+      <td>The 2,544 runs that ship today, the conversion step, and the
+        share-alike thread that comes with the reference. Zero work. <em>Doing nothing is A.</em></td></tr>
+    <tr><td class="k">B</td><td class="lab">Count in the printed page's own words</td>
+      <td>2,580 runs, no conversion step, no share-alike thread. Costs
+        114 runs a reader can land on today to gain 150 new ones.</td></tr>
+  </table>
+</section>
+
+<section>
+  <h2><span class="n">What else was weighed</span>What is not on the list, and why?</h2>
+  <ul class="plain">
+    <li><b>Keep the reference, fall back to the page only where they disagree.</b> Keeps the
+      share-alike thread — shedding which is the whole gain — so it buys the churn without the
+      payoff. Out.</li>
+    <li><b>Count in the reference but ship the runs already converted, to drop the conversion
+      step.</b> Removes the step but not the licence thread, the larger half of the cost. A
+      tidy-up of A, not a third answer.</li>
+  </ul>
+</section>
+
+<section>
+  <h2><span class="n">Sensitivity</span>What would change the answer?</h2>
+  <ul class="plain">
+    <li><b>A channel being chosen where share-alike terms bite</b> — a store build. Then B's
+      licence gain stops being insurance and becomes the reason.</li>
+    <li><b>A hafiz judging the 114 lost runs.</b> If the runs the page drops are ones
+      a reader leans on, the cost is higher than a count says; if marginal, lower. Nobody has
+      looked at <em>which</em> 114 they are, only at how many.</li>
+    <li><b>The reference being re-licensed permissively.</b> Then the licence half dissolves and
+      only the 114-for-150 churn is left, which on its own does not
+      obviously favour either side.</li>
+  </ul>
+</section>
+
+<section>
+  <h2><span class="n">Scope</span>What is this not settling?</h2>
+  <ul class="plain">
+    <li><b>The licence question itself</b> — whether the reference binds what we ship, and in
+      which channels — is asked elsewhere and only pointed at here.</li>
+    <li><b>Which verses are look-alikes.</b> Untouched; only which words of an agreed pair get
+      washed.</li>
+    <li><b>The four verses whose two printings cannot be lined up at all.</b> They take no part
+      in this and their alignment is not reopened.</li>
+    <li><b>What the panel looks like.</b> Nothing here changes that — only, if B wins, which
+      114-and-150 of its pairs shift the run they draw.</li>
+  </ul>
+</section>
+</div>
