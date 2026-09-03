@@ -479,11 +479,30 @@ that scored strokes and arrangement as two numbers instead of one would report t
 rather than merely explain them afterwards. §⑧ says why the naive version of that must not be
 built. Nothing depends on the answer today, which is why this is open rather than urgent.
 
-### ② Whether the names agree with the text they belong to · **open**
+### ② Whether the names agree with the text they belong to · **answered**
 
-The check described in §⑧ — name against carried text rather than name against drawing — has not
-been done. It is cheap, it is independent of everything here, and it would catch a class of error
-this document is blind to.
+The check described in §⑧ — name against carried text rather than name against drawing — is cheap,
+independent of everything here, and would catch a class of error this document is blind to: a mark
+drawn exactly as its name says and the wrong name for its word.
+
+**Answered 2026-09-02.** It was run as a census over the whole corpus, and the class of error is
+empty. Of the 326,515 marks, a naming verdict was reachable on 326,506 — the other nine are §④'s
+own count residual, where the text and the print disagree on how many marks a word has, and no
+name can be checked against a count that does not line up. **Every one of the 326,506 carries a
+name its own text calls for. None is named wrong for its word.** The map from a written mark to
+the name the print draws is not invented for this check: it is the one §⑤ recovered from the
+corpus and froze, so the census reuses a proven table rather than the hand-built one §④ warns
+would manufacture its own mismatches. §⑧'s prediction — that every mark would pass a record-against-
+record check — is now a measurement rather than an expectation.
+
+It stays a **bag** check, and that is the half of the question it can reach alone: the set of
+names in a ligature against the set its text asks for. It cannot see a mark that is the right name
+for the word but drawn on the wrong *letter* within its ligature — that needs to know which mark
+sits on which letter, which is the pairing §⑤ recovers and, past it, a reader's eye on the page.
+That half is a different question, and it stays open.
+
+**Answered by** `packages/etl/scripts/probe-mark-names.mjs` (`pnpm probe:mark-names`) — it ships
+nothing, re-runs the census on demand, and writes a page of evidence beside the run.
 
 ## How can someone look at this for themselves?
 

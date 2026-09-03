@@ -918,10 +918,10 @@
     {
       "id": "names-never-checked-against-the-text",
       "source": { "file": "docs/design/mark-labels.md", "item": "②" },
-      "status": "open",
+      "status": "answered",
       "severity": "question",
       "owner": "agent",
-      "note": "Everything measured so far compares a name to a drawing. Nothing has compared a name to the text the mark belongs to, which is a different question with a different blind spot — it would catch a mark that is drawn exactly as its name says and is the wrong name for that word. Cheap, and independent of both the placement and the drawing work."
+      "note": "Answered 2026-09-02 by a whole-corpus census (probe:mark-names). Everything before it compared a name to a drawing; this compares a name to the text the mark belongs to — the class of error a drawing check is blind to, a mark drawn exactly as its name says and the wrong name for its word. Of 326,515 marks a naming verdict was reachable on 326,506 (the other nine are §④'s count residual); all 326,506 carry a name their own text calls for, none wrong. It reuses §⑤'s frozen, corpus-derived codepoint→name table rather than a hand-built one, so it cannot manufacture the mismatch §④ warns of. It is a bag check by design; the wrong-letter-within-a-ligature half needs §⑤'s pairing and an eye, and stays open."
     },
     {
       "id": "nobody-has-looked-at-the-placement-verdicts",
