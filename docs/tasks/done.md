@@ -117,3 +117,21 @@ veils the neighbouring ink the crop caught; the shared opening is washed green a
 run ochre, the same two colours on both halves. Closed word-indexing ⑥ with
 `apps/web/src/components/DiffView.test.tsx`, whose scrim test pins the even-odd path so a return
 to the un-veiled crop fails it.
+
+## #52 — Check each mark's name against the text it sits on (mark-labels ②)
+
+**Done:** 2026-09-02, commit `515489e` "Ask each mark's name of its text, and hear the whole
+corpus agree".
+
+The third and last of the mark-name checks, and the one two documents left open. Place
+(`probe-mark-ink`) and drawing (`probe-mark-labels`) both compare a mark to a drawing, so neither
+can see a mark drawn exactly as its name says and the wrong name for its word. This — new
+`probe-mark-names.mjs` (`pnpm probe:mark-names`) — compares the name to the carried text: for each
+ligature, is the bag of drawn names the bag the text's own codepoints call for? It reuses the
+`DRAWN_NAME` table `probe-diacritics` ⑤ recovered and froze, so it cannot hand-build the mismatch
+§④ warns of. Census over all 326,515 marks: 326,506 reach a verdict (the other 9 are ④'s count
+residual), and every one carries a name its text calls for — none wrong, exactly as §⑧ predicted.
+A bag check by design; the wrong-letter-within-a-ligature half needs ⑤'s pairing and an eye, and
+stays open. Answered mark-labels ② (open → answered) in the doc and `docs/issues.json`; indexed
+the probe in `docs/map.json` beside its two siblings. No test named in `closedBy` because it is a
+measurement that re-runs on demand, not a code fix — `answered`, not `fixed`.
