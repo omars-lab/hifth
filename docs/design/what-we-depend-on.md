@@ -458,7 +458,7 @@ either a declared tree or a named declaration, and the map has to mention it eit
 broken on purpose both ways before being left green — an empty directory added, and the word
 tree's row removed from the map — because a check that has only ever passed is a comment.
 
-### ⑤ Nothing checks the licences of the installed package tree · **open**
+### ⑤ Nothing checks the licences of the installed package tree · **fixed**
 
 Every licence gate here is about vendored data. The package tree is unchecked, and the
 audit that checked it by hand found it clean — which is the good time to add the check
@@ -468,6 +468,18 @@ rather than the bad one.
 declared as a production dependency, since the offline-support package is declared for
 development and ships anyway. It would need a proof that it can fail, per the convention
 the notices gate set.
+
+**Closed by** a gate that vets the shipped package tree, added 2026-09-03. It does not
+walk production dependencies — that split is the trap this called out, because the offline
+register shim is declared for development and ships anyway, and the small-database package
+under the cache-expiry logic is declared by nothing here yet rides the generated service
+worker. So it computes the ship set from the two channels the app actually emits — the
+browser bundle and the service worker — and fails on any shipped package whose licence is
+not on a small allow-set of permissive terms. The set today is twenty-four packages,
+twenty-three under the same permissive licence and one other, all clean. It was proven to
+fail the way the notices gate was: the one non-standard licence was dropped from the
+allow-set and the gate named the exact package the audit had flagged as undeclared, then
+the allow-set was restored.
 
 ### ⑥ Whether to move the structural metadata to a public-domain source · **open**
 
