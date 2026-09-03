@@ -182,3 +182,33 @@ what-we-depend-on ⑤ (open → fixed, `closedBy: scripts/gate-license-tree.mjs`
 `docs/issues.json`; indexed the gate in `docs/map.json` under the provenance group. A `fixed`, not
 an `answered`: a gate that fails if a shipped package's licence goes unclassified is itself the
 regression guard.
+
+## #55 — Measure hamza sideways displacement whole-book: tail or class? (mark-registration ㉒)
+
+**Done:** 2026-09-03, commit `3603adf` "The weakest matches wander with the tail, not with the letter they mark".
+
+Sixty marks drawn by hand from the two lowest bands the ink search still accepts had raised a
+question §④'s book-scale refutation could not reach: every hamza among them, eleven of eleven, was
+pushed about a page unit sideways in the same direction with its size correct, while every other
+mark sat still. Eleven marks leaning one way is either a bug in what the search matches against or a
+case for a per-class nudge — both actionable — so ㉒ asked whether a whole class goes wrong by name
+rather than at random. The record set the closure test itself: re-measure the sideways offset for
+hamza alone across the whole book, which separates a property of the weak tail from a property of
+hamza, and only then, if it is the tail, test whether the search settles on the letter under the
+hamza. The first step settled it. Across every placed mark in the book — 16,295 hamzas among
+325,847 — sorted into the same match-quality bands, the hamza sits at or below the class middle
+everywhere: its typical sideways offset is a little under half a unit where the placed population
+runs a little over, and the share landing more than three-quarters out sideways is the *lowest* of
+any common mark (38.9%, against 41–44% for fatha, kasra, shadda and sukun). In the barely-accepted
+band itself the hamza is the fourteenth most displaced of seventeen classes, better placed than
+fatha and kasra and far better than the marks that truly struggle there (a small waw off by more
+than a whole unit). The leftward direction the sitting saw is real but shared by every class — the
+print sets its whole text low and across — and the hamza's lean is milder than the shadda's or the
+kasra's, not an outlier. The sitting's one-unit hamza was a draw from the tail: the book-wide middle
+in that same band is under half a unit and the eleven simply landed high. So the halving between the
+two bands and the eleven-in-one-direction were both real and both a fact about the weak tail and the
+common lean, not about the hamza. No class leans on its own, which is what §④'s ink refutation and
+§㉓'s class-by-class residue had already said, so the second step was never needed. Resolved as
+`answered`, not `fixed` — a measurement banks no code, so nothing is owed a regression guard; the
+finding lives in the ㉒ record and the index note. The whole-book scored rows it rests on are the
+ones a fresh run of the ink scorer reproduces mark-for-mark (checked on a page: zero difference).
