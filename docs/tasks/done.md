@@ -334,3 +334,23 @@ stays open, but its blocker changed: it now waits on the owner's choice between 
 on any missing measurement or picture, so its issue moved to owner: user. The choice itself — A,
 keep the corpus; B, count in the page and shed the share-alike licence at the cost of the 114 —
 is the owner's to make from the page.
+
+## #61 — Measure the hop's recall against an external ruler (what-we-depend-on ⑪)
+
+**Done:** 2026-09-03, commit `dfdd34f` "Fetch a ruler; the hop keeps its own counsel" — finding
+in [`docs/design/hop-recall.data.json`](../design/hop-recall.data.json), reasoning at
+[`docs/design/what-we-depend-on.md` item ⑪](../design/what-we-depend-on.md).
+
+⑪ had no number for what the hop leaves out, so its edge count could be read as neither thorough
+nor thin. This read a second, independently built look-alike catalogue — QUL's Mutashabihat
+resource 73, login-gated and unstated-licence — once from a gitignored cache as a measuring
+stick, took one number, and left none of its bytes in the build; `packages/etl/scripts/probe-hop-recall.mjs`
+refuses to run without the cache and cannot fetch it. The probe reads the shipped shards, so the
+"ours" side is exactly what the app serves. The answer is framed as a divergence on purpose: the
+two catalogues are different kinds of thing (ours hand-picks the verses a hafiz confuses, the
+ruler mechanically records every repeated word-run), so neither contains the other and a close
+match would read as copying rather than rigour. Ayah recall is 41%, the sets are not nested (921
+shared, 1,311 only-ruler, 599 only-hop), and the misses split 677 tight-phrase omission
+candidates against 634 broad-formula recurrences the hop is silent on by design. The hop is not
+finished but not thin and not a subset; the 677 are a new item if anyone opens them, not this one.
+⑪ moved open→answered.
