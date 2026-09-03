@@ -136,6 +136,8 @@ const messages: Catalog = {
   "notices.pack-gone.action": "See what is kept",
   "notices.pack-gone.body": "The browser cleared pages you saved for reading offline. Nothing is lost from your record, and they will not open without a connection until they are saved again.",
   "notices.pack-gone.title": "Pages you kept are no longer on this device",
+  openOnQul: "Quran Library",
+  openOnQulAria: (d) => "Open " + d.label + " on the Quran Library (opens a new tab)",
   packAbsent: (d) => plural(LC, d.n, { one: d.nText + " ayah of this juz is not in this build", other: d.nText + " ayahs of this juz are not in this build" }),
   packGone: (d) => "Juz " + d.juzText + " · no longer on this phone",
   packKeep: (d) => "Keep juz " + d.juzText + " here",
