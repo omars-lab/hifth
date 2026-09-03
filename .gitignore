@@ -45,3 +45,9 @@ docs/design/*.artifact.html
 *.p12
 id_rsa*
 **/credentials.json
+
+# The QUL mutashabihat ruler: a login-gated phrase-recurrence catalogue read ONCE
+# into this cache as a build-time measuring stick for the hop's recall
+# (what-we-depend-on ⑪ / probe-hop-recall.mjs). Zero bytes of it ship — the
+# committed finding is docs/design/hop-recall.data.json, numbers and verse keys only.
+packages/etl/data/mutashabihat/.cache/

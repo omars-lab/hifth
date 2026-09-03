@@ -577,7 +577,7 @@ improvement available. Both are share-alike, so they can be read at build time b
 be vendored here or shipped. Provenance first: one project the audit examined claimed
 independence while having partly scraped the corpus it was being compared to.
 
-### ⑪ Nothing measures what the hop does not contain · **open**
+### ⑪ Nothing measures what the hop does not contain · **answered**
 
 The pairings corpus is deliberately not exhaustive and that is the reason to prefer it, but
 no number exists for what it omits, so 3,002 edges cannot be read as sufficient or thin. A
@@ -587,6 +587,35 @@ usable as a ruler.
 **What would answer it:** a recall figure against it, computed at build time, shipping
 nothing. It bears directly on whether the hop is finished, which no other measurement here
 speaks to.
+
+**What answered it, 2026-09-03.** A second, independently built catalogue was read once as a
+measuring stick — a published list of recurring phrases, each entry a shared run of words and
+the verses it recurs in, from a two-verse echo up to a closing formula that repeats in seventy.
+Its download is login-gated and its licence is unstated, so none of it is vendored or shipped;
+it was read from a local cache, a number was taken, and nothing of it remains in the build. The
+number is checked in beside this document — counts, percentages and our own verse keys, no
+scripture — and the script that took it runs only where the cache is.
+
+The first thing the ruler settles is that the two catalogues are not the same kind of thing,
+and so neither is meant to contain the other. Ours hand-picks the verses a hafiz actually slips
+between; the ruler mechanically records every repeated word-run, common formulae and all. Two
+verses that share a run are not two verses a reader confuses. Read that way, the overlap is the
+right shape: of the 2,232 verses the ruler touches, the hop flags **921 — a recall of 41%** —
+and the two sets are not nested. 1,311 of the ruler's verses the hop does not flag, and **599
+verses the hop flags have no phrase in the ruler at all**. A catalogue that matched it closely
+would be the worrying result, not this one: on the provenance the audit already turned up, a
+near-identical independent recompute reads as evidence of copying, not of rigour. Low, explained
+divergence is both the safer and the truer picture.
+
+The 1,311 the hop misses split cleanly into omission and choice. **677** sit in a tight two-to-
+four-verse phrase — genuine candidates a hafiz might confuse, worth a later look; specimens are
+recorded beside the number (1:6, 2:8, 2:25, 2:30 among them). The other **634** are reachable
+only through a broad shared formula — five verses, ten, or the long closing refrains — and those
+are the ruler counting mechanical recurrence where the hop is deliberately silent. **82% of the
+ruler's phrase-pairs come from formulae spanning eleven verses or more**, which is why its pair
+count dwarfs the hop's and why pair-level recall (3.8%) measures the gap between the two *kinds*
+of catalogue rather than a shortfall in either. The hop is not finished — the 677 tight misses
+say so — but it is not thin either, and it is emphatically not a subset of anything.
 
 ### ⑫ A table in our own code is described in its own comment as copied verbatim · **fixed**
 
