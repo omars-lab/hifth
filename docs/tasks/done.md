@@ -467,3 +467,20 @@ If that is ever worth closing, the shape is the inverse of graph-walking — the
 its few licence-bearing exports and the trace checks that any bucket importing one names it — and
 that is a narrower new item, not this row reopening. Reopens only if a new licensed upstream, a
 copyleft one above all, reaches a shipped bucket through core.
+
+## #72 — Stamp the placement page: H is decided (2026-09-03, `fb5b9f1`)
+
+The `mark-placement` decision was recorded in the register as **decided: H** in `0881048`, but
+the [drawn page](../design/mark-placement.html) and its [record](../design/mark-registration.md)
+still read as an open question that recommended F. They now say what the register says.
+
+A "Decided — H" banner opens the page in the shape the page-bar decisions use; every place F was
+badged "the recommendation" now names it as the line-by-line fix H falls back to where it cannot
+place a mark from its own ink. Every option stays drawn — losing options are the reason H was a
+choice, and section 7 still shows why the numbers ran past F to I. The record gains a decision
+note and its §⑦ Option-F marker moved recommended → "the fallback under H", so page, record and
+register agree.
+
+The remaining work — graduating H into the app (the per-mark ink displacement plus the guard) and
+closing the reproduced mark defects dammed behind the placement decision — is the follow-on, tracked
+separately. This closed only the "the page still asks a decided question" gap.
