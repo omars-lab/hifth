@@ -472,12 +472,28 @@ What this document does *not* settle, stated so that each answer would be recogn
 arrives. Both are indexed in [`docs/issues.json`](../issues.json), which is the only place that
 counts them.
 
-### ① Whether a spacing-aware comparison is worth building · **open**
+### ① Whether a spacing-aware comparison is worth building · **answered**
 
 The five remaining disagreements are the right strokes at an unusual distance apart. A comparison
 that scored strokes and arrangement as two numbers instead of one would report them correctly
 rather than merely explain them afterwards. §⑧ says why the naive version of that must not be
 built. Nothing depends on the answer today, which is why this is open rather than urgent.
+
+**Answered 2026-09-03: not worth building.** The whole prize is five marks of 326,515 — the ones
+drawn with the right strokes at an unusual distance apart — and nothing in the app depends on
+them. Set against that is the cost, and the cost is not neutral: the naive spacing-aware
+comparison §⑧ warns against would stop reading arrangement as part of the shape, and arrangement
+is the only thing that separates a *fathatan* from two *fathatas* written one after another — a
+distinction that carries 3,635 marks. Building it would corrupt 3,635 to rescue 5. A careful
+version that kept two numbers — one for the strokes, one for the arrangement — would avoid that
+harm and report the five correctly, but a second comparison axis to maintain forever is not
+earned by five marks that already have a written explanation beside them. So the status quo
+stands: one whole-picture score, and the five named afterward rather than scored apart.
+
+**What would reopen it.** Either the five growing into a class large enough to matter, or a
+feature that colours a recitation rule and so leans on exactly the iqlab and doubled-vowel marks
+§⑨ flags — at which point a *targeted* two-number comparison over those specific marks, never the
+naive one, becomes a new item worth speccing rather than this one reopening.
 
 ### ② Whether the names agree with the text they belong to · **answered**
 
