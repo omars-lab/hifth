@@ -498,10 +498,23 @@ the adjacency tree would stop being a copyleft derivative and the index-conversi
 would disappear. The substitute corpus is already vendored under the friendliest terms in
 the repo.
 
-**What would answer it:** run the measurement. The print splits 9,533 proclitics the
-morphology joins, so the uniqueness rule keeps a different number of runs than the current
-2,544 — and until somebody knows whether that number is 2,400 or 900, this option has no
-cost attached and cannot be drawn honestly.
+**Measured on 2026-09-03: the print keeps 2,580 spans, and the cost is churn, not a free
+gain.** Re-running the uniqueness rule over the print's own words — with no conversion step,
+because a run computed there already lands in print positions — keeps 36 more spans than
+today's 2,544. But the two sets are not nested: 2,430 spans are common to both, 150 are
+new, and 114 a reader can currently land on would disappear. The mechanism is the split
+itself. A shared phrase is never fewer print words than morphology words and is often more
+(the print run is longer on 1,414 of the shared pairs, the same length on 1,130, and shorter
+on none), so some runs grow long enough to break a uniqueness tie while repeated common
+proclitics forge new ties elsewhere. The four verses whose two printings cannot be aligned
+take no part in the churn, so this is the ordinary behaviour of the rule and not an artefact
+of the hard cases. The option can therefore be drawn now: it trades 114 spans for 150 and
+sheds the copyleft dependency, and whether that trade is worth making is what this row still
+holds open.
+
+**What would answer it:** a ruling in the decision register that weighs the licence
+improvement against the 114 spans it would cost, with both span sets drawn on real pages so
+a reader can see for themselves what is gained and what is lost.
 
 ### ⑧ Whether the tajweed spans should move to a pause-aware engine · **open**
 
