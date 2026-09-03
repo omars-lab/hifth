@@ -92,3 +92,28 @@ Per-mark candidates written to `packages/etl/out/doubled-ink.json`; rebuilt any 
 `probe-piece-union.mjs --set doubled`. The item stays open because the per-mark size repair for
 refused doubled marks is still unbuilt and untested — the free half only bounds its target and
 forbids it from touching the accepted marks.
+
+## #50 — Gate the reach-for-ink cluster on the placement decision
+
+**Done:** 2026-09-01, commit `65acd27` "Gate the reach-for-ink cluster on the placement ruling it
+waits on".
+
+The reach-for-ink measurement campaign is complete but every repair it points at waits on the
+owner's `mark-placement` ruling (adopting a correction that moves each mark to its own ink is
+option H, the owner's call). Recorded that dependency machine-readably rather than leaving it in
+prose: added `blockedBy: ["the placement decision"]` to the nine confirmed/open rows in
+`docs/issues.json` that cannot proceed until it is settled (㉖, ㉘, ㉙, ㉚, ㉛, ㉜, ㉝, ㉞, ㉟), so
+`make issues` shows the whole cluster as waiting on one thing. Pure triage hygiene — no status
+changed, no measurement re-run.
+
+## #51 — Build comparison-crop option F into the look-alike panel (word-indexing ⑥)
+
+**Done:** 2026-09-02, commit `f7763de` "Veil the crop's neighbours, and colour by what the words
+are, not which ayah".
+
+The `comparison-crop` decision (option F, omar, 2026-08-16) built into `DiffView`, the component
+it was proven against. A paper scrim (even-odd path — padded frame minus the ayah's own lines)
+veils the neighbouring ink the crop caught; the shared opening is washed green and each divergent
+run ochre, the same two colours on both halves. Closed word-indexing ⑥ with
+`apps/web/src/components/DiffView.test.tsx`, whose scrim test pins the even-odd path so a return
+to the un-veiled crop fails it.
