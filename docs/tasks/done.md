@@ -404,3 +404,31 @@ ask. Word geometry lives in a separate per-ligature path corpus (measurable outl
 a font); both sources are the V2/1421H printing, fixed by the 56/56 pagination cross-check over the
 four V1/V2 divergence bands — the single readable number. Answered, no code owed. The §⑧
 cross-check stays rejected on its own grounds (shadda-merged marks, contextual-variant outlines).
+
+## #65 — Generate the ETL script census from disk + map; wire it to the anti-drift hook (etl-pipeline ⑦①)
+
+**Done:** 2026-09-03, commit `a9a6404` — the open question in
+[`etl-pipeline.md`](../design/etl-pipeline.md) §⑦① flipped open → answered, index row in
+[`issues.json`](../issues.json) set to answered, new generated census at
+[`etl-scripts.md`](../design/etl-scripts.md).
+
+The question was whether the ETL orientation document should generate itself, opened because a
+hand-drawn list of scripts is exactly the drift this repo gates against — and on 2026-09-03 the
+list's own falsification test was found to have fired silently: it named about a third of the
+scripts and missed an entire family, because the check it leaned on validates the pointers that
+exist and structurally cannot see a script that is absent. Owner chose Option 1: generate the one
+part that is derivable — the census — and keep the flow diagrams and the prose hand-written,
+because their edges and reasons live in no register and deriving them would need an invented
+edge-map that would drift in turn.
+
+Built to the repo's existing generated-register idiom: a shared payload+hash module
+(`scripts/etl-scripts.mjs`) enumerates every script under `packages/etl/scripts` straight off the
+**filesystem** — not `map.json`, which had itself gone short by nine — grouped by role and
+annotated with each script's one-line note from the code map (a script the map does not name is
+marked so, keeping the map↔disk gap visible). `build-etl-scripts.mjs` renders the hash-stamped
+`docs/design/etl-scripts.md`; `gate:etl-scripts` refuses a commit where the committed copy was
+built from a different source. The gate is wired into all three sites `gate:gates` insists on (the
+`gates` composite, `make ci`, the CI workflow) plus the pre-commit staleness loop and
+`make render-docs`. A script added, renamed or re-described now moves a stamped hash and the
+commit is refused; a directory cannot be missing a file it contains, which is the guarantee the
+old map-pointer balance could not give. 69 scripts on disk, 59 named in the map.
