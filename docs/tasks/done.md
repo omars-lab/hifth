@@ -261,24 +261,33 @@ is now attached to the record as the evidence it was waiting for.
 
 ## #58 — Corroborate the shipped page table against an independent page-per-ayah source (what-we-depend-on ⑨)
 
-**Done:** 2026-09-03, commit `53868c6` "Corroborate the page table against an outside witness; ⑨ answered".
+**Done:** 2026-09-03, commit `53868c6`, corrected the same day (redundant probe removed, record rewritten) — see below.
 
-The table that says which leaf each verse sits on reaches three shipped outputs and had never
-been checked against anything outside this project — it is read straight off the printed
-artwork's own geometry, one shape per verse, so nothing could have caught a verse quietly filed
-on the wrong leaf. A new probe read a page-per-verse table compiled by an entirely different
-route, expanded it to all 6,236 verses, and compared. 6,180 match. The 56 that do not are the
-finding, not a fault: every one is off by exactly one leaf, and every one lands inside the four
-short stretches where the earlier and later printings of this mus'haf are already known to break
-their pages differently — none outside them. So the two tables agree everywhere the two
-printings agree and part company only, and exactly, where the printings themselves do. The
-outside table follows the earlier printing; ours follows the later one the artwork is drawn
-from — which is a second, independent confirmation of which printing this app ships, from a
-different measurement than the one that first settled it. The outside source is read once at
-build time only to check a number, never kept or shipped, so its licence never bites; its answer
-is pinned beside the table because the check needs the internet and cannot run on a fresh clone.
-One thing the run surfaced on its own: the public-domain source the audit had named for this had
-vanished in the year since — its home gone, its one surviving copy placed under a share-alike,
-no-commercial-use licence — which is quiet evidence for the still-open question of whether a
-freely-usable replacement for the pagination even exists. The correctness half of ⑨ is closed;
-that permissive-replacement half stays with the question that owns it.
+The item asked whether the table that says which leaf each verse sits on had ever been checked
+against a source outside this project. I first answered it the expensive way: I wrote a probe
+that read a published page-per-verse table, expanded it to all 6,236 verses, and compared —
+6,180 matched, and the 56 that did not were all off by one leaf and all inside the short
+stretches where the two printings of this mus'haf are known to break their pages differently.
+A clean result. It was also redundant. The project already runs exactly this comparison against
+a different published table, and had recorded its answer — 568 of 604 pages agree, the other 36
+being the known divergence — beside the table itself, ten days before this item was written
+calling the table "corroborated by none". It was not; the phrase was wrong, and I repeated the
+mistake by not checking for the existing witness before building a second one. So the correction
+commit deletes the redundant probe and its pin, and rewrites the record to say what is actually
+true: the correctness question was already answered from outside the repo, and a fresh run
+confirmed it again live.
+
+What the item genuinely wanted, underneath the correctness check, was a witness of a particular
+kind — a page-per-verse source under a permissive licence, which would double as a candidate
+replacement for the pagination the app currently depends on a single upstream for. That source
+could not be found: the project that once held it is gone, and its one surviving copy has been
+placed under a no-commercial-use, no-derivatives licence. That is the one durable finding of the
+whole exercise, and it is evidence for a different, still-open question — whether any freely
+usable replacement for the pagination exists at all — so it was handed to the record that owns
+that question rather than kept here. The correctness half of ⑨ is closed against the witness the
+repo already had; the replacement half stays open where it belongs.
+
+The lesson is the reason the next task exists: before going out to ask the world whether it still
+agrees with us, look first at whether we already asked it. The repo centralises every
+outside-witness check in one place and records each answer beside the data it is about; a new one
+almost always belongs there as another reference, not as a parallel script.

@@ -529,34 +529,32 @@ something this new, which vendoring the core would largely dissolve.
 
 ### ⑨ The page table is derived from one source and corroborated by none · **answered**
 
-The table reaches three shipped outputs and sits at the centre of ①, and nothing checked it.
-The one this project ships is read off the page artwork's own geometry — one polygon per
-ayah, filed by the leaf it sits on — so a page number per ayah compiled from anything other
-than that artwork is a genuinely independent second opinion.
+The table reaches three shipped outputs and sits at the centre of ①. It is read off the page
+artwork's own geometry — one shape per ayah, filed by the leaf it sits on — so a page number
+per ayah compiled by any other route is a genuinely independent second opinion.
 
-**Measured 2026-09-03: corroborated, and the disagreements are the finding.** Compared across
-all 6,236 ayahs against an independently compiled table of page numbers, 6,180 agree and 56
-differ. Every one of the 56 is off by exactly one leaf, and every one falls inside the four
-short stretches where the two printings of this mus'haf — the earlier one and the later one
-this project's artwork comes from — are already known to break their pages differently. Not
-one disagreement falls outside those stretches. So the two tables are identical everywhere the
-two printings are identical, and differ only, and exactly, where the printings themselves do:
-the outside witness follows the earlier printing, and our table follows the later one the
-artwork is drawn from. That is a correctness check passed — a table built by a completely
-different route agrees with ours across 6,180 ayahs — and, from a different instrument than
-the one that first established which printing the artwork is, a second confirmation of the
-same printing (bearing on ④). A disagreement outside those stretches would have meant a table
-built wrong; there were none.
+**The correctness half was already answered, and this record had not noticed.** A check this
+project already runs against a page table *published for readers* does exactly this comparison:
+across all 604 pages it agrees on 568 and diverges on precisely the 36 where the earlier and
+later printings of this mus'haf are known to break their pages differently — a party with no
+access to our artwork re-deriving which printing the artwork is. That comparison was recorded
+beside the table on the sixth of August, ten days before this item was written calling the
+table "corroborated by none". It was not; the phrase was wrong. So the correctness question
+here is not open and never needed a new check — the table is corroborated by an outside
+witness, and the same result independently confirms the printing (bearing on ④).
 
-**On the witness.** The audit named a source under a public-domain dedication for this. By the
-time the comparison was run that file could not be relocated — the project that held it is
-gone, and its one surviving fork had been relicensed to a non-commercial, no-derivatives
-licence — which is itself evidence for ①: a permissive replacement that was counted on has
-already decayed. A different published metadata source stood in, read once at build time and
-neither vendored here nor shipped, so it is read only to check a number and never to make one
-(what-we-distribute ②); the correctness question turned on the witness being independent, not
-on its licence. The comparison reaches the public internet and so cannot run offline; its
-answer lives in a small pin checked in beside the table, the way the printing check's does.
+**What this item actually wanted was a different kind of witness, and that is the finding.** It
+named a page-per-ayah source under a public-domain dedication — valuable not because a second
+correctness check was missing but because a *permissively-licensed* one would double as a
+candidate replacement for the pagination, which is ①'s open problem. By the time it was
+looked for, that source could not be relocated: the project that held it is gone, and its one
+surviving fork had been relicensed to a non-commercial, no-derivatives licence. A permissive
+replacement that was counted on had already decayed. That is real evidence, and it belongs to
+①; there is no permissive page-per-ayah source to adopt today. The reader-facing tables that
+*do* answer are read only to check a number, never to make one, so they are instruments and
+not ingredients (what-we-distribute ②) and their licences do not bind — but they are also not
+replacements, which is the whole of what ① is asking. The correctness half is closed here; the
+replacement half stays with ①.
 
 ### ⑩ The segmentation disagreement has no disinterested witness · **open**
 
