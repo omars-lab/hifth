@@ -135,3 +135,23 @@ A bag check by design; the wrong-letter-within-a-ligature half needs ⑤'s pairi
 stays open. Answered mark-labels ② (open → answered) in the doc and `docs/issues.json`; indexed
 the probe in `docs/map.json` beside its two siblings. No test named in `closedBy` because it is a
 measurement that re-runs on demand, not a code fix — `answered`, not `fixed`.
+
+## #53 — Count each page's marks against the text (mark-registration ③)
+
+**Done:** 2026-09-02, commit `056e929` "Count the marks a page should have, and hear all but
+three agree".
+
+The fourth mark question, and the only one that can see a mark that is *not there*. Place, drawing
+and name all walk the marks the print drew, so none can catch a mark the text calls for and the
+print never drew — a missing mark has no rectangle to be wrong about. This — new
+`probe-mark-counts.mjs` (`pnpm probe:mark-counts`) — counts instead: it expands each word's text
+straight into the marks it calls for and compares that bag, name by name, to the bag the print
+drew, never touching the ligature join, so it is a second path to the corpus independent of the
+name check's align. Census over all 326,515 marks / 86,965 lettered words: 86,962 carry exactly
+their text's marks; the missing/duplicated class is empty save for three words — the same three
+the naming check sets aside as its print-vs-text count residual (two missing a hamza on an initial
+alef, one seated-hamza cluster the print draws with two extra marks). A multiset check, blind to
+order and placement by design — those are geometry, and the other three probes' job. Answered
+mark-registration ③ (open → answered) in the doc and `docs/issues.json`; indexed the probe in
+`docs/map.json` beside its three siblings. No test in `closedBy`: a census that re-runs on demand,
+not a code fix — `answered`, not `fixed`.
