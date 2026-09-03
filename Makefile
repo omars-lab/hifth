@@ -601,6 +601,20 @@ probe-reference: core ## A second opinion on the print: make probe-reference [PA
 	@node scripts/probe-reference.mjs \
 	  $(if $(PAGES)$(ALL),--page-table,) $(if $(ALL),--all --quiet,)
 
+.PHONY: probe-qul
+probe-qul: core ## Do the outside library's rulers agree with our numbers? make probe-qul [WRITE=1]
+	@# Reads the QUL exports cached in gitignored `.cache/qul*/` and cross-checks
+	@# three of them against what we ship: page layout (V2 / id 10, never V1),
+	@# juz boundaries, and the two similarity corpora. Bare run prints agreement
+	@# numbers; WRITE=1 refreshes the numbers-only pin under packages/etl/data/qul/.
+	@#
+	@# `probe-`, not `gate-`, for the same reason as probe-reference above: it
+	@# needs a local cache the repo does not carry, so it can only pass by being
+	@# unable to look. A missing cache makes it skip that section and exit 0. It
+	@# ships zero QUL bytes and pins only ids / verse keys / counts — see the
+	@# qul-reliance decision and the leverage-qul skill for the guardrails.
+	@node packages/etl/scripts/probe-qul-rulers.mjs $(if $(WRITE),--write,)
+
 # ---------------------------------------------------------------------------
 
 .PHONY: help

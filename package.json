@@ -59,6 +59,7 @@
     "probe:diacritics": "node packages/etl/scripts/probe-diacritics.mjs",
     "probe:mark-ink": "node packages/etl/scripts/probe-mark-ink.mjs",
     "probe:mark-labels": "node packages/etl/scripts/probe-mark-labels.mjs",
+    "probe:qul-rulers": "node packages/etl/scripts/probe-qul-rulers.mjs",
     "adjudicate:marks": "node packages/etl/scripts/build-mark-adjudication.mjs",
     "adjudicate:score": "node packages/etl/scripts/score-mark-adjudication.mjs",
     "nudge:marks": "node packages/etl/scripts/build-mark-nudge.mjs",
