@@ -234,6 +234,28 @@ describe("what counts as our error", () => {
   });
 
   /**
+   * A tap on the ink fires a placement and a reshape at once. Counting those raw filed
+   * one gesture under both "moved it" and "called the wrong shape" — the ㉑ distortion
+   * that made a word tally read as a fault tally. The word breakdown now counts settled
+   * words, so a tap is filed once, under "pointed at the ink", while the two hand words
+   * are reserved for what a hand did. The mark-level fault rate is unaffected: a tap is
+   * still a correction, so the mark still counts as one of ours to answer.
+   */
+  it("files a tap on the ink under `pointed`, not under both hand words", () => {
+    const said = [
+      say(INK_IDS[0], "placement", { by: [0.5, -0.25], to: [0.5, -0.25], how: "ink", ink: [0.5, -0.25] }),
+      say(INK_IDS[0], "wrong-shape", { size: [7, 6], was: [5.6, 3.6], how: "ink", ink: [0.5, -0.25] }),
+      say(INK_IDS[1], "placement", { by: [-1, 0], to: [-1, 0] }), // a hand move on another mark
+    ];
+    const { code, out } = run(sit({ said }));
+    expect(code).toBe(0);
+    expect(out).toMatch(/pointed at the ink\s+1/);
+    expect(out).toMatch(/moved it by hand\s+1/); // the hand move, not the tap
+    expect(out).toMatch(/called the wrong shape\s+0/); // the tap did not file here
+    expect(out).toMatch(/2 of 10 gradable marks/); // both still faults at the mark level
+  });
+
+  /**
    * A reader who thinks the print itself is wrong still puts the rectangle where they
    * think it belongs, so a mark carries both words at once — and most of the fourteen
    * called odd in the real sitting also carried a move. Taking such a mark out of the
@@ -394,6 +416,27 @@ describe("the distances, which are not the rate", () => {
     expect(out).toMatch(/across 0\.500 · down 0\.000 — medians, signed/);
     expect(out).toMatch(/2 marks, one row each, settled over 4 separate nudges and drags/);
     expect(out).toMatch(/never combined/);
+  });
+
+  /**
+   * A tap on the ink is one gesture, and it is neither a nudge nor a drag. Counting
+   * it as one of those turned the pad's difficulty score into a tally of how many
+   * marks got pointed at — so the tap's two halves stay out of the nudges-and-drags
+   * count, and the marks that were pointed at are named on their own line.
+   */
+  it("keeps a tap on the ink out of the nudges-and-drags count, and names it apart", () => {
+    const said = [
+      // a tap: the placement-and-reshape pair one press fires, both from the ink
+      say(NUDGED, "placement", { by: D, to: at(0, 0), how: "ink", ink: at(0, 0) }),
+      say(NUDGED, "wrong-shape", { size: [7, 6], was: [5.6, 3.6], how: "ink", ink: at(0, 0) }),
+      // a hand nudge on another mark: one go, no ink
+      say(ONCE, "placement", { by: [0.5, 0], to: at(0.5, 0) }),
+    ];
+    const { code, out } = run(sit({ said }));
+    expect(code).toBe(0);
+    // One hand go, not three: the tap's two halves are neither nudges nor drags.
+    expect(out).toMatch(/2 marks, one row each, settled over 1 separate nudges and drags/);
+    expect(out).toMatch(/1 of those was placed by a single tap on the ink, which is neither/);
   });
 
   it("prints the hand and the whole correction as two numbers under two sentences", () => {

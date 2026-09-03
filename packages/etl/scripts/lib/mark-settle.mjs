@@ -76,12 +76,19 @@ export function asDrawn(allRows, { radius = 3, iouFloor = 0.55 } = {}) {
 }
 
 /**
- * The six words a sitting can say about a mark, in the order a person would want to
- * read them: what is wrong with our rectangle, then what is wrong with the print, then
- * what could not be settled at all.
+ * The seven words a sitting can say about a mark, in the order a person would want to
+ * read them: fine, then the corrections — first what a *point* said (one gesture that
+ * fixes place and size at once, by tapping the ink), then what a *hand* said about our
+ * rectangle — then what is wrong with the print, then what could not be settled at all.
+ *
+ * `pointed` and the two hand words (`placement`, `wrong-shape`) are kept apart on
+ * purpose: a tap on the ink is one statement — "the box belongs around *this*" — and
+ * pooling it with a hand nudge turned a fault tally into a gesture tally, counting one
+ * decision as two goes. The hand words are now reserved for what a hand actually did.
  */
 export const VOCABULARY = [
   "looks-right",
+  "pointed",
   "placement",
   "wrong-shape",
   "intended-ink",
@@ -90,7 +97,7 @@ export const VOCABULARY = [
 ];
 
 /** The words that say our placement is wrong. Everything else is not that. */
-export const FAULTS = ["placement", "wrong-shape", "intended-ink"];
+export const FAULTS = ["pointed", "placement", "wrong-shape", "intended-ink"];
 
 /**
  * Collapse a transcript to one row per mark.
@@ -102,7 +109,9 @@ export const FAULTS = ["placement", "wrong-shape", "intended-ink"];
  * Returns a Map keyed by mark id. Each row carries what the mark is (`page`, `line`,
  * `name`, `rule`), what was said about it (`words`, `notes`), where it came to rest
  * (`to`, measured from the uncorrected box) and at what size (`size`, with `was` for
- * the size it started at), and how much work that took (`goes`).
+ * the size it started at), how much *hand* work that took (`goes` for drags, `reshapes`
+ * for handle pulls), how many *taps* settled it (`points`), and by which gesture each
+ * axis came to rest (`placedBy`, `sizedBy`: `"point"`, `"hand"`, or null if untouched).
  */
 export function settle(said) {
   const rows = new Map();
@@ -123,6 +132,9 @@ export function settle(said) {
         notes: [],
         goes: 0,
         reshapes: 0,
+        points: 0,
+        placedBy: null,
+        sizedBy: null,
       };
       rows.set(e.id, row);
     }
@@ -130,17 +142,33 @@ export function settle(said) {
     // drawn by is re-derived from the displacements on every read, so the last one is
     // the one that agrees with the displacements this run was given.
     if (e.rule != null) row.rule = e.rule;
-    if (e.kind && !row.words.includes(e.kind)) row.words.push(e.kind);
-    if (Array.isArray(e.to)) row.to = e.to;
-    if (Array.isArray(e.size)) row.size = e.size;
+    // A tap on the ink carries `how: "ink"`; a hand nudge or drag carries nothing. The
+    // gesture, not the event kind, is what a word records: a tap says `pointed` whether
+    // it arrived as the placement half or the wrong-shape half of the pair one tap fires.
+    const point = e.how === "ink";
+    const word = point ? "pointed" : e.kind;
+    if (word && !row.words.includes(word)) row.words.push(word);
+    // Where it came to rest, and by which gesture. `placedBy`/`sizedBy` are last-wins on
+    // the axis the event carries, so a mark tapped and then hand-nudged rests as `hand`.
+    if (Array.isArray(e.to)) {
+      row.to = e.to;
+      if (e.kind === "placement") row.placedBy = point ? "point" : "hand";
+    }
+    if (Array.isArray(e.size)) {
+      row.size = e.size;
+      if (e.kind === "wrong-shape") row.sizedBy = point ? "point" : "hand";
+    }
     // The size it started at is a fact about the rectangle we shipped, so it comes from
     // the first reshape and is not overwritten by later ones, which carry it forward
     // unchanged anyway.
     if (Array.isArray(e.was) && row.was == null) row.was = e.was;
-    // Moving and reshaping are counted apart because they are complaints about
+    // Hand goes and reshapes are counted apart because they are complaints about
     // different controls: one about the pad and the drag, the other about the handles.
-    if (e.kind === "placement") row.goes += 1;
-    if (e.kind === "wrong-shape") row.reshapes += 1;
+    // A tap is neither a nudge nor a drag, so it is counted on `points` instead — once
+    // per tap, keyed off the placement half so the pair one tap fires is not counted twice.
+    if (e.kind === "placement" && !point) row.goes += 1;
+    if (e.kind === "wrong-shape" && !point) row.reshapes += 1;
+    if (e.kind === "placement" && point) row.points += 1;
     // A note is the one thing a reader writes in their own words, so nothing is thrown
     // away and nothing is merged: two notes about one mark are two things they said.
     if (typeof e.note === "string" && e.note.trim() && !row.notes.includes(e.note)) {

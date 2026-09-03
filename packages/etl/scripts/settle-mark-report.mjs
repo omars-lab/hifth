@@ -363,6 +363,9 @@ const marks = settled.map((row) => {
     was: row.was ? row.was.map(n3) : null,
     goes: row.goes,
     reshapes: row.reshapes,
+    points: row.points,
+    placedBy: row.placedBy,
+    sizedBy: row.sizedBy,
     notes: row.notes,
   };
 });
@@ -485,16 +488,36 @@ say(`  ${faults.length} of ${marks.length} settled marks carry a complaint about
 say("  That share is over the marks somebody SAID something about, which is not the rate.");
 say("  The rate is over the marks they looked at, and it is the scorer's to compute.");
 
+// A hand nudge and a tap on the ink are two ways to move a rectangle, and pooling
+// them turned a fault tally into a gesture tally — a tap counted as a "go" it never
+// was. So the two kinds are reported apart: what a hand did, over how many goes, and
+// how many marks a single tap settled.
 const moved = marks.filter((m) => m.hand);
 if (moved.length) {
   const mags = moved.map((m) => Math.hypot(m.hand[0], m.hand[1])).sort((a, b) => a - b);
+  const byHand = moved.filter((m) => m.placedBy === "hand");
+  const byPoint = moved.filter((m) => m.placedBy === "point");
   say();
-  say(`  ${moved.length} were moved, over ${moved.reduce((a, m) => a + m.goes, 0)} separate goes:`);
-  say(`    median ${n3(mags[mags.length >> 1])} units by hand · worst ${n3(mags[mags.length - 1])}`);
+  say(`  ${moved.length} came to rest away from where we drew them:`);
+  if (byHand.length) {
+    say(`    ${byHand.length} moved by hand, over ${byHand.reduce((a, m) => a + m.goes, 0)} separate goes`);
+  }
+  if (byPoint.length) say(`    ${byPoint.length} placed by pointing at the ink, one tap each`);
+  say(`    median ${n3(mags[mags.length >> 1])} units off · worst ${n3(mags[mags.length - 1])}`);
 }
 const reshaped = marks.filter((m) => m.size && m.was);
 if (reshaped.length) {
-  say(`  ${reshaped.length} were reshaped, over ${reshaped.reduce((a, m) => a + m.reshapes, 0)} separate goes.`);
+  const byHand = reshaped.filter((m) => m.sizedBy === "hand");
+  const byPoint = reshaped.filter((m) => m.sizedBy === "point");
+  say();
+  say(`  ${reshaped.length} came to rest at a size other than the one we drew:`);
+  if (byHand.length) {
+    say(`    ${byHand.length} reshaped by hand, over ${byHand.reduce((a, m) => a + m.reshapes, 0)} separate goes`);
+  }
+  if (byPoint.length) say(`    ${byPoint.length} sized by pointing at the ink, one tap each`);
+}
+if (marks.some((m) => m.points)) {
+  say(`  A tap sets place and size together, so a pointed mark is in both lines above — one statement, not two.`);
 }
 if (banked.length) say(`  ${banked.length} were banked as could-not-say.`);
 
