@@ -387,3 +387,20 @@ offline like every docs page, states the four honest gaps still owed to a human,
 outside source it measured against. The companion record carries the mermaid source and maps each
 figure back to the register that owns it. Served from the site at its own path on merge; the
 front-door link is the canonical site address so it survives being sent to anybody.
+
+## #64 — Settle which printing's fonts produced the shipped pages (mark-registration ④)
+
+**Done:** 2026-09-03, commit `0e3a4b9` "Settle by looking: the shipped pages are ayah artwork,
+not word fonts" — marker in [`mark-registration.md`](../design/mark-registration.md#-which-of-the-two-printings-fonts-produced-the-pages--answered)
+flipped ④ open → answered, index row in [`issues.json`](../issues.json) rewritten.
+
+The question was whether the shipped pages came from the publisher's per-page word fonts — if so,
+the finest addressable unit would be a whole word and the "ask the font, not the picture"
+cross-check would be impossible in principle rather than merely awkward. Settled by looking, as ④
+said it would be: all 604 page SVGs are flattened, ayah-tagged vector artwork whose finest unit is
+the ayah (surah/ayah/number attributes, 6,236 each; ayah:x/ayah:y anchors; nothing per-word,
+per-glyph or per-ligature, no text/use/font-family/@font-face). There is no font on the pages to
+ask. Word geometry lives in a separate per-ligature path corpus (measurable outline geometry, not
+a font); both sources are the V2/1421H printing, fixed by the 56/56 pagination cross-check over the
+four V1/V2 divergence bands — the single readable number. Answered, no code owed. The §⑧
+cross-check stays rejected on its own grounds (shadda-merged marks, contextual-variant outlines).
