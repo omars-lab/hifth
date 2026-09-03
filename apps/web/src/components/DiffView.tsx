@@ -44,32 +44,67 @@ function union(rects: readonly Rect[]): Rect | null {
   return { x: left, y: top, width: right - left, height: bottom - top };
 }
 
+/** An SVG path `d` tracing one rectangle — four straight sides and a close. */
+function rectPath(r: Rect): string {
+  return `M${r.x} ${r.y}H${r.x + r.width}V${r.y + r.height}H${r.x}Z`;
+}
+
+/** The overlay geometry for one wash rectangle, grown a whisker for a snug fit. */
+function appendBand(svg: SVGSVGElement, r: Rect, cls: string): void {
+  const rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+  rect.setAttribute("x", String(r.x - 0.5));
+  rect.setAttribute("y", String(r.y - 0.5));
+  rect.setAttribute("width", String(r.width + 1));
+  rect.setAttribute("height", String(r.height + 1));
+  rect.setAttribute("rx", "1");
+  rect.setAttribute("class", cls);
+  svg.appendChild(rect);
+}
+
 /**
- * One side of the comparison: the ayah as the mus'haf prints it, with the words
- * it does *not* share with its partner washed.
+ * One side of the comparison: the ayah as the mus'haf prints it, veiled down to
+ * its own lines and washed to show where it agrees with its partner and where
+ * it does not.
+ *
+ * Three overlays go on, in this order, all in the page's own coordinate space:
+ *  - a **scrim** — one paper-coloured shape covering the whole crop with the
+ *    ayah's own lines punched out of it, so the neighbouring words the crop
+ *    happened to catch fade back and cannot be read as part of this ayah;
+ *  - a **green** wash on the words the two ayat share;
+ *  - an **ochre** wash on each run of words that differ.
  *
  * The page's own markup is mounted once and then cropped by overriding the
  * `viewBox` — word boxes and page artwork are authored in the same user units
  * (page 1 is `0 0 235 235`, and its words run x 11.6–227.5, y 19.5–211.7), so a
  * band rectangle is a crop rectangle with no conversion in between. Nothing is
- * redrawn or re-parsed when the wash changes; only the overlay rectangles move.
+ * redrawn or re-parsed when the washes change; only the overlays move.
  */
 function PrintedAyah({
   side,
   loaded,
-  wash,
 }: {
   side: DiffSide;
   loaded: Loaded;
-  wash: string;
 }): JSX.Element | null {
   const host = useRef<HTMLDivElement>(null);
 
   const present = loaded.index.span(side.key);
+  // The ayah's own lines — the crop's extent, and the holes the scrim leaves.
   const lines = present ? loaded.index.bandsFor(side.key, present.from, present.to) : [];
   const box = union(lines);
 
-  const washes = present
+  // The shared opening, clamped to what this page actually carries (a run can
+  // begin on the leaf before), and the divergent tails at either end.
+  const [sFrom, sTo] = side.shared;
+  const shared =
+    present && Math.max(sFrom, present.from) <= Math.min(sTo, present.to)
+      ? loaded.index.bandsFor(
+          side.key,
+          Math.max(sFrom, present.from),
+          Math.min(sTo, present.to),
+        )
+      : [];
+  const diff = present
     ? divergentRuns(present, side.shared).flatMap(([from, to]) =>
         loaded.index.bandsFor(side.key, from, to),
       )
@@ -95,19 +130,27 @@ function PrintedAyah({
     // the ayah, and a screen reader should not walk 20 KB of path data.
     svg.setAttribute("aria-hidden", "true");
     svg.setAttribute("focusable", "false");
-    // Wash the leftover. Drawn into the page's own root so the rectangles share
-    // its coordinate space rather than being positioned against the element.
-    for (const r of washes) {
-      const rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
-      rect.setAttribute("x", String(r.x - 0.5));
-      rect.setAttribute("y", String(r.y - 0.5));
-      rect.setAttribute("width", String(r.width + 1));
-      rect.setAttribute("height", String(r.height + 1));
-      rect.setAttribute("rx", "1");
-      rect.setAttribute("class", wash);
-      svg.appendChild(rect);
-    }
-  }, [loaded, box, washes, wash]);
+    // The scrim: the padded crop rectangle, then each of the ayah's own lines
+    // (grown a hair so a descender is not clipped) as an even-odd hole. What is
+    // left painted is exactly the margin and the neighbours' ink.
+    const outer = {
+      x: box.x - PAD,
+      y: box.y - PAD,
+      width: box.width + PAD * 2,
+      height: box.height + PAD * 2,
+    };
+    const holes = lines
+      .map((b) => rectPath({ x: b.x - 1, y: b.y - 1, width: b.width + 2, height: b.height + 2 }))
+      .join("");
+    const scrim = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    scrim.setAttribute("d", rectPath(outer) + holes);
+    scrim.setAttribute("fill-rule", "evenodd");
+    scrim.setAttribute("class", styles.scrim as string);
+    svg.appendChild(scrim);
+    // Then the two washes, over the ink, sharing the page's coordinate space.
+    for (const r of shared) appendBand(svg, r, styles.wShare as string);
+    for (const r of diff) appendBand(svg, r, styles.wDiff as string);
+  }, [loaded, box, shared, diff, lines]);
 
   if (!box) return null;
   return <div ref={host} className={styles.crop} />;
@@ -118,10 +161,11 @@ function PrintedAyah({
  * expands to.
  *
  * It stacks the source ayah and its look-alike **as the mus'haf prints them**,
- * cropped out of the page artwork that already ships, and washes the words the
- * two do not have in common. Which words those are is not a judgement made here:
- * the edge carries the matching run on both sides in the print's own word
- * numbering, and the leftover at either end is what differs.
+ * cropped out of the page artwork that already ships. Each side is veiled down
+ * to its own lines, its shared opening washed green and its divergent tail
+ * washed ochre. Which words those are is not a judgement made here: the edge
+ * carries the matching run on both sides in the print's own word numbering, and
+ * the leftover at either end is what differs.
  *
  * Renders nothing when the edge names no words (452 of 2,996 look-alike edges
  * match in more than one place, so they name none), or when either page's
@@ -173,11 +217,11 @@ export function DiffView({ edge, fromKey }: DiffViewProps): JSX.Element | null {
         <span className={styles.who}>
           {fromLabel} · {t.hereTag}
         </span>
-        <PrintedAyah side={diff.from} loaded={sides.from} wash={styles.dA as string} />
+        <PrintedAyah side={diff.from} loaded={sides.from} />
       </div>
       <div className={styles.side}>
         <span className={styles.who}>{toLabel}</span>
-        <PrintedAyah side={diff.to} loaded={sides.to} wash={styles.dB as string} />
+        <PrintedAyah side={diff.to} loaded={sides.to} />
       </div>
     </div>
   );

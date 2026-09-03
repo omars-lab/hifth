@@ -39,8 +39,8 @@ const EDGE: Edge = {
 
 const FROM = "quran/hafs-kfqc/2:48";
 
-/** Every wash rectangle on the page, in the order the component appended them. */
-function washes(root: HTMLElement, cls: string): SVGRectElement[] {
+/** Every wash rectangle in one crop, in the order the component appended them. */
+function washes(root: ParentNode, cls: string): SVGRectElement[] {
   return Array.from(root.querySelectorAll<SVGRectElement>(`rect.${cls}`));
 }
 
@@ -51,19 +51,55 @@ function xSpan(rect: SVGRectElement): [number, number] {
 }
 
 describe("DiffView (spec §3 — why these two are confusable)", () => {
-  it("washes the words each side does not share, on both sides", async () => {
+  it("washes the divergent tail ochre on both sides — the same colour, not one each", async () => {
     const { container } = render(<DiffView edge={EDGE} fromKey={FROM} />);
     await waitFor(() => expect(container.querySelectorAll("svg")).toHaveLength(2));
+    const [fromSvg, toSvg] = Array.from(container.querySelectorAll("svg"));
 
     // 2:48 shares 1–13 of its 23 words, so 14–23 is what differs: x 140 → 238.
-    const a = washes(container, styles.dA as string);
+    const a = washes(fromSvg as SVGSVGElement, styles.wDiff as string);
     expect(a).toHaveLength(1);
     expect(xSpan(a[0] as SVGRectElement)).toEqual([140, 238]);
 
-    // 2:123 shares the same opening but is 22 words, so 14–22: x 140 → 228.
-    const b = washes(container, styles.dB as string);
+    // 2:123 shares the same opening but is 22 words, so 14–22: x 140 → 228 —
+    // and it wears the *same* ochre class, since neither ayah is the wrong one.
+    const b = washes(toSvg as SVGSVGElement, styles.wDiff as string);
     expect(b).toHaveLength(1);
     expect(xSpan(b[0] as SVGRectElement)).toEqual([140, 228]);
+  });
+
+  it("washes the shared opening green on both sides", async () => {
+    const { container } = render(<DiffView edge={EDGE} fromKey={FROM} />);
+    await waitFor(() => expect(container.querySelectorAll("svg")).toHaveLength(2));
+    const [fromSvg, toSvg] = Array.from(container.querySelectorAll("svg"));
+
+    // Both share words 1–13: one band spanning x 10 → 138.
+    for (const svg of [fromSvg, toSvg]) {
+      const share = washes(svg as SVGSVGElement, styles.wShare as string);
+      expect(share).toHaveLength(1);
+      expect(xSpan(share[0] as SVGRectElement)).toEqual([10, 138]);
+    }
+  });
+
+  it("veils everything the crop caught that is NOT this ayah — a scrim with the ayah punched out", async () => {
+    // The guard against neighbour-bleed: before this, a crop showed the tails of
+    // the line above and the head of the line below as if they were the ayah's.
+    // The scrim covers the whole padded crop and leaves a hole exactly over the
+    // ayah's own lines. Remove it, or stop punching the hole, and this fails.
+    const { container } = render(<DiffView edge={EDGE} fromKey={FROM} />);
+    await waitFor(() => expect(container.querySelectorAll("svg")).toHaveLength(2));
+    const [fromSvg] = Array.from(container.querySelectorAll("svg"));
+
+    const scrims = (fromSvg as SVGSVGElement).querySelectorAll<SVGPathElement>(
+      `path.${styles.scrim as string}`,
+    );
+    expect(scrims).toHaveLength(1);
+    const scrim = scrims[0] as SVGPathElement;
+    expect(scrim.getAttribute("fill-rule")).toBe("evenodd");
+    // The crop is "8 18 232 14"; the ayah's one line is x 10–238, y 20–30. So the
+    // scrim is the padded rect (M8 18…) with that line, grown a hair, as an
+    // even-odd hole (M9 19…) — the ayah shows through, the margin stays veiled.
+    expect(scrim.getAttribute("d")).toBe("M8 18H240V32H8ZM9 19H239V31H9Z");
   });
 
   it("crops each page to the ayah rather than showing the whole leaf", async () => {

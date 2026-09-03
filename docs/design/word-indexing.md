@@ -585,7 +585,7 @@ probe is not a gate and will not become one: it reads the gitignored 378 MB page
 on a clean checkout it has nothing to read. Re-run it before writing the bake — the numbers
 above are of one pin.
 
-### ⑥ The look-alike panel draws one rectangle where the geometry gives it several · **open**
+### ⑥ The look-alike panel draws one rectangle where the geometry gives it several · **fixed**
 
 Opened 2026-08-16 by the decision `comparison-crop`, which chose how to fix it. This row
 tracks the build, not the choice — the choice is made, recorded, and drawn.
@@ -612,3 +612,12 @@ shard or no page still renders nothing and the hop row keeps its plain note.
 **What it does not settle.** Which words get marked — read off the edge's spans, verified,
 unchanged. The exact green and yellow, chosen to survive over ink on cream and open to
 argument without reopening the decision.
+
+**Closed by** `apps/web/src/components/DiffView.test.tsx`. `DiffView` now mounts, over each
+crop, a paper scrim as an even-odd path — the padded frame with the ayah's own lines punched
+out — so a word from a neighbouring ayah fades back instead of reading as this ayah's; then a
+green wash on the shared opening and an ochre one on each divergent run, the same two colours
+on both halves. Two tokens carry the green and the ochre. The scrim's own test pins its
+even-odd path to the padded crop with the line as its hole, so a return to the un-veiled crop
+— no scrim, or a scrim that does not punch the ayah out — fails it. The fallback is untouched:
+no edge, no shard or no page still renders nothing and the row keeps its plain note.
