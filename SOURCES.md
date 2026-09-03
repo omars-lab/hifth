@@ -357,10 +357,28 @@ href: https://github.com/mushafdatabase/MushafDatabase-Ligature-Based-SVG
 These are named in the plan for later loops. They are listed here so their license
 review is tracked from the start; no bytes are vendored until the noted loop.
 
-- **QUL (qul.tarteel.ai) layout DB + phrase ranges** — ayah→page table for edge dir
-  bucketing (Loop 4a) + anchor cross-check (Loop 4b). Madani layouts: V1/1405H
-  (id 15), V2/1421H (id 10), V4/1441H (id 19) — pin the print matching quran-svg
-  in Loop 4a. License: per-resource on QUL; review each before use.
+- **QUL (qul.tarteel.ai)** — the Quranic Universal Library, Tarteel's aggregation of
+  mushaf layouts, word morphology, a syntactic treebank / ayah-dependency graph, tajweed
+  spans and look-alike phrase catalogues, each a separate resource under its own terms.
+  It is a **goldmine to measure against, not a shelf to vendor from**: every resource
+  reviewed so far is login-gated for download and states no licence on its resource or
+  credits pages, so nothing from it ships (see the tajweed and morphology rejections
+  below). What it is good for is a build-time ruler — read once from a local cache to
+  check a number we derived ourselves, leaving zero of its bytes in the build, which is a
+  different act from distributing it. Individual resources:
+  - **Layout DB + phrase ranges** — ayah→page table for edge dir bucketing (Loop 4a) +
+    anchor cross-check (Loop 4b). Madani layouts: V1/1405H (id 15), V2/1421H (id 10),
+    V4/1441H (id 19) — pin the print matching quran-svg in Loop 4a. License: per-resource
+    on QUL; review each before use.
+  - **Mutashabihat ul Quran (resource 73)** — a phrase-recurrence catalogue: 814 phrases
+    over 2,232 ayahs, each entry a shared word-run and the verses it recurs in. Used
+    2026-09-03 as the build-time ruler for the hop's recall — read once from a gitignored
+    cache by `packages/etl/scripts/probe-hop-recall.mjs`, which ships nothing; the finding
+    is `docs/design/hop-recall.data.json` and the reasoning is
+    [`docs/design/what-we-depend-on.md` item ⑪](docs/design/what-we-depend-on.md). It is
+    NOT a dependency and not a match to aim at — a phrase catalogue records mechanical
+    word-runs, where the hop hand-picks the verses a hafiz confuses, so the two diverge by
+    design. Login-gated; no licence stated.
 - **QurSim** — *demoted 2026-07-25*: semantic relatedness (Ibn Kathir-derived,
   graded pairs), not lafẓi mutashabihat, and no canonical download endpoint.
   Someday-scoped as a reserved `related` edge type; not a Loop 4 source.
