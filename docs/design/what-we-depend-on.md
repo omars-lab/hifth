@@ -402,7 +402,7 @@ are compared by nobody. It is *answered* and not *fixed*: the deferral itself is
 gate fails if the question it defers to closes or disappears — but nothing would fail if
 someone flipped the verdict back to "ours", and a word that claims a test has to name one.
 
-### ③ Structural metadata reaches the adjacency shards and nothing names it · **open**
+### ③ Structural metadata reaches the adjacency shards and nothing names it · **answered**
 
 **510 of 3,002 shipped edges** carry a same-part flag computed from the CC BY structural
 tables. Neither the licensing map's row nor the shipped notice names that upstream. The
@@ -424,6 +424,29 @@ adjacency builder writes a paragraph into the notice saying what the flag is der
 What stays open is the other half — the trace still does not follow the core package, so the
 hand-written declaration is the only thing standing between the next upstream reached that
 way and silence. That is a design question, not a defect, and the marker says so now.
+
+*Answered 2026-09-03: the trace should not follow the core package.* Walking the shared core's
+import graph to discover licensed derivations was the obvious move and is the wrong one. The graph
+is large and almost entirely uninteresting — nearly every export in it carries no upstream
+obligation at all — so a follower spends its whole effort producing noise, and the judgement it
+would still have to make, *which of these reaches is a licensed derivation*, is exactly the hard
+part it cannot automate. It would buy false confidence and a standing maintenance cost to catch a
+case that is already caught: the one real derivation — the same-part flag computed from the CC BY
+structural tables — is now named by hand in both the licensing row and the shipped notice, so
+today's exposure is closed.
+
+What that leaves standing is a precedent, not a defect: a builder could reach a **new** upstream
+through the core package and nothing automated would notice. It stays small — attribution rather
+than copyleft, and the source is credited in the colophon regardless — but it is the real residue.
+The right shape for closing it, if it is ever worth closing, is the opposite of graph-walking:
+have the core package **declare** its few license-bearing exports, and let the notices trace check
+that any bucket importing one names its upstream — a short hand-kept list rather than a graph
+traversal. That is a narrower piece of work than this row, and belongs to a new one if the
+precedent is ever felt to be worth machinery.
+
+**What would reopen it:** a new licensed upstream — a copyleft one above all — reaching a shipped
+bucket through the core package, or a decision to close the precedent proactively with the
+source-side declaration above.
 
 ### ④ Two shipped things are covered by no row of the licensing map · **fixed**
 
