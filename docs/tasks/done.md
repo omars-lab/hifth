@@ -311,3 +311,26 @@ number is a different thing from adopting it, and a source being free enough to 
 does not make it free enough to depend on. The concrete incident — a duplicate page-table probe
 written and then reverted because the check already existed — is named in the skill as the
 reason the guardrail is there, so the lesson stays attached to the mistake that earned it.
+
+## #60 — Register the print-vs-corpus adjacency-span decision (what-we-depend-on ⑦)
+
+**Done:** 2026-09-03, commit `8ddba21` "Draw both ways of counting a look-alike's shared words, and ask which".
+
+The measurement was already in hand from #56: run the same uniqueness rule over the printed
+page's own words instead of the vendored word-by-word corpus and you keep 2,580 shared runs
+against today's 2,544 — but the sets are not nested, and the difference is 150 runs only the
+page finds and 114 only the corpus keeps and the page would lose. What was owed was not another
+number but the thing the ⑦ note itself asked for: a ruling put in front of a person, with both
+span sets drawn on the real pages so the 114 lost and the 150 gained are things you can look at
+rather than a count to take on trust. So this task built the decision — a record in the register,
+an on-site page that crops each specimen from the page it sits on and washes the shared run
+exactly as the look-alike panel does, and a row that ties it both ways to the crop decision it
+shares its span geometry with. The generator follows the extract/render split the decide skill
+asks for when the finding needs a cache the repo does not carry: an opt-in `--extract` reads the
+ligature cache, reproduces the shipped 2,544 as a control so the print figure is trustworthy, and
+writes a small findings JSON carrying only verse keys and box geometry — no scripture; the default
+render draws the page from those committed bytes alone, so it rebuilds on a fresh clone. The ⑦ row
+stays open, but its blocker changed: it now waits on the owner's choice between the two ways, not
+on any missing measurement or picture, so its issue moved to owner: user. The choice itself — A,
+keep the corpus; B, count in the page and shed the share-alike licence at the cost of the 114 —
+is the owner's to make from the page.
