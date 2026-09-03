@@ -1207,10 +1207,10 @@
     {
       "id": "which-printing-made-the-shipped-pages",
       "source": { "file": "docs/design/mark-registration.md", "item": "④" },
-      "status": "open",
+      "status": "answered",
       "severity": "question",
       "owner": "agent",
-      "note": "If the shipped pages came from the publisher's per-page fonts, the smallest addressable thing in that source is a whole word, and one of the cross-checks becomes impossible in principle rather than merely awkward. The two candidates differ in a single readable number, so this is settled by looking rather than by arguing."
+      "note": "Answered 2026-09-03 by looking. The shipped pages are not per-page word fonts: all 604 page SVGs are flattened ayah-tagged vector artwork whose finest addressable unit is the ayah (surah/ayah/number attributes, 6,236 each; ayah:x/ayah:y anchors; no per-word, per-glyph or per-ligature attributes, no <text>, <use>, font-family or @font-face). Word geometry comes from a separate per-ligature <path data-text> corpus (MushafDatabase-Ligature-Based-SVG SVG V1.01), measurable outline geometry, not a font. Both are the V2/1421H printing — the single readable number, settled by the pagination cross-check over the four V1/V2 divergence bands plus controls (56/56, verdict same-print). The §⑧ ask-the-font cross-check has no font to ask against the shipped pages; it stays rejected on its own grounds (shadda-merged marks, contextual-variant outlines)."
     },
     {
       "id": "position-might-separate-the-look-alike-pairs",
