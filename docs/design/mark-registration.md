@@ -1374,11 +1374,36 @@ re-derives it or checks it. That is the same shape of problem as the fit residua
 recorded number nobody re-validates — and it deserves the same answer a gate gives everything
 else here: re-derive offline from committed bytes and fail on drift.
 
-### ③ Do the pages count the marks they should · **open**
+### ③ Do the pages count the marks they should · **answered**
 
-An entirely separate and much cheaper check, borrowed from §⑤: does each page carry the number
-of marks of each name that the text says it should, in the order it says? It would catch
-missing and duplicated marks, which no geometric score can, and it is a few hours of work.
+An entirely separate and much cheaper check, borrowed from the table that names what the print
+draws for each written mark: does each page carry the number of marks of each name that the text
+says it should? It would catch missing and duplicated marks, which no geometric score can,
+because geometry can only be wrong about a mark that is *there* — a mark never drawn has no box
+to be in the wrong place.
+
+**Answered 2026-09-02.** A census over all 326,515 marks took the count straight from each word's
+own letters — the marks the text calls for — and compared it to the marks the print actually drew,
+without going anywhere near which mark sits on which letter. **86,962 of 86,965 words carry
+exactly the marks their text calls for.** The class of error no geometry can see — a mark simply
+absent, or one drawn twice — is empty save for three words, and those three are not a new finding:
+they are the same three the [naming check](mark-labels.md) already sets aside, where the print and
+the bare text disagree about how many marks a hamza wants. Two are missing the hamza the text
+writes on an initial alef; one is a seated-hamza cluster where the print adds two marks the plain
+codepoints do not enumerate. Both are the same word each time it occurs, so they are the print's
+own rendering habit, not scattered loss — but whether the print or the text is right about those
+three is a reader's call, not a counting tool's, and it belongs to the print oddities a hafiz is
+asked to look at.
+
+This is the count half; it is deliberately blind to order and placement, which are where a mark
+*sits* and are answered by the correction fit and the naming pairing. It is also a second,
+independent path to the corpus: where the naming check reaches names through the ligature join and
+*sets a count that does not line up aside*, this one expands the text directly and *reports* the
+mismatch, because the count is the whole question. Both agreeing on 86,962 is worth more than
+either alone.
+
+**Answered by** `packages/etl/scripts/probe-mark-counts.mjs` (`pnpm probe:mark-counts`), which
+writes the evidence page and exits non-zero on any page short a mark or long one.
 
 ### ④ Which of the two printings' fonts produced the pages · **open**
 

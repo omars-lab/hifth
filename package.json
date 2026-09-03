@@ -60,6 +60,7 @@
     "probe:mark-ink": "node packages/etl/scripts/probe-mark-ink.mjs",
     "probe:mark-labels": "node packages/etl/scripts/probe-mark-labels.mjs",
     "probe:mark-names": "node packages/etl/scripts/probe-mark-names.mjs",
+    "probe:mark-counts": "node packages/etl/scripts/probe-mark-counts.mjs",
     "adjudicate:marks": "node packages/etl/scripts/build-mark-adjudication.mjs",
     "adjudicate:score": "node packages/etl/scripts/score-mark-adjudication.mjs",
     "nudge:marks": "node packages/etl/scripts/build-mark-nudge.mjs",
