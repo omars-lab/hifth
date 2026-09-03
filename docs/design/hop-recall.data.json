@@ -1,0 +1,76 @@
+{
+  "what": "How much of a larger, independent look-alike catalogue does the hop cover?",
+  "generatedBy": "packages/etl/scripts/probe-hop-recall.mjs",
+  "generatedAt": "2026-09-03",
+  "shipsNothingFromRuler": true,
+  "ruler": {
+    "name": "Mutashabihat ul Quran (QUL resource 73)",
+    "source": "https://qul.tarteel.ai/resources/mutashabihat/73",
+    "kind": "phrase-recurrence catalogue: each entry a shared word-run and the ayahs it recurs in",
+    "access": "login-gated download, unstated licence — usable as a ruler, not as a dependency",
+    "phrases": 814,
+    "ayahs": 2232,
+    "pairs": 17862
+  },
+  "hop": {
+    "from": "apps/web/public/assets/adj/hafs-kfqc (the shipped shards)",
+    "mutashabihEdgesDirected": 2994,
+    "ayahs": 1520,
+    "pairs": 1497
+  },
+  "recall": {
+    "ayahCoverage": {
+      "covered": 921,
+      "of": 2232,
+      "pct": 41.26
+    },
+    "pair": {
+      "covered": 673,
+      "of": 17862,
+      "pct": 3.77
+    }
+  },
+  "divergence": {
+    "nested": false,
+    "sharedAyahs": 921,
+    "onlyInRuler": 1311,
+    "onlyInHop": 599
+  },
+  "omissionVsCuration": {
+    "missedRulerAyahs": 1311,
+    "genuineOmissionCandidates": 677,
+    "middling": 323,
+    "deliberateCuration": 311,
+    "rulerPairMassFromBroadFormulaePct": 82.14
+  },
+  "specimens": {
+    "genuineOmission": [
+      "1:6",
+      "2:8",
+      "2:25",
+      "2:30",
+      "2:33",
+      "2:76",
+      "2:87",
+      "2:100",
+      "2:102",
+      "2:107",
+      "2:109",
+      "2:110"
+    ],
+    "onlyOurs": [
+      "2:6",
+      "2:40",
+      "2:45",
+      "2:47",
+      "2:49",
+      "2:58",
+      "2:101",
+      "2:120",
+      "2:122",
+      "2:145",
+      "2:159",
+      "2:176"
+    ]
+  }
+}
