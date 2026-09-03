@@ -449,3 +449,21 @@ second comparison axis to maintain forever is not earned by five already-explain
 status quo stands. Reopens only if the five grow into a class that matters, or a recitation-rule
 colouring makes the iqlab and doubled-vowel marks load-bearing — at which point a *targeted* (never
 the naive) two-number comparison becomes a new item, not this one reopening.
+
+## #71 — Should the licence trace follow the shared core's imports? (2026-09-03, `53948cf`)
+
+`what-we-depend-on` ③, the open design half, is now **answered: no**. The heading marker on the
+[record](../design/what-we-depend-on.md) and the index status in [`issues.json`](../issues.json)
+both moved open → answered.
+
+Answered by weighing the machinery against the exposure, no reader owed. The one derivation that
+reaches the shipped shards through the shared core — the same-part flag computed off the CC BY
+structural tables — is already named in its licensing row and in the notice that ships beside the
+data, so today's exposure is shut. Walking the core's import graph to catch the *next* one is the
+move to refuse: that graph is large and almost entirely unlicensed, so a follower is mostly noise
+and still leaves the hard call — which reach is actually a licensed derivation — to a human. What
+remains is a precedent rather than a defect: a new upstream reached through core would ship unnamed.
+If that is ever worth closing, the shape is the inverse of graph-walking — the core package declares
+its few licence-bearing exports and the trace checks that any bucket importing one names it — and
+that is a narrower new item, not this row reopening. Reopens only if a new licensed upstream, a
+copyleft one above all, reaches a shipped bucket through core.
