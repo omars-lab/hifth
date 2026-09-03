@@ -155,3 +155,30 @@ order and placement by design — those are geometry, and the other three probes
 mark-registration ③ (open → answered) in the doc and `docs/issues.json`; indexed the probe in
 `docs/map.json` beside its three siblings. No test in `closedBy`: a census that re-runs on demand,
 not a code fix — `answered`, not `fixed`.
+
+## #54 — Gate the installed package-tree licences over what ships (what-we-depend-on ⑤)
+
+**Done:** 2026-09-03, commit `cd00797` "Check the licence of every package that reaches a device,
+not just the ones we declare".
+
+The fifth licence gate, and the first that watches code instead of vendored data. The other four
+watch the page artwork, the colophon's quotation and the asset trees; the packages that actually
+run in the browser were watched by nobody but the 2026-08-16 hand audit, which read all 565
+installed packages across twelve buckets and found them clean — the good time to add the check,
+not the bad one. A naive "production dependencies" gate would have been wrong in the direction that
+hides things: the two packages the record flagged both ship without being declared as runtime deps
+— `workbox-window`, dev-declared yet pulled into the bundle through the offline-support register
+shim, and `idb`, declared by nothing in the repo at all, riding the generated service worker
+because the page cache is expiry-bounded. So new `scripts/gate-license-tree.mjs`
+(`pnpm gate:license-tree`) computes the ship set from the two channels the app emits — the browser
+bundle (workspace runtime deps + `workbox-window`) and the service worker (the `workbox-*` family
+`workbox-build` lists, a deliberate superset that can only over-report) — takes the transitive
+closure over runtime deps of each, and fails on any package whose SPDX licence is off a small
+permissive allow-set; everything else fails closed. Ship set today: 24 packages, 23 MIT and idb's
+one ISC. Proven to fail 2026-09-03 by dropping ISC, which named `idb@7.1.1` exactly, then restored;
+the empty-channel case (no `workbox-build`) correctly drops idb so a removed PWA leaves no phantom
+worker. Wired into the gates composite, `make ci` and CI, as `gate:gates` requires. Fixed
+what-we-depend-on ⑤ (open → fixed, `closedBy: scripts/gate-license-tree.mjs`) in the doc and
+`docs/issues.json`; indexed the gate in `docs/map.json` under the provenance group. A `fixed`, not
+an `answered`: a gate that fails if a shipped package's licence goes unclassified is itself the
+regression guard.
