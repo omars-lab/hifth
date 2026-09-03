@@ -614,6 +614,11 @@
           "file": "packages/etl/scripts/probe-word-registration.mjs",
           "symbol": "fit",
           "note": "The second question about the same unadopted corpus, and the one word-level selection was blocked on: do their word boxes land on our paper? Fits a 4-parameter axis-aligned affine per page from the one landmark both corpora carry independently — the ayah-end ornament — and then checks every word centre falls inside the ayah polygon its own attributes name. The answer (`word-registration.probe.json`) is that scale is 1.3333 both axes and the offsets are the two constants already sitting in our own SVGs' transform matrices, one per page parity; residual is sub-pixel, so the per-page fit is a check rather than a necessity. Reuses `ligature-svg.probe.json`'s pin — one pin, not two — so a corpus that moves invalidates both probes at once."
+        },
+        {
+          "file": "packages/etl/scripts/probe-page-table.mjs",
+          "symbol": "witness",
+          "note": "Corroborates the shipped table `ayah-pages.json` against an outside witness — a page-per-ayah table compiled by a completely different route than our page SVG geometry — the second opinion the-page-table-has-only-one-witness went the whole feature's life without. Expands the witness's 604 page-starts into a full 6,236-entry table and compares: 6,180 agree, 56 differ, and all 56 land inside `probe-ligature-print`'s V1/V2 divergence bands (120–123, 144–145, 531–534, 564–600), so ours paginates as V2 and the witness as V1 — a correctness pass and a second confirmation of the printing (④). INSTRUMENT not ingredient (what-we-distribute ②): the witness is read once at build time to check a number, never vendored or shipped. Named `probe-` and not `gate-`: it reaches the public internet, and its answer lives in `page-table.probe.json` beside the table."
         }
       ],
       "extend": [
