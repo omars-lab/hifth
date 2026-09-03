@@ -9,3 +9,4 @@
 - [Playwright WebKit missing](playwright-webkit-missing.md) — iphone e2e project cannot launch locally; run the Chromium projects, ask before installing WebKit
 - [Designs public on the site](designs-public-on-site.md) — tenet since 2026-09-01: docs/ pages are served from blog.bytesofpurpose.com/hifth/docs/ by the build; never publish a decision page to claude.ai as its address
 - [Golden re-baseline recipe](golden-rebaseline-recipe.md) — show the owner the diff and ask first; darwin via make golden-update, linux via make golden-linux UPDATE=1 (image already local, no download)
+- [QUL verse→URL mapping](qul-verse-url-mapping.md) — /cms/verses/N where N is the global 1-based ayah ordinal (1:1→1, 2:1→8); derivable from AYAH_COUNTS
