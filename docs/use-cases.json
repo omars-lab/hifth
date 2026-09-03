@@ -289,7 +289,7 @@
         },
         {
           "file": "apps/web/src/components/DiffView.test.tsx",
-          "test": "washes the words each side does not share, on both sides"
+          "test": "washes the divergent tail ochre on both sides — the same colour, not one each"
         }
       ],
       "includes": [

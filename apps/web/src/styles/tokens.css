@@ -99,13 +99,16 @@
   /* Feedback */
   --danger: #a23b2c;
 
-  /* Diff readings (spec §3 diff view) — the two divergent tokens in a
-     mutashabih pair. `a` reuses the danger terracotta, `b` the accent
-     verdigris, each over a faint wash so scripture stays legible. */
-  --diff-a: #a23b2c;
-  --diff-a-wash: rgba(162, 59, 44, 0.1);
-  --diff-b: #17544d;
-  --diff-b-wash: rgba(23, 84, 77, 0.1);
+  /* Diff readings (comparison-crop decision, option F) — a mutashabih pair is
+     drawn the same on both sides, not one colour each. The words the two ayat
+     SHARE carry a leaf-green wash; the words that DIVERGE carry an ochre one
+     (pushed off the verdigris/terracotta pair so neither reads as "wrong"), and
+     everything outside the ayah is veiled with a paper scrim. Two tokens, each
+     over a faint wash so the scripture underneath stays legible. */
+  --diff-share: #3f7d43;
+  --diff-share-wash: rgba(63, 125, 67, 0.16);
+  --diff-part: #a8791d;
+  --diff-part-wash: rgba(198, 141, 20, 0.22);
 
   /* Type roles (Loop 0 uses platform fonts; display face is a later decision). */
   --font-arabic: "Noto Naskh Arabic", "Geeza Pro", "Amiri", serif;
