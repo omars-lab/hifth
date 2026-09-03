@@ -68,6 +68,33 @@
   ],
   "decisions": [
     {
+      "id": "qul-reliance",
+      "question": "When the app leans on the outside library of Qur'an data, does it copy what the library holds into the app, or only measure its own work against the library and link back out to it?",
+      "status": "decided",
+      "options": [
+        {
+          "id": "A",
+          "label": "Measure against it and link out; copy none of its bytes"
+        },
+        {
+          "id": "B",
+          "label": "Copy the verified text, the fonts, and the layout in"
+        },
+        {
+          "id": "C",
+          "label": "Copy only the layout numbers, not the text or fonts"
+        }
+      ],
+      "doc": "docs/decisions/qul-reliance.md",
+      "decided": "A",
+      "by": "omar",
+      "date": "2026-09-03",
+      "related": [
+        "loop-4a",
+        "loop-4b"
+      ]
+    },
+    {
       "id": "juz-detents",
       "question": "When a reader lets go of the page bar near a juz marker, should the bar pull the page onto it?",
       "status": "decided",
@@ -594,7 +621,8 @@
       "related": [
         "loop-4b",
         "word-search",
-        "comparison-crop"
+        "comparison-crop",
+        "qul-reliance"
       ]
     },
     {
@@ -605,7 +633,8 @@
       "by": "omar",
       "date": "2026-08-03",
       "related": [
-        "loop-4a"
+        "loop-4a",
+        "qul-reliance"
       ]
     },
     {
