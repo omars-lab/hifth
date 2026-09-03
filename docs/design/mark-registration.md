@@ -2292,7 +2292,7 @@ record; the ruling report has a test that a tapped mark and a hand-moved one app
 separate headings; and the scorer has one that a tap is filed under *pointed* and not both hand
 words while the fault rate still counts it.
 
-### ㉒ Whether the weakest matches go wrong by class rather than at random · **open**
+### ㉒ Whether the weakest matches go wrong by class rather than at random · **answered**
 
 The correction places each mark from its own printed ink and accepts the match when the
 rectangle and the ink overlap by more than 0.55. The marks that clear that bar only just have
@@ -2320,6 +2320,35 @@ on the hamza — which §④ names as the mechanism and does not test.
 What this must **not** do is become a per-class correction fitted to sixty marks. Eleven hamzas
 from two bands are enough to say *look here*; they are not enough to edit the placement of
 326,515 marks.
+
+**Answered on 2026-09-03, and the answer was the tail — hamza is not even a bad member of it.**
+The first of the two steps was taken: the sideways displacement was re-measured for every mark
+the search places across the whole book — sixteen thousand hamzas among three hundred thousand
+placed marks — and sorted the same way the sitting sorted its sixty, by how convincingly the ink
+matched. In every band of match quality the hamza sits at or below the middle of the pack. Its
+typical sideways offset is a little under half a page unit where the placed marks as a whole run
+a little over, and the share of hamzas that land more than three-quarters of a unit out sideways
+is the *lowest* of any common mark — about two in five, against a slightly larger share for
+fatha, kasra, shadda and sukun. In the barely-accepted band the sitting drew its alarm from — an
+overlap just above the 0.55 bar — the hamza is the fourteenth most displaced of seventeen kinds
+of mark, placed better than fatha and kasra and far better than the marks that genuinely struggle
+there: a lone waw drawn small is off by more than a whole unit, a shadda or a doubled fatha by
+better than four-fifths, against the hamza's four-tenths.
+
+The one thing the sitting saw that is real is the shared direction: every mark it moved went the
+same way, because the print sets its whole text a little low and a little to one side, so the
+lean is common to every class and the hamza's share of it is if anything milder than the
+shadda's or the kasra's. What eleven marks could not show is that four-tenths of a unit is the
+*ordinary* barely-accepted hamza and the sitting's 1.077 was a draw from the long end of that
+spread — the whole-book middle in that same band is four-tenths, and the eleven simply landed
+high. So the halving between the two bands and the eleven-in-one-direction were both real and
+both a fact about the weak tail and the common lean, not about the hamza. There is no class
+leaning one way to correct for, which is what §④'s refutation from the ink and §㉓'s
+class-by-class residue had already said, and what a per-class term fitted to sixty marks would
+have got wrong. The second step — testing whether the search settles on the letter a hamza sits
+on rather than on the hamza — is therefore not reached: it was the remedy for a hamza fault that
+the first step shows is not there. The whole-book scored rows this rests on are the ones a fresh
+run of the ink scorer reproduces mark-for-mark; checked on a page, the difference was zero.
 
 ### ㉓ Whether the marks we cannot place from ink are wrong in one way or in two · **answered**
 
