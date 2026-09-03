@@ -1,6 +1,6 @@
 ---
 name: validate
-description: Validate the Hifth repo — every check we can run, automated and manual, in cost order. Use when asked to validate, verify, run the gates, check a loop is landable, prepare a release, run a spot-audit, or answer "is this still true?". Also the front door for recording a manual validation result so it becomes a permanent test.
+description: Validate the Hifth repo — every check we can run, automated and manual, in cost order. Use when asked to validate, verify, run the gates, check a loop is landable, prepare a release, run a spot-audit, answer "is this still true?", or corroborate a derived artifact against an independent outside source (an independent-witness check — read this skill's "The probes" section BEFORE writing any new outside-witness script, so a check the repo already runs is not built a second time). Also the front door for recording a manual validation result so it becomes a permanent test.
 ---
 
 # Validating Hifth
@@ -267,6 +267,46 @@ thing they do: `edge-spot-audit` no longer needs a human to confirm ayah *k* is 
 page *n*, so the scarce reader spends the whole half hour on the judgement only
 they can make. Narrowing is recorded in `docs/issues.json`; the check stays
 `owner: user`.
+
+### Before you write a new probe — check we are not already asking
+
+The commonest way to waste an afternoon here is to be handed a question of the form
+*"does anything outside this repo still agree with our X?"*, and answer it by
+writing a fresh script that fetches an outside source and diffs it against X —
+without first noticing that a probe already asks that exact question. It has
+happened: a page-table corroboration probe (against Tanzil, V1) was written and
+committed to answer what-we-depend-on ⑨, when `probe-reference.mjs --page-table`
+had been diffing the same table against another published V1 source for weeks,
+with its `568 agree · 36/36 diverge` pinned in `PROVENANCE.md`. The redundant probe
+was reverted. The record had even called the table "corroborated by none" — which
+was simply false, and building a second witness repeated the error instead of
+catching it.
+
+So before adding any outside-witness check, spend five minutes ruling out that the
+answer already exists:
+
+1. **Read the probes table above.** `probe-reference` is the *general* outside-
+   witness probe — it already reaches api.quran.com and five other references, and
+   its `--page-table` mode diffs our ayah→page table against a published one. If
+   your question is "does an outside party still agree with a table/edition/offer
+   we assert", it is very likely already here or belongs here.
+2. **Read the `PROVENANCE.md` of the data you are about to check.** A probe's answer
+   is banked beside the data it is about, not in the script. `packages/etl/data/pages/PROVENANCE.md`
+   already records three independent witnesses on the page table. If your finding
+   restates one of them, you have found a corroboration, not a gap.
+3. **Prefer a reference over a script.** If a genuinely new outside source is worth
+   asking, add it as another reference *inside* `probe-reference` — that is where
+   the repo centralises outside-witness checks — rather than as a parallel script
+   that has to be discovered, reachability-checked and maintained on its own. A new
+   standalone `probe-*` is warranted only when it asks a *different kind* of
+   question of a *different kind* of source (as `probe-ligature-print` asks "which
+   print is this corpus?" and `probe-word-registration` asks "do its boxes land on
+   our ink?").
+4. **A witness is not a replacement.** Corroborating X against an outside source
+   (reading it to *check* a number) is an instrument use — its licence does not
+   bind, per what-we-distribute ②. Adopting that source *as* X (an ingredient) is a
+   different, licence-bound question. Keep them apart: a permissive corroboration
+   does not make a source adoptable, and an unadoptable source can still corroborate.
 
 ---
 
@@ -559,7 +599,7 @@ The suite is meant to grow as results arrive. Where a new check goes:
 | a new vendored data source | a `SOURCES.md` entry + a `PROVENANCE.md` with a SHA-256 |
 | a new invariant about committed data | a `scripts/gate-*.mjs`, wired into `pnpm gates`, `make ci` and `.github/workflows/ci.yml` |
 | a check only a human can do | a `docs/validation/ledger.json` entry — non-empty `tunes`, and a `runbook` whose every step has an `expect` |
-| a claim about the world outside this repo | a `probe-*` / `check-*` script, opt-in and **never** in `pnpm gates`, whose measurement lands in the relevant `PROVENANCE.md` |
+| a claim about the world outside this repo | a `probe-*` / `check-*` script, opt-in and **never** in `pnpm gates`, whose measurement lands in the relevant `PROVENANCE.md` — but first run "Before you write a new probe" above: an outside-witness check is usually a new reference inside `probe-reference`, not a new script |
 
 New gates follow the existing shape: a header comment saying what it defends and
 *why the failure it prevents is hard to notice*, a clear failure message naming the
