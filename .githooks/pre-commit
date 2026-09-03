@@ -89,7 +89,7 @@ fi
 # hash comparison, well under a second for all three. The decisions README is
 # already covered above, since its hash depends only on decisions.json.
 if [ -n "$staged" ] && command -v node >/dev/null 2>&1; then
-  for gate in use-cases issues tasks; do
+  for gate in use-cases issues tasks etl-scripts; do
     if ! out=$(node "scripts/gate-$gate.mjs" 2>&1); then
       echo "$out"
       echo ""
