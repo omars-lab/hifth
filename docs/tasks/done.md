@@ -354,3 +354,17 @@ shared, 1,311 only-ruler, 599 only-hop), and the misses split 677 tight-phrase o
 candidates against 634 broad-formula recurrences the hop is silent on by design. The hop is not
 finished but not thin and not a subset; the 677 are a new item if anyone opens them, not this one.
 ⑪ moved open→answered.
+
+## #63 — Record QUL (qul.tarteel.ai) in SOURCES.md as a corroboration goldmine
+
+**Done:** 2026-09-03, commit `169952a` "Record QUL as a goldmine to measure against, not a shelf
+to vendor" — entry in [`SOURCES.md`](../../SOURCES.md) Pending sources.
+
+The user asked to add QUL alongside the other sources. It was already named there for its layout
+DB; this widened the entry to the library QUL actually is — mushaf layouts, word morphology, a
+syntactic treebank / ayah-dependency graph, tajweed spans and look-alike phrase catalogues — and
+recorded the standing rule that governs all of it: every resource reviewed is login-gated with no
+licence stated, so nothing ships, and its only use is as a build-time ruler read once from a cache
+to check a number we derived ourselves. Names the Mutashabihat resource 73 used for the hop's
+recall (#61) and cross-links ⑪, so the precedent sits in the file a licence question is answered
+from.
