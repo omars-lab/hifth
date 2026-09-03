@@ -217,6 +217,7 @@ ci: core ## Full local mirror of the CI build-test-gate job, IN CI ORDER
 	$(PNPM) gate:license
 	$(PNPM) gate:license-copy
 	$(PNPM) gate:notices
+	$(PNPM) gate:license-tree
 	$(PNPM) gate:validation
 	$(PNPM) gate:verified-edges
 	$(PNPM) gate:edges

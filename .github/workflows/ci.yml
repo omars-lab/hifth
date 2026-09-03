@@ -132,6 +132,15 @@ jobs:
       - name: Gate — every asset tree names the upstreams it was built from
         run: pnpm gate:notices
 
+      # gate:notices above vets the vendored data trees. This vets the other
+      # thing that ships — the installed package tree — and over what actually
+      # reaches the browser, not what the manifest calls a production dependency:
+      # the offline register shim is dev-declared and ships, and idb is declared
+      # nowhere yet rides the generated service worker. Fails on any shipped
+      # package whose licence nobody has classified.
+      - name: Gate — every shipped package carries a classified licence
+        run: pnpm gate:license-tree
+
       # The manual-validation ledger. This does NOT fail on outstanding checks —
       # a phone that has not been held yet is a fact, not a broken build, and a
       # permanently red gate teaches everyone to ignore it. It fails when the
