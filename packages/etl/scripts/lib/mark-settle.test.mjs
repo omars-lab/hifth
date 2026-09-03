@@ -127,7 +127,7 @@ describe("what a mark ends up being called", () => {
     ]);
     expect(row.words).toEqual(["looks-right", "placement", "print-defect", "exception"]);
     expect(VOCABULARY).toContain("intended-ink");
-    expect(FAULTS).toEqual(["placement", "wrong-shape", "intended-ink"]);
+    expect(FAULTS).toEqual(["pointed", "placement", "wrong-shape", "intended-ink"]);
   });
 
   /**
@@ -154,6 +154,57 @@ describe("what a mark ends up being called", () => {
       ev("19:377", "exception", { note: "   " }),
     ]);
     expect(row.notes).toEqual(["the tooth is missing", "and the one beside it leans"]);
+  });
+});
+
+describe("a tap on the ink is one statement, told apart from what a hand says", () => {
+  /**
+   * A tap on the ink fires the pair the page sends for one press: a placement and a
+   * reshape, both carrying `how: "ink"`. Before this, the settler read the pair as a
+   * hand move plus a hand reshape and counted the mark as having taken two goes — a
+   * fault tally wearing the shape of a gesture tally. The gesture, not the event kind,
+   * is what the word now records.
+   */
+  const tap = (id, to, size) => [
+    ev(id, "placement", { by: to, to, how: "ink", ink: to }),
+    ev(id, "wrong-shape", { size, was: [5, 4], how: "ink", ink: to }),
+  ];
+
+  it("calls a tap `pointed`, and never `placement` or `wrong-shape`", () => {
+    expect(one(tap("19:377", [-1, 0], [7, 6])).words).toEqual(["pointed"]);
+  });
+
+  it("counts a tap on its own tally, never as a hand nudge or a hand reshape", () => {
+    const row = one(tap("19:377", [-1, 0], [7, 6]));
+    expect(row.points).toBe(1);
+    expect(row.goes).toBe(0);
+    expect(row.reshapes).toBe(0);
+  });
+
+  it("records both axes as settled by pointing, at the place and size the tap named", () => {
+    const row = one(tap("19:377", [-1, 0], [7, 6]));
+    expect(row.placedBy).toBe("point");
+    expect(row.sizedBy).toBe("point");
+    expect(row.to).toEqual([-1, 0]);
+    expect(row.size).toEqual([7, 6]);
+  });
+
+  it("reads a tap as a fault, because pointing at the ink says our rectangle was wrong", () => {
+    expect(isFault(one(tap("19:377", [-1, 0], [7, 6])))).toBe(true);
+  });
+
+  /**
+   * A hand nudge after a tap is a later word on where the mark rests, so the hand
+   * wins the resting place — but the reader did point, and that press is not erased:
+   * it stays on `points` and in `words`, so the row shows both were said.
+   */
+  it("lets a hand nudge after a tap take the resting place, and remembers both were said", () => {
+    const row = one([...tap("19:377", [-1, 0], [7, 6]), moved("19:377", [0.5, 0], [-0.5, 0])]);
+    expect(row.to).toEqual([-0.5, 0]);
+    expect(row.placedBy).toBe("hand");
+    expect(row.goes).toBe(1);
+    expect(row.points).toBe(1);
+    expect(row.words).toEqual(["pointed", "placement"]);
   });
 });
 

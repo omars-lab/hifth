@@ -240,8 +240,9 @@ if (seenSaid != null && seenSaid < lowBound) {
 /* ── the report ───────────────────────────────────────────────────────────── */
 
 const WORDS = {
-  placement: "moved it",
-  "wrong-shape": "wrong shape",
+  pointed: "pointed at the ink",
+  placement: "moved it by hand",
+  "wrong-shape": "called the wrong shape",
   "intended-ink": "boxed the right ink",
   "print-defect": "odd in the print",
   exception: "banked, could not say",
@@ -332,13 +333,22 @@ for (const rule of [...groups.keys()].sort()) {
   const faulted = new Set(evs.filter((e) => FAULTS.includes(e.kind)).map((e) => e.id));
   const affirmed = new Set(evs.filter((e) => e.kind === AFFIRMED).map((e) => e.id));
 
+  // The word breakdown counts SETTLED words, not raw event kinds. A tap on the ink
+  // fires a placement and a reshape at once, and counting those raw would file one
+  // gesture under both "moved it" and "called the wrong shape" — the distortion that
+  // made a fault tally read as far more statements than were made. Settling attributes
+  // the tap to `pointed` and reserves the two hand words for what a hand actually did.
+  const settledRows = settle(evs);
+  const withWord = (word) =>
+    new Set([...settledRows.values()].filter((r) => r.words.includes(word)).map((r) => r.id));
+
   say();
   say("  What was said, by word — a mark can carry more than one, so these do not sum:");
-  for (const kind of Object.keys(WORDS)) {
-    const ids = new Set(evs.filter((e) => e.kind === kind).map((e) => e.id));
-    if (!ids.size && kind !== "placement" && kind !== "wrong-shape") continue;
+  for (const word of Object.keys(WORDS)) {
+    const ids = withWord(word);
+    if (!ids.size && word !== "placement" && word !== "wrong-shape") continue;
     const [lo, hi] = wilson(ids.size, dHi || 1);
-    say(`    ${WORDS[kind].padEnd(24)} ${String(ids.size).padStart(3)}   ${pct(ids.size / (dHi || 1)).padStart(6)}   95% ${pct(lo)}–${pct(hi)}`);
+    say(`    ${WORDS[word].padEnd(24)} ${String(ids.size).padStart(3)}   ${pct(ids.size / (dHi || 1)).padStart(6)}   95% ${pct(lo)}–${pct(hi)}`);
   }
 
   say();
@@ -419,11 +429,15 @@ for (const rule of [...groups.keys()].sort()) {
    * be two answers to "what did this mark end up saying", and the disagreement would
    * only ever be found by somebody comparing a report against a ruling by eye.
    */
-  const rows = settle(evs);
+  const rows = settledRows;
   const finals = new Map();
   let goes = 0;
+  let pointed = 0;
   for (const row of rows.values()) {
     goes += row.goes;
+    // A tap on the ink is one gesture, not a nudge or a drag — counted apart so the
+    // "nudges and drags" total below stays a fact about the pad, not about pointing.
+    if (row.placedBy === "point") pointed += 1;
     if (row.to) finals.set(row.id, row);
   }
   if (finals.size) {
@@ -454,6 +468,9 @@ for (const rule of [...groups.keys()].sort()) {
     say(`    median ${n3(median(mags))} · p90 ${n3(quantile(mags, 0.9))} · worst ${n3(Math.max(...mags))}`);
     say(`    across ${n3(median(hand.map((v) => v[0])))} · down ${n3(median(hand.map((v) => v[1])))} — medians, signed`);
     say(`    ${finals.size} ${finals.size === 1 ? "mark" : "marks"}, one row each, settled over ${goes} separate nudges and drags.`);
+    if (pointed) {
+      say(`    ${pointed} of those ${pointed === 1 ? "was placed" : "were placed"} by a single tap on the ink, which is neither.`);
+    }
     if (goes > finals.size * 2) {
       say("    That ratio is itself a finding about the pad rather than about the print: a rectangle");
       say("    that takes several goes to settle is one the controls are not letting anybody place.");

@@ -446,3 +446,45 @@ describe("the answers that were banked as they were given", () => {
     expect(err).toMatch(/not in the displacements/);
   });
 });
+
+describe("pointing at the ink, told apart from moving by hand", () => {
+  /**
+   * A tap on the ink and a hand nudge are two ways to move a rectangle, and the
+   * ruling now keeps them apart: the tap arrives as the placement-and-reshape pair
+   * one press fires, both halves carrying `how: "ink"`, and is counted as one point
+   * on its own tally rather than as the two hand goes it used to be read as. The two
+   * kinds are reported under separate headings — the thing ㉗ asked for.
+   */
+  it("reports pointed marks and hand-moved ones under separate headings", () => {
+    const point = INK_IDS[0];
+    const nudge = INK_IDS[1];
+    const said = [
+      // one tap: a placement and a reshape, both from the ink, in a single press
+      ev(point, "placement", { by: [0.5, -0.25], to: [0.5, -0.25], how: "ink", ink: [0.5, -0.25] }),
+      ev(point, "wrong-shape", { size: [7, 6], was: [5.6, 3.6], how: "ink", ink: [0.5, -0.25] }),
+      // a hand nudge on a different mark: two goes, no ink
+      ev(nudge, "placement", { by: [-1, 0], to: [-1, 0] }),
+      ev(nudge, "placement", { by: [0.4, 0], to: [-0.6, 0] }),
+    ];
+    const { code, out, ruling } = run(sit({ said }));
+    expect(code).toBe(0);
+
+    const pt = ruling.settledMarks.find((m) => m.id === point);
+    const nd = ruling.settledMarks.find((m) => m.id === nudge);
+    // The tap is one point, and never a hand go or reshape; the nudge is two hand goes.
+    expect(pt.placedBy).toBe("point");
+    expect(pt.sizedBy).toBe("point");
+    expect(pt.points).toBe(1);
+    expect(pt.goes).toBe(0);
+    expect(pt.reshapes).toBe(0);
+    expect(nd.placedBy).toBe("hand");
+    expect(nd.goes).toBe(2);
+
+    // The report keeps the two gestures on their own lines, and says why one mark is
+    // in both the moved and the reshaped counts.
+    expect(out).toMatch(/1 moved by hand, over 2 separate goes/);
+    expect(out).toMatch(/1 placed by pointing at the ink, one tap each/);
+    expect(out).toMatch(/1 sized by pointing at the ink, one tap each/);
+    expect(out).toMatch(/one statement, not two/);
+  });
+});

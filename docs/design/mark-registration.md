@@ -2183,7 +2183,7 @@ out of the built page, evaluates it with nothing in scope, and makes it agree wi
 came from. The same discipline put the reading of a built sitting into one place shared with the
 auditor, so the front door and the audit cannot disagree about how many parts exist.
 
-### ㉑ Whether a mark reached by pointing can ever be called only one kind of wrong · **confirmed**
+### ㉑ Whether a mark reached by pointing can ever be called only one kind of wrong · **fixed**
 
 Sixty marks were sat on 2026-08-17, in
 [two sittings](../validation/rulings/2026-08-17-placement-what-kind-of-wrong-placed.seed23.settled.json),
@@ -2248,6 +2248,24 @@ word-level counts from the fallback sittings can be quoted with the caveat attac
 from the band sittings still cannot. And a sitting drawn from marks the correction places well
 cannot be scored on words at all — which is most of the book, and is the population any future
 sitting checking a *good* rule would have to be drawn from.
+
+**Closed by a word of its own, 2026-09-02.** A tap on the ink now settles to a single word —
+*pointed* — and the two hand words, *moved it* and *the wrong shape*, are held back for what a
+hand actually did. A mark tapped and then nudged by hand carries both, in reading order, so
+nothing the reader said is thrown away; a mark only tapped carries just the one. The settler
+reports the two kinds under separate headings — how many marks a hand moved and over how many
+goes, against how many a single tap placed, with a line saying that a tap sets place and size
+together so a pointed mark shows in both counts as one statement rather than two. The scorer's
+word breakdown now counts the settled words rather than the raw presses, so a tap is filed once
+under *pointed* instead of twice under the two hand words, and its "settled over N nudges and
+drags" line no longer counts a tap as either. The mark-level fault rate is left exactly as this
+row insisted it should be: a tap is still a correction, so the mark still counts as one of ours
+to answer. What now notices a regression: the settling unit tests carry a case for each of
+these — that a tap reads as *pointed* and never as a hand word, that it is counted apart from a
+hand nudge, and that a later hand nudge takes the resting place while the tap stays in the
+record; the ruling report has a test that a tapped mark and a hand-moved one appear under
+separate headings; and the scorer has one that a tap is filed under *pointed* and not both hand
+words while the fault rate still counts it.
 
 ### ㉒ Whether the weakest matches go wrong by class rather than at random · **open**
 
@@ -2555,12 +2573,52 @@ ships 323 distinct sizes across 1,935 marks, which is very nearly one per mark, 
 that fail worst are the ones with the fewest marks under them. Both theories were the selected
 population describing its own selection, again.
 
-**One thing this cannot say.** Every measurement here is over marks the search refused. That
-the size is noisy among *refused* doubled marks does not establish it is noisy among the
-accepted ones, and no reader can settle that — it needs the ink extent measured under all
-8,554 of them, which is the free half of the paragraph above and is still owed.
+**One thing this could not say, now said.** Every measurement above is over marks the search
+refused. That the size is noisy among *refused* doubled marks did not establish it is noisy
+among the accepted ones, and no reader could settle that — it needed the ink extent measured
+under all 8,554, which is the free half of the paragraph above. It has now been measured. For
+every doubled mark in the book, the pieces of ink whose middle sits inside the rectangle we
+ship are unioned — the same reach-for-the-ink rule ㉘ scores placements with — and the union's
+width and height are compared, edge for edge, against what we draw. 8,463 of the 8,554 resolve
+to an ink piece; the other 91 have none inside the box and are left out.
 
-### ㉗ Counting what a reader pressed stopped meaning anything when tapping the ink was added · **confirmed**
+**And the box is not, across the population, too small.** 84.7% of doubled marks sit within
+half a unit of their ink in *both* axes, and the median box is if anything a hair *larger* than
+the ink it holds: width runs 0.067 units narrower than the ink at the median (quartiles −0.20
+to −0.03), height 0.10 narrower (−0.17 to −0.05). Only 2.5% have ink spilling past the box by
+more than half a unit in any direction. The gap is not one number a repair could add back:
+about the tight centre there is a one-sided tail — width reaches −1.37 at the tenth percentile —
+so extent has to be measured per mark, exactly the varying branch a reader had already found
+from thirty-three. Across the whole book, then, the headline of this item is refuted a second
+time, and by a different instrument than the reader's.
+
+**Where "too small" actually lives is the refusal.** Split by whether the search accepted the
+box, the two populations do not look alike. The 8,294 accepted doubled marks are tight and
+faintly roomy — width quartiles −0.17 to −0.03, and just 2.0% with ink past the box by more
+than half a unit. The 169 refused ones are wide and shifted the other way — width quartiles
+−1.97 to +0.20, and 24.3% with ink past the box, twelve times the accepted rate. So a doubled
+box being too small is real, and it is a property of the marks the search already cannot place,
+not of doubled marks as such. That is the same shape every earlier pass found and could not
+prove was confined to the refused slice; now it is proven confined to it.
+
+**What the instrument cannot see, kept honest.** The union counts only pieces whose middle
+falls inside the shipped rectangle, so a box drawn too small to reach its far stroke drops that
+stroke from the count and reads less short than it is — every one of the 169 refused marks had
+a piece in its window it left out, which for a too-small box is where the missing stroke would
+be. The 24.3% is therefore a floor, not a ceiling; the accepted marks, whose strokes sit inside
+the box by construction, are unaffected by it. And the far tail of the area ratio — 97 marks
+above twice the box, one at fourteen times — is the union swallowing a whole letter body whose
+centre happened to land in the box, which is why every figure here is a median or a quartile and
+none is a mean. Rebuilt any time by `probe-piece-union.mjs --set doubled` over the whole-book
+rows; the per-mark candidates it wrote are `packages/etl/out/doubled-ink.json`.
+
+This does not close the item. The defect it names — a refused doubled mark needs its size
+measured, not just its position moved — is still without a shipped repair or a test that would
+notice one; what the free half changes is that the repair now has a bounded target (a
+sixth-of-refused-doubled minority) and a proof it must not touch the accepted marks, which are
+already the right size.
+
+### ㉗ Counting what a reader pressed stopped meaning anything when tapping the ink was added · **fixed**
 
 [The sitting above](../validation/rulings/2026-08-17-placement-weak-size-part1.seed23.settled.json)
 reports eighty-five presses of *the rectangle is the wrong shape*, across
@@ -2590,6 +2648,24 @@ to one is the kind of number that gets quoted into a decision, and this one very
 the doubled-mark finding above was reached from the geometry of the corrections, but *the rate*
 at which shape was called wrong is what suggested looking there, and on its own it would have
 pointed at every mark in the sitting equally.
+
+**Closed by, 2026-09-02, and the prediction it corrects is left standing.** *What would answer
+it* said the transcript carried the gesture on every placement but not on the shape events, and
+that "nothing downstream separates them". The first half is left in place because the fix went
+through the half it named: the emitter was taught to stamp *how* a rectangle came to move on
+both halves of the pair a tap fires, so a shape event now says whether a hand pulled a handle
+or a tap set the size. With both halves tagged, the settler counts hand moves and hand reshapes
+apart from taps, keeps taps on a count of their own, and reports the two kinds under separate
+headings — so the *60 were reshaped over 85 separate goes* line is now split into what a hand
+did, over how many goes, and how many marks a single tap sized, with a note that a tap sets
+place and size together so a pointed mark is in both counts as one statement. The scorer's
+*settled over N nudges and drags* count no longer includes a tap and names the pointed marks on
+their own line, and its by-word breakdown counts the settled words, so a tap is filed once as
+*pointed* rather than twice under the hand words (the other end of ㉑). What now notices a
+regression: the settling unit tests count a tap on its own tally and never as a hand reshape;
+the ruling report has a test that the hand-moved and pointed kinds print under separate
+headings; and the scorer has one that a tap stays out of the nudges-and-drags count and is
+named apart.
 
 ### ㉘ A rule that reaches for the ink, rather than resizing toward it, was checked against the whole book · **confirmed**
 

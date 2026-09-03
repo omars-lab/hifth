@@ -98,10 +98,25 @@ const all = Array.isArray(parsed) ? parsed : parsed.rows;
 // of "refused" is a second definition waiting to drift from the first.
 const atEdge = (r) => ranOutOfRoom(r, radius);
 const placed = (r) => !refusedItsOwnInk(r, radius, iouFloor);
+
+// The six names the corpus draws as two of one thing — the tanwin and their
+// successive forms. `the-doubled-marks-are-drawn-too-small` (㉖) asks the size
+// question of exactly this population, and its free half needs the answer over
+// *all* of them, accepted marks included — not just the ones the search
+// refused, which is the only slice the placement passes ever measured.
+const DOUBLED = new Set([
+  "successive fathatan",
+  "successive kasratan",
+  "successive dammatan",
+  "fathatan",
+  "kasratan",
+  "dammatan",
+]);
 const SETS = {
   refused: (r) => !placed(r),
   weak: (r) => r.iouBest < iouFloor,
   edge: (r) => atEdge(r),
+  doubled: (r) => DOUBLED.has(r.name),
   all: () => true,
 };
 if (!SETS[set]) {
@@ -231,6 +246,7 @@ for (const r of pool) {
     k: r.k,
     name: r.name,
     box: r.box,
+    placed: placed(r),
     searchedAt: effRadius,
     piecesInWindow: boxes.length,
     piecesUnioned: inside.length,
@@ -264,5 +280,50 @@ console.error(
 console.error("worst 10 by area ratio:");
 for (const r of worst) {
   console.error(`  ${r.page}:${r.k} ${r.name} — shipped ${r.box[2]}×${r.box[3]}, ratio ${r.ratio}, grew ${r.grow}`);
+}
+
+// The size question `the-doubled-marks-are-drawn-too-small` (㉖) actually asks:
+// how far the ink extends past the box we draw, edge to edge, and whether that
+// gap is one number (a consistent shortfall the repair could add) or a spread
+// (extent has to be measured per mark). Area ratio cannot tell the two apart —
+// a box can be right in one axis and wrong in the other — so width and height
+// are reported separately, and the spread p10..p90 is the whole answer: a tight
+// band around one value is arithmetic, a wide one is not. `share bigger` is how
+// often the ink is the larger of the two, i.e. how often "too small" is even the
+// direction of the error.
+const withCand = out.filter((r) => r.candidate);
+const growW = withCand.map((r) => r.grow[0]);
+const growH = withCand.map((r) => r.grow[1]);
+const share = (xs, pred) => (xs.length ? n3(xs.filter(pred).length / xs.length) : null);
+const band = (xs) => `p10 ${q(xs, 0.1)}, p50 ${q(xs, 0.5)}, p90 ${q(xs, 0.9)}`;
+console.error(
+  `ink-vs-drawn over the ${withCand.length} with a candidate — width grow ${band(growW)} (share bigger ${share(growW, (v) => v > 0)}); ` +
+    `height grow ${band(growH)} (share bigger ${share(growH, (v) => v > 0)})`,
+);
+
+// The half no placement pass could reach: the same extent gap split by whether
+// the search accepted the box or refused it. If accepted doubled marks show the
+// same spread, size is noisy across the whole population and not an artefact of
+// the refused slice the earlier numbers were all measured over.
+for (const [label, keep] of [["accepted", true], ["refused", false]]) {
+  const g = withCand.filter((r) => r.placed === keep);
+  if (!g.length) continue;
+  const w = g.map((r) => r.grow[0]);
+  const h = g.map((r) => r.grow[1]);
+  console.error(
+    `  ${label}: ${g.length} marks — width grow ${band(w)}; height grow ${band(h)}; ` +
+      `area ratio p50 ${q(g.map((r) => r.ratio), 0.5)}`,
+  );
+}
+
+// Per name, so a class that carries the whole effect is not hidden inside the
+// pooled median — the counts above already show the tanwin are not one thing.
+const names = [...new Set(withCand.map((r) => r.name))].sort();
+for (const nm of names) {
+  const g = withCand.filter((r) => r.name === nm);
+  console.error(
+    `  ${nm}: ${g.length} — width grow p50 ${q(g.map((r) => r.grow[0]), 0.5)}, ` +
+      `height grow p50 ${q(g.map((r) => r.grow[1]), 0.5)}, area ratio p50 ${q(g.map((r) => r.ratio), 0.5)}`,
+  );
 }
 console.error(`wrote ${out.length} rows to ${outPath}`);
