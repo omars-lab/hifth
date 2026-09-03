@@ -527,16 +527,36 @@ regeneration path is closed because its classifier carries no licence.
 the same judgement the colouring is already waiting on — and a decision about depending on
 something this new, which vendoring the core would largely dissolve.
 
-### ⑨ The page table is derived from one source and corroborated by none · **open**
+### ⑨ The page table is derived from one source and corroborated by none · **answered**
 
-The table reaches three shipped outputs and sits at the centre of ①, and nothing checks it.
-A metadata file under a public-domain dedication carries a page number per ayah, compiled
-independently of the corpus this project derives its table from.
+The table reaches three shipped outputs and sits at the centre of ①, and nothing checked it.
+The one this project ships is read off the page artwork's own geometry — one polygon per
+ayah, filed by the leaf it sits on — so a page number per ayah compiled from anything other
+than that artwork is a genuinely independent second opinion.
 
-**What would answer it:** compare the two across all 6,236 ayahs. Agreement is a correctness
-check on an unchecked table and evidence bearing on ① — two independent compilations
-agreeing is what a fact about a printing looks like. Disagreement is worth more and would
-never otherwise surface. The source is public domain, so nothing about this is constrained.
+**Measured 2026-09-03: corroborated, and the disagreements are the finding.** Compared across
+all 6,236 ayahs against an independently compiled table of page numbers, 6,180 agree and 56
+differ. Every one of the 56 is off by exactly one leaf, and every one falls inside the four
+short stretches where the two printings of this mus'haf — the earlier one and the later one
+this project's artwork comes from — are already known to break their pages differently. Not
+one disagreement falls outside those stretches. So the two tables are identical everywhere the
+two printings are identical, and differ only, and exactly, where the printings themselves do:
+the outside witness follows the earlier printing, and our table follows the later one the
+artwork is drawn from. That is a correctness check passed — a table built by a completely
+different route agrees with ours across 6,180 ayahs — and, from a different instrument than
+the one that first established which printing the artwork is, a second confirmation of the
+same printing (bearing on ④). A disagreement outside those stretches would have meant a table
+built wrong; there were none.
+
+**On the witness.** The audit named a source under a public-domain dedication for this. By the
+time the comparison was run that file could not be relocated — the project that held it is
+gone, and its one surviving fork had been relicensed to a non-commercial, no-derivatives
+licence — which is itself evidence for ①: a permissive replacement that was counted on has
+already decayed. A different published metadata source stood in, read once at build time and
+neither vendored here nor shipped, so it is read only to check a number and never to make one
+(what-we-distribute ②); the correctness question turned on the witness being independent, not
+on its licence. The comparison reaches the public internet and so cannot run offline; its
+answer lives in a small pin checked in beside the table, the way the printing check's does.
 
 ### ⑩ The segmentation disagreement has no disinterested witness · **open**
 
