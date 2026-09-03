@@ -415,7 +415,8 @@
         "word-selection",
         "loop-4a",
         "note-export-shape",
-        "highlight-shape"
+        "highlight-shape",
+        "adjacency-span-source"
       ]
     },
     {
@@ -896,6 +897,31 @@
       "related": [
         "highlight-shape",
         "tajweed-colours"
+      ]
+    },
+    {
+      "id": "adjacency-span-source",
+      "question": "Which words does the app line look-alikes up on — the printed page's own, or the separate word-by-word corpus it counts them in today?",
+      "status": "open",
+      "options": [
+        {
+          "id": "A",
+          "label": "Keep counting in the corpus's words"
+        },
+        {
+          "id": "B",
+          "label": "Count in the printed page's own words"
+        }
+      ],
+      "artifact": "https://blog.bytesofpurpose.com/hifth/docs/design/adjacency-span-source.html",
+      "page": "docs/design/adjacency-span-source.html",
+      "builtBy": "scripts/build-adjacency-span-source.mjs",
+      "doc": "docs/decisions/adjacency-span-source.md",
+      "decided": null,
+      "by": null,
+      "date": null,
+      "related": [
+        "comparison-crop"
       ]
     }
   ]
