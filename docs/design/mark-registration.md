@@ -12,11 +12,21 @@
 > mislabelling stacked inside it. They are measured apart now, and the naming question needs
 > no page and no rectangle at all — so a displacement cannot contaminate it.
 
-**Status:** a finding and a proposal. The measurement is built, run and reproducible; the
-remedy is **not applied** and the thresholds below are **not enforced anywhere**. Nothing in
-the app changes as a result of this document. What it settles is that the rectangles are
-displaced by a large, consistent, *correctable* amount, and that the correction is worth
-making before anything is drawn for a reader.
+**Status:** a finding, and a decision made on it. The measurement is built, run and
+reproducible; the remedy is **not yet applied** and the thresholds below are **not enforced
+anywhere**, so nothing in the app changes as a result of this document *yet*. What it settles
+is that the rectangles are displaced by a large, consistent, *correctable* amount, and that
+the correction is worth making before anything is drawn for a reader.
+
+> **Decided (2026-09-03): option H** — put each mark where its own ink is, and line the rest
+> up. On the drawn page ([`mark-placement.html`](mark-placement.html), also at
+> <https://blog.bytesofpurpose.com/hifth/docs/design/mark-placement.html>), the owner chose
+> the per-mark option over the line-by-line grains of §⑦ below. Those grains stay written up
+> here — H falls back to one of them (option F) wherever it cannot place a mark from ink, so
+> every word about them is still load-bearing. What changes is that §⑦ is no longer choosing
+> *between* A–I; it is describing the fallback under the chosen answer, and the open questions
+> below (the reach-for-ink cluster especially) are now the work of building H, not of deciding
+> whether to.
 
 ---
 
@@ -867,7 +877,7 @@ Cost: the correction no longer fits in the four numbers a page already carries, 
 small table of its own beside them, and everything that places a rectangle has to read it. That
 is the real price of E and F both, and it is what §⑩ ⑨ is holding open.
 
-### Option F — record a printed line that is allowed to tilt · **recommended**
+### Option F — record a printed line that is allowed to tilt · **the fallback under H**
 
 The same as E, except that a line's move is permitted to change gradually from one end of the
 line to the other rather than being one number for the whole line. Four numbers a line instead
