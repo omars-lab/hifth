@@ -1,0 +1,65 @@
+{
+  "$comment": "Do the QUL rulers agree with our shipped numbers? See qul-reliance: QUL is a ruler + outbound link only, and this repo ships none of its bytes. This pin holds AGREEMENT NUMBERS ONLY — verse keys, ids, boundary counts; no Qur'an text — plus the SHA-256 of every file read so a rerun reproduces or says upstream moved. Opt-in probe, never a gate (the cache is gitignored). Regenerate with `make probe-qul` / `--write`.",
+  "measuredAt": "2026-09-03",
+  "reads": {
+    "packages/etl/data/pages/.cache/qul-layout10/qpc-v2-15-lines.db": "e4df98f35dd3b8927ff096337c8739e0f0b12c8ba622834c345eaa4c3e28dd8c",
+    "packages/etl/data/pages/ayah-pages.json": "50afcbaf4600341f1b9ce402af5bbe3c87efb62026d060548182733b3d913fd5",
+    "packages/etl/data/meta/.cache/qul-metadata/quran-metadata-juz.json": "0e34f5abbd786c828d388b1f3c732db8b42b1bf36a4f619603e4c632f9e86628",
+    "packages/etl/data/mutashabihat/mutashabiha_data.json": "785d5efa266a19c405a449b0a01ebf34fe7dc09836d5b6ef301eae874db780f0",
+    "packages/etl/data/similar-ayah/.cache/qul74/matching-ayah.json": "ee2aac81622a3522aaf6badbf0454395bac903bd865baf5a0b1839afe38e1fac",
+    "packages/etl/data/mutashabihat/.cache/qul73/phrase_verses.json": "10a82f12653fff106994408d89c6a6ca5c31bef4af9fd20fd9327452711fe02c",
+    "packages/etl/data/mutashabihat/.cache/qul73/phrases.json": "179e8ae3affdd42db9eb82e0748a6c8d7a9ff9e1e170a6c58a9146c21c0e94c6"
+  },
+  "layout": {
+    "authority": "QCF V2 ( 1421H print )",
+    "pages": {
+      "ours": 604,
+      "theirs": 604
+    },
+    "linesPerPage": 15,
+    "surahFirstPage": {
+      "checked": 114,
+      "agree": 96,
+      "headerOnPriorPage": [
+        4,
+        10,
+        22,
+        23,
+        24,
+        26,
+        27,
+        32,
+        33,
+        37,
+        38,
+        45,
+        47,
+        53,
+        60,
+        64,
+        65,
+        80
+      ],
+      "surprises": []
+    }
+  },
+  "juz": {
+    "checked": 30,
+    "agree": 30,
+    "mismatches": []
+  },
+  "similarity": {
+    "ourEdges": 2516,
+    "corpus74": {
+      "theirPairs": 3552,
+      "oursCorroborated": 70,
+      "oursCorroboratedPct": 2.8,
+      "novelToUs": 2295
+    },
+    "corpus73": {
+      "theirCoPairs": 17862,
+      "ourUndirectedCorroborated": 37,
+      "ourUndirectedPairs": 1493
+    }
+  }
+}

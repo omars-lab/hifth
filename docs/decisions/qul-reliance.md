@@ -120,9 +120,14 @@ are recorded item by item as each is picked up.
 
 ---
 
-*Where this lives in the code:* the ruler/probe pattern (`packages/etl/scripts/probe-hop-recall.mjs`
-and `probe-reference.mjs`) reads the library from a gitignored `.cache/qul*/` and emits
-numbers-only `*.probe.json`; the no-text guarantee is enforced by `gate:scripture` /
-`gate:notext`; per-item attribution is recorded in `SOURCES.md` and surfaced through
-`gate:notices`. The download mechanism and per-item licence posture are in the
-`leverage-qul` skill and the `qul-licensing` memory.
+*Where this lives in the code:* the QUL rulers are cross-checked by
+`packages/etl/scripts/probe-qul-rulers.mjs` (run it with `make probe-qul`), which reads the
+library from a gitignored `.cache/qul*/`, measures its page layout, juz boundaries and two
+similarity corpora against what we ship, and emits the numbers-only pin
+`packages/etl/data/qul/qul-rulers.probe.json` — following the same ruler/probe pattern as
+`probe-reference.mjs`. The no-text guarantee is enforced by `gate:scripture` / `gate:notext`;
+the per-resource licence read and the by-eye confirmation that each cached export is text-free
+are the human check `qul-rulers-terms-and-text-free` in `docs/validation/ledger.json`; per-item
+attribution is recorded in `SOURCES.md` and surfaced through `gate:notices`. The download
+mechanism and per-resource licence posture are in the `leverage-qul` skill and the
+`qul-licensing` memory.

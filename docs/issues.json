@@ -707,6 +707,13 @@
       "owner": "user"
     },
     {
+      "id": "check-qul-rulers-terms-and-text-free",
+      "source": { "ledger": "qul-rulers-terms-and-text-free" },
+      "severity": "risk",
+      "owner": "user",
+      "note": "The human half of the qul-reliance boundary. The probe (make probe-qul) can prove our numbers agree with the outside library's rulers and can pin the SHA-256 of every cached file it reads, but it cannot read a session-gated, per-resource licence page, and it cannot look inside a gitignored cache the tree deliberately does not carry to confirm the export is numbers and verse keys rather than text or glyphs. Both are on a reader. Risk rather than question because leaning on a ruler whose licence forbids the use, or whose export turned out to carry scripture, would breach the standing no-text guarantee — the one thing the whole SVG-artwork model exists to keep."
+    },
+    {
       "id": "check-source-offer-resolves",
       "source": { "ledger": "source-offer-resolves" },
       "severity": "risk",

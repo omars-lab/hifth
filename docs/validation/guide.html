@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" data-ledger-hash="cb24e2e108b8">
+<html lang="en" data-ledger-hash="6fee1b3dc646">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -123,11 +123,11 @@ li.struck .expect::before { content: "machine "; color: var(--green); }
 <header class="top">
   <p class="kicker">Hifth · حِفظ</p>
   <h1>Field guide</h1>
-  <p class="lede">The checks a machine cannot run. 9 of 11 outstanding.</p>
+  <p class="lede">The checks a machine cannot run. 10 of 12 outstanding.</p>
   <p class="rule">Every result here must tighten something automated — a threshold, a
   fixture, a gate. That is what <b>tunes</b> is for at the foot of each card. A verdict
   that tunes nothing has to be bought again by hand, forever.</p>
-  <p class="src">Generated from <code>docs/validation/ledger.json</code> · <code>cb24e2e108b8</code>
+  <p class="src">Generated from <code>docs/validation/ledger.json</code> · <code>6fee1b3dc646</code>
   · never edit this file — run <code>make guide</code></p>
 </header>
 
@@ -368,6 +368,67 @@ li.struck .expect::before { content: "machine "; color: var(--green); }
     <p class="tunes-lead">Then do what it tunes:</p>
     <ul class="tunes"><li>SOURCES.md §hafs-kfqc — drops the 'pending-that-glance' clause from the Status line</li><li>apps/web/src/components/Colophon.tsx — the mushaf licence line, if the wording moved</li></ul>
     <p class="expect">Written up in SOURCES.md §hafs-kfqc</p>
+  </section>
+</article>
+<article class="card" id="qul-rulers-terms-and-text-free">
+  <div class="head">
+    <span class="badge">outstanding</span>
+    <h2>Read each borrowed ruler's licence, and confirm its export carries no Qur'an text</h2>
+    <p class="id"><code>qul-rulers-terms-and-text-free</code></p>
+  </div>
+
+  <p class="why">The app measures its own numbers against the outside library (qul.tarteel.ai) and links back to it, shipping none of its bytes — that boundary is the qul-reliance decision. Two things rest on a human, not a gate. First, the library's licence is per-resource, not a blanket grant (its FAQ #3 and #9): some resources are public domain, some require attribution, some restrict use, so the licence and the exact attribution string for each ruler we lean on can only be read off that resource's own page. Second, the whole boundary assumes what we cache to measure against is numbers, ids and verse keys — not text or glyphs; the tree's gates prove no Qur'an text is in the repository, but the exports live in a gitignored cache the tree deliberately does not carry, so only a reader opening the cached files can confirm the thing the probe feeds on is genuinely text-free.</p>
+  
+
+  
+  <section class="block">
+    <h3>What you need</h3>
+    <ul class="bullets"><li>An ordinary browser, signed in to qul.tarteel.ai (the download links are session-gated).</li><li>The local cache the probe reads, under packages/etl/data/**/.cache/qul*/ — present only on a machine that has run the leverage-qul pull. If it is absent, <code>make probe-qul</code> skips and there is nothing to eyeball; pull first.</li><li>About ten minutes.</li></ul>
+  </section>
+  <section class="block">
+    <h3>Setup — on the laptop</h3>
+    <pre class="cmd">make probe-qul</pre>
+    <p class="expect">Prints agreement numbers and, for layout, <code>0 surprises</code>. If it says a section was skipped, that ruler's cache is missing — pull it before this check can cover it.</p>
+  </section>
+
+  <section class="block">
+    <h3>Steps — on the phone</h3>
+    <ol class="steps">
+      <li>
+        <label class="do"><input type="checkbox" data-step="qul-rulers-terms-and-text-free:0"><span>For each ruler the probe names — the QCF V2 page layout, the juz metadata, and the two similarity corpora — open its page on qul.tarteel.ai and read the licence and attribution it states.</span></label>
+        <p class="expect">Each page states a licence that permits measuring against it and linking back (ruler + deep-link, no redistribution of its bytes), and names the attribution it wants. None of them is what we are relying on if it forbids reuse outright.</p>
+        
+        <p class="why">The licence is per-resource; there is no blanket grant to lean on. A ruler whose page forbids the use we are making of it is one the probe should stop reading, and that judgement is only on its own page.</p>
+        
+      </li>
+      <li>
+        <label class="do"><input type="checkbox" data-step="qul-rulers-terms-and-text-free:1"><span>Confirm the attribution string we record for each ruler in SOURCES.md says what that resource's page asks for.</span></label>
+        <p class="expect">Each borrowed ruler has a SOURCES.md entry whose attribution matches its page, even though we ship none of its bytes.</p>
+        
+        <p class="why">Attribution is owed for ruler use as much as for shipped bytes. An attribution we wrote from memory is a claim on the library's behalf, and it drifts the same way the mushaf licence line did.</p>
+        
+      </li>
+      <li>
+        <label class="do"><input type="checkbox" data-step="qul-rulers-terms-and-text-free:2"><span>Open two or three of the cached export files the probe pin lists under <code>reads</code> and look at what they actually contain.</span></label>
+        <p class="expect">Verse keys, word indices, page and line numbers, ids — and no Arabic script, no glyph blobs, no per-word text. The pin's schema notes say numbers only; confirm the bytes agree.</p>
+        
+        <p class="why">The text-free claim is the load-bearing half of the boundary, and it is about files the tree does not carry, so no gate here can see them. If a future export quietly starts shipping a text column, this is the only place it is caught before the probe starts reading it.</p>
+        
+      </li>
+    </ol>
+  </section>
+
+  <section class="block">
+    <h3>Reading the result</h3>
+    <ul class="bullets"><li>A licence permits the use and the attribution matches → nothing changes; note the date and which resource pages you read in <code>result</code>.</li><li>A licence is stricter than our use assumes, or forbids it → stop the probe reading that resource and record why in SOURCES.md and the qul-reliance record; a ruler we may not use is not a ruler.</li><li>Our attribution string has drifted from the page → fix it in SOURCES.md; <code>pnpm gate:notices</code> asserts the string is present, not that it is faithful, so this is the only check that keeps it true.</li><li>An export carries Arabic text or glyphs → the probe must stop reading that file and the leverage-qul rubric must mark that resource text-bearing; ruler use of a text-bearing export is exactly the boundary the decision draws.</li></ul>
+  </section>
+
+  <section class="block record">
+    <h3>Record it</h3>
+    <pre class="cmd">make record CHECK=qul-rulers-terms-and-text-free RESULT='read layout/juz/similar-ayah/mutashabihat pages on qul.tarteel.ai on &lt;date&gt; — licences permit ruler use, attributions match SOURCES.md; spot-checked &lt;files&gt; in the cache, numbers/verse-keys only, no text'</pre>
+    <p class="tunes-lead">Then do what it tunes:</p>
+    <ul class="tunes"><li>SOURCES.md — the per-resource QUL licence + attribution entries this check keeps faithful</li><li>.claude/skills/leverage-qul/ — the rubric that marks which resources are text-bearing and off-limits to the probe</li></ul>
+    <p class="expect">Written up in docs/decisions/qul-reliance.md</p>
   </section>
 </article>
 <article class="card is-done" id="source-offer-resolves">
