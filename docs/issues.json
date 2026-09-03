@@ -1199,10 +1199,10 @@
     {
       "id": "pages-are-never-counted-against-the-text",
       "source": { "file": "docs/design/mark-registration.md", "item": "③" },
-      "status": "open",
+      "status": "answered",
       "severity": "question",
       "owner": "agent",
-      "note": "Does each page carry the number of marks of each name the text says it should, in that order? Counting is blind to geometry and geometry is blind to counting: no score in either document can see a missing or duplicated mark, because a mark that was never drawn has no box to be wrong about. Cheap next to everything else here."
+      "note": "Answered 2026-09-02 by a whole-corpus census (probe:mark-counts). 86,962 of 86,965 words carry exactly the marks their text calls for; the missing/duplicated-mark class no geometry can see is empty save for 3 words, which are the same 3 the naming check (mark-labels ②) already sets aside — 2 missing a hamza on an initial alef, 1 seated-hamza cluster the print draws with 2 extra marks. Independent of the naming check: it expands the text directly and reports the count mismatch the naming check sets aside. Counts a multiset, blind to order/placement by design (that is geometry). Whether the print or the text is right about those 3 is a hafiz's call — the print-oddities lane."
     },
     {
       "id": "which-printing-made-the-shipped-pages",
