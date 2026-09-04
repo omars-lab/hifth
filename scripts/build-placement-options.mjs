@@ -51,6 +51,7 @@
  */
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { basename, join } from "node:path";
+import { ranOutOfRoom, refusedItsOwnInk } from "../packages/etl/scripts/lib/mark-ink.mjs";
 
 const ROOT = new URL("..", import.meta.url).pathname;
 const DATA = join(ROOT, "docs/design/mark-placement.data.json");
@@ -129,9 +130,17 @@ const GRAINS = ["shipped", "page", "line", "tilt", "curve"];
  * a pinned search are.
  */
 const TRUST = { iou: 0.55, radius: 3 };
-const atWindowEdge = (r) =>
-  Math.abs(Math.abs(r.dx) - TRUST.radius) < 1e-6 || Math.abs(Math.abs(r.dy) - TRUST.radius) < 1e-6;
-const trusted = (r) => r.iouBest >= TRUST.iou && !atWindowEdge(r);
+// The out-of-room and refusal tests are the ship asset's own, imported rather than
+// re-stated here, so the trusted/refused split a reader inspects on this page is the
+// split the app actually ships. Both read the mark's *own* searched distance — three
+// for the ordinary look, eight for the ones the wider second look rescued, carried on
+// each row as `searchedAt` — instead of a fixed three. A mark allowed eight units that
+// came to rest at three had room to spare, so its match is a real find; the same
+// landing judged against a hard-coded three would read as a wall it backed into. That
+// is the one population where a fixed three and the per-mark reach give opposite
+// verdicts, and reconciling them is issue ㊱ (docs/design/mark-registration.md).
+const atWindowEdge = (r) => ranOutOfRoom(r, TRUST.radius);
+const trusted = (r) => !refusedItsOwnInk(r, TRUST.radius, TRUST.iou);
 
 /** The grain names the correction builder knows, keyed by ours. */
 const GRAIN_ARG = { page: "page", line: "line", tilt: "line-tilt", curve: "line-curve" };
@@ -252,7 +261,13 @@ async function extract() {
     // the search found it; where it is not, it inherits the printed line. The
     // fallback is what makes this shippable rather than reckless — see TRUST.
     const a = corr.tilt.apply(r);
-    o.mark = trusted(r) ? [r3(r.dx), r3(r.dy)] : [r3(a.dx), r3(a.dy)];
+    // Only a mark carries an ink measurement. A word or a verse-end circle is not
+    // placed on its own ink, so under H it simply inherits the printed line like
+    // every other grain — the tilt fallback below. `trusted` reads ink fields a
+    // non-mark row does not have, so gate on their presence rather than let a
+    // missing measurement read as a confident match.
+    const isInkMark = Number.isFinite(r.iouBest);
+    o.mark = isInkMark && trusted(r) ? [r3(r.dx), r3(r.dy)] : [r3(a.dx), r3(a.dy)];
     return o;
   };
 

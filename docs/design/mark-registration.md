@@ -3106,7 +3106,7 @@ strokes, the double-damma, the single fatha wedge, each box on its own mark's in
 reaching into a neighbour. What now notices a regression: `packages/etl/scripts/lib/piece-union.test.mjs`,
 and `scripts/gate-mark-placements.mjs` reconciling the committed shards to the pin.
 
-### ㊱ The ship asset and the decision page disagree about which marks ran out of room · **open**
+### ㊱ The ship asset and the decision page disagree about which marks ran out of room · **fixed**
 
 Two tests in the tree ask the same question — did a mark's ink search run out of the room it was
 given? — and they answer it differently, because they read the room differently. The asset the app
@@ -3129,6 +3129,18 @@ ships. Until then the page slightly over-states how many rescued marks fall back
 nothing the app draws, which is why this is a page-fidelity question and not a defect in the asset. The
 count of affected marks is the wide look's own yield: only marks the second look rescued and that
 settled between three and eight units diverge, and no other mark can.
+
+**Closed by.** The page no longer keeps its own copy of the wall. Its trusted/refused
+illustration now calls the very tests the shipped placement uses — the same out-of-room and
+refusal rule, which reads each mark's own searched distance rather than a fixed three — so the
+two cannot give different answers on any mark. It was rebuilt from the same whole-book
+displacements the app ships from, the ones that carry the wider second look. The drawn page is
+unchanged, because it has no refused marks to redraw; what moved is the book-wide count the page
+reports below the picture, from 1,877 marks handed back to the printed line down to 668 — 99.8%
+placed from their own ink — which is the split the app actually makes. A test holds the rule in
+place: a mark allowed eight units that comes to rest at three is a real find, not a wall, and one
+pinned at eight is out of room; if that ever stops being true the test fails. See the issue index
+under `ship-asset-and-page-disagree-on-ran-out-of-room`.
 
 ## How can someone look at this for themselves?
 
