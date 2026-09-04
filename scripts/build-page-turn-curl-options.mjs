@@ -1,0 +1,526 @@
+/*
+ * Builds docs/design/page-turn-curl-options.html — the decision page that reopens
+ * the settled rejection of a curling page turn (page-transition.md §8①).
+ *
+ * The rejection's own bar was: "reconsider only if someone can draw a curl that
+ * expresses the four states of what lies between two pages." So this page mounts
+ * the curl LIVE — four turn styles, each playable by hand, each made to tell the
+ * truth in all four states — because a curl is felt, and a still picture lets a
+ * reader be wrong about it.
+ *
+ * It reads the app's own tokens so every colour and width on the page is the one
+ * that would ship (the fore-edge stack, the gutter core, the sunk-paper of a
+ * missing leaf, the turn durations). It reads @hifth/core for the rule that says
+ * which of the four states a pair of pages is in, so the four demos are labelled
+ * by the same function the app turns by. It references two real vendored pages so
+ * the "settled" state under the skeleton is the actual printed page, not a mock.
+ *
+ * Single render mode: everything it needs is committed bytes (tokens, core dist,
+ * the page SVGs on disk). No large cache, so no --extract half.
+ */
+import { readFileSync, writeFileSync } from "node:fs";
+import { join } from "node:path";
+import { ROOT } from "./code-pointers.mjs";
+
+const TOKENS_CSS = join(ROOT, "apps/web/src/styles/tokens.css");
+const CORE = join(ROOT, "packages/core/dist/index.js");
+const PAGE = join(ROOT, "docs/design/page-turn-curl-options.html");
+
+const { foldBetween, spreadOf } = await import(CORE);
+const tokensCss = readFileSync(TOKENS_CSS, "utf8");
+
+const token = (name) => {
+  const m = tokensCss.match(new RegExp(`--${name}:\\s*([^;]+);`));
+  if (!m) throw new Error(`token --${name} not found in tokens.css`);
+  return m[1].trim();
+};
+
+// The app's own values, so the demo cannot drift from what ships.
+const T = {
+  paper: token("paper"),
+  paperRaised: token("paper-raised"),
+  paperSunk: token("paper-sunk"),
+  ink: token("ink"),
+  inkSoft: token("ink-soft"),
+  hairline: token("hairline"),
+  gutterShadow: token("gutter-shadow"),
+  gutterShadowDeep: token("gutter-shadow-deep"),
+  gutterCore: token("gutter-core"),
+  foreEdge: token("fore-edge"),
+  foreEdgeDeep: token("fore-edge-deep"),
+  leafEdge: token("leaf-edge"),
+  foldCreaseWidth: token("fold-crease-width"),
+  foldGapWidth: token("fold-gap-width"),
+  durFast: token("dur-fast"),
+  durMed: token("dur-med"),
+  durHop: token("dur-hop"),
+};
+
+// The four states, named by the same rule the app turns by, on a 604-page book.
+// One real, turnable pair per state so the labels on the page are not invented.
+const TOTAL = 604;
+const EX = {
+  crease: { from: 1, to: 2 },
+  gap: { from: 7, to: 6 },
+  hole: { from: 7, to: 9 },
+  none: { from: 19, to: 7 },
+};
+for (const [state, { from, to }] of Object.entries(EX)) {
+  const got = foldBetween(from, to, TOTAL);
+  // "none" is the caller's to pass for a jump; foldBetween sees only two far
+  // pages and also answers "hole" for 19↔7, so only check the three it decides.
+  if (state !== "none" && got !== state) {
+    throw new Error(`example ${from}->${to} is ${got}, expected ${state}`);
+  }
+}
+// The pages the demo actually paints — real vendored artwork, referenced
+// relatively so the page opens from a clone and the build restages the path.
+const REAL = { current: 7, turned: 6 };
+const svgHref = (p) => `../../apps/web/public/assets/pages/hafs-kfqc/${p}.svg`;
+
+const LIVE = {
+  total: TOTAL,
+  examples: EX,
+  spreads: {
+    crease: [spreadOf(EX.crease.from, TOTAL), spreadOf(EX.crease.to, TOTAL)],
+  },
+  real: REAL,
+  durMs: {
+    fast: Number(String(T.durFast).replace("ms", "")),
+    med: Number(String(T.durMed).replace("ms", "")),
+    hop: Number(String(T.durHop).replace("ms", "")),
+  },
+};
+
+const esc = (s) =>
+  String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+// ---------------------------------------------------------------- the page
+
+const html = `<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Should a page turn curl?</title>
+<style>
+  :root{
+    --bg:#f6f4ef; --panel:#fffdf9; --ink:#211d17; --ink-2:#6a6156; --line:#e3ddd1;
+    --line-soft:#efeae0; --accent:#8a6d3b; --accent-soft:#f0e7d6; --lean:#3f6f5f; --lean-soft:#e2efe9;
+    /* the app's own paper, ink and edges, read from its tokens at build time */
+    --paper:${T.paper}; --paper-raised:${T.paperRaised}; --paper-sunk:${T.paperSunk};
+    --m-ink:${T.ink}; --m-ink-soft:${T.inkSoft}; --m-hairline:${T.hairline};
+    --gutter-shadow:${T.gutterShadow}; --gutter-shadow-deep:${T.gutterShadowDeep}; --gutter-core:${T.gutterCore};
+    --fore-edge:${T.foreEdge}; --fore-edge-deep:${T.foreEdgeDeep}; --leaf-edge:${T.leafEdge};
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#17150f; --panel:#201d16; --ink:#efe9dd; --ink-2:#a79c8a; --line:#332e23;
+      --line-soft:#2a261d; --accent:#c8a565; --accent-soft:#332a1a; --lean:#7fb59f; --lean-soft:#1e2b26;
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#17150f; --panel:#201d16; --ink:#efe9dd; --ink-2:#a79c8a; --line:#332e23;
+    --line-soft:#2a261d; --accent:#c8a565; --accent-soft:#332a1a; --lean:#7fb59f; --lean-soft:#1e2b26;
+  }
+  *{box-sizing:border-box}
+  body{margin:0; background:var(--bg); color:var(--ink); font:16px/1.6 "Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif; -webkit-font-smoothing:antialiased}
+  .wrap{max-width:1000px; margin:0 auto; padding:3rem 1.4rem 4rem}
+  .eyebrow{font-family:"SF Mono",ui-monospace,Menlo,monospace; font-size:.72rem; letter-spacing:.14em; text-transform:uppercase; color:var(--accent); margin:0 0 .5rem}
+  h1{font-size:2rem; line-height:1.2; margin:0 0 .8rem; text-wrap:balance}
+  h2{font-size:1.35rem; margin:2.6rem 0 .6rem; text-wrap:balance}
+  h2.q{font-size:1.6rem; margin-top:3.4rem; padding-top:1.8rem; border-top:1px solid var(--line)}
+  h3{font-size:1.1rem; margin:1.6rem 0 .4rem}
+  p, li{max-width:68ch}
+  .lede{font-size:1.12rem; color:var(--ink-2)}
+  dl.gloss{max-width:68ch; display:grid; grid-template-columns:auto 1fr; gap:.3rem 1rem}
+  dl.gloss dt{font-weight:600}
+  dl.gloss dd{margin:0}
+  table{border-collapse:collapse; margin:1rem 0; font-size:.92rem}
+  th,td{border-bottom:1px solid var(--line); padding:.5rem .8rem; text-align:left; vertical-align:top}
+  th{font-family:"SF Mono",ui-monospace,Menlo,monospace; font-size:.68rem; letter-spacing:.08em; text-transform:uppercase; color:var(--ink-2)}
+  .num{font-family:"SF Mono",ui-monospace,Menlo,monospace; font-size:.88rem}
+  blockquote{margin:1rem 0; padding:.6rem 1rem; border-left:3px solid var(--line); color:var(--ink-2); font-style:italic}
+  .foot{margin-top:3rem; padding-top:1.2rem; border-top:1px solid var(--line); font-size:.82rem; color:var(--ink-2); max-width:68ch}
+  a{color:var(--accent)}
+
+  /* the live board — the felt options, mounted as real, draggable code */
+  .live{border:1px solid var(--line); border-radius:16px; background:var(--panel); padding:1.3rem 1.4rem 1.6rem; margin-top:1.4rem}
+  .controls{display:flex; flex-wrap:wrap; gap:1.2rem 2rem; align-items:flex-start; margin-bottom:1.1rem}
+  .ctl-label{font-family:"SF Mono",ui-monospace,Menlo,monospace; font-size:.66rem; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-2); margin:0 0 .4rem}
+  .seg{display:inline-flex; flex-wrap:wrap; border:1px solid var(--line); border-radius:999px; overflow:hidden}
+  .seg button{appearance:none; border:0; background:transparent; color:var(--ink-2); font:inherit; font-size:.88rem; padding:.42rem .95rem; cursor:pointer; border-inline-start:1px solid var(--line)}
+  .seg button:first-child{border-inline-start:0}
+  .seg button[aria-pressed="true"]{background:var(--accent); color:#fff}
+  .board{display:flex; gap:1.6rem; flex-wrap:wrap; align-items:flex-start}
+  .stage-col{flex:1 1 320px; min-width:280px}
+
+  /* the book: a right-hand leaf you grab by its outer edge and pull, the way the
+     app turns. The gutter (spine) is on the left; the fore-edge you grab is on
+     the right. Nothing here carries a single Arabic letter — the real pages are
+     drawn letters (outlined paths) loaded as images, and everything else is bars. */
+  .book{position:relative; width:100%; aspect-ratio:345/500; background:var(--paper); border:1px solid var(--m-hairline); border-radius:3px; overflow:hidden; user-select:none; touch-action:none; box-shadow:0 6px 20px rgba(0,0,0,.14)}
+  .book *{pointer-events:none}
+  .leaf{position:absolute; inset:0; background:var(--paper)}
+  .leaf.next{background:var(--paper)}
+  .pageimg{position:absolute; inset:6% 7% 6% 7%; width:86%; height:88%; object-fit:contain; opacity:.96}
+  /* skeleton text — the loading bars that stand in for glyphs while a leaf moves */
+  .sk{position:absolute; inset:7% 8% 7% 10%; display:flex; flex-direction:column; gap:3.6%}
+  .sk i{display:block; height:3.1%; border-radius:2px; background:var(--m-hairline); opacity:.85}
+  .sk i:nth-child(3n){width:78%} .sk i:nth-child(3n+1){width:94%} .sk i:nth-child(3n+2){width:86%}
+  .sk i:nth-child(7n){width:62%}
+  .sk.settling i{animation:sheen 1.1s ease-in-out infinite}
+  @keyframes sheen{0%,100%{opacity:.55}50%{opacity:.95}}
+  /* the fore-edge stack: the cut edges of the block of leaves you'd really see */
+  .foreedge{position:absolute; top:0; bottom:0; width:${T.foldGapWidth}; pointer-events:none;
+    background:linear-gradient(to right,
+      var(--fore-edge-deep) 0 4px, var(--m-hairline) 4px 5px, var(--fore-edge) 5px 9px,
+      var(--m-hairline) 9px 10px, var(--paper-sunk) 10px 20px, var(--m-hairline) 20px 21px,
+      var(--fore-edge) 21px 25px, var(--m-hairline) 25px 26px, var(--fore-edge-deep) 26px 30px)}
+  /* a missing leaf: sunk paper behind a dashed edge — the app's word for "no result yet" */
+  .void{position:absolute; inset:0; background:var(--paper-sunk); border-left:1px dashed var(--m-hairline); display:grid; place-items:center; text-align:center; padding:1.4rem}
+  .void span{font-size:.82rem; color:var(--m-ink-soft); max-width:22ch; font-style:italic}
+  /* the gutter, drawn permanently between two facing leaves */
+  .gutter{position:absolute; top:0; bottom:0; width:${T.foldCreaseWidth}; pointer-events:none;
+    background:linear-gradient(to right, transparent 0%, var(--gutter-shadow) 42%,
+      var(--gutter-shadow-deep) calc(50% - 1px), var(--gutter-core) calc(50% - .5px),
+      var(--gutter-core) calc(50% + .5px), var(--gutter-shadow-deep) calc(50% + 1px),
+      var(--gutter-shadow) 58%, transparent 100%)}
+
+  /* the lifted flap — the folded-back part of the current leaf, drawn as a curl */
+  .flap{position:absolute; top:0; bottom:0; left:0; transform-origin:right center;
+    background:var(--paper-raised); box-shadow:-8px 0 16px rgba(0,0,0,.16);
+    border-right:1px solid var(--m-hairline); overflow:hidden; display:none}
+  .flap::after{content:""; position:absolute; inset:0;
+    background:linear-gradient(to left, rgba(255,255,255,.28), transparent 22%, rgba(38,32,26,.05) 60%, rgba(38,32,26,.14))}
+  /* the flat seam — option A's whole vocabulary: a band that sweeps, no leaf lifts */
+  .seam{position:absolute; top:0; bottom:0; width:${T.foldGapWidth}; display:none; z-index:5;
+    background:linear-gradient(to right, transparent, var(--gutter-shadow-deep) 45%, var(--gutter-core) 50%, var(--gutter-shadow-deep) 55%, transparent)}
+  /* option D's cue — a lifting shadow, cast by a corner that never carries a word */
+  .liftshadow{position:absolute; top:0; bottom:0; width:34%; right:0; display:none; z-index:4; pointer-events:none;
+    background:radial-gradient(120% 90% at 100% 50%, rgba(38,32,26,.22), transparent 62%)}
+  .grip{position:absolute; top:0; bottom:0; right:0; width:26px; cursor:grab; z-index:6; pointer-events:auto;
+    background:linear-gradient(to left, rgba(38,32,26,.10), transparent)}
+  .grip::before{content:"↤"; position:absolute; top:50%; right:5px; transform:translateY(-50%); color:var(--m-ink-soft); font-size:1rem}
+  .grip:active{cursor:grabbing}
+  .book.locked .grip{display:none}
+  .lockmsg{position:absolute; left:8%; right:8%; bottom:7%; z-index:7; display:none; font-size:.86rem; color:var(--m-ink-soft); background:rgba(255,255,255,.72); border-radius:8px; padding:.5rem .7rem; text-align:center}
+  .book.locked .lockmsg{display:block}
+  .jumpbtn{appearance:none; margin-top:.7rem; border:1px solid var(--line); background:var(--panel); color:var(--ink); font:inherit; font-size:.86rem; padding:.4rem .9rem; border-radius:999px; cursor:pointer; display:none}
+  .book.locked.jumpable ~ .jumpbtn{display:inline-block}
+
+  .readout{font-size:.92rem; color:var(--ink-2); margin-top:.7rem; min-height:2.6em; max-width:40ch}
+  .whatnow{font-size:.9rem; color:var(--ink-2); margin:.3rem 0 0}
+  .opt-note{border:1px solid var(--line-soft); border-radius:12px; background:var(--bg); padding:.9rem 1.1rem; margin-top:1rem}
+  .opt-note h4{margin:0 0 .3rem; font-size:.98rem; font-family:"SF Mono",ui-monospace,Menlo,monospace; letter-spacing:.02em}
+  .opt-note p{margin:.25rem 0; font-size:.92rem; color:var(--ink-2); max-width:60ch}
+  .verdict{font-family:"SF Mono",ui-monospace,Menlo,monospace; font-size:.72rem; letter-spacing:.06em; text-transform:uppercase; padding:.2rem .5rem; border-radius:999px}
+  .v-holds{color:var(--lean); background:var(--lean-soft)}
+  .v-breaks{color:#9a5b2f; background:#f3e2d3}
+  @media (prefers-reduced-motion: reduce){ .flap,.seam,.liftshadow{transition:none!important} .sk.settling i{animation:none} }
+</style>
+</head>
+<body>
+<main class="wrap">
+  <p class="eyebrow">A settled decision, reopened</p>
+  <h1>Should a page turn curl?</h1>
+  <p class="lede">When you turn a page in the app today, a soft seam sweeps across the words and the next page is underneath &mdash; but no word ever moves. A paper book does something different: you grab the outer edge and the leaf <em>curls</em> up and over. The app once ruled the curl out, on three grounds. A new idea &mdash; show plain grey lines where the words will be while the leaf is moving, and let the real words settle in only once it lies flat &mdash; may answer all three. This page mounts four ways to turn a page so you can turn them by hand and decide, because a curl is something you feel, not something a picture can settle.</p>
+
+  <h2>A few words, defined once</h2>
+  <dl class="gloss">
+    <dt>Leaf</dt><dd>One sheet of the book. It has two sides &mdash; the page you are reading and the page on its back.</dd>
+    <dt>Opening</dt><dd>The two pages you see at once when the book is open flat.</dd>
+    <dt>Gutter</dt><dd>The shadowed valley down the middle of an opening, where the two pages meet at the spine.</dd>
+    <dt>Fore-edge</dt><dd>The outer edge of a leaf, opposite the spine &mdash; the edge you grab to turn it. Look at it and you see the stacked cut edges of all the leaves beneath.</dd>
+    <dt>Skeleton lines</dt><dd>Plain grey bars drawn where lines of text will be, before the real words load &mdash; the same "still loading" placeholder a reader sees all over the web.</dd>
+  </dl>
+
+  <h2 class="q">What is being decided?</h2>
+  <p>Should turning a page <strong>curl the leaf</strong> the way a paper book does &mdash; or keep sweeping a flat seam across the words, the way the app does today? And if it curls, what rides on the curling surface: the real words, or grey skeleton lines that become words only once the leaf is flat?</p>
+
+  <h2 class="q">Why is this being asked now?</h2>
+  <p>The app ships the flat seam, and the owner asked for a real corner-curl turn like a paper book. An earlier note had already considered the curl and rejected it, on three grounds worth quoting in full so this page is not pretending they don't exist:</p>
+  <blockquote>A curl moves the words, and the one rule of a page turn here is that words never move. A curl also claims two pages are neighbours by the very act of curling &mdash; so it cannot tell the truth when the printed book has a leaf here that this build doesn't, or when the two pages simply face each other and nothing turns at all. And the thing the owner pointed at as a reference is a flat ribbon with a fold in it, not a curl.</blockquote>
+  <p>The reason to reopen it: the skeleton-lines idea may answer the first ground (the curling surface carries grey bars, not words, so no word moves), and the four demos below are built to answer the second (each turn style is made to tell the truth in all four situations). Whether they succeed is what this page is for.</p>
+
+  <h2 class="q">What happens if nobody decides?</h2>
+  <p>The flat seam keeps shipping, and it works. Nothing is blocked behind this &mdash; it is a question of how a turn <em>feels</em>, not a defect. The honest cost of waiting is small, so it is fine to leave this open until the demos below either win a reader over or don't.</p>
+
+  <h2 class="q">What does the app do today, and what does that cost?</h2>
+  <p>Today the turn is the flat seam &mdash; option A below, playable. It holds one rule above all others: <strong>no word moves during a turn.</strong> That rule is not taste; it is a measurement. A single printed page in this book is drawn letters, and the drawing is heavy:</p>
+  <table>
+    <thead><tr><th>A printed page, as the app draws it</th><th>Weight</th></tr></thead>
+    <tbody>
+      <tr><td>The lightest page (page 1)</td><td class="num">about 59 KB of drawn letters</td></tr>
+      <tr><td>A dense page (page 10)</td><td class="num">about 154 KB of drawn letters</td></tr>
+    </tbody>
+  </table>
+  <p>Sliding all of that across the screen every frame of a turn is the one thing page-drawing memory cannot afford on a phone, and that is why the seam moves <em>over</em> the words instead of moving them. Any curl has to get past this rule, not around it &mdash; which is exactly what the skeleton idea tries to do.</p>
+
+  <h2 class="q">What do other books and apps do?</h2>
+  <p>Paper books curl &mdash; that is the reference. E-readers such as the big-name tablets' reading apps also curl, and they can, because their text is light, re-flowable letters they can cheaply redraw mid-curl. <em>This is a survey from earlier work on the turn, not a fresh look today &mdash; said plainly so it isn't mistaken for more than it is.</em> The reason their answer doesn't simply transfer: this app doesn't render light re-flowable text; it renders heavy, exact drawn artwork of one specific printing, letter for letter, because a reader who has memorised the page needs the page they memorised. So the curl that is cheap for re-flowable text is the expensive thing the rule above forbids.</p>
+
+  <h2 class="q">What have we already decided that ties our hands?</h2>
+  <p>Three earlier decisions bound this one, and every option below is checked against them:</p>
+  <ul>
+    <li><strong>Words never move during a turn.</strong> The measured rule above. An option that moves the drawn letters reopens it.</li>
+    <li><strong>A turn must tell the truth about what lies between the two pages.</strong> There are four situations &mdash; the two pages face each other; a leaf turned between two different openings; the printed book has a leaf here this build doesn't; or it isn't a turn at all but a jump to somewhere far off. A turn that looks the same in all four is lying about three of them.</li>
+    <li><strong>The original rejection of the curl.</strong> Reopened here, on its own terms &mdash; its bar was "reconsider only if someone can draw a curl that expresses all four situations." The board below is that attempt.</li>
+  </ul>
+
+  <h2 class="q">What are the options? Turn each one by hand.</h2>
+  <p>Grab the right edge of the book and pull left to turn, the way you grab a leaf's outer edge. Switch the turn style, and switch which of the four situations you're in &mdash; the same turn should tell the truth in each. The book you're turning shows a real printed page from the app; the grey bars are the skeleton lines.</p>
+
+  <div class="live" id="board">
+    <div class="controls">
+      <div>
+        <p class="ctl-label">Turn style</p>
+        <div class="seg" id="seg-style" role="group" aria-label="Turn style">
+          <button data-style="A" aria-pressed="true">A · Flat seam (today)</button>
+          <button data-style="B" aria-pressed="false">B · Skeleton curl</button>
+          <button data-style="C" aria-pressed="false">C · Curl the real words</button>
+          <button data-style="D" aria-pressed="false">D · Shadow lift</button>
+        </div>
+      </div>
+      <div>
+        <p class="ctl-label">What lies between the pages</p>
+        <div class="seg" id="seg-state" role="group" aria-label="Situation">
+          <button data-state="gap" aria-pressed="true">A leaf turned</button>
+          <button data-state="hole" aria-pressed="false">A missing leaf</button>
+          <button data-state="crease" aria-pressed="false">Facing pages</button>
+          <button data-state="none" aria-pressed="false">A jump</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="board">
+      <div class="stage-col">
+        <div class="book" id="book">
+          <div class="leaf next" id="next"></div>
+          <div class="leaf top" id="top">
+            <img class="pageimg" id="top-img" alt="" src="${svgHref(REAL.current)}">
+          </div>
+          <div class="liftshadow" id="liftshadow"></div>
+          <div class="flap" id="flap"></div>
+          <div class="seam" id="seam"></div>
+          <div class="lockmsg" id="lockmsg"></div>
+          <div class="grip" id="grip" role="button" tabindex="0" aria-label="Grab the fore-edge and pull left to turn"></div>
+        </div>
+        <button class="jumpbtn" id="jumpbtn">Jump there</button>
+        <p class="readout" id="readout"></p>
+      </div>
+      <div class="stage-col">
+        <div class="opt-note" id="note"></div>
+      </div>
+    </div>
+  </div>
+
+  <h2 class="q">What else could we consider, and why is it not here?</h2>
+  <ul>
+    <li><strong>Curl the whole leaf at once</strong> (a full-page flip). Left off: it is option C at book scale &mdash; it moves every drawn letter on the leaf, which is the expensive thing the rule forbids. If C loses on feel, this loses worse.</li>
+    <li><strong>Slide the page sideways</strong> (push the old page off, slide the new one on). Left off for now: it is a real third family, but it still slides the drawn letters, so it meets the same rule C does. Worth its own page if the curl family is rejected outright.</li>
+    <li><strong>A dog-ear only</strong> (fold just the corner, never the whole leaf). It is the small end of option B and is really a tuning of it, not a separate answer &mdash; so it lives inside B's knobs, not as its own option.</li>
+  </ul>
+
+  <h2 class="q">What would change the answer?</h2>
+  <ul>
+    <li>If the printed pages ever became light re-flowable text, curling the real words (option C) would stop being expensive, and the whole rule that forbids it would soften.</li>
+    <li>If a hafiz says the flat seam reads as a jump rather than a turn &mdash; that the hand doesn't believe a page was turned &mdash; that is evidence for a curl the still picture can't give.</li>
+    <li>If even the skeleton curl (option B) stutters on a slow phone once it's built for real, the measured rule wins and the flat seam stays.</li>
+  </ul>
+
+  <h2 class="q">What is this not settling?</h2>
+  <p>Not the exact shape of the curl &mdash; how tight it rolls, how long it takes, whether it makes a sound. Not whether the winning curl borrows the fore-edge colours you see at its fold. And not the performance sign-off: even if a curl wins here on feel, it still owes a real measurement on a slow phone before it shships. This page decides the <em>direction</em>; the numbers come after.</p>
+
+  <p class="foot">Every colour, edge and width on the turning book is read from the app's own stylesheet at build time, and the printed page shown is real vendored artwork &mdash; drawn letters, loaded as an image, so this page carries no Qur'an text of its own. Rebuild it with the build script named in this decision's record. The turn styles are live, interchangeable pieces of code; the one that wins graduates into the app and the losers are deleted, so nothing here is throwaway that the choice did not need.</p>
+</main>
+
+<script>
+(function(){
+  var LIVE = ${JSON.stringify(LIVE)};
+  var REAL = LIVE.real, DUR = LIVE.durMs, SVG = function(p){ return "${svgHref(0)}".replace("/0.svg","/"+p+".svg"); };
+
+  var book=document.getElementById('book');
+  if(!book) return;
+  var topLeaf=document.getElementById('top'), topImg=document.getElementById('top-img');
+  var nextLeaf=document.getElementById('next'), flap=document.getElementById('flap');
+  var seam=document.getElementById('seam'), lift=document.getElementById('liftshadow');
+  var grip=document.getElementById('grip'), lockmsg=document.getElementById('lockmsg');
+  var jumpbtn=document.getElementById('jumpbtn'), readout=document.getElementById('readout');
+  var note=document.getElementById('note');
+
+  var style='A', state='gap';
+  var dragging=false, p=0;               // p: 0 flat … 1 fully turned
+  var W=1;                                // book width in px, measured
+
+  // --- skeleton line factory: grey bars where words will be, no glyph anywhere
+  function skeleton(cls){ var d=document.createElement('div'); d.className='sk'+(cls?' '+cls:'');
+    for(var i=0;i<12;i++){ d.appendChild(document.createElement('i')); } return d; }
+  function realPage(p){ var img=document.createElement('img'); img.className='pageimg'; img.alt=''; img.src=SVG(p); return img; }
+
+  // --- what the revealed side shows, per situation
+  function paintNext(){
+    nextLeaf.innerHTML='';
+    if(state==='hole'){
+      var v=document.createElement('div'); v.className='void';
+      v.innerHTML='<span>The printed book has a leaf here that this build doesn\\u2019t.</span>';
+      nextLeaf.appendChild(v);
+      return;
+    }
+    if(state==='gap'){
+      // during a curl the incoming page is skeleton lines; the real page settles
+      // in only when flat and at rest (that is the whole of option B's idea).
+      var wantReal = (p<=0.001) && (style==='B') && nextLeaf.getAttribute('data-settled')==='1';
+      if(style==='B'){ nextLeaf.appendChild(skeleton(dragging?'settling':'')); }
+      else { nextLeaf.appendChild(realPage(REAL.turned)); }
+      // a fore-edge stack at the fold: the cut edges you'd really see. Positioned
+      // by render() at the fold line, so it reads as the edge of the leaf block —
+      // this is the one thing that tells "a leaf turned" apart from "a missing leaf".
+      var fe=document.createElement('div'); fe.className='foreedge'; fe.id='foreedge'; nextLeaf.appendChild(fe);
+    }
+  }
+
+  // --- the flap: the folded-back part of the current leaf, drawn as a curl
+  function paintFlap(){
+    flap.innerHTML='';
+    if(style==='C'){ flap.appendChild(realPage(REAL.current)); flap.firstChild.style.transform='scaleX(-1)'; }
+    else if(style==='B'){ var s=skeleton(); s.style.transform='scaleX(-1)'; flap.appendChild(s); }
+    // D and A put nothing on a flap.
+  }
+
+  function lock(msg, jumpable){
+    book.classList.add('locked'); if(jumpable) book.classList.add('jumpable'); else book.classList.remove('jumpable');
+    lockmsg.textContent=msg; jumpbtn.style.display = jumpable ? 'inline-block' : 'none';
+  }
+  function unlock(){ book.classList.remove('locked'); book.classList.remove('jumpable'); jumpbtn.style.display='none'; }
+
+  // --- render at progress p (0..1). No drawn letter ever translates unless C.
+  function render(){
+    W=book.clientWidth||1;
+    flap.style.display='none'; seam.style.display='none'; lift.style.display='none';
+    // facing pages and a jump are not leaf-turns: no option curls them (that is
+    // how each option tells the truth about those two situations).
+    if(state==='crease'){
+      lock('These two pages face each other. Nothing turns \\u2014 the gutter just deepens between them.', false);
+      nextLeaf.innerHTML=''; var g1=document.createElement('div'); g1.className='gutter'; g1.style.left='calc(50% - '+(parseInt('${T.foldCreaseWidth}')/2)+'px)'; nextLeaf.appendChild(g1);
+      topLeaf.style.clipPath='none'; return;
+    }
+    if(state==='none'){
+      lock('A jump isn\\u2019t a turn \\u2014 the page is replaced, not lifted. Press Jump.', true);
+      topLeaf.style.clipPath='none'; nextLeaf.innerHTML=''; return;
+    }
+    unlock();
+    var foldX = W*(1-p);                  // the fold line sweeps right→left as you pull
+    if(style==='A'){
+      // the flat seam: a band sweeps across; the page cross-swaps at the seam; nothing lifts.
+      seam.style.display='block';
+      seam.style.left=(foldX - parseInt('${T.foldGapWidth}')/2)+'px';
+      // left of the seam is already the next page; right is still the current one
+      topLeaf.style.clipPath='inset(0 0 0 '+foldX+'px)';   // current page only to the right of the seam
+      nextLeaf.style.clipPath='inset(0 '+(W-foldX)+'px 0 0)'; // next page to the left of the seam
+      return;
+    }
+    if(style==='D'){
+      // shadow lift: the page stays whole and flat, a soft shadow lifts off the edge.
+      lift.style.display='block';
+      lift.style.width=(24+p*30)+'%';
+      lift.style.opacity=String(0.5+p*0.5);
+      topLeaf.style.clipPath='none';
+      nextLeaf.style.clipPath='inset(0 '+(W)+'px 0 0)'; // next hidden until release
+      return;
+    }
+    // B and C: a real curl. Current leaf is cut at the fold; the strip to the
+    // right of the fold is folded back over as the flap.
+    topLeaf.style.clipPath='inset(0 '+(W-foldX)+'px 0 0)';
+    nextLeaf.style.clipPath='inset(0 0 0 '+foldX+'px)';
+    var stripW = W - foldX;                        // width of the lifted strip
+    var flapLeft = Math.max(0, foldX - stripW);    // folded back to the left of the fold
+    flap.style.display='block';
+    flap.style.left=flapLeft+'px';
+    flap.style.width=(foldX-flapLeft)+'px';
+    // a little curl: the closer to fully turned, the more it rolls
+    flap.style.transform='perspective(1400px) rotateY('+(-Math.min(28,p*30))+'deg)';
+    // the fore-edge stack rides at the fold line, at the near edge of what's revealed
+    var fe=document.getElementById('foreedge'); if(fe){ fe.style.left=foldX+'px'; }
+  }
+
+  function settleTo(target, ms, after){
+    var start=p, t0=performance.now(); var dur=Math.max(1,ms);
+    function step(now){ var k=Math.min(1,(now-t0)/dur); var e=1-Math.pow(1-k,3); p=start+(target-start)*e; render(); if(k<1){ requestAnimationFrame(step); } else { p=target; render(); if(after) after(); } }
+    requestAnimationFrame(step);
+  }
+
+  function completeTurn(){
+    settleTo(1, DUR.med, function(){
+      readout.textContent = style==='B'
+        ? 'Turned. The words settle in only now, with the leaf flat \\u2014 while it moved, you saw grey lines, so no word ever moved.'
+        : (style==='A' ? 'Turned. The seam swept over the words; none of them moved.'
+        : (style==='C' ? 'Turned. Did you feel the words drag as the leaf curled? That is the rule this option breaks.'
+        : 'Turned. Only the shadow lifted; the page stayed put, then swapped.'));
+      if(style==='B'){ // the settle: skeleton → real page
+        nextLeaf.innerHTML=''; nextLeaf.appendChild(realPage(REAL.turned));
+        var fe=document.createElement('div'); fe.className='foreedge'; nextLeaf.appendChild(fe);
+      }
+      // reset for another go
+      setTimeout(function(){ p=0; paintNext(); render(); }, 650);
+    });
+  }
+  function cancelTurn(){ settleTo(0, DUR.fast, function(){ paintNext(); render(); readout.textContent='Let go before halfway \\u2014 the leaf fell back.'; }); }
+
+  // --- drag
+  function onDown(e){ if(book.classList.contains('locked')) return; dragging=true; grip.setPointerCapture&&grip.setPointerCapture(e.pointerId); readout.textContent=''; e.preventDefault(); }
+  function onMove(e){ if(!dragging) return; var r=book.getBoundingClientRect(); var x=e.clientX-r.left; p=Math.max(0,Math.min(1,(r.width-x)/r.width)); paintNext(); render(); }
+  function onUp(){ if(!dragging) return; dragging=false; if(p>0.5) completeTurn(); else cancelTurn(); }
+  grip.addEventListener('pointerdown', onDown);
+  window.addEventListener('pointermove', onMove);
+  window.addEventListener('pointerup', onUp);
+  grip.addEventListener('keydown', function(e){ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); if(!book.classList.contains('locked')){ p=0; paintNext(); render(); completeTurn(); } } });
+  jumpbtn.addEventListener('click', function(){
+    topLeaf.style.transition='opacity '+DUR.hop+'ms ease'; nextLeaf.innerHTML=''; nextLeaf.appendChild(realPage(REAL.turned));
+    nextLeaf.style.clipPath='none'; topLeaf.style.opacity='0';
+    readout.textContent='Jumped. The page was replaced with a soft cross-fade \\u2014 no leaf lifted, because this is a relocation, not a turn.';
+    setTimeout(function(){ topLeaf.style.opacity='1'; topLeaf.style.transition=''; nextLeaf.style.clipPath='inset(0 100% 0 0)'; render(); }, DUR.hop+500);
+  });
+
+  // --- the per-option truth note beside the book
+  var NOTES = {
+    A:{ title:'A · Flat seam (today)', holds:true, lines:[
+      'A band sweeps across the page; the words underneath never move. It is the rule made visible.',
+      'Tells the truth in all four situations: it can be a gutter (facing pages), a fore-edge gap (a leaf turned), a sunk dashed slot (a missing leaf), or absent (a jump).',
+      'The cost it is paying: some hands don\\u2019t believe a page was turned \\u2014 the seam can read as a jump.' ] },
+    B:{ title:'B · Skeleton curl (the new idea)', holds:true, lines:[
+      'The leaf curls, but the curling surface carries grey skeleton lines, not words. The real page settles in only once the leaf is flat.',
+      'So no word moves during the turn \\u2014 the one rule the curl always broke before.',
+      'At a missing leaf it curls to reveal the sunk, dashed slot; at facing pages it does not curl at all (nothing turned). It tells the truth in all four.' ] },
+    C:{ title:'C · Curl the real words', holds:false, lines:[
+      'The leaf curls carrying the actual drawn letters, so you can feel exactly what the rule was protecting against.',
+      'This is here to be felt and probably to lose: on a phone those letters are heavy, and dragging them is the expense the rule forbids.',
+      'Shown so the choice is a choice \\u2014 you can be wrong about it from a picture and right from a hand on it.' ] },
+    D:{ title:'D · Shadow lift', holds:true, lines:[
+      'The page stays whole and flat; only a soft shadow lifts off the edge, then the page swaps. No word moves.',
+      'A middle answer: a hint of a lifting leaf without a moving surface.',
+      'Quieter than a curl \\u2014 the question is whether it is too quiet to read as a turn.' ] }
+  };
+  function paintNote(){
+    var n=NOTES[style];
+    var html='<h4>'+n.title+'  <span class="verdict '+(n.holds?'v-holds':'v-breaks')+'">'+(n.holds?'keeps the rule':'breaks the rule')+'</span></h4>';
+    for(var i=0;i<n.lines.length;i++){ html+='<p>'+n.lines[i]+'</p>'; }
+    note.innerHTML=html;
+  }
+
+  // --- wiring the two segmented controls
+  function setStyle(s){ style=s; [].forEach.call(document.querySelectorAll('#seg-style button'),function(b){ b.setAttribute('aria-pressed', b.getAttribute('data-style')===s?'true':'false'); }); p=0; paintFlap(); paintNext(); render(); paintNote(); readout.textContent=''; }
+  function setState(st){ state=st; [].forEach.call(document.querySelectorAll('#seg-state button'),function(b){ b.setAttribute('aria-pressed', b.getAttribute('data-state')===st?'true':'false'); }); p=0; paintNext(); render(); readout.textContent=''; }
+  [].forEach.call(document.querySelectorAll('#seg-style button'),function(b){ b.addEventListener('click',function(){ setStyle(b.getAttribute('data-style')); }); });
+  [].forEach.call(document.querySelectorAll('#seg-state button'),function(b){ b.addEventListener('click',function(){ setState(b.getAttribute('data-state')); }); });
+  window.addEventListener('resize', render);
+
+  paintFlap(); paintNext(); render(); paintNote();
+})();
+</script>
+</body>
+</html>
+`;
+
+writeFileSync(PAGE, html);
+console.log(`wrote ${PAGE} (${(html.length / 1024).toFixed(1)} KB)`);

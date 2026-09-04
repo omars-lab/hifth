@@ -464,7 +464,8 @@
         "spread-zoom",
         "juz-detents",
         "boundary-juz",
-        "tafseer-reading"
+        "tafseer-reading",
+        "page-turn-curl"
       ]
     },
     {
@@ -922,6 +923,36 @@
       "date": null,
       "related": [
         "comparison-crop"
+      ]
+    },
+    {
+      "id": "page-turn-curl",
+      "question": "When you turn a page, should the leaf curl the way a paper book does?",
+      "status": "open",
+      "options": [
+        {
+          "id": "A",
+          "label": "Flat seam (today): a band sweeps over the words; none move"
+        },
+        {
+          "id": "B",
+          "label": "Skeleton curl: the leaf curls carrying grey lines, real words settle in only when flat"
+        },
+        {
+          "id": "C",
+          "label": "Curl the real words: the leaf curls carrying the drawn letters"
+        },
+        {
+          "id": "D",
+          "label": "Shadow lift: a shadow lifts off the edge, no surface moves, the page swaps"
+        }
+      ],
+      "artifact": "https://blog.bytesofpurpose.com/hifth/docs/design/page-turn-curl-options.html",
+      "page": "docs/design/page-turn-curl-options.html",
+      "builtBy": "scripts/build-page-turn-curl-options.mjs",
+      "doc": "docs/decisions/page-turn-curl.md#when-you-turn-a-page-should-the-leaf-curl-the-way-a-paper-book-does",
+      "related": [
+        "desktop-vs-mobile"
       ]
     }
   ]
