@@ -52,8 +52,9 @@
 import { readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { inkPieces, readPageInk } from "./lib/ink.mjs";
+import { readPageInk } from "./lib/ink.mjs";
 import { ranOutOfRoom, refusedItsOwnInk } from "./lib/mark-ink.mjs";
+import { pieceUnionCandidate } from "./lib/piece-union.mjs";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(HERE, "..", "..", "..");
@@ -141,63 +142,6 @@ if (!pool.length) {
   process.exit(2);
 }
 
-/**
- * Every piece of ink in a window, as a bounding box, keyed by nothing but its
- * own connectivity. Mirrors the box half of `build-mark-report.mjs`'s
- * `crop()` exactly — same ring loop, same thin-ring exclusion — because that
- * function and this one have to agree pixel for pixel about what a piece is,
- * or a reader could affirm a candidate this rule never actually drew.
- */
-function pieceBoxesIn(shapes, vx, vy, vw, vh) {
-  const cut = inkPieces(shapes, vx, vy, vw, vh, res);
-  const seen = new Map();
-  const boxes = [];
-  for (const sh of shapes) {
-    for (const ring of sh.rings) {
-      let lo = Infinity;
-      let hi = -Infinity;
-      let loy = Infinity;
-      let hiy = -Infinity;
-      for (let i = 0; i < ring.length; i += 2) {
-        if (ring[i] < lo) lo = ring[i];
-        if (ring[i] > hi) hi = ring[i];
-        if (ring[i + 1] < loy) loy = ring[i + 1];
-        if (ring[i + 1] > hiy) hiy = ring[i + 1];
-      }
-      if (hi < vx || lo > vx + vw || hiy < vy || loy > vy + vh) continue;
-      // A ring too thin to have rasterised anything belongs to no piece — see
-      // crop()'s own comment on why that is the honest outcome, not a bug.
-      const l = cut.of(ring);
-      if (!l) continue;
-      let p = seen.get(l);
-      if (p === undefined) {
-        p = boxes.length;
-        seen.set(l, p);
-        boxes.push([lo, loy, hi, hiy]);
-      } else {
-        const b = boxes[p];
-        if (lo < b[0]) b[0] = lo;
-        if (loy < b[1]) b[1] = loy;
-        if (hi > b[2]) b[2] = hi;
-        if (hiy > b[3]) b[3] = hiy;
-      }
-    }
-  }
-  return boxes;
-}
-
-/**
- * One mark's window: the shipped rectangle, padded by however far this mark
- * was actually allowed to search. Same construction as `probe-mark-ink.mjs`'s
- * `windowOf`, because a candidate has to be drawn from exactly the ink that
- * mark's own search had in view — not a wider or narrower guess about it.
- */
-function windowOf(box, effRadius) {
-  const pad = effRadius + 1;
-  const padX = pad + box[2];
-  return { vx: box[0] - padX, vy: box[1] - pad, vw: box[2] + 2 * padX, vh: box[3] + 2 * pad };
-}
-
 const inks = new Map();
 const inkFor = (p) => {
   if (!inks.has(p)) inks.set(p, readPageInk(readFileSync(join(PAGES, `${p}.svg`), "utf8"), 1 / res));
@@ -206,53 +150,25 @@ const inkFor = (p) => {
 
 const n3 = (v) => Math.round(v * 1000) / 1000;
 
+// The candidate, its window and its rounding now live in lib/piece-union.mjs,
+// which `build-mark-placements.mjs` imports too, so the box a reader is shown
+// here and the box the app ships are computed by exactly one function.
 const out = [];
 for (const r of pool) {
-  const [bx, by, bw, bh] = r.box;
-  const effRadius = r.searchedAt ?? radius;
-  const { vx, vy, vw, vh } = windowOf(r.box, effRadius);
   const { shapes } = inkFor(r.page);
-  const boxes = pieceBoxesIn(shapes, vx, vy, vw, vh);
-
-  // "Whose middle falls inside the rectangle we already ship" — ㉘'s own
-  // wording, tested against the shipped box, never the ink-corrected one: the
-  // whole point of this rule is to find a candidate independent of what the
-  // displacement search already guessed.
-  const inside = boxes.filter((b) => {
-    const cx = (b[0] + b[2]) / 2;
-    const cy = (b[1] + b[3]) / 2;
-    return cx >= bx && cx <= bx + bw && cy >= by && cy <= by + bh;
-  });
-
-  let candidate = null;
-  if (inside.length) {
-    let lo = Infinity;
-    let loy = Infinity;
-    let hi = -Infinity;
-    let hiy = -Infinity;
-    for (const b of inside) {
-      if (b[0] < lo) lo = b[0];
-      if (b[1] < loy) loy = b[1];
-      if (b[2] > hi) hi = b[2];
-      if (b[3] > hiy) hiy = b[3];
-    }
-    candidate = [n3(lo), n3(loy), n3(hi - lo), n3(hiy - loy)];
-  }
-
-  const shippedArea = bw * bh;
-  const candidateArea = candidate ? candidate[2] * candidate[3] : null;
+  const { candidate, ratio, grow, piecesInWindow, piecesUnioned } = pieceUnionCandidate(r, shapes, { radius, res });
   out.push({
     page: r.page,
     k: r.k,
     name: r.name,
     box: r.box,
     placed: placed(r),
-    searchedAt: effRadius,
-    piecesInWindow: boxes.length,
-    piecesUnioned: inside.length,
+    searchedAt: r.searchedAt ?? radius,
+    piecesInWindow,
+    piecesUnioned,
     candidate,
-    ratio: candidate ? n3(candidateArea / shippedArea) : null,
-    grow: candidate ? [n3(candidate[2] - bw), n3(candidate[3] - bh)] : null,
+    ratio,
+    grow,
   });
 }
 

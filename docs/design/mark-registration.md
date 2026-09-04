@@ -2542,7 +2542,7 @@ everything downstream reads it as meaning, and by the same test file: four cases
 answer never exceeds the distance given, at four different distances, plus one asserting it
 lands on the boundary exactly when the ink is out of reach.*
 
-### ㉖ The doubled marks are drawn too small, and no amount of moving them will help · **confirmed**
+### ㉖ The doubled marks are drawn too small, and no amount of moving them will help · **fixed**
 
 The one finding of ㉓ that survived the corpus, and it survived because it is not about
 position at all. Carried out of ㉓ so that the refuted part and the confirmed part stop
@@ -2698,6 +2698,22 @@ notice one; what the free half changes is that the repair now has a bounded targ
 sixth-of-refused-doubled minority) and a proof it must not touch the accepted marks, which are
 already the right size.
 
+**Closed by, 2026-09-04.** The per-mark size repair this item asked for — measure the extent,
+do not add a constant — is now what the app draws. For every mark the ink search refuses, the
+build reaches for the ink: it unions the print pieces whose middle sits inside the shipped
+rectangle and draws that union when the guard ㉞ settled (1.75/0.571) trusts its area, the exact
+mechanism ㉘ through ㉟ arrived at. Because the reach fires *only* where the search already
+refused, the accepted doubled marks the free half above proved were already the right size are
+left byte-for-byte untouched — the whole-book asset rebuilt to the identical bytes when the
+reach tier was wired in, so nothing outside the refused slice moved. Across the book this ships
+as 68 marks drawn on reached-for ink; a sample of them was drawn on the actual page artwork and
+looked at, each rectangle sitting on its own mark's strokes rather than a neighbour's. What now
+notices a regression: `packages/etl/scripts/lib/piece-union.test.mjs` covers the union, the
+symmetric guard, and the tier that reaches only for a refused mark carrying a trusted candidate;
+and `scripts/gate-mark-placements.mjs` reconciles the committed shards to the pin, source tags
+and all. The heading stays wrong-as-first-written, as this item's convention has kept it: *drawn
+too small* was refuted twice, and the fix is a per-mark size, not a size increase.
+
 ### ㉗ Counting what a reader pressed stopped meaning anything when tapping the ink was added · **fixed**
 
 [The sitting above](../validation/rulings/2026-08-17-placement-weak-size-part1.seed23.settled.json)
@@ -2747,7 +2763,7 @@ the ruling report has a test that the hand-moved and pointed kinds print under s
 headings; and the scorer has one that a tap stays out of the nudges-and-drags count and is
 named apart.
 
-### ㉘ A rule that reaches for the ink, rather than resizing toward it, was checked against the whole book · **confirmed**
+### ㉘ A rule that reaches for the ink, rather than resizing toward it, was checked against the whole book · **answered**
 
 Item ㉖ found that doubled marks want their size fixed and their position left alone, and
 scored candidates that resize the shipped rectangle toward the reader's own. But fifty-seven
@@ -2786,7 +2802,7 @@ production output the way ㉔ and ㉕ were, which is the check that would make t
 about the accepted 99.9% a guarantee rather than a sample. That is the next step, tracked
 alongside the rest of this item's population split.
 
-### ㉙ Run as an escalation over every mark the book currently refuses, the rule mostly holds up and one way it does not · **confirmed**
+### ㉙ Run as an escalation over every mark the book currently refuses, the rule mostly holds up and one way it does not · **answered**
 
 The step ㉘ left owed. The current corpus refuses exactly 329 marks — the same population ㉖'s
 table counts, so nothing has drifted between the two — and the rule was run as an escalation:
@@ -2820,7 +2836,7 @@ something that refuses a piece union that has grown implausibly large relative t
 already ship, the same way it already refuses to guess when it finds no ink at all, before the
 outlier above stops being a risk on every mark rather than a known one on this one.
 
-### ㉚ The same sitting, sat the rest of the way, says the outlier in ㉙ was not one mark · **confirmed**
+### ㉚ The same sitting, sat the rest of the way, says the outlier in ㉙ was not one mark · **answered**
 
 The sitting behind ㉖ and ㉙ was only two thirds sat — sixty-one of its ninety marks. It has
 since been finished: the same reader, the same report, continued rather than re-dealt,
@@ -2850,6 +2866,11 @@ in our rectangle — one successive dammatan, one hamza, one small yeh, one succ
 fathatan, on four pages between 115 and 260. Folded into the running note on item ⑭ above,
 which they extend rather than reopen: nothing here says the answer, only that it is still being
 asked in the same shape.
+
+**Shipped 2026-09-04.** The rule these three items measured — reach for the ink under a refused
+mark's window, guarded — is now built and drawn by the app, so all three move from *confirmed
+finding* to *answered*. The guard's own design and cutoff are ㉜ and ㉞; the wiring and its yield
+are ㉟, where the *Closed by* note lives.
 
 ### ㉛ The marks that ran out of room and still shipped as placed were never looked at, until now · **confirmed**
 
@@ -2894,7 +2915,7 @@ offsets, which is what a ruling is allowed to hold. It cannot show the rectangle
 mark; only a page that draws the print itself could do that, and the next section says plainly
 that no such page exists yet for this document to point to.
 
-### ㉜ What should refuse a piece union too large to trust · **open**
+### ㉜ What should refuse a piece union too large to trust · **fixed**
 
 **None of the rule ㉘–㉚ describe has been written yet.** Everything above was scored from a
 script that was run twice and never checked in — once as a sample, once as an escalation — so
@@ -2948,7 +2969,17 @@ run the rule, once guarded, on the 216 of 229 never-sat marks it could answer, o
 the guard itself has been checked against ground truth first. Both remain for whoever writes and
 checks the rule this designs.
 
-### ㉝ The guard ㉜ describes catches one disagreement in four; read both ways, it catches three · **confirmed**
+**Closed by, 2026-09-04.** The guard this item designed is built and shipped. It lives in one
+place both the measuring script and the app's build import — `packages/etl/scripts/lib/piece-union.mjs`
+— so a reader's measurement and the shipped rectangle can never be computed a hair apart. It
+refuses a candidate whose area sits past 1.75× or under 0.571× of the shipped rectangle *in
+either direction* — the symmetric shape ㉝ found the one-sided design here missed, at the cutoff
+㉞ settled — and now runs inside the placement build for every refused mark. Tested directly:
+a candidate at the ceiling and at the floor is refused, one just inside either bound trusted, and
+the reach tier is chosen only when a refused mark carries a candidate the guard believes. The
+re-deal ㉟ made is wired: the endorsed corrections are what the app draws.
+
+### ㉝ The guard ㉜ describes catches one disagreement in four; read both ways, it catches three · **answered**
 
 **What was run.** The piece-union script ㉜ needed but never had was rebuilt from ㉘'s own description
 rather than recovered, since nothing of the twice-run original survives, and scored against all 89 marks
@@ -2989,7 +3020,7 @@ run a guarded rule on the 216 of 229 never-sat marks it could answer, or wait fo
 checked against ground truth first. This is that check. Running the result on the untested population is
 still someone else's call.
 
-### ㉞ Doubling the ground truth moves the cutoff, not just confirms it · **confirmed**
+### ㉞ Doubling the ground truth moves the cutoff, not just confirms it · **answered**
 
 **What was run.** ㉝ scored 89 marks and said plainly its cutoff was "a line, not a number checked
 against any wider population." A second wrong-size sitting has since finished —
@@ -3023,7 +3054,7 @@ open — whether to run the now-twice-checked guard on the 216 of 229 never-sat 
 or hold for weak-size-part2's roughly 90 still-unsat marks first, which would put a third of the
 329-mark population's own ground truth behind the number rather than a little over half.
 
-### ㉟ The re-deal, made: run the checked guard now, and record what it decides · **confirmed**
+### ㉟ The re-deal, made: run the checked guard now, and record what it decides · **fixed**
 
 **The call ㉜, ㉝ and ㉞ each left open is now made: run the guard.** Three items in a row said the
 same thing — the guard has been checked, but running its verdicts on the marks nobody has ever sat is
@@ -3060,6 +3091,20 @@ what the app draws. That is the same act as adopting option H of the still-open 
 decision — putting each mark where its own ink is — and that decision is the owner's to rule, not this
 measurement's to pre-empt. This item is the evidence that ruling needs: the guard's yield, on the marks
 no human will ever check, is 73% trusted and 27% caught. Wiring waits on the ruling; the number does not.
+
+**Closed by, 2026-09-04, and the one step this item deliberately left is now taken.** ㉟ recorded
+the guard's yield but stopped short of wiring the corrections in, because that act *is* adopting
+option H of the `mark-placement` decision. The owner ruled H on 2026-09-03, so the wiring
+followed: the build now draws each refused mark on its reached-for ink when the guard trusts it,
+and falls to the printed line's tilt otherwise — the three-tier rule described at the head of
+`build-mark-placements.mjs`. It ships as **68 marks drawn on reach**, not the 142 ㉟ measured,
+and the gap is two known and correct things: the ship asset reads each mark's *own* searched
+distance rather than the fixed three the measurement used (the ㊱ divergence below), and hand
+placements from the same ruling overlay some of what reach would otherwise draw. A sample of the
+68 was drawn on the actual page artwork and looked at before this was banked — the two fathatan
+strokes, the double-damma, the single fatha wedge, each box on its own mark's ink and none
+reaching into a neighbour. What now notices a regression: `packages/etl/scripts/lib/piece-union.test.mjs`,
+and `scripts/gate-mark-placements.mjs` reconciling the committed shards to the pin.
 
 ### ㊱ The ship asset and the decision page disagree about which marks ran out of room · **open**
 

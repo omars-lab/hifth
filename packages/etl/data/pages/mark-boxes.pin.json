@@ -1,9 +1,13 @@
 {
   "$comment": "What build-mark-placements.mjs wrote, per page: the final rectangle of every mark, option H. The sha256 is the shard this repo ships; gate:mark-placements checks every one offline and re-derives the rule from the committed rows fingerprint and rulings.",
-  "$rule": "Option H (docs/decisions.json → mark-placement, decided). Each mark sits on its own found ink when its match clears IoU 0.55 and the search kept room (its own searchedAt); otherwise it inherits the printed line's tilt. Hand placements from the rulings win over both.",
+  "$rule": "Option H (docs/decisions.json → mark-placement, decided). Each mark sits on its own found ink when its match clears IoU 0.55 and the search kept room (its own searchedAt). A refused mark reaches for the ink instead — the union of pieces under its window — when that union's area stays between 0.571x and 1.75x the shipped box (the guard settled in mark-registration ㉞); otherwise it inherits the printed line's tilt. Hand placements win over all of them.",
   "rule": {
     "iou": 0.55,
     "radius": 3,
+    "reachGuard": {
+      "grow": 1.75,
+      "shrink": 0.571
+    },
     "fallback": "line-tilt"
   },
   "rows": {
@@ -66,7 +70,8 @@
   "totals": {
     "marks": 326515,
     "ink": 325508,
-    "tilt": 115,
+    "reach": 68,
+    "tilt": 47,
     "hand": 892
   },
   "pages": [
@@ -75,6 +80,7 @@
       "ayahs": 7,
       "marks": 141,
       "ink": 140,
+      "reach": 0,
       "tilt": 0,
       "hand": 1,
       "sha256": "0b48635227b2e6b6004af85d9e87697bc24c9b99f80d41b5c539e57b8d8eab59"
@@ -84,15 +90,17 @@
       "ayahs": 5,
       "marks": 163,
       "ink": 161,
-      "tilt": 1,
+      "reach": 1,
+      "tilt": 0,
       "hand": 1,
-      "sha256": "8f067dae9a3a8d77823ea5613006cd58aa39b38929ea0ae15d56a64d55260ade"
+      "sha256": "a6fb1ee8c4e5b84fdead800aa1871f498382ca4513869fd09a4da7f7bb62de4f"
     },
     {
       "page": 3,
       "ayahs": 11,
       "marks": 535,
       "ink": 535,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "713de0b958bf1134c03a41051e413900570cf0cab799a9bad2056d9ef151f7fd"
@@ -102,6 +110,7 @@
       "ayahs": 8,
       "marks": 561,
       "ink": 560,
+      "reach": 0,
       "tilt": 0,
       "hand": 1,
       "sha256": "a1a391c269a204a33e411c131b655bdd29eb2627f19ff48e0ccd27209c683623"
@@ -111,24 +120,27 @@
       "ayahs": 5,
       "marks": 503,
       "ink": 502,
-      "tilt": 1,
+      "reach": 1,
+      "tilt": 0,
       "hand": 0,
-      "sha256": "62d6258895a8d3a8365251a424b601459b61ccc3c2f61c9d180b7b3a46457c25"
+      "sha256": "8dccb182abdbe1ab410cd8a4abe1d440ff1d904213dc3f9876a976c2fc7d1ca6"
     },
     {
       "page": 6,
       "ayahs": 8,
       "marks": 612,
       "ink": 609,
-      "tilt": 2,
+      "reach": 1,
+      "tilt": 1,
       "hand": 1,
-      "sha256": "cadcb6faa1e5519ca7af7496f201f9085b12b754dbe40288be3f090b6fbb8b30"
+      "sha256": "d4837164e72313e6b306114891de0386c9d4baabd788e7d3dad7d29af1385791"
     },
     {
       "page": 7,
       "ayahs": 11,
       "marks": 597,
       "ink": 597,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "389d10ec24aa12876f172d85a94874bb8b5a235335caa6c34446375da92f133a"
@@ -138,6 +150,7 @@
       "ayahs": 9,
       "marks": 548,
       "ink": 548,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "f5b18e239d672dcae15be69417d92c77f1fafb1490d2d70fc666d16d19a2f523"
@@ -147,6 +160,7 @@
       "ayahs": 4,
       "marks": 520,
       "ink": 520,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "bed1ae2931f14964cc3902ecbe72a9b6cf262e687ee468e41a0bad1743332953"
@@ -156,6 +170,7 @@
       "ayahs": 8,
       "marks": 542,
       "ink": 540,
+      "reach": 0,
       "tilt": 0,
       "hand": 2,
       "sha256": "6c65476b9e8dee929b6ad605acad7a501a0e9047e909337112585ca7cb563ae4"
@@ -165,6 +180,7 @@
       "ayahs": 7,
       "marks": 564,
       "ink": 564,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "21e2da9a27fed707c94f214e1719c301adf0a0ad0fc91bb738565d4c6bd6f8e3"
@@ -174,6 +190,7 @@
       "ayahs": 7,
       "marks": 521,
       "ink": 520,
+      "reach": 0,
       "tilt": 0,
       "hand": 1,
       "sha256": "c3a2ef99c3e04e91d7a899e097e0ff0d59c40883d00b8768767a947b3ec1b91c"
@@ -183,6 +200,7 @@
       "ayahs": 5,
       "marks": 528,
       "ink": 526,
+      "reach": 0,
       "tilt": 0,
       "hand": 2,
       "sha256": "3e49d0e71641eefdb216012e39f3fd89dc92969bdf1c4588b862c9346e0acb92"
@@ -192,6 +210,7 @@
       "ayahs": 5,
       "marks": 490,
       "ink": 490,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "2ad495931a1db696cf615b4e00d6e69744b3acf17d8c538f053886819e4181dc"
@@ -201,6 +220,7 @@
       "ayahs": 8,
       "marks": 518,
       "ink": 518,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "1628d26e0091ed74364cefa838264b6896f0038f06b5069db1d7beab7ce12673"
@@ -210,6 +230,7 @@
       "ayahs": 4,
       "marks": 500,
       "ink": 499,
+      "reach": 0,
       "tilt": 0,
       "hand": 1,
       "sha256": "14b42bb37ab7b102563b60d0762b969f9e5c8b4db789f2949b530ab5b0d42867"
@@ -219,6 +240,7 @@
       "ayahs": 7,
       "marks": 519,
       "ink": 519,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "6f76cb42694ba57602a8f82e50b539c519d0d2db7491ce8d3d929e549642ffa3"
@@ -228,6 +250,7 @@
       "ayahs": 7,
       "marks": 541,
       "ink": 540,
+      "reach": 0,
       "tilt": 0,
       "hand": 1,
       "sha256": "af0a39496ce5bd51bace2a80f1530b00441a2f34c7865c381d57747afd9f52dd"
@@ -237,6 +260,7 @@
       "ayahs": 7,
       "marks": 633,
       "ink": 632,
+      "reach": 0,
       "tilt": 0,
       "hand": 1,
       "sha256": "17e26d9e28f1db2bb4caf32ce9f74b0e31eb580f4309b2b75e3976e125ee377a"
@@ -246,6 +270,7 @@
       "ayahs": 8,
       "marks": 576,
       "ink": 574,
+      "reach": 0,
       "tilt": 0,
       "hand": 2,
       "sha256": "6d72da5c12608abdf85a36fe64958bfab84ca1661dcd14dc748cf7c5cf243b62"
@@ -255,6 +280,7 @@
       "ayahs": 7,
       "marks": 545,
       "ink": 544,
+      "reach": 0,
       "tilt": 0,
       "hand": 1,
       "sha256": "3953f7a1472f9bfb9a69735b1151291d5f58f68b3511f9de65498fdd3dd419b8"
@@ -264,15 +290,17 @@
       "ayahs": 4,
       "marks": 542,
       "ink": 539,
-      "tilt": 1,
+      "reach": 1,
+      "tilt": 0,
       "hand": 2,
-      "sha256": "431a363ad9dc9c6507e8a681745a15f57a960f65058cb2575ad859fc8405ff3a"
+      "sha256": "f4efaf503e79bd19ced437666d61a0bfb3d178d9b38a92c3e0edee9b868e5d30"
     },
     {
       "page": 23,
       "ayahs": 8,
       "marks": 538,
       "ink": 537,
+      "reach": 0,
       "tilt": 0,
       "hand": 1,
       "sha256": "78e9fbdb2011439f995af5ec2998612c1997c17d427688fbff153c203256e98b"
@@ -282,6 +310,7 @@
       "ayahs": 10,
       "marks": 597,
       "ink": 594,
+      "reach": 0,
       "tilt": 0,
       "hand": 3,
       "sha256": "9b9c9fe6101e7329440a06f90948dcb8da690c173166594e3ce16cbf84b9e6ec"
@@ -291,6 +320,7 @@
       "ayahs": 6,
       "marks": 579,
       "ink": 577,
+      "reach": 0,
       "tilt": 0,
       "hand": 2,
       "sha256": "376a467ea56b7ca5605cacfca59dfdd26550b05d28c4578acde8c8d46942204c"
@@ -300,6 +330,7 @@
       "ayahs": 7,
       "marks": 545,
       "ink": 545,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "9ce6cb7a7c12c4322b7e0a93a087ea34d9bf22dcfd462371fa7c473bd5d043b6"
@@ -309,6 +340,7 @@
       "ayahs": 5,
       "marks": 618,
       "ink": 618,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "254c5905d52f0544f8364d9650d0527d65de0a97c6c4ee5ef33e95bf18472730"
@@ -318,6 +350,7 @@
       "ayahs": 5,
       "marks": 481,
       "ink": 475,
+      "reach": 0,
       "tilt": 1,
       "hand": 5,
       "sha256": "944167287c842ac4767a15c23511bc766fd88b99caecf21213dad11f79a2f7e8"
@@ -327,6 +360,7 @@
       "ayahs": 4,
       "marks": 546,
       "ink": 546,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "2105ec63d1a9837648cba998906a8b57e7f75bddb00e16957dd0a88511f66be7"
@@ -336,15 +370,17 @@
       "ayahs": 6,
       "marks": 672,
       "ink": 661,
-      "tilt": 1,
+      "reach": 1,
+      "tilt": 0,
       "hand": 10,
-      "sha256": "ff9af95fd8495e95fdb5ce71741313abb67b729a6ec80a79824ea8ad55c289ef"
+      "sha256": "c52140412b02d66c4cafc5f81dd2860c9150ddf43753121f1a7665b1a1e255c2"
     },
     {
       "page": 31,
       "ayahs": 6,
       "marks": 451,
       "ink": 451,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "0e0c58134df7cb1f6335d0f4a9636a5ded62b596a676a6b3a81e2a469e99ea4c"
@@ -354,6 +390,7 @@
       "ayahs": 8,
       "marks": 521,
       "ink": 512,
+      "reach": 0,
       "tilt": 0,
       "hand": 9,
       "sha256": "fcb9e06d81b77ea56c4e47beb0cffaa7eca7307b0b2f0f3153355311c60dd1e7"
@@ -363,6 +400,7 @@
       "ayahs": 5,
       "marks": 596,
       "ink": 595,
+      "reach": 0,
       "tilt": 0,
       "hand": 1,
       "sha256": "9a9b2da26098ca2ddb644f3506ca916ea93bad69d84266125dbc742ea520fe23"
@@ -372,6 +410,7 @@
       "ayahs": 4,
       "marks": 526,
       "ink": 526,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "5e5050725765a4c594b4f6321d91ae30b1a45aca2eb4bb51891756e93c20c4cd"
@@ -381,6 +420,7 @@
       "ayahs": 5,
       "marks": 589,
       "ink": 589,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "b95d4b5648c2bfbc285d2f6e4871100cdb74450f95b21bad00f1a7b3a2bab8cf"
@@ -390,6 +430,7 @@
       "ayahs": 6,
       "marks": 631,
       "ink": 625,
+      "reach": 0,
       "tilt": 1,
       "hand": 5,
       "sha256": "5590db632ecbf504311ff0fedbe8eb37ff578303d083eb73a62792fa9b05bbef"
@@ -399,6 +440,7 @@
       "ayahs": 3,
       "marks": 633,
       "ink": 633,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "cf53a550e0a2cd4f73f37a9b80d63c82f8ba9b5352f4d6dd3d2a2ed309f46153"
@@ -408,6 +450,7 @@
       "ayahs": 4,
       "marks": 564,
       "ink": 564,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "58127819f86ef9fea6bd5fb1505cb81baae907f93fcdec322d366459bd76d5fd"
@@ -417,6 +460,7 @@
       "ayahs": 8,
       "marks": 484,
       "ink": 484,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "5ad7fd505723efcfa281da87cfefbfe4e66bcb5a5a0ebe27954bf5c3ca89faf8"
@@ -426,6 +470,7 @@
       "ayahs": 3,
       "marks": 496,
       "ink": 492,
+      "reach": 0,
       "tilt": 0,
       "hand": 4,
       "sha256": "a0bc42541d4781ce7f4ea6b677cc21e2ee68e35aef975dcddd296179ad6c9f39"
@@ -435,6 +480,7 @@
       "ayahs": 4,
       "marks": 460,
       "ink": 460,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "0629ddbf163be16516671b3e1c714f11ba928f2a0c51877719bf9aeaa9fd1640"
@@ -444,6 +490,7 @@
       "ayahs": 4,
       "marks": 576,
       "ink": 576,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "aca1d29c94646da4961d22929cc7d273b5c8da85142cecc9a72aa711a95fa5c1"
@@ -453,6 +500,7 @@
       "ayahs": 3,
       "marks": 537,
       "ink": 537,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "748e89c1e32842846cf183f99a9ab9db4c9e8e42a9b51473f1f9fa5a0ced365e"
@@ -462,6 +510,7 @@
       "ayahs": 5,
       "marks": 553,
       "ink": 553,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "ede43990878e482b1dba4de75f5fa1b8bae707a528d1584410f0f9b1d9a5bf19"
@@ -471,6 +520,7 @@
       "ayahs": 5,
       "marks": 528,
       "ink": 528,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "d447e266ed8e8fe0bd3781197042e2b7566f57e01fe26339bc1e02ac088896ef"
@@ -480,6 +530,7 @@
       "ayahs": 5,
       "marks": 442,
       "ink": 440,
+      "reach": 0,
       "tilt": 0,
       "hand": 2,
       "sha256": "330a22f5d08b6e85c6991418ad545700e8e0361ceee350a78568f768286bafbe"
@@ -489,6 +540,7 @@
       "ayahs": 7,
       "marks": 553,
       "ink": 553,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "ea6a9d0ce3a57277b9180ab26c2f578f16bc5440100fcc94c8c2ddde4e70ebbb"
@@ -498,6 +550,7 @@
       "ayahs": 1,
       "marks": 548,
       "ink": 548,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "13c876340b56d162ba85fd5edebf9869c259c0be21e02a49ea38846ebc6015a0"
@@ -507,6 +560,7 @@
       "ayahs": 4,
       "marks": 540,
       "ink": 539,
+      "reach": 0,
       "tilt": 0,
       "hand": 1,
       "sha256": "5f6e2616fbf22169b4f9dd98a074d8aca3fef49275cf993695244ff2441853d5"
@@ -516,15 +570,17 @@
       "ayahs": 9,
       "marks": 542,
       "ink": 540,
-      "tilt": 1,
+      "reach": 1,
+      "tilt": 0,
       "hand": 1,
-      "sha256": "c2f8aa2d8d3771ba8cedad3bb248f2a5ff7dbf22511ef8ac965a371cd2943805"
+      "sha256": "efb94cd5121b6dcef5a826d69d77dce816b2720703f1889c218d9b0e0f1f34b6"
     },
     {
       "page": 51,
       "ayahs": 6,
       "marks": 535,
       "ink": 535,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "407aa9e8900e07ace958c55f6af2557949238f99e2a550a2ccb565fd42e6a6a7"
@@ -534,6 +590,7 @@
       "ayahs": 7,
       "marks": 550,
       "ink": 538,
+      "reach": 0,
       "tilt": 0,
       "hand": 12,
       "sha256": "0cc0d19ae0c479b70c861f2baeeafa5d14cea4526076f557098b4ce9d8d37c87"
@@ -543,6 +600,7 @@
       "ayahs": 7,
       "marks": 556,
       "ink": 556,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "510d3965f9f99705c102cd693b4219b887bb0f9556879c37eeefa16a180760f3"
@@ -552,6 +610,7 @@
       "ayahs": 8,
       "marks": 582,
       "ink": 580,
+      "reach": 0,
       "tilt": 0,
       "hand": 2,
       "sha256": "3fb5be8815cd950985e7d821aacbd05644061e798a4dcf6d49dabacd6f9c18e1"
@@ -561,6 +620,7 @@
       "ayahs": 8,
       "marks": 562,
       "ink": 562,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "5db20bbe422304a43b223a3d7af67bde843f9334a5efcf3f9d75b842ecd516fa"
@@ -570,6 +630,7 @@
       "ayahs": 7,
       "marks": 544,
       "ink": 538,
+      "reach": 0,
       "tilt": 1,
       "hand": 5,
       "sha256": "cb6cbf299abd95fff4079d2cc7ae4edfd645f819fe28bf5427506035ad681382"
@@ -579,6 +640,7 @@
       "ayahs": 9,
       "marks": 529,
       "ink": 529,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "5a52e0ff30eda38cc5c5737d034cb8138bd4b34a7155b4f394f64514253f073c"
@@ -588,6 +650,7 @@
       "ayahs": 9,
       "marks": 575,
       "ink": 573,
+      "reach": 0,
       "tilt": 0,
       "hand": 2,
       "sha256": "b1923e230bd741a040e1090ab722ddd71975d0d86b4f45ff9a2949466a81af24"
@@ -597,6 +660,7 @@
       "ayahs": 7,
       "marks": 591,
       "ink": 591,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "988202c541609cda45dd77dde2d3509389f20c68bde6c5797367334ee99a1430"
@@ -606,6 +670,7 @@
       "ayahs": 6,
       "marks": 533,
       "ink": 513,
+      "reach": 0,
       "tilt": 2,
       "hand": 18,
       "sha256": "1e9dd078e160ae405ee739a675dddc2476fc078f6f669bd85aa3713bdd2a61ae"
@@ -615,6 +680,7 @@
       "ayahs": 8,
       "marks": 542,
       "ink": 542,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "0021596f79dd3cd61fe69093e27815de498f7736dcf476db4e46dc19c0adb4d7"
@@ -624,15 +690,17 @@
       "ayahs": 9,
       "marks": 566,
       "ink": 565,
-      "tilt": 1,
+      "reach": 1,
+      "tilt": 0,
       "hand": 0,
-      "sha256": "e83f344034c4e63651cbd7ab3d4298939caa38c3c7f9820c2786cfd424a9fff8"
+      "sha256": "83af4d70b00c5518b9aa3aac808bba2b15a042b8d99845c2054dd0a590c7657e"
     },
     {
       "page": 63,
       "ayahs": 8,
       "marks": 577,
       "ink": 577,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "d19d51783c3a755345b4c32ba026fd57b0ae7563bb94d711a66a9f392800062c"
@@ -642,24 +710,27 @@
       "ayahs": 7,
       "marks": 533,
       "ink": 527,
-      "tilt": 1,
+      "reach": 1,
+      "tilt": 0,
       "hand": 5,
-      "sha256": "5d744626a75c442e8aeacc1fd68a7bd831ec447333b392a95cf08e19207b0312"
+      "sha256": "59d5813487332d0debf4197f70abaaddacca07dd60066fd0488ca62ed43d01f5"
     },
     {
       "page": 65,
       "ayahs": 6,
       "marks": 553,
       "ink": 552,
-      "tilt": 1,
+      "reach": 1,
+      "tilt": 0,
       "hand": 0,
-      "sha256": "86fcfe05208628803f0ecc14e6fbd5a59c525634d9e66de15bdf66537d2c6981"
+      "sha256": "b32dfb78bcaa8b2f78be39d7494e3c322a176ece7ba5f137bf789c2fe8ea790c"
     },
     {
       "page": 66,
       "ayahs": 11,
       "marks": 573,
       "ink": 573,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "dc2422c44d62900c06e9a47ec1117a1d7d4eca228e763be372ca43d7a04bd6ea"
@@ -669,6 +740,7 @@
       "ayahs": 8,
       "marks": 513,
       "ink": 513,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "039ea2ed5ef4ed6294fda64f7a0e173c838304dd6a55db0c4f7183e13edbabbc"
@@ -678,6 +750,7 @@
       "ayahs": 8,
       "marks": 548,
       "ink": 546,
+      "reach": 0,
       "tilt": 0,
       "hand": 2,
       "sha256": "32c1da063bc6921f40e1ed9e6865285438a40f514e9e7382d5d5b07e2f1ecd1b"
@@ -687,6 +760,7 @@
       "ayahs": 5,
       "marks": 431,
       "ink": 431,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "0f9e01c04fe3bbdf926deaec4fb64ef144e671eab238bde73f55bb5c94d87b5d"
@@ -696,6 +770,7 @@
       "ayahs": 4,
       "marks": 563,
       "ink": 559,
+      "reach": 0,
       "tilt": 0,
       "hand": 4,
       "sha256": "ce84cb860725a7fc02521b5f5f98329f43186eec8d0e2686a37774aabf9fdc04"
@@ -705,6 +780,7 @@
       "ayahs": 8,
       "marks": 556,
       "ink": 556,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "b4fe2864f1b51f85e29e1336e635f88b6a6328675ed900d5442584b5e075806b"
@@ -714,6 +790,7 @@
       "ayahs": 8,
       "marks": 561,
       "ink": 561,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "1beac62dd8d79190150b494a1e8def78df49876a9de4c4c165f5c18985c6b64d"
@@ -723,6 +800,7 @@
       "ayahs": 7,
       "marks": 586,
       "ink": 586,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "19c940dcaa853622b42bb93e59468ddcd08fd195ffbcdc946b9bd216188536a2"
@@ -732,6 +810,7 @@
       "ayahs": 6,
       "marks": 516,
       "ink": 516,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "4d7fc7c16e826a4dc3f1c8d7bc28e42edcbb41fa3fd0f8fdb5ffb1ff43185727"
@@ -741,6 +820,7 @@
       "ayahs": 8,
       "marks": 556,
       "ink": 556,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "53256e9930121a45e3a1bac24aeaf8564761b9e73e84eec893790f09cc66f4ce"
@@ -750,6 +830,7 @@
       "ayahs": 6,
       "marks": 505,
       "ink": 502,
+      "reach": 0,
       "tilt": 0,
       "hand": 3,
       "sha256": "4f592ae8792e1a5ff7993e3919b1bed46ae63eb03aac84e1eb4b11da41b38c90"
@@ -759,6 +840,7 @@
       "ayahs": 6,
       "marks": 622,
       "ink": 621,
+      "reach": 0,
       "tilt": 0,
       "hand": 1,
       "sha256": "497432698affc43a1d12442fb436fa42b7676333f78885e0485bcdb6fccc27d9"
@@ -768,6 +850,7 @@
       "ayahs": 5,
       "marks": 558,
       "ink": 555,
+      "reach": 0,
       "tilt": 0,
       "hand": 3,
       "sha256": "b9d560c2239633553151c19f5ac9d664849a22ef3462da0a32ea855745740d84"
@@ -777,6 +860,7 @@
       "ayahs": 3,
       "marks": 433,
       "ink": 433,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "e396fe7aca8a19bfda1108e446979c97a76cbd3d6b6a534cb7790749be5cb1f5"
@@ -786,6 +870,7 @@
       "ayahs": 5,
       "marks": 518,
       "ink": 517,
+      "reach": 0,
       "tilt": 1,
       "hand": 0,
       "sha256": "d4b2c307f17da0eaa5820996954a3d574147000f7a41237017ba832c2763ee91"
@@ -795,15 +880,17 @@
       "ayahs": 4,
       "marks": 464,
       "ink": 461,
-      "tilt": 2,
+      "reach": 2,
+      "tilt": 0,
       "hand": 1,
-      "sha256": "9ae0d1d5ee43eee70a6c71731ea4bfaf95b6b78fbcb34e75c305b9ac76336a24"
+      "sha256": "5bd4f2114d02016fb90de04f79b7f434233221074adcb341a3eee9934294fe01"
     },
     {
       "page": 82,
       "ayahs": 3,
       "marks": 502,
       "ink": 501,
+      "reach": 0,
       "tilt": 0,
       "hand": 1,
       "sha256": "3750ca07831203600c0db81512c178641d14b20460bab4fb6e6f549b214acf5f"
@@ -813,6 +900,7 @@
       "ayahs": 7,
       "marks": 472,
       "ink": 472,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "de52367cd8a529140c254bd5b30907d997ad78d4740610e4db98f369c8990dfa"
@@ -822,6 +910,7 @@
       "ayahs": 4,
       "marks": 489,
       "ink": 489,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "f414582263237c914b1318624ea538478b9874d13604f4a79f38d3793766e82b"
@@ -831,6 +920,7 @@
       "ayahs": 7,
       "marks": 554,
       "ink": 554,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "6437b81866eee462ebf7fdf1c6e3df607b663e1efc4d7e0b14f0ecb188fc9488"
@@ -840,6 +930,7 @@
       "ayahs": 7,
       "marks": 573,
       "ink": 569,
+      "reach": 0,
       "tilt": 0,
       "hand": 4,
       "sha256": "cb22a3fa0677dc00bb2edc5edc1afede696c7209adcf9dd158624bb567f12f0a"
@@ -849,15 +940,17 @@
       "ayahs": 8,
       "marks": 608,
       "ink": 606,
-      "tilt": 2,
+      "reach": 2,
+      "tilt": 0,
       "hand": 0,
-      "sha256": "78c31341bc9e158d81786b07ec9966f736c10bc820b67ba31730b011ca755a41"
+      "sha256": "0c1d4bce325ed154f5fdebc85987cc63558a3929ad5477b649b734e7d1fc48c1"
     },
     {
       "page": 88,
       "ayahs": 6,
       "marks": 493,
       "ink": 474,
+      "reach": 0,
       "tilt": 0,
       "hand": 19,
       "sha256": "ca3908299494d6f6f14b094730d44bd82a3dddbc70fa08c6e760da77b2108dc4"
@@ -867,6 +960,7 @@
       "ayahs": 9,
       "marks": 548,
       "ink": 548,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "8c0b8ec36fffaf4e5f1d387840f7e958b03fad239e8d359ec900afe73b5bb209"
@@ -876,6 +970,7 @@
       "ayahs": 5,
       "marks": 624,
       "ink": 623,
+      "reach": 0,
       "tilt": 0,
       "hand": 1,
       "sha256": "17ecca2b5f97e269bbb0610132660b97e97ddfb5322e018bdf7ab65e9a7e79c6"
@@ -885,6 +980,7 @@
       "ayahs": 7,
       "marks": 558,
       "ink": 557,
+      "reach": 0,
       "tilt": 0,
       "hand": 1,
       "sha256": "d351d9bb80b77c82cf7131a959348bdcdd228b39daf3d72df8986e1589c11bb8"
@@ -894,6 +990,7 @@
       "ayahs": 5,
       "marks": 581,
       "ink": 580,
+      "reach": 0,
       "tilt": 0,
       "hand": 1,
       "sha256": "6d1258411f445fde0f5d2537fc20dc0bd451c3d4954238a99f2d0745dd7322bd"
@@ -903,15 +1000,17 @@
       "ayahs": 3,
       "marks": 480,
       "ink": 479,
-      "tilt": 1,
+      "reach": 1,
+      "tilt": 0,
       "hand": 0,
-      "sha256": "e572307f5f66171d1deda5eddb13e15024a22cc5d17cbc63f8b82dd6c81411e2"
+      "sha256": "0b43d1e6057809da08a952743e5e2406f7308e1bf2c71a5cc60442af06f565ed"
     },
     {
       "page": 94,
       "ayahs": 7,
       "marks": 622,
       "ink": 620,
+      "reach": 0,
       "tilt": 0,
       "hand": 2,
       "sha256": "2bbf32ee57a111ad4460af93826eb001192496f31c097b18b3cc005653f680b2"
@@ -921,6 +1020,7 @@
       "ayahs": 4,
       "marks": 530,
       "ink": 529,
+      "reach": 0,
       "tilt": 0,
       "hand": 1,
       "sha256": "7419a07735a31f9928ba6d06e8831c66876611ede8709279d02441d008b732ee"
@@ -930,6 +1030,7 @@
       "ayahs": 8,
       "marks": 505,
       "ink": 504,
+      "reach": 0,
       "tilt": 0,
       "hand": 1,
       "sha256": "51494689272efcbecf7958f65943ca54f093d07f99f171c2b1f7de787eec2d9f"
@@ -939,6 +1040,7 @@
       "ayahs": 8,
       "marks": 502,
       "ink": 501,
+      "reach": 0,
       "tilt": 0,
       "hand": 1,
       "sha256": "06d1cc4f1baa7753c18836104a645e811ba5a914808977ab8fe6e78ef4921891"
@@ -948,6 +1050,7 @@
       "ayahs": 6,
       "marks": 506,
       "ink": 504,
+      "reach": 0,
       "tilt": 0,
       "hand": 2,
       "sha256": "41eb897aa2b24c3db28228a81a8025de02c34ccb8017c06b493ebd81898e73a7"
@@ -957,6 +1060,7 @@
       "ayahs": 7,
       "marks": 509,
       "ink": 508,
+      "reach": 0,
       "tilt": 0,
       "hand": 1,
       "sha256": "0e5e6f1123805509e89edb171602a7a8384ad13517c5a84c8100e92dc0a8d9c2"
@@ -966,6 +1070,7 @@
       "ayahs": 6,
       "marks": 603,
       "ink": 588,
+      "reach": 0,
       "tilt": 1,
       "hand": 14,
       "sha256": "c50e16cac354a4500745a2a6be139658bfe4f4eb036e4b93d4bc2c9caa3b0672"
@@ -975,6 +1080,7 @@
       "ayahs": 7,
       "marks": 555,
       "ink": 555,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "f02abef4c3e5597b78e3ed479aef93b8599587c13c6e3faf18bdeebc84c79adb"
@@ -984,6 +1090,7 @@
       "ayahs": 7,
       "marks": 551,
       "ink": 544,
+      "reach": 0,
       "tilt": 0,
       "hand": 7,
       "sha256": "2b3875b6800956a2eae5b58935535d7e121c55638f4c6706f4d1d5add90d6440"
@@ -993,6 +1100,7 @@
       "ayahs": 8,
       "marks": 601,
       "ink": 600,
+      "reach": 0,
       "tilt": 0,
       "hand": 1,
       "sha256": "5de2cfaa64687b294f853c466ed8ca36041d4e824e259176e5f97a38f1ce6277"
@@ -1002,6 +1110,7 @@
       "ayahs": 8,
       "marks": 536,
       "ink": 535,
+      "reach": 0,
       "tilt": 0,
       "hand": 1,
       "sha256": "374a2328d0ab2294fda85dfd86dc4f2deb7d0ec3340023b031d0d61aedfaced6"
@@ -1011,6 +1120,7 @@
       "ayahs": 5,
       "marks": 531,
       "ink": 531,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "c4f9989f2056ce8ac4202e72caff1ddb103ad0b2f6ffe87ad94659999c2f0a90"
@@ -1020,15 +1130,17 @@
       "ayahs": 3,
       "marks": 522,
       "ink": 521,
-      "tilt": 1,
+      "reach": 1,
+      "tilt": 0,
       "hand": 0,
-      "sha256": "337b90715a71e5911878a6e6644179e8fab1ab94cc7aa3e2ad841f24e961e538"
+      "sha256": "37a8f7501022e0b6cd392c1b56216863cd81d145338d1184101ab49b6a1bc768"
     },
     {
       "page": 107,
       "ayahs": 3,
       "marks": 622,
       "ink": 620,
+      "reach": 0,
       "tilt": 0,
       "hand": 2,
       "sha256": "f13f5f31ea7539433e8a9f4d5098c05543fe6b9994c7a3b87000974c1dac42ee"
@@ -1038,6 +1150,7 @@
       "ayahs": 4,
       "marks": 525,
       "ink": 525,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "c3b804554810c693bb8a7f421f2c26d35408764e7da81a97c2f05db3323eee68"
@@ -1047,6 +1160,7 @@
       "ayahs": 4,
       "marks": 505,
       "ink": 505,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "71a27488127b7fea7e282083d6d22ca9fc4f4f9e91b0a1bdfae3c7758764d544"
@@ -1056,6 +1170,7 @@
       "ayahs": 4,
       "marks": 443,
       "ink": 437,
+      "reach": 0,
       "tilt": 1,
       "hand": 5,
       "sha256": "6175ce4e91673c4acea48dc99bc159df4ba7eb8bc69347f78fb0b0f1ea8bc082"
@@ -1065,6 +1180,7 @@
       "ayahs": 6,
       "marks": 557,
       "ink": 556,
+      "reach": 0,
       "tilt": 0,
       "hand": 1,
       "sha256": "2a612ec539a618046de297e267bd6572a49fa26f788312d21d93a41fede01b33"
@@ -1074,6 +1190,7 @@
       "ayahs": 8,
       "marks": 559,
       "ink": 558,
+      "reach": 0,
       "tilt": 0,
       "hand": 1,
       "sha256": "8dc547c1775eab055c8a59373b847b4438495bab31e0fc811495ae5eafd3b391"
@@ -1083,6 +1200,7 @@
       "ayahs": 5,
       "marks": 511,
       "ink": 496,
+      "reach": 0,
       "tilt": 1,
       "hand": 14,
       "sha256": "74bf771a86d9c54fb6cccb37b7167968733f9f1ba3294dc45084f757e4ddd9c4"
@@ -1092,6 +1210,7 @@
       "ayahs": 5,
       "marks": 496,
       "ink": 496,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "23c699a495b7f43f41d0ebd2ef8ff1bea515f9437041d9fbd8d1d6868671055e"
@@ -1101,6 +1220,7 @@
       "ayahs": 4,
       "marks": 513,
       "ink": 512,
+      "reach": 0,
       "tilt": 0,
       "hand": 1,
       "sha256": "e8facdcae0ff534dce86cf8cf67cbf127c59ad78a8c190fdfb081caa11542376"
@@ -1110,15 +1230,17 @@
       "ayahs": 5,
       "marks": 578,
       "ink": 572,
-      "tilt": 2,
+      "reach": 1,
+      "tilt": 1,
       "hand": 4,
-      "sha256": "07d97c27d953bb74faefae6e45ce7c084fc7c3a4f9fa3d3d1b00b5161e7f2944"
+      "sha256": "2d163e2ca5194dfbec473acba69b57d1736f9e22d303a3aaf1fb63705f70f0dc"
     },
     {
       "page": 117,
       "ayahs": 7,
       "marks": 678,
       "ink": 677,
+      "reach": 0,
       "tilt": 0,
       "hand": 1,
       "sha256": "d31f0fc3dd201c0ccf5c3e9c609dc2e8a4c862681df5eb2a506cda042bd1a84f"
@@ -1128,6 +1250,7 @@
       "ayahs": 7,
       "marks": 639,
       "ink": 639,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "cafe8a98261265fdb3324ff154e3f7b48d375e17b377b60738423ba68eea3624"
@@ -1137,6 +1260,7 @@
       "ayahs": 6,
       "marks": 569,
       "ink": 569,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "65a70d777b62d7d8257707d3c53ed68fe03a61bee5c03e5376466d75fcb61754"
@@ -1146,15 +1270,17 @@
       "ayahs": 7,
       "marks": 584,
       "ink": 579,
-      "tilt": 1,
+      "reach": 1,
+      "tilt": 0,
       "hand": 4,
-      "sha256": "69a32ba30fd7b34b9ebf603ac31719dc016a75c15f10f826a8b57eba1531feaa"
+      "sha256": "932540fcf88ddefae80cd9f77d78b5ba84135e64d6b503296bf7b93b00f4b5a4"
     },
     {
       "page": 121,
       "ayahs": 6,
       "marks": 459,
       "ink": 459,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "caedaa98be6ac36c0f1b2c20f77b60e6783c748f0ad9d56b1cff5a2d629b86d8"
@@ -1164,6 +1290,7 @@
       "ayahs": 7,
       "marks": 585,
       "ink": 585,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "e241123380e1b1643874f42e74be3d05bab3f15885c23e037d70eb3bd1d45bed"
@@ -1173,6 +1300,7 @@
       "ayahs": 5,
       "marks": 560,
       "ink": 559,
+      "reach": 0,
       "tilt": 0,
       "hand": 1,
       "sha256": "f2d6c8ab4803b0fba5de36d13b1e00dd61cdc93775cc495bd1d67b96ae80ae38"
@@ -1182,6 +1310,7 @@
       "ayahs": 8,
       "marks": 567,
       "ink": 564,
+      "reach": 0,
       "tilt": 0,
       "hand": 3,
       "sha256": "2cf578ee287fa8edf445f5d351c415729981ca499fc879eaf3ff45dcd48891ec"
@@ -1191,6 +1320,7 @@
       "ayahs": 5,
       "marks": 614,
       "ink": 610,
+      "reach": 0,
       "tilt": 1,
       "hand": 3,
       "sha256": "b724578e1e7e3f9f8aa80c8f69281591049d37d30f1618df2894554c1fa6ed59"
@@ -1200,15 +1330,17 @@
       "ayahs": 5,
       "marks": 541,
       "ink": 540,
-      "tilt": 1,
+      "reach": 1,
+      "tilt": 0,
       "hand": 0,
-      "sha256": "f0ac57bf242de10fca987a1cd4105ed740a50baf739ae29e64c6923848bcb7fa"
+      "sha256": "89dae93b928272982311a13da49a4decc2cebfad6414d7dfcfe67b3795e85303"
     },
     {
       "page": 127,
       "ayahs": 7,
       "marks": 608,
       "ink": 608,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "dd460b50b807d1a2a6d92927c9071468ec744b59f92bd4d01a5fc7c0dee096a6"
@@ -1218,15 +1350,17 @@
       "ayahs": 8,
       "marks": 512,
       "ink": 510,
-      "tilt": 1,
+      "reach": 1,
+      "tilt": 0,
       "hand": 1,
-      "sha256": "55adc545cc459b3f37b544513711a703fd741cc803d626809aab27972342c716"
+      "sha256": "0b050db35e9f84169e0b34427158dbba3b2d076930fba9acdc2294acaecdf0bc"
     },
     {
       "page": 129,
       "ayahs": 10,
       "marks": 515,
       "ink": 515,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "e725b7e90c6f492ede9fea618cc05a524fe4a97c1e7cafbdc498e8e4b0c23768"
@@ -1236,6 +1370,7 @@
       "ayahs": 9,
       "marks": 656,
       "ink": 648,
+      "reach": 0,
       "tilt": 3,
       "hand": 5,
       "sha256": "4223a4caaa049deeb09ebe3e5e1536a786c379e164e1c4e7d4250a2b599cf392"
@@ -1245,6 +1380,7 @@
       "ayahs": 8,
       "marks": 588,
       "ink": 588,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "3050b01a39343491cb383cf087dd1e9b07a58fe1676326bf01b2a61248f6a6d2"
@@ -1254,6 +1390,7 @@
       "ayahs": 9,
       "marks": 582,
       "ink": 577,
+      "reach": 0,
       "tilt": 1,
       "hand": 4,
       "sha256": "0f07051ac77c8619ab11913c6edda061d469629b3f01a1fe7ee4b5341b0aaab9"
@@ -1263,6 +1400,7 @@
       "ayahs": 8,
       "marks": 561,
       "ink": 561,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "ddcefe8affcd678977ba69ad0e8ae37eac6e7ca6bc857314bbb593d95c8315d2"
@@ -1272,6 +1410,7 @@
       "ayahs": 7,
       "marks": 548,
       "ink": 544,
+      "reach": 0,
       "tilt": 1,
       "hand": 3,
       "sha256": "faf26c1ce70b17923c46d529ad4503cc78c323a9cf931d56ce6d0bb31c90ac72"
@@ -1281,6 +1420,7 @@
       "ayahs": 9,
       "marks": 589,
       "ink": 589,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "6708ff66c2a2bd0d224ea073e642c63e746b87e1ff7aea489d00a2641be6d990"
@@ -1290,6 +1430,7 @@
       "ayahs": 5,
       "marks": 509,
       "ink": 509,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "fa129871ad797bc4b01ed5e36827c35b532d895554892b5d4d9078a114f9cfc8"
@@ -1299,6 +1440,7 @@
       "ayahs": 8,
       "marks": 544,
       "ink": 539,
+      "reach": 0,
       "tilt": 0,
       "hand": 5,
       "sha256": "748985cb9e3dcb9f7240b40eeebf382ef2849ca71beb76b326c6c32a336e4695"
@@ -1308,15 +1450,17 @@
       "ayahs": 9,
       "marks": 554,
       "ink": 548,
-      "tilt": 2,
+      "reach": 1,
+      "tilt": 1,
       "hand": 4,
-      "sha256": "5963c794b18f6b8b840202867601f52a0672d26c5cf3262ed67ea702ac48927d"
+      "sha256": "5f635d6abf092363f7f22de42bfdcbd59417514ec29d50e066af7633d224a279"
     },
     {
       "page": 139,
       "ayahs": 4,
       "marks": 589,
       "ink": 589,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "abebd8e120614ceb74f3f6d4c5d1582f49a6cedb34bdbe3afdf7f9d909af2294"
@@ -1326,6 +1470,7 @@
       "ayahs": 7,
       "marks": 593,
       "ink": 593,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "648a4b2accc503013e56d73da57ab8546dc96c7dd31651ef8821314524b6bcda"
@@ -1335,6 +1480,7 @@
       "ayahs": 9,
       "marks": 568,
       "ink": 566,
+      "reach": 0,
       "tilt": 0,
       "hand": 2,
       "sha256": "9c49bdecd1fb5a15bb50e0f1987298b64169ba581ee7c1792ba943242238173d"
@@ -1344,6 +1490,7 @@
       "ayahs": 8,
       "marks": 566,
       "ink": 565,
+      "reach": 0,
       "tilt": 0,
       "hand": 1,
       "sha256": "3a5e5687886dd87ab69c0ebddfc5662f4f977b90e50924e7b35440ad0dac6434"
@@ -1353,6 +1500,7 @@
       "ayahs": 6,
       "marks": 547,
       "ink": 546,
+      "reach": 0,
       "tilt": 0,
       "hand": 1,
       "sha256": "e193f3d99ebffcf19451a5ffc1f97c1209f4668c0f1471e173cefb3be8fe44e6"
@@ -1362,6 +1510,7 @@
       "ayahs": 6,
       "marks": 504,
       "ink": 504,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "5bd31cb26c100b4a4a238fa4c12d33e9d77a057a1a967e22229a73487e9b4b1b"
@@ -1371,6 +1520,7 @@
       "ayahs": 7,
       "marks": 462,
       "ink": 462,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "ee7946a329e7bc3fc479772241cd2d64d460f11915cfac5bdc675014e1d335d5"
@@ -1380,24 +1530,27 @@
       "ayahs": 5,
       "marks": 502,
       "ink": 500,
-      "tilt": 1,
+      "reach": 1,
+      "tilt": 0,
       "hand": 1,
-      "sha256": "709ae34ea5184f721773ab4a7db9950c183f170619a6c8335458394058336710"
+      "sha256": "d20c44be793d493798cd585538acaa09848b1384a79ed094c83fb1ea754fa91b"
     },
     {
       "page": 147,
       "ayahs": 4,
       "marks": 538,
       "ink": 537,
-      "tilt": 1,
+      "reach": 1,
+      "tilt": 0,
       "hand": 0,
-      "sha256": "86a4edd238377a36ca2f027c731f3fc61ee0256f35dfc64d2d00753fe235f163"
+      "sha256": "aa6793d02bd2bccf9eb20386a458f100730943e2237c7be7b7004682bc233d84"
     },
     {
       "page": 148,
       "ayahs": 5,
       "marks": 532,
       "ink": 532,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "72143767084afa6416a4aa4dbe5a8aaf94c40a9196cc5ac7b62a63047173f884"
@@ -1407,6 +1560,7 @@
       "ayahs": 6,
       "marks": 539,
       "ink": 538,
+      "reach": 0,
       "tilt": 0,
       "hand": 1,
       "sha256": "804ff602024c7264e945023b3c4f277722a1f0afd87ebc26d43cda31349ffdb6"
@@ -1416,6 +1570,7 @@
       "ayahs": 8,
       "marks": 609,
       "ink": 607,
+      "reach": 0,
       "tilt": 1,
       "hand": 1,
       "sha256": "355ebf6e75cc82db2ff0c2744cc43483997cfc83b9e4883a9dd2ffd7a13d6a81"
@@ -1425,6 +1580,7 @@
       "ayahs": 11,
       "marks": 491,
       "ink": 491,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "c20df0627695bd2f90a07a65938c839603b731af0aab7396c8d5e5ed9865ac98"
@@ -1434,6 +1590,7 @@
       "ayahs": 11,
       "marks": 606,
       "ink": 602,
+      "reach": 0,
       "tilt": 0,
       "hand": 4,
       "sha256": "5724a41f030879513f524c739092ea9c50798ab235ced75d3f94f270e6d13cfb"
@@ -1443,6 +1600,7 @@
       "ayahs": 8,
       "marks": 564,
       "ink": 562,
+      "reach": 0,
       "tilt": 0,
       "hand": 2,
       "sha256": "a059e4e3acd549f9367895632f8d8746d8935ef0d9a4ca25f5569b9fa421d034"
@@ -1452,6 +1610,7 @@
       "ayahs": 7,
       "marks": 617,
       "ink": 613,
+      "reach": 0,
       "tilt": 0,
       "hand": 4,
       "sha256": "6cbc444addb0d46f5d66e5796680259c54ea42104764e74c0751ba6d09c74edf"
@@ -1461,6 +1620,7 @@
       "ayahs": 6,
       "marks": 561,
       "ink": 561,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "99a5126092ce32b102f37147e904d7157401dbab4c391b6c1efdb711e01e39a9"
@@ -1470,6 +1630,7 @@
       "ayahs": 8,
       "marks": 594,
       "ink": 594,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "8bab17f942bdc98f88739f3c25e604f6e891f2af2292dc71ce37bff0f4e5c234"
@@ -1479,15 +1640,17 @@
       "ayahs": 6,
       "marks": 563,
       "ink": 561,
-      "tilt": 1,
+      "reach": 1,
+      "tilt": 0,
       "hand": 1,
-      "sha256": "c7e13f15b7bfd17d6b07670b583d2f1e7192277726c82e2497d3ad14ad54c714"
+      "sha256": "c7376d00457352a9b84fd60c11f88d6bfcd5aa05510773dd140c18ab3e3f7c82"
     },
     {
       "page": 158,
       "ayahs": 10,
       "marks": 551,
       "ink": 544,
+      "reach": 0,
       "tilt": 0,
       "hand": 7,
       "sha256": "47abf333cb9e237775d285139ca55392d2497daca07ec10f07fd7fc717510c9d"
@@ -1497,6 +1660,7 @@
       "ayahs": 6,
       "marks": 512,
       "ink": 512,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "14640dab792ff6475c3bb02eac9964476ba4632b80452c61300a0ae3b353765f"
@@ -1506,6 +1670,7 @@
       "ayahs": 8,
       "marks": 493,
       "ink": 491,
+      "reach": 0,
       "tilt": 1,
       "hand": 1,
       "sha256": "ae22bc3f56dd9a936279cb417ae8e331de089d1b22b2a50fb43b35d6fc7676e1"
@@ -1515,6 +1680,7 @@
       "ayahs": 6,
       "marks": 464,
       "ink": 464,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "695ff41864240a01e7cf43f754adaf3fecb21af85d1db9b70aadf4f1a625ce03"
@@ -1524,6 +1690,7 @@
       "ayahs": 8,
       "marks": 594,
       "ink": 591,
+      "reach": 0,
       "tilt": 0,
       "hand": 3,
       "sha256": "29bef6b037df32dfc56cf4fe45f401148d3c08f540543b9862253836072161f0"
@@ -1533,6 +1700,7 @@
       "ayahs": 9,
       "marks": 532,
       "ink": 532,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "079652628d58e0a753228ee2e4a72523cb2a2f7ded37220b34b95c2dab67948a"
@@ -1542,6 +1710,7 @@
       "ayahs": 16,
       "marks": 529,
       "ink": 529,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "3f49f334f847a8c580b420079eb5882e143172500a8c234ed71b628488ab12ca"
@@ -1551,6 +1720,7 @@
       "ayahs": 10,
       "marks": 548,
       "ink": 548,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "753b896ca9d47aa93d5c8fe74f032d08af9a7b724fe0d2ac72bbeae5111349fa"
@@ -1560,6 +1730,7 @@
       "ayahs": 7,
       "marks": 534,
       "ink": 534,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "526977e193a5db76b441d39ce461048b145be40a9094ff83b8c6d64d819c928e"
@@ -1569,6 +1740,7 @@
       "ayahs": 6,
       "marks": 533,
       "ink": 533,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "5bb187b0700948c733f04cd910a0e0c745e7ad89e30a9256984e4de397165fd0"
@@ -1578,6 +1750,7 @@
       "ayahs": 6,
       "marks": 519,
       "ink": 514,
+      "reach": 0,
       "tilt": 0,
       "hand": 5,
       "sha256": "f523b75252589c796b47249ef8474ecf7194a71044595c46a507dccad9cbabb6"
@@ -1587,6 +1760,7 @@
       "ayahs": 6,
       "marks": 573,
       "ink": 573,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "88764480ed0a4e14a1f806ed0151c28d05aa104e215fc2c58bdc879de08d5d4c"
@@ -1596,6 +1770,7 @@
       "ayahs": 4,
       "marks": 539,
       "ink": 539,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "031ac6ab530774609a48e6adb4a9e59c4293918ed39d4cbfd7c70939f0420335"
@@ -1605,6 +1780,7 @@
       "ayahs": 4,
       "marks": 460,
       "ink": 458,
+      "reach": 0,
       "tilt": 0,
       "hand": 2,
       "sha256": "12ed9a1977ee423f5ab60db337776815f3e321128900228cc8a3065aac35570d"
@@ -1614,6 +1790,7 @@
       "ayahs": 7,
       "marks": 572,
       "ink": 570,
+      "reach": 0,
       "tilt": 0,
       "hand": 2,
       "sha256": "309f4e63763f90a5fc3c41ef2010ee3543d1316eb4829cd6823a907e0f424c6e"
@@ -1623,15 +1800,17 @@
       "ayahs": 8,
       "marks": 575,
       "ink": 573,
-      "tilt": 1,
+      "reach": 1,
+      "tilt": 0,
       "hand": 1,
-      "sha256": "f8ecc0791e5d4b910b879039a6d93efabdfd6df9ed6f3754e1ef2b811d7b23d8"
+      "sha256": "1bbc5bf2a2524f837fbdaeb225ef12be6195ffdbfd4acccba0747465357c8cd6"
     },
     {
       "page": 174,
       "ayahs": 9,
       "marks": 599,
       "ink": 598,
+      "reach": 0,
       "tilt": 0,
       "hand": 1,
       "sha256": "395a56425b2ec4599858384abf80def5fd6c6bbd4dbba29ded03bd4c62ec0754"
@@ -1641,6 +1820,7 @@
       "ayahs": 8,
       "marks": 534,
       "ink": 533,
+      "reach": 0,
       "tilt": 0,
       "hand": 1,
       "sha256": "a99dc443d89b6a30a8be9cfb1cf5bc01c40f9bf0e6453a77ef17f1a54066e8d9"
@@ -1650,6 +1830,7 @@
       "ayahs": 11,
       "marks": 544,
       "ink": 542,
+      "reach": 0,
       "tilt": 0,
       "hand": 2,
       "sha256": "744acfe6c69d54fb934f5b1144ed57b902f2e568b29f9636b14314bb88a89832"
@@ -1659,6 +1840,7 @@
       "ayahs": 8,
       "marks": 483,
       "ink": 483,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "55cfade7053c833a694b37dbc203b04f6cdd70d589962f8e2c362013482b3c45"
@@ -1668,6 +1850,7 @@
       "ayahs": 8,
       "marks": 556,
       "ink": 556,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "f2986603268a0b1bcbcee213ebe7d61c9ad336140569612e00c677898f4c07ec"
@@ -1677,6 +1860,7 @@
       "ayahs": 9,
       "marks": 536,
       "ink": 536,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "559fe2c71d188099ac93b2d64adc75c47c7990010131944dcc178c9dc8857f10"
@@ -1686,6 +1870,7 @@
       "ayahs": 8,
       "marks": 550,
       "ink": 550,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "c5e634c16d2a279142aadb03c8a7cc6b293e9130f68510912f5abaf652a11f5a"
@@ -1695,6 +1880,7 @@
       "ayahs": 7,
       "marks": 495,
       "ink": 495,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "f179c425eb8b4e516ba8cc55d0d283c52888de1fa28f6486be2cc6d0cce1aa52"
@@ -1704,6 +1890,7 @@
       "ayahs": 5,
       "marks": 521,
       "ink": 520,
+      "reach": 0,
       "tilt": 0,
       "hand": 1,
       "sha256": "8c13acc85ddae65dec84c69164327f1258b79c60726399f8e15e2057d190a2d1"
@@ -1713,6 +1900,7 @@
       "ayahs": 7,
       "marks": 522,
       "ink": 521,
+      "reach": 0,
       "tilt": 0,
       "hand": 1,
       "sha256": "d5ad4de77e6046b92ca9cf8e594a0db5301eae9e39a795c3023a47d925d1bddb"
@@ -1722,6 +1910,7 @@
       "ayahs": 9,
       "marks": 547,
       "ink": 546,
+      "reach": 0,
       "tilt": 0,
       "hand": 1,
       "sha256": "dc9f56c327747f83359f3dcc811cb3bc5e6ce877d606d91e5926ad02bf551cb8"
@@ -1731,6 +1920,7 @@
       "ayahs": 8,
       "marks": 562,
       "ink": 562,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "ccb569bf0d2fc58ebf84521aa376a3d1ec7c4a40954204944b22c555abe9ee99"
@@ -1740,6 +1930,7 @@
       "ayahs": 6,
       "marks": 575,
       "ink": 575,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "4838b09dcee90037f9453bf1ed4ad03aea3132af0d099c3329f851fe4a9f7510"
@@ -1749,6 +1940,7 @@
       "ayahs": 6,
       "marks": 562,
       "ink": 561,
+      "reach": 0,
       "tilt": 0,
       "hand": 1,
       "sha256": "3ea596e0d45dfd50e27347b75d04d8f1d6b43680ddccf02655e4040b5f6a6b21"
@@ -1758,6 +1950,7 @@
       "ayahs": 7,
       "marks": 509,
       "ink": 509,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "fe54541476745b72d3bc1bfbba9f1731189aa4d7f6e032de3871bd04dc0ca336"
@@ -1767,6 +1960,7 @@
       "ayahs": 7,
       "marks": 555,
       "ink": 555,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "acf5ef9b2124d072427e821c6e2ab236b8b99434751acb2dbcc7e82238a4b407"
@@ -1776,6 +1970,7 @@
       "ayahs": 6,
       "marks": 526,
       "ink": 526,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "4cafb91782721a6087820f02b14f8694c50eca4b79026ba0c7eed1c22510e4cc"
@@ -1785,6 +1980,7 @@
       "ayahs": 5,
       "marks": 474,
       "ink": 474,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "2411e5dadd049118f21e8f9fb185690d927972976cc215ba277938e222690d91"
@@ -1794,6 +1990,7 @@
       "ayahs": 5,
       "marks": 489,
       "ink": 485,
+      "reach": 0,
       "tilt": 0,
       "hand": 4,
       "sha256": "26597153923fef783709597319f253690ce0e838f63397eef788ee3ee7259829"
@@ -1803,6 +2000,7 @@
       "ayahs": 4,
       "marks": 483,
       "ink": 483,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "8e2c71ab8a91ea15662eafa331e1e26b55ea8ca361e62fcc5f2541871a805a4e"
@@ -1812,6 +2010,7 @@
       "ayahs": 7,
       "marks": 510,
       "ink": 510,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "bd8ae558be4785235fc7afdfff2cb43ce14cd8f3005f34ef127ad6c729d3b4ff"
@@ -1821,6 +2020,7 @@
       "ayahs": 7,
       "marks": 475,
       "ink": 475,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "a39ca9c59c9285fc4e20334bc86ad704d722f0d98b24f1eae61dbec1a0c0e879"
@@ -1830,6 +2030,7 @@
       "ayahs": 7,
       "marks": 534,
       "ink": 534,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "f4dd742882603e59e4ca36c23ec185c03868af79c6c3cbb138f884980289b09e"
@@ -1839,6 +2040,7 @@
       "ayahs": 7,
       "marks": 496,
       "ink": 496,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "ba744d8b72235eed8038a65b6e84aeda1f3450580c46a909f26ce231f4390d1f"
@@ -1848,6 +2050,7 @@
       "ayahs": 4,
       "marks": 533,
       "ink": 527,
+      "reach": 0,
       "tilt": 0,
       "hand": 6,
       "sha256": "e6351c86e0320d4b373a16eee8c2007708210f4fabb2f7264ef41188ed7175d3"
@@ -1857,6 +2060,7 @@
       "ayahs": 7,
       "marks": 537,
       "ink": 536,
+      "reach": 0,
       "tilt": 1,
       "hand": 0,
       "sha256": "5f2c4d9123f6a9d1c4bc258d4bace7af5813d5602caedfaf7d8742abdf16c080"
@@ -1866,6 +2070,7 @@
       "ayahs": 7,
       "marks": 576,
       "ink": 576,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "692b4e89dd62ad0230cd9d55377cbe1146654bfdaed72ba8032b128a495cca9e"
@@ -1875,6 +2080,7 @@
       "ayahs": 7,
       "marks": 508,
       "ink": 508,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "3f8aa1e1841316ee2768e930808bd0b801a16d4d795183fe86a9d65b5041670f"
@@ -1884,6 +2090,7 @@
       "ayahs": 6,
       "marks": 527,
       "ink": 526,
+      "reach": 0,
       "tilt": 0,
       "hand": 1,
       "sha256": "51ee1f216ac97640bb4fada642ea2d55374af1629d0658226cdb2c904869b90d"
@@ -1893,6 +2100,7 @@
       "ayahs": 7,
       "marks": 566,
       "ink": 565,
+      "reach": 0,
       "tilt": 0,
       "hand": 1,
       "sha256": "35d2507f478048b5ab6cbf0ebabcfeab622fa3b97f2499aa7610c6a97102566b"
@@ -1902,15 +2110,17 @@
       "ayahs": 5,
       "marks": 532,
       "ink": 531,
-      "tilt": 1,
+      "reach": 1,
+      "tilt": 0,
       "hand": 0,
-      "sha256": "af6c9ee0ffc8fde4e2d04f6d764b403a1ac1a118021f4c6883e69aa997207433"
+      "sha256": "f083477c1a8222b5ee75024501a67c7f8f5c5e826dbeef331a66c2400702c5ef"
     },
     {
       "page": 205,
       "ayahs": 6,
       "marks": 510,
       "ink": 507,
+      "reach": 0,
       "tilt": 0,
       "hand": 3,
       "sha256": "85232c175068c433b3c4e7703fda8e384b9f938f3c3e8f439eac29ceebc64576"
@@ -1920,6 +2130,7 @@
       "ayahs": 5,
       "marks": 523,
       "ink": 515,
+      "reach": 0,
       "tilt": 0,
       "hand": 8,
       "sha256": "63283be81d2fe878fc6042e5694da6e42a9d4f0126f5e3f40b7baa0ce11196be"
@@ -1929,6 +2140,7 @@
       "ayahs": 7,
       "marks": 457,
       "ink": 456,
+      "reach": 0,
       "tilt": 0,
       "hand": 1,
       "sha256": "a51d48f4040a167067b4029c8b618a3ee5aa2400427a855c26322128011a2ab7"
@@ -1938,6 +2150,7 @@
       "ayahs": 6,
       "marks": 529,
       "ink": 527,
+      "reach": 0,
       "tilt": 0,
       "hand": 2,
       "sha256": "a354926c18f8c133ed377d52b84ab558864319b16a050c10b4a4a1b322277b15"
@@ -1947,6 +2160,7 @@
       "ayahs": 8,
       "marks": 549,
       "ink": 549,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "247e8643a76a19467caf6a43d267f28079bc5a131ae5d58a1a1e0207fca8bcf7"
@@ -1956,6 +2170,7 @@
       "ayahs": 6,
       "marks": 522,
       "ink": 522,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "23b08f190b32341e17f194b44597ab7cc5bc8967d1746a0cfdabe312e689a4bb"
@@ -1965,15 +2180,17 @@
       "ayahs": 5,
       "marks": 615,
       "ink": 614,
-      "tilt": 1,
+      "reach": 1,
+      "tilt": 0,
       "hand": 0,
-      "sha256": "2c06a24948e691ff2676de808c6b96f3938f782deeb87711a0ef2e77cf095860"
+      "sha256": "19c996626536bd42d54ae1b7347d7d01fa5fb06476a377afe71daaf7f4d5f58f"
     },
     {
       "page": 212,
       "ayahs": 8,
       "marks": 595,
       "ink": 592,
+      "reach": 0,
       "tilt": 0,
       "hand": 3,
       "sha256": "4e186fec8cb04e6caead2b99db6d8c4798ff2ea6940030847983751b6b9ca631"
@@ -1983,6 +2200,7 @@
       "ayahs": 9,
       "marks": 603,
       "ink": 602,
+      "reach": 0,
       "tilt": 0,
       "hand": 1,
       "sha256": "07e4c22073f0b80d6b8b1f485e193612f03758d6b41c7c15d48708e34bfb00e6"
@@ -1992,6 +2210,7 @@
       "ayahs": 11,
       "marks": 571,
       "ink": 569,
+      "reach": 0,
       "tilt": 0,
       "hand": 2,
       "sha256": "fe8721aaab5dc9216e22d42b2395d8a1eb047afa8057f6022c732790b20dff08"
@@ -2001,6 +2220,7 @@
       "ayahs": 8,
       "marks": 558,
       "ink": 558,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "a671ca6cd9c6546270feb6e59797baaeae79c0d401a193876fe62867f48129fc"
@@ -2010,6 +2230,7 @@
       "ayahs": 9,
       "marks": 481,
       "ink": 476,
+      "reach": 0,
       "tilt": 0,
       "hand": 5,
       "sha256": "3ff39547c250cf6d3189cab32e7e6e9d37998e7974acec66ee937ea5f2853264"
@@ -2019,6 +2240,7 @@
       "ayahs": 8,
       "marks": 597,
       "ink": 595,
+      "reach": 0,
       "tilt": 0,
       "hand": 2,
       "sha256": "19dfc4d67bb75f2a0ebb38e94a048b66a2e0c8374c34cf15d41d73ddc95b1246"
@@ -2028,6 +2250,7 @@
       "ayahs": 10,
       "marks": 580,
       "ink": 578,
+      "reach": 0,
       "tilt": 0,
       "hand": 2,
       "sha256": "0fae1c18cf8845c9ed44740284b3577156902148c3639312a5915a147fc0622c"
@@ -2037,6 +2260,7 @@
       "ayahs": 9,
       "marks": 564,
       "ink": 563,
+      "reach": 0,
       "tilt": 0,
       "hand": 1,
       "sha256": "544613e3eb39873db33ee278e3fdb7099d3dfabe2c29e3d3ff1a103ac61b577d"
@@ -2046,6 +2270,7 @@
       "ayahs": 9,
       "marks": 544,
       "ink": 539,
+      "reach": 0,
       "tilt": 0,
       "hand": 5,
       "sha256": "ab55efb16ec1c1645a1613b97310b08ec345f76009d797757f84195ba99a5777"
@@ -2055,15 +2280,17 @@
       "ayahs": 8,
       "marks": 507,
       "ink": 506,
-      "tilt": 1,
+      "reach": 1,
+      "tilt": 0,
       "hand": 0,
-      "sha256": "280a331abd845cd63e647c9b8e77e665e055c22c5700bf1113bfaa7152413559"
+      "sha256": "bd4b1e5dd8681fa81b30ea7a23e0818bf591051a895af24ce2e79e37fa801af0"
     },
     {
       "page": 222,
       "ayahs": 7,
       "marks": 550,
       "ink": 548,
+      "reach": 0,
       "tilt": 0,
       "hand": 2,
       "sha256": "d14e56d2b19495656e0d29d5908d72cccea822a5e3a1ba881f6d97ee2709d30e"
@@ -2073,6 +2300,7 @@
       "ayahs": 7,
       "marks": 560,
       "ink": 559,
+      "reach": 0,
       "tilt": 0,
       "hand": 1,
       "sha256": "e35c950203759705edb87ec8f5457a6290663a729a889a811fb724f2a11f065a"
@@ -2082,6 +2310,7 @@
       "ayahs": 9,
       "marks": 556,
       "ink": 556,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "edb606e3b09dc9636c3d63c880b2a4b516191423db4dcad28702aa46f4a2e4f7"
@@ -2091,6 +2320,7 @@
       "ayahs": 9,
       "marks": 574,
       "ink": 574,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "4c22ccd61a3edd0be233e86e49aeeded39bb7adc527badd305fbd92014c6890e"
@@ -2100,6 +2330,7 @@
       "ayahs": 8,
       "marks": 536,
       "ink": 533,
+      "reach": 0,
       "tilt": 0,
       "hand": 3,
       "sha256": "a705783b8f7770bec7c0ec7c611528b6adef243bfc4bb6bf9944b3f67d182d7e"
@@ -2109,6 +2340,7 @@
       "ayahs": 8,
       "marks": 554,
       "ink": 553,
+      "reach": 0,
       "tilt": 0,
       "hand": 1,
       "sha256": "559fcced74ba42b5b9329c70fee9d7add28206a7f1adb86f4a990a7edc8c6d76"
@@ -2118,15 +2350,17 @@
       "ayahs": 9,
       "marks": 614,
       "ink": 608,
-      "tilt": 1,
+      "reach": 1,
+      "tilt": 0,
       "hand": 5,
-      "sha256": "f0a9d4687562c06bc69a6bf6034059b01443882a8968c6687ef6d760c6b17261"
+      "sha256": "a1a526cb30d135751822301a0b7dc5b1a0c23f4a1e5e6846c68e5b5f9f700681"
     },
     {
       "page": 229,
       "ayahs": 9,
       "marks": 529,
       "ink": 529,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "fdbc37781cc3c12402a1a32be456f2385e26631c5ac72684b0109d359aebb243"
@@ -2136,6 +2370,7 @@
       "ayahs": 10,
       "marks": 585,
       "ink": 581,
+      "reach": 0,
       "tilt": 0,
       "hand": 4,
       "sha256": "38f43159e8415c98293212013b633715ea0739519cd28985ba769f73cd61d9b8"
@@ -2145,6 +2380,7 @@
       "ayahs": 7,
       "marks": 524,
       "ink": 523,
+      "reach": 0,
       "tilt": 0,
       "hand": 1,
       "sha256": "cdff0ac301eadcd4654b390a706be8376bcbae1947364ddae6b7ddfaaba3837f"
@@ -2154,6 +2390,7 @@
       "ayahs": 9,
       "marks": 520,
       "ink": 517,
+      "reach": 0,
       "tilt": 0,
       "hand": 3,
       "sha256": "07a217a23e01084e1212cb89be3ad1c0957dc97b6919a33e7f964336886c3fca"
@@ -2163,6 +2400,7 @@
       "ayahs": 11,
       "marks": 556,
       "ink": 555,
+      "reach": 0,
       "tilt": 0,
       "hand": 1,
       "sha256": "a55ad2b2c8d00c408e5a94ebea8d2ca28e31f1af2ace20c591fc58301f2c6a67"
@@ -2172,15 +2410,17 @@
       "ayahs": 9,
       "marks": 535,
       "ink": 533,
-      "tilt": 2,
+      "reach": 1,
+      "tilt": 1,
       "hand": 0,
-      "sha256": "19657930f4926e9feb47886098217de38f9a7e84e46b24f72f2eeffb176bf40c"
+      "sha256": "fcb3f31082518eacacad45cb0328b1f6adb9a470b6fbc0f7cfd64fde2120aaa4"
     },
     {
       "page": 235,
       "ayahs": 10,
       "marks": 501,
       "ink": 501,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "1928f7b8e7bf3d946fcd3fd3531992590fa6926b311aacb0b3b231a0b0f0c1d1"
@@ -2190,6 +2430,7 @@
       "ayahs": 10,
       "marks": 554,
       "ink": 553,
+      "reach": 0,
       "tilt": 1,
       "hand": 0,
       "sha256": "af9bf217545a889635eb1e6744b798ab0845a68d6bb23bdc7f52c9991239c86d"
@@ -2199,6 +2440,7 @@
       "ayahs": 8,
       "marks": 542,
       "ink": 542,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "6c2c5222ed0d307fdee481d0252ccb4f7dcff18b1554f39a5018bb83dcaded8e"
@@ -2208,6 +2450,7 @@
       "ayahs": 8,
       "marks": 513,
       "ink": 513,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "2a8466f0e617ae7fddaba77aac3426cff75202ea18e25bd308ce5cc5cd35db03"
@@ -2217,6 +2460,7 @@
       "ayahs": 7,
       "marks": 638,
       "ink": 635,
+      "reach": 0,
       "tilt": 0,
       "hand": 3,
       "sha256": "be41e9ba450c83a5d3fee8c762b4ccfa561e9afe4cced6b42c8bf680d59a884b"
@@ -2226,15 +2470,17 @@
       "ayahs": 6,
       "marks": 553,
       "ink": 552,
-      "tilt": 1,
+      "reach": 1,
+      "tilt": 0,
       "hand": 0,
-      "sha256": "cb3f058d6a2db806d8a612c916c5de9b47c4bb46046a992cb63a430385219078"
+      "sha256": "0f6e730ab4f4232926b5a253a7101e1778fbd25adf120691e7241a32f8fbf7ee"
     },
     {
       "page": 241,
       "ayahs": 9,
       "marks": 594,
       "ink": 594,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "d7d8d153438dfa0a8c0eb6eb797a090f5149a86139d273f4d1ece4de80147740"
@@ -2244,6 +2490,7 @@
       "ayahs": 11,
       "marks": 571,
       "ink": 566,
+      "reach": 0,
       "tilt": 0,
       "hand": 5,
       "sha256": "6ca144bd3d6f6ea015ec08fdac8be84eedc0d1440f6dae018cf2e853192b866c"
@@ -2253,6 +2500,7 @@
       "ayahs": 6,
       "marks": 543,
       "ink": 542,
+      "reach": 0,
       "tilt": 0,
       "hand": 1,
       "sha256": "32c7a6dd9747849c69a42e3b99cece383d3e82282be6aa87daa3231fcaf82f74"
@@ -2262,6 +2510,7 @@
       "ayahs": 9,
       "marks": 513,
       "ink": 507,
+      "reach": 0,
       "tilt": 0,
       "hand": 6,
       "sha256": "4d17029021ddfdb0ee1eac2fbfdd2ad5dd758ad553bf4b9e20e3290e5105e249"
@@ -2271,6 +2520,7 @@
       "ayahs": 8,
       "marks": 522,
       "ink": 522,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "1d150499337b84d73c82f4d135df577aeb29695bbf46ad00556c2ef4e3fd6e66"
@@ -2280,6 +2530,7 @@
       "ayahs": 9,
       "marks": 510,
       "ink": 510,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "e097cb4dc5ddf86c621db7c8c413f23a7b76b7e97ee71d1b6ea63890918047f0"
@@ -2289,6 +2540,7 @@
       "ayahs": 8,
       "marks": 559,
       "ink": 558,
+      "reach": 0,
       "tilt": 0,
       "hand": 1,
       "sha256": "40d110415e504aae869da82265d70b2c958c19a244355b10d3911d2892815be4"
@@ -2298,6 +2550,7 @@
       "ayahs": 8,
       "marks": 540,
       "ink": 540,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "f649a056c617a22de7942e68c33ea5b13b171255612bf68b9e1e5efce1b5b6a4"
@@ -2307,15 +2560,17 @@
       "ayahs": 5,
       "marks": 519,
       "ink": 518,
-      "tilt": 1,
+      "reach": 1,
+      "tilt": 0,
       "hand": 0,
-      "sha256": "03760e4ee51803d6ed1f6e997cae0c188950b889c4554193816b11e862da2c04"
+      "sha256": "e7f702ed318b2bc6bcbbd7d5be01519cebf377aa06bece504594f3b035accdff"
     },
     {
       "page": 250,
       "ayahs": 8,
       "marks": 532,
       "ink": 521,
+      "reach": 0,
       "tilt": 1,
       "hand": 10,
       "sha256": "65b043ca355288409104388d5dfb63f39867ae05d778761c7cdd87d3708bfa71"
@@ -2325,15 +2580,17 @@
       "ayahs": 5,
       "marks": 649,
       "ink": 646,
-      "tilt": 1,
+      "reach": 1,
+      "tilt": 0,
       "hand": 2,
-      "sha256": "dbdcfcf7e5143858b5b5bfdb273eb269921d6698043dbab67d35f09aa2793dc6"
+      "sha256": "13bdbbfc85c9796d18083dbd3a051a9b1424e7f58491bea97c50dadbb4e0f007"
     },
     {
       "page": 252,
       "ayahs": 10,
       "marks": 639,
       "ink": 636,
+      "reach": 0,
       "tilt": 1,
       "hand": 2,
       "sha256": "3313635f9d7bf0e54731c2b176fc606662690974c99e28981863ac5d93baf562"
@@ -2343,6 +2600,7 @@
       "ayahs": 6,
       "marks": 592,
       "ink": 592,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "ffd48105ad5a9e63b08028597b43b6d56f984f1a8200627a5714f2697e679fde"
@@ -2352,6 +2610,7 @@
       "ayahs": 8,
       "marks": 585,
       "ink": 583,
+      "reach": 0,
       "tilt": 0,
       "hand": 2,
       "sha256": "27f8172c5652f6be9ceadbb918efe8bb9795f7da64c38c593b30bf906fec7be2"
@@ -2361,6 +2620,7 @@
       "ayahs": 6,
       "marks": 415,
       "ink": 414,
+      "reach": 0,
       "tilt": 0,
       "hand": 1,
       "sha256": "6460c1ef18cd5b308e4f68e403a09a2eb18f3011ef23a4b30fe7487ccc89ac31"
@@ -2370,6 +2630,7 @@
       "ayahs": 5,
       "marks": 516,
       "ink": 514,
+      "reach": 0,
       "tilt": 0,
       "hand": 2,
       "sha256": "db0fd78d99af926294e17b3743e94f77ea9d440dc3fee305558d6768ab4a2f4a"
@@ -2379,6 +2640,7 @@
       "ayahs": 8,
       "marks": 510,
       "ink": 509,
+      "reach": 0,
       "tilt": 0,
       "hand": 1,
       "sha256": "10a83ec243bec831380beb10df01847eb4d9f635f2913869c33126b6dc132522"
@@ -2388,6 +2650,7 @@
       "ayahs": 6,
       "marks": 530,
       "ink": 530,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "9f39f3d01a7f34b4b09cfec45db6dceddf3d8a61d18ea24a22b846ac63696244"
@@ -2397,6 +2660,7 @@
       "ayahs": 9,
       "marks": 539,
       "ink": 539,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "eb1680a4d74be776c4dcf09c7ec981cbf33d76424f6a56ad080115c182600e68"
@@ -2406,6 +2670,7 @@
       "ayahs": 9,
       "marks": 541,
       "ink": 530,
+      "reach": 0,
       "tilt": 1,
       "hand": 10,
       "sha256": "3db053e74678d5af76c2ef2884937404c4d7f4dfa0248bbc2cc772a3ac32f7a6"
@@ -2415,6 +2680,7 @@
       "ayahs": 10,
       "marks": 516,
       "ink": 516,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "5b7925e010bf4202410333b49579830f168862b91e2f4357b9cb0fc8b859d83e"
@@ -2424,15 +2690,17 @@
       "ayahs": 15,
       "marks": 466,
       "ink": 465,
-      "tilt": 1,
+      "reach": 1,
+      "tilt": 0,
       "hand": 0,
-      "sha256": "0ab0756175f6ac7100de4264ffb04e39f92c6a70d85b776c4538a597ad0eeb87"
+      "sha256": "044fdf456d7273fa036a1ab5df96ade1cc723268b6aaf469c3d32f23edb5d9b0"
     },
     {
       "page": 263,
       "ayahs": 16,
       "marks": 563,
       "ink": 562,
+      "reach": 0,
       "tilt": 0,
       "hand": 1,
       "sha256": "9bbd04f357ab908e2e744195c6b4171ef2380855e6db6d3007de8cb45a940234"
@@ -2442,6 +2710,7 @@
       "ayahs": 20,
       "marks": 522,
       "ink": 519,
+      "reach": 0,
       "tilt": 0,
       "hand": 3,
       "sha256": "5e0a1f447f77c109c23d61ebd4122a4e61a2e05162759b28506313f60da998e1"
@@ -2451,6 +2720,7 @@
       "ayahs": 19,
       "marks": 541,
       "ink": 541,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "bc6b057a56b213478aad83292c78c827997bdcbf05c9dd021160a01d1da6e7fd"
@@ -2460,15 +2730,17 @@
       "ayahs": 20,
       "marks": 560,
       "ink": 556,
-      "tilt": 1,
+      "reach": 1,
+      "tilt": 0,
       "hand": 3,
-      "sha256": "e00ec68e284ae7a511f49487bb2e2e876db03826352cac9d11cc902aaaf2e809"
+      "sha256": "270df17e21c4f2395d455c5690267b57e580ec9ed38547e9bc0355e8dc40b313"
     },
     {
       "page": 267,
       "ayahs": 15,
       "marks": 455,
       "ink": 454,
+      "reach": 0,
       "tilt": 0,
       "hand": 1,
       "sha256": "d5510ef349dfab40fe57a2de34b2abec32a9d53428c171ea333a1bdc4f24fb3c"
@@ -2478,15 +2750,17 @@
       "ayahs": 8,
       "marks": 488,
       "ink": 487,
-      "tilt": 1,
+      "reach": 1,
+      "tilt": 0,
       "hand": 0,
-      "sha256": "fa4288da66db95fe423a6893227efffc7c914b1e0e6b49158527d34284a9ad95"
+      "sha256": "59aeddaaf6276c4cf3e342c69f242baee68cd768beb705550e4e5420569f1e8a"
     },
     {
       "page": 269,
       "ayahs": 12,
       "marks": 514,
       "ink": 514,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "f3927c028d9b580e0b0a5f09e667c0918699ec8ee0b3c76acae0e674fe4f86ea"
@@ -2496,6 +2770,7 @@
       "ayahs": 8,
       "marks": 561,
       "ink": 560,
+      "reach": 0,
       "tilt": 1,
       "hand": 0,
       "sha256": "229b18035331c11feb4e2246e96579c1519d35e93f01b8522139bb0b0ff2fcef"
@@ -2505,6 +2780,7 @@
       "ayahs": 8,
       "marks": 527,
       "ink": 527,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "1126c588c3431dbc4195bdc05c29d28ea86a662e9079e0e15a2c75b30944d1ca"
@@ -2514,6 +2790,7 @@
       "ayahs": 12,
       "marks": 598,
       "ink": 596,
+      "reach": 0,
       "tilt": 0,
       "hand": 2,
       "sha256": "a2da20a1a3831cfa233ddf43098b3d3d0f68d4cec2986c25b905fc0c8442029f"
@@ -2523,6 +2800,7 @@
       "ayahs": 10,
       "marks": 589,
       "ink": 584,
+      "reach": 0,
       "tilt": 0,
       "hand": 5,
       "sha256": "b77f4d1cb3179f9fce75b066a597c1446c0ae502f729330082e30d7844877fc9"
@@ -2532,6 +2810,7 @@
       "ayahs": 8,
       "marks": 610,
       "ink": 606,
+      "reach": 0,
       "tilt": 1,
       "hand": 3,
       "sha256": "a73bd0d0d6aa10f42cee0d42dabfd6742cabb0a98b90efb354a118ba39c4bdfc"
@@ -2541,6 +2820,7 @@
       "ayahs": 7,
       "marks": 534,
       "ink": 534,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "dee9bdad9e9d42deff91d739093ceff53b13926016426d3fac00e0c262ae156a"
@@ -2550,6 +2830,7 @@
       "ayahs": 8,
       "marks": 506,
       "ink": 506,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "dfb8f1503622bfec3dda159e45dca88b97eeb54b84841d9e9fa99a6ec961b6ce"
@@ -2559,6 +2840,7 @@
       "ayahs": 6,
       "marks": 518,
       "ink": 517,
+      "reach": 0,
       "tilt": 0,
       "hand": 1,
       "sha256": "f81b78835aafe4a2f518f3198077c6e3edfcc6c338a5b4e8be1ac4397663d17d"
@@ -2568,6 +2850,7 @@
       "ayahs": 9,
       "marks": 513,
       "ink": 513,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "90485aa82c1acaf8ce8b32789baf92acbd3b559a04a7a3c175e64db3ebc64016"
@@ -2577,6 +2860,7 @@
       "ayahs": 8,
       "marks": 493,
       "ink": 493,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "67fb65214f3a87e9608bbff9874712eacc36044f881bcebc6a2701b488d8f976"
@@ -2586,6 +2870,7 @@
       "ayahs": 8,
       "marks": 495,
       "ink": 495,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "81ade64011fe45caad177e69fc001326bd916c1b18a4f916c07ea0d8f25f19be"
@@ -2595,6 +2880,7 @@
       "ayahs": 10,
       "marks": 543,
       "ink": 542,
+      "reach": 0,
       "tilt": 0,
       "hand": 1,
       "sha256": "4d243e6149c990ff6e7348a3b4dc426556c3dab1699eeead2deb3e6d58f85f08"
@@ -2604,15 +2890,17 @@
       "ayahs": 7,
       "marks": 477,
       "ink": 476,
-      "tilt": 1,
+      "reach": 1,
+      "tilt": 0,
       "hand": 0,
-      "sha256": "9dfcb3f266383422f54f36ebd6f5a54ef4b2453f8dd4d4f964eb47ca0b4840e4"
+      "sha256": "1e1465b9b963564e1b232e23be1ee4642d3dd18a45411d5ca88b1964d33aca6e"
     },
     {
       "page": 283,
       "ayahs": 10,
       "marks": 598,
       "ink": 598,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "c50f910eb85d93193ee5e35e16b6713b88986f4cbee9a35d0dbbe4f5be75e911"
@@ -2622,15 +2910,17 @@
       "ayahs": 10,
       "marks": 547,
       "ink": 543,
-      "tilt": 2,
+      "reach": 1,
+      "tilt": 1,
       "hand": 2,
-      "sha256": "e798e6c65996e58758a9a79e379a9f3c8114f1aecf4bac5241551211351ecbb4"
+      "sha256": "3f95f82559802185961763dbb28630b10433563734b9cedb07c12b3ad95cbc3a"
     },
     {
       "page": 285,
       "ayahs": 11,
       "marks": 585,
       "ink": 583,
+      "reach": 0,
       "tilt": 0,
       "hand": 2,
       "sha256": "9120452c14d0ab9f0fb1a25e6138639e5bec9269bd48c455fb057a156ff9e83a"
@@ -2640,6 +2930,7 @@
       "ayahs": 11,
       "marks": 618,
       "ink": 616,
+      "reach": 0,
       "tilt": 0,
       "hand": 2,
       "sha256": "5c666848481ce0f8a1e49f03dccc055372850634a35d112e051e1a7104592507"
@@ -2649,6 +2940,7 @@
       "ayahs": 9,
       "marks": 544,
       "ink": 544,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "359ec6282c536ef6a2cb68011c6c257f4305ec98adfb65e8df6d915ac03445e7"
@@ -2658,6 +2950,7 @@
       "ayahs": 8,
       "marks": 558,
       "ink": 555,
+      "reach": 0,
       "tilt": 1,
       "hand": 2,
       "sha256": "ac432866b695e5f52e4c7e0fd970b63d08586c512cc4ffc975d226aba5f67a24"
@@ -2667,6 +2960,7 @@
       "ayahs": 9,
       "marks": 548,
       "ink": 548,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "21ad59b4c439af57b1c22ff3e8aec6a6ccb678ea6de26af8b8b9ba598f9da946"
@@ -2676,6 +2970,7 @@
       "ayahs": 11,
       "marks": 542,
       "ink": 542,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "0cfcf1c210956af38964452af4a3825778c39df4880671778e12b56eb6b16b46"
@@ -2685,6 +2980,7 @@
       "ayahs": 10,
       "marks": 548,
       "ink": 547,
+      "reach": 0,
       "tilt": 0,
       "hand": 1,
       "sha256": "e68e8f2fb653068811f6177dcc289d3055dae0eecebcead696cb72a0187449d4"
@@ -2694,15 +2990,17 @@
       "ayahs": 8,
       "marks": 586,
       "ink": 585,
-      "tilt": 1,
+      "reach": 1,
+      "tilt": 0,
       "hand": 0,
-      "sha256": "eea3d6de99e81ef39a5ced74df0e2f9796161e283b1c858f8015a038a011faab"
+      "sha256": "0f0e9178384819b659b62822c0b55868cb57231731d2631a341000c969b4f412"
     },
     {
       "page": 293,
       "ayahs": 11,
       "marks": 531,
       "ink": 531,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "a16f67909d25a2dcdf2ac23becc509065d8a568bddce4460d17384a6251259c1"
@@ -2712,6 +3010,7 @@
       "ayahs": 11,
       "marks": 547,
       "ink": 546,
+      "reach": 0,
       "tilt": 0,
       "hand": 1,
       "sha256": "76e3a49e0b94126b85183218967ca7e364970df0ae99fee1af1c86ad550140f4"
@@ -2721,6 +3020,7 @@
       "ayahs": 5,
       "marks": 533,
       "ink": 533,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "da7ba44c7a3089751c8024b3f09380abba70ffdc6b139a3bf6fedceed0449053"
@@ -2730,6 +3030,7 @@
       "ayahs": 7,
       "marks": 537,
       "ink": 535,
+      "reach": 0,
       "tilt": 0,
       "hand": 2,
       "sha256": "e8208281a65d058c73d99af2bc4c77edb4ede706f6d3544ce8e8801f633172fa"
@@ -2739,6 +3040,7 @@
       "ayahs": 7,
       "marks": 575,
       "ink": 575,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "da0a5f96a7d394662439f113b4e9d9de0859c5505d1ce572b6fdcf81b0bc48c4"
@@ -2748,6 +3050,7 @@
       "ayahs": 11,
       "marks": 590,
       "ink": 585,
+      "reach": 0,
       "tilt": 2,
       "hand": 3,
       "sha256": "be9de43bc5b0f05a47df40c48a2ab739d26a88eb10fac2565c71178ee7b408a3"
@@ -2757,6 +3060,7 @@
       "ayahs": 8,
       "marks": 568,
       "ink": 567,
+      "reach": 0,
       "tilt": 0,
       "hand": 1,
       "sha256": "8535c30e9aa4a79c7000206d75e211470a3aca50a3c0b05cacc11d27f90ffbb0"
@@ -2766,6 +3070,7 @@
       "ayahs": 8,
       "marks": 551,
       "ink": 551,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "bbb6cb825ca7324f1c5a591ae5a6d8c90f68b0be353b80ea61e10ecb8d7f8ec4"
@@ -2775,6 +3080,7 @@
       "ayahs": 13,
       "marks": 547,
       "ink": 546,
+      "reach": 0,
       "tilt": 0,
       "hand": 1,
       "sha256": "242622bda2b7b75e89d0b0049766a35ecb43d61150399ae3b4c9cc69cc48b2aa"
@@ -2784,6 +3090,7 @@
       "ayahs": 9,
       "marks": 553,
       "ink": 550,
+      "reach": 0,
       "tilt": 0,
       "hand": 3,
       "sha256": "c2c0b6ad335b00d47c3029d6a0faadeb0c674fc2468dfb235021c55ef0329317"
@@ -2793,6 +3100,7 @@
       "ayahs": 14,
       "marks": 602,
       "ink": 602,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "e6df09af67707edfe8194a0390be0f710cda1692f44b32fea7c55eee09e5c085"
@@ -2802,6 +3110,7 @@
       "ayahs": 13,
       "marks": 640,
       "ink": 639,
+      "reach": 0,
       "tilt": 0,
       "hand": 1,
       "sha256": "2675e1e9c6539485f553481b7b682e1d4797194914a49fc99a43b488728e3f74"
@@ -2811,6 +3120,7 @@
       "ayahs": 11,
       "marks": 410,
       "ink": 410,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "eb9e2193f849575fa715be298a048960fbda942ba10b495242411d1473824696"
@@ -2820,6 +3130,7 @@
       "ayahs": 14,
       "marks": 511,
       "ink": 511,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "d4945c585e2e566bee45c67cbfb0aee18a8137197163e6947a9502287b0b3bcd"
@@ -2829,6 +3140,7 @@
       "ayahs": 13,
       "marks": 552,
       "ink": 552,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "a9e7a90cba90c8797e49701e601228e14215cf370dfd7101720fd2287648356f"
@@ -2838,6 +3150,7 @@
       "ayahs": 13,
       "marks": 584,
       "ink": 579,
+      "reach": 0,
       "tilt": 0,
       "hand": 5,
       "sha256": "21809aa046af491db0c4e2c6fae68dfc79f779df610ed285b7c76a4beccbfe9e"
@@ -2847,6 +3160,7 @@
       "ayahs": 13,
       "marks": 621,
       "ink": 621,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "1e746180c82a41bf0b27c4f4f64a07db9bfd4b9313dd27003f424daa28d68b23"
@@ -2856,6 +3170,7 @@
       "ayahs": 12,
       "marks": 574,
       "ink": 572,
+      "reach": 0,
       "tilt": 0,
       "hand": 2,
       "sha256": "cad58701c5c8be5be46ac8a273c1ebcd9862302e80a6f2a549e2e5e1a3f0e053"
@@ -2865,6 +3180,7 @@
       "ayahs": 19,
       "marks": 534,
       "ink": 534,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "5f7859d3d4347664fae11144f57ce0805036d364f474137b07337c1485bec73e"
@@ -2874,6 +3190,7 @@
       "ayahs": 14,
       "marks": 473,
       "ink": 472,
+      "reach": 0,
       "tilt": 0,
       "hand": 1,
       "sha256": "91c1dac64c5b86691bcec9df7e3d633ca520b3884078c6e526e5be5051b56557"
@@ -2883,6 +3200,7 @@
       "ayahs": 25,
       "marks": 518,
       "ink": 516,
+      "reach": 0,
       "tilt": 0,
       "hand": 2,
       "sha256": "50f643da5fa2c607180bf1eaf00d33c5ae00f1731875aa82b891b025210a1c82"
@@ -2892,6 +3210,7 @@
       "ayahs": 14,
       "marks": 614,
       "ink": 609,
+      "reach": 0,
       "tilt": 0,
       "hand": 5,
       "sha256": "65e59abd34189f8f14aa1165a34fa9d1941dfffef10a86087eefc1f4e1296201"
@@ -2901,15 +3220,17 @@
       "ayahs": 13,
       "marks": 547,
       "ink": 545,
-      "tilt": 1,
+      "reach": 1,
+      "tilt": 0,
       "hand": 1,
-      "sha256": "82c62cac14c654f8765e727a3d0b440fa3e14dac5b3c59f86cbc980b61b4f09b"
+      "sha256": "ed87f98f43a76d4ac9855b7aa02f98a4dc4106b9ae737f30f9e6e88efc4fa30b"
     },
     {
       "page": 316,
       "ayahs": 12,
       "marks": 632,
       "ink": 632,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "6df05d8f1b3dff7aa1aea9a457777857df8f7d78c7469d53f0ff3400b99abfe2"
@@ -2919,6 +3240,7 @@
       "ayahs": 11,
       "marks": 571,
       "ink": 571,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "f2373b6f917e93526a5befe5d0732bd26d3a20e4d0c2f85e72bc6784f5d6b955"
@@ -2928,15 +3250,17 @@
       "ayahs": 11,
       "marks": 543,
       "ink": 540,
-      "tilt": 2,
+      "reach": 2,
+      "tilt": 0,
       "hand": 1,
-      "sha256": "7eec6ae96de3a959319db1d73d727443bd317ab1eca4a4a27782db8e0036f7df"
+      "sha256": "f8dea179cd3cfaaee243b2b848e5f79770d13cc70c44e16588d1f8a28af2854f"
     },
     {
       "page": 319,
       "ayahs": 15,
       "marks": 536,
       "ink": 535,
+      "reach": 0,
       "tilt": 0,
       "hand": 1,
       "sha256": "a1b829e090a695f0d36e0e6e6659cf1ae7e8167218fc39e57be3a1d5a3a1a355"
@@ -2946,6 +3270,7 @@
       "ayahs": 12,
       "marks": 531,
       "ink": 524,
+      "reach": 0,
       "tilt": 0,
       "hand": 7,
       "sha256": "7598622140d66266bae526baaf63015f894a33b974237b8e88ee917db7a56d38"
@@ -2955,6 +3280,7 @@
       "ayahs": 10,
       "marks": 608,
       "ink": 606,
+      "reach": 0,
       "tilt": 0,
       "hand": 2,
       "sha256": "0222d1f9ed48ea9f511e92a8e789f448be07b8a71d578d9e01447a13497befe2"
@@ -2964,6 +3290,7 @@
       "ayahs": 10,
       "marks": 451,
       "ink": 451,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "7052c00203bf5e01b45b8425452e6d675fcf7c6c5a6e49f628e870e18a4ae024"
@@ -2973,6 +3300,7 @@
       "ayahs": 14,
       "marks": 554,
       "ink": 554,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "8931bc370042fd71d4e10009b7824855672bc410cbd213640e0de353024263db"
@@ -2982,6 +3310,7 @@
       "ayahs": 11,
       "marks": 533,
       "ink": 533,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "bdbe2bb1106e8f60b1a0f01d12fcbcbb20946333d57506144c496b8aff51e048"
@@ -2991,15 +3320,17 @@
       "ayahs": 9,
       "marks": 453,
       "ink": 452,
-      "tilt": 1,
+      "reach": 1,
+      "tilt": 0,
       "hand": 0,
-      "sha256": "cecbb03fdb95c4589c1e36dca7f92bc9a22bf4d7bac2ff4916ad5cfdb023f9af"
+      "sha256": "7d08d9d5745339dcc51244f024d4c79cbb7a490ec20a4ae59be40608a47b226d"
     },
     {
       "page": 326,
       "ayahs": 13,
       "marks": 534,
       "ink": 533,
+      "reach": 0,
       "tilt": 0,
       "hand": 1,
       "sha256": "7bb08238452a849141cb7dac1139e012a00faa33dc667671d5d8af3021c1a36b"
@@ -3009,6 +3340,7 @@
       "ayahs": 15,
       "marks": 503,
       "ink": 503,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "d72e90e3c33b7e7d984cf85998933e8a5c7a2f8e908e0cd9f44bf2df29489691"
@@ -3018,15 +3350,17 @@
       "ayahs": 9,
       "marks": 533,
       "ink": 526,
-      "tilt": 1,
+      "reach": 1,
+      "tilt": 0,
       "hand": 6,
-      "sha256": "79a84e4b2ba2c6d9dbf52a000f43900fa33eb4731f9baf733c66ecc7f2b0cdd2"
+      "sha256": "65183fa26795eebb5ba05fe93176504f371eb754a4387539310573d1e1893f40"
     },
     {
       "page": 329,
       "ayahs": 9,
       "marks": 482,
       "ink": 482,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "5a4493a8112549e193327a2c95c66783e8b95e16d1f05fa8758b90c594b6623f"
@@ -3036,6 +3370,7 @@
       "ayahs": 11,
       "marks": 453,
       "ink": 452,
+      "reach": 0,
       "tilt": 0,
       "hand": 1,
       "sha256": "53edc97b0188d45f67b375ce0ec8ca40605ff166a236c6585aad9ea968e28844"
@@ -3045,6 +3380,7 @@
       "ayahs": 11,
       "marks": 463,
       "ink": 463,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "44ca9cf7f6d9aad03c294872407ef852126a603e46a36afe823c86ba4f6ef84a"
@@ -3054,6 +3390,7 @@
       "ayahs": 5,
       "marks": 491,
       "ink": 490,
+      "reach": 0,
       "tilt": 0,
       "hand": 1,
       "sha256": "4e7c441f80eb194633595912f2257eed83dbb5154da3cfce526381676c48d452"
@@ -3063,6 +3400,7 @@
       "ayahs": 10,
       "marks": 577,
       "ink": 576,
+      "reach": 0,
       "tilt": 0,
       "hand": 1,
       "sha256": "dfab347dceedc55609a975d9ad275174d69a5103ea39abb71e6f1cc6670ed74d"
@@ -3072,6 +3410,7 @@
       "ayahs": 8,
       "marks": 521,
       "ink": 517,
+      "reach": 0,
       "tilt": 0,
       "hand": 4,
       "sha256": "82cbcb66f024e920b5f6a776406796e55ee71218e05025cad93e412b417d0a67"
@@ -3081,6 +3420,7 @@
       "ayahs": 7,
       "marks": 505,
       "ink": 505,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "a17e6306b4456b7200d8dd3ec2872e16abed9ea1176f25a01821a7b291becf78"
@@ -3090,6 +3430,7 @@
       "ayahs": 8,
       "marks": 578,
       "ink": 578,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "5edb7e65d7e7c672a34cee1cf0a4ef7d7dee20656f1baca1f8178282be2389b8"
@@ -3099,6 +3440,7 @@
       "ayahs": 8,
       "marks": 528,
       "ink": 528,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "49af5416270ec98f56e6e66fb8b6f0852163f66787d91b0b1d2e77a5c526dbd3"
@@ -3108,6 +3450,7 @@
       "ayahs": 9,
       "marks": 556,
       "ink": 552,
+      "reach": 0,
       "tilt": 0,
       "hand": 4,
       "sha256": "019de05de51844a37635bedff101c9288fd9288f79526d521b5c60732609ede0"
@@ -3117,6 +3460,7 @@
       "ayahs": 9,
       "marks": 497,
       "ink": 497,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "c8e893ac4735bdfd9ed82aa6b0939fab63691e27075c2666ab8a3b73475d2b61"
@@ -3126,6 +3470,7 @@
       "ayahs": 8,
       "marks": 535,
       "ink": 534,
+      "reach": 0,
       "tilt": 0,
       "hand": 1,
       "sha256": "d614c91fac0592f48002ddc2d0405ec093ac08cb4894845e345ed44b0caedb6c"
@@ -3135,6 +3480,7 @@
       "ayahs": 6,
       "marks": 474,
       "ink": 474,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "e6a24f2eeebb66b3b7c3e635aa5eaae105550a9f3af36ed57bca8ba6c2350a0d"
@@ -3144,6 +3490,7 @@
       "ayahs": 17,
       "marks": 493,
       "ink": 493,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "f1e8438c79029d70620bce54238c51f26887286b065f66321403871a8374f3bc"
@@ -3153,6 +3500,7 @@
       "ayahs": 10,
       "marks": 589,
       "ink": 586,
+      "reach": 0,
       "tilt": 0,
       "hand": 3,
       "sha256": "a03d6d541816151d702cda079f678ffd65928f80d9ffe38e84840814504068ee"
@@ -3162,6 +3510,7 @@
       "ayahs": 15,
       "marks": 588,
       "ink": 586,
+      "reach": 0,
       "tilt": 0,
       "hand": 2,
       "sha256": "dcb0e4ad2b1ecb84f2827151fd5a0d4d571b8e97aa62ce0ad70aebc8dc0972de"
@@ -3171,6 +3520,7 @@
       "ayahs": 17,
       "marks": 584,
       "ink": 582,
+      "reach": 0,
       "tilt": 0,
       "hand": 2,
       "sha256": "7180949617a9af92fe1606607723a6eeae74bdfc8f1c209689b1f7365c789469"
@@ -3180,6 +3530,7 @@
       "ayahs": 15,
       "marks": 582,
       "ink": 579,
+      "reach": 0,
       "tilt": 0,
       "hand": 3,
       "sha256": "ed7c622e681b67ad99a54118aa4b71d911d41b4153b3d5a7b06b6b3a16aa9b5a"
@@ -3189,6 +3540,7 @@
       "ayahs": 15,
       "marks": 514,
       "ink": 512,
+      "reach": 0,
       "tilt": 0,
       "hand": 2,
       "sha256": "8db6924ebf1028f72f877d2b4d8232ecd74b985550e17dbd2161555578138d67"
@@ -3198,6 +3550,7 @@
       "ayahs": 15,
       "marks": 533,
       "ink": 531,
+      "reach": 0,
       "tilt": 1,
       "hand": 1,
       "sha256": "2f58291401d9c516b815c261e0b09fb62b380c9c1399c8cc2c2b619119496b68"
@@ -3207,6 +3560,7 @@
       "ayahs": 14,
       "marks": 521,
       "ink": 521,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "d275826ef238d3a2421a737594249abd13c927da073e326b4c383f74c104b116"
@@ -3216,6 +3570,7 @@
       "ayahs": 10,
       "marks": 626,
       "ink": 622,
+      "reach": 0,
       "tilt": 1,
       "hand": 3,
       "sha256": "cd20c6f6dc49f2a1a53f154b3aeefbbbd82f0906abebc2e0458915489497eec6"
@@ -3225,6 +3580,7 @@
       "ayahs": 10,
       "marks": 605,
       "ink": 604,
+      "reach": 0,
       "tilt": 1,
       "hand": 0,
       "sha256": "bf16d73cc77c1a1b2cc7bf066885ca87bccb5fd7f16dcaa270445a1e08a06f87"
@@ -3234,15 +3590,17 @@
       "ayahs": 7,
       "marks": 610,
       "ink": 606,
-      "tilt": 3,
+      "reach": 2,
+      "tilt": 1,
       "hand": 1,
-      "sha256": "14510bb7168a123c6b35dc6791704645235b32a95f594b908c88c366b7a272ba"
+      "sha256": "2f4f86d2133cd9d3ee5b2f8a927fd1ad7b56094c8b442a5dd6b2ca5d554205c0"
     },
     {
       "page": 353,
       "ayahs": 4,
       "marks": 578,
       "ink": 578,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "ad17f8bad57084a217bcb663123528ea35a0bf4bbd31e2d06c2b7daf8b7aecac"
@@ -3252,6 +3610,7 @@
       "ayahs": 5,
       "marks": 600,
       "ink": 599,
+      "reach": 0,
       "tilt": 0,
       "hand": 1,
       "sha256": "fb64ac195012bbd405be9699f81c52957398f9dd5b4a2ed4c3d98ded7492cceb"
@@ -3261,6 +3620,7 @@
       "ayahs": 7,
       "marks": 609,
       "ink": 608,
+      "reach": 0,
       "tilt": 0,
       "hand": 1,
       "sha256": "09f100e1e97d084db4627ebcf16428ea47132ddeb8332cbfb33c80a43603f719"
@@ -3270,6 +3630,7 @@
       "ayahs": 10,
       "marks": 630,
       "ink": 629,
+      "reach": 0,
       "tilt": 0,
       "hand": 1,
       "sha256": "ddb939839845543157eed3ad635256219e58463d14f1926c4919c9c5468de61a"
@@ -3279,6 +3640,7 @@
       "ayahs": 5,
       "marks": 576,
       "ink": 575,
+      "reach": 0,
       "tilt": 0,
       "hand": 1,
       "sha256": "8268a5769192fece10f01063ae6d1b19faa6b8c1276ac313a343ba808d842d65"
@@ -3288,6 +3650,7 @@
       "ayahs": 3,
       "marks": 505,
       "ink": 505,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "9cbfe2970a9d72169e2fddaf6d3780dce36f17712d4166363c0b326bcd89a19d"
@@ -3297,6 +3660,7 @@
       "ayahs": 5,
       "marks": 505,
       "ink": 503,
+      "reach": 0,
       "tilt": 0,
       "hand": 2,
       "sha256": "022a30e26928f52296c518704de2bdb8f00fb97fa4d0003d3eccdce9e9d3b5b1"
@@ -3306,6 +3670,7 @@
       "ayahs": 9,
       "marks": 499,
       "ink": 498,
+      "reach": 0,
       "tilt": 0,
       "hand": 1,
       "sha256": "3841a39130dca7c9576057c0d1943757329e2d5ac0d7ed25e1820372d06bcbea"
@@ -3315,6 +3680,7 @@
       "ayahs": 9,
       "marks": 472,
       "ink": 472,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "4a479c5008a5051566b767ec985916e06ea7114f44a2fca98f1d1620c05321c6"
@@ -3324,15 +3690,17 @@
       "ayahs": 12,
       "marks": 554,
       "ink": 553,
-      "tilt": 1,
+      "reach": 1,
+      "tilt": 0,
       "hand": 0,
-      "sha256": "7ccbc8cda516c073a08e64dd470eab8be4c429c0511176991f2ffa6009494b6a"
+      "sha256": "008b631aed49a64cb8b52ef63a21e929d5f4d122d2f45319818a757ed7c390c3"
     },
     {
       "page": 363,
       "ayahs": 11,
       "marks": 512,
       "ink": 511,
+      "reach": 0,
       "tilt": 0,
       "hand": 1,
       "sha256": "813e620eb46cba85bd5659555aff29c6888dcfd4cf9c99d9185283c7a6688d48"
@@ -3342,15 +3710,17 @@
       "ayahs": 12,
       "marks": 531,
       "ink": 527,
-      "tilt": 1,
+      "reach": 1,
+      "tilt": 0,
       "hand": 3,
-      "sha256": "a2c11a08b17cd901e3a82579ff104fd16169e90b0729573012c35e53112f7db5"
+      "sha256": "4a68106c1597960d1f1227a46b4e06f95efc5602ebc08d97758e6bbb7a2baff7"
     },
     {
       "page": 365,
       "ayahs": 12,
       "marks": 524,
       "ink": 524,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "bf14b3ee473810457841d5d2146ed62431a9f497971d39890e06a584757f2384"
@@ -3360,15 +3730,17 @@
       "ayahs": 10,
       "marks": 468,
       "ink": 462,
-      "tilt": 3,
+      "reach": 3,
+      "tilt": 0,
       "hand": 3,
-      "sha256": "4b2317a3ab7d018f72fab414bb4fa6f73e787aeb64e1492ebe7adae870443a2d"
+      "sha256": "a7ac8c8f29d039245680c14c48e08f63eab220c0a51d5ec8ef7bdbd0cbecb5dd"
     },
     {
       "page": 367,
       "ayahs": 19,
       "marks": 540,
       "ink": 540,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "713f640cf93bfc741fa2d3242a2c94b62d60c1b7883fc58bf982723cb3c50580"
@@ -3378,6 +3750,7 @@
       "ayahs": 20,
       "marks": 555,
       "ink": 555,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "025c0d064892acd0709693d10d8530a940b2de455f893f57dd4cb26970d7b126"
@@ -3387,6 +3760,7 @@
       "ayahs": 21,
       "marks": 618,
       "ink": 616,
+      "reach": 0,
       "tilt": 1,
       "hand": 1,
       "sha256": "ecf494496b0eb4e2fe2c168585feb7959f1cc80571d099410af39f940a965caf"
@@ -3396,6 +3770,7 @@
       "ayahs": 23,
       "marks": 535,
       "ink": 530,
+      "reach": 0,
       "tilt": 0,
       "hand": 5,
       "sha256": "6fb98224a5349144eb7972f61a2fc49e85040e0c7d32dcf55ad9122045d3ddfe"
@@ -3405,6 +3780,7 @@
       "ayahs": 28,
       "marks": 557,
       "ink": 557,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "b03bc69e4a30e6252861e9a31ca2e686e0aacc02095bf3b153adfed3dbba53f4"
@@ -3414,6 +3790,7 @@
       "ayahs": 25,
       "marks": 560,
       "ink": 559,
+      "reach": 0,
       "tilt": 0,
       "hand": 1,
       "sha256": "0ffd6cd551ec09f9afa52fdf86fe3c4c4c5420ef50cccf6d7abeab5afe3af250"
@@ -3423,6 +3800,7 @@
       "ayahs": 23,
       "marks": 544,
       "ink": 543,
+      "reach": 0,
       "tilt": 0,
       "hand": 1,
       "sha256": "4f8e15ee15341352b91c392d822cbee543304c70cbc75f7f8ff07c40d7a3c16b"
@@ -3432,6 +3810,7 @@
       "ayahs": 24,
       "marks": 579,
       "ink": 576,
+      "reach": 0,
       "tilt": 1,
       "hand": 2,
       "sha256": "a36bdd3d1ab106d34d892d134c451f845f009be22f396d56597335d29c1aff0b"
@@ -3441,6 +3820,7 @@
       "ayahs": 23,
       "marks": 554,
       "ink": 549,
+      "reach": 0,
       "tilt": 0,
       "hand": 5,
       "sha256": "9ea1ac253f50587da84bd4f5e7032db911768e3c48b0ba60c2b0a2b481664d20"
@@ -3450,6 +3830,7 @@
       "ayahs": 21,
       "marks": 496,
       "ink": 492,
+      "reach": 0,
       "tilt": 0,
       "hand": 4,
       "sha256": "87d2b9578074a06e99f3285c3834911949e2dda45965faf5d8e20d97316d7f36"
@@ -3459,6 +3840,7 @@
       "ayahs": 13,
       "marks": 562,
       "ink": 562,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "8beed414f77afb714263184d9873bfa4b626b0056c6c2b3e1ca0a97ae18e413e"
@@ -3468,6 +3850,7 @@
       "ayahs": 9,
       "marks": 569,
       "ink": 568,
+      "reach": 0,
       "tilt": 0,
       "hand": 1,
       "sha256": "7878c2e4fe028eb969d9035184c54037620ffd40c48dc8e55356505b60d50aa8"
@@ -3477,6 +3860,7 @@
       "ayahs": 13,
       "marks": 580,
       "ink": 580,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "c9a95b9380855579ab66092937bad39e52992463c880ed8a32f4c12d793eca98"
@@ -3486,6 +3870,7 @@
       "ayahs": 9,
       "marks": 621,
       "ink": 618,
+      "reach": 0,
       "tilt": 0,
       "hand": 3,
       "sha256": "538fbc3d750f0c59b2cfde0696af822e12a95d1ff97da6964fa8442418cadc58"
@@ -3495,6 +3880,7 @@
       "ayahs": 11,
       "marks": 493,
       "ink": 493,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "a0cfe54a19235e4f07e55d7a6702e55309d56c2c3b8e7cf5961f33537e44cd81"
@@ -3504,6 +3890,7 @@
       "ayahs": 8,
       "marks": 534,
       "ink": 533,
+      "reach": 0,
       "tilt": 1,
       "hand": 0,
       "sha256": "7794a0e7ed07defc7d7ad24d2ba893d157b33822271c76a1c11d8eefa52b0811"
@@ -3513,6 +3900,7 @@
       "ayahs": 13,
       "marks": 547,
       "ink": 547,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "472e280c4609bc7af6550de35e87312b78b61e402b9b5df6497096e39e561305"
@@ -3522,6 +3910,7 @@
       "ayahs": 12,
       "marks": 575,
       "ink": 568,
+      "reach": 0,
       "tilt": 0,
       "hand": 7,
       "sha256": "752bc02b7e452d3a6bf32a93314264713efe81cf9c48d757b3d1cf0ba0078e09"
@@ -3531,6 +3920,7 @@
       "ayahs": 10,
       "marks": 485,
       "ink": 484,
+      "reach": 0,
       "tilt": 0,
       "hand": 1,
       "sha256": "e7241177a784ce30fb6b3d7789f5192cf6037efbe6fec793a2d8ac23e37c9eaf"
@@ -3540,6 +3930,7 @@
       "ayahs": 8,
       "marks": 509,
       "ink": 509,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "626121f705114fc6ffaa0388c0c5f581700c22ed8e793b224b1d37ad4f04ec6e"
@@ -3549,6 +3940,7 @@
       "ayahs": 8,
       "marks": 593,
       "ink": 593,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "f52f86bacf75fbd6374e1d3a1d7c6cd63dd1496f42a07bd3dc79c61b5dc6157d"
@@ -3558,6 +3950,7 @@
       "ayahs": 7,
       "marks": 525,
       "ink": 519,
+      "reach": 0,
       "tilt": 0,
       "hand": 6,
       "sha256": "74191a67f10f6d9f9e1f321d7408fde9bb947998ac23062d8f85264418fa797a"
@@ -3567,6 +3960,7 @@
       "ayahs": 7,
       "marks": 530,
       "ink": 526,
+      "reach": 0,
       "tilt": 1,
       "hand": 3,
       "sha256": "7b7f854e3648763b4a3e0349b90a88d6829b26aa328b00785d927f2da38da920"
@@ -3576,6 +3970,7 @@
       "ayahs": 8,
       "marks": 517,
       "ink": 515,
+      "reach": 0,
       "tilt": 0,
       "hand": 2,
       "sha256": "981c119ed64c1aede58be84b4943f534f9d883913362c822a2db0ff19f278a97"
@@ -3585,6 +3980,7 @@
       "ayahs": 7,
       "marks": 523,
       "ink": 522,
+      "reach": 0,
       "tilt": 0,
       "hand": 1,
       "sha256": "32d526cbdfc5e69f82ba34ee4aa5f756f3893cd0c00c26282407bba4f04290c2"
@@ -3594,6 +3990,7 @@
       "ayahs": 9,
       "marks": 565,
       "ink": 565,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "02eac91fc018d4e6e10c9e4ac8ef803bd0ae029619aa8025b6956cd9eef6f7e4"
@@ -3603,6 +4000,7 @@
       "ayahs": 11,
       "marks": 558,
       "ink": 558,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "9a304d3e21aa88cf7a463a113d571c24b4dd8625e0561245c2633b5dc259b114"
@@ -3612,6 +4010,7 @@
       "ayahs": 7,
       "marks": 539,
       "ink": 539,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "7f6178661be3761a3f6abe137a8f9467cddb20562f552ae0a9e23ad3ea9ba573"
@@ -3621,6 +4020,7 @@
       "ayahs": 7,
       "marks": 550,
       "ink": 550,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "bf811ab0e432253f9d7055e2a65bce6d757ad79da09f8ef94c32e866e9f2a8d5"
@@ -3630,15 +4030,17 @@
       "ayahs": 10,
       "marks": 485,
       "ink": 482,
-      "tilt": 1,
+      "reach": 1,
+      "tilt": 0,
       "hand": 2,
-      "sha256": "4e7d37a9e8e94e80c73657e44a9cac7fbb452f0f6b2c2678c418acf1569236b3"
+      "sha256": "eabe16d77576ae55bb2f20084c0a8872467db9c85df179240a4d00fb93949e0a"
     },
     {
       "page": 397,
       "ayahs": 8,
       "marks": 554,
       "ink": 554,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "29081ff9c2544f99042d945235875bdc1335743cabf9f14e6c902f2243615557"
@@ -3648,6 +4050,7 @@
       "ayahs": 9,
       "marks": 531,
       "ink": 531,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "3e1c356689ca95ed5f60dee2662d23370c90322f3bae49190201228e3df36fe0"
@@ -3657,6 +4060,7 @@
       "ayahs": 7,
       "marks": 503,
       "ink": 503,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "5b788f6769c540f657468cf42cce1922b3196811eb05d37407aecac44991c2f7"
@@ -3666,15 +4070,17 @@
       "ayahs": 8,
       "marks": 483,
       "ink": 478,
-      "tilt": 1,
+      "reach": 1,
+      "tilt": 0,
       "hand": 4,
-      "sha256": "d72b1cf35eff57a64b33edf63a02df840b5b0a0b24f70daf6b1180ef7115d88b"
+      "sha256": "6e6e4e127ff7c2f5f6bf24f03831c232b6ecbe76e567ef20e330018fb254b1b1"
     },
     {
       "page": 401,
       "ayahs": 7,
       "marks": 486,
       "ink": 483,
+      "reach": 0,
       "tilt": 0,
       "hand": 3,
       "sha256": "5984a8c50d33f4f230b55e38bc37613ba9e2a03670e7aab504e1b8df008313d1"
@@ -3684,6 +4090,7 @@
       "ayahs": 7,
       "marks": 541,
       "ink": 540,
+      "reach": 0,
       "tilt": 0,
       "hand": 1,
       "sha256": "18abf68bfc10fad597e279cacaea54d93ef8e04969fc2369a44ffd1d8d7e7553"
@@ -3693,6 +4100,7 @@
       "ayahs": 11,
       "marks": 588,
       "ink": 587,
+      "reach": 0,
       "tilt": 0,
       "hand": 1,
       "sha256": "8092d00931a9119600d2fc0c436e1e04f2f021b6d41cd810da71c84dcdd86fda"
@@ -3702,6 +4110,7 @@
       "ayahs": 11,
       "marks": 462,
       "ink": 462,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "afc9564cfa32403eaae62639e020f6b41ee7bb357096d2d5c6bb27082b87623e"
@@ -3711,6 +4120,7 @@
       "ayahs": 10,
       "marks": 559,
       "ink": 558,
+      "reach": 0,
       "tilt": 0,
       "hand": 1,
       "sha256": "46cfba1b801e97fb9ed1074727ae8d7f82a3fd2cfa7977f5b06dfaf48a14a1ed"
@@ -3720,6 +4130,7 @@
       "ayahs": 9,
       "marks": 546,
       "ink": 545,
+      "reach": 0,
       "tilt": 0,
       "hand": 1,
       "sha256": "a4f4d0de550447569d6f1812f9e839364fc6293b7808faf137239a4d6a6e1817"
@@ -3729,6 +4140,7 @@
       "ayahs": 8,
       "marks": 522,
       "ink": 521,
+      "reach": 0,
       "tilt": 1,
       "hand": 0,
       "sha256": "93c75e41039c742a222450a4fc542201230339ffab6b2608b7d0938ef9c7fd22"
@@ -3738,6 +4150,7 @@
       "ayahs": 9,
       "marks": 575,
       "ink": 572,
+      "reach": 0,
       "tilt": 0,
       "hand": 3,
       "sha256": "5fae243bed1e30a3df34eb0fe30391a517851158c772d1ccee2fea3519874865"
@@ -3747,6 +4160,7 @@
       "ayahs": 9,
       "marks": 588,
       "ink": 588,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "791ae49a496e9152eb38b442094a47572291f916d9c0234ba93ad37c13c069e8"
@@ -3756,6 +4170,7 @@
       "ayahs": 10,
       "marks": 539,
       "ink": 535,
+      "reach": 0,
       "tilt": 0,
       "hand": 4,
       "sha256": "b5d254119c2cc9888c56b07c5b965c2dc588bc360e8c3f2ea81ec44c22243005"
@@ -3765,6 +4180,7 @@
       "ayahs": 11,
       "marks": 473,
       "ink": 472,
+      "reach": 0,
       "tilt": 0,
       "hand": 1,
       "sha256": "042e12b9bec031c10585f1a4dc5ed969f6744c26c2af19e2f5f3eebbfe4b617e"
@@ -3774,6 +4190,7 @@
       "ayahs": 8,
       "marks": 571,
       "ink": 571,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "5f175bc0bcdc032a567ce2ec5f42815198083496bc7acd17e60f172bec3759c5"
@@ -3783,6 +4200,7 @@
       "ayahs": 9,
       "marks": 580,
       "ink": 580,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "d3e14880ee1cea1eeb1a1a003afcd8b07a2e1248e43d6eddfe4dcf3d10a14aae"
@@ -3792,15 +4210,17 @@
       "ayahs": 6,
       "marks": 544,
       "ink": 538,
-      "tilt": 1,
+      "reach": 1,
+      "tilt": 0,
       "hand": 5,
-      "sha256": "2ef3d79b57369f56b82377d5f5f2ae46f171277469c5dea5dfd54db8b143526f"
+      "sha256": "7de0e7f4ec3ec8aa56e28550769b77f248e0bd9d1c743384ed8dc8970067e600"
     },
     {
       "page": 415,
       "ayahs": 11,
       "marks": 507,
       "ink": 506,
+      "reach": 0,
       "tilt": 0,
       "hand": 1,
       "sha256": "4baf86eb6fdf7b14091b9d427ac2fd82210e85ac720dbe56eba53c1c7bbf16be"
@@ -3810,6 +4230,7 @@
       "ayahs": 9,
       "marks": 524,
       "ink": 520,
+      "reach": 0,
       "tilt": 0,
       "hand": 4,
       "sha256": "340e550128967a209e3b46277faaec62028c4d563542d0db45ab185c9b66f60e"
@@ -3819,6 +4240,7 @@
       "ayahs": 10,
       "marks": 488,
       "ink": 488,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "95421b5b3273d773772bed0081f69bf93417f79a94afacb5c03996f8f441a806"
@@ -3828,6 +4250,7 @@
       "ayahs": 6,
       "marks": 528,
       "ink": 526,
+      "reach": 0,
       "tilt": 0,
       "hand": 2,
       "sha256": "0692656f87fd8a794794f4c8b4b867ba8e3464340d535598e20dc015987e9ded"
@@ -3837,6 +4260,7 @@
       "ayahs": 9,
       "marks": 567,
       "ink": 566,
+      "reach": 0,
       "tilt": 0,
       "hand": 1,
       "sha256": "423375afe087f943ae5b8f9f7a66f1f2c0719085abd719d8f383e4628013e90f"
@@ -3846,6 +4270,7 @@
       "ayahs": 7,
       "marks": 588,
       "ink": 587,
+      "reach": 0,
       "tilt": 0,
       "hand": 1,
       "sha256": "9b974e1b0a277b02c34104929a14dd8eb07da0b854d20bc93d37d5b1d041e601"
@@ -3855,6 +4280,7 @@
       "ayahs": 8,
       "marks": 546,
       "ink": 546,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "b4d3206489105c90ff75f50eebb8c11af14a70b948cb6159f7aedc4db99e8aa3"
@@ -3864,6 +4290,7 @@
       "ayahs": 5,
       "marks": 542,
       "ink": 540,
+      "reach": 0,
       "tilt": 0,
       "hand": 2,
       "sha256": "8d72b64be5cd405687417859ccc7e0e9e30b73218bf50850e8d2cf67d2f0178a"
@@ -3873,6 +4300,7 @@
       "ayahs": 8,
       "marks": 590,
       "ink": 589,
+      "reach": 0,
       "tilt": 0,
       "hand": 1,
       "sha256": "0d94d23537bd6c0aafb74670650afdecb709d69a2045dea39bd7a29003369f61"
@@ -3882,6 +4310,7 @@
       "ayahs": 7,
       "marks": 559,
       "ink": 550,
+      "reach": 0,
       "tilt": 0,
       "hand": 9,
       "sha256": "8d734b9e06e992e95a9e7b91947e14463db21e46dfe5eabf9e1d9ab65466d01f"
@@ -3891,6 +4320,7 @@
       "ayahs": 4,
       "marks": 555,
       "ink": 554,
+      "reach": 0,
       "tilt": 0,
       "hand": 1,
       "sha256": "712b603aaa05bc85bc596b5ab313a4f51d81bce5a1894b2cb43ac18ad46b6285"
@@ -3900,15 +4330,17 @@
       "ayahs": 8,
       "marks": 583,
       "ink": 580,
-      "tilt": 1,
+      "reach": 1,
+      "tilt": 0,
       "hand": 2,
-      "sha256": "8ad1a6a0ca10833b41acad37f0c988ea172492ab002d5a6da357cded8bc48548"
+      "sha256": "881fbc16fbafbae83fd78ded3c3f853bbde4ee059102a920d03135600d3654a7"
     },
     {
       "page": 427,
       "ayahs": 11,
       "marks": 569,
       "ink": 568,
+      "reach": 0,
       "tilt": 0,
       "hand": 1,
       "sha256": "e231de0c80c313e594960be7c9a94fdbc99d76029a574676832668fd9741850a"
@@ -3918,6 +4350,7 @@
       "ayahs": 7,
       "marks": 472,
       "ink": 470,
+      "reach": 0,
       "tilt": 0,
       "hand": 2,
       "sha256": "73a1b874bb7225fa8613346ddde322c5103f86993c1633ef9e407210c136dac1"
@@ -3927,6 +4360,7 @@
       "ayahs": 7,
       "marks": 571,
       "ink": 570,
+      "reach": 0,
       "tilt": 0,
       "hand": 1,
       "sha256": "6f16da5289c64cf2a5512d9fe96dd30251bdf3eabc3a9f2da15e14b4c6e09741"
@@ -3936,15 +4370,17 @@
       "ayahs": 8,
       "marks": 538,
       "ink": 534,
-      "tilt": 1,
+      "reach": 1,
+      "tilt": 0,
       "hand": 3,
-      "sha256": "6d5dec2cd11f2da3e873d6f80407dedc2fe19786b95736ee3668fbd375f957dd"
+      "sha256": "f8f785c76be0022398bd8fab63d60d9e2ff6edf4a6c2070e4b75b1cf901a2af6"
     },
     {
       "page": 431,
       "ayahs": 9,
       "marks": 527,
       "ink": 526,
+      "reach": 0,
       "tilt": 0,
       "hand": 1,
       "sha256": "d0ef7d31ceca85a1314970edac53207a3bef60f79d725e0dc54d86918bb7c8a8"
@@ -3954,6 +4390,7 @@
       "ayahs": 8,
       "marks": 579,
       "ink": 572,
+      "reach": 0,
       "tilt": 0,
       "hand": 7,
       "sha256": "cfc1c4223b672ba87377de5c8c5ab00b0c908502c897e39eff18981940af8bda"
@@ -3963,6 +4400,7 @@
       "ayahs": 9,
       "marks": 572,
       "ink": 571,
+      "reach": 0,
       "tilt": 0,
       "hand": 1,
       "sha256": "b19c535267e69001737f113aafe4b52321eda34a98f268230c3ef94e36ef5b9f"
@@ -3972,6 +4410,7 @@
       "ayahs": 9,
       "marks": 502,
       "ink": 500,
+      "reach": 0,
       "tilt": 0,
       "hand": 2,
       "sha256": "010cf132f364bbdfd59b56d850779b5b035b453ffd24e2fdd46ece243605f65f"
@@ -3981,6 +4420,7 @@
       "ayahs": 8,
       "marks": 624,
       "ink": 624,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "b71d61c3e1a9b3a09ee3e874769149e0a87322bd853f2c397c613e5bf68ef883"
@@ -3990,6 +4430,7 @@
       "ayahs": 7,
       "marks": 521,
       "ink": 520,
+      "reach": 0,
       "tilt": 0,
       "hand": 1,
       "sha256": "322c23f9cfd1e6a3d92a297f20c14d61ccb96bac954932f4e65f47de0b56b9ec"
@@ -3999,6 +4440,7 @@
       "ayahs": 12,
       "marks": 550,
       "ink": 549,
+      "reach": 0,
       "tilt": 0,
       "hand": 1,
       "sha256": "3ae94718af3fa0f9818e29ae7334ea081c384943cb6c0eb5b8c00b69f274c854"
@@ -4008,6 +4450,7 @@
       "ayahs": 8,
       "marks": 525,
       "ink": 520,
+      "reach": 0,
       "tilt": 1,
       "hand": 4,
       "sha256": "8415bc0da459786d2483505c9f1c2c9a7ee48f10dc3385cfef32021a6c6e521f"
@@ -4017,6 +4460,7 @@
       "ayahs": 6,
       "marks": 604,
       "ink": 604,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "b10f6f3afa02592a1a983879792fdfbda6385e05d0f1e59db72b075807da886b"
@@ -4026,6 +4470,7 @@
       "ayahs": 13,
       "marks": 458,
       "ink": 449,
+      "reach": 0,
       "tilt": 0,
       "hand": 9,
       "sha256": "b986492060004dbe4d70712376a71f9fa826df0cc5ac8a7badf404d187d67df7"
@@ -4035,6 +4480,7 @@
       "ayahs": 15,
       "marks": 545,
       "ink": 543,
+      "reach": 0,
       "tilt": 0,
       "hand": 2,
       "sha256": "f3545ca9835baa245f0d8838ecfa3edf49107f2642adcfd43c01f9f3be2821da"
@@ -4044,6 +4490,7 @@
       "ayahs": 13,
       "marks": 526,
       "ink": 524,
+      "reach": 0,
       "tilt": 0,
       "hand": 2,
       "sha256": "b4ed1a4b3c87ef9e05b216859b3d384344d3e0b9db8ec0bd208952e96f8653ac"
@@ -4053,6 +4500,7 @@
       "ayahs": 14,
       "marks": 537,
       "ink": 537,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "e51e3221fb87e8bd2f5ab1945327de4caf11bcffe4f72facb81129bb9b5bd186"
@@ -4062,6 +4510,7 @@
       "ayahs": 16,
       "marks": 529,
       "ink": 529,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "eff37588fbae07e3fadaf68a7f2c27c00d4b158142bbf1749a7578b5a8784cc8"
@@ -4071,6 +4520,7 @@
       "ayahs": 13,
       "marks": 491,
       "ink": 490,
+      "reach": 0,
       "tilt": 0,
       "hand": 1,
       "sha256": "3d80fdab74e6b033fcc1ae2161d60f489e06ae40ca12c1b1e16ac2b19a2f5ecb"
@@ -4080,6 +4530,7 @@
       "ayahs": 24,
       "marks": 546,
       "ink": 546,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "4f3b440a6793273ae641c3a17356399d8b5aeab26ca86b3bd12b584f9e5bfc86"
@@ -4089,15 +4540,17 @@
       "ayahs": 27,
       "marks": 562,
       "ink": 561,
-      "tilt": 1,
+      "reach": 1,
+      "tilt": 0,
       "hand": 0,
-      "sha256": "5f0d456380cad513385ecb029e05005b92c365122ffc9da0049ad7d93a349ef6"
+      "sha256": "88aa8ac8b19ca8e091065ce32c83b539ba283b20ce54ada5650f72530dd06f50"
     },
     {
       "page": 448,
       "ayahs": 25,
       "marks": 541,
       "ink": 540,
+      "reach": 0,
       "tilt": 0,
       "hand": 1,
       "sha256": "7f6c138c30410fcd9daad1ace895538df8518d21e1ccc7175afce27b021d1bc1"
@@ -4107,6 +4560,7 @@
       "ayahs": 26,
       "marks": 556,
       "ink": 556,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "7bfb8d610fb4a51cad0a66563de345bf33f6149a53db67b7e50eb060d634e1be"
@@ -4116,6 +4570,7 @@
       "ayahs": 24,
       "marks": 531,
       "ink": 529,
+      "reach": 0,
       "tilt": 0,
       "hand": 2,
       "sha256": "21defeface1d9f6e6d2c41c2d8c82a14460ddd6f872288275078172a1258033c"
@@ -4125,6 +4580,7 @@
       "ayahs": 27,
       "marks": 546,
       "ink": 546,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "28985fe37e7bc10c7b0c2c58f1cb77d74254cd48b7f46adb033098da266b559b"
@@ -4134,6 +4590,7 @@
       "ayahs": 29,
       "marks": 530,
       "ink": 527,
+      "reach": 0,
       "tilt": 0,
       "hand": 3,
       "sha256": "6207ceba72409db86e6525eddd624e90e150d7a1f06ff54eccbe2256a0b51635"
@@ -4143,6 +4600,7 @@
       "ayahs": 16,
       "marks": 539,
       "ink": 539,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "6141b50db6936b5d9fcf1b269a6558807255958b2f3a27aeb75d42af4d0a3c5c"
@@ -4152,6 +4610,7 @@
       "ayahs": 10,
       "marks": 605,
       "ink": 604,
+      "reach": 0,
       "tilt": 0,
       "hand": 1,
       "sha256": "14241924a9d40b1142440a7e5db1ce8ef22c062b210ddf2cdece43e18d913133"
@@ -4161,6 +4620,7 @@
       "ayahs": 16,
       "marks": 617,
       "ink": 616,
+      "reach": 0,
       "tilt": 0,
       "hand": 1,
       "sha256": "9d8854d46057aa75c7443749c7fd1e4fea83f93c5a950a8ae6bc02a320467601"
@@ -4170,15 +4630,17 @@
       "ayahs": 19,
       "marks": 578,
       "ink": 568,
-      "tilt": 1,
+      "reach": 1,
+      "tilt": 0,
       "hand": 9,
-      "sha256": "2cbb1dc7ce56255cf9df0d24ac83d12d16cc652b805aff06813995b10022ab4d"
+      "sha256": "ebd5376b4883b33d75a363797e984fdd930ae92459b8d1a20bc7060f56465587"
     },
     {
       "page": 457,
       "ayahs": 22,
       "marks": 612,
       "ink": 611,
+      "reach": 0,
       "tilt": 0,
       "hand": 1,
       "sha256": "fa19e28e911db3454690402f42d8cf5b8e3632282d48fc749929bedc65fa91c2"
@@ -4188,6 +4650,7 @@
       "ayahs": 10,
       "marks": 502,
       "ink": 501,
+      "reach": 0,
       "tilt": 0,
       "hand": 1,
       "sha256": "cb7d7f1f1f5b38c1d42ed72515b7b07ed42c1fcf522ef8f6620003a578be5a24"
@@ -4197,6 +4660,7 @@
       "ayahs": 5,
       "marks": 597,
       "ink": 596,
+      "reach": 0,
       "tilt": 0,
       "hand": 1,
       "sha256": "abc96aea25e6efd50f1d01758dec3b4297f8d5cf35a27cda923848c0f33047db"
@@ -4206,6 +4670,7 @@
       "ayahs": 11,
       "marks": 636,
       "ink": 634,
+      "reach": 0,
       "tilt": 1,
       "hand": 1,
       "sha256": "cb5b9bb9afa65ce8c91c1ac8044d7c7159a7503670ac8a49dee4f8ef2867ec38"
@@ -4215,6 +4680,7 @@
       "ayahs": 10,
       "marks": 558,
       "ink": 557,
+      "reach": 0,
       "tilt": 0,
       "hand": 1,
       "sha256": "e0d7f792e385d85fcab6f60c2fce09e36415c1711885d5c0b9785bdfa59da768"
@@ -4224,6 +4690,7 @@
       "ayahs": 9,
       "marks": 508,
       "ink": 506,
+      "reach": 0,
       "tilt": 0,
       "hand": 2,
       "sha256": "544d24a4cf0aec5b3e648f68da825fa96c9f194ab658f1d0878b118a23112ff5"
@@ -4233,6 +4700,7 @@
       "ayahs": 7,
       "marks": 525,
       "ink": 524,
+      "reach": 0,
       "tilt": 0,
       "hand": 1,
       "sha256": "915a335066de12dcb1f0d7ce82cc37367b10cf91a5b4804b5d0ba5f19f0b8f2b"
@@ -4242,6 +4710,7 @@
       "ayahs": 9,
       "marks": 537,
       "ink": 536,
+      "reach": 0,
       "tilt": 0,
       "hand": 1,
       "sha256": "68b69d3b3685a2a0bef3f9418de3e5b5b516370646cdb8bb1f4f641d1a3e3a5e"
@@ -4251,6 +4720,7 @@
       "ayahs": 11,
       "marks": 527,
       "ink": 525,
+      "reach": 0,
       "tilt": 0,
       "hand": 2,
       "sha256": "d617a90b53c296f77faf6e11e640dd77eed92a91b45c0d488efdc7045b674ccb"
@@ -4260,6 +4730,7 @@
       "ayahs": 7,
       "marks": 534,
       "ink": 525,
+      "reach": 0,
       "tilt": 0,
       "hand": 9,
       "sha256": "440d8540eab1c69373809f273f2df34ddfd36faf44258f1980a1cabaf7a38925"
@@ -4269,6 +4740,7 @@
       "ayahs": 8,
       "marks": 478,
       "ink": 478,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "1ba1fb489a8d4850285407b5dd7a0ebab1a42e92c6dbf4a9a845bbe3c42d40aa"
@@ -4278,6 +4750,7 @@
       "ayahs": 9,
       "marks": 535,
       "ink": 535,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "c9e52e962ef40a8ae889bf33d6aad5305fe9d98940c0b787e5e07a060dfce70c"
@@ -4287,6 +4760,7 @@
       "ayahs": 9,
       "marks": 507,
       "ink": 507,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "9b7e826f2c9bb6049e27b54ad6c54e10b3c15dcae5930dccb9e12cf77aac5fd1"
@@ -4296,6 +4770,7 @@
       "ayahs": 8,
       "marks": 534,
       "ink": 530,
+      "reach": 0,
       "tilt": 1,
       "hand": 3,
       "sha256": "2864d2b8194b5ed1c644c7a446a532370d4268dc6c813a8207e342092c423aa7"
@@ -4305,6 +4780,7 @@
       "ayahs": 7,
       "marks": 520,
       "ink": 520,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "9660ae16cb250a1511eeb439cc400b1bddc64c22d34a66fcd1b96483c1db9b89"
@@ -4314,6 +4790,7 @@
       "ayahs": 9,
       "marks": 515,
       "ink": 512,
+      "reach": 0,
       "tilt": 0,
       "hand": 3,
       "sha256": "7bb4bd6b5a685040b0b5457ba081529f21beb7ae8e6c4eee3ff76bdfaf77f602"
@@ -4323,6 +4800,7 @@
       "ayahs": 9,
       "marks": 488,
       "ink": 488,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "95e86a5dede48aa8f97c0c70e15b99c911d15b2e0852725d558fdc2b336d4b65"
@@ -4332,6 +4810,7 @@
       "ayahs": 8,
       "marks": 498,
       "ink": 492,
+      "reach": 0,
       "tilt": 0,
       "hand": 6,
       "sha256": "fd06b25f12c52c364446e6111ca77bbbece0b3a9b835244f80414099bf5fc144"
@@ -4341,6 +4820,7 @@
       "ayahs": 11,
       "marks": 520,
       "ink": 520,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "b4a242e5fd30889d289129f8b0ff02f2cf0bd84882a1cf076efd7e72d6a6620d"
@@ -4350,6 +4830,7 @@
       "ayahs": 8,
       "marks": 514,
       "ink": 512,
+      "reach": 0,
       "tilt": 0,
       "hand": 2,
       "sha256": "65eafde5aa9caedf0bcfc8997e789c13842c4059621a0a555b021ec9cd455af4"
@@ -4359,15 +4840,17 @@
       "ayahs": 11,
       "marks": 504,
       "ink": 503,
-      "tilt": 1,
+      "reach": 1,
+      "tilt": 0,
       "hand": 0,
-      "sha256": "7f5f69471d6b8f36c9cd318c571ef8d44cd6c259c4c461476fab195fcde4523a"
+      "sha256": "faa3270f029b92631a3a455a36e49b4e7ca74edef8f337508c614efcd2248d37"
     },
     {
       "page": 478,
       "ayahs": 9,
       "marks": 585,
       "ink": 583,
+      "reach": 0,
       "tilt": 0,
       "hand": 2,
       "sha256": "12613e746243d2333c1df6085f3cdbd1b2f7bc59b86f110cfab286343bfc3ea5"
@@ -4377,6 +4860,7 @@
       "ayahs": 9,
       "marks": 571,
       "ink": 571,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "f73ec96247830338a31b6a6bccbee19b19027feeb089b044729565520ceada43"
@@ -4386,6 +4870,7 @@
       "ayahs": 9,
       "marks": 525,
       "ink": 522,
+      "reach": 0,
       "tilt": 0,
       "hand": 3,
       "sha256": "1ee7f21a7c8c1979b1475dcad942efdc223c5208dc51d12581775ddcfff26ccd"
@@ -4395,6 +4880,7 @@
       "ayahs": 8,
       "marks": 578,
       "ink": 578,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "0c201b178ea39302987fb7068febc2ef09ac0d67db6e3dc486fde546072ab21e"
@@ -4404,6 +4890,7 @@
       "ayahs": 8,
       "marks": 554,
       "ink": 553,
+      "reach": 0,
       "tilt": 0,
       "hand": 1,
       "sha256": "cd45053b6e391a7c2edfe2acd56aa68421e18707dbbd124534f46e8337d74c5f"
@@ -4413,6 +4900,7 @@
       "ayahs": 10,
       "marks": 501,
       "ink": 499,
+      "reach": 0,
       "tilt": 0,
       "hand": 2,
       "sha256": "c929972c486ab5cc536e976086758a5040c8ab8a762fd064750a8b96a41ee0a2"
@@ -4422,6 +4910,7 @@
       "ayahs": 5,
       "marks": 564,
       "ink": 564,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "0241a46810c345a1f12f4a234d92d265f948f52a9877125fe3c8c5578ef5f385"
@@ -4431,6 +4920,7 @@
       "ayahs": 7,
       "marks": 491,
       "ink": 491,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "0fb2358a8d7c60559d3ecd6af042ba0f0c17325f4d48e18b857ec17338c4f99c"
@@ -4440,6 +4930,7 @@
       "ayahs": 9,
       "marks": 580,
       "ink": 579,
+      "reach": 0,
       "tilt": 0,
       "hand": 1,
       "sha256": "81ae09bc812fff177c865e2bcb1d6764c2c1399f20d8d970c2fae3ac34ef94ec"
@@ -4449,6 +4940,7 @@
       "ayahs": 13,
       "marks": 619,
       "ink": 618,
+      "reach": 0,
       "tilt": 0,
       "hand": 1,
       "sha256": "5c5ff6f4c573e35842ed792dc275a1a39d3744a7bfa5f86e38f4bff1b24b8bb9"
@@ -4458,6 +4950,7 @@
       "ayahs": 7,
       "marks": 541,
       "ink": 541,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "901a8a06d0ff0bb45d64802990b8dbb96d9d1836ebec6f5e73bbeab18bff3809"
@@ -4467,6 +4960,7 @@
       "ayahs": 12,
       "marks": 453,
       "ink": 452,
+      "reach": 0,
       "tilt": 0,
       "hand": 1,
       "sha256": "e9c07ca3a3b19d2e68622b71ad8f02ab95cfbaf1d4639bd82b2751e6793a20ee"
@@ -4476,6 +4970,7 @@
       "ayahs": 12,
       "marks": 551,
       "ink": 542,
+      "reach": 0,
       "tilt": 0,
       "hand": 9,
       "sha256": "dcf9d0a5d8d4dbe35c00c93c7a50cf253dedd7d79a71a6ac10dbb78c0d30aa6e"
@@ -4485,6 +4980,7 @@
       "ayahs": 11,
       "marks": 577,
       "ink": 575,
+      "reach": 0,
       "tilt": 0,
       "hand": 2,
       "sha256": "47f32fd7d6d9ed0cbc37e4d9f266e3dc0419e321310c26c34d2c7a3614e2b8fc"
@@ -4494,6 +4990,7 @@
       "ayahs": 14,
       "marks": 554,
       "ink": 546,
+      "reach": 0,
       "tilt": 0,
       "hand": 8,
       "sha256": "6ba656d059744dfbd57199aead5ea2197388872cb7a273c2bc9f151690294079"
@@ -4503,6 +5000,7 @@
       "ayahs": 13,
       "marks": 522,
       "ink": 522,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "71fc112b900c82e6dc96c116c493dacd96c2745bd0d0bbe993de2eb73f9268f1"
@@ -4512,6 +5010,7 @@
       "ayahs": 13,
       "marks": 518,
       "ink": 517,
+      "reach": 0,
       "tilt": 0,
       "hand": 1,
       "sha256": "7d126e570246b55af02d1b9bccbbd7e4cb123f8b73573a6456894745fc9527f9"
@@ -4521,6 +5020,7 @@
       "ayahs": 16,
       "marks": 574,
       "ink": 574,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "378d18d150eb0670d273d06645cf5147d26aa91913541a49bd37b1b9fdbff7c7"
@@ -4530,6 +5030,7 @@
       "ayahs": 18,
       "marks": 460,
       "ink": 456,
+      "reach": 0,
       "tilt": 0,
       "hand": 4,
       "sha256": "934005ee98e458a97cc2970210674a8469206fee310c5e9a54542dd7b2cb0438"
@@ -4539,6 +5040,7 @@
       "ayahs": 21,
       "marks": 565,
       "ink": 565,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "5ecd40fe836288d196dff0b427183b0280ed639a6d8f91da65e41072c5aedbb3"
@@ -4548,6 +5050,7 @@
       "ayahs": 20,
       "marks": 423,
       "ink": 423,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "cee0ecf15f00bd1ed6d2c2d8ad1d7bc4058b803ac29468c0d27c571ee1a1deb8"
@@ -4557,6 +5060,7 @@
       "ayahs": 13,
       "marks": 587,
       "ink": 585,
+      "reach": 0,
       "tilt": 0,
       "hand": 2,
       "sha256": "048a75c339d33066c2bc9accae09ee2e3467b06c343e65aa22d6eb6fee1474f2"
@@ -4566,6 +5070,7 @@
       "ayahs": 9,
       "marks": 563,
       "ink": 562,
+      "reach": 0,
       "tilt": 0,
       "hand": 1,
       "sha256": "5ab97c6d8bda80a25a392d91a498c0dc7b4bf1cef93f4539569cc2309acdfb72"
@@ -4575,6 +5080,7 @@
       "ayahs": 10,
       "marks": 655,
       "ink": 655,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "3e1df3187e3be9dcf9ca867038a8beb413c65140bfc992fdbb072f708ef14b17"
@@ -4584,6 +5090,7 @@
       "ayahs": 10,
       "marks": 509,
       "ink": 508,
+      "reach": 0,
       "tilt": 0,
       "hand": 1,
       "sha256": "0ea3f99d6a32dea72eb314e9e2365cb38eb1cdea15f56d6340dcac877f6eb73f"
@@ -4593,15 +5100,17 @@
       "ayahs": 9,
       "marks": 593,
       "ink": 592,
-      "tilt": 1,
+      "reach": 1,
+      "tilt": 0,
       "hand": 0,
-      "sha256": "f34cc4e7ab6a17bd24d6f61c4d1795b1cc4a231dcef58aa747f58857568d15dd"
+      "sha256": "2bfc90f1440a27075a36e88504bf93b7a990615df43d1c601c8145762f5c1631"
     },
     {
       "page": 504,
       "ayahs": 6,
       "marks": 639,
       "ink": 637,
+      "reach": 0,
       "tilt": 0,
       "hand": 2,
       "sha256": "8f1606476a70ff2a724b0de3d5a904cac89b63b6c4854ce56394125160d8ab25"
@@ -4611,15 +5120,17 @@
       "ayahs": 8,
       "marks": 592,
       "ink": 590,
-      "tilt": 1,
+      "reach": 1,
+      "tilt": 0,
       "hand": 1,
-      "sha256": "491fa1912104f9917d1dc4056b802a71f5a41e12074b142409df9ce29b78bfb6"
+      "sha256": "1344eb55374c6f19dbe7638da84162718acbfb9f30bab89172de6ad3d5087a64"
     },
     {
       "page": 506,
       "ayahs": 7,
       "marks": 547,
       "ink": 545,
+      "reach": 0,
       "tilt": 0,
       "hand": 2,
       "sha256": "4dd3a19d467c2e32a3d0901e4e9297610caadaaa4d422e7211bb8a8c94009e52"
@@ -4629,6 +5140,7 @@
       "ayahs": 11,
       "marks": 639,
       "ink": 638,
+      "reach": 0,
       "tilt": 0,
       "hand": 1,
       "sha256": "5e80c7011188af4f175fb5f68b022a60f0d8a330aa94c0b3eeaec18716808f38"
@@ -4638,15 +5150,17 @@
       "ayahs": 8,
       "marks": 680,
       "ink": 676,
-      "tilt": 1,
+      "reach": 1,
+      "tilt": 0,
       "hand": 3,
-      "sha256": "3ad2fc6737e3c6283dfe39e433b643ac9fe2960f24b4cbbe802a29787a6f6519"
+      "sha256": "2a47ba082d257f02e8ea08ed5c172b58dba93126318bda28b2756a6ec6be9f5b"
     },
     {
       "page": 509,
       "ayahs": 10,
       "marks": 552,
       "ink": 552,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "7a826118b6f0fad52c84e04faa64e3772db77a85d6c691ada4058eb45a05a754"
@@ -4656,6 +5170,7 @@
       "ayahs": 9,
       "marks": 592,
       "ink": 592,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "ad543fda95a472700fc03a1681ec07cf24b08609dc0cc73179022154112859d0"
@@ -4665,6 +5180,7 @@
       "ayahs": 9,
       "marks": 500,
       "ink": 499,
+      "reach": 0,
       "tilt": 0,
       "hand": 1,
       "sha256": "d3174efcbeee4bca12ee81ff7af0ffb309e0fe9c3b64b3716d6e575705d9155f"
@@ -4674,6 +5190,7 @@
       "ayahs": 6,
       "marks": 546,
       "ink": 542,
+      "reach": 0,
       "tilt": 0,
       "hand": 4,
       "sha256": "471b4cda3305d7b9962583ea2fe13c78f1d2740c4c905eeca3140c76ac478442"
@@ -4683,6 +5200,7 @@
       "ayahs": 8,
       "marks": 555,
       "ink": 555,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "ea8a05b7eb1106f4cb157b6c369e9a01ee509c25361724ac407dc220bb49c4b1"
@@ -4692,6 +5210,7 @@
       "ayahs": 5,
       "marks": 549,
       "ink": 547,
+      "reach": 0,
       "tilt": 0,
       "hand": 2,
       "sha256": "ec94d68c0470bc4f21e2edf8bc36ba139424c998c2ca84182e22fccec9eeb5c5"
@@ -4701,6 +5220,7 @@
       "ayahs": 5,
       "marks": 528,
       "ink": 524,
+      "reach": 0,
       "tilt": 1,
       "hand": 3,
       "sha256": "3c8d78616f2de777379994baae1235aed29f425720a22e12c6bdd9b18e5e76bc"
@@ -4710,6 +5230,7 @@
       "ayahs": 7,
       "marks": 649,
       "ink": 649,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "af7109490decc2f53d8b5afa76b63b4feea7c0f74279db3a8238e1c78415be74"
@@ -4719,6 +5240,7 @@
       "ayahs": 7,
       "marks": 614,
       "ink": 612,
+      "reach": 0,
       "tilt": 0,
       "hand": 2,
       "sha256": "a25065bbf28b5ec8b88eeee900cc7ff17f63ba5d45f1fe867b4488b8c45591ab"
@@ -4728,15 +5250,17 @@
       "ayahs": 15,
       "marks": 491,
       "ink": 484,
-      "tilt": 1,
+      "reach": 1,
+      "tilt": 0,
       "hand": 6,
-      "sha256": "4d4ba95076190c66993ef3e0686a4b6fe1a317617a7630c5247f3127cf6cee60"
+      "sha256": "7932e31021424821250bc04c628daf938730c2a143043daa8ba264bc1ecf57cc"
     },
     {
       "page": 519,
       "ayahs": 20,
       "marks": 586,
       "ink": 586,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "c8811f83c9b1e343b5b1ab175de5c729afa5f3cc650c4be49725fd4799c0b20a"
@@ -4746,6 +5270,7 @@
       "ayahs": 16,
       "marks": 460,
       "ink": 460,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "24af7ce7f4572e1ef3883196e04e8b67ad417eba4750f65fc791b65e1f2851bb"
@@ -4755,6 +5280,7 @@
       "ayahs": 24,
       "marks": 573,
       "ink": 573,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "8c6dc9c1042d4e8c875dfb9e7f162dd25d25132bbbcebd6c10986fda40caf485"
@@ -4764,6 +5290,7 @@
       "ayahs": 21,
       "marks": 584,
       "ink": 583,
+      "reach": 0,
       "tilt": 0,
       "hand": 1,
       "sha256": "39c0d4acdee70132c0c14cfde98276e4de3af54bb11e435f62c0ad6e6b797f5d"
@@ -4773,6 +5300,7 @@
       "ayahs": 23,
       "marks": 452,
       "ink": 451,
+      "reach": 0,
       "tilt": 0,
       "hand": 1,
       "sha256": "33d5ad5ceef1e6d844bc029acdf260f1167ce5cd4b6fc192c6064b444799161c"
@@ -4782,15 +5310,17 @@
       "ayahs": 17,
       "marks": 557,
       "ink": 555,
-      "tilt": 1,
+      "reach": 1,
+      "tilt": 0,
       "hand": 1,
-      "sha256": "e88de85b7613123cc2e209811552d667d6824dd7f64fdc06c94a19ae8dab0509"
+      "sha256": "58c68e29fe256907bc4d777a550048f768888d1e705d848077bd91678773e9fc"
     },
     {
       "page": 525,
       "ayahs": 18,
       "marks": 547,
       "ink": 547,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "0ad346946daa77f0aa9d4db06554cd07eecb2d20449644e6322a33eff0f74a8f"
@@ -4800,6 +5330,7 @@
       "ayahs": 26,
       "marks": 553,
       "ink": 550,
+      "reach": 0,
       "tilt": 0,
       "hand": 3,
       "sha256": "d99056fb9a09497c342b6aef95b699e84c35d5e45176825b509fc48df9b236f3"
@@ -4809,6 +5340,7 @@
       "ayahs": 18,
       "marks": 644,
       "ink": 644,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "a07ea0fbc5e61de7714a0ee5829cd6f11748d048f21af884814f7449c3b30d5e"
@@ -4818,6 +5350,7 @@
       "ayahs": 24,
       "marks": 484,
       "ink": 484,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "bbb18838c69238c23c1060e4ac036f4ac5f2c9121b6e77b555cca4a7d6eb7f2b"
@@ -4827,6 +5360,7 @@
       "ayahs": 21,
       "marks": 589,
       "ink": 589,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "395df20078f5a860343de6fb70427f692f7048e4f9e96af9aad43eac941c06de"
@@ -4836,6 +5370,7 @@
       "ayahs": 22,
       "marks": 584,
       "ink": 575,
+      "reach": 0,
       "tilt": 1,
       "hand": 8,
       "sha256": "c2b1418cbbace3bb255641b670d87ae1018ab6feb6f88404a17e409f44fd475b"
@@ -4845,6 +5380,7 @@
       "ayahs": 24,
       "marks": 451,
       "ink": 450,
+      "reach": 0,
       "tilt": 0,
       "hand": 1,
       "sha256": "6f0339fb25f5b65e933cb023fb794c3134155a360745d7283e01052afe7c01f6"
@@ -4854,6 +5390,7 @@
       "ayahs": 23,
       "marks": 589,
       "ink": 589,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "b73974f69124c6685ebae022b2d1d3a83878f75ddece267bcb1a76c2cb4b09d1"
@@ -4863,6 +5400,7 @@
       "ayahs": 28,
       "marks": 570,
       "ink": 569,
+      "reach": 0,
       "tilt": 0,
       "hand": 1,
       "sha256": "c81f79e2f6918e318375f0b2c6357dd198c0a9586b88a4c6d8c898aaadb22383"
@@ -4872,6 +5410,7 @@
       "ayahs": 25,
       "marks": 444,
       "ink": 439,
+      "reach": 0,
       "tilt": 0,
       "hand": 5,
       "sha256": "55d5ef2716a9b6acc527b862539ef437c31c323adedd8022625f8514ec897fdb"
@@ -4881,6 +5420,7 @@
       "ayahs": 34,
       "marks": 538,
       "ink": 535,
+      "reach": 0,
       "tilt": 0,
       "hand": 3,
       "sha256": "53d688c038d0c1001214d37e2e3127d4e482ba24ee46894045e6fe3c1c7df755"
@@ -4890,6 +5430,7 @@
       "ayahs": 26,
       "marks": 560,
       "ink": 557,
+      "reach": 0,
       "tilt": 0,
       "hand": 3,
       "sha256": "971308a3f48b8d7d78a57d8beb91d52dd417ecd185f4646a081a1c3244a99cfa"
@@ -4899,6 +5440,7 @@
       "ayahs": 23,
       "marks": 486,
       "ink": 486,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "6f032ca899451a0654c9bd292317f4cfa852aaad2b6a7d64c4669e67e71d8c99"
@@ -4908,6 +5450,7 @@
       "ayahs": 8,
       "marks": 604,
       "ink": 598,
+      "reach": 0,
       "tilt": 0,
       "hand": 6,
       "sha256": "47671a9523ea7f3896dbfb1aede800962faa719c6a7a4dcd26062e4216476b27"
@@ -4917,6 +5460,7 @@
       "ayahs": 7,
       "marks": 612,
       "ink": 611,
+      "reach": 0,
       "tilt": 0,
       "hand": 1,
       "sha256": "abdff67cec875f2cf7e559f57adf6eeae352b9df289fabde0080436d8e1b350e"
@@ -4926,6 +5470,7 @@
       "ayahs": 6,
       "marks": 580,
       "ink": 580,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "ec76914b9bb0698cf56bbbf4c4503108d5e59341e05d52f7c5086543070f4b47"
@@ -4935,6 +5480,7 @@
       "ayahs": 5,
       "marks": 561,
       "ink": 561,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "604fb5215eb9b3e9ee99cc66fcfe0148d03caa1dcfd93daaaa39ac40debe4ec9"
@@ -4944,6 +5490,7 @@
       "ayahs": 6,
       "marks": 509,
       "ink": 509,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "a87d03d64a2ce510ba51eb6654d032a0c6364cc112d0e8d7fb10dcf126f3ce3f"
@@ -4953,6 +5500,7 @@
       "ayahs": 5,
       "marks": 642,
       "ink": 642,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "86d2e0a7f9878223ec5932e3872f3bd8edad01b2bc17cd781242eb52e9a8c415"
@@ -4962,6 +5510,7 @@
       "ayahs": 10,
       "marks": 653,
       "ink": 651,
+      "reach": 0,
       "tilt": 0,
       "hand": 2,
       "sha256": "c1b0338b3435bcb92b10c5096f1418ff9cd7e4f6bcea6e37186cd7acf697cf3e"
@@ -4971,15 +5520,17 @@
       "ayahs": 4,
       "marks": 508,
       "ink": 507,
-      "tilt": 1,
+      "reach": 1,
+      "tilt": 0,
       "hand": 0,
-      "sha256": "788ec81043c1f88ec8e52000ac160a56772eca3ed481b2d2d926d9a7648037a8"
+      "sha256": "89d8cc26ff18bcdb567bc9db7e3988bd445617949008b945b0527e5f3d552cd9"
     },
     {
       "page": 546,
       "ayahs": 6,
       "marks": 589,
       "ink": 589,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "b3652ae1e37faf65f2d1ee9423067e0b4e478533e1b1483a228d0bd4aeb1a044"
@@ -4989,6 +5540,7 @@
       "ayahs": 7,
       "marks": 540,
       "ink": 540,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "01cc8a23d521a48f40298066833a10d6cfd0e806d2e0825b275825894766a195"
@@ -4998,6 +5550,7 @@
       "ayahs": 8,
       "marks": 532,
       "ink": 532,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "ab92f82668cfaf40a0497e01b64e389bfa538585a357e9976c17bf77c640beee"
@@ -5007,6 +5560,7 @@
       "ayahs": 5,
       "marks": 623,
       "ink": 623,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "c82af52a7630030f4334be447def246754591ad343b8df0018c1df8c1ff5ba9d"
@@ -5016,6 +5570,7 @@
       "ayahs": 6,
       "marks": 677,
       "ink": 677,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "65d5a1d3c719d83de33a4b79e057d026602556fa838e40fd0c944c8a6eeddca2"
@@ -5025,6 +5580,7 @@
       "ayahs": 7,
       "marks": 494,
       "ink": 494,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "6a9d935d8b44fcf8cc9509cff180bbd7ff6e1ec89d9275066823aa9bee69c9c6"
@@ -5034,6 +5590,7 @@
       "ayahs": 9,
       "marks": 704,
       "ink": 702,
+      "reach": 0,
       "tilt": 0,
       "hand": 2,
       "sha256": "45a08be33eaee8536f56edabb0cb83d5f34c6bf2e6bb1c3bce5cfbb1f19b65de"
@@ -5043,6 +5600,7 @@
       "ayahs": 8,
       "marks": 511,
       "ink": 511,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "140aa4b44f6d8271b7cc5df4770ad848ae2a79f6ee915760d84c0e25f8d39d58"
@@ -5052,6 +5610,7 @@
       "ayahs": 7,
       "marks": 525,
       "ink": 521,
+      "reach": 0,
       "tilt": 0,
       "hand": 4,
       "sha256": "f0293f32d7643ea175af44201614d8c7ff68a4cdd088ca279cba6d7cdd19ebf3"
@@ -5061,6 +5620,7 @@
       "ayahs": 7,
       "marks": 522,
       "ink": 522,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "b8a4601577dc2184bcfea68c24fa79423601103803c5266415f8b9b32dc76968"
@@ -5070,6 +5630,7 @@
       "ayahs": 9,
       "marks": 581,
       "ink": 580,
+      "reach": 0,
       "tilt": 0,
       "hand": 1,
       "sha256": "ffe50067388c03a729910e47e05245423bdf47dfd926931fe6fbe50dc1cf49aa"
@@ -5079,6 +5640,7 @@
       "ayahs": 9,
       "marks": 500,
       "ink": 500,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "30d66ae16f100b4fb2833af79efab11b46bbdcd16b544c011853b9bd83d7b31a"
@@ -5088,6 +5650,7 @@
       "ayahs": 5,
       "marks": 589,
       "ink": 589,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "9bef692ed2eeb2c1b456c23c5b0b74b4cac9a460f44fd9d153d747e31affb9a6"
@@ -5097,6 +5660,7 @@
       "ayahs": 7,
       "marks": 652,
       "ink": 652,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "cec5ba3eb5a554ac62c6bd8c7644f2ad736e785f98061f2c648dab0d274f59ef"
@@ -5106,6 +5670,7 @@
       "ayahs": 7,
       "marks": 571,
       "ink": 566,
+      "reach": 0,
       "tilt": 0,
       "hand": 5,
       "sha256": "a69703725ec5f95a0abd27e762a9de1b9170b17b0167bc231c234d0aacb840aa"
@@ -5115,6 +5680,7 @@
       "ayahs": 5,
       "marks": 535,
       "ink": 535,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "efe97283c3e15e8b2cb510aa3d30b70a2614c7319f36605f967e64b7e9c4ae7c"
@@ -5124,6 +5690,7 @@
       "ayahs": 12,
       "marks": 529,
       "ink": 527,
+      "reach": 0,
       "tilt": 0,
       "hand": 2,
       "sha256": "d73d93c34e3c186e65c03e784209a8481d6602b4337d42f980781f70627a0aae"
@@ -5133,6 +5700,7 @@
       "ayahs": 14,
       "marks": 599,
       "ink": 599,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "0930413ef5ad257d1a05cba32626160628a4b214f3d70a42e226fe7ebb32739c"
@@ -5142,6 +5710,7 @@
       "ayahs": 20,
       "marks": 481,
       "ink": 479,
+      "reach": 0,
       "tilt": 1,
       "hand": 1,
       "sha256": "28cc0f67fd1a6c4fdd6202dce8b521330ae9f47f8f847c9add8769ad0f4a8720"
@@ -5151,6 +5720,7 @@
       "ayahs": 26,
       "marks": 635,
       "ink": 635,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "9b3c290350dd5954b2038beeeafe6ca00c7fd75b3f13d62654eff9a06ea07ffc"
@@ -5160,15 +5730,17 @@
       "ayahs": 18,
       "marks": 520,
       "ink": 518,
-      "tilt": 1,
+      "reach": 1,
+      "tilt": 0,
       "hand": 1,
-      "sha256": "14a9653f712bd56994e999a7acb56044166d756f89669226499b9c5ad3d512f0"
+      "sha256": "d9a9c448ca4784bf0e83b5a5e7dd67a8bc77d2be982c3462abb68703792379b4"
     },
     {
       "page": 567,
       "ayahs": 27,
       "marks": 622,
       "ink": 618,
+      "reach": 0,
       "tilt": 0,
       "hand": 4,
       "sha256": "9c6f3da692084069f5ef4558860a149f1111a6d0501a89ed2879e636728a2b4e"
@@ -5178,6 +5750,7 @@
       "ayahs": 27,
       "marks": 479,
       "ink": 477,
+      "reach": 0,
       "tilt": 0,
       "hand": 2,
       "sha256": "bcd9702ad1bee08f3785c19e6b3d5c3cbc7d2ffeebc6c4f43ce88397a52019bf"
@@ -5187,6 +5760,7 @@
       "ayahs": 30,
       "marks": 639,
       "ink": 639,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "231ba0fd88404d190949e92063561a91cb23f1a83bb584565bb349f154f5476a"
@@ -5196,6 +5770,7 @@
       "ayahs": 14,
       "marks": 514,
       "ink": 513,
+      "reach": 0,
       "tilt": 0,
       "hand": 1,
       "sha256": "5fc150f891514b1733b47c5139c0ba7ff725c3be6a58f0a212f708b655770d5e"
@@ -5205,6 +5780,7 @@
       "ayahs": 18,
       "marks": 562,
       "ink": 562,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "bba065d92177771852f502ebbbb32826ae8749c19fc58fe5c083740f2b62c56b"
@@ -5214,6 +5790,7 @@
       "ayahs": 13,
       "marks": 527,
       "ink": 520,
+      "reach": 0,
       "tilt": 0,
       "hand": 7,
       "sha256": "f94b031e3c4f8ab46d6aec048f589f27abd9e510c74697c1efce333404133680"
@@ -5223,6 +5800,7 @@
       "ayahs": 15,
       "marks": 592,
       "ink": 592,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "ea024f2015d20e0ade34bd853526a14be9f8cf7c1c256b3a2ccab673c356f2f1"
@@ -5232,6 +5810,7 @@
       "ayahs": 19,
       "marks": 510,
       "ink": 509,
+      "reach": 0,
       "tilt": 0,
       "hand": 1,
       "sha256": "c6cd3f2269e20b0e99037c0f69e0e59960c8b9d1e038713273f8b36c90b57a87"
@@ -5241,6 +5820,7 @@
       "ayahs": 19,
       "marks": 547,
       "ink": 547,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "a23b583d72975ad499d6c877d1d3f9d544cbfbc74ba6810c22e33681b78bc0af"
@@ -5250,6 +5830,7 @@
       "ayahs": 29,
       "marks": 620,
       "ink": 617,
+      "reach": 0,
       "tilt": 0,
       "hand": 3,
       "sha256": "1f921c6732bd89d02a89823f2c0c5ef782f908e00c5854478d7318e3ac193af8"
@@ -5259,6 +5840,7 @@
       "ayahs": 28,
       "marks": 561,
       "ink": 560,
+      "reach": 0,
       "tilt": 0,
       "hand": 1,
       "sha256": "604bf51115c0e5bb1481324dd28737fdcd9e1abe55dd701e15400dd65260782d"
@@ -5268,6 +5850,7 @@
       "ayahs": 26,
       "marks": 534,
       "ink": 525,
+      "reach": 0,
       "tilt": 0,
       "hand": 9,
       "sha256": "86363f6a28cfd331b0990f2a7caa69aea0e1f728e72166b6a3a4be5e8be1c7a4"
@@ -5277,24 +5860,27 @@
       "ayahs": 20,
       "marks": 595,
       "ink": 593,
-      "tilt": 1,
+      "reach": 1,
+      "tilt": 0,
       "hand": 1,
-      "sha256": "884497c618fe7313f111891782f6d4601ca4787cb5059a8399f7d7324964f428"
+      "sha256": "142ad25242b9668fd8b7982ff158ec5d23940190cee0a471dbf6d31f65af6a37"
     },
     {
       "page": 580,
       "ayahs": 25,
       "marks": 494,
       "ink": 487,
-      "tilt": 2,
+      "reach": 2,
+      "tilt": 0,
       "hand": 5,
-      "sha256": "bf57eac96762d404d149b5a0b4d531938178aa1e192c57954b3493aed56b25b4"
+      "sha256": "a9672964512e04d95ca5d35afd610d28122c6111b657b70026b79b81e05647a7"
     },
     {
       "page": 581,
       "ayahs": 31,
       "marks": 574,
       "ink": 572,
+      "reach": 0,
       "tilt": 0,
       "hand": 2,
       "sha256": "eafe66cca1426ed552b8722b13ec8fa5f4cfd87c912f1bba11820b36990c1ce5"
@@ -5304,6 +5890,7 @@
       "ayahs": 30,
       "marks": 445,
       "ink": 438,
+      "reach": 0,
       "tilt": 0,
       "hand": 7,
       "sha256": "cdf8d29ed5b06e301c8b904ce7a51c2a80a536f1ac532321cbcd7214a05a8a53"
@@ -5313,6 +5900,7 @@
       "ayahs": 26,
       "marks": 517,
       "ink": 517,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "2a7d3925650d2a054bf6dc4e8bd1d1abd7f6101c69836f452d49214939496baa"
@@ -5322,6 +5910,7 @@
       "ayahs": 30,
       "marks": 562,
       "ink": 560,
+      "reach": 0,
       "tilt": 0,
       "hand": 2,
       "sha256": "33e96489713167227c0aa690bc45d2a364301c275dd82d66cae46f15eb9c3c04"
@@ -5331,6 +5920,7 @@
       "ayahs": 40,
       "marks": 567,
       "ink": 566,
+      "reach": 0,
       "tilt": 0,
       "hand": 1,
       "sha256": "7acf9ada7ea78eb9becd770d672cbca1c133b6dd0d7129d2f5987ebfb13bfbd9"
@@ -5340,6 +5930,7 @@
       "ayahs": 31,
       "marks": 465,
       "ink": 464,
+      "reach": 0,
       "tilt": 0,
       "hand": 1,
       "sha256": "b33f44d94ad13e4ec49eeebeb70879378a74ddde032d9e9e0abcd0756518e6a6"
@@ -5349,6 +5940,7 @@
       "ayahs": 23,
       "marks": 415,
       "ink": 415,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "cb12f33b8c96f7856e99a999bab52482782c7a88c78c0e8084fde87b57de1555"
@@ -5358,6 +5950,7 @@
       "ayahs": 29,
       "marks": 588,
       "ink": 574,
+      "reach": 0,
       "tilt": 0,
       "hand": 14,
       "sha256": "a922ee25622db09037958593660302c26e3dd6ecc99e8cf84773371692bd35ea"
@@ -5367,6 +5960,7 @@
       "ayahs": 27,
       "marks": 474,
       "ink": 473,
+      "reach": 0,
       "tilt": 0,
       "hand": 1,
       "sha256": "60961232b9af8dc64cf249f6cf34be784d6f92301e21cf9933316bac6be2ad49"
@@ -5376,6 +5970,7 @@
       "ayahs": 23,
       "marks": 489,
       "ink": 488,
+      "reach": 0,
       "tilt": 0,
       "hand": 1,
       "sha256": "4f4c6af79b13ea44f755f04646730454746fe42bb400e9f2a8a5c415ce96a9ba"
@@ -5385,6 +5980,7 @@
       "ayahs": 27,
       "marks": 414,
       "ink": 414,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "4cd3dfa6f3298175adf8a146f6c32d5dbc6c141452694006b1d6f74fdc448cac"
@@ -5394,6 +5990,7 @@
       "ayahs": 31,
       "marks": 448,
       "ink": 447,
+      "reach": 0,
       "tilt": 0,
       "hand": 1,
       "sha256": "2f9f92ded7b7ceb89352f287ebdd14da330d2c8995b72fa2bc4c7d1258a68cd2"
@@ -5403,6 +6000,7 @@
       "ayahs": 26,
       "marks": 488,
       "ink": 487,
+      "reach": 0,
       "tilt": 0,
       "hand": 1,
       "sha256": "1dd8b834c76d5ef6a83b190e7af0ff12564cc0b0abd706d70a0a4f80d3ed1062"
@@ -5412,6 +6010,7 @@
       "ayahs": 26,
       "marks": 471,
       "ink": 470,
+      "reach": 0,
       "tilt": 0,
       "hand": 1,
       "sha256": "898b284d7ca5738e62c5297573b5f59c6756cf48634e272b4719bcad4e8982bc"
@@ -5421,6 +6020,7 @@
       "ayahs": 26,
       "marks": 412,
       "ink": 412,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "d236a424ec76896ed4f445f45f663a02b6ba825d42da5a2fd5958943f187211e"
@@ -5430,6 +6030,7 @@
       "ayahs": 25,
       "marks": 401,
       "ink": 398,
+      "reach": 0,
       "tilt": 0,
       "hand": 3,
       "sha256": "98a3c6bf58a112e289be34ed7f1dc5abd55eaefe11268dd6f7dbc6e990b1c483"
@@ -5439,6 +6040,7 @@
       "ayahs": 26,
       "marks": 429,
       "ink": 429,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "a1e13ed3d27d2271b6d5fd1a94c5e60973b0dc5562243bae353d2dca218ed6a7"
@@ -5448,6 +6050,7 @@
       "ayahs": 17,
       "marks": 449,
       "ink": 447,
+      "reach": 0,
       "tilt": 0,
       "hand": 2,
       "sha256": "56253ae4f26001ccecc37744a49c1347fda8a6c85c3d560d012221d82a8f2b32"
@@ -5457,6 +6060,7 @@
       "ayahs": 16,
       "marks": 417,
       "ink": 416,
+      "reach": 0,
       "tilt": 0,
       "hand": 1,
       "sha256": "aa1f7611c8137bfdab343d6af95e3499e3212ebcde4bcf7d06dcc177653c1d41"
@@ -5466,6 +6070,7 @@
       "ayahs": 25,
       "marks": 386,
       "ink": 385,
+      "reach": 0,
       "tilt": 0,
       "hand": 1,
       "sha256": "34f08a546eda417b25c52e32b6f4f9e7307b406a4497f3f9715b1fddcb9acd4b"
@@ -5475,6 +6080,7 @@
       "ayahs": 17,
       "marks": 312,
       "ink": 312,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "0920d3f8eebdff0279aed8e68c2c6ea099c70d7cbfd5b07239e1ddb999220800"
@@ -5484,6 +6090,7 @@
       "ayahs": 14,
       "marks": 236,
       "ink": 236,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "3b33c852f404126a298c8ca4c332567785aeceef07fe3c6d8bab086c550e5b08"
@@ -5493,6 +6100,7 @@
       "ayahs": 14,
       "marks": 256,
       "ink": 256,
+      "reach": 0,
       "tilt": 0,
       "hand": 0,
       "sha256": "2ff2c6c03f2cbcd577229e3a769d7a20391097f9285ade863eac814cea16bcc6"
@@ -5502,6 +6110,7 @@
       "ayahs": 15,
       "marks": 195,
       "ink": 194,
+      "reach": 0,
       "tilt": 0,
       "hand": 1,
       "sha256": "292204d5699972be0c1d2205a5023be07fec26b796238a58bf214231b19d242f"

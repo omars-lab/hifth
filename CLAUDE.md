@@ -4,6 +4,8 @@
 
 This is the tenet. Everything below is how it is enforced.
 
+And it is not only for pages and records: **always explain things in simple, straightforward language, with no jargon** — in conversation as much as in a checked-in document. When you tell the owner what the options are, what broke, what a choice would cost, or where something stands, use plain words a reader who has never opened this repository would follow, and say the plain thing a jargon term stands for instead of naming the term. Domain words the owner already uses stay; our own words for our own plumbing go.
+
 Hifth is for huffaz, and its decisions get made by people who are not in the weeds of this
 code — including the person who owns it, six months from now, and anyone they show it to.
 So **every options page and every decision record must be followable by someone who has

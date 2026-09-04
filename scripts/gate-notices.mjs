@@ -179,6 +179,13 @@ const UNBUCKETED = {
   // no attribution — so the tree carries no inherited terms and the source entry
   // is a courtesy pointer, not a condition.
   words: { verdict: "ours", source: "word-geometry-mushafdatabase" },
+  // The same kind of thing, one tree over: where every diacritic mark sits, four
+  // numbers to a mark, and the 892 the reader placed by hand. No byte of the
+  // ligature print they were measured from ships, and that print's grant reserves
+  // commercial printing while leaving digital use free of any attribution — so the
+  // tree carries no inherited terms and the source is a courtesy pointer, not a
+  // condition.
+  marks: { verdict: "ours", source: "hafs-kfqc" },
   // Ships the whole 6,236-entry page table verbatim, which is the third of the
   // three outputs the pagination question covers. Having a row in the licence
   // table is what it was missing; what the row cannot yet say is settled.
