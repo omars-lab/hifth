@@ -2907,6 +2907,29 @@ the worst of it, is exactly what the next sitting would answer — and unlike th
 population, which is already known to be almost entirely wrong, this is a population that ships
 today as trusted and has never had a rate put on it at all.
 
+**Were the eighty a fair draw, or the worst of it? On everything measurable without an eye, a
+fair draw.** No eye touched the 259, and no machine can supply the reader's complaint that the
+box was wrong — that is exactly what a sitting is. But the question "did these eighty happen to
+be the worst of it" can be asked of the features that do not need an eye: the search score, how
+far the search was allowed to look, the ink under the mark, and the match before the search ran.
+On every one of them the eighty that were sat and the 259 that were not are the same population.
+The sat marks match at a median score of 0.913, the unsat at 0.910; the ink under them is the
+same to three decimals; four out of five in each group ran out of room on the sideways axis, not
+the vertical. A standard test for "are these two samples drawn from one distribution" comes back
+*yes* on every feature — the largest gap between the two never reaches even two-thirds of the
+threshold that would flag a real difference.
+
+So the eighty are not the worst of the 339 hiding the rest; they are an ordinary slice of it.
+That does not prove the other 259 each carry a complaint — only an eye can say that — but it
+removes the one worry that would make the eighty untrustworthy: there is no measurable way in
+which the unsat marks are a different, gentler population. If the eighty were all a little wrong,
+the 259 that look identical by every number are very unlikely to be all right. The decision this
+leaves is no longer "sit 259 to find out"; it is "ship a uniformly-small wrong as-is, or sit a
+small confirming sample, knowing the population is homogeneous." The whole comparison is in
+[`docs/validation/rulings/2026-09-04-edge-still-placed-sample-representativeness.json`](../validation/rulings/2026-09-04-edge-still-placed-sample-representativeness.json),
+rebuilt by its script from the placement rows and the two committed sittings; it holds only
+scores, page numbers and counts, no ink and no scripture.
+
 **Where the eighty answers actually are.**
 [`docs/validation/rulings/2026-08-17-placement-edge-still-placed.seed23.settled.json`](../validation/rulings/2026-08-17-placement-edge-still-placed.seed23.settled.json)
 carries all eighty, mark by mark — the box we ship, the box the reader settled on, and how far
