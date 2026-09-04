@@ -357,10 +357,27 @@ href: https://github.com/mushafdatabase/MushafDatabase-Ligature-Based-SVG
 These are named in the plan for later loops. They are listed here so their license
 review is tracked from the start; no bytes are vendored until the noted loop.
 
-- **QUL (qul.tarteel.ai) layout DB + phrase ranges** — ayah→page table for edge dir
-  bucketing (Loop 4a) + anchor cross-check (Loop 4b). Madani layouts: V1/1405H
-  (id 15), V2/1421H (id 10), V4/1441H (id 19) — pin the print matching quran-svg
-  in Loop 4a. License: per-resource on QUL; review each before use.
+- **QUL (qul.tarteel.ai) — a ruler and an outbound link, never vendored.** This is the
+  settled shape, not a pending one: `qul-reliance` (decided **A**) leans on QUL only to
+  measure our own numbers against it and to link a reader out to it, and this repo copies
+  **none of its bytes**. Option C, copy the layout numbers, was turned down. The resources
+  ruled against — read from a **gitignored** cache, never committed — are the KFGQPC QCF
+  V2/1421H page layout (id 10; the layouts are V1/1405H id 15, V2/1421H id 10, V4/1441H
+  id 19, and we match V2), the juz metadata, and the two similarity corpora (id 73
+  phrase-level, id 74 ayah-level). The measurement is `make probe-qul`, pinned numbers-only
+  in `packages/etl/data/qul/qul-rulers.probe.json`; the outbound link is
+  `https://qul.tarteel.ai/cms/verses/N`.
+
+  **Licence: per-resource on QUL (their FAQ #3/#9), and its confirmation is a human
+  check, not done here.** Because nothing is vendored there is no fenced licence to bind
+  to a colophon row — but attribution is still owed for ruler use, and the exact licence +
+  attribution string for each of the four resources above must be read off that resource's
+  own (session-gated) page before it is relied on. That read, the eyeball that each cached
+  export is genuinely text-free, and the recording of each string back here are the ledger
+  check `qul-rulers-terms-and-text-free` (owner: user, pending). The
+  `leverage-qul` skill's rubric (`.claude/skills/leverage-qul/resources.md`) tracks each
+  resource's text-bearing status and its PENDING/confirmed licence state; fill a row there
+  and add its verbatim licence here when the check is run.
 - **QurSim** — *demoted 2026-07-25*: semantic relatedness (Ibn Kathir-derived,
   graded pairs), not lafẓi mutashabihat, and no canonical download endpoint.
   Someday-scoped as a reserved `related` edge type; not a Loop 4 source.
