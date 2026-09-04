@@ -54,7 +54,375 @@
       "theirPairs": 3552,
       "oursCorroborated": 70,
       "oursCorroboratedPct": 2.8,
-      "novelToUs": 2295
+      "novelToUs": 2295,
+      "gap": {
+        "strongMisses": 781,
+        "verbatimMisses": 635,
+        "versesTouched": 384,
+        "shortNoise": 712,
+        "strongestMissing": [
+          {
+            "pair": "2:136|3:84",
+            "sharedWords": 29,
+            "score": 90,
+            "coverage": 100
+          },
+          {
+            "pair": "16:115|2:173",
+            "sharedWords": 21,
+            "score": 89,
+            "coverage": 84
+          },
+          {
+            "pair": "13:25|2:27",
+            "sharedWords": 19,
+            "score": 86,
+            "coverage": 83
+          },
+          {
+            "pair": "2:123|2:48",
+            "sharedWords": 18,
+            "score": 92,
+            "coverage": 100
+          },
+          {
+            "pair": "2:62|5:69",
+            "sharedWords": 18,
+            "score": 87,
+            "coverage": 75
+          },
+          {
+            "pair": "11:110|41:45",
+            "sharedWords": 18,
+            "score": 100,
+            "coverage": 100
+          },
+          {
+            "pair": "2:49|7:141",
+            "sharedWords": 17,
+            "score": 92,
+            "coverage": 94
+          },
+          {
+            "pair": "4:116|4:48",
+            "sharedWords": 17,
+            "score": 84,
+            "coverage": 85
+          },
+          {
+            "pair": "2:35|7:19",
+            "sharedWords": 16,
+            "score": 87,
+            "coverage": 89
+          },
+          {
+            "pair": "10:38|11:13",
+            "sharedWords": 16,
+            "score": 93,
+            "coverage": 89
+          },
+          {
+            "pair": "22:62|31:30",
+            "sharedWords": 16,
+            "score": 100,
+            "coverage": 100
+          },
+          {
+            "pair": "2:59|7:162",
+            "sharedWords": 15,
+            "score": 80,
+            "coverage": 88
+          },
+          {
+            "pair": "2:107|9:116",
+            "sharedWords": 15,
+            "score": 88,
+            "coverage": 88
+          },
+          {
+            "pair": "2:134|2:141",
+            "sharedWords": 15,
+            "score": 100,
+            "coverage": 100
+          },
+          {
+            "pair": "3:116|58:17",
+            "sharedWords": 15,
+            "score": 91,
+            "coverage": 83
+          },
+          {
+            "pair": "9:55|9:85",
+            "sharedWords": 15,
+            "score": 85,
+            "coverage": 88
+          },
+          {
+            "pair": "20:128|32:26",
+            "sharedWords": 15,
+            "score": 83,
+            "coverage": 83
+          },
+          {
+            "pair": "61:9|9:33",
+            "sharedWords": 14,
+            "score": 100,
+            "coverage": 100
+          },
+          {
+            "pair": "16:43|21:7",
+            "sharedWords": 14,
+            "score": 97,
+            "coverage": 93
+          },
+          {
+            "pair": "27:81|30:53",
+            "sharedWords": 14,
+            "score": 97,
+            "coverage": 100
+          },
+          {
+            "pair": "29:22|42:31",
+            "sharedWords": 14,
+            "score": 94,
+            "coverage": 82
+          },
+          {
+            "pair": "3:10|3:116",
+            "sharedWords": 13,
+            "score": 80,
+            "coverage": 72
+          },
+          {
+            "pair": "21:41|6:10",
+            "sharedWords": 13,
+            "score": 100,
+            "coverage": 100
+          },
+          {
+            "pair": "10:17|6:21",
+            "sharedWords": 13,
+            "score": 90,
+            "coverage": 93
+          },
+          {
+            "pair": "11:50|7:65",
+            "sharedWords": 13,
+            "score": 82,
+            "coverage": 76
+          },
+          {
+            "pair": "30:37|39:52",
+            "sharedWords": 13,
+            "score": 89,
+            "coverage": 87
+          },
+          {
+            "pair": "59:4|8:13",
+            "sharedWords": 12,
+            "score": 96,
+            "coverage": 100
+          },
+          {
+            "pair": "2:122|2:47",
+            "sharedWords": 11,
+            "score": 100,
+            "coverage": 100
+          },
+          {
+            "pair": "24:5|3:89",
+            "sharedWords": 11,
+            "score": 100,
+            "coverage": 100
+          },
+          {
+            "pair": "36:46|6:4",
+            "sharedWords": 11,
+            "score": 100,
+            "coverage": 100
+          },
+          {
+            "pair": "68:7|6:117",
+            "sharedWords": 11,
+            "score": 92,
+            "coverage": 100
+          },
+          {
+            "pair": "66:9|9:73",
+            "sharedWords": 11,
+            "score": 100,
+            "coverage": 100
+          },
+          {
+            "pair": "23:83|27:68",
+            "sharedWords": 11,
+            "score": 91,
+            "coverage": 92
+          },
+          {
+            "pair": "26:109|26:127",
+            "sharedWords": 11,
+            "score": 100,
+            "coverage": 100
+          },
+          {
+            "pair": "26:109|26:164",
+            "sharedWords": 11,
+            "score": 100,
+            "coverage": 100
+          },
+          {
+            "pair": "26:109|26:145",
+            "sharedWords": 11,
+            "score": 100,
+            "coverage": 100
+          },
+          {
+            "pair": "26:109|26:180",
+            "sharedWords": 11,
+            "score": 100,
+            "coverage": 100
+          },
+          {
+            "pair": "26:127|26:164",
+            "sharedWords": 11,
+            "score": 100,
+            "coverage": 100
+          },
+          {
+            "pair": "26:127|26:145",
+            "sharedWords": 11,
+            "score": 100,
+            "coverage": 100
+          },
+          {
+            "pair": "26:127|26:180",
+            "sharedWords": 11,
+            "score": 100,
+            "coverage": 100
+          },
+          {
+            "pair": "26:145|26:180",
+            "sharedWords": 11,
+            "score": 100,
+            "coverage": 100
+          },
+          {
+            "pair": "26:145|26:164",
+            "sharedWords": 11,
+            "score": 100,
+            "coverage": 100
+          },
+          {
+            "pair": "26:164|26:180",
+            "sharedWords": 11,
+            "score": 100,
+            "coverage": 100
+          },
+          {
+            "pair": "59:1|61:1",
+            "sharedWords": 11,
+            "score": 100,
+            "coverage": 100
+          },
+          {
+            "pair": "57:1|61:1",
+            "sharedWords": 11,
+            "score": 92,
+            "coverage": 122
+          },
+          {
+            "pair": "5:92|64:12",
+            "sharedWords": 10,
+            "score": 85,
+            "coverage": 77
+          },
+          {
+            "pair": "41:36|7:200",
+            "sharedWords": 10,
+            "score": 89,
+            "coverage": 91
+          },
+          {
+            "pair": "23:6|70:30",
+            "sharedWords": 10,
+            "score": 100,
+            "coverage": 100
+          },
+          {
+            "pair": "33:62|48:23",
+            "sharedWords": 10,
+            "score": 84,
+            "coverage": 83
+          },
+          {
+            "pair": "39:48|45:33",
+            "sharedWords": 10,
+            "score": 91,
+            "coverage": 91
+          },
+          {
+            "pair": "59:1|62:1",
+            "sharedWords": 10,
+            "score": 84,
+            "coverage": 83
+          },
+          {
+            "pair": "61:1|62:1",
+            "sharedWords": 10,
+            "score": 84,
+            "coverage": 83
+          },
+          {
+            "pair": "2:162|3:88",
+            "sharedWords": 9,
+            "score": 100,
+            "coverage": 100
+          },
+          {
+            "pair": "3:182|8:51",
+            "sharedWords": 9,
+            "score": 100,
+            "coverage": 100
+          },
+          {
+            "pair": "22:10|3:182",
+            "sharedWords": 9,
+            "score": 96,
+            "coverage": 100
+          },
+          {
+            "pair": "39:13|6:15",
+            "sharedWords": 9,
+            "score": 100,
+            "coverage": 100
+          },
+          {
+            "pair": "11:19|7:45",
+            "sharedWords": 9,
+            "score": 90,
+            "coverage": 82
+          },
+          {
+            "pair": "22:10|8:51",
+            "sharedWords": 9,
+            "score": 96,
+            "coverage": 100
+          },
+          {
+            "pair": "12:22|28:14",
+            "sharedWords": 9,
+            "score": 96,
+            "coverage": 90
+          },
+          {
+            "pair": "15:19|50:7",
+            "sharedWords": 9,
+            "score": 81,
+            "coverage": 82
+          }
+        ]
+      }
     },
     "corpus73": {
       "theirCoPairs": 17862,

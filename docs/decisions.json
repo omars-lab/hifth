@@ -91,7 +91,8 @@
       "date": "2026-09-03",
       "related": [
         "loop-4a",
-        "loop-4b"
+        "loop-4b",
+        "similar-ayah-enrichment"
       ]
     },
     {
@@ -442,7 +443,8 @@
         "word-selection",
         "loop-4a",
         "note-export-shape",
-        "highlight-shape"
+        "highlight-shape",
+        "similar-ayah-enrichment"
       ]
     },
     {
@@ -925,6 +927,36 @@
       "related": [
         "highlight-shape",
         "tajweed-colours"
+      ]
+    },
+    {
+      "id": "similar-ayah-enrichment",
+      "question": "Should the app take in the outside library's whole-verse look-alike pairs, as bare verse numbers and no Qur'an text, so a reader on one twin is offered the other?",
+      "status": "open",
+      "options": [
+        {
+          "id": "A",
+          "label": "Leave the look-alike set as it is"
+        },
+        {
+          "id": "B",
+          "label": "Take in the pair numbers only, and offer each twin from the other"
+        },
+        {
+          "id": "C",
+          "label": "Take in the pairs and work out the word-by-word marking too"
+        }
+      ],
+      "artifact": "https://blog.bytesofpurpose.com/hifth/docs/design/similar-ayah-enrichment.html",
+      "page": "docs/design/similar-ayah-enrichment.html",
+      "builtBy": "scripts/build-similar-ayah-gap.mjs",
+      "doc": "docs/decisions/similar-ayah-enrichment.md",
+      "decided": null,
+      "by": null,
+      "date": null,
+      "related": [
+        "qul-reliance",
+        "comparison-crop"
       ]
     }
   ]
