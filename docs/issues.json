@@ -1454,10 +1454,11 @@
         "file": "docs/design/mark-registration.md",
         "item": "㊱"
       },
-      "status": "open",
+      "status": "fixed",
       "severity": "question",
       "owner": "agent",
-      "note": "Not a defect in what the app draws — the shipped placement asset reads each mark's own searched distance and trusts a rescued mark that landed past three units but well inside the eight it was searched to. The public decision page's illustration hard-codes the three-unit wall, so it over-states how many wide-look marks fall back to the printed line. Reconciling the page's trusted/refused illustration with the asset's per-mark test is a page-fidelity follow-up; the correct behaviour already ships. Only marks the wide second look rescued and that settled between three and eight units can diverge. Adjacent to the-search-could-not-look-far-enough (㉔), which introduced the per-mark reach these two tests read differently."
+      "closedBy": "packages/etl/scripts/lib/mark-ink.test.mjs",
+      "note": "Not a defect in what the app draws — the shipped placement asset reads each mark's own searched distance and trusts a rescued mark that landed past three units but well inside the eight it was searched to. The public decision page's illustration hard-codes the three-unit wall, so it over-states how many wide-look marks fall back to the printed line. Reconciling the page's trusted/refused illustration with the asset's per-mark test is a page-fidelity follow-up; the correct behaviour already ships. Only marks the wide second look rescued and that settled between three and eight units can diverge. Adjacent to the-search-could-not-look-far-enough (㉔), which introduced the per-mark reach these two tests read differently. Fixed 2026-09-04: the decision page now calls the ship asset's own out-of-room and refusal tests (the shared reach-aware rule that reads each mark's searchedAt) instead of a parallel three-unit copy, so the two cannot diverge by construction, and was rebuilt from the escalated whole-book displacements the app ships from. The drawn page (179) is unchanged because it has no refused marks; the corpus fall-back count it reports dropped from 1,877 to 668 (99.8% placed from ink), matching how the app decides. Guarded by mark-ink.test.mjs, which pins that a mark searched to eight and landing at three is not out of room while one pinned at eight is."
     },
     {
       "id": "the-search-reported-answers-it-never-checked",

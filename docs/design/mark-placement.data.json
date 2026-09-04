@@ -6,7 +6,7 @@
   "to sit on the printer's own ink. Mark names are Latin; words are referred to by the",
   "print's own word index and never by their text."
  ],
- "ran": "2026-08-15",
+ "ran": "2026-09-04",
  "page": 179,
  "viewBox": "0 0 345 550",
  "far": 0.75,
@@ -25012,7 +25012,7 @@
    },
    "tilt": {
     "far": 0.042,
-    "p50": 0.208
+    "p50": 0.209
    },
    "curve": {
     "far": 0.029,
@@ -25023,96 +25023,96 @@
    "shipped": 0.975,
    "page": 0.181,
    "line": 0.101,
-   "tilt": 0.031,
+   "tilt": 0.032,
    "curve": 0.02
   },
-  "shuffle": 0.328,
+  "shuffle": 0.329,
   "lines": 8820
  },
  "heldOut": {
   "shipped": {
    "pages": 604,
    "scored": 161265,
-   "far": 96.44,
+   "far": 96.45,
    "ci": [
-    96.35,
-    96.53
+    96.36,
+    96.54
    ],
    "p50": 1.233,
-   "p95": 2.489,
-   "trained": 96.39
+   "p95": 2.498,
+   "trained": 96.4
   },
   "page": {
    "pages": 604,
    "scored": 161265,
-   "far": 18.2,
+   "far": 18.23,
    "ci": [
-    18.02,
-    18.39
+    18.04,
+    18.42
    ],
    "p50": 0.395,
-   "p95": 1.338,
-   "trained": 18.05
+   "p95": 1.342,
+   "trained": 18.07
   },
   "line": {
    "pages": 604,
    "scored": 161265,
-   "far": 11.84,
+   "far": 11.83,
    "ci": [
     11.68,
-    12
+    11.99
    ],
    "p50": 0.313,
    "p95": 1.01,
-   "trained": 9.91
+   "trained": 9.88
   },
   "tilt": {
    "pages": 604,
    "scored": 161265,
-   "far": 4.95,
+   "far": 5,
    "ci": [
-    4.84,
-    5.05
+    4.9,
+    5.11
    ],
    "p50": 0.224,
-   "p95": 0.746,
-   "trained": 3.49
+   "p95": 0.75,
+   "trained": 3.48
   },
   "curve": {
    "pages": 604,
    "scored": 161265,
-   "far": 4.12,
+   "far": 4.18,
    "ci": [
-    4.02,
-    4.22
+    4.08,
+    4.28
    ],
    "p50": 0.198,
-   "p95": 0.691,
-   "trained": 2.34
+   "p95": 0.695,
+   "trained": 2.35
   },
-  "shuffle": 32.72,
-  "shuffleCurve": 34.4,
+  "shuffle": 32.87,
+  "shuffleCurve": 34.52,
   "mark": {
-   "placed": 324638,
-   "fellBack": 1877,
-   "share": 99.43,
-   "weak": 1210,
-   "clamped": 730,
+   "placed": 325847,
+   "fellBack": 668,
+   "share": 99.8,
+   "weak": 329,
+   "clamped": 370,
    "fallback": {
-    "far": 73.15,
-    "p50": 1.547,
-    "p95": 4.71
+    "far": 53.14,
+    "p50": 0.826,
+    "p95": 3.778
    },
-   "far": 0.42
+   "far": 0.11
   }
  },
  "neighbour": {
   "anyP50": 8.32,
   "sameP50": 24.8,
   "radius": 3,
-  "jumpAny": 1.08,
-  "jumpSame": 0.014,
-  "jumpSameN": 47
+  "jumpAny": 1.15,
+  "jumpSame": 0.056,
+  "jumpSameN": 182
  },
  "unmeasured": [
   1,
