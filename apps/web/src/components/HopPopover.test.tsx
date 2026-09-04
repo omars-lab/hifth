@@ -4,7 +4,7 @@ import type { Edge, RailChip } from "@hifth/core";
 import { HopPopover } from "./HopPopover";
 
 const edge = (surah: number, ayah: number, extra: Partial<Edge> = {}): Edge => ({
-  type: "loop",
+  type: "mutashabih",
   to: `quran/hafs-kfqc/${surah}:${ayah}`,
   page: 7,
   dir: { dSurah: 0, dPage: 0, sameJuz: true },
