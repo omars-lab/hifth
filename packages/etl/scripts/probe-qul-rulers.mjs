@@ -196,11 +196,51 @@ function similarityCheck() {
       seen.add(u);
       if (!oursUndir.has(u)) novel += 1;
     }
+    // The gap, characterised. `novelToUs` counts every pair the library has that
+    // we do not — but many are trivial for a memoriser (surah openings sharing
+    // the disconnected letters, single-word coincidences), so bucket by strength.
+    // A "strong" miss is a real look-alike: 4+ shared words, high score, high
+    // coverage. These verse-key pairs are NUMBERS, no Qur'an text — but we ship
+    // none of them today (qul-reliance is "copy none"); this only measures what a
+    // reader would gain if that boundary were reopened. Sample capped + sorted by
+    // shared-word count so the pin names the worst offenders reproducibly.
+    const perSide = new Map(); // undirected -> best {score,cov,mw}
+    for (const [k, arr] of Object.entries(sim))
+      for (const m of arr) {
+        const u = k < m.matched_ayah_key ? `${k}|${m.matched_ayah_key}` : `${m.matched_ayah_key}|${k}`;
+        const cur = { score: m.score, cov: m.coverage, mw: m.matched_words_count };
+        const prev = perSide.get(u);
+        if (!prev || cur.score > prev.score) perSide.set(u, cur);
+      }
+    const novelPairs = [...perSide].filter(([u]) => !oursUndir.has(u));
+    const strong = novelPairs.filter(([, v]) => v.mw >= 4 && v.score >= 80 && v.cov >= 70);
+    const shortNoise = novelPairs.filter(([, v]) => v.mw < 4).length;
+    // A "verbatim" miss is the sharpest case: two verses the ruler scores as a
+    // 100% match over 100% coverage — word-for-word the same verse in two
+    // places — that we do not connect at all. These are the twins a memoriser
+    // most needs a bridge between, and the ones a picture makes undeniable.
+    const verbatim = strong.filter(([, v]) => v.score === 100 && v.cov === 100).length;
+    const versesTouched = new Set();
+    for (const [u] of strong) {
+      const [a, b] = u.split("|");
+      versesTouched.add(a);
+      versesTouched.add(b);
+    }
     result.corpus74 = {
       theirPairs: theirPairs.size,
       oursCorroborated: corrob,
       oursCorroboratedPct: ours.size ? Math.round((corrob / ours.size) * 1000) / 10 : 0,
       novelToUs: novel,
+      gap: {
+        strongMisses: strong.length,
+        verbatimMisses: verbatim,
+        versesTouched: versesTouched.size,
+        shortNoise,
+        strongestMissing: strong
+          .sort((x, y) => y[1].mw - x[1].mw)
+          .slice(0, 60)
+          .map(([u, v]) => ({ pair: u, sharedWords: v.mw, score: v.score, coverage: v.cov })),
+      },
     };
   }
 
@@ -275,11 +315,18 @@ else
 if (S.skipped) console.log(`similarity  — ${S.skipped}`);
 else {
   console.log(`similarity  — ${S.ourEdges} of our directed edges`);
-  if (S.corpus74)
+  if (S.corpus74) {
     console.log(
       `              corpus 74: ${S.corpus74.oursCorroborated} corroborated ` +
         `(${S.corpus74.oursCorroboratedPct}%), ${S.corpus74.novelToUs} pairs novel to us`,
     );
+    if (S.corpus74.gap)
+      console.log(
+        `              gap: ${S.corpus74.gap.strongMisses} strong look-alikes we lack ` +
+          `(${S.corpus74.gap.verbatimMisses} verbatim, ${S.corpus74.gap.versesTouched} verses), ` +
+          `${S.corpus74.gap.shortNoise} short/noise`,
+      );
+  }
   if (S.corpus73)
     console.log(
       `              corpus 73: ${S.corpus73.ourUndirectedCorroborated}/${S.corpus73.ourUndirectedPairs} ` +
