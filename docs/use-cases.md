@@ -511,7 +511,7 @@ Whoever is changing the app next, including this project's own future self. Arri
 
 | | |
 |---|---|
-| happens in | [`docs/map.json:37`](../docs/map.json#L37) — `select-an-ayah` |
+| happens in | [`docs/map.json:36`](../docs/map.json#L36) — `select-an-ayah` |
 | happens in | [`scripts/gate-map.mjs:36`](../scripts/gate-map.mjs#L36) — `features` |
 | proven by | `pnpm gate:map` |
 
