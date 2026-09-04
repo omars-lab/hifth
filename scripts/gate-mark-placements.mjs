@@ -112,7 +112,7 @@ function ayahKeysOf(svg) {
 
 /* ------------------------------------------------------------- per-page checks */
 
-const totals = { marks: 0, ink: 0, tilt: 0, hand: 0 };
+const totals = { marks: 0, ink: 0, reach: 0, tilt: 0, hand: 0 };
 const shippedHand = []; // { page, name, rect }
 
 for (const row of pin.pages) {
@@ -153,7 +153,7 @@ for (const row of pin.pages) {
   const ayahKeys = Object.keys(shard.marks);
   for (const key of ayahKeys) if (!polygonKeys.has(key)) fail(`${where}: ${key} has marks but no polygon on the page`);
 
-  const tally = { marks: 0, ink: 0, tilt: 0, hand: 0 };
+  const tally = { marks: 0, ink: 0, reach: 0, tilt: 0, hand: 0 };
   for (const key of ayahKeys) {
     const list = shard.marks[key];
     if (!Array.isArray(list) || list.length === 0) {
@@ -164,7 +164,7 @@ for (const row of pin.pages) {
       const at = `${where} ${key}`;
       if (!Number.isInteger(mk.w) || mk.w < 1) fail(`${at}: mark word index is ${mk.w}`);
       if (typeof mk.n !== "string" || !mk.n) fail(`${at}: mark has no name`);
-      if (!["ink", "tilt", "hand"].includes(mk.s)) fail(`${at}: mark source is "${mk.s}"`);
+      if (!["ink", "reach", "tilt", "hand"].includes(mk.s)) fail(`${at}: mark source is "${mk.s}"`);
       const rect = mk.r;
       if (!Array.isArray(rect) || rect.length !== 4 || rect.some((v) => !Number.isFinite(v))) {
         fail(`${at}: rectangle is not four finite numbers`);
@@ -184,6 +184,7 @@ for (const row of pin.pages) {
 
   if (row.marks !== tally.marks) fail(`${where}: pin says ${row.marks} marks, the shard holds ${tally.marks}`);
   if (row.ink !== tally.ink) fail(`${where}: pin says ${row.ink} ink, the shard holds ${tally.ink}`);
+  if ((row.reach ?? 0) !== tally.reach) fail(`${where}: pin says ${row.reach ?? 0} reach, the shard holds ${tally.reach}`);
   if (row.tilt !== tally.tilt) fail(`${where}: pin says ${row.tilt} tilt, the shard holds ${tally.tilt}`);
   if (row.hand !== tally.hand) fail(`${where}: pin says ${row.hand} hand, the shard holds ${tally.hand}`);
   if (row.ayahs !== ayahKeys.length) fail(`${where}: pin says ${row.ayahs} ayahs, the shard holds ${ayahKeys.length}`);
@@ -265,6 +266,6 @@ if (failures.length) {
 
 console.log(
   `gate:mark-placements — ${pin.pages.length} shard(s) match the pin; ${totals.marks} marks drawn ` +
-    `(${totals.ink} on ink, ${totals.tilt} on the line's tilt, ${totals.hand} by hand), every rectangle inside its page; ` +
+    `(${totals.ink} on ink, ${totals.reach} reaching for the ink, ${totals.tilt} on the line's tilt, ${totals.hand} by hand), every rectangle inside its page; ` +
     `all ${totals.hand} hand placements trace to a committed ruling and none is stranded`,
 );
