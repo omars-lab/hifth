@@ -1364,6 +1364,16 @@
           "file": ".claude/skills/mushaf-reference/SKILL.md",
           "symbol": "name: mushaf-reference",
           "note": "The prose half of the probe: which published references are reachable (measured), what each can and cannot settle, and the trap — six of archive.org's twelve KFGQPC scans are a different qira'a or script, so comparing against one produces confident, wrong verdicts. The symbol is the frontmatter name and not a section heading because scripts/code-pointers.mjs reads a leading `#` as a comment, so no Markdown heading can ever be a live pointer; the name is the better anchor anyway, since renaming the skill is the change that would actually strand this row."
+        },
+        {
+          "file": "packages/etl/scripts/probe-qul-rulers.mjs",
+          "symbol": "similarityCheck",
+          "note": "The QUL half of the same idea: measure our shipped numbers against the outside library and pin the AGREEMENT, never the bytes. Reads layout 10 (the V2 page authority), the juz metadata and the two similarity corpora (73 phrase, 74 ayah) from a gitignored cache, and writes verse keys, ids and counts plus the SHA-256 of every file read — so a rerun reproduces or says upstream moved. `probe-` and opt-in for probe-reference.mjs's reason (the cache a clean checkout lacks would make a gate red for everyone but the maintainer). The `gap` block characterises what corpus 74 knows and we do not — 781 strong, 635 verbatim whole-verse twins — which is the evidence the similar-ayah-enrichment decision rests on. No glyph crosses in; gate:scripture and gate:notext stay green."
+        },
+        {
+          "file": ".claude/skills/leverage-qul/SKILL.md",
+          "symbol": "name: leverage-qul",
+          "note": "The prose half of the QUL probe, and the guardrails qul-reliance turns on: QUL is a ruler and an outbound link, never a vendored source, so no byte of its text enters the tree. Walks discover (the /download link is session-gated but 302s to a public Wasabi object) → cache (gitignored, ask first) → sample by eye → pin numbers-only. Its rubric resources.md marks each resource text-bearing or numbers-only and tracks the per-resource licence, which is PENDING until a human reads each session-gated page (the ledger check qul-rulers-terms-and-text-free). Symbol is the frontmatter name, not a heading, for the reason the mushaf-reference and decide rows give."
         }
       ],
       "extend": [
