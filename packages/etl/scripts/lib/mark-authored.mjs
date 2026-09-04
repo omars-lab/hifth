@@ -35,11 +35,25 @@
 
 /**
  * A mark's own identity, re-derivable from the print and stable across extracts:
- * the word it sits on (`surah:aya:idx`), the mark's name, and its rank among the
- * same-named marks in its group (`nth` of `of`, the count `marksOf` assigns
- * right-to-left). Two marks a reader could tell apart never share one.
+ * the word it sits on (`surah:aya:idx`), the ligature it sits on within that word
+ * when it has one (the letters and which of the word's ligatures, numbered right
+ * to left), the mark's name, and its rank among the same-named marks in that
+ * ligature (`nth` of `of`, the count `marksOf` assigns right-to-left). Two marks
+ * a reader could tell apart never share one.
+ *
+ * The ligature has to be named, not just the word: `marksOf` ranks a mark only
+ * against the others in its own ligature, so a word that draws the same letter
+ * twice — two hamzas, each a solo ligature carrying one fatha — would hand both
+ * fathas the identical "first of one" and collapse two distinct marks onto one
+ * id. Naming the ligature (its letters and its right-to-left ordinal in the word)
+ * is what keeps the identity one-to-one across the whole book. A mark the corpus
+ * drew inside no ligature carries none of this, and its word already tells it
+ * apart from every other.
  */
-export const authoredIdOf = (m) => `${m.surah}:${m.aya}:${m.idx}/${m.name}#${m.nth}of${m.of}`;
+export const authoredIdOf = (m) => {
+  const grp = m.lig ? `${m.lig.text ?? ""}#${m.ligNo ?? 1}/` : "";
+  return `${m.surah}:${m.aya}:${m.idx}/${grp}${m.name}#${m.nth}of${m.of}`;
+};
 
 const near = (a, b, eps) =>
   Array.isArray(a) && Array.isArray(b) && a.length === b.length && a.every((v, i) => Math.abs(v - b[i]) <= eps);

@@ -90,6 +90,7 @@ const CEILINGS = {
   roots: 768 * 1024, //  532.3 KB   the root index started carrying text
   skins: 384 * 1024, //  245.1 KB   the tajweed shards started carrying geometry
   words: 1792 * 1024, // 885.6 KB   the word shards started carrying text
+  marks: 5120 * 1024, // 3.03 MB    the mark-placement shards began carrying a final rectangle per mark (option H) — the biggest asset the app ships, one row per diacritic; a jump means the shards started carrying something beyond (word, name, rect, source)
 };
 
 /** A single page's SVG, gzipped. Today's heaviest is 54.3 KB (page 567). */

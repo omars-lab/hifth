@@ -123,5 +123,29 @@ export function marksOf(p) {
       });
     }
   }
+
+  // Which ligature of its word a mark sits on, numbered right to left. A rank
+  // among same-named marks is only unique inside one ligature, so a word that
+  // draws the same letter twice — two hamzas, each its own solo ligature —
+  // hands both their sole fatha the same "first of one" and the two become
+  // indistinguishable. This ordinal is the missing half: it names WHICH of the
+  // word's ligatures, so a mark's identity is unique across the whole book even
+  // when its neighbour is a copy of the same letter. Marks the corpus drew
+  // inside no ligature carry 0; their word is already their group.
+  const ligX = new Map();
+  for (const r of rows) {
+    if (!r.lig) continue;
+    const w = `${r.surah}:${r.aya}:${r.idx}`;
+    let byLig = ligX.get(w);
+    if (!byLig) ligX.set(w, (byLig = new Map()));
+    const prev = byLig.get(r.lig);
+    if (prev === undefined || r.box[0] > prev) byLig.set(r.lig, r.box[0]);
+  }
+  const ligNo = new Map();
+  for (const byLig of ligX.values()) {
+    [...byLig.entries()].sort((a, b) => b[1] - a[1]).forEach(([lig], i) => ligNo.set(lig, i + 1));
+  }
+  for (const r of rows) r.ligNo = r.lig ? ligNo.get(r.lig) : 0;
+
   return rows;
 }

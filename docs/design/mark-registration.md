@@ -3061,6 +3061,30 @@ decision — putting each mark where its own ink is — and that decision is the
 measurement's to pre-empt. This item is the evidence that ruling needs: the guard's yield, on the marks
 no human will ever check, is 73% trusted and 27% caught. Wiring waits on the ruling; the number does not.
 
+### ㊱ The ship asset and the decision page disagree about which marks ran out of room · **open**
+
+Two tests in the tree ask the same question — did a mark's ink search run out of the room it was
+given? — and they answer it differently, because they read the room differently. The asset the app
+actually draws from asks each mark about *its own* reach: most marks were searched to three units, but
+the ones a wider second look rescued were searched to eight, and each mark carries the distance it was
+actually searched to. The public decision page, where option H is drawn for a reader, hard-codes the
+ordinary three-unit wall for every mark instead.
+
+They give opposite verdicts on exactly one population: a mark the wide look rescued that came to rest
+past three units but inside eight. The ship asset trusts it — rightly, because a mark searched to
+eight units that landed at three was nowhere near the edge of what it was allowed to look at, so its
+match is a real find rather than a wall it backed into. The decision page, seeing only the three-unit
+rule, would mark that same landing as *ran out of room* and show it falling back to the printed line.
+The shipped behaviour is the correct one; the divergence is only in the drawing.
+
+**What would answer it.** Reconcile the decision page's illustration with the ship asset's per-mark
+test — read each mark's own searched distance in the page's `trusted` component instead of a fixed
+three — so a reader inspecting the trusted/refused split on the page sees the same split the app
+ships. Until then the page slightly over-states how many rescued marks fall back to the line. It changes
+nothing the app draws, which is why this is a page-fidelity question and not a defect in the asset. The
+count of affected marks is the wide look's own yield: only marks the second look rescued and that
+settled between three and eight units diverge, and no other mark can.
+
 ## How can someone look at this for themselves?
 
 The measurement writes a page of evidence: the worst verdicts first, each one drawn at a size

@@ -46,6 +46,14 @@ describe("a mark's stable identity", () => {
     const second = authoredIdOf(mark(1, "fatha", [3, 2, 6, 3], { nth: 2, of: 2 }));
     expect(first).not.toBe(second);
   });
+
+  it("separates the same letter drawn twice in one word by which ligature it is", () => {
+    // A word with two hamzas: each is its own solo ligature carrying one fatha,
+    // so both fathas are "first of one" and only the ligature tells them apart.
+    const onFirstHamza = { ...mark(9, "fatha", [294, 55, 7, 4]), lig: { text: "ء" }, ligNo: 1 };
+    const onSecondHamza = { ...mark(12, "fatha", [267, 57, 6, 3]), lig: { text: "ء" }, ligNo: 2 };
+    expect(authoredIdOf(onFirstHamza)).not.toBe(authoredIdOf(onSecondHamza));
+  });
 });
 
 describe("finding the live mark a ruling is about", () => {

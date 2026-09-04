@@ -11,6 +11,7 @@
     "build:adjacency": "node scripts/build-adjacency.mjs",
     "build:roots": "node scripts/build-roots.mjs",
     "build:tajweed": "node scripts/build-tajweed.mjs",
+    "build:mark-placements": "node scripts/build-mark-placements.mjs",
     "audit:corpus": "node scripts/audit-corpus.mjs",
     "etl": "node scripts/extract-pages.mjs && node scripts/build-adjacency.mjs && node scripts/build-roots.mjs && node scripts/build-tajweed.mjs",
     "typecheck": "tsc -p tsconfig.json --noEmit",
