@@ -220,6 +220,15 @@ jobs:
       - name: Gate — every word box lands on the ayah it claims
         run: pnpm gate:words
 
+      # Where every mark is finally drawn — option H, one rectangle per diacritic
+      # across all 604 pages. A hash proves the ~14 MB of shards are the ones the
+      # builder wrote; then this re-derives, from the committed bytes alone, that
+      # every rectangle is drawable on its page and — the reason it exists — that
+      # not one mark a person placed by hand is stranded, reconciling the shipped
+      # hand marks against the committed rulings by rectangle without the corpus.
+      - name: Gate — the mark placements ship, and no hand placement is stranded
+        run: pnpm gate:mark-placements
+
       # The map between the two word indices — the print's, which every box
       # carries, and QAC's, which the roots shards speak. It was derived from a
       # 351 MB corpus this repo does not vendor, so CI cannot re-derive it; what
