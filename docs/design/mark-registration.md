@@ -2938,6 +2938,61 @@ offsets, which is what a ruling is allowed to hold. It cannot show the rectangle
 mark; only a page that draws the print itself could do that, and the next section says plainly
 that no such page exists yet for this document to point to.
 
+**The owner's call, 2026-09-05: fix them, do not just measure them.** Shown the choice — ship
+the uniformly-small wrong as it stands, sit a small confirming sample first, or fix the placement
+for all 339 — the owner chose to fix. The small fault is worth removing, not just recording. That
+turns this from a question into work.
+
+**And the eighty hands say the fix has a direction.** The reader did not move these marks at
+random. On seventy-one of the eighty sideways, and sixty-one of seventy-nine vertically, the
+reader pushed the box *further the same way the automatic search had already been pushing it* —
+mean agreement 0.66 on a scale where one is the same direction and zero is a right angle. This is
+the section's own principle turned into a number: when a mark runs out of room, the search has
+stopped at an arbitrary wall while still getting better, so the direction it was heading is
+trustworthy and only the distance is missing. The eighty hands measured the missing distance —
+a median of about 0.68 units further, in the direction the search was already going. So a fix
+does not have to guess where each of the 339 belongs; it has to let each one keep going the way
+its own search was already pointing, until the ink says stop. What the fix must still settle is
+*how* it finds where to stop — by letting the ink search look further, or by the distance the
+eighty hands measured — and that is the next section's work, not this one's.
+
+**The pivot, 2026-09-05: letting the search look further cannot be the way, and eighty are
+already done.** Two things turned up the moment the fix was actually built against the machinery
+rather than sketched, and together they narrow the work and change the choice.
+
+*First, letting the ink search look further cannot move these marks onto the spot the reader
+wants — and this is provable, not a guess.* When a mark ran out of room, the search did not simply
+stop at the wall; it was already handed a second, much wider look. That wider look reaches out
+eight units, and the furthest any of the eighty readers ever moved a mark was 3.2 units, with a
+median of about 0.68. So every spot any reader preferred was inside the wider search's reach the
+whole time — and on all 339 the wider search still declined to go there and kept the box where it
+was. The reason is the one thing the section keeps circling: the search picks the spot where the
+mark's own ink overlaps best, and the reader picks the spot where the mark *belongs to the eye*,
+and on these marks those are not the same place. The wider search settles it — given room to reach
+the reader's spot, the best-overlap rule looked at it and preferred a different one. There is no
+cleverer automatic search hiding behind this, because the only search there is has already looked
+where the reader points and disagreed. That closes the first of the two ways this section left
+open: the ink search is already at its own best answer for these marks.
+
+*Second, of the 339, eighty are already fixed in what ships.* When a reader sits and settles a
+mark by hand, the app draws it exactly where the reader put it, above whatever the automatic
+search chose — and the two sittings behind this section settled eighty of the 339. Every one of
+those eighty ships today at the reader's own box, not the search's. So the population still
+carrying the small, uniform wrong is not 339 marks; it is the 259 nobody has sat.
+
+*So the choice the owner's "fix them" turns into is narrower and more honest than the one first
+shown.* The automatic search cannot be improved for these — that door is now closed by proof — so
+the 259 can only be set right one of two ways. A hafiz sits them by hand, the way the eighty were,
+which is a reading of each mark and the only thing that carries the reader's own judgement onto
+the page. Or the single direction-and-distance the eighty hands measured — keep going the way each
+mark's own search was already pointing, by about two-thirds of a unit — is applied to all 259
+sight-unseen. The second is an approximation, not a reading: a blanket push sits some marks better
+and some worse, because the eighty hands agreed on the *direction* far more than on the exact
+distance, and it stakes 259 marks no eye has checked on the average of eighty that were. Which of
+those two the 259 are worth is the live question now, and it is the owner's, because the premise
+of the first ask — that a better automatic placement was somewhere to be found — is the thing that
+turned out not to be true.
+
 ### ㉜ What should refuse a piece union too large to trust · **fixed**
 
 **None of the rule ㉘–㉚ describe has been written yet.** Everything above was scored from a
