@@ -2872,7 +2872,7 @@ mark's window, guarded — is now built and drawn by the app, so all three move 
 finding* to *answered*. The guard's own design and cutoff are ㉜ and ㉞; the wiring and its yield
 are ㉟, where the *Closed by* note lives.
 
-### ㉛ The marks that ran out of room and still shipped as placed were never looked at, until now · **confirmed**
+### ㉛ The marks that ran out of room and still shipped as placed were never looked at, until now · **blocked**
 
 ㉕ found the code bug: a mark whose search ran out of room could still slip past the check meant
 to catch that and ship as if its own ink had confidently answered. The bug is fixed, but fixing
@@ -2992,6 +2992,24 @@ distance, and it stakes 259 marks no eye has checked on the average of eighty th
 those two the 259 are worth is the live question now, and it is the owner's, because the premise
 of the first ask — that a better automatic placement was somewhere to be found — is the thing that
 turned out not to be true.
+
+**Decided, 2026-09-05: a hafiz sits the 259 by hand.** Shown the narrowed choice — a hafiz
+sits them, or a blanket nudge is applied to all 259 sight-unseen, or the 259 are left as they
+are for now — the owner chose the hand. It is the only fix that carries a reader's own judgement
+onto the page rather than the average of eighty other readers', and it doubles as the answer to
+the owner's own condition for caring at all: whether an offset this small is visible enough to a
+hafiz to matter is a thing only a hafiz looking can settle, and the looking *is* the fix. A survey
+of how other projects place marks (linked below) found nothing that changes this. Everyone who
+places marks cheaply does it by shipping the letters as live text and letting a font carry the
+mark — the one thing this app does not do — and the only project that works from the printed
+artwork the way this one does reaches for the very same ink-geometry signal our own search uses.
+So there is no automatic method in the field that our search has not already run to the end of,
+and the code is left with nothing owed here: the eighty already ship at the reader's box, and the
+259 now wait on a person. The sitting itself needs no new tool — the report the eighty were sat
+from can draw the same edge population at the rectangle it ships, skip the eighty already answered,
+and hand out the remaining 259 in slices a reader can work through across sittings — so when a
+hafiz is free it is one command, not a rebuild. Prior art:
+[`docs/research/prior-art-mark-registration.md`](../research/prior-art-mark-registration.md).
 
 ### ㉜ What should refuse a piece union too large to trust · **fixed**
 
