@@ -379,6 +379,20 @@ review is tracked from the start; no bytes are vendored until the noted loop.
     NOT a dependency and not a match to aim at — a phrase catalogue records mechanical
     word-runs, where the hop hand-picks the verses a hafiz confuses, so the two diverge by
     design. Login-gated; no licence stated.
+- **MASAQ (Morphologically Annotated Sequential Arabic of the Qur'an)** — a published,
+  openly-licensed grammatical analysis of the whole Qur'an (Mendeley Data `9yvrzxktmr`,
+  **CC BY 4.0**), built on the Tanzil text and tokenised on its own terms. Used 2026-09-05
+  as a build-time **witness** for the segmentation split — read once from a gitignored
+  cache by `packages/etl/scripts/probe-segmentation-witness.mjs`, which ships nothing; the
+  finding is `docs/design/segmentation-witness.data.json` and the reasoning is
+  [`docs/design/what-we-depend-on.md` item ⑩](docs/design/what-we-depend-on.md). It is an
+  **instrument, not an ingredient** (what-we-distribute ②): read only to check a number we
+  derived ourselves, vendored and shipped nowhere. Because it is genuinely open, its licence
+  would in principle permit vendoring with attribution — but this use needs only the number,
+  so nothing of it leaves in the build. Its independence from the morphology corpus is
+  measured, not assumed: it tokenises the book into 77,411 words to the corpus's 77,429 and
+  spells 8.6% of aligned words differently, so it is a second grammar, not an echo of the
+  first.
 - **QurSim** — *demoted 2026-07-25*: semantic relatedness (Ibn Kathir-derived,
   graded pairs), not lafẓi mutashabihat, and no canonical download endpoint.
   Someday-scoped as a reserved `related` edge type; not a Loop 4 source.
