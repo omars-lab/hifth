@@ -51,3 +51,10 @@ id_rsa*
 # (what-we-depend-on ⑪ / probe-hop-recall.mjs). Zero bytes of it ship — the
 # committed finding is docs/design/hop-recall.data.json, numbers and verse keys only.
 packages/etl/data/mutashabihat/.cache/
+
+# MASAQ (Mendeley 9yvrzxktmr, CC BY): a third, independent grammatical analysis of
+# the whole Qur'an, read ONCE into this cache as a build-time witness for the
+# segmentation split (what-we-depend-on ⑩ / probe-segmentation-witness.mjs). Zero
+# bytes of it ship — the committed finding is docs/design/segmentation-witness.data.json,
+# counts and verse keys only.
+packages/etl/data/segmentation/.cache/

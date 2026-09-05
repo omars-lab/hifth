@@ -546,6 +546,16 @@ each washed on the real mus'haf page it sits on, built from committed findings b
 What stays open is the owner's choice between the two ways, not any missing measurement or
 picture; this row waits on that decision.
 
+**And the choice is between two conventions, not a fix for an error (2026-09-05, from ⑩).** A
+third, independent grammar was measured over the 9,533 places where the two ways part, and it
+folds the small attached particle onto its word at every single one of them — the same reading
+the morphology uses, and the opposite of the print, which writes the particle separately. So
+computing the runs over the print's own words is not correcting a mistake in the morphology;
+both grammars agree the join is the grammatical reading, and the print's separated particle is
+its own long-standing typographic convention. Adopting it for the neighbour rail is a licence
+choice made knowing the print is the measured outlier, which is the honest frame for the owner's
+decision — not "the print is right and the corpus is wrong".
+
 ### ⑧ Whether the tajweed spans should move to a pause-aware engine · **open**
 
 An MIT engine with a corpus-free core would mean vendoring no annotation data and no Quran
@@ -586,7 +596,7 @@ not ingredients (what-we-distribute ②) and their licences do not bind — but 
 replacements, which is the whole of what ① is asking. The correctness half is closed here; the
 replacement half stays with ①.
 
-### ⑩ The segmentation disagreement has no disinterested witness · **open**
+### ⑩ The segmentation disagreement has no disinterested witness · **answered**
 
 Whether ⑦ is possible turns on 9,533 places where the print splits a word the morphology
 joins. The only two opinions are the two being compared, so a disagreement cannot say which
@@ -599,6 +609,37 @@ only. It converts ⑦ from an argument into a measurement, and ⑦ is the cheape
 improvement available. Both are share-alike, so they can be read at build time but must not
 be vendored here or shipped. Provenance first: one project the audit examined claimed
 independence while having partly scraped the corpus it was being compared to.
+
+**What answered it, 2026-09-05.** A third grammar was read once as a witness — a published,
+freely-licensed grammatical analysis of the whole Qur'an, built on a different edition of the
+text and split into words on its own terms. It is share-alike, so none of it is vendored or
+shipped; it was read from a local cache, a number was taken, and nothing of it remains in the
+build. The number is checked in beside this document — counts and verse keys, no scripture — and
+the script that took it runs only where the cache is.
+
+Provenance first, as the item demands. A witness copied from the grammar it would check spells
+and splits words identically to it; this one does neither. It tokenises the book into a
+different number of words, and on more than half the verses it spells at least one word
+differently — a plainer spelling where the printed tradition keeps an older one. That
+disagreement is the evidence that it is a second opinion and not an echo of the first.
+
+The finding itself is one-sided and clean. At each of the 9,533 disputed positions the print
+writes a small attached particle — the "and", the "the", the "in" — as its own separate word,
+while the grammar folds it onto the word it belongs to. A split leaves one unmistakable trace
+in any word-by-word grammar: a standalone particle with no word under it. The third witness
+produces that trace **nowhere** — not once in more than seventy-seven thousand words — so it
+folds the particle at **every one of the 9,533 positions**, exactly as the incumbent grammar
+does. Three independent counts agree: the standalone-particle count is zero; the witness's
+word count per verse matches the grammar's almost everywhere, and is never higher except in a
+single verse where the extra word is a real word, not a split particle; and at each disputed
+position the witness carries the particle as a folded piece of its word.
+
+So the disagreement is settled as a disagreement of **convention, not of correctness**. The
+print's separated particle is a typographic habit of the press; folding it is the grammatical
+reading, and now two independent grammars fold it while only the print separates it. That is
+what ⑦ was missing: adopting the print's own word count for the neighbour rail becomes a
+licence choice made with eyes open — the print is the outlier and we can say by how much — not
+a correction of an error, because on the grammar's own terms nothing is in error.
 
 ### ⑪ Nothing measures what the hop does not contain · **answered**
 
