@@ -236,6 +236,14 @@ const POLYGON_REPAIRS = [
     from: "M 253.05 45.89 L 340.0 45.89 L 340.0 81.89 L 253.05 81.89 Z",
     to: "M 5.0 9.89 L 340.0 9.89 L 340.0 45.89 L 5.0 45.89 Z M 253.05 45.89 L 340.0 45.89 L 340.0 81.89 L 253.05 81.89 Z",
   },
+  // p564: 68:3's left-margin box stops 8 units above its line's foot (296.49,
+  // where its line-mate reaches 304.6), so it reads as a fraction of a line
+  {
+    page: 564,
+    number: "068003",
+    from: "M 5.0 268.6 L 28.57 268.6 L 28.57 296.49 L 5.0 296.49 Z M 202.69 296.49 L 340.0 296.49 L 340.0 332.5 L 202.69 332.5 Z",
+    to: "M 5.0 268.6 L 28.57 268.6 L 28.57 304.6 L 5.0 304.6 Z M 202.69 296.49 L 340.0 296.49 L 340.0 332.5 L 202.69 332.5 Z",
+  },
   // p566: 68:43 given only its last line
   {
     page: 566,
@@ -286,6 +294,14 @@ const POLYGON_REPAIRS = [
     number: "106004",
     from: "M 5.0 180.0 L 340.0 180.0 L 340.0 184.41 L 5.0 184.41 Z M 64.1 184.41 L 340.0 184.41 L 340.0 188.81 L 64.1 188.81 Z",
     to: "M 5.0 118.52 L 125.87 118.52 L 125.87 154.52 L 5.0 154.52 Z M 64.1 154.52 L 340.0 154.52 L 340.0 190.52 L 64.1 190.52 Z",
+  },
+  // p602: 107:2's left-margin box stops 8 units above its line's foot (296.86,
+  // where its line-mate reaches 304.6), so it reads as a fraction of a line
+  {
+    page: 602,
+    number: "107002",
+    from: "M 5.0 268.6 L 124.61 268.6 L 124.61 296.86 L 5.0 296.86 Z M 262.65 296.86 L 340.0 296.86 L 340.0 332.7 L 262.65 332.7 Z",
+    to: "M 5.0 268.6 L 124.61 268.6 L 124.61 304.6 L 5.0 304.6 Z M 262.65 296.86 L 340.0 296.86 L 340.0 332.7 L 262.65 332.7 Z",
   },
   // p604: 114:6 given two 4.6-unit slivers instead of two lines
   {
