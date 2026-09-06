@@ -1161,13 +1161,11 @@
         "file": "docs/PLAN.md",
         "item": "17"
       },
-      "status": "blocked",
+      "status": "fixed",
       "severity": "defect",
       "owner": "agent",
-      "blockedBy": [
-        "the upstream page cache, a 348 MB fetch nobody starts without asking"
-      ],
-      "note": "Reproduced 2026-09-01 by the whole-book sweep: 2 of 12,350 rectangles are off the line grid, 68:3 on page 564 (27.9 on a 36 line) and 107:2 on page 602 (28.3), both a left-margin tail cut ~8 units short with the next ayah's box starting that much early. Held at 2 by gate:boxes as ceiling and floor. Agent-owned because the repair is mechanical (a vendoring repair entry, re-vendor, re-pin, lower the gate to 0); the one owner-visible part is that two pinned pages change. PLAN 17 carries the numbers and both answers."
+      "closedBy": "scripts/gate-boxes.mjs",
+      "note": "CLOSED 2026-09-06: repaired at the source. The vendoring step now stretches each short tail to its line's foot (a repair entry per box), the two pages were re-vendored and re-pinned, and gate:boxes holds the off-grid count at 0 as ceiling and floor, so a third box off the grid is again an event. The owner saw the before/after of both pages and said commit. ORIGINAL NOTE FOLLOWS. Reproduced 2026-09-01 by the whole-book sweep: 2 of 12,350 rectangles are off the line grid, 68:3 on page 564 (27.9 on a 36 line) and 107:2 on page 602 (28.3), both a left-margin tail cut ~8 units short with the next ayah's box starting that much early. Held at 2 by gate:boxes as ceiling and floor. Agent-owned because the repair is mechanical (a vendoring repair entry, re-vendor, re-pin, lower the gate to 0); the one owner-visible part is that two pinned pages change. PLAN 17 carries the numbers and both answers."
     },
     {
       "id": "plan-hifth-licence",

@@ -11,9 +11,11 @@
  *             could be. The fallback is right there, and the page set is held
  *             as tightly as the count: a ninth fallback on page 300 is a
  *             defect even if one on page 1 were repaired the same day.
- *   OFF-GRID  2 — p564 68:3 and p602 107:2, the same shape twice: an ayah's
- *             short tail at the left margin cut to ~28 units on a 36-unit line,
- *             with the next ayah's box starting 8 units early. PLAN 17.
+ *   OFF-GRID  0 — held at 0 since 2026-09-06. Two boxes used to sit here, the
+ *             same shape twice: p564 68:3 and p602 107:2, each with a short tail
+ *             at the left margin cut to ~28 units on a 36-unit line. Both were
+ *             repaired at the source (the vendoring step now extends the tail to
+ *             its line's foot) so the pen draws them as one full line. PLAN 17.
  *
  * Both are ceilings *and* floors: a count that falls is also reported, because
  * a fallback that disappears means either a polygon was repaired (then lower
@@ -29,7 +31,7 @@ import { sweep } from "./lib/box-sweep.mjs";
 
 const FALLBACK_COUNT = 8;
 const FALLBACK_PAGES = new Set([1, 2]);
-const OFF_GRID_COUNT = 2;
+const OFF_GRID_COUNT = 0;
 
 const list = process.argv.includes("--list");
 const failures = [];
