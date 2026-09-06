@@ -307,6 +307,27 @@ answer already exists:
    bind, per what-we-distribute ②. Adopting that source *as* X (an ingredient) is a
    different, licence-bound question. Keep them apart: a permissive corroboration
    does not make a source adoptable, and an unadoptable source can still corroborate.
+5. **Reduce the question to a signature that survives surface differences.** A real
+   outside witness spells and tokenises on its own terms, so aligning it position by
+   position and demanding exact matches fails on orthography that has nothing to do
+   with your question. The segmentation witness (what-we-depend-on ⑩,
+   `probe-segmentation-witness.mjs`) spelled a plainer form where the print keeps an
+   older one, and strict word-for-word alignment (`alignBlocks` in `lib/segmentation.mjs`)
+   returned null on verses whose word *boundaries* were identical. Don't fight that —
+   find the one signature that answers your question and is blind to spelling. ⑩ asked
+   "does the witness ever split a proclitic the morphology joins?", and a split has
+   exactly one fingerprint: a bare particle standing as its own token with no stem
+   under it. Counting those across the book (zero, in 77,411 words) settled it with no
+   alignment and no spelling normalisation. An earlier attempt leaning on a whitelist
+   of prefix tags mis-flagged 24 positions from positional drift; the tag-independent
+   count had none of that fragility.
+6. **Prove independence — measure the divergence, don't assume it.** ⑨'s reverted
+   probe warns in one direction (a source partly scraped from what it "corroborated");
+   the same trap catches a witness that only *looks* separate. Take a number a copy
+   could not produce: ⑩'s witness counts the book at 77,411 words to the incumbent's
+   77,429 and spells at least one word differently on more than half the verses. That
+   measured disagreement *is* the proof it is a second opinion, so record it beside the
+   finding — a reader cannot tell a witness from an echo without it.
 
 ---
 

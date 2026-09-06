@@ -67,6 +67,28 @@ The drawn page shows specimens from each of the three buckets, each verse croppe
 sits on with the run washed exactly as `DiffView` washes it, so the 114 lost and the 150 gained are
 things a reader can look at rather than numbers to take on trust.
 
+## Is the print's split a mistake, or just a different habit?
+
+The whole churn above comes from one thing: the printed page writes a few small attached
+particles — the "and", the "the", the "in" — as their own separate words, where the word-by-word
+reference folds each onto the word it belongs to. Before counting the runs in the print's words it
+is worth knowing which of the two is the odd one out, because if the split were simply an error the
+print had made, option B would be building the neighbour rail on that mistake.
+
+It is not an error. On 2026-09-05 a third, independent grammar of the whole Qur'an — built on a
+different edition of the text and split into words on its own terms — was read once as a witness
+over the 9,533 places where the two disagree; the full account is under the tenth open question of
+the dependency map. It folds the particle at every single one of them: not once in more than
+seventy-seven thousand words does it write a bare particle as its own word. Two independent
+grammars fold the particle; only the print separates it.
+
+So the print's separated particle is a long-standing typographic habit of the press, not a slip
+the reference corrected. That does not decide the question — it frames it honestly. Choosing B
+counts the runs in the segmentation we now know to be the outlier of the three, with eyes open
+about that, rather than repairing a corpus that was wrong. Whether the outlier is the right thing
+to line the app on is still the same licence-and-usefulness trade, unchanged in its 114-for-150
+shape above.
+
 ## What already decides part of this
 
 - **What the app is allowed to give away, by channel** (not a registered decision — it lives in
