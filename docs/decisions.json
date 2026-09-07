@@ -83,12 +83,16 @@
         {
           "id": "C",
           "label": "Copy only the layout numbers, not the text or fonts"
+        },
+        {
+          "id": "D",
+          "label": "Hold a copy in a store we control — off the repository and off the shipped bundle"
         }
       ],
       "doc": "docs/decisions/qul-reliance.md",
-      "decided": "A",
+      "decided": "D",
       "by": "omar",
-      "date": "2026-09-03",
+      "date": "2026-09-07",
       "related": [
         "loop-4a",
         "loop-4b",
