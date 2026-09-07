@@ -1390,6 +1390,38 @@
     },
 
     {
+      "id": "qul-store",
+      "what": "Holding a copy of QUL's page layout — and, once its licence is read, its word text — in a database we run, off the repository and off the shipped bundle.",
+      "layer": "L3 etl",
+      "entry": [
+        {
+          "file": "packages/etl/scripts/ingest-qul-supabase.mjs",
+          "symbol": "licenceCleared",
+          "note": "The hard gate on the word-text half. The page-map ingest (--pages) runs freely: it carries only positions — page, line, line kind, and the first/last word ids of a line — no text. The word-text ingest (--words) refuses to run unless the licence has been cleared by hand (--licence-cleared, and the ledger check is not still pending), because word text is bytes we would be holding and the per-resource licence has not been read yet. Both halves skip cleanly (exit 0) when their gitignored cache is absent, so a clean checkout is never red. The cache is populated by the leverage-qul walk (the QUL /download link is session-gated), which is the owner's to run — this script never logs in and never sees a credential."
+        },
+        {
+          "file": "supabase/migrations/20260907000001_qul_page_map.sql",
+          "symbol": "qul_page_lines",
+          "note": "The store's positions-only tables. One row per printed line: which page, which line, what kind of line, whether it is centred, and — on ayah lines only — the surah and the first/last word ids the line spans. A companion table holds the layout's own counts. Text-free by construction; the column comments say why each column is a number and never a glyph."
+        },
+        {
+          "file": "supabase/migrations/20260907000002_qul_words.sql",
+          "symbol": "qul_words",
+          "note": "The one text-bearing table, and the only place in this store a Qur'an glyph would ever sit. It exists in the migration so the shape is reviewable, but the ingest refuses to fill it until the licence is read (see licenceCleared). Its comment states the boundary in full: held under option D only, and whether any reader receives these bytes is a separate open question this table does not answer. QUL numbers words more coarsely than our print, so these ids do not transfer onto our artwork."
+        }
+      ],
+      "extend": [
+        "Read the qul-reliance decision record first (indexed in the decisions register). The original choice — copy none of QUL's bytes — still governs the repository and the shipped build; no glyph enters the tree and gate:notext and gate:scripture stay green. What reopened it (2026-09-07, option D) is that a database we run is a fourth place a byte can sit that the original options never named: not the source tree, not the bundle a reader downloads, but a store dev tools read. Option D admits exactly that store, and does not settle whether any reader ever receives those bytes — that stays a separate open question.",
+        "The store is not the repository. The ship-zero-Qur'an-text rule is kept here by the migrations and the ingest carrying no glyph in the committed bytes; the held copy lives in the database, which the repo never contains. Verify a new file here is Arabic-free the same way the rest of the tree is checked.",
+        "The word-text ingest stays gated until a human reads the exact resource's licence AND the glyph font's, and clears the ledger check. Do not remove the gate to 'unblock' a run — the gate is the licence read, made mechanical.",
+        "Connection keys (SUPABASE_DB_URL and any service key) are the owner's to supply at run time. No key is committed, and this script enters none — the same reason the leverage-qul login is the owner's to perform.",
+        "The picture that argues option D — the page drawn on real artwork — lives in the qul-page-source design doc on the graduate-page-bar-winners lineage; it reconciles into this store's story at merge. A decided decision needs no artifact of its own, which is why none is minted on this branch."
+      ],
+      "gates": ["pnpm gate:notext", "pnpm gate:scripture", "make ci"],
+      "seeAlso": ["validation", "decisions", "provenance"]
+    },
+
+    {
       "id": "decisions",
       "what": "Every question this project has had to answer, in words a person outside the repo can act on.",
       "layer": "gate",

@@ -18,11 +18,17 @@ for every QUL resource this repo leans on:
 Sharpen this file as resources are read; the skill body does not change when the rubric
 does.
 
+**Under `qul-reliance` option D (2026-09-07):** a text-bearing export is no longer only a
+thing to keep *out* — it may be **held in the store we control** (never the repo or the
+build) once its licence is read. So a **Yes** in the text-bearing column now means *ruler
+probes must not read it*, and *the ingest may hold it only after its licence row is cleared*.
+
 ## The resources
 
 | id | resource | export shape (looked at) | text-bearing? | licence / attribution |
 |---|---|---|---|---|
 | **10** | KFGQPC QCF V2 (1421H) page layout | SQLite: `pages` rows of `page_number`, `line_number`, `line_type`, `surah_number`, `first/last_word_id`; `info` table of counts | **No** — ids, line types and counts. The word *ids* are numbers, not glyphs. | **PENDING** — read resource 10's page on qul.tarteel.ai. It is the V2 layout authority (`mushaf-reference` names it); confirm its terms permit ruler use + our page fingerprinting. |
+| **TBD** | QCF V2 per-word text (keyed by global word id) | *not yet cached* — expected as `word_id -> {surah, ayah, position, text}` | **Yes** — the word glyph/uthmani text. Held in the store under option D, never in the tree. | **PENDING** — identify the exact resource id on qul.tarteel.ai and read its licence + the glyph font's before the word-text ingest may hold it. |
 | **73** | phrase-level similarity | JSON: `phrases.json` = phrase_id → `{ ayah: { verse_key: [[from,to]] } }`; `phrase_verses.json` = the verses each phrase spans | **No** — verse keys and word-index ranges (`[from,to]` integers). No phrase *text*. | **PENDING** — read resource 73's page. |
 | **74** | ayah-level similarity (whole-verse look-alikes) | JSON: verse_key → `[{ matched_ayah_key, score, coverage, matched_words_count, match_words }]` | **No** — verse keys and match scores/counts. `match_words` is index ranges, **not** text — and coarser than our print's word count, so it must not drive per-word rendering. | **PENDING** — read resource 74's page. This is the corpus behind the open `similar-ayah-enrichment` decision. |
 | — | juz metadata | JSON: `"1": { first_verse_key, verses_count, ... }` | **No** — verse keys and counts. | **PENDING** — read the metadata resource's page. |
