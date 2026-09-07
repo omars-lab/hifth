@@ -1,6 +1,6 @@
 # When the app leans on the outside library, does it copy what the library holds, or only measure against it?
 
-**Status:** decided. **Date:** 2026-09-03. **Decided by:** omar.
+**Status:** decided — now **D** (reopened and re-decided 2026-09-07). Originally decided **A** on 2026-09-03. **Decided by:** omar. The reopening and its reasons are the last section below.
 
 ## A few words first
 
@@ -93,9 +93,19 @@ numbers as data but still ship no text or fonts. *Cost:* mostly redundant — th
 derives those numbers from its own artwork and only needs the library to *check* them, so
 copying them in buys little and starts the habit of copying.
 
-**Decided: A.** The app measures against the outside library and links back to it, and copies
-none of its bytes. Attribution to each library item used is still required and recorded, even
-though nothing of it ships.
+**D — Hold a copy in a store we control, off the repository and off the shipped bundle.**
+*(Added when this was reopened, 2026-09-07.)* Keep a copy of the library's page positions
+and its word text in a hosted database this project owns — never checked into the repository,
+never compiled into the app that ships to readers. The building tools read it; whether any
+reader ever does is a separate question this option leaves open. *Cost:* the project now
+**holds** a copy of the library's Qur'an text somewhere it controls — a posture the three
+earlier options did not have, because each of them was about the bytes that *ship*, and this
+is a fourth place bytes can sit. That copy needs each item's licence read before it is held,
+and a standing guarantee that the store never leaks into the repository or the build.
+
+**Decided (2026-09-03): A.** The app measures against the outside library and links back to it,
+and copies none of its bytes. Attribution to each library item used is still required and
+recorded, even though nothing of it ships. *This held until 2026-09-07; see the reopening below.*
 
 ## What else could be considered, and why is it not here?
 
@@ -118,6 +128,59 @@ its own open question, decided on a page a reader can try. It does not settle wh
 outside-library items get used as rulers, nor their individual licences and attributions; those
 are recorded item by item as each is picked up.
 
+## Reopened, 2026-09-07 — why, and what changed
+
+### Why open a settled question again?
+
+The look-alike-verse work reached the point the 2026-09-03 record foresaw: to enrich *which
+words* make two verses resemble each other across the whole book, the building tools need the
+library's word text staged somewhere they can query it repeatedly, not read once from a scratch
+folder and thrown away. The owner chose to stage it — the page positions **and** the word text —
+in a hosted database this project controls, rather than re-derive it each run. That is a copy
+held on our own infrastructure, which is the thing option A was written to avoid, so the
+boundary had to be redrawn on purpose instead of being moved by a build script.
+
+### Did the earlier answer actually forbid this?
+
+Not exactly, and that is the point. Every one of the first three options was framed around the
+bytes that **ship to readers**: A ships nothing, B ships text and fonts, C ships numbers. A
+database the project owns, that the building tools read and readers do not, is a place none of
+those three named. So this is genuinely a new option — **D** — not a reversal of A on A's own
+terms. The repository still carries no Qur'an text; the app that ships to readers still carries
+none. What is new is that a copy now sits in a store we control, between the library and our
+own tools.
+
+### What does holding a copy oblige us to?
+
+Reading the licence first. The outside library states plainly that using its data commercially
+is allowed, but only *subject to each resource's own terms* — some items are public domain, some
+require attribution, some restrict use, and there is no blanket grant (its own guidance,
+<https://qul.tarteel.ai/faq#faq-9>). So before the printed-page layout we lean on and the font
+that draws its glyphs may be **held** in our store, each one's individual licence has to be read
+and its attribution recorded — a check that was owed-in-theory under A and is owed-in-fact under
+D, because now we hold the bytes rather than only measuring against them.
+
+### What is this reopening deciding, and what is it not?
+
+**Deciding (2026-09-07): D.** A copy of the library's page positions and word text may be held
+in a hosted database this project controls, kept out of the repository and out of the shipped
+bundle, for the building tools to read.
+
+It is **not** deciding that any reader ever receives those bytes. Whether the app streams the
+held text to the people using it — which would make the store part of what ships, and land it
+back at option B — is a separate open question, decided on its own page, not here. Until that is
+decided, the store is for the building tools alone. It is also not deciding the individual
+licences of the specific items held; those are read and recorded item by item, and the layout
+and its font are the first two owed.
+
+### What would change this answer?
+
+If the licence read on the printed-page layout or its font came back as *may not be copied or
+held*, D is off the table for that item and it stays a ruler measured against, never held. And
+if the project decided readers should receive the held text, that is not a tweak to D — it is
+the separate display question, gated on clearing each item's licence to ship, not merely to
+hold.
+
 ---
 
 *Where this lives in the code:* the QUL rulers are cross-checked by
@@ -131,3 +194,12 @@ are the human check `qul-rulers-terms-and-text-free` in `docs/validation/ledger.
 attribution is recorded in `SOURCES.md` and surfaced through `gate:notices`. The download
 mechanism and per-resource licence posture are in the `leverage-qul` skill and the
 `qul-licensing` memory.
+
+*Under option D (2026-09-07):* the held copy lives in a hosted database reached through the
+Supabase command-line tool (project ref `zbkqfstkjmgzsrraodez`), populated by an ingest
+step on branch `qul-etl-supabase` (off `qul-integration`); its source inputs stay in a
+gitignored `.cache/` so nothing lands in the tree. The no-text guarantee `gate:scripture` /
+`gate:notext` now reads as *the repository and the shipped bundle carry no Qur'an text* — the
+store is deliberately outside both. The per-resource licence read for the QPC V2 page layout
+(library id 10) and its glyph font is the now-owed human check
+`qul-rulers-terms-and-text-free` in `docs/validation/ledger.json`.
