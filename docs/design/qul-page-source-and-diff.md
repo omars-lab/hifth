@@ -5,9 +5,16 @@
 > against that library's to see where the two disagree. It is a map of what has to be
 > settled, not a settling of any of it. Nothing here is decided.
 
-**Status:** open — scoping only, written 2026-09-06. No option below is chosen; no register
-row exists yet. The last section says which of these, if any, is worth opening as a real
-recorded decision.
+**Status:** open — written 2026-09-06 as scoping. Two register rows now point at this page:
+one for the checking half and one for the development-only draw; both are open, neither is
+chosen. The last section says why those two and not the others.
+
+**Update, 2026-09-07:** the owner chose the *mechanism* for the store, if we draw at all — a
+hosted database we control, filled once by a run that reads the library's data and writes it
+to the database, with the repository and the shipped bundle both kept free of the words by
+construction. That narrows decision ②'s option C and sharpens decision ③, and it is folded in
+below. It does **not** settle either open decision: whether to draw at all, and — if we do —
+whether that database is read only by developers or by every reader, both remain open.
 
 ## A word on the words
 
@@ -24,6 +31,13 @@ recorded decision.
   of whole printed words *is* Qur'an text in the only sense that matters here, and this
   project has a standing rule that it ships none — so the shapes being *reachable* and the
   shapes being *shippable* are two different things.
+- **A store we control** — a hosted database, standing outside this repository, that we fill
+  once from the library (a run reads the library's data and writes it to the database) and
+  then read from at run time. It is a third place the words could live, next to *in the
+  shipped files* (which the rule forbids) and *fetched live from the library each time*. It
+  keeps the words out of the repository by construction — but it also means we are *holding a
+  copy* of them on our own infrastructure, a posture this project has not taken before, which
+  the licence question below has to cover.
 - **Witness vs. source** — a *witness* is something we read only to check ourselves against;
   nothing of it reaches the reader. A *source* is something we build the shipped app out of,
   so whatever terms come with it travel all the way to the reader. The whole first half of
@@ -159,6 +173,28 @@ working posture.
   buys a page drawn from the library that a developer can see beside our own without a single
   Qur'an letter reaching a reader.
 
+  *Where the words would live (the owner's current direction).* The store need not be a cache
+  on one developer's machine. The chosen mechanism is a hosted database we control, filled
+  once by a run that reads the library's data and writes it there, and read at run time by the
+  app. This keeps the words out of the repository by construction, and it makes the side-by-
+  side reachable from any developer's machine rather than only the one that ran the import. It
+  does not, on its own, answer the one question that decides everything else about it: **who is
+  allowed to read from that database.**
+    - *Read only by developers.* The app readers receive is compiled without the code that
+      reaches the database, and only an authenticated developer build fetches from it. The
+      public build stays exactly as today; the reader receives no library byte. This is option
+      C proper — the three honest legs above already describe it, with the bundle-reading check
+      now also refusing the fetch code, not only the letters.
+    - *Read by every reader.* The shipped app streams the words from the database and draws
+      them for anyone. That is not option C at all; it is option B (a public source) with the
+      words arriving from our database instead of our bundle. The reader now *receives* Qur'an
+      text — streamed rather than shipped, but received — and every term under it travels the
+      whole way.
+    The database is a delivery mechanism, not a decision: it can serve either surface. Which
+    surface it serves is the decision, and it is the same witness-or-source fork this whole
+    section turns on. Choosing the hosted store settles *where* the words sit; it leaves *who
+    reads them* exactly where it was.
+
 **What already constrains it:** the read-to-check posture already chose A once, for the page
 table. This decision asks whether page *rendering* should be the place we cross into B or C —
 and C exists precisely so the crossing never reaches the reader. **What would change the
@@ -191,6 +227,16 @@ and for the word-shape font was never made. Two things to settle here:
   radius sharply — but the reading is still owed before even the development path loads a
   byte, because you are loading it, just not shipping it. What drops is the *stakes* of the
   answer, not the need for it.
+- **Holding a copy at all is a new posture.** The recorded stance is *copy-nothing* — read the
+  library to measure, vendor none of it. A store we control (the owner's current direction)
+  holds a copy of the library's data on our own infrastructure, which "copy-nothing" as
+  written does not allow. So the reading has to answer not only "may we ship it" and "may we
+  read it," but "may we *hold* a copy and serve that copy" — and to whom. A term that permits
+  a private working copy for a handful of developers is a very different grant from one that
+  permits serving a copy to the public, and the who-reads-from-it fork in decision ② is what
+  decides which grant we need. Whichever it is, the copy-nothing posture would have to be
+  reworded to say "copy-nothing into the repository and the shipped bundle" rather than
+  "copy-nothing anywhere," and that rewording is part of this decision, not a footnote to it.
 
 **What is excluded:** attribution wording — a smaller, downstream task once the terms are
 known. **What would change the answer:** a channel being chosen where store terms bite turns
@@ -314,12 +360,15 @@ of the public-source path (B), not of C.
 ## What this is not settling
 
 It does not decide whether we ever draw a page from the library, nor whether we build the
-fine comparison — only what each would require. It does not read any licence; it names the
-reading as owed. It does not touch which printing is the right witness (already settled) or
-re-open the page table (already cross-checked). And it takes no position on whether a second
-printing belongs in the *public* app at all — the forcing question behind option B — nor on
-whether a developer-only side-by-side is worth building, the lighter want behind option C.
-Neither is asked here.
+fine comparison — only what each would require. It records that a hosted database we control
+is the chosen *mechanism* for where the library's words would live if we draw from them, but
+it does not settle who may read from that database — developers only, or every reader — which
+is the same witness-or-source fork named above, nor whether the licence permits our holding a
+copy at all. It does not read any licence; it names the reading as owed. It does not touch
+which printing is the right witness (already settled) or re-open the page table (already
+cross-checked). And it takes no position on whether a second printing belongs in the *public*
+app at all — the forcing question behind option B — nor on whether a developer-only side-by-
+side is worth building, the lighter want behind option C. Neither is asked here.
 
 ## The one-paragraph recommendation
 
@@ -333,4 +382,9 @@ present want justifies; or into a development build only (option C), which a rew
 one new bundle-reading check make genuinely safe, and which pairs with the comparison so a
 developer can see the disagreement drawn rather than listed. That development-only draw is
 worth opening as its own decision *if the owner wants the side-by-side*; the public draw stays
-named-but-shut until someone actually wants a second printing readers can choose. 
+named-but-shut until someone actually wants a second printing readers can choose. The owner
+has now chosen a hosted database as the store for that drawing half — which settles *where*
+the words would live, not *who reads them*. Keep that database read only by developer builds
+until the licence for holding and serving a copy is read; kept that way, the draw stays as
+safe as option C promises, and the moment a reader build is allowed to fetch from it, we are
+in option B and owe every term to every reader. 
