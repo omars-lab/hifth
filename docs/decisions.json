@@ -954,6 +954,60 @@
       "related": [
         "desktop-vs-mobile"
       ]
+    },
+    {
+      "id": "qul-page-cross-check",
+      "question": "Should we build a fine, line-by-line check that holds our own page against the other library’s and records where the two disagree?",
+      "status": "open",
+      "options": [
+        {
+          "id": "A",
+          "label": "Keep the coarse page check we already have"
+        },
+        {
+          "id": "B",
+          "label": "Build the fine check as a one-time report we read and act on"
+        },
+        {
+          "id": "C",
+          "label": "Build the fine check as a held count an automated guard watches forever"
+        }
+      ],
+      "artifact": "https://blog.bytesofpurpose.com/hifth/docs/design/qul-page-source-and-diff.html",
+      "page": "docs/design/qul-page-source-and-diff.html",
+      "builtBy": "scripts/build-qul-page-source-and-diff.mjs",
+      "doc": "docs/decisions/qul-page-cross-check.md",
+      "decided": null,
+      "by": null,
+      "date": null,
+      "related": [
+        "qul-dev-draw-toggle"
+      ]
+    },
+    {
+      "id": "qul-dev-draw-toggle",
+      "question": "Should a developer be able to draw a page from the other library’s words while the app that readers receive still carries none of it?",
+      "status": "open",
+      "options": [
+        {
+          "id": "A",
+          "label": "Keep the other library a check only, never a source"
+        },
+        {
+          "id": "B",
+          "label": "Let a development build draw from it, with the public build kept clear by a new rule and a new check"
+        }
+      ],
+      "artifact": "https://blog.bytesofpurpose.com/hifth/docs/design/qul-page-source-and-diff.html",
+      "page": "docs/design/qul-page-source-and-diff.html",
+      "builtBy": "scripts/build-qul-page-source-and-diff.mjs",
+      "doc": "docs/decisions/qul-dev-draw-toggle.md",
+      "decided": null,
+      "by": null,
+      "date": null,
+      "related": [
+        "qul-page-cross-check"
+      ]
     }
   ]
 }

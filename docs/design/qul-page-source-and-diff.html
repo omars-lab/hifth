@@ -1,0 +1,158 @@
+<title>Could a page come from the other library, and could we check ours against it?</title>
+<style>
+:root {
+  --ground: #f4efe6; --raised: #fbf8f2; --sunk: #ece4d6;
+  --ink: #26201a; --soft: #5c5347; --faint: #6b6255;
+  --rule: #ded4c3; --rule-soft: #eae1d2;
+  --accent: #1f6f66; --accent-ink: #17544d; --accent-soft: #d7e7e3;
+  --serif: "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", "Hoefler Text", Georgia, serif;
+  --sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --measure: 40rem;
+}
+:root:not([data-theme="light"]) {
+  @media (prefers-color-scheme: dark) {
+    --ground: #1a1712; --raised: #221e18; --sunk: #14110d;
+    --ink: #ece3d4; --soft: #b3a793; --faint: #8f836f;
+    --rule: #3a3227; --rule-soft: #2c261d;
+    --accent: #6fc3b7; --accent-ink: #9fd8cf; --accent-soft: #21332f;
+  }
+}
+:root[data-theme="dark"] {
+  --ground: #1a1712; --raised: #221e18; --sunk: #14110d;
+  --ink: #ece3d4; --soft: #b3a793; --faint: #8f836f;
+  --rule: #3a3227; --rule-soft: #2c261d;
+  --accent: #6fc3b7; --accent-ink: #9fd8cf; --accent-soft: #21332f;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--ground); color: var(--ink);
+  font-family: var(--sans); line-height: 1.62; }
+.wrap { max-width: 52rem; margin: 0 auto; padding: 3rem 1.5rem 5rem; }
+h1, h2, h3 { font-family: var(--serif); font-weight: 600; text-wrap: balance; line-height: 1.25; }
+h1 { font-size: clamp(1.6rem, 4.5vw, 2.4rem); margin: 0 0 1rem; }
+h2 { font-size: 1.4rem; margin: 2.4rem 0 0.8rem; padding-top: 1.4rem; border-top: 1px solid var(--rule-soft); }
+h3 { font-size: 1.12rem; margin: 1.8rem 0 0.5rem; color: var(--accent-ink); }
+p, li { max-width: var(--measure); }
+p, ul, blockquote, .scroll { margin: 0 0 0.9rem; }
+li { margin: 0 0 0.5rem; }
+ul ul { margin-top: 0.5rem; }
+strong { color: var(--ink); }
+blockquote { border-left: 3px solid var(--accent); background: var(--raised);
+  margin-left: 0; padding: 0.2rem 1.1rem; color: var(--soft); border-radius: 0 6px 6px 0; }
+blockquote p { margin: 0.6rem 0; font-style: italic; }
+hr { border: none; border-top: 1px solid var(--rule); margin: 2rem 0; }
+.scroll { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; font-size: 0.95rem; }
+th, td { border: 1px solid var(--rule); padding: 0.5rem 0.7rem; text-align: left;
+  vertical-align: top; }
+th { background: var(--sunk); font-family: var(--serif); }
+a { color: var(--accent-ink); }
+</style>
+<main class="wrap">
+<h1>Could a page come from the other library, and could we check ours against it?</h1>
+<blockquote><p>An index of the decisions that stand between us and two related ideas: drawing a page of the mus'haf from an outside library's data instead of our own, and holding our page up against that library's to see where the two disagree. It is a map of what has to be settled, not a settling of any of it. Nothing here is decided.</p></blockquote>
+<p><strong>Status:</strong> open — scoping only, written 2026-09-06. No option below is chosen; no register row exists yet. The last section says which of these, if any, is worth opening as a real recorded decision.</p>
+<h2>A word on the words</h2>
+<ul>
+<li><strong>The other library</strong> — a public collection of Qur'an data that this project already reads once, as a ruler, to check its own work. It is named in the source register and in the reasons below; a reader does not need its name to weigh the questions.</li>
+<li><strong>Its page map</strong> — for one particular printing, a table that says, line by line, which run of words sits on each line of each page. It carries <em>positions</em>, not the words themselves: no letters, only "words number X through Y live on this line." To turn that into a page a person can read, you still need the shapes of the words, which is a separate thing the library also holds.</li>
+<li><strong>The word shapes</strong> — a font whose every character is a whole printed word. The library publishes these fonts itself, so they are a plain download, not a missing piece. But a font of whole printed words <em>is</em> Qur'an text in the only sense that matters here, and this project has a standing rule that it ships none — so the shapes being <em>reachable</em> and the shapes being <em>shippable</em> are two different things.</li>
+<li><strong>Witness vs. source</strong> — a <em>witness</em> is something we read only to check ourselves against; nothing of it reaches the reader. A <em>source</em> is something we build the shipped app out of, so whatever terms come with it travel all the way to the reader. The whole first half of this document turns on which of these we mean.</li>
+</ul>
+<h2>Why this is being asked now, and what it is really two of</h2>
+<p>The question arrived as one — "what would it take to base a page on the other library, and to diff our page against it and mark the problems?" It is really two questions with very different costs, and the honest first move is to split them:</p>
+<p>1. <strong>Draw a page from the library's data.</strong> In a public build this runs straight into the rule that we ship no Qur'an text (see the first decision). But it need not be a public build: a development-only route (decision ②, option C) makes drawing genuinely reachable while the public app is untouched. This is the half that <em>could</em> change what a reader sees — and the live question is whether to keep it from ever doing so. 2. <strong>Check our page against the library's and record the disagreements.</strong> Cheap, and almost entirely on the safe side of that rule, because a page map can be compared to a page map without any letters changing hands. This is the half that changes nothing a reader sees and only tells <em>us</em> where to look.</p>
+<p>The app already has the plumbing for more than one page source (a named edition, chosen by a single label, with a registry that lists the printings we know about and marks which ones we actually carry). So the <em>machinery</em> of a second source is not the hard part. The hard parts are a rule, a licence, and a set of safety checks that currently assume one printing — and those are the decisions below.</p>
+<h2>What already constrains all of this</h2>
+<p>Three earlier things bound the space before any option is drawn, and every decision below inherits them:</p>
+<ul>
+<li><strong>We ship no Qur'an text.</strong> A standing rule, kept by the shipped bytes and not only by policy: the pages we carry are outline drawings, not letters. The library's word-shapes are <em>reachable</em> — it publishes the fonts directly — so nothing technical stops us drawing a page with them. What stops us is this rule: those shapes are the very thing it forbids in shipped bytes. The block is ours, not the library's — which matters, because a rule we own is one we can reword on purpose (decision ②, option C).</li>
+<li><strong>We already treat the library as a ruler, and only a ruler.</strong> Two finished loops cross- checked all 604 pages of our own page table against the library's page map for one specific printing, and settled that this printing — not an older one that disagrees on dozens of pages — is the one to check against. That work banked the library as a witness and went no further.</li>
+<li><strong>Read-to-check, copy-nothing.</strong> The recorded posture is that we may measure against the library but vendor nothing from it, and that attribution is owed even when zero bytes ship. What was never done is a per-resource licence reading for the two specific things a drawn page would need — the page map and the word-shapes.</li>
+</ul>
+<h2>Prior art</h2>
+<p>I looked only inside this project for this scoping pass, and should say so plainly. The outside world's practice — how other mus'haf apps source their pages — was surveyed in the dependency audit this project already holds, and is not re-gathered here; a real decision on the drawing half (the first below) should pull that survey forward rather than take my word that it exists. The comparison half has direct internal prior art: this project has twice built an independent-witness check (a page table against an outside page source, a word- splitting habit against a third grammar), and those set the pattern the comparison decisions lean on.</p>
+<hr>
+<h2>The decisions</h2>
+<p>Eight, grouped: the first four are about <em>drawing a page from the library</em>; the next three are about <em>checking our page against it</em>; the last asks how many of these are really one.</p>
+<h3>① If a page "came from the other library," what would actually be coming — a picture, a map of where the words go, or the words themselves?</h3>
+<p><strong>Why now:</strong> every later question changes shape depending on this answer, so it goes first. <strong>What we do today:</strong> our pages are outline drawings we vendored and pinned; they carry the shapes and the tappable ayah regions in one self-contained file. <strong>The cost of leaving it:</strong> none — this is a fork in the road, not a leak. <strong>What already constrains it:</strong> the no-text rule, sharply.</p>
+<p>The library offers three different things a person might mean:</p>
+<div class="scroll"><table>
+<thead><tr><th></th><th>What it is</th><th>What it collides with</th></tr></thead>
+<tbody>
+<tr><td><strong>A</strong></td><td>A ready-made picture of the page</td><td>We would be shipping someone else's rendered Qur'an page — the no-text rule in spirit, and a licence question on the image itself.</td></tr>
+<tr><td><strong>B</strong></td><td>The map of which words sit on which line</td><td>Carries no letters, so it does <strong>not</strong> break the no-text rule on its own — but it is only half a page. To <em>draw</em> from it you still need the word-shapes (row C), which do break the rule. As a thing to <em>check against</em>, it is enough by itself.</td></tr>
+<tr><td><strong>C</strong></td><td>The words themselves (the word-shape font)</td><td>Reachable — the library publishes the font, it is a download away — but it is the very thing the ship-rule forbids putting into shipped bytes. The barrier is our rule, not availability.</td></tr>
+</tbody>
+</table></div>
+<p><strong>What is excluded:</strong> re-typing the text ourselves in an ordinary font — a different project with its own correctness burden, out of scope here. <strong>What would change the answer:</strong> all three are <em>reachable</em> — the library publishes both the map and the shapes. What varies is what may <strong>ship</strong>: only B may enter a public build. A development-only route (decision ②, option C) lets even C be drawn without shipping it; relaxing the no-text rule for a store build would be the other way to put A or C into a public build, and there is no reason to do that today.</p>
+<h3>② Do we want the library to <em>check</em> our pages, or to <em>build</em> them?</h3>
+<p><strong>Why now:</strong> this is the licence fork, and it is worth stating before any work because the two answers cost wildly different amounts. <strong>What we do today:</strong> check only — the library is a ruler, nothing of it ships. <strong>The cost of leaving it:</strong> none; check-only is a settled, working posture.</p>
+<ul>
+<li><strong>A — keep it a witness (check only).</strong> Read the page map to compare against our own, ship nothing, owe attribution. Nearly free, and it is where the whole comparison half of this document lives. Its licence reach is the lightest possible: nothing the library owns reaches the reader.</li>
+<li><strong>B — make it a public source (build the shipped page from it).</strong> Compute the page readers receive out of the library's data. Then whatever terms sit under the page map — and under the word-shapes it would need — travel to the reader, and the no-text rule has to be answered, not sidestepped.</li>
+<li><p><strong>C — build from it, but only in a development build.</strong> The public app stays exactly as it is today — our own drawn pages, the library a witness only — while a developer running the app locally can load the library's words and shapes at run time and see a page drawn from them. This is a real third answer, not a hedge, and it needs a reworded rule to stand on.</p>
+<p><em>The rule it needs.</em> Today "ship no Qur'an text" is one boundary that holds for free. It is really three surfaces, and this option splits them:</p>
+<ul>
+<li>the checked-in files carry zero Qur'an text, ever — unchanged;</li>
+<li>the public build served to readers carries zero Qur'an text — but now enforced on purpose, not for free;</li>
+<li>the app while a developer runs it may load the words and shapes at run time from an outside source.</li>
+</ul>
+<p><em>What keeps it honest.</em> The project's own line is that the no-text rule is kept by the shipped bytes, not by policy — so a toggle merely <em>promised</em> to be development-only is exactly the policy-not-bytes version the project distrusts. Three legs make it bytes again:</p>
+<ul>
+<li>the words and shapes never enter the checked-in files — loaded from an ignored local cache, or live from the library, and never committed — so every existing check on committed bytes is untouched;</li>
+<li>the development path is compiled out of the public build behind a build switch;</li>
+<li>a new check reads the built public bundle and fails if any Arabic letter, or the loader code that reaches for the library, appears in it.</li>
+</ul>
+<p>That last check is what turns "development-only" from a promise into a fact, the same way the existing checks turn "no text" into a fact.</p>
+<p><em>What it costs to adopt.</em> A reworded tenet (the three surfaces above), one new bundle-reading check, a "development-only" mark on the printing registry so the source can never be chosen in a public build, and one ignore rule for the local cache. That is the whole bill — and it buys a page drawn from the library that a developer can see beside our own without a single Qur'an letter reaching a reader.</p></li>
+</ul>
+<p><strong>What already constrains it:</strong> the read-to-check posture already chose A once, for the page table. This decision asks whether page <em>rendering</em> should be the place we cross into B or C — and C exists precisely so the crossing never reaches the reader. <strong>What would change the answer:</strong> wanting a second printing <em>on offer to readers</em> is the only thing that makes B pay for itself; wanting to <em>see</em> the library's page beside ours while developing is what makes C pay for itself, and it pairs naturally with the comparison half below.</p>
+<h3>③ Before we read a single byte for this, whose terms come with the page map and the word-shapes, and where would they bite?</h3>
+<p><strong>Why now:</strong> the one piece of homework that was explicitly deferred and never done. <strong>What we do today:</strong> we have a general posture (per-resource, attribution owed) but no licence reading for these two specific resources. <strong>The cost of leaving it:</strong> small as long as we stay a witness; blocking the moment we try to draw from the library, because you cannot ship what you have not cleared.</p>
+<p>The library's terms are <strong>per resource</strong>, not one blanket grant — some resources are public domain, some ask only for attribution, some restrict use. The determination for the page map and for the word-shape font was never made. Two things to settle here:</p>
+<ul>
+<li><strong>The reading itself</strong> — what each of the two resources actually permits, recorded in the source register the same way every other upstream is.</li>
+<li><strong>Which channels a restrictive term would bite.</strong> On the web the app serves today, most terms cost nothing anyone has to act on. In a build submitted to an app store, a share- alike or non-commercial term would bite hard. This is the same channel-by-channel reasoning the distribution map already uses, and it should be answered there, not guessed here.</li>
+<li><strong>How far the development-only route shrinks this.</strong> A restrictive or share-alike term that only ever touches a build the public never receives (decision ②, option C) reaches no reader, where the same term in a public source reaches every reader. That shrinks the blast radius sharply — but the reading is still owed before even the development path loads a byte, because you are loading it, just not shipping it. What drops is the <em>stakes</em> of the answer, not the need for it.</li>
+</ul>
+<p><strong>What is excluded:</strong> attribution wording — a smaller, downstream task once the terms are known. <strong>What would change the answer:</strong> a channel being chosen where store terms bite turns this from paperwork into a gate.</p>
+<h3>④ If we did add a second page source, what does it cost to make our safety checks speak more than one printing?</h3>
+<p><strong>Why now:</strong> the app's machinery already handles a second source cleanly, so the real bill is elsewhere — in the checks, which today quietly assume one printing. <strong>What we do today:</strong> several automated checks carry constants true only of the printing we ship (its exact page count, which pages are allowed a decorated exception, where its files live). <strong>The cost of leaving it:</strong> none until a second source exists; a hard blocker the day one does, because the checks would either reject the newcomer or, worse, wave through a real defect.</p>
+<ul>
+<li><strong>A — generalise the checks per printing.</strong> Teach each check to look up a printing's own expected numbers instead of a baked-in constant. More work up front; the checks then guard every source honestly. <strong>B — special-case the second source.</strong> Duplicate or branch each check. Less work now, a mess that compounds with every printing after.</li>
+</ul>
+<p><strong>What is excluded:</strong> the app's own rendering path, which is already source-blind and needs nothing here. <strong>What would change the answer:</strong> intending <em>several</em> future printings argues for A now; a single one-off comparison might tolerate B, or neither.</p>
+<h3>⑤ When we hold our page up against the library's, what exactly are we comparing, and how close counts as the same?</h3>
+<p><strong>Why now:</strong> the first real question of the comparison half, and the one that decides whether the comparison can stay on the safe side of the no-text rule. <strong>What we do today:</strong> nothing — the 604-page cross-check compared page tables at the level of "which ayah starts which page," not the finer structure. <strong>The cost of leaving it:</strong> we keep a coarse check where a finer one would catch more.</p>
+<p>The good news: everything worth comparing can be said in <em>word numbers</em>, with no letters anywhere. Four things to choose among (any, all, or a subset):</p>
+<ul>
+<li>which line of the page each word falls on,</li>
+<li>where each line breaks,</li>
+<li>where each ayah begins and ends,</li>
+<li>where each page begins and ends.</li>
+</ul>
+<p>And a tolerance for each: an exact match, or a match within some slack. Comparing word-to- line assignment is the strictest and the most revealing; comparing only page boundaries is what we already did.</p>
+<p><strong>What is excluded:</strong> anything that would need the letters (the exact pixel shape of a word) — that is the drawing half, not the checking half. <strong>What would change the answer:</strong> finding that our page map and the library's use word numbers that do not line up one-to-one would force an alignment step first (the project already owns one such map for a different pair).</p>
+<h3>⑥ How do we tell a real mistake from a difference of habit?</h3>
+<p><strong>Why now:</strong> the lesson the last two witness checks taught, and the one most likely to be forgotten. <strong>What we do today:</strong> not applicable — no fine comparison runs yet. <strong>The cost of leaving it:</strong> a comparison with no answer here would cry "defect" at every place the two printings simply follow different conventions, and drown the real findings.</p>
+<p>The two printings will disagree in ways that are nobody's error — a word a hafiz would never question, split or joined differently by two houses that both have a tradition behind them. The project already learned this the hard way with word-splitting, and the rule it drew is: <strong>a difference of convention is not a mistake to correct.</strong> So a decision is owed on what counts as a genuine discrepancy versus a known, catalogued habit — and probably a small list of the habits, so the comparison subtracts them before it reports.</p>
+<p><strong>What would change the answer:</strong> a hafiz looking at a sample of the disagreements and telling us which kind each is; nobody has done that yet.</p>
+<h3>⑦ When the comparison turns up a disagreement, where does it go and who owns it?</h3>
+<p><strong>Why now:</strong> a finding with nowhere to land is a finding that evaporates — the project has watched exactly that happen. <strong>What we do today:</strong> open work lives in a small set of registers, indexed in one place; the whole-book box sweep is the model — it holds a count and turns a new stray into an event. <strong>The cost of leaving it:</strong> a comparison that only prints to a screen once teaches nothing the next person can find.</p>
+<p>Two shapes to choose between, and a couple of smaller calls inside:</p>
+<ul>
+<li><strong>A — a one-time report.</strong> Run the comparison, read the list, act on what matters, done. Right if the disagreements are few and mostly conventions. <strong>B — a held count that guards forever.</strong> Bank the number of real disagreements and let an automated check flag any change to it, the way the box sweep does. Right if we expect the set to stay small and want a new one to be noticed.</li>
+</ul>
+<p>And, whichever: which register a genuine disagreement is filed under, how bad it is called, and whether it is ours to fix or the printing's to explain.</p>
+<p><strong>What would change the answer:</strong> the size and nature of the first run's output — a short list of conventions argues for A, a handful of true defects for B.</p>
+<h3>⑧ Is this one decision, or several — and which, if any, should be written down now?</h3>
+<p><strong>Why now:</strong> so the owner is not handed one giant question when most of these can wait. <strong>What we do today:</strong> nothing is recorded; this scoping doc is the whole of it.</p>
+<p>My read: the two halves are genuinely separate decisions and should never be one row. The <strong>checking</strong> half (⑤⑥⑦) is close to a single decision — "should we build the fine page-to- page check, and how strict" — and it is cheap, aligned with work already done, and blocked by nothing. The <strong>drawing</strong> half (①②③④) used to look like one large, always-shut question. Option C changes that: a development-only draw is genuinely reachable — gated by a reworded rule and one new bundle-reading check — and it pairs naturally with the comparison half, since the cleanest way to <em>see</em> a disagreement is to draw the library's page beside ours while developing. So the drawing half is now worth opening as its own decision <em>if the owner wants that side-by-side</em>, with the public build never carrying it either way. What still should not be opened is the public-source version (option B): ② and ③ have no forcing reason to reach the reader today.</p>
+<p><strong>Where I was unsure:</strong> whether ① and ② are one decision or two. They are coupled — "what form does the content take" and "witness or source" push on each other — but I kept them apart because ② can be answered <em>witness</em> while ① is still unsettled (you can check against the page map without ever deciding what a drawn page would be made of), and that combination is exactly the cheap path. If they were merged, the cheap path would be buried inside a question that also drags in the word-shapes and the no-text rule. I also hovered over whether ④ (the checks) belongs to the drawing half or is its own thing; I left it in the drawing half because nothing forces it until a second source exists, but it is the one drawing-half item that a serious <em>checking</em> effort might also want, if the check starts wanting per-printing numbers of its own. Option C sharpens this last point: because a development-only draw commits no per-printing files, it does not trip the existing per-printing checks at all — it <em>adds</em> a new check (the bundle reading) rather than needing the old ones generalised. So ④ stays a cost of the public-source path (B), not of C.</p>
+<hr>
+<h2>What this is not settling</h2>
+<p>It does not decide whether we ever draw a page from the library, nor whether we build the fine comparison — only what each would require. It does not read any licence; it names the reading as owed. It does not touch which printing is the right witness (already settled) or re-open the page table (already cross-checked). And it takes no position on whether a second printing belongs in the <em>public</em> app at all — the forcing question behind option B — nor on whether a developer-only side-by-side is worth building, the lighter want behind option C. Neither is asked here.</p>
+<h2>The one-paragraph recommendation</h2>
+<p>The two halves are not the same size. <strong>Checking our page against the library's is cheap and already in the project's grain</strong> — the machinery to read the library as a witness exists, the comparison can be done entirely in word numbers with no letters and no licence reaching the reader, and there is a clear internal pattern to copy. If anything here is worth opening as a real decision now, it is that one (⑤⑥⑦ as a single record). <strong>Drawing a page from the library is reachable, but only two ways</strong> — into a public build, which the no-text rule forbids and no present want justifies; or into a development build only (option C), which a reworded rule and one new bundle-reading check make genuinely safe, and which pairs with the comparison so a developer can see the disagreement drawn rather than listed. That development-only draw is worth opening as its own decision <em>if the owner wants the side-by-side</em>; the public draw stays named-but-shut until someone actually wants a second printing readers can choose.</p>
+</main>
