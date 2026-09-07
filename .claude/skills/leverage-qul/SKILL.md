@@ -11,9 +11,12 @@ exactly two ways, and this skill is how you stay inside them.
 
 ## The one rule everything else serves
 
-`qul-reliance` (`docs/decisions/qul-reliance.md`, decided **A**) settled it: QUL is a
-**ruler and an outbound link, and this repo copies none of its bytes.** Option C — copy
-only the layout numbers — was on the table and was **turned down**. So:
+`qul-reliance` (`docs/decisions/qul-reliance.md`) was **reopened and re-decided D on
+2026-09-07**. It first settled (A, 2026-09-03) that QUL is a **ruler and an outbound link,
+and this repo copies none of its bytes** — and that still holds for the repository and the
+shipped bundle. What D adds is a third, deliberately narrow place a copy may live: a hosted
+database this project controls, off the tree and off the build, for the building tools to
+read. So the ways this project uses QUL are now:
 
 - **A ruler** — read a QUL dataset from a gitignored cache, measure our shipped numbers
   against it, and pin the *agreement figures* (verse keys, ids, boundary counts) plus a
@@ -23,11 +26,19 @@ only the layout numbers — was on the table and was **turned down**. So:
   `https://qul.tarteel.ai/cms/verses/N`, where N is the global 1-based ayah number
   (1:1 → 1). A URL, not the text. This is the `HopPopover` outbound link for an
   un-vendored target.
+- **A held copy — the store (option D).** A copy of the page positions and the word text may
+  be *held* in the hosted database this project controls (reached through the Supabase
+  command-line tool), populated by `ingest-qul-supabase.mjs` from the same gitignored
+  `.cache/`. It never enters the repository or the shipped bundle, and it is read by the
+  building tools alone — whether any reader receives those bytes is a separate open question,
+  not settled by D. The text-bearing word export may be held only after its licence is read
+  (the ledger check `qul-rulers-terms-and-text-free`); the ingest refuses it otherwise.
 
-Anything that would put QUL's *content* into the tree — its text, its fonts, its
-per-word ranges laid onto our artwork — is out of bounds until `qul-reliance` is
-reopened, and reopening it is itself a decision (see `similar-ayah-enrichment`, the open
-question about whether the ayah-level twins are worth it).
+Putting QUL's *content* into the **tree** — its text, its fonts, its per-word ranges laid
+onto our shipped artwork — remains out of bounds: D moved the boundary to admit a store we
+control, not the repository and not the build. Holding a text-bearing export in that store
+still waits on that resource's licence read, and shipping any of it to readers is a further
+decision (see `similar-ayah-enrichment`, and the open question of who reads the store).
 
 This skill is the **content + validation** half. For which *reference* answers which
 question, the V1/V2 revision trap, and the edge spot-audit, read the sibling skill

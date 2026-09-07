@@ -615,6 +615,23 @@ probe-qul: core ## Do the outside library's rulers agree with our numbers? make 
 	@# qul-reliance decision and the leverage-qul skill for the guardrails.
 	@node packages/etl/scripts/probe-qul-rulers.mjs $(if $(WRITE),--write,)
 
+.PHONY: ingest-qul
+ingest-qul: ## Load the held QUL copy into the store: make ingest-qul [PAGES=1] [WORDS=1] [DRY=1] [LICENCE=1]
+	@# Fills the database we run (option D of the qul-reliance decision) from the
+	@# gitignored QUL cache. PAGES=1 loads the positions-only page map — page,
+	@# line, line kind, and each ayah line's first/last word ids, no text — and
+	@# runs freely. WORDS=1 loads the one text-bearing table and REFUSES unless
+	@# LICENCE=1 is set AND the ledger's per-resource licence check has cleared,
+	@# because that copy is bytes we hold and the licence has not been read yet.
+	@#
+	@# The connection string is the owner's to supply as SUPABASE_DB_URL; this
+	@# target enters no credential. A missing cache makes either half skip and
+	@# exit 0, so a clean checkout is never red. DRY=1 prints what it would do and
+	@# writes nothing. See the qul-reliance record and the qul-store map node.
+	@SUPABASE_DB_URL="$(SUPABASE_DB_URL)" node packages/etl/scripts/ingest-qul-supabase.mjs \
+	  $(if $(PAGES),--pages,) $(if $(WORDS),--words,) \
+	  $(if $(DRY),--dry-run,) $(if $(LICENCE),--licence-cleared,)
+
 # ---------------------------------------------------------------------------
 
 .PHONY: help
