@@ -143,7 +143,9 @@ shown to whoever runs it — that is a matter for the tool, decided by building 
 where they do not, and what each one is for, are drawn in the ETL join map at
 `docs/design/qul-data-join-map.html` — served on the app's own site once merged, at
 `https://blog.bytesofpurpose.com/hifth/docs/design/qul-data-join-map.html`. The same join drawn
-as one full entity diagram, every box and every row count, is `docs/design/qul-data-erd.md`.
+as one full entity diagram, every box and every row count, is `docs/design/qul-data-erd.md`, and
+rendered on the app's own site — with the three store tables drawn too — at
+`docs/design/qul-data-erd.html`.
 
 *Where this lives in the code:* the held copy is reached through the Supabase command-line tool
 (project ref `zbkqfstkjmgzsrraodez`) and populated by the ingest step on branch
