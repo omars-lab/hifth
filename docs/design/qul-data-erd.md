@@ -48,8 +48,8 @@ erDiagram
   LAYOUT }o--|| FONT_SURAHNAME : "draws surah-name lines"
   WORDS_TEXT }o--|| FONT_NASTALEEQ : "draws word glyphs"
 
-  WORDS_TEXT { int word_id "qpc-v4 · 83,668 words · HELD" }
-  LAYOUT { int first_last_word_id "digital-khatt · 9,046 lines · 604 pages · HELD" }
+  WORDS_TEXT { int word_id "qpc-v4 · 83,668 words · HELD, loaded" }
+  LAYOUT { int first_last_word_id "digital-khatt · 9,046 lines · 604 pages · HELD, loaded" }
   WORD_ROOT { txt location "50,298 words rooted (60%)" }
   WORD_LEMMA { txt location "72,510 words lemmatised (87%)" }
   WORD_STEM { txt location "77,427 words stemmed (93%)" }
@@ -96,7 +96,7 @@ the [qul-etl-plugins](../decisions/qul-etl-plugins.md) decision):
   app keeps a copy of, so it can draw its own word-by-word page and stand it beside the printed
   one to check it. That is settled by [qul-store-purpose](../decisions/qul-store-purpose.md). The
   two **fonts** are held too, as the thing that draws the held text. None of it ships to readers;
-  all of it needs its licence read first.
+  each needed its licence read first, and those reads cleared on 8 September 2026; the word text and the layout are now loaded and verified in the store, while the two fonts are cleared to hold but not loaded yet.
 - **Reference only** — everything else on the diagram (the grammar files, the themes and topics,
   the two similar-verse sets, the division ranges) is a ruler: the app measures its own work
   against it and links back to it, and keeps none of its bytes. Whether any of these is ever held
@@ -137,7 +137,7 @@ Not one of these pages shows a licence, and the library states terms **per resou
 blanket. So before any text, font, or morphology box is held, that resource's own page is read
 and its terms recorded — the human check
 [qul-held-copy-licensed-and-offbundle](../validation/) stands in front of exactly that, and the
-tool that holds the copy refuses to run until it is done. Attribution is owed even for the
+tool that holds the copy refuses to run until it is done; that check passed on 8 September 2026, and the word text and layout have since been loaded and verified in the store. Attribution is owed even for the
 numbers-only boxes we merely measure against.
 
 ## Where this lives
