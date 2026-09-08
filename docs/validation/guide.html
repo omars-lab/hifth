@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" data-ledger-hash="b184b77a4d91">
+<html lang="en" data-ledger-hash="eaec0db911bc">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -123,11 +123,11 @@ li.struck .expect::before { content: "machine "; color: var(--green); }
 <header class="top">
   <p class="kicker">Hifth · حِفظ</p>
   <h1>Field guide</h1>
-  <p class="lede">The checks a machine cannot run. 11 of 13 outstanding.</p>
+  <p class="lede">The checks a machine cannot run. 10 of 13 outstanding.</p>
   <p class="rule">Every result here must tighten something automated — a threshold, a
   fixture, a gate. That is what <b>tunes</b> is for at the foot of each card. A verdict
   that tunes nothing has to be bought again by hand, forever.</p>
-  <p class="src">Generated from <code>docs/validation/ledger.json</code> · <code>b184b77a4d91</code>
+  <p class="src">Generated from <code>docs/validation/ledger.json</code> · <code>eaec0db911bc</code>
   · never edit this file — run <code>make guide</code></p>
 </header>
 
@@ -431,15 +431,15 @@ li.struck .expect::before { content: "machine "; color: var(--green); }
     <p class="expect">Written up in docs/decisions/qul-reliance.md</p>
   </section>
 </article>
-<article class="card" id="qul-held-copy-licensed-and-offbundle">
+<article class="card is-done" id="qul-held-copy-licensed-and-offbundle">
   <div class="head">
-    <span class="badge">outstanding</span>
+    <span class="badge ok">done</span>
     <h2>Before any held item is text, a font, or morphology, read that resource's licence and confirm the store stays off the repo and off the shipped build</h2>
     <p class="id"><code>qul-held-copy-licensed-and-offbundle</code></p>
   </div>
 
   <p class="why">The held copy is the other side of the ruler check, and its obligation is the opposite one. Where the ruler boundary confirms an export carries NO Qur'an text, the held copy DELIBERATELY holds text (the per-word qpc-v4 text), and it may also hold fonts and morphology. The qul-reliance decision permits this only in a store the owner controls — off the repository and off the shipped bundle — and only after each held item's own licence is read, because the outside library grants terms per resource, not in a blanket. So two things rest on a human, not a gate. First, each text-bearing, font, or morphology item held has a licence that only its own resource page states, and holding it before that read is exactly what the decision forbids. Second, the store lives outside the tree, so no gate here can see what it actually holds; only a person signed in to the store can confirm it holds what was licensed and nothing has leaked into what ships.</p>
-  
+  <p class="verdict"><b>Verdict 2026-09-08:</b> Owner verified and cleared the licences for the held resources on 2026-09-08 — the DigitalKhatt 15-line layout (OFL 1.1), the Quranic Arabic Corpus morphology (GNU GPL), and the KFGQPC QPC-V4 word text plus the surah-name and Nastaleeq fonts. Cleared to hold in the owner-controlled dev store. Repo and shipped build carry no Quran text (no-text/scripture gates green). The store-side boundary (store holds only licensed items, nothing leaked into ship) is re-confirmed by the owner signed into the store after each hold.</p>
 
   
   <section class="block">
