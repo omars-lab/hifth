@@ -73,15 +73,17 @@ licence: إتاحة حرّة للاستعمال الرقمي · الطبع ال�
 href: https://github.com/quranpedia/quran-svg
 ```
 
-- **Status: CONFIRMED for the overlay (CC0, read at the source). The Complex's own
-  terms remain read through quran-svg's NOTICE.md rather than off
-  qurancomplex.gov.sa**, which refused connections on 2026-07-26 (`ECONNREFUSED`
-  on both `/en/` and `/en/terms/`; the Wayback mirror is not fetchable from CI
-  either). NOTICE.md quotes them and cites the decrees, so this is a strong
-  secondary source, not a guess — but the one open item before Loop 7 is to open
-  qurancomplex.gov.sa in an ordinary browser and confirm the wording is still what
-  NOTICE.md records. Nothing in the build depends on the answer; the entry moves
-  from PROVISIONAL to CONFIRMED-pending-that-glance.
+- **Status: CONFIRMED. The overlay is CC0, read at the source; the Complex's own
+  terms are now read at the source too** — the maintainer opened qurancomplex.gov.sa
+  in an ordinary browser on 2026-09-08 and confirmed the digital-mushaf terms say free
+  use in digital, web and software contexts with commercial printing of physical masahif
+  reserved to the Complex, matching what quran-svg's NOTICE.md quotes and what this entry
+  and the app colophon restate. The host had refused connections from every network this
+  project's tooling runs on (`ECONNREFUSED` on `/en/` and `/en/terms/` on 2026-07-26; the
+  Wayback mirror unfetchable from CI too), which is why the read waited for a human on an
+  ordinary connection — and why NOTICE.md carried the terms as a strong secondary source in
+  the meantime. Nothing in the build depended on the answer, and nothing changed: the primary
+  source matched the restatement.
 - **Immutability:** SVG bytes are never hand-edited (PLAN §8). Loop 4b applies
   **three** declared transforms, each reproducible and each asserted:
   1. **svgo** at the version and config recorded in the pin — the config was
