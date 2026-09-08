@@ -1070,8 +1070,8 @@
         },
         {
           "file": "packages/etl/package.json",
-          "symbol": "\"etl\": \"node scripts/extract-pages.mjs",
-          "note": "The ordinary path, and what it deliberately omits. build-words.mjs and build-alignment.mjs are NOT in this chain because both read the gitignored ligature cache, so chaining them would make the ordinary build fail on a clean checkout. Their outputs are committed and gate:words / gate:align re-derive them from committed bytes instead — the trick that lets a cache-dependent build be checked offline."
+          "symbol": "\"etl\": \"node scripts/etl.mjs",
+          "note": "The entry point, now one line: the runner drives whichever registered source is asked for (see the etl-plugins feature). A bare run does the default sources — the shipping build — and its step list lives in the derive-and-measure plugin, where you can also read what it deliberately omits: build-words.mjs and build-alignment.mjs are NOT in the chain because both read the gitignored ligature cache, so chaining them would make the ordinary build fail on a clean checkout. Their outputs are committed and gate:words / gate:align re-derive them from committed bytes instead — the trick that lets a cache-dependent build be checked offline."
         },
         {
           "file": "packages/etl/scripts/lib/candidate-pages.mjs",
@@ -1109,8 +1109,44 @@
         "encoding-inspector",
         "assets-and-pages",
         "provenance",
-        "ci-and-gates"
+        "ci-and-gates",
+        "etl-plugins"
       ]
+    },
+
+    {
+      "id": "etl-plugins",
+      "what": "The one interface every Qur'an-data source enters by. There are two, and they complement rather than replace each other: one derives the app's own pages and shards from what the project already owns and measures them against outside rulers, shipping none of their bytes; the other holds a copy of the outside library's V4 pieces in a store the owner controls, to draw our own page and check ours against it. Neither is privileged and neither forks the pipeline — a registry lists them, a runner drives them. The tenet in CLAUDE.md ('Every source of Qur'an data is a plugin') and the decision qul-etl-plugins are what this feature enforces.",
+      "layer": "L3 etl",
+      "entry": [
+        {
+          "file": "packages/etl/scripts/lib/etl-plugins.mjs",
+          "symbol": "export const PLUGINS",
+          "note": "The registry — the single place the tenet is enforced. A source is a named descriptor with the same shape as every other (the EtlPlugin typedef beside it), and it is discovered here, never wired in by hand at a call site. Adding a source is adding a file under plugins/ and one line to this array; nothing about the runner changes."
+        },
+        {
+          "file": "packages/etl/scripts/etl.mjs",
+          "symbol": "async function main",
+          "note": "The runner — one command in front of every source. Bare (`make etl`) it runs the default sources, which is the shipping build and byte-identical to the old explicit chain. `--list` (`make etl-list`) prints each source and what it reads, writes, and needs. A bare name runs one source and forwards its flags; `--all` runs every source, defaults first."
+        },
+        {
+          "file": "packages/etl/scripts/plugins/derive-and-measure.mjs",
+          "symbol": "const STEPS",
+          "note": "The shipping source, as a plugin. Its STEPS array IS the ordinary build order — extract-pages, build-adjacency, build-roots, build-tajweed — so what the etl-pipeline feature calls 'the ordinary path and what it deliberately omits' is read here now. It is the only default: its output is what `make ci` compares byte-for-byte against the committed assets."
+        },
+        {
+          "file": "packages/etl/scripts/plugins/held-copy.mjs",
+          "symbol": "export default",
+          "note": "The held-copy source, as a plugin. It ships nothing: it forwards its flags to ingest-qul-supabase.mjs, which holds the V4 pieces in the owner's store under qul-reliance option D. It is NOT a default — it needs the owner's database and, for anything text-bearing, a licence read recorded first — so it names those under `needs` and stays one command away (`etl:hold`), never in the shipping build."
+        }
+      ],
+      "extend": [
+        "A new Qur'an-data source is a new file under packages/etl/scripts/plugins/ exporting one EtlPlugin descriptor, plus one line in the PLUGINS array. Do not add a second entry point or a privileged path — that is exactly what the tenet and qul-etl-plugins forbid. If a source needs a database, a licence read, or anything not in the tree, it is `default: false` and says why under `needs`.",
+        "A source whose output ships is `default: true` and its output must stay byte-identical under gate:notext / gate:scripture / make ci. A source that holds outside bytes ships nothing and keeps its own gates inside the script it forwards to — the runner does not second-guess them.",
+        "Do not restate the decision here. qul-etl-plugins (docs/decisions/qul-etl-plugins.md) owns why the two sources are complementary; qul-store-purpose owns what the held copy is for; qul-reliance owns why a copy may be held at all. This feature owns the SHAPE — one registry, one runner, one descriptor per source."
+      ],
+      "gates": ["pnpm gate:map", "pnpm gate:notext", "pnpm gate:scripture", "make ci"],
+      "seeAlso": ["etl-pipeline", "edge-data-etl", "provenance"]
     },
 
     {
