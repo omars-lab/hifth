@@ -7,8 +7,10 @@
 -- `qul-reliance` option-D posture it may live here — in a store this project
 -- controls — but NEVER in the repository or the shipped bundle, and only after the
 -- source resource's own licence has been read and recorded (QUL states terms per
--- resource; see the validation check `qul-rulers-terms-and-text-free`). The ingest
--- step refuses to populate this table until that read is marked done. The same read
+-- resource; see the validation check `qul-held-copy-licensed-and-offbundle`, the
+-- held-copy obligation, distinct from the ruler check `qul-rulers-terms-and-text-free`
+-- that confirms an export carries no text). The ingest step refuses to populate this
+-- table until that read is marked done. The same read
 -- gates every other held item that is text, a font, or morphology (the fonts that
 -- DRAW this text, library ids 457/462, and the per-word root/lemma/stem) — each is
 -- held only once its own originator's terms are read, never before.
