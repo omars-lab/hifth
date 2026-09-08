@@ -157,3 +157,34 @@ bundle carry no Qur'an text* — the drawn page and its fonts live only in the h
 building tools. The per-resource licence reads owed before the layout, the word text and the
 fonts may be held are the human checks in `docs/validation/ledger.json`; per-item attribution is
 recorded in `SOURCES.md`.
+
+*Licence reads (dev held copy, 2026-09-08):* the resource pages were read for build-time,
+off-bundle holding — a private copy in the owner's dev store, shown to no reader. What each says:
+
+- **The page layout (digital-khatt 15-line, library id 21)** is under the SIL Open Font License
+  1.1 — copying and holding are freely permitted, with attribution and the reserved-name rule.
+  The layout we hold is numbers only, so its risk is thin either way. *Clear to hold; owes
+  attribution.*
+- **The word-by-word grammar (root, lemma, stem)** is the Quranic Arabic Corpus under the GNU
+  General Public Licence. That licence's conditions attach when bytes are *handed on*, not when a
+  copy is held and read by our own tools; a dev copy that ships nothing carries no obligation
+  beyond the attribution already recorded. *Clear to hold for dev use; if any grammar-derived
+  bytes are ever shipped, the licence's share-alike terms attach at that point.*
+- **The word text (QPC V4, library id 47) and the two fonts that draw it (surah-name, library id
+  457; Nastaleeq, library id 462)** are all the property of the King Fahd Glorious Quran Printing
+  Complex, and here the read turned up a genuine fork: two different licences travel under the
+  Complex's name. One grants "Use, Copy, and Distribute" free of cost (no selling, no modifying,
+  no reverse-engineering) — under which a private held copy is fine. The other says the material
+  "may not be reproduced [or] modified without the express written approval" of the Complex —
+  under which even a private held copy needs their written permission first. Which one binds a
+  given piece depends on the exact licence bundled with that specific resource on the library, and
+  that is the owner's to check per item. **Until that is verified, these three are not cleared to
+  hold** — this is the one blocker the held copy still waits on, and it is a decision only the
+  owner can make.
+- **The library itself** states, in its own FAQ, that terms vary per resource (the resources are
+  the authors', not the library's) and that commercial use is allowed only after each resource's
+  own terms are reviewed — which is exactly the per-resource posture assumed here.
+
+Two things are still owed and only the owner can do them: verify the Complex licence variant that
+binds the word text and the two fonts, and — signed into the store — confirm it holds only the
+items whose licences clear, with nothing leaked into what ships. So the ledger check stays open.
