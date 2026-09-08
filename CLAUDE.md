@@ -106,6 +106,25 @@ those, but the address a record gives a reader is the one on the site, and the d
 refuses any other. Nothing is hidden from the people the app is for: the reasoning is as public
 as the result, and a reader who disagrees with a choice can open the page it was made on.
 
+## Every source of Qur'an data is a plugin
+
+The third tenet. This app takes in Qur'an data two ways, and they are meant to complement each
+other, not compete. One **derives** the app's own pages and shards from what the project already
+owns — the vendored print and our own corpora — and measures them against outside rulers,
+shipping none of the rulers' bytes. The other **holds** a copy of the outside library in a store
+the owner controls, off the repository and off the shipped bundle, so the tools can draw our own
+page and check ours against it. The first is the build that ships; the second ships nothing.
+Neither replaces the other, and a third could join them tomorrow.
+
+So **a source enters behind one shared interface — a named plugin with the same shape as the
+others, discovered not hard-wired — never a fork of the pipeline and never a privileged path.**
+A registry lists the sources and a runner drives them; adding one is adding a file and a line,
+and nothing about the runner changes. A source whose output ships stays checkable offline and
+byte-for-byte against what is committed; a source that holds outside bytes keeps its own gates —
+the licence read owed before any text, font, or morphology is held — inside itself, and the
+runner does not route around them. The shape lives in the `etl-plugins` feature of the code map;
+why the two are complementary is the `qul-etl-plugins` decision.
+
 ## The other registers
 
 Same rule in each: they index, they do not restate.

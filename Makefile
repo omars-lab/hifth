@@ -49,11 +49,12 @@ preview: build ## Build, then serve the production bundle locally
 	$(WEB) preview --port $(PORT)
 
 .PHONY: etl
-etl: core ## Run the full ETL (pages + adjacency + root + tajweed shards) into assets
-	$(ETL) extract:pages
-	$(ETL) build:adjacency
-	$(ETL) build:roots
-	$(ETL) build:tajweed
+etl: core ## Run every default Qur'an-data source (the ones that ship) through the plugin runner
+	$(ETL) etl
+
+.PHONY: etl-list
+etl-list: ## List every registered Qur'an-data source and what each reads, writes, and needs
+	$(ETL) etl:list
 
 .PHONY: clean
 clean: ## Remove all build output (the "clean-state" discipline — see loop-0.md)

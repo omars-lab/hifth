@@ -97,7 +97,8 @@
         "loop-4a",
         "loop-4b",
         "similar-ayah-enrichment",
-        "qul-store-purpose"
+        "qul-store-purpose",
+        "qul-etl-plugins"
       ]
     },
     {
@@ -989,7 +990,35 @@
       "date": "2026-09-07",
       "related": [
         "qul-reliance",
-        "similar-ayah-enrichment"
+        "similar-ayah-enrichment",
+        "qul-etl-plugins"
+      ]
+    },
+    {
+      "id": "qul-etl-plugins",
+      "question": "When a new way of taking in Qur'an data arrives, how does it join the ways already here?",
+      "status": "decided",
+      "options": [
+        {
+          "id": "A",
+          "label": "Fold each new source into the existing shipping build as more steps on the same line"
+        },
+        {
+          "id": "B",
+          "label": "Give every source one shared shape — a named source in a list, driven by one runner, no privileged path"
+        },
+        {
+          "id": "C",
+          "label": "Keep the held copy as a separate script no build knows about, run by hand"
+        }
+      ],
+      "doc": "docs/decisions/qul-etl-plugins.md",
+      "decided": "B",
+      "by": "omar",
+      "date": "2026-09-07",
+      "related": [
+        "qul-reliance",
+        "qul-store-purpose"
       ]
     }
   ]
