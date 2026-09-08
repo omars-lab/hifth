@@ -76,11 +76,13 @@
     "pnpm gate:issues   the invariants",
     "the `issues` skill drives triage: pick, open, close"
   ],
-
   "issues": [
     {
       "id": "plain-wheel-does-nothing",
-      "source": { "file": "docs/design/page-turning.md", "item": "③" },
+      "source": {
+        "file": "docs/design/page-turning.md",
+        "item": "③"
+      },
       "status": "fixed",
       "severity": "defect",
       "owner": "agent",
@@ -89,7 +91,10 @@
     },
     {
       "id": "silent-turn-across-an-absent-page",
-      "source": { "file": "docs/design/page-turning.md", "item": "④" },
+      "source": {
+        "file": "docs/design/page-turning.md",
+        "item": "④"
+      },
       "status": "fixed",
       "severity": "defect",
       "owner": "agent",
@@ -98,7 +103,10 @@
     },
     {
       "id": "ayah-focus-eats-the-page-turn-keys",
-      "source": { "file": "docs/design/page-turning.md", "item": "⑤" },
+      "source": {
+        "file": "docs/design/page-turning.md",
+        "item": "⑤"
+      },
       "status": "fixed",
       "severity": "defect",
       "owner": "agent",
@@ -107,7 +115,10 @@
     },
     {
       "id": "dead-page-fade-css",
-      "source": { "file": "docs/design/page-turning.md", "item": "⑧" },
+      "source": {
+        "file": "docs/design/page-turning.md",
+        "item": "⑧"
+      },
       "status": "answered",
       "severity": "defect",
       "owner": "agent",
@@ -115,7 +126,10 @@
     },
     {
       "id": "mounted-set-has-no-ceiling",
-      "source": { "file": "docs/design/page-turning.md", "item": "⑩" },
+      "source": {
+        "file": "docs/design/page-turning.md",
+        "item": "⑩"
+      },
       "status": "fixed",
       "severity": "risk",
       "owner": "agent",
@@ -124,7 +138,10 @@
     },
     {
       "id": "double-centring",
-      "source": { "file": "docs/design/page-turning.md", "item": "①" },
+      "source": {
+        "file": "docs/design/page-turning.md",
+        "item": "①"
+      },
       "status": "fixed",
       "severity": "defect",
       "owner": "agent",
@@ -132,7 +149,10 @@
     },
     {
       "id": "stage-fit-tests-cannot-catch-it",
-      "source": { "file": "docs/design/page-turning.md", "item": "②" },
+      "source": {
+        "file": "docs/design/page-turning.md",
+        "item": "②"
+      },
       "status": "fixed",
       "severity": "defect",
       "owner": "agent",
@@ -140,7 +160,10 @@
     },
     {
       "id": "drop-shadow-costs-the-frame-budget",
-      "source": { "file": "docs/design/page-turning.md", "item": "⑥" },
+      "source": {
+        "file": "docs/design/page-turning.md",
+        "item": "⑥"
+      },
       "status": "fixed",
       "severity": "defect",
       "owner": "agent",
@@ -148,7 +171,10 @@
     },
     {
       "id": "the-rounded-corner-is-invisible",
-      "source": { "file": "docs/design/page-turning.md", "item": "⑦" },
+      "source": {
+        "file": "docs/design/page-turning.md",
+        "item": "⑦"
+      },
       "status": "fixed",
       "severity": "defect",
       "owner": "agent",
@@ -156,7 +182,10 @@
     },
     {
       "id": "zoom-anchor-coordinate-space",
-      "source": { "file": "docs/design/page-turning.md", "item": "⑨" },
+      "source": {
+        "file": "docs/design/page-turning.md",
+        "item": "⑨"
+      },
       "status": "fixed",
       "severity": "defect",
       "owner": "agent",
@@ -164,33 +193,48 @@
     },
     {
       "id": "reduced-motion-had-nothing-to-remove",
-      "source": { "file": "docs/design/page-turning.md", "item": "⑪" },
+      "source": {
+        "file": "docs/design/page-turning.md",
+        "item": "⑪"
+      },
       "status": "fixed",
       "severity": "question",
       "owner": "agent",
       "closedBy": "apps/web/e2e/page-turn.spec.ts"
     },
-
     {
       "id": "does-the-fold-read-at-all",
-      "source": { "file": "docs/design/page-transition.md", "item": "②" },
+      "source": {
+        "file": "docs/design/page-transition.md",
+        "item": "②"
+      },
       "status": "blocked",
       "severity": "question",
       "owner": "user",
-      "blockedBy": ["a hafiz on the acceptance phone"],
+      "blockedBy": [
+        "a hafiz on the acceptance phone"
+      ],
       "note": "A design judgement with no evidence behind it. There is no cheaper instrument than putting it in front of someone and no measurement substitutes for it."
     },
     {
       "id": "turn-cost-gated-on-the-perf-verdict",
-      "source": { "file": "docs/design/page-transition.md", "item": "③" },
+      "source": {
+        "file": "docs/design/page-transition.md",
+        "item": "③"
+      },
       "status": "blocked",
       "severity": "risk",
       "owner": "user",
-      "blockedBy": ["perf-verdict-on-device"]
+      "blockedBy": [
+        "perf-verdict-on-device"
+      ]
     },
     {
       "id": "does-a-real-fore-edge-stack-vary",
-      "source": { "file": "docs/design/page-transition.md", "item": "⑤" },
+      "source": {
+        "file": "docs/design/page-transition.md",
+        "item": "⑤"
+      },
       "status": "open",
       "severity": "question",
       "owner": "user",
@@ -198,7 +242,10 @@
     },
     {
       "id": "the-spreads-phase",
-      "source": { "file": "docs/design/page-transition.md", "item": "①" },
+      "source": {
+        "file": "docs/design/page-transition.md",
+        "item": "①"
+      },
       "status": "answered",
       "severity": "defect",
       "owner": "agent",
@@ -206,7 +253,10 @@
     },
     {
       "id": "the-field-colour",
-      "source": { "file": "docs/design/page-transition.md", "item": "④" },
+      "source": {
+        "file": "docs/design/page-transition.md",
+        "item": "④"
+      },
       "status": "answered",
       "severity": "question",
       "owner": "agent",
@@ -214,15 +264,20 @@
     },
     {
       "id": "gesture-thresholds-inherited",
-      "source": { "file": "docs/design/page-transition.md", "item": "⑥" },
+      "source": {
+        "file": "docs/design/page-transition.md",
+        "item": "⑥"
+      },
       "status": "answered",
       "severity": "question",
       "owner": "agent"
     },
-
     {
       "id": "arrow-turns-leaf-or-page-at-desktop",
-      "source": { "file": "docs/design/desktop.md", "item": "①" },
+      "source": {
+        "file": "docs/design/desktop.md",
+        "item": "①"
+      },
       "status": "answered",
       "severity": "question",
       "owner": "agent",
@@ -231,7 +286,10 @@
     },
     {
       "id": "do-the-two-leaves-pan-together",
-      "source": { "file": "docs/design/desktop.md", "item": "②" },
+      "source": {
+        "file": "docs/design/desktop.md",
+        "item": "②"
+      },
       "status": "fixed",
       "severity": "question",
       "owner": "agent",
@@ -240,7 +298,10 @@
     },
     {
       "id": "min-width-as-a-proxy-for-a-keyboard",
-      "source": { "file": "docs/design/desktop.md", "item": "③" },
+      "source": {
+        "file": "docs/design/desktop.md",
+        "item": "③"
+      },
       "status": "fixed",
       "severity": "question",
       "closedBy": "apps/web/e2e/desktop.spec.ts",
@@ -249,35 +310,50 @@
     },
     {
       "id": "second-mount-frame-budget",
-      "source": { "file": "docs/design/desktop.md", "item": "④" },
+      "source": {
+        "file": "docs/design/desktop.md",
+        "item": "④"
+      },
       "status": "blocked",
       "severity": "risk",
       "owner": "user",
-      "blockedBy": ["perf-verdict-on-device"],
+      "blockedBy": [
+        "perf-verdict-on-device"
+      ],
       "note": "loop-4b dropped off the blocker list by happening: the second mount is real on every spread now, which is what made the risk measurable rather than hypothetical. It still cannot be answered without the on-device verdict, so the chain is one link shorter and not shorter than that."
     },
     {
       "id": "where-the-revision-map-sits-at-desktop",
-      "source": { "file": "docs/design/desktop.md", "item": "⑤" },
+      "source": {
+        "file": "docs/design/desktop.md",
+        "item": "⑤"
+      },
       "status": "fixed",
       "severity": "question",
       "owner": "agent",
       "closedBy": "apps/web/e2e/desktop.spec.ts",
       "note": "Asked as a design question and answered as a defect: RevisionMap was the only one of eight sheets with no `@media (min-width: 900px)` rule, and at 1440px its auto-fill grid laid 30 juz out as a single row. Fixed with a bounded centred card plus a named column count per scope; the owed row in docs/decisions/desktop-vs-mobile.md is row 22."
     },
-
     {
       "id": "warmth-thresholds",
-      "source": { "file": "docs/design/revision-record.md", "item": "①" },
+      "source": {
+        "file": "docs/design/revision-record.md",
+        "item": "①"
+      },
       "status": "blocked",
       "severity": "question",
       "owner": "user",
-      "blockedBy": ["a hafiz"],
+      "blockedBy": [
+        "a hafiz"
+      ],
       "note": "A ledger candidate. The bands decide what `cold` means, and a threshold chosen by whoever wrote the renderer is a claim about somebody else's revision habit."
     },
     {
       "id": "what-a-tap-on-the-heatmap-does",
-      "source": { "file": "docs/design/revision-record.md", "item": "②" },
+      "source": {
+        "file": "docs/design/revision-record.md",
+        "item": "②"
+      },
       "status": "fixed",
       "severity": "question",
       "owner": "agent",
@@ -286,26 +362,36 @@
     },
     {
       "id": "multi-edition-revision-records",
-      "source": { "file": "docs/design/revision-record.md", "item": "③" },
+      "source": {
+        "file": "docs/design/revision-record.md",
+        "item": "③"
+      },
       "status": "fixed",
       "severity": "defect",
       "owner": "agent",
       "closedBy": "packages/core/src/revision.test.ts",
       "note": "Latent rather than hypothetical: one edition is vendored, but an IndexedDB record outlives the build, so stored page ids would join the next print's grid silently. comparableEvents partitions at page scope only — a juz is the same in every print, and filtering there would show a hafiz less revision than they did."
     },
-
     {
       "id": "arabic-number-agreement",
-      "source": { "file": "docs/design/i18n.md", "item": "①" },
+      "source": {
+        "file": "docs/design/i18n.md",
+        "item": "①"
+      },
       "status": "open",
       "severity": "defect",
       "owner": "user",
-      "blockedBy": ["a hafiz"],
+      "blockedBy": [
+        "a hafiz"
+      ],
       "note": "37 forms Arabic silently substitutes today. One JSON edit each, but the edit needs a hafiz's eye. Named in its source as a known defect, deliberately deferred."
     },
     {
       "id": "i18n-other-assumes-two-languages",
-      "source": { "file": "docs/design/i18n.md", "item": "④" },
+      "source": {
+        "file": "docs/design/i18n.md",
+        "item": "④"
+      },
       "status": "fixed",
       "severity": "risk",
       "owner": "agent",
@@ -314,7 +400,10 @@
     },
     {
       "id": "lang-switch-interpolates-a-locale-name",
-      "source": { "file": "docs/design/i18n.md", "item": "⑤" },
+      "source": {
+        "file": "docs/design/i18n.md",
+        "item": "⑤"
+      },
       "status": "answered",
       "severity": "risk",
       "owner": "agent",
@@ -322,22 +411,30 @@
     },
     {
       "id": "ar-as-the-reference-locale",
-      "source": { "file": "docs/design/i18n.md", "item": "②" },
+      "source": {
+        "file": "docs/design/i18n.md",
+        "item": "②"
+      },
       "status": "answered",
       "severity": "question",
       "owner": "agent"
     },
     {
       "id": "refjoin-is-punctuation",
-      "source": { "file": "docs/design/i18n.md", "item": "③" },
+      "source": {
+        "file": "docs/design/i18n.md",
+        "item": "③"
+      },
       "status": "answered",
       "severity": "question",
       "owner": "agent"
     },
-
     {
       "id": "where-the-alignment-lives",
-      "source": { "file": "docs/design/word-indexing.md", "item": "①" },
+      "source": {
+        "file": "docs/design/word-indexing.md",
+        "item": "①"
+      },
       "status": "answered",
       "severity": "question",
       "owner": "agent",
@@ -345,7 +442,10 @@
     },
     {
       "id": "announcing-a-run-needs-the-text",
-      "source": { "file": "docs/design/word-indexing.md", "item": "②" },
+      "source": {
+        "file": "docs/design/word-indexing.md",
+        "item": "②"
+      },
       "status": "answered",
       "severity": "question",
       "owner": "agent",
@@ -353,7 +453,10 @@
     },
     {
       "id": "exceptions-are-orthographic",
-      "source": { "file": "docs/design/word-indexing.md", "item": "③" },
+      "source": {
+        "file": "docs/design/word-indexing.md",
+        "item": "③"
+      },
       "status": "answered",
       "severity": "question",
       "owner": "agent",
@@ -361,7 +464,10 @@
     },
     {
       "id": "no-ayah-spans-a-page",
-      "source": { "file": "docs/design/word-indexing.md", "item": "④" },
+      "source": {
+        "file": "docs/design/word-indexing.md",
+        "item": "④"
+      },
       "status": "answered",
       "severity": "risk",
       "owner": "agent",
@@ -369,7 +475,10 @@
     },
     {
       "id": "tajweed-word-granularity-needs-a-third-text",
-      "source": { "file": "docs/design/word-indexing.md", "item": "⑤" },
+      "source": {
+        "file": "docs/design/word-indexing.md",
+        "item": "⑤"
+      },
       "status": "answered",
       "severity": "question",
       "owner": "agent",
@@ -377,16 +486,21 @@
     },
     {
       "id": "the-crop-draws-neighbours-with-nothing-saying-so",
-      "source": { "file": "docs/design/word-indexing.md", "item": "⑥" },
+      "source": {
+        "file": "docs/design/word-indexing.md",
+        "item": "⑥"
+      },
       "status": "open",
       "severity": "defect",
       "owner": "agent",
       "note": "Opened 2026-08-16, and it is a build row rather than a question: the decision comparison-crop is DECIDED (option F, omar, 2026-08-16) and the fix is drawn, measured and checked in — what is missing is the component. The panel takes the union of bandsFor's per-line rectangles and draws that, so it draws whatever else is printed on those lines: 5,088 crops over 2,544 pairs, 69.8% mean share, 820 of them (16.1%) more neighbour than ayah, worst 10.3% (80:36, page 585). The wash marks the words the two ayahs do not share, so nothing distinguishes an unmarked neighbour from unmarked shared wording and a reader can read one as the other — on the app's own signature pair the crop labelled 2:123 has its whole first line occupied by 2:122. What F needs, all inside DiffView and its stylesheet: an evenodd scrim over the frame minus the bands, a green band on the shared range, a yellow band on each divergent run, two new tokens. No new data — divergentRuns and bandsFor already return every rectangle, and scripts/build-crop-options.mjs draws the option from exactly those calls, so the geometry is proven before the component moves. Preserve the fallback: no edge, no shard or no page still renders nothing and the hop row keeps its plain note. Not settled by this row: which words get marked (read off the edge's spans, verified, unchanged) and the exact green and yellow, which can be argued without reopening the decision."
     },
-
     {
       "id": "alef-maddah-is-a-fourth-correction",
-      "source": { "file": "docs/design/encoding-inspector.md", "item": "①" },
+      "source": {
+        "file": "docs/design/encoding-inspector.md",
+        "item": "①"
+      },
       "status": "fixed",
       "severity": "question",
       "owner": "agent",
@@ -395,7 +509,10 @@
     },
     {
       "id": "lam-shamsiyyah-starts-on-the-wasl",
-      "source": { "file": "docs/design/encoding-inspector.md", "item": "②" },
+      "source": {
+        "file": "docs/design/encoding-inspector.md",
+        "item": "②"
+      },
       "status": "answered",
       "severity": "defect",
       "owner": "agent",
@@ -403,7 +520,10 @@
     },
     {
       "id": "oracle-covers-a-quarter",
-      "source": { "file": "docs/design/encoding-inspector.md", "item": "③" },
+      "source": {
+        "file": "docs/design/encoding-inspector.md",
+        "item": "③"
+      },
       "status": "fixed",
       "severity": "risk",
       "owner": "agent",
@@ -412,7 +532,10 @@
     },
     {
       "id": "inspector-draws-no-ink",
-      "source": { "file": "docs/design/encoding-inspector.md", "item": "④" },
+      "source": {
+        "file": "docs/design/encoding-inspector.md",
+        "item": "④"
+      },
       "status": "answered",
       "severity": "question",
       "owner": "agent",
@@ -420,152 +543,207 @@
     },
     {
       "id": "drift-label-reads-backwards",
-      "source": { "file": "docs/design/encoding-inspector.md", "item": "⑤" },
+      "source": {
+        "file": "docs/design/encoding-inspector.md",
+        "item": "⑤"
+      },
       "status": "answered",
       "severity": "defect",
       "owner": "agent",
       "note": "ANSWERED 2026-08-07: the label now reads forwards. The one-line fix the row asked for has been made, and the line above the histogram gained a note saying which way the sign runs and that it read the other way for as long as it existed — the row is kept rather than deleted because a label that was wrong from the day it was written is the kind of thing that gets re-introduced by whoever next writes a histogram. `answered` and not `fixed` on purpose: what changed is a console.log string and there is no test that would fail if somebody inverted it again, while the correctness that IS tested — oracleOf's sign convention, pinned in tajweed-fold.test.mjs — was never wrong. Recording that gap is worth more than claiming a closure this repo's definition of `fixed` would refuse. ORIGINAL NOTE FOLLOWS. probe-tajweed-words.mjs prints its miss histogram under 'distance to the expected letter (negative = the fold ran long)'. The convention in lib/tajweed-fold.mjs — documented on oracleOf and pinned by its tests — is the opposite: delta is actual minus stated, so POSITIVE means the letter sits later than the offsets say, which is the fold running long. Numbers unaffected, sentence inverted, one line. Deliberately not fixed in the commit that found it: probe-tajweed-words.mjs and tajweed-words.probe.json were owned by a concurrent session, and a one-word edit that collides is worse than a filed item. Whoever next touches that file should fix the label and delete this row."
     },
-
     {
       "id": "adj-shards-have-two-upstreams",
-      "source": { "file": "docs/design/track-b-native.md", "item": "①" },
+      "source": {
+        "file": "docs/design/track-b-native.md",
+        "item": "①"
+      },
       "status": "answered",
       "severity": "defect",
       "owner": "agent",
       "note": "ANSWERED 2026-08-15: the row names both parents. The claim was re-measured over the shipped shards before anything was edited rather than read off this note — 2,544 of 3,002 edges across 114 files carry a span, and 85 of the 114 contain a toSpan, so the strict reading applies to the common case and not to a corner. apps/web/public/assets/adj/** now reads 'GPL-3.0 (inherited) and free use with attribution (inherited) — The Quranic Arabic Corpus's and Waqar144's', and LICENSES.md gained a section saying how the second parent got there: as a feature, with no licence file touched. The story is load-bearing, not decoration — a two-parent row with nothing behind it reads like an over-cautious duplicate and invites the next person to simplify it back to one. `answered` and not `fixed`, by the same reasoning as drift-label-reads-backwards: what changed is prose, no test would fail if somebody reverted it, and this repo's definition of `fixed` refuses the word without a gate that notices. That gap is not a footnote here — it is the whole of the item this row leaves behind, nothing-notices-a-new-upstream, which is the gate question this note originally carried and which stays open on its own terms rather than being closed by the edit it asked for. The second thing the correction did not settle is adj-shards-ship-no-notice: naming a GPL parent brings both of LICENSES.md's stated consequences with it, and the bucket discharges only the first. ORIGINAL NOTE FOLLOWS. LICENSES.md buckets apps/web/public/assets/adj/** under 'Free use with attribution (inherited) — Waqar144's', naming the mutashabihat dataset alone. That was true when the shards carried only edge endpoints and stopped being true when word-D1 added the spans. build-adjacency.mjs:45 imports wordsByAyah and sharedRuns from morphology.mjs, whose header states what it reads — the GPL'd Quranic Arabic Corpus morphology; spansOf (:287) calls sharedRuns and the result is written into every shard at :342 as `span` / `toSpan`. So the shipped adjacency shards carry values COMPUTED FROM GPL'd data, and under the same strict reading of 'derivative' this repo applies to itself elsewhere they are a GPL derivative with one of their two parents unnamed. Independent of Track B and wrong today, which is why it is `confirmed` rather than parked with the rest of that document's rows. It matters more inside a store binary than on the web, and the asymmetry is the point: a static site discharges GPL §4–6 by handing the browser the whole bundle, which is LICENSES.md's own argument for plain GPL over AGPL, while a wrapped binary is the thing that has to be licensed. What would answer it: correct the row to name both parents, and decide whether gate:license-copy's reach should extend to the bucket table — the drift here was introduced by a FEATURE rather than by anyone touching a licence file, so the gate that would have caught it is one that notices an asset tree gaining a new upstream."
     },
-
     {
       "id": "adj-shards-ship-no-notice",
-      "source": { "file": "docs/design/track-b-native.md", "item": "⑤" },
+      "source": {
+        "file": "docs/design/track-b-native.md",
+        "item": "⑤"
+      },
       "status": "fixed",
       "severity": "defect",
       "owner": "agent",
       "closedBy": "scripts/gate-notices.mjs",
       "note": "FIXED 2026-08-16: build-adjacency.mjs writes the notice. It names BOTH parents, because the failure available here was fixing the one-parent error in the other direction — a notice that discharged the GPL half and dropped Waqar144's attribution would be the identical mistake pointed the other way, and it would have looked like a fix. The corpus's copyright block is no longer copied into two builders: morphology.mjs gained copyrightBlock(), build-roots.mjs was moved onto it, and the two derived trees now reproduce ONE quotation instead of two copies that can drift — which matters more than it sounds, because the corpus's own third term is that its notice be reproduced appropriately, and two readers of one quotation is exactly how a reproduction stops being one. The roots shards rebuilt byte-identical, which is what makes that extraction a refactor rather than a claim about one. Rebuild: 3,002 edges on 1,521 ayahs across 114 shards, 2,544 carrying a span, unchanged. ORIGINAL NOTE FOLLOWS. LICENSES.md names two consequences of a bucket being a GPL derivative — the corresponding source reaches recipients, and the notice travels with the data. Once adj-shards-have-two-upstreams is taken, apps/web/public/assets/adj/** owes both and discharges only the first. Measured: roots/hafs-kfqc/NOTICE.txt and skins/hafs-kfqc/NOTICE.txt exist and are written by their own builders (build-roots.mjs:271, build-tajweed.mjs:211); adj/hafs-kfqc/ holds 114 shard files and nothing else. Two of the three derived trees keep the convention and the third never joined it, which is what makes this a defect rather than a difference of opinion about how much attribution is enough. It stayed invisible for exactly the reason the licence row did: the spans arrived as a feature, and a feature has no reason to look at what a sibling build step writes beside its output. Deliberately NOT folded into the LICENSES.md correction — that was prose about a file, this is a build change that rewrites a shipped asset tree, and mixing the two would put a 114-file rebuild inside a commit whose diff reads as a documentation edit. What would answer it: build-adjacency.mjs emitting NOTICE.txt beside the shards, quoted verbatim from the source header the way build-roots.mjs does it, and naming BOTH upstreams rather than the one the file is mostly about — the failure mode available here is a notice that fixes the GPL half and drops Waqar144's attribution, which is the same one-parent mistake in the other direction."
     },
-
     {
       "id": "nothing-notices-a-new-upstream",
-      "source": { "file": "docs/design/track-b-native.md", "item": "⑥" },
+      "source": {
+        "file": "docs/design/track-b-native.md",
+        "item": "⑥"
+      },
       "status": "fixed",
       "severity": "risk",
       "owner": "agent",
       "closedBy": "scripts/gate-notices.mjs",
       "note": "FIXED 2026-08-16, and BOTH shapes were built rather than one, because building it showed the choice this note framed was false: the cheap half catches a missing notice and is blind to a wrong bucket row, which is the defect that actually happened, so shipping the cheap half alone would have re-opened this item under a different name. gate:notices ties three things that could each drift alone. (1) The table against the shipped bytes: every LICENSES.md bucket row with inherited terms must ship a NOTICE.txt naming what the row names, checked in BOTH directions, so a new inherited bucket cannot be added to the table without arriving in the gate's declaration. (2) The names against SOURCES.md, so a typo or a renamed project fails instead of quietly matching nothing. (3) The trace: each builder is walked through its transitive relative imports and every vendored input the module graph reads must carry a verdict — an input the trace finds and the declaration does not mention FAILS THE BUILD, which puts the decision on whoever wrote the feature that reached the new upstream, at the moment they reach it. The import trace was the half this note called too expensive to be obviously worth it, and that was wrong: the scope that matters is relative imports inside one package and string literals matched against the vendored files that actually exist. What it cannot see is written into the gate's header rather than left for someone to discover — no dynamic paths, no @hifth/core, and *.pin.json / *.probe.json are treated as this project's own artefacts, so a builder reaching a new upstream ONLY through a pin is invisible to check 3. The exemption list is the part that needed defending, since gate-gates.mjs says in as many words that a quiet line in an array is how an allow-list starts every time: this one cannot go quiet, because a deferred input must name an issue id that exists AND is still open, so closing the question breaks the build until the declaration is revisited. It found adj-shards-carry-a-third-upstream on its first run. ORIGINAL NOTE FOLLOWS. The general form of adj-shards-have-two-upstreams and adj-shards-ship-no-notice, kept as its own row because it outlives both: one corrects a row, the other writes a file, and neither makes the next occurrence more visible than this one was. The drift ran for the whole life of the spans feature and every mechanism that could have caught it was pointed elsewhere. gate:license-copy pins the licence text quoted in SOURCES.md against the copy in the colophon — a real check on whether a quotation drifted, and no check at all on whether the SET of things being quoted is still complete. Nothing in the repo greps for NOTICE: two builders write one by convention, verified by nobody. The honest difficulty is that 'an asset tree gained a new upstream' is a fact about an import graph and not about a directory — build-adjacency.mjs never opens the morphology file and reaches it two hops out through morphology.mjs, so a gate that could see this has to trace transitively, which is real work with a real chance of producing a gate that is wrong in a way nobody notices. That is worse than no gate. What would answer it: deciding which of two shapes is worth building. The cheap one — every directory under assets/ that a builder writes carries a NOTICE.txt, and the set of upstreams named across them matches LICENSES.md's bucket table — would have caught the missing notice and would NOT have caught the wrong bucket row, since that row was internally consistent while being incomplete. The real one is the import trace. Not obviously worth either, which is why this is a question about a gate rather than a task to write one."
     },
-
     {
       "id": "adj-shards-carry-a-third-upstream",
-      "source": { "file": "docs/design/track-b-native.md", "item": "⑦" },
+      "source": {
+        "file": "docs/design/track-b-native.md",
+        "item": "⑦"
+      },
       "status": "open",
       "severity": "question",
       "owner": "user",
-      "blockedBy": ["a licensing opinion"],
+      "blockedBy": [
+        "a licensing opinion"
+      ],
       "note": "Found by gate:notices on the first run it ever did, which is the strongest thing that can be said for having built the trace. build-adjacency.mjs reads data/pages/ayah-pages.json and writes `page` and `dPage` into EVERY edge of all 114 shards — 3,002 of them. That table is derived from the KFGQPC page corpus, which LICENSES.md buckets separately as 'not ours to relicense', under terms neither of the adjacency row's two upstreams grants. So the shards may have three parents rather than the two just established. They may equally have two: which page an ayah falls on is arguably a fact about a printing rather than expression, and this repo already treats it as a measurement — the same table is used in REVERSE to identify which print a corpus follows (the V1/V2 argument in data/pages/PROVENANCE.md), which is not a thing one does with someone else's authorship. The shards carry no page image, no glyph and no text; they carry the integer. Not decidable from here and guessing costs more than waiting: naming KFGQPC on the row without grounds overstates what the app owes AND propagates into the NOTICE.txt shipped to every reader, while leaving it unnamed understates it if the answer runs the other way. Both are worse than an open question with the number attached to it. What would answer it: the same licensing opinion gpl-and-the-app-store is already waiting on, with this added to its scope — a fourth question for a reader already being asked three, which is cheaper than a second engagement. Until then gate:notices carries the deferral explicitly and the deferral is only valid while this row is open, so it cannot be forgotten and cannot outlive its answer. WIDENED 2026-08-16: the dependency audit measured the same table reaching two further shipped outputs — all 44,431 root-shard occurrence tuples and assets/manifest.json verbatim — so the opinion this row waits on has to be asked about three outputs, not one. Carried as the-pagination-question-covers-three-outputs rather than rewritten here, because this row is cited from track-b-native.md and from the notices gate's deferral and widening it would change what those pointers mean."
     },
-
     {
       "id": "gpl-and-the-app-store",
-      "source": { "file": "docs/design/track-b-native.md", "item": "②" },
+      "source": {
+        "file": "docs/design/track-b-native.md",
+        "item": "②"
+      },
       "status": "open",
       "severity": "risk",
       "owner": "user",
-      "blockedBy": ["a licensing opinion"],
+      "blockedBy": [
+        "a licensing opinion"
+      ],
       "note": "Track B's blocker is a licence Hifth does not own. A GPL'd binary on Apple's App Store conflicts with the per-device and DRM terms GPL §6 and §10 do not let a distributor add; the projects that ship anyway (Signal, OsmAnd) do it by having EVERY copyright holder grant an additional permission under §7. Hifth cannot assemble that grant. The Quranic Arabic Corpus header — quoted verbatim in SOURCES.md and pinned into the colophon by gate:license-copy — grants the GPL and then says copies may be distributed but 'CHANGING IT IS NOT ALLOWED'; SOURCES.md already records that tension and resolves it for a website by vendoring verbatim and deriving at build time, but a §7 additional permission IS a change to the licensing terms and only the copyright holder can grant it. quran-tajweed's CC BY 4.0 §2(a)(5)(B) separately forbids applying Effective Technological Measures, which FairPlay is — narrower, because the skin is one edition and could be omitted from a store build, where the QAC-derived data cannot (see adj-shards-have-two-upstreams). And KFGQPC's own terms are still unread by a human (board item #55), which a store submission is exactly the context that stops making deferrable. All of this is argued from licence text by a non-lawyer, and 'I read the licence' is not the standard this repo holds gates to. What would answer it: a licensing opinion from someone qualified, scoped to the three upstreams by name. Until then Track B stays gated and docs/design/track-b-native.md stays the reason."
     },
-
     {
       "id": "track-b-order-is-unachievable",
-      "source": { "file": "docs/design/track-b-native.md", "item": "③" },
+      "source": {
+        "file": "docs/design/track-b-native.md",
+        "item": "③"
+      },
       "status": "open",
       "severity": "defect",
       "owner": "agent",
-      "blockedBy": ["gpl-and-the-app-store"],
+      "blockedBy": [
+        "gpl-and-the-app-store"
+      ],
       "note": "HALF FIXED 2026-08-15: PLAN.md:1297 now cites research §6. The citation was checked rather than trusted — §5 of docs/research/2026-07-20-mobile-svg-pwa.md is the offline finding (quota is not the problem, eviction is) and §6 is the iOS deep-link caveat — so this row was right about which number was wrong. That half was safe to take on its own precisely because it is a pointer and not a plan: it changes nothing about what Track B does or in what order, so it carries none of the reason the order half is being held. The ORDER half stands and stays blocked on gpl-and-the-app-store, which is why this row is still open. ORIGINAL NOTE FOLLOWS. PLAN.md §Track B reads 'Capacitor iOS, then Android', with Android as a ~95%-shared-code fast-follow. On the licences this repo vendors that order inverts: the store that blocks is Apple's, so the reachable order is Android first and iOS gated on gpl-and-the-app-store. The same section carries a second, smaller error: it cites the iOS deep-link caveat as 'research §5', and §5 of docs/research/2026-07-20-mobile-svg-pwa.md is 'Offline: quota is a non-issue; eviction is the issue' — the deep-link caveat is §6. Both are one-line edits. Deliberately NOT made in the commit that introduced the scoping doc: a roadmap edit that changes a track's stated order should be its own decision with its own record, not a footnote to a document nobody has reviewed yet. Blocked on the licensing opinion for the same reason — if that opinion comes back saying the §7 route is available after all, the order it dictates changes again, and editing the roadmap twice is worse than editing it once."
     },
-
     {
       "id": "track-b-payload-has-narrowed",
-      "source": { "file": "docs/design/track-b-native.md", "item": "④" },
+      "source": {
+        "file": "docs/design/track-b-native.md",
+        "item": "④"
+      },
       "status": "open",
       "severity": "question",
       "owner": "user",
-      "blockedBy": ["web v1.0 and somebody using it"],
+      "blockedBy": [
+        "web v1.0 and somebody using it"
+      ],
       "note": "Track B's stated payload was: bundle the corpus offline, native share sheet, Universal Links, haptics, state restoration, iPad two-page spread, App Store review notes. Read one at a time against what the web build now does, most of it has already been delivered or dismissed. Offline-by-default is Loop 6b's pin-a-juz packs, and the whole print is 27.87 MB gz across 1,584 files measured by gate:assets — under every store threshold that would have forced staged delivery, which retires the delivery plan's On-Demand-Resources risk outright. The iPad spread is recorded at PLAN.md:1038 as having become a web concern and desktop.md shipped it. navigator.share already exists; the wrapper buys the fallback, not the feature. Haptics and state restoration are small and are not a reason. What is left is ONE load-bearing promise — Universal Links, i.e. a tapped hop link opening an installed app, which research §6 confirms is a genuine iOS platform limit — and it is on the one platform whose store is blocked. The honest remaining options: drop Track B; ship Android only and accept the asymmetry; or treat the iOS deep-link gap as a documented limitation, which onboarding already respects (research §6 says it must not promise link-into-app on iOS, and it does not). Not decidable from here: what would answer it is web v1.0 shipping and someone using it. Worth recording that the gate did its job — Track B was always gated on v1.0, and in the waiting its reason was half-dismantled by the web build itself rather than by an argument."
     },
-
     {
       "id": "tajweed-span-to-named-mark",
-      "source": { "file": "docs/design/sub-word-marks.md", "item": "①" },
+      "source": {
+        "file": "docs/design/sub-word-marks.md",
+        "item": "①"
+      },
       "status": "open",
       "severity": "question",
       "owner": "agent",
-      "blockedBy": ["a hafiz looking at the drawn marks"],
+      "blockedBy": [
+        "a hafiz looking at the drawn marks"
+      ],
       "note": "Narrowed again 2026-08-07 by mark-B, and the offline half is now ANSWERED — the remaining half needs an eye and nothing else. `pnpm probe:encodings --marks` walks all 60,057 annotations from a Tanzil offset down to a drawn path through lib/mark-join.mjs (the same join probe:diacritics ④/⑤ measured, extracted so the inspector and the probe cannot drift), and the answer is a SPLIT rather than a rate: 47.51% open on a codepoint the print draws a named path for — the rectangle to light — and 51.52% open on a base letter with no path above it, which is the CORRECT answer and not a shortfall, because ten of the eighteen rules name a consonant (qalqalah → ق, lam_shamsiyyah → ل, ghunnah → ن/م) and the print draws a consonant as a letter outline. The eight rules that name a mark reach one almost always: hamzat_wasl → wasla 98.11%, madd_2 98.58%, iqlab 99.82%. Nothing is unreachable for a structural reason — no-host, no-word and unjoined are all 0 — and the remainder is explained rather than dropped: 497 respelt words, whose offsets do not address data-hafs by construction, and 82 oracle misses. So a mark-granular highlight is available for the rules about marks and not for the rules about letters, and any UI built on this has to SAY WHICH IT IS DOING; that is a constraint mark-C inherits and it was not visible before the walk. What is left is what arithmetic cannot reach: whether the box the dictionary names sits where a reader LOOKS for that mark, and whether lighting it reads as a truer rendering of the rule than washing the word. The inspector now draws the boxes with the selected annotation's own mark lit inside its word, so the screen those two questions need exists — sub-word-marks.md §⑧ ① carries the table. Opened 2026-08-07 with mark-A. Two measurements now exist over the same words and nothing has checked whether they meet. word-indexing.md ⑪ ⑤ lands 59,975 of 60,057 tajweed annotations (99.86%) on the letter their rule names, 83.31% of them inside a single print word; sub-word-marks.md ⑤ puts 326,515 named mark boxes inside those same words, 0 of them outside. The open question is whether a span's [start,end) coincides with a mark a reader can be SHOWN — whether madd_246 opening at a codepoint means there is a maddah box there — and, if so, whether highlighting the mark is a truer rendering of the rule than washing the whole word. Narrowed 2026-08-07 by sub-word-marks.md ⑤: with the codepoint→name dictionary pinned (34 of 34 tokens, by elimination, validated on 62,931 held-out runs), the first half — does madd_246 open at a codepoint the print draws a maddah for — is now an offline measurement, and should be made before anyone looks at a screen because it is cheap and it bounds what the looking is for. What ⑤ did NOT close, and what still needs the encoding inspector (mark-B), which already reconciles the print, the ligature corpus, QAC and the tajweed offsets on one screen and would gain the mark boxes over the same frame: whether the box the dictionary NAMES sits where a reader looks for that mark, and whether lighting it reads as a truer rendering of the rule than washing the word. The first is a claim about the picture — every step of ⑤ is a correspondence between a reconstructed text and the corpus's own attributes, and none of it looks at where the outline sits relative to the letter that wrote it — and the second was never a measurement at all. What must not happen instead is deriving the correspondence from the fact that both numbers exist — reading a mapping off where the offsets happen to land and then declaring that they land there is the circularity ⑪ ⑤ names about its own oracle, and it passes on a broken answer. Note this is a rendering question and not a recitation one: DIACRITICS records what the corpus wrote in an attribute and this repo asserts nothing about how any of the twenty-six are pronounced."
     },
-
     {
       "id": "diacritic-shards-need-a-caller",
-      "source": { "file": "docs/design/sub-word-marks.md", "item": "②" },
+      "source": {
+        "file": "docs/design/sub-word-marks.md",
+        "item": "②"
+      },
       "status": "open",
       "severity": "question",
       "owner": "agent",
-      "blockedBy": ["tajweed-span-to-named-mark"],
+      "blockedBy": [
+        "tajweed-span-to-named-mark"
+      ],
       "note": "Measured with mark-A and deliberately not spent: the mark tree would be 7.35 MB raw / 2.28 MB gz across 604 shards, weighed as the shard text build-words.mjs would actually write rather than estimated from a path count. It fits — gate:assets allows 32 MB gz for the mushaf and the corpus is at 27.87 MB — and it is still 2.28 MB nobody has asked for, which is precisely the waste gate:assets already names for a non-vendored edition: the download is paid for and unreachable. So mark-A ships nothing to apps/web/public/assets and this stays open until mark-B produces a caller. If the inspector shows a mark-granular highlight reads better than a word wash, mark-C spends the bytes; if it does not, this stays a probe and the corpus stays uncosted, which is a legitimate outcome. Two constraints on whoever does spend them: word-indexing.md ⑪ ① is the standing warning that shipping an ANSWER costs multiples of shipping the QUESTION (placement C cost 8.9x its estimate for exactly that reason), so a diacritics ceiling must be set from a build rather than from the 2.28 MB above; and gate:assets fails outright on an asset kind with no CEILINGS entry, so the gate is edited in the same commit or CI goes red."
     },
-
     {
       "id": "skins-says-the-glyphs-are-anonymous",
-      "source": { "file": "docs/design/sub-word-marks.md", "item": "③" },
+      "source": {
+        "file": "docs/design/sub-word-marks.md",
+        "item": "③"
+      },
       "status": "confirmed",
       "severity": "defect",
       "owner": "agent",
-      "blockedBy": ["diacritic-shards-need-a-caller"],
+      "blockedBy": [
+        "diacritic-shards-need-a-caller"
+      ],
       "note": "packages/core/src/skins.ts justifies ayah-granular tajweed painting with the claim that the print's glyphs are anonymous outlined <path>s. That is true of apps/web/public/assets/pages/**, which is what the app draws, and false of the ligature corpus, where every mark is drawn by <path data-type=\"diacritic\" data-diacritic=\"…\"> inside its word's group — 326,515 of them, 26 distinct names, measured over all 604 pages by pnpm probe:diacritics. The comment already names Loop 4b's ligature corpus as its own gate; the geometry arrived and nothing went back to it. Left as a defect rather than edited in place on purpose: it is load-bearing prose about why a shipped feature has the granularity it has, and rewriting it before the replacement granularity exists would leave the file claiming a capability the app does not have. Closed by mark-C, in the commit that gives the skin something finer to paint — or, if diacritic-shards-need-a-caller answers 'not worth it', by a correction saying the marks are named and measured and still not shipped, which is a different sentence from the one there now."
     },
-
     {
       "id": "diacritic-ids-are-an-unversioned-wire-format",
-      "source": { "file": "docs/design/sub-word-marks.md", "item": "④" },
+      "source": {
+        "file": "docs/design/sub-word-marks.md",
+        "item": "④"
+      },
       "status": "open",
       "severity": "risk",
       "owner": "agent",
-      "blockedBy": ["diacritic-shards-need-a-caller"],
+      "blockedBy": [
+        "diacritic-shards-need-a-caller"
+      ],
       "note": "A mark ships as an integer and not a name because a page carries ~540 of them and the names are the larger half of the bytes. That makes DIACRITICS's ORDER a wire format, and it is the only array in @hifth/core that is one. Appending is safe; reordering silently re-labels the whole corpus — every fatha in 604 shards becomes a kasra — while changing no geometry, so no gate that measures rectangles would notice, and readDiacritics would keep passing because it looks names up rather than positions. Today the defence is one docblock stating the rule and six ids pinned in diacritics.test.ts, both inside the package that would be doing the reordering. What would answer it: either a gate reading the committed shards and asserting the vocabulary they were written against — cheap once shards exist, meaningless before — or a decision that the test suffices because the ETL rebuilds every shard from source in one pass and a stale shard cannot survive a build. Deferred to mark-C deliberately: the risk does not exist until something is shipped that an id can be stale in."
     },
-
     {
       "id": "etl-map-should-generate-itself",
-      "source": { "file": "docs/design/etl-pipeline.md", "item": "①" },
+      "source": {
+        "file": "docs/design/etl-pipeline.md",
+        "item": "①"
+      },
       "status": "open",
       "severity": "question",
       "owner": "agent",
       "note": "Opened 2026-08-07 with the document itself, because the objection is strong enough that writing it down was the honest alternative to pretending it does not exist. docs/map.json already names every ETL script and package.json already names every gate, so diagrams ① and ③ of etl-pipeline.md are derivable — and a hand-drawn copy of derivable facts is exactly the drift this repo gates against everywhere else. gate:map exists because orientation documents rot. What argues the other way is that the value of that page is not in the boxes: a generator would emit four correct diagrams and none of the three paragraphs under ③ — gate:edges shipped wrong for four loops, gate:pages shipped and did nothing, gate:ci-artifacts uploaded artifacts that no longer existed — and those paragraphs are the only part that would have prevented the defects they describe. The failure in each case was in the space BETWEEN checks, which is the one thing a generator over the checks cannot see. So the balance taken is: cite every script by path in prose, let gate:map's pointer validation catch a rename, and treat a script added without a mention here as the evidence the balance was wrong. Cheap to reverse in either direction, which is why it is a question and not a defect."
     },
-
     {
       "id": "perf-verdict",
-      "source": { "file": "docs/backlog.md", "item": "①" },
+      "source": {
+        "file": "docs/backlog.md",
+        "item": "①"
+      },
       "status": "blocked",
       "severity": "risk",
       "owner": "user",
-      "blockedBy": ["perf-verdict-on-device"],
+      "blockedBy": [
+        "perf-verdict-on-device"
+      ],
       "note": "The keystone. The oldest open item in the project and the one the most others inherit from."
     },
     {
       "id": "perf-on-real-mid-tier-android",
-      "source": { "file": "docs/backlog.md", "item": "②" },
+      "source": {
+        "file": "docs/backlog.md",
+        "item": "②"
+      },
       "status": "blocked",
       "severity": "risk",
       "owner": "user",
-      "blockedBy": ["an Android phone"],
+      "blockedBy": [
+        "an Android phone"
+      ],
       "note": "The probe removed the tooling dependency for the reader and not the hardware dependency for the claim."
     },
     {
       "id": "mounted-set-ceiling",
-      "source": { "file": "docs/backlog.md", "item": "③" },
+      "source": {
+        "file": "docs/backlog.md",
+        "item": "③"
+      },
       "status": "fixed",
       "severity": "risk",
       "owner": "agent",
@@ -574,7 +752,10 @@
     },
     {
       "id": "spread-mounts-two-leaves",
-      "source": { "file": "docs/backlog.md", "item": "④" },
+      "source": {
+        "file": "docs/backlog.md",
+        "item": "④"
+      },
       "status": "fixed",
       "severity": "risk",
       "owner": "agent",
@@ -583,7 +764,10 @@
     },
     {
       "id": "bundle-headroom",
-      "source": { "file": "docs/backlog.md", "item": "⑤" },
+      "source": {
+        "file": "docs/backlog.md",
+        "item": "⑤"
+      },
       "status": "fixed",
       "severity": "risk",
       "owner": "agent",
@@ -592,7 +776,10 @@
     },
     {
       "id": "nothing-watches-the-vendored-corpus",
-      "source": { "file": "docs/backlog.md", "item": "⑥" },
+      "source": {
+        "file": "docs/backlog.md",
+        "item": "⑥"
+      },
       "status": "fixed",
       "severity": "risk",
       "owner": "agent",
@@ -601,7 +788,10 @@
     },
     {
       "id": "shard-prefetch-misses-the-hop",
-      "source": { "file": "docs/backlog.md", "item": "⑧" },
+      "source": {
+        "file": "docs/backlog.md",
+        "item": "⑧"
+      },
       "status": "fixed",
       "severity": "defect",
       "owner": "agent",
@@ -610,7 +800,10 @@
     },
     {
       "id": "tti-criterion-has-no-instrument",
-      "source": { "file": "docs/backlog.md", "item": "⑨" },
+      "source": {
+        "file": "docs/backlog.md",
+        "item": "⑨"
+      },
       "status": "fixed",
       "severity": "risk",
       "owner": "agent",
@@ -619,7 +812,10 @@
     },
     {
       "id": "tti-margin-is-half-an-rtt",
-      "source": { "file": "docs/backlog.md", "item": "⑫" },
+      "source": {
+        "file": "docs/backlog.md",
+        "item": "⑫"
+      },
       "status": "fixed",
       "severity": "risk",
       "owner": "agent",
@@ -628,16 +824,24 @@
     },
     {
       "id": "ci-frame-budget-is-emulated",
-      "source": { "file": "docs/backlog.md", "item": "⑩" },
+      "source": {
+        "file": "docs/backlog.md",
+        "item": "⑩"
+      },
       "status": "blocked",
       "severity": "risk",
       "owner": "agent",
-      "blockedBy": ["perf-verdict-on-device"],
+      "blockedBy": [
+        "perf-verdict-on-device"
+      ],
       "note": "The only mechanical part of the perf verdict, listed separately so it is not forgotten once the interesting part is settled."
     },
     {
       "id": "both-locales-at-first-paint",
-      "source": { "file": "docs/backlog.md", "item": "⑦" },
+      "source": {
+        "file": "docs/backlog.md",
+        "item": "⑦"
+      },
       "status": "answered",
       "severity": "question",
       "owner": "agent",
@@ -645,7 +849,10 @@
     },
     {
       "id": "manifest-is-one-whole-fetch",
-      "source": { "file": "docs/backlog.md", "item": "⑪" },
+      "source": {
+        "file": "docs/backlog.md",
+        "item": "⑪"
+      },
       "status": "fixed",
       "severity": "risk",
       "owner": "agent",
@@ -654,7 +861,10 @@
     },
     {
       "id": "corpus-is-outlines-and-repeats",
-      "source": { "file": "docs/backlog.md", "item": "⑬" },
+      "source": {
+        "file": "docs/backlog.md",
+        "item": "⑬"
+      },
       "status": "answered",
       "severity": "question",
       "owner": "agent",
@@ -662,7 +872,10 @@
     },
     {
       "id": "page-bar-draws-one-node-per-page",
-      "source": { "file": "docs/backlog.md", "item": "⑭" },
+      "source": {
+        "file": "docs/backlog.md",
+        "item": "⑭"
+      },
       "status": "fixed",
       "severity": "defect",
       "owner": "agent",
@@ -671,7 +884,10 @@
     },
     {
       "id": "pinning-writes-every-file-twice",
-      "source": { "file": "docs/backlog.md", "item": "⑮" },
+      "source": {
+        "file": "docs/backlog.md",
+        "item": "⑮"
+      },
       "status": "fixed",
       "severity": "defect",
       "owner": "agent",
@@ -680,140 +896,204 @@
     },
     {
       "id": "site-answers-on-plain-http",
-      "source": { "file": "docs/backlog.md", "item": "⑯" },
+      "source": {
+        "file": "docs/backlog.md",
+        "item": "⑯"
+      },
       "status": "blocked",
       "severity": "defect",
       "owner": "user",
-      "blockedBy": ["the Cloudflare zone dashboard"],
+      "blockedBy": [
+        "the Cloudflare zone dashboard"
+      ],
       "note": "Reproduced 2026-08-06 with two curl lines against the deployed site: http:// returns 200 and the whole app in cleartext — not a redirect — and the https response carries no Strict-Transport-Security. The security half is ordinary; the half that made it a backlog row is that a service worker needs a secure context, so an http arrival hits pwa.ts:270's `if (!(\"serviceWorker\" in navigator)) return` and gets a mushaf that paints and hops correctly with no precache, no pinned juz and no offline, and nothing on screen to tell it apart from the build that has them — Loop 6b's whole promise, absent and unfalsifiable from the inside. Every offline check we own runs against localhost, which browsers treat as secure regardless of scheme, so the suite is green on a configuration that fails in the field: the same blind spot /validate's probes section is about. The fix is two toggles in the Cloudflare zone (Always Use HTTPS, then HSTS) and there is no token on this machine, nor should there be. Verified by curl returning 301 with an https location, and strict-transport-security on the https response; it will never be a gate, because it reaches the network and the deployed origin is not reproducible from a commit."
     },
-
     {
       "id": "check-perf-verdict-on-device",
-      "source": { "ledger": "perf-verdict-on-device" },
+      "source": {
+        "ledger": "perf-verdict-on-device"
+      },
       "severity": "risk",
       "owner": "user"
     },
     {
       "id": "check-screen-reader-walkthrough",
-      "source": { "ledger": "screen-reader-walkthrough" },
+      "source": {
+        "ledger": "screen-reader-walkthrough"
+      },
       "severity": "risk",
       "owner": "user"
     },
     {
       "id": "check-kfgqpc-terms",
-      "source": { "ledger": "kfgqpc-terms-primary-source" },
+      "source": {
+        "ledger": "kfgqpc-terms-primary-source"
+      },
       "severity": "risk",
       "owner": "user"
     },
     {
       "id": "check-qul-rulers-terms-and-text-free",
-      "source": { "ledger": "qul-rulers-terms-and-text-free" },
+      "source": {
+        "ledger": "qul-rulers-terms-and-text-free"
+      },
       "severity": "risk",
       "owner": "user",
       "note": "The human half of the qul-reliance boundary. The probe (make probe-qul) can prove our numbers agree with the outside library's rulers and can pin the SHA-256 of every cached file it reads, but it cannot read a session-gated, per-resource licence page, and it cannot look inside a gitignored cache the tree deliberately does not carry to confirm the export is numbers and verse keys rather than text or glyphs. Both are on a reader. Risk rather than question because leaning on a ruler whose licence forbids the use, or whose export turned out to carry scripture, would breach the standing no-text guarantee — the one thing the whole SVG-artwork model exists to keep."
     },
     {
+      "id": "check-qul-held-copy-licensed-and-offbundle",
+      "source": {
+        "ledger": "qul-held-copy-licensed-and-offbundle"
+      },
+      "severity": "risk",
+      "owner": "user",
+      "note": "The human half of the held-copy boundary, and the mirror image of the ruler check: where that one confirms an export carries NO text, this one confirms the text, fonts, and morphology the held copy DELIBERATELY holds are each licensed to hold. The ingest step (the held-copy source) refuses to hold any text-bearing item until this check is recorded done, but no gate can read a session-gated, per-resource licence page, and no gate can look inside the store — which lives outside the tree — to confirm it holds only what was licensed. Risk rather than question because holding a copy of a resource whose page forbids it, or letting a held byte leak into what ships, would breach the qul-reliance option-D posture the whole store exists to keep."
+    },
+    {
       "id": "check-source-offer-resolves",
-      "source": { "ledger": "source-offer-resolves" },
+      "source": {
+        "ledger": "source-offer-resolves"
+      },
       "severity": "risk",
       "owner": "user"
     },
     {
       "id": "check-edge-spot-audit",
-      "source": { "ledger": "edge-spot-audit" },
+      "source": {
+        "ledger": "edge-spot-audit"
+      },
       "severity": "risk",
       "owner": "user",
       "note": "The only check that can establish the scripture data is correct. Narrowed on 2026-08-06 without being closed: scripts/probe-reference.mjs settles the arithmetic underneath it from a third party — all 604 pages of our ayah→page table against api.quran.com's, 568 agree and 36 diverge exactly where V1/1405H and V2/1421H are known to, 0 surprises — so 'is this ayah on the page we print beside it?' is no longer part of what a human is being asked. What is left is the whole of the judgement: whether an edge joins two ayahs a hafiz would actually confuse. No reachable source answers that, which is why this stays owner:user and severity:risk rather than moving. The probe is deliberately not a gate (it reaches the network) and its measurement is banked in packages/etl/data/pages/PROVENANCE.md; .claude/skills/mushaf-reference/SKILL.md names which published references can stand in for paper and which will make a correct pair look wrong."
     },
     {
       "id": "check-offline-survival",
-      "source": { "ledger": "offline-survival-8-day" },
+      "source": {
+        "ledger": "offline-survival-8-day"
+      },
       "severity": "risk",
       "owner": "user"
     },
     {
       "id": "check-revision-record-on-a-phone",
-      "source": { "ledger": "revision-record-lands-on-a-phone" },
+      "source": {
+        "ledger": "revision-record-lands-on-a-phone"
+      },
       "severity": "risk",
       "owner": "user"
     },
     {
       "id": "check-placement-correction-by-eye",
-      "source": { "ledger": "placement-correction-by-eye" },
+      "source": {
+        "ledger": "placement-correction-by-eye"
+      },
       "severity": "risk",
       "owner": "user",
       "note": "The runnable half of nobody-has-looked-at-the-placement-verdicts: that row is the question, this row is the twenty minutes that answers it. Built 2026-08-08 — `pnpm adjudicate:marks` renders a hundred blind two-panel trials over forty pages, and `pnpm adjudicate:score` rebuilds the key from the seed afterwards, so nothing on disk knew the answers while they were being given. Deliberately a forced choice rather than a list of verdicts with agree/disagree beside each: a person shown a machine's verdict agrees with it, and what comes back is the machine's own opinion wearing a human's name. It is a risk rather than a question because mark-C cannot ship on an uninspected correction. Wired into `make session CHECK=placement-correction-by-eye` on 2026-08-12: opened from a session the trials post each answer straight into that sitting's transcript and bank the ruling file at the end, so the twenty minutes cannot end in a download nobody can find. Still says nothing about how it is going, because it still does not know."
     },
     {
       "id": "check-placement-residual-by-hand",
-      "source": { "ledger": "placement-residual-by-hand" },
+      "source": {
+        "ledger": "placement-residual-by-hand"
+      },
       "severity": "risk",
       "owner": "user",
       "note": "The other half hour, and it asks a question the first one cannot. A forced choice returns a preference — our rectangle beat the one it was shown against — and a correction that points the right way and falls a third short wins every trial while still being wrong. Built 2026-08-12: `pnpm nudge:marks` renders one rectangle per trial, starting a fixed distance out in a direction that changes every time, and the reader puts it where it belongs; `pnpm nudge:score` subtracts what the machine proposed from where it was actually put, and what is left is a magnitude in units. It reports that against the reader's OWN precision, measured in the same sitting from marks shown twice, because a residual smaller than the hand that produced it is not a finding. Deliberately a second session rather than a drag handle on the first: adjusting a rectangle inside a two-panel trial and then scoring the landing against the two starting positions IS the answer key, and adjusting after answering teaches the direction of the correction, which points the same way on nearly every page. The two should not be worked back to back by the same person. Risk rather than question because mark-C's thresholds are a claim about magnitude and only this can check one."
     },
     {
       "id": "check-placement-holds-off-its-own-pages",
-      "source": { "ledger": "placement-holds-off-its-own-pages" },
+      "source": {
+        "ledger": "placement-holds-off-its-own-pages"
+      },
       "severity": "risk",
       "owner": "user",
       "note": "The third sitting, and the first one that can be wrong. Its two predecessors both drew every trial from the same forty pages the correction was worked out on, because a trial needs a proposed move to start from and only those forty had one — so between them they could establish that the correction points the right way and nothing else. Built 2026-08-12 once all 604 pages carried a measurement: the builder now takes the pages to draw from as an argument, will hold out the pages an earlier sitting used, and picks by preference from the pages wanting the largest and smallest moves rather than at random. That last part is the whole point — across the original forty the proposed moves spanned 0.31 units of which most was noise, and across the held-out forty it spans 1.75 across and 3.38 down, four to six times the leverage per placement, which is the difference between being able to read the SIZE of the correction and not. Two blocks, deliberately on pages that do not overlap: forty-seven placements over forty held-out pages for whether it travels, and twenty-three over five pages at four or five each for how much of the leftover belongs to the page rather than to the hand — the second thing being what the clustered interval currently has to assume the worst about. Neither block has the correction applied to it: applying it first would make a genuine nought indistinguishable from a coincidence and would bake an unresolved number into the instrument measuring it. FOUR PREDICTIONS ARE BANKED IN THE LEDGER BEFORE ANYBODY PLACES ANYTHING, which is the part that makes this a check rather than an exercise — direction at 90% or better, the leftover returning either near (-0.073, -0.110) or near nought, the size estimate at 1.0 with an interval a fifth of a unit wide, and the between-page spread exceeding the within-page one. Each says in the ledger what its own failure would mean. What this still cannot answer is whether the leftover is a fact about the print or about one reader; only a second person placing the same rectangles separates those, and that block is designed in the plan and not built. Scoring is guarded twice over: the answers carry a fingerprint of the displacements AND of the chosen pages, and the scorer refuses a displacements file that has no row for a page the sitting used, because a file can carry the right fingerprint and still be the wrong file for these pages. Risk rather than question for the same reason as its neighbours: mark-C cannot ship on a correction judged only where it was fitted."
     },
-
     {
       "id": "check-placement-what-kind-of-wrong",
-      "source": { "ledger": "placement-what-kind-of-wrong" },
+      "source": {
+        "ledger": "placement-what-kind-of-wrong"
+      },
       "severity": "risk",
       "owner": "user",
       "note": "The fourth sitting, and the first one that does not answer in a distance. Its three predecessors all ask how far — is our rectangle preferred to the one beside it, how far does a reader move it, does either answer survive on a page the correction never measured — and a distance is the right currency right up to the point where the best correction places most rectangles from their own ink and the remainder stops being rectangles that are merely far out. Measured over the whole book: where a rectangle was placed from its own ink the printed strokes fill about a fifth of it and roughly one in eighty is effectively bare; where the match was weak it is a ninth and more than a QUARTER are bare; where the best match sat on the edge of how far the search was allowed to look it is a twentieth and more than a THIRD are bare. About a third of what is left is a rectangle over blank paper, and no distance can say `there is nothing in this place`. Nor can one separate right-place-wrong-size from right-size-wrong-place — two faults with two repairs in two files, and a size complaint written as a displacement is a wrong number that looks like a right one. Built 2026-08-13: `pnpm report:marks` draws sixty of them one at a time, each croppable between the whole word and a close look because the first attempt at this was stopped after one screen for not being able to tell WHICH letter a mark belonged to, and the reader answers in words from a vocabulary of five — move it, wrong shape, box the right ink instead, the print is odd, bank it. As many as are true, not one: forced to pick one a reader picks the most obvious and the second fault is never recorded by anybody, which is the deliberate break from all three earlier sittings. Two of the five carry their own rules. Wrong shape carries no coordinates and never will, for the reason above. The print is odd is the only answer on the page that is not about us — we did not draw those pages — and it routes into THIS catalog as rows of its own rather than into any ruling that grades a correction, because counted as a placement failure a printing oddity makes our correction look worse than it is and counted the other way, better. The page reports how many are left and nothing else: no score, no running share, no verdict, because a reader who can see the score answers the score. Risk rather than question because both readings of the tail in mark-registration.md §⑩ ⑨ are live — if most of the remainder is the print then every error figure in that document overstates our own by that share, and if most of it is rectangles that could have been placed and were not then the search is too timid and that is a change to make. Widened the same day into TWO sittings of sixty, and the second one is the one that matters most: everything above is about the six in a thousand the correction refuses to place, and the other 99.4% — every rectangle put where its own printed ink is — has never been looked at by anybody. Its only evidence is a held-out split, which defends against a correction that fits noise and not at all against one that is confidently wrong the same way everywhere, since the ink is both what it was fitted to and the only thing that has ever been asked. Three faults in sixty there is a few per cent of 324,638 marks, which is thousands, and a fact about the whole book; the identical share in the tail is a rounding error. The two are never pooled and there is no combined figure, here or in the scorer: the populations differ in size by a factor of 173, so a rate over both would be a fact about how many of each the sampler happened to draw. `pnpm report:score` reads each ruling, re-derives which population every answer came from rather than believing the file, prints an interval beside every share because sixty marks cannot tell one in fifty from one in seven, and takes the marks called odd in the print out of the denominator rather than into the numerator — printing the rate both ways so the size of that choice is visible."
     },
-
     {
       "id": "plan-perf-verdict",
-      "source": { "file": "docs/PLAN.md", "item": "1" },
+      "source": {
+        "file": "docs/PLAN.md",
+        "item": "1"
+      },
       "status": "blocked",
       "severity": "risk",
       "owner": "user",
-      "blockedBy": ["perf-verdict-on-device"]
+      "blockedBy": [
+        "perf-verdict-on-device"
+      ]
     },
     {
       "id": "plan-per-edition-licence-review",
-      "source": { "file": "docs/PLAN.md", "item": "2" },
+      "source": {
+        "file": "docs/PLAN.md",
+        "item": "2"
+      },
       "status": "blocked",
       "severity": "risk",
       "owner": "user",
-      "blockedBy": ["kfgqpc-terms-primary-source"],
+      "blockedBy": [
+        "kfgqpc-terms-primary-source"
+      ],
       "note": "Substantially closed. What is still live: the Libyan Endowments editions are non-commercial-only, so EditionPicker may not grow one of those rows on the strength of hafs-kfqc's terms."
     },
     {
       "id": "plan-loop-assigned-deferrals",
-      "source": { "file": "docs/PLAN.md", "item": "3" },
+      "source": {
+        "file": "docs/PLAN.md",
+        "item": "3"
+      },
       "status": "blocked",
       "severity": "question",
       "owner": "agent",
-      "blockedBy": ["loop-7"],
+      "blockedBy": [
+        "loop-7"
+      ],
       "note": "loop-4b came and settled the half that was about vendoring; what it did not do is give the other half what it was waiting for. The word-granular items said 'after 4b' and 4b's answer is that the adopted corpus has no word geometry at all, so they now wait on plan-word-geometry-is-a-second-corpus rather than on a loop. The hafiz sign-off on the tajweed skin waits on loop-7. Re-pointed rather than closed: the blockers moved, the item did not. Still blocked on 2026-08-04, and worth being precise about why: plan-word-geometry-is-a-second-corpus is now answered, but what it answered is the print question — the candidate corpus is our V2 — not the geometry question. Its own probe found the next wall (a different viewBox and page frame, so no word box transfers without per-page registration), so these deferrals wait on that work, which follow-up 13 now names and task #65 carries. Re-pointed a third time on 2026-08-04, and the wall has moved off geometry for good: word-B vendored the boxes, so where every word sits is now a committed, gated fact. What the word-granular painting still lacks is not position but identity — the box carries the *print's* word index, and the roots and tajweed data carry the Quranic Arabic Corpus's, and the two segmentations disagree on 4,499 of 6,236 ayahs. So these items wait on an alignment between them, which task #65 now carries; plan-word-geometry-is-a-second-corpus is done and is left in blockedBy only until #65 opens a row of its own. Re-pointed a fourth and last time on 2026-08-06, by the sweep that found this row had gone stale in the way it kept promising not to. #65 shipped and never opened the row it was holding a place for, so this item spent two loops naming a blocker that had already been discharged: word-granularity roots and the `?w=` UI are DONE (word-C/D, query-params.md documents the param), and the alignment they were waiting on is baked into assets/adj/** and assets/roots/**. Of the three deferrals this item carries, one is closed, one is now its own row with a wall of a different kind (tajweed-word-granularity-needs-a-third-text), and only the hafiz sign-off still waits on loop-7 — which is the only reason this stays `blocked` rather than `answered`. The lesson is the one the row itself demonstrates: a compound item re-pointed four times is a register asking to be split, and splitting it is what finally made the available work visible. And splitting it worked: tajweed-word-granularity-needs-a-third-text was answered the same week it got its own row (probe-tajweed-words.mjs, 99.81% oracle, 83.31% of annotations inside one print word, an eleven-ayah named residual), so it is dropped from blockedBy here and loop-7's hafiz sign-off is now the whole of what this row waits on."
     },
     {
       "id": "plan-screen-reader-pass",
-      "source": { "file": "docs/PLAN.md", "item": "4" },
+      "source": {
+        "file": "docs/PLAN.md",
+        "item": "4"
+      },
       "status": "blocked",
       "severity": "risk",
       "owner": "user",
-      "blockedBy": ["screen-reader-walkthrough"]
+      "blockedBy": [
+        "screen-reader-walkthrough"
+      ]
     },
     {
       "id": "plan-tajweed-golden-row",
-      "source": { "file": "docs/PLAN.md", "item": "8" },
+      "source": {
+        "file": "docs/PLAN.md",
+        "item": "8"
+      },
       "status": "blocked",
       "severity": "question",
       "owner": "user",
-      "blockedBy": ["a hafiz", "loop-7"],
+      "blockedBy": [
+        "a hafiz",
+        "loop-7"
+      ],
       "note": "Two preconditions, both of which must hold: the palette sign-off, and a test-only way to drive the skin — a production-readable skin= param would ship a shareable link that turns a beta annotation layer on for a reader who never saw the badge."
     },
     {
       "id": "plan-stage-coordinate-model",
-      "source": { "file": "docs/PLAN.md", "item": "10" },
+      "source": {
+        "file": "docs/PLAN.md",
+        "item": "10"
+      },
       "status": "fixed",
       "severity": "defect",
       "owner": "agent",
@@ -822,7 +1102,10 @@
     },
     {
       "id": "plan-drag-to-turn",
-      "source": { "file": "docs/PLAN.md", "item": "11" },
+      "source": {
+        "file": "docs/PLAN.md",
+        "item": "11"
+      },
       "status": "fixed",
       "severity": "question",
       "owner": "agent",
@@ -831,7 +1114,10 @@
     },
     {
       "id": "plan-gate-scope-differs-by-machine",
-      "source": { "file": "docs/PLAN.md", "item": "12" },
+      "source": {
+        "file": "docs/PLAN.md",
+        "item": "12"
+      },
       "status": "fixed",
       "severity": "defect",
       "owner": "agent",
@@ -840,7 +1126,10 @@
     },
     {
       "id": "plan-word-geometry-is-a-second-corpus",
-      "source": { "file": "docs/PLAN.md", "item": "13" },
+      "source": {
+        "file": "docs/PLAN.md",
+        "item": "13"
+      },
       "status": "answered",
       "severity": "question",
       "owner": "agent",
@@ -849,7 +1138,10 @@
     },
     {
       "id": "plan-ayah-polygon-misses-its-ayah",
-      "source": { "file": "docs/PLAN.md", "item": "14" },
+      "source": {
+        "file": "docs/PLAN.md",
+        "item": "14"
+      },
       "status": "fixed",
       "severity": "defect",
       "owner": "agent",
@@ -858,7 +1150,10 @@
     },
     {
       "id": "plan-word-selection-is-finger-only",
-      "source": { "file": "docs/PLAN.md", "item": "15" },
+      "source": {
+        "file": "docs/PLAN.md",
+        "item": "15"
+      },
       "status": "fixed",
       "severity": "defect",
       "owner": "agent",
@@ -867,7 +1162,10 @@
     },
     {
       "id": "plan-golden-baselines-predate-the-spread-triage",
-      "source": { "file": "docs/PLAN.md", "item": "16" },
+      "source": {
+        "file": "docs/PLAN.md",
+        "item": "16"
+      },
       "status": "fixed",
       "severity": "defect",
       "owner": "user",
@@ -876,23 +1174,34 @@
     },
     {
       "id": "plan-two-ayah-boxes-are-cut-short-of-the-line",
-      "source": { "file": "docs/PLAN.md", "item": "17" },
+      "source": {
+        "file": "docs/PLAN.md",
+        "item": "17"
+      },
       "status": "blocked",
       "severity": "defect",
       "owner": "agent",
-      "blockedBy": ["the upstream page cache, a 348 MB fetch nobody starts without asking"],
+      "blockedBy": [
+        "the upstream page cache, a 348 MB fetch nobody starts without asking"
+      ],
       "note": "Reproduced 2026-09-01 by the whole-book sweep: 2 of 12,350 rectangles are off the line grid, 68:3 on page 564 (27.9 on a 36 line) and 107:2 on page 602 (28.3), both a left-margin tail cut ~8 units short with the next ayah's box starting that much early. Held at 2 by gate:boxes as ceiling and floor. Agent-owned because the repair is mechanical (a vendoring repair entry, re-vendor, re-pin, lower the gate to 0); the one owner-visible part is that two pinned pages change. PLAN 17 carries the numbers and both answers."
     },
     {
       "id": "plan-hifth-licence",
-      "source": { "file": "docs/PLAN.md", "item": "5" },
+      "source": {
+        "file": "docs/PLAN.md",
+        "item": "5"
+      },
       "status": "answered",
       "severity": "question",
       "owner": "agent"
     },
     {
       "id": "plan-ink-faint-contrast",
-      "source": { "file": "docs/PLAN.md", "item": "6" },
+      "source": {
+        "file": "docs/PLAN.md",
+        "item": "6"
+      },
       "status": "fixed",
       "severity": "defect",
       "owner": "agent",
@@ -900,14 +1209,20 @@
     },
     {
       "id": "plan-merge-pass-is-a-step",
-      "source": { "file": "docs/PLAN.md", "item": "7" },
+      "source": {
+        "file": "docs/PLAN.md",
+        "item": "7"
+      },
       "status": "answered",
       "severity": "question",
       "owner": "agent"
     },
     {
       "id": "plan-revision-record",
-      "source": { "file": "docs/PLAN.md", "item": "9" },
+      "source": {
+        "file": "docs/PLAN.md",
+        "item": "9"
+      },
       "status": "fixed",
       "severity": "question",
       "owner": "agent",
@@ -915,7 +1230,10 @@
     },
     {
       "id": "spacing-is-scored-as-shape",
-      "source": { "file": "docs/design/mark-labels.md", "item": "①" },
+      "source": {
+        "file": "docs/design/mark-labels.md",
+        "item": "①"
+      },
       "status": "open",
       "severity": "question",
       "owner": "agent",
@@ -923,7 +1241,10 @@
     },
     {
       "id": "names-never-checked-against-the-text",
-      "source": { "file": "docs/design/mark-labels.md", "item": "②" },
+      "source": {
+        "file": "docs/design/mark-labels.md",
+        "item": "②"
+      },
       "status": "open",
       "severity": "question",
       "owner": "agent",
@@ -931,16 +1252,24 @@
     },
     {
       "id": "nobody-has-looked-at-the-placement-verdicts",
-      "source": { "file": "docs/design/mark-registration.md", "item": "①" },
+      "source": {
+        "file": "docs/design/mark-registration.md",
+        "item": "①"
+      },
       "status": "open",
       "severity": "question",
       "owner": "user",
-      "blockedBy": ["placement-correction-by-eye"],
+      "blockedBy": [
+        "placement-correction-by-eye"
+      ],
       "note": "The placement measurement has been reproduced twice and its controls hold, but no human has looked at a single verdict. Until one does, the thresholds in that document's §⑦ stay unenforced and nothing is wired into CI. The equivalent question for the naming probe WAS worked by eye, and doing so is what caught a scorer artefact that had been read as forty-five mislabelled marks — which is the argument for spending the time here too. Narrowed 2026-08-08 without being closed: the blocker was 'a person working the evidence page', and that page was the wrong instrument — it ranks the machine's own verdicts worst-first and draws the expected outline in green beside the rectangle, so a reader is being shown the answer and asked whether they agree, which is the one form of looking that cannot produce evidence. What replaced it is a forced choice between two rectangles with nothing on screen saying which is ours and no key written down until the scorer rebuilds it from the seed; it carries its own controls (obviously-wrong rectangles to catch a session worked while distracted, identical pairs to catch a person who always picks something, and same-size displacements in other directions to measure whether an eye can resolve a shift this small at all — which is what the headline number has to be read against). The runbook is `placement-correction-by-eye` in the validation ledger; this row stays open until a ruling is banked. Scoped 2026-08-12, which is a narrowing of what this row can ever deliver rather than of the work: a forced choice settles a preference and not a distance, so a-preference-does-not-say-how-far now carries the magnitude half and neither row's answer should be read as the other's."
     },
     {
       "id": "a-preference-does-not-say-how-far",
-      "source": { "file": "docs/design/mark-registration.md", "item": "⑦" },
+      "source": {
+        "file": "docs/design/mark-registration.md",
+        "item": "⑦"
+      },
       "status": "open",
       "severity": "question",
       "owner": "user",
@@ -948,7 +1277,10 @@
     },
     {
       "id": "the-correction-is-only-judged-where-it-was-fitted",
-      "source": { "file": "docs/design/mark-registration.md", "item": "⑧" },
+      "source": {
+        "file": "docs/design/mark-registration.md",
+        "item": "⑧"
+      },
       "status": "open",
       "severity": "risk",
       "owner": "agent",
@@ -956,7 +1288,10 @@
     },
     {
       "id": "the-frame-is-registered-on-ornaments-and-used-to-place-text",
-      "source": { "file": "docs/design/mark-registration.md", "item": "⑨" },
+      "source": {
+        "file": "docs/design/mark-registration.md",
+        "item": "⑨"
+      },
       "status": "open",
       "severity": "defect",
       "owner": "agent",
@@ -964,16 +1299,24 @@
     },
     {
       "id": "whether-what-is-left-over-is-even-ours",
-      "source": { "file": "docs/design/mark-registration.md", "item": "⑩" },
+      "source": {
+        "file": "docs/design/mark-registration.md",
+        "item": "⑩"
+      },
       "status": "open",
       "severity": "question",
       "owner": "user",
-      "blockedBy": ["placement-what-kind-of-wrong"],
+      "blockedBy": [
+        "placement-what-kind-of-wrong"
+      ],
       "note": "Opened 2026-08-13 as the named half of the tail the-frame-is-registered-on-ornaments-and-used-to-place-text refused to average into its figures. That row establishes that the remainder has changed CHARACTER rather than only size — a heavier-than-gaussian tail after the best correction, so a minority of rectangles are wrong for a reason of their own — and then stops, because every instrument in that line of work answers in a distance and the question here is not a distance. It is which of four things a bare rectangle is: somewhere else entirely, the right place at the wrong size, the right size in the wrong place, or a page that was printed unusually and is not our fault at all. THE FOURTH IS WHY THIS IS A ROW AND NOT A PARAGRAPH. We did not draw those pages, and there is currently no route by which a reader who notices something odd in the printing can say so — the placement rulings have nowhere to put it, and put anywhere else it silently becomes a grade on our own correction, in whichever direction happens to flatter or damn us. This catalog is that route, and answers of that kind become rows here, one per finding, sourced to the page they are about. Deliberately owner:user and deliberately not narrowed by any probe: a probe can settle where a mark is and is structurally incapable of settling whether a printed page looks wrong to somebody who reads mus'hafs. What closes it is the sitting in check-placement-what-kind-of-wrong being placed and read, plus whatever print rows it opens being triaged like any other defect — not the instrument existing, which it already does. Read against the standing rule that distinct failure modes are never summed: the share that comes back as the print is a correction to be applied to this project's error figures, not a number to add to them."
     },
     {
       "id": "the-reader-could-not-see-the-box-they-were-vouching-for",
-      "source": { "file": "docs/design/mark-registration.md", "item": "⑪" },
+      "source": {
+        "file": "docs/design/mark-registration.md",
+        "item": "⑪"
+      },
       "status": "fixed",
       "severity": "defect",
       "owner": "agent",
@@ -982,7 +1325,10 @@
     },
     {
       "id": "the-scorer-averaged-increments-and-printed-zero",
-      "source": { "file": "docs/design/mark-registration.md", "item": "⑫" },
+      "source": {
+        "file": "docs/design/mark-registration.md",
+        "item": "⑫"
+      },
       "status": "fixed",
       "severity": "defect",
       "owner": "agent",
@@ -991,7 +1337,10 @@
     },
     {
       "id": "a-sitting-banked-what-was-left-not-what-was-seen",
-      "source": { "file": "docs/design/mark-registration.md", "item": "⑬" },
+      "source": {
+        "file": "docs/design/mark-registration.md",
+        "item": "⑬"
+      },
       "status": "fixed",
       "severity": "defect",
       "owner": "agent",
@@ -1000,7 +1349,10 @@
     },
     {
       "id": "print-oddities-called-out-by-eye",
-      "source": { "file": "docs/design/mark-registration.md", "item": "⑭" },
+      "source": {
+        "file": "docs/design/mark-registration.md",
+        "item": "⑭"
+      },
       "status": "open",
       "severity": "question",
       "owner": "user",
@@ -1008,7 +1360,10 @@
     },
     {
       "id": "pointed-answers-are-not-hand-placed-ones",
-      "source": { "file": "docs/design/mark-registration.md", "item": "⑮" },
+      "source": {
+        "file": "docs/design/mark-registration.md",
+        "item": "⑮"
+      },
       "status": "open",
       "severity": "question",
       "owner": "user",
@@ -1016,7 +1371,10 @@
     },
     {
       "id": "a-finger-resting-on-the-box-banked-a-placement",
-      "source": { "file": "docs/design/mark-registration.md", "item": "⑯" },
+      "source": {
+        "file": "docs/design/mark-registration.md",
+        "item": "⑯"
+      },
       "status": "fixed",
       "severity": "defect",
       "owner": "agent",
@@ -1025,7 +1383,10 @@
     },
     {
       "id": "nothing-checked-the-sittings-were-still-current",
-      "source": { "file": "docs/design/mark-registration.md", "item": "⑰" },
+      "source": {
+        "file": "docs/design/mark-registration.md",
+        "item": "⑰"
+      },
       "status": "fixed",
       "severity": "risk",
       "owner": "agent",
@@ -1034,7 +1395,10 @@
     },
     {
       "id": "the-same-nudge-twice-magnified-the-page",
-      "source": { "file": "docs/design/mark-registration.md", "item": "⑱" },
+      "source": {
+        "file": "docs/design/mark-registration.md",
+        "item": "⑱"
+      },
       "status": "fixed",
       "severity": "defect",
       "owner": "agent",
@@ -1043,7 +1407,10 @@
     },
     {
       "id": "a-sitting-was-reachable-only-from-the-machine-serving-it",
-      "source": { "file": "docs/design/mark-registration.md", "item": "⑲" },
+      "source": {
+        "file": "docs/design/mark-registration.md",
+        "item": "⑲"
+      },
       "status": "fixed",
       "severity": "defect",
       "owner": "agent",
@@ -1052,7 +1419,10 @@
     },
     {
       "id": "the-front-door-could-not-say-which-sitting-you-were-in",
-      "source": { "file": "docs/design/mark-registration.md", "item": "⑳" },
+      "source": {
+        "file": "docs/design/mark-registration.md",
+        "item": "⑳"
+      },
       "status": "fixed",
       "severity": "defect",
       "owner": "agent",
@@ -1061,7 +1431,10 @@
     },
     {
       "id": "pointing-at-ink-files-both-words-every-time",
-      "source": { "file": "docs/design/mark-registration.md", "item": "㉑" },
+      "source": {
+        "file": "docs/design/mark-registration.md",
+        "item": "㉑"
+      },
       "status": "fixed",
       "closedBy": "packages/etl/scripts/lib/mark-settle.test.mjs",
       "severity": "defect",
@@ -1070,7 +1443,10 @@
     },
     {
       "id": "the-fallback-rule-may-be-wrong-in-two-different-ways",
-      "source": { "file": "docs/design/mark-registration.md", "item": "㉓" },
+      "source": {
+        "file": "docs/design/mark-registration.md",
+        "item": "㉓"
+      },
       "status": "answered",
       "severity": "question",
       "owner": "agent",
@@ -1079,7 +1455,10 @@
     },
     {
       "id": "the-search-could-not-look-far-enough",
-      "source": { "file": "docs/design/mark-registration.md", "item": "㉔" },
+      "source": {
+        "file": "docs/design/mark-registration.md",
+        "item": "㉔"
+      },
       "status": "fixed",
       "severity": "defect",
       "owner": "agent",
@@ -1088,7 +1467,10 @@
     },
     {
       "id": "the-search-reported-answers-it-never-checked",
-      "source": { "file": "docs/design/mark-registration.md", "item": "㉕" },
+      "source": {
+        "file": "docs/design/mark-registration.md",
+        "item": "㉕"
+      },
       "status": "fixed",
       "severity": "defect",
       "owner": "agent",
@@ -1097,16 +1479,24 @@
     },
     {
       "id": "the-doubled-marks-are-drawn-too-small",
-      "source": { "file": "docs/design/mark-registration.md", "item": "㉖" },
+      "source": {
+        "file": "docs/design/mark-registration.md",
+        "item": "㉖"
+      },
       "status": "confirmed",
       "severity": "defect",
       "owner": "agent",
-      "blockedBy": ["the placement decision"],
+      "blockedBy": [
+        "the placement decision"
+      ],
       "note": "The one finding of the-fallback-rule-may-be-wrong-in-two-different-ways that survived the corpus, carried out of it so the refuted half and the confirmed half stop travelling together. It survived because it is not about position at all. A doubled mark is two of something and the rectangle is drawn for one, which shows up as a class refused far more often than any other AND matching worse even when accepted: refused at 2.42% against a base rate of 0.45 to 0.54%, matching at 0.889 where accepted against 0.909, and at 0.457 where refused — half of a good match, a number no rectangle in the right place can produce. THE EVIDENCE THAT IT IS A SIZE FAULT IS THAT DISTANCE WAS NEVER THE PROBLEM: these marks need 2.14 units of movement against 4.292 for the refused population as a whole, and only 17% ever reach the search boundary. The escalation in the-search-could-not-look-far-enough recovers most of the book and only 45% of these, exactly as it should — a rectangle too small to contain its mark caps the overlap below the floor wherever it is put, so a fix that only moves things cannot reach it. What would answer it, and it needs no reader: measure the extent of the ink under every doubled mark in the book against the width and height we draw, which the print can be asked about directly. A consistent shortfall means the box is being computed from one component of a two-component mark and the repair is arithmetic; a varying one means extent has to be measured per mark. Either way it is a change to what the rectangle IS rather than to where it goes, and belongs in a different part of the pipeline. ANSWERED BY A READER 2026-08-17 AND IT IS THE VARYING BRANCH, so the arithmetic repair does not exist. Ninety badly-matched marks from the recomputed corpus were put in front of somebody; 61 came back corrected, 33 doubled and 28 single — the first ground truth this item has had rather than an inference from match scores. THE POPULATION CLAIM GETS STRONGER: doubled marks are 8,554 of 326,515 in the book (2.6%) and 160 of the 329 refused for matching badly (48.6%), 19x over-represented, at rates of successive kasratan 3.15%, fathatan 2.86%, kasratan 1.84%, successive fathatan 1.55%, successive dammatan 1.11% against fatha 0.05%, kasra 0.05%, sukun 0.00%, shadda 0.00%. THE HEADLINE OF THIS ITEM IS WRONG AND IS LEFT STANDING: 'drawn too small' was a prediction from the theory's shape, and of the 33 doubled marks 14 were made wider and 19 narrower — median width change -0.13 against a median magnitude of 0.57, and height +0.23 against 0.51. The error is four times its own average, which is another way of saying there is no average. WHERE IN THE RECTANGLE THE FAULT SITS, which nobody had asked: measured edge by edge, a doubled mark's near edge moves 0.209 and its far edge 0.549, while a single mark's two side edges move 0.672 and 0.586 — a single box slides whole, a doubled box is anchored right and runs to the wrong place. Whether the near edge is the one the reading starts from is a guess, not a claim; the geometry does not know which way the line is read. WHAT EACH KIND OF FIX COULD BUY, scored as overlap with the rectangles the reader settled on, doubled then single: as shipped 0.788/0.623; given the reader's size about our centre 0.796/0.722; moved perfectly at our size 0.852/0.744; given the reader's size from our near edge 0.868/0.711. So for a doubled mark fix the size and leave the position, and for a single mark the exact reverse — a rule treating the refused population as one thing spends its effort on the wrong half either way. AND THE REFUSAL IS VINDICATED: the answer the search found and rejected is worse than what we ship in its place, 0.596 against 0.715 overlap with its centre 1.065 units out against 0.664. TWO THEORIES THIS SITTING SUGGESTED AND THE CORPUS KILLED, both named because both were reachable: the 13 hamza in the sitting all shipped at 4.00 by 3.90 while hamza ships 21 sizes across the book, which looked like a class drawn from a constant — but that size is 16,214 of the 16,385 hamza and is refused at 0.43%, the class's own rate; and one level down, that some particular size fails, which breaks out to nothing anywhere (successive kasratan ships 323 distinct sizes across 1,935 marks, and the worst-failing sizes are the ones with fewest marks under them). Both were the selected population describing its own selection. WHAT THIS CANNOT SAY: every measurement here is over refused marks, so noisy size among refused doubled marks does not establish it among accepted ones — that still needs the ink extent measured under all 8,554, which is the free half above. MEASURED 2026-09-02 over all 8,554 (8,463 resolve to an ink piece, via probe-piece-union.mjs --set doubled): across the population the box is NOT too small — 84.7% sit within half a unit of their ink in both axes, the median box is a hair larger than the ink (width -0.067, height -0.10), only 2.5% have ink past the box by >0.5, and the gap varies rather than being one constant to add back, so the varying branch is confirmed a second time. Split by the search's own verdict, 'too small' is confined to the refusal: accepted doubled marks 2.0% too-small, refused 24.3% (twelve-fold, and a floor rather than a ceiling since the middle-inside-box union drops a too-small box's far stroke). Still confirmed — the per-mark size repair for refused doubled marks is unbuilt and has no test; the free half only bounds its target and forbids it from touching the accepted marks."
     },
     {
       "id": "counting-presses-stopped-meaning-anything",
-      "source": { "file": "docs/design/mark-registration.md", "item": "㉗" },
+      "source": {
+        "file": "docs/design/mark-registration.md",
+        "item": "㉗"
+      },
       "status": "fixed",
       "closedBy": "packages/etl/scripts/settle-mark-report.test.mjs",
       "severity": "defect",
@@ -1115,79 +1505,122 @@
     },
     {
       "id": "reach-for-the-ink-rather-than-resize-toward-it-sample",
-      "source": { "file": "docs/design/mark-registration.md", "item": "㉘" },
+      "source": {
+        "file": "docs/design/mark-registration.md",
+        "item": "㉘"
+      },
       "status": "confirmed",
       "severity": "risk",
       "owner": "agent",
-      "blockedBy": ["the placement decision"],
+      "blockedBy": [
+        "the placement decision"
+      ],
       "note": "The sample-scored stage of reach-for-the-ink-rather-than-resize-toward-it, kept as its own row because it is its own document item: scored against the reader's own tapped ink and regressed over a tenth of the corpus, before the full-corpus escalation in item ㉙ turned the accepted-population safety claim from a sample into a guarantee. Read that row for the current state."
     },
     {
       "id": "reach-for-the-ink-rather-than-resize-toward-it-escalation",
-      "source": { "file": "docs/design/mark-registration.md", "item": "㉙" },
+      "source": {
+        "file": "docs/design/mark-registration.md",
+        "item": "㉙"
+      },
       "status": "confirmed",
       "severity": "risk",
       "owner": "agent",
-      "blockedBy": ["the placement decision"],
+      "blockedBy": [
+        "the placement decision"
+      ],
       "note": "The full-corpus escalation stage of reach-for-the-ink-rather-than-resize-toward-it, kept as its own row because it is its own document item: fired only where the shipped rule already refuses (329 of 326,515 marks), turning the accepted-population safety claim from a sample into a guarantee, before item ㉚ finished the sitting it was checked against and found the disagreement rate worse than this stage's own count showed. Read that row for the current state."
     },
     {
       "id": "reach-for-the-ink-rather-than-resize-toward-it",
-      "source": { "file": "docs/design/mark-registration.md", "item": "㉚" },
+      "source": {
+        "file": "docs/design/mark-registration.md",
+        "item": "㉚"
+      },
       "status": "confirmed",
       "severity": "risk",
       "owner": "agent",
-      "blockedBy": ["the placement decision"],
+      "blockedBy": [
+        "the placement decision"
+      ],
       "note": "Follows from counting-presses-stopped-meaning-anything: 57 of the 61 marks in the wrong-size sitting were placed by the reader TAPPING THE INK, so their rectangles were already close to a rule that reads the ink under the shipped window rather than resizing a guess toward it. Checked two ways. Against what the reader chose: taking every ink piece whose middle falls inside the shipped rectangle reproduces the reader's own tapped set on 96% of the 57 (94% doubled, 100% single), and scores 0.847/0.769 overlap against the reader's rectangle on doubled/single marks, both above what ships (0.788/0.623) and above every resized-guess candidate the-doubled-marks-are-drawn-too-small scored. Against marks nobody is arguing about: run over 31,805 marks on 60 pages spread through the book (about a tenth of the corpus), the rule's answer sits a median 0.077 units from what ships for the 31,773 already-accepted marks, 99.2% within half a unit. The 791 already-accepted doubled marks among them barely change size (width -0.075, height -0.088) against the several-unit corrections the refused doubled marks needed — the direct answer to what the-doubled-marks-are-drawn-too-small left owed, that the accepted doubled marks are not secretly wrong too. The 32 refused marks in the same sample moved the way predicted, median 1.47 units. Then run as a true escalation (fires only where iouBest < 0.55) over all 329 marks the current corpus refuses, not a sample: the accepted 326,186 are unchanged by construction, not by sampling. Of the 329, 304 get an answer; 25 have no ink piece under them at all (11 of 71 hamza) and must keep today's rectangle. Matched mark-for-mark against the 33 doubled marks with reader ground truth then on record, typical agreement was close (median combined size error 0.064 units) but one mark showed the rule sweeping in an unintended piece of ink and proposing growth of (4.79, 12.35) against a reader who barely touched it (0.04, -0.20); four more disagreed by 2-4 units. THE SAME SITTING WAS FINISHED ON 2026-08-19 (ninety of ninety marks, up from sixty-one) and the doubled-mark ground truth grew from 33 to 45: the worst case is still the same mark, nothing sat since disagreed worse, but the disagreement rate is not what the smaller count said — 17 of 45 doubled marks (38%) now disagree by two units or more, not 5 of 33 (15%); singles stayed solid, 2 of 44. severity stays risk, but the guard this needs is no longer optional caution against a tail case — at more than a third of doubled marks, the rule cannot ship without it. mark-H/E on the task board carries the implementation; the guard's own design is item ㉜, its own row below."
     },
     {
       "id": "reach-for-the-ink-rather-than-resize-toward-it-guard",
-      "source": { "file": "docs/design/mark-registration.md", "item": "㉜" },
+      "source": {
+        "file": "docs/design/mark-registration.md",
+        "item": "㉜"
+      },
       "status": "open",
       "severity": "risk",
       "owner": "agent",
-      "blockedBy": ["the placement decision"],
+      "blockedBy": [
+        "the placement decision"
+      ],
       "note": "The guard ㉙ said the rule could not ship without, designed rather than built: checked the repo first and found nothing to attach a guard to — the commits behind ㉘ and ㉙ (67f1905, 4a138e3) touch only this design doc and the task board, never a script, so the piece-union rule itself has never been committed, only scored from a run that was thrown away. The design proposes the same shape of refusal the rule already has for finding no piece at all (keep the shipped rectangle) applied to the opposite failure — a piece found, but the candidate grown far past the rectangle already shipping — measured as a ratio of areas rather than a fixed unit count, since a doubled mark's box and a single mark's box are not drawn at the same size. Names the gap in the numbers already on record (0.064 median combined units of agreement against a worst case grown several times its own shipped area) but does not fix a cutoff inside it, and says plainly what would: run a candidate ratio against all 45 doubled marks with a reader's answer and check it both catches ㉚'s seventeen disagreements and stays quiet on the marks ㉙ already called safe. mark-H/E on the task board carries whatever is built from this design. The cutoff and the re-deal are now both settled: item ㉝ found the guard has to be symmetric (a shrink, not only a growth, is most of the failure); ㉞ moved the cutoff to 1.75/0.571 on double the ground truth and found it held; and ㉟ made the re-deal call — run the checked guard now — and recorded what it decides: on the 195 never-sat candidate marks it accepts 142 (73%) and refuses 53 (27%), the refusals catching candidates grown or shrunk implausibly (worst ratios 29.6, 20.5, 18.2). What keeps this row open is the one step ㉟ deliberately did not take: wiring those 142 corrections into what the app draws is the same act as ruling option H of the open mark-placement decision, so it waits on that ruling. Read item ㉟ for the current state."
     },
     {
       "id": "reach-for-the-ink-rather-than-resize-toward-it-guard-shape",
-      "source": { "file": "docs/design/mark-registration.md", "item": "㉝" },
+      "source": {
+        "file": "docs/design/mark-registration.md",
+        "item": "㉝"
+      },
       "status": "confirmed",
       "severity": "risk",
       "owner": "agent",
-      "blockedBy": ["the placement decision"],
+      "blockedBy": [
+        "the placement decision"
+      ],
       "note": "The check ㉜ itself called for, run now that the piece-union script exists to run it with: scored against all 89 marks carrying a reader's settled answer, not only the 45 doubled ones ㉜ named, because ㉜'s own test needs the marks that already agree too, and those are not all doubled — the corpus has moved since ㉜ was written, the same drift ㉛ already found once, so the 89 split 40 doubled and 49 single now, not 45 doubled. Of the 89, 17 (16 of them single) have no piece to point to and are out of scope for an area-ratio cutoff by construction; the other 72 (39 doubled, 33 single) each carry a candidate and a ratio. The guard exactly as ㉜ describes it — refuse only once a candidate has grown past the shipped rectangle — catches at most 5 of the 20 marks disagreeing by two combined units or more, because 15 of those 20 disagreements are candidates that came out smaller than shipped, not larger; a guard that only watches for growth cannot see a shrink. The same measure read both ways — refuse when the candidate's area sits far from the shipped area in either direction, grown past roughly double or fallen under about half — catches 15 of the 20 disagreeing marks while wrongly refusing only 1 of the 52 that already agreed, and holds up close to evenly across doubled (10 of 13 caught, no false refusals) and single (5 of 7 caught, one false refusal) marks. Settles that area alone can separate the two populations, contrary to what ㉜'s one-sided shape assumed; does not settle the exact cutoff, which is only where this run's 89 marks happen to sit a line, or the re-deal question for the 229 unsat marks, which ㉜ also left open. mark-H/E on the task board carries whatever ships from this. A second sitting doubled the ground truth and moved the cutoff; read ㉞'s row below."
     },
     {
       "id": "reach-for-the-ink-rather-than-resize-toward-it-guard-cutoff",
-      "source": { "file": "docs/design/mark-registration.md", "item": "㉞" },
+      "source": {
+        "file": "docs/design/mark-registration.md",
+        "item": "㉞"
+      },
       "status": "confirmed",
       "severity": "risk",
       "owner": "agent",
-      "blockedBy": ["the placement decision"],
+      "blockedBy": [
+        "the placement decision"
+      ],
       "note": "㉝ scored 89 marks and said its cutoff was a line, not a number checked against any wider population. A second wrong-size sitting has since finished (91 more marks, weak-size-part3, from the same 329-mark population weak-size-part1 was itself drawn from), rerun through a script committed this time rather than lost — score-piece-union-guard.mjs — against both sittings together, 181 marks with no id repeated. 145 carry a candidate; 39 disagree with the reader by two combined units or more (close in proportion to ㉝'s 20 of 72), 106 agree closer than that. At ㉝'s own cutoff (ratio ≥ 2 or ≤ 0.5) the guard still catches 30 of 39 (77%, against ㉝'s 75%) while wrongly refusing 2 of 106 (1.9%, against ㉝'s 1 in 52) — the shape holds at twice the size. But sweeping the ratio from 1.5 to 4 found a number that strictly beats 2.0: at 1.75 the guard catches 34 of 39 (87%) for the identical 2 false refusals out of 106 that 2.0 costs — doubled 21 of 24 caught (1 false refusal in 46), single 13 of 15 caught (1 in 60). Looser at 1.5, four more catches (38 of 39) cost nearly quadruple the false refusals (7 of 106). The cutoff moves from 2/0.5 to 1.75/0.571 on double the ground truth ㉝ asked for. Does not touch the re-deal question either item left open — run the guard on the 216 of 229 never-sat marks, or hold for weak-size-part2's roughly 90 still-unsat marks first. mark-H/E on the task board carries whatever ships from this."
     },
     {
       "id": "reach-for-the-ink-rather-than-resize-toward-it-guard-redeal",
-      "source": { "file": "docs/design/mark-registration.md", "item": "㉟" },
+      "source": {
+        "file": "docs/design/mark-registration.md",
+        "item": "㉟"
+      },
       "status": "confirmed",
       "severity": "risk",
       "owner": "agent",
-      "blockedBy": ["the placement decision"],
+      "blockedBy": [
+        "the placement decision"
+      ],
       "note": "The re-deal question ㉜, ㉝ and ㉞ each left open — trust the guard's verdicts on the never-sat marks now, or hold for another wrong-size sitting first — was made: run it now, on the reasoning ㉞ had already surfaced (the 1.75/0.571 cutoff held under a doubling of ground truth, so a third sitting moves it less than the second did, while it blocks nothing else). Applied at 1.75/0.571 to every never-sat refused mark carrying a piece-union candidate: 142 of 195 accepted (73%), 53 refused (27%) — 38 of the refusals candidates that shrank under 0.571x, 15 that grew past 1.75x, the worst area ratios 29.6, 20.5 and 18.2 plainly a neighbour's ink swept in. The accept rate holds at ~73-75% whether 'never sat' counts only the wrong-size sittings drawn from this population or any sitting at all, and the corpus has moved well past ㉞'s counts — 209 refused marks now carry a reader's answer, not 145, so waiting buys even less. What ㉟ deliberately did NOT do, and what keeps the umbrella guard row open, is wire the 142 endorsed corrections into what the app draws: that act is adopting option H of the open mark-placement decision, so it waits on that ruling rather than pre-empting it. ㉟ is the evidence that ruling needs."
     },
     {
       "id": "the-boundary-marks-that-ship-as-placed-were-never-read",
-      "source": { "file": "docs/design/mark-registration.md", "item": "㉛" },
+      "source": {
+        "file": "docs/design/mark-registration.md",
+        "item": "㉛"
+      },
       "status": "confirmed",
       "severity": "risk",
       "owner": "agent",
-      "blockedBy": ["the placement decision"],
+      "blockedBy": [
+        "the placement decision"
+      ],
       "note": "the-search-reported-answers-it-never-checked fixed the code bug: a mark whose search ran out of room could slip past the check meant to catch that and ship as placed from its own ink. Fixing the bug never asked whether the rectangles it now correctly counts as boundary-hits are actually right — they still ship as placed whenever they clear the match floor. That population, on the corpus as it stands today, is 339 marks (search ran out of room, iouBest 0.55 to 1.01). Two sittings of forty, drawn the same way as the-doubled-marks-are-drawn-too-small and reach-for-the-ink-rather-than-resize-toward-it, 80 of 339 seen so far: every one of the eighty carries a complaint, and unlike counting-presses-stopped-meaning-anything's tally the movement is mostly real (79 of 80 moved by 0.05 units or more, 73 of 80 genuinely resized). But it is a small kind of wrong — median hand distance 0.676 against the fallback population's multi-unit corrections, median size change 0.07 to 0.09 units — not the fallback population's kind. 259 of 339 remain unsat; whether the rate and size hold across the rest is open."
     },
     {
       "id": "the-weakest-matches-may-go-wrong-by-class",
-      "source": { "file": "docs/design/mark-registration.md", "item": "㉒" },
+      "source": {
+        "file": "docs/design/mark-registration.md",
+        "item": "㉒"
+      },
       "status": "open",
       "severity": "question",
       "owner": "agent",
@@ -1195,16 +1628,24 @@
     },
     {
       "id": "the-displacement-correction-could-go-stale",
-      "source": { "file": "docs/design/mark-registration.md", "item": "②" },
+      "source": {
+        "file": "docs/design/mark-registration.md",
+        "item": "②"
+      },
       "status": "open",
       "severity": "risk",
       "owner": "agent",
-      "blockedBy": ["the placement decision"],
+      "blockedBy": [
+        "the placement decision"
+      ],
       "note": "Only bites if the per-page correction is adopted. It would be data derived from two printings with nothing re-deriving or re-checking it — the same shape of problem as the fit residual that looked like validation and was blind to a one-unit displacement. The answer is the one every other derived number here already gets: re-derive offline from committed bytes and fail on drift."
     },
     {
       "id": "pages-are-never-counted-against-the-text",
-      "source": { "file": "docs/design/mark-registration.md", "item": "③" },
+      "source": {
+        "file": "docs/design/mark-registration.md",
+        "item": "③"
+      },
       "status": "open",
       "severity": "question",
       "owner": "agent",
@@ -1212,7 +1653,10 @@
     },
     {
       "id": "which-printing-made-the-shipped-pages",
-      "source": { "file": "docs/design/mark-registration.md", "item": "④" },
+      "source": {
+        "file": "docs/design/mark-registration.md",
+        "item": "④"
+      },
       "status": "open",
       "severity": "question",
       "owner": "agent",
@@ -1220,16 +1664,24 @@
     },
     {
       "id": "position-might-separate-the-look-alike-pairs",
-      "source": { "file": "docs/design/mark-registration.md", "item": "⑤" },
+      "source": {
+        "file": "docs/design/mark-registration.md",
+        "item": "⑤"
+      },
       "status": "open",
       "severity": "risk",
       "owner": "agent",
-      "blockedBy": ["the placement decision"],
+      "blockedBy": [
+        "the placement decision"
+      ],
       "note": "Shape does not separate fatha from kasra (0.968) or fathatan from kasratan (0.914), and no better shape comparison will — what separates them is which side of the letter they sit on, which a centred comparison discards before it starts. This is a risk rather than a question because it lands on the tajweed work: a rule that names a kasra cannot be verified by shape alone. Answerable only once placement is corrected, because it needs to know where the letter is. Carried here only — mark-labels.md §⑦ Option D points at this row rather than repeating it."
     },
     {
       "id": "marks-are-drawn-with-the-strokes-of-their-own-name",
-      "source": { "file": "docs/design/mark-registration.md", "item": "⑥" },
+      "source": {
+        "file": "docs/design/mark-registration.md",
+        "item": "⑥"
+      },
       "status": "answered",
       "severity": "question",
       "owner": "agent",
@@ -1237,16 +1689,24 @@
     },
     {
       "id": "the-pagination-question-covers-three-outputs",
-      "source": { "file": "docs/design/what-we-depend-on.md", "item": "①" },
+      "source": {
+        "file": "docs/design/what-we-depend-on.md",
+        "item": "①"
+      },
       "status": "open",
       "severity": "question",
       "owner": "user",
-      "blockedBy": ["a licensing opinion"],
+      "blockedBy": [
+        "a licensing opinion"
+      ],
       "note": "adj-shards-carry-a-third-upstream asks whether a table of which page an ayah falls on carries its source's terms forward, and scopes the question to one asset tree. The dependency audit of 2026-08-16 measured the same table reaching two more shipped outputs: every one of 44,431 root-shard occurrence tuples carries a page number matching the vendored table across all 604 pages, and assets/manifest.json ships the table verbatim at 6,236 entries, byte-identical to data/pages/ayah-pages.json. So the opinion being awaited is the same opinion and only its scope is wrong — which matters because scope is what a reader of the request will answer against, and an opinion returned about one tree would have to be re-obtained for the other two. Carried separately from the original row rather than folded into it because that row is cited from track-b-native.md and from the notices gate's deferral, and widening a row other things point at changes what those pointers mean. What would answer it: the licensing opinion already requested, asked about all three outputs."
     },
     {
       "id": "notices-gate-states-a-false-fact-about-roots",
-      "source": { "file": "docs/design/what-we-depend-on.md", "item": "②" },
+      "source": {
+        "file": "docs/design/what-we-depend-on.md",
+        "item": "②"
+      },
       "status": "answered",
       "severity": "defect",
       "owner": "agent",
@@ -1254,7 +1714,10 @@
     },
     {
       "id": "structural-metadata-reaches-the-hop-unnamed",
-      "source": { "file": "docs/design/what-we-depend-on.md", "item": "③" },
+      "source": {
+        "file": "docs/design/what-we-depend-on.md",
+        "item": "③"
+      },
       "status": "open",
       "severity": "question",
       "owner": "agent",
@@ -1262,7 +1725,10 @@
     },
     {
       "id": "the-asset-manifest-is-in-no-licence-bucket",
-      "source": { "file": "docs/design/what-we-depend-on.md", "item": "④" },
+      "source": {
+        "file": "docs/design/what-we-depend-on.md",
+        "item": "④"
+      },
       "status": "fixed",
       "closedBy": "scripts/gate-notices.mjs",
       "severity": "defect",
@@ -1271,7 +1737,10 @@
     },
     {
       "id": "nothing-checks-the-package-tree-licences",
-      "source": { "file": "docs/design/what-we-depend-on.md", "item": "⑤" },
+      "source": {
+        "file": "docs/design/what-we-depend-on.md",
+        "item": "⑤"
+      },
       "status": "open",
       "severity": "risk",
       "owner": "agent",
@@ -1279,7 +1748,10 @@
     },
     {
       "id": "structural-metadata-could-be-public-domain",
-      "source": { "file": "docs/design/what-we-depend-on.md", "item": "⑥" },
+      "source": {
+        "file": "docs/design/what-we-depend-on.md",
+        "item": "⑥"
+      },
       "status": "open",
       "severity": "question",
       "owner": "user",
@@ -1287,7 +1759,10 @@
     },
     {
       "id": "the-hop-could-be-computed-from-the-print",
-      "source": { "file": "docs/design/what-we-depend-on.md", "item": "⑦" },
+      "source": {
+        "file": "docs/design/what-we-depend-on.md",
+        "item": "⑦"
+      },
       "status": "open",
       "severity": "question",
       "owner": "agent",
@@ -1295,16 +1770,24 @@
     },
     {
       "id": "the-tajweed-spans-could-be-generated-not-vendored",
-      "source": { "file": "docs/design/what-we-depend-on.md", "item": "⑧" },
+      "source": {
+        "file": "docs/design/what-we-depend-on.md",
+        "item": "⑧"
+      },
       "status": "open",
       "severity": "question",
       "owner": "user",
-      "blockedBy": ["a hafiz's judgement on the divergences"],
+      "blockedBy": [
+        "a hafiz's judgement on the divergences"
+      ],
       "note": "An MIT-licensed engine ships a corpus-free core of about 34 KB that would mean vendoring no annotation data and no Quran text at all, emits the same codepoint-range shape the current source does, and models pause — which a precomputed span dataset structurally cannot, and which matters for an app whose reader stops mid-page. It agrees with the incumbent at 99.80% across all 6,236 ayahs with all 108 divergences catalogued. Two things weigh against: it was created five weeks before this audit, is at version 0.1.1 with two stars and one author, and depending on that is a real risk — largely dissolved by the fact that MIT permits vendoring the core outright. And the incumbent is worse than SOURCES.md records: its grant is one README sentence covering 'this data file', singular, while the classifier that generated it carries no licence at all, so regenerating the annotations ourselves from that project is not an available escape. Blocked on the same hafiz judgement the colouring already waits on, since the 108 divergences are exactly what a reader qualified to judge tajweed would have to rule on."
     },
     {
       "id": "the-page-table-has-only-one-witness",
-      "source": { "file": "docs/design/what-we-depend-on.md", "item": "⑨" },
+      "source": {
+        "file": "docs/design/what-we-depend-on.md",
+        "item": "⑨"
+      },
       "status": "open",
       "severity": "risk",
       "owner": "agent",
@@ -1312,7 +1795,10 @@
     },
     {
       "id": "the-segmentation-split-has-no-third-opinion",
-      "source": { "file": "docs/design/what-we-depend-on.md", "item": "⑩" },
+      "source": {
+        "file": "docs/design/what-we-depend-on.md",
+        "item": "⑩"
+      },
       "status": "open",
       "severity": "question",
       "owner": "agent",
@@ -1320,7 +1806,10 @@
     },
     {
       "id": "nothing-measures-what-the-hop-misses",
-      "source": { "file": "docs/design/what-we-depend-on.md", "item": "⑪" },
+      "source": {
+        "file": "docs/design/what-we-depend-on.md",
+        "item": "⑪"
+      },
       "status": "open",
       "severity": "question",
       "owner": "agent",
@@ -1328,7 +1817,10 @@
     },
     {
       "id": "the-licence-map-describes-one-door",
-      "source": { "file": "docs/design/what-we-distribute.md", "item": "①" },
+      "source": {
+        "file": "docs/design/what-we-distribute.md",
+        "item": "①"
+      },
       "status": "answered",
       "severity": "defect",
       "owner": "agent",
@@ -1336,7 +1828,10 @@
     },
     {
       "id": "inputs-are-not-sorted-into-ingredients-and-instruments",
-      "source": { "file": "docs/design/what-we-distribute.md", "item": "②" },
+      "source": {
+        "file": "docs/design/what-we-distribute.md",
+        "item": "②"
+      },
       "status": "open",
       "severity": "question",
       "owner": "agent",
@@ -1344,16 +1839,24 @@
     },
     {
       "id": "whether-a-store-build-carries-every-tree",
-      "source": { "file": "docs/design/what-we-distribute.md", "item": "③" },
+      "source": {
+        "file": "docs/design/what-we-distribute.md",
+        "item": "③"
+      },
       "status": "open",
       "severity": "question",
       "owner": "user",
-      "blockedBy": ["inputs-are-not-sorted-into-ingredients-and-instruments"],
+      "blockedBy": [
+        "inputs-are-not-sorted-into-ingredients-and-instruments"
+      ],
       "note": "The store channel is the only one carrying a blocker, and it does not have to carry what the site channel carries. Both blocking clauses — the copyleft prohibition on imposing further restrictions, and the share-alike prohibition on applying technological measures — are triggered by what the channel does to a recipient rather than by anything the data is, which is why the identical bytes pass through the site channel today without difficulty. So the question is not how to make the data acceptable but which trees a wrapped build needs to contain. The audit has the feature-loss numbers and they are very uneven: omitting the root shards costs a whole lens and leaves the hop intact, omitting the tajweed skin costs colouring and nothing else, omitting the pairings ends the app, and omitting the page artwork means there is no app at all. Deliberately not opened as a decision yet: inputs-are-not-sorted-into-ingredients-and-instruments may remove the blocker from the adjacency tree entirely, which would change what the options are, and drawing options against a set that is about to move is how an options page goes stale before it is read."
     },
     {
       "id": "twelve-verses-of-scripture-ship-in-the-bundle",
-      "source": { "file": "docs/design/what-we-distribute.md", "item": "④" },
+      "source": {
+        "file": "docs/design/what-we-distribute.md",
+        "item": "④"
+      },
       "status": "fixed",
       "closedBy": "scripts/gate-scripture.mjs",
       "severity": "defect",
@@ -1362,7 +1865,10 @@
     },
     {
       "id": "a-pipeline-test-held-a-four-word-phrase",
-      "source": { "file": "docs/design/what-we-distribute.md", "item": "④" },
+      "source": {
+        "file": "docs/design/what-we-distribute.md",
+        "item": "④"
+      },
       "status": "fixed",
       "closedBy": "scripts/gate-scripture.mjs",
       "severity": "defect",
@@ -1371,7 +1877,10 @@
     },
     {
       "id": "the-transliteration-table-is-copied-into-our-code",
-      "source": { "file": "docs/design/what-we-depend-on.md", "item": "⑫" },
+      "source": {
+        "file": "docs/design/what-we-depend-on.md",
+        "item": "⑫"
+      },
       "status": "fixed",
       "closedBy": "packages/etl/scripts/build-roots.mjs",
       "severity": "defect",
@@ -1380,7 +1889,10 @@
     },
     {
       "id": "the-artwork-pipeline-declares-two-transforms-and-applies-three",
-      "source": { "file": "docs/design/what-we-depend-on.md", "item": "⑬" },
+      "source": {
+        "file": "docs/design/what-we-depend-on.md",
+        "item": "⑬"
+      },
       "status": "fixed",
       "closedBy": "SOURCES.md",
       "severity": "defect",
@@ -1389,16 +1901,26 @@
     },
     {
       "id": "whether-a-permissive-relicence-is-available-at-all",
-      "source": { "file": "docs/design/what-we-depend-on.md", "item": "⑭" },
+      "source": {
+        "file": "docs/design/what-we-depend-on.md",
+        "item": "⑭"
+      },
       "status": "open",
       "severity": "question",
       "owner": "user",
-      "blockedBy": ["twelve-verses-of-scripture-ship-in-the-bundle", "the-transliteration-table-is-copied-into-our-code", "a licensing opinion"],
+      "blockedBy": [
+        "twelve-verses-of-scripture-ship-in-the-bundle",
+        "the-transliteration-table-is-copied-into-our-code",
+        "a licensing opinion"
+      ],
       "note": "Worth separating from the store question because someone may want it answered for unrelated reasons — a reader wanting to build a different mus'haf on @hifth/core, where GPL is the thing stopping them. LICENSES.md:55-57 answers it already: 'The app code is not a derivative of the corpus data — it reads the shards at runtime — so nothing here reaches our source by way of the data.' The premise was verified and holds: every asset access in apps/web/src/assets.ts is a fetch by URL, and neither apps/web/src/** nor packages/core/src/** contains a readFileSync, import or fetch targeting packages/etl/data/. The conclusion does not follow, because the content did not arrive over the boundary being guarded — somebody typed it in, by four routes ranked worst first in the design doc: the twelve verses, the Buckwalter table, the 114 romanised names, and the 318 Tanzil numbers, the last being the only one with an automated re-derivation behind it. Also not an escape from the data question: permissive code beside GPL data in one deploy is exactly the unresolved aggregation reading, where GPL-3.0 §5's aggregate paragraph protects the other parts from the covered work rather than the reverse, and the honest answer is that a static deploy of separately-fetched JSON is the paradigm aggregate under one reading and not separate-and-independent under another. Two things worth knowing before this is decided: relicensing the ETL scripts more permissively does not break the §6 corresponding-source obligation, it over-satisfies it; and file-level copyleft is the usually-skipped middle option, letting a third party embed the engine in something closed while changes to our own files still come back, which fits if the motive is 'let people use this' rather than 'let people take this'."
     },
     {
       "id": "how-durable-must-a-confusion-map-be",
-      "source": { "file": "docs/design/confusion-points.md", "item": "①" },
+      "source": {
+        "file": "docs/design/confusion-points.md",
+        "item": "①"
+      },
       "status": "open",
       "severity": "question",
       "owner": "user",
@@ -1406,7 +1928,10 @@
     },
     {
       "id": "should-a-confusion-map-leave-the-device",
-      "source": { "file": "docs/design/confusion-points.md", "item": "②" },
+      "source": {
+        "file": "docs/design/confusion-points.md",
+        "item": "②"
+      },
       "status": "open",
       "severity": "question",
       "owner": "user",
@@ -1414,7 +1939,10 @@
     },
     {
       "id": "how-are-slip-candidates-ranked",
-      "source": { "file": "docs/design/confusion-points.md", "item": "③" },
+      "source": {
+        "file": "docs/design/confusion-points.md",
+        "item": "③"
+      },
       "status": "open",
       "severity": "risk",
       "owner": "user",
@@ -1422,7 +1950,10 @@
     },
     {
       "id": "does-a-captured-slip-become-navigable",
-      "source": { "file": "docs/design/confusion-points.md", "item": "④" },
+      "source": {
+        "file": "docs/design/confusion-points.md",
+        "item": "④"
+      },
       "status": "open",
       "severity": "question",
       "owner": "user",
@@ -1430,7 +1961,10 @@
     },
     {
       "id": "who-sets-a-confusion-seams-state",
-      "source": { "file": "docs/design/confusion-points.md", "item": "⑤" },
+      "source": {
+        "file": "docs/design/confusion-points.md",
+        "item": "⑤"
+      },
       "status": "open",
       "severity": "question",
       "owner": "user",
@@ -1438,7 +1972,10 @@
     },
     {
       "id": "should-a-student-share-a-map-with-a-teacher",
-      "source": { "file": "docs/design/confusion-points.md", "item": "⑥" },
+      "source": {
+        "file": "docs/design/confusion-points.md",
+        "item": "⑥"
+      },
       "status": "open",
       "severity": "question",
       "owner": "user",
@@ -1446,7 +1983,10 @@
     },
     {
       "id": "should-the-app-learn-where-most-readers-slip",
-      "source": { "file": "docs/design/confusion-points.md", "item": "⑦" },
+      "source": {
+        "file": "docs/design/confusion-points.md",
+        "item": "⑦"
+      },
       "status": "open",
       "severity": "question",
       "owner": "user",
@@ -1454,7 +1994,10 @@
     },
     {
       "id": "is-the-privacy-rule-nothing-leaves-or-nothing-that-doesnt-serve",
-      "source": { "file": "docs/design/revision-record.md", "item": "④" },
+      "source": {
+        "file": "docs/design/revision-record.md",
+        "item": "④"
+      },
       "status": "open",
       "severity": "question",
       "owner": "user",
@@ -1462,11 +2005,16 @@
     },
     {
       "id": "plan-graduate-page-bar-winners",
-      "source": { "file": "docs/PLAN.md", "item": "18" },
+      "source": {
+        "file": "docs/PLAN.md",
+        "item": "18"
+      },
       "status": "blocked",
       "severity": "question",
       "owner": "user",
-      "blockedBy": ["a phone or a WebKit run"],
+      "blockedBy": [
+        "a phone or a WebKit run"
+      ],
       "note": "The page-bar's two questions were both decided C on 2026-09-02 (decisions juz-detents and boundary-juz): a juz marker is a tap-to-open button that grows as the pointer nears it (never during a drag, never eating the drag), and a page carrying a juz seam belongs to both juz. GRADUATED 2026-09-02: the app bar now imports only the winner — each marker is a button that jumps to its juz and, on a fine pointer, grows as the pointer nears it; the thumb bubble names both juz on a seam page, scoped to the bubble alone (shelf and wheel keep one juz each, per boundary-juz). Per graduation-losers (option A) the two losing strategies and their live-page wiring STAY in the core module and on docs/design/page-bar-options.html — they are not deleted — so a reader can still feel why the winner won; the bar reaches only the winner. Covered by a desktop e2e against the real corpus (apps/web/e2e/pagebar-detents.spec.ts) and by PageSlider component tests; the desktop project and gate:i18n/gate:decisions are green. What keeps this row open is the one sub-question the desktop live page cannot prove: the phone bar is ~0.4px a page with no pointer to grow a marker, so a two-juz seam label there needs a layout that must be judged on the owner's phone (or a WebKit run local darwin cannot launch). Blocks nothing shipped."
     }
   ]

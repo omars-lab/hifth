@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" data-ledger-hash="6fee1b3dc646">
+<html lang="en" data-ledger-hash="b184b77a4d91">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -123,11 +123,11 @@ li.struck .expect::before { content: "machine "; color: var(--green); }
 <header class="top">
   <p class="kicker">Hifth · حِفظ</p>
   <h1>Field guide</h1>
-  <p class="lede">The checks a machine cannot run. 10 of 12 outstanding.</p>
+  <p class="lede">The checks a machine cannot run. 11 of 13 outstanding.</p>
   <p class="rule">Every result here must tighten something automated — a threshold, a
   fixture, a gate. That is what <b>tunes</b> is for at the foot of each card. A verdict
   that tunes nothing has to be bought again by hand, forever.</p>
-  <p class="src">Generated from <code>docs/validation/ledger.json</code> · <code>6fee1b3dc646</code>
+  <p class="src">Generated from <code>docs/validation/ledger.json</code> · <code>b184b77a4d91</code>
   · never edit this file — run <code>make guide</code></p>
 </header>
 
@@ -429,6 +429,67 @@ li.struck .expect::before { content: "machine "; color: var(--green); }
     <p class="tunes-lead">Then do what it tunes:</p>
     <ul class="tunes"><li>SOURCES.md — the per-resource QUL licence + attribution entries this check keeps faithful</li><li>.claude/skills/leverage-qul/ — the rubric that marks which resources are text-bearing and off-limits to the probe</li></ul>
     <p class="expect">Written up in docs/decisions/qul-reliance.md</p>
+  </section>
+</article>
+<article class="card" id="qul-held-copy-licensed-and-offbundle">
+  <div class="head">
+    <span class="badge">outstanding</span>
+    <h2>Before any held item is text, a font, or morphology, read that resource's licence and confirm the store stays off the repo and off the shipped build</h2>
+    <p class="id"><code>qul-held-copy-licensed-and-offbundle</code></p>
+  </div>
+
+  <p class="why">The held copy is the other side of the ruler check, and its obligation is the opposite one. Where the ruler boundary confirms an export carries NO Qur'an text, the held copy DELIBERATELY holds text (the per-word qpc-v4 text), and it may also hold fonts and morphology. The qul-reliance decision permits this only in a store the owner controls — off the repository and off the shipped bundle — and only after each held item's own licence is read, because the outside library grants terms per resource, not in a blanket. So two things rest on a human, not a gate. First, each text-bearing, font, or morphology item held has a licence that only its own resource page states, and holding it before that read is exactly what the decision forbids. Second, the store lives outside the tree, so no gate here can see what it actually holds; only a person signed in to the store can confirm it holds what was licensed and nothing has leaked into what ships.</p>
+  
+
+  
+  <section class="block">
+    <h3>What you need</h3>
+    <ul class="bullets"><li>An ordinary browser, signed in to qul.tarteel.ai (the resource pages and downloads are session-gated).</li><li>Access to the store the held copy lives in, to confirm what it actually holds.</li><li>About fifteen minutes, and this before the first non-dry-run hold of any text-bearing item.</li></ul>
+  </section>
+  <section class="block">
+    <h3>Setup — on the laptop</h3>
+    <pre class="cmd">node packages/etl/scripts/etl.mjs held-copy --pages --dry-run</pre>
+    <p class="expect">Reads the layout cache and reports counts without touching any store. Confirms the held-copy source runs and sees its cache before you clear anything to hold.</p>
+  </section>
+
+  <section class="block">
+    <h3>Steps — on the phone</h3>
+    <ol class="steps">
+      <li>
+        <label class="do"><input type="checkbox" data-step="qul-held-copy-licensed-and-offbundle:0"><span>For each item the held copy holds or is about to hold that is text, a font, or morphology — the per-word text, the surah-name font, the Nastaleeq font, any per-word root/lemma/stem — open its resource page on qul.tarteel.ai and read the licence and attribution it states.</span></label>
+        <p class="expect">Each item's page states a licence that permits holding a copy in a private store for the tools to read, and names the attribution it asks for. An item whose page forbids that use is one the held copy may not hold.</p>
+        
+        <p class="why">The licence is per resource; there is no blanket grant. Holding a text-bearing item before its own page is read is exactly the boundary the decision draws, and only that page can be read for it.</p>
+        
+      </li>
+      <li>
+        <label class="do"><input type="checkbox" data-step="qul-held-copy-licensed-and-offbundle:1"><span>Confirm SOURCES.md carries an entry for each held resource — including the positions-only page layout — whose attribution matches what that resource's page asks for.</span></label>
+        <p class="expect">Every held item, and the layout it is placed by, has a SOURCES.md entry whose attribution says what its page asks, even where the item is numbers only.</p>
+        
+        <p class="why">Attribution is owed for holding a copy as much as for shipping bytes, and for zero-byte ruler use too. An attribution written from memory is a claim on the library's behalf and drifts.</p>
+        
+      </li>
+      <li>
+        <label class="do"><input type="checkbox" data-step="qul-held-copy-licensed-and-offbundle:2"><span>Confirm the two boundaries: the repository and the shipped build carry none of the held bytes, and the store holds only the items whose licences you just read.</span></label>
+        <p class="expect">The no-text and scripture gates are green (the repo side), and the store's contents match the licensed list — no item held that was not read for.</p>
+        
+        <p class="why">The store is outside the tree, so no gate here can see it. This is the only place a held item that was never licensed, or a leak from the store into what ships, is caught by a person before it stands.</p>
+        
+      </li>
+    </ol>
+  </section>
+
+  <section class="block">
+    <h3>Reading the result</h3>
+    <ul class="bullets"><li>Every held item's licence permits the hold and the attributions match → clear the ingest to hold: pass --licence-cleared and record here the date and which resource pages you read.</li><li>An item's licence forbids holding a private copy → it is not held; record why in SOURCES.md and the qul-reliance record, and the ingest stays refused for it.</li><li>An attribution has drifted from the page → fix it in SOURCES.md; the notices gate asserts a string is present, not that it is faithful, so this is the only check that keeps it true.</li><li>The store holds an item no licence was read for → stop, read it or remove it; a held copy of an unread item is the boundary the decision forbids.</li></ul>
+  </section>
+
+  <section class="block record">
+    <h3>Record it</h3>
+    <pre class="cmd">make record CHECK=qul-held-copy-licensed-and-offbundle RESULT='read text/font/morphology/layout resource pages on qul.tarteel.ai on &lt;date&gt; — licences permit holding a private copy, attributions match SOURCES.md; confirmed no-text/scripture gates green and the store holds only licensed items'</pre>
+    <p class="tunes-lead">Then do what it tunes:</p>
+    <ul class="tunes"><li>packages/etl/scripts/ingest-qul-supabase.mjs — the licence gate that refuses to hold any text-bearing item until this check is recorded done</li><li>SOURCES.md — the per-resource licence + attribution entries for each held item this check keeps faithful</li><li>.claude/skills/leverage-qul/ — the rubric that marks which held resources are text-bearing and gates them behind this read</li></ul>
+    <p class="expect">Written up in docs/decisions/qul-store-purpose.md</p>
   </section>
 </article>
 <article class="card is-done" id="source-offer-resolves">

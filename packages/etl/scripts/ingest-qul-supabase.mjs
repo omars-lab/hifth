@@ -26,9 +26,10 @@
  *             Safe to run whenever its cache is present.
  *   --words   the per-word qpc-v4 text (library id 47), keyed by the same global word id.
  *             TEXT-BEARING, so it refuses to run until the source resource's licence has
- *             been read and recorded (the ledger check `qul-rulers-terms-and-text-free`)
- *             AND you pass --licence-cleared to acknowledge it. Holding text you have not
- *             cleared is exactly what option D forbids. The same gate stands in front of
+ *             been read and recorded (the ledger check `qul-held-copy-licensed-and-offbundle`,
+ *             the held-copy obligation — distinct from the ruler check that confirms an export
+ *             carries NO text) AND you pass --licence-cleared to acknowledge it. Holding text
+ *             you have not cleared is exactly what option D forbids. The same gate stands in front of
  *             every other held item that is text, a font, or morphology — the fonts that
  *             draw this text (ids 457/462) and the per-word root/lemma/stem — so any of
  *             those added here later routes through this same licence check, never around it.
@@ -67,7 +68,7 @@ const CACHE = {
   words: join(ETL, "data/qul/.cache/qul-words/words.json"),
 };
 const LEDGER = join(REPO, "docs/validation/ledger.json");
-const LICENCE_CHECK = "qul-rulers-terms-and-text-free";
+const LICENCE_CHECK = "qul-held-copy-licensed-and-offbundle";
 
 const DB_URL = process.env.SUPABASE_DB_URL || "";
 
