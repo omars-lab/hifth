@@ -94,7 +94,7 @@ function ingestPages() {
     return;
   }
   const info = JSON.parse(
-    execFileSync("sqlite3", ["-json", CACHE.layout, "SELECT * FROM info"], { encoding: "utf8" }),
+    execFileSync("sqlite3", ["-json", CACHE.layout, "SELECT * FROM info"], { encoding: "utf8", maxBuffer: 64 * 1024 * 1024 }),
   )[0];
   const rows = JSON.parse(
     execFileSync(
@@ -105,7 +105,7 @@ function ingestPages() {
         "SELECT page_number, line_number, line_type, surah_number, " +
           "first_word_id, last_word_id FROM pages ORDER BY page_number, line_number",
       ],
-      { encoding: "utf8" },
+      { encoding: "utf8", maxBuffer: 64 * 1024 * 1024 },
     ),
   );
 
