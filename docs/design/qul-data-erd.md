@@ -4,7 +4,8 @@ This is the whole of the outside library of Qur'an data, drawn as one picture: e
 comes in, and the exact keys that clip one file to the next. It is the map you read before
 asking what the app can build from this library, or before adding a new piece of it — the
 [join map](qul-data-join-map.html) is the same spine drawn by hand and argued through; this page
-is the full entity diagram behind it.
+is the full entity diagram behind it. Its on-site twin, rendered in the browser
+with the three store tables drawn as well, is [the QUL data model](qul-data-erd.html).
 
 It carries **no Qur'an text**. Every column that would hold Arabic is named and counted, never
 shown.
