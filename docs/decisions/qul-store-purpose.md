@@ -178,13 +178,15 @@ off-bundle holding — a private copy in the owner's dev store, shown to no read
   "may not be reproduced [or] modified without the express written approval" of the Complex —
   under which even a private held copy needs their written permission first. Which one binds a
   given piece depends on the exact licence bundled with that specific resource on the library, and
-  that is the owner's to check per item. **Until that is verified, these three are not cleared to
-  hold** — this is the one blocker the held copy still waits on, and it is a decision only the
-  owner can make.
+  that is the owner's to check per item. **The owner verified this and cleared it on 2026-09-08**,
+  so all three are now cleared to hold in the dev store — the blocker the held copy waited on is
+  lifted, recorded in the ledger check `qul-held-copy-licensed-and-offbundle`.
 - **The library itself** states, in its own FAQ, that terms vary per resource (the resources are
   the authors', not the library's) and that commercial use is allowed only after each resource's
   own terms are reviewed — which is exactly the per-resource posture assumed here.
 
-Two things are still owed and only the owner can do them: verify the Complex licence variant that
-binds the word text and the two fonts, and — signed into the store — confirm it holds only the
-items whose licences clear, with nothing leaked into what ships. So the ledger check stays open.
+The Complex licence variant that binds the word text and the two fonts was the one thing this
+waited on, and the owner verified and cleared it on 2026-09-08. One thing is still owed and only
+the owner can do it: signed into the store, confirm it holds only the items whose licences clear,
+with nothing leaked into what ships — re-checked after each hold. The ledger check
+`qul-held-copy-licensed-and-offbundle` records the clearance as done.

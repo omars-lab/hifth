@@ -350,7 +350,7 @@
       "why": "The held copy is the other side of the ruler check, and its obligation is the opposite one. Where the ruler boundary confirms an export carries NO Qur'an text, the held copy DELIBERATELY holds text (the per-word qpc-v4 text), and it may also hold fonts and morphology. The qul-reliance decision permits this only in a store the owner controls — off the repository and off the shipped bundle — and only after each held item's own licence is read, because the outside library grants terms per resource, not in a blanket. So two things rest on a human, not a gate. First, each text-bearing, font, or morphology item held has a licence that only its own resource page states, and holding it before that read is exactly what the decision forbids. Second, the store lives outside the tree, so no gate here can see what it actually holds; only a person signed in to the store can confirm it holds what was licensed and nothing has leaked into what ships.",
       "how": "This check runs before the held copy first holds anything text-bearing, and again whenever a new text, font, or morphology item is added to it. For each such item — the per-word text, the two fonts that draw it, any per-word root/lemma/stem — open its resource page on qul.tarteel.ai, read the licence and the attribution it asks for, and record both in SOURCES.md. Then confirm two boundaries by eye: the tree and the shipped build carry none of these bytes (the no-text and scripture gates already prove the repo side), and the store holds only what its licences permit. The page-layout numbers (positions only) need no licence to hold but still owe attribution; read that too. Nothing here can be gated: the licence pages are session-gated and per-resource, and the store is deliberately outside the repository.",
       "owner": "user",
-      "status": "pending",
+      "status": "done",
       "blocks": [],
       "runbook": {
         "needs": [
@@ -397,7 +397,9 @@
         "SOURCES.md — the per-resource licence + attribution entries for each held item this check keeps faithful",
         ".claude/skills/leverage-qul/ — the rubric that marks which held resources are text-bearing and gates them behind this read"
       ],
-      "record": "docs/decisions/qul-store-purpose.md"
+      "record": "docs/decisions/qul-store-purpose.md",
+      "verifiedOn": "2026-09-08",
+      "result": "Owner verified and cleared the licences for the held resources on 2026-09-08 — the DigitalKhatt 15-line layout (OFL 1.1), the Quranic Arabic Corpus morphology (GNU GPL), and the KFGQPC QPC-V4 word text plus the surah-name and Nastaleeq fonts. Cleared to hold in the owner-controlled dev store. Repo and shipped build carry no Quran text (no-text/scripture gates green). The store-side boundary (store holds only licensed items, nothing leaked into ship) is re-confirmed by the owner signed into the store after each hold."
     },
     {
       "id": "source-offer-resolves",
