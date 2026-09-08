@@ -231,7 +231,7 @@
       "why": "SOURCES.md currently reads KFGQPC's terms through quran-svg's NOTICE.md, which quotes them verbatim and cites Royal Decrees 136/8 and 9/B/46356 — strong, but secondary. The app states those terms to every reader in the colophon, and an earlier paraphrase of them was wrong.",
       "how": "Open qurancomplex.gov.sa in an ordinary browser. The host is unreachable from automation, and this was measured rather than assumed: a GitHub-hosted runner (Azure westus2, run 30285643491, 2026-07-27) resolves the A record to 66.9.131.70 and then times out on TCP 443 — connect rc=124, and curl returns 000 under both a curl and a desktop-Chrome User-Agent. The same failure appears from the maintainer's machine. A third network confirmed it on 2026-08-16: a licensing research pass reached for the primary terms and got connect ECONNREFUSED on qurancomplex.gov.sa and on the dm., fonts. and nashrmaktabi. subdomains, having also found web.archive.org hard-blocked by its tooling. Three unrelated networks failing at the TCP layer is not a bot filter a header could talk past, and no scheduled watcher can do this. It stays a human check permanently. Confirm the wording still says free digital/web/software use with commercial printing reserved.",
       "owner": "user",
-      "status": "pending",
+      "status": "done",
       "blocks": [],
       "runbook": {
         "needs": [
@@ -288,7 +288,9 @@
           "Reading qurancomplex.gov.sa itself. The host times out on TCP 443 from every network this project's tooling runs on (measured, twice) and the Wayback mirror is not fetchable either — that is why research ⑦ was cancelled rather than built, and why no watcher will ever cover this.",
           "Judging whether our summary is **stricter** than the source. A gate can prove two copies match; only a reader can notice that both are wrong in the same direction, and overstating someone else's terms fails silently because it reads as caution."
         ]
-      }
+      },
+      "verifiedOn": "2026-09-08",
+      "result": "Owner opened qurancomplex.gov.sa in an ordinary browser on 2026-09-08 and read the digital-mushaf terms at the source: free use in digital, web and software contexts, with commercial printing of physical masahif reserved to the Complex — the same restriction quran-svg NOTICE.md quotes, citing the Royal Decrees. Confirmed our two restatements (SOURCES.md hafs-kfqc and the app colophon) match that wording and are not stricter than the source. No move from NOTICE.md needed."
     },
     {
       "id": "qul-rulers-terms-and-text-free",
