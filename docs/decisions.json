@@ -96,7 +96,8 @@
       "related": [
         "loop-4a",
         "loop-4b",
-        "similar-ayah-enrichment"
+        "similar-ayah-enrichment",
+        "qul-store-purpose"
       ]
     },
     {
@@ -960,7 +961,35 @@
       "date": null,
       "related": [
         "qul-reliance",
-        "comparison-crop"
+        "comparison-crop",
+        "qul-store-purpose"
+      ]
+    },
+    {
+      "id": "qul-store-purpose",
+      "question": "Now that the app holds a copy of the outside library, what is that copy for?",
+      "status": "decided",
+      "options": [
+        {
+          "id": "A",
+          "label": "Only sharpen what we already print — hold the numbers, draw no page of our own"
+        },
+        {
+          "id": "B",
+          "label": "Draw our own word-by-word mus'haf, keep the printed page as default, and stand the two side by side to check our pages — and hold the numbers too"
+        },
+        {
+          "id": "C",
+          "label": "Hold the numbers now, decide the drawing later"
+        }
+      ],
+      "doc": "docs/decisions/qul-store-purpose.md",
+      "decided": "B",
+      "by": "omar",
+      "date": "2026-09-07",
+      "related": [
+        "qul-reliance",
+        "similar-ayah-enrichment"
       ]
     }
   ]

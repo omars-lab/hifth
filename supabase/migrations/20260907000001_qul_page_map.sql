@@ -1,10 +1,13 @@
--- QUL page map — the KFGQPC QCF V2 (1421H) page layout (library id 10).
+-- QUL page map — the digital-khatt 15-line page layout (library id 21), the V4
+-- mus'haf plan this project draws its own word-by-word page from.
 --
 -- POSITIONS ONLY. Every column here is a number, an id, or a short line-type tag.
 -- No Qur'an text lives in this table. It records which word ids sit on which page
--- and line, following the source layout's own `pages` table. Held under the
--- `qul-reliance` option-D posture (a store this project controls, off the repo and
--- off the shipped bundle); the repo carries none of these bytes.
+-- and line, following the source layout's own `pages` table (9,046 lines across
+-- 604 pages, 15 lines to a page). The word-id ranges match the qpc-v4 word text
+-- (library id 47) exactly, 1..83,668, with no gaps — see docs/decisions/qul-store-purpose.md.
+-- Held under the `qul-reliance` option-D posture (a store this project controls,
+-- off the repo and off the shipped bundle); the repo carries none of these bytes.
 
 create table if not exists public.qul_page_lines (
   page_number   smallint not null,
@@ -23,7 +26,7 @@ create table if not exists public.qul_page_lines (
 );
 
 comment on table public.qul_page_lines is
-  'KFGQPC QCF V2 (1421H) page layout, library id 10 — positions only, no Qur''an text.';
+  'digital-khatt 15-line page layout, library id 21 (V4) — positions only, no Qur''an text.';
 
 -- A page''s lines are read in order; a word-id lookup wants the ranges.
 create index if not exists qul_page_lines_first_word_idx

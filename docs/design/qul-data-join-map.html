@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The QUL join map</title>
+<style>
+  :root{
+    --bg:#faf9f6; --ink:#1f2328; --muted:#5a626b; --line:#d9d5cc;
+    --card:#ffffff; --accent:#7a5c2e; --spine:#2f5d50; --spine-soft:#e3efeb;
+    --warn:#8a4b2f; --warn-soft:#f6e9e2; --ok:#2f6d3a;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{ --bg:#16181c; --ink:#e8e6e1; --muted:#a2a8b0; --line:#33373d;
+      --card:#1e2126; --accent:#c9a86a; --spine:#7fc7b3; --spine-soft:#1d302b;
+      --warn:#e0a082; --warn-soft:#2e211b; --ok:#8fd39b; }
+  }
+  *{box-sizing:border-box}
+  body{background:var(--bg); color:var(--ink); font:15px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; margin:0; padding:2rem 1.25rem 4rem}
+  main{max-width:1040px; margin:0 auto}
+  h1{font-size:1.6rem; margin:0 0 .25rem; text-wrap:balance}
+  .sub{color:var(--muted); margin:0 0 1.5rem}
+  h2{font-size:1.2rem; margin:2.5rem 0 .5rem; border-bottom:2px solid var(--line); padding-bottom:.3rem; text-wrap:balance}
+  h3{font-size:1rem; margin:1.4rem 0 .4rem; color:var(--accent)}
+  p{margin:.5rem 0}
+  a{color:var(--spine)}
+  .decided{display:inline-block; font-size:.72rem; letter-spacing:.08em; text-transform:uppercase; background:var(--spine-soft); color:var(--spine); border:1px solid var(--spine); border-radius:999px; padding:.15rem .6rem; vertical-align:middle; margin-left:.5rem}
+  table{border-collapse:collapse; width:100%; font-size:13px; margin:.6rem 0}
+  .scroll{overflow-x:auto}
+  th,td{border:1px solid var(--line); padding:.4rem .5rem; text-align:left; vertical-align:top}
+  th{background:var(--spine-soft); position:sticky; top:0}
+  td.num{font-variant-numeric:tabular-nums; white-space:nowrap}
+  code{background:var(--spine-soft); padding:.05rem .3rem; border-radius:4px; font-size:.9em}
+  .tag-ok{color:var(--ok); font-weight:600}
+  .tag-part{color:var(--accent); font-weight:600}
+  .tag-warn{color:var(--warn); font-weight:600}
+  .legend{color:var(--muted); font-size:.85rem}
+  .callout{background:var(--warn-soft); border-left:4px solid var(--warn); padding:.7rem 1rem; border-radius:6px; margin:1rem 0}
+  .callout.ok{background:var(--spine-soft); border-left-color:var(--spine)}
+  ul{margin:.4rem 0 .4rem 1.2rem; padding:0}
+  .spine-svg{width:100%; height:auto; display:block}
+  .card{background:var(--card); border:1px solid var(--line); border-radius:10px; padding:1rem 1.2rem; margin:1rem 0}
+  .sbs{display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin:1rem 0}
+  @media (max-width:640px){ .sbs{grid-template-columns:1fr} }
+  .leaf{border:1px solid var(--line); border-radius:8px; padding:.9rem 1rem; background:var(--card)}
+  .leaf h4{margin:0 0 .3rem; font-size:.95rem}
+  .leaf .role{font-size:.8rem; color:var(--muted)}
+</style>
+</head>
+<body>
+<main>
+  <h1>The QUL join map <span class="decided">Decided — render our own</span></h1>
+  <p class="sub">The pieces of the outside library of Qur'an data, how they clip together, where their
+  keys line up and where they do not, and what each one is for. This page holds no Qur'an text — every
+  column of Arabic script is named and counted, never shown.</p>
+
+  <div class="card">
+    <strong>Why this page exists.</strong> The app now holds a copy of parts of this library in a
+    store it controls, off the code and out of what ships. We decided what that copy is <em>for</em>:
+    to draw our own word-by-word page of the Qur'an and stand it beside the printed page the app
+    already shows, to check our page is right — and to feed the look-alike-verse work its numbers. This
+    is the picture that decision was made on. The reasons live in the decision record,
+    <a href="../decisions/qul-store-purpose.md">what the held copy is for</a>.
+  </div>
+
+  <div class="card">
+    <strong>Words a stranger would need:</strong>
+    <ul>
+      <li><b>Ayah</b> — a verse. There are 6,236 of them.</li>
+      <li><b>Mus'haf</b> — the printed Qur'an, 604 pages, 15 lines to a page.</li>
+      <li><b>Word-by-word</b> — the text broken into single words, each in its own place, the way a
+      page is really set.</li>
+      <li><b>Word id</b> — a single 1-to-83,668 number given to every word in reading order. This is
+      the backbone.</li>
+      <li><b>Verse key</b> — "surah:ayah", e.g. the 23rd ayah of surah 2 is written 2:23.</li>
+      <li><b>Root / lemma / stem</b> — three ways of naming the linguistic core a word is built from.</li>
+    </ul>
+  </div>
+
+  <h2>What ties these files together?</h2>
+  <p>One backbone, and three ways things hang off it. The backbone is the word id: every word in the
+  book, numbered 1 to 83,668 in reading order. The page plan hangs off it from above (each line owns a
+  run of word ids), the word text sits right on it, the linguistics hang off to one side (keyed by
+  where each word sits — surah, ayah, word), and everything about whole verses hangs off the other
+  side (keyed by the verse). The fonts sit underneath, drawing what the plan and the text place.</p>
+
+  <svg class="spine-svg" viewBox="0 0 900 300" role="img" aria-label="Word id spine with the page plan above, the word text on it, morphology to the left, the verse registry to the right, and fonts below">
+    <defs>
+      <marker id="ar" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="currentColor"/></marker>
+    </defs>
+    <rect x="300" y="130" width="300" height="42" rx="8" fill="var(--spine-soft)" stroke="var(--spine)" stroke-width="2"/>
+    <text x="450" y="151" text-anchor="middle" font-size="14" font-weight="700" fill="var(--ink)">Global word id  1 … 83,668</text>
+    <text x="450" y="166" text-anchor="middle" font-size="11" fill="var(--muted)">the word text runs on it; the page plan owns a range of it per line</text>
+    <g color="var(--spine)">
+      <rect x="330" y="30" width="240" height="46" rx="8" fill="var(--card)" stroke="var(--spine)" stroke-width="1.5"/>
+      <text x="450" y="49" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">PAGE PLAN — 15-line layout</text>
+      <text x="450" y="65" text-anchor="middle" font-size="11" fill="var(--muted)">9,046 lines · 604 pages</text>
+      <line x1="450" y1="76" x2="450" y2="128" stroke="var(--spine)" stroke-width="1.5" marker-end="url(#ar)"/>
+      <text x="470" y="106" font-size="10.5" fill="var(--muted)">word-id range per line</text>
+    </g>
+    <g color="var(--accent)">
+      <rect x="20" y="112" width="230" height="78" rx="8" fill="var(--card)" stroke="var(--accent)" stroke-width="1.5"/>
+      <text x="135" y="131" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">LINGUISTICS (per word)</text>
+      <text x="135" y="147" text-anchor="middle" font-size="11" fill="var(--muted)">root 50,298 · lemma 72,510</text>
+      <text x="135" y="161" text-anchor="middle" font-size="11" fill="var(--muted)">stem 77,427 · 0 broken links</text>
+      <text x="135" y="178" text-anchor="middle" font-size="10.5" fill="var(--accent)">joins by surah:ayah:word</text>
+      <line x1="250" y1="151" x2="298" y2="151" stroke="var(--accent)" stroke-width="1.5" marker-end="url(#ar)"/>
+    </g>
+    <g color="var(--spine)">
+      <rect x="650" y="112" width="230" height="78" rx="8" fill="var(--card)" stroke="var(--spine)" stroke-width="1.5"/>
+      <text x="765" y="131" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">VERSE REGISTRY</text>
+      <text x="765" y="147" text-anchor="middle" font-size="11" fill="var(--muted)">6,236 ayahs (ordinal 1..6236)</text>
+      <text x="765" y="161" text-anchor="middle" font-size="11" fill="var(--muted)">themes · topics · look-alikes</text>
+      <text x="765" y="178" text-anchor="middle" font-size="10.5" fill="var(--spine)">joins by verse key</text>
+      <line x1="650" y1="151" x2="602" y2="151" stroke="var(--spine)" stroke-width="1.5" marker-end="url(#ar)"/>
+    </g>
+    <g color="var(--warn)">
+      <rect x="330" y="228" width="240" height="52" rx="8" fill="var(--card)" stroke="var(--warn)" stroke-width="1.5"/>
+      <text x="450" y="248" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">FONTS (draw only)</text>
+      <text x="450" y="264" text-anchor="middle" font-size="11" fill="var(--muted)">surah-name · Nastaleeq word glyphs</text>
+      <line x1="450" y1="172" x2="450" y2="226" stroke="var(--warn)" stroke-width="1.5" marker-end="url(#ar)"/>
+    </g>
+  </svg>
+
+  <h2>How does drawing our own page check the printed one?</h2>
+  <p>The app shows the mus'haf as outlined artwork — the printed page drawn as shapes, with no letters
+  in it. That is what readers see, and it stays that way. The trouble is that the artwork looks like a
+  page whether or not it is the <em>right</em> page: if the wrong page were shown for a verse, or a line
+  break fell in the wrong place, nothing in the building tools would catch it. The only check today is a
+  person holding a printed copy against the screen.</p>
+  <p>The held copy gives the building tools a second witness. From the page plan and the word text we can
+  draw our own word-by-word page — the same 15 lines, the same words in the same places — and lay it
+  beside the artwork the app ships. If the two disagree about which verse a page carries or where a line
+  turns, the drawing catches it. The drawing never ships; it exists so the shipped page can be checked
+  by something other than a human with a printed mus'haf.</p>
+  <div class="sbs">
+    <div class="leaf">
+      <h4>What ships</h4>
+      <p class="role">The printed page, as outlined artwork — no letters, the reader's view. Unchanged.</p>
+    </div>
+    <div class="leaf">
+      <h4>What checks it</h4>
+      <p class="role">Our own page, drawn word-by-word from the held copy, stood beside it in the building
+      tools. Disagreements are registration mistakes to fix.</p>
+    </div>
+  </div>
+  <div class="callout ok">
+    <b>This is a proofing tool, the way publishers proof a new edition</b> — laid page-for-page beside a
+    trusted one. It is not a second thing readers see, and it does not put Qur'an text into what ships.
+  </div>
+
+  <h2>Where do the keys NOT line up?</h2>
+  <div class="callout ok">
+    <b>Word id and the page plan: perfect.</b> Both run 1..83,668 with no gaps. Drawing a page is just
+    "pull the words whose id falls in this line's range."
+  </div>
+  <div class="callout">
+    <b>The linguistics are thinner than the text, on purpose.</b> Of 83,668 words, a root is known for
+    50,298 (60%), a lemma for 72,510 (87%), a stem for 77,427 (93%). Not every word is built on a
+    triliteral root, so this is language, not damage. Every linguistics row points at a real word —
+    <b>zero</b> dangling pointers.
+  </div>
+  <div class="callout">
+    <b>Two "look-alike verse" sets, counting different things.</b> One is 3,552 scored verse-to-verse
+    pairs over 1,162 source verses. The other is phrase-anchored: 814 phrases spread across 2,232
+    verses. They agree in spirit but are not the same measurement — the pairwise-scored set is the
+    stronger independent cross-check for the look-alike work the app already ships.
+  </div>
+
+  <h2>What is in each file, and who owns it?</h2>
+  <p class="legend">Text-bearing = holds Arabic script (described here, never shown). The licence column
+  reflects what the resource page itself displays.</p>
+  <div class="scroll">
+  <table>
+    <thead><tr><th>File</th><th>Holds</th><th>Rows</th><th>Join key</th><th>Text?</th><th>Resource</th><th>Licence shown</th></tr></thead>
+    <tbody>
+      <tr><td>digital-khatt-15-lines.db</td><td>Page plan: word→line→page</td><td class="num">9,046</td><td>word id; page,line</td><td>no</td><td>Mushaf layout id 21</td><td class="tag-warn">none shown</td></tr>
+      <tr><td>qpc-v4.db</td><td>Word text (V4)</td><td class="num">83,668</td><td>word id; surah:ayah:word</td><td>yes</td><td>Quran script id 47</td><td class="tag-warn">none shown</td></tr>
+      <tr><td>qpc-hafs-word-by-word.json</td><td>Word text (Hafs, JSON)</td><td class="num">83,668</td><td>surah:ayah:word</td><td>yes</td><td>Quran script</td><td class="tag-warn">none shown</td></tr>
+      <tr><td>word-root.db</td><td>Word→root + root list</td><td class="num">50,298 / 1,642</td><td>surah:ayah:word</td><td>yes</td><td>Morphology</td><td class="tag-warn">none shown</td></tr>
+      <tr><td>word-lemma.db</td><td>Word→lemma + lemma list</td><td class="num">72,510 / 4,817</td><td>surah:ayah:word</td><td>yes</td><td>Morphology</td><td class="tag-warn">none shown</td></tr>
+      <tr><td>word-stem.db</td><td>Word→stem + stem list</td><td class="num">77,427 / 12,113</td><td>surah:ayah:word</td><td>yes</td><td>Morphology</td><td class="tag-warn">none shown</td></tr>
+      <tr><td>ayah-root.db</td><td>Per-ayah roots</td><td class="num">6,214</td><td>verse key</td><td>yes</td><td>Morphology</td><td class="tag-warn">none shown</td></tr>
+      <tr><td>ayah-lemma.db</td><td>Per-ayah lemmas</td><td class="num">6,216</td><td>verse key</td><td>yes</td><td>Morphology</td><td class="tag-warn">none shown</td></tr>
+      <tr><td>ayah-stem.db</td><td>Per-ayah stems</td><td class="num">6,236</td><td>verse key</td><td>yes</td><td>Morphology</td><td class="tag-warn">none shown</td></tr>
+      <tr><td>ayah-themes.db</td><td>Theme label + ayah range</td><td class="num">2,098</td><td>surah + ayah range</td><td>no</td><td>Ayah theme</td><td class="tag-warn">none shown</td></tr>
+      <tr><td>topics.db</td><td>Topic list + ayah lists</td><td class="num">2,512</td><td>topic id; verse-key list</td><td>yes</td><td>Topics &amp; concepts</td><td class="tag-warn">none shown</td></tr>
+      <tr><td>matching-ayah.db</td><td>Scored look-alike pairs</td><td class="num">3,552</td><td>verse key + matched key</td><td>no</td><td>Similar ayahs</td><td class="tag-warn">none shown</td></tr>
+      <tr><td>mutashabihat (zip→2 json)</td><td>Repeated-phrase set</td><td class="num">814 / 2,232</td><td>verse key + word range</td><td>yes</td><td>Mutashabihat</td><td class="tag-warn">none shown</td></tr>
+      <tr><td>surah-info-en.db</td><td>English surah write-ups</td><td class="num">114</td><td>surah number</td><td>mostly English</td><td>Surah information</td><td class="tag-warn">none shown</td></tr>
+      <tr><td>quran-metadata-ayah.sqlite</td><td>Verse registry (backbone)</td><td class="num">6,236</td><td>ordinal; verse key</td><td>yes</td><td>Quran metadata</td><td class="tag-warn">none shown</td></tr>
+      <tr><td>quran-metadata-surah-name.sqlite</td><td>Surah registry</td><td class="num">114</td><td>surah number</td><td>yes</td><td>Quran metadata</td><td class="tag-warn">none shown</td></tr>
+      <tr><td>quran-metadata-hizb.sqlite</td><td>Hizb ranges</td><td class="num">60</td><td>verse-key range</td><td>no</td><td>Quran metadata</td><td class="tag-warn">none shown</td></tr>
+      <tr><td>quran-metadata-rub.sqlite</td><td>Rub ranges</td><td class="num">240</td><td>verse-key range</td><td>no</td><td>Quran metadata</td><td class="tag-warn">none shown</td></tr>
+      <tr><td>quran-metadata-manzil.sqlite</td><td>Manzil ranges</td><td class="num">7</td><td>verse-key range</td><td>no</td><td>Quran metadata</td><td class="tag-warn">none shown</td></tr>
+      <tr><td>quran-metadata-sajda.sqlite</td><td>Prostration ayahs</td><td class="num">15</td><td>verse key</td><td>no</td><td>Quran metadata</td><td class="tag-warn">none shown</td></tr>
+      <tr><td>quran-metadata-juz.json</td><td>Juz ranges</td><td class="num">30</td><td>verse-key range</td><td>no</td><td>Quran metadata</td><td class="tag-warn">none shown</td></tr>
+      <tr><td>quran-metadata-ruku.json</td><td>Ruku ranges</td><td class="num">~558</td><td>verse-key range</td><td>no</td><td>Quran metadata</td><td class="tag-warn">none shown</td></tr>
+      <tr><td>surah-name-v4.ttf</td><td>Surah-name font</td><td class="num">116 glyphs</td><td>draws layout surah lines</td><td>asset</td><td>Font id 457</td><td class="tag-warn">none shown</td></tr>
+      <tr><td>KFGQPCNastaleeq-Regular.ttf</td><td>Nastaleeq text font</td><td class="num">—</td><td>draws word glyphs</td><td>asset</td><td>Font id 462</td><td class="tag-warn">none shown</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <div class="callout">
+    <b>The licence reality:</b> the library prints <em>no</em> licence label on any of these resource
+    pages. Its own guidance says licensing is per-resource and varies (public domain / attribution /
+    restricted) and tells you to check each originator's own terms. Three originators to clear before
+    anything they made may be <em>held</em>, all attribution-bearing and some commercial-restricted
+    upstream: <b>King Fahd Complex</b> (the word text and fonts), <b>DigitalKhatt / Dr. Amin Anane</b>
+    (the page plan), <b>Dr. Kais Dukes / Tanzil</b> (the linguistics and base text). Until an item's
+    terms are read, that item is not held — the drawing is built only from what has cleared.
+  </div>
+
+  <h2>Do we have enough to build?</h2>
+  <div class="scroll">
+  <table>
+    <thead><tr><th>Goal</th><th>Verdict</th><th>Evidence</th></tr></thead>
+    <tbody>
+      <tr><td>Draw our own word-by-word page to check the printed one</td><td class="tag-ok">YES</td><td>The page plan's ranges match the text's word ids exactly, 1..83,668; 604 pages; both fonts present. What is missing is licence clearance, not data.</td></tr>
+      <tr><td>Per-word linguistics (root / lemma / stem)</td><td class="tag-part">PARTIAL</td><td>Cleanly joinable, 0 broken links, but coverage is 60% / 87% / 93% by nature — not every word has a root.</td></tr>
+      <tr><td>Verse themes and topics</td><td class="tag-ok">YES*</td><td>2,098 theme ranges + 2,512 topics cover the book; needs light parsing (themes are ranges, topic verses are lists).</td></tr>
+      <tr><td>An independent second opinion on verse similarity</td><td class="tag-ok">YES</td><td>The scored-pair set (3,552 pairs) comes from a different method than the app's phrase-based set — a real cross-check.</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <p class="legend">This page is served from the app's own site and contains zero Qur'an codepoints —
+  every Arabic column above is named and counted, never shown. The held copy it describes lives in a
+  store off the code and out of what ships; see <a href="../decisions/qul-store-purpose.md">what the held
+  copy is for</a> and its parent, <a href="../decisions/qul-reliance.md">copy or only measure?</a></p>
+</main>
+</body>
+</html>

@@ -6,8 +6,15 @@
  * 2026-09-07 and re-decided **D**: a copy of the outside library's page positions and
  * word text may be *held* in a hosted database this project controls — off the
  * repository and off the shipped bundle — for the building tools to read. This script
- * is that hold. It reads the same gitignored `.cache/` the ruler probe reads, and
- * upserts into the Supabase schema in `supabase/migrations/`.
+ * is that hold. It reads a gitignored `.cache/` and upserts into the Supabase schema in
+ * `supabase/migrations/`.
+ *
+ * WHAT V4 MEANS HERE. `qul-store-purpose` (docs/decisions/qul-store-purpose.md) settled
+ * what the held copy is for: draw our own word-by-word page and stand it beside the
+ * shipped print to check our pages. That page is drawn from the V4 pieces — the
+ * digital-khatt 15-line layout (library id 21) and the qpc-v4 word text (library id 47) —
+ * NOT the V2 ruler (library id 10) the probe measures against. The two are different
+ * resources with different caches; this script holds the V4 pair.
  *
  * WHAT CROSSES WHERE. Nothing this script writes touches the repository. The page map
  * is numbers only. The word text is text-bearing and flows cache -> database directly,
@@ -15,13 +22,16 @@
  * carries no Qur'an text: `gate:scripture` / `gate:notext` stay green.
  *
  * TWO HALVES, ONE GATED.
- *   --pages   the KFGQPC QCF V2 (1421H) page layout, library id 10 — positions only.
+ *   --pages   the digital-khatt 15-line page layout, library id 21 — positions only.
  *             Safe to run whenever its cache is present.
- *   --words   the per-word text, keyed by the same global word id. TEXT-BEARING, so it
- *             refuses to run until the source resource's licence has been read and
- *             recorded (the ledger check `qul-rulers-terms-and-text-free`) AND you pass
- *             --licence-cleared to acknowledge it. Holding text you have not cleared is
- *             exactly what option D forbids.
+ *   --words   the per-word qpc-v4 text (library id 47), keyed by the same global word id.
+ *             TEXT-BEARING, so it refuses to run until the source resource's licence has
+ *             been read and recorded (the ledger check `qul-rulers-terms-and-text-free`)
+ *             AND you pass --licence-cleared to acknowledge it. Holding text you have not
+ *             cleared is exactly what option D forbids. The same gate stands in front of
+ *             every other held item that is text, a font, or morphology — the fonts that
+ *             draw this text (ids 457/462) and the per-word root/lemma/stem — so any of
+ *             those added here later routes through this same licence check, never around it.
  *
  * RUN.
  *   node packages/etl/scripts/ingest-qul-supabase.mjs --pages --dry-run   # read cache, count, touch no db
@@ -49,9 +59,11 @@ const DO_WORDS = argv.has("--words");
 const LICENCE_CLEARED = argv.has("--licence-cleared");
 
 const CACHE = {
-  // shared with probe-qul-rulers.mjs — the sanctioned ruler cache, gitignored
-  layout: join(ETL, "data/pages/.cache/qul-layout10/qpc-v2-15-lines.db"),
-  // text-bearing word export, shaped as an array of {word_id, surah, ayah, position, text}
+  // the V4 self-render layout (library id 21), gitignored — distinct from the probe's
+  // V2 ruler cache (library id 10). Populate it with the leverage-qul skill.
+  layout: join(ETL, "data/pages/.cache/qul-layout21/digital-khatt-15-lines.db"),
+  // text-bearing qpc-v4 word export (library id 47), shaped as an array of
+  // {word_id, surah, ayah, position, text}
   words: join(ETL, "data/qul/.cache/qul-words/words.json"),
 };
 const LEDGER = join(REPO, "docs/validation/ledger.json");
@@ -74,7 +86,7 @@ function psqlExec(sql) {
   });
 }
 
-/* ── the page map — positions only, library id 10 ─────────────────────────── */
+/* ── the page map — positions only, library id 21 (digital-khatt V4) ──────── */
 function ingestPages() {
   if (!existsSync(CACHE.layout)) {
     console.log("pages — layout cache absent; skipped. Populate it with the leverage-qul skill.");
