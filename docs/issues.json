@@ -2045,10 +2045,13 @@
         "file": "docs/PLAN.md",
         "item": "21"
       },
-      "status": "open",
+      "status": "blocked",
       "severity": "question",
-      "owner": "user",
-      "note": "Owner said 2026-09-09 what it is FOR: reader interaction, marking at the level of a single harakah — (1) a hafiz pinning their own common or personal recitation mistakes finer than a word, and (2) flagging where the printed mus'haf, or our rendering of it, has an issue at one mark. Both are the expensive draw-it-ourselves route, not a by-kind filter. The crux to settle before any options are drawn: nothing today exposes a single harakah as an addressable, positioned thing — the app's print is outlined paths with no character structure, and the library's per-page font bakes each word into one glyph, so neither can point at one mark. The finest geometry the app ships is per-word (the word boxes). Per-harakah tap targets need per-mark geometry over the print, which does not exist yet; the library's plain Unicode word text and Unicode Hafs face (resource 245, held Qur'an text) address a harakah in the character stream but not at a position on the printed page. So step one is a feasibility probe — can a harakah be positioned on our own print at all? — then a decision page on how a reader picks one and what it costs. Fetch nothing held until the feasibility answer is in hand."
+      "owner": "agent",
+      "note": "Owner said 2026-09-09 what it is FOR: reader interaction at one mark — a hafiz pinning their own common or personal recitation mistakes finer than a word, and flagging where the printed mus'haf, or our rendering of it, has an issue at one mark. Feasibility probed the same day. Per-harakah addressing on our own print is NOT reachable today: the floor is per-word, and only pause signs (which the print counts as words) are finer. BUT the route to it needs no new held scripture — the per-mark ink positions for all 26 diacritic kinds (326,515 rectangles) are already derived from the gitignored ligature cache (see the sub-word-marks and mark-registration design records). Two things stand between that and a tappable harakah: the positions are about one unit off and the correction is not yet applied (mark-registration), and they are not yet shipped as an asset — mark-granularity already commits to the letter/harakah anchor 'when the geometry exists', and the mistake-marking feature (decided option D, not yet built) allows a single mark as an anchor. Both blockers are the sibling branch's live mark-registration and mark-nudge work; do NOT touch them from the qul-page-diff worktree. So the path is route 1: ship the corrected per-mark geometry, then add a harakah anchor to the marking feature. Route 2 — hold the library's plain Unicode word text and Unicode Hafs face (resource 245) and draw it over the print ourselves — gives true per-character addressing but is the expensive route and pulls in more held scripture; unnecessary given route 1. Related: mistake-marking, mark-granularity, mark-registration. Fetch nothing held.",
+      "blockedBy": [
+        "the per-mark ink geometry being corrected and shipped as an asset (the sibling branch's mark-registration and mark-granularity work)"
+      ]
     }
   ]
 }
