@@ -477,3 +477,253 @@ export async function loadWordBoxes(page: number, base = "/"): Promise<WordBoxes
   if (!r.ok) return null;
   return (await r.json()) as WordBoxes;
 }
+
+/** One store word, measured where it lands on the print. Box is in viewBox units. */
+export type StoreWordBox = {
+  /** the word's own address, `"surah:ayah:position"` */
+  word: string;
+  /** the ayah it belongs to, `"surah:ayah"` — the store's word→ayah opinion */
+  ayah: string;
+  /** the glyph's ink box, in the print's viewBox coordinates */
+  box: { x: number; y: number; w: number; h: number };
+};
+
+/**
+ * Measure every store word's box on the drawn, justified page.
+ *
+ * Each word is one <tspan> of one code point, so the browser has already laid it
+ * out — spacing justification and right-to-left order included — and reports the
+ * glyph's ink box in viewBox units through `getExtentOfChar`. Spaces sit between
+ * words, so the character index of word i on its line is 2i. The SVG must be in
+ * the document and the face loaded (`fontReady`), and `calibrateFontSize` should
+ * have run first so the size is the print's; this is the "later pass" that
+ * `buildStorePageSvg`'s data-line/data-word attributes exist for.
+ *
+ * Returns one entry per ayah word actually drawn (surah-name and basmala lines
+ * carry no words and no tappable ayah, so they contribute none).
+ */
+export function measureStoreWordBoxes(svg: SVGSVGElement): StoreWordBox[] {
+  const out: StoreWordBox[] = [];
+  for (const text of svg.querySelectorAll<SVGTextElement>('text[data-line-type="ayah"]')) {
+    const spans = [...text.querySelectorAll<SVGTSpanElement>("tspan[data-word]")];
+    spans.forEach((span, i) => {
+      const addr = span.getAttribute("data-word");
+      if (!addr) return;
+      // words joined by a single space → word i is character 2i on the line
+      const idx = i * 2;
+      let r: DOMRect | { x: number; y: number; width: number; height: number };
+      try {
+        r = text.getExtentOfChar(idx);
+      } catch {
+        return;
+      }
+      if (!(r.width > 0) || !(r.height > 0)) return;
+      const parts = addr.split(":");
+      out.push({
+        word: addr,
+        ayah: `${parts[0]}:${parts[1]}`,
+        box: { x: r.x, y: r.y, w: r.width, h: r.height },
+      });
+    });
+  }
+  return out;
+}
+
+/*
+ * WHERE A TAP LANDS. The app makes each ayah tappable by a shape in the page
+ * asset — one <path class="ayahPolygon"> per ayah, in the same viewBox units as
+ * the word boxes above. Most are a stack of full-line rectangles, but some (the
+ * closing ayahs of al-Fatiha, a centred last line) are irregular polygons with
+ * slanted edges. So this reads the shape as what it is — a set of straight-sided
+ * rings — and asks the browser's own hit-test question of a store word's box
+ * centre: does the word the store places for ayah X land where the app lets a
+ * reader tap X — on a neighbour, or on nothing? The rings are straight-line only
+ * (measured across all 6,236 shapes: no curves), so this point-in-polygon test
+ * is exact and agrees with the app's isPointInFill, while staying pure DOM-free
+ * JavaScript that also runs in a whole-book sweep by tool.
+ */
+type Point = { x: number; y: number };
+type Ring = Point[];
+export type TapShape = { ayah: string; rings: Ring[] };
+
+/** Parse a straight-line path (M/L/H/V and relatives, Z) into its closed rings. */
+export function polygonsFromPath(d: string): Ring[] {
+  const tokens = d.match(/[MmLlHhVvZz]|-?\d*\.?\d+(?:e-?\d+)?/g);
+  if (!tokens) return [];
+  const rings: Ring[] = [];
+  let ring: Ring = [];
+  let cx = 0,
+    cy = 0,
+    sx = 0,
+    sy = 0;
+  let cmd = "";
+  let i = 0;
+  const num = () => parseFloat(tokens[i++] as string);
+  const isCmd = (s: string) => /^[MmLlHhVvZz]$/.test(s);
+  const flush = () => {
+    if (ring.length >= 3) rings.push(ring);
+    ring = [];
+  };
+  while (i < tokens.length) {
+    const tk = tokens[i] as string;
+    if (isCmd(tk)) cmd = tokens[i++] as string;
+    switch (cmd) {
+      case "M":
+        flush();
+        cx = num();
+        cy = num();
+        sx = cx;
+        sy = cy;
+        ring.push({ x: cx, y: cy });
+        cmd = "L";
+        break;
+      case "m":
+        flush();
+        cx += num();
+        cy += num();
+        sx = cx;
+        sy = cy;
+        ring.push({ x: cx, y: cy });
+        cmd = "l";
+        break;
+      case "L":
+        cx = num();
+        cy = num();
+        ring.push({ x: cx, y: cy });
+        break;
+      case "l":
+        cx += num();
+        cy += num();
+        ring.push({ x: cx, y: cy });
+        break;
+      case "H":
+        cx = num();
+        ring.push({ x: cx, y: cy });
+        break;
+      case "h":
+        cx += num();
+        ring.push({ x: cx, y: cy });
+        break;
+      case "V":
+        cy = num();
+        ring.push({ x: cx, y: cy });
+        break;
+      case "v":
+        cy += num();
+        ring.push({ x: cx, y: cy });
+        break;
+      case "Z":
+      case "z":
+        cx = sx;
+        cy = sy;
+        flush();
+        cmd = "";
+        break;
+      default:
+        i++;
+    }
+  }
+  flush();
+  return rings;
+}
+
+/** Read the ayah tap shapes out of a page asset's SVG source. */
+export function tapShapesFromSvgText(svgText: string): TapShape[] {
+  const doc = new DOMParser().parseFromString(svgText, "image/svg+xml");
+  const out: TapShape[] = [];
+  for (const path of doc.querySelectorAll("path.ayahPolygon")) {
+    const surah = path.getAttribute("surah");
+    const ayah = path.getAttribute("ayah");
+    const d = path.getAttribute("d");
+    if (!surah || !ayah || !d) continue;
+    const rings = polygonsFromPath(d);
+    if (!rings.length) continue;
+    out.push({ ayah: `${surah}:${ayah}`, rings });
+  }
+  return out;
+}
+
+/** The app's tap shapes for a page, from the very asset that draws them. */
+export async function loadTapShapes(page: number, base = "/"): Promise<TapShape[]> {
+  const r = await fetch(`${base}assets/pages/${EDITION}/${page}.svg`);
+  if (!r.ok) throw new Error(`page svg HTTP ${r.status}`);
+  return tapShapesFromSvgText(await r.text());
+}
+
+/** One store word that did not land in its own ayah's tap shape. */
+export type Mislanded = StoreWordBox & {
+  /** the ayah whose tap shape it fell in, or null when it fell on none */
+  landedIn: string | null;
+};
+
+/** The per-page verdict: how many store words tap their own ayah, and which do not. */
+export type PlacementReport = {
+  /** store words measured (surah-name and basmala lines carry none) */
+  total: number;
+  /** words whose box centre falls in their own ayah's tap shape */
+  ok: number;
+  /** words whose centre falls in a *different* ayah's shape — a crossed tap */
+  inNeighbour: Mislanded[];
+  /** words whose centre falls in no ayah shape at all */
+  outside: Mislanded[];
+};
+
+function centreOf(b: { x: number; y: number; w: number; h: number }): Point {
+  return { x: b.x + b.w / 2, y: b.y + b.h / 2 };
+}
+
+/** Even-odd ray cast, the same rule a browser fill hit-test uses on a ring. */
+function inRing(p: Point, ring: Ring): boolean {
+  let inside = false;
+  for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+    const a = ring[i] as Point;
+    const b = ring[j] as Point;
+    if (a.y > p.y !== b.y > p.y && p.x < ((b.x - a.x) * (p.y - a.y)) / (b.y - a.y) + a.x) {
+      inside = !inside;
+    }
+  }
+  return inside;
+}
+
+/** In the shape if in any of its rings — the union the app makes tappable. */
+function inShape(p: Point, s: TapShape): boolean {
+  return s.rings.some((ring) => inRing(p, ring));
+}
+
+/**
+ * Classify each measured store word by where its box centre lands among the
+ * app's tap shapes: in its own ayah (counted), in another ayah (a crossed tap,
+ * recorded with which), or in none (recorded).
+ *
+ * Pure and framework-free, so the same check runs in the workbench, in the app
+ * overlay, and in a whole-book sweep by tool. It says nothing about whether the
+ * store's line pairing was trustworthy — a page placed by fit (print rows !=
+ * store lines) will report placement guesses, not store findings, so the caller
+ * must weigh `geom.rows === geom.ayahLines` before trusting a non-zero count.
+ */
+export function classifyPlacement(boxes: StoreWordBox[], shapes: TapShape[]): PlacementReport {
+  const byAyah = new Map<string, TapShape>();
+  for (const s of shapes) byAyah.set(s.ayah, s);
+  const inNeighbour: Mislanded[] = [];
+  const outside: Mislanded[] = [];
+  let ok = 0;
+  for (const b of boxes) {
+    const c = centreOf(b.box);
+    const own = byAyah.get(b.ayah);
+    if (own && inShape(c, own)) {
+      ok++;
+      continue;
+    }
+    let landed: string | null = null;
+    for (const s of shapes) {
+      if (s.ayah === b.ayah) continue;
+      if (inShape(c, s)) {
+        landed = s.ayah;
+        break;
+      }
+    }
+    if (landed) inNeighbour.push({ ...b, landedIn: landed });
+    else outside.push({ ...b, landedIn: null });
+  }
+  return { total: boxes.length, ok, inNeighbour, outside };
+}

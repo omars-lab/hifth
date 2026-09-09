@@ -1,13 +1,18 @@
 import { useEffect, useMemo, useState } from "react";
 import { StorePageSvg } from "./StorePageSvg";
 import {
+  classifyPlacement,
   EDITION,
   loadFixture,
+  loadTapShapes,
   loadWordBoxes,
   parseViewBox,
   type Fixture,
   type Line,
   type PageGeometry,
+  type PlacementReport,
+  type StoreWordBox,
+  type TapShape,
   type ViewBox,
   type Word,
   type WordBoxes,
@@ -122,6 +127,8 @@ export function QulDiff() {
   const [view, setView] = useState<View>(viewFromUrl);
   const [load, setLoad] = useState<Load>({ state: "loading" });
   const [geom, setGeom] = useState<PageGeometry | null>(null);
+  const [boxes, setBoxes] = useState<StoreWordBox[]>([]);
+  const [shapes, setShapes] = useState<TapShape[]>([]);
 
   useEffect(() => {
     const url = new URL(window.location.href);
@@ -134,6 +141,7 @@ export function QulDiff() {
     let live = true;
     setLoad({ state: "loading" });
     setGeom(null);
+    setBoxes([]);
     Promise.all([loadFixture(page), loadWordBoxes(page), viewBoxOf(page)])
       .then(([fixture, boxes, viewBox]) => {
         if (!live) return;
@@ -147,6 +155,28 @@ export function QulDiff() {
       live = false;
     };
   }, [page]);
+
+  // The app's tap shapes for this page, read from the very asset that draws them,
+  // so a store word can be asked whether it lands where a reader can tap its ayah.
+  useEffect(() => {
+    let live = true;
+    setShapes([]);
+    loadTapShapes(page)
+      .then((s) => {
+        if (live) setShapes(s);
+      })
+      .catch(() => {
+        if (live) setShapes([]);
+      });
+    return () => {
+      live = false;
+    };
+  }, [page]);
+
+  const report = useMemo<PlacementReport | null>(
+    () => (boxes.length && shapes.length ? classifyPlacement(boxes, shapes) : null),
+    [boxes, shapes],
+  );
 
   const print = (
     <img
@@ -187,6 +217,7 @@ export function QulDiff() {
                     viewBox={load.viewBox}
                     page={page}
                     onGeometry={setGeom}
+                    onWordBoxes={setBoxes}
                   />
                 </div>
               </div>
@@ -216,6 +247,7 @@ export function QulDiff() {
                     fill={OVERLAY_INK}
                     style={S.overlay}
                     onGeometry={setGeom}
+                    onWordBoxes={setBoxes}
                   />
                 )}
               </div>
@@ -233,6 +265,19 @@ export function QulDiff() {
         </h2>
         {load.state === "ok" ? (
           <StoreLines lines={[...load.fixture.lines].sort((a, b) => a.line_number - b.line_number)} geom={geom} />
+        ) : (
+          <StoreStatus load={load} page={page} />
+        )}
+      </section>
+      <section style={S.structure}>
+        <h2 style={S.paneTitle}>
+          Where a tap lands{" "}
+          <span style={S.paneSub}>
+            does each store word sit where the app lets a reader tap its ayah?
+          </span>
+        </h2>
+        {load.state === "ok" ? (
+          <TapLanding report={report} geom={geom} />
         ) : (
           <StoreStatus load={load} page={page} />
         )}
@@ -323,6 +368,64 @@ function StoreStatus({ load, page }: { load: Load; page: number }) {
     return <div style={S.msg}>Could not read the fixture: {load.message}</div>;
   if (load.state === "absent") return <Absent page={page} />;
   return null;
+}
+
+function TapLanding({
+  report,
+  geom,
+}: {
+  report: PlacementReport | null;
+  geom: PageGeometry | null;
+}) {
+  if (!report) return <p style={S.muted}>Measuring the store's words against the tap shapes…</p>;
+  const paired = geom ? geom.rows === geom.ayahLines : false;
+  const crossed = report.inNeighbour.length;
+  const off = report.outside.length;
+  const clean = crossed === 0 && off === 0;
+  return (
+    <div>
+      <div style={S.summary}>
+        <span>
+          <strong>{report.ok}</strong> of <strong>{report.total}</strong> words tap their own ayah
+        </span>
+        {crossed > 0 && (
+          <span>
+            <strong style={{ color: "#b4231b" }}>{crossed}</strong> land on a neighbour
+          </span>
+        )}
+        {off > 0 && (
+          <span>
+            <strong style={{ color: "#b4231b" }}>{off}</strong> land on no ayah
+          </span>
+        )}
+        {clean && <span style={{ color: "#1f7a44" }}>every word taps its own ayah</span>}
+      </div>
+      {!paired && (
+        <p style={S.tapWarn}>
+          This page's lines were placed by fit (print rows {geom?.rows ?? "?"} vs store lines{" "}
+          {geom?.ayahLines ?? "?"}), so a miss below is a guess about where the lines are, not a
+          store finding. Trust the count only where the two agree.
+        </p>
+      )}
+      {!clean && (
+        <ul style={S.tapList}>
+          {report.inNeighbour.map((w) => (
+            <li key={w.word}>
+              <span dir="ltr" style={S.tapWord}>{w.word}</span> — the store places it in ayah{" "}
+              <strong dir="ltr">{w.ayah}</strong>, but its box taps{" "}
+              <strong dir="ltr">{w.landedIn}</strong>
+            </li>
+          ))}
+          {report.outside.map((w) => (
+            <li key={w.word}>
+              <span dir="ltr" style={S.tapWord}>{w.word}</span> — the store places it in ayah{" "}
+              <strong dir="ltr">{w.ayah}</strong>, but its box taps no ayah shape
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
 }
 
 function StoreLines({ lines, geom }: { lines: Line[]; geom: PageGeometry | null }) {
@@ -571,6 +674,33 @@ const S: Record<string, React.CSSProperties> = {
     fontSize: 13,
   },
   lines: { listStyle: "none", margin: 0, padding: 0, display: "grid", gap: 4 },
+  muted: { opacity: 0.6, fontSize: 13, margin: "6px 0" },
+  tapWarn: {
+    margin: "0 0 10px",
+    padding: "8px 10px",
+    background: "#fdf3e7",
+    border: `1px solid #e7cfa6`,
+    borderRadius: 8,
+    fontSize: 12.5,
+    lineHeight: 1.5,
+  },
+  tapList: {
+    listStyle: "none",
+    margin: 0,
+    padding: 0,
+    display: "grid",
+    gap: 4,
+    fontSize: 13,
+    lineHeight: 1.5,
+  },
+  tapWord: {
+    fontVariantNumeric: "tabular-nums",
+    fontWeight: 600,
+    background: PAPER,
+    border: `1px solid ${EDGE}`,
+    borderRadius: 5,
+    padding: "0 5px",
+  },
   lineRow: {
     display: "grid",
     gridTemplateColumns: "56px 1fr 72px",
