@@ -114,9 +114,9 @@ Someone memorising the Qur'an, holding a phone, usually mid-revision. Every gest
 |---|---|
 | happens in | [`packages/core/src/words.ts:120`](../packages/core/src/words.ts#L120) — `class WordIndex` |
 | happens in | [`packages/core/src/gestures.ts:204`](../packages/core/src/gestures.ts#L204) — `heldIntent` |
-| happens in | [`apps/web/src/components/PageStage.tsx:1740`](../apps/web/src/components/PageStage.tsx#L1740) — `applyWords` |
+| happens in | [`apps/web/src/components/PageStage.tsx:1743`](../apps/web/src/components/PageStage.tsx#L1743) — `applyWords` |
 | happens in | [`packages/core/src/adjacency.ts:384`](../packages/core/src/adjacency.ts#L384) — `refineByWords` |
-| happens in | [`apps/web/src/App.tsx:965`](../apps/web/src/App.tsx#L965) — `const handleSelectWords` |
+| happens in | [`apps/web/src/App.tsx:1006`](../apps/web/src/App.tsx#L1006) — `const handleSelectWords` |
 | proven by | [`apps/web/e2e/word.spec.ts:109`](../apps/web/e2e/word.spec.ts#L109) — “a hold inside the selected ayah drops to words; a drag extends the run” |
 | proven by | [`apps/web/e2e/word.spec.ts:151`](../apps/web/e2e/word.spec.ts#L151) — “Escape climbs back to the whole ayah, not out of the selection” |
 | proven by | [`apps/web/e2e/word.spec.ts:177`](../apps/web/e2e/word.spec.ts#L177) — “Enter again descends to words; ← carries the run and Shift+← grows it” |
@@ -135,7 +135,7 @@ Someone memorising the Qur'an, holding a phone, usually mid-revision. Every gest
 |---|---|
 | happens in | [`packages/core/src/adjacency.ts:420`](../packages/core/src/adjacency.ts#L420) — `class Adjacency` |
 | happens in | [`packages/core/src/adjacency.ts:155`](../packages/core/src/adjacency.ts#L155) — `bucketEdges` |
-| happens in | [`apps/web/src/components/PageStage.tsx:1397`](../apps/web/src/components/PageStage.tsx#L1397) — `async navigateTo` |
+| happens in | [`apps/web/src/components/PageStage.tsx:1400`](../apps/web/src/components/PageStage.tsx#L1400) — `async navigateTo` |
 | proven by | [`apps/web/e2e/hop.spec.ts:8`](../apps/web/e2e/hop.spec.ts#L8) — “tap 2:48 → rail → popover → cross-page hop to 2:123 → bead back” |
 | proven by | [`apps/web/e2e/hop.spec.ts:55`](../apps/web/e2e/hop.spec.ts#L55) — “un-vendored hop targets are surfaced but disabled (no ghost pages)” |
 
@@ -237,7 +237,7 @@ Someone memorising the Qur'an, holding a phone, usually mid-revision. Every gest
 
 | | |
 |---|---|
-| happens in | [`apps/web/src/components/PageSlider.tsx:123`](../apps/web/src/components/PageSlider.tsx#L123) — `PageSlider` |
+| happens in | [`apps/web/src/components/PageSlider.tsx:141`](../apps/web/src/components/PageSlider.tsx#L141) — `PageSlider` |
 | happens in | [`packages/core/src/pages.ts:36`](../packages/core/src/pages.ts#L36) — `nearestPage` |
 | proven by | [`apps/web/e2e/pagebar.spec.ts:31`](../apps/web/e2e/pagebar.spec.ts#L31) — “spans the printed mus'haf and says how much of it is here” |
 | proven by | [`apps/web/e2e/pagebar.spec.ts:105`](../apps/web/e2e/pagebar.spec.ts#L105) — “letting go in the gap lands on the nearest page we have, and says so” |
@@ -297,7 +297,7 @@ Someone memorising the Qur'an, holding a phone, usually mid-revision. Every gest
 | | |
 |---|---|
 | happens in | [`apps/web/src/components/PageSpread.tsx:152`](../apps/web/src/components/PageSpread.tsx#L152) — `PageSpread` |
-| happens in | [`apps/web/src/i18n.tsx:488`](../apps/web/src/i18n.tsx#L488) — `facingAbsent` |
+| happens in | [`apps/web/src/i18n.tsx:498`](../apps/web/src/i18n.tsx#L498) — `facingAbsent` |
 | proven by | [`apps/web/e2e/desktop.spec.ts:283`](../apps/web/e2e/desktop.spec.ts#L283) — “announces the missing facing page instead of showing blank paper” |
 | proven by | [`apps/web/src/components/PageSpread.test.tsx:82`](../apps/web/src/components/PageSpread.test.tsx#L82) — “draws the missing facing page as absent, not as blank paper” |
 | proven by | [`apps/web/src/components/PageSpread.test.tsx:133`](../apps/web/src/components/PageSpread.test.tsx#L133) — “leaves the far side blank and unlabelled at the end of an odd-length print” |
@@ -425,7 +425,7 @@ Someone memorising the Qur'an, holding a phone, usually mid-revision. Every gest
 | | |
 |---|---|
 | happens in | [`apps/web/src/lang.ts:121`](../apps/web/src/lang.ts#L121) — `detectLang` |
-| happens in | [`apps/web/src/i18n.tsx:917`](../apps/web/src/i18n.tsx#L917) — `LangProvider` |
+| happens in | [`apps/web/src/i18n.tsx:930`](../apps/web/src/i18n.tsx#L930) — `LangProvider` |
 | happens in | [`apps/web/src/components/Colophon.tsx:220`](../apps/web/src/components/Colophon.tsx#L220) — `langRow` |
 | proven by | [`apps/web/e2e/lang.spec.ts:28`](../apps/web/e2e/lang.spec.ts#L28) — “an English phone opens an English chrome” |
 | proven by | [`apps/web/e2e/lang.spec.ts:102`](../apps/web/e2e/lang.spec.ts#L102) — “the switch is in the colophon, and the choice survives a reload” |
@@ -440,9 +440,9 @@ Someone memorising the Qur'an, holding a phone, usually mid-revision. Every gest
 
 | | |
 |---|---|
-| happens in | [`apps/web/src/messages/ar.json:129`](../apps/web/src/messages/ar.json#L129) — `distancePages` |
+| happens in | [`apps/web/src/messages/ar.json:132`](../apps/web/src/messages/ar.json#L132) — `distancePages` |
 | happens in | [`apps/web/src/messages/plural.ts:39`](../apps/web/src/messages/plural.ts#L39) — `export function plural` |
-| happens in | [`apps/web/src/i18n.tsx:542`](../apps/web/src/i18n.tsx#L542) — `buildStrings` |
+| happens in | [`apps/web/src/i18n.tsx:552`](../apps/web/src/i18n.tsx#L552) — `buildStrings` |
 | proven by | [`apps/web/src/i18n.test.tsx:121`](../apps/web/src/i18n.test.tsx#L121) — “agrees with the plural rules of the language, not with a ternary” |
 | proven by | [`apps/web/src/i18n.test.tsx:99`](../apps/web/src/i18n.test.tsx#L99) — “writes counts inside aria-labels in the language's own digits” |
 
@@ -498,7 +498,7 @@ Whoever is changing the app next, including this project's own future self. Arri
 |---|---|
 | happens in | [`scripts/messages-compile.mjs:378`](../scripts/messages-compile.mjs#L378) — `export function compileAll` |
 | happens in | [`apps/web/src/lang.ts:80`](../apps/web/src/lang.ts#L80) — `LOCALES` |
-| happens in | [`apps/web/src/i18n.tsx:542`](../apps/web/src/i18n.tsx#L542) — `buildStrings` |
+| happens in | [`apps/web/src/i18n.tsx:552`](../apps/web/src/i18n.tsx#L552) — `buildStrings` |
 | proven by | [`apps/web/src/i18n.test.tsx:53`](../apps/web/src/i18n.test.tsx#L53) — “builds a bundle for every locale that has a catalog” |
 | proven by | [`apps/web/src/i18n.test.tsx:62`](../apps/web/src/i18n.test.tsx#L62) — “carries the same keys in every language” |
 | proven by | [`apps/web/src/i18n.test.tsx:88`](../apps/web/src/i18n.test.tsx#L88) — “gives each language the digits it declared” |
@@ -511,7 +511,7 @@ Whoever is changing the app next, including this project's own future self. Arri
 
 | | |
 |---|---|
-| happens in | [`docs/map.json:37`](../docs/map.json#L37) — `select-an-ayah` |
+| happens in | [`docs/map.json:36`](../docs/map.json#L36) — `select-an-ayah` |
 | happens in | [`scripts/gate-map.mjs:36`](../scripts/gate-map.mjs#L36) — `features` |
 | proven by | `pnpm gate:map` |
 

@@ -250,6 +250,7 @@ ci: core ## Full local mirror of the CI build-test-gate job, IN CI ORDER
 	$(PNPM) gate:params
 	$(CORE) build && $(WEB) build
 	$(PNPM) gate:budget
+	$(PNPM) gate:bundle-notext
 	@echo ""
 	@echo "  ✓ build-test-gate mirror passed."
 	@echo "    CI also runs two more jobs: make e2e, make lighthouse."

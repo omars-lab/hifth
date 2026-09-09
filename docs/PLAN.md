@@ -1104,9 +1104,9 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     development path is compiled out of the public build (a separate entry that is not a build
     input, a server route that exists only in dev, and the in-app toggle behind a build-time
     flag like the perf probe in follow-up ①) — *done*, page and toggle both, 2026-09-08; and a
-    gate that reads the **built** bundle and fails on any Arabic letter or on the loader that
-    reaches for the store — *not yet built*. Today no gate looks at the shipped bytes for this:
-    `gate:scripture` reads the tree and `gate:notext` is a Safari rendering check wearing a
+    gate that reads the **built** bundle and fails on the store's held letters or on the loader that
+    reaches for it — *done*, 2026-09-09. The two older gates never covered this:
+    `gate:scripture` reads the tree, and `gate:notext` is a Safari rendering check wearing a
     scripture name.
     **The overlay, built (2026-09-08):** one drawing of the store's page, shared by the
     side-by-side page and the app (`apps/web/src/qul-diff/storePage.ts`), and the in-app
@@ -1126,7 +1126,7 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     are each set to their own row's width. Checked by eye on pages 1, 2, 3, 300 and 604: every
     line pairs, and on 300 the store's letters sit on the print's stroke for stroke. A bonus for
     follow-up ⑳: the pairing gives every store word a measured position in the app's own frame.
-    **What would close it:** add the bundle gate. One register loose end: branch `graduate-page-bar-winners` opened two
+    **What closed it (2026-09-09):** a gate that weighs the built bundle. It does not fail on any Arabic letter — the app's own interface has an Arabic locale, and a gate that refused it would be switched off in a week. It fails on the two things that can only be the store: the store's font encodes each printed word as one private character (a presentation form or a private-use code point), which the interface's locale never uses; and the loader's own words — the dev-fixture route, the overlay module, the dev font, the build-time flag — which a normal build drops with the branch that names them. Measured zero of both on a real build, and it fails when a fake glyph or route is planted. One register loose end: branch `graduate-page-bar-winners` opened two
     rows this branch does not carry — *could a developer draw a page from the other library
     without a reader receiving it* (its option B is exactly this) and *should we build a fine
     check against the library's page map* — so whichever branch merges second stamps the first

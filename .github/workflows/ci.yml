@@ -305,6 +305,13 @@ jobs:
       - name: Gate — JS budget (<150KB gz)
         run: pnpm gate:budget
 
+      # The public bundle carries no held Qur'an letters and no road into the
+      # development-only store overlay. The overlay compiles out behind a
+      # build-time flag; this weighs the emitted bytes and proves it did. See
+      # scripts/gate-bundle-notext.mjs.
+      - name: Gate — the public bundle carries no held letters or store loader
+        run: pnpm gate:bundle-notext
+
       # Deliberately the last step, and deliberately an upload rather than a
       # rebuild in the deploy job: what gets published is then *these* bytes —
       # the ones the budget gate just weighed and the ETL determinism check just
