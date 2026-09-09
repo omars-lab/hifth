@@ -4,9 +4,11 @@ import {
   calibrateFontSize,
   fontReady,
   lineGeometry,
+  measureStoreWordBoxes,
   type DrawOptions,
   type Fixture,
   type PageGeometry,
+  type StoreWordBox,
   type ViewBox,
   type WordBoxes,
 } from "./storePage";
@@ -26,6 +28,7 @@ export function StorePageSvg({
   bands = true,
   style,
   onGeometry,
+  onWordBoxes,
 }: {
   fixture: Fixture;
   boxes: WordBoxes | null;
@@ -35,6 +38,7 @@ export function StorePageSvg({
   bands?: boolean;
   style?: React.CSSProperties | undefined;
   onGeometry?: (g: PageGeometry) => void;
+  onWordBoxes?: (boxes: StoreWordBox[]) => void;
 }) {
   const host = useRef<HTMLDivElement>(null);
   const geom = useMemo(() => lineGeometry(fixture, boxes, viewBox), [fixture, boxes, viewBox]);
@@ -57,13 +61,16 @@ export function StorePageSvg({
     // The words' size is measured from the words, so the face must be loaded
     // and the drawing in the document first; until then it is drawn at the guess.
     void fontReady(page).then(() => {
-      if (live) calibrateFontSize(svg, geom);
+      if (!live) return;
+      calibrateFontSize(svg, geom);
+      // Boxes are only true once the size is the print's, so measure here.
+      onWordBoxes?.(measureStoreWordBoxes(svg));
     });
     return () => {
       live = false;
       el.replaceChildren();
     };
-  }, [fixture, geom, page, fill, bands]);
+  }, [fixture, geom, page, fill, bands, onWordBoxes]);
 
   return <div ref={host} style={style} />;
 }
