@@ -1151,6 +1151,22 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     **What it depends on:** the shared drawing component and the overlay in ⑲, because the word
     boxes have to be measured at the print's geometry, not the workbench's, to mean anything
     against the tap shapes. Blocks nothing shipped.
+    **What it found (2026-09-09):** the sweep is built and run across all 604 pages. Of 83,196
+    store words, **96.3% tap their own ayah's shape**; 3.6% land in a neighbour's and 0.06% (47
+    words) outside every shape. The flags are not misplaced tap shapes — they **concentrate at ayah
+    boundaries**, and a page's count scales with how many boundaries it has (the worst pages are the
+    short-surah pages where ayahs are one to three words: page 585 alone throws 131). On a line where
+    one ayah ends and the next begins, the store's justification and the tap-shape edge disagree
+    about which side of the split a boundary word sits, by about one word's width. No word lands on
+    the wrong *line* — vertical registration is exact everywhere, which is the thing the shapes have
+    to get right. Confirmed three ways: against the browser's own hit-test (zero disagreements on 738
+    words), by structure, and by eye on three rendered pages. The 47 "outside" words are 15 the store
+    justifies past the column edge plus 32 in the hairline between two shapes — neither a reader being
+    told the wrong ayah. The story, the numbers and the reproduction are in
+    [`docs/issues/qul-tap-sweep.md`](issues/qul-tap-sweep.md), the text-free evidence beside it. The
+    tap shapes stand: the app answers a tap with the right ayah, page after page. A tighter next
+    instrument would compare each store word against the app's *own* print words rather than the
+    store's re-justification, removing the two-justifications hair; the boxes for that already ship.
 
 21. **Can the library's page pick out a single harakah, and should it?** Asked 2026-09-08. The
     short answer is no, not as the page is drawn today, and the longer answer is a question for

@@ -212,3 +212,24 @@ names them is dropped. Calibrated against a real build (zero of both), and prove
 planting a fake glyph and route and watching it fail, then reverting. Wired into all three places a
 gate runs here (the quick sweep, the local mirror, the blocking job), which the wiring gate
 confirms — thirty gates now, each in all three.
+
+## #100 — Diff view: compare the app's tappable ayah areas against the store's words (selectable-area registration check)
+
+**Done:** 2026-09-09 (branch `qul-page-diff`) — follow-up ⑳ in [`docs/PLAN.md`](../PLAN.md); the
+finding and how to read it are in [`docs/issues/qul-tap-sweep.md`](../issues/qul-tap-sweep.md), the
+text-free evidence beside it.
+
+A tool now lays the app's own tappable ayah shapes over the held store's page — every word drawn in
+the print's per-page font at the print's geometry, its box measured — and, per page, counts every
+word whose box centre falls outside its own ayah's shape or inside a neighbour's; then it sweeps all
+604 pages the way the highlight sweep replaced page-by-page looking. Of 83,196 store words, 96.3%
+tap their own ayah. The 3.6% that do not **concentrate at ayah boundaries** — on a shared line where
+one ayah ends and the next begins, the store's justification and the tap-shape edge disagree by about
+one word's width — and a page's flag count scales with how many boundaries it has, not with any
+misplacement; the worst pages are the short-surah pages. No word lands on the wrong *line*. Only 47
+words fall outside every shape (15 the store justifies past the column edge, 32 in the hairline
+between two shapes), none a reader being told the wrong ayah. Verified three ways: against the
+browser's own hit-test (zero disagreements on 738 words), by structure, and by eye on three rendered
+pages. 18 pages placed by fit are marked lower-confidence in the evidence. The sweep tool is
+`apps/web/scripts/qul-tap-sweep.mjs`; the bulk fixture puller that feeds it is
+`packages/etl/scripts/qul-page-fixtures-all.mjs`.

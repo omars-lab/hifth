@@ -2034,13 +2034,10 @@
         "file": "docs/PLAN.md",
         "item": "20"
       },
-      "status": "blocked",
+      "status": "answered",
       "severity": "question",
       "owner": "agent",
-      "blockedBy": [
-        "plan-qul-dev-toggle"
-      ],
-      "note": "Owner ask 2026-09-08: compare not only how the two pages look but where a reader can tap. Lay the app's tappable ayah shapes over the library's page, measure every word's box in the print's per-page font at the print's geometry, and count per page the words that fall outside their own ayah's shape or inside a neighbour's; then sweep all 604 pages by tool. Waits on the shared component and overlay of follow-up 19, because the boxes only mean something measured in the app's frame."
+      "note": "Answered 2026-09-09 by a whole-book tool sweep (docs/issues/qul-tap-sweep.md). Of 83,196 store words, 96.3% tap their own ayah shape; the 3.6% that do not concentrate at ayah-split boundaries on shared lines (two independent justifications disagreeing by about one word), not misplaced shapes; no word lands on the wrong line. 47 words fall outside every shape — 15 the store justifies past the column edge, 32 in the hairline between two shapes — none a reader being told the wrong ayah. Verified against the browser hit-test (zero disagreements on 738 words), by structure, and by eye on three rendered pages. 18 pages placed by fit are marked lower-confidence in the evidence. The sweep tool is apps/web/scripts/qul-tap-sweep.mjs; nothing owed in code."
     },
     {
       "id": "plan-qul-harakat",
