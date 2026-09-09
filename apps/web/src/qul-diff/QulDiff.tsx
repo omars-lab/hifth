@@ -1,4 +1,17 @@
 import { useEffect, useMemo, useState } from "react";
+import { StorePageSvg } from "./StorePageSvg";
+import {
+  EDITION,
+  loadFixture,
+  loadWordBoxes,
+  parseViewBox,
+  type Fixture,
+  type Line,
+  type PageGeometry,
+  type ViewBox,
+  type Word,
+  type WordBoxes,
+} from "./storePage";
 
 /*
  * The dev diff view — the second draughtsman from `qul-store-purpose`.
@@ -10,58 +23,34 @@ import { useEffect, useMemo, useState } from "react";
  * answers itself by eye: does the right verse land on the right line, does a break
  * fall where it should.
  *
- * WHY NO ARABIC HERE. Two reasons, one line. (1) The store's word text is a
- * font-private, one-codepoint-per-word encoding that only the QPC V4 font draws as
- * words; without that font it renders as the wrong glyph, so a faithful letter-render
- * waits on the font (docs/issues/qul-diff-render-needs-font.md). (2) This file is
- * checked in, and the repo ships no Qur'an text — gate:scripture would refuse a
- * single Arabic codepoint in this source. So the render is structural: verse numbers,
- * word counts, ayah boundaries. It answers the registration question without a glyph.
+ * The drawing itself lives in `storePage.ts` and is shared with the in-app overlay
+ * (`overlay.ts`): the store's words set in the print's own per-page font, at the
+ * print's geometry, which this page reads from the app's own word boxes. Under it,
+ * the structure — verse and word run per line, a medallion where an ayah ends — so a
+ * slip can be named by line and verse, not only seen.
+ *
+ * WHY NO ARABIC HERE. The store's word text is a font-private, one-codepoint-per-word
+ * encoding that only the page's own font file draws as words
+ * (docs/issues/qul-diff-render-needs-font.md), and it arrives at run time from a
+ * gitignored fixture. This file is checked in, and the repo ships no Qur'an text —
+ * gate:scripture would refuse a single Arabic codepoint in this source.
  */
-
-type Word = {
-  word_id: number;
-  surah: number;
-  ayah: number;
-  position: number;
-  text: string;
-};
-
-type Line = {
-  line_number: number;
-  line_type: string;
-  is_centered: boolean;
-  surah_number: number | null;
-  first_word_id: number | null;
-  last_word_id: number | null;
-  words: Word[];
-};
-
-type Fixture = { page: number; lines: Line[] };
 
 type Load =
   | { state: "loading" }
   | { state: "absent"; page: number }
   | { state: "error"; message: string }
-  | { state: "ok"; fixture: Fixture };
+  | { state: "ok"; fixture: Fixture; boxes: WordBoxes | null; viewBox: ViewBox };
+
+/** How the two pages stand: beside each other, or the store laid over the print. */
+type View = "side" | "overlay";
 
 const PAGE_MIN = 1;
 const PAGE_MAX = 604;
-const EDITION = "hafs-kfqc";
-
-/*
- * The print's own word-shape font, dev-served from the ETL's gitignored cache (see
- * `qulFixturesDev` in vite.config.ts). It is ONE FILE PER PAGE: page N's words are the
- * code points FC41, FC42, … and only `pN.ttf` maps them to N's words — the same code point
- * is a different word in every other page's file, and a general Arabic font shows it as
- * an unrelated ligature. So the face is declared per page, under a family name that carries
- * the page number, and the declaration changes with the page. The family name is ours; the
- * file is the library's (QUL resource 240). Neither this file nor the CSS below carries a
- * single Arabic letter: the letters arrive at run time, in dev, and nowhere else.
- */
-const fontFamily = (page: number) => `Hifth QUL Dev V4 p${page}`;
-const fontCss = (page: number) =>
-  `@font-face{font-family:"${fontFamily(page)}";src:url("/dev-fixtures/fonts/p${page}.ttf") format("truetype");font-display:block;}`;
+/** The print's default viewBox; pages 1 and 2 override it in the manifest. */
+const DEFAULT_VIEWBOX: ViewBox = { x: 0, y: 0, w: 345, h: 550 };
+/** The store's ink when it lies over the print: a blue the print never uses. */
+const OVERLAY_INK = "#1d4ed8";
 
 function clampPage(n: number): number {
   if (!Number.isFinite(n)) return PAGE_MIN;
@@ -71,6 +60,24 @@ function clampPage(n: number): number {
 function pageFromUrl(): number {
   const p = new URLSearchParams(window.location.search).get("page");
   return clampPage(parseInt(p ?? "", 10) || PAGE_MIN);
+}
+
+function viewFromUrl(): View {
+  return new URLSearchParams(window.location.search).get("view") === "overlay" ? "overlay" : "side";
+}
+
+let manifestCache: Promise<{ viewBox?: string; viewBoxOverrides?: Record<string, string> } | null> | null =
+  null;
+function loadManifest() {
+  manifestCache ??= fetch("/assets/manifest.json")
+    .then((r) => (r.ok ? r.json() : null))
+    .catch(() => null);
+  return manifestCache;
+}
+
+async function viewBoxOf(page: number): Promise<ViewBox> {
+  const m = await loadManifest();
+  return parseViewBox(m?.viewBoxOverrides?.[String(page)] ?? m?.viewBox) ?? DEFAULT_VIEWBOX;
 }
 
 /** The structural label beside each run of words: "surah:ayah", digits only. */
@@ -112,28 +119,26 @@ function ayahGroups(words: Word[]): { key: string; words: Word[] }[] {
 
 export function QulDiff() {
   const [page, setPage] = useState<number>(pageFromUrl);
+  const [view, setView] = useState<View>(viewFromUrl);
   const [load, setLoad] = useState<Load>({ state: "loading" });
+  const [geom, setGeom] = useState<PageGeometry | null>(null);
 
   useEffect(() => {
     const url = new URL(window.location.href);
     url.searchParams.set("page", String(page));
+    url.searchParams.set("view", view);
     window.history.replaceState(null, "", url);
+  }, [page, view]);
 
+  useEffect(() => {
     let live = true;
     setLoad({ state: "loading" });
-    fetch(`/dev-fixtures/qul-page-${page}.json`, { cache: "no-store" })
-      .then(async (r) => {
-        const body = await r.json();
+    setGeom(null);
+    Promise.all([loadFixture(page), loadWordBoxes(page), viewBoxOf(page)])
+      .then(([fixture, boxes, viewBox]) => {
         if (!live) return;
-        if (body && body.error === "fixture-absent") {
-          setLoad({ state: "absent", page });
-          return;
-        }
-        if (!r.ok) {
-          setLoad({ state: "error", message: `HTTP ${r.status}` });
-          return;
-        }
-        setLoad({ state: "ok", fixture: body as Fixture });
+        if (!fixture) setLoad({ state: "absent", page });
+        else setLoad({ state: "ok", fixture, boxes, viewBox });
       })
       .catch((e) => {
         if (live) setLoad({ state: "error", message: String(e) });
@@ -143,45 +148,119 @@ export function QulDiff() {
     };
   }, [page]);
 
+  const print = (
+    <img
+      key={page}
+      src={`/assets/pages/${EDITION}/${page}.svg`}
+      alt={`Print page ${page}`}
+      style={S.printImg}
+    />
+  );
+
   return (
     <div style={S.app}>
-      <style>{fontCss(page)}</style>
-      <Header page={page} onPage={(n) => setPage(clampPage(n))} />
-      <main style={S.split}>
-        <section style={S.pane}>
-          <h2 style={S.paneTitle}>
-            Shipped print <span style={S.paneSub}>edition {EDITION}</span>
-          </h2>
-          <div style={S.printWrap}>
-            <img
-              key={page}
-              src={`/assets/pages/${EDITION}/${page}.svg`}
-              alt={`Print page ${page}`}
-              style={S.printImg}
-            />
-          </div>
-        </section>
-        <section style={S.pane}>
-          <h2 style={S.paneTitle}>
-            Store page <span style={S.paneSub}>held copy · QPC V4 words · library font</span>
-          </h2>
-          <StorePane load={load} page={page} />
-        </section>
-      </main>
+      <Header
+        page={page}
+        onPage={(n) => setPage(clampPage(n))}
+        view={view}
+        onView={setView}
+      />
+      {view === "side" ? (
+        <main style={S.split}>
+          <section style={S.pane}>
+            <h2 style={S.paneTitle}>
+              Shipped print <span style={S.paneSub}>edition {EDITION}</span>
+            </h2>
+            <div style={S.printWrap}>{print}</div>
+          </section>
+          <section style={S.pane}>
+            <h2 style={S.paneTitle}>
+              Store page{" "}
+              <span style={S.paneSub}>held copy · QPC V4 words · library font · print geometry</span>
+            </h2>
+            {load.state === "ok" ? (
+              <div style={S.printWrap}>
+                <div style={S.printImg}>
+                  <StorePageSvg
+                    fixture={load.fixture}
+                    boxes={load.boxes}
+                    viewBox={load.viewBox}
+                    page={page}
+                    onGeometry={setGeom}
+                  />
+                </div>
+              </div>
+            ) : (
+              <StoreStatus load={load} page={page} />
+            )}
+          </section>
+        </main>
+      ) : (
+        <main style={S.single}>
+          <section style={S.pane}>
+            <h2 style={S.paneTitle}>
+              Store over print{" "}
+              <span style={S.paneSub}>
+                the print in black, the store's words in blue, at the print's geometry
+              </span>
+            </h2>
+            <div style={S.printWrap}>
+              <div style={{ ...S.printImg, position: "relative" }}>
+                {print}
+                {load.state === "ok" && (
+                  <StorePageSvg
+                    fixture={load.fixture}
+                    boxes={load.boxes}
+                    viewBox={load.viewBox}
+                    page={page}
+                    fill={OVERLAY_INK}
+                    style={S.overlay}
+                    onGeometry={setGeom}
+                  />
+                )}
+              </div>
+            </div>
+            {load.state !== "ok" && <StoreStatus load={load} page={page} />}
+          </section>
+        </main>
+      )}
+      <section style={S.structure}>
+        <h2 style={S.paneTitle}>
+          Line by line{" "}
+          <span style={S.paneSub}>
+            what the store says is on each line · where the print's lines were measured
+          </span>
+        </h2>
+        {load.state === "ok" ? (
+          <StoreLines lines={[...load.fixture.lines].sort((a, b) => a.line_number - b.line_number)} geom={geom} />
+        ) : (
+          <StoreStatus load={load} page={page} />
+        )}
+      </section>
       <footer style={S.foot}>
-        Each line is drawn twice: the store's words in the print's own per-page font (the
-        library's tajweed-coloured pack — the colour is the library's, not a finding — served
-        in dev from a gitignored cache, never from the tree or the shipped bundle), and under
-        them the structure — the verse and word run on the line, and a medallion where an
-        ayah ends. Compare line for line against the print on the left; a word on the wrong
-        line, or an ayah ending on the wrong line, is a registration finding.
-        Background: docs/issues/qul-diff-render-needs-font.md.
+        The store's page is drawn in the print's own per-page font (the library's
+        tajweed-coloured pack — the colour is the library's, not a finding — served in dev
+        from a gitignored cache, never from the tree or the shipped bundle), each line set at
+        the height the print's own word boxes say that line is. Beside the print, or laid
+        over it in blue: a blue word with no black under it, or an ayah ending on the wrong
+        line, is a registration finding. The same drawing mounts in the running app behind a
+        dev-only flag (make dev-qul). Background: docs/issues/qul-diff-render-needs-font.md.
       </footer>
     </div>
   );
 }
 
-function Header({ page, onPage }: { page: number; onPage: (n: number) => void }) {
+function Header({
+  page,
+  onPage,
+  view,
+  onView,
+}: {
+  page: number;
+  onPage: (n: number) => void;
+  view: View;
+  onView: (v: View) => void;
+}) {
   return (
     <header style={S.header}>
       <div>
@@ -192,6 +271,19 @@ function Header({ page, onPage }: { page: number; onPage: (n: number) => void })
         </div>
       </div>
       <div style={S.nav}>
+        <span style={S.seg} role="group" aria-label="view">
+          {(["side", "overlay"] as View[]).map((v) => (
+            <button
+              key={v}
+              type="button"
+              onClick={() => onView(v)}
+              style={{ ...S.segBtn, ...(view === v ? S.segOn : null) }}
+              aria-pressed={view === v}
+            >
+              {v === "side" ? "side by side" : "overlay"}
+            </button>
+          ))}
+        </span>
         <button
           type="button"
           style={S.btn}
@@ -225,18 +317,15 @@ function Header({ page, onPage }: { page: number; onPage: (n: number) => void })
   );
 }
 
-function StorePane({ load, page }: { load: Load; page: number }) {
+function StoreStatus({ load, page }: { load: Load; page: number }) {
   if (load.state === "loading") return <div style={S.msg}>Reading the store…</div>;
   if (load.state === "error")
     return <div style={S.msg}>Could not read the fixture: {load.message}</div>;
   if (load.state === "absent") return <Absent page={page} />;
-
-  const { lines } = load.fixture;
-  const ordered = [...lines].sort((a, b) => a.line_number - b.line_number);
-  return <StoreLines lines={ordered} page={page} />;
+  return null;
 }
 
-function StoreLines({ lines, page }: { lines: Line[]; page: number }) {
+function StoreLines({ lines, geom }: { lines: Line[]; geom: PageGeometry | null }) {
   const ends = useMemo(() => ayahEndIds(lines), [lines]);
 
   const ayahWords = lines.flatMap((l) => (l.line_type === "ayah" ? l.words : []));
@@ -261,17 +350,39 @@ function StoreLines({ lines, page }: { lines: Line[]; page: number }) {
         <span>
           verses <strong dir="ltr">{range}</strong>
         </span>
+        {geom && (
+          <span title="rows of word boxes the print has, against ayah lines the store has">
+            print rows <strong>{geom.rows}</strong> · store ayah lines{" "}
+            <strong>{geom.ayahLines}</strong>
+            {geom.rows !== geom.ayahLines && (
+              <strong style={{ color: "#b4231b" }}> — unpaired, lines placed by fit</strong>
+            )}
+          </span>
+        )}
       </div>
       <ol style={S.lines}>
         {lines.map((l) => (
-          <StoreLine key={l.line_number} line={l} ends={ends} page={page} />
+          <StoreLine
+            key={l.line_number}
+            line={l}
+            ends={ends}
+            slot={geom?.lines.find((s) => s.line === l) ?? null}
+          />
         ))}
       </ol>
     </div>
   );
 }
 
-function StoreLine({ line, ends, page }: { line: Line; ends: Set<number>; page: number }) {
+function StoreLine({
+  line,
+  ends,
+  slot,
+}: {
+  line: Line;
+  ends: Set<number>;
+  slot: { y: number; measured: boolean } | null;
+}) {
   const centered = line.is_centered || line.line_type !== "ayah";
   const rowStyle: React.CSSProperties = {
     ...S.line,
@@ -279,25 +390,7 @@ function StoreLine({ line, ends, page }: { line: Line; ends: Set<number>; page: 
   };
 
   let content: React.ReactNode;
-  let glyphs: React.ReactNode = null;
   if (line.line_type === "ayah") {
-    // One private code point per printed word, so the join is the whole layout step:
-    // the font supplies the shapes, the space the only spacing. Full-measure lines are
-    // justified as the print's are; a centred line (a surah's last, short line) is not.
-    glyphs = (
-      <span
-        style={{
-          ...S.glyphs,
-          fontFamily: `"${fontFamily(page)}", serif`,
-          textAlign: centered ? "center" : "justify",
-          textAlignLast: centered ? "center" : "justify",
-        }}
-        dir="rtl"
-        lang="ar"
-      >
-        {line.words.map((w) => w.text).join(" ")}
-      </span>
-    );
     const groups = ayahGroups(line.words);
     content = groups.map((g, i) => {
       const firstWord = g.words[0];
@@ -335,10 +428,17 @@ function StoreLine({ line, ends, page }: { line: Line; ends: Set<number>; page: 
         <span style={S.lineType}>{line.line_type}</span>
       </span>
       <span style={S.lineBody}>
-        {glyphs}
         <span style={rowStyle} dir="rtl">
           {content}
         </span>
+      </span>
+      <span style={S.where} title="the line's centre on the print, in the page's own units">
+        {slot ? (
+          <>
+            y {slot.y.toFixed(1)}
+            <span style={S.whereHow}>{slot.measured ? "measured" : "by fit"}</span>
+          </>
+        ) : null}
       </span>
     </li>
   );
@@ -407,6 +507,35 @@ const S: Record<string, React.CSSProperties> = {
     textAlign: "center",
   },
   pageMax: { opacity: 0.6 },
+  seg: {
+    display: "inline-flex",
+    border: `1px solid ${EDGE}`,
+    borderRadius: 6,
+    overflow: "hidden",
+    marginInlineEnd: 8,
+  },
+  segBtn: {
+    font: "inherit",
+    fontSize: 13,
+    padding: "6px 10px",
+    border: 0,
+    background: PAPER,
+    color: INK,
+    cursor: "pointer",
+  },
+  segOn: { background: ACCENT, color: "#fff" },
+  single: { padding: 24, display: "grid", justifyContent: "center" },
+  overlay: { position: "absolute", inset: 0, pointerEvents: "none", opacity: 0.72 },
+  structure: { padding: "0 24px", maxWidth: 1100 },
+  where: {
+    fontSize: 11,
+    opacity: 0.6,
+    fontVariantNumeric: "tabular-nums",
+    whiteSpace: "nowrap",
+    paddingTop: 6,
+    textAlign: "right",
+  },
+  whereHow: { display: "block", fontSize: 10, textTransform: "uppercase", letterSpacing: 0.3 },
   split: {
     display: "grid",
     gridTemplateColumns: "minmax(320px, 1fr) minmax(320px, 1fr)",
@@ -430,7 +559,7 @@ const S: Record<string, React.CSSProperties> = {
     borderRadius: 8,
     padding: 12,
   },
-  printImg: { width: "100%", maxWidth: 440, height: "auto", display: "block" },
+  printImg: { width: "100%", maxWidth: 520, height: "auto", display: "block" },
   summary: {
     display: "flex",
     gap: 18,
@@ -444,7 +573,7 @@ const S: Record<string, React.CSSProperties> = {
   lines: { listStyle: "none", margin: 0, padding: 0, display: "grid", gap: 4 },
   lineRow: {
     display: "grid",
-    gridTemplateColumns: "56px 1fr",
+    gridTemplateColumns: "56px 1fr 72px",
     gap: 10,
     alignItems: "start",
     minHeight: 34,
@@ -454,14 +583,6 @@ const S: Record<string, React.CSSProperties> = {
   },
   gutter: { display: "flex", flexDirection: "column", lineHeight: 1.1, paddingTop: 6 },
   lineBody: { display: "grid", gap: 2, minWidth: 0 },
-  glyphs: {
-    display: "block",
-    fontSize: 27,
-    lineHeight: 1.75,
-    color: INK,
-    whiteSpace: "nowrap",
-    overflow: "hidden",
-  },
   lineNo: { fontWeight: 700, fontVariantNumeric: "tabular-nums" },
   lineType: { fontSize: 10, opacity: 0.5, textTransform: "uppercase", letterSpacing: 0.3 },
   line: { display: "flex", flexWrap: "wrap", gap: 8, alignItems: "center" },

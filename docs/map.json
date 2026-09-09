@@ -1426,6 +1426,46 @@
     },
 
     {
+      "id": "qul-page-diff",
+      "what": "The development-only comparison of the held library's page against the page the app ships: a side-by-side workbench page that is not a build input, and an in-app overlay that lays the store's words over the print at the print's own geometry, behind a build-time flag. Both mount one drawing. Nothing here reaches the public build; the words and the per-page font it draws with come from gitignored files over a dev-server-only route.",
+      "layer": "L2 web",
+      "entry": [
+        {
+          "file": "apps/web/src/qul-diff/storePage.ts",
+          "symbol": "lineGeometry",
+          "note": "Where the store's lines land on the print. The app's own word boxes for the page are clustered into rows (boxes not a word tall — gutter signs, stretched boxes — set aside first, since they bridge rows); the rows are paired top-to-bottom with the store's ayah lines and each paired line takes its row's centre and its row's own width; surah-name and basmala lines take the y a straight-line fit predicts. `rows !== ayahLines` in the result means the pairing is a guess and the drawing says so."
+        },
+        {
+          "file": "apps/web/src/qul-diff/storePage.ts",
+          "symbol": "calibrateFontSize",
+          "note": "The letters' size is measured, not tuned: with the face loaded and the drawing in the document, each justified line proposes the size at which its natural width is the measure it was given, and the median wins. The per-page font is cut so every full line fills one measure at one size, which is what makes a single number right for the page."
+        },
+        {
+          "file": "apps/web/src/qul-diff/overlay.ts",
+          "symbol": "mountQulOverlay",
+          "note": "The in-app toggle. Watches the page stage for hosts stamped data-page, dresses each once with two drawings (blue over the print; the store's own ink alone), and a pill flips print / store / both by a data attribute on the document — a mode change is CSS, never a rebuild. Reached only from main.tsx behind import.meta.env.VITE_QUL_OVERLAY, so every normal build drops the module whole."
+        },
+        {
+          "file": "apps/web/vite.config.ts",
+          "symbol": "qulFixturesDev",
+          "note": "The dev-server-only route that serves a page's fixture and the per-page font file from gitignored places. `apply: \"serve\"` — it does not exist in a build, so there is no path a build could carry."
+        }
+      ],
+      "extend": [
+        "Pull a page first: dotenvx run -- node packages/etl/scripts/qul-page-fixture.mjs --page N writes the gitignored fixture; then make dev-qul for the app with the overlay, or open qul-diff.html?page=N on the plain dev server for the workbench (view=side or view=overlay).",
+        "The drawing is plain DOM on purpose — the page stage builds its print hosts by hand, outside React, and the overlay has to sit inside one. StorePageSvg.tsx is the one-effect React wrapper the workbench uses; add nothing to it that the overlay would then lack.",
+        "A page that reports 'placed by fit' is a finding, not a bug to paper over: either the print's boxes really do have a different number of rows from the store's ayah lines (look at the page) or a class of box the clustering does not yet set aside has bridged two rows (look at the box heights, as page 300's gutter signs were found).",
+        "Keep every word out of the tracked tree. The fixture and the font are gitignored and gate:scripture reads the tree; the bundle gate (follow-up ⑲) reads dist/. Do not add an import of the fixture, a copy of a word, or the font family's code points anywhere a build can see."
+      ],
+      "gates": [
+        "pnpm gate:scripture",
+        "pnpm gate:notext",
+        "make ci"
+      ],
+      "seeAlso": ["qul-store", "etl-plugins", "desktop-spread", "word-geometry"]
+    },
+
+    {
       "id": "qul-store",
       "what": "Holding a copy of QUL's page layout — and, once its licence is read, its word text — in a database we run, off the repository and off the shipped bundle.",
       "layer": "L3 etl",
