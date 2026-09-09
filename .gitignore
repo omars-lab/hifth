@@ -3,6 +3,7 @@ dist/
 .turbo/
 *.tsbuildinfo
 apps/web/dev-dist/
+apps/web/dev-fixtures/
 apps/web/playwright-report/
 apps/web/test-results/
 # Lighthouse CI run artifacts (the gate's thresholds live in .lighthouserc.json,

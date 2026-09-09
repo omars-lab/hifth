@@ -162,7 +162,7 @@
   <div class="keyrow">
     <span><span class="sw hub"></span>Backbone hub</span>
     <span><span class="sw held"></span>Held, loaded in the store</span>
-    <span><span class="sw font"></span>Held, not loaded yet</span>
+    <span><span class="sw font"></span>Held font — kept in the building tools' cache, never the store or the bundle</span>
     <span><span class="sw ref"></span>Reference only — we measure against it, keep no bytes</span>
   </div>
 
@@ -182,7 +182,7 @@
     <!-- FONT surah names (held not loaded) -->
     <rect x="730" y="28" width="170" height="44" rx="8" fill="var(--warn-soft)" stroke="var(--warn)" stroke-width="1.5"/>
     <text x="815" y="48" text-anchor="middle" font-size="11.5" font-weight="600" fill="var(--ink)">FONT — surah names</text>
-    <text x="815" y="63" text-anchor="middle" font-size="9.5" fill="var(--muted)">116 glyphs · held, not loaded</text>
+    <text x="815" y="63" text-anchor="middle" font-size="9.5" fill="var(--muted)">116 glyphs · cleared, not fetched</text>
     <line x1="610" y1="50" x2="730" y2="50" stroke="var(--muted)" stroke-width="1.4" marker-end="url(#ear)"/>
     <text x="670" y="42" text-anchor="middle" font-size="9" fill="var(--muted)">draws</text>
 
@@ -212,12 +212,14 @@
     <line x1="210" y1="182" x2="420" y2="180" stroke="var(--accent)" stroke-width="1.4" marker-end="url(#ear)"/>
     <text x="300" y="172" text-anchor="middle" font-size="9.5" fill="var(--accent)">location s:a:w</text>
 
-    <!-- FONT nastaleeq -->
+    <!-- FONT page-by-page (one file per page; the layout's page number picks the file) -->
     <rect x="730" y="158" width="170" height="44" rx="8" fill="var(--warn-soft)" stroke="var(--warn)" stroke-width="1.5"/>
-    <text x="815" y="178" text-anchor="middle" font-size="11.5" font-weight="600" fill="var(--ink)">FONT — Nastaleeq</text>
-    <text x="815" y="193" text-anchor="middle" font-size="9.5" fill="var(--muted)">word glyphs · held, not loaded</text>
+    <text x="815" y="178" text-anchor="middle" font-size="11.5" font-weight="600" fill="var(--ink)">FONT — page-by-page V4</text>
+    <text x="815" y="193" text-anchor="middle" font-size="9.5" fill="var(--muted)">604 files, one per page · fetched</text>
     <line x1="620" y1="180" x2="730" y2="180" stroke="var(--muted)" stroke-width="1.4" marker-end="url(#ear)"/>
     <text x="675" y="172" text-anchor="middle" font-size="9" fill="var(--muted)">draws</text>
+    <line x1="610" y1="70" x2="732" y2="160" stroke="var(--muted)" stroke-width="1.4" stroke-dasharray="3 3" marker-end="url(#ear)"/>
+    <text x="742" y="108" text-anchor="middle" font-size="9" fill="var(--muted)">page number → file</text>
 
     <!-- ===== ayah region ===== -->
     <!-- AYAH REGISTRY hub (reference) -->
@@ -309,8 +311,12 @@
   <div class="callout ok">
     <b>Held — two boxes, plus the two fonts.</b> The <b>word text</b> and the <b>page plan</b> are the
     V4 pair the app keeps a copy of, so it can draw its own word-by-word page and stand it beside the
-    printed one to check it. Both were loaded and verified on 8&nbsp;September&nbsp;2026. The two
-    <b>fonts</b> that draw them are cleared to hold, but not loaded yet.
+    printed one to check it. Both were loaded and verified on 8&nbsp;September&nbsp;2026. The
+    <b>page-by-page word font</b> that draws the text — 604 files, one per page, because each
+    printed word is one private character that only its own page's file can draw — was fetched
+    the same day into the building tools' cache and reaches only the development diff view,
+    never the store or the shipped bundle. The <b>surah-name font</b> is cleared to hold but not
+    fetched yet.
   </div>
   <div class="callout">
     <b>Reference only — everything else.</b> The grammar files, the themes and topics, the two
@@ -332,8 +338,8 @@
     <tbody>
       <tr><td>WORD TEXT</td><td>qpc-v4 word text</td><td class="num">83,668</td><td>word id; location</td><td>yes</td><td class="tag-held">held, loaded</td></tr>
       <tr><td>LAYOUT</td><td>digital-khatt 15-line layout</td><td class="num">9,046 / 604 pp</td><td>word-id range per line</td><td>no — numbers</td><td class="tag-held">held, loaded</td></tr>
-      <tr><td>FONT — surah names</td><td>surah-name display font</td><td class="num">116 glyphs</td><td>draws surah lines</td><td>asset</td><td class="tag-held">held, not loaded</td></tr>
-      <tr><td>FONT — Nastaleeq</td><td>Nastaleeq text font</td><td class="num">—</td><td>draws word glyphs</td><td>asset</td><td class="tag-held">held, not loaded</td></tr>
+      <tr><td>FONT — surah names</td><td>surah-name display font</td><td class="num">116 glyphs</td><td>draws surah lines</td><td>asset</td><td class="tag-held">cleared, not fetched</td></tr>
+      <tr><td>FONT — page-by-page V4</td><td>qpc-v4 word font, one file per page</td><td class="num">604 files</td><td>page number → file; word character → glyph</td><td>asset — every glyph is a printed word</td><td class="tag-held">held, fetched to the dev cache</td></tr>
       <tr><td>word → root</td><td>word-root</td><td class="num">50,298</td><td>location</td><td>yes</td><td class="tag-ref">reference</td></tr>
       <tr><td>word → lemma</td><td>word-lemma</td><td class="num">72,510</td><td>location</td><td>yes</td><td class="tag-ref">reference</td></tr>
       <tr><td>word → stem</td><td>word-stem</td><td class="num">77,427</td><td>location</td><td>yes</td><td class="tag-ref">reference</td></tr>

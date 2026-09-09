@@ -47,7 +47,8 @@ erDiagram
   SURAH_REGISTRY ||--o{ AYAH_REGISTRY : "surah number"
   SURAH_REGISTRY ||--o{ SURAH_INFO_EN : "surah number"
   LAYOUT }o--|| FONT_SURAHNAME : "draws surah-name lines"
-  WORDS_TEXT }o--|| FONT_NASTALEEQ : "draws word glyphs"
+  LAYOUT ||--|| FONT_PAGE : "page number picks the file"
+  WORDS_TEXT }o--|| FONT_PAGE : "draws word glyphs"
 
   WORDS_TEXT { int word_id "qpc-v4 · 83,668 words · HELD, loaded" }
   LAYOUT { int first_last_word_id "digital-khatt · 9,046 lines · 604 pages · HELD, loaded" }
@@ -66,7 +67,7 @@ erDiagram
   SURAH_REGISTRY { int surah_number "metadata · 114 surahs" }
   SURAH_INFO_EN { int surah_number "114 English descriptions" }
   FONT_SURAHNAME { txt glyphs "surah-name-v4 · 116 glyphs" }
-  FONT_NASTALEEQ { txt glyphs "KFGQPC Nastaleeq" }
+  FONT_PAGE { txt glyphs "qpc-v4 page-by-page · 604 files, one per page · HELD, fetched" }
 ```
 
 ## What each backbone does
@@ -96,8 +97,16 @@ the [qul-etl-plugins](../decisions/qul-etl-plugins.md) decision):
 - **Held** — the two boxes marked HELD, the **word text** and the **layout**, are the V4 pair the
   app keeps a copy of, so it can draw its own word-by-word page and stand it beside the printed
   one to check it. That is settled by [qul-store-purpose](../decisions/qul-store-purpose.md). The
-  two **fonts** are held too, as the thing that draws the held text. None of it ships to readers;
-  each needed its licence read first, and those reads cleared on 8 September 2026; the word text and the layout are now loaded and verified in the store, while the two fonts are cleared to hold but not loaded yet.
+  two **fonts** are held too, as the thing that draws the held text. The word font is **one file
+  per page**: each printed word is a single private character, and only its own page's file
+  knows what that character looks like, so the pack is 604 files keyed by page number, and a
+  general Arabic text face draws the wrong shape for every word (tried first, on 8 September
+  2026, and recorded in [the render issue](../issues/qul-diff-render-needs-font.md)). None of
+  it ships to readers; each needed its licence read first, and those reads cleared on
+  8 September 2026. The word text and the layout are loaded and verified in the store; the
+  page-by-page word font was fetched the same day into the building tools' own cache and is
+  served only to the development diff view; the surah-name font is cleared to hold but not
+  fetched yet.
 - **Reference only** — everything else on the diagram (the grammar files, the themes and topics,
   the two similar-verse sets, the division ranges) is a ruler: the app measures its own work
   against it and links back to it, and keeps none of its bytes. Whether any of these is ever held
@@ -130,7 +139,7 @@ by, whether it carries Arabic, and what the library's own page says about its li
 | SURAH_INFO_EN | English surah descriptions | 114 | surah number | Mostly English | Surah information | none shown |
 | META_RANGES | juz / hizb / rub / manzil / ruku / sajda ranges | 30 / 60 / 240 / 7 / ~558 / 15 | first/last verse key | No | Quran metadata | none shown |
 | FONT_SURAHNAME | surah-name display font | 116 glyphs | draws surah-name lines | Rendering asset | Quran font (id 457) | none shown |
-| FONT_NASTALEEQ | Nastaleeq Arabic text font | — | draws word glyphs | Rendering asset | Quran font (id 462) | none shown |
+| FONT_PAGE | qpc-v4 page-by-page word font | 604 files, one per page | page number → file; each word's character → its glyph | Rendering asset — every glyph is a printed word | Quran font (id 240) | none shown |
 
 ## The licence, in one line
 
