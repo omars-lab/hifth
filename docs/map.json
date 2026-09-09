@@ -1604,6 +1604,11 @@
           "file": "apps/web/scripts/qul-tap-sweep.mjs",
           "symbol": "onePage",
           "note": "The whole-book tappable-area sweep (follow-up ⑳). Reuses the workbench module inside a headless browser to measure every store word box at the print's geometry, lays the app's tap shapes over it, and classifies each word box centre as own-shape / neighbour / outside. Output is text-free (page numbers, s:a addresses, counts) and committed as evidence in docs/issues/qul-tap-sweep.json; the finding is docs/issues/qul-tap-sweep.md."
+        },
+        {
+          "file": "apps/web/scripts/qul-print-tap-sweep.mjs",
+          "symbol": "onePage",
+          "note": "The tighter companion to the store sweep: lays the app's OWN print word boxes (assets/words) over the app's own tap shapes and classifies each box centre the same way. Removes the store entirely — no held copy, no font, no fixtures — so both its generator and its output (docs/issues/qul-print-tap-sweep.json) reproduce on a clean clone. Confirms the store residue is a boundary artifact: with one justification removed the residue drops ~8x (99.56% own-ayah), stays at ayah boundaries, and is directional (345 of 379 into the preceding ayah, never the wrong line)."
         }
       ],
       "extend": [
@@ -1611,7 +1616,8 @@
         "The drawing is plain DOM on purpose — the page stage builds its print hosts by hand, outside React, and the overlay has to sit inside one. StorePageSvg.tsx is the one-effect React wrapper the workbench uses; add nothing to it that the overlay would then lack.",
         "A page that reports 'placed by fit' is a finding, not a bug to paper over: either the print's boxes really do have a different number of rows from the store's ayah lines (look at the page) or a class of box the clustering does not yet set aside has bridged two rows (look at the box heights, as page 300's gutter signs were found).",
         "Keep every word out of the tracked tree. The fixture and the font are gitignored and gate:scripture reads the tree; the bundle gate (follow-up ⑲) reads dist/. Do not add an import of the fixture, a copy of a word, or the font family's code points anywhere a build can see.",
-        "For a whole-book sweep, pull every page at once: dotenvx run -- node packages/etl/scripts/qul-page-fixtures-all.mjs writes all 604 gitignored fixtures over one database connection (it carries no Qur'an text itself). Then apps/web/scripts/qul-tap-sweep.mjs runs the tappable-area check across them against the running dev server."
+        "For a whole-book sweep, pull every page at once: dotenvx run -- node packages/etl/scripts/qul-page-fixtures-all.mjs writes all 604 gitignored fixtures over one database connection (it carries no Qur'an text itself). Then apps/web/scripts/qul-tap-sweep.mjs runs the tappable-area check across them against the running dev server.",
+        "qul-print-tap-sweep.mjs is the store-free companion: it needs no fixtures and no font (only the app's own committed word boxes and tap shapes), so it runs against a bare dev server and both its generator and its JSON reproduce on a clean clone. Use it, not the store sweep, whenever the question is about the app's own tap registration rather than the store."
       ],
       "gates": [
         "pnpm gate:scripture",
