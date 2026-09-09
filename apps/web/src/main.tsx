@@ -53,3 +53,13 @@ initPwa();
 if (import.meta.env.VITE_PERF_PROBE) {
   void import("./perf/probe").then((m) => m.mountPerfProbe());
 }
+
+/*
+ * The store-over-print dev overlay (`make dev-qul`), the same way and for the
+ * same reason: a build-time constant, so the module and the store's words it
+ * fetches never enter a public bundle — `gate:bundle-notext` reads dist/ for
+ * any trace of it.
+ */
+if (import.meta.env.VITE_QUL_OVERLAY) {
+  void import("./qul-diff/overlay").then((m) => m.mountQulOverlay());
+}

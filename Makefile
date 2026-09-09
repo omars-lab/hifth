@@ -39,6 +39,14 @@ install: ## Install deps + wire the gitleaks pre-commit hook (runs "prepare")
 dev: ## Start the web app in dev mode (Vite HMR) — the main local dev loop
 	$(WEB) dev
 
+.PHONY: dev-qul
+dev-qul: ## Dev server with the store-over-print overlay mounted (print / store / both pill)
+	@# VITE_QUL_OVERLAY is read at build time only (src/main.tsx); it is never set
+	@# for `make build`, so the overlay and the store's words stay out of dist/.
+	@# The words and the per-page font come from gitignored files served by a
+	@# dev-only route — pull a page first: dotenvx run -- node packages/etl/scripts/qul-page-fixture.mjs --page N
+	VITE_QUL_OVERLAY=1 $(WEB) dev
+
 .PHONY: build
 build: node-ok ## Production build (core first — package exports resolve to its dist/)
 	$(CORE) build

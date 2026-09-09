@@ -1103,14 +1103,30 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     (gitignored fixtures and cache; the scripture gate reads the tree) — *done*; the
     development path is compiled out of the public build (a separate entry that is not a build
     input, a server route that exists only in dev, and the in-app toggle behind a build-time
-    flag like the perf probe in follow-up ①) — *done for the page, owed for the toggle*; and a
+    flag like the perf probe in follow-up ①) — *done*, page and toggle both, 2026-09-08; and a
     gate that reads the **built** bundle and fails on any Arabic letter or on the loader that
     reaches for the store — *not yet built*. Today no gate looks at the shipped bytes for this:
     `gate:scripture` reads the tree and `gate:notext` is a Safari rendering check wearing a
     scripture name.
-    **What would close it:** lift the store-page drawing into one component the workbench and
-    the app both mount; mount it as the overlay in the page stage behind the build-time flag;
-    add the bundle gate. One register loose end: branch `graduate-page-bar-winners` opened two
+    **The overlay, built (2026-09-08):** one drawing of the store's page, shared by the
+    side-by-side page and the app (`apps/web/src/qul-diff/storePage.ts`), and the in-app
+    toggle behind the build-time flag (`make dev-qul`; a pill in the corner flips print /
+    store / both, and says for the page in view whether its lines paired). Two things had to
+    be worked out for the store's words to land *on* the print rather than near it, and both
+    come from the print's own measurements, not from a guess. **Where the lines are:** the app
+    ships every page's word boxes, and those boxes fall into rows; the rows *are* the print's
+    lines, so each store line is placed at the row it pairs with, and a line with no boxes of
+    its own (a surah name, a basmala) at the position a straight line through the others
+    predicts. The pairing had to learn to ignore the few boxes that are not a word tall — the
+    small signs that sit in the gutter between two lines bridged two rows into one on page 300
+    until they were set aside. **How big the letters are:** the library's font is cut so that
+    every full line of a page fills the same measure at one size, so the size is *measured*,
+    once the drawing is on the page — the one size at which a line's natural width is the
+    width the print gave that line — and the page's short centred lines (the two opening pages)
+    are each set to their own row's width. Checked by eye on pages 1, 2, 3, 300 and 604: every
+    line pairs, and on 300 the store's letters sit on the print's stroke for stroke. A bonus for
+    follow-up ⑳: the pairing gives every store word a measured position in the app's own frame.
+    **What would close it:** add the bundle gate. One register loose end: branch `graduate-page-bar-winners` opened two
     rows this branch does not carry — *could a developer draw a page from the other library
     without a reader receiving it* (its option B is exactly this) and *should we build a fine
     check against the library's page map* — so whichever branch merges second stamps the first

@@ -177,3 +177,20 @@ cache. The owner's standing permission to fetch from the library while signed in
 What is still owed — the shared component, the in-app overlay, the bundle gate, the tappable-area
 comparison (follow-up ⑳) and the harakat question (follow-up ㉑) — is tracked in
 [`docs/tasks.md`](../tasks.md).
+
+## #95 / #96 — One drawing of the store's page, and the in-app overlay behind a build-time flag
+
+**Done:** 2026-09-08 (branch `qul-page-diff`) — the story is follow-up ⑲ in
+[`docs/PLAN.md`](../PLAN.md); where it lives is the `qul-page-diff` row of the code map.
+
+The side-by-side workbench and the running app now mount the same drawing of the store's page.
+In the app it is an overlay, not a swap: a pill in the corner flips print / store / both while the
+tappable ayah shapes, the highlighter and the marks keep working underneath, and the whole road in
+is one build-time flag (`make dev-qul`) so every normal build drops it. The store's lines are placed
+from the app's own word boxes — the boxes fall into rows, the rows are the print's lines — and the
+letters are sized by measuring the drawing once it is on the page, not by a number tuned by hand.
+Two things the eye-check caught and the code now knows: the small signs in the gutter between two
+lines are not a word tall and were bridging two rows into one on page 300; and the two opening pages
+set every line to its own width, so a paired line takes its own row's measure, not the page's.
+Checked on pages 1, 2, 3, 300 and 604 in both rooms. Still owed from the same follow-up: the gate
+that reads the built bundle (#97).
