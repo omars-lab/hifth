@@ -101,8 +101,25 @@ The fixtures and the per-page font are gitignored held copy; the sweep's output 
 
 A word landing on the **wrong line** (a vertical miss), or a neighbour-flag count that does *not*
 scale with a page's ayah-boundary count — either would mean a tap shape genuinely off its ayah, and
-neither appears. A tighter test would compare each store word against the app's *own* print words
-rather than the store's re-justification, removing the two-justifications hair; the boxes for that
-are the same ones the app already ships, and it is the natural next instrument if the boundary
-residue ever needs to be driven to zero. Until then the tap shapes stand: **the app answers a tap
-with the right ayah, page after page.**
+neither appears.
+
+The tighter test named here has now been run, and its evidence is committed beside this record as
+`qul-print-tap-sweep.json` (generator: `apps/web/scripts/qul-print-tap-sweep.mjs`, which touches no
+held copy — only the app's own committed word boxes and tap shapes). It removes the store entirely:
+instead of the store's re-justified words it lays the app's **own** print word boxes — the ones the
+app already ships — over the same tap shapes, so the only two things left to disagree are the app's
+own ink-traced ayah polygon and its own word-box layout, with no foreign justification. Across all
+604 pages **99.56%** of 91,451 print words tap their own ayah; **0.41%** (379) land in a neighbour
+and **0.02%** (20) outside — a residue roughly **eight times smaller** than the store sweep's 3.6%,
+and concentrated the same way, at ayah boundaries. It shrinks by removing one justification and does
+not vanish, because the polygon and the word boxes are still two readings of the same print that
+part by a hair where an ayah ends mid-line.
+
+That leftover residue is **directional**, which is what a boundary artifact looks like: of the 379
+neighbour words, 345 land in the immediately **preceding** ayah, **none** in the following one, and
+not one lands on the wrong line — the only disagreement is which side of a shared-line split a
+boundary word sits on. None is the first word of its ayah; they are interior words on a line their
+ayah shares with the one before it. That bias is a property of the app's own registration — its word
+boxes against its ink-traced shapes — not of the store, and it is where to look first if the
+boundary residue ever needs to be driven to zero. Until then the tap shapes stand: **the app answers
+a tap with the right ayah, page after page.**
