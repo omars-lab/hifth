@@ -213,6 +213,20 @@ planting a fake glyph and route and watching it fail, then reverting. Wired into
 gate runs here (the quick sweep, the local mirror, the blocking job), which the wiring gate
 confirms — thirty gates now, each in all three.
 
+## #99 — Redraw the outside library's entity diagram for the per-page word font
+
+**Done:** 2026-09-09 (branch `qul-page-diff`) — the story is follow-up ⑲ in
+[`docs/PLAN.md`](../PLAN.md); where it lives is the `qul-page-diff` row of the code map.
+
+When the held copy first got its entity diagram, the box for its text face named the library's
+Nastaleeq font — a calligraphic face for reading, not the one that drew the printed pages. The page
+diff needs the other one: the printing's own per-page font, where every page is a separate file and
+each private character *is* one printed word, so the store's words come out in the exact letters of
+the print. Both the written diagram and the hand-drawn one on the site now carry that face instead —
+a row of its own (six hundred and four files, one per page, keyed page number to file to glyph),
+marked a rendering asset so no one mistakes it for held text — and the Nastaleeq box is gone. The
+same font is the one the workbench and the in-app overlay fetch and draw.
+
 ## #100 — Diff view: compare the app's tappable ayah areas against the store's words (selectable-area registration check)
 
 **Done:** 2026-09-09 (branch `qul-page-diff`) — follow-up ⑳ in [`docs/PLAN.md`](../PLAN.md); the
