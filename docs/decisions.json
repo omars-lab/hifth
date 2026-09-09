@@ -297,7 +297,8 @@
         "loop-6a",
         "tajweed-colours",
         "mark-placement",
-        "mistake-note-anchor"
+        "mistake-note-anchor",
+        "harakah-pick"
       ]
     },
     {
@@ -341,7 +342,8 @@
         "mark-granularity",
         "word-selection",
         "comparison-crop",
-        "sitting-hosting"
+        "sitting-hosting",
+        "harakah-pick"
       ]
     },
     {
@@ -675,7 +677,8 @@
       "related": [
         "word-selection",
         "mark-granularity",
-        "mistake-note-kinds"
+        "mistake-note-kinds",
+        "harakah-pick"
       ]
     },
     {
@@ -1007,6 +1010,37 @@
       "date": null,
       "related": [
         "qul-page-cross-check"
+      ]
+    },
+    {
+      "id": "harakah-pick",
+      "question": "How does a reader pick one vowel-sign to note, when it is smaller than a fingertip?",
+      "status": "open",
+      "options": [
+        {
+          "id": "A",
+          "label": "Tap the word, then tap the sign from an enlarged tray"
+        },
+        {
+          "id": "B",
+          "label": "Press the page, and a loupe snaps to the nearest sign"
+        },
+        {
+          "id": "C",
+          "label": "Tap the word, then tap the sign by its name"
+        }
+      ],
+      "artifact": "https://blog.bytesofpurpose.com/hifth/docs/design/harakah-pick-options.html",
+      "page": "docs/design/harakah-pick-options.html",
+      "builtBy": "scripts/build-harakah-pick-options.mjs",
+      "doc": "docs/decisions/harakah-pick.md",
+      "decided": null,
+      "by": null,
+      "date": null,
+      "related": [
+        "mistake-note-anchor",
+        "mark-granularity",
+        "mark-placement"
       ]
     }
   ]
