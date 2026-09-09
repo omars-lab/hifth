@@ -73,12 +73,12 @@
   .panel.show{display:block;}
   .pp-note{font-size:.78rem;color:var(--ink-faint);text-align:center;max-width:34rem;margin:0 auto .6rem;}
   .pp-scroll{overflow-x:auto;padding:.15rem;}
-  .pp-track{min-width:18rem;}
+  .pp-track{width:max-content;min-width:18rem;margin:0 auto;}
   .pp-row{display:flex;align-items:stretch;gap:.45rem;}
   .pp-rowname{width:4.6rem;flex:none;font-size:.62rem;letter-spacing:.02em;color:var(--ink-faint);
     display:flex;align-items:center;justify-content:flex-end;text-align:right;}
-  .pp-band{position:relative;flex:1;height:2.5rem;}
-  .pp-ribbon{position:relative;flex:1;height:3rem;border:1px dashed var(--paper-sunk);border-radius:var(--radius-sm);
+  .pp-band{position:relative;flex:none;width:var(--pp-w,20rem);height:2.5rem;}
+  .pp-ribbon{position:relative;flex:none;width:var(--pp-w,20rem);height:3rem;border:1px dashed var(--paper-sunk);border-radius:var(--radius-sm);
     margin:.18rem 0;cursor:pointer;background:var(--paper);overflow:hidden;}
   .pp-ribbon svg{position:absolute;inset:0;width:100%;height:100%;}
   .pp-ribbon.sel{outline:2px solid var(--sel);outline-offset:-2px;background:var(--sel-soft);}
@@ -442,6 +442,12 @@ function openPanel(w){
   curMarks.forEach(function(s){ ((s.y+s.mh/2)<cy ? ppU : ppL).appendChild(markCell(s)); });
   renderSel();
   panel.classList.add("show");
+  // Size all three rows to the word's real width-to-height, so the letters
+  // read undistorted and each mark sits over the letter it belongs to —
+  // rather than a short word smeared across the whole panel. Wide words then
+  // overflow into the horizontal scroll rather than stretching.
+  var h=ppR.clientHeight||48;
+  panel.style.setProperty("--pp-w", Math.round(h*curB.bw/curB.bh)+"px");
 }
 function toggle(key){ if(sel[key]) delete sel[key]; else sel[key]=true; renderSel(); }
 function summary(){
