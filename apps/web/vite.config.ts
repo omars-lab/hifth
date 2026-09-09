@@ -1,7 +1,71 @@
 import { execFileSync } from "node:child_process";
-import { defineConfig } from "vite";
+import { readFileSync } from "node:fs";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
+import { defineConfig, type Plugin } from "vite";
 import react from "@vitejs/plugin-react";
 import { VitePWA } from "vite-plugin-pwa";
+
+/**
+ * Serve the QUL page fixtures to the dev diff view — dev only, never a build input.
+ *
+ * The diff view (`qul-diff.html`) stands the store's word-by-word page beside the
+ * shipped print, the `qul-store-purpose` check. The store's text is text-bearing, so
+ * its fixtures live under `apps/web/dev-fixtures/` — gitignored, and NOT under
+ * `public/`, so a production build can never copy one into the shipped bundle. Vite
+ * serves `public/` by path but not this directory, so a small dev-only route hands
+ * these files to the page. It exists only in `configureServer`; `vite build` never
+ * runs it (`apply: "serve"`), so nothing here can reach production. Only
+ * `qul-page-<n>.json` is served — no path can escape the one directory.
+ *
+ * The same route also hands over the library's own word-shape fonts, so the diff view can
+ * draw the store's words as the print draws them. The print's font is ONE FILE PER PAGE:
+ * page N's words are code points FC41, FC42, … in `pN.ttf` and in no other file, so a
+ * general Arabic font shows the wrong ligature for each and only the page's own file draws
+ * the word. A font whose every character is a whole printed word IS Qur'an text in the only
+ * sense that matters here, so the 604 files live where the other held inputs live — the
+ * ETL's gitignored `.cache/qul-fonts/qpc-v4-tajweed/` (QUL resource 240, fetched
+ * 2026-09-08 under the licence read recorded that day) — and are served by page number only.
+ */
+function qulFixturesDev(): Plugin {
+  const here = dirname(fileURLToPath(import.meta.url));
+  const dir = join(here, "dev-fixtures");
+  const fontsDir = join(
+    here, "..", "..", "packages", "etl", "data", "qul", ".cache", "qul-fonts", "qpc-v4-tajweed",
+  );
+  return {
+    name: "hifth-qul-fixtures-dev",
+    apply: "serve",
+    configureServer(server) {
+      server.middlewares.use((req, res, next) => {
+        const url = (req.url ?? "").split("?")[0] ?? "";
+        const fontPage = Number(/^\/dev-fixtures\/fonts\/p(\d{1,3})\.ttf$/.exec(url)?.[1]);
+        if (fontPage >= 1 && fontPage <= 604) {
+          res.setHeader("Content-Type", "font/ttf");
+          res.setHeader("Cache-Control", "no-store");
+          try {
+            res.end(readFileSync(join(fontsDir, `p${fontPage}.ttf`)));
+          } catch {
+            res.statusCode = 404;
+            res.end();
+          }
+          return;
+        }
+        const m = /^\/dev-fixtures\/(qul-page-\d+\.json)$/.exec(url);
+        const file = m?.[1];
+        if (!file) return next();
+        res.setHeader("Content-Type", "application/json; charset=utf-8");
+        res.setHeader("Cache-Control", "no-store");
+        try {
+          res.end(readFileSync(join(dir, file), "utf8"));
+        } catch {
+          res.statusCode = 404;
+          res.end(JSON.stringify({ error: "fixture-absent", file }));
+        }
+      });
+    },
+  };
+}
 
 /**
  * The commit this bundle was built from.
@@ -42,6 +106,7 @@ export default defineConfig({
     __SOURCE_COMMIT__: JSON.stringify(sourceCommit()),
   },
   plugins: [
+    qulFixturesDev(),
     react(),
     VitePWA({
       registerType: "prompt",

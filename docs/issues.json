@@ -2016,6 +2016,42 @@
         "a phone or a WebKit run"
       ],
       "note": "The page-bar's two questions were both decided C on 2026-09-02 (decisions juz-detents and boundary-juz): a juz marker is a tap-to-open button that grows as the pointer nears it (never during a drag, never eating the drag), and a page carrying a juz seam belongs to both juz. GRADUATED 2026-09-02: the app bar now imports only the winner — each marker is a button that jumps to its juz and, on a fine pointer, grows as the pointer nears it; the thumb bubble names both juz on a seam page, scoped to the bubble alone (shelf and wheel keep one juz each, per boundary-juz). Per graduation-losers (option A) the two losing strategies and their live-page wiring STAY in the core module and on docs/design/page-bar-options.html — they are not deleted — so a reader can still feel why the winner won; the bar reaches only the winner. Covered by a desktop e2e against the real corpus (apps/web/e2e/pagebar-detents.spec.ts) and by PageSlider component tests; the desktop project and gate:i18n/gate:decisions are green. What keeps this row open is the one sub-question the desktop live page cannot prove: the phone bar is ~0.4px a page with no pointer to grow a marker, so a two-juz seam label there needs a layout that must be judged on the owner's phone (or a WebKit run local darwin cannot launch). Blocks nothing shipped."
+    },
+    {
+      "id": "plan-qul-dev-toggle",
+      "source": {
+        "file": "docs/PLAN.md",
+        "item": "19"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "agent",
+      "note": "The development-only comparison of a page powered by the outside library against the page the app ships. Built 2026-09-08: the fixture reader, the side-by-side dev page (qul-diff.html, not a build input), the structure layer eye-checked on pages 1 and 300, and the library's page-by-page word font (one file per page; a general text face drew every word wrong) served in dev from a gitignored cache; the data diagram and join map now show that font in place of the text face. Shape decided: the in-app toggle is an OVERLAY on the print, not a swap, so the ayah shapes, highlighter and marks keep working while a developer flips print/store/both. Owed: one shared drawing component, the overlay behind a build-time flag, and a gate over the built bundle (no Arabic letters, no store loader). Follow-ups 20 (tappable-area comparison) and 21 (the harakat question) build on it. Sibling branch graduate-page-bar-winners holds the open rows qul-dev-draw-toggle and qul-page-cross-check; stamp the first decided B at merge and point it here."
+    },
+    {
+      "id": "plan-qul-selectable-area",
+      "source": {
+        "file": "docs/PLAN.md",
+        "item": "20"
+      },
+      "status": "blocked",
+      "severity": "question",
+      "owner": "agent",
+      "blockedBy": [
+        "plan-qul-dev-toggle"
+      ],
+      "note": "Owner ask 2026-09-08: compare not only how the two pages look but where a reader can tap. Lay the app's tappable ayah shapes over the library's page, measure every word's box in the print's per-page font at the print's geometry, and count per page the words that fall outside their own ayah's shape or inside a neighbour's; then sweep all 604 pages by tool. Waits on the shared component and overlay of follow-up 19, because the boxes only mean something measured in the app's frame."
+    },
+    {
+      "id": "plan-qul-harakat",
+      "source": {
+        "file": "docs/PLAN.md",
+        "item": "21"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "user",
+      "note": "Owner asked 2026-09-08 whether the library's rendering can pick out a single harakah. Not as drawn: the per-page font makes each printed word one character with its marks baked in. It would need the library's plain Unicode word text and Unicode Hafs face (resource 245), both Qur'an text, held under the same licence read and never-in-the-tree rule. What the owner wants it FOR decides whether a cheap show/hide-by-kind filter is enough or the expensive draw-it-ourselves route is needed; nothing is fetched until that is said."
     }
   ]
 }

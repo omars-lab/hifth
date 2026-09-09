@@ -1063,6 +1063,98 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     device-bound check rather than something drawn here. Blocks nothing shipped; the bar works
     today.
 
+19. **A developer can now lay the outside library's page beside ours — and a toggle that lays
+    it *over* ours, in the running app, is what comes next.** Opened 2026-09-08, from the
+    direction given the same day: a development-only switch that compares a page powered by
+    the outside library with the page this app has always shipped.
+    **Why:** our shipped pages are outline drawings, and until now nothing in the building
+    tools could say whether page N shows the right verse on the right line — only a person's
+    eye could, page by page. The held copy of the library exists to be the second draughtsman
+    that can ([qul-store-purpose](decisions/qul-store-purpose.md), option B): draw the same
+    page from the library's word-by-word plan and stand it against ours, so a slipped line or
+    an ayah ending one line early is *seen* rather than assumed away. That decision left "how
+    the check is shown" to the tool, and this follow-up is the tool's answer.
+    **What is built (2026-09-08):** a reader that pulls one page out of the held store into a
+    gitignored fixture (`packages/etl/scripts/qul-page-fixture.mjs`); a development-only page,
+    `apps/web/qul-diff.html`, that is not a build input and stands the shipped print beside the
+    store's page; the structure layer — each line's verse and word run, a medallion where an
+    ayah ends — checked by eye on pages 1 and 300, both registering **line for line** with the
+    print. First finding: the store carries an explicit surah-name line that the print folds
+    into its decorative frame; a difference of convention, not an error. Then the print's own
+    word-shape font fetched into the ETL's gitignored cache and served in dev only, so the
+    store's page is drawn in the letters the print uses, not only in labels — and both pages
+    re-checked with the letters in place: every word on the line the print has it on. One
+    wrong turn worth keeping: the first font fetched was the library's general Nastaleeq
+    text face, and it drew every word as an unrelated ligature, because the print's font is
+    *one file per page* — page N's words are a run of private code points that only page N's
+    file maps to those words. The right resource is the library's per-page pack (604 files,
+    69 MB zipped, the tajweed-coloured cut; licence cleared to hold 2026-09-08).
+    **What is decided here about shape — overlay, not swap.** The in-app toggle lays the
+    store's page *over* the print at identical geometry and lets a developer flip between
+    print, store, and both, rather than replacing the print. Reason: swapping the page out
+    would take with it everything the app does *with* a page — the tappable ayah shapes, the
+    highlighter, marks, hops — so the developer would be comparing a page nobody can use. An
+    overlay keeps the app whole, and flipping two drawings in one place is how a printer's eye
+    catches a registration slip in the first place. The side-by-side page stays as the
+    instrument for a page-at-a-time audit; the overlay is for seeing the store's page in the
+    real frame, zoomed and turned.
+    **What keeps "development only" a fact and not a promise** — three legs, the same three
+    the sibling branch's open record names: the words and the font never enter tracked files
+    (gitignored fixtures and cache; the scripture gate reads the tree) — *done*; the
+    development path is compiled out of the public build (a separate entry that is not a build
+    input, a server route that exists only in dev, and the in-app toggle behind a build-time
+    flag like the perf probe in follow-up ①) — *done for the page, owed for the toggle*; and a
+    gate that reads the **built** bundle and fails on any Arabic letter or on the loader that
+    reaches for the store — *not yet built*. Today no gate looks at the shipped bytes for this:
+    `gate:scripture` reads the tree and `gate:notext` is a Safari rendering check wearing a
+    scripture name.
+    **What would close it:** lift the store-page drawing into one component the workbench and
+    the app both mount; mount it as the overlay in the page stage behind the build-time flag;
+    add the bundle gate. One register loose end: branch `graduate-page-bar-winners` opened two
+    rows this branch does not carry — *could a developer draw a page from the other library
+    without a reader receiving it* (its option B is exactly this) and *should we build a fine
+    check against the library's page map* — so whichever branch merges second stamps the first
+    one decided B and points it here. Blocks nothing shipped; the app's pages are unchanged.
+
+20. **Compare not only how the two pages look, but where a reader can tap.** Asked for
+    2026-09-08, the same day the side-by-side view began drawing the library's page in the
+    print's own letters: "beyond comparing masahif, I also want to compare selectable area."
+    **Why:** the app does two things with a page — it shows it, and it answers a tap on it with
+    an ayah. Follow-up ⑲ checks the first against the outside library; nothing checks the
+    second. Each ayah's tappable shape was drawn from the print's own ink, ayah by ayah, and the
+    only test of whether it encloses exactly the words that belong to it has been a person's
+    eye. The library's page gives a second opinion at the word: it says which words make up
+    each line and each ayah, and once those words are drawn in the print's per-page font at the
+    print's geometry, every word has a measured box.
+    **What it would do:** in the development view, lay the app's own tappable ayah shapes over
+    the library's page and count, per page, every word whose box falls outside the shape of the
+    ayah it belongs to, or inside a neighbour's. Zero is the expected answer on most pages; a
+    non-zero count is a shape to look at, and a word that lands in the *wrong* ayah's shape is a
+    reader tapping one ayah and being told another. Then a sweep by tool across all 604 pages,
+    the way the highlight sweep in follow-up ⑩ replaced page-by-page looking.
+    **What it depends on:** the shared drawing component and the overlay in ⑲, because the word
+    boxes have to be measured at the print's geometry, not the workbench's, to mean anything
+    against the tap shapes. Blocks nothing shipped.
+
+21. **Can the library's page pick out a single harakah, and should it?** Asked 2026-09-08. The
+    short answer is no, not as the page is drawn today, and the longer answer is a question for
+    the owner rather than a build.
+    **Why not today:** the per-page font draws each printed word as *one* character with its
+    vowel and reading marks already part of the shape. There is no separate character for a
+    fatha or a shadda to select, hide or colour; the tajweed colouring in the library's cut is
+    baked into each word's shape by the font itself.
+    **What it would take:** the library's plain Unicode word text (where a word is letters plus
+    combining marks, each mark its own character) and its single Unicode Hafs face (resource
+    245), neither of which is held. With those, marks can be filtered by kind at the text level —
+    show or hide every sukun, every shadda — cheaply; colouring one mark on its own in a browser
+    is not cheap, because a browser will not style half a shaped word, so it means drawing the
+    text ourselves. Both files are Qur'an text and would join the held copy under the same
+    licence read and the same never-in-the-tree rule.
+    **What is open:** what the owner wants a selectable harakah *for* — a reading check, a
+    tajweed lesson, a comparison against the print's own marks — decides whether the cheap
+    filter is enough or the expensive drawing is needed, and whether either earns holding two
+    more files. Nothing is fetched until that is said. Blocks nothing shipped.
+
 **The half of these a machine cannot run now has a register — and a runbook.** Follow-ups
 ① (the phone), ② (the browser glance) and ④ (VoiceOver/TalkBack) still wait on a human, and
 prose cannot answer "is that still true, on what device, and when?" — ⑤ (does the source
