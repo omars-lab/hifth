@@ -192,5 +192,23 @@ letters are sized by measuring the drawing once it is on the page, not by a numb
 Two things the eye-check caught and the code now knows: the small signs in the gutter between two
 lines are not a word tall and were bridging two rows into one on page 300; and the two opening pages
 set every line to its own width, so a paired line takes its own row's measure, not the page's.
-Checked on pages 1, 2, 3, 300 and 604 in both rooms. Still owed from the same follow-up: the gate
-that reads the built bundle (#97).
+Checked on pages 1, 2, 3, 300 and 604 in both rooms.
+
+## #97 — Gate the built public bundle: no held letters, no store loader, no dev-fixture path
+
+**Done:** 2026-09-09 (branch `qul-page-diff`) — the story is follow-up ⑲ in
+[`docs/PLAN.md`](../PLAN.md); where it lives is the `qul-page-diff` row of the code map.
+
+The overlay is meant to compile out of every public build, and until now nothing looked at the
+built bytes to prove it did. A new check weighs the shipped app — the entry page, the service
+worker, and the hashed script and style files — and fails on the two things that can only be the
+store. It does **not** fail on Arabic: the app's own interface has an Arabic locale (licence
+notices, the printing's name, provenance), and a gate that refused that would be switched off in a
+week. It fails on the store's held letters — the per-page font encodes each printed word as one
+private character (a presentation form or a private-use code point), which the interface's locale
+never uses — and on the loader's own words: the dev-fixture route, the overlay module, the dev
+font family, the build-time flag, none of which survive a normal build because the branch that
+names them is dropped. Calibrated against a real build (zero of both), and proved to bite by
+planting a fake glyph and route and watching it fail, then reverting. Wired into all three places a
+gate runs here (the quick sweep, the local mirror, the blocking job), which the wiring gate
+confirms — thirty gates now, each in all three.
