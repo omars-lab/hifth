@@ -315,6 +315,23 @@ href: https://tanzil.net
   [`docs/design/word-indexing.md`](docs/design/word-indexing.md) is the record —
   including the measurement that says the two indices are monotone, and the four
   ayahs where they cannot be related at all.
+- **One exception, on a decision page — not in the app.** The picker on
+  [`docs/design/harakah-pick-options.html`](docs/design/harakah-pick-options.html)
+  has to *draw* a word letter by letter, so for one verse (2:38, page 7) it ships
+  the derived letter and mark **outlines** from this corpus — the shapes, sliced
+  into letters and spaced apart, in
+  [`docs/design/data/harakah-ligatures-7.json`](docs/design/data/harakah-ligatures-7.json),
+  written by `scripts/extract-ligatures.mjs`. This is derived geometry like the
+  word boxes, one richness up: the glyph shapes rather than their bounding
+  rectangles. Still no upstream bytes ship byte-for-byte, and still no Qur'an
+  *text* — the outlines are re-serialised `<path>` data with every Arabic
+  codepoint dropped (the extractor asserts zero before it writes; the page build
+  asserts zero before it publishes), and the letter *counts* that drive the
+  slicing are integers taken from the corpus and the string they were measured
+  from is discarded. The Sadaqa-e-Jaria grant below covers "derive … publish …
+  for any lawful purpose", so this is licensed; it is called out here so the
+  entry's "per word, a rectangle" is not read as forbidding the one page that
+  needs the shapes. The app itself still ships none of this.
 - **How geometry from one print lands on another:** both corpora draw the same
   page and both mark the end of every ayah with an ornament, so the ornaments are
   a correspondence neither was built to provide. `build-words.mjs` fits

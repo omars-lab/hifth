@@ -58,3 +58,8 @@ packages/etl/data/mutashabihat/.cache/
 # bytes of it ship — the committed finding is docs/design/segmentation-witness.data.json,
 # counts and verse keys only.
 packages/etl/data/segmentation/.cache/
+
+# The MushafDatabase ligature SVG fetch cache: per-ligature outlines with
+# Arabic data-text, read at build time to derive letter/mark outlines (numbers
+# and shapes only ship). The corpus it points at is not committed.
+packages/etl/data/ligature/.cache/
