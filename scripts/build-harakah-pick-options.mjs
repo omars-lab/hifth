@@ -93,6 +93,42 @@ const signs = markList.map((m, i) => ({
   src: m.s,
 }));
 
+// The sliced letters, from the ligature corpus (built by extract-ligatures.mjs).
+// Each word becomes its letters in reading order (rightmost first), each letter
+// carrying its own outline and the outlines of the marks that sit on it, in the
+// corpus's own frame. The picker lays each letter out afresh cropped to its own
+// box, so the corpus frame never has to register against the shipped page frame.
+const LIGS = join(ROOT, "docs/design/data/harakah-ligatures-7.json");
+const ligDoc = JSON.parse(readFileSync(LIGS, "utf8"));
+if (ligDoc.ayah !== AYAH) die(`ligature extract is for ${ligDoc.ayah}, not ${AYAH}`);
+const unionBB = (boxes) => {
+  const x0 = Math.min(...boxes.map((b) => b[0]));
+  const y0 = Math.min(...boxes.map((b) => b[1]));
+  const x1 = Math.max(...boxes.map((b) => b[0] + b[2]));
+  const y1 = Math.max(...boxes.map((b) => b[1] + b[3]));
+  return [x0, y0, x1 - x0, y1 - y0];
+};
+// Keyed by word index in the verse (wi === shipped word number, since from=1).
+const ligWords = {};
+for (const w of ligDoc.words) {
+  const letters = w.ligs
+    .slice()
+    // Arabic reads right→left, so lay the letters rightmost-first. Sort by each
+    // letter's CENTRE, not its left edge: a wide connected cluster reaches far
+    // left, so its left edge sorts it after a narrow letter that in fact sits to
+    // its left — the centre places every letter where it actually reads.
+    .sort((a, b) => b.bb[0] + b.bb[2] / 2 - (a.bb[0] + a.bb[2] / 2))
+    .map((l) => ({
+      bb: l.bb,
+      ubb: unionBB([l.bb, ...l.dia.map((d) => d.bb)]),
+      n: l.n || 1,
+      cuts: l.cuts || [],
+      body: l.body,
+      dia: l.dia.map((d) => ({ name: d.name, bb: d.bb, d: d.d })),
+    }));
+  ligWords[w.wi] = { bb: w.bb, letters };
+}
+
 // The crop is the union of the verse's word boxes, padded, so the verse fills
 // the stage at a size where the signs are actually visible.
 const minX = Math.min(...wordBoxes.map((b) => b.x));
@@ -117,6 +153,7 @@ const DATA = {
   crop,
   words: wordBoxes,
   signs,
+  ligWords,
   ayah: AYAH,
   page: PAGE,
 };
@@ -197,24 +234,18 @@ const html = `<!doctype html>
   .panel.show{display:block;}
   .pp-note{font-size:.78rem;color:var(--ink-faint);text-align:center;max-width:34rem;margin:0 auto .6rem;}
   .pp-scroll{overflow-x:auto;padding:.15rem;}
-  .pp-track{width:max-content;min-width:18rem;margin:0 auto;}
-  .pp-row{display:flex;align-items:stretch;gap:.45rem;}
-  .pp-rowname{width:4.6rem;flex:none;font-size:.62rem;letter-spacing:.02em;color:var(--ink-faint);
-    display:flex;align-items:center;justify-content:flex-end;text-align:right;}
-  .pp-band{position:relative;flex:none;width:var(--pp-w,20rem);height:2.5rem;}
-  .pp-ribbon{position:relative;flex:none;width:var(--pp-w,20rem);height:3rem;border:1px dashed var(--paper-sunk);border-radius:var(--radius-sm);
-    margin:.18rem 0;cursor:pointer;background:var(--paper);overflow:hidden;}
-  .pp-ribbon svg{position:absolute;inset:0;width:100%;height:100%;}
-  .pp-ribbon.sel{outline:2px solid var(--sel);outline-offset:-2px;background:var(--sel-soft);}
-  .pp-colbox{position:absolute;top:0;bottom:0;border:1.5px solid var(--accent-strong);border-radius:2px;
-    background:var(--accent-tint);opacity:.6;pointer-events:none;}
-  .pp-cell{position:absolute;padding:0;border:1px solid var(--paper-sunk);background:var(--paper-raised);
-    border-radius:var(--radius-sm);cursor:pointer;overflow:hidden;display:flex;flex-direction:column;align-items:center;}
-  .pp-upper .pp-cell{bottom:0;} .pp-lower .pp-cell{top:0;}
-  .pp-cell svg{width:100%;height:1.6rem;display:block;}
-  .pp-cell small{font-size:.58rem;line-height:1;color:var(--ink-soft);padding:.06rem .12rem .12rem;white-space:nowrap;}
-  .pp-cell.sel{border-color:var(--sel);background:var(--sel-soft);box-shadow:0 0 0 1px var(--sel);}
-  .pp-cell:focus-visible,.pp-ribbon:focus-visible,.pp-word button:focus-visible,.pp-actions button:focus-visible{
+  .pp-strip{width:max-content;min-width:16rem;margin:0 auto;}
+  .pp-strip svg{display:block;height:9.5rem;width:auto;}
+  /* the ink of a letter and of its marks, drawn in the corpus's own outlines */
+  .pp-strip .ink{fill:var(--ink);}
+  /* the tap targets, laid over each letter and each mark in their true places */
+  .pp-strip .hit{fill:transparent;stroke:var(--paper-sunk);stroke-width:.25;
+    cursor:pointer;transition:fill .1s;}
+  .pp-strip .hit.letter{stroke-dasharray:1 1;}
+  .pp-strip .hit:hover{fill:var(--accent-tint);}
+  .pp-strip .hit.sel{fill:var(--sel-soft);stroke:var(--sel);stroke-width:.5;stroke-dasharray:none;}
+  .pp-strip .hit:focus-visible{outline:none;stroke:var(--accent);stroke-width:.6;}
+  .pp-word button:focus-visible,.pp-actions button:focus-visible{
     outline:2px solid var(--accent);outline-offset:1px;}
   .pp-word{display:flex;gap:.5rem;justify-content:center;flex-wrap:wrap;margin:.7rem 0 0;}
   .pp-word button{appearance:none;border:1px solid var(--paper-sunk);background:var(--paper-raised);color:var(--ink);
@@ -293,14 +324,10 @@ const html = `<!doctype html>
     <div class="tray" id="tray" aria-label="Signs on the word you tapped"></div>
     <div class="chips" id="chips" aria-label="Signs on the word you tapped, by name"></div>
     <div class="panel" id="panel" aria-label="The word broken into its parts">
-      <p class="pp-note">Marks and the whole word are exact — measured on the print. Individual letters
-        aren't cut apart on their own yet: picking one letter alone needs per-letter shapes the app does
-        not ship, and that piece is tracked as the next step.</p>
-      <div class="pp-scroll"><div class="pp-track">
-        <div class="pp-row"><div class="pp-rowname">upper marks</div><div class="pp-band pp-upper" id="ppU"></div></div>
-        <div class="pp-row"><div class="pp-rowname">letters</div><div class="pp-ribbon" id="ppR" tabindex="0" role="button" aria-label="the letters, without their marks"></div></div>
-        <div class="pp-row"><div class="pp-rowname">lower marks</div><div class="pp-band pp-lower" id="ppL"></div></div>
-      </div></div>
+      <p class="pp-note">The word is spread out, letter by letter, with each mark sitting where it really
+        sits on its letter. Tap a letter to take the letter; tap a mark to take just that mark; take as
+        many as you like. Every shape here is measured on the print.</p>
+      <div class="pp-scroll"><div class="pp-strip" id="ppStrip" aria-label="the word, spread out letter by letter"></div></div>
       <div class="pp-word">
         <button id="wWith" type="button">Whole word, with marks</button>
         <button id="wWithout" type="button">Letters only, no marks</button>
@@ -531,74 +558,101 @@ function openChips(w){
 // is selectable, several at once; the whole word (with or without its marks) is
 // one tap; and a live selection opens the four things a reader can do with it.
 var panel=document.getElementById("panel");
-var ppU=document.getElementById("ppU"), ppR=document.getElementById("ppR"), ppL=document.getElementById("ppL");
+var ppStrip=document.getElementById("ppStrip");
 var ppActions=document.getElementById("ppActions");
 var wWith=document.getElementById("wWith"), wWithout=document.getElementById("wWithout");
-var sel={}, curB=null, curMarks=[];
+var sel={}, curLetters=[], curNames={};
 
-function frac(v){ return (v*100)+"%"; }
-function markCell(s){
-  var btn=document.createElement("button"); btn.className="pp-cell"; btn.type="button";
-  btn.style.left=frac((s.x-curB.x)/curB.bw);
-  btn.style.width="max(2.1rem,"+frac(s.mw/curB.bw)+")";
-  btn.setAttribute("aria-label","mark "+s.name);
-  btn.setAttribute("data-key","m:"+s.id);
-  var pad=1.4, svg=document.createElementNS(SVGNS,"svg");
-  svg.setAttribute("viewBox",(s.x-pad)+" "+(s.y-pad)+" "+(s.mw+pad*2)+" "+(s.mh+pad*2));
-  svg.setAttribute("preserveAspectRatio","xMidYMid meet");
-  svg.appendChild(el("use",{href:"#leaf",x:0,y:0,width:DATA.vbw,height:DATA.vbh,class:"leaf"}));
-  var cap=document.createElement("small"); cap.textContent=s.name;
-  btn.appendChild(svg); btn.appendChild(cap);
-  btn.addEventListener("click",function(){ toggle("m:"+s.id); });
-  return btn;
+// How far apart the sliced letters are pulled from each other, in the print's
+// own units. The letters touch in the print; here they are cut apart and spaced
+// so each — and each mark on it — is a comfortable target on its own.
+var LETTER_GAP=9;
+var MARK_MINHIT=2.8; // smallest a mark's tap target is grown to, centred on its ink
+var PAD=1.6;
+
+function growRect(bb, minSize){
+  var x=bb[0], y=bb[1], w=bb[2], h=bb[3];
+  if(w<minSize){ x-=(minSize-w)/2; w=minSize; }
+  if(h<minSize){ y-=(minSize-h)/2; h=minSize; }
+  return [x,y,w,h];
+}
+function pathEl(d, cls){ return el("path",{d:d,class:cls}); }
+function hitRect(bb, key, label){
+  var r=el("rect",{x:bb[0],y:bb[1],width:bb[2],height:bb[3],rx:.5,
+    class:"hit"+(key.charAt(0)==="L"?" letter":""),"data-key":key,tabindex:"0",
+    role:"button","aria-label":label});
+  r.addEventListener("click",function(ev){ ev.stopPropagation(); toggle(key); });
+  r.addEventListener("keydown",function(ev){ if(ev.key==="Enter"||ev.key===" "){ ev.preventDefault(); toggle(key); } });
+  return r;
 }
 function openPanel(w){
-  litWord(w); sel={};
-  curB=DATA.words.filter(function(b){ return b.w===w; })[0];
-  curMarks=DATA.signs.filter(function(s){ return s.w===w; });
-  var cy=curB.y+curB.bh/2; // above this line = an upper mark, below = a lower one
-  ppU.innerHTML=""; ppL.innerHTML=""; ppR.innerHTML="";
-  var rsvg=document.createElementNS(SVGNS,"svg");
-  rsvg.setAttribute("viewBox",curB.x+" "+curB.y+" "+curB.bw+" "+curB.bh);
-  rsvg.setAttribute("preserveAspectRatio","none");
-  rsvg.appendChild(el("use",{href:"#leaf",x:0,y:0,width:DATA.vbw,height:DATA.vbh,class:"leaf"}));
-  ppR.appendChild(rsvg);
-  curMarks.forEach(function(s){ ((s.y+s.mh/2)<cy ? ppU : ppL).appendChild(markCell(s)); });
+  litWord(w); sel={}; curNames={};
+  var word=DATA.ligWords[w];
+  curLetters=(word&&word.letters)?word.letters:[];
+  // Lay the letters out afresh, spread apart, keeping each letter's own vertical
+  // place so every mark stays sitting exactly where it sits on its letter. We
+  // build left-to-right in reverse reading order, so the first letter of the
+  // word lands on the right, the way the print reads.
+  var ink=el("g",{class:"inklayer"}), hits=el("g",{class:"hitlayer"});
+  var cursor=0, minY=Infinity, maxY=-Infinity, maxX=0;
+  var marks=[];
+  for(var vi=curLetters.length-1; vi>=0; vi--){
+    var L=curLetters[vi];
+    var tx=cursor - L.ubb[0];
+    var g=el("g",{transform:"translate("+tx+",0)"});
+    L.body.forEach(function(d){ g.appendChild(pathEl(d,"ink")); });
+    L.dia.forEach(function(d){ d.d.forEach(function(p){ g.appendChild(pathEl(p,"ink")); }); });
+    ink.appendChild(g);
+    // the letter tap areas. A connected cluster is one outline with no per-letter
+    // geometry, so it was cut at the joins measured from the ink; each letter gets
+    // its own band, and a lone letter is a single band spanning its whole width.
+    var bEdges=[L.bb[0]].concat(L.cuts||[]).concat([L.bb[0]+L.bb[2]]);
+    for(var bi=0; bi<bEdges.length-1; bi++){
+      var band=[bEdges[bi]+tx, L.bb[1], bEdges[bi+1]-bEdges[bi], L.bb[3]];
+      hits.appendChild(hitRect(band,"L:"+vi+":"+bi,"letter"));
+    }
+    // each mark's tap area, grown to a comfortable size, drawn on top
+    L.dia.forEach(function(d,di){
+      var mb=growRect([d.bb[0]+tx,d.bb[1],d.bb[2],d.bb[3]],MARK_MINHIT);
+      marks.push(hitRect(mb,"m:"+vi+":"+di,"mark "+d.name));
+      curNames["m:"+vi+":"+di]=d.name;
+      minY=Math.min(minY,mb[1]); maxY=Math.max(maxY,mb[1]+mb[3]);
+    });
+    minY=Math.min(minY,L.ubb[1]); maxY=Math.max(maxY,L.ubb[1]+L.ubb[3]);
+    cursor += L.ubb[2] + LETTER_GAP;
+    maxX=cursor - LETTER_GAP;
+  }
+  marks.forEach(function(m){ hits.appendChild(m); });
+  var vbY=minY-PAD, vbH=(maxY-minY)+PAD*2;
+  var svg=el("svg",{viewBox:(0-PAD)+" "+vbY+" "+(maxX+PAD*2)+" "+vbH,
+    preserveAspectRatio:"xMidYMid meet"});
+  svg.appendChild(ink); svg.appendChild(hits);
+  ppStrip.innerHTML=""; ppStrip.appendChild(svg);
   renderSel();
   panel.classList.add("show");
-  // Size all three rows to the word's real width-to-height, so the letters
-  // read undistorted and each mark sits over the letter it belongs to —
-  // rather than a short word smeared across the whole panel. Wide words then
-  // overflow into the horizontal scroll rather than stretching.
-  var h=ppR.clientHeight||48;
-  panel.style.setProperty("--pp-w", Math.round(h*curB.bw/curB.bh)+"px");
 }
 function toggle(key){ if(sel[key]) delete sel[key]; else sel[key]=true; renderSel(); }
 function summary(){
-  var nm=Object.keys(sel).filter(function(k){ return k.indexOf("m:")===0; }).length;
+  var keys=Object.keys(sel);
+  var nl=keys.filter(function(k){ return k.charAt(0)==="L"; }).length;
+  var nm=keys.filter(function(k){ return k.indexOf("m:")===0; }).length;
   var parts=[];
-  if(nm) parts.push(nm+(nm===1?" mark":" marks"));
+  if(nl) parts.push(nl+(nl===1?" letter":" letters"));
+  if(nm){
+    var names=keys.filter(function(k){ return k.indexOf("m:")===0; }).map(function(k){ return curNames[k]; });
+    parts.push((nm===1?"the ":nm+" marks (")+names.join(", ")+(nm===1?" mark":")"));
+  }
   if(sel["word"]) parts.push("the whole word");
   if(sel["wordbare"]) parts.push("the letters (no marks)");
   return parts.join(" + ");
 }
 function renderSel(){
-  panel.querySelectorAll(".pp-cell").forEach(function(c){ c.classList.toggle("sel", !!sel[c.getAttribute("data-key")]); });
-  ppR.classList.toggle("sel", !!sel["wordbare"]);
+  ppStrip.querySelectorAll(".hit").forEach(function(c){ c.classList.toggle("sel", !!sel[c.getAttribute("data-key")]); });
   wWithout.classList.toggle("sel", !!sel["wordbare"]);
   wWith.classList.toggle("sel", !!sel["word"]);
-  ppR.querySelectorAll(".pp-colbox").forEach(function(x){ x.remove(); }); // the letter each chosen mark sits on
-  curMarks.forEach(function(s){
-    if(sel["m:"+s.id]){
-      var box=document.createElement("div"); box.className="pp-colbox";
-      box.style.left=frac((s.x-curB.x)/curB.bw);
-      box.style.width="max(6px,"+frac(s.mw/curB.bw)+")";
-      ppR.appendChild(box);
-    }
-  });
   var keys=Object.keys(sel);
   ppActions.classList.toggle("show", keys.length>0);
-  if(!keys.length){ emptyEl.hidden=false; emptyEl.textContent="Tap parts of the word to select them — one, or several at once."; caughtEl.hidden=true; }
+  if(!keys.length){ emptyEl.hidden=false; emptyEl.textContent="Tap the letters and marks you want — one, or several at once."; caughtEl.hidden=true; }
   else { emptyEl.hidden=true; caughtEl.hidden=false; caughtEl.innerHTML="Selected: <b>"+summary()+"</b>. Choose what to do with it below."; }
 }
 function doAction(kind){
@@ -608,8 +662,6 @@ function doAction(kind){
 }
 wWith.addEventListener("click",function(){ toggle("word"); });
 wWithout.addEventListener("click",function(){ toggle("wordbare"); });
-ppR.addEventListener("click",function(){ toggle("wordbare"); });
-ppR.addEventListener("keydown",function(e){ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); toggle("wordbare"); } });
 [].forEach.call(ppActions.querySelectorAll("button"),function(b){
   b.addEventListener("click",function(){ doAction(b.getAttribute("data-kind")); });
 });

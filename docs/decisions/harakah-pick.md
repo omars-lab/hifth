@@ -94,9 +94,10 @@ Each is built live on the page and tried by hand, on verse 2:38 at the size it w
 used. None aims at the tiny target directly.
 
 - **A · Word, then part — the precision picker.** Tap the word — a big, familiar target — and
-  it opens into three rows aligned by where the ink sits: the marks above the letters, the
-  letters themselves, the marks below. Pick any of them, **several at once**, or the whole word
-  **with** its marks or **without**. Takes the word boxes the app already ships plus the new
+  it opens into three rows aligned by where the ink sits: the marks above the letters, **each
+  letter on its own** — a joined cluster is split so every letter is its own target — and the
+  marks below. Pick any of them, **several at once**, or the whole word **with** its marks or
+  **without**. Takes the word boxes the app already ships plus the new
   per-mark positions. Gets a calm second choice with nothing to aim at small, and the one
   gesture here that reaches *more* than a single sign — a run of marks, or the whole word. Costs
   two deliberate taps rather than one motion, and is the tallest thing to draw on the page.
@@ -129,13 +130,17 @@ used. None aims at the tiny target directly.
 - A reader who cannot hold the press steady enough for the loupe would rule it out; a reader who
   does not know the names would rule out the named row; a device with no hover or no fine pointer
   changes which is comfortable.
-- **One change would grow the winner rather than replace it.** The precision picker can already
-  reach a mark, a run of marks, or the whole word; the one part it cannot yet hand you on its own
-  is a single *letter*, because the app knows the exact place of every mark but does not yet carry
-  the shape of each letter apart from its neighbours. The day those letter shapes ship, the middle
-  row becomes pickable letter by letter with nothing else about the gesture changing — so this is
-  a reason to build toward the picker, not a reason to wait. The page is honest about this where
-  the letters are drawn.
+- **One change would sharpen the winner rather than replace it.** The precision picker already
+  reaches a mark, a run of marks, a single *letter*, or the whole word — the middle row splits a
+  joined cluster into its letters and each one is its own target. It splits them by reading the
+  ink: joined Arabic letters meet at a thin stroke along the line, so the picker cuts at those thin
+  valleys, one fewer cut than there are letters in the cluster. On most words the cut lands cleanly
+  on the join; on a few visually crowded clusters it can sit a little off, because the valley it
+  reads is a good guess at the join, not a certainty. The exact fix is known and is the step this
+  grows into: shaping the word with its own font, which reports where each letter truly begins
+  instead of inferring it from the ink. That would nudge a handful of imperfect cuts and change
+  nothing about the gesture — so it is a reason to build on the picker, not a reason to wait. The
+  page is honest about this where the letters are drawn.
 
 ## What is this not settling?
 
@@ -144,8 +149,10 @@ used. None aims at the tiny target directly.
 - The finer line-by-line straightening of the sign boxes — a separate polish still waiting on the
   owner's eye — and the size and timing of the tray and the loupe, which are tuning of whichever
   option wins.
-- Picking a single *letter* on its own. That waits on the letter shapes the app does not yet
-  carry; it is the next step the winner grows into, not a gap in this choice, and the page is
-  honest about it where the parts are drawn.
+- The exact boundary where one letter is cut from the next inside a crowded cluster. A reader can
+  pick each letter on its own today, but the place of the cut is read from the ink and is a close
+  guess, not a certainty; on a few dense clusters it sits a little off. Making it exact waits on
+  shaping the word with its own font — the next step the picker grows into, not a gap in this
+  choice, and the page is honest about it where the letters are drawn.
 - Anything about how the note is stored or whether it leaves the phone — the mistake-note
   decision already settled that. This page is only the reach that picks the spot.
