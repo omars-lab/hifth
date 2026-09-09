@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Picking one sign</title>
+<title>Picking the exact part</title>
 <style>
   :root{
     --paper:#f4efe6; --paper-raised:#fbf8f2; --paper-sunk:#ece4d6;
@@ -68,6 +68,40 @@
   .chip{appearance:none;border:1px solid var(--paper-sunk);background:var(--paper-raised);
     color:var(--ink);border-radius:var(--radius-pill);padding:.35rem .8rem;font:inherit;font-size:.86rem;cursor:pointer;}
   .chip .pos{color:var(--ink-faint);font-variant-numeric:tabular-nums;margin-inline-end:.35rem;}
+  /* ── The precision panel (option A, the winner being shaped) ── */
+  .panel{display:none;margin:.9rem 0 .2rem;}
+  .panel.show{display:block;}
+  .pp-note{font-size:.78rem;color:var(--ink-faint);text-align:center;max-width:34rem;margin:0 auto .6rem;}
+  .pp-scroll{overflow-x:auto;padding:.15rem;}
+  .pp-track{min-width:18rem;}
+  .pp-row{display:flex;align-items:stretch;gap:.45rem;}
+  .pp-rowname{width:4.6rem;flex:none;font-size:.62rem;letter-spacing:.02em;color:var(--ink-faint);
+    display:flex;align-items:center;justify-content:flex-end;text-align:right;}
+  .pp-band{position:relative;flex:1;height:2.5rem;}
+  .pp-ribbon{position:relative;flex:1;height:3rem;border:1px dashed var(--paper-sunk);border-radius:var(--radius-sm);
+    margin:.18rem 0;cursor:pointer;background:var(--paper);overflow:hidden;}
+  .pp-ribbon svg{position:absolute;inset:0;width:100%;height:100%;}
+  .pp-ribbon.sel{outline:2px solid var(--sel);outline-offset:-2px;background:var(--sel-soft);}
+  .pp-colbox{position:absolute;top:0;bottom:0;border:1.5px solid var(--accent-strong);border-radius:2px;
+    background:var(--accent-tint);opacity:.6;pointer-events:none;}
+  .pp-cell{position:absolute;padding:0;border:1px solid var(--paper-sunk);background:var(--paper-raised);
+    border-radius:var(--radius-sm);cursor:pointer;overflow:hidden;display:flex;flex-direction:column;align-items:center;}
+  .pp-upper .pp-cell{bottom:0;} .pp-lower .pp-cell{top:0;}
+  .pp-cell svg{width:100%;height:1.6rem;display:block;}
+  .pp-cell small{font-size:.58rem;line-height:1;color:var(--ink-soft);padding:.06rem .12rem .12rem;white-space:nowrap;}
+  .pp-cell.sel{border-color:var(--sel);background:var(--sel-soft);box-shadow:0 0 0 1px var(--sel);}
+  .pp-cell:focus-visible,.pp-ribbon:focus-visible,.pp-word button:focus-visible,.pp-actions button:focus-visible{
+    outline:2px solid var(--accent);outline-offset:1px;}
+  .pp-word{display:flex;gap:.5rem;justify-content:center;flex-wrap:wrap;margin:.7rem 0 0;}
+  .pp-word button{appearance:none;border:1px solid var(--paper-sunk);background:var(--paper-raised);color:var(--ink);
+    border-radius:var(--radius-pill);padding:.35rem .85rem;font:inherit;font-size:.85rem;cursor:pointer;}
+  .pp-word button.sel{border-color:var(--sel);background:var(--sel-soft);}
+  .pp-actions{display:none;flex-wrap:wrap;gap:.5rem;justify-content:center;align-items:center;margin:.85rem 0 0;
+    border-top:1px dashed var(--paper-sunk);padding-top:.75rem;}
+  .pp-actions.show{display:flex;}
+  .pp-actions .lab{width:100%;text-align:center;font-size:.85rem;color:var(--ink-soft);margin-bottom:.05rem;}
+  .pp-actions button{appearance:none;border:0;color:#fff;border-radius:var(--radius-pill);padding:.42rem .9rem;
+    font:inherit;font-size:.85rem;font-weight:600;cursor:pointer;}
   /* ── The readout ── */
   .readout{margin:1rem auto 0;max-width:34rem;min-height:3.2rem;
     border-top:1px dashed var(--paper-sunk);padding-top:.8rem;text-align:center;}
@@ -93,12 +127,12 @@
 <body>
 <main>
   <p style="color:var(--ink-faint);font-size:.86rem;margin:0 0 .3rem;">A decision, drawn — Hifth</p>
-  <h1>Picking one sign, when it is smaller than a fingertip</h1>
+  <h1>Picking the exact part of a word to note</h1>
   <p class="lead">A reader can already pin a private note to a whole verse or a whole word. The
-  next step lets them pin one to a single vowel-sign — a personal recitation slip, or a
-  &ldquo;the print is off right here&rdquo; flag. The signs are drawn and placed; the only
-  open thing is the gesture that catches the one you mean. Try the three below, on a real
-  page. The gesture you choose is the one that ships.</p>
+  next step lets them reach finer than that — one vowel-sign, several at once, or the whole word with
+  its marks or with the marks stripped off — for a personal recitation slip, or a &ldquo;the print is
+  off right here&rdquo; flag. The parts are drawn and placed; the open thing is the gesture that reaches the
+  one you mean. Try the three below, on a real page. The gesture you choose is the one that ships.</p>
 
   <div class="glossary">
     <dl>
@@ -134,6 +168,27 @@
     </div>
     <div class="tray" id="tray" aria-label="Signs on the word you tapped"></div>
     <div class="chips" id="chips" aria-label="Signs on the word you tapped, by name"></div>
+    <div class="panel" id="panel" aria-label="The word broken into its parts">
+      <p class="pp-note">Marks and the whole word are exact — measured on the print. Individual letters
+        aren't cut apart on their own yet: picking one letter alone needs per-letter shapes the app does
+        not ship, and that piece is tracked as the next step.</p>
+      <div class="pp-scroll"><div class="pp-track">
+        <div class="pp-row"><div class="pp-rowname">upper marks</div><div class="pp-band pp-upper" id="ppU"></div></div>
+        <div class="pp-row"><div class="pp-rowname">letters</div><div class="pp-ribbon" id="ppR" tabindex="0" role="button" aria-label="the letters, without their marks"></div></div>
+        <div class="pp-row"><div class="pp-rowname">lower marks</div><div class="pp-band pp-lower" id="ppL"></div></div>
+      </div></div>
+      <div class="pp-word">
+        <button id="wWith" type="button">Whole word, with marks</button>
+        <button id="wWithout" type="button">Letters only, no marks</button>
+      </div>
+      <div class="pp-actions" id="ppActions">
+        <span class="lab">What do you want to do with the selection?</span>
+        <button type="button" style="background:var(--k-comment)" data-kind="Comment">Add a comment</button>
+        <button type="button" style="background:var(--k-correction)" data-kind="Correction">Flag a mistake</button>
+        <button type="button" style="background:var(--k-question)" data-kind="Question">Ask a question</button>
+        <button type="button" style="background:var(--k-dev)" data-kind="Note to us">Note to us</button>
+      </div>
+    </div>
     <div class="readout" id="readout">
       <div class="empty" id="empty">Nothing caught yet.</div>
       <div class="caught" id="caught" hidden></div>
@@ -147,7 +202,7 @@
   </div>
 
   <h2>What is being decided?</h2>
-  <p>When a reader wants to note one vowel-sign, how do they pick it? A sign on this page is about
+  <p>When a reader wants to note something finer than a whole word — one vowel-sign, a few of them, or the word itself with or without its marks — how do they reach for it? A sign on this page is about
   6.3 by 3.4 in the page's own units, on a page 345 wide — around a
   fiftieth of the width. This one verse carries 60 of them, stacked above and below the
   letters. A fingertip covers a dozen at once, so tapping the sign directly is not on the table; every
@@ -171,9 +226,12 @@
   aims at the tiny target directly.</p>
   <table>
     <tr><th>Way</th><th>The gesture</th><th>What it trades</th></tr>
-    <tr><td>Word, then sign</td><td>Tap the word — a big, familiar target — and its signs lift out
-      enlarged; tap the one you mean.</td><td>Two deliberate taps. Precise, calm, nothing to aim at
-      small. Slower than one gesture.</td></tr>
+    <tr><td>Word, then part<br><small>the precision picker</small></td><td>Tap the word — a big,
+      familiar target — and it opens into three rows: the marks above the letters, the letters
+      themselves, the marks below. Pick any of them, several at once, or the whole word with its marks
+      or without.</td><td>Two deliberate taps, then a calm second choice with nothing to aim at small —
+      and the one gesture that reaches more than a single sign. Slower than one motion, and the tallest
+      to draw on the page.</td></tr>
     <tr><td>Press &amp; loupe</td><td>Press the page; a magnifier rises and snaps to the nearest sign;
       slide to change it, let go to take it.</td><td>One continuous gesture, direct — you reach for the
       ink itself. Asks for a steadier hand, and a loupe to see past the fingertip.</td></tr>
@@ -209,13 +267,20 @@
   not know the names would rule out the named row; a device with no hover or no fine pointer changes
   which is comfortable. The honest test is a hafiz doing it on a phone a few times — which is what this
   page is for.</p>
+  <p>One thing would grow the winner rather than replace it. The precision picker can already reach a
+  mark, a run of marks, or the whole word; the one part it cannot yet hand you on its own is a single
+  <em>letter</em>, because the app knows the exact place of every mark but does not yet carry the shape
+  of each letter apart from its neighbours. The day those letter shapes ship, the middle row becomes
+  pickable letter by letter with nothing else about the gesture changing — so this is a reason to build
+  toward it, not a reason to wait.</p>
 
   <h2>What is this not settling?</h2>
-  <p>Not what a caught sign then lets you write — the four kinds of note are already decided and only
-  shown here as a hint of where the gesture leads. Not the finer line-by-line straightening of the
-  sign boxes, which is a separate polish still waiting on the owner's eye. Not whether the same gesture
-  is how a reader picks a whole <em>word</em> — that already has its own way, and this only adds the
-  step past it.</p>
+  <p>Not what a caught part then lets you write — the four kinds of note are already decided, and the
+  menu that opens on a selection is shown here only as a hint of where the gesture leads. Not the finer
+  line-by-line straightening of the sign boxes, which is a separate polish still waiting on the owner's
+  eye. And not the one part left out on purpose: picking a single <em>letter</em> on its own, which
+  waits on the letter shapes the app does not yet carry — the page is honest about that where the parts
+  are drawn, and it is the next step, not a gap in this choice.</p>
 
   <p class="foot">Built by <code>scripts/build-harakah-pick-options.mjs</code> from the vendored print
   (page 7), its shipped word and per-sign boxes, and the app's design tokens — committed bytes
@@ -248,7 +313,7 @@ var opt = "A";
 var caughtId = null;
 
 var HINTS = {
-  A: "Tap a word. Its signs lift out below — tap the one you mean.",
+  A: "Tap a word. It opens into three rows — marks above, letters, marks below — and you pick any parts, one or several.",
   B: "Press and hold on the page, slide to the sign, let go to take it.",
   C: "Tap a word, then pick its sign from the named row."
 };
@@ -336,6 +401,89 @@ function openChips(w){
   chips.classList.add("show");
 }
 
+// ── Option A, shaped into a precision picker ─────────────────────────────────
+// Tap a word and it breaks into three rows aligned by where the ink sits: the
+// marks above the letters, the letters themselves, the marks below. Every part
+// is selectable, several at once; the whole word (with or without its marks) is
+// one tap; and a live selection opens the four things a reader can do with it.
+var panel=document.getElementById("panel");
+var ppU=document.getElementById("ppU"), ppR=document.getElementById("ppR"), ppL=document.getElementById("ppL");
+var ppActions=document.getElementById("ppActions");
+var wWith=document.getElementById("wWith"), wWithout=document.getElementById("wWithout");
+var sel={}, curB=null, curMarks=[];
+
+function frac(v){ return (v*100)+"%"; }
+function markCell(s){
+  var btn=document.createElement("button"); btn.className="pp-cell"; btn.type="button";
+  btn.style.left=frac((s.x-curB.x)/curB.bw);
+  btn.style.width="max(2.1rem,"+frac(s.mw/curB.bw)+")";
+  btn.setAttribute("aria-label","mark "+s.name);
+  btn.setAttribute("data-key","m:"+s.id);
+  var pad=1.4, svg=document.createElementNS(SVGNS,"svg");
+  svg.setAttribute("viewBox",(s.x-pad)+" "+(s.y-pad)+" "+(s.mw+pad*2)+" "+(s.mh+pad*2));
+  svg.setAttribute("preserveAspectRatio","xMidYMid meet");
+  svg.appendChild(el("use",{href:"#leaf",x:0,y:0,width:DATA.vbw,height:DATA.vbh,class:"leaf"}));
+  var cap=document.createElement("small"); cap.textContent=s.name;
+  btn.appendChild(svg); btn.appendChild(cap);
+  btn.addEventListener("click",function(){ toggle("m:"+s.id); });
+  return btn;
+}
+function openPanel(w){
+  litWord(w); sel={};
+  curB=DATA.words.filter(function(b){ return b.w===w; })[0];
+  curMarks=DATA.signs.filter(function(s){ return s.w===w; });
+  var cy=curB.y+curB.bh/2; // above this line = an upper mark, below = a lower one
+  ppU.innerHTML=""; ppL.innerHTML=""; ppR.innerHTML="";
+  var rsvg=document.createElementNS(SVGNS,"svg");
+  rsvg.setAttribute("viewBox",curB.x+" "+curB.y+" "+curB.bw+" "+curB.bh);
+  rsvg.setAttribute("preserveAspectRatio","none");
+  rsvg.appendChild(el("use",{href:"#leaf",x:0,y:0,width:DATA.vbw,height:DATA.vbh,class:"leaf"}));
+  ppR.appendChild(rsvg);
+  curMarks.forEach(function(s){ ((s.y+s.mh/2)<cy ? ppU : ppL).appendChild(markCell(s)); });
+  renderSel();
+  panel.classList.add("show");
+}
+function toggle(key){ if(sel[key]) delete sel[key]; else sel[key]=true; renderSel(); }
+function summary(){
+  var nm=Object.keys(sel).filter(function(k){ return k.indexOf("m:")===0; }).length;
+  var parts=[];
+  if(nm) parts.push(nm+(nm===1?" mark":" marks"));
+  if(sel["word"]) parts.push("the whole word");
+  if(sel["wordbare"]) parts.push("the letters (no marks)");
+  return parts.join(" + ");
+}
+function renderSel(){
+  panel.querySelectorAll(".pp-cell").forEach(function(c){ c.classList.toggle("sel", !!sel[c.getAttribute("data-key")]); });
+  ppR.classList.toggle("sel", !!sel["wordbare"]);
+  wWithout.classList.toggle("sel", !!sel["wordbare"]);
+  wWith.classList.toggle("sel", !!sel["word"]);
+  ppR.querySelectorAll(".pp-colbox").forEach(function(x){ x.remove(); }); // the letter each chosen mark sits on
+  curMarks.forEach(function(s){
+    if(sel["m:"+s.id]){
+      var box=document.createElement("div"); box.className="pp-colbox";
+      box.style.left=frac((s.x-curB.x)/curB.bw);
+      box.style.width="max(6px,"+frac(s.mw/curB.bw)+")";
+      ppR.appendChild(box);
+    }
+  });
+  var keys=Object.keys(sel);
+  ppActions.classList.toggle("show", keys.length>0);
+  if(!keys.length){ emptyEl.hidden=false; emptyEl.textContent="Tap parts of the word to select them — one, or several at once."; caughtEl.hidden=true; }
+  else { emptyEl.hidden=true; caughtEl.hidden=false; caughtEl.innerHTML="Selected: <b>"+summary()+"</b>. Choose what to do with it below."; }
+}
+function doAction(kind){
+  if(!Object.keys(sel).length) return;
+  emptyEl.hidden=true; caughtEl.hidden=false;
+  caughtEl.innerHTML="<b>"+kind+"</b> pinned to <b>"+summary()+"</b>. In the app this opens the note editor.";
+}
+wWith.addEventListener("click",function(){ toggle("word"); });
+wWithout.addEventListener("click",function(){ toggle("wordbare"); });
+ppR.addEventListener("click",function(){ toggle("wordbare"); });
+ppR.addEventListener("keydown",function(e){ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); toggle("wordbare"); } });
+[].forEach.call(ppActions.querySelectorAll("button"),function(b){
+  b.addEventListener("click",function(){ doAction(b.getAttribute("data-kind")); });
+});
+
 // ── Option B: press and loupe ────────────────────────────────────────────────
 DATA.signs.forEach(function(s){
   var r = el("rect",{x:s.x,y:s.y,width:s.mw,height:s.mh,rx:.6,class:"sign","data-id":s.id});
@@ -386,7 +534,7 @@ function onDown(e){
     var t=e.target;
     if(t && t.classList && t.classList.contains("wordhit")){
       var w=Number(t.getAttribute("data-w"));
-      if(opt==="A") openTray(w); else openChips(w);
+      if(opt==="A") openPanel(w); else openChips(w);
     }
   }
 }
@@ -410,6 +558,7 @@ function setOpt(o){
   });
   hint.textContent=HINTS[o];
   tray.classList.remove("show"); chips.classList.remove("show");
+  if(panel){ panel.classList.remove("show"); sel={}; ppActions.classList.remove("show"); }
   loupeHide(); pressing=false;
   clearClasses();
   if(caughtId!=null) setCaught(caughtId);
