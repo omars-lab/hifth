@@ -83,6 +83,11 @@
   .pp-strip .hit.letter{stroke-dasharray:1 1;}
   .pp-strip .hit:hover{fill:var(--accent-tint);}
   .pp-strip .hit.sel{fill:var(--sel-soft);stroke:var(--sel);stroke-width:.5;stroke-dasharray:none;}
+  /* hovering (or focusing) a letter's box lights that letter's ink — and the marks that ride on it */
+  .pp-strip .ink{transition:fill .12s,opacity .12s;}
+  .pp-strip g.hot .ink{fill:var(--sel);}
+  /* the rest of the word drops back toward the paper, so the lit letter stands alone */
+  .pp-strip g.dim .ink{opacity:.12;}
   .pp-strip .hit:focus-visible{outline:none;stroke:var(--accent);stroke-width:.6;}
   .pp-word button:focus-visible,.pp-actions button:focus-visible{
     outline:2px solid var(--accent);outline-offset:1px;}
@@ -163,10 +168,10 @@
     <div class="tray" id="tray" aria-label="Signs on the word you tapped"></div>
     <div class="chips" id="chips" aria-label="Signs on the word you tapped, by name"></div>
     <div class="panel" id="panel" aria-label="The word broken into its parts">
-      <p class="pp-note">The word is spread out, letter by letter, with each mark sitting where it really
-        sits on its letter. Tap a letter to take the letter; tap a mark to take just that mark; take as
-        many as you like. Every shape here is measured on the print.</p>
-      <div class="pp-scroll"><div class="pp-strip" id="ppStrip" aria-label="the word, spread out letter by letter"></div></div>
+      <p class="pp-note">The word stays whole, the way it is in the print. Point at a letter and the
+        rest of the word fades back, so that one letter stands alone in colour — pick it, or pick just
+        a mark; take as many as you like. Every shape here is measured on the print.</p>
+      <div class="pp-scroll"><div class="pp-strip" id="ppStrip" aria-label="the word, whole, with one letter picked out by colour"></div></div>
       <div class="pp-word">
         <button id="wWith" type="button">Whole word, with marks</button>
         <button id="wWithout" type="button">Letters only, no marks</button>
@@ -257,20 +262,25 @@
   not know the names would rule out the named row; a device with no hover or no fine pointer changes
   which is comfortable. The honest test is a hafiz doing it on a phone a few times — which is what this
   page is for.</p>
-  <p>One thing would grow the winner rather than replace it. The precision picker can already reach a
-  mark, a run of marks, or the whole word; the one part it cannot yet hand you on its own is a single
-  <em>letter</em>, because the app knows the exact place of every mark but does not yet carry the shape
-  of each letter apart from its neighbours. The day those letter shapes ship, the middle row becomes
-  pickable letter by letter with nothing else about the gesture changing — so this is a reason to build
-  toward it, not a reason to wait.</p>
+  <p>One thing would sharpen the winner rather than replace it. The precision picker already reaches a
+  mark, a run of marks, a single <em>letter</em>, or the whole word — point at a letter and the rest of
+  the word fades back, so that one letter stands alone in colour without the joined ink being cut. Which
+  colour belongs to which letter is read from the ink: joined Arabic letters meet at a thin stroke, so
+  the picker draws the colour boundary at those thin places. On most words it lands cleanly; on a few
+  crowded clusters the colour can spill a hair into a neighbour, because the thin place it reads is a
+  good guess at the join, not a certainty. The exact fix is the step this grows into — shaping the word
+  with its own font, which reports where each letter truly begins — and it would change nothing about the
+  gesture, so it is a reason to build on the picker, not a reason to wait.</p>
 
   <h2>What is this not settling?</h2>
   <p>Not what a caught part then lets you write — the four kinds of note are already decided, and the
   menu that opens on a selection is shown here only as a hint of where the gesture leads. Not the finer
   line-by-line straightening of the sign boxes, which is a separate polish still waiting on the owner's
-  eye. And not the one part left out on purpose: picking a single <em>letter</em> on its own, which
-  waits on the letter shapes the app does not yet carry — the page is honest about that where the parts
-  are drawn, and it is the next step, not a gap in this choice.</p>
+  eye. And not the exact edge of the colour that picks out one letter on a crowded cluster: a reader can
+  pick each letter on its own today, but where one letter's colour gives way to the next is read from the
+  ink and is a close guess, not a certainty; on a few dense clusters it sits a hair off. Making it exact
+  waits on shaping the word with its own font — the next step the picker grows into, and the page is
+  honest about it where the letters are drawn.</p>
 
   <p class="foot">Built by <code>scripts/build-harakah-pick-options.mjs</code> from the vendored print
   (page 7), its shipped word and per-sign boxes, and the app's design tokens — committed bytes
@@ -402,12 +412,19 @@ var ppActions=document.getElementById("ppActions");
 var wWith=document.getElementById("wWith"), wWithout=document.getElementById("wWithout");
 var sel={}, curLetters=[], curNames={};
 
-// How far apart the sliced letters are pulled from each other, in the print's
-// own units. The letters touch in the print; here they are cut apart and spaced
-// so each — and each mark on it — is a comfortable target on its own.
+// The gap between one WORD-cluster and the next, in the print's own units. Words
+// are set apart so each is a clear group; the letters inside a word stay joined
+// as they are in the print, and are told apart by colour, not by a gap.
 var LETTER_GAP=9;
 var MARK_MINHIT=2.8; // smallest a mark's tap target is grown to, centred on its ink
 var PAD=1.6;
+
+// Which letter-band a point falls in, by its x. Bands run left-to-right in draw
+// order; the last band catches anything past the final cut.
+function bandOf(cx, edges, nb){
+  for(var k=0;k<nb;k++){ if(cx < edges[k+1] || k===nb-1) return k; }
+  return nb-1;
+}
 
 function growRect(bb, minSize){
   var x=bb[0], y=bb[1], w=bb[2], h=bb[3];
@@ -416,42 +433,91 @@ function growRect(bb, minSize){
   return [x,y,w,h];
 }
 function pathEl(d, cls){ return el("path",{d:d,class:cls}); }
-function hitRect(bb, key, label){
+function hitRect(bb, key, label, inkId){
   var r=el("rect",{x:bb[0],y:bb[1],width:bb[2],height:bb[3],rx:.5,
     class:"hit"+(key.charAt(0)==="L"?" letter":""),"data-key":key,tabindex:"0",
     role:"button","aria-label":label});
   r.addEventListener("click",function(ev){ ev.stopPropagation(); toggle(key); });
   r.addEventListener("keydown",function(ev){ if(ev.key==="Enter"||ev.key===" "){ ev.preventDefault(); toggle(key); } });
+  if(inkId){
+    var hot=function(on){
+      // Light the hovered letter, and drop every other letter of the word (and the
+      // marks riding on them) toward the paper — so the one letter stands alone by
+      // colour, without cutting the joined ink or opening a gap a bad cut would show.
+      var ligs=document.querySelectorAll(".pp-strip .lig");
+      for(var i=0;i<ligs.length;i++){
+        var isMe=ligs[i].id===inkId;
+        ligs[i].classList.toggle("hot",on&&isMe);
+        ligs[i].classList.toggle("dim",on&&!isMe);
+      }
+      var ms=document.querySelectorAll(".pp-strip [data-of]");
+      for(var j=0;j<ms.length;j++){
+        var mine=ms[j].getAttribute("data-of")===inkId;
+        ms[j].classList.toggle("hot",on&&mine);
+        ms[j].classList.toggle("dim",on&&!mine);
+      }
+    };
+    r.addEventListener("mouseenter",function(){ hot(true); });
+    r.addEventListener("mouseleave",function(){ hot(false); });
+    r.addEventListener("focus",function(){ hot(true); });
+    r.addEventListener("blur",function(){ hot(false); });
+  }
   return r;
 }
 function openPanel(w){
   litWord(w); sel={}; curNames={};
   var word=DATA.ligWords[w];
   curLetters=(word&&word.letters)?word.letters:[];
-  // Lay the letters out afresh, spread apart, keeping each letter's own vertical
-  // place so every mark stays sitting exactly where it sits on its letter. We
-  // build left-to-right in reverse reading order, so the first letter of the
-  // word lands on the right, the way the print reads.
-  var ink=el("g",{class:"inklayer"}), hits=el("g",{class:"hitlayer"});
+  // Lay the words out left-to-right with a gap between them; inside a word the
+  // letters stay joined as they are in the print, each mark sitting exactly where
+  // it sits on its letter. We build in reverse reading order, so the first letter
+  // of the word lands on the right, the way the print reads.
+  var ink=el("g",{class:"inklayer"}), hits=el("g",{class:"hitlayer"}), defs=el("defs");
   var cursor=0, minY=Infinity, maxY=-Infinity, maxX=0;
   var marks=[];
+  var clipSeq=0;
   for(var vi=curLetters.length-1; vi>=0; vi--){
     var L=curLetters[vi];
     var tx=cursor - L.ubb[0];
-    var g=el("g",{transform:"translate("+tx+",0)"});
-    L.body.forEach(function(d){ g.appendChild(pathEl(d,"ink")); });
-    L.dia.forEach(function(d){ d.d.forEach(function(p){ g.appendChild(pathEl(p,"ink")); }); });
-    ink.appendChild(g);
-    // the letter tap areas. A connected cluster is one outline with no per-letter
-    // geometry, so it was cut at the joins measured from the ink; each letter gets
-    // its own band, and a lone letter is a single band spanning its whole width.
+    // The letter tap-bands. A connected cluster is one outline with no per-letter
+    // geometry, so it was cut at the joins measured from the ink; a lone letter is
+    // a single band spanning its whole width.
     var bEdges=[L.bb[0]].concat(L.cuts||[]).concat([L.bb[0]+L.bb[2]]);
-    for(var bi=0; bi<bEdges.length-1; bi++){
+    var nb=bEdges.length-1;
+    // Draw the body once, in its true joined shape — the letters are NOT pulled
+    // apart, because vertical cuts cannot separate cursive letters that overlap
+    // sideways (a waw's tail sweeps back under the letters before it). Instead each
+    // letter is a separately-coloured window onto the one outline, clipped to its
+    // band's x-range; hovering a letter paints just that window and fades the rest,
+    // so a letter is picked out by colour rather than by a gap a bad cut would show.
+    for(var bi=0; bi<nb; bi++){
+      var inkId="ink_L_"+vi+"_"+bi;
+      var g;
+      if(nb>1){
+        var cx0=(bi===0)?-1e4:bEdges[bi];
+        var cx1=(bi===nb-1)?1e4:bEdges[bi+1];
+        var cid="lc"+(clipSeq++);
+        var cp=el("clipPath",{id:cid,clipPathUnits:"userSpaceOnUse"});
+        cp.appendChild(el("rect",{x:cx0,y:-1e4,width:cx1-cx0,height:2e4}));
+        defs.appendChild(cp);
+        g=el("g",{id:inkId,class:"lig",transform:"translate("+tx+",0)","clip-path":"url(#"+cid+")"});
+      } else {
+        g=el("g",{id:inkId,class:"lig",transform:"translate("+tx+",0)"});
+      }
+      L.body.forEach(function(d){ g.appendChild(pathEl(d,"ink")); });
+      ink.appendChild(g);
       var band=[bEdges[bi]+tx, L.bb[1], bEdges[bi+1]-bEdges[bi], L.bb[3]];
-      hits.appendChild(hitRect(band,"L:"+vi+":"+bi,"letter"));
+      hits.appendChild(hitRect(band,"L:"+vi+":"+bi,"letter",inkId));
     }
-    // each mark's tap area, grown to a comfortable size, drawn on top
+    // Each mark rides the letter it sits on — bucketed by its centre-x into a band,
+    // drawn un-clipped so it always stays whole, tagged with the letter it belongs
+    // to so it fades and lights together with that letter.
     L.dia.forEach(function(d,di){
+      var mbi=nb>1?bandOf(d.bb[0]+d.bb[2]/2,bEdges,nb):0;
+      var mid="ink_L_"+vi+"_"+mbi; // hovering the letter lights its marks too
+      var gm=el("g",{transform:"translate("+tx+",0)","data-of":mid});
+      d.d.forEach(function(p){ gm.appendChild(pathEl(p,"ink")); });
+      ink.appendChild(gm);
       var mb=growRect([d.bb[0]+tx,d.bb[1],d.bb[2],d.bb[3]],MARK_MINHIT);
       marks.push(hitRect(mb,"m:"+vi+":"+di,"mark "+d.name));
       curNames["m:"+vi+":"+di]=d.name;
@@ -465,7 +531,7 @@ function openPanel(w){
   var vbY=minY-PAD, vbH=(maxY-minY)+PAD*2;
   var svg=el("svg",{viewBox:(0-PAD)+" "+vbY+" "+(maxX+PAD*2)+" "+vbH,
     preserveAspectRatio:"xMidYMid meet"});
-  svg.appendChild(ink); svg.appendChild(hits);
+  svg.appendChild(defs); svg.appendChild(ink); svg.appendChild(hits);
   ppStrip.innerHTML=""; ppStrip.appendChild(svg);
   renderSel();
   panel.classList.add("show");
