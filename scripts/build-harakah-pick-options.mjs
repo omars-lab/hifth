@@ -124,6 +124,7 @@ for (const w of ligDoc.words) {
       ubb: unionBB([l.bb, ...l.dia.map((d) => d.bb)]),
       n: l.n || 1,
       cuts: l.cuts || [],
+      names: l.names || [],
       body: l.body,
       dia: l.dia.map((d) => ({ name: d.name, bb: d.bb, d: d.d })),
     }));
@@ -267,7 +268,9 @@ const html = `<!doctype html>
   .pp-aside li .n{flex:0 0 1.4rem;text-align:right;font-variant-numeric:tabular-nums;
     font-weight:700;color:var(--sel);}
   .pp-aside li .nm{color:var(--ink);}
-  .pp-aside li.other .n{color:var(--ink-soft);}
+  /* letters name the shapes, marks name the signs on them — a hair of colour
+     apart so the two groups read as two groups without needing a divider */
+  .pp-aside li.mark .n{color:var(--ink-soft);}
   .pp-aside li.whole{margin-top:.15rem;padding-top:.35rem;border-top:1px dashed var(--paper-sunk);
     color:var(--ink-soft);font-size:.82rem;}
   .pp-word button:focus-visible,.pp-actions button:focus-visible{
@@ -406,9 +409,10 @@ const html = `<!doctype html>
   <table>
     <tr><th>Way</th><th>The gesture</th><th>What it trades</th></tr>
     <tr><td>Word, then part<br><small>the precision picker</small></td><td>Tap the word — a big,
-      familiar target — and it opens into three rows: the marks above the letters, the letters
-      themselves, the marks below. Pick any of them, several at once, or the whole word with its marks
-      or without.</td><td>Two deliberate taps, then a calm second choice with nothing to aim at small —
+      familiar target — and it opens whole, the way it sits in the print, each letter and each mark
+      its own target. Point at one to pick it out in colour while the rest fades back, and a tally
+      beside the word names what you took — 1 waw, 1 kasra. Pick any of them, several at once, or the
+      whole word with its marks or without.</td><td>Two deliberate taps, then a calm second choice with nothing to aim at small —
       and the one gesture that reaches more than a single sign. Slower than one motion, and the tallest
       to draw on the page.</td></tr>
     <tr><td>Press &amp; loupe</td><td>Press the page; a magnifier rises and snaps to the nearest sign;
@@ -497,7 +501,7 @@ var opt = "A";
 var caughtId = null;
 
 var HINTS = {
-  A: "Tap a word. It opens into three rows — marks above, letters, marks below — and you pick any parts, one or several.",
+  A: "Tap a word. It opens whole, each letter and mark its own target; point at one to pick it out in colour, and a tally beside the word names what you took.",
   B: "Press and hold on the page, slide to the sign, let go to take it.",
   C: "Tap a word, then pick its sign from the named row."
 };
@@ -586,9 +590,10 @@ function openChips(w){
 }
 
 // ── Option A, shaped into a precision picker ─────────────────────────────────
-// Tap a word and it breaks into three rows aligned by where the ink sits: the
-// marks above the letters, the letters themselves, the marks below. Every part
-// is selectable, several at once; the whole word (with or without its marks) is
+// Tap a word and it opens whole, the way it sits in the print — each letter and
+// each mark its own target. Point at one to pick it out in colour while the rest
+// fades back; a tally beside the word names what you took. Every part is
+// selectable, several at once; the whole word (with or without its marks) is
 // one tap; and a live selection opens the four things a reader can do with it.
 var panel=document.getElementById("panel");
 var ppStrip=document.getElementById("ppStrip");
@@ -693,7 +698,11 @@ function openPanel(w){
       L.body.forEach(function(d){ g.appendChild(pathEl(d,"ink")); });
       ink.appendChild(g);
       var band=[bEdges[bi]+tx, L.bb[1], bEdges[bi+1]-bEdges[bi], L.bb[3]];
-      hits.appendChild(hitRect(band,"L:"+vi+":"+bi,"letter",inkId));
+      // Name this band. Bands run left→right, but Arabic reads right→left, so the
+      // leftmost band is the LAST letter in reading order: band bi ↔ names[nb-1-bi].
+      var lname=(L.names&&L.names.length===nb)?L.names[nb-1-bi]:"letter";
+      curNames["L:"+vi+":"+bi]=lname;
+      hits.appendChild(hitRect(band,"L:"+vi+":"+bi,"letter "+lname,inkId));
     }
     // Each mark rides the letter it sits on — bucketed by its centre-x into a band,
     // drawn un-clipped so it always stays whole, tagged with the letter it belongs
@@ -737,28 +746,36 @@ function summary(){
   if(sel["wordbare"]) parts.push("the letters (no marks)");
   return parts.join(" + ");
 }
-// The tally beside the word: one row per *specific* mark by name — "1 kasra",
-// "2 fatha" — so the reader sees what they took even when the tap-box could not
-// trace the letter cleanly. Marks carry ASCII names (held-copy safe); letters
-// have no name in the corpus, so they show as a single muted count.
+// The tally beside the word: one row per *specific* thing by name — the letters
+// first ("1 waw, 1 ha"), then the marks ("1 kasra, 2 fatha") — so the reader sees
+// what they took even when the tap-box could not trace the letter cleanly. Both
+// letters and marks carry ASCII names (held-copy safe); each name is counted.
+function tallyBy(keys,pred){
+  var byName={}, order=[];
+  keys.filter(pred).forEach(function(k){
+    var nm=curNames[k]||"part";
+    if(byName[nm]==null){ byName[nm]=0; order.push(nm); }
+    byName[nm]++;
+  });
+  return order.map(function(nm){ return {nm:nm, n:byName[nm]}; });
+}
+// A plural that is right for these names: "kasras", "waws", but "ta marbutas".
+function plural(nm,n){ return n>1 ? nm+"s" : nm; }
 function renderAside(){
   var keys=Object.keys(sel);
   if(!keys.length){
     ppAside.innerHTML='<h4>Your pick</h4><p class="none">Point at a letter or a mark and it is named here, so you can check the box caught what you meant.</p>';
     return;
   }
-  var byName={}, order=[];
-  keys.filter(function(k){ return k.indexOf("m:")===0; }).forEach(function(k){
-    var nm=curNames[k]||"mark";
-    if(byName[nm]==null){ byName[nm]=0; order.push(nm); }
-    byName[nm]++;
-  });
-  var nl=keys.filter(function(k){ return k.charAt(0)==="L"; }).length;
+  var lets=tallyBy(keys,function(k){ return k.charAt(0)==="L"; });
+  var marks=tallyBy(keys,function(k){ return k.indexOf("m:")===0; });
   var html='<h4>Your pick</h4><ul>';
-  order.forEach(function(nm){
-    html+='<li><span class="n">'+byName[nm]+'</span><span class="nm">'+nm+(byName[nm]>1?"s":"")+'</span></li>';
+  lets.forEach(function(r){
+    html+='<li><span class="n">'+r.n+'</span><span class="nm">'+plural(r.nm,r.n)+'</span></li>';
   });
-  if(nl) html+='<li class="other"><span class="n">'+nl+'</span><span class="nm">'+(nl===1?"letter":"letters")+'</span></li>';
+  marks.forEach(function(r){
+    html+='<li class="mark"><span class="n">'+r.n+'</span><span class="nm">'+plural(r.nm,r.n)+'</span></li>';
+  });
   html+='</ul>';
   if(sel["word"]) html+='<div class="whole">the whole word, with marks</div>';
   if(sel["wordbare"]) html+='<div class="whole">the letters, no marks</div>';

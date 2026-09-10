@@ -31,6 +31,26 @@ const RAW_URL =
   "https://raw.githubusercontent.com/mushafdatabase/MushafDatabase-Ligature-Based-SVG/master/SVG%20V1.01/007.svg";
 const OUT = join(ROOT, "docs/design/data/harakah-ligatures-7.json");
 
+// The ASCII name of each Arabic base letter, so the picker can name a picked
+// letter ("1 waw, 1 ha") the way it already names a picked mark ("1 kasra").
+// Only the NAME travels into the output — never the Arabic character — the same
+// copy-safe bargain the mark names already keep. Confusable pairs are kept apart
+// by the names a hafiz uses: ح hha vs ه ha, ت ta vs ط taa, ذ dhal vs ظ dhaa.
+const LETTER_NAME = {
+  0x0621: "hamza", 0x0622: "alif madda", 0x0623: "alif hamza", 0x0624: "waw hamza",
+  0x0625: "alif hamza", 0x0626: "ya hamza", 0x0627: "alif", 0x0628: "ba",
+  0x0629: "ta marbuta", 0x062a: "ta", 0x062b: "tha", 0x062c: "jeem", 0x062d: "hha",
+  0x062e: "kha", 0x062f: "dal", 0x0630: "dhal", 0x0631: "ra", 0x0632: "zay",
+  0x0633: "seen", 0x0634: "sheen", 0x0635: "saad", 0x0636: "daad", 0x0637: "taa",
+  0x0638: "dhaa", 0x0639: "ayn", 0x063a: "ghayn", 0x0641: "fa", 0x0642: "qaf",
+  0x0643: "kaf", 0x0644: "lam", 0x0645: "meem", 0x0646: "noon", 0x0647: "ha",
+  0x0648: "waw", 0x0649: "alif maqsura", 0x064a: "ya", 0x0671: "alif wasla",
+};
+// The letters of a cluster, in the corpus's own reading order (first letter of
+// the string first). An unmapped codepoint falls back to "letter" so a name is
+// always returned and the count still matches the cut count.
+const letterNames = (s) => [...(s || "")].map((c) => LETTER_NAME[c.codePointAt(0)] || "letter");
+
 const die = (m) => {
   console.error(`extract-ligatures: ${m}`);
   process.exit(1);
@@ -416,7 +436,11 @@ const out = {
         // How many letters this connected cluster holds — the length of the
         // corpus's own letter string. Only the COUNT is kept; the string (Arabic)
         // is thrown away, so the output stays copy-safe.
-        const nLetters = [...(textPath?.getAttribute("data-text") || "")].length || 1;
+        const dataText = textPath?.getAttribute("data-text") || "";
+        const nLetters = [...dataText].length || 1;
+        // The name of each letter in the cluster, reading order — the only thing
+        // kept from the Arabic string; the string itself is discarded below.
+        const names = dataText ? letterNames(dataText) : ["letter"];
         const baseD = [
           ...l.querySelectorAll(':scope > path[data-type="text"]'),
         ].map((p) => p.getAttribute("d"));
@@ -435,7 +459,7 @@ const out = {
         // Where to cut this cluster into single letters, measured on the base
         // outline (dots would blur the join). Empty when it is one letter.
         const cuts = letterCuts(baseD, bbox(baseD), nLetters);
-        return { bb, n: nLetters, cuts, body, dia };
+        return { bb, n: nLetters, cuts, names, body, dia };
       });
       return {
         wi: Number(w.getAttribute("data-word-index-in-ayah")),
