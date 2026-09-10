@@ -94,14 +94,15 @@ Each is built live on the page and tried by hand, on verse 2:38 at the size it w
 used. None aims at the tiny target directly.
 
 - **A · Word, then part — the precision picker.** Tap the word — a big, familiar target — and
-  it opens into three rows aligned by where the ink sits: the marks above the letters, **each
-  letter on its own** — the word stays joined the way it is in the print, and pointing at a
-  letter fades the rest of the word back so that one letter stands alone in colour — and the
-  marks below. Pick any of them, **several at once**, or the whole word **with** its marks or
-  **without**. Takes the word boxes the app already ships plus the new
-  per-mark positions. Gets a calm second choice with nothing to aim at small, and the one
-  gesture here that reaches *more* than a single sign — a run of marks, or the whole word. Costs
-  two deliberate taps rather than one motion, and is the tallest thing to draw on the page.
+  it opens whole, the way it sits in the print, **each letter and each mark its own target**.
+  The word stays joined; point at a letter or a mark and the rest fades back so that one part
+  stands alone in colour. **A tally beside the word names what you took** — 1 waw, 1 kasra — so
+  the pick is confirmed in words, not only in colour. Pick any of them, **several at once**, or
+  the whole word **with** its marks or **without**. Takes the word boxes the app already ships
+  plus the new per-mark positions. Gets a calm second choice with nothing to aim at small, and
+  the one gesture here that reaches *more* than a single sign — a run of marks, or the whole
+  word. Costs two deliberate taps rather than one motion, and is the tallest thing to draw on
+  the page.
 - **B · Press &amp; loupe.** Press anywhere near the sign; a magnifier lifts above the fingertip,
   shows the ink enlarged, and snaps a box onto the nearest sign; slide to correct, release to
   take it. Takes the per-mark positions and a magnifier. Gets a single continuous gesture that
