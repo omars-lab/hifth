@@ -72,9 +72,14 @@
   .panel{display:none;margin:.9rem 0 .2rem;}
   .panel.show{display:block;}
   .pp-note{font-size:.78rem;color:var(--ink-faint);text-align:center;max-width:34rem;margin:0 auto .6rem;}
-  .pp-scroll{overflow-x:auto;padding:.15rem;}
-  .pp-strip{width:max-content;min-width:16rem;margin:0 auto;}
-  .pp-strip svg{display:block;height:9.5rem;width:auto;}
+  /* the word and its running tally sit side by side; the tally is a status menu
+     beside the word, not a line beneath it. On a narrow screen they stack. */
+  .pp-body{display:flex;gap:1rem;align-items:stretch;justify-content:center;flex-wrap:wrap;}
+  .pp-scroll{overflow-x:auto;padding:.15rem;flex:1 1 20rem;min-width:0;}
+  .pp-strip{width:max-content;min-width:16rem;margin:0 auto;text-align:center;}
+  /* margin-inline:auto centres a short word inside the min-width strip, so a two-letter
+     word sits in the middle of the panel instead of hugging the left edge */
+  .pp-strip svg{display:block;height:9.5rem;width:auto;margin-inline:auto;}
   /* the ink of a letter and of its marks, drawn in the corpus's own outlines */
   .pp-strip .ink{fill:var(--ink);}
   /* the tap targets, laid over each letter and each mark in their true places */
@@ -89,6 +94,20 @@
   /* the rest of the word drops back toward the paper, so the lit letter stands alone */
   .pp-strip g.dim .ink{opacity:.12;}
   .pp-strip .hit:focus-visible{outline:none;stroke:var(--accent);stroke-width:.6;}
+  /* ── The running tally beside the word ── */
+  .pp-aside{flex:0 0 12rem;min-width:11rem;align-self:center;border:1px solid var(--paper-sunk);
+    border-radius:var(--radius);background:var(--paper-raised);padding:.65rem .75rem;text-align:left;}
+  .pp-aside h4{margin:0 0 .5rem;font-size:.74rem;font-weight:600;letter-spacing:.03em;
+    text-transform:uppercase;color:var(--ink-soft);}
+  .pp-aside .none{font-size:.82rem;color:var(--ink-faint);line-height:1.35;margin:0;}
+  .pp-aside ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:.3rem;}
+  .pp-aside li{display:flex;align-items:baseline;gap:.5rem;font-size:.9rem;}
+  .pp-aside li .n{flex:0 0 1.4rem;text-align:right;font-variant-numeric:tabular-nums;
+    font-weight:700;color:var(--sel);}
+  .pp-aside li .nm{color:var(--ink);}
+  .pp-aside li.other .n{color:var(--ink-soft);}
+  .pp-aside li.whole{margin-top:.15rem;padding-top:.35rem;border-top:1px dashed var(--paper-sunk);
+    color:var(--ink-soft);font-size:.82rem;}
   .pp-word button:focus-visible,.pp-actions button:focus-visible{
     outline:2px solid var(--accent);outline-offset:1px;}
   .pp-word{display:flex;gap:.5rem;justify-content:center;flex-wrap:wrap;margin:.7rem 0 0;}
@@ -171,7 +190,10 @@
       <p class="pp-note">The word stays whole, the way it is in the print. Point at a letter and the
         rest of the word fades back, so that one letter stands alone in colour — pick it, or pick just
         a mark; take as many as you like. Every shape here is measured on the print.</p>
-      <div class="pp-scroll"><div class="pp-strip" id="ppStrip" aria-label="the word, whole, with one letter picked out by colour"></div></div>
+      <div class="pp-body">
+        <div class="pp-scroll"><div class="pp-strip" id="ppStrip" aria-label="the word, whole, with one letter picked out by colour"></div></div>
+        <aside class="pp-aside" id="ppAside" aria-live="polite" aria-label="What you have picked, named"></aside>
+      </div>
       <div class="pp-word">
         <button id="wWith" type="button">Whole word, with marks</button>
         <button id="wWithout" type="button">Letters only, no marks</button>
@@ -408,6 +430,7 @@ function openChips(w){
 // one tap; and a live selection opens the four things a reader can do with it.
 var panel=document.getElementById("panel");
 var ppStrip=document.getElementById("ppStrip");
+var ppAside=document.getElementById("ppAside");
 var ppActions=document.getElementById("ppActions");
 var wWith=document.getElementById("wWith"), wWithout=document.getElementById("wWithout");
 var sel={}, curLetters=[], curNames={};
@@ -415,7 +438,8 @@ var sel={}, curLetters=[], curNames={};
 // The gap between one WORD-cluster and the next, in the print's own units. Words
 // are set apart so each is a clear group; the letters inside a word stay joined
 // as they are in the print, and are told apart by colour, not by a gap.
-var LETTER_GAP=9;
+var LETTER_GAP=18; // gap between separable clusters; only real cluster boundaries
+// can widen — sub-letters inside one joined cluster share an outline and cannot part
 var MARK_MINHIT=2.8; // smallest a mark's tap target is grown to, centred on its ink
 var PAD=1.6;
 
@@ -551,12 +575,40 @@ function summary(){
   if(sel["wordbare"]) parts.push("the letters (no marks)");
   return parts.join(" + ");
 }
+// The tally beside the word: one row per *specific* mark by name — "1 kasra",
+// "2 fatha" — so the reader sees what they took even when the tap-box could not
+// trace the letter cleanly. Marks carry ASCII names (held-copy safe); letters
+// have no name in the corpus, so they show as a single muted count.
+function renderAside(){
+  var keys=Object.keys(sel);
+  if(!keys.length){
+    ppAside.innerHTML='<h4>Your pick</h4><p class="none">Point at a letter or a mark and it is named here, so you can check the box caught what you meant.</p>';
+    return;
+  }
+  var byName={}, order=[];
+  keys.filter(function(k){ return k.indexOf("m:")===0; }).forEach(function(k){
+    var nm=curNames[k]||"mark";
+    if(byName[nm]==null){ byName[nm]=0; order.push(nm); }
+    byName[nm]++;
+  });
+  var nl=keys.filter(function(k){ return k.charAt(0)==="L"; }).length;
+  var html='<h4>Your pick</h4><ul>';
+  order.forEach(function(nm){
+    html+='<li><span class="n">'+byName[nm]+'</span><span class="nm">'+nm+(byName[nm]>1?"s":"")+'</span></li>';
+  });
+  if(nl) html+='<li class="other"><span class="n">'+nl+'</span><span class="nm">'+(nl===1?"letter":"letters")+'</span></li>';
+  html+='</ul>';
+  if(sel["word"]) html+='<div class="whole">the whole word, with marks</div>';
+  if(sel["wordbare"]) html+='<div class="whole">the letters, no marks</div>';
+  ppAside.innerHTML=html;
+}
 function renderSel(){
   ppStrip.querySelectorAll(".hit").forEach(function(c){ c.classList.toggle("sel", !!sel[c.getAttribute("data-key")]); });
   wWithout.classList.toggle("sel", !!sel["wordbare"]);
   wWith.classList.toggle("sel", !!sel["word"]);
   var keys=Object.keys(sel);
   ppActions.classList.toggle("show", keys.length>0);
+  renderAside();
   if(!keys.length){ emptyEl.hidden=false; emptyEl.textContent="Tap the letters and marks you want — one, or several at once."; caughtEl.hidden=true; }
   else { emptyEl.hidden=true; caughtEl.hidden=false; caughtEl.innerHTML="Selected: <b>"+summary()+"</b>. Choose what to do with it below."; }
 }
