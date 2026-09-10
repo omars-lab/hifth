@@ -95,7 +95,8 @@ used. None aims at the tiny target directly.
 
 - **A · Word, then part — the precision picker.** Tap the word — a big, familiar target — and
   it opens into three rows aligned by where the ink sits: the marks above the letters, **each
-  letter on its own** — a joined cluster is split so every letter is its own target — and the
+  letter on its own** — the word stays joined the way it is in the print, and pointing at a
+  letter fades the rest of the word back so that one letter stands alone in colour — and the
   marks below. Pick any of them, **several at once**, or the whole word **with** its marks or
   **without**. Takes the word boxes the app already ships plus the new
   per-mark positions. Gets a calm second choice with nothing to aim at small, and the one
@@ -131,16 +132,19 @@ used. None aims at the tiny target directly.
   does not know the names would rule out the named row; a device with no hover or no fine pointer
   changes which is comfortable.
 - **One change would sharpen the winner rather than replace it.** The precision picker already
-  reaches a mark, a run of marks, a single *letter*, or the whole word — the middle row splits a
-  joined cluster into its letters and each one is its own target. It splits them by reading the
-  ink: joined Arabic letters meet at a thin stroke along the line, so the picker cuts at those thin
-  valleys, one fewer cut than there are letters in the cluster. On most words the cut lands cleanly
-  on the join; on a few visually crowded clusters it can sit a little off, because the valley it
-  reads is a good guess at the join, not a certainty. The exact fix is known and is the step this
-  grows into: shaping the word with its own font, which reports where each letter truly begins
-  instead of inferring it from the ink. That would nudge a handful of imperfect cuts and change
-  nothing about the gesture — so it is a reason to build on the picker, not a reason to wait. The
-  page is honest about this where the letters are drawn.
+  reaches a mark, a run of marks, a single *letter*, or the whole word — pointing at a letter fades
+  the rest of the word back so that one letter stands alone in colour, without the joined ink being
+  cut. The word is never pulled apart, because a straight vertical line cannot separate cursive
+  letters that overlap sideways — a waw's tail sweeps back underneath the letters before it — so a
+  cut would leave an empty gap and orphaned ink. Colouring one letter sidesteps that entirely.
+  Which colour belongs to which letter is still read from the ink: joined Arabic letters meet at a
+  thin stroke, so the picker draws the colour boundary at those thin places. On most words it lands
+  cleanly; on a few visually crowded clusters the colour can spill a hair into a neighbour, because
+  the thin place it reads is a good guess at the join, not a certainty. The exact fix is known and
+  is the step this grows into: shaping the word with its own font, which reports where each letter
+  truly begins instead of inferring it from the ink. That would sharpen a handful of imperfect
+  edges and change nothing about the gesture — so it is a reason to build on the picker, not a
+  reason to wait. The page is honest about this where the letters are drawn.
 
 ## What is this not settling?
 
@@ -149,10 +153,10 @@ used. None aims at the tiny target directly.
 - The finer line-by-line straightening of the sign boxes — a separate polish still waiting on the
   owner's eye — and the size and timing of the tray and the loupe, which are tuning of whichever
   option wins.
-- The exact boundary where one letter is cut from the next inside a crowded cluster. A reader can
-  pick each letter on its own today, but the place of the cut is read from the ink and is a close
-  guess, not a certainty; on a few dense clusters it sits a little off. Making it exact waits on
-  shaping the word with its own font — the next step the picker grows into, not a gap in this
-  choice, and the page is honest about it where the letters are drawn.
+- The exact edge of the colour that picks out one letter inside a crowded cluster. A reader can
+  pick each letter on its own today, but where one letter's colour gives way to the next is read
+  from the ink and is a close guess, not a certainty; on a few dense clusters it sits a hair off.
+  Making it exact waits on shaping the word with its own font — the next step the picker grows
+  into, not a gap in this choice, and the page is honest about it where the letters are drawn.
 - Anything about how the note is stored or whether it leaves the phone — the mistake-note
   decision already settled that. This page is only the reach that picks the spot.
