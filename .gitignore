@@ -63,3 +63,6 @@ packages/etl/data/segmentation/.cache/
 # Arabic data-text, read at build time to derive letter/mark outlines (numbers
 # and shapes only ship). The corpus it points at is not committed.
 packages/etl/data/ligature/.cache/
+
+# Font shaping for the harakah picker: cached font + verse text (build-time inputs, never shipped)
+packages/etl/data/shaped/.cache/
