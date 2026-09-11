@@ -315,23 +315,18 @@ href: https://tanzil.net
   [`docs/design/word-indexing.md`](docs/design/word-indexing.md) is the record —
   including the measurement that says the two indices are monotone, and the four
   ayahs where they cannot be related at all.
-- **One exception, on a decision page — not in the app.** The picker on
+- **This page once sliced this corpus's outlines; it no longer does.** For a
+  while the picker on
   [`docs/design/harakah-pick-options.html`](docs/design/harakah-pick-options.html)
-  has to *draw* a word letter by letter, so for one verse (2:38, page 7) it ships
-  the derived letter and mark **outlines** from this corpus — the shapes, sliced
-  into letters and spaced apart, in
-  [`docs/design/data/harakah-ligatures-7.json`](docs/design/data/harakah-ligatures-7.json),
-  written by `scripts/extract-ligatures.mjs`. This is derived geometry like the
-  word boxes, one richness up: the glyph shapes rather than their bounding
-  rectangles. Still no upstream bytes ship byte-for-byte, and still no Qur'an
-  *text* — the outlines are re-serialised `<path>` data with every Arabic
-  codepoint dropped (the extractor asserts zero before it writes; the page build
-  asserts zero before it publishes), and the letter *counts* that drive the
-  slicing are integers taken from the corpus and the string they were measured
-  from is discarded. The Sadaqa-e-Jaria grant below covers "derive … publish …
-  for any lawful purpose", so this is licensed; it is called out here so the
-  entry's "per word, a rectangle" is not read as forbidding the one page that
-  needs the shapes. The app itself still ships none of this.
+  drew verse 2:38 from letter and mark **outlines** sliced out of this corpus,
+  because it has to draw a word letter by letter. That slicing could not cleanly
+  separate cursive letters whose ink overlaps sideways — a neighbour's stroke came
+  away with the one you picked — so the page now shapes the verse from its own
+  Unicode font instead (**Amiri Quran, OFL**; its own entry below), which reports
+  every letter and every mark as its *own* outline. Nothing of *this* corpus's ink
+  ships anywhere now: the app and this decision page both take only rectangles from
+  it, the "per word, a rectangle" the entry opens with. The switch, and why, is in
+  the harakah-pick decision's own record.
 - **How geometry from one print lands on another:** both corpora draw the same
   page and both mark the end of every ayah with an ornament, so the ornaments are
   a correspondence neither was built to provide. `build-words.mjs` fits
@@ -366,6 +361,46 @@ href: https://github.com/mushafdatabase/MushafDatabase-Ligature-Based-SVG
 ```
 
 - **Status: DERIVED (word-B) — word boxes on our frame; no upstream bytes ship.**
+
+---
+
+### amiri-quran-font
+
+- **Name:** Amiri Quran — a Naskh typeface for the Qur'an by Khaled Hosny, a
+  companion of the Amiri family shaped for full Qur'anic vocalisation. It is used
+  at **build time only**, to shape one verse into per-letter and per-mark outlines
+  for the harakah picker; the font file is never shipped.
+- **Provenance:** Amiri Quran Regular, **Version 1.003**, `AmiriQuran-Regular.ttf`,
+  136,920 bytes, `sha256:e2a47644762d16bdfb6d33e0d8db8c6ff30beae84150ef5a705316bbd829455c`.
+  From the Amiri project (https://github.com/alif-type/amiri), also distributed on
+  Google Fonts. Kept in the gitignored cache
+  `packages/etl/data/shaped/.cache/AmiriQuran-Regular.ttf` and read once by
+  `scripts/shape-verse-letters.mjs`.
+- **What is taken, and what is not.** No font bytes ship. The shaping script lays
+  out verse 2:38's words, takes each glyph's **outline** — solid `<path>` geometry
+  in the font's own units — and writes them to
+  [`docs/design/data/harakah-shaped-2-38.json`](docs/design/data/harakah-shaped-2-38.json),
+  each shape tagged with an ASCII name (`ta`, `kasra`) and its bounding box. Still
+  no Qur'an *text*: the outlines carry no Arabic codepoints (the shaper asserts
+  zero before it writes; the page build asserts zero before it publishes), and the
+  string that was laid out lives only in the gitignored cache. The picker on
+  [`docs/design/harakah-pick-options.html`](docs/design/harakah-pick-options.html)
+  draws each letter and mark from these outlines, one solid and the rest in
+  invisible ink, so a single part can be picked without a neighbour's ink coming
+  with it. The app itself ships none of this — it is one decision page.
+- **License (SIL Open Font License 1.1):** the font may be used, studied, modified
+  and redistributed freely, and — the clause this relies on — **embedded** and its
+  outlines used in documents and other works. Deriving fixed outline geometry for a
+  page is squarely within that grant; the font is not sold, not redistributed as a
+  font, and not renamed. Attribution to Khaled Hosny and the Amiri project is a
+  courtesy kept here and honoured because the licence is a gift, not because a
+  page of outlines compels it.
+- **Status: BUILD-TIME INPUT — font not shipped; only its outlines, name-tagged and
+  Arabic-free, on one decision page.**
+
+```colophon
+not-credited: The app ships nothing from this font — no bytes, no outlines, no name. It shapes one verse into outlines for a single decision page at build time, so it never reaches the reader's screen and the app's colophon does not name it. Attribution to Khaled Hosny and the Amiri project is kept here in SOURCES.md.
+```
 
 ---
 

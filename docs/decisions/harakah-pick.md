@@ -94,15 +94,17 @@ Each is built live on the page and tried by hand, on verse 2:38 at the size it w
 used. None aims at the tiny target directly.
 
 - **A · Word, then part — the precision picker.** Tap the word — a big, familiar target — and
-  it opens whole, the way it sits in the print, **each letter and each mark its own target**.
-  The word stays joined; point at a letter or a mark and the rest fades back so that one part
-  stands alone in colour. **A tally beside the word names what you took** — 1 waw, 1 kasra — so
-  the pick is confirmed in words, not only in colour. Pick any of them, **several at once**, or
-  the whole word **with** its marks or **without**. Takes the word boxes the app already ships
-  plus the new per-mark positions. Gets a calm second choice with nothing to aim at small, and
-  the one gesture here that reaches *more* than a single sign — a run of marks, or the whole
-  word. Costs two deliberate taps rather than one motion, and is the tallest thing to draw on
-  the page.
+  it opens into a row of copies: **one copy of the whole word for each letter and each mark**.
+  In a copy, the one part it is for is drawn in solid ink and every other part in invisible ink,
+  so you still read which word it is but only that one part is there to take. **Point at the copy
+  for the part you mean** and take it; take **several at once**, or the whole word **with** its
+  marks or **without**. **A tally beside the row names what you took** — 1 ta, 1 kasra — so the
+  pick is confirmed in words, not only in ink. Each part is its own outline shaped from the
+  word's own font, so a solid part never drags a neighbour's ink with it: the ta comes without
+  the ya. Takes the word boxes the app already ships plus the shaped outlines of the verse. Gets
+  a calm second choice with nothing to aim at small, and the one gesture here that reaches *more*
+  than a single sign — a run of marks, or the whole word. Costs a row you scroll along rather
+  than one motion, and is the tallest thing to draw on the page.
 - **B · Press &amp; loupe.** Press anywhere near the sign; a magnifier lifts above the fingertip,
   shows the ink enlarged, and snaps a box onto the nearest sign; slide to correct, release to
   take it. Takes the per-mark positions and a magnifier. Gets a single continuous gesture that
@@ -132,20 +134,18 @@ used. None aims at the tiny target directly.
 - A reader who cannot hold the press steady enough for the loupe would rule it out; a reader who
   does not know the names would rule out the named row; a device with no hover or no fine pointer
   changes which is comfortable.
-- **One change would sharpen the winner rather than replace it.** The precision picker already
-  reaches a mark, a run of marks, a single *letter*, or the whole word — pointing at a letter fades
-  the rest of the word back so that one letter stands alone in colour, without the joined ink being
-  cut. The word is never pulled apart, because a straight vertical line cannot separate cursive
-  letters that overlap sideways — a waw's tail sweeps back underneath the letters before it — so a
-  cut would leave an empty gap and orphaned ink. Colouring one letter sidesteps that entirely.
-  Which colour belongs to which letter is still read from the ink: joined Arabic letters meet at a
-  thin stroke, so the picker draws the colour boundary at those thin places. On most words it lands
-  cleanly; on a few visually crowded clusters the colour can spill a hair into a neighbour, because
-  the thin place it reads is a good guess at the join, not a certainty. The exact fix is known and
-  is the step this grows into: shaping the word with its own font, which reports where each letter
-  truly begins instead of inferring it from the ink. That would sharpen a handful of imperfect
-  edges and change nothing about the gesture — so it is a reason to build on the picker, not a
-  reason to wait. The page is honest about this where the letters are drawn.
+- **One thing that would have sharpened the winner has now been built into it.** An earlier
+  precision picker kept the word's joined ink and told one letter from the next by colour, reading
+  the boundary from the thin stroke where two letters meet. That was a good guess, and on most
+  words it landed cleanly, but on a few visually crowded clusters the colour spilled a hair into a
+  neighbour — the ta caught a little of the ya — because a thin place is where the join *usually*
+  is, not a certainty, and a straight cut could not have separated cursive strokes that overlap
+  sideways at all. The picker no longer guesses. The verse is now shaped from its own Qur'an font,
+  so every letter and every mark is its own outline, and each copy of the word shows exactly one
+  of them in solid ink with the rest in invisible ink. There is no colour boundary left to read,
+  and no cluster where one part's ink reaches into the next: the ta comes without the ya. This
+  sharpened the winner and changed nothing about the gesture — it was a reason to build on the
+  picker, not to wait, and it is done.
 
 ## What is this not settling?
 
@@ -154,10 +154,11 @@ used. None aims at the tiny target directly.
 - The finer line-by-line straightening of the sign boxes — a separate polish still waiting on the
   owner's eye — and the size and timing of the tray and the loupe, which are tuning of whichever
   option wins.
-- The exact edge of the colour that picks out one letter inside a crowded cluster. A reader can
-  pick each letter on its own today, but where one letter's colour gives way to the next is read
-  from the ink and is a close guess, not a certainty; on a few dense clusters it sits a hair off.
-  Making it exact waits on shaping the word with its own font — the next step the picker grows
-  into, not a gap in this choice, and the page is honest about it where the letters are drawn.
+- ~~The exact edge of the colour that picks out one letter inside a crowded cluster.~~ **Settled
+  while this stayed open.** This once sat here because the picker read the boundary between two
+  letters from the ink and, on a few dense clusters, sat a hair off. It no longer does: each letter
+  is now its own font-shaped outline, so there is no colour edge to guess and no cluster where one
+  letter's ink reaches into the next. It is left here, struck through, so a reader sees it was
+  considered and closed rather than dropped.
 - Anything about how the note is stored or whether it leaves the phone — the mistake-note
   decision already settled that. This page is only the reach that picks the spot.

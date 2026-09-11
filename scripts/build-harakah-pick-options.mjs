@@ -93,42 +93,32 @@ const signs = markList.map((m, i) => ({
   src: m.s,
 }));
 
-// The letters of each word, from the ligature corpus (built by extract-ligatures.mjs).
-// Each word becomes its letters in reading order (rightmost first), each letter
-// carrying its own outline and the outlines of the marks that sit on it, in the
-// corpus's own frame. The picker keeps the word joined as it is in the print and
-// clips each letter to its own column, so a letter is told apart by colour when it
-// is picked out, without cutting the joined ink or opening a gap.
-const LIGS = join(ROOT, "docs/design/data/harakah-ligatures-7.json");
-const ligDoc = JSON.parse(readFileSync(LIGS, "utf8"));
-if (ligDoc.ayah !== AYAH) die(`ligature extract is for ${ligDoc.ayah}, not ${AYAH}`);
-const unionBB = (boxes) => {
-  const x0 = Math.min(...boxes.map((b) => b[0]));
-  const y0 = Math.min(...boxes.map((b) => b[1]));
-  const x1 = Math.max(...boxes.map((b) => b[0] + b[2]));
-  const y1 = Math.max(...boxes.map((b) => b[1] + b[3]));
-  return [x0, y0, x1 - x0, y1 - y0];
+// The word, shaped from its own Unicode font (Amiri Quran, OFL) so every letter
+// and every mark is its OWN outline. This is what the precision picker draws each
+// part from: because the parts are separate shapes, inking one and hiding the rest
+// is bleed-free, where slicing one merged print outline could not be. Built by
+// scripts/shape-verse-letters.mjs; carries outlined paths and ASCII names only.
+const SHAPED = join(ROOT, "docs/design/data/harakah-shaped-2-38.json");
+const shapedDoc = JSON.parse(readFileSync(SHAPED, "utf8"));
+if (shapedDoc.key !== AYAH) die(`shaped data is for ${shapedDoc.key}, not ${AYAH}`);
+// The print cuts this verse into 19 boxes; the font shapes it into 17 words. Map
+// each print word (the tap target, 1-based) to its shaped word (0-based). Two
+// print boxes carry no word of their own: box 5 is the pause mark, and boxes
+// 16+17 are the two halves of one word — both of which open that one shaped word.
+const PRINT_TO_SHAPED = {
+  1: 0, 2: 1, 3: 2, 4: 3, 5: null, 6: 4, 7: 5, 8: 6, 9: 7, 10: 8,
+  11: 9, 12: 10, 13: 11, 14: 12, 15: 13, 16: 14, 17: 14, 18: 15, 19: 16,
 };
-// Keyed by word index in the verse (wi === shipped word number, since from=1).
-const ligWords = {};
-for (const w of ligDoc.words) {
-  const letters = w.ligs
-    .slice()
-    // Arabic reads right→left, so lay the letters rightmost-first. Sort by each
-    // letter's CENTRE, not its left edge: a wide connected cluster reaches far
-    // left, so its left edge sorts it after a narrow letter that in fact sits to
-    // its left — the centre places every letter where it actually reads.
-    .sort((a, b) => b.bb[0] + b.bb[2] / 2 - (a.bb[0] + a.bb[2] / 2))
-    .map((l) => ({
-      bb: l.bb,
-      ubb: unionBB([l.bb, ...l.dia.map((d) => d.bb)]),
-      n: l.n || 1,
-      cuts: l.cuts || [],
-      names: l.names || [],
-      body: l.body,
-      dia: l.dia.map((d) => ({ name: d.name, bb: d.bb, d: d.d })),
-    }));
-  ligWords[w.wi] = { bb: w.bb, letters };
+// Guard the map against a data drift: every target must exist, and every shaped
+// word must be reachable from some print box.
+{
+  const targets = Object.values(PRINT_TO_SHAPED).filter((v) => v !== null);
+  for (const t of targets)
+    if (!shapedDoc.words[t]) die(`print→shaped names a missing shaped word ${t}`);
+  for (let i = 0; i < shapedDoc.words.length; i++)
+    if (!targets.includes(i)) die(`shaped word ${i} is unreachable from any print box`);
+  for (const w of wordBoxes)
+    if (!(w.w in PRINT_TO_SHAPED)) die(`print word ${w.w} has no shaped mapping`);
 }
 
 // The crop is the union of the verse's word boxes, padded, so the verse fills
@@ -155,7 +145,8 @@ const DATA = {
   crop,
   words: wordBoxes,
   signs,
-  ligWords,
+  shaped: shapedDoc.words,
+  printToShaped: PRINT_TO_SHAPED,
   ayah: AYAH,
   page: PAGE,
 };
@@ -239,24 +230,28 @@ const html = `<!doctype html>
      beside the word, not a line beneath it. On a narrow screen they stack. */
   .pp-body{display:flex;gap:1rem;align-items:stretch;justify-content:center;flex-wrap:wrap;}
   .pp-scroll{overflow-x:auto;padding:.15rem;flex:1 1 20rem;min-width:0;}
-  .pp-strip{width:max-content;min-width:16rem;margin:0 auto;text-align:center;}
-  /* margin-inline:auto centres a short word inside the min-width strip, so a two-letter
-     word sits in the middle of the panel instead of hugging the left edge */
-  .pp-strip svg{display:block;height:9.5rem;width:auto;margin-inline:auto;}
-  /* the ink of a letter and of its marks, drawn in the corpus's own outlines */
-  .pp-strip .ink{fill:var(--ink);}
-  /* the tap targets, laid over each letter and each mark in their true places */
-  .pp-strip .hit{fill:transparent;stroke:var(--paper-sunk);stroke-width:.25;
-    cursor:pointer;transition:fill .1s;}
-  .pp-strip .hit.letter{stroke-dasharray:1 1;}
-  .pp-strip .hit:hover{fill:var(--accent-tint);}
-  .pp-strip .hit.sel{fill:var(--sel-soft);stroke:var(--sel);stroke-width:.5;stroke-dasharray:none;}
-  /* hovering (or focusing) a letter's box lights that letter's ink — and the marks that ride on it */
-  .pp-strip .ink{transition:fill .12s,opacity .12s;}
-  .pp-strip g.hot .ink{fill:var(--sel);}
-  /* the rest of the word drops back toward the paper, so the lit letter stands alone */
-  .pp-strip g.dim .ink{opacity:.12;}
-  .pp-strip .hit:focus-visible{outline:none;stroke:var(--accent);stroke-width:.6;}
+  /* Each part gets its OWN copy of the word, spaced apart in a row. In a copy, one
+     part is solid ink and every other part is invisible ink — there to hold the
+     letter's place, so you still see which word it is. Tap a copy to take that part. */
+  .pp-strip{display:flex;flex-wrap:nowrap;gap:.55rem;width:max-content;min-width:16rem;
+    margin:0 auto;padding:.1rem;}
+  .pp-cell{appearance:none;font:inherit;border:1px solid var(--paper-sunk);
+    background:var(--paper-raised);border-radius:var(--radius);padding:.3rem .3rem .2rem;
+    cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:.2rem;
+    transition:border-color .1s,background .1s;}
+  .pp-cell .cellword{display:block;height:5.6rem;width:auto;}
+  /* invisible ink: the other parts, faint, holding their place in the word */
+  .pp-cell .gh{fill:var(--ink);opacity:.10;transition:fill .12s;}
+  /* the one part this copy is for */
+  .pp-cell .tk{fill:var(--ink);transition:fill .12s;}
+  .pp-cell:hover{border-color:var(--accent);background:var(--accent-tint);}
+  .pp-cell:hover .tk{fill:var(--accent-strong);}
+  .pp-cell:focus-visible{outline:2px solid var(--accent);outline-offset:1px;}
+  .pp-cell.sel{border-color:var(--sel);background:var(--sel-soft);}
+  .pp-cell.sel .tk{fill:var(--sel);}
+  /* the name under each copy — what you take when you tap it */
+  .pp-cn{font-size:.72rem;color:var(--ink-soft);white-space:nowrap;line-height:1.1;}
+  .pp-cell.sel .pp-cn{color:var(--sel);font-weight:600;}
   /* ── The running tally beside the word ── */
   .pp-aside{flex:0 0 12rem;min-width:11rem;align-self:center;border:1px solid var(--paper-sunk);
     border-radius:var(--radius);background:var(--paper-raised);padding:.65rem .75rem;text-align:left;}
@@ -352,11 +347,12 @@ const html = `<!doctype html>
     <div class="tray" id="tray" aria-label="Signs on the word you tapped"></div>
     <div class="chips" id="chips" aria-label="Signs on the word you tapped, by name"></div>
     <div class="panel" id="panel" aria-label="The word broken into its parts">
-      <p class="pp-note">The word stays whole, the way it is in the print. Point at a letter and the
-        rest of the word fades back, so that one letter stands alone in colour — pick it, or pick just
-        a mark; take as many as you like. Every shape here is measured on the print.</p>
+      <p class="pp-note">Each letter and each mark gets its own copy of the word, side by side. In a
+        copy, one part is solid ink and the rest is invisible ink — there so you can still see which
+        word it is. Tap a copy to take that part; take as many as you like, or the whole word below.
+        Every shape here is drawn from the word's own font, so one part never carries a neighbour's ink.</p>
       <div class="pp-body">
-        <div class="pp-scroll"><div class="pp-strip" id="ppStrip" aria-label="the word, whole, with one letter picked out by colour"></div></div>
+        <div class="pp-scroll"><div class="pp-strip" id="ppStrip" aria-label="a copy of the word for each letter and mark, one part inked in each"></div></div>
         <aside class="pp-aside" id="ppAside" aria-live="polite" aria-label="What you have picked, named"></aside>
       </div>
       <div class="pp-word">
@@ -600,134 +596,66 @@ var ppStrip=document.getElementById("ppStrip");
 var ppAside=document.getElementById("ppAside");
 var ppActions=document.getElementById("ppActions");
 var wWith=document.getElementById("wWith"), wWithout=document.getElementById("wWithout");
-var sel={}, curLetters=[], curNames={};
+var sel={}, curNames={};
 
-// The gap between one WORD-cluster and the next, in the print's own units. Words
-// are set apart so each is a clear group; the letters inside a word stay joined
-// as they are in the print, and are told apart by colour, not by a gap.
-var LETTER_GAP=18; // gap between separable clusters; only real cluster boundaries
-// can widen — sub-letters inside one joined cluster share an outline and cannot part
-var MARK_MINHIT=2.8; // smallest a mark's tap target is grown to, centred on its ink
-var PAD=1.6;
+// Which shaped word a tapped print-box opens. The print cuts the verse into more
+// boxes than the font makes words: one box is the pause mark, and a word can be
+// split across two boxes — those map to no new word, or to the same word.
+function shapedFor(w){ var si=DATA.printToShaped[w]; return (si==null||si===undefined)?null:DATA.shaped[si]; }
 
-// Which letter-band a point falls in, by its x. Bands run left-to-right in draw
-// order; the last band catches anything past the final cut.
-function bandOf(cx, edges, nb){
-  for(var k=0;k<nb;k++){ if(cx < edges[k+1] || k===nb-1) return k; }
-  return nb-1;
+// The padded frame that fits the whole word, in the font's own units. Every cell
+// draws the same word in this same frame, so the letters sit in the same place
+// copy to copy — only which one is inked changes.
+function wordFrame(word){
+  var x0=Infinity,y0=Infinity,x1=-Infinity,y1=-Infinity;
+  word.letters.concat(word.marks).forEach(function(s){
+    x0=Math.min(x0,s.bb[0]); y0=Math.min(y0,s.bb[1]);
+    x1=Math.max(x1,s.bb[2]); y1=Math.max(y1,s.bb[3]);
+  });
+  var pad=(x1-x0)*0.04+20;
+  return [x0-pad, y0-pad, (x1-x0)+2*pad, (y1-y0)+2*pad];
 }
 
-function growRect(bb, minSize){
-  var x=bb[0], y=bb[1], w=bb[2], h=bb[3];
-  if(w<minSize){ x-=(minSize-w)/2; w=minSize; }
-  if(h<minSize){ y-=(minSize-h)/2; h=minSize; }
-  return [x,y,w,h];
+// One cell: its own copy of the whole word, every part drawn in invisible ink
+// except the one part this cell is for, which is solid. Tap the cell to take that
+// part. Because each part is its own font outline, the solid one never drags a
+// neighbour's ink with it — the ta comes without the ya.
+function cell(word, frame, key, name, targetPart){
+  // The button and its label are HTML; only the drawing is SVG. el() makes
+  // SVG-namespaced nodes, so an el("button") is an inert SVG element with no HTML
+  // layout — make the wrappers with createElement and keep el() for svg/path.
+  var b=document.createElement("button");
+  b.type="button"; b.className="pp-cell"; b.setAttribute("data-key",key); b.setAttribute("aria-label",name);
+  // Fix the copy's width from the word's aspect ratio: inside a flex button an SVG
+  // with width:auto can collapse, so give it an explicit width for the height.
+  var ratio=frame[2]/frame[3];
+  var svg=el("svg",{viewBox:frame.join(" "),preserveAspectRatio:"xMidYMid meet",class:"cellword",
+    style:"height:5.6rem;width:"+(5.6*ratio).toFixed(2)+"rem"});
+  word.letters.forEach(function(L){ svg.appendChild(el("path",{d:L.d,class:(L===targetPart)?"tk":"gh"})); });
+  word.marks.forEach(function(m){ svg.appendChild(el("path",{d:m.d,class:(m===targetPart)?"tk":"gh"})); });
+  b.appendChild(svg);
+  var lab=document.createElement("span"); lab.className="pp-cn"; lab.textContent=name; b.appendChild(lab);
+  b.addEventListener("click",function(){ toggle(key); });
+  curNames[key]=name;
+  return b;
 }
-function pathEl(d, cls){ return el("path",{d:d,class:cls}); }
-function hitRect(bb, key, label, inkId){
-  var r=el("rect",{x:bb[0],y:bb[1],width:bb[2],height:bb[3],rx:.5,
-    class:"hit"+(key.charAt(0)==="L"?" letter":""),"data-key":key,tabindex:"0",
-    role:"button","aria-label":label});
-  r.addEventListener("click",function(ev){ ev.stopPropagation(); toggle(key); });
-  r.addEventListener("keydown",function(ev){ if(ev.key==="Enter"||ev.key===" "){ ev.preventDefault(); toggle(key); } });
-  if(inkId){
-    var hot=function(on){
-      // Light the hovered letter, and drop every other letter of the word (and the
-      // marks riding on them) toward the paper — so the one letter stands alone by
-      // colour, without cutting the joined ink or opening a gap a bad cut would show.
-      var ligs=document.querySelectorAll(".pp-strip .lig");
-      for(var i=0;i<ligs.length;i++){
-        var isMe=ligs[i].id===inkId;
-        ligs[i].classList.toggle("hot",on&&isMe);
-        ligs[i].classList.toggle("dim",on&&!isMe);
-      }
-      var ms=document.querySelectorAll(".pp-strip [data-of]");
-      for(var j=0;j<ms.length;j++){
-        var mine=ms[j].getAttribute("data-of")===inkId;
-        ms[j].classList.toggle("hot",on&&mine);
-        ms[j].classList.toggle("dim",on&&!mine);
-      }
-    };
-    r.addEventListener("mouseenter",function(){ hot(true); });
-    r.addEventListener("mouseleave",function(){ hot(false); });
-    r.addEventListener("focus",function(){ hot(true); });
-    r.addEventListener("blur",function(){ hot(false); });
-  }
-  return r;
-}
+
 function openPanel(w){
   litWord(w); sel={}; curNames={};
-  var word=DATA.ligWords[w];
-  curLetters=(word&&word.letters)?word.letters:[];
-  // Lay the words out left-to-right with a gap between them; inside a word the
-  // letters stay joined as they are in the print, each mark sitting exactly where
-  // it sits on its letter. We build in reverse reading order, so the first letter
-  // of the word lands on the right, the way the print reads.
-  var ink=el("g",{class:"inklayer"}), hits=el("g",{class:"hitlayer"}), defs=el("defs");
-  var cursor=0, minY=Infinity, maxY=-Infinity, maxX=0;
-  var marks=[];
-  var clipSeq=0;
-  for(var vi=curLetters.length-1; vi>=0; vi--){
-    var L=curLetters[vi];
-    var tx=cursor - L.ubb[0];
-    // The letter tap-bands. A connected cluster is one outline with no per-letter
-    // geometry, so it was cut at the joins measured from the ink; a lone letter is
-    // a single band spanning its whole width.
-    var bEdges=[L.bb[0]].concat(L.cuts||[]).concat([L.bb[0]+L.bb[2]]);
-    var nb=bEdges.length-1;
-    // Draw the body once, in its true joined shape — the letters are NOT pulled
-    // apart, because vertical cuts cannot separate cursive letters that overlap
-    // sideways (a waw's tail sweeps back under the letters before it). Instead each
-    // letter is a separately-coloured window onto the one outline, clipped to its
-    // band's x-range; hovering a letter paints just that window and fades the rest,
-    // so a letter is picked out by colour rather than by a gap a bad cut would show.
-    for(var bi=0; bi<nb; bi++){
-      var inkId="ink_L_"+vi+"_"+bi;
-      var g;
-      if(nb>1){
-        var cx0=(bi===0)?-1e4:bEdges[bi];
-        var cx1=(bi===nb-1)?1e4:bEdges[bi+1];
-        var cid="lc"+(clipSeq++);
-        var cp=el("clipPath",{id:cid,clipPathUnits:"userSpaceOnUse"});
-        cp.appendChild(el("rect",{x:cx0,y:-1e4,width:cx1-cx0,height:2e4}));
-        defs.appendChild(cp);
-        g=el("g",{id:inkId,class:"lig",transform:"translate("+tx+",0)","clip-path":"url(#"+cid+")"});
-      } else {
-        g=el("g",{id:inkId,class:"lig",transform:"translate("+tx+",0)"});
-      }
-      L.body.forEach(function(d){ g.appendChild(pathEl(d,"ink")); });
-      ink.appendChild(g);
-      var band=[bEdges[bi]+tx, L.bb[1], bEdges[bi+1]-bEdges[bi], L.bb[3]];
-      // Name this band. Bands run left→right, but Arabic reads right→left, so the
-      // leftmost band is the LAST letter in reading order: band bi ↔ names[nb-1-bi].
-      var lname=(L.names&&L.names.length===nb)?L.names[nb-1-bi]:"letter";
-      curNames["L:"+vi+":"+bi]=lname;
-      hits.appendChild(hitRect(band,"L:"+vi+":"+bi,"letter "+lname,inkId));
-    }
-    // Each mark rides the letter it sits on — bucketed by its centre-x into a band,
-    // drawn un-clipped so it always stays whole, tagged with the letter it belongs
-    // to so it fades and lights together with that letter.
-    L.dia.forEach(function(d,di){
-      var mbi=nb>1?bandOf(d.bb[0]+d.bb[2]/2,bEdges,nb):0;
-      var mid="ink_L_"+vi+"_"+mbi; // hovering the letter lights its marks too
-      var gm=el("g",{transform:"translate("+tx+",0)","data-of":mid});
-      d.d.forEach(function(p){ gm.appendChild(pathEl(p,"ink")); });
-      ink.appendChild(gm);
-      var mb=growRect([d.bb[0]+tx,d.bb[1],d.bb[2],d.bb[3]],MARK_MINHIT);
-      marks.push(hitRect(mb,"m:"+vi+":"+di,"mark "+d.name));
-      curNames["m:"+vi+":"+di]=d.name;
-      minY=Math.min(minY,mb[1]); maxY=Math.max(maxY,mb[1]+mb[3]);
-    });
-    minY=Math.min(minY,L.ubb[1]); maxY=Math.max(maxY,L.ubb[1]+L.ubb[3]);
-    cursor += L.ubb[2] + LETTER_GAP;
-    maxX=cursor - LETTER_GAP;
+  var word=shapedFor(w);
+  if(!word){ panel.classList.remove("show"); renderSel(); return; }
+  var frame=wordFrame(word);
+  ppStrip.innerHTML="";
+  // Letters first, in reading order: the first letter you say sits rightmost in
+  // the print, which is the last entry in the font's visual (left→right) order —
+  // so walk the letters back-to-front and the cells read the way you say the word.
+  for(var li=word.letters.length-1; li>=0; li--){
+    ppStrip.appendChild(cell(word,frame,"L:"+li,word.letters[li].name,word.letters[li]));
   }
-  marks.forEach(function(m){ hits.appendChild(m); });
-  var vbY=minY-PAD, vbH=(maxY-minY)+PAD*2;
-  var svg=el("svg",{viewBox:(0-PAD)+" "+vbY+" "+(maxX+PAD*2)+" "+vbH,
-    preserveAspectRatio:"xMidYMid meet"});
-  svg.appendChild(defs); svg.appendChild(ink); svg.appendChild(hits);
-  ppStrip.innerHTML=""; ppStrip.appendChild(svg);
+  // Then each mark, in the order it sits across the word.
+  word.marks.forEach(function(m,mi){
+    ppStrip.appendChild(cell(word,frame,"m:"+mi,m.name,m));
+  });
   renderSel();
   panel.classList.add("show");
 }
@@ -782,7 +710,7 @@ function renderAside(){
   ppAside.innerHTML=html;
 }
 function renderSel(){
-  ppStrip.querySelectorAll(".hit").forEach(function(c){ c.classList.toggle("sel", !!sel[c.getAttribute("data-key")]); });
+  ppStrip.querySelectorAll(".pp-cell").forEach(function(c){ c.classList.toggle("sel", !!sel[c.getAttribute("data-key")]); });
   wWithout.classList.toggle("sel", !!sel["wordbare"]);
   wWith.classList.toggle("sel", !!sel["word"]);
   var keys=Object.keys(sel);
