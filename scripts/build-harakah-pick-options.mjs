@@ -242,6 +242,9 @@ const html = `<!doctype html>
   .pp-cell .cellword{display:block;height:5.6rem;width:auto;}
   /* invisible ink: the other parts, faint, holding their place in the word */
   .pp-cell .gh{fill:var(--ink);opacity:.10;transition:fill .12s;}
+  /* the anchor: in a mark's copy, the one letter the mark sits on — drawn a shade
+     up from invisible, so the mark reads as stacked above or below THAT letter */
+  .pp-cell .ctx{fill:var(--ink);opacity:.34;transition:fill .12s;}
   /* the one part this copy is for */
   .pp-cell .tk{fill:var(--ink);transition:fill .12s;}
   .pp-cell:hover{border-color:var(--accent);background:var(--accent-tint);}
@@ -616,11 +619,25 @@ function wordFrame(word){
   return [x0-pad, y0-pad, (x1-x0)+2*pad, (y1-y0)+2*pad];
 }
 
+// The letter a mark sits on: the one whose horizontal span best contains the mark's
+// centre, else the nearest by centre. A mark's own y already puts it above or below
+// (that is the font placing it by kind), so the anchor only needs the column right.
+function baseLetterOf(word, mark){
+  if(!word.letters.length) return null;
+  var mx=(mark.bb[0]+mark.bb[2])/2, best=null, bestD=Infinity;
+  word.letters.forEach(function(L){
+    var lo=L.bb[0], hi=L.bb[2];
+    var d=(mx>=lo&&mx<=hi)?0:Math.min(Math.abs(mx-lo),Math.abs(mx-hi));
+    if(d<bestD){ bestD=d; best=L; }
+  });
+  return best;
+}
+
 // One cell: its own copy of the whole word, every part drawn in invisible ink
 // except the one part this cell is for, which is solid. Tap the cell to take that
 // part. Because each part is its own font outline, the solid one never drags a
 // neighbour's ink with it — the ta comes without the ya.
-function cell(word, frame, key, name, targetPart){
+function cell(word, frame, key, name, targetPart, anchor){
   // The button and its label are HTML; only the drawing is SVG. el() makes
   // SVG-namespaced nodes, so an el("button") is an inert SVG element with no HTML
   // layout — make the wrappers with createElement and keep el() for svg/path.
@@ -631,8 +648,11 @@ function cell(word, frame, key, name, targetPart){
   var ratio=frame[2]/frame[3];
   var svg=el("svg",{viewBox:frame.join(" "),preserveAspectRatio:"xMidYMid meet",class:"cellword",
     style:"height:5.6rem;width:"+(5.6*ratio).toFixed(2)+"rem"});
-  word.letters.forEach(function(L){ svg.appendChild(el("path",{d:L.d,class:(L===targetPart)?"tk":"gh"})); });
-  word.marks.forEach(function(m){ svg.appendChild(el("path",{d:m.d,class:(m===targetPart)?"tk":"gh"})); });
+  // Solid the target part; hold the letter it sits on a shade up from invisible
+  // (the "anchor"), so a mark reads as stacked on that letter; the rest stays faint.
+  var inkClass=function(part){ return part===targetPart?"tk":(part===anchor?"ctx":"gh"); };
+  word.letters.forEach(function(L){ svg.appendChild(el("path",{d:L.d,class:inkClass(L)})); });
+  word.marks.forEach(function(m){ svg.appendChild(el("path",{d:m.d,class:inkClass(m)})); });
   b.appendChild(svg);
   var lab=document.createElement("span"); lab.className="pp-cn"; lab.textContent=name; b.appendChild(lab);
   b.addEventListener("click",function(){ toggle(key); });
@@ -646,15 +666,16 @@ function openPanel(w){
   if(!word){ panel.classList.remove("show"); renderSel(); return; }
   var frame=wordFrame(word);
   ppStrip.innerHTML="";
-  // Letters first, in reading order: the first letter you say sits rightmost in
-  // the print, which is the last entry in the font's visual (left→right) order —
-  // so walk the letters back-to-front and the cells read the way you say the word.
-  for(var li=word.letters.length-1; li>=0; li--){
+  // Letters in visual order, left→right: the font lays glyphs out left-to-right,
+  // so word.letters[0] is the leftmost letter in the print. Walk front-to-back and
+  // the leftmost card is the leftmost letter — the strip mirrors the word on the page.
+  for(var li=0; li<word.letters.length; li++){
     ppStrip.appendChild(cell(word,frame,"L:"+li,word.letters[li].name,word.letters[li]));
   }
-  // Then each mark, in the order it sits across the word.
+  // Then each mark, in the order it sits across the word — each shown stacked on the
+  // letter it belongs to (nearest by horizontal centre), above or below by its own kind.
   word.marks.forEach(function(m,mi){
-    ppStrip.appendChild(cell(word,frame,"m:"+mi,m.name,m));
+    ppStrip.appendChild(cell(word,frame,"m:"+mi,m.name,m,baseLetterOf(word,m)));
   });
   renderSel();
   panel.classList.add("show");
