@@ -484,3 +484,192 @@ register agree.
 The remaining work — graduating H into the app (the per-mark ink displacement plus the guard) and
 closing the reproduced mark defects dammed behind the placement decision — is the follow-on, tracked
 separately. This closed only the "the page still asks a decided question" gap.
+
+## #73 — Graduate H: auto-place trusted marks on their ink, hand-place the hard core
+
+**Done:** 2026-09-04, commit `cab8c42` "Each mark ships where its own ink is, and the hard core
+keeps the hand that placed it".
+
+The owner's placement ruling (H) reaches the ship asset: a mark the ink search trusts is placed on
+its own ink at build time; the hard core the search cannot place is read from the hand-sitting
+table instead. Rests on `5cd6c1d` (the 209 hard-core marks sat on their own ink by hand),
+`66f4797` (reading those hand placements back into a table a builder can ship) and `54294a6`
+(unblocking the reach-for-ink frontier once the ruling was made).
+
+## #74 — Fold both refused-mark refinements into the placement asset
+
+**Done:** 2026-09-04, commit `d8443f3` "A refused mark reaches for its own ink, guarded, instead of
+only tilting".
+
+A refused mark no longer merely tilts toward its ink — it reaches for it, under the symmetric
+too-big/too-small guard #210 escalated, so a candidate that would grow or shrink past the shipped
+rectangle is held back.
+
+## #75 — Reconcile the option-H decision page with the ship asset's per-mark reach (㊱)
+
+**Done:** 2026-09-04, commit `a87e64b` "The decision page reads each mark's own reach, as the ship
+asset does".
+
+The drawn placement page now reads each mark's own reach the same way the shipped asset does, so
+the picture a reader decides from and the bytes the app serves cannot drift apart.
+
+## #76 — Sit the remaining 259 boundary-hit marks, or decide they ship as-is (㉛)
+
+**Done:** 2026-09-05, commit `1db1b6b` "A hafiz sits the 259 edge marks by hand; the code owes
+nothing more".
+
+The 259 marks that hit a boundary were sat by hand and found already at the ink search's best
+answer — `77e7007` showed eighty were fixed already, `65671e3` asked whether those eighty were a
+fair sample of the rest (they were), and `527a00b` surveyed how other Qur'an projects place marks
+and confirmed our route is the only one that fits. The code owes nothing further here.
+
+## #78 — Corroborate the word-segmentation split against a disinterested third corpus (⑩)
+
+**Done:** 2026-09-05, commit `5aacec0` "A third grammar reads the split the same way both incumbents
+already do".
+
+A third, independently built grammar reads the contested word-segmentation split the same way both
+incumbent corpora already do, corroborating it as a convention rather than an error — the witness
+technique of counting a tag-independent signature across a disinterested corpus. `d4c59f4` records
+how the neighbour-rail decision heard that third grammar and how the next witness-check inherits the
+method.
+
+## #79–#82 — Reopen the page-curl decision on a board where each turn is felt by hand
+
+**Done:** 2026-09-04, commit `f465818` "Reopen the page-curl question on a board where each turn is
+felt by hand".
+
+The four curl tasks — study the turn machinery and the prior live-options pattern, build the live
+curl option components behind one interface, draw the options page under `docs/design/`, and register
+the reopened decision — landed together: the difference between the options is felt, not drawn, so
+each is a live interchangeable component mounted on the decision page and tried by hand. `b7159ff`
+("Sort every encumbered input into ingredient or instrument") is the companion that sorted each
+gesture the board takes into what it operates on versus what operates it.
+
+## #83 — Repair two off-grid ayah boxes (PLAN 17: 68:3 p564, 107:2 p602)
+
+**Done:** 2026-09-06, commit `4d33246` "Stretch two short ayah tails to the foot of their line".
+
+The two verses whose tap boxes sat off the line grid (68:3 on page 564, 107:2 on page 602) now
+stretch their short tails to the foot of their line, so the tappable area matches the ink.
+
+## #84–#86 — Design the outside page library as a held store, and open its decisions
+
+**Done:** 2026-09-07, commits `51567fd`, `a5a4ebc`, `2f15b32`, `1ced08b`.
+
+`51567fd` opened the two questions about the other page library — check it, and draw from it in dev.
+`a5a4ebc` folded the hosted-database store into the page-source design; `2f15b32` reopened the
+copy-none boundary for a store we *hold* (not bytes we ship); `1ced08b` linked the repo to its own
+hosted database project. The design.md of these decisions and their register rows are the through-line
+of the cluster.
+
+## #87 · #89 · #91 · #93 — Map the whole outside library, and draw it on our own site
+
+**Done:** 2026-09-07 → 09-09, commits `e0b8daa`, `8c45b71`, `a94052c`, `3b4bdcf`, `b0f9089`.
+
+`8c45b71` read the whole layout without the read overflowing (the inventory + join model crawl of the
+qul-data folder); `e0b8daa` drew the whole outside library as one entity diagram with keys and counts
+(the ERD artifact and the join-map graduated into the ETL design page); `a94052c` made the store draw
+itself on our own site and `3b4bdcf` marked the held copy as loaded on the map; `b0f9089` logged the
+finished ERD redraw. The full ERD and store schema are rendered on-site as hand-drawn SVG so they open
+from a clone.
+
+## #88 — Record the qul-store-purpose decision (render V4 + side-by-side validation)
+
+**Done:** 2026-09-07, commit `68ccb0a` "Settle what the held copy is for, and point the store at V4".
+
+Settled what the held copy is for — rendering the V4 page and validating our own numbers side by side
+against it — and pointed the store at the V4 printing rather than the earlier V2 scaffold.
+
+## #90 — Realign the store scaffold from V2 to V4, and extend the licence gate
+
+**Done:** 2026-09-07, commit `f645acb` "Build the text-free QUL store, gated where a byte would be
+held".
+
+The text-free store scaffold was realigned to V4 (resources 21+47) and gated where a byte of held
+scripture could leak. `d0a910a` gave the held copy its own licence check, distinct from the ruler
+check, so the two boundaries are policed separately.
+
+## #92 — Record the QUL held-copy licence reads into SOURCES.md and the ledger
+
+**Done:** 2026-09-07 → 09-08, commits `69ddbfb`, `abb493f`, `d624371`.
+
+`69ddbfb` banked the held-copy licence reads and named the one blocker still owed; `abb493f` recorded
+the owner's licence clearance for the dev held copy; `d624371` read the Complex's terms at the source
+and confirmed the shipped colophon holds. Rests on the earlier QUL boundary work (`8ebbdc1`,
+`acff60d`, `9fb1d6b`) that established per-resource attribution and copy-nothing.
+
+## #94 · #99 — The page-diff workbench, drawn in the print's own per-page letters
+
+**Done:** 2026-09-08, commit `868cbc2` "Stand the library's page beside ours, drawn in the print's own
+per-page letters".
+
+The dev page-diff workbench stands the library's page beside ours. The per-page word font (resource
+240) replaces the earlier Nastaleeq box — each page drawn in its own `pN.ttf` letters, fetched and
+served in dev only — so the ERD and the workbench both reflect the real per-page font.
+
+## #95 · #96 — One store-page component, mounted in the workbench and laid over the print in-app
+
+**Done:** 2026-09-08, commit `8b73a59` "The store's page is drawn once, and laid over the print in the
+running app".
+
+The store-page drawing was lifted into one component both the workbench and the app mount. An in-app
+dev toggle lays the store's page over the print in the running app, compiled out of the public build.
+
+## #97 — Gate the built public bundle against held scripture and any road to it
+
+**Done:** 2026-09-09, commit `6b1d523` "A gate weighs the built app and refuses the store's letters or
+a road to them".
+
+A gate weighs the *built* public bundle and refuses it if it carries the store's Arabic letters, the
+store loader, or a dev-fixture path — the held-copy tenet enforced on shipped bytes, not just policy.
+
+## #100 — Register the app's tap shapes against the store's word boxes, all 604 pages
+
+**Done:** 2026-09-09, commit `699a5e6` "Lay the app's tap shapes over the store's page and name every
+word that lands wrong".
+
+The diff view lays the app's tappable ayah areas over the store's word boxes and names every word that
+lands wrong. `e95ffe5` swept all 604 pages (the tap shapes answer with the right ayah everywhere) and
+`120e192` measured the residue with the store removed — what remains is boundaries, not misregistration.
+
+## #102 — Register #95–#101 in PLAN + issues, and re-render the docs
+
+**Done:** 2026-09-09, commit `2defa22` "Re-render the stale tasks doc".
+
+Registered the then-open store/diff tasks in the roadmap and issue index and re-rendered the generated
+tasks doc. The done.md move this task also named — archiving the finished QUL tasks — is what the
+current archive pass (#73–#111) completes, since that half never reached this branch.
+
+## #103–#107 — Sharpen the harakah picker: precise, spaced, named and tallied
+
+**Done:** 2026-09-09 → 09-11, commits `0cc420f`, `9852508`, `3515bee`, `baba179`, `072b02b`,
+`2980c69`, `d365ac8`.
+
+The sign-picker became a precision picker (`0cc420f`), its rows sized to the word's real shape rather
+than the panel width (`9852508`); it picks a letter by colour rather than by cutting (`3515bee`) and a
+reader can take one letter out of a joined word, with visible space between separable clusters
+(`baba179`); a side panel names what you took (`072b02b`) and aggregates it into named counts —
+letters by name, not just a tally (`2980c69`); and the picker's verse is shaped from its own font so a
+single part can be taken alone (`d365ac8`). Centring the picked word landed in the same series.
+
+## #108 — Reconstruct-word layout in the word drawer picker
+
+**Done:** 2026-09-19, commit `4ca583b` "Draw each vowel-sign stacked on its own letter, in the word's
+own order".
+
+Each vowel-sign is drawn stacked in its own base letter's column — above or below by type — with the
+letters in a row in the word's own order, so the grid spells the word.
+
+## #109–#111 — Live bottom-sheet word and ayah drawers, tap versus long-press
+
+**Done:** 2026-09-19, commit `c48472a` "Open the word tools with a tap and the verse tools with a hold,
+in one bottom sheet".
+
+A quick tap on a word opens the word drawer (the fine part-picker); a press-and-hold opens the ayah
+drawer (whole-verse tools); both are the same bottom sheet on desktop and mobile, built live on the
+page so the reader decides by doing it. The same commit wrote the decision record
+[`selection-drawer.md`](../decisions/selection-drawer.md) and its on-site page
+[`selection-drawer.html`](../design/selection-drawer.html), and registered the `selection-drawer`
+decision (status open) with reciprocal links to the harakah-pick, mistake-note-anchor and
+word-selection decisions — gates green.
