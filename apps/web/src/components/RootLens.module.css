@@ -291,13 +291,13 @@
   }
 
   /*
-   * On a spread the app names a side: the same leaf as the ayah (Option C), so
-   * the card stays beside the verse it is about rather than across the gutter
-   * from it, held to the outer margin and kept narrow so it sits beside the
-   * text rather than over it. Physical `left`/`right` on purpose — the leaf is
-   * on a physical side of the gutter whatever direction the chrome reads in, so
-   * the logical inset above (which follows `dir`) is the wrong axis here, and
-   * the attribute's specificity is what overrides it.
+   * On a spread the app names a side: the facing leaf, opposite the ayah
+   * (Option D), so the card never lands on top of the verse it is about — a
+   * same-leaf card, tried live as Option C, covered a leaf-filling surah's own
+   * lines. Physical `left`/`right` on purpose — the leaf is on a physical side
+   * of the gutter whatever direction the chrome reads in, so the logical inset
+   * above (which follows `dir`) is the wrong axis here, and the attribute's
+   * specificity is what overrides it.
    */
   .sheet[data-side="left"] {
     left: var(--space-5);

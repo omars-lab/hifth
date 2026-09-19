@@ -1275,7 +1275,7 @@ test.describe("Hifth · the trail bar holds its height", () => {
 });
 
 /*
- * The ayah's sheets rise on the ayah's own leaf.
+ * The ayah's sheets rise over the facing leaf.
  *
  * All three sheets an ayah can raise — the hop list a rail chip opens, the
  * highlighted passage's menu, the root lens — are *about* one ayah, and on a
@@ -1283,17 +1283,18 @@ test.describe("Hifth · the trail bar holds its height", () => {
  * follow the chrome's direction (inline-end: the right in English, the left in
  * Arabic). On a spread that is the wrong axis: the ayah sits on a physical side
  * of the gutter whatever language the chrome reads in, so a corner chosen by
- * language could land the card on the wrong leaf entirely. So the app names the
- * side — and the drawer decision (docs/design/ayah-drawer.md, decided C) puts it
- * on the ayah's *own* leaf, so the tools stay beside the verse they are about
- * rather than across the gutter from it.
+ * language could land the card on top of the verse it is about. So the app names
+ * the side — and the drawer decision (docs/design/ayah-drawer.md, decided D)
+ * puts it on the *facing* leaf, opposite the ayah, so the pressed verse stays
+ * fully visible with its tools across the gutter. (The same-leaf placement,
+ * Option C, was tried live and covered a leaf-filling surah's own lines.)
  *
  * Asserted in both languages, because the corner used to be chosen by the
  * chrome's direction and the side must not be; and on geometry against the open
  * book rather than on the attribute alone, since the attribute is only a claim
  * about where the stylesheet will put the card.
  */
-test.describe("Hifth · the ayah's sheets rise on the ayah's own leaf", () => {
+test.describe("Hifth · the ayah's sheets rise over the facing leaf", () => {
   /** `LANG_STORAGE_KEY` in src/i18n.ts — set before the app boots. */
   const LANG_KEY = "hifth.lang.v1";
   /** Any rail chip; the hop list it opens is the sheet under test. */
@@ -1308,7 +1309,7 @@ test.describe("Hifth · the ayah's sheets rise on the ayah's own leaf", () => {
   }
 
   for (const lang of ["ar", "en"] as const) {
-    test(`the hop list lands on the ayah's own leaf, with the chrome in ${lang}`, async ({ page }) => {
+    test(`the hop list lands opposite the ayah, with the chrome in ${lang}`, async ({ page }) => {
       await page.addInitScript((a) => localStorage.setItem(a.key, a.lang), { key: LANG_KEY, lang });
       // 2:48 is the last ayah of page 7 — the right-hand leaf of the opening (7, 8).
       await page.goto("/#/hafs-kfqc/2:48");
@@ -1317,9 +1318,9 @@ test.describe("Hifth · the ayah's sheets rise on the ayah's own leaf", () => {
       await expect(sheet(page)).toBeVisible();
       expect(
         await sideOf(page, sheet(page)),
-        "an ayah on the right leaf raises its sheet over its own (right) leaf",
-      ).toBe("right");
-      expect(await sheet(page).getAttribute("data-side")).toBe("right");
+        "an ayah on the right leaf raises its sheet over the facing (left) leaf",
+      ).toBe("left");
+      expect(await sheet(page).getAttribute("data-side")).toBe("left");
       await page.keyboard.press("Escape");
       await expect(sheet(page)).toHaveCount(0);
 
@@ -1331,12 +1332,12 @@ test.describe("Hifth · the ayah's sheets rise on the ayah's own leaf", () => {
       await expect(sheet(page)).toBeVisible();
       expect(
         await sideOf(page, sheet(page)),
-        "an ayah on the left leaf raises its sheet over its own (left) leaf",
-      ).toBe("left");
-      expect(await sheet(page).getAttribute("data-side")).toBe("left");
+        "an ayah on the left leaf raises its sheet over the facing (right) leaf",
+      ).toBe("right");
+      expect(await sheet(page).getAttribute("data-side")).toBe("right");
     });
 
-    test(`the passage's menu lands on the passage's own leaf, with the chrome in ${lang}`, async ({
+    test(`the passage's menu lands opposite the passage, with the chrome in ${lang}`, async ({
       page,
     }) => {
       await page.addInitScript((a) => localStorage.setItem(a.key, a.lang), { key: LANG_KEY, lang });
@@ -1344,19 +1345,19 @@ test.describe("Hifth · the ayah's sheets rise on the ayah's own leaf", () => {
       await page.goto("/#/hafs-kfqc/2:47-2:48");
       await expect(pageSvg(page, 7)).toBeVisible({ timeout: 20_000 });
       await expect(sheet(page)).toBeVisible();
-      expect(await sideOf(page, sheet(page)), "a passage on the right leaf").toBe("right");
+      expect(await sideOf(page, sheet(page)), "a passage on the right leaf").toBe("left");
 
       await page.goto("/#/hafs-kfqc/2:52-2:53");
       await expect(page.locator(NUM)).toHaveText("8");
       await expect(sheet(page)).toBeVisible();
-      expect(await sideOf(page, sheet(page)), "a passage on the left leaf").toBe("left");
+      expect(await sideOf(page, sheet(page)), "a passage on the left leaf").toBe("right");
     });
   }
 
   test("raising a sheet moves neither leaf", async ({ page }) => {
     // The card is fixed, not in flow, so the paper under it must not shift by a
-    // pixel when it rises — checked on both leaves, the ayah's own and the one
-    // facing it, since either is a layout the card could have pushed.
+    // pixel when it rises — on either leaf, since the facing stage is a second
+    // layout the card could just as well have pushed.
     await page.goto("/#/hafs-kfqc/2:48");
     await expect(pageSvg(page, 7)).toBeVisible({ timeout: 20_000 });
     const live = await restingBox(page, 7);
