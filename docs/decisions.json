@@ -1074,7 +1074,38 @@
       "related": [
         "harakah-pick",
         "mistake-note-anchor",
-        "word-selection"
+        "word-selection",
+        "ayah-drawer"
+      ]
+    },
+    {
+      "id": "ayah-drawer",
+      "question": "When you press a verse, does one drawer open to hold that verse's tools — and where does it sit?",
+      "status": "decided",
+      "options": [
+        {
+          "id": "A",
+          "label": "Leave the tools scattered around the verse, the way they are today"
+        },
+        {
+          "id": "B",
+          "label": "Gather them into one bottom sheet, the same on a phone and on a two-leaf spread"
+        },
+        {
+          "id": "C",
+          "label": "A bottom sheet on a phone; on a spread, a side panel on the pressed verse's own leaf"
+        },
+        {
+          "id": "D",
+          "label": "A bottom sheet on a phone; on a spread, a side panel on the opposite leaf"
+        }
+      ],
+      "doc": "docs/design/ayah-drawer.md",
+      "decided": "C",
+      "by": "omar",
+      "date": "2026-09-19",
+      "related": [
+        "selection-drawer"
       ]
     }
   ]
