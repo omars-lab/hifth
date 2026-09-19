@@ -1354,18 +1354,25 @@ export function App(): JSX.Element {
   /*
    * Which side of the desk the ayah's sheets land on, when the book is open.
    *
-   * On a spread the three sheets (the hop list, the highlighted passage's
-   * menu, the root lens) are all *about* one ayah, and a card that rises over
-   * that ayah hides the thing the reader is working on. So the card goes over
-   * the other leaf: an ayah on the right-hand page raises its options on the
-   * left, and the reverse. The side is physical, not logical — the leaf is on a
-   * physical side of the gutter whatever language the chrome reads in — which
-   * is why this is not left to the sheets' `dir`. Below the breakpoint, or with
-   * the book closed to one leaf, there is no other leaf, and `null` lets the
-   * sheet keep its chrome-direction default (a phone's bottom sheet, or a
-   * single leaf's corner card). A range is anchored by its first ayah; a range
-   * that crosses the gutter has no side that is not partly under the card, and
-   * the head is the ayah the reader started from.
+   * On a spread the ayah's sheets (the hop list, the highlighted passage's
+   * menu, the root lens, and in the pitch build the commentary) are all *about*
+   * one ayah, and they open on the **same** leaf as that ayah — press on the
+   * right-hand page and the card is on the right, press on the left and it is on
+   * the left. That keeps the tools tied to the verse they belong to, so the
+   * reader's eye and hand stay on one side of the book and never lose which leaf
+   * they pressed. This is Option C of the ayah-drawer decision
+   * (docs/design/ayah-drawer.md); the earlier code opened on the *other* leaf
+   * (Option D) to keep the verse fully uncovered, and the two are this one memo
+   * with its returns swapped. The cost the live options page surfaced is that a
+   * same-leaf card wide enough for its contents can cover the verse it is about,
+   * so the card is held to the outer margin and sized to sit beside the text —
+   * see the width in each sheet's stylesheet. The side is physical, not logical
+   * — the leaf is on a physical side of the gutter whatever language the chrome
+   * reads in — which is why this is not left to the sheets' `dir`. Below the
+   * breakpoint, or with the book closed to one leaf, there is no second leaf,
+   * and `null` lets the sheet keep its chrome-direction default (a phone's
+   * bottom sheet, or a single leaf's corner card). A range is anchored by its
+   * first ayah — the ayah the reader started from.
    */
   const sheetSide = useMemo<"left" | "right" | null>(() => {
     if (!desktop || pageMode !== "two" || !resolver) return null;
@@ -1374,8 +1381,8 @@ export function App(): JSX.Element {
     const loc = resolver.resolve(anchor);
     if (!loc) return null;
     const { right, left } = spreadOf(page, totalPages);
-    if (loc.page === right) return "left";
-    if (loc.page === left) return "right";
+    if (loc.page === right) return "right";
+    if (loc.page === left) return "left";
     return null;
   }, [desktop, pageMode, resolver, selectedRange, selectedKey, page, totalPages]);
   const selectedSurah = selectedKey ? parseAyahKey(selectedKey)?.surah : null;

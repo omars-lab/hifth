@@ -11,6 +11,14 @@ Nothing is broken, but nothing is *together*. This record proposes one calm pane
 drawer** — that opens when you press a verse and holds everything about that verse in one place,
 and it settles where that panel sits on a phone and on a wide screen.
 
+**Decided (2026-09-19, omar): Option C.** One drawer, gathering the scattered tools: a bottom
+sheet on a phone and on a single page, and on a two-leaf spread a side panel on the pressed
+verse's *own* leaf. The placement is now live in the app — the verse's sheets open on its own
+leaf instead of the opposite one. Graduating it confirmed, on a real screen, the cost this record
+names below: on the al-Fatiha spread a same-leaf panel wide enough to hold its contents covers the
+leaf's other verses, so *how wide the spread panel should be* is the open follow-on (see "what is
+this not settling"), not the placement itself.
+
 ---
 
 ## A few words, once
@@ -293,9 +301,13 @@ drawer's contents and consolidation) and **supersedes one clause** (the desktop-
 for the reason given in "Where this parts from the companion design". The gesture, the phone
 bottom sheet, and the four note kinds are untouched.
 
-**Registering this.** When the owner is ready: add a row to `docs/decisions.json` (question,
-status `open`, options A–D, the live options page as both `artifact` and `page`, `builtBy`,
-`doc` pointing here, and `related` naming the companion selection-drawer decision in both
-directions), then `make decisions-doc` and `pnpm gate:decisions`. An open decision needs the live
-page checked in under `docs/` and its site address, and at least two options — all present here.
-Left to the owner, per this pass's scope.
+**Registering this.** Registered in `docs/decisions.json` as `ayah-drawer`, `status` `decided`,
+`decided` `C`, `by` `omar`, `date` `2026-09-19`, options A–D, `doc` pointing here, and `related`
+naming the companion `selection-drawer` decision in both directions; re-rendered with `make
+decisions-doc` and checked with `pnpm gate:decisions`. The live options page
+([`ayah-drawer-options.html`](./ayah-drawer-options.html)) is checked in under `docs/` — so it is
+served from the site at the same path and reachable from this record — but, unlike the
+script-built option pages, it is hand-authored with its geometry inlined, so it is linked from
+here rather than carried as the register row's `artifact`/`page` (those require a `builtBy`
+generator, and a decided decision does not need them). Writing that generator is a small follow-on
+only if this is ever reopened.
