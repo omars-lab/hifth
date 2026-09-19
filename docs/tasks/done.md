@@ -36,6 +36,137 @@ symmetric reframing — confirmed, and escalated as a revision to ㉜'s own test
 181 marks and re-cut at 1.75/0.571 by item ㉞ — see
 [`hifth-continue.md`](../../.claude/prompts/hifth-continue.md) §1 for where that stands now.
 
+## #1 · #3 · #6 · #18 · #19 · #23 — Desktop two-page spread triage: width, tap-shift, zoom, edge-grab turn, level leaves
+
+**Done:** 2026-09-01, commit `b90b450` "Desktop spread triage: edge-grab turns, zoom open, level
+leaves, solid beads" (the zoom decisions recorded alongside in `b6933ba`).
+
+The spread's first desktop pass: the reading column stopped stretching too wide, tapping a verse no
+longer nudged the page upward, zoom opens to 100% and past, the outer fore-edge turns the leaf under a
+hand cursor, and a juz jump lands the two leaves level. The still-missing desktop turn animation was
+noted here for a later pass — that fix is #11, still open.
+
+## #2 · #14 · #24 · #25 · #26 — The revision map: numbered cells, activity by month, honest empties, a readable date
+
+**Done:** 2026-09-01, commits `7d4402e` "Number every cell on the revision map, and grow the page cells
+to hold it", `ae8d01d` "The map can be asked 'what did I touch this month'", `631278b` "The map keys
+'not in this build' only when a cell in fact is", `0ab9619` "The map's date reads as a date a person
+writes, not a stamp".
+
+The map that shows what a reader has revised got a number on every cell (with larger cells to hold
+it), a time-range picker and the activity calendar in the menu, the "not in this build" state shown
+only when a cell truly is absent, and its "active since" line rewritten as a date a person writes.
+
+## #4 · #12 · #16 · #30 — Verse highlights: one swipe per line, and a whole-book sweep for the misdrawn boxes
+
+**Done:** 2026-09-01, commits `b2ffce3` "Draw one swipe per line, and forgive the print its rounding",
+`0873c77` "A whole-book sweep finds the next misdrawn verse box by tool, not by eye", `f75acf9`
+"Colour the exact letter, and let the palette page know it".
+
+Multi-line verse highlights stopped merging their middle lines into one blob; the odd highlights on
+2:249 and 10:44 were fixed, then the whole book was swept by tool to catch every other misdrawn verse
+box rather than finding them by eye.
+
+## #17 — The highlight customizer, drawn as shape and strength
+
+**Done:** 2026-09-02, commit `dc247f4` "Draw the highlight customizer as shape and strength, not 'box
+vs fill'".
+
+The choice between a boxed and a filled highlight, and its strength, was drawn as a decision page
+rather than shipped as a raw toggle.
+
+## #5 · #7 · #8 · #10 · #13 — The ayah drawer and a reader's own marks, each drawn as a decision first
+
+**Done:** 2026-09-01 → 09-02, commits `dd0085e` "An ayah's options rise over the facing leaf, not over
+the ayah", `c4a67b5` "A tafseer is a decision before it is a feature, and the options are drawn",
+`29e5842` "Record whether a reader can pin their own note to the page", `31867fe` "A batch of a
+reader's notes can leave the phone, and it says where without saying what", `97406ae` "Draw the
+fold-tap bookmark as two open questions, not one gesture".
+
+The verse-options drawer (rising over the facing leaf), a sourced commentary section, reader
+mistake-marks, a batch export of those marks off the phone, and a bookmark by the page's centre seam —
+each opened as a drawn decision before becoming a feature. (The facing-leaf placement here is the
+earlier rule the ayah-drawer redesign now revisits — see `docs/design/ayah-drawer.md`.)
+
+## #9 — The wordmark reads in English when the app is in English
+
+**Done:** 2026-08-31, commit `(batched)`. The brand wordmark shows in English in English mode while
+scripture stays Arabic — the app half of the wider "artifacts speak English" rule kept in memory.
+
+## #20 · #28 · #29 — The page bar: thirty juz detents with a page-shaped handle, and a stage that always lands level
+
+**Done:** 2026-09-01, commits `3a9396a` "The page bar gets thirty juz marks, a page-shaped handle and a
+bubble that names the juz", `0035a4d` "Every road into the stage lands level and centred, by one settle
+step".
+
+The bottom page scrollbar became thirty juz detents with a draggable page-shaped handle and a
+juz-naming bubble (the stray line through the pill items gone with the redesign), and one settle step
+now guarantees every road into the stage lands level and centred.
+
+## #27 — Desktop-spread zoom: a dev-only orphan that never reached the built app
+
+**Done:** 2026-09, commit `(batched)` — recorded in memory `desktop-zoom-strictmode-orphan`. "One leaf
+grows, one stays" on the spread was a development-mode double-mount artefact; the built app was never
+affected, and host teardown now removes the orphan.
+
+## #31 · #32 — The desktop-triage backlog and the page-bar questions, written where the next session will find them
+
+**Done:** 2026-09-01, commits `893ca0a` "The follow-up list stops counting itself", `69c1d74` "Two
+page-bar questions put in front of a person: does a mark pull, and whose juz is a boundary page".
+
+The session's desktop-triage list moved into the repo's own registers rather than living only in a task
+tracker, and the two page-bar questions were written up as decisions a person can answer.
+
+## #33 — A verification recipe: which server, and a real reload
+
+**Done:** 2026-09, commit `(batched)` — recorded in memory `spa-hash-nav-no-reload` and the `run-app`
+skill. A fix is checked on the server where it can actually fail, with a forced reload, because a
+hash-only navigation keeps the old bundle running.
+
+## #34 — Golden baselines re-based after the owner saw the post-hop framing
+
+**Done:** 2026-09-01, commits `75db3cd` "The twelve goldens agree with the settle step, on both
+platforms, because the owner said so", `71cbd65` "Memory: goldens are re-baselined after the owner has
+seen the diff".
+
+The stale golden images were re-based on both platforms once the owner confirmed the new post-hop
+framing.
+
+## #35 — The pre-commit hook refuses a stale rendered register page
+
+**Done:** 2026-09-01, commit `cc1ec1d` "The hook refuses a stale rendered register, and the plan says
+what this branch carries".
+
+## #36 — Retire the false "no page number reaches a root shard" claim
+
+**Done:** 2026-09, commit `(batched)` — what-we-depend-on item ②. The notices trace's outdated claim
+was removed once it stopped being true.
+
+## #37 · #38 — The licensing map by door, and the adjacency tree's third parent
+
+**Done:** 2026-09-01, commit `bab3d41` "The licensing map is organised by door, and the adjacency tree
+names its third parent".
+
+The licensing map was reorganised by distribution channel and then path, and the CC BY structural
+metadata was named as the adjacency data's third source in the row and the shipped notice.
+
+## #39 · #40 — Every design public on the site, and the board's answers folded into records
+
+**Done:** 2026-09-01 → 09-02, commits `0e643ce` "Every design is public: the site serves each page
+under docs/ at its own path", `73e2f40` "Fold the board's answers into the records the reader can open".
+
+The build now serves every page under the docs tree at its own address, the colophon links them, and
+the decision board's answers were folded into on-site records and the register.
+
+## #41 · #42 · #43 · #44 · #45 — The live-options tenet, and the three open decisions mounted as live options
+
+**Done:** 2026-09-02, commit `0bbc945` "Mount the three open decisions as live options, not only
+drawings" (the tenet itself adopted in CLAUDE.md and the `decide` skill alongside, `(batched)`).
+
+A felt difference is now built and mounted live, not only drawn: the juz-detents, boundary-juz and
+mark-placement decisions were each built as interchangeable live option components on their on-site
+pages and wired into the decision register and gates.
+
 ## #46 / #47 — Graduate the page-bar decision winners into the app bar
 
 **Done:** 2026-09-02, commit `1872644` "The page bar now does what its two questions decided"
@@ -673,3 +804,83 @@ page so the reader decides by doing it. The same commit wrote the decision recor
 [`selection-drawer.html`](../design/selection-drawer.html), and registered the `selection-drawer`
 decision (status open) with reciprocal links to the harakah-pick, mistake-note-anchor and
 word-selection decisions — gates green.
+
+## #1–#45 — The desktop-triage, revision-map, page-bar and live-options era
+
+**Done:** 2026-07-25 → 2026-09-02, across many earlier sessions on branch `harakat-marking`.
+
+These are the earliest tracked tasks — the ones that predate this archive's first numbered entry
+above — moved here in one pass so the session task tracker only carries open work. They are grouped
+because they were done in themed runs, not one at a time, and their reasoning already lives in the
+design docs and registers each one fed (see [`docs/design/`](../design/), [`docs/decisions/`](../decisions/),
+[`docs/issues.json`](../issues.json), and [`docs/PLAN.md`](../PLAN.md)); the exact commit for any one is
+in the branch history for that date range. Nothing here is restated beyond its one-line subject.
+
+**Reading, highlighting and the ayah drawer**
+- #3 — Fix the mushaf shifting up when an ayah is tapped
+- #4 — Fix the odd highlight on ayah 2:249
+- #7 — Add a tafseer section to the ayah drawer, with sourced text and provenance validation
+- #8 — Comment-style ayah mistake-marking (annotations)
+- #12 — Fix a multi-line ayah highlight merging its middle lines into one blob
+- #16 — Fix ayah 10:44 not highlighting like the others
+- #17 — Highlight-style customizer (shape and strength) — see [`docs/design/highlight-style-options.html`](../design/highlight-style-options.html)
+- #30 — Whole-book highlight sweep: find the next 2:249 / 10:44 by tool, not by eye
+
+**The book: zoom, page-turn and the two-leaf spread**
+- #6 — Allow zooming to and past 100%
+- #18 — Edge/corner grab-to-turn with a hand cursor on the page edges
+- #19 — Fix leaves misaligned vertically after a juz jump
+- #22 — Fix leaf misalignment after flipping pages (the turn path)
+- #23 — Investigate the missing page-turn animation/corners on desktop — see [`docs/design/page-turning.md`](../design/page-turning.md)
+- #27 — Fix desktop-spread zoom (one leaf grew, one stayed) — a dev-only StrictMode orphan host
+- #29 — One post-navigation invariant for the stage: every road lands level and centred
+- #34 — Re-baseline the golden images (darwin + linux) after the owner confirmed the post-hop framing
+
+**Revision map and activity calendar**
+- #2 — Draw division numbers on the revision-map cells and enlarge the page cells
+- #14 — Add an activity calendar to the menu bar
+- #24 — Remove the "Not in this build" absent state from the revision map
+- #25 — Reword and reformat the map's "since" line to "Active since Sept 1st, 2026"
+- #26 — Add a time-range pill picker to the revision map (All Time / Last Month / This Month)
+
+**Page bar (the bottom scrollbar)**
+- #1 — Constrain the page-slider width on desktop
+- #20 — Fix a line striking through the page-bar pill items
+- #28 — Redesign the bottom page scrollbar: 30 juz detents, a draggable page-icon handle, a popover — see [`docs/design/page-bar-options.html`](../design/page-bar-options.html)
+- #32 — Record the page-bar decisions: detents as landmarks or magnets, and which juz a boundary page belongs to
+
+**Navigation, chrome and persistence**
+- #5 — Desktop: show the ayah-options drawer on the opposite page of a spread (**note:** revisited in the ayah-drawer design — the owner now wants the drawer on the *same* side as the clicked leaf)
+- #9 — English branding/wordmark in English mode
+- #10 — Local persistence plus batch export/email of marks and comments
+- #13 — Bookmark a page by clicking its centre seam
+- #21 — Update the URL anchor when a page is flipped
+
+**Process, registers and the live-options tenet**
+- #31 — Put the desktop-triage backlog in a repo register, not only in the session task list
+- #33 — Verification recipe: which server, and a real reload, so a fix is checked where it can fail
+- #35 — Pre-commit refuses a stale rendered register page
+- #36 — Notices gate: retire the false "no page number reaches a root shard" claim
+- #37 — Name the CC BY structural metadata in the adjacency licence row and shipped notice
+- #38 — Reorganise the licensing map by channel, then by path
+- #39 — Every design is public on the site: stage `docs/` into the build, derive decision addresses, link from the colophon
+- #40 — Fold the board's decision-answers into on-site records and the register
+- #41 — Adopt the live-options tenet in CLAUDE.md and the `decide` skill
+- #42 — Build the live juz-detents options (A/B/C) as interchangeable components on their on-site page
+- #43 — Build the live boundary-juz options (A/B/C) as interchangeable components on their on-site page
+- #44 — Build the live mark-placement options (A/B/G/H/F/I) as interchangeable components on their on-site page
+- #45 — Wire the three live pages into the decision register and gates
+
+## #112–#115 — The private Study-Quran pitch layer on al-Fātiḥah
+
+**Done:** 2026-09-19, in the working tree on branch `harakat-marking` — **not yet committed** (held for
+the owner's say-so), so there is no commit link yet. The reasoning is in CLAUDE.md → "What we are
+building right now" and the code in `apps/web/src/pitch/`.
+
+The private pitch build (`make pitch`, guarded by the build-time `VITE_PITCH` flag) loads The Study
+Quran's held commentary and cross-references for al-Fātiḥah — the demo shown, in a room, to the
+rights-holders, never deployed.
+- #112 — Extract the curated al-Fātiḥah pitch data into gitignored private JSON
+- #113 — Wire the Study Quran surah intro and commentary into the verse drawer (pitch build only)
+- #114 — Wire the editors' cross-references and curated meaning-jumps as tappable verse-to-verse hops
+- #115 — Verify the held-copy gates pass and the private pitch layer stays out of the public build
