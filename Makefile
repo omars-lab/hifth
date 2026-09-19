@@ -39,6 +39,17 @@ install: ## Install deps + wire the gitleaks pre-commit hook (runs "prepare")
 dev: ## Start the web app in dev mode (Vite HMR) — the main local dev loop
 	$(WEB) dev
 
+.PHONY: pitch
+pitch: ## Serve the PRIVATE pitch build (Study Quran commentary + curated roads on al-Fātiḥah)
+	@# VITE_PITCH turns on the private pitch layer (apps/web/src/pitch/): the
+	@# app loads the gitignored held copy under public/assets/private/ and shows
+	@# it live. This is the demo we take into a room with the rights-holders; it
+	@# is never deployed. Every public build (make build / ci / preview) leaves
+	@# the flag unset, so the pitch code is dead-code-eliminated and the held
+	@# copy is absent. Run the extractor once first if the JSON is missing:
+	@#   node packages/etl/tools/pitch/extract-fatiha.mjs
+	VITE_PITCH=1 $(WEB) dev
+
 .PHONY: build
 build: node-ok ## Production build (core first — package exports resolve to its dist/)
 	$(CORE) build
@@ -92,6 +103,34 @@ report: ## Open the last e2e run's report — traces, image diffs, the failing s
 	  exit 1; \
 	}
 	$(WEB) exec playwright show-report
+
+# The headless eye. NOT a test — it asserts nothing and holds no baselines (the
+# `testing` skill owns the suites that do). It opens a server you already have
+# up (make dev / make pitch / make preview), deep-links to a screen, runs a few
+# steps, and writes a PNG an agent (or you) can open. Every difference rides in
+# a make var, so the call site stays one command (CLAUDE.md → "Run one simple
+# command, not a compound one"):
+#
+#   make drive HASH='#/hafs-kfqc/1:1'
+#   make drive HASH='#/hafs-kfqc/1:1' ACT='clickrole=button|commentary; settle=400' \
+#     EXPECT='div[role="dialog"]' OUT=fatiha-commentary.png LOCALE=en-US
+#   make drive BASE=http://localhost:5173 VIEWPORT=1440x900   # the pitch server, desktop spread
+#
+# Flags map 1:1 to the driver (apps/web/e2e/tools/drive.mjs). OUT is relative to
+# apps/web; the run prints the path to open. --expect makes a silently-wrong
+# flow exit non-zero instead of handing back a screenshot of the wrong screen.
+DRIVE_OUT ?= test-results/drive/shot.png
+.PHONY: drive
+drive: node-ok ## Open the running app at a deep link, do a few steps, save a PNG to look at
+	$(WEB) exec node e2e/tools/drive.mjs --out '$(DRIVE_OUT)' \
+	  $(if $(BASE),--base '$(BASE)',) \
+	  $(if $(HASH),--hash '$(HASH)',) \
+	  $(if $(ACT),--act '$(ACT)',) \
+	  $(if $(EXPECT),--expect '$(EXPECT)',) \
+	  $(if $(LOCALE),--locale '$(LOCALE)',) \
+	  $(if $(VIEWPORT),--viewport '$(VIEWPORT)',) \
+	  $(if $(FULL),--full,)
+	@echo "  → open apps/web/$(DRIVE_OUT)"
 
 .PHONY: core
 core: node-ok ## Build @hifth/core only (needed before typecheck/test — the Loop 0 lesson)

@@ -1,0 +1,230 @@
+/*
+ * CommentarySheet — same bottom-sheet geometry as RootLens / HopPopover (full
+ * sheet <900px, floating card above), but its body is a reading surface: a
+ * comfortable measure, the editors' translation set large and quiet, then the
+ * commentary prose. Private pitch build only — see src/pitch/pitch.ts.
+ */
+
+/* The ✎ trigger in the trail bar — quiet until tapped, like ⬡ and share. */
+.trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  min-block-size: var(--touch-min);
+  padding-inline: var(--space-2);
+  border: none;
+  background: none;
+  color: var(--ink-soft);
+  font-size: var(--text-md);
+  cursor: pointer;
+}
+
+.trigger[aria-expanded="true"] {
+  color: var(--accent-strong);
+}
+
+.trigger:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+.scrim {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-sheet);
+  background: rgba(38, 32, 26, 0.28);
+  animation: fade var(--dur-fast) ease;
+}
+
+.sheet {
+  position: fixed;
+  inset-inline: 0;
+  inset-block-end: 0;
+  z-index: var(--z-sheet);
+  max-block-size: 82vh;
+  overflow-y: auto;
+  padding: var(--space-3) var(--space-4) calc(var(--space-5) + env(safe-area-inset-bottom));
+  background: var(--paper-raised);
+  border-start-start-radius: var(--radius-lg);
+  border-start-end-radius: var(--radius-lg);
+  box-shadow: var(--shadow-2);
+  animation: rise var(--dur-med) var(--ease-hop);
+}
+
+.grip {
+  inline-size: 40px;
+  block-size: 4px;
+  margin: 0 auto var(--space-2);
+  border-radius: var(--radius-pill);
+  background: var(--hairline);
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding-block-end: var(--space-2);
+  border-block-end: 1px solid var(--hairline);
+}
+
+.glyph {
+  font-size: var(--text-lg);
+  color: var(--accent-strong);
+}
+
+.heading {
+  flex: 1;
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  min-inline-size: 0;
+}
+
+.title {
+  margin: 0;
+  font-size: var(--text-md);
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.ref {
+  color: var(--ink-faint);
+  font-size: var(--text-sm);
+}
+
+.close {
+  min-inline-size: var(--touch-min);
+  min-block-size: var(--touch-min);
+  border: none;
+  background: none;
+  color: var(--ink-soft);
+  font-size: var(--text-md);
+  cursor: pointer;
+}
+
+.close:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+/* The reading column: hold the measure near 60ch so long commentary stays easy
+   on the eye even when the sheet is wide on a desktop spread. */
+.body {
+  max-inline-size: 60ch;
+  margin-inline: auto;
+}
+
+/* The surah introduction, shown once — on the opening verse. Set apart as a
+   lead-in, not competing with the verse's own reading. */
+.intro {
+  margin-block: var(--space-3);
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
+  background: var(--paper-sunk);
+}
+
+.introTitle {
+  margin: 0 0 var(--space-2);
+  font-size: var(--text-md);
+  font-weight: 600;
+  color: var(--accent-strong);
+}
+
+.introPara {
+  margin: 0 0 var(--space-2);
+  color: var(--ink-soft);
+  font-size: var(--text-sm);
+  line-height: 1.65;
+}
+
+.introPara:last-child {
+  margin-block-end: 0;
+}
+
+/* The editors' translation — the loudest thing on the surface, but calm: large,
+   a touch of contrast, room around it. */
+.translation {
+  margin: var(--space-4) 0;
+  padding-inline-start: var(--space-3);
+  border-inline-start: 3px solid var(--accent-tint);
+  color: var(--ink);
+  font-size: var(--text-lg);
+  line-height: 1.5;
+  font-style: italic;
+}
+
+.commentary {
+  margin-block-start: var(--space-3);
+}
+
+.para {
+  margin: 0 0 var(--space-3);
+  color: var(--ink);
+  font-size: var(--text-md);
+  line-height: 1.7;
+}
+
+.para:last-child {
+  margin-block-end: 0;
+}
+
+/* The attribution — present and legible, never competing with the reading. */
+.credit {
+  max-inline-size: 60ch;
+  margin: var(--space-4) auto 0;
+  padding-block-start: var(--space-2);
+  border-block-start: 1px solid var(--hairline);
+  color: var(--ink-faint);
+  font-size: var(--text-xs);
+  line-height: 1.5;
+}
+
+.creditNote {
+  display: block;
+  margin-block-start: var(--space-1);
+}
+
+@media (min-width: 900px) {
+  .sheet {
+    inset-inline-start: auto;
+    inset-inline-end: var(--space-5);
+    inset-block-end: var(--space-5);
+    inline-size: 460px;
+    max-block-size: 80vh;
+    border-radius: var(--radius-lg);
+  }
+
+  /* On a spread the app names a side: the leaf the ayah is *not* on, so the card
+     never covers the ayah it is about. Physical left/right on purpose — the leaf
+     sits on a physical side of the gutter whatever way the chrome reads. */
+  .sheet[data-side="left"] {
+    left: var(--space-5);
+    right: auto;
+  }
+
+  .sheet[data-side="right"] {
+    left: auto;
+    right: var(--space-5);
+  }
+}
+
+@keyframes rise {
+  from {
+    transform: translateY(100%);
+  }
+}
+
+@keyframes fade {
+  from {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sheet,
+  .scrim {
+    animation: none;
+  }
+}

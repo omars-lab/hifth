@@ -1,5 +1,7 @@
 import { execFileSync } from "node:child_process";
-import { defineConfig } from "vite";
+import { rmSync } from "node:fs";
+import { resolve } from "node:path";
+import { defineConfig, type Plugin } from "vite";
 import react from "@vitejs/plugin-react";
 import { VitePWA } from "vite-plugin-pwa";
 
@@ -36,12 +38,41 @@ function sourceCommit(): string {
 // Loop 0 precached the shell so the app is installable; Loop 6a made the
 // runtime side explicit, one strategy per asset class (see `workbox` below).
 // Pin-a-juz packs are Loop 6b — they need the corpus vendored (Loop 4b) first.
+/**
+ * Held-copy safety net for the private pitch layer.
+ *
+ * `src/pitch/` reads a gitignored JSON under `public/assets/private/` that
+ * carries The Study Quran's copyrighted commentary and translation. That folder
+ * is served in the pitch dev build (`make pitch`); but Vite copies everything in
+ * `public/` into `dist/`, so a *public* build run on a laptop that also holds the
+ * pitch data would otherwise carry the held copy into `dist/`. It never reaches
+ * the deployed site — CI checks out a clean tree where the folder does not exist,
+ * so its output is byte-identical with or without this plugin — but this removes
+ * the held copy from *any* public build's output too, so "the public build is
+ * clean of held copy" holds unconditionally, on a laptop as much as in CI. When
+ * VITE_PITCH is set (the pitch build itself), the folder is left in place.
+ */
+function dropPrivateUnlessPitch(): Plugin {
+  return {
+    name: "hifth-drop-private",
+    apply: "build",
+    closeBundle() {
+      if (process.env.VITE_PITCH) return;
+      rmSync(resolve(import.meta.dirname, "dist/assets/private"), {
+        recursive: true,
+        force: true,
+      });
+    },
+  };
+}
+
 export default defineConfig({
   base: "./",
   define: {
     __SOURCE_COMMIT__: JSON.stringify(sourceCommit()),
   },
   plugins: [
+    dropPrivateUnlessPitch(),
     react(),
     VitePWA({
       registerType: "prompt",
