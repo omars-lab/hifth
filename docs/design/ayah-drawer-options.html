@@ -1,0 +1,459 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Where should a verse's drawer open?</title>
+<style>
+  :root{
+    --ink:#20242a; --muted:#5b626c; --line:#d9d3c7; --paper:#f7f3ea;
+    --leaf:#fffdf8; --sel:#e8a13a; --selwash:rgba(232,161,58,.22);
+    --accent:#1f6f66; --panel:#fbf7ee; --shadow:rgba(30,30,25,.22);
+    --chip:#efe9db;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --ink:#e9e5db; --muted:#a3a89f; --line:#3a3f36; --paper:#171916;
+      --leaf:#22251f; --panel:#1e211b; --chip:#2b2f27; --shadow:rgba(0,0,0,.5);
+    }
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; background:var(--paper); color:var(--ink);
+    font:16px/1.6 "Iowan Old Style","Charter",Palatino,Georgia,serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:980px; margin:0 auto; padding:28px 20px 80px}
+  h1{font-size:1.7rem; line-height:1.2; margin:.2em 0 .3em; text-wrap:balance}
+  .lede{color:var(--muted); max-width:60ch; margin:0 0 1.2em}
+  details.gloss{border:1px solid var(--line); border-radius:8px; padding:.5em .8em; margin:0 0 1.4em; background:var(--panel)}
+  details.gloss summary{cursor:pointer; font-weight:600; font-size:.92rem}
+  details.gloss dl{margin:.6em 0 0; font-size:.9rem}
+  details.gloss dt{font-weight:600; float:left; clear:left; margin-right:.5em}
+  details.gloss dd{margin:0 0 .3em}
+
+  .controls{display:flex; flex-wrap:wrap; gap:16px; align-items:flex-end; margin:0 0 10px}
+  .seg{display:flex; flex-direction:column; gap:5px}
+  .seg .lbl{font-size:.74rem; letter-spacing:.06em; text-transform:uppercase; color:var(--muted)}
+  .seg .row{display:flex; gap:4px; background:var(--chip); padding:4px; border-radius:10px}
+  .seg button{
+    font:inherit; font-size:.9rem; border:0; background:transparent; color:var(--ink);
+    padding:7px 12px; border-radius:7px; cursor:pointer; white-space:nowrap;
+  }
+  .seg button[aria-pressed="true"]{background:var(--leaf); box-shadow:0 1px 3px var(--shadow); font-weight:600}
+  .spacer{flex:1}
+
+  .caption{min-height:2.6em; margin:12px 0 6px; color:var(--muted); font-size:.95rem; max-width:64ch}
+  .caption b{color:var(--ink)}
+
+  /* ---- the book ---- */
+  .stage{position:relative}
+  .book{display:flex; justify-content:center; gap:0; position:relative}
+  .stage[data-view="single"] .leaf[data-side="left"]{display:none}
+  .leaf{
+    position:relative; width:min(44vw,400px); aspect-ratio:1/1;
+    background:var(--leaf); border:1px solid var(--line);
+    box-shadow:0 6px 22px var(--shadow); overflow:hidden;
+  }
+  .stage[data-view="single"] .leaf[data-side="right"]{width:min(78vw,460px)}
+  .leaf[data-side="right"]{border-left:none}          /* gutter meeting */
+  .leaf .print{position:absolute; inset:0; width:100%; height:100%; pointer-events:none; user-select:none}
+  @media (prefers-color-scheme: dark){ .leaf .print{filter:invert(.9) hue-rotate(180deg)} }
+
+  .hot{
+    position:absolute; border:0; background:transparent; padding:0; margin:0; cursor:pointer;
+    border-radius:3px; transition:background .12s;
+  }
+  .hot:hover{background:rgba(120,120,120,.12)}
+  .hot.sel{background:var(--selwash); box-shadow:inset 0 0 0 1.5px var(--sel)}
+  .hot:focus-visible{outline:2px solid var(--accent); outline-offset:1px}
+
+  /* ---- the drawer (one element, relocated per option) ---- */
+  .drawer{
+    position:absolute; background:var(--panel); color:var(--ink);
+    box-shadow:0 -2px 30px var(--shadow); z-index:5; display:flex; flex-direction:column;
+    border:1px solid var(--line);
+  }
+  .drawer[hidden]{display:none}
+  .drawer .grip{align-self:center; width:38px; height:4px; border-radius:2px; background:var(--line); margin:8px 0 2px}
+  .drawer header{display:flex; align-items:center; gap:8px; padding:6px 14px 4px}
+  .drawer header .ttl{font-weight:700; font-size:1.02rem}
+  .drawer header .x{margin-left:auto; border:0; background:transparent; font-size:1.1rem; cursor:pointer; color:var(--muted)}
+  .drawer .body{padding:6px 14px 14px; overflow:auto}
+  .drawer .grp{margin:10px 0 0}
+  .drawer .grp h4{margin:0 0 5px; font-size:.72rem; letter-spacing:.06em; text-transform:uppercase; color:var(--muted); font-weight:700}
+  .chiprow{display:flex; flex-wrap:wrap; gap:6px}
+  .rel{border:1px solid var(--line); background:var(--leaf); border-radius:999px; padding:5px 11px; font-size:.86rem; cursor:pointer; color:var(--ink)}
+  .rel .to{font-weight:700; color:var(--accent)}
+  .rel.twin{border-color:var(--sel)}
+  .note{font-size:.85rem; color:var(--muted); margin:6px 0 0}
+  .actions{display:flex; gap:8px; margin-top:12px}
+  .actions button{flex:1; border:1px solid var(--line); background:var(--leaf); border-radius:8px; padding:8px; font:inherit; font-size:.85rem; cursor:pointer; color:var(--ink)}
+
+  /* placement: bottom sheet */
+  .stage.mode-bottom .drawer{
+    left:0; right:0; bottom:0; border-radius:16px 16px 0 0; max-height:64%;
+    animation:rise .22s ease-out;
+  }
+  /* placement: side panel, mounted inside a leaf */
+  .leaf .drawer.side{
+    top:0; bottom:0; width:82%; max-height:none; border-radius:0;
+  }
+  .leaf .drawer.side.from-right{right:0; border-left:1px solid var(--line); animation:slideL .22s ease-out}
+  .leaf .drawer.side.from-left{left:0; border-right:1px solid var(--line); animation:slideR .22s ease-out}
+
+  @keyframes rise{from{transform:translateY(100%)} to{transform:none}}
+  @keyframes slideL{from{transform:translateX(100%)} to{transform:none}}
+  @keyframes slideR{from{transform:translateX(-100%)} to{transform:none}}
+  @media (prefers-reduced-motion:reduce){ .drawer{animation:none !important} }
+
+  /* ---- Option A: the scatter (today) ---- */
+  .scatter{position:absolute; inset:0; z-index:5; pointer-events:none}
+  .scatter .railcol{position:absolute; display:flex; flex-direction:column; gap:4px; pointer-events:auto}
+  .scatter .railchip{background:var(--leaf); border:1px solid var(--line); border-radius:8px; font-size:.7rem; padding:3px 6px; box-shadow:0 1px 4px var(--shadow); white-space:nowrap}
+  .scatter .botrow{position:absolute; left:8px; right:8px; bottom:8px; display:flex; gap:6px; justify-content:center; pointer-events:auto}
+  .scatter .botrow span{background:var(--leaf); border:1px solid var(--line); border-radius:8px; padding:5px 9px; font-size:.8rem; box-shadow:0 1px 4px var(--shadow)}
+  .scatter .float{position:absolute; right:10px; top:10px; width:52%; background:var(--panel); border:1px solid var(--line); border-radius:10px; padding:8px 10px; font-size:.78rem; box-shadow:0 4px 18px var(--shadow); pointer-events:auto}
+
+  .gutter{width:0}
+  .hintbar{font-size:.85rem; color:var(--muted); margin:6px 0 0}
+  section.read{margin:34px 0 0; border-top:1px solid var(--line); padding-top:20px}
+  section.read h2{font-size:1.15rem; margin:0 0 .4em}
+  section.read h3{font-size:1rem; margin:1.1em 0 .2em}
+  section.read p{max-width:64ch; color:var(--ink)}
+  section.read .cost{color:var(--muted)}
+  .foot{margin-top:34px; font-size:.82rem; color:var(--muted)}
+  a{color:var(--accent)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>Where should a verse's drawer open?</h1>
+  <p class="lede">Tap a verse on the page below. A drawer gathers everything about that verse
+  — its label, the verses it connects to, its roots, the scholar's note, share — into one place.
+  The question is <b>where that drawer should appear</b>. Two of the four choices differ in
+  something no picture settles: whether the drawer covers the verse you are reading, and whether
+  your eye has to cross to the other page. So try each with your hand.</p>
+
+  <details class="gloss">
+    <summary>A few words, once</summary>
+    <dl>
+      <dt>Verse</dt><dd>one numbered sentence of the Qur'an (1:1 is the first verse of the first surah).</dd>
+      <dt>Surah</dt><dd>a chapter. This page shows al-Fātiḥah, the opening surah, on the right leaf.</dd>
+      <dt>Spread</dt><dd>the two facing pages you see on a wide screen. On a phone you see one.</dd>
+      <dt>Leaf</dt><dd>one page of the open book. In the Qur'an the right leaf is read first.</dd>
+      <dt>Gutter</dt><dd>the fold down the middle, where the two leaves meet.</dd>
+    </dl>
+  </details>
+
+  <div class="controls">
+    <div class="seg" id="seg-option">
+      <span class="lbl">Where the drawer opens</span>
+      <div class="row" role="group" aria-label="Drawer placement option">
+        <button data-option="A" aria-pressed="false">A · scattered (today)</button>
+        <button data-option="B" aria-pressed="false">B · bottom, always</button>
+        <button data-option="C" aria-pressed="true">C · same leaf</button>
+        <button data-option="D" aria-pressed="false">D · other leaf</button>
+      </div>
+    </div>
+    <div class="seg" id="seg-view">
+      <span class="lbl">Screen</span>
+      <div class="row" role="group" aria-label="Screen size">
+        <button data-view="spread" aria-pressed="true">Spread (wide)</button>
+        <button data-view="single" aria-pressed="false">One page (phone)</button>
+      </div>
+    </div>
+  </div>
+
+  <p class="caption" id="caption"></p>
+
+  <div class="stage mode-bottom" id="stage" data-view="spread" data-option="C">
+    <div class="book" id="book">
+      <div class="leaf" data-side="left" id="leaf-left">
+        <img class="print" alt="Left page of the open mus'haf (printed page two)."
+             src="../../apps/web/public/assets/pages/hafs-kfqc/2.svg">
+      </div>
+      <div class="gutter"></div>
+      <div class="leaf" data-side="right" id="leaf-right">
+        <img class="print" alt="Right page of the open mus'haf (al-Fātiḥah, page one)."
+             src="../../apps/web/public/assets/pages/hafs-kfqc/1.svg">
+      </div>
+    </div>
+    <p class="hintbar">Tip: on the spread, tap a verse on the <b>right</b> leaf and one on the
+    <b>left</b>, and watch which side answers under each option.</p>
+  </div>
+
+  <!-- The one drawer, built once, relocated by the script. -->
+  <template id="drawer-tpl">
+    <div class="drawer" role="dialog" aria-modal="false" aria-label="Verse drawer" dir="ltr">
+      <div class="grip" aria-hidden="true"></div>
+      <header>
+        <span class="ttl">al-Fātiḥah 1:1</span>
+        <button class="x" aria-label="Close">✕</button>
+      </header>
+      <div class="body">
+        <div class="grp">
+          <h4>Related verses</h4>
+          <div class="chiprow" id="relrow"></div>
+          <p class="note" id="relnote"></p>
+        </div>
+        <div class="grp">
+          <h4>Shared roots</h4>
+          <div class="chiprow">
+            <span class="rel">the root that means <i>praise</i></span>
+            <span class="rel">the root that means <i>Lord</i></span>
+          </div>
+        </div>
+        <div class="grp">
+          <h4>The scholar's note</h4>
+          <p class="note">The commentary on this verse appears here in the demo build. (Held
+          text is not shown on this public design page.)</p>
+        </div>
+        <div class="actions">
+          <button>Share this verse</button>
+        </div>
+      </div>
+    </div>
+  </template>
+
+  <section class="read">
+    <h2>What am I choosing between?</h2>
+    <p><b>A — leave it scattered (today).</b> The related verses sit in a little rail beside the
+    verse, a row of controls runs along the bottom, and notes float over the page. Nothing is
+    wrong with any one piece; the cost is that you look in three places for one verse.
+    <span class="cost">On the list because doing nothing is always a real choice — it is the one to beat.</span></p>
+
+    <p><b>B — one drawer from the bottom, on every screen.</b> The same panel rises from the
+    bottom whether you are on a phone or a wide spread. One shape to learn everywhere.
+    <span class="cost">The felt cost is on the spread: it covers both leaves, and it forgets which leaf you pressed.</span></p>
+
+    <p><b>C — bottom on a phone, a side panel on the verse's own leaf (recommended).</b> On a
+    phone, the bottom drawer of B. On a spread, the drawer opens on the <i>same</i> leaf as the
+    verse you pressed. Your eye and hand stay on one side of the book.
+    <span class="cost">The felt cost: the drawer shares its leaf with the verse, so it must sit beside the text without hiding it — try whether it does.</span></p>
+
+    <p><b>D — bottom on a phone, a side panel on the <i>other</i> leaf on a spread.</b> Like C,
+    but the drawer opens across the gutter, to leave the verse itself completely uncovered.
+    This is what the app does today for its existing panels.
+    <span class="cost">The felt cost: the drawer and the verse it is about are on opposite pages — does that feel connected, or split?</span></p>
+
+    <h3>What to feel for</h3>
+    <p>Does the drawer cover the verse you just tapped? When you tap left, then right, does your
+    attention stay put or get thrown across the fold? Does the drawer changing shape between phone
+    and spread bother you, or do you not even notice? The answer that matters is the one your hand
+    finds, not the one this page argues.</p>
+
+    <p>The full written design — why this is being asked, what it consolidates, and what it is not
+    settling — is in <a href="./ayah-drawer.md">the design record</a>. C and D are the same code
+    with the side flipped; the winner becomes the app and the other is deleted.</p>
+  </section>
+
+  <p class="foot">Drawn on the real printed pages the app ships (al-Fātiḥah and the start of
+  al-Baqarah), at about the size a reader uses. The page art is outlined shapes, not text.
+  Related-verse and root chips here are stand-ins for the app's own, shown to place the drawer,
+  not to reproduce any held content.</p>
+
+</div>
+
+<script>
+(function(){
+  "use strict";
+  var VB = 235; // page svg viewBox is 0 0 235 235
+
+  // Real per-verse word boxes [x,y,w,h] in the 235-space (from the app's word geometry).
+  var BOXES = {
+    // right leaf — al-Fātiḥah (page 1)
+    "1:1":[[147.2,28.4,35.2,14.6],[135.4,20.8,15.4,19.9],[83.5,20.3,51.9,23.8],[75.8,19.5,35.9,22.6]],
+    "1:2":[[160.3,49.6,42.4,17.1],[144.4,50.3,15.9,19.5],[110.1,54,33,18.4],[52.8,49.8,56.9,20.4]],
+    "1:3":[[187.4,78.2,39,24.9],[142.5,77.6,43.3,21.8]],
+    "1:4":[[86.7,83.4,38.4,16.7],[65.4,82.8,19.9,17],[30.2,79.1,36.4,24.5]],
+    "1:5":[[198.7,109.4,28.8,19.2],[167.1,109.3,28.6,16.8],[155,110.8,9,15.1],[128.3,108.9,29.2,18.4],[69.9,108.5,55.8,19.1]],
+    "1:6":[[11.6,106.4,40.5,21],[181.8,134.5,37.7,20.8],[126.1,134,53.6,21.8]],
+    "1:7":[[79,138.8,30,16.9],[53.6,132.4,24.2,23.9],[16.8,132.7,34.6,19.4],[164.7,165.2,34.6,22],[141.1,166.8,24.2,20],[76.9,163.2,67.5,23.5],[38.1,164.3,37,23],[90.3,190.2,59.1,21.5]],
+    // left leaf — start of al-Baqarah (page 2), a couple of verses to test a left-leaf press
+    "2:1":[[185.1,50.5,16.2,18.8]],
+    "2:2":[[150.6,53.6,19.2,16.5],[107.2,50.8,43.2,19.6],[97.1,50.7,10,16.6],[79.1,54.1,18.6,16.4],[62.9,56.3,16.9,14.5],[37.2,53.6,24.5,15.5],[188.2,78.7,35.7,19.7]]
+  };
+  var RIGHT = ["1:1","1:2","1:3","1:4","1:5","1:6","1:7"];
+  var LEFT  = ["2:1","2:2"];
+
+  // Related-verse chips shown per verse (stand-ins; references only, no held text).
+  var RELATED = {
+    "1:1":{twin:{to:"27:30",label:"a twin opening"}, note:"The one other place these exact words open a text — Solomon's letter to the Queen of Sheba."},
+    "1:2":{extra:[{to:"10:10",label:"same praise"}], note:"The last words of the people of Paradise are this same praise."},
+    "1:3":{extra:[{to:"2:163",label:"the one God"}], note:"The two Names paired here name the one God alone."},
+    "1:4":{extra:[{to:"82:19",label:"the Day"}], note:"What the Day of Judgment is."},
+    "1:5":{extra:[{to:"51:56",label:"why we worship"}], note:"No words shared — the link is the meaning."},
+    "1:6":{extra:[{to:"6:153",label:"the straight path"}], note:"The straight path, named again as God's own."},
+    "1:7":{extra:[{to:"4:69",label:"those blessed"}], note:"Who 'those whom Thou hast blessed' are."},
+    "2:1":{extra:[], note:"A left-leaf verse, here only to test which side the drawer answers on."},
+    "2:2":{extra:[{to:"3:138",label:"guidance"}], note:"A left-leaf verse, here only to test the press side."}
+  };
+
+  function bounds(key){
+    var bs = BOXES[key], x0=1e9,y0=1e9,x1=-1e9,y1=-1e9;
+    for(var i=0;i<bs.length;i++){var b=bs[i]; x0=Math.min(x0,b[0]); y0=Math.min(y0,b[1]); x1=Math.max(x1,b[0]+b[2]); y1=Math.max(y1,b[1]+b[3]);}
+    var pad=1.5; x0-=pad;y0-=pad;x1+=pad;y1+=pad;
+    return {x:x0,y:y0,w:x1-x0,h:y1-y0};
+  }
+  function pct(v){return (v/VB*100)+"%";}
+
+  function makeHotspots(leaf, keys){
+    keys.forEach(function(key){
+      var r=bounds(key);
+      var btn=document.createElement("button");
+      btn.className="hot"; btn.dataset.key=key;
+      btn.setAttribute("aria-label","Verse "+key);
+      btn.style.left=pct(r.x); btn.style.top=pct(r.y);
+      btn.style.width=pct(r.w); btn.style.height=pct(r.h);
+      btn.addEventListener("click", function(){ select(key, leaf.dataset.side); });
+      leaf.appendChild(btn);
+    });
+  }
+
+  var leafLeft=document.getElementById("leaf-left");
+  var leafRight=document.getElementById("leaf-right");
+  makeHotspots(leafLeft, LEFT);
+  makeHotspots(leafRight, RIGHT);
+
+  var stage=document.getElementById("stage");
+  var caption=document.getElementById("caption");
+  var tpl=document.getElementById("drawer-tpl");
+  var drawer=tpl.content.firstElementChild.cloneNode(true);
+  drawer.hidden=true;
+  drawer.querySelector(".x").addEventListener("click", clearSel);
+
+  var option="C", view="spread", sel=null;
+
+  function surahLabel(key){ return (key.charAt(0)==="1"?"al-Fātiḥah ":"al-Baqarah ")+key; }
+  function other(side){ return side==="left"?"right":"left"; }
+
+  function fillDrawer(key){
+    drawer.querySelector(".ttl").textContent=surahLabel(key);
+    var rel=RELATED[key]||{extra:[]};
+    var row=drawer.querySelector("#relrow"); row.innerHTML="";
+    if(rel.twin){
+      var t=document.createElement("button"); t.className="rel twin";
+      t.innerHTML='<span class="to">→ '+rel.twin.to+'</span> · '+rel.twin.label; row.appendChild(t);
+    }
+    (rel.extra||[]).forEach(function(e){
+      var c=document.createElement("button"); c.className="rel";
+      c.innerHTML='<span class="to">→ '+e.to+'</span> · '+e.label; row.appendChild(c);
+    });
+    if(!rel.twin && (!rel.extra||!rel.extra.length)){
+      var n=document.createElement("span"); n.className="note"; n.textContent="No related verses on this one."; row.appendChild(n);
+    }
+    drawer.querySelector("#relnote").textContent=rel.note||"";
+  }
+
+  function place(){
+    // detach drawer first
+    if(drawer.parentNode) drawer.parentNode.removeChild(drawer);
+    // clear any scatter
+    var old=stage.querySelector(".scatter"); if(old) old.remove();
+    stage.classList.remove("mode-bottom");
+    drawer.classList.remove("side","from-right","from-left");
+
+    if(!sel){ drawer.hidden=true; return; }
+    drawer.hidden=false;
+
+    var singleLike = (view==="single");
+
+    if(option==="A"){ drawer.hidden=true; renderScatter(); return; }
+
+    if(option==="B" || singleLike){
+      // bottom sheet spanning the visible area
+      stage.classList.add("mode-bottom");
+      stage.appendChild(drawer);
+      return;
+    }
+    // spread + C/D → side panel inside a leaf
+    var targetSide = (option==="C") ? sel.side : other(sel.side);
+    var leaf = (targetSide==="left")?leafLeft:leafRight;
+    drawer.classList.add("side");
+    // slide from the book's outer fore-edge
+    drawer.classList.add(targetSide==="right" ? "from-right" : "from-left");
+    leaf.appendChild(drawer);
+  }
+
+  function renderScatter(){
+    var leaf = (sel.side==="left")?leafLeft:leafRight;
+    var r=bounds(sel.key);
+    var sc=document.createElement("div"); sc.className="scatter";
+    // a little rail beside the verse
+    var rail=document.createElement("div"); rail.className="railcol";
+    rail.style.top=pct(r.y);
+    // put the rail toward the gutter side of the verse
+    rail.style.left=pct(Math.min(r.x+r.w+2, VB-40));
+    var rel=RELATED[sel.key]||{};
+    var chips=[]; if(rel.twin) chips.push("→ "+rel.twin.to); (rel.extra||[]).forEach(function(e){chips.push("→ "+e.to);});
+    if(!chips.length) chips.push("· roots"); chips.slice(0,3).forEach(function(txt){
+      var c=document.createElement("div"); c.className="railchip"; c.textContent=txt; rail.appendChild(c);
+    });
+    sc.appendChild(rail);
+    // bottom row of controls
+    var bot=document.createElement("div"); bot.className="botrow";
+    ["✎ note","⬡ roots","↗ share",surahLabel(sel.key)].forEach(function(t){
+      var s=document.createElement("span"); s.textContent=t; bot.appendChild(s);
+    });
+    sc.appendChild(bot);
+    // a floating note panel
+    var fl=document.createElement("div"); fl.className="float";
+    fl.textContent="A note panel floats over the page here — one more place to look.";
+    sc.appendChild(fl);
+    leaf.appendChild(sc);
+  }
+
+  function select(key, side){
+    sel={key:key, side:side};
+    // paint selection
+    Array.prototype.forEach.call(document.querySelectorAll(".hot"), function(h){
+      h.classList.toggle("sel", h.dataset.key===key);
+    });
+    fillDrawer(key);
+    place();
+    updateCaption();
+  }
+  function clearSel(){
+    sel=null;
+    Array.prototype.forEach.call(document.querySelectorAll(".hot"), function(h){h.classList.remove("sel");});
+    place(); updateCaption();
+  }
+
+  var CAP = {
+    A:"<b>A · scattered.</b> No single drawer — the verse's tools sit in a rail beside it, a row along the bottom, and a floating note. Tap a verse and count how many places you look.",
+    B:"<b>B · bottom, always.</b> One panel rises from the bottom on every screen. On the spread, notice it covers both leaves — including the verse you tapped.",
+    C:"<b>C · same leaf (recommended).</b> On the spread the drawer opens on the leaf you pressed. Does it sit beside the verse, or hide it? Tap left, then right.",
+    D:"<b>D · other leaf.</b> On the spread the drawer opens across the gutter, leaving the verse uncovered. Does reaching to the far page feel connected, or split?"
+  };
+  function updateCaption(){
+    var base=CAP[option];
+    if(sel){ base+=" &nbsp;— showing <b>"+surahLabel(sel.key)+"</b>, pressed on the <b>"+sel.side+"</b> leaf."; }
+    else { base+=" &nbsp;— tap a verse to begin."; }
+    if(view==="single" && option!=="A"){ base+=" &nbsp;(On one page, B, C and D all use the bottom drawer — the difference is a spread thing.)"; }
+    caption.innerHTML=base;
+  }
+
+  // controls
+  document.getElementById("seg-option").addEventListener("click", function(e){
+    var b=e.target.closest("button[data-option]"); if(!b) return;
+    option=b.dataset.option; stage.dataset.option=option;
+    Array.prototype.forEach.call(this.querySelectorAll("button"), function(x){x.setAttribute("aria-pressed", x===b?"true":"false");});
+    place(); updateCaption();
+  });
+  document.getElementById("seg-view").addEventListener("click", function(e){
+    var b=e.target.closest("button[data-view]"); if(!b) return;
+    view=b.dataset.view; stage.dataset.view=view;
+    Array.prototype.forEach.call(this.querySelectorAll("button"), function(x){x.setAttribute("aria-pressed", x===b?"true":"false");});
+    place(); updateCaption();
+  });
+  document.addEventListener("keydown", function(e){ if(e.key==="Escape" && sel) clearSel(); });
+
+  // start with al-Fātiḥah 1:1 selected on the right leaf, option C, so the page opens "doing something"
+  updateCaption();
+  select("1:1","right");
+})();
+</script>
+</body>
+</html>

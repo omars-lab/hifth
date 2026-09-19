@@ -61,6 +61,18 @@ never opened this repository.** Concretely:
   may still be drawn. The test is whether a reader could be *wrong* about the option from a
   picture and *right* about it from a hand on it; where that is true, drawing it is not enough.
 
+- **A rough build discovers what an upfront list of pros and cons cannot.** Facing a choice,
+  the pull is to write out every option with its costs, settle it on the page, then build the
+  winner. Resist it: a list made before anything exists can only hold what you already thought
+  of, and the considerations that actually decide a feature are the ones no list had a row for
+  — the panel that turns out to cover the verse it is about, the reach across the gutter that
+  feels wrong, the shape you only notice is confusing once your own hand is on it. So name the
+  options you can already see, then build a quick, throwaway POC as the *instrument that finds
+  the rest*, and write the pros and cons in full **afterwards** — the ones the demo taught you,
+  not only the ones you guessed before. This is not a licence to skip the thinking; it is where
+  the thinking gets its evidence. It is the felt-difference rule carried one step earlier: build
+  to *find* the options, not only to choose between the ones you already named.
+
 ### Legible is not the same as answerable
 
 The second failure is quieter than the first: a page anyone can read, which still nobody can

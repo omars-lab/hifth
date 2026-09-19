@@ -112,7 +112,8 @@ answerable by the person it is for.
       is **built live** as an interchangeable component (`OptionA` … `OptionN` behind one
       interface) and mounted on the decision page, not only drawn. A reader decides it by doing
       it. The winner graduates into the app; the losers are deleted. Purely structural or
-      policy options — which label a page carries — may stay drawn.
+      policy options — which label a page carries — may stay drawn. The `design-iterate` skill is
+      this build-render-look-iterate loop in full: reach for it whenever the options are felt.
 - [ ] It is drawn on real data from this project, not a mock. A mock cannot surprise you, and
       the surprise is the reason to draw it — a wash that turns out invisible at print size
       has answered the question no paragraph would have.
