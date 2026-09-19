@@ -1356,23 +1356,25 @@ export function App(): JSX.Element {
    *
    * On a spread the ayah's sheets (the hop list, the highlighted passage's
    * menu, the root lens, and in the pitch build the commentary) are all *about*
-   * one ayah, and they open on the **same** leaf as that ayah — press on the
-   * right-hand page and the card is on the right, press on the left and it is on
-   * the left. That keeps the tools tied to the verse they belong to, so the
-   * reader's eye and hand stay on one side of the book and never lose which leaf
-   * they pressed. This is Option C of the ayah-drawer decision
-   * (docs/design/ayah-drawer.md); the earlier code opened on the *other* leaf
-   * (Option D) to keep the verse fully uncovered, and the two are this one memo
-   * with its returns swapped. The cost the live options page surfaced is that a
-   * same-leaf card wide enough for its contents can cover the verse it is about,
-   * so the card is held to the outer margin and sized to sit beside the text —
-   * see the width in each sheet's stylesheet. The side is physical, not logical
-   * — the leaf is on a physical side of the gutter whatever language the chrome
-   * reads in — which is why this is not left to the sheets' `dir`. Below the
-   * breakpoint, or with the book closed to one leaf, there is no second leaf,
-   * and `null` lets the sheet keep its chrome-direction default (a phone's
-   * bottom sheet, or a single leaf's corner card). A range is anchored by its
-   * first ayah — the ayah the reader started from.
+   * one ayah, and they open on the **opposite** leaf from that ayah — press on
+   * the right-hand page and the card lands on the left, press on the left and it
+   * lands on the right. That is the one thing a card must never do: cover the
+   * verse it is about. This is Option D of the ayah-drawer decision
+   * (docs/design/ayah-drawer.md). It was briefly graduated as Option C
+   * (same leaf, so the card sits beside the verse it belongs to), but building
+   * that live showed the flaw a still drawing hid: on a surah that fills its own
+   * leaf — al-Fātiḥah is the whole demo — a same-leaf card wide enough to read
+   * lands on top of the verse, and because the script runs right-to-left it
+   * hides where each line begins. Opening on the facing leaf keeps the pressed
+   * verse fully visible with its tools across the gutter, so C and D are this
+   * one memo with its returns swapped, and D is the one that keeps the promise.
+   * The side is physical, not logical — the leaf is on a physical side of the
+   * gutter whatever language the chrome reads in — which is why this is not left
+   * to the sheets' `dir`. Below the breakpoint, or with the book closed to one
+   * leaf, there is no second leaf, and `null` lets the sheet keep its
+   * chrome-direction default (a phone's bottom sheet, or a single leaf's corner
+   * card). A range is anchored by its first ayah — the ayah the reader started
+   * from.
    */
   const sheetSide = useMemo<"left" | "right" | null>(() => {
     if (!desktop || pageMode !== "two" || !resolver) return null;
@@ -1381,8 +1383,8 @@ export function App(): JSX.Element {
     const loc = resolver.resolve(anchor);
     if (!loc) return null;
     const { right, left } = spreadOf(page, totalPages);
-    if (loc.page === right) return "right";
-    if (loc.page === left) return "left";
+    if (loc.page === right) return "left";
+    if (loc.page === left) return "right";
     return null;
   }, [desktop, pageMode, resolver, selectedRange, selectedKey, page, totalPages]);
   const selectedSurah = selectedKey ? parseAyahKey(selectedKey)?.surah : null;

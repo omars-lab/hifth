@@ -11,13 +11,20 @@ Nothing is broken, but nothing is *together*. This record proposes one calm pane
 drawer** — that opens when you press a verse and holds everything about that verse in one place,
 and it settles where that panel sits on a phone and on a wide screen.
 
-**Decided (2026-09-19, omar): Option C.** One drawer, gathering the scattered tools: a bottom
-sheet on a phone and on a single page, and on a two-leaf spread a side panel on the pressed
-verse's *own* leaf. The placement is now live in the app — the verse's sheets open on its own
-leaf instead of the opposite one. Graduating it confirmed, on a real screen, the cost this record
-names below: on the al-Fatiha spread a same-leaf panel wide enough to hold its contents covers the
-leaf's other verses, so *how wide the spread panel should be* is the open follow-on (see "what is
-this not settling"), not the placement itself.
+**Decided (2026-09-19, omar): Option D.** One drawer, gathering the scattered tools: a bottom
+sheet on a phone and on a single page, and on a two-leaf spread a side panel on the *facing*
+leaf, opposite the pressed verse. The placement is now live in the app.
+
+We got here the honest way, and the record keeps the detour because it is the reason the answer
+is trusted. Option C — the same leaf as the verse — was chosen first and graduated into the app,
+on the argument that the tools should sit beside the verse they belong to. Building it and looking
+at it on a real screen showed what no still drawing had: on the al-Fatiha spread the surah fills
+its own leaf, so a same-leaf panel wide enough to read lands *on top of* the verse it is about,
+and because the script runs right-to-left it hides where every line begins. That is the one thing
+a drawer must never do. Opening it on the facing leaf instead keeps the pressed verse fully
+visible with its tools across the gutter — which is exactly what the pitch's al-Fatiha moment
+needs. So the choice flipped from C to D, on the evidence the live build produced. C stays in the
+options below, because it is the reason D was a choice and not a default.
 
 ---
 
@@ -39,9 +46,10 @@ this not settling"), not the placement itself.
 ## What is being decided?
 
 **When you press a verse, does one drawer open to hold that verse's tools — and where does it
-sit?** The answer proposed here: yes, one drawer; on a phone or a single page it rises from the
-bottom; on a two-leaf spread it opens on the **same leaf** as the verse you pressed — press a
-verse on the right leaf and the drawer is on the right, press on the left and it is on the left.
+sit?** The answer settled here: yes, one drawer; on a phone or a single page it rises from the
+bottom; on a two-leaf spread it opens on the **facing leaf**, opposite the verse you pressed —
+press a verse on the right leaf and the drawer is on the left, press on the left and it is on the
+right — so the verse itself stays fully visible.
 
 ## Why is this being asked now?
 
@@ -158,10 +166,12 @@ from the bottom versus from a side, and whether it covers the verse you are read
 something a still picture cannot carry, which is why they are built rather than drawn.
 
 Building the page already taught the record something no paragraph had: on a real spread a
-same-leaf side panel wide enough to hold the drawer's contents **covers the verse it is about**, so
-Option C's hoped-for "sits beside the verse" only holds if the panel is kept narrow — exactly the
-kind of nuance the "what would change the answer" section below anticipated, now seen rather than
-guessed.
+same-leaf side panel wide enough to hold the drawer's contents **covers the verse it is about**.
+Option C's hoped-for "sits beside the verse" does not survive a surah that fills its own leaf —
+al-Fatiha, the demo passage, is exactly that — and on right-to-left text the panel hides where
+each line begins. That is what flipped the choice to Option D: opening on the *facing* leaf is the
+only placement that keeps the pressed verse uncovered. Exactly the kind of nuance the "what would
+change the answer" section below anticipated, now seen rather than guessed.
 
 **Option A — leave it scattered (what happens today).**
 The rail beside the verse, the row along the bottom, the panels over the page. *Draw:* the
@@ -177,28 +187,29 @@ spread it must be tried, because the felt cost is that it covers both leaves. *C
 learn everywhere, but on a spread it hides the verse you are working on and forgets which leaf you
 pressed.
 
-**Option C — bottom sheet on a phone, a side panel on the pressed verse's own leaf (recommended).**
+**Option C — bottom sheet on a phone, a side panel on the pressed verse's own leaf (tried, reversed).**
 On a phone and a single page, the bottom sheet of Option B, unchanged. On a spread, the drawer
 opens on the **same** leaf as the verse: press on the right leaf, the drawer is on the right;
 press on the left, it is on the left. *Draw + build live:* the felt question is whether a
 same-side panel sits comfortably beside the verse without hiding it. *Cost:* two shapes to learn
-(bottom on a phone, side on a spread), and the drawer shares its leaf with the verse, so it must
-be sized to sit beside the text rather than over it. *Why recommended:* the drawer stays visually
-tied to the verse it is about — your eye and your hand stay on one side of the book — and the
-"which leaf" fact the demo lost is exactly what places it.
+(bottom on a phone, side on a spread), and the drawer shares its leaf with the verse. *What
+happened:* this was chosen and graduated first, on the argument that the drawer should stay tied
+to the verse it is about. Trying it live answered the felt question in the negative — on al-Fatiha,
+which fills its own leaf, the panel covers the surah — so the choice reversed to D.
 
-**Option D — bottom sheet on a phone, a side panel on the *other* leaf on a spread.**
+**Option D — bottom sheet on a phone, a side panel on the *facing* leaf on a spread (chosen).**
 Like C, but on a spread the drawer opens on the leaf **opposite** the verse, to keep the verse
-itself completely uncovered. *This is what the app's own side-placement helper does today for its
-existing panels.* *Draw + build live:* the felt question is whether reaching across the gutter to
-a panel about the verse on the far side feels connected or feels split. *Cost:* the verse stays
-fully visible, but the drawer and its subject are on opposite sides of the book, and your
-attention crosses the gutter every time.
+itself completely uncovered. *Draw + build live:* the felt question is whether reaching across the
+gutter to a panel about the verse on the far side feels connected or feels split. *Cost:* the
+drawer and its subject are on opposite sides of the book, so your attention crosses the gutter.
+*Why chosen:* the verse stays fully visible — which, on a leaf-filling surah like al-Fatiha, is
+the difference between reading the passage and reading a panel that hides it. The felt crossing is
+a smaller price than a covered verse, and the live build made that plain.
 
-**C and D are the same code with the side flipped**, so the choice between them is cheap to make
+**C and D are the same code with the side flipped**, so the choice between them was cheap to make
 and cheap to change — which is the argument for deciding it by hand on the live page rather than in
-prose. C is recommended, but D carries the app's current reasoning ("never cover the verse"), and
-that is a real reason a reader might prefer it once they feel both.
+prose. C was chosen first and reversed to D once both were felt on the real spread; "never cover
+the verse" won.
 
 ### What the drawer holds, in all options
 
@@ -284,14 +295,12 @@ you pressed" look does not depend on whether `swipesFromPath` recognised its sha
 focus restored, scrim, grip; `data-side` for placement. The existing `side` prop values are
 `"left" | "right" | null` (null → phone/bottom).
 
-**The placement rule — the one behavioural change from today.** `sheetSide` in `App.tsx` currently
-returns the *opposite* leaf (ayah on `right` → sheet on `"left"`), which is **Option D**. The
-recommended **Option C (same leaf)** is the same memo with the two returns swapped: ayah on
-`right` → `"right"`, ayah on `left` → `"left"`. Because C and D differ by exactly that swap, the
-live options page can mount both by toggling it, one panel per option behind one frame
-(`OptionC` / `OptionD`), and the winner graduates while the loser is deleted — per the house rule
-that a felt difference is built, not drawn. `sheetSide` stays `null` below the desktop breakpoint,
-in one-page mode, and with the book closed to a single leaf, so the phone/single-page bottom sheet
+**The placement rule.** `sheetSide` in `App.tsx` returns the *opposite* leaf (ayah on `right` →
+sheet on `"left"`, ayah on `left` → `"right"`), which is **Option D** — the chosen placement.
+Option C (same leaf) was the same memo with the two returns swapped, and was briefly graduated
+before the live al-Fatiha render sent it back here; C and D differing by exactly that swap is what
+made the reversal a one-line change. `sheetSide` stays `null` below the desktop breakpoint, in
+one-page mode, and with the book closed to a single leaf, so the phone/single-page bottom sheet
 (Options B/C/D share it) is unchanged.
 
 **Relation to the companion page.** `docs/design/selection-drawer.html` decides the gesture (tap
@@ -302,7 +311,7 @@ for the reason given in "Where this parts from the companion design". The gestur
 bottom sheet, and the four note kinds are untouched.
 
 **Registering this.** Registered in `docs/decisions.json` as `ayah-drawer`, `status` `decided`,
-`decided` `C`, `by` `omar`, `date` `2026-09-19`, options A–D, `doc` pointing here, and `related`
+`decided` `D`, `by` `omar`, `date` `2026-09-19`, options A–D, `doc` pointing here, and `related`
 naming the companion `selection-drawer` decision in both directions; re-rendered with `make
 decisions-doc` and checked with `pnpm gate:decisions`. The live options page
 ([`ayah-drawer-options.html`](./ayah-drawer-options.html)) is checked in under `docs/` — so it is
