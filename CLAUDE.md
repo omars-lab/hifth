@@ -1,5 +1,30 @@
 # Working in this repo
 
+## What we are building right now
+
+Hifth is a personal proof-of-concept, not a product we are releasing in this form. The
+near-term goal is one thing: **a qualitative demo good enough to show the team behind The
+Study Quran, so they want to collaborate with us.** Everything we build now serves that
+pitch. We are rushing it on purpose — a demo that *feels* like the real thing, on a few
+verses done beautifully, beats a complete app done thinly. Depth of impression over breadth
+of coverage.
+
+Two consequences to hold onto:
+
+- **The pitch build is private, and shown to the people who own the material.** It may show
+  what a real collaboration would look like — including The Study Quran's own commentary and
+  the scripture beside it — because it is shown to them, in a room, not shipped to the world.
+  It is a mockup of a partnership, not a release of their book.
+- **The public site and its rules do not change.** The tenets below still govern anything
+  merged to the public site: designs stay public, and the shipped app carries no Qur'an text
+  and no held commentary — the gates that enforce that stay on. The pitch build lives on its
+  own private track, outside that pipeline, so nothing in it reaches the public site. When
+  the two would collide — a demo that must show held text — the demo is the private one, and
+  the public build stays clean.
+
+If a task does not move the pitch forward, it is not urgent right now. When in doubt, build
+the thing that will make a scholar lean in.
+
 ## Decisions are explained in plain language, or they are not explained
 
 This is the tenet. Everything below is how it is enforced.
