@@ -533,7 +533,8 @@
         "mark-granularity",
         "mark-placement",
         "comparison-crop",
-        "mistake-note-anchor"
+        "mistake-note-anchor",
+        "selection-drawer"
       ]
     },
     {
@@ -678,7 +679,8 @@
         "word-selection",
         "mark-granularity",
         "mistake-note-kinds",
-        "harakah-pick"
+        "harakah-pick",
+        "selection-drawer"
       ]
     },
     {
@@ -1040,7 +1042,39 @@
       "related": [
         "mistake-note-anchor",
         "mark-granularity",
-        "mark-placement"
+        "mark-placement",
+        "selection-drawer"
+      ]
+    },
+    {
+      "id": "selection-drawer",
+      "question": "How does a reader open the tools for one word, and the tools for the whole verse, from the same page?",
+      "status": "open",
+      "options": [
+        {
+          "id": "A",
+          "label": "Tap the word for its tools; press and hold for the verse tools"
+        },
+        {
+          "id": "B",
+          "label": "Any press asks first: this word, or the whole verse?"
+        },
+        {
+          "id": "C",
+          "label": "The word tools open on the word; the verse tools sit behind their own handle"
+        }
+      ],
+      "artifact": "https://blog.bytesofpurpose.com/hifth/docs/design/selection-drawer.html",
+      "page": "docs/design/selection-drawer.html",
+      "builtBy": "scripts/build-selection-drawer.mjs",
+      "doc": "docs/decisions/selection-drawer.md",
+      "decided": null,
+      "by": null,
+      "date": null,
+      "related": [
+        "harakah-pick",
+        "mistake-note-anchor",
+        "word-selection"
       ]
     }
   ]
