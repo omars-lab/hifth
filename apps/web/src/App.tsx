@@ -65,13 +65,27 @@ import { Colophon } from "./components/Colophon";
 import { RevisionMap } from "./components/RevisionMap";
 import { LiveAnnouncer, useAnnouncer } from "./components/LiveAnnouncer";
 import { RootLens, RootLensTrigger } from "./components/RootLens";
+// The private pitch layer (see src/pitch/pitch.ts). `PITCH` is a build-time
+// constant that is false in every public build, so every guarded branch below is
+// dead code the bundler drops, and the held-copy JSON those branches would load
+// is gitignored and never deployed.
+import {
+  PITCH,
+  loadPitchSurah,
+  mergeShard,
+  commentaryFor,
+  type PitchSurah,
+} from "./pitch/pitch";
+import { CommentarySheet, CommentaryTrigger } from "./pitch/CommentarySheet";
 import { SkinToggle, TajweedLegend } from "./components/SkinToggle";
 import { PageSlider } from "./components/PageSlider";
 import styles from "./App.module.css";
 
 // The app opens on page 7 (the mock's first curated page). Full page routing is
-// Loop 3; here the page follows the selection through hops.
-const START_PAGE = 7;
+// Loop 3; here the page follows the selection through hops. The private pitch
+// build instead opens on page 1 — al-Fātiḥah, the surah the demo is built around
+// — so the first thing in the room is the page we polished.
+const START_PAGE = PITCH ? 1 : 7;
 
 /** `quran/…/2:47` → its spec-§7 ref, or null if it is not a bare ayah key. */
 function refOf(key: string): AyahRef | null {
@@ -100,6 +114,13 @@ export function App(): JSX.Element {
   // Adjacency shards, fetched on demand and cached for the session (Loop 4a:
   // the ETL writes all 114, one per surah, each a few KB gzipped).
   const [shards, setShards] = useState<ReadonlyMap<number, AdjacencyShard>>(new Map());
+  // The private pitch payloads (The Study Quran commentary + curated roads),
+  // one per surah, loaded only in the pitch build. Empty everywhere else.
+  const [pitchSurahs, setPitchSurahs] = useState<ReadonlyMap<number, PitchSurah>>(
+    new Map(),
+  );
+  // Whether the commentary sheet is showing for the current selection.
+  const [commentaryOpen, setCommentaryOpen] = useState(false);
   const [page, setPage] = useState(START_PAGE);
   const [selectedKey, setSelectedKey] = useState<string | null>(null);
   // The drag-highlighted passage: its ayah keys in reading order (spec §3's
@@ -410,9 +431,19 @@ export function App(): JSX.Element {
   const adjacency = useMemo(() => {
     if (!manifest) return null;
     const adj = new Adjacency(manifest.edition);
-    for (const [surah, shard] of shards) adj.addShard(surah, shard);
+    // The pitch build adds the curated cross-references and meaning-jumps by
+    // merging each surah's pitch edges into its base shard — including surahs
+    // whose base shard is empty (al-Fātiḥah), which is why we walk the union.
+    const surahs = new Set<number>(shards.keys());
+    if (PITCH) for (const s of pitchSurahs.keys()) surahs.add(s);
+    for (const surah of surahs) {
+      const base = shards.get(surah);
+      const pitch = PITCH ? pitchSurahs.get(surah)?.shard : undefined;
+      const merged = pitch ? mergeShard(base, pitch) : base;
+      if (merged) adj.addShard(surah, merged);
+    }
     return adj;
-  }, [manifest, shards]);
+  }, [manifest, shards, pitchSurahs]);
 
   // Fetch a surah's shard at most once per session; a null result (missing
   // file) still counts as requested so we don't hammer a broken deploy.
@@ -428,13 +459,28 @@ export function App(): JSX.Element {
     [manifest],
   );
 
+  // The pitch surah for a selection, loaded at most once per session — the same
+  // shape as `ensureShard`, but for the private held payload. A no-op (and fully
+  // dead code) in every public build.
+  const requestedPitch = useRef(new Set<number>());
+  const ensurePitch = useCallback((surah: number) => {
+    if (!PITCH || requestedPitch.current.has(surah)) return;
+    requestedPitch.current.add(surah);
+    void loadPitchSurah(surah).then((p) => {
+      if (p) setPitchSurahs((m) => new Map(m).set(surah, p));
+    });
+  }, []);
+
   // On-demand load for the selection's surah (covers taps AND deep-link
   // restores — both go through setSelectedKey)…
   useEffect(() => {
     if (!selectedKey) return;
     const surah = parseAyahKey(selectedKey)?.surah;
-    if (surah) ensureShard(surah);
-  }, [selectedKey, ensureShard]);
+    if (surah) {
+      ensureShard(surah);
+      ensurePitch(surah);
+    }
+  }, [selectedKey, ensureShard, ensurePitch]);
 
   // …and for every surah the highlighted range touches (a range never spans
   // surahs today, but the loop costs nothing and is honest about the shape).
@@ -503,6 +549,7 @@ export function App(): JSX.Element {
   // taps, hops, bead-backs and deep links in one line, without every handler
   // having to remember).
   useEffect(() => setRootsOpen(false), [selectedKey]);
+  useEffect(() => setCommentaryOpen(false), [selectedKey]);
 
   // Rail chips for the current selection (empty when nothing selected / no hops).
   const chips = useMemo(
@@ -1332,6 +1379,11 @@ export function App(): JSX.Element {
     return null;
   }, [desktop, pageMode, resolver, selectedRange, selectedKey, page, totalPages]);
   const selectedSurah = selectedKey ? parseAyahKey(selectedKey)?.surah : null;
+  // The held commentary for the current selection, if the pitch build has it.
+  const pitchSurah =
+    PITCH && selectedSurah ? (pitchSurahs.get(selectedSurah) ?? null) : null;
+  const commentaryEntry = PITCH ? commentaryFor(pitchSurah, selectedKey) : null;
+  const hasCommentary = commentaryEntry !== null;
 
   return (
     // The chrome reads in the UI language's direction — every offset in the
@@ -1624,6 +1676,13 @@ export function App(): JSX.Element {
               onHopEdge={handleHop}
               onClose={() => setRootsOpen(false)}
             />
+            {PITCH && (
+              <CommentarySheet
+                entry={commentaryOpen ? commentaryEntry : null}
+                side={sheetSide}
+                onClose={() => setCommentaryOpen(false)}
+              />
+            )}
           </>
         )}
       </main>
@@ -1688,6 +1747,13 @@ export function App(): JSX.Element {
           open={rootsOpen}
           onToggle={() => setRootsOpen((o) => !o)}
         />
+        {PITCH && (
+          <CommentaryTrigger
+            has={hasCommentary}
+            open={commentaryOpen}
+            onToggle={() => setCommentaryOpen((o) => !o)}
+          />
+        )}
         <ShareSheet state={selectedKey ? currentState : null} hasTrail={trail.length > 0} />
         {/* Screen-reader-only summary of what the rail is offering. It used to
             read «السورة 2 · 1 روابط» — the surah as a bare number a listener has
