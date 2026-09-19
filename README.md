@@ -6,6 +6,12 @@ The knowledge graph is the routing table; the page is the interface.
 
 Web app first, mobile-first, fully static — no backend.
 
+> **Right now this is a personal proof-of-concept, not a release.** The near-term goal is a
+> qualitative demo to present to the team behind *The Study Quran*, to earn their buy-in to
+> collaborate — see [CLAUDE.md → What we are building right now](CLAUDE.md#what-we-are-building-right-now).
+> That pitch build is private and shown to the rights-holders; the public site below stays
+> clean of held text, as its gates enforce.
+
 **Live: <https://blog.bytesofpurpose.com/hifth/>** — installable; open it on a phone. Every
 push to `main` that clears all four CI jobs publishes there.
 
