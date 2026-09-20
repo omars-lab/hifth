@@ -40,14 +40,14 @@ dev: ## Start the web app in dev mode (Vite HMR) — the main local dev loop
 	$(WEB) dev
 
 .PHONY: pitch
-pitch: ## Serve the PRIVATE pitch build (Study Quran commentary + curated roads on al-Fātiḥah)
+pitch: ## Serve the PRIVATE pitch build (Study Quran commentary across the whole Qur'an)
 	@# VITE_PITCH turns on the private pitch layer (apps/web/src/pitch/): the
 	@# app loads the gitignored held copy under public/assets/private/ and shows
 	@# it live. This is the demo we take into a room with the rights-holders; it
 	@# is never deployed. Every public build (make build / ci / preview) leaves
 	@# the flag unset, so the pitch code is dead-code-eliminated and the held
 	@# copy is absent. Run the extractor once first if the JSON is missing:
-	@#   node packages/etl/tools/pitch/extract-fatiha.mjs
+	@#   node packages/etl/tools/pitch/extract.mjs
 	VITE_PITCH=1 $(WEB) dev
 
 .PHONY: build
@@ -95,7 +95,7 @@ pitch-e2e: core ## Playwright check of the PRIVATE pitch commentary (local only 
 	@test -f apps/web/public/assets/private/study-quran/1.json || { \
 	  echo ""; \
 	  echo "  No private pitch data — apps/web/public/assets/private/study-quran/1.json"; \
-	  echo "  Build it first:  node packages/etl/tools/pitch/extract-fatiha.mjs"; \
+	  echo "  Build it first:  node packages/etl/tools/pitch/extract.mjs"; \
 	  echo ""; \
 	  exit 1; \
 	}
