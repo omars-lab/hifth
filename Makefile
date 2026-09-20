@@ -75,7 +75,7 @@ clean: ## Remove all build output (the "clean-state" discipline — see loop-0.m
 # Quality gates — each target is one CI step; `ci` runs them in CI order
 # ---------------------------------------------------------------------------
 
-.PHONY: lint typecheck test e2e
+.PHONY: lint typecheck test e2e pitch-e2e
 lint:      ## eslint across the workspace (incl. the layer-boundary rules)
 	$(PNPM) lint
 typecheck: core ## tsc --noEmit in every package
@@ -85,6 +85,21 @@ test: core ## Vitest unit/contract tests in every package
 e2e: core ## Playwright mobile e2e (iPhone WebKit + Android Chromium + golden images)
 	$(WEB) build
 	$(WEB) test:e2e
+
+pitch-e2e: core ## Playwright check of the PRIVATE pitch commentary (local only — needs the note file)
+	@# The one suite `make e2e` cannot run. The public bundle drops the pitch
+	@# layer, so the commentary sheet is not in it; and the notes live in a
+	@# gitignored file (build it with the extractor below), so CI could not run
+	@# this even if it wanted to. HIFTH_PITCH=1 swaps the whole Playwright run for
+	@# a single project that builds and serves the pitch bundle on its own port.
+	@test -f apps/web/public/assets/private/study-quran/1.json || { \
+	  echo ""; \
+	  echo "  No private pitch data — apps/web/public/assets/private/study-quran/1.json"; \
+	  echo "  Build it first:  node packages/etl/tools/pitch/extract-fatiha.mjs"; \
+	  echo ""; \
+	  exit 1; \
+	}
+	HIFTH_PITCH=1 $(WEB) exec playwright test --project=pitch
 
 .PHONY: report
 report: ## Open the last e2e run's report — traces, image diffs, the failing screen

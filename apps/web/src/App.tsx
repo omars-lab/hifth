@@ -549,7 +549,20 @@ export function App(): JSX.Element {
   // taps, hops, bead-backs and deep links in one line, without every handler
   // having to remember).
   useEffect(() => setRootsOpen(false), [selectedKey]);
-  useEffect(() => setCommentaryOpen(false), [selectedKey]);
+  // Moving the selection closes the commentary — except in the pitch build,
+  // where a verse that carries a Study Quran note opens it on the tap itself.
+  // The demo's whole point is «tap a verse, read the note»; making that a
+  // second click on a footer button buried the moment. A verse with no note
+  // (everything outside al-Fātiḥah, in this build) still just closes it.
+  useEffect(() => {
+    if (!PITCH) {
+      setCommentaryOpen(false);
+      return;
+    }
+    const surah = selectedKey ? parseAyahKey(selectedKey)?.surah : null;
+    const ps = surah ? (pitchSurahs.get(surah) ?? null) : null;
+    setCommentaryOpen(commentaryFor(ps, selectedKey) !== null);
+  }, [selectedKey, pitchSurahs]);
 
   // Rail chips for the current selection (empty when nothing selected / no hops).
   const chips = useMemo(
