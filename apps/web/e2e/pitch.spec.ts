@@ -12,13 +12,14 @@ import { test, expect, type Locator, type Page } from "@playwright/test";
  * `make pitch-e2e` builds and serves; a bare `playwright test` skips it, the
  * same way `make golden` is honest about running only where its baseline is.
  *
- * What it guards, all three the "no drawer on tap" report turned up:
+ * What it guards, from the "no drawer on tap" report:
  *   1. Tapping a verse that HAS a Study Quran note opens the note on that tap —
  *      not on a second click of a footer button (the two-click bug).
  *   2. The note lands on the FACING leaf, opposite the verse (Option D,
- *      docs/design/ayah-drawer.md), so it never covers the verse it is about.
- *   3. A verse with NO note opens nothing — only al-Fātiḥah was extracted, so
- *      every al-Baqarah verse is a live check that selection alone is silent.
+ *      docs/design/ayah-drawer.md), so it never covers the verse it is about —
+ *      checked on both leaves: al-Fātiḥah on the right, al-Baqarah on the left.
+ *   3. The coverage is the whole Qur'an, not just al-Fātiḥah: a verse in a later
+ *      surah, on the other leaf, opens its own note too.
  */
 
 // Skip loudly rather than fail if this file is run outside `make pitch-e2e`
@@ -69,12 +70,20 @@ test.describe("Hifth · the pitch build's Study Quran commentary", () => {
     expect(await sideOf(page, sheet(page))).toBe("left");
   });
 
-  test("a verse with no note opens nothing", async ({ page }) => {
+  test("a later surah's verse opens its note on the facing leaf", async ({ page }) => {
     await page.goto("/#/hafs-kfqc/p1");
     await expect(pageSvg(page, 2)).toBeVisible({ timeout: 20_000 });
+    await expect(sheet(page), "no selection, so no note yet").toHaveCount(0);
+
     // 2:3 is the 10th ayah overall (al-Fātiḥah's 7, then 2:1, 2:2, 2:3) and sits
-    // on the left leaf. No al-Baqarah note was extracted, so selection is silent.
+    // on the left leaf. Its surah's notes load on the tap; the note then opens.
     await verse(page, 2, 10).click();
-    await expect(sheet(page)).toHaveCount(0);
+
+    await expect(sheet(page)).toBeVisible();
+    await expect(sheet(page)).toContainText("Study Quran");
+    // A left-leaf verse raises its note over the RIGHT leaf — the other side
+    // from al-Fātiḥah above, so the two tests pin both halves of Option D.
+    expect(await sheet(page).getAttribute("data-side")).toBe("right");
+    expect(await sideOf(page, sheet(page))).toBe("right");
   });
 });
