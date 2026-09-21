@@ -963,7 +963,7 @@
     {
       "id": "qul-page-cross-check",
       "question": "Should we build a fine, line-by-line check that holds our own page against the other library’s and records where the two disagree?",
-      "status": "open",
+      "status": "decided",
       "options": [
         {
           "id": "A",
@@ -982,9 +982,9 @@
       "page": "docs/design/qul-page-source-and-diff.html",
       "builtBy": "scripts/build-qul-page-source-and-diff.mjs",
       "doc": "docs/decisions/qul-page-cross-check.md",
-      "decided": null,
-      "by": null,
-      "date": null,
+      "decided": "B",
+      "by": "omar",
+      "date": "2026-09-21",
       "related": [
         "qul-dev-draw-toggle"
       ]

@@ -1,6 +1,7 @@
 # Should we build a fine check that holds our page against the other library's?
 
-**Status:** open — asked 2026-09-06.
+**Status:** decided **B** by omar, 2026-09-21 — asked 2026-09-06. Build the fine check as a
+report a person runs and reads, not a guard that watches forever. See [The decision](#the-decision).
 
 **Picture:**
 <https://blog.bytesofpurpose.com/hifth/docs/design/qul-page-source-and-diff.html> — the whole
@@ -86,6 +87,39 @@ The size and nature of the first run's output: a short list of conventions argue
 light B; a handful of true defects argues for C, the held count. A hafiz judging a sample of
 the disagreements — which are error and which are habit — is what nobody has done yet, and it
 is what would settle B-versus-C honestly.
+
+## The decision
+
+**B, decided by omar on 2026-09-21: build the check, and build it as a report a person runs
+and reads — not a guard that watches forever.** The owner's words were "wire it in as a fourth
+witness." That rejects A (do nothing) outright. Between B and C, two facts settled it, so no
+further question was needed:
+
+- **C cannot exist here.** A guard that watches forever has to run on its own, and this check
+  cannot: the library's page map is a sign-in-gated download, so the file has to be handed to
+  the check by a person each time. A guard with no file to read would either never run or would
+  end up comparing our page table to a frozen copy of our own numbers — which watches nothing.
+  Its twin, the coarse cross-check, is opt-in for exactly this reason, and this follows it.
+- **B is what the finding could actually support.** When the check was built, the fine,
+  word-by-word granularity the question imagined — which word sits on which line — turned out
+  not to be sound: the library counts the words of the mus'haf differently than we do (a
+  different split of the same text), so lining up word-for-word would invent disagreements that
+  are only a difference of counting. So the built check compares the parts that need no such
+  line-up and are therefore trustworthy: **where each surah opens** (all 114 agree, to the
+  page) and the shape of the print (604 pages, 15 lines each — both agree). That is a report
+  worth reading, and it is honest about the one comparison it does not make.
+
+**What was built:** a second-opinion probe (`scripts/probe-qul-v2-layout.mjs`, `make
+probe-qul-v2 DB=<the downloaded file>`) that reads the library's V2/1421H layout in place,
+stores none of its bytes, and checks our page table against it. It is documented as the twin of
+the existing coarse probe in the validation ledger's spot-audit runbook, and attributed in
+`SOURCES.md`. First run, 2026-09-21: 114/114 surah openings agree, constants agree.
+
+**What is deliberately left for later:** the finer sub-choices the picture holds (line breaks,
+ayah boundaries, how much slack counts as a match) stay unbuilt until a run shows a real
+disagreement worth filing — which the first run did not. If a future word-level source ever
+does line up with our counting, reopening C would be a fresh decision, not a reversal of this
+one.
 
 ## What this is not settling
 
