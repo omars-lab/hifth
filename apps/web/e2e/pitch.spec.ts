@@ -87,3 +87,31 @@ test.describe("Hifth · the pitch build's Study Quran commentary", () => {
     expect(await sideOf(page, sheet(page))).toBe("right");
   });
 });
+
+test.describe("Hifth · the pitch commentary on a phone", () => {
+  // A phone is a single page with no facing leaf to place the note on, so the
+  // note is a full-width bottom sheet, not a card pinned to one side. This is
+  // the other half of the "no drawer on tap" report: the desktop tests above
+  // check the side placement; this one checks the phone path opens at all and
+  // does not try to take a side it has no room for.
+  test.use({ viewport: { width: 390, height: 844 } });
+
+  test("tapping a verse opens a full-width bottom sheet with no side", async ({ page }) => {
+    // Deep-linking a verse selects it, which opens the note the same way a tap
+    // does (the pitch build opens on selection). 2:255 is Āyat al-Kursī.
+    await page.goto("/#/hafs-kfqc/2:255");
+    await expect(sheet(page)).toBeVisible({ timeout: 20_000 });
+    await expect(sheet(page)).toContainText("Study Quran");
+
+    // No facing leaf on a phone, so the note takes no side: the attribute is
+    // absent (App.tsx sheetSide returns null whenever it is not a desktop
+    // two-page spread) and the sheet spans nearly the full window width.
+    expect(await sheet(page).getAttribute("data-side")).toBeNull();
+    const box = (await sheet(page).boundingBox())!;
+    expect(box.width).toBeGreaterThan(390 * 0.9);
+
+    // The verse's own number was stripped from the front of its note.
+    await expect(sheet(page)).toContainText("This verse is known as");
+    await expect(sheet(page)).not.toContainText("255 This verse is known as");
+  });
+});
