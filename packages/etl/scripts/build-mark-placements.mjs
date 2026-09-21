@@ -97,9 +97,9 @@ import { gzipSync } from "node:zlib";
 import { fingerprint } from "./lib/answered.mjs";
 import { readPageInk } from "./lib/ink.mjs";
 import { authoredIdOf, authoredPlacements } from "./lib/mark-authored.mjs";
-import { refusedItsOwnInk } from "./lib/mark-ink.mjs";
 import { marksOf } from "./lib/marks.mjs";
-import { GUARD, pieceUnionCandidate, reachOrFall } from "./lib/piece-union.mjs";
+import { RES, RULE, automaticPlacement, r1 } from "./lib/mark-placement.mjs";
+import { GUARD } from "./lib/piece-union.mjs";
 import { correctionFor } from "./lib/registration-grain.mjs";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
@@ -110,18 +110,12 @@ const PAGES = join(REPO, "apps", "web", "public", "assets", "pages", "hafs-kfqc"
 const OUT = join(REPO, "apps", "web", "public", "assets", "marks", "hafs-kfqc");
 const PIN_OUT = join(HERE, "..", "data", "pages", "mark-boxes.pin.json");
 
-/** The raster grain the ink search ran at, and so the grain a reach candidate is cut at. */
-const RES = 16;
-
-/**
- * The rule, in two numbers. A mark is placed on its own ink when its best match
- * clears `iou` and the search did not run out of `radius` (or the wider reach
- * the mark itself records). Both are the settled values every sitting used.
- */
-const RULE = { iou: 0.55, radius: 3 };
-
+// The raster grain (`RES`), the ink/reach rule (`RULE`) and the one-decimal
+// round (`r1`) now live in `lib/mark-placement.mjs`, next to the automatic
+// placement they parametrise, so the placement sitting judges the same rival
+// this ship asset draws. `GUARD` (imported above) is still named directly here,
+// because the pin records its two numbers as metadata.
 const sha = (s) => createHash("sha256").update(s).digest("hex");
-const r1 = (v) => Math.round(v * 10) / 10;
 
 const argOf = (flag, dflt = null) => {
   const i = process.argv.indexOf(flag);
@@ -218,20 +212,9 @@ for (const page of pages) {
     // singles' position (㉟) in one move. A refused mark with no piece to point
     // to, or one whose union the guard throws out, falls back to the printed
     // line's own tilt. A hand placement, resolved below, wins over all of them.
-    const refused = refusedItsOwnInk(row, RULE.radius, RULE.iou);
-    const { candidate, ratio } = refused
-      ? pieceUnionCandidate(row, inkForPage(page), { radius: RULE.radius, res: RES })
-      : { candidate: null, ratio: null };
-    let src = reachOrFall(refused, candidate, ratio);
-    let rect;
-    if (src === "ink") {
-      rect = [r1(m.box[0] + row.dx), r1(m.box[1] + row.dy), r1(m.box[2]), r1(m.box[3])];
-    } else if (src === "reach") {
-      rect = candidate.map(r1);
-    } else {
-      const d = corr.apply(row);
-      rect = [r1(m.box[0] + d.dx), r1(m.box[1] + d.dy), r1(m.box[2]), r1(m.box[3])];
-    }
+    const auto = automaticPlacement({ mark: m, row, ink: inkForPage(page), corr });
+    let rect = auto.rect;
+    let src = auto.src;
 
     const cid = authoredIdOf(m);
     const hand = placements.get(cid);
