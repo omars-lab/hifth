@@ -156,6 +156,7 @@ export interface Catalog {
   readonly pauseAyah: (d: { readonly label: string | number }) => string;
   readonly playAyah: (d: { readonly label: string | number }) => string;
   readonly prevPage: string;
+  readonly qulVerse: (d: { readonly label: string | number }) => string;
   readonly "railDirection.earlier": string;
   readonly "railDirection.later": string;
   readonly "railDirection.loop": string;
