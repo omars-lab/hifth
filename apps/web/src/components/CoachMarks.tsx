@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useT } from "../i18n";
+import { useT, type CoachStep } from "../i18n";
 import { COACH_STORAGE_KEY, coachDismissed, rememberDismissal } from "../coach";
+import { PITCH } from "../pitch/pitch";
 import styles from "./CoachMarks.module.css";
 
 // The key and its two accessors live in `../coach` — a module with no React and
@@ -20,6 +21,29 @@ export { COACH_STORAGE_KEY, coachDismissed };
  * feature that does not exist yet, in either language.
  */
 const GLYPHS: readonly string[] = ["◉", "▤", "↪"];
+
+/**
+ * In the pitch build a tap does something different from the public app: it
+ * opens the Study Quran note — a reading drawer that carries the translation,
+ * the commentary, and (below them) the verses this one connects to — rather than
+ * a rail of link-chips beside the ayah. So the first card and the last card say
+ * what actually happens here: you read in the drawer, and you hop from the
+ * "Related verses" list inside it, not from a chip. The middle card (press and
+ * drag over a passage) still opens a merged list, so it is left alone.
+ *
+ * The pitch demo runs in English, so these overrides are English literals; they
+ * are dead-code-eliminated from the public build, where PITCH is a build-time
+ * false (see pitch.ts). By index into `coachSteps`: 0 = tap, 2 = hop.
+ */
+const PITCH_STEP_OVERRIDES: Readonly<Record<number, Partial<CoachStep>>> = {
+  0: {
+    body: "Its Study Quran note opens beside it: the translation, the commentary, and the verses it connects to.",
+  },
+  2: {
+    title: "Tap a related verse",
+    body: "You hop there, its note opens, and a bead on the trail brings you back.",
+  },
+};
 
 interface CoachMarksProps {
   /** Render only once the app is usable (there is nothing to teach before). */
@@ -83,7 +107,9 @@ export function CoachMarks({ ready, onDismiss }: CoachMarksProps): JSX.Element |
 
   if (dismissed || !ready) return null;
 
-  const steps = t.coachSteps;
+  const steps = PITCH
+    ? t.coachSteps.map((s, i) => ({ ...s, ...PITCH_STEP_OVERRIDES[i] }))
+    : t.coachSteps;
   const current = steps[step]!;
   const last = step === steps.length - 1;
 

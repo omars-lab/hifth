@@ -170,6 +170,115 @@
   margin-block-end: 0;
 }
 
+/* Related verses — the roads out of this verse, The Study Quran's own
+   cross-references. A quiet block below the reading: it is navigation, so it is
+   set apart from the prose, but it is still part of the same reading surface. */
+.related {
+  margin-block-start: var(--space-4);
+  padding-block-start: var(--space-3);
+  border-block-start: 1px solid var(--hairline);
+}
+
+.relatedTitle {
+  margin: 0 0 var(--space-1);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--accent-strong);
+}
+
+.relatedLede {
+  margin: 0 0 var(--space-2);
+  color: var(--ink-faint);
+  font-size: var(--text-xs);
+  line-height: 1.5;
+}
+
+.roads {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.road {
+  margin: 0;
+}
+
+/* Each road is one tappable row: the target verse, a line on why they connect,
+   and a jump arrow. Full-width and touch-tall so it reads like a list on a
+   phone and a menu on the spread. */
+.roadHop {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: baseline;
+  column-gap: var(--space-2);
+  inline-size: 100%;
+  min-block-size: var(--touch-min);
+  padding: var(--space-2);
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius-md);
+  background: var(--paper-sunk);
+  color: var(--ink);
+  text-align: start;
+  cursor: pointer;
+}
+
+.roadHop:hover:not(:disabled) {
+  border-color: var(--accent-tint);
+}
+
+.roadHop:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.roadHop:disabled {
+  cursor: default;
+  opacity: 0.55;
+}
+
+.roadLabel {
+  grid-column: 1;
+  display: inline-flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  font-weight: 600;
+  font-size: var(--text-sm);
+}
+
+.badge {
+  padding-inline: var(--space-1);
+  border-radius: var(--radius-sm);
+  background: var(--accent-tint);
+  color: var(--accent-strong);
+  font-size: var(--text-xs);
+  font-weight: 600;
+}
+
+.roadNote {
+  grid-column: 1;
+  color: var(--ink-soft);
+  font-size: var(--text-xs);
+  line-height: 1.5;
+}
+
+.roadUnavailable {
+  grid-column: 1;
+  color: var(--ink-faint);
+  font-size: var(--text-xs);
+  font-style: italic;
+}
+
+.roadArrow {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  align-self: center;
+  color: var(--accent-strong);
+  font-size: var(--text-md);
+}
+
 /* The attribution — present and legible, never competing with the reading. */
 .credit {
   max-inline-size: 60ch;

@@ -34,6 +34,7 @@
  *   clickrole=<role>|<name>    click a role by accessible name (substring, case-insensitive)
  *   fill=<css>|<text>          type text into an input
  *   press=<Key>               keyboard press (e.g. Escape, Enter)
+ *   scroll=<css>|<bottom|top|±px>  scroll a container so a shot catches what is below its fold
  *   settle=<ms>               pause (for an animation to finish before the shot)
  *
  * A deep-link hash reaches most states with no clicks at all: `#/hafs-kfqc/2:48`
@@ -123,6 +124,18 @@ async function runStep(page, step) {
     case "press":
       await page.keyboard.press(arg);
       return;
+    case "scroll": {
+      // scroll=<css>|<bottom|top|±px> — scroll a container (e.g. a drawer whose
+      // content runs past the fold) so a shot can catch what is below it.
+      const [sel, ...restArg] = arg.split("|");
+      const how = (restArg.join("|") || "bottom").trim();
+      await page.locator(sel.trim()).first().evaluate((el, h) => {
+        if (h === "bottom") el.scrollTop = el.scrollHeight;
+        else if (h === "top") el.scrollTop = 0;
+        else el.scrollTop += Number(h);
+      }, how);
+      return;
+    }
     case "settle":
       await page.waitForTimeout(Number(arg));
       return;

@@ -1406,6 +1406,16 @@ export function App(): JSX.Element {
     PITCH && selectedSurah ? (pitchSurahs.get(selectedSurah) ?? null) : null;
   const commentaryEntry = PITCH ? commentaryFor(pitchSurah, selectedKey) : null;
   const hasCommentary = commentaryEntry !== null;
+  // The roads out of the open note: the same merged edges the rail would show
+  // (Study Quran cross-references included), handed to the drawer so the reading
+  // and the navigation live on one surface instead of the note covering a rail.
+  const commentaryRoads = useMemo(
+    () =>
+      PITCH && adjacency && commentaryOpen && selectedKey
+        ? adjacency.hopsForKey(selectedKey)
+        : [],
+    [adjacency, commentaryOpen, selectedKey],
+  );
 
   return (
     // The chrome reads in the UI language's direction — every offset in the
@@ -1702,6 +1712,9 @@ export function App(): JSX.Element {
               <CommentarySheet
                 entry={commentaryOpen ? commentaryEntry : null}
                 side={sheetSide}
+                roads={commentaryRoads}
+                canHop={canHop}
+                onHop={handleHop}
                 onClose={() => setCommentaryOpen(false)}
               />
             )}
