@@ -681,7 +681,8 @@
         "packages/etl/data/pages/word-boxes.pin.json — a supported correction is two more numbers per page recorded there. This is the artifact the check exists to release.",
         "packages/etl/scripts/probe-mark-ink.mjs — its thresholds exit non-zero today and are wired into nothing. A verdict here is the named prerequisite for turning them into a gate.",
         "docs/design/mark-registration.md §⑦ — the recommendation is provisional pending exactly this, and §⑩ ① is this question.",
-        "packages/etl/scripts/lib/adjudication.mjs — an invalid session tunes the mix of trials, not the conclusion about the marks."
+        "packages/etl/scripts/lib/adjudication.mjs — an invalid session tunes the mix of trials, not the conclusion about the marks.",
+        "docs/design/robust-validation.md — the rebuilt sitting is designed here: with the winner now each mark on its own ink, 99.69% of boxes sit on their ink and a random draw is a landslide that tells you nothing, so the hundred trials must be drawn from the ~1,007 marks the correction is least sure of (the hand-placed, the tilted, the patched, the faint-inked). This runbook's setup still builds the old per-page trials and must be rebuilt from that design before anybody sits it."
       ],
       "record": "docs/design/mark-registration.md",
       "verifiedOn": "2026-08-12",
