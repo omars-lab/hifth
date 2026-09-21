@@ -662,6 +662,21 @@ probe-reference: core ## A second opinion on the print: make probe-reference [PA
 	@node scripts/probe-reference.mjs \
 	  $(if $(PAGES)$(ALL),--page-table,) $(if $(ALL),--all --quiet,)
 
+.PHONY: probe-qul-v2
+probe-qul-v2: core ## A fourth witness on the print: make probe-qul-v2 DB=<path to QUL V2 layout SQLite>
+	@# Checks every surah's first-ayah page, plus 604 pages / 15 lines, against
+	@# QUL's V2/1421H layout authority — the resource PROVENANCE.md matched our
+	@# edition to. The opposite direction from `probe-reference`: that one uses a
+	@# V1 table as a fingerprint and must DISAGREE on 36 pages; this reads the V2
+	@# authority direct and must AGREE everywhere.
+	@#
+	@# NOT in `make ci`, same as probe-reference: the layout export is a
+	@# login-gated download the repo never vendors (zero QUL bytes), so the file
+	@# is PASSED IN and read in place. A gate could never see it.
+	@#
+	@# Needs node's experimental SQLite reader, present in the pinned v22.22.3.
+	@node --experimental-sqlite scripts/probe-qul-v2-layout.mjs $(if $(DB),--db $(DB),)
+
 # ---------------------------------------------------------------------------
 
 .PHONY: help

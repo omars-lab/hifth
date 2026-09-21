@@ -459,7 +459,14 @@ review is tracked from the start; no bytes are vendored until the noted loop.
   - **Layout DB + phrase ranges** — ayah→page table for edge dir bucketing (Loop 4a) +
     anchor cross-check (Loop 4b). Madani layouts: V1/1405H (id 15), V2/1421H (id 10),
     V4/1441H (id 19) — pin the print matching quran-svg in Loop 4a. License: per-resource
-    on QUL; review each before use.
+    on QUL; review each before use. The **V2/1421H layout (id 10)** is also read live as a
+    build-time **witness** by `scripts/probe-qul-v2-layout.mjs` (task #66, owner-requested
+    2026-09-20 as a fourth, deliberately-redundant cross-check): it checks every surah's
+    first-ayah page and the 604-page / 15-line constants against ours (114/114 agree,
+    2026-09-21). The SQLite export is a login-gated download read once from a path passed in;
+    zero of its bytes are vendored, and only page *positions* — no letters — are compared, so
+    it stays on the safe side of the no-text rule. Attribution: KFGQPC V2/1421H layout via
+    QUL (qul.tarteel.ai), `mushaf-layout/10`.
   - **Mutashabihat ul Quran (resource 73)** — a phrase-recurrence catalogue: 814 phrases
     over 2,232 ayahs, each entry a shared word-run and the verses it recurs in. Used
     2026-09-03 as the build-time ruler for the hop's recall — read once from a gitignored
