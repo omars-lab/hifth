@@ -104,6 +104,12 @@ const CREDITS: readonly Credit[] = [
     licence: "صدقة جارية · إتاحة حرّة",
     href: "https://github.com/mushafdatabase/MushafDatabase-Ligature-Based-SVG",
   },
+  {
+    what: "التلاوة",
+    who: "الشيخ محمد صديق المنشاوي · عبر مكتبة قرآن (quran.com)",
+    licence: "إتاحة حرّة للاستماع · بثّ من مكتبة قرآن",
+    href: "https://quran.com",
+  },
 ];
 
 /**

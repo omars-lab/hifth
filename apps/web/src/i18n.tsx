@@ -262,6 +262,14 @@ export interface Strings {
   /** DiffView's "you are here" tag on the upper verse. */
   hereTag: string;
 
+  /* ---- recitation (per-verse audio) -------------------------------------- */
+  /** Play the selected verse's recitation — the ▶ trigger's label. */
+  playAyah(label: string): string;
+  /** Pause it — the same trigger once it is sounding. */
+  pauseAyah(label: string): string;
+  /** Announced when the recitation CDN will not play the file. */
+  audioUnavailable: string;
+
   /* ---- highlighted range -------------------------------------------------- */
   rangeAria(title: string, links: number): string;
   rangeEmpty: string;
@@ -635,6 +643,10 @@ export function buildStrings(lang: Lang, m: Catalog): Strings {
     pageUnavailable: m.pageUnavailable,
     wordLevelPending: m.wordLevelPending,
     hereTag: m.hereTag,
+
+    playAyah: (label) => m.playAyah({ label }),
+    pauseAyah: (label) => m.pauseAyah({ label }),
+    audioUnavailable: m.audioUnavailable,
 
     rangeAria: (title, links) => m.rangeAria({ title, links }),
     rangeEmpty: m.rangeEmpty,

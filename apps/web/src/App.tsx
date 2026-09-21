@@ -65,6 +65,8 @@ import { Colophon } from "./components/Colophon";
 import { RevisionMap } from "./components/RevisionMap";
 import { LiveAnnouncer, useAnnouncer } from "./components/LiveAnnouncer";
 import { RootLens, RootLensTrigger } from "./components/RootLens";
+import { PlayTrigger } from "./components/PlayTrigger";
+import { useVerseAudio } from "./audio";
 // The private pitch layer (see src/pitch/pitch.ts). `PITCH` is a build-time
 // constant that is false in every public build, so every guarded branch below is
 // dead code the bundler drops, and the held-copy JSON those branches would load
@@ -367,6 +369,13 @@ export function App(): JSX.Element {
   }, [desktop, stage]);
   const { t, dir } = useT();
   const { message, announce } = useAnnouncer();
+
+  // Per-verse recitation: one <audio> for the app, streamed from the public
+  // Quran.com CDN (see audio.ts — nothing is held in the tree). A CDN failure is
+  // said out loud, so a silent verse is never a mystery.
+  const audio = useVerseAudio((k) =>
+    announce(`${t.ayahLabel(k) ?? k} — ${t.audioUnavailable}`),
+  );
   /*
    * The stepper's press, said out loud.
    *
@@ -549,6 +558,13 @@ export function App(): JSX.Element {
   // taps, hops, bead-backs and deep links in one line, without every handler
   // having to remember).
   useEffect(() => setRootsOpen(false), [selectedKey]);
+  // Moving the selection also stops any recitation: the ▶ belongs to the verse
+  // you are on, so a hop or a fresh tap should not leave the last one sounding.
+  // `stopAudio` is stable, so this fires only when the selection actually moves.
+  const stopAudio = audio.stop;
+  useEffect(() => {
+    stopAudio();
+  }, [selectedKey, stopAudio]);
   // Moving the selection closes the commentary — except in the pitch build,
   // where a verse that carries a Study Quran note opens it on the tap itself.
   // The demo's whole point is «tap a verse, read the note»; making that a
@@ -1775,6 +1791,12 @@ export function App(): JSX.Element {
           currentKey={selectedKey}
           onBeadBack={handleBeadBack}
           onClearCurrent={handleClearCurrent}
+        />
+        <PlayTrigger
+          selectedKey={selectedKey}
+          label={selectedKey ? (t.ayahLabel(selectedKey) ?? selectedKey) : null}
+          phase={audio.phaseFor(selectedKey)}
+          onToggle={audio.toggle}
         />
         <RootLensTrigger
           count={rootCount}

@@ -404,6 +404,44 @@ not-credited: The app ships nothing from this font — no bytes, no outlines, no
 
 ---
 
+### quran-com-audio
+
+- **Name:** Verse-by-verse recitation — Mohamed Siddiq al-Minshawi (Murattal),
+  streamed from Quran.com's public audio CDN. The source behind the ▶ that lets a
+  hafiz hear the ayah they landed on (task #67).
+- **What is taken, and what is not.** **No audio ships.** Nothing is vendored, and
+  nothing is held in the tree. Each ayah's file lives on `verses.quran.com`, and
+  the app plays it with a plain `<audio>` element at play time — the file streams
+  straight from the hosted site, the way a browser plays any linked media. The URL
+  is a pure function of the ayah, so there is no API call either: surah and ayah,
+  each padded to three digits, at
+  `https://verses.quran.com/Minshawi/Murattal/mp3/{SSS}{AAA}.mp3` (built by
+  `apps/web/src/audio.ts`). The CDN serves it with `Access-Control-Allow-Origin: *`
+  and byte ranges, so the cross-origin stream needs no proxy of ours.
+- **Access:** open. The owner's standing stance (2026-09-20, "qul allows open
+  access") is that Quran.com / QUL resources are openly accessible for this POC, so
+  the app links the CDN directly. That is a green light on *access*, not a waiver of
+  the credit: the file carries no explicit licence of its own, so the reciter is
+  named as a courtesy — the honest posture for a source read openly but not
+  formally licensed for redistribution. Since Hifth redistributes none of the
+  bytes (it only links them, the way any web page links media it does not host),
+  there is nothing here to license; the credit is respect for the reciter's work,
+  recorded so a later reader does not mistake a courtesy for a condition, or a
+  condition for a courtesy.
+- **Colophon row.** Verbatim; bound to `Colophon.tsx` by `gate:license-copy`.
+
+```colophon
+what: التلاوة
+who: الشيخ محمد صديق المنشاوي · عبر مكتبة قرآن (quran.com)
+licence: إتاحة حرّة للاستماع · بثّ من مكتبة قرآن
+href: https://quran.com
+```
+
+- **Status: STREAMED (task #67) — client-side `<audio>` from Quran.com's CDN; no
+  bytes vendored or shipped.**
+
+---
+
 ## Pending sources (not yet vendored — recorded so the gate is ready)
 
 These are named in the plan for later loops. They are listed here so their license
