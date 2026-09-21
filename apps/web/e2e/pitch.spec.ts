@@ -86,6 +86,26 @@ test.describe("Hifth · the pitch build's Study Quran commentary", () => {
     expect(await sheet(page).getAttribute("data-side")).toBe("right");
     expect(await sideOf(page, sheet(page))).toBe("right");
   });
+
+  test("a related verse in the note hops there and opens its own note", async ({ page }) => {
+    // 1:6 — the straight-path verse — carries The Study Quran's own
+    // cross-references, folded into the note as a "Related verses" list. This is
+    // the whole point of the roads-in-the-drawer choice: read and navigate on
+    // one surface, no rail buried behind the scrim.
+    await page.goto("/#/hafs-kfqc/1:6");
+    await expect(sheet(page)).toBeVisible({ timeout: 20_000 });
+    await expect(sheet(page)).toContainText("Related verses");
+
+    // Tap the road to al-Anʿām 6:153 (a reachable, vendored page). The label is
+    // the target's own ayah label, the button its "Hop to …" name.
+    await sheet(page).getByRole("button", { name: /Hop to .*6:153/ }).click();
+
+    // The hop landed and the arrived verse's own note opened in turn: the same
+    // dialog now names 6:153 (App re-opens the note on the new selection).
+    await expect(page.getByRole("dialog", { name: /6:153/ })).toBeVisible();
+    // And it is a real note, not an empty shell — its commentary is present.
+    await expect(sheet(page)).toContainText("The Study Quran");
+  });
 });
 
 test.describe("Hifth · the pitch commentary on a phone", () => {

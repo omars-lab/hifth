@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef } from "react";
-import type { LeafSide } from "@hifth/core";
+import { orderForHifz, type Edge, type LeafSide } from "@hifth/core";
 import { useT } from "../i18n";
 import type { PitchCommentary } from "./pitch";
 import styles from "./CommentarySheet.module.css";
@@ -54,10 +54,25 @@ export function CommentarySheet({
   entry,
   onClose,
   side = null,
+  roads = [],
+  canHop,
+  onHop,
 }: {
   entry: PitchCommentary | null;
   onClose: () => void;
   side?: LeafSide | null;
+  /**
+   * The verses this one connects to — The Study Quran's own cross-references,
+   * merged into the app's adjacency and handed straight back here. Tapping one
+   * jumps there (and, in the pitch build, opens that verse's note in turn), so
+   * the reading and the roads live on one surface instead of the note burying a
+   * rail behind it. Empty when the verse leads nowhere the app can reach.
+   */
+  roads?: readonly Edge[];
+  /** Whether a target's page is vendored (unreachable targets are shown, disabled). */
+  canHop?: (toKey: string) => boolean;
+  /** Jump to a related verse — the same hop the rail uses, so it leaves a trail. */
+  onHop?: (edge: Edge) => void;
 }): JSX.Element | null {
   const { t } = useT();
   const sheetRef = useRef<HTMLDivElement>(null);
@@ -158,6 +173,44 @@ export function CommentarySheet({
               </p>
             ))}
           </section>
+
+          {roads.length > 0 && (
+            <section className={styles.related} aria-label="Related verses">
+              <h3 className={styles.relatedTitle}>Related verses</h3>
+              <p className={styles.relatedLede}>
+                Where The Study Quran connects this verse. Tap one to go there.
+              </p>
+              <ul className={styles.roads}>
+                {orderForHifz(roads).map((edge) => {
+                  const enabled = canHop ? canHop(edge.to) : true;
+                  const label = t.ayahLabel(edge.to) ?? edge.to;
+                  return (
+                    <li key={`${edge.type}:${edge.to}`} className={styles.road}>
+                      <button
+                        type="button"
+                        className={styles.roadHop}
+                        disabled={!enabled || !onHop}
+                        onClick={() => onHop?.(edge)}
+                        aria-label={t.hopTo(label)}
+                      >
+                        <span className={styles.roadLabel}>
+                          {label}
+                          {edge.twin && <span className={styles.badge}>{t.twin}</span>}
+                        </span>
+                        {edge.note && <span className={styles.roadNote}>{edge.note}</span>}
+                        {!enabled && (
+                          <span className={styles.roadUnavailable}>{t.pageUnavailable}</span>
+                        )}
+                        <span className={styles.roadArrow} aria-hidden="true">
+                          ↪
+                        </span>
+                      </button>
+                    </li>
+                  );
+                })}
+              </ul>
+            </section>
+          )}
         </div>
 
         <footer className={styles.credit}>
