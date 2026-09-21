@@ -455,6 +455,10 @@ issues: ## What is still open, worst first:  make issues  ·  make issues ID=<id
 box-sweep: core ## Draw every ayah box the pen cannot draw as lines, on its page → docs/design/ayah-box-sweep.html
 	@node scripts/build-box-sweep.mjs
 
+.PHONY: arabic-number-review
+arabic-number-review: ## A hafiz's sheet to confirm the Arabic plural forms → docs/design/arabic-number-agreement-review.html
+	@node scripts/build-arabic-number-review.mjs
+
 .PHONY: issues-doc
 issues-doc: ## Re-render docs/issues.md from docs/issues.json and its four registers
 	@node scripts/build-issues-doc.mjs
