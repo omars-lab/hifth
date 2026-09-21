@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" data-ledger-hash="70ab6dbdd401">
+<html lang="en" data-ledger-hash="5fdb334d3d3e">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -127,7 +127,7 @@ li.struck .expect::before { content: "machine "; color: var(--green); }
   <p class="rule">Every result here must tighten something automated — a threshold, a
   fixture, a gate. That is what <b>tunes</b> is for at the foot of each card. A verdict
   that tunes nothing has to be bought again by hand, forever.</p>
-  <p class="src">Generated from <code>docs/validation/ledger.json</code> · <code>70ab6dbdd401</code>
+  <p class="src">Generated from <code>docs/validation/ledger.json</code> · <code>5fdb334d3d3e</code>
   · never edit this file — run <code>make guide</code></p>
 </header>
 
@@ -772,7 +772,7 @@ li.struck .expect::before { content: "machine "; color: var(--green); }
     <h3>Record it</h3>
     <pre class="cmd">make record CHECK=placement-correction-by-eye RESULT='seed 11 · 100 trials over 40 held-out pages · as shipped &lt;pct&gt; [&lt;lo&gt;–&lt;hi&gt;], decoy &lt;pct&gt;, catches &lt;pct&gt;, twins &lt;pct&gt; → &lt;supported|not supported|says nothing&gt;'</pre>
     <p class="tunes-lead">Then do what it tunes:</p>
-    <ul class="tunes"><li>packages/etl/data/pages/word-boxes.pin.json — a supported correction is two more numbers per page recorded there. This is the artifact the check exists to release.</li><li>packages/etl/scripts/probe-mark-ink.mjs — its thresholds exit non-zero today and are wired into nothing. A verdict here is the named prerequisite for turning them into a gate.</li><li>docs/design/mark-registration.md §⑦ — the recommendation is provisional pending exactly this, and §⑩ ① is this question.</li><li>packages/etl/scripts/lib/adjudication.mjs — an invalid session tunes the mix of trials, not the conclusion about the marks.</li></ul>
+    <ul class="tunes"><li>packages/etl/data/pages/word-boxes.pin.json — a supported correction is two more numbers per page recorded there. This is the artifact the check exists to release.</li><li>packages/etl/scripts/probe-mark-ink.mjs — its thresholds exit non-zero today and are wired into nothing. A verdict here is the named prerequisite for turning them into a gate.</li><li>docs/design/mark-registration.md §⑦ — the recommendation is provisional pending exactly this, and §⑩ ① is this question.</li><li>packages/etl/scripts/lib/adjudication.mjs — an invalid session tunes the mix of trials, not the conclusion about the marks.</li><li>docs/design/robust-validation.md — the rebuilt sitting is designed here: with the winner now each mark on its own ink, 99.69% of boxes sit on their ink and a random draw is a landslide that tells you nothing, so the hundred trials must be drawn from the ~1,007 marks the correction is least sure of (the hand-placed, the tilted, the patched, the faint-inked). This runbook's setup still builds the old per-page trials and must be rebuilt from that design before anybody sits it.</li></ul>
     <p class="expect">Written up in docs/design/mark-registration.md</p>
   </section>
 </article>
