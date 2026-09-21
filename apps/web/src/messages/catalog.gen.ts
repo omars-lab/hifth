@@ -15,6 +15,7 @@ export interface Catalog {
   readonly arrivedRange: (d: { readonly via: string | number; readonly ref: string | number; readonly page: string | number }) => string;
   readonly arrivedVia: (d: { readonly origin: "jump" | "other" }) => string;
   readonly arrivedZoom: (d: { readonly pctText: string | number }) => string;
+  readonly audioUnavailable: string;
   readonly ayahAria: (d: { readonly label: string | number }) => string;
   readonly ayahUnavailable: string;
   readonly backTo: (d: { readonly label: string | number; readonly page: string | number }) => string;
@@ -152,6 +153,8 @@ export interface Catalog {
   readonly pageUnavailable: string;
   readonly pageWord: string;
   readonly pagesVendored: (d: { readonly haveText: string | number; readonly totalText: string | number }) => string;
+  readonly pauseAyah: (d: { readonly label: string | number }) => string;
+  readonly playAyah: (d: { readonly label: string | number }) => string;
   readonly prevPage: string;
   readonly "railDirection.earlier": string;
   readonly "railDirection.later": string;
