@@ -77,6 +77,19 @@ const parseRef = (key) => {
 };
 
 /**
+ * Every captured commentary block opens with the verse label it covers — "3 …"
+ * for a single ayah, "67–71 …" for a range the note is shared across. When the
+ * label is exactly the ayah the reader tapped, it just repeats the verse the
+ * drawer is already about, so we drop it. A range label stays: it is the note's
+ * own way of saying "this covers verses 67 through 71", which the drawer cannot
+ * show any other way. Only ever removes a leading number equal to this ayah;
+ * touches nothing else in the held text.
+ */
+function trimSelfLabel(text, ayah) {
+  return text.replace(new RegExp(`^${ayah}[\\s\\u00a0]+`), "");
+}
+
+/**
  * Al-Fātiḥah's hand-written roads — the demo's centrepiece, kept by hand because
  * every `note` is our own plain-language line about WHY the two verses connect,
  * never a quote of the held translation. The rest of the Qur'an takes its roads
@@ -242,9 +255,9 @@ function buildSurah(surah) {
     const ref = parseRef(entry.key);
     if (!ref) continue;
     const [s, a] = ref;
-    const blocks = (entry.commentary ?? []).flatMap((c) =>
-      (c.blocks ?? []).map((b) => b.text).filter(Boolean),
-    );
+    const blocks = (entry.commentary ?? [])
+      .flatMap((c) => (c.blocks ?? []).map((b) => b.text).filter(Boolean))
+      .map((text) => trimSelfLabel(text, a));
     verses[`${s}:${a}`] = {
       ref: `${s}:${a}`,
       key: canon(s, a),
