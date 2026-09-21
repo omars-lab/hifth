@@ -57,6 +57,7 @@
   "playAyah": "تشغيل {label}",
   "pauseAyah": "إيقاف {label}",
   "audioUnavailable": "تعذّر تشغيل هذا التسجيل",
+  "qulVerse": "افتح {label} في QUL",
   "rangeAria": "مقطع محدَّد · {title} · {links} روابط",
   "rangeEmpty": "لا روابط في هذا المقطع بعد",
   "rangeFrom": "من {refs}",

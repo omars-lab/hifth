@@ -270,6 +270,10 @@ export interface Strings {
   /** Announced when the recitation CDN will not play the file. */
   audioUnavailable: string;
 
+  /* ---- reference (per-verse deep link) ----------------------------------- */
+  /** Open the selected verse's page in the Quranic Universal Library — the ↗ link. */
+  qulVerse(label: string): string;
+
   /* ---- highlighted range -------------------------------------------------- */
   rangeAria(title: string, links: number): string;
   rangeEmpty: string;
@@ -647,6 +651,7 @@ export function buildStrings(lang: Lang, m: Catalog): Strings {
     playAyah: (label) => m.playAyah({ label }),
     pauseAyah: (label) => m.pauseAyah({ label }),
     audioUnavailable: m.audioUnavailable,
+    qulVerse: (label) => m.qulVerse({ label }),
 
     rangeAria: (title, links) => m.rangeAria({ title, links }),
     rangeEmpty: m.rangeEmpty,

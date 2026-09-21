@@ -162,6 +162,7 @@ const messages: Catalog = {
   pauseAyah: (d) => "Pause " + d.label,
   playAyah: (d) => "Play " + d.label,
   prevPage: "Previous page",
+  qulVerse: (d) => "Open " + d.label + " on QUL",
   "railDirection.earlier": "Similar verses in earlier surahs",
   "railDirection.later": "Similar verses in later surahs",
   "railDirection.loop": "Similar verses in this surah",

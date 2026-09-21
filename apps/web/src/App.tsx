@@ -66,6 +66,7 @@ import { RevisionMap } from "./components/RevisionMap";
 import { LiveAnnouncer, useAnnouncer } from "./components/LiveAnnouncer";
 import { RootLens, RootLensTrigger } from "./components/RootLens";
 import { PlayTrigger } from "./components/PlayTrigger";
+import { QulTrigger } from "./components/QulTrigger";
 import { useVerseAudio } from "./audio";
 // The private pitch layer (see src/pitch/pitch.ts). `PITCH` is a build-time
 // constant that is false in every public build, so every guarded branch below is
@@ -1803,6 +1804,10 @@ export function App(): JSX.Element {
           curated={curatedRoots.length}
           open={rootsOpen}
           onToggle={() => setRootsOpen((o) => !o)}
+        />
+        <QulTrigger
+          selectedKey={selectedKey}
+          label={selectedKey ? (t.ayahLabel(selectedKey) ?? selectedKey) : null}
         />
         {PITCH && (
           <CommentaryTrigger

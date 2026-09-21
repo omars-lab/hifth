@@ -57,6 +57,7 @@
   "playAyah": "Play {label}",
   "pauseAyah": "Pause {label}",
   "audioUnavailable": "This recitation could not be played",
+  "qulVerse": "Open {label} on QUL",
   "rangeAria": "Highlighted passage · {title} · {links} links",
   "rangeEmpty": "No links in this passage yet",
   "rangeFrom": "from {refs}",

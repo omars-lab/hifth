@@ -162,6 +162,7 @@ const messages: Catalog = {
   pauseAyah: (d) => "إيقاف " + d.label,
   playAyah: (d) => "تشغيل " + d.label,
   prevPage: "الصفحة السابقة",
+  qulVerse: (d) => "افتح " + d.label + " في QUL",
   "railDirection.earlier": "متشابهات في سور سابقة",
   "railDirection.later": "متشابهات في سور لاحقة",
   "railDirection.loop": "متشابهات في السورة",
