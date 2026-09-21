@@ -384,7 +384,7 @@
       "blockedBy": [
         "a hafiz"
       ],
-      "note": "37 forms Arabic silently substitutes today. One JSON edit each, but the edit needs a hafiz's eye. Named in its source as a known defect, deliberately deferred."
+      "note": "37 forms Arabic silently substitutes today. The real unit is five counted nouns (page, link, verse, word, occurrence) across six agreement forms each; page is already done as the worked model, leaving four nouns to confirm. A hafiz-review sheet drawing those four on real Arabic lines, with a live 'reads as' preview and a copy-out button, is built at docs/design/arabic-number-agreement-review.html (make arabic-number-review) and was sent to the owner 2026-09-21. Once the hafiz returns the confirmed forms, they wire into ar.json as ICU plural blocks plus three one-line adapter changes in i18n.tsx (raw total/links/shown to pagesVendored/railSummary/rootsTruncated). Named in its source as a known defect, deliberately deferred until the hafiz's eye."
     },
     {
       "id": "i18n-other-assumes-two-languages",
