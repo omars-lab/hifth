@@ -260,6 +260,63 @@ even we don't fully agree with the machine."
 
 ---
 
+## Open questions, and what would answer each
+
+The holes above are named; these are the ones this page is holding open as work to do, and the
+catalog tracks them from here. Together they are one body of work — the *rigor stack* — that closes
+the first hole above: every safeguard we have pins the *data*, and none pins the *checking code*.
+The first item is that whole gap as a single decision; the five under it are the concrete steps that
+would close it, in the order that returns the most for the least. The fuller argument for each is in
+the section just above, "What we should add, to close the code gap the rest can't."
+
+### ① Could someone quietly change the checking code without us noticing? · **open**
+
+Right now we can prove our *data* has not been tampered with: we take a fingerprint of the printed
+pages and of the measurements, and if a single number changes, a check fails loudly. We do none of
+that for the checking *scripts* themselves. So someone could quietly edit a script that grades our
+work, and it would pass every other check while reporting a different answer from the same inputs —
+and nothing would catch it. This is the one question the five below break into concrete steps.
+**What would answer it:** deciding to build those steps, in roughly the order given — or deciding a
+lighter bar is enough and writing down why, so the next person inherits the call instead of asking
+it over again.
+
+### ② Should every result carry a fingerprint of the grading code, not just its inputs? · **open**
+
+The single highest-value step. Stamp each result with a hash of the grading script and the small
+libraries it leans on, beside the input fingerprint it already carries, so a result names the exact
+code that produced it. **What would answer it:** a changed grader that returns a different verdict
+from the same inputs becomes detectable from the result alone.
+
+### ③ Should each grader refuse to run until it passes a known-answer self-test? · **open**
+
+Bake a tiny fixture with a known verdict into each grader, so one that has been quietly changed
+fails its own test before it scores anything real — the same move the build already makes when it
+re-derives its foundation pages every run. **What would answer it:** a grader that no longer produces
+the known verdict stops itself, instead of shipping a wrong number.
+
+### ④ Should the seed and the ruling be published, so an outsider can re-score? · **open**
+
+With the committed seed, the committed inputs and their fingerprints, a stranger who wants us to be
+wrong can regenerate the exact sitting, apply the committed answers, and get our number — or not.
+**What would answer it:** someone outside the project reproduces the number without trusting us, or
+shows they cannot.
+
+### ⑤ Should a second person sit the same trials, to measure reader agreement? · **open**
+
+Cheap, and it turns "one person's eyes" from a hole into a corroboration. Most sittings are one
+reader, so a single blind spot is currently the app's. **What would answer it:** a second reader's
+answers on the same trials, and a measured level of agreement between the two.
+
+### ⑥ Should a second, independently written instrument grade the first? · **open**
+
+The one error the fingerprints cannot catch is the measuring code agreeing with itself. The fix is a
+*different* measurement — a second, independently written way of finding where each mark's ink is —
+used to grade the first. **What would answer it:** a separate instrument produces its own verdict on
+the marks the first is least sure of, and the two either agree or hand us a named list of where they
+do not.
+
+---
+
 ## What this page is not settling
 
 - It does not re-open the placement decision — that the box goes on the mark's own ink is settled.
@@ -269,7 +326,7 @@ even we don't fully agree with the machine."
 - It does not replace any check with another. Every family here catches something the others cannot;
   the design is that they overlap.
 - The code-fingerprinting and self-test additions above are proposals, not yet built. Whether to
-  build them, and in what order, is a live question this page opens, not one it closes.
+  build them, and in what order, is tracked as the open questions above, not settled here.
 
 ---
 
