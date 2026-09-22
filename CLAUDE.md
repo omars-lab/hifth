@@ -38,6 +38,12 @@ never opened this repository.** Concretely:
 
 - **Headings are questions.** "What does the app colour today?", not "Current salience
   model". A reader arrives holding a question; the page's headings are how they find it.
+  And the question must be answerable by a stranger cold, grounded in something concrete
+  that could actually happen — not an abstract or analogy-shaped framing. "Could someone
+  quietly change the checking code without us noticing?", not "Should the code be pinned
+  the way the data already is?" — the second is jargon-free and still opaque, because it
+  makes the reader decode a metaphor before they can have an opinion. Test: could a reader
+  answer it without first unpacking an analogy?
 - **No internal identifiers in the prose a reader is meant to follow.** No file names, no
   function names, no gate names, no commands, no backticked code in a question or an option
   label. Those belong in the record's body, where the reasons live, and in the code map —
