@@ -185,7 +185,14 @@ export function PageSpread({
   });
 
   const leaf = (leafPage: number | null, side: "right" | "left"): JSX.Element => {
-    const key = side;
+    // The live leaf keeps a stable identity ("live") no matter which side of the
+    // opening it is on, so a turn that flips the reader from the right leaf to
+    // the left (every single-page turn does — odd pages sit right, even left)
+    // *reorders* the live stage instead of remounting it. A remount here would
+    // cold-arrive the fresh stage at fit and throw away the zoom a turn is meant
+    // to carry (§4.5). The furniture and facing leaves keep their side as key,
+    // which stays unique whichever role the two positions hold.
+    const key = leafPage === page ? "live" : side;
     // The end of the book. Furniture, not a hole: no label, no caption, nothing
     // for a screen reader to stop on.
     if (leafPage === null) {

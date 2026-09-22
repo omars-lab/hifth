@@ -573,8 +573,8 @@ already-existing behaviour made visible or made correct.
 
 ## 4. The gesture model
 
-**§4.1–4.4 are shipped** (PLAN follow-up ⑪); **§4.5 is not** — `goToPage` still resets the
-view on every turn. Two departures are worth naming up front so the rest reads as built
+**§4.1–4.5 are shipped** (PLAN follow-up ⑪; §4.5's view-carry landed after, see its note).
+Two departures are worth naming up front so the rest reads as built
 rather than proposed. §4.3's per-page `.leaf` wrapper is **withdrawn** — the finger drags
 the *fold*, the single band `page-transition.md` §3.1 already defined, and the pages
 themselves do not move at all; and the rule is **device-blind**, so a mouse drag on a
@@ -712,8 +712,36 @@ distinction is *turn* vs *jump*: a turn is continuous reading and should preserv
 jump to an arbitrary ayah is a relocation and should frame its target.
 
 **Layer:** L1 gets `viewFitsAcross`; L2 gets the intent wiring, the fold-tracking states, and
-the `centerCurrent` call-site change. The first two shipped; the third has not — §4.5 above
-is still an open recommendation, and `goToPage` still resets the view on every turn.
+the settle call-site change. All three have shipped now.
+
+**Shipped.** The settle path had been consolidated since this section was written: every road
+onto a page (a cold open, a deep link, a hop, a turn's landing) now ends in one shared `arrive`,
+and the mid-sweep swap in `crossFade` settles the incoming leaf too — so the reset lived in two
+places, not one call site. The change adds a second settle primitive beside `centerCurrent`:
+`reclampCurrent`, which keeps `view.current` and only re-clamps it against the incoming page's
+fit (`clampView`). The turn road uses it — `arrive` takes a `carry` flag that `land` passes, and
+`crossFade` always carries — while the three relocations (cold open, deep link, hop) keep
+`centerCurrent`'s reset, because a jump to an arbitrary page is a move *to* a page, not reading
+*across* one. At rest (z = 1) the clamp centres exactly as the reset did, so the common
+unzoomed turn is unchanged and "every road lands the leaves level" still holds; the carry shows
+only once the reader has zoomed in. `PageStage.settle.test.ts` was widened to count both settle
+primitives (the same "settle only from `arrive` and `crossFade`" rule, now over two verbs).
+
+**And still the zoom did not carry — the settle split was necessary but not sufficient.** The
+paragraph above read as done, and the unit test that counts the primitives was green, but a
+Playwright test that actually turned a magnified page and measured the size on the far side went
+red: the carried zoom was written correctly, then thrown away a beat later. The cause was one
+level up from the settle path, in how the spread is built. Odd pages sit on the right leaf and
+even on the left (`spreadOf`), so *every single-page turn flips the live leaf across the gutter* —
+and `PageSpread` had keyed each leaf's wrapper by its side, so the flip changed the live wrapper's
+React key and **remounted the whole live stage**. The turn's own animation carried the zoom
+faithfully; then, a moment after it settled, the remount cold-arrived a fresh stage at fit. The
+fix is to give the live leaf a key that does not depend on its side (`"live"`), so a flip
+*reorders* the stage instead of remounting it — the imperative turn keeps full ownership of the
+view, which §4.5 had assumed all along. The lesson banked as a tenet (see the repo's working
+notes): a change that only reads correct is not shipped; `desktop.spec.ts` "a turn keeps the
+reader's magnification; a hop reframes it" is the test that would have caught it on day one and
+is what now notices if the remount returns.
 
 ### 4.6 What is *not* in the gesture model
 

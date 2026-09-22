@@ -966,6 +966,30 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
   }, [applyTransform, measureFit]);
 
   /**
+   * Land a page keeping whatever the reader was looking at, not resetting it.
+   *
+   * A *turn* is continuous reading: a reader zoomed into the third line of one
+   * page, who turns the leaf, means to keep reading the third line of the next —
+   * mus'haf pages are geometrically congruent (same box, same fifteen lines), so
+   * the very same viewframes the same place on either. `centerCurrent` throws
+   * that away and snaps back to the whole page at rest; this keeps `view.current`
+   * and only re-clamps it against the incoming page's fit, so a zoom that was
+   * valid stays valid and one that would now overhang is pulled back inside.
+   *
+   * At rest (z = 1, unzoomed) the clamp centres exactly as `centerCurrent` does,
+   * so the common turn lands identically and "every road lands the leaves level"
+   * still holds; the difference shows only once the reader has zoomed in. This is
+   * the turn road only (`crossFade` mid-sweep and `land`); a hop, a deep link and
+   * a cold open are relocations, not reading, and keep resetting to the page.
+   */
+  const reclampCurrent = useCallback(() => {
+    const fit = measureFit();
+    if (!fit) return;
+    view.current = clampView(view.current, fit);
+    applyTransform();
+  }, [applyTransform, measureFit]);
+
+  /**
    * The one settle step every road onto a page ends with.
    *
    * Four roads bring a leaf onto the stage — a cold open, a deep link
@@ -979,22 +1003,30 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
    * its own road, none of the fixes reaching the next road. A rule kept in four
    * places is kept in three, so it is kept here once. `crossFade` is the fifth
    * road and cannot come through here (it reveals the incoming leaf itself,
-   * because both leaves must be visible for the fade), so it calls
-   * `centerCurrent` directly — which is the only other place that may.
-   * `PageStage.settle.test.ts` counts, and the desktop e2e "every road onto a
-   * page lands the leaves level" drives each road.
+   * because both leaves must be visible for the fade), so it settles the
+   * incoming leaf directly — with `reclampCurrent`, the turn road's carry, since
+   * a cross-fade only ever happens on a turn (§4.5). `PageStage.settle.test.ts`
+   * counts, and the desktop e2e "every road onto a page lands the leaves level"
+   * drives each road.
    *
    * `navigatedRef` is claimed here too: a page has arrived, whichever road
    * brought it, and the cold-mount effect must not re-centre over it.
+   *
+   * `carry` is the turn road's exception (§4.5): a turn is reading continued, so
+   * it keeps the reader's zoom and pan (`reclampCurrent`) instead of snapping
+   * back to the whole page. The relocations — cold open, deep link, hop — leave
+   * it false and reset, because they are moves *to* a page, not reading *across*
+   * one.
    */
   const arrive = useCallback(
-    (next: number): void => {
+    (next: number, carry = false): void => {
       navigatedRef.current = true;
       cancelTween();
       setCurrentPage(next);
-      centerCurrent();
+      if (carry) reclampCurrent();
+      else centerCurrent();
     },
-    [cancelTween, centerCurrent, setCurrentPage],
+    [cancelTween, centerCurrent, reclampCurrent, setCurrentPage],
   );
 
   /**
@@ -1030,9 +1062,12 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
       incoming.host.style.display = "block";
       // The incoming leaf has to arrive already wearing its transform, or it
       // paints for one frame at the layer's origin — unclamped, top-left — and
-      // the fade shows a page sliding into place under the band.
+      // the fade shows a page sliding into place under the band. It wears the
+      // reader's carried view (§4.5), not a reset: a zoomed turn fades the
+      // incoming leaf in at the same zoom, so the swap under the band is
+      // invisible instead of a snap back to the whole page mid-fade.
       currentPageRef.current = to;
-      centerCurrent();
+      reclampCurrent();
       // Flush, so the transition has a start value to run from instead of
       // coalescing both writes into one.
       void incoming.host.offsetWidth;
@@ -1043,13 +1078,13 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
         outgoing.host.style.opacity = "0";
       }
     },
-    [centerCurrent],
+    [reclampCurrent],
   );
 
   /** End a turn on the destination page: display swapped, inline fades cleared. */
   const land = useCallback(
     (next: number): void => {
-      arrive(next);
+      arrive(next, /* carry the reader's view across the turn (§4.5) */ true);
       for (const mp of pagesRef.current.values()) {
         mp.host.style.transition = "";
         mp.host.style.opacity = "";
