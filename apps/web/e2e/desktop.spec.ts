@@ -1210,6 +1210,61 @@ test.describe("Hifth · one page or two, and how big", () => {
     await zoomBtn(page, "in").click();
     await expect.poll(() => scaleOf(page, 7)).toBeCloseTo(1.25, 2);
   });
+
+  test("a turn keeps the reader's magnification; a hop reframes it", async ({ page }) => {
+    // §4.5 of the page-turning design: turning a page is continuing to read the
+    // same book, so a reader who has magnified to study one line lands on the next
+    // page at the same size — the pages are the same shape, so the line is waiting
+    // where the eye already is. A hop is the opposite: it is asking to be taken
+    // somewhere else, so it frames its target afresh. This test holds the two
+    // apart, because the easy mistake is to make everything reset (the old turn) or
+    // to make everything carry (a refactor that forgets the hop still frames).
+    await page.goto("/#/hafs-kfqc/p7");
+    await expect(pageSvg(page, 7)).toBeVisible({ timeout: 20_000 });
+
+    // One leaf, so the turn is a real leaf turn rather than a within-opening flip.
+    await modeBtn(page, "one").click();
+    await expect.poll(() => soloOf(page)).toBe("true");
+
+    // Magnify to 200% — a rung well clear of the 155% a hop would frame at, so a
+    // later reading of the scale says "carried" or "reframed" with no ambiguity.
+    await zoomBtn(page, "in").click(); // 125
+    await zoomBtn(page, "in").click(); // 150
+    await zoomBtn(page, "in").click(); // 200
+    await expect.poll(() => scaleOf(page, 7)).toBeCloseTo(2, 2);
+    await expect(readout(page)).toHaveText("٢٠٠٪");
+
+    // Turn to the next page. The magnification comes with the reader.
+    await page.keyboard.press("ArrowLeft");
+    await expect(page.locator(NUM)).toHaveText("8");
+    await expect.poll(
+      () => scaleOf(page, 8),
+      "the turn reset the zoom instead of carrying it",
+    ).toBeCloseTo(2, 2);
+    await expect(readout(page)).toHaveText("٢٠٠٪");
+
+    // And it keeps carrying, turn after turn — this is reading, not one lucky hop.
+    await page.keyboard.press("ArrowLeft");
+    await expect(page.locator(NUM)).toHaveText("9");
+    await expect.poll(() => scaleOf(page, 9)).toBeCloseTo(2, 2);
+
+    // Now a hop — the jumper, to an ayah on another page. This is not reading on;
+    // it is being taken somewhere, so the magnification is dropped and the target
+    // is framed afresh, well below the 200% we were carrying.
+    await page.keyboard.press("/");
+    const jumper = page.getByRole("dialog", { name: "اذهب إلى" });
+    await expect(jumper).toBeVisible();
+    await jumper.getByRole("combobox").fill("2:120");
+    await expect(jumper.getByRole("option").first()).toBeVisible();
+    await page.keyboard.press("Enter");
+    await expect(jumper).toHaveCount(0);
+
+    const landedPage = Number(await page.locator(NUM).textContent());
+    await expect.poll(
+      () => scaleOf(page, landedPage),
+      "the hop carried the turn's magnification instead of reframing its target",
+    ).toBeLessThan(1.9);
+  });
 });
 
 /*

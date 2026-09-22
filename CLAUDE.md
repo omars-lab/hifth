@@ -182,3 +182,26 @@ the decision gate already refuses — *a link with no copy dies the day the host
 a page nobody had thought to attach to a decision. Since 2026-09-01 the build serves every
 page under `docs/` from the site, so a merged page cannot leave by that door at all; the
 register is for the copies that still do.
+
+## A fix ships with the test that would have caught it
+
+Every defect we find, and every change that could bring one back, leaves behind an automated
+check in the **same change** — a unit test, or a Playwright test when the bug is something a
+reader would see or do. Not "later", not "if there's time": the test is part of the fix, and a
+fix without one is not finished. This is what the `fixed` word in the issue register already
+means — *closed in code **and** in a test that would fail if it came back* — made the rule for
+every change, not only the ones that reach the register.
+
+Write the test **first** where you can, so you watch it fail for the real reason before you make
+it pass; that is the only proof the test is wired to the actual behaviour and not to a mirror of
+the bug. A test that was green the moment you wrote it has told you nothing.
+
+This is here because it caught one. The design said the reader's magnification carries across a
+page turn, and the code that split the settle step read as if it did — but a Playwright test that
+turned a magnified page and checked the size on the far side went red: every turn flips the live
+leaf from one side of the opening to the other, which was silently remounting the stage and
+snapping it back to the whole page. No amount of reading the source would have shown that; the
+turn had to actually happen in a browser. The test is what turned a plausible-looking change into
+a real one, and it is now the thing that will notice the day the remount comes back. (Omar,
+2026-09-22: "are we adding regression tests / playwright tests as we encounter issues … this
+should be a tenet of how we work".)
