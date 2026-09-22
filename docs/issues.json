@@ -1986,6 +1986,72 @@
         "a phone or a WebKit run"
       ],
       "note": "The page-bar's two questions were both decided C on 2026-09-02 (decisions juz-detents and boundary-juz): a juz marker is a tap-to-open button that grows as the pointer nears it (never during a drag, never eating the drag), and a page carrying a juz seam belongs to both juz. GRADUATED 2026-09-02: the app bar now imports only the winner — each marker is a button that jumps to its juz and, on a fine pointer, grows as the pointer nears it; the thumb bubble names both juz on a seam page, scoped to the bubble alone (shelf and wheel keep one juz each, per boundary-juz). Per graduation-losers (option A) the two losing strategies and their live-page wiring STAY in the core module and on docs/design/page-bar-options.html — they are not deleted — so a reader can still feel why the winner won; the bar reaches only the winner. Covered by a desktop e2e against the real corpus (apps/web/e2e/pagebar-detents.spec.ts) and by PageSlider component tests; the desktop project and gate:i18n/gate:decisions are green. What keeps this row open is the one sub-question the desktop live page cannot prove: the phone bar is ~0.4px a page with no pointer to grow a marker, so a two-juz seam label there needs a layout that must be judged on the owner's phone (or a WebKit run local darwin cannot launch). Blocks nothing shipped."
+    },
+    {
+      "id": "rigor-stack-pins-the-checking-code",
+      "source": {
+        "file": "docs/design/robust-validation.md",
+        "item": "①"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "agent",
+      "note": "The umbrella. Every safeguard the validation story has pins the DATA — a strong hash over the printed pages, a fingerprint over the measurements a score ran on — and nothing pins the CHECKING CODE, so a quietly modified grader would pass every other check and report a different verdict from identical inputs. This row is that whole gap held open as one decision; the five subtasks below are the concrete steps that answer it, in value-for-effort order: fingerprint-the-grading-code (②, the single highest-value move), grader-known-answer-self-test (③), publish-seed-and-ruling-for-rescoring (④), second-reader-on-the-placement-sitting (⑤), second-independent-mark-ink-instrument (⑥). Tracked as tasks #125–#129. Question rather than defect because whether to build the stack, and in what order, is a call nobody has made yet; each subtask is a risk it would close. Same source hole as robust-validation.md §'Where are the holes?' item 1, which is the prose description this decision acts on."
+    },
+    {
+      "id": "fingerprint-the-grading-code",
+      "source": {
+        "file": "docs/design/robust-validation.md",
+        "item": "②"
+      },
+      "status": "open",
+      "severity": "risk",
+      "owner": "agent",
+      "note": "Subtask of rigor-stack-pins-the-checking-code (①), and the highest-value one. Stamp every ruling with a hash of the grading script and the small libraries it leans on, beside the input fingerprint it already carries, so a result names the exact code that produced it and a changed grader returning a different verdict from identical inputs is detectable from the result alone. The repo already computes a hash over its build scripts for a different check, so this is that same move pointed at the graders. Task #125."
+    },
+    {
+      "id": "grader-known-answer-self-test",
+      "source": {
+        "file": "docs/design/robust-validation.md",
+        "item": "③"
+      },
+      "status": "open",
+      "severity": "risk",
+      "owner": "agent",
+      "note": "Subtask of rigor-stack-pins-the-checking-code (①). Bake a tiny fixture with a known verdict into each grader so one that has been quietly changed fails its own self-test before it scores anything real — the same move the build already makes when it re-derives its three foundation pages every run and refuses to continue if they drift. Task #126."
+    },
+    {
+      "id": "publish-seed-and-ruling-for-rescoring",
+      "source": {
+        "file": "docs/design/robust-validation.md",
+        "item": "④"
+      },
+      "status": "open",
+      "severity": "risk",
+      "owner": "agent",
+      "note": "Subtask of rigor-stack-pins-the-checking-code (①). Publish the committed seed, the committed inputs and their fingerprints so a stranger who wants us to be wrong can regenerate the exact sitting, apply the committed answers, and arrive at our number — or not. Reproduction by an adversary is worth more than any assurance we write. Task #127."
+    },
+    {
+      "id": "second-reader-on-the-placement-sitting",
+      "source": {
+        "file": "docs/design/robust-validation.md",
+        "item": "⑤"
+      },
+      "status": "open",
+      "severity": "risk",
+      "owner": "agent",
+      "note": "Subtask of rigor-stack-pins-the-checking-code (①). Have a second person sit the same trials, to turn 'one person's eyes' from a hole into a corroboration — most sittings are one reader, so a single blind spot is currently the app's. Cheap. The blind, seed-rebuilt design already supports it. Task #128; the same second-reader block is what several placement-residual sittings note as still owed (e.g. the-residual-is-one-hand's-line of the by-hand sittings)."
+    },
+    {
+      "id": "second-independent-mark-ink-instrument",
+      "source": {
+        "file": "docs/design/robust-validation.md",
+        "item": "⑥"
+      },
+      "status": "open",
+      "severity": "risk",
+      "owner": "agent",
+      "note": "Subtask of rigor-stack-pins-the-checking-code (①), and the deepest hole: the one error no fingerprint can catch is the measuring code agreeing with itself, because the instrument that grades a placement is the same family of code that measured the ink in the first place. The fix is a genuinely DIFFERENT measurement — a second, independently written way of finding where each mark's ink is — used to grade the first, producing its own verdict on the marks the first is least sure of. The by-eye sitting is a human instance of this; this subtask is the machine one. Most expensive of the five, so last by value-for-effort. Task #129."
     }
   ]
 }
