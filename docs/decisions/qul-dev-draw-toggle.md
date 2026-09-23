@@ -1,6 +1,7 @@
 # Could a developer draw a page from the other library without a reader ever receiving it?
 
-**Status:** open — asked 2026-09-06.
+**Status:** decided — B, by the owner, 2026-09-08. Asked 2026-09-06. See
+[So what was decided](#so-what-was-decided) at the foot.
 
 **Picture:**
 <https://blog.bytesofpurpose.com/hifth/docs/design/qul-page-source-and-diff.html> — the whole
@@ -106,3 +107,14 @@ to readers* is a different, larger want — the forcing question behind the publ
 It does not decide whether we ever draw the reader's page from the library, does not read any
 licence, and does not build the cross-check — that is the sibling decision. It reworks the
 no-text rule only if this option is chosen; today the rule stands exactly as written.
+
+## So what was decided
+
+Decided (2026-09-08): **B.** The owner gave the direction in one breath — add the faithful
+letters to the held copy now, and draw from it behind a development-only switch — and the
+sibling question of what the held copy is *for* was settled the day before as
+[the held copy is both the feeder and a drawable page](qul-store-purpose.md): the drawn page
+stands beside the shipped page for the building tools to check, and never ships. This record
+is that decision applied to the switch itself. The choice was made in conversation and only
+written here on 2026-09-23, when the branch that carried it merged; no line in the plan
+records it, so this record and its sibling are the whole written trail.
