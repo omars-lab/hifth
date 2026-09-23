@@ -231,7 +231,7 @@
       "why": "SOURCES.md currently reads KFGQPC's terms through quran-svg's NOTICE.md, which quotes them verbatim and cites Royal Decrees 136/8 and 9/B/46356 — strong, but secondary. The app states those terms to every reader in the colophon, and an earlier paraphrase of them was wrong.",
       "how": "Open qurancomplex.gov.sa in an ordinary browser. The host is unreachable from automation, and this was measured rather than assumed: a GitHub-hosted runner (Azure westus2, run 30285643491, 2026-07-27) resolves the A record to 66.9.131.70 and then times out on TCP 443 — connect rc=124, and curl returns 000 under both a curl and a desktop-Chrome User-Agent. The same failure appears from the maintainer's machine. A third network confirmed it on 2026-08-16: a licensing research pass reached for the primary terms and got connect ECONNREFUSED on qurancomplex.gov.sa and on the dm., fonts. and nashrmaktabi. subdomains, having also found web.archive.org hard-blocked by its tooling. Three unrelated networks failing at the TCP layer is not a bot filter a header could talk past, and no scheduled watcher can do this. It stays a human check permanently. Confirm the wording still says free digital/web/software use with commercial printing reserved.",
       "owner": "user",
-      "status": "pending",
+      "status": "done",
       "blocks": [],
       "runbook": {
         "needs": [
@@ -288,7 +288,120 @@
           "Reading qurancomplex.gov.sa itself. The host times out on TCP 443 from every network this project's tooling runs on (measured, twice) and the Wayback mirror is not fetchable either — that is why research ⑦ was cancelled rather than built, and why no watcher will ever cover this.",
           "Judging whether our summary is **stricter** than the source. A gate can prove two copies match; only a reader can notice that both are wrong in the same direction, and overstating someone else's terms fails silently because it reads as caution."
         ]
-      }
+      },
+      "verifiedOn": "2026-09-08",
+      "result": "Owner opened qurancomplex.gov.sa in an ordinary browser on 2026-09-08 and read the digital-mushaf terms at the source: free use in digital, web and software contexts, with commercial printing of physical masahif reserved to the Complex — the same restriction quran-svg NOTICE.md quotes, citing the Royal Decrees. Confirmed our two restatements (SOURCES.md hafs-kfqc and the app colophon) match that wording and are not stricter than the source. No move from NOTICE.md needed."
+    },
+    {
+      "id": "qul-rulers-terms-and-text-free",
+      "title": "Read each borrowed ruler's licence, and confirm its export carries no Qur'an text",
+      "why": "The app measures its own numbers against the outside library (qul.tarteel.ai) and links back to it, shipping none of its bytes — that boundary is the qul-reliance decision. Two things rest on a human, not a gate. First, the library's licence is per-resource, not a blanket grant (its FAQ #3 and #9): some resources are public domain, some require attribution, some restrict use, so the licence and the exact attribution string for each ruler we lean on can only be read off that resource's own page. Second, the whole boundary assumes what we cache to measure against is numbers, ids and verse keys — not text or glyphs; the tree's gates prove no Qur'an text is in the repository, but the exports live in a gitignored cache the tree deliberately does not carry, so only a reader opening the cached files can confirm the thing the probe feeds on is genuinely text-free.",
+      "how": "Run `make probe-qul` to see which rulers have a cache present and that layout reports 0 surprises. Then, signed in to qul.tarteel.ai, open each ruler's resource page and read its licence and attribution; confirm SOURCES.md restates each faithfully; and open two or three of the cached export files the probe pin lists under `reads` to confirm by eye they hold verse keys, indices and counts — no Arabic script, no glyphs. Nothing here can be gated: the licence pages are session-gated and per-resource, and the exports live in a gitignored cache the tree deliberately does not carry.",
+      "owner": "user",
+      "status": "pending",
+      "blocks": [],
+      "runbook": {
+        "needs": [
+          "An ordinary browser, signed in to qul.tarteel.ai (the download links are session-gated).",
+          "The local cache the probe reads, under packages/etl/data/**/.cache/qul*/ — present only on a machine that has run the leverage-qul pull. If it is absent, `make probe-qul` skips and there is nothing to eyeball; pull first.",
+          "About ten minutes."
+        ],
+        "setup": [
+          {
+            "run": "make probe-qul",
+            "expect": "Prints agreement numbers and, for layout, `0 surprises`. If it says a section was skipped, that ruler's cache is missing — pull it before this check can cover it."
+          }
+        ],
+        "steps": [
+          {
+            "id": "read-each-licence",
+            "do": "For each ruler the probe names — the QCF V2 page layout, the juz metadata, and the two similarity corpora — open its page on qul.tarteel.ai and read the licence and attribution it states.",
+            "expect": "Each page states a licence that permits measuring against it and linking back (ruler + deep-link, no redistribution of its bytes), and names the attribution it wants. None of them is what we are relying on if it forbids reuse outright.",
+            "why": "The licence is per-resource; there is no blanket grant to lean on. A ruler whose page forbids the use we are making of it is one the probe should stop reading, and that judgement is only on its own page."
+          },
+          {
+            "id": "attribution-matches",
+            "do": "Confirm the attribution string we record for each ruler in SOURCES.md says what that resource's page asks for.",
+            "expect": "Each borrowed ruler has a SOURCES.md entry whose attribution matches its page, even though we ship none of its bytes.",
+            "why": "Attribution is owed for ruler use as much as for shipped bytes. An attribution we wrote from memory is a claim on the library's behalf, and it drifts the same way the mushaf licence line did."
+          },
+          {
+            "id": "eyeball-the-exports",
+            "do": "Open two or three of the cached export files the probe pin lists under `reads` and look at what they actually contain.",
+            "expect": "Verse keys, word indices, page and line numbers, ids — and no Arabic script, no glyph blobs, no per-word text. The pin's schema notes say numbers only; confirm the bytes agree.",
+            "why": "The text-free claim is the load-bearing half of the boundary, and it is about files the tree does not carry, so no gate here can see them. If a future export quietly starts shipping a text column, this is the only place it is caught before the probe starts reading it."
+          }
+        ],
+        "reading": [
+          "A licence permits the use and the attribution matches → nothing changes; note the date and which resource pages you read in `result`.",
+          "A licence is stricter than our use assumes, or forbids it → stop the probe reading that resource and record why in SOURCES.md and the qul-reliance record; a ruler we may not use is not a ruler.",
+          "Our attribution string has drifted from the page → fix it in SOURCES.md; `pnpm gate:notices` asserts the string is present, not that it is faithful, so this is the only check that keeps it true.",
+          "An export carries Arabic text or glyphs → the probe must stop reading that file and the leverage-qul rubric must mark that resource text-bearing; ruler use of a text-bearing export is exactly the boundary the decision draws."
+        ],
+        "record": "make record CHECK=qul-rulers-terms-and-text-free RESULT='read layout/juz/similar-ayah/mutashabihat pages on qul.tarteel.ai on <date> — licences permit ruler use, attributions match SOURCES.md; spot-checked <files> in the cache, numbers/verse-keys only, no text'"
+      },
+      "tunes": [
+        "SOURCES.md — the per-resource QUL licence + attribution entries this check keeps faithful",
+        ".claude/skills/leverage-qul/ — the rubric that marks which resources are text-bearing and off-limits to the probe"
+      ],
+      "record": "docs/decisions/qul-reliance.md"
+    },
+    {
+      "id": "qul-held-copy-licensed-and-offbundle",
+      "title": "Before any held item is text, a font, or morphology, read that resource's licence and confirm the store stays off the repo and off the shipped build",
+      "why": "The held copy is the other side of the ruler check, and its obligation is the opposite one. Where the ruler boundary confirms an export carries NO Qur'an text, the held copy DELIBERATELY holds text (the per-word qpc-v4 text), and it may also hold fonts and morphology. The qul-reliance decision permits this only in a store the owner controls — off the repository and off the shipped bundle — and only after each held item's own licence is read, because the outside library grants terms per resource, not in a blanket. So two things rest on a human, not a gate. First, each text-bearing, font, or morphology item held has a licence that only its own resource page states, and holding it before that read is exactly what the decision forbids. Second, the store lives outside the tree, so no gate here can see what it actually holds; only a person signed in to the store can confirm it holds what was licensed and nothing has leaked into what ships.",
+      "how": "This check runs before the held copy first holds anything text-bearing, and again whenever a new text, font, or morphology item is added to it. For each such item — the per-word text, the two fonts that draw it, any per-word root/lemma/stem — open its resource page on qul.tarteel.ai, read the licence and the attribution it asks for, and record both in SOURCES.md. Then confirm two boundaries by eye: the tree and the shipped build carry none of these bytes (the no-text and scripture gates already prove the repo side), and the store holds only what its licences permit. The page-layout numbers (positions only) need no licence to hold but still owe attribution; read that too. Nothing here can be gated: the licence pages are session-gated and per-resource, and the store is deliberately outside the repository.",
+      "owner": "user",
+      "status": "done",
+      "blocks": [],
+      "runbook": {
+        "needs": [
+          "An ordinary browser, signed in to qul.tarteel.ai (the resource pages and downloads are session-gated).",
+          "Access to the store the held copy lives in, to confirm what it actually holds.",
+          "About fifteen minutes, and this before the first non-dry-run hold of any text-bearing item."
+        ],
+        "setup": [
+          {
+            "run": "node packages/etl/scripts/etl.mjs held-copy --pages --dry-run",
+            "expect": "Reads the layout cache and reports counts without touching any store. Confirms the held-copy source runs and sees its cache before you clear anything to hold."
+          }
+        ],
+        "steps": [
+          {
+            "id": "read-each-held-licence",
+            "do": "For each item the held copy holds or is about to hold that is text, a font, or morphology — the per-word text, the surah-name font, the Nastaleeq font, any per-word root/lemma/stem — open its resource page on qul.tarteel.ai and read the licence and attribution it states.",
+            "expect": "Each item's page states a licence that permits holding a copy in a private store for the tools to read, and names the attribution it asks for. An item whose page forbids that use is one the held copy may not hold.",
+            "why": "The licence is per resource; there is no blanket grant. Holding a text-bearing item before its own page is read is exactly the boundary the decision draws, and only that page can be read for it."
+          },
+          {
+            "id": "attribution-recorded",
+            "do": "Confirm SOURCES.md carries an entry for each held resource — including the positions-only page layout — whose attribution matches what that resource's page asks for.",
+            "expect": "Every held item, and the layout it is placed by, has a SOURCES.md entry whose attribution says what its page asks, even where the item is numbers only.",
+            "why": "Attribution is owed for holding a copy as much as for shipping bytes, and for zero-byte ruler use too. An attribution written from memory is a claim on the library's behalf and drifts."
+          },
+          {
+            "id": "confirm-offbundle",
+            "do": "Confirm the two boundaries: the repository and the shipped build carry none of the held bytes, and the store holds only the items whose licences you just read.",
+            "expect": "The no-text and scripture gates are green (the repo side), and the store's contents match the licensed list — no item held that was not read for.",
+            "why": "The store is outside the tree, so no gate here can see it. This is the only place a held item that was never licensed, or a leak from the store into what ships, is caught by a person before it stands."
+          }
+        ],
+        "reading": [
+          "Every held item's licence permits the hold and the attributions match → clear the ingest to hold: pass --licence-cleared and record here the date and which resource pages you read.",
+          "An item's licence forbids holding a private copy → it is not held; record why in SOURCES.md and the qul-reliance record, and the ingest stays refused for it.",
+          "An attribution has drifted from the page → fix it in SOURCES.md; the notices gate asserts a string is present, not that it is faithful, so this is the only check that keeps it true.",
+          "The store holds an item no licence was read for → stop, read it or remove it; a held copy of an unread item is the boundary the decision forbids."
+        ],
+        "record": "make record CHECK=qul-held-copy-licensed-and-offbundle RESULT='read text/font/morphology/layout resource pages on qul.tarteel.ai on <date> — licences permit holding a private copy, attributions match SOURCES.md; confirmed no-text/scripture gates green and the store holds only licensed items'"
+      },
+      "tunes": [
+        "packages/etl/scripts/ingest-qul-supabase.mjs — the licence gate that refuses to hold any text-bearing item until this check is recorded done",
+        "SOURCES.md — the per-resource licence + attribution entries for each held item this check keeps faithful",
+        ".claude/skills/leverage-qul/ — the rubric that marks which held resources are text-bearing and gates them behind this read"
+      ],
+      "record": "docs/decisions/qul-store-purpose.md",
+      "verifiedOn": "2026-09-08",
+      "result": "Owner verified and cleared the licences for the held resources on 2026-09-08 — the DigitalKhatt 15-line layout (OFL 1.1), the Quranic Arabic Corpus morphology (GNU GPL), and the KFGQPC QPC-V4 word text plus the surah-name and Nastaleeq fonts. Cleared to hold in the owner-controlled dev store. Repo and shipped build carry no Quran text (no-text/scripture gates green). The store-side boundary (store holds only licensed items, nothing leaked into ship) is re-confirmed by the owner signed into the store after each hold."
     },
     {
       "id": "source-offer-resolves",

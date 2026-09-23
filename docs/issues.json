@@ -934,6 +934,24 @@
       "owner": "user"
     },
     {
+      "id": "check-qul-rulers-terms-and-text-free",
+      "source": {
+        "ledger": "qul-rulers-terms-and-text-free"
+      },
+      "severity": "risk",
+      "owner": "user",
+      "note": "The human half of the qul-reliance boundary. The probe (make probe-qul) can prove our numbers agree with the outside library's rulers and can pin the SHA-256 of every cached file it reads, but it cannot read a session-gated, per-resource licence page, and it cannot look inside a gitignored cache the tree deliberately does not carry to confirm the export is numbers and verse keys rather than text or glyphs. Both are on a reader. Risk rather than question because leaning on a ruler whose licence forbids the use, or whose export turned out to carry scripture, would breach the standing no-text guarantee — the one thing the whole SVG-artwork model exists to keep."
+    },
+    {
+      "id": "check-qul-held-copy-licensed-and-offbundle",
+      "source": {
+        "ledger": "qul-held-copy-licensed-and-offbundle"
+      },
+      "severity": "risk",
+      "owner": "user",
+      "note": "The human half of the held-copy boundary, and the mirror image of the ruler check: where that one confirms an export carries NO text, this one confirms the text, fonts, and morphology the held copy DELIBERATELY holds are each licensed to hold. The ingest step (the held-copy source) refuses to hold any text-bearing item until this check is recorded done, but no gate can read a session-gated, per-resource licence page, and no gate can look inside the store — which lives outside the tree — to confirm it holds only what was licensed. Risk rather than question because holding a copy of a resource whose page forbids it, or letting a held byte leak into what ships, would breach the qul-reliance option-D posture the whole store exists to keep."
+    },
+    {
       "id": "check-source-offer-resolves",
       "source": {
         "ledger": "source-offer-resolves"

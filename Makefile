@@ -60,11 +60,12 @@ preview: build ## Build, then serve the production bundle locally
 	$(WEB) preview --port $(PORT)
 
 .PHONY: etl
-etl: core ## Run the full ETL (pages + adjacency + root + tajweed shards) into assets
-	$(ETL) extract:pages
-	$(ETL) build:adjacency
-	$(ETL) build:roots
-	$(ETL) build:tajweed
+etl: core ## Run every default Qur'an-data source (the ones that ship) through the plugin runner
+	$(ETL) etl
+
+.PHONY: etl-list
+etl-list: ## List every registered Qur'an-data source and what each reads, writes, and needs
+	$(ETL) etl:list
 
 .PHONY: clean
 clean: ## Remove all build output (the "clean-state" discipline — see loop-0.md)
@@ -696,6 +697,37 @@ probe-qul-v2: core ## A fourth witness on the print: make probe-qul-v2 DB=<path 
 	@#
 	@# Needs node's experimental SQLite reader, present in the pinned v22.22.3.
 	@node --experimental-sqlite scripts/probe-qul-v2-layout.mjs $(if $(DB),--db $(DB),)
+
+.PHONY: probe-qul
+probe-qul: core ## Do the outside library's rulers agree with our numbers? make probe-qul [WRITE=1]
+	@# Reads the QUL exports cached in gitignored `.cache/qul*/` and cross-checks
+	@# three of them against what we ship: page layout (V2 / id 10, never V1),
+	@# juz boundaries, and the two similarity corpora. Bare run prints agreement
+	@# numbers; WRITE=1 refreshes the numbers-only pin under packages/etl/data/qul/.
+	@#
+	@# `probe-`, not `gate-`, for the same reason as probe-reference above: it
+	@# needs a local cache the repo does not carry, so it can only pass by being
+	@# unable to look. A missing cache makes it skip that section and exit 0. It
+	@# ships zero QUL bytes and pins only ids / verse keys / counts — see the
+	@# qul-reliance decision and the leverage-qul skill for the guardrails.
+	@node packages/etl/scripts/probe-qul-rulers.mjs $(if $(WRITE),--write,)
+
+.PHONY: ingest-qul
+ingest-qul: ## Load the held QUL copy into the store: make ingest-qul [PAGES=1] [WORDS=1] [DRY=1] [LICENCE=1]
+	@# Fills the database we run (option D of the qul-reliance decision) from the
+	@# gitignored QUL cache. PAGES=1 loads the positions-only page map — page,
+	@# line, line kind, and each ayah line's first/last word ids, no text — and
+	@# runs freely. WORDS=1 loads the one text-bearing table and REFUSES unless
+	@# LICENCE=1 is set AND the ledger's per-resource licence check has cleared,
+	@# because that copy is bytes we hold and the licence has not been read yet.
+	@#
+	@# The connection string is the owner's to supply as SUPABASE_DB_URL; this
+	@# target enters no credential. A missing cache makes either half skip and
+	@# exit 0, so a clean checkout is never red. DRY=1 prints what it would do and
+	@# writes nothing. See the qul-reliance record and the qul-store map node.
+	@SUPABASE_DB_URL="$(SUPABASE_DB_URL)" node packages/etl/scripts/ingest-qul-supabase.mjs \
+	  $(if $(PAGES),--pages,) $(if $(WORDS),--words,) \
+	  $(if $(DRY),--dry-run,) $(if $(LICENCE),--licence-cleared,)
 
 # ---------------------------------------------------------------------------
 

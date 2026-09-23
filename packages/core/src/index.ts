@@ -48,6 +48,11 @@ export {
   hizbOf,
 } from "./quran-meta.js";
 
+// The "links back to it" half of the qul-reliance decision — a per-verse
+// reference page on the outside library, built from the verse's absolute
+// ordinal and nothing downloaded. Ships a URL, not bytes.
+export { QUL_VERSE_BASE, qulVerseUrl, qulVerseUrlFromKey } from "./qul-link.js";
+
 export { Resolver, type ResolvedLocation } from "./resolver.js";
 
 // Loop 6b — what a pinned juz is made of. The pack's page list is read off the

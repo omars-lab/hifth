@@ -68,6 +68,40 @@
   ],
   "decisions": [
     {
+      "id": "qul-reliance",
+      "question": "When the app leans on the outside library of Qur'an data, does it copy what the library holds into the app, or only measure its own work against the library and link back out to it?",
+      "status": "decided",
+      "options": [
+        {
+          "id": "A",
+          "label": "Measure against it and link out; copy none of its bytes"
+        },
+        {
+          "id": "B",
+          "label": "Copy the verified text, the fonts, and the layout in"
+        },
+        {
+          "id": "C",
+          "label": "Copy only the layout numbers, not the text or fonts"
+        },
+        {
+          "id": "D",
+          "label": "Hold a copy in a store we control — off the repository and off the shipped bundle"
+        }
+      ],
+      "doc": "docs/decisions/qul-reliance.md",
+      "decided": "D",
+      "by": "omar",
+      "date": "2026-09-07",
+      "related": [
+        "loop-4a",
+        "loop-4b",
+        "similar-ayah-enrichment",
+        "qul-store-purpose",
+        "qul-etl-plugins"
+      ]
+    },
+    {
       "id": "juz-detents",
       "question": "When a reader lets go of the page bar near a juz marker, should the bar pull the page onto it?",
       "status": "decided",
@@ -451,7 +485,8 @@
         "loop-4a",
         "note-export-shape",
         "highlight-shape",
-        "adjacency-span-source"
+        "adjacency-span-source",
+        "similar-ayah-enrichment"
       ]
     },
     {
@@ -633,7 +668,8 @@
       "related": [
         "loop-4b",
         "word-search",
-        "comparison-crop"
+        "comparison-crop",
+        "qul-reliance"
       ]
     },
     {
@@ -644,7 +680,8 @@
       "by": "omar",
       "date": "2026-08-03",
       "related": [
-        "loop-4a"
+        "loop-4a",
+        "qul-reliance"
       ]
     },
     {
@@ -937,6 +974,92 @@
       "related": [
         "highlight-shape",
         "tajweed-colours"
+      ]
+    },
+    {
+      "id": "similar-ayah-enrichment",
+      "question": "Should the app take in the outside library's whole-verse look-alike pairs, as bare verse numbers and no Qur'an text, so a reader on one twin is offered the other?",
+      "status": "open",
+      "options": [
+        {
+          "id": "A",
+          "label": "Leave the look-alike set as it is"
+        },
+        {
+          "id": "B",
+          "label": "Take in the pair numbers only, and offer each twin from the other"
+        },
+        {
+          "id": "C",
+          "label": "Take in the pairs and work out the word-by-word marking too"
+        }
+      ],
+      "artifact": "https://blog.bytesofpurpose.com/hifth/docs/design/similar-ayah-enrichment.html",
+      "page": "docs/design/similar-ayah-enrichment.html",
+      "builtBy": "scripts/build-similar-ayah-gap.mjs",
+      "doc": "docs/decisions/similar-ayah-enrichment.md",
+      "decided": null,
+      "by": null,
+      "date": null,
+      "related": [
+        "qul-reliance",
+        "comparison-crop",
+        "qul-store-purpose"
+      ]
+    },
+    {
+      "id": "qul-store-purpose",
+      "question": "Now that the app holds a copy of the outside library, what is that copy for?",
+      "status": "decided",
+      "options": [
+        {
+          "id": "A",
+          "label": "Only sharpen what we already print — hold the numbers, draw no page of our own"
+        },
+        {
+          "id": "B",
+          "label": "Draw our own word-by-word mus'haf, keep the printed page as default, and stand the two side by side to check our pages — and hold the numbers too"
+        },
+        {
+          "id": "C",
+          "label": "Hold the numbers now, decide the drawing later"
+        }
+      ],
+      "doc": "docs/decisions/qul-store-purpose.md",
+      "decided": "B",
+      "by": "omar",
+      "date": "2026-09-07",
+      "related": [
+        "qul-reliance",
+        "similar-ayah-enrichment",
+        "qul-etl-plugins"
+      ]
+    },
+    {
+      "id": "qul-etl-plugins",
+      "question": "When a new way of taking in Qur'an data arrives, how does it join the ways already here?",
+      "status": "decided",
+      "options": [
+        {
+          "id": "A",
+          "label": "Fold each new source into the existing shipping build as more steps on the same line"
+        },
+        {
+          "id": "B",
+          "label": "Give every source one shared shape — a named source in a list, driven by one runner, no privileged path"
+        },
+        {
+          "id": "C",
+          "label": "Keep the held copy as a separate script no build knows about, run by hand"
+        }
+      ],
+      "doc": "docs/decisions/qul-etl-plugins.md",
+      "decided": "B",
+      "by": "omar",
+      "date": "2026-09-07",
+      "related": [
+        "qul-reliance",
+        "qul-store-purpose"
       ]
     },
     {

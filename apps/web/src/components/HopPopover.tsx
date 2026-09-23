@@ -1,5 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { orderForHifz, type Edge, type LeafSide, type RailChip } from "@hifth/core";
+import {
+  orderForHifz,
+  qulVerseUrlFromKey,
+  type Edge,
+  type LeafSide,
+  type RailChip,
+} from "@hifth/core";
 import { useT } from "../i18n";
 import { DiffView } from "./DiffView";
 import styles from "./HopPopover.module.css";
@@ -135,6 +141,11 @@ export function HopPopover({
           {edges.map((edge) => {
             const enabled = canHop(edge.to);
             const label = t.ayahLabel(edge.to) ?? edge.to;
+            // When we do not carry the target's page, the leap is honestly
+            // disabled — but the verse still exists, so we link out to it on the
+            // outside library rather than dead-ending (the qul-reliance
+            // decision's "link back to it" half). Ships a URL, not bytes.
+            const qulUrl = enabled ? null : qulVerseUrlFromKey(edge.to);
             const isOpen = expanded === edge.to;
             const diffId = `diff-${edge.to.replace(/[^\w-]/g, "-")}`;
             return (
@@ -160,15 +171,28 @@ export function HopPopover({
                       <span className={styles.unavailable}>{t.pageUnavailable}</span>
                     )}
                   </button>
-                  <button
-                    type="button"
-                    className={styles.hop}
-                    disabled={!enabled}
-                    onClick={() => onHop(edge)}
-                    aria-label={t.hopTo(label)}
-                  >
-                    <span aria-hidden="true">↪</span>
-                  </button>
+                  {qulUrl ? (
+                    <a
+                      className={styles.qul}
+                      href={qulUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label={t.openOnQulAria(label)}
+                    >
+                      <span className={styles.qulLabel}>{t.openOnQul}</span>
+                      <span aria-hidden="true">↗</span>
+                    </a>
+                  ) : (
+                    <button
+                      type="button"
+                      className={styles.hop}
+                      disabled={!enabled}
+                      onClick={() => onHop(edge)}
+                      aria-label={t.hopTo(label)}
+                    >
+                      <span aria-hidden="true">↪</span>
+                    </button>
+                  )}
                 </div>
                 {isOpen && fromKey && (
                   <div id={diffId}>

@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The QUL data model</title>
+<style>
+  :root{
+    --bg:#faf9f6; --ink:#1f2328; --muted:#5a626b; --line:#d9d5cc;
+    --card:#ffffff; --accent:#7a5c2e; --spine:#2f5d50; --spine-soft:#e3efeb;
+    --warn:#8a4b2f; --warn-soft:#f6e9e2; --ok:#2f6d3a; --pk:#3a4d8f; --pk-soft:#e6e9f6;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{ --bg:#16181c; --ink:#e8e6e1; --muted:#a2a8b0; --line:#33373d;
+      --card:#1e2126; --accent:#c9a86a; --spine:#7fc7b3; --spine-soft:#1d302b;
+      --warn:#e0a082; --warn-soft:#2e211b; --ok:#8fd39b; --pk:#9fb0ea; --pk-soft:#1c2030; }
+  }
+  *{box-sizing:border-box}
+  body{background:var(--bg); color:var(--ink); font:15px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; margin:0; padding:2rem 1.25rem 4rem}
+  main{max-width:1040px; margin:0 auto}
+  h1{font-size:1.6rem; margin:0 0 .25rem; text-wrap:balance}
+  .sub{color:var(--muted); margin:0 0 1.5rem}
+  h2{font-size:1.2rem; margin:2.5rem 0 .5rem; border-bottom:2px solid var(--line); padding-bottom:.3rem; text-wrap:balance}
+  h3{font-size:1rem; margin:1.4rem 0 .4rem; color:var(--accent)}
+  p{margin:.5rem 0}
+  a{color:var(--spine)}
+  .decided{display:inline-block; font-size:.72rem; letter-spacing:.08em; text-transform:uppercase; background:var(--spine-soft); color:var(--spine); border:1px solid var(--spine); border-radius:999px; padding:.15rem .6rem; vertical-align:middle; margin-left:.5rem}
+  code{background:var(--spine-soft); padding:.05rem .3rem; border-radius:4px; font-size:.9em}
+  .card{background:var(--card); border:1px solid var(--line); border-radius:10px; padding:1rem 1.2rem; margin:1rem 0}
+  .callout{background:var(--warn-soft); border-left:4px solid var(--warn); padding:.7rem 1rem; border-radius:6px; margin:1rem 0}
+  .callout.ok{background:var(--spine-soft); border-left-color:var(--spine)}
+  ul{margin:.4rem 0 .4rem 1.2rem; padding:0}
+  .scroll{overflow-x:auto; margin:1rem 0}
+  .diagram{width:100%; height:auto; display:block}
+  table{border-collapse:collapse; width:100%; font-size:13px; margin:.6rem 0}
+  th,td{border:1px solid var(--line); padding:.4rem .5rem; text-align:left; vertical-align:top}
+  th{background:var(--spine-soft); position:sticky; top:0}
+  td.num{font-variant-numeric:tabular-nums; white-space:nowrap}
+  .tag-held{color:var(--spine); font-weight:600}
+  .tag-ref{color:var(--muted); font-weight:600}
+  .legend{color:var(--muted); font-size:.85rem}
+  .keyrow{display:flex; flex-wrap:wrap; gap:1rem 1.4rem; align-items:center; font-size:.82rem; color:var(--muted); margin:.6rem 0 0}
+  .keyrow .sw{display:inline-block; width:.9rem; height:.9rem; border-radius:3px; vertical-align:-.1rem; margin-right:.35rem; border:1.5px solid}
+  .sw.held{background:var(--spine-soft); border-color:var(--spine)}
+  .sw.font{background:var(--warn-soft); border-color:var(--warn)}
+  .sw.ref{background:var(--card); border-color:var(--line)}
+  .sw.hub{background:var(--spine); border-color:var(--spine)}
+</style>
+</head>
+<body>
+<main>
+  <h1>The QUL data model <span class="decided">Decided — render our own</span></h1>
+  <p class="sub">Two pictures, drawn on this page and served from the app's own site. First, the
+  small thing the app actually keeps: three tables in a store it controls, and the one join that
+  ties them together. Then the whole outside library those two tables were drawn from, every file
+  and every key, as one entity diagram. This page holds no Qur'an text — each column of Arabic
+  script is named and counted, never shown.</p>
+
+  <div class="card">
+    <strong>Two pictures, and why both.</strong> The first is <em>what we keep</em>: the three
+    tables now living in the store, so a reader can see the real shape the app draws its own page
+    from. The second is <em>where those two tables came from</em>: the full library of Qur'an data,
+    of which we hold only two pieces and measure our own work against the rest. The plain-language
+    spine of the second picture, argued through by hand, is the
+    <a href="qul-data-join-map.html">join map</a>; the reasons the store exists at all are in the
+    decision record, <a href="../decisions/qul-store-purpose.md">what the held copy is for</a>. The
+    same full diagram, drawn for the code host instead of the browser, is
+    <a href="qul-data-erd.md">the entity diagram in text form</a>.
+  </div>
+
+  <h2>What do we actually keep, and how do the tables join?</h2>
+  <p>The store holds <b>three tables</b>. Two carry the page and the words; a third holds the source
+  layout's own counts. Only one column in the whole store carries Qur'an text — the word's glyphs —
+  and it lives here, in a store off the code and out of what the app ships, never in the repository
+  and never in the build.</p>
+
+  <div class="scroll">
+  <svg class="diagram" viewBox="0 0 1000 430" role="img" style="min-width:760px"
+       aria-label="Store schema: qul_page_lines and qul_words joined by word id, plus qul_layout_info; the page lines' first and last word id name a range of the word table's word id, verified with zero dangling references.">
+    <defs>
+      <marker id="sar" markerWidth="9" markerHeight="9" refX="7" refY="3.5" orient="auto"><path d="M0,0 L7,3.5 L0,7 Z" fill="var(--spine)"/></marker>
+    </defs>
+
+    <!-- qul_page_lines -->
+    <rect x="40" y="60" width="270" height="208" rx="9" fill="var(--card)" stroke="var(--line)" stroke-width="1.5"/>
+    <rect x="40" y="60" width="270" height="40" rx="9" fill="var(--spine-soft)" stroke="var(--spine)" stroke-width="1.5"/>
+    <rect x="40" y="88" width="270" height="12" fill="var(--spine-soft)"/>
+    <text x="54" y="79" font-size="13" font-weight="700" fill="var(--ink)">qul_page_lines</text>
+    <text x="296" y="79" text-anchor="end" font-size="10.5" fill="var(--muted)">9,046 lines · 604 pp</text>
+    <!-- rows -->
+    <text x="54" y="115" font-size="11.5" font-weight="700" fill="var(--ink)">page_number</text>
+    <text x="296" y="115" text-anchor="end" font-size="10" fill="var(--pk)">smallint · PK</text>
+    <text x="54" y="139" font-size="11.5" font-weight="700" fill="var(--ink)">line_number</text>
+    <text x="296" y="139" text-anchor="end" font-size="10" fill="var(--pk)">smallint · PK</text>
+    <text x="54" y="163" font-size="11.5" fill="var(--ink)">line_type</text>
+    <text x="296" y="163" text-anchor="end" font-size="10" fill="var(--muted)">text · a tag</text>
+    <text x="54" y="187" font-size="11.5" fill="var(--ink)">is_centered</text>
+    <text x="296" y="187" text-anchor="end" font-size="10" fill="var(--muted)">boolean</text>
+    <text x="54" y="211" font-size="11.5" fill="var(--ink)">surah_number</text>
+    <text x="296" y="211" text-anchor="end" font-size="10" fill="var(--muted)">smallint · header lines</text>
+    <text x="54" y="235" font-size="11.5" fill="var(--ink)">first_word_id</text>
+    <text x="296" y="235" text-anchor="end" font-size="10" fill="var(--spine)">integer · range start</text>
+    <text x="54" y="259" font-size="11.5" fill="var(--ink)">last_word_id</text>
+    <text x="296" y="259" text-anchor="end" font-size="10" fill="var(--spine)">integer · range end</text>
+
+    <!-- qul_words -->
+    <rect x="690" y="60" width="270" height="160" rx="9" fill="var(--card)" stroke="var(--spine)" stroke-width="1.5"/>
+    <rect x="690" y="60" width="270" height="40" rx="9" fill="var(--spine-soft)" stroke="var(--spine)" stroke-width="1.5"/>
+    <rect x="690" y="88" width="270" height="12" fill="var(--spine-soft)"/>
+    <text x="704" y="79" font-size="13" font-weight="700" fill="var(--ink)">qul_words</text>
+    <text x="946" y="79" text-anchor="end" font-size="10.5" fill="var(--muted)">83,668 words</text>
+    <text x="704" y="115" font-size="11.5" font-weight="700" fill="var(--ink)">word_id</text>
+    <text x="946" y="115" text-anchor="end" font-size="10" fill="var(--pk)">integer · PK</text>
+    <text x="704" y="139" font-size="11.5" fill="var(--ink)">surah</text>
+    <text x="946" y="139" text-anchor="end" font-size="10" fill="var(--muted)">smallint</text>
+    <text x="704" y="163" font-size="11.5" fill="var(--ink)">ayah</text>
+    <text x="946" y="163" text-anchor="end" font-size="10" fill="var(--muted)">smallint</text>
+    <text x="704" y="187" font-size="11.5" fill="var(--ink)">position</text>
+    <text x="946" y="187" text-anchor="end" font-size="10" fill="var(--muted)">smallint · in ayah</text>
+    <text x="704" y="211" font-size="11.5" font-weight="700" fill="var(--warn)">text</text>
+    <text x="946" y="211" text-anchor="end" font-size="10" fill="var(--warn)">the only Arabic column · held</text>
+
+    <!-- join: first/last word id -> word_id -->
+    <path d="M310,229 C 470,229 520,120 690,113" fill="none" stroke="var(--spine)" stroke-width="1.6" marker-end="url(#sar)"/>
+    <path d="M310,253 C 500,253 540,130 690,119" fill="none" stroke="var(--spine)" stroke-width="1.6" stroke-dasharray="4 3" marker-end="url(#sar)"/>
+    <text x="500" y="300" text-anchor="middle" font-size="11.5" font-weight="600" fill="var(--ink)">first_word_id &amp; last_word_id name a range of word_id</text>
+    <text x="500" y="318" text-anchor="middle" font-size="10.5" fill="var(--muted)">a page line owns the words whose id falls in [first, last] · verified: every range resolves, 0 dangling</text>
+
+    <!-- qul_layout_info -->
+    <rect x="40" y="332" width="270" height="84" rx="9" fill="var(--card)" stroke="var(--line)" stroke-width="1.5"/>
+    <rect x="40" y="332" width="270" height="36" rx="9" fill="var(--spine-soft)" stroke="var(--spine)" stroke-width="1.5"/>
+    <rect x="40" y="358" width="270" height="10" fill="var(--spine-soft)"/>
+    <text x="54" y="355" font-size="13" font-weight="700" fill="var(--ink)">qul_layout_info</text>
+    <text x="296" y="355" text-anchor="end" font-size="10.5" fill="var(--muted)">the layout's own counts</text>
+    <text x="54" y="388" font-size="11.5" font-weight="700" fill="var(--ink)">key</text>
+    <text x="296" y="388" text-anchor="end" font-size="10" fill="var(--pk)">text · PK</text>
+    <text x="54" y="408" font-size="11.5" fill="var(--ink)">value</text>
+    <text x="296" y="408" text-anchor="end" font-size="10" fill="var(--muted)">text · a number</text>
+
+    <text x="690" y="352" font-size="11" fill="var(--muted)">Stand-alone: the source layout's totals —</text>
+    <text x="690" y="368" font-size="11" fill="var(--muted)">15 lines to a page, 604 pages, 83,668 words.</text>
+    <text x="690" y="390" font-size="11" fill="var(--muted)">No Qur'an text; nothing joins to it.</text>
+  </svg>
+  </div>
+
+  <div class="callout ok">
+    <b>To draw a page, the app reads it straight off these two tables.</b> Take the page's fifteen
+    lines from the page table; for each line, pull the words whose id lands between its
+    <code>first_word_id</code> and <code>last_word_id</code> from the word table. That is the entire
+    join — one range lookup per line — and it holds because both tables run the same word id, 1 to
+    83,668, with no gaps. The check that every line's range resolves to real words, with nothing
+    left dangling, passed when the copy was loaded on 8&nbsp;September&nbsp;2026.
+  </div>
+
+  <h2>Where did these two tables come from?</h2>
+  <p>The outside library — the Quranic Universal Library — comes in eighteen files. We keep a copy of
+  just two of them (the word text and the page plan, plus the two fonts that draw them) and measure
+  our own work against the rest. Here is the whole library as one diagram: every file, and the exact
+  key that clips one file to the next. Three backbones run through it — a <b>word id</b> down the
+  middle, a <b>verse key</b> on the verse side, and a <b>location</b> triple the grammar files use.</p>
+
+  <div class="keyrow">
+    <span><span class="sw hub"></span>Backbone hub</span>
+    <span><span class="sw held"></span>Held, loaded in the store</span>
+    <span><span class="sw font"></span>Held, not loaded yet</span>
+    <span><span class="sw ref"></span>Reference only — we measure against it, keep no bytes</span>
+  </div>
+
+  <div class="scroll">
+  <svg class="diagram" viewBox="0 0 1040 650" role="img" style="min-width:820px"
+       aria-label="The full library entity diagram: the word text joins the page layout by word id and the two fonts draw them; the three per-word grammar files join by location; the ayah registry is the verse-key hub off which the per-ayah grammar, themes, topics, the two similar-verse sets, the repeated-phrase set and the division ranges all hang; the surah registry keys the ayah registry and the English descriptions by surah number.">
+    <defs>
+      <marker id="ear" markerWidth="9" markerHeight="9" refX="7" refY="3.5" orient="auto"><path d="M0,0 L7,3.5 L0,7 Z" fill="var(--muted)"/></marker>
+    </defs>
+
+    <!-- ===== word-id region ===== -->
+    <!-- LAYOUT (held) -->
+    <rect x="430" y="24" width="180" height="52" rx="8" fill="var(--spine-soft)" stroke="var(--spine)" stroke-width="2"/>
+    <text x="520" y="46" text-anchor="middle" font-size="12" font-weight="700" fill="var(--ink)">LAYOUT — page plan</text>
+    <text x="520" y="63" text-anchor="middle" font-size="10" fill="var(--muted)">9,046 lines · 604 pages · held</text>
+
+    <!-- FONT surah names (held not loaded) -->
+    <rect x="730" y="28" width="170" height="44" rx="8" fill="var(--warn-soft)" stroke="var(--warn)" stroke-width="1.5"/>
+    <text x="815" y="48" text-anchor="middle" font-size="11.5" font-weight="600" fill="var(--ink)">FONT — surah names</text>
+    <text x="815" y="63" text-anchor="middle" font-size="9.5" fill="var(--muted)">116 glyphs · held, not loaded</text>
+    <line x1="610" y1="50" x2="730" y2="50" stroke="var(--muted)" stroke-width="1.4" marker-end="url(#ear)"/>
+    <text x="670" y="42" text-anchor="middle" font-size="9" fill="var(--muted)">draws</text>
+
+    <!-- WORD TEXT hub (held) -->
+    <rect x="420" y="150" width="200" height="58" rx="9" fill="var(--spine)" stroke="var(--spine)" stroke-width="2"/>
+    <text x="520" y="176" text-anchor="middle" font-size="12.5" font-weight="700" fill="#ffffff">WORD TEXT — qpc-v4</text>
+    <text x="520" y="194" text-anchor="middle" font-size="10" fill="#e3efeb">83,668 words · held, loaded</text>
+    <!-- spine layout -> word text -->
+    <line x1="520" y1="76" x2="520" y2="150" stroke="var(--spine)" stroke-width="2" marker-end="url(#ear)"/>
+    <text x="530" y="116" font-size="10" fill="var(--spine)">word id 1..83,668</text>
+
+    <!-- grammar cluster (location) -->
+    <rect x="40" y="120" width="160" height="36" rx="7" fill="var(--card)" stroke="var(--accent)" stroke-width="1.4"/>
+    <text x="120" y="138" text-anchor="middle" font-size="11" font-weight="600" fill="var(--ink)">word → root</text>
+    <text x="120" y="151" text-anchor="middle" font-size="9" fill="var(--muted)">50,298 (60%)</text>
+    <rect x="40" y="164" width="160" height="36" rx="7" fill="var(--card)" stroke="var(--accent)" stroke-width="1.4"/>
+    <text x="120" y="182" text-anchor="middle" font-size="11" font-weight="600" fill="var(--ink)">word → lemma</text>
+    <text x="120" y="195" text-anchor="middle" font-size="9" fill="var(--muted)">72,510 (87%)</text>
+    <rect x="40" y="208" width="160" height="36" rx="7" fill="var(--card)" stroke="var(--accent)" stroke-width="1.4"/>
+    <text x="120" y="226" text-anchor="middle" font-size="11" font-weight="600" fill="var(--ink)">word → stem</text>
+    <text x="120" y="239" text-anchor="middle" font-size="9" fill="var(--muted)">77,427 (93%)</text>
+    <!-- bracket -->
+    <line x1="200" y1="138" x2="210" y2="138" stroke="var(--accent)" stroke-width="1.4"/>
+    <line x1="200" y1="182" x2="210" y2="182" stroke="var(--accent)" stroke-width="1.4"/>
+    <line x1="200" y1="226" x2="210" y2="226" stroke="var(--accent)" stroke-width="1.4"/>
+    <line x1="210" y1="138" x2="210" y2="226" stroke="var(--accent)" stroke-width="1.4"/>
+    <line x1="210" y1="182" x2="420" y2="180" stroke="var(--accent)" stroke-width="1.4" marker-end="url(#ear)"/>
+    <text x="300" y="172" text-anchor="middle" font-size="9.5" fill="var(--accent)">location s:a:w</text>
+
+    <!-- FONT nastaleeq -->
+    <rect x="730" y="158" width="170" height="44" rx="8" fill="var(--warn-soft)" stroke="var(--warn)" stroke-width="1.5"/>
+    <text x="815" y="178" text-anchor="middle" font-size="11.5" font-weight="600" fill="var(--ink)">FONT — Nastaleeq</text>
+    <text x="815" y="193" text-anchor="middle" font-size="9.5" fill="var(--muted)">word glyphs · held, not loaded</text>
+    <line x1="620" y1="180" x2="730" y2="180" stroke="var(--muted)" stroke-width="1.4" marker-end="url(#ear)"/>
+    <text x="675" y="172" text-anchor="middle" font-size="9" fill="var(--muted)">draws</text>
+
+    <!-- ===== ayah region ===== -->
+    <!-- AYAH REGISTRY hub (reference) -->
+    <rect x="420" y="300" width="200" height="58" rx="9" fill="var(--card)" stroke="var(--spine)" stroke-width="2"/>
+    <text x="520" y="326" text-anchor="middle" font-size="12.5" font-weight="700" fill="var(--ink)">AYAH REGISTRY</text>
+    <text x="520" y="344" text-anchor="middle" font-size="10" fill="var(--muted)">6,236 ayahs · ordinal + verse key</text>
+    <line x1="520" y1="208" x2="520" y2="300" stroke="var(--spine)" stroke-width="2" marker-end="url(#ear)"/>
+    <text x="530" y="258" font-size="10" fill="var(--spine)">verse key s:a</text>
+
+    <!-- SURAH REGISTRY -->
+    <rect x="40" y="306" width="160" height="44" rx="7" fill="var(--card)" stroke="var(--line)" stroke-width="1.4"/>
+    <text x="120" y="326" text-anchor="middle" font-size="11" font-weight="600" fill="var(--ink)">SURAH REGISTRY</text>
+    <text x="120" y="340" text-anchor="middle" font-size="9" fill="var(--muted)">114 surahs</text>
+    <line x1="200" y1="328" x2="420" y2="328" stroke="var(--muted)" stroke-width="1.4" marker-end="url(#ear)"/>
+    <text x="310" y="321" text-anchor="middle" font-size="9.5" fill="var(--muted)">surah no.</text>
+    <!-- SURAH INFO EN -->
+    <rect x="40" y="372" width="160" height="40" rx="7" fill="var(--card)" stroke="var(--line)" stroke-width="1.4"/>
+    <text x="120" y="390" text-anchor="middle" font-size="11" font-weight="600" fill="var(--ink)">SURAH INFO (English)</text>
+    <text x="120" y="403" text-anchor="middle" font-size="9" fill="var(--muted)">114 descriptions</text>
+    <line x1="120" y1="350" x2="120" y2="372" stroke="var(--muted)" stroke-width="1.4" marker-end="url(#ear)"/>
+
+    <!-- verse bus -->
+    <line x1="520" y1="358" x2="520" y2="600" stroke="var(--spine)" stroke-width="1.6"/>
+    <text x="528" y="382" font-size="9.5" fill="var(--muted)">everything below joins by verse key</text>
+
+    <!-- left ribs -->
+    <rect x="250" y="430" width="150" height="36" rx="7" fill="var(--card)" stroke="var(--line)" stroke-width="1.4"/>
+    <text x="325" y="448" text-anchor="middle" font-size="10.5" font-weight="600" fill="var(--ink)">per-ayah roots</text>
+    <text x="325" y="461" text-anchor="middle" font-size="9" fill="var(--muted)">6,214</text>
+    <line x1="520" y1="448" x2="400" y2="448" stroke="var(--muted)" stroke-width="1.3" marker-end="url(#ear)"/>
+
+    <rect x="250" y="474" width="150" height="36" rx="7" fill="var(--card)" stroke="var(--line)" stroke-width="1.4"/>
+    <text x="325" y="492" text-anchor="middle" font-size="10.5" font-weight="600" fill="var(--ink)">per-ayah lemmas</text>
+    <text x="325" y="505" text-anchor="middle" font-size="9" fill="var(--muted)">6,216</text>
+    <line x1="520" y1="492" x2="400" y2="492" stroke="var(--muted)" stroke-width="1.3" marker-end="url(#ear)"/>
+
+    <rect x="250" y="518" width="150" height="36" rx="7" fill="var(--card)" stroke="var(--line)" stroke-width="1.4"/>
+    <text x="325" y="536" text-anchor="middle" font-size="10.5" font-weight="600" fill="var(--ink)">per-ayah stems</text>
+    <text x="325" y="549" text-anchor="middle" font-size="9" fill="var(--muted)">6,236</text>
+    <line x1="520" y1="536" x2="400" y2="536" stroke="var(--muted)" stroke-width="1.3" marker-end="url(#ear)"/>
+
+    <rect x="250" y="562" width="150" height="40" rx="7" fill="var(--card)" stroke="var(--line)" stroke-width="1.4"/>
+    <text x="325" y="580" text-anchor="middle" font-size="10.5" font-weight="600" fill="var(--ink)">repeated phrases</text>
+    <text x="325" y="594" text-anchor="middle" font-size="9" fill="var(--muted)">814 · 2,232 verses</text>
+    <line x1="520" y1="582" x2="400" y2="582" stroke="var(--muted)" stroke-width="1.3" marker-end="url(#ear)"/>
+
+    <!-- right ribs -->
+    <rect x="640" y="430" width="170" height="36" rx="7" fill="var(--card)" stroke="var(--line)" stroke-width="1.4"/>
+    <text x="725" y="448" text-anchor="middle" font-size="10.5" font-weight="600" fill="var(--ink)">themes</text>
+    <text x="725" y="461" text-anchor="middle" font-size="9" fill="var(--muted)">2,098 labelled ranges</text>
+    <line x1="520" y1="448" x2="640" y2="448" stroke="var(--muted)" stroke-width="1.3" marker-end="url(#ear)"/>
+
+    <rect x="640" y="474" width="170" height="36" rx="7" fill="var(--card)" stroke="var(--line)" stroke-width="1.4"/>
+    <text x="725" y="492" text-anchor="middle" font-size="10.5" font-weight="600" fill="var(--ink)">topics</text>
+    <text x="725" y="505" text-anchor="middle" font-size="9" fill="var(--muted)">2,512 topics</text>
+    <line x1="520" y1="492" x2="640" y2="492" stroke="var(--muted)" stroke-width="1.3" marker-end="url(#ear)"/>
+
+    <rect x="640" y="518" width="170" height="36" rx="7" fill="var(--card)" stroke="var(--line)" stroke-width="1.4"/>
+    <text x="725" y="536" text-anchor="middle" font-size="10.5" font-weight="600" fill="var(--ink)">similar-verse pairs</text>
+    <text x="725" y="549" text-anchor="middle" font-size="9" fill="var(--muted)">3,552 pairs</text>
+    <line x1="520" y1="536" x2="640" y2="536" stroke="var(--muted)" stroke-width="1.3" marker-end="url(#ear)"/>
+
+    <rect x="640" y="562" width="170" height="40" rx="7" fill="var(--card)" stroke="var(--line)" stroke-width="1.4"/>
+    <text x="725" y="580" text-anchor="middle" font-size="10.5" font-weight="600" fill="var(--ink)">division ranges</text>
+    <text x="725" y="594" text-anchor="middle" font-size="9" fill="var(--muted)">juz hizb rub manzil ruku sajda</text>
+    <line x1="520" y1="582" x2="640" y2="582" stroke="var(--muted)" stroke-width="1.3" marker-end="url(#ear)"/>
+  </svg>
+  </div>
+
+  <h2>What does each backbone do?</h2>
+  <h3>The word id — 1 to 83,668</h3>
+  <p>The main spine. The page plan stores, for each printed line, its first and last word id; the
+  word text carries the same ids on its own rows. So to draw a page you walk its lines and, for each
+  line, pull the words whose id falls in that line's range. The two run the same 1-to-83,668 with no
+  gaps — the single fact that makes drawing our own page possible at all. This is exactly the join
+  the first picture draws between the two store tables.</p>
+  <h3>The location — surah:ayah:word</h3>
+  <p>The three grammar files — root, lemma, stem — point at a word by this triple. Not every word has
+  all three (particles and some names have no triliteral root), so coverage is 60%, 87%, and 93% of
+  the 83,668 words. What matters is the other direction: every grammar row points at a word that
+  exists — no broken pointers — so the gap is only "some words have no root", never "a root points
+  nowhere".</p>
+  <h3>The verse key — surah:ayah — and the ordinal 1 to 6,236</h3>
+  <p>Everything verse-level clips here: the per-verse grammar roll-ups, the themes, the topic lists,
+  the two similar-verse sets, and the division ranges. The ayah registry is the hub — its ordinal and
+  its verse key are what all of these join through.</p>
+
+  <h2>Which of this do we hold, and which do we only measure against?</h2>
+  <div class="callout ok">
+    <b>Held — two boxes, plus the two fonts.</b> The <b>word text</b> and the <b>page plan</b> are the
+    V4 pair the app keeps a copy of, so it can draw its own word-by-word page and stand it beside the
+    printed one to check it. Both were loaded and verified on 8&nbsp;September&nbsp;2026. The two
+    <b>fonts</b> that draw them are cleared to hold, but not loaded yet.
+  </div>
+  <div class="callout">
+    <b>Reference only — everything else.</b> The grammar files, the themes and topics, the two
+    similar-verse sets, the division ranges: each is a ruler the app measures its own work against and
+    links back to, keeping none of its bytes. Whether any of these is ever held is a separate,
+    still-open question. The line between the two is the whole of the "copy or only measure?"
+    decision, and it is why the word-text and font boxes carry a licence obligation the ruler boxes do
+    not.
+  </div>
+
+  <h2>Which file is behind each box?</h2>
+  <p class="legend">Each box above is one file in the library. Row counts are measured, not estimated.
+  "Carries Arabic" is described here, never shown. Not one of these resource pages prints a licence,
+  and the library states terms per resource — so before any text, font, or grammar box may be held,
+  that resource's own page is read and recorded.</p>
+  <div class="scroll">
+  <table>
+    <thead><tr><th>Box</th><th>File</th><th>Rows</th><th>Joins by</th><th>Arabic?</th><th>Kept how</th></tr></thead>
+    <tbody>
+      <tr><td>WORD TEXT</td><td>qpc-v4 word text</td><td class="num">83,668</td><td>word id; location</td><td>yes</td><td class="tag-held">held, loaded</td></tr>
+      <tr><td>LAYOUT</td><td>digital-khatt 15-line layout</td><td class="num">9,046 / 604 pp</td><td>word-id range per line</td><td>no — numbers</td><td class="tag-held">held, loaded</td></tr>
+      <tr><td>FONT — surah names</td><td>surah-name display font</td><td class="num">116 glyphs</td><td>draws surah lines</td><td>asset</td><td class="tag-held">held, not loaded</td></tr>
+      <tr><td>FONT — Nastaleeq</td><td>Nastaleeq text font</td><td class="num">—</td><td>draws word glyphs</td><td>asset</td><td class="tag-held">held, not loaded</td></tr>
+      <tr><td>word → root</td><td>word-root</td><td class="num">50,298</td><td>location</td><td>yes</td><td class="tag-ref">reference</td></tr>
+      <tr><td>word → lemma</td><td>word-lemma</td><td class="num">72,510</td><td>location</td><td>yes</td><td class="tag-ref">reference</td></tr>
+      <tr><td>word → stem</td><td>word-stem</td><td class="num">77,427</td><td>location</td><td>yes</td><td class="tag-ref">reference</td></tr>
+      <tr><td>per-ayah roots</td><td>ayah-root</td><td class="num">6,214</td><td>verse key</td><td>yes</td><td class="tag-ref">reference</td></tr>
+      <tr><td>per-ayah lemmas</td><td>ayah-lemma</td><td class="num">6,216</td><td>verse key</td><td>yes</td><td class="tag-ref">reference</td></tr>
+      <tr><td>per-ayah stems</td><td>ayah-stem</td><td class="num">6,236</td><td>verse key</td><td>yes</td><td class="tag-ref">reference</td></tr>
+      <tr><td>themes</td><td>ayah-themes</td><td class="num">2,098</td><td>surah + ayah range</td><td>no (English)</td><td class="tag-ref">reference</td></tr>
+      <tr><td>topics</td><td>topics ontology</td><td class="num">2,512</td><td>topic id; verse-key list</td><td>yes</td><td class="tag-ref">reference</td></tr>
+      <tr><td>similar-verse pairs</td><td>matching-ayah</td><td class="num">3,552</td><td>verse key + matched key</td><td>no</td><td class="tag-ref">reference</td></tr>
+      <tr><td>repeated phrases</td><td>mutashabihat</td><td class="num">814 / 2,232</td><td>verse key + word range</td><td>yes</td><td class="tag-ref">reference</td></tr>
+      <tr><td>AYAH REGISTRY</td><td>quran-metadata (ayah)</td><td class="num">6,236</td><td>ordinal; verse key</td><td>yes</td><td class="tag-ref">reference</td></tr>
+      <tr><td>SURAH REGISTRY</td><td>quran-metadata (surah)</td><td class="num">114</td><td>surah number</td><td>yes</td><td class="tag-ref">reference</td></tr>
+      <tr><td>SURAH INFO (English)</td><td>surah-info-en</td><td class="num">114</td><td>surah number</td><td>mostly English</td><td class="tag-ref">reference</td></tr>
+      <tr><td>division ranges</td><td>quran-metadata (juz…sajda)</td><td class="num">30 / 60 / 240 / 7 / ~558 / 15</td><td>first/last verse key</td><td>no</td><td class="tag-ref">reference</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <p class="legend">This page is served from the app's own site and contains zero Qur'an codepoints —
+  every Arabic column above is named and counted, never shown. The store it draws lives off the code
+  and out of what ships; the reasons are in <a href="../decisions/qul-store-purpose.md">what the held
+  copy is for</a> and its parent, <a href="../decisions/qul-reliance.md">copy or only measure?</a>,
+  and the two sources sit side by side under <a href="../decisions/qul-etl-plugins.md">how the two
+  data sources fit together</a>.</p>
+</main>
+</body>
+</html>

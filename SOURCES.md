@@ -73,15 +73,17 @@ licence: إتاحة حرّة للاستعمال الرقمي · الطبع ال�
 href: https://github.com/quranpedia/quran-svg
 ```
 
-- **Status: CONFIRMED for the overlay (CC0, read at the source). The Complex's own
-  terms remain read through quran-svg's NOTICE.md rather than off
-  qurancomplex.gov.sa**, which refused connections on 2026-07-26 (`ECONNREFUSED`
-  on both `/en/` and `/en/terms/`; the Wayback mirror is not fetchable from CI
-  either). NOTICE.md quotes them and cites the decrees, so this is a strong
-  secondary source, not a guess — but the one open item before Loop 7 is to open
-  qurancomplex.gov.sa in an ordinary browser and confirm the wording is still what
-  NOTICE.md records. Nothing in the build depends on the answer; the entry moves
-  from PROVISIONAL to CONFIRMED-pending-that-glance.
+- **Status: CONFIRMED. The overlay is CC0, read at the source; the Complex's own
+  terms are now read at the source too** — the maintainer opened qurancomplex.gov.sa
+  in an ordinary browser on 2026-09-08 and confirmed the digital-mushaf terms say free
+  use in digital, web and software contexts with commercial printing of physical masahif
+  reserved to the Complex, matching what quran-svg's NOTICE.md quotes and what this entry
+  and the app colophon restate. The host had refused connections from every network this
+  project's tooling runs on (`ECONNREFUSED` on `/en/` and `/en/terms/` on 2026-07-26; the
+  Wayback mirror unfetchable from CI too), which is why the read waited for a human on an
+  ordinary connection — and why NOTICE.md carried the terms as a strong secondary source in
+  the meantime. Nothing in the build depended on the answer, and nothing changed: the primary
+  source matched the restatement.
 - **Immutability:** SVG bytes are never hand-edited (PLAN §8). Loop 4b applies
   **three** declared transforms, each reproducible and each asserted:
   1. **svgo** at the version and config recorded in the pin — the config was
@@ -447,15 +449,30 @@ href: https://quran.com
 These are named in the plan for later loops. They are listed here so their license
 review is tracked from the start; no bytes are vendored until the noted loop.
 
-- **QUL (qul.tarteel.ai)** — the Quranic Universal Library, Tarteel's aggregation of
-  mushaf layouts, word morphology, a syntactic treebank / ayah-dependency graph, tajweed
-  spans and look-alike phrase catalogues, each a separate resource under its own terms.
-  It is a **goldmine to measure against, not a shelf to vendor from**: every resource
-  reviewed so far is login-gated for download and states no licence on its resource or
-  credits pages, so nothing from it ships (see the tajweed and morphology rejections
-  below). What it is good for is a build-time ruler — read once from a local cache to
-  check a number we derived ourselves, leaving zero of its bytes in the build, which is a
-  different act from distributing it. Individual resources:
+- **QUL (qul.tarteel.ai) — a ruler and an outbound link, never vendored.** The Quranic
+  Universal Library is Tarteel's aggregation of mushaf layouts, word morphology, a syntactic
+  treebank / ayah-dependency graph, tajweed spans and look-alike phrase catalogues, each a
+  separate resource under its own terms — a **goldmine to measure against, not a shelf to
+  vendor from**. This is the settled shape, not a pending one: `qul-reliance` (decided
+  **A**) leans on QUL only to measure our own numbers against it and to link a reader out
+  to it, and this repo copies **none of its bytes**. Option C, copy the layout numbers, was
+  turned down. The resources ruled against — read from a **gitignored** cache, never
+  committed — are the KFGQPC QCF V2/1421H page layout (id 10; the layouts are V1/1405H
+  id 15, V2/1421H id 10, V4/1441H id 19, and we match V2), the juz metadata, and the two
+  similarity corpora (id 73 phrase-level, id 74 ayah-level). The measurement is
+  `make probe-qul`, pinned numbers-only in `packages/etl/data/qul/qul-rulers.probe.json`;
+  the outbound link is `https://qul.tarteel.ai/cms/verses/N`.
+
+  **Licence: per-resource on QUL (their FAQ #3/#9), and its confirmation is a human
+  check, not done here.** Because nothing is vendored there is no fenced licence to bind
+  to a colophon row — but attribution is still owed for ruler use, and the exact licence +
+  attribution string for each of the four resources above must be read off that resource's
+  own (session-gated) page before it is relied on. That read, the eyeball that each cached
+  export is genuinely text-free, and the recording of each string back here are the ledger
+  check `qul-rulers-terms-and-text-free` (owner: user, pending). The
+  `leverage-qul` skill's rubric (`.claude/skills/leverage-qul/resources.md`) tracks each
+  resource's text-bearing status and its PENDING/confirmed licence state; fill a row there
+  and add its verbatim licence here when the check is run. Individual resources:
   - **Layout DB + phrase ranges** — ayah→page table for edge dir bucketing (Loop 4a) +
     anchor cross-check (Loop 4b). Madani layouts: V1/1405H (id 15), V2/1421H (id 10),
     V4/1441H (id 19) — pin the print matching quran-svg in Loop 4a. License: per-resource
