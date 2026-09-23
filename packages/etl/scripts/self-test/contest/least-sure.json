@@ -1,0 +1,430 @@
+{
+ "built": "2026-09-22",
+ "classes": [
+  "hand"
+ ],
+ "count": 15,
+ "pages": 3,
+ "marks": [
+  {
+   "page": 1,
+   "k": 0,
+   "name": "fatha",
+   "class": "hand",
+   "surah": 1,
+   "aya": 1,
+   "idx": 0,
+   "box": [
+    40,
+    90,
+    4.5,
+    2.8
+   ],
+   "shipped": [
+    39.4,
+    90.2,
+    4.5,
+    2.8
+   ],
+   "rival": [
+    40.9,
+    90.7,
+    4.5,
+    2.8
+   ],
+   "rivalTier": "tilt"
+  },
+  {
+   "page": 1,
+   "k": 1,
+   "name": "kasra",
+   "class": "hand",
+   "surah": 1,
+   "aya": 2,
+   "idx": 1,
+   "box": [
+    100,
+    90,
+    5,
+    2.8
+   ],
+   "shipped": [
+    99.4,
+    90.2,
+    5,
+    2.8
+   ],
+   "rival": [
+    100.9,
+    90.7,
+    5,
+    2.8
+   ],
+   "rivalTier": "tilt"
+  },
+  {
+   "page": 1,
+   "k": 2,
+   "name": "damma",
+   "class": "hand",
+   "surah": 1,
+   "aya": 3,
+   "idx": 2,
+   "box": [
+    160,
+    90,
+    4.5,
+    2.8
+   ],
+   "shipped": [
+    159.4,
+    90.2,
+    4.5,
+    2.8
+   ],
+   "rival": [
+    160.9,
+    90.7,
+    4.5,
+    2.8
+   ],
+   "rivalTier": "tilt"
+  },
+  {
+   "page": 1,
+   "k": 3,
+   "name": "fatha",
+   "class": "hand",
+   "surah": 1,
+   "aya": 4,
+   "idx": 3,
+   "box": [
+    220,
+    90,
+    5,
+    2.8
+   ],
+   "shipped": [
+    219.4,
+    90.2,
+    5,
+    2.8
+   ],
+   "rival": [
+    220.9,
+    90.7,
+    5,
+    2.8
+   ],
+   "rivalTier": "tilt"
+  },
+  {
+   "page": 1,
+   "k": 4,
+   "name": "kasra",
+   "class": "hand",
+   "surah": 1,
+   "aya": 5,
+   "idx": 4,
+   "box": [
+    280,
+    90,
+    4.5,
+    2.8
+   ],
+   "shipped": [
+    279.4,
+    90.2,
+    4.5,
+    2.8
+   ],
+   "rival": [
+    280.9,
+    90.7,
+    4.5,
+    2.8
+   ],
+   "rivalTier": "tilt"
+  },
+  {
+   "page": 2,
+   "k": 0,
+   "name": "fatha",
+   "class": "hand",
+   "surah": 1,
+   "aya": 1,
+   "idx": 0,
+   "box": [
+    40,
+    130,
+    4.5,
+    2.8
+   ],
+   "shipped": [
+    39.4,
+    130.2,
+    4.5,
+    2.8
+   ],
+   "rival": [
+    40.9,
+    130.7,
+    4.5,
+    2.8
+   ],
+   "rivalTier": "tilt"
+  },
+  {
+   "page": 2,
+   "k": 1,
+   "name": "kasra",
+   "class": "hand",
+   "surah": 1,
+   "aya": 2,
+   "idx": 1,
+   "box": [
+    100,
+    130,
+    5,
+    2.8
+   ],
+   "shipped": [
+    99.4,
+    130.2,
+    5,
+    2.8
+   ],
+   "rival": [
+    100.9,
+    130.7,
+    5,
+    2.8
+   ],
+   "rivalTier": "tilt"
+  },
+  {
+   "page": 2,
+   "k": 2,
+   "name": "damma",
+   "class": "hand",
+   "surah": 1,
+   "aya": 3,
+   "idx": 2,
+   "box": [
+    160,
+    130,
+    4.5,
+    2.8
+   ],
+   "shipped": [
+    159.4,
+    130.2,
+    4.5,
+    2.8
+   ],
+   "rival": [
+    160.9,
+    130.7,
+    4.5,
+    2.8
+   ],
+   "rivalTier": "tilt"
+  },
+  {
+   "page": 2,
+   "k": 3,
+   "name": "fatha",
+   "class": "hand",
+   "surah": 1,
+   "aya": 4,
+   "idx": 3,
+   "box": [
+    220,
+    130,
+    5,
+    2.8
+   ],
+   "shipped": [
+    219.4,
+    130.2,
+    5,
+    2.8
+   ],
+   "rival": [
+    220.9,
+    130.7,
+    5,
+    2.8
+   ],
+   "rivalTier": "tilt"
+  },
+  {
+   "page": 2,
+   "k": 4,
+   "name": "kasra",
+   "class": "hand",
+   "surah": 1,
+   "aya": 5,
+   "idx": 4,
+   "box": [
+    280,
+    130,
+    4.5,
+    2.8
+   ],
+   "shipped": [
+    279.4,
+    130.2,
+    4.5,
+    2.8
+   ],
+   "rival": [
+    280.9,
+    130.7,
+    4.5,
+    2.8
+   ],
+   "rivalTier": "tilt"
+  },
+  {
+   "page": 3,
+   "k": 0,
+   "name": "fatha",
+   "class": "hand",
+   "surah": 1,
+   "aya": 1,
+   "idx": 0,
+   "box": [
+    40,
+    170,
+    4.5,
+    2.8
+   ],
+   "shipped": [
+    39.4,
+    170.2,
+    4.5,
+    2.8
+   ],
+   "rival": [
+    40.9,
+    170.7,
+    4.5,
+    2.8
+   ],
+   "rivalTier": "tilt"
+  },
+  {
+   "page": 3,
+   "k": 1,
+   "name": "kasra",
+   "class": "hand",
+   "surah": 1,
+   "aya": 2,
+   "idx": 1,
+   "box": [
+    100,
+    170,
+    5,
+    2.8
+   ],
+   "shipped": [
+    99.4,
+    170.2,
+    5,
+    2.8
+   ],
+   "rival": [
+    100.9,
+    170.7,
+    5,
+    2.8
+   ],
+   "rivalTier": "tilt"
+  },
+  {
+   "page": 3,
+   "k": 2,
+   "name": "damma",
+   "class": "hand",
+   "surah": 1,
+   "aya": 3,
+   "idx": 2,
+   "box": [
+    160,
+    170,
+    4.5,
+    2.8
+   ],
+   "shipped": [
+    159.4,
+    170.2,
+    4.5,
+    2.8
+   ],
+   "rival": [
+    160.9,
+    170.7,
+    4.5,
+    2.8
+   ],
+   "rivalTier": "tilt"
+  },
+  {
+   "page": 3,
+   "k": 3,
+   "name": "fatha",
+   "class": "hand",
+   "surah": 1,
+   "aya": 4,
+   "idx": 3,
+   "box": [
+    220,
+    170,
+    5,
+    2.8
+   ],
+   "shipped": [
+    219.4,
+    170.2,
+    5,
+    2.8
+   ],
+   "rival": [
+    220.9,
+    170.7,
+    5,
+    2.8
+   ],
+   "rivalTier": "tilt"
+  },
+  {
+   "page": 3,
+   "k": 4,
+   "name": "kasra",
+   "class": "hand",
+   "surah": 1,
+   "aya": 5,
+   "idx": 4,
+   "box": [
+    280,
+    170,
+    4.5,
+    2.8
+   ],
+   "shipped": [
+    279.4,
+    170.2,
+    4.5,
+    2.8
+   ],
+   "rival": [
+    280.9,
+    170.7,
+    4.5,
+    2.8
+   ],
+   "rivalTier": "tilt"
+  }
+ ]
+}

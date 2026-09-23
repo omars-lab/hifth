@@ -1,0 +1,20 @@
+<out>
+  settled by packages/etl/scripts/settle-mark-report.mjs · code <fingerprint> (5 files)
+  1 sitting · 6 answers · 6 marks
+  10 marks were put in front of somebody across them
+
+  3 of 6 settled marks carry a complaint about our rectangle — 50.0% of the marks answered.
+  That share is over the marks somebody SAID something about, which is not the rate.
+  The rate is over the marks they looked at, and it is the scorer's to compute.
+
+  2 came to rest away from where we drew them:
+    2 moved by hand, over 2 separate goes
+    median 1 units off · worst 1
+
+  1 came to rest at a size other than the one we drew:
+    1 reshaped by hand, over 1 separate goes
+
+  1 mark was called odd in the print. That is a defect in vendored data,
+  not in our correction, and it belongs in docs/issues.json rather than in this ruling:
+    page 1, line 1, fatha — (no note)
+  Run again with --issues for a row you can paste into the register.

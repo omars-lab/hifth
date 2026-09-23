@@ -1,0 +1,11 @@
+ruling <root>/packages/etl/scripts/self-test/adjudication/ruling.json
+seed 7 · 16 of 16 answered · displacements 2026-09-22 (aaa8372b)
+graded by packages/etl/scripts/score-mark-adjudication.mjs · code <fingerprint> (9 files)
+median 3.1s a trial
+as shipped                 100.0%  [61.0% – 100.0%]  6/6
+the decoy                  100.0%  [56.6% – 100.0%]  5/5
+the catches                100.0%  [43.9% – 100.0%]  3/3
+twins called can't tell    100.0%  2/2
+neither box closed on it     0.0%  0/16
+session valid: the catches were caught
+the correction is supported: the interval on "as shipped" clears half

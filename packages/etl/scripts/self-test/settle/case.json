@@ -1,0 +1,8 @@
+{
+  "args": [
+    "fixture:sitting.json"
+  ],
+  "code": 0,
+  "stdout": "expected.txt",
+  "writes": "expected.json"
+}

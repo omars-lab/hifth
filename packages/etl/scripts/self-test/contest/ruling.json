@@ -1,0 +1,111 @@
+{
+ "built": "2026-09-22T00:00:00.000Z",
+ "kind": "contest",
+ "seed": 11,
+ "count": 12,
+ "pages": 3,
+ "classes": [
+  "hand"
+ ],
+ "leastSureBuilt": "2026-09-22",
+ "leastSureFingerprint": "044f0ca2",
+ "asks": [
+  "choice",
+  "neither"
+ ],
+ "select": {
+  "of": [
+   1,
+   2,
+   3
+  ],
+  "fp": "21cdd3d7"
+ },
+ "finished": "2026-09-22T00:30:00.000Z",
+ "answers": [
+  {
+   "i": 0,
+   "id": "p3k3",
+   "choice": 0,
+   "neither": false,
+   "ms": 3000
+  },
+  {
+   "i": 1,
+   "id": "p1k4",
+   "choice": 0,
+   "neither": false,
+   "ms": 3250
+  },
+  {
+   "i": 2,
+   "id": "p2k4",
+   "choice": 0,
+   "neither": false,
+   "ms": 3500
+  },
+  {
+   "i": 3,
+   "id": "p3k1",
+   "choice": -1,
+   "neither": false,
+   "ms": 3750
+  },
+  {
+   "i": 4,
+   "id": "p1k0",
+   "choice": 1,
+   "neither": false,
+   "ms": 3000
+  },
+  {
+   "i": 5,
+   "id": "p2k1",
+   "choice": 0,
+   "neither": false,
+   "ms": 3250
+  },
+  {
+   "i": 6,
+   "id": "p3k0",
+   "choice": -1,
+   "neither": false,
+   "ms": 3500
+  },
+  {
+   "i": 7,
+   "id": "p1k3",
+   "choice": 1,
+   "neither": false,
+   "ms": 3750
+  },
+  {
+   "i": 8,
+   "id": "p2k2",
+   "choice": 0,
+   "neither": false,
+   "ms": 3000
+  },
+  {
+   "i": 9,
+   "id": "p3k4",
+   "choice": 1,
+   "neither": false,
+   "ms": 3250
+  },
+  {
+   "i": 10,
+   "id": "p1k2",
+   "choice": 0,
+   "neither": false,
+   "ms": 3500
+  },
+  {
+   "i": 11,
+   "id": "p2k3",
+   "choice": 0,
+   "neither": false,
+   "ms": 3750
+  }
+ ]
+}

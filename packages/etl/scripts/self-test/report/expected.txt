@@ -1,0 +1,87 @@
+packages/etl/scripts/self-test/report/sitting.json
+  fixture set · seed 23 · displacements fafae766 · 10 drawn
+  graded by packages/etl/scripts/score-mark-report.mjs · code <fingerprint> (7 files)
+  drawn by ink 6, line-tilt 4
+
+── ink — the marks placed from their own ink ──
+  6 marks looked at, 3 answers given about 3 of them
+
+  What was said, by word — a mark can carry more than one, so these do not sum:
+    moved it by hand           1    16.7%   95% 3.0%–56.4%
+    called the wrong shape     1    16.7%   95% 3.0%–56.4%
+
+  Our placement is wrong on this mark — moved, wrong shape, or boxed elsewhere:
+    2 of 6 gradable marks — 33.3%, 95% 9.7%–70.0%
+
+  How much of that denominator somebody actually vouched for:
+    1 said outright that nothing was wrong · 3 passed in silence
+    More were passed in silence than were affirmed, so the rate leans on the passing.
+
+  How far the reader's own hand moved the rectangle we drew, in page units:
+    median 1.000 · p90 1.000 · worst 1.000
+    across -1.000 · down 0.000 — medians, signed
+    1 mark, one row each, settled over 1 separate nudges and drags.
+
+  Where those rectangles ended up, measured from the box before any correction:
+    across -0.500 · down -0.250 — medians, signed
+    This is the whole correction their answers imply — ours already in it, theirs on top —
+    so it is the one to set beside a measurement taken off the ink, which is measured from
+    that same uncorrected box. It is not a second opinion about the line above and the two
+    are never differenced: the gap between them is only the correction we already applied.
+
+    A distance and the count above it are different questions and are never combined: a
+    mark called the wrong shape has no distance, and a mark moved a hundredth of a unit is
+    not the same finding as one moved a whole mark-height.
+
+  What this many marks can support:
+    The interval above is the finding, not the point estimate: 6 marks cannot tell
+    9.7% from 70.0%, and a decision that needs them apart needs a larger sitting.
+    It says nothing whatever about the other population — see the fallback sitting for that.
+
+── line-tilt — the marks that inherited the printed line ──
+  4 marks looked at, 3 answers given about 3 of them
+
+  What was said, by word — a mark can carry more than one, so these do not sum:
+    moved it by hand           1    25.0%   95% 4.6%–69.9%
+    called the wrong shape     0     0.0%   95% 0.0%–49.0%
+    odd in the print           1    25.0%   95% 4.6%–69.9%
+
+  Our placement is wrong on this mark — moved, wrong shape, or boxed elsewhere:
+    1 of 3 gradable marks — 33.3%, 95% 6.1%–79.2%
+    1 mark is out of the denominator because the print itself was
+    called into question there — not our error, and not evidence that we are right either.
+    Counted in instead, the rate would read 25.0%; the gap is the size of that choice.
+
+  How much of that denominator somebody actually vouched for:
+    1 said outright that nothing was wrong · 1 passed in silence
+
+  How far the reader's own hand moved the rectangle we drew, in page units:
+    median 0.912 · p90 0.912 · worst 0.912
+    across 0.900 · down -0.150 — medians, signed
+    1 mark, one row each, settled over 1 separate nudges and drags.
+
+  Where those rectangles ended up, measured from the box before any correction:
+    across 0.900 · down -0.150 — medians, signed
+    This is the whole correction their answers imply — ours already in it, theirs on top —
+    so it is the one to set beside a measurement taken off the ink, which is measured from
+    that same uncorrected box. It is not a second opinion about the line above and the two
+    are never differenced: the gap between them is only the correction we already applied.
+
+    A distance and the count above it are different questions and are never combined: a
+    mark called the wrong shape has no distance, and a mark moved a hundredth of a unit is
+    not the same finding as one moved a whole mark-height.
+
+  Called odd in the print — these belong in docs/issues.json as a defect in vendored data,
+  not in this correction's error figures:
+    page 1, line 1, fatha — (no note)
+
+  What this many marks can support:
+    The interval above is the finding, not the point estimate: 3 marks cannot tell
+    6.1% from 79.2%, and a decision that needs them apart needs a larger sitting.
+    It says nothing whatever about the other population — see the placed sitting for that.
+
+Two populations appeared in one transcript and are reported apart above. They are not
+summed: the marks placed from their own ink and the marks that fell back to the printed
+line are placed by different rules, so a rate over both is weighted by whatever mix the
+sampler drew, which is a fact about the sampler rather than about the print.
+

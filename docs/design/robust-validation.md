@@ -303,12 +303,29 @@ or a touched library two imports away, changes the fingerprint, an unrelated fil
 each real grader resolves to a distinct twelve-digit stamp; `settle-mark-report.test.mjs` proves
 the stamp actually lands in a written ruling.
 
-### ③ Should each grader refuse to run until it passes a known-answer self-test? · **open**
+### ③ Should each grader refuse to run until it passes a known-answer self-test? · **fixed**
 
 Bake a tiny fixture with a known verdict into each grader, so one that has been quietly changed
 fails its own test before it scores anything real — the same move the build already makes when it
 re-derives its foundation pages every run. **What would answer it:** a grader that no longer produces
 the known verdict stops itself, instead of shipping a wrong number.
+
+**Closed by** one shared helper, `packages/etl/scripts/lib/self-test.mjs`, that every grader calls
+before it reads a single real argument. Each of the five keeps a made-up sitting — a handful of
+invented marks on three invented pages, a reader's answers, and the verdict those answers earned —
+committed under `packages/etl/scripts/self-test/<grader>/`, small enough to read and needing no
+cache or download, so it runs the same in a clean clone. On every start the grader re-scores that
+fixture in a child process and compares the exit code, everything it printed, and (for the settler)
+the ruling it wrote, against the record; only two things are set aside as not-verdicts, the absolute
+paths and the code fingerprint from ②, which changes with every edit by design. A mismatch, or a
+missing fixture, stops the grader with exit 3, prints nothing to the result stream, and names the
+first line that moved. When a change to a grader is *meant* to change its verdict,
+`rebuild-grader-self-tests.mjs` re-records the fixture, so the new verdict lands in the diff a
+reviewer reads instead of in a number nobody explained. The test that would fail if this regressed
+is `packages/etl/scripts/self-test.test.mjs`: it copies the fixtures to a scratch directory, changes
+one figure in each recorded verdict, and proves every grader then refuses with nothing scored; it
+also proves the committed fixtures reproduce their records byte for byte and that the graders still
+go on to score after passing.
 
 ### ④ Should the seed and the ruling be published, so an outsider can re-score? · **open**
 
@@ -341,9 +358,9 @@ do not.
   remaining doubt is named, not hidden.
 - It does not replace any check with another. Every family here catches something the others cannot;
   the design is that they overlap.
-- Of the additions above, the code fingerprint is built (②); the self-test and the rest are still
-  proposals. Whether to build those, and in what order, is tracked as the open questions above,
-  not settled here.
+- Of the additions above, the code fingerprint (②) and the known-answer self-test (③) are built;
+  the rest are still proposals. Whether to build those, and in what order, is tracked as the open
+  questions above, not settled here.
 
 ---
 
@@ -369,5 +386,9 @@ because a reader deciding whether to trust the app should not need a filename to
 - **The build-script hash the code-fingerprint idea extends** — `scripts/gate-etl-scripts.mjs`.
 - **The grading-code fingerprint itself** — `packages/etl/scripts/lib/grader-code.mjs`, read by
   every `score-*` and `settle-*` script; a ruling's `code` block is what it writes.
+- **The graders' known-answer self-test** — `packages/etl/scripts/lib/self-test.mjs`, called first
+  by every `score-*` and `settle-*` script; the fixtures are under `packages/etl/scripts/self-test/`,
+  one directory per grader, and `rebuild-grader-self-tests.mjs` re-records them when a verdict is
+  meant to change.
 - **The full list of machine checks** — the `gate:*` scripts under `scripts/`, aggregated by the
   `gates` script and mirrored in the continuous-integration workflow.
