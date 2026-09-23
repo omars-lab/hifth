@@ -89,3 +89,18 @@
   stroke-width: 0.3;
   vector-effect: non-scaling-stroke;
 }
+
+/*
+ * One vowel mark the other ayah does not carry on the same word (the
+ * diff-mark-tint decision, option C). Appended after the word washes so it sits
+ * on top of them — a mark inside the green run is the case that matters most,
+ * because it is the only sign that the two "shared" words are recited
+ * differently. A heavier stroke than the washes: the box is a few page units
+ * across, and at the panel's width a hairline around it would vanish.
+ */
+.wMark {
+  fill: var(--diff-mark-wash);
+  stroke: var(--diff-mark);
+  stroke-width: 0.6;
+  vector-effect: non-scaling-stroke;
+}

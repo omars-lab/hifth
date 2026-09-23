@@ -13,6 +13,7 @@ import type {
   AdjacencyShard,
   AssetManifest,
   AyahRootsShard,
+  MarkShard,
   PackPlan,
   RootIndexShard,
   TajweedShard,
@@ -196,4 +197,19 @@ export async function loadTajweedVocabulary(
  */
 export function loadWordShard(edition: string, page: number): Promise<WordShard | null> {
   return json<WordShard>(`${BASE}assets/words/${edition}/${page}.json`);
+}
+
+/**
+ * Fetch one page's vowel-mark shard — every mark on the sheet with its word,
+ * its name and its own box (the mark-placement decision, option H). Keyed by
+ * page for the same reason the word shard is: a mark's box is a position on
+ * paper.
+ *
+ * Quiet on a miss, like the word shard, and the miss costs even less: the
+ * look-alike panel draws its word washes without it and only the per-mark tint
+ * goes missing. Not precached; it is fetched when a hop row is expanded, beside
+ * the page and word shard the panel already fetches.
+ */
+export function loadMarkShard(edition: string, page: number): Promise<MarkShard | null> {
+  return json<MarkShard>(`${BASE}assets/marks/${edition}/${page}.json`);
 }

@@ -109,6 +109,15 @@ export {
 export { wordDiff, divergentRuns, type DiffSide, type WordDiff } from "./verse-diff.js";
 
 export {
+  unmatchedMarks,
+  isMarkShard,
+  type WireMark,
+  type MarkShard,
+  type MarkSide,
+  type MarkDiff,
+} from "./mark-diff.js";
+
+export {
   serializeState,
   parseHash,
   refToKey,
