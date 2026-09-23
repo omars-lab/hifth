@@ -70,6 +70,7 @@ import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { planContest } from "./lib/adjudication.mjs";
+import { codeLine } from "./lib/grader-code.mjs";
 import { wilson } from "./lib/mark-ink.mjs";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
@@ -234,6 +235,8 @@ const verdict = s.shipped.n === 0
 const out = [
   `ruling ${rulingPath}`,
   `seed ${ruling.seed} · ${ruling.answers.length} of ${ruling.count} answered · least-sure ${ruling.leastSureBuilt} (${fp})`,
+  // The other fingerprint: the code that reached this verdict, beside the input it read.
+  codeLine(fileURLToPath(import.meta.url)),
   `${ruling.classes ? `over the ${ruling.classes.join(", ")} marks · ` : ""}median ${(median / 1000).toFixed(1)}s a trial`,
   "",
   line("the hand box preferred", s.shipped),

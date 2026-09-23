@@ -101,6 +101,7 @@
 import { readFileSync, writeFileSync, mkdirSync } from "node:fs";
 import { dirname, isAbsolute, join, basename } from "node:path";
 import { fileURLToPath } from "node:url";
+import { codeStamp } from "./lib/grader-code.mjs";
 import { asDrawn, settle, isFault, byMark } from "./lib/mark-settle.mjs";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
@@ -388,6 +389,14 @@ const out = {
   settledAt: new Date().toISOString(),
   rows: first.rows,
   rowsFingerprint: first.rowsFingerprint,
+  /**
+   * The other fingerprint. `rowsFingerprint` above names the input this was settled
+   * from; this names the code that settled it — this script and every library it
+   * reaches — so a ruling re-settled by a changed script reads as a different ruling
+   * even when every input byte is the same. Rulings written before this existed
+   * carry no `code` and are read as unstamped, not rewritten.
+   */
+  code: codeStamp(fileURLToPath(import.meta.url)),
   set: first.set,
   seed: first.seed,
   radius,
@@ -465,6 +474,7 @@ const say = (s = "") => process.stdout.write(`${s}\n`);
 const pct = (v) => `${(v * 100).toFixed(1)}%`;
 
 say(`${outPath.replace(`${ROOT}/`, "")}`);
+say(`  settled by ${out.code.script} · code ${out.code.fingerprint} (${out.code.files.length} files)`);
 say(`  ${docs.length} ${docs.length === 1 ? "sitting" : "sittings"} · ${said.length} answers · ${marks.length} marks`);
 const looked = out.sittings.reduce((a, s) => a + Number(s.looked ?? 0), 0);
 if (looked) say(`  ${looked} marks were put in front of somebody across them`);

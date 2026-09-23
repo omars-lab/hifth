@@ -59,6 +59,7 @@ import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { planSession } from "./lib/adjudication.mjs";
+import { codeLine } from "./lib/grader-code.mjs";
 import { wilson } from "./lib/mark-ink.mjs";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
@@ -233,6 +234,8 @@ const names = flagged.slice(0, NAMED).map((a) => a.id).join(", ") +
 const out = [
   `ruling ${rulingPath}`,
   `seed ${ruling.seed} · ${ruling.answers.length} of ${ruling.count} answered · displacements ${ruling.shiftRan} (${fp})`,
+  // The other fingerprint: the code that reached this verdict, beside the input it read.
+  codeLine(fileURLToPath(import.meta.url)),
   `median ${(median / 1000).toFixed(1)}s a trial`,
   "",
   line("as shipped", s.shipped),
