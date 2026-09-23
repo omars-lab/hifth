@@ -540,6 +540,32 @@
         difference, and the record of what changed our minds — lives beside this page in
         <a href="../design/what-we-depend-on.md">the record of what this app depends on</a> and
         <a href="./ledger.json">the standing list of human-only checks</a>.</p>
+
+      <h3 style="margin-top:2.2rem">Re-score one of our rulings yourself</h3>
+      <p>The mark-placement figures come from sittings where a person answered the same question over
+        and over, and the answers are committed. One of those sittings can be scored again by anyone,
+        from the repository and one hash-checked download, without taking our word for anything.
+        Clone it, install, fetch the word pages the marks are read from, and run one command:</p>
+      <p class="sub" style="line-height:2.1">
+        <span class="vkey">git clone https://github.com/omars-lab/hifth.git</span><br>
+        <span class="vkey">cd hifth</span> · <span class="vkey">pnpm install</span><br>
+        <span class="vkey">pnpm --filter @hifth/etl build:words --fetch</span> &nbsp;<small>(about 350 MB, checked against a committed hash)</small><br>
+        <span class="vkey">make rescore RULING=2026-08-12T1650-placement-residual-by-hand.seed23</span></p>
+      <p>What you should see: a small table with three rows that matter — the fingerprint of the
+        measurement the sitting was shown against, the fingerprint of the grading code, and the
+        headline — each with a <em>recorded</em> column and a <em>now</em> column and the word
+        <span class="vkey">same</span> beside it; then the line <span class="vkey">everything agrees</span>.
+        The headline for that sitting is <span class="vkey">98.3% [91.1% – 99.7%] 59/60</span>: sixty
+        placements over forty pages, fifty-nine of which the reader put nearer our correction than the
+        box as first printed. The <em>recorded</em> column comes from a receipt committed beside the
+        ruling, holding what the scorer said on the day — so you are comparing a published number with
+        one your own machine just produced, not two runs on ours. If any row says
+        <span class="vkey">DIFFERS</span>, the command says which and why, and we would want to hear about it.</p>
+      <p class="sub">Two honest limits. The other rulings in that directory are settled tables, made from
+        transcripts and a large measurement that were never committed; the same command refuses those
+        in so many words rather than replaying something smaller, and <span class="vkey">make rescore</span>
+        on its own lists which is which. And nobody outside the project has run this yet — that is the
+        half of the check we cannot do for ourselves.</p>
     </div>
   </section>
 
