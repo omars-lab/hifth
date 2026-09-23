@@ -109,6 +109,12 @@
   --diff-share-wash: rgba(63, 125, 67, 0.16);
   --diff-part: #a8791d;
   --diff-part-wash: rgba(198, 141, 20, 0.22);
+  /* A single vowel mark the two ayat do not share (diff-mark-tint decision,
+     option C). Its box is a few units across, so it needs a colour that reads
+     on top of BOTH washes above — an indigo, off the green/ochre axis, and a
+     touch denser than either since there is so little of it. */
+  --diff-mark: #3b5fa8;
+  --diff-mark-wash: rgba(59, 95, 168, 0.3);
 
   /* Type roles (Loop 0 uses platform fonts; display face is a later decision). */
   --font-arabic: "Noto Naskh Arabic", "Geeza Pro", "Amiri", serif;

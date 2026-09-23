@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from "vitest";
 import { render, waitFor } from "@testing-library/react";
-import type { Edge, WordShard } from "@hifth/core";
+import type { Edge, MarkShard, WordShard } from "@hifth/core";
 import { DiffView } from "./DiffView";
 import styles from "./DiffView.module.css";
 
@@ -20,11 +20,38 @@ const SHARDS: Record<number, WordShard> = {
   19: { page: 19, words: { "2:123": { from: 1, boxes: boxes(22) } } },
 };
 
+/**
+ * Marks, same idea: word *w*'s *k*-th mark sits at x = 10w + k, one unit square,
+ * above the line. Word 3 is inside the shared run and prints with a fatha and a
+ * kasra on 2:48 but a fatha and a damma on 2:123 — the one-vowel trap. Word 14
+ * (first of the divergent tail) carries a sukun on both. Word 15 has a fatha on
+ * 2:48 and nothing on 2:123 — a difference, but on a word the wash already
+ * calls different, so it must NOT be tinted.
+ */
+const mark = (w: number, k: number, n: string) =>
+  ({ w, n, r: [10 * w + k, 15, 1, 1], s: "ink" }) as const;
+
+const MARKS: Record<number, MarkShard> = {
+  7: {
+    page: 7,
+    marks: {
+      "2:48": [mark(3, 0, "fatha"), mark(3, 1, "kasra"), mark(14, 0, "sukun"), mark(15, 0, "fatha")],
+    },
+  },
+  19: {
+    page: 19,
+    marks: { "2:123": [mark(3, 0, "fatha"), mark(3, 1, "damma"), mark(14, 0, "sukun")] },
+  },
+};
+
 const PAGE_SVG = '<svg viewBox="0 0 235 235" width="235" height="235"><path d="M0 0" /></svg>';
+
+const loadMarkShard = vi.fn(async (_edition: string, page: number) => MARKS[page] ?? null);
 
 vi.mock("../assets", () => ({
   loadPageSvg: vi.fn(async () => PAGE_SVG),
   loadWordShard: vi.fn(async (_edition: string, page: number) => SHARDS[page] ?? null),
+  loadMarkShard: (edition: string, page: number) => loadMarkShard(edition, page),
 }));
 
 /** The 2:48 ↔ 2:123 edge as it ships: both sides match on their first 13 words. */
@@ -79,6 +106,37 @@ describe("DiffView (spec §3 — why these two are confusable)", () => {
       expect(share).toHaveLength(1);
       expect(xSpan(share[0] as SVGRectElement)).toEqual([10, 138]);
     }
+  });
+
+  it("tints the one vowel mark the other side does not carry on the same word — on both sides", async () => {
+    // Word 3 is shared, and 2:48 prints it with a kasra where 2:123 has a damma.
+    // The fatha they both carry stays quiet. Words 14 and 15 are in the
+    // divergent tail, so nothing there is tinted whatever it carries — the
+    // ochre wash already says those are different words.
+    const { container } = render(<DiffView edge={EDGE} fromKey={FROM} />);
+    await waitFor(() => expect(container.querySelectorAll("svg")).toHaveLength(2));
+    const [fromSvg, toSvg] = Array.from(container.querySelectorAll("svg"));
+
+    const a = washes(fromSvg as SVGSVGElement, styles.wMark as string);
+    expect(a.map((r) => xSpan(r)[0])).toEqual([31]);
+    const b = washes(toSvg as SVGSVGElement, styles.wMark as string);
+    expect(b.map((r) => xSpan(r)[0])).toEqual([31]);
+
+    // Drawn after the washes, so a tint inside the green run sits on top of it.
+    const order = Array.from((fromSvg as SVGSVGElement).querySelectorAll("rect")).map((r) =>
+      r.getAttribute("class"),
+    );
+    expect(order.indexOf(styles.wMark as string)).toBeGreaterThan(order.lastIndexOf(styles.wShare as string));
+  });
+
+  it("still draws the word washes when a page has no marks to hand — only the tint goes missing", async () => {
+    loadMarkShard.mockResolvedValueOnce(null).mockResolvedValueOnce(null);
+    const { container } = render(<DiffView edge={EDGE} fromKey={FROM} />);
+    await waitFor(() => expect(container.querySelectorAll("svg")).toHaveLength(2));
+    const [fromSvg] = Array.from(container.querySelectorAll("svg"));
+    expect(washes(fromSvg as SVGSVGElement, styles.wShare as string)).toHaveLength(1);
+    expect(washes(fromSvg as SVGSVGElement, styles.wDiff as string)).toHaveLength(1);
+    expect(washes(fromSvg as SVGSVGElement, styles.wMark as string)).toHaveLength(0);
   });
 
   it("veils everything the crop caught that is NOT this ayah — a scrim with the ayah punched out", async () => {
