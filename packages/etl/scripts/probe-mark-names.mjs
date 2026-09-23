@@ -60,7 +60,7 @@
  * Named `probe-` and not `gate-`: the ligature corpus is a gitignored cache, so
  * there is nothing for a gate to read on a clean checkout. It ships nothing.
  */
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 

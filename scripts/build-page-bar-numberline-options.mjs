@@ -439,7 +439,7 @@ const html = `<!doctype html>
 </html>
 `;
 
-const arabic = html.match(/[؀-ۿݐ-ݿࢠ-ࣿﭐ-﷿ﹰ-﻿]/g);
+const arabic = html.match(/[؀-ۿݐ-ݿࢠ-ࣿﭐ-﷿ﹰ-\uFEFF]/g);
 if (arabic) die(`refusing to write: the page carries ${arabic.length} Arabic codepoint(s)`);
 writeFileSync(PAGE, html);
 console.log(
