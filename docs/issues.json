@@ -2004,10 +2004,11 @@
         "file": "docs/design/robust-validation.md",
         "item": "②"
       },
-      "status": "open",
+      "status": "fixed",
       "severity": "risk",
       "owner": "agent",
-      "note": "Subtask of rigor-stack-pins-the-checking-code (①), and the highest-value one. Stamp every ruling with a hash of the grading script and the small libraries it leans on, beside the input fingerprint it already carries, so a result names the exact code that produced it and a changed grader returning a different verdict from identical inputs is detectable from the result alone. The repo already computes a hash over its build scripts for a different check, so this is that same move pointed at the graders. Task #125."
+      "closedBy": "packages/etl/scripts/lib/grader-code.test.mjs",
+      "note": "Subtask of rigor-stack-pins-the-checking-code (①), and the highest-value one. Stamp every ruling with a hash of the grading script and the small libraries it leans on, beside the input fingerprint it already carries, so a result names the exact code that produced it and a changed grader returning a different verdict from identical inputs is detectable from the result alone. The repo already computes a hash over its build scripts for a different check, so this is that same move pointed at the graders. Task #125. FIXED 2026-09-22: packages/etl/scripts/lib/grader-code.mjs hashes a grader and every library it reaches through its own imports; the four scorers print the stamp beside their input-fingerprint line and settle-mark-report writes a `code` block (script, fingerprint, files covered) into every ruling. Old rulings read as unstamped, none rewritten. The per-instrument input hash is deliberately left as separate copies. Closed by the helper's own test (a touched grader or library changes the stamp, an unrelated file does not) and a settle-mark-report test that reads the stamp back out of a written ruling."
     },
     {
       "id": "grader-known-answer-self-test",

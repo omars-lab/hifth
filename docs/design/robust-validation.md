@@ -280,12 +280,28 @@ and nothing would catch it. This is the one question the five below break into c
 lighter bar is enough and writing down why, so the next person inherits the call instead of asking
 it over again.
 
-### ② Should every result carry a fingerprint of the grading code, not just its inputs? · **open**
+### ② Should every result carry a fingerprint of the grading code, not just its inputs? · **fixed**
 
 The single highest-value step. Stamp each result with a hash of the grading script and the small
 libraries it leans on, beside the input fingerprint it already carries, so a result names the exact
 code that produced it. **What would answer it:** a changed grader that returns a different verdict
 from the same inputs becomes detectable from the result alone.
+
+**Closed by** one small shared helper, `packages/etl/scripts/lib/grader-code.mjs`, that hashes a
+grading script together with every library it reaches through its own imports (the same strong
+hash the build-script census already uses, pointed at one script's imports instead of a directory).
+All five graders carry it: the four scorers (`score-mark-adjudication`, `score-mark-nudge`,
+`score-placement-contest`, `score-mark-report`) print a `graded by … · code …` line beside the
+input-fingerprint line they already printed, and the settler (`settle-mark-report`) writes a
+`code` block — script, fingerprint, and the list of files the fingerprint covers — into every
+ruling it produces, beside `rowsFingerprint`. Rulings written before this existed carry no stamp
+and read as "unstamped", never as an error; none were rewritten. The input hash each instrument
+keeps its own copy of is deliberately untouched — sharing that one would let a single edit
+re-bless every old ruling, and the code hash has no such trap. The test that would fail if this
+regressed is `packages/etl/scripts/lib/grader-code.test.mjs`: it proves a touched grading script,
+or a touched library two imports away, changes the fingerprint, an unrelated file does not, and
+each real grader resolves to a distinct twelve-digit stamp; `settle-mark-report.test.mjs` proves
+the stamp actually lands in a written ruling.
 
 ### ③ Should each grader refuse to run until it passes a known-answer self-test? · **open**
 
@@ -325,8 +341,9 @@ do not.
   remaining doubt is named, not hidden.
 - It does not replace any check with another. Every family here catches something the others cannot;
   the design is that they overlap.
-- The code-fingerprinting and self-test additions above are proposals, not yet built. Whether to
-  build them, and in what order, is tracked as the open questions above, not settled here.
+- Of the additions above, the code fingerprint is built (②); the self-test and the rest are still
+  proposals. Whether to build those, and in what order, is tracked as the open questions above,
+  not settled here.
 
 ---
 
@@ -350,5 +367,7 @@ because a reader deciding whether to trust the app should not need a filename to
 - **The foundation self-test** — `packages/etl/scripts/vendor-pages.mjs` (`--verify-loop0`, run
   unconditionally).
 - **The build-script hash the code-fingerprint idea extends** — `scripts/gate-etl-scripts.mjs`.
+- **The grading-code fingerprint itself** — `packages/etl/scripts/lib/grader-code.mjs`, read by
+  every `score-*` and `settle-*` script; a ruling's `code` block is what it writes.
 - **The full list of machine checks** — the `gate:*` scripts under `scripts/`, aggregated by the
   `gates` script and mirrored in the continuous-integration workflow.

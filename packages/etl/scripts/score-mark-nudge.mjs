@@ -84,6 +84,7 @@ import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { planNudge, sameBuild } from "./lib/adjudication.mjs";
+import { codeLine } from "./lib/grader-code.mjs";
 import { wilson } from "./lib/mark-ink.mjs";
 import { agreementOf, clusteredCI, mean, meanCI, sd, slopeOf, spreadUnderSplit } from "./lib/placement-stats.mjs";
 
@@ -444,6 +445,8 @@ const real = clust.map((c) => Number.isFinite(c.lo) && (c.lo > 0 || c.hi < 0));
 const out = [
   `placements ${path}`,
   `seed ${ruling.seed} · reader ${ruling.reader ?? "unrecorded"} · ${rows.length} of ${ruling.count} placed · displacements ${ruling.shiftRan} (${fp})`,
+  // The other fingerprint: the code that reached this verdict, beside the input it read.
+  codeLine(fileURLToPath(import.meta.url)),
   `median ${(median(ms) / 1000).toFixed(1)}s a placement`,
   "",
   say("pages these can speak for", `${coverage.placed} placed on, of ${coverage.chosen} this session was built over`),
