@@ -327,12 +327,40 @@ one figure in each recorded verdict, and proves every grader then refuses with n
 also proves the committed fixtures reproduce their records byte for byte and that the graders still
 go on to score after passing.
 
-### ④ Should the seed and the ruling be published, so an outsider can re-score? · **open**
+### ④ Should the seed and the ruling be published, so an outsider can re-score? · **fixed**
 
 With the committed seed, the committed inputs and their fingerprints, a stranger who wants us to be
 wrong can regenerate the exact sitting, apply the committed answers, and get our number — or not.
 **What would answer it:** someone outside the project reproduces the number without trusting us, or
 shows they cannot.
+
+**Closed by** one command, `packages/etl/scripts/replay-ruling.mjs` (`make rescore RULING=<id>`),
+that takes a ruling from `docs/validation/rulings/`, rebuilds the sitting from its committed seed,
+applies the committed answers, runs the scorer again, and prints — recorded beside recomputed — the
+three things that have to agree for the number to be the same number: the fingerprint of the input,
+the fingerprint of the grading code from ②, and the headline figure. It exits 0 only when all three
+do, and names which one did not otherwise. The record it checks against is a small **receipt**
+beside the ruling (`<ruling>.replay.json`), written once with `--record` and committed: what the
+scorer said on the day, including every line it printed. A ruling with no receipt is *unstamped*, and
+the command says so and stops rather than inventing a record to agree with; a grader change that is
+meant to move a number is re-recorded there, so the move lands in a diff, the same way ③'s fixtures
+are. **What it covers, precisely:** the raw sittings — a placing session or a forced choice — whose
+answers are keyed by trial and whose measurement is committed with its fingerprint in its name.
+Today that is one ruling, the placing sitting of 2026-08-12 (seed 23, 60 placements over 40 pages,
+98.3% nearer our correction), and its receipt is committed. One thing the rebuild reads is not in
+the repository: the word-corpus pages the marks are read from, which are a pinned download whose
+hash *is* committed and is checked on fetch. **What it does not cover:** the nine settled tables.
+Each is the collapse of a transcript against a measurement of every mark on every page, and neither
+the transcripts nor that measurement was ever committed — the measurement is rebuilt, not stored,
+and is tens of megabytes. A settled table can be re-counted from its own rows; it cannot be
+re-scored, and the command refuses it in those words instead of replaying something smaller. The
+test that would fail if this regressed is `packages/etl/scripts/replay-ruling.test.mjs`: it records
+a receipt for a grader's known-answer fixture, proves the same bytes replay to a match, then changes
+one answer in the ruling, one figure in the receipt's headline, and the receipt's code fingerprint,
+and proves each comes back as a named mismatch with a non-zero exit; it also proves a ruling with no
+receipt is refused as unstamped, a settled table is refused as such, and — where the download is
+present — that the committed sitting replays to its committed receipt. The half of the question only
+an outsider can answer is still open: nobody outside the project has run it yet.
 
 ### ⑤ Should a second person sit the same trials, to measure reader agreement? · **open**
 
@@ -358,9 +386,9 @@ do not.
   remaining doubt is named, not hidden.
 - It does not replace any check with another. Every family here catches something the others cannot;
   the design is that they overlap.
-- Of the additions above, the code fingerprint (②) and the known-answer self-test (③) are built;
-  the rest are still proposals. Whether to build those, and in what order, is tracked as the open
-  questions above, not settled here.
+- Of the additions above, the code fingerprint (②), the known-answer self-test (③) and the outsider's
+  replay (④) are built; the rest are still proposals. Whether to build those, and in what order, is
+  tracked as the open questions above, not settled here.
 
 ---
 
@@ -390,5 +418,8 @@ because a reader deciding whether to trust the app should not need a filename to
   by every `score-*` and `settle-*` script; the fixtures are under `packages/etl/scripts/self-test/`,
   one directory per grader, and `rebuild-grader-self-tests.mjs` re-records them when a verdict is
   meant to change.
+- **The outsider's replay** — `packages/etl/scripts/replay-ruling.mjs`, run as `make rescore
+  RULING=<id>`; the receipts it checks against sit beside their rulings in `docs/validation/rulings/`
+  as `<ruling>.replay.json`, and `make rescore` with no ruling lists what can and cannot be replayed.
 - **The full list of machine checks** — the `gate:*` scripts under `scripts/`, aggregated by the
   `gates` script and mirrored in the continuous-integration workflow.

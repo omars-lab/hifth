@@ -87,6 +87,42 @@ Every source on the page is public and citable. The five links, and what each wa
 - `https://corpus.quran.com` — the word-by-word morphology behind the shared-word underline.
 - `https://github.com/quranpedia/quran-svg` — the printed-page geometry every check is built on.
 
+## Re-score a ruling yourself
+
+The page's figures about mark placement come from sittings whose answers are committed under
+`docs/validation/rulings/`. One of them can be re-scored by anyone, from the repository and one
+pinned download, without taking our word for anything. What to do:
+
+```
+git clone https://github.com/omars-lab/hifth.git
+cd hifth
+pnpm install
+pnpm --filter @hifth/etl build:words --fetch          # the word-corpus pages the marks are read from; ~350 MB, hash-checked
+make rescore RULING=2026-08-12T1650-placement-residual-by-hand.seed23
+```
+
+What you should see: a small table with three rows that matter — the fingerprint of the
+measurement the sitting was shown against, the fingerprint of the grading code, and the headline
+— each with a *recorded* column and a *now* column and the word `same` beside it, then the line
+`everything agrees`, and an exit code of 0. The headline for that sitting is
+`98.3% [91.1% – 99.7%] 59/60`: sixty placements over forty pages, fifty-nine of which a reader
+put nearer our correction than the box as first printed. If any row says `DIFFERS`, the command
+exits 1 and says which one and what that means; that is the finding the command exists to make
+public, and we would want to hear about it.
+
+How it works, briefly: the trials of a sitting are never stored, only the answers. The seed in the
+file name rebuilds the trial list; the committed measurement beside it (its fingerprint is in its
+name) is what the reader was shown; the scorer runs again on those and prints its result; and the
+*recorded* column comes from a receipt committed beside the ruling, which holds what the scorer
+said on the day, so the comparison is between a published number and a recomputed one — not
+between two runs on our machine.
+
+What this does not yet cover: the nine settled tables in the same directory, which are collapsed
+from transcripts and a large derived measurement that were never committed. `make rescore` with
+no ruling named lists every file there and says, for each, whether it can be replayed. And nobody
+outside the project has run this yet — when someone does, that is the half of the check we
+cannot do ourselves.
+
 ## Honest gaps the page states
 
 Kept in sync with `docs/issues.json` and `docs/validation/ledger.json`:
