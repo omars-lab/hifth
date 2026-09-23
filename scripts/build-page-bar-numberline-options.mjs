@@ -1,0 +1,452 @@
+#!/usr/bin/env node
+/**
+ * Draws the three answers to one page-bar question — `page-bar-numberline`: can
+ * the bar read out its own landmarks (juz numbers, and the page under the finger)
+ * like a ruler, instead of staying a mute row of ticks? — on a faithful bar at a
+ * phone and a desktop width, from committed data only.
+ *
+ * A build-to-choose page: the three options are live, driven by the *real*
+ * shipped maths, so the reader chooses by moving the pointer, not by reading a
+ * description. Nothing on it is typed in twice:
+ *
+ *   - the 30 juz opening pages come from `apps/web/public/assets/manifest.json`
+ *     (`ayahPages`) and the juz table in `@hifth/core` — the same two the app
+ *     reads — not the even-every-twenty approximation an earlier draft used;
+ *   - the spread itself is `fisheyeSpread` and `pageBarFisheye` from core,
+ *     inlined by `.toString()`, and the swell is `markerEmphasis` with the app's
+ *     own `tapButtonDetent.emphasis`. The page cannot claim a lens the app does
+ *     not ship, because it runs the app's function;
+ *   - the thumb width is read out of `PageSlider.module.css`, so the bar's
+ *     geometry follows the real bar.
+ *
+ * One output, `docs/design/page-bar-numberline-options.html`, inline throughout
+ * (the host blocks external URLs; the bar is chrome, not print). The page carries
+ * no Arabic codepoints — the app's English mode is what is drawn — and the script
+ * refuses to write if any slip in.
+ *
+ * Registered in docs/decisions.json as `builtBy` for `page-bar-numberline`; the
+ * reasons live in docs/decisions/page-bar.md.
+ */
+import { readFileSync, writeFileSync } from "node:fs";
+import { join } from "node:path";
+import { ROOT } from "./code-pointers.mjs";
+
+const MANIFEST = join(ROOT, "apps/web/public/assets/manifest.json");
+const CORE = join(ROOT, "packages/core/dist/index.js");
+const SLIDER_CSS = join(ROOT, "apps/web/src/components/PageSlider.module.css");
+const PAGE = join(ROOT, "docs/design/page-bar-numberline-options.html");
+
+function die(msg) {
+  console.error(`build-page-bar-numberline-options: ${msg}`);
+  process.exit(1);
+}
+
+// ------------------------------------------------------------------- the data
+
+const { JUZ_STARTS, AYAH_COUNTS, fisheyeSpread, pageBarFisheye, markerEmphasis, tapButtonDetent } =
+  await import(CORE);
+
+const manifest = JSON.parse(readFileSync(MANIFEST, "utf8"));
+const ayahPages = manifest.ayahPages;
+const TOTAL = Math.max(...ayahPages);
+
+const globalIndex = (surah, ayah) => {
+  let n = 0;
+  for (let i = 0; i < surah - 1; i++) n += AYAH_COUNTS[i];
+  return n + ayah - 1;
+};
+
+// The real page each juz opens on, from the vendored print — not 20·(n−1)+2.
+const JUZ_PAGES = JUZ_STARTS.map(([surah, ayah]) => ayahPages[globalIndex(surah, ayah)]);
+
+// The thumb width the real bar uses, so the drawn geometry matches it.
+const THUMB = (() => {
+  const css = readFileSync(SLIDER_CSS, "utf8");
+  const m = css.match(/--thumb:\s*(\d+(?:\.\d+)?)px/);
+  return m ? Number(m[1]) : 22;
+})();
+
+// The two knobs the live options must honour, straight from the shipped code.
+const LENS = {
+  radiusPx: pageBarFisheye.radiusPx,
+  power: pageBarFisheye.power,
+  juzPageWindow: pageBarFisheye.juzPageWindow,
+};
+const EMPH = { near: tapButtonDetent.emphasis.near, peak: tapButtonDetent.emphasis.peak };
+
+// ------------------------------------------------------------------- the page
+
+const LEAF_SVG =
+  '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7.5 2.5H14L18 6.5V19.5A1.5 1.5 0 0 1 16.5 21H7.5A1.5 1.5 0 0 1 6 19.5V4A1.5 1.5 0 0 1 7.5 2.5Z" fill="var(--paper)" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M13.75 2.75V6A1 1 0 0 0 14.75 7H18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>';
+
+const html = `<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Page bar — what numbers can you read?</title>
+<style>
+  :root {
+    --paper: #fbf7ef;
+    --paper-raised: #f4ecdd;
+    --ink: #2b2620;
+    --ink-soft: #6b6055;
+    --ink-faint: #9a8f80;
+    --hairline: #e4d8c4;
+    --accent: #3f7d5f;
+    --accent-strong: #2f5f47;
+    --accent-tint: #e7f0ea;
+    --highlight: #c98a2b;
+    --space-1: 4px; --space-2: 8px; --space-3: 12px; --space-4: 16px;
+    --radius-sm: 4px; --radius-md: 8px; --radius-pill: 999px;
+    --touch-min: 44px;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 880px; margin: 0 auto; padding: 32px 16px 96px; }
+  h1 { font-size: 1.7rem; color: var(--accent-strong); margin: 0 0 4px; }
+  .sub { color: var(--ink-soft); margin: 0 0 28px; }
+  h2 { font-size: 1.15rem; color: var(--ink); margin: 34px 0 10px; }
+  p { margin: 0 0 12px; }
+  .glossary { background: var(--paper-raised); border: 1px solid var(--hairline); border-radius: var(--radius-md); padding: 14px 18px; margin: 0 0 24px; font-size: 0.92rem; }
+  .glossary b { color: var(--accent-strong); }
+  .controls { display: flex; flex-wrap: wrap; gap: 18px; align-items: center; margin: 8px 0 22px; position: sticky; top: 0; background: var(--paper); padding: 12px 0; z-index: 5; border-bottom: 1px solid var(--hairline); }
+  .seg { display: inline-flex; border: 1px solid var(--hairline); border-radius: var(--radius-pill); overflow: hidden; }
+  .seg button { border: 0; background: none; padding: 8px 14px; font: inherit; font-size: 0.9rem; color: var(--ink-soft); cursor: pointer; }
+  .seg button[aria-pressed="true"] { background: var(--accent); color: #fff; }
+  .seg + .seg { margin-left: 0; }
+  .ctl-label { font-size: 0.82rem; color: var(--ink-faint); text-transform: uppercase; letter-spacing: 0.05em; margin-right: 8px; }
+  .stageWrap { display: flex; justify-content: center; margin: 10px 0 6px; }
+  .device { background: var(--paper); border: 1px solid var(--hairline); border-radius: 22px; box-shadow: 0 8px 30px rgba(0,0,0,0.08); overflow: hidden; }
+  .device .pageStrip { height: 210px; background:
+      repeating-linear-gradient(0deg, transparent 0 14px, rgba(107,96,85,0.06) 14px 15px),
+      linear-gradient(180deg, #fffdf8, #fbf7ef);
+    border-bottom: 1px solid var(--hairline); position: relative; }
+  .device .pageStrip::after { content: "the mus'haf page (stand-in — no scripture on a public page)"; position: absolute; inset: 0; display: grid; place-items: center; color: var(--ink-faint); font-size: 0.8rem; font-style: italic; }
+
+  /* ---- the bar, faithful to the app ---- */
+  .bar { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: var(--space-1) var(--space-2); padding: var(--space-1) var(--space-3); border-top: 1px solid var(--hairline); background: var(--paper-raised); direction: rtl; }
+  .edge { display: grid; place-items: center; min-width: var(--touch-min); min-height: var(--touch-min); border: 0; background: none; color: var(--ink-soft); font-size: 1rem; cursor: pointer; }
+  .track { position: relative; min-height: var(--touch-min); }
+  .rail { position: absolute; inset-inline: 0; top: 50%; height: 2px; background: var(--hairline); transform: translateY(-50%); }
+  .runs { position: absolute; inset-inline: 0; top: 50%; height: 0; }
+  .run { position: absolute; top: -7px; height: 14px; border-radius: 1px; background: var(--ink-soft); opacity: 0.28; }
+  .juz { position: absolute; top: -9px; width: 2px; height: 18px; padding: 0; border: 0; -webkit-appearance: none; appearance: none; border-radius: 1px; background: var(--accent); opacity: 0.65; transform-origin: center bottom; cursor: pointer; }
+  .loupe { position: absolute; bottom: 52px; height: 60px; border-radius: 10px; background: var(--paper); border: 1px solid var(--hairline); box-shadow: 0 10px 26px rgba(0,0,0,0.14); direction: ltr; overflow: hidden; }
+  .loupe::after { content: ""; position: absolute; left: 50%; bottom: -7px; width: 12px; height: 12px; background: var(--paper); border-right: 1px solid var(--hairline); border-bottom: 1px solid var(--hairline); transform: translateX(-50%) rotate(45deg); }
+  .loupe .ljuz { position: absolute; top: 8px; width: 2px; height: 20px; background: var(--accent); }
+  .loupe .ljuzN { position: absolute; top: 0; font-size: 11px; font-weight: 700; color: var(--accent-strong); transform: translateX(-50%); white-space: nowrap; }
+  .loupe .lpt { position: absolute; top: 30px; width: 1px; height: 7px; background: var(--ink-faint); }
+  .loupe .lpn { position: absolute; top: 39px; font-size: 10px; color: var(--ink-soft); transform: translateX(-50%); }
+  .loupe .lhere { position: absolute; top: 6px; width: 2px; height: 40px; background: var(--highlight); }
+  .juzLbl { position: absolute; font-size: 10px; font-weight: 700; color: var(--accent-strong); transform: translateX(50%); white-space: nowrap; pointer-events: none; direction: ltr; }
+  .pageTick { position: absolute; top: -4px; width: 1px; height: 8px; background: var(--ink-faint); opacity: 0.7; }
+  .pageLbl { position: absolute; font-size: 9px; color: var(--ink-soft); transform: translateX(50%); white-space: nowrap; pointer-events: none; direction: ltr; }
+  .handle { position: absolute; top: 50%; width: 26px; height: 26px; transform: translate(50%, -50%); color: var(--accent-strong); filter: drop-shadow(0 1px 1px rgba(0,0,0,0.25)); pointer-events: none; }
+  .handle svg { display: block; width: 100%; height: 100%; }
+  .inventory { grid-column: 1 / -1; text-align: center; color: var(--ink-soft); font-size: 11px; direction: ltr; }
+  .lens { position: absolute; top: -14px; height: 28px; border-radius: var(--radius-pill); background: radial-gradient(ellipse at center, rgba(63,125,95,0.10), transparent 72%); pointer-events: none; opacity: 0; }
+  .note { color: var(--ink-faint); font-size: 0.82rem; margin-top: 4px; text-align: center; }
+  .readOn { min-height: 34px; text-align:center; color: var(--ink-soft); font-size: 0.9rem; margin: 2px 0 18px; }
+  .readOn b { color: var(--accent-strong); }
+  ul.change { color: var(--ink-soft); }
+  .tag { display:inline-block; font-size:0.72rem; font-weight:700; text-transform:uppercase; letter-spacing:0.05em; padding:2px 7px; border-radius:var(--radius-pill); }
+  .tag.rec { background: var(--accent-tint); color: var(--accent-strong); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>The page bar — what numbers can you actually read?</h1>
+  <p class="sub">A build-to-choose page. Move your pointer across the bar; switch the option and the device.</p>
+
+  <div class="glossary" style="border-color:var(--accent); background:var(--accent-tint);">
+    <b>Decided — B, the fisheye.</b> Omar chose it on 2026-09-22, after building all three on the real bar. The bar spreads apart under the pointer and names the juz around you, with the exact page beneath — no second surface hanging over the mus'haf. It ships <b>behind a setting the reader can turn off</b>, since it is a quiet addition, not a change anyone is forced to take. The loupe (C) read more, but at the cost of a floating panel; «today» (A) stays available as the off state. The losing options are kept below — they are the reason the choice was a choice.
+  </div>
+
+  <div class="glossary">
+    <b>mus'haf</b> — the printed Qur'an, here the 604-page Madani layout.
+    &nbsp;·&nbsp; <b>juz</b> — one of the thirty equal parts a hafiz reads the book by; in this edition juz 1 opens on page 1 and each next juz opens roughly twenty pages on, at the real openings this page draws from the print.
+    &nbsp;·&nbsp; <b>the bar</b> — the strip along the bottom that scrubs the whole book, with a page turn on each edge.
+  </div>
+
+  <p>The bar already grows a juz mark as your pointer nears it — a magnifying-glass swell, decided and shipped. What it has never shown is a <em>number</em>: to learn which juz a mark is, you hover it for a tooltip or drag the thumb for the pop-up. The question here is the one raised watching a hafiz hunt for juz 18: <b>can the bar itself read out its landmarks — juz numbers, and page numbers every five — like a ruler under your finger?</b></p>
+
+  <div class="controls">
+    <div><span class="ctl-label">Option</span>
+      <div class="seg" id="optSeg">
+        <button data-opt="A" aria-pressed="true">A · today</button>
+        <button data-opt="B" aria-pressed="false">B · fisheye</button>
+        <button data-opt="C" aria-pressed="false">C · loupe</button>
+      </div>
+    </div>
+    <div><span class="ctl-label">Device</span>
+      <div class="seg" id="devSeg">
+        <button data-dev="phone" aria-pressed="true">phone</button>
+        <button data-dev="desktop" aria-pressed="false">desktop</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="stageWrap" id="stageWrap"></div>
+  <div class="readOn" id="readOn"></div>
+  <p class="note" id="note"></p>
+
+  <h2>The options</h2>
+  <p><b>A · today</b> — magnifying juz marks, no numbers. The number line is felt, never read; a landmark costs a hover or a drag. This is the thing to beat.</p>
+  <p><b>B · fisheye</b> — a Dock-style lens that <em>spreads the bar apart</em> under the pointer. The marks near your finger don't just swell — they slide apart to make room, so the juz around you can name themselves and the exact page you're on can sit beneath, where the track was too tight for them a moment before. The bar stays flat everywhere else, and there's no second surface. (Page-every-five was tried in the lens and dropped — the render showed it smears even when spread; see below.) <span class="tag rec">what the owner asked for</span></p>
+  <p><b>C · loupe</b> — a magnifier panel that floats <em>above</em> the pointer, like a jeweller's loupe laid on a ruler. It dedicates a fixed, generous strip to the forty-odd pages under your finger, so juz numbers and page-every-five sit far apart and read cleanly — at the cost of a second thing hovering over the page. The most literal answer to «zoom into a piece of it».</p>
+
+  <h2>What building it taught — the things no upfront list had a row for</h2>
+  <ul class="change" id="findings">
+    <li><b>Page-every-five cannot be read in the bar itself.</b> Across 604 pages, five pages sit about seven pixels apart on a desktop track and two on a phone. Even the fisheye — which really does slide the marks apart — cannot open that up enough: the numbers still touch. This was the first thing the render killed, and it is why <b>B names the juz and the single page you're on, and leaves the full page ruler to the loupe.</b></li>
+    <li><b>The phone is where a zoom is needed most and an in-place one helps least.</b> The narrower the bar, the more juz fall under a lens of any fixed width — a dozen of them on the phone — and spreading a fixed strip apart cannot make room for a dozen two-digit numbers. So B had to name the juz by <em>page distance</em>, not by pixels: only the two or three right under the finger. The loupe has no such trouble, because it hands the same few pages a whole panel regardless of how tight the bar is.</li>
+    <li><b>A loupe is the only option that reads the same on both.</b> Phone and desktop, it shows page-every-five and the juz names cleanly, because its width is its own, not the bar's. Its cost is the one thing a still picture does show plainly: a panel hanging over the page while you scrub.</li>
+    <li><b>«Today» is not broken — it is just mute.</b> The marks were never overflowing or mis-drawn (an earlier hunt for a bar overflow found nothing to fix); they simply carry no number. Every option here is about giving them a voice, not repairing them.</li>
+  </ul>
+
+  <h2>What else was considered, and why it is not a live option here</h2>
+  <p><b>An always-on printed ruler</b> — juz numbers standing over every mark, all the time, no pointer needed. The render of «today» already shows why it is out: thirty juz marks on a phone bar are a dense picket of ticks about seven pixels apart, and a number over each would be a solid smear. Always-on can afford a very coarse scale (a number every fifty pages, say) but not the juz-by-juz reading the question is asking for, so it is not drawn as its own option.</p>
+
+  <h2>What would change the answer</h2>
+  <p>If the bar were given far more width — a tablet or desktop only, laid out edge to edge — the in-place fisheye (B) could start to carry page numbers too, and the loupe's second surface would look like more than it buys. And if scrubbing on a phone turns out to feel fine with a panel floating over the page, the loupe (C) is the clear winner; if that panel feels like it is in the way, B's quiet in-bar reading wins. That is the one thing these pictures cannot settle — it wants a thumb on a real phone.</p>
+
+  <h2>What this is <em>not</em> settling</h2>
+  <p>Two things are left open on purpose. First, the phone verdict above — whether a hafiz scrubbing with a thumb wants the loupe's panel or would rather it stay out of the way — is not decided here; B ships as the default because it is the quieter of the two, and the switch is exactly so that call can be revisited on a real phone without another round of drawing. Second, B names <em>the page you are on</em> but not a running page ruler; if the loupe is later wanted for the full ruler on wide screens, that is a new option on a new page, not a reopening of this one.</p>
+
+<script>
+(function(){
+  var TOTAL = ${TOTAL};
+  var JUZ = ${JSON.stringify(JUZ_PAGES)}; // real opening pages, from the vendored print
+  var THUMB = ${THUMB};
+  // The two knobs, straight from the shipped bar — not re-typed here.
+  var LENS = ${JSON.stringify(LENS)};
+  var EMPH = ${JSON.stringify(EMPH)};
+  var state = { opt:"A", dev:"phone", lensPx:null, page:115 };
+
+  // widths of the *track* portion, illustrative of each device's real bar
+  var DEV = {
+    phone:   { w:390,  track:230 },
+    desktop: { w:1000, track:840 }
+  };
+
+  var LEAF_SVG = '${LEAF_SVG}';
+
+  // ---- the real shipped maths, inlined so this page cannot claim a lens the app
+  // ---- does not run. Same functions as @hifth/core and PageSlider.
+  ${fisheyeSpread.toString()}
+  ${markerEmphasis.toString()}
+  function frac(p){ return (p-1)/(TOTAL-1); }               // 0..1 over the print
+  function pxOf(p, trackW){ return (1-frac(p)) * (trackW - THUMB) + THUMB/2; }
+  function pageAtPx(px, trackW){ return Math.round((1 - (px-THUMB/2)/(trackW-THUMB)) * (TOTAL-1) + 1); }
+  function emph(dist){ return markerEmphasis(dist, EMPH.near, EMPH.peak); }
+  // Dock-style spread: a point at signed distance d from the lens centre L lands
+  // at L + fisheyeSpread(d) — exactly what PageSlider does with restCentre − px.
+  function warpX(x, L){ if(L===null) return x; return L + fisheyeSpread(x - L, LENS); }
+
+  function el(tag, cls, css){ var e=document.createElement(tag); if(cls)e.className=cls; if(css)e.setAttribute("style",css); return e; }
+
+  function render(){
+    var d = DEV[state.dev];
+    var wrap = document.getElementById("stageWrap");
+    wrap.innerHTML = "";
+    var device = el("div","device"); device.style.width = d.w+"px";
+    device.appendChild(el("div","pageStrip"));
+
+    var bar = el("div","bar");
+    var prev = el("button","edge"); prev.textContent="▸"; prev.tabIndex=-1;
+    var next = el("button","edge"); next.textContent="◂"; next.tabIndex=-1;
+    var track = el("div","track"); track.id="track"; track.style.minWidth=d.track+"px";
+
+    track.appendChild(el("div","rail"));
+
+    var runs = el("div","runs");
+    var run = el("span","run");
+    run.style.cssText = "top:-7px;height:14px;insetInlineStart:"+(THUMB/2)+"px;inlineSize:"+(d.track-THUMB)+"px;";
+    runs.appendChild(run);
+    track.appendChild(runs);
+
+    var trackW = d.track;
+
+    JUZ.forEach(function(pg, i){
+      var x = pxOf(pg, trackW);
+      var mk = el("button","juz");
+      mk.style.insetInlineStart = (x-1)+"px";
+      mk.dataset.juz = (i+1);
+      mk.dataset.px = x;
+      mk.tabIndex=-1;
+      track.appendChild(mk);
+    });
+
+    var lens = el("div","lens"); lens.id="lens"; track.appendChild(lens);
+
+    var handle = el("span","handle"); handle.innerHTML = LEAF_SVG;
+    handle.style.insetInlineStart = pxOf(state.page, trackW)+"px";
+    track.appendChild(handle);
+
+    bar.appendChild(prev); bar.appendChild(track); bar.appendChild(next);
+    var inv = el("span","inventory"); inv.textContent = "604 of 604 pages available";
+    bar.appendChild(inv);
+    device.appendChild(bar);
+    wrap.appendChild(device);
+
+    paint();
+    if(state.dev==="phone" && state.opt!=="A" && state.lensPx===null){ state.lensPx = pxOf(state.page, trackW); paint(); }
+  }
+
+  function paint(){
+    var track = document.getElementById("track");
+    if(!track) return;
+    var d = DEV[state.dev]; var trackW = d.track;
+    var lensPx = state.lensPx;
+    var hoverOK = (state.dev==="desktop");
+    Array.prototype.forEach.call(track.querySelectorAll(".juzLbl,.pageTick,.pageLbl,.loupe"), function(n){ n.remove(); });
+    var lens = document.getElementById("lens");
+    lens.style.opacity = 0;
+
+    var useLens = (state.opt==="B" && lensPx!==null);
+    var pUnderB = useLens ? pageAtPx(lensPx, trackW) : null;
+
+    var marks = track.querySelectorAll(".juz");
+    Array.prototype.forEach.call(marks, function(mk){
+      var x = parseFloat(mk.dataset.px);
+      var juz = mk.dataset.juz;
+      var scale = 1, op = 0.65, showLbl = false, drawX = x;
+
+      if(state.opt==="A"){
+        if(hoverOK && lensPx!==null){ scale = emph(Math.abs(x-lensPx)); if(scale>1.02) op=1; }
+      } else if(state.opt==="B"){
+        if(useLens){
+          var dist = Math.abs(x-lensPx);
+          drawX = warpX(x, lensPx);
+          scale = emph(dist);
+          // Name only the juz within the shipped page-window of the finger — a
+          // page-based window, not a pixel one, so the label count stays two or
+          // three on any track (a pixel window buries a dozen juz on the phone).
+          var startPg = JUZ[parseInt(juz,10)-1];
+          if(Math.abs(startPg - pUnderB) <= LENS.juzPageWindow){ showLbl = true; op = 1; }
+        }
+      }
+      mk.style.insetInlineStart = (drawX-1)+"px";
+      mk.style.transform = "scale("+scale+")";
+      mk.style.opacity = op;
+      if(showLbl){
+        var lbl = document.createElement("span");
+        lbl.className = "juzLbl";
+        lbl.textContent = juz;
+        lbl.style.insetInlineStart = drawX+"px";
+        lbl.style.top = "-24px";
+        var dd = Math.abs(x-lensPx);
+        lbl.style.opacity = Math.max(0, 1 - dd/42);
+        lbl.style.fontSize = (10 + 3*Math.max(0,1-dd/30)) + "px";
+        track.appendChild(lbl);
+      }
+    });
+
+    if(useLens){
+      var pUnder = pageAtPx(lensPx, trackW);
+      var here = document.createElement("span"); here.className="pageLbl";
+      here.textContent = "p "+pUnder; here.style.insetInlineStart = lensPx+"px"; here.style.top="14px";
+      here.style.opacity = 1; here.style.fontWeight = "700"; here.style.color = "var(--ink)";
+      track.appendChild(here);
+      lens.style.opacity = 1;
+      lens.style.insetInlineStart = (lensPx-LENS.radiusPx)+"px";
+      lens.style.width = (LENS.radiusPx*2)+"px";
+    }
+
+    if(state.opt==="C" && lensPx!==null){
+      var R = (state.dev==="desktop") ? 20 : 14;
+      var pMid = pageAtPx(lensPx, trackW);
+      var lo = Math.max(1, pMid-R), hi = Math.min(TOTAL, pMid+R);
+      var Wp = Math.min(trackW-8, 320), pad = 14;
+      var left = Math.max(0, Math.min(trackW-Wp, lensPx - Wp/2));
+      var lp = el("div","loupe");
+      lp.style.insetInlineStart = left+"px"; lp.style.width = Wp+"px";
+      function lx(pg){ return pad + ((pg-lo)/(hi-lo)) * (Wp-2*pad); }
+      for(var pp = Math.ceil(lo/5)*5; pp<=hi; pp+=5){
+        var t = document.createElement("span"); t.className="lpt"; t.style.left = lx(pp)+"px"; lp.appendChild(t);
+        var nn = document.createElement("span"); nn.className="lpn"; nn.textContent = pp; nn.style.left = lx(pp)+"px"; lp.appendChild(nn);
+      }
+      JUZ.forEach(function(startPg, i){
+        if(startPg<lo || startPg>hi) return;
+        var jt = document.createElement("span"); jt.className="ljuz"; jt.style.left = lx(startPg)+"px"; lp.appendChild(jt);
+        var jn = document.createElement("span"); jn.className="ljuzN"; jn.textContent = "Juz "+(i+1); jn.style.left = lx(startPg)+"px"; lp.appendChild(jn);
+      });
+      var lh = document.createElement("span"); lh.className="lhere"; lh.style.left = lx(pMid)+"px"; lp.appendChild(lh);
+      track.appendChild(lp);
+    }
+    updateReadout();
+  }
+
+  function updateReadout(){
+    var r = document.getElementById("readOn"), n=document.getElementById("note");
+    if(state.opt==="A"){
+      r.innerHTML = state.dev==="desktop" ? "Hover a mark and it swells — but stays <b>unnamed</b>. To read juz 18 you still hover for a tooltip or drag the thumb."
+                                          : "On a phone there is no hover: the marks sit at their plain size, <b>unnamed</b>. A landmark costs a drag.";
+      n.textContent = "Option A — the bar today.";
+    } else if(state.opt==="B"){
+      r.innerHTML = state.dev==="desktop" ? "The bar spreads apart under the pointer and <b>names the juz</b> around it, with the <b>exact page</b> you are on beneath. Page-every-five was tried here and dropped — even spread, the steps smear; that is the loupe's job."
+                                          : "No hover on a phone, so the lens is parked over the current page — it names the juz and the page, but you cannot <b>sweep</b> it without dragging.";
+      n.textContent = "Option B — move the pointer (desktop) to sweep the lens.";
+    } else {
+      r.innerHTML = state.dev==="desktop" ? "A loupe floats above your finger: the forty-odd pages under it, given a whole strip to breathe in, so <b>juz numbers</b> and <b>page-every-five</b> read cleanly — at the cost of a panel over the page."
+                                          : "On a phone the loupe parks over the current page. Same clean read — juz and page numbers far apart — but it is a second surface hovering above the bar.";
+      n.textContent = "Option C — a magnifier panel over the pointer.";
+    }
+  }
+
+  document.addEventListener("mousemove", function(e){
+    var track = document.getElementById("track"); if(!track) return;
+    if(state.dev!=="desktop") return;
+    var b = track.getBoundingClientRect();
+    if(e.clientX < b.left-20 || e.clientX > b.right+20 || e.clientY < b.top-40 || e.clientY > b.bottom+40){ return; }
+    state.lensPx = e.clientX - b.left;
+    paint();
+  });
+
+  document.getElementById("optSeg").addEventListener("click", function(e){
+    var b=e.target.closest("button"); if(!b) return;
+    state.opt=b.dataset.opt; state.lensPx = (state.dev==="phone")?null:state.lensPx;
+    Array.prototype.forEach.call(this.children, function(c){ c.setAttribute("aria-pressed", c===b); });
+    render();
+  });
+  document.getElementById("devSeg").addEventListener("click", function(e){
+    var b=e.target.closest("button"); if(!b) return;
+    state.dev=b.dataset.dev; state.lensPx = null;
+    Array.prototype.forEach.call(this.children, function(c){ c.setAttribute("aria-pressed", c===b); });
+    render();
+  });
+
+  window.__setState = function(opt, dev, lensFrac){
+    state.opt=opt; state.dev=dev; state.lensPx=null;
+    Array.prototype.forEach.call(document.getElementById("optSeg").children,function(c){c.setAttribute("aria-pressed",c.dataset.opt===opt);});
+    Array.prototype.forEach.call(document.getElementById("devSeg").children,function(c){c.setAttribute("aria-pressed",c.dataset.dev===dev);});
+    render();
+    if(lensFrac!==null && lensFrac!==undefined){ state.lensPx = DEV[dev].track*lensFrac; paint(); }
+  };
+
+  render();
+})();
+</script>
+</div>
+</body>
+</html>
+`;
+
+const arabic = html.match(/[؀-ۿݐ-ݿࢠ-ࣿﭐ-﷿ﹰ-﻿]/g);
+if (arabic) die(`refusing to write: the page carries ${arabic.length} Arabic codepoint(s)`);
+writeFileSync(PAGE, html);
+console.log(
+  `page-bar-numberline-options — 30 juz markers (openings ${JUZ_PAGES.slice(0, 4).join(", ")} … ${
+    JUZ_PAGES[JUZ_PAGES.length - 1]
+  }), lens r=${LENS.radiusPx}px p=${LENS.power} window=${LENS.juzPageWindow}pp → ${PAGE.replace(
+    ROOT,
+    "",
+  )} (${(html.length / 1024).toFixed(0)} KB)`,
+);
