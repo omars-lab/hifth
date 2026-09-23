@@ -8,6 +8,8 @@ import {
   resolvePullNearby,
   resolveTapButton,
   markerEmphasis,
+  fisheyeSpread,
+  pageBarFisheye,
   type DetentContext,
 } from "./detent-strategy.js";
 
@@ -115,5 +117,57 @@ describe("only C's markers grow on approach", () => {
     expect(tapButtonDetent.emphasis).not.toBeNull();
     expect(tapButtonDetent.emphasis?.peak).toBeGreaterThan(1);
     expect(tapButtonDetent.emphasis?.near).toBeGreaterThan(0);
+  });
+});
+
+describe("fisheyeSpread (the page-bar dock, decided B)", () => {
+  const lens = pageBarFisheye;
+  const W = lens.radiusPx;
+
+  it("does not move the point under the pointer", () => {
+    expect(fisheyeSpread(0, lens)).toBe(0);
+  });
+
+  it("leaves everything at or past the window edge exactly where it was", () => {
+    // At the edge the curve meets the identity, so the warp is seamless: nothing
+    // outside the neighbourhood twitches when the pointer moves.
+    expect(fisheyeSpread(W, lens)).toBeCloseTo(W, 6);
+    expect(fisheyeSpread(-W, lens)).toBeCloseTo(-W, 6);
+    expect(fisheyeSpread(W + 40, lens)).toBe(W + 40);
+    expect(fisheyeSpread(-(W + 40), lens)).toBe(-(W + 40));
+  });
+
+  it("pushes a point inside the window outward — the spread that makes numbers readable", () => {
+    // A power below 1 expands the middle: a marker halfway to the edge is thrown
+    // past halfway, opening a gap its neighbour's number can sit in.
+    const mid = fisheyeSpread(W / 2, lens);
+    expect(mid).toBeGreaterThan(W / 2);
+    expect(mid).toBeLessThan(W);
+  });
+
+  it("is symmetric about the pointer — the two sides spread the same", () => {
+    for (const d of [7, 19, 40, 70]) {
+      expect(fisheyeSpread(-d, lens)).toBeCloseTo(-fisheyeSpread(d, lens), 10);
+    }
+  });
+
+  it("never lets a farther marker overtake a nearer one — order is preserved", () => {
+    let prev = -Infinity;
+    for (let d = 0; d <= W; d += 4) {
+      const s = fisheyeSpread(d, lens);
+      expect(s).toBeGreaterThanOrEqual(prev);
+      prev = s;
+    }
+  });
+
+  it("names a real neighbourhood of pages to label, and a spread the eye can see", () => {
+    expect(lens.radiusPx).toBeGreaterThan(0);
+    expect(lens.power).toBeGreaterThan(0);
+    expect(lens.power).toBeLessThan(1); // below 1 is what expands the centre
+    expect(lens.juzPageWindow).toBeGreaterThan(0);
+  });
+
+  it("is inline-safe — its source names no import/require", () => {
+    expect(fisheyeSpread.toString()).not.toMatch(/\bimport\b|\brequire\b/);
   });
 });

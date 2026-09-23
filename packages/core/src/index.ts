@@ -344,8 +344,11 @@ export {
   resolvePullNearby,
   resolveTapButton,
   markerEmphasis,
+  fisheyeSpread,
+  pageBarFisheye,
   type DetentContext,
   type DetentStrategy,
+  type FisheyeLens,
   type Landing,
 } from "./decision-options/detent-strategy.js";
 

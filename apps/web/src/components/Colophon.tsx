@@ -10,6 +10,10 @@ interface ColophonProps {
   open: boolean;
   /** Dismiss the sheet. */
   onClose: () => void;
+  /** Whether the page bar spreads under the pointer (the graduated fisheye). */
+  fisheye: boolean;
+  /** Flip the spread on or off; the choice is remembered on this device. */
+  onToggleFisheye: () => void;
 }
 
 /** Focusable descendants of `root`, in tab order (excludes disabled + hidden). */
@@ -144,7 +148,12 @@ const CREDITS: readonly Credit[] = [
  * A11y: EditionPicker's contract — modal dialog, focus in, Tab trapped, Escape
  * closes, focus restored to the wordmark.
  */
-export function Colophon({ open, onClose }: ColophonProps): JSX.Element | null {
+export function Colophon({
+  open,
+  onClose,
+  fisheye,
+  onToggleFisheye,
+}: ColophonProps): JSX.Element | null {
   const { t, dir, lang, setLang } = useT();
   const sheetRef = useRef<HTMLDivElement>(null);
   const restoreRef = useRef<HTMLElement | null>(null);
@@ -247,6 +256,29 @@ export function Colophon({ open, onClose }: ColophonProps): JSX.Element | null {
             ))}
           </div>
           <p className={styles.note}>{t.langSectionNote}</p>
+        </section>
+
+        {/* The page bar's spread-under-the-pointer. A single on/off switch rather
+            than the language section's radio group: this is a two-state feature,
+            so `aria-pressed` is the right semantics, and the state word beside the
+            label carries the same fact for a sighted reader without relying on the
+            button's fill alone. It lives with the language switch because both are
+            device preferences chosen once and then forgotten — unlike the skin,
+            which is opted into each session. */}
+        <section className={styles.block} aria-labelledby="colophon-pagebar">
+          <h3 className={styles.subhead} id="colophon-pagebar">
+            {t.pagebarSectionTitle}
+          </h3>
+          <button
+            type="button"
+            className={styles.toggle}
+            aria-pressed={fisheye}
+            onClick={onToggleFisheye}
+          >
+            <span>{t.pagebarFisheyeLabel}</span>
+            <span className={styles.toggleState}>{fisheye ? t.stateOn : t.stateOff}</span>
+          </button>
+          <p className={styles.note}>{t.pagebarFisheyeNote}</p>
         </section>
 
         <p className={styles.lede}>{t.aboutLede}</p>

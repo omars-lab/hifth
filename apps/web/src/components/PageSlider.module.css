@@ -219,6 +219,52 @@
 }
 
 /*
+ * The fisheye's label layer (option B, graduated). It spans the track and takes
+ * no pointer — the effect fills it on hover with a juz number over each marker it
+ * has fanned open, and one small tag naming the exact page under the pointer. The
+ * children are positioned in physical pixels (`left`, set inline) because they
+ * ride the same warped positions the markers take, which the effect computes in
+ * pixels; everything else in this file is logical, and this is the documented
+ * exception, kept beside `--thumb` as the other physical value the bar owns.
+ */
+.lens {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* A juz number, sitting just above its (spread-apart) marker. Small and in the
+   marker's own green so it reads as part of the tick, not as a page number. */
+.lensJuz {
+  position: absolute;
+  top: 0;
+  transform: translateX(-50%);
+  color: var(--accent-strong);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+/* The page under the pointer, named in a small dark tag above the bar — the same
+   ink as the scrub bubble, so the two readouts of "where am I" match. It floats
+   over the track top like the bubble, and the two never coexist (the bubble is
+   drawn only mid-drag, this only on a hover with no drag). */
+.lensPage {
+  position: absolute;
+  bottom: calc(100% - var(--space-2));
+  transform: translateX(-50%);
+  padding: 2px var(--space-2);
+  border-radius: var(--radius-sm);
+  background: var(--ink);
+  color: var(--paper);
+  font-size: var(--text-xs);
+  white-space: nowrap;
+  box-shadow: var(--shadow-2);
+}
+
+/*
  * The handle: a page icon over the invisible native thumb, centred on the same
  * value. `pointer-events: none` so the drag stays the input's — the handle is
  * paint, not a second control. Sized a touch beyond the thumb so the leaf reads

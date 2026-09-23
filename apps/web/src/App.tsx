@@ -82,6 +82,7 @@ import {
 import { CommentarySheet, CommentaryTrigger } from "./pitch/CommentarySheet";
 import { SkinToggle, TajweedLegend } from "./components/SkinToggle";
 import { PageSlider } from "./components/PageSlider";
+import { fisheyeEnabled, rememberFisheye } from "./pagebar-fisheye";
 import styles from "./App.module.css";
 
 // The app opens on page 7 (the mock's first curated page). Full page routing is
@@ -666,6 +667,20 @@ export function App(): JSX.Element {
   // one a reader can forget they enabled. Opting in each session is the price of
   // shipping it early.
   const [skin, setSkin] = useState<SkinId>("plain");
+  // Whether the page bar spreads apart under the pointer — the graduated fisheye
+  // (option B, docs/decisions/page-bar.md). Persisted, and default on: it is the
+  // behaviour the decision chose, so a fresh device gets it, and the colophon's
+  // switch is only there to turn it off. Unlike the beta skin above, this is not
+  // a layer a reader can be misled by — it changes how a control feels, not what
+  // the mus'haf says — so restoring it on a cold start is a convenience, not a risk.
+  const [fisheye, setFisheye] = useState<boolean>(() => fisheyeEnabled());
+  const toggleFisheye = useCallback(() => {
+    setFisheye((on) => {
+      const next = !on;
+      rememberFisheye(next);
+      return next;
+    });
+  }, []);
   const [legendOpen, setLegendOpen] = useState(false);
   const [tajweedShards, setTajweedShards] = useState<ReadonlyMap<number, TajweedShard>>(
     new Map(),
@@ -1766,7 +1781,12 @@ export function App(): JSX.Element {
         onSelect={handleEditionSelect}
         onClose={() => setEditionOpen(false)}
       />
-      <Colophon open={colophonOpen} onClose={() => setColophonOpen(false)} />
+      <Colophon
+        open={colophonOpen}
+        onClose={() => setColophonOpen(false)}
+        fisheye={fisheye}
+        onToggleFisheye={toggleFisheye}
+      />
       {/* `onGoToPage` is the app's own page-turner, handed over unchanged: a
           press on a map cell is a jump, and everything a jump owes — refusing an
           unvendored page, cancelling one in flight, saying where it landed —
@@ -1842,6 +1862,7 @@ export function App(): JSX.Element {
         onJuzTap={goToJuz}
         juzStarts={juzStarts}
         pageContext={pageContext}
+        fisheye={fisheye}
       />
 
       <LiveAnnouncer message={message} />

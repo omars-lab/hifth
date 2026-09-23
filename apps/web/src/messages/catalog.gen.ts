@@ -152,6 +152,9 @@ export interface Catalog {
   readonly pageOfTotal: (d: { readonly page: string | number; readonly total: string | number }) => string;
   readonly pageUnavailable: string;
   readonly pageWord: string;
+  readonly pagebarFisheyeLabel: string;
+  readonly pagebarFisheyeNote: string;
+  readonly pagebarSectionTitle: string;
   readonly pagesVendored: (d: { readonly haveText: string | number; readonly totalText: string | number }) => string;
   readonly pauseAyah: (d: { readonly label: string | number }) => string;
   readonly playAyah: (d: { readonly label: string | number }) => string;
@@ -206,6 +209,8 @@ export interface Catalog {
   readonly spreadTwoAria: string;
   readonly stageFailed: (d: { readonly pageText: string | number }) => string;
   readonly stageLoading: string;
+  readonly stateOff: string;
+  readonly stateOn: string;
   readonly surahN: (d: { readonly surahText: string | number }) => string;
   readonly tagline: string;
   readonly tajweed: string;

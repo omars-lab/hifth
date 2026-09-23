@@ -86,6 +86,49 @@ export function markerEmphasis(distPx: number, near: number, peak: number): numb
   return 1 + (peak - 1) * t * t;
 }
 
+/**
+ * The fisheye lens (page-bar-numberline, decided B on 2026-09-22, docs/decisions/
+ * page-bar.md §"How does a reader find one juz among thirty on a bar this small?"):
+ * on a pointer that can hover, the page bar spreads apart under the pointer like a
+ * dock, so the juz landmarks near the finger separate far enough to read their
+ * numbers — while everything past the window stays exactly where it was.
+ */
+export interface FisheyeLens {
+  /** How far either side of the pointer, in pixels, the spread reaches. */
+  readonly radiusPx: number;
+  /**
+   * The shape of the spread. Below 1 expands the middle (the markers under the
+   * pointer fan out); at 1 it is no spread at all. It is the curve's exponent.
+   */
+  readonly power: number;
+  /** Pages either side of the pointer whose juz opening is named in the bar. */
+  readonly juzPageWindow: number;
+}
+
+/** The lens the bar graduated — tuned on the decision page against the real 604. */
+export const pageBarFisheye: FisheyeLens = {
+  radiusPx: 82,
+  power: 0.58,
+  juzPageWindow: 26,
+};
+
+/**
+ * Where a marker moves to under the lens. Given its signed distance from the
+ * pointer in pixels (which side and how far), return its new signed distance:
+ * inside the window the position is pushed outward along a power curve, so a
+ * cluster of juz ticks fans open under the pointer; at and beyond the window edge
+ * the displacement is zero, so the warp meets the untouched track seamlessly and
+ * nothing outside the neighbourhood twitches when the pointer moves. Standalone
+ * and side-effect-free, like the resolvers above, so the decision page can inline
+ * it and the app and the test share the exact same curve.
+ */
+export function fisheyeSpread(signedDistPx: number, lens: FisheyeLens): number {
+  const ad = Math.abs(signedDistPx);
+  if (!(ad < lens.radiusPx)) return signedDistPx; // at/beyond the edge: unmoved
+  const sign = signedDistPx < 0 ? -1 : 1;
+  return sign * lens.radiusPx * Math.pow(ad / lens.radiusPx, lens.power);
+}
+
 /** A resolver plus how it presents itself, for the bar and the decision page. */
 export interface DetentStrategy {
   readonly id: "A" | "B" | "C";

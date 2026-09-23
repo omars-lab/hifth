@@ -1,5 +1,14 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { labelBoth, markerEmphasis, nearestPage, pageFraction, pageRuns, tapButtonDetent } from "@hifth/core";
+import {
+  fisheyeSpread,
+  labelBoth,
+  markerEmphasis,
+  nearestPage,
+  pageBarFisheye,
+  pageFraction,
+  pageRuns,
+  tapButtonDetent,
+} from "@hifth/core";
 import { useT } from "../i18n";
 import { useMediaQuery } from "../useMediaQuery";
 import styles from "./PageSlider.module.css";
@@ -10,6 +19,12 @@ import styles from "./PageSlider.module.css";
 // losing strategies stay in the core module, kept tryable on the decision page
 // by the graduation-losers decision (option A), and never reached from here.
 const EMPHASIS = tapButtonDetent.emphasis ?? { near: 0, peak: 1 };
+
+// The fisheye lens (option B, graduated · docs/decisions/page-bar.md §"How does a
+// reader find one juz among thirty on a bar this small?"): how far the spread
+// reaches, its curve, and how many pages either side of the pointer get their juz
+// named. Shared with the decision page, so the app and the drawing warp identically.
+const LENS = pageBarFisheye;
 
 interface PageSliderProps {
   /**
@@ -56,6 +71,17 @@ interface PageSliderProps {
    * landmarks they were before the decision.
    */
   onJuzTap?: (juz: number) => void;
+  /**
+   * Spread the bar apart under the pointer — the graduated fisheye (option B,
+   * docs/decisions/page-bar.md §"How does a reader find one juz among thirty on a
+   * bar this small?"). On a pointer that can hover, the juz landmarks near the
+   * cursor fan out far enough to read their numbers, and the exact page under the
+   * cursor is named in the bar. A hover affordance only: a finger has no "near
+   * without pressing", so on a touch screen this changes nothing. Off, the bar is
+   * the plain grow-on-approach scrubber (option C alone). Defaults on — the
+   * behaviour the decision chose; the settings sheet is where it is turned off.
+   */
+  fisheye?: boolean;
 }
 
 /**
@@ -147,11 +173,16 @@ export function PageSlider({
   juzStarts = [],
   pageContext,
   onJuzTap,
+  fisheye = true,
 }: PageSliderProps): JSX.Element {
   const { t } = useT();
   const inputRef = useRef<HTMLInputElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
   const railRef = useRef<HTMLDivElement>(null);
+  // The layer the fisheye draws its labels into — juz numbers fanned open under
+  // the pointer and the page beneath it. Drawn imperatively by the effect below,
+  // from the same warped positions the markers take.
+  const lensRef = useRef<HTMLDivElement>(null);
   // True from the pointerdown that starts a drag until its release. The marker
   // growth reads this: it must never fire mid-drag, or a swollen button would
   // sit under a thumb that is only passing through — the one thing option C's
@@ -167,6 +198,14 @@ export function PageSlider({
   // This is exactly the split the decision named: the refinement answers the
   // phone's fixed-target cost, and the phone is the device it does not run on.
   const finePointer = useMediaQuery("(hover: hover) and (pointer: fine)");
+
+  // What the imperative lens reads, kept current without re-subscribing the
+  // pointer listeners on every render. `t` is a fresh object each render and
+  // `total` never changes, so threading them through the effect's deps would
+  // either churn the listeners or freeze a stale copy — the handlers read the
+  // latest here instead.
+  const liveRef = useRef({ t, total, juzStarts, fisheye });
+  liveRef.current = { t, total, juzStarts, fisheye };
 
   const empty = available.length === 0;
   const value = scrub ?? page;
@@ -215,42 +254,107 @@ export function PageSlider({
     return () => el.removeEventListener("change", handle);
   }, [commit]);
 
-  // Option C's refinement, graduated: on a pointer that can hover, each marker
-  // grows as the pointer nears it and settles back as it leaves — but never
-  // while a drag is under way. The scale is read live off each marker's own box,
-  // so it is right whichever way the RTL track runs and whatever the marker's
-  // rest size, and the growth is symmetric about the marker's centre so reading
-  // that centre off an already-scaled box stays exact. Only a fine pointer runs
-  // this; a finger has no hover to grow toward, and there the markers are tapped
-  // at their plain size (the phone layout the decision left for a real device).
+  // Two graduated behaviours, both hover-only, both driven from here: option C's
+  // grow-on-approach (each marker swells as the pointer nears it) and option B's
+  // fisheye (the markers near the pointer also *spread apart* so their juz numbers
+  // become readable, and the page under the pointer is named). Neither fires while
+  // a drag is under way, so a passing thumb never meets a swollen or shifted
+  // button. Only a fine pointer runs this; a finger has no hover to grow toward,
+  // and there the markers are tapped at their plain size — the phone layout both
+  // decisions left for a real device.
+  //
+  // Each marker's *rest* centre is computed from its juz's opening page, not read
+  // off its box: the spread moves the box, so measuring a centre off an
+  // already-shifted marker would feed back on itself. The formula matches the one
+  // the markup positions the markers with (`insetInlineStart`, from the right in
+  // this RTL bar), so the two never drift.
   useEffect(() => {
     if (!finePointer) return;
     const track = trackRef.current;
     if (!track) return;
+    const clamp = (v: number, lo: number, hi: number): number => Math.max(lo, Math.min(hi, v));
     const marks = (): HTMLElement[] =>
       Array.from(railRef.current?.querySelectorAll<HTMLElement>("[data-testid='juz-detent']") ?? []);
-    const scaleAll = (px: number | null): void => {
+    const applyLens = (px: number | null): void => {
+      const { t: tt, total: tot, juzStarts: js, fisheye: fish } = liveRef.current;
+      const layer = lensRef.current;
+      const rect = track.getBoundingClientRect();
+      const thumb = parseFloat(getComputedStyle(track).getPropertyValue("--thumb")) || 22;
+      const usable = Math.max(1, rect.width - thumb);
+      // A marker's rest centre in physical pixels, read from *layout* — `offsetLeft`
+      // and `offsetWidth` ignore CSS transforms, so they give the untransformed
+      // position even while the spread has warped the marker's painted box. That is
+      // what keeps the warp from feeding back on itself, and it tracks the real tick
+      // exactly (the grow underneath must peak *on* the marker, not beside it) rather
+      // than re-deriving the RTL `inset-inline-start` sum by hand.
+      const restCentre = (m: HTMLElement): number => {
+        const parent = (m.offsetParent as HTMLElement | null) ?? track;
+        const pr = parent.getBoundingClientRect();
+        return pr.left + parent.clientLeft + m.offsetLeft + m.offsetWidth / 2;
+      };
+
       for (const m of marks()) {
         if (px === null) {
           m.style.transform = "";
           continue;
         }
-        const box = m.getBoundingClientRect();
-        const centre = box.left + box.width / 2;
-        m.style.transform = `scale(${markerEmphasis(Math.abs(centre - px), EMPHASIS.near, EMPHASIS.peak)})`;
+        const juz = Number(m.dataset.juz);
+        const start = js[juz - 1];
+        if (start === null || start === undefined) {
+          m.style.transform = "";
+          continue;
+        }
+        const centre = restCentre(m);
+        const grow = markerEmphasis(Math.abs(centre - px), EMPHASIS.near, EMPHASIS.peak);
+        if (fish) {
+          // Spread the marker outward from the pointer, then grow it in place.
+          const dx = fisheyeSpread(centre - px, LENS) - (centre - px);
+          m.style.transform = `translateX(${dx}px) scale(${grow})`;
+        } else {
+          m.style.transform = `scale(${grow})`;
+        }
       }
+
+      // The labels are the fisheye's alone. Cleared whenever the pointer leaves or
+      // the spread is off, so the plain grow-on-approach bar carries none.
+      if (!layer) return;
+      if (px === null || !fish) {
+        layer.replaceChildren();
+        return;
+      }
+      const fPtr = clamp((rect.right - px - thumb / 2) / usable, 0, 1);
+      const pageUnder = clamp(Math.round(1 + fPtr * (tot - 1)), 1, tot);
+      const kids: HTMLElement[] = [];
+      for (const m of marks()) {
+        const juz = Number(m.dataset.juz);
+        const start = js[juz - 1];
+        if (start === null || start === undefined) continue;
+        if (Math.abs(start - pageUnder) > LENS.juzPageWindow) continue;
+        const warped = px + fisheyeSpread(restCentre(m) - px, LENS);
+        const span = document.createElement("span");
+        span.className = `${styles.lensJuz ?? ""} numeric`;
+        span.style.left = `${warped - rect.left}px`;
+        span.textContent = tt.num(juz);
+        kids.push(span);
+      }
+      const pageTag = document.createElement("span");
+      pageTag.className = `${styles.lensPage ?? ""} numeric`;
+      pageTag.style.left = `${px - rect.left}px`;
+      pageTag.textContent = tt.pageN(pageUnder);
+      kids.push(pageTag);
+      layer.replaceChildren(...kids);
     };
     const onMove = (e: PointerEvent): void => {
       if (draggingRef.current) return;
-      scaleAll(e.clientX);
+      applyLens(e.clientX);
     };
-    const onLeave = (): void => scaleAll(null);
+    const onLeave = (): void => applyLens(null);
     // A drag begins on the range input under the rail; from its first press
     // until release every marker is pinned to its plain size, so a passing thumb
-    // never meets a grown button.
+    // never meets a grown or shifted button.
     const onDown = (): void => {
       draggingRef.current = true;
-      scaleAll(null);
+      applyLens(null);
     };
     const onUp = (): void => {
       draggingRef.current = false;
@@ -265,9 +369,9 @@ export function PageSlider({
       track.removeEventListener("pointerleave", onLeave);
       input?.removeEventListener("pointerdown", onDown);
       window.removeEventListener("pointerup", onUp);
-      scaleAll(null);
+      applyLens(null);
     };
-  }, [finePointer, juzStarts]);
+  }, [finePointer, fisheye]);
 
   const onKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -420,6 +524,14 @@ export function PageSlider({
             )}
           </div>
         )}
+
+        {/* The fisheye's labels — the juz numbers fanned open under the pointer
+            and the exact page beneath it, drawn imperatively by the effect above
+            so they ride the same warped positions the markers take. Pure hover
+            decoration: aria-hidden and pointer-events off, because the input
+            already speaks the page and the juz is named in the popover. Empty
+            until a fine pointer hovers with the spread on. */}
+        <div className={styles.lens} aria-hidden="true" ref={lensRef} />
 
         {/* The handle, a page rather than a puck, painted over the invisible
             native thumb at the same value — see `PageHandleIcon`. Hidden while
