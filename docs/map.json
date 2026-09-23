@@ -1224,8 +1224,8 @@
         },
         {
           "file": "packages/etl/package.json",
-          "symbol": "\"etl\": \"node scripts/extract-pages.mjs",
-          "note": "The ordinary path, and what it deliberately omits. build-words.mjs and build-alignment.mjs are NOT in this chain because both read the gitignored ligature cache, so chaining them would make the ordinary build fail on a clean checkout. Their outputs are committed and gate:words / gate:align re-derive them from committed bytes instead — the trick that lets a cache-dependent build be checked offline."
+          "symbol": "\"etl\": \"node scripts/etl.mjs",
+          "note": "The entry point, now one line: the runner drives whichever registered source is asked for (see the etl-plugins feature). A bare run does the default sources — the shipping build — and its step list lives in the derive-and-measure plugin, where you can also read what it deliberately omits: build-words.mjs and build-alignment.mjs are NOT in the chain because both read the gitignored ligature cache, so chaining them would make the ordinary build fail on a clean checkout. Their outputs are committed and gate:words / gate:align re-derive them from committed bytes instead — the trick that lets a cache-dependent build be checked offline."
         },
         {
           "file": "packages/etl/scripts/lib/candidate-pages.mjs",
@@ -1268,9 +1268,45 @@
         "encoding-inspector",
         "assets-and-pages",
         "provenance",
-        "ci-and-gates"
+        "ci-and-gates",
+        "etl-plugins"
       ]
     },
+    {
+      "id": "etl-plugins",
+      "what": "The one interface every Qur'an-data source enters by. There are two, and they complement rather than replace each other: one derives the app's own pages and shards from what the project already owns and measures them against outside rulers, shipping none of their bytes; the other holds a copy of the outside library's V4 pieces in a store the owner controls, to draw our own page and check ours against it. Neither is privileged and neither forks the pipeline — a registry lists them, a runner drives them. The tenet in CLAUDE.md ('Every source of Qur'an data is a plugin') and the decision qul-etl-plugins are what this feature enforces.",
+      "layer": "L3 etl",
+      "entry": [
+        {
+          "file": "packages/etl/scripts/lib/etl-plugins.mjs",
+          "symbol": "export const PLUGINS",
+          "note": "The registry — the single place the tenet is enforced. A source is a named descriptor with the same shape as every other (the EtlPlugin typedef beside it), and it is discovered here, never wired in by hand at a call site. Adding a source is adding a file under plugins/ and one line to this array; nothing about the runner changes."
+        },
+        {
+          "file": "packages/etl/scripts/etl.mjs",
+          "symbol": "async function main",
+          "note": "The runner — one command in front of every source. Bare (`make etl`) it runs the default sources, which is the shipping build and byte-identical to the old explicit chain. `--list` (`make etl-list`) prints each source and what it reads, writes, and needs. A bare name runs one source and forwards its flags; `--all` runs every source, defaults first."
+        },
+        {
+          "file": "packages/etl/scripts/plugins/derive-and-measure.mjs",
+          "symbol": "const STEPS",
+          "note": "The shipping source, as a plugin. Its STEPS array IS the ordinary build order — extract-pages, build-adjacency, build-roots, build-tajweed — so what the etl-pipeline feature calls 'the ordinary path and what it deliberately omits' is read here now. It is the only default: its output is what `make ci` compares byte-for-byte against the committed assets."
+        },
+        {
+          "file": "packages/etl/scripts/plugins/held-copy.mjs",
+          "symbol": "export default",
+          "note": "The held-copy source, as a plugin. It ships nothing: it forwards its flags to ingest-qul-supabase.mjs, which holds the V4 pieces in the owner's store under qul-reliance option D. It is NOT a default — it needs the owner's database and, for anything text-bearing, a licence read recorded first — so it names those under `needs` and stays one command away (`etl:hold`), never in the shipping build."
+        }
+      ],
+      "extend": [
+        "A new Qur'an-data source is a new file under packages/etl/scripts/plugins/ exporting one EtlPlugin descriptor, plus one line in the PLUGINS array. Do not add a second entry point or a privileged path — that is exactly what the tenet and qul-etl-plugins forbid. If a source needs a database, a licence read, or anything not in the tree, it is `default: false` and says why under `needs`.",
+        "A source whose output ships is `default: true` and its output must stay byte-identical under gate:notext / gate:scripture / make ci. A source that holds outside bytes ships nothing and keeps its own gates inside the script it forwards to — the runner does not second-guess them.",
+        "Do not restate the decision here. qul-etl-plugins (docs/decisions/qul-etl-plugins.md) owns why the two sources are complementary; qul-store-purpose owns what the held copy is for; qul-reliance owns why a copy may be held at all. This feature owns the SHAPE — one registry, one runner, one descriptor per source."
+      ],
+      "gates": ["pnpm gate:map", "pnpm gate:notext", "pnpm gate:scripture", "make ci"],
+      "seeAlso": ["etl-pipeline", "edge-data-etl", "provenance"]
+    },
+
     {
       "id": "edge-data-etl",
       "what": "Turning the mutashabihat dataset into the per-surah shards the app hops through.",
@@ -1556,6 +1592,16 @@
           "file": ".claude/skills/mushaf-reference/SKILL.md",
           "symbol": "name: mushaf-reference",
           "note": "The prose half of the probe: which published references are reachable (measured), what each can and cannot settle, and the trap — six of archive.org's twelve KFGQPC scans are a different qira'a or script, so comparing against one produces confident, wrong verdicts. The symbol is the frontmatter name and not a section heading because scripts/code-pointers.mjs reads a leading `#` as a comment, so no Markdown heading can ever be a live pointer; the name is the better anchor anyway, since renaming the skill is the change that would actually strand this row."
+        },
+        {
+          "file": "packages/etl/scripts/probe-qul-rulers.mjs",
+          "symbol": "similarityCheck",
+          "note": "The QUL half of the same idea: measure our shipped numbers against the outside library and pin the AGREEMENT, never the bytes. Reads layout 10 (the V2 page authority), the juz metadata and the two similarity corpora (73 phrase, 74 ayah) from a gitignored cache, and writes verse keys, ids and counts plus the SHA-256 of every file read — so a rerun reproduces or says upstream moved. `probe-` and opt-in for probe-reference.mjs's reason (the cache a clean checkout lacks would make a gate red for everyone but the maintainer). The `gap` block characterises what corpus 74 knows and we do not — 781 strong, 635 verbatim whole-verse twins — which is the evidence the similar-ayah-enrichment decision rests on. No glyph crosses in; gate:scripture and gate:notext stay green."
+        },
+        {
+          "file": ".claude/skills/leverage-qul/SKILL.md",
+          "symbol": "name: leverage-qul",
+          "note": "The prose half of the QUL probe, and the guardrails qul-reliance turns on: QUL is a ruler and an outbound link, never a vendored source, so no byte of its text enters the tree. Walks discover (the /download link is session-gated but 302s to a public Wasabi object) → cache (gitignored, ask first) → sample by eye → pin numbers-only. Its rubric resources.md marks each resource text-bearing or numbers-only and tracks the per-resource licence, which is PENDING until a human reads each session-gated page (the ledger check qul-rulers-terms-and-text-free). Symbol is the frontmatter name, not a heading, for the reason the mushaf-reference and decide rows give."
         }
       ],
       "extend": [
@@ -1576,6 +1622,38 @@
         "provenance"
       ]
     },
+    {
+      "id": "qul-store",
+      "what": "Holding a copy of QUL's page layout — and, once its licence is read, its word text — in a database we run, off the repository and off the shipped bundle.",
+      "layer": "L3 etl",
+      "entry": [
+        {
+          "file": "packages/etl/scripts/ingest-qul-supabase.mjs",
+          "symbol": "licenceCleared",
+          "note": "The hard gate on the word-text half. The page-map ingest (--pages) runs freely: it carries only positions — page, line, line kind, and the first/last word ids of a line — no text. The word-text ingest (--words) refuses to run unless the licence has been cleared by hand (--licence-cleared, and the ledger check is not still pending), because word text is bytes we would be holding and the per-resource licence has not been read yet. Both halves skip cleanly (exit 0) when their gitignored cache is absent, so a clean checkout is never red. The cache is populated by the leverage-qul walk (the QUL /download link is session-gated), which is the owner's to run — this script never logs in and never sees a credential."
+        },
+        {
+          "file": "supabase/migrations/20260907000001_qul_page_map.sql",
+          "symbol": "qul_page_lines",
+          "note": "The store's positions-only tables. One row per printed line: which page, which line, what kind of line, whether it is centred, and — on ayah lines only — the surah and the first/last word ids the line spans. A companion table holds the layout's own counts. Text-free by construction; the column comments say why each column is a number and never a glyph."
+        },
+        {
+          "file": "supabase/migrations/20260907000002_qul_words.sql",
+          "symbol": "qul_words",
+          "note": "The one text-bearing table, and the only place in this store a Qur'an glyph would ever sit. It exists in the migration so the shape is reviewable, but the ingest refuses to fill it until the licence is read (see licenceCleared). Its comment states the boundary in full: held under option D only, and whether any reader receives these bytes is a separate open question this table does not answer. QUL numbers words more coarsely than our print, so these ids do not transfer onto our artwork."
+        }
+      ],
+      "extend": [
+        "Read the qul-reliance decision record first (indexed in the decisions register). The original choice — copy none of QUL's bytes — still governs the repository and the shipped build; no glyph enters the tree and gate:notext and gate:scripture stay green. What reopened it (2026-09-07, option D) is that a database we run is a fourth place a byte can sit that the original options never named: not the source tree, not the bundle a reader downloads, but a store dev tools read. Option D admits exactly that store, and does not settle whether any reader ever receives those bytes — that stays a separate open question.",
+        "The store is not the repository. The ship-zero-Qur'an-text rule is kept here by the migrations and the ingest carrying no glyph in the committed bytes; the held copy lives in the database, which the repo never contains. Verify a new file here is Arabic-free the same way the rest of the tree is checked.",
+        "The word-text ingest stays gated until a human reads the exact resource's licence AND the glyph font's, and clears the ledger check. Do not remove the gate to 'unblock' a run — the gate is the licence read, made mechanical.",
+        "Connection keys (SUPABASE_DB_URL and any service key) are the owner's to supply at run time. No key is committed, and this script enters none — the same reason the leverage-qul login is the owner's to perform.",
+        "The picture that argues option D — the page drawn on real artwork — lives in the qul-page-source design doc on the graduate-page-bar-winners lineage; it reconciles into this store's story at merge. A decided decision needs no artifact of its own, which is why none is minted on this branch."
+      ],
+      "gates": ["pnpm gate:notext", "pnpm gate:scripture", "make ci"],
+      "seeAlso": ["validation", "decisions", "provenance"]
+    },
+
     {
       "id": "decisions",
       "what": "Every question this project has had to answer, in words a person outside the repo can act on.",

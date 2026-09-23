@@ -266,6 +266,9 @@ export interface Strings {
   hopTo(label: string): string;
   twin: string;
   pageUnavailable: string;
+  /** The outbound-link label on a hop row whose page we do not carry. */
+  openOnQul: string;
+  openOnQulAria(label: string): string;
   wordLevelPending: string;
   /** DiffView's "you are here" tag on the upper verse. */
   hereTag: string;
@@ -659,6 +662,8 @@ export function buildStrings(lang: Lang, m: Catalog): Strings {
     hopTo: (label) => m.hopTo({ label }),
     twin: m.twin,
     pageUnavailable: m.pageUnavailable,
+    openOnQul: m.openOnQul,
+    openOnQulAria: (label) => m.openOnQulAria({ label }),
     wordLevelPending: m.wordLevelPending,
     hereTag: m.hereTag,
 
