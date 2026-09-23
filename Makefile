@@ -516,6 +516,22 @@ validate: ## Outstanding manual checks — or one check's full runbook:  make va
 	  node packages/etl/scripts/sample-edges.mjs --coverage; \
 	fi
 
+.PHONY: rescore
+rescore: ## Re-score a committed ruling from its seed and check it against its receipt:  make rescore RULING=<id>  ·  make rescore (lists them)
+	@# The one command an outsider runs to get our number, or not. It rebuilds
+	@# the sitting from the committed seed, applies the committed answers, runs
+	@# the scorer again and prints — recorded beside recomputed — the input
+	@# fingerprint, the code fingerprint and the headline. Exit 0 only when all
+	@# three agree. A ruling with no receipt beside it is unstamped and stops;
+	@# a settled table cannot be rebuilt from committed bytes and says so.
+	@# Someone on the project writes the receipt once:
+	@#   node packages/etl/scripts/replay-ruling.mjs <id> --record
+	@if [ -n "$(RULING)" ]; then \
+	  node packages/etl/scripts/replay-ruling.mjs "$(RULING)"; \
+	else \
+	  node packages/etl/scripts/replay-ruling.mjs --list; \
+	fi
+
 .PHONY: validate-auto
 validate-auto: ## Run the machine half of the manual checks:  make validate-auto [CHECK=<id>]
 	@# Runs each check's declared `evidence.run` and writes the real exit code to
