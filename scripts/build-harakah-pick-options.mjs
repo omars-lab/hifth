@@ -44,12 +44,6 @@ const die = (m) => {
   console.error(`build-harakah-pick-options: ${m}`);
   process.exit(1);
 };
-const esc = (s) =>
-  String(s)
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
 
 // ── The leaf and the crop ────────────────────────────────────────────────────
 const PAGE = 7;

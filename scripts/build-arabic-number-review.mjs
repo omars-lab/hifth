@@ -38,7 +38,6 @@ const MSG = join(REPO, "apps", "web", "src", "messages");
 const OUT = join(REPO, "docs", "design", "arabic-number-agreement-review.html");
 
 const ar = JSON.parse(readFileSync(join(MSG, "ar.json"), "utf8"));
-const en = JSON.parse(readFileSync(join(MSG, "en.json"), "utf8"));
 
 // The six CLDR plural categories Arabic uses, with a plain gloss and a count that
 // actually occurs in this app so the hafiz sees the real number+noun pairing.

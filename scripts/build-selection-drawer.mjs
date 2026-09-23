@@ -85,17 +85,6 @@ const wordBoxes = wordEntry.boxes.map((b, i) => ({
   bh: b[3],
 }));
 
-// Marks for the verse, each already named and placed on its own ink or by hand.
-const signs = markList.map((m, i) => ({
-  id: i,
-  w: m.w,
-  name: m.n,
-  x: m.r[0],
-  y: m.r[1],
-  mw: m.r[2],
-  mh: m.r[3],
-}));
-
 // The word, shaped from its own Unicode font (Amiri Quran, OFL) so every letter
 // and every mark is its OWN outline. Built by scripts/shape-verse-letters.mjs;
 // carries outlined paths and ASCII names only.

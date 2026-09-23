@@ -302,7 +302,7 @@ made. Only this: once a choice is made by hand, what becomes of the hands-on opt
 `;
 
 // Standing rule: a page built from the mus'haf-app world ships zero Arabic codepoints.
-const arabic = html.match(/[؀-ۿݐ-ݿﭐ-﷿ﹰ-﻿]/g);
+const arabic = html.match(/[؀-ۿݐ-ݿﭐ-﷿ﹰ-\uFEFF]/g);
 if (arabic) {
   console.error(`Refusing to write: ${arabic.length} Arabic codepoint(s) found.`);
   process.exit(1);

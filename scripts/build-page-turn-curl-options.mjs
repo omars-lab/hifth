@@ -92,9 +92,6 @@ const LIVE = {
   },
 };
 
-const esc = (s) =>
-  String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-
 // ---------------------------------------------------------------- the page
 
 const html = `<!doctype html>

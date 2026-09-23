@@ -81,7 +81,7 @@
  * leaves the ship set, so the gate reports only the bundle — the PWA being
  * removed must not leave a phantom worker under review.
  */
-import { readFileSync, existsSync, readdirSync, statSync } from "node:fs";
+import { readFileSync, existsSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 
 const ROOT = new URL("..", import.meta.url).pathname;
