@@ -144,6 +144,14 @@ export interface Strings {
   /** Accessible name of the switch, naming the language it moves to. */
   langSwitchTo(other: string): string;
 
+  /* ---- the page bar's spread switch --------------------------------------- */
+  pagebarSectionTitle: string;
+  pagebarFisheyeLabel: string;
+  pagebarFisheyeNote: string;
+  /** On/off, for the state word beside a two-state switch. */
+  stateOn: string;
+  stateOff: string;
+
   /* ---- chrome ------------------------------------------------------------- */
   about: string;
   /**
@@ -581,6 +589,12 @@ export function buildStrings(lang: Lang, m: Catalog): Strings {
     langSectionTitle: m.langSectionTitle,
     langSectionNote: m.langSectionNote,
     langSwitchTo: (other) => m.langSwitchTo({ other }),
+
+    pagebarSectionTitle: m.pagebarSectionTitle,
+    pagebarFisheyeLabel: m.pagebarFisheyeLabel,
+    pagebarFisheyeNote: m.pagebarFisheyeNote,
+    stateOn: m.stateOn,
+    stateOff: m.stateOff,
 
     about: m.about,
     wordmark: m.wordmark,

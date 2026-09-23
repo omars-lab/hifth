@@ -200,7 +200,11 @@ export default defineConfig({
           // over the real corpus, where a hover swells the real tick and a tap
           // turns the book to the juz. The growth is gated on a fine pointer, so
           // it too is a desktop-only claim.
-          testMatch: /(desktop|stage-fit|detent-live|pagebar-detents)\.spec\.ts/,
+          //
+          // `pagebar-fisheye` is option B on the same bar: a hover spreads the
+          // neighbourhood apart and names the page under the pointer. Same fine-
+          // pointer gate, same reason a phone cannot make the gesture.
+          testMatch: /(desktop|stage-fit|detent-live|pagebar-detents|pagebar-fisheye)\.spec\.ts/,
           use: {
             browserName: "chromium",
             viewport: { width: 1440, height: 900 },
@@ -209,12 +213,12 @@ export default defineConfig({
         {
           name: "iphone",
           use: { ...devices["iPhone 13"] },
-          testIgnore: /(golden|shots|desktop|detent-live|pagebar-detents|pitch)\.spec\.ts/,
+          testIgnore: /(golden|shots|desktop|detent-live|pagebar-detents|pagebar-fisheye|pitch)\.spec\.ts/,
         },
         {
           name: "android",
           use: { ...devices["Pixel 7"] },
-          testIgnore: /(golden|shots|desktop|detent-live|pagebar-detents|pitch)\.spec\.ts/,
+          testIgnore: /(golden|shots|desktop|detent-live|pagebar-detents|pagebar-fisheye|pitch)\.spec\.ts/,
         },
         {
           // The golden-image project. Its viewport is spelled out rather than
