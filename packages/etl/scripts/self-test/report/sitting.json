@@ -1,0 +1,94 @@
+{
+ "built": "mark-report",
+ "rows": "packages/etl/scripts/self-test/report/rows.json",
+ "rowsFingerprint": "fafae766",
+ "set": "fixture",
+ "slice": "-p1of1-fixture",
+ "seed": 23,
+ "radius": 3,
+ "iouFloor": 0.55,
+ "pool": 10,
+ "of": 10,
+ "shown": 10,
+ "drawnBy": {
+  "ink": 6,
+  "line-tilt": 4
+ },
+ "finished": "2026-09-22T00:40:00.000Z",
+ "seen": 10,
+ "whole": true,
+ "said": [
+  {
+   "id": "1:0",
+   "kind": "looks-right",
+   "page": 1,
+   "line": 1,
+   "name": "fatha",
+   "rule": "ink"
+  },
+  {
+   "id": "1:1",
+   "kind": "placement",
+   "page": 1,
+   "line": 1,
+   "name": "fatha",
+   "rule": "ink",
+   "by": [
+    -1,
+    0
+   ],
+   "to": [
+    -0.5,
+    -0.25
+   ]
+  },
+  {
+   "id": "1:2",
+   "kind": "wrong-shape",
+   "page": 1,
+   "line": 1,
+   "name": "fatha",
+   "rule": "ink",
+   "size": [
+    7,
+    6
+   ],
+   "was": [
+    5.6,
+    3.6
+   ]
+  },
+  {
+   "id": "1:6",
+   "kind": "placement",
+   "page": 1,
+   "line": 1,
+   "name": "fatha",
+   "rule": "line-tilt",
+   "by": [
+    0.4,
+    0.1
+   ],
+   "to": [
+    0.9,
+    -0.15
+   ]
+  },
+  {
+   "id": "1:7",
+   "kind": "looks-right",
+   "page": 1,
+   "line": 1,
+   "name": "fatha",
+   "rule": "line-tilt"
+  },
+  {
+   "id": "1:8",
+   "kind": "print-defect",
+   "page": 1,
+   "line": 1,
+   "name": "fatha",
+   "rule": "line-tilt"
+  }
+ ]
+}

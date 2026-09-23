@@ -72,6 +72,11 @@ import { fileURLToPath } from "node:url";
 import { planContest } from "./lib/adjudication.mjs";
 import { codeLine } from "./lib/grader-code.mjs";
 import { wilson } from "./lib/mark-ink.mjs";
+import { selfTest } from "./lib/self-test.mjs";
+
+// Before anything real is read: re-score the known fixture, and stop if its
+// recorded verdict does not come back.
+selfTest(import.meta.url, "contest");
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const ETL = join(HERE, "..");

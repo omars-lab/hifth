@@ -1,0 +1,192 @@
+[
+ {
+  "page": 1,
+  "k": 0,
+  "line": 1,
+  "name": "fatha",
+  "box": [
+   180,
+   40,
+   5.6,
+   3.6
+  ],
+  "ink": 0.1,
+  "dx": 0.5,
+  "dy": -0.25,
+  "iou0": 0,
+  "iouBest": 0.8,
+  "phi0": 0,
+  "nullPhi": 0
+ },
+ {
+  "page": 1,
+  "k": 1,
+  "line": 1,
+  "name": "fatha",
+  "box": [
+   172,
+   40,
+   5.6,
+   3.6
+  ],
+  "ink": 0.1,
+  "dx": 0.5,
+  "dy": -0.25,
+  "iou0": 0,
+  "iouBest": 0.8,
+  "phi0": 0,
+  "nullPhi": 0
+ },
+ {
+  "page": 1,
+  "k": 2,
+  "line": 1,
+  "name": "fatha",
+  "box": [
+   164,
+   40,
+   5.6,
+   3.6
+  ],
+  "ink": 0.1,
+  "dx": 0.5,
+  "dy": -0.25,
+  "iou0": 0,
+  "iouBest": 0.8,
+  "phi0": 0,
+  "nullPhi": 0
+ },
+ {
+  "page": 1,
+  "k": 3,
+  "line": 1,
+  "name": "fatha",
+  "box": [
+   156,
+   40,
+   5.6,
+   3.6
+  ],
+  "ink": 0.1,
+  "dx": 0.5,
+  "dy": -0.25,
+  "iou0": 0,
+  "iouBest": 0.8,
+  "phi0": 0,
+  "nullPhi": 0
+ },
+ {
+  "page": 1,
+  "k": 4,
+  "line": 1,
+  "name": "fatha",
+  "box": [
+   148,
+   40,
+   5.6,
+   3.6
+  ],
+  "ink": 0.1,
+  "dx": 0.5,
+  "dy": -0.25,
+  "iou0": 0,
+  "iouBest": 0.8,
+  "phi0": 0,
+  "nullPhi": 0
+ },
+ {
+  "page": 1,
+  "k": 5,
+  "line": 1,
+  "name": "fatha",
+  "box": [
+   140,
+   40,
+   5.6,
+   3.6
+  ],
+  "ink": 0.1,
+  "dx": 3,
+  "dy": -0.25,
+  "iou0": 0,
+  "iouBest": 0.8,
+  "phi0": 0,
+  "nullPhi": 0
+ },
+ {
+  "page": 1,
+  "k": 6,
+  "line": 1,
+  "name": "fatha",
+  "box": [
+   132,
+   40,
+   5.6,
+   3.6
+  ],
+  "ink": 0.1,
+  "dx": 0.5,
+  "dy": -0.25,
+  "iou0": 0,
+  "iouBest": 0.2,
+  "phi0": 0,
+  "nullPhi": 0
+ },
+ {
+  "page": 1,
+  "k": 7,
+  "line": 1,
+  "name": "fatha",
+  "box": [
+   124,
+   40,
+   5.6,
+   3.6
+  ],
+  "ink": 0.1,
+  "dx": 0.5,
+  "dy": -0.25,
+  "iou0": 0,
+  "iouBest": 0.2,
+  "phi0": 0,
+  "nullPhi": 0
+ },
+ {
+  "page": 1,
+  "k": 8,
+  "line": 1,
+  "name": "fatha",
+  "box": [
+   116,
+   40,
+   5.6,
+   3.6
+  ],
+  "ink": 0.1,
+  "dx": 0.5,
+  "dy": -0.25,
+  "iou0": 0,
+  "iouBest": 0.2,
+  "phi0": 0,
+  "nullPhi": 0
+ },
+ {
+  "page": 1,
+  "k": 9,
+  "line": 1,
+  "name": "fatha",
+  "box": [
+   108,
+   40,
+   5.6,
+   3.6
+  ],
+  "ink": 0.1,
+  "dx": 0.5,
+  "dy": -0.25,
+  "iou0": 0,
+  "iouBest": 0.2,
+  "phi0": 0,
+  "nullPhi": 0
+ }
+]

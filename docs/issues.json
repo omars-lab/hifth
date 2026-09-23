@@ -2016,10 +2016,11 @@
         "file": "docs/design/robust-validation.md",
         "item": "③"
       },
-      "status": "open",
+      "status": "fixed",
       "severity": "risk",
       "owner": "agent",
-      "note": "Subtask of rigor-stack-pins-the-checking-code (①). Bake a tiny fixture with a known verdict into each grader so one that has been quietly changed fails its own self-test before it scores anything real — the same move the build already makes when it re-derives its three foundation pages every run and refuses to continue if they drift. Task #126."
+      "closedBy": "packages/etl/scripts/self-test.test.mjs",
+      "note": "Subtask of rigor-stack-pins-the-checking-code (①). Bake a tiny fixture with a known verdict into each grader so one that has been quietly changed fails its own self-test before it scores anything real — the same move the build already makes when it re-derives its three foundation pages every run and refuses to continue if they drift. Task #126. FIXED 2026-09-22: packages/etl/scripts/lib/self-test.mjs is called first by all five graders; each keeps a small made-up sitting and its recorded verdict under packages/etl/scripts/self-test/<grader>/ (no cache or download, runs in a clean clone), re-scores it in a child process on every start, and stops with exit 3 and nothing scored if the exit code, the printed verdict or (for the settler) the written ruling has moved — only paths and the ② code fingerprint are set aside. rebuild-grader-self-tests.mjs re-records a fixture when a change is meant. Closed by a test that tampers a copy of every recorded verdict and proves each grader refuses, and that the committed fixtures reproduce their records byte for byte."
     },
     {
       "id": "publish-seed-and-ruling-for-rescoring",

@@ -1,0 +1,11 @@
+{
+  "args": [
+    "fixture:ruling.json",
+    "--shift",
+    "fixture:shift.json",
+    "--io",
+    "scripts:lib/self-test-io.mjs"
+  ],
+  "code": 0,
+  "stdout": "expected.txt"
+}

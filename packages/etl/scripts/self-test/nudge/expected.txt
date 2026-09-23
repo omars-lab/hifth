@@ -1,0 +1,44 @@
+placements <root>/packages/etl/scripts/self-test/nudge/ruling.json
+seed 5 · reader fixture · 10 of 12 placed · displacements 2026-09-22 (aaa8372b)
+graded by packages/etl/scripts/score-mark-nudge.mjs · code <fingerprint> (10 files)
+median 6.5s a placement
+
+pages these can speak for      3 placed on, of 3 this session was built over
+                               the displacements cover 3 of 604 pages (0.5%)
+                               every placement is on a page the correction was fitted to, so nothing below
+                               says whether it holds on a page nobody has measured
+
+landed nearer our correction   100.0%  [72.2% – 100.0%]  10/10
+typical miss, from as-shipped  1.08 units
+typical miss, from corrected   0.06 units
+
+what is left over, across      x +0.059  [+0.054 – +0.064]  as 10 placements
+  · clustered by page                   [+0.054 – +0.064]  as 3 pages — read this one
+what is left over, down        y -0.025  [-0.028 – -0.022]  as 10 placements
+  · clustered by page                   [-0.027 – -0.023]  as 3 pages — read this one
+this hand's own precision      0.01 units, from 1 marks placed twice (typical gap 0.01)
+pull of the starting point     x -0.21  y -0.03  (0 is none, 1 is 'never moved')
+the box was the wrong size     0/10
+
+is the proposed move the right size?
+  across                       the reader moved 1.00× as far as we propose  [1.00× – 1.01×]
+                               proposed moves span -1.100…+0.400, sd 0.691
+  down                         the reader moved 1.00× as far as we propose  [1.00× – 1.00×]
+                               proposed moves span -1.050…+0.300, sd 0.593
+  Decidable: the proposed moves vary enough across these pages for the gain above to mean something.
+
+what does not explain what is left over
+  the mark it sits on          a mean per name leaves MORE spread, not less
+                               across 0.009 vs 0.009, down 0.005 vs 0.005, over 3 names
+  where it sits on the page    t = 1.6 across, 0.0 down — a translation, not a stretch
+  how late in the sitting      t = 0.3 across, 0.3 down — no drift as it wore on
+  where it started             see the pull of the starting point above
+
+is what is left over the print, or this reader?
+  Unanswerable from one hand. Everything above measures a reader against the print and cannot
+  say which of the two it is reading. A second person on the identical build settles it.
+
+the correction goes the right way: placements land nearer it than they do the shipped box, and the interval clears half
+the residual is 0.06 units, larger than this hand's precision (0.01).
+The best guess at a further correction is (+0.059, -0.025) on top of what is proposed. How much to trust it:
+Clustered by page, the across and down components are distinguishable from nought at 95%; anything not named here is not.

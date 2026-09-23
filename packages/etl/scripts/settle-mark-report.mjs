@@ -103,6 +103,11 @@ import { dirname, isAbsolute, join, basename } from "node:path";
 import { fileURLToPath } from "node:url";
 import { codeStamp } from "./lib/grader-code.mjs";
 import { asDrawn, settle, isFault, byMark } from "./lib/mark-settle.mjs";
+import { selfTest } from "./lib/self-test.mjs";
+
+// Before anything real is read: re-settle the known fixture into a scratch file,
+// and stop if the ruling it produces is not the one on record.
+selfTest(import.meta.url, "settle");
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(HERE, "..", "..", "..");
