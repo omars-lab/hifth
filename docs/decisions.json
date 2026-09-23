@@ -1032,7 +1032,8 @@
       "related": [
         "qul-reliance",
         "similar-ayah-enrichment",
-        "qul-etl-plugins"
+        "qul-etl-plugins",
+        "qul-dev-draw-toggle"
       ]
     },
     {
@@ -1149,7 +1150,7 @@
     {
       "id": "qul-dev-draw-toggle",
       "question": "Should a developer be able to draw a page from the other library’s words while the app that readers receive still carries none of it?",
-      "status": "open",
+      "status": "decided",
       "options": [
         {
           "id": "A",
@@ -1164,11 +1165,12 @@
       "page": "docs/design/qul-page-source-and-diff.html",
       "builtBy": "scripts/build-qul-page-source-and-diff.mjs",
       "doc": "docs/decisions/qul-dev-draw-toggle.md",
-      "decided": null,
-      "by": null,
-      "date": null,
+      "decided": "B",
+      "by": "omar",
+      "date": "2026-09-08",
       "related": [
-        "qul-page-cross-check"
+        "qul-page-cross-check",
+        "qul-store-purpose"
       ]
     },
     {
