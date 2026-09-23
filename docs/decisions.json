@@ -95,6 +95,38 @@
       "related": [
         "boundary-juz",
         "desktop-vs-mobile",
+        "graduation-losers",
+        "page-bar-numberline"
+      ]
+    },
+    {
+      "id": "page-bar-numberline",
+      "question": "Can the page bar read out its own landmarks — the juz around your finger and the page under it — like a ruler, without a second surface or a drag?",
+      "status": "decided",
+      "options": [
+        {
+          "id": "A",
+          "label": "Today: marks swell, but stay unnamed"
+        },
+        {
+          "id": "B",
+          "label": "Fisheye: the bar spreads apart and names the juz and page in place"
+        },
+        {
+          "id": "C",
+          "label": "Loupe: a magnifier panel floats over the pointer"
+        }
+      ],
+      "artifact": "https://blog.bytesofpurpose.com/hifth/docs/design/page-bar-numberline-options.html",
+      "page": "docs/design/page-bar-numberline-options.html",
+      "builtBy": "scripts/build-page-bar-numberline-options.mjs",
+      "doc": "docs/decisions/page-bar-numberline.md#what-is-being-decided",
+      "decided": "B",
+      "by": "omar",
+      "date": "2026-09-22",
+      "related": [
+        "juz-detents",
+        "desktop-vs-mobile",
         "graduation-losers"
       ]
     },
@@ -216,7 +248,8 @@
       "doc": "docs/decisions/graduation-losers.md#what-is-being-decided",
       "related": [
         "juz-detents",
-        "boundary-juz"
+        "boundary-juz",
+        "page-bar-numberline"
       ],
       "decided": "A",
       "by": "omar",
@@ -467,7 +500,8 @@
         "juz-detents",
         "boundary-juz",
         "tafseer-reading",
-        "page-turn-curl"
+        "page-turn-curl",
+        "page-bar-numberline"
       ]
     },
     {
