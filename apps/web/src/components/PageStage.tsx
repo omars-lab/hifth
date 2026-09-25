@@ -429,6 +429,8 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
   const { t } = useT();
   const stageRef = useRef<HTMLDivElement>(null);
   const layerRef = useRef<HTMLDivElement>(null);
+  /** The frame the overlay sits in; it is told where the leaf is on every write. */
+  const overlayRef = useRef<HTMLDivElement>(null);
   const pagesRef = useRef(new Map<number, MountedPage>());
   /** Mounts still in flight, so concurrent callers share one fetch (see ensurePage). */
   const pendingRef = useRef(new Map<number, Promise<MountedPage | null>>());
@@ -640,6 +642,20 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
     if (fit) view.current = clampView(view.current, fit);
     const { x, y, z } = view.current;
     cur.host.style.transform = `translate3d(${x}px, ${y}px, 0) scale(${z})`;
+    // Tell the overlay where the paper is, so a thing that belongs *to* the
+    // paper — the folded corner — can sit on its corner while the ribbons stay
+    // put. Written on the overlay's own small frame, not the stage, so a pinch
+    // does not restyle every glyph on the page each frame. The transform origin
+    // is the host's top-left and the host is laid out at the layer's top-left,
+    // so the layer's offset plus the translate is the leaf's corner.
+    const frame = overlayRef.current;
+    const layer = layerRef.current;
+    if (frame && layer) {
+      frame.style.setProperty("--leaf-x", `${layer.offsetLeft + x}px`);
+      frame.style.setProperty("--leaf-y", `${layer.offsetTop + y}px`);
+      frame.style.setProperty("--leaf-w", `${cur.host.offsetWidth * z}px`);
+      frame.style.setProperty("--leaf-z", String(z));
+    }
   }, []);
 
   /*
@@ -2275,7 +2291,17 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
         {label}
       </span>
       <div ref={layerRef} className={styles.layer} aria-busy={status === "loading"} />
-      {overlay}
+      {overlay && (
+        <div
+          ref={overlayRef}
+          className={styles.overlayFrame}
+          // Which top corner of the leaf is free (the other is bound into the
+          // spine). A lone page with no partner is treated as a left leaf.
+          data-free-side={leafSideOf(page, total) ?? "left"}
+        >
+          {overlay}
+        </div>
+      )}
       {band && (target ? createPortal(band, target) : band)}
       {status === "loading" && <div className={styles.hint}>{t.stageLoading}</div>}
       {status === "error" && (

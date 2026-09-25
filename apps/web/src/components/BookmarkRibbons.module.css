@@ -19,11 +19,18 @@
   --rib-3: #7a5a1e;
 }
 
-/* The corner a reader folds: top-left, the page's free top corner on a phone. */
+/* The corner a reader folds: the leaf's free top corner — the right one on a
+   right-hand page, the left one on a left-hand page — never the corner bound
+   into the spine. The stage tells us where the leaf is (--leaf-x/-y/-w, and its
+   zoom as --leaf-z) and trims the paper off along the diagonal (--dog-ear, in
+   paper units, see PageStage.module.css); this lays the folded-over flap on the
+   paper next to the trim, so the two together read as one turned-down corner.
+   Physical left/right on purpose: the leaf's sides are physical, the page's
+   reading direction has nothing to do with which corner is free. */
 .fold {
   position: absolute;
-  inset-block-start: 0;
-  inset-inline-start: 0;
+  inset-block-start: var(--leaf-y, 0px);
+  left: var(--leaf-x, 0px);
   inline-size: var(--touch-min);
   block-size: var(--touch-min);
   padding: 0;
@@ -33,21 +40,40 @@
   pointer-events: auto;
 }
 
-.foldFlap {
+:global([data-free-side="right"]) .fold {
+  left: calc(var(--leaf-x, 0px) + var(--leaf-w, 100%) - var(--touch-min));
+}
+
+/* The flap casts its shadow onto the page. A filter on the parent, because the
+   flap's own clip-path would cut a shadow of its own away. */
+.foldShadow {
   position: absolute;
-  inset-block-start: 0;
-  inset-inline-start: 0;
-  inline-size: 22px;
-  block-size: 22px;
-  background: linear-gradient(135deg, var(--paper-sunk) 50%, transparent 50%);
-  box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.15);
+  top: 0;
+  left: 0;
+  filter: drop-shadow(1px 2px 1.5px rgba(0, 0, 0, 0.22));
+}
+
+:global([data-free-side="right"]) .foldShadow {
+  left: auto;
+  right: 0;
+  filter: drop-shadow(-1px 2px 1.5px rgba(0, 0, 0, 0.22));
+}
+
+/* The back of the paper, folded over: the triangle on the page's side of the
+   fold line. Slightly darker than the page, and darker still toward the crease,
+   where a fold catches less light. */
+.foldFlap {
+  display: block;
+  inline-size: calc(var(--dog-ear, 16px) * var(--leaf-z, 1));
+  block-size: calc(var(--dog-ear, 16px) * var(--leaf-z, 1));
+  clip-path: polygon(100% 0, 100% 100%, 0 100%);
+  background: linear-gradient(135deg, var(--paper-sunk) 45%, var(--paper-raised) 100%);
   transition: inline-size var(--dur-fast) ease, block-size var(--dur-fast) ease;
 }
 
-.fold:hover .foldFlap,
-.fold:focus-visible .foldFlap {
-  inline-size: 30px;
-  block-size: 30px;
+:global([data-free-side="right"]) .foldFlap {
+  clip-path: polygon(0 0, 100% 100%, 0 100%);
+  background: linear-gradient(225deg, var(--paper-sunk) 45%, var(--paper-raised) 100%);
 }
 
 .fold:focus-visible {
@@ -57,7 +83,9 @@
 
 .ribbons {
   position: absolute;
-  inset-block-start: 0;
+  /* From the head of the paper, not the top of the field; and pinned to the
+     top of the field once the page's head is panned out of view. */
+  inset-block-start: max(0px, var(--leaf-y, 0px));
   inset-inline-end: 14%;
   display: flex;
   flex-direction: row-reverse;

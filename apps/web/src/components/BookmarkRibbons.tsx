@@ -79,8 +79,17 @@ export function BookmarkRibbons({
 
   return (
     <div ref={rootRef} className={styles.overlay} data-bookmark-overlay="">
-      <button type="button" className={styles.fold} onClick={onKeyClick} aria-label={t.bmDrop} title={t.bmDrop}>
-        <span className={styles.foldFlap} aria-hidden="true" />
+      <button
+        type="button"
+        className={styles.fold}
+        onClick={onKeyClick}
+        aria-label={t.bmDrop}
+        title={t.bmDrop}
+        data-bookmark-fold=""
+      >
+        <span className={styles.foldShadow} aria-hidden="true">
+          <span className={styles.foldFlap} />
+        </span>
       </button>
       <ul className={styles.ribbons}>
         {bookmarks.map((b, i) => (
