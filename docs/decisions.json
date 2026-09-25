@@ -130,7 +130,8 @@
         "boundary-juz",
         "desktop-vs-mobile",
         "graduation-losers",
-        "page-bar-numberline"
+        "page-bar-numberline",
+        "page-bar-look"
       ]
     },
     {
@@ -161,7 +162,39 @@
       "related": [
         "juz-detents",
         "desktop-vs-mobile",
-        "graduation-losers"
+        "graduation-losers",
+        "page-bar-look"
+      ]
+    },
+    {
+      "id": "page-bar-look",
+      "question": "What should the page bar look like so it reads as something you move through the book with?",
+      "status": "decided",
+      "options": [
+        {
+          "id": "today",
+          "label": "Today: a thick grey slab striped green, with a page-icon knob"
+        },
+        {
+          "id": "A",
+          "label": "Thirty juz segments on a thin two-colour track, with a round knob"
+        },
+        {
+          "id": "B",
+          "label": "Thicker juz blocks, keeping the page-icon knob"
+        },
+        {
+          "id": "C",
+          "label": "A plain track and round knob, with juz dots underneath"
+        }
+      ],
+      "doc": "docs/decisions/page-bar-look.md#so-what-was-decided",
+      "decided": "A",
+      "by": "omar",
+      "date": "2026-09-25",
+      "related": [
+        "juz-detents",
+        "page-bar-numberline"
       ]
     },
     {

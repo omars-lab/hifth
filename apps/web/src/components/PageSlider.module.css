@@ -132,10 +132,10 @@
 
 /*
  * The native thumb is kept for its whole keyboard and assistive-technology
- * contract, but not for its paint: the visible handle is the page icon drawn
+ * contract, but not for its paint: the visible handle is the round knob drawn
  * over it (`.handle`). So the thumb keeps the `--thumb` hit target the runs are
- * measured against and turns transparent, and the reader grabs a leaf of the
- * book instead of a browser puck. Both engines, because each names the thumb its
+ * measured against and turns transparent, and the knob drawn over it looks
+ * the same in every browser. Both engines, because each names the thumb its
  * own way and a rule for one is silently ignored by the other.
  */
 .range::-webkit-slider-thumb {
@@ -169,52 +169,66 @@
   pointer-events: none;
 }
 
-/* The whole book, faint, under the runs: the one rail a reader sees. It spans
-   the same thumb-centre to thumb-centre stretch the runs are measured on, so a
-   complete edition covers it exactly and a partial one leaves its gaps pale. */
+/*
+ * The bar follows the common slider pattern (Material's slider, the e-reader
+ * scrubbers): a thin rounded track, filled in the accent from the book's first
+ * page up to the knob, pale beyond it. Chosen by the owner on 2026-09-25 over a
+ * thick grey slab with green stripes, which read as a barcode rather than as a
+ * control. The juz cut the track into thirty segments (see `.juz`).
+ */
+
+/* The whole book, faint, under the runs. It spans the same thumb-centre to
+   thumb-centre stretch the runs are measured on, so a complete edition covers
+   it exactly and a partial one leaves its gaps paler still. */
 .runs::before {
   content: "";
   position: absolute;
   inset-inline: calc(var(--thumb) / 2 - 1px);
-  inset-block-start: -7px;
-  block-size: 14px;
-  border-radius: 1px;
+  inset-block-start: -3px;
+  block-size: 6px;
+  border-radius: 3px;
   background: var(--hairline);
 }
 
 /*
  * One bar per contiguous stretch of vendored pages. A single held page is a
- * 2px-wide bar — the same mark the per-page ticks used to draw — and a complete
- * edition is one bar the length of the track, which is the truthful picture of
- * "all of it is here" and costs one node instead of 604.
+ * 2px-wide bar, and a complete edition is one bar the length of the track,
+ * which is the truthful picture of "all of it is here" and costs one node
+ * instead of 604.
  */
 .run {
   position: absolute;
-  inset-block-start: -7px;
-  block-size: 14px;
-  border-radius: 1px;
-  background: var(--ink-soft);
-  opacity: 0.55;
+  inset-block-start: -3px;
+  block-size: 6px;
+  border-radius: 3px;
+  background: color-mix(in srgb, var(--ink-soft) 35%, var(--paper-raised));
 }
 
-/* The page on the stage, so the bar shows where you are even when the thumb is
-   elsewhere mid-drag. Drawn over the run, never instead of it: inside a full
-   edition every page is on a run, and the two facts are independent. */
+/* From the book's first page to the knob: how far in you are. */
+.fill {
+  position: absolute;
+  inset-block-start: -3px;
+  block-size: 6px;
+  border-radius: 3px;
+  background: var(--accent);
+}
+
+/* The page on the stage, so the bar shows where you are even when the knob is
+   elsewhere mid-drag. At rest the knob covers it. */
 .here {
   position: absolute;
-  inset-block-start: -7px;
+  inset-block-start: -5px;
   inline-size: 2px;
-  block-size: 14px;
+  block-size: 10px;
   border-radius: 1px;
   background: var(--accent-strong);
 }
 
 /*
- * The 30 juz, drawn as green detents — the coarse layer of the bar. Their own
- * container, positioned like the inventory's, and taller than a run so the two
- * layers read apart: the grey rail says which pages are here, the green ticks
- * say which part of the book each stretch is. `pointer-events: none` so they
- * never intercept a drag (the whole rail belongs to the thumb underneath).
+ * The 30 juz, drawn as thin cuts in the track, so the bar reads as thirty
+ * segments the way a video bar reads as its chapters. Their own container,
+ * positioned like the inventory's. `pointer-events: none` so the rail never
+ * intercepts a drag (the whole rail belongs to the thumb underneath).
  */
 .juzRail {
   position: absolute;
@@ -224,25 +238,28 @@
   pointer-events: none;
 }
 
-/* A marker is now a button (graduated option C), so it carries a button reset —
-   but it must still draw as the plain 2px tick it was. It takes the pointer (the
-   rail around it does not), grows from its own centre under the effect that
-   scales it, and eases that growth so the swell is felt rather than snapped. */
+/* A marker is a button (graduated option C), so it carries a button reset. It
+   paints a 1px cut the colour of the bar's paper, and its transparent border
+   widens what a pointer can hit to 5 by 18 px without drawing any of it. It
+   grows from its own centre under the effect that scales it, and eases that
+   growth so the swell is felt rather than snapped. */
 .juz {
   position: absolute;
   inset-block-start: -9px;
-  inline-size: 2px;
-  block-size: 18px;
+  box-sizing: content-box;
+  inline-size: 1px;
+  block-size: 10px;
   /* The global button rule sets a 44px minimum, which won over the size above
-     and drew each tick as a 44px green block. 30 of them could not each have a
-     44px target on a phone-wide bar anyway; the drag takes the rail. */
+     and drew each marker as a 44px green block. 30 of them could not each have
+     a 44px target on a phone-wide bar anyway; the drag takes the rail. */
   min-inline-size: 0;
   min-block-size: 0;
+  margin-inline-start: -1.5px;
   padding: 0;
-  border: 0;
-  border-radius: 1px;
-  background: var(--accent);
-  opacity: 0.65;
+  border: solid transparent;
+  border-width: 4px 2px;
+  background: var(--paper-raised);
+  background-clip: content-box;
   pointer-events: auto;
   cursor: pointer;
   transform-origin: center;
@@ -250,7 +267,7 @@
 }
 
 .juz:hover {
-  opacity: 1;
+  background-color: var(--ink-soft);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -306,20 +323,23 @@
 }
 
 /*
- * The handle: a page icon over the invisible native thumb, centred on the same
+ * The handle: a round knob over the invisible native thumb, centred on the same
  * value. `pointer-events: none` so the drag stays the input's — the handle is
- * paint, not a second control. Sized a touch beyond the thumb so the leaf reads
- * clearly; a soft shadow lifts it off the rail and the ticks beneath it.
+ * paint, not a second control. Accent to match the fill it ends, ringed in the
+ * bar's paper and lifted by a soft shadow so it reads apart from the track.
  */
 .handle {
   position: absolute;
   inset-block-start: 50%;
-  inline-size: 26px;
-  block-size: 26px;
+  box-sizing: border-box;
+  inline-size: var(--thumb);
+  block-size: var(--thumb);
+  border: 3px solid var(--paper-raised);
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 1px 3px rgb(0 0 0 / 0.35);
   transform: translate(-50%, -50%);
   pointer-events: none;
-  color: var(--accent-strong);
-  filter: drop-shadow(0 1px 1px rgb(0 0 0 / 0.25));
 }
 
 /* Centring is a physical shift: `translateX(-50%)` moves left in both writing
@@ -327,12 +347,6 @@
    always RTL, but stating both keeps the rule visible if that ever changes. */
 .bar[dir="rtl"] .handle {
   transform: translate(50%, -50%);
-}
-
-.handleIcon {
-  display: block;
-  inline-size: 100%;
-  block-size: 100%;
 }
 
 /*

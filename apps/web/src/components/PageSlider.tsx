@@ -85,36 +85,6 @@ interface PageSliderProps {
 }
 
 /**
- * The handle, drawn as a leaf of the mus'haf rather than a browser puck. It is
- * painted *over* the native thumb (which is kept, sized, and made invisible), so
- * the reader grabs a page while the range input underneath keeps every scrap of
- * its keyboard and assistive-technology behaviour. `currentColor` is the track's
- * accent, `--paper` the page — a small card the colour of the book above it.
- */
-function PageHandleIcon(): JSX.Element {
-  return (
-    <svg className={styles.handleIcon} viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-      <path
-        d="M7.5 2.5H14L18 6.5V19.5A1.5 1.5 0 0 1 16.5 21H7.5A1.5 1.5 0 0 1 6 19.5V4A1.5 1.5 0 0 1 7.5 2.5Z"
-        fill="var(--paper)"
-        stroke="currentColor"
-        strokeWidth="1.6"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M13.75 2.75V6A1 1 0 0 0 14.75 7H18"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.6"
-        strokeLinejoin="round"
-      />
-      <line x1="8.75" y1="12" x2="15.25" y2="12" stroke="currentColor" strokeWidth="1.3" opacity="0.55" />
-      <line x1="8.75" y1="15" x2="15.25" y2="15" stroke="currentColor" strokeWidth="1.3" opacity="0.55" />
-    </svg>
-  );
-}
-
-/**
  * PageSlider — the page bar: scrub the whole mus'haf, with a page turn on each
  * edge.
  *
@@ -477,6 +447,17 @@ export function PageSlider({
               }}
             />
           ))}
+          {/* How far into the book the handle is: filled from the book's first
+              page to the handle, the way a progress slider says "you are here,
+              and this much is behind you". */}
+          <span
+            className={styles.fill}
+            data-testid="page-fill"
+            style={{
+              insetInlineStart: "calc(var(--thumb) / 2 - 1px)",
+              inlineSize: `calc(${pageFraction(value, total)} * (100% - var(--thumb)) + 2px)`,
+            }}
+          />
           {/* The page on the stage. Its own element, because it is its own
               fact: the run under it says "these pages are here" and this says
               "you are on this one", and the two only shared a class while a
@@ -533,11 +514,11 @@ export function PageSlider({
             until a fine pointer hovers with the spread on. */}
         <div className={styles.lens} aria-hidden="true" ref={lensRef} />
 
-        {/* The handle, a page rather than a puck, painted over the invisible
-            native thumb at the same value — see `PageHandleIcon`. Hidden while
-            the bar is inert (no inventory), so no lone leaf floats over a dead
-            track. Follows the drag: `value` is the scrub value mid-drag, the
-            loaded page at rest. */}
+        {/* The handle, a round knob painted over the invisible native thumb at
+            the same value, so the range input underneath keeps its keyboard and
+            screen-reader behaviour. Hidden while the bar is inert (no
+            inventory), so no knob floats over a dead track. Follows the drag:
+            `value` is the scrub value mid-drag, the loaded page at rest. */}
         {!empty && (
           <span
             className={styles.handle}
@@ -546,9 +527,7 @@ export function PageSlider({
             style={{
               insetInlineStart: `calc(${pageFraction(value, total)} * (100% - var(--thumb)) + var(--thumb) / 2)`,
             }}
-          >
-            <PageHandleIcon />
-          </span>
+          />
         )}
 
         {scrub !== null && (
