@@ -27,6 +27,29 @@ export {
 // be inside a selection but never an end of one is enforced.
 export { formatWordKey, parseWordKey, ayahKeyOf, type WordKey } from "./keys.js";
 
+// Bookmarks — many named ribbons, cleared one surah or all at once, saved to a
+// file and loaded back (decisions bookmark-model, bookmark-store, bookmark-admin).
+export {
+  BOOKMARK_NAME_MAX,
+  bookmarksOnPage,
+  clearSurah,
+  dropBookmark,
+  droppedAt,
+  groupBySurah,
+  liftBookmark,
+  mergeBookmarks,
+  moveBookmark,
+  openBookmark,
+  parseBookmarkFile,
+  renameBookmark,
+  surahOf,
+  toBookmarkFile,
+  type Bookmark,
+  type BookmarkEvent,
+  type BookmarkFile,
+  type SurahGroup,
+} from "./bookmarks.js";
+
 export {
   WordIndex,
   isWordShard,
