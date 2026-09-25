@@ -197,6 +197,11 @@
   inset-block-start: -9px;
   inline-size: 2px;
   block-size: 18px;
+  /* The global button rule sets a 44px minimum, which won over the size above
+     and drew each tick as a 44px green block. 30 of them could not each have a
+     44px target on a phone-wide bar anyway; the drag takes the rail. */
+  min-inline-size: 0;
+  min-block-size: 0;
   padding: 0;
   border: 0;
   border-radius: 1px;
