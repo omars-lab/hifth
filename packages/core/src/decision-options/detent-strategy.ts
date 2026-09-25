@@ -156,14 +156,23 @@ export const pageBarFocus: FocusLens = {
   minTickGapPx: 6,
 };
 
-/** Where a point moves to under the magnifier; the same contract as fisheyeSpread. */
-export function focusSpread(signedDistPx: number, lens: FocusLens): number {
+/**
+ * Where a point moves to under the magnifier; the same contract as fisheyeSpread.
+ *
+ * `reachPx` is how much bar is left on the point's side of the pointer. Near an
+ * end of the bar that is less than the radius, and a full-radius spread would push
+ * the last pages past the end (seen 2026-09-25 at page 587). So the window on that
+ * side shrinks to what is left: the end of the bar stays put, and everything
+ * between it and the pointer is spread inside it.
+ */
+export function focusSpread(signedDistPx: number, lens: FocusLens, reachPx = Infinity): number {
+  const radius = Math.min(lens.radiusPx, reachPx);
   const ad = Math.abs(signedDistPx);
-  if (!(ad < lens.radiusPx)) return signedDistPx;
+  if (!(radius > 0) || !(ad < radius)) return signedDistPx;
   const sign = signedDistPx < 0 ? -1 : 1;
   const d = lens.magnify - 1;
-  const x = ad / lens.radiusPx;
-  return sign * lens.radiusPx * (((d + 1) * x) / (d * x + 1));
+  const x = ad / radius;
+  return sign * radius * (((d + 1) * x) / (d * x + 1));
 }
 
 /**

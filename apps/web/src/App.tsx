@@ -19,6 +19,7 @@ import {
   Tajweed,
   appKeyAction,
   editionMeta,
+  hizbPageIndex,
   juzOf,
   juzOfPage,
   juzPageIndex,
@@ -1028,6 +1029,8 @@ export function App(): JSX.Element {
    * jump after it is an array index.
    */
   const juzStarts = useMemo(() => juzPageIndex(manifest?.pages ?? []), [manifest]);
+  /** The same for the sixty hizbs, so the magnifier can mark where each begins. */
+  const hizbStarts = useMemo(() => hizbPageIndex(manifest?.pages ?? []), [manifest]);
 
   // Where a page sits in the book, for the page bar's scrub readout: its surah
   // (above), the juz already *running* onto it, and the juz that *begins* on it
@@ -2013,6 +2016,7 @@ export function App(): JSX.Element {
         onGoTo={handleScrubTo}
         onJuzTap={goToJuz}
         juzStarts={juzStarts}
+        hizbStarts={hizbStarts}
         pageContext={pageContext}
         fisheye={fisheye}
       />

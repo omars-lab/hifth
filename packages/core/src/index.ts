@@ -86,6 +86,7 @@ export {
   juzSpan,
   juzOfPage,
   juzPageIndex,
+  hizbPageIndex,
   planPack,
   type PackPlan,
 } from "./packs.js";

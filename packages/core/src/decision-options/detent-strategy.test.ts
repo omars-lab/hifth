@@ -43,6 +43,18 @@ describe("focusSpread (the page-bar magnifier since 2026-09-25)", () => {
     const beside = focusSpread(pagePx, lens) - focusSpread(0, lens);
     expect(beside).toBeGreaterThanOrEqual(lens.minTickGapPx);
   });
+
+  it("never pushes a page past the end of the bar", () => {
+    // The pointer 30px from the end: every page on that side must land inside
+    // those 30px, and the end itself must not move (seen at page 587).
+    const reach = 30;
+    for (let d = 0; d <= reach; d += 0.5) {
+      expect(focusSpread(d, lens, reach)).toBeLessThanOrEqual(reach + 1e-9);
+    }
+    expect(focusSpread(reach, lens, reach)).toBeCloseTo(reach, 9);
+    // The other side, with room to spare, is the full-radius curve.
+    expect(focusSpread(-50, lens, Infinity)).toBe(focusSpread(-50, lens));
+  });
 });
 
 describe("pageTickStep (the map rule for page marks)", () => {
