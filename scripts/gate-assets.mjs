@@ -167,6 +167,10 @@ const rows = [];
 let files = 0;
 
 for (const entry of readdirSync(ASSETS, { withFileTypes: true })) {
+  // `private/` is the pitch's held copy: gitignored, only on the laptop that
+  // makes the pitch, and removed from every public build by `hifth-drop-private`
+  // in apps/web/vite.config.ts. It never ships, so it has nothing to weigh.
+  if (entry.name === "private") continue;
   if (!entry.isDirectory()) {
     // The manifest is the one file that legitimately lives at the root; anything
     // else here is unweighed by every per-kind rule below.

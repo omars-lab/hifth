@@ -2,6 +2,16 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   Adjacency,
   Concordance,
+  bookmarksOnPage,
+  clearSurah,
+  dropBookmark,
+  liftBookmark,
+  mergeBookmarks,
+  moveBookmark,
+  openBookmark,
+  parseBookmarkFile,
+  renameBookmark,
+  toBookmarkFile,
   DEFAULT_FIELD,
   MOUNTED_PAGE_CAP,
   Resolver,
@@ -63,6 +73,10 @@ import { EditionPicker } from "./components/EditionPicker";
 import { CoachMarks, coachDismissed } from "./components/CoachMarks";
 import { Colophon } from "./components/Colophon";
 import { RevisionMap } from "./components/RevisionMap";
+import { BookmarkRibbons } from "./components/BookmarkRibbons";
+import { BookmarkDrawer } from "./components/BookmarkDrawer";
+import { BookmarkShelf } from "./components/BookmarkShelf";
+import { useBookmarks } from "./useBookmarks";
 import { LiveAnnouncer, useAnnouncer } from "./components/LiveAnnouncer";
 import { RootLens, RootLensTrigger } from "./components/RootLens";
 import { PlayTrigger } from "./components/PlayTrigger";
@@ -868,6 +882,94 @@ export function App(): JSX.Element {
     [pageTurns, announce, t],
   );
 
+  // Bookmarks (docs/decisions/bookmark-fold.md, bookmark-admin.md): ribbons on
+  // the page, a drawer per ribbon, and the tidy-up in the page map. Every change
+  // is one core rule, then one whole-set write, then one announced line.
+  const { bookmarks, commit: commitBookmarks } = useBookmarks(announce, t.bmNotSaved);
+  const [drawerId, setDrawerId] = useState<string | null>(null);
+  const [freshId, setFreshId] = useState<string | null>(null);
+  const drawerBookmark = bookmarks.find((b) => b.id === drawerId) ?? null;
+
+  /** Where a bookmark dropped on `p` points: the selected ayah if it is on that page, else the page's first. */
+  const bookmarkTarget = useCallback(
+    (p: number): { key: string; page: number } | null => {
+      if (!resolver) return null;
+      if (selectedKey && resolver.resolve(selectedKey)?.page === p) return { key: selectedKey, page: p };
+      const first = resolver.keysOnPage(p)[0];
+      return first ? { key: first, page: p } : null;
+    },
+    [resolver, selectedKey],
+  );
+
+  // Where "move it" would put the open ribbon: the selected ayah when there is
+  // one it is not already on, else the page on the stage when it sits elsewhere.
+  // Null when neither would change anything, and the drawer then offers no move.
+  const selectedAt = selectedKey && resolver ? resolver.resolve(selectedKey)?.page : undefined;
+  const moveTarget =
+    drawerBookmark && selectedKey && selectedAt !== undefined && selectedKey !== drawerBookmark.key
+      ? { key: selectedKey, page: selectedAt }
+      : drawerBookmark && drawerBookmark.page !== page
+        ? bookmarkTarget(page)
+        : null;
+
+  const dropOn = useCallback(
+    (p: number) => {
+      const at = bookmarkTarget(p);      if (!at) return;
+      const name = t.ayahLabel(at.key) ?? t.pageN(p);
+      const next = dropBookmark(bookmarks, { ...at, name }, Date.now());
+      const made = next[next.length - 1]!;
+      commitBookmarks(next, t.bmDropped(made.name));
+      setFreshId(made.id);
+      setDrawerId(made.id);
+    },
+    [bookmarkTarget, bookmarks, commitBookmarks, t],
+  );
+
+  const openFromShelf = useCallback(
+    (id: string) => {
+      const b = bookmarks.find((x) => x.id === id);
+      if (!b) return;
+      setRevisionOpen(false);
+      commitBookmarks(openBookmark(bookmarks, id, Date.now()), t.bmOpen(b.name, b.page));
+      goToPage(b.page, t.bmOpen(b.name, b.page));
+    },
+    [bookmarks, commitBookmarks, goToPage, t],
+  );
+
+  const saveBookmarkFile = useCallback(() => {
+    const blob = new Blob([JSON.stringify(toBookmarkFile(bookmarks, Date.now()), null, 2)], {
+      type: "application/json",
+    });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "hifth-bookmarks.json";
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }, [bookmarks]);
+
+  const loadBookmarkFile = useCallback(
+    (text: string) => {
+      const file = parseBookmarkFile(text);
+      if (!file) {
+        announce(t.bmLoadBad);
+        return;
+      }
+      const merged = mergeBookmarks(bookmarks, file.bookmarks);
+      commitBookmarks(merged, t.bmLoaded(merged.length - bookmarks.length));
+    },
+    [announce, bookmarks, commitBookmarks, t],
+  );
+
+  const ribbonsFor = (p: number) => (
+    <BookmarkRibbons
+      bookmarks={bookmarksOnPage(bookmarks, p)}
+      onDrop={() => dropOn(p)}
+      onOpen={setDrawerId}
+      freshId={freshId}
+    />
+  );
+
   // Where one page's worth of movement lands, or null if it lands nowhere.
   //
   // "The next page" means the next page we actually *have*: this walks
@@ -1657,6 +1759,7 @@ export function App(): JSX.Element {
                   labelFor={(key) => t.ayahAria(t.ayahLabel(key) ?? key)}
                   skin={skin}
                   tajweedLookup={tajweed?.lookup ?? null}
+                  overlay={ribbonsFor(facing)}
                 />
               )}
             >
@@ -1692,6 +1795,7 @@ export function App(): JSX.Element {
                 labelFor={(key) => t.ayahAria(t.ayahLabel(key) ?? key)}
                 skin={skin}
                 tajweedLookup={tajweed?.lookup ?? null}
+                overlay={ribbonsFor(page)}
                 /* On the desktop spread the page turns by its fore-edge, not by
                    a swipe across its middle: the edge rails drive the fold, and
                    the stage's own swipe-to-turn is off so a drag through the
@@ -1801,6 +1905,48 @@ export function App(): JSX.Element {
         page={page}
         onGoToPage={goToPage}
         openAt={revisionAt}
+      >
+        <BookmarkShelf
+          bookmarks={bookmarks}
+          onOpen={openFromShelf}
+          onClearSurah={(surah) => {
+            const next = clearSurah(bookmarks, surah);
+            commitBookmarks(next, t.bmCleared(bookmarks.length - next.length));
+          }}
+          onClearAll={() => commitBookmarks([], t.bmCleared(bookmarks.length))}
+          onSave={saveBookmarkFile}
+          onLoad={loadBookmarkFile}
+        />
+      </RevisionMap>
+
+      <BookmarkDrawer
+        bookmark={drawerBookmark}
+        moveLabel={moveTarget ? (t.ayahLabel(moveTarget.key) ?? t.pageN(moveTarget.page)) : null}
+        onRename={(name) => {
+          if (!drawerBookmark) return;
+          const next = renameBookmark(bookmarks, drawerBookmark.id, name, Date.now());
+          const renamed = next.find((b) => b.id === drawerBookmark.id);
+          if (renamed && renamed.name !== drawerBookmark.name)
+            commitBookmarks(next, t.bmRenamed(renamed.name));
+          setDrawerId(null);
+        }}
+        onMoveHere={() => {
+          if (!drawerBookmark || !moveTarget) return;
+          commitBookmarks(
+            moveBookmark(bookmarks, drawerBookmark.id, moveTarget, Date.now()),
+            t.bmMoved(drawerBookmark.name, moveTarget.page),
+          );
+          setDrawerId(null);
+        }}
+        onLift={() => {
+          if (!drawerBookmark) return;
+          commitBookmarks(liftBookmark(bookmarks, drawerBookmark.id), t.bmLifted(drawerBookmark.name));
+          setDrawerId(null);
+        }}
+        onAddAnother={() => {
+          if (drawerBookmark) dropOn(drawerBookmark.page);
+        }}
+        onClose={() => setDrawerId(null)}
       />
 
       {/* Pinned RTL with the stage, and for the same reason: the trail reads
