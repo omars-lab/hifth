@@ -1419,8 +1419,16 @@ test.describe("Hifth · the ayah's sheets rise over the facing leaf", () => {
     const facing = await restingBox(page, 8);
     await chip(page).click();
     await expect(sheet(page)).toBeVisible();
-    expect(await restingBox(page, 7), "the live leaf moved when the sheet rose").toEqual(live);
-    expect(await restingBox(page, 8), "the facing leaf moved when the sheet rose").toEqual(facing);
+    // "Not by a pixel", measured as that: a sub-pixel rounding change in layout
+    // (seen at 0.0025px) is not a leaf moving.
+    const within = (b: { x: number; y: number; width: number; height: number }) => ({
+      x: expect.closeTo(b.x, 1),
+      y: expect.closeTo(b.y, 1),
+      width: expect.closeTo(b.width, 1),
+      height: expect.closeTo(b.height, 1),
+    });
+    expect(await restingBox(page, 7), "the live leaf moved when the sheet rose").toEqual(within(live));
+    expect(await restingBox(page, 8), "the facing leaf moved when the sheet rose").toEqual(within(facing));
   });
 
   test("with one leaf, or on a phone, no side is named and the default stands", async ({

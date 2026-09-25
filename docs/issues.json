@@ -2073,6 +2073,17 @@
       "severity": "risk",
       "owner": "agent",
       "note": "Subtask of rigor-stack-pins-the-checking-code (①), and the deepest hole: the one error no fingerprint can catch is the measuring code agreeing with itself, because the instrument that grades a placement is the same family of code that measured the ink in the first place. The fix is a genuinely DIFFERENT measurement — a second, independently written way of finding where each mark's ink is — used to grade the first, producing its own verdict on the marks the first is least sure of. The by-eye sitting is a human instance of this; this subtask is the machine one. Most expensive of the five, so last by value-for-effort. Task #129."
+    },
+    {
+      "id": "storage-not-kept",
+      "source": {
+        "file": "docs/backlog.md",
+        "item": "⑰"
+      },
+      "status": "open",
+      "severity": "risk",
+      "owner": "agent",
+      "note": "Owner, 2026-09-25: the 'offline storage is not guaranteed' banner was a warning with no action for the reader, so it came out of the app and the underlying risk came here. The pages a browser will not promise to keep may be cleared under storage pressure; the fix is ours (ask for the promise at a moment the browser rewards, measure refusals, check the kept-juz recovery path on a phone)."
     }
   ]
 }

@@ -39,9 +39,9 @@ import styles from "./OfflineNotice.module.css";
  *     the benefit and the exact menu path; there is no prompt to fire (§5a).
  *   • `install-prompt` — Android/Chromium handed us a deferred prompt, so the
  *     action button fires the real one.
- *   • `best-effort` — persist denied and no install path to offer. Honest, not
- *     alarming: the pages are cached, they are simply first in line if the
- *     device runs short.
+ *   (Persist denied with no install path to offer used to say so too. It gave the
+ *     reader nothing to do, so since 2026-09-25 it says nothing, and making the
+ *     storage stick is our job: docs/issues.json, storage-not-kept.)
  *   • `pack-gone` — a juz the reader deliberately kept is no longer whole. The
  *     only one of the five that reports something that has *already happened*
  *     rather than a risk, which is why it outranks even `capped`, and the only
@@ -51,7 +51,7 @@ import styles from "./OfflineNotice.module.css";
  * and the bundles' `notices` record is indexed by it — so a fifth state cannot
  * be added without both languages growing an entry for it.
  */
-type NoticeKind = "pack-gone" | "capped" | "install-ios" | "install-prompt" | "best-effort";
+type NoticeKind = "pack-gone" | "capped" | "install-ios" | "install-prompt";
 
 /**
  * Pick the one thing worth saying. Order is by what blocks offline hardest:
@@ -79,10 +79,9 @@ function pickNotice(
   if (standalone) return null;
   if (ios) return "install-ios";
   if (installable) return "install-prompt";
-  // No StorageManager at all: we could not verify anything, and with no install
-  // path there is no action to offer. Say nothing rather than guess.
-  if (durability === "unsupported") return null;
-  return "best-effort";
+  // Storage not promised, or not checkable, and no install path: there is no
+  // action to offer the reader, so say nothing. The risk is ours to close.
+  return null;
 }
 
 interface OfflineNoticeProps {
