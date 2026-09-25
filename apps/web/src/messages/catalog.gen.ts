@@ -149,8 +149,6 @@ export interface Catalog {
   readonly nearestPageN: (d: { readonly page: string | number }) => string;
   readonly nextPage: string;
   readonly noConcordance: string;
-  readonly "notices.best-effort.body": string;
-  readonly "notices.best-effort.title": string;
   readonly "notices.capped.body": string;
   readonly "notices.capped.title": string;
   readonly "notices.install-ios.body": string;

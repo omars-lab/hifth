@@ -150,8 +150,6 @@
   "notices.install-prompt.title": "ثبّت حفظ ليعمل دون إنترنت",
   "notices.install-prompt.body": "التثبيت يجعل الصفحات التي زرتها تبقى محفوظة على جهازك.",
   "notices.install-prompt.action": "ثبّت",
-  "notices.best-effort.title": "الحفظ دون إنترنت غير مضمون",
-  "notices.best-effort.body": "لم يمنح المتصفّح تخزينًا دائمًا، فقد يحذف الصفحات المحفوظة إذا ضاقت مساحة الجهاز. تُحفظ الصفحة من جديد كلّما فتحتها ومعك إنترنت.",
   "dismissNotice": "إخفاء التنبيه",
   "dismiss": "إخفاء",
   "aboutTitle": "عن حِفظ",

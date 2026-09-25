@@ -155,8 +155,6 @@ const messages: Catalog = {
   nearestPageN: (d) => "Nearest available page · Page " + d.page,
   nextPage: "Next page",
   noConcordance: "No concordance table for that edition yet",
-  "notices.best-effort.body": "The browser did not grant persistent storage, so saved pages may be deleted if the device runs short. Each page is saved again whenever you open it online.",
-  "notices.best-effort.title": "Offline storage is not guaranteed",
   "notices.capped.body": "The browser gives this site only a small amount of space, so saved pages may be deleted. Check the free space on your device, and the «clear site data when all windows are closed» setting under privacy.",
   "notices.capped.title": "There is not enough room for Hifth to work offline",
   "notices.install-ios.body": "From the browser's share button, choose «Add to Home Screen». Without installing, Safari deletes saved pages after seven days without opening the app.",

@@ -150,8 +150,6 @@
   "notices.install-prompt.title": "Install Hifth so it works offline",
   "notices.install-prompt.body": "Installing keeps the pages you have visited saved on your device.",
   "notices.install-prompt.action": "Install",
-  "notices.best-effort.title": "Offline storage is not guaranteed",
-  "notices.best-effort.body": "The browser did not grant persistent storage, so saved pages may be deleted if the device runs short. Each page is saved again whenever you open it online.",
   "dismissNotice": "Hide this notice",
   "dismiss": "Hide",
   "aboutTitle": "About Hifth",
