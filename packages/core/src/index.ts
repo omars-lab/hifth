@@ -383,9 +383,13 @@ export {
   markerEmphasis,
   fisheyeSpread,
   pageBarFisheye,
+  focusSpread,
+  pageBarFocus,
+  pageTickStep,
   type DetentContext,
   type DetentStrategy,
   type FisheyeLens,
+  type FocusLens,
   type Landing,
 } from "./decision-options/detent-strategy.js";
 

@@ -1,7 +1,8 @@
 # Plan: showing page and juz boundaries when the page bar magnifies
 
 *Plan, written 25 September 2026 at the owner's request: "we can show page and juz boundaries
-in the zoomed in view". Nothing here is built yet. The steps are in the order they pay off.*
+in the zoomed in view". The steps are in the order they pay off. Step 1 and most of step 3 were
+built the same day; the rest is still to do.*
 
 ## A few words, defined once
 
@@ -23,7 +24,9 @@ Seen on a desktop render of the new bar, with the mouse a third of the way along
   one and a half to two pixels apart. So the reader cannot see where one page ends and the
   next begins, which is the thing the owner asked for.
 - The page label under the mouse uses Western digits ("426") while the juz numbers above it use
-  Arabic-Indic digits. Two number styles on one small strip.
+  Arabic-Indic digits. This turned out to be on purpose: the app shows page numbers in Western
+  digits everywhere, because that is the number a reader types into the page jumper. So it
+  stays.
 - When two juz start close together, their numbers crowd into each other.
 - The page label can sit too high and get cut off at the top edge of the bar's area.
 - A phone has no mouse, so it gets none of this.
@@ -64,7 +67,16 @@ Seen on a desktop render of the new bar, with the mouse a third of the way along
 
 ## What is the plan?
 
-### 1. Draw page marks only where they have room (the biggest win)
+### 1. Draw page marks only where they have room (the biggest win) — built 25 September
+
+*What was built:* the marks hang like a ruler just under the track, with every 5th one longer.
+The page under the mouse is a short green bar between its own two marks. The magnifier now
+widens the bar about nine times right under the mouse and eases off towards its edge; the
+decision page for the magnifier still shows the gentler curve it was chosen with. Marks are
+kept at least 6 pixels apart, because at 4 they bunched up where the spacing switched from
+every page to every 5th. One thing still to fix: the knob and the green part of the track do
+not move with the magnifier, so when the mouse is near the knob the knob sits a little off the
+marks around it.
 
 Inside the magnifier, draw a short tick at each page boundary, but only where the spread
 leaves enough room to see it. The rule is the map rule: every page if ticks land at least
@@ -87,9 +99,8 @@ boundary and a page boundary never look alike. The juz segment the mouse is insi
 slightly thicker, the way a video bar thickens the hovered chapter. That answers "which juz
 am I in?" without having to read a number.
 
-### 3. Tidy the labels
+### 3. Tidy the labels — overlap rule built 25 September
 
-- Show the page label in the same Arabic-Indic digits as the juz numbers.
 - When two labels would overlap, keep the one nearer the mouse and drop the other. The page
   label always wins.
 - Place the labels inside the bar's own area so none of them gets cut off.

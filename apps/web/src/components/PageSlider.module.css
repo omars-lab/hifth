@@ -305,6 +305,32 @@
   white-space: nowrap;
 }
 
+/* A page mark: a ruler tick hanging just under the track at the edge between two
+   pages, drawn only inside the magnifier where the pages have room to be told
+   apart. Every 5th page's tick is longer, as on a ruler. */
+.lensTick {
+  position: absolute;
+  top: calc(50% + 5px);
+  inline-size: 1px;
+  block-size: 4px;
+  background: var(--ink-soft);
+  transform: translateX(-50%);
+}
+
+.lensTickMajor {
+  block-size: 7px;
+}
+
+/* The page under the pointer, as a span of the track between its own two edges —
+   so the reader sees how wide one page is at this magnification. */
+.lensHere {
+  position: absolute;
+  top: calc(50% + 5px);
+  block-size: 3px;
+  border-radius: 1.5px;
+  background: var(--accent-strong);
+}
+
 /* The page under the pointer, named in a small dark tag above the bar — the same
    ink as the scrub bubble, so the two readouts of "where am I" match. It floats
    over the track top like the bubble, and the two never coexist (the bubble is

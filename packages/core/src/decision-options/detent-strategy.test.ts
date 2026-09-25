@@ -10,8 +10,49 @@ import {
   markerEmphasis,
   fisheyeSpread,
   pageBarFisheye,
+  focusSpread,
+  pageBarFocus,
+  pageTickStep,
   type DetentContext,
 } from "./detent-strategy.js";
+
+describe("focusSpread (the page-bar magnifier since 2026-09-25)", () => {
+  const lens = pageBarFocus;
+  const W = lens.radiusPx;
+
+  it("keeps the pointer fixed and the window edge and beyond unmoved", () => {
+    expect(focusSpread(0, lens)).toBe(0);
+    expect(focusSpread(W, lens)).toBeCloseTo(W, 6);
+    expect(focusSpread(-(W + 5), lens)).toBe(-(W + 5));
+  });
+
+  it("is symmetric and never folds back on itself", () => {
+    let prev = -Infinity;
+    for (let d = -W - 10; d <= W + 10; d += 0.5) {
+      const s = focusSpread(d, lens);
+      expect(s).toBeGreaterThanOrEqual(prev);
+      expect(focusSpread(-d, lens)).toBeCloseTo(-s, 10);
+      prev = s;
+    }
+  });
+
+  it("opens single pages wide enough to mark beside the pointer", () => {
+    // A desktop bar gives each of 604 pages under a pixel. Right beside the
+    // pointer the magnifier must stretch one page past the smallest mark gap.
+    const pagePx = 0.83;
+    const beside = focusSpread(pagePx, lens) - focusSpread(0, lens);
+    expect(beside).toBeGreaterThanOrEqual(lens.minTickGapPx);
+  });
+});
+
+describe("pageTickStep (the map rule for page marks)", () => {
+  it("marks every page where pages are wide, then fives, tens, then nothing", () => {
+    expect(pageTickStep(6, 4)).toBe(1);
+    expect(pageTickStep(1, 4)).toBe(5);
+    expect(pageTickStep(0.5, 4)).toBe(10);
+    expect(pageTickStep(0.2, 4)).toBeNull();
+  });
+});
 
 /**
  * A tiny stand-in for the vendored page table: juz 2 opens on page 22 and juz 3

@@ -1,12 +1,13 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
-  fisheyeSpread,
+  focusSpread,
   labelBoth,
   markerEmphasis,
   nearestPage,
-  pageBarFisheye,
+  pageBarFocus,
   pageFraction,
   pageRuns,
+  pageTickStep,
   tapButtonDetent,
 } from "@hifth/core";
 import { useT } from "../i18n";
@@ -23,8 +24,10 @@ const EMPHASIS = tapButtonDetent.emphasis ?? { near: 0, peak: 1 };
 // The fisheye lens (option B, graduated · docs/decisions/page-bar.md §"How does a
 // reader find one juz among thirty on a bar this small?"): how far the spread
 // reaches, its curve, and how many pages either side of the pointer get their juz
-// named. Shared with the decision page, so the app and the drawing warp identically.
-const LENS = pageBarFisheye;
+// named. Since 2026-09-25 the bar uses a stronger curve than the decision page drew
+// (docs/design/page-bar-zoom-plan.md, step 1), so single pages open wide enough to
+// mark beside the pointer; the decision page keeps the curve that was chosen on.
+const LENS = pageBarFocus;
 
 interface PageSliderProps {
   /**
@@ -251,6 +254,7 @@ export function PageSlider({
       const rect = track.getBoundingClientRect();
       const thumb = parseFloat(getComputedStyle(track).getPropertyValue("--thumb")) || 22;
       const usable = Math.max(1, rect.width - thumb);
+      const halfPage = usable / Math.max(1, tot - 1) / 2;
       // A marker's rest centre in physical pixels, read from *layout* — `offsetLeft`
       // and `offsetWidth` ignore CSS transforms, so they give the untransformed
       // position even while the spread has warped the marker's painted box. That is
@@ -278,7 +282,11 @@ export function PageSlider({
         const grow = markerEmphasis(Math.abs(centre - px), EMPHASIS.near, EMPHASIS.peak);
         if (fish) {
           // Spread the marker outward from the pointer, then grow it in place.
-          const dx = fisheyeSpread(centre - px, LENS) - (centre - px);
+          // Under the magnifier a juz cut lands on the *edge* of its opening page
+          // (half a page toward the book's start, rightward in this RTL bar), so
+          // it sits on a page mark rather than halfway across a page.
+          const edge = centre + halfPage;
+          const dx = px + focusSpread(edge - px, LENS) - centre;
           m.style.transform = `translateX(${dx}px) scale(${grow})`;
         } else {
           m.style.transform = `scale(${grow})`;
@@ -295,12 +303,43 @@ export function PageSlider({
       const fPtr = clamp((rect.right - px - thumb / 2) / usable, 0, 1);
       const pageUnder = clamp(Math.round(1 + fPtr * (tot - 1)), 1, tot);
       const kids: HTMLElement[] = [];
+
+      // Page marks, drawn only where the magnifier leaves room to see them
+      // (docs/design/page-bar-zoom-plan.md, step 1): every page right beside the
+      // pointer, every 5th a little further out, every 10th beyond that, none
+      // past the window. A mark sits on the edge between two pages; the page
+      // under the pointer is the accent span between its own two edges.
+      const restX = (v: number): number => rect.right - thumb / 2 - ((v - 1) / Math.max(1, tot - 1)) * usable;
+      const warpX = (v: number): number => px + focusSpread(restX(v) - px, LENS);
+      const reachPages = Math.ceil((LENS.radiusPx / usable) * (tot - 1)) + 1;
+      let lastTick = Number.NaN;
+      for (let p = Math.max(1, pageUnder - reachPages); p < Math.min(tot, pageUnder + reachPages); p++) {
+        const x = warpX(p + 0.5);
+        if (Math.abs(x - px) >= LENS.radiusPx) continue;
+        const step = pageTickStep(Math.abs(warpX(p + 1) - warpX(p)), LENS.minTickGapPx);
+        if (step === null || p % step !== 0) continue;
+        if (Math.abs(x - lastTick) < LENS.minTickGapPx) continue;
+        lastTick = x;
+        const tick = document.createElement("span");
+        tick.className = `${styles.lensTick ?? ""} ${p % 5 === 0 ? (styles.lensTickMajor ?? "") : ""}`;
+        tick.dataset.testid = "page-tick";
+        tick.style.left = `${x - rect.left}px`;
+        kids.push(tick);
+      }
+      const hereA = warpX(pageUnder - 0.5);
+      const hereB = warpX(pageUnder + 0.5);
+      const herePage = document.createElement("span");
+      herePage.className = styles.lensHere ?? "";
+      herePage.style.left = `${Math.min(hereA, hereB) - rect.left}px`;
+      herePage.style.width = `${Math.abs(hereB - hereA)}px`;
+      kids.push(herePage);
+
       for (const m of marks()) {
         const juz = Number(m.dataset.juz);
         const start = js[juz - 1];
         if (start === null || start === undefined) continue;
         if (Math.abs(start - pageUnder) > LENS.juzPageWindow) continue;
-        const warped = px + fisheyeSpread(restCentre(m) - px, LENS);
+        const warped = px + focusSpread(restCentre(m) + halfPage - px, LENS);
         const span = document.createElement("span");
         span.className = `${styles.lensJuz ?? ""} numeric`;
         span.style.left = `${warped - rect.left}px`;
@@ -313,6 +352,22 @@ export function PageSlider({
       pageTag.textContent = tt.pageN(pageUnder);
       kids.push(pageTag);
       layer.replaceChildren(...kids);
+
+      // Labels that would overlap give way: the page tag always stays, then the
+      // juz numbers nearest the pointer, and any number that would touch one
+      // already kept is dropped (zoom plan, step 3).
+      const kept: DOMRect[] = [pageTag.getBoundingClientRect()];
+      const juzLabels = Array.from(layer.querySelectorAll<HTMLElement>(`.${styles.lensJuz ?? "_"}`));
+      const centreOf = (r: DOMRect): number => r.left + r.width / 2;
+      const boxes = juzLabels.map((el) => ({ el, r: el.getBoundingClientRect() }));
+      boxes.sort((a, b) => Math.abs(centreOf(a.r) - px) - Math.abs(centreOf(b.r) - px));
+      for (const { el, r } of boxes) {
+        const clash = kept.some(
+          (k) => r.left < k.right + 2 && r.right > k.left - 2 && r.top < k.bottom && r.bottom > k.top,
+        );
+        if (clash) el.remove();
+        else kept.push(r);
+      }
     };
     const onMove = (e: PointerEvent): void => {
       if (draggingRef.current) return;
