@@ -195,14 +195,13 @@ describe("PageSlider", () => {
     expect(document.querySelectorAll("[data-testid='juz-detent']")).toHaveLength(0);
   });
 
-  it("hands the reader a page to grab, drawn over the native thumb", () => {
+  it("hands the reader a knob to grab, drawn over the native thumb", () => {
     // The handle is paint over the input, never a second control: the range
-    // keeps the role, the value text and the keyboard; the leaf is aria-hidden.
+    // keeps the role, the value text and the keyboard; the knob is aria-hidden.
     slider();
     const handle = document.querySelector("[data-testid='page-handle']");
     expect(handle).not.toBeNull();
     expect(handle!.getAttribute("aria-hidden")).toBe("true");
-    expect(handle!.querySelector("svg")).not.toBeNull();
     expect(screen.getAllByRole("slider")).toHaveLength(1);
   });
 
