@@ -331,7 +331,8 @@
         "bookmark-store",
         "note-persistence",
         "confusion-map-export",
-        "mistake-note-kinds"
+        "mistake-note-kinds",
+        "bookmark-admin"
       ]
     },
     {
@@ -913,7 +914,8 @@
       "date": "2026-09-02",
       "related": [
         "bookmark-store",
-        "pin-marker"
+        "pin-marker",
+        "bookmark-admin"
       ]
     },
     {
@@ -945,6 +947,35 @@
         "bookmark-model",
         "note-persistence",
         "confusion-map-export",
+        "storage-model",
+        "bookmark-admin"
+      ]
+    },
+    {
+      "id": "bookmark-admin",
+      "question": "Where does a reader clear many bookmarks at once, and how is clearing all of them confirmed?",
+      "status": "decided",
+      "options": [
+        {
+          "id": "A",
+          "label": "From the page map, grouped by surah, with clear-all asking first"
+        },
+        {
+          "id": "B",
+          "label": "Only from each ribbon, one at a time"
+        },
+        {
+          "id": "C",
+          "label": "Leave bookmarks out of the demo"
+        }
+      ],
+      "doc": "docs/decisions/bookmark-admin.md",
+      "decided": "A",
+      "by": "omar",
+      "date": "2026-09-25",
+      "related": [
+        "bookmark-model",
+        "bookmark-store",
         "storage-model"
       ]
     },
