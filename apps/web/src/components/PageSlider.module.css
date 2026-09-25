@@ -89,11 +89,34 @@
  * rebuilt slider is how a control loses its screen-reader behaviour.
  */
 .range {
+  -webkit-appearance: none;
+  appearance: none;
   inline-size: 100%;
   margin: 0;
   accent-color: var(--accent);
   background: none;
   cursor: pointer;
+}
+
+/* The browser's own track is not drawn either: the runs (and the base under
+   them) are the rail. Left painted, it showed as a pale pill poking out past
+   the grey inventory, with its filled half as a green stub at the handle — two
+   bars where the reader should see one. Kept the thumb's height so the thumb
+   sits centred on it in both engines. */
+.range::-webkit-slider-runnable-track {
+  block-size: var(--thumb);
+  background: transparent;
+  border: none;
+}
+
+.range::-moz-range-track {
+  block-size: var(--thumb);
+  background: transparent;
+  border: none;
+}
+
+.range::-moz-range-progress {
+  background: transparent;
 }
 
 .range:disabled {
@@ -144,6 +167,19 @@
   inset-block-start: 50%;
   block-size: 0;
   pointer-events: none;
+}
+
+/* The whole book, faint, under the runs: the one rail a reader sees. It spans
+   the same thumb-centre to thumb-centre stretch the runs are measured on, so a
+   complete edition covers it exactly and a partial one leaves its gaps pale. */
+.runs::before {
+  content: "";
+  position: absolute;
+  inset-inline: calc(var(--thumb) / 2 - 1px);
+  inset-block-start: -7px;
+  block-size: 14px;
+  border-radius: 1px;
+  background: var(--hairline);
 }
 
 /*
