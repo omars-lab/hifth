@@ -70,7 +70,7 @@ import { ShareSheet } from "./components/ShareSheet";
 import { OfflineNotice } from "./components/OfflineNotice";
 import { Jumper } from "./components/Jumper";
 import { EditionPicker } from "./components/EditionPicker";
-import { CoachMarks, coachDismissed } from "./components/CoachMarks";
+import { CoachMarks } from "./components/CoachMarks";
 import { Colophon } from "./components/Colophon";
 import { RevisionMap } from "./components/RevisionMap";
 import { BookmarkRibbons } from "./components/BookmarkRibbons";
@@ -173,13 +173,11 @@ export function App(): JSX.Element {
   // shelf it is pointing at is only rendered at juz scope.
   const [revisionAt, setRevisionAt] = useState<RevisionScope | undefined>(undefined);
   /*
-   * Is the coach strip still claiming its band of the layout? Read once, from
-   * the same storage the strip reads, so the two agree on the very first frame
-   * — a notice that appears and is then pushed down a tick later is worse than
-   * either strip alone. Private mode throws and `coachDismissed` answers true,
-   * which is the right default here too: no strip, so nothing to hold.
+   * Is the tips strip up? It no longer opens by itself on a first visit (the
+   * owner's call, 2026-09-25): it starts closed and opens only from the button
+   * in settings, so a first open goes straight to the page.
    */
-  const [coachUp, setCoachUp] = useState(() => !coachDismissed());
+  const [coachUp, setCoachUp] = useState(false);
 
   const stageRef = useRef<PageStageHandle>(null);
   /*
@@ -1677,7 +1675,11 @@ export function App(): JSX.Element {
 
       {/* The three verbs, once, in the layout rather than over the page — the
           first tap it teaches has to land while the strip is still up. */}
-      <CoachMarks ready={resolver !== null} onDismiss={() => setCoachUp(false)} />
+      <CoachMarks
+        ready={resolver !== null}
+        open={coachUp}
+        onDismiss={() => setCoachUp(false)}
+      />
 
       {/* Pinned RTL, in both languages. The mus'haf is read right-to-left, the
           page-turn convention follows it (Loop 1's decision), and the hop rail
@@ -1890,6 +1892,10 @@ export function App(): JSX.Element {
         onClose={() => setColophonOpen(false)}
         fisheye={fisheye}
         onToggleFisheye={toggleFisheye}
+        onShowTips={() => {
+          setColophonOpen(false);
+          setCoachUp(true);
+        }}
       />
       {/* `onGoToPage` is the app's own page-turner, handed over unchanged: a
           press on a map cell is a jump, and everything a jump owes — refusing an

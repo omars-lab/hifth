@@ -671,7 +671,7 @@
     {
       "id": "learn-the-gestures-once",
       "actor": "hafiz",
-      "goal": "Tell me what I can do here the first time, and then never again.",
+      "goal": "Let me open straight onto the page, and show me what I can do here when I ask.",
       "feature": "wayfinding",
       "code": [
         {
@@ -682,7 +682,7 @@
       "proof": [
         {
           "file": "apps/web/e2e/wayfinding.spec.ts",
-          "test": "the coach marks teach three verbs once, then never again"
+          "test": "the tips wait in settings, teach three verbs, then leave"
         }
       ]
     },

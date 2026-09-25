@@ -248,6 +248,9 @@ export interface Catalog {
   readonly tajweed: string;
   readonly tajweedCredit: string;
   readonly tapHint: string;
+  readonly tipsNote: string;
+  readonly tipsSectionTitle: string;
+  readonly tipsShow: string;
   readonly trail: string;
   readonly twin: string;
   readonly wordHops: (d: { readonly n: number; readonly nText: string | number; readonly u: number; readonly uText: string | number }) => string;

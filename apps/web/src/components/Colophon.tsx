@@ -14,6 +14,8 @@ interface ColophonProps {
   fisheye: boolean;
   /** Flip the spread on or off; the choice is remembered on this device. */
   onToggleFisheye: () => void;
+  /** Open the three tips strip. It no longer opens by itself (owner, 2026-09-25). */
+  onShowTips?: () => void;
 }
 
 /** Focusable descendants of `root`, in tab order (excludes disabled + hidden). */
@@ -153,6 +155,7 @@ export function Colophon({
   onClose,
   fisheye,
   onToggleFisheye,
+  onShowTips,
 }: ColophonProps): JSX.Element | null {
   const { t, dir, lang, setLang } = useT();
   const sheetRef = useRef<HTMLDivElement>(null);
@@ -280,6 +283,21 @@ export function Colophon({
           </button>
           <p className={styles.note}>{t.pagebarFisheyeNote}</p>
         </section>
+
+        {/* The tips used to open on a device's first visit, above the page. The
+            owner asked on 2026-09-25 that they wait to be asked for, so this is
+            now the only way they appear. */}
+        {onShowTips && (
+          <section className={styles.block} aria-labelledby="colophon-tips">
+            <h3 className={styles.subhead} id="colophon-tips">
+              {t.tipsSectionTitle}
+            </h3>
+            <button type="button" className={styles.toggle} onClick={onShowTips}>
+              <span>{t.tipsShow}</span>
+            </button>
+            <p className={styles.note}>{t.tipsNote}</p>
+          </section>
+        )}
 
         <p className={styles.lede}>{t.aboutLede}</p>
         <p className={styles.caveat}>{t.aboutCaveat}</p>

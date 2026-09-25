@@ -1,6 +1,7 @@
 import { test, expect } from "@playwright/test";
 import { tapAyah } from "./ayah";
 import { contextWithout } from "./inventory";
+import { openTips } from "./tips";
 
 /*
  * Loop 6a — wayfinding: getting anywhere, and knowing where you are.
@@ -25,10 +26,13 @@ import { contextWithout } from "./inventory";
 test.describe("Hifth · wayfinding", () => {
   const pageNum = "header .numeric";
 
-  test("the coach marks teach three verbs once, then never again", async ({ page }) => {
+  test("the tips wait in settings, teach three verbs, then leave", async ({ page }) => {
     await page.goto("/");
-    const strip = page.getByRole("region", { name: "كيف تتنقّل" });
-    await expect(strip).toBeVisible();
+    // A first open goes straight to the page (owner, 2026-09-25).
+    await expect(page.locator("svg[role='group']").first()).toBeVisible();
+    await expect(page.getByRole("region", { name: "كيف تتنقّل" })).toHaveCount(0);
+
+    const strip = await openTips(page);
     await expect(strip.getByText("المس آية")).toBeVisible();
 
     // The strip is in the layout, not over it: the ayah it talks about is
@@ -45,7 +49,7 @@ test.describe("Hifth · wayfinding", () => {
     await strip.getByText("تمّ").tap();
     await expect(strip).toHaveCount(0);
 
-    // Dismissed for good — a reload does not teach it again. (The reload
+    // A reload does not bring it back either. (The reload
     // restores the selection from the hash, so its hop target's page is mounted
     // too: two page <svg>s, hence `.first()`.)
     await page.reload();

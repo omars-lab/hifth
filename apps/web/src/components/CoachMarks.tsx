@@ -49,6 +49,12 @@ interface CoachMarksProps {
   /** Render only once the app is usable (there is nothing to teach before). */
   ready: boolean;
   /**
+   * Whether the reader asked for the tips. They used to open by themselves on a
+   * device's first visit; since 2026-09-25 (the owner's call) they open only from
+   * the button in settings, so a first open goes straight to the page.
+   */
+  open: boolean;
+  /**
    * Fired when the strip leaves for good. The strip occupies layout above the
    * stage, so what shares that space is a question only App can answer — it
    * holds the storage notice back until this fires.
@@ -71,16 +77,21 @@ interface CoachMarksProps {
  * control, Escape skips the whole thing — and animation-free under
  * `prefers-reduced-motion` (the CSS honours it via the shared duration tokens).
  */
-export function CoachMarks({ ready, onDismiss }: CoachMarksProps): JSX.Element | null {
+export function CoachMarks({ ready, open, onDismiss }: CoachMarksProps): JSX.Element | null {
   const { t } = useT();
-  // Read storage once, on mount: a dismissal must not re-render into view.
-  const [dismissed, setDismissed] = useState(() => coachDismissed());
   const [step, setStep] = useState(0);
   const stripRef = useRef<HTMLDivElement>(null);
 
+  // Every opening starts at the first card, and takes focus so a keyboard user
+  // who pressed the settings button lands in the lesson they asked for.
+  useEffect(() => {
+    if (!open) return;
+    setStep(0);
+    stripRef.current?.querySelector<HTMLElement>("[data-primary]")?.focus();
+  }, [open]);
+
   const dismiss = useCallback(() => {
     rememberDismissal();
-    setDismissed(true);
     onDismiss?.();
   }, [onDismiss]);
 
@@ -105,7 +116,7 @@ export function CoachMarks({ ready, onDismiss }: CoachMarksProps): JSX.Element |
     stripRef.current?.querySelector<HTMLElement>("[data-primary]")?.focus();
   }, [step]);
 
-  if (dismissed || !ready) return null;
+  if (!open || !ready) return null;
 
   const steps = PITCH
     ? t.coachSteps.map((s, i) => ({ ...s, ...PITCH_STEP_OVERRIDES[i] }))
