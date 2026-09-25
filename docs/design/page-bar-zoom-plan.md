@@ -1,8 +1,8 @@
 # Plan: showing page and juz boundaries when the page bar magnifies
 
 *Plan, written 25 September 2026 at the owner's request: "we can show page and juz boundaries
-in the zoomed in view". The steps are in the order they pay off. Step 1 and most of step 3 were
-built the same day; the rest is still to do.*
+in the zoomed in view". The steps are in the order they pay off. Steps 1 to 3 were built the
+same day, apart from thickening the juz you are in; the rest is still to do.*
 
 ## A few words, defined once
 
@@ -92,14 +92,27 @@ The page under the mouse gets its tick drawn in the accent colour and taller tha
 The ticks are paint only. The bar's single control, and what the keyboard and screen reader
 hear, do not change.
 
-### 2. Make the juz boundary under the mouse unmistakable
+### 2. Make the juz boundary under the mouse unmistakable — built 25 September, with the hizb
+
+*What was built:* inside the magnifier, the edge where a juz begins gets a tall green mark
+that crosses the track, named "Juz 30" just under the page marks. The owner also said it was
+unclear where each hizb (half a juz) is, so each hizb start gets a shorter, paler mark and
+its own name, which gives way to a juz name when the two would overlap. The owner also
+reported marks spilling past the end of the bar near page 587. That was the magnifier's
+reach running past the bar's end; near an end, the magnifier now only reaches as far as the
+end, so the end stays put. The page tag slides back inside the bar there too. Not built yet:
+thickening the juz the mouse is inside.
 
 Juz cuts are already there. Inside the magnifier they get taller than page ticks, so a juz
 boundary and a page boundary never look alike. The juz segment the mouse is inside gets
 slightly thicker, the way a video bar thickens the hovered chapter. That answers "which juz
 am I in?" without having to read a number.
 
-### 3. Tidy the labels — overlap rule built 25 September
+### 3. Tidy the labels — built 25 September
+
+*What was built:* the overlap rule below, with juz names ranked above hizb names, and the juz
+and hizb names moved under the page marks so the page tag above the bar no longer pushes them
+out.
 
 - When two labels would overlap, keep the one nearer the mouse and drop the other. The page
   label always wins.

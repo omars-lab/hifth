@@ -292,17 +292,49 @@
   z-index: 1;
 }
 
-/* A juz number, sitting just above its (spread-apart) marker. Small and in the
-   marker's own green so it reads as part of the tick, not as a page number. */
-.lensJuz {
+/* Where a juz or hizb begins, inside the magnifier: a mark on the edge before its
+   opening page, named just under the page marks. A juz cut is tall, green and
+   crosses the track; a hizb cut is shorter and quieter. Both stand clearly taller
+   than any page mark, so a boundary never passes for a page. */
+.lensJuzCut,
+.lensHizbCut {
   position: absolute;
-  top: 0;
   transform: translateX(-50%);
-  color: var(--accent-strong);
+  border-radius: 1px;
+}
+
+.lensJuzCut {
+  top: calc(50% - 7px);
+  inline-size: 2px;
+  block-size: 20px;
+  background: var(--accent-strong);
+}
+
+.lensHizbCut {
+  top: calc(50% + 3px);
+  inline-size: 1.5px;
+  block-size: 10px;
+  background: var(--accent-strong);
+  opacity: 0.6;
+}
+
+.lensJuz,
+.lensHizb {
+  position: absolute;
+  top: calc(50% + 14px);
+  transform: translateX(-50%);
   font-size: var(--text-xs);
-  font-weight: 600;
   line-height: 1;
   white-space: nowrap;
+}
+
+.lensJuz {
+  color: var(--accent-strong);
+  font-weight: 600;
+}
+
+.lensHizb {
+  color: var(--ink-soft);
 }
 
 /* A page mark: a ruler tick hanging just under the track at the edge between two

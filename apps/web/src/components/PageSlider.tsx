@@ -58,6 +58,12 @@ interface PageSliderProps {
    */
   juzStarts?: readonly (number | null)[];
   /**
+   * The page each of the 60 hizb opens on, in the same shape as `juzStarts`.
+   * Only the magnifier reads it: it marks a hizb start between the juz cuts,
+   * so a reader can see which half of a juz the pointer is in.
+   */
+  hizbStarts?: readonly (number | null)[];
+  /**
    * Where a page sits in the book, for the scrub readout: the surah at its head,
    * the juz already *running* onto it, and the juz that *begins* on it when one
    * does (`null` otherwise). The bar names a boundary page for both juz — the
@@ -144,6 +150,7 @@ export function PageSlider({
   onStep,
   onGoTo,
   juzStarts = [],
+  hizbStarts = [],
   pageContext,
   onJuzTap,
   fisheye = true,
@@ -177,8 +184,8 @@ export function PageSlider({
   // `total` never changes, so threading them through the effect's deps would
   // either churn the listeners or freeze a stale copy — the handlers read the
   // latest here instead.
-  const liveRef = useRef({ t, total, juzStarts, fisheye });
-  liveRef.current = { t, total, juzStarts, fisheye };
+  const liveRef = useRef({ t, total, juzStarts, hizbStarts, fisheye });
+  liveRef.current = { t, total, juzStarts, hizbStarts, fisheye };
 
   const empty = available.length === 0;
   const value = scrub ?? page;
@@ -249,12 +256,18 @@ export function PageSlider({
     const marks = (): HTMLElement[] =>
       Array.from(railRef.current?.querySelectorAll<HTMLElement>("[data-testid='juz-detent']") ?? []);
     const applyLens = (px: number | null): void => {
-      const { t: tt, total: tot, juzStarts: js, fisheye: fish } = liveRef.current;
+      const { t: tt, total: tot, juzStarts: js, hizbStarts: hs, fisheye: fish } = liveRef.current;
       const layer = lensRef.current;
       const rect = track.getBoundingClientRect();
       const thumb = parseFloat(getComputedStyle(track).getPropertyValue("--thumb")) || 22;
       const usable = Math.max(1, rect.width - thumb);
       const halfPage = usable / Math.max(1, tot - 1) / 2;
+      // How much bar is left on a point's side of the pointer. The magnifier
+      // never reaches past it, so the first and last pages stay on the bar.
+      const lowEnd = rect.left + thumb / 2;
+      const highEnd = rect.right - thumb / 2;
+      const spread = (x: number, ptr: number): number =>
+        ptr + focusSpread(x - ptr, LENS, x < ptr ? ptr - lowEnd : highEnd - ptr);
       // A marker's rest centre in physical pixels, read from *layout* — `offsetLeft`
       // and `offsetWidth` ignore CSS transforms, so they give the untransformed
       // position even while the spread has warped the marker's painted box. That is
@@ -286,7 +299,7 @@ export function PageSlider({
           // (half a page toward the book's start, rightward in this RTL bar), so
           // it sits on a page mark rather than halfway across a page.
           const edge = centre + halfPage;
-          const dx = px + focusSpread(edge - px, LENS) - centre;
+          const dx = spread(edge, px) - centre;
           m.style.transform = `translateX(${dx}px) scale(${grow})`;
         } else {
           m.style.transform = `scale(${grow})`;
@@ -310,8 +323,23 @@ export function PageSlider({
       // past the window. A mark sits on the edge between two pages; the page
       // under the pointer is the accent span between its own two edges.
       const restX = (v: number): number => rect.right - thumb / 2 - ((v - 1) / Math.max(1, tot - 1)) * usable;
-      const warpX = (v: number): number => px + focusSpread(restX(v) - px, LENS);
+      const warpX = (v: number): number => spread(restX(v), px);
       const reachPages = Math.ceil((LENS.radiusPx / usable) * (tot - 1)) + 1;
+      // Juz and hizb starts inside the window, each as its own mark on the edge
+      // before its opening page: a juz cut is tall and green and named "Juz 30",
+      // a hizb cut is shorter and named "Hizb 59". They hang in the same row as
+      // the page marks and are named under them, away from the page tag above,
+      // so the tag can never crowd them out. A page mark that would sit on one
+      // of them is skipped.
+      const cuts: { x: number; juz: number | null; hizb: number }[] = [];
+      for (let h = 1; h <= hs.length; h++) {
+        const start = hs[h - 1];
+        if (start === null || start === undefined || start <= 1) continue;
+        if (Math.abs(start - pageUnder) > LENS.juzPageWindow) continue;
+        const x = warpX(start - 0.5);
+        if (Math.abs(x - px) >= LENS.radiusPx) continue;
+        cuts.push({ x, juz: h % 2 === 1 ? (h + 1) / 2 : null, hizb: h });
+      }
       let lastTick = Number.NaN;
       for (let p = Math.max(1, pageUnder - reachPages); p < Math.min(tot, pageUnder + reachPages); p++) {
         const x = warpX(p + 0.5);
@@ -319,6 +347,7 @@ export function PageSlider({
         const step = pageTickStep(Math.abs(warpX(p + 1) - warpX(p)), LENS.minTickGapPx);
         if (step === null || p % step !== 0) continue;
         if (Math.abs(x - lastTick) < LENS.minTickGapPx) continue;
+        if (cuts.some((c) => Math.abs(c.x - x) < LENS.minTickGapPx / 2)) continue;
         lastTick = x;
         const tick = document.createElement("span");
         tick.className = `${styles.lensTick ?? ""} ${p % 5 === 0 ? (styles.lensTickMajor ?? "") : ""}`;
@@ -334,17 +363,17 @@ export function PageSlider({
       herePage.style.width = `${Math.abs(hereB - hereA)}px`;
       kids.push(herePage);
 
-      for (const m of marks()) {
-        const juz = Number(m.dataset.juz);
-        const start = js[juz - 1];
-        if (start === null || start === undefined) continue;
-        if (Math.abs(start - pageUnder) > LENS.juzPageWindow) continue;
-        const warped = px + focusSpread(restCentre(m) + halfPage - px, LENS);
-        const span = document.createElement("span");
-        span.className = `${styles.lensJuz ?? ""} numeric`;
-        span.style.left = `${warped - rect.left}px`;
-        span.textContent = tt.num(juz);
-        kids.push(span);
+      for (const c of cuts) {
+        const mark = document.createElement("span");
+        mark.className = c.juz !== null ? (styles.lensJuzCut ?? "") : (styles.lensHizbCut ?? "");
+        mark.dataset.testid = c.juz !== null ? "juz-cut" : "hizb-cut";
+        mark.style.left = `${c.x - rect.left}px`;
+        kids.push(mark);
+        const name = document.createElement("span");
+        name.className = `${c.juz !== null ? (styles.lensJuz ?? "") : (styles.lensHizb ?? "")} numeric`;
+        name.style.left = `${c.x - rect.left}px`;
+        name.textContent = c.juz !== null ? tt.juzN(c.juz) : tt.hizbN(c.hizb);
+        kids.push(name);
       }
       const pageTag = document.createElement("span");
       pageTag.className = `${styles.lensPage ?? ""} numeric`;
@@ -352,15 +381,26 @@ export function PageSlider({
       pageTag.textContent = tt.pageN(pageUnder);
       kids.push(pageTag);
       layer.replaceChildren(...kids);
+      // Near an end of the bar the tag, centred on the pointer, would hang past
+      // it; slide it back inside, the way the marks themselves are kept inside.
+      const tagBox = pageTag.getBoundingClientRect();
+      const nudge =
+        tagBox.left < rect.left ? rect.left - tagBox.left : tagBox.right > rect.right ? rect.right - tagBox.right : 0;
+      if (nudge !== 0) pageTag.style.left = `${px - rect.left + nudge}px`;
 
       // Labels that would overlap give way: the page tag always stays, then the
       // juz numbers nearest the pointer, and any number that would touch one
       // already kept is dropped (zoom plan, step 3).
       const kept: DOMRect[] = [pageTag.getBoundingClientRect()];
       const juzLabels = Array.from(layer.querySelectorAll<HTMLElement>(`.${styles.lensJuz ?? "_"}`));
+      const hizbLabels = Array.from(layer.querySelectorAll<HTMLElement>(`.${styles.lensHizb ?? "_"}`));
       const centreOf = (r: DOMRect): number => r.left + r.width / 2;
-      const boxes = juzLabels.map((el) => ({ el, r: el.getBoundingClientRect() }));
-      boxes.sort((a, b) => Math.abs(centreOf(a.r) - px) - Math.abs(centreOf(b.r) - px));
+      // A juz name outranks a hizb name; within each, the one nearer the pointer.
+      const byNearness = (els: HTMLElement[]) =>
+        els
+          .map((el) => ({ el, r: el.getBoundingClientRect() }))
+          .sort((a, b) => Math.abs(centreOf(a.r) - px) - Math.abs(centreOf(b.r) - px));
+      const boxes = [...byNearness(juzLabels), ...byNearness(hizbLabels)];
       for (const { el, r } of boxes) {
         const clash = kept.some(
           (k) => r.left < k.right + 2 && r.right > k.left - 2 && r.top < k.bottom && r.bottom > k.top,

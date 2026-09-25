@@ -47,7 +47,7 @@
  * an asset's address looks like, and a pack plan that hard-coded `assets/pages/`
  * would be a second place — quietly wrong the day the base path changes.
  */
-import { JUZ_STARTS, TOTAL_AYAHS, juzOf, toAbsoluteAyah } from "./quran-meta.js";
+import { HIZB_STARTS, JUZ_STARTS, TOTAL_AYAHS, hizbOf, juzOf, toAbsoluteAyah } from "./quran-meta.js";
 import type { PageMeta } from "./types.js";
 
 /** The files one pinned juz needs, in the terms the loaders take. */
@@ -168,10 +168,28 @@ export function juzOfPage(page: number, pages: readonly PageMeta[]): number | nu
  * same sheet, which is what a boundary is.
  */
 export function juzPageIndex(pages: readonly PageMeta[]): readonly (number | null)[] {
-  const first: (number | null)[] = new Array<number | null>(JUZ_COUNT).fill(null);
+  return firstPageOf(pages, JUZ_COUNT, juzOf);
+}
+
+/**
+ * The same table for the sixty hizb: the page each one opens on, or `null` where
+ * this build does not hold it. The page bar's magnifier marks these between the
+ * juz cuts (docs/design/page-bar-zoom-plan.md). Odd hizbs open their juz, so
+ * entry 2k − 2 always equals `juzPageIndex` entry k − 1.
+ */
+export function hizbPageIndex(pages: readonly PageMeta[]): readonly (number | null)[] {
+  return firstPageOf(pages, HIZB_STARTS.length, hizbOf);
+}
+
+function firstPageOf(
+  pages: readonly PageMeta[],
+  count: number,
+  divisionOf: (surah: number, ayah: number) => number,
+): readonly (number | null)[] {
+  const first: (number | null)[] = new Array<number | null>(count).fill(null);
   for (const meta of pages) {
     for (const polygon of meta.polygons) {
-      const i = juzOf(polygon.surah, polygon.ayah) - 1;
+      const i = divisionOf(polygon.surah, polygon.ayah) - 1;
       const held = first[i];
       if (held === null || held === undefined || meta.page < held) first[i] = meta.page;
     }
