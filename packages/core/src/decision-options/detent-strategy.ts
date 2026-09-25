@@ -129,6 +129,53 @@ export function fisheyeSpread(signedDistPx: number, lens: FisheyeLens): number {
   return sign * lens.radiusPx * Math.pow(ad / lens.radiusPx, lens.power);
 }
 
+/**
+ * The magnifier the bar ships since 2026-09-25 (docs/design/page-bar-zoom-plan.md,
+ * step 1). The power curve above opens a hole at the pointer and then packs the
+ * pages tight again within a page or two, so single pages could never be marked.
+ * This is the classic graphical fisheye (Sarkar and Brown, 1992):
+ * g(x) = (D + 1)·x / (D·x + 1) on the distance as a fraction of the radius. It
+ * magnifies by D + 1 right at the pointer and eases off smoothly, and it still
+ * leaves the window edge and everything past it exactly where it was.
+ */
+export interface FocusLens {
+  /** How far either side of the pointer, in pixels, the magnifier reaches. */
+  readonly radiusPx: number;
+  /** How many times wider the bar is right under the pointer (D + 1). */
+  readonly magnify: number;
+  /** Pages either side of the pointer whose juz opening is named in the bar. */
+  readonly juzPageWindow: number;
+  /** The closest two page marks may sit, in pixels, before they are thinned out. */
+  readonly minTickGapPx: number;
+}
+
+export const pageBarFocus: FocusLens = {
+  radiusPx: 120,
+  magnify: 9,
+  juzPageWindow: 26,
+  minTickGapPx: 6,
+};
+
+/** Where a point moves to under the magnifier; the same contract as fisheyeSpread. */
+export function focusSpread(signedDistPx: number, lens: FocusLens): number {
+  const ad = Math.abs(signedDistPx);
+  if (!(ad < lens.radiusPx)) return signedDistPx;
+  const sign = signedDistPx < 0 ? -1 : 1;
+  const d = lens.magnify - 1;
+  const x = ad / lens.radiusPx;
+  return sign * lens.radiusPx * (((d + 1) * x) / (d * x + 1));
+}
+
+/**
+ * How many pages apart the page marks are drawn where one page is `pagePx` wide:
+ * every page if they clear `minGapPx`, else every 5th, else every 10th, else none.
+ * The map rule — finer marks appear only where there is room to see them.
+ */
+export function pageTickStep(pagePx: number, minGapPx: number): 1 | 5 | 10 | null {
+  for (const step of [1, 5, 10] as const) if (step * pagePx >= minGapPx) return step;
+  return null;
+}
+
 /** A resolver plus how it presents itself, for the bar and the decision page. */
 export interface DetentStrategy {
   readonly id: "A" | "B" | "C";

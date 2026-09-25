@@ -55,6 +55,11 @@ test.describe("Hifth · the page bar's spread (option B, the fisheye)", () => {
     // Juz numbers bloom around the pointer — the window is ±26 pages, so a
     // mid-track hover names several.
     expect(await page.locator("nav [class*='lensJuz']").count()).toBeGreaterThan(0);
+    // Page marks appear only where the magnifier opens the pages up: some, but
+    // nowhere near one per page of the book.
+    const ticks = await page.locator("nav [data-testid='page-tick']").count();
+    expect(ticks).toBeGreaterThan(5);
+    expect(ticks).toBeLessThan(80);
   });
 
   test("on, a marker beside the pointer slides outward", async ({ page }) => {
@@ -87,6 +92,7 @@ test.describe("Hifth · the page bar's spread (option B, the fisheye)", () => {
 
     await expect(page.locator("nav [class*='lensPage']")).toHaveCount(0);
     await expect(page.locator("nav [class*='lensJuz']")).toHaveCount(0);
+    await expect(page.locator("nav [data-testid='page-tick']")).toHaveCount(0);
     // No translateX anywhere — the neighbour that slid aside with the lens on
     // stays put with it off.
     expect(await shiftOf(marks.nth(15))).toBe(0);
