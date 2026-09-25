@@ -81,14 +81,14 @@ test.describe("Hifth · the hop", () => {
         await chip.tap();
 
         const sheet = page.getByRole("dialog");
-        // Every link is shown, but every leap is disabled — honest dead-end notes.
-        const hopBtns = sheet.getByRole("button", { name: /انتقل إلى/ });
-        await expect(hopBtns.first()).toBeVisible();
-        const count = await hopBtns.count();
-        for (let i = 0; i < count; i++) {
-          await expect(hopBtns.nth(i)).toBeDisabled();
-        }
-        await expect(sheet.getByText(/غير متوفّرة بعد/).first()).toBeVisible();
+        // Every link is shown, none leaps to a page we do not have, and each one
+        // says so and links out to the verse on the outside library instead.
+        const rows = sheet.getByRole("listitem");
+        await expect(rows.first()).toBeVisible();
+        const count = await rows.count();
+        await expect(sheet.getByRole("button", { name: /انتقل إلى/ })).toHaveCount(0);
+        await expect(sheet.getByText(/غير متوفّرة بعد/)).toHaveCount(count);
+        await expect(sheet.getByRole("link", { name: /المكتبة القرآنية الجامعة/ })).toHaveCount(count);
 
         await sheet.getByRole("button", { name: "إغلاق" }).tap();
         await expect(page.getByRole("dialog")).toHaveCount(0);

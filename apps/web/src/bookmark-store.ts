@@ -84,3 +84,61 @@ export async function writeBookmarks(set: readonly Bookmark[]): Promise<boolean>
     db?.close();
   }
 }
+
+/*
+ * The seam — where the reader left off (docs/decisions/bookmark-fold.md, "What
+ * changed (2026-09-25)"). One page, kept beside the set under its own key, so
+ * the kept bookmarks and the place that moves on its own never share a write.
+ */
+const SEAM_KEY = "seam";
+
+export interface Seam {
+  readonly page: number;
+  /** When it last moved. */
+  readonly at: number;
+}
+
+interface SeamRecord extends Seam {
+  readonly id: typeof SEAM_KEY;
+}
+
+/** Where the seam lies, or null when the reader has not stayed on a page yet. */
+export async function readSeam(): Promise<Seam | null> {
+  if (!bookmarkStoreSupported()) return null;
+  let db: IDBDatabase | null = null;
+  try {
+    db = await openDb();
+    const tx = db.transaction(SETS, "readonly");
+    const rec = await new Promise<SeamRecord | undefined>((resolve, reject) => {
+      const req = tx.objectStore(SETS).get(SEAM_KEY);
+      req.onsuccess = () => resolve(req.result as SeamRecord | undefined);
+      req.onerror = () => reject(req.error);
+    });
+    return rec && Number.isInteger(rec.page) ? { page: rec.page, at: rec.at } : null;
+  } catch {
+    return null;
+  } finally {
+    db?.close();
+  }
+}
+
+/** Lay the seam on a page. False when the phone refused the write. */
+export async function writeSeam(seam: Seam): Promise<boolean> {
+  if (!bookmarkStoreSupported()) return false;
+  let db: IDBDatabase | null = null;
+  try {
+    db = await openDb();
+    const tx = db.transaction(SETS, "readwrite");
+    tx.objectStore(SETS).put({ id: SEAM_KEY, ...seam } satisfies SeamRecord);
+    await new Promise<void>((resolve, reject) => {
+      tx.oncomplete = () => resolve();
+      tx.onerror = () => reject(tx.error);
+      tx.onabort = () => reject(tx.error);
+    });
+    return true;
+  } catch {
+    return false;
+  } finally {
+    db?.close();
+  }
+}

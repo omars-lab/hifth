@@ -52,6 +52,7 @@ export interface Catalog {
   readonly bmRibbon: (d: { readonly name: string | number }) => string;
   readonly bmSave: string;
   readonly bmSaveName: string;
+  readonly bmSeam: string;
   readonly chipAria: (d: { readonly direction: string | number; readonly countText: string | number }) => string;
   readonly clearSelection: string;
   readonly close: string;

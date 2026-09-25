@@ -552,6 +552,8 @@ export interface Strings {
 
   /* ---- bookmarks: ribbons on the page, and tidying them from the page map -- */
   bmDrop: string;
+  /** The red seam's name: where the reader left off. */
+  bmSeam: string;
   bmRibbon(name: string): string;
   bmDrawerTitle: string;
   bmNameLabel: string;
@@ -950,6 +952,7 @@ export function buildStrings(lang: Lang, m: Catalog): Strings {
     juzEdge: (juz) => m.juzEdge({ juzText: n(juz) }),
 
     bmDrop: m.bmDrop,
+    bmSeam: m.bmSeam,
     bmRibbon: (name) => m.bmRibbon({ name }),
     bmDrawerTitle: m.bmDrawerTitle,
     bmNameLabel: m.bmNameLabel,

@@ -12,6 +12,8 @@ interface BookmarkRibbonsProps {
   onOpen: (id: string) => void;
   /** The ribbon just dropped, which unrolls; every other one is already hanging. */
   freshId?: string | null;
+  /** The red seam — where the reader left off — lies on this page. */
+  seam?: boolean;
 }
 
 /**
@@ -35,6 +37,7 @@ export function BookmarkRibbons({
   onDrop,
   onOpen,
   freshId = null,
+  seam = false,
 }: BookmarkRibbonsProps): JSX.Element {
   const { t } = useT();
   const rootRef = useRef<HTMLDivElement>(null);
@@ -79,6 +82,7 @@ export function BookmarkRibbons({
 
   return (
     <div ref={rootRef} className={styles.overlay} data-bookmark-overlay="">
+      {seam && <span className={styles.seam} role="img" aria-label={t.bmSeam} title={t.bmSeam} data-bookmark-seam="" />}
       <button
         type="button"
         className={styles.fold}

@@ -58,6 +58,7 @@ const messages: Catalog = {
   bmRibbon: (d) => "Bookmark: " + d.name,
   bmSave: "Save to a file",
   bmSaveName: "Save name",
+  bmSeam: "Where you left off",
   chipAria: (d) => d.direction + " · " + d.countText,
   clearSelection: "Clear highlight",
   close: "Close",
