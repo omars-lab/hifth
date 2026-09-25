@@ -356,8 +356,13 @@ for (const b of BUCKETS) {
   }
 }
 
-/* 6 ─ The folder against the declarations. Everything shipped is spoken for. */
-const shipped = existsSync(ASSETS) ? readdirSync(ASSETS) : [];
+/* 6 ─ The folder against the declarations. Everything shipped is spoken for.
+ * Except `private/`: the pitch's held copy, gitignored, present only on a laptop
+ * that holds it, and removed from every public build's output by the
+ * `hifth-drop-private` step in apps/web/vite.config.ts. It never ships, so it has
+ * no terms to declare, and a check that failed for its presence failed every run
+ * on the one machine that makes the pitch. */
+const shipped = existsSync(ASSETS) ? readdirSync(ASSETS).filter((e) => e !== "private") : [];
 if (shipped.length === 0) {
   problems.push("apps/web/public/assets/ is empty or missing — the app ships no data");
 }

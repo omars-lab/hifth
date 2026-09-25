@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import {
   comparableEvents,
   dayOf,
@@ -80,6 +80,12 @@ interface RevisionMapProps {
    * than a mocked global — the same reason `revision.ts` is clockless.
    */
   today?: string;
+  /**
+   * The reader's bookmarks section, drawn under the map at every scope. Passed
+   * in rather than built here because the bookmarks belong to the app — the
+   * ribbons on the page read and change the same set.
+   */
+  children?: ReactNode;
 }
 
 /** How many divisions the whole book has, at each scope. */
@@ -295,6 +301,7 @@ export function RevisionMap({
   onGoToPage,
   openAt,
   today,
+  children,
 }: RevisionMapProps): JSX.Element | null {
   const { t, dir } = useT();
   const sheetRef = useRef<HTMLDivElement>(null);
@@ -740,6 +747,8 @@ export function RevisionMap({
             offering to keep one under a grid of 604 pages would be offering it
             in a unit the reader is not looking at. */}
         {scope === "juz" && <PackShelf edition={edition} pages={pages} page={page} />}
+
+        {children}
       </div>
     </>
   );

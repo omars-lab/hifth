@@ -5,6 +5,7 @@ import {
   useImperativeHandle,
   useRef,
   useState,
+  type ReactNode,
   type RefObject,
 } from "react";
 import { createPortal } from "react-dom";
@@ -189,6 +190,13 @@ interface PageStageProps {
    * highlighter takes a function, exactly like `labelFor`.
    */
   tajweedLookup?: TajweedLookup | null;
+  /**
+   * Things that sit on the leaf rather than in it — today the reader's bookmark
+   * ribbons. Drawn over the layer and outside the pan/zoom transform, so a ribbon
+   * stays hanging from the head of the page however the text is magnified. The
+   * overlay stops its own presses reaching the stage's gestures.
+   */
+  overlay?: ReactNode;
   /**
    * Where to draw the fold, when this stage is one leaf of an open spread.
    *
@@ -413,6 +421,7 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
     onJuzTurn,
     skin = "plain",
     tajweedLookup = null,
+    overlay,
     foldTarget = null,
   },
   ref,
@@ -2266,6 +2275,7 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
         {label}
       </span>
       <div ref={layerRef} className={styles.layer} aria-busy={status === "loading"} />
+      {overlay}
       {band && (target ? createPortal(band, target) : band)}
       {status === "loading" && <div className={styles.hint}>{t.stageLoading}</div>}
       {status === "error" && (

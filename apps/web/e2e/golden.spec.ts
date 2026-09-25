@@ -258,6 +258,12 @@ async function open(page: Page, hash: string, pageNo: number): Promise<Locator> 
   // harness that flakes on *arrival* teaches people to re-run it.
   await expect(svg).toBeVisible({ timeout: 20_000 });
   await page.addStyleTag({ content: '[role="dialog"] { visibility: hidden !important; }' });
+  // The bookmark ribbons are the reader's, not the page's, and are covered by
+  // bookmarks.spec. Removed rather than masked: with the layer in the stage, the
+  // element screenshot's scroll-into-view scrolled the stage itself (272 px on
+  // page 9 at this size), so these shots photographed a different part of the
+  // page. Measured, not guessed; the baselines were right and are unchanged.
+  await page.addStyleTag({ content: "[data-bookmark-overlay] { display: none !important; }" });
   await settle(svg);
   // A shot named `breadcrumb` must not be able to photograph a frame without
   // one. The crumb is not painted with the page: `PageStage` draws it in an
