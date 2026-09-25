@@ -654,6 +654,7 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
       frame.style.setProperty("--leaf-x", `${layer.offsetLeft + x}px`);
       frame.style.setProperty("--leaf-y", `${layer.offsetTop + y}px`);
       frame.style.setProperty("--leaf-w", `${cur.host.offsetWidth * z}px`);
+      frame.style.setProperty("--leaf-h", `${cur.host.offsetHeight * z}px`);
       frame.style.setProperty("--leaf-z", String(z));
     }
   }, []);

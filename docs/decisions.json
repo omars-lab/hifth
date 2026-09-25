@@ -942,9 +942,9 @@
       "page": "docs/design/bookmark-fold-options.html",
       "builtBy": "scripts/build-bookmark-fold-options.mjs",
       "doc": "docs/decisions/bookmark-fold.md#is-a-bookmark-one-ribbon-that-moves-or-many-the-reader-drops-and-lifts",
-      "decided": "B",
+      "decided": "C",
       "by": "omar",
-      "date": "2026-09-02",
+      "date": "2026-09-25",
       "related": [
         "bookmark-store",
         "pin-marker",

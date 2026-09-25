@@ -49,6 +49,32 @@ test.describe("Hifth · bookmarks", () => {
     await expect(page.getByRole("button", { name: "Bookmark: Morning review" })).toHaveCount(0);
   });
 
+  test("the red seam follows the page you stay on, not the one you glance at", async ({ page }) => {
+    // The seam moves once a page has been open a few seconds (six). Real time,
+    // not a faked clock: the page's own drawing runs on the clock too.
+    const seam = page.getByRole("img", { name: "Where you left off" });
+    await page.goto("/#/hafs-kfqc/p110");
+    await expect(page.locator("svg[role='group']").first()).toBeVisible();
+    await expect(seam).toHaveCount(0);
+    await page.waitForTimeout(7000);
+    await expect(seam).toHaveCount(1);
+
+    // A quick look elsewhere does not take it along. (Going back by link is also
+    // what caught the address bug: a link to a page the app had written itself
+    // was once ignored after the reader moved on.)
+    await page.goto("/#/hafs-kfqc/p300");
+    await expect(page.locator("svg[role='group']").first()).toBeVisible();
+    await page.waitForTimeout(2000);
+    await expect(seam).toHaveCount(0);
+    await page.goto("/#/hafs-kfqc/p110");
+    await expect(seam).toHaveCount(1);
+
+    // And it is kept on the phone: there straight after a reload, well before a
+    // fresh wait could have laid it again.
+    await page.reload();
+    await expect(seam).toHaveCount(1, { timeout: 3000 });
+  });
+
   test("clearing all from the page map asks first, and names the count", async ({ page }) => {
     await ready(page);
     const fold = page.getByRole("button", { name: "Drop a bookmark on this page" }).first();

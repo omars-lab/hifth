@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import type { Bookmark } from "@hifth/core";
-import { readBookmarks, writeBookmarks } from "./bookmark-store";
+import { readBookmarks, readSeam, writeBookmarks, writeSeam } from "./bookmark-store";
 
 /**
  * The reader's bookmarks, held for the app: loaded from the phone once, and every
@@ -41,4 +41,42 @@ export function useBookmarks(
   );
 
   return { bookmarks, commit };
+}
+
+/**
+ * How long a page has to stay open before the seam moves to it. Long enough that
+ * a quick jump to glance at another ayah and back leaves the seam where the
+ * reading is; short enough that turning onward carries it along.
+ */
+export const SEAM_DWELL_MS = 6000;
+
+/**
+ * The seam: the one red ribbon that marks where the reader left off. Nobody
+ * places it — it follows the last page the reader stayed on (`SEAM_DWELL_MS`),
+ * and is written to the phone each time it moves.
+ */
+export function useSeam(page: number | null): number | null {
+  const [seam, setSeam] = useState<number | null>(null);
+
+  useEffect(() => {
+    let live = true;
+    void readSeam().then((s) => {
+      // A move made before the read landed wins over what was stored.
+      if (live && s) setSeam((now) => now ?? s.page);
+    });
+    return () => {
+      live = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (page === null) return;
+    const timer = setTimeout(() => {
+      setSeam(page);
+      void writeSeam({ page, at: Date.now() });
+    }, SEAM_DWELL_MS);
+    return () => clearTimeout(timer);
+  }, [page]);
+
+  return seam;
 }

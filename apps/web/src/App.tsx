@@ -77,7 +77,7 @@ import { RevisionMap } from "./components/RevisionMap";
 import { BookmarkRibbons } from "./components/BookmarkRibbons";
 import { BookmarkDrawer } from "./components/BookmarkDrawer";
 import { BookmarkShelf } from "./components/BookmarkShelf";
-import { useBookmarks } from "./useBookmarks";
+import { useBookmarks, useSeam } from "./useBookmarks";
 import { LiveAnnouncer, useAnnouncer } from "./components/LiveAnnouncer";
 import { RootLens, RootLensTrigger } from "./components/RootLens";
 import { PlayTrigger } from "./components/PlayTrigger";
@@ -885,6 +885,8 @@ export function App(): JSX.Element {
   // the page, a drawer per ribbon, and the tidy-up in the page map. Every change
   // is one core rule, then one whole-set write, then one announced line.
   const { bookmarks, commit: commitBookmarks } = useBookmarks(announce, t.bmNotSaved);
+  // The red seam: where the reader left off, following the last page they stayed on.
+  const seamPage = useSeam(page);
   const [drawerId, setDrawerId] = useState<string | null>(null);
   const [freshId, setFreshId] = useState<string | null>(null);
   const drawerBookmark = bookmarks.find((b) => b.id === drawerId) ?? null;
@@ -966,6 +968,7 @@ export function App(): JSX.Element {
       onDrop={() => dropOn(p)}
       onOpen={setDrawerId}
       freshId={freshId}
+      seam={seamPage === p}
     />
   );
 

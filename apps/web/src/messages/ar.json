@@ -224,6 +224,7 @@
   "arrivedJuz": "الجزء {juzText} · صفحة {page}",
   "juzEdge": "لا جزء في هذا الاتجاه · الجزء {juzText}",
   "bmDrop": "ضع علامة على هذه الصفحة",
+  "bmSeam": "حيث توقفت",
   "bmRibbon": "علامة: {name}",
   "bmDrawerTitle": "علامة",
   "bmNameLabel": "الاسم",

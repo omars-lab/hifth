@@ -14,9 +14,12 @@
   inset: 0;
   pointer-events: none;
   z-index: 2;
-  --rib-1: #8a2a2a;
+  /* Red is kept for the seam alone, so red on the page always means "where
+     you left off"; the ribbons a reader keeps take turns among the others. */
+  --rib-1: #2e3f6b;
   --rib-2: #2f5a4a;
   --rib-3: #7a5a1e;
+  --seam: #b3261e;
 }
 
 /* The corner a reader folds: the leaf's free top corner — the right one on a
@@ -79,6 +82,31 @@
 .fold:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: -2px;
+}
+
+/* The seam: one red ribbon lying down the middle of the book, along the edge of
+   the leaf that is bound into the spine — the side opposite the free corner. It
+   runs the height of the paper and its cut tail hangs past the foot, the way a
+   mus'haf's silk marker does when the book is closed on it. Drawn in paper
+   units (--leaf-z), so it zooms with the page. */
+.seam {
+  position: absolute;
+  inset-block-start: var(--leaf-y, 0px);
+  left: calc(var(--leaf-x, 0px) + var(--leaf-w, 100%) - var(--seam-w));
+  --seam-w: calc(9px * var(--leaf-z, 1));
+  /* Short: the field ends a few pixels under the paper, and a longer tail is cut off. */
+  --seam-tail: calc(8px * var(--leaf-z, 1));
+  inline-size: var(--seam-w);
+  block-size: calc(var(--leaf-h, 100%) + var(--seam-tail));
+  background:
+    linear-gradient(90deg, rgba(0, 0, 0, 0.18), transparent 35%, rgba(255, 255, 255, 0.16) 60%, rgba(0, 0, 0, 0.12)),
+    var(--seam);
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 50% calc(100% - var(--seam-tail)), 0 100%);
+  filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.25));
+}
+
+:global([data-free-side="right"]) .seam {
+  left: var(--leaf-x, 0px);
 }
 
 .ribbons {

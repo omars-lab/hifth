@@ -58,6 +58,7 @@ const messages: Catalog = {
   bmRibbon: (d) => "علامة: " + d.name,
   bmSave: "احفظ في ملف",
   bmSaveName: "احفظ الاسم",
+  bmSeam: "حيث توقفت",
   chipAria: (d) => d.direction + " · " + d.countText,
   clearSelection: "إلغاء التحديد",
   close: "إغلاق",

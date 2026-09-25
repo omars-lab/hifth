@@ -224,6 +224,7 @@
   "arrivedJuz": "Juz {juzText} · page {page}",
   "juzEdge": "No juz that way · juz {juzText}",
   "bmDrop": "Drop a bookmark on this page",
+  "bmSeam": "Where you left off",
   "bmRibbon": "Bookmark: {name}",
   "bmDrawerTitle": "Bookmark",
   "bmNameLabel": "Name",
