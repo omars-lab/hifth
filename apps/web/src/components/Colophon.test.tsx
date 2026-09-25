@@ -89,6 +89,13 @@ describe("Colophon", () => {
     fireEvent.keyDown(dialog, { key: "Escape" });
     expect(onClose).toHaveBeenCalledOnce();
   });
+
+  it("is where the tips are asked for, since they no longer open by themselves", () => {
+    const onShowTips = vi.fn();
+    render(<Colophon open onClose={() => {}} fisheye onToggleFisheye={() => {}} onShowTips={onShowTips} />);
+    fireEvent.click(screen.getByRole("button", { name: "عرض الإرشادات" }));
+    expect(onShowTips).toHaveBeenCalledOnce();
+  });
 });
 
 describe("provenance", () => {

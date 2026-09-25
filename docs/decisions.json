@@ -1363,6 +1363,25 @@
       "related": [
         "selection-drawer"
       ]
+    },
+    {
+      "id": "tips-on-request",
+      "question": "Should the three tips open by themselves on a first visit, or wait until the reader asks?",
+      "status": "decided",
+      "options": [
+        {
+          "id": "today",
+          "label": "Open by themselves on the first visit, then never again"
+        },
+        {
+          "id": "on-request",
+          "label": "Wait behind a Show the tips button in settings"
+        }
+      ],
+      "doc": "docs/decisions/tips-on-request.md#so-what-was-decided",
+      "decided": "on-request",
+      "by": "omar",
+      "date": "2026-09-25"
     }
   ]
 }

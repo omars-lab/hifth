@@ -1,6 +1,7 @@
 import { test, expect, type BrowserContext, type Page } from "@playwright/test";
 import { tapAyah } from "./ayah";
 import { COACH_STORAGE_KEY } from "../src/coach";
+import { openTips } from "./tips";
 
 /*
  * Loop 6a, the ungated half of the exit criterion (PLAN §Loop 6a):
@@ -638,7 +639,7 @@ test.describe("Hifth · storage durability, as UI", () => {
     );
   }
 
-  test("the storage warning waits for the coach strip to finish teaching", async ({ page }) => {
+  test("the storage warning steps aside while the tips are up", async ({ page }) => {
     // The Loop 6a merge defect, as a test. Two agents each added a strip *in*
     // the layout above the stage, each for the same good reason — neither may
     // cover an ayah. Together they took 226px of a 412×839 phone: the stage
@@ -655,9 +656,12 @@ test.describe("Hifth · storage durability, as UI", () => {
       });
     });
     await page.goto("/");
+    // The tips no longer open by themselves (owner, 2026-09-25), so on a first
+    // visit the warning has the band to itself; a reader who asks for the tips
+    // gets them in its place.
+    await expect(page.locator("[data-notice]")).toHaveAttribute("data-notice", "best-effort");
 
-    const coach = page.getByRole("region", { name: "كيف تتنقّل" });
-    await expect(coach).toBeVisible();
+    const coach = await openTips(page);
     await expect(page.locator("[data-notice]")).toHaveCount(0);
 
     await coach.getByRole("button", { name: "تخطَّ" }).click();
