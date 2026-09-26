@@ -14,6 +14,8 @@ export const TOOL_KEYS: Readonly<Record<string, PageTool>> = {
   KeyH: "highlight",
   KeyB: "bookmark",
   KeyN: "note",
+  KeyK: "sign",
+  KeyW: "word",
   KeyM: "mistake",
 };
 
@@ -22,6 +24,8 @@ const TOOLS: ReadonlyArray<{ tool: PageTool; letter: string }> = [
   { tool: "highlight", letter: "H" },
   { tool: "bookmark", letter: "B" },
   { tool: "note", letter: "N" },
+  { tool: "sign", letter: "K" },
+  { tool: "word", letter: "W" },
   { tool: "mistake", letter: "M" },
 ];
 
@@ -36,7 +40,10 @@ interface PageToolbarProps {
  * docs/design/page-toolbar-plan.md: select, highlight and bookmark, the three
  * tools that already existed behind a press-and-hold and a corner button — and
  * step 2's note, which pins the reader's words to a word on the page, and
- * step 3's mistake, which marks the words a reader slips on.
+ * step 3's mistake, which marks the words a reader slips on. Between them sit
+ * the two tools the harakah-pick decision chose (D): harakat, whose magnifier
+ * follows the pointer and takes the sign it rings, and word, which opens a
+ * word into its parts.
  *
  * One tab stop, arrow keys along it (the ARIA toolbar pattern), and the tools
  * are radios because exactly one is on at a time. The name of the tool that is
@@ -108,7 +115,11 @@ export function PageToolbar({ tool, onTool }: PageToolbarProps): JSX.Element {
             ? t.toolNoteHint
             : tool === "mistake"
               ? t.toolMistakeHint
-              : t.toolOn(nameOf(tool))}
+              : tool === "sign"
+                ? t.toolSignHint
+                : tool === "word"
+                  ? t.toolWordHint
+                  : t.toolOn(nameOf(tool))}
       </span>
     </div>
   );
@@ -124,7 +135,11 @@ export function toolName(t: ReturnType<typeof useT>["t"], x: PageTool): string {
         ? t.toolBookmark
         : x === "note"
           ? t.toolNote
-          : t.toolMistake;
+          : x === "sign"
+            ? t.toolSign
+            : x === "word"
+              ? t.toolWord
+              : t.toolMistake;
 }
 
 function ToolIcon({ tool }: { tool: PageTool }): JSX.Element {
@@ -157,6 +172,20 @@ function ToolIcon({ tool }: { tool: PageTool }): JSX.Element {
       <svg {...common}>
         <path d="M8 15l4-11 4 11M9.5 11h5" />
         <path d="M4 20c1.3-1.3 2.7-1.3 4 0s2.7 1.3 4 0 2.7-1.3 4 0 2.7 1.3 4 0" />
+      </svg>
+    );
+  if (tool === "sign")
+    return (
+      <svg {...common}>
+        <circle cx="10" cy="10" r="6" />
+        <path d="M14.5 14.5L20 20" />
+        <path d="M8 9.5l4-1.5" />
+      </svg>
+    );
+  if (tool === "word")
+    return (
+      <svg {...common}>
+        <path d="M4 7V5h16v2M12 5v14M9 19h6" />
       </svg>
     );
   if (tool === "note")

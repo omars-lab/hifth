@@ -70,10 +70,10 @@ import { recordLook } from "./revision-store";
 import { useT } from "./i18n";
 import { useHashRouter } from "./useHashRouter";
 import { DESKTOP_QUERY, useMediaQuery } from "./useMediaQuery";
-import { PageStage, type PageStageHandle, type PageTool } from "./components/PageStage";
+import { PageStage, type PageStageHandle, type PageTool, type WordRect } from "./components/PageStage";
 import { PageToolbar, TOOL_KEYS, toolName } from "./components/PageToolbar";
 import { NoteBox } from "./components/NoteBox";
-import { SignPicker, useVerseSigns } from "./components/SignPicker";
+import { WordParts, useWordParts } from "./components/WordParts";
 import { PageSpread } from "./components/PageSpread";
 import { EdgeGrabRails, type EdgeTurnDriver } from "./components/EdgeGrabRails";
 import { DesktopChrome } from "./components/DesktopChrome";
@@ -1055,6 +1055,29 @@ export function App(): JSX.Element {
     },
     [notes, commitNotes, chooseTool],
   );
+  // The harakat tool's click: pin a note on the sign the magnifier rings, and
+  // open the box. The tool stays up, so the next sign is one more click.
+  const pickSignNote = useCallback(
+    (at: { page: number; key: string; word: number; mark: number; x: number; y: number }) => {
+      const next = addNote(notes, at, Date.now());
+      commitNotes(next, "");
+      setNoteOpenId(next[next.length - 1]!.id);
+    },
+    [notes, commitNotes],
+  );
+  // The word tool's tap opens the word into its parts; a part picked drops a
+  // note on it (a sign, or the whole word).
+  const [wordOpen, setWordOpen] = useState<{ page: number; key: string; word: number; rect: WordRect } | null>(
+    null,
+  );
+  const pickWordPart = (at: { x: number; y: number; mark: number | null }) => {
+    const w = wordOpen;
+    setWordOpen(null);
+    if (!w) return;
+    const next = addNote(notes, { page: w.page, key: w.key, word: w.word, ...at }, Date.now());
+    commitNotes(next, "");
+    setNoteOpenId(next[next.length - 1]!.id);
+  };
   /** Put focus back on a pin after its box closes, so the keyboard is not lost. */
   const focusPin = (id: string) =>
     requestAnimationFrame(() =>
@@ -1065,7 +1088,9 @@ export function App(): JSX.Element {
   const closeNote = (text: string) => {
     const n = openNote;
     setNoteOpenId(null);
-    chooseTool("select");
+    // The harakat and word tools stay up for the next sign; the note tool is
+    // used once.
+    if (toolRef.current !== "sign" && toolRef.current !== "word") chooseTool("select");
     if (!n) return;
     if (text.trim() === "") {
       commitNotes(removeNote(notes, n.id), "");
@@ -1317,10 +1342,10 @@ export function App(): JSX.Element {
         if (at !== undefined) dropWithTool(at, key);
         return;
       }
-      // Under the note tool the stage pins a note instead (`onPlaceNote`).
-      // Under the note and mistake tools the stage pins a note or marks the
-      // word instead (`onPlaceNote`, `onMarkWord`).
-      if (toolRef.current === "note" || toolRef.current === "mistake") return;
+      // Under the note, harakat, word and mistake tools the stage pins a note,
+      // takes a sign, opens the word or marks it instead (`onPlaceNote`,
+      // `onPickSign`, `onOpenWord`, `onMarkWord`).
+      if (toolRef.current !== "select" && toolRef.current !== "highlight") return;
       setOpenDirection(null);
       setSelectedRange(null); // a tap replaces a highlight — never both at once
       const toggledOff = selectedKeyRef.current === key;
@@ -1937,7 +1962,7 @@ export function App(): JSX.Element {
                  book with two outer edges to grab; the phone still turns by
                  swiping the leaf itself, so it gets no rails and keeps its
                  gesture. */
-              edgeRails={desktop ? <EdgeGrabRails driver={edgeTurn} /> : undefined}
+              edgeRails={desktop ? <EdgeGrabRails driver={edgeTurn} aside={tool === "sign" || tool === "word"} /> : undefined}
               renderFacing={(facing) => (
                 /* The facing leaf gets its own stage rather than a second
                    visible host inside the current one: PageStage's whole
@@ -1989,6 +2014,8 @@ export function App(): JSX.Element {
                   onPlaceNote={placeNote}
                   onOpenNote={setNoteOpenId}
                   onMarkWord={markWord}
+                onPickSign={pickSignNote}
+                onOpenWord={setWordOpen}
                   labelFor={(key) => t.ayahAria(t.ayahLabel(key) ?? key)}
                   skin={skin}
                   tajweedLookup={tajweed?.lookup ?? null}
@@ -2045,6 +2072,8 @@ export function App(): JSX.Element {
                 onPlaceNote={placeNote}
                 onOpenNote={setNoteOpenId}
                 onMarkWord={markWord}
+                onPickSign={pickSignNote}
+                onOpenWord={setWordOpen}
               />
             </PageSpread>
             <HopRail
@@ -2265,13 +2294,37 @@ export function App(): JSX.Element {
           onDelete={deleteNote}
         />
       )}
-      {picking && manifest && (
-        <MistakePicker
-          key={picking.id}
-          mistake={picking}
+      {wordOpen && manifest && (
+        <WordPartsHost
+          key={`${wordOpen.key}#${wordOpen.word}`}
           manifest={manifest}
+          page={wordOpen.page}
+          verseKey={wordOpen.key}
+          word={wordOpen.word}
+          label={t.ayahLabel(wordOpen.key) ?? wordOpen.key}
+          anchor={() => wordOpen.rect}
+          mode="note"
+          onPick={(mark, _name, at) => pickWordPart({ ...at, mark })}
+          onClose={() => setWordOpen(null)}
+        />
+      )}
+      {picking && manifest && picking.word !== null && (
+        <WordPartsHost
+          key={picking.id}
+          manifest={manifest}
+          page={picking.page}
+          verseKey={picking.key}
+          word={picking.word}
           label={t.ayahLabel(picking.key) ?? picking.key}
-          onPick={pickSign}
+          anchor={() => {
+            const r = [...document.querySelectorAll(`[data-mistake-word="${CSS.escape(picking.id)}"]`)]
+              .map((el) => el.getBoundingClientRect())
+              .find((b) => b.width > 0);
+            return r ? { left: r.left, top: r.top, right: r.right, bottom: r.bottom } : null;
+          }}
+          mode="mistake"
+          chosen={picking.mark ?? null}
+          onPick={(mark, name) => pickSign(mark, name)}
           onClear={clearMistake}
           onClose={() => setPickingId(null)}
         />
@@ -2287,39 +2340,57 @@ export function App(): JSX.Element {
 }
 
 /**
- * The sign picker for one marked word: loads the verse's signs, then mounts
- * the picker the open harakah-pick decision defaults to.
+ * One word opened into its parts (harakah-pick = D): loads the word's box and
+ * signs, then mounts the row. The word tool drops a note on the part picked;
+ * the mistake tool's second tap says which part the slip was on.
  */
-function MistakePicker({
-  mistake,
+function WordPartsHost({
   manifest,
+  page,
+  verseKey,
+  word,
   label,
+  anchor,
+  mode,
+  chosen,
   onPick,
   onClear,
   onClose,
 }: {
-  mistake: Note;
   manifest: AssetManifest;
+  page: number;
+  verseKey: string;
+  word: number;
   label: string;
-  onPick: (mark: number | null, name: string | null) => void;
-  onClear: () => void;
+  anchor: () => WordRect | null;
+  mode: "note" | "mistake";
+  chosen?: number | null;
+  /** The part picked, its name, and where on the page a note on it is pinned. */
+  onPick: (mark: number | null, name: string | null, at: { x: number; y: number }) => void;
+  onClear?: () => void;
   onClose: () => void;
 }): JSX.Element | null {
-  const signs = useVerseSigns(manifest.edition, mistake.page, mistake.key);
-  if (!signs || mistake.word === null) return null;
-  const [, , w, h] = (manifest.pages.find((p) => p.page === mistake.page)?.viewBox ?? "0 0 345 550")
+  const data = useWordParts(manifest.edition, page, verseKey, word);
+  if (!data) return null;
+  const [, , w, h] = (manifest.pages.find((p) => p.page === page)?.viewBox ?? "0 0 345 550")
     .split(/\s+/)
     .map(Number);
   return (
-    <SignPicker
+    <WordParts
       label={label}
-      signs={signs}
-      word={mistake.word}
-      chosen={mistake.mark ?? null}
-      pageSrc={pageUrl(manifest.edition, mistake.page)}
+      data={data}
+      pageSrc={pageUrl(manifest.edition, page)}
       pageSize={{ w: w || 345, h: h || 550 }}
-      mistakeId={mistake.id}
-      onPick={(mark) => onPick(mark, mark === null ? null : (signs[mark]?.name ?? null))}
+      anchor={anchor}
+      mode={mode}
+      chosen={chosen}
+      onPick={(mark, name) => {
+        const s = mark === null ? null : data.signs.find((x) => x.index === mark);
+        const at = s
+          ? { x: s.r[0] + s.r[2] / 2, y: s.r[1] }
+          : { x: data.box.x + data.box.width / 2, y: data.box.y };
+        onPick(mark, name, at);
+      }}
       onClear={onClear}
       onClose={onClose}
     />

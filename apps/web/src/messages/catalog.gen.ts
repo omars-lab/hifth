@@ -282,11 +282,17 @@ export interface Catalog {
   readonly toolNoteHint: string;
   readonly toolOn: (d: { readonly name: string | number }) => string;
   readonly toolSelect: string;
+  readonly toolSign: string;
+  readonly toolSignHint: string;
+  readonly toolWord: string;
+  readonly toolWordHint: string;
   readonly toolbarLabel: string;
   readonly trail: string;
   readonly twin: string;
   readonly wordHops: (d: { readonly n: number; readonly nText: string | number; readonly u: number; readonly uText: string | number }) => string;
   readonly wordLevelPending: string;
+  readonly wordParts: (d: { readonly label: string | number }) => string;
+  readonly wordPartsHint: string;
   readonly wordmark: string;
   readonly zoomIn: string;
   readonly zoomLevel: (d: { readonly pctText: string | number }) => string;

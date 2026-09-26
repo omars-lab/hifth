@@ -1,10 +1,13 @@
-/* SignPicker — the tray a marked word opens into: each vowel-sign on the word as
-   an enlarged crop of the print, named, with "the whole word" and "clear". */
+/* WordParts — the row a word opens into under the word tool (and under the
+   mistake tool's second tap): the whole word, then one copy of it per
+   vowel-sign with that sign in full ink and the rest faint. */
 
 .box {
   position: fixed;
   z-index: var(--z-sheet);
-  max-inline-size: min(24rem, calc(100vw - 24px));
+  max-inline-size: min(36rem, calc(100vw - 24px));
+  max-block-size: calc(100vh - 24px);
+  overflow: auto;
   padding: var(--space-3);
   border-radius: 10px;
   background: var(--paper, #fffdf8);
@@ -16,25 +19,31 @@
 }
 
 .head {
-  margin-block-end: var(--space-2);
   color: var(--ink-soft, #57534e);
   font-size: 13px;
 }
 
+.hint {
+  margin-block-start: 2px;
+  color: var(--ink-faint, #78716c);
+  font-size: 12px;
+}
+
 .none {
-  margin: 0 0 var(--space-2);
+  margin: var(--space-2) 0 0;
   color: var(--ink-soft, #57534e);
 }
 
-/* Right to left, like the word: the first sign read is the first tile. */
-.tray {
+/* Right to left, like the word: the first sign read is the first copy after the whole word. */
+.row {
   display: flex;
   flex-wrap: wrap;
   direction: rtl;
   gap: var(--space-2);
+  margin-block-start: var(--space-2);
 }
 
-.sign {
+.part {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -48,39 +57,56 @@
   cursor: pointer;
 }
 
-.sign:hover {
+.part:hover {
   border-color: var(--accent);
 }
 
-.sign[aria-pressed="true"] {
+.part[aria-pressed="true"] {
   border-color: var(--danger);
   box-shadow: inset 0 0 0 1px var(--danger);
 }
 
-/* One tile of the page, enlarged: the whole page drawn large, and a window on it. */
-.crop {
+.part:focus-visible,
+.clear:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* One copy of the word: the page drawn large behind a window the word's size. */
+.copy {
   position: relative;
   display: block;
-  inline-size: 64px;
-  block-size: 64px;
   overflow: hidden;
   border-radius: 4px;
   background: #fff;
 }
 
-.crop img {
+.copy img {
   position: absolute;
   max-inline-size: none;
   pointer-events: none;
 }
 
+/* The rest of the word, faint, so the copy still reads as the word. */
+.faint {
+  position: absolute;
+  inset: 0;
+  opacity: 0.22;
+}
+
+/* The one sign, in full ink: the same print, seen through the sign's own window. */
+.solid {
+  position: absolute;
+  overflow: hidden;
+}
+
 .ring {
   position: absolute;
   border: 1.5px solid var(--accent);
-  border-radius: 3px;
+  border-radius: 4px;
 }
 
-.sign[aria-pressed="true"] .ring {
+.part[aria-pressed="true"] .ring {
   border-color: var(--danger);
 }
 
@@ -92,39 +118,17 @@
 
 .actions {
   display: flex;
-  justify-content: space-between;
-  gap: var(--space-2);
+  justify-content: flex-start;
   margin-block-start: var(--space-2);
 }
 
-.clear,
-.whole {
+.clear {
   min-block-size: var(--touch-min);
   padding: 0 var(--space-3);
-  border-radius: 8px;
-  font: inherit;
-  cursor: pointer;
-}
-
-.clear {
   border: none;
+  border-radius: 8px;
   background: none;
   color: var(--danger);
-}
-
-.whole {
-  border: 1px solid rgba(0, 0, 0, 0.18);
-  background: var(--paper-raised, var(--paper));
-  color: inherit;
-}
-
-.whole[aria-pressed="true"] {
-  border-color: var(--danger);
-}
-
-.sign:focus-visible,
-.clear:focus-visible,
-.whole:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
+  font: inherit;
+  cursor: pointer;
 }

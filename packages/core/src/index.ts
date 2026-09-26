@@ -468,9 +468,13 @@ export {
   type ScrubStrategy,
 } from "./decision-options/scrub-rate.js";
 
+// Reaching one vowel-sign on a page: the sign tool's magnifier and the word
+// tool's copies (harakah-pick = D).
+export { nearestSignOnPage, signsOfWord, type ReachedSign } from "./sign-reach.js";
+
 // How does a reader pick one vowel-sign when it is smaller than a fingertip?
-// Three pickers, and the one the mistake tool mounts until the owner chooses.
-// (docs/decisions/harakah-pick.md, open)
+// The three pickers tried on the decision page; the owner chose D, two tools
+// built from B and a fuller A (docs/decisions/harakah-pick.md).
 export {
   HARAKAH_PICKERS,
   HARAKAH_PICK_DEFAULT,

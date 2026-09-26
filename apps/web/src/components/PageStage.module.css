@@ -508,3 +508,49 @@
   stroke: var(--danger);
   stroke-width: 0.7;
 }
+
+/* The harakat tool (harakah-pick = D): a fine crosshair, since the magnifier
+   above it shows what it is on; and the word tool: the pointing hand, since a
+   tap there opens the word. Over the verses too, as for the note tool. */
+.stage[data-tool="sign"],
+.stage[data-tool="sign"] .host :global(svg) :global(.ayahPolygon),
+.stage[data-tool="sign"] .host :global(svg) :global([id^="verse-"]) {
+  cursor: crosshair;
+}
+.stage[data-tool="word"],
+.stage[data-tool="word"] .host :global(svg) :global(.ayahPolygon),
+.stage[data-tool="word"] .host :global(svg) :global([id^="verse-"]) {
+  cursor: pointer;
+}
+
+/* The harakat tool's magnifier: a round window on the print above the
+   pointer, the sign it would take ringed in the app's green. It never takes
+   the pointer, so the page under it keeps its moves and clicks. */
+.loupe {
+  position: fixed;
+  z-index: 60;
+  overflow: hidden;
+  border-radius: 50%;
+  background: var(--paper, #fff);
+  border: 2px solid var(--accent);
+  box-shadow: 0 6px 18px rgb(0 0 0 / 0.22);
+  pointer-events: none;
+}
+.loupe img {
+  position: absolute;
+  max-width: none;
+}
+.loupeRing {
+  position: absolute;
+  border: 2px solid var(--accent);
+  border-radius: 4px;
+}
+.loupeName {
+  position: absolute;
+  inset-inline: 0;
+  bottom: 10px;
+  text-align: center;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--accent-strong);
+}

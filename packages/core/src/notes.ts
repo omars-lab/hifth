@@ -18,8 +18,8 @@
  * A comment note is anchored to a *word*. The mistake tool (step 3) marks a
  * word as a slip — a note of the kind "correction" with no text — and a second
  * tap narrows it to one vowel-sign on that word, which sets `mark` and
- * `onHarakah`. How the reader picks that sign is the open "harakah pick"
- * decision; the note only records which sign was picked.
+ * `onHarakah`. A comment can sit on one sign too: the sign tool and the word
+ * tool (harakah-pick = D) pin a note to the sign the reader took.
  *
  * Everything here is pure and clockless, like the bookmarks module: every
  * change takes `now`.
@@ -71,12 +71,17 @@ export function noteId(now: number, set: readonly Note[]): string {
   return id;
 }
 
-/** Pin a new, empty note. The reader types into it next. */
+/**
+ * Pin a new, empty note. The reader types into it next. `mark` pins it to one
+ * vowel-sign on the word (the sign tool, or a sign taken in the word tool);
+ * absent or null, it sits on the word.
+ */
 export function addNote(
   set: readonly Note[],
-  at: { key: string; page: number; word: number | null; x: number; y: number },
+  at: { key: string; page: number; word: number | null; x: number; y: number; mark?: number | null },
   now: number,
 ): Note[] {
+  const mark = at.mark ?? null;
   const note: Note = {
     id: noteId(now, set),
     key: at.key,
@@ -84,7 +89,8 @@ export function addNote(
     word: at.word,
     x: at.x,
     y: at.y,
-    onHarakah: false,
+    onHarakah: mark !== null,
+    ...(mark !== null ? { mark } : {}),
     kind: "comment",
     text: "",
     createdAt: now,

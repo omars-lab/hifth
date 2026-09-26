@@ -20,10 +20,18 @@ const T = 1_758_000_000_000;
 const at = { key: k(2, 5), page: 3, word: 4, x: 120.5, y: 88 };
 
 describe("notes", () => {
-  it("pins an empty comment on a word, never on a single mark yet", () => {
+  it("pins an empty comment on a word by default", () => {
     const [n] = addNote([], at, T);
     expect(n).toMatchObject({ ...at, text: "", kind: "comment", onHarakah: false, createdAt: T, updatedAt: T });
+    expect(n!.mark).toBeUndefined();
     expect(isNote(n)).toBe(true);
+  });
+
+  it("pins a comment on one vowel-sign when given its mark", () => {
+    const [n] = addNote([], { ...at, mark: 7 }, T);
+    expect(n).toMatchObject({ word: 4, mark: 7, onHarakah: true, kind: "comment" });
+    expect(isNote(n)).toBe(true);
+    expect(addNote([], { ...at, mark: null }, T)[0]!.onHarakah).toBe(false);
   });
 
   it("gives two notes pinned in the same moment different ids", () => {

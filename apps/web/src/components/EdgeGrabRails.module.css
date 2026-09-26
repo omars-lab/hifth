@@ -51,6 +51,13 @@
   opacity: 1;
 }
 
+/* Out of the way while a tool points at single signs (the harakat and word
+   tools): the first word of every line sits under the strip's corners. */
+.rail[data-aside="true"] {
+  pointer-events: none;
+  opacity: 0;
+}
+
 /* A reader who has turned off motion still gets the hand and the turn; the only
    thing dropped is the fade-in, which appears at once instead. */
 @media (prefers-reduced-motion: reduce) {
