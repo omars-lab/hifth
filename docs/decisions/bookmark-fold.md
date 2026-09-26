@@ -253,3 +253,9 @@ Assumptions made while building it, to be corrected on sight:
 - **The seam is kept on the phone** beside the kept bookmarks. It does not go into the saved
   bookmarks file yet; it is your place, not a bookmark you chose, and a file carried to another
   phone arguably should not move that phone's place. Open to change.
+- **A bookmarked page keeps its corner folded down**, well deeper than the small curl every
+  page shows, so a glance at the corner says whether the page is marked.
+- **Tapping a folded corner unfolds it**, and that lifts every bookmark on the page at once.
+  Nothing is asked first; instead a line at the foot of the screen says what was lifted and
+  offers **Undo** for a few seconds. A second bookmark on a page that is already folded comes
+  from the first one's drawer ("Add another here"), since the corner itself now unfolds.

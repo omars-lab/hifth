@@ -364,8 +364,28 @@
 .stage {
   --dog-ear: 16px;
 }
-.stage:has([data-bookmark-fold]:is(:hover, :focus-visible)) {
+/* A page that holds a bookmark keeps its corner folded well down — deep enough
+   to tell from the small curl every page has, at a glance. */
+.stage:has([data-bookmark-fold][data-folded]) {
+  --dog-ear: 44px;
+}
+/* Under a mouse the corner moves toward what a press would do: a flat corner
+   starts to fold, a folded one starts to open. Only where there is a real
+   pointer — a phone keeps "hover" after a tap, which would leave the corner
+   stuck half-way. */
+@media (hover: hover) {
+  .stage:has([data-bookmark-fold]:hover) {
+    --dog-ear: 26px;
+  }
+  .stage:has([data-bookmark-fold][data-folded]:hover) {
+    --dog-ear: 32px;
+  }
+}
+.stage:has([data-bookmark-fold]:focus-visible) {
   --dog-ear: 26px;
+}
+.stage:has([data-bookmark-fold][data-folded]:focus-visible) {
+  --dog-ear: 32px;
 }
 .stage:has([data-bookmark-fold]) .host[data-leaf="right"] {
   clip-path: polygon(0 0, calc(100% - var(--dog-ear)) 0, 100% var(--dog-ear), 100% 100%, 0 100%);

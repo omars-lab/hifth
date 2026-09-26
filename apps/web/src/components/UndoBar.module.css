@@ -1,0 +1,44 @@
+/* UndoBar — a short line over the foot of the page with one button, "Undo". */
+
+.bar {
+  position: fixed;
+  inset-inline: var(--space-4);
+  /* Over the hint line above the page bar, clear of the page's last line of text. */
+  inset-block-end: calc(64px + env(safe-area-inset-bottom, 0px));
+  z-index: var(--z-sheet);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  max-inline-size: 28rem;
+  margin-inline: auto;
+  padding: var(--space-2) var(--space-2) var(--space-2) var(--space-4);
+  border-radius: 10px;
+  background: #2a241d;
+  color: #fdf8ee;
+  box-shadow: var(--shadow-2);
+  font-family: var(--font-chrome);
+  font-size: 14px;
+}
+
+.said {
+  min-inline-size: 0;
+}
+
+.undo {
+  flex: none;
+  min-block-size: var(--touch-min);
+  padding: 0 var(--space-3);
+  border: none;
+  border-radius: 8px;
+  background: none;
+  color: #f2c572;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.undo:focus-visible {
+  outline: 2px solid #f2c572;
+  outline-offset: 2px;
+}

@@ -8,6 +8,8 @@ interface BookmarkRibbonsProps {
   bookmarks: readonly Bookmark[];
   /** Fold the corner: drop a new bookmark on this page. */
   onDrop: () => void;
+  /** Unfold the corner: lift every bookmark on this page (the reader can undo it). */
+  onUnfold: () => void;
   /** Open one ribbon's drawer. */
   onOpen: (id: string) => void;
   /** The ribbon just dropped, which unrolls; every other one is already hanging. */
@@ -35,6 +37,7 @@ interface BookmarkRibbonsProps {
 export function BookmarkRibbons({
   bookmarks,
   onDrop,
+  onUnfold,
   onOpen,
   freshId = null,
   seam = false,
@@ -42,9 +45,14 @@ export function BookmarkRibbons({
   const { t } = useT();
   const rootRef = useRef<HTMLDivElement>(null);
   const act = useRef<(button: HTMLButtonElement) => void>(() => {});
+  // A page that holds a bookmark keeps its corner folded down until the reader
+  // unfolds it (docs/decisions/bookmark-fold.md, 2026-09-25): so the corner
+  // folds a flat page and unfolds a folded one.
+  const folded = bookmarks.length > 0;
   act.current = (button) => {
     const id = button.dataset.bookmark;
     if (id) onOpen(id);
+    else if (button.dataset.folded !== undefined) onUnfold();
     else onDrop();
   };
 
@@ -87,9 +95,10 @@ export function BookmarkRibbons({
         type="button"
         className={styles.fold}
         onClick={onKeyClick}
-        aria-label={t.bmDrop}
-        title={t.bmDrop}
+        aria-label={folded ? t.bmUnfold(bookmarks.length) : t.bmDrop}
+        title={folded ? t.bmUnfold(bookmarks.length) : t.bmDrop}
         data-bookmark-fold=""
+        data-folded={folded ? "" : undefined}
       >
         <span className={styles.foldShadow} aria-hidden="true">
           <span className={styles.foldFlap} />

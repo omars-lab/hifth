@@ -554,6 +554,12 @@ export interface Strings {
   bmDrop: string;
   /** The red seam's name: where the reader left off. */
   bmSeam: string;
+  /** A folded corner's name: tapping it unfolds the corner and lifts the page's bookmarks. */
+  bmUnfold(count: number): string;
+  bmUnfolded(count: number): string;
+  bmUndo: string;
+  /** Said when an unfold is undone. */
+  bmRestored: string;
   bmRibbon(name: string): string;
   bmDrawerTitle: string;
   bmNameLabel: string;
@@ -953,6 +959,10 @@ export function buildStrings(lang: Lang, m: Catalog): Strings {
 
     bmDrop: m.bmDrop,
     bmSeam: m.bmSeam,
+    bmUnfold: (count) => m.bmUnfold({ count, countText: n(count) }),
+    bmUnfolded: (count) => m.bmUnfolded({ count, countText: n(count) }),
+    bmUndo: m.bmUndo,
+    bmRestored: m.bmRestored,
     bmRibbon: (name) => m.bmRibbon({ name }),
     bmDrawerTitle: m.bmDrawerTitle,
     bmNameLabel: m.bmNameLabel,
