@@ -71,7 +71,8 @@ import { useT } from "./i18n";
 import { useHashRouter } from "./useHashRouter";
 import { DESKTOP_QUERY, useMediaQuery } from "./useMediaQuery";
 import { PageStage, type PageStageHandle, type PageTool, type WordRect } from "./components/PageStage";
-import { PageToolbar, TOOL_KEYS, toolName } from "./components/PageToolbar";
+import { PageToolbar, TOOL_KEYS, toolHint, toolName } from "./components/PageToolbar";
+import { PhoneToolbarA, PhoneToolbarB, PhoneToolbarC, phoneBarFromUrl } from "./components/PhoneToolbar";
 import { NoteBox } from "./components/NoteBox";
 import { WordParts, useWordParts } from "./components/WordParts";
 import { PageSpread } from "./components/PageSpread";
@@ -227,6 +228,8 @@ export function App(): JSX.Element {
    * The query and its arithmetic live in useMediaQuery.ts.
    */
   const desktop = useMediaQuery(DESKTOP_QUERY);
+  /** Which of the three phone tool layouts is on trial (phone-toolbar, open). */
+  const [phoneBar] = useState(() => phoneBarFromUrl(window.location.search));
   /*
    * One leaf or two — the reader's own answer, and the only thing the spread
    * consults (docs/design/desktop.md §8 ②, superseded mechanism).
@@ -1928,6 +1931,7 @@ export function App(): JSX.Element {
       {/* Its own row above the book, not floated over it: floated, it sat on
           the page's first line. */}
       {resolver && desktop && <PageToolbar tool={tool} onTool={chooseTool} />}
+      {resolver && !desktop && phoneBar === "a" && <PhoneToolbarA tool={tool} onTool={chooseTool} />}
       <main
         className={styles.main}
         dir="rtl"
@@ -2013,7 +2017,7 @@ export function App(): JSX.Element {
                      into the same book is the one thing §3.4 forbids. */
                   dragToTurn={false}
                   bound
-                  tool={desktop ? tool : "select"}
+                  tool={tool}
                   notes={notes}
                   noteLabel={noteLabel}
                   onPlaceNote={placeNote}
@@ -2071,7 +2075,7 @@ export function App(): JSX.Element {
                    spread does the fold belong to something wider than it. */
                 foldTarget={desktop ? bookRef : null}
                 bound={desktop && pageMode === "two"}
-                tool={desktop ? tool : "select"}
+                tool={tool}
                 notes={notes}
                 noteLabel={noteLabel}
                 onPlaceNote={placeNote}
@@ -2231,11 +2235,14 @@ export function App(): JSX.Element {
           oldest-to-newest in the mus'haf's own direction, and its beads sit
           under the rail they came from. */}
       <footer className={styles.trail} aria-label={t.trail} dir="rtl">
+        {resolver && !desktop && phoneBar === "b" && <PhoneToolbarB tool={tool} onTool={chooseTool} />}
+        {resolver && !desktop && phoneBar === "c" && <PhoneToolbarC tool={tool} onTool={chooseTool} />}
         <TrailBeads
           trail={trail}
           currentKey={selectedKey}
           onBeadBack={handleBeadBack}
           onClearCurrent={handleClearCurrent}
+          hint={!desktop && phoneBar !== "c" && tool !== "select" ? toolHint(t, tool, true) : undefined}
         />
         <PlayTrigger
           selectedKey={selectedKey}

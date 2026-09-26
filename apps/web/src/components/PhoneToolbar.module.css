@@ -1,0 +1,173 @@
+/*
+ * The page tools on a phone (docs/design/page-toolbar-plan.md, step 5): three
+ * layouts on trial, A to C. None of them may sit on the text while closed —
+ * the same rule that gave the desktop bar a row of its own.
+ */
+
+.row {
+  display: flex;
+  justify-content: space-between;
+  gap: 2px;
+}
+
+.tool {
+  display: inline-grid;
+  place-items: center;
+  gap: 2px;
+  min-block-size: var(--touch-min);
+  min-inline-size: var(--touch-min);
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--ink-soft);
+  font: inherit;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+/* On is said by fill and weight, not colour alone (WCAG 1.4.1). */
+.tool[aria-checked="true"] {
+  background: var(--accent-tint);
+  color: var(--accent-strong);
+}
+
+.tool:focus-visible,
+.caseButton:focus-visible,
+.close:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
+
+/* ── A · the strip joined under the top bar ─────────────────────────────── */
+.strip {
+  padding: 0 var(--space-2);
+  border-block-end: 1px solid var(--hairline);
+  background: var(--paper-raised);
+}
+
+/* ── B and C · the one button in the bottom row ──────────────────────────── */
+.case,
+.trayHost {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-inline-end: var(--space-2);
+}
+
+.caseButton {
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  inline-size: var(--touch-min);
+  block-size: var(--touch-min);
+  border: 1px solid var(--hairline);
+  border-radius: 50%;
+  background: var(--paper);
+  color: var(--ink-soft);
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.caseButton[data-on] {
+  border-color: var(--accent);
+  background: var(--accent-tint);
+  color: var(--accent-strong);
+}
+
+/* B · the fan: the tools stood up above the button, with their names, over
+   the page only while it is open. */
+.case {
+  position: relative;
+}
+
+.fan {
+  position: absolute;
+  inset-block-end: calc(100% + var(--space-2));
+  inset-inline-start: 0;
+  z-index: 30;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: var(--space-1);
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius-md);
+  background: var(--paper-raised);
+  box-shadow: 0 6px 20px rgb(0 0 0 / 0.18);
+  animation: fan-out 140ms ease-out;
+}
+
+.fan .tool {
+  grid-auto-flow: column;
+  justify-content: start;
+  gap: var(--space-2);
+  padding-inline: var(--space-2) var(--space-3);
+}
+
+.label {
+  font-size: var(--text-sm);
+  white-space: nowrap;
+}
+
+@keyframes fan-out {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.96);
+  }
+}
+
+/* C · the tray: slides up over the whole bottom row and stays until closed. */
+.tray {
+  position: absolute;
+  inset-inline: 0;
+  inset-block-end: 0;
+  z-index: 30;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: var(--space-1) var(--space-2) var(--space-2);
+  border-block-start: 1px solid var(--hairline);
+  background: var(--paper-raised);
+  box-shadow: 0 -4px 14px rgb(0 0 0 / 0.08);
+  animation: tray-up 160ms ease-out;
+}
+
+.trayRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.trayRow .row {
+  flex: 1;
+}
+
+.close {
+  flex: none;
+  inline-size: var(--touch-min);
+  block-size: var(--touch-min);
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--ink-soft);
+  font-size: 1.4rem;
+  cursor: pointer;
+}
+
+.trayHint {
+  padding-inline: var(--space-2);
+  color: var(--ink-soft);
+  font-size: var(--text-sm);
+}
+
+@keyframes tray-up {
+  from {
+    transform: translateY(100%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fan,
+  .tray {
+    animation: none;
+  }
+}

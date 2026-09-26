@@ -294,6 +294,10 @@
   "toolWord": "Word",
   "toolWordHint": "Tap a word to open it into its parts",
   "wordParts": "The parts of a word in {label}",
-  "wordPartsHint": "Pick a part to write a note on it · Shift-click to pick several",
-  "wordPartsMany": "{n, plural, one{Note on this sign} other{Note on these {nText} signs}}"
+  "wordPartsHint": "Pick a part to write a note on it",
+  "wordPartsHintMany": "Shift-click to pick several",
+  "wordPartsMany": "{n, plural, one{Note on this sign} other{Note on these {nText} signs}}",
+  "toolSignHintTouch": "Tap near a vowel-sign to note it",
+  "phoneTools": "Page tools · {name} is on",
+  "phoneToolsClose": "Close the tools"
 }

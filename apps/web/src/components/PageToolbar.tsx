@@ -19,7 +19,8 @@ export const TOOL_KEYS: Readonly<Record<string, PageTool>> = {
   KeyM: "mistake",
 };
 
-const TOOLS: ReadonlyArray<{ tool: PageTool; letter: string }> = [
+/** The tools in the order every bar shows them, desktop and phone alike. */
+export const TOOLS: ReadonlyArray<{ tool: PageTool; letter: string }> = [
   { tool: "select", letter: "V" },
   { tool: "highlight", letter: "H" },
   { tool: "bookmark", letter: "B" },
@@ -108,21 +109,27 @@ export function PageToolbar({ tool, onTool }: PageToolbarProps): JSX.Element {
       {/* For the eye. The change is announced once, by App, through the one
           polite announcer the app has — a second live region here would talk
           over it. */}
-      <span className={styles.name}>
-        {tool === "bookmark"
-          ? t.toolBookmarkHint
-          : tool === "note"
-            ? t.toolNoteHint
-            : tool === "mistake"
-              ? t.toolMistakeHint
-              : tool === "sign"
-                ? t.toolSignHint
-                : tool === "word"
-                  ? t.toolWordHint
-                  : t.toolOn(nameOf(tool))}
-      </span>
+      <span className={styles.name}>{toolHint(t, tool)}</span>
     </div>
   );
+}
+
+/** What to do with the tool that is on, or its name when there is nothing to add. */
+export function toolHint(t: ReturnType<typeof useT>["t"], x: PageTool, touch = false): string {
+  // A finger has no hover, so the harakat tool's magnifier cannot follow it:
+  // on a phone a tap takes the sign nearest the finger.
+  if (touch && x === "sign") return t.toolSignHintTouch;
+  return x === "bookmark"
+    ? t.toolBookmarkHint
+    : x === "note"
+      ? t.toolNoteHint
+      : x === "mistake"
+        ? t.toolMistakeHint
+        : x === "sign"
+          ? t.toolSignHint
+          : x === "word"
+            ? t.toolWordHint
+            : t.toolOn(toolName(t, x));
 }
 
 /** A tool's spoken name. App says the same name when a tool is switched on. */
@@ -142,7 +149,7 @@ export function toolName(t: ReturnType<typeof useT>["t"], x: PageTool): string {
               : t.toolMistake;
 }
 
-function ToolIcon({ tool }: { tool: PageTool }): JSX.Element {
+export function ToolIcon({ tool }: { tool: PageTool }): JSX.Element {
   const common = {
     width: 18,
     height: 18,

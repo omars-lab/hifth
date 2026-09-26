@@ -355,7 +355,8 @@
       "related": [
         "juz-detents",
         "boundary-juz",
-        "page-bar-numberline"
+        "page-bar-numberline",
+        "phone-toolbar"
       ],
       "decided": "A",
       "by": "omar",
@@ -642,7 +643,8 @@
         "tafseer-reading",
         "page-turn-curl",
         "page-bar-numberline",
-        "page-bar-phone-scrub"
+        "page-bar-phone-scrub",
+        "phone-toolbar"
       ]
     },
     {
@@ -1343,7 +1345,8 @@
         "mark-granularity",
         "mark-placement",
         "selection-drawer",
-        "diff-mark-tint"
+        "diff-mark-tint",
+        "phone-toolbar"
       ]
     },
     {
@@ -1375,7 +1378,8 @@
         "harakah-pick",
         "mistake-note-anchor",
         "word-selection",
-        "ayah-drawer"
+        "ayah-drawer",
+        "phone-toolbar"
       ]
     },
     {
@@ -1426,6 +1430,38 @@
       "decided": "on-request",
       "by": "omar",
       "date": "2026-09-25"
+    },
+    {
+      "id": "phone-toolbar",
+      "question": "Where should the page tools sit on a phone, and how does a reader switch between them?",
+      "status": "open",
+      "options": [
+        {
+          "id": "A",
+          "label": "A strip under the top bar, always there"
+        },
+        {
+          "id": "B",
+          "label": "One button in the bottom row that fans the tools out"
+        },
+        {
+          "id": "C",
+          "label": "A Tools button in the bottom row that slides a tray up"
+        }
+      ],
+      "artifact": "https://blog.bytesofpurpose.com/hifth/docs/design/phone-toolbar-options.html",
+      "page": "docs/design/phone-toolbar-options.html",
+      "builtBy": "scripts/build-phone-toolbar-options.mjs",
+      "doc": "docs/decisions/phone-toolbar.md",
+      "decided": null,
+      "by": null,
+      "date": null,
+      "related": [
+        "harakah-pick",
+        "selection-drawer",
+        "desktop-vs-mobile",
+        "graduation-losers"
+      ]
     }
   ]
 }

@@ -144,3 +144,10 @@
   font: inherit;
   cursor: pointer;
 }
+
+/* Shift and Cmd are keyboard keys: a touch screen is not told about them. */
+@media (any-hover: none) {
+  .hintMany {
+    display: none;
+  }
+}

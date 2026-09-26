@@ -641,6 +641,13 @@ export interface Strings {
   /** The word tool's row of parts, named by its verse. */
   wordParts(label: string): string;
   wordPartsHint: string;
+  /** Added where a keyboard is likely: how to pick several parts. */
+  wordPartsHintMany: string;
+  /** The harakat tool's hint on a phone, where a tap takes the nearest sign. */
+  toolSignHintTouch: string;
+  /** The phone's tools button, naming the tool that is on. */
+  phoneTools(name: string): string;
+  phoneToolsClose: string;
   /** The button that writes one note on the signs gathered. */
   wordPartsMany(count: number): string;
 }
@@ -1092,6 +1099,10 @@ export function buildStrings(lang: Lang, m: Catalog): Strings {
     toolWordHint: m.toolWordHint,
     wordParts: (label) => m.wordParts({ label }),
     wordPartsHint: m.wordPartsHint,
+    wordPartsHintMany: m.wordPartsHintMany,
+    toolSignHintTouch: m.toolSignHintTouch,
+    phoneTools: (name) => m.phoneTools({ name }),
+    phoneToolsClose: m.phoneToolsClose,
     wordPartsMany: (count) => m.wordPartsMany({ n: count, nText: n(count) }),
   };
 }

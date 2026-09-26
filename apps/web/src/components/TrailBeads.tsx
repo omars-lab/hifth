@@ -16,6 +16,8 @@ interface TrailBeadsProps {
   onBeadBack: (index: number) => void;
   /** Clear the current selection (tap the live bead). */
   onClearCurrent: () => void;
+  /** Said in place of the tap hint while a page tool is on (the phone's tools). */
+  hint?: string | undefined;
 }
 
 /**
@@ -29,10 +31,11 @@ export function TrailBeads({
   currentKey,
   onBeadBack,
   onClearCurrent,
+  hint,
 }: TrailBeadsProps): JSX.Element {
   const { t } = useT();
   if (!currentKey) {
-    return <span className={styles.hint}>{t.tapHint}</span>;
+    return <span className={styles.hint}>{hint ?? t.tapHint}</span>;
   }
 
   const currentLabel = t.ayahLabel(currentKey) ?? currentKey;

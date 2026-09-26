@@ -183,7 +183,12 @@ export function WordParts({
       }}
     >
       <div className={styles.head}>{heading}</div>
-      {mode === "note" && <div className={styles.hint}>{t.wordPartsHint}</div>}
+      {mode === "note" && (
+        <div className={styles.hint}>
+          {t.wordPartsHint}
+          {gathering && <span className={styles.hintMany}> · {t.wordPartsHintMany}</span>}
+        </div>
+      )}
       <div className={styles.row}>
         <button
           type="button"
