@@ -20,7 +20,8 @@
             1,
             4
           ]
-        }
+        },
+        "twin": true
       },
       {
         "type": "mutashabih",
@@ -30,6 +31,33 @@
           "dSurah": -12,
           "dPage": -18
         }
+      }
+    ],
+    "ext": []
+  },
+  "27": {
+    "edges": [
+      {
+        "type": "mutashabih",
+        "to": "quran/hafs-kfqc/38:87",
+        "page": 458,
+        "dir": {
+          "dSurah": -43,
+          "dPage": -128
+        },
+        "span": {
+          "from": [
+            1,
+            5
+          ]
+        },
+        "toSpan": {
+          "from": [
+            1,
+            5
+          ]
+        },
+        "twin": true
       }
     ],
     "ext": []

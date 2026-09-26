@@ -461,7 +461,8 @@
             1,
             7
           ]
-        }
+        },
+        "twin": true
       },
       {
         "type": "mutashabih",

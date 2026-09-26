@@ -64,7 +64,8 @@
             1,
             10
           ]
-        }
+        },
+        "twin": true
       }
     ],
     "ext": []
@@ -1591,6 +1592,34 @@
     ],
     "ext": []
   },
+  "134": {
+    "edges": [
+      {
+        "type": "mutashabih",
+        "to": "quran/hafs-kfqc/2:141",
+        "page": 21,
+        "dir": {
+          "dSurah": 0,
+          "dPage": 1,
+          "sameJuz": true
+        },
+        "span": {
+          "from": [
+            1,
+            19
+          ]
+        },
+        "toSpan": {
+          "from": [
+            1,
+            19
+          ]
+        },
+        "twin": true
+      }
+    ],
+    "ext": []
+  },
   "136": {
     "edges": [
       {
@@ -1613,6 +1642,34 @@
             39
           ]
         }
+      }
+    ],
+    "ext": []
+  },
+  "141": {
+    "edges": [
+      {
+        "type": "mutashabih",
+        "to": "quran/hafs-kfqc/2:134",
+        "page": 20,
+        "dir": {
+          "dSurah": 0,
+          "dPage": -1,
+          "sameJuz": true
+        },
+        "span": {
+          "from": [
+            1,
+            19
+          ]
+        },
+        "toSpan": {
+          "from": [
+            1,
+            19
+          ]
+        },
+        "twin": true
       }
     ],
     "ext": []
@@ -1914,6 +1971,7 @@
             10
           ]
         },
+        "twin": true,
         "ctx": true
       },
       {

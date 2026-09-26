@@ -427,7 +427,8 @@
             1,
             10
           ]
-        }
+        },
+        "twin": true
       },
       {
         "type": "mutashabih",
@@ -455,6 +456,33 @@
           "dSurah": -23,
           "dPage": -193
         }
+      }
+    ],
+    "ext": []
+  },
+  "73": {
+    "edges": [
+      {
+        "type": "mutashabih",
+        "to": "quran/hafs-kfqc/15:30",
+        "page": 263,
+        "dir": {
+          "dSurah": -23,
+          "dPage": -194
+        },
+        "span": {
+          "from": [
+            1,
+            4
+          ]
+        },
+        "toSpan": {
+          "from": [
+            1,
+            4
+          ]
+        },
+        "twin": true
       }
     ],
     "ext": []
@@ -611,7 +639,8 @@
             1,
             5
           ]
-        }
+        },
+        "twin": true
       },
       {
         "type": "mutashabih",
@@ -779,6 +808,33 @@
     ],
     "ext": []
   },
+  "81": {
+    "edges": [
+      {
+        "type": "mutashabih",
+        "to": "quran/hafs-kfqc/15:38",
+        "page": 264,
+        "dir": {
+          "dSurah": -23,
+          "dPage": -193
+        },
+        "span": {
+          "from": [
+            1,
+            4
+          ]
+        },
+        "toSpan": {
+          "from": [
+            1,
+            4
+          ]
+        },
+        "twin": true
+      }
+    ],
+    "ext": []
+  },
   "83": {
     "edges": [
       {
@@ -800,7 +856,8 @@
             1,
             4
           ]
-        }
+        },
+        "twin": true
       },
       {
         "type": "mutashabih",
@@ -871,6 +928,33 @@
             6
           ]
         }
+      }
+    ],
+    "ext": []
+  },
+  "87": {
+    "edges": [
+      {
+        "type": "mutashabih",
+        "to": "quran/hafs-kfqc/81:27",
+        "page": 586,
+        "dir": {
+          "dSurah": 43,
+          "dPage": 128
+        },
+        "span": {
+          "from": [
+            1,
+            5
+          ]
+        },
+        "toSpan": {
+          "from": [
+            1,
+            5
+          ]
+        },
+        "twin": true
       }
     ],
     "ext": []

@@ -1,4 +1,53 @@
 {
+  "2": {
+    "edges": [
+      {
+        "type": "mutashabih",
+        "to": "quran/hafs-kfqc/39:1",
+        "page": 458,
+        "dir": {
+          "dSurah": -7,
+          "dPage": -44
+        },
+        "span": {
+          "from": [
+            1,
+            6
+          ]
+        },
+        "toSpan": {
+          "from": [
+            1,
+            6
+          ]
+        },
+        "twin": true
+      },
+      {
+        "type": "mutashabih",
+        "to": "quran/hafs-kfqc/45:2",
+        "page": 499,
+        "dir": {
+          "dSurah": -1,
+          "dPage": -3
+        },
+        "span": {
+          "from": [
+            1,
+            6
+          ]
+        },
+        "toSpan": {
+          "from": [
+            1,
+            6
+          ]
+        },
+        "twin": true
+      }
+    ],
+    "ext": []
+  },
   "4": {
     "edges": [
       {

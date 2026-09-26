@@ -1,10 +1,13 @@
 #!/usr/bin/env node
 /**
- * Draws the options for `similar-ayah-enrichment`: whether the app's set of
- * look-alike verse pairs should take in the whole-verse twins the outside
- * measuring library knows about and the app does not — as bare verse numbers,
- * no Qur'an text — even though we decided (qul-reliance) to copy nothing from
- * that library.
+ * Draws the decision `similar-ayah-enrichment`, now decided (option D): the
+ * whole-verse twins — verses repeated word for word in two places — are found
+ * in the app's OWN already-vendored word data at build time, shipped as bare
+ * verse numbers, and the outside measuring library is used only to confirm the
+ * set is complete. The copy-nothing boundary (qul-reliance) is not reopened.
+ * The page keeps the options that lost (A, B, C) because they are the reason the
+ * choice was a choice; the pivot from "take the library's pairs in" to "find
+ * them ourselves" is written up in docs/issues/verbatim-twins-found-in-house.md.
  *
  * Every specimen is the real printed page with real geometry over it. The
  * verses are cut out of the mus'haf artwork the app already ships (the same
@@ -31,21 +34,13 @@
  * similar-ayah-enrichment; the reasons live in
  * docs/decisions/similar-ayah-enrichment.md.
  */
-import { readFileSync, readdirSync, writeFileSync } from "node:fs";
+import { readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { ROOT } from "./code-pointers.mjs";
-import { WordIndex } from "../packages/core/dist/index.js";
+import { twinPanel } from "./twin-crop.mjs";
 
-const ASSETS = join(ROOT, "apps/web/public/assets");
-const WORDS = join(ASSETS, "words/hafs-kfqc");
 const OUT = join(ROOT, "docs/design/similar-ayah-enrichment.html");
 const PIN = join(ROOT, "packages/etl/data/qul/qul-rulers.probe.json");
-
-/** Where the checked-in copy reaches the print from, relative to docs/design/. */
-const PRINT_HREF = (page) => `../../apps/web/public/assets/pages/hafs-kfqc/${page}.svg`;
-
-/** Breathing room around a crop, in page units — about a letter's width. */
-const PAD = 2;
 
 /**
  * The twins to draw, each one looked at on the printed page and confirmed.
@@ -85,97 +80,22 @@ const NEARLY = [
   },
 ];
 
-// ---------------------------------------------------------------- geometry
-
-const shardCache = new Map();
-function indexOf(page) {
-  if (!shardCache.has(page)) {
-    try {
-      shardCache.set(page, new WordIndex(JSON.parse(readFileSync(join(WORDS, `${page}.json`), "utf8"))));
-    } catch {
-      shardCache.set(page, null);
-    }
-  }
-  return shardCache.get(page);
-}
-
-// verse key -> page, built once from the shipped word geometry.
-const v2p = new Map();
-for (const f of readdirSync(WORDS)) {
-  if (!f.endsWith(".json")) continue;
-  const d = JSON.parse(readFileSync(join(WORDS, f), "utf8"));
-  for (const k of Object.keys(d.words ?? {})) if (!v2p.has(k)) v2p.set(k, d.page);
-}
-
-function unionOf(rs) {
-  let l = Infinity;
-  let t = Infinity;
-  let r = -Infinity;
-  let b = -Infinity;
-  for (const q of rs) {
-    l = Math.min(l, q.x);
-    t = Math.min(t, q.y);
-    r = Math.max(r, q.x + q.width);
-    b = Math.max(b, q.y + q.height);
-  }
-  return { x: l, y: t, width: r - l, height: b - t };
-}
-
-function printSize(page) {
-  const vb = readFileSync(join(ASSETS, `pages/hafs-kfqc/${page}.svg`), "utf8").match(/viewBox="([^"]+)"/);
-  const [, , w, h] = vb[1].split(/\s+/).map(Number);
-  return { w, h };
-}
-
-// ----------------------------------------------------------------- drawing
-
-const n = (v) => Number(v.toFixed(2));
-const vb = (r) => `${n(r.x)} ${n(r.y)} ${n(r.width)} ${n(r.height)}`;
-const box = (r) => `M${n(r.x)} ${n(r.y)}H${n(r.x + r.width)}V${n(r.y + r.height)}H${n(r.x)}Z`;
-const wash = (cls, r) =>
-  `<rect class="${cls}" x="${n(r.x - 0.5)}" y="${n(r.y - 0.5)}" width="${n(r.width + 1)}" height="${n(r.height + 1)}" rx="1"></rect>`;
-
-/**
- * One verse, cut out of its printed page. Neighbours that the crop rectangle
- * catches are faded (the same treatment the app itself uses). `green` washes
- * the whole verse; `mark` washes named words yellow.
- */
-function crop(key, { green = false, mark = null } = {}) {
-  const page = v2p.get(key);
-  const idx = indexOf(page);
-  const sp = idx.span(key);
-  const bands = idx.bandsFor(key, sp.from, sp.to);
-  const u = unionOf(bands);
-  const frame = { x: u.x - PAD, y: u.y - PAD, width: u.width + PAD * 2, height: u.height + PAD * 2 };
-  const { w, h } = printSize(page);
-  const holes = bands.map((b) => box({ x: b.x - 1, y: b.y - 1, width: b.width + 2, height: b.height + 2 }));
-  const greens = green ? bands.map((r) => wash("w-share", r)).join("") : "";
-  const yellows = mark ? mark.map((i) => idx.boxOf(key, i)).filter(Boolean).map((r) => wash("w-diff", r)).join("") : "";
-  return (
-    `<svg class="art" viewBox="${vb(frame)}" aria-hidden="true" focusable="false">` +
-    `<image href="${PRINT_HREF(page)}" x="0" y="0" width="${w}" height="${h}"></image>` +
-    `<path class="scrim" d="${box(frame)}${holes.join("")}" fill-rule="evenodd"></path>` +
-    greens +
-    yellows +
-    `</svg>`
-  );
-}
-
-function twinPanel([a, b], opts = {}) {
-  const marks = opts.mark ?? {};
-  const one = (k) => `<figure class="crop"><figcaption>${k}</figcaption>${crop(k, { green: opts.green, mark: marks[k] })}</figure>`;
-  const note = opts.note ? `<p class="note">${esc(opts.note)}</p>` : "";
-  return `<div class="pair">${one(a)}${one(b)}${note}</div>`;
-}
-
-const esc = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;");
-
 // ------------------------------------------------------------------- numbers
 
 const pin = JSON.parse(readFileSync(PIN, "utf8"));
 const S = pin.similarity;
 const G = S.corpus74.gap;
 const num = (x) => x.toLocaleString("en-US");
+
+/**
+ * What the app shipped BEFORE the twins were added — the gap this decision
+ * closed. The pin now holds the after-numbers (it measures what ships), so the
+ * before-numbers cannot be re-derived from a current run; they are the recorded
+ * historical baseline, the same figures the decision record's table carries, and
+ * their provenance is docs/issues/verbatim-twins-found-in-house.md. Re-derivable
+ * only by rebuilding the pin against the pre-twin edge set in git history.
+ */
+const BEFORE = { ourEdges: 2516, corroboratedPct: 2.8, strongMisses: 781, verbatimMisses: 635, versesTouched: 384 };
 
 // ---------------------------------------------------------------------- page
 
@@ -187,7 +107,7 @@ const html = `<!doctype html>
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>The look-alikes the app does not connect</title>
+<title>The look-alikes the app now connects</title>
 <style>
   :root {
     --paper: #f7f4ee; --paper-raised: #fffdf8; --ink: #26201a; --ink-soft: #5c5348;
@@ -237,11 +157,17 @@ const html = `<!doctype html>
 </head>
 <body>
 <main>
-  <h1>The look-alikes the app does not connect</h1>
-  <p class="standfirst">A separate library of Qur'an data, used here only as a measuring stick,
-  knows of hundreds of verse pairs that are the same verse in two places. The app's own set of
-  look-alikes barely overlaps them. This page asks whether those pairs should be brought in —
-  and shows you the ones that are missing.</p>
+  <h1>The look-alikes the app now connects</h1>
+  <p class="standfirst">Hundreds of verse pairs are the same verse in two places — the hardest
+  look-alikes for a memoriser to keep apart. The app used to connect almost none of them. It now
+  finds them all in its own word data and washes the whole matching verse green, and a separate
+  library of Qur'an data — used only as a measuring stick — confirms the set is complete. This
+  page shows the twins now bridged, and how the decision was reached.</p>
+  <p style="background:var(--paper-raised);border:1px solid var(--hair);border-left:3px solid var(--green);border-radius:6px;padding:0.7rem 1rem;margin:0 0 1.5rem;">
+  <b>Decided (option D).</b> The twins are found in the app's own already-included word data,
+  shipped as bare verse numbers, and the outside library only checks the result. The
+  copy-nothing boundary was not reopened. The options that lost are kept below, because they are
+  why the choice was a choice.</p>
 
   <dl class="glossary">
     <dt>mus'haf</dt><dd>The printed Qur'an, page by page, as the reader sees it.</dd>
@@ -252,125 +178,137 @@ const html = `<!doctype html>
       against but, by an earlier decision, copies nothing from.</dd>
   </dl>
 
-  <h2>What is being decided?</h2>
+  <h2>What was being decided?</h2>
   <p>The app carries a set of look-alike verse pairs, and offers the reader a bridge from one to
-  the other. That set was built from recurring phrases. The outside library holds a different
-  kind of look-alike — whole verses repeated, word for word, in two places — and the two sets
-  hardly overlap. <b>Should the app take the library's whole-verse pairs in, as bare verse
-  numbers and no Qur'an text, so a reader on one is offered the other?</b></p>
+  the other. That set was built from recurring phrases. There is a different kind of look-alike —
+  whole verses repeated, word for word, in two places — that the phrase-built set barely caught.
+  The question was <b>how the app should connect those whole-verse twins</b>: by taking the
+  outside library's pairs in (and reopening the copy-nothing boundary), or some other way.</p>
 
-  <h2>Why is this being asked now?</h2>
+  <h2>Why was this asked now?</h2>
   <p>The library was brought in as a ruler — a way to check the app's own numbers. Held up
-  against it, the app's look-alike set turned out to cover almost none of the library's
-  whole-verse twins. That is not a bug in either set; they were built to catch different things.
-  But it means a reader standing on one of these twins is shown nothing about the other, and the
-  measurement is what surfaced it.</p>
+  against it, the app's look-alike set turned out to cover almost none of the whole-verse twins.
+  That is not a bug in either set; they were built to catch different things. But it meant a
+  reader standing on one of these twins was shown nothing about the other, and the measurement is
+  what surfaced it.</p>
 
-  <h2>What happens if nobody decides?</h2>
-  <p>Nothing breaks. The app keeps working exactly as it does today, and the reader is simply
-  not told about these particular twins. The cost is quiet and real: these are among the hardest
-  verses to keep apart, and the bridge the app is for is precisely the one it is not offering
-  here. Nothing else is blocked behind this — it can sit open at no cost to anything else.</p>
+  <h2>What would leaving it have cost?</h2>
+  <p>Nothing would have broken — the reader would simply not be told about these particular
+  twins. But they are among the hardest verses to keep apart, and the bridge the app exists for is
+  precisely the one it was not offering here. That quiet cost is why the status quo (option A
+  below) was not chosen.</p>
 
-  <h2>What does the app do today, and what is it costing?</h2>
+  <h2>What did the app ship before, and what does it ship now?</h2>
   <div class="stat">
-    <div><div class="big">${num(S.ourEdges)}</div><div class="cap">look-alike links the app ships today</div></div>
-    <div><div class="big">${S.corpus74.oursCorroboratedPct}%</div><div class="cap">of them the outside library also knows</div></div>
-    <div><div class="big">${num(G.strongMisses)}</div><div class="cap">strong look-alikes the library has that the app lacks</div></div>
-    <div><div class="big">${num(G.verbatimMisses)}</div><div class="cap">of those scored a full word-for-word match</div></div>
+    <div><div class="big">${num(BEFORE.ourEdges)} → ${num(S.ourEdges)}</div><div class="cap">look-alike links the app ships</div></div>
+    <div><div class="big">${BEFORE.corroboratedPct}% → ${S.corpus74.oursCorroboratedPct}%</div><div class="cap">of them the outside library also knows</div></div>
+    <div><div class="big">${num(BEFORE.strongMisses)} → ${num(G.strongMisses)}</div><div class="cap">strong look-alikes the library has that the app lacks</div></div>
+    <div><div class="big">${num(BEFORE.verbatimMisses)} → ${num(G.verbatimMisses)}</div><div class="cap">of those, full word-for-word matches still unlinked</div></div>
   </div>
-  <p>The app's set and the library's set describe the same danger from two sides and meet in
-  almost none of the same pairs. The library scores <b>${num(G.verbatimMisses)}</b> pairs as a
-  full match, across <b>${num(G.versesTouched)}</b> verses. Looked at on the page, these are the
-  same verse in two places — sometimes identical throughout, sometimes with one side carrying an
-  extra word or phrase the other does not. The rest of the library's extra pairs —
-  <b>${num(G.shortNoise)}</b> of them — are short coincidences a reader would never confuse, and
-  are left out of these counts.</p>
+  <p>The whole-verse gap the ruler measured fell from <b>${num(BEFORE.verbatimMisses)}</b> to
+  <b>${num(G.verbatimMisses)}</b>. The three that remain are not twins the app is missing: held
+  glyph against glyph they each differ by at least a word — two by a single letter of spelling,
+  one by a reordered ending — so they are near-pairs, and the twin-finder is right to leave them
+  out. The library's other extra pairs — <b>${num(G.shortNoise)}</b> short coincidences a reader
+  would never confuse — are left out of these counts.</p>
 
-  <h2>What do the missing twins look like?</h2>
-  <p>Each verse below is cut straight out of the printed page, at the size the app would show it.
+  <h2>What do the twins look like, now connected?</h2>
+  <p>Each verse below is cut straight out of the printed page, at the size the app shows it.
   Nothing is retyped, and the neighbouring verses the crop catches are faded so only the verse
   itself reads clearly. <span class="swatch" style="background:rgba(63,125,67,.16);border:1px solid var(--green)"></span>
-  green means the app has confirmed, on the page, that the two verses are word for word the
-  same.</p>
+  green is the whole verse: every word is shared, so the app washes it all, which is exactly what
+  ships for these pairs now.</p>
 
   <h2>Word for word the same, in two places</h2>
-  <p>The app connects none of these today. Each pair is one verse, printed twice, pages apart.</p>
+  <p>The app now bridges every one of these, found in its own word data. Each pair is one verse,
+  printed twice, pages apart.</p>
   <div class="gallery">
 ${sameGallery}
   </div>
 
-  <h2>Nearly the same</h2>
-  <p>These resemble each other closely but are not identical. The app can show that they are
-  alike — that is what the crops below do — but it cannot mark <em>where</em> they part without
-  first working out, word by word, which word on one page answers to which on the other. The
-  library's own word numbering will not do that job: it counts a verse's words more coarsely than
-  the printed page draws them (a verse the page sets in seventeen words the library counts as
-  fifteen), so its marks would land on the wrong words. That mismatch is the whole reason the
-  last option below costs what it does.</p>
+  <h2>Nearly the same — the part still to build</h2>
+  <p>These resemble each other closely but are not identical, and marking them is what option D
+  did <em>not</em> settle. The app can show that they are alike — that is what the crops below do —
+  but it cannot mark <em>where</em> they part without first working out, word by word, which word
+  on one page answers to which on the other. The library's own word numbering will not do that
+  job: it counts a verse's words more coarsely than the printed page draws them (a verse the page
+  sets in seventeen words the library counts as fifteen), so its marks would land on the wrong
+  words. Working that alignment out on the app's own pages is the open tail of this decision.</p>
   <div class="gallery">
 ${nearGallery}
   </div>
 
   <h2>What have we already decided that touches this?</h2>
-  <p>One decision rules most of this space, and this page cannot pretend otherwise. The app
-  settled that when it leans on the outside library it <b>copies none of its bytes</b> — it
-  measures against the library and links out to it, and it turned down even copying the
-  library's bare layout numbers. Taking the library's look-alike pairs in — even as nothing but
-  verse numbers — would reopen that decision. So the real question here is narrower and more
-  honest than "should we add these pairs": it is <b>whether these twins are worth reopening the
-  copy-nothing boundary for.</b> The decision this page belongs to is recorded as related to
-  that one, in both directions.</p>
+  <p>One decision ruled most of this space. The app settled that when it leans on the outside
+  library it <b>copies none of its bytes</b> — it measures against the library and links out to
+  it, and it turned down even copying the library's bare layout numbers. Taking the library's
+  look-alike pairs in — even as nothing but verse numbers — would have reopened that decision.
+  <b>Option D was chosen precisely so it did not have to be.</b> The twins are found in the app's
+  own already-included word data, so nothing is taken from the library at all and the boundary
+  stands untouched. The two decisions are recorded as related, in both directions.</p>
   <p>A second decision settles how a look-alike is <em>shown</em> once the app has it: both
   verses cut from the page, the shared words marked, the differing words marked. Whatever is
   taken in here would flow into that display — which is what makes the word-numbering mismatch
   above a real cost and not a footnote.</p>
 
-  <h2>So what are the options?</h2>
+  <h2>So what were the options?</h2>
   <ul class="options">
     <li>
-      <div><span class="lbl">A — Leave the set as it is.</span> <span class="tag">status quo</span></div>
+      <div><span class="lbl">A — Leave the set as it is.</span> <span class="tag">status quo · not chosen</span></div>
       <p>Keep the copy-nothing boundary whole. The app connects the look-alikes it built itself
-      and stays silent about the library's twins. Costs nothing to build; the
-      ${num(G.verbatimMisses)} twins above stay unconnected.</p>
+      and stays silent about the twins. Costs nothing to build; the ${num(BEFORE.verbatimMisses)}
+      whole-verse twins stay unconnected — which is exactly the bridge the app exists to build.</p>
     </li>
     <li>
-      <div><span class="lbl">B — Take in the pair numbers only, and show a whole-verse resemblance.</span></div>
+      <div><span class="lbl">B — Take in the pair numbers only, and show a whole-verse resemblance.</span> <span class="tag">not chosen</span></div>
       <p>Bring in the library's twins as bare verse-number pairs — no Qur'an text, no fonts, no
       layout. A reader on one twin is offered the other, drawn from the app's own printed pages.
-      Reopens the copy-nothing boundary the smallest amount that closes the gap. What it does not
-      give: the word-by-word green/yellow marking, because the library's word numbers do not line
-      up with the print, so the app would show that these two resemble each other without marking
-      where they part.</p>
+      Reopens the copy-nothing boundary the smallest amount that would close the gap — but reopens
+      it, and does not give the word-by-word marking.</p>
     </li>
     <li>
-      <div><span class="lbl">C — Take in the pairs and align the words ourselves.</span></div>
-      <p>As B, plus the app works out the word-by-word correspondence on its own printed pages,
-      so the shared-and-differing marking works on these twins exactly as it does on the ones the
-      app built itself. Full parity with the existing display; the most work, and the marking has
-      to be checked by eye where a verse's word count differs between the page and the library.</p>
+      <div><span class="lbl">C — Take in the pairs and align the words ourselves.</span> <span class="tag">not chosen</span></div>
+      <p>As B, plus the app works out the word-by-word correspondence on its own printed pages.
+      Full parity with the existing display; the most work; and still reopens the boundary, because
+      the pairs themselves would come from the library.</p>
+    </li>
+    <li style="border-left:3px solid var(--green);">
+      <div><span class="lbl">D — Find the twins in the app's own word data; use the library only to check the set.</span> <span class="tag">chosen</span></div>
+      <p>The app never takes the library's pairs in at all. It groups its own already-included
+      words by their skeleton, at build time, and any two verses that match in full are twins — the
+      same per-word comparison the app already uses for the pairs it built itself. Only verse
+      numbers are written out; no Qur'an text ships. The library is then held up beside the result
+      and agrees almost exactly — 636 pairs found against its 635 — which is what tells us the set
+      is complete rather than lucky. Because every word of a twin is shared, the existing
+      green marking washes the whole verse with nothing left to build. This is the only option that
+      connects the twins <b>without</b> reopening the copy-nothing boundary, and it costs less than
+      B, not more.</p>
     </li>
   </ul>
 
   <h2>What else could be considered, and why is it not here?</h2>
-  <p>The app could try to find these twins itself, without the library at all. It cannot: the app
-  ships no Qur'an text — only anonymous page artwork and numbers — so it has nothing to compare
-  word against word. Finding whole-verse twins needs a text-bearing collection computed
-  somewhere else, and the library is one. Copying the library's verified text and fonts in
-  wholesale was considered when the boundary was first drawn and turned down; it is not revived
-  here.</p>
+  <p>Finding these twins without the library at all was, in an earlier draft, written off as the
+  one thing the app could not do — "it ships no Qur'an text, only page artwork and numbers, so it
+  has nothing to compare word against word." That was true of what the app <em>ships</em> and
+  false of what it <em>builds from</em>: the verified words it needs have been present at build
+  time all along, read to make other things and never shipped. The dismissed option turned out to
+  be the available one, and it is the one that was chosen. Copying the library's verified text and
+  fonts in wholesale was weighed when the boundary was first drawn and turned down; it is not
+  revived here.</p>
 
   <h2>What would change the answer?</h2>
-  <p>If the app ever gained a text-bearing collection of its own — for any other reason — the
-  twins could be computed in-house and the boundary would not need reopening at all. If the
-  word-by-word alignment turns out cheap and reliable, C stops being expensive relative to B, and
-  the choice collapses to "reopen the boundary or not."</p>
+  <p>The choice rests on the build-time word data being present and trustworthy. If it were ever
+  removed, the in-house finder would go with it and the question would revert to A/B/C — the
+  library's pairs, and the boundary. If the library and the in-house set ever disagreed on which
+  verses are whole-verse twins, that disagreement would be the signal to look again; today they
+  agree to within a pair.</p>
 
   <h2>What is this not settling?</h2>
-  <p>Not whether a verse should announce on the page you are reading that it resembles others —
-  that is a separate question about the reading surface. Not the exact shape the imported numbers
-  would take. And not the copy-nothing boundary in general: this asks only whether these twins
-  are the exception worth making, not whether the boundary was right.</p>
+  <p>Not the word-by-word marking of the near-pairs above — that needs a per-word alignment worked
+  out on the app's own pages, and is the open tail of this decision. Not whether a verse should
+  announce on the page you are reading that it resembles others — a separate question about the
+  reading surface. And option D was chosen precisely so the copy-nothing boundary did not have to
+  be touched at all.</p>
 
   <footer>
     <p>Built by <code>scripts/build-similar-ayah-gap.mjs</code> over the checked-in measurement
