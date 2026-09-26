@@ -13,12 +13,14 @@ export const TOOL_KEYS: Readonly<Record<string, PageTool>> = {
   KeyV: "select",
   KeyH: "highlight",
   KeyB: "bookmark",
+  KeyN: "note",
 };
 
 const TOOLS: ReadonlyArray<{ tool: PageTool; letter: string }> = [
   { tool: "select", letter: "V" },
   { tool: "highlight", letter: "H" },
   { tool: "bookmark", letter: "B" },
+  { tool: "note", letter: "N" },
 ];
 
 interface PageToolbarProps {
@@ -30,7 +32,8 @@ interface PageToolbarProps {
 /**
  * The bar of page tools above the mus'haf on a computer — step 1 of
  * docs/design/page-toolbar-plan.md: select, highlight and bookmark, the three
- * tools that already existed behind a press-and-hold and a corner button.
+ * tools that already existed behind a press-and-hold and a corner button — and
+ * step 2's note, which pins the reader's words to a word on the page.
  *
  * One tab stop, arrow keys along it (the ARIA toolbar pattern), and the tools
  * are radios because exactly one is on at a time. The name of the tool that is
@@ -43,8 +46,7 @@ interface PageToolbarProps {
 export function PageToolbar({ tool, onTool }: PageToolbarProps): JSX.Element {
   const { t } = useT();
   const buttons = useRef<Array<HTMLButtonElement | null>>([]);
-  const nameOf = (x: PageTool) =>
-    x === "select" ? t.toolSelect : x === "highlight" ? t.toolHighlight : t.toolBookmark;
+  const nameOf = (x: PageTool) => toolName(t, x);
 
   // Arrow keys move focus along the bar and pick the tool they land on, as
   // arrows do in any radio group. The bar is laid out in reading order, so in
@@ -97,10 +99,21 @@ export function PageToolbar({ tool, onTool }: PageToolbarProps): JSX.Element {
           polite announcer the app has — a second live region here would talk
           over it. */}
       <span className={styles.name}>
-        {tool === "bookmark" ? t.toolBookmarkHint : t.toolOn(nameOf(tool))}
+        {tool === "bookmark" ? t.toolBookmarkHint : tool === "note" ? t.toolNoteHint : t.toolOn(nameOf(tool))}
       </span>
     </div>
   );
+}
+
+/** A tool's spoken name. App says the same name when a tool is switched on. */
+export function toolName(t: ReturnType<typeof useT>["t"], x: PageTool): string {
+  return x === "select"
+    ? t.toolSelect
+    : x === "highlight"
+      ? t.toolHighlight
+      : x === "bookmark"
+        ? t.toolBookmark
+        : t.toolNote;
 }
 
 function ToolIcon({ tool }: { tool: PageTool }): JSX.Element {
@@ -126,6 +139,13 @@ function ToolIcon({ tool }: { tool: PageTool }): JSX.Element {
       <svg {...common}>
         <path d="M14.5 4.5l5 5L10 19H5v-5z" />
         <path d="M4 22h16" />
+      </svg>
+    );
+  if (tool === "note")
+    return (
+      <svg {...common}>
+        <path d="M12 21s-6-5.6-6-10.5a6 6 0 0 1 12 0C18 15.4 12 21 12 21z" />
+        <circle cx="12" cy="10.5" r="2" />
       </svg>
     );
   return (

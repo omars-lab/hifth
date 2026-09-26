@@ -50,6 +50,21 @@ export {
   type SurahGroup,
 } from "./bookmarks.js";
 
+// Notes — the reader's words pinned to a word on the page, carried in the same
+// saved file as the bookmarks (decisions note-persistence, note-export-shape).
+export {
+  NOTE_TEXT_MAX,
+  addNote,
+  editNote,
+  isNote,
+  mergeNotes,
+  notesOnPage,
+  removeNote,
+  restoreNote,
+  type Note,
+  type NoteKind,
+} from "./notes.js";
+
 export {
   WordIndex,
   isWordShard,

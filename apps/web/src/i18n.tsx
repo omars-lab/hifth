@@ -604,6 +604,18 @@ export interface Strings {
   /** The tool that is on, named: printed on the bar and announced. */
   toolOn(name: string): string;
   toolBookmarkHint: string;
+  toolNote: string;
+  toolNoteHint: string;
+  /** A note's pin, named by its verse. */
+  notePin(label: string): string;
+  /** The box a note is typed in, named by its verse. */
+  noteBox(label: string): string;
+  noteDone: string;
+  noteDelete: string;
+  noteSaved: string;
+  noteDeleted: string;
+  noteRestored: string;
+  noteLoaded(n: number): string;
 }
 
 /** The reader's own calendar day for a moment, as the `YYYY-MM-DD` `longDay` reads. */
@@ -1024,6 +1036,16 @@ export function buildStrings(lang: Lang, m: Catalog): Strings {
     toolBookmark: m.toolBookmark,
     toolOn: (name) => m.toolOn({ name }),
     toolBookmarkHint: m.toolBookmarkHint,
+    toolNote: m.toolNote,
+    toolNoteHint: m.toolNoteHint,
+    notePin: (label) => m.notePin({ label }),
+    noteBox: (label) => m.noteBox({ label }),
+    noteDone: m.noteDone,
+    noteDelete: m.noteDelete,
+    noteSaved: m.noteSaved,
+    noteDeleted: m.noteDeleted,
+    noteRestored: m.noteRestored,
+    noteLoaded: (count) => m.noteLoaded({ n: count, nText: n(count) }),
   };
 }
 
