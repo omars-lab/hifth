@@ -1,7 +1,19 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { PackPlan } from "@hifth/core";
 import { PACK_CACHE } from "./packs.js";
-import { loadPageSvg, loadShard, packUrls, pageUrl, shardUrl } from "./assets.js";
+import {
+  letterShardUrl,
+  loadLetterShard,
+  loadMarkShard,
+  loadPageSvg,
+  loadShard,
+  loadWordShard,
+  markShardUrl,
+  packUrls,
+  pageUrl,
+  shardUrl,
+  wordShardUrl,
+} from "./assets.js";
 
 /*
  * Two things are asserted here and nothing else: that a pinned file is served
@@ -99,5 +111,24 @@ describe("packUrls", () => {
     const lastPage = urls.lastIndexOf(pageUrl(EDITION, 583));
     const firstShard = urls.indexOf(shardUrl(EDITION, 78));
     expect(lastPage).toBeLessThan(firstShard);
+  });
+
+  it("carries each page's words, marks and letters, so the tools work on a pinned page", async () => {
+    const urls = packUrls(EDITION, plan);
+    for (const page of plan.pages) {
+      for (const url of [wordShardUrl(EDITION, page), markShardUrl(EDITION, page), letterShardUrl(EDITION, page)]) {
+        expect(urls).toContain(url);
+        pinned.set(url, new Response(`{"page":${page}}`));
+      }
+    }
+    offline();
+    await expect(loadWordShard(EDITION, 582)).resolves.toEqual({ page: 582 });
+    await expect(loadMarkShard(EDITION, 582)).resolves.toEqual({ page: 582 });
+    await expect(loadLetterShard(EDITION, 583)).resolves.toEqual({ page: 583 });
+  });
+
+  it("brings the tools' data after the hops, so reading is never held up for it", () => {
+    const urls = packUrls(EDITION, plan);
+    expect(urls.indexOf(shardUrl(EDITION, 79))).toBeLessThan(urls.indexOf(wordShardUrl(EDITION, 582)));
   });
 });
