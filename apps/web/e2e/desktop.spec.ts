@@ -775,6 +775,31 @@ test.describe("Hifth · the page bar at desktop", () => {
       "the slider is bounded but not centred under the book",
     ).toBeLessThan(barBox.width * 0.1);
   });
+
+  test("the knob moves with the magnifier, and holds still under the mouse", async ({ page }) => {
+    // The magnifier spreads the marks near the mouse; the knob and the page mark
+    // used to stay put, so near the knob they sat off the marks around them.
+    await page.goto("/#/hafs-kfqc/p106");
+    await expect(spread(page)).toBeVisible();
+    const knob = page.getByTestId("page-handle");
+    const here = page.getByTestId("page-here");
+    const centre = async (l: typeof knob) => {
+      const b = await boxOf(l);
+      return { x: b.x + b.width / 2, y: b.y + b.height / 2 };
+    };
+    const rest = await centre(knob);
+    const restHere = (await centre(here)).x;
+
+    // Right on the knob: the magnifier leaves the point under the mouse alone.
+    await page.mouse.move(rest.x, rest.y);
+    expect(Math.abs((await centre(knob)).x - rest.x), "the knob ran from the mouse").toBeLessThan(1);
+
+    // Beside it: the knob is pushed away, and the page mark goes with it.
+    await page.mouse.move(rest.x + 6, rest.y);
+    const moved = (await centre(knob)).x - rest.x;
+    expect(moved, "the knob stayed put while the marks around it spread").toBeLessThan(-10);
+    expect(Math.abs((await centre(here)).x - restHere - moved), "the knob left its page mark").toBeLessThan(1);
+  });
 });
 
 /*
