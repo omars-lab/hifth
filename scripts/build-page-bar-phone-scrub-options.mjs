@@ -1,0 +1,408 @@
+#!/usr/bin/env node
+/**
+ * Builds the page for one open question — `phone-scrub`: on a phone, with no
+ * hover and so no magnifier, how does a thumb land on one exact page of 604? —
+ * step 5 of docs/design/page-bar-zoom-plan.md.
+ *
+ * A build-to-choose page with the four options mounted live, one phone-sized bar
+ * each, so the reader chooses by dragging (mouse or finger), not by reading.
+ * Nothing on it is typed in twice:
+ *
+ *   - the 30 juz opening pages come from `apps/web/public/assets/manifest.json`
+ *     (`ayahPages`) and the juz table in `@hifth/core`, as the app reads them;
+ *   - the speeds and the drag step are `scrubRateSlowAway`, `scrubAdvance` and
+ *     `APPLE_SCRUB_BANDS` from core, the strip's zoom is `stripPxPerPage`, and
+ *     which page marks the strip draws is the desktop magnifier's own
+ *     `pageTickStep` with its `minTickGapPx` — all inlined by `.toString()` from
+ *     the compiled core, so the page runs what the unit tests check;
+ *   - the knob width is read out of `PageSlider.module.css`.
+ *
+ * One output, `docs/design/page-bar-phone-scrub-options.html`, inline throughout.
+ * The page carries no Arabic codepoints and the script refuses to write if any
+ * slip in. Registered in docs/decisions.json as `builtBy` for `phone-scrub`; the
+ * reasons live in docs/decisions/page-bar-phone-scrub.md.
+ */
+import { readFileSync, writeFileSync } from "node:fs";
+import { join } from "node:path";
+import { ROOT } from "./code-pointers.mjs";
+
+const MANIFEST = join(ROOT, "apps/web/public/assets/manifest.json");
+const CORE = join(ROOT, "packages/core/dist/index.js");
+const SLIDER_CSS = join(ROOT, "apps/web/src/components/PageSlider.module.css");
+const PAGE = join(ROOT, "docs/design/page-bar-phone-scrub-options.html");
+
+function die(msg) {
+  console.error(`build-page-bar-phone-scrub-options: ${msg}`);
+  process.exit(1);
+}
+
+// ------------------------------------------------------------------- the data
+
+const core = await import(CORE);
+const {
+  JUZ_STARTS,
+  AYAH_COUNTS,
+  SCRUB_STRATEGIES,
+  APPLE_SCRUB_BANDS,
+  scrubRateSlowAway,
+  scrubAdvance,
+  stripPxPerPage,
+  pageTickStep,
+  pageBarFocus,
+} = core;
+if (!SCRUB_STRATEGIES) die("core has no SCRUB_STRATEGIES — run the core build first");
+
+const manifest = JSON.parse(readFileSync(MANIFEST, "utf8"));
+const ayahPages = manifest.ayahPages;
+const TOTAL = Math.max(...ayahPages);
+
+const globalIndex = (surah, ayah) => {
+  let n = 0;
+  for (let i = 0; i < surah - 1; i++) n += AYAH_COUNTS[i];
+  return n + ayah - 1;
+};
+const JUZ_PAGES = JUZ_STARTS.map(([surah, ayah]) => ayahPages[globalIndex(surah, ayah)]);
+
+const THUMB = (() => {
+  const m = readFileSync(SLIDER_CSS, "utf8").match(/--thumb:\s*(\d+(?:\.\d+)?)px/);
+  return m ? Number(m[1]) : 22;
+})();
+
+const OPTIONS = SCRUB_STRATEGIES.map(({ id, label, slows, tickStrip }) => ({ id, label, slows, tickStrip }));
+const STRIP_MAGNIFY = 5;
+const MIN_TICK_GAP = pageBarFocus.minTickGapPx;
+
+// A 360px phone: 12px padding each side, a 44px page-turn button at each end
+// and 8px gaps leave the track 232px, as the real bar lays out.
+const PHONE_W = 360;
+const TRACK_W = PHONE_W - 2 * 12 - 2 * 44 - 2 * 8;
+
+const BLURB = {
+  A: "The knob stays under your thumb. One pixel of thumb is about three pages, so landing on one exact page takes a steady hand or a tap on the page-turn buttons afterwards.",
+  B: "Drag along the bar as usual. To go finer, keep dragging but slide your thumb up the page: half speed from a thumb's width up, then a quarter, then a tenth. Come back down and the knob returns under your thumb.",
+  C: "Full speed, as today, but a strip above your thumb shows the pages around the knob, with every 5th page marked and the juz openings named, so you can see how close you are.",
+  D: "Slide up to slow down, and the strip zooms in as you do: every 5th page at full and half speed, single pages from a quarter speed on.",
+};
+
+// ------------------------------------------------------------------- the page
+
+const html = `<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Page bar on a phone — landing on one page</title>
+<style>
+  :root {
+    --paper: #fbf7ef; --paper-raised: #f4ecdd; --ink: #2b2620; --ink-soft: #6b6055;
+    --ink-faint: #9a8f80; --hairline: #e4d8c4; --accent: #3f7d5f; --accent-strong: #2f5f47;
+    --accent-tint: #e7f0ea; --highlight: #c98a2b;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper: #1d1b18; --paper-raised: #26231f; --ink: #eee6d8; --ink-soft: #bfb3a2;
+      --ink-faint: #8d8274; --hairline: #3b362f; --accent: #6fb08e; --accent-strong: #8fcaa9;
+      --accent-tint: #243229; --highlight: #e0a64c;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--paper); color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    line-height: 1.5; -webkit-font-smoothing: antialiased; }
+  .wrap { max-width: 1560px; margin: 0 auto; padding: 32px 16px 96px; }
+  .prose { max-width: 760px; }
+  h1 { font-size: 1.7rem; color: var(--accent-strong); margin: 0 0 4px; }
+  .sub { color: var(--ink-soft); margin: 0 0 24px; }
+  h2 { font-size: 1.15rem; margin: 34px 0 10px; }
+  p, li { margin: 0 0 10px; }
+  .glossary { background: var(--paper-raised); border: 1px solid var(--hairline); border-radius: 8px; padding: 14px 18px; margin: 0 0 20px; font-size: 0.92rem; }
+  .glossary b { color: var(--accent-strong); }
+  .open { background: var(--accent-tint); border-color: var(--accent); }
+  .phones { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(${PHONE_W}px, 100%), 1fr)); gap: 28px 20px; margin: 18px 0 8px; justify-items: center; }
+  .opt { width: 100%; max-width: ${PHONE_W}px; }
+  .opt h3 { font-size: 1rem; margin: 0 0 4px; }
+  .opt .what { font-size: 0.86rem; color: var(--ink-soft); min-height: 6.2em; margin: 0 0 10px; }
+  .phone { position: relative; width: 100%; border: 1px solid var(--hairline); border-radius: 22px; overflow: hidden; background: var(--paper); box-shadow: 0 8px 30px rgba(0,0,0,0.08); user-select: none; -webkit-user-select: none; }
+  .pageArea { height: 300px; position: relative; border-bottom: 1px solid var(--hairline);
+    background: repeating-linear-gradient(0deg, transparent 0 14px, rgba(107,96,85,0.07) 14px 15px), var(--paper); }
+  .pageArea .standin { position: absolute; inset: 0 0 auto; display: grid; place-items: center; color: var(--ink-faint); font-size: 0.8rem; font-style: italic; text-align: center; padding: 18px 30px 0; }
+  .guides { position: absolute; left: 0; right: 0; bottom: 0; pointer-events: none; opacity: 0; transition: opacity .15s; }
+  .dragging .guides { opacity: 1; }
+  .guide { position: absolute; left: 0; right: 0; border-top: 1px dashed var(--hairline); font-size: 10px; color: var(--ink-faint); padding: 1px 8px; text-align: right; }
+  .bar { display: grid; grid-template-columns: 44px 1fr 44px; align-items: center; gap: 4px 8px; padding: 4px 12px 8px; background: var(--paper-raised); direction: rtl; }
+  .edge { display: grid; place-items: center; height: 44px; border: 0; background: none; color: var(--ink-soft); font: inherit; font-size: 1rem; cursor: pointer; }
+  .track { position: relative; height: 44px; touch-action: none; cursor: pointer; }
+  .rail { position: absolute; left: ${THUMB / 2}px; right: ${THUMB / 2}px; top: 50%; height: 4px; margin-top: -2px; border-radius: 2px; background: var(--hairline); }
+  .fill { position: absolute; right: ${THUMB / 2}px; top: 50%; height: 4px; margin-top: -2px; border-radius: 2px; background: var(--accent); }
+  .cut { position: absolute; top: 50%; width: 2px; height: 10px; margin: -5px 0 0 -1px; background: var(--paper-raised); }
+  .knob { position: absolute; top: 50%; width: ${THUMB}px; height: ${THUMB}px; margin: -${THUMB / 2}px 0 0 -${THUMB / 2}px; border-radius: 50%; background: var(--paper); border: 2px solid var(--accent-strong); box-shadow: 0 1px 3px rgba(0,0,0,0.3); pointer-events: none; }
+  .dragging .knob { transform: scale(1.15); }
+  .readout { position: absolute; pointer-events: none; transform: translate(-50%, -100%); background: var(--ink); color: var(--paper); border-radius: 8px; padding: 4px 10px; font-size: 0.85rem; white-space: nowrap; display: none; text-align: center; line-height: 1.3; }
+  .readout small { display: block; opacity: 0.75; font-size: 0.72rem; }
+  .dragging .readout { display: block; }
+  .strip { position: absolute; pointer-events: none; height: 46px; width: 300px; transform: translateX(-50%); background: var(--paper-raised); border: 1px solid var(--hairline); border-radius: 8px; overflow: hidden; display: none; box-shadow: 0 6px 18px rgba(0,0,0,0.12); }
+  .dragging .strip { display: block; }
+  .strip i { position: absolute; bottom: 0; width: 1px; background: var(--ink-faint); }
+  .strip i.five { background: var(--ink-soft); }
+  .strip i.juz { width: 2px; background: var(--accent); }
+  .strip b { position: absolute; top: 3px; font-size: 9px; font-weight: 600; color: var(--ink-soft); transform: translateX(-50%); white-space: nowrap; }
+  .strip b.juz { color: var(--accent-strong); font-weight: 700; }
+  .strip .here { position: absolute; top: 0; bottom: 0; left: 50%; width: 2px; margin-left: -1px; background: var(--highlight); }
+  .inventory { grid-column: 1 / -1; text-align: center; color: var(--ink-soft); font-size: 11px; direction: ltr; }
+  .task { font-size: 0.88rem; margin: 10px 0 0; display: flex; gap: 8px; align-items: baseline; flex-wrap: wrap; }
+  .task b { color: var(--accent-strong); }
+  .task button { font: inherit; font-size: 0.8rem; border: 1px solid var(--hairline); background: var(--paper-raised); color: var(--ink); border-radius: 999px; padding: 2px 10px; cursor: pointer; }
+  .result { font-size: 0.85rem; color: var(--ink-soft); min-height: 1.4em; }
+  .result.hit { color: var(--accent-strong); font-weight: 600; }
+  table { border-collapse: collapse; font-size: 0.9rem; margin: 6px 0 14px; }
+  th, td { border-bottom: 1px solid var(--hairline); padding: 6px 10px; text-align: left; vertical-align: top; }
+  th { color: var(--ink-soft); font-weight: 600; }
+  a { color: var(--accent-strong); }
+</style>
+</head>
+<body>
+<div class="wrap">
+ <div class="prose">
+  <h1>On a phone, how do you land on one exact page?</h1>
+  <p class="sub">Four ways to drag the page bar, each one live below. Drag the round knob with your thumb on a phone, or with the mouse on a computer.</p>
+
+  <div class="glossary open"><b>Still open.</b> Nothing here is in the app yet; today's phone bar is option A. The one the owner picks is the one that gets built into the bar.</div>
+
+  <div class="glossary">
+    <b>The page bar</b>: the strip along the bottom of the app that you drag through all ${TOTAL} pages, with a page-turn button at each end.
+    &nbsp;·&nbsp; <b>The knob</b>: the round handle you drag along it.
+    &nbsp;·&nbsp; <b>Juz</b>: one of the thirty roughly equal parts of the book; the bar is cut into thirty segments, one per juz.
+    &nbsp;·&nbsp; <b>The magnifier</b>: on a computer, the stretch of bar under the mouse spreads apart so single pages can be told apart. A phone has no mouse to hover with, so it never appears there.
+  </div>
+
+  <h2>What is being decided?</h2>
+  <p>On a phone the bar is about ${TRACK_W} pixels across for ${TOTAL} pages, so one pixel of thumb movement is about three pages. The question is what, if anything, should help a thumb stop on the page it wants.</p>
+
+  <h2>Why ask now?</h2>
+  <p>The computer got its magnifier this week, with single-page marks under the mouse. The phone, where a fat finger needs the help most, got nothing, because the magnifier works by hovering. The plan for the magnifier left the phone as its last step, to be tried by hand and chosen, not slipped in.</p>
+
+  <h2>What happens if nobody decides?</h2>
+  <p>Nothing breaks. The phone keeps option A: drag close, let go, then step with the page-turn buttons or type the page number. It works; it is just slow for a precise landing.</p>
+ </div>
+
+  <h2>Try each one</h2>
+  <p class="prose">Each bar gives you a page to aim for. Drag, let go, and it tells you how far off you landed. The dashed lines above the bar, shown while dragging, are where options B and D change speed.</p>
+  <div class="phones" id="phones"></div>
+
+ <div class="prose">
+  <h2>How do the four compare?</h2>
+  <table>
+    <tr><th></th><th>What you gain</th><th>What it costs</th><th>What it commits us to</th></tr>
+    <tr><td><b>A · today</b></td><td>Nothing new to learn; nothing to build.</td><td>An exact page usually takes a second step: the page-turn buttons or typing the number.</td><td>The phone stays the one place with no help landing on a page.</td></tr>
+    <tr><td><b>B · slide away to slow</b></td><td>Exact pages with a thumb, and nothing extra drawn over the page. Anyone who has scrubbed a video on an iPhone has met it.</td><td>Nobody finds it without being told. With nothing on screen saying why, the knob drifting away from the thumb can look broken.</td><td>Needs a way to be discovered: a line in the tutorial, or the speed shown in the readout (as it is here).</td></tr>
+    <tr><td><b>C · strip of page marks</b></td><td>You can see how close you are, and where each juz opens, without learning anything.</td><td>At full speed the strip races by, since one thumb pixel is still three pages. It shows the problem more than it solves it. It also covers part of the page while you drag.</td><td>A second thing drawn over the page during every drag.</td></tr>
+    <tr><td><b>D · both</b></td><td>The strip explains the slowing: it zooms in as you slide up, so the change is visible, not only felt.</td><td>The most to build, and the busiest while dragging.</td><td>Both of the above, and both have to be kept working together.</td></tr>
+  </table>
+
+  <h2>What do other apps do?</h2>
+  <ul>
+    <li><b>Apple's own players</b> (music, podcasts, video) slow the scrub as you slide your finger up: half, a quarter, then a tenth speed, and the knob rushes back under your finger as you return to the bar. Option B copies those speeds and heights exactly, from a detailed rebuild of the behaviour: <a href="https://arthurhammer.de/2020/03/uislider-with-scrubbing-speeds/">UISlider with scrubbing speeds</a>; also <a href="https://www.howtogeek.com/254608/how-to-scrub-through-audio-and-video-slowly-in-ios/">how it behaves for a user</a>.</li>
+    <li><b>Video apps with chapters</b> show a preview above the finger while scrubbing. That is the idea behind the strip in C.</li>
+    <li><b>Qur'an apps</b>: we did not look again for this question. The look at the magnifier found list-and-jump menus rather than bars that help you land.</li>
+  </ul>
+
+  <h2>What have we already decided that this has to respect?</h2>
+  <ul>
+    <li>The bar's look: a thin track cut into thirty juz, with a round knob.</li>
+    <li>The magnifier on a computer, with page marks drawn only where they have room. The strip in C and D uses the same rule for which marks to draw.</li>
+    <li>A juz mark is a button, and the drag itself never snaps to a juz. Nothing here changes that.</li>
+  </ul>
+
+  <h2>What else was considered?</h2>
+  <ul>
+    <li><b>Press and hold to magnify the bar in place</b>, like the computer's magnifier. Under a thumb you cannot see the marks you are spreading apart, so the strip (C) is the same idea moved to where you can see it.</li>
+    <li><b>A wheel of page numbers</b>, like a date picker. It lands exactly, but it is a different control. The app already has a page-number box for typing.</li>
+    <li><b>Snap to every 5th page while dragging</b>. It is precise to five, not to one, and it fights the rule that the drag itself never snaps.</li>
+  </ul>
+
+  <h2>What would change the answer?</h2>
+  <p>Trying these on a real phone. Whether sliding up feels natural or awkward, and whether the strip helps or gets in the way, only show up under a real thumb. A mouse on this page is a fair first try, but not the test. If readers rarely want an exact page from the bar, and mostly step with the buttons once they are close, A is enough.</p>
+
+  <h2>What is this not settling?</h2>
+  <ul>
+    <li>The computer: the magnifier stays as it is.</li>
+    <li>The exact speeds and heights. B and D use Apple's, and they can be tuned once one is chosen.</li>
+    <li>How a new reader learns about sliding up. That comes with the tutorial, if B or D wins.</li>
+  </ul>
+ </div>
+
+<script>
+(function(){
+  var TOTAL = ${TOTAL};
+  var JUZ = ${JSON.stringify(JUZ_PAGES)};
+  var THUMB = ${THUMB};
+  var TRACK_W = ${TRACK_W};
+  var BANDS = ${JSON.stringify(APPLE_SCRUB_BANDS)};
+  var OPTIONS = ${JSON.stringify(OPTIONS)};
+  var BLURB = ${JSON.stringify(BLURB)};
+  var MAGNIFY = ${STRIP_MAGNIFY};
+  var MIN_GAP = ${MIN_TICK_GAP};
+
+  // The shipped option logic, inlined from the compiled core.
+  ${scrubRateSlowAway.toString()}
+  ${scrubAdvance.toString()}
+  ${stripPxPerPage.toString()}
+  ${pageTickStep.toString()}
+
+  var SPAN = TRACK_W - THUMB;
+  var BAR_PX_PER_PAGE = SPAN / (TOTAL - 1);
+  // The bar runs right to left: page 1 at the right end.
+  function pxOfPage(p){ return (1 - (p - 1) / (TOTAL - 1)) * SPAN + THUMB / 2; }
+  function pageFloatAt(px){ return (1 - (px - THUMB / 2) / SPAN) * (TOTAL - 1) + 1; }
+  function clampPx(px){ return Math.max(THUMB / 2, Math.min(TRACK_W - THUMB / 2, px)); }
+  function juzOf(p){ var j = 1; for (var i = 0; i < JUZ.length; i++) if (JUZ[i] <= p) j = i + 1; return j; }
+  var SPEED = { "1": "full speed", "0.5": "half speed", "0.25": "quarter speed", "0.1": "tenth speed" };
+  function randomTarget(){
+    for (;;) { var p = 20 + Math.floor(Math.random() * (TOTAL - 40)); if (JUZ.indexOf(p) < 0) return p; }
+  }
+  function el(tag, cls, parent){ var e = document.createElement(tag); if (cls) e.className = cls; if (parent) parent.appendChild(e); return e; }
+
+  function mount(opt){
+    var box = el("section", "opt", document.getElementById("phones"));
+    box.dataset.opt = opt.id;
+    el("h3", "", box).textContent = opt.id + " · " + opt.label;
+    el("p", "what", box).textContent = BLURB[opt.id];
+    var phone = el("div", "phone", box);
+    var area = el("div", "pageArea", phone);
+    el("div", "standin", area).textContent = "the mus'haf page (a stand-in: no scripture on a public page)";
+    var guides = el("div", "guides", area);
+    if (opt.slows) {
+      BANDS.forEach(function(b){
+        if (b.fromPx === 0) return;
+        var g = el("div", "guide", guides);
+        g.style.bottom = (b.fromPx - 4) + "px"; // the track sits 4px below the page area
+        g.textContent = SPEED[String(b.rate)] + " above here";
+      });
+    }
+    var bar = el("div", "bar", phone);
+    var next = el("button", "edge", bar); next.textContent = "\\u25B8"; next.setAttribute("aria-label", "previous page");
+    var track = el("div", "track", bar);
+    var prev = el("button", "edge", bar); prev.textContent = "\\u25C2"; prev.setAttribute("aria-label", "next page");
+    el("span", "inventory", bar).textContent = TOTAL + " pages";
+    // A screen narrower than the drawn phone squeezes the track; measure it.
+    TRACK_W = track.clientWidth || TRACK_W; SPAN = TRACK_W - THUMB; BAR_PX_PER_PAGE = SPAN / (TOTAL - 1);
+    el("div", "rail", track);
+    var fill = el("div", "fill", track);
+    JUZ.slice(1).forEach(function(p){ el("span", "cut", track).style.left = pxOfPage(p) + "px"; });
+    var knob = el("span", "knob", track);
+    var readout = el("div", "readout", phone);
+    var strip = opt.tickStrip ? el("div", "strip", phone) : null;
+    var task = el("p", "task", box);
+    var result = el("p", "result", box);
+
+    var pos = pxOfPage(100), target = randomTarget(), tries = 0, drag = null;
+    function setTask(){ task.innerHTML = "Try it: land on page <b>" + target + "</b> <button type=button>another page</button>"; tries = 0; result.textContent = ""; result.className = "result"; }
+    task.addEventListener("click", function(e){ if (e.target.tagName === "BUTTON") { target = randomTarget(); setTask(); } });
+    setTask();
+
+    function page(){ return Math.round(pageFloatAt(pos)); }
+    function offOf(e){ var r = track.getBoundingClientRect(); return Math.max(0, r.top - e.clientY); }
+
+    function paint(e, rate){
+      knob.style.left = pos + "px";
+      fill.style.left = pos + "px";
+      if (!drag) return;
+      var pr = phone.getBoundingClientRect();
+      var fx = e.clientX - pr.left, fy = e.clientY - pr.top;
+      var p = page();
+      readout.innerHTML = "Page " + p + " · Juz " + juzOf(p) + (opt.slows ? "<small>" + SPEED[String(rate)] + "</small>" : "");
+      var bx = Math.max(60, Math.min(pr.width - 60, fx));
+      var by = Math.max(opt.tickStrip ? 110 : 48, fy - 36);
+      readout.style.left = bx + "px"; readout.style.top = by + "px";
+      if (strip) {
+        strip.style.left = Math.max(152, Math.min(pr.width - 152, fx)) + "px";
+        strip.style.top = (by - 46 - 62) + "px";
+        drawStrip(pageFloatAt(pos), rate);
+      }
+    }
+
+    function drawStrip(cur, rate){
+      strip.innerHTML = "";
+      var ppp = stripPxPerPage(BAR_PX_PER_PAGE, rate, MAGNIFY);
+      var step = pageTickStep(ppp, MIN_GAP) || 10;
+      var half = 150 / ppp;
+      var labels = [];
+      for (var p = Math.max(1, Math.ceil(cur - half)); p <= Math.min(TOTAL, Math.floor(cur + half)); p++) {
+        var isJuz = JUZ.indexOf(p) >= 0;
+        if (p % step !== 0 && !isJuz) continue;
+        var x = 150 - (p - cur) * ppp;
+        var t = el("i", isJuz ? "juz" : p % 5 === 0 ? "five" : "", strip);
+        t.style.left = x + "px";
+        t.style.height = isJuz ? "30px" : p % 5 === 0 ? "14px" : "8px";
+        if (isJuz) labels.push({ x: x, w: 36, text: "Juz " + (JUZ.indexOf(p) + 1), cls: "juz", rank: 0 });
+        else if (p % 5 === 0) labels.push({ x: x, w: 20, text: String(p), cls: "", rank: 1 });
+      }
+      // The magnifier's overlap rule: juz names first, then page numbers, nearer
+      // the knob first; a label that would touch one already placed is dropped.
+      labels.sort(function(a, b){ return a.rank - b.rank || Math.abs(a.x - 150) - Math.abs(b.x - 150); });
+      var placed = [];
+      labels.forEach(function(l){
+        if (l.x < l.w / 2 || l.x > 300 - l.w / 2) return; // would be cut by the strip's edge
+        for (var i = 0; i < placed.length; i++) if (Math.abs(l.x - placed[i].x) < (l.w + placed[i].w) / 2 + 4) return;
+        placed.push(l);
+        var b = el("b", l.cls, strip); b.textContent = l.text; b.style.left = l.x + "px";
+      });
+      el("span", "here", strip);
+    }
+
+    track.addEventListener("pointerdown", function(e){
+      e.preventDefault();
+      track.setPointerCapture(e.pointerId);
+      var r = track.getBoundingClientRect();
+      pos = clampPx(e.clientX - r.left); // a tap on the bar moves the knob there, as today
+      drag = { lastX: e.clientX, off: offOf(e) };
+      phone.classList.add("dragging");
+      paint(e, 1);
+    });
+    track.addEventListener("pointermove", function(e){
+      if (!drag) return;
+      var r = track.getBoundingClientRect();
+      var fingerPos = e.clientX - r.left;
+      var off = offOf(e);
+      var rate = opt.slows ? scrubRateSlowAway(off, BANDS) : 1;
+      pos = opt.slows
+        ? clampPx(scrubAdvance(pos, e.clientX - drag.lastX, rate, drag.off, off, fingerPos))
+        : clampPx(fingerPos);
+      drag.lastX = e.clientX; drag.off = off;
+      paint(e, rate);
+    });
+    function end(){
+      if (!drag) return;
+      drag = null;
+      phone.classList.remove("dragging");
+      tries++;
+      var p = page(), miss = Math.abs(p - target);
+      result.className = "result" + (miss === 0 ? " hit" : "");
+      result.textContent = miss === 0
+        ? "Landed exactly on " + p + (tries === 1 ? ", first try." : ", after " + tries + " drags.")
+        : "Landed on " + p + ": " + miss + " page" + (miss === 1 ? "" : "s") + " off.";
+    }
+    track.addEventListener("pointerup", end);
+    track.addEventListener("pointercancel", end);
+    function stepBy(d){ pos = pxOfPage(Math.max(1, Math.min(TOTAL, page() + d))); knob.style.left = pos + "px"; fill.style.left = pos + "px"; }
+    next.addEventListener("click", function(){ stepBy(-1); });
+    prev.addEventListener("click", function(){ stepBy(1); });
+    paint(null, 1);
+  }
+
+  OPTIONS.forEach(mount);
+})();
+</script>
+</div>
+</body>
+</html>
+`;
+
+const arabic = html.match(/[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]/g);
+if (arabic) die(`refusing to write: the page carries ${arabic.length} Arabic codepoint(s)`);
+writeFileSync(PAGE, html);
+console.log(
+  `page-bar-phone-scrub-options — ${OPTIONS.length} live bars, track ${TRACK_W}px for ${TOTAL} pages, ` +
+    `speeds ${APPLE_SCRUB_BANDS.map((b) => `${b.rate}@${b.fromPx}px`).join(" ")} → ${PAGE.replace(ROOT, "")} ` +
+    `(${(html.length / 1024).toFixed(0)} KB)`,
+);

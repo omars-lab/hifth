@@ -303,7 +303,7 @@
         {
           "file": "apps/web/src/components/PageSlider.tsx",
           "symbol": "PageSlider",
-          "note": "The bottom bar: a 604-long track with a page turn on each edge, pinned RTL in both languages so page 1 sits on the right. Two traps live here — it commits on the native `change` event, not React's `onChange` (which is `input`, and would mount a 170 KB SVG per value crossed), and it takes the arrow keys itself, because a range's own step of 1-of-604 snaps straight back inside a three-page inventory."
+          "note": "The bottom bar: a 604-long track with a page turn on each edge, pinned RTL in both languages so page 1 sits on the right. Two traps live here — it commits on the native `change` event, not React's `onChange` (which is `input`, and would mount a 170 KB SVG per value crossed), and it takes the arrow keys itself, because a range's own step of 1-of-604 snaps straight back inside a three-page inventory. On a phone a drag pad lies over the range (under the juz buttons) and drives the slowed drag and its strip of marks from core's scrub-rate (option D of page-bar-phone-scrub); the range stays for keys and screen readers."
         },
         {
           "file": "scripts/build-page-bar-options.mjs",

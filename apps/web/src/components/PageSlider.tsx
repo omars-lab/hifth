@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
+  APPLE_SCRUB_BANDS,
   focusSpread,
   labelBoth,
   markerEmphasisDock,
@@ -8,6 +9,9 @@ import {
   pageFraction,
   pageRuns,
   pageTickStep,
+  scrubAdvance,
+  scrubRateSlowAway,
+  stripPxPerPage,
   tapButtonDetent,
 } from "@hifth/core";
 import { useT } from "../i18n";
@@ -28,6 +32,27 @@ const EMPHASIS = tapButtonDetent.emphasis ?? { near: 0, peak: 1 };
 // (docs/design/page-bar-zoom-plan.md, step 1), so single pages open wide enough to
 // mark beside the pointer; the decision page keeps the curve that was chosen on.
 const LENS = pageBarFocus;
+
+// The phone's scrub (option D, graduated · docs/decisions/page-bar-phone-scrub.md):
+// sliding the thumb up while dragging slows the knob to half, a quarter, then a
+// tenth, at Apple's heights, and a strip of page marks above the thumb zooms in as
+// it slows. The strip is STRIP_MAGNIFY times the bar at full speed, so it shows
+// every 5th page at full and half speed and single pages from a quarter on. The
+// bar imports only D's pieces; A to C stay on the decision page.
+const SCRUB_BANDS = APPLE_SCRUB_BANDS;
+const STRIP_MAGNIFY = 5;
+const STRIP_MAX_W = 300;
+const SPEED_NAMES = { 1: "full", 0.5: "half", 0.25: "quarter", 0.1: "tenth" } as const;
+const speedName = (rate: number): "full" | "half" | "quarter" | "tenth" =>
+  SPEED_NAMES[rate as keyof typeof SPEED_NAMES] ?? "full";
+
+/** A phone drag in progress: where the knob and thumb are, in track pixels from its left. */
+interface PhoneDrag {
+  pos: number;
+  fingerX: number;
+  off: number;
+  rate: number;
+}
 
 interface PageSliderProps {
   /**
@@ -171,6 +196,10 @@ export function PageSlider({
   // Non-null only mid-drag: where the thumb is, before anything has been asked
   // of the stage.
   const [scrub, setScrub] = useState<number | null>(null);
+  // Non-null only mid-drag on a phone: the knob, the thumb and the speed, which
+  // the readout and the strip of page marks above the thumb are drawn from.
+  const [phone, setPhone] = useState<PhoneDrag | null>(null);
+  const phoneRef = useRef<(PhoneDrag & { lastX: number }) | null>(null);
 
   // Whether this pointer can hover — a mouse or trackpad, not a finger. The
   // grow-on-approach is a hover effect; a touch device has no "near without
@@ -222,6 +251,110 @@ export function PageSlider({
     },
     [available, onGoTo],
   );
+
+  // The phone's own drag. A native range input gives no say over how fast its
+  // thumb follows a finger, so on a phone a pad over the input takes the drag,
+  // moves the knob by the graduated rule, and commits on release exactly as the
+  // native `change` does. The input underneath keeps the keyboard and the
+  // screen reader; the pad is paint and pointer only.
+  const geometry = (): { rect: DOMRect; thumb: number; usable: number } | null => {
+    const track = trackRef.current;
+    if (!track) return null;
+    const rect = track.getBoundingClientRect();
+    const thumb = parseFloat(getComputedStyle(track).getPropertyValue("--thumb")) || 22;
+    return { rect, thumb, usable: Math.max(1, rect.width - thumb) };
+  };
+  // Track pixels from the left to a page, and back. Page 1 is at the right.
+  const pageAtPx = (x: number, g: { rect: DOMRect; thumb: number; usable: number }): number =>
+    1 + ((g.rect.width - g.thumb / 2 - x) / g.usable) * (total - 1);
+  const phoneMove = (e: React.PointerEvent<HTMLDivElement>, start: boolean): void => {
+    const g = geometry();
+    if (!g) return;
+    const clampX = (x: number): number => Math.max(g.thumb / 2, Math.min(g.rect.width - g.thumb / 2, x));
+    const fingerX = clampX(e.clientX - g.rect.left);
+    // How far above the bar the thumb is; on or below the bar is full speed.
+    const off = Math.max(0, g.rect.top - e.clientY);
+    const prev = phoneRef.current;
+    let next: PhoneDrag & { lastX: number };
+    if (start || !prev) {
+      // A touch on the bar moves the knob there, as it always has.
+      next = { pos: fingerX, fingerX, off, rate: 1, lastX: e.clientX };
+    } else {
+      const rate = scrubRateSlowAway(off, SCRUB_BANDS);
+      const pos = clampX(scrubAdvance(prev.pos, e.clientX - prev.lastX, rate, prev.off, off, fingerX));
+      next = { pos, fingerX, off, rate, lastX: e.clientX };
+    }
+    phoneRef.current = next;
+    setPhone({ pos: next.pos, fingerX: next.fingerX, off: next.off, rate: next.rate });
+    setScrub(Math.max(1, Math.min(total, Math.round(pageAtPx(next.pos, g)))));
+  };
+  const onPadDown = (e: React.PointerEvent<HTMLDivElement>): void => {
+    if (e.button !== 0 || empty) return;
+    e.preventDefault();
+    e.currentTarget.setPointerCapture(e.pointerId);
+    phoneMove(e, true);
+  };
+  const onPadMove = (e: React.PointerEvent<HTMLDivElement>): void => {
+    if (phoneRef.current) phoneMove(e, false);
+  };
+  const onPadUp = (): void => {
+    const drag = phoneRef.current;
+    const g = geometry();
+    phoneRef.current = null;
+    setPhone(null);
+    if (!drag || !g) return setScrub(null);
+    commit(Math.max(1, Math.min(total, Math.round(pageAtPx(drag.pos, g)))));
+  };
+  const onPadCancel = (): void => {
+    phoneRef.current = null;
+    setPhone(null);
+    setScrub(null);
+  };
+
+  // The strip of page marks above the thumb, for the drag under way: the pages
+  // around the knob at the strip's zoom for this speed, with the desktop
+  // magnifier's rule for which marks have room, the juz openings named, and the
+  // page numbers that fit between them.
+  const strip = useMemo(() => {
+    if (phone === null) return null;
+    const g = geometry();
+    if (!g) return null;
+    const width = Math.min(STRIP_MAX_W, (typeof window === "undefined" ? STRIP_MAX_W : window.innerWidth) - 24);
+    const perPage = stripPxPerPage(g.usable / Math.max(1, total - 1), phone.rate, STRIP_MAGNIFY);
+    const step = pageTickStep(perPage, LENS.minTickGapPx) ?? 10;
+    const cur = pageAtPx(phone.pos, g);
+    const juzOf = new Map<number, number>();
+    juzStarts.forEach((start, i) => {
+      if (start !== null) juzOf.set(start, i + 1);
+    });
+    const half = width / 2 / perPage;
+    const ticks: { x: number; kind: "juz" | "five" | "one" }[] = [];
+    const labels: { x: number; w: number; text: string; juz: boolean }[] = [];
+    for (let p = Math.max(1, Math.ceil(cur - half)); p <= Math.min(total, Math.floor(cur + half)); p++) {
+      const juz = juzOf.get(p);
+      if (juz === undefined && p % step !== 0) continue;
+      // Later pages lie to the left, as on the bar.
+      const x = width / 2 - (p - cur) * perPage;
+      ticks.push({ x, kind: juz !== undefined ? "juz" : p % 5 === 0 ? "five" : "one" });
+      if (juz !== undefined) labels.push({ x, w: 44, text: t.juzN(juz), juz: true });
+      else if (p % 5 === 0) labels.push({ x, w: 22, text: String(p), juz: false });
+    }
+    // The magnifier's overlap rule: juz names first, then page numbers, nearer the
+    // knob first; a name that would touch one already placed, or the strip's
+    // edge, is dropped.
+    labels.sort((a, b) => Number(b.juz) - Number(a.juz) || Math.abs(a.x - width / 2) - Math.abs(b.x - width / 2));
+    const placed: typeof labels = [];
+    for (const l of labels) {
+      if (l.x < l.w / 2 || l.x > width - l.w / 2) continue;
+      if (placed.some((q) => Math.abs(l.x - q.x) < (l.w + q.w) / 2 + 4)) continue;
+      placed.push(l);
+    }
+    // Centred on the thumb, but kept on the screen.
+    const centre =
+      Math.max(width / 2 + 8, Math.min(window.innerWidth - width / 2 - 8, g.rect.left + phone.fingerX)) - g.rect.left;
+    return { width, left: centre - width / 2, ticks, labels: placed };
+    // `geometry` reads the live track; the drag state is what changes.
+  }, [phone, total, juzStarts, t]);
 
   // Native `change`, not React's `onChange`: React maps `onChange` on a range
   // input to the `input` event, which fires for every value the thumb passes
@@ -547,6 +680,21 @@ export function PageSlider({
           onBlur={() => setScrub(null)}
         />
 
+        {/* The phone's drag pad (option D, graduated): over the input, under the
+            juz buttons, so a tap on a juz still opens it and every other touch on
+            the bar is a drag the pad paces. Only where nothing can hover. */}
+        {!finePointer && !empty && (
+          <div
+            className={styles.scrubPad}
+            data-testid="scrub-pad"
+            aria-hidden="true"
+            onPointerDown={onPadDown}
+            onPointerMove={onPadMove}
+            onPointerUp={onPadUp}
+            onPointerCancel={onPadCancel}
+          />
+        )}
+
         {/* The inventory, drawn on the track — as runs, not as pages. Each run
             spans from its first held page's fraction of the book to its last,
             offset by half the thumb so it lines up with the thumb's centre
@@ -655,7 +803,51 @@ export function PageSlider({
           />
         )}
 
-        {scrub !== null && (
+        {/* On a phone mid-drag, the readout and the strip of page marks ride
+            above the thumb — lifted as it slides up, so neither is ever under it. */}
+        {scrub !== null && phone !== null && strip !== null && (
+          <div
+            className={styles.phoneFloat}
+            style={{ left: `${strip.left}px`, width: `${strip.width}px`, bottom: `calc(100% + ${phone.off}px)` }}
+          >
+            <div className={styles.strip} data-testid="scrub-strip" data-speed={speedName(phone.rate)} aria-hidden="true">
+              {strip.ticks.map((tk) => (
+                <i
+                  key={`${tk.kind}-${tk.x.toFixed(2)}`}
+                  className={tk.kind === "juz" ? styles.stripJuz : tk.kind === "five" ? styles.stripFive : styles.stripTick}
+                  data-testid="strip-tick"
+                  style={{ left: `${tk.x}px` }}
+                />
+              ))}
+              {strip.labels.map((l) => (
+                <b
+                  key={`${l.text}-${l.x.toFixed(2)}`}
+                  className={`${l.juz ? styles.stripJuzName : styles.stripPageName} numeric`}
+                  style={{ left: `${l.x}px` }}
+                >
+                  {l.text}
+                </b>
+              ))}
+              <span className={styles.stripHere} />
+            </div>
+            <output className={styles.bubble}>
+              <span className="numeric">{t.pageOfTotal(scrub, total)}</span>
+              {context !== null && (
+                <span className={styles.context}>
+                  {juzLabel} · {t.surahName(context.surah)}
+                </span>
+              )}
+              <span className={styles.speed} data-testid="scrub-speed">
+                {phone.rate === 1 ? t.scrubSlowHint : t.scrubSpeed(speedName(phone.rate))}
+              </span>
+              {landing !== null && landing !== scrub && (
+                <span className={styles.snap}>{t.nearestPageN(landing)}</span>
+              )}
+            </output>
+          </div>
+        )}
+
+        {scrub !== null && phone === null && (
           <output
             className={styles.bubble}
             style={{
@@ -695,8 +887,10 @@ export function PageSlider({
           when the news is good, it is the bar saying what is behind it, and the
           next edition to be vendored will arrive partial (`e2e/pagebar.spec.ts`
           holds that decision). It is also the slider's accessible description,
-          so the fact reaches a listener who will never see the runs. */}
-      <span id="hifth-page-inventory" className={styles.inventory}>
+          so the fact reaches a listener who will never see the runs. The bar
+          runs right to left, so without `dir="auto"` the English line put its
+          leading number at the far end ("of 604 pages available 604"). */}
+      <span id="hifth-page-inventory" className={styles.inventory} dir="auto">
         {t.pagesVendored(available.length, total)}
       </span>
     </nav>
