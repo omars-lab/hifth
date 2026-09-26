@@ -55,6 +55,7 @@ export {
 export {
   NOTE_TEXT_MAX,
   addNote,
+  signsOfNote,
   editNote,
   isMistake,
   isNote,

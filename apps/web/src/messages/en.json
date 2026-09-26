@@ -294,5 +294,6 @@
   "toolWord": "Word",
   "toolWordHint": "Tap a word to open it into its parts",
   "wordParts": "The parts of a word in {label}",
-  "wordPartsHint": "Pick a part to write a note on it"
+  "wordPartsHint": "Pick a part to write a note on it · Shift-click to pick several",
+  "wordPartsMany": "{n, plural, one{Note on this sign} other{Note on these {nText} signs}}"
 }

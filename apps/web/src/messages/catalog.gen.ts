@@ -295,6 +295,7 @@ export interface Catalog {
   readonly wordLevelPending: string;
   readonly wordParts: (d: { readonly label: string | number }) => string;
   readonly wordPartsHint: string;
+  readonly wordPartsMany: (d: { readonly n: number; readonly nText: string | number }) => string;
   readonly wordmark: string;
   readonly zoomIn: string;
   readonly zoomLevel: (d: { readonly pctText: string | number }) => string;

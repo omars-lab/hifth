@@ -67,6 +67,18 @@
 }
 
 .part:focus-visible,
+.many {
+  min-block-size: var(--touch-min);
+  padding: 0 var(--space-3);
+  border: none;
+  border-radius: 8px;
+  background: var(--accent);
+  color: var(--paper);
+  font: inherit;
+  cursor: pointer;
+}
+
+.many:focus-visible,
 .clear:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 2px;

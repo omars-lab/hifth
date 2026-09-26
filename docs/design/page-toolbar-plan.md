@@ -188,9 +188,16 @@ marked one, and its key gains a line for the dot. Only the first tap counts: pic
 afterwards is the same slip. Clearing the red mark off the page leaves the dot, because
 clearing says "I have it now", not "I never slipped".
 
+**One note on several signs (2026-09-26).** In the word tool, Shift-click (or ⌘-click) a sign
+to start gathering; after that each click on a sign picks it or lets it go, and a button
+under the row writes one note on all of them. A plain click with nothing gathered still drops
+a note at once, so the one-sign case stays one click. The saved note lists every sign it sits
+on and keeps the first in the old single-sign slot, so a file opened by an older copy of the
+app still lands the note on one of its signs. A marked mistake stays one sign per slip.
+
 Left for later: both tools and the mistake tool work only on a computer (the phone has no
-tool bar yet, step 5); the word's parts are its signs, not yet its letters, because a letter's
-own shape exists today for one verse only; and a part is one sign, not a run of them.
+tool bar yet, step 5); and the word's parts are its signs, not yet its letters, because a
+letter's own shape exists today for one verse only.
 
 ### 4. The crop tool
 

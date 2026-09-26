@@ -142,4 +142,48 @@ test.describe("Hifth · the harakat and word tools", () => {
     await expect(pins(page)).toHaveCount(1);
     await expect(toolBtn(page, "Word")).toHaveAttribute("aria-checked", "true");
   });
+
+  test("W: Shift-click gathers several signs, and one note is written on all of them", async ({ page }) => {
+    await page.goto("/#/hafs-kfqc/p7");
+    await expect(pageSvg(page, 7)).toBeVisible();
+    await page.keyboard.press("KeyW");
+    const at = await ayahTarget(page, "#verse-46");
+    await page.mouse.click(at.x, at.y);
+    const signs = parts(page).locator('[data-part="sign"]');
+    await expect(signs.nth(1)).toBeVisible();
+    const many = parts(page).locator("[data-note-many]");
+    await expect(many).toHaveCount(0);
+
+    // Shift starts the gathering; after that a plain click toggles too.
+    await signs.nth(0).click({ modifiers: ["Shift"] });
+    await expect(parts(page)).toBeVisible();
+    await expect(many).toHaveText("Note on this sign");
+    await signs.nth(1).click();
+    await expect(many).toHaveText("Note on these 2 signs");
+    await expect(parts(page).locator('[data-part="sign"][aria-pressed="true"]')).toHaveCount(2);
+    await signs.nth(1).click();
+    await expect(many).toHaveText("Note on this sign");
+    await signs.nth(1).click();
+
+    await many.click();
+    await expect(parts(page)).toHaveCount(0);
+    await expect(box(page)).toBeVisible();
+    await box(page).getByRole("textbox").fill("Both held too long");
+    await page.keyboard.press("Escape");
+    await expect(pins(page)).toHaveCount(1);
+    // What is kept is one note on both signs, the first also in the single-sign slot.
+    const kept = await page.evaluate(
+      () =>
+        new Promise<{ mark?: number; marks?: number[] }[]>((resolve) => {
+          const open = indexedDB.open("hifth.bookmarks.v1");
+          open.onsuccess = () => {
+            const get = open.result.transaction("sets").objectStore("sets").get("notes");
+            get.onsuccess = () => resolve((get.result?.notes ?? []) as { mark?: number; marks?: number[] }[]);
+          };
+        }),
+    );
+    expect(kept).toHaveLength(1);
+    expect(kept[0]!.marks).toHaveLength(2);
+    expect(kept[0]!.mark).toBe(kept[0]!.marks![0]);
+  });
 });
