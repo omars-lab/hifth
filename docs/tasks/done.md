@@ -884,3 +884,62 @@ rights-holders, never deployed.
 - #113 — Wire the Study Quran surah intro and commentary into the verse drawer (pitch build only)
 - #114 — Wire the editors' cross-references and curated meaning-jumps as tappable verse-to-verse hops
 - #115 — Verify the held-copy gates pass and the private pitch layer stays out of the public build
+
+## #11–#163 — Archived 2026-09-26: page turn, bookmarks, tool bar, word tools, validation, QUL links
+
+**Done:** 2026-09-12 to 2026-09-26, shipped through PRs #99, #100, #101, #102 and #103 (merges
+`5e2dd26`, `e41a369`, `3694f17`, `ea11d34`, `4a6fdd9`). The reasoning lives in the decisions each
+fed ([`docs/decisions/README.md`](../decisions/README.md)) and in those PRs.
+
+- #11 — Fix desktop page-turn animation
+- #15 — Manage bookmarks from the calendar view
+- #66 — Evaluate QUL's mus'haf page preview as a check on where pages start and end
+- #67 — A play button on each verse, using the Minshawi recitation
+- #68 — Link each verse to its QUL page
+- #98 — Reconcile the sibling branch's open dev-draw-toggle decision row
+- #101 — Diff view: colour any single vowel mark on its own (decision diff-mark-tint = C)
+- #116 — Add the `design-iterate` skill: build, screenshot, look, iterate
+- #117 — Drop the repeated verse number from the pitch commentary
+- #118 — Check the phone bottom sheet on Android Chromium
+- #119 — A Related verses section in the pitch commentary drawer
+- #120 — List every way the app is checked (tests, reference comparisons, by-eye sittings)
+- #121 — Write `docs/design/robust-validation.md`
+- #122 — Record the placement sitting as a hunt for disagreements, not a page-by-page vote
+- #123 — Render, gate and commit the harakat-marking work; send the doc to the owner
+- #124 — Point the by-eye placement sitting at the places the checks disagree
+- #125 — Stamp each ruling with a fingerprint of the code that scored it
+- #126 — Give each scorer a known-answer self-test it always runs
+- #127 — Publish the seed, ruling and fingerprints so anyone can re-score
+- #130 — Fix the bottom page bar overflowing; try a magnifying zoom
+- #132 — Record the bookmark tidy-up decision (build both, clear from calendar with confirm)
+- #133 — Store bookmarks on the phone, with save-to-file and load-back
+- #134 — Drop and lift named ribbons on the page, with a drawer per bookmark
+- #135 — Clear bookmarks from the reading calendar (a surah, or all, with confirm)
+- #136 — Commit, push and show the owner the bookmarks working
+- #137 — Ship page bar look A
+- #138 — Write the zoomed-bar plan: page and juz boundaries under the pointer
+- #139 — Zoomed bar step 1: page ticks inside the magnifier
+- #140 — Tutorial off by default; start it from a settings button
+- #141 — Explore a tool bar above the page
+- #142 — Page bar: keep marks inside, show juz and hizb cuts
+- #143 — Stop showing readers the "offline storage not guaranteed" warning
+- #144 — Make the "drop a bookmark" page corner look natural
+- #145 — Tool bar step 1: select, highlight, bookmark
+- #146 — Unfold a folded corner to lift its bookmarks, with undo
+- #147 — Fix 5:1's outline grabbing a sliver of 4:176's line
+- #148 — Fix the two-page view overlapping at 150% zoom
+- #149 — Record bookmark model = C: corners you keep, a red seam that follows you
+- #150 — Build the red seam: where you left off, in the gutter
+- #151 — Zoomed bar step 4: smooth the juz-mark swell
+- #152 — Build the harakat and word tools (harakah-pick = D)
+- #153 — Let the harakat tool reach signs under the bookmark corner fold
+- #154 — Fix the stage-fit test that failed under load
+- #155 — Pick several parts of a word at once
+- #156 — Write marked mistakes into the revision record
+- #157 — Tool bar on the phone
+- #158 — Tool bar crop tool (licence checked first)
+- #159 — Letters as parts in the word tool
+- #160 — Page turn styles A/B/D as a reader setting
+- #161 — Fix CI on #101, commit the decide skill, merge #101
+- #162 — Bring over similar-ayah-enrichment = D (look-alike twins from our own corpus)
+- #163 — Consolidate checkouts, branches and worktrees into one

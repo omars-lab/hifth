@@ -269,6 +269,8 @@
   "bmLoadBad": "That is not a bookmark file. Nothing was changed.",
   "toolbarLabel": "Page tools",
   "toolSelect": "Select",
+  "toolRead": "Read",
+  "toolReadHint": "Taps do nothing, so a stray touch opens nothing",
   "toolHighlight": "Highlight",
   "toolBookmark": "Bookmark",
   "toolOn": "{name} tool",
