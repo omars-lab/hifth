@@ -1,0 +1,126 @@
+/*
+ * VerseDrawer — rises from the bottom over the bar and the page slider, never
+ * over the page: it is kept shorter than those two together, so the verse it
+ * is about stays in sight. Each tool is a glyph with its word under it.
+ */
+
+.drawer {
+  position: fixed;
+  inset-inline: 0;
+  inset-block-end: 0;
+  z-index: calc(var(--z-chrome) + 5);
+  margin-inline: auto;
+  max-inline-size: 40rem;
+  padding: var(--space-2) var(--space-3) calc(var(--space-2) + env(safe-area-inset-bottom));
+  border-start-start-radius: var(--radius-lg);
+  border-start-end-radius: var(--radius-lg);
+  background: var(--paper-raised);
+  box-shadow: var(--shadow-2);
+  font-family: var(--font-chrome);
+  animation: rise var(--dur-fast) ease-out;
+}
+
+@keyframes rise {
+  from {
+    transform: translateY(100%);
+  }
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.title {
+  font-size: var(--text-sm);
+  color: var(--ink-soft);
+}
+
+.close {
+  inline-size: 32px;
+  block-size: 32px;
+  border: none;
+  border-radius: var(--radius-pill);
+  background: none;
+  color: var(--ink-soft);
+  font-size: var(--text-md);
+  cursor: pointer;
+}
+
+.close:hover {
+  background: var(--paper-sunk);
+}
+
+.tools {
+  display: flex;
+  justify-content: center;
+  gap: var(--space-1);
+}
+
+/* The triggers bring their own footer styling; here each becomes one cell. */
+.tools :is(button, a) {
+  display: flex;
+  flex: 1 1 0;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  align-content: center;
+  gap: 2px 4px;
+  min-inline-size: 0;
+  max-inline-size: 5.5rem;
+  min-block-size: 3.25rem;
+  padding: var(--space-1);
+  border: none;
+  border-radius: var(--radius-md);
+  background: none;
+  color: var(--accent-strong);
+  font-size: var(--text-md);
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.tools :is(button, a):hover,
+.tools :is(button, a)[aria-expanded="true"],
+.tools :is(button, a)[aria-pressed="true"] {
+  background: var(--accent-tint);
+}
+
+.tools :is(button, a):focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+/* The share button is a pill wrapped in a div, with a word already in it. */
+.tools > div {
+  display: flex;
+  flex: 1 1 0;
+  justify-content: center;
+  min-inline-size: 0;
+  max-inline-size: 5.5rem;
+  position: relative;
+}
+
+.tools > div > [role="status"] {
+  position: absolute;
+  inset-block-end: 100%;
+  white-space: nowrap;
+}
+
+.tools [data-caption],
+.tools > div button > span:last-child {
+  font-size: var(--text-xs);
+  color: var(--ink-soft);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex-basis: 100%;
+  text-align: center;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .drawer {
+    animation: none;
+  }
+}

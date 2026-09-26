@@ -73,6 +73,11 @@
           "note": "The swipe branch is also the whole contract with the wipe animation, and none of it is visible. A `<line>` renders identically whichever end you write first, so the order of x1/x2 here is the only thing deciding which way the ink travels — right to left, because that is where a pen meets Arabic, and a backwards wipe would look subtly wrong to a reader and correct to everyone else. `--hl-len` and `--hl-i` are the two numbers CSS cannot work out for itself: a dash pattern must be told the stroke's length (`100%` on a line is the viewport, not the line) and which line of the ayah this is, so line 2 starts after line 1."
         },
         {
+          "file": "apps/web/src/components/VerseDrawer.tsx",
+          "symbol": "VerseDrawer",
+          "note": "What a verse tap opens (selection-drawer = D): one drawer of the verse's tools, each glyph with its word, where they used to be loose glyphs along the bar under the page. Not a dialog, so the page stays live and the drawer follows the light. It rises over the bar and the page slider only, never the page, so it cannot cover the verse it is about; the e2e test taps the page's last verse and checks exactly that. The tools are the same trigger components the bar held, given a `caption`; App steps the drawer aside while a sheet it opened is up."
+        },
+        {
           "file": "apps/web/src/components/PageStage.tsx",
           "symbol": "PageStage",
           "note": "The React boundary. Binds @use-gesture to the surface, hands events to pointerIntent, and calls the Highlighter imperatively. The only file where the two worlds touch."
