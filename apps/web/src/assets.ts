@@ -39,6 +39,18 @@ export function shardUrl(edition: string, surah: number): string {
   return `${BASE}assets/adj/${edition}/${surah}.json`;
 }
 
+export function wordShardUrl(edition: string, page: number): string {
+  return `${BASE}assets/words/${edition}/${page}.json`;
+}
+
+export function markShardUrl(edition: string, page: number): string {
+  return `${BASE}assets/marks/${edition}/${page}.json`;
+}
+
+export function letterShardUrl(edition: string, page: number): string {
+  return `${BASE}assets/letters/${edition}/${page}.json`;
+}
+
 /**
  * Every file a pinned juz is made of, pages first so paper arrives before hops.
  *
@@ -48,12 +60,23 @@ export function shardUrl(edition: string, surah: number): string {
  * selects and no hop fires. It is ~1.3 KB gzipped against a few MB of paper,
  * and every pack carrying its own copy is what makes a pack self-sufficient
  * rather than dependent on a cache with a different eviction policy.
+ *
+ * Each page's words, vowel marks and letters come last. Without them a pinned
+ * page still reads and hops, but the harakat and word tools find nothing to
+ * pick on it. They add a fifth to a quarter to a juz (juz 30: 0.8 MB against
+ * 3.9 MB of paper, mostly the marks), and arriving after the hops they never
+ * hold up reading.
  */
 export function packUrls(edition: string, plan: PackPlan): string[] {
   return [
     manifestUrl(),
     ...plan.pages.map((page) => pageUrl(edition, page)),
     ...plan.surahs.map((surah) => shardUrl(edition, surah)),
+    ...plan.pages.flatMap((page) => [
+      wordShardUrl(edition, page),
+      markShardUrl(edition, page),
+      letterShardUrl(edition, page),
+    ]),
   ];
 }
 
@@ -197,7 +220,7 @@ export async function loadTajweedVocabulary(
  * ayah granularity: the reader loses the finer grain, not the ayah they had.
  */
 export function loadWordShard(edition: string, page: number): Promise<WordShard | null> {
-  return json<WordShard>(`${BASE}assets/words/${edition}/${page}.json`);
+  return json<WordShard>(wordShardUrl(edition, page));
 }
 
 /**
@@ -212,7 +235,7 @@ export function loadWordShard(edition: string, page: number): Promise<WordShard 
  * the page and word shard the panel already fetches.
  */
 export function loadMarkShard(edition: string, page: number): Promise<MarkShard | null> {
-  return json<MarkShard>(`${BASE}assets/marks/${edition}/${page}.json`);
+  return json<MarkShard>(markShardUrl(edition, page));
 }
 
 /**
@@ -221,5 +244,5 @@ export function loadMarkShard(edition: string, page: number): Promise<MarkShard 
  * word the cut was not trusted on is absent and shows no letters.
  */
 export function loadLetterShard(edition: string, page: number): Promise<LetterShard | null> {
-  return json<LetterShard>(`${BASE}assets/letters/${edition}/${page}.json`);
+  return json<LetterShard>(letterShardUrl(edition, page));
 }
