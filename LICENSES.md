@@ -38,6 +38,7 @@ from them, and some of it inherits their terms.
 | `apps/web/public/assets/adj/**` | **GPL-3.0** (inherited) *and* free use with attribution (inherited) *and* **CC BY** (inherited) | The Quranic Arabic Corpus's *and* Waqar144's *and* Tanzil's |
 | `apps/web/public/assets/words/**` | **GPL-3.0-or-later** | Ours — rectangles we measured |
 | `apps/web/public/assets/marks/**` | **GPL-3.0-or-later** | Ours — rectangles we measured |
+| `apps/web/public/assets/letters/**` | **GPL-3.0-or-later** | Ours — dividing lines we measured |
 | `apps/web/public/assets/manifest.json` | **GPL-3.0-or-later**, with one question open (below) | Ours |
 | `apps/web/public/assets/pages/**` | KFGQPC's own terms — **not ours to relicense** | KFGQPC |
 
@@ -188,6 +189,16 @@ hold that line independently. The Complex's grant behind that print reserves com
 prints nothing. The 892 marks the reader placed by hand are ours outright. So the tree inherits
 nothing that has to travel with it, and the colophon's credit to the Complex is the same
 courtesy the word row's is, not a condition.
+
+## Why the letter lines are ours too
+
+`apps/web/public/assets/letters/**` says, for each word, where one letter ends and the next
+begins: a few dividing lines across the word, found in the ink of the same KFGQPC hafs
+ligature print the mark rectangles were measured from. To know how many letters to look for,
+the build reads the word's spelling from the Quranic Arabic Corpus; that spelling is used and
+dropped, and **no letter of it ships**, nor any byte of the print. What ships is lines on our
+page frame. So the tree carries the same terms as the marks: ours, with the Complex credited
+as a courtesy.
 
 ## The manifest's one open question
 
