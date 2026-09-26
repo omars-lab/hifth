@@ -56,9 +56,13 @@ export {
   NOTE_TEXT_MAX,
   addNote,
   editNote,
+  isMistake,
   isNote,
+  markMistake,
   mergeNotes,
+  mistakeOn,
   notesOnPage,
+  pickMistakeSign,
   removeNote,
   restoreNote,
   type Note,
@@ -463,3 +467,23 @@ export {
   type ScrubBand,
   type ScrubStrategy,
 } from "./decision-options/scrub-rate.js";
+
+// How does a reader pick one vowel-sign when it is smaller than a fingertip?
+// Three pickers, and the one the mistake tool mounts until the owner chooses.
+// (docs/decisions/harakah-pick.md, open)
+export {
+  HARAKAH_PICKERS,
+  HARAKAH_PICK_DEFAULT,
+  OptionA as HarakahPickA,
+  OptionB as HarakahPickB,
+  OptionC as HarakahPickC,
+  signsOnWord,
+  trayChoices,
+  namedChoices,
+  noChoices,
+  nearestSign,
+  noSnap,
+  type HarakahPicker,
+  type PickChoice,
+  type PickSign,
+} from "./decision-options/harakah-pick.js";

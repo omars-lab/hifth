@@ -9,7 +9,9 @@
     --paper:#f4efe6; --paper-raised:#fbf8f2; --paper-sunk:#ece4d6;
     --ink:#26201a; --ink-soft:#5c5347; --ink-faint:#6b6255;
     --accent:#1f6f66; --accent-strong:#17544d; --accent-tint:#d7e7e3;
-    --sel:#e8a13a; --sel-soft:rgba(232,161,58,.32);
+    --danger:#a23b2c;
+    /* A caught sign is a marked mistake, so it wears the app's mistake red. */
+    --sel:var(--danger); --sel-soft:rgba(162,59,44,.18);
     --radius-sm:6px; --radius-md:10px; --radius-lg:16px; --radius-pill:999px;
     --shadow:0 1px 2px rgba(38,32,26,.10),0 6px 20px rgba(38,32,26,.10);
     --k-comment:#1f6f66; --k-correction:#c1622d; --k-question:#7a5bbd; --k-dev:#5c5347;
@@ -55,12 +57,15 @@
     pointer-events:none;background:var(--paper);transform:translate(-50%,-50%);display:none;}
   .loupe .cross{position:absolute;inset:0;}
   /* ── The tray (option A) and chips (option C) ── */
-  .tray{display:none;flex-wrap:wrap;gap:.5rem;justify-content:center;margin:.9rem 0 .2rem;}
+  /* Right to left, as the app's tray is: the first sign read is the first tile. */
+  .tray{display:none;flex-wrap:wrap;gap:.5rem;justify-content:center;margin:.9rem 0 .2rem;direction:rtl;}
+  .fuller{display:block;text-align:center;font-size:.8rem;color:var(--ink-soft);margin:.4rem 0 0;}
   .tray.show{display:flex;}
   .tray .sgn{appearance:none;border:1px solid var(--paper-sunk);background:var(--paper-raised);
     border-radius:var(--radius-md);padding:.4rem;cursor:pointer;display:flex;flex-direction:column;
     align-items:center;gap:.2rem;min-width:3.4rem;}
-  .tray .sgn svg{width:2.6rem;height:2.6rem;}
+  .tray .sgn.sel{border-color:var(--danger);box-shadow:inset 0 0 0 1px var(--danger);}
+  .tray .sgn svg{width:4rem;height:4rem;background:#fff;border-radius:4px;}
   .tray .sgn small{font-size:.68rem;color:var(--ink-soft);}
   .tray .sgn:focus-visible,.chip:focus-visible,.seg button:focus-visible{outline:2px solid var(--accent);outline-offset:2px;}
   .chips{display:none;flex-wrap:wrap;gap:.4rem;justify-content:center;margin:.9rem 0 .2rem;}
@@ -193,6 +198,7 @@
         <svg id="loupeSvg" viewBox="0 0 20 20"><use href="#leaf" x="0" y="0" width="345" height="550" class="leaf"></use><g id="loupeSigns"></g></svg>
       </div>
     </div>
+    <label class="fuller" id="fullerWrap"><input type="checkbox" id="fuller"> Fuller version: letters too, not only signs</label>
     <div class="tray" id="tray" aria-label="Signs on the word you tapped"></div>
     <div class="chips" id="chips" aria-label="Signs on the word you tapped, by name"></div>
     <div class="panel" id="panel" aria-label="The word broken into its parts">
@@ -253,13 +259,13 @@
   aims at the tiny target directly.</p>
   <table>
     <tr><th>Way</th><th>The gesture</th><th>What it trades</th></tr>
-    <tr><td>Word, then part<br><small>the precision picker</small></td><td>Tap the word — a big,
-      familiar target — and it opens whole, the way it sits in the print, each letter and each mark
-      its own target. Point at one to pick it out in colour while the rest fades back, and a tally
-      beside the word names what you took — 1 waw, 1 kasra. Pick any of them, several at once, or the
-      whole word with its marks or without.</td><td>Two deliberate taps, then a calm second choice with nothing to aim at small —
-      and the one gesture that reaches more than a single sign. Slower than one motion, and the tallest
-      to draw on the page.</td></tr>
+    <tr><td>Word, then sign<br><small>what the app does until you choose</small></td><td>Tap the word — a big,
+      familiar target — and its signs lift into a tray under it, each an enlarged window on the print
+      with its name beneath, in reading order. Tap the one you mean. Its fuller version (the switch under
+      the buttons) opens the word whole instead, each letter as well as each mark its own target, several
+      at once.</td><td>Two deliberate taps, then a calm second choice where every target is finger-sized,
+      and you still see the ink you are choosing. Slower than one motion; the fuller version reaches
+      letters too, but today it can be drawn for this one verse only.</td></tr>
     <tr><td>Press &amp; loupe</td><td>Press the page; a magnifier rises and snaps to the nearest sign;
       slide to change it, let go to take it.</td><td>One continuous gesture, direct — you reach for the
       ink itself. Asks for a steadier hand, and a loupe to see past the fingertip.</td></tr>
@@ -317,8 +323,11 @@
 
   <p class="foot">Built by <code>scripts/build-harakah-pick-options.mjs</code> from the vendored print
   (page 7), its shipped word and per-sign boxes, and the app's design tokens — committed bytes
-  only. The print is outlined paths; this page carries no Qur'an text. The winning gesture graduates
-  into the marking tool and the other two are deleted.</p>
+  only. The print is outlined paths; this page carries no Qur'an text. Which signs a tapped word opens
+  into, and which sign a press lands on, are worked out by the same three pieces of code the app runs
+  (<code>packages/core/src/decision-options/harakah-pick.ts</code>), so what you feel here is what the
+  app would do. The app's mistake tool already mounts the first way, as a stand-in until this is
+  decided; the winning way takes its place and the other two are deleted.</p>
 </main>
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
@@ -345,8 +354,39 @@ var SVGNS = "http://www.w3.org/2000/svg";
 var opt = "A";
 var caughtId = null;
 
+function trayChoices(signs, word) {
+    const on = signs.filter((s) => s.w === word).sort((a, b) => b.x + b.mw / 2 - (a.x + a.mw / 2));
+    return on.map((s) => ({ id: s.id, label: s.name }));
+}
+function noSnap(_signs, _x, _y) {
+    return null;
+}
+function noChoices(_signs, _word) {
+    return [];
+}
+function nearestSign(signs, x, y) {
+    let best = null;
+    let bestD = Infinity;
+    for (const s of signs) {
+        const dx = s.x + s.mw / 2 - x;
+        const dy = s.y + s.mh / 2 - y;
+        const d = dx * dx + dy * dy;
+        if (d < bestD) {
+            bestD = d;
+            best = s.id;
+        }
+    }
+    return best;
+}
+function namedChoices(signs, word) {
+    const on = signs.filter((s) => s.w === word).sort((a, b) => b.x + b.mw / 2 - (a.x + a.mw / 2));
+    return on.map((s, i) => ({ id: s.id, label: `${i + 1} · ${s.name}` }));
+}
+var PICKERS = {A: {label: "Word, then sign", startsOn: "word", shows: "ink", choices: trayChoices, snap: noSnap}, B: {label: "Press and loupe", startsOn: "press", shows: "loupe", choices: noChoices, snap: nearestSign}, C: {label: "Word, then names", startsOn: "word", shows: "name", choices: namedChoices, snap: noSnap}};
+var DEFAULT_PICKER = "A";
 var HINTS = {
-  A: "Tap a word. It opens whole, each letter and mark its own target; point at one to pick it out in colour, and a tally beside the word names what you took.",
+  A: "Tap a word. Its signs lift into a tray, each one enlarged from the print and named; tap the one you mean. This is the one the app uses until you choose.",
+  A_FULL: "Tap a word. It opens whole, each letter and mark its own target; point at one to pick it out in colour, and a tally beside the word names what you took.",
   B: "Press and hold on the page, slide to the sign, let go to take it.",
   C: "Tap a word, then pick its sign from the named row."
 };
@@ -377,6 +417,7 @@ function setCaught(id){
     if(Number(r.getAttribute("data-id"))===id) cls="sign caught";
     r.setAttribute("class", cls);
   });
+  tray.querySelectorAll(".sgn").forEach(function(b){ b.classList.toggle("sel", Number(b.getAttribute("data-id"))===id); });
   var s = DATA.signs[id];
   emptyEl.hidden = true;
   caughtEl.hidden = false;
@@ -391,11 +432,7 @@ function nthOnWord(s){
   return 0;
 }
 
-// ── Option A + C: the word's signs, enlarged ────────────────────────────────
-function signsOnWord(w){
-  return DATA.signs.filter(function(s){ return s.w===w; })
-    .sort(function(a,b){ return b.x - a.x; }); // reading order, right to left
-}
+// ── Option A + C: the word's signs, from the shared pickers ─────────────────
 function litWord(w){
   gWords.querySelectorAll(".wordhit").forEach(function(r){
     r.setAttribute("class", Number(r.getAttribute("data-w"))===w ? "wordhit lit":"wordhit");
@@ -404,17 +441,20 @@ function litWord(w){
 function openTray(w){
   litWord(w);
   tray.innerHTML="";
-  signsOnWord(w).forEach(function(s){
+  PICKERS.A.choices(DATA.signs, w).forEach(function(c){
+    var s=DATA.signs[c.id];
     var btn=document.createElement("button");
-    btn.className="sgn"; btn.type="button";
+    btn.className="sgn"; btn.type="button"; btn.setAttribute("data-id", s.id);
     btn.setAttribute("aria-label","sign "+s.name);
-    var pad=1.4;
+    // The same window on the print the app's tray shows: sixteen page units
+    // square, centred on the sign, so its letter and neighbours come with it.
+    var win=16, cx=s.x+s.mw/2, cy=s.y+s.mh/2;
     var svg=document.createElementNS(SVGNS,"svg");
-    svg.setAttribute("viewBox",(s.x-pad)+" "+(s.y-pad)+" "+(s.mw+pad*2)+" "+(s.mh+pad*2));
+    svg.setAttribute("viewBox",(cx-win/2)+" "+(cy-win/2)+" "+win+" "+win);
     var use=el("use",{href:"#leaf",x:0,y:0,width:DATA.vbw,height:DATA.vbh,class:"leaf"});
-    var box=el("rect",{x:s.x,y:s.y,width:s.mw,height:s.mh,rx:.5,fill:"none",stroke:"var(--sel)","stroke-width":.4});
+    var box=el("rect",{x:s.x-.8,y:s.y-.8,width:s.mw+1.6,height:s.mh+1.6,rx:.5,fill:"none",stroke:"var(--accent)","stroke-width":.35});
     svg.appendChild(use); svg.appendChild(box);
-    var cap=document.createElement("small"); cap.textContent=s.name;
+    var cap=document.createElement("small"); cap.textContent=c.label;
     btn.appendChild(svg); btn.appendChild(cap);
     btn.addEventListener("click",function(){ setCaught(s.id); });
     tray.appendChild(btn);
@@ -424,11 +464,11 @@ function openTray(w){
 function openChips(w){
   litWord(w);
   chips.innerHTML="";
-  signsOnWord(w).forEach(function(s,i){
+  PICKERS.C.choices(DATA.signs, w).forEach(function(c){
     var b=document.createElement("button");
     b.className="chip"; b.type="button";
-    b.innerHTML='<span class="pos">'+(i+1)+'</span>'+s.name;
-    b.addEventListener("click",function(){ setCaught(s.id); });
+    b.textContent=c.label;
+    b.addEventListener("click",function(){ setCaught(c.id); });
     chips.appendChild(b);
   });
   chips.classList.add("show");
@@ -606,23 +646,14 @@ function svgPoint(clientX, clientY){
   var pt=page.createSVGPoint(); pt.x=clientX; pt.y=clientY;
   return pt.matrixTransform(page.getScreenCTM().inverse());
 }
-function nearestSign(ux, uy){
-  var best=null, bd=Infinity;
-  DATA.signs.forEach(function(s){
-    var cx=s.x+s.mw/2, cy=s.y+s.mh/2;
-    var d=(cx-ux)*(cx-ux)+(cy-uy)*(cy-uy);
-    if(d<bd){ bd=d; best=s; }
-  });
-  return best;
-}
 var pressing=false, snapId=null;
 function loupeShow(clientX, clientY){
   loupe.style.display="block";
   loupe.style.left=clientX+"px";
   loupe.style.top=(clientY-90)+"px"; // float above the fingertip, clear of the stage clip
   var p=svgPoint(clientX, clientY);
-  var s=nearestSign(p.x,p.y);
-  snapId = s?s.id:null;
+  snapId = PICKERS.B.snap(DATA.signs, p.x, p.y);
+  var s = snapId==null ? null : DATA.signs[snapId];
   // Frame the loupe on the sign the reader is about to take, not the raw
   // fingertip: a magnifier is only useful if it shows the target, centred,
   // with enough of the surrounding letters to tell which sign it is.
@@ -647,7 +678,7 @@ function onDown(e){
     var t=e.target;
     if(t && t.classList && t.classList.contains("wordhit")){
       var w=Number(t.getAttribute("data-w"));
-      if(opt==="A") openPanel(w); else openChips(w);
+      if(opt==="A") { if(fuller.checked) openPanel(w); else openTray(w); } else openChips(w);
     }
   }
 }
@@ -664,12 +695,16 @@ stage.addEventListener("pointerup", onUp);
 stage.addEventListener("pointercancel", function(){ pressing=false; loupeHide(); });
 
 // ── Switching options ────────────────────────────────────────────────────────
+var fuller=document.getElementById("fuller");
+var fullerWrap=document.getElementById("fullerWrap");
+fuller.addEventListener("change",function(){ setOpt("A"); });
 function setOpt(o){
   opt=o;
+  fullerWrap.style.display = (o==="A") ? "" : "none";
   [].forEach.call(document.querySelectorAll(".seg button"),function(b){
     b.setAttribute("aria-pressed", b.getAttribute("data-opt")===o?"true":"false");
   });
-  hint.textContent=HINTS[o];
+  hint.textContent=(o==="A"&&fuller.checked)?HINTS.A_FULL:HINTS[o];
   tray.classList.remove("show"); chips.classList.remove("show");
   if(panel){ panel.classList.remove("show"); sel={}; ppActions.classList.remove("show"); }
   loupeHide(); pressing=false;
@@ -682,7 +717,7 @@ function setOpt(o){
 [].forEach.call(document.querySelectorAll(".seg button"),function(b){
   b.addEventListener("click",function(){ setOpt(b.getAttribute("data-opt")); });
 });
-setOpt("A");
+setOpt(DEFAULT_PICKER);
 </script>
 </body>
 </html>
