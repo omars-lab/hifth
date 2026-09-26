@@ -382,6 +382,7 @@ export {
   resolvePullNearby,
   resolveTapButton,
   markerEmphasis,
+  markerEmphasisDock,
   fisheyeSpread,
   pageBarFisheye,
   focusSpread,

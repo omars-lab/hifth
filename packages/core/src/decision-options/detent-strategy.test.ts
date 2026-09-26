@@ -8,6 +8,7 @@ import {
   resolvePullNearby,
   resolveTapButton,
   markerEmphasis,
+  markerEmphasisDock,
   fisheyeSpread,
   pageBarFisheye,
   focusSpread,
@@ -222,5 +223,31 @@ describe("fisheyeSpread (the page-bar dock, decided B)", () => {
 
   it("is inline-safe — its source names no import/require", () => {
     expect(fisheyeSpread.toString()).not.toMatch(/\bimport\b|\brequire\b/);
+  });
+});
+
+describe("markerEmphasisDock (the bar's rounded swell, zoom plan step 4)", () => {
+  it("is 1 at and beyond the edge, and the peak under the pointer", () => {
+    expect(markerEmphasisDock(28, 28, 2.4)).toBe(1);
+    expect(markerEmphasisDock(40, 28, 2.4)).toBe(1);
+    expect(markerEmphasisDock(0, 28, 2.4)).toBeCloseTo(2.4, 10);
+    expect(markerEmphasisDock(0, 0, 2.4)).toBe(1);
+    expect(markerEmphasisDock(Number.NaN, 28, 2.4)).toBe(1);
+  });
+  it("is flat on the marker, where the squared curve has a point", () => {
+    // One pixel off the marker: the rounded top has barely moved, the point has.
+    const dockDrop = 2.4 - markerEmphasisDock(1, 28, 2.4);
+    const sharpDrop = 2.4 - markerEmphasis(1, 28, 2.4);
+    expect(dockDrop).toBeLessThan(0.01);
+    expect(sharpDrop).toBeGreaterThan(0.09);
+  });
+  it("is halfway grown halfway in, and never grows as the pointer leaves", () => {
+    expect(markerEmphasisDock(14, 28, 2.4)).toBeCloseTo(1.7, 10);
+    let last = Infinity;
+    for (let d = 0; d <= 28; d += 0.5) {
+      const g = markerEmphasisDock(d, 28, 2.4);
+      expect(g).toBeLessThanOrEqual(last);
+      last = g;
+    }
   });
 });

@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   focusSpread,
   labelBoth,
-  markerEmphasis,
+  markerEmphasisDock,
   nearestPage,
   pageBarFocus,
   pageFraction,
@@ -292,7 +292,7 @@ export function PageSlider({
           continue;
         }
         const centre = restCentre(m);
-        const grow = markerEmphasis(Math.abs(centre - px), EMPHASIS.near, EMPHASIS.peak);
+        const grow = markerEmphasisDock(Math.abs(centre - px), EMPHASIS.near, EMPHASIS.peak);
         if (fish) {
           // Spread the marker outward from the pointer, then grow it in place.
           // Under the magnifier a juz cut lands on the *edge* of its opening page
