@@ -138,17 +138,16 @@ const BUCKETS = [
     // here so the row and the notice must carry it; the question of whether
     // the trace should follow the core package stays open in
     // what-we-depend-on.md ③.
-    names: ["Quranic Arabic Corpus", "Waqar144", "Tanzil"],
-    sources: ["quranic-arabic-corpus", "mutashabihat-waqar144", "tanzil-quran-metadata"],
+    names: ["Waqar144", "Tanzil", "MushafDatabase"],
+    sources: ["mutashabihat-waqar144", "tanzil-quran-metadata", "word-geometry-mushafdatabase"],
     reads: {
       "mutashabiha_data.json": "named",
-      // The spans. This is the one the row was missing.
-      "quranic-corpus-morphology-0.4.txt": "named",
-      // The whole-verse twins: verse numbers only, found by grouping the same
-      // morphology corpus's words (build-verbatim-twins.mjs). Nothing new
-      // reaches the tree through it — its terms are the corpus's, already named
-      // on this row — and the outside list it was checked against is not read.
-      "verbatim-twins.json": "named",
+      // The spans and the whole-verse twins, since 2026-09-26: the print's words
+      // as numbers, glued "and" and all (decision adjacency-span-source = D).
+      // Until then the corpus morphology was read here, and was this row's
+      // GPL parent; the builder no longer imports its reader, and this list no
+      // longer names it, so a builder that reached it again would fail here.
+      "print-word-ids.json": "named",
       // Found by this gate on its first run, and not settled by writing it:
       // every edge carries `page` and `dPage`, straight out of a pagination
       // table derived from the KFGQPC page corpus. Whether a pagination table
