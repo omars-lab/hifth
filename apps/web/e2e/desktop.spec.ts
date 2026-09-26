@@ -800,6 +800,47 @@ test.describe("Hifth · the page bar at desktop", () => {
     expect(moved, "the knob stayed put while the marks around it spread").toBeLessThan(-10);
     expect(Math.abs((await centre(here)).x - restHere - moved), "the knob left its page mark").toBeLessThan(1);
   });
+
+  test("the juz under the mouse is drawn thicker, and only while the mouse is there", async ({ page }) => {
+    await page.goto("/#/hafs-kfqc/p106");
+    await expect(spread(page)).toBeVisible();
+    const band = page.getByTestId("juz-hover");
+    await expect(band, "the juz was thick before the mouse came").toBeHidden();
+
+    // Midway along the bar is juz 14 at this width (page 272, as the page tag says).
+    const track = await boxOf(page.getByRole("slider"));
+    const x = track.x + track.width * 0.55;
+    const y = track.y + track.height / 2;
+    await page.mouse.move(x, y);
+    await expect(band).toBeVisible();
+    const juz = Number(await band.getAttribute("data-juz"));
+    const b = await boxOf(band);
+    expect(b.height, "the hovered juz is no thicker than the track").toBeGreaterThan(6);
+
+    // That juz only: it runs from its own opening cut to the next juz's, and the
+    // mouse is inside it.
+    expect(x).toBeGreaterThan(b.x);
+    expect(x).toBeLessThan(b.x + b.width);
+    const cuts = page.getByTestId("juz-cut");
+    const cutXs: number[] = [];
+    for (let i = 0; i < (await cuts.count()); i++) {
+      const c = await boxOf(cuts.nth(i));
+      cutXs.push(c.x + c.width / 2);
+    }
+    const nearEdge = (edge: number) => cutXs.some((cx) => Math.abs(cx - edge) < 2);
+    expect(nearEdge(b.x) && nearEdge(b.x + b.width), `juz ${juz} is not bounded by its own two cuts`).toBe(true);
+
+    // Leaving puts it back.
+    await page.mouse.move(x, track.y - 200);
+    await expect(band, "the juz stayed thick after the mouse left").toBeHidden();
+
+    // And a drag never meets it: pressing the knob clears it.
+    const knob = await boxOf(page.getByTestId("page-handle"));
+    await page.mouse.move(knob.x + knob.width / 2, knob.y + knob.height / 2);
+    await page.mouse.down();
+    await expect(band, "the juz stayed thick under a drag").toBeHidden();
+    await page.mouse.up();
+  });
 });
 
 /*

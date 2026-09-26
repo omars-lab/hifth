@@ -2,7 +2,7 @@
 
 *Plan, written 25 September 2026 at the owner's request: "we can show page and juz boundaries
 in the zoomed in view". The steps are in the order they pay off. Steps 1 to 3 were built the
-same day, apart from thickening the juz you are in; the rest is still to do.*
+same day; the rest is still to do.*
 
 ## A few words, defined once
 
@@ -101,8 +101,10 @@ unclear where each hizb (half a juz) is, so each hizb start gets a shorter, pale
 its own name, which gives way to a juz name when the two would overlap. The owner also
 reported marks spilling past the end of the bar near page 587. That was the magnifier's
 reach running past the bar's end; near an end, the magnifier now only reaches as far as the
-end, so the end stays put. The page tag slides back inside the bar there too. Not built yet:
-thickening the juz the mouse is inside.
+end, so the end stays put. The page tag slides back inside the bar there too. Since 25
+September the juz the mouse is inside is drawn thicker too, from its own green mark to the
+next juz's, keeping the green of the part already read and the grey of the rest. It shows
+only while the mouse hovers, and goes the moment you press to drag.
 
 Juz cuts are already there. Inside the magnifier they get taller than page ticks, so a juz
 boundary and a page boundary never look alike. The juz segment the mouse is inside gets
