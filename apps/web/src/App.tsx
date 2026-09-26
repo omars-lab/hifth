@@ -298,12 +298,11 @@ export function App(): JSX.Element {
     // caller's request, because a turn ends at fit and a hop with the book open
     // ends at fit too (see `navigateTo` below) — mirroring the landed value keeps
     // the two leaves agreeing without this having to know which verb ran.
-    // The facing leaf is the left-hand page of the opening, so its gutter is its
-    // right edge: pinned there, it grows leftward, away from the fold. (The live
-    // leaf is the right-hand page and pins at its left edge, below.) The ref is
-    // null unless the book is open, so this is a no-op on a lone leaf.
+    // Each leaf of an open book grows away from the fold on its own side, which
+    // it works out from its page (the `bound` prop). The ref is null unless the
+    // book is open, so this is a no-op on a lone leaf.
     const mirrorFacing = (): void => {
-      facingStageRef.current?.setZoom(stageRef.current?.zoomNow() ?? 1, "right");
+      facingStageRef.current?.setZoom(stageRef.current?.zoomNow() ?? 1);
     };
     const settle = <T,>(work: Promise<T> | undefined, missing: T): Promise<T> =>
       (work ?? Promise.resolve(missing)).then((landed) => {
@@ -342,11 +341,12 @@ export function App(): JSX.Element {
       // With the book open, each leaf pins at its gutter edge so the opening
       // grows outward from the fold as one sheet rather than each leaf swelling
       // from its own middle — which crushed the fold and pushed the outer margins
-      // off-screen. The live leaf is the right-hand page (gutter on its left); on
-      // a lone leaf there is no fold, so it grows from its centre.
+      // off-screen. The live leaf can be either side of the opening (an even page
+      // is the left-hand one), so the stage picks its own edge; on a lone leaf
+      // there is no fold, so it grows from its centre.
       setZoom: (z: number) => {
-        const applied = stageRef.current?.setZoom(z, bookOpenRef.current ? "left" : "center") ?? 1;
-        facingStageRef.current?.setZoom(z, "right");
+        const applied = stageRef.current?.setZoom(z) ?? 1;
+        facingStageRef.current?.setZoom(z);
         setZoom(applied);
       },
     };
@@ -1794,6 +1794,7 @@ export function App(): JSX.Element {
                      to can be handed a tracked band, and a second fold drawn
                      into the same book is the one thing §3.4 forbids. */
                   dragToTurn={false}
+                  bound
                   labelFor={(key) => t.ayahAria(t.ayahLabel(key) ?? key)}
                   skin={skin}
                   tajweedLookup={tajweed?.lookup ?? null}
@@ -1843,6 +1844,7 @@ export function App(): JSX.Element {
                 /* Only the live stage turns pages, and only on a desktop
                    spread does the fold belong to something wider than it. */
                 foldTarget={desktop ? bookRef : null}
+                bound={desktop && pageMode === "two"}
               />
             </PageSpread>
             <HopRail

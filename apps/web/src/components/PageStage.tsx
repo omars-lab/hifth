@@ -211,22 +211,39 @@ interface PageStageProps {
    * `docs/design/page-transition.md` §3.5, decision row 21.
    */
   foldTarget?: RefObject<HTMLElement | null> | null;
+  /**
+   * This leaf is one side of an open book (two pages showing).
+   *
+   * A magnified leaf then stays joined to its partner at the fold: it grows
+   * outward from the gutter and cannot be panned sideways, because a sideways
+   * pan on one leaf alone would slide it over the other page (#148). Up and down
+   * still pan. The stage works out which edge is its gutter from the page's own
+   * side of the opening, so the caller only has to say that the book is open.
+   */
+  bound?: boolean;
 }
 
 /**
  * Which point a button-driven zoom holds still as the paper grows.
  *
- * `"center"` is the lone-leaf answer — a single page has no reason to grow to
- * one side. `"left"` and `"right"` name a *visual* edge of the leaf's box (not a
- * reading side), and they are the spread answer: the leaf grows *away* from the
- * fold. Pin each leaf at the edge its gutter is on — the right-hand leaf at its
- * left edge, the left-hand leaf at its right edge — and the two stay joined at
- * the seam and open outward together like one sheet, instead of each swelling
- * from its own middle, crushing the fold while their outer margins run off the
- * screen. A stage does not know whether it is the live or the facing leaf, so
- * the caller — which does — names the edge.
+ * A lone leaf grows from its own centre — a single page has no reason to grow
+ * to one side. A `bound` leaf grows *away* from the fold: pinned at the edge its
+ * gutter is on — the right-hand leaf at its left edge, the left-hand leaf at its
+ * right edge — so the two stay joined at the seam and open outward together
+ * like one sheet, instead of each swelling from its own middle and crushing the
+ * fold while their outer margins run off the screen.
+ *
+ * The edge comes from the page's side of the opening (`leafSideOf`), not from
+ * which stage is live. It used to be named by the caller on the belief that the
+ * live leaf is always the right-hand page; on an even page it is the left-hand
+ * one, so both leaves grew *into* the fold and each was cut off at it (#148).
  */
-export type ZoomAnchor = "center" | "left" | "right";
+type FoldEdge = "left" | "right";
+
+function foldEdgeOf(page: number, total: number): FoldEdge | null {
+  const side = leafSideOf(page, total);
+  return side === "right" ? "left" : side === "left" ? "right" : null;
+}
 
 /** What App can drive imperatively on the stage. */
 export interface PageStageHandle {
@@ -259,15 +276,15 @@ export interface PageStageHandle {
    */
   turnTo: (page: number) => Promise<boolean>;
   /**
-   * Magnify to `z`, anchored at `anchor` (default the middle of the stage), and
-   * answer with what was actually applied.
+   * Magnify to `z`, anchored at the middle of the stage (or, on a `bound` leaf,
+   * at its gutter edge), and answer with what was actually applied.
    *
    * Anchored at the middle because a button has no pointer to zoom about: the
    * wheel could keep the paper under the cursor still, and a control in the
    * chrome is nowhere near the paper at all. The middle is the only point the
    * reader can predict — for a lone leaf. With the book open the predictable
-   * point is the fold, not each leaf's own centre, so the caller pins each leaf
-   * at its gutter edge (`ZoomAnchor`) and the opening grows outward as one.
+   * point is the fold, not each leaf's own centre, so each `bound` leaf pins at
+   * its gutter edge (`foldEdgeOf`) and the opening grows outward as one.
    *
    * It **returns** rather than reports through a callback, and the returned
    * number is the one the caller must store. `clampView` runs inside the same
@@ -276,7 +293,7 @@ export interface PageStageHandle {
    * the first press against a limit, and the readout would then be describing a
    * magnification nobody is looking at.
    */
-  setZoom: (z: number, anchor?: ZoomAnchor) => number;
+  setZoom: (z: number) => number;
   /**
    * The magnification the paper is at right now.
    *
@@ -423,6 +440,7 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
     tajweedLookup = null,
     overlay,
     foldTarget = null,
+    bound = false,
   },
   ref,
 ): JSX.Element {
@@ -493,6 +511,9 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
   // Same reason: mountPage decides a leaf's free edge after an await.
   const totalRef = useRef(total);
   totalRef.current = total;
+  // Read by `applyTransform`, which runs from gestures and tweens, not renders.
+  const boundRef = useRef(bound);
+  boundRef.current = bound;
   // And the same reason again, for the one mark that is owed to a page the
   // reader is not on. See the breadcrumb effect below for what went wrong.
   const breadcrumbRef = useRef(breadcrumbKey);
@@ -640,6 +661,17 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
     // theirs, which is legal for neither.
     const fit = fitRef.current;
     if (fit) view.current = clampView(view.current, fit);
+    // A leaf of an open book that is wider than its box stays pinned at the fold
+    // across: the gutter edge of the page sits on the gutter, and the rest runs
+    // outward over the desk. Without this a sideways pan, or a zoom about any
+    // other point, would slide one page across the other (#148).
+    const edge = boundRef.current ? foldEdgeOf(currentPageRef.current, totalRef.current) : null;
+    const over = fit && edge ? fit.contentWidth * view.current.z - fit.stageWidth : 0;
+    if (over > 0) view.current = { ...view.current, x: edge === "left" ? 0 : -over };
+    // And says so, because the stage and the book both clip to their own box and
+    // have to stop doing so on the outer side while a page hangs over the desk.
+    const stageEl = stageRef.current;
+    if (stageEl) stageEl.toggleAttribute("data-spills", over > 0.5);
     const { x, y, z } = view.current;
     cur.host.style.transform = `translate3d(${x}px, ${y}px, 0) scale(${z})`;
     // Tell the overlay where the paper is, so a thing that belongs *to* the
@@ -1424,7 +1456,7 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
   useImperativeHandle(
     ref,
     (): PageStageHandle => ({
-      setZoom(z, anchor = "center") {
+      setZoom(z) {
         const layer = layerRef.current;
         if (!layer) return view.current.z;
         // The same two things a wheel gesture used to do at its first event:
@@ -1435,15 +1467,15 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
         measureFit();
         const rect = layer.getBoundingClientRect();
         const base = { z: view.current.z, x: view.current.x, y: view.current.y };
-        // A button has no pointer to anchor to, so the caller names the point.
+        // A button has no pointer to anchor to, so the stage picks the point.
         // The lone leaf grows from its own centre; an open book pins each leaf at
-        // its gutter edge (`left`/`right`) so the fold stays put and the opening
+        // its gutter edge (`foldEdgeOf`) so the fold stays put and the opening
         // grows outward as one sheet. Vertically always the middle — the fold is
         // a vertical line, so height has no side to prefer. Through `zoomAbout`
         // rather than writing `view` directly: the anchor arithmetic §7 ⑨ fixed
         // has one implementation and this is not a second.
-        const ox =
-          anchor === "left" ? rect.left : anchor === "right" ? rect.right : rect.left + rect.width / 2;
+        const edge = boundRef.current ? foldEdgeOf(currentPageRef.current, totalRef.current) : null;
+        const ox = edge === "left" ? rect.left : edge === "right" ? rect.right : rect.left + rect.width / 2;
         zoomAbout(clampZoom(z, MIN_ZOOM, MAX_ZOOM), ox, rect.top + rect.height / 2, base);
         // The rail sits beside the selected ayah and has just been moved.
         emitSelectionRect();
@@ -2284,6 +2316,7 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
       // difference itself; see the pair of rules under `.stage[data-leaf]` in
       // the stylesheet, and why an odd→even turn made that necessary.
       data-leaf={leafSideOf(page, total) ?? undefined}
+      data-bound={bound ? "" : undefined}
       // A long press IS a gesture here (it arms the marquee), so the platform's
       // own long-press menu would fight it on every highlight.
       onContextMenu={(e) => e.preventDefault()}
