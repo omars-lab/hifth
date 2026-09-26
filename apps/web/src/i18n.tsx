@@ -111,7 +111,7 @@ export type { EditionCopy };
  *  these unions are declared by the components that own the behaviour, and an
  *  index into these records stops compiling the day one of them gains a case. */
 type Direction = "loop" | "earlier" | "later" | "root";
-type NoticeKind = "pack-gone" | "capped" | "install-ios" | "install-prompt" | "best-effort";
+type NoticeKind = "pack-gone" | "capped" | "install-ios" | "install-prompt";
 
 /** One coach card: the glyph belongs to the component, the words to the language. */
 export interface CoachStep {
@@ -143,6 +143,18 @@ export interface Strings {
   langSectionNote: string;
   /** Accessible name of the switch, naming the language it moves to. */
   langSwitchTo(other: string): string;
+
+  /* ---- the page bar's spread switch --------------------------------------- */
+  pagebarSectionTitle: string;
+  pagebarFisheyeLabel: string;
+  pagebarFisheyeNote: string;
+  /* ---- the tips, started from settings (owner, 2026-09-25) ---------------- */
+  tipsSectionTitle: string;
+  tipsShow: string;
+  tipsNote: string;
+  /** On/off, for the state word beside a two-state switch. */
+  stateOn: string;
+  stateOff: string;
 
   /* ---- chrome ------------------------------------------------------------- */
   about: string;
@@ -264,6 +276,18 @@ export interface Strings {
   wordLevelPending: string;
   /** DiffView's "you are here" tag on the upper verse. */
   hereTag: string;
+
+  /* ---- recitation (per-verse audio) -------------------------------------- */
+  /** Play the selected verse's recitation — the ▶ trigger's label. */
+  playAyah(label: string): string;
+  /** Pause it — the same trigger once it is sounding. */
+  pauseAyah(label: string): string;
+  /** Announced when the recitation CDN will not play the file. */
+  audioUnavailable: string;
+
+  /* ---- reference (per-verse deep link) ----------------------------------- */
+  /** Open the selected verse's page in the Quranic Universal Library — the ↗ link. */
+  qulVerse(label: string): string;
 
   /* ---- highlighted range -------------------------------------------------- */
   rangeAria(title: string, links: number): string;
@@ -525,10 +549,65 @@ export interface Strings {
   arrivedJuz(juz: number, page: number): string;
   /** …and where it did not, because that was the first or last juz we hold. */
   juzEdge(juz: number): string;
+
+  /* ---- bookmarks: ribbons on the page, and tidying them from the page map -- */
+  bmDrop: string;
+  /** The red seam's name: where the reader left off. */
+  bmSeam: string;
+  /** A folded corner's name: tapping it unfolds the corner and lifts the page's bookmarks. */
+  bmUnfold(count: number): string;
+  bmUnfolded(count: number): string;
+  bmUndo: string;
+  /** Said when an unfold is undone. */
+  bmRestored: string;
+  bmRibbon(name: string): string;
+  bmDrawerTitle: string;
+  bmNameLabel: string;
+  bmSaveName: string;
+  bmMoveTo(label: string): string;
+  bmLift: string;
+  bmAddAnother: string;
+  bmHistory: string;
+  /** One line of a bookmark's history: what happened, the day, the page. */
+  bmEvent(what: "dropped" | "renamed" | "moved" | "opened", at: number, page: number): string;
+  bmDropped(name: string): string;
+  bmLifted(name: string): string;
+  bmRenamed(name: string): string;
+  bmMoved(name: string, page: number): string;
+  bmNotSaved: string;
+  bmHead: string;
+  bmCount(n: number): string;
+  bmGroup(surah: number, n: number): string;
+  bmOpen(name: string, page: number): string;
+  bmClear: string;
+  bmClearSurahAria(surah: number): string;
+  bmClearAll: string;
+  bmConfirmAll(n: number): string;
+  bmConfirmSurah(n: number, surah: number): string;
+  bmCancel: string;
+  bmCleared(n: number): string;
+  bmSave: string;
+  bmLoad: string;
+  bmLoaded(n: number): string;
+  bmLoadBad: string;
+  toolbarLabel: string;
+  toolSelect: string;
+  toolHighlight: string;
+  toolBookmark: string;
+  /** The tool that is on, named: printed on the bar and announced. */
+  toolOn(name: string): string;
+  toolBookmarkHint: string;
+}
+
+/** The reader's own calendar day for a moment, as the `YYYY-MM-DD` `longDay` reads. */
+function localDay(at: number): string {
+  const d = new Date(at);
+  const p = (v: number) => String(v).padStart(2, "0");
+  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
 }
 
 /* ------------------------------------------------------------------------- */
-/* The assembler                                                              */
+/* The assembler                                                            */
 /* ------------------------------------------------------------------------- */
 
 /**
@@ -572,6 +651,15 @@ export function buildStrings(lang: Lang, m: Catalog): Strings {
     langSectionTitle: m.langSectionTitle,
     langSectionNote: m.langSectionNote,
     langSwitchTo: (other) => m.langSwitchTo({ other }),
+
+    pagebarSectionTitle: m.pagebarSectionTitle,
+    pagebarFisheyeLabel: m.pagebarFisheyeLabel,
+    pagebarFisheyeNote: m.pagebarFisheyeNote,
+    tipsSectionTitle: m.tipsSectionTitle,
+    tipsShow: m.tipsShow,
+    tipsNote: m.tipsNote,
+    stateOn: m.stateOn,
+    stateOff: m.stateOff,
 
     about: m.about,
     wordmark: m.wordmark,
@@ -640,6 +728,11 @@ export function buildStrings(lang: Lang, m: Catalog): Strings {
     openOnQulAria: (label) => m.openOnQulAria({ label }),
     wordLevelPending: m.wordLevelPending,
     hereTag: m.hereTag,
+
+    playAyah: (label) => m.playAyah({ label }),
+    pauseAyah: (label) => m.pauseAyah({ label }),
+    audioUnavailable: m.audioUnavailable,
+    qulVerse: (label) => m.qulVerse({ label }),
 
     rangeAria: (title, links) => m.rangeAria({ title, links }),
     rangeEmpty: m.rangeEmpty,
@@ -769,10 +862,6 @@ export function buildStrings(lang: Lang, m: Catalog): Strings {
         body: m["notices.install-prompt.body"],
         action: m["notices.install-prompt.action"],
       },
-      "best-effort": {
-        title: m["notices.best-effort.title"],
-        body: m["notices.best-effort.body"],
-      },
     },
     dismissNotice: m.dismissNotice,
     dismiss: m.dismiss,
@@ -874,6 +963,56 @@ export function buildStrings(lang: Lang, m: Catalog): Strings {
     arrivedZoom: (percent) => m.arrivedZoom({ pctText: n(percent) }),
     arrivedJuz: (juz, page) => m.arrivedJuz({ juzText: n(juz), page }),
     juzEdge: (juz) => m.juzEdge({ juzText: n(juz) }),
+
+    bmDrop: m.bmDrop,
+    bmSeam: m.bmSeam,
+    bmUnfold: (count) => m.bmUnfold({ count, countText: n(count) }),
+    bmUnfolded: (count) => m.bmUnfolded({ count, countText: n(count) }),
+    bmUndo: m.bmUndo,
+    bmRestored: m.bmRestored,
+    bmRibbon: (name) => m.bmRibbon({ name }),
+    bmDrawerTitle: m.bmDrawerTitle,
+    bmNameLabel: m.bmNameLabel,
+    bmSaveName: m.bmSaveName,
+    bmMoveTo: (label) => m.bmMoveTo({ label }),
+    bmLift: m.bmLift,
+    bmAddAnother: m.bmAddAnother,
+    bmHistory: m.bmHistory,
+    // "opened" is spelled `other` for the same reason "link" is in `via`.
+    bmEvent: (what, at, page) =>
+      m.bmEvent({
+        what: what === "opened" ? "other" : what,
+        dayText: longDay(localDay(at), lang),
+        page,
+      }),
+    bmDropped: (name) => m.bmDropped({ name }),
+    bmLifted: (name) => m.bmLifted({ name }),
+    bmRenamed: (name) => m.bmRenamed({ name }),
+    bmMoved: (name, page) => m.bmMoved({ name, page }),
+    bmNotSaved: m.bmNotSaved,
+    bmHead: m.bmHead,
+    bmCount: (count) => m.bmCount({ n: count, nText: n(count) }),
+    bmGroup: (surah, count) =>
+      m.bmGroup({ surah: fmtSurahName(surah, lang), nText: n(count) }),
+    bmOpen: (name, page) => m.bmOpen({ name, page }),
+    bmClear: m.bmClear,
+    bmClearSurahAria: (surah) => m.bmClearSurahAria({ surah: fmtSurahName(surah, lang) }),
+    bmClearAll: m.bmClearAll,
+    bmConfirmAll: (count) => m.bmConfirmAll({ n: count, nText: n(count) }),
+    bmConfirmSurah: (count, surah) =>
+      m.bmConfirmSurah({ n: count, nText: n(count), surah: fmtSurahName(surah, lang) }),
+    bmCancel: m.bmCancel,
+    bmCleared: (count) => m.bmCleared({ n: count, nText: n(count) }),
+    bmSave: m.bmSave,
+    bmLoad: m.bmLoad,
+    bmLoaded: (count) => m.bmLoaded({ n: count, nText: n(count) }),
+    bmLoadBad: m.bmLoadBad,
+    toolbarLabel: m.toolbarLabel,
+    toolSelect: m.toolSelect,
+    toolHighlight: m.toolHighlight,
+    toolBookmark: m.toolBookmark,
+    toolOn: (name) => m.toolOn({ name }),
+    toolBookmarkHint: m.toolBookmarkHint,
   };
 }
 

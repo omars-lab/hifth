@@ -161,6 +161,35 @@ it — the scorer will refuse, but the reason is worth knowing anyway: it would 
 day's answers against another day's measurement, which is the single failure this whole
 naming exists to make loud.
 
+## Replaying one, and the receipt beside it
+
+Re-scoring says what the number is today. It does not, on its own, say whether that is the
+number we published. The thing that does is a **receipt** — `<ruling>.replay.json`, beside the
+ruling — holding what the scorer said on the day it was recorded: the fingerprint of the
+displacements it read, the fingerprint of the grading code, the headline, and every line it
+printed. One command rebuilds the sitting, scores it again and lays the two side by side:
+
+```
+make rescore RULING=2026-08-12T1650-placement-residual-by-hand.seed23
+make rescore                                        # lists every file here and what it is
+```
+
+It exits 0 only when the input, the code and the headline all agree, and names the one that
+does not otherwise. A ruling with no receipt is *unstamped* — there is nothing to check a
+replay against — and the command says so and stops rather than inventing a record to agree
+with. Someone on the project writes the receipt once, with
+`node packages/etl/scripts/replay-ruling.mjs <id> --record`, and commits it; a grader change
+that is meant to move a number is re-recorded the same way, so the move lands in a diff.
+
+What it can and cannot do is a fact about what is committed. A **raw sitting** — a placing
+session or a forced choice — replays, because its answers are keyed by trial and its
+displacements are in this directory; the rebuild also reads the word-corpus pages the marks come
+from, which are a pinned download (`pnpm --filter @hifth/etl build:words --fetch`) whose hash is
+committed and checked on fetch. A **settled table** does not: it was made from a transcript and
+from a measurement of every mark on every page, and neither is committed — the measurement is
+rebuilt, not stored. A settled table can be re-counted from its own rows; it cannot be
+re-scored, and the command refuses it in those words.
+
 ## Are these committed?
 
 Yes. They contain no Qur'anic text: a ruling is page numbers, mark indices, offsets in page

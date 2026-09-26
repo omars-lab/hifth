@@ -12,11 +12,21 @@
 > mislabelling stacked inside it. They are measured apart now, and the naming question needs
 > no page and no rectangle at all — so a displacement cannot contaminate it.
 
-**Status:** a finding and a proposal. The measurement is built, run and reproducible; the
-remedy is **not applied** and the thresholds below are **not enforced anywhere**. Nothing in
-the app changes as a result of this document. What it settles is that the rectangles are
-displaced by a large, consistent, *correctable* amount, and that the correction is worth
-making before anything is drawn for a reader.
+**Status:** a finding, and a decision made on it. The measurement is built, run and
+reproducible; the remedy is **not yet applied** and the thresholds below are **not enforced
+anywhere**, so nothing in the app changes as a result of this document *yet*. What it settles
+is that the rectangles are displaced by a large, consistent, *correctable* amount, and that
+the correction is worth making before anything is drawn for a reader.
+
+> **Decided (2026-09-03): option H** — put each mark where its own ink is, and line the rest
+> up. On the drawn page ([`mark-placement.html`](mark-placement.html), also at
+> <https://blog.bytesofpurpose.com/hifth/docs/design/mark-placement.html>), the owner chose
+> the per-mark option over the line-by-line grains of §⑦ below. Those grains stay written up
+> here — H falls back to one of them (option F) wherever it cannot place a mark from ink, so
+> every word about them is still load-bearing. What changes is that §⑦ is no longer choosing
+> *between* A–I; it is describing the fallback under the chosen answer, and the open questions
+> below (the reach-for-ink cluster especially) are now the work of building H, not of deciding
+> whether to.
 
 ---
 
@@ -867,7 +877,7 @@ Cost: the correction no longer fits in the four numbers a page already carries, 
 small table of its own beside them, and everything that places a rectangle has to read it. That
 is the real price of E and F both, and it is what §⑩ ⑨ is holding open.
 
-### Option F — record a printed line that is allowed to tilt · **recommended**
+### Option F — record a printed line that is allowed to tilt · **the fallback under H**
 
 The same as E, except that a line's move is permitted to change gradually from one end of the
 line to the other rather than being one number for the whole line. Four numbers a line instead
@@ -1374,18 +1384,59 @@ re-derives it or checks it. That is the same shape of problem as the fit residua
 recorded number nobody re-validates — and it deserves the same answer a gate gives everything
 else here: re-derive offline from committed bytes and fail on drift.
 
-### ③ Do the pages count the marks they should · **open**
+### ③ Do the pages count the marks they should · **answered**
 
-An entirely separate and much cheaper check, borrowed from §⑤: does each page carry the number
-of marks of each name that the text says it should, in the order it says? It would catch
-missing and duplicated marks, which no geometric score can, and it is a few hours of work.
+An entirely separate and much cheaper check, borrowed from the table that names what the print
+draws for each written mark: does each page carry the number of marks of each name that the text
+says it should? It would catch missing and duplicated marks, which no geometric score can,
+because geometry can only be wrong about a mark that is *there* — a mark never drawn has no box
+to be in the wrong place.
 
-### ④ Which of the two printings' fonts produced the pages · **open**
+**Answered 2026-09-02.** A census over all 326,515 marks took the count straight from each word's
+own letters — the marks the text calls for — and compared it to the marks the print actually drew,
+without going anywhere near which mark sits on which letter. **86,962 of 86,965 words carry
+exactly the marks their text calls for.** The class of error no geometry can see — a mark simply
+absent, or one drawn twice — is empty save for three words, and those three are not a new finding:
+they are the same three the [naming check](mark-labels.md) already sets aside, where the print and
+the bare text disagree about how many marks a hamza wants. Two are missing the hamza the text
+writes on an initial alef; one is a seated-hamza cluster where the print adds two marks the plain
+codepoints do not enumerate. Both are the same word each time it occurs, so they are the print's
+own rendering habit, not scattered loss — but whether the print or the text is right about those
+three is a reader's call, not a counting tool's, and it belongs to the print oddities a hafiz is
+asked to look at.
+
+This is the count half; it is deliberately blind to order and placement, which are where a mark
+*sits* and are answered by the correction fit and the naming pairing. It is also a second,
+independent path to the corpus: where the naming check reaches names through the ligature join and
+*sets a count that does not line up aside*, this one expands the text directly and *reports* the
+mismatch, because the count is the whole question. Both agreeing on 86,962 is worth more than
+either alone.
+
+**Answered by** `packages/etl/scripts/probe-mark-counts.mjs` (`pnpm probe:mark-counts`), which
+writes the evidence page and exits non-zero on any page short a mark or long one.
+
+### ④ Which of the two printings' fonts produced the pages · **answered**
 
 If the shipped pages came from the publisher's per-page fonts, the smallest thing addressable
 in that source is a whole word, and one of the cross-checks in §⑧ is impossible in principle
 rather than merely awkward. The two candidate sources differ in a single readable number, so
 this is settled by looking, not by arguing.
+
+**Answered by** looking. The shipped pages are not per-page word fonts at all: every one of the
+604 `apps/web/public/assets/pages/hafs-kfqc/*.svg` files is flattened, ayah-tagged vector artwork
+whose finest addressable unit is the whole ayah — each carries `surah`, `ayah` and `number`
+attributes on its ayah polygons (6,236 of each across the book, one per ayah) plus `ayah:x`/`ayah:y`
+anchors, and nothing per-word, per-glyph or per-ligature: no `<text>`, no `<use>`, no `font-family`,
+no `@font-face`. Word geometry is not read from these pages at all; it comes from a *separate*
+per-ligature `<path data-text>` corpus (`MushafDatabase-Ligature-Based-SVG`, SVG V1.01), which is
+measurable outline geometry, not a font. Both sources are the **V2 / 1421H** printing, and that is
+the single readable number settled by looking: the pagination cross-check runs the four bands
+where V1/1405H and V2/1421H diverge plus controls and lands 56/56
+(`packages/etl/data/pages/ligature-svg.probe.json`, verdict `same-print`;
+`packages/etl/scripts/probe-ligature-print.mjs`). So the §⑧ “ask the font, not the picture”
+cross-check is not merely awkward against the shipped pages — it has no font to ask; it stays
+rejected on its own independent grounds (shadda-merged marks share no separate glyph, and
+contextual-variant outlines).
 
 ### ⑤ What separates the look-alike pairs · **open**
 
@@ -2267,7 +2318,7 @@ record; the ruling report has a test that a tapped mark and a hand-moved one app
 separate headings; and the scorer has one that a tap is filed under *pointed* and not both hand
 words while the fault rate still counts it.
 
-### ㉒ Whether the weakest matches go wrong by class rather than at random · **open**
+### ㉒ Whether the weakest matches go wrong by class rather than at random · **answered**
 
 The correction places each mark from its own printed ink and accepts the match when the
 rectangle and the ink overlap by more than 0.55. The marks that clear that bar only just have
@@ -2295,6 +2346,35 @@ on the hamza — which §④ names as the mechanism and does not test.
 What this must **not** do is become a per-class correction fitted to sixty marks. Eleven hamzas
 from two bands are enough to say *look here*; they are not enough to edit the placement of
 326,515 marks.
+
+**Answered on 2026-09-03, and the answer was the tail — hamza is not even a bad member of it.**
+The first of the two steps was taken: the sideways displacement was re-measured for every mark
+the search places across the whole book — sixteen thousand hamzas among three hundred thousand
+placed marks — and sorted the same way the sitting sorted its sixty, by how convincingly the ink
+matched. In every band of match quality the hamza sits at or below the middle of the pack. Its
+typical sideways offset is a little under half a page unit where the placed marks as a whole run
+a little over, and the share of hamzas that land more than three-quarters of a unit out sideways
+is the *lowest* of any common mark — about two in five, against a slightly larger share for
+fatha, kasra, shadda and sukun. In the barely-accepted band the sitting drew its alarm from — an
+overlap just above the 0.55 bar — the hamza is the fourteenth most displaced of seventeen kinds
+of mark, placed better than fatha and kasra and far better than the marks that genuinely struggle
+there: a lone waw drawn small is off by more than a whole unit, a shadda or a doubled fatha by
+better than four-fifths, against the hamza's four-tenths.
+
+The one thing the sitting saw that is real is the shared direction: every mark it moved went the
+same way, because the print sets its whole text a little low and a little to one side, so the
+lean is common to every class and the hamza's share of it is if anything milder than the
+shadda's or the kasra's. What eleven marks could not show is that four-tenths of a unit is the
+*ordinary* barely-accepted hamza and the sitting's 1.077 was a draw from the long end of that
+spread — the whole-book middle in that same band is four-tenths, and the eleven simply landed
+high. So the halving between the two bands and the eleven-in-one-direction were both real and
+both a fact about the weak tail and the common lean, not about the hamza. There is no class
+leaning one way to correct for, which is what §④'s refutation from the ink and §㉓'s
+class-by-class residue had already said, and what a per-class term fitted to sixty marks would
+have got wrong. The second step — testing whether the search settles on the letter a hamza sits
+on rather than on the hamza — is therefore not reached: it was the remedy for a hamza fault that
+the first step shows is not there. The whole-book scored rows this rests on are the ones a fresh
+run of the ink scorer reproduces mark-for-mark; checked on a page, the difference was zero.
 
 ### ㉓ Whether the marks we cannot place from ink are wrong in one way or in two · **answered**
 
@@ -2462,7 +2542,7 @@ everything downstream reads it as meaning, and by the same test file: four cases
 answer never exceeds the distance given, at four different distances, plus one asserting it
 lands on the boundary exactly when the ink is out of reach.*
 
-### ㉖ The doubled marks are drawn too small, and no amount of moving them will help · **confirmed**
+### ㉖ The doubled marks are drawn too small, and no amount of moving them will help · **fixed**
 
 The one finding of ㉓ that survived the corpus, and it survived because it is not about
 position at all. Carried out of ㉓ so that the refuted part and the confirmed part stop
@@ -2618,6 +2698,22 @@ notice one; what the free half changes is that the repair now has a bounded targ
 sixth-of-refused-doubled minority) and a proof it must not touch the accepted marks, which are
 already the right size.
 
+**Closed by, 2026-09-04.** The per-mark size repair this item asked for — measure the extent,
+do not add a constant — is now what the app draws. For every mark the ink search refuses, the
+build reaches for the ink: it unions the print pieces whose middle sits inside the shipped
+rectangle and draws that union when the guard ㉞ settled (1.75/0.571) trusts its area, the exact
+mechanism ㉘ through ㉟ arrived at. Because the reach fires *only* where the search already
+refused, the accepted doubled marks the free half above proved were already the right size are
+left byte-for-byte untouched — the whole-book asset rebuilt to the identical bytes when the
+reach tier was wired in, so nothing outside the refused slice moved. Across the book this ships
+as 68 marks drawn on reached-for ink; a sample of them was drawn on the actual page artwork and
+looked at, each rectangle sitting on its own mark's strokes rather than a neighbour's. What now
+notices a regression: `packages/etl/scripts/lib/piece-union.test.mjs` covers the union, the
+symmetric guard, and the tier that reaches only for a refused mark carrying a trusted candidate;
+and `scripts/gate-mark-placements.mjs` reconciles the committed shards to the pin, source tags
+and all. The heading stays wrong-as-first-written, as this item's convention has kept it: *drawn
+too small* was refuted twice, and the fix is a per-mark size, not a size increase.
+
 ### ㉗ Counting what a reader pressed stopped meaning anything when tapping the ink was added · **fixed**
 
 [The sitting above](../validation/rulings/2026-08-17-placement-weak-size-part1.seed23.settled.json)
@@ -2667,7 +2763,7 @@ the ruling report has a test that the hand-moved and pointed kinds print under s
 headings; and the scorer has one that a tap stays out of the nudges-and-drags count and is
 named apart.
 
-### ㉘ A rule that reaches for the ink, rather than resizing toward it, was checked against the whole book · **confirmed**
+### ㉘ A rule that reaches for the ink, rather than resizing toward it, was checked against the whole book · **answered**
 
 Item ㉖ found that doubled marks want their size fixed and their position left alone, and
 scored candidates that resize the shipped rectangle toward the reader's own. But fifty-seven
@@ -2706,7 +2802,7 @@ production output the way ㉔ and ㉕ were, which is the check that would make t
 about the accepted 99.9% a guarantee rather than a sample. That is the next step, tracked
 alongside the rest of this item's population split.
 
-### ㉙ Run as an escalation over every mark the book currently refuses, the rule mostly holds up and one way it does not · **confirmed**
+### ㉙ Run as an escalation over every mark the book currently refuses, the rule mostly holds up and one way it does not · **answered**
 
 The step ㉘ left owed. The current corpus refuses exactly 329 marks — the same population ㉖'s
 table counts, so nothing has drifted between the two — and the rule was run as an escalation:
@@ -2740,7 +2836,7 @@ something that refuses a piece union that has grown implausibly large relative t
 already ship, the same way it already refuses to guess when it finds no ink at all, before the
 outlier above stops being a risk on every mark rather than a known one on this one.
 
-### ㉚ The same sitting, sat the rest of the way, says the outlier in ㉙ was not one mark · **confirmed**
+### ㉚ The same sitting, sat the rest of the way, says the outlier in ㉙ was not one mark · **answered**
 
 The sitting behind ㉖ and ㉙ was only two thirds sat — sixty-one of its ninety marks. It has
 since been finished: the same reader, the same report, continued rather than re-dealt,
@@ -2771,7 +2867,12 @@ fathatan, on four pages between 115 and 260. Folded into the running note on ite
 which they extend rather than reopen: nothing here says the answer, only that it is still being
 asked in the same shape.
 
-### ㉛ The marks that ran out of room and still shipped as placed were never looked at, until now · **confirmed**
+**Shipped 2026-09-04.** The rule these three items measured — reach for the ink under a refused
+mark's window, guarded — is now built and drawn by the app, so all three move from *confirmed
+finding* to *answered*. The guard's own design and cutoff are ㉜ and ㉞; the wiring and its yield
+are ㉟, where the *Closed by* note lives.
+
+### ㉛ The marks that ran out of room and still shipped as placed were never looked at, until now · **blocked**
 
 ㉕ found the code bug: a mark whose search ran out of room could still slip past the check meant
 to catch that and ship as if its own ink had confidently answered. The bug is fixed, but fixing
@@ -2806,6 +2907,29 @@ the worst of it, is exactly what the next sitting would answer — and unlike th
 population, which is already known to be almost entirely wrong, this is a population that ships
 today as trusted and has never had a rate put on it at all.
 
+**Were the eighty a fair draw, or the worst of it? On everything measurable without an eye, a
+fair draw.** No eye touched the 259, and no machine can supply the reader's complaint that the
+box was wrong — that is exactly what a sitting is. But the question "did these eighty happen to
+be the worst of it" can be asked of the features that do not need an eye: the search score, how
+far the search was allowed to look, the ink under the mark, and the match before the search ran.
+On every one of them the eighty that were sat and the 259 that were not are the same population.
+The sat marks match at a median score of 0.913, the unsat at 0.910; the ink under them is the
+same to three decimals; four out of five in each group ran out of room on the sideways axis, not
+the vertical. A standard test for "are these two samples drawn from one distribution" comes back
+*yes* on every feature — the largest gap between the two never reaches even two-thirds of the
+threshold that would flag a real difference.
+
+So the eighty are not the worst of the 339 hiding the rest; they are an ordinary slice of it.
+That does not prove the other 259 each carry a complaint — only an eye can say that — but it
+removes the one worry that would make the eighty untrustworthy: there is no measurable way in
+which the unsat marks are a different, gentler population. If the eighty were all a little wrong,
+the 259 that look identical by every number are very unlikely to be all right. The decision this
+leaves is no longer "sit 259 to find out"; it is "ship a uniformly-small wrong as-is, or sit a
+small confirming sample, knowing the population is homogeneous." The whole comparison is in
+[`docs/validation/rulings/2026-09-04-edge-still-placed-sample-representativeness.json`](../validation/rulings/2026-09-04-edge-still-placed-sample-representativeness.json),
+rebuilt by its script from the placement rows and the two committed sittings; it holds only
+scores, page numbers and counts, no ink and no scripture.
+
 **Where the eighty answers actually are.**
 [`docs/validation/rulings/2026-08-17-placement-edge-still-placed.seed23.settled.json`](../validation/rulings/2026-08-17-placement-edge-still-placed.seed23.settled.json)
 carries all eighty, mark by mark — the box we ship, the box the reader settled on, and how far
@@ -2814,7 +2938,80 @@ offsets, which is what a ruling is allowed to hold. It cannot show the rectangle
 mark; only a page that draws the print itself could do that, and the next section says plainly
 that no such page exists yet for this document to point to.
 
-### ㉜ What should refuse a piece union too large to trust · **open**
+**The owner's call, 2026-09-05: fix them, do not just measure them.** Shown the choice — ship
+the uniformly-small wrong as it stands, sit a small confirming sample first, or fix the placement
+for all 339 — the owner chose to fix. The small fault is worth removing, not just recording. That
+turns this from a question into work.
+
+**And the eighty hands say the fix has a direction.** The reader did not move these marks at
+random. On seventy-one of the eighty sideways, and sixty-one of seventy-nine vertically, the
+reader pushed the box *further the same way the automatic search had already been pushing it* —
+mean agreement 0.66 on a scale where one is the same direction and zero is a right angle. This is
+the section's own principle turned into a number: when a mark runs out of room, the search has
+stopped at an arbitrary wall while still getting better, so the direction it was heading is
+trustworthy and only the distance is missing. The eighty hands measured the missing distance —
+a median of about 0.68 units further, in the direction the search was already going. So a fix
+does not have to guess where each of the 339 belongs; it has to let each one keep going the way
+its own search was already pointing, until the ink says stop. What the fix must still settle is
+*how* it finds where to stop — by letting the ink search look further, or by the distance the
+eighty hands measured — and that is the next section's work, not this one's.
+
+**The pivot, 2026-09-05: letting the search look further cannot be the way, and eighty are
+already done.** Two things turned up the moment the fix was actually built against the machinery
+rather than sketched, and together they narrow the work and change the choice.
+
+*First, letting the ink search look further cannot move these marks onto the spot the reader
+wants — and this is provable, not a guess.* When a mark ran out of room, the search did not simply
+stop at the wall; it was already handed a second, much wider look. That wider look reaches out
+eight units, and the furthest any of the eighty readers ever moved a mark was 3.2 units, with a
+median of about 0.68. So every spot any reader preferred was inside the wider search's reach the
+whole time — and on all 339 the wider search still declined to go there and kept the box where it
+was. The reason is the one thing the section keeps circling: the search picks the spot where the
+mark's own ink overlaps best, and the reader picks the spot where the mark *belongs to the eye*,
+and on these marks those are not the same place. The wider search settles it — given room to reach
+the reader's spot, the best-overlap rule looked at it and preferred a different one. There is no
+cleverer automatic search hiding behind this, because the only search there is has already looked
+where the reader points and disagreed. That closes the first of the two ways this section left
+open: the ink search is already at its own best answer for these marks.
+
+*Second, of the 339, eighty are already fixed in what ships.* When a reader sits and settles a
+mark by hand, the app draws it exactly where the reader put it, above whatever the automatic
+search chose — and the two sittings behind this section settled eighty of the 339. Every one of
+those eighty ships today at the reader's own box, not the search's. So the population still
+carrying the small, uniform wrong is not 339 marks; it is the 259 nobody has sat.
+
+*So the choice the owner's "fix them" turns into is narrower and more honest than the one first
+shown.* The automatic search cannot be improved for these — that door is now closed by proof — so
+the 259 can only be set right one of two ways. A hafiz sits them by hand, the way the eighty were,
+which is a reading of each mark and the only thing that carries the reader's own judgement onto
+the page. Or the single direction-and-distance the eighty hands measured — keep going the way each
+mark's own search was already pointing, by about two-thirds of a unit — is applied to all 259
+sight-unseen. The second is an approximation, not a reading: a blanket push sits some marks better
+and some worse, because the eighty hands agreed on the *direction* far more than on the exact
+distance, and it stakes 259 marks no eye has checked on the average of eighty that were. Which of
+those two the 259 are worth is the live question now, and it is the owner's, because the premise
+of the first ask — that a better automatic placement was somewhere to be found — is the thing that
+turned out not to be true.
+
+**Decided, 2026-09-05: a hafiz sits the 259 by hand.** Shown the narrowed choice — a hafiz
+sits them, or a blanket nudge is applied to all 259 sight-unseen, or the 259 are left as they
+are for now — the owner chose the hand. It is the only fix that carries a reader's own judgement
+onto the page rather than the average of eighty other readers', and it doubles as the answer to
+the owner's own condition for caring at all: whether an offset this small is visible enough to a
+hafiz to matter is a thing only a hafiz looking can settle, and the looking *is* the fix. A survey
+of how other projects place marks (linked below) found nothing that changes this. Everyone who
+places marks cheaply does it by shipping the letters as live text and letting a font carry the
+mark — the one thing this app does not do — and the only project that works from the printed
+artwork the way this one does reaches for the very same ink-geometry signal our own search uses.
+So there is no automatic method in the field that our search has not already run to the end of,
+and the code is left with nothing owed here: the eighty already ship at the reader's box, and the
+259 now wait on a person. The sitting itself needs no new tool — the report the eighty were sat
+from can draw the same edge population at the rectangle it ships, skip the eighty already answered,
+and hand out the remaining 259 in slices a reader can work through across sittings — so when a
+hafiz is free it is one command, not a rebuild. Prior art:
+[`docs/research/prior-art-mark-registration.md`](../research/prior-art-mark-registration.md).
+
+### ㉜ What should refuse a piece union too large to trust · **fixed**
 
 **None of the rule ㉘–㉚ describe has been written yet.** Everything above was scored from a
 script that was run twice and never checked in — once as a sample, once as an escalation — so
@@ -2868,7 +3065,17 @@ run the rule, once guarded, on the 216 of 229 never-sat marks it could answer, o
 the guard itself has been checked against ground truth first. Both remain for whoever writes and
 checks the rule this designs.
 
-### ㉝ The guard ㉜ describes catches one disagreement in four; read both ways, it catches three · **confirmed**
+**Closed by, 2026-09-04.** The guard this item designed is built and shipped. It lives in one
+place both the measuring script and the app's build import — `packages/etl/scripts/lib/piece-union.mjs`
+— so a reader's measurement and the shipped rectangle can never be computed a hair apart. It
+refuses a candidate whose area sits past 1.75× or under 0.571× of the shipped rectangle *in
+either direction* — the symmetric shape ㉝ found the one-sided design here missed, at the cutoff
+㉞ settled — and now runs inside the placement build for every refused mark. Tested directly:
+a candidate at the ceiling and at the floor is refused, one just inside either bound trusted, and
+the reach tier is chosen only when a refused mark carries a candidate the guard believes. The
+re-deal ㉟ made is wired: the endorsed corrections are what the app draws.
+
+### ㉝ The guard ㉜ describes catches one disagreement in four; read both ways, it catches three · **answered**
 
 **What was run.** The piece-union script ㉜ needed but never had was rebuilt from ㉘'s own description
 rather than recovered, since nothing of the twice-run original survives, and scored against all 89 marks
@@ -2909,7 +3116,7 @@ run a guarded rule on the 216 of 229 never-sat marks it could answer, or wait fo
 checked against ground truth first. This is that check. Running the result on the untested population is
 still someone else's call.
 
-### ㉞ Doubling the ground truth moves the cutoff, not just confirms it · **confirmed**
+### ㉞ Doubling the ground truth moves the cutoff, not just confirms it · **answered**
 
 **What was run.** ㉝ scored 89 marks and said plainly its cutoff was "a line, not a number checked
 against any wider population." A second wrong-size sitting has since finished —
@@ -2943,7 +3150,7 @@ open — whether to run the now-twice-checked guard on the 216 of 229 never-sat 
 or hold for weak-size-part2's roughly 90 still-unsat marks first, which would put a third of the
 329-mark population's own ground truth behind the number rather than a little over half.
 
-### ㉟ The re-deal, made: run the checked guard now, and record what it decides · **confirmed**
+### ㉟ The re-deal, made: run the checked guard now, and record what it decides · **fixed**
 
 **The call ㉜, ㉝ and ㉞ each left open is now made: run the guard.** Three items in a row said the
 same thing — the guard has been checked, but running its verdicts on the marks nobody has ever sat is
@@ -2980,6 +3187,56 @@ what the app draws. That is the same act as adopting option H of the still-open 
 decision — putting each mark where its own ink is — and that decision is the owner's to rule, not this
 measurement's to pre-empt. This item is the evidence that ruling needs: the guard's yield, on the marks
 no human will ever check, is 73% trusted and 27% caught. Wiring waits on the ruling; the number does not.
+
+**Closed by, 2026-09-04, and the one step this item deliberately left is now taken.** ㉟ recorded
+the guard's yield but stopped short of wiring the corrections in, because that act *is* adopting
+option H of the `mark-placement` decision. The owner ruled H on 2026-09-03, so the wiring
+followed: the build now draws each refused mark on its reached-for ink when the guard trusts it,
+and falls to the printed line's tilt otherwise — the three-tier rule described at the head of
+`build-mark-placements.mjs`. It ships as **68 marks drawn on reach**, not the 142 ㉟ measured,
+and the gap is two known and correct things: the ship asset reads each mark's *own* searched
+distance rather than the fixed three the measurement used (the ㊱ divergence below), and hand
+placements from the same ruling overlay some of what reach would otherwise draw. A sample of the
+68 was drawn on the actual page artwork and looked at before this was banked — the two fathatan
+strokes, the double-damma, the single fatha wedge, each box on its own mark's ink and none
+reaching into a neighbour. What now notices a regression: `packages/etl/scripts/lib/piece-union.test.mjs`,
+and `scripts/gate-mark-placements.mjs` reconciling the committed shards to the pin.
+
+### ㊱ The ship asset and the decision page disagree about which marks ran out of room · **fixed**
+
+Two tests in the tree ask the same question — did a mark's ink search run out of the room it was
+given? — and they answer it differently, because they read the room differently. The asset the app
+actually draws from asks each mark about *its own* reach: most marks were searched to three units, but
+the ones a wider second look rescued were searched to eight, and each mark carries the distance it was
+actually searched to. The public decision page, where option H is drawn for a reader, hard-codes the
+ordinary three-unit wall for every mark instead.
+
+They give opposite verdicts on exactly one population: a mark the wide look rescued that came to rest
+past three units but inside eight. The ship asset trusts it — rightly, because a mark searched to
+eight units that landed at three was nowhere near the edge of what it was allowed to look at, so its
+match is a real find rather than a wall it backed into. The decision page, seeing only the three-unit
+rule, would mark that same landing as *ran out of room* and show it falling back to the printed line.
+The shipped behaviour is the correct one; the divergence is only in the drawing.
+
+**What would answer it.** Reconcile the decision page's illustration with the ship asset's per-mark
+test — read each mark's own searched distance in the page's `trusted` component instead of a fixed
+three — so a reader inspecting the trusted/refused split on the page sees the same split the app
+ships. Until then the page slightly over-states how many rescued marks fall back to the line. It changes
+nothing the app draws, which is why this is a page-fidelity question and not a defect in the asset. The
+count of affected marks is the wide look's own yield: only marks the second look rescued and that
+settled between three and eight units diverge, and no other mark can.
+
+**Closed by.** The page no longer keeps its own copy of the wall. Its trusted/refused
+illustration now calls the very tests the shipped placement uses — the same out-of-room and
+refusal rule, which reads each mark's own searched distance rather than a fixed three — so the
+two cannot give different answers on any mark. It was rebuilt from the same whole-book
+displacements the app ships from, the ones that carry the wider second look. The drawn page is
+unchanged, because it has no refused marks to redraw; what moved is the book-wide count the page
+reports below the picture, from 1,877 marks handed back to the printed line down to 668 — 99.8%
+placed from their own ink — which is the split the app actually makes. A test holds the rule in
+place: a mark allowed eight units that comes to rest at three is a real find, not a wall, and one
+pinned at eight is out of room; if that ever stops being true the test fails. See the issue index
+under `ship-asset-and-page-disagree-on-ran-out-of-room`.
 
 ## How can someone look at this for themselves?
 

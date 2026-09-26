@@ -292,11 +292,16 @@ the *residue*. Every script here reads more than it writes, and the difference i
 
 ---
 
-## ⑤ The seven scripts that build nothing
+## ⑤ The scripts that build nothing
 
-Diagram ① is the whole of what writes `assets/**`. The other seven scripts in
-`packages/etl/scripts/` never do — they measure, report, or are read *by* the seven that
-build. Their outputs are pins, reports and a human's afternoon.
+Diagram ① is the whole of what writes `assets/**`. Most scripts in
+`packages/etl/scripts/` never do — they measure, report, or are read *by* the ones that
+build. Their outputs are pins, reports and a human's afternoon. The authoritative census of them
+is [`etl-scripts.md`](etl-scripts.md), generated straight off the filesystem so it cannot go
+short the way a hand-kept count did (see ⑦①); the diagram below draws only the ETL core, as an
+illustration and not a tally, and a second family — the mark-registration harness that scores a
+reader's marks into the validation ledger — grew up beside it and is listed in that generated
+census rather than redrawn here.
 
 ```mermaid
 flowchart LR
@@ -313,7 +318,7 @@ flowchart LR
     smp["sample-edges.mjs<br/>20 stratified pairs, seeded"]:::rep
   end
 
-  subgraph P["probes · read the gitignored cache"]
+  subgraph P["the ETL-core probes · read the gitignored cache"]
     p1["probe-ligature-print.mjs<br/>which print does it paginate?"]:::rep
     p2["probe-word-registration.mjs<br/>does a box land on our frame?"]:::rep
     p3["probe-tajweed-words.mjs<br/>do offsets hit print words?"]:::rep
@@ -348,9 +353,11 @@ with a mus'haf open.
 | may read the 380 MB cache | **no** | yes |
 | may fail on a clean checkout | never | routinely |
 
-The four probes — `probe-encodings`, `probe-tajweed-words`, `probe-word-registration`,
-`probe-ligature-print` — measure things a gate structurally cannot, because they need bytes
-that are not in the repo and never will be. Making one a gate would either vendor the corpus
+The four ETL-core probes drawn above — `probe-encodings`, `probe-tajweed-words`,
+`probe-word-registration`, `probe-ligature-print` — measure things a gate structurally
+cannot, because they need bytes that are not in the repo and never will be. Every later probe
+reads that same gitignored cache for the same reason, which is why the prefix and not any
+count is what carries the rule. Making one a gate would either vendor the corpus
 or make CI depend on the network, and both are worse than the thing they would buy.
 
 What replaces enforcement is the pin: each probe writes its findings to a committed
@@ -387,7 +394,7 @@ regeneration.
 
 ## ⑦ Open questions, and what would answer each
 
-### ① Whether this document should be generated rather than written · **open**
+### ① Whether this document should be generated rather than written · **answered**
 
 `docs/map.json` already knows every script, and `package.json` already knows every gate.
 Diagrams ① and ③ are therefore derivable, and a hand-drawn copy of derivable facts is
@@ -397,10 +404,33 @@ orientation documents rot.
 Deliberately not done yet, and the reason is that the *prose* is the point and the prose is
 not derivable. A generator would produce four correct diagrams and none of the three
 paragraphs under ③, which are the only part that would have prevented the defects they
-describe. What would answer it: `gate:map` already validates pointers in prose files, so the
-cheap version is to cite the scripts by path here and let that gate catch a rename. If a
-script is ever added and this document does not mention it, that is the evidence the balance
-was wrong.
+describe. What would answer it: the cheap version was to cite the scripts by path here and
+let `gate:map` catch a rename — under the falsification test that *if a script is ever added
+and this document does not mention it, the balance was wrong.*
+
+**Measured on 2026-09-03: the test has fired, and silently.** `packages/etl/scripts/` now
+holds 33 scripts; this document enumerates about fourteen and draws four probes where there
+are twelve, and an entire mark-registration family — a dozen build-, probe- and score-
+scripts — is named nowhere in it. It drifted with nothing noticing, because `gate:map`
+validates the pointers that *exist*: it cannot see a script that is *absent*, so the one
+check the balance leaned on could never have caught this. §⑤ was first repaired to state a
+definition rather than carry a count, and now points at a generated census — but that only
+settles the list. Whether the diagrams themselves should be generated from the map, so no
+hand-drawn copy of derivable facts survives here at all, is what this question came down to,
+and the drift is the evidence that decided it.
+
+**Answered 2026-09-03: the census is generated; the diagrams and the prose are not.** The
+list of scripts now lives in [`etl-scripts.md`](etl-scripts.md), built straight from the files
+on disk — not from `docs/map.json`, which had itself gone short by nine — and checked by its own
+gate on every commit, so a script added without a mention moves a stamped hash and the commit is
+refused. The drift measured above cannot recur, because the check now reads the directory rather
+than the register, and a directory cannot be missing a file it contains. What stays hand-written
+is everything no register holds: the flow diagrams, whose edges are recorded nowhere, and the
+three paragraphs under ③, which are the only part that would have prevented the defects they
+describe. Generating those would first mean inventing an edge-map to derive them from — another
+hand-maintained thing that drifts, the cure carrying the disease. So the split is by what is
+actually derivable: the list is, and is now generated and gated; the topology and the reasons
+are not, and stay written.
 
 ---
 

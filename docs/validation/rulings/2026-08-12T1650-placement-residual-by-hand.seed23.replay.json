@@ -1,0 +1,28 @@
+{
+ "built": "replay-receipt",
+ "ruling": "2026-08-12T1650-placement-residual-by-hand.seed23.json",
+ "recordedAt": "2026-09-23T05:11:45.542Z",
+ "gradedBy": "packages/etl/scripts/score-mark-nudge.mjs",
+ "input": {
+  "file": "mark-shift.40pages.c8528da9.json",
+  "fingerprint": "c8528da9"
+ },
+ "code": {
+  "fingerprint": "0cc8048aa8f7",
+  "files": [
+   "packages/etl/scripts/lib/adjudication.mjs",
+   "packages/etl/scripts/lib/diacritics.mjs",
+   "packages/etl/scripts/lib/grader-code.mjs",
+   "packages/etl/scripts/lib/ink.mjs",
+   "packages/etl/scripts/lib/mark-ink.mjs",
+   "packages/etl/scripts/lib/marks.mjs",
+   "packages/etl/scripts/lib/mushaf-frame.mjs",
+   "packages/etl/scripts/lib/placement-stats.mjs",
+   "packages/etl/scripts/lib/self-test.mjs",
+   "packages/etl/scripts/score-mark-nudge.mjs"
+  ]
+ },
+ "headline": "98.3% [91.1% – 99.7%] 59/60",
+ "exit": 0,
+ "verdict": "placements docs/validation/rulings/2026-08-12T1650-placement-residual-by-hand.seed23.json\nseed 23 · reader unrecorded · 60 of 60 placed · displacements 2026-08-12 (c8528da9)\ngraded by packages/etl/scripts/score-mark-nudge.mjs · code <fingerprint> (10 files)\nmedian 7.2s a placement\n\npages these can speak for      40 placed on, of 40 this session was built over\n                               the displacements cover 40 of 604 pages (6.6%)\n                               every placement is on a page the correction was fitted to, so nothing below\n                               says whether it holds on a page nobody has measured\n\nlanded nearer our correction    98.3%  [91.1% – 99.7%]  59/60\ntypical miss, from as-shipped  1.15 units\ntypical miss, from corrected   0.39 units\n\nwhat is left over, across      x -0.073  [-0.206 – +0.060]  as 60 placements\n  · clustered by page                   [-0.223 – +0.077]  as 40 pages — read this one\nwhat is left over, down        y -0.110  [-0.215 – -0.005]  as 60 placements\n  · clustered by page                   [-0.230 – +0.009]  as 40 pages — read this one\nthis hand's own precision      0.03 units, from 9 marks placed twice (typical gap 0.04)\npull of the starting point     x -0.01  y -0.04  (0 is none, 1 is 'never moved')\nthe box was the wrong size     0/60\n\nis the proposed move the right size?\n  across                       the reader moved 0.50× as far as we propose  [-0.99× – 1.98×]\n                               proposed moves span -0.875…-0.500, sd 0.113\n  down                         the reader moved 0.91× as far as we propose  [-0.68× – 2.49×]\n                               proposed moves span -1.188…-0.813, sd 0.080\n  Undecidable from this sample. These pages propose nearly the same move as each other, so\n  nothing here separates a correction that is exactly right from one that is a fifth short —\n  and on pages like these, a wrong gain and a constant residual are the same number. Pages\n  whose corrections differ would settle it; more placements on these pages will not.\n\nwhat does not explain what is left over\n  the mark it sits on          a mean per name leaves MORE spread, not less\n                               across 0.545 vs 0.526, down 0.425 vs 0.415, over 11 names\n  where it sits on the page    t = -1.6 across, -0.5 down — a translation, not a stretch\n  how late in the sitting      t = -0.5 across, 0.2 down — no drift as it wore on\n  where it started             see the pull of the starting point above\n\nis what is left over the print, or this reader?\n  Unanswerable from one hand. Everything above measures a reader against the print and cannot\n  say which of the two it is reading. A second person on the identical build settles it.\n\nthe correction goes the right way: placements land nearer it than they do the shipped box, and the interval clears half\nthe residual is 0.13 units, larger than this hand's precision (0.03).\nThe best guess at a further correction is (-0.073, -0.110) on top of what is proposed. How much to trust it:\nClustered by page, neither component is distinguishable from nought at 95%. The direction is settled and the\ndistance is not: this says our correction may be short, not that it is. Do not apply the residual on this.\n"
+}

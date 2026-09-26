@@ -2,6 +2,16 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   Adjacency,
   Concordance,
+  bookmarksOnPage,
+  clearSurah,
+  dropBookmark,
+  liftBookmark,
+  mergeBookmarks,
+  moveBookmark,
+  openBookmark,
+  parseBookmarkFile,
+  renameBookmark,
+  toBookmarkFile,
   DEFAULT_FIELD,
   MOUNTED_PAGE_CAP,
   Resolver,
@@ -9,6 +19,7 @@ import {
   Tajweed,
   appKeyAction,
   editionMeta,
+  hizbPageIndex,
   juzOf,
   juzOfPage,
   juzPageIndex,
@@ -22,6 +33,7 @@ import {
   type AyahRange,
   type AyahRef,
   type AyahRootsShard,
+  type Bookmark,
   type Edge,
   type FieldId,
   type JumpTarget,
@@ -48,7 +60,8 @@ import { recordLook } from "./revision-store";
 import { useT } from "./i18n";
 import { useHashRouter } from "./useHashRouter";
 import { DESKTOP_QUERY, useMediaQuery } from "./useMediaQuery";
-import { PageStage, type PageStageHandle } from "./components/PageStage";
+import { PageStage, type PageStageHandle, type PageTool } from "./components/PageStage";
+import { PageToolbar, TOOL_KEYS } from "./components/PageToolbar";
 import { PageSpread } from "./components/PageSpread";
 import { EdgeGrabRails, type EdgeTurnDriver } from "./components/EdgeGrabRails";
 import { DesktopChrome } from "./components/DesktopChrome";
@@ -60,18 +73,41 @@ import { ShareSheet } from "./components/ShareSheet";
 import { OfflineNotice } from "./components/OfflineNotice";
 import { Jumper } from "./components/Jumper";
 import { EditionPicker } from "./components/EditionPicker";
-import { CoachMarks, coachDismissed } from "./components/CoachMarks";
+import { CoachMarks } from "./components/CoachMarks";
 import { Colophon } from "./components/Colophon";
 import { RevisionMap } from "./components/RevisionMap";
+import { BookmarkRibbons } from "./components/BookmarkRibbons";
+import { UndoBar } from "./components/UndoBar";
+import { BookmarkDrawer } from "./components/BookmarkDrawer";
+import { BookmarkShelf } from "./components/BookmarkShelf";
+import { useBookmarks, useSeam } from "./useBookmarks";
 import { LiveAnnouncer, useAnnouncer } from "./components/LiveAnnouncer";
 import { RootLens, RootLensTrigger } from "./components/RootLens";
+import { PlayTrigger } from "./components/PlayTrigger";
+import { QulTrigger } from "./components/QulTrigger";
+import { useVerseAudio } from "./audio";
+// The private pitch layer (see src/pitch/pitch.ts). `PITCH` is a build-time
+// constant that is false in every public build, so every guarded branch below is
+// dead code the bundler drops, and the held-copy JSON those branches would load
+// is gitignored and never deployed.
+import {
+  PITCH,
+  loadPitchSurah,
+  mergeShard,
+  commentaryFor,
+  type PitchSurah,
+} from "./pitch/pitch";
+import { CommentarySheet, CommentaryTrigger } from "./pitch/CommentarySheet";
 import { SkinToggle, TajweedLegend } from "./components/SkinToggle";
 import { PageSlider } from "./components/PageSlider";
+import { fisheyeEnabled, rememberFisheye } from "./pagebar-fisheye";
 import styles from "./App.module.css";
 
 // The app opens on page 7 (the mock's first curated page). Full page routing is
-// Loop 3; here the page follows the selection through hops.
-const START_PAGE = 7;
+// Loop 3; here the page follows the selection through hops. The private pitch
+// build instead opens on page 1 — al-Fātiḥah, the surah the demo is built around
+// — so the first thing in the room is the page we polished.
+const START_PAGE = PITCH ? 1 : 7;
 
 /** `quran/…/2:47` → its spec-§7 ref, or null if it is not a bare ayah key. */
 function refOf(key: string): AyahRef | null {
@@ -100,6 +136,13 @@ export function App(): JSX.Element {
   // Adjacency shards, fetched on demand and cached for the session (Loop 4a:
   // the ETL writes all 114, one per surah, each a few KB gzipped).
   const [shards, setShards] = useState<ReadonlyMap<number, AdjacencyShard>>(new Map());
+  // The private pitch payloads (The Study Quran commentary + curated roads),
+  // one per surah, loaded only in the pitch build. Empty everywhere else.
+  const [pitchSurahs, setPitchSurahs] = useState<ReadonlyMap<number, PitchSurah>>(
+    new Map(),
+  );
+  // Whether the commentary sheet is showing for the current selection.
+  const [commentaryOpen, setCommentaryOpen] = useState(false);
   const [page, setPage] = useState(START_PAGE);
   const [selectedKey, setSelectedKey] = useState<string | null>(null);
   // The drag-highlighted passage: its ayah keys in reading order (spec §3's
@@ -134,13 +177,11 @@ export function App(): JSX.Element {
   // shelf it is pointing at is only rendered at juz scope.
   const [revisionAt, setRevisionAt] = useState<RevisionScope | undefined>(undefined);
   /*
-   * Is the coach strip still claiming its band of the layout? Read once, from
-   * the same storage the strip reads, so the two agree on the very first frame
-   * — a notice that appears and is then pushed down a tick later is worse than
-   * either strip alone. Private mode throws and `coachDismissed` answers true,
-   * which is the right default here too: no strip, so nothing to hold.
+   * Is the tips strip up? It no longer opens by itself on a first visit (the
+   * owner's call, 2026-09-25): it starts closed and opens only from the button
+   * in settings, so a first open goes straight to the page.
    */
-  const [coachUp, setCoachUp] = useState(() => !coachDismissed());
+  const [coachUp, setCoachUp] = useState(false);
 
   const stageRef = useRef<PageStageHandle>(null);
   /*
@@ -258,12 +299,11 @@ export function App(): JSX.Element {
     // caller's request, because a turn ends at fit and a hop with the book open
     // ends at fit too (see `navigateTo` below) — mirroring the landed value keeps
     // the two leaves agreeing without this having to know which verb ran.
-    // The facing leaf is the left-hand page of the opening, so its gutter is its
-    // right edge: pinned there, it grows leftward, away from the fold. (The live
-    // leaf is the right-hand page and pins at its left edge, below.) The ref is
-    // null unless the book is open, so this is a no-op on a lone leaf.
+    // Each leaf of an open book grows away from the fold on its own side, which
+    // it works out from its page (the `bound` prop). The ref is null unless the
+    // book is open, so this is a no-op on a lone leaf.
     const mirrorFacing = (): void => {
-      facingStageRef.current?.setZoom(stageRef.current?.zoomNow() ?? 1, "right");
+      facingStageRef.current?.setZoom(stageRef.current?.zoomNow() ?? 1);
     };
     const settle = <T,>(work: Promise<T> | undefined, missing: T): Promise<T> =>
       (work ?? Promise.resolve(missing)).then((landed) => {
@@ -302,11 +342,12 @@ export function App(): JSX.Element {
       // With the book open, each leaf pins at its gutter edge so the opening
       // grows outward from the fold as one sheet rather than each leaf swelling
       // from its own middle — which crushed the fold and pushed the outer margins
-      // off-screen. The live leaf is the right-hand page (gutter on its left); on
-      // a lone leaf there is no fold, so it grows from its centre.
+      // off-screen. The live leaf can be either side of the opening (an even page
+      // is the left-hand one), so the stage picks its own edge; on a lone leaf
+      // there is no fold, so it grows from its centre.
       setZoom: (z: number) => {
-        const applied = stageRef.current?.setZoom(z, bookOpenRef.current ? "left" : "center") ?? 1;
-        facingStageRef.current?.setZoom(z, "right");
+        const applied = stageRef.current?.setZoom(z) ?? 1;
+        facingStageRef.current?.setZoom(z);
         setZoom(applied);
       },
     };
@@ -346,6 +387,13 @@ export function App(): JSX.Element {
   }, [desktop, stage]);
   const { t, dir } = useT();
   const { message, announce } = useAnnouncer();
+
+  // Per-verse recitation: one <audio> for the app, streamed from the public
+  // Quran.com CDN (see audio.ts — nothing is held in the tree). A CDN failure is
+  // said out loud, so a silent verse is never a mystery.
+  const audio = useVerseAudio((k) =>
+    announce(`${t.ayahLabel(k) ?? k} — ${t.audioUnavailable}`),
+  );
   /*
    * The stepper's press, said out loud.
    *
@@ -410,9 +458,19 @@ export function App(): JSX.Element {
   const adjacency = useMemo(() => {
     if (!manifest) return null;
     const adj = new Adjacency(manifest.edition);
-    for (const [surah, shard] of shards) adj.addShard(surah, shard);
+    // The pitch build adds the curated cross-references and meaning-jumps by
+    // merging each surah's pitch edges into its base shard — including surahs
+    // whose base shard is empty (al-Fātiḥah), which is why we walk the union.
+    const surahs = new Set<number>(shards.keys());
+    if (PITCH) for (const s of pitchSurahs.keys()) surahs.add(s);
+    for (const surah of surahs) {
+      const base = shards.get(surah);
+      const pitch = PITCH ? pitchSurahs.get(surah)?.shard : undefined;
+      const merged = pitch ? mergeShard(base, pitch) : base;
+      if (merged) adj.addShard(surah, merged);
+    }
     return adj;
-  }, [manifest, shards]);
+  }, [manifest, shards, pitchSurahs]);
 
   // Fetch a surah's shard at most once per session; a null result (missing
   // file) still counts as requested so we don't hammer a broken deploy.
@@ -428,13 +486,28 @@ export function App(): JSX.Element {
     [manifest],
   );
 
+  // The pitch surah for a selection, loaded at most once per session — the same
+  // shape as `ensureShard`, but for the private held payload. A no-op (and fully
+  // dead code) in every public build.
+  const requestedPitch = useRef(new Set<number>());
+  const ensurePitch = useCallback((surah: number) => {
+    if (!PITCH || requestedPitch.current.has(surah)) return;
+    requestedPitch.current.add(surah);
+    void loadPitchSurah(surah).then((p) => {
+      if (p) setPitchSurahs((m) => new Map(m).set(surah, p));
+    });
+  }, []);
+
   // On-demand load for the selection's surah (covers taps AND deep-link
   // restores — both go through setSelectedKey)…
   useEffect(() => {
     if (!selectedKey) return;
     const surah = parseAyahKey(selectedKey)?.surah;
-    if (surah) ensureShard(surah);
-  }, [selectedKey, ensureShard]);
+    if (surah) {
+      ensureShard(surah);
+      ensurePitch(surah);
+    }
+  }, [selectedKey, ensureShard, ensurePitch]);
 
   // …and for every surah the highlighted range touches (a range never spans
   // surahs today, but the loop costs nothing and is honest about the shape).
@@ -503,6 +576,27 @@ export function App(): JSX.Element {
   // taps, hops, bead-backs and deep links in one line, without every handler
   // having to remember).
   useEffect(() => setRootsOpen(false), [selectedKey]);
+  // Moving the selection also stops any recitation: the ▶ belongs to the verse
+  // you are on, so a hop or a fresh tap should not leave the last one sounding.
+  // `stopAudio` is stable, so this fires only when the selection actually moves.
+  const stopAudio = audio.stop;
+  useEffect(() => {
+    stopAudio();
+  }, [selectedKey, stopAudio]);
+  // Moving the selection closes the commentary — except in the pitch build,
+  // where a verse that carries a Study Quran note opens it on the tap itself.
+  // The demo's whole point is «tap a verse, read the note»; making that a
+  // second click on a footer button buried the moment. A verse with no note
+  // (everything outside al-Fātiḥah, in this build) still just closes it.
+  useEffect(() => {
+    if (!PITCH) {
+      setCommentaryOpen(false);
+      return;
+    }
+    const surah = selectedKey ? parseAyahKey(selectedKey)?.surah : null;
+    const ps = surah ? (pitchSurahs.get(surah) ?? null) : null;
+    setCommentaryOpen(commentaryFor(ps, selectedKey) !== null);
+  }, [selectedKey, pitchSurahs]);
 
   // Rail chips for the current selection (empty when nothing selected / no hops).
   const chips = useMemo(
@@ -589,6 +683,20 @@ export function App(): JSX.Element {
   // one a reader can forget they enabled. Opting in each session is the price of
   // shipping it early.
   const [skin, setSkin] = useState<SkinId>("plain");
+  // Whether the page bar spreads apart under the pointer — the graduated fisheye
+  // (option B, docs/decisions/page-bar.md). Persisted, and default on: it is the
+  // behaviour the decision chose, so a fresh device gets it, and the colophon's
+  // switch is only there to turn it off. Unlike the beta skin above, this is not
+  // a layer a reader can be misled by — it changes how a control feels, not what
+  // the mus'haf says — so restoring it on a cold start is a convenience, not a risk.
+  const [fisheye, setFisheye] = useState<boolean>(() => fisheyeEnabled());
+  const toggleFisheye = useCallback(() => {
+    setFisheye((on) => {
+      const next = !on;
+      rememberFisheye(next);
+      return next;
+    });
+  }, []);
   const [legendOpen, setLegendOpen] = useState(false);
   const [tajweedShards, setTajweedShards] = useState<ReadonlyMap<number, TajweedShard>>(
     new Map(),
@@ -776,6 +884,154 @@ export function App(): JSX.Element {
     [pageTurns, announce, t],
   );
 
+  // Bookmarks (docs/decisions/bookmark-fold.md, bookmark-admin.md): ribbons on
+  // the page, a drawer per ribbon, and the tidy-up in the page map. Every change
+  // is one core rule, then one whole-set write, then one announced line.
+  const { bookmarks, commit: commitBookmarks } = useBookmarks(announce, t.bmNotSaved);
+  // The red seam: where the reader left off, following the last page they stayed on.
+  const seamPage = useSeam(page);
+  const [drawerId, setDrawerId] = useState<string | null>(null);
+  const [freshId, setFreshId] = useState<string | null>(null);
+  const drawerBookmark = bookmarks.find((b) => b.id === drawerId) ?? null;
+
+  /** Where a bookmark dropped on `p` points: the selected ayah if it is on that page, else the page's first. */
+  const bookmarkTarget = useCallback(
+    (p: number): { key: string; page: number } | null => {
+      if (!resolver) return null;
+      if (selectedKey && resolver.resolve(selectedKey)?.page === p) return { key: selectedKey, page: p };
+      const first = resolver.keysOnPage(p)[0];
+      return first ? { key: first, page: p } : null;
+    },
+    [resolver, selectedKey],
+  );
+
+  // Where "move it" would put the open ribbon: the selected ayah when there is
+  // one it is not already on, else the page on the stage when it sits elsewhere.
+  // Null when neither would change anything, and the drawer then offers no move.
+  const selectedAt = selectedKey && resolver ? resolver.resolve(selectedKey)?.page : undefined;
+  const moveTarget =
+    drawerBookmark && selectedKey && selectedAt !== undefined && selectedKey !== drawerBookmark.key
+      ? { key: selectedKey, page: selectedAt }
+      : drawerBookmark && drawerBookmark.page !== page
+        ? bookmarkTarget(page)
+        : null;
+
+  const dropOn = useCallback(
+    (p: number, key?: string) => {
+      const at = key ? { key, page: p } : bookmarkTarget(p);
+      if (!at) return;
+      const name = t.ayahLabel(at.key) ?? t.pageN(p);
+      const next = dropBookmark(bookmarks, { ...at, name }, Date.now());
+      const made = next[next.length - 1]!;
+      commitBookmarks(next, t.bmDropped(made.name));
+      setFreshId(made.id);
+      setDrawerId(made.id);
+    },
+    [bookmarkTarget, bookmarks, commitBookmarks, t],
+  );
+
+  // The page toolbar's tool (docs/design/page-toolbar-plan.md, step 1). The ref
+  // is for the tap handlers below: a bookmark tap puts the tool down at once,
+  // and the click that follows the same tap must already see it down.
+  const [tool, setToolState] = useState<PageTool>("select");
+  const toolRef = useRef<PageTool>("select");
+  const chooseTool = useCallback(
+    (next: PageTool) => {
+      if (toolRef.current === next) return;
+      toolRef.current = next;
+      setToolState(next);
+      announce(
+        t.toolOn(
+          next === "select" ? t.toolSelect : next === "highlight" ? t.toolHighlight : t.toolBookmark,
+        ),
+      );
+    },
+    [announce, t],
+  );
+  // The bookmark tool is used once and put down: nobody drops five bookmarks in
+  // a row (the plan's table, "after one use").
+  const dropWithTool = useCallback(
+    (p: number, key?: string) => {
+      chooseTool("select");
+      dropOn(p, key);
+    },
+    [chooseTool, dropOn],
+  );
+
+  const openFromShelf = useCallback(
+    (id: string) => {
+      const b = bookmarks.find((x) => x.id === id);
+      if (!b) return;
+      setRevisionOpen(false);
+      commitBookmarks(openBookmark(bookmarks, id, Date.now()), t.bmOpen(b.name, b.page));
+      goToPage(b.page, t.bmOpen(b.name, b.page));
+    },
+    [bookmarks, commitBookmarks, goToPage, t],
+  );
+
+  const saveBookmarkFile = useCallback(() => {
+    const blob = new Blob([JSON.stringify(toBookmarkFile(bookmarks, Date.now()), null, 2)], {
+      type: "application/json",
+    });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "hifth-bookmarks.json";
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }, [bookmarks]);
+
+  const loadBookmarkFile = useCallback(
+    (text: string) => {
+      const file = parseBookmarkFile(text);
+      if (!file) {
+        announce(t.bmLoadBad);
+        return;
+      }
+      const merged = mergeBookmarks(bookmarks, file.bookmarks);
+      commitBookmarks(merged, t.bmLoaded(merged.length - bookmarks.length));
+    },
+    [announce, bookmarks, commitBookmarks, t],
+  );
+
+  // Unfolding a corner lifts every bookmark on the page at once, with no
+  // question first; the bookmarks it lifted wait here for a few seconds so one
+  // tap on "Undo" puts them back (docs/decisions/bookmark-fold.md, 2026-09-25).
+  const [unfolded, setUnfolded] = useState<{ lifted: Bookmark[]; said: string } | null>(null);
+  const unfold = useCallback(
+    (p: number) => {
+      const lifted = bookmarksOnPage(bookmarks, p);
+      if (lifted.length === 0) return;
+      const gone = new Set(lifted.map((b) => b.id));
+      const said = t.bmUnfolded(lifted.length);
+      commitBookmarks(
+        bookmarks.filter((b) => !gone.has(b.id)),
+        said,
+      );
+      if (drawerId && gone.has(drawerId)) setDrawerId(null);
+      setUnfolded({ lifted, said });
+    },
+    [bookmarks, commitBookmarks, drawerId, t],
+  );
+  const undoUnfold = () => {
+    if (!unfolded) return;
+    const held = new Set(bookmarks.map((b) => b.id));
+    commitBookmarks([...bookmarks, ...unfolded.lifted.filter((b) => !held.has(b.id))], t.bmRestored);
+    setUnfolded(null);
+  };
+  const endUndo = useCallback(() => setUnfolded(null), []);
+
+  const ribbonsFor = (p: number) => (
+    <BookmarkRibbons
+      bookmarks={bookmarksOnPage(bookmarks, p)}
+      onDrop={() => dropOn(p)}
+      onUnfold={() => unfold(p)}
+      onOpen={setDrawerId}
+      freshId={freshId}
+      seam={seamPage === p}
+    />
+  );
+
   // Where one page's worth of movement lands, or null if it lands nowhere.
   //
   // "The next page" means the next page we actually *have*: this walks
@@ -836,6 +1092,8 @@ export function App(): JSX.Element {
    * jump after it is an array index.
    */
   const juzStarts = useMemo(() => juzPageIndex(manifest?.pages ?? []), [manifest]);
+  /** The same for the sixty hizbs, so the magnifier can mark where each begins. */
+  const hizbStarts = useMemo(() => hizbPageIndex(manifest?.pages ?? []), [manifest]);
 
   // Where a page sits in the book, for the page bar's scrub readout: its surah
   // (above), the juz already *running* onto it, and the juz that *begins* on it
@@ -949,6 +1207,13 @@ export function App(): JSX.Element {
   // fire the toggle branch spuriously). We read the live value via a ref.
   const handleSelect = useCallback(
     (key: string) => {
+      // Under the bookmark tool a tap on an ayah drops the ribbon at that ayah
+      // instead of selecting it.
+      if (toolRef.current === "bookmark") {
+        const at = resolver?.resolve(key)?.page;
+        if (at !== undefined) dropWithTool(at, key);
+        return;
+      }
       setOpenDirection(null);
       setSelectedRange(null); // a tap replaces a highlight — never both at once
       const toggledOff = selectedKeyRef.current === key;
@@ -962,7 +1227,7 @@ export function App(): JSX.Element {
       const loc = toggledOff ? null : resolver?.resolve(key);
       if (loc) void recordLook({ key, page: loc.page });
     },
-    [announce, resolver, t],
+    [announce, dropWithTool, resolver, t],
   );
 
   // A marquee released over ayahs (Loop 5). The passage replaces the selection —
@@ -1303,22 +1568,60 @@ export function App(): JSX.Element {
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [stepPage]);
 
+  // The page toolbar's keys: V, H and B by their place on the keyboard, and
+  // Escape to put a tool down. Desktop only, like the bar, and never while the
+  // reader is typing or a sheet is open — the same fences as the map above.
+  useEffect(() => {
+    if (!desktop) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.defaultPrevented || e.altKey || e.ctrlKey || e.metaKey || e.shiftKey) return;
+      const el = document.activeElement as HTMLElement | null;
+      if (
+        el instanceof HTMLInputElement ||
+        el instanceof HTMLTextAreaElement ||
+        el instanceof HTMLSelectElement ||
+        el?.isContentEditable === true ||
+        document.querySelector('[role="dialog"]') !== null
+      )
+        return;
+      if (e.key === "Escape") {
+        if (toolRef.current !== "select") chooseTool("select");
+        return;
+      }
+      const next = TOOL_KEYS[e.code];
+      if (!next) return;
+      e.preventDefault();
+      chooseTool(next);
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [desktop, chooseTool]);
+
   const openChip = railChips.find((c) => c.direction === openDirection) ?? null;
   /*
    * Which side of the desk the ayah's sheets land on, when the book is open.
    *
-   * On a spread the three sheets (the hop list, the highlighted passage's
-   * menu, the root lens) are all *about* one ayah, and a card that rises over
-   * that ayah hides the thing the reader is working on. So the card goes over
-   * the other leaf: an ayah on the right-hand page raises its options on the
-   * left, and the reverse. The side is physical, not logical — the leaf is on a
-   * physical side of the gutter whatever language the chrome reads in — which
-   * is why this is not left to the sheets' `dir`. Below the breakpoint, or with
-   * the book closed to one leaf, there is no other leaf, and `null` lets the
-   * sheet keep its chrome-direction default (a phone's bottom sheet, or a
-   * single leaf's corner card). A range is anchored by its first ayah; a range
-   * that crosses the gutter has no side that is not partly under the card, and
-   * the head is the ayah the reader started from.
+   * On a spread the ayah's sheets (the hop list, the highlighted passage's
+   * menu, the root lens, and in the pitch build the commentary) are all *about*
+   * one ayah, and they open on the **opposite** leaf from that ayah — press on
+   * the right-hand page and the card lands on the left, press on the left and it
+   * lands on the right. That is the one thing a card must never do: cover the
+   * verse it is about. This is Option D of the ayah-drawer decision
+   * (docs/design/ayah-drawer.md). It was briefly graduated as Option C
+   * (same leaf, so the card sits beside the verse it belongs to), but building
+   * that live showed the flaw a still drawing hid: on a surah that fills its own
+   * leaf — al-Fātiḥah is the whole demo — a same-leaf card wide enough to read
+   * lands on top of the verse, and because the script runs right-to-left it
+   * hides where each line begins. Opening on the facing leaf keeps the pressed
+   * verse fully visible with its tools across the gutter, so C and D are this
+   * one memo with its returns swapped, and D is the one that keeps the promise.
+   * The side is physical, not logical — the leaf is on a physical side of the
+   * gutter whatever language the chrome reads in — which is why this is not left
+   * to the sheets' `dir`. Below the breakpoint, or with the book closed to one
+   * leaf, there is no second leaf, and `null` lets the sheet keep its
+   * chrome-direction default (a phone's bottom sheet, or a single leaf's corner
+   * card). A range is anchored by its first ayah — the ayah the reader started
+   * from.
    */
   const sheetSide = useMemo<"left" | "right" | null>(() => {
     if (!desktop || pageMode !== "two" || !resolver) return null;
@@ -1332,6 +1635,21 @@ export function App(): JSX.Element {
     return null;
   }, [desktop, pageMode, resolver, selectedRange, selectedKey, page, totalPages]);
   const selectedSurah = selectedKey ? parseAyahKey(selectedKey)?.surah : null;
+  // The held commentary for the current selection, if the pitch build has it.
+  const pitchSurah =
+    PITCH && selectedSurah ? (pitchSurahs.get(selectedSurah) ?? null) : null;
+  const commentaryEntry = PITCH ? commentaryFor(pitchSurah, selectedKey) : null;
+  const hasCommentary = commentaryEntry !== null;
+  // The roads out of the open note: the same merged edges the rail would show
+  // (Study Quran cross-references included), handed to the drawer so the reading
+  // and the navigation live on one surface instead of the note covering a rail.
+  const commentaryRoads = useMemo(
+    () =>
+      PITCH && adjacency && commentaryOpen && selectedKey
+        ? adjacency.hopsForKey(selectedKey)
+        : [],
+    [adjacency, commentaryOpen, selectedKey],
+  );
 
   return (
     // The chrome reads in the UI language's direction — every offset in the
@@ -1459,14 +1777,33 @@ export function App(): JSX.Element {
 
       {/* The three verbs, once, in the layout rather than over the page — the
           first tap it teaches has to land while the strip is still up. */}
-      <CoachMarks ready={resolver !== null} onDismiss={() => setCoachUp(false)} />
+      <CoachMarks
+        ready={resolver !== null}
+        open={coachUp}
+        onDismiss={() => setCoachUp(false)}
+      />
 
       {/* Pinned RTL, in both languages. The mus'haf is read right-to-left, the
           page-turn convention follows it (Loop 1's decision), and the hop rail
           anchors to `inset-inline-start` — under an LTR chrome the rail would
           swap to the side the reader's thumb is not on and the arrow keys would
           argue with the page. */}
-      <main className={styles.main} dir="rtl">
+      {/* Its own row above the book, not floated over it: floated, it sat on
+          the page's first line. */}
+      {resolver && desktop && <PageToolbar tool={tool} onTool={chooseTool} />}
+      <main
+        className={styles.main}
+        dir="rtl"
+        /* The bookmark tool's tap on a page's margin, where there is no ayah to
+           hear it. A tap on an ayah has already been taken by `handleSelect`,
+           which put the tool down, so this sees "select" and does nothing. */
+        onClick={(e) => {
+          if (toolRef.current !== "bookmark") return;
+          const leaf = (e.target as Element).closest?.("[data-page]");
+          const p = Number(leaf?.getAttribute("data-page"));
+          if (p > 0) dropWithTool(p);
+        }}
+      >
         {resolver && (
           <>
             {/* At desktop width the stage is one leaf of an open mus'haf: the
@@ -1538,9 +1875,12 @@ export function App(): JSX.Element {
                      to can be handed a tracked band, and a second fold drawn
                      into the same book is the one thing §3.4 forbids. */
                   dragToTurn={false}
+                  bound
+                  tool={desktop ? tool : "select"}
                   labelFor={(key) => t.ayahAria(t.ayahLabel(key) ?? key)}
                   skin={skin}
                   tajweedLookup={tajweed?.lookup ?? null}
+                  overlay={ribbonsFor(facing)}
                 />
               )}
             >
@@ -1576,6 +1916,7 @@ export function App(): JSX.Element {
                 labelFor={(key) => t.ayahAria(t.ayahLabel(key) ?? key)}
                 skin={skin}
                 tajweedLookup={tajweed?.lookup ?? null}
+                overlay={ribbonsFor(page)}
                 /* On the desktop spread the page turns by its fore-edge, not by
                    a swipe across its middle: the edge rails drive the fold, and
                    the stage's own swipe-to-turn is off so a drag through the
@@ -1585,6 +1926,8 @@ export function App(): JSX.Element {
                 /* Only the live stage turns pages, and only on a desktop
                    spread does the fold belong to something wider than it. */
                 foldTarget={desktop ? bookRef : null}
+                bound={desktop && pageMode === "two"}
+                tool={desktop ? tool : "select"}
               />
             </PageSpread>
             <HopRail
@@ -1624,6 +1967,16 @@ export function App(): JSX.Element {
               onHopEdge={handleHop}
               onClose={() => setRootsOpen(false)}
             />
+            {PITCH && (
+              <CommentarySheet
+                entry={commentaryOpen ? commentaryEntry : null}
+                side={sheetSide}
+                roads={commentaryRoads}
+                canHop={canHop}
+                onHop={handleHop}
+                onClose={() => setCommentaryOpen(false)}
+              />
+            )}
           </>
         )}
       </main>
@@ -1655,7 +2008,16 @@ export function App(): JSX.Element {
         onSelect={handleEditionSelect}
         onClose={() => setEditionOpen(false)}
       />
-      <Colophon open={colophonOpen} onClose={() => setColophonOpen(false)} />
+      <Colophon
+        open={colophonOpen}
+        onClose={() => setColophonOpen(false)}
+        fisheye={fisheye}
+        onToggleFisheye={toggleFisheye}
+        onShowTips={() => {
+          setColophonOpen(false);
+          setCoachUp(true);
+        }}
+      />
       {/* `onGoToPage` is the app's own page-turner, handed over unchanged: a
           press on a map cell is a jump, and everything a jump owes — refusing an
           unvendored page, cancelling one in flight, saying where it landed —
@@ -1670,6 +2032,48 @@ export function App(): JSX.Element {
         page={page}
         onGoToPage={goToPage}
         openAt={revisionAt}
+      >
+        <BookmarkShelf
+          bookmarks={bookmarks}
+          onOpen={openFromShelf}
+          onClearSurah={(surah) => {
+            const next = clearSurah(bookmarks, surah);
+            commitBookmarks(next, t.bmCleared(bookmarks.length - next.length));
+          }}
+          onClearAll={() => commitBookmarks([], t.bmCleared(bookmarks.length))}
+          onSave={saveBookmarkFile}
+          onLoad={loadBookmarkFile}
+        />
+      </RevisionMap>
+
+      <BookmarkDrawer
+        bookmark={drawerBookmark}
+        moveLabel={moveTarget ? (t.ayahLabel(moveTarget.key) ?? t.pageN(moveTarget.page)) : null}
+        onRename={(name) => {
+          if (!drawerBookmark) return;
+          const next = renameBookmark(bookmarks, drawerBookmark.id, name, Date.now());
+          const renamed = next.find((b) => b.id === drawerBookmark.id);
+          if (renamed && renamed.name !== drawerBookmark.name)
+            commitBookmarks(next, t.bmRenamed(renamed.name));
+          setDrawerId(null);
+        }}
+        onMoveHere={() => {
+          if (!drawerBookmark || !moveTarget) return;
+          commitBookmarks(
+            moveBookmark(bookmarks, drawerBookmark.id, moveTarget, Date.now()),
+            t.bmMoved(drawerBookmark.name, moveTarget.page),
+          );
+          setDrawerId(null);
+        }}
+        onLift={() => {
+          if (!drawerBookmark) return;
+          commitBookmarks(liftBookmark(bookmarks, drawerBookmark.id), t.bmLifted(drawerBookmark.name));
+          setDrawerId(null);
+        }}
+        onAddAnother={() => {
+          if (drawerBookmark) dropOn(drawerBookmark.page);
+        }}
+        onClose={() => setDrawerId(null)}
       />
 
       {/* Pinned RTL with the stage, and for the same reason: the trail reads
@@ -1682,12 +2086,29 @@ export function App(): JSX.Element {
           onBeadBack={handleBeadBack}
           onClearCurrent={handleClearCurrent}
         />
+        <PlayTrigger
+          selectedKey={selectedKey}
+          label={selectedKey ? (t.ayahLabel(selectedKey) ?? selectedKey) : null}
+          phase={audio.phaseFor(selectedKey)}
+          onToggle={audio.toggle}
+        />
         <RootLensTrigger
           count={rootCount}
           curated={curatedRoots.length}
           open={rootsOpen}
           onToggle={() => setRootsOpen((o) => !o)}
         />
+        <QulTrigger
+          selectedKey={selectedKey}
+          label={selectedKey ? (t.ayahLabel(selectedKey) ?? selectedKey) : null}
+        />
+        {PITCH && (
+          <CommentaryTrigger
+            has={hasCommentary}
+            open={commentaryOpen}
+            onToggle={() => setCommentaryOpen((o) => !o)}
+          />
+        )}
         <ShareSheet state={selectedKey ? currentState : null} hasTrail={trail.length > 0} />
         {/* Screen-reader-only summary of what the rail is offering. It used to
             read «السورة 2 · 1 روابط» — the surah as a bare number a listener has
@@ -1713,9 +2134,12 @@ export function App(): JSX.Element {
         onGoTo={handleScrubTo}
         onJuzTap={goToJuz}
         juzStarts={juzStarts}
+        hizbStarts={hizbStarts}
         pageContext={pageContext}
+        fisheye={fisheye}
       />
 
+      {unfolded && <UndoBar said={unfolded.said} onUndo={undoUnfold} onDone={endUndo} />}
       <LiveAnnouncer message={message} />
     </div>
   );

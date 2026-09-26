@@ -1027,11 +1027,17 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     two pages — with `OFF_GRID_COUNT` in `scripts/gate-boxes.mjs` lowered to 0 in the same
     change; or a decision to tolerate it, written here, in which case the gate keeps holding
     2 so that a third is still an event. Not chosen here because the fix is a corpus edit, and
-    corpus edits are owner-visible in the pinned pages. Blocks nothing. **Blocked, 2026-09-01:** the repair entry has to be
-    written against the *upstream* polygon, and the upstream page cache is gone — it was a
-    symlink into a scratch directory that has since been emptied, so re-vendoring means a
-    348 MB fetch first, which nobody starts without asking. Until then the gate holds the
-    count at 2 and the two tails ship as the print drew them.
+    corpus edits are owner-visible in the pinned pages. Blocks nothing. **Fixed, 2026-09-06:** the
+    first answer was taken. The vendoring step now carries a repair entry for each tail that
+    stretches it from ~28 units to its line's foot (36); the two pages were re-vendored and
+    re-pinned so the change lives in the pinned bytes, and the box gate's off-grid count was
+    lowered to 0 in the same change, holding as ceiling and floor so a third off-grid box is
+    again an event. Only the two target boxes moved — each is invisible until its ayah is
+    tapped, so no plain-page render changed and the goldens were untouched — and the owner saw
+    the before/after of both pages before it was committed. **Closed by** the box sweep gate,
+    which now refuses any rectangle off the line grid. The 348 MB upstream fetch that had
+    blocked this was run once, under `--fetch`, and reproduced all 604 pages byte-for-byte
+    before the two repairs were applied, so the two changed pages are the whole diff.
 
 18. **The page-bar's two questions are answered, and the app now does what they say — save one phone-only corner.**
     Both were settled by the owner on 2026-09-02, and both chose the same option. A juz marker

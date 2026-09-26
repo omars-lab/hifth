@@ -56,10 +56,16 @@
  *   node packages/etl/scripts/score-mark-adjudication.mjs ruling.json
  */
 import { readFileSync } from "node:fs";
-import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
+import { dirname, join, resolve } from "node:path";
+import { fileURLToPath, pathToFileURL } from "node:url";
 import { planSession } from "./lib/adjudication.mjs";
+import { codeLine } from "./lib/grader-code.mjs";
 import { wilson } from "./lib/mark-ink.mjs";
+import { selfTest } from "./lib/self-test.mjs";
+
+// Before anything real is read: re-score the known fixture, and stop if its
+// recorded verdict does not come back.
+selfTest(import.meta.url, "adjudication");
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const ETL = join(HERE, "..");
@@ -75,10 +81,18 @@ for (let i = 0; i < argv.length; i += 1) {
   else if (!rulingPath) rulingPath = argv[i];
 }
 if (!rulingPath) {
-  process.stderr.write("usage: score-mark-adjudication.mjs <ruling.json> [--shift path]\n");
+  process.stderr.write("usage: score-mark-adjudication.mjs <ruling.json> [--shift path] [--io module.mjs]\n");
   process.exit(2);
 }
 const shiftPath = arg("--shift", join(ETL, "out", "mark-shift.json"));
+/**
+ * Where the marks and the ink come from, if not the shipped pages and the
+ * corpus cache. The planner already takes its readers as an argument so its
+ * arithmetic can be checked on invented marks; this is that seam reached from
+ * the command line, and the self-test is what reaches for it.
+ */
+const ioPath = arg("--io", null);
+const io = ioPath ? await import(pathToFileURL(resolve(ioPath)).href) : null;
 
 /** Below this share of catches right, the session says nothing and is not scored. */
 const CATCH_FLOOR = 0.9;
@@ -147,7 +161,7 @@ if (Array.isArray(ruling.select?.of)) {
   shifts = ruling.select.of.map((p) => byPage.get(p));
 }
 
-const { trials } = planSession({ seed: ruling.seed, count: ruling.count, shifts });
+const { trials } = planSession({ seed: ruling.seed, count: ruling.count, shifts, ...(io ? { io } : {}) });
 
 const byIndex = new Map(trials.map((t) => [t.i, t]));
 const buckets = { shipped: [], decoy: [], catch: [], twin: [] };
@@ -233,6 +247,8 @@ const names = flagged.slice(0, NAMED).map((a) => a.id).join(", ") +
 const out = [
   `ruling ${rulingPath}`,
   `seed ${ruling.seed} · ${ruling.answers.length} of ${ruling.count} answered · displacements ${ruling.shiftRan} (${fp})`,
+  // The other fingerprint: the code that reached this verdict, beside the input it read.
+  codeLine(fileURLToPath(import.meta.url)),
   `median ${(median / 1000).toFixed(1)}s a trial`,
   "",
   line("as shipped", s.shipped),

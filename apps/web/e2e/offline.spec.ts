@@ -1,6 +1,7 @@
 import { test, expect, type BrowserContext, type Page } from "@playwright/test";
 import { tapAyah } from "./ayah";
 import { COACH_STORAGE_KEY } from "../src/coach";
+import { openTips } from "./tips";
 
 /*
  * Loop 6a, the ungated half of the exit criterion (PLAN §Loop 6a):
@@ -638,41 +639,44 @@ test.describe("Hifth · storage durability, as UI", () => {
     );
   }
 
-  test("the storage warning waits for the coach strip to finish teaching", async ({ page }) => {
+  test("the storage warning steps aside while the tips are up", async ({ page }) => {
     // The Loop 6a merge defect, as a test. Two agents each added a strip *in*
     // the layout above the stage, each for the same good reason — neither may
     // cover an ayah. Together they took 226px of a 412×839 phone: the stage
     // dropped from 713px to 487px on precisely the visit where a reader is
     // deciding what this app is. They take turns now, teaching first.
-    await page.addInitScript(() => {
-      Object.defineProperty(navigator, "storage", {
-        configurable: true,
-        value: {
-          persist: async () => false,
-          persisted: async () => false,
-          estimate: async () => ({ usage: 1_000_000, quota: 40 * 1024 * 1024 * 1024 }),
-        },
-      });
-    });
+    // A capped quota: the one storage warning a reader can act on.
+    await stubStorage(page, { persisted: false, quota: 300 * 1024 * 1024 });
     await page.goto("/");
+    // The tips no longer open by themselves (owner, 2026-09-25), so on a first
+    // visit the warning has the band to itself; a reader who asks for the tips
+    // gets them in its place.
+    await expect(page.locator("[data-notice]")).toHaveAttribute("data-notice", "capped");
 
-    const coach = page.getByRole("region", { name: "كيف تتنقّل" });
-    await expect(coach).toBeVisible();
+    const coach = await openTips(page);
     await expect(page.locator("[data-notice]")).toHaveCount(0);
 
     await coach.getByRole("button", { name: "تخطَّ" }).click();
     await expect(coach).toHaveCount(0);
 
     // Held, not cancelled: the same warning is still owed once the band is free.
-    await expect(page.locator("[data-notice]")).toHaveAttribute("data-notice", "best-effort");
+    await expect(page.locator("[data-notice]")).toHaveAttribute("data-notice", "capped");
   });
 
-  test("a denied persist() renders a warning, not a console message", async ({ page }) => {
+  test("a denied persist() with nothing for the reader to do shows no warning", async ({ page }) => {
+    // The owner, 2026-09-25: storage the browser will not promise to keep is our
+    // problem, tracked in the backlog, not a banner for the reader.
     await stubStorage(page, { persisted: false, quota: 40 * 1024 * 1024 * 1024 });
     await page.goto("/");
+    await expect(page.locator("svg[role='group']").first()).toBeVisible();
+    await expect(page.locator("[data-notice]")).toHaveCount(0);
+  });
+
+  test("a warning the reader dismissed stays dismissed", async ({ page }) => {
+    await stubStorage(page, { persisted: false, quota: 300 * 1024 * 1024 });
+    await page.goto("/");
     const notice = page.locator("[data-notice]");
-    await expect(notice).toHaveAttribute("data-notice", "best-effort");
-    await expect(notice).toContainText("غير مضمون");
+    await expect(notice).toHaveAttribute("data-notice", "capped");
 
     // Dismissible, and it stays dismissed — a warning that returns every launch
     // is a warning nobody reads.

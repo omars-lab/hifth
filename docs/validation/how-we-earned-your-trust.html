@@ -1,0 +1,595 @@
+<title>How We Earned Your Trust</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+
+<style>
+  :root {
+    --paper:      #F1EBDC;
+    --paper-2:    #E9E1CE;
+    --raise:      #FBF7EE;
+    --ink:        #262019;
+    --ink-2:      #6A5F4B;
+    --ink-3:      #90836B;
+    --line:       #D7CDB6;
+    --line-soft:  #E3DAC5;
+    --amber:      #B0740F;
+    --amber-ink:  #7C5309;
+    --amber-soft: rgba(176,116,15,0.15);
+    --amber-line: rgba(176,116,15,0.38);
+    --teal:       #2C685C;
+    --teal-ink:   #1F4C43;
+    --teal-soft:  rgba(44,104,92,0.13);
+    --teal-line:  rgba(44,104,92,0.34);
+    --clay:       #A5472C;
+    --clay-ink:   #7E3520;
+    --clay-soft:  rgba(165,71,44,0.12);
+    --clay-line:  rgba(165,71,44,0.32);
+    --shadow:     0 1px 2px rgba(38,32,25,.06), 0 10px 30px rgba(38,32,25,.09);
+    --shadow-sm:  0 1px 2px rgba(38,32,25,.06), 0 4px 14px rgba(38,32,25,.07);
+
+    --serif: 'Spectral', Georgia, 'Times New Roman', serif;
+    --mono:  'IBM Plex Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+
+    --measure: 40rem;
+    --gap: clamp(1.1rem, 3.5vw, 2rem);
+  }
+
+  :root:not([data-theme="light"]) {
+    @media (prefers-color-scheme: dark) {
+      --paper:      #171308;
+      --paper-2:    #1F1A0F;
+      --raise:      #241E12;
+      --ink:        #EDE5D2;
+      --ink-2:      #B0A483;
+      --ink-3:      #857A5E;
+      --line:       #362D1B;
+      --line-soft:  #2C2415;
+      --amber:      #E0A63C;
+      --amber-ink:  #F0C266;
+      --amber-soft: rgba(224,166,60,0.16);
+      --amber-line: rgba(224,166,60,0.42);
+      --teal:       #74B7A6;
+      --teal-ink:   #97CDBF;
+      --teal-soft:  rgba(116,183,166,0.15);
+      --teal-line:  rgba(116,183,166,0.4);
+      --clay:       #DB8261;
+      --clay-ink:   #E79E82;
+      --clay-soft:  rgba(219,130,97,0.14);
+      --clay-line:  rgba(219,130,97,0.38);
+      --shadow:     0 1px 2px rgba(0,0,0,.4), 0 14px 40px rgba(0,0,0,.5);
+      --shadow-sm:  0 1px 2px rgba(0,0,0,.35), 0 5px 16px rgba(0,0,0,.4);
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper:      #171308;
+    --paper-2:    #1F1A0F;
+    --raise:      #241E12;
+    --ink:        #EDE5D2;
+    --ink-2:      #B0A483;
+    --ink-3:      #857A5E;
+    --line:       #362D1B;
+    --line-soft:  #2C2415;
+    --amber:      #E0A63C;
+    --amber-ink:  #F0C266;
+    --amber-soft: rgba(224,166,60,0.16);
+    --amber-line: rgba(224,166,60,0.42);
+    --teal:       #74B7A6;
+    --teal-ink:   #97CDBF;
+    --teal-soft:  rgba(116,183,166,0.15);
+    --teal-line:  rgba(116,183,166,0.4);
+    --clay:       #DB8261;
+    --clay-ink:   #E79E82;
+    --clay-soft:  rgba(219,130,97,0.14);
+    --clay-line:  rgba(219,130,97,0.38);
+    --shadow:     0 1px 2px rgba(0,0,0,.4), 0 14px 40px rgba(0,0,0,.5);
+    --shadow-sm:  0 1px 2px rgba(0,0,0,.35), 0 5px 16px rgba(0,0,0,.4);
+  }
+
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--serif);
+    font-size: clamp(1.02rem, 0.55vw + 0.92rem, 1.15rem);
+    line-height: 1.64;
+    font-weight: 400;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  ::selection { background: var(--amber-soft); }
+
+  .wrap { max-width: 52rem; margin: 0 auto; padding: 0 clamp(1.1rem, 4vw, 2.4rem); }
+  h1, h2, h3 { font-family: var(--serif); text-wrap: balance; margin: 0; letter-spacing: -0.01em; }
+  a { color: var(--amber-ink); text-underline-offset: 3px; text-decoration-thickness: 1px; }
+  a:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; border-radius: 2px; }
+  p { margin: 0 0 1rem; }
+
+  .eyebrow {
+    font-family: var(--mono); font-size: .72rem; letter-spacing: .2em;
+    text-transform: uppercase; color: var(--amber); font-weight: 500; margin: 0;
+  }
+
+  /* ---------- top bar ---------- */
+  .topbar {
+    display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+    padding: 1rem 0 .85rem;
+    border-bottom: 1px solid var(--line-soft);
+    position: sticky; top: 0; z-index: 20;
+    background: color-mix(in srgb, var(--paper) 90%, transparent);
+    backdrop-filter: blur(8px);
+  }
+  .brand { font-family: var(--mono); font-size: .78rem; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-2); display: flex; align-items: center; gap: .6rem; }
+  .brand b { color: var(--ink); font-weight: 600; }
+  .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--amber); box-shadow: 0 0 0 3px var(--amber-soft); }
+  .toggle {
+    font-family: var(--mono); font-size: .72rem; letter-spacing: .08em;
+    background: transparent; color: var(--ink-2); border: 1px solid var(--line);
+    border-radius: 999px; padding: .38rem .8rem; cursor: pointer; transition: .2s;
+  }
+  .toggle:hover { color: var(--ink); border-color: var(--ink-3); }
+  .toggle:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
+
+  /* ---------- hero ---------- */
+  .hero { padding: clamp(2.6rem, 8vw, 5rem) 0 clamp(1.6rem, 4vw, 2.6rem); }
+  .hero h1 {
+    font-size: clamp(2.1rem, 6.5vw, 3.5rem); line-height: 1.05; font-weight: 600;
+    margin: .8rem 0 0; max-width: 18ch;
+  }
+  .lede { font-size: clamp(1.14rem, 1.1vw + 1rem, 1.4rem); color: var(--ink-2); margin: 1.3rem 0 0; max-width: var(--measure); line-height: 1.5; }
+  .lede b { color: var(--ink); font-weight: 500; }
+
+  /* ---------- sections ---------- */
+  section { padding: clamp(1.6rem, 4vw, 2.6rem) 0; border-top: 1px solid var(--line-soft); }
+  section > .col, .col { max-width: var(--measure); }
+  h2 { font-size: clamp(1.5rem, 3.2vw, 2.05rem); font-weight: 600; line-height: 1.12; margin-bottom: .9rem; }
+  h2 .q { color: var(--ink); }
+  h3 { font-size: 1.16rem; font-weight: 600; margin: 1.6rem 0 .5rem; }
+  .sub { color: var(--ink-2); }
+  strong { font-weight: 600; color: var(--ink); }
+
+  /* ---------- glossary ---------- */
+  .gloss { display: grid; gap: .1rem; margin: 1rem 0 0; border: 1px solid var(--line); border-radius: 14px; overflow: hidden; background: var(--raise); box-shadow: var(--shadow-sm); }
+  .gloss dl { display: grid; grid-template-columns: minmax(8.5rem, 12rem) 1fr; gap: 0; margin: 0; }
+  .gloss dt { font-weight: 600; color: var(--ink); padding: .7rem .95rem; border-top: 1px solid var(--line-soft); }
+  .gloss dd { margin: 0; color: var(--ink-2); padding: .7rem .95rem; border-top: 1px solid var(--line-soft); font-size: .96em; }
+  .gloss dl:first-child dt, .gloss dl:first-child dd { border-top: 0; }
+  @media (max-width: 34rem) {
+    .gloss dl { grid-template-columns: 1fr; }
+    .gloss dd { padding-top: 0; }
+    .gloss dt { padding-bottom: .2rem; }
+  }
+
+  /* ---------- the check cards ---------- */
+  .checks { display: grid; gap: 1.1rem; margin-top: 1.4rem; }
+  .check {
+    border: 1px solid var(--line); border-radius: 16px; background: var(--raise);
+    padding: 1.2rem 1.25rem 1.3rem; box-shadow: var(--shadow-sm); position: relative;
+  }
+  .check h3 { margin: 0 0 .7rem; font-size: 1.18rem; padding-right: 3.4rem; }
+  .verdict {
+    position: absolute; top: 1.2rem; right: 1.15rem;
+    font-family: var(--mono); font-size: .64rem; letter-spacing: .13em; text-transform: uppercase;
+    font-weight: 600; padding: .28rem .55rem; border-radius: 999px; white-space: nowrap;
+  }
+  .verdict.pass { color: var(--teal-ink); background: var(--teal-soft); border: 1px solid var(--teal-line); }
+  .verdict.open { color: var(--clay-ink); background: var(--clay-soft); border: 1px solid var(--clay-line); }
+  .check p { margin: 0 0 .7rem; color: var(--ink-2); }
+  .check p:last-child { margin-bottom: 0; }
+  .check p b, .check strong { color: var(--ink); }
+  .figure {
+    display: flex; align-items: baseline; gap: .7rem; flex-wrap: wrap;
+    margin: 0 0 .85rem; padding: 0 0 .85rem; border-bottom: 1px dashed var(--line);
+  }
+  .figure .n { font-family: var(--mono); font-size: 1.65rem; font-weight: 600; color: var(--amber-ink); line-height: 1; letter-spacing: -0.02em; }
+  .figure .of { font-family: var(--mono); font-size: .82rem; color: var(--ink-3); letter-spacing: .02em; }
+
+  .vkey { font-family: var(--mono); font-size: .86em; color: var(--ink-2); background: var(--paper-2); border: 1px solid var(--line-soft); border-radius: 5px; padding: .04em .34em; white-space: nowrap; }
+
+  /* ---------- the diagram ---------- */
+  .diagram-wrap { margin: 1.4rem 0 .4rem; border: 1px solid var(--line); border-radius: 16px; background: var(--raise); box-shadow: var(--shadow-sm); padding: 1.2rem clamp(.6rem, 3vw, 1.4rem) 1rem; overflow-x: auto; }
+  .diagram-wrap svg { display: block; width: 100%; height: auto; min-width: 460px; max-width: 720px; margin: 0 auto; }
+  .flow-node { fill: var(--paper); stroke: var(--line); stroke-width: 1.4; }
+  .flow-node.start { fill: var(--amber-soft); stroke: var(--amber-line); }
+  .flow-node.good { fill: var(--teal-soft); stroke: var(--teal-line); }
+  .flow-node.warn { fill: var(--clay-soft); stroke: var(--clay-line); }
+  .flow-node.human { fill: var(--paper-2); stroke: var(--ink-3); stroke-dasharray: 4 3; }
+  .flow-diamond { fill: var(--raise); stroke: var(--ink-3); stroke-width: 1.4; }
+  .flow-t { fill: var(--ink); font-family: var(--serif); font-size: 13.5px; }
+  .flow-t.sm { font-size: 12px; fill: var(--ink-2); }
+  .flow-lab { fill: var(--ink-3); font-family: var(--mono); font-size: 10.5px; letter-spacing: .06em; text-transform: uppercase; }
+  .flow-edge { stroke: var(--ink-3); stroke-width: 1.4; fill: none; }
+
+  .legend { display: flex; flex-wrap: wrap; gap: .5rem 1.1rem; margin: 1rem 0 0; font-family: var(--mono); font-size: .72rem; color: var(--ink-2); letter-spacing: .02em; }
+  .legend span { display: inline-flex; align-items: center; gap: .4rem; }
+  .swatch { width: 11px; height: 11px; border-radius: 3px; border: 1px solid var(--line); }
+  .swatch.good { background: var(--teal-soft); border-color: var(--teal-line); }
+  .swatch.warn { background: var(--clay-soft); border-color: var(--clay-line); }
+  .swatch.human { background: var(--paper-2); border-color: var(--ink-3); border-style: dashed; }
+
+  /* ---------- lists ---------- */
+  ul.plain { list-style: none; padding: 0; margin: 1rem 0 0; display: grid; gap: .7rem; }
+  ul.plain > li { display: grid; grid-template-columns: auto 1fr; gap: .7rem; align-items: start; color: var(--ink-2); }
+  ul.plain .tick { color: var(--teal); font-weight: 700; font-family: var(--mono); }
+  ul.plain .wait { color: var(--clay); font-weight: 700; font-family: var(--mono); }
+  ul.plain b { color: var(--ink); font-weight: 600; }
+
+  .sources { display: grid; gap: .1rem; margin-top: 1.2rem; border: 1px solid var(--line); border-radius: 14px; overflow: hidden; background: var(--raise); }
+  .sources a.src { display: grid; grid-template-columns: 1fr auto; gap: .5rem 1rem; align-items: baseline; padding: .85rem 1rem; border-top: 1px solid var(--line-soft); text-decoration: none; color: var(--ink); transition: background .15s; }
+  .sources a.src:first-child { border-top: 0; }
+  .sources a.src:hover { background: var(--paper-2); }
+  .sources a.src .what { font-weight: 500; }
+  .sources a.src .who { color: var(--ink-3); font-size: .9em; }
+  .sources a.src .host { font-family: var(--mono); font-size: .74rem; color: var(--amber-ink); letter-spacing: .01em; grid-column: 1 / -1; }
+
+  /* ---------- callout ---------- */
+  .callout { border-left: 3px solid var(--amber-line); background: var(--amber-soft); padding: .9rem 1.1rem; border-radius: 0 12px 12px 0; margin: 1.2rem 0; color: var(--ink-2); }
+  .callout b { color: var(--ink); }
+
+  footer { border-top: 1px solid var(--line-soft); padding: 2rem 0 3rem; color: var(--ink-3); font-size: .9rem; }
+  footer a { color: var(--ink-2); }
+  footer .mono { font-family: var(--mono); font-size: .74rem; letter-spacing: .04em; }
+
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+
+<div class="topbar wrap">
+  <div class="brand"><span class="dot"></span> <b>Hifth</b> · trust</div>
+  <button class="toggle" id="themeBtn" type="button" aria-label="Switch light or dark">theme</button>
+</div>
+
+<main class="wrap">
+
+  <header class="hero">
+    <p class="eyebrow">How we earned your trust</p>
+    <h1>We don't ask you to take our word for it.</h1>
+    <p class="lede">Hifth carries the Qur'an, marks where you slip, and shows you the verses you are
+      likely to confuse. For every one of those things, we found <b>someone outside this project who
+      had built the same thing on their own</b> — and we compared, letter by letter and page by page.
+      This is what we checked, what we found, and — plainly — where we still fall short.</p>
+  </header>
+
+  <section>
+    <div class="col">
+      <h2><span class="q">Why should an app that carries the Qur'an have to prove itself?</span></h2>
+      <p>Because a muṣḥaf is not a place for "trust me." A wrong page number, a mislaid mark, a
+        confusion the app failed to warn you about — any of these quietly teaches a mistake to
+        someone memorising. So the rule this project holds itself to is simple: <strong>nothing the
+        app shows you rests on our own say-so.</strong></p>
+      <p>Everything is built up from the printed page. And for each thing we build, we look for an
+        <strong>independent witness</strong> — a separate group who built the same thing without ever
+        seeing our work — and we check ourselves against them. When we agree, we lock the check so it
+        runs again every single time the app is rebuilt. When we differ, we look at every difference
+        and explain each one. And when a witness turns out not to be truly independent after all, we
+        say so and stop leaning on it.</p>
+      <p class="sub">A few words used below, once:</p>
+      <div class="gloss">
+        <dl><dt>verse</dt><dd>one āyah of the Qur'an. There are 6,236 in the printing this app uses.</dd></dl>
+        <dl><dt>muṣḥaf</dt><dd>the printed Qur'an — a specific print, page for page.</dd></dl>
+        <dl><dt>hafiz</dt><dd>someone who has memorised the Qur'an, or is memorising it.</dd></dl>
+        <dl><dt>look-alikes</dt><dd>verses that begin the same way and then diverge — the ones a hafiz most often slips between. In Arabic, <i>mutashabihat</i>.</dd></dl>
+        <dl><dt>tajweed</dt><dd>the rules of correct recitation; in the app, the colours over the letters.</dd></dl>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="col">
+      <h2><span class="q">How do we check our work?</span></h2>
+      <p>The same loop every time. Build a thing from the printed page; find someone who built it
+        independently; compare; and act on what the comparison shows.</p>
+    </div>
+    <div class="diagram-wrap">
+      <svg viewBox="0 0 700 470" role="img" aria-labelledby="flowTitle flowDesc">
+        <title id="flowTitle">How a piece of the app is checked</title>
+        <desc id="flowDesc">We build a piece from the printed page, find an independent witness, and
+          test whether the witness is truly independent and whether it agrees. If it is not
+          independent, we say so and do not count it. If it agrees, we lock the check to re-run on
+          every build. If it differs, we examine every difference and either fix ours or explain and
+          log the gap. Separately, whatever no witness can settle is handed to a person.</desc>
+
+        <defs>
+          <marker id="arrow" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0,0 L10,5 L0,10 z" fill="var(--ink-3)"/>
+          </marker>
+        </defs>
+
+        <!-- edges (drawn first, under the nodes) -->
+        <path class="flow-edge" marker-end="url(#arrow)" d="M350,54 L350,78"/>
+        <path class="flow-edge" marker-end="url(#arrow)" d="M350,120 L350,144"/>
+        <path class="flow-edge" marker-end="url(#arrow)" d="M350,206 L350,230"/>
+        <!-- independent? no -> warn box on right -->
+        <path class="flow-edge" marker-end="url(#arrow)" d="M470,177 L560,177 L560,214"/>
+        <!-- agree? yes -> good -->
+        <path class="flow-edge" marker-end="url(#arrow)" d="M350,292 L350,316"/>
+        <!-- agree? no (right) -> examine -->
+        <path class="flow-edge" marker-end="url(#arrow)" d="M470,261 L560,261 L560,316"/>
+        <path class="flow-edge" marker-end="url(#arrow)" d="M560,364 L560,392 L470,392"/>
+
+        <!-- 1. build -->
+        <g>
+          <rect class="flow-node start" x="230" y="20" width="240" height="34" rx="9"/>
+          <text class="flow-t" x="350" y="41" text-anchor="middle">We build it from the printed page</text>
+        </g>
+        <!-- 2. witness -->
+        <g>
+          <rect class="flow-node" x="196" y="78" width="308" height="42" rx="9"/>
+          <text class="flow-t" x="350" y="95" text-anchor="middle">We find an independent witness — someone</text>
+          <text class="flow-t sm" x="350" y="111" text-anchor="middle">who built the same thing, and never saw ours</text>
+        </g>
+        <!-- 3. independent? diamond -->
+        <g>
+          <polygon class="flow-diamond" points="350,144 470,177 350,210 230,177"/>
+          <text class="flow-t" x="350" y="174" text-anchor="middle">Is the witness</text>
+          <text class="flow-t" x="350" y="190" text-anchor="middle">truly independent?</text>
+          <text class="flow-lab" x="360" y="164" text-anchor="start">no →</text>
+        </g>
+        <!-- not independent box -->
+        <g>
+          <rect class="flow-node warn" x="470" y="214" width="180" height="46" rx="9"/>
+          <text class="flow-t" x="560" y="233" text-anchor="middle">We say so, and</text>
+          <text class="flow-t" x="560" y="249" text-anchor="middle">do not count it</text>
+        </g>
+        <!-- 4. agree? diamond -->
+        <g>
+          <polygon class="flow-diamond" points="350,230 466,261 350,292 234,261"/>
+          <text class="flow-t" x="350" y="257" text-anchor="middle">Do they agree,</text>
+          <text class="flow-t" x="350" y="273" text-anchor="middle">line by line?</text>
+          <text class="flow-lab" x="356" y="248" text-anchor="start">no →</text>
+        </g>
+        <!-- agree -> lock -->
+        <g>
+          <rect class="flow-node good" x="222" y="316" width="256" height="46" rx="9"/>
+          <text class="flow-t" x="350" y="335" text-anchor="middle">They agree — we lock the check</text>
+          <text class="flow-t" x="350" y="351" text-anchor="middle">to run on every build, for good</text>
+        </g>
+        <!-- differ -> examine -->
+        <g>
+          <rect class="flow-node" x="490" y="316" width="150" height="48" rx="9"/>
+          <text class="flow-t sm" x="565" y="333" text-anchor="middle">We examine every</text>
+          <text class="flow-t sm" x="565" y="348" text-anchor="middle">difference, one</text>
+          <text class="flow-t sm" x="565" y="361" text-anchor="middle">at a time</text>
+        </g>
+        <!-- examine -> outcome -->
+        <g>
+          <rect class="flow-node" x="300" y="378" width="170" height="52" rx="9"/>
+          <text class="flow-t sm" x="385" y="396" text-anchor="middle">A printing difference?</text>
+          <text class="flow-t sm" x="385" y="410" text-anchor="middle">Our mistake? Or a</text>
+          <text class="flow-t sm" x="385" y="423" text-anchor="middle">real gap? — fix or log it</text>
+        </g>
+
+        <!-- human lane -->
+        <g>
+          <rect class="flow-node human" x="40" y="316" width="150" height="114" rx="9"/>
+          <text class="flow-lab" x="115" y="336" text-anchor="middle">and, in parallel</text>
+          <text class="flow-t sm" x="115" y="358" text-anchor="middle">What no witness</text>
+          <text class="flow-t sm" x="115" y="373" text-anchor="middle">can settle goes</text>
+          <text class="flow-t sm" x="115" y="388" text-anchor="middle">to a person:</text>
+          <text class="flow-t sm" x="115" y="406" text-anchor="middle">a hafiz's ear,</text>
+          <text class="flow-t sm" x="115" y="421" text-anchor="middle">a printed muṣḥaf</text>
+        </g>
+      </svg>
+    </div>
+    <div class="col">
+      <div class="legend">
+        <span><span class="swatch good"></span> agreed &amp; locked</span>
+        <span><span class="swatch warn"></span> set aside, honestly</span>
+        <span><span class="swatch human"></span> only a person can say</span>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="col">
+      <h2><span class="q">So — what did the witnesses say?</span></h2>
+      <p>Six of the checks that matter most to a reader. Each one names what we built, who we checked
+        it against, and the number that came back.</p>
+    </div>
+    <div class="col checks">
+
+      <article class="check">
+        <span class="verdict pass">holds</span>
+        <h3>Is every verse on the page it is truly on?</h3>
+        <div class="figure"><span class="n">568&nbsp;/&nbsp;604</span><span class="of">pages agree — and the 36 that don't are the ones the printings themselves disagree on</span></div>
+        <p>The app knows which page every verse sits on by reading the shape of the printed page
+          directly. To check it, we compared our page for every verse against a widely used, separately
+          maintained page list that has never seen our artwork.</p>
+        <p><strong>568 of the 604 pages match exactly.</strong> The 36 that differ are not errors: they
+          are precisely the pages where the two standard printings of this muṣḥaf are known to break
+          differently. A second, independent reference agreed with us on <strong>6,180 of the 6,236
+          verses</strong>, with every one of the differences falling in those same known places.</p>
+      </article>
+
+      <article class="check">
+        <span class="verdict open">honest gap</span>
+        <h3>Does the app catch the verses you would actually confuse?</h3>
+        <div class="figure"><span class="n">41%</span><span class="of">of a much larger phrase catalogue — and that is the number we wanted, not a shortfall</span></div>
+        <p>Our list of look-alikes is hand-picked: the verses a hafiz genuinely slips between. We measured
+          it against a far larger catalogue, built by others, that mechanically lists <em>every</em>
+          repeated phrase in the Qur'an — 2,232 verses in all.</p>
+        <p>We flag <strong>921 of those 2,232 verses</strong>. The two lists are deliberately not the
+          same: they hold 1,311 verses we leave out, and we flag 599 they never list at all. That is by
+          design — they catalogue every mechanical echo, including formulas that recur in dozens of
+          verses, while we keep only the ones that actually trip a reader. <b>A near-perfect match would
+          have been the worrying result</b>, not this one: it would suggest we had simply copied them.</p>
+        <p>Being honest about the gap: of the 1,311 we don't flag, <strong>677 sit in a tight, two-to-four
+          verse echo</strong> — real candidates worth a second look (verses like <span class="vkey">2:8</span>,
+          <span class="vkey">2:25</span>, <span class="vkey">2:30</span> among them). The other 634 are the
+          long, common refrains we leave alone on purpose. The list is not finished — but it is not thin,
+          and it is nobody's copy.</p>
+      </article>
+
+      <article class="check">
+        <span class="verdict pass">holds</span>
+        <h3>Do the recitation colours come from somewhere we can stand behind?</h3>
+        <div class="figure"><span class="n">99.80%</span><span class="of">agreement with a separate engine that carries no Qur'an text of its own</span></div>
+        <p>The colours over the letters mark the rules of tajweed. We checked them against an
+          independently built recitation engine that ships no verse data at all — it works the rules out
+          for itself. Across all 6,236 verses it <strong>agrees with our colouring 99.80% of the
+          time</strong>, and every one of the 108 differences is written down for a hafiz to judge.</p>
+        <p>And a caution we owe you plainly: a <em>different</em> source we looked at, which seemed to be a
+          second independent witness, turned out to be <strong>the same underlying data</strong> — its
+          rule counts matched ours exactly, down to the rarest rule appearing on the very same 13 verses.
+          We did not count it twice. A witness only counts when it is genuinely its own.</p>
+      </article>
+
+      <article class="check">
+        <span class="verdict pass">holds</span>
+        <h3>Is the printed page really the one we say it is?</h3>
+        <div class="figure"><span class="n">56&nbsp;/&nbsp;56</span><span class="of">pages confirm it is the exact printing we claim</span></div>
+        <p>Tapping a single word on the page relies on a second, independent scan of the muṣḥaf. Before
+          trusting it, we had to be sure it was the same printing we ship — not a lookalike edition that
+          breaks pages differently. So we checked 56 pages, <strong>chosen to include the handful where
+          the two standard printings are famously different</strong>, against our own page list.</p>
+        <p><strong>All 56 matched.</strong> Picking exactly the pages that would betray a wrong edition is
+          what makes this a real test and not a lucky coincidence.</p>
+      </article>
+
+      <article class="check">
+        <span class="verdict pass">holds</span>
+        <h3>Are the fixed facts of the book actually right?</h3>
+        <div class="figure"><span class="n">318</span><span class="of">structural numbers, re-checked against their source on every single build</span></div>
+        <p>How many verses are in each chapter; where each of the thirty parts begins; where every place of
+          prostration falls — 318 fixed numbers in all. These are carried in the app's own code, which is
+          exactly the kind of place a typo hides.</p>
+        <p>So they are not trusted — they are <strong>re-derived from the reference reckoning of the book
+          every time the app is built</strong>, and compared. A single mistaken digit stops the build. This
+          is the check we hold up as the model for all the others.</p>
+      </article>
+
+      <article class="check">
+        <span class="verdict pass">holds</span>
+        <h3>Does every small mark sit on a word that calls for it?</h3>
+        <div class="figure"><span class="n">86,962&nbsp;/&nbsp;86,965</span><span class="of">words carry exactly the marks their text asks for</span></div>
+        <p>The tiny marks over the words — the pause signs, the elongations — were counted, word by word,
+          against what the text of each word actually calls for. <strong>All but three of the 86,965 words
+          match exactly.</strong> Whether the print or the text is right about those three is a hafiz's
+          call, and it is set aside for one — not swept away.</p>
+      </article>
+
+    </div>
+  </section>
+
+  <section>
+    <div class="col">
+      <h2><span class="q">What can no computer ever check?</span></h2>
+      <p>Some things a machine simply cannot settle. A comparison can tell you two verses share words; it
+        cannot tell you a reader would confuse them. For those, the only honest witness is a person, and we
+        keep a standing list of exactly which checks still need one — and which have been done.</p>
+      <ul class="plain">
+        <li><span class="wait">□</span><span>Whether a hafiz, holding a printed muṣḥaf, agrees that our
+          look-alike pairs are ones you would really confuse. <b>Waiting on a hafiz.</b></span></li>
+        <li><span class="wait">□</span><span>Whether a screen-reader user can actually select a verse and
+          hop between look-alikes by touch, and whether it is phrased well by ear. <b>Waiting on a phone and
+          an ear.</b></span></li>
+        <li><span class="wait">□</span><span>Whether your revision history really survives a real phone left
+          offline for more than a week. <b>Waiting on a real device and real days.</b></span></li>
+        <li><span class="tick">✓</span><span>Whether a stranger, logged out, can reach the app's open source
+          code. <b>Done.</b></span></li>
+        <li><span class="tick">✓</span><span>How far a mark still sits from where it belongs, measured by
+          placing marks on the page by hand. <b>Done.</b></span></li>
+      </ul>
+      <div class="callout">Two of these are finished; the rest are honestly still open. We would rather show
+        you an unfinished list than pretend a person has looked when no person has.</div>
+    </div>
+  </section>
+
+  <section>
+    <div class="col">
+      <h2><span class="q">Where did we come up short?</span></h2>
+      <p>Trust is not a clean sheet — it is knowing exactly where the edges are. As of today:</p>
+      <ul class="plain">
+        <li><span class="wait">▸</span><span><b>The look-alike list is not finished.</b> There are 677 verse
+          pairings, tight enough to be worth flagging, that we do not yet flag.</span></li>
+        <li><span class="wait">▸</span><span><b>We have not settled which words to underline</b> when two verses
+          share an opening. There are two defensible answers and the choice is still open.</span></li>
+        <li><span class="wait">▸</span><span><b>The 108 tajweed differences still need a hafiz.</b> We have found
+          and listed every one; none has yet been judged.</span></li>
+        <li><span class="wait">▸</span><span><b>One licence we still read secondhand.</b> The printing authority's
+          own website has refused to load for us from several networks, so we describe its terms as reported by
+          others and say plainly that we could not reach the source ourselves.</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <section>
+    <div class="col">
+      <h2><span class="q">Want to check the witnesses yourself?</span></h2>
+      <p>Every source above is public. Open them and hold us to the same comparison.</p>
+      <div class="sources">
+        <a class="src" href="https://qul.tarteel.ai/resources/mutashabihat/73" target="_blank" rel="noopener">
+          <span class="what">The larger look-alike catalogue</span><span class="who">the phrase list we measured our hop against</span>
+          <span class="host">qul.tarteel.ai</span></a>
+        <a class="src" href="https://quran.com" target="_blank" rel="noopener">
+          <span class="what">The independent page list</span><span class="who">a separately maintained page-for-every-verse table</span>
+          <span class="host">quran.com</span></a>
+        <a class="src" href="https://tanzil.net" target="_blank" rel="noopener">
+          <span class="what">The reference reckoning of the book</span><span class="who">the structural numbers we re-derive on every build</span>
+          <span class="host">tanzil.net</span></a>
+        <a class="src" href="https://corpus.quran.com" target="_blank" rel="noopener">
+          <span class="what">The word-by-word corpus</span><span class="who">the morphology behind the shared-word underline</span>
+          <span class="host">corpus.quran.com</span></a>
+        <a class="src" href="https://github.com/quranpedia/quran-svg" target="_blank" rel="noopener">
+          <span class="what">The printed-page geometry</span><span class="who">the page shapes every check above is built on</span>
+          <span class="host">github.com/quranpedia/quran-svg</span></a>
+      </div>
+      <p style="margin-top:1.3rem" class="sub">The full reasoning behind each check — every number, every
+        difference, and the record of what changed our minds — lives beside this page in
+        <a href="../design/what-we-depend-on.md">the record of what this app depends on</a> and
+        <a href="./ledger.json">the standing list of human-only checks</a>.</p>
+
+      <h3 style="margin-top:2.2rem">Re-score one of our rulings yourself</h3>
+      <p>The mark-placement figures come from sittings where a person answered the same question over
+        and over, and the answers are committed. One of those sittings can be scored again by anyone,
+        from the repository and one hash-checked download, without taking our word for anything.
+        Clone it, install, fetch the word pages the marks are read from, and run one command:</p>
+      <p class="sub" style="line-height:2.1">
+        <span class="vkey">git clone https://github.com/omars-lab/hifth.git</span><br>
+        <span class="vkey">cd hifth</span> · <span class="vkey">pnpm install</span><br>
+        <span class="vkey">pnpm --filter @hifth/etl build:words --fetch</span> &nbsp;<small>(about 350 MB, checked against a committed hash)</small><br>
+        <span class="vkey">make rescore RULING=2026-08-12T1650-placement-residual-by-hand.seed23</span></p>
+      <p>What you should see: a small table with three rows that matter — the fingerprint of the
+        measurement the sitting was shown against, the fingerprint of the grading code, and the
+        headline — each with a <em>recorded</em> column and a <em>now</em> column and the word
+        <span class="vkey">same</span> beside it; then the line <span class="vkey">everything agrees</span>.
+        The headline for that sitting is <span class="vkey">98.3% [91.1% – 99.7%] 59/60</span>: sixty
+        placements over forty pages, fifty-nine of which the reader put nearer our correction than the
+        box as first printed. The <em>recorded</em> column comes from a receipt committed beside the
+        ruling, holding what the scorer said on the day — so you are comparing a published number with
+        one your own machine just produced, not two runs on ours. If any row says
+        <span class="vkey">DIFFERS</span>, the command says which and why, and we would want to hear about it.</p>
+      <p class="sub">Two honest limits. The other rulings in that directory are settled tables, made from
+        transcripts and a large measurement that were never committed; the same command refuses those
+        in so many words rather than replaying something smaller, and <span class="vkey">make rescore</span>
+        on its own lists which is which. And nobody outside the project has run this yet — that is the
+        half of the check we cannot do for ourselves.</p>
+    </div>
+  </section>
+
+  <footer class="wrap">
+    <p>Hifth is for huffaz. Its reasoning is meant to be as public as its result — a reader who doubts a
+      choice can open the page it was made on. <a href="https://blog.bytesofpurpose.com/hifth/docs/">Every design and decision.</a></p>
+    <p class="mono">Built from committed measurements. The figures on this page are produced by the project's
+      own checks and match the records linked above.</p>
+  </footer>
+
+</main>
+
+<script>
+  (function () {
+    var btn = document.getElementById('themeBtn');
+    var root = document.documentElement;
+    function apply(t) { if (t === 'light' || t === 'dark') root.setAttribute('data-theme', t); else root.removeAttribute('data-theme'); }
+    try { apply(localStorage.getItem('hifth-theme')); } catch (e) {}
+    btn.addEventListener('click', function () {
+      var cur = root.getAttribute('data-theme');
+      var isDark = cur ? cur === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
+      var next = isDark ? 'light' : 'dark';
+      apply(next);
+      try { localStorage.setItem('hifth-theme', next); } catch (e) {}
+    });
+  })();
+</script>

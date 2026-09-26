@@ -775,6 +775,31 @@ test.describe("Hifth · the page bar at desktop", () => {
       "the slider is bounded but not centred under the book",
     ).toBeLessThan(barBox.width * 0.1);
   });
+
+  test("the knob moves with the magnifier, and holds still under the mouse", async ({ page }) => {
+    // The magnifier spreads the marks near the mouse; the knob and the page mark
+    // used to stay put, so near the knob they sat off the marks around them.
+    await page.goto("/#/hafs-kfqc/p106");
+    await expect(spread(page)).toBeVisible();
+    const knob = page.getByTestId("page-handle");
+    const here = page.getByTestId("page-here");
+    const centre = async (l: typeof knob) => {
+      const b = await boxOf(l);
+      return { x: b.x + b.width / 2, y: b.y + b.height / 2 };
+    };
+    const rest = await centre(knob);
+    const restHere = (await centre(here)).x;
+
+    // Right on the knob: the magnifier leaves the point under the mouse alone.
+    await page.mouse.move(rest.x, rest.y);
+    expect(Math.abs((await centre(knob)).x - rest.x), "the knob ran from the mouse").toBeLessThan(1);
+
+    // Beside it: the knob is pushed away, and the page mark goes with it.
+    await page.mouse.move(rest.x + 6, rest.y);
+    const moved = (await centre(knob)).x - rest.x;
+    expect(moved, "the knob stayed put while the marks around it spread").toBeLessThan(-10);
+    expect(Math.abs((await centre(here)).x - restHere - moved), "the knob left its page mark").toBeLessThan(1);
+  });
 });
 
 /*
@@ -1148,6 +1173,53 @@ test.describe("Hifth · one page or two, and how big", () => {
     await expect(readout(page)).toHaveText("١٠٠٪");
   });
 
+  /*
+   * #148: at 150% the two pages of an opening were drawn over each other. The
+   * row above only ever opened at page 7, where the live leaf is the right-hand
+   * page — and the stage was told "the live leaf pins at its left edge", which is
+   * only true there. On an even page the live leaf is the left-hand one, so both
+   * leaves grew *into* the fold and each was cut off at it: the reader saw the
+   * inner halves of two pages side by side, reading as one garbled line. Both
+   * parities, then, and a zoom past the point where a leaf is wider than its box.
+   */
+  for (const at of [106, 105]) {
+    test(`at 150% the two pages meet at the fold and do not overlap (opened at ${at})`, async ({
+      page,
+    }) => {
+      await page.goto(`/#/hafs-kfqc/p${at}`);
+      await expect(pageSvg(page, 105)).toBeVisible({ timeout: 20_000 });
+      await expect(pageSvg(page, 106)).toBeVisible();
+      // Each page's inner edge at fit is its side of the fold (the two sit a few
+      // pixels apart there, across the gutter's core).
+      const rightFold = (await restingBox(page, 105)).x;
+      const leftFit = await restingBox(page, 106);
+      const leftFold = leftFit.x + leftFit.width;
+
+      await zoomBtn(page, "in").click();
+      await zoomBtn(page, "in").click();
+      await expect.poll(() => scaleOf(page, 105)).toBeCloseTo(1.5, 2);
+      await expect.poll(() => scaleOf(page, 106)).toBeCloseTo(1.5, 2);
+
+      const right = await restingBox(page, 105);
+      const left = await restingBox(page, 106);
+      expect(Math.abs(right.x - rightFold), "the right-hand page starts at the fold").toBeLessThan(3);
+      expect(Math.abs(left.x + left.width - leftFold), "the left-hand page ends at the fold").toBeLessThan(3);
+
+      // And the part hanging over the desk is drawn, not cut at the leaf's box:
+      // a point just inside each page's outer edge is that page.
+      const hits = await page.evaluate(
+        ([rx, lx, y]) =>
+          [rx, lx].map((x) => document.elementFromPoint(x, y)?.closest("svg")?.getAttribute("aria-labelledby")),
+        [right.x + right.width - 20, left.x + 20, right.y + right.height / 2] as const,
+      );
+      expect(hits).toEqual(["page-label-105", "page-label-106"]);
+      // The desk stops the page at the window, with no sideways scroll.
+      expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(
+        page.viewportSize()!.width,
+      );
+    });
+  }
+
   test("the ends of the ladder are stated, not discovered by clicking", async ({ page }) => {
     await page.goto("/#/hafs-kfqc/p7");
     await expect(pageSvg(page, 7)).toBeVisible({ timeout: 20_000 });
@@ -1209,6 +1281,61 @@ test.describe("Hifth · one page or two, and how big", () => {
     await modeBtn(page, "one").click();
     await zoomBtn(page, "in").click();
     await expect.poll(() => scaleOf(page, 7)).toBeCloseTo(1.25, 2);
+  });
+
+  test("a turn keeps the reader's magnification; a hop reframes it", async ({ page }) => {
+    // §4.5 of the page-turning design: turning a page is continuing to read the
+    // same book, so a reader who has magnified to study one line lands on the next
+    // page at the same size — the pages are the same shape, so the line is waiting
+    // where the eye already is. A hop is the opposite: it is asking to be taken
+    // somewhere else, so it frames its target afresh. This test holds the two
+    // apart, because the easy mistake is to make everything reset (the old turn) or
+    // to make everything carry (a refactor that forgets the hop still frames).
+    await page.goto("/#/hafs-kfqc/p7");
+    await expect(pageSvg(page, 7)).toBeVisible({ timeout: 20_000 });
+
+    // One leaf, so the turn is a real leaf turn rather than a within-opening flip.
+    await modeBtn(page, "one").click();
+    await expect.poll(() => soloOf(page)).toBe("true");
+
+    // Magnify to 200% — a rung well clear of the 155% a hop would frame at, so a
+    // later reading of the scale says "carried" or "reframed" with no ambiguity.
+    await zoomBtn(page, "in").click(); // 125
+    await zoomBtn(page, "in").click(); // 150
+    await zoomBtn(page, "in").click(); // 200
+    await expect.poll(() => scaleOf(page, 7)).toBeCloseTo(2, 2);
+    await expect(readout(page)).toHaveText("٢٠٠٪");
+
+    // Turn to the next page. The magnification comes with the reader.
+    await page.keyboard.press("ArrowLeft");
+    await expect(page.locator(NUM)).toHaveText("8");
+    await expect.poll(
+      () => scaleOf(page, 8),
+      "the turn reset the zoom instead of carrying it",
+    ).toBeCloseTo(2, 2);
+    await expect(readout(page)).toHaveText("٢٠٠٪");
+
+    // And it keeps carrying, turn after turn — this is reading, not one lucky hop.
+    await page.keyboard.press("ArrowLeft");
+    await expect(page.locator(NUM)).toHaveText("9");
+    await expect.poll(() => scaleOf(page, 9)).toBeCloseTo(2, 2);
+
+    // Now a hop — the jumper, to an ayah on another page. This is not reading on;
+    // it is being taken somewhere, so the magnification is dropped and the target
+    // is framed afresh, well below the 200% we were carrying.
+    await page.keyboard.press("/");
+    const jumper = page.getByRole("dialog", { name: "اذهب إلى" });
+    await expect(jumper).toBeVisible();
+    await jumper.getByRole("combobox").fill("2:120");
+    await expect(jumper.getByRole("option").first()).toBeVisible();
+    await page.keyboard.press("Enter");
+    await expect(jumper).toHaveCount(0);
+
+    const landedPage = Number(await page.locator(NUM).textContent());
+    await expect.poll(
+      () => scaleOf(page, landedPage),
+      "the hop carried the turn's magnification instead of reframing its target",
+    ).toBeLessThan(1.9);
   });
 });
 
@@ -1281,17 +1408,18 @@ test.describe("Hifth · the trail bar holds its height", () => {
  * highlighted passage's menu, the root lens — are *about* one ayah, and on a
  * wide screen each is a card pinned to a bottom corner. Which corner used to
  * follow the chrome's direction (inline-end: the right in English, the left in
- * Arabic). On a spread that is the wrong axis. The ayah sits on a physical side
- * of the gutter whatever language the chrome reads in, and half the time the
- * card landed on top of it — in English, every ayah on the right-hand page
- * raised its options over itself, and the selection wash was the thing the card
- * hid (triage item ⑤; docs/design/desktop.md §5). So the app names the side:
- * the leaf the ayah is *not* on.
+ * Arabic). On a spread that is the wrong axis: the ayah sits on a physical side
+ * of the gutter whatever language the chrome reads in, so a corner chosen by
+ * language could land the card on top of the verse it is about. So the app names
+ * the side — and the drawer decision (docs/design/ayah-drawer.md, decided D)
+ * puts it on the *facing* leaf, opposite the ayah, so the pressed verse stays
+ * fully visible with its tools across the gutter. (The same-leaf placement,
+ * Option C, was tried live and covered a leaf-filling surah's own lines.)
  *
- * Asserted in both languages, because the default that hid the defect in
- * Arabic exposed it in English; and on geometry against the open book rather
- * than on the attribute alone, since the attribute is only a claim about where
- * the stylesheet will put the card.
+ * Asserted in both languages, because the corner used to be chosen by the
+ * chrome's direction and the side must not be; and on geometry against the open
+ * book rather than on the attribute alone, since the attribute is only a claim
+ * about where the stylesheet will put the card.
  */
 test.describe("Hifth · the ayah's sheets rise over the facing leaf", () => {
   /** `LANG_STORAGE_KEY` in src/i18n.ts — set before the app boots. */
@@ -1317,7 +1445,7 @@ test.describe("Hifth · the ayah's sheets rise over the facing leaf", () => {
       await expect(sheet(page)).toBeVisible();
       expect(
         await sideOf(page, sheet(page)),
-        "an ayah on the right leaf raises its sheet over the left one",
+        "an ayah on the right leaf raises its sheet over the facing (left) leaf",
       ).toBe("left");
       expect(await sheet(page).getAttribute("data-side")).toBe("left");
       await page.keyboard.press("Escape");
@@ -1331,7 +1459,7 @@ test.describe("Hifth · the ayah's sheets rise over the facing leaf", () => {
       await expect(sheet(page)).toBeVisible();
       expect(
         await sideOf(page, sheet(page)),
-        "an ayah on the left leaf raises its sheet over the right one",
+        "an ayah on the left leaf raises its sheet over the facing (right) leaf",
       ).toBe("right");
       expect(await sheet(page).getAttribute("data-side")).toBe("right");
     });
@@ -1363,8 +1491,16 @@ test.describe("Hifth · the ayah's sheets rise over the facing leaf", () => {
     const facing = await restingBox(page, 8);
     await chip(page).click();
     await expect(sheet(page)).toBeVisible();
-    expect(await restingBox(page, 7), "the live leaf moved when the sheet rose").toEqual(live);
-    expect(await restingBox(page, 8), "the facing leaf moved when the sheet rose").toEqual(facing);
+    // "Not by a pixel", measured as that: a sub-pixel rounding change in layout
+    // (seen at 0.0025px) is not a leaf moving.
+    const within = (b: { x: number; y: number; width: number; height: number }) => ({
+      x: expect.closeTo(b.x, 1),
+      y: expect.closeTo(b.y, 1),
+      width: expect.closeTo(b.width, 1),
+      height: expect.closeTo(b.height, 1),
+    });
+    expect(await restingBox(page, 7), "the live leaf moved when the sheet rose").toEqual(within(live));
+    expect(await restingBox(page, 8), "the facing leaf moved when the sheet rose").toEqual(within(facing));
   });
 
   test("with one leaf, or on a phone, no side is named and the default stands", async ({
@@ -1739,3 +1875,114 @@ test.describe("every road onto a page lands the leaves level", () => {
     });
   }
 });
+
+/*
+ * The page tools bar, step 1 of docs/design/page-toolbar-plan.md: select,
+ * highlight and bookmark on a bar above the book, with V, H and B, and Escape
+ * to put a tool down. English, so the names read as the plan writes them.
+ */
+test.describe("Hifth · the page tools bar", () => {
+  test.use({ locale: "en-US" });
+
+  const bar = (page: Page): Locator => page.getByRole("toolbar", { name: "Page tools" });
+  const toolBtn = (page: Page, name: string): Locator =>
+    bar(page).getByRole("radio", { name, exact: true });
+
+  test("the letters pick a tool, the bar names it, and Escape puts it down", async ({ page }) => {
+    await page.goto("/#/hafs-kfqc/p8");
+    await expect(pageSvg(page, 8)).toBeVisible();
+    await expect(toolBtn(page, "Select")).toHaveAttribute("aria-checked", "true");
+    await expect(bar(page)).toContainText("Select tool");
+
+    await page.keyboard.press("KeyH");
+    await expect(toolBtn(page, "Highlight")).toHaveAttribute("aria-checked", "true");
+    await expect(bar(page)).toContainText("Highlight tool");
+    // The pointer says it too, on the page itself.
+    const cursor = await page
+      .locator('[data-tool="highlight"][data-page="8"]')
+      .evaluate((el) => getComputedStyle(el).cursor);
+    expect(cursor).toContain("cell");
+
+    await page.keyboard.press("Escape");
+    await expect(toolBtn(page, "Select")).toHaveAttribute("aria-checked", "true");
+
+    // Clicking the tool that is on puts it down, too.
+    await toolBtn(page, "Highlight").click();
+    await toolBtn(page, "Highlight").click();
+    await expect(toolBtn(page, "Select")).toHaveAttribute("aria-checked", "true");
+  });
+
+  test("one stop on the keyboard, and the arrows walk along it", async ({ page }) => {
+    await page.goto("/#/hafs-kfqc/p8");
+    await expect(pageSvg(page, 8)).toBeVisible();
+    await toolBtn(page, "Select").focus();
+    // Only the tool that is on takes a tab stop.
+    await expect(bar(page).locator('[tabindex="0"]')).toHaveCount(1);
+    await page.keyboard.press("ArrowRight");
+    await expect(toolBtn(page, "Highlight")).toBeFocused();
+    await expect(toolBtn(page, "Highlight")).toHaveAttribute("aria-checked", "true");
+    await page.keyboard.press("End");
+    await expect(toolBtn(page, "Bookmark")).toHaveAttribute("aria-checked", "true");
+  });
+
+  test("with the highlighter, a plain drag paints — no hold first", async ({ page }) => {
+    await page.goto("/#/hafs-kfqc/p7");
+    await expect(pageSvg(page, 7)).toBeVisible();
+    const first = await ayahTarget(page, "#verse-46");
+    const second = await ayahTarget(page, "#verse-47");
+
+    await page.keyboard.press("KeyH");
+    await page.mouse.move(first.x, first.y);
+    await page.mouse.down();
+    await page.mouse.move(second.x, second.y, { steps: 10 });
+    await expect(page.locator("#hifth-overlay rect.hl-marquee")).toHaveCount(1);
+    await page.mouse.up();
+    await expect(page.locator("#hifth-overlay .hl-hlt")).not.toHaveCount(0);
+    // It stays on for the next stroke.
+    await expect(toolBtn(page, "Highlight")).toHaveAttribute("aria-checked", "true");
+  });
+
+  test("with the bookmark tool, a tap drops a ribbon there, and the tool goes back", async ({
+    page,
+  }) => {
+    await page.goto("/#/hafs-kfqc/p7");
+    await expect(pageSvg(page, 7)).toBeVisible();
+    await page.keyboard.press("KeyB");
+    await expect(bar(page)).toContainText("Tap a page to drop a bookmark");
+    await tapAyahAt(page, "#verse-46");
+
+    const drawer = page.getByRole("dialog", { name: "Bookmark" });
+    await expect(drawer).toBeVisible();
+    await expect(toolBtn(page, "Select")).toHaveAttribute("aria-checked", "true");
+    await drawer.getByRole("button", { name: "Close" }).click();
+    await expect(page.getByRole("button", { name: /^Bookmark:/ })).toHaveCount(1);
+  });
+});
+
+test.describe("Hifth · the red seam lies on the fold", () => {
+  test.use({ locale: "en-US" });
+
+  test("on an open book the seam is centred on the crease, half on each page", async ({ page }) => {
+    // Drawn inside one leaf, it once sat wholly on that leaf, flush with its
+    // inner edge: a ribbon beside the fold rather than down it.
+    test.slow();
+    await page.goto("/#/hafs-kfqc/p106");
+    const seam = page.getByRole("img", { name: "Where you left off" });
+    await expect(seam).toHaveCount(1, { timeout: 12_000 });
+    const at = await page.evaluate(() => {
+      const s = document.querySelector("[data-bookmark-seam]")!.getBoundingClientRect();
+      const leaves = [...document.querySelectorAll<HTMLElement>("[data-bound][data-page]")].map((e) =>
+        e.getBoundingClientRect(),
+      );
+      return { centre: (s.left + s.right) / 2, width: s.width, leaves: leaves.length, crease: Math.min(...leaves.map((r) => r.right)) };
+    });
+    expect(at.leaves, "not an open book").toBe(2);
+    expect(Math.abs(at.centre - at.crease), "the seam is off the crease").toBeLessThan(1.5);
+    expect(at.width).toBeGreaterThan(4);
+  });
+});
+
+async function tapAyahAt(page: Page, selector: string): Promise<void> {
+  const at = await ayahTarget(page, selector);
+  await page.mouse.click(at.x, at.y);
+}

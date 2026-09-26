@@ -4,6 +4,7 @@ import { tapAyah } from "./ayah";
 import { COACH_STORAGE_KEY } from "../src/coach";
 import { formatFailures, measureContrast } from "./contrast";
 import { contextWithout } from "./inventory";
+import { openTips } from "./tips";
 
 /*
  * Contrast, on every surface — PLAN follow-up ⑥.
@@ -187,12 +188,13 @@ const SURFACES: readonly Surface[] = [
     },
   },
   {
-    name: "first run — the coach strip",
+    name: "the tips strip, opened from settings",
     open: async (page) => {
-      // Deliberately NOT `settled`: this is the one visit where the teaching
-      // strip is on screen, and it is the first text a reader ever sees here.
+      // It used to be the first text a reader ever saw here; since 2026-09-25 it
+      // opens only from the button in settings, so that is how it is reached.
+      await settled(page);
       await page.goto("/");
-      await expect(page.getByRole("region", { name: "كيف تتنقّل" })).toBeVisible();
+      await openTips(page);
     },
   },
   {

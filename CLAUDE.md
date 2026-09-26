@@ -1,8 +1,35 @@
 # Working in this repo
 
+## What we are building right now
+
+Hifth is a personal proof-of-concept, not a product we are releasing in this form. The
+near-term goal is one thing: **a qualitative demo good enough to show the team behind The
+Study Quran, so they want to collaborate with us.** Everything we build now serves that
+pitch. We are rushing it on purpose — a demo that *feels* like the real thing, on a few
+verses done beautifully, beats a complete app done thinly. Depth of impression over breadth
+of coverage.
+
+Two consequences to hold onto:
+
+- **The pitch build is private, and shown to the people who own the material.** It may show
+  what a real collaboration would look like — including The Study Quran's own commentary and
+  the scripture beside it — because it is shown to them, in a room, not shipped to the world.
+  It is a mockup of a partnership, not a release of their book.
+- **The public site and its rules do not change.** The tenets below still govern anything
+  merged to the public site: designs stay public, and the shipped app carries no Qur'an text
+  and no held commentary — the gates that enforce that stay on. The pitch build lives on its
+  own private track, outside that pipeline, so nothing in it reaches the public site. When
+  the two would collide — a demo that must show held text — the demo is the private one, and
+  the public build stays clean.
+
+If a task does not move the pitch forward, it is not urgent right now. When in doubt, build
+the thing that will make a scholar lean in.
+
 ## Decisions are explained in plain language, or they are not explained
 
 This is the tenet. Everything below is how it is enforced.
+
+And it is not only for pages and records: **always explain things in simple, straightforward language, with no jargon** — in conversation as much as in a checked-in document. When you tell the owner what the options are, what broke, what a choice would cost, or where something stands, use plain words a reader who has never opened this repository would follow, and say the plain thing a jargon term stands for instead of naming the term. Domain words the owner already uses stay; our own words for our own plumbing go.
 
 Hifth is for huffaz, and its decisions get made by people who are not in the weeds of this
 code — including the person who owns it, six months from now, and anyone they show it to.
@@ -11,6 +38,12 @@ never opened this repository.** Concretely:
 
 - **Headings are questions.** "What does the app colour today?", not "Current salience
   model". A reader arrives holding a question; the page's headings are how they find it.
+  And the question must be answerable by a stranger cold, grounded in something concrete
+  that could actually happen — not an abstract or analogy-shaped framing. "Could someone
+  quietly change the checking code without us noticing?", not "Should the code be pinned
+  the way the data already is?" — the second is jargon-free and still opaque, because it
+  makes the reader decode a metaphor before they can have an opinion. Test: could a reader
+  answer it without first unpacking an analogy?
 - **No internal identifiers in the prose a reader is meant to follow.** No file names, no
   function names, no gate names, no commands, no backticked code in a question or an option
   label. Those belong in the record's body, where the reasons live, and in the code map —
@@ -33,6 +66,18 @@ never opened this repository.** Concretely:
   option whose difference is purely structural or policy — which of two labels a page carries —
   may still be drawn. The test is whether a reader could be *wrong* about the option from a
   picture and *right* about it from a hand on it; where that is true, drawing it is not enough.
+
+- **A rough build discovers what an upfront list of pros and cons cannot.** Facing a choice,
+  the pull is to write out every option with its costs, settle it on the page, then build the
+  winner. Resist it: a list made before anything exists can only hold what you already thought
+  of, and the considerations that actually decide a feature are the ones no list had a row for
+  — the panel that turns out to cover the verse it is about, the reach across the gutter that
+  feels wrong, the shape you only notice is confusing once your own hand is on it. So name the
+  options you can already see, then build a quick, throwaway POC as the *instrument that finds
+  the rest*, and write the pros and cons in full **afterwards** — the ones the demo taught you,
+  not only the ones you guessed before. This is not a licence to skip the thinking; it is where
+  the thinking gets its evidence. It is the felt-difference rule carried one step earlier: build
+  to *find* the options, not only to choose between the ones you already named.
 
 ### Legible is not the same as answerable
 
@@ -156,3 +201,26 @@ the decision gate already refuses — *a link with no copy dies the day the host
 a page nobody had thought to attach to a decision. Since 2026-09-01 the build serves every
 page under `docs/` from the site, so a merged page cannot leave by that door at all; the
 register is for the copies that still do.
+
+## A fix ships with the test that would have caught it
+
+Every defect we find, and every change that could bring one back, leaves behind an automated
+check in the **same change** — a unit test, or a Playwright test when the bug is something a
+reader would see or do. Not "later", not "if there's time": the test is part of the fix, and a
+fix without one is not finished. This is what the `fixed` word in the issue register already
+means — *closed in code **and** in a test that would fail if it came back* — made the rule for
+every change, not only the ones that reach the register.
+
+Write the test **first** where you can, so you watch it fail for the real reason before you make
+it pass; that is the only proof the test is wired to the actual behaviour and not to a mirror of
+the bug. A test that was green the moment you wrote it has told you nothing.
+
+This is here because it caught one. The design said the reader's magnification carries across a
+page turn, and the code that split the settle step read as if it did — but a Playwright test that
+turned a magnified page and checked the size on the far side went red: every turn flips the live
+leaf from one side of the opening to the other, which was silently remounting the stage and
+snapping it back to the whole page. No amount of reading the source would have shown that; the
+turn had to actually happen in a browser. The test is what turned a plausible-looking change into
+a real one, and it is now the thing that will notice the day the remount comes back. (Omar,
+2026-09-22: "are we adding regression tests / playwright tests as we encounter issues … this
+should be a tenet of how we work".)

@@ -1,0 +1,59 @@
+{
+  "$comment": "⑩ (what-we-depend-on): a third, independent grammar (MASAQ, CC BY) measured over the 9,533 positions where the print splits a proclitic the morphology joins. Numbers and verse keys only; no scripture. Rebuild: node packages/etl/scripts/probe-segmentation-witness.mjs (needs the gitignored MASAQ cache; ships nothing).",
+  "witness": {
+    "name": "MASAQ (Morphologically Annotated Sequential Arabic of the Qur'an)",
+    "source": "Mendeley Data 9yvrzxktmr",
+    "licence": "CC BY 4.0",
+    "base_text": "Tanzil",
+    "role": "instrument — read at build time to check a number, vendored and shipped nowhere",
+    "words": 77411
+  },
+  "disputed": {
+    "positions": 9533,
+    "ayahs": 4495
+  },
+  "verdict": {
+    "stemless_proclitic_tokens_in_witness": 0,
+    "splits_at_disputed_positions": 0,
+    "joins_at_disputed_positions": 9533,
+    "agreement_with_morphology_join": 1,
+    "agreement_with_print_split": 0,
+    "reading": "MASAQ never emits a bare proclitic token, so it joins at every disputed position — the same grammatical convention the morphology uses. The print's split is the outlier, a typographic convention, not an error in either grammar."
+  },
+  "cross_checks": {
+    "word_count_tier_over_disputed_ayahs": {
+      "witness_equals_morphology": {
+        "ayahs": 4486,
+        "positions": 9509
+      },
+      "witness_joins_even_more": {
+        "ayahs": 8,
+        "positions": 23
+      },
+      "witness_has_more_words": {
+        "ayahs": 1,
+        "positions": 1,
+        "detail": [
+          {
+            "ayah": "7:61",
+            "extraWords": 1,
+            "disputedHere": 1
+          }
+        ]
+      },
+      "disputed_ayahs_absent_from_witness": 0
+    },
+    "note_7_61": "7:61 is the only disputed ayah where MASAQ carries one more word than the morphology; the extra word is a separate stem, not a proclitic given its own token, so it is not a split."
+  },
+  "independence": {
+    "witness_words": 77411,
+    "morphology_words": 77429,
+    "shared_ayahs": 6236,
+    "equal_count_ayahs": 6217,
+    "ayahs_with_a_spelling_difference": 3695,
+    "aligned_words_compared": 77015,
+    "aligned_words_spelled_differently": 6595,
+    "spelling_divergence_pct": 8.6,
+    "reading": "A witness scraped from the morphology would tokenise and spell identically. MASAQ differs in both — a different total word count and a spelling difference on 8.6% of aligned words across more than half the book — so it is a genuine second grammar, not a derivative."
+  }
+}

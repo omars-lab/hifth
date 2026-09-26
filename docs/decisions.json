@@ -129,7 +129,72 @@
       "related": [
         "boundary-juz",
         "desktop-vs-mobile",
-        "graduation-losers"
+        "graduation-losers",
+        "page-bar-numberline",
+        "page-bar-look"
+      ]
+    },
+    {
+      "id": "page-bar-numberline",
+      "question": "Can the page bar read out its own landmarks — the juz around your finger and the page under it — like a ruler, without a second surface or a drag?",
+      "status": "decided",
+      "options": [
+        {
+          "id": "A",
+          "label": "Today: marks swell, but stay unnamed"
+        },
+        {
+          "id": "B",
+          "label": "Fisheye: the bar spreads apart and names the juz and page in place"
+        },
+        {
+          "id": "C",
+          "label": "Loupe: a magnifier panel floats over the pointer"
+        }
+      ],
+      "artifact": "https://blog.bytesofpurpose.com/hifth/docs/design/page-bar-numberline-options.html",
+      "page": "docs/design/page-bar-numberline-options.html",
+      "builtBy": "scripts/build-page-bar-numberline-options.mjs",
+      "doc": "docs/decisions/page-bar-numberline.md#what-is-being-decided",
+      "decided": "B",
+      "by": "omar",
+      "date": "2026-09-22",
+      "related": [
+        "juz-detents",
+        "desktop-vs-mobile",
+        "graduation-losers",
+        "page-bar-look"
+      ]
+    },
+    {
+      "id": "page-bar-look",
+      "question": "What should the page bar look like so it reads as something you move through the book with?",
+      "status": "decided",
+      "options": [
+        {
+          "id": "today",
+          "label": "Today: a thick grey slab striped green, with a page-icon knob"
+        },
+        {
+          "id": "A",
+          "label": "Thirty juz segments on a thin two-colour track, with a round knob"
+        },
+        {
+          "id": "B",
+          "label": "Thicker juz blocks, keeping the page-icon knob"
+        },
+        {
+          "id": "C",
+          "label": "A plain track and round knob, with juz dots underneath"
+        }
+      ],
+      "doc": "docs/decisions/page-bar-look.md#so-what-was-decided",
+      "decided": "A",
+      "by": "omar",
+      "date": "2026-09-25",
+      "related": [
+        "juz-detents",
+        "page-bar-numberline"
       ]
     },
     {
@@ -250,7 +315,8 @@
       "doc": "docs/decisions/graduation-losers.md#what-is-being-decided",
       "related": [
         "juz-detents",
-        "boundary-juz"
+        "boundary-juz",
+        "page-bar-numberline"
       ],
       "decided": "A",
       "by": "omar",
@@ -298,7 +364,8 @@
         "bookmark-store",
         "note-persistence",
         "confusion-map-export",
-        "mistake-note-kinds"
+        "mistake-note-kinds",
+        "bookmark-admin"
       ]
     },
     {
@@ -331,13 +398,15 @@
         "loop-6a",
         "tajweed-colours",
         "mark-placement",
-        "mistake-note-anchor"
+        "mistake-note-anchor",
+        "harakah-pick",
+        "diff-mark-tint"
       ]
     },
     {
       "id": "mark-placement",
       "question": "Should the app line up what it draws one page at a time, or one printed line at a time?",
-      "status": "open",
+      "status": "decided",
       "options": [
         {
           "id": "A",
@@ -368,14 +437,16 @@
       "page": "docs/design/mark-placement.html",
       "builtBy": "scripts/build-placement-options.mjs",
       "doc": "docs/design/mark-registration.md",
-      "decided": null,
-      "by": null,
-      "date": null,
+      "decided": "H",
+      "by": "omar",
+      "date": "2026-09-03",
       "related": [
         "mark-granularity",
         "word-selection",
         "comparison-crop",
-        "sitting-hosting"
+        "sitting-hosting",
+        "harakah-pick",
+        "diff-mark-tint"
       ]
     },
     {
@@ -450,7 +521,38 @@
         "loop-4a",
         "note-export-shape",
         "highlight-shape",
-        "similar-ayah-enrichment"
+        "adjacency-span-source",
+        "similar-ayah-enrichment",
+        "diff-mark-tint"
+      ]
+    },
+    {
+      "id": "diff-mark-tint",
+      "question": "When two look-alike verses differ by one vowel, should the panel show that vowel?",
+      "status": "decided",
+      "options": [
+        {
+          "id": "A",
+          "label": "Leave it — colour whole words only"
+        },
+        {
+          "id": "B",
+          "label": "Tint the whole word when its vowels differ"
+        },
+        {
+          "id": "C",
+          "label": "Colour any single mark on its own"
+        }
+      ],
+      "doc": "docs/decisions/diff-mark-tint.md",
+      "decided": "C",
+      "by": "omar",
+      "date": "2026-09-23",
+      "related": [
+        "comparison-crop",
+        "mark-placement",
+        "mark-granularity",
+        "harakah-pick"
       ]
     },
     {
@@ -498,7 +600,9 @@
         "spread-zoom",
         "juz-detents",
         "boundary-juz",
-        "tafseer-reading"
+        "tafseer-reading",
+        "page-turn-curl",
+        "page-bar-numberline"
       ]
     },
     {
@@ -564,7 +668,8 @@
         "mark-granularity",
         "mark-placement",
         "comparison-crop",
-        "mistake-note-anchor"
+        "mistake-note-anchor",
+        "selection-drawer"
       ]
     },
     {
@@ -710,7 +815,9 @@
       "related": [
         "word-selection",
         "mark-granularity",
-        "mistake-note-kinds"
+        "mistake-note-kinds",
+        "harakah-pick",
+        "selection-drawer"
       ]
     },
     {
@@ -835,12 +942,13 @@
       "page": "docs/design/bookmark-fold-options.html",
       "builtBy": "scripts/build-bookmark-fold-options.mjs",
       "doc": "docs/decisions/bookmark-fold.md#is-a-bookmark-one-ribbon-that-moves-or-many-the-reader-drops-and-lifts",
-      "decided": "B",
+      "decided": "C",
       "by": "omar",
-      "date": "2026-09-02",
+      "date": "2026-09-25",
       "related": [
         "bookmark-store",
-        "pin-marker"
+        "pin-marker",
+        "bookmark-admin"
       ]
     },
     {
@@ -872,6 +980,35 @@
         "bookmark-model",
         "note-persistence",
         "confusion-map-export",
+        "storage-model",
+        "bookmark-admin"
+      ]
+    },
+    {
+      "id": "bookmark-admin",
+      "question": "Where does a reader clear many bookmarks at once, and how is clearing all of them confirmed?",
+      "status": "decided",
+      "options": [
+        {
+          "id": "A",
+          "label": "From the page map, grouped by surah, with clear-all asking first"
+        },
+        {
+          "id": "B",
+          "label": "Only from each ribbon, one at a time"
+        },
+        {
+          "id": "C",
+          "label": "Leave bookmarks out of the demo"
+        }
+      ],
+      "doc": "docs/decisions/bookmark-admin.md",
+      "decided": "A",
+      "by": "omar",
+      "date": "2026-09-25",
+      "related": [
+        "bookmark-model",
+        "bookmark-store",
         "storage-model"
       ]
     },
@@ -991,7 +1128,8 @@
       "related": [
         "qul-reliance",
         "similar-ayah-enrichment",
-        "qul-etl-plugins"
+        "qul-etl-plugins",
+        "qul-dev-draw-toggle"
       ]
     },
     {
@@ -1020,6 +1158,230 @@
         "qul-reliance",
         "qul-store-purpose"
       ]
+    },
+    {
+      "id": "adjacency-span-source",
+      "question": "Which words does the app line look-alikes up on — the printed page's own, or the separate word-by-word corpus it counts them in today?",
+      "status": "open",
+      "options": [
+        {
+          "id": "A",
+          "label": "Keep counting in the corpus's words"
+        },
+        {
+          "id": "B",
+          "label": "Count in the printed page's own words"
+        }
+      ],
+      "artifact": "https://blog.bytesofpurpose.com/hifth/docs/design/adjacency-span-source.html",
+      "page": "docs/design/adjacency-span-source.html",
+      "builtBy": "scripts/build-adjacency-span-source.mjs",
+      "doc": "docs/decisions/adjacency-span-source.md",
+      "decided": null,
+      "by": null,
+      "date": null,
+      "related": [
+        "comparison-crop"
+      ]
+    },
+    {
+      "id": "page-turn-curl",
+      "question": "When you turn a page, should the leaf curl the way a paper book does?",
+      "status": "open",
+      "options": [
+        {
+          "id": "A",
+          "label": "Flat seam (today): a band sweeps over the words; none move"
+        },
+        {
+          "id": "B",
+          "label": "Skeleton curl: the leaf curls carrying grey lines, real words settle in only when flat"
+        },
+        {
+          "id": "C",
+          "label": "Curl the real words: the leaf curls carrying the drawn letters"
+        },
+        {
+          "id": "D",
+          "label": "Shadow lift: a shadow lifts off the edge, no surface moves, the page swaps"
+        }
+      ],
+      "artifact": "https://blog.bytesofpurpose.com/hifth/docs/design/page-turn-curl-options.html",
+      "page": "docs/design/page-turn-curl-options.html",
+      "builtBy": "scripts/build-page-turn-curl-options.mjs",
+      "doc": "docs/decisions/page-turn-curl.md#when-you-turn-a-page-should-the-leaf-curl-the-way-a-paper-book-does",
+      "related": [
+        "desktop-vs-mobile"
+      ]
+    },
+    {
+      "id": "qul-page-cross-check",
+      "question": "Should we build a fine, line-by-line check that holds our own page against the other library’s and records where the two disagree?",
+      "status": "decided",
+      "options": [
+        {
+          "id": "A",
+          "label": "Keep the coarse page check we already have"
+        },
+        {
+          "id": "B",
+          "label": "Build the fine check as a one-time report we read and act on"
+        },
+        {
+          "id": "C",
+          "label": "Build the fine check as a held count an automated guard watches forever"
+        }
+      ],
+      "artifact": "https://blog.bytesofpurpose.com/hifth/docs/design/qul-page-source-and-diff.html",
+      "page": "docs/design/qul-page-source-and-diff.html",
+      "builtBy": "scripts/build-qul-page-source-and-diff.mjs",
+      "doc": "docs/decisions/qul-page-cross-check.md",
+      "decided": "B",
+      "by": "omar",
+      "date": "2026-09-21",
+      "related": [
+        "qul-dev-draw-toggle"
+      ]
+    },
+    {
+      "id": "qul-dev-draw-toggle",
+      "question": "Should a developer be able to draw a page from the other library’s words while the app that readers receive still carries none of it?",
+      "status": "decided",
+      "options": [
+        {
+          "id": "A",
+          "label": "Keep the other library a check only, never a source"
+        },
+        {
+          "id": "B",
+          "label": "Let a development build draw from it, with the public build kept clear by a new rule and a new check"
+        }
+      ],
+      "artifact": "https://blog.bytesofpurpose.com/hifth/docs/design/qul-page-source-and-diff.html",
+      "page": "docs/design/qul-page-source-and-diff.html",
+      "builtBy": "scripts/build-qul-page-source-and-diff.mjs",
+      "doc": "docs/decisions/qul-dev-draw-toggle.md",
+      "decided": "B",
+      "by": "omar",
+      "date": "2026-09-08",
+      "related": [
+        "qul-page-cross-check",
+        "qul-store-purpose"
+      ]
+    },
+    {
+      "id": "harakah-pick",
+      "question": "How does a reader pick the exact part of a word to note — one vowel-sign, several at once, or the word itself?",
+      "status": "open",
+      "options": [
+        {
+          "id": "A",
+          "label": "Tap the word, then tap the sign from an enlarged tray"
+        },
+        {
+          "id": "B",
+          "label": "Press the page, and a loupe snaps to the nearest sign"
+        },
+        {
+          "id": "C",
+          "label": "Tap the word, then tap the sign by its name"
+        }
+      ],
+      "artifact": "https://blog.bytesofpurpose.com/hifth/docs/design/harakah-pick-options.html",
+      "page": "docs/design/harakah-pick-options.html",
+      "builtBy": "scripts/build-harakah-pick-options.mjs",
+      "doc": "docs/decisions/harakah-pick.md",
+      "decided": null,
+      "by": null,
+      "date": null,
+      "related": [
+        "mistake-note-anchor",
+        "mark-granularity",
+        "mark-placement",
+        "selection-drawer",
+        "diff-mark-tint"
+      ]
+    },
+    {
+      "id": "selection-drawer",
+      "question": "How does a reader open the tools for one word, and the tools for the whole verse, from the same page?",
+      "status": "open",
+      "options": [
+        {
+          "id": "A",
+          "label": "Tap the word for its tools; press and hold for the verse tools"
+        },
+        {
+          "id": "B",
+          "label": "Any press asks first: this word, or the whole verse?"
+        },
+        {
+          "id": "C",
+          "label": "The word tools open on the word; the verse tools sit behind their own handle"
+        }
+      ],
+      "artifact": "https://blog.bytesofpurpose.com/hifth/docs/design/selection-drawer.html",
+      "page": "docs/design/selection-drawer.html",
+      "builtBy": "scripts/build-selection-drawer.mjs",
+      "doc": "docs/decisions/selection-drawer.md",
+      "decided": null,
+      "by": null,
+      "date": null,
+      "related": [
+        "harakah-pick",
+        "mistake-note-anchor",
+        "word-selection",
+        "ayah-drawer"
+      ]
+    },
+    {
+      "id": "ayah-drawer",
+      "question": "When you press a verse, does one drawer open to hold that verse's tools — and where does it sit?",
+      "status": "decided",
+      "options": [
+        {
+          "id": "A",
+          "label": "Leave the tools scattered around the verse, the way they are today"
+        },
+        {
+          "id": "B",
+          "label": "Gather them into one bottom sheet, the same on a phone and on a two-leaf spread"
+        },
+        {
+          "id": "C",
+          "label": "A bottom sheet on a phone; on a spread, a side panel on the pressed verse's own leaf"
+        },
+        {
+          "id": "D",
+          "label": "A bottom sheet on a phone; on a spread, a side panel on the opposite leaf"
+        }
+      ],
+      "doc": "docs/design/ayah-drawer.md",
+      "decided": "D",
+      "by": "omar",
+      "date": "2026-09-19",
+      "related": [
+        "selection-drawer"
+      ]
+    },
+    {
+      "id": "tips-on-request",
+      "question": "Should the three tips open by themselves on a first visit, or wait until the reader asks?",
+      "status": "decided",
+      "options": [
+        {
+          "id": "today",
+          "label": "Open by themselves on the first visit, then never again"
+        },
+        {
+          "id": "on-request",
+          "label": "Wait behind a Show the tips button in settings"
+        }
+      ],
+      "doc": "docs/decisions/tips-on-request.md#so-what-was-decided",
+      "decided": "on-request",
+      "by": "omar",
+      "date": "2026-09-25"
     }
   ]
 }

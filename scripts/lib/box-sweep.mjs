@@ -33,6 +33,11 @@
  *   FUSED     a rectangle taller than a line (the 2:249 class), which the pen
  *             now splits back into lines. Counted, not flagged: it is handled,
  *             and the count is what says how common the case is.
+ *   REACH-BACK a surah's first ayah with a rectangle above the foot of the
+ *             ayah before it — the previous surah's end-marker strip handed to
+ *             the opener, so tapping it lights the wrong marker and stretches
+ *             the box over the surah title. Five were repaired at the source
+ *             on 2026-09-25; the gate holds the class at zero.
  *   DOT       a rectangle narrower than the band it carries, which the pen
  *             renders as a single round dot — a one-word tail. Counted.
  *
@@ -130,6 +135,7 @@ export async function sweep(pagesDir = PAGES_DIR) {
     fused: 0,
     fusedMaxLines: 0,
     dot: 0,
+    reachBack: 0,
   };
   const flagged = [];
 
@@ -138,9 +144,20 @@ export async function sweep(pagesDir = PAGES_DIR) {
     const svg = readFileSync(join(pagesDir, f), "utf8");
     const polys = readPolygons(svg);
     const lineHeight = pageLineHeight(polys.map((p) => p.d));
+    let prevBottom = null;
     for (const p of polys) {
       census.polygons++;
       const rects = rectsFromPath(p.d);
+      // A surah's first ayah starts below its title, so no part of it may sit
+      // higher than the foot of the ayah before it on the page.
+      if (rects && p.ayah === 1 && prevBottom !== null) {
+        const i = rects.findIndex((r) => r.y < prevBottom - 1);
+        if (i >= 0) {
+          census.reachBack++;
+          flagged.push({ page, key: p.key, rule: "reach-back", d: p.d, lineHeight, rect: i });
+        }
+      }
+      prevBottom = rects ? Math.max(...rects.map((r) => r.y + r.height)) : null;
       if (!rects) {
         const kind = fallbackKind(p.d);
         census.fallback++;

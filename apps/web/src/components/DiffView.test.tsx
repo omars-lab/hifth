@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from "vitest";
 import { render, waitFor } from "@testing-library/react";
-import type { Edge, WordShard } from "@hifth/core";
+import type { Edge, MarkShard, WordShard } from "@hifth/core";
 import { DiffView } from "./DiffView";
 import styles from "./DiffView.module.css";
 
@@ -20,11 +20,38 @@ const SHARDS: Record<number, WordShard> = {
   19: { page: 19, words: { "2:123": { from: 1, boxes: boxes(22) } } },
 };
 
+/**
+ * Marks, same idea: word *w*'s *k*-th mark sits at x = 10w + k, one unit square,
+ * above the line. Word 3 is inside the shared run and prints with a fatha and a
+ * kasra on 2:48 but a fatha and a damma on 2:123 — the one-vowel trap. Word 14
+ * (first of the divergent tail) carries a sukun on both. Word 15 has a fatha on
+ * 2:48 and nothing on 2:123 — a difference, but on a word the wash already
+ * calls different, so it must NOT be tinted.
+ */
+const mark = (w: number, k: number, n: string) =>
+  ({ w, n, r: [10 * w + k, 15, 1, 1], s: "ink" }) as const;
+
+const MARKS: Record<number, MarkShard> = {
+  7: {
+    page: 7,
+    marks: {
+      "2:48": [mark(3, 0, "fatha"), mark(3, 1, "kasra"), mark(14, 0, "sukun"), mark(15, 0, "fatha")],
+    },
+  },
+  19: {
+    page: 19,
+    marks: { "2:123": [mark(3, 0, "fatha"), mark(3, 1, "damma"), mark(14, 0, "sukun")] },
+  },
+};
+
 const PAGE_SVG = '<svg viewBox="0 0 235 235" width="235" height="235"><path d="M0 0" /></svg>';
+
+const loadMarkShard = vi.fn(async (_edition: string, page: number) => MARKS[page] ?? null);
 
 vi.mock("../assets", () => ({
   loadPageSvg: vi.fn(async () => PAGE_SVG),
   loadWordShard: vi.fn(async (_edition: string, page: number) => SHARDS[page] ?? null),
+  loadMarkShard: (edition: string, page: number) => loadMarkShard(edition, page),
 }));
 
 /** The 2:48 ↔ 2:123 edge as it ships: both sides match on their first 13 words. */
@@ -39,8 +66,8 @@ const EDGE: Edge = {
 
 const FROM = "quran/hafs-kfqc/2:48";
 
-/** Every wash rectangle on the page, in the order the component appended them. */
-function washes(root: HTMLElement, cls: string): SVGRectElement[] {
+/** Every wash rectangle in one crop, in the order the component appended them. */
+function washes(root: ParentNode, cls: string): SVGRectElement[] {
   return Array.from(root.querySelectorAll<SVGRectElement>(`rect.${cls}`));
 }
 
@@ -51,19 +78,86 @@ function xSpan(rect: SVGRectElement): [number, number] {
 }
 
 describe("DiffView (spec §3 — why these two are confusable)", () => {
-  it("washes the words each side does not share, on both sides", async () => {
+  it("washes the divergent tail ochre on both sides — the same colour, not one each", async () => {
     const { container } = render(<DiffView edge={EDGE} fromKey={FROM} />);
     await waitFor(() => expect(container.querySelectorAll("svg")).toHaveLength(2));
+    const [fromSvg, toSvg] = Array.from(container.querySelectorAll("svg"));
 
     // 2:48 shares 1–13 of its 23 words, so 14–23 is what differs: x 140 → 238.
-    const a = washes(container, styles.dA as string);
+    const a = washes(fromSvg as SVGSVGElement, styles.wDiff as string);
     expect(a).toHaveLength(1);
     expect(xSpan(a[0] as SVGRectElement)).toEqual([140, 238]);
 
-    // 2:123 shares the same opening but is 22 words, so 14–22: x 140 → 228.
-    const b = washes(container, styles.dB as string);
+    // 2:123 shares the same opening but is 22 words, so 14–22: x 140 → 228 —
+    // and it wears the *same* ochre class, since neither ayah is the wrong one.
+    const b = washes(toSvg as SVGSVGElement, styles.wDiff as string);
     expect(b).toHaveLength(1);
     expect(xSpan(b[0] as SVGRectElement)).toEqual([140, 228]);
+  });
+
+  it("washes the shared opening green on both sides", async () => {
+    const { container } = render(<DiffView edge={EDGE} fromKey={FROM} />);
+    await waitFor(() => expect(container.querySelectorAll("svg")).toHaveLength(2));
+    const [fromSvg, toSvg] = Array.from(container.querySelectorAll("svg"));
+
+    // Both share words 1–13: one band spanning x 10 → 138.
+    for (const svg of [fromSvg, toSvg]) {
+      const share = washes(svg as SVGSVGElement, styles.wShare as string);
+      expect(share).toHaveLength(1);
+      expect(xSpan(share[0] as SVGRectElement)).toEqual([10, 138]);
+    }
+  });
+
+  it("tints the one vowel mark the other side does not carry on the same word — on both sides", async () => {
+    // Word 3 is shared, and 2:48 prints it with a kasra where 2:123 has a damma.
+    // The fatha they both carry stays quiet. Words 14 and 15 are in the
+    // divergent tail, so nothing there is tinted whatever it carries — the
+    // ochre wash already says those are different words.
+    const { container } = render(<DiffView edge={EDGE} fromKey={FROM} />);
+    await waitFor(() => expect(container.querySelectorAll("svg")).toHaveLength(2));
+    const [fromSvg, toSvg] = Array.from(container.querySelectorAll("svg"));
+
+    const a = washes(fromSvg as SVGSVGElement, styles.wMark as string);
+    expect(a.map((r) => xSpan(r)[0])).toEqual([31]);
+    const b = washes(toSvg as SVGSVGElement, styles.wMark as string);
+    expect(b.map((r) => xSpan(r)[0])).toEqual([31]);
+
+    // Drawn after the washes, so a tint inside the green run sits on top of it.
+    const order = Array.from((fromSvg as SVGSVGElement).querySelectorAll("rect")).map((r) =>
+      r.getAttribute("class"),
+    );
+    expect(order.indexOf(styles.wMark as string)).toBeGreaterThan(order.lastIndexOf(styles.wShare as string));
+  });
+
+  it("still draws the word washes when a page has no marks to hand — only the tint goes missing", async () => {
+    loadMarkShard.mockResolvedValueOnce(null).mockResolvedValueOnce(null);
+    const { container } = render(<DiffView edge={EDGE} fromKey={FROM} />);
+    await waitFor(() => expect(container.querySelectorAll("svg")).toHaveLength(2));
+    const [fromSvg] = Array.from(container.querySelectorAll("svg"));
+    expect(washes(fromSvg as SVGSVGElement, styles.wShare as string)).toHaveLength(1);
+    expect(washes(fromSvg as SVGSVGElement, styles.wDiff as string)).toHaveLength(1);
+    expect(washes(fromSvg as SVGSVGElement, styles.wMark as string)).toHaveLength(0);
+  });
+
+  it("veils everything the crop caught that is NOT this ayah — a scrim with the ayah punched out", async () => {
+    // The guard against neighbour-bleed: before this, a crop showed the tails of
+    // the line above and the head of the line below as if they were the ayah's.
+    // The scrim covers the whole padded crop and leaves a hole exactly over the
+    // ayah's own lines. Remove it, or stop punching the hole, and this fails.
+    const { container } = render(<DiffView edge={EDGE} fromKey={FROM} />);
+    await waitFor(() => expect(container.querySelectorAll("svg")).toHaveLength(2));
+    const [fromSvg] = Array.from(container.querySelectorAll("svg"));
+
+    const scrims = (fromSvg as SVGSVGElement).querySelectorAll<SVGPathElement>(
+      `path.${styles.scrim as string}`,
+    );
+    expect(scrims).toHaveLength(1);
+    const scrim = scrims[0] as SVGPathElement;
+    expect(scrim.getAttribute("fill-rule")).toBe("evenodd");
+    // The crop is "8 18 232 14"; the ayah's one line is x 10–238, y 20–30. So the
+    // scrim is the padded rect (M8 18…) with that line, grown a hair, as an
+    // even-odd hole (M9 19…) — the ayah shows through, the margin stays veiled.
+    expect(scrim.getAttribute("d")).toBe("M8 18H240V32H8ZM9 19H239V31H9Z");
   });
 
   it("crops each page to the ayah rather than showing the whole leaf", async () => {

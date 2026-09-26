@@ -1,5 +1,15 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { labelBoth, markerEmphasis, nearestPage, pageFraction, pageRuns, tapButtonDetent } from "@hifth/core";
+import {
+  focusSpread,
+  labelBoth,
+  markerEmphasisDock,
+  nearestPage,
+  pageBarFocus,
+  pageFraction,
+  pageRuns,
+  pageTickStep,
+  tapButtonDetent,
+} from "@hifth/core";
 import { useT } from "../i18n";
 import { useMediaQuery } from "../useMediaQuery";
 import styles from "./PageSlider.module.css";
@@ -10,6 +20,14 @@ import styles from "./PageSlider.module.css";
 // losing strategies stay in the core module, kept tryable on the decision page
 // by the graduation-losers decision (option A), and never reached from here.
 const EMPHASIS = tapButtonDetent.emphasis ?? { near: 0, peak: 1 };
+
+// The fisheye lens (option B, graduated · docs/decisions/page-bar.md §"How does a
+// reader find one juz among thirty on a bar this small?"): how far the spread
+// reaches, its curve, and how many pages either side of the pointer get their juz
+// named. Since 2026-09-25 the bar uses a stronger curve than the decision page drew
+// (docs/design/page-bar-zoom-plan.md, step 1), so single pages open wide enough to
+// mark beside the pointer; the decision page keeps the curve that was chosen on.
+const LENS = pageBarFocus;
 
 interface PageSliderProps {
   /**
@@ -40,6 +58,12 @@ interface PageSliderProps {
    */
   juzStarts?: readonly (number | null)[];
   /**
+   * The page each of the 60 hizb opens on, in the same shape as `juzStarts`.
+   * Only the magnifier reads it: it marks a hizb start between the juz cuts,
+   * so a reader can see which half of a juz the pointer is in.
+   */
+  hizbStarts?: readonly (number | null)[];
+  /**
    * Where a page sits in the book, for the scrub readout: the surah at its head,
    * the juz already *running* onto it, and the juz that *begins* on it when one
    * does (`null` otherwise). The bar names a boundary page for both juz — the
@@ -56,36 +80,17 @@ interface PageSliderProps {
    * landmarks they were before the decision.
    */
   onJuzTap?: (juz: number) => void;
-}
-
-/**
- * The handle, drawn as a leaf of the mus'haf rather than a browser puck. It is
- * painted *over* the native thumb (which is kept, sized, and made invisible), so
- * the reader grabs a page while the range input underneath keeps every scrap of
- * its keyboard and assistive-technology behaviour. `currentColor` is the track's
- * accent, `--paper` the page — a small card the colour of the book above it.
- */
-function PageHandleIcon(): JSX.Element {
-  return (
-    <svg className={styles.handleIcon} viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-      <path
-        d="M7.5 2.5H14L18 6.5V19.5A1.5 1.5 0 0 1 16.5 21H7.5A1.5 1.5 0 0 1 6 19.5V4A1.5 1.5 0 0 1 7.5 2.5Z"
-        fill="var(--paper)"
-        stroke="currentColor"
-        strokeWidth="1.6"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M13.75 2.75V6A1 1 0 0 0 14.75 7H18"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.6"
-        strokeLinejoin="round"
-      />
-      <line x1="8.75" y1="12" x2="15.25" y2="12" stroke="currentColor" strokeWidth="1.3" opacity="0.55" />
-      <line x1="8.75" y1="15" x2="15.25" y2="15" stroke="currentColor" strokeWidth="1.3" opacity="0.55" />
-    </svg>
-  );
+  /**
+   * Spread the bar apart under the pointer — the graduated fisheye (option B,
+   * docs/decisions/page-bar.md §"How does a reader find one juz among thirty on a
+   * bar this small?"). On a pointer that can hover, the juz landmarks near the
+   * cursor fan out far enough to read their numbers, and the exact page under the
+   * cursor is named in the bar. A hover affordance only: a finger has no "near
+   * without pressing", so on a touch screen this changes nothing. Off, the bar is
+   * the plain grow-on-approach scrubber (option C alone). Defaults on — the
+   * behaviour the decision chose; the settings sheet is where it is turned off.
+   */
+  fisheye?: boolean;
 }
 
 /**
@@ -145,13 +150,19 @@ export function PageSlider({
   onStep,
   onGoTo,
   juzStarts = [],
+  hizbStarts = [],
   pageContext,
   onJuzTap,
+  fisheye = true,
 }: PageSliderProps): JSX.Element {
   const { t } = useT();
   const inputRef = useRef<HTMLInputElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
   const railRef = useRef<HTMLDivElement>(null);
+  // The layer the fisheye draws its labels into — juz numbers fanned open under
+  // the pointer and the page beneath it. Drawn imperatively by the effect below,
+  // from the same warped positions the markers take.
+  const lensRef = useRef<HTMLDivElement>(null);
   // True from the pointerdown that starts a drag until its release. The marker
   // growth reads this: it must never fire mid-drag, or a swollen button would
   // sit under a thumb that is only passing through — the one thing option C's
@@ -167,6 +178,14 @@ export function PageSlider({
   // This is exactly the split the decision named: the refinement answers the
   // phone's fixed-target cost, and the phone is the device it does not run on.
   const finePointer = useMediaQuery("(hover: hover) and (pointer: fine)");
+
+  // What the imperative lens reads, kept current without re-subscribing the
+  // pointer listeners on every render. `t` is a fresh object each render and
+  // `total` never changes, so threading them through the effect's deps would
+  // either churn the listeners or freeze a stale copy — the handlers read the
+  // latest here instead.
+  const liveRef = useRef({ t, total, juzStarts, hizbStarts, fisheye });
+  liveRef.current = { t, total, juzStarts, hizbStarts, fisheye };
 
   const empty = available.length === 0;
   const value = scrub ?? page;
@@ -215,42 +234,222 @@ export function PageSlider({
     return () => el.removeEventListener("change", handle);
   }, [commit]);
 
-  // Option C's refinement, graduated: on a pointer that can hover, each marker
-  // grows as the pointer nears it and settles back as it leaves — but never
-  // while a drag is under way. The scale is read live off each marker's own box,
-  // so it is right whichever way the RTL track runs and whatever the marker's
-  // rest size, and the growth is symmetric about the marker's centre so reading
-  // that centre off an already-scaled box stays exact. Only a fine pointer runs
-  // this; a finger has no hover to grow toward, and there the markers are tapped
-  // at their plain size (the phone layout the decision left for a real device).
+  // Two graduated behaviours, both hover-only, both driven from here: option C's
+  // grow-on-approach (each marker swells as the pointer nears it) and option B's
+  // fisheye (the markers near the pointer also *spread apart* so their juz numbers
+  // become readable, and the page under the pointer is named). Neither fires while
+  // a drag is under way, so a passing thumb never meets a swollen or shifted
+  // button. Only a fine pointer runs this; a finger has no hover to grow toward,
+  // and there the markers are tapped at their plain size — the phone layout both
+  // decisions left for a real device.
+  //
+  // Each marker's *rest* centre is computed from its juz's opening page, not read
+  // off its box: the spread moves the box, so measuring a centre off an
+  // already-shifted marker would feed back on itself. The formula matches the one
+  // the markup positions the markers with (`insetInlineStart`, from the right in
+  // this RTL bar), so the two never drift.
   useEffect(() => {
     if (!finePointer) return;
     const track = trackRef.current;
     if (!track) return;
+    const clamp = (v: number, lo: number, hi: number): number => Math.max(lo, Math.min(hi, v));
     const marks = (): HTMLElement[] =>
       Array.from(railRef.current?.querySelectorAll<HTMLElement>("[data-testid='juz-detent']") ?? []);
-    const scaleAll = (px: number | null): void => {
+    const applyLens = (px: number | null): void => {
+      const { t: tt, total: tot, juzStarts: js, hizbStarts: hs, fisheye: fish } = liveRef.current;
+      const layer = lensRef.current;
+      const rect = track.getBoundingClientRect();
+      const thumb = parseFloat(getComputedStyle(track).getPropertyValue("--thumb")) || 22;
+      const usable = Math.max(1, rect.width - thumb);
+      const halfPage = usable / Math.max(1, tot - 1) / 2;
+      // How much bar is left on a point's side of the pointer. The magnifier
+      // never reaches past it, so the first and last pages stay on the bar.
+      const lowEnd = rect.left + thumb / 2;
+      const highEnd = rect.right - thumb / 2;
+      const spread = (x: number, ptr: number): number =>
+        ptr + focusSpread(x - ptr, LENS, x < ptr ? ptr - lowEnd : highEnd - ptr);
+      // A marker's rest centre in physical pixels, read from *layout* — `offsetLeft`
+      // and `offsetWidth` ignore CSS transforms, so they give the untransformed
+      // position even while the spread has warped the marker's painted box. That is
+      // what keeps the warp from feeding back on itself, and it tracks the real tick
+      // exactly (the grow underneath must peak *on* the marker, not beside it) rather
+      // than re-deriving the RTL `inset-inline-start` sum by hand.
+      const restCentre = (m: HTMLElement): number => {
+        const parent = (m.offsetParent as HTMLElement | null) ?? track;
+        const pr = parent.getBoundingClientRect();
+        return pr.left + parent.clientLeft + m.offsetLeft + m.offsetWidth / 2;
+      };
+
       for (const m of marks()) {
         if (px === null) {
           m.style.transform = "";
           continue;
         }
-        const box = m.getBoundingClientRect();
-        const centre = box.left + box.width / 2;
-        m.style.transform = `scale(${markerEmphasis(Math.abs(centre - px), EMPHASIS.near, EMPHASIS.peak)})`;
+        const juz = Number(m.dataset.juz);
+        const start = js[juz - 1];
+        if (start === null || start === undefined) {
+          m.style.transform = "";
+          continue;
+        }
+        const centre = restCentre(m);
+        const grow = markerEmphasisDock(Math.abs(centre - px), EMPHASIS.near, EMPHASIS.peak);
+        if (fish) {
+          // Spread the marker outward from the pointer, then grow it in place.
+          // Under the magnifier a juz cut lands on the *edge* of its opening page
+          // (half a page toward the book's start, rightward in this RTL bar), so
+          // it sits on a page mark rather than halfway across a page.
+          const edge = centre + halfPage;
+          const dx = spread(edge, px) - centre;
+          m.style.transform = `translateX(${dx}px) scale(${grow})`;
+        } else {
+          m.style.transform = `scale(${grow})`;
+        }
+      }
+
+      // The knob, the page on the stage and the leading end of the fill ride the
+      // same spread as the marks, or near the pointer the knob sits a little off
+      // the marks around it (zoom plan, step 1's leftover). Their rest positions
+      // are read with this shift cleared: both are centred by a CSS translate that
+      // layout does not see, and under a lens that widens nine times a few pixels
+      // of error became forty. The spread leaves the pointer's own
+      // point where it is, so the mouse is only ever over the knob where the knob
+      // really rests — a press there still lands on the control underneath.
+      const handle = track.querySelector<HTMLElement>("[data-testid='page-handle']");
+      const here = track.querySelector<HTMLElement>("[data-testid='page-here']");
+      const fill = track.querySelector<HTMLElement>("[data-testid='page-fill']");
+      for (const el of [handle, here]) {
+        if (!el) continue;
+        el.style.translate = "";
+        if (px === null || !fish) continue;
+        const r = el.getBoundingClientRect();
+        const c = r.left + r.width / 2;
+        el.style.translate = `${spread(c, px) - c}px 0`;
+      }
+      if (fill) {
+        // Filled from the book's first page, on the right of this bar, to the
+        // knob: the right end is past the magnifier and stays; the left end moves.
+        fill.style.transform = "";
+        const { left, right } = fill.getBoundingClientRect();
+        if (px !== null && fish && right - left >= 1) {
+          fill.style.transformOrigin = "right center";
+          fill.style.transform = `scaleX(${(right - spread(left, px)) / (right - left)})`;
+        }
+      }
+
+      // The labels are the fisheye's alone. Cleared whenever the pointer leaves or
+      // the spread is off, so the plain grow-on-approach bar carries none.
+      if (!layer) return;
+      if (px === null || !fish) {
+        layer.replaceChildren();
+        return;
+      }
+      const fPtr = clamp((rect.right - px - thumb / 2) / usable, 0, 1);
+      const pageUnder = clamp(Math.round(1 + fPtr * (tot - 1)), 1, tot);
+      const kids: HTMLElement[] = [];
+
+      // Page marks, drawn only where the magnifier leaves room to see them
+      // (docs/design/page-bar-zoom-plan.md, step 1): every page right beside the
+      // pointer, every 5th a little further out, every 10th beyond that, none
+      // past the window. A mark sits on the edge between two pages; the page
+      // under the pointer is the accent span between its own two edges.
+      const restX = (v: number): number => rect.right - thumb / 2 - ((v - 1) / Math.max(1, tot - 1)) * usable;
+      const warpX = (v: number): number => spread(restX(v), px);
+      const reachPages = Math.ceil((LENS.radiusPx / usable) * (tot - 1)) + 1;
+      // Juz and hizb starts inside the window, each as its own mark on the edge
+      // before its opening page: a juz cut is tall and green and named "Juz 30",
+      // a hizb cut is shorter and named "Hizb 59". They hang in the same row as
+      // the page marks and are named under them, away from the page tag above,
+      // so the tag can never crowd them out. A page mark that would sit on one
+      // of them is skipped.
+      const cuts: { x: number; juz: number | null; hizb: number }[] = [];
+      for (let h = 1; h <= hs.length; h++) {
+        const start = hs[h - 1];
+        if (start === null || start === undefined || start <= 1) continue;
+        if (Math.abs(start - pageUnder) > LENS.juzPageWindow) continue;
+        const x = warpX(start - 0.5);
+        if (Math.abs(x - px) >= LENS.radiusPx) continue;
+        cuts.push({ x, juz: h % 2 === 1 ? (h + 1) / 2 : null, hizb: h });
+      }
+      let lastTick = Number.NaN;
+      for (let p = Math.max(1, pageUnder - reachPages); p < Math.min(tot, pageUnder + reachPages); p++) {
+        const x = warpX(p + 0.5);
+        if (Math.abs(x - px) >= LENS.radiusPx) continue;
+        const step = pageTickStep(Math.abs(warpX(p + 1) - warpX(p)), LENS.minTickGapPx);
+        if (step === null || p % step !== 0) continue;
+        if (Math.abs(x - lastTick) < LENS.minTickGapPx) continue;
+        if (cuts.some((c) => Math.abs(c.x - x) < LENS.minTickGapPx / 2)) continue;
+        lastTick = x;
+        const tick = document.createElement("span");
+        tick.className = `${styles.lensTick ?? ""} ${p % 5 === 0 ? (styles.lensTickMajor ?? "") : ""}`;
+        tick.dataset.testid = "page-tick";
+        tick.style.left = `${x - rect.left}px`;
+        kids.push(tick);
+      }
+      const hereA = warpX(pageUnder - 0.5);
+      const hereB = warpX(pageUnder + 0.5);
+      const herePage = document.createElement("span");
+      herePage.className = styles.lensHere ?? "";
+      herePage.style.left = `${Math.min(hereA, hereB) - rect.left}px`;
+      herePage.style.width = `${Math.abs(hereB - hereA)}px`;
+      kids.push(herePage);
+
+      for (const c of cuts) {
+        const mark = document.createElement("span");
+        mark.className = c.juz !== null ? (styles.lensJuzCut ?? "") : (styles.lensHizbCut ?? "");
+        mark.dataset.testid = c.juz !== null ? "juz-cut" : "hizb-cut";
+        mark.style.left = `${c.x - rect.left}px`;
+        kids.push(mark);
+        const name = document.createElement("span");
+        name.className = `${c.juz !== null ? (styles.lensJuz ?? "") : (styles.lensHizb ?? "")} numeric`;
+        name.style.left = `${c.x - rect.left}px`;
+        name.textContent = c.juz !== null ? tt.juzN(c.juz) : tt.hizbN(c.hizb);
+        kids.push(name);
+      }
+      const pageTag = document.createElement("span");
+      pageTag.className = `${styles.lensPage ?? ""} numeric`;
+      pageTag.style.left = `${px - rect.left}px`;
+      pageTag.textContent = tt.pageN(pageUnder);
+      kids.push(pageTag);
+      layer.replaceChildren(...kids);
+      // Near an end of the bar the tag, centred on the pointer, would hang past
+      // it; slide it back inside, the way the marks themselves are kept inside.
+      const tagBox = pageTag.getBoundingClientRect();
+      const nudge =
+        tagBox.left < rect.left ? rect.left - tagBox.left : tagBox.right > rect.right ? rect.right - tagBox.right : 0;
+      if (nudge !== 0) pageTag.style.left = `${px - rect.left + nudge}px`;
+
+      // Labels that would overlap give way: the page tag always stays, then the
+      // juz numbers nearest the pointer, and any number that would touch one
+      // already kept is dropped (zoom plan, step 3).
+      const kept: DOMRect[] = [pageTag.getBoundingClientRect()];
+      const juzLabels = Array.from(layer.querySelectorAll<HTMLElement>(`.${styles.lensJuz ?? "_"}`));
+      const hizbLabels = Array.from(layer.querySelectorAll<HTMLElement>(`.${styles.lensHizb ?? "_"}`));
+      const centreOf = (r: DOMRect): number => r.left + r.width / 2;
+      // A juz name outranks a hizb name; within each, the one nearer the pointer.
+      const byNearness = (els: HTMLElement[]) =>
+        els
+          .map((el) => ({ el, r: el.getBoundingClientRect() }))
+          .sort((a, b) => Math.abs(centreOf(a.r) - px) - Math.abs(centreOf(b.r) - px));
+      const boxes = [...byNearness(juzLabels), ...byNearness(hizbLabels)];
+      for (const { el, r } of boxes) {
+        const clash = kept.some(
+          (k) => r.left < k.right + 2 && r.right > k.left - 2 && r.top < k.bottom && r.bottom > k.top,
+        );
+        if (clash) el.remove();
+        else kept.push(r);
       }
     };
     const onMove = (e: PointerEvent): void => {
       if (draggingRef.current) return;
-      scaleAll(e.clientX);
+      applyLens(e.clientX);
     };
-    const onLeave = (): void => scaleAll(null);
+    const onLeave = (): void => applyLens(null);
     // A drag begins on the range input under the rail; from its first press
     // until release every marker is pinned to its plain size, so a passing thumb
-    // never meets a grown button.
+    // never meets a grown or shifted button.
     const onDown = (): void => {
       draggingRef.current = true;
-      scaleAll(null);
+      applyLens(null);
     };
     const onUp = (): void => {
       draggingRef.current = false;
@@ -265,9 +464,9 @@ export function PageSlider({
       track.removeEventListener("pointerleave", onLeave);
       input?.removeEventListener("pointerdown", onDown);
       window.removeEventListener("pointerup", onUp);
-      scaleAll(null);
+      applyLens(null);
     };
-  }, [finePointer, juzStarts]);
+  }, [finePointer, fisheye]);
 
   const onKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -373,6 +572,17 @@ export function PageSlider({
               }}
             />
           ))}
+          {/* How far into the book the handle is: filled from the book's first
+              page to the handle, the way a progress slider says "you are here,
+              and this much is behind you". */}
+          <span
+            className={styles.fill}
+            data-testid="page-fill"
+            style={{
+              insetInlineStart: "calc(var(--thumb) / 2 - 1px)",
+              inlineSize: `calc(${pageFraction(value, total)} * (100% - var(--thumb)) + 2px)`,
+            }}
+          />
           {/* The page on the stage. Its own element, because it is its own
               fact: the run under it says "these pages are here" and this says
               "you are on this one", and the two only shared a class while a
@@ -421,11 +631,19 @@ export function PageSlider({
           </div>
         )}
 
-        {/* The handle, a page rather than a puck, painted over the invisible
-            native thumb at the same value — see `PageHandleIcon`. Hidden while
-            the bar is inert (no inventory), so no lone leaf floats over a dead
-            track. Follows the drag: `value` is the scrub value mid-drag, the
-            loaded page at rest. */}
+        {/* The fisheye's labels — the juz numbers fanned open under the pointer
+            and the exact page beneath it, drawn imperatively by the effect above
+            so they ride the same warped positions the markers take. Pure hover
+            decoration: aria-hidden and pointer-events off, because the input
+            already speaks the page and the juz is named in the popover. Empty
+            until a fine pointer hovers with the spread on. */}
+        <div className={styles.lens} aria-hidden="true" ref={lensRef} />
+
+        {/* The handle, a round knob painted over the invisible native thumb at
+            the same value, so the range input underneath keeps its keyboard and
+            screen-reader behaviour. Hidden while the bar is inert (no
+            inventory), so no knob floats over a dead track. Follows the drag:
+            `value` is the scrub value mid-drag, the loaded page at rest. */}
         {!empty && (
           <span
             className={styles.handle}
@@ -434,9 +652,7 @@ export function PageSlider({
             style={{
               insetInlineStart: `calc(${pageFraction(value, total)} * (100% - var(--thumb)) + var(--thumb) / 2)`,
             }}
-          >
-            <PageHandleIcon />
-          </span>
+          />
         )}
 
         {scrub !== null && (

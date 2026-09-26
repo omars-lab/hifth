@@ -317,6 +317,18 @@ href: https://tanzil.net
   [`docs/design/word-indexing.md`](docs/design/word-indexing.md) is the record —
   including the measurement that says the two indices are monotone, and the four
   ayahs where they cannot be related at all.
+- **This page once sliced this corpus's outlines; it no longer does.** For a
+  while the picker on
+  [`docs/design/harakah-pick-options.html`](docs/design/harakah-pick-options.html)
+  drew verse 2:38 from letter and mark **outlines** sliced out of this corpus,
+  because it has to draw a word letter by letter. That slicing could not cleanly
+  separate cursive letters whose ink overlaps sideways — a neighbour's stroke came
+  away with the one you picked — so the page now shapes the verse from its own
+  Unicode font instead (**Amiri Quran, OFL**; its own entry below), which reports
+  every letter and every mark as its *own* outline. Nothing of *this* corpus's ink
+  ships anywhere now: the app and this decision page both take only rectangles from
+  it, the "per word, a rectangle" the entry opens with. The switch, and why, is in
+  the harakah-pick decision's own record.
 - **How geometry from one print lands on another:** both corpora draw the same
   page and both mark the end of every ayah with an ornament, so the ornaments are
   a correspondence neither was built to provide. `build-words.mjs` fits
@@ -354,21 +366,102 @@ href: https://github.com/mushafdatabase/MushafDatabase-Ligature-Based-SVG
 
 ---
 
+### amiri-quran-font
+
+- **Name:** Amiri Quran — a Naskh typeface for the Qur'an by Khaled Hosny, a
+  companion of the Amiri family shaped for full Qur'anic vocalisation. It is used
+  at **build time only**, to shape one verse into per-letter and per-mark outlines
+  for the harakah picker; the font file is never shipped.
+- **Provenance:** Amiri Quran Regular, **Version 1.003**, `AmiriQuran-Regular.ttf`,
+  136,920 bytes, `sha256:e2a47644762d16bdfb6d33e0d8db8c6ff30beae84150ef5a705316bbd829455c`.
+  From the Amiri project (https://github.com/alif-type/amiri), also distributed on
+  Google Fonts. Kept in the gitignored cache
+  `packages/etl/data/shaped/.cache/AmiriQuran-Regular.ttf` and read once by
+  `scripts/shape-verse-letters.mjs`.
+- **What is taken, and what is not.** No font bytes ship. The shaping script lays
+  out verse 2:38's words, takes each glyph's **outline** — solid `<path>` geometry
+  in the font's own units — and writes them to
+  [`docs/design/data/harakah-shaped-2-38.json`](docs/design/data/harakah-shaped-2-38.json),
+  each shape tagged with an ASCII name (`ta`, `kasra`) and its bounding box. Still
+  no Qur'an *text*: the outlines carry no Arabic codepoints (the shaper asserts
+  zero before it writes; the page build asserts zero before it publishes), and the
+  string that was laid out lives only in the gitignored cache. The picker on
+  [`docs/design/harakah-pick-options.html`](docs/design/harakah-pick-options.html)
+  draws each letter and mark from these outlines, one solid and the rest in
+  invisible ink, so a single part can be picked without a neighbour's ink coming
+  with it. The app itself ships none of this — it is one decision page.
+- **License (SIL Open Font License 1.1):** the font may be used, studied, modified
+  and redistributed freely, and — the clause this relies on — **embedded** and its
+  outlines used in documents and other works. Deriving fixed outline geometry for a
+  page is squarely within that grant; the font is not sold, not redistributed as a
+  font, and not renamed. Attribution to Khaled Hosny and the Amiri project is a
+  courtesy kept here and honoured because the licence is a gift, not because a
+  page of outlines compels it.
+- **Status: BUILD-TIME INPUT — font not shipped; only its outlines, name-tagged and
+  Arabic-free, on one decision page.**
+
+```colophon
+not-credited: The app ships nothing from this font — no bytes, no outlines, no name. It shapes one verse into outlines for a single decision page at build time, so it never reaches the reader's screen and the app's colophon does not name it. Attribution to Khaled Hosny and the Amiri project is kept here in SOURCES.md.
+```
+
+---
+
+### quran-com-audio
+
+- **Name:** Verse-by-verse recitation — Mohamed Siddiq al-Minshawi (Murattal),
+  streamed from Quran.com's public audio CDN. The source behind the ▶ that lets a
+  hafiz hear the ayah they landed on (task #67).
+- **What is taken, and what is not.** **No audio ships.** Nothing is vendored, and
+  nothing is held in the tree. Each ayah's file lives on `verses.quran.com`, and
+  the app plays it with a plain `<audio>` element at play time — the file streams
+  straight from the hosted site, the way a browser plays any linked media. The URL
+  is a pure function of the ayah, so there is no API call either: surah and ayah,
+  each padded to three digits, at
+  `https://verses.quran.com/Minshawi/Murattal/mp3/{SSS}{AAA}.mp3` (built by
+  `apps/web/src/audio.ts`). The CDN serves it with `Access-Control-Allow-Origin: *`
+  and byte ranges, so the cross-origin stream needs no proxy of ours.
+- **Access:** open. The owner's standing stance (2026-09-20, "qul allows open
+  access") is that Quran.com / QUL resources are openly accessible for this POC, so
+  the app links the CDN directly. That is a green light on *access*, not a waiver of
+  the credit: the file carries no explicit licence of its own, so the reciter is
+  named as a courtesy — the honest posture for a source read openly but not
+  formally licensed for redistribution. Since Hifth redistributes none of the
+  bytes (it only links them, the way any web page links media it does not host),
+  there is nothing here to license; the credit is respect for the reciter's work,
+  recorded so a later reader does not mistake a courtesy for a condition, or a
+  condition for a courtesy.
+- **Colophon row.** Verbatim; bound to `Colophon.tsx` by `gate:license-copy`.
+
+```colophon
+what: التلاوة
+who: الشيخ محمد صديق المنشاوي · عبر مكتبة قرآن (quran.com)
+licence: إتاحة حرّة للاستماع · بثّ من مكتبة قرآن
+href: https://quran.com
+```
+
+- **Status: STREAMED (task #67) — client-side `<audio>` from Quran.com's CDN; no
+  bytes vendored or shipped.**
+
+---
+
 ## Pending sources (not yet vendored — recorded so the gate is ready)
 
 These are named in the plan for later loops. They are listed here so their license
 review is tracked from the start; no bytes are vendored until the noted loop.
 
-- **QUL (qul.tarteel.ai) — a ruler and an outbound link, never vendored.** This is the
-  settled shape, not a pending one: `qul-reliance` (decided **A**) leans on QUL only to
-  measure our own numbers against it and to link a reader out to it, and this repo copies
-  **none of its bytes**. Option C, copy the layout numbers, was turned down. The resources
-  ruled against — read from a **gitignored** cache, never committed — are the KFGQPC QCF
-  V2/1421H page layout (id 10; the layouts are V1/1405H id 15, V2/1421H id 10, V4/1441H
-  id 19, and we match V2), the juz metadata, and the two similarity corpora (id 73
-  phrase-level, id 74 ayah-level). The measurement is `make probe-qul`, pinned numbers-only
-  in `packages/etl/data/qul/qul-rulers.probe.json`; the outbound link is
-  `https://qul.tarteel.ai/cms/verses/N`.
+- **QUL (qul.tarteel.ai) — a ruler and an outbound link, never vendored.** The Quranic
+  Universal Library is Tarteel's aggregation of mushaf layouts, word morphology, a syntactic
+  treebank / ayah-dependency graph, tajweed spans and look-alike phrase catalogues, each a
+  separate resource under its own terms — a **goldmine to measure against, not a shelf to
+  vendor from**. This is the settled shape, not a pending one: `qul-reliance` (decided
+  **A**) leans on QUL only to measure our own numbers against it and to link a reader out
+  to it, and this repo copies **none of its bytes**. Option C, copy the layout numbers, was
+  turned down. The resources ruled against — read from a **gitignored** cache, never
+  committed — are the KFGQPC QCF V2/1421H page layout (id 10; the layouts are V1/1405H
+  id 15, V2/1421H id 10, V4/1441H id 19, and we match V2), the juz metadata, and the two
+  similarity corpora (id 73 phrase-level, id 74 ayah-level). The measurement is
+  `make probe-qul`, pinned numbers-only in `packages/etl/data/qul/qul-rulers.probe.json`;
+  the outbound link is `https://qul.tarteel.ai/cms/verses/N`.
 
   **Licence: per-resource on QUL (their FAQ #3/#9), and its confirmation is a human
   check, not done here.** Because nothing is vendored there is no fenced licence to bind
@@ -379,7 +472,41 @@ review is tracked from the start; no bytes are vendored until the noted loop.
   check `qul-rulers-terms-and-text-free` (owner: user, pending). The
   `leverage-qul` skill's rubric (`.claude/skills/leverage-qul/resources.md`) tracks each
   resource's text-bearing status and its PENDING/confirmed licence state; fill a row there
-  and add its verbatim licence here when the check is run.
+  and add its verbatim licence here when the check is run. Individual resources:
+  - **Layout DB + phrase ranges** — ayah→page table for edge dir bucketing (Loop 4a) +
+    anchor cross-check (Loop 4b). Madani layouts: V1/1405H (id 15), V2/1421H (id 10),
+    V4/1441H (id 19) — pin the print matching quran-svg in Loop 4a. License: per-resource
+    on QUL; review each before use. The **V2/1421H layout (id 10)** is also read live as a
+    build-time **witness** by `scripts/probe-qul-v2-layout.mjs` (task #66, owner-requested
+    2026-09-20 as a fourth, deliberately-redundant cross-check): it checks every surah's
+    first-ayah page and the 604-page / 15-line constants against ours (114/114 agree,
+    2026-09-21). The SQLite export is a login-gated download read once from a path passed in;
+    zero of its bytes are vendored, and only page *positions* — no letters — are compared, so
+    it stays on the safe side of the no-text rule. Attribution: KFGQPC V2/1421H layout via
+    QUL (qul.tarteel.ai), `mushaf-layout/10`.
+  - **Mutashabihat ul Quran (resource 73)** — a phrase-recurrence catalogue: 814 phrases
+    over 2,232 ayahs, each entry a shared word-run and the verses it recurs in. Used
+    2026-09-03 as the build-time ruler for the hop's recall — read once from a gitignored
+    cache by `packages/etl/scripts/probe-hop-recall.mjs`, which ships nothing; the finding
+    is `docs/design/hop-recall.data.json` and the reasoning is
+    [`docs/design/what-we-depend-on.md` item ⑪](docs/design/what-we-depend-on.md). It is
+    NOT a dependency and not a match to aim at — a phrase catalogue records mechanical
+    word-runs, where the hop hand-picks the verses a hafiz confuses, so the two diverge by
+    design. Login-gated; no licence stated.
+- **MASAQ (Morphologically Annotated Sequential Arabic of the Qur'an)** — a published,
+  openly-licensed grammatical analysis of the whole Qur'an (Mendeley Data `9yvrzxktmr`,
+  **CC BY 4.0**), built on the Tanzil text and tokenised on its own terms. Used 2026-09-05
+  as a build-time **witness** for the segmentation split — read once from a gitignored
+  cache by `packages/etl/scripts/probe-segmentation-witness.mjs`, which ships nothing; the
+  finding is `docs/design/segmentation-witness.data.json` and the reasoning is
+  [`docs/design/what-we-depend-on.md` item ⑩](docs/design/what-we-depend-on.md). It is an
+  **instrument, not an ingredient** (what-we-distribute ②): read only to check a number we
+  derived ourselves, vendored and shipped nowhere. Because it is genuinely open, its licence
+  would in principle permit vendoring with attribution — but this use needs only the number,
+  so nothing of it leaves in the build. Its independence from the morphology corpus is
+  measured, not assumed: it tokenises the book into 77,411 words to the corpus's 77,429 and
+  spells 8.6% of aligned words differently, so it is a second grammar, not an echo of the
+  first.
 - **QurSim** — *demoted 2026-07-25*: semantic relatedness (Ibn Kathir-derived,
   graded pairs), not lafẓi mutashabihat, and no canonical download endpoint.
   Someday-scoped as a reserved `related` edge type; not a Loop 4 source.

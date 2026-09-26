@@ -1,0 +1,138 @@
+/*
+ * BookmarkDrawer — the same sheet furniture as the page map and the colophon,
+ * so a ribbon's drawer behaves like every other sheet under a thumb.
+ */
+
+.scrim {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-sheet);
+  background: rgba(38, 32, 26, 0.28);
+}
+
+.sheet {
+  position: fixed;
+  inset-inline: 0;
+  inset-block-end: 0;
+  z-index: var(--z-sheet);
+  max-block-size: 82vh;
+  max-inline-size: 560px;
+  margin-inline: auto;
+  overflow-y: auto;
+  padding: var(--space-3) var(--space-4) calc(var(--space-5) + env(safe-area-inset-bottom));
+  background: var(--paper-raised);
+  border-start-start-radius: var(--radius-lg);
+  border-start-end-radius: var(--radius-lg);
+  box-shadow: var(--shadow-2);
+  font-family: var(--font-chrome);
+}
+
+.grip {
+  inline-size: 40px;
+  block-size: 4px;
+  margin: 0 auto var(--space-2);
+  border-radius: var(--radius-pill);
+  background: var(--hairline);
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding-block-end: var(--space-2);
+  border-block-end: 1px solid var(--hairline);
+}
+
+.title {
+  flex: 1;
+  margin: 0;
+  font-size: var(--text-md);
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.close {
+  min-inline-size: var(--touch-min);
+  min-block-size: var(--touch-min);
+  border: none;
+  background: none;
+  color: var(--ink-soft);
+  font-size: var(--text-md);
+  cursor: pointer;
+}
+
+.nameRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  margin-block-start: var(--space-3);
+}
+
+.label {
+  flex: 0 0 100%;
+  font-size: var(--text-sm);
+  color: var(--ink-soft);
+}
+
+.input {
+  flex: 1 1 12rem;
+  min-inline-size: 0;
+  min-block-size: var(--touch-min);
+  padding-inline: var(--space-3);
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius-md);
+  background: var(--paper);
+  color: var(--ink);
+  font: inherit;
+  font-size: var(--text-md);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-block-start: var(--space-3);
+}
+
+.action {
+  min-block-size: var(--touch-min);
+  padding-inline: var(--space-3);
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  font-size: var(--text-sm);
+  cursor: pointer;
+}
+
+.action:hover {
+  background: var(--accent-tint);
+}
+
+.action[data-kind="lift"] {
+  color: var(--danger);
+}
+
+.action:focus-visible,
+.input:focus-visible,
+.close:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.sub {
+  margin: var(--space-4) 0 var(--space-2);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--ink-soft);
+}
+
+.history {
+  margin: 0;
+  padding-inline-start: var(--space-4);
+  font-size: var(--text-sm);
+  line-height: 1.7;
+  color: var(--ink-soft);
+}

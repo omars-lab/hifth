@@ -717,6 +717,32 @@ never in `pnpm gates`.
 
 ---
 
+### ⑰ Saved pages can be cleared when a browser will not promise to keep them · **open**
+
+**What happens.** A browser decides by itself whether to promise this site's saved
+pages will be kept. When it will not, and there is no install offer to make, the
+pages are kept only on a best-effort basis: if the device runs short of space, they
+may be cleared first. They come back the next time each page is opened with a
+connection, but a reader who is offline at that moment finds them gone.
+
+**Why the reader no longer hears about it.** Until 25 September 2026 the app showed a
+banner, "Offline storage is not guaranteed". The owner took it out: it gave the
+reader nothing to do, and a risk the reader cannot act on is ours to fix, not
+theirs to read. The banner still appears where the reader can act: a storage cap
+they set themselves, an install offer, and a kept juz that has already been cleared.
+
+**What could close it.**
+- Ask for the promise at a moment the browser rewards, such as after the reader
+  keeps a juz or installs the app, rather than only on first load.
+- Measure how often it is refused in practice, per browser, before building more.
+- If a kept juz is cleared anyway, the "kept juz is gone" notice already says so and
+  offers to fetch it again; check that path on a real phone.
+
+**How we'd know:** on a phone where the promise was refused, a kept juz survives a
+week of normal use, or the app fetches it back without the reader noticing.
+
+---
+
 ## Considered and deliberately not doing
 
 - **Precaching the mushaf corpus in the service worker.** Ruled out at `vite.config.ts:35` —

@@ -20,12 +20,12 @@ import { SOURCE_REPO, isCommit, sourceUrl, urlFor } from "../provenance";
 
 describe("Colophon", () => {
   it("renders nothing until it is opened", () => {
-    const { container } = render(<Colophon open={false} onClose={() => {}} />);
+    const { container } = render(<Colophon open={false} onClose={() => {}} fisheye onToggleFisheye={() => {}} />);
     expect(container).toBeEmptyDOMElement();
   });
 
   it("offers the source for this build, not a branch", () => {
-    render(<Colophon open onClose={() => {}} />);
+    render(<Colophon open onClose={() => {}} fisheye onToggleFisheye={() => {}} />);
     const link = screen.getByRole("link", { name: /الشيفرة المصدرية/ });
     // Under vitest there is no `define`, so this is the "dev" fallback — the
     // repository root. `urlFor` covers the shape the deployed build ships.
@@ -34,7 +34,7 @@ describe("Colophon", () => {
   });
 
   it("links the designs and decisions the site serves beside the app", () => {
-    render(<Colophon open onClose={() => {}} />);
+    render(<Colophon open onClose={() => {}} fisheye onToggleFisheye={() => {}} />);
     // Relative: the build stages docs/ next to the app, so the link holds on
     // any host the app is served from and needs no knowledge of which.
     const link = screen.getByRole("link", { name: /التصاميم والقرارات/ });
@@ -42,7 +42,7 @@ describe("Colophon", () => {
   });
 
   it("credits every source whose licence asks to be named", () => {
-    render(<Colophon open onClose={() => {}} />);
+    render(<Colophon open onClose={() => {}} fisheye onToggleFisheye={() => {}} />);
     // The Quranic Arabic Corpus requires the link, verbatim: "a link is made to
     // http://corpus.quran.com". quran-tajweed is CC BY 4.0. The mutashabihat
     // data asks for a mention in the app itself. KFGQPC is the mushaf. Tanzil is
@@ -73,7 +73,7 @@ describe("Colophon", () => {
     // non-commercial-only is the Libyan Endowments edition's term for an edition
     // Hifth does not vendor. Overstating someone else's terms fails silently —
     // it reads as caution, so no reader files a bug. This pins the negative.
-    render(<Colophon open onClose={() => {}} />);
+    render(<Colophon open onClose={() => {}} fisheye onToggleFisheye={() => {}} />);
     const row = screen.getByText(/KFGQPC/).closest("li");
     expect(row).not.toBeNull();
     expect(row!.textContent).not.toMatch(/غير التجاري/);
@@ -82,12 +82,19 @@ describe("Colophon", () => {
 
   it("is a modal dialog that Escape closes", () => {
     const onClose = vi.fn();
-    render(<Colophon open onClose={onClose} />);
+    render(<Colophon open onClose={onClose} fisheye onToggleFisheye={() => {}} />);
     const dialog = screen.getByRole("dialog", { name: "عن حِفظ" });
     expect(dialog).toHaveAttribute("aria-modal", "true");
 
     fireEvent.keyDown(dialog, { key: "Escape" });
     expect(onClose).toHaveBeenCalledOnce();
+  });
+
+  it("is where the tips are asked for, since they no longer open by themselves", () => {
+    const onShowTips = vi.fn();
+    render(<Colophon open onClose={() => {}} fisheye onToggleFisheye={() => {}} onShowTips={onShowTips} />);
+    fireEvent.click(screen.getByRole("button", { name: "عرض الإرشادات" }));
+    expect(onShowTips).toHaveBeenCalledOnce();
   });
 });
 

@@ -161,6 +161,29 @@ describe("nextIntent · latching", () => {
   });
 });
 
+describe("pointerIntent · the highlighter tool paints without a hold", () => {
+  it("a drag that would have panned paints instead", () => {
+    expect(pointerIntent(sample({ elapsedMs: 20, dx: 40 }))).toBe("pan");
+    expect(pointerIntent(sample({ elapsedMs: 20, dx: 40, paintOnDrag: true }))).toBe("marquee");
+  });
+
+  it("a drag that would have turned the page paints instead", () => {
+    const turning = { elapsedMs: 20, dx: 200, fitsAcross: true, edgeDistancePx: 400 };
+    expect(pointerIntent(sample(turning))).toBe("turn");
+    expect(pointerIntent(sample({ ...turning, paintOnDrag: true }))).toBe("marquee");
+  });
+
+  it("a press that has not moved is still a tap, so a tap still selects", () => {
+    expect(pointerIntent(sample({ elapsedMs: 20, dx: 2, paintOnDrag: true }))).toBe("tap");
+  });
+
+  it("a drag that starts inside the selection still chooses words", () => {
+    expect(pointerIntent(sample({ elapsedMs: 20, dx: 40, paintOnDrag: true, insideSelection: true }))).toBe(
+      "word",
+    );
+  });
+});
+
 describe("pointerIntent · the hold inside a selection means words", () => {
   it("the same hold that paints a marquee chooses words when it began inside the selection", () => {
     expect(pointerIntent(sample({ elapsedMs: LONG_PRESS_MS, insideSelection: true }))).toBe("word");

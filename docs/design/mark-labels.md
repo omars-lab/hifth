@@ -472,18 +472,53 @@ What this document does *not* settle, stated so that each answer would be recogn
 arrives. Both are indexed in [`docs/issues.json`](../issues.json), which is the only place that
 counts them.
 
-### ① Whether a spacing-aware comparison is worth building · **open**
+### ① Whether a spacing-aware comparison is worth building · **answered**
 
 The five remaining disagreements are the right strokes at an unusual distance apart. A comparison
 that scored strokes and arrangement as two numbers instead of one would report them correctly
 rather than merely explain them afterwards. §⑧ says why the naive version of that must not be
 built. Nothing depends on the answer today, which is why this is open rather than urgent.
 
-### ② Whether the names agree with the text they belong to · **open**
+**Answered 2026-09-03: not worth building.** The whole prize is five marks of 326,515 — the ones
+drawn with the right strokes at an unusual distance apart — and nothing in the app depends on
+them. Set against that is the cost, and the cost is not neutral: the naive spacing-aware
+comparison §⑧ warns against would stop reading arrangement as part of the shape, and arrangement
+is the only thing that separates a *fathatan* from two *fathatas* written one after another — a
+distinction that carries 3,635 marks. Building it would corrupt 3,635 to rescue 5. A careful
+version that kept two numbers — one for the strokes, one for the arrangement — would avoid that
+harm and report the five correctly, but a second comparison axis to maintain forever is not
+earned by five marks that already have a written explanation beside them. So the status quo
+stands: one whole-picture score, and the five named afterward rather than scored apart.
 
-The check described in §⑧ — name against carried text rather than name against drawing — has not
-been done. It is cheap, it is independent of everything here, and it would catch a class of error
-this document is blind to.
+**What would reopen it.** Either the five growing into a class large enough to matter, or a
+feature that colours a recitation rule and so leans on exactly the iqlab and doubled-vowel marks
+§⑨ flags — at which point a *targeted* two-number comparison over those specific marks, never the
+naive one, becomes a new item worth speccing rather than this one reopening.
+
+### ② Whether the names agree with the text they belong to · **answered**
+
+The check described in §⑧ — name against carried text rather than name against drawing — is cheap,
+independent of everything here, and would catch a class of error this document is blind to: a mark
+drawn exactly as its name says and the wrong name for its word.
+
+**Answered 2026-09-02.** It was run as a census over the whole corpus, and the class of error is
+empty. Of the 326,515 marks, a naming verdict was reachable on 326,506 — the other nine are §④'s
+own count residual, where the text and the print disagree on how many marks a word has, and no
+name can be checked against a count that does not line up. **Every one of the 326,506 carries a
+name its own text calls for. None is named wrong for its word.** The map from a written mark to
+the name the print draws is not invented for this check: it is the one §⑤ recovered from the
+corpus and froze, so the census reuses a proven table rather than the hand-built one §④ warns
+would manufacture its own mismatches. §⑧'s prediction — that every mark would pass a record-against-
+record check — is now a measurement rather than an expectation.
+
+It stays a **bag** check, and that is the half of the question it can reach alone: the set of
+names in a ligature against the set its text asks for. It cannot see a mark that is the right name
+for the word but drawn on the wrong *letter* within its ligature — that needs to know which mark
+sits on which letter, which is the pairing §⑤ recovers and, past it, a reader's eye on the page.
+That half is a different question, and it stays open.
+
+**Answered by** `packages/etl/scripts/probe-mark-names.mjs` (`pnpm probe:mark-names`) — it ships
+nothing, re-runs the census on demand, and writes a page of evidence beside the run.
 
 ## How can someone look at this for themselves?
 

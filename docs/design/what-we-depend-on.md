@@ -402,7 +402,7 @@ are compared by nobody. It is *answered* and not *fixed*: the deferral itself is
 gate fails if the question it defers to closes or disappears — but nothing would fail if
 someone flipped the verdict back to "ours", and a word that claims a test has to name one.
 
-### ③ Structural metadata reaches the adjacency shards and nothing names it · **open**
+### ③ Structural metadata reaches the adjacency shards and nothing names it · **answered**
 
 **510 of 3,002 shipped edges** carry a same-part flag computed from the CC BY structural
 tables. Neither the licensing map's row nor the shipped notice names that upstream. The
@@ -424,6 +424,29 @@ adjacency builder writes a paragraph into the notice saying what the flag is der
 What stays open is the other half — the trace still does not follow the core package, so the
 hand-written declaration is the only thing standing between the next upstream reached that
 way and silence. That is a design question, not a defect, and the marker says so now.
+
+*Answered 2026-09-03: the trace should not follow the core package.* Walking the shared core's
+import graph to discover licensed derivations was the obvious move and is the wrong one. The graph
+is large and almost entirely uninteresting — nearly every export in it carries no upstream
+obligation at all — so a follower spends its whole effort producing noise, and the judgement it
+would still have to make, *which of these reaches is a licensed derivation*, is exactly the hard
+part it cannot automate. It would buy false confidence and a standing maintenance cost to catch a
+case that is already caught: the one real derivation — the same-part flag computed from the CC BY
+structural tables — is now named by hand in both the licensing row and the shipped notice, so
+today's exposure is closed.
+
+What that leaves standing is a precedent, not a defect: a builder could reach a **new** upstream
+through the core package and nothing automated would notice. It stays small — attribution rather
+than copyleft, and the source is credited in the colophon regardless — but it is the real residue.
+The right shape for closing it, if it is ever worth closing, is the opposite of graph-walking:
+have the core package **declare** its few license-bearing exports, and let the notices trace check
+that any bucket importing one names its upstream — a short hand-kept list rather than a graph
+traversal. That is a narrower piece of work than this row, and belongs to a new one if the
+precedent is ever felt to be worth machinery.
+
+**What would reopen it:** a new licensed upstream — a copyleft one above all — reaching a shipped
+bucket through the core package, or a decision to close the precedent proactively with the
+source-side declaration above.
 
 ### ④ Two shipped things are covered by no row of the licensing map · **fixed**
 
@@ -458,7 +481,7 @@ either a declared tree or a named declaration, and the map has to mention it eit
 broken on purpose both ways before being left green — an empty directory added, and the word
 tree's row removed from the map — because a check that has only ever passed is a comment.
 
-### ⑤ Nothing checks the licences of the installed package tree · **open**
+### ⑤ Nothing checks the licences of the installed package tree · **fixed**
 
 Every licence gate here is about vendored data. The package tree is unchecked, and the
 audit that checked it by hand found it clean — which is the good time to add the check
@@ -468,6 +491,18 @@ rather than the bad one.
 declared as a production dependency, since the offline-support package is declared for
 development and ships anyway. It would need a proof that it can fail, per the convention
 the notices gate set.
+
+**Closed by** a gate that vets the shipped package tree, added 2026-09-03. It does not
+walk production dependencies — that split is the trap this called out, because the offline
+register shim is declared for development and ships anyway, and the small-database package
+under the cache-expiry logic is declared by nothing here yet rides the generated service
+worker. So it computes the ship set from the two channels the app actually emits — the
+browser bundle and the service worker — and fails on any shipped package whose licence is
+not on a small allow-set of permissive terms. The set today is twenty-four packages,
+twenty-three under the same permissive licence and one other, all clean. It was proven to
+fail the way the notices gate was: the one non-standard licence was dropped from the
+allow-set and the gate named the exact package the audit had flagged as undeclared, then
+the allow-set was restored.
 
 ### ⑥ Whether to move the structural metadata to a public-domain source · **open**
 
@@ -486,10 +521,40 @@ the adjacency tree would stop being a copyleft derivative and the index-conversi
 would disappear. The substitute corpus is already vendored under the friendliest terms in
 the repo.
 
-**What would answer it:** run the measurement. The print splits 9,533 proclitics the
-morphology joins, so the uniqueness rule keeps a different number of runs than the current
-2,544 — and until somebody knows whether that number is 2,400 or 900, this option has no
-cost attached and cannot be drawn honestly.
+**Measured on 2026-09-03: the print keeps 2,580 spans, and the cost is churn, not a free
+gain.** Re-running the uniqueness rule over the print's own words — with no conversion step,
+because a run computed there already lands in print positions — keeps 36 more spans than
+today's 2,544. But the two sets are not nested: 2,430 spans are common to both, 150 are
+new, and 114 a reader can currently land on would disappear. The mechanism is the split
+itself. A shared phrase is never fewer print words than morphology words and is often more
+(the print run is longer on 1,414 of the shared pairs, the same length on 1,130, and shorter
+on none), so some runs grow long enough to break a uniqueness tie while repeated common
+proclitics forge new ties elsewhere. The four verses whose two printings cannot be aligned
+take no part in the churn, so this is the ordinary behaviour of the rule and not an artefact
+of the hard cases. The option can therefore be drawn now: it trades 114 spans for 150 and
+sheds the copyleft dependency, and whether that trade is worth making is what this row still
+holds open.
+
+**What would answer it:** a ruling in the decision register that weighs the licence
+improvement against the 114 spans it would cost, with both span sets drawn on real pages so
+a reader can see for themselves what is gained and what is lost.
+
+**Now drawn (2026-09-03):** that ruling is registered as the decision `adjacency-span-source`,
+and its page draws all three buckets — the 2,430 agreed, the 150 gained and the 114 lost —
+each washed on the real mus'haf page it sits on, built from committed findings by
+`scripts/build-adjacency-span-source.mjs` and served at `docs/design/adjacency-span-source.html`.
+What stays open is the owner's choice between the two ways, not any missing measurement or
+picture; this row waits on that decision.
+
+**And the choice is between two conventions, not a fix for an error (2026-09-05, from ⑩).** A
+third, independent grammar was measured over the 9,533 places where the two ways part, and it
+folds the small attached particle onto its word at every single one of them — the same reading
+the morphology uses, and the opposite of the print, which writes the particle separately. So
+computing the runs over the print's own words is not correcting a mistake in the morphology;
+both grammars agree the join is the grammatical reading, and the print's separated particle is
+its own long-standing typographic convention. Adopting it for the neighbour rail is a licence
+choice made knowing the print is the measured outlier, which is the honest frame for the owner's
+decision — not "the print is right and the corpus is wrong".
 
 ### ⑧ Whether the tajweed spans should move to a pause-aware engine · **open**
 
@@ -502,18 +567,36 @@ regeneration path is closed because its classifier carries no licence.
 the same judgement the colouring is already waiting on — and a decision about depending on
 something this new, which vendoring the core would largely dissolve.
 
-### ⑨ The page table is derived from one source and corroborated by none · **open**
+### ⑨ The page table is derived from one source and corroborated by none · **answered**
 
-The table reaches three shipped outputs and sits at the centre of ①, and nothing checks it.
-A metadata file under a public-domain dedication carries a page number per ayah, compiled
-independently of the corpus this project derives its table from.
+The table reaches three shipped outputs and sits at the centre of ①. It is read off the page
+artwork's own geometry — one shape per ayah, filed by the leaf it sits on — so a page number
+per ayah compiled by any other route is a genuinely independent second opinion.
 
-**What would answer it:** compare the two across all 6,236 ayahs. Agreement is a correctness
-check on an unchecked table and evidence bearing on ① — two independent compilations
-agreeing is what a fact about a printing looks like. Disagreement is worth more and would
-never otherwise surface. The source is public domain, so nothing about this is constrained.
+**The correctness half was already answered, and this record had not noticed.** A check this
+project already runs against a page table *published for readers* does exactly this comparison:
+across all 604 pages it agrees on 568 and diverges on precisely the 36 where the earlier and
+later printings of this mus'haf are known to break their pages differently — a party with no
+access to our artwork re-deriving which printing the artwork is. That comparison was recorded
+beside the table on the sixth of August, ten days before this item was written calling the
+table "corroborated by none". It was not; the phrase was wrong. So the correctness question
+here is not open and never needed a new check — the table is corroborated by an outside
+witness, and the same result independently confirms the printing (bearing on ④).
 
-### ⑩ The segmentation disagreement has no disinterested witness · **open**
+**What this item actually wanted was a different kind of witness, and that is the finding.** It
+named a page-per-ayah source under a public-domain dedication — valuable not because a second
+correctness check was missing but because a *permissively-licensed* one would double as a
+candidate replacement for the pagination, which is ①'s open problem. By the time it was
+looked for, that source could not be relocated: the project that held it is gone, and its one
+surviving fork had been relicensed to a non-commercial, no-derivatives licence. A permissive
+replacement that was counted on had already decayed. That is real evidence, and it belongs to
+①; there is no permissive page-per-ayah source to adopt today. The reader-facing tables that
+*do* answer are read only to check a number, never to make one, so they are instruments and
+not ingredients (what-we-distribute ②) and their licences do not bind — but they are also not
+replacements, which is the whole of what ① is asking. The correctness half is closed here; the
+replacement half stays with ①.
+
+### ⑩ The segmentation disagreement has no disinterested witness · **answered**
 
 Whether ⑦ is possible turns on 9,533 places where the print splits a word the morphology
 joins. The only two opinions are the two being compared, so a disagreement cannot say which
@@ -527,7 +610,38 @@ improvement available. Both are share-alike, so they can be read at build time b
 be vendored here or shipped. Provenance first: one project the audit examined claimed
 independence while having partly scraped the corpus it was being compared to.
 
-### ⑪ Nothing measures what the hop does not contain · **open**
+**What answered it, 2026-09-05.** A third grammar was read once as a witness — a published,
+freely-licensed grammatical analysis of the whole Qur'an, built on a different edition of the
+text and split into words on its own terms. It is share-alike, so none of it is vendored or
+shipped; it was read from a local cache, a number was taken, and nothing of it remains in the
+build. The number is checked in beside this document — counts and verse keys, no scripture — and
+the script that took it runs only where the cache is.
+
+Provenance first, as the item demands. A witness copied from the grammar it would check spells
+and splits words identically to it; this one does neither. It tokenises the book into a
+different number of words, and on more than half the verses it spells at least one word
+differently — a plainer spelling where the printed tradition keeps an older one. That
+disagreement is the evidence that it is a second opinion and not an echo of the first.
+
+The finding itself is one-sided and clean. At each of the 9,533 disputed positions the print
+writes a small attached particle — the "and", the "the", the "in" — as its own separate word,
+while the grammar folds it onto the word it belongs to. A split leaves one unmistakable trace
+in any word-by-word grammar: a standalone particle with no word under it. The third witness
+produces that trace **nowhere** — not once in more than seventy-seven thousand words — so it
+folds the particle at **every one of the 9,533 positions**, exactly as the incumbent grammar
+does. Three independent counts agree: the standalone-particle count is zero; the witness's
+word count per verse matches the grammar's almost everywhere, and is never higher except in a
+single verse where the extra word is a real word, not a split particle; and at each disputed
+position the witness carries the particle as a folded piece of its word.
+
+So the disagreement is settled as a disagreement of **convention, not of correctness**. The
+print's separated particle is a typographic habit of the press; folding it is the grammatical
+reading, and now two independent grammars fold it while only the print separates it. That is
+what ⑦ was missing: adopting the print's own word count for the neighbour rail becomes a
+licence choice made with eyes open — the print is the outlier and we can say by how much — not
+a correction of an error, because on the grammar's own terms nothing is in error.
+
+### ⑪ Nothing measures what the hop does not contain · **answered**
 
 The pairings corpus is deliberately not exhaustive and that is the reason to prefer it, but
 no number exists for what it omits, so 3,002 edges cannot be read as sufficient or thin. A
@@ -537,6 +651,35 @@ usable as a ruler.
 **What would answer it:** a recall figure against it, computed at build time, shipping
 nothing. It bears directly on whether the hop is finished, which no other measurement here
 speaks to.
+
+**What answered it, 2026-09-03.** A second, independently built catalogue was read once as a
+measuring stick — a published list of recurring phrases, each entry a shared run of words and
+the verses it recurs in, from a two-verse echo up to a closing formula that repeats in seventy.
+Its download is login-gated and its licence is unstated, so none of it is vendored or shipped;
+it was read from a local cache, a number was taken, and nothing of it remains in the build. The
+number is checked in beside this document — counts, percentages and our own verse keys, no
+scripture — and the script that took it runs only where the cache is.
+
+The first thing the ruler settles is that the two catalogues are not the same kind of thing,
+and so neither is meant to contain the other. Ours hand-picks the verses a hafiz actually slips
+between; the ruler mechanically records every repeated word-run, common formulae and all. Two
+verses that share a run are not two verses a reader confuses. Read that way, the overlap is the
+right shape: of the 2,232 verses the ruler touches, the hop flags **921 — a recall of 41%** —
+and the two sets are not nested. 1,311 of the ruler's verses the hop does not flag, and **599
+verses the hop flags have no phrase in the ruler at all**. A catalogue that matched it closely
+would be the worrying result, not this one: on the provenance the audit already turned up, a
+near-identical independent recompute reads as evidence of copying, not of rigour. Low, explained
+divergence is both the safer and the truer picture.
+
+The 1,311 the hop misses split cleanly into omission and choice. **677** sit in a tight two-to-
+four-verse phrase — genuine candidates a hafiz might confuse, worth a later look; specimens are
+recorded beside the number (1:6, 2:8, 2:25, 2:30 among them). The other **634** are reachable
+only through a broad shared formula — five verses, ten, or the long closing refrains — and those
+are the ruler counting mechanical recurrence where the hop is deliberately silent. **82% of the
+ruler's phrase-pairs come from formulae spanning eleven verses or more**, which is why its pair
+count dwarfs the hop's and why pair-level recall (3.8%) measures the gap between the two *kinds*
+of catalogue rather than a shortfall in either. The hop is not finished — the 677 tight misses
+say so — but it is not thin either, and it is emphatically not a subset of anything.
 
 ### ⑫ A table in our own code is described in its own comment as copied verbatim · **fixed**
 

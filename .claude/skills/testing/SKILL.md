@@ -18,6 +18,13 @@ order is a unit test; DOM order becoming *sides* under an RTL flow is e2e; the c
 of the band is a golden. Don't assert in e2e what jsdom could have caught, and don't
 screenshot what a geometry assertion states more precisely.
 
+These three layers **assert**. When you need to *look* — see a change rather than
+pin it — that is the `run-app` skill's `make drive`, not a layer here: it drives a
+real headless Chromium against a running server and writes a PNG, holds no baselines,
+and asserts nothing (its one optional `--expect` only stops a silently-wrong flow
+from handing back a misleading picture). Look first, then, once you know what to
+hold still, add the claim in the lowest layer above that can hold it.
+
 ## The current policy: non-mobile only
 
 **Until the mobile app is implemented, we run the non-mobile tests only.** That means:

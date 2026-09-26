@@ -233,7 +233,7 @@ describe("what the English UI must not translate", () => {
     // «المتشابهات» and its licence line unchanged.
     render(
       <LangProvider>
-        <Colophon open onClose={() => {}} />
+        <Colophon open onClose={() => {}} fisheye onToggleFisheye={() => {}} />
       </LangProvider>,
     );
     expect(screen.getByRole("dialog", { name: EN.aboutTitle })).toBeInTheDocument();
@@ -244,7 +244,7 @@ describe("what the English UI must not translate", () => {
   it("offers both languages by name, in their own script", () => {
     render(
       <LangProvider>
-        <Colophon open onClose={() => {}} />
+        <Colophon open onClose={() => {}} fisheye onToggleFisheye={() => {}} />
       </LangProvider>,
     );
     const arabic = screen.getByRole("radio", { name: EN.langSwitchTo(AR.langName) });
@@ -273,7 +273,7 @@ describe("what the English UI must not translate", () => {
   it("offers every language there is, not merely the one this is not", () => {
     render(
       <LangProvider>
-        <Colophon open onClose={() => {}} />
+        <Colophon open onClose={() => {}} fisheye onToggleFisheye={() => {}} />
       </LangProvider>,
     );
     const offered = screen.getAllByRole("radio").map((el) => el.getAttribute("lang"));
@@ -286,7 +286,7 @@ describe("what the English UI must not translate", () => {
     // buttons. Each option now carries its own.
     render(
       <LangProvider>
-        <Colophon open onClose={() => {}} />
+        <Colophon open onClose={() => {}} fisheye onToggleFisheye={() => {}} />
       </LangProvider>,
     );
     // Asked of whichever language the provider actually opened in, rather than
