@@ -1312,7 +1312,7 @@
     {
       "id": "harakah-pick",
       "question": "How does a reader pick the exact part of a word to note — one vowel-sign, several at once, or the word itself?",
-      "status": "open",
+      "status": "decided",
       "options": [
         {
           "id": "A",
@@ -1325,15 +1325,19 @@
         {
           "id": "C",
           "label": "Tap the word, then tap the sign by its name"
+        },
+        {
+          "id": "D",
+          "label": "Two tools: a sign tool whose magnifier follows the pointer, and a word tool that opens the word into its parts"
         }
       ],
       "artifact": "https://blog.bytesofpurpose.com/hifth/docs/design/harakah-pick-options.html",
       "page": "docs/design/harakah-pick-options.html",
       "builtBy": "scripts/build-harakah-pick-options.mjs",
-      "doc": "docs/decisions/harakah-pick.md",
-      "decided": null,
-      "by": null,
-      "date": null,
+      "doc": "docs/decisions/harakah-pick.md#so-what-was-decided",
+      "decided": "D",
+      "by": "omar",
+      "date": "2026-09-26",
       "related": [
         "mistake-note-anchor",
         "mark-granularity",
