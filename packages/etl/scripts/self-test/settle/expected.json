@@ -1,0 +1,261 @@
+{
+ "built": "mark-settled",
+ "rows": "packages/etl/scripts/self-test/settle/rows.json",
+ "rowsFingerprint": "fafae766",
+ "set": "fixture",
+ "seed": 23,
+ "radius": 3,
+ "iouFloor": 0.55,
+ "sittings": [
+  {
+   "file": "sitting.json",
+   "slice": "-p1of1-fixture",
+   "finished": "2026-09-22T00:40:00.000Z",
+   "shown": 10,
+   "seen": 10,
+   "looked": 10,
+   "whole": true,
+   "answers": 6,
+   "spoke": 6
+  }
+ ],
+ "banked": [],
+ "marks": 6,
+ "faulted": 3,
+ "defects": 1,
+ "answers": 6,
+ "settledMarks": [
+  {
+   "id": "1:0",
+   "page": 1,
+   "line": 1,
+   "name": "fatha",
+   "rule": "ink",
+   "words": [
+    "looks-right"
+   ],
+   "fault": false,
+   "box": [
+    180,
+    40,
+    5.6,
+    3.6
+   ],
+   "drawn": [
+    180.5,
+    39.75,
+    5.6,
+    3.6
+   ],
+   "settled": null,
+   "hand": null,
+   "to": null,
+   "size": null,
+   "was": null,
+   "goes": 0,
+   "reshapes": 0,
+   "points": 0,
+   "placedBy": null,
+   "sizedBy": null,
+   "notes": []
+  },
+  {
+   "id": "1:1",
+   "page": 1,
+   "line": 1,
+   "name": "fatha",
+   "rule": "ink",
+   "words": [
+    "placement"
+   ],
+   "fault": true,
+   "box": [
+    172,
+    40,
+    5.6,
+    3.6
+   ],
+   "drawn": [
+    172.5,
+    39.75,
+    5.6,
+    3.6
+   ],
+   "settled": [
+    171.5,
+    39.75,
+    5.6,
+    3.6
+   ],
+   "hand": [
+    -1,
+    0
+   ],
+   "to": [
+    -0.5,
+    -0.25
+   ],
+   "size": null,
+   "was": null,
+   "goes": 1,
+   "reshapes": 0,
+   "points": 0,
+   "placedBy": "hand",
+   "sizedBy": null,
+   "notes": []
+  },
+  {
+   "id": "1:2",
+   "page": 1,
+   "line": 1,
+   "name": "fatha",
+   "rule": "ink",
+   "words": [
+    "wrong-shape"
+   ],
+   "fault": true,
+   "box": [
+    164,
+    40,
+    5.6,
+    3.6
+   ],
+   "drawn": [
+    164.5,
+    39.75,
+    5.6,
+    3.6
+   ],
+   "settled": null,
+   "hand": null,
+   "to": null,
+   "size": [
+    7,
+    6
+   ],
+   "was": [
+    5.6,
+    3.6
+   ],
+   "goes": 0,
+   "reshapes": 1,
+   "points": 0,
+   "placedBy": null,
+   "sizedBy": "hand",
+   "notes": []
+  },
+  {
+   "id": "1:6",
+   "page": 1,
+   "line": 1,
+   "name": "fatha",
+   "rule": "line-tilt",
+   "words": [
+    "placement"
+   ],
+   "fault": true,
+   "box": [
+    132,
+    40,
+    5.6,
+    3.6
+   ],
+   "drawn": [
+    132,
+    40,
+    5.6,
+    3.6
+   ],
+   "settled": [
+    132.9,
+    39.85,
+    5.6,
+    3.6
+   ],
+   "hand": [
+    0.9,
+    -0.15
+   ],
+   "to": [
+    0.9,
+    -0.15
+   ],
+   "size": null,
+   "was": null,
+   "goes": 1,
+   "reshapes": 0,
+   "points": 0,
+   "placedBy": "hand",
+   "sizedBy": null,
+   "notes": []
+  },
+  {
+   "id": "1:7",
+   "page": 1,
+   "line": 1,
+   "name": "fatha",
+   "rule": "line-tilt",
+   "words": [
+    "looks-right"
+   ],
+   "fault": false,
+   "box": [
+    124,
+    40,
+    5.6,
+    3.6
+   ],
+   "drawn": [
+    124,
+    40,
+    5.6,
+    3.6
+   ],
+   "settled": null,
+   "hand": null,
+   "to": null,
+   "size": null,
+   "was": null,
+   "goes": 0,
+   "reshapes": 0,
+   "points": 0,
+   "placedBy": null,
+   "sizedBy": null,
+   "notes": []
+  },
+  {
+   "id": "1:8",
+   "page": 1,
+   "line": 1,
+   "name": "fatha",
+   "rule": "line-tilt",
+   "words": [
+    "print-defect"
+   ],
+   "fault": false,
+   "box": [
+    116,
+    40,
+    5.6,
+    3.6
+   ],
+   "drawn": [
+    116,
+    40,
+    5.6,
+    3.6
+   ],
+   "settled": null,
+   "hand": null,
+   "to": null,
+   "size": null,
+   "was": null,
+   "goes": 0,
+   "reshapes": 0,
+   "points": 0,
+   "placedBy": null,
+   "sizedBy": null,
+   "notes": []
+  }
+ ]
+}

@@ -16,6 +16,14 @@ const externalBase = process.env.HIFTH_BASE_URL;
 // that an ordinary run does not have.
 const shots = process.env.HIFTH_SHOTS === "1";
 
+// The pitch build's own e2e (e2e/pitch.spec.ts). It is not in the ordinary
+// suite for the same reason the pitch layer is not in the public bundle: the
+// commentary sheet only exists when VITE_PITCH=1, and the notes it shows live
+// in a gitignored file on one laptop. So `make pitch-e2e` sets this flag, which
+// swaps the whole run for one chromium project that builds and serves the pitch
+// bundle on its own port — nothing here can rebuild or reserve the public one.
+const pitch = process.env.HIFTH_PITCH === "1";
+
 export default defineConfig({
   testDir: "./e2e",
   fullyParallel: true,
@@ -57,7 +65,7 @@ export default defineConfig({
     ["json", { outputFile: "test-results/results.json" }],
   ],
   use: {
-    baseURL: externalBase ?? "http://localhost:4173",
+    baseURL: externalBase ?? (pitch ? "http://localhost:4273" : "http://localhost:4173"),
     // Arabic is the suite's default because it is the app's, and because every
     // committed aria snapshot and golden image was recorded in it. Without this
     // the chrome's language would be the *runner's* locale: a laptop set to
@@ -103,7 +111,22 @@ export default defineConfig({
       caret: "hide",
     },
   },
-  projects: shots
+  projects: pitch
+    ? [
+        {
+          // The pitch commentary project. Chromium at a spread width, no touch:
+          // the note is a floating card here (not a phone bottom sheet), so it
+          // can land on a leaf and the placement (Option D) is testable. It runs
+          // pitch.spec.ts alone, against the pitch bundle the webServer builds.
+          name: "pitch",
+          testMatch: /pitch\.spec\.ts/,
+          use: {
+            browserName: "chromium",
+            viewport: { width: 1440, height: 900 },
+          },
+        },
+      ]
+    : shots
     ? [
         {
           // A picture in a phone runbook should have been taken on a phone, and
@@ -177,7 +200,11 @@ export default defineConfig({
           // over the real corpus, where a hover swells the real tick and a tap
           // turns the book to the juz. The growth is gated on a fine pointer, so
           // it too is a desktop-only claim.
-          testMatch: /(desktop|stage-fit|detent-live|pagebar-detents)\.spec\.ts/,
+          //
+          // `pagebar-fisheye` is option B on the same bar: a hover spreads the
+          // neighbourhood apart and names the page under the pointer. Same fine-
+          // pointer gate, same reason a phone cannot make the gesture.
+          testMatch: /(desktop|stage-fit|detent-live|pagebar-detents|pagebar-fisheye)\.spec\.ts/,
           use: {
             browserName: "chromium",
             viewport: { width: 1440, height: 900 },
@@ -186,12 +213,12 @@ export default defineConfig({
         {
           name: "iphone",
           use: { ...devices["iPhone 13"] },
-          testIgnore: /(golden|shots|desktop|detent-live|pagebar-detents)\.spec\.ts/,
+          testIgnore: /(golden|shots|desktop|detent-live|pagebar-detents|pagebar-fisheye|pitch)\.spec\.ts/,
         },
         {
           name: "android",
           use: { ...devices["Pixel 7"] },
-          testIgnore: /(golden|shots|desktop|detent-live|pagebar-detents)\.spec\.ts/,
+          testIgnore: /(golden|shots|desktop|detent-live|pagebar-detents|pagebar-fisheye|pitch)\.spec\.ts/,
         },
         {
           // The golden-image project. Its viewport is spelled out rather than
@@ -212,8 +239,13 @@ export default defineConfig({
     ? {}
     : {
         webServer: {
-          command: "pnpm exec vite preview --port 4173 --strictPort",
-          url: "http://localhost:4173",
+          // In pitch mode, build the private bundle to a gitignored dir and
+          // serve it on its own port, so a pitch run never touches — or is
+          // fooled by — whatever public build is sitting in dist/.
+          command: pitch
+            ? "VITE_PITCH=1 pnpm exec vite build --outDir dist/pitch && pnpm exec vite preview --outDir dist/pitch --port 4273 --strictPort"
+            : "pnpm exec vite preview --port 4173 --strictPort",
+          url: pitch ? "http://localhost:4273" : "http://localhost:4173",
           // Never reuse, unless someone asks for it by name.
           //
           // `reuseExistingServer: !CI` looks like a local convenience and is

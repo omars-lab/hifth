@@ -39,7 +39,7 @@
  *      and the ayahs are exactly those two — so a future pin that fixes them
  *      upstream fails loudly instead of drifting silently.
  *
- *   3. Twenty-three polygon repairs across nineteen pages (PLAN follow-up 14).
+ *   3. Thirty-three polygon repairs across twenty-four pages (PLAN follow-up 14).
  *      Upstream gives some ayahs a tappable box that does not cover the ayah:
  *      a page's first ayah given only its last line, two lines of scripture
  *      under one line of polygon, a rect squashed off the line grid. The ayah
@@ -99,7 +99,7 @@ const ID_REPAIRS = [
  * from, to} — PLAN follow-up 14. `from` is the exact upstream `d`, matched
  * before svgo touches it, so a pin that repairs one upstream fails loudly.
  *
- * Four shapes of defect, all measured off the page's own geometry — its line
+ * Five shapes of defect, all measured off the page's own geometry — its line
  * pitch (the modal rect height), or the ink either side of a boundary — rather
  * than a number chosen to make a page look right:
  *
@@ -123,6 +123,18 @@ const ID_REPAIRS = [
  *                                the previous ayah's. Page 577 is the only one,
  *                                and it carries two entries for the same reason
  *                                the displaced rects do.
+ *   the borrowed margin          a surah's first ayah is given the left-margin
+ *                                strip of the previous surah's last line — the
+ *                                strip holding that line's end-of-ayah marker.
+ *                                Tapping the opener lit the other surah's
+ *                                marker and stretched its box up over the
+ *                                surah title. Five pages (106, 255, 440, 467,
+ *                                515), each with two entries: the strip goes
+ *                                back to the ayah whose line it is, and the
+ *                                opener loses it. A reader found p106 on
+ *                                2026-09-25; the other four came from sweeping
+ *                                every opener, and `gate:boxes` now holds the
+ *                                class at zero.
  *
  * The first three shapes are the ones `gate:pages` can see: it measures ink
  * against polygon and demands zero orphans. The fourth is invisible to it —
@@ -134,6 +146,71 @@ const ID_REPAIRS = [
  * argument for having two.
  */
 const POLYGON_REPAIRS = [
+  // p106: 5:1 borrows the margin strip of 4:176's last line
+  {
+    page: 106,
+    number: "004176",
+    from: "M 5.0 8.25 L 340.0 8.25 L 340.0 152.25 L 5.0 152.25 Z M 17.0 152.25 L 340.0 152.25 L 340.0 188.25 L 17.0 188.25 Z",
+    to: "M 5.0 8.25 L 340.0 8.25 L 340.0 152.25 L 5.0 152.25 Z M 5.0 152.25 L 340.0 152.25 L 340.0 188.25 L 5.0 188.25 Z",
+  },
+  {
+    page: 106,
+    number: "005001",
+    from: "M 5.0 152.25 L 17.0 152.25 L 17.0 188.25 L 5.0 188.25 Z M 5.0 260.25 L 340.0 260.25 L 340.0 332.25 L 5.0 332.25 Z M 248.25 332.25 L 340.0 332.25 L 340.0 368.25 L 248.25 368.25 Z",
+    to: "M 5.0 260.25 L 340.0 260.25 L 340.0 332.25 L 5.0 332.25 Z M 248.25 332.25 L 340.0 332.25 L 340.0 368.25 L 248.25 368.25 Z",
+  },
+  // p255: 14:1 borrows the margin strip of 13:43's last line
+  {
+    page: 255,
+    number: "013043",
+    from: "M 5.0 8.5 L 340.0 8.5 L 340.0 44.5 L 5.0 44.5 Z M 52.5 44.5 L 340.0 44.5 L 340.0 80.5 L 52.5 80.5 Z",
+    to: "M 5.0 8.5 L 340.0 8.5 L 340.0 44.5 L 5.0 44.5 Z M 5.0 44.5 L 340.0 44.5 L 340.0 80.5 L 5.0 80.5 Z",
+  },
+  {
+    page: 255,
+    number: "014001",
+    from: "M 5.0 44.5 L 52.5 44.5 L 52.5 80.5 L 5.0 80.5 Z M 5.0 152.5 L 340.0 152.5 L 340.0 188.5 L 5.0 188.5 Z M 16.75 188.5 L 340.0 188.5 L 340.0 224.5 L 16.75 224.5 Z",
+    to: "M 5.0 152.5 L 340.0 152.5 L 340.0 188.5 L 5.0 188.5 Z M 16.75 188.5 L 340.0 188.5 L 340.0 224.5 L 16.75 224.5 Z",
+  },
+  // p440: 36:1 borrows the margin strip of 35:45's last line
+  {
+    page: 440,
+    number: "035045",
+    from: "M 5.0 12.75 L 340.0 12.75 L 340.0 84.25 L 5.0 84.25 Z M 18.75 84.25 L 340.0 84.25 L 340.0 120.0 L 18.75 120.0 Z",
+    to: "M 5.0 12.75 L 340.0 12.75 L 340.0 84.25 L 5.0 84.25 Z M 5.0 84.25 L 340.0 84.25 L 340.0 120.0 L 5.0 120.0 Z",
+  },
+  {
+    page: 440,
+    number: "036001",
+    from: "M 5.0 84.25 L 18.75 84.25 L 18.75 120.0 L 5.0 120.0 Z M 297.0 191.5 L 340.0 191.5 L 340.0 222.5 L 297.0 222.5 Z",
+    to: "M 297.0 191.5 L 340.0 191.5 L 340.0 222.5 L 297.0 222.5 Z",
+  },
+  // p467: 40:1 borrows the margin strip of 39:75's last line
+  {
+    page: 467,
+    number: "039075",
+    from: "M 5.0 15.5 L 340.0 15.5 L 340.0 51.5 L 5.0 51.5 Z M 14.25 51.5 L 340.0 51.5 L 340.0 87.5 L 14.25 87.5 Z",
+    to: "M 5.0 15.5 L 340.0 15.5 L 340.0 51.5 L 5.0 51.5 Z M 5.0 51.5 L 340.0 51.5 L 340.0 87.5 L 5.0 87.5 Z",
+  },
+  {
+    page: 467,
+    number: "040001",
+    from: "M 5.0 51.5 L 14.25 51.5 L 14.25 87.5 L 5.0 87.5 Z M 297.25 159.5 L 340.0 159.5 L 340.0 189.0 L 297.25 189.0 Z",
+    to: "M 297.25 159.5 L 340.0 159.5 L 340.0 189.0 L 297.25 189.0 Z",
+  },
+  // p515: 49:1 borrows the margin strip of 48:29's last line
+  {
+    page: 515,
+    number: "048029",
+    from: "M 5.0 9.75 L 340.0 9.75 L 340.0 189.25 L 5.0 189.25 Z M 15.5 189.25 L 340.0 189.25 L 340.0 225.0 L 15.5 225.0 Z",
+    to: "M 5.0 9.75 L 340.0 9.75 L 340.0 189.25 L 5.0 189.25 Z M 5.0 189.25 L 340.0 189.25 L 340.0 225.0 L 5.0 225.0 Z",
+  },
+  {
+    page: 515,
+    number: "049001",
+    from: "M 5.0 189.25 L 15.5 189.25 L 15.5 225.0 L 5.0 225.0 Z M 5.0 296.75 L 340.0 296.75 L 340.0 332.5 L 5.0 332.5 Z M 189.25 332.5 L 340.0 332.5 L 340.0 368.5 L 189.25 368.5 Z",
+    to: "M 5.0 296.75 L 340.0 296.75 L 340.0 332.5 L 5.0 332.5 Z M 189.25 332.5 L 340.0 332.5 L 340.0 368.5 L 189.25 368.5 Z",
+  },
   // p227: two 28.8-unit rects where the ink sets two lines of 35.96
   {
     page: 227,
@@ -236,6 +313,14 @@ const POLYGON_REPAIRS = [
     from: "M 253.05 45.89 L 340.0 45.89 L 340.0 81.89 L 253.05 81.89 Z",
     to: "M 5.0 9.89 L 340.0 9.89 L 340.0 45.89 L 5.0 45.89 Z M 253.05 45.89 L 340.0 45.89 L 340.0 81.89 L 253.05 81.89 Z",
   },
+  // p564: 68:3's left-margin box stops 8 units above its line's foot (296.49,
+  // where its line-mate reaches 304.6), so it reads as a fraction of a line
+  {
+    page: 564,
+    number: "068003",
+    from: "M 5.0 268.6 L 28.57 268.6 L 28.57 296.49 L 5.0 296.49 Z M 202.69 296.49 L 340.0 296.49 L 340.0 332.5 L 202.69 332.5 Z",
+    to: "M 5.0 268.6 L 28.57 268.6 L 28.57 304.6 L 5.0 304.6 Z M 202.69 296.49 L 340.0 296.49 L 340.0 332.5 L 202.69 332.5 Z",
+  },
   // p566: 68:43 given only its last line
   {
     page: 566,
@@ -286,6 +371,14 @@ const POLYGON_REPAIRS = [
     number: "106004",
     from: "M 5.0 180.0 L 340.0 180.0 L 340.0 184.41 L 5.0 184.41 Z M 64.1 184.41 L 340.0 184.41 L 340.0 188.81 L 64.1 188.81 Z",
     to: "M 5.0 118.52 L 125.87 118.52 L 125.87 154.52 L 5.0 154.52 Z M 64.1 154.52 L 340.0 154.52 L 340.0 190.52 L 64.1 190.52 Z",
+  },
+  // p602: 107:2's left-margin box stops 8 units above its line's foot (296.86,
+  // where its line-mate reaches 304.6), so it reads as a fraction of a line
+  {
+    page: 602,
+    number: "107002",
+    from: "M 5.0 268.6 L 124.61 268.6 L 124.61 296.86 L 5.0 296.86 Z M 262.65 296.86 L 340.0 296.86 L 340.0 332.7 L 262.65 332.7 Z",
+    to: "M 5.0 268.6 L 124.61 268.6 L 124.61 304.6 L 5.0 304.6 Z M 262.65 296.86 L 340.0 296.86 L 340.0 332.7 L 262.65 332.7 Z",
   },
   // p604: 114:6 given two 4.6-unit slivers instead of two lines
   {

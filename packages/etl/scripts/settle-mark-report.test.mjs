@@ -24,6 +24,7 @@ import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { codeFingerprint } from "./lib/grader-code.mjs";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const SCRIPT = join(HERE, "settle-mark-report.mjs");
@@ -207,6 +208,24 @@ describe("the two distances, which are two different questions", () => {
     expect(m.hand).toBeNull();
     expect(m.settled).toBeNull();
     expect(m.fault).toBe(false);
+  });
+});
+
+describe("the code that settled it, named in the ruling", () => {
+  /**
+   * `rowsFingerprint` names the input; this names the settler. A ruling carries both
+   * so a changed script re-settling the same hour reads as a different ruling, and
+   * the list of files says exactly what the hash covers.
+   */
+  it("stamps the settling script, its fingerprint and the files the fingerprint covers", () => {
+    const { code, ruling, out } = run(sit({ said: [ev(INK_IDS[0], "looks-right")] }));
+    expect(code).toBe(0);
+    const want = codeFingerprint(SCRIPT);
+    expect(ruling.code.script).toBe("packages/etl/scripts/settle-mark-report.mjs");
+    expect(ruling.code.fingerprint).toBe(want.hash);
+    expect(ruling.code.files).toEqual(want.files);
+    expect(ruling.code.files).toContain("packages/etl/scripts/lib/mark-settle.mjs");
+    expect(out).toMatch(new RegExp(`settled by packages/etl/scripts/settle-mark-report.mjs · code ${want.hash}`));
   });
 });
 

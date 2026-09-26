@@ -1,0 +1,25 @@
+{
+ "ran": "2026-09-22",
+ "from": "self-test fixture — three invented pages, see lib/self-test-io.mjs",
+ "units": "page units of the shipped page frame; add these to a claimed rectangle to correct it",
+ "shifts": [
+  {
+   "page": 1,
+   "dx": -0.7,
+   "dy": -1.05,
+   "n": 20
+  },
+  {
+   "page": 2,
+   "dx": 0.4,
+   "dy": -0.8,
+   "n": 20
+  },
+  {
+   "page": 3,
+   "dx": -1.1,
+   "dy": 0.3,
+   "n": 20
+  }
+ ]
+}

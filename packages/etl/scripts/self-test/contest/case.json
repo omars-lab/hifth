@@ -1,0 +1,9 @@
+{
+  "args": [
+    "fixture:ruling.json",
+    "--least-sure",
+    "fixture:least-sure.json"
+  ],
+  "code": 0,
+  "stdout": "expected.txt"
+}

@@ -47,8 +47,12 @@ export const STATUS_ORDER = ["confirmed", "suspected", "open", "blocked", "answe
 // as a doc bug and is not one. Extended to ㉟ on 2026-08-17, when the mark
 // registration document reached ⑳ and hit exactly that wall: the twenty circled
 // digits are one Unicode block and the next fifteen are a different one, so the
-// ceiling was the block boundary rather than any decision anybody made.
-const MARKERS = "①②③④⑤⑥⑦⑧⑨⑩⑪⑫⑬⑭⑮⑯⑰⑱⑲⑳㉑㉒㉓㉔㉕㉖㉗㉘㉙㉚㉛㉜㉝㉞㉟";
+// ceiling was the block boundary rather than any decision anybody made. Extended
+// again to ㊿ on 2026-09-03, when that same document reached ㉟ and hit the next
+// block boundary: U+325F ㉟ is the end of its block and U+32B1 ㊱ starts another,
+// so ㊱–㊿ are written out here for the same headroom-past-the-largest-register
+// reason, and for the same reason they are listed rather than ranged.
+const MARKERS = "①②③④⑤⑥⑦⑧⑨⑩⑪⑫⑬⑭⑮⑯⑰⑱⑲⑳㉑㉒㉓㉔㉕㉖㉗㉘㉙㉚㉛㉜㉝㉞㉟㊱㊲㊳㊴㊵㊶㊷㊸㊹㊺㊻㊼㊽㊾㊿";
 const ITEM = new RegExp(`^### ([${MARKERS}])\\s+(.*?)\\s+·\\s+\\*\\*(\\w+)\\*\\*\\s*$`);
 
 export function readIssues() {

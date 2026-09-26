@@ -37,6 +37,7 @@ from them, and some of it inherits their terms.
 | `apps/web/public/assets/skins/**` | **CC BY 4.0** (inherited) | quran-tajweed's |
 | `apps/web/public/assets/adj/**` | **GPL-3.0** (inherited) *and* free use with attribution (inherited) *and* **CC BY** (inherited) | The Quranic Arabic Corpus's *and* Waqar144's *and* Tanzil's |
 | `apps/web/public/assets/words/**` | **GPL-3.0-or-later** | Ours — rectangles we measured |
+| `apps/web/public/assets/marks/**` | **GPL-3.0-or-later** | Ours — rectangles we measured |
 | `apps/web/public/assets/manifest.json` | **GPL-3.0-or-later**, with one question open (below) | Ours |
 | `apps/web/public/assets/pages/**` | KFGQPC's own terms — **not ours to relicense** | KFGQPC |
 
@@ -170,6 +171,23 @@ commercially included, with no prior approval and no attribution obliged — so 
 inherits nothing that has to travel with it. The colophon credits it anyway, and `SOURCES.md`
 says in as many words that the credit is a courtesy so that a later reader does not mistake it
 for a condition, or mistake a condition for a courtesy.
+
+## Why the mark rectangles are ours too
+
+`apps/web/public/assets/marks/**` is 604 files of the same kind of thing: for every diacritic
+mark of the mus'haf, a rectangle on **our** page frame, at the place and size the app draws it.
+It shipped undeclared for the same reason the word rectangles did — nothing read the folder
+until `gate:notices` did — and this is the row it asked for.
+
+Each rectangle was measured from the KFGQPC hafs ligature drawing (`hafs-kfqc` in `SOURCES.md`):
+the placement search reads the print's own mark ink and records where the mark sits, four
+numbers to a mark. **No byte of that artwork ships** — a mark shard carries page numbers,
+indices and offsets, nothing that could redraw a glyph, and `gate:scripture` and `gate:notext`
+hold that line independently. The Complex's grant behind that print reserves commercial
+*printing* and leaves digital use — websites, software — free, obliging no attribution; Hifth
+prints nothing. The 892 marks the reader placed by hand are ours outright. So the tree inherits
+nothing that has to travel with it, and the colophon's credit to the Complex is the same
+courtesy the word row's is, not a condition.
 
 ## The manifest's one open question
 

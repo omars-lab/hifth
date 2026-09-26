@@ -157,6 +157,12 @@ table.grid caption{ text-align:left; font-size:.82rem; color:var(--dim); padding
   border-radius:0 5px 5px 0; margin:1.5rem 0 0; }
 .note p:last-child{ margin:0; }
 
+.decided{ border:1px solid var(--accent); border-left:4px solid var(--accent);
+  border-radius:10px; background:var(--tint); padding:1rem 1.2rem; margin:0 0 2rem;
+  font-size:1.02rem; color:var(--ink); }
+.decided b{ color:var(--ink); font-weight:650; }
+.decided .who{ display:block; margin-top:.5rem; color:var(--dim); font-size:.9rem; }
+
 .prior{ margin:1.25rem 0 0; max-width:64ch; }
 .prior dt{ font-family:ui-sans-serif,"Helvetica Neue",Arial,system-ui,sans-serif; font-size:.92rem;
   font-weight:650; margin-top:1.1rem; }
@@ -184,13 +190,25 @@ footer strong{ color:var(--ink); }
   </p>
   <div class="stats">
     <div><b>97%</b><span>of rectangles are badly out today</span></div>
-    <div><b>5.0%</b><span>after the recommended fix</span></div>
+    <div><b>5.0%</b><span>after the line-by-line fix H falls back to</span></div>
     <div><b>326,515</b><span>marks measured, on 604 pages</span></div>
     <div><b>4</b><span>pages nothing could measure</span></div>
   </div>
 </div>
 
 <main>
+
+  <div class="decided">
+    <b>Decided &mdash; H: put each mark where its own ink is, and line the rest up.</b>
+    Every mark whose own ink the search can find convincingly is drawn exactly on that ink &mdash;
+    not merely on its printed line, on that one letter. The words, and the minority of marks the
+    search cannot place, fall back to lining each printed line up on its own (option F below). So
+    most of the page reads as exact and the rest reads as even, instead of the whole page sitting a
+    mark's height off the way it does today.
+    <span class="who">Chosen by the owner on 3 September 2026. Every other option stays drawn below:
+    they are the reason H was a choice, and section 7 is still where the numbers say why the answer
+    did not stop at F.</span>
+  </div>
 
 <section>
   <h2><span class="num">1</span>A few words, before anything else</h2>
@@ -299,7 +317,7 @@ footer strong{ color:var(--ink); }
   var RULES = [{"id":"A","grain":"shipped","wordsStay":false,"label":"Leave the rectangles where they are"},{"id":"B","grain":"page","wordsStay":false,"label":"Line each page up as a whole"},{"id":"F","grain":"tilt","wordsStay":false,"label":"Line each line up, and let it tilt"},{"id":"G","grain":"tilt","wordsStay":true,"label":"Line the marks up, leave the words"},{"id":"I","grain":"curve","wordsStay":false,"label":"Line each line up, and let it bend"},{"id":"H","grain":"mark","wordsStay":false,"label":"Put each mark on its own ink"}];
   var MARKS = [{"b":[325.7,233.9,5.6,3.1],"o":{"page":[-0.75,-0.937],"tilt":[-1.289,-1.287],"curve":[-1.64,-1.331],"mark":[-1.687,-1.312]}},{"b":[321.4,235.9,2.1,6.1],"o":{"page":[-0.75,-0.937],"tilt":[-1.271,-1.277],"curve":[-1.574,-1.314],"mark":[-1.812,-1.312]}},{"b":[318.7,232.3,6.6,3.1],"o":{"page":[-0.75,-0.937],"tilt":[-1.269,-1.276],"curve":[-1.569,-1.313],"mark":[-1.625,-1.312]}},{"b":[313.6,226.2,4,3.9],"o":{"page":[-0.75,-0.937],"tilt":[-1.251,-1.264],"curve":[-1.502,-1.295],"mark":[-1.375,-1.312]}},{"b":[311.7,222.5,6.3,3.4],"o":{"page":[-0.75,-0.937],"tilt":[-1.248,-1.263],"curve":[-1.494,-1.293],"mark":[-1.312,-1.187]}},{"b":[306.2,230.8,4.3,3.3],"o":{"page":[-0.75,-0.937],"tilt":[-1.229,-1.251],"curve":[-1.428,-1.276],"mark":[-1.5,-1.312]}},{"b":[303.8,224.8,5.3,6.6],"o":{"page":[-0.75,-0.937],"tilt":[-1.224,-1.248],"curve":[-1.409,-1.271],"mark":[-1.375,-1.312]}},{"b":[298.3,227.6,6.3,3.4],"o":{"page":[-0.75,-0.937],"tilt":[-1.209,-1.239],"curve":[-1.36,-1.258],"mark":[-1.437,-1.312]}},{"b":[286.6,224.8,5.3,4.3],"o":{"page":[-0.75,-0.937],"tilt":[-1.173,-1.218],"curve":[-1.247,-1.227],"mark":[-1.125,-1.062]}},{"b":[281.4,224.8,4.3,3.3],"o":{"page":[-0.75,-0.937],"tilt":[-1.157,-1.207],"curve":[-1.197,-1.212],"mark":[-1.125,-1.187]}},{"b":[279.3,220.8,7,3.6],"o":{"page":[-0.75,-0.937],"tilt":[-1.154,-1.206],"curve":[-1.19,-1.211],"mark":[-1,-1.062]}},{"b":[276.9,249.4,7,3.6],"o":{"page":[-0.75,-0.937],"tilt":[-1.147,-1.202],"curve":[-1.17,-1.205],"mark":[-1.187,-1.187]}},{"b":[254.9,236.3,8.5,3.9],"o":{"page":[-0.75,-0.937],"tilt":[-1.085,-1.164],"curve":[-1.001,-1.154],"mark":[-1.125,-0.937]}},{"b":[236.9,234.3,6.3,3.4],"o":{"page":[-0.75,-0.937],"tilt":[-1.029,-1.13],"curve":[-0.87,-1.11],"mark":[-0.875,-1.187]}},{"b":[225.6,231.6,6.3,3.4],"o":{"page":[-0.75,-0.937],"tilt":[-0.996,-1.11],"curve":[-0.802,-1.086],"mark":[-0.75,-1.187]}},{"b":[218.4,230,5.3,6.6],"o":{"page":[-0.75,-0.937],"tilt":[-0.973,-1.096],"curve":[-0.76,-1.07],"mark":[-0.75,-1.187]}},{"b":[212.4,232.3,6.6,3.1],"o":{"page":[-0.75,-0.937],"tilt":[-0.958,-1.087],"curve":[-0.732,-1.059],"mark":[-0.812,-1.187]}},{"b":[208.2,226.6,3.2,4.1],"o":{"page":[-0.75,-0.937],"tilt":[-0.94,-1.076],"curve":[-0.703,-1.047],"mark":[-0.812,-1.187]}},{"b":[199.9,226.7,4,3.9],"o":{"page":[-0.75,-0.937],"tilt":[-0.917,-1.062],"curve":[-0.668,-1.031],"mark":[-0.625,-1.187]}},{"b":[197.9,223.1,6.3,3.4],"o":{"page":[-0.75,-0.937],"tilt":[-0.915,-1.061],"curve":[-0.664,-1.03],"mark":[-0.687,-1.062]}},{"b":[192.3,248.2,7,3.5],"o":{"page":[-0.75,-0.937],"tilt":[-0.899,-1.051],"curve":[-0.642,-1.02],"mark":[-0.625,-1.187]}},{"b":[175.8,231.6,5.3,6.6],"o":{"page":[-0.75,-0.937],"tilt":[-0.848,-1.021],"curve":[-0.581,-0.988],"mark":[-0.625,-1.187]}},{"b":[164.4,226.8,3.2,4.1],"o":{"page":[-0.75,-0.937],"tilt":[-0.812,-0.999],"curve":[-0.548,-0.966],"mark":[-0.625,-1.187]}},{"b":[156.8,226.1,5.3,4.3],"o":{"page":[-0.75,-0.937],"tilt":[-0.793,-0.987],"curve":[-0.533,-0.955],"mark":[-0.375,-1.062]}},{"b":[150,232.4,4.3,3.3],"o":{"page":[-0.75,-0.937],"tilt":[-0.771,-0.974],"curve":[-0.52,-0.943],"mark":[-0.375,-1.062]}},{"b":[148.1,227.7,7,3.6],"o":{"page":[-0.75,-0.937],"tilt":[-0.77,-0.973],"curve":[-0.519,-0.942],"mark":[-0.375,-1]}},{"b":[141.6,234.1,6.3,3.4],"o":{"page":[-0.75,-0.937],"tilt":[-0.749,-0.961],"curve":[-0.509,-0.931],"mark":[-0.5,-1.062]}},{"b":[133.3,234.2,7,3.6],"o":{"page":[-0.75,-0.937],"tilt":[-0.726,-0.947],"curve":[-0.501,-0.919],"mark":[-0.562,-0.812]}},{"b":[122.8,234.7,7,3.5],"o":{"page":[-0.75,-0.937],"tilt":[-0.695,-0.928],"curve":[-0.495,-0.903],"mark":[-0.75,-0.5]}},{"b":[113.3,231.2,5.3,6.6],"o":{"page":[-0.75,-0.937],"tilt":[-0.665,-0.91],"curve":[-0.496,-0.889],"mark":[-0.75,-0.5]}},{"b":[97.4,227.4,7,3.6],"o":{"page":[-0.75,-0.937],"tilt":[-0.621,-0.883],"curve":[-0.506,-0.869],"mark":[-0.687,-0.5]}},{"b":[92,231.6,5.3,6.6],"o":{"page":[-0.75,-0.937],"tilt":[-0.602,-0.872],"curve":[-0.514,-0.861],"mark":[-0.75,-0.5]}},{"b":[86.3,243,5.5,5.7],"o":{"page":[-0.75,-0.937],"tilt":[-0.586,-0.862],"curve":[-0.523,-0.854],"mark":[-0.375,-0.937]}},{"b":[78.8,234.5,7,3.6],"o":{"page":[-0.75,-0.937],"tilt":[-0.566,-0.85],"curve":[-0.536,-0.846],"mark":[-0.562,-0.5]}},{"b":[70.5,225.9,7,3.5],"o":{"page":[-0.75,-0.937],"tilt":[-0.542,-0.835],"curve":[-0.555,-0.837],"mark":[-0.5,-0.562]}},{"b":[57.2,229.3,6.3,3.4],"o":{"page":[-0.75,-0.937],"tilt":[-0.502,-0.811],"curve":[-0.595,-0.822],"mark":[-0.5,-1]}},{"b":[53.3,238.1,5.6,3.1],"o":{"page":[-0.75,-0.937],"tilt":[-0.489,-0.803],"curve":[-0.609,-0.818],"mark":[-0.562,-0.75]}},{"b":[47.3,225.9,4.3,3.3],"o":{"page":[-0.75,-0.937],"tilt":[-0.47,-0.791],"curve":[-0.633,-0.812],"mark":[-0.375,-1.062]}},{"b":[45.4,222.3,7,3.6],"o":{"page":[-0.75,-0.937],"tilt":[-0.468,-0.79],"curve":[-0.636,-0.811],"mark":[-0.312,-0.937]}},{"b":[43.4,234.6,4.4,3],"o":{"page":[-0.75,-0.937],"tilt":[-0.459,-0.785],"curve":[-0.649,-0.808],"mark":[-0.437,-0.937]}},{"b":[38,227.1,3.2,4.1],"o":{"page":[-0.75,-0.937],"tilt":[-0.441,-0.774],"curve":[-0.674,-0.803],"mark":[-0.375,-1.062]}},{"b":[25.8,231.4,7,3.6],"o":{"page":[-0.75,-0.937],"tilt":[-0.411,-0.756],"curve":[-0.722,-0.794],"mark":[-1,-0.812]}},{"b":[19.2,232.5,4.4,3],"o":{"page":[-0.75,-0.937],"tilt":[-0.388,-0.742],"curve":[-0.762,-0.788],"mark":[-1.062,-0.812]}},{"b":[7.8,229.6,5.3,6.6],"o":{"page":[-0.75,-0.937],"tilt":[-0.355,-0.722],"curve":[-0.824,-0.78],"mark":[-1,-0.812]}},{"b":[325.6,271.7,6.3,3.4],"o":{"page":[-0.75,-0.937],"tilt":[-0.554,-0.917],"curve":[-0.713,-0.694],"mark":[-0.937,-0.75]}},{"b":[319.6,262.7,4,3.9],"o":{"page":[-0.75,-0.937],"tilt":[-0.564,-0.912],"curve":[-0.697,-0.725],"mark":[-0.437,-0.812]}},{"b":[317.1,259.4,7,3.6],"o":{"page":[-0.75,-0.937],"tilt":[-0.565,-0.911],"curve":[-0.695,-0.729],"mark":[-0.375,-0.812]}},{"b":[306.7,266.9,5.3,6.6],"o":{"page":[-0.75,-0.937],"tilt":[-0.58,-0.903],"curve":[-0.673,-0.772],"mark":[-0.5,-0.75]}},{"b":[300.3,270.7,4.4,3],"o":{"page":[-0.75,-0.937],"tilt":[-0.589,-0.898],"curve":[-0.66,-0.797],"mark":[-0.625,-0.812]}},{"b":[287.6,264.7,7.8,3.7],"o":{"page":[-0.75,-0.937],"tilt":[-0.603,-0.889],"curve":[-0.643,-0.833],"mark":[-1,-0.875]}},{"b":[284.3,272.2,4.4,3],"o":{"page":[-0.75,-0.937],"tilt":[-0.61,-0.886],"curve":[-0.637,-0.848],"mark":[-0.187,-0.687]}},{"b":[266.2,270,8.5,3.9],"o":{"page":[-0.75,-0.937],"tilt":[-0.631,-0.874],"curve":[-0.619,-0.892],"mark":[-0.25,-0.687]}},{"b":[258.1,268.3,5.3,6.6],"o":{"page":[-0.75,-0.937],"tilt":[-0.644,-0.867],"curve":[-0.611,-0.913],"mark":[-1,-0.937]}},{"b":[242,267.7,7,3.5],"o":{"page":[-0.75,-0.937],"tilt":[-0.664,-0.856],"curve":[-0.603,-0.942],"mark":[-0.937,-0.937]}},{"b":[212.9,271.1,6.3,3.4],"o":{"page":[-0.75,-0.937],"tilt":[-0.703,-0.834],"curve":[-0.603,-0.975],"mark":[-1,-0.937]}},{"b":[205,262.4,7,3.6],"o":{"page":[-0.75,-0.937],"tilt":[-0.713,-0.828],"curve":[-0.606,-0.978],"mark":[-1.187,-1]}},{"b":[189.2,268.3,7.8,3.7],"o":{"page":[-0.75,-0.937],"tilt":[-0.734,-0.817],"curve":[-0.617,-0.98],"mark":[-0.812,-1]}},{"b":[176.5,262,5.3,6.6],"o":{"page":[-0.75,-0.937],"tilt":[-0.752,-0.807],"curve":[-0.632,-0.975],"mark":[-0.75,-0.937]}},{"b":[165.9,264.8,5.3,6.6],"o":{"page":[-0.75,-0.937],"tilt":[-0.766,-0.799],"curve":[-0.646,-0.967],"mark":[-0.875,-0.937]}},{"b":[159.2,263.5,3.2,4.1],"o":{"page":[-0.75,-0.937],"tilt":[-0.776,-0.793],"curve":[-0.658,-0.959],"mark":[-0.875,-0.937]}},{"b":[132.5,268.1,7.8,3.7],"o":{"page":[-0.75,-0.937],"tilt":[-0.809,-0.775],"curve":[-0.705,-0.92],"mark":[-0.5,-0.937]}},{"b":[126.1,264.2,5.3,4.3],"o":{"page":[-0.75,-0.937],"tilt":[-0.819,-0.769],"curve":[-0.723,-0.904],"mark":[-0.5,-0.937]}},{"b":[120.8,264.1,4.3,3.3],"o":{"page":[-0.75,-0.937],"tilt":[-0.826,-0.765],"curve":[-0.737,-0.891],"mark":[-0.5,-0.937]}},{"b":[119,260.4,6.3,3.4],"o":{"page":[-0.75,-0.937],"tilt":[-0.827,-0.765],"curve":[-0.739,-0.889],"mark":[-0.5,-0.812]}},{"b":[116,287.2,6.3,3.4],"o":{"page":[-0.75,-0.937],"tilt":[-0.831,-0.762],"curve":[-0.747,-0.881],"mark":[-0.75,-0.937]}},{"b":[101.9,268.9,7,3.6],"o":{"page":[-0.75,-0.937],"tilt":[-0.85,-0.752],"curve":[-0.785,-0.843],"mark":[-0.562,-0.75]}},{"b":[91,266.3,6.3,3.4],"o":{"page":[-0.75,-0.937],"tilt":[-0.865,-0.744],"curve":[-0.82,-0.807],"mark":[-0.437,-0.937]}},{"b":[80.2,261.3,5.3,6.6],"o":{"page":[-0.75,-0.937],"tilt":[-0.879,-0.736],"curve":[-0.858,-0.766],"mark":[-0.5,-0.937]}},{"b":[72.8,263.2,3.2,4.1],"o":{"page":[-0.75,-0.937],"tilt":[-0.891,-0.729],"curve":[-0.888,-0.734],"mark":[-0.5,-0.937]}},{"b":[61.6,269,8.5,3.9],"o":{"page":[-0.75,-0.937],"tilt":[-0.902,-0.723],"curve":[-0.92,-0.698],"mark":[-1.437,-0.375]}},{"b":[50.9,285.6,7.8,3.7],"o":{"page":[-0.75,-0.937],"tilt":[-0.917,-0.715],"curve":[-0.964,-0.648],"mark":[-0.312,-0.875]}},{"b":[44.9,271.7,4.4,3],"o":{"page":[-0.75,-0.937],"tilt":[-0.927,-0.709],"curve":[-0.997,-0.611],"mark":[-0.437,-0.75]}},{"b":[34.6,268.9,8.5,3.9],"o":{"page":[-0.75,-0.937],"tilt":[-0.938,-0.703],"curve":[-1.033,-0.569],"mark":[-1.5,-0.375]}},{"b":[22.5,270.2,6.3,3.4],"o":{"page":[-0.75,-0.937],"tilt":[-0.955,-0.693],"curve":[-1.094,-0.498],"mark":[-1.562,-0.312]}},{"b":[14.6,265.5,5.3,6.6],"o":{"page":[-0.75,-0.937],"tilt":[-0.966,-0.687],"curve":[-1.136,-0.449],"mark":[-1.437,-0.5]}},{"b":[8.9,276.7,4.4,3],"o":{"page":[-0.75,-0.937],"tilt":[-0.974,-0.683],"curve":[-1.167,-0.412],"mark":[-1.437,-0.375]}},{"b":[324.8,298.3,7,3.6],"o":{"page":[-0.75,-0.937],"tilt":[-1.12,-0.353],"curve":[-1.343,-0.31],"mark":[-1.437,-0.5]}},{"b":[310.2,302.6,7,3.6],"o":{"page":[-0.75,-0.937],"tilt":[-1.081,-0.381],"curve":[-1.247,-0.349],"mark":[-0.75,-0.375]}},{"b":[307.4,308.8,4.4,3],"o":{"page":[-0.75,-0.937],"tilt":[-1.07,-0.389],"curve":[-1.221,-0.359],"mark":[-1.437,-0.5]}},{"b":[292.6,306.6,7.8,3.7],"o":{"page":[-0.75,-0.937],"tilt":[-1.035,-0.414],"curve":[-1.141,-0.393],"mark":[-1.25,-0.437]}},{"b":[285,304.5,5.3,6.6],"o":{"page":[-0.75,-0.937],"tilt":[-1.011,-0.431],"curve":[-1.089,-0.415],"mark":[-1.125,-0.375]}},{"b":[269.1,303.1,6.3,3.4],"o":{"page":[-0.75,-0.937],"tilt":[-0.97,-0.46],"curve":[-1.004,-0.453],"mark":[-1.125,-0.312]}},{"b":[235,320.3,4,3.9],"o":{"page":[-0.75,-0.937],"tilt":[-0.876,-0.527],"curve":[-0.833,-0.535],"mark":[-0.75,-0.375]}},{"b":[235,324,4.9,2.6],"o":{"page":[-0.75,-0.937],"tilt":[-0.877,-0.526],"curve":[-0.835,-0.534],"mark":[-1,-0.312]}},{"b":[224.8,305.6,4.3,3.3],"o":{"page":[-0.75,-0.937],"tilt":[-0.849,-0.546],"curve":[-0.79,-0.558],"mark":[-0.75,-0.5]}},{"b":[222.7,301.7,7.8,3.7],"o":{"page":[-0.75,-0.937],"tilt":[-0.848,-0.547],"curve":[-0.789,-0.558],"mark":[-0.687,-0.562]}},{"b":[207.3,301.5,7.8,3.7],"o":{"page":[-0.75,-0.937],"tilt":[-0.807,-0.576],"curve":[-0.729,-0.592],"mark":[-0.75,-0.562]}},{"b":[199.2,309.5,4.3,3.3],"o":{"page":[-0.75,-0.937],"tilt":[-0.78,-0.595],"curve":[-0.693,-0.612],"mark":[-0.75,-0.562]}},{"b":[196.9,305.4,7.8,3.7],"o":{"page":[-0.75,-0.937],"tilt":[-0.779,-0.596],"curve":[-0.691,-0.613],"mark":[-0.75,-0.5]}},{"b":[190,299.3,5.3,4.3],"o":{"page":[-0.75,-0.937],"tilt":[-0.757,-0.612],"curve":[-0.664,-0.63],"mark":[-0.5,-0.812]}},{"b":[180.8,304.3,4.3,3.3],"o":{"page":[-0.75,-0.937],"tilt":[-0.731,-0.63],"curve":[-0.634,-0.649],"mark":[-0.625,-0.5]}},{"b":[178.1,300,7.8,3.7],"o":{"page":[-0.75,-0.937],"tilt":[-0.729,-0.632],"curve":[-0.631,-0.651],"mark":[-0.437,-0.687]}},{"b":[169,304.5,7,3.6],"o":{"page":[-0.75,-0.937],"tilt":[-0.703,-0.65],"curve":[-0.604,-0.67],"mark":[-0.687,-0.5]}},{"b":[162.6,299.4,6.6,3.1],"o":{"page":[-0.75,-0.937],"tilt":[-0.685,-0.663],"curve":[-0.586,-0.682],"mark":[-0.437,-0.812]}},{"b":[155.4,308,4.3,3.3],"o":{"page":[-0.75,-0.937],"tilt":[-0.663,-0.679],"curve":[-0.566,-0.698],"mark":[-0.75,-0.5]}},{"b":[155.3,323.9,7,3.6],"o":{"page":[-0.75,-0.937],"tilt":[-0.666,-0.676],"curve":[-0.569,-0.695],"mark":[-0.75,-0.5]}},{"b":[140.6,320,7,3.6],"o":{"page":[-0.75,-0.937],"tilt":[-0.627,-0.705],"curve":[-0.537,-0.722],"mark":[-0.5,-0.75]}},{"b":[122.3,303.9,7,3.6],"o":{"page":[-0.75,-0.937],"tilt":[-0.578,-0.739],"curve":[-0.505,-0.754],"mark":[-0.437,-0.937]}},{"b":[112.4,298.5,5.3,4.3],"o":{"page":[-0.75,-0.937],"tilt":[-0.549,-0.76],"curve":[-0.49,-0.772],"mark":[-0.5,-0.937]}},{"b":[105.9,303.6,4.3,3.3],"o":{"page":[-0.75,-0.937],"tilt":[-0.531,-0.773],"curve":[-0.482,-0.783],"mark":[-0.625,-1.062]}},{"b":[103.4,299,7.8,3.7],"o":{"page":[-0.75,-0.937],"tilt":[-0.529,-0.775],"curve":[-0.481,-0.784],"mark":[-0.437,-0.937]}},{"b":[97.7,320.7,6.3,3.4],"o":{"page":[-0.75,-0.937],"tilt":[-0.511,-0.787],"curve":[-0.475,-0.794],"mark":[-0.5,-0.875]}},{"b":[90.9,298.9,5.3,4.3],"o":{"page":[-0.75,-0.937],"tilt":[-0.492,-0.801],"curve":[-0.469,-0.805],"mark":[-0.375,-0.937]}},{"b":[78.1,306.1,4.3,3.3],"o":{"page":[-0.75,-0.937],"tilt":[-0.456,-0.826],"curve":[-0.462,-0.825],"mark":[-0.5,-0.937]}},{"b":[76.1,299.3,5.3,6.6],"o":{"page":[-0.75,-0.937],"tilt":[-0.452,-0.829],"curve":[-0.462,-0.827],"mark":[-0.375,-0.937]}},{"b":[63.2,307.4,4.3,3.3],"o":{"page":[-0.75,-0.937],"tilt":[-0.416,-0.855],"curve":[-0.46,-0.846],"mark":[-0.5,-0.875]}},{"b":[61.2,300.1,5.3,6.6],"o":{"page":[-0.75,-0.937],"tilt":[-0.412,-0.858],"curve":[-0.46,-0.848],"mark":[-0.5,-0.937]}},{"b":[54.2,299.7,5.3,4.3],"o":{"page":[-0.75,-0.937],"tilt":[-0.394,-0.871],"curve":[-0.461,-0.858],"mark":[-0.375,-0.812]}},{"b":[48.9,299.5,4.4,3],"o":{"page":[-0.75,-0.937],"tilt":[-0.378,-0.882],"curve":[-0.463,-0.866],"mark":[-0.375,-0.812]}},{"b":[44.8,305.4,5.3,6.6],"o":{"page":[-0.75,-0.937],"tilt":[-0.368,-0.889],"curve":[-0.465,-0.87],"mark":[-0.562,-0.687]}},{"b":[20.7,302.6,4.4,3],"o":{"page":[-0.75,-0.937],"tilt":[-0.303,-0.936],"curve":[-0.485,-0.901],"mark":[-0.375,-0.812]}},{"b":[10.6,305.1,5.3,6.6],"o":{"page":[-0.75,-0.937],"tilt":[-0.277,-0.954],"curve":[-0.498,-0.912],"mark":[-0.625,-0.687]}},{"b":[61.5,329.1,7.8,3.7],"o":{"page":[-0.75,-0.937],"tilt":[-0.511,-0.941],"curve":[-0.487,-0.928],"mark":[-0.562,-0.812]}}];
   var WORDS = [{"b":[94.3,197.6,15.7,26.6],"o":{"page":[-0.75,-0.937],"tilt":[-0.933,-1.13],"curve":[-0.944,-1.132],"mark":[-0.933,-1.13]}},{"b":[295,222.5,36.8,28.5],"o":{"page":[-0.75,-0.937],"tilt":[-1.244,-1.26],"curve":[-1.479,-1.29],"mark":[-1.244,-1.26]}},{"b":[247.3,220.8,44.6,32.1],"o":{"page":[-0.75,-0.937],"tilt":[-1.116,-1.183],"curve":[-1.081,-1.178],"mark":[-1.116,-1.183]}},{"b":[208.2,226.6,36.2,26.2],"o":{"page":[-0.75,-0.937],"tilt":[-0.989,-1.106],"curve":[-0.788,-1.081],"mark":[-0.989,-1.106]}},{"b":[164,223.1,40.8,30.4],"o":{"page":[-0.75,-0.937],"tilt":[-0.866,-1.031],"curve":[-0.601,-0.998],"mark":[-0.866,-1.031]}},{"b":[141.6,226.1,20.5,22.4],"o":{"page":[-0.75,-0.937],"tilt":[-0.77,-0.973],"curve":[-0.519,-0.942],"mark":[-0.77,-0.973]}},{"b":[128.8,234.2,11.6,18.3],"o":{"page":[-0.75,-0.937],"tilt":[-0.72,-0.943],"curve":[-0.499,-0.915],"mark":[-0.72,-0.943]}},{"b":[86.3,227.4,43.5,25.5],"o":{"page":[-0.75,-0.937],"tilt":[-0.642,-0.896],"curve":[-0.5,-0.878],"mark":[-0.642,-0.896]}},{"b":[74.9,234.5,11,17.7],"o":{"page":[-0.75,-0.937],"tilt":[-0.561,-0.846],"curve":[-0.54,-0.844],"mark":[-0.561,-0.846]}},{"b":[65.5,225.9,12,22.2],"o":{"page":[-0.75,-0.937],"tilt":[-0.534,-0.831],"curve":[-0.562,-0.834],"mark":[-0.534,-0.831]}},{"b":[38,222.3,25.5,31.1],"o":{"page":[-0.75,-0.937],"tilt":[-0.474,-0.794],"curve":[-0.628,-0.813],"mark":[-0.474,-0.794]}},{"b":[7.1,229.6,28.6,18.7],"o":{"page":[-0.75,-0.937],"tilt":[-0.388,-0.742],"curve":[-0.762,-0.788],"mark":[-0.388,-0.742]}},{"b":[321.5,271.7,10.4,17.1],"o":{"page":[-0.75,-0.937],"tilt":[-0.557,-0.915],"curve":[-0.708,-0.703],"mark":[-0.557,-0.915]}},{"b":[295.2,259.4,29,28.3],"o":{"page":[-0.75,-0.937],"tilt":[-0.579,-0.903],"curve":[-0.673,-0.771],"mark":[-0.579,-0.903]}},{"b":[241.5,264.7,54.2,25.3],"o":{"page":[-0.75,-0.937],"tilt":[-0.634,-0.873],"curve":[-0.617,-0.896],"mark":[-0.634,-0.873]}},{"b":[209,271.1,10.2,17.7],"o":{"page":[-0.75,-0.937],"tilt":[-0.706,-0.832],"curve":[-0.604,-0.976],"mark":[-0.706,-0.832]}},{"b":[199.4,262.4,12.6,22.5],"o":{"page":[-0.75,-0.937],"tilt":[-0.717,-0.826],"curve":[-0.608,-0.979],"mark":[-0.717,-0.826]}},{"b":[159.2,261.5,39.6,28.4],"o":{"page":[-0.75,-0.937],"tilt":[-0.752,-0.806],"curve":[-0.632,-0.975],"mark":[-0.752,-0.806]}},{"b":[101,260.4,58.9,30.2],"o":{"page":[-0.75,-0.937],"tilt":[-0.816,-0.771],"curve":[-0.719,-0.908],"mark":[-0.816,-0.771]}},{"b":[72.8,261.3,24.5,27.9],"o":{"page":[-0.75,-0.937],"tilt":[-0.877,-0.737],"curve":[-0.85,-0.775],"mark":[-0.877,-0.737]}},{"b":[30.9,267.6,41.9,21.7],"o":{"page":[-0.75,-0.937],"tilt":[-0.92,-0.713],"curve":[-0.976,-0.634],"mark":[-0.92,-0.713]}},{"b":[18.7,270.2,10.1,18.9],"o":{"page":[-0.75,-0.937],"tilt":[-0.958,-0.692],"curve":[-1.104,-0.487],"mark":[-0.958,-0.692]}},{"b":[7.1,265.5,14.8,24.3],"o":{"page":[-0.75,-0.937],"tilt":[-0.97,-0.685],"curve":[-1.15,-0.433],"mark":[-0.97,-0.685]}},{"b":[319.2,298.3,12.6,21.8],"o":{"page":[-0.75,-0.937],"tilt":[-1.113,-0.358],"curve":[-1.324,-0.317],"mark":[-1.113,-0.358]}},{"b":[268.7,302.6,50.8,23.2],"o":{"page":[-0.75,-0.937],"tilt":[-1.029,-0.418],"curve":[-1.127,-0.399],"mark":[-1.029,-0.418]}},{"b":[239.2,311.3,7.4,7.2],"o":{"page":[-0.75,-0.937],"tilt":[-0.892,-0.516],"curve":[-0.86,-0.522],"mark":[-0.892,-0.516]}},{"b":[222.7,301.7,17.2,24.8],"o":{"page":[-0.75,-0.937],"tilt":[-0.861,-0.538],"curve":[-0.809,-0.548],"mark":[-0.861,-0.538]}},{"b":[193.3,301.5,25.6,22.9],"o":{"page":[-0.75,-0.937],"tilt":[-0.793,-0.586],"curve":[-0.71,-0.602],"mark":[-0.793,-0.586]}},{"b":[151.2,299.3,44.1,28.1],"o":{"page":[-0.75,-0.937],"tilt":[-0.705,-0.649],"curve":[-0.606,-0.668],"mark":[-0.705,-0.649]}},{"b":[122,303.9,25.7,19.7],"o":{"page":[-0.75,-0.937],"tilt":[-0.602,-0.722],"curve":[-0.519,-0.738],"mark":[-0.602,-0.722]}},{"b":[97.7,298.5,20.3,25.6],"o":{"page":[-0.75,-0.937],"tilt":[-0.53,-0.774],"curve":[-0.481,-0.783],"mark":[-0.53,-0.774]}},{"b":[58.7,298.9,37.5,26],"o":{"page":[-0.75,-0.937],"tilt":[-0.449,-0.832],"curve":[-0.461,-0.829],"mark":[-0.449,-0.832]}},{"b":[7.1,299.5,52.4,24.7],"o":{"page":[-0.75,-0.937],"tilt":[-0.331,-0.916],"curve":[-0.475,-0.888],"mark":[-0.331,-0.916]}},{"b":[7.1,329.1,62.2,31.2],"o":{"page":[-0.75,-0.937],"tilt":[-0.486,-0.947],"curve":[-0.386,-0.893],"mark":[-0.486,-0.947]}},{"b":[9.4,328.9,8.8,6.9],"o":{"page":[-0.75,-0.937],"tilt":[-0.464,-0.953],"curve":[-0.281,-0.853],"mark":[-0.464,-0.953]}}];
-  var CAPS = {"A":"Every box sits where the app puts it today — noticeably off the letter, the same way on nearly every line.","B":"One correction for the whole page. Most boxes tighten; the top and bottom lines stay a little off.","F":"The recommendation. Each line lined up on its own and allowed to tilt — boxes sit on their letters, start to finish.","G":"The marks move like F; the word outlines stay on today's fit — so a mark lands right while its word does not.","I":"Like F, but each line's correction may bend. A shade fewer whole-line misses; the ends of a line are still the weak spot.","H":"Each mark the ink search placed goes onto its own ink — watch a box land exactly on the dashed outline. The rest fall back to F."};
+  var CAPS = {"A":"Every box sits where the app puts it today — noticeably off the letter, the same way on nearly every line.","B":"One correction for the whole page. Most boxes tighten; the top and bottom lines stay a little off.","F":"Each line lined up on its own and allowed to tilt — boxes sit on their letters, start to finish. Where H cannot place a mark, this is what it falls back to.","G":"The marks move like F; the word outlines stay on today's fit — so a mark lands right while its word does not.","I":"Like F, but each line's correction may bend. A shade fewer whole-line misses; the ends of a line are still the weak spot.","H":"Each mark the ink search placed goes onto its own ink — watch a box land exactly on the dashed outline. The rest fall back to F."};
   function placeBy(b, off) {
     if (!off)
         return [b[0], b[1], b[2], b[3]];
@@ -486,7 +504,7 @@ footer strong{ color:var(--ink); }
   <div class="cost">
     <div><h4>What it does</h4><p>Nothing changes. The rectangle for every mark and every word stays where the fit on the verse-end circles put it.</p></div>
     <div><h4>What a reader would notice</h4><p>A reader sees what they see today: a highlight or a tap-target that sits noticeably off the letter it is meant to be on, on nearly every line, in the same direction every time. It does not wobble or vary page to page — it is a steady, learnable offset, which is exactly why it reads as &quot;the app is a bit off&quot; rather than as a glitch.</p></div>
-    <div><h4>Rectangles badly out</h4><p><b class="big">96.44%</b> <span class="dim">[96.35, 96.53]</span><br><span class="dim small">measured on marks the correction was not worked out from</span></p></div>
+    <div><h4>Rectangles badly out</h4><p><b class="big">96.45%</b> <span class="dim">[96.36, 96.54]</span><br><span class="dim small">measured on marks the correction was not worked out from</span></p></div>
     <div><h4>On this page</h4><p><b class="big">98.7%</b><br><span class="dim small">of 536 marks further than 0.75 of a unit from their own ink</span></p></div>
   </div>
 </article>
@@ -514,14 +532,14 @@ footer strong{ color:var(--ink); }
   <div class="cost">
     <div><h4>What it does</h4><p>Every rectangle on a page moves together, by one amount worked out from that page's own marks.</p></div>
     <div><h4>What a reader would notice</h4><p>The offset shrinks a lot on most lines but does not disappear, because one correction is being asked to fit every line on the page and most pages are not printed with every line in exactly the same place. A reader would likely still notice marks sitting slightly off on some lines, especially near the top or bottom of the page, even though the page as a whole looks visibly better aligned than today.</p></div>
-    <div><h4>Rectangles badly out</h4><p><b class="big">18.20%</b> <span class="dim">[18.02, 18.39]</span><br><span class="dim small">measured on marks the correction was not worked out from</span></p></div>
+    <div><h4>Rectangles badly out</h4><p><b class="big">18.23%</b> <span class="dim">[18.04, 18.42]</span><br><span class="dim small">measured on marks the correction was not worked out from</span></p></div>
     <div><h4>On this page</h4><p><b class="big">16.0%</b><br><span class="dim small">of 536 marks further than 0.75 of a unit from their own ink</span></p></div>
   </div>
 </article>
 <article class="opt" id="option-F">
   <header class="opt-h">
     <h3>F — Line each printed line up on its own, and let it tilt</h3>
-    <p class="tag">the recommendation — four more numbers a line</p>
+    <p class="tag">the line-by-line fix — four more numbers a line, and where H falls back</p>
   </header>
   <figure class="spec " style="--ar:32.1277%">
   <div class="win">
@@ -542,7 +560,7 @@ footer strong{ color:var(--ink); }
   <div class="cost">
     <div><h4>What it does</h4><p>Each printed line gets its own amount, and that amount is allowed to grow along the line rather than being the same at both ends. Marks and words move together.</p></div>
     <div><h4>What a reader would notice</h4><p>A reader tapping or reading along nearly any single line would see the highlight sit on the right letter, start to finish. The visible exceptions are concentrated: whole lines that still read as a little off, and the two ends of a line reading worse than its middle — so an occasional line, or the first/last word of a line, is where a mismatch would still show up.</p></div>
-    <div><h4>Rectangles badly out</h4><p><b class="big">4.95%</b> <span class="dim">[4.84, 5.05]</span><br><span class="dim small">measured on marks the correction was not worked out from</span></p></div>
+    <div><h4>Rectangles badly out</h4><p><b class="big">5.00%</b> <span class="dim">[4.90, 5.11]</span><br><span class="dim small">measured on marks the correction was not worked out from</span></p></div>
     <div><h4>On this page</h4><p><b class="big">3.4%</b><br><span class="dim small">of 536 marks further than 0.75 of a unit from their own ink</span></p></div>
   </div>
 </article>
@@ -570,7 +588,7 @@ footer strong{ color:var(--ink); }
   <div class="cost">
     <div><h4>What it does</h4><p>The same per-line correction, applied only to the marks. Word rectangles stay on the fit they ship on today.</p></div>
     <div><h4>What a reader would notice</h4><p>Wherever the app highlights a single mark, it looks the same as option F — sitting on the right letter. But anything that outlines or reacts to a whole word — tapping a word, a word-level highlight — still shows today's offset, so a reader who taps a word right after seeing a mark land correctly would notice the two behaving differently.</p></div>
-    <div><h4>Rectangles badly out</h4><p><b class="big">4.95%</b> <span class="dim">[4.84, 5.05]</span><br><span class="dim small">measured on marks the correction was not worked out from</span></p></div>
+    <div><h4>Rectangles badly out</h4><p><b class="big">5.00%</b> <span class="dim">[4.90, 5.11]</span><br><span class="dim small">measured on marks the correction was not worked out from</span></p></div>
     <div><h4>On this page</h4><p><b class="big">3.4%</b><br><span class="dim small">of 536 marks further than 0.75 of a unit from their own ink</span></p></div>
   </div>
 </article>
@@ -598,14 +616,14 @@ footer strong{ color:var(--ink); }
   <div class="cost">
     <div><h4>What it does</h4><p>The same as F, except the amount is allowed to bend along the line rather than only grow at a steady rate. Marks and words move together.</p></div>
     <div><h4>What a reader would notice</h4><p>Close to F in what a reader would see day to day — marks sitting on their letters along almost every line — with fewer of the whole-line misses F still leaves behind. The two ends of a line are still the likeliest place to notice anything off; bending the correction does not reach that particular pattern any better than tilting it does.</p></div>
-    <div><h4>Rectangles badly out</h4><p><b class="big">4.12%</b> <span class="dim">[4.02, 4.22]</span><br><span class="dim small">measured on marks the correction was not worked out from</span></p></div>
+    <div><h4>Rectangles badly out</h4><p><b class="big">4.18%</b> <span class="dim">[4.08, 4.28]</span><br><span class="dim small">measured on marks the correction was not worked out from</span></p></div>
     <div><h4>On this page</h4><p><b class="big">3.0%</b><br><span class="dim small">of 536 marks further than 0.75 of a unit from their own ink</span></p></div>
   </div>
 </article>
 <article class="opt" id="option-H">
   <header class="opt-h">
     <h3>H — Put each mark where its own ink is, and line up the rest</h3>
-    <p class="tag">the most accurate — and the one this measurement cannot grade</p>
+    <p class="tag">the option the owner chose — most accurate, and the one this measurement cannot grade</p>
   </header>
   <figure class="spec " style="--ar:32.1277%">
   <div class="win">
@@ -625,26 +643,26 @@ footer strong{ color:var(--ink); }
 </figure>
   <div class="cost">
     <div><h4>What it does</h4><p>Every mark whose ink was found convincingly goes exactly where it was found. The rest — and every word rectangle — get the per-line correction instead.</p></div>
-    <div><h4>What a reader would notice</h4><p>For most marks, a reader would see the highlight sit exactly on the letter's own ink — not merely on the line, on that letter. A minority of marks (the ones the search could not place convincingly) and every word behave like option F instead, so the experience is not perfectly uniform: most of the page looks exact, and the rest looks like the recommendation above.</p></div>
-    <div><h4>Rectangles badly out</h4><p><b class="big">0.42%</b><br><span class="dim small">counting only the 0.6% it would not place from ink — the rest sit on the measurement and cannot be graded by it</span></p></div>
-    <div><h4>Placed from the mark's own ink</h4><p><b class="big">99.4%</b><br><span class="dim small">1,877 marks fall back to the printed line: 730 where the search ran out of room and 1,210 where it found nothing convincing</span></p></div>
+    <div><h4>What a reader would notice</h4><p>For most marks, a reader would see the highlight sit exactly on the letter's own ink — not merely on the line, on that letter. A minority of marks (the ones the search could not place convincingly) and every word behave like option F instead, so the experience is not perfectly uniform: most of the page looks exact, and the rest looks like option F above.</p></div>
+    <div><h4>Rectangles badly out</h4><p><b class="big">0.11%</b><br><span class="dim small">counting only the 0.2% it would not place from ink — the rest sit on the measurement and cannot be graded by it</span></p></div>
+    <div><h4>Placed from the mark's own ink</h4><p><b class="big">99.8%</b><br><span class="dim small">668 marks fall back to the printed line: 370 where the search ran out of room and 329 where it found nothing convincing</span></p></div>
   </div>
 </article>
   <div class="note">
     <p>
-      <strong>F still carries the word &ldquo;recommended&rdquo; and I is the better option on every
-      number here. That is not an oversight.</strong> I was worked out after this page was written,
-      by asking what the rectangles F leaves badly out have in common — and the answer was each
-      other: more than half of them sit on the one printed line in fifteen that has gone wrong as a
-      whole, and a rectangle at either end of a line is about twice as likely to be badly out as one
-      in the middle. A correction that can only grow at a steady rate cannot follow that, because a
-      rate that splits the difference is wrong in the same direction at both ends. Letting it bend is
-      the whole of option I, and it costs one more number a line.
+      <strong>Among the line-by-line fixes, I is the better one on every number here.</strong> It was
+      worked out after this page was first written, by asking what the rectangles F leaves badly out
+      have in common — and the answer was each other: more than half of them sit on the one printed
+      line in fifteen that has gone wrong as a whole, and a rectangle at either end of a line is about
+      twice as likely to be badly out as one in the middle. A correction that can only grow at a steady
+      rate cannot follow that, because a rate that splits the difference is wrong in the same direction
+      at both ends. Letting it bend is the whole of option I, and it costs one more number a line.
     </p>
     <p>
-      Moving the recommendation is the decision this page exists to ask for, so the page does not
-      quietly move it. What the page can do is put the two side by side and say which way the numbers
-      point, which is what section 7 does.
+      The owner chose H, which sits above all of these line-by-line fixes: it puts each mark it can
+      place onto that mark's own ink, and falls back to a line-by-line fix only where it cannot. So
+      the choice between F and I is now the choice of what H falls back to — I is the stronger
+      fallback, and section 7 is where the numbers say so.
     </p>
   </div>
 </section>
@@ -669,50 +687,50 @@ footer strong{ color:var(--ink); }
     <tbody>
       <tr>
   <td>A — as it ships</td>
-  <td class="n">96.44%</td>
-  <td class="n">96.35 – 96.53</td>
+  <td class="n">96.45%</td>
+  <td class="n">96.36 – 96.54</td>
   <td class="n">1.23</td>
-  <td class="n">2.49</td>
-  <td class="n">96.39%</td>
+  <td class="n">2.50</td>
+  <td class="n">96.40%</td>
 </tr>
       <tr>
   <td>B — each page</td>
-  <td class="n">18.20%</td>
-  <td class="n">18.02 – 18.39</td>
+  <td class="n">18.23%</td>
+  <td class="n">18.04 – 18.42</td>
   <td class="n">0.40</td>
   <td class="n">1.34</td>
-  <td class="n">18.05%</td>
+  <td class="n">18.07%</td>
 </tr>
       <tr>
   <td>E — each printed line, no tilt</td>
-  <td class="n">11.84%</td>
-  <td class="n">11.68 – 12.00</td>
+  <td class="n">11.83%</td>
+  <td class="n">11.68 – 11.99</td>
   <td class="n">0.31</td>
   <td class="n">1.01</td>
-  <td class="n">9.91%</td>
+  <td class="n">9.88%</td>
 </tr>
       <tr>
   <td>F and G — each line, tilted</td>
-  <td class="n">4.95%</td>
-  <td class="n">4.84 – 5.05</td>
+  <td class="n">5.00%</td>
+  <td class="n">4.90 – 5.11</td>
   <td class="n">0.22</td>
   <td class="n">0.75</td>
-  <td class="n">3.49%</td>
+  <td class="n">3.48%</td>
 </tr>
       <tr>
   <td>I — each line, bent</td>
-  <td class="n">4.12%</td>
-  <td class="n">4.02 – 4.22</td>
+  <td class="n">4.18%</td>
+  <td class="n">4.08 – 4.28</td>
   <td class="n">0.20</td>
   <td class="n">0.69</td>
-  <td class="n">2.34%</td>
+  <td class="n">2.35%</td>
 </tr>
       <tr class="aside">
-  <td>H — each mark, where its own ink is<span class="dim small"><br>on the 0.6% it hands back to the printed line</span></td>
-  <td class="n">0.42%</td>
+  <td>H — each mark, where its own ink is<span class="dim small"><br>on the 0.2% it hands back to the printed line</span></td>
+  <td class="n">0.11%</td>
   <td class="n">—</td>
-  <td class="n">1.55</td>
-  <td class="n">4.71</td>
+  <td class="n">0.83</td>
+  <td class="n">3.78</td>
   <td class="n">—</td>
 </tr>
     </tbody>
@@ -723,10 +741,10 @@ footer strong{ color:var(--ink); }
       Every other row is graded by holding half of each page's marks back and marking the
       correction on marks it never saw. H has nothing to hold back: each mark carries its own two
       numbers, so there is no second half of anything. What the row does state is the part of H
-      that is a model — the 1,877 marks it refuses to
+      that is a model — the 668 marks it refuses to
       place from ink and hands to the printed line instead, which is
-      0.6% of the mus'haf and where all of its remaining
-      error lives. The other 99.4% sit exactly on the ink they were
+      0.2% of the mus'haf and where all of its remaining
+      error lives. The other 99.8% sit exactly on the ink they were
       measured against, so their score is zero by construction and means nothing at all. That is
       the trade this option asks you to accept: far fewer rectangles out of place, and no way for
       this instrument to prove it. Section 12 says what could.
@@ -734,7 +752,7 @@ footer strong{ color:var(--ink); }
     <p>
       <strong>The control that makes this a finding rather than a bigger model.</strong> Give every
       printed line <em>another</em> line's correction, chosen at random, and grade it on the same
-      unseen half: 32.7% of rectangles are badly out — worse than
+      unseen half: 32.9% of rectangles are badly out — worse than
       applying no per-line correction at all, and
       7 times worse than the real one. So the
       per-line figures are not what any correction with that many knobs would have given. The last
@@ -746,7 +764,7 @@ footer strong{ color:var(--ink); }
     <p>
       <strong>The same control, run again on the bent line.</strong> A bend has one more number a
       line to be wrong with, so it is where that objection bites hardest. Wearing another line's bend
-      leaves 34.4% badly out — worse again than wearing another
+      leaves 34.5% badly out — worse again than wearing another
       line's tilt, and far worse than correcting nothing per-line at all. A shape freer still, one
       allowed to change direction twice along a line rather than bend once, was worked out the same
       way and refused: it does better on the marks it was worked out from and worse on the marks it
@@ -782,7 +800,7 @@ footer strong{ color:var(--ink); }
   </div><div class="bh">
     <h3>F</h3>
     <p class="bt">Line each printed line up on its own, and let it tilt</p>
-    <p class="bv">the recommendation</p>
+    <p class="bv">the line-by-line fix, and where H falls back</p>
   </div><div class="bh">
     <h3>G</h3>
     <p class="bt">Line the marks up, and leave the words where they are</p>
@@ -798,27 +816,27 @@ footer strong{ color:var(--ink); }
   </div>
   <div class="tc lbl">How wrong it leaves things</div>
   <div class="tc bar-cell">
-    <b>96.4<span class="pc">%</span></b>
-    <div class="bar"><i style="width:96.44%"></i></div>
+    <b>96.5<span class="pc">%</span></b>
+    <div class="bar"><i style="width:96.45%"></i></div>
     <span>of rectangles land badly out</span>
   </div><div class="tc bar-cell">
     <b>18.2<span class="pc">%</span></b>
-    <div class="bar"><i style="width:18.20%"></i></div>
+    <div class="bar"><i style="width:18.23%"></i></div>
     <span>of rectangles land badly out</span>
   </div><div class="tc bar-cell">
     <b>5.0<span class="pc">%</span></b>
-    <div class="bar"><i style="width:4.95%"></i></div>
+    <div class="bar"><i style="width:5.00%"></i></div>
     <span>of rectangles land badly out</span>
   </div><div class="tc bar-cell">
     <b>5.0<span class="pc">%</span></b>
-    <div class="bar"><i style="width:4.95%"></i></div>
+    <div class="bar"><i style="width:5.00%"></i></div>
     <span>of rectangles land badly out</span>
   </div><div class="tc bar-cell">
-    <b>4.1<span class="pc">%</span></b>
-    <div class="bar"><i style="width:4.12%"></i></div>
+    <b>4.2<span class="pc">%</span></b>
+    <div class="bar"><i style="width:4.18%"></i></div>
     <span>of rectangles land badly out</span>
   </div><div class="tc bar-cell">
-    <b>0.4<span class="pc">%</span></b>
+    <b>0.1<span class="pc">%</span></b>
     <div class="bar"><i style="width:0.80%"></i></div>
     <span>of rectangles land badly out — counting only the ones it will not place from ink</span>
   </div>
@@ -867,7 +885,7 @@ footer strong{ color:var(--ink); }
          style="width:104.8632%;height:520.3406%;left:-2.4316%;top:-210.5014%">
     <svg class="ov" viewBox="8 222.5 329.0 105.7" aria-hidden="true"><circle cx="194.2" cy="100.3" r="2.6" fill="none" stroke="#d55e00" stroke-width="0.3"/><circle cx="193.54" cy="99.41" r="1.1" fill="#0072b2" fill-opacity="0.85"/><circle cx="252.8" cy="135.7" r="2.6" fill="none" stroke="#d55e00" stroke-width="0.3"/><circle cx="252.12" cy="134.45" r="1.1" fill="#0072b2" fill-opacity="0.85"/><circle cx="15.3" cy="207.2" r="2.6" fill="none" stroke="#d55e00" stroke-width="0.3"/><circle cx="14.38" cy="206.22" r="1.1" fill="#0072b2" fill-opacity="0.85"/><circle cx="229.9" cy="278.9" r="2.6" fill="none" stroke="#d55e00" stroke-width="0.3"/><circle cx="229.19" cy="278.04" r="1.1" fill="#0072b2" fill-opacity="0.85"/><circle cx="256.6" cy="313.9" r="2.6" fill="none" stroke="#d55e00" stroke-width="0.3"/><circle cx="255.74" cy="313.46" r="1.1" fill="#0072b2" fill-opacity="0.85"/><circle cx="212.2" cy="350.7" r="2.6" fill="none" stroke="#d55e00" stroke-width="0.3"/><circle cx="211.63" cy="349.72" r="1.1" fill="#0072b2" fill-opacity="0.85"/><circle cx="106.1" cy="386" r="2.6" fill="none" stroke="#d55e00" stroke-width="0.3"/><circle cx="105.49" cy="385.22" r="1.1" fill="#0072b2" fill-opacity="0.85"/><circle cx="253.8" cy="494.4" r="2.6" fill="none" stroke="#d55e00" stroke-width="0.3"/><circle cx="252.99" cy="493.47" r="1.1" fill="#0072b2" fill-opacity="0.85"/><circle cx="15" cy="529" r="2.6" fill="none" stroke="#d55e00" stroke-width="0.3"/><circle cx="14.40" cy="528.23" r="1.1" fill="#0072b2" fill-opacity="0.85"/></svg>
   </div>
-  <figcaption>F — the same circles, after the recommended correction. They no longer do.</figcaption>
+  <figcaption>F — the same circles, after a line-by-line correction. They no longer do.</figcaption>
 </figure>
   </div>
   <p>
@@ -912,8 +930,8 @@ footer strong{ color:var(--ink); }
       nearest one that <em>looks the same</em> is 24.8, against a search that
       reaches 3 and an error near one. Across all
       326,515 marks the search ends up nearer some other mark
-      1.08% of the time and nearer an identical-looking one
-      0.01% — 47 marks in the whole mus'haf.
+      1.15% of the time and nearer an identical-looking one
+      0.06% — 182 marks in the whole mus'haf.
       <strong>What the measuring did refuse is different.</strong> Where the ink match is poor the
       search is chasing noise rather than finding a mark, and a search that stops at the edge of the
       distance it was allowed has not found anything at all — it has run out of room. Option H is
@@ -1021,6 +1039,6 @@ footer strong{ color:var(--ink); }
     <code>docs/design/mark-registration.md</code>. Page 179 was chosen because its numbers sit
     at the middle of all 604 measured pages on every option, not at either end. The print is
     <code>assets/pages/hafs-kfqc/179.svg</code>: outlined shapes only, no text. Measured
-    2026-08-15.
+    2026-09-04.
   </p>
 </footer>

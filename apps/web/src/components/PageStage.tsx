@@ -5,6 +5,7 @@ import {
   useImperativeHandle,
   useRef,
   useState,
+  type ReactNode,
   type RefObject,
 } from "react";
 import { createPortal } from "react-dom";
@@ -190,6 +191,13 @@ interface PageStageProps {
    */
   tajweedLookup?: TajweedLookup | null;
   /**
+   * Things that sit on the leaf rather than in it — today the reader's bookmark
+   * ribbons. Drawn over the layer and outside the pan/zoom transform, so a ribbon
+   * stays hanging from the head of the page however the text is magnified. The
+   * overlay stops its own presses reaching the stage's gestures.
+   */
+  overlay?: ReactNode;
+  /**
    * Where to draw the fold, when this stage is one leaf of an open spread.
    *
    * Absent (the phone) the band is a sibling of `.layer` inside the stage and
@@ -203,22 +211,50 @@ interface PageStageProps {
    * `docs/design/page-transition.md` §3.5, decision row 21.
    */
   foldTarget?: RefObject<HTMLElement | null> | null;
+  /**
+   * This leaf is one side of an open book (two pages showing).
+   *
+   * A magnified leaf then stays joined to its partner at the fold: it grows
+   * outward from the gutter and cannot be panned sideways, because a sideways
+   * pan on one leaf alone would slide it over the other page (#148). Up and down
+   * still pan. The stage works out which edge is its gutter from the page's own
+   * side of the opening, so the caller only has to say that the book is open.
+   */
+  bound?: boolean;
+  /**
+   * The tool the reader has picked from the page toolbar
+   * (`docs/design/page-toolbar-plan.md`, step 1). It sets the pointer's shape,
+   * and with the highlighter a drag paints straight away instead of moving the
+   * page. What a tap does under the bookmark tool is App's business: the tap
+   * still arrives through `onSelect`.
+   */
+  tool?: PageTool;
 }
+
+/** The page toolbar's tools. "select" is the app as it has always behaved. */
+export type PageTool = "select" | "highlight" | "bookmark";
 
 /**
  * Which point a button-driven zoom holds still as the paper grows.
  *
- * `"center"` is the lone-leaf answer — a single page has no reason to grow to
- * one side. `"left"` and `"right"` name a *visual* edge of the leaf's box (not a
- * reading side), and they are the spread answer: the leaf grows *away* from the
- * fold. Pin each leaf at the edge its gutter is on — the right-hand leaf at its
- * left edge, the left-hand leaf at its right edge — and the two stay joined at
- * the seam and open outward together like one sheet, instead of each swelling
- * from its own middle, crushing the fold while their outer margins run off the
- * screen. A stage does not know whether it is the live or the facing leaf, so
- * the caller — which does — names the edge.
+ * A lone leaf grows from its own centre — a single page has no reason to grow
+ * to one side. A `bound` leaf grows *away* from the fold: pinned at the edge its
+ * gutter is on — the right-hand leaf at its left edge, the left-hand leaf at its
+ * right edge — so the two stay joined at the seam and open outward together
+ * like one sheet, instead of each swelling from its own middle and crushing the
+ * fold while their outer margins run off the screen.
+ *
+ * The edge comes from the page's side of the opening (`leafSideOf`), not from
+ * which stage is live. It used to be named by the caller on the belief that the
+ * live leaf is always the right-hand page; on an even page it is the left-hand
+ * one, so both leaves grew *into* the fold and each was cut off at it (#148).
  */
-export type ZoomAnchor = "center" | "left" | "right";
+type FoldEdge = "left" | "right";
+
+function foldEdgeOf(page: number, total: number): FoldEdge | null {
+  const side = leafSideOf(page, total);
+  return side === "right" ? "left" : side === "left" ? "right" : null;
+}
 
 /** What App can drive imperatively on the stage. */
 export interface PageStageHandle {
@@ -251,15 +287,15 @@ export interface PageStageHandle {
    */
   turnTo: (page: number) => Promise<boolean>;
   /**
-   * Magnify to `z`, anchored at `anchor` (default the middle of the stage), and
-   * answer with what was actually applied.
+   * Magnify to `z`, anchored at the middle of the stage (or, on a `bound` leaf,
+   * at its gutter edge), and answer with what was actually applied.
    *
    * Anchored at the middle because a button has no pointer to zoom about: the
    * wheel could keep the paper under the cursor still, and a control in the
    * chrome is nowhere near the paper at all. The middle is the only point the
    * reader can predict — for a lone leaf. With the book open the predictable
-   * point is the fold, not each leaf's own centre, so the caller pins each leaf
-   * at its gutter edge (`ZoomAnchor`) and the opening grows outward as one.
+   * point is the fold, not each leaf's own centre, so each `bound` leaf pins at
+   * its gutter edge (`foldEdgeOf`) and the opening grows outward as one.
    *
    * It **returns** rather than reports through a callback, and the returned
    * number is the one the caller must store. `clampView` runs inside the same
@@ -268,7 +304,7 @@ export interface PageStageHandle {
    * the first press against a limit, and the readout would then be describing a
    * magnification nobody is looking at.
    */
-  setZoom: (z: number, anchor?: ZoomAnchor) => number;
+  setZoom: (z: number) => number;
   /**
    * The magnification the paper is at right now.
    *
@@ -413,13 +449,18 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
     onJuzTurn,
     skin = "plain",
     tajweedLookup = null,
+    overlay,
     foldTarget = null,
+    bound = false,
+    tool = "select",
   },
   ref,
 ): JSX.Element {
   const { t } = useT();
   const stageRef = useRef<HTMLDivElement>(null);
   const layerRef = useRef<HTMLDivElement>(null);
+  /** The frame the overlay sits in; it is told where the leaf is on every write. */
+  const overlayRef = useRef<HTMLDivElement>(null);
   const pagesRef = useRef(new Map<number, MountedPage>());
   /** Mounts still in flight, so concurrent callers share one fetch (see ensurePage). */
   const pendingRef = useRef(new Map<number, Promise<MountedPage | null>>());
@@ -466,6 +507,8 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
   turnTargetOfRef.current = turnTargetOf;
   const dragToTurnRef = useRef(dragToTurn);
   dragToTurnRef.current = dragToTurn;
+  const toolRef = useRef(tool);
+  toolRef.current = tool;
   const onJuzTurnRef = useRef(onJuzTurn);
   onJuzTurnRef.current = onJuzTurn;
   // The wheel's two accumulators — core owns the rule, this is just where the
@@ -482,6 +525,9 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
   // Same reason: mountPage decides a leaf's free edge after an await.
   const totalRef = useRef(total);
   totalRef.current = total;
+  // Read by `applyTransform`, which runs from gestures and tweens, not renders.
+  const boundRef = useRef(bound);
+  boundRef.current = bound;
   // And the same reason again, for the one mark that is owed to a page the
   // reader is not on. See the breadcrumb effect below for what went wrong.
   const breadcrumbRef = useRef(breadcrumbKey);
@@ -629,8 +675,34 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
     // theirs, which is legal for neither.
     const fit = fitRef.current;
     if (fit) view.current = clampView(view.current, fit);
+    // A leaf of an open book that is wider than its box stays pinned at the fold
+    // across: the gutter edge of the page sits on the gutter, and the rest runs
+    // outward over the desk. Without this a sideways pan, or a zoom about any
+    // other point, would slide one page across the other (#148).
+    const edge = boundRef.current ? foldEdgeOf(currentPageRef.current, totalRef.current) : null;
+    const over = fit && edge ? fit.contentWidth * view.current.z - fit.stageWidth : 0;
+    if (over > 0) view.current = { ...view.current, x: edge === "left" ? 0 : -over };
+    // And says so, because the stage and the book both clip to their own box and
+    // have to stop doing so on the outer side while a page hangs over the desk.
+    const stageEl = stageRef.current;
+    if (stageEl) stageEl.toggleAttribute("data-spills", over > 0.5);
     const { x, y, z } = view.current;
     cur.host.style.transform = `translate3d(${x}px, ${y}px, 0) scale(${z})`;
+    // Tell the overlay where the paper is, so a thing that belongs *to* the
+    // paper — the folded corner — can sit on its corner while the ribbons stay
+    // put. Written on the overlay's own small frame, not the stage, so a pinch
+    // does not restyle every glyph on the page each frame. The transform origin
+    // is the host's top-left and the host is laid out at the layer's top-left,
+    // so the layer's offset plus the translate is the leaf's corner.
+    const frame = overlayRef.current;
+    const layer = layerRef.current;
+    if (frame && layer) {
+      frame.style.setProperty("--leaf-x", `${layer.offsetLeft + x}px`);
+      frame.style.setProperty("--leaf-y", `${layer.offsetTop + y}px`);
+      frame.style.setProperty("--leaf-w", `${cur.host.offsetWidth * z}px`);
+      frame.style.setProperty("--leaf-h", `${cur.host.offsetHeight * z}px`);
+      frame.style.setProperty("--leaf-z", String(z));
+    }
   }, []);
 
   /*
@@ -966,6 +1038,30 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
   }, [applyTransform, measureFit]);
 
   /**
+   * Land a page keeping whatever the reader was looking at, not resetting it.
+   *
+   * A *turn* is continuous reading: a reader zoomed into the third line of one
+   * page, who turns the leaf, means to keep reading the third line of the next —
+   * mus'haf pages are geometrically congruent (same box, same fifteen lines), so
+   * the very same viewframes the same place on either. `centerCurrent` throws
+   * that away and snaps back to the whole page at rest; this keeps `view.current`
+   * and only re-clamps it against the incoming page's fit, so a zoom that was
+   * valid stays valid and one that would now overhang is pulled back inside.
+   *
+   * At rest (z = 1, unzoomed) the clamp centres exactly as `centerCurrent` does,
+   * so the common turn lands identically and "every road lands the leaves level"
+   * still holds; the difference shows only once the reader has zoomed in. This is
+   * the turn road only (`crossFade` mid-sweep and `land`); a hop, a deep link and
+   * a cold open are relocations, not reading, and keep resetting to the page.
+   */
+  const reclampCurrent = useCallback(() => {
+    const fit = measureFit();
+    if (!fit) return;
+    view.current = clampView(view.current, fit);
+    applyTransform();
+  }, [applyTransform, measureFit]);
+
+  /**
    * The one settle step every road onto a page ends with.
    *
    * Four roads bring a leaf onto the stage — a cold open, a deep link
@@ -979,22 +1075,30 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
    * its own road, none of the fixes reaching the next road. A rule kept in four
    * places is kept in three, so it is kept here once. `crossFade` is the fifth
    * road and cannot come through here (it reveals the incoming leaf itself,
-   * because both leaves must be visible for the fade), so it calls
-   * `centerCurrent` directly — which is the only other place that may.
-   * `PageStage.settle.test.ts` counts, and the desktop e2e "every road onto a
-   * page lands the leaves level" drives each road.
+   * because both leaves must be visible for the fade), so it settles the
+   * incoming leaf directly — with `reclampCurrent`, the turn road's carry, since
+   * a cross-fade only ever happens on a turn (§4.5). `PageStage.settle.test.ts`
+   * counts, and the desktop e2e "every road onto a page lands the leaves level"
+   * drives each road.
    *
    * `navigatedRef` is claimed here too: a page has arrived, whichever road
    * brought it, and the cold-mount effect must not re-centre over it.
+   *
+   * `carry` is the turn road's exception (§4.5): a turn is reading continued, so
+   * it keeps the reader's zoom and pan (`reclampCurrent`) instead of snapping
+   * back to the whole page. The relocations — cold open, deep link, hop — leave
+   * it false and reset, because they are moves *to* a page, not reading *across*
+   * one.
    */
   const arrive = useCallback(
-    (next: number): void => {
+    (next: number, carry = false): void => {
       navigatedRef.current = true;
       cancelTween();
       setCurrentPage(next);
-      centerCurrent();
+      if (carry) reclampCurrent();
+      else centerCurrent();
     },
-    [cancelTween, centerCurrent, setCurrentPage],
+    [cancelTween, centerCurrent, reclampCurrent, setCurrentPage],
   );
 
   /**
@@ -1030,9 +1134,12 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
       incoming.host.style.display = "block";
       // The incoming leaf has to arrive already wearing its transform, or it
       // paints for one frame at the layer's origin — unclamped, top-left — and
-      // the fade shows a page sliding into place under the band.
+      // the fade shows a page sliding into place under the band. It wears the
+      // reader's carried view (§4.5), not a reset: a zoomed turn fades the
+      // incoming leaf in at the same zoom, so the swap under the band is
+      // invisible instead of a snap back to the whole page mid-fade.
       currentPageRef.current = to;
-      centerCurrent();
+      reclampCurrent();
       // Flush, so the transition has a start value to run from instead of
       // coalescing both writes into one.
       void incoming.host.offsetWidth;
@@ -1043,13 +1150,13 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
         outgoing.host.style.opacity = "0";
       }
     },
-    [centerCurrent],
+    [reclampCurrent],
   );
 
   /** End a turn on the destination page: display swapped, inline fades cleared. */
   const land = useCallback(
     (next: number): void => {
-      arrive(next);
+      arrive(next, /* carry the reader's view across the turn (§4.5) */ true);
       for (const mp of pagesRef.current.values()) {
         mp.host.style.transition = "";
         mp.host.style.opacity = "";
@@ -1363,7 +1470,7 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
   useImperativeHandle(
     ref,
     (): PageStageHandle => ({
-      setZoom(z, anchor = "center") {
+      setZoom(z) {
         const layer = layerRef.current;
         if (!layer) return view.current.z;
         // The same two things a wheel gesture used to do at its first event:
@@ -1374,15 +1481,15 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
         measureFit();
         const rect = layer.getBoundingClientRect();
         const base = { z: view.current.z, x: view.current.x, y: view.current.y };
-        // A button has no pointer to anchor to, so the caller names the point.
+        // A button has no pointer to anchor to, so the stage picks the point.
         // The lone leaf grows from its own centre; an open book pins each leaf at
-        // its gutter edge (`left`/`right`) so the fold stays put and the opening
+        // its gutter edge (`foldEdgeOf`) so the fold stays put and the opening
         // grows outward as one sheet. Vertically always the middle — the fold is
         // a vertical line, so height has no side to prefer. Through `zoomAbout`
         // rather than writing `view` directly: the anchor arithmetic §7 ⑨ fixed
         // has one implementation and this is not a second.
-        const ox =
-          anchor === "left" ? rect.left : anchor === "right" ? rect.right : rect.left + rect.width / 2;
+        const edge = boundRef.current ? foldEdgeOf(currentPageRef.current, totalRef.current) : null;
+        const ox = edge === "left" ? rect.left : edge === "right" ? rect.right : rect.left + rect.width / 2;
         zoomAbout(clampZoom(z, MIN_ZOOM, MAX_ZOOM), ox, rect.top + rect.height / 2, base);
         // The rail sits beside the selected ayah and has just been moved.
         emitSelectionRect();
@@ -1999,6 +2106,8 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
           insideSelection:
             selectedKeyRef.current !== null &&
             pagesRef.current.get(currentPageRef.current)?.hl.pressedKey === selectedKeyRef.current,
+          // The highlighter tool has already said what a drag is for.
+          paintOnDrag: toolRef.current === "highlight",
         });
         intentRef.current = intent;
 
@@ -2223,6 +2332,11 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
       // difference itself; see the pair of rules under `.stage[data-leaf]` in
       // the stylesheet, and why an odd→even turn made that necessary.
       data-leaf={leafSideOf(page, total) ?? undefined}
+      data-bound={bound ? "" : undefined}
+      data-tool={tool === "select" ? undefined : tool}
+      // So a click anywhere on this leaf — margin included — can say which page
+      // it landed on, which is all the bookmark tool needs from it.
+      data-page={page}
       // A long press IS a gesture here (it arms the marquee), so the platform's
       // own long-press menu would fight it on every highlight.
       onContextMenu={(e) => e.preventDefault()}
@@ -2231,6 +2345,17 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
         {label}
       </span>
       <div ref={layerRef} className={styles.layer} aria-busy={status === "loading"} />
+      {overlay && (
+        <div
+          ref={overlayRef}
+          className={styles.overlayFrame}
+          // Which top corner of the leaf is free (the other is bound into the
+          // spine). A lone page with no partner is treated as a left leaf.
+          data-free-side={leafSideOf(page, total) ?? "left"}
+        >
+          {overlay}
+        </div>
+      )}
       {band && (target ? createPortal(band, target) : band)}
       {status === "loading" && <div className={styles.hint}>{t.stageLoading}</div>}
       {status === "error" && (

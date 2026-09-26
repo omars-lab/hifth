@@ -89,16 +89,19 @@ describe("OfflineNotice", () => {
     expect(notice).toHaveTextContent(/عند إغلاق كل النوافذ/);
   });
 
-  it("falls back to an honest best-effort warning with no install path", async () => {
+  it("says nothing when storage is merely not promised and there is nothing to do", async () => {
+    // The owner, 2026-09-25: a warning with no action for the reader is our
+    // problem to fix, not theirs to read (docs/issues.json, storage-not-kept).
     stubUserAgent(ANDROID_UA);
     stubStorage({
       persist: async () => false,
       persisted: async () => false,
       estimate: async () => ({ usage: 0, quota: 40 * GB }),
     });
-    render(<OfflineNotice />);
-    const notice = await screen.findByRole("status");
-    expect(notice).toHaveAttribute("data-notice", "best-effort");
+    const { container } = render(<OfflineNotice />);
+    await waitFor(() => expect(navigator.storage).toBeDefined());
+    await new Promise((r) => setTimeout(r, 20));
+    expect(container.querySelector("[data-notice]")).toBeNull();
   });
 
   it("stays silent while held, and says the same thing once released", async () => {
@@ -110,16 +113,15 @@ describe("OfflineNotice", () => {
     // happens, so nothing is re-derived when the strip lifts.
     stubUserAgent(ANDROID_UA);
     stubStorage({
-      persist: async () => false,
       persisted: async () => false,
-      estimate: async () => ({ usage: 0, quota: 40 * GB }),
+      estimate: async () => ({ usage: 1e6, quota: 300 * 1024 * 1024 }),
     });
     const { container, rerender } = render(<OfflineNotice hold />);
     await waitFor(() => expect(navigator.storage).toBeDefined());
     expect(container.querySelector("[data-notice]")).toBeNull();
 
     rerender(<OfflineNotice hold={false} />);
-    expect(await screen.findByRole("status")).toHaveAttribute("data-notice", "best-effort");
+    expect(await screen.findByRole("status")).toHaveAttribute("data-notice", "capped");
   });
 
   it("dismisses once and stays dismissed on the next visit", async () => {

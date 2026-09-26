@@ -8,8 +8,64 @@ import {
   resolvePullNearby,
   resolveTapButton,
   markerEmphasis,
+  markerEmphasisDock,
+  fisheyeSpread,
+  pageBarFisheye,
+  focusSpread,
+  pageBarFocus,
+  pageTickStep,
   type DetentContext,
 } from "./detent-strategy.js";
+
+describe("focusSpread (the page-bar magnifier since 2026-09-25)", () => {
+  const lens = pageBarFocus;
+  const W = lens.radiusPx;
+
+  it("keeps the pointer fixed and the window edge and beyond unmoved", () => {
+    expect(focusSpread(0, lens)).toBe(0);
+    expect(focusSpread(W, lens)).toBeCloseTo(W, 6);
+    expect(focusSpread(-(W + 5), lens)).toBe(-(W + 5));
+  });
+
+  it("is symmetric and never folds back on itself", () => {
+    let prev = -Infinity;
+    for (let d = -W - 10; d <= W + 10; d += 0.5) {
+      const s = focusSpread(d, lens);
+      expect(s).toBeGreaterThanOrEqual(prev);
+      expect(focusSpread(-d, lens)).toBeCloseTo(-s, 10);
+      prev = s;
+    }
+  });
+
+  it("opens single pages wide enough to mark beside the pointer", () => {
+    // A desktop bar gives each of 604 pages under a pixel. Right beside the
+    // pointer the magnifier must stretch one page past the smallest mark gap.
+    const pagePx = 0.83;
+    const beside = focusSpread(pagePx, lens) - focusSpread(0, lens);
+    expect(beside).toBeGreaterThanOrEqual(lens.minTickGapPx);
+  });
+
+  it("never pushes a page past the end of the bar", () => {
+    // The pointer 30px from the end: every page on that side must land inside
+    // those 30px, and the end itself must not move (seen at page 587).
+    const reach = 30;
+    for (let d = 0; d <= reach; d += 0.5) {
+      expect(focusSpread(d, lens, reach)).toBeLessThanOrEqual(reach + 1e-9);
+    }
+    expect(focusSpread(reach, lens, reach)).toBeCloseTo(reach, 9);
+    // The other side, with room to spare, is the full-radius curve.
+    expect(focusSpread(-50, lens, Infinity)).toBe(focusSpread(-50, lens));
+  });
+});
+
+describe("pageTickStep (the map rule for page marks)", () => {
+  it("marks every page where pages are wide, then fives, tens, then nothing", () => {
+    expect(pageTickStep(6, 4)).toBe(1);
+    expect(pageTickStep(1, 4)).toBe(5);
+    expect(pageTickStep(0.5, 4)).toBe(10);
+    expect(pageTickStep(0.2, 4)).toBeNull();
+  });
+});
 
 /**
  * A tiny stand-in for the vendored page table: juz 2 opens on page 22 and juz 3
@@ -115,5 +171,83 @@ describe("only C's markers grow on approach", () => {
     expect(tapButtonDetent.emphasis).not.toBeNull();
     expect(tapButtonDetent.emphasis?.peak).toBeGreaterThan(1);
     expect(tapButtonDetent.emphasis?.near).toBeGreaterThan(0);
+  });
+});
+
+describe("fisheyeSpread (the page-bar dock, decided B)", () => {
+  const lens = pageBarFisheye;
+  const W = lens.radiusPx;
+
+  it("does not move the point under the pointer", () => {
+    expect(fisheyeSpread(0, lens)).toBe(0);
+  });
+
+  it("leaves everything at or past the window edge exactly where it was", () => {
+    // At the edge the curve meets the identity, so the warp is seamless: nothing
+    // outside the neighbourhood twitches when the pointer moves.
+    expect(fisheyeSpread(W, lens)).toBeCloseTo(W, 6);
+    expect(fisheyeSpread(-W, lens)).toBeCloseTo(-W, 6);
+    expect(fisheyeSpread(W + 40, lens)).toBe(W + 40);
+    expect(fisheyeSpread(-(W + 40), lens)).toBe(-(W + 40));
+  });
+
+  it("pushes a point inside the window outward — the spread that makes numbers readable", () => {
+    // A power below 1 expands the middle: a marker halfway to the edge is thrown
+    // past halfway, opening a gap its neighbour's number can sit in.
+    const mid = fisheyeSpread(W / 2, lens);
+    expect(mid).toBeGreaterThan(W / 2);
+    expect(mid).toBeLessThan(W);
+  });
+
+  it("is symmetric about the pointer — the two sides spread the same", () => {
+    for (const d of [7, 19, 40, 70]) {
+      expect(fisheyeSpread(-d, lens)).toBeCloseTo(-fisheyeSpread(d, lens), 10);
+    }
+  });
+
+  it("never lets a farther marker overtake a nearer one — order is preserved", () => {
+    let prev = -Infinity;
+    for (let d = 0; d <= W; d += 4) {
+      const s = fisheyeSpread(d, lens);
+      expect(s).toBeGreaterThanOrEqual(prev);
+      prev = s;
+    }
+  });
+
+  it("names a real neighbourhood of pages to label, and a spread the eye can see", () => {
+    expect(lens.radiusPx).toBeGreaterThan(0);
+    expect(lens.power).toBeGreaterThan(0);
+    expect(lens.power).toBeLessThan(1); // below 1 is what expands the centre
+    expect(lens.juzPageWindow).toBeGreaterThan(0);
+  });
+
+  it("is inline-safe — its source names no import/require", () => {
+    expect(fisheyeSpread.toString()).not.toMatch(/\bimport\b|\brequire\b/);
+  });
+});
+
+describe("markerEmphasisDock (the bar's rounded swell, zoom plan step 4)", () => {
+  it("is 1 at and beyond the edge, and the peak under the pointer", () => {
+    expect(markerEmphasisDock(28, 28, 2.4)).toBe(1);
+    expect(markerEmphasisDock(40, 28, 2.4)).toBe(1);
+    expect(markerEmphasisDock(0, 28, 2.4)).toBeCloseTo(2.4, 10);
+    expect(markerEmphasisDock(0, 0, 2.4)).toBe(1);
+    expect(markerEmphasisDock(Number.NaN, 28, 2.4)).toBe(1);
+  });
+  it("is flat on the marker, where the squared curve has a point", () => {
+    // One pixel off the marker: the rounded top has barely moved, the point has.
+    const dockDrop = 2.4 - markerEmphasisDock(1, 28, 2.4);
+    const sharpDrop = 2.4 - markerEmphasis(1, 28, 2.4);
+    expect(dockDrop).toBeLessThan(0.01);
+    expect(sharpDrop).toBeGreaterThan(0.09);
+  });
+  it("is halfway grown halfway in, and never grows as the pointer leaves", () => {
+    expect(markerEmphasisDock(14, 28, 2.4)).toBeCloseTo(1.7, 10);
+    let last = Infinity;
+    for (let d = 0; d <= 28; d += 0.5) {
+      const g = markerEmphasisDock(d, 28, 2.4);
+      expect(g).toBeLessThanOrEqual(last);
+      last = g;
+    }
   });
 });

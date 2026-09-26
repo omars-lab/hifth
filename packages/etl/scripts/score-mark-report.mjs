@@ -74,8 +74,14 @@
 import { readFileSync } from "node:fs";
 import { dirname, isAbsolute, join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { codeLine } from "./lib/grader-code.mjs";
 import { asDrawn, settle } from "./lib/mark-settle.mjs";
 import { wilson } from "./lib/mark-ink.mjs";
+import { selfTest } from "./lib/self-test.mjs";
+
+// Before anything real is read: re-score the known fixture, and stop if its
+// recorded verdict does not come back.
+selfTest(import.meta.url, "report");
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const ETL = join(HERE, "..");
@@ -277,6 +283,8 @@ const say = (s = "") => out.push(s);
 
 say(`${path.replace(`${ROOT}/`, "")}`);
 say(`  ${doc.set} set · seed ${doc.seed} · displacements ${doc.rowsFingerprint} · ${shown} drawn`);
+// The other fingerprint: the code that reached this verdict, beside the input it read.
+say(`  ${codeLine(fileURLToPath(import.meta.url))}`);
 say(`  drawn by ${Object.entries(doc.drawnBy ?? {}).map(([k, v]) => `${k} ${v}`).join(", ") || "unrecorded"}`);
 if (repaired) {
   say(`  ${repaired} answers carried no rule and were re-derived from the displacements.`);

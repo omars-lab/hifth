@@ -27,9 +27,10 @@ document disagrees with it, it says so in as many words and gives the argument:
 - **§3.1** — the `≤16 px translateX` direction cue in `page-turning.md` §3.1 (a) is
   **withdrawn** for the same reason: it moves glyphs to say something that can be said
   beside them.
-- **§8 ①** — the page curl is rejected there partly on **cost** (a 3D transform per frame
-  over a rasterized 170 KB SVG, with the perf verdict open). This document rejects it on
-  **honesty**, which is an argument that survives the perf verdict going our way.
+- **§8 ①** — the page curl was rejected there on **honesty** (a curl moves glyphs and cannot
+  express all four fold states), an argument that survives the perf verdict going our way. It
+  is now **reopened** (2026-09-04): the owner's skeleton-loading idea routes around the glyph
+  rule, and a board turns each option by hand — see `page-turn-curl.md`.
 - **§2.4** — `page-turning.md` §8 says "a shaded gutter darkens real scripture" and rules
   out gutter shading. `PageSpread.module.css:60-75` already ships a 28 px gutter gradient
   that falls on both leaves, and `tokens.css` defends it at length. The blanket rule is
@@ -1114,7 +1115,25 @@ and the measurement in §1 supplies two:
 the user asked to mimic. Rejecting the curl here is not overruling the request; it is reading
 it.
 
-**Rejected. Reconsider only if someone can draw a curl that expresses `Fold`'s four states.**
+**Reopened, 2026-09-04.** The bar this rejection set for itself — *reconsider only if someone
+can draw a curl that expresses `Fold`'s four states* — has been met, and by the two changes the
+rejection called contingent: Loop 4b vendored every leaf, so a real page now lies beneath to
+reveal, and the owner supplied an idea that clears reason 1. The idea is to hide the glyphs
+behind a **skeleton loading animation** — grey loading bars for the lines — on the curling
+surface, so the leaf curls while no drawn letter ever moves; the real page settles in only once
+the leaf lies flat. That routes around the axiom instead of breaking it. Reason 2 is answered by
+construction: a curl fires only for a leaf-turn (*gap*) and a missing leaf (*hole*, revealed as
+sunk paper), never for a *crease* (the gutter just deepens) or a jump.
+
+The question is now live on a board where each option is turned by hand, including the forbidden
+one (curl the real glyphs) so a reader can feel what the axiom protects:
+
+- **Decision record:** [`../decisions/page-turn-curl.md`](../decisions/page-turn-curl.md)
+- **Turn each option yourself:** [`page-turn-curl-options.html`](./page-turn-curl-options.html)
+- **In the register:** `page-turn-curl` (open).
+
+The reasoning above stays as written — it is why the bar was set, and the board is built to clear
+exactly the two bars it names.
 
 ### ② The others
 

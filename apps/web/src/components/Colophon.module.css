@@ -150,6 +150,47 @@
   outline-offset: 2px;
 }
 
+/* The page bar's spread switch — one full-width control, styled like the language
+   pill so the two device preferences read as a pair. `aria-pressed` carries the
+   on/off state; the fill and the state word are its sighted echo. */
+.toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  inline-size: 100%;
+  min-block-size: var(--touch-min);
+  padding-inline: var(--space-3);
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--ink);
+  font-family: inherit;
+  font-size: var(--text-md);
+  text-align: start;
+  cursor: pointer;
+}
+
+.toggle[aria-pressed="true"] {
+  border-color: var(--accent);
+  background: var(--accent-tint);
+}
+
+.toggle:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.toggleState {
+  color: var(--ink-soft);
+  font-size: var(--text-sm);
+}
+
+.toggle[aria-pressed="true"] .toggleState {
+  color: var(--accent-strong);
+  font-weight: 600;
+}
+
 /* The §6 offer, given the weight of a control rather than a footnote link:
    it is the one thing on this sheet a reader is entitled to act on. */
 .source {

@@ -81,11 +81,17 @@
  *   node packages/etl/scripts/score-mark-nudge.mjs a.json --against b.json
  */
 import { readFileSync } from "node:fs";
-import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
+import { dirname, join, resolve } from "node:path";
+import { fileURLToPath, pathToFileURL } from "node:url";
 import { planNudge, sameBuild } from "./lib/adjudication.mjs";
+import { codeLine } from "./lib/grader-code.mjs";
 import { wilson } from "./lib/mark-ink.mjs";
 import { agreementOf, clusteredCI, mean, meanCI, sd, slopeOf, spreadUnderSplit } from "./lib/placement-stats.mjs";
+import { selfTest } from "./lib/self-test.mjs";
+
+// Before anything real is read: re-score the known fixture, and stop if its
+// recorded verdict does not come back.
+selfTest(import.meta.url, "nudge");
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const ETL = join(HERE, "..");
@@ -105,11 +111,18 @@ for (let i = 0; i < argv.length; i += 1) {
 }
 if (!path) {
   process.stderr.write(
-    "usage: score-mark-nudge.mjs <placements.json> [--shift path] [--against other-placements.json]\n",
+    "usage: score-mark-nudge.mjs <placements.json> [--shift path] [--against other-placements.json] [--io module.mjs]\n",
   );
   process.exit(2);
 }
 const shiftPath = arg("--shift", join(ETL, "out", "mark-shift.json"));
+/**
+ * Where the marks and the ink come from, if not the shipped pages and the
+ * corpus cache — the planner's own injection seam, reached from the command
+ * line so the self-test can run without either.
+ */
+const ioPath = arg("--io", null);
+const io = ioPath ? await import(pathToFileURL(resolve(ioPath)).href) : null;
 /**
  * A second person's answers to the identical questions, if anybody sat them.
  *
@@ -189,7 +202,7 @@ if (Array.isArray(ruling.select?.of)) {
   }
   shifts = ruling.select.of.map((p) => byPage.get(p));
 }
-const { trials } = planNudge({ seed: ruling.seed, count: ruling.count, shifts });
+const { trials } = planNudge({ seed: ruling.seed, count: ruling.count, shifts, ...(io ? { io } : {}) });
 const byIndex = new Map(trials.map((t) => [t.i, t]));
 
 const rows = [];
@@ -444,6 +457,8 @@ const real = clust.map((c) => Number.isFinite(c.lo) && (c.lo > 0 || c.hi < 0));
 const out = [
   `placements ${path}`,
   `seed ${ruling.seed} · reader ${ruling.reader ?? "unrecorded"} · ${rows.length} of ${ruling.count} placed · displacements ${ruling.shiftRan} (${fp})`,
+  // The other fingerprint: the code that reached this verdict, beside the input it read.
+  codeLine(fileURLToPath(import.meta.url)),
   `median ${(median(ms) / 1000).toFixed(1)}s a placement`,
   "",
   say("pages these can speak for", `${coverage.placed} placed on, of ${coverage.chosen} this session was built over`),

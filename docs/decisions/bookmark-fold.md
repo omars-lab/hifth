@@ -13,6 +13,11 @@ own store today, a saved file, and the reader's own cloud file once there is sig
 the [storage model](storage-model.md) the notes and the confusion map also take. The options and
 reasoning below stand as drawn; the decision and the owner's added detail are gathered at the end.*
 
+*Changed 2026-09-25 by the owner: the first question is now **C, both** — the folded corners
+are the bookmarks a reader keeps, and a red seam down the middle of the book marks where they
+left off and moves on its own. See [What changed (2026-09-25)](#what-changed-2026-09-25) at the
+end.*
+
 It is drawn on a real page, at the size a phone would show it, so the argument is about a
 picture anyone can open:
 
@@ -217,3 +222,40 @@ whether it shares a store with the confusion map's per-place history or stays se
 storage model settles *where* it lives, not *what* it is); and the first-sign-in merge — when a
 reader who has bookmarks on the phone signs in, the phone's set seeds the cloud file, and a
 conflict between two devices is a later question, not this decision's.
+
+## What changed (2026-09-25)
+
+Once the folded corner was drawn as a real turned-down corner of the paper, the owner looked at
+it and moved the first answer from B to **C — both kinds, and they look nothing alike**:
+
+> i like the corners, thats a good bookmark option ... the other one is the red seam that should
+> be down the middle ... that is a "continuation" bookmark - the corners are permanent unless
+> unfolded, the seam transitions from one page to the next based on latest page it applies on
+
+- **A folded corner is a bookmark you keep.** Folding a page's corner marks it, and it stays
+  marked until you unfold it. Everything decided on 2026-09-02 about these still holds: each has
+  a name along its ribbon, its own history, and its own drawer.
+- **The red seam is where you left off.** One red ribbon lies down the middle of the book, in
+  the fold between the two pages, on whichever page you were last reading. You never place it;
+  it moves itself as you read.
+
+Option C's own warning was that a reader would have to tell a ribbon that moves on its own from
+ones they placed. The owner's answer removes it: the two are different objects on the page — a
+bent corner at the outside edge, a red seam at the spine — so there is nothing to tell apart.
+
+Assumptions made while building it, to be corrected on sight:
+
+- **"The latest page" means the last page you stayed on**, not every page you passed. The seam
+  moves to a page once you have stayed on it for a few seconds, so a quick jump to look at
+  another ayah and back does not drag it away from your reading.
+- **On a phone, one page shows at a time**, so the seam lies along that page's inner edge — the
+  side that would be bound into the spine.
+- **The seam is kept on the phone** beside the kept bookmarks. It does not go into the saved
+  bookmarks file yet; it is your place, not a bookmark you chose, and a file carried to another
+  phone arguably should not move that phone's place. Open to change.
+- **A bookmarked page keeps its corner folded down**, well deeper than the small curl every
+  page shows, so a glance at the corner says whether the page is marked.
+- **Tapping a folded corner unfolds it**, and that lifts every bookmark on the page at once.
+  Nothing is asked first; instead a line at the foot of the screen says what was lifted and
+  offers **Undo** for a few seconds. A second bookmark on a page that is already folded comes
+  from the first one's drawer ("Add another here"), since the corner itself now unfolds.

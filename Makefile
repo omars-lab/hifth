@@ -39,6 +39,17 @@ install: ## Install deps + wire the gitleaks pre-commit hook (runs "prepare")
 dev: ## Start the web app in dev mode (Vite HMR) — the main local dev loop
 	$(WEB) dev
 
+.PHONY: pitch
+pitch: ## Serve the PRIVATE pitch build (Study Quran commentary across the whole Qur'an)
+	@# VITE_PITCH turns on the private pitch layer (apps/web/src/pitch/): the
+	@# app loads the gitignored held copy under public/assets/private/ and shows
+	@# it live. This is the demo we take into a room with the rights-holders; it
+	@# is never deployed. Every public build (make build / ci / preview) leaves
+	@# the flag unset, so the pitch code is dead-code-eliminated and the held
+	@# copy is absent. Run the extractor once first if the JSON is missing:
+	@#   node packages/etl/tools/pitch/extract.mjs
+	VITE_PITCH=1 $(WEB) dev
+
 .PHONY: build
 build: node-ok ## Production build (core first — package exports resolve to its dist/)
 	$(CORE) build
@@ -65,7 +76,7 @@ clean: ## Remove all build output (the "clean-state" discipline — see loop-0.m
 # Quality gates — each target is one CI step; `ci` runs them in CI order
 # ---------------------------------------------------------------------------
 
-.PHONY: lint typecheck test e2e
+.PHONY: lint typecheck test e2e pitch-e2e
 lint:      ## eslint across the workspace (incl. the layer-boundary rules)
 	$(PNPM) lint
 typecheck: core ## tsc --noEmit in every package
@@ -75,6 +86,21 @@ test: core ## Vitest unit/contract tests in every package
 e2e: core ## Playwright mobile e2e (iPhone WebKit + Android Chromium + golden images)
 	$(WEB) build
 	$(WEB) test:e2e
+
+pitch-e2e: core ## Playwright check of the PRIVATE pitch commentary (local only — needs the note file)
+	@# The one suite `make e2e` cannot run. The public bundle drops the pitch
+	@# layer, so the commentary sheet is not in it; and the notes live in a
+	@# gitignored file (build it with the extractor below), so CI could not run
+	@# this even if it wanted to. HIFTH_PITCH=1 swaps the whole Playwright run for
+	@# a single project that builds and serves the pitch bundle on its own port.
+	@test -f apps/web/public/assets/private/study-quran/1.json || { \
+	  echo ""; \
+	  echo "  No private pitch data — apps/web/public/assets/private/study-quran/1.json"; \
+	  echo "  Build it first:  node packages/etl/tools/pitch/extract.mjs"; \
+	  echo ""; \
+	  exit 1; \
+	}
+	HIFTH_PITCH=1 $(WEB) exec playwright test --project=pitch
 
 .PHONY: report
 report: ## Open the last e2e run's report — traces, image diffs, the failing screen
@@ -93,6 +119,34 @@ report: ## Open the last e2e run's report — traces, image diffs, the failing s
 	  exit 1; \
 	}
 	$(WEB) exec playwright show-report
+
+# The headless eye. NOT a test — it asserts nothing and holds no baselines (the
+# `testing` skill owns the suites that do). It opens a server you already have
+# up (make dev / make pitch / make preview), deep-links to a screen, runs a few
+# steps, and writes a PNG an agent (or you) can open. Every difference rides in
+# a make var, so the call site stays one command (CLAUDE.md → "Run one simple
+# command, not a compound one"):
+#
+#   make drive HASH='#/hafs-kfqc/1:1'
+#   make drive HASH='#/hafs-kfqc/1:1' ACT='clickrole=button|commentary; settle=400' \
+#     EXPECT='div[role="dialog"]' OUT=fatiha-commentary.png LOCALE=en-US
+#   make drive BASE=http://localhost:5173 VIEWPORT=1440x900   # the pitch server, desktop spread
+#
+# Flags map 1:1 to the driver (apps/web/e2e/tools/drive.mjs). OUT is relative to
+# apps/web; the run prints the path to open. --expect makes a silently-wrong
+# flow exit non-zero instead of handing back a screenshot of the wrong screen.
+DRIVE_OUT ?= test-results/drive/shot.png
+.PHONY: drive
+drive: node-ok ## Open the running app at a deep link, do a few steps, save a PNG to look at
+	$(WEB) exec node e2e/tools/drive.mjs --out '$(DRIVE_OUT)' \
+	  $(if $(BASE),--base '$(BASE)',) \
+	  $(if $(HASH),--hash '$(HASH)',) \
+	  $(if $(ACT),--act '$(ACT)',) \
+	  $(if $(EXPECT),--expect '$(EXPECT)',) \
+	  $(if $(LOCALE),--locale '$(LOCALE)',) \
+	  $(if $(VIEWPORT),--viewport '$(VIEWPORT)',) \
+	  $(if $(FULL),--full,)
+	@echo "  → open apps/web/$(DRIVE_OUT)"
 
 .PHONY: core
 core: node-ok ## Build @hifth/core only (needed before typecheck/test — the Loop 0 lesson)
@@ -218,6 +272,7 @@ ci: core ## Full local mirror of the CI build-test-gate job, IN CI ORDER
 	$(PNPM) gate:license
 	$(PNPM) gate:license-copy
 	$(PNPM) gate:notices
+	$(PNPM) gate:license-tree
 	$(PNPM) gate:validation
 	$(PNPM) gate:verified-edges
 	$(PNPM) gate:edges
@@ -229,12 +284,14 @@ ci: core ## Full local mirror of the CI build-test-gate job, IN CI ORDER
 	$(PNPM) gate:pages
 	$(PNPM) gate:boxes
 	$(PNPM) gate:words
+	$(PNPM) gate:mark-placements
 	$(PNPM) gate:align
 	$(PNPM) gate:map
 	$(PNPM) gate:use-cases
 	$(PNPM) gate:issues
 	$(PNPM) gate:tasks
 	$(PNPM) gate:decisions
+	$(PNPM) gate:etl-scripts
 	$(PNPM) gate:quran-meta
 	$(PNPM) gate:tajweed
 	$(PNPM) gate:revision-privacy
@@ -399,6 +456,10 @@ issues: ## What is still open, worst first:  make issues  ·  make issues ID=<id
 box-sweep: core ## Draw every ayah box the pen cannot draw as lines, on its page → docs/design/ayah-box-sweep.html
 	@node scripts/build-box-sweep.mjs
 
+.PHONY: arabic-number-review
+arabic-number-review: ## A hafiz's sheet to confirm the Arabic plural forms → docs/design/arabic-number-agreement-review.html
+	@node scripts/build-arabic-number-review.mjs
+
 .PHONY: issues-doc
 issues-doc: ## Re-render docs/issues.md from docs/issues.json and its four registers
 	@node scripts/build-issues-doc.mjs
@@ -416,6 +477,10 @@ tasks: ## What is still open, by whose turn it is:  make tasks
 .PHONY: tasks-doc
 tasks-doc: ## Re-render docs/tasks.md from the decisions, ledger, issues and PLAN registers
 	@node scripts/build-tasks-doc.mjs
+
+.PHONY: etl-scripts-doc
+etl-scripts-doc: ## Re-render docs/design/etl-scripts.md from the scripts on disk and the code map
+	@node scripts/build-etl-scripts.mjs
 
 .PHONY: decisions
 decisions: ## What has been decided and what is still open:  make decisions  ·  make decisions ID=<id>
@@ -435,7 +500,7 @@ decisions-doc: ## Re-render docs/decisions/README.md from docs/decisions.json
 	@node scripts/build-decisions-doc.mjs
 
 .PHONY: render-docs
-render-docs: use-cases-doc issues-doc tasks-doc decisions-doc ## Re-render every generated register page (the pre-commit hook refuses a stale one)
+render-docs: use-cases-doc issues-doc tasks-doc decisions-doc etl-scripts-doc ## Re-render every generated register page (the pre-commit hook refuses a stale one)
 
 .PHONY: validate
 validate: ## Outstanding manual checks — or one check's full runbook:  make validate CHECK=<id>
@@ -450,6 +515,22 @@ validate: ## Outstanding manual checks — or one check's full runbook:  make va
 	  node scripts/gate-validation.mjs; \
 	  node scripts/gate-verified-edges.mjs; \
 	  node packages/etl/scripts/sample-edges.mjs --coverage; \
+	fi
+
+.PHONY: rescore
+rescore: ## Re-score a committed ruling from its seed and check it against its receipt:  make rescore RULING=<id>  ·  make rescore (lists them)
+	@# The one command an outsider runs to get our number, or not. It rebuilds
+	@# the sitting from the committed seed, applies the committed answers, runs
+	@# the scorer again and prints — recorded beside recomputed — the input
+	@# fingerprint, the code fingerprint and the headline. Exit 0 only when all
+	@# three agree. A ruling with no receipt beside it is unstamped and stops;
+	@# a settled table cannot be rebuilt from committed bytes and says so.
+	@# Someone on the project writes the receipt once:
+	@#   node packages/etl/scripts/replay-ruling.mjs <id> --record
+	@if [ -n "$(RULING)" ]; then \
+	  node packages/etl/scripts/replay-ruling.mjs "$(RULING)"; \
+	else \
+	  node packages/etl/scripts/replay-ruling.mjs --list; \
 	fi
 
 .PHONY: validate-auto
@@ -601,6 +682,21 @@ probe-reference: core ## A second opinion on the print: make probe-reference [PA
 	@# qira'a to compare against.
 	@node scripts/probe-reference.mjs \
 	  $(if $(PAGES)$(ALL),--page-table,) $(if $(ALL),--all --quiet,)
+
+.PHONY: probe-qul-v2
+probe-qul-v2: core ## A fourth witness on the print: make probe-qul-v2 DB=<path to QUL V2 layout SQLite>
+	@# Checks every surah's first-ayah page, plus 604 pages / 15 lines, against
+	@# QUL's V2/1421H layout authority — the resource PROVENANCE.md matched our
+	@# edition to. The opposite direction from `probe-reference`: that one uses a
+	@# V1 table as a fingerprint and must DISAGREE on 36 pages; this reads the V2
+	@# authority direct and must AGREE everywhere.
+	@#
+	@# NOT in `make ci`, same as probe-reference: the layout export is a
+	@# login-gated download the repo never vendors (zero QUL bytes), so the file
+	@# is PASSED IN and read in place. A gate could never see it.
+	@#
+	@# Needs node's experimental SQLite reader, present in the pinned v22.22.3.
+	@node --experimental-sqlite scripts/probe-qul-v2-layout.mjs $(if $(DB),--db $(DB),)
 
 .PHONY: probe-qul
 probe-qul: core ## Do the outside library's rulers agree with our numbers? make probe-qul [WRITE=1]

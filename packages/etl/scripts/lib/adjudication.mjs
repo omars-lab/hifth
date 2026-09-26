@@ -89,6 +89,9 @@ export const windowFor = ([, , w, h]) => Math.max(w, h) + 14;
 
 const TAU = Math.PI * 2;
 
+/** The centre of a rectangle `[x, y, w, h]`. */
+const centre = ([x, y, w, h]) => [x + w / 2, y + h / 2];
+
 /**
  * Where the mark rows and the shipped ink come from.
  *
@@ -483,6 +486,137 @@ export function planNudge({ seed, count, shifts, io = readers }) {
   }
   const trials = out.map((t, i) => ({ i, ...t }));
   return { trials, repeats, skippedForInk, pages: new Set(trials.map((t) => t.page)).size };
+}
+
+/**
+ * Least-sure marks, taken a page at a time in rotation.
+ *
+ * The same round-robin `pool` uses, and for the same reason: a plain shuffle of a
+ * thousand marks over four hundred pages returns a session that is mostly a
+ * handful of pages, and the question is about placements spread across the whole
+ * print. No ink floor here — every least-sure mark is a real mark the app already
+ * draws a rectangle on, so the shipped rectangle is on ink by construction.
+ */
+function contestPool(marks, want, rand) {
+  const perPage = new Map();
+  for (const m of shuffled(marks, rand)) {
+    if (!perPage.has(m.page)) perPage.set(m.page, []);
+    perPage.get(m.page).push(m);
+  }
+  const order = shuffled([...perPage.keys()], rand);
+  const at = new Map(order.map((p) => [p, 0]));
+  const out = [];
+  let exhausted = 0;
+  while (out.length < want && exhausted < order.length) {
+    exhausted = 0;
+    for (const p of order) {
+      if (out.length >= want) break;
+      const i = at.get(p);
+      const list = perPage.get(p);
+      if (i >= list.length) {
+        exhausted += 1;
+        continue;
+      }
+      out.push(list[i]);
+      at.set(p, i + 1);
+    }
+  }
+  return out;
+}
+
+/**
+ * The contest the robust-validation design asks for.
+ *
+ * ## A different question from `planSession`
+ *
+ * `planSession` puts a *per-page move* on trial: two rectangles the same size, one
+ * where the app draws it today and one shifted by the page's measured correction.
+ * That question was superseded on exactly the marks that matter most here. Where a
+ * person placed a mark by hand, or the machine reached for the ink or fell to the
+ * line, the shipped rectangle is no longer "the box plus a per-page shift" — it is
+ * a placement of its own, and the honest question is whether *that* placement beats
+ * the one the machine would have drawn with the person left out.
+ *
+ * So a trial here is two *absolute* rectangles, which may differ in size as well as
+ * position (a reached mark is resized, not only moved): the **shipped** rectangle
+ * the app holds, and the **rival** the automatic pipeline draws on its own. A reader
+ * who prefers the shipped one far more than half the time is evidence the extra
+ * placement work was right rather than busy — the "is the placement correct?" test,
+ * not the "can you see a shift?" one.
+ *
+ * The four trial kinds keep their jobs. **shipped** is the question: the real pair.
+ * **twin** is the same rectangle twice, to catch a reader who always picks. **catch**
+ * puts the shipped rectangle against a copy of itself a whole letter away, to catch
+ * a reader who is clicking. **decoy** puts it against a copy displaced by *this
+ * mark's own* shipped-to-rival distance in a neutral direction — the yardstick the
+ * headline is read against, because a shipped-vs-rival result near half only means
+ * the rival is as good if a reader could have told a gap this size apart at all.
+ *
+ * As in `planSession`, the answer lives nowhere: the plan is a pure function of the
+ * seed and the least-sure marks, so the scorer rebuilds it rather than reading a key.
+ *
+ * @param seed   any integer; the same seed and the same marks rebuild the same
+ *               session, answers included.
+ * @param count  how many trials.
+ * @param marks  the least-sure marks, each carrying both rectangles already:
+ *               `{page, k, name, class, box, surah, aya, idx, shipped, rival}`.
+ *               `shipped` is what the app draws today; `rival` is `automaticPlacement`
+ *               with the person left out. Built by `build-least-sure.mjs`.
+ */
+export function planContest({ seed, count, marks }) {
+  const rand = rng(seed);
+  const kinds = kindOrder(count, rand);
+  const chosen = contestPool(marks, kinds.length, rand);
+  if (chosen.length < kinds.length) {
+    throw new Error(`only ${chosen.length} least-sure marks available; asked for ${kinds.length}`);
+  }
+  const trials = chosen.map((m, i) => {
+    const kind = kinds[i];
+    const shipped = m.shipped;
+    let rival;
+    if (kind === "shipped") {
+      rival = m.rival;
+    } else if (kind === "twin") {
+      rival = shipped;
+    } else {
+      // catch: a whole letter away. decoy: the size of this mark's own
+      // shipped-to-rival gap. Both displace the shipped rectangle, so the shipped
+      // one is unambiguously the answer — the catch weeds out clicking, the decoy
+      // calibrates how visible a gap this size is at all.
+      const [sx, sy] = centre(shipped);
+      const [rx, ry] = centre(m.rival);
+      const gap = Math.hypot(sx - rx, sy - ry) || 1;
+      const dist = kind === "catch" ? CATCH_UNITS : gap;
+      const toward = Math.atan2(ry - sy, rx - sx); // where the real rival lies, to avoid
+      let th = 0;
+      for (let t = 0; t < 8; t += 1) {
+        th = rand() * TAU;
+        const off = Math.abs(((th - toward + Math.PI) % TAU) - Math.PI);
+        if (kind === "catch" || off > Math.PI / 6) break;
+      }
+      rival = [shipped[0] + dist * Math.cos(th), shipped[1] + dist * Math.sin(th), shipped[2], shipped[3]];
+    }
+    const shippedFirst = rand() < 0.5;
+    return {
+      i,
+      id: `p${m.page}k${m.k}`,
+      kind,
+      page: m.page,
+      k: m.k,
+      name: m.name,
+      class: m.class,
+      surah: m.surah,
+      aya: m.aya,
+      idx: m.idx,
+      // The window is centred on where the app draws the mark today.
+      box: shipped,
+      rects: shippedFirst ? [shipped, rival] : [rival, shipped],
+      // Which panel holds the shipped rectangle. Null for twins, where both do.
+      answer: kind === "twin" ? null : shippedFirst ? 0 : 1,
+      jitter: [(rand() - 0.5) * 1.6, (rand() - 0.5) * 1.6],
+    };
+  });
+  return { trials, pages: new Set(trials.map((t) => t.page)).size };
 }
 
 /**

@@ -1,0 +1,187 @@
+{
+  "built": "2026-09-04T18:44:06.874Z",
+  "question": "Are the 80 sat 'still placed at the edge' marks a representative sample of the 339, on the features measurable without an eye?",
+  "rowsFile": "packages/etl/out/mark-rows.line-tilt.json",
+  "predicate": {
+    "ranOutOfRoom": true,
+    "radius": 3,
+    "band": [
+      0.55,
+      1.01
+    ]
+  },
+  "population": 339,
+  "sat": 80,
+  "unsat": 259,
+  "axis": {
+    "sat": {
+      "xAxisOnly": 65,
+      "yAxisOnly": 13,
+      "both": 2,
+      "xAxisOnlyPct": 81.3,
+      "yAxisOnlyPct": 16.3,
+      "bothPct": 2.5
+    },
+    "unsat": {
+      "xAxisOnly": 206,
+      "yAxisOnly": 50,
+      "both": 3,
+      "xAxisOnlyPct": 79.5,
+      "yAxisOnlyPct": 19.3,
+      "bothPct": 1.2
+    },
+    "all": {
+      "xAxisOnly": 271,
+      "yAxisOnly": 63,
+      "both": 5,
+      "xAxisOnlyPct": 79.9,
+      "yAxisOnlyPct": 18.6,
+      "bothPct": 1.5
+    }
+  },
+  "compare": {
+    "iouBest": {
+      "sat": {
+        "n": 80,
+        "min": 0.7733,
+        "p25": 0.896,
+        "median": 0.913,
+        "p75": 0.9257,
+        "max": 0.9516,
+        "mean": 0.904
+      },
+      "unsat": {
+        "n": 259,
+        "min": 0.5701,
+        "p25": 0.8944,
+        "median": 0.9102,
+        "p75": 0.9238,
+        "max": 0.9632,
+        "mean": 0.9045
+      },
+      "all": {
+        "n": 339,
+        "min": 0.5701,
+        "p25": 0.8948,
+        "median": 0.9106,
+        "p75": 0.9239,
+        "max": 0.9632,
+        "mean": 0.9044
+      },
+      "ks": {
+        "D": 0.1108,
+        "crit05": 0.174,
+        "differs": false
+      }
+    },
+    "searchedAt": {
+      "sat": {
+        "n": 80,
+        "min": 3,
+        "p25": 3,
+        "median": 3,
+        "p75": 3,
+        "max": 3,
+        "mean": 3
+      },
+      "unsat": {
+        "n": 259,
+        "min": 3,
+        "p25": 3,
+        "median": 3,
+        "p75": 3,
+        "max": 3,
+        "mean": 3
+      },
+      "all": {
+        "n": 339,
+        "min": 3,
+        "p25": 3,
+        "median": 3,
+        "p75": 3,
+        "max": 3,
+        "mean": 3
+      },
+      "ks": {
+        "D": 0,
+        "crit05": 0.174,
+        "differs": false
+      }
+    },
+    "ink": {
+      "sat": {
+        "n": 80,
+        "min": 0,
+        "p25": 0.0304,
+        "median": 0.0692,
+        "p75": 0.1175,
+        "max": 0.3203,
+        "mean": 0.0841
+      },
+      "unsat": {
+        "n": 259,
+        "min": 0,
+        "p25": 0.0108,
+        "median": 0.0671,
+        "p75": 0.1158,
+        "max": 0.432,
+        "mean": 0.0769
+      },
+      "all": {
+        "n": 339,
+        "min": 0,
+        "p25": 0.0173,
+        "median": 0.0681,
+        "p75": 0.1174,
+        "max": 0.432,
+        "mean": 0.0786
+      },
+      "ks": {
+        "D": 0.1175,
+        "crit05": 0.174,
+        "differs": false
+      }
+    },
+    "iou0": {
+      "sat": {
+        "n": 80,
+        "min": 0,
+        "p25": 0,
+        "median": 0.0041,
+        "p75": 0.0879,
+        "max": 0.2562,
+        "mean": 0.0441
+      },
+      "unsat": {
+        "n": 259,
+        "min": 0,
+        "p25": 0,
+        "median": 0,
+        "p75": 0.0714,
+        "max": 0.5993,
+        "mean": 0.0504
+      },
+      "all": {
+        "n": 339,
+        "min": 0,
+        "p25": 0,
+        "median": 0,
+        "p75": 0.075,
+        "max": 0.5993,
+        "mean": 0.0489
+      },
+      "ks": {
+        "D": 0.1078,
+        "crit05": 0.174,
+        "differs": false
+      }
+    }
+  },
+  "verdict": {
+    "iouBest": "same",
+    "searchedAt": "same",
+    "ink": "same",
+    "iou0": "same"
+  },
+  "reading": "For each feature: KS D is the largest gap between the sat and unsat distributions; crit05 is the 0.05 threshold. differs=false on every feature means the eighty are a representative draw and their eye-finding is likely to hold across the 259. A feature with differs=true marks where the unsat marks are systematically unlike the sat ones, and where an eye is therefore still specifically owed."
+}

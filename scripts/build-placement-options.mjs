@@ -51,6 +51,7 @@
  */
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { basename, join } from "node:path";
+import { ranOutOfRoom, refusedItsOwnInk } from "../packages/etl/scripts/lib/mark-ink.mjs";
 
 const ROOT = new URL("..", import.meta.url).pathname;
 const DATA = join(ROOT, "docs/design/mark-placement.data.json");
@@ -129,9 +130,17 @@ const GRAINS = ["shipped", "page", "line", "tilt", "curve"];
  * a pinned search are.
  */
 const TRUST = { iou: 0.55, radius: 3 };
-const atWindowEdge = (r) =>
-  Math.abs(Math.abs(r.dx) - TRUST.radius) < 1e-6 || Math.abs(Math.abs(r.dy) - TRUST.radius) < 1e-6;
-const trusted = (r) => r.iouBest >= TRUST.iou && !atWindowEdge(r);
+// The out-of-room and refusal tests are the ship asset's own, imported rather than
+// re-stated here, so the trusted/refused split a reader inspects on this page is the
+// split the app actually ships. Both read the mark's *own* searched distance — three
+// for the ordinary look, eight for the ones the wider second look rescued, carried on
+// each row as `searchedAt` — instead of a fixed three. A mark allowed eight units that
+// came to rest at three had room to spare, so its match is a real find; the same
+// landing judged against a hard-coded three would read as a wall it backed into. That
+// is the one population where a fixed three and the per-mark reach give opposite
+// verdicts, and reconciling them is issue ㊱ (docs/design/mark-registration.md).
+const atWindowEdge = (r) => ranOutOfRoom(r, TRUST.radius);
+const trusted = (r) => !refusedItsOwnInk(r, TRUST.radius, TRUST.iou);
 
 /** The grain names the correction builder knows, keyed by ours. */
 const GRAIN_ARG = { page: "page", line: "line", tilt: "line-tilt", curve: "line-curve" };
@@ -252,7 +261,13 @@ async function extract() {
     // the search found it; where it is not, it inherits the printed line. The
     // fallback is what makes this shippable rather than reckless — see TRUST.
     const a = corr.tilt.apply(r);
-    o.mark = trusted(r) ? [r3(r.dx), r3(r.dy)] : [r3(a.dx), r3(a.dy)];
+    // Only a mark carries an ink measurement. A word or a verse-end circle is not
+    // placed on its own ink, so under H it simply inherits the printed line like
+    // every other grain — the tilt fallback below. `trusted` reads ink fields a
+    // non-mark row does not have, so gate on their presence rather than let a
+    // missing measurement read as a confident match.
+    const isInkMark = Number.isFinite(r.iouBest);
+    o.mark = isInkMark && trusted(r) ? [r3(r.dx), r3(r.dy)] : [r3(a.dx), r3(a.dy)];
     return o;
   };
 
@@ -583,7 +598,7 @@ const OPTIONS = [
     id: "F",
     grain: "tilt",
     title: "Line each printed line up on its own, and let it tilt",
-    tag: "the recommendation — four more numbers a line",
+    tag: "the line-by-line fix — four more numbers a line, and where H falls back",
     what: "Each printed line gets its own amount, and that amount is allowed to grow along the line rather than being the same at both ends. Marks and words move together.",
     feel: "A reader tapping or reading along nearly any single line would see the highlight sit on the right letter, start to finish. The visible exceptions are concentrated: whole lines that still read as a little off, and the two ends of a line reading worse than its middle — so an occasional line, or the first/last word of a line, is where a mismatch would still show up.",
   },
@@ -608,9 +623,9 @@ const OPTIONS = [
     id: "H",
     grain: "mark",
     title: "Put each mark where its own ink is, and line up the rest",
-    tag: "the most accurate — and the one this measurement cannot grade",
+    tag: "the option the owner chose — most accurate, and the one this measurement cannot grade",
     what: "Every mark whose ink was found convincingly goes exactly where it was found. The rest — and every word rectangle — get the per-line correction instead.",
-    feel: "For most marks, a reader would see the highlight sit exactly on the letter's own ink — not merely on the line, on that letter. A minority of marks (the ones the search could not place convincingly) and every word behave like option F instead, so the experience is not perfectly uniform: most of the page looks exact, and the rest looks like the recommendation above.",
+    feel: "For most marks, a reader would see the highlight sit exactly on the letter's own ink — not merely on the line, on that letter. A minority of marks (the ones the search could not place convincingly) and every word behave like option F instead, so the experience is not perfectly uniform: most of the page looks exact, and the rest looks like option F above.",
   },
 ];
 
@@ -663,7 +678,7 @@ const TRADEOFFS = {
     undo: { tone: "warn", head: "Reversible, not free", body: "Dropping the table means rebuilding everything it moved." },
   },
   F: {
-    verdict: "the recommendation",
+    verdict: "the line-by-line fix, and where H falls back",
     build: {
       tone: "warn",
       head: "Four numbers a printed line",
@@ -953,7 +968,7 @@ function render({ artifact: ARTIFACT, out }) {
   const LIVE_CAPS = {
     A: "Every box sits where the app puts it today — noticeably off the letter, the same way on nearly every line.",
     B: "One correction for the whole page. Most boxes tighten; the top and bottom lines stay a little off.",
-    F: "The recommendation. Each line lined up on its own and allowed to tilt — boxes sit on their letters, start to finish.",
+    F: "Each line lined up on its own and allowed to tilt — boxes sit on their letters, start to finish. Where H cannot place a mark, this is what it falls back to.",
     G: "The marks move like F; the word outlines stay on today's fit — so a mark lands right while its word does not.",
     I: "Like F, but each line's correction may bend. A shade fewer whole-line misses; the ends of a line are still the weak spot.",
     H: "Each mark the ink search placed goes onto its own ink — watch a box land exactly on the dashed outline. The rest fall back to F.",
@@ -1161,13 +1176,25 @@ ${printDefs}
   </p>
   <div class="stats">
     <div><b>${(c.pooled.shipped.far * 100).toFixed(0)}%</b><span>of rectangles are badly out today</span></div>
-    <div><b>${ho("tilt") ? `${ho("tilt").far.toFixed(1)}%` : pctS(c.pooled.tilt.far)}</b><span>after the recommended fix</span></div>
+    <div><b>${ho("tilt") ? `${ho("tilt").far.toFixed(1)}%` : pctS(c.pooled.tilt.far)}</b><span>after the line-by-line fix H falls back to</span></div>
     <div><b>${c.marks.toLocaleString("en")}</b><span>marks measured, on ${c.pages} pages</span></div>
     <div><b>${c.unmeasuredCount ?? d.unmeasured.length}</b><span>pages nothing could measure</span></div>
   </div>
 </div>
 
 <main>
+
+  <div class="decided">
+    <b>Decided &mdash; H: put each mark where its own ink is, and line the rest up.</b>
+    Every mark whose own ink the search can find convincingly is drawn exactly on that ink &mdash;
+    not merely on its printed line, on that one letter. The words, and the minority of marks the
+    search cannot place, fall back to lining each printed line up on its own (option F below). So
+    most of the page reads as exact and the rest reads as even, instead of the whole page sitting a
+    mark's height off the way it does today.
+    <span class="who">Chosen by the owner on 3 September 2026. Every other option stays drawn below:
+    they are the reason H was a choice, and section 7 is still where the numbers say why the answer
+    did not stop at F.</span>
+  </div>
 
 <section>
   <h2><span class="num">1</span>A few words, before anything else</h2>
@@ -1338,19 +1365,19 @@ ${liveBoard}
   ${OPTIONS.map(optionCard).join("\n")}
   <div class="note">
     <p>
-      <strong>F still carries the word &ldquo;recommended&rdquo; and I is the better option on every
-      number here. That is not an oversight.</strong> I was worked out after this page was written,
-      by asking what the rectangles F leaves badly out have in common — and the answer was each
-      other: more than half of them sit on the one printed line in fifteen that has gone wrong as a
-      whole, and a rectangle at either end of a line is about twice as likely to be badly out as one
-      in the middle. A correction that can only grow at a steady rate cannot follow that, because a
-      rate that splits the difference is wrong in the same direction at both ends. Letting it bend is
-      the whole of option I, and it costs one more number a line.
+      <strong>Among the line-by-line fixes, I is the better one on every number here.</strong> It was
+      worked out after this page was first written, by asking what the rectangles F leaves badly out
+      have in common — and the answer was each other: more than half of them sit on the one printed
+      line in fifteen that has gone wrong as a whole, and a rectangle at either end of a line is about
+      twice as likely to be badly out as one in the middle. A correction that can only grow at a steady
+      rate cannot follow that, because a rate that splits the difference is wrong in the same direction
+      at both ends. Letting it bend is the whole of option I, and it costs one more number a line.
     </p>
     <p>
-      Moving the recommendation is the decision this page exists to ask for, so the page does not
-      quietly move it. What the page can do is put the two side by side and say which way the numbers
-      point, which is what section 7 does.
+      The owner chose H, which sits above all of these line-by-line fixes: it puts each mark it can
+      place onto that mark's own ink, and falls back to a line-by-line fix only where it cannot. So
+      the choice between F and I is now the choice of what H falls back to — I is the stronger
+      fallback, and section 7 is where the numbers say so.
     </p>
   </div>
 </section>
@@ -1461,7 +1488,7 @@ ${liveBoard}
   </p>
   <div class="two">
     ${specimen(layerOrnaments("shipped"), { crop: BAND, label: "A — the circles land on themselves." })}
-    ${specimen(layerOrnaments("tilt"), { crop: BAND, label: "F — the same circles, after the recommended correction. They no longer do." })}
+    ${specimen(layerOrnaments("tilt"), { crop: BAND, label: "F — the same circles, after a line-by-line correction. They no longer do." })}
   </div>
   <p>
     Whether that matters depends entirely on what the circles are used for, and today they are used
@@ -1786,6 +1813,12 @@ table.grid caption{ text-align:left; font-size:.82rem; color:var(--dim); padding
 .note{ border-left:3px solid var(--accent); background:var(--tint); padding:1rem 1.15rem;
   border-radius:0 5px 5px 0; margin:1.5rem 0 0; }
 .note p:last-child{ margin:0; }
+
+.decided{ border:1px solid var(--accent); border-left:4px solid var(--accent);
+  border-radius:10px; background:var(--tint); padding:1rem 1.2rem; margin:0 0 2rem;
+  font-size:1.02rem; color:var(--ink); }
+.decided b{ color:var(--ink); font-weight:650; }
+.decided .who{ display:block; margin-top:.5rem; color:var(--dim); font-size:.9rem; }
 
 .prior{ margin:1.25rem 0 0; max-width:64ch; }
 .prior dt{ font-family:ui-sans-serif,"Helvetica Neue",Arial,system-ui,sans-serif; font-size:.92rem;

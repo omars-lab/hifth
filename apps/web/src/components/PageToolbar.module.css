@@ -1,0 +1,91 @@
+/*
+ * The page tools bar (docs/design/page-toolbar-plan.md, step 1).
+ *
+ * It takes a row of its own above the book. Floated over the reading area
+ * it sat on the page's first line, and a tool bar that hides the text it works
+ * on is no use. Desktop only, by the same breakpoint as
+ * `DesktopChrome.module.css` (the copy of record is `DESKTOP_QUERY` in
+ * `src/useMediaQuery.ts`).
+ */
+.bar {
+  display: none;
+}
+
+@media (min-width: 1024px) and (min-height: 740px) {
+  .bar {
+    align-self: center;
+    /* Kept thin: at the smallest desktop window every pixel of this row comes
+       out of the page, and a page there must never be smaller than the
+       narrowest phone's (the desktop spread tests hold that line). */
+    margin-block: 4px 2px;
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding-block: 2px;
+    padding-inline: 2px var(--space-3);
+    border: 1px solid var(--hairline);
+    border-radius: var(--radius-md);
+    background: var(--paper-raised, var(--paper));
+    box-shadow: 0 1px 3px rgb(0 0 0 / 0.08);
+  }
+}
+
+.tools {
+  display: flex;
+  gap: 2px;
+}
+
+.tool {
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  min-block-size: var(--touch-min);
+  min-inline-size: var(--touch-min);
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--ink-soft);
+  cursor: pointer;
+}
+
+.tool:hover {
+  color: var(--accent-strong);
+}
+
+/* On is said by fill and weight, not colour alone (WCAG 1.4.1), and
+   `aria-checked` says it to a screen reader. */
+.tool[aria-checked="true"] {
+  background: var(--accent-tint);
+  color: var(--accent-strong);
+}
+
+.tool:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
+
+/* The key, small in the corner, as Figma and tldraw print it. */
+.letter {
+  position: absolute;
+  inset-block-end: 2px;
+  inset-inline-start: 3px;
+  font-family: var(--font-latin);
+  font-size: 9px;
+  line-height: 1;
+  color: var(--ink-faint);
+}
+
+/* No letters where nothing can hover: a tablet has the room for the bar but
+   not, usually, the keyboard — the same test the header's key legend uses. */
+@media (any-hover: none) {
+  .letter {
+    display: none;
+  }
+}
+
+.name {
+  min-inline-size: 7em;
+  color: var(--ink-soft);
+  font-size: var(--text-sm);
+  white-space: nowrap;
+}

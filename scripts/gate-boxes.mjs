@@ -11,11 +11,16 @@
  *             could be. The fallback is right there, and the page set is held
  *             as tightly as the count: a ninth fallback on page 300 is a
  *             defect even if one on page 1 were repaired the same day.
- *   OFF-GRID  2 — p564 68:3 and p602 107:2, the same shape twice: an ayah's
- *             short tail at the left margin cut to ~28 units on a 36-unit line,
- *             with the next ayah's box starting 8 units early. PLAN 17.
+ *   OFF-GRID  0 — held at 0 since 2026-09-06. Two boxes used to sit here, the
+ *             same shape twice: p564 68:3 and p602 107:2, each with a short tail
+ *             at the left margin cut to ~28 units on a 36-unit line. Both were
+ *             repaired at the source (the vendoring step now extends the tail to
+ *             its line's foot) so the pen draws them as one full line. PLAN 17.
  *
- * Both are ceilings *and* floors: a count that falls is also reported, because
+ *   REACH-BACK 0 — since 2026-09-25. A surah's first ayah may not reach up
+ *             onto the previous surah's last line (p106 5:1 and four more).
+ *
+ * All three are ceilings *and* floors: a count that falls is also reported, because
  * a fallback that disappears means either a polygon was repaired (then lower
  * the number here, in the same change) or the pen started accepting something
  * it used to refuse — and the second is exactly the kind of change this gate
@@ -29,7 +34,8 @@ import { sweep } from "./lib/box-sweep.mjs";
 
 const FALLBACK_COUNT = 8;
 const FALLBACK_PAGES = new Set([1, 2]);
-const OFF_GRID_COUNT = 2;
+const OFF_GRID_COUNT = 0;
+const REACH_BACK_COUNT = 0;
 
 const list = process.argv.includes("--list");
 const failures = [];
@@ -46,7 +52,7 @@ console.log(
   `gate:boxes — ${census.polygons} boxes on ${census.pages} pages, ${census.rects} rectangles: ` +
     `${census.fallback} fallback (pages ${fallbackPages.join(", ") || "none"}; ` +
     `${census.fallbackByKind.polygon} polygon, ${census.fallbackByKind.slanted} slanted, ${census.fallbackByKind.other} other), ` +
-    `${census.offGrid} off-grid, ${census.fused} fused (up to ${census.fusedMaxLines} lines), ${census.dot} dots`,
+    `${census.offGrid} off-grid, ${census.fused} fused (up to ${census.fusedMaxLines} lines), ${census.dot} dots, ${census.reachBack} reach-back`,
 );
 
 if (list) {
@@ -54,6 +60,8 @@ if (list) {
     const detail =
       f.rule === "fallback"
         ? `${f.kind}  ${f.d.slice(0, 60)}${f.d.length > 60 ? "…" : ""}`
+        : f.rule === "reach-back"
+        ? `rect ${f.rect} sits above the foot of the ayah before it`
         : `rect ${f.rect} is ${f.height.toFixed(1)} tall on a ${f.lineHeight} line (${f.lines} lines)`;
     console.log(
       `  p${String(f.page).padStart(3)}  ${f.key.padEnd(7)}  ${f.rule.padEnd(9)}  ${detail}`,
@@ -85,6 +93,14 @@ if (census.offGrid !== OFF_GRID_COUNT) {
       (census.offGrid > OFF_GRID_COUNT
         ? "Run with --list; a new one is a polygon-layer quirk to record in PLAN 17 and repair."
         : "Fewer than held — lower OFF_GRID_COUNT in the change that repaired it."),
+  );
+}
+
+if (census.reachBack !== REACH_BACK_COUNT) {
+  fail(
+    `${census.reachBack} surah opener(s) reach back onto the previous surah's last line; ` +
+      `the gate holds ${REACH_BACK_COUNT}. Run with --list, then repair it in the vendoring step ` +
+      `(the strip goes back to the ayah whose line it is).`,
   );
 }
 

@@ -317,17 +317,59 @@ parses the rows and refuses an inherited tree or a shipped path with no row, but
 checks that the rows stay sorted by door, and a later edit that collapsed them back into one
 table would pass every gate.
 
-### ② Which encumbered inputs are ingredients and which are only instruments · **open**
+### ② Which encumbered inputs are ingredients and which are only instruments · **answered**
 
-The distinction above is the whole of the technique, and this project has never sorted its
-inputs by it. Some are unambiguous — the pairings and the page artwork are ingredients, the
-comparison corpora identified in the audit are instruments. At least one is genuinely
-undecided: the morphology corpus is an ingredient for the root lens and, for the adjacency
-tree, may be replaceable by an instrument if the recomputation the audit proposes works.
+The distinction above is the whole of the technique, and this project had never sorted its
+inputs by it. Sorting them turned out to need only the two sharper tests the survey
+supplied — *can a recipient recover the input's protected content out of what we shipped?*
+and, if they can, *does what we shipped describe the input in a way that means anything
+against some other work?* — applied to measurements we already hold. The sort follows.
 
-**What would answer it:** classify each input, and for the undecided one, the measurement
-already tracked. The classification is cheap and would say immediately which of the
-separation patterns are even available.
+**The ingredients — their protected expression rides out in something we ship.**
+
+- **The page artwork.** We ship the printed pages themselves, so nothing is more plainly an
+  ingredient; and the geometry we draw from them — the page a verse sits on, the box around
+  each word — describes that one printed mus'haf in exact detail and means nothing against
+  any other page ever set. It is recoverable *and* it fails the second test. Both edges cut
+  the same way here.
+- **The pairings.** The look-alike word pairs ride out whole inside the neighbour data —
+  every one of the 2,516 is fully recoverable from what ships — so they are an ingredient by
+  the first test alone.
+- **The morphology corpus, where it feeds the root lens.** The relation it records between
+  roots and words ships in full, all 44,431 of it, so a recipient recovers the relation
+  entire. What that does *not* recover is protected expression: which root a word is keyed
+  to is a judgement made against a standard scheme, one that means the same thing against any
+  Arabic text and not just ours, so it passes the second test even though it fails the first.
+  Recoverable and exposed are different axes, and this input sits recoverable-but-safe.
+
+**The instruments — read only to check an output, so nothing of them leaves through any door.**
+
+- **The two outside corpora we compare against** — the second page-per-ayah witness and the
+  disinterested third opinion on where words divide. Each is read only to check a table we
+  built our own way; no value from either ever changes a byte of what ships. A validator is
+  not a dependency, and neither of these needs to go out at all.
+
+The line between the root scheme and the page geometry is the whole reason both tests are
+needed rather than one: the question is never whether something is a fact but whether a
+person chose among more than a few defensible alternatives. A morphological parse and a
+tajweed span are judgements; where ink physically sits on a page is an observation. That is
+why the root keying survives being fully recoverable and the page geometry does not.
+
+**The one input the sort cannot close on its own.** The morphology corpus feeds a second
+tree — the neighbour relation between verses — and there it is an ingredient *today*, because
+that relation is computed from it. Whether it stays one turns on the open question of whether
+the same neighbour hop can be recomputed from the printed page's own word order instead. If
+that holds, the corpus stops feeding the neighbour tree and becomes, for that tree, one more
+instrument: read to check the recomputed hop, shipped nowhere. So this input's neighbour-tree
+role is forwarded to that question and answered there, not here.
+
+*Answered 2026-09-04.* Every encumbered input now has a side. What it buys is exactly what the
+technique promised: the two outside corpora can be handled as instruments — nothing about them
+need ever ship — while the page artwork and the pairings cannot be separated away by any
+build-machine manoeuvre, because they ride out in the very trees we hand people. The one live
+lever is the morphology corpus's neighbour-tree role, and it is not ours to pull here. This is
+the input to the store-build decision below, not a substitute for it: knowing which trees are
+ingredients is what lets that decision be drawn against real feature loss rather than argued.
 
 ### ③ Whether a store build should carry every tree · **open**
 
@@ -337,9 +379,12 @@ very uneven — one omission costs a whole lens, another costs colouring and not
 and a third would end the app.
 
 **What would answer it:** this is a decision, not a task, and needs its options drawn
-against real feature loss rather than argued. It should not be opened until the
-classification in ② exists, because ② may remove the blocker from one of the trees
-entirely and change what the options are.
+against real feature loss rather than argued. Its precondition is now met — ② has sorted the
+inputs, and it did not remove the store-door blocker from any tree by reclassification: the
+page artwork and the pairings ride out as ingredients, so the only live lever is whether the
+neighbour tree can drop the morphology corpus, which is a separate open question. So this can
+now be opened, with the tree-by-tree feature-loss numbers the audit already holds as its
+options.
 
 ### ④ Twelve verses of scripture go out through the site door · **fixed**
 

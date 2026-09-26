@@ -1,0 +1,11 @@
+ruling <root>/packages/etl/scripts/self-test/contest/ruling.json
+seed 11 · 12 of 12 answered · least-sure 2026-09-22 (044f0ca2)
+graded by packages/etl/scripts/score-placement-contest.mjs · code <fingerprint> (9 files)
+over the hand marks · median 3.5s a trial
+the hand box preferred       100.0%  [51.0% – 100.0%]  4/4
+the decoy (a gap this size)  100.0%  [43.9% – 100.0%]  3/3
+the catches                  100.0%  [43.9% – 100.0%]  3/3
+twins called can't tell      100.0%  2/2
+neither box closed on it       0.0%  0/12
+session valid: the catches were caught
+the hand overrides are supported: the interval on "the hand box" clears half, so on these marks a person placed the mark better than the machine would have

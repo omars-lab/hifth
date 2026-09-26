@@ -23,8 +23,11 @@ export function useHashRouter(
 ): void {
   const onRestoreRef = useRef(onRestore);
   onRestoreRef.current = onRestore;
-  // The hash we last wrote, so a hashchange we caused is ignored.
-  const selfWritten = useRef<string | null>(null);
+  // The hash for what the app is showing now, so a hashchange that only names
+  // the current view is ignored. It was once "the hash we last wrote", which
+  // went stale the moment the reader moved on: a link back to that page was
+  // then taken for our own echo and dropped, leaving the reader where they were.
+  const showing = useRef<string | null>(null);
   // Guard the cold-open restore so it runs exactly once, when we first become
   // ready — a teacher's link parsed before the resolver loads must not be lost.
   const coldOpened = useRef(false);
@@ -35,7 +38,7 @@ export function useHashRouter(
   useEffect(() => {
     const apply = () => {
       const hash = window.location.hash;
-      if (hash === selfWritten.current) return;
+      if (hash === showing.current) return;
       const parsed = parseHash(hash);
       if (parsed) onRestoreRef.current(parsed);
     };
@@ -53,8 +56,8 @@ export function useHashRouter(
   useEffect(() => {
     if (!state || !coldOpened.current) return;
     const hash = serializeState(state);
+    showing.current = hash;
     if (hash === window.location.hash) return;
-    selfWritten.current = hash;
     window.history.replaceState(null, "", hash);
   }, [state]);
 }

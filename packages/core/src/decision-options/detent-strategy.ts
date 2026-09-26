@@ -86,6 +86,118 @@ export function markerEmphasis(distPx: number, near: number, peak: number): numb
   return 1 + (peak - 1) * t * t;
 }
 
+/**
+ * The same growth with the Dock's curve, a raised cosine: rounded at the top and
+ * easing out at the edge. The squared curve above comes to a point *on* the marker,
+ * so the size jumps as the pointer crosses it; this one is flat there and grows
+ * earlier in the approach (docs/design/page-bar-zoom-plan.md, step 4). The page bar
+ * uses this one since 2026-09-25; the decision page keeps the squared curve it was
+ * chosen on. Same arguments, same `1` at or beyond `near`, same `peak` under it.
+ */
+export function markerEmphasisDock(distPx: number, near: number, peak: number): number {
+  if (near <= 0 || !(distPx < near)) return 1;
+  return 1 + ((peak - 1) * (1 + Math.cos((Math.PI * distPx) / near))) / 2;
+}
+
+/**
+ * The fisheye lens (page-bar-numberline, decided B on 2026-09-22, docs/decisions/
+ * page-bar.md §"How does a reader find one juz among thirty on a bar this small?"):
+ * on a pointer that can hover, the page bar spreads apart under the pointer like a
+ * dock, so the juz landmarks near the finger separate far enough to read their
+ * numbers — while everything past the window stays exactly where it was.
+ */
+export interface FisheyeLens {
+  /** How far either side of the pointer, in pixels, the spread reaches. */
+  readonly radiusPx: number;
+  /**
+   * The shape of the spread. Below 1 expands the middle (the markers under the
+   * pointer fan out); at 1 it is no spread at all. It is the curve's exponent.
+   */
+  readonly power: number;
+  /** Pages either side of the pointer whose juz opening is named in the bar. */
+  readonly juzPageWindow: number;
+}
+
+/** The lens the bar graduated — tuned on the decision page against the real 604. */
+export const pageBarFisheye: FisheyeLens = {
+  radiusPx: 82,
+  power: 0.58,
+  juzPageWindow: 26,
+};
+
+/**
+ * Where a marker moves to under the lens. Given its signed distance from the
+ * pointer in pixels (which side and how far), return its new signed distance:
+ * inside the window the position is pushed outward along a power curve, so a
+ * cluster of juz ticks fans open under the pointer; at and beyond the window edge
+ * the displacement is zero, so the warp meets the untouched track seamlessly and
+ * nothing outside the neighbourhood twitches when the pointer moves. Standalone
+ * and side-effect-free, like the resolvers above, so the decision page can inline
+ * it and the app and the test share the exact same curve.
+ */
+export function fisheyeSpread(signedDistPx: number, lens: FisheyeLens): number {
+  const ad = Math.abs(signedDistPx);
+  if (!(ad < lens.radiusPx)) return signedDistPx; // at/beyond the edge: unmoved
+  const sign = signedDistPx < 0 ? -1 : 1;
+  return sign * lens.radiusPx * Math.pow(ad / lens.radiusPx, lens.power);
+}
+
+/**
+ * The magnifier the bar ships since 2026-09-25 (docs/design/page-bar-zoom-plan.md,
+ * step 1). The power curve above opens a hole at the pointer and then packs the
+ * pages tight again within a page or two, so single pages could never be marked.
+ * This is the classic graphical fisheye (Sarkar and Brown, 1992):
+ * g(x) = (D + 1)·x / (D·x + 1) on the distance as a fraction of the radius. It
+ * magnifies by D + 1 right at the pointer and eases off smoothly, and it still
+ * leaves the window edge and everything past it exactly where it was.
+ */
+export interface FocusLens {
+  /** How far either side of the pointer, in pixels, the magnifier reaches. */
+  readonly radiusPx: number;
+  /** How many times wider the bar is right under the pointer (D + 1). */
+  readonly magnify: number;
+  /** Pages either side of the pointer whose juz opening is named in the bar. */
+  readonly juzPageWindow: number;
+  /** The closest two page marks may sit, in pixels, before they are thinned out. */
+  readonly minTickGapPx: number;
+}
+
+export const pageBarFocus: FocusLens = {
+  radiusPx: 120,
+  magnify: 9,
+  juzPageWindow: 26,
+  minTickGapPx: 6,
+};
+
+/**
+ * Where a point moves to under the magnifier; the same contract as fisheyeSpread.
+ *
+ * `reachPx` is how much bar is left on the point's side of the pointer. Near an
+ * end of the bar that is less than the radius, and a full-radius spread would push
+ * the last pages past the end (seen 2026-09-25 at page 587). So the window on that
+ * side shrinks to what is left: the end of the bar stays put, and everything
+ * between it and the pointer is spread inside it.
+ */
+export function focusSpread(signedDistPx: number, lens: FocusLens, reachPx = Infinity): number {
+  const radius = Math.min(lens.radiusPx, reachPx);
+  const ad = Math.abs(signedDistPx);
+  if (!(radius > 0) || !(ad < radius)) return signedDistPx;
+  const sign = signedDistPx < 0 ? -1 : 1;
+  const d = lens.magnify - 1;
+  const x = ad / radius;
+  return sign * radius * (((d + 1) * x) / (d * x + 1));
+}
+
+/**
+ * How many pages apart the page marks are drawn where one page is `pagePx` wide:
+ * every page if they clear `minGapPx`, else every 5th, else every 10th, else none.
+ * The map rule — finer marks appear only where there is room to see them.
+ */
+export function pageTickStep(pagePx: number, minGapPx: number): 1 | 5 | 10 | null {
+  for (const step of [1, 5, 10] as const) if (step * pagePx >= minGapPx) return step;
+  return null;
+}
+
 /** A resolver plus how it presents itself, for the bar and the decision page. */
 export interface DetentStrategy {
   readonly id: "A" | "B" | "C";

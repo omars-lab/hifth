@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { JUZ_COUNT, juzOfPage, juzPageIndex, juzSpan, planPack } from "./packs.js";
+import { JUZ_COUNT, hizbPageIndex, juzOfPage, juzPageIndex, juzSpan, planPack } from "./packs.js";
 import {
   JUZ_STARTS,
   TOTAL_AYAHS,
@@ -173,6 +173,14 @@ describe("juzPageIndex", () => {
   it("takes the lowest page, not the first one the manifest happens to list", () => {
     const descending = [page(23, "2:150"), page(22, "2:142")];
     expect(juzPageIndex(descending)[1]).toBe(22);
+  });
+
+  it("has a sixty-entry hizb twin whose odd hizbs open on their juz's page", () => {
+    const pages = [page(1, "1:1"), page(21, "2:100"), page(22, "2:141", "2:142")];
+    const hizb = hizbPageIndex(pages);
+    expect(hizb).toHaveLength(60);
+    expect(hizb[0]).toBe(juzPageIndex(pages)[0]);
+    expect(hizb[2]).toBe(juzPageIndex(pages)[1]);
   });
 
   it("leaves a juz this build does not carry as null rather than the next one along", () => {

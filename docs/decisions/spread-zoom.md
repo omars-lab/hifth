@@ -160,3 +160,20 @@ share.
   accepted: growing from the fold keeps the middle gap and spends the desk margin
   before anything clips, so a modest magnification loses no edges at all. If either
   proves worse in the hand than on the page, this is reopenable on that evidence.
+
+## A fix, and the one limit it leaves (2026-09-25)
+
+Growing from the fold only worked when the page being read was the right-hand
+page of the opening. On an even page it is the left-hand one, and there both pages
+grew *into* the fold instead of away from it, and each was cut off at its own half
+of the book. At 150% the reader saw the inner halves of two pages side by side,
+which reads as one garbled line (#148). Each page now works out for itself which
+side the fold is on, stays joined to it, and hangs out over the empty desk on its
+outer side; the edge of the window is where it stops.
+
+The limit this leaves: with the book open, a magnified page moves up and down but
+not sideways, because sliding one page sideways would slide it over the other.
+Past roughly 170% on a 1440-wide screen the outer edges of both pages are off the
+window and cannot be dragged back into view. Closing to one page gets them back.
+If readers want those edges while keeping two pages, the answer is to slide the
+whole opening together, which is a larger change and is not built.

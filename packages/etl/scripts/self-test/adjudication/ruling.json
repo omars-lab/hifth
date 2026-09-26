@@ -1,0 +1,136 @@
+{
+ "built": "2026-09-22T00:00:00.000Z",
+ "kind": "session",
+ "seed": 7,
+ "count": 16,
+ "pages": 3,
+ "shiftRan": "2026-09-22",
+ "shiftFingerprint": "aaa8372b",
+ "asks": [
+  "choice",
+  "neither"
+ ],
+ "select": {
+  "of": [
+   1,
+   2,
+   3
+  ],
+  "strategy": "all"
+ },
+ "finished": "2026-09-22T00:10:00.000Z",
+ "answers": [
+  {
+   "i": 0,
+   "id": "p3k8",
+   "choice": 1,
+   "neither": false,
+   "ms": 2500
+  },
+  {
+   "i": 1,
+   "id": "p1k2",
+   "choice": 1,
+   "neither": false,
+   "ms": 2800
+  },
+  {
+   "i": 2,
+   "id": "p2k15",
+   "choice": 1,
+   "neither": false,
+   "ms": 3100
+  },
+  {
+   "i": 3,
+   "id": "p3k12",
+   "choice": -1,
+   "neither": false,
+   "ms": 3400
+  },
+  {
+   "i": 4,
+   "id": "p1k15",
+   "choice": 1,
+   "neither": false,
+   "ms": 3700
+  },
+  {
+   "i": 5,
+   "id": "p2k2",
+   "choice": 0,
+   "neither": false,
+   "ms": 2500
+  },
+  {
+   "i": 6,
+   "id": "p3k1",
+   "choice": 0,
+   "neither": false,
+   "ms": 2800
+  },
+  {
+   "i": 7,
+   "id": "p1k17",
+   "choice": 1,
+   "neither": false,
+   "ms": 3100
+  },
+  {
+   "i": 8,
+   "id": "p2k8",
+   "choice": 1,
+   "neither": false,
+   "ms": 3400
+  },
+  {
+   "i": 9,
+   "id": "p3k16",
+   "choice": 1,
+   "neither": false,
+   "ms": 3700
+  },
+  {
+   "i": 10,
+   "id": "p1k14",
+   "choice": -1,
+   "neither": false,
+   "ms": 2500
+  },
+  {
+   "i": 11,
+   "id": "p2k18",
+   "choice": 1,
+   "neither": false,
+   "ms": 2800
+  },
+  {
+   "i": 12,
+   "id": "p3k18",
+   "choice": 1,
+   "neither": false,
+   "ms": 3100
+  },
+  {
+   "i": 13,
+   "id": "p1k7",
+   "choice": 1,
+   "neither": false,
+   "ms": 3400
+  },
+  {
+   "i": 14,
+   "id": "p2k19",
+   "choice": 1,
+   "neither": false,
+   "ms": 3700
+  },
+  {
+   "i": 15,
+   "id": "p3k19",
+   "choice": 1,
+   "neither": false,
+   "ms": 2500
+  }
+ ]
+}
