@@ -1330,7 +1330,12 @@
         {
           "file": "packages/etl/scripts/build-adjacency.mjs",
           "symbol": "addEdge",
-          "note": "Dataset + curated edges → 114 shards. Reverse edges are generated here, so an edge stated once is navigable from both ends."
+          "note": "Dataset + curated edges + verbatim twins → 114 shards. Reverse edges are generated here, so an edge stated once is navigable from both ends."
+        },
+        {
+          "file": "packages/etl/scripts/build-verbatim-twins.mjs",
+          "symbol": "FLOOR_WORDS",
+          "note": "The feeder that closed the whole-verse gap from our OWN bytes. The dataset above is built from recurring *phrases*, and against the outside ruler (probe-qul-rulers.mjs) it turned out to miss almost every whole verse repeated word-for-word in two places — the hardest of all for a memoriser, a verse repeated whole with only its surroundings to tell the two apart. This finds them by grouping every verse by its rasm skeleton (`wordsByAyah` → `normalise` in morphology.mjs, the same per-word comparison build-adjacency scores on) and writing `data/mutashabihat/verbatim-twins.json` — 636 pairs of verse NUMBERS, no text. build-adjacency reads it and joins each pair as a `twin` edge, so the span pass washes the whole verse. Structurally the sibling of build-alignment.mjs: a build step that writes a committed intermediate a later writer consumes, not an assets/** writer. Floor of four words is where coincidence (الم, short refrains) stops and confusion starts; the ruler's own strong line agrees (636 found against its 635), which is what says the set is complete, not lucky. Nothing of the ruler is copied — it only confirmed. Decision: similar-ayah-enrichment (decided D)."
         },
         {
           "file": "packages/core/src/quran-meta.ts",
@@ -1368,7 +1373,8 @@
         "Every script prints a summary line — counts in, counts out, largest shard. Read it; a silent 10% drop in edges looks exactly like success.",
         "Human verdicts on specific edges are permanent. They go in the verified-edges register, and gate:verified-edges enforces them from then on.",
         "Data here can be structurally perfect and semantically noise; gate:edges is the only check that reads meaning. A new edge type whose promise is shared phrasing belongs in its SCORED_TYPES, or it ships unmeasured.",
-        "A new edge type also becomes a new stratum in the spot-audit draw automatically, and `make validate` will show it as a class nobody has looked at until someone does."
+        "A new edge type also becomes a new stratum in the spot-audit draw automatically, and `make validate` will show it as a class nobody has looked at until someone does.",
+        "Verbatim twins are derived, never hand-listed: change the floor or the grouping in build-verbatim-twins.mjs and re-run `pnpm --filter @hifth/etl build:twins` before `make etl`, so verbatim-twins.json and the shards regenerate together. It reads only the morphology corpus and writes verse numbers, so the copy-nothing boundary holds — do not fold in the ruler's pairs (that would reopen qul-reliance)."
       ],
       "gates": [
         "pnpm gate:verified-edges",
@@ -1611,7 +1617,7 @@
         {
           "file": "packages/etl/scripts/probe-qul-rulers.mjs",
           "symbol": "similarityCheck",
-          "note": "The QUL half of the same idea: measure our shipped numbers against the outside library and pin the AGREEMENT, never the bytes. Reads layout 10 (the V2 page authority), the juz metadata and the two similarity corpora (73 phrase, 74 ayah) from a gitignored cache, and writes verse keys, ids and counts plus the SHA-256 of every file read — so a rerun reproduces or says upstream moved. `probe-` and opt-in for probe-reference.mjs's reason (the cache a clean checkout lacks would make a gate red for everyone but the maintainer). The `gap` block characterises what corpus 74 knows and we do not — 781 strong, 635 verbatim whole-verse twins — which is the evidence the similar-ayah-enrichment decision rests on. No glyph crosses in; gate:scripture and gate:notext stay green."
+          "note": "The QUL half of the same idea: measure our shipped numbers against the outside library and pin the AGREEMENT, never the bytes. Reads layout 10 (the V2 page authority), the juz metadata and the two similarity corpora (73 phrase, 74 ayah) from a gitignored cache, and writes verse keys, ids and counts plus the SHA-256 of every file read — so a rerun reproduces or says upstream moved. `probe-` and opt-in for probe-reference.mjs's reason (the cache a clean checkout lacks would make a gate red for everyone but the maintainer). The `gap` block characterises what corpus 74 knows and we do not — the evidence the similar-ayah-enrichment decision rested on. When first measured it was 781 strong and 635 verbatim whole-verse twins; deciding that decision (option D) closed the whole-verse gap by deriving those twins from our own morphology (build-verbatim-twins.mjs) and folding them into the shipped set, so the probe now reads the twins back in and the verbatim gap falls to 3 — three genuine near-pairs the exact-sequence finder correctly leaves out. No glyph crosses in; gate:scripture and gate:notext stay green."
         },
         {
           "file": ".claude/skills/leverage-qul/SKILL.md",

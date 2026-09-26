@@ -919,6 +919,7 @@
             12
           ]
         },
+        "twin": true,
         "ctx": true
       }
     ],

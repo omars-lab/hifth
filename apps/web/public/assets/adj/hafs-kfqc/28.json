@@ -1,4 +1,31 @@
 {
+  "2": {
+    "edges": [
+      {
+        "type": "mutashabih",
+        "to": "quran/hafs-kfqc/26:2",
+        "page": 367,
+        "dir": {
+          "dSurah": -2,
+          "dPage": -18
+        },
+        "span": {
+          "from": [
+            1,
+            4
+          ]
+        },
+        "toSpan": {
+          "from": [
+            1,
+            4
+          ]
+        },
+        "twin": true
+      }
+    ],
+    "ext": []
+  },
   "12": {
     "edges": [
       {
@@ -724,6 +751,34 @@
     ],
     "ext": []
   },
+  "62": {
+    "edges": [
+      {
+        "type": "mutashabih",
+        "to": "quran/hafs-kfqc/28:74",
+        "page": 394,
+        "dir": {
+          "dSurah": 0,
+          "dPage": 1,
+          "sameJuz": true
+        },
+        "span": {
+          "from": [
+            1,
+            9
+          ]
+        },
+        "toSpan": {
+          "from": [
+            1,
+            9
+          ]
+        },
+        "twin": true
+      }
+    ],
+    "ext": []
+  },
   "64": {
     "edges": [
       {
@@ -878,6 +933,34 @@
             5
           ]
         }
+      }
+    ],
+    "ext": []
+  },
+  "74": {
+    "edges": [
+      {
+        "type": "mutashabih",
+        "to": "quran/hafs-kfqc/28:62",
+        "page": 393,
+        "dir": {
+          "dSurah": 0,
+          "dPage": -1,
+          "sameJuz": true
+        },
+        "span": {
+          "from": [
+            1,
+            9
+          ]
+        },
+        "toSpan": {
+          "from": [
+            1,
+            9
+          ]
+        },
+        "twin": true
       }
     ],
     "ext": []
