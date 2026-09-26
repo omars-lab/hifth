@@ -1,7 +1,16 @@
 # The page bar on a phone — how does a thumb land on one exact page?
 
-*Status: open. Four options, each running on the decision page so you can drag them. Nothing
-here is in the app yet; the phone bar today is option A.*
+*Status: decided 25 September 2026 by the owner: **D**, slow down by sliding up, with a strip
+of page marks that zooms in as you do. The four options stay running on the decision page.*
+
+## So what was decided?
+
+**D.** On a phone, while dragging the page bar, sliding the thumb up slows the knob to half, a
+quarter, then a tenth of its speed, and a strip of page marks above the thumb zooms in as it
+slows, until it shows single pages. The reason is that slowing down with nothing to watch is
+aiming blind, and marks without slowing race past; together, the strip shows what the slowing
+is doing. B and C are not built on their own. The speeds and heights start at Apple's and can
+be tuned by hand on a real phone.
 
 **Try it:** <https://blog.bytesofpurpose.com/hifth/docs/design/page-bar-phone-scrub-options.html>
 — `page-bar-phone-scrub-options.html`, checked in and rebuilt by
