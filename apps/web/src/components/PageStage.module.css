@@ -458,7 +458,7 @@
 .stage[data-tool="note"],
 .stage[data-tool="note"] .host :global(svg) :global(.ayahPolygon),
 .stage[data-tool="note"] .host :global(svg) :global([id^="verse-"]) {
-  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath d='M12 22s-6.5-6-6.5-11.5a6.5 6.5 0 0 1 13 0C18.5 16 12 22 12 22z' fill='%232563eb' stroke='%23fff' stroke-width='1.5' stroke-linejoin='round'/%3E%3Ccircle cx='12' cy='10.5' r='2.2' fill='%23fff'/%3E%3C/svg%3E") 12 22, crosshair;
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath d='M12 22s-6.5-6-6.5-11.5a6.5 6.5 0 0 1 13 0C18.5 16 12 22 12 22z' fill='%231f6f66' stroke='%23fff' stroke-width='1.5' stroke-linejoin='round'/%3E%3Ccircle cx='12' cy='10.5' r='2.2' fill='%23fff'/%3E%3C/svg%3E") 12 22, crosshair;
 }
 
 /* A note's pin on the page. Its shapes must take the pointer, against the rule
@@ -472,7 +472,7 @@
   pointer-events: auto;
 }
 .host :global(svg) :global([data-note-pin]) :global(path) {
-  fill: #2563eb;
+  fill: var(--accent);
   stroke: #fff;
   stroke-width: 0.8;
 }
