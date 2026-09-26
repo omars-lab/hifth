@@ -1,15 +1,19 @@
 # Should the app take in the whole-verse twins the ruler knows and it does not?
 
-**Status:** open — no option chosen. Recorded 2026-09-03.
+**Status:** decided 2026-09-03 (omar) — **D**. The twins are found in the app's own
+already-included word data, shipped as bare verse numbers, and the outside library is used only
+to confirm the set is complete. The copy-nothing boundary is not reopened. The answer the record
+was first written to weigh — reopening that boundary to take the ruler's pairs in — turned out to
+be unnecessary; see "What else could be considered" and the pivot note in
+`docs/issues/verbatim-twins-found-in-house.md`.
 
 **Picture:** <https://blog.bytesofpurpose.com/hifth/docs/design/similar-ayah-enrichment.html> — the
-missing twins drawn on the real printed pages, at the size the app would show them, with the
-counts computed from the checked-in measurement. Checked in as `similar-ayah-enrichment.html`,
-rebuilt by `node scripts/build-similar-ayah-gap.mjs`.
+twins drawn on the real printed pages, at the size the app shows them, with the counts computed
+from the checked-in measurement. Checked in as `similar-ayah-enrichment.html`, rebuilt by
+`node scripts/build-similar-ayah-gap.mjs`.
 
 Read the picture first. This file is the reasons; the page is the subject, and no paragraph here
-substitutes for seeing two verses that are the same verse, sitting pages apart, that the app
-connects with nothing.
+substitutes for seeing two verses that are the same verse, sitting pages apart, now bridged.
 
 ## What this is
 
@@ -34,28 +38,39 @@ library's bare layout numbers was on the table and was turned down.
 Bringing the library's look-alike pairs in — even as nothing but pairs of verse numbers, which is
 about as far from "its bytes" as a derived fact can get — is still taking a computed result out of
 that library and shipping it. It reopens the copy-nothing decision. This record does not pretend
-otherwise, and the two are cross-linked in the register. The honest form of the question is not
+otherwise, and the two are cross-linked in the register. The honest form of that question is not
 "should we add these pairs" but **"are these twins the exception worth reopening the boundary
 for."**
 
-## The cost of leaving it
+**The chosen answer sidesteps this entirely.** Option D finds the twins in the app's *own*
+already-vendored word data — the verified Arabic the morphology corpus carries, read only at build
+time, never shipped — and writes out nothing but verse numbers. Nothing is taken from the outside
+library at all; it is left doing only what the boundary allows, measuring. So the collision above
+is the reason A, B and C are on the page, and the reason none of them was chosen.
+
+## What it was costing, and what the choice closed
 
 Computed by the measurement this decision is built on, re-derived whenever that measurement pin is
-rebuilt:
+rebuilt. The first column is what the app shipped before this decision; the second is after the
+twins were added:
 
-| | |
-| --- | --- |
-| look-alike links the app ships today | 2,516 |
-| of them the ruler also knows | 2.8% |
-| strong look-alikes the ruler has that the app lacks | 781 |
-| of those, scored a full word-for-word match | 635 |
-| verses those full matches touch | 384 |
+| | before | after |
+| --- | --- | --- |
+| look-alike links the app ships | 2,516 | 3,781 |
+| of them the ruler also knows | 2.8% | 35.3% |
+| strong look-alikes the ruler has that the app lacks | 781 | 149 |
+| of those, scored a full word-for-word match | 635 | 3 |
+| verses those full matches touch | 384 | — |
 
-The cost of the status quo is quiet: nothing breaks, and a reader is simply not told about these
-particular twins. But they are among the hardest verses to keep apart — a verse repeated whole, in
-two sūras, with only its surroundings to tell it apart — and the bridge the app exists to build is
-exactly the one it is not building here. Nothing else is blocked behind this decision; it can sit
-open indefinitely at no cost to anything else.
+The cost of the old status quo was quiet: nothing broke, and a reader was simply not told about
+these particular twins. But they are among the hardest verses to keep apart — a verse repeated
+whole, in two sūras, with only its surroundings to tell it apart — and the bridge the app exists to
+build was exactly the one it was not building there.
+
+The three full matches that remain are not twins the app is missing. Held glyph against glyph they
+each differ by at least a word — two by a single letter of spelling, one by a reordered ending — so
+they are *near*-pairs, and the app's twin-finder is right to leave them out. They belong to the
+open tail below, not to this count.
 
 ## What the ruler cannot tell us, and why it matters
 
@@ -107,23 +122,48 @@ Drawn on the picture; summarised here.
   correspondence on its own pages so the shared-and-differing marking works on these twins as it
   does on the app's own. Full parity; the most work; the alignment has to be eye-checked where a
   verse's word count differs between page and ruler.
+- **D — Find the twins in the app's own word data; use the ruler only to check the set. ← chosen.**
+  The app never takes the ruler's pairs in at all. It groups its own already-vendored words by
+  their rasm skeleton, at build time, and any two verses whose skeletons match in full are twins —
+  the same per-word comparison the app already uses for the pairs it built itself. Only verse
+  numbers are written out; no Qur'an text ships. The ruler is then held up beside the result and
+  agrees almost exactly (636 pairs found, against its 635), which is what tells us the set is
+  complete rather than lucky. Because every word of a twin is shared, the app's existing
+  green-and-yellow marking washes the whole verse green with nothing left to build. This is the
+  only option that connects the twins **without** reopening the copy-nothing boundary, and it costs
+  less than B, not more.
 
 ## What else could be considered, and why it is not here
 
-Finding these twins **without the ruler at all** — the app cannot, because it ships no Qur'an text,
-only anonymous page artwork and numbers, so it has nothing to compare word against word. Copying
-the ruler's verified text and fonts in wholesale was weighed when the boundary was first drawn and
-turned down; it is not revived here.
+Finding these twins **without the ruler at all** was written into an earlier draft of this record
+as the one thing the app could not do — "it ships no Qur'an text, only anonymous page artwork and
+numbers, so it has nothing to compare word against word." That was true of what the app *ships* and
+false of what it *builds from*. The verified Arabic of the morphology corpus has been vendored for
+other work all along, read only at build time and never shipped; comparing verses word against word
+there is exactly what it makes possible. The sentence was wrong, the option it dismissed was
+available, and it is the one that was chosen — option D. The pivot is written up in full at
+`docs/issues/verbatim-twins-found-in-house.md`.
+
+Copying the ruler's verified text and fonts in wholesale was weighed when the boundary was first
+drawn and turned down; it is not revived here.
 
 ## What would change the answer
 
-If the app ever gained a text-bearing collection of its own, for any reason, the twins could be
-computed in-house and the boundary would not need reopening. If the word-by-word alignment proves
-cheap and reliable, C stops costing much more than B, and the choice collapses to "reopen the
-boundary or not."
+The choice rests on the build-time word data being present and trustworthy. If that vendored corpus
+were ever removed, the in-house finder would go with it and the question would revert to A/B/C — the
+ruler's pairs, and the boundary. If the ruler and the in-house set ever drifted apart on which
+verses are whole-verse twins, the disagreement would be the signal to look again; today they agree
+to within a pair, which is why D is trusted.
 
 ## What this is not settling
 
+Not the word-by-word marking of **near**-pairs — two verses that differ by a word or two, where the
+app would mark what they share green and what they part on yellow, as it already does for its own
+built pairs. That marking needs a per-word correspondence worked out on the app's own pages
+(the ruler's word numbering does not survive the trip to the printed artwork), and it is the open
+tail of this decision, not part of what D settled. The three full matches still in the gap are
+exactly these near-pairs.
+
 Not whether a verse should announce, on the page you are reading, that it resembles others — that
-is a separate question about the reading surface. Not the exact shape imported numbers would take.
-Not the copy-nothing boundary in general: only whether these twins are the exception worth making.
+is a separate question about the reading surface. Not the copy-nothing boundary in general: D was
+chosen precisely so that boundary did not have to be touched.

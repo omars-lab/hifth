@@ -677,6 +677,7 @@
             9
           ]
         },
+        "twin": true,
         "ctx": true
       }
     ],

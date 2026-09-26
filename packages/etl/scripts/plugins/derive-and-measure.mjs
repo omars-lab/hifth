@@ -24,7 +24,7 @@ const HERE = dirname(fileURLToPath(import.meta.url));
 const SCRIPTS = join(HERE, "..");
 
 // The shipped-shard build, unchanged: pages, then the shards derived from them.
-const STEPS = ["extract-pages.mjs", "build-adjacency.mjs", "build-roots.mjs", "build-tajweed.mjs"];
+const STEPS = ["extract-pages.mjs", "build-verbatim-twins.mjs", "build-adjacency.mjs", "build-roots.mjs", "build-tajweed.mjs"];
 
 /** @type {import("../lib/etl-plugins.mjs").EtlPlugin} */
 export default {

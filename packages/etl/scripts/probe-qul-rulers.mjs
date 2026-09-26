@@ -57,6 +57,7 @@ const CACHE = {
 const SHIPPED = {
   ayahPages: join(ETL, "data/pages/ayah-pages.json"),
   edges: join(ETL, "data/mutashabihat/mutashabiha_data.json"),
+  twins: join(ETL, "data/mutashabihat/verbatim-twins.json"),
 };
 const PIN = join(ETL, "data/qul/qul-rulers.probe.json");
 
@@ -166,6 +167,18 @@ function similarityCheck() {
         for (const a of srcs) if (a !== b) ours.add(`${a}|${b}`);
       }
     }
+  }
+
+  // The whole-verse twins are the other half of what we ship (build-verbatim-twins
+  // finds them in our own vendored corpus; build-adjacency joins every pair in a
+  // cluster). Fold them into our set so the ruler measures the full shipped signal,
+  // not only the phrase-recurrence half. Every pair, both directions, to match the
+  // directed set above. Keys are already "surah:ayah".
+  if (existsSync(SHIPPED.twins)) {
+    note(SHIPPED.twins);
+    for (const cluster of json(SHIPPED.twins).twins)
+      for (const a of cluster)
+        for (const b of cluster) if (a !== b) ours.add(`${a}|${b}`);
   }
 
   const result = { ourEdges: ours.size };
