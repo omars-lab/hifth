@@ -167,6 +167,18 @@
       --sheet-shadow:0 -2px 10px rgba(0,0,0,.30),0 -12px 40px rgba(0,0,0,.5);}
     .leaf path{fill:#ece4d6;}
   }
+
+  /* What a choice does for a hafiz, marked the way a reader marks a page: a highlighter stroke. */
+  .hafiz-box{margin:1.6em 0;padding:1em 1.15em;border:2px solid #e8c400;border-radius:12px;background:rgba(255,236,120,.14)}
+  .hafiz-box h2{margin-top:0}
+  .hafiz-box ul{margin:.5em 0 0;padding-left:1.1em}
+  .hafiz-box li{margin:.45em 0}
+  .hl{background-image:linear-gradient(100deg,rgba(255,221,0,0) 0%,rgba(255,221,0,.62) 1.2%,rgba(255,228,50,.48) 50%,rgba(255,221,0,.66) 98.8%,rgba(255,221,0,0) 100%);border-radius:.4em .2em .45em .25em;padding:.06em .28em;margin:0 -.08em;-webkit-box-decoration-break:clone;box-decoration-break:clone}
+  .for-hafiz{margin:.55em 0 0}
+  @media (prefers-color-scheme: dark){
+    .hafiz-box{background:rgba(250,204,21,.08);border-color:#b99a10}
+    .hl{background-image:linear-gradient(100deg,rgba(250,204,21,0) 0%,rgba(250,204,21,.34) 1.2%,rgba(250,204,21,.26) 50%,rgba(250,204,21,.36) 98.8%,rgba(250,204,21,0) 100%)}
+  }
 </style>
 </head>
 <body>
@@ -224,6 +236,15 @@
   bottom drawer holding the verse's tools. The drawer is one shape, rising from the bottom, on phone and
   desktop alike.</p>
 
+  <section class="hafiz-box">
+  <h2>What does this change for a hafiz?</h2>
+  <p><span class="hl">A hafiz who has just slipped wants to mark exactly where — one vowel, one word —
+  with one thumb, without losing their place.</span> How many moves that mark takes decides whether it
+  gets made at all in the middle of a recitation, and the marked slips are what the next revision is
+  built from. The verse's own tools (listen, translate, bookmark) are wanted less often in the middle of
+  a recitation, so they can afford a slower door.</p>
+  </section>
+
   <h2>Why is this being asked now?</h2>
   <p>Because the pieces on both sides are ready and want a home. The whole-verse tools already exist —
   a reader can note a verse, read a translation, hear it recited, bookmark it. The word's fine picker
@@ -244,13 +265,16 @@
     <tr><td>Tap vs hold<br><small>drawn here</small></td><td>A quick tap opens the word drawer; a press
       and hold on the same word opens the ayah drawer. Both are bottom sheets.</td><td>One target, two
       depths — nothing new to learn but the hold. Asks a reader to discover that holding does more, and
-      asks the build to tell a tap from a hold without misfiring on a scroll.</td></tr>
+      asks the build to tell a tap from a hold without misfiring on a scroll.
+      <p class="for-hafiz"><span class="hl"><b>For a hafiz:</b> marking a slip on a word is one tap, the fastest of the three. The verse tools take a hold that someone has to show you once.</span></p></td></tr>
     <tr><td>Ask which</td><td>Any press opens one sheet that asks &ldquo;this word, or the whole
       verse?&rdquo; and the reader picks.</td><td>Nothing hidden — but a question on every touch, and a
-      second tap before any tool, for a choice that is usually obvious.</td></tr>
+      second tap before any tool, for a choice that is usually obvious.
+      <p class="for-hafiz"><span class="hl"><b>For a hafiz:</b> every slip costs a question and a second tap, mid-recitation. It is the most likely of the three to be skipped, and slips left unmarked are lost.</span></p></td></tr>
     <tr><td>Two affordances</td><td>The word's tools open on the word; the verse's tools live behind a
       separate control (a margin handle, a verse number).</td><td>No hold to discover, but a second thing
-      on the page to find, and the verse tools no longer reached from the word a reader is looking at.</td></tr>
+      on the page to find, and the verse tools no longer reached from the word a reader is looking at.
+      <p class="for-hafiz"><span class="hl"><b>For a hafiz:</b> marking a slip is one tap, as in the first. The verse tools move away from where your eyes are.</span></p></td></tr>
   </table>
 
   <h2>What did we already decide that this leans on?</h2>
