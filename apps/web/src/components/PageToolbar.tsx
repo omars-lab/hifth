@@ -10,6 +10,7 @@ import styles from "./PageToolbar.module.css";
  * have rules").
  */
 export const TOOL_KEYS: Readonly<Record<string, PageTool>> = {
+  KeyR: "read",
   KeyV: "select",
   KeyH: "highlight",
   KeyB: "bookmark",
@@ -22,6 +23,7 @@ export const TOOL_KEYS: Readonly<Record<string, PageTool>> = {
 
 /** The tools in the order every bar shows them, desktop and phone alike. */
 export const TOOLS: ReadonlyArray<{ tool: PageTool; letter: string }> = [
+  { tool: "read", letter: "R" },
   { tool: "select", letter: "V" },
   { tool: "highlight", letter: "H" },
   { tool: "bookmark", letter: "B" },
@@ -121,7 +123,9 @@ export function toolHint(t: ReturnType<typeof useT>["t"], x: PageTool, touch = f
   // A finger has no hover, so the harakat tool's magnifier cannot follow it:
   // on a phone a tap takes the sign nearest the finger.
   if (touch && x === "sign") return t.toolSignHintTouch;
-  return x === "bookmark"
+  return x === "read"
+    ? t.toolReadHint
+    : x === "bookmark"
     ? t.toolBookmarkHint
     : x === "note"
       ? t.toolNoteHint
@@ -138,7 +142,9 @@ export function toolHint(t: ReturnType<typeof useT>["t"], x: PageTool, touch = f
 
 /** A tool's spoken name. App says the same name when a tool is switched on. */
 export function toolName(t: ReturnType<typeof useT>["t"], x: PageTool): string {
-  return x === "select"
+  return x === "read"
+    ? t.toolRead
+    : x === "select"
     ? t.toolSelect
     : x === "highlight"
       ? t.toolHighlight
@@ -167,6 +173,12 @@ export function ToolIcon({ tool }: { tool: PageTool }): JSX.Element {
     strokeLinecap: "round" as const,
     "aria-hidden": true,
   };
+  if (tool === "read")
+    return (
+      <svg {...common}>
+        <path d="M12 6c-2-1.5-5-2-8-1.5v13c3-.5 6 0 8 1.5 2-1.5 5-2 8-1.5v-13c-3-.5-6 0-8 1.5zM12 6v13" />
+      </svg>
+    );
   if (tool === "select")
     return (
       <svg {...common}>

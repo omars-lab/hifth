@@ -1392,7 +1392,8 @@ export function App(): JSX.Element {
   // holds the keys the merged hop list is built from.
   const handleSelectRange = useCallback(
     (fromKey: string, toKey: string, keys: readonly string[]) => {
-      if (keys.length === 0) return;
+      // In Read mode nothing a hand does on the page opens anything.
+      if (keys.length === 0 || toolRef.current === "read") return;
       setOpenDirection(null);
       setSelectedKey(null);
       setSelectedRange(keys);
@@ -1427,7 +1428,7 @@ export function App(): JSX.Element {
    */
   const handleSelectWords = useCallback(
     (wordKey: string) => {
-      if (!adjacency) return;
+      if (!adjacency || toolRef.current === "read") return;
       const hops = adjacency.hopsForWords(
         wordKey,
         roots ? { roots: roots.rootsForWords(wordKey) } : {},
@@ -2264,7 +2265,11 @@ export function App(): JSX.Element {
           currentKey={selectedKey}
           onBeadBack={handleBeadBack}
           onClearCurrent={handleClearCurrent}
-          hint={!desktop && phoneBar !== "c" && tool !== "select" ? toolHint(t, tool, true) : undefined}
+          hint={
+            tool === "read" || (!desktop && phoneBar !== "c" && tool !== "select")
+              ? toolHint(t, tool, true)
+              : undefined
+          }
         />
         <PlayTrigger
           selectedKey={selectedKey}

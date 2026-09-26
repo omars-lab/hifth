@@ -654,10 +654,23 @@
 .stage[data-tool="sign"] .host :global(svg) :global([id^="verse-"]) {
   cursor: crosshair;
 }
+/* selection-drawer = D: every mode wears its own pointer. The word tool: a
+   small box with cross-hairs, one word's worth; the default tool, which takes
+   the whole verse, a pair of brackets round it — on the verses only, so the
+   fore-edge keeps its page-turning hand. */
 .stage[data-tool="word"],
 .stage[data-tool="word"] .host :global(svg) :global(.ayahPolygon),
 .stage[data-tool="word"] .host :global(svg) :global([id^="verse-"]) {
-  cursor: pointer;
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Crect x='6' y='8' width='12' height='8' rx='1.5' fill='%23fff' fill-opacity='.6' stroke='%23000' stroke-width='1.5'/%3E%3Cpath d='M12 3v5M12 16v5M1 12h5M18 12h5' stroke='%23000' stroke-width='1.5'/%3E%3C/svg%3E") 12 12, pointer;
+}
+/* Read mode: the plain arrow, so nothing on the page looks tappable. */
+.stage[data-tool="read"] .host :global(svg) :global(.ayahPolygon),
+.stage[data-tool="read"] .host :global(svg) :global([id^="verse-"]) {
+  cursor: default;
+}
+.stage[data-tool="select"] .host :global(svg) :global(.ayahPolygon),
+.stage[data-tool="select"] .host :global(svg) :global([id^="verse-"]) {
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath d='M7 4H4v16h3M17 4h3v16h-3' fill='none' stroke='%23b45309' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3Ccircle cx='12' cy='12' r='1.6' fill='%23b45309'/%3E%3C/svg%3E") 12 12, pointer;
 }
 
 /* The harakat tool's magnifier: a round window on the print above the

@@ -299,6 +299,8 @@ const messages: Catalog = {
   toolNote: "Note",
   toolNoteHint: "Tap a word to pin a note",
   toolOn: (d) => d.name + " tool",
+  toolRead: "Read",
+  toolReadHint: "Taps do nothing, so a stray touch opens nothing",
   toolSelect: "Select",
   toolSign: "Harakat",
   toolSignHint: "Point at a vowel-sign, click to note it",

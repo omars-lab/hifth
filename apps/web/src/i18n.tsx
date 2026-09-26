@@ -641,6 +641,8 @@ export interface Strings {
   mistakeRestored: string;
   toolSign: string;
   toolSignHint: string;
+  toolRead: string;
+  toolReadHint: string;
   toolWord: string;
   toolWordHint: string;
   /** The word tool's row of parts, named by its verse. */
@@ -1115,6 +1117,8 @@ export function buildStrings(lang: Lang, m: Catalog): Strings {
     mistakeRestored: m.mistakeRestored,
     toolSign: m.toolSign,
     toolSignHint: m.toolSignHint,
+    toolRead: m.toolRead,
+    toolReadHint: m.toolReadHint,
     toolWord: m.toolWord,
     toolWordHint: m.toolWordHint,
     wordParts: (label) => m.wordParts({ label }),
