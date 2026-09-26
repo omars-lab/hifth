@@ -13,6 +13,7 @@ import {
   pickMistakeSign,
   removeNote,
   restoreNote,
+  signsOfNote,
 } from "./notes.js";
 
 const k = (s: number, a: number) => `quran/hafs-kfqc/${s}:${a}`;
@@ -25,6 +26,21 @@ describe("notes", () => {
     expect(n).toMatchObject({ ...at, text: "", kind: "comment", onHarakah: false, createdAt: T, updatedAt: T });
     expect(n!.mark).toBeUndefined();
     expect(isNote(n)).toBe(true);
+  });
+
+  it("pins a comment on several signs, keeping the first in `mark` for older readers", () => {
+    const [n] = addNote([], { ...at, marks: [5, 2, 5, 3] }, T);
+    expect(n!.marks).toEqual([2, 3, 5]);
+    expect(n!.mark).toBe(2);
+    expect(n!.onHarakah).toBe(true);
+    expect(signsOfNote(n!)).toEqual([2, 3, 5]);
+    expect(isNote(n)).toBe(true);
+    expect(isNote({ ...n!, marks: [1, -1] })).toBe(false);
+    // One sign is just `mark`; none is the whole word.
+    const [one] = addNote([], { ...at, marks: [4] }, T);
+    expect(one!.marks).toBeUndefined();
+    expect(signsOfNote(one!)).toEqual([4]);
+    expect(signsOfNote(addNote([], at, T)[0]!)).toEqual([]);
   });
 
   it("pins a comment on one vowel-sign when given its mark", () => {

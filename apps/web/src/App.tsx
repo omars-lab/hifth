@@ -1070,7 +1070,7 @@ export function App(): JSX.Element {
   const [wordOpen, setWordOpen] = useState<{ page: number; key: string; word: number; rect: WordRect } | null>(
     null,
   );
-  const pickWordPart = (at: { x: number; y: number; mark: number | null }) => {
+  const pickWordPart = (at: { x: number; y: number; mark?: number | null; marks?: readonly number[] }) => {
     const w = wordOpen;
     setWordOpen(null);
     if (!w) return;
@@ -2310,6 +2310,7 @@ export function App(): JSX.Element {
           anchor={() => wordOpen.rect}
           mode="note"
           onPick={(mark, _name, at) => pickWordPart({ ...at, mark })}
+          onPickMany={(marks, at) => pickWordPart({ ...at, marks })}
           onClose={() => setWordOpen(null)}
         />
       )}
@@ -2359,6 +2360,7 @@ function WordPartsHost({
   mode,
   chosen,
   onPick,
+  onPickMany,
   onClear,
   onClose,
 }: {
@@ -2372,11 +2374,17 @@ function WordPartsHost({
   chosen?: number | null;
   /** The part picked, its name, and where on the page a note on it is pinned. */
   onPick: (mark: number | null, name: string | null, at: { x: number; y: number }) => void;
+  /** Several signs picked for one note; it is pinned over the first of them. */
+  onPickMany?: (marks: number[], at: { x: number; y: number }) => void;
   onClear?: () => void;
   onClose: () => void;
 }): JSX.Element | null {
   const data = useWordParts(manifest.edition, page, verseKey, word);
   if (!data) return null;
+  const pinOver = (mark: number | null) => {
+    const s = mark === null ? null : data.signs.find((x) => x.index === mark);
+    return s ? { x: s.r[0] + s.r[2] / 2, y: s.r[1] } : { x: data.box.x + data.box.width / 2, y: data.box.y };
+  };
   const [, , w, h] = (manifest.pages.find((p) => p.page === page)?.viewBox ?? "0 0 345 550")
     .split(/\s+/)
     .map(Number);
@@ -2389,13 +2397,10 @@ function WordPartsHost({
       anchor={anchor}
       mode={mode}
       chosen={chosen}
-      onPick={(mark, name) => {
-        const s = mark === null ? null : data.signs.find((x) => x.index === mark);
-        const at = s
-          ? { x: s.r[0] + s.r[2] / 2, y: s.r[1] }
-          : { x: data.box.x + data.box.width / 2, y: data.box.y };
-        onPick(mark, name, at);
-      }}
+      onPick={(mark, name) => onPick(mark, name, pinOver(mark))}
+      onPickMany={
+        onPickMany && ((marks) => onPickMany(marks, pinOver(Math.min(...marks))))
+      }
       onClear={onClear}
       onClose={onClose}
     />

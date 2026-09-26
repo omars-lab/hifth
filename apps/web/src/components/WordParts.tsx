@@ -51,6 +51,11 @@ interface WordPartsProps {
   chosen?: number | null | undefined;
   /** A part was picked: a sign's place in its verse's list, or null for the whole word. */
   onPick: (mark: number | null, name: string | null) => void;
+  /**
+   * Note mode only: several signs were gathered (Shift- or ⌘-click) and the
+   * reader asked for one note on all of them.
+   */
+  onPickMany?: ((marks: number[]) => void) | undefined;
   onClear?: (() => void) | undefined;
   onClose: () => void;
 }
@@ -87,10 +92,23 @@ export function WordParts({
   mode,
   chosen = null,
   onPick,
+  onPickMany,
   onClear,
   onClose,
 }: WordPartsProps): JSX.Element {
   const { t } = useT();
+  // Signs gathered for one note. A plain click with none gathered still picks
+  // at once, so the one-part case stays one click; Shift or ⌘ starts a
+  // gathering, and once one is under way every click on a sign toggles it.
+  const [several, setSeveral] = useState<number[]>([]);
+  const gathering = mode === "note" && onPickMany !== undefined;
+  const takeSign = (e: React.MouseEvent, index: number, name: string) => {
+    if (gathering && (several.length > 0 || e.shiftKey || e.metaKey || e.ctrlKey)) {
+      setSeveral((s) => (s.includes(index) ? s.filter((x) => x !== index) : [...s, index]));
+      return;
+    }
+    onPick(index, name);
+  };
   const boxRef = useRef<HTMLDivElement>(null);
   const [at, setAt] = useState<{ left: number; top: number } | null>(null);
   const onCloseRef = useRef(onClose);
@@ -190,10 +208,12 @@ export function WordParts({
               key={s.index}
               type="button"
               className={styles.part}
-              aria-pressed={mode === "mistake" ? chosen === s.index : undefined}
+              aria-pressed={
+                mode === "mistake" ? chosen === s.index : several.length > 0 ? several.includes(s.index) : undefined
+              }
               data-part="sign"
               data-sign={s.index}
-              onClick={() => onPick(s.index, s.name)}
+              onClick={(e) => takeSign(e, s.index, s.name)}
             >
               <span className={styles.copy} style={{ width: cw, height: ch }} aria-hidden="true">
                 <span className={styles.faint}>{print()}</span>
@@ -207,6 +227,13 @@ export function WordParts({
           );
         })}
       </div>
+      {gathering && several.length > 0 && (
+        <div className={styles.actions}>
+          <button type="button" className={styles.many} data-note-many onClick={() => onPickMany!(several)}>
+            {t.wordPartsMany(several.length)}
+          </button>
+        </div>
+      )}
       {mode === "mistake" && signs.length === 0 && <p className={styles.none}>{t.mistakeNoSigns}</p>}
       {mode === "mistake" && onClear && (
         <div className={styles.actions}>

@@ -49,6 +49,13 @@ export interface Note {
    * sign data ships them in). Absent or null: the whole word.
    */
   readonly mark?: number | null;
+  /**
+   * Every sign the note sits on, in ascending order, when it sits on more than
+   * one (the word tool's several-part pick). `mark` is always the first of
+   * them, so a file read by an app that knows only `mark` still lands the note
+   * on one of its signs rather than losing it. Absent for one sign or none.
+   */
+  readonly marks?: readonly number[];
   readonly kind: NoteKind;
   readonly text: string;
   readonly createdAt: number;
@@ -71,17 +78,32 @@ export function noteId(now: number, set: readonly Note[]): string {
   return id;
 }
 
+/** Every sign a note sits on, ascending; empty when it sits on the whole word. */
+export function signsOfNote(n: Pick<Note, "mark" | "marks">): number[] {
+  if (n.marks && n.marks.length > 0) return [...n.marks];
+  return n.mark === undefined || n.mark === null ? [] : [n.mark];
+}
+
 /**
  * Pin a new, empty note. The reader types into it next. `mark` pins it to one
  * vowel-sign on the word (the sign tool, or a sign taken in the word tool);
- * absent or null, it sits on the word.
+ * `marks` to several; neither, it sits on the word.
  */
 export function addNote(
   set: readonly Note[],
-  at: { key: string; page: number; word: number | null; x: number; y: number; mark?: number | null },
+  at: {
+    key: string;
+    page: number;
+    word: number | null;
+    x: number;
+    y: number;
+    mark?: number | null;
+    marks?: readonly number[];
+  },
   now: number,
 ): Note[] {
-  const mark = at.mark ?? null;
+  const several = [...new Set(at.marks ?? [])].sort((a, b) => a - b);
+  const mark = several.length > 0 ? several[0]! : (at.mark ?? null);
   const note: Note = {
     id: noteId(now, set),
     key: at.key,
@@ -91,6 +113,7 @@ export function addNote(
     y: at.y,
     onHarakah: mark !== null,
     ...(mark !== null ? { mark } : {}),
+    ...(several.length > 1 ? { marks: several } : {}),
     kind: "comment",
     text: "",
     createdAt: now,
@@ -181,6 +204,9 @@ export function isNote(x: unknown): x is Note {
     Number.isFinite(n.y) &&
     typeof n.onHarakah === "boolean" &&
     (n.mark === undefined || n.mark === null || (typeof n.mark === "number" && Number.isInteger(n.mark) && n.mark >= 0)) &&
+    (n.marks === undefined ||
+      (Array.isArray(n.marks) &&
+        (n.marks as unknown[]).every((m) => typeof m === "number" && Number.isInteger(m) && m >= 0))) &&
     KINDS.includes(n.kind as NoteKind) &&
     typeof n.text === "string" &&
     typeof n.createdAt === "number" &&

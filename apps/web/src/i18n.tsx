@@ -641,6 +641,8 @@ export interface Strings {
   /** The word tool's row of parts, named by its verse. */
   wordParts(label: string): string;
   wordPartsHint: string;
+  /** The button that writes one note on the signs gathered. */
+  wordPartsMany(count: number): string;
 }
 
 /** The reader's own calendar day for a moment, as the `YYYY-MM-DD` `longDay` reads. */
@@ -1090,6 +1092,7 @@ export function buildStrings(lang: Lang, m: Catalog): Strings {
     toolWordHint: m.toolWordHint,
     wordParts: (label) => m.wordParts({ label }),
     wordPartsHint: m.wordPartsHint,
+    wordPartsMany: (count) => m.wordPartsMany({ n: count, nText: n(count) }),
   };
 }
 
