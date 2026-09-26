@@ -4,9 +4,13 @@ import {
   NOTE_TEXT_MAX,
   addNote,
   editNote,
+  isMistake,
   isNote,
+  markMistake,
   mergeNotes,
+  mistakeOn,
   notesOnPage,
+  pickMistakeSign,
   removeNote,
   restoreNote,
 } from "./notes.js";
@@ -87,5 +91,38 @@ describe("notes in the saved file", () => {
   it("refuses a file whose notes are broken", () => {
     const bad = { ...toBookmarkFile(bookmarks, T), notes: [{ id: "x" }] };
     expect(parseBookmarkFile(JSON.stringify(bad))).toBeNull();
+  });
+});
+
+describe("marked mistakes", () => {
+  it("marks a word once, as a correction with no sign yet, and keeps it off the pins", () => {
+    const set = markMistake([], at, T);
+    const again = markMistake(set, at, T + 1);
+    expect(again).toHaveLength(1);
+    expect(set[0]).toMatchObject({ kind: "correction", mark: null, onHarakah: false, text: "" });
+    expect(isMistake(set[0]!)).toBe(true);
+    expect(isNote(set[0])).toBe(true);
+    expect(notesOnPage(set, 3)).toEqual([]);
+    expect(mistakeOn(set, 3, at.key, 4)?.id).toBe(set[0]!.id);
+    expect(mistakeOn(set, 3, at.key, 5)).toBeUndefined();
+  });
+
+  it("narrows to one sign and back to the whole word", () => {
+    const set = markMistake([], at, T);
+    const id = set[0]!.id;
+    const onSign = pickMistakeSign(set, id, 2, T + 5);
+    expect(onSign[0]).toMatchObject({ mark: 2, onHarakah: true, updatedAt: T + 5 });
+    expect(pickMistakeSign(onSign, id, 2, T + 9)[0]!.updatedAt).toBe(T + 5);
+    expect(pickMistakeSign(onSign, id, null, T + 9)[0]).toMatchObject({ mark: null, onHarakah: false });
+  });
+
+  it("rides in the saved file and comes back", () => {
+    const set = pickMistakeSign(markMistake([], at, T), markMistake([], at, T)[0]!.id, 1, T + 1);
+    const file = parseBookmarkFile(JSON.stringify(toBookmarkFile([], T, set)));
+    expect(file?.notes?.[0]).toMatchObject({ kind: "correction", mark: 1, onHarakah: true });
+  });
+
+  it("refuses a sign number that is not a whole number", () => {
+    expect(isNote({ ...markMistake([], at, T)[0]!, mark: 1.5 })).toBe(false);
   });
 });

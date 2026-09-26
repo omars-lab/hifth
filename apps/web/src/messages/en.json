@@ -275,5 +275,16 @@
   "noteSaved": "Note saved",
   "noteDeleted": "Note deleted",
   "noteRestored": "Note put back",
-  "noteLoaded": "{n, plural, one{{nText} note added from the file} other{{nText} notes added from the file}}"
+  "noteLoaded": "{n, plural, one{{nText} note added from the file} other{{nText} notes added from the file}}",
+  "toolMistake": "Mistake",
+  "toolMistakeHint": "Tap a word to mark a slip",
+  "mistakeMarked": "Slip marked on {label}",
+  "mistakePicker": "Which sign did you slip on in {label}?",
+  "mistakeWholeWord": "The whole word",
+  "mistakeSignPicked": "Slip marked on the {name}",
+  "mistakeWordPicked": "Slip marked on the whole word",
+  "mistakeNoSigns": "No vowel-signs are recorded on this word.",
+  "mistakeClear": "Clear mark",
+  "mistakeCleared": "Mark cleared",
+  "mistakeRestored": "Mark put back"
 }

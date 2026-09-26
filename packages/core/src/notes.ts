@@ -15,9 +15,11 @@
  *   (note-persistence = B), which is the bookmark file's own path; notes join
  *   it rather than starting a second file.
  *
- * A note is anchored to a *word* today. Pinning to one letter or one vowel mark
- * is the mistake tool's question (step 3, the open "harakah pick" decision), so
- * `onHarakah` is always false here and the field is kept for that step.
+ * A comment note is anchored to a *word*. The mistake tool (step 3) marks a
+ * word as a slip — a note of the kind "correction" with no text — and a second
+ * tap narrows it to one vowel-sign on that word, which sets `mark` and
+ * `onHarakah`. How the reader picks that sign is the open "harakah pick"
+ * decision; the note only records which sign was picked.
  *
  * Everything here is pure and clockless, like the bookmarks module: every
  * change takes `now`.
@@ -40,8 +42,13 @@ export interface Note {
   /** Where the pin stands, in the page's own drawing units. */
   readonly x: number;
   readonly y: number;
-  /** Always false until the mistake tool can pick a single mark. */
+  /** True when the note sits on one vowel-sign rather than the whole word. */
   readonly onHarakah: boolean;
+  /**
+   * Which sign, by its place in the verse's list of signs (the order the app's
+   * sign data ships them in). Absent or null: the whole word.
+   */
+  readonly mark?: number | null;
   readonly kind: NoteKind;
   readonly text: string;
   readonly createdAt: number;
@@ -101,8 +108,54 @@ export function restoreNote(set: readonly Note[], note: Note): Note[] {
   return set.some((x) => x.id === note.id) ? [...set] : [...set, note];
 }
 
+/** The notes a reader wrote on a page, as pins. Marked mistakes are drawn on their word instead. */
 export function notesOnPage(set: readonly Note[], page: number): Note[] {
-  return set.filter((x) => x.page === page);
+  return set.filter((x) => x.page === page && !isMistake(x));
+}
+
+/**
+ * A marked mistake (step 3): a note of the kind "correction" on a word. It is
+ * the decided note shape, so it rides in the same store and the same saved
+ * file as every other note.
+ */
+export function isMistake(note: Note): boolean {
+  return note.kind === "correction";
+}
+
+/** The mistake already marked on this word, if there is one. */
+export function mistakeOn(set: readonly Note[], page: number, key: string, word: number): Note | undefined {
+  return set.find((x) => isMistake(x) && x.page === page && x.key === key && x.word === word);
+}
+
+/** Mark a word as a slip. A word already marked is left as it is. */
+export function markMistake(
+  set: readonly Note[],
+  at: { key: string; page: number; word: number; x: number; y: number },
+  now: number,
+): Note[] {
+  if (mistakeOn(set, at.page, at.key, at.word)) return [...set];
+  const note: Note = {
+    id: noteId(now, set),
+    key: at.key,
+    page: at.page,
+    word: at.word,
+    x: at.x,
+    y: at.y,
+    onHarakah: false,
+    mark: null,
+    kind: "correction",
+    text: "",
+    createdAt: now,
+    updatedAt: now,
+  };
+  return [...set, note];
+}
+
+/** Narrow a marked mistake to one sign on its word, or back to the whole word (null). */
+export function pickMistakeSign(set: readonly Note[], id: string, mark: number | null, now: number): Note[] {
+  return set.map((x) =>
+    x.id === id && (x.mark ?? null) !== mark ? { ...x, mark, onHarakah: mark !== null, updatedAt: now } : x,
+  );
 }
 
 export function isNote(x: unknown): x is Note {
@@ -121,6 +174,7 @@ export function isNote(x: unknown): x is Note {
     typeof n.y === "number" &&
     Number.isFinite(n.y) &&
     typeof n.onHarakah === "boolean" &&
+    (n.mark === undefined || n.mark === null || (typeof n.mark === "number" && Number.isInteger(n.mark) && n.mark >= 0)) &&
     KINDS.includes(n.kind as NoteKind) &&
     typeof n.text === "string" &&
     typeof n.createdAt === "number" &&

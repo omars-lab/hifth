@@ -483,3 +483,28 @@
   stroke: var(--focus-ring, #111);
   stroke-width: 1.4;
 }
+
+/* The mistake tool (step 3): a pencil-tick pointer in the --danger red (a data
+   URI cannot read a token, so the hex is the token's). */
+.stage[data-tool="mistake"],
+.stage[data-tool="mistake"] .host :global(svg) :global(.ayahPolygon),
+.stage[data-tool="mistake"] .host :global(svg) :global([id^="verse-"]) {
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath d='M14.5 4.5l5 5L10 19H5v-5z' fill='%23a23b2c' stroke='%23fff' stroke-width='1.5' stroke-linejoin='round'/%3E%3C/svg%3E") 5 19, crosshair;
+}
+
+/* A word marked as a slip: a quiet red wash under the ink, like Tarteel's. It
+   never takes the pointer, so a tap on it still reaches the verse beneath —
+   which is how a second tap finds the word to open its signs. */
+.host :global(svg) :global([data-mistakes]) {
+  pointer-events: none;
+}
+.host :global(svg) :global([data-mistake-word]) {
+  fill: var(--danger);
+  fill-opacity: 0.16;
+}
+/* Narrowed to one sign: a ring round that sign, in the same red. */
+.host :global(svg) :global([data-mistake-sign]) {
+  fill: none;
+  stroke: var(--danger);
+  stroke-width: 0.7;
+}

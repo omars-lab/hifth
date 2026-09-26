@@ -150,6 +150,15 @@ export interface Catalog {
   readonly mapSince: (d: { readonly dayText: string | number }) => string;
   readonly mapTitle: string;
   readonly mapWentTo: (d: { readonly label: string | number; readonly page: string | number }) => string;
+  readonly mistakeClear: string;
+  readonly mistakeCleared: string;
+  readonly mistakeMarked: (d: { readonly label: string | number }) => string;
+  readonly mistakeNoSigns: string;
+  readonly mistakePicker: (d: { readonly label: string | number }) => string;
+  readonly mistakeRestored: string;
+  readonly mistakeSignPicked: (d: { readonly name: string | number }) => string;
+  readonly mistakeWholeWord: string;
+  readonly mistakeWordPicked: string;
   readonly mushaf: string;
   readonly nearestPageN: (d: { readonly page: string | number }) => string;
   readonly nextPage: string;
@@ -267,6 +276,8 @@ export interface Catalog {
   readonly toolBookmark: string;
   readonly toolBookmarkHint: string;
   readonly toolHighlight: string;
+  readonly toolMistake: string;
+  readonly toolMistakeHint: string;
   readonly toolNote: string;
   readonly toolNoteHint: string;
   readonly toolOn: (d: { readonly name: string | number }) => string;
