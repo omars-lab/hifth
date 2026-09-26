@@ -22,6 +22,32 @@ and both of those are the decision being made by whoever wrote the page.
 a section, and a short decision should stay short — but each one that goes unanswered should
 go unanswered *on purpose*, and you should be able to say why.
 
+## Before anything: the fundamentals, in as few words as it takes
+
+A page can answer every question below and still lose the reader, because it explains the
+*machinery* before the *thing*. Say the fundamental first, in a few short sentences, and only then
+add anything else.
+
+- **Find the cause before writing the options.** Ask "why do these differ at all?" and measure until
+  the answer is one plain sentence. If you cannot say it, you are not ready to present options —
+  the options you would list are guesses around a thing you have not seen.
+- **Say what is the same before what is different.** "Both lists hold the same text, letter for
+  letter; they only cut it into words in different places." One sentence like that removes a whole
+  class of worry the reader was about to have.
+- **One real example before any number.** "Arabic spells *and he said* as one word, but the page
+  shows a gap after *and*" lands where "9,533 segmentation disagreements" does not.
+- **Short.** Short sentences, few of them, no word the reader does not need to choose. If a
+  sentence is there to sound thorough, cut it.
+- **Test:** could the owner repeat the whole choice back in one breath — what differs, why, and what
+  each option does about it? If not, the top of the page is not done.
+
+A clear cause often *is* the answer: once it was plain that the look-alike word lists differed only
+at the gap after "and", a middle option (count the page's words, but treat that gap as no break)
+fell out that beat both original options. The first version of that page listed licences, word
+counts and a conversion step, and never said why the lists differed — the owner had to ask, twice.
+(Omar, 2026-09-26: "why didnt our decsiion explain things this way" — "explain things in a
+minimalistic fashion focused on the fundamentals".)
+
 ## First, and highlighted: what does it change for a hafiz?
 
 Hifth is for someone memorising the Qur'an, phone in hand, mid-revision. Every decision page
@@ -115,6 +141,9 @@ answerable by the person it is for.
 - [ ] The last heading is the decision itself: *so what is being decided?*
 
 **Words**
+
+- [ ] The page opens with the fundamental — what differs, why, and what stays the same — in a few
+      short sentences with one real example, before any number, licence or option.
 
 - [ ] No file names, paths, function names, gate names, or commands anywhere a reader is
       meant to follow. They belong in the body of the record, where the reasons are.

@@ -1,6 +1,11 @@
 # How does a reader open the tools for one word, and the tools for the whole verse, from the same page?
 
-*Status: open, asked 2026-09-12. A reader looking at a verse of the print has two different
+**Decided: D**, by Omar, 2026-09-26, after trying all four on the live page. A small bar of modes
+— Read, Word, Verse, Slip — each with its own cursor, decides what a tap does. Why: a reader always
+knows what a tap is about to do; a slip is marked in one tap; in Read mode a stray thumb opens
+nothing. Still to do: move the mode bar into the app's tool bar, and delete the other three ways.
+
+*Asked 2026-09-12. A reader looking at a verse of the print has two different
 reaches in mind at two different moments: sometimes they want to do something with a single word
 — pin a slip to it, pick a sign inside it — and sometimes they want something for the whole verse
 — hear it, read a translation, bookmark it, flag it. This decision is how one gesture on one word
@@ -98,15 +103,17 @@ shipped, and the four kinds of note already decided.
 
 ## How does a reader open each? — the options
 
-The first is built live on the page and tried by hand, on verse 2:38 at the size it would really be
-used. The other two are drawn in words so the edge of the choice is visible.
+All four are built live on the page and tried by hand, on verse 2:38 at the size it would really
+be used; a switch above the verse flips between them. D was added on 2026-09-26 at the owner's
+asking: "why can't we have different tools for this, or different modes we can toggle ... with
+different cursors ... word selection mode, ayah mode, etc".
 
 - **A · Tap for the word, hold for the verse.** A quick tap on a word opens the word drawer; a
   press-and-hold on the same word opens the ayah drawer. Both are the same bottom sheet. Takes the
   press-to-a-word gesture already shipped and adds one thing to learn — that holding does more. Gets
   two depths out of one target with nothing new on the page, and keeps the verse's tools on the very
   word a reader is looking at. Costs the discovery — a reader has to find that holding is different —
-  and asks the build to tell a tap from a hold without firing on a scroll. This is the one built live.
+  and asks the build to tell a tap from a hold without firing on a scroll.
 - **B · Ask which, every time.** Any press opens one sheet that asks "this word, or the whole
   verse?" and the reader picks. Takes the same gesture and hides nothing — no reader can miss the
   verse tools. Costs a question on every single touch and a second tap before any tool at all, for a
@@ -114,7 +121,18 @@ used. The other two are drawn in words so the edge of the choice is visible.
 - **C · Two separate handles.** The word's tools open on the word; the verse's tools live behind
   their own control — a handle in the margin, or the verse number. Takes no hold to discover. Costs
   a second thing on the page to find, and the verse tools are no longer reached from the word a
-  reader is looking at — the very hop this feature was trying to remove.
+  reader is looking at — the very hop this feature was trying to remove. Built with the verse's own
+  printed number as the handle, ringed, so nothing new is added to the page.
+- **D · Modes on the tool bar, each with its own cursor.** A small bar over the page — Read, Word,
+  Ayah, Slip — and whichever is on decides what a tap does. The cursor changes with the mode
+  (cross-hairs on a box for a word, brackets for a verse, a red pen for a slip), and before a tap the
+  page lights what the tap will take: one word, or the whole verse. Nothing hidden, no hold to learn,
+  and every tap does exactly one thing with no question asked. It is how the app's existing tool bar
+  (select, highlight, bookmark) already works, so it adds modes to a bar readers already have rather
+  than a new gesture. Costs a switch before changing reach and the risk of forgetting the mode —
+  which the cursor and the light are there to answer. A phone has no cursor, so there the lit
+  button and the light under the thumb carry it alone. For a hafiz: in Slip mode a slip is one tap
+  with no drawer at all, the fastest mark of the four; Read mode means a stray thumb opens nothing.
 
 ## What else could be considered, and why is it not here?
 

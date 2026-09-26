@@ -1208,7 +1208,7 @@
     {
       "id": "adjacency-span-source",
       "question": "Which words does the app line look-alikes up on — the printed page's own, or the separate word-by-word corpus it counts them in today?",
-      "status": "open",
+      "status": "decided",
       "options": [
         {
           "id": "A",
@@ -1217,15 +1217,23 @@
         {
           "id": "B",
           "label": "Count in the printed page's own words"
+        },
+        {
+          "id": "C",
+          "label": "Keep every run either count finds"
+        },
+        {
+          "id": "D",
+          "label": "Count in the page's words, with each lone \"and\" glued back on"
         }
       ],
       "artifact": "https://blog.bytesofpurpose.com/hifth/docs/design/adjacency-span-source.html",
       "page": "docs/design/adjacency-span-source.html",
       "builtBy": "scripts/build-adjacency-span-source.mjs",
       "doc": "docs/decisions/adjacency-span-source.md",
-      "decided": null,
-      "by": null,
-      "date": null,
+      "decided": "D",
+      "by": "omar",
+      "date": "2026-09-26",
       "related": [
         "comparison-crop"
       ]
@@ -1394,7 +1402,7 @@
     {
       "id": "selection-drawer",
       "question": "How does a reader open the tools for one word, and the tools for the whole verse, from the same page?",
-      "status": "open",
+      "status": "decided",
       "options": [
         {
           "id": "A",
@@ -1407,15 +1415,19 @@
         {
           "id": "C",
           "label": "The word tools open on the word; the verse tools sit behind their own handle"
+        },
+        {
+          "id": "D",
+          "label": "A tool bar of modes (read, word, verse, slip), each with its own cursor, decides what a tap does"
         }
       ],
       "artifact": "https://blog.bytesofpurpose.com/hifth/docs/design/selection-drawer.html",
       "page": "docs/design/selection-drawer.html",
       "builtBy": "scripts/build-selection-drawer.mjs",
       "doc": "docs/decisions/selection-drawer.md",
-      "decided": null,
-      "by": null,
-      "date": null,
+      "decided": "D",
+      "by": "omar",
+      "date": "2026-09-26",
       "related": [
         "harakah-pick",
         "mistake-note-anchor",
