@@ -167,10 +167,12 @@ describe("App shell", () => {
       poly.dispatchEvent(new Event("pointerup", { bubbles: true }));
     });
 
-    // Footer now shows the surah name + ayah ref in Arabic-Indic digits.
+    // Footer now shows the surah name + ayah ref in Arabic-Indic digits, and
+    // the verse drawer rises under the same name.
     await waitFor(() => {
-      expect(screen.getByText(/البقرة · ٢:٤١/)).toBeInTheDocument();
+      expect(within(screen.getByRole("contentinfo")).getByText(/البقرة · ٢:٤١/)).toBeInTheDocument();
     });
+    expect(screen.getByRole("region", { name: /البقرة · ٢:٤١/ })).toBeInTheDocument();
     // And the highlighter drew a selection clone into the overlay.
     expect(container.querySelector("#hifth-overlay .hl-sel")).not.toBeNull();
   });

@@ -17,6 +17,7 @@ export function PlayTrigger({
   label,
   phase,
   onToggle,
+  caption,
 }: {
   /** The selected ayah key, or null (nothing selected, or a word/range). */
   selectedKey: string | null;
@@ -26,6 +27,8 @@ export function PlayTrigger({
   phase: AudioPhase;
   /** Start or pause this verse. */
   onToggle: (key: string) => void;
+  /** A word under the glyph, shown when the button sits in the verse drawer. */
+  caption?: string;
 }): JSX.Element | null {
   const { t } = useT();
   if (!selectedKey || !label) return null;
@@ -47,6 +50,7 @@ export function PlayTrigger({
       <span aria-hidden="true" className={loading ? styles.spinning : undefined}>
         {glyph}
       </span>
+      {caption && <span data-caption="">{caption}</span>}
     </button>
   );
 }

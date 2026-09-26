@@ -643,6 +643,16 @@ export interface Strings {
   toolSignHint: string;
   toolRead: string;
   toolReadHint: string;
+  /** The verse drawer (selection-drawer = D): its name, and each tool's caption. */
+  verseTools(label: string): string;
+  vdListen: string;
+  vdPause: string;
+  vdRoots: string;
+  vdCommentary: string;
+  vdQul: string;
+  vdShare: string;
+  vdBookmark: string;
+  vdBookmarkAria(label: string): string;
   toolWord: string;
   toolWordHint: string;
   /** The word tool's row of parts, named by its verse. */
@@ -1119,6 +1129,15 @@ export function buildStrings(lang: Lang, m: Catalog): Strings {
     toolSignHint: m.toolSignHint,
     toolRead: m.toolRead,
     toolReadHint: m.toolReadHint,
+    verseTools: (label) => m.verseTools({ label }),
+    vdListen: m.vdListen,
+    vdPause: m.vdPause,
+    vdRoots: m.vdRoots,
+    vdCommentary: m.vdCommentary,
+    vdQul: m.vdQul,
+    vdShare: m.vdShare,
+    vdBookmark: m.vdBookmark,
+    vdBookmarkAria: (label) => m.vdBookmarkAria({ label }),
     toolWord: m.toolWord,
     toolWordHint: m.toolWordHint,
     wordParts: (label) => m.wordParts({ label }),

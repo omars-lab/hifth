@@ -15,11 +15,14 @@ import styles from "./QulTrigger.module.css";
 export function QulTrigger({
   selectedKey,
   label,
+  caption,
 }: {
   /** The selected ayah key, or null (nothing selected, or a word/range). */
   selectedKey: string | null;
   /** The ayah's own label, for the link's accessible name. */
   label: string | null;
+  /** A word under the glyph, shown when the button sits in the verse drawer. */
+  caption?: string;
 }): JSX.Element | null {
   const { t } = useT();
   if (!selectedKey || !label) return null;
@@ -36,6 +39,7 @@ export function QulTrigger({
       title={t.qulVerse(label)}
     >
       <span aria-hidden="true">↗</span>
+      {caption && <span data-caption="">{caption}</span>}
     </a>
   );
 }

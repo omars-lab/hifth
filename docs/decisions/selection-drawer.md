@@ -3,7 +3,11 @@
 **Decided: D**, by Omar, 2026-09-26, after trying all four on the live page. A small bar of modes
 — Read, Word, Verse, Slip — each with its own cursor, decides what a tap does. Why: a reader always
 knows what a tap is about to do; a slip is marked in one tap; in Read mode a stray thumb opens
-nothing. Still to do: move the mode bar into the app's tool bar, and delete the other three ways.
+nothing. Done 2026-09-26: the mode bar is in the app's tool bar, and a Verse-mode tap opens one
+drawer of the verse's tools (listen, commentary, same roots, share, bookmark, QUL), each named in a
+word, rising over the bar under the page so it never covers the verse. The other three ways lived
+only on the options page, so the app had nothing of them to delete. Still to do: the word's tools
+open beside the word rather than in the same drawer.
 
 *Asked 2026-09-12. A reader looking at a verse of the print has two different
 reaches in mind at two different moments: sometimes they want to do something with a single word
