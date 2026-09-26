@@ -203,7 +203,7 @@
     {
       "id": "page-bar-phone-scrub",
       "question": "On a phone, where there is no mouse to magnify the page bar, how should a thumb land on one exact page out of 604?",
-      "status": "open",
+      "status": "decided",
       "options": [
         {
           "id": "A",
@@ -225,7 +225,10 @@
       "artifact": "https://blog.bytesofpurpose.com/hifth/docs/design/page-bar-phone-scrub-options.html",
       "page": "docs/design/page-bar-phone-scrub-options.html",
       "builtBy": "scripts/build-page-bar-phone-scrub-options.mjs",
-      "doc": "docs/decisions/page-bar-phone-scrub.md#what-is-being-decided",
+      "doc": "docs/decisions/page-bar-phone-scrub.md#so-what-was-decided",
+      "decided": "D",
+      "by": "omar",
+      "date": "2026-09-25",
       "related": [
         "page-bar-numberline",
         "page-bar-look",
