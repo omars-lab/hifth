@@ -237,8 +237,8 @@ if (spanFail.length) {
   for (const line of spanFail.slice(0, 15)) console.error(`  ${line}`);
   if (spanFail.length > 15) console.error(`  …and ${spanFail.length - 15} more`);
   console.error(
-    "\n  A span is derived, not written: it is the longest shared run converted" +
-      "\n  through `word-alignment.pin.json`. Check `pnpm gate:align` first, then" +
+    "\n  A span is derived, not written: it is the longest shared run in the" +
+      "\n  print's own words (packages/etl/data/pages/print-word-ids.json). Check" +
       "\n  `spansOf` in build-adjacency.mjs, then rebuild the shards.\n",
   );
   process.exit(1);

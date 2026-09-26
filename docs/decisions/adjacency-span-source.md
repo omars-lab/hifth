@@ -13,8 +13,15 @@ the 150 extra runs B and C would add turn out to be a side effect of counting th
 not something a hafiz asked for. The owner: "if we had logic to accomodate for this gap, would that
 change our decision" — then "yes record D".
 
-**Still to do:** the app's shipped look-alike runs are still counted in the corpus. Switching the
-build to the glued count is the follow-up; this page's measurement is the rule it should use.
+**Done, 2026-09-26:** the app's look-alike runs are now found in the page's own words with "and"
+glued back. Every run the corpus gave still comes out, on the same words, plus one new pair
+(2:145 and 13:37). The groups of identical verses come from the page's words too and match the
+corpus's 74 exactly. So the corpus no longer feeds the look-alike data at all, and its
+share-alike licence is off it. A test compares the shipped runs against the corpus on every run of
+the unit tests. In the code: the word list is `packages/etl/data/pages/print-word-ids.json`
+(numbers only, no text), made by `packages/etl/scripts/build-print-word-ids.mjs`; the build is
+`packages/etl/scripts/build-adjacency.mjs`; the test is
+`packages/etl/scripts/lib/print-words.test.mjs`.
 
 **Picture:** <https://blog.bytesofpurpose.com/hifth/docs/design/adjacency-span-source.html> — the
 two ways of finding the shared runs, each drawn on the real pages where they differ: the runs

@@ -329,6 +329,16 @@ href: https://tanzil.net
   ships anywhere now: the app and this decision page both take only rectangles from
   it, the "per word, a rectangle" the entry opens with. The switch, and why, is in
   the harakah-pick decision's own record.
+- **The words as numbers, since 2026-09-26.** The look-alike spans and whole-verse
+  twins are found in this corpus's words (decision `adjacency-span-source` = D), so
+  its text is now read as well as its geometry — but read into numbers, not copied:
+  [`packages/etl/data/pages/print-word-ids.json`](packages/etl/data/pages/print-word-ids.json)
+  gives each word of each verse a number, the same number exactly when two words are
+  written with the same letters, with each lone "and" glued onto the next word. No
+  letters are stored and nothing of it ships; the shipped shards carry only the
+  print positions a run covers. Rebuilt from the cache by
+  `packages/etl/scripts/build-print-word-ids.mjs`, which records a digest of the 604
+  pages it read.
 - **How geometry from one print lands on another:** both corpora draw the same
   page and both mark the end of every ayah with an ornament, so the ornaments are
   a correspondence neither was built to provide. `build-words.mjs` fits

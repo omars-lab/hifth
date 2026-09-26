@@ -19,9 +19,9 @@
  * (dPage from the ayah-page table, sameJuz from the juz table) and, where the
  * pair shares one unambiguous phrase, the print word range on each side (see
  * Pass 2½) → one shard per surah, all 114 written (empty shards included so
- * the app's loader never 404s), plus a NOTICE.txt naming BOTH upstreams — the
- * spans make this tree a derivative of the GPL'd corpus as well as of the
- * mutashabihat dataset, which the write block below says at length.
+ * the app's loader never 404s), plus a NOTICE.txt naming every upstream — the
+ * pairings' dataset, the print whose words the spans and twins are found in,
+ * and the juz table — which the write block below says at length.
  *
  * Loop 2's `buildShards` compiler is retired here — this script emits
  * spec-shape shards directly (the adjacency.ts comment foretold it).
@@ -44,8 +44,8 @@ import {
   juzOf,
   TOTAL_AYAHS,
 } from "@hifth/core";
-import { wordsByAyah, sharedRuns, copyrightBlock } from "./morphology.mjs";
-import { openAlignment } from "./lib/segmentation.mjs";
+import { sharedRuns } from "./lib/shared-runs.mjs";
+import { openPrintWords } from "./lib/print-words.mjs";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const REPO = join(HERE, "..", "..", "..");
@@ -76,14 +76,38 @@ const DATASET = JSON.parse(
 );
 
 /**
- * Verbatim twins: clusters of verses identical word-for-word, generated from the
- * vendored morphology corpus by `build-verbatim-twins.mjs`. Every pair in a
- * cluster is a `twin` mutashabih edge; the span pass washes the whole verse,
- * since all words are shared. Verse keys only — the twins carry no text.
+ * The print's words as numbers (`lib/print-words.mjs`): where the spans and the
+ * twins are found. Decision `adjacency-span-source` = D.
  */
-const TWINS = JSON.parse(
-  readFileSync(join(DATA, "mutashabihat", "verbatim-twins.json"), "utf8"),
-).twins;
+const printWords = openPrintWords();
+
+/**
+ * Verbatim twins: clusters of verses whose print words are identical, "and"
+ * glued as everywhere else, at least TWIN_FLOOR words long so a short refrain
+ * ("Alif Lam Mim") is not a twin. Every pair in a cluster is a `twin`
+ * mutashabih edge; the span pass washes the whole verse, since all words are
+ * shared. Found here from the print; the same 74 clusters the corpus gives in
+ * `data/mutashabihat/verbatim-twins.json`, which a test holds this to.
+ */
+const TWIN_FLOOR = 4;
+const TWINS = (() => {
+  const bySeq = new Map();
+  for (const [key, words] of printWords) {
+    if (words.length < TWIN_FLOOR) continue;
+    const seq = words.map((w) => w.id).join(",");
+    if (!bySeq.has(seq)) bySeq.set(seq, []);
+    bySeq.get(seq).push(key);
+  }
+  const byKey = (x, y) => {
+    const [a, b] = x.split(":").map(Number);
+    const [c, d] = y.split(":").map(Number);
+    return a - c || b - d;
+  };
+  return [...bySeq.values()]
+    .filter((c) => c.length > 1)
+    .map((c) => c.sort(byKey))
+    .sort((x, y) => byKey(x[0], y[0]));
+})();
 
 /**
  * The Loop-2 curated seed, verbatim from the mock (linker-mock.html §ADJ).
@@ -293,35 +317,31 @@ for (const [k, meta] of [...edges]) {
  * uniqueness rule keeps 2,544 (85.0%) and needs no length floor to do it: the
  * floor a threshold would impose is what the rule already implies.
  *
- * Both ends are converted from QAC word numbers to print indices through
- * `word-alignment.pin.json`, because print indices are what a word box carries
- * and therefore the only numbers the app can highlight. The four ayahs the
- * alignment excepts (2:72, 12:39, 12:41, 37:130) get no span on either side of
- * any edge; measured, they block none of the 2,544.
+ * The run is found in the print's own words, with each lone "and" glued onto
+ * the word after it (decision `adjacency-span-source` = D, 2026-09-26). Until
+ * then it was found in the corpus's words and converted to print positions;
+ * the print, glued, keeps all 2,544 of those runs on the same words and finds
+ * 2 more — a test holds it to that. A run over a glued "and" starts at the
+ * "and" and ends at the end of its word, so it is already in print positions.
  *
  * A generated reverse needs no special case: `sharedRuns(b, a)` mirrors
  * `sharedRuns(a, b)`, so b→a derives the same two ranges with `span` and
  * `toSpan` swapped. `gate:edges` checks that they do.
  */
-const qacWords = wordsByAyah();
-const align = openAlignment();
-
-/** The print range covering QAC words `first…first+len-1`, or null. */
-function printRange(key, first, len) {
-  const head = align.printWordsOf(key, first);
-  const tail = align.printWordsOf(key, first + len - 1);
-  if (!head?.length || !tail?.length) return null;
-  return [Math.min(...head), Math.max(...tail)];
-}
-
 /** `{ from, to }` print ranges for a pair, or null when there is no one answer. */
-function spansOf(srcKey, tgtKey) {
-  if (align.exception(srcKey) || align.exception(tgtKey)) return null;
-  const { len, runs } = sharedRuns(qacWords.get(srcKey), qacWords.get(tgtKey));
+function spansOf(srcKey, tgtKey, words = printWords) {
+  const a = words.get(srcKey);
+  const b = words.get(tgtKey);
+  if (!a?.length || !b?.length) return null;
+  const { len, runs } = sharedRuns(a.map((w) => w.id), b.map((w) => w.id));
   if (len === 0 || runs.length !== 1) return null;
-  const from = printRange(srcKey, runs[0].a, len);
-  const to = printRange(tgtKey, runs[0].b, len);
-  return from && to ? { from, to } : null;
+  // runs are 1-based positions; the arrays are 0-based.
+  const a0 = runs[0].a - 1;
+  const b0 = runs[0].b - 1;
+  return {
+    from: [a[a0].first, a[a0 + len - 1].last],
+    to: [b[b0].first, b[b0 + len - 1].last],
+  };
 }
 
 /* ------------------------------------------------------------------ */
@@ -388,30 +408,23 @@ const OUT_DIR = join(ASSETS, "adj", EDITION);
 rmSync(OUT_DIR, { recursive: true, force: true });
 mkdirSync(OUT_DIR, { recursive: true });
 
-// This tree has two parents and the notice has to say both, because the way to
-// get this wrong twice is to fix it once. The pairings are Waqar144's and owe
-// attribution; the spans — which words of an ayah a pairing shares — are
-// computed by `sharedRuns` out of the GPL'd Quranic Arabic Corpus morphology,
-// so under the same reading of "derivative" the root shards get, these shards
-// carry GPL terms forward and owe the corpus's copyright notice as well. A
-// notice that discharged only the GPL half and dropped Waqar144 would be the
-// identical one-parent error this file shipped for the whole life of the spans
-// feature, pointed the other way.
+// Every parent this tree has is named in the notice, because the way to get a
+// notice wrong is to fix it once and let the next feature add a parent. The
+// pairings are Waqar144's and owe attribution. The spans — which words of an
+// ayah a pairing shares — and the whole-verse twins are found in the print's
+// own words (MushafDatabase, a Sadaqa-e-Jaria grant: free to use, derive and
+// publish; attribution is a courtesy we keep). `sameJuz` comes from core's juz
+// table, which is Tanzil's structural metadata under CC BY; gate:notices cannot
+// see that read, because it does not follow imports into @hifth/core, so the
+// declaration there names Tanzil by hand and this paragraph is the notice's half.
 //
-// It was that long-lived because the spans arrived as a FEATURE. Nobody touched
-// a licence file, so nothing prompted anybody to look at what a sibling build
-// step writes beside its output — build-roots.mjs and build-tajweed.mjs both
-// emit a NOTICE.txt and this one never joined them. `gate:notices` is what now
-// notices; the comment is here because the gate can only check what is declared.
-//
-// A third parent was named on 2026-09-01: `sameJuz` comes from core's juz
-// table, which is Tanzil's structural metadata under CC BY. gate:notices cannot
-// see that read, because it does not follow imports into @hifth/core — the
-// declaration there names Tanzil by hand, and this paragraph is the notice's
-// half of it.
-//
-// The corpus block is `copyrightBlock()`'s, the same call build-roots.mjs makes,
-// so the two trees reproduce one quotation rather than two copies of it.
+// Until 2026-09-26 the spans and twins were found in the GPL'd Quranic Arabic
+// Corpus morphology, and this tree carried GPL terms forward because of it —
+// a parent it shipped for months without naming, until gate:notices noticed.
+// Decision adjacency-span-source = D moved both to the print: the same 2,544
+// spans on the same words, and the same 74 twin clusters, with no corpus read.
+// The builder no longer imports the corpus reader at all (the run-finder moved
+// to lib/shared-runs.mjs), so gate:notices would fail the day it did again.
 writeFileSync(
   join(OUT_DIR, "NOTICE.txt"),
   [
@@ -421,12 +434,15 @@ writeFileSync(
     "  Free to use as you see fit; the author asks that the project be credited,",
     "  and credits in turn the work of Qari Idrees Al-Asim, rahimahu Allah.",
     "",
-    "The word ranges on each edge (the span / toSpan fields) are computed from",
-    "the Quranic Arabic Corpus morphology (version 0.4), which is GPL-licensed,",
-    "so these files carry GPL-3.0 terms forward as well as the terms above. The",
-    "corresponding source is packages/etl/scripts/build-adjacency.mjs and the",
-    "pinned input packages/etl/data/roots/quranic-corpus-morphology-0.4.txt,",
-    "both in the repository named in the app's colophon.",
+    "The word ranges on each edge (the span / toSpan fields) and the whole-verse",
+    "twins are found in the words of the print itself, as numbered by",
+    "MushafDatabase-Ligature-Based-SVG",
+    "  https://github.com/mushafdatabase/MushafDatabase-Ligature-Based-SVG",
+    "  commit ae5786ab08597f8123575dec4e774f1eca195e0f",
+    "  Released as Sadaqa-e-Jaria: free to use, copy, modify, publish, distribute",
+    "  and derive, for any lawful purpose, without prior approval. Credited here",
+    "  as a courtesy. The words are compared as numbers (same number, same",
+    "  letters); packages/etl/data/pages/print-word-ids.json is that list.",
     "",
     "The sameJuz flag on an edge is computed from the juz table in @hifth/core,",
     "which is derived from the Tanzil Quran metadata (quran-data.xml,",
@@ -438,8 +454,6 @@ writeFileSync(
     "",
     "Generated by packages/etl/scripts/build-adjacency.mjs; see SOURCES.md and",
     "LICENSES.md for how the three sets of terms compose.",
-    "",
-    copyrightBlock(),
     "",
   ].join("\n"),
 );
