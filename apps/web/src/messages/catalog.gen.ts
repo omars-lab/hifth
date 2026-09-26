@@ -309,6 +309,15 @@ export interface Catalog {
   readonly turnStyleNote: string;
   readonly turnStyleSeam: string;
   readonly twin: string;
+  readonly vdBookmark: string;
+  readonly vdBookmarkAria: (d: { readonly label: string | number }) => string;
+  readonly vdCommentary: string;
+  readonly vdListen: string;
+  readonly vdPause: string;
+  readonly vdQul: string;
+  readonly vdRoots: string;
+  readonly vdShare: string;
+  readonly verseTools: (d: { readonly label: string | number }) => string;
   readonly wordHops: (d: { readonly n: number; readonly nText: string | number; readonly u: number; readonly uText: string | number }) => string;
   readonly wordLevelPending: string;
   readonly wordParts: (d: { readonly label: string | number }) => string;
