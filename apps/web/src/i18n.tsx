@@ -643,6 +643,8 @@ export interface Strings {
   wordPartsHint: string;
   /** Added where a keyboard is likely: how to pick several parts. */
   wordPartsHintMany: string;
+  /** One letter of the word in the word tool, by its place from the right (1 = first). */
+  wordPartsLetter(n: number): string;
   /** The harakat tool's hint on a phone, where a tap takes the nearest sign. */
   toolSignHintTouch: string;
   /** The phone's tools button, naming the tool that is on. */
@@ -1108,6 +1110,7 @@ export function buildStrings(lang: Lang, m: Catalog): Strings {
     wordParts: (label) => m.wordParts({ label }),
     wordPartsHint: m.wordPartsHint,
     wordPartsHintMany: m.wordPartsHintMany,
+    wordPartsLetter: (count) => m.wordPartsLetter({ nText: n(count) }),
     toolSignHintTouch: m.toolSignHintTouch,
     toolCrop: m.toolCrop,
     toolCropHint: m.toolCropHint,

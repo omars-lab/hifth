@@ -307,6 +307,7 @@ export interface Catalog {
   readonly wordParts: (d: { readonly label: string | number }) => string;
   readonly wordPartsHint: string;
   readonly wordPartsHintMany: string;
+  readonly wordPartsLetter: (d: { readonly nText: string | number }) => string;
   readonly wordPartsMany: (d: { readonly n: number; readonly nText: string | number }) => string;
   readonly wordmark: string;
   readonly zoomIn: string;

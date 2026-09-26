@@ -13,6 +13,7 @@ import type {
   AdjacencyShard,
   AssetManifest,
   AyahRootsShard,
+  LetterShard,
   MarkShard,
   PackPlan,
   RootIndexShard,
@@ -212,4 +213,13 @@ export function loadWordShard(edition: string, page: number): Promise<WordShard 
  */
 export function loadMarkShard(edition: string, page: number): Promise<MarkShard | null> {
   return json<MarkShard>(`${BASE}assets/marks/${edition}/${page}.json`);
+}
+
+/**
+ * Fetch one page's letter shard — where each word's letters divide from one
+ * another in the print (letter-parts = A). Lines only, never the letters: a
+ * word the cut was not trusted on is absent and shows no letters.
+ */
+export function loadLetterShard(edition: string, page: number): Promise<LetterShard | null> {
+  return json<LetterShard>(`${BASE}assets/letters/${edition}/${page}.json`);
 }

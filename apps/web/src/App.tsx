@@ -1076,7 +1076,13 @@ export function App(): JSX.Element {
   );
   // The crop tool's box, in the page's own units, while its sheet is open.
   const [crop, setCrop] = useState<CropBox | null>(null);
-  const pickWordPart = (at: { x: number; y: number; mark?: number | null; marks?: readonly number[] }) => {
+  const pickWordPart = (at: {
+    x: number;
+    y: number;
+    mark?: number | null;
+    marks?: readonly number[];
+    letter?: number;
+  }) => {
     const w = wordOpen;
     setWordOpen(null);
     if (!w) return;
@@ -2326,6 +2332,7 @@ export function App(): JSX.Element {
           mode="note"
           onPick={(mark, _name, at) => pickWordPart({ ...at, mark })}
           onPickMany={(marks, at) => pickWordPart({ ...at, marks })}
+          onPickLetter={(letter, at) => pickWordPart({ ...at, letter })}
           onClose={() => setWordOpen(null)}
         />
       )}
@@ -2399,6 +2406,7 @@ function WordPartsHost({
   chosen,
   onPick,
   onPickMany,
+  onPickLetter,
   onClear,
   onClose,
 }: {
@@ -2414,6 +2422,8 @@ function WordPartsHost({
   onPick: (mark: number | null, name: string | null, at: { x: number; y: number }) => void;
   /** Several signs picked for one note; it is pinned over the first of them. */
   onPickMany?: (marks: number[], at: { x: number; y: number }) => void;
+  /** One letter picked, by its place from the right; the note is pinned over its top. */
+  onPickLetter?: (letter: number, at: { x: number; y: number }) => void;
   onClear?: () => void;
   onClose: () => void;
 }): JSX.Element | null {
@@ -2422,6 +2432,12 @@ function WordPartsHost({
   const pinOver = (mark: number | null) => {
     const s = mark === null ? null : data.signs.find((x) => x.index === mark);
     return s ? { x: s.r[0] + s.r[2] / 2, y: s.r[1] } : { x: data.box.x + data.box.width / 2, y: data.box.y };
+  };
+  /** Over the middle of a letter, at the top of the word. */
+  const pinOverLetter = (letter: number) => {
+    const xs = (data.letters[letter] ?? []).map(([x]) => x);
+    const mid = xs.length ? (Math.min(...xs) + Math.max(...xs)) / 2 : data.box.x + data.box.width / 2;
+    return { x: Math.min(Math.max(mid, data.box.x), data.box.x + data.box.width), y: data.box.y };
   };
   const [, , w, h] = (manifest.pages.find((p) => p.page === page)?.viewBox ?? "0 0 345 550")
     .split(/\s+/)
@@ -2439,6 +2455,7 @@ function WordPartsHost({
       onPickMany={
         onPickMany && ((marks) => onPickMany(marks, pinOver(Math.min(...marks))))
       }
+      onPickLetter={onPickLetter && ((letter) => onPickLetter(letter, pinOverLetter(letter)))}
       onClear={onClear}
       onClose={onClose}
     />

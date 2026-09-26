@@ -473,6 +473,7 @@ export {
 // Reaching one vowel-sign on a page: the sign tool's magnifier and the word
 // tool's copies (harakah-pick = D).
 export { nearestSignOnPage, signsOfWord, type ReachedSign } from "./sign-reach.js";
+export { LETTER_PAD, isLetterShard, lettersOfWord, type LetterShard, type WireLine } from "./letter-parts.js";
 
 // How does a reader pick one vowel-sign when it is smaller than a fingertip?
 // The three pickers tried on the decision page; the owner chose D, two tools

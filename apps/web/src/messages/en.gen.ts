@@ -313,6 +313,7 @@ const messages: Catalog = {
   wordParts: (d) => "The parts of a word in " + d.label,
   wordPartsHint: "Pick a part to write a note on it",
   wordPartsHintMany: "Shift-click to pick several",
+  wordPartsLetter: (d) => "Letter " + d.nText,
   wordPartsMany: (d) => plural(LC, d.n, { one: "Note on this sign", other: "Note on these " + d.nText + " signs" }),
   wordmark: "Hifth",
   zoomIn: "Zoom in",

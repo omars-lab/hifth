@@ -112,6 +112,12 @@
   overflow: hidden;
 }
 
+/* One letter, in full ink: the same print, clipped to where the letter's joins were cut. */
+.letter {
+  position: absolute;
+  inset: 0;
+}
+
 .ring {
   position: absolute;
   border: 1.5px solid var(--accent);

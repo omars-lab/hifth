@@ -43,6 +43,16 @@ describe("notes", () => {
     expect(signsOfNote(addNote([], at, T)[0]!)).toEqual([]);
   });
 
+  it("pins a comment on one letter of the word", () => {
+    const [n] = addNote([], { ...at, letter: 2 }, T);
+    expect(n!.letter).toBe(2);
+    expect(n!.onHarakah).toBe(false);
+    expect(isNote(n)).toBe(true);
+    expect(isNote({ ...n!, letter: -1 })).toBe(false);
+    expect(isNote({ ...n!, letter: 1.5 })).toBe(false);
+    expect("letter" in addNote([], at, T)[0]!).toBe(false);
+  });
+
   it("pins a comment on one vowel-sign when given its mark", () => {
     const [n] = addNote([], { ...at, mark: 7 }, T);
     expect(n).toMatchObject({ word: 4, mark: 7, onHarakah: true, kind: "comment" });

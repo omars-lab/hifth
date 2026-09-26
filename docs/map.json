@@ -671,9 +671,19 @@
           "note": "The second question about the same unadopted corpus, and the one word-level selection was blocked on: do their word boxes land on our paper? Fits a 4-parameter axis-aligned affine per page from the one landmark both corpora carry independently — the ayah-end ornament — and then checks every word centre falls inside the ayah polygon its own attributes name. The answer (`word-registration.probe.json`) is that scale is 1.3333 both axes and the offsets are the two constants already sitting in our own SVGs' transform matrices, one per page parity; residual is sub-pixel, so the per-page fit is a check rather than a necessity. Reuses `ligature-svg.probe.json`'s pin — one pin, not two — so a corpus that moves invalidates both probes at once."
         },
         {
+          "file": "packages/etl/scripts/lib/letter-cuts.mjs",
+          "symbol": "cutPage",
+          "note": "The letter cutter behind decision letter-parts = A, shared by the probe and the build: finds where one letter joins the next in the print's own ink. Each word box is split into connected pieces (signs, dots, a neighbour's tail, and the letter bodies); the word's spelling is split into runs of joined letters, one per body, and each body is cut by a least-cost pass over its columns that prefers thin strokes on the body's own writing line and letter widths near a per-letter prior, then a seam follows the thinnest path through the ink. A word whose bodies and runs disagree in number, or where a letter would keep almost no ink, is left uncut, never guessed. `dividers` turns a cut into the lines between letters and `encodeLines` writes them small."
+        },
+        {
           "file": "packages/etl/scripts/probe-letter-cuts.mjs",
-          "symbol": "cutColumns",
-          "note": "The trial behind decision letter-parts = A: finds where one letter joins the next in the print's own ink. Each word box is split into connected pieces (signs, dots, a neighbour's tail, and the letter bodies); the word's spelling is split into runs of joined letters, one per body, and each body is cut by a least-cost pass over its columns that prefers thin strokes on the writing line and letter widths near a per-letter prior, then a seam follows the thinnest path through the ink. A word whose bodies and runs disagree in number is left uncut and reported, never guessed. Writes a coloured page and a JSON report to a scratch directory; ships nothing."
+          "symbol": "cutPage",
+          "note": "Draws one page of the letter cut for the eye: each letter coloured by the region its dividing lines give it (what ships, not the cutter's own labels), the lines in red, words left uncut boxed in orange. Writes a picture and a JSON report to a scratch directory; ships nothing, and both carry the print's ink so they stay out of docs/."
+        },
+        {
+          "file": "packages/etl/scripts/build-letters.mjs",
+          "symbol": "buildPage",
+          "note": "Writes assets/letters/<edition>/<page>.json: for each word the cut could be trusted on, the dividing lines between its letters and nothing else — no spelling ships. A word with a line that had to cross a letter's ink is left out, and the word tool shows it whole. Runs a page per process, several at once."
         }
       ],
       "extend": [

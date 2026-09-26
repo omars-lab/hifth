@@ -296,6 +296,7 @@
   "wordParts": "The parts of a word in {label}",
   "wordPartsHint": "Pick a part to write a note on it",
   "wordPartsHintMany": "Shift-click to pick several",
+  "wordPartsLetter": "Letter {nText}",
   "wordPartsMany": "{n, plural, one{Note on this sign} other{Note on these {nText} signs}}",
   "toolSignHintTouch": "Tap near a vowel-sign to note it",
   "toolCrop": "Crop",

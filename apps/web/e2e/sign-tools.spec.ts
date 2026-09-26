@@ -143,6 +143,29 @@ test.describe("Hifth · the harakat and word tools", () => {
     await expect(toolBtn(page, "Word")).toHaveAttribute("aria-checked", "true");
   });
 
+  test("W: a word cut at its joins offers its letters, and a letter picked takes a note", async ({ page }) => {
+    await page.goto("/#/hafs-kfqc/p7");
+    await expect(pageSvg(page, 7)).toBeVisible();
+    await page.keyboard.press("KeyW");
+    // Every word of this verse is in page 7's letter data.
+    const at = await ayahTarget(page, "#verse-46");
+    await page.mouse.click(at.x, at.y);
+    const letters = parts(page).locator('[data-part="letter"]');
+    // The letter data loads with the word's; wait for the row before counting it.
+    await expect(letters.first()).toBeVisible();
+    expect(await letters.count()).toBeGreaterThan(1);
+    await expect(letters.first()).toHaveAccessibleName("Letter 1");
+    // Each copy is the print clipped to its own letter.
+    await expect(letters.first().locator("span[style*='clip-path']")).toHaveCount(1);
+
+    await letters.nth(1).click();
+    await expect(parts(page)).toHaveCount(0);
+    await expect(box(page)).toBeVisible();
+    await box(page).getByRole("textbox").fill("This letter, not the next");
+    await page.keyboard.press("Escape");
+    await expect(pins(page)).toHaveCount(1);
+  });
+
   test("W: Shift-click gathers several signs, and one note is written on all of them", async ({ page }) => {
     await page.goto("/#/hafs-kfqc/p7");
     await expect(pageSvg(page, 7)).toBeVisible();

@@ -296,6 +296,7 @@
   "wordParts": "أجزاء كلمة في {label}",
   "wordPartsHint": "اختر جزءًا لتكتب عليه ملاحظة",
   "wordPartsHintMany": "اضغط مع Shift لتختار أكثر من جزء",
+  "wordPartsLetter": "الحرف {nText}",
   "wordPartsMany": "{n, plural, zero{ملاحظة على العلامات} one{ملاحظة على هذه العلامة} two{ملاحظة على هاتين العلامتين} few{ملاحظة على هذه العلامات الـ{nText}} many{ملاحظة على هذه العلامات الـ{nText}} other{ملاحظة على هذه العلامات الـ{nText}}}",
   "toolSignHintTouch": "اضغط قرب علامة تشكيل لتكتب عليها ملاحظة",
   "toolCrop": "قصّ",

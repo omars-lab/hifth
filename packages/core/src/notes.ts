@@ -56,6 +56,11 @@ export interface Note {
    * on one of its signs rather than losing it. Absent for one sign or none.
    */
   readonly marks?: readonly number[];
+  /**
+   * Which letter of the word the note sits on, counted from the right, first
+   * letter 0 (the word tool's letters, letter-parts = A). Absent: no one letter.
+   */
+  readonly letter?: number;
   readonly kind: NoteKind;
   readonly text: string;
   readonly createdAt: number;
@@ -99,6 +104,7 @@ export function addNote(
     y: number;
     mark?: number | null;
     marks?: readonly number[];
+    letter?: number | null;
   },
   now: number,
 ): Note[] {
@@ -114,6 +120,7 @@ export function addNote(
     onHarakah: mark !== null,
     ...(mark !== null ? { mark } : {}),
     ...(several.length > 1 ? { marks: several } : {}),
+    ...(at.letter !== undefined && at.letter !== null ? { letter: at.letter } : {}),
     kind: "comment",
     text: "",
     createdAt: now,
@@ -207,6 +214,7 @@ export function isNote(x: unknown): x is Note {
     (n.marks === undefined ||
       (Array.isArray(n.marks) &&
         (n.marks as unknown[]).every((m) => typeof m === "number" && Number.isInteger(m) && m >= 0))) &&
+    (n.letter === undefined || (typeof n.letter === "number" && Number.isInteger(n.letter) && n.letter >= 0)) &&
     KINDS.includes(n.kind as NoteKind) &&
     typeof n.text === "string" &&
     typeof n.createdAt === "number" &&
