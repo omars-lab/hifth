@@ -669,6 +669,11 @@
           "file": "packages/etl/scripts/probe-word-registration.mjs",
           "symbol": "fit",
           "note": "The second question about the same unadopted corpus, and the one word-level selection was blocked on: do their word boxes land on our paper? Fits a 4-parameter axis-aligned affine per page from the one landmark both corpora carry independently — the ayah-end ornament — and then checks every word centre falls inside the ayah polygon its own attributes name. The answer (`word-registration.probe.json`) is that scale is 1.3333 both axes and the offsets are the two constants already sitting in our own SVGs' transform matrices, one per page parity; residual is sub-pixel, so the per-page fit is a check rather than a necessity. Reuses `ligature-svg.probe.json`'s pin — one pin, not two — so a corpus that moves invalidates both probes at once."
+        },
+        {
+          "file": "packages/etl/scripts/probe-letter-cuts.mjs",
+          "symbol": "cutColumns",
+          "note": "The trial behind decision letter-parts = A: finds where one letter joins the next in the print's own ink. Each word box is split into connected pieces (signs, dots, a neighbour's tail, and the letter bodies); the word's spelling is split into runs of joined letters, one per body, and each body is cut by a least-cost pass over its columns that prefers thin strokes on the writing line and letter widths near a per-letter prior, then a seam follows the thinnest path through the ink. A word whose bodies and runs disagree in number is left uncut and reported, never guessed. Writes a coloured page and a JSON report to a scratch directory; ships nothing."
         }
       ],
       "extend": [
