@@ -233,6 +233,18 @@ const html = `<!doctype html>
   .options .tag { font: 0.8rem monospace; color: var(--ink-soft); }
   footer { margin-top: 3rem; padding-top: 1rem; border-top: 1px solid var(--hair);
     font-size: 0.9rem; color: var(--ink-soft); }
+
+  /* What a choice does for a hafiz, marked the way a reader marks a page: a highlighter stroke. */
+  .hafiz-box{margin:1.6em 0;padding:1em 1.15em;border:2px solid #e8c400;border-radius:12px;background:rgba(255,236,120,.14)}
+  .hafiz-box h2{margin-top:0}
+  .hafiz-box ul{margin:.5em 0 0;padding-left:1.1em}
+  .hafiz-box li{margin:.45em 0}
+  .hl{background-image:linear-gradient(100deg,rgba(255,221,0,0) 0%,rgba(255,221,0,.62) 1.2%,rgba(255,228,50,.48) 50%,rgba(255,221,0,.66) 98.8%,rgba(255,221,0,0) 100%);border-radius:.4em .2em .45em .25em;padding:.06em .28em;margin:0 -.08em;-webkit-box-decoration-break:clone;box-decoration-break:clone}
+  .for-hafiz{margin:.55em 0 0}
+  @media (prefers-color-scheme: dark){
+    .hafiz-box{background:rgba(250,204,21,.08);border-color:#b99a10}
+    .hl{background-image:linear-gradient(100deg,rgba(250,204,21,0) 0%,rgba(250,204,21,.34) 1.2%,rgba(250,204,21,.26) 50%,rgba(250,204,21,.36) 98.8%,rgba(250,204,21,0) 100%)}
+  }
 </style>
 </head>
 <body>
@@ -258,6 +270,16 @@ const html = `<!doctype html>
   kind of look-alike — whole verses repeated, word for word, in two places — and the two sets
   hardly overlap. <b>Should the app take the library's whole-verse pairs in, as bare verse
   numbers and no Qur'an text, so a reader on one is offered the other?</b></p>
+
+  <section class="hafiz-box">
+  <h2>What does this change for a hafiz?</h2>
+  <p><span class="hl">A verse that appears word for word in two places is one of the easiest to slip
+  between: nothing in the words tells you which place you are in, so a hafiz reciting one can carry
+  straight on into what follows the other.</span> Today, standing on one of these ${num(G.verbatimMisses)}
+  twins, the app says nothing about the other. For an identical pair, what a hafiz has to learn is not
+  which words differ — none do — but what comes before and after each copy, so simply being shown the
+  twin is most of the value.</p>
+  </section>
 
   <h2>Why is this being asked now?</h2>
   <p>The library was brought in as a ruler — a way to check the app's own numbers. Held up
@@ -333,6 +355,7 @@ ${nearGallery}
       <p>Keep the copy-nothing boundary whole. The app connects the look-alikes it built itself
       and stays silent about the library's twins. Costs nothing to build; the
       ${num(G.verbatimMisses)} twins above stay unconnected.</p>
+      <p class="for-hafiz"><span class="hl"><b>For a hafiz:</b> nothing changes, and on these twins you get no warning that the verse also stands somewhere else — the exact slip the app exists to catch.</span></p>
     </li>
     <li>
       <div><span class="lbl">B — Take in the pair numbers only, and show a whole-verse resemblance.</span></div>
@@ -342,6 +365,7 @@ ${nearGallery}
       give: the word-by-word green/yellow marking, because the library's word numbers do not line
       up with the print, so the app would show that these two resemble each other without marking
       where they part.</p>
+      <p class="for-hafiz"><span class="hl"><b>For a hafiz:</b> you are told the twin exists and can open it, and see what surrounds each copy. On a near-twin you learn that the two are alike, but not which words set them apart.</span></p>
     </li>
     <li>
       <div><span class="lbl">C — Take in the pairs and align the words ourselves.</span></div>
@@ -349,6 +373,7 @@ ${nearGallery}
       so the shared-and-differing marking works on these twins exactly as it does on the ones the
       app built itself. Full parity with the existing display; the most work, and the marking has
       to be checked by eye where a verse's word count differs between the page and the library.</p>
+      <p class="for-hafiz"><span class="hl"><b>For a hafiz:</b> everything B gives, and on a near-twin the words that differ are marked — which is the part you actually have to memorise.</span></p>
     </li>
   </ul>
 

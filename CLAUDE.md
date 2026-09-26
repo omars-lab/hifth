@@ -85,7 +85,8 @@ The second failure is quieter than the first: a page anyone can read, which stil
 act on, because it opens with three options and the options are the *last* thing a person
 needs. So a decision — the record and the page both — answers these, in roughly this order:
 
-what is being decided · why it is being asked now · what happens if nobody decides · what
+what is being decided · **what it changes for a hafiz, highlighted, for the page and for
+each option** · why it is being asked now · what happens if nobody decides · what
 the app does today and what that costs, measured · what people outside this project do about
 it, linked, and *if you did not look, say you did not look* · what we have already decided
 that constrains it · the options, each one drawn · what else could be considered and why it

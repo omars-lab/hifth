@@ -360,7 +360,10 @@ test.describe("Hifth · the desktop spread", () => {
     await page.setViewportSize({ width: 390, height: 844 });
     await expect(langs).toBeHidden();
     await page.getByRole("button", { name: /عن حِفظ/ }).click();
-    await expect(page.getByRole("dialog").getByRole("radio")).toHaveCount(2);
+    // The language pair only: the sheet has other radio groups (the turn style).
+    await expect(
+      page.getByRole("dialog").locator('[aria-labelledby="colophon-lang"]').getByRole("radio"),
+    ).toHaveCount(2);
   });
 
   test("still turns pages with the arrow keys the header advertises", async ({ page }) => {
@@ -799,6 +802,47 @@ test.describe("Hifth · the page bar at desktop", () => {
     const moved = (await centre(knob)).x - rest.x;
     expect(moved, "the knob stayed put while the marks around it spread").toBeLessThan(-10);
     expect(Math.abs((await centre(here)).x - restHere - moved), "the knob left its page mark").toBeLessThan(1);
+  });
+
+  test("the juz under the mouse is drawn thicker, and only while the mouse is there", async ({ page }) => {
+    await page.goto("/#/hafs-kfqc/p106");
+    await expect(spread(page)).toBeVisible();
+    const band = page.getByTestId("juz-hover");
+    await expect(band, "the juz was thick before the mouse came").toBeHidden();
+
+    // Midway along the bar is juz 14 at this width (page 272, as the page tag says).
+    const track = await boxOf(page.getByRole("slider"));
+    const x = track.x + track.width * 0.55;
+    const y = track.y + track.height / 2;
+    await page.mouse.move(x, y);
+    await expect(band).toBeVisible();
+    const juz = Number(await band.getAttribute("data-juz"));
+    const b = await boxOf(band);
+    expect(b.height, "the hovered juz is no thicker than the track").toBeGreaterThan(6);
+
+    // That juz only: it runs from its own opening cut to the next juz's, and the
+    // mouse is inside it.
+    expect(x).toBeGreaterThan(b.x);
+    expect(x).toBeLessThan(b.x + b.width);
+    const cuts = page.getByTestId("juz-cut");
+    const cutXs: number[] = [];
+    for (let i = 0; i < (await cuts.count()); i++) {
+      const c = await boxOf(cuts.nth(i));
+      cutXs.push(c.x + c.width / 2);
+    }
+    const nearEdge = (edge: number) => cutXs.some((cx) => Math.abs(cx - edge) < 2);
+    expect(nearEdge(b.x) && nearEdge(b.x + b.width), `juz ${juz} is not bounded by its own two cuts`).toBe(true);
+
+    // Leaving puts it back.
+    await page.mouse.move(x, track.y - 200);
+    await expect(band, "the juz stayed thick after the mouse left").toBeHidden();
+
+    // And a drag never meets it: pressing the knob clears it.
+    const knob = await boxOf(page.getByTestId("page-handle"));
+    await page.mouse.move(knob.x + knob.width / 2, knob.y + knob.height / 2);
+    await page.mouse.down();
+    await expect(band, "the juz stayed thick under a drag").toBeHidden();
+    await page.mouse.up();
   });
 });
 
@@ -1922,7 +1966,7 @@ test.describe("Hifth · the page tools bar", () => {
     await expect(toolBtn(page, "Highlight")).toBeFocused();
     await expect(toolBtn(page, "Highlight")).toHaveAttribute("aria-checked", "true");
     await page.keyboard.press("End");
-    await expect(toolBtn(page, "Bookmark")).toHaveAttribute("aria-checked", "true");
+    await expect(toolBtn(page, "Crop")).toHaveAttribute("aria-checked", "true");
   });
 
   test("with the highlighter, a plain drag paints — no hold first", async ({ page }) => {

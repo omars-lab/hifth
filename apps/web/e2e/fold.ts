@@ -18,6 +18,8 @@ import type { Page } from "@playwright/test";
 export interface FoldSighting {
   /** The word it carried: `crease`, `gap` or `hole`. Never `none` — see §3.4. */
   word: string;
+  /** The turn style it was drawn in: `seam`, `curl` or `lift` (the reader's setting). */
+  style: string | null;
   /**
    * The `data-testid` of the element it was inserted into, or null for one that
    * has none. This is the whole of docs/design/page-transition.md §3.5: on a
@@ -49,6 +51,7 @@ export async function watchFolds(page: Page): Promise<void> {
       const host = node.parentElement;
       seen.push({
         word: node.getAttribute("data-fold") ?? "",
+        style: node.getAttribute("data-style"),
         host: host?.getAttribute("data-testid") ?? null,
         hostLeaf: host?.getAttribute("data-leaf") ?? null,
         width: node.getBoundingClientRect().width,

@@ -7,6 +7,14 @@ import {
   dropBookmark,
   liftBookmark,
   mergeBookmarks,
+  mergeNotes,
+  addNote,
+  editNote,
+  markMistake,
+  mistakeOn,
+  pickMistakeSign,
+  removeNote,
+  restoreNote,
   moveBookmark,
   openBookmark,
   parseBookmarkFile,
@@ -34,6 +42,7 @@ import {
   type AyahRef,
   type AyahRootsShard,
   type Bookmark,
+  type Note,
   type Edge,
   type FieldId,
   type JumpTarget,
@@ -49,6 +58,7 @@ import {
 } from "@hifth/core";
 import {
   loadManifest,
+  pageUrl,
   loadRootAyahShard,
   loadRootBucket,
   loadShard,
@@ -60,8 +70,12 @@ import { recordLook } from "./revision-store";
 import { useT } from "./i18n";
 import { useHashRouter } from "./useHashRouter";
 import { DESKTOP_QUERY, useMediaQuery } from "./useMediaQuery";
-import { PageStage, type PageStageHandle, type PageTool } from "./components/PageStage";
-import { PageToolbar, TOOL_KEYS } from "./components/PageToolbar";
+import { PageStage, type PageStageHandle, type PageTool, type WordRect } from "./components/PageStage";
+import { PageToolbar, TOOL_KEYS, toolHint, toolName } from "./components/PageToolbar";
+import { PhoneToolbarA, PhoneToolbarB, PhoneToolbarC, phoneBarFromUrl } from "./components/PhoneToolbar";
+import { NoteBox } from "./components/NoteBox";
+import { WordParts, useWordParts } from "./components/WordParts";
+import { CropSheet, type CropBox } from "./components/CropSheet";
 import { PageSpread } from "./components/PageSpread";
 import { EdgeGrabRails, type EdgeTurnDriver } from "./components/EdgeGrabRails";
 import { DesktopChrome } from "./components/DesktopChrome";
@@ -80,7 +94,7 @@ import { BookmarkRibbons } from "./components/BookmarkRibbons";
 import { UndoBar } from "./components/UndoBar";
 import { BookmarkDrawer } from "./components/BookmarkDrawer";
 import { BookmarkShelf } from "./components/BookmarkShelf";
-import { useBookmarks, useSeam } from "./useBookmarks";
+import { useBookmarks, useNotes, useSeam } from "./useBookmarks";
 import { LiveAnnouncer, useAnnouncer } from "./components/LiveAnnouncer";
 import { RootLens, RootLensTrigger } from "./components/RootLens";
 import { PlayTrigger } from "./components/PlayTrigger";
@@ -101,6 +115,7 @@ import { CommentarySheet, CommentaryTrigger } from "./pitch/CommentarySheet";
 import { SkinToggle, TajweedLegend } from "./components/SkinToggle";
 import { PageSlider } from "./components/PageSlider";
 import { fisheyeEnabled, rememberFisheye } from "./pagebar-fisheye";
+import { rememberTurnStyle, savedTurnStyle, type TurnStyle } from "./turn-style";
 import styles from "./App.module.css";
 
 // The app opens on page 7 (the mock's first curated page). Full page routing is
@@ -215,6 +230,8 @@ export function App(): JSX.Element {
    * The query and its arithmetic live in useMediaQuery.ts.
    */
   const desktop = useMediaQuery(DESKTOP_QUERY);
+  /** Which of the three phone tool layouts is on trial (phone-toolbar, open). */
+  const [phoneBar] = useState(() => phoneBarFromUrl(window.location.search));
   /*
    * One leaf or two — the reader's own answer, and the only thing the spread
    * consults (docs/design/desktop.md §8 ②, superseded mechanism).
@@ -697,6 +714,13 @@ export function App(): JSX.Element {
       return next;
     });
   }, []);
+  // How a page turn looks (docs/decisions/page-turn-curl.md, decided 2026-09-26):
+  // the flat seam unless this device picked the curl or the shadow in settings.
+  const [turnStyle, setTurnStyle] = useState<TurnStyle>(() => savedTurnStyle());
+  const chooseTurnStyle = useCallback((style: TurnStyle) => {
+    rememberTurnStyle(style);
+    setTurnStyle(style);
+  }, []);
   const [legendOpen, setLegendOpen] = useState(false);
   const [tajweedShards, setTajweedShards] = useState<ReadonlyMap<number, TajweedShard>>(
     new Map(),
@@ -940,11 +964,7 @@ export function App(): JSX.Element {
       if (toolRef.current === next) return;
       toolRef.current = next;
       setToolState(next);
-      announce(
-        t.toolOn(
-          next === "select" ? t.toolSelect : next === "highlight" ? t.toolHighlight : t.toolBookmark,
-        ),
-      );
+      announce(t.toolOn(toolName(t, next)));
     },
     [announce, t],
   );
@@ -969,8 +989,19 @@ export function App(): JSX.Element {
     [bookmarks, commitBookmarks, goToPage, t],
   );
 
+  // Notes (docs/design/page-toolbar-plan.md, step 2): the note tool drops a
+  // pin at a word and opens a box beside it; the pin stays and reopens the box.
+  // Kept on the device beside the bookmarks, and carried in the same saved file
+  // (note-persistence = B, note-export-shape = C).
+  const { notes, commit: commitNotes } = useNotes(announce, t.bmNotSaved);
+  const [noteOpenId, setNoteOpenId] = useState<string | null>(null);
+  const openNote = notes.find((n) => n.id === noteOpenId) ?? null;
+  // A deleted note (or a cleared mistake) waits here for a few seconds so
+  // "Undo" can put it back; `said` and `restored` are what the bar and the undo say.
+  const [deletedNote, setDeletedNote] = useState<{ note: Note; said: string; restored: string } | null>(null);
+
   const saveBookmarkFile = useCallback(() => {
-    const blob = new Blob([JSON.stringify(toBookmarkFile(bookmarks, Date.now()), null, 2)], {
+    const blob = new Blob([JSON.stringify(toBookmarkFile(bookmarks, Date.now(), notes), null, 2)], {
       type: "application/json",
     });
     const url = URL.createObjectURL(blob);
@@ -979,7 +1010,7 @@ export function App(): JSX.Element {
     a.download = "hifth-bookmarks.json";
     a.click();
     setTimeout(() => URL.revokeObjectURL(url), 1000);
-  }, [bookmarks]);
+  }, [bookmarks, notes]);
 
   const loadBookmarkFile = useCallback(
     (text: string) => {
@@ -989,9 +1020,13 @@ export function App(): JSX.Element {
         return;
       }
       const merged = mergeBookmarks(bookmarks, file.bookmarks);
-      commitBookmarks(merged, t.bmLoaded(merged.length - bookmarks.length));
+      const said = t.bmLoaded(merged.length - bookmarks.length);
+      const mergedNotes = file.notes ? mergeNotes(notes, file.notes) : null;
+      const newNotes = mergedNotes ? mergedNotes.length - notes.length : 0;
+      commitBookmarks(merged, newNotes > 0 ? `${said} · ${t.noteLoaded(newNotes)}` : said);
+      if (mergedNotes) commitNotes(mergedNotes, "");
     },
-    [announce, bookmarks, commitBookmarks, t],
+    [announce, bookmarks, commitBookmarks, notes, commitNotes, t],
   );
 
   // Unfolding a corner lifts every bookmark on the page at once, with no
@@ -1021,6 +1056,123 @@ export function App(): JSX.Element {
   };
   const endUndo = useCallback(() => setUnfolded(null), []);
 
+  // The note tool's tap: pin a fresh note, put the tool down (it is used once,
+  // like the bookmark tool) and open the box to type in.
+  const placeNote = useCallback(
+    (at: { page: number; key: string; word: number | null; x: number; y: number }) => {
+      const next = addNote(notes, at, Date.now());
+      commitNotes(next, "");
+      chooseTool("select");
+      setNoteOpenId(next[next.length - 1]!.id);
+    },
+    [notes, commitNotes, chooseTool],
+  );
+  // The harakat tool's click: pin a note on the sign the magnifier rings, and
+  // open the box. The tool stays up, so the next sign is one more click.
+  const pickSignNote = useCallback(
+    (at: { page: number; key: string; word: number; mark: number; x: number; y: number }) => {
+      const next = addNote(notes, at, Date.now());
+      commitNotes(next, "");
+      setNoteOpenId(next[next.length - 1]!.id);
+    },
+    [notes, commitNotes],
+  );
+  // The word tool's tap opens the word into its parts; a part picked drops a
+  // note on it (a sign, or the whole word).
+  const [wordOpen, setWordOpen] = useState<{ page: number; key: string; word: number; rect: WordRect } | null>(
+    null,
+  );
+  // The crop tool's box, in the page's own units, while its sheet is open.
+  const [crop, setCrop] = useState<CropBox | null>(null);
+  const pickWordPart = (at: {
+    x: number;
+    y: number;
+    mark?: number | null;
+    marks?: readonly number[];
+    letter?: number;
+  }) => {
+    const w = wordOpen;
+    setWordOpen(null);
+    if (!w) return;
+    const next = addNote(notes, { page: w.page, key: w.key, word: w.word, ...at }, Date.now());
+    commitNotes(next, "");
+    setNoteOpenId(next[next.length - 1]!.id);
+  };
+  /** Put focus back on a pin after its box closes, so the keyboard is not lost. */
+  const focusPin = (id: string) =>
+    requestAnimationFrame(() =>
+      document.querySelector<SVGElement>(`[data-note-id="${CSS.escape(id)}"]`)?.focus(),
+    );
+  // Closing keeps what was typed; a note closed empty was never written, and
+  // goes away without a word.
+  const closeNote = (text: string) => {
+    const n = openNote;
+    setNoteOpenId(null);
+    // The harakat and word tools stay up for the next sign; the note tool is
+    // used once.
+    if (toolRef.current !== "sign" && toolRef.current !== "word") chooseTool("select");
+    if (!n) return;
+    if (text.trim() === "") {
+      commitNotes(removeNote(notes, n.id), "");
+      return;
+    }
+    const next = editNote(notes, n.id, text, Date.now());
+    if (next.some((x, i) => x !== notes[i])) commitNotes(next, t.noteSaved);
+    focusPin(n.id);
+  };
+  const deleteNote = () => {
+    const n = openNote;
+    setNoteOpenId(null);
+    if (!n) return;
+    commitNotes(removeNote(notes, n.id), t.noteDeleted);
+    setDeletedNote({ note: n, said: t.noteDeleted, restored: t.noteRestored });
+  };
+  const undoDelete = () => {
+    if (!deletedNote) return;
+    commitNotes(restoreNote(notes, deletedNote.note), deletedNote.restored);
+    setDeletedNote(null);
+  };
+  const endNoteUndo = useCallback(() => setDeletedNote(null), []);
+
+  // The mistake tool (docs/design/page-toolbar-plan.md, step 3): a tap marks a
+  // word in a quiet red and the tool stays up for the next one; a tap on a
+  // word already marked opens the sign picker. A mistake is a note of kind
+  // "correction", so it is kept and saved with the notes (notes-export = C).
+  const [pickingId, setPickingId] = useState<string | null>(null);
+  const picking = notes.find((n) => n.id === pickingId) ?? null;
+  const markWord = useCallback(
+    (at: { page: number; key: string; word: number; x: number; y: number }) => {
+      const held = mistakeOn(notes, at.page, at.key, at.word);
+      if (held) {
+        setPickingId(held.id);
+        return;
+      }
+      commitNotes(markMistake(notes, at, Date.now()), t.mistakeMarked(t.ayahLabel(at.key) ?? at.key));
+      // Into the revision record too, so the calendar can show where the reader
+      // slips. Only on the first tap: picking the sign or clearing the mark
+      // later is the same slip, not another one.
+      void recordLook({ key: at.key, page: at.page, slip: true });
+    },
+    [notes, commitNotes, t],
+  );
+  const pickSign = (mark: number | null, name: string | null) => {
+    const n = picking;
+    setPickingId(null);
+    if (!n) return;
+    commitNotes(
+      pickMistakeSign(notes, n.id, mark, Date.now()),
+      name ? t.mistakeSignPicked(name) : t.mistakeWordPicked,
+    );
+  };
+  const clearMistake = () => {
+    const n = picking;
+    setPickingId(null);
+    if (!n) return;
+    commitNotes(removeNote(notes, n.id), t.mistakeCleared);
+    setDeletedNote({ note: n, said: t.mistakeCleared, restored: t.mistakeRestored });
+  };
+  const noteLabel = useCallback((n: Note) => t.notePin(t.ayahLabel(n.key) ?? n.key), [t]);
+
   const ribbonsFor = (p: number) => (
     <BookmarkRibbons
       bookmarks={bookmarksOnPage(bookmarks, p)}
@@ -1029,6 +1181,7 @@ export function App(): JSX.Element {
       onOpen={setDrawerId}
       freshId={freshId}
       seam={seamPage === p}
+      aside={tool === "sign" || tool === "word"}
     />
   );
 
@@ -1214,6 +1367,10 @@ export function App(): JSX.Element {
         if (at !== undefined) dropWithTool(at, key);
         return;
       }
+      // Under the note, harakat, word and mistake tools the stage pins a note,
+      // takes a sign, opens the word or marks it instead (`onPlaceNote`,
+      // `onPickSign`, `onOpenWord`, `onMarkWord`).
+      if (toolRef.current !== "select" && toolRef.current !== "highlight") return;
       setOpenDirection(null);
       setSelectedRange(null); // a tap replaces a highlight — never both at once
       const toggledOff = selectedKeyRef.current === key;
@@ -1791,6 +1948,7 @@ export function App(): JSX.Element {
       {/* Its own row above the book, not floated over it: floated, it sat on
           the page's first line. */}
       {resolver && desktop && <PageToolbar tool={tool} onTool={chooseTool} />}
+      {resolver && !desktop && phoneBar === "a" && <PhoneToolbarA tool={tool} onTool={chooseTool} />}
       <main
         className={styles.main}
         dir="rtl"
@@ -1830,7 +1988,7 @@ export function App(): JSX.Element {
                  book with two outer edges to grab; the phone still turns by
                  swiping the leaf itself, so it gets no rails and keeps its
                  gesture. */
-              edgeRails={desktop ? <EdgeGrabRails driver={edgeTurn} /> : undefined}
+              edgeRails={desktop ? <EdgeGrabRails driver={edgeTurn} aside={tool === "sign" || tool === "word"} /> : undefined}
               renderFacing={(facing) => (
                 /* The facing leaf gets its own stage rather than a second
                    visible host inside the current one: PageStage's whole
@@ -1876,7 +2034,15 @@ export function App(): JSX.Element {
                      into the same book is the one thing §3.4 forbids. */
                   dragToTurn={false}
                   bound
-                  tool={desktop ? tool : "select"}
+                  tool={tool}
+                  notes={notes}
+                  noteLabel={noteLabel}
+                  onPlaceNote={placeNote}
+                  onOpenNote={setNoteOpenId}
+                  onMarkWord={markWord}
+                onPickSign={pickSignNote}
+                onOpenWord={setWordOpen}
+                onCrop={setCrop}
                   labelFor={(key) => t.ayahAria(t.ayahLabel(key) ?? key)}
                   skin={skin}
                   tajweedLookup={tajweed?.lookup ?? null}
@@ -1926,8 +2092,17 @@ export function App(): JSX.Element {
                 /* Only the live stage turns pages, and only on a desktop
                    spread does the fold belong to something wider than it. */
                 foldTarget={desktop ? bookRef : null}
+                turnStyle={turnStyle}
                 bound={desktop && pageMode === "two"}
-                tool={desktop ? tool : "select"}
+                tool={tool}
+                notes={notes}
+                noteLabel={noteLabel}
+                onPlaceNote={placeNote}
+                onOpenNote={setNoteOpenId}
+                onMarkWord={markWord}
+                onPickSign={pickSignNote}
+                onOpenWord={setWordOpen}
+                onCrop={setCrop}
               />
             </PageSpread>
             <HopRail
@@ -2013,6 +2188,8 @@ export function App(): JSX.Element {
         onClose={() => setColophonOpen(false)}
         fisheye={fisheye}
         onToggleFisheye={toggleFisheye}
+        turnStyle={turnStyle}
+        onTurnStyle={chooseTurnStyle}
         onShowTips={() => {
           setColophonOpen(false);
           setCoachUp(true);
@@ -2080,11 +2257,14 @@ export function App(): JSX.Element {
           oldest-to-newest in the mus'haf's own direction, and its beads sit
           under the rail they came from. */}
       <footer className={styles.trail} aria-label={t.trail} dir="rtl">
+        {resolver && !desktop && phoneBar === "b" && <PhoneToolbarB tool={tool} onTool={chooseTool} />}
+        {resolver && !desktop && phoneBar === "c" && <PhoneToolbarC tool={tool} onTool={chooseTool} />}
         <TrailBeads
           trail={trail}
           currentKey={selectedKey}
           onBeadBack={handleBeadBack}
           onClearCurrent={handleClearCurrent}
+          hint={!desktop && phoneBar !== "c" && tool !== "select" ? toolHint(t, tool, true) : undefined}
         />
         <PlayTrigger
           selectedKey={selectedKey}
@@ -2139,8 +2319,156 @@ export function App(): JSX.Element {
         fisheye={fisheye}
       />
 
-      {unfolded && <UndoBar said={unfolded.said} onUndo={undoUnfold} onDone={endUndo} />}
+      {openNote && (
+        <NoteBox
+          key={openNote.id}
+          note={openNote}
+          label={t.ayahLabel(openNote.key) ?? openNote.key}
+          onClose={closeNote}
+          onDelete={deleteNote}
+        />
+      )}
+      {crop && manifest && (
+        <CropHost key={`${crop.page}:${crop.x}:${crop.y}`} manifest={manifest} box={crop} onClose={() => setCrop(null)} />
+      )}
+      {wordOpen && manifest && (
+        <WordPartsHost
+          key={`${wordOpen.key}#${wordOpen.word}`}
+          manifest={manifest}
+          page={wordOpen.page}
+          verseKey={wordOpen.key}
+          word={wordOpen.word}
+          label={t.ayahLabel(wordOpen.key) ?? wordOpen.key}
+          anchor={() => wordOpen.rect}
+          mode="note"
+          onPick={(mark, _name, at) => pickWordPart({ ...at, mark })}
+          onPickMany={(marks, at) => pickWordPart({ ...at, marks })}
+          onPickLetter={(letter, at) => pickWordPart({ ...at, letter })}
+          onClose={() => setWordOpen(null)}
+        />
+      )}
+      {picking && manifest && picking.word !== null && (
+        <WordPartsHost
+          key={picking.id}
+          manifest={manifest}
+          page={picking.page}
+          verseKey={picking.key}
+          word={picking.word}
+          label={t.ayahLabel(picking.key) ?? picking.key}
+          anchor={() => {
+            const r = [...document.querySelectorAll(`[data-mistake-word="${CSS.escape(picking.id)}"]`)]
+              .map((el) => el.getBoundingClientRect())
+              .find((b) => b.width > 0);
+            return r ? { left: r.left, top: r.top, right: r.right, bottom: r.bottom } : null;
+          }}
+          mode="mistake"
+          chosen={picking.mark ?? null}
+          onPick={(mark, name) => pickSign(mark, name)}
+          onClear={clearMistake}
+          onClose={() => setPickingId(null)}
+        />
+      )}
+      {unfolded ? (
+        <UndoBar said={unfolded.said} onUndo={undoUnfold} onDone={endUndo} />
+      ) : (
+        deletedNote && <UndoBar said={deletedNote.said} onUndo={undoDelete} onDone={endNoteUndo} />
+      )}
       <LiveAnnouncer message={message} />
     </div>
+  );
+}
+
+/** The crop tool's sheet, given the page's drawing and its size. */
+function CropHost({
+  manifest,
+  box,
+  onClose,
+}: {
+  manifest: AssetManifest;
+  box: CropBox;
+  onClose: () => void;
+}): JSX.Element {
+  const [, , w, h] = (manifest.pages.find((p) => p.page === box.page)?.viewBox ?? "0 0 345 550")
+    .split(/\s+/)
+    .map(Number);
+  return (
+    <CropSheet
+      box={box}
+      pageSrc={pageUrl(manifest.edition, box.page)}
+      pageSize={{ w: w || 345, h: h || 550 }}
+      onClose={onClose}
+    />
+  );
+}
+
+/**
+ * One word opened into its parts (harakah-pick = D): loads the word's box and
+ * signs, then mounts the row. The word tool drops a note on the part picked;
+ * the mistake tool's second tap says which part the slip was on.
+ */
+function WordPartsHost({
+  manifest,
+  page,
+  verseKey,
+  word,
+  label,
+  anchor,
+  mode,
+  chosen,
+  onPick,
+  onPickMany,
+  onPickLetter,
+  onClear,
+  onClose,
+}: {
+  manifest: AssetManifest;
+  page: number;
+  verseKey: string;
+  word: number;
+  label: string;
+  anchor: () => WordRect | null;
+  mode: "note" | "mistake";
+  chosen?: number | null;
+  /** The part picked, its name, and where on the page a note on it is pinned. */
+  onPick: (mark: number | null, name: string | null, at: { x: number; y: number }) => void;
+  /** Several signs picked for one note; it is pinned over the first of them. */
+  onPickMany?: (marks: number[], at: { x: number; y: number }) => void;
+  /** One letter picked, by its place from the right; the note is pinned over its top. */
+  onPickLetter?: (letter: number, at: { x: number; y: number }) => void;
+  onClear?: () => void;
+  onClose: () => void;
+}): JSX.Element | null {
+  const data = useWordParts(manifest.edition, page, verseKey, word);
+  if (!data) return null;
+  const pinOver = (mark: number | null) => {
+    const s = mark === null ? null : data.signs.find((x) => x.index === mark);
+    return s ? { x: s.r[0] + s.r[2] / 2, y: s.r[1] } : { x: data.box.x + data.box.width / 2, y: data.box.y };
+  };
+  /** Over the middle of a letter, at the top of the word. */
+  const pinOverLetter = (letter: number) => {
+    const xs = (data.letters[letter] ?? []).map(([x]) => x);
+    const mid = xs.length ? (Math.min(...xs) + Math.max(...xs)) / 2 : data.box.x + data.box.width / 2;
+    return { x: Math.min(Math.max(mid, data.box.x), data.box.x + data.box.width), y: data.box.y };
+  };
+  const [, , w, h] = (manifest.pages.find((p) => p.page === page)?.viewBox ?? "0 0 345 550")
+    .split(/\s+/)
+    .map(Number);
+  return (
+    <WordParts
+      label={label}
+      data={data}
+      pageSrc={pageUrl(manifest.edition, page)}
+      pageSize={{ w: w || 345, h: h || 550 }}
+      anchor={anchor}
+      mode={mode}
+      chosen={chosen}
+      onPick={(mark, name) => onPick(mark, name, pinOver(mark))}
+      onPickMany={
+        onPickMany && ((marks) => onPickMany(marks, pinOver(Math.min(...marks))))
+      }
+      onPickLetter={onPickLetter && ((letter) => onPickLetter(letter, pinOverLetter(letter)))}
+      onClear={onClear}
+      onClose={onClose}
+    />
   );
 }

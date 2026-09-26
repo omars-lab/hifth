@@ -1,6 +1,6 @@
 # When you turn a page, should the leaf curl the way a paper book does?
 
-*Status: open. Reopens a rejection recorded in `page-transition.md` §8①.*
+*Status: decided 2026-09-26 by Omar: A, B and D, as a setting the reader switches. C is out. Reopened a rejection recorded in `page-transition.md` §8①.*
 
 - **Turn each option by hand:** the live board is at
   [`docs/design/page-turn-curl-options.html`](../design/page-turn-curl-options.html),
@@ -143,7 +143,23 @@ And not the performance sign-off: even a curl that wins here on feel still owes 
 measurement on a slow phone before it graduates. This decides the **direction**; the
 numbers come after.
 
-## When it is decided
+## What was decided
+
+**Decided (2026-09-26, Omar): keep A, B and D, and let the reader choose.** The flat seam
+(A) stays the default. The skeleton curl (B) and the shadow lift (D) sit beside it in the
+reader's settings, so each hafiz picks the turn that feels right to them. Curling the real
+words (C) is left out: it is the one option that moves the drawn letters, and none of the
+others needed that.
+
+The owner's words: "lets implement a, b, and d as turning options" and "this should be a
+setting we can toggle".
+
+**For a hafiz:** nothing about the page changes. The words never move during a turn in any
+of the three. What changes is only how the turn feels under the thumb, and that is now the
+reader's choice rather than ours.
+
+## When it is decided (as written before the choice)
+
 
 The winning turn style graduates into `PageStage`'s `.fold` rendering — the
 `foldBetween` / `runTurn` / `turnBy` contract stays; only what is drawn between the

@@ -669,6 +669,21 @@
           "file": "packages/etl/scripts/probe-word-registration.mjs",
           "symbol": "fit",
           "note": "The second question about the same unadopted corpus, and the one word-level selection was blocked on: do their word boxes land on our paper? Fits a 4-parameter axis-aligned affine per page from the one landmark both corpora carry independently — the ayah-end ornament — and then checks every word centre falls inside the ayah polygon its own attributes name. The answer (`word-registration.probe.json`) is that scale is 1.3333 both axes and the offsets are the two constants already sitting in our own SVGs' transform matrices, one per page parity; residual is sub-pixel, so the per-page fit is a check rather than a necessity. Reuses `ligature-svg.probe.json`'s pin — one pin, not two — so a corpus that moves invalidates both probes at once."
+        },
+        {
+          "file": "packages/etl/scripts/lib/letter-cuts.mjs",
+          "symbol": "cutPage",
+          "note": "The letter cutter behind decision letter-parts = A, shared by the probe and the build: finds where one letter joins the next in the print's own ink. Each word box is split into connected pieces (signs, dots, a neighbour's tail, and the letter bodies); the word's spelling is split into runs of joined letters, one per body, and each body is cut by a least-cost pass over its columns that prefers thin strokes on the body's own writing line and letter widths near a per-letter prior, then a seam follows the thinnest path through the ink. A word whose bodies and runs disagree in number, or where a letter would keep almost no ink, is left uncut, never guessed. `dividers` turns a cut into the lines between letters and `encodeLines` writes them small."
+        },
+        {
+          "file": "packages/etl/scripts/probe-letter-cuts.mjs",
+          "symbol": "cutPage",
+          "note": "Draws one page of the letter cut for the eye: each letter coloured by the region its dividing lines give it (what ships, not the cutter's own labels), the lines in red, words left uncut boxed in orange. Writes a picture and a JSON report to a scratch directory; ships nothing, and both carry the print's ink so they stay out of docs/."
+        },
+        {
+          "file": "packages/etl/scripts/build-letters.mjs",
+          "symbol": "buildPage",
+          "note": "Writes assets/letters/<edition>/<page>.json: for each word the cut could be trusted on, the dividing lines between its letters and nothing else — no spelling ships. A word with a line that had to cross a letter's ink is left out, and the word tool shows it whole. Runs a page per process, several at once."
         }
       ],
       "extend": [
@@ -1913,6 +1928,62 @@
       "seeAlso": [
         "validation",
         "golden-images"
+      ]
+    },
+    {
+      "id": "page-notes",
+      "what": "The note tool: press N on a computer, tap a word, type a note; pins stay on the page, kept on the device and in the saved bookmark file.",
+      "layer": "L2 web",
+      "entry": [
+        {
+          "file": "packages/core/src/notes.ts",
+          "symbol": "addNote",
+          "note": "What a note is and every change to one, pure and clockless. A note sits on a word; the letter-or-mark field is there for step 3 of the toolbar plan and always false today."
+        },
+        {
+          "file": "packages/core/src/bookmarks.ts",
+          "symbol": "toBookmarkFile",
+          "note": "Notes ride in the bookmark file as an optional field, so one saved file is the reader's whole state; older files without notes still load."
+        },
+        {
+          "file": "apps/web/src/bookmark-store.ts",
+          "symbol": "writeNotes",
+          "note": "Kept on the device in the bookmarks store, written whole."
+        },
+        {
+          "file": "apps/web/src/useBookmarks.ts",
+          "symbol": "useNotes",
+          "note": "Says a note is saved only once the device has kept it."
+        },
+        {
+          "file": "apps/web/src/components/PageStage.tsx",
+          "symbol": "drawNotePins",
+          "note": "Draws the pins on the page and turns a tap under the note tool into the word under it."
+        },
+        {
+          "file": "apps/web/src/components/NoteBox.tsx",
+          "symbol": "NoteBox",
+          "note": "The box beside a pin. Keeps its own draft and hands it over once, on closing."
+        },
+        {
+          "file": "apps/web/src/App.tsx",
+          "symbol": "placeNote",
+          "note": "Ties it together: pin, open, close, delete with an Undo line."
+        }
+      ],
+      "extend": [
+        "Change what a note holds in packages/core/src/notes.ts and its isNote check together, with a test in notes.test.ts.",
+        "Change the pins or the box, then look at the real page before believing it.",
+        "Run the desktop e2e notes tests."
+      ],
+      "gates": [
+        "make ci",
+        "make e2e"
+      ],
+      "seeAlso": [
+        "select-an-ayah",
+        "word-selection",
+        "desktop-spread"
       ]
     }
   ]

@@ -101,6 +101,8 @@ gesture.
 | **Highlight** | H | selects the verse | paints across verses, no hold first | stays on |
 | **Bookmark** | B | drops a ribbon on that page | — | goes back |
 | **Note** | N | drops a note pin on that verse or word, and opens its box | — | goes back |
+| **Harakat** | K | a magnifier follows the pointer, no press needed, and rings the nearest vowel-sign; a click drops a note on that sign | — | stays on |
+| **Word** | W | opens the word into its parts, one enlarged copy per sign; picking a part drops a note on it | — | stays on |
 | **Mark a mistake** | M | marks that word; a second tap picks the exact sign | — | stays on |
 | **Crop** | C | — | draws a box, then offers to share it as an image | goes back |
 
@@ -137,6 +139,17 @@ Pins stay on the page afterwards and tapping one reopens it. Notes use the repor
 already decided on, so they export in the batch file. This is the step that makes the bar pay
 for itself, because notes have no way in at all today.
 
+**Built 2026-09-25.** The fourth tool on the bar, letter N, with a pin for a pointer. A tap on
+the page drops a pin on the word under it and opens a small box beside it; the tool then goes
+back to Select. Done, Escape or a press anywhere else closes the box and keeps what was typed;
+a note closed empty is simply not kept. Tapping a pin opens it again to change it or delete it,
+and a deleted note can be brought back with Undo for a few seconds, the same way an unfolded
+corner can. A screen reader hears each pin as a button named by its verse. Notes are kept on
+the device next to the bookmarks and go into the same saved file, so saving and loading
+bookmarks carries notes too. Three things were left for later: a note sits on a word, not yet
+on a single letter or mark (that is step 3's question); the phone has no way to add a note yet,
+though a pin loaded from a file opens with a tap (step 5); and notes do not sync anywhere yet.
+
 ### 3. The mistake tool
 
 Tap a word to mark it. It turns a quiet red, like Tarteel, and is recorded in the revision
@@ -145,6 +158,46 @@ signs so you can pick the exact vowel or letter. This step needs the open "harak
 decision settled first, and building the tool is the natural way to settle it: build its three
 options as three versions of this tool and let the owner try them by hand.
 
+**Built 2026-09-25, with the sign picker still a stand-in.** The fifth tool on the bar, letter
+M. A tap marks the word under it in a quiet red, and the tool stays on so you can mark the
+next slip straight away. Tap a marked word again and a small picker opens under it: each
+vowel-sign on the word as an enlarged window on the print, named underneath, plus "the whole
+word" and "clear mark". Pick a sign and a thin red ring goes round it on the page. Clearing
+asks nothing and can be undone for a few seconds, like a deleted note. A mistake is kept as a
+note of the "correction" kind that sits on its word and, once picked, on one sign, so it is
+stored on the device beside notes and bookmarks and goes into the same saved file.
+
+**The owner tried all three on the decision page and chose a fourth way, D (2026-09-26):** keep
+the magnifier and the word opened into its parts, but as two tools of their own rather than
+two ways to do one thing.
+
+- **Harakat (K).** A magnifier follows the pointer with no press first, the tool being on is
+  what says "I am pointing at a sign". It rings the nearest vowel-sign and names it; a click
+  drops a note on that one sign. The tool stays on, so the next sign is one more click.
+- **Word (W).** A tap opens the word into its parts: the whole word first, then one enlarged
+  copy of the word for each sign, with that sign in full ink and the rest faint. Picking a part
+  drops a note on it. The mistake tool's second tap opens the same row, so a slip is pinned to
+  its sign the same way.
+
+While either tool is on, the strip along the page's outer edge that turns the page steps
+aside, because the first word of every line sits under it; the arrows and keys still turn.
+
+**Slips on the calendar (2026-09-26).** Marking a word now also writes a slip into the
+revision record, so the calendar puts a small red dot on each page, hizb or juz where you
+marked one, and its key gains a line for the dot. Only the first tap counts: picking the sign
+afterwards is the same slip. Clearing the red mark off the page leaves the dot, because
+clearing says "I have it now", not "I never slipped".
+
+**One note on several signs (2026-09-26).** In the word tool, Shift-click (or ⌘-click) a sign
+to start gathering; after that each click on a sign picks it or lets it go, and a button
+under the row writes one note on all of them. A plain click with nothing gathered still drops
+a note at once, so the one-sign case stays one click. The saved note lists every sign it sits
+on and keeps the first in the old single-sign slot, so a file opened by an older copy of the
+app still lands the note on one of its signs. A marked mistake stays one sign per slip.
+
+Left for later: the word's parts are its signs, not yet its letters, because a
+letter's own shape exists today for one verse only.
+
 ### 4. The crop tool
 
 Drag a box over the page to get an image of it to share. Before building this, check one
@@ -152,6 +205,14 @@ licence question: the print's publisher allows free digital use but keeps commer
 rights. An image a reader shares is probably fine, but that has to be checked against the
 licence text, not assumed. If it is not fine, crop becomes "share a link to these verses",
 which the app can already do.
+
+**Built.** The licence was checked: the print's terms, read at the publisher's own site on
+8 September 2026 and quoted in the sources file, allow free use in digital, web and software
+settings, and reserve only the printing of paper copies for sale. A reader sharing a picture of
+part of a page prints nothing. So crop cuts an image, and each image carries a line under it
+naming the page and whose print it is. Pick the tool (C), drag a box over the page, and a sheet
+shows the cut-out with Save, and Share on a phone that can share images. A tap without a drag
+cuts nothing. The same tool sits in the phone's tray.
 
 ### 5. The phone
 
@@ -163,6 +224,13 @@ and trying by hand, rather than choosing from a picture:
 - a row that slides up from the page bar at the bottom, where the thumb already is.
 
 This goes to the owner as its own decision, with all three running on the decision page.
+
+**Built (2026-09-26).** All three are in the app, picked by the address (`?phonebar=a`, `b`, or
+`c`; C when none is named), and mounted side by side on the
+[decision page](phone-toolbar-options.html), with the reasons in the
+[record](../decisions/phone-toolbar.md). A tool picked on a phone now works by a tap on the
+page; the vowel-sign tool takes the sign nearest the tap, since there is no pointer to aim.
+**Chosen: C, the tray** (owner, 2026-09-26); A and B stay tryable on the decision page.
 
 ## How will we know each step worked?
 
@@ -194,5 +262,5 @@ This goes to the owner as its own decision, with all three running on the decisi
 - What a note or mistake mark looks like on the page. That was settled by the placement and
   granularity decisions.
 - Whether notes sync to an account. The decided answer is still that they leave as a file.
-- Which picking method the mistake tool uses for a single vowel. That is the open "harakah
-  pick" decision, and step 3 is where it gets answered.
+- Which picking method reaches a single vowel. That was the "harakah pick" decision, settled
+  as D on 2026-09-26 after the owner tried all three ways by hand on its page.

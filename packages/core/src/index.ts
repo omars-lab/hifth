@@ -50,6 +50,26 @@ export {
   type SurahGroup,
 } from "./bookmarks.js";
 
+// Notes — the reader's words pinned to a word on the page, carried in the same
+// saved file as the bookmarks (decisions note-persistence, note-export-shape).
+export {
+  NOTE_TEXT_MAX,
+  addNote,
+  signsOfNote,
+  editNote,
+  isMistake,
+  isNote,
+  markMistake,
+  mergeNotes,
+  mistakeOn,
+  notesOnPage,
+  pickMistakeSign,
+  removeNote,
+  restoreNote,
+  type Note,
+  type NoteKind,
+} from "./notes.js";
+
 export {
   WordIndex,
   isWordShard,
@@ -359,6 +379,7 @@ export {
   lastSeen,
   rollUp,
   scopesOf,
+  slipsIn,
   type DayStamp,
   type RevisionEvent,
   type RevisionScope,
@@ -448,3 +469,28 @@ export {
   type ScrubBand,
   type ScrubStrategy,
 } from "./decision-options/scrub-rate.js";
+
+// Reaching one vowel-sign on a page: the sign tool's magnifier and the word
+// tool's copies (harakah-pick = D).
+export { nearestSignOnPage, signsOfWord, type ReachedSign } from "./sign-reach.js";
+export { LETTER_PAD, isLetterShard, lettersOfWord, type LetterShard, type WireLine } from "./letter-parts.js";
+
+// How does a reader pick one vowel-sign when it is smaller than a fingertip?
+// The three pickers tried on the decision page; the owner chose D, two tools
+// built from B and a fuller A (docs/decisions/harakah-pick.md).
+export {
+  HARAKAH_PICKERS,
+  HARAKAH_PICK_DEFAULT,
+  OptionA as HarakahPickA,
+  OptionB as HarakahPickB,
+  OptionC as HarakahPickC,
+  signsOnWord,
+  trayChoices,
+  namedChoices,
+  noChoices,
+  nearestSign,
+  noSnap,
+  type HarakahPicker,
+  type PickChoice,
+  type PickSign,
+} from "./decision-options/harakah-pick.js";

@@ -188,6 +188,7 @@ export function PageSlider({
   // the pointer and the page beneath it. Drawn imperatively by the effect below,
   // from the same warped positions the markers take.
   const lensRef = useRef<HTMLDivElement>(null);
+  const juzBandRef = useRef<HTMLSpanElement>(null);
   // True from the pointerdown that starts a drag until its release. The marker
   // growth reads this: it must never fire mid-drag, or a swollen button would
   // sit under a thumb that is only passing through — the one thing option C's
@@ -471,6 +472,8 @@ export function PageSlider({
 
       // The labels are the fisheye's alone. Cleared whenever the pointer leaves or
       // the spread is off, so the plain grow-on-approach bar carries none.
+      const band = juzBandRef.current;
+      if (band) band.style.display = "";
       if (!layer) return;
       if (px === null || !fish) {
         layer.replaceChildren();
@@ -487,6 +490,29 @@ export function PageSlider({
       // under the pointer is the accent span between its own two edges.
       const restX = (v: number): number => rect.right - thumb / 2 - ((v - 1) / Math.max(1, tot - 1)) * usable;
       const warpX = (v: number): number => spread(restX(v), px);
+
+      // The juz the pointer is in, drawn thicker from the cut that opens it to
+      // the cut that opens the next, on the same warped edges as those cuts. The
+      // part already read (the book's start, on the right, up to the knob) keeps
+      // the fill's colour and the rest keeps the track's.
+      let juzHere = 0;
+      js.forEach((start, i) => {
+        if (start !== null && start !== undefined && start <= pageUnder) juzHere = i + 1;
+      });
+      if (band && juzHere > 0) {
+        const next = js.slice(juzHere).find((s): s is number => s !== null && s !== undefined) ?? tot + 1;
+        const startPage = js[juzHere - 1] ?? 1;
+        const bandRight = startPage <= 1 ? restX(1) + 1 : warpX(startPage - 0.5);
+        const bandLeft = next > tot ? restX(tot) - 1 : warpX(next - 0.5);
+        const fillLeft = fill ? fill.getBoundingClientRect().left : rect.right;
+        const holder = (band.offsetParent as HTMLElement | null) ?? track;
+        const origin = holder.getBoundingClientRect().left + holder.clientLeft;
+        band.dataset.juz = String(juzHere);
+        band.style.left = `${bandLeft - origin}px`;
+        band.style.width = `${Math.max(0, bandRight - bandLeft)}px`;
+        band.style.setProperty("--band-split", `${clamp(fillLeft - bandLeft, 0, bandRight - bandLeft)}px`);
+        band.style.display = "block";
+      }
       const reachPages = Math.ceil((LENS.radiusPx / usable) * (tot - 1)) + 1;
       // Juz and hizb starts inside the window, each as its own mark on the edge
       // before its opening page: a juz cut is tall and green and named "Juz 30",
@@ -720,6 +746,12 @@ export function PageSlider({
               }}
             />
           ))}
+          {/* The juz the mouse is inside, drawn a little thicker than the rest of
+              the track, the way a video bar thickens the chapter under the
+              pointer (zoom plan, step 2). Hidden until a hover with the
+              magnifier on; placed and sized by the effect above, under the fill
+              and the juz cuts so both still show on it. */}
+          <span className={styles.juzBand} data-testid="juz-hover" ref={juzBandRef} />
           {/* How far into the book the handle is: filled from the book's first
               page to the handle, the way a progress slider says "you are here,
               and this much is behind you". */}
