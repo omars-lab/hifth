@@ -54,6 +54,7 @@ import {
 } from "@hifth/core";
 import { loadMarkShard, loadPageSvg, loadWordShard, pageUrl } from "../assets";
 import { useT } from "../i18n";
+import type { TurnStyle } from "../turn-style";
 import styles from "./PageStage.module.css";
 
 interface PageStageProps {
@@ -221,6 +222,12 @@ interface PageStageProps {
    * `docs/design/page-transition.md` §3.5, decision row 21.
    */
   foldTarget?: RefObject<HTMLElement | null> | null;
+  /**
+   * How a turn looks — the reader's choice in settings (page-turn-curl, decided
+   * 2026-09-26): the flat seam, the skeleton curl or the shadow lift. None of
+   * them moves a drawn word; see `drawnStyle` for which situations each draws.
+   */
+  turnStyle?: TurnStyle;
   /**
    * This leaf is one side of an open book (two pages showing).
    *
@@ -522,6 +529,27 @@ type FoldKind = Exclude<Fold, "none">;
 /** Which way the band travels. Forward is toward the later page. */
 type TurnDir = "forward" | "back";
 
+/** What actually crosses the page on one turn. */
+type Fold3 = { kind: FoldKind; dir: TurnDir; style: TurnStyle };
+
+/**
+ * Which style a turn of this kind draws, given the reader's choice.
+ *
+ * The curl and the lift are both about a leaf turning, so they draw only where
+ * a leaf did turn (`gap`), and the curl also where the print has a leaf this
+ * build lacks (`hole`), which it shows as sunk paper instead of grey lines —
+ * as the decision page drew it. Facing pages (`crease`) never curl or lift in
+ * any style: nothing turned, so every style keeps the seam's crease there.
+ */
+function drawnStyle(kind: FoldKind, chosen: TurnStyle): TurnStyle {
+  if (chosen === "curl" && (kind === "gap" || kind === "hole")) return "curl";
+  if (chosen === "lift" && kind === "gap") return "lift";
+  return "seam";
+}
+
+/** Grey lines standing where words will be on the curling leaf — never a glyph. */
+const SKELETON_LINES = 15; // the Madani page's fifteen lines
+
 const MIN_ZOOM = 0.8;
 const MAX_ZOOM = 5;
 
@@ -606,6 +634,7 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
     tajweedLookup = null,
     overlay,
     foldTarget = null,
+    turnStyle = "seam",
     bound = false,
     tool = "select",
     notes,
@@ -755,8 +784,11 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
    * (§3.4 rule 1). `armedRef` is what stops a re-target restarting the sweep
    * from the screen edge — the band continues from wherever it is.
    */
-  const [fold, setFold] = useState<{ kind: FoldKind; dir: TurnDir } | null>(null);
-  const foldRef = useRef<{ kind: FoldKind; dir: TurnDir } | null>(null);
+  const [fold, setFold] = useState<Fold3 | null>(null);
+  const foldRef = useRef<Fold3 | null>(null);
+  // Read when a turn starts, so a switch in settings takes effect on the next one.
+  const turnStyleRef = useRef(turnStyle);
+  turnStyleRef.current = turnStyle;
   const foldElRef = useRef<HTMLDivElement | null>(null);
   const armedRef = useRef(false);
   const turnRef = useRef(0);
@@ -1107,6 +1139,28 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
   }, []);
 
   /**
+   * Fade what crosses the page — the lift's shadow coming up and going, the
+   * curled leaf clearing once the real page is under it. Opacity only: the
+   * element stays where it was put.
+   */
+  const fadeFold = useCallback((el: HTMLElement, opacity: number, ms: number): void => {
+    el.style.transition = ms > 0 ? `opacity ${ms}ms linear` : "none";
+    el.style.opacity = String(opacity);
+  }, []);
+
+  /**
+   * The lift's shadow sits on the edge the turn starts from and never travels:
+   * the left edge for a forward turn (the side a forward band enters from) and
+   * the right for a turn back.
+   */
+  const placeLift = useCallback((el: HTMLElement, dir: TurnDir): void => {
+    const span = el.parentElement?.clientWidth ?? 0;
+    const x = dir === "forward" ? 0 : span - el.offsetWidth;
+    el.style.transition = "none";
+    el.style.transform = `translate3d(${x}px, 0, 0)`;
+  }, []);
+
+  /**
    * Put the band in the DOM at its entry edge — on insert, and only on insert.
    *
    * A ref callback rather than an effect because it runs during commit, before
@@ -1127,9 +1181,14 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
       const state = foldRef.current;
       if (!state) return;
       armedRef.current = true;
-      moveFold(el, sweepOf(el, state.dir).enter, 0);
+      if (state.style === "lift") {
+        placeLift(el, state.dir);
+        fadeFold(el, 0, 0);
+      } else {
+        moveFold(el, sweepOf(el, state.dir).enter, 0);
+      }
     },
-    [moveFold, sweepOf],
+    [fadeFold, moveFold, placeLift, sweepOf],
   );
 
   /** Wait for the band to exist and be placed, or give up after a few frames. */
@@ -1462,6 +1521,96 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
   }, [setTurnPhase]);
 
   /**
+   * The curl's and the lift's turn, once the element is on the stage.
+   *
+   * Same waits and the same generation check as the seam's, and the same three
+   * endings — landed, stalled then landed, or given back when the page never
+   * arrives. What differs is only what crosses the page:
+   *
+   *  - curl: the leaf comes over curled, carrying grey lines, and lies flat
+   *    over the page. The page is swapped underneath while it covers it, and the
+   *    leaf then clears — the real words settle in once the leaf is flat. While
+   *    the page is still coming the flat leaf simply stays, its lines pulsing.
+   *  - lift: a shadow comes up on the edge the turn starts from, the page
+   *    cross-fades under it, and the shadow goes. Nothing travels.
+   */
+  const runStyledTurn = useCallback(
+    async (
+      el: HTMLDivElement,
+      style: TurnStyle,
+      from: number,
+      next: number,
+      dir: TurnDir,
+      mount: Promise<MountedPage | null>,
+      gen: number,
+      sweepMs: number,
+      fadeMs: number,
+    ): Promise<boolean> => {
+      const mine = (): boolean => turnRef.current === gen;
+      const giveBack = async (): Promise<boolean> => {
+        setTurnPhase("retreating");
+        if (style === "curl") {
+          delete el.dataset.flat;
+          moveFold(el, sweepOf(el, dir).enter, fadeMs);
+        } else fadeFold(el, 0, fadeMs);
+        await sleep(fadeMs);
+        if (mine()) {
+          setErrorPage(next);
+          setStatus("error");
+          abortTurn();
+        }
+        return false;
+      };
+
+      setTurnPhase("crossing");
+      if (style === "curl") {
+        moveFold(el, sweepOf(el, dir).middle, sweepMs);
+        await sleep(sweepMs);
+        if (!mine()) return false;
+        el.dataset.flat = "1";
+        if (!pagesRef.current.has(next)) {
+          setTurnPhase("stalled");
+          const mp = await mount;
+          if (!mine()) return false;
+          if (!mp) return giveBack();
+          setTurnPhase("crossing");
+        }
+        // Covered by the leaf, so the swap needs no fade of its own.
+        const mp = await mount;
+        if (!mine()) return false;
+        if (!mp) return giveBack();
+        land(next);
+        fadeFold(el, 0, fadeMs * 2);
+        await sleep(fadeMs * 2);
+      } else {
+        fadeFold(el, 1, sweepMs / 2);
+        await sleep(sweepMs / 2);
+        if (!mine()) return false;
+        if (!pagesRef.current.has(next)) {
+          setTurnPhase("stalled");
+          const mp = await mount;
+          if (!mine()) return false;
+          if (!mp) return giveBack();
+          setTurnPhase("crossing");
+        }
+        crossFade(from, next, fadeMs);
+        await sleep(fadeMs);
+        if (!mine()) return false;
+        land(next);
+        fadeFold(el, 0, sweepMs / 2);
+        await sleep(sweepMs / 2);
+      }
+      if (!mine()) return true;
+      armedRef.current = false;
+      foldRef.current = null;
+      setFold(null);
+      setTurnPhase(null);
+      return true;
+    },
+    [abortTurn, crossFade, fadeFold, land, moveFold, setTurnPhase, sweepOf],
+  );
+
+  /**
    * The turn itself — insert the band, sweep it, swap under it, land.
    *
    * Written as one linear async function rather than as a reducer because that
@@ -1515,10 +1664,13 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
       const mount = ensurePage(next);
       void mount.catch(() => null);
 
-      foldRef.current = { kind: kind as FoldKind, dir };
+      foldRef.current = { kind: kind as FoldKind, dir, style: drawnStyle(kind as FoldKind, turnStyleRef.current) };
       setFold(foldRef.current);
       const el = await armedFold(gen);
       if (!el || !mine()) return false;
+
+      const style = foldRef.current?.style ?? "seam";
+      if (style !== "seam") return runStyledTurn(el, style, from, next, dir, mount, gen, sweepMs, fadeMs);
 
       const { enter, exit, middle } = sweepOf(el, dir);
       setTurnPhase("crossing");
@@ -1581,6 +1733,7 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
       ensurePage,
       land,
       moveFold,
+      runStyledTurn,
       setTurnPhase,
       sweepOf,
     ],
@@ -1631,7 +1784,7 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
       if (!drawn) return;
 
       setTurnPhase("tracking");
-      foldRef.current = { kind: kind as FoldKind, dir };
+      foldRef.current = { kind: kind as FoldKind, dir, style: drawnStyle(kind as FoldKind, turnStyleRef.current) };
       setFold(foldRef.current);
       // Pre-mount the destination now rather than at release. The reader is
       // holding a picture of a page; by the time they commit, 200-odd ms of
@@ -1654,11 +1807,21 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
       const turn = dragTurnRef.current;
       const el = foldElRef.current;
       if (!turn?.drawn || !el || !armedRef.current || turnRef.current !== turn.gen) return;
-      const { enter, exit } = sweepOf(el, turn.dir);
+      const style = foldRef.current?.style ?? "seam";
+      if (style === "lift") {
+        // The shadow deepens as the hand travels; half the page is all of it.
+        const span = el.parentElement?.clientWidth || 1;
+        fadeFold(el, Math.min(1, Math.abs(dx) / (span / 2)), 0);
+        return;
+      }
+      const sweep = sweepOf(el, turn.dir);
+      // The curled leaf comes as far as lying flat over the page and no further.
+      const { enter } = sweep;
+      const exit = style === "curl" ? sweep.middle : sweep.exit;
       const at = enter + dx;
       moveFold(el, exit > enter ? Math.min(exit, Math.max(enter, at)) : Math.max(exit, Math.min(enter, at)), 0);
     },
-    [moveFold, sweepOf],
+    [fadeFold, moveFold, sweepOf],
   );
 
   /** Slide the band back the way it came and take it off the stage. */
@@ -1669,7 +1832,8 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
       if (el && mine()) {
         const ms = durationMs("--dur-fast", 120);
         setTurnPhase("retreating");
-        moveFold(el, sweepOf(el, dir).enter, ms);
+        if (foldRef.current?.style === "lift") fadeFold(el, 0, ms);
+        else moveFold(el, sweepOf(el, dir).enter, ms);
         await sleep(ms);
       }
       if (!mine()) return;
@@ -1678,7 +1842,7 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
       setFold(null);
       setTurnPhase(null);
     },
-    [durationMs, moveFold, setTurnPhase, sweepOf],
+    [durationMs, fadeFold, moveFold, setTurnPhase, sweepOf],
   );
 
   /**
@@ -2682,16 +2846,39 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
   }, []);
 
   /*
-   * The band. One div, no children, `aria-hidden` — everything it says is also
+   * The band. One div — the curl adds its leaf's face — and `aria-hidden`: everything it says is also
    * said by the announcer on landing, by the leaf's own edges at rest and by the
    * page bar's inventory, so there is nothing here for a screen reader to stop
    * on. Rendered into the spread when there is one, so that a turn which leaves
    * an opening sweeps the whole book rather than one of its two panels.
    */
-  const band = fold ? (
-    <div ref={attachFold} className={styles.fold} data-fold={fold.kind} aria-hidden="true" />
-  ) : null;
   const target = foldTarget?.current ?? null;
+  const band = fold ? (
+    <div
+      ref={attachFold}
+      className={styles.fold}
+      data-fold={fold.kind}
+      data-style={fold.style}
+      data-dir={fold.dir}
+      aria-hidden="true"
+    >
+      {/* The curled leaf's face: grey lines where words will be, never a glyph.
+          A missing leaf has no lines to carry — its face is sunk paper. */}
+      {fold.style === "curl" && (
+        // On an open book the whole opening changes, so what comes over is an
+        // opening too: two faces with the crease between them, not one wide sheet.
+        // The faces sit on one leaf, which is what curls, so they tilt as one.
+        <div className={styles.leaf}>
+          {(target ? ["right", "left"] : ["whole"]).map((side) => (
+            <div key={side} className={styles.leafFace} data-side={side}>
+              {fold.kind === "gap" &&
+                Array.from({ length: SKELETON_LINES }, (_, i) => <i key={i} />)}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  ) : null;
 
   return (
     <div

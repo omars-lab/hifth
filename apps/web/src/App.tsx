@@ -115,6 +115,7 @@ import { CommentarySheet, CommentaryTrigger } from "./pitch/CommentarySheet";
 import { SkinToggle, TajweedLegend } from "./components/SkinToggle";
 import { PageSlider } from "./components/PageSlider";
 import { fisheyeEnabled, rememberFisheye } from "./pagebar-fisheye";
+import { rememberTurnStyle, savedTurnStyle, type TurnStyle } from "./turn-style";
 import styles from "./App.module.css";
 
 // The app opens on page 7 (the mock's first curated page). Full page routing is
@@ -712,6 +713,13 @@ export function App(): JSX.Element {
       rememberFisheye(next);
       return next;
     });
+  }, []);
+  // How a page turn looks (docs/decisions/page-turn-curl.md, decided 2026-09-26):
+  // the flat seam unless this device picked the curl or the shadow in settings.
+  const [turnStyle, setTurnStyle] = useState<TurnStyle>(() => savedTurnStyle());
+  const chooseTurnStyle = useCallback((style: TurnStyle) => {
+    rememberTurnStyle(style);
+    setTurnStyle(style);
   }, []);
   const [legendOpen, setLegendOpen] = useState(false);
   const [tajweedShards, setTajweedShards] = useState<ReadonlyMap<number, TajweedShard>>(
@@ -2084,6 +2092,7 @@ export function App(): JSX.Element {
                 /* Only the live stage turns pages, and only on a desktop
                    spread does the fold belong to something wider than it. */
                 foldTarget={desktop ? bookRef : null}
+                turnStyle={turnStyle}
                 bound={desktop && pageMode === "two"}
                 tool={tool}
                 notes={notes}
@@ -2179,6 +2188,8 @@ export function App(): JSX.Element {
         onClose={() => setColophonOpen(false)}
         fisheye={fisheye}
         onToggleFisheye={toggleFisheye}
+        turnStyle={turnStyle}
+        onTurnStyle={chooseTurnStyle}
         onShowTips={() => {
           setColophonOpen(false);
           setCoachUp(true);

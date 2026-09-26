@@ -148,6 +148,11 @@ export interface Strings {
   pagebarSectionTitle: string;
   pagebarFisheyeLabel: string;
   pagebarFisheyeNote: string;
+  turnSectionTitle: string;
+  turnStyleSeam: string;
+  turnStyleCurl: string;
+  turnStyleLift: string;
+  turnStyleNote: string;
   /* ---- the tips, started from settings (owner, 2026-09-25) ---------------- */
   tipsSectionTitle: string;
   tipsShow: string;
@@ -718,6 +723,11 @@ export function buildStrings(lang: Lang, m: Catalog): Strings {
     pagebarSectionTitle: m.pagebarSectionTitle,
     pagebarFisheyeLabel: m.pagebarFisheyeLabel,
     pagebarFisheyeNote: m.pagebarFisheyeNote,
+    turnSectionTitle: m.turnSectionTitle,
+    turnStyleSeam: m.turnStyleSeam,
+    turnStyleCurl: m.turnStyleCurl,
+    turnStyleLift: m.turnStyleLift,
+    turnStyleNote: m.turnStyleNote,
     tipsSectionTitle: m.tipsSectionTitle,
     tipsShow: m.tipsShow,
     tipsNote: m.tipsNote,

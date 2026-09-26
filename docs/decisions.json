@@ -1229,7 +1229,7 @@
     {
       "id": "page-turn-curl",
       "question": "When you turn a page, should the leaf curl the way a paper book does?",
-      "status": "open",
+      "status": "decided",
       "options": [
         {
           "id": "A",
@@ -1246,8 +1246,15 @@
         {
           "id": "D",
           "label": "Shadow lift: a shadow lifts off the edge, no surface moves, the page swaps"
+        },
+        {
+          "id": "ABD",
+          "label": "Keep A, B and D, and let the reader pick one in settings; flat seam stays the default; C is left out"
         }
       ],
+      "decided": "ABD",
+      "by": "omar",
+      "date": "2026-09-26",
       "artifact": "https://blog.bytesofpurpose.com/hifth/docs/design/page-turn-curl-options.html",
       "page": "docs/design/page-turn-curl-options.html",
       "builtBy": "scripts/build-page-turn-curl-options.mjs",

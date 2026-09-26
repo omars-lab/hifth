@@ -360,7 +360,10 @@ test.describe("Hifth · the desktop spread", () => {
     await page.setViewportSize({ width: 390, height: 844 });
     await expect(langs).toBeHidden();
     await page.getByRole("button", { name: /عن حِفظ/ }).click();
-    await expect(page.getByRole("dialog").getByRole("radio")).toHaveCount(2);
+    // The language pair only: the sheet has other radio groups (the turn style).
+    await expect(
+      page.getByRole("dialog").locator('[aria-labelledby="colophon-lang"]').getByRole("radio"),
+    ).toHaveCount(2);
   });
 
   test("still turns pages with the arrow keys the header advertises", async ({ page }) => {

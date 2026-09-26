@@ -301,6 +301,11 @@ export interface Catalog {
   readonly toolWordHint: string;
   readonly toolbarLabel: string;
   readonly trail: string;
+  readonly turnSectionTitle: string;
+  readonly turnStyleCurl: string;
+  readonly turnStyleLift: string;
+  readonly turnStyleNote: string;
+  readonly turnStyleSeam: string;
   readonly twin: string;
   readonly wordHops: (d: { readonly n: number; readonly nText: string | number; readonly u: number; readonly uText: string | number }) => string;
   readonly wordLevelPending: string;
