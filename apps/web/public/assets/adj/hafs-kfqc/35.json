@@ -281,6 +281,33 @@
     ],
     "ext": []
   },
+  "17": {
+    "edges": [
+      {
+        "type": "mutashabih",
+        "to": "quran/hafs-kfqc/14:20",
+        "page": 258,
+        "dir": {
+          "dSurah": -21,
+          "dPage": -178
+        },
+        "span": {
+          "from": [
+            1,
+            6
+          ]
+        },
+        "toSpan": {
+          "from": [
+            1,
+            6
+          ]
+        },
+        "twin": true
+      }
+    ],
+    "ext": []
+  },
   "18": {
     "edges": [
       {

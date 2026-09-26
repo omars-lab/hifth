@@ -72,5 +72,76 @@
       }
     ],
     "ext": []
+  },
+  "44": {
+    "edges": [
+      {
+        "type": "mutashabih",
+        "to": "quran/hafs-kfqc/37:80",
+        "page": 449,
+        "dir": {
+          "dSurah": -40,
+          "dPage": -132
+        },
+        "span": {
+          "from": [
+            1,
+            4
+          ]
+        },
+        "toSpan": {
+          "from": [
+            1,
+            4
+          ]
+        },
+        "twin": true
+      },
+      {
+        "type": "mutashabih",
+        "to": "quran/hafs-kfqc/37:121",
+        "page": 450,
+        "dir": {
+          "dSurah": -40,
+          "dPage": -131
+        },
+        "span": {
+          "from": [
+            1,
+            4
+          ]
+        },
+        "toSpan": {
+          "from": [
+            1,
+            4
+          ]
+        },
+        "twin": true
+      },
+      {
+        "type": "mutashabih",
+        "to": "quran/hafs-kfqc/37:131",
+        "page": 451,
+        "dir": {
+          "dSurah": -40,
+          "dPage": -130
+        },
+        "span": {
+          "from": [
+            1,
+            4
+          ]
+        },
+        "toSpan": {
+          "from": [
+            1,
+            4
+          ]
+        },
+        "twin": true
+      }
+    ],
+    "ext": []
   }
 }

@@ -1,4 +1,32 @@
 {
+  "13": {
+    "edges": [
+      {
+        "type": "mutashabih",
+        "to": "quran/hafs-kfqc/83:22",
+        "page": 588,
+        "dir": {
+          "dSurah": 1,
+          "dPage": 1,
+          "sameJuz": true
+        },
+        "span": {
+          "from": [
+            1,
+            4
+          ]
+        },
+        "toSpan": {
+          "from": [
+            1,
+            4
+          ]
+        },
+        "twin": true
+      }
+    ],
+    "ext": []
+  },
   "19": {
     "edges": [
       {

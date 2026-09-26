@@ -190,6 +190,33 @@
     ],
     "ext": []
   },
+  "20": {
+    "edges": [
+      {
+        "type": "mutashabih",
+        "to": "quran/hafs-kfqc/35:17",
+        "page": 436,
+        "dir": {
+          "dSurah": 21,
+          "dPage": 178
+        },
+        "span": {
+          "from": [
+            1,
+            6
+          ]
+        },
+        "toSpan": {
+          "from": [
+            1,
+            6
+          ]
+        },
+        "twin": true
+      }
+    ],
+    "ext": []
+  },
   "21": {
     "edges": [
       {

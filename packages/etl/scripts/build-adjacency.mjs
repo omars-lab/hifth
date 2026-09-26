@@ -76,6 +76,16 @@ const DATASET = JSON.parse(
 );
 
 /**
+ * Verbatim twins: clusters of verses identical word-for-word, generated from the
+ * vendored morphology corpus by `build-verbatim-twins.mjs`. Every pair in a
+ * cluster is a `twin` mutashabih edge; the span pass washes the whole verse,
+ * since all words are shared. Verse keys only — the twins carry no text.
+ */
+const TWINS = JSON.parse(
+  readFileSync(join(DATA, "mutashabihat", "verbatim-twins.json"), "utf8"),
+).twins;
+
+/**
  * The Loop-2 curated seed, verbatim from the mock (linker-mock.html §ADJ).
  * Bare "surah:ayah" refs; `w` is a word anchor on the TARGET. These edges
  * carry hand-written notes/twin flags the dataset lacks — on collision with
@@ -170,10 +180,14 @@ function addEdge(fromAbs, toAbs, type, meta, { curated = false } = {}) {
   const prev = edges.get(k);
   if (prev) {
     duplicates += 1;
-    // ctx accumulates (a continuation hint never hurts); curated metadata
-    // wins wholesale, otherwise first-in wins.
+    // ctx and twin accumulate (both are direction-neutral facts a later pass
+    // can only add — a continuation hint never hurts, and a pair a phrase edge
+    // and the twin scan both name really is a twin); curated metadata otherwise
+    // wins wholesale, else first-in wins.
     const ctx = prev.ctx || meta.ctx;
-    edges.set(k, curated ? { ...meta, ...(ctx ? { ctx: true } : {}) } : { ...prev, ...(ctx ? { ctx: true } : {}) });
+    const twin = prev.twin || meta.twin;
+    const carry = { ...(ctx ? { ctx: true } : {}), ...(twin ? { twin: true } : {}) };
+    edges.set(k, curated ? { ...meta, ...carry } : { ...prev, ...carry });
     return;
   }
   edges.set(k, meta);
@@ -220,6 +234,22 @@ for (const [ref, list] of Object.entries(CURATED)) {
       },
       { curated: true },
     );
+  }
+}
+
+// Verbatim twins: join every pair within a cluster. `twin: true` drives the
+// badge; the whole-verse wash comes free from the span pass, because a twin
+// shares every word. Emit one direction per pair — pass 2 adds the reverse.
+// Curated metadata (a hand-written note on a known twin) already won above and
+// wins here too: addEdge merges rather than overwriting a curated edge.
+let twinPairs = 0;
+for (const cluster of TWINS) {
+  const list = cluster.map(refToAbs);
+  for (let i = 0; i < list.length; i++) {
+    for (let j = i + 1; j < list.length; j++) {
+      addEdge(list[i], list[j], "mutashabih", { twin: true });
+      twinPairs += 1;
+    }
   }
 }
 

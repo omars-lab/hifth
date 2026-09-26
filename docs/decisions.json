@@ -932,7 +932,7 @@
     {
       "id": "similar-ayah-enrichment",
       "question": "Should the app take in the outside library's whole-verse look-alike pairs, as bare verse numbers and no Qur'an text, so a reader on one twin is offered the other?",
-      "status": "open",
+      "status": "decided",
       "options": [
         {
           "id": "A",
@@ -945,15 +945,19 @@
         {
           "id": "C",
           "label": "Take in the pairs and work out the word-by-word marking too"
+        },
+        {
+          "id": "D",
+          "label": "Find the twins in the app's own word data; use the outside library only to check the set is complete"
         }
       ],
       "artifact": "https://blog.bytesofpurpose.com/hifth/docs/design/similar-ayah-enrichment.html",
       "page": "docs/design/similar-ayah-enrichment.html",
       "builtBy": "scripts/build-similar-ayah-gap.mjs",
       "doc": "docs/decisions/similar-ayah-enrichment.md",
-      "decided": null,
-      "by": null,
-      "date": null,
+      "decided": "D",
+      "by": "omar",
+      "date": "2026-09-03",
       "related": [
         "qul-reliance",
         "comparison-crop"
