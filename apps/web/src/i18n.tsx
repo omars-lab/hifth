@@ -616,6 +616,20 @@ export interface Strings {
   noteDeleted: string;
   noteRestored: string;
   noteLoaded(n: number): string;
+  toolMistake: string;
+  toolMistakeHint: string;
+  /** Said when a word is marked, named by its verse. */
+  mistakeMarked(label: string): string;
+  /** The sign picker, named by its verse. */
+  mistakePicker(label: string): string;
+  mistakeWholeWord: string;
+  /** Said when a sign is picked, named by the sign ("fatha"). */
+  mistakeSignPicked(name: string): string;
+  mistakeWordPicked: string;
+  mistakeNoSigns: string;
+  mistakeClear: string;
+  mistakeCleared: string;
+  mistakeRestored: string;
 }
 
 /** The reader's own calendar day for a moment, as the `YYYY-MM-DD` `longDay` reads. */
@@ -1046,6 +1060,17 @@ export function buildStrings(lang: Lang, m: Catalog): Strings {
     noteDeleted: m.noteDeleted,
     noteRestored: m.noteRestored,
     noteLoaded: (count) => m.noteLoaded({ n: count, nText: n(count) }),
+    toolMistake: m.toolMistake,
+    toolMistakeHint: m.toolMistakeHint,
+    mistakeMarked: (label) => m.mistakeMarked({ label }),
+    mistakePicker: (label) => m.mistakePicker({ label }),
+    mistakeWholeWord: m.mistakeWholeWord,
+    mistakeSignPicked: (name) => m.mistakeSignPicked({ name }),
+    mistakeWordPicked: m.mistakeWordPicked,
+    mistakeNoSigns: m.mistakeNoSigns,
+    mistakeClear: m.mistakeClear,
+    mistakeCleared: m.mistakeCleared,
+    mistakeRestored: m.mistakeRestored,
   };
 }
 

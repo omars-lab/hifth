@@ -1,0 +1,130 @@
+/* SignPicker — the tray a marked word opens into: each vowel-sign on the word as
+   an enlarged crop of the print, named, with "the whole word" and "clear". */
+
+.box {
+  position: fixed;
+  z-index: var(--z-sheet);
+  max-inline-size: min(24rem, calc(100vw - 24px));
+  padding: var(--space-3);
+  border-radius: 10px;
+  background: var(--paper, #fffdf8);
+  color: var(--ink, #1c1917);
+  box-shadow: var(--shadow-2);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  font-family: var(--font-chrome);
+  font-size: 14px;
+}
+
+.head {
+  margin-block-end: var(--space-2);
+  color: var(--ink-soft, #57534e);
+  font-size: 13px;
+}
+
+.none {
+  margin: 0 0 var(--space-2);
+  color: var(--ink-soft, #57534e);
+}
+
+/* Right to left, like the word: the first sign read is the first tile. */
+.tray {
+  display: flex;
+  flex-wrap: wrap;
+  direction: rtl;
+  gap: var(--space-2);
+}
+
+.sign {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 4px;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  border-radius: 8px;
+  background: var(--paper-raised, var(--paper));
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.sign:hover {
+  border-color: var(--accent);
+}
+
+.sign[aria-pressed="true"] {
+  border-color: var(--danger);
+  box-shadow: inset 0 0 0 1px var(--danger);
+}
+
+/* One tile of the page, enlarged: the whole page drawn large, and a window on it. */
+.crop {
+  position: relative;
+  display: block;
+  inline-size: 64px;
+  block-size: 64px;
+  overflow: hidden;
+  border-radius: 4px;
+  background: #fff;
+}
+
+.crop img {
+  position: absolute;
+  max-inline-size: none;
+  pointer-events: none;
+}
+
+.ring {
+  position: absolute;
+  border: 1.5px solid var(--accent);
+  border-radius: 3px;
+}
+
+.sign[aria-pressed="true"] .ring {
+  border-color: var(--danger);
+}
+
+.name {
+  direction: ltr;
+  font-size: 12px;
+  color: var(--ink-soft, #57534e);
+}
+
+.actions {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-2);
+  margin-block-start: var(--space-2);
+}
+
+.clear,
+.whole {
+  min-block-size: var(--touch-min);
+  padding: 0 var(--space-3);
+  border-radius: 8px;
+  font: inherit;
+  cursor: pointer;
+}
+
+.clear {
+  border: none;
+  background: none;
+  color: var(--danger);
+}
+
+.whole {
+  border: 1px solid rgba(0, 0, 0, 0.18);
+  background: var(--paper-raised, var(--paper));
+  color: inherit;
+}
+
+.whole[aria-pressed="true"] {
+  border-color: var(--danger);
+}
+
+.sign:focus-visible,
+.clear:focus-visible,
+.whole:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}

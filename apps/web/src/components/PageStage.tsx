@@ -17,6 +17,8 @@ import {
   foldBetween,
   formatWordKey,
   frameBboxToView,
+  isMarkShard,
+  isMistake,
   isViewportIntent,
   isWordShard,
   leafSideOf,
@@ -36,6 +38,7 @@ import {
   DEFAULT_HOP_ZOOM,
   WHEEL_TURN_REST,
   type Fold,
+  type MarkShard,
   type Note,
   type PointerIntent,
   type Resolver,
@@ -45,7 +48,7 @@ import {
   type View,
   type WheelTurnState,
 } from "@hifth/core";
-import { loadPageSvg, loadWordShard } from "../assets";
+import { loadMarkShard, loadPageSvg, loadWordShard } from "../assets";
 import { useT } from "../i18n";
 import styles from "./PageStage.module.css";
 
@@ -242,10 +245,66 @@ interface PageStageProps {
   onPlaceNote?: (at: { page: number; key: string; word: number | null; x: number; y: number }) => void;
   /** A pin was pressed (click, Enter or Space): open its note. */
   onOpenNote?: (id: string) => void;
+  /**
+   * Under the mistake tool (step 3), a tap on a word. Whether that marks it or
+   * opens its signs is App's business; the stage only says which word.
+   */
+  onMarkWord?: (at: { page: number; key: string; word: number; x: number; y: number }) => void;
 }
 
 /** The page toolbar's tools. "select" is the app as it has always behaved. */
-export type PageTool = "select" | "highlight" | "bookmark" | "note";
+export type PageTool = "select" | "highlight" | "bookmark" | "note" | "mistake";
+
+/** The bare "surah:ayah" a sign shard is keyed by, from any form of a verse's key. */
+function bareAyah(key: string): string {
+  const tail = key.slice(key.lastIndexOf("/") + 1);
+  const hash = tail.indexOf("#");
+  return hash === -1 ? tail : tail.slice(0, hash);
+}
+
+/**
+ * Draw a page's marked mistakes, replacing whatever it had: a quiet red wash on
+ * each marked word, and a ring round the one sign a mistake was narrowed to.
+ * Laid first in the drawing, so the ink sits on top of the wash.
+ */
+function drawMistakes(
+  svg: SVGSVGElement,
+  page: number,
+  notes: readonly Note[],
+  words: WordIndex | null,
+  marks: MarkShard | null,
+): void {
+  svg.querySelector("g[data-mistakes]")?.remove();
+  const mine = notes.filter((n) => isMistake(n) && n.page === page && n.word !== null);
+  if (mine.length === 0 || !words) return;
+  const g = document.createElementNS(SVG_NS, "g");
+  g.setAttribute("data-mistakes", "");
+  g.setAttribute("aria-hidden", "true");
+  for (const n of mine) {
+    const box = words.boxOf(n.key, n.word as number);
+    if (!box) continue;
+    const r = document.createElementNS(SVG_NS, "rect");
+    r.setAttribute("data-mistake-word", n.id);
+    r.setAttribute("x", String(box.x - 0.6));
+    r.setAttribute("y", String(box.y - 0.6));
+    r.setAttribute("width", String(box.width + 1.2));
+    r.setAttribute("height", String(box.height + 1.2));
+    r.setAttribute("rx", "1.5");
+    g.append(r);
+    const sign = n.mark != null ? marks?.marks[bareAyah(n.key)]?.[n.mark] : undefined;
+    if (sign) {
+      const ring = document.createElementNS(SVG_NS, "rect");
+      ring.setAttribute("data-mistake-sign", n.id);
+      ring.setAttribute("x", String(sign.r[0] - 0.8));
+      ring.setAttribute("y", String(sign.r[1] - 0.8));
+      ring.setAttribute("width", String(sign.r[2] + 1.6));
+      ring.setAttribute("height", String(sign.r[3] + 1.6));
+      ring.setAttribute("rx", "1");
+      g.append(ring);
+    }
+  }
+  svg.prepend(g);
+}
 
 const SVG_NS = "http://www.w3.org/2000/svg";
 
@@ -508,6 +567,7 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
     noteLabel,
     onPlaceNote,
     onOpenNote,
+    onMarkWord,
   },
   ref,
 ): JSX.Element {
@@ -576,6 +636,11 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
   onOpenNoteRef.current = onOpenNote;
   /** Set once the word shards can be fetched; mountPage's tap listener calls it. */
   const placeNoteRef = useRef<(page: number, key: string, x: number, y: number) => void>(() => {});
+  const onMarkWordRef = useRef(onMarkWord);
+  onMarkWordRef.current = onMarkWord;
+  const markWordRef = useRef<(page: number, key: string, x: number, y: number) => void>(() => {});
+  /** Draws a page's mistakes once its word and sign data are in (set below, where those are fetched). */
+  const paintMistakesRef = useRef<(page: number, svg: SVGSVGElement) => void>(() => {});
   const onJuzTurnRef = useRef(onJuzTurn);
   onJuzTurnRef.current = onJuzTurn;
   // The wheel's two accumulators — core owns the rule, this is just where the
@@ -1017,13 +1082,14 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
     svg.addEventListener("pointerup", (e) => {
       const from = press;
       press = null;
-      if (toolRef.current !== "note" || !from) return;
+      const using = toolRef.current;
+      if ((using !== "note" && using !== "mistake") || !from) return;
       if (Math.hypot(e.clientX - from.x, e.clientY - from.y) > TAP_SLOP_PX) return;
       if ((e.target as Element | null)?.closest("[data-note-pin]")) return;
       const key = hl.pressedKey;
       const at = hl.svgPointFromClient(e.clientX, e.clientY);
       if (!key || !at) return;
-      placeNoteRef.current(targetPage, key, at.x, at.y);
+      (using === "note" ? placeNoteRef : markWordRef).current(targetPage, key, at.x, at.y);
     });
     const pinOf = (e: Event) => (e.target as Element | null)?.closest("[data-note-pin]")?.getAttribute("data-note-id");
     svg.addEventListener("click", (e) => {
@@ -1103,6 +1169,7 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
       // runs on a change of notes, not on a page arriving.
       const svg = svgEl as unknown as SVGSVGElement;
       drawNotePins(svg, targetPage, notesRef.current, (n) => noteLabelRef.current?.(n) ?? n.key);
+      paintMistakesRef.current(targetPage, svg);
       wireNotes(svg, targetPage, hl);
       return mp;
     },
@@ -1925,11 +1992,47 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
     });
   };
 
-  // Redraw the pins on every mounted page when the notes change; a page that
-  // mounts later draws its own in mountPage.
+  // The mistake tool's tap: the word under it, or its nearest neighbour. A tap
+  // that finds no word (a page with no word data) marks nothing.
+  markWordRef.current = (targetPage, key, x, y) => {
+    void ensureWords(resolver.edition, targetPage).then((idx) => {
+      const word = idx?.wordAt(key, x, y) ?? null;
+      if (word !== null) onMarkWordRef.current?.({ page: targetPage, key, word, x, y });
+    });
+  };
+
+  /** A page's sign data, fetched at most once, like the word data. */
+  const markShardsRef = useRef(new Map<string, Promise<MarkShard | null>>());
+  const ensureMarks = useCallback((edition: string, page: number): Promise<MarkShard | null> => {
+    const id = `${edition}/${page}`;
+    let got = markShardsRef.current.get(id);
+    if (!got) {
+      got = loadMarkShard(edition, page).then((m) => (m && isMarkShard(m) ? m : null));
+      markShardsRef.current.set(id, got);
+    }
+    return got;
+  }, []);
+
+  // Mistakes wait for the page's word and sign data; only a page that has any
+  // fetches them. Reads the notes live, so a late answer draws what is current.
+  paintMistakesRef.current = (p, svg) => {
+    const any = notesRef.current.some((n) => isMistake(n) && n.page === p);
+    if (!any) {
+      svg.querySelector("g[data-mistakes]")?.remove();
+      return;
+    }
+    const edition = resolver.edition;
+    void Promise.all([ensureWords(edition, p), ensureMarks(edition, p)]).then(([idx, marks]) =>
+      drawMistakes(svg, p, notesRef.current, idx, marks),
+    );
+  };
+
+  // Redraw the pins and the mistakes on every mounted page when the notes
+  // change; a page that mounts later draws its own in mountPage.
   useEffect(() => {
     for (const [p, mp] of pagesRef.current) {
       drawNotePins(mp.svg, p, notes ?? [], (n) => noteLabelRef.current?.(n) ?? n.key);
+      paintMistakesRef.current(p, mp.svg);
     }
   }, [notes, status]);
 

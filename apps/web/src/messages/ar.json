@@ -275,5 +275,16 @@
   "noteSaved": "حُفظت الملاحظة",
   "noteDeleted": "حُذفت الملاحظة",
   "noteRestored": "أُعيدت الملاحظة",
-  "noteLoaded": "{n, plural, zero{لم تُضف ملاحظات} one{أُضيفت ملاحظة واحدة من الملف} two{أُضيفت ملاحظتان من الملف} few{أُضيفت {nText} ملاحظات من الملف} many{أُضيفت {nText} ملاحظة من الملف} other{أُضيفت {nText} ملاحظة من الملف}}"
+  "noteLoaded": "{n, plural, zero{لم تُضف ملاحظات} one{أُضيفت ملاحظة واحدة من الملف} two{أُضيفت ملاحظتان من الملف} few{أُضيفت {nText} ملاحظات من الملف} many{أُضيفت {nText} ملاحظة من الملف} other{أُضيفت {nText} ملاحظة من الملف}}",
+  "toolMistake": "خطأ",
+  "toolMistakeHint": "انقر كلمة لتعلّم عليها خطأ",
+  "mistakeMarked": "عُلّم خطأ على {label}",
+  "mistakePicker": "على أي علامة أخطأت في {label}؟",
+  "mistakeWholeWord": "الكلمة كلها",
+  "mistakeSignPicked": "عُلّم الخطأ على {name}",
+  "mistakeWordPicked": "عُلّم الخطأ على الكلمة كلها",
+  "mistakeNoSigns": "لا حركات مسجّلة على هذه الكلمة.",
+  "mistakeClear": "امسح العلامة",
+  "mistakeCleared": "مُسحت العلامة",
+  "mistakeRestored": "أُعيدت العلامة"
 }

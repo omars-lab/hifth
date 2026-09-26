@@ -156,6 +156,26 @@ signs so you can pick the exact vowel or letter. This step needs the open "harak
 decision settled first, and building the tool is the natural way to settle it: build its three
 options as three versions of this tool and let the owner try them by hand.
 
+**Built 2026-09-25, with the sign picker still a stand-in.** The fifth tool on the bar, letter
+M. A tap marks the word under it in a quiet red, and the tool stays on so you can mark the
+next slip straight away. Tap a marked word again and a small picker opens under it: each
+vowel-sign on the word as an enlarged window on the print, named underneath, plus "the whole
+word" and "clear mark". Pick a sign and a thin red ring goes round it on the page. Clearing
+asks nothing and can be undone for a few seconds, like a deleted note. A mistake is kept as a
+note of the "correction" kind that sits on its word and, once picked, on one sign, so it is
+stored on the device beside notes and bookmarks and goes into the same saved file.
+
+The picker is way A of the open "harakah pick" decision (tap the word, then pick the sign from
+a tray), used as a stand-in: nothing reached finer than a word before, so there was no current
+behaviour to keep, and A starts from the same tap the tool already uses. **The decision is not
+made.** The three ways are now three interchangeable pieces of code with one shared shape, and
+the decision page runs that same code live, so the owner can try all three by hand; whichever
+wins replaces the stand-in without the tool changing.
+
+Left for later: marks are not yet written into the revision record, so the calendar cannot
+show where you slip; marks can only be made on a computer (the phone has no tool bar yet, step
+5); and the picker takes one sign, not a letter or a run of signs.
+
 ### 4. The crop tool
 
 Drag a box over the page to get an image of it to share. Before building this, check one
@@ -206,4 +226,5 @@ This goes to the owner as its own decision, with all three running on the decisi
   granularity decisions.
 - Whether notes sync to an account. The decided answer is still that they leave as a file.
 - Which picking method the mistake tool uses for a single vowel. That is the open "harakah
-  pick" decision, and step 3 is where it gets answered.
+  pick" decision. Step 3 built the tool with all three ways ready to swap in, and the owner
+  answers it by trying them on its page.
