@@ -430,3 +430,21 @@ export {
   type PlacedRect,
   type PlacementRule,
 } from "./decision-options/placement-rule.js";
+
+// phone-scrub: on a phone, how does a thumb land on one exact page of 604 — slow
+// the knob by sliding up and away, show a strip of page marks, both, or neither?
+// (docs/decisions/page-bar-phone-scrub.md)
+export {
+  APPLE_SCRUB_BANDS,
+  SCRUB_STRATEGIES,
+  fullSpeedScrub,
+  slowAwayScrub,
+  tickStripScrub,
+  slowAndStripScrub,
+  scrubRateFull,
+  scrubRateSlowAway,
+  scrubAdvance,
+  stripPxPerPage,
+  type ScrubBand,
+  type ScrubStrategy,
+} from "./decision-options/scrub-rate.js";

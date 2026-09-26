@@ -144,6 +144,11 @@ This is a real change to how the drag feels, so it is built as options you can t
 the owner as its own decision, not slipped in. A second option to try alongside it: show the
 same page ticks from step 1 in a strip above the finger while dragging.
 
+*Built for choosing, 25 September:* four versions you can drag, today's, the slow-down, the
+strip, and both together, are on [the phone decision's page](https://blog.bytesofpurpose.com/hifth/docs/design/page-bar-phone-scrub-options.html),
+with the reasons in [the decision record](../decisions/page-bar-phone-scrub.md). None is in the
+app until the owner picks one.
+
 ## How will we know each step worked?
 
 - A still render at desktop size with the mouse at three spots: near the start, in the middle
