@@ -26,6 +26,16 @@ same pass.
 
 Read the picture first. This file is the reasons; the page is the subject.
 
+## The short version
+
+Both word lists we hold have **the same text, letter for letter**. They differ only in where one
+word ends and the next begins, and only at "and" — the letter *waw*. Arabic spells "and he said"
+as one word, but *waw* never joins the letter after it, so the page shows a small gap there. The
+printed page's list counts that gap as a word break; the word-by-word reference, like every
+grammar, does not. The app finds look-alike phrases by counting words, so the two lists pick
+slightly different phrases in a few hundred pairs. Counting the page's words while treating that
+gap as no break (D) gives exactly today's phrases, without the reference's licence.
+
 ## A word on the words
 
 Two verses of the Qur'an often open with the same phrase and then diverge — *mutashabihat*, the
