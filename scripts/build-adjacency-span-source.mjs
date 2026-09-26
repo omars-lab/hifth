@@ -649,10 +649,10 @@ ${defs}
 <div class="wrap">
 <header>
   <h1>Which words does the app line look-alikes up on?</h1>
-  <p class="sub">When two verses open the same way, the app washes the phrase they share so the
-    eye is taught the seam. To wash it, the app must know that phrase word for word — and it can
-    count those words two ways. This page draws what the choice between them keeps and drops, on
-    the real pages where they differ.</p>
+  <p class="sub">When two verses open the same way, the app colours the phrase they share. To
+    find that phrase it counts words — and the two word lists we hold hold the <b>same text,
+    letter for letter</b>, but cut it into words in different places. This page shows why, and
+    what each way of counting keeps and drops, on the real pages where they differ.</p>
   <span class="status">Status <b>Decided: D</b> · by Omar, 2026-09-26 · asked 2026-09-03</span>
   <p class="picture">This is the picture the decision record points at. Every run below is drawn
     on the printed page it actually sits on, washed exactly as the look-alike panel washes it.
@@ -666,24 +666,25 @@ ${defs}
       pairs a hafiz most often slips between. Known in the tradition as <em>mutashabihat</em>.</dd>
     <dt>shared run</dt><dd>The stretch of words a look-alike pair has in common, taken as the
       longest run they share and kept only where it sits in exactly one place on each side.</dd>
-    <dt>the page's words vs. the corpus's</dt><dd>The printed mus'haf has its own words; a
-      separate word-by-word reference we carry has its own count of the same verse. The two
-      mostly agree, but the printed page splits some short joining particles the reference writes
-      joined — so a phrase is often more words on the page, never fewer.</dd>
+    <dt>the page's words vs. the reference's</dt><dd>Two lists of the same verses, the same
+      letters in the same order. They differ only in where one word ends and the next begins —
+      and only at "and", the letter <em>waw</em>. Arabic spells "and he said" as one word, but
+      <em>waw</em> never joins to the letter after it, so the page shows a small gap there. The
+      printed page's list counts that gap as a word break; the word-by-word reference, like every
+      grammar, does not. Same text, different cuts.</dd>
   </dl>
 </section>
 
 <section>
   <h2><span class="n">The question</span>What is being decided?</h2>
-  <p>The shared runs are worked out once when the app is built. The question here is only which
-    set of words they are counted in: <b>the printed page's own words</b>, or <b>the separate
-    word-by-word reference we carry today</b>. Nothing else about the look-alike panel changes —
-    only which words of an agreed pair get washed.</p>
-  <p>It is asked now because the reference we count in today comes under a share-alike licence
-    that reaches whatever the app builds from it, and the printed page's words — already carried,
-    already read — do not. Counting the runs in the page's own words would take the whole
-    look-alike feature out from under that licence and delete a conversion step besides. The
-    catch is that it does not keep the same runs.</p>
+  <p>Which word list the app counts in when it finds the phrase two look-alike verses share:
+    <b>the printed page's</b>, or <b>the separate word-by-word reference</b> it uses today.
+    Nothing else about the look-alike panel changes.</p>
+  <p>It matters for one reason: the reference comes with a licence that says anything built from
+    it must be shared on the same terms, which some app stores refuse. The printed page's list
+    carries no such condition. But because the two lists cut "and" differently, switching lists
+    naively would change which phrase gets coloured in a few hundred pairs — unless the app
+    accounts for that gap, which is option D.</p>
 </section>
 
 <section>
