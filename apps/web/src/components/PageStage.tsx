@@ -286,8 +286,12 @@ export interface WordRect {
   readonly bottom: number;
 }
 
-/** The page toolbar's tools. "select" is the app as it has always behaved. */
-export type PageTool = "select" | "highlight" | "bookmark" | "note" | "sign" | "word" | "mistake" | "crop";
+/**
+ * The page toolbar's tools. "select" is the app as it has always behaved — a tap
+ * takes the whole verse; "read" is the mode where a tap opens nothing
+ * (selection-drawer = D).
+ */
+export type PageTool = "read" | "select" | "highlight" | "bookmark" | "note" | "sign" | "word" | "mistake" | "crop";
 
 /**
  * How far, in page units, the harakat tool's magnifier reaches for a sign. A
@@ -1217,7 +1221,7 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
       const from = press;
       press = null;
       const using = toolRef.current;
-      if (using === "select" || using === "highlight" || using === "bookmark" || using === "crop" || !from) return;
+      if (using === "read" || using === "select" || using === "highlight" || using === "bookmark" || using === "crop" || !from) return;
       if (Math.hypot(e.clientX - from.x, e.clientY - from.y) > TAP_SLOP_PX) return;
       if ((e.target as Element | null)?.closest("[data-note-pin]")) return;
       const at = hl.svgPointFromClient(e.clientX, e.clientY);
@@ -2893,7 +2897,7 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
       // the stylesheet, and why an odd→even turn made that necessary.
       data-leaf={leafSideOf(page, total) ?? undefined}
       data-bound={bound ? "" : undefined}
-      data-tool={tool === "select" ? undefined : tool}
+      data-tool={tool}
       // So a click anywhere on this leaf — margin included — can say which page
       // it landed on, which is all the bookmark tool needs from it.
       data-page={page}
