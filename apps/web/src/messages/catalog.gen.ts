@@ -74,6 +74,12 @@ export interface Catalog {
   readonly "coachSteps.3.title": string;
   readonly copied: string;
   readonly copyFailed: string;
+  readonly cropCaption: (d: { readonly page: string | number }) => string;
+  readonly cropClose: string;
+  readonly cropSave: string;
+  readonly cropShare: string;
+  readonly cropShared: string;
+  readonly cropTitle: (d: { readonly page: string | number }) => string;
   readonly designsLink: string;
   readonly devBuild: string;
   readonly devBuildNote: string;
@@ -279,6 +285,8 @@ export interface Catalog {
   readonly tipsShow: string;
   readonly toolBookmark: string;
   readonly toolBookmarkHint: string;
+  readonly toolCrop: string;
+  readonly toolCropHint: string;
   readonly toolHighlight: string;
   readonly toolMistake: string;
   readonly toolMistakeHint: string;

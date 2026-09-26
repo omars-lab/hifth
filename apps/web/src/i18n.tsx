@@ -646,6 +646,14 @@ export interface Strings {
   /** The harakat tool's hint on a phone, where a tap takes the nearest sign. */
   toolSignHintTouch: string;
   /** The phone's tools button, naming the tool that is on. */
+  toolCrop: string;
+  toolCropHint: string;
+  cropTitle(page: number): string;
+  cropCaption(page: number): string;
+  cropShare: string;
+  cropSave: string;
+  cropClose: string;
+  cropShared: string;
   phoneTools(name: string): string;
   phoneToolsClose: string;
   /** The button that writes one note on the signs gathered. */
@@ -1101,6 +1109,14 @@ export function buildStrings(lang: Lang, m: Catalog): Strings {
     wordPartsHint: m.wordPartsHint,
     wordPartsHintMany: m.wordPartsHintMany,
     toolSignHintTouch: m.toolSignHintTouch,
+    toolCrop: m.toolCrop,
+    toolCropHint: m.toolCropHint,
+    cropTitle: (page) => m.cropTitle({ page }),
+    cropCaption: (page) => m.cropCaption({ page }),
+    cropShare: m.cropShare,
+    cropSave: m.cropSave,
+    cropClose: m.cropClose,
+    cropShared: m.cropShared,
     phoneTools: (name) => m.phoneTools({ name }),
     phoneToolsClose: m.phoneToolsClose,
     wordPartsMany: (count) => m.wordPartsMany({ n: count, nText: n(count) }),

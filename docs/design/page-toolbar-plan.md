@@ -206,6 +206,14 @@ rights. An image a reader shares is probably fine, but that has to be checked ag
 licence text, not assumed. If it is not fine, crop becomes "share a link to these verses",
 which the app can already do.
 
+**Built.** The licence was checked: the print's terms, read at the publisher's own site on
+8 September 2026 and quoted in the sources file, allow free use in digital, web and software
+settings, and reserve only the printing of paper copies for sale. A reader sharing a picture of
+part of a page prints nothing. So crop cuts an image, and each image carries a line under it
+naming the page and whose print it is. Pick the tool (C), drag a box over the page, and a sheet
+shows the cut-out with Save, and Share on a phone that can share images. A tap without a drag
+cuts nothing. The same tool sits in the phone's tray.
+
 ### 5. The phone
 
 A phone has no pointer shapes, no letters and little room. Three layouts are worth building

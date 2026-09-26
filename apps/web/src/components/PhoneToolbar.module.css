@@ -137,7 +137,7 @@
   gap: var(--space-1);
 }
 
-.trayRow .row {
+.trayRow .trayHint {
   flex: 1;
 }
 

@@ -75,6 +75,7 @@ import { PageToolbar, TOOL_KEYS, toolHint, toolName } from "./components/PageToo
 import { PhoneToolbarA, PhoneToolbarB, PhoneToolbarC, phoneBarFromUrl } from "./components/PhoneToolbar";
 import { NoteBox } from "./components/NoteBox";
 import { WordParts, useWordParts } from "./components/WordParts";
+import { CropSheet, type CropBox } from "./components/CropSheet";
 import { PageSpread } from "./components/PageSpread";
 import { EdgeGrabRails, type EdgeTurnDriver } from "./components/EdgeGrabRails";
 import { DesktopChrome } from "./components/DesktopChrome";
@@ -1073,6 +1074,8 @@ export function App(): JSX.Element {
   const [wordOpen, setWordOpen] = useState<{ page: number; key: string; word: number; rect: WordRect } | null>(
     null,
   );
+  // The crop tool's box, in the page's own units, while its sheet is open.
+  const [crop, setCrop] = useState<CropBox | null>(null);
   const pickWordPart = (at: { x: number; y: number; mark?: number | null; marks?: readonly number[] }) => {
     const w = wordOpen;
     setWordOpen(null);
@@ -2025,6 +2028,7 @@ export function App(): JSX.Element {
                   onMarkWord={markWord}
                 onPickSign={pickSignNote}
                 onOpenWord={setWordOpen}
+                onCrop={setCrop}
                   labelFor={(key) => t.ayahAria(t.ayahLabel(key) ?? key)}
                   skin={skin}
                   tajweedLookup={tajweed?.lookup ?? null}
@@ -2083,6 +2087,7 @@ export function App(): JSX.Element {
                 onMarkWord={markWord}
                 onPickSign={pickSignNote}
                 onOpenWord={setWordOpen}
+                onCrop={setCrop}
               />
             </PageSpread>
             <HopRail
@@ -2306,6 +2311,9 @@ export function App(): JSX.Element {
           onDelete={deleteNote}
         />
       )}
+      {crop && manifest && (
+        <CropHost key={`${crop.page}:${crop.x}:${crop.y}`} manifest={manifest} box={crop} onClose={() => setCrop(null)} />
+      )}
       {wordOpen && manifest && (
         <WordPartsHost
           key={`${wordOpen.key}#${wordOpen.word}`}
@@ -2349,6 +2357,29 @@ export function App(): JSX.Element {
       )}
       <LiveAnnouncer message={message} />
     </div>
+  );
+}
+
+/** The crop tool's sheet, given the page's drawing and its size. */
+function CropHost({
+  manifest,
+  box,
+  onClose,
+}: {
+  manifest: AssetManifest;
+  box: CropBox;
+  onClose: () => void;
+}): JSX.Element {
+  const [, , w, h] = (manifest.pages.find((p) => p.page === box.page)?.viewBox ?? "0 0 345 550")
+    .split(/\s+/)
+    .map(Number);
+  return (
+    <CropSheet
+      box={box}
+      pageSrc={pageUrl(manifest.edition, box.page)}
+      pageSize={{ w: w || 345, h: h || 550 }}
+      onClose={onClose}
+    />
   );
 }
 
