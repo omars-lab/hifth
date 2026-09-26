@@ -1,0 +1,121 @@
+<!doctype html>
+<!--
+  A dated public snapshot of this page lives at
+  bytesofpurpose-blog/designs/2026-09-04-verse-twins.mdx in omars-lab.github.io
+  (draft, kind design-story). This page is the record; that post is a dated
+  snapshot of it — the one-way arrangement etl-pipeline.md section 8 describes.
+  Rebuilt by scripts/build-twins-explainer.mjs; edit there, not here.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>The same verse, in two places</title>
+<style>
+  :root {
+    --paper: #f7f4ee; --paper-raised: #fffdf8; --ink: #26201a; --ink-soft: #5c5348;
+    --hair: #e4ddd0; --green: #3f7d43; --accent: #17544d;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--paper); color: var(--ink);
+    font: 16px/1.6 "Iowan Old Style", Palatino, Georgia, serif; }
+  main { max-width: 720px; margin: 0 auto; padding: 2.5rem 1.25rem 5rem; }
+  h1 { font-size: 2rem; line-height: 1.2; margin: 0 0 0.5rem; }
+  h2 { font-size: 1.3rem; margin: 2.6rem 0 0.6rem; }
+  .standfirst { font-size: 1.15rem; color: var(--ink-soft); margin: 0 0 1.5rem; }
+  p { margin: 0 0 1rem; }
+  b { color: var(--ink); }
+  .glossary { background: var(--paper-raised); border: 1px solid var(--hair);
+    border-radius: 10px; padding: 0.6rem 1rem; margin: 1.5rem 0; }
+  .glossary dt { font-weight: 600; margin-top: 0.5rem; }
+  .glossary dd { margin: 0 0 0.2rem; color: var(--ink-soft); }
+  .stat { display: flex; flex-wrap: wrap; gap: 1.4rem; margin: 1.4rem 0; }
+  .stat div { flex: 1 1 8rem; }
+  .stat .big { font-size: 2.2rem; font-weight: 700; color: var(--accent); line-height: 1; }
+  .stat .cap { font-size: 0.9rem; color: var(--ink-soft); }
+  .gallery { display: grid; grid-template-columns: 1fr; gap: 1.4rem; margin: 1.4rem 0; }
+  .pair { background: var(--paper-raised); border: 1px solid var(--hair);
+    border-radius: 10px; padding: 0.9rem; }
+  .crop { margin: 0 0 0.6rem; }
+  .crop:last-of-type { margin-bottom: 0; }
+  .crop figcaption { font: 0.85rem monospace; color: var(--ink-soft); margin-bottom: 0.25rem; }
+  .art { display: block; width: 100%; height: auto; background: #fff;
+    border: 1px solid var(--hair); border-radius: 4px; }
+  .scrim { fill: var(--paper); opacity: 0.72; }
+  .w-share { fill: rgba(63, 125, 67, 0.16); stroke: var(--green);
+    stroke-width: 0.3; vector-effect: non-scaling-stroke; }
+  .swatch { display: inline-block; width: 0.8em; height: 0.8em; border-radius: 2px;
+    vertical-align: -1px; margin-right: 0.15em; }
+  footer { margin-top: 3rem; padding-top: 1rem; border-top: 1px solid var(--hair);
+    font-size: 0.9rem; color: var(--ink-soft); }
+  footer a { color: var(--accent); }
+</style>
+</head>
+<body>
+<main>
+  <h1>The same verse, in two places</h1>
+  <p class="standfirst">Some verses of the Qur'an appear twice — the very same words, sitting
+  pages apart, in two different sūras. For someone memorising, these are the easiest of all to mix
+  up. The app now finds every one of them and shows you, on the page, that you are standing on a
+  verse that lives somewhere else too.</p>
+
+  <dl class="glossary">
+    <dt>mus'haf</dt><dd>The printed Qur'an, page by page, as you read it.</dd>
+    <dt>verse</dt><dd>One āyah. The app names each by its sūra and number — 11:110 is sūra 11,
+      verse 110.</dd>
+    <dt>twin</dt><dd>Two verses that are word for word the same, in two places. The tradition
+      counts these among the mutashābihāt — the look-alikes a hafiz has to hold apart.</dd>
+  </dl>
+
+  <h2>What is a twin?</h2>
+  <p>A twin is not two verses that <em>resemble</em> each other. It is one verse, printed twice —
+  the same words, in the same order, once here and once pages away. Nothing in the wording tells
+  you which of the two you are reading; only what comes before and after it does.</p>
+
+  <h2>Why are they the hardest to keep apart?</h2>
+  <p>When you are reciting from memory and reach a verse that exists in two places, there is a
+  fork in the road with no sign on it. The words that would tell you which way to go are identical,
+  so the only thing that can keep you on the right sūra is the memory of what surrounds it. That is
+  exactly the slip a memoriser fears, and exactly the place a reminder helps most.</p>
+
+  <h2>How many are there?</h2>
+  <div class="stat">
+    <div><div class="big">636</div><div class="cap">pairs of twin verses</div></div>
+    <div><div class="big">208</div><div class="cap">verses that have a twin</div></div>
+  </div>
+  <p>Some verses have more than one twin — a short refrain can repeat many times over — which is
+  why there are more pairs than verses. The app connects all of them.</p>
+
+  <h2>What do they look like?</h2>
+  <p>Each verse below is cut straight out of the printed page, at the size the app shows it. The
+  neighbouring verses are faded so only the verse itself reads clearly, and the whole verse is
+  washed <span class="swatch" style="background:rgba(63,125,67,.16);border:1px solid var(--green)"></span>
+  green — because for a twin, every single word is shared. Read the two crops in each pair and you
+  are reading the same verse, twice.</p>
+  <div class="gallery">
+<div class="pair"><figure class="crop"><figcaption>11:110</figcaption><svg class="art" viewBox="6 80.8 331.1 72.4" aria-hidden="true" focusable="false"><image href="../../apps/web/public/assets/pages/hafs-kfqc/234.svg" x="0" y="0" width="345" height="550"></image><path class="scrim" d="M6 80.8H337.1V153.2H6ZM7 81.8H336V111.8H7ZM26.5 117.5H336.1V152.2H26.5Z" fill-rule="evenodd"></path><rect class="w-share" x="7.5" y="82.3" width="328" height="29" rx="1"></rect><rect class="w-share" x="27" y="118" width="308.6" height="33.7" rx="1"></rect></svg></figure><figure class="crop"><figcaption>41:45</figcaption><svg class="art" viewBox="5 402.4 328.9 108.1" aria-hidden="true" focusable="false"><image href="../../apps/web/public/assets/pages/hafs-kfqc/481.svg" x="0" y="0" width="345" height="550"></image><path class="scrim" d="M5 402.4H333.9V510.5H5ZM6 403.4H156.7V433H6ZM6 440.4H332.9V473H6ZM128.3 475.8H332.9V509.5H128.3Z" fill-rule="evenodd"></path><rect class="w-share" x="6.5" y="403.9" width="149.7" height="28.6" rx="1"></rect><rect class="w-share" x="6.5" y="440.9" width="325.9" height="31.6" rx="1"></rect><rect class="w-share" x="128.8" y="476.3" width="203.6" height="32.7" rx="1"></rect></svg></figure></div>
+<div class="pair"><figure class="crop"><figcaption>21:41</figcaption><svg class="art" viewBox="4.6 263.8 329.8 105.5" aria-hidden="true" focusable="false"><image href="../../apps/web/public/assets/pages/hafs-kfqc/325.svg" x="0" y="0" width="345" height="550"></image><path class="scrim" d="M4.6 263.8H334.4V369.3H4.6ZM5.6 264.8H96V297.1H5.6ZM5.6 297.6H333.3V336H5.6ZM220.2 340.7H333.4V368.3H220.2Z" fill-rule="evenodd"></path><rect class="w-share" x="6.1" y="265.3" width="89.4" height="31.3" rx="1"></rect><rect class="w-share" x="6.1" y="298.1" width="326.7" height="37.4" rx="1"></rect><rect class="w-share" x="220.7" y="341.2" width="112.2" height="26.6" rx="1"></rect></svg></figure><figure class="crop"><figcaption>6:10</figcaption><svg class="art" viewBox="4 42.3 330.9 74.8" aria-hidden="true" focusable="false"><image href="../../apps/web/public/assets/pages/hafs-kfqc/129.svg" x="0" y="0" width="345" height="550"></image><path class="scrim" d="M4 42.3H334.9V117.1H4ZM5 43.3H265.8V83.5H5ZM80.9 81H333.9V116.1H80.9Z" fill-rule="evenodd"></path><rect class="w-share" x="5.5" y="43.8" width="259.8" height="39.2" rx="1"></rect><rect class="w-share" x="81.4" y="81.5" width="252" height="34.1" rx="1"></rect></svg></figure></div>
+<div class="pair"><figure class="crop"><figcaption>36:46</figcaption><svg class="art" viewBox="5.3 150.2 328.3 74.9" aria-hidden="true" focusable="false"><image href="../../apps/web/public/assets/pages/hafs-kfqc/443.svg" x="0" y="0" width="345" height="550"></image><path class="scrim" d="M5.3 150.2H333.6V225.1H5.3ZM6.3 151.2H332.6V188.3H6.3ZM276.7 198.2H332.6V224.1H276.7Z" fill-rule="evenodd"></path><rect class="w-share" x="6.8" y="151.7" width="325.3" height="36.1" rx="1"></rect><rect class="w-share" x="277.2" y="198.7" width="54.9" height="24.9" rx="1"></rect></svg></figure><figure class="crop"><figcaption>6:4</figcaption><svg class="art" viewBox="6.8 223.2 330.5 73.9" aria-hidden="true" focusable="false"><image href="../../apps/web/public/assets/pages/hafs-kfqc/128.svg" x="0" y="0" width="345" height="550"></image><path class="scrim" d="M6.8 223.2H337.3V297.1H6.8ZM7.8 224.2H154.2V263H7.8ZM126.2 259H336.3V296.1H126.2Z" fill-rule="evenodd"></path><rect class="w-share" x="8.3" y="224.7" width="145.4" height="37.8" rx="1"></rect><rect class="w-share" x="126.7" y="259.5" width="209.1" height="36.1" rx="1"></rect></svg></figure></div>
+<div class="pair"><figure class="crop"><figcaption>24:5</figcaption><svg class="art" viewBox="5.9 293.7 331.1 72.4" aria-hidden="true" focusable="false"><image href="../../apps/web/public/assets/pages/hafs-kfqc/350.svg" x="0" y="0" width="345" height="550"></image><path class="scrim" d="M5.9 293.7H337V366.1H5.9ZM6.9 294.7H27.8V327.4H6.9ZM61.1 331.6H336V365.1H61.1Z" fill-rule="evenodd"></path><rect class="w-share" x="7.4" y="295.2" width="19.9" height="31.7" rx="1"></rect><rect class="w-share" x="61.6" y="332.1" width="273.9" height="32.5" rx="1"></rect></svg></figure><figure class="crop"><figcaption>3:89</figcaption><svg class="art" viewBox="5.2 329 329.6 72.2" aria-hidden="true" focusable="false"><image href="../../apps/web/public/assets/pages/hafs-kfqc/61.svg" x="0" y="0" width="345" height="550"></image><path class="scrim" d="M5.2 329H334.8V401.2H5.2ZM6.2 330H123.3V363.2H6.2ZM79.8 365.9H333.8V400.2H79.8Z" fill-rule="evenodd"></path><rect class="w-share" x="6.7" y="330.5" width="116.1" height="32.2" rx="1"></rect><rect class="w-share" x="80.3" y="366.4" width="253" height="33.3" rx="1"></rect></svg></figure></div>
+<div class="pair"><figure class="crop"><figcaption>2:134</figcaption><svg class="art" viewBox="7.8 470.7 328 69.9" aria-hidden="true" focusable="false"><image href="../../apps/web/public/assets/pages/hafs-kfqc/20.svg" x="0" y="0" width="345" height="550"></image><path class="scrim" d="M7.8 470.7H335.8V540.6H7.8ZM8.8 471.7H182.5V503.1H8.8ZM27.9 510.6H334.8V539.6H27.9Z" fill-rule="evenodd"></path><rect class="w-share" x="9.3" y="472.2" width="172.7" height="30.4" rx="1"></rect><rect class="w-share" x="28.4" y="511.1" width="305.9" height="28" rx="1"></rect></svg></figure><figure class="crop"><figcaption>2:141</figcaption><svg class="art" viewBox="6.3 471.5 328.5 70.4" aria-hidden="true" focusable="false"><image href="../../apps/web/public/assets/pages/hafs-kfqc/21.svg" x="0" y="0" width="345" height="550"></image><path class="scrim" d="M6.3 471.5H334.8V541.9H6.3ZM7.3 472.5H206.4V505.5H7.3ZM26.4 511H333.8V540.9H26.4Z" fill-rule="evenodd"></path><rect class="w-share" x="7.8" y="473" width="198.1" height="32" rx="1"></rect><rect class="w-share" x="26.9" y="511.5" width="306.4" height="28.9" rx="1"></rect></svg></figure></div>
+  </div>
+
+  <h2>What does the app do with them?</h2>
+  <p>When you are on one twin, the app offers you the other — a bridge from here to the place this
+  same verse also lives. It is drawn from the app's own reading of the printed pages; the app finds
+  the twins itself, from the words it already has, and keeps no separate copy of the Qur'an to do
+  it.</p>
+
+  <footer>
+    <p>Built by <code>scripts/build-twins-explainer.mjs</code> from the app's own twin data and the
+    printed pages it already ships. The counts re-derive from that data; every crop is the real
+    page.</p>
+    <p>Why the app finds these itself rather than copying them from elsewhere, and what that choice
+    cost — the full reasoning is on the decision page:
+    <a href="similar-ayah-enrichment.html">similar-ayah-enrichment.html</a>.</p>
+    <p>This page's address on the site:
+    <a href="https://blog.bytesofpurpose.com/hifth/docs/design/verse-twins.html">blog.bytesofpurpose.com/hifth/docs/design/verse-twins.html</a></p>
+  </footer>
+</main>
+</body>
+</html>

@@ -144,6 +144,11 @@ const BUCKETS = [
       "mutashabiha_data.json": "named",
       // The spans. This is the one the row was missing.
       "quranic-corpus-morphology-0.4.txt": "named",
+      // The whole-verse twins: verse numbers only, found by grouping the same
+      // morphology corpus's words (build-verbatim-twins.mjs). Nothing new
+      // reaches the tree through it — its terms are the corpus's, already named
+      // on this row — and the outside list it was checked against is not read.
+      "verbatim-twins.json": "named",
       // Found by this gate on its first run, and not settled by writing it:
       // every edge carries `page` and `dPage`, straight out of a pagination
       // table derived from the KFGQPC page corpus. Whether a pagination table

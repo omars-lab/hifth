@@ -26,6 +26,33 @@
     ],
     "ext": []
   },
+  "15": {
+    "edges": [
+      {
+        "type": "mutashabih",
+        "to": "quran/hafs-kfqc/83:13",
+        "page": 588,
+        "dir": {
+          "dSurah": 15,
+          "dPage": 24
+        },
+        "span": {
+          "from": [
+            1,
+            7
+          ]
+        },
+        "toSpan": {
+          "from": [
+            1,
+            7
+          ]
+        },
+        "twin": true
+      }
+    ],
+    "ext": []
+  },
   "30": {
     "edges": [
       {
@@ -89,6 +116,33 @@
     ],
     "ext": []
   },
+  "36": {
+    "edges": [
+      {
+        "type": "mutashabih",
+        "to": "quran/hafs-kfqc/37:154",
+        "page": 452,
+        "dir": {
+          "dSurah": -31,
+          "dPage": -113
+        },
+        "span": {
+          "from": [
+            1,
+            4
+          ]
+        },
+        "toSpan": {
+          "from": [
+            1,
+            4
+          ]
+        },
+        "twin": true
+      }
+    ],
+    "ext": []
+  },
   "43": {
     "edges": [
       {
@@ -112,6 +166,33 @@
             4
           ]
         }
+      }
+    ],
+    "ext": []
+  },
+  "45": {
+    "edges": [
+      {
+        "type": "mutashabih",
+        "to": "quran/hafs-kfqc/7:183",
+        "page": 174,
+        "dir": {
+          "dSurah": -61,
+          "dPage": -392
+        },
+        "span": {
+          "from": [
+            1,
+            7
+          ]
+        },
+        "toSpan": {
+          "from": [
+            1,
+            7
+          ]
+        },
+        "twin": true
       }
     ],
     "ext": []
@@ -149,6 +230,33 @@
           "dPage": -41
         },
         "ctx": true
+      }
+    ],
+    "ext": []
+  },
+  "47": {
+    "edges": [
+      {
+        "type": "mutashabih",
+        "to": "quran/hafs-kfqc/52:41",
+        "page": 525,
+        "dir": {
+          "dSurah": -16,
+          "dPage": -41
+        },
+        "span": {
+          "from": [
+            1,
+            5
+          ]
+        },
+        "toSpan": {
+          "from": [
+            1,
+            5
+          ]
+        },
+        "twin": true
       }
     ],
     "ext": []

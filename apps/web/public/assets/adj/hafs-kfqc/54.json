@@ -25,6 +25,131 @@
     ],
     "ext": []
   },
+  "16": {
+    "edges": [
+      {
+        "type": "mutashabih",
+        "to": "quran/hafs-kfqc/54:21",
+        "page": 529,
+        "dir": {
+          "dSurah": 0,
+          "dPage": 0,
+          "sameJuz": true
+        },
+        "span": {
+          "from": [
+            1,
+            5
+          ]
+        },
+        "toSpan": {
+          "from": [
+            1,
+            5
+          ]
+        },
+        "twin": true
+      },
+      {
+        "type": "mutashabih",
+        "to": "quran/hafs-kfqc/54:30",
+        "page": 530,
+        "dir": {
+          "dSurah": 0,
+          "dPage": 1,
+          "sameJuz": true
+        },
+        "span": {
+          "from": [
+            1,
+            5
+          ]
+        },
+        "toSpan": {
+          "from": [
+            1,
+            5
+          ]
+        },
+        "twin": true
+      }
+    ],
+    "ext": []
+  },
+  "17": {
+    "edges": [
+      {
+        "type": "mutashabih",
+        "to": "quran/hafs-kfqc/54:22",
+        "page": 529,
+        "dir": {
+          "dSurah": 0,
+          "dPage": 0,
+          "sameJuz": true
+        },
+        "span": {
+          "from": [
+            1,
+            8
+          ]
+        },
+        "toSpan": {
+          "from": [
+            1,
+            8
+          ]
+        },
+        "twin": true
+      },
+      {
+        "type": "mutashabih",
+        "to": "quran/hafs-kfqc/54:32",
+        "page": 530,
+        "dir": {
+          "dSurah": 0,
+          "dPage": 1,
+          "sameJuz": true
+        },
+        "span": {
+          "from": [
+            1,
+            8
+          ]
+        },
+        "toSpan": {
+          "from": [
+            1,
+            8
+          ]
+        },
+        "twin": true
+      },
+      {
+        "type": "mutashabih",
+        "to": "quran/hafs-kfqc/54:40",
+        "page": 530,
+        "dir": {
+          "dSurah": 0,
+          "dPage": 1,
+          "sameJuz": true
+        },
+        "span": {
+          "from": [
+            1,
+            8
+          ]
+        },
+        "toSpan": {
+          "from": [
+            1,
+            8
+          ]
+        },
+        "twin": true
+      }
+    ],
+    "ext": []
+  },
   "19": {
     "edges": [
       {
@@ -73,6 +198,330 @@
             16
           ]
         }
+      }
+    ],
+    "ext": []
+  },
+  "21": {
+    "edges": [
+      {
+        "type": "mutashabih",
+        "to": "quran/hafs-kfqc/54:16",
+        "page": 529,
+        "dir": {
+          "dSurah": 0,
+          "dPage": 0,
+          "sameJuz": true
+        },
+        "span": {
+          "from": [
+            1,
+            5
+          ]
+        },
+        "toSpan": {
+          "from": [
+            1,
+            5
+          ]
+        },
+        "twin": true
+      },
+      {
+        "type": "mutashabih",
+        "to": "quran/hafs-kfqc/54:30",
+        "page": 530,
+        "dir": {
+          "dSurah": 0,
+          "dPage": 1,
+          "sameJuz": true
+        },
+        "span": {
+          "from": [
+            1,
+            5
+          ]
+        },
+        "toSpan": {
+          "from": [
+            1,
+            5
+          ]
+        },
+        "twin": true
+      }
+    ],
+    "ext": []
+  },
+  "22": {
+    "edges": [
+      {
+        "type": "mutashabih",
+        "to": "quran/hafs-kfqc/54:17",
+        "page": 529,
+        "dir": {
+          "dSurah": 0,
+          "dPage": 0,
+          "sameJuz": true
+        },
+        "span": {
+          "from": [
+            1,
+            8
+          ]
+        },
+        "toSpan": {
+          "from": [
+            1,
+            8
+          ]
+        },
+        "twin": true
+      },
+      {
+        "type": "mutashabih",
+        "to": "quran/hafs-kfqc/54:32",
+        "page": 530,
+        "dir": {
+          "dSurah": 0,
+          "dPage": 1,
+          "sameJuz": true
+        },
+        "span": {
+          "from": [
+            1,
+            8
+          ]
+        },
+        "toSpan": {
+          "from": [
+            1,
+            8
+          ]
+        },
+        "twin": true
+      },
+      {
+        "type": "mutashabih",
+        "to": "quran/hafs-kfqc/54:40",
+        "page": 530,
+        "dir": {
+          "dSurah": 0,
+          "dPage": 1,
+          "sameJuz": true
+        },
+        "span": {
+          "from": [
+            1,
+            8
+          ]
+        },
+        "toSpan": {
+          "from": [
+            1,
+            8
+          ]
+        },
+        "twin": true
+      }
+    ],
+    "ext": []
+  },
+  "30": {
+    "edges": [
+      {
+        "type": "mutashabih",
+        "to": "quran/hafs-kfqc/54:16",
+        "page": 529,
+        "dir": {
+          "dSurah": 0,
+          "dPage": -1,
+          "sameJuz": true
+        },
+        "span": {
+          "from": [
+            1,
+            5
+          ]
+        },
+        "toSpan": {
+          "from": [
+            1,
+            5
+          ]
+        },
+        "twin": true
+      },
+      {
+        "type": "mutashabih",
+        "to": "quran/hafs-kfqc/54:21",
+        "page": 529,
+        "dir": {
+          "dSurah": 0,
+          "dPage": -1,
+          "sameJuz": true
+        },
+        "span": {
+          "from": [
+            1,
+            5
+          ]
+        },
+        "toSpan": {
+          "from": [
+            1,
+            5
+          ]
+        },
+        "twin": true
+      }
+    ],
+    "ext": []
+  },
+  "32": {
+    "edges": [
+      {
+        "type": "mutashabih",
+        "to": "quran/hafs-kfqc/54:17",
+        "page": 529,
+        "dir": {
+          "dSurah": 0,
+          "dPage": -1,
+          "sameJuz": true
+        },
+        "span": {
+          "from": [
+            1,
+            8
+          ]
+        },
+        "toSpan": {
+          "from": [
+            1,
+            8
+          ]
+        },
+        "twin": true
+      },
+      {
+        "type": "mutashabih",
+        "to": "quran/hafs-kfqc/54:22",
+        "page": 529,
+        "dir": {
+          "dSurah": 0,
+          "dPage": -1,
+          "sameJuz": true
+        },
+        "span": {
+          "from": [
+            1,
+            8
+          ]
+        },
+        "toSpan": {
+          "from": [
+            1,
+            8
+          ]
+        },
+        "twin": true
+      },
+      {
+        "type": "mutashabih",
+        "to": "quran/hafs-kfqc/54:40",
+        "page": 530,
+        "dir": {
+          "dSurah": 0,
+          "dPage": 0,
+          "sameJuz": true
+        },
+        "span": {
+          "from": [
+            1,
+            8
+          ]
+        },
+        "toSpan": {
+          "from": [
+            1,
+            8
+          ]
+        },
+        "twin": true
+      }
+    ],
+    "ext": []
+  },
+  "40": {
+    "edges": [
+      {
+        "type": "mutashabih",
+        "to": "quran/hafs-kfqc/54:17",
+        "page": 529,
+        "dir": {
+          "dSurah": 0,
+          "dPage": -1,
+          "sameJuz": true
+        },
+        "span": {
+          "from": [
+            1,
+            8
+          ]
+        },
+        "toSpan": {
+          "from": [
+            1,
+            8
+          ]
+        },
+        "twin": true
+      },
+      {
+        "type": "mutashabih",
+        "to": "quran/hafs-kfqc/54:22",
+        "page": 529,
+        "dir": {
+          "dSurah": 0,
+          "dPage": -1,
+          "sameJuz": true
+        },
+        "span": {
+          "from": [
+            1,
+            8
+          ]
+        },
+        "toSpan": {
+          "from": [
+            1,
+            8
+          ]
+        },
+        "twin": true
+      },
+      {
+        "type": "mutashabih",
+        "to": "quran/hafs-kfqc/54:32",
+        "page": 530,
+        "dir": {
+          "dSurah": 0,
+          "dPage": 0,
+          "sameJuz": true
+        },
+        "span": {
+          "from": [
+            1,
+            8
+          ]
+        },
+        "toSpan": {
+          "from": [
+            1,
+            8
+          ]
+        },
+        "twin": true
       }
     ],
     "ext": []
