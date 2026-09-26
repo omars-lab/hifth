@@ -14,10 +14,9 @@ import styles from "./PhoneToolbar.module.css";
  *   B · one button in the bottom row that fans the tools out, like a pen case;
  *   C · a Tools button in the bottom row that slides the tools up in its place.
  *
- * All three take the desktop bar's own inputs, so whichever wins drops in with
- * nothing else changing, and the two that lose are deleted. Until the choice is
- * made the app shows C; `?phonebar=a` or `?phonebar=b` in the address shows the
- * others, which is how the decision page mounts all three side by side.
+ * The owner chose C (2026-09-26), so the app shows C. A and B stay, still
+ * tryable, as the rule on losing options asks: `?phonebar=a` or `?phonebar=b`
+ * in the address shows them, which is how the decision page mounts all three.
  */
 export interface PhoneToolbarProps {
   tool: PageTool;

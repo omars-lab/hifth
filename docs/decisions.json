@@ -1434,7 +1434,7 @@
     {
       "id": "phone-toolbar",
       "question": "Where should the page tools sit on a phone, and how does a reader switch between them?",
-      "status": "open",
+      "status": "decided",
       "options": [
         {
           "id": "A",
@@ -1453,9 +1453,9 @@
       "page": "docs/design/phone-toolbar-options.html",
       "builtBy": "scripts/build-phone-toolbar-options.mjs",
       "doc": "docs/decisions/phone-toolbar.md",
-      "decided": null,
-      "by": null,
-      "date": null,
+      "decided": "C",
+      "by": "omar",
+      "date": "2026-09-26",
       "related": [
         "harakah-pick",
         "selection-drawer",
