@@ -1,16 +1,37 @@
 # How does a reader pick the exact part of a word to note — one vowel-sign, several at once, or the word itself?
 
-*Status: open, asked 2026-09-09. This is the gesture the mistake-note decision left
-undrawn. That decision settled **that** a reader can pin a note to a spot finer than a word
-once the finer geometry ships; it did not settle **how** the reader reaches out and takes
-that spot when the spot is smaller than the fingertip covering it. Three ways are built live
-on the page below, each one a real hand on the real print — you pick by doing them, not by
-reading about them.*
+*Status: decided 26 September 2026 by the owner: **D**, which none of the three drawn ways was
+on its own. The magnifier from B becomes its own tool, and the fuller version of A becomes a
+second tool. C is dropped. The page below keeps all three running as they were tried.*
 
-*Updated 2026-09-25, still open: the three ways are now three interchangeable pieces of code
+## So what was decided?
+
+**D: two tools on the tool bar, each doing one job.**
+
+- **A sign tool** ("harakat"). With it on, the magnifier from B follows the pointer over the
+  page with no press and hold first, and rings the vowel-sign nearest the pointer. A click takes
+  that sign and opens a note on it. The press was only ever there to tell a pick apart from the
+  page's other gestures; once a tool is on, a plain touch already means "pick", so the press is
+  dropped.
+- **A word tool.** Tap a word and it opens into its parts, the fuller version of A: a row of
+  copies of the word, one for each part, with that part inked and the rest faint. A note can be
+  dropped on any part: one sign, several, a letter, or the whole word with or without its marks.
+
+The owner's reason, in their words: the magnifier "should be a feature ... but without a press
+... its own harakat tool", and "a separate word selection tool that breaks down a word in the
+fuller version of option A ... and lets us drop notes on any part of the word". Trying the
+three showed they were not rivals: B is quickest when you can see the sign you mean, and A's
+fuller row is the only one that reaches more than one sign or a letter. So each gets its own
+tool instead of one winning.
+
+What follows for the build: the mistake tool's second tap opens the word tool's row rather
+than the plain tray, the tray and the named row (C) leave the app, and the letters of every
+word need their own shapes, which today exist for one verse only. Until they do, the word tool
+opens each word into its signs and the whole word, and the letters come with the shapes.
+
+*Before that, updated 2026-09-25: the three ways were made three interchangeable pieces of code
 behind one shared shape (`packages/core/src/decision-options/harakah-pick.ts`, `OptionA` to
-`OptionC`). The page runs that very code, and the app's new mistake tool mounts the first way
-as a stand-in until this is decided — a stand-in, not the answer.*
+`OptionC`), and the page runs that very code.*
 
 **The picture:** <https://blog.bytesofpurpose.com/hifth/docs/design/harakah-pick-options.html> —
 `harakah-pick-options.html`, checked in and rebuilt by `scripts/build-harakah-pick-options.mjs`
