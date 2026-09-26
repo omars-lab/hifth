@@ -1,5 +1,5 @@
 /**
- * harakah-pick (open, docs/decisions/harakah-pick.md): a vowel-sign is smaller
+ * harakah-pick (decided D, docs/decisions/harakah-pick.md): a vowel-sign is smaller
  * than the fingertip that would land on it, so how does a reader say which one
  * they mean?
  *
@@ -16,9 +16,9 @@
  *
  * As in scrub-rate.ts, every function here is standalone — it reads only its
  * arguments — so the page builder inlines the very same compiled source and the
- * page runs what the unit test checks. The app's mistake tool mounts the
- * picker named by `HARAKAH_PICK_DEFAULT`: A, until the owner chooses. When one
- * is chosen the other two are deleted.
+ * page runs what the unit test checks. The owner chose none of the three as
+ * they stood but D, which splits A and B into two tools; those live in the app
+ * (sign-reach.ts), and these remain only for the decision page.
  *
  * A sign here is a position on the print and a name (fatha, kasra…), never the
  * verse's text.
@@ -136,9 +136,10 @@ export const OptionC: HarakahPicker = {
 export const HARAKAH_PICKERS: readonly HarakahPicker[] = [OptionA, OptionB, OptionC];
 
 /**
- * The picker the app's mistake tool mounts while the decision is open. Nothing
- * reached finer than a word before the tool, so there is no "today" to keep;
- * A is the first option and the one the word-tap tool fits without a new
- * gesture. This is a default, not the decision.
+ * The option the decision page opens on. The app no longer mounts any of the
+ * three: the owner chose D (2026-09-26), which keeps A's enlarged ink as its
+ * own word tool and B's magnifier, with no press, as its own sign tool (see
+ * sign-reach.ts and the app's word-parts row). These stay because the decision
+ * page is built from them, so it keeps showing what was chosen between.
  */
 export const HARAKAH_PICK_DEFAULT: HarakahPicker = OptionA;

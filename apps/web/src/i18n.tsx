@@ -630,6 +630,13 @@ export interface Strings {
   mistakeClear: string;
   mistakeCleared: string;
   mistakeRestored: string;
+  toolSign: string;
+  toolSignHint: string;
+  toolWord: string;
+  toolWordHint: string;
+  /** The word tool's row of parts, named by its verse. */
+  wordParts(label: string): string;
+  wordPartsHint: string;
 }
 
 /** The reader's own calendar day for a moment, as the `YYYY-MM-DD` `longDay` reads. */
@@ -1071,6 +1078,12 @@ export function buildStrings(lang: Lang, m: Catalog): Strings {
     mistakeClear: m.mistakeClear,
     mistakeCleared: m.mistakeCleared,
     mistakeRestored: m.mistakeRestored,
+    toolSign: m.toolSign,
+    toolSignHint: m.toolSignHint,
+    toolWord: m.toolWord,
+    toolWordHint: m.toolWordHint,
+    wordParts: (label) => m.wordParts({ label }),
+    wordPartsHint: m.wordPartsHint,
   };
 }
 

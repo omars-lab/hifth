@@ -15,6 +15,7 @@ import {
   clampZoom,
   easeInOutCubic,
   foldBetween,
+  formatAyahKey,
   formatWordKey,
   frameBboxToView,
   isMarkShard,
@@ -24,6 +25,7 @@ import {
   leafSideOf,
   lerpView,
   marqueeRect,
+  nearestSignOnPage,
   nextIntent,
   notesOnPage,
   TAP_SLOP_PX,
@@ -37,9 +39,11 @@ import {
   WordIndex,
   DEFAULT_HOP_ZOOM,
   WHEEL_TURN_REST,
+  type EditionId,
   type Fold,
   type MarkShard,
   type Note,
+  type ReachedSign,
   type PointerIntent,
   type Resolver,
   type SkinId,
@@ -48,7 +52,7 @@ import {
   type View,
   type WheelTurnState,
 } from "@hifth/core";
-import { loadMarkShard, loadPageSvg, loadWordShard } from "../assets";
+import { loadMarkShard, loadPageSvg, loadWordShard, pageUrl } from "../assets";
 import { useT } from "../i18n";
 import styles from "./PageStage.module.css";
 
@@ -250,10 +254,46 @@ interface PageStageProps {
    * opens its signs is App's business; the stage only says which word.
    */
   onMarkWord?: (at: { page: number; key: string; word: number; x: number; y: number }) => void;
+  /**
+   * Under the harakat tool (harakah-pick = D), a click takes the vowel-sign the
+   * magnifier rings. The stage says which sign; App pins a note on it.
+   */
+  onPickSign?: (at: { page: number; key: string; word: number; mark: number; x: number; y: number }) => void;
+  /**
+   * Under the word tool, a tap on a word opens it into its parts. `rect` is the
+   * word's box on screen, so the row of parts can stand beside it.
+   */
+  onOpenWord?: (at: { page: number; key: string; word: number; rect: WordRect }) => void;
+}
+
+/** A word's box on screen, in window pixels. */
+export interface WordRect {
+  readonly left: number;
+  readonly top: number;
+  readonly right: number;
+  readonly bottom: number;
 }
 
 /** The page toolbar's tools. "select" is the app as it has always behaved. */
-export type PageTool = "select" | "highlight" | "bookmark" | "note" | "mistake";
+export type PageTool = "select" | "highlight" | "bookmark" | "note" | "sign" | "word" | "mistake";
+
+/**
+ * How far, in page units, the harakat tool's magnifier reaches for a sign. A
+ * line of the print is about 27 units tall, so this finds the signs on the line
+ * under the pointer and the one above or below, and nothing across the margin.
+ */
+const SIGN_REACH = 14;
+
+/** What the harakat tool's magnifier shows: the sign it rings, and where the pointer is. */
+interface Loupe {
+  readonly page: number;
+  readonly sign: ReachedSign;
+  readonly clientX: number;
+  readonly clientY: number;
+  /** The page's size in its own units, for drawing the enlarged print. */
+  readonly w: number;
+  readonly h: number;
+}
 
 /** The bare "surah:ayah" a sign shard is keyed by, from any form of a verse's key. */
 function bareAyah(key: string): string {
@@ -568,6 +608,8 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
     onPlaceNote,
     onOpenNote,
     onMarkWord,
+    onPickSign,
+    onOpenWord,
   },
   ref,
 ): JSX.Element {
@@ -639,6 +681,20 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
   const onMarkWordRef = useRef(onMarkWord);
   onMarkWordRef.current = onMarkWord;
   const markWordRef = useRef<(page: number, key: string, x: number, y: number) => void>(() => {});
+  const onPickSignRef = useRef(onPickSign);
+  onPickSignRef.current = onPickSign;
+  const onOpenWordRef = useRef(onOpenWord);
+  onOpenWordRef.current = onOpenWord;
+  /** The harakat tool's pointer: ring the nearest sign, or (on a click) take it. Set below, beside the sign data. */
+  const reachSignRef = useRef<(page: number, svg: SVGSVGElement, x: number, y: number, e: PointerEvent, take: boolean) => void>(
+    () => {},
+  );
+  const openWordRef = useRef<(page: number, svg: SVGSVGElement, key: string, x: number, y: number) => void>(() => {});
+  const [loupe, setLoupe] = useState<Loupe | null>(null);
+  // The magnifier belongs to the harakat tool alone.
+  useEffect(() => {
+    if (tool !== "sign") setLoupe(null);
+  }, [tool]);
   /** Draws a page's mistakes once its word and sign data are in (set below, where those are fetched). */
   const paintMistakesRef = useRef<(page: number, svg: SVGSVGElement) => void>(() => {});
   const onJuzTurnRef = useRef(onJuzTurn);
@@ -1083,13 +1139,31 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
       const from = press;
       press = null;
       const using = toolRef.current;
-      if ((using !== "note" && using !== "mistake") || !from) return;
+      if (using === "select" || using === "highlight" || using === "bookmark" || !from) return;
       if (Math.hypot(e.clientX - from.x, e.clientY - from.y) > TAP_SLOP_PX) return;
       if ((e.target as Element | null)?.closest("[data-note-pin]")) return;
-      const key = hl.pressedKey;
       const at = hl.svgPointFromClient(e.clientX, e.clientY);
-      if (!key || !at) return;
-      (using === "note" ? placeNoteRef : markWordRef).current(targetPage, key, at.x, at.y);
+      if (!at) return;
+      // The harakat tool takes the sign its magnifier rings, whichever verse
+      // it is on, so it does not need the verse under the pointer.
+      if (using === "sign") {
+        reachSignRef.current(targetPage, svg, at.x, at.y, e, true);
+        return;
+      }
+      const key = hl.pressedKey;
+      if (!key) return;
+      if (using === "word") openWordRef.current(targetPage, svg, key, at.x, at.y);
+      else (using === "note" ? placeNoteRef : markWordRef).current(targetPage, key, at.x, at.y);
+    });
+    // The harakat tool's magnifier follows the pointer with no press first:
+    // the tool being on is what says a touch means "take a sign".
+    svg.addEventListener("pointermove", (e) => {
+      if (toolRef.current !== "sign") return;
+      const at = hl.svgPointFromClient(e.clientX, e.clientY);
+      if (at) reachSignRef.current(targetPage, svg, at.x, at.y, e, false);
+    });
+    svg.addEventListener("pointerleave", () => {
+      if (toolRef.current === "sign") setLoupe(null);
     });
     const pinOf = (e: Event) => (e.target as Element | null)?.closest("[data-note-pin]")?.getAttribute("data-note-id");
     svg.addEventListener("click", (e) => {
@@ -2013,6 +2087,48 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
     return got;
   }, []);
 
+  // The harakat tool: ring the sign nearest the pointer in the magnifier, and
+  // on a click pin a note on it. Nothing within reach rings nothing.
+  reachSignRef.current = (targetPage, svg, x, y, e, take) => {
+    const edition = resolver.edition;
+    const { clientX, clientY } = e;
+    void ensureMarks(edition, targetPage).then((shard) => {
+      if (toolRef.current !== "sign") return;
+      const sign = shard ? nearestSignOnPage(shard, x, y, SIGN_REACH) : null;
+      const vb = svg.viewBox.baseVal;
+      setLoupe(sign ? { page: targetPage, sign, clientX, clientY, w: vb?.width || 345, h: vb?.height || 550 } : null);
+      if (!take || !sign) return;
+      const [surah, ayah] = sign.ayah.split(":").map(Number) as [number, number];
+      onPickSignRef.current?.({
+        page: targetPage,
+        key: formatAyahKey(edition as EditionId, surah, ayah),
+        word: sign.word,
+        mark: sign.index,
+        x: sign.r[0] + sign.r[2] / 2,
+        y: sign.r[1],
+      });
+    });
+  };
+
+  // The word tool's tap: the word under it, opened into its parts beside its
+  // box on screen.
+  openWordRef.current = (targetPage, svg, key, x, y) => {
+    void ensureWords(resolver.edition, targetPage).then((idx) => {
+      const word = idx?.wordAt(key, x, y) ?? null;
+      const box = word === null ? null : idx?.boxOf(key, word);
+      const m = svg.getScreenCTM();
+      if (word === null || !box || !m) return;
+      const a = new DOMPoint(box.x, box.y).matrixTransform(m);
+      const b = new DOMPoint(box.x + box.width, box.y + box.height).matrixTransform(m);
+      onOpenWordRef.current?.({
+        page: targetPage,
+        key,
+        word,
+        rect: { left: Math.min(a.x, b.x), top: Math.min(a.y, b.y), right: Math.max(a.x, b.x), bottom: Math.max(a.y, b.y) },
+      });
+    });
+  };
+
   // Mistakes wait for the page's word and sign data; only a page that has any
   // fetches them. Reads the notes live, so a late answer draws what is current.
   paintMistakesRef.current = (p, svg) => {
@@ -2588,6 +2704,7 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
         </div>
       )}
       {band && (target ? createPortal(band, target) : band)}
+      {loupe && createPortal(<SignLoupe loupe={loupe} src={pageUrl(resolver.edition, loupe.page)} />, document.body)}
       {status === "loading" && <div className={styles.hint}>{t.stageLoading}</div>}
       {status === "error" && (
         /* Names the page it failed on, always — the two ways of getting here
@@ -2603,6 +2720,50 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
     </div>
   );
 });
+
+/** The magnifier's size in pixels, and how many pixels one page unit becomes inside it. */
+const LOUPE_PX = 128;
+const LOUPE_ZOOM = 7;
+
+/**
+ * The harakat tool's magnifier: the print around the ringed sign, enlarged,
+ * standing above the pointer so the hand never covers what it shows (B of
+ * harakah-pick, without the press). For the eye only: the tool bar names the
+ * tool, and the note that a click opens says which sign it is on.
+ */
+function SignLoupe({ loupe, src }: { loupe: Loupe; src: string }): JSX.Element {
+  const { sign, w, h } = loupe;
+  const cx = sign.r[0] + sign.r[2] / 2;
+  const cy = sign.r[1] + sign.r[3] / 2;
+  const left = LOUPE_PX / 2 - cx * LOUPE_ZOOM;
+  const top = LOUPE_PX / 2 - cy * LOUPE_ZOOM;
+  const above = loupe.clientY - LOUPE_PX - 28;
+  return (
+    <div
+      className={styles.loupe}
+      aria-hidden="true"
+      data-sign-loupe={`${sign.ayah}/${sign.index}`}
+      style={{
+        left: loupe.clientX - LOUPE_PX / 2,
+        top: above >= 8 ? above : loupe.clientY + 28,
+        width: LOUPE_PX,
+        height: LOUPE_PX,
+      }}
+    >
+      <img src={src} alt="" draggable={false} style={{ left, top, width: w * LOUPE_ZOOM, height: h * LOUPE_ZOOM }} />
+      <span
+        className={styles.loupeRing}
+        style={{
+          left: left + (sign.r[0] - 0.8) * LOUPE_ZOOM,
+          top: top + (sign.r[1] - 0.8) * LOUPE_ZOOM,
+          width: (sign.r[2] + 1.6) * LOUPE_ZOOM,
+          height: (sign.r[3] + 1.6) * LOUPE_ZOOM,
+        }}
+      />
+      <span className={styles.loupeName}>{sign.name}</span>
+    </div>
+  );
+}
 
 /**
  * Restart the pulse animation on the freshly-drawn selection.

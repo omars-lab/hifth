@@ -286,5 +286,11 @@
   "mistakeNoSigns": "لا حركات مسجّلة على هذه الكلمة.",
   "mistakeClear": "امسح العلامة",
   "mistakeCleared": "مُسحت العلامة",
-  "mistakeRestored": "أُعيدت العلامة"
+  "mistakeRestored": "أُعيدت العلامة",
+  "toolSign": "حركات",
+  "toolSignHint": "أشر إلى حركة، وانقر لتكتب عليها ملاحظة",
+  "toolWord": "كلمة",
+  "toolWordHint": "انقر كلمة لتفتحها إلى أجزائها",
+  "wordParts": "أجزاء كلمة في {label}",
+  "wordPartsHint": "اختر جزءًا لتكتب عليه ملاحظة"
 }

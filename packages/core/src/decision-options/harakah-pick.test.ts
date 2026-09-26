@@ -47,7 +47,7 @@ describe("harakah-pick options", () => {
     expect(nearestSign([], 0, 0)).toBeNull();
   });
 
-  it("lists the three options, and the app's default is A until one is chosen", () => {
+  it("lists the three options, and the decision page opens on A", () => {
     expect(HARAKAH_PICKERS.map((p) => p.id)).toEqual(["A", "B", "C"]);
     expect(HARAKAH_PICK_DEFAULT).toBe(OptionA);
   });

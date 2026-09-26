@@ -286,5 +286,11 @@
   "mistakeNoSigns": "No vowel-signs are recorded on this word.",
   "mistakeClear": "Clear mark",
   "mistakeCleared": "Mark cleared",
-  "mistakeRestored": "Mark put back"
+  "mistakeRestored": "Mark put back",
+  "toolSign": "Harakat",
+  "toolSignHint": "Point at a vowel-sign, click to note it",
+  "toolWord": "Word",
+  "toolWordHint": "Tap a word to open it into its parts",
+  "wordParts": "The parts of a word in {label}",
+  "wordPartsHint": "Pick a part to write a note on it"
 }

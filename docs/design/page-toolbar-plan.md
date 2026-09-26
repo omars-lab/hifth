@@ -101,6 +101,8 @@ gesture.
 | **Highlight** | H | selects the verse | paints across verses, no hold first | stays on |
 | **Bookmark** | B | drops a ribbon on that page | — | goes back |
 | **Note** | N | drops a note pin on that verse or word, and opens its box | — | goes back |
+| **Harakat** | K | a magnifier follows the pointer, no press needed, and rings the nearest vowel-sign; a click drops a note on that sign | — | stays on |
+| **Word** | W | opens the word into its parts, one enlarged copy per sign; picking a part drops a note on it | — | stays on |
 | **Mark a mistake** | M | marks that word; a second tap picks the exact sign | — | stays on |
 | **Crop** | C | — | draws a box, then offers to share it as an image | goes back |
 
@@ -165,16 +167,25 @@ asks nothing and can be undone for a few seconds, like a deleted note. A mistake
 note of the "correction" kind that sits on its word and, once picked, on one sign, so it is
 stored on the device beside notes and bookmarks and goes into the same saved file.
 
-The picker is way A of the open "harakah pick" decision (tap the word, then pick the sign from
-a tray), used as a stand-in: nothing reached finer than a word before, so there was no current
-behaviour to keep, and A starts from the same tap the tool already uses. **The decision is not
-made.** The three ways are now three interchangeable pieces of code with one shared shape, and
-the decision page runs that same code live, so the owner can try all three by hand; whichever
-wins replaces the stand-in without the tool changing.
+**The owner tried all three on the decision page and chose a fourth way, D (2026-09-26):** keep
+the magnifier and the word opened into its parts, but as two tools of their own rather than
+two ways to do one thing.
+
+- **Harakat (K).** A magnifier follows the pointer with no press first, the tool being on is
+  what says "I am pointing at a sign". It rings the nearest vowel-sign and names it; a click
+  drops a note on that one sign. The tool stays on, so the next sign is one more click.
+- **Word (W).** A tap opens the word into its parts: the whole word first, then one enlarged
+  copy of the word for each sign, with that sign in full ink and the rest faint. Picking a part
+  drops a note on it. The mistake tool's second tap opens the same row, so a slip is pinned to
+  its sign the same way.
+
+While either tool is on, the strip along the page's outer edge that turns the page steps
+aside, because the first word of every line sits under it; the arrows and keys still turn.
 
 Left for later: marks are not yet written into the revision record, so the calendar cannot
-show where you slip; marks can only be made on a computer (the phone has no tool bar yet, step
-5); and the picker takes one sign, not a letter or a run of signs.
+show where you slip; both tools and the mistake tool work only on a computer (the phone has no
+tool bar yet, step 5); the word's parts are its signs, not yet its letters, because a letter's
+own shape exists today for one verse only; and a part is one sign, not a run of them.
 
 ### 4. The crop tool
 
@@ -225,6 +236,5 @@ This goes to the owner as its own decision, with all three running on the decisi
 - What a note or mistake mark looks like on the page. That was settled by the placement and
   granularity decisions.
 - Whether notes sync to an account. The decided answer is still that they leave as a file.
-- Which picking method the mistake tool uses for a single vowel. That is the open "harakah
-  pick" decision. Step 3 built the tool with all three ways ready to swap in, and the owner
-  answers it by trying them on its page.
+- Which picking method reaches a single vowel. That was the "harakah pick" decision, settled
+  as D on 2026-09-26 after the owner tried all three ways by hand on its page.
