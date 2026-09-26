@@ -77,6 +77,43 @@ test.describe("Hifth · the mistake tool", () => {
     await expect(signRings(page)).toHaveCount(1);
   });
 
+  test("a marked slip shows on the calendar, and stays there once the mark is cleared", async ({ page }) => {
+    await page.goto("/#/hafs-kfqc/p7");
+    await expect(pageSvg(page, 7)).toBeVisible();
+    await page.keyboard.press("KeyM");
+    const at = await ayahTarget(page, "#verse-46");
+    await page.mouse.click(at.x, at.y);
+    await expect(washes(page)).toHaveCount(1);
+    // Picking the sign later is the same slip, not a second one.
+    await page.mouse.click(at.x, at.y);
+    await picker(page).locator("[data-sign]").first().click();
+    await expect(picker(page)).toHaveCount(0);
+
+    const cellFor7 = async () => {
+      await page.getByRole("button", { name: /what you have opened$/ }).click();
+      const sheet = page.getByRole("dialog", { name: "What you have opened" });
+      await sheet.getByRole("radio", { name: "Page", exact: true }).click();
+      return { sheet, cell: sheet.getByRole("list", { name: "Map of the mus'haf" }).locator('[data-id="7"]') };
+    };
+    const first = await cellFor7();
+    const sheet = first.sheet;
+    let cell = first.cell;
+    await expect(cell).toHaveAttribute("data-slips", "1");
+    await expect(cell).toHaveAccessibleName(/1 mistake marked$/);
+    await expect(sheet.getByText("Where you marked a mistake")).toBeVisible();
+    // A page with no slip carries no dot.
+    await expect(sheet.locator('[data-id="8"]')).not.toHaveAttribute("data-slips", /.*/);
+    await page.keyboard.press("Escape");
+
+    // Clearing the red mark off the page says "I have it now", not "I never slipped".
+    await page.keyboard.press("KeyM");
+    await page.mouse.click(at.x, at.y);
+    await picker(page).getByRole("button", { name: "Clear mark" }).click();
+    await expect(washes(page)).toHaveCount(0);
+    ({ cell } = await cellFor7());
+    await expect(cell).toHaveAttribute("data-slips", "1");
+  });
+
   test("clearing a mark asks nothing, and Undo puts it back", async ({ page }) => {
     await page.goto("/#/hafs-kfqc/p7");
     await expect(pageSvg(page, 7)).toBeVisible();

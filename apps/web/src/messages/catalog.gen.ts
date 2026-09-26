@@ -134,6 +134,7 @@ export interface Catalog {
   readonly mapCellAbsent: (d: { readonly label: string | number }) => string;
   readonly mapCellNever: (d: { readonly label: string | number }) => string;
   readonly mapCellSeen: (d: { readonly label: string | number; readonly when: "today" | "yesterday" | "other"; readonly daysText: string | number }) => string;
+  readonly mapCellSlips: (d: { readonly cell: string | number; readonly n: number; readonly nText: string | number }) => string;
   readonly mapGrid: string;
   readonly mapHeld: (d: { readonly haveText: string | number; readonly totalText: string | number; readonly scope: "page" | "hizb" | "other" }) => string;
   readonly mapLegend: string;
@@ -148,6 +149,7 @@ export interface Catalog {
   readonly mapRecent: string;
   readonly mapScopeGroup: string;
   readonly mapSince: (d: { readonly dayText: string | number }) => string;
+  readonly mapSlips: string;
   readonly mapTitle: string;
   readonly mapWentTo: (d: { readonly label: string | number; readonly page: string | number }) => string;
   readonly mistakeClear: string;

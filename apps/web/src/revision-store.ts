@@ -66,6 +66,8 @@ export interface Look {
   readonly endKey?: string;
   /** The page it was read on. */
   readonly page: number;
+  /** The reader marked a mistake here (see `RevisionEvent.slip`). */
+  readonly slip?: boolean;
 }
 
 export interface RevisionRecord {
@@ -191,6 +193,7 @@ export async function recordLook(look: Look, now: number = Date.now()): Promise<
       page: look.page,
       at: now,
       tz: -new Date(now).getTimezoneOffset(),
+      ...(look.slip ? { slip: true as const } : {}),
     };
     const day = dayOf(event);
     const tx = db.transaction([DAYS, META], "readwrite");

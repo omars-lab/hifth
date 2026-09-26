@@ -187,6 +187,8 @@
   "mapAbsent": "غير متوفّر في هذه النسخة",
   "mapNeverOpened": "متوفّر ولم يُفتح",
   "mapRecent": "فُتح حديثًا",
+  "mapSlips": "حيث علّمتَ خطأً",
+  "mapCellSlips": "{cell} · {n, plural, zero{لا أخطاء} one{خطأ واحد معلَّم} two{خطآن معلَّمان} few{{nText} أخطاء معلَّمة} many{{nText} خطأً معلَّمًا} other{{nText} خطأ معلَّم}}",
   "mapCellAbsent": "{label} · غير متوفّر في هذه النسخة",
   "mapCellNever": "{label} · لم يُفتح",
   "mapCellSeen": "{label} · {when, select, today{فُتح اليوم} yesterday{فُتح أمس} other{فُتح قبل {daysText} يومًا}}",

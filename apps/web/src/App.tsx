@@ -1128,6 +1128,10 @@ export function App(): JSX.Element {
         return;
       }
       commitNotes(markMistake(notes, at, Date.now()), t.mistakeMarked(t.ayahLabel(at.key) ?? at.key));
+      // Into the revision record too, so the calendar can show where the reader
+      // slips. Only on the first tap: picking the sign or clearing the mark
+      // later is the same slip, not another one.
+      void recordLook({ key: at.key, page: at.page, slip: true });
     },
     [notes, commitNotes, t],
   );

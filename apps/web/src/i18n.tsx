@@ -468,6 +468,10 @@ export interface Strings {
   mapAbsent: string;
   mapNeverOpened: string;
   mapRecent: string;
+  /** Legend row for the red dot: a division where a mistake was marked. */
+  mapSlips: string;
+  /** A cell's accessible name with its count of marked mistakes added. */
+  mapCellSlips(cell: string, n: number): string;
   /** A cell's accessible name, one per state. */
   mapCellAbsent(label: string): string;
   mapCellNever(label: string): string;
@@ -957,6 +961,8 @@ export function buildStrings(lang: Lang, m: Catalog): Strings {
     mapAbsent: m.mapAbsent,
     mapNeverOpened: m.mapNeverOpened,
     mapRecent: m.mapRecent,
+    mapSlips: m.mapSlips,
+    mapCellSlips: (cell, count) => m.mapCellSlips({ cell, n: count, nText: n(count) }),
     mapCellAbsent: (label) => m.mapCellAbsent({ label }),
     mapCellNever: (label) => m.mapCellNever({ label }),
     // Not a plural: "today" and "yesterday" are not categories any CLDR rule

@@ -85,6 +85,15 @@ export interface RevisionEvent {
    * `-new Date().getTimezoneOffset()`. Positive east of Greenwich.
    */
   readonly tz: number;
+  /**
+   * The reader marked a mistake here. A mark is stronger evidence than a tap —
+   * nobody marks a slip in an ayah they did not recite — so it warms the
+   * division like any other look, and is counted apart by `slipsIn` so the
+   * calendar can show where the reader slips. Kept on the record even if the
+   * red mark is later cleared off the page: clearing says "I have it now", not
+   * "I never slipped".
+   */
+  readonly slip?: true;
 }
 
 /** The local calendar day an event belongs to. */
@@ -211,6 +220,19 @@ export function lastSeen(
     }
   }
   return seen;
+}
+
+/**
+ * Scope id → how many slips were marked there. Only divisions with at least
+ * one appear; a slip whose scope cannot be named is dropped, as in `rollUp`.
+ */
+export function slipsIn(events: readonly RevisionEvent[], scope: RevisionScope): Map<number, number> {
+  const slips = new Map<number, number>();
+  for (const event of events) {
+    if (!event.slip) continue;
+    for (const id of scopesOf(event, scope)) slips.set(id, (slips.get(id) ?? 0) + 1);
+  }
+  return slips;
 }
 
 /**

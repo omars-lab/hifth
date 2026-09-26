@@ -187,6 +187,8 @@
   "mapAbsent": "Not in this build",
   "mapNeverOpened": "Here, never opened",
   "mapRecent": "Opened recently",
+  "mapSlips": "Where you marked a mistake",
+  "mapCellSlips": "{cell} · {n, plural, one{{nText} mistake marked} other{{nText} mistakes marked}}",
   "mapCellAbsent": "{label} · not in this build",
   "mapCellNever": "{label} · never opened",
   "mapCellSeen": "{label} · {when, select, today{opened today} yesterday{opened yesterday} other{opened {daysText} days ago}}",
