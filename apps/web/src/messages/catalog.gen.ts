@@ -222,6 +222,8 @@ export interface Catalog {
   readonly scopeHizb: string;
   readonly scopeJuz: string;
   readonly scopePage: string;
+  readonly scrubSlowHint: string;
+  readonly scrubSpeed: (d: { readonly speed: "half" | "quarter" | "tenth" | "other" }) => string;
   readonly selected: (d: { readonly label: string | number }) => string;
   readonly selectionCleared: string;
   readonly shareAriaAyah: string;

@@ -226,6 +226,13 @@ export interface Strings {
    * never become.
    */
   nearestPageN(page: number): string;
+  /**
+   * How fast the knob follows the thumb on a phone, said in the scrub readout
+   * while the thumb slides up to slow it (docs/decisions/page-bar-phone-scrub.md).
+   */
+  scrubSpeed(speed: "full" | "half" | "quarter" | "tenth"): string;
+  /** Said under the readout at full speed, so the slowing can be found. */
+  scrubSlowHint: string;
   selectionCleared: string;
   selected(label: string): string;
   highlighted(span: string): string;
@@ -686,6 +693,10 @@ export function buildStrings(lang: Lang, m: Catalog): Strings {
     firstPage: (page) => m.firstPage({ page }),
     lastPage: (page) => m.lastPage({ page }),
     nearestPageN: (page) => m.nearestPageN({ page }),
+    // Full speed is spelled `other`: ICU requires one, and a fifth case that
+    // repeats it could drift from it.
+    scrubSpeed: (speed) => m.scrubSpeed({ speed: speed === "full" ? "other" : speed }),
+    scrubSlowHint: m.scrubSlowHint,
     selectionCleared: m.selectionCleared,
     selected: (label) => m.selected({ label }),
     highlighted: (span) => m.highlighted({ span }),

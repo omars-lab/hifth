@@ -132,7 +132,17 @@ already fallen from 2.4 times the mark's size to 2.2; the new one is still at 2.
 it is at 1.7 where the old one was at 1.35, so the mark starts to grow earlier and the top is
 round. The decision page still draws the old curve, since that is what the choice was made on.
 
-### 5. Give the phone its own version: slow down by sliding away
+### 5. Give the phone its own version: slow down by sliding away — built 25 September
+
+*What was built:* the owner's pick, both together (option D). On a phone, while you drag the
+knob, sliding your thumb up slows it: full speed on the bar, half from 50 pixels up, a quarter
+from 100, a tenth from 150, and it catches back up to your thumb when you come back down. A
+strip of page marks rides above your thumb for the length of the drag and zooms with the
+speed: every fifth page at full and half speed, single pages from a quarter on, with each juz
+opening named. The readout under the strip says the page, the juz and surah, and the speed
+(or, at full speed, that sliding up goes slower). Keyboard, screen reader and the computer's
+magnifier are unchanged. The other three versions stay on the decision page to try, and the
+app never uses them.
 
 A phone has no hover, so the magnifier cannot appear before you touch. The phone version is
 the Apple one: while dragging the knob, sliding your finger up and away from the bar slows
@@ -143,6 +153,11 @@ they want.
 This is a real change to how the drag feels, so it is built as options you can try and put to
 the owner as its own decision, not slipped in. A second option to try alongside it: show the
 same page ticks from step 1 in a strip above the finger while dragging.
+
+*Built for choosing, 25 September:* four versions you can drag, today's, the slow-down, the
+strip, and both together, are on [the phone decision's page](https://blog.bytesofpurpose.com/hifth/docs/design/page-bar-phone-scrub-options.html),
+with the reasons in [the decision record](../decisions/page-bar-phone-scrub.md). None is in the
+app until the owner picks one. The owner picked D, both together.
 
 ## How will we know each step worked?
 

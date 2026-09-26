@@ -131,7 +131,8 @@
         "desktop-vs-mobile",
         "graduation-losers",
         "page-bar-numberline",
-        "page-bar-look"
+        "page-bar-look",
+        "page-bar-phone-scrub"
       ]
     },
     {
@@ -163,7 +164,8 @@
         "juz-detents",
         "desktop-vs-mobile",
         "graduation-losers",
-        "page-bar-look"
+        "page-bar-look",
+        "page-bar-phone-scrub"
       ]
     },
     {
@@ -194,7 +196,44 @@
       "date": "2026-09-25",
       "related": [
         "juz-detents",
-        "page-bar-numberline"
+        "page-bar-numberline",
+        "page-bar-phone-scrub"
+      ]
+    },
+    {
+      "id": "page-bar-phone-scrub",
+      "question": "On a phone, where there is no mouse to magnify the page bar, how should a thumb land on one exact page out of 604?",
+      "status": "decided",
+      "options": [
+        {
+          "id": "A",
+          "label": "Today: the knob follows the thumb"
+        },
+        {
+          "id": "B",
+          "label": "Slide up and away to slow the knob"
+        },
+        {
+          "id": "C",
+          "label": "A strip of page marks above the thumb"
+        },
+        {
+          "id": "D",
+          "label": "Both: slow down, and the strip zooms in"
+        }
+      ],
+      "artifact": "https://blog.bytesofpurpose.com/hifth/docs/design/page-bar-phone-scrub-options.html",
+      "page": "docs/design/page-bar-phone-scrub-options.html",
+      "builtBy": "scripts/build-page-bar-phone-scrub-options.mjs",
+      "doc": "docs/decisions/page-bar-phone-scrub.md#so-what-was-decided",
+      "decided": "D",
+      "by": "omar",
+      "date": "2026-09-25",
+      "related": [
+        "page-bar-numberline",
+        "page-bar-look",
+        "juz-detents",
+        "desktop-vs-mobile"
       ]
     },
     {
@@ -602,7 +641,8 @@
         "boundary-juz",
         "tafseer-reading",
         "page-turn-curl",
-        "page-bar-numberline"
+        "page-bar-numberline",
+        "page-bar-phone-scrub"
       ]
     },
     {

@@ -439,6 +439,102 @@
   transform: translateX(50%);
 }
 
+/*
+ * The phone's drag (option D of the phone scrub decision, graduated). The pad
+ * lies over the range input and under the juz buttons and takes every touch on
+ * the bar, so the knob can be slowed as the thumb slides up. `touch-action: none`
+ * keeps the browser from reading a slide up as a scroll.
+ */
+.scrubPad {
+  position: absolute;
+  inset: 0;
+  touch-action: none;
+}
+
+/* The readout and the strip, stacked above the thumb and lifted with it. Placed
+   in physical pixels, like the lens, because it follows the thumb's own point. */
+.phoneFloat {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  padding-block-end: var(--space-3);
+  pointer-events: none;
+  z-index: 2;
+}
+
+.bar[dir="rtl"] .phoneFloat .bubble {
+  position: static;
+  transform: none;
+}
+
+.speed {
+  color: var(--paper);
+  font-size: var(--text-xs);
+  opacity: 0.85;
+}
+
+/* The strip of page marks: a ruler over the pages around the knob, zoomed in as
+   the knob slows. The knob's own point is the line down the middle. */
+.strip {
+  position: relative;
+  inline-size: 100%;
+  block-size: 46px;
+  overflow: hidden;
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius-md);
+  background: var(--paper-raised);
+  box-shadow: var(--shadow-2);
+}
+
+.stripTick,
+.stripFive,
+.stripJuz {
+  position: absolute;
+  bottom: 0;
+  inline-size: 1px;
+  block-size: 8px;
+  background: var(--ink-faint);
+  transform: translateX(-50%);
+}
+
+.stripFive {
+  block-size: 14px;
+  background: var(--ink-soft);
+}
+
+.stripJuz {
+  inline-size: 2px;
+  block-size: 30px;
+  background: var(--accent);
+}
+
+.stripJuzName,
+.stripPageName {
+  position: absolute;
+  top: 3px;
+  transform: translateX(-50%);
+  font-size: 9px;
+  line-height: 1.2;
+  white-space: nowrap;
+  color: var(--ink-soft);
+}
+
+.stripJuzName {
+  color: var(--accent-strong);
+  font-weight: 700;
+}
+
+.stripHere {
+  position: absolute;
+  inset-block: 0;
+  left: 50%;
+  inline-size: 2px;
+  margin-left: -1px;
+  background: var(--highlight, var(--accent-strong));
+}
+
 /* The juz · surah line — the book's landmarks for the page under the thumb. A
    step down from the page number it sits under, and a hair dimmer, so the popover
    reads as "page, then where that page is" rather than three equal facts. */
