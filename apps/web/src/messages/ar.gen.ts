@@ -313,6 +313,7 @@ const messages: Catalog = {
   wordParts: (d) => "أجزاء كلمة في " + d.label,
   wordPartsHint: "اختر جزءًا لتكتب عليه ملاحظة",
   wordPartsHintMany: "اضغط مع Shift لتختار أكثر من جزء",
+  wordPartsLetter: (d) => "الحرف " + d.nText,
   wordPartsMany: (d) => plural(LC, d.n, { zero: "ملاحظة على العلامات", one: "ملاحظة على هذه العلامة", two: "ملاحظة على هاتين العلامتين", few: "ملاحظة على هذه العلامات الـ" + d.nText, many: "ملاحظة على هذه العلامات الـ" + d.nText, other: "ملاحظة على هذه العلامات الـ" + d.nText }),
   wordmark: "حفظ",
   zoomIn: "تكبير",

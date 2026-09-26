@@ -1,6 +1,14 @@
 import { useEffect, useRef, useState } from "react";
-import { isMarkShard, isWordShard, signsOfWord, WordIndex, type ReachedSign } from "@hifth/core";
-import { loadMarkShard, loadWordShard } from "../assets";
+import {
+  isLetterShard,
+  isMarkShard,
+  isWordShard,
+  lettersOfWord,
+  signsOfWord,
+  WordIndex,
+  type ReachedSign,
+} from "@hifth/core";
+import { loadLetterShard, loadMarkShard, loadWordShard } from "../assets";
 import { useT } from "../i18n";
 import type { WordRect } from "./PageStage";
 import styles from "./WordParts.module.css";
@@ -9,21 +17,29 @@ import styles from "./WordParts.module.css";
 export interface WordPartsData {
   readonly box: { x: number; y: number; width: number; height: number };
   readonly signs: readonly ReachedSign[];
+  /**
+   * Each letter's outline on the page, right to left, in the page's units;
+   * empty when the print could not be cut into letters for this word.
+   */
+  readonly letters: readonly (readonly (readonly [number, number])[])[];
 }
 
-/** A word's box and signs from the page's word and sign data, once both are in. */
+/** A word's box, signs and letters from the page's word, sign and letter data, once they are in. */
 export function useWordParts(edition: string, page: number, key: string, word: number): WordPartsData | null {
   const [data, setData] = useState<WordPartsData | null>(null);
   useEffect(() => {
     let live = true;
     setData(null);
     const bare = key.slice(key.lastIndexOf("/") + 1).split("#")[0]!;
-    void Promise.all([loadWordShard(edition, page), loadMarkShard(edition, page)]).then(([ws, ms]) => {
+    // A page with no letter data yet still opens, with signs only.
+    const letterShard = loadLetterShard(edition, page).catch(() => null);
+    void Promise.all([loadWordShard(edition, page), loadMarkShard(edition, page), letterShard]).then(([ws, ms, ls]) => {
       if (!live || !ws || !isWordShard(ws)) return;
       const box = new WordIndex(ws).boxOf(key, word);
       if (!box) return;
       const signs = ms && isMarkShard(ms) ? signsOfWord(ms, bare, word) : [];
-      setData({ box: { x: box.x, y: box.y, width: box.width, height: box.height }, signs });
+      const letters = ls && isLetterShard(ls) ? lettersOfWord(ls, bare, word, box) : [];
+      setData({ box: { x: box.x, y: box.y, width: box.width, height: box.height }, signs, letters });
     });
     return () => {
       live = false;
@@ -56,6 +72,8 @@ interface WordPartsProps {
    * reader asked for one note on all of them.
    */
   onPickMany?: ((marks: number[]) => void) | undefined;
+  /** Note mode only: one letter was picked, by its place from the right (0 = first). */
+  onPickLetter?: ((letter: number) => void) | undefined;
   onClear?: (() => void) | undefined;
   onClose: () => void;
 }
@@ -80,8 +98,9 @@ const MAX_ZOOM = 3.4;
  * take; the first copy is the whole word. Right to left, in reading order.
  *
  * Every copy is the print itself, cut from the page's drawing, so it works on
- * all 604 pages. Letters as parts of their own need each letter's own shape,
- * which today exists for one verse only; they join the row when it exists.
+ * all 604 pages. Under the word tool a second row gives each letter its own
+ * copy (letter-parts = A): the print cut where one letter joins the next, from
+ * the page's letter data. A word the cut was not trusted on has no such row.
  */
 export function WordParts({
   label,
@@ -93,6 +112,7 @@ export function WordParts({
   chosen = null,
   onPick,
   onPickMany,
+  onPickLetter,
   onClear,
   onClose,
 }: WordPartsProps): JSX.Element {
@@ -148,7 +168,7 @@ export function WordParts({
     return () => document.removeEventListener("pointerdown", onDown, true);
   }, []);
 
-  const { box, signs } = data;
+  const { box, signs, letters } = data;
   const ZOOM = Math.min(MAX_ZOOM, COPY_PX / (box.height + PAD * 2));
   const x0 = box.x - PAD;
   const y0 = box.y - PAD;
@@ -232,6 +252,36 @@ export function WordParts({
           );
         })}
       </div>
+      {mode === "note" && onPickLetter && letters.length > 1 && (
+        <div className={styles.row} data-letters={letters.length}>
+          {letters.map((outline, i) => {
+            // The letter's own outline on the print, in the copy's pixels.
+            const clip = `polygon(${outline
+              .map(([x, y]) => `${((x - x0) * ZOOM).toFixed(1)}px ${((y - y0) * ZOOM).toFixed(1)}px`)
+              .join(", ")})`;
+            const name = t.wordPartsLetter(i + 1);
+            return (
+              <button
+                key={i}
+                type="button"
+                className={styles.part}
+                data-part="letter"
+                data-letter={i}
+                aria-label={name}
+                onClick={() => onPickLetter(i)}
+              >
+                <span className={styles.copy} style={{ width: cw, height: ch }} aria-hidden="true">
+                  <span className={styles.faint}>{print()}</span>
+                  <span className={styles.letter} style={{ clipPath: clip }}>
+                    {print()}
+                  </span>
+                </span>
+                <span className={styles.name}>{name}</span>
+              </button>
+            );
+          })}
+        </div>
+      )}
       {gathering && several.length > 0 && (
         <div className={styles.actions}>
           <button type="button" className={styles.many} data-note-many onClick={() => onPickMany!(several)}>
