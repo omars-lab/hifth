@@ -74,9 +74,10 @@ The page under the mouse is a short green bar between its own two marks. The mag
 widens the bar about nine times right under the mouse and eases off towards its edge; the
 decision page for the magnifier still shows the gentler curve it was chosen with. Marks are
 kept at least 6 pixels apart, because at 4 they bunched up where the spacing switched from
-every page to every 5th. One thing still to fix: the knob and the green part of the track do
-not move with the magnifier, so when the mouse is near the knob the knob sits a little off the
-marks around it.
+every page to every 5th. The knob and the green part of the track at first stayed put while the
+marks around them spread, so near the mouse the knob sat off its own page; since 25 September
+they move with the magnifier too. The magnifier never moves the point right under the mouse,
+so the mouse only ever reaches the knob where it really is, and a press there still grabs it.
 
 Inside the magnifier, draw a short tick at each page boundary, but only where the spread
 leaves enough room to see it. The rule is the map rule: every page if ticks land at least

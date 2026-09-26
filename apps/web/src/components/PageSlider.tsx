@@ -306,6 +306,36 @@ export function PageSlider({
         }
       }
 
+      // The knob, the page on the stage and the leading end of the fill ride the
+      // same spread as the marks, or near the pointer the knob sits a little off
+      // the marks around it (zoom plan, step 1's leftover). Their rest positions
+      // are read with this shift cleared: both are centred by a CSS translate that
+      // layout does not see, and under a lens that widens nine times a few pixels
+      // of error became forty. The spread leaves the pointer's own
+      // point where it is, so the mouse is only ever over the knob where the knob
+      // really rests — a press there still lands on the control underneath.
+      const handle = track.querySelector<HTMLElement>("[data-testid='page-handle']");
+      const here = track.querySelector<HTMLElement>("[data-testid='page-here']");
+      const fill = track.querySelector<HTMLElement>("[data-testid='page-fill']");
+      for (const el of [handle, here]) {
+        if (!el) continue;
+        el.style.translate = "";
+        if (px === null || !fish) continue;
+        const r = el.getBoundingClientRect();
+        const c = r.left + r.width / 2;
+        el.style.translate = `${spread(c, px) - c}px 0`;
+      }
+      if (fill) {
+        // Filled from the book's first page, on the right of this bar, to the
+        // knob: the right end is past the magnifier and stays; the left end moves.
+        fill.style.transform = "";
+        const { left, right } = fill.getBoundingClientRect();
+        if (px !== null && fish && right - left >= 1) {
+          fill.style.transformOrigin = "right center";
+          fill.style.transform = `scaleX(${(right - spread(left, px)) / (right - left)})`;
+        }
+      }
+
       // The labels are the fisheye's alone. Cleared whenever the pointer leaves or
       // the spread is off, so the plain grow-on-approach bar carries none.
       if (!layer) return;
