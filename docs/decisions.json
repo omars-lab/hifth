@@ -1217,6 +1217,14 @@
         {
           "id": "B",
           "label": "Count in the printed page's own words"
+        },
+        {
+          "id": "C",
+          "label": "Keep every run either count finds"
+        },
+        {
+          "id": "D",
+          "label": "Count in the page's words, with each lone \"and\" glued back on"
         }
       ],
       "artifact": "https://blog.bytesofpurpose.com/hifth/docs/design/adjacency-span-source.html",
@@ -1407,6 +1415,10 @@
         {
           "id": "C",
           "label": "The word tools open on the word; the verse tools sit behind their own handle"
+        },
+        {
+          "id": "D",
+          "label": "A tool bar of modes (read, word, verse, slip), each with its own cursor, decides what a tap does"
         }
       ],
       "artifact": "https://blog.bytesofpurpose.com/hifth/docs/design/selection-drawer.html",

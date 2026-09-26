@@ -12,6 +12,15 @@
       "printLonger": 1414,
       "sameLength": 1130,
       "printShorter": 0
+    },
+    "union": 2694,
+    "joined": {
+      "kept": 2546,
+      "alsoCorpus": 2544,
+      "sameRunAsCorpus": 2544,
+      "corpusLost": 0,
+      "alsoPrint": 2432,
+      "neither": 0
     }
   },
   "examples": {
