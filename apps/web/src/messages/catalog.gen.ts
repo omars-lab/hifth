@@ -254,6 +254,12 @@ export interface Catalog {
   readonly tipsNote: string;
   readonly tipsSectionTitle: string;
   readonly tipsShow: string;
+  readonly toolBookmark: string;
+  readonly toolBookmarkHint: string;
+  readonly toolHighlight: string;
+  readonly toolOn: (d: { readonly name: string | number }) => string;
+  readonly toolSelect: string;
+  readonly toolbarLabel: string;
   readonly trail: string;
   readonly twin: string;
   readonly wordHops: (d: { readonly n: number; readonly nText: string | number; readonly u: number; readonly uText: string | number }) => string;

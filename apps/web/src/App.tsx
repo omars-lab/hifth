@@ -60,7 +60,8 @@ import { recordLook } from "./revision-store";
 import { useT } from "./i18n";
 import { useHashRouter } from "./useHashRouter";
 import { DESKTOP_QUERY, useMediaQuery } from "./useMediaQuery";
-import { PageStage, type PageStageHandle } from "./components/PageStage";
+import { PageStage, type PageStageHandle, type PageTool } from "./components/PageStage";
+import { PageToolbar, TOOL_KEYS } from "./components/PageToolbar";
 import { PageSpread } from "./components/PageSpread";
 import { EdgeGrabRails, type EdgeTurnDriver } from "./components/EdgeGrabRails";
 import { DesktopChrome } from "./components/DesktopChrome";
@@ -916,8 +917,9 @@ export function App(): JSX.Element {
         : null;
 
   const dropOn = useCallback(
-    (p: number) => {
-      const at = bookmarkTarget(p);      if (!at) return;
+    (p: number, key?: string) => {
+      const at = key ? { key, page: p } : bookmarkTarget(p);
+      if (!at) return;
       const name = t.ayahLabel(at.key) ?? t.pageN(p);
       const next = dropBookmark(bookmarks, { ...at, name }, Date.now());
       const made = next[next.length - 1]!;
@@ -926,6 +928,34 @@ export function App(): JSX.Element {
       setDrawerId(made.id);
     },
     [bookmarkTarget, bookmarks, commitBookmarks, t],
+  );
+
+  // The page toolbar's tool (docs/design/page-toolbar-plan.md, step 1). The ref
+  // is for the tap handlers below: a bookmark tap puts the tool down at once,
+  // and the click that follows the same tap must already see it down.
+  const [tool, setToolState] = useState<PageTool>("select");
+  const toolRef = useRef<PageTool>("select");
+  const chooseTool = useCallback(
+    (next: PageTool) => {
+      if (toolRef.current === next) return;
+      toolRef.current = next;
+      setToolState(next);
+      announce(
+        t.toolOn(
+          next === "select" ? t.toolSelect : next === "highlight" ? t.toolHighlight : t.toolBookmark,
+        ),
+      );
+    },
+    [announce, t],
+  );
+  // The bookmark tool is used once and put down: nobody drops five bookmarks in
+  // a row (the plan's table, "after one use").
+  const dropWithTool = useCallback(
+    (p: number, key?: string) => {
+      chooseTool("select");
+      dropOn(p, key);
+    },
+    [chooseTool, dropOn],
   );
 
   const openFromShelf = useCallback(
@@ -1177,6 +1207,13 @@ export function App(): JSX.Element {
   // fire the toggle branch spuriously). We read the live value via a ref.
   const handleSelect = useCallback(
     (key: string) => {
+      // Under the bookmark tool a tap on an ayah drops the ribbon at that ayah
+      // instead of selecting it.
+      if (toolRef.current === "bookmark") {
+        const at = resolver?.resolve(key)?.page;
+        if (at !== undefined) dropWithTool(at, key);
+        return;
+      }
       setOpenDirection(null);
       setSelectedRange(null); // a tap replaces a highlight — never both at once
       const toggledOff = selectedKeyRef.current === key;
@@ -1190,7 +1227,7 @@ export function App(): JSX.Element {
       const loc = toggledOff ? null : resolver?.resolve(key);
       if (loc) void recordLook({ key, page: loc.page });
     },
-    [announce, resolver, t],
+    [announce, dropWithTool, resolver, t],
   );
 
   // A marquee released over ayahs (Loop 5). The passage replaces the selection —
@@ -1531,6 +1568,35 @@ export function App(): JSX.Element {
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [stepPage]);
 
+  // The page toolbar's keys: V, H and B by their place on the keyboard, and
+  // Escape to put a tool down. Desktop only, like the bar, and never while the
+  // reader is typing or a sheet is open — the same fences as the map above.
+  useEffect(() => {
+    if (!desktop) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.defaultPrevented || e.altKey || e.ctrlKey || e.metaKey || e.shiftKey) return;
+      const el = document.activeElement as HTMLElement | null;
+      if (
+        el instanceof HTMLInputElement ||
+        el instanceof HTMLTextAreaElement ||
+        el instanceof HTMLSelectElement ||
+        el?.isContentEditable === true ||
+        document.querySelector('[role="dialog"]') !== null
+      )
+        return;
+      if (e.key === "Escape") {
+        if (toolRef.current !== "select") chooseTool("select");
+        return;
+      }
+      const next = TOOL_KEYS[e.code];
+      if (!next) return;
+      e.preventDefault();
+      chooseTool(next);
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [desktop, chooseTool]);
+
   const openChip = railChips.find((c) => c.direction === openDirection) ?? null;
   /*
    * Which side of the desk the ayah's sheets land on, when the book is open.
@@ -1722,7 +1788,22 @@ export function App(): JSX.Element {
           anchors to `inset-inline-start` — under an LTR chrome the rail would
           swap to the side the reader's thumb is not on and the arrow keys would
           argue with the page. */}
-      <main className={styles.main} dir="rtl">
+      {/* Its own row above the book, not floated over it: floated, it sat on
+          the page's first line. */}
+      {resolver && desktop && <PageToolbar tool={tool} onTool={chooseTool} />}
+      <main
+        className={styles.main}
+        dir="rtl"
+        /* The bookmark tool's tap on a page's margin, where there is no ayah to
+           hear it. A tap on an ayah has already been taken by `handleSelect`,
+           which put the tool down, so this sees "select" and does nothing. */
+        onClick={(e) => {
+          if (toolRef.current !== "bookmark") return;
+          const leaf = (e.target as Element).closest?.("[data-page]");
+          const p = Number(leaf?.getAttribute("data-page"));
+          if (p > 0) dropWithTool(p);
+        }}
+      >
         {resolver && (
           <>
             {/* At desktop width the stage is one leaf of an open mus'haf: the
@@ -1795,6 +1876,7 @@ export function App(): JSX.Element {
                      into the same book is the one thing §3.4 forbids. */
                   dragToTurn={false}
                   bound
+                  tool={desktop ? tool : "select"}
                   labelFor={(key) => t.ayahAria(t.ayahLabel(key) ?? key)}
                   skin={skin}
                   tajweedLookup={tajweed?.lookup ?? null}
@@ -1845,6 +1927,7 @@ export function App(): JSX.Element {
                    spread does the fold belong to something wider than it. */
                 foldTarget={desktop ? bookRef : null}
                 bound={desktop && pageMode === "two"}
+                tool={desktop ? tool : "select"}
               />
             </PageSpread>
             <HopRail

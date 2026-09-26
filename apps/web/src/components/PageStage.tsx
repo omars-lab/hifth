@@ -221,7 +221,18 @@ interface PageStageProps {
    * side of the opening, so the caller only has to say that the book is open.
    */
   bound?: boolean;
+  /**
+   * The tool the reader has picked from the page toolbar
+   * (`docs/design/page-toolbar-plan.md`, step 1). It sets the pointer's shape,
+   * and with the highlighter a drag paints straight away instead of moving the
+   * page. What a tap does under the bookmark tool is App's business: the tap
+   * still arrives through `onSelect`.
+   */
+  tool?: PageTool;
 }
+
+/** The page toolbar's tools. "select" is the app as it has always behaved. */
+export type PageTool = "select" | "highlight" | "bookmark";
 
 /**
  * Which point a button-driven zoom holds still as the paper grows.
@@ -441,6 +452,7 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
     overlay,
     foldTarget = null,
     bound = false,
+    tool = "select",
   },
   ref,
 ): JSX.Element {
@@ -495,6 +507,8 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
   turnTargetOfRef.current = turnTargetOf;
   const dragToTurnRef = useRef(dragToTurn);
   dragToTurnRef.current = dragToTurn;
+  const toolRef = useRef(tool);
+  toolRef.current = tool;
   const onJuzTurnRef = useRef(onJuzTurn);
   onJuzTurnRef.current = onJuzTurn;
   // The wheel's two accumulators — core owns the rule, this is just where the
@@ -2092,6 +2106,8 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
           insideSelection:
             selectedKeyRef.current !== null &&
             pagesRef.current.get(currentPageRef.current)?.hl.pressedKey === selectedKeyRef.current,
+          // The highlighter tool has already said what a drag is for.
+          paintOnDrag: toolRef.current === "highlight",
         });
         intentRef.current = intent;
 
@@ -2317,6 +2333,10 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
       // the stylesheet, and why an odd→even turn made that necessary.
       data-leaf={leafSideOf(page, total) ?? undefined}
       data-bound={bound ? "" : undefined}
+      data-tool={tool === "select" ? undefined : tool}
+      // So a click anywhere on this leaf — margin included — can say which page
+      // it landed on, which is all the bookmark tool needs from it.
+      data-page={page}
       // A long press IS a gesture here (it arms the marquee), so the platform's
       // own long-press menu would fight it on every highlight.
       onContextMenu={(e) => e.preventDefault()}

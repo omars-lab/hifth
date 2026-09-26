@@ -590,6 +590,13 @@ export interface Strings {
   bmLoad: string;
   bmLoaded(n: number): string;
   bmLoadBad: string;
+  toolbarLabel: string;
+  toolSelect: string;
+  toolHighlight: string;
+  toolBookmark: string;
+  /** The tool that is on, named: printed on the bar and announced. */
+  toolOn(name: string): string;
+  toolBookmarkHint: string;
 }
 
 /** The reader's own calendar day for a moment, as the `YYYY-MM-DD` `longDay` reads. */
@@ -1000,6 +1007,12 @@ export function buildStrings(lang: Lang, m: Catalog): Strings {
     bmLoad: m.bmLoad,
     bmLoaded: (count) => m.bmLoaded({ n: count, nText: n(count) }),
     bmLoadBad: m.bmLoadBad,
+    toolbarLabel: m.toolbarLabel,
+    toolSelect: m.toolSelect,
+    toolHighlight: m.toolHighlight,
+    toolBookmark: m.toolBookmark,
+    toolOn: (name) => m.toolOn({ name }),
+    toolBookmarkHint: m.toolBookmarkHint,
   };
 }
 

@@ -167,6 +167,18 @@ export interface PointerSample {
    * what keeps every existing test measuring what it was written to measure.
    */
   insideSelection?: boolean;
+
+  /**
+   * The reader has picked the highlighter from the page toolbar
+   * (`docs/design/page-toolbar-plan.md`, step 1). With it on, a drag paints
+   * straight away — no hold first — because the tool already said what a drag
+   * is for. The price is that a drag no longer moves or turns the page while it
+   * is on, which is why it is a tool the reader picks and puts down, and why
+   * Escape puts it down.
+   *
+   * Optional and "no" by default, like the two above.
+   */
+  paintOnDrag?: boolean;
 }
 
 /** Straight-line movement from the press point (CSS px). */
@@ -186,7 +198,7 @@ export function pointerIntent(sample: PointerSample): PointerIntent {
   const held = sample.elapsedMs >= LONG_PRESS_MS;
   if (moved > TAP_SLOP_PX) {
     // Moved decisively: which happened first, the hold or the movement?
-    if (held) return heldIntent(sample);
+    if (held || sample.paintOnDrag) return heldIntent(sample);
     return isTurnStroke(sample) ? "turn" : "pan";
   }
   // Still inside the slop radius: a completed hold arms the marquee; otherwise
