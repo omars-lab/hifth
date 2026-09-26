@@ -207,6 +207,8 @@
 }
 
 .trail {
+  /* The phone's tool tray (PhoneToolbar C) slides up over this row. */
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: flex-start;

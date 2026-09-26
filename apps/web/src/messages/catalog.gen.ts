@@ -211,6 +211,8 @@ export interface Catalog {
   readonly pagebarSectionTitle: string;
   readonly pagesVendored: (d: { readonly haveText: string | number; readonly totalText: string | number }) => string;
   readonly pauseAyah: (d: { readonly label: string | number }) => string;
+  readonly phoneTools: (d: { readonly name: string | number }) => string;
+  readonly phoneToolsClose: string;
   readonly playAyah: (d: { readonly label: string | number }) => string;
   readonly prevPage: string;
   readonly qulVerse: (d: { readonly label: string | number }) => string;
@@ -286,6 +288,7 @@ export interface Catalog {
   readonly toolSelect: string;
   readonly toolSign: string;
   readonly toolSignHint: string;
+  readonly toolSignHintTouch: string;
   readonly toolWord: string;
   readonly toolWordHint: string;
   readonly toolbarLabel: string;
@@ -295,6 +298,7 @@ export interface Catalog {
   readonly wordLevelPending: string;
   readonly wordParts: (d: { readonly label: string | number }) => string;
   readonly wordPartsHint: string;
+  readonly wordPartsHintMany: string;
   readonly wordPartsMany: (d: { readonly n: number; readonly nText: string | number }) => string;
   readonly wordmark: string;
   readonly zoomIn: string;

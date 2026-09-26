@@ -195,8 +195,7 @@ a note at once, so the one-sign case stays one click. The saved note lists every
 on and keeps the first in the old single-sign slot, so a file opened by an older copy of the
 app still lands the note on one of its signs. A marked mistake stays one sign per slip.
 
-Left for later: both tools and the mistake tool work only on a computer (the phone has no
-tool bar yet, step 5); and the word's parts are its signs, not yet its letters, because a
+Left for later: the word's parts are its signs, not yet its letters, because a
 letter's own shape exists today for one verse only.
 
 ### 4. The crop tool
@@ -217,6 +216,12 @@ and trying by hand, rather than choosing from a picture:
 - a row that slides up from the page bar at the bottom, where the thumb already is.
 
 This goes to the owner as its own decision, with all three running on the decision page.
+
+**Built (2026-09-26).** All three are in the app, picked by the address (`?phonebar=a`, `b`, or
+`c`; C when none is named), and mounted side by side on the
+[decision page](phone-toolbar-options.html), with the reasons in the
+[record](../decisions/phone-toolbar.md). A tool picked on a phone now works by a tap on the
+page; the vowel-sign tool takes the sign nearest the tap, since there is no pointer to aim.
 
 ## How will we know each step worked?
 
