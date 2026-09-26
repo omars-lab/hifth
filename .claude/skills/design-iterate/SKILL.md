@@ -79,7 +79,9 @@ no need to ask. Loop 3–5 until the options are each honestly the best version 
 option written to lose). Then stop; the choice is the owner's.
 
 ### 6 · Decide — put it in front of the owner, then record
-Hand the owner the live page and let them pick by doing. Record the choice with the `decide`
+Hand the owner the live page and let them pick by doing. Open it, on the page and in what you
+say, with the fundamentals in a few short sentences — what differs, why, what stays the same, one
+real example — before any option; the `decide` skill's first section is the rule. Record the choice with the `decide`
 skill: the winning component **graduates into the app**, the losers are **deleted**, and the row in
 `docs/decisions.json` names the options page as both its `artifact` (the site address) and its
 `page` (checked in). Nothing was throwaway that the choice did not need.
