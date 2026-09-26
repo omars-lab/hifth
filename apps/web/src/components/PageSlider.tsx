@@ -887,8 +887,10 @@ export function PageSlider({
           when the news is good, it is the bar saying what is behind it, and the
           next edition to be vendored will arrive partial (`e2e/pagebar.spec.ts`
           holds that decision). It is also the slider's accessible description,
-          so the fact reaches a listener who will never see the runs. */}
-      <span id="hifth-page-inventory" className={styles.inventory}>
+          so the fact reaches a listener who will never see the runs. The bar
+          runs right to left, so without `dir="auto"` the English line put its
+          leading number at the far end ("of 604 pages available 604"). */}
+      <span id="hifth-page-inventory" className={styles.inventory} dir="auto">
         {t.pagesVendored(available.length, total)}
       </span>
     </nav>
