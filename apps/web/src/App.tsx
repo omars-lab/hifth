@@ -13,6 +13,7 @@ import {
   juzOfPage,
   juzPageIndex,
   keyToRef,
+  listTafsirProviders,
   parseAyahKey,
   refToKey,
   spreadBudget,
@@ -32,6 +33,8 @@ import {
   type RootIndexShard,
   type SkinId,
   spreadOf,
+  type TafsirEntry,
+  type TafsirProvider,
   type TajweedShard,
   type TajweedVocabulary,
 } from "@hifth/core";
@@ -65,6 +68,10 @@ import { Colophon } from "./components/Colophon";
 import { RevisionMap } from "./components/RevisionMap";
 import { LiveAnnouncer, useAnnouncer } from "./components/LiveAnnouncer";
 import { RootLens, RootLensTrigger } from "./components/RootLens";
+import { CommentaryLens, CommentaryLensTrigger } from "./components/CommentaryLens";
+import { commentaryEdges, entryForAyah, indexEntries } from "./tafsir/commentary";
+import { restoreTafsirProviders } from "./tafsir/sideload";
+import { registerLiveTafsirProvider, LIVE_TAFSIR_ID } from "./tafsir/quran-foundation";
 import { SkinToggle, TajweedLegend } from "./components/SkinToggle";
 import { PageSlider } from "./components/PageSlider";
 import styles from "./App.module.css";
@@ -119,6 +126,16 @@ export function App(): JSX.Element {
     new Map(),
   );
   const [rootsOpen, setRootsOpen] = useState(false);
+  // Commentary (tafsir) seam. A side-loaded provider registers in the core
+  // registry at startup (`restoreTafsirProviders`); `tafsirReady` bumps once
+  // that async restore lands so the memos below recompute. `tafsirEntries`
+  // caches each surah's entries the way `shards` caches adjacency, and
+  // `commentaryOpen` is the ✎ sheet.
+  const [tafsirReady, setTafsirReady] = useState(0);
+  const [tafsirEntries, setTafsirEntries] = useState<
+    ReadonlyMap<number, readonly TafsirEntry[]>
+  >(new Map());
+  const [commentaryOpen, setCommentaryOpen] = useState(false);
   // Loop 6a wayfinding sheets: "go to" (`/` or the ⌖ button) and the mushaf
   // picker. Both are modal, so at most one is up at a time in practice.
   const [jumperOpen, setJumperOpen] = useState(false);
@@ -503,6 +520,63 @@ export function App(): JSX.Element {
   // taps, hops, bead-backs and deep links in one line, without every handler
   // having to remember).
   useEffect(() => setRootsOpen(false), [selectedKey]);
+
+  // Re-register any side-loaded commentary provider once per mount. It is a
+  // no-op when nothing was ever imported, and idempotent (register replaces),
+  // so a re-run costs nothing; the bump makes the provider memos recompute.
+  useEffect(() => {
+    // The open live provider (Quran Foundation) registers synchronously if the
+    // build is configured for it; a side-loaded private edition restores async.
+    const live = registerLiveTafsirProvider();
+    void restoreTafsirProviders().then((ids) => {
+      if (ids.length || live) setTafsirReady((n) => n + 1);
+    });
+    if (live) setTafsirReady((n) => n + 1);
+  }, []);
+
+  // The active provider. Until the source chooser (deferred in the
+  // `tafsir-provider` decision) is built, a side-loaded private edition takes
+  // precedence over the open live fallback: a reader who imported their own book
+  // sees it, not generic live text; with no side-load, the live provider serves.
+  const activeProvider = useMemo<TafsirProvider | null>(() => {
+    const providers = listTafsirProviders();
+    return providers.find((p) => p.source.id !== LIVE_TAFSIR_ID) ?? providers[0] ?? null;
+  }, [tafsirReady]);
+
+  // Fetch the selection's surah commentary at most once per provider. Keyed on
+  // the provider id so swapping providers re-fetches; mirrors `ensureShard`.
+  const requestedTafsir = useRef(new Set<string>());
+  useEffect(() => {
+    requestedTafsir.current = new Set();
+    setTafsirEntries(new Map());
+  }, [activeProvider]);
+  useEffect(() => {
+    if (!activeProvider || !selectedKey) return;
+    const surah = parseAyahKey(selectedKey)?.surah;
+    if (!surah || !activeProvider.has(surah)) return;
+    const tag = `${activeProvider.source.id}/${surah}`;
+    if (requestedTafsir.current.has(tag)) return;
+    requestedTafsir.current.add(tag);
+    void activeProvider.load(surah).then((entries) => {
+      setTafsirEntries((m) => new Map(m).set(surah, entries));
+    });
+  }, [activeProvider, selectedKey]);
+
+  // The focused ayah's entry (indexed per surah), and its cross-references as
+  // runtime `tafsir-ref` edges — never written to a shipped shard.
+  const tafsirEntry = useMemo<TafsirEntry | null>(() => {
+    if (!selectedKey) return null;
+    const surah = parseAyahKey(selectedKey)?.surah;
+    if (!surah) return null;
+    const idx = indexEntries(tafsirEntries.get(surah) ?? []);
+    return entryForAyah(idx, selectedKey) ?? null;
+  }, [selectedKey, tafsirEntries]);
+  const commentaryEdgeList = useMemo<Edge[]>(
+    () => (selectedKey && tafsirEntry && resolver ? commentaryEdges(tafsirEntry, selectedKey, resolver) : []),
+    [selectedKey, tafsirEntry, resolver],
+  );
+  // Same rule as the root lens: the sheet is about one ayah, so a move closes it.
+  useEffect(() => setCommentaryOpen(false), [selectedKey]);
 
   // Rail chips for the current selection (empty when nothing selected / no hops).
   const chips = useMemo(
@@ -1624,6 +1698,15 @@ export function App(): JSX.Element {
               onHopEdge={handleHop}
               onClose={() => setRootsOpen(false)}
             />
+            <CommentaryLens
+              entry={commentaryOpen ? tafsirEntry : null}
+              source={activeProvider?.source ?? null}
+              edges={commentaryEdgeList}
+              side={sheetSide}
+              canHop={canHop}
+              onHop={handleHop}
+              onClose={() => setCommentaryOpen(false)}
+            />
           </>
         )}
       </main>
@@ -1655,7 +1738,17 @@ export function App(): JSX.Element {
         onSelect={handleEditionSelect}
         onClose={() => setEditionOpen(false)}
       />
-      <Colophon open={colophonOpen} onClose={() => setColophonOpen(false)} />
+      <Colophon
+        open={colophonOpen}
+        onClose={() => setColophonOpen(false)}
+        tafsirLoaded={
+          activeProvider
+            ? { id: activeProvider.source.id, label: activeProvider.source.label }
+            : null
+        }
+        onTafsirImported={() => setTafsirReady((n) => n + 1)}
+        onTafsirRemoved={() => setTafsirReady((n) => n + 1)}
+      />
       {/* `onGoToPage` is the app's own page-turner, handed over unchanged: a
           press on a map cell is a jump, and everything a jump owes — refusing an
           unvendored page, cancelling one in flight, saying where it landed —
@@ -1687,6 +1780,11 @@ export function App(): JSX.Element {
           curated={curatedRoots.length}
           open={rootsOpen}
           onToggle={() => setRootsOpen((o) => !o)}
+        />
+        <CommentaryLensTrigger
+          present={tafsirEntry !== null}
+          open={commentaryOpen}
+          onToggle={() => setCommentaryOpen((o) => !o)}
         />
         <ShareSheet state={selectedKey ? currentState : null} hasTrail={trail.length > 0} />
         {/* Screen-reader-only summary of what the rail is offering. It used to

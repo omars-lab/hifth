@@ -27,6 +27,24 @@ export {
 // be inside a selection but never an end of one is enforced.
 export { formatWordKey, parseWordKey, ayahKeyOf, type WordKey } from "./keys.js";
 
+// tafsir seam — commentary is its own node in the reserved `tafsir/<name>/S:A`
+// namespace, behind a provider contract so a live open source and a side-loaded
+// private edition are swapped without the UI knowing which (decision
+// `tafsir-provider`). Core owns the key grammar, the contract, and the registry;
+// the data and I/O live in the app.
+export { formatTafsirKey, parseTafsirKey, type TafsirKey } from "./keys.js";
+export {
+  registerTafsirProvider,
+  getTafsirProvider,
+  listTafsirProviders,
+  unregisterTafsirProvider,
+  tafsirKeyFor,
+  type TafsirSource,
+  type TafsirBlock,
+  type TafsirEntry,
+  type TafsirProvider,
+} from "./tafsir.js";
+
 export {
   WordIndex,
   isWordShard,
