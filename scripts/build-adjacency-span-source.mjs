@@ -241,10 +241,42 @@ async function extract() {
     return { from: [Math.min(...from), Math.max(...from)], to: [Math.min(...to), Math.max(...to)], len };
   }
 
+  // The mixed way: the print's own words, but with each lone "and" glued back onto
+  // the word after it — the one habit the corpus folds and the print does not
+  // (9,533 places; the only print word the corpus never writes on its own). Only
+  // print data is read, so no corpus licence reaches it; the run still lands in
+  // print positions, from the glued "and" to the end of its word.
+  const AND = skeleton("\u0648");
+  const joinedSkel = new Map();
+  for (const [key, arr] of printSkel) {
+    const out = [];
+    for (let i = 0; i < arr.length; i += 1) {
+      const e = arr[i];
+      const next = arr[i + 1];
+      if (e.skel === AND && next) {
+        out.push({ first: e.idx, last: next.idx, skel: e.skel + next.skel });
+        i += 1;
+      } else out.push({ first: e.idx, last: e.idx, skel: e.skel });
+    }
+    joinedSkel.set(key, out);
+  }
+  function joinedSpan(srcKey, tgtKey) {
+    const a = joinedSkel.get(srcKey);
+    const b = joinedSkel.get(tgtKey);
+    if (!a?.length || !b?.length) return null;
+    const { len, runs } = sharedRuns(a.map((e) => e.skel), b.map((e) => e.skel));
+    if (len === 0 || runs.length !== 1) return null;
+    const a0 = runs[0].a - 1;
+    const b0 = runs[0].b - 1;
+    return { from: [a[a0].first, a[a0 + len - 1].last], to: [b[b0].first, b[b0 + len - 1].last], len };
+  }
+
   // Walk the mutashabih edges, tally, and collect drawable candidates.
   const t = {
     mutEdges: 0, qacKept: 0, printKept: 0, both: 0, onlyQac: 0, onlyPrint: 0, neither: 0,
     lenLonger: 0, lenSame: 0, lenShorter: 0,
+    joinedKept: 0, joinedAndCorpus: 0, joinedAndPrint: 0, joinedSameAsCorpus: 0,
+    joinedOnly: 0, union: 0,
   };
   const cand = { both: [], onlyQac: [], onlyPrint: [] };
   const seen = new Set(); // undirected dedup for specimens
@@ -258,8 +290,19 @@ async function extract() {
     const tgtKey = `${tgt.surah}:${tgt.ayah}`;
     const q = qacSpan(srcKey, tgtKey);
     const p = printSpan(srcKey, tgtKey);
+    const j = joinedSpan(srcKey, tgtKey);
     if (q) t.qacKept += 1;
     if (p) t.printKept += 1;
+    if (q || p) t.union += 1;
+    if (j) {
+      t.joinedKept += 1;
+      if (q) t.joinedAndCorpus += 1;
+      if (p) t.joinedAndPrint += 1;
+      if (!q && !p) t.joinedOnly += 1;
+      if (q && q.from[0] === j.from[0] && q.from[1] === j.from[1] && q.to[0] === j.to[0] && q.to[1] === j.to[1]) {
+        t.joinedSameAsCorpus += 1;
+      }
+    }
     let bucket;
     if (q && p) { t.both += 1; bucket = "both"; }
     else if (q) { t.onlyQac += 1; bucket = "onlyQac"; }
@@ -316,6 +359,17 @@ async function extract() {
       corpusOnly: t.onlyQac,
       mutEdges: t.mutEdges,
       onCorpusKept: { printLonger: t.lenLonger, sameLength: t.lenSame, printShorter: t.lenShorter },
+      // Option C, both lists: every run either one finds.
+      union: t.union,
+      // Option D, the print's words with each lone "and" glued back on.
+      joined: {
+        kept: t.joinedKept,
+        alsoCorpus: t.joinedAndCorpus,
+        sameRunAsCorpus: t.joinedSameAsCorpus,
+        corpusLost: t.qacKept - t.joinedAndCorpus,
+        alsoPrint: t.joinedAndPrint,
+        neither: t.joinedOnly,
+      },
     },
     examples: {
       agreed: pick(cand.both, 2),
@@ -327,7 +381,9 @@ async function extract() {
   console.log(
     `extract → ${DATA_OUT.replace(ROOT, "")}\n` +
       `  control corpusKept=${t.qacKept} (must be 2544)  printKept=${t.printKept}\n` +
-      `  agreed=${t.both} printOnly=${t.onlyPrint} corpusOnly=${t.onlyQac}\n` +
+      `  agreed=${t.both} printOnly=${t.onlyPrint} corpusOnly=${t.onlyQac}  union=${t.union}\n` +
+      `  joined=${t.joinedKept} (with corpus ${t.joinedAndCorpus}, same run ${t.joinedSameAsCorpus}, ` +
+      `corpus lost ${t.qacKept - t.joinedAndCorpus}, new ${t.joinedOnly})\n` +
       `  specimens: agreed=${payload.examples.agreed.length} ` +
       `corpusOnly=${payload.examples.corpusOnly.length} printOnly=${payload.examples.printOnly.length}`,
   );
@@ -406,6 +462,7 @@ function renderCopy(data, artifact) {
     `<div class="specimens">${arr.map(specimen).join("")}</div></div>`;
 
   const t = data.tallies;
+  const j = t.joined;
   const pages = [...new Set(
     Object.values(data.examples).flat().flatMap((e) => e.sides.map((s) => s.page)),
   )];
@@ -629,6 +686,28 @@ ${defs}
     catch is that it does not keep the same runs.</p>
 </section>
 
+<section>
+  <h2><span class="n">The reason</span>Why do the two lists disagree at all?</h2>
+  <p>Because of one word. The printed page writes <b>"and"</b> — the single letter <em>waw</em>
+    that opens so many phrases — as a word of its own, standing apart. The word-by-word reference
+    joins it to the word it belongs to, the way every grammar of Arabic does. It happens in
+    ${(9533).toLocaleString()} places, and it is the <em>only</em> word the page writes alone that the
+    reference never does. Every run gained and every run lost below comes from it.</p>
+  <ul class="plain">
+    <li><b>Why runs are gained.</b> A phrase with an "and" in it is one word longer on the page.
+      Where two stretches used to tie for longest — so neither was kept — the extra word can make
+      one of them the clear winner, and a new run appears.</li>
+    <li><b>Why runs are lost.</b> A lone "and" repeats everywhere. Counted as a word, it can
+      stretch a second, unrelated match to the same length as the real one, forging a tie — and a
+      run that used to be the single longest is no longer kept.</li>
+  </ul>
+  <p>So there is a way through the middle: read the page's own words, but <b>glue each lone "and"
+    back onto the word after it</b> before counting. Measured, that gives ${j.kept.toLocaleString()}
+    runs — the same ${j.sameRunAsCorpus.toLocaleString()} runs as today, on the same words, losing
+    ${j.corpusLost}, plus ${j.kept - j.alsoCorpus} more — and it never reads the reference, so its
+    licence does not come with it. That is option D below.</p>
+</section>
+
 <section class="hafiz-box">
   <h2><span class="n">For the reader this is for</span>What does this change for a hafiz?</h2>
   <p>A hafiz opens a look-alike pair to see the phrase the two verses share, which is where one slides
@@ -638,6 +717,9 @@ ${defs}
   <p><span class="hl">So for a hafiz the question is which ${t.corpusOnly} pairs would be lost, and
   nobody has looked yet.</span> If they are pairs huffaz are known to confuse, that loss outweighs the
   licence gain; if they are rarely confused, the swap costs a hafiz almost nothing.</p>
+  <p><span class="hl">Gluing the "and" back (D) removes that worry: every pair coloured today stays
+  coloured, on the same words.</span> Taking both lists together (C) goes the other way — a hafiz
+  gains ${t.printOnly} coloured pairs and loses none.</p>
 </section>
 
 <section>
@@ -732,15 +814,29 @@ ${defs}
       <td>${t.printKept.toLocaleString()} runs, no conversion step, no share-alike thread. Costs
         ${t.corpusOnly} runs a reader can land on today to gain ${t.printOnly} new ones.
         <p class="for-hafiz"><span class="hl"><b>For a hafiz:</b> the coloured phrase is counted in the words of the page you memorised from, but ${t.corpusOnly} pairs you may rely on lose their colour. Worth it only if those are pairs huffaz rarely confuse.</span></p></td></tr>
+    <tr><td class="k">C</td><td class="lab">Both lists together</td>
+      <td>Count both ways and keep every run either one finds: ${t.union.toLocaleString()} runs, none
+        lost. Where both find a run, keep today's. Costs keeping the reference, so the share-alike
+        thread stays, and the build carries two counts to keep in step.
+        <p class="for-hafiz"><span class="hl"><b>For a hafiz:</b> the most coloured pairs of any option — ${t.printOnly} more than today, none taken away.</span></p></td></tr>
+    <tr><td class="k">D</td><td class="lab">The page's words, with each lone "and" glued back on</td>
+      <td>${j.kept.toLocaleString()} runs: all ${j.sameRunAsCorpus.toLocaleString()} of today's, on
+        the same words, plus ${j.kept - j.alsoCorpus}. Reads only the page, so no share-alike thread
+        and no conversion step. Costs one small rule in the build, and gives up the
+        ${t.printOnly} extra runs B and C would add.
+        <p class="for-hafiz"><span class="hl"><b>For a hafiz:</b> nothing you see changes — every pair coloured today stays coloured the same way — while the app sheds the licence underneath.</span></p></td></tr>
   </table>
 </section>
 
 <section>
   <h2><span class="n">What else was weighed</span>What is not on the list, and why?</h2>
   <ul class="plain">
-    <li><b>Keep the reference, fall back to the page only where they disagree.</b> Keeps the
-      share-alike thread — shedding which is the whole gain — so it buys the churn without the
-      payoff. Out.</li>
+    <li><b>Keep the reference, fall back to the page only where they disagree.</b> This is C,
+      both lists together, now on the list: it was first set aside for keeping the licence, but it
+      is the only way to gain the ${t.printOnly} without losing the ${t.corpusOnly}, so a hafiz
+      should get to weigh it.</li>
+    <li><b>Glue more than "and" back.</b> Nothing else to glue: "and" is the only word the page
+      writes alone that the reference never does.</li>
     <li><b>Count in the reference but ship the runs already converted, to drop the conversion
       step.</b> Removes the step but not the licence thread, the larger half of the cost. A
       tidy-up of A, not a third answer.</li>
@@ -752,6 +848,9 @@ ${defs}
   <ul class="plain">
     <li><b>A channel being chosen where share-alike terms bite</b> — a store build. Then B's
       licence gain stops being insurance and becomes the reason.</li>
+    <li><b>A hafiz judging the ${t.printOnly} extra runs.</b> If they help, C (or D plus a
+      second pass that also counts the "and" alone) earns its keep; if not, D gives today's runs
+      with no licence and is hard to beat.</li>
     <li><b>A hafiz judging the ${t.corpusOnly} lost runs.</b> If the runs the page drops are ones
       a reader leans on, the cost is higher than a count says; if marginal, lower. Nobody has
       looked at <em>which</em> ${t.corpusOnly} they are, only at how many.</li>
@@ -770,8 +869,9 @@ ${defs}
       washed.</li>
     <li><b>The four verses whose two printings cannot be lined up at all.</b> They take no part
       in this and their alignment is not reopened.</li>
-    <li><b>What the panel looks like.</b> Nothing here changes that — only, if B wins, which
-      ${t.corpusOnly}-and-${t.printOnly} of its pairs shift the run they draw.</li>
+    <li><b>What the panel looks like.</b> Nothing here changes that — only which pairs carry a
+      run: under D none shift, under B ${t.corpusOnly} drop and ${t.printOnly} arrive, under C
+      ${t.printOnly} arrive.</li>
   </ul>
 </section>
 </div>

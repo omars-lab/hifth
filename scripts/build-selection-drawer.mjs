@@ -115,6 +115,10 @@ const minY = Math.min(...wordBoxes.map((b) => b.y));
 const maxX = Math.max(...wordBoxes.map((b) => b.x + b.bw));
 const maxY = Math.max(...wordBoxes.map((b) => b.y + b.bh));
 const PAD = 3;
+// The printed verse-number ornament sits just past the verse's last word (to its
+// left, the line being right to left). Option C rings it as the verse's handle.
+const lastBox = wordBoxes[wordBoxes.length - 1];
+const endMark = { cx: +(lastBox.x - 13).toFixed(1), cy: +(lastBox.y + lastBox.bh / 2).toFixed(1), r: 10.5 };
 const crop = {
   x: Math.max(0, minX - PAD),
   y: Math.max(0, minY - PAD),
@@ -304,6 +308,48 @@ const html = `<!doctype html>
     .leaf path{fill:#ece4d6;}
   }
 
+  /* ── Which way to try: A to D, all on the same verse ── */
+  .optswitch{display:flex;flex-wrap:wrap;gap:.3rem;justify-content:center;margin:0 0 .7rem;}
+  .optswitch button{appearance:none;font:inherit;font-size:.84rem;font-weight:600;cursor:pointer;
+    border:1px solid var(--paper-sunk);background:var(--paper);color:var(--ink-soft);
+    padding:.34rem .75rem;border-radius:var(--radius-pill);}
+  .optswitch button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:#fff;}
+
+  /* D: a tool bar above the page; each mode has its own cursor. A phone has no
+     cursor, so the pressed button and the hover light carry the same message. */
+  .modebar{display:none;gap:.2rem;justify-content:center;margin:0 auto .6rem;width:max-content;max-width:100%;
+    background:var(--paper-raised);border:1px solid var(--paper-sunk);border-radius:var(--radius-md);
+    padding:.22rem;box-shadow:var(--shadow);}
+  .try.opt-D .modebar{display:flex;}
+  .modebar button{appearance:none;font:inherit;font-size:.8rem;font-weight:600;cursor:pointer;
+    display:flex;align-items:center;gap:.3rem;border:0;background:transparent;color:var(--ink-soft);
+    padding:.35rem .6rem;border-radius:var(--radius-sm);}
+  .modebar button svg{width:18px;height:18px;flex:0 0 auto;}
+  .modebar button[aria-pressed="true"]{background:var(--accent-tint);color:var(--accent-strong);}
+  .modebar kbd{font:inherit;font-size:.68rem;color:var(--ink-faint);border:1px solid var(--paper-sunk);
+    border-radius:4px;padding:0 .25rem;}
+  .stage.m-read, .stage.m-read .wordhit{cursor:grab;}
+  .stage.m-word, .stage.m-word .wordhit{cursor:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24'%3E%3Cpath d='M12 1v5M12 18v5M1 12h5M18 12h5' stroke='white' stroke-width='3.5'/%3E%3Cpath d='M12 1v5M12 18v5M1 12h5M18 12h5' stroke='%2317544d' stroke-width='1.6'/%3E%3Crect x='7.5' y='9' width='9' height='6' rx='1.2' fill='%23d7e7e3' stroke='%2317544d' stroke-width='1.4'/%3E%3C/svg%3E") 12 12, crosshair;}
+  .stage.m-ayah, .stage.m-ayah .wordhit{cursor:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='24'%3E%3Cpath d='M8 3H4v18h4M20 3h4v18h-4' fill='none' stroke='white' stroke-width='4'/%3E%3Cpath d='M8 3H4v18h4M20 3h4v18h-4' fill='none' stroke='%23e8a13a' stroke-width='2'/%3E%3Ccircle cx='14' cy='12' r='2' fill='%23e8a13a' stroke='white'/%3E%3C/svg%3E") 14 12, cell;}
+  .stage.m-slip, .stage.m-slip .wordhit{cursor:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24'%3E%3Cpath d='M2 22l2.5-6.5L16 4l4 4L8.5 19.5z' fill='%23c1622d' stroke='white' stroke-width='1.5'/%3E%3Cpath d='M2 22l2.5-6.5 4 4z' fill='%2326201a'/%3E%3C/svg%3E") 2 22, pointer;}
+  .wordhit.hov{fill:var(--accent-tint);opacity:.45;}
+  .wordhit.hovaya{fill:var(--sel-soft);opacity:.6;}
+  .slipmark{fill:#c1622d;}
+  /* C: the verse's own handle is its printed number, the ornament at its end */
+  .vring{display:none;fill:rgba(232,161,58,.12);stroke:var(--sel);stroke-width:1.2;cursor:pointer;}
+  .try.opt-C .vring{display:inline;}
+  .vring:hover{fill:var(--sel-soft);}
+  /* the closed sheet's shadow must not peek above the bottom of the screen */
+  .sheet:not(.open){box-shadow:none;}
+  @media (max-width:30rem){
+    .modebar{gap:0;} .modebar kbd{display:none;} .modebar button{padding:.35rem .45rem;}
+  }
+  /* B: the question every press asks */
+  .ask{display:grid;gap:.6rem;grid-template-columns:1fr 1fr;}
+  .ask button{appearance:none;font:inherit;font-weight:650;cursor:pointer;padding:1rem .6rem;
+    border-radius:var(--radius-md);border:1px solid var(--paper-sunk);background:var(--paper);color:var(--ink);}
+  .ask button:hover{border-color:var(--accent);background:var(--accent-tint);}
+
   /* What a choice does for a hafiz, marked the way a reader marks a page: a highlighter stroke. */
   .hafiz-box{margin:1.6em 0;padding:1em 1.15em;border:2px solid #e8c400;border-radius:12px;background:rgba(255,236,120,.14)}
   .hafiz-box h2{margin-top:0}
@@ -321,10 +367,12 @@ const html = `<!doctype html>
 <main>
   <p style="color:var(--ink-faint);font-size:.86rem;margin:0 0 .3rem;">A design, drawn — Hifth</p>
   <h1>The word drawer and the ayah drawer</h1>
-  <p class="lead">On a page of the print, one press should reach the tools for a single word, and a
-  firmer, longer press should reach the tools for the whole verse. Both open the same way — a sheet
+  <p class="lead">On a page of the print, a reader needs to reach the tools for a single word, and
+  also the tools for the whole verse. Both open the same way — a sheet
   that rises from the bottom of the screen, on a phone and on a desktop alike. Try it on the real verse
-  below: a quick tap opens the word's fine picker; press and hold opens the verse's tools.</p>
+  below. There are four ways to do it, and each one is live: pick A, B, C or D above the verse and use it
+  the way a reader would. D is the tool-bar way — a Word mode and an Ayah mode (and a Read and a Slip
+  mode), each with its own cursor, so you always know what a tap is about to do.</p>
 
   <div class="glossary">
     <dl>
@@ -336,19 +384,33 @@ const html = `<!doctype html>
 
   <div class="note">
     <strong>Two reaches, one page.</strong> Tapping a word already lit it and let a reader note it.
-    This adds a second reach on the same spot: hold instead of tap, and the tools widen from the one
-    word to the whole verse. The gesture is felt, not read — so it is built here, live, on a real page.
+    This adds a second reach: the tools for the whole verse. How a reader asks for the wider reach is
+    felt, not read — so every way is built here, live, on a real page.
   </div>
 
-  <div class="try">
-    <p class="hint" id="hint">Tap a word for its picker. Press and hold a word for the verse's tools.</p>
+  <div class="try" id="try">
+    <div class="optswitch" role="group" aria-label="Which way to try">
+      <button type="button" data-opt="A">A · Tap or hold</button>
+      <button type="button" data-opt="B">B · Ask which</button>
+      <button type="button" data-opt="C">C · Two handles</button>
+      <button type="button" data-opt="D">D · Modes</button>
+    </div>
+    <div class="modebar" role="toolbar" aria-label="What a tap does">
+      <button type="button" data-mode="read" title="Read — taps do nothing, the page is only for reading (R)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 5h7a2 2 0 0 1 2 2v13a2 2 0 0 0-2-2H3zM21 5h-7a2 2 0 0 0-2 2v13a2 2 0 0 1 2-2h7z"/></svg>Read <kbd>R</kbd></button>
+      <button type="button" data-mode="word" title="Word — a tap opens that word's tools (W)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/><rect x="8" y="9.5" width="8" height="5" rx="1"/></svg>Word <kbd>W</kbd></button>
+      <button type="button" data-mode="ayah" title="Ayah — a tap opens the whole verse's tools (A)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M7 3H4v18h3M17 3h3v18h-3"/><circle cx="12" cy="12" r="1.6" fill="currentColor"/></svg>Ayah <kbd>A</kbd></button>
+      <button type="button" data-mode="slip" title="Slip — a tap marks that word as a slip, no drawer (S)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 21l2.5-6.5L16 4l4 4L8.5 18.5z"/></svg>Slip <kbd>S</kbd></button>
+    </div>
+    <p class="hint" id="hint"></p>
     <div class="stage" id="stage">
       <svg id="page" viewBox="${crop.x} ${crop.y} ${crop.w} ${crop.h}" aria-label="A real verse of the print, zoomed in">
         <use href="#leaf" x="0" y="0" width="${VBW}" height="${VBH}" class="leaf"></use>
+        <g id="slips"></g>
         <g id="words"></g>
+        <circle class="vring" id="vhandle" cx="${endMark.cx}" cy="${endMark.cy}" r="${endMark.r}" role="button" tabindex="0" aria-label="The verse's tools"></circle>
       </svg>
     </div>
-    <p class="try-tip">On a mouse, hold the button down; on a phone, press and hold. A drag scrolls and cancels.</p>
+    <p class="try-tip" id="tryTip"></p>
   </div>
 
   <!-- the bottom sheet, reused for both drawers -->
@@ -367,10 +429,9 @@ const html = `<!doctype html>
 
   <h2>What is being decided?</h2>
   <p>How a reader opens two different sets of tools on the same page — the ones for a single word, and
-  the ones for a whole verse — and where those tools live. The answer drawn here: a quick tap on a word
-  opens a bottom drawer holding that word's fine picker; a press-and-hold on the same word opens a
-  bottom drawer holding the verse's tools. The drawer is one shape, rising from the bottom, on phone and
-  desktop alike.</p>
+  the ones for a whole verse. Whichever way wins, both open in the same place: a drawer rising from the
+  bottom, on phone and desktop alike. What differs is how the reader says which one they want — a
+  hold, a question, a second button, or a mode chosen on a tool bar.</p>
 
   <section class="hafiz-box">
   <h2>What does this change for a hafiz?</h2>
@@ -395,7 +456,7 @@ const html = `<!doctype html>
   than meeting the word's tools under one gesture.</p>
 
   <h2>How does a reader open each? — the options</h2>
-  <p>The first is built live above; the other two are described so the edge of the choice is visible.</p>
+  <p>All four are built live above — switch between them with the buttons over the verse.</p>
   <table>
     <tr><th>Way</th><th>The gesture</th><th>What it trades</th></tr>
     <tr><td>Tap vs hold<br><small>drawn here</small></td><td>A quick tap opens the word drawer; a press
@@ -411,6 +472,16 @@ const html = `<!doctype html>
       separate control (a margin handle, a verse number).</td><td>No hold to discover, but a second thing
       on the page to find, and the verse tools no longer reached from the word a reader is looking at.
       <p class="for-hafiz"><span class="hl"><b>For a hafiz:</b> marking a slip is one tap, as in the first. The verse tools move away from where your eyes are.</span></p></td></tr>
+    <tr><td>Modes<br><small>new</small></td><td>A small tool bar over the page: <b>Read</b>, <b>Word</b>,
+      <b>Ayah</b>, <b>Slip</b>. Whichever is on decides what a tap does, and the cursor changes with it
+      — cross-hairs on a box for a word, brackets for a verse, a red pen for a slip. Before you tap, the
+      page lights what the tap will take: one word, or the whole verse.</td><td>Nothing hidden and no
+      hold to learn, and each tap does exactly one thing with no question asked. Costs a switch before
+      changing reach, and the risk of forgetting which mode you are in — the cursor and the light are
+      what answer that. It is the way the app's tool bar already works (select, highlight, bookmark),
+      so it adds modes to a bar a reader already has rather than a new gesture. A phone has no cursor,
+      so there the lit button and the light under the thumb carry it alone.
+      <p class="for-hafiz"><span class="hl"><b>For a hafiz:</b> in Slip mode a slip is one tap with no drawer at all — the fastest mark of the four, so a whole page of slips can be marked while reciting. Read mode means a stray thumb opens nothing. Switching to the verse's tools costs one tap on the bar.</span></p></td></tr>
   </table>
 
   <h2>What did we already decide that this leans on?</h2>
@@ -438,7 +509,8 @@ const html = `<!doctype html>
   <h2>What would change the answer?</h2>
   <p>A reader who holds too briefly and keeps landing in the word drawer when they meant the verse would
   push the hold shorter, or toward the &ldquo;ask which&rdquo; option. A reader who never discovers the
-  hold at all would argue for a visible second affordance. The honest test is a hafiz on their own phone,
+  hold at all would argue for a visible second affordance, or for modes. A reader who keeps tapping in
+  the wrong mode would argue against modes. The honest test is a hafiz on their own phone,
   reaching for a verse's tools without being told how — which is what the live stage above is for.</p>
 
   <h2>What is this not settling?</h2>
@@ -765,7 +837,7 @@ function openAyahDrawer(w){
   openSheet("Verse "+DATA.ayah, "the whole ayah");
   sheetBody.className="sheet-body aya";
   sheetBody.innerHTML=
-    '<p class="lead2">The tools for the whole verse — the same set the app already carries, reached by holding instead of tapping.</p>'+
+    '<p class="lead2">The tools for the whole verse — the same set the app already carries.</p>'+
     '<h4>Pin a note to the verse</h4>'+
     '<div class="kinds">'+
       '<button type="button" style="background:var(--k-comment)" data-kind="Comment">Add a comment</button>'+
@@ -790,7 +862,98 @@ function openAyahDrawer(w){
   });
 }
 
-// ── The gesture: tap vs press-and-hold ───────────────────────────────────────
+// ── Which way is being tried: A to D, on the same verse ─────────────────────
+// A tap or hold · B ask which · C two handles · D modes, each with its own cursor.
+var tryBox = document.getElementById("try");
+var tryTip = document.getElementById("tryTip");
+var gSlips = document.getElementById("slips");
+var opt = "D", mode = "word";
+var HINTS = {
+  A: "Tap a word for its picker. Press and hold a word for the verse's tools.",
+  B: "Tap any word. A sheet asks: this word, or the whole verse?",
+  C: "Tap a word for its picker. Tap the verse's own number (ringed, at its end) for the verse's tools.",
+  D: {
+    read: "Read mode: taps do nothing, so a stray thumb never opens anything. Pick a tool above to work.",
+    word: "Word mode: tap a word for its picker. Your cursor is a small box with cross-hairs.",
+    ayah: "Ayah mode: the whole verse lights as you move. Tap anywhere on it for the verse's tools.",
+    slip: "Slip mode: tap a word to mark a slip right there, no drawer. Tap it again to take it back."
+  }
+};
+var TIPS = {
+  A: "On a mouse, hold the button down; on a phone, press and hold. A drag scrolls and cancels.",
+  B: "Every tap asks first, even when the answer is obvious. Feel the second tap.",
+  C: "No hold to learn, but the verse's tools live away from the word you are looking at.",
+  D: "Keys: R read, W word, A ayah, S slip. On a phone there is no cursor: the lit button and the light under your finger say the same thing."
+};
+function setHint(){
+  hint.textContent = opt==="D" ? HINTS.D[mode] : HINTS[opt];
+  tryTip.textContent = TIPS[opt];
+}
+function setOpt(o){
+  if(sheetOpen) closeSheet();
+  opt=o;
+  tryBox.className="try opt-"+o;
+  document.querySelectorAll(".optswitch button").forEach(function(b){
+    b.setAttribute("aria-pressed", b.getAttribute("data-opt")===o?"true":"false");
+  });
+  applyMode();
+}
+function setMode(m){ mode=m; applyMode(); }
+function applyMode(){
+  stage.className = "stage" + (opt==="D" ? " m-"+mode : "");
+  document.querySelectorAll(".modebar button").forEach(function(b){
+    b.setAttribute("aria-pressed", b.getAttribute("data-mode")===mode?"true":"false");
+  });
+  clearLit(); setHint();
+}
+document.querySelectorAll(".optswitch button").forEach(function(b){
+  b.addEventListener("click", function(){ setOpt(b.getAttribute("data-opt")); });
+});
+document.querySelectorAll(".modebar button").forEach(function(b){
+  b.addEventListener("click", function(){ setMode(b.getAttribute("data-mode")); });
+});
+document.addEventListener("keydown", function(e){
+  if(opt!=="D" || sheetOpen || e.metaKey || e.ctrlKey || e.altKey) return;
+  var m={r:"read",w:"word",a:"ayah",s:"slip"}[e.key.toLowerCase()];
+  if(m) setMode(m);
+});
+
+function litAll(cls){ gWords.querySelectorAll(".wordhit").forEach(function(r){ r.setAttribute("class","wordhit "+cls); }); }
+
+// B: the question every press asks.
+function openAsk(w){
+  litWord(w,"lit");
+  openSheet("This word, or the whole verse?", "you tapped one word");
+  sheetBody.className="sheet-body";
+  sheetBody.innerHTML='<div class="ask"><button type="button" id="askWord">This word</button>'+
+    '<button type="button" id="askAyah">The whole verse</button></div>';
+  document.getElementById("askWord").addEventListener("click", function(){ openWordDrawer(w); });
+  document.getElementById("askAyah").addEventListener("click", function(){ litAll("hovaya"); openAyahDrawer(w); litAll("hovaya"); });
+}
+
+// D, slip mode: a mark under the word, no drawer at all.
+function toggleSlip(w){
+  var had=gSlips.querySelector('[data-w="'+w+'"]');
+  if(had){ had.remove(); hint.textContent="Slip taken back."; return; }
+  var b=DATA.words.filter(function(x){ return x.w===w; })[0]; if(!b) return;
+  gSlips.appendChild(el("rect",{x:b.x+b.bw*0.08,y:b.y+b.bh-1.6,width:b.bw*0.84,height:1.3,rx:0.6,class:"slipmark","data-w":w}));
+  var n=gSlips.childNodes.length;
+  hint.textContent="Slip marked on word "+w+" of verse "+DATA.ayah+" ("+n+" on this verse). In the app it goes into your revision record.";
+}
+
+// What a finished tap does, for each way.
+function tapOn(w){
+  if(opt==="B") return openAsk(w);
+  if(opt==="D"){
+    if(mode==="read"){ clearLit(); hint.textContent=HINTS.D.read; return; }
+    if(mode==="ayah"){ openAyahDrawer(w); litAll("hovaya"); return; }
+    if(mode==="slip"){ clearLit(); return toggleSlip(w); }
+  }
+  openWordDrawer(w);
+}
+
+// ── The gesture ──────────────────────────────────────────────────────────────
+// Only A tells a tap from a hold; the others act on a plain tap.
 var HOLD_MS=450, MOVE_CANCEL=10; // px of movement that turns a press into a scroll
 var press=null; // {w, x, y, timer, fired}
 function wordAt(e){
@@ -803,37 +966,54 @@ function onDown(e){
   var w=wordAt(e); if(w==null) return;
   e.preventDefault();
   stage.setPointerCapture && stage.setPointerCapture(e.pointerId);
-  litWord(w,"press");
-  press={ w:w, x:e.clientX, y:e.clientY, fired:false, timer:setTimeout(function(){
-    press.fired=true; openAyahDrawer(w);
-  }, HOLD_MS) };
+  if(opt==="D" && mode==="ayah") litAll("press"); else if(!(opt==="D" && mode==="read")) litWord(w,"press");
+  press={ w:w, x:e.clientX, y:e.clientY, fired:false, timer:null };
+  if(opt==="A") press.timer=setTimeout(function(){ press.fired=true; openAyahDrawer(w); litAll("hovaya"); }, HOLD_MS);
 }
 function onMove(e){
-  if(!press || press.fired) return;
+  if(!press){ hover(e); return; }
+  if(press.fired) return;
   if(Math.abs(e.clientX-press.x)>MOVE_CANCEL || Math.abs(e.clientY-press.y)>MOVE_CANCEL){
     clearTimeout(press.timer); clearLit(); press=null;
   }
+}
+// D shows what a tap will take before you tap: one word, or the whole verse.
+function hover(e){
+  if(sheetOpen || opt!=="D" || mode==="read") return;
+  var w=wordAt(e);
+  if(w==null){ clearLit(); return; }
+  if(mode==="ayah") litAll("hovaya"); else litWord(w,"hov");
 }
 function onUp(e){
   if(!press) return;
   clearTimeout(press.timer);
   var wasQuick=!press.fired, w=press.w;
   press=null;
-  if(wasQuick) openWordDrawer(w); // a hold already opened the ayah drawer
+  if(wasQuick) tapOn(w); // in A, a hold already opened the ayah drawer
 }
 function onCancel(){ if(press){ clearTimeout(press.timer); press=null; } if(!sheetOpen) clearLit(); }
 stage.addEventListener("pointerdown", onDown);
 stage.addEventListener("pointermove", onMove);
 stage.addEventListener("pointerup", onUp);
 stage.addEventListener("pointercancel", onCancel);
-// keyboard: a plain click (Enter/Space on a focused word) opens the word drawer;
-// the hold has no keyboard form, so the ayah drawer is reached another way there.
+stage.addEventListener("pointerleave", function(){ if(!press && !sheetOpen) clearLit(); });
+// C: the verse's own handle.
+var vh=document.getElementById("vhandle");
+vh.addEventListener("pointerdown", function(e){ e.stopPropagation(); });
+vh.addEventListener("click", function(){ openAyahDrawer(0); litAll("hovaya"); });
+vh.addEventListener("keydown", function(ev){ if(ev.key==="Enter"||ev.key===" "){ ev.preventDefault(); openAyahDrawer(0); litAll("hovaya"); } });
+// keyboard: Enter/Space on a focused word does what a tap does.
 gWords.querySelectorAll(".wordhit").forEach(function(r){
   r.setAttribute("tabindex","0"); r.setAttribute("role","button");
   r.addEventListener("keydown", function(ev){
-    if(ev.key==="Enter"||ev.key===" "){ ev.preventDefault(); openWordDrawer(Number(r.getAttribute("data-w"))); }
+    if(ev.key==="Enter"||ev.key===" "){ ev.preventDefault(); tapOn(Number(r.getAttribute("data-w"))); }
   });
 });
+// Open on the way asked for in the address (#A to #D), else on D in word mode.
+var start=(location.hash||"").replace("#","").split("-");
+if(/^[ABCD]$/.test(start[0])){ opt=start[0]; }
+if(start[1] && HINTS.D[start[1]]) mode=start[1];
+setOpt(opt);
 </script>
 </body>
 </html>
