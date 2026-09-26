@@ -1402,7 +1402,7 @@
     {
       "id": "selection-drawer",
       "question": "How does a reader open the tools for one word, and the tools for the whole verse, from the same page?",
-      "status": "open",
+      "status": "decided",
       "options": [
         {
           "id": "A",
@@ -1425,9 +1425,9 @@
       "page": "docs/design/selection-drawer.html",
       "builtBy": "scripts/build-selection-drawer.mjs",
       "doc": "docs/decisions/selection-drawer.md",
-      "decided": null,
-      "by": null,
-      "date": null,
+      "decided": "D",
+      "by": "omar",
+      "date": "2026-09-26",
       "related": [
         "harakah-pick",
         "mistake-note-anchor",

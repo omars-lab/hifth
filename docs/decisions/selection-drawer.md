@@ -1,6 +1,11 @@
 # How does a reader open the tools for one word, and the tools for the whole verse, from the same page?
 
-*Status: open, asked 2026-09-12. A reader looking at a verse of the print has two different
+**Decided: D**, by Omar, 2026-09-26, after trying all four on the live page. A small bar of modes
+— Read, Word, Verse, Slip — each with its own cursor, decides what a tap does. Why: a reader always
+knows what a tap is about to do; a slip is marked in one tap; in Read mode a stray thumb opens
+nothing. Still to do: move the mode bar into the app's tool bar, and delete the other three ways.
+
+*Asked 2026-09-12. A reader looking at a verse of the print has two different
 reaches in mind at two different moments: sometimes they want to do something with a single word
 — pin a slip to it, pick a sign inside it — and sometimes they want something for the whole verse
 — hear it, read a translation, bookmark it, flag it. This decision is how one gesture on one word
