@@ -1821,6 +1821,48 @@
         "validation",
         "golden-images"
       ]
+    },
+    {
+      "id": "tafsir-seam",
+      "what": "A verse's commentary, from any source behind one contract — a live public service, or a private book the reader side-loads.",
+      "layer": "L1 core",
+      "entry": [
+        {
+          "file": "packages/core/src/keys.ts",
+          "symbol": "formatTafsirKey",
+          "note": "A note is its own node in the reserved `tafsir/<name>/S:A` namespace — a sibling of the `quran/` grammar, not a decoration on a verse key — so two sources can both annotate 2:30 and neither collides. The `<name>` is a provider id, not an edition, because a note is keyed to the ayah and every edition of that ayah shares it."
+        },
+        {
+          "file": "packages/core/src/tafsir.ts",
+          "symbol": "TafsirProvider",
+          "note": "The contract the panel renders against: given a surah, `has` answers cheaply and `load` returns one entry per annotated ayah, async, `[]` never a throw. Core holds the contract, the entry/block/source shapes, and a registry — and no data and no I/O, because the bytes are the reader's or the network's, never the repo's (decision tafsir-provider, and the scripture gate)."
+        },
+        {
+          "file": "packages/core/src/tafsir.ts",
+          "symbol": "registerTafsirProvider",
+          "note": "The registry the swap turns on: a side-load registers a provider at runtime, the open live source registers one at startup, and the UI asks getTafsirProvider for the active one without learning which kind it got."
+        },
+        {
+          "file": "apps/web/src/tafsir/sideload.ts",
+          "symbol": "importTafsirBundle",
+          "note": "The app's half: reads the export's on-disk bundle (an object translation, lemma-grouped commentary, keyed refs), adapts each row to the flat core entry in adaptEntry, stores it per-surah in the reader's own IndexedDB (mirroring packs.ts), and registers a study-quran provider. restoreTafsirProviders brings it back after a reload; nothing is ever committed."
+        }
+      ],
+      "extend": [
+        "A new commentary source is a new TafsirProvider in the web app, registered on the registry — not a change to the panel. A live source (the Quran Foundation lookup, H5) ships with the app because it holds no text; a private edition is side-loaded from a folder and kept in the reader's browser, because its words are theirs.",
+        "The core package must stay data-free and I/O-free: no fetch, no IndexedDB, no bundle parsing. If a change wants to put text or an address in packages/core, it belongs in the app instead — the scripture gate and the tafsir-provider decision are why.",
+        "The on-disk bundle shape is the export pipeline's (scripts/export_tafseer.py in the books repo); adaptEntry is the one place it is read, so the format can change there without the provider or the panel knowing."
+      ],
+      "gates": [
+        "pnpm --filter @hifth/core test",
+        "pnpm --filter web test",
+        "make ci"
+      ],
+      "seeAlso": [
+        "decisions",
+        "select-an-ayah",
+        "offline-pwa"
+      ]
     }
   ]
 }

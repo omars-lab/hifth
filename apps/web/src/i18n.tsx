@@ -351,6 +351,34 @@ export interface Strings {
   rootsOccurrences(count: number): string;
   rootsUnavailable: string;
   rootsCredit: string;
+
+  /* ---- commentary (tafsir) sheet ------------------------------------------ */
+  commentaryTitle: string;
+  /** aria label for the ✎ trigger. */
+  commentaryTrigger: string;
+  /** "{source} · {licence}" — a note is never anonymous. */
+  commentarySource(label: string, license: string): string;
+  commentaryEmpty: string;
+  /** "Ayah 30" / "Ayahs 30–39" — the span a note attaches to. */
+  commentaryLemma(a: number, z: number): string;
+  /** Badge on an OCR-recovered run; `…Note` is its longer tooltip. */
+  commentaryOcr: string;
+  commentaryOcrNote: string;
+  commentaryRefs: string;
+  commentaryUnavailable: string;
+
+  /* ---- side-loading a commentary edition (Colophon) ----------------------- */
+  tafsirImportTitle: string;
+  tafsirImportBody: string;
+  tafsirImportButton: string;
+  tafsirImportBusy: string;
+  /** "The Study Quran loaded · 114 surahs, 6236 entries". */
+  tafsirImportOk(label: string, surahs: number, entries: number): string;
+  tafsirImportError(reason: string): string;
+  tafsirImportLoaded(label: string): string;
+  tafsirImportRemove: string;
+  tafsirImportUnsupported: string;
+
   /** "نفس الصفحة" / "2 pages later" — page distance the way a hafiz says it. */
   distance(dPage: number): string;
 
@@ -736,6 +764,26 @@ export function buildStrings(lang: Lang, m: Catalog): Strings {
     rootsOccurrences: (count) => m.rootsOccurrences({ count, countText: n(count) }),
     rootsUnavailable: m.rootsUnavailable,
     rootsCredit: m.rootsCredit,
+    commentaryTitle: m.commentaryTitle,
+    commentaryTrigger: m.commentaryTrigger,
+    commentarySource: (label, license) => m.commentarySource({ label, license }),
+    commentaryEmpty: m.commentaryEmpty,
+    commentaryLemma: (a, z) =>
+      m.commentaryLemma({ range: z > a ? "yes" : "other", aText: n(a), zText: n(z) }),
+    commentaryOcr: m.commentaryOcr,
+    commentaryOcrNote: m.commentaryOcrNote,
+    commentaryRefs: m.commentaryRefs,
+    commentaryUnavailable: m.commentaryUnavailable,
+    tafsirImportTitle: m.tafsirImportTitle,
+    tafsirImportBody: m.tafsirImportBody,
+    tafsirImportButton: m.tafsirImportButton,
+    tafsirImportBusy: m.tafsirImportBusy,
+    tafsirImportOk: (label, surahs, entries) =>
+      m.tafsirImportOk({ label, nText: n(surahs), eText: n(entries) }),
+    tafsirImportError: (reason) => m.tafsirImportError({ reason }),
+    tafsirImportLoaded: (label) => m.tafsirImportLoaded({ label }),
+    tafsirImportRemove: m.tafsirImportRemove,
+    tafsirImportUnsupported: m.tafsirImportUnsupported,
     // Three messages, because they are three different jobs: the zero case is a
     // whole sentence, the count agrees with a number, and "before/after" wraps
     // the result. Composing them here is what lets a language put the direction

@@ -3,6 +3,8 @@ import { useT } from "../i18n";
 import { LOCALES } from "../lang";
 import { LOCALE_IDS } from "../messages/locales.gen";
 import { SOURCE_REPO, hasCommit, shortCommit, sourceUrl } from "../provenance";
+import { removeTafsirBundle } from "../tafsir/sideload";
+import { TafsirImport } from "./TafsirImport";
 import styles from "./Colophon.module.css";
 
 interface ColophonProps {
@@ -10,6 +12,12 @@ interface ColophonProps {
   open: boolean;
   /** Dismiss the sheet. */
   onClose: () => void;
+  /** The side-loaded commentary edition already on this device, if any. */
+  tafsirLoaded?: { readonly id: string; readonly label: string } | null;
+  /** A commentary edition was imported (its source id) — re-read the registry. */
+  onTafsirImported?: (sourceId: string) => void;
+  /** A commentary edition was removed (its source id). */
+  onTafsirRemoved?: (sourceId: string) => void;
 }
 
 /** Focusable descendants of `root`, in tab order (excludes disabled + hidden). */
@@ -138,7 +146,13 @@ const CREDITS: readonly Credit[] = [
  * A11y: EditionPicker's contract — modal dialog, focus in, Tab trapped, Escape
  * closes, focus restored to the wordmark.
  */
-export function Colophon({ open, onClose }: ColophonProps): JSX.Element | null {
+export function Colophon({
+  open,
+  onClose,
+  tafsirLoaded,
+  onTafsirImported,
+  onTafsirRemoved,
+}: ColophonProps): JSX.Element | null {
   const { t, dir, lang, setLang } = useT();
   const sheetRef = useRef<HTMLDivElement>(null);
   const restoreRef = useRef<HTMLElement | null>(null);
@@ -242,6 +256,27 @@ export function Colophon({ open, onClose }: ColophonProps): JSX.Element | null {
           </div>
           <p className={styles.note}>{t.langSectionNote}</p>
         </section>
+
+        {/* Side-loading a commentary edition. It lives here, one tap from every
+            screen, for the same reason the language switch does: chosen once and
+            then forgotten. The bytes are the reader's own — a book they bought —
+            so this is the only door they come in through; nothing is fetched or
+            committed. Rendered only when the app wires the callbacks, so a build
+            that has not adopted the seam shows no dead control. */}
+        {onTafsirImported && onTafsirRemoved && (
+          <section className={styles.block} aria-labelledby="colophon-tafsir">
+            <h3 className={styles.subhead} id="colophon-tafsir">
+              {t.tafsirImportTitle}
+            </h3>
+            <p className={styles.body}>{t.tafsirImportBody}</p>
+            <TafsirImport
+              loaded={tafsirLoaded ?? null}
+              onImported={onTafsirImported}
+              onRemoved={onTafsirRemoved}
+              removeBundle={removeTafsirBundle}
+            />
+          </section>
+        )}
 
         <p className={styles.lede}>{t.aboutLede}</p>
         <p className={styles.caveat}>{t.aboutCaveat}</p>

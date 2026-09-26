@@ -129,6 +129,7 @@
       "date": "2026-09-02",
       "related": [
         "tafseer-source",
+        "tafsir-provider",
         "desktop-vs-mobile"
       ]
     },
@@ -158,7 +159,18 @@
       "by": "omar",
       "date": "2026-09-02",
       "related": [
-        "tafseer-reading"
+        "tafseer-reading",
+        "tafsir-provider"
+      ]
+    },
+    {
+      "id": "tafsir-provider",
+      "question": "When a verse shows commentary, how does the app stay free to swap where that commentary comes from — a private book the reader loads in, or a live public service — without the rest of the app knowing which?",
+      "status": "living",
+      "doc": "docs/decisions/tafseer.md#how-a-commentary-source-plugs-in",
+      "related": [
+        "tafseer-reading",
+        "tafseer-source"
       ]
     },
     {
