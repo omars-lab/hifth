@@ -1,1 +1,57 @@
-{}
+{
+  "13": {
+    "edges": [
+      {
+        "type": "mutashabih",
+        "to": "quran/hafs-kfqc/68:15",
+        "page": 564,
+        "dir": {
+          "dSurah": -15,
+          "dPage": -24
+        },
+        "span": {
+          "from": [
+            1,
+            7
+          ]
+        },
+        "toSpan": {
+          "from": [
+            1,
+            7
+          ]
+        },
+        "twin": true
+      }
+    ],
+    "ext": []
+  },
+  "22": {
+    "edges": [
+      {
+        "type": "mutashabih",
+        "to": "quran/hafs-kfqc/82:13",
+        "page": 587,
+        "dir": {
+          "dSurah": -1,
+          "dPage": -1,
+          "sameJuz": true
+        },
+        "span": {
+          "from": [
+            1,
+            4
+          ]
+        },
+        "toSpan": {
+          "from": [
+            1,
+            4
+          ]
+        },
+        "twin": true
+      }
+    ],
+    "ext": []
+  }
+}

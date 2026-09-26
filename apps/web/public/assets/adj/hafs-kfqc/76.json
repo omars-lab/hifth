@@ -97,6 +97,7 @@
             10
           ]
         },
+        "twin": true,
         "ctx": true
       }
     ],

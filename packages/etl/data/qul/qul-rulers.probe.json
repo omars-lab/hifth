@@ -1,11 +1,12 @@
 {
   "$comment": "Do the QUL rulers agree with our shipped numbers? See qul-reliance: QUL is a ruler + outbound link only, and this repo ships none of its bytes. This pin holds AGREEMENT NUMBERS ONLY — verse keys, ids, boundary counts; no Qur'an text — plus the SHA-256 of every file read so a rerun reproduces or says upstream moved. Opt-in probe, never a gate (the cache is gitignored). Regenerate with `make probe-qul` / `--write`.",
-  "measuredAt": "2026-09-03",
+  "measuredAt": "2026-09-04",
   "reads": {
     "packages/etl/data/pages/.cache/qul-layout10/qpc-v2-15-lines.db": "e4df98f35dd3b8927ff096337c8739e0f0b12c8ba622834c345eaa4c3e28dd8c",
     "packages/etl/data/pages/ayah-pages.json": "50afcbaf4600341f1b9ce402af5bbe3c87efb62026d060548182733b3d913fd5",
     "packages/etl/data/meta/.cache/qul-metadata/quran-metadata-juz.json": "0e34f5abbd786c828d388b1f3c732db8b42b1bf36a4f619603e4c632f9e86628",
     "packages/etl/data/mutashabihat/mutashabiha_data.json": "785d5efa266a19c405a449b0a01ebf34fe7dc09836d5b6ef301eae874db780f0",
+    "packages/etl/data/mutashabihat/verbatim-twins.json": "3e7c8401f2db7784981fa699e1ef38ad6650709b7cbb0a9d9af1e247f16b5ed3",
     "packages/etl/data/similar-ayah/.cache/qul74/matching-ayah.json": "ee2aac81622a3522aaf6badbf0454395bac903bd865baf5a0b1839afe38e1fac",
     "packages/etl/data/mutashabihat/.cache/qul73/phrase_verses.json": "10a82f12653fff106994408d89c6a6ca5c31bef4af9fd20fd9327452711fe02c",
     "packages/etl/data/mutashabihat/.cache/qul73/phrases.json": "179e8ae3affdd42db9eb82e0748a6c8d7a9ff9e1e170a6c58a9146c21c0e94c6"
@@ -49,16 +50,16 @@
     "mismatches": []
   },
   "similarity": {
-    "ourEdges": 2516,
+    "ourEdges": 3781,
     "corpus74": {
       "theirPairs": 3552,
-      "oursCorroborated": 70,
-      "oursCorroboratedPct": 2.8,
-      "novelToUs": 2295,
+      "oursCorroborated": 1335,
+      "oursCorroboratedPct": 35.3,
+      "novelToUs": 1663,
       "gap": {
-        "strongMisses": 781,
-        "verbatimMisses": 635,
-        "versesTouched": 384,
+        "strongMisses": 149,
+        "verbatimMisses": 3,
+        "versesTouched": 223,
         "shortNoise": 712,
         "strongestMissing": [
           {
@@ -90,12 +91,6 @@
             "sharedWords": 18,
             "score": 87,
             "coverage": 75
-          },
-          {
-            "pair": "11:110|41:45",
-            "sharedWords": 18,
-            "score": 100,
-            "coverage": 100
           },
           {
             "pair": "2:49|7:141",
@@ -140,12 +135,6 @@
             "coverage": 88
           },
           {
-            "pair": "2:134|2:141",
-            "sharedWords": 15,
-            "score": 100,
-            "coverage": 100
-          },
-          {
             "pair": "3:116|58:17",
             "sharedWords": 15,
             "score": 91,
@@ -162,12 +151,6 @@
             "sharedWords": 15,
             "score": 83,
             "coverage": 83
-          },
-          {
-            "pair": "61:9|9:33",
-            "sharedWords": 14,
-            "score": 100,
-            "coverage": 100
           },
           {
             "pair": "16:43|21:7",
@@ -194,12 +177,6 @@
             "coverage": 72
           },
           {
-            "pair": "21:41|6:10",
-            "sharedWords": 13,
-            "score": 100,
-            "coverage": 100
-          },
-          {
             "pair": "10:17|6:21",
             "sharedWords": 13,
             "score": 90,
@@ -224,33 +201,9 @@
             "coverage": 100
           },
           {
-            "pair": "2:122|2:47",
-            "sharedWords": 11,
-            "score": 100,
-            "coverage": 100
-          },
-          {
-            "pair": "24:5|3:89",
-            "sharedWords": 11,
-            "score": 100,
-            "coverage": 100
-          },
-          {
-            "pair": "36:46|6:4",
-            "sharedWords": 11,
-            "score": 100,
-            "coverage": 100
-          },
-          {
             "pair": "68:7|6:117",
             "sharedWords": 11,
             "score": 92,
-            "coverage": 100
-          },
-          {
-            "pair": "66:9|9:73",
-            "sharedWords": 11,
-            "score": 100,
             "coverage": 100
           },
           {
@@ -258,72 +211,6 @@
             "sharedWords": 11,
             "score": 91,
             "coverage": 92
-          },
-          {
-            "pair": "26:109|26:127",
-            "sharedWords": 11,
-            "score": 100,
-            "coverage": 100
-          },
-          {
-            "pair": "26:109|26:164",
-            "sharedWords": 11,
-            "score": 100,
-            "coverage": 100
-          },
-          {
-            "pair": "26:109|26:145",
-            "sharedWords": 11,
-            "score": 100,
-            "coverage": 100
-          },
-          {
-            "pair": "26:109|26:180",
-            "sharedWords": 11,
-            "score": 100,
-            "coverage": 100
-          },
-          {
-            "pair": "26:127|26:164",
-            "sharedWords": 11,
-            "score": 100,
-            "coverage": 100
-          },
-          {
-            "pair": "26:127|26:145",
-            "sharedWords": 11,
-            "score": 100,
-            "coverage": 100
-          },
-          {
-            "pair": "26:127|26:180",
-            "sharedWords": 11,
-            "score": 100,
-            "coverage": 100
-          },
-          {
-            "pair": "26:145|26:180",
-            "sharedWords": 11,
-            "score": 100,
-            "coverage": 100
-          },
-          {
-            "pair": "26:145|26:164",
-            "sharedWords": 11,
-            "score": 100,
-            "coverage": 100
-          },
-          {
-            "pair": "26:164|26:180",
-            "sharedWords": 11,
-            "score": 100,
-            "coverage": 100
-          },
-          {
-            "pair": "59:1|61:1",
-            "sharedWords": 11,
-            "score": 100,
-            "coverage": 100
           },
           {
             "pair": "57:1|61:1",
@@ -342,12 +229,6 @@
             "sharedWords": 10,
             "score": 89,
             "coverage": 91
-          },
-          {
-            "pair": "23:6|70:30",
-            "sharedWords": 10,
-            "score": 100,
-            "coverage": 100
           },
           {
             "pair": "33:62|48:23",
@@ -374,12 +255,6 @@
             "coverage": 83
           },
           {
-            "pair": "2:162|3:88",
-            "sharedWords": 9,
-            "score": 100,
-            "coverage": 100
-          },
-          {
             "pair": "3:182|8:51",
             "sharedWords": 9,
             "score": 100,
@@ -389,12 +264,6 @@
             "pair": "22:10|3:182",
             "sharedWords": 9,
             "score": 96,
-            "coverage": 100
-          },
-          {
-            "pair": "39:13|6:15",
-            "sharedWords": 9,
-            "score": 100,
             "coverage": 100
           },
           {
@@ -420,14 +289,146 @@
             "sharedWords": 9,
             "score": 81,
             "coverage": 82
+          },
+          {
+            "pair": "16:34|45:33",
+            "sharedWords": 9,
+            "score": 86,
+            "coverage": 82
+          },
+          {
+            "pair": "17:48|25:9",
+            "sharedWords": 9,
+            "score": 100,
+            "coverage": 100
+          },
+          {
+            "pair": "57:1|59:1",
+            "sharedWords": 9,
+            "score": 92,
+            "coverage": 82
+          },
+          {
+            "pair": "84:25|95:6",
+            "sharedWords": 9,
+            "score": 96,
+            "coverage": 100
+          },
+          {
+            "pair": "2:6|36:10",
+            "sharedWords": 8,
+            "score": 86,
+            "coverage": 73
+          },
+          {
+            "pair": "2:95|62:7",
+            "sharedWords": 8,
+            "score": 85,
+            "coverage": 89
+          },
+          {
+            "pair": "3:51|43:64",
+            "sharedWords": 8,
+            "score": 96,
+            "coverage": 89
+          },
+          {
+            "pair": "19:36|3:51",
+            "sharedWords": 8,
+            "score": 95,
+            "coverage": 100
+          },
+          {
+            "pair": "27:69|6:11",
+            "sharedWords": 8,
+            "score": 81,
+            "coverage": 80
+          },
+          {
+            "pair": "23:37|6:29",
+            "sharedWords": 8,
+            "score": 86,
+            "coverage": 89
+          },
+          {
+            "pair": "64:15|8:28",
+            "sharedWords": 8,
+            "score": 88,
+            "coverage": 80
+          },
+          {
+            "pair": "11:39|39:40",
+            "sharedWords": 8,
+            "score": 91,
+            "coverage": 80
+          },
+          {
+            "pair": "15:11|36:30",
+            "sharedWords": 8,
+            "score": 86,
+            "coverage": 73
+          },
+          {
+            "pair": "16:29|40:76",
+            "sharedWords": 8,
+            "score": 90,
+            "coverage": 100
+          },
+          {
+            "pair": "16:29|39:72",
+            "sharedWords": 8,
+            "score": 87,
+            "coverage": 89
+          },
+          {
+            "pair": "18:72|18:75",
+            "sharedWords": 8,
+            "score": 96,
+            "coverage": 89
+          },
+          {
+            "pair": "23:82|56:47",
+            "sharedWords": 8,
+            "score": 87,
+            "coverage": 89
+          },
+          {
+            "pair": "26:139|26:8",
+            "sharedWords": 8,
+            "score": 92,
+            "coverage": 80
+          },
+          {
+            "pair": "26:158|26:8",
+            "sharedWords": 8,
+            "score": 92,
+            "coverage": 80
+          },
+          {
+            "pair": "26:24|44:7",
+            "sharedWords": 8,
+            "score": 96,
+            "coverage": 89
+          },
+          {
+            "pair": "26:139|26:67",
+            "sharedWords": 8,
+            "score": 92,
+            "coverage": 80
+          },
+          {
+            "pair": "26:158|26:67",
+            "sharedWords": 8,
+            "score": 92,
+            "coverage": 80
           }
         ]
       }
     },
     "corpus73": {
       "theirCoPairs": 17862,
-      "ourUndirectedCorroborated": 37,
-      "ourUndirectedPairs": 1493
+      "ourUndirectedCorroborated": 138,
+      "ourUndirectedPairs": 2125
     }
   }
 }

@@ -98,7 +98,8 @@
             1,
             5
           ]
-        }
+        },
+        "twin": true
       },
       {
         "type": "mutashabih",
@@ -192,6 +193,87 @@
             2
           ]
         }
+      }
+    ],
+    "ext": []
+  },
+  "30": {
+    "edges": [
+      {
+        "type": "mutashabih",
+        "to": "quran/hafs-kfqc/23:6",
+        "page": 342,
+        "dir": {
+          "dSurah": -47,
+          "dPage": -227
+        },
+        "span": {
+          "from": [
+            1,
+            10
+          ]
+        },
+        "toSpan": {
+          "from": [
+            1,
+            10
+          ]
+        },
+        "twin": true
+      }
+    ],
+    "ext": []
+  },
+  "31": {
+    "edges": [
+      {
+        "type": "mutashabih",
+        "to": "quran/hafs-kfqc/23:7",
+        "page": 342,
+        "dir": {
+          "dSurah": -47,
+          "dPage": -227
+        },
+        "span": {
+          "from": [
+            1,
+            7
+          ]
+        },
+        "toSpan": {
+          "from": [
+            1,
+            7
+          ]
+        },
+        "twin": true
+      }
+    ],
+    "ext": []
+  },
+  "32": {
+    "edges": [
+      {
+        "type": "mutashabih",
+        "to": "quran/hafs-kfqc/23:8",
+        "page": 342,
+        "dir": {
+          "dSurah": -47,
+          "dPage": -227
+        },
+        "span": {
+          "from": [
+            1,
+            7
+          ]
+        },
+        "toSpan": {
+          "from": [
+            1,
+            7
+          ]
+        },
+        "twin": true
       }
     ],
     "ext": []

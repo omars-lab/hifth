@@ -1,1 +1,58 @@
-{}
+{
+  "3": {
+    "edges": [
+      {
+        "type": "mutashabih",
+        "to": "quran/hafs-kfqc/109:5",
+        "page": 603,
+        "dir": {
+          "dSurah": 0,
+          "dPage": 0,
+          "sameJuz": true
+        },
+        "span": {
+          "from": [
+            1,
+            6
+          ]
+        },
+        "toSpan": {
+          "from": [
+            1,
+            6
+          ]
+        },
+        "twin": true
+      }
+    ],
+    "ext": []
+  },
+  "5": {
+    "edges": [
+      {
+        "type": "mutashabih",
+        "to": "quran/hafs-kfqc/109:3",
+        "page": 603,
+        "dir": {
+          "dSurah": 0,
+          "dPage": 0,
+          "sameJuz": true
+        },
+        "span": {
+          "from": [
+            1,
+            6
+          ]
+        },
+        "toSpan": {
+          "from": [
+            1,
+            6
+          ]
+        },
+        "twin": true
+      }
+    ],
+    "ext": []
+  }
+}

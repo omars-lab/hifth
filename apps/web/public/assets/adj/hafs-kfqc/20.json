@@ -192,6 +192,7 @@
             5
           ]
         },
+        "twin": true,
         "ctx": true
       }
     ],

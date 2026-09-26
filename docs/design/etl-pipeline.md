@@ -4,7 +4,7 @@
 > somewhere — this is the only place the *shape* is. Read it before adding a build script,
 > a gate, or a corpus.
 
-**Status:** design of record for the ETL as a whole — the 14 scripts in
+**Status:** design of record for the ETL as a whole — the fifteen scripts in
 [`packages/etl/scripts/`](../../packages/etl/scripts), the seven vendored sources they read,
 the shards they write into `apps/web/public/assets/**`, and the 23 gates that fence them.
 
@@ -79,6 +79,7 @@ flowchart TB
   words --> ba
   mut --> badj --> adj
   man --> badj
+  morph --> bvt["build-verbatim-twins.mjs"]:::script --> vtwin["verbatim-twins.json<br/>636 twin pairs<br/>numbers only"]:::src --> badj
   man --> br
   morph --> br --> roots
   align --> br
@@ -111,6 +112,21 @@ nothing to read on a clean checkout, and why none of them is a gate. See ④.
 built from — it is a fixture of human verdicts that `gate:verified-edges` replays against
 whatever the ETL just produced. Every other gate is structural and proves the pipeline is
 deterministic; this one is the only one that knows whether the output is *true*.
+
+**`build-verbatim-twins.mjs` builds a shard-feeder, not a shard.** It is the one build step
+that writes into `packages/etl/data/**` rather than `assets/**`: it reads the morphology
+corpus, groups every verse by its rasm skeleton (the same per-word normalisation the edge
+builder compares on), and writes `verbatim-twins.json` — 636 pairs of verse *numbers* and
+nothing else. `build-adjacency.mjs` then reads that intermediate and joins each pair as a
+`twin` look-alike edge, so the existing span pass washes the whole verse. Structurally it is
+the twin of `build-alignment.mjs`, which likewise writes a committed pin that a later writer
+(`build-roots.mjs`) consumes. Two things make it worth its own box. It closed a real gap —
+the app's phrase-built look-alike set had almost none of these whole-verse repeats, the
+hardest verses of all for a memoriser to keep apart — and it closed it **from our own
+vendored bytes**, so ④'s boundary held: the morphology text was read in memory and only verse
+numbers were written. The outside similarity library (`probe-qul-rulers.mjs`) was the ruler
+that *confirmed* the set (636 found against its 635), never the source it was copied from. The
+decision this implements is [`similar-ayah-enrichment.md`](similar-ayah-enrichment.md).
 
 ---
 
@@ -445,6 +461,15 @@ figures from here — 604 pages, 380 MB, 91,451 boxes, 86,965 → 77,429 words, 
 
 **This document is the record. The post is a dated snapshot of it.** That direction is the
 whole of the arrangement, and it is deliberately not enforced by anything.
+
+A second derived post now sits beside it, snapshotting a *different* record: the twins reader
+page ([`verse-twins.html`](verse-twins.html)) is mirrored at
+`bytesofpurpose-blog/designs/2026-09-04-verse-twins.mdx` (drafted 2026-09-04, kind
+`design-story`, not yet published). It carries no crops — it links back to the live reader page
+for those — and repeats the two figures that page cites from the twins pin file (636 pairs, 208
+verses). Same arrangement, same non-enforcement: the reader page is the record, the post is the
+dated snapshot. This section names it because the ledger of derived public posts is this one, and
+one that is not written down here is one nobody knows to keep in step.
 
 Nothing can enforce it. The two repositories share no CI, and neither build may depend on the
 other's checkout or on the network — the same constraint that made four of the ETL's own
