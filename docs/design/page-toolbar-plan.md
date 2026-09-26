@@ -124,6 +124,12 @@ computer, with the letters, Escape, the named active tool and the pointer shapes
 lands on the page, so it is safe, and it shows the idea to the people we pitch it to on the
 first try.
 
+**Built 2026-09-25.** The bar sits in its own row above the book, not floating over it, because
+over the page it covered the first line. Two parts of this step were left for later: the
+setting that turns the letters off, and locking a tool on with a double-click. For now the
+highlighter stays on until you put it down, and the bookmark tool goes back to Select after one
+bookmark.
+
 ### 2. The note tool, like Figma's comment mode
 
 Tap anywhere on the page, and a pin drops at the word under your finger, with a box to type in.

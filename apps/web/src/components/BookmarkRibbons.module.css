@@ -109,6 +109,16 @@
   left: var(--leaf-x, 0px);
 }
 
+/* On an open book the seam lies on the crease itself, centred on it, half on
+   each page. (On one page alone there is no crease, and it stays inside the
+   page's inner edge, as above.) */
+:global([data-bound]) .seam {
+  left: calc(var(--leaf-x, 0px) + var(--leaf-w, 100%) - var(--seam-w) / 2);
+}
+:global([data-bound]) :global([data-free-side="right"]) .seam {
+  left: calc(var(--leaf-x, 0px) - var(--seam-w) / 2);
+}
+
 .ribbons {
   position: absolute;
   /* From the head of the paper, not the top of the field; and pinned to the

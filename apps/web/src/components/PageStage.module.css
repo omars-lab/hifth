@@ -55,14 +55,31 @@
    nearest the gutter, and the two halves read as one garbled line. So the clip
    opens outward and stays shut at the fold and at the head and foot — the page
    still pans up and down inside its own height. */
-.stage[data-bound][data-spills] {
+
+/* Every leaf of an open book is cut by a clip rather than by `overflow`, so the
+   cut can leave a thin allowance over the fold: the red seam lies *on* the
+   crease, half on each page, and the half on the far side belongs to this leaf.
+   The allowance is only the seam's: the paper itself is pinned at the fold
+   (PageStage's `bound`), so nothing else ever reaches into it. A leaf carrying
+   the seam is lifted so its half is drawn over the facing page, not under it. */
+.stage[data-bound] {
   overflow: visible;
+  --fold-allow: 24px;
+}
+.stage[data-bound][data-leaf="right"] {
+  clip-path: inset(0 0 0 calc(-1 * var(--fold-allow)));
+}
+.stage[data-bound][data-leaf="left"] {
+  clip-path: inset(0 calc(-1 * var(--fold-allow)) 0 0);
+}
+.stage[data-bound]:has([data-bookmark-seam]) {
+  z-index: 1;
 }
 .stage[data-bound][data-spills][data-leaf="right"] {
-  clip-path: inset(0 -100vw 0 0);
+  clip-path: inset(0 -100vw 0 calc(-1 * var(--fold-allow)));
 }
 .stage[data-bound][data-spills][data-leaf="left"] {
-  clip-path: inset(0 0 0 -100vw);
+  clip-path: inset(0 calc(-1 * var(--fold-allow)) 0 -100vw);
 }
 
 /* The inset above is the *visible* leaf's, and there is only one stage — so the
@@ -423,4 +440,15 @@
   inset-block-end: var(--space-5);
   color: var(--ink-on-field, var(--ink-soft));
   font-size: var(--text-sm);
+}
+
+/* The page toolbar's pointer shapes (docs/design/page-toolbar-plan.md, step 1).
+   The bar also names the tool that is on, so the shape is never the only
+   place it is said. A drawn highlighter and ribbon, each with a built-in
+   shape behind it for a browser that will not draw a picture as a pointer. */
+.stage[data-tool="highlight"] {
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath d='M14.5 4.5l5 5L10 19H5v-5z' fill='%23fde68a' stroke='%23000' stroke-width='1.5' stroke-linejoin='round'/%3E%3C/svg%3E") 5 19, cell;
+}
+.stage[data-tool="bookmark"] {
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath d='M7 3h10v18l-5-4-5 4z' fill='%23b91c1c' stroke='%23fff' stroke-width='1.5' stroke-linejoin='round'/%3E%3C/svg%3E") 12 3, copy;
 }

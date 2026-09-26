@@ -1850,3 +1850,114 @@ test.describe("every road onto a page lands the leaves level", () => {
     });
   }
 });
+
+/*
+ * The page tools bar, step 1 of docs/design/page-toolbar-plan.md: select,
+ * highlight and bookmark on a bar above the book, with V, H and B, and Escape
+ * to put a tool down. English, so the names read as the plan writes them.
+ */
+test.describe("Hifth · the page tools bar", () => {
+  test.use({ locale: "en-US" });
+
+  const bar = (page: Page): Locator => page.getByRole("toolbar", { name: "Page tools" });
+  const toolBtn = (page: Page, name: string): Locator =>
+    bar(page).getByRole("radio", { name, exact: true });
+
+  test("the letters pick a tool, the bar names it, and Escape puts it down", async ({ page }) => {
+    await page.goto("/#/hafs-kfqc/p8");
+    await expect(pageSvg(page, 8)).toBeVisible();
+    await expect(toolBtn(page, "Select")).toHaveAttribute("aria-checked", "true");
+    await expect(bar(page)).toContainText("Select tool");
+
+    await page.keyboard.press("KeyH");
+    await expect(toolBtn(page, "Highlight")).toHaveAttribute("aria-checked", "true");
+    await expect(bar(page)).toContainText("Highlight tool");
+    // The pointer says it too, on the page itself.
+    const cursor = await page
+      .locator('[data-tool="highlight"][data-page="8"]')
+      .evaluate((el) => getComputedStyle(el).cursor);
+    expect(cursor).toContain("cell");
+
+    await page.keyboard.press("Escape");
+    await expect(toolBtn(page, "Select")).toHaveAttribute("aria-checked", "true");
+
+    // Clicking the tool that is on puts it down, too.
+    await toolBtn(page, "Highlight").click();
+    await toolBtn(page, "Highlight").click();
+    await expect(toolBtn(page, "Select")).toHaveAttribute("aria-checked", "true");
+  });
+
+  test("one stop on the keyboard, and the arrows walk along it", async ({ page }) => {
+    await page.goto("/#/hafs-kfqc/p8");
+    await expect(pageSvg(page, 8)).toBeVisible();
+    await toolBtn(page, "Select").focus();
+    // Only the tool that is on takes a tab stop.
+    await expect(bar(page).locator('[tabindex="0"]')).toHaveCount(1);
+    await page.keyboard.press("ArrowRight");
+    await expect(toolBtn(page, "Highlight")).toBeFocused();
+    await expect(toolBtn(page, "Highlight")).toHaveAttribute("aria-checked", "true");
+    await page.keyboard.press("End");
+    await expect(toolBtn(page, "Bookmark")).toHaveAttribute("aria-checked", "true");
+  });
+
+  test("with the highlighter, a plain drag paints — no hold first", async ({ page }) => {
+    await page.goto("/#/hafs-kfqc/p7");
+    await expect(pageSvg(page, 7)).toBeVisible();
+    const first = await ayahTarget(page, "#verse-46");
+    const second = await ayahTarget(page, "#verse-47");
+
+    await page.keyboard.press("KeyH");
+    await page.mouse.move(first.x, first.y);
+    await page.mouse.down();
+    await page.mouse.move(second.x, second.y, { steps: 10 });
+    await expect(page.locator("#hifth-overlay rect.hl-marquee")).toHaveCount(1);
+    await page.mouse.up();
+    await expect(page.locator("#hifth-overlay .hl-hlt")).not.toHaveCount(0);
+    // It stays on for the next stroke.
+    await expect(toolBtn(page, "Highlight")).toHaveAttribute("aria-checked", "true");
+  });
+
+  test("with the bookmark tool, a tap drops a ribbon there, and the tool goes back", async ({
+    page,
+  }) => {
+    await page.goto("/#/hafs-kfqc/p7");
+    await expect(pageSvg(page, 7)).toBeVisible();
+    await page.keyboard.press("KeyB");
+    await expect(bar(page)).toContainText("Tap a page to drop a bookmark");
+    await tapAyahAt(page, "#verse-46");
+
+    const drawer = page.getByRole("dialog", { name: "Bookmark" });
+    await expect(drawer).toBeVisible();
+    await expect(toolBtn(page, "Select")).toHaveAttribute("aria-checked", "true");
+    await drawer.getByRole("button", { name: "Close" }).click();
+    await expect(page.getByRole("button", { name: /^Bookmark:/ })).toHaveCount(1);
+  });
+});
+
+test.describe("Hifth · the red seam lies on the fold", () => {
+  test.use({ locale: "en-US" });
+
+  test("on an open book the seam is centred on the crease, half on each page", async ({ page }) => {
+    // Drawn inside one leaf, it once sat wholly on that leaf, flush with its
+    // inner edge: a ribbon beside the fold rather than down it.
+    test.slow();
+    await page.goto("/#/hafs-kfqc/p106");
+    const seam = page.getByRole("img", { name: "Where you left off" });
+    await expect(seam).toHaveCount(1, { timeout: 12_000 });
+    const at = await page.evaluate(() => {
+      const s = document.querySelector("[data-bookmark-seam]")!.getBoundingClientRect();
+      const leaves = [...document.querySelectorAll<HTMLElement>("[data-bound][data-page]")].map((e) =>
+        e.getBoundingClientRect(),
+      );
+      return { centre: (s.left + s.right) / 2, width: s.width, leaves: leaves.length, crease: Math.min(...leaves.map((r) => r.right)) };
+    });
+    expect(at.leaves, "not an open book").toBe(2);
+    expect(Math.abs(at.centre - at.crease), "the seam is off the crease").toBeLessThan(1.5);
+    expect(at.width).toBeGreaterThan(4);
+  });
+});
+
+async function tapAyahAt(page: Page, selector: string): Promise<void> {
+  const at = await ayahTarget(page, selector);
+  await page.mouse.click(at.x, at.y);
+}

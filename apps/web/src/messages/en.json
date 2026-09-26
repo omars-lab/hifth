@@ -257,5 +257,11 @@
   "bmSave": "Save to a file",
   "bmLoad": "Load from a file",
   "bmLoaded": "{n, plural, =0{Nothing new in that file} one{{nText} bookmark added from the file} other{{nText} bookmarks added from the file}}",
-  "bmLoadBad": "That is not a bookmark file. Nothing was changed."
+  "bmLoadBad": "That is not a bookmark file. Nothing was changed.",
+  "toolbarLabel": "Page tools",
+  "toolSelect": "Select",
+  "toolHighlight": "Highlight",
+  "toolBookmark": "Bookmark",
+  "toolOn": "{name} tool",
+  "toolBookmarkHint": "Tap a page to drop a bookmark"
 }
