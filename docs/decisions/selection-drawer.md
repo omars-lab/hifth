@@ -6,8 +6,12 @@ knows what a tap is about to do; a slip is marked in one tap; in Read mode a str
 nothing. Done 2026-09-26: the mode bar is in the app's tool bar, and a Verse-mode tap opens one
 drawer of the verse's tools (listen, commentary, same roots, share, bookmark, QUL), each named in a
 word, rising over the bar under the page so it never covers the verse. The other three ways lived
-only on the options page, so the app had nothing of them to delete. Still to do: the word's tools
-open beside the word rather than in the same drawer.
+only on the options page, so the app had nothing of them to delete. Done 2026-09-26 too: a Word-mode
+tap opens the word's parts in the same drawer, on the bottom of the window, each row on one line.
+What building it showed: the word's drawer carries enlarged copies of the word, so it stands taller
+than the verse's and covers the page's last two or three lines on a desktop window — the tapped
+word too when it is on the bottom line, though the drawer shows that word large. Open: whether that
+cost is kept, or the drawer moves to the top of the window when the word is low.
 
 *Asked 2026-09-12. A reader looking at a verse of the print has two different
 reaches in mind at two different moments: sometimes they want to do something with a single word

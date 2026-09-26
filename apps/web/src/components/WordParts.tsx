@@ -63,6 +63,12 @@ interface WordPartsProps {
    * the slip was, the current pick is shown pressed, and the mark can be cleared.
    */
   mode: "note" | "mistake";
+  /**
+   * Stand in the verse drawer's place — on the bottom of the window, over the
+   * bar under the page — rather than beside the word (selection-drawer = D).
+   * The word tool's row does; the slip picker still opens on its word.
+   */
+  docked?: boolean | undefined;
   /** The sign picked so far (mistake mode); null for the whole word. */
   chosen?: number | null | undefined;
   /** A part was picked: a sign's place in its verse's list, or null for the whole word. */
@@ -89,6 +95,11 @@ const PAD = 2.5;
  */
 const COPY_PX = 76;
 const MAX_ZOOM = 3.4;
+/**
+ * Smaller in the drawer, whose rows run on one line each: two rows of the full
+ * size stood half a page tall and covered the lower lines, the tapped word's too.
+ */
+const DOCKED_COPY_PX = 52;
 
 /**
  * The word tool's row of parts: the fuller version of A that the harakah-pick
@@ -109,6 +120,7 @@ export function WordParts({
   pageSize,
   anchor,
   mode,
+  docked = false,
   chosen = null,
   onPick,
   onPickMany,
@@ -139,6 +151,7 @@ export function WordParts({
   // Stand below the word, or above it when there is no room; measured a frame
   // late so the row has its size.
   useEffect(() => {
+    if (docked) return;
     const frame = requestAnimationFrame(() => {
       const box = boxRef.current;
       if (!box) return;
@@ -152,9 +165,9 @@ export function WordParts({
       setAt({ left, top });
     });
     return () => cancelAnimationFrame(frame);
-  }, [data]);
+  }, [data, docked]);
 
-  const placed = at !== null;
+  const placed = docked || at !== null;
   useEffect(() => {
     if (placed) boxRef.current?.querySelector<HTMLButtonElement>("button")?.focus();
   }, [placed]);
@@ -169,7 +182,7 @@ export function WordParts({
   }, []);
 
   const { box, signs, letters } = data;
-  const ZOOM = Math.min(MAX_ZOOM, COPY_PX / (box.height + PAD * 2));
+  const ZOOM = Math.min(MAX_ZOOM, (docked ? DOCKED_COPY_PX : COPY_PX) / (box.height + PAD * 2));
   const x0 = box.x - PAD;
   const y0 = box.y - PAD;
   const cw = (box.width + PAD * 2) * ZOOM;
@@ -189,11 +202,11 @@ export function WordParts({
   return (
     <div
       ref={boxRef}
-      className={styles.box}
+      className={docked ? `${styles.box} ${styles.docked}` : styles.box}
       role="dialog"
       aria-label={heading}
       data-word-parts={mode}
-      style={at ? { left: at.left, top: at.top } : { visibility: "hidden" }}
+      style={docked ? undefined : at ? { left: at.left, top: at.top } : { visibility: "hidden" }}
       onKeyDown={(e) => {
         if (e.key === "Escape") {
           e.preventDefault();
@@ -202,7 +215,14 @@ export function WordParts({
         }
       }}
     >
-      <div className={styles.head}>{heading}</div>
+      <div className={styles.head}>
+        <span>{heading}</span>
+        {docked && (
+          <button type="button" className={styles.close} aria-label={t.close} onClick={onClose}>
+            <span aria-hidden="true">×</span>
+          </button>
+        )}
+      </div>
       {mode === "note" && (
         <div className={styles.hint}>
           {t.wordPartsHint}

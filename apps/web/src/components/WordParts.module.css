@@ -19,8 +19,69 @@
 }
 
 .head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
   color: var(--ink-soft, #57534e);
   font-size: 13px;
+}
+
+/* The word tool's row, in the verse drawer's place and shape (VerseDrawer.module.css):
+   on the bottom of the window, over the bar under the page, rising as it opens. */
+.docked {
+  inset-inline: 0;
+  inset-block-end: 0;
+  margin-inline: auto;
+  inline-size: min(40rem, 100vw);
+  max-inline-size: none;
+  padding-block-start: var(--space-2);
+  max-block-size: 50vh;
+  padding-block-end: calc(var(--space-3) + env(safe-area-inset-bottom));
+  border: none;
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  background: var(--paper-raised, var(--paper));
+  animation: rise var(--dur-fast) ease-out;
+}
+
+/* Each row on one line, scrolled sideways when the word has more parts than fit,
+   so the drawer stays a strip under the page rather than a wall over it. */
+.docked .row {
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  padding-block-end: 2px;
+}
+
+.docked .part {
+  flex: none;
+}
+
+@keyframes rise {
+  from {
+    transform: translateY(100%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .docked {
+    animation: none;
+  }
+}
+
+.close {
+  flex: none;
+  inline-size: 32px;
+  block-size: 32px;
+  border: none;
+  border-radius: var(--radius-pill);
+  background: none;
+  color: var(--ink-soft);
+  font-size: var(--text-md);
+  cursor: pointer;
+}
+
+.close:hover {
+  background: var(--paper-sunk);
 }
 
 .hint {
