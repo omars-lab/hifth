@@ -293,6 +293,8 @@ export interface Catalog {
   readonly toolNote: string;
   readonly toolNoteHint: string;
   readonly toolOn: (d: { readonly name: string | number }) => string;
+  readonly toolRead: string;
+  readonly toolReadHint: string;
   readonly toolSelect: string;
   readonly toolSign: string;
   readonly toolSignHint: string;

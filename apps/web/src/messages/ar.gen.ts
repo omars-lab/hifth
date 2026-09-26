@@ -299,6 +299,8 @@ const messages: Catalog = {
   toolNote: "ملاحظة",
   toolNoteHint: "انقر كلمة لتثبّت عليها ملاحظة",
   toolOn: (d) => "أداة " + d.name,
+  toolRead: "قراءة",
+  toolReadHint: "النقر لا يفتح شيئًا، فلا تفتح لمسة عابرة أي شيء",
   toolSelect: "تحديد",
   toolSign: "حركات",
   toolSignHint: "أشر إلى حركة، وانقر لتكتب عليها ملاحظة",

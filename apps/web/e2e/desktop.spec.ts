@@ -1956,6 +1956,39 @@ test.describe("Hifth · the page tools bar", () => {
     await expect(toolBtn(page, "Select")).toHaveAttribute("aria-checked", "true");
   });
 
+  // selection-drawer = D: a Read mode where a stray tap opens nothing, and the
+  // verse and word modes each wear their own pointer.
+  test("in Read mode a tap selects nothing; Verse and Word each have their own pointer", async ({
+    page,
+  }) => {
+    await page.goto("/#/hafs-kfqc/p7");
+    await expect(pageSvg(page, 7)).toBeVisible();
+    const at = await ayahTarget(page, "#verse-46");
+
+    await page.keyboard.press("KeyR");
+    await expect(toolBtn(page, "Read")).toHaveAttribute("aria-checked", "true");
+    await expect(bar(page)).toContainText("Taps do nothing");
+    // The line under the page must not still invite a tap.
+    await expect(page.getByText("Tap an ayah on the page to select it")).toHaveCount(0);
+    await page.mouse.click(at.x, at.y);
+    await expect(page.locator("#hifth-overlay .hl-sel")).toHaveCount(0);
+
+    // Measured on the verse itself, where the pointer is when a tap lands.
+    const cursorOn = async (tool: string) =>
+      page
+        .locator(`[data-tool="${tool}"][data-page="7"] #verse-46`)
+        .first()
+        .evaluate((el) => getComputedStyle(el).cursor);
+    expect(await cursorOn("read")).toBe("default");
+    await page.keyboard.press("KeyW");
+    expect(await cursorOn("word")).toContain("data:image/svg+xml");
+    // The default tool is the verse tool: its own pointer, and a tap selects the verse.
+    await page.keyboard.press("Escape");
+    expect(await cursorOn("select")).toContain("data:image/svg+xml");
+    await page.mouse.click(at.x, at.y);
+    await expect(page.locator("#hifth-overlay .hl-sel")).not.toHaveCount(0);
+  });
+
   test("one stop on the keyboard, and the arrows walk along it", async ({ page }) => {
     await page.goto("/#/hafs-kfqc/p8");
     await expect(pageSvg(page, 8)).toBeVisible();

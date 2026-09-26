@@ -269,6 +269,8 @@
   "bmLoadBad": "هذا ليس ملف علامات. لم يتغيّر شيء.",
   "toolbarLabel": "أدوات الصفحة",
   "toolSelect": "تحديد",
+  "toolRead": "قراءة",
+  "toolReadHint": "النقر لا يفتح شيئًا، فلا تفتح لمسة عابرة أي شيء",
   "toolHighlight": "تظليل",
   "toolBookmark": "علامة",
   "toolOn": "أداة {name}",
