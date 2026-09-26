@@ -19,6 +19,20 @@ test.describe("Hifth · per-verse recitation (task #67)", () => {
       requested = route.request().url();
       await route.fulfill({ status: 200, contentType: "audio/mpeg", body: "" });
     });
+    // WebKit fetches media outside Playwright's interception, so on the iPhone
+    // project the route above never fires. Record, as well, the address the app
+    // hands its player: the same fact (which file for which verse), read one
+    // step earlier, where every engine can see it.
+    await page.addInitScript(() => {
+      const d = Object.getOwnPropertyDescriptor(HTMLMediaElement.prototype, "src")!;
+      Object.defineProperty(HTMLMediaElement.prototype, "src", {
+        ...d,
+        set(this: HTMLMediaElement, v: string) {
+          (window as unknown as { __audioSrc?: string }).__audioSrc = String(v);
+          d.set!.call(this, v);
+        },
+      });
+    });
 
     await page.goto("/");
     await expect(page.locator("svg[role='group']").first()).toBeVisible();
@@ -34,6 +48,12 @@ test.describe("Hifth · per-verse recitation (task #67)", () => {
     // Tapping it reaches for exactly this verse's file — surah 002, ayah 048,
     // each padded to three digits. This is the whole point of `verseAudioUrl`.
     await play.tap();
-    await expect.poll(() => requested).toContain("/Minshawi/Murattal/mp3/002048.mp3");
+    await expect
+      .poll(
+        async () =>
+          requested ??
+          (await page.evaluate(() => (window as unknown as { __audioSrc?: string }).__audioSrc ?? "")),
+      )
+      .toContain("/Minshawi/Murattal/mp3/002048.mp3");
   });
 });
