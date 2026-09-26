@@ -16,6 +16,11 @@ interface BookmarkRibbonsProps {
   freshId?: string | null;
   /** The red seam — where the reader left off — lies on this page. */
   seam?: boolean;
+  /**
+   * Stand aside and let the pointer through to the page: the harakat and word
+   * tools point at single signs, and the corner sits over the first line's.
+   */
+  aside?: boolean;
 }
 
 /**
@@ -41,6 +46,7 @@ export function BookmarkRibbons({
   onOpen,
   freshId = null,
   seam = false,
+  aside = false,
 }: BookmarkRibbonsProps): JSX.Element {
   const { t } = useT();
   const rootRef = useRef<HTMLDivElement>(null);
@@ -89,7 +95,7 @@ export function BookmarkRibbons({
   };
 
   return (
-    <div ref={rootRef} className={styles.overlay} data-bookmark-overlay="">
+    <div ref={rootRef} className={styles.overlay} data-bookmark-overlay="" data-aside={aside ? "" : undefined}>
       {seam && <span className={styles.seam} role="img" aria-label={t.bmSeam} title={t.bmSeam} data-bookmark-seam="" />}
       <button
         type="button"

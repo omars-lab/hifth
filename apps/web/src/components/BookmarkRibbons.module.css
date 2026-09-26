@@ -186,6 +186,15 @@
   text-overflow: ellipsis;
 }
 
+/* Out of the way while a tool points at single signs (the harakat and word
+   tools): the corner and the ribbons sit over the head of the page's first
+   lines. They stay faintly drawn, so the page still shows it is kept. */
+.overlay[data-aside] .fold,
+.overlay[data-aside] .ribbon {
+  pointer-events: none;
+  opacity: 0.25;
+}
+
 @keyframes unroll {
   from {
     transform: scaleY(0.05);

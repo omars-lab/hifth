@@ -15,14 +15,20 @@ import {
   clampZoom,
   easeInOutCubic,
   foldBetween,
+  formatAyahKey,
   formatWordKey,
   frameBboxToView,
+  isMarkShard,
+  isMistake,
   isViewportIntent,
   isWordShard,
   leafSideOf,
   lerpView,
   marqueeRect,
+  nearestSignOnPage,
   nextIntent,
+  notesOnPage,
+  TAP_SLOP_PX,
   nextWheelTurn,
   retainPages,
   MOUNTED_PAGE_CAP,
@@ -33,7 +39,11 @@ import {
   WordIndex,
   DEFAULT_HOP_ZOOM,
   WHEEL_TURN_REST,
+  type EditionId,
   type Fold,
+  type MarkShard,
+  type Note,
+  type ReachedSign,
   type PointerIntent,
   type Resolver,
   type SkinId,
@@ -42,8 +52,9 @@ import {
   type View,
   type WheelTurnState,
 } from "@hifth/core";
-import { loadPageSvg, loadWordShard } from "../assets";
+import { loadMarkShard, loadPageSvg, loadWordShard, pageUrl } from "../assets";
 import { useT } from "../i18n";
+import type { TurnStyle } from "../turn-style";
 import styles from "./PageStage.module.css";
 
 interface PageStageProps {
@@ -212,6 +223,12 @@ interface PageStageProps {
    */
   foldTarget?: RefObject<HTMLElement | null> | null;
   /**
+   * How a turn looks — the reader's choice in settings (page-turn-curl, decided
+   * 2026-09-26): the flat seam, the skeleton curl or the shadow lift. None of
+   * them moves a drawn word; see `drawnStyle` for which situations each draws.
+   */
+  turnStyle?: TurnStyle;
+  /**
    * This leaf is one side of an open book (two pages showing).
    *
    * A magnified leaf then stays joined to its partner at the fold: it grows
@@ -229,10 +246,155 @@ interface PageStageProps {
    * still arrives through `onSelect`.
    */
   tool?: PageTool;
+  /**
+   * The reader's notes (step 2 of the toolbar plan). Each one on a mounted page
+   * is drawn as a pin at its spot, a button named by `noteLabel`.
+   */
+  notes?: readonly Note[];
+  noteLabel?: (note: Note) => string;
+  /** Under the note tool, a tap on a verse asks for a pin at the word under it. */
+  onPlaceNote?: (at: { page: number; key: string; word: number | null; x: number; y: number }) => void;
+  /** A pin was pressed (click, Enter or Space): open its note. */
+  onOpenNote?: (id: string) => void;
+  /**
+   * Under the mistake tool (step 3), a tap on a word. Whether that marks it or
+   * opens its signs is App's business; the stage only says which word.
+   */
+  onMarkWord?: (at: { page: number; key: string; word: number; x: number; y: number }) => void;
+  /**
+   * Under the harakat tool (harakah-pick = D), a click takes the vowel-sign the
+   * magnifier rings. The stage says which sign; App pins a note on it.
+   */
+  onPickSign?: (at: { page: number; key: string; word: number; mark: number; x: number; y: number }) => void;
+  /**
+   * Under the word tool, a tap on a word opens it into its parts. `rect` is the
+   * word's box on screen, so the row of parts can stand beside it.
+   */
+  onOpenWord?: (at: { page: number; key: string; word: number; rect: WordRect }) => void;
+  /**
+   * Under the crop tool (step 4), a box was dragged over the page: its corner
+   * and size in page units, on the page shown. What becomes of it is App's.
+   */
+  onCrop?: (at: { page: number; x: number; y: number; width: number; height: number }) => void;
+}
+
+/** A word's box on screen, in window pixels. */
+export interface WordRect {
+  readonly left: number;
+  readonly top: number;
+  readonly right: number;
+  readonly bottom: number;
 }
 
 /** The page toolbar's tools. "select" is the app as it has always behaved. */
-export type PageTool = "select" | "highlight" | "bookmark";
+export type PageTool = "select" | "highlight" | "bookmark" | "note" | "sign" | "word" | "mistake" | "crop";
+
+/**
+ * How far, in page units, the harakat tool's magnifier reaches for a sign. A
+ * line of the print is about 27 units tall, so this finds the signs on the line
+ * under the pointer and the one above or below, and nothing across the margin.
+ */
+const SIGN_REACH = 14;
+
+/** What the harakat tool's magnifier shows: the sign it rings, and where the pointer is. */
+interface Loupe {
+  readonly page: number;
+  readonly sign: ReachedSign;
+  readonly clientX: number;
+  readonly clientY: number;
+  /** The page's size in its own units, for drawing the enlarged print. */
+  readonly w: number;
+  readonly h: number;
+}
+
+/** The bare "surah:ayah" a sign shard is keyed by, from any form of a verse's key. */
+function bareAyah(key: string): string {
+  const tail = key.slice(key.lastIndexOf("/") + 1);
+  const hash = tail.indexOf("#");
+  return hash === -1 ? tail : tail.slice(0, hash);
+}
+
+/**
+ * Draw a page's marked mistakes, replacing whatever it had: a quiet red wash on
+ * each marked word, and a ring round the one sign a mistake was narrowed to.
+ * Laid first in the drawing, so the ink sits on top of the wash.
+ */
+function drawMistakes(
+  svg: SVGSVGElement,
+  page: number,
+  notes: readonly Note[],
+  words: WordIndex | null,
+  marks: MarkShard | null,
+): void {
+  svg.querySelector("g[data-mistakes]")?.remove();
+  const mine = notes.filter((n) => isMistake(n) && n.page === page && n.word !== null);
+  if (mine.length === 0 || !words) return;
+  const g = document.createElementNS(SVG_NS, "g");
+  g.setAttribute("data-mistakes", "");
+  g.setAttribute("aria-hidden", "true");
+  for (const n of mine) {
+    const box = words.boxOf(n.key, n.word as number);
+    if (!box) continue;
+    const r = document.createElementNS(SVG_NS, "rect");
+    r.setAttribute("data-mistake-word", n.id);
+    r.setAttribute("x", String(box.x - 0.6));
+    r.setAttribute("y", String(box.y - 0.6));
+    r.setAttribute("width", String(box.width + 1.2));
+    r.setAttribute("height", String(box.height + 1.2));
+    r.setAttribute("rx", "1.5");
+    g.append(r);
+    const sign = n.mark != null ? marks?.marks[bareAyah(n.key)]?.[n.mark] : undefined;
+    if (sign) {
+      const ring = document.createElementNS(SVG_NS, "rect");
+      ring.setAttribute("data-mistake-sign", n.id);
+      ring.setAttribute("x", String(sign.r[0] - 0.8));
+      ring.setAttribute("y", String(sign.r[1] - 0.8));
+      ring.setAttribute("width", String(sign.r[2] + 1.6));
+      ring.setAttribute("height", String(sign.r[3] + 1.6));
+      ring.setAttribute("rx", "1");
+      g.append(ring);
+    }
+  }
+  svg.prepend(g);
+}
+
+const SVG_NS = "http://www.w3.org/2000/svg";
+
+/**
+ * Draw a page's note pins, replacing whatever pins it had. The pin's tip sits on
+ * the spot the reader tapped; its head stands above, in the page's own units, so
+ * it grows and shrinks with the paper like everything else drawn on it.
+ */
+function drawNotePins(
+  svg: SVGSVGElement,
+  page: number,
+  notes: readonly Note[],
+  labelOf: (note: Note) => string,
+): void {
+  svg.querySelector("g[data-note-pins]")?.remove();
+  const mine = notesOnPage(notes, page);
+  if (mine.length === 0) return;
+  const g = document.createElementNS(SVG_NS, "g");
+  g.setAttribute("data-note-pins", "");
+  for (const n of mine) {
+    const pin = document.createElementNS(SVG_NS, "g");
+    pin.setAttribute("data-note-pin", "");
+    pin.setAttribute("data-note-id", n.id);
+    pin.setAttribute("role", "button");
+    pin.setAttribute("tabindex", "0");
+    pin.setAttribute("aria-label", labelOf(n));
+    pin.setAttribute("transform", `translate(${n.x} ${n.y}) scale(1.4)`);
+    const body = document.createElementNS(SVG_NS, "path");
+    body.setAttribute("d", "M0 0C-1.2-3.2-4.4-5.2-4.4-8.6a4.4 4.4 0 0 1 8.8 0C4.4-5.2 1.2-3.2 0 0z");
+    const dot = document.createElementNS(SVG_NS, "circle");
+    dot.setAttribute("cx", "0");
+    dot.setAttribute("cy", "-8.6");
+    dot.setAttribute("r", "1.6");
+    pin.append(body, dot);
+    g.append(pin);
+  }
+  svg.append(g);
+}
 
 /**
  * Which point a button-driven zoom holds still as the paper grows.
@@ -367,6 +529,27 @@ type FoldKind = Exclude<Fold, "none">;
 /** Which way the band travels. Forward is toward the later page. */
 type TurnDir = "forward" | "back";
 
+/** What actually crosses the page on one turn. */
+type Fold3 = { kind: FoldKind; dir: TurnDir; style: TurnStyle };
+
+/**
+ * Which style a turn of this kind draws, given the reader's choice.
+ *
+ * The curl and the lift are both about a leaf turning, so they draw only where
+ * a leaf did turn (`gap`), and the curl also where the print has a leaf this
+ * build lacks (`hole`), which it shows as sunk paper instead of grey lines —
+ * as the decision page drew it. Facing pages (`crease`) never curl or lift in
+ * any style: nothing turned, so every style keeps the seam's crease there.
+ */
+function drawnStyle(kind: FoldKind, chosen: TurnStyle): TurnStyle {
+  if (chosen === "curl" && (kind === "gap" || kind === "hole")) return "curl";
+  if (chosen === "lift" && kind === "gap") return "lift";
+  return "seam";
+}
+
+/** Grey lines standing where words will be on the curling leaf — never a glyph. */
+const SKELETON_LINES = 15; // the Madani page's fifteen lines
+
 const MIN_ZOOM = 0.8;
 const MAX_ZOOM = 5;
 
@@ -451,8 +634,17 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
     tajweedLookup = null,
     overlay,
     foldTarget = null,
+    turnStyle = "seam",
     bound = false,
     tool = "select",
+    notes,
+    noteLabel,
+    onPlaceNote,
+    onOpenNote,
+    onMarkWord,
+    onPickSign,
+    onOpenWord,
+    onCrop,
   },
   ref,
 ): JSX.Element {
@@ -476,6 +668,17 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
    * mount effect is a default, so the request wins regardless of timing.
    */
   const navigatedRef = useRef(false);
+  /**
+   * Which relocation is the latest. A hop and a deep link each wait for their
+   * page to mount before they arrive, and a page that is already mounted
+   * answers at once while one that is not waits for its fetch — so an older
+   * request for an unmounted page could land *after* a newer one and put the
+   * reader back where they had just left. That is what a cold-opened link did
+   * when a hop came in before its page had loaded: the chrome said 7 and the
+   * stage showed 1. Each relocation takes a number on the way in and gives up
+   * after its wait if a newer one has taken the next.
+   */
+  const relocateRef = useRef(0);
   const [status, setStatus] = useState<"loading" | "ready" | "error">("loading");
   /*
    * Which page the error banner is about, when that is not the `page` prop.
@@ -509,6 +712,39 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
   dragToTurnRef.current = dragToTurn;
   const toolRef = useRef(tool);
   toolRef.current = tool;
+  // Read by mountPage after its await, so a page that lands late still gets
+  // its pins, and by the pin listeners it wires.
+  const notesRef = useRef<readonly Note[]>(notes ?? []);
+  notesRef.current = notes ?? [];
+  const noteLabelRef = useRef(noteLabel);
+  noteLabelRef.current = noteLabel;
+  const onPlaceNoteRef = useRef(onPlaceNote);
+  onPlaceNoteRef.current = onPlaceNote;
+  const onOpenNoteRef = useRef(onOpenNote);
+  onOpenNoteRef.current = onOpenNote;
+  /** Set once the word shards can be fetched; mountPage's tap listener calls it. */
+  const placeNoteRef = useRef<(page: number, key: string, x: number, y: number) => void>(() => {});
+  const onMarkWordRef = useRef(onMarkWord);
+  onMarkWordRef.current = onMarkWord;
+  const markWordRef = useRef<(page: number, key: string, x: number, y: number) => void>(() => {});
+  const onPickSignRef = useRef(onPickSign);
+  onPickSignRef.current = onPickSign;
+  const onOpenWordRef = useRef(onOpenWord);
+  onOpenWordRef.current = onOpenWord;
+  const onCropRef = useRef(onCrop);
+  onCropRef.current = onCrop;
+  /** The harakat tool's pointer: ring the nearest sign, or (on a click) take it. Set below, beside the sign data. */
+  const reachSignRef = useRef<(page: number, svg: SVGSVGElement, x: number, y: number, e: PointerEvent, take: boolean) => void>(
+    () => {},
+  );
+  const openWordRef = useRef<(page: number, svg: SVGSVGElement, key: string, x: number, y: number) => void>(() => {});
+  const [loupe, setLoupe] = useState<Loupe | null>(null);
+  // The magnifier belongs to the harakat tool alone.
+  useEffect(() => {
+    if (tool !== "sign") setLoupe(null);
+  }, [tool]);
+  /** Draws a page's mistakes once its word and sign data are in (set below, where those are fetched). */
+  const paintMistakesRef = useRef<(page: number, svg: SVGSVGElement) => void>(() => {});
   const onJuzTurnRef = useRef(onJuzTurn);
   onJuzTurnRef.current = onJuzTurn;
   // The wheel's two accumulators — core owns the rule, this is just where the
@@ -548,8 +784,11 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
    * (§3.4 rule 1). `armedRef` is what stops a re-target restarting the sweep
    * from the screen edge — the band continues from wherever it is.
    */
-  const [fold, setFold] = useState<{ kind: FoldKind; dir: TurnDir } | null>(null);
-  const foldRef = useRef<{ kind: FoldKind; dir: TurnDir } | null>(null);
+  const [fold, setFold] = useState<Fold3 | null>(null);
+  const foldRef = useRef<Fold3 | null>(null);
+  // Read when a turn starts, so a switch in settings takes effect on the next one.
+  const turnStyleRef = useRef(turnStyle);
+  turnStyleRef.current = turnStyle;
   const foldElRef = useRef<HTMLDivElement | null>(null);
   const armedRef = useRef(false);
   const turnRef = useRef(0);
@@ -900,6 +1139,28 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
   }, []);
 
   /**
+   * Fade what crosses the page — the lift's shadow coming up and going, the
+   * curled leaf clearing once the real page is under it. Opacity only: the
+   * element stays where it was put.
+   */
+  const fadeFold = useCallback((el: HTMLElement, opacity: number, ms: number): void => {
+    el.style.transition = ms > 0 ? `opacity ${ms}ms linear` : "none";
+    el.style.opacity = String(opacity);
+  }, []);
+
+  /**
+   * The lift's shadow sits on the edge the turn starts from and never travels:
+   * the left edge for a forward turn (the side a forward band enters from) and
+   * the right for a turn back.
+   */
+  const placeLift = useCallback((el: HTMLElement, dir: TurnDir): void => {
+    const span = el.parentElement?.clientWidth ?? 0;
+    const x = dir === "forward" ? 0 : span - el.offsetWidth;
+    el.style.transition = "none";
+    el.style.transform = `translate3d(${x}px, 0, 0)`;
+  }, []);
+
+  /**
    * Put the band in the DOM at its entry edge — on insert, and only on insert.
    *
    * A ref callback rather than an effect because it runs during commit, before
@@ -920,9 +1181,14 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
       const state = foldRef.current;
       if (!state) return;
       armedRef.current = true;
-      moveFold(el, sweepOf(el, state.dir).enter, 0);
+      if (state.style === "lift") {
+        placeLift(el, state.dir);
+        fadeFold(el, 0, 0);
+      } else {
+        moveFold(el, sweepOf(el, state.dir).enter, 0);
+      }
     },
-    [moveFold, sweepOf],
+    [fadeFold, moveFold, placeLift, sweepOf],
   );
 
   /** Wait for the band to exist and be placed, or give up after a few frames. */
@@ -936,6 +1202,63 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
   }, []);
 
   /** The one-shot mount `ensurePage` de-duplicates. Never call it directly. */
+  /**
+   * The note tool's two listeners on one page. A tap under the note tool asks
+   * for a pin (a tap, not a drag: the same slop the highlighter uses), and a
+   * pin under any tool opens its note. Pins are not verses, so the
+   * highlighter's own tap finds no verse on them and selects nothing.
+   */
+  const wireNotes = useCallback((svg: SVGSVGElement, targetPage: number, hl: Highlighter) => {
+    let press: { x: number; y: number } | null = null;
+    svg.addEventListener("pointerdown", (e) => {
+      press = { x: e.clientX, y: e.clientY };
+    });
+    svg.addEventListener("pointerup", (e) => {
+      const from = press;
+      press = null;
+      const using = toolRef.current;
+      if (using === "select" || using === "highlight" || using === "bookmark" || using === "crop" || !from) return;
+      if (Math.hypot(e.clientX - from.x, e.clientY - from.y) > TAP_SLOP_PX) return;
+      if ((e.target as Element | null)?.closest("[data-note-pin]")) return;
+      const at = hl.svgPointFromClient(e.clientX, e.clientY);
+      if (!at) return;
+      // The harakat tool takes the sign its magnifier rings, whichever verse
+      // it is on, so it does not need the verse under the pointer.
+      if (using === "sign") {
+        reachSignRef.current(targetPage, svg, at.x, at.y, e, true);
+        return;
+      }
+      const key = hl.pressedKey;
+      if (!key) return;
+      if (using === "word") openWordRef.current(targetPage, svg, key, at.x, at.y);
+      else (using === "note" ? placeNoteRef : markWordRef).current(targetPage, key, at.x, at.y);
+    });
+    // The harakat tool's magnifier follows the pointer with no press first:
+    // the tool being on is what says a touch means "take a sign".
+    svg.addEventListener("pointermove", (e) => {
+      if (toolRef.current !== "sign") return;
+      const at = hl.svgPointFromClient(e.clientX, e.clientY);
+      if (at) reachSignRef.current(targetPage, svg, at.x, at.y, e, false);
+    });
+    svg.addEventListener("pointerleave", () => {
+      if (toolRef.current === "sign") setLoupe(null);
+    });
+    const pinOf = (e: Event) => (e.target as Element | null)?.closest("[data-note-pin]")?.getAttribute("data-note-id");
+    svg.addEventListener("click", (e) => {
+      const id = pinOf(e);
+      if (!id) return;
+      e.stopPropagation();
+      onOpenNoteRef.current?.(id);
+    });
+    svg.addEventListener("keydown", (e) => {
+      const id = pinOf(e);
+      if (!id || (e.key !== "Enter" && e.key !== " ")) return;
+      e.preventDefault();
+      e.stopPropagation();
+      onOpenNoteRef.current?.(id);
+    });
+  }, []);
+
   const mountPage = useCallback(
     async (targetPage: number): Promise<MountedPage | null> => {
       const layer = layerRef.current;
@@ -994,9 +1317,15 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
       if (crumb && resolver.resolve(crumb)?.page === targetPage) {
         hl.highlight(crumb, "crumb", "breadcrumb");
       }
+      // Pins, for the same reason as the crumb: the effect that redraws them
+      // runs on a change of notes, not on a page arriving.
+      const svg = svgEl as unknown as SVGSVGElement;
+      drawNotePins(svg, targetPage, notesRef.current, (n) => noteLabelRef.current?.(n) ?? n.key);
+      paintMistakesRef.current(targetPage, svg);
+      wireNotes(svg, targetPage, hl);
       return mp;
     },
-    [resolver],
+    [resolver, wireNotes],
   );
 
   /** Fetch + mount a page's SVG, returning its Highlighter (or null if unvendored). */
@@ -1192,6 +1521,96 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
   }, [setTurnPhase]);
 
   /**
+   * The curl's and the lift's turn, once the element is on the stage.
+   *
+   * Same waits and the same generation check as the seam's, and the same three
+   * endings — landed, stalled then landed, or given back when the page never
+   * arrives. What differs is only what crosses the page:
+   *
+   *  - curl: the leaf comes over curled, carrying grey lines, and lies flat
+   *    over the page. The page is swapped underneath while it covers it, and the
+   *    leaf then clears — the real words settle in once the leaf is flat. While
+   *    the page is still coming the flat leaf simply stays, its lines pulsing.
+   *  - lift: a shadow comes up on the edge the turn starts from, the page
+   *    cross-fades under it, and the shadow goes. Nothing travels.
+   */
+  const runStyledTurn = useCallback(
+    async (
+      el: HTMLDivElement,
+      style: TurnStyle,
+      from: number,
+      next: number,
+      dir: TurnDir,
+      mount: Promise<MountedPage | null>,
+      gen: number,
+      sweepMs: number,
+      fadeMs: number,
+    ): Promise<boolean> => {
+      const mine = (): boolean => turnRef.current === gen;
+      const giveBack = async (): Promise<boolean> => {
+        setTurnPhase("retreating");
+        if (style === "curl") {
+          delete el.dataset.flat;
+          moveFold(el, sweepOf(el, dir).enter, fadeMs);
+        } else fadeFold(el, 0, fadeMs);
+        await sleep(fadeMs);
+        if (mine()) {
+          setErrorPage(next);
+          setStatus("error");
+          abortTurn();
+        }
+        return false;
+      };
+
+      setTurnPhase("crossing");
+      if (style === "curl") {
+        moveFold(el, sweepOf(el, dir).middle, sweepMs);
+        await sleep(sweepMs);
+        if (!mine()) return false;
+        el.dataset.flat = "1";
+        if (!pagesRef.current.has(next)) {
+          setTurnPhase("stalled");
+          const mp = await mount;
+          if (!mine()) return false;
+          if (!mp) return giveBack();
+          setTurnPhase("crossing");
+        }
+        // Covered by the leaf, so the swap needs no fade of its own.
+        const mp = await mount;
+        if (!mine()) return false;
+        if (!mp) return giveBack();
+        land(next);
+        fadeFold(el, 0, fadeMs * 2);
+        await sleep(fadeMs * 2);
+      } else {
+        fadeFold(el, 1, sweepMs / 2);
+        await sleep(sweepMs / 2);
+        if (!mine()) return false;
+        if (!pagesRef.current.has(next)) {
+          setTurnPhase("stalled");
+          const mp = await mount;
+          if (!mine()) return false;
+          if (!mp) return giveBack();
+          setTurnPhase("crossing");
+        }
+        crossFade(from, next, fadeMs);
+        await sleep(fadeMs);
+        if (!mine()) return false;
+        land(next);
+        fadeFold(el, 0, sweepMs / 2);
+        await sleep(sweepMs / 2);
+      }
+      if (!mine()) return true;
+      armedRef.current = false;
+      foldRef.current = null;
+      setFold(null);
+      setTurnPhase(null);
+      return true;
+    },
+    [abortTurn, crossFade, fadeFold, land, moveFold, setTurnPhase, sweepOf],
+  );
+
+  /**
    * The turn itself — insert the band, sweep it, swap under it, land.
    *
    * Written as one linear async function rather than as a reducer because that
@@ -1245,10 +1664,13 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
       const mount = ensurePage(next);
       void mount.catch(() => null);
 
-      foldRef.current = { kind: kind as FoldKind, dir };
+      foldRef.current = { kind: kind as FoldKind, dir, style: drawnStyle(kind as FoldKind, turnStyleRef.current) };
       setFold(foldRef.current);
       const el = await armedFold(gen);
       if (!el || !mine()) return false;
+
+      const style = foldRef.current?.style ?? "seam";
+      if (style !== "seam") return runStyledTurn(el, style, from, next, dir, mount, gen, sweepMs, fadeMs);
 
       const { enter, exit, middle } = sweepOf(el, dir);
       setTurnPhase("crossing");
@@ -1311,6 +1733,7 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
       ensurePage,
       land,
       moveFold,
+      runStyledTurn,
       setTurnPhase,
       sweepOf,
     ],
@@ -1361,7 +1784,7 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
       if (!drawn) return;
 
       setTurnPhase("tracking");
-      foldRef.current = { kind: kind as FoldKind, dir };
+      foldRef.current = { kind: kind as FoldKind, dir, style: drawnStyle(kind as FoldKind, turnStyleRef.current) };
       setFold(foldRef.current);
       // Pre-mount the destination now rather than at release. The reader is
       // holding a picture of a page; by the time they commit, 200-odd ms of
@@ -1384,11 +1807,21 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
       const turn = dragTurnRef.current;
       const el = foldElRef.current;
       if (!turn?.drawn || !el || !armedRef.current || turnRef.current !== turn.gen) return;
-      const { enter, exit } = sweepOf(el, turn.dir);
+      const style = foldRef.current?.style ?? "seam";
+      if (style === "lift") {
+        // The shadow deepens as the hand travels; half the page is all of it.
+        const span = el.parentElement?.clientWidth || 1;
+        fadeFold(el, Math.min(1, Math.abs(dx) / (span / 2)), 0);
+        return;
+      }
+      const sweep = sweepOf(el, turn.dir);
+      // The curled leaf comes as far as lying flat over the page and no further.
+      const { enter } = sweep;
+      const exit = style === "curl" ? sweep.middle : sweep.exit;
       const at = enter + dx;
       moveFold(el, exit > enter ? Math.min(exit, Math.max(enter, at)) : Math.max(exit, Math.min(enter, at)), 0);
     },
-    [moveFold, sweepOf],
+    [fadeFold, moveFold, sweepOf],
   );
 
   /** Slide the band back the way it came and take it off the stage. */
@@ -1399,7 +1832,8 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
       if (el && mine()) {
         const ms = durationMs("--dur-fast", 120);
         setTurnPhase("retreating");
-        moveFold(el, sweepOf(el, dir).enter, ms);
+        if (foldRef.current?.style === "lift") fadeFold(el, 0, ms);
+        else moveFold(el, sweepOf(el, dir).enter, ms);
         await sleep(ms);
       }
       if (!mine()) return;
@@ -1408,7 +1842,7 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
       setFold(null);
       setTurnPhase(null);
     },
-    [durationMs, moveFold, setTurnPhase, sweepOf],
+    [durationMs, fadeFold, moveFold, setTurnPhase, sweepOf],
   );
 
   /**
@@ -1507,7 +1941,9 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
         // A hop is not a turn (§4.5), so any band still crossing belongs to a
         // page relationship the reader has just left behind.
         abortTurn();
+        const ticket = ++relocateRef.current;
         const mp = await ensurePage(loc.page);
+        if (ticket !== relocateRef.current) return; // a newer move has the stage
         // A page that will not mount has to be *said*, not swallowed. Staying
         // silent leaves the previous page on the stage while the chrome and the
         // live region have already committed to the new number — the reader is
@@ -1549,6 +1985,7 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
             clampZoom(opts?.zoom ?? DEFAULT_HOP_ZOOM, MIN_ZOOM, MAX_ZOOM),
           );
           await tweenTo(target);
+          if (ticket !== relocateRef.current) return;
         }
         if (opts?.pulse !== false) {
           mp.hl.highlight(key, "sel", "selection");
@@ -1558,7 +1995,9 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
       },
       async showPage(next) {
         abortTurn(); // a deep link is a relocation, not a turn
+        const ticket = ++relocateRef.current;
         const mp = await ensurePage(next);
+        if (ticket !== relocateRef.current) return; // a newer move has the stage
         if (!mp) {
           setStatus("error"); // same contract as navigateTo above
           return;
@@ -1570,6 +2009,8 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
         arrive(next);
       },
       turnTo(next) {
+        // A turn is a move too: a hop still waiting on its page must not land on top of it.
+        relocateRef.current += 1;
         return runTurn(next);
       },
       beginEdgeTurn(step) {
@@ -1804,6 +2245,102 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
     },
     [],
   );
+
+  // The note tool's tap, now that word shards can be fetched: the word of the
+  // tapped verse nearest the point — the one under it, or its neighbour when the
+  // tap fell in the gap between two. A page with no word shard still takes a pin, on its verse.
+  placeNoteRef.current = (targetPage, key, x, y) => {
+    void ensureWords(resolver.edition, targetPage).then((idx) => {
+      const word = idx?.wordAt(key, x, y) ?? null;
+      onPlaceNoteRef.current?.({ page: targetPage, key, word, x, y });
+    });
+  };
+
+  // The mistake tool's tap: the word under it, or its nearest neighbour. A tap
+  // that finds no word (a page with no word data) marks nothing.
+  markWordRef.current = (targetPage, key, x, y) => {
+    void ensureWords(resolver.edition, targetPage).then((idx) => {
+      const word = idx?.wordAt(key, x, y) ?? null;
+      if (word !== null) onMarkWordRef.current?.({ page: targetPage, key, word, x, y });
+    });
+  };
+
+  /** A page's sign data, fetched at most once, like the word data. */
+  const markShardsRef = useRef(new Map<string, Promise<MarkShard | null>>());
+  const ensureMarks = useCallback((edition: string, page: number): Promise<MarkShard | null> => {
+    const id = `${edition}/${page}`;
+    let got = markShardsRef.current.get(id);
+    if (!got) {
+      got = loadMarkShard(edition, page).then((m) => (m && isMarkShard(m) ? m : null));
+      markShardsRef.current.set(id, got);
+    }
+    return got;
+  }, []);
+
+  // The harakat tool: ring the sign nearest the pointer in the magnifier, and
+  // on a click pin a note on it. Nothing within reach rings nothing.
+  reachSignRef.current = (targetPage, svg, x, y, e, take) => {
+    const edition = resolver.edition;
+    const { clientX, clientY } = e;
+    void ensureMarks(edition, targetPage).then((shard) => {
+      if (toolRef.current !== "sign") return;
+      const sign = shard ? nearestSignOnPage(shard, x, y, SIGN_REACH) : null;
+      const vb = svg.viewBox.baseVal;
+      setLoupe(sign ? { page: targetPage, sign, clientX, clientY, w: vb?.width || 345, h: vb?.height || 550 } : null);
+      if (!take || !sign) return;
+      const [surah, ayah] = sign.ayah.split(":").map(Number) as [number, number];
+      onPickSignRef.current?.({
+        page: targetPage,
+        key: formatAyahKey(edition as EditionId, surah, ayah),
+        word: sign.word,
+        mark: sign.index,
+        x: sign.r[0] + sign.r[2] / 2,
+        y: sign.r[1],
+      });
+    });
+  };
+
+  // The word tool's tap: the word under it, opened into its parts beside its
+  // box on screen.
+  openWordRef.current = (targetPage, svg, key, x, y) => {
+    void ensureWords(resolver.edition, targetPage).then((idx) => {
+      const word = idx?.wordAt(key, x, y) ?? null;
+      const box = word === null ? null : idx?.boxOf(key, word);
+      const m = svg.getScreenCTM();
+      if (word === null || !box || !m) return;
+      const a = new DOMPoint(box.x, box.y).matrixTransform(m);
+      const b = new DOMPoint(box.x + box.width, box.y + box.height).matrixTransform(m);
+      onOpenWordRef.current?.({
+        page: targetPage,
+        key,
+        word,
+        rect: { left: Math.min(a.x, b.x), top: Math.min(a.y, b.y), right: Math.max(a.x, b.x), bottom: Math.max(a.y, b.y) },
+      });
+    });
+  };
+
+  // Mistakes wait for the page's word and sign data; only a page that has any
+  // fetches them. Reads the notes live, so a late answer draws what is current.
+  paintMistakesRef.current = (p, svg) => {
+    const any = notesRef.current.some((n) => isMistake(n) && n.page === p);
+    if (!any) {
+      svg.querySelector("g[data-mistakes]")?.remove();
+      return;
+    }
+    const edition = resolver.edition;
+    void Promise.all([ensureWords(edition, p), ensureMarks(edition, p)]).then(([idx, marks]) =>
+      drawMistakes(svg, p, notesRef.current, idx, marks),
+    );
+  };
+
+  // Redraw the pins and the mistakes on every mounted page when the notes
+  // change; a page that mounts later draws its own in mountPage.
+  useEffect(() => {
+    for (const [p, mp] of pagesRef.current) {
+      drawNotePins(mp.svg, p, notes ?? [], (n) => noteLabelRef.current?.(n) ?? n.key);
+      paintMistakesRef.current(p, mp.svg);
+    }
+  }, [notes, status]);
 
   /**
    * Put the run's cursor on one named word, ink from the anchor to it, and — on
@@ -2309,16 +2846,39 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
   }, []);
 
   /*
-   * The band. One div, no children, `aria-hidden` — everything it says is also
+   * The band. One div — the curl adds its leaf's face — and `aria-hidden`: everything it says is also
    * said by the announcer on landing, by the leaf's own edges at rest and by the
    * page bar's inventory, so there is nothing here for a screen reader to stop
    * on. Rendered into the spread when there is one, so that a turn which leaves
    * an opening sweeps the whole book rather than one of its two panels.
    */
-  const band = fold ? (
-    <div ref={attachFold} className={styles.fold} data-fold={fold.kind} aria-hidden="true" />
-  ) : null;
   const target = foldTarget?.current ?? null;
+  const band = fold ? (
+    <div
+      ref={attachFold}
+      className={styles.fold}
+      data-fold={fold.kind}
+      data-style={fold.style}
+      data-dir={fold.dir}
+      aria-hidden="true"
+    >
+      {/* The curled leaf's face: grey lines where words will be, never a glyph.
+          A missing leaf has no lines to carry — its face is sunk paper. */}
+      {fold.style === "curl" && (
+        // On an open book the whole opening changes, so what comes over is an
+        // opening too: two faces with the crease between them, not one wide sheet.
+        // The faces sit on one leaf, which is what curls, so they tilt as one.
+        <div className={styles.leaf}>
+          {(target ? ["right", "left"] : ["whole"]).map((side) => (
+            <div key={side} className={styles.leafFace} data-side={side}>
+              {fold.kind === "gap" &&
+                Array.from({ length: SKELETON_LINES }, (_, i) => <i key={i} />)}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  ) : null;
 
   return (
     <div
@@ -2356,7 +2916,25 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
           {overlay}
         </div>
       )}
+      {tool === "crop" && (
+        <CropLayer
+          onBox={(a, b) => {
+            const hl = pagesRef.current.get(currentPageRef.current)?.hl;
+            const p = hl?.svgPointFromClient(a.x, a.y);
+            const q = hl?.svgPointFromClient(b.x, b.y);
+            if (!p || !q) return;
+            onCropRef.current?.({
+              page: currentPageRef.current,
+              x: Math.min(p.x, q.x),
+              y: Math.min(p.y, q.y),
+              width: Math.abs(q.x - p.x),
+              height: Math.abs(q.y - p.y),
+            });
+          }}
+        />
+      )}
       {band && (target ? createPortal(band, target) : band)}
+      {loupe && createPortal(<SignLoupe loupe={loupe} src={pageUrl(resolver.edition, loupe.page)} />, document.body)}
       {status === "loading" && <div className={styles.hint}>{t.stageLoading}</div>}
       {status === "error" && (
         /* Names the page it failed on, always — the two ways of getting here
@@ -2372,6 +2950,116 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
     </div>
   );
 });
+
+/** The least a crop box may be, in screen pixels on each side, so a stray tap cuts nothing. */
+const CROP_MIN_PX = 16;
+
+/**
+ * The crop tool's layer: laid over the page while the tool is on, so a drag
+ * draws a box instead of moving the page. It listens natively and stops the
+ * press there, because the page's own pan, zoom and highlight listen natively
+ * on the stage beneath it and would otherwise take the same stroke.
+ */
+function CropLayer({ onBox }: { onBox: (a: { x: number; y: number }, b: { x: number; y: number }) => void }): JSX.Element {
+  const ref = useRef<HTMLDivElement>(null);
+  const [box, setBox] = useState<{ left: number; top: number; width: number; height: number } | null>(null);
+  const onBoxRef = useRef(onBox);
+  onBoxRef.current = onBox;
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    let from: { x: number; y: number; id: number } | null = null;
+    const local = (x: number, y: number) => {
+      const r = el.getBoundingClientRect();
+      return { x: x - r.left, y: y - r.top };
+    };
+    const draw = (e: PointerEvent) => {
+      if (!from) return;
+      const a = local(from.x, from.y);
+      const b = local(e.clientX, e.clientY);
+      setBox({ left: Math.min(a.x, b.x), top: Math.min(a.y, b.y), width: Math.abs(b.x - a.x), height: Math.abs(b.y - a.y) });
+    };
+    const down = (e: PointerEvent) => {
+      e.stopPropagation();
+      if (from) return;
+      from = { x: e.clientX, y: e.clientY, id: e.pointerId };
+      el.setPointerCapture(e.pointerId);
+    };
+    const move = (e: PointerEvent) => {
+      e.stopPropagation();
+      if (from && e.pointerId === from.id) draw(e);
+    };
+    const up = (e: PointerEvent) => {
+      e.stopPropagation();
+      if (!from || e.pointerId !== from.id) return;
+      const start = from;
+      from = null;
+      setBox(null);
+      if (e.type === "pointercancel") return;
+      if (Math.abs(e.clientX - start.x) < CROP_MIN_PX || Math.abs(e.clientY - start.y) < CROP_MIN_PX) return;
+      onBoxRef.current(start, { x: e.clientX, y: e.clientY });
+    };
+    el.addEventListener("pointerdown", down);
+    el.addEventListener("pointermove", move);
+    el.addEventListener("pointerup", up);
+    el.addEventListener("pointercancel", up);
+    return () => {
+      el.removeEventListener("pointerdown", down);
+      el.removeEventListener("pointermove", move);
+      el.removeEventListener("pointerup", up);
+      el.removeEventListener("pointercancel", up);
+    };
+  }, []);
+  return (
+    <div ref={ref} className={styles.cropLayer} data-crop-layer>
+      {box && <div className={styles.cropBox} style={box} data-crop-box />}
+    </div>
+  );
+}
+
+/** The magnifier's size in pixels, and how many pixels one page unit becomes inside it. */
+const LOUPE_PX = 128;
+const LOUPE_ZOOM = 7;
+
+/**
+ * The harakat tool's magnifier: the print around the ringed sign, enlarged,
+ * standing above the pointer so the hand never covers what it shows (B of
+ * harakah-pick, without the press). For the eye only: the tool bar names the
+ * tool, and the note that a click opens says which sign it is on.
+ */
+function SignLoupe({ loupe, src }: { loupe: Loupe; src: string }): JSX.Element {
+  const { sign, w, h } = loupe;
+  const cx = sign.r[0] + sign.r[2] / 2;
+  const cy = sign.r[1] + sign.r[3] / 2;
+  const left = LOUPE_PX / 2 - cx * LOUPE_ZOOM;
+  const top = LOUPE_PX / 2 - cy * LOUPE_ZOOM;
+  const above = loupe.clientY - LOUPE_PX - 28;
+  return (
+    <div
+      className={styles.loupe}
+      aria-hidden="true"
+      data-sign-loupe={`${sign.ayah}/${sign.index}`}
+      style={{
+        left: loupe.clientX - LOUPE_PX / 2,
+        top: above >= 8 ? above : loupe.clientY + 28,
+        width: LOUPE_PX,
+        height: LOUPE_PX,
+      }}
+    >
+      <img src={src} alt="" draggable={false} style={{ left, top, width: w * LOUPE_ZOOM, height: h * LOUPE_ZOOM }} />
+      <span
+        className={styles.loupeRing}
+        style={{
+          left: left + (sign.r[0] - 0.8) * LOUPE_ZOOM,
+          top: top + (sign.r[1] - 0.8) * LOUPE_ZOOM,
+          width: (sign.r[2] + 1.6) * LOUPE_ZOOM,
+          height: (sign.r[3] + 1.6) * LOUPE_ZOOM,
+        }}
+      />
+      <span className={styles.loupeName}>{sign.name}</span>
+    </div>
+  );
+}
 
 /**
  * Restart the pulse animation on the freshly-drawn selection.

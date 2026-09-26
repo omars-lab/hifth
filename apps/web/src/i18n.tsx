@@ -148,6 +148,11 @@ export interface Strings {
   pagebarSectionTitle: string;
   pagebarFisheyeLabel: string;
   pagebarFisheyeNote: string;
+  turnSectionTitle: string;
+  turnStyleSeam: string;
+  turnStyleCurl: string;
+  turnStyleLift: string;
+  turnStyleNote: string;
   /* ---- the tips, started from settings (owner, 2026-09-25) ---------------- */
   tipsSectionTitle: string;
   tipsShow: string;
@@ -468,6 +473,10 @@ export interface Strings {
   mapAbsent: string;
   mapNeverOpened: string;
   mapRecent: string;
+  /** Legend row for the red dot: a division where a mistake was marked. */
+  mapSlips: string;
+  /** A cell's accessible name with its count of marked mistakes added. */
+  mapCellSlips(cell: string, n: number): string;
   /** A cell's accessible name, one per state. */
   mapCellAbsent(label: string): string;
   mapCellNever(label: string): string;
@@ -604,6 +613,58 @@ export interface Strings {
   /** The tool that is on, named: printed on the bar and announced. */
   toolOn(name: string): string;
   toolBookmarkHint: string;
+  toolNote: string;
+  toolNoteHint: string;
+  /** A note's pin, named by its verse. */
+  notePin(label: string): string;
+  /** The box a note is typed in, named by its verse. */
+  noteBox(label: string): string;
+  noteDone: string;
+  noteDelete: string;
+  noteSaved: string;
+  noteDeleted: string;
+  noteRestored: string;
+  noteLoaded(n: number): string;
+  toolMistake: string;
+  toolMistakeHint: string;
+  /** Said when a word is marked, named by its verse. */
+  mistakeMarked(label: string): string;
+  /** The sign picker, named by its verse. */
+  mistakePicker(label: string): string;
+  mistakeWholeWord: string;
+  /** Said when a sign is picked, named by the sign ("fatha"). */
+  mistakeSignPicked(name: string): string;
+  mistakeWordPicked: string;
+  mistakeNoSigns: string;
+  mistakeClear: string;
+  mistakeCleared: string;
+  mistakeRestored: string;
+  toolSign: string;
+  toolSignHint: string;
+  toolWord: string;
+  toolWordHint: string;
+  /** The word tool's row of parts, named by its verse. */
+  wordParts(label: string): string;
+  wordPartsHint: string;
+  /** Added where a keyboard is likely: how to pick several parts. */
+  wordPartsHintMany: string;
+  /** One letter of the word in the word tool, by its place from the right (1 = first). */
+  wordPartsLetter(n: number): string;
+  /** The harakat tool's hint on a phone, where a tap takes the nearest sign. */
+  toolSignHintTouch: string;
+  /** The phone's tools button, naming the tool that is on. */
+  toolCrop: string;
+  toolCropHint: string;
+  cropTitle(page: number): string;
+  cropCaption(page: number): string;
+  cropShare: string;
+  cropSave: string;
+  cropClose: string;
+  cropShared: string;
+  phoneTools(name: string): string;
+  phoneToolsClose: string;
+  /** The button that writes one note on the signs gathered. */
+  wordPartsMany(count: number): string;
 }
 
 /** The reader's own calendar day for a moment, as the `YYYY-MM-DD` `longDay` reads. */
@@ -662,6 +723,11 @@ export function buildStrings(lang: Lang, m: Catalog): Strings {
     pagebarSectionTitle: m.pagebarSectionTitle,
     pagebarFisheyeLabel: m.pagebarFisheyeLabel,
     pagebarFisheyeNote: m.pagebarFisheyeNote,
+    turnSectionTitle: m.turnSectionTitle,
+    turnStyleSeam: m.turnStyleSeam,
+    turnStyleCurl: m.turnStyleCurl,
+    turnStyleLift: m.turnStyleLift,
+    turnStyleNote: m.turnStyleNote,
     tipsSectionTitle: m.tipsSectionTitle,
     tipsShow: m.tipsShow,
     tipsNote: m.tipsNote,
@@ -924,6 +990,8 @@ export function buildStrings(lang: Lang, m: Catalog): Strings {
     mapAbsent: m.mapAbsent,
     mapNeverOpened: m.mapNeverOpened,
     mapRecent: m.mapRecent,
+    mapSlips: m.mapSlips,
+    mapCellSlips: (cell, count) => m.mapCellSlips({ cell, n: count, nText: n(count) }),
     mapCellAbsent: (label) => m.mapCellAbsent({ label }),
     mapCellNever: (label) => m.mapCellNever({ label }),
     // Not a plural: "today" and "yesterday" are not categories any CLDR rule
@@ -1024,6 +1092,47 @@ export function buildStrings(lang: Lang, m: Catalog): Strings {
     toolBookmark: m.toolBookmark,
     toolOn: (name) => m.toolOn({ name }),
     toolBookmarkHint: m.toolBookmarkHint,
+    toolNote: m.toolNote,
+    toolNoteHint: m.toolNoteHint,
+    notePin: (label) => m.notePin({ label }),
+    noteBox: (label) => m.noteBox({ label }),
+    noteDone: m.noteDone,
+    noteDelete: m.noteDelete,
+    noteSaved: m.noteSaved,
+    noteDeleted: m.noteDeleted,
+    noteRestored: m.noteRestored,
+    noteLoaded: (count) => m.noteLoaded({ n: count, nText: n(count) }),
+    toolMistake: m.toolMistake,
+    toolMistakeHint: m.toolMistakeHint,
+    mistakeMarked: (label) => m.mistakeMarked({ label }),
+    mistakePicker: (label) => m.mistakePicker({ label }),
+    mistakeWholeWord: m.mistakeWholeWord,
+    mistakeSignPicked: (name) => m.mistakeSignPicked({ name }),
+    mistakeWordPicked: m.mistakeWordPicked,
+    mistakeNoSigns: m.mistakeNoSigns,
+    mistakeClear: m.mistakeClear,
+    mistakeCleared: m.mistakeCleared,
+    mistakeRestored: m.mistakeRestored,
+    toolSign: m.toolSign,
+    toolSignHint: m.toolSignHint,
+    toolWord: m.toolWord,
+    toolWordHint: m.toolWordHint,
+    wordParts: (label) => m.wordParts({ label }),
+    wordPartsHint: m.wordPartsHint,
+    wordPartsHintMany: m.wordPartsHintMany,
+    wordPartsLetter: (count) => m.wordPartsLetter({ nText: n(count) }),
+    toolSignHintTouch: m.toolSignHintTouch,
+    toolCrop: m.toolCrop,
+    toolCropHint: m.toolCropHint,
+    cropTitle: (page) => m.cropTitle({ page }),
+    cropCaption: (page) => m.cropCaption({ page }),
+    cropShare: m.cropShare,
+    cropSave: m.cropSave,
+    cropClose: m.cropClose,
+    cropShared: m.cropShared,
+    phoneTools: (name) => m.phoneTools({ name }),
+    phoneToolsClose: m.phoneToolsClose,
+    wordPartsMany: (count) => m.wordPartsMany({ n: count, nText: n(count) }),
   };
 }
 

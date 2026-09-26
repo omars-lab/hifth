@@ -1,11 +1,39 @@
 # How does a reader pick the exact part of a word to note — one vowel-sign, several at once, or the word itself?
 
-*Status: open, asked 2026-09-09. This is the gesture the mistake-note decision left
-undrawn. That decision settled **that** a reader can pin a note to a spot finer than a word
-once the finer geometry ships; it did not settle **how** the reader reaches out and takes
-that spot when the spot is smaller than the fingertip covering it. Three ways are built live
-on the page below, each one a real hand on the real print — you pick by doing them, not by
-reading about them.*
+*Status: decided 26 September 2026 by the owner: **D**, which none of the three drawn ways was
+on its own. The magnifier from B becomes its own tool, and the fuller version of A becomes a
+second tool. C is dropped. The page below keeps all three running as they were tried.*
+
+## So what was decided?
+
+**D: two tools on the tool bar, each doing one job.**
+
+- **A sign tool** ("harakat"). With it on, the magnifier from B follows the pointer over the
+  page with no press and hold first, and rings the vowel-sign nearest the pointer. A click takes
+  that sign and opens a note on it. The press was only ever there to tell a pick apart from the
+  page's other gestures; once a tool is on, a plain touch already means "pick", so the press is
+  dropped.
+- **A word tool.** Tap a word and it opens into its parts, the fuller version of A: a row of
+  copies of the word, one for each part, with that part inked and the rest faint. A note can be
+  dropped on any part: one sign, several, a letter, or the whole word with or without its marks.
+
+The owner's reason, in their words: the magnifier "should be a feature ... but without a press
+... its own harakat tool", and "a separate word selection tool that breaks down a word in the
+fuller version of option A ... and lets us drop notes on any part of the word". Trying the
+three showed they were not rivals: B is quickest when you can see the sign you mean, and A's
+fuller row is the only one that reaches more than one sign or a letter. So each gets its own
+tool instead of one winning.
+
+What follows for the build: the mistake tool's second tap opens the word tool's row rather
+than the plain tray, the tray and the named row (C) leave the app, and the letters of every
+word need their own shapes, which today exist for one verse only. Until they do, the word tool
+opens each word into its signs and the whole word, and the letters come with the shapes.
+Where those shapes come from was its own question, settled 2026-09-26: cut from the print
+itself, checked by eye ([letter-parts](letter-parts.md)).
+
+*Before that, updated 2026-09-25: the three ways were made three interchangeable pieces of code
+behind one shared shape (`packages/core/src/decision-options/harakah-pick.ts`, `OptionA` to
+`OptionC`), and the page runs that very code.*
 
 **The picture:** <https://blog.bytesofpurpose.com/hifth/docs/design/harakah-pick-options.html> —
 `harakah-pick-options.html`, checked in and rebuilt by `scripts/build-harakah-pick-options.mjs`
@@ -54,7 +82,15 @@ reach the sign, not the word around it.
 ## What does the app do today, and what does that cost?
 
 Press and hold, and the selection drops to the word under the finger and does not turn the
-page. That is the finest a reader can point today: a word. On this verse a word carries three
+page. That is the finest a reader can point today with the selection: a word.
+
+Since 2026-09-25 the tool bar also has a **mistake tool** (key M, step 3 of
+`docs/design/page-toolbar-plan.md`): tap a word and it is marked in a quiet red; tap the marked
+word again and a picker opens to say which sign the slip was on. That picker is way **A** below
+— the tray — because nothing reached finer than a word before, so there was no "today" to keep,
+and A is the one that starts from the same word-tap the tool already uses. It is mounted behind
+the same shared shape as B and C, so whichever way the owner chooses replaces it without the
+tool changing. Before that picker existed: On this verse a word carries three
 to five vowel-signs, so "the word" is three to five different things a reader might have meant
 and cannot separate. The cost is exactly that ambiguity — a hafiz who always slips on one
 vowel of one word can record the word, not the slip.
@@ -93,8 +129,15 @@ per-mark ink positions already measured.
 Each is built live on the page and tried by hand, on verse 2:38 at the size it would really be
 used. None aims at the tiny target directly.
 
-- **A · Word, then part — the precision picker.** Tap the word — a big, familiar target — and
-  it opens into a row of copies: **one copy of the whole word for each letter and each mark**.
+- **A · Word, then sign.** Tap the word — a big, familiar target — and its signs lift into a
+  tray beneath it, each one a finger-sized window on the print, enlarged, with its name under
+  it, in the order you read them. Tap the one you mean, or "the whole word". This is what the
+  app's mistake tool shows today, as the stand-in. It works on every page, because it needs
+  only the word boxes and sign positions the app already ships. Gets a calm second choice where
+  every target is finger-sized and you still see the ink you are choosing; costs a second tap.
+
+  **Its fuller version — the precision picker**, kept behind a switch under A on the page. Tap
+  the word and it opens into a row of copies: **one copy of the whole word for each letter and each mark**.
   In a copy, the one part it is for is drawn in solid ink and every other part in invisible ink,
   so you still read which word it is but only that one part is there to take. **Point at the copy
   for the part you mean** and take it; take **several at once**, or the whole word **with** its
@@ -104,7 +147,8 @@ used. None aims at the tiny target directly.
   the ya. Takes the word boxes the app already ships plus the shaped outlines of the verse. Gets
   a calm second choice with nothing to aim at small, and the one gesture here that reaches *more*
   than a single sign — a run of marks, or the whole word. Costs a row you scroll along rather
-  than one motion, and is the tallest thing to draw on the page.
+  than one motion, is the tallest thing to draw on the page, and today exists for this one verse
+  only: the font shapes it draws from are made verse by verse, and no other verse has them yet.
 - **B · Press &amp; loupe.** Press anywhere near the sign; a magnifier lifts above the fingertip,
   shows the ink enlarged, and snaps a box onto the nearest sign; slide to correct, release to
   take it. Takes the per-mark positions and a magnifier. Gets a single continuous gesture that

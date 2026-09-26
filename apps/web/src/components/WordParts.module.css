@@ -1,0 +1,159 @@
+/* WordParts — the row a word opens into under the word tool (and under the
+   mistake tool's second tap): the whole word, then one copy of it per
+   vowel-sign with that sign in full ink and the rest faint. */
+
+.box {
+  position: fixed;
+  z-index: var(--z-sheet);
+  max-inline-size: min(36rem, calc(100vw - 24px));
+  max-block-size: calc(100vh - 24px);
+  overflow: auto;
+  padding: var(--space-3);
+  border-radius: 10px;
+  background: var(--paper, #fffdf8);
+  color: var(--ink, #1c1917);
+  box-shadow: var(--shadow-2);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  font-family: var(--font-chrome);
+  font-size: 14px;
+}
+
+.head {
+  color: var(--ink-soft, #57534e);
+  font-size: 13px;
+}
+
+.hint {
+  margin-block-start: 2px;
+  color: var(--ink-faint, #78716c);
+  font-size: 12px;
+}
+
+.none {
+  margin: var(--space-2) 0 0;
+  color: var(--ink-soft, #57534e);
+}
+
+/* Right to left, like the word: the first sign read is the first copy after the whole word. */
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  direction: rtl;
+  gap: var(--space-2);
+  margin-block-start: var(--space-2);
+}
+
+.part {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 4px;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  border-radius: 8px;
+  background: var(--paper-raised, var(--paper));
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.part:hover {
+  border-color: var(--accent);
+}
+
+.part[aria-pressed="true"] {
+  border-color: var(--danger);
+  box-shadow: inset 0 0 0 1px var(--danger);
+}
+
+.part:focus-visible,
+.many {
+  min-block-size: var(--touch-min);
+  padding: 0 var(--space-3);
+  border: none;
+  border-radius: 8px;
+  background: var(--accent);
+  color: var(--paper);
+  font: inherit;
+  cursor: pointer;
+}
+
+.many:focus-visible,
+.clear:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* One copy of the word: the page drawn large behind a window the word's size. */
+.copy {
+  position: relative;
+  display: block;
+  overflow: hidden;
+  border-radius: 4px;
+  background: #fff;
+}
+
+.copy img {
+  position: absolute;
+  max-inline-size: none;
+  pointer-events: none;
+}
+
+/* The rest of the word, faint, so the copy still reads as the word. */
+.faint {
+  position: absolute;
+  inset: 0;
+  opacity: 0.22;
+}
+
+/* The one sign, in full ink: the same print, seen through the sign's own window. */
+.solid {
+  position: absolute;
+  overflow: hidden;
+}
+
+/* One letter, in full ink: the same print, clipped to where the letter's joins were cut. */
+.letter {
+  position: absolute;
+  inset: 0;
+}
+
+.ring {
+  position: absolute;
+  border: 1.5px solid var(--accent);
+  border-radius: 4px;
+}
+
+.part[aria-pressed="true"] .ring {
+  border-color: var(--danger);
+}
+
+.name {
+  direction: ltr;
+  font-size: 12px;
+  color: var(--ink-soft, #57534e);
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-start;
+  margin-block-start: var(--space-2);
+}
+
+.clear {
+  min-block-size: var(--touch-min);
+  padding: 0 var(--space-3);
+  border: none;
+  border-radius: 8px;
+  background: none;
+  color: var(--danger);
+  font: inherit;
+  cursor: pointer;
+}
+
+/* Shift and Cmd are keyboard keys: a touch screen is not told about them. */
+@media (any-hover: none) {
+  .hintMany {
+    display: none;
+  }
+}

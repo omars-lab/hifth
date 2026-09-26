@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Page tools on a phone</title>
+<style>
+  :root{
+    --paper:#f4efe6; --paper-raised:#fbf8f2; --paper-sunk:#ece4d6;
+    --ink:#26201a; --ink-soft:#5c5347; --ink-faint:#6b6255;
+    --accent:#1f6f66; --accent-strong:#17544d; --accent-tint:#d7e7e3;
+    --radius-md:10px; --radius-lg:16px;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --paper:#1c1915; --paper-raised:#25211c; --paper-sunk:#332d26;
+      --ink:#efe8dc; --ink-soft:#c9bfb0; --ink-faint:#a89e8f;
+      --accent:#5fb3a8; --accent-strong:#8fd0c6; --accent-tint:#23403c;
+    }
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--paper);color:var(--ink);
+    font:16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;}
+  main{max-width:78rem;margin:0 auto;padding:2rem 1rem 5rem;}
+  h1{font-size:1.9rem;line-height:1.2;margin:.2rem 0 .4rem;}
+  h2{font-size:1.28rem;margin:2.4rem 0 .5rem;}
+  p,li{max-width:40rem;} .lead{font-size:1.12rem;color:var(--ink-soft);}
+  a{color:var(--accent-strong);}
+  .glossary{background:var(--paper-raised);border:1px solid var(--paper-sunk);
+    border-radius:var(--radius-md);padding:.8rem 1rem;margin:1.2rem 0;font-size:.95rem;max-width:40rem;}
+  .glossary dt{font-weight:650;} .glossary dd{margin:0 0 .5rem;color:var(--ink-soft);}
+  .phones{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,21rem),1fr));gap:1.4rem;margin:1.4rem 0;}
+  .opt{display:flex;flex-direction:column;background:var(--paper-raised);border:1px solid var(--paper-sunk);border-radius:var(--radius-lg);padding:1rem;}
+  .opt h3{margin:0 0 .2rem;font-size:1.05rem;}
+  .opt .gist{flex:1;margin:0 0 .8rem;color:var(--ink-soft);font-size:.95rem;}
+  .opt.rec{border-color:var(--accent);}
+  .rec-tag{display:inline-block;font-size:.75rem;font-weight:650;color:var(--accent-strong);
+    background:var(--accent-tint);border-radius:999px;padding:.05rem .55rem;margin-left:.4rem;}
+  .frame{width:100%;max-width:390px;aspect-ratio:390/844;margin:0 auto;border:8px solid var(--ink);
+    border-radius:28px;overflow:hidden;background:var(--paper);position:relative;}
+  .frame iframe{position:absolute;inset:0;width:100%;height:100%;border:0;}
+  .frame .away{position:absolute;inset:0;display:grid;place-items:center;padding:1rem;text-align:center;
+    color:var(--ink-soft);font-size:.9rem;}
+  .open{display:block;text-align:center;font-size:.85rem;margin:.5rem 0 0;}
+  table{border-collapse:collapse;width:100%;font-size:.93rem;margin:1rem 0;}
+  th,td{border:1px solid var(--paper-sunk);padding:.5rem .6rem;vertical-align:top;text-align:left;}
+  th{background:var(--paper-raised);}
+  td ul{margin:0;padding-left:1.1rem;}
+  .scroll{overflow-x:auto;}
+</style>
+</head>
+<body>
+<main>
+<h1>Where should the page tools sit on a phone?</h1>
+<p class="lead">On a computer, the tools for noting the page — bookmark, note, mistake, vowel-sign, word — sit in a
+bar of their own above the page. A phone has no mouse, no keyboard and little room, so that bar does not fit.
+Three ways of fitting it are built below, each in a real copy of the app. Hold each one and try a tool on the page;
+the owner chose C this way.</p>
+
+<dl class="glossary">
+  <dt>Mus'haf</dt><dd>the printed Qur'an, shown here one page at a time.</dd>
+  <dt>Vowel-sign</dt><dd>the small mark above or below a letter that says how to sound it.</dd>
+  <dt>The bottom row</dt><dd>the strip under the page that holds the page bar and the bookmarks.</dd>
+  <dt>Below the fold</dt><dd>off the bottom of the screen, so the reader has to scroll to see it.</dd>
+</dl>
+
+<h2>What should you try in each?</h2>
+<p>Pick the Word tool, then tap a word on the page: it opens into its parts. Pick Mistake and tap a word: it is marked.
+Then go back to plain reading. Notice how far your thumb went, whether the page's last line stayed in view, and
+whether you could tell which tool was on.</p>
+
+<div class="phones">
+  <section class="opt">
+    <h3>A · A strip under the top bar</h3>
+    <p class="gist">Always there. One tap to any tool.</p>
+    <div class="frame"><div class="away" data-away>This copy of the app loads on the app's own site. From a clone, run the app and open it with <b>?phonebar=a</b> in the address.</div><iframe data-bar="a" title="A · A strip under the top bar" loading="lazy" hidden></iframe></div>
+    <a class="open" data-open="a" hidden>Open it full screen</a>
+  </section>
+  <section class="opt">
+    <h3>B · A pen case in the bottom row</h3>
+    <p class="gist">One button that shows the tool that is on; a tap fans the tools out, with their names.</p>
+    <div class="frame"><div class="away" data-away>This copy of the app loads on the app's own site. From a clone, run the app and open it with <b>?phonebar=b</b> in the address.</div><iframe data-bar="b" title="B · A pen case in the bottom row" loading="lazy" hidden></iframe></div>
+    <a class="open" data-open="b" hidden>Open it full screen</a>
+  </section>
+  <section class="opt rec">
+    <h3>C · A tray that slides up from the bottom row<span class="rec-tag">chosen</span></h3>
+    <p class="gist">A Tools button by the thumb; the tray stays up, with a line saying what the tool on does, until it is closed.</p>
+    <div class="frame"><div class="away" data-away>This copy of the app loads on the app's own site. From a clone, run the app and open it with <b>?phonebar=c</b> in the address.</div><iframe data-bar="c" title="C · A tray that slides up from the bottom row" loading="lazy" hidden></iframe></div>
+    <a class="open" data-open="c" hidden>Open it full screen</a>
+  </section>
+</div>
+
+<h2>What does each one cost, and what does it lead to?</h2>
+<div class="scroll"><table>
+  <tr><th></th><th>What it buys</th><th>What it costs</th><th>What it commits us to</th></tr>
+  <tr><th>A · A strip under the top bar</th><td><ul><li>One tap switches tools, and every tool is always in sight.</li><li>Nothing to open or close, so nothing to learn.</li></ul></td><td><ul><li>It takes a row of the screen for good: on a phone the page's last lines drop below the fold.</li><li>It sits at the top, the hardest place for a thumb to reach one-handed.</li></ul></td><td>The page shrinks by a row on every phone, whether or not the reader ever uses a tool.</td></tr>
+  <tr><th>B · A pen case in the bottom row</th><td><ul><li>Costs no room: the page is as big as it is today.</li><li>The button's picture says which tool is on, and the fan names every tool.</li></ul></td><td><ul><li>Two taps to switch tools, every time.</li><li>The fan covers part of the page while it is open.</li></ul></td><td>The one button has to carry the whole state of the tools; a reader who forgets a tool is on sees only its small picture.</td></tr>
+  <tr><th>C · A tray that slides up from the bottom row</th><td><ul><li>Costs no room while closed, and sits where the thumb already is.</li><li>While open, switching is one tap, and the line under the tools says what a tap on the page will do.</li><li>Closing it puts the page back to plain reading, so a tool is never left on by accident.</li></ul></td><td><ul><li>While open it covers the bottom row: the page bar and the bookmarks are out of reach until it closes.</li><li>Two taps to the first tool.</li></ul></td><td>Tool use becomes a mode the reader steps into and out of; the bottom row is where that mode lives.</td></tr>
+</table></div>
+<p><b>Chosen: C</b>, by the owner on 26 September 2026. It is the only one that keeps the whole page in view while reading and still leaves the
+tools by the thumb with a line saying what a tap will do; the bottom row it hides is not needed while noting.</p>
+
+<h2>What happens to A and B?</h2>
+<p>They stay here, still tryable, so the reason C was a choice can still be felt. The app shows C; the other two open
+only from this page.</p>
+
+<h2>Where are the reasons?</h2>
+<p>In <a href="../decisions/phone-toolbar.md">the decision record</a>, with what the app did before, what else was
+looked at, and what would change the answer.</p>
+</main>
+<script>
+  // On the site the app sits two folders above this page. From a file:// clone there is none.
+  (function () {
+    if (location.protocol === "file:") return;
+    var app = new URL("../../", location.href);
+    document.querySelectorAll("iframe[data-bar]").forEach(function (f) {
+      var id = f.getAttribute("data-bar");
+      var src = app.href + "?phonebar=" + id + "#/hafs-kfqc/p7";
+      f.src = src;
+      f.hidden = false;
+      f.previousElementSibling.hidden = true;
+      var open = document.querySelector('[data-open="' + id + '"]');
+      open.href = src;
+      open.hidden = false;
+    });
+  })();
+</script>
+</body>
+</html>

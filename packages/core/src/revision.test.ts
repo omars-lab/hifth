@@ -7,6 +7,7 @@ import {
   lastSeen,
   rollUp,
   scopesOf,
+  slipsIn,
   type RevisionEvent,
 } from "./revision.js";
 
@@ -252,5 +253,30 @@ describe("comparableEvents", () => {
     const day = lastSeen(comparableEvents([theirs], "page", EDITION), "page");
     expect(day.get(7)).toBeUndefined();
     expect(lastSeen([theirs], "page").get(7)).toBe("2026-03-09");
+  });
+});
+
+describe("slipsIn", () => {
+  it("counts only marked slips, and counts each one where it fell", () => {
+    const events = [
+      look(),
+      look({ slip: true }),
+      look({ slip: true }),
+      look({ key: key(2, 142), page: 22, slip: true }),
+    ];
+    const byPage = slipsIn(events, "page");
+    expect(byPage.get(7)).toBe(2);
+    expect(byPage.get(22)).toBe(1);
+    expect(byPage.size).toBe(2);
+    // 2:48 is in juz 1, 2:142 opens juz 2.
+    expect([...slipsIn(events, "juz")]).toEqual([
+      [1, 2],
+      [2, 1],
+    ]);
+  });
+
+  it("still lets a slip warm its division like any look", () => {
+    const only = look({ slip: true });
+    expect(lastSeen([only], "page").get(7)).toBe("2026-03-09");
   });
 });

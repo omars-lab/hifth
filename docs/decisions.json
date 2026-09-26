@@ -355,7 +355,8 @@
       "related": [
         "juz-detents",
         "boundary-juz",
-        "page-bar-numberline"
+        "page-bar-numberline",
+        "phone-toolbar"
       ],
       "decided": "A",
       "by": "omar",
@@ -642,7 +643,8 @@
         "tafseer-reading",
         "page-turn-curl",
         "page-bar-numberline",
-        "page-bar-phone-scrub"
+        "page-bar-phone-scrub",
+        "phone-toolbar"
       ]
     },
     {
@@ -1227,7 +1229,7 @@
     {
       "id": "page-turn-curl",
       "question": "When you turn a page, should the leaf curl the way a paper book does?",
-      "status": "open",
+      "status": "decided",
       "options": [
         {
           "id": "A",
@@ -1244,8 +1246,15 @@
         {
           "id": "D",
           "label": "Shadow lift: a shadow lifts off the edge, no surface moves, the page swaps"
+        },
+        {
+          "id": "ABD",
+          "label": "Keep A, B and D, and let the reader pick one in settings; flat seam stays the default; C is left out"
         }
       ],
+      "decided": "ABD",
+      "by": "omar",
+      "date": "2026-09-26",
       "artifact": "https://blog.bytesofpurpose.com/hifth/docs/design/page-turn-curl-options.html",
       "page": "docs/design/page-turn-curl-options.html",
       "builtBy": "scripts/build-page-turn-curl-options.mjs",
@@ -1312,7 +1321,7 @@
     {
       "id": "harakah-pick",
       "question": "How does a reader pick the exact part of a word to note — one vowel-sign, several at once, or the word itself?",
-      "status": "open",
+      "status": "decided",
       "options": [
         {
           "id": "A",
@@ -1325,21 +1334,57 @@
         {
           "id": "C",
           "label": "Tap the word, then tap the sign by its name"
+        },
+        {
+          "id": "D",
+          "label": "Two tools: a sign tool whose magnifier follows the pointer, and a word tool that opens the word into its parts"
         }
       ],
       "artifact": "https://blog.bytesofpurpose.com/hifth/docs/design/harakah-pick-options.html",
       "page": "docs/design/harakah-pick-options.html",
       "builtBy": "scripts/build-harakah-pick-options.mjs",
-      "doc": "docs/decisions/harakah-pick.md",
-      "decided": null,
-      "by": null,
-      "date": null,
+      "doc": "docs/decisions/harakah-pick.md#so-what-was-decided",
+      "decided": "D",
+      "by": "omar",
+      "date": "2026-09-26",
       "related": [
         "mistake-note-anchor",
         "mark-granularity",
         "mark-placement",
         "selection-drawer",
-        "diff-mark-tint"
+        "diff-mark-tint",
+        "phone-toolbar",
+        "letter-parts"
+      ]
+    },
+    {
+      "id": "letter-parts",
+      "question": "How should the word tool show a word's letters, when the print draws each word as one piece?",
+      "status": "decided",
+      "options": [
+        {
+          "id": "A",
+          "label": "Cut the print where one letter joins the next, checked by eye"
+        },
+        {
+          "id": "B",
+          "label": "Shape every word in a typeface and use its letters"
+        },
+        {
+          "id": "C",
+          "label": "Name the letters, with no picture"
+        },
+        {
+          "id": "D",
+          "label": "Leave letters out for now"
+        }
+      ],
+      "doc": "docs/decisions/letter-parts.md",
+      "decided": "A",
+      "by": "omar",
+      "date": "2026-09-26",
+      "related": [
+        "harakah-pick"
       ]
     },
     {
@@ -1371,7 +1416,8 @@
         "harakah-pick",
         "mistake-note-anchor",
         "word-selection",
-        "ayah-drawer"
+        "ayah-drawer",
+        "phone-toolbar"
       ]
     },
     {
@@ -1422,6 +1468,38 @@
       "decided": "on-request",
       "by": "omar",
       "date": "2026-09-25"
+    },
+    {
+      "id": "phone-toolbar",
+      "question": "Where should the page tools sit on a phone, and how does a reader switch between them?",
+      "status": "decided",
+      "options": [
+        {
+          "id": "A",
+          "label": "A strip under the top bar, always there"
+        },
+        {
+          "id": "B",
+          "label": "One button in the bottom row that fans the tools out"
+        },
+        {
+          "id": "C",
+          "label": "A Tools button in the bottom row that slides a tray up"
+        }
+      ],
+      "artifact": "https://blog.bytesofpurpose.com/hifth/docs/design/phone-toolbar-options.html",
+      "page": "docs/design/phone-toolbar-options.html",
+      "builtBy": "scripts/build-phone-toolbar-options.mjs",
+      "doc": "docs/decisions/phone-toolbar.md",
+      "decided": "C",
+      "by": "omar",
+      "date": "2026-09-26",
+      "related": [
+        "harakah-pick",
+        "selection-drawer",
+        "desktop-vs-mobile",
+        "graduation-losers"
+      ]
     }
   ]
 }

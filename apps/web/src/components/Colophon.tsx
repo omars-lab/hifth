@@ -3,6 +3,7 @@ import { useT } from "../i18n";
 import { LOCALES } from "../lang";
 import { LOCALE_IDS } from "../messages/locales.gen";
 import { SOURCE_REPO, hasCommit, shortCommit, sourceUrl } from "../provenance";
+import { TURN_STYLES, type TurnStyle } from "../turn-style";
 import styles from "./Colophon.module.css";
 
 interface ColophonProps {
@@ -14,6 +15,9 @@ interface ColophonProps {
   fisheye: boolean;
   /** Flip the spread on or off; the choice is remembered on this device. */
   onToggleFisheye: () => void;
+  /** How a page turn looks — the reader's pick of three; remembered on this device. */
+  turnStyle?: TurnStyle;
+  onTurnStyle?: (style: TurnStyle) => void;
   /** Open the three tips strip. It no longer opens by itself (owner, 2026-09-25). */
   onShowTips?: () => void;
 }
@@ -155,6 +159,8 @@ export function Colophon({
   onClose,
   fisheye,
   onToggleFisheye,
+  turnStyle,
+  onTurnStyle,
   onShowTips,
 }: ColophonProps): JSX.Element | null {
   const { t, dir, lang, setLang } = useT();
@@ -283,6 +289,33 @@ export function Colophon({
           </button>
           <p className={styles.note}>{t.pagebarFisheyeNote}</p>
         </section>
+
+        {/* How a turn looks (page-turn-curl, decided 2026-09-26: all three kept,
+            the reader picks). Three states, so a radio group like the language
+            one, each button naming the style it offers. */}
+        {turnStyle && onTurnStyle && (
+          <section className={styles.block} aria-labelledby="colophon-turn">
+            <h3 className={styles.subhead} id="colophon-turn">
+              {t.turnSectionTitle}
+            </h3>
+            <div className={styles.langRow} role="radiogroup" aria-labelledby="colophon-turn">
+              {TURN_STYLES.map((style) => (
+                <button
+                  key={style}
+                  type="button"
+                  role="radio"
+                  className={styles.lang}
+                  aria-checked={turnStyle === style}
+                  data-turn-style={style}
+                  onClick={() => onTurnStyle(style)}
+                >
+                  {style === "seam" ? t.turnStyleSeam : style === "curl" ? t.turnStyleCurl : t.turnStyleLift}
+                </button>
+              ))}
+            </div>
+            <p className={styles.note}>{t.turnStyleNote}</p>
+          </section>
+        )}
 
         {/* The tips used to open on a device's first visit, above the page. The
             owner asked on 2026-09-25 that they wait to be asked for, so this is

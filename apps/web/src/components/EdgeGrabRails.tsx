@@ -56,7 +56,18 @@ const GRAB_SLOP_PX = 4;
  * the grab region inward at top and bottom and pinches it to a sliver at the
  * midline, so the middle of the fore-edge stays the page's.
  */
-export function EdgeGrabRails({ driver }: { driver?: EdgeTurnDriver }): JSX.Element | null {
+export function EdgeGrabRails({
+  driver,
+  aside = false,
+}: {
+  driver?: EdgeTurnDriver;
+  /**
+   * Stand aside and let the pointer through to the page: the harakat and word
+   * tools point at single signs, and the first word of every line sits under
+   * the strip's corners. The arrows and keys still turn the page meanwhile.
+   */
+  aside?: boolean;
+}): JSX.Element | null {
   // Which side, if any, is being held right now — only to swap the cursor to a
   // closed hand. The drag's numbers live in the ref beside it.
   const [held, setHeld] = useState<"left" | "right" | null>(null);
@@ -71,6 +82,7 @@ export function EdgeGrabRails({ driver }: { driver?: EdgeTurnDriver }): JSX.Elem
       data-side={side}
       data-testid={`edge-grab-${side}`}
       data-grabbing={held === side ? "true" : undefined}
+      data-aside={aside ? "true" : undefined}
       aria-hidden="true"
       onPointerDown={(e) => {
         // Left button only, and take the pointer so the whole drag arrives here

@@ -375,6 +375,126 @@
   border-right: 1px dashed var(--hairline);
 }
 
+/* The skeleton curl (turn style B, decided 2026-09-26). The element is a whole
+   leaf, not a band: it comes over the page curled, lies flat, and clears once
+   the real page is under it. Its face carries grey lines where words will be,
+   never a glyph — the drawn words do not move in any turn style. These rules
+   come after the three above so the leaf's own width and paper win. */
+.fold[data-style="curl"] {
+  width: 100%;
+  background: none;
+  border: 0;
+  perspective: 1400px;
+}
+
+.leafFace {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-evenly;
+  padding: 6% 7%;
+  background: var(--paper-raised, var(--paper));
+}
+
+.leaf {
+  position: absolute;
+  inset: 0;
+  box-shadow: 0 0 18px rgb(38 32 26 / 0.18);
+  transition: transform var(--dur-med) var(--ease-hop);
+}
+
+/* The shade lies over both faces, so it is drawn on top of them. */
+.leaf::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.leafFace[data-side="right"] {
+  left: 50%;
+  box-shadow: inset 12px 0 14px -10px var(--gutter-shadow-deep, rgb(38 32 26 / 0.25));
+}
+
+.leafFace[data-side="left"] {
+  right: 50%;
+  box-shadow: inset -12px 0 14px -10px var(--gutter-shadow-deep, rgb(38 32 26 / 0.25));
+}
+
+/* Curled while it travels: hinged on its trailing edge, so the leading edge
+   lifts; and shaded toward that edge, where a real leaf rolls. */
+.fold[data-dir="forward"] .leaf {
+  transform-origin: left center;
+  transform: rotateY(-24deg);
+}
+
+.fold[data-dir="forward"] .leaf::after {
+  background: linear-gradient(to left, rgb(38 32 26 / 0.16), transparent 30%);
+}
+
+.fold[data-dir="back"] .leaf {
+  transform-origin: right center;
+  transform: rotateY(24deg);
+}
+
+.fold[data-dir="back"] .leaf::after {
+  background: linear-gradient(to right, rgb(38 32 26 / 0.16), transparent 30%);
+}
+
+.fold[data-flat] .leaf {
+  transform: none;
+}
+
+.fold[data-flat] .leaf::after {
+  background: none;
+}
+
+.leafFace i {
+  display: block;
+  height: 0.9%;
+  border-radius: 2px;
+  background: var(--hairline);
+  opacity: 0.85;
+}
+
+.leafFace i:nth-child(3n) { width: 78%; }
+.leafFace i:nth-child(3n + 1) { width: 94%; }
+.leafFace i:nth-child(3n + 2) { width: 86%; }
+.leafFace i:nth-child(7n) { width: 62%; }
+
+/* Still coming: the flat leaf waits, its lines pulsing, rather than landing on nothing. */
+.fold[data-flat] .leafFace i {
+  animation: skeletonWait 1.1s ease-in-out infinite;
+}
+
+@keyframes skeletonWait {
+  0%, 100% { opacity: 0.55; }
+  50% { opacity: 0.95; }
+}
+
+/* A missing leaf curls over as sunk paper behind dashed edges — the app's word
+   for "not here" — instead of lines that promise words. */
+.fold[data-style="curl"][data-fold="hole"] .leafFace {
+  background: var(--paper-sunk);
+  border-inline: 1px dashed var(--hairline);
+}
+
+/* The shadow lift (turn style D). A soft shadow on the edge the turn starts
+   from; it never travels, only comes up and goes. */
+.fold[data-style="lift"] {
+  width: 46%;
+  opacity: 0;
+}
+
+.fold[data-style="lift"][data-dir="forward"] {
+  background: radial-gradient(120% 90% at 0% 50%, rgb(38 32 26 / 0.42), transparent 64%);
+}
+
+.fold[data-style="lift"][data-dir="back"] {
+  background: radial-gradient(120% 90% at 100% 50%, rgb(38 32 26 / 0.42), transparent 64%);
+}
+
 /* The only text in the app that ever sits on the field, which is why it reads
    `--ink-on-field` rather than a fixed ink: a field that changes the desk under
    this sentence has to change the sentence too. The fallback keeps it correct
@@ -382,6 +502,23 @@
 /* The frame the bookmark overlay sits in: the stage's box, outside the pan/zoom
    transform. PageStage writes the current leaf's box onto it as --leaf-x/-y/-w
    and its zoom as --leaf-z. */
+/* The crop tool's layer: over the page and its pins, under nothing the reader
+   needs while cutting. The box is drawn in the accent, dashed, like a marquee. */
+.cropLayer {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  cursor: crosshair;
+  touch-action: none;
+}
+
+.cropBox {
+  position: absolute;
+  border: 2px dashed var(--accent);
+  background: color-mix(in srgb, var(--accent) 10%, transparent);
+  pointer-events: none;
+}
+
 .overlayFrame {
   position: absolute;
   inset: 0;
@@ -451,4 +588,106 @@
 }
 .stage[data-tool="bookmark"] {
   cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath d='M7 3h10v18l-5-4-5 4z' fill='%23b91c1c' stroke='%23fff' stroke-width='1.5' stroke-linejoin='round'/%3E%3C/svg%3E") 12 3, copy;
+}
+
+/* The note tool (step 2): a drawn pin as the pointer, over the verses too,
+   since a verse is exactly where a note is dropped. */
+.stage[data-tool="note"],
+.stage[data-tool="note"] .host :global(svg) :global(.ayahPolygon),
+.stage[data-tool="note"] .host :global(svg) :global([id^="verse-"]) {
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath d='M12 22s-6.5-6-6.5-11.5a6.5 6.5 0 0 1 13 0C18.5 16 12 22 12 22z' fill='%231f6f66' stroke='%23fff' stroke-width='1.5' stroke-linejoin='round'/%3E%3Ccircle cx='12' cy='10.5' r='2.2' fill='%23fff'/%3E%3C/svg%3E") 12 22, crosshair;
+}
+
+/* A note's pin on the page. Its shapes must take the pointer, against the rule
+   above that glyphs never do: a pin is a button, not ink. */
+.host :global(svg) :global([data-note-pin]) {
+  cursor: pointer;
+  outline: none;
+}
+.host :global(svg) :global([data-note-pin]) :global(path),
+.host :global(svg) :global([data-note-pin]) :global(circle) {
+  pointer-events: auto;
+}
+.host :global(svg) :global([data-note-pin]) :global(path) {
+  fill: var(--accent);
+  stroke: #fff;
+  stroke-width: 0.8;
+}
+.host :global(svg) :global([data-note-pin]) :global(circle) {
+  fill: #fff;
+}
+.host :global(svg) :global([data-note-pin]:focus-visible) :global(path) {
+  stroke: var(--focus-ring, #111);
+  stroke-width: 1.4;
+}
+
+/* The mistake tool (step 3): a pencil-tick pointer in the --danger red (a data
+   URI cannot read a token, so the hex is the token's). */
+.stage[data-tool="mistake"],
+.stage[data-tool="mistake"] .host :global(svg) :global(.ayahPolygon),
+.stage[data-tool="mistake"] .host :global(svg) :global([id^="verse-"]) {
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath d='M14.5 4.5l5 5L10 19H5v-5z' fill='%23a23b2c' stroke='%23fff' stroke-width='1.5' stroke-linejoin='round'/%3E%3C/svg%3E") 5 19, crosshair;
+}
+
+/* A word marked as a slip: a quiet red wash under the ink, like Tarteel's. It
+   never takes the pointer, so a tap on it still reaches the verse beneath —
+   which is how a second tap finds the word to open its signs. */
+.host :global(svg) :global([data-mistakes]) {
+  pointer-events: none;
+}
+.host :global(svg) :global([data-mistake-word]) {
+  fill: var(--danger);
+  fill-opacity: 0.16;
+}
+/* Narrowed to one sign: a ring round that sign, in the same red. */
+.host :global(svg) :global([data-mistake-sign]) {
+  fill: none;
+  stroke: var(--danger);
+  stroke-width: 0.7;
+}
+
+/* The harakat tool (harakah-pick = D): a fine crosshair, since the magnifier
+   above it shows what it is on; and the word tool: the pointing hand, since a
+   tap there opens the word. Over the verses too, as for the note tool. */
+.stage[data-tool="sign"],
+.stage[data-tool="sign"] .host :global(svg) :global(.ayahPolygon),
+.stage[data-tool="sign"] .host :global(svg) :global([id^="verse-"]) {
+  cursor: crosshair;
+}
+.stage[data-tool="word"],
+.stage[data-tool="word"] .host :global(svg) :global(.ayahPolygon),
+.stage[data-tool="word"] .host :global(svg) :global([id^="verse-"]) {
+  cursor: pointer;
+}
+
+/* The harakat tool's magnifier: a round window on the print above the
+   pointer, the sign it would take ringed in the app's green. It never takes
+   the pointer, so the page under it keeps its moves and clicks. */
+.loupe {
+  position: fixed;
+  z-index: 60;
+  overflow: hidden;
+  border-radius: 50%;
+  background: var(--paper, #fff);
+  border: 2px solid var(--accent);
+  box-shadow: 0 6px 18px rgb(0 0 0 / 0.22);
+  pointer-events: none;
+}
+.loupe img {
+  position: absolute;
+  max-width: none;
+}
+.loupeRing {
+  position: absolute;
+  border: 2px solid var(--accent);
+  border-radius: 4px;
+}
+.loupeName {
+  position: absolute;
+  inset-inline: 0;
+  bottom: 10px;
+  text-align: center;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--accent-strong);
 }
