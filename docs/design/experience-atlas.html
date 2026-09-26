@@ -1,0 +1,372 @@
+<title>Hifth Experience Atlas</title>
+<style>
+:root {
+  /* The same tokens docs/design/decision-board.html uses — this page sits
+     beside it and a different palette would read as a different project's
+     document about the same project. */
+  --ground: #f4efe6;
+  --raised: #fbf8f2;
+  --sunk: #ece4d6;
+  --ink: #26201a;
+  --soft: #5c5347;
+  --faint: #6b6255;
+  --rule: #ded4c3;
+  --rule-soft: #eae1d2;
+  --accent: #1f6f66;
+  --accent-ink: #17544d;
+  --accent-soft: #d7e7e3;
+  --terra: #a23b2c;
+  --terra-soft: #f3ded8;
+  --serif: "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", "Hoefler Text", Georgia, serif;
+  --mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace;
+  --measure: 37rem;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --ground: #17140f;
+    --raised: #201c16;
+    --sunk: #100e0a;
+    --ink: #ece3d3;
+    --soft: #b4a893;
+    --faint: #918675;
+    --rule: #352f26;
+    --rule-soft: #262019;
+    --accent: #5fb0a3;
+    --accent-ink: #7cc4b8;
+    --accent-soft: #1c3a35;
+    --terra: #d9826c;
+    --terra-soft: #3a201a;
+  }
+}
+:root[data-theme="dark"] {
+  --ground: #17140f;
+  --raised: #201c16;
+  --sunk: #100e0a;
+  --ink: #ece3d3;
+  --soft: #b4a893;
+  --faint: #918675;
+  --rule: #352f26;
+  --rule-soft: #262019;
+  --accent: #5fb0a3;
+  --accent-ink: #7cc4b8;
+  --accent-soft: #1c3a35;
+  --terra: #d9826c;
+  --terra-soft: #3a201a;
+}
+
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--ground);
+  color: var(--ink);
+  font-family: var(--serif);
+  font-size: 17px;
+  line-height: 1.62;
+  -webkit-text-size-adjust: 100%;
+}
+.wrap { max-width: 74rem; margin: 0 auto; padding: 0 clamp(1.25rem, 4vw, 3rem) 6rem; }
+.col { max-width: var(--measure); }
+p { margin: 0 0 1.05em; text-wrap: pretty; }
+a { color: var(--accent-ink); text-underline-offset: 2px; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 2px; }
+
+header { padding: clamp(3rem, 8vw, 5.5rem) 0 0; }
+.eyebrow {
+  font-family: var(--mono); font-size: 12px; letter-spacing: 0.13em;
+  text-transform: uppercase; color: var(--faint); margin: 0 0 1.1rem;
+}
+h1 {
+  font-size: clamp(2rem, 4.6vw, 3.05rem); line-height: 1.1; margin: 0 0 1.1rem;
+  font-weight: 600; letter-spacing: -0.012em; text-wrap: balance; max-width: 26ch;
+}
+.stand { font-size: 1.16rem; color: var(--soft); max-width: var(--measure); }
+
+.tally { display: flex; flex-wrap: wrap; gap: 0 2.6rem; margin: 2.2rem 0 0; padding: 0; list-style: none; }
+.tally li { display: flex; flex-direction: column; }
+.tally .fig {
+  font-family: var(--mono); font-size: 1.9rem; line-height: 1.1;
+  font-variant-numeric: tabular-nums; letter-spacing: -0.02em;
+}
+.tally .open .fig { color: var(--terra); }
+.tally .lab { font-size: 0.86rem; color: var(--faint); }
+
+section { margin: 4.4rem 0 0; }
+h2 {
+  font-size: clamp(1.4rem, 2.6vw, 1.85rem); line-height: 1.2; margin: 0 0 0.7rem;
+  font-weight: 600; letter-spacing: -0.008em; text-wrap: balance;
+}
+h2 .n {
+  display: block; font-family: var(--mono); font-size: 12px; letter-spacing: 0.13em;
+  text-transform: uppercase; color: var(--faint); margin-bottom: 0.5rem; font-weight: 400;
+}
+
+.deck { display: grid; gap: 1.1rem; margin-top: 2rem; }
+.deck-tight { grid-template-columns: repeat(auto-fill, minmax(19rem, 1fr)); align-items: start; }
+.card {
+  background: var(--raised); border: 1px solid var(--rule); border-radius: 4px;
+  padding: 1.25rem 1.4rem 1.35rem;
+}
+.card h3 {
+  font-size: 1.1rem; line-height: 1.34; margin: 0 0 0.55rem;
+  font-weight: 600; text-wrap: pretty;
+}
+.card p { font-size: 0.97rem; color: var(--soft); margin: 0; }
+.card-top {
+  display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between;
+  gap: 0.5rem 1rem; margin-bottom: 0.7rem;
+}
+.pill {
+  display: inline-block; padding: 0.16rem 0.62rem; border-radius: 999px;
+  border: 1px solid var(--rule); font-family: var(--mono); font-size: 11.5px;
+  letter-spacing: 0.04em; color: var(--soft); background: var(--sunk);
+}
+.pill-open { border-color: var(--terra); background: var(--terra-soft); color: var(--terra); }
+.pill-living { border-color: var(--accent); background: var(--accent-soft); color: var(--accent-ink); }
+.weight {
+  font-family: var(--mono); font-size: 11.5px; color: var(--faint);
+  font-variant-numeric: tabular-nums;
+}
+.links { margin: 0.8rem 0 0; font-size: 0.92rem; }
+.links .sep { color: var(--rule); margin: 0 0.5rem; }
+.go { font-weight: 600; }
+.orphan-note {
+  font-size: 0.9rem; color: var(--soft); margin: 0.8rem 0 0;
+  padding: 0.6rem 0.8rem; border-radius: 3px; background: var(--terra-soft);
+}
+.pub-loose { border-color: var(--terra); }
+
+.instrument {
+  background: var(--raised); border: 1px solid var(--rule); border-radius: 4px;
+  padding: 1.6rem 1.7rem 1.7rem; max-width: var(--measure);
+}
+.instrument p:last-child { margin-bottom: 0; }
+
+.note {
+  margin-top: 4.6rem; padding-top: 1.5rem; border-top: 1px solid var(--rule);
+  font-size: 0.9rem; color: var(--faint); max-width: 46rem;
+}
+@media (max-width: 34rem) {
+  .card-top { flex-direction: column; }
+}
+</style>
+
+<div class="wrap">
+<header>
+  <p class="eyebrow">Hifth · the experience atlas</p>
+  <h1>Where does this project's work actually live, and how do you get to it?</h1>
+  <p class="stand">Hifth is one running app and a shelf of pages built to argue about how it
+  should look and behave. Nothing before this page said where all of that lives in one place —
+  a reader handed a single link had to already know that the app itself, the pages arguing over
+  its details, and the pages that got published and forgotten were three different things kept
+  in three different registers. This page is the front door to all three, plus the fourth: the
+  way this project checks that any of the above is actually right.</p>
+
+  <ul class="tally">
+    <li><span class="fig">12</span><span class="lab">things the app does</span></li>
+    <li><span class="fig">5</span><span class="lab">pages built to argue a design call</span></li>
+    <li class="open"><span class="fig">4</span><span class="lab">published pages with no home yet</span></li>
+  </ul>
+</header>
+
+<section>
+  <div class="col">
+    <h2><span class="n">The app</span>What does Hifth actually do?</h2>
+    <p>One line per thing a reader can do in the running app today, taken from the same map
+    the codebase itself is oriented by — so this list cannot say more than the app actually
+    does. There is no public link yet: today the app only runs from a helper on the machine
+    that built it, and the check that would say whether a build is fit to hand to a stranger
+    fails on purpose while the project stays private. That check exists and is run on demand;
+    it is not silence, it is a known answer.</p>
+  </div>
+  <div class="deck deck-tight">
+<article class="card">
+  <h3>Select an ayah</h3>
+  <p>Tap an ayah on the page, or drag a marquee across several, and see amber marker swipes laid over them.</p>
+</article>
+<article class="card">
+  <h3>The hop</h3>
+  <p>From a selected ayah, jump to the mutashabihat that resemble it — the reason this app exists.</p>
+</article>
+<article class="card">
+  <h3>Root lens</h3>
+  <p>Show every ayah sharing an Arabic root with this one — the other way ayahs rhyme.</p>
+</article>
+<article class="card">
+  <h3>Share links</h3>
+  <p>Every view has a URL, and every URL restores its view — offline, from a cold start.</p>
+</article>
+<article class="card">
+  <h3>Wayfinding</h3>
+  <p>Getting to a known place: the surah/ayah jumper, the page bar along the bottom, the keyboard map, and the coach marks that teach the gestures once.</p>
+</article>
+<article class="card">
+  <h3>Editions and colouring</h3>
+  <p>Which mushaf print you are reading, and whether tajweed colouring is on.</p>
+</article>
+<article class="card">
+  <h3>Ui language</h3>
+  <p>Which language the chrome speaks — and the much longer list of things that never change with it.</p>
+</article>
+<article class="card">
+  <h3>Desktop spread</h3>
+  <p>On a wide screen the app shows an open mus'haf — two leaves and a spine — and says plainly which half it does not have.</p>
+</article>
+<article class="card">
+  <h3>Offline pwa</h3>
+  <p>Works with the phone in aeroplane mode, a week after you last opened it.</p>
+</article>
+<article class="card">
+  <h3>Word selection</h3>
+  <p>Hold inside an ayah you have already selected, and the grain gets finer: the run under your finger is words, and dragging extends it.</p>
+</article>
+<article class="card">
+  <h3>Revision record</h3>
+  <p>What the reader has opened, by day and by page, hizb or juz — the log, and the picture drawn from it. Never leaves the device.</p>
+</article>
+<article class="card">
+  <h3>Accessibility</h3>
+  <p>Usable by someone who cannot see the page: labels on the polygons, a live region for what changed, and Arabic digits everywhere.</p>
+</article></div>
+</section>
+
+<section>
+  <div class="col">
+    <h2><span class="n">The design calls</span>What pages were built to help make a decision?</h2>
+    <p>Every one of these draws its options on a real page of the mus'haf, at the size it would
+    actually be used, because a wash you cannot see at that size is an answer and it is one no
+    paragraph would have given you. The reasoning behind each — why it was asked now, what
+    happens if nobody decides, what would change the answer — is written where the decision
+    itself lives, not repeated here. <a href="https://claude.ai/code/artifact/9a42955e-4c2f-4dc9-8c95-a50942c46a00">The decision board</a>
+    draws every one of these on a single time line together with the ones still waiting on
+    somebody; this page only points at each in turn.</p>
+  </div>
+  <div class="deck deck-tight">
+<article class="card">
+  <div class="card-top">
+    <span class="pill pill-open">open</span>
+  </div>
+  <h3>Should the app colour tajweed one colour a verse, or should it colour the exact letter a rule lands on?</h3>
+  <p class="links">
+    <a class="go" href="https://claude.ai/code/artifact/5f230dff-e4e8-40c6-9c4e-888786eeef9b">Open the page</a>
+    <span class="sep">·</span>
+    <a href="../../docs/design/mark-granularity.html">the same page, kept here</a>
+  </p>
+</article>
+<article class="card">
+  <div class="card-top">
+    <span class="pill pill-open">open</span>
+  </div>
+  <h3>Should the app line up what it draws one page at a time, or one printed line at a time?</h3>
+  <p class="links">
+    <a class="go" href="https://claude.ai/code/artifact/7652b2f5-61a1-4072-bfab-ef3b649e55f5">Open the page</a>
+    <span class="sep">·</span>
+    <a href="../../docs/design/mark-placement.html">the same page, kept here</a>
+  </p>
+</article>
+<article class="card">
+  <div class="card-top">
+    <span class="pill pill-living">decided</span>
+  </div>
+  <h3>When somebody sits down to check the app's rectangles against the printed page, where should those questions come from — a laptop at home, or a link they can open anywhere?</h3>
+  <p class="links">
+    <a class="go" href="https://claude.ai/code/artifact/84b4bfe6-f875-4186-9d32-c37f26ad71be">Open the page</a>
+    <span class="sep">·</span>
+    <a href="../../docs/design/sitting-hosting.html">the same page, kept here</a>
+  </p>
+</article>
+<article class="card">
+  <div class="card-top">
+    <span class="pill pill-living">decided</span>
+  </div>
+  <h3>When the app shows a verse cut out of the printed page, what should it do about the neighbouring verses that come with it?</h3>
+  <p class="links">
+    <a class="go" href="https://claude.ai/code/artifact/b7be0f22-3ff5-45b7-a5c1-850dd73ef1f1">Open the page</a>
+    <span class="sep">·</span>
+    <a href="../../docs/design/comparison-crop.html">the same page, kept here</a>
+  </p>
+</article>
+<article class="card">
+  <div class="card-top">
+    <span class="pill pill-open">open</span>
+  </div>
+  <h3>Should a reader be able to change the colours the app uses for recitation rules, and how many colours are there to change?</h3>
+  <p class="links">
+    <a class="go" href="https://claude.ai/code/artifact/74b37363-d082-45e7-9651-54c47c328844">Open the page</a>
+    <span class="sep">·</span>
+    <a href="../../docs/design/tajweed-colours.html">the same page, kept here</a>
+  </p>
+</article></div>
+</section>
+
+<section>
+  <div class="col">
+    <h2><span class="n">Published, and homeless</span>What has gone out with nowhere pointing at it?</h2>
+    <p>Each of these is a real page, published and shown to somebody, and still not named by any
+    decision or checked into this repository — so the address on the card is, right now, the
+    only copy. They stay here rather than being quietly fixed, because the fix for each is a
+    person's call about where the finding belongs, not a rewrite this page can make for them.</p>
+  </div>
+  <div class="deck deck-tight">
+<article class="card pub-loose">
+  <div class="card-top">
+    <span class="pill pill-open">No copy — the link is all there is</span>
+  </div>
+  <h3><a href="https://claude.ai/code/artifact/e4f6003d-de26-44b4-9545-326e2f2f7c8c">Registered on the Ornaments</a></h3>
+  <p>Why the boxes drawn around tajweed marks sit off the ink: what was measured, the same mistake found named in medical imaging and in typesetting, and the plan that came out of it.</p>
+  <p class="orphan-note">No copy anywhere. It is the diagnosis that the still-open question about lining up the rectangles grew out of, and it holds two things that question's own page does not: the count showing not one mark in three hundred thousand is named wrongly, and the reason the alignment can report itself excellent while being a whole mark-height out. When that question is settled, its record should absorb both, and this row should point at a page instead of at nothing.</p>
+</article>
+<article class="card pub-loose">
+  <div class="card-top">
+    <span class="pill pill-open">No copy — the link is all there is</span>
+  </div>
+  <h3><a href="https://claude.ai/code/artifact/085bf1d2-e4df-4eb0-a2d7-ee7da65f5dbb">Two spellings, one word</a></h3>
+  <p>Why two machine readings of the same printed page disagree about ten verses, and why a reader looking at the page would see nothing different.</p>
+  <p class="orphan-note">No copy anywhere. It settles a question — the disagreement is in the two readings, not in the print — but it was never written down as a decision, so the finding survives only at this address. It belongs in the record that covers where the two readings of the text come from.</p>
+</article>
+<article class="card pub-loose">
+  <div class="card-top">
+    <span class="pill pill-open">No copy — the link is all there is</span>
+  </div>
+  <h3><a href="https://claude.ai/code/artifact/27493ed0-8f09-4ea4-b778-85377014e820">Two segmentations, one text — PLAN ⑬</a></h3>
+  <p>Two different ways of cutting the same text into words, how far the two agree, and where that agreement ought to be kept.</p>
+  <p class="orphan-note">No copy anywhere, and its title is written in this project's own shorthand, which is the other half of the same problem: a page nobody outside can name is one nobody outside can use. It predates the rule that a decision page must be checked in.</p>
+</article>
+<article class="card pub-loose">
+  <div class="card-top">
+    <span class="pill pill-open">No copy — the link is all there is</span>
+  </div>
+  <h3><a href="https://claude.ai/code/artifact/b4e0d26b-fb7d-430f-9f16-de815d4ceae1">Should the two leaves pan and zoom together?</a></h3>
+  <p>Three screenshots of the running app comparing what zooming into one leaf does to a two-page spread, with a recommendation.</p>
+  <p class="orphan-note">No copy anywhere. This one is a decision in everything but filing: the title is the question, the page puts options, and it carries a recommendation. What is missing is the record — the reasons, who chose, and when — so it should become a row in the decision register rather than stay here.</p>
+</article></div>
+</section>
+
+<section>
+  <div class="col">
+    <h2><span class="n">The instrument</span>How does this project check that any of the above is right?</h2>
+    <p>Every one of the pages above rests on a claim about the printed page — that a rectangle
+    sits where it should, that a colour reads clearly, that a crop shows the right verse. Those
+    claims get checked by a person sitting with the app and a real mus'haf open beside it, one
+    verse at a time, and the settled answer for where that checking happens is described below
+    rather than linked: the sessions themselves render real verses of the Qur'an, and this
+    project ships none of that text to a page anyone outside it can open.</p>
+  </div>
+  <div class="instrument">
+    <p>A checking session is opened by its address on the household's private network, from
+    whichever phone or laptop is at hand. Every answer a person gives is posted back the instant
+    it is given and appended to a plain record on that same machine — nothing is sent anywhere
+    else, and nothing about a session is reachable from outside that network. The two published
+    alternatives — handing a session to a stranger as a page, with or without a place for their
+    answers to land — were drawn, compared, and set aside for the same reason: either one would
+    put verses of the Qur'an on a server this project does not control, and nothing about how
+    the rectangles line up is worth that trade.</p>
+  </div>
+</section>
+
+<p class="note">Drawn from this project's own registers on every build: the app's shape from
+the map it is oriented by, the design calls and their pages from the decision register, and the
+homeless pages from the list of everything this project has published. Nothing on this page is
+typed a second time — if it ever disagrees with one of those, the register is right and this
+page has not been rebuilt. The decisions themselves, drawn in full with every option and every
+constraint between them, are one page over at the decision board linked above.</p>
+</div>

@@ -233,6 +233,7 @@ ci: core ## Full local mirror of the CI build-test-gate job, IN CI ORDER
 	$(PNPM) gate:issues
 	$(PNPM) gate:tasks
 	$(PNPM) gate:decisions
+	$(PNPM) gate:artifacts
 	$(PNPM) gate:quran-meta
 	$(PNPM) gate:tajweed
 	$(PNPM) gate:revision-privacy

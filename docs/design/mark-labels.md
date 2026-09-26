@@ -469,8 +469,8 @@ wrongly. It answers a different question, and it should be done as well, not ins
 ## ⑩ Open questions, and what would answer each
 
 What this document does *not* settle, stated so that each answer would be recognisable when it
-arrives. Both are indexed in [`docs/issues.json`](../issues.json), which is the only place that
-counts them.
+arrives. All three are indexed in [`docs/issues.json`](../issues.json), which is the only place
+that counts them.
 
 ### ① Whether a spacing-aware comparison is worth building · **open**
 
@@ -484,6 +484,19 @@ built. Nothing depends on the answer today, which is why this is open rather tha
 The check described in §⑧ — name against carried text rather than name against drawing — has not
 been done. It is cheap, it is independent of everything here, and it would catch a class of error
 this document is blind to.
+
+### ③ Does a finished measurement need a row of its own, or does it stay reachable only by opening this file · **open**
+
+This document settles its own question — nothing above is left hanging, and nothing in the
+app changes as a result. But settling a question is not the same as being findable: this file
+has no row in [`docs/decisions.json`](../decisions.json) (it decided nothing) and, until this
+paragraph, no row in [`docs/issues.json`](../issues.json) either, so a reader who did not
+already know this document existed had no register that would lead them to it.
+
+**What would answer it:** a person deciding whether a completed measurement wants a home in
+one of the existing registers, a mention from the document it corrects (`skins.ts`'s comment,
+per [`sub-word-marks.md`](sub-word-marks.md) §⑧ ③), or nothing at all — a finding that changes
+no code may not need one. Not a judgement this document can make about itself.
 
 ## How can someone look at this for themselves?
 

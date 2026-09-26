@@ -162,6 +162,16 @@
       "page": null,
       "builtBy": null,
       "note": "No copy anywhere. This one is a decision in everything but filing: the title is the question, the page puts options, and it carries a recommendation. What is missing is the record — the reasons, who chose, and when — so it should become a row in the decision register rather than stay here."
+    },
+    {
+      "url": "https://claude.ai/code/artifact/19e5206d-3f76-4c47-ac26-b857b8c8b923",
+      "title": "Hifth Experience Atlas",
+      "published": "2026-08-26",
+      "shows": "One line per thing the running app does today, every page built to argue a design call, every published page nobody has claimed yet, and how this project checks its own work by hand — one front door to all four.",
+      "decision": null,
+      "page": "docs/design/experience-atlas.html",
+      "builtBy": "scripts/build-experience-atlas.mjs",
+      "note": null
     }
   ]
 }

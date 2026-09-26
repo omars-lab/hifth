@@ -75,6 +75,21 @@ if [ -n "$staged" ] && command -v node >/dev/null 2>&1; then
     echo "  to bypass this one commit:  git commit --no-verify"
     exit 1
   fi
+
+  # docs/artifacts.json is the only record that a published page exists at all
+  # — its address is minted outside this repository and never written back to
+  # it, so the moment it drifts from docs/decisions.json (a row copying a
+  # decision's page/builtBy, then the decision's own page moves) is the commit
+  # that moved one side and not the other. Scoped and silent the same way.
+  # shellcheck disable=SC2086
+  if ! node scripts/gate-artifacts.mjs --files $staged; then
+    echo ""
+    echo "pre-commit: docs/artifacts.json has a row that does not match or resolve (above)."
+    echo "  a row naming a decision must copy that decision's page/builtBy exactly;"
+    echo "  a row with its own page needs a builtBy that exists — 'make map FEATURE=decisions' for more."
+    echo "  to bypass this one commit:  git commit --no-verify"
+    exit 1
+  fi
 fi
 
 # The licence the reader is shown and the licence on record, on the one commit

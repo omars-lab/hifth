@@ -1443,6 +1443,21 @@
           "file": "scripts/hook-artifact.sh",
           "symbol": "command -v node",
           "note": "The reminder, fired by the PostToolUse hook in .claude/settings.json the moment a page is published — while the page, its subject and the reason for it are all still in hand. Reminding later is asking somebody to reconstruct. It exists as a shell wrapper rather than a bare `node …` in the settings file because settings.json is checked in and shared, and a hook runs in whatever environment the editor has: where node lives under nvm and nothing sourced it, the bare form fails with 'command not found' and is reported as an error against a publish that succeeded, which teaches people to delete the hook. So it looks for node, and if there is genuinely none it says nothing and leaves. `set -e` is deliberately absent for the same reason."
+        },
+        {
+          "file": "scripts/build-experience-atlas.mjs",
+          "symbol": "appFeatures",
+          "note": "The front door, and the only page that draws all three registers — the map, the decisions, the shelf — side by side rather than one at a time. Restates nothing it does not have to: the design-call cards link out to the decision board rather than redrawing its timeline, and `appFeatures` is read straight off the map's own L1/L2 rows, so a feature added there needs no edit here to appear. Two feature ids collide with this project's own plumbing words ('skin', 'a11y') and are the only titles overridden rather than derived from the id, because the plain-language tenet applies to a card heading exactly as it applies to a decision's question."
+        },
+        {
+          "file": "scripts/artifacts.mjs",
+          "symbol": "readArtifacts",
+          "note": "docs/artifacts.json now has three readers — the decision board, the experience atlas and the new gate — and a fourth hand-rolled JSON.parse would have been the second place this register's shape could drift from what actually reads it. Read-only on purpose: a register this repo hand-edits is one no script should be able to overwrite."
+        },
+        {
+          "file": "scripts/gate-artifacts.mjs",
+          "symbol": "DESIGN_DIR",
+          "note": "The half of the shelf nothing checked before this: that a row naming a decision never drifts from what that decision's own record already says, and that every file under docs/design/ is named by one register or the other. `url` is the one deliberate duplicate (checked against the decision's own `artifact` field); `page`/`builtBy` may be left null — the usual case, docs/decisions.json owns them — or repeated exactly, the way sitting-hosting's row does with a `note` explaining why. Two earlier drafts of this gate got it wrong in opposite directions: one required page/builtBy to mirror the decision's exactly with no null case allowed, the other required them null with no repeat-with-reason case allowed — both broke on real, correct rows in the register before landing on the union of both."
         }
       ],
       "extend": [
@@ -1456,9 +1471,11 @@
         "Never paraphrase a decision into the register. It stores the question; the record owns the answer, and `make decisions` reads the answer out of the record as you run it.",
         "Legible is not answerable. A page that opens with three options gives a reader the last thing they need first — so the record and the page both say why it is being asked now, what happens if nobody decides, what people outside this project already do (linked; and if you did not look, say so), what we have already decided that constrains it, what was left off the option list and why, and what would change the answer. The decide skill is that list in full.",
         "Fill `related` in BOTH rows. One direction resolves fine and reads as complete, which is why it is the failure worth a gate.",
-        "When the call is made, set `decided`, `by` and `date` — and leave the losing options on the page. They are the reason the choice was a choice, and the next person to reopen it will want them."
+        "When the call is made, set `decided`, `by` and `date` — and leave the losing options on the page. They are the reason the choice was a choice, and the next person to reopen it will want them.",
+        "A new feature in docs/map.json's L1/L2 rows appears on the experience atlas with no edit to it — it is read from the same map. A feature that should NOT show there (an internal one, a gate-layer one) needs no exclusion either; the atlas already filters to L1/L2 only.",
+        "A row in docs/artifacts.json that names a `decision` leaves `page`/`builtBy` null unless it has its own reason to repeat them — if it does, they must match the decision's own `page`/`builtBy` exactly. `url` is always repeated, and must match the decision's `artifact` field exactly."
       ],
-      "gates": ["pnpm gate:decisions", "make ci"],
+      "gates": ["pnpm gate:decisions", "pnpm gate:artifacts", "make ci"],
       "seeAlso": ["ci-and-gates", "validation"]
     },
 

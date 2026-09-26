@@ -252,6 +252,16 @@ jobs:
       - name: Gate — every decision is indexed, and every open one is legible
         run: pnpm gate:decisions
 
+      # docs/artifacts.json is the only record that a page was ever published —
+      # the address is minted outside this repository and never written back to
+      # it. This checks the register's own bookkeeping (every url resolves,
+      # every page it claims is checked in and rebuildable, a row that names a
+      # decision matches that decision's own page/builtBy exactly) and the
+      # reverse direction: a page under docs/design/ that neither register
+      # names is one nobody would ever be led to.
+      - name: Gate — every published page has a home, or says why not
+        run: pnpm gate:artifacts
+
       # AYAH_COUNTS, JUZ_STARTS and HIZB_STARTS are hand-typed numbers whose only
       # symptom when wrong is an ayah quietly filed under the wrong division —
       # in range, ascending, and false. This re-derives all three from the

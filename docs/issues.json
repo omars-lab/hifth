@@ -1351,6 +1351,22 @@
       "owner": "user",
       "blockedBy": ["twelve-verses-of-scripture-ship-in-the-bundle", "the-transliteration-table-is-copied-into-our-code", "a licensing opinion"],
       "note": "Worth separating from the store question because someone may want it answered for unrelated reasons — a reader wanting to build a different mus'haf on @hifth/core, where GPL is the thing stopping them. LICENSES.md:55-57 answers it already: 'The app code is not a derivative of the corpus data — it reads the shards at runtime — so nothing here reaches our source by way of the data.' The premise was verified and holds: every asset access in apps/web/src/assets.ts is a fetch by URL, and neither apps/web/src/** nor packages/core/src/** contains a readFileSync, import or fetch targeting packages/etl/data/. The conclusion does not follow, because the content did not arrive over the boundary being guarded — somebody typed it in, by four routes ranked worst first in the design doc: the twelve verses, the Buckwalter table, the 114 romanised names, and the 318 Tanzil numbers, the last being the only one with an automated re-derivation behind it. Also not an escape from the data question: permissive code beside GPL data in one deploy is exactly the unresolved aggregation reading, where GPL-3.0 §5's aggregate paragraph protects the other parts from the covered work rather than the reverse, and the honest answer is that a static deploy of separately-fetched JSON is the paradigm aggregate under one reading and not separate-and-independent under another. Two things worth knowing before this is decided: relicensing the ETL scripts more permissively does not break the §6 corresponding-source obligation, it over-satisfies it; and file-level copyleft is the usually-skipped middle option, letting a third party embed the engine in something closed while changes to our own files still come back, which fits if the motive is 'let people use this' rather than 'let people take this'."
+    },
+    {
+      "id": "mark-labels-no-register-home",
+      "source": { "file": "docs/design/mark-labels.md", "item": "③" },
+      "status": "open",
+      "severity": "question",
+      "owner": "user",
+      "note": "A finished measurement that decided nothing and changed no code has no row in docs/decisions.json and, until now, none here either — the only way to find it was to already know it existed. Whether a completed measurement like this needs a home in a register, or is fine reachable only by opening the file, is a call about the registers themselves, not about the measurement."
+    },
+    {
+      "id": "sub-word-marks-no-register-home",
+      "source": { "file": "docs/design/sub-word-marks.md", "item": "⑤" },
+      "status": "open",
+      "severity": "question",
+      "owner": "user",
+      "note": "A design-of-record cited from mark-granularity.html's decision row and from mark-labels.md, but carrying no row of its own in docs/decisions.json — it settles nothing on its own while its own §⑧ ①②④ stay open. Whether it belongs in the decision register once one of those resolves, or is better left reachable only through the documents that already cite it, is a call about the registers, not one this document can make about itself."
     }
   ]
 }
