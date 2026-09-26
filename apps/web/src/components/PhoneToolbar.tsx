@@ -139,10 +139,13 @@ export function PhoneToolbarC({ tool, onTool }: PhoneToolbarProps): JSX.Element 
         // In the chrome's own direction, like the desktop bar: the bottom row
         // it covers is pinned right to left for the mus'haf, the tools are not.
         <div className={styles.tray} role="toolbar" aria-label={t.toolbarLabel} dir={dir}>
+          <div className={styles.row} role="radiogroup" aria-label={t.toolbarLabel}>
+            <ToolButtons tool={tool} onTool={onTool} />
+          </div>
+          {/* The close sits on the line under the tools, not beside them: eight
+              tools at thumb size are the whole width of a 390px phone. */}
           <div className={styles.trayRow}>
-            <div className={styles.row} role="radiogroup" aria-label={t.toolbarLabel}>
-              <ToolButtons tool={tool} onTool={onTool} />
-            </div>
+            <span className={styles.trayHint}>{toolHint(t, tool, true)}</span>
             <button
               type="button"
               className={styles.close}
@@ -155,7 +158,6 @@ export function PhoneToolbarC({ tool, onTool }: PhoneToolbarProps): JSX.Element 
               ×
             </button>
           </div>
-          <span className={styles.trayHint}>{toolHint(t, tool, true)}</span>
         </div>
       )}
     </div>

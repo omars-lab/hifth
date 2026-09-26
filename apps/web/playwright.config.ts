@@ -205,8 +205,9 @@ export default defineConfig({
           // neighbourhood apart and names the page under the pointer. Same fine-
           // pointer gate, same reason a phone cannot make the gesture.
           // `notes`, `mistakes` and `sign-tools` are the note, mistake, harakat
-          // and word tools, which live on the desktop-only tools bar.
-          testMatch: /(desktop|stage-fit|detent-live|pagebar-detents|pagebar-fisheye|notes|mistakes|sign-tools)\.spec\.ts/,
+          // and word tools, which live on the desktop-only tools bar. `crop`
+          // runs here and on the phones: it is the one tool test for both.
+          testMatch: /(desktop|stage-fit|detent-live|pagebar-detents|pagebar-fisheye|notes|mistakes|sign-tools|crop)\.spec\.ts/,
           use: {
             browserName: "chromium",
             viewport: { width: 1440, height: 900 },

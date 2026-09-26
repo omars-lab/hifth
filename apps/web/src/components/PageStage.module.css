@@ -382,6 +382,23 @@
 /* The frame the bookmark overlay sits in: the stage's box, outside the pan/zoom
    transform. PageStage writes the current leaf's box onto it as --leaf-x/-y/-w
    and its zoom as --leaf-z. */
+/* The crop tool's layer: over the page and its pins, under nothing the reader
+   needs while cutting. The box is drawn in the accent, dashed, like a marquee. */
+.cropLayer {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  cursor: crosshair;
+  touch-action: none;
+}
+
+.cropBox {
+  position: absolute;
+  border: 2px dashed var(--accent);
+  background: color-mix(in srgb, var(--accent) 10%, transparent);
+  pointer-events: none;
+}
+
 .overlayFrame {
   position: absolute;
   inset: 0;

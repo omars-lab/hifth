@@ -264,6 +264,11 @@ interface PageStageProps {
    * word's box on screen, so the row of parts can stand beside it.
    */
   onOpenWord?: (at: { page: number; key: string; word: number; rect: WordRect }) => void;
+  /**
+   * Under the crop tool (step 4), a box was dragged over the page: its corner
+   * and size in page units, on the page shown. What becomes of it is App's.
+   */
+  onCrop?: (at: { page: number; x: number; y: number; width: number; height: number }) => void;
 }
 
 /** A word's box on screen, in window pixels. */
@@ -275,7 +280,7 @@ export interface WordRect {
 }
 
 /** The page toolbar's tools. "select" is the app as it has always behaved. */
-export type PageTool = "select" | "highlight" | "bookmark" | "note" | "sign" | "word" | "mistake";
+export type PageTool = "select" | "highlight" | "bookmark" | "note" | "sign" | "word" | "mistake" | "crop";
 
 /**
  * How far, in page units, the harakat tool's magnifier reaches for a sign. A
@@ -610,6 +615,7 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
     onMarkWord,
     onPickSign,
     onOpenWord,
+    onCrop,
   },
   ref,
 ): JSX.Element {
@@ -696,6 +702,8 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
   onPickSignRef.current = onPickSign;
   const onOpenWordRef = useRef(onOpenWord);
   onOpenWordRef.current = onOpenWord;
+  const onCropRef = useRef(onCrop);
+  onCropRef.current = onCrop;
   /** The harakat tool's pointer: ring the nearest sign, or (on a click) take it. Set below, beside the sign data. */
   const reachSignRef = useRef<(page: number, svg: SVGSVGElement, x: number, y: number, e: PointerEvent, take: boolean) => void>(
     () => {},
@@ -1150,7 +1158,7 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
       const from = press;
       press = null;
       const using = toolRef.current;
-      if (using === "select" || using === "highlight" || using === "bookmark" || !from) return;
+      if (using === "select" || using === "highlight" || using === "bookmark" || using === "crop" || !from) return;
       if (Math.hypot(e.clientX - from.x, e.clientY - from.y) > TAP_SLOP_PX) return;
       if ((e.target as Element | null)?.closest("[data-note-pin]")) return;
       const at = hl.svgPointFromClient(e.clientX, e.clientY);
@@ -2721,6 +2729,23 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
           {overlay}
         </div>
       )}
+      {tool === "crop" && (
+        <CropLayer
+          onBox={(a, b) => {
+            const hl = pagesRef.current.get(currentPageRef.current)?.hl;
+            const p = hl?.svgPointFromClient(a.x, a.y);
+            const q = hl?.svgPointFromClient(b.x, b.y);
+            if (!p || !q) return;
+            onCropRef.current?.({
+              page: currentPageRef.current,
+              x: Math.min(p.x, q.x),
+              y: Math.min(p.y, q.y),
+              width: Math.abs(q.x - p.x),
+              height: Math.abs(q.y - p.y),
+            });
+          }}
+        />
+      )}
       {band && (target ? createPortal(band, target) : band)}
       {loupe && createPortal(<SignLoupe loupe={loupe} src={pageUrl(resolver.edition, loupe.page)} />, document.body)}
       {status === "loading" && <div className={styles.hint}>{t.stageLoading}</div>}
@@ -2738,6 +2763,72 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
     </div>
   );
 });
+
+/** The least a crop box may be, in screen pixels on each side, so a stray tap cuts nothing. */
+const CROP_MIN_PX = 16;
+
+/**
+ * The crop tool's layer: laid over the page while the tool is on, so a drag
+ * draws a box instead of moving the page. It listens natively and stops the
+ * press there, because the page's own pan, zoom and highlight listen natively
+ * on the stage beneath it and would otherwise take the same stroke.
+ */
+function CropLayer({ onBox }: { onBox: (a: { x: number; y: number }, b: { x: number; y: number }) => void }): JSX.Element {
+  const ref = useRef<HTMLDivElement>(null);
+  const [box, setBox] = useState<{ left: number; top: number; width: number; height: number } | null>(null);
+  const onBoxRef = useRef(onBox);
+  onBoxRef.current = onBox;
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    let from: { x: number; y: number; id: number } | null = null;
+    const local = (x: number, y: number) => {
+      const r = el.getBoundingClientRect();
+      return { x: x - r.left, y: y - r.top };
+    };
+    const draw = (e: PointerEvent) => {
+      if (!from) return;
+      const a = local(from.x, from.y);
+      const b = local(e.clientX, e.clientY);
+      setBox({ left: Math.min(a.x, b.x), top: Math.min(a.y, b.y), width: Math.abs(b.x - a.x), height: Math.abs(b.y - a.y) });
+    };
+    const down = (e: PointerEvent) => {
+      e.stopPropagation();
+      if (from) return;
+      from = { x: e.clientX, y: e.clientY, id: e.pointerId };
+      el.setPointerCapture(e.pointerId);
+    };
+    const move = (e: PointerEvent) => {
+      e.stopPropagation();
+      if (from && e.pointerId === from.id) draw(e);
+    };
+    const up = (e: PointerEvent) => {
+      e.stopPropagation();
+      if (!from || e.pointerId !== from.id) return;
+      const start = from;
+      from = null;
+      setBox(null);
+      if (e.type === "pointercancel") return;
+      if (Math.abs(e.clientX - start.x) < CROP_MIN_PX || Math.abs(e.clientY - start.y) < CROP_MIN_PX) return;
+      onBoxRef.current(start, { x: e.clientX, y: e.clientY });
+    };
+    el.addEventListener("pointerdown", down);
+    el.addEventListener("pointermove", move);
+    el.addEventListener("pointerup", up);
+    el.addEventListener("pointercancel", up);
+    return () => {
+      el.removeEventListener("pointerdown", down);
+      el.removeEventListener("pointermove", move);
+      el.removeEventListener("pointerup", up);
+      el.removeEventListener("pointercancel", up);
+    };
+  }, []);
+  return (
+    <div ref={ref} className={styles.cropLayer} data-crop-layer>
+      {box && <div className={styles.cropBox} style={box} data-crop-box />}
+    </div>
+  );
+}
 
 /** The magnifier's size in pixels, and how many pixels one page unit becomes inside it. */
 const LOUPE_PX = 128;

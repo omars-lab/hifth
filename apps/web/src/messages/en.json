@@ -298,6 +298,14 @@
   "wordPartsHintMany": "Shift-click to pick several",
   "wordPartsMany": "{n, plural, one{Note on this sign} other{Note on these {nText} signs}}",
   "toolSignHintTouch": "Tap near a vowel-sign to note it",
+  "toolCrop": "Crop",
+  "toolCropHint": "Drag a box over the page to cut it out",
+  "cropTitle": "A cut-out of page {page}",
+  "cropCaption": "Page {page} · King Fahd Complex print",
+  "cropShare": "Share",
+  "cropSave": "Save image",
+  "cropClose": "Close",
+  "cropShared": "Shared",
   "phoneTools": "Page tools · {name} is on",
   "phoneToolsClose": "Close the tools"
 }

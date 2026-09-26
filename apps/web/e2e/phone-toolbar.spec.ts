@@ -25,7 +25,7 @@ test.describe("Hifth · the page tools on a phone", () => {
     await expect(page.getByRole("toolbar", { name: "Page tools" })).toHaveCount(0);
 
     await bar(page, "c").getByRole("button", { name: /^Page tools · Select is on$/ }).click();
-    await expect(page.getByRole("toolbar", { name: "Page tools" }).getByRole("radio")).toHaveCount(7);
+    await expect(page.getByRole("toolbar", { name: "Page tools" }).getByRole("radio")).toHaveCount(8);
     await radio(page, "Word").click();
     await expect(page.getByText("Tap a word to open it into its parts")).toBeVisible();
     const at = await ayahTarget(page, "#verse-46");
@@ -42,7 +42,7 @@ test.describe("Hifth · the page tools on a phone", () => {
 
   test("A: a strip under the top bar, one tap to a tool", async ({ page }) => {
     await page.goto("/?phonebar=a#/hafs-kfqc/p7");
-    await expect(bar(page, "a").getByRole("radio")).toHaveCount(7);
+    await expect(bar(page, "a").getByRole("radio")).toHaveCount(8);
     await radio(page, "Mistake").click();
     await expect(radio(page, "Mistake")).toHaveAttribute("aria-checked", "true");
     await expect(page.getByText("Tap a word to mark a slip")).toBeVisible();
@@ -55,7 +55,7 @@ test.describe("Hifth · the page tools on a phone", () => {
     await page.goto("/?phonebar=b#/hafs-kfqc/p7");
     const button = bar(page, "b").getByRole("button", { name: /^Page tools · / });
     await button.click();
-    await expect(bar(page, "b").getByRole("radio")).toHaveCount(7);
+    await expect(bar(page, "b").getByRole("radio")).toHaveCount(8);
     await radio(page, "Note").click();
     await expect(bar(page, "b").getByRole("radio")).toHaveCount(0);
     await expect(button).toHaveAccessibleName("Page tools · Note is on");
