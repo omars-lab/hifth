@@ -1,6 +1,20 @@
 # Which words does the app line look-alikes up on?
 
-**Status:** open — asked 2026-09-03.
+**Status:** decided — **D**, by Omar, 2026-09-26. Asked 2026-09-03.
+
+**Decision:** count the look-alike runs in the printed page's own words, with each lone "and" glued
+back onto the word after it. It keeps every run the app colours today, on the same words, and reads
+only the print, so the corpus's share-alike licence no longer reaches the look-alike feature.
+
+**Why D:** once the owner asked why the two word lists differ, the answer was one habit — the print
+leaves a gap after "and" and lists it as a word; the spelling and grammar attach it. With that gap
+accounted for, A's only merit (today's runs) and B's only merit (no licence) come together, and
+the 150 extra runs B and C would add turn out to be a side effect of counting the gap as a word,
+not something a hafiz asked for. The owner: "if we had logic to accomodate for this gap, would that
+change our decision" — then "yes record D".
+
+**Still to do:** the app's shipped look-alike runs are still counted in the corpus. Switching the
+build to the glued count is the follow-up; this page's measurement is the rule it should use.
 
 **Picture:** <https://blog.bytesofpurpose.com/hifth/docs/design/adjacency-span-source.html> — the
 two ways of finding the shared runs, each drawn on the real pages where they differ: the runs
@@ -11,6 +25,16 @@ reference finds and the printed page loses. Checked in as
 same pass.
 
 Read the picture first. This file is the reasons; the page is the subject.
+
+## The short version
+
+Both word lists we hold have **the same text, letter for letter**. They differ only in where one
+word ends and the next begins, and only at "and" — the letter *waw*. Arabic spells "and he said"
+as one word, but *waw* never joins the letter after it, so the page shows a small gap there. The
+printed page's list counts that gap as a word break; the word-by-word reference, like every
+grammar, does not. The app finds look-alike phrases by counting words, so the two lists pick
+slightly different phrases in a few hundred pairs. Counting the page's words while treating that
+gap as no break (D) gives exactly today's phrases, without the reference's licence.
 
 ## A word on the words
 
@@ -67,10 +91,26 @@ The drawn page shows specimens from each of the three buckets, each verse croppe
 sits on with the run washed exactly as `DiffView` washes it, so the 114 lost and the 150 gained are
 things a reader can look at rather than numbers to take on trust.
 
+## Why do the two counts disagree at all?
+
+Measured on 2026-09-26 over every page, after the owner asked "why does this happen? is there not
+a hybrid option?": the whole difference is **one word**. The print writes "and" (the single letter
+*waw*) as a word of its own in 9,533 places, and it is the only word the print writes alone that the
+corpus never does. Every other difference between the two word lists is nil.
+
+- **Runs gained:** a phrase with an "and" in it is one word longer on the page, which can break a
+  tie between two equally long stretches, so a run gets kept that used to be dropped.
+- **Runs lost:** a lone "and" repeats everywhere, so counted as a word it can stretch an unrelated
+  second match to the same length as the real one, forging a tie that drops a run.
+
+Glue each lone "and" back onto the word after it, reading only the print, and the rule keeps 2,546
+runs: all 2,544 of today's, on exactly the same words, and 2 more. That is option D. It never reads
+the corpus, so the share-alike thread does not reach it.
+
 ## Is the print's split a mistake, or just a different habit?
 
 The whole churn above comes from one thing: the printed page writes a few small attached
-particles — the "and", the "the", the "in" — as their own separate words, where the word-by-word
+particle — the "and" — as its own separate words, where the word-by-word
 reference folds each onto the word it belongs to. Before counting the runs in the print's words it
 is worth knowing which of the two is the odd one out, because if the split were simply an error the
 print had made, option B would be building the neighbour rail on that mistake.
@@ -119,13 +159,21 @@ particular choice for us to follow.
 | --- | --- | --- |
 | **A** | Keep counting in the corpus's words | The 2,544 runs that ship today, the conversion table, and the share-alike thread that comes with the corpus. Zero work. |
 | **B** | Count in the printed page's own words | 2,580 runs, no conversion table, no share-alike thread. Costs 114 runs a reader can land on today to gain 150 new ones. |
+| **C** | Keep every run either count finds | 2,694 runs, none lost. Keeps the corpus and its share-alike thread, and the build carries two counts. |
+| **D** | The page's words, with each lone "and" glued back on | 2,546 runs: all of today's on the same words, plus 2. Reads only the print, so no share-alike thread and no conversion table. One small rule in the build; gives up the 150 B and C add. |
+
+For a hafiz: A and D change nothing they see; B takes 114 coloured pairs away and adds 150; C adds
+150 and takes none. D is the one that sheds the licence without a hafiz noticing.
 
 Doing nothing is A.
 
 ## What else was considered
 
-- **Keep the corpus, fall back to the page only where they disagree.** Keeps the share-alike thread
-  — the whole gain is shedding it — so it buys the churn without the payoff. Out.
+- **Keep the corpus, fall back to the page only where they disagree.** First set aside for keeping
+  the share-alike thread; now on the list as C, since it is the only way to gain the 150 without
+  losing the 114, and that is a hafiz's call to weigh.
+- **Glue more than "and" back.** There is nothing else to glue: "and" is the only word the print
+  writes alone that the corpus never does.
 - **Count in the corpus but ship the runs already converted, so the conversion table can be
   dropped.** Removes the table but not the licence thread, which is the larger half of the cost. It
   is a tidy-up of A, not a third answer to the question.

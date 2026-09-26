@@ -159,11 +159,11 @@ ul.plain li b { color: var(--ink); }
 <div class="wrap">
 <header>
   <h1>Which words does the app line look-alikes up on?</h1>
-  <p class="sub">When two verses open the same way, the app washes the phrase they share so the
-    eye is taught the seam. To wash it, the app must know that phrase word for word — and it can
-    count those words two ways. This page draws what the choice between them keeps and drops, on
-    the real pages where they differ.</p>
-  <span class="status">Status <b>Open</b> · asked 2026-09-03</span>
+  <p class="sub">When two verses open the same way, the app colours the phrase they share. To
+    find that phrase it counts words — and the two word lists we hold hold the <b>same text,
+    letter for letter</b>, but cut it into words in different places. This page shows why, and
+    what each way of counting keeps and drops, on the real pages where they differ.</p>
+  <span class="status">Status <b>Decided: D</b> · by Omar, 2026-09-26 · asked 2026-09-03</span>
   <p class="picture">This is the picture the decision record points at. Every run below is drawn
     on the printed page it actually sits on, washed exactly as the look-alike panel washes it.
     Rebuilt from committed findings — no scripture travels in this page.</p>
@@ -176,24 +176,47 @@ ul.plain li b { color: var(--ink); }
       pairs a hafiz most often slips between. Known in the tradition as <em>mutashabihat</em>.</dd>
     <dt>shared run</dt><dd>The stretch of words a look-alike pair has in common, taken as the
       longest run they share and kept only where it sits in exactly one place on each side.</dd>
-    <dt>the page's words vs. the corpus's</dt><dd>The printed mus'haf has its own words; a
-      separate word-by-word reference we carry has its own count of the same verse. The two
-      mostly agree, but the printed page splits some short joining particles the reference writes
-      joined — so a phrase is often more words on the page, never fewer.</dd>
+    <dt>the page's words vs. the reference's</dt><dd>Two lists of the same verses, the same
+      letters in the same order. They differ only in where one word ends and the next begins —
+      and only at "and", the letter <em>waw</em>. Arabic spells "and he said" as one word, but
+      <em>waw</em> never joins to the letter after it, so the page shows a small gap there. The
+      printed page's list counts that gap as a word break; the word-by-word reference, like every
+      grammar, does not. Same text, different cuts.</dd>
   </dl>
 </section>
 
 <section>
   <h2><span class="n">The question</span>What is being decided?</h2>
-  <p>The shared runs are worked out once when the app is built. The question here is only which
-    set of words they are counted in: <b>the printed page's own words</b>, or <b>the separate
-    word-by-word reference we carry today</b>. Nothing else about the look-alike panel changes —
-    only which words of an agreed pair get washed.</p>
-  <p>It is asked now because the reference we count in today comes under a share-alike licence
-    that reaches whatever the app builds from it, and the printed page's words — already carried,
-    already read — do not. Counting the runs in the page's own words would take the whole
-    look-alike feature out from under that licence and delete a conversion step besides. The
-    catch is that it does not keep the same runs.</p>
+  <p>Which word list the app counts in when it finds the phrase two look-alike verses share:
+    <b>the printed page's</b>, or <b>the separate word-by-word reference</b> it uses today.
+    Nothing else about the look-alike panel changes.</p>
+  <p>It matters for one reason: the reference comes with a licence that says anything built from
+    it must be shared on the same terms, which some app stores refuse. The printed page's list
+    carries no such condition. But because the two lists cut "and" differently, switching lists
+    naively would change which phrase gets coloured in a few hundred pairs — unless the app
+    accounts for that gap, which is option D.</p>
+</section>
+
+<section>
+  <h2><span class="n">The reason</span>Why do the two lists disagree at all?</h2>
+  <p>Because of one word. The printed page writes <b>"and"</b> — the single letter <em>waw</em>
+    that opens so many phrases — as a word of its own, standing apart. The word-by-word reference
+    joins it to the word it belongs to, the way every grammar of Arabic does. It happens in
+    9,533 places, and it is the <em>only</em> word the page writes alone that the
+    reference never does. Every run gained and every run lost below comes from it.</p>
+  <ul class="plain">
+    <li><b>Why runs are gained.</b> A phrase with an "and" in it is one word longer on the page.
+      Where two stretches used to tie for longest — so neither was kept — the extra word can make
+      one of them the clear winner, and a new run appears.</li>
+    <li><b>Why runs are lost.</b> A lone "and" repeats everywhere. Counted as a word, it can
+      stretch a second, unrelated match to the same length as the real one, forging a tie — and a
+      run that used to be the single longest is no longer kept.</li>
+  </ul>
+  <p>So there is a way through the middle: read the page's own words, but <b>glue each lone "and"
+    back onto the word after it</b> before counting. Measured, that gives 2,546
+    runs — the same 2,544 runs as today, on the same words, losing
+    0, plus 2 more — and it never reads the reference, so its
+    licence does not come with it. That is option D below.</p>
 </section>
 
 <section class="hafiz-box">
@@ -205,6 +228,9 @@ ul.plain li b { color: var(--ink); }
   <p><span class="hl">So for a hafiz the question is which 114 pairs would be lost, and
   nobody has looked yet.</span> If they are pairs huffaz are known to confuse, that loss outweighs the
   licence gain; if they are rarely confused, the swap costs a hafiz almost nothing.</p>
+  <p><span class="hl">Gluing the "and" back (D) removes that worry: every pair coloured today stays
+  coloured, on the same words.</span> Taking both lists together (C) goes the other way — a hafiz
+  gains 150 coloured pairs and loses none.</p>
 </section>
 
 <section>
@@ -287,15 +313,29 @@ ul.plain li b { color: var(--ink); }
       <td>2,580 runs, no conversion step, no share-alike thread. Costs
         114 runs a reader can land on today to gain 150 new ones.
         <p class="for-hafiz"><span class="hl"><b>For a hafiz:</b> the coloured phrase is counted in the words of the page you memorised from, but 114 pairs you may rely on lose their colour. Worth it only if those are pairs huffaz rarely confuse.</span></p></td></tr>
+    <tr><td class="k">C</td><td class="lab">Both lists together</td>
+      <td>Count both ways and keep every run either one finds: 2,694 runs, none
+        lost. Where both find a run, keep today's. Costs keeping the reference, so the share-alike
+        thread stays, and the build carries two counts to keep in step.
+        <p class="for-hafiz"><span class="hl"><b>For a hafiz:</b> the most coloured pairs of any option — 150 more than today, none taken away.</span></p></td></tr>
+    <tr><td class="k">D</td><td class="lab">The page's words, with each lone "and" glued back on</td>
+      <td>2,546 runs: all 2,544 of today's, on
+        the same words, plus 2. Reads only the page, so no share-alike thread
+        and no conversion step. Costs one small rule in the build, and gives up the
+        150 extra runs B and C would add.
+        <p class="for-hafiz"><span class="hl"><b>For a hafiz:</b> nothing you see changes — every pair coloured today stays coloured the same way — while the app sheds the licence underneath.</span></p></td></tr>
   </table>
 </section>
 
 <section>
   <h2><span class="n">What else was weighed</span>What is not on the list, and why?</h2>
   <ul class="plain">
-    <li><b>Keep the reference, fall back to the page only where they disagree.</b> Keeps the
-      share-alike thread — shedding which is the whole gain — so it buys the churn without the
-      payoff. Out.</li>
+    <li><b>Keep the reference, fall back to the page only where they disagree.</b> This is C,
+      both lists together, now on the list: it was first set aside for keeping the licence, but it
+      is the only way to gain the 150 without losing the 114, so a hafiz
+      should get to weigh it.</li>
+    <li><b>Glue more than "and" back.</b> Nothing else to glue: "and" is the only word the page
+      writes alone that the reference never does.</li>
     <li><b>Count in the reference but ship the runs already converted, to drop the conversion
       step.</b> Removes the step but not the licence thread, the larger half of the cost. A
       tidy-up of A, not a third answer.</li>
@@ -307,6 +347,9 @@ ul.plain li b { color: var(--ink); }
   <ul class="plain">
     <li><b>A channel being chosen where share-alike terms bite</b> — a store build. Then B's
       licence gain stops being insurance and becomes the reason.</li>
+    <li><b>A hafiz judging the 150 extra runs.</b> If they help, C (or D plus a
+      second pass that also counts the "and" alone) earns its keep; if not, D gives today's runs
+      with no licence and is hard to beat.</li>
     <li><b>A hafiz judging the 114 lost runs.</b> If the runs the page drops are ones
       a reader leans on, the cost is higher than a count says; if marginal, lower. Nobody has
       looked at <em>which</em> 114 they are, only at how many.</li>
@@ -325,8 +368,9 @@ ul.plain li b { color: var(--ink); }
       washed.</li>
     <li><b>The four verses whose two printings cannot be lined up at all.</b> They take no part
       in this and their alignment is not reopened.</li>
-    <li><b>What the panel looks like.</b> Nothing here changes that — only, if B wins, which
-      114-and-150 of its pairs shift the run they draw.</li>
+    <li><b>What the panel looks like.</b> Nothing here changes that — only which pairs carry a
+      run: under D none shift, under B 114 drop and 150 arrive, under C
+      150 arrive.</li>
   </ul>
 </section>
 </div>
