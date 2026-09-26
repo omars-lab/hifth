@@ -87,6 +87,19 @@ export function markerEmphasis(distPx: number, near: number, peak: number): numb
 }
 
 /**
+ * The same growth with the Dock's curve, a raised cosine: rounded at the top and
+ * easing out at the edge. The squared curve above comes to a point *on* the marker,
+ * so the size jumps as the pointer crosses it; this one is flat there and grows
+ * earlier in the approach (docs/design/page-bar-zoom-plan.md, step 4). The page bar
+ * uses this one since 2026-09-25; the decision page keeps the squared curve it was
+ * chosen on. Same arguments, same `1` at or beyond `near`, same `peak` under it.
+ */
+export function markerEmphasisDock(distPx: number, near: number, peak: number): number {
+  if (near <= 0 || !(distPx < near)) return 1;
+  return 1 + ((peak - 1) * (1 + Math.cos((Math.PI * distPx) / near))) / 2;
+}
+
+/**
  * The fisheye lens (page-bar-numberline, decided B on 2026-09-22, docs/decisions/
  * page-bar.md §"How does a reader find one juz among thirty on a bar this small?"):
  * on a pointer that can hover, the page bar spreads apart under the pointer like a

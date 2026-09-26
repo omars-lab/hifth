@@ -118,13 +118,18 @@ out.
   label always wins.
 - Place the labels inside the bar's own area so none of them gets cut off.
 
-### 4. Smooth the swell with the Dock's curve
+### 4. Smooth the swell with the Dock's curve — built 25 September
 
 Today each juz mark grows with a curve that comes to a sharp point right on the mark, so the
 size jumps as the mouse passes over it. Swap it for the Dock's raised cosine, which is rounded
 at the top and eases in and out. This is small, but do it after step 1,
 because the stronger spread in step 1 changes how the edge feels anyway. Judge it by moving the
 mouse across the bar, not from a still picture.
+
+Measured on one juz mark as the mouse crosses it: two pixels off the mark, the old curve had
+already fallen from 2.4 times the mark's size to 2.2; the new one is still at 2.38. Halfway out
+it is at 1.7 where the old one was at 1.35, so the mark starts to grow earlier and the top is
+round. The decision page still draws the old curve, since that is what the choice was made on.
 
 ### 5. Give the phone its own version: slow down by sliding away
 
