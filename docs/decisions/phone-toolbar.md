@@ -1,9 +1,10 @@
 # Where should the page tools sit on a phone?
 
-*Status: open, asked 2026-09-26. On a computer the tools for noting the page sit in a bar of
-their own above it. That bar does not fit a phone. Three ways of fitting it are built into the
-app and mounted live on the decision page; the owner chooses by holding each. Until then the
-app shows C.*
+*Status: decided 26 September 2026 by the owner: **C**, the tray that slides up from the
+bottom row. On a computer the tools for noting the page sit in a bar of their own above it; that
+bar does not fit a phone. Three ways of fitting it were built into the app and mounted live on
+the decision page, and the owner chose by holding each. C is what the app shows; A and B stay
+on the page, still tryable, as the rule on losing options asks.*
 
 **The page:** <https://blog.bytesofpurpose.com/hifth/docs/design/phone-toolbar-options.html> —
 `phone-toolbar-options.html`, checked in and rebuilt by `scripts/build-phone-toolbar-options.mjs`.
@@ -34,9 +35,7 @@ the same way a click does, and on a phone the vowel-sign tool takes the sign nea
 
 ## What happens if nobody decides?
 
-The app keeps showing C, and A and B stay reachable only by their address. Nothing breaks. The
-cost is two layouts carried in the code until the choice is made — small, and deleted the day it
-is (see the rule on losing options, related below).
+The app keeps showing C, and A and B stay reachable only by their address. Nothing breaks.
 
 ## What did the phone do before, and what did that cost?
 
@@ -58,7 +57,8 @@ e-readers) for this; most of them have no page tools to place.
   its own. All three obey it.
 - **A phone's tools open from the bottom** — the verse drawer rises from the bottom on a phone,
   and the thumb is already there.
-- **The losers are deleted** — the layouts that lose are removed from the app, not hidden.
+- **The losers stay tryable** — the layouts that lose stay on the decision page, reachable by
+  their address, so the reason the choice was a choice can still be felt.
 
 ## What are the options?
 

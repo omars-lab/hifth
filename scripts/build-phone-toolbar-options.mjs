@@ -132,7 +132,7 @@ const html = `<!doctype html>
 <p class="lead">On a computer, the tools for noting the page — bookmark, note, mistake, vowel-sign, word — sit in a
 bar of their own above the page. A phone has no mouse, no keyboard and little room, so that bar does not fit.
 Three ways of fitting it are built below, each in a real copy of the app. Hold each one and try a tool on the page;
-the one that feels right is the answer.</p>
+the owner chose C this way.</p>
 
 <dl class="glossary">
   <dt>Mus'haf</dt><dd>the printed Qur'an, shown here one page at a time.</dd>
@@ -149,7 +149,7 @@ whether you could tell which tool was on.</p>
 <div class="phones">
 ${OPTIONS.map(
   (o) => `  <section class="opt${o.id === "c" ? " rec" : ""}">
-    <h3>${esc(o.name)}${o.id === "c" ? '<span class="rec-tag">recommended</span>' : ""}</h3>
+    <h3>${esc(o.name)}${o.id === "c" ? '<span class="rec-tag">chosen</span>' : ""}</h3>
     <p class="gist">${esc(o.gist)}</p>
     <div class="frame"><div class="away" data-away>This copy of the app loads on the app's own site. From a clone, run the app and open it with <b>?phonebar=${o.id}</b> in the address.</div><iframe data-bar="${o.id}" title="${esc(o.name)}" loading="lazy" hidden></iframe></div>
     <a class="open" data-open="${o.id}" hidden>Open it full screen</a>
@@ -162,12 +162,12 @@ ${OPTIONS.map(
   <tr><th></th><th>What it buys</th><th>What it costs</th><th>What it commits us to</th></tr>
 ${OPTIONS.map((o) => `  <tr><th>${esc(o.name)}</th><td>${list(o.pros)}</td><td>${list(o.cons)}</td><td>${esc(o.then)}</td></tr>`).join("\n")}
 </table></div>
-<p><b>Recommended: C.</b> It is the only one that keeps the whole page in view while reading and still leaves the
+<p><b>Chosen: C</b>, by the owner on 26 September 2026. It is the only one that keeps the whole page in view while reading and still leaves the
 tools by the thumb with a line saying what a tap will do; the bottom row it hides is not needed while noting.</p>
 
-<h2>What happens if nobody decides?</h2>
-<p>The app keeps showing C, and the other two stay reachable only by their address. Nothing breaks. The cost is two
-extra layouts carried in the app until the choice is made.</p>
+<h2>What happens to A and B?</h2>
+<p>They stay here, still tryable, so the reason C was a choice can still be felt. The app shows C; the other two open
+only from this page.</p>
 
 <h2>Where are the reasons?</h2>
 <p>In <a href="../decisions/phone-toolbar.md">the decision record</a>, with what the app did before, what else was

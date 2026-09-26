@@ -222,6 +222,7 @@ This goes to the owner as its own decision, with all three running on the decisi
 [decision page](phone-toolbar-options.html), with the reasons in the
 [record](../decisions/phone-toolbar.md). A tool picked on a phone now works by a tap on the
 page; the vowel-sign tool takes the sign nearest the tap, since there is no pointer to aim.
+**Chosen: C, the tray** (owner, 2026-09-26); A and B stay tryable on the decision page.
 
 ## How will we know each step worked?
 
