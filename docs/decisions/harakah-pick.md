@@ -28,6 +28,8 @@ What follows for the build: the mistake tool's second tap opens the word tool's 
 than the plain tray, the tray and the named row (C) leave the app, and the letters of every
 word need their own shapes, which today exist for one verse only. Until they do, the word tool
 opens each word into its signs and the whole word, and the letters come with the shapes.
+Where those shapes come from was its own question, settled 2026-09-26: cut from the print
+itself, checked by eye ([letter-parts](letter-parts.md)).
 
 *Before that, updated 2026-09-25: the three ways were made three interchangeable pieces of code
 behind one shared shape (`packages/core/src/decision-options/harakah-pick.ts`, `OptionA` to

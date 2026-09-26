@@ -1346,7 +1346,38 @@
         "mark-placement",
         "selection-drawer",
         "diff-mark-tint",
-        "phone-toolbar"
+        "phone-toolbar",
+        "letter-parts"
+      ]
+    },
+    {
+      "id": "letter-parts",
+      "question": "How should the word tool show a word's letters, when the print draws each word as one piece?",
+      "status": "decided",
+      "options": [
+        {
+          "id": "A",
+          "label": "Cut the print where one letter joins the next, checked by eye"
+        },
+        {
+          "id": "B",
+          "label": "Shape every word in a typeface and use its letters"
+        },
+        {
+          "id": "C",
+          "label": "Name the letters, with no picture"
+        },
+        {
+          "id": "D",
+          "label": "Leave letters out for now"
+        }
+      ],
+      "doc": "docs/decisions/letter-parts.md",
+      "decided": "A",
+      "by": "omar",
+      "date": "2026-09-26",
+      "related": [
+        "harakah-pick"
       ]
     },
     {
