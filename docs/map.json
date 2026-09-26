@@ -1333,9 +1333,24 @@
           "note": "Dataset + curated edges + verbatim twins → 114 shards. Reverse edges are generated here, so an edge stated once is navigable from both ends."
         },
         {
+          "file": "packages/etl/scripts/build-adjacency.mjs",
+          "symbol": "spansOf",
+          "note": "Which words a look-alike pair shares, and the whole-verse twins (TWIN_FLOOR), both found in the print's own words with each lone 'and' glued on — decision adjacency-span-source = D, 2026-09-26. Before that both came from the corpus morphology, which made this tree a GPL derivative; the print keeps every one of those spans on the same words and the same 74 twin clusters, which lib/print-words.test.mjs holds it to."
+        },
+        {
+          "file": "packages/etl/scripts/build-print-word-ids.mjs",
+          "symbol": "glueAnd",
+          "note": "Reads the MushafDatabase ligature pages from the local cache (never downloads) and writes data/pages/print-word-ids.json: per verse, one [first, last, id] triple per word, same id = same letters, 'and' glued. Numbers only, no text, so the build that CI reruns can find runs without the 350 MB cache. Rerun only when the pinned upstream moves."
+        },
+        {
+          "file": "packages/etl/scripts/lib/print-words.mjs",
+          "symbol": "openPrintWords",
+          "note": "The one reader of print-word-ids.json, and glueAnd, the one rule for joining a lone 'and' — shared by the generator and tested on its own."
+        },
+        {
           "file": "packages/etl/scripts/build-verbatim-twins.mjs",
           "symbol": "FLOOR_WORDS",
-          "note": "The feeder that closed the whole-verse gap from our OWN bytes. The dataset above is built from recurring *phrases*, and against the outside ruler (probe-qul-rulers.mjs) it turned out to miss almost every whole verse repeated word-for-word in two places — the hardest of all for a memoriser, a verse repeated whole with only its surroundings to tell the two apart. This finds them by grouping every verse by its rasm skeleton (`wordsByAyah` → `normalise` in morphology.mjs, the same per-word comparison build-adjacency scores on) and writing `data/mutashabihat/verbatim-twins.json` — 636 pairs of verse NUMBERS, no text. build-adjacency reads it and joins each pair as a `twin` edge, so the span pass washes the whole verse. Structurally the sibling of build-alignment.mjs: a build step that writes a committed intermediate a later writer consumes, not an assets/** writer. Floor of four words is where coincidence (الم, short refrains) stops and confusion starts; the ruler's own strong line agrees (636 found against its 635), which is what says the set is complete, not lucky. Nothing of the ruler is copied — it only confirmed. Decision: similar-ayah-enrichment (decided D)."
+          "note": "Since 2026-09-26 a WITNESS, not the feeder: build-adjacency finds the twins in the print's own words, and lib/print-words.test.mjs checks they match this file's 74 clusters. Kept for that check. Before: the feeder that closed the whole-verse gap from our OWN bytes. The dataset above is built from recurring *phrases*, and against the outside ruler (probe-qul-rulers.mjs) it turned out to miss almost every whole verse repeated word-for-word in two places — the hardest of all for a memoriser, a verse repeated whole with only its surroundings to tell the two apart. This finds them by grouping every verse by its rasm skeleton (`wordsByAyah` → `normalise` in morphology.mjs, the same per-word comparison build-adjacency scores on) and writing `data/mutashabihat/verbatim-twins.json` — 636 pairs of verse NUMBERS, no text. build-adjacency reads it and joins each pair as a `twin` edge, so the span pass washes the whole verse. Structurally the sibling of build-alignment.mjs: a build step that writes a committed intermediate a later writer consumes, not an assets/** writer. Floor of four words is where coincidence (الم, short refrains) stops and confusion starts; the ruler's own strong line agrees (636 found against its 635), which is what says the set is complete, not lucky. Nothing of the ruler is copied — it only confirmed. Decision: similar-ayah-enrichment (decided D)."
         },
         {
           "file": "packages/core/src/quran-meta.ts",

@@ -35,7 +35,7 @@ from them, and some of it inherits their terms.
 | The app bundle, `apps/web/dist/`, about 120 KB gz | **GPL-3.0-or-later** | Ours |
 | `apps/web/public/assets/roots/**` | **GPL-3.0** (inherited) | The Quranic Arabic Corpus's |
 | `apps/web/public/assets/skins/**` | **CC BY 4.0** (inherited) | quran-tajweed's |
-| `apps/web/public/assets/adj/**` | **GPL-3.0** (inherited) *and* free use with attribution (inherited) *and* **CC BY** (inherited) | The Quranic Arabic Corpus's *and* Waqar144's *and* Tanzil's |
+| `apps/web/public/assets/adj/**` | free use with attribution (inherited) *and* **CC BY** (inherited) *and* Sadaqa-e-Jaria free use (inherited) | Waqar144's *and* Tanzil's *and* MushafDatabase's |
 | `apps/web/public/assets/words/**` | **GPL-3.0-or-later** | Ours — rectangles we measured |
 | `apps/web/public/assets/marks/**` | **GPL-3.0-or-later** | Ours — rectangles we measured |
 | `apps/web/public/assets/letters/**` | **GPL-3.0-or-later** | Ours — dividing lines we measured |
@@ -102,6 +102,17 @@ sentence was quietly standing in for.
 
 ## Why the adjacency shards have three parents, and not one
 
+**Since 2026-09-26 the corpus is no longer one of them.** The spans, and the whole-verse twins,
+are now found in the print's own words — MushafDatabase's numbering, the same upstream the word
+boxes come from, released as Sadaqa-e-Jaria (free to use, derive and publish) — with each lone
+"and" glued onto the word after it, which is the one habit the corpus and the print differ on.
+Glued, the print keeps every span the corpus gave, on the same words, and the same 74 twin
+clusters; a test holds it to both. The builder no longer imports the corpus reader at all, so
+the notice check would fail the day it did. That was decision `adjacency-span-source` = D. The
+three parents are now Waqar144 (the pairings), Tanzil (the juz flag) and MushafDatabase (the
+spans and twins). What follows is how the corpus came to be a parent, kept because the way it
+arrived — as a feature, with no licence edit — is the lesson.
+
 `apps/web/public/assets/adj/**` carried one upstream for most of this project's life, and the
 row above said so: the mutashabihat pairings are Waqar144's, free to use with attribution.
 That stopped being true when the shards started carrying **spans** — which words of an ayah
@@ -139,10 +150,9 @@ The notice travels with this data too, as of 2026-08-16. `assets/adj/<edition>/N
 written by the build beside the shards, and it names **both** parents — the way to get a
 two-parent row wrong twice is to fix it once, and a notice that discharged the GPL half while
 dropping Waqar144's attribution would have been the same one-parent mistake wearing the other
-hat. Since 2026-09-01 it names all three. The corpus's copyright block in it is not a copy of the one beside the root shards: both
-are read out of the source file on every build by the same function, because the corpus's own
-terms ask that its notice be *reproduced*, and two readers of one quotation is precisely how a
-reproduction stops being one.
+hat. Since 2026-09-01 it names all three; since 2026-09-26 the three are Waqar144, Tanzil and
+MushafDatabase, and the corpus's copyright block is no longer in it, because nothing of the
+corpus reaches these shards.
 
 Nothing had noticed any of this, which is its own finding. `gate:notices` now traces what each
 builder actually reads, in imports rather than in prose, and fails the build when a shipped
