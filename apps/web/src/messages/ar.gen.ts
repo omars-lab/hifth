@@ -228,6 +228,8 @@ const messages: Catalog = {
   scopeHizb: "حزب",
   scopeJuz: "جزء",
   scopePage: "صفحة",
+  scrubSlowHint: "اسحب إلى الأعلى للإبطاء",
+  scrubSpeed: (d) => select(d.speed, { half: "نصف السرعة", quarter: "ربع السرعة", tenth: "عُشر السرعة", other: "السرعة الكاملة" }),
   selected: (d) => "حُدّدت " + d.label,
   selectionCleared: "أُلغي التحديد",
   shareAriaAyah: "شارك هذه الآية كرابط",

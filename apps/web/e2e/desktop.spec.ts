@@ -1980,6 +1980,19 @@ test.describe("Hifth · the red seam lies on the fold", () => {
     expect(Math.abs(at.centre - at.crease), "the seam is off the crease").toBeLessThan(1.5);
     expect(at.width).toBeGreaterThan(4);
   });
+
+  test("the page bar keeps the plain drag and its magnifier: no thumb pad, no strip of marks", async ({ page }) => {
+    await page.goto("/#/hafs-kfqc/p7");
+    const slider = page.getByRole("slider");
+    await expect(slider).toBeVisible();
+    await expect(page.getByTestId("scrub-pad")).toHaveCount(0);
+    const box = (await slider.boundingBox())!;
+    await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+    await page.mouse.down();
+    await page.mouse.move(box.x + box.width / 2 - 60, box.y - 160, { steps: 6 });
+    await expect(page.getByTestId("scrub-strip")).toHaveCount(0);
+    await page.mouse.up();
+  });
 });
 
 async function tapAyahAt(page: Page, selector: string): Promise<void> {

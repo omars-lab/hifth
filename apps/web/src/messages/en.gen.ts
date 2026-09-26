@@ -228,6 +228,8 @@ const messages: Catalog = {
   scopeHizb: "Hizb",
   scopeJuz: "Juz",
   scopePage: "Page",
+  scrubSlowHint: "Slide up to go slower",
+  scrubSpeed: (d) => select(d.speed, { half: "Half speed", quarter: "Quarter speed", tenth: "Tenth speed", other: "Full speed" }),
   selected: (d) => "Selected " + d.label,
   selectionCleared: "Selection cleared",
   shareAriaAyah: "Share this ayah as a link",

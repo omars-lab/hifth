@@ -29,6 +29,8 @@
   "firstPage": "First available page · Page {page}",
   "lastPage": "Last available page · Page {page}",
   "nearestPageN": "Nearest available page · Page {page}",
+  "scrubSpeed": "{speed, select, half{Half speed} quarter{Quarter speed} tenth{Tenth speed} other{Full speed}}",
+  "scrubSlowHint": "Slide up to go slower",
   "selectionCleared": "Selection cleared",
   "selected": "Selected {label}",
   "highlighted": "Highlighted {span}",
