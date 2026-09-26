@@ -75,6 +75,44 @@ test.describe("Hifth · the harakat and word tools", () => {
     await expect(loupe(page)).toHaveCount(0);
   });
 
+  test("K: the bookmark corner steps aside, so a sign under it can be reached", async ({ page }) => {
+    await page.goto("/#/hafs-kfqc/p7");
+    await expect(pageSvg(page, 7)).toBeVisible();
+    await page.keyboard.press("KeyK");
+
+    // A sign whose middle lies under the corner, found on screen.
+    const under = await page.evaluate(async () => {
+      const fold = [...document.querySelectorAll<HTMLElement>("[data-bookmark-fold]")].find(
+        (f) => f.getBoundingClientRect().width > 0,
+      )!;
+      const f = fold.getBoundingClientRect();
+      const res = await fetch(new URL("assets/marks/hafs-kfqc/7.json", document.baseURI));
+      const shard = (await res.json()) as { marks: Record<string, { r: number[] }[]> };
+      const svg = [...document.querySelectorAll<SVGSVGElement>('svg[aria-labelledby="page-label-7"]')].find(
+        (s) => s.getBoundingClientRect().width > 0,
+      )!;
+      const ctm = svg.getScreenCTM()!;
+      for (const [ayah, list] of Object.entries(shard.marks))
+        for (const [i, m] of list.entries()) {
+          const pt = svg.createSVGPoint();
+          pt.x = m.r[0]! + m.r[2]! / 2;
+          pt.y = m.r[1]! + m.r[3]! / 2;
+          const at = pt.matrixTransform(ctm);
+          if (at.x > f.left + 2 && at.x < f.right - 2 && at.y > f.top + 2 && at.y < f.bottom - 2)
+            return { x: at.x, y: at.y, id: `${ayah}/${i}` };
+        }
+      return null;
+    });
+    test.skip(under === null, "no sign lies under the corner on this layout");
+    await page.mouse.move(under!.x - 10, under!.y + 10);
+    await page.mouse.move(under!.x, under!.y, { steps: 4 });
+    await expect(loupe(page)).toHaveAttribute("data-sign-loupe", under!.id);
+
+    // Back on the select tool, the corner is the corner again.
+    await page.keyboard.press("KeyV");
+    await expect(page.locator("[data-bookmark-overlay][data-aside]")).toHaveCount(0);
+  });
+
   test("W: a tap opens the word into its parts, and a part picked takes a note", async ({ page }) => {
     await page.goto("/#/hafs-kfqc/p7");
     await expect(pageSvg(page, 7)).toBeVisible();
