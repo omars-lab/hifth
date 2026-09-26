@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { Bookmark } from "@hifth/core";
 import { readBookmarks, readSeam, writeBookmarks, writeSeam } from "./bookmark-store";
 
@@ -32,10 +32,17 @@ export function useBookmarks(
     };
   }, []);
 
+  // Writes go one after another. Each opens the store on its own, and two
+  // opened close together (a drop, then the rename a moment later) could
+  // otherwise finish in either order — and the older set, landing last, would
+  // quietly put the old name back.
+  const queue = useRef<Promise<unknown>>(Promise.resolve());
   const commit = useCallback(
     (next: Bookmark[], said: string) => {
       setBookmarks(next);
-      void writeBookmarks(next).then((ok) => announce(ok ? said : notSaved));
+      queue.current = queue.current
+        .then(() => writeBookmarks(next))
+        .then((ok) => announce(ok ? said : notSaved));
     },
     [announce, notSaved],
   );

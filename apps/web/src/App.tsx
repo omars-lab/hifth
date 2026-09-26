@@ -33,6 +33,7 @@ import {
   type AyahRange,
   type AyahRef,
   type AyahRootsShard,
+  type Bookmark,
   type Edge,
   type FieldId,
   type JumpTarget,
@@ -75,6 +76,7 @@ import { CoachMarks } from "./components/CoachMarks";
 import { Colophon } from "./components/Colophon";
 import { RevisionMap } from "./components/RevisionMap";
 import { BookmarkRibbons } from "./components/BookmarkRibbons";
+import { UndoBar } from "./components/UndoBar";
 import { BookmarkDrawer } from "./components/BookmarkDrawer";
 import { BookmarkShelf } from "./components/BookmarkShelf";
 import { useBookmarks, useSeam } from "./useBookmarks";
@@ -962,10 +964,38 @@ export function App(): JSX.Element {
     [announce, bookmarks, commitBookmarks, t],
   );
 
+  // Unfolding a corner lifts every bookmark on the page at once, with no
+  // question first; the bookmarks it lifted wait here for a few seconds so one
+  // tap on "Undo" puts them back (docs/decisions/bookmark-fold.md, 2026-09-25).
+  const [unfolded, setUnfolded] = useState<{ lifted: Bookmark[]; said: string } | null>(null);
+  const unfold = useCallback(
+    (p: number) => {
+      const lifted = bookmarksOnPage(bookmarks, p);
+      if (lifted.length === 0) return;
+      const gone = new Set(lifted.map((b) => b.id));
+      const said = t.bmUnfolded(lifted.length);
+      commitBookmarks(
+        bookmarks.filter((b) => !gone.has(b.id)),
+        said,
+      );
+      if (drawerId && gone.has(drawerId)) setDrawerId(null);
+      setUnfolded({ lifted, said });
+    },
+    [bookmarks, commitBookmarks, drawerId, t],
+  );
+  const undoUnfold = () => {
+    if (!unfolded) return;
+    const held = new Set(bookmarks.map((b) => b.id));
+    commitBookmarks([...bookmarks, ...unfolded.lifted.filter((b) => !held.has(b.id))], t.bmRestored);
+    setUnfolded(null);
+  };
+  const endUndo = useCallback(() => setUnfolded(null), []);
+
   const ribbonsFor = (p: number) => (
     <BookmarkRibbons
       bookmarks={bookmarksOnPage(bookmarks, p)}
       onDrop={() => dropOn(p)}
+      onUnfold={() => unfold(p)}
       onOpen={setDrawerId}
       freshId={freshId}
       seam={seamPage === p}
@@ -2024,6 +2054,7 @@ export function App(): JSX.Element {
         fisheye={fisheye}
       />
 
+      {unfolded && <UndoBar said={unfolded.said} onUndo={undoUnfold} onDone={endUndo} />}
       <LiveAnnouncer message={message} />
     </div>
   );

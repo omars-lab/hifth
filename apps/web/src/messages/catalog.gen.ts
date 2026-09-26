@@ -49,10 +49,14 @@ export interface Catalog {
   readonly bmNotSaved: string;
   readonly bmOpen: (d: { readonly name: string | number; readonly page: string | number }) => string;
   readonly bmRenamed: (d: { readonly name: string | number }) => string;
+  readonly bmRestored: string;
   readonly bmRibbon: (d: { readonly name: string | number }) => string;
   readonly bmSave: string;
   readonly bmSaveName: string;
   readonly bmSeam: string;
+  readonly bmUndo: string;
+  readonly bmUnfold: (d: { readonly count: number; readonly countText: string | number }) => string;
+  readonly bmUnfolded: (d: { readonly count: number; readonly countText: string | number }) => string;
   readonly chipAria: (d: { readonly direction: string | number; readonly countText: string | number }) => string;
   readonly clearSelection: string;
   readonly close: string;
