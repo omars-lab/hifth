@@ -186,6 +186,11 @@ const UNBUCKETED = {
   // tree carries no inherited terms and the source is a courtesy pointer, not a
   // condition.
   marks: { verdict: "ours", source: "hafs-kfqc" },
+  // Where one letter ends and the next begins inside each word: dividing lines
+  // this project found in the same ligature print's ink. The corpus spelling
+  // that says how many letters to look for is read at build time and never
+  // ships; neither does a byte of the print. Same terms as the marks.
+  letters: { verdict: "ours", source: "hafs-kfqc" },
   // Ships the whole 6,236-entry page table verbatim, which is the third of the
   // three outputs the pagination question covers. Having a row in the licence
   // table is what it was missing; what the row cannot yet say is settled.
