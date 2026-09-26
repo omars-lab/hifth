@@ -1148,6 +1148,53 @@ test.describe("Hifth · one page or two, and how big", () => {
     await expect(readout(page)).toHaveText("١٠٠٪");
   });
 
+  /*
+   * #148: at 150% the two pages of an opening were drawn over each other. The
+   * row above only ever opened at page 7, where the live leaf is the right-hand
+   * page — and the stage was told "the live leaf pins at its left edge", which is
+   * only true there. On an even page the live leaf is the left-hand one, so both
+   * leaves grew *into* the fold and each was cut off at it: the reader saw the
+   * inner halves of two pages side by side, reading as one garbled line. Both
+   * parities, then, and a zoom past the point where a leaf is wider than its box.
+   */
+  for (const at of [106, 105]) {
+    test(`at 150% the two pages meet at the fold and do not overlap (opened at ${at})`, async ({
+      page,
+    }) => {
+      await page.goto(`/#/hafs-kfqc/p${at}`);
+      await expect(pageSvg(page, 105)).toBeVisible({ timeout: 20_000 });
+      await expect(pageSvg(page, 106)).toBeVisible();
+      // Each page's inner edge at fit is its side of the fold (the two sit a few
+      // pixels apart there, across the gutter's core).
+      const rightFold = (await restingBox(page, 105)).x;
+      const leftFit = await restingBox(page, 106);
+      const leftFold = leftFit.x + leftFit.width;
+
+      await zoomBtn(page, "in").click();
+      await zoomBtn(page, "in").click();
+      await expect.poll(() => scaleOf(page, 105)).toBeCloseTo(1.5, 2);
+      await expect.poll(() => scaleOf(page, 106)).toBeCloseTo(1.5, 2);
+
+      const right = await restingBox(page, 105);
+      const left = await restingBox(page, 106);
+      expect(Math.abs(right.x - rightFold), "the right-hand page starts at the fold").toBeLessThan(3);
+      expect(Math.abs(left.x + left.width - leftFold), "the left-hand page ends at the fold").toBeLessThan(3);
+
+      // And the part hanging over the desk is drawn, not cut at the leaf's box:
+      // a point just inside each page's outer edge is that page.
+      const hits = await page.evaluate(
+        ([rx, lx, y]) =>
+          [rx, lx].map((x) => document.elementFromPoint(x, y)?.closest("svg")?.getAttribute("aria-labelledby")),
+        [right.x + right.width - 20, left.x + 20, right.y + right.height / 2] as const,
+      );
+      expect(hits).toEqual(["page-label-105", "page-label-106"]);
+      // The desk stops the page at the window, with no sideways scroll.
+      expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(
+        page.viewportSize()!.width,
+      );
+    });
+  }
+
   test("the ends of the ladder are stated, not discovered by clicking", async ({ page }) => {
     await page.goto("/#/hafs-kfqc/p7");
     await expect(pageSvg(page, 7)).toBeVisible({ timeout: 20_000 });

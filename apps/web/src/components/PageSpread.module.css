@@ -46,6 +46,10 @@
   justify-content: center;
   min-inline-size: 0;
   min-block-size: 0;
+  /* The desk's edge is where a magnified page stops (#148). `clip`, not
+     `hidden`: nothing here should become a scroll box, and the window must not
+     grow a sideways scrollbar for a page hanging over the desk. */
+  overflow-x: clip;
 
   /*
    * The field, drawn once and here.
@@ -103,6 +107,14 @@
   min-inline-size: 0;
   min-block-size: 0;
   overflow: hidden;
+}
+
+/* Except while a magnified leaf hangs over the desk (#148): then the book is
+   wider than this box on purpose, and the leaves clip themselves at the fold,
+   head and foot (PageStage.module.css, `data-spills`). The desk still stops
+   them at the window's edge. */
+.book:has([data-spills]) {
+  overflow: visible;
 }
 
 /*

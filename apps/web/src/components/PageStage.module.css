@@ -49,6 +49,22 @@
   padding-right: 0;
 }
 
+/* A magnified leaf of an open book hangs over the desk on its outer side (#148).
+   It is pinned at the fold, so the part wider than its box is all on the
+   fore-edge side; cutting it at the box would show only the half of each page
+   nearest the gutter, and the two halves read as one garbled line. So the clip
+   opens outward and stays shut at the fold and at the head and foot — the page
+   still pans up and down inside its own height. */
+.stage[data-bound][data-spills] {
+  overflow: visible;
+}
+.stage[data-bound][data-spills][data-leaf="right"] {
+  clip-path: inset(0 -100vw 0 0);
+}
+.stage[data-bound][data-spills][data-leaf="left"] {
+  clip-path: inset(0 0 0 -100vw);
+}
+
 /* The inset above is the *visible* leaf's, and there is only one stage — so the
    moment two leaves of opposite parity are painted together it is wrong for one
    of them. That is every odd→even turn, and it was unreachable until Loop 4b:
