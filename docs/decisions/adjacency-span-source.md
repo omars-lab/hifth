@@ -1,6 +1,20 @@
 # Which words does the app line look-alikes up on?
 
-**Status:** open — asked 2026-09-03.
+**Status:** decided — **D**, by Omar, 2026-09-26. Asked 2026-09-03.
+
+**Decision:** count the look-alike runs in the printed page's own words, with each lone "and" glued
+back onto the word after it. It keeps every run the app colours today, on the same words, and reads
+only the print, so the corpus's share-alike licence no longer reaches the look-alike feature.
+
+**Why D:** once the owner asked why the two word lists differ, the answer was one habit — the print
+leaves a gap after "and" and lists it as a word; the spelling and grammar attach it. With that gap
+accounted for, A's only merit (today's runs) and B's only merit (no licence) come together, and
+the 150 extra runs B and C would add turn out to be a side effect of counting the gap as a word,
+not something a hafiz asked for. The owner: "if we had logic to accomodate for this gap, would that
+change our decision" — then "yes record D".
+
+**Still to do:** the app's shipped look-alike runs are still counted in the corpus. Switching the
+build to the glued count is the follow-up; this page's measurement is the rule it should use.
 
 **Picture:** <https://blog.bytesofpurpose.com/hifth/docs/design/adjacency-span-source.html> — the
 two ways of finding the shared runs, each drawn on the real pages where they differ: the runs
