@@ -22,6 +22,28 @@ and both of those are the decision being made by whoever wrote the page.
 a section, and a short decision should stay short — but each one that goes unanswered should
 go unanswered *on purpose*, and you should be able to say why.
 
+## First, and highlighted: what does it change for a hafiz?
+
+Hifth is for someone memorising the Qur'an, phone in hand, mid-revision. Every decision page
+says what the choice does **for that person**, and says it before the options, where a reader
+cannot miss it. Setting aside whether the text is correct (that is the validation work, and a
+separate track), the one question is: *does this help a hafiz recite without slipping?*
+
+- **Near the top, in a highlighted box:** who this touches, and when in a revision session
+  they would notice it. One or two sentences.
+- **On every option, a highlighted line** beginning *For a hafiz:* — what that option catches
+  or misses, adds or takes away, in the hafiz's terms: a slip caught or not, a look-alike
+  offered or not, a thumb's reach, time lost mid-recitation. Not "better data", not "cleaner".
+- **Say it when the answer is "barely".** A decision that hardly touches a hafiz is worth
+  knowing; it tells the reader to decide it quickly, or leave it.
+- **Rank against what a hafiz needs most**, in this order unless evidence says otherwise: the
+  look-alike verses and the words that differ between them; marking a slip exactly where it
+  happened; seeing what has not been revised lately; getting back to one's place; comfort.
+
+The highlight is the look of a highlighter pen on the page — the class `hafiz` in the pages'
+styles — so the reader's eye lands on these lines first, and a page without them is plainly
+missing something.
+
 ## The questions a record has to answer
 
 **1 · What is being decided?** One question, in plain words, that a person could answer with
