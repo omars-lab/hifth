@@ -154,6 +154,14 @@ export interface Catalog {
   readonly nearestPageN: (d: { readonly page: string | number }) => string;
   readonly nextPage: string;
   readonly noConcordance: string;
+  readonly noteBox: (d: { readonly label: string | number }) => string;
+  readonly noteDelete: string;
+  readonly noteDeleted: string;
+  readonly noteDone: string;
+  readonly noteLoaded: (d: { readonly n: number; readonly nText: string | number }) => string;
+  readonly notePin: (d: { readonly label: string | number }) => string;
+  readonly noteRestored: string;
+  readonly noteSaved: string;
   readonly "notices.capped.body": string;
   readonly "notices.capped.title": string;
   readonly "notices.install-ios.body": string;
@@ -259,6 +267,8 @@ export interface Catalog {
   readonly toolBookmark: string;
   readonly toolBookmarkHint: string;
   readonly toolHighlight: string;
+  readonly toolNote: string;
+  readonly toolNoteHint: string;
   readonly toolOn: (d: { readonly name: string | number }) => string;
   readonly toolSelect: string;
   readonly toolbarLabel: string;

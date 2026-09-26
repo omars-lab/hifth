@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { Bookmark } from "@hifth/core";
-import { readBookmarks, readSeam, writeBookmarks, writeSeam } from "./bookmark-store";
+import type { Bookmark, Note } from "@hifth/core";
+import { readBookmarks, readNotes, readSeam, writeBookmarks, writeNotes, writeSeam } from "./bookmark-store";
 
 /**
  * The reader's bookmarks, held for the app: loaded from the phone once, and every
@@ -86,4 +86,46 @@ export function useSeam(page: number | null): number | null {
   }, [page]);
 
   return seam;
+}
+
+/**
+ * The reader's notes, held like the bookmarks: read once, every change written
+ * back whole, one write after another. `said` may be empty, for a change that
+ * needs no spoken line of its own (the box opening on a fresh pin).
+ */
+export function useNotes(
+  announce: (line: string) => void,
+  notSaved: string,
+): {
+  notes: readonly Note[];
+  commit: (next: Note[], said: string) => void;
+} {
+  const [notes, setNotes] = useState<readonly Note[]>([]);
+
+  useEffect(() => {
+    let live = true;
+    void readNotes().then((set) => {
+      if (!live) return;
+      setNotes((now) => (now.length === 0 ? set : [...set, ...now.filter((n) => !set.some((s) => s.id === n.id))]));
+    });
+    return () => {
+      live = false;
+    };
+  }, []);
+
+  const queue = useRef<Promise<unknown>>(Promise.resolve());
+  const commit = useCallback(
+    (next: Note[], said: string) => {
+      setNotes(next);
+      queue.current = queue.current
+        .then(() => writeNotes(next))
+        .then((ok) => {
+          if (!ok) announce(notSaved);
+          else if (said) announce(said);
+        });
+    },
+    [announce, notSaved],
+  );
+
+  return { notes, commit };
 }

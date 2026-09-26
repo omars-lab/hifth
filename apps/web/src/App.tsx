@@ -7,6 +7,11 @@ import {
   dropBookmark,
   liftBookmark,
   mergeBookmarks,
+  mergeNotes,
+  addNote,
+  editNote,
+  removeNote,
+  restoreNote,
   moveBookmark,
   openBookmark,
   parseBookmarkFile,
@@ -34,6 +39,7 @@ import {
   type AyahRef,
   type AyahRootsShard,
   type Bookmark,
+  type Note,
   type Edge,
   type FieldId,
   type JumpTarget,
@@ -61,7 +67,8 @@ import { useT } from "./i18n";
 import { useHashRouter } from "./useHashRouter";
 import { DESKTOP_QUERY, useMediaQuery } from "./useMediaQuery";
 import { PageStage, type PageStageHandle, type PageTool } from "./components/PageStage";
-import { PageToolbar, TOOL_KEYS } from "./components/PageToolbar";
+import { PageToolbar, TOOL_KEYS, toolName } from "./components/PageToolbar";
+import { NoteBox } from "./components/NoteBox";
 import { PageSpread } from "./components/PageSpread";
 import { EdgeGrabRails, type EdgeTurnDriver } from "./components/EdgeGrabRails";
 import { DesktopChrome } from "./components/DesktopChrome";
@@ -80,7 +87,7 @@ import { BookmarkRibbons } from "./components/BookmarkRibbons";
 import { UndoBar } from "./components/UndoBar";
 import { BookmarkDrawer } from "./components/BookmarkDrawer";
 import { BookmarkShelf } from "./components/BookmarkShelf";
-import { useBookmarks, useSeam } from "./useBookmarks";
+import { useBookmarks, useNotes, useSeam } from "./useBookmarks";
 import { LiveAnnouncer, useAnnouncer } from "./components/LiveAnnouncer";
 import { RootLens, RootLensTrigger } from "./components/RootLens";
 import { PlayTrigger } from "./components/PlayTrigger";
@@ -940,11 +947,7 @@ export function App(): JSX.Element {
       if (toolRef.current === next) return;
       toolRef.current = next;
       setToolState(next);
-      announce(
-        t.toolOn(
-          next === "select" ? t.toolSelect : next === "highlight" ? t.toolHighlight : t.toolBookmark,
-        ),
-      );
+      announce(t.toolOn(toolName(t, next)));
     },
     [announce, t],
   );
@@ -969,8 +972,18 @@ export function App(): JSX.Element {
     [bookmarks, commitBookmarks, goToPage, t],
   );
 
+  // Notes (docs/design/page-toolbar-plan.md, step 2): the note tool drops a
+  // pin at a word and opens a box beside it; the pin stays and reopens the box.
+  // Kept on the device beside the bookmarks, and carried in the same saved file
+  // (note-persistence = B, note-export-shape = C).
+  const { notes, commit: commitNotes } = useNotes(announce, t.bmNotSaved);
+  const [noteOpenId, setNoteOpenId] = useState<string | null>(null);
+  const openNote = notes.find((n) => n.id === noteOpenId) ?? null;
+  // A deleted note waits here for a few seconds so "Undo" can put it back.
+  const [deletedNote, setDeletedNote] = useState<Note | null>(null);
+
   const saveBookmarkFile = useCallback(() => {
-    const blob = new Blob([JSON.stringify(toBookmarkFile(bookmarks, Date.now()), null, 2)], {
+    const blob = new Blob([JSON.stringify(toBookmarkFile(bookmarks, Date.now(), notes), null, 2)], {
       type: "application/json",
     });
     const url = URL.createObjectURL(blob);
@@ -979,7 +992,7 @@ export function App(): JSX.Element {
     a.download = "hifth-bookmarks.json";
     a.click();
     setTimeout(() => URL.revokeObjectURL(url), 1000);
-  }, [bookmarks]);
+  }, [bookmarks, notes]);
 
   const loadBookmarkFile = useCallback(
     (text: string) => {
@@ -989,9 +1002,13 @@ export function App(): JSX.Element {
         return;
       }
       const merged = mergeBookmarks(bookmarks, file.bookmarks);
-      commitBookmarks(merged, t.bmLoaded(merged.length - bookmarks.length));
+      const said = t.bmLoaded(merged.length - bookmarks.length);
+      const mergedNotes = file.notes ? mergeNotes(notes, file.notes) : null;
+      const newNotes = mergedNotes ? mergedNotes.length - notes.length : 0;
+      commitBookmarks(merged, newNotes > 0 ? `${said} · ${t.noteLoaded(newNotes)}` : said);
+      if (mergedNotes) commitNotes(mergedNotes, "");
     },
-    [announce, bookmarks, commitBookmarks, t],
+    [announce, bookmarks, commitBookmarks, notes, commitNotes, t],
   );
 
   // Unfolding a corner lifts every bookmark on the page at once, with no
@@ -1020,6 +1037,52 @@ export function App(): JSX.Element {
     setUnfolded(null);
   };
   const endUndo = useCallback(() => setUnfolded(null), []);
+
+  // The note tool's tap: pin a fresh note, put the tool down (it is used once,
+  // like the bookmark tool) and open the box to type in.
+  const placeNote = useCallback(
+    (at: { page: number; key: string; word: number | null; x: number; y: number }) => {
+      const next = addNote(notes, at, Date.now());
+      commitNotes(next, "");
+      chooseTool("select");
+      setNoteOpenId(next[next.length - 1]!.id);
+    },
+    [notes, commitNotes, chooseTool],
+  );
+  /** Put focus back on a pin after its box closes, so the keyboard is not lost. */
+  const focusPin = (id: string) =>
+    requestAnimationFrame(() =>
+      document.querySelector<SVGElement>(`[data-note-id="${CSS.escape(id)}"]`)?.focus(),
+    );
+  // Closing keeps what was typed; a note closed empty was never written, and
+  // goes away without a word.
+  const closeNote = (text: string) => {
+    const n = openNote;
+    setNoteOpenId(null);
+    chooseTool("select");
+    if (!n) return;
+    if (text.trim() === "") {
+      commitNotes(removeNote(notes, n.id), "");
+      return;
+    }
+    const next = editNote(notes, n.id, text, Date.now());
+    if (next.some((x, i) => x !== notes[i])) commitNotes(next, t.noteSaved);
+    focusPin(n.id);
+  };
+  const deleteNote = () => {
+    const n = openNote;
+    setNoteOpenId(null);
+    if (!n) return;
+    commitNotes(removeNote(notes, n.id), t.noteDeleted);
+    setDeletedNote(n);
+  };
+  const undoDelete = () => {
+    if (!deletedNote) return;
+    commitNotes(restoreNote(notes, deletedNote), t.noteRestored);
+    setDeletedNote(null);
+  };
+  const endNoteUndo = useCallback(() => setDeletedNote(null), []);
+  const noteLabel = useCallback((n: Note) => t.notePin(t.ayahLabel(n.key) ?? n.key), [t]);
 
   const ribbonsFor = (p: number) => (
     <BookmarkRibbons
@@ -1214,6 +1277,8 @@ export function App(): JSX.Element {
         if (at !== undefined) dropWithTool(at, key);
         return;
       }
+      // Under the note tool the stage pins a note instead (`onPlaceNote`).
+      if (toolRef.current === "note") return;
       setOpenDirection(null);
       setSelectedRange(null); // a tap replaces a highlight — never both at once
       const toggledOff = selectedKeyRef.current === key;
@@ -1877,6 +1942,10 @@ export function App(): JSX.Element {
                   dragToTurn={false}
                   bound
                   tool={desktop ? tool : "select"}
+                  notes={notes}
+                  noteLabel={noteLabel}
+                  onPlaceNote={placeNote}
+                  onOpenNote={setNoteOpenId}
                   labelFor={(key) => t.ayahAria(t.ayahLabel(key) ?? key)}
                   skin={skin}
                   tajweedLookup={tajweed?.lookup ?? null}
@@ -1928,6 +1997,10 @@ export function App(): JSX.Element {
                 foldTarget={desktop ? bookRef : null}
                 bound={desktop && pageMode === "two"}
                 tool={desktop ? tool : "select"}
+                notes={notes}
+                noteLabel={noteLabel}
+                onPlaceNote={placeNote}
+                onOpenNote={setNoteOpenId}
               />
             </PageSpread>
             <HopRail
@@ -2139,7 +2212,20 @@ export function App(): JSX.Element {
         fisheye={fisheye}
       />
 
-      {unfolded && <UndoBar said={unfolded.said} onUndo={undoUnfold} onDone={endUndo} />}
+      {openNote && (
+        <NoteBox
+          key={openNote.id}
+          note={openNote}
+          label={t.ayahLabel(openNote.key) ?? openNote.key}
+          onClose={closeNote}
+          onDelete={deleteNote}
+        />
+      )}
+      {unfolded ? (
+        <UndoBar said={unfolded.said} onUndo={undoUnfold} onDone={endUndo} />
+      ) : (
+        deletedNote && <UndoBar said={t.noteDeleted} onUndo={undoDelete} onDone={endNoteUndo} />
+      )}
       <LiveAnnouncer message={message} />
     </div>
   );

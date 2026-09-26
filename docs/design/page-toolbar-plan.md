@@ -137,6 +137,17 @@ Pins stay on the page afterwards and tapping one reopens it. Notes use the repor
 already decided on, so they export in the batch file. This is the step that makes the bar pay
 for itself, because notes have no way in at all today.
 
+**Built 2026-09-25.** The fourth tool on the bar, letter N, with a pin for a pointer. A tap on
+the page drops a pin on the word under it and opens a small box beside it; the tool then goes
+back to Select. Done, Escape or a press anywhere else closes the box and keeps what was typed;
+a note closed empty is simply not kept. Tapping a pin opens it again to change it or delete it,
+and a deleted note can be brought back with Undo for a few seconds, the same way an unfolded
+corner can. A screen reader hears each pin as a button named by its verse. Notes are kept on
+the device next to the bookmarks and go into the same saved file, so saving and loading
+bookmarks carries notes too. Three things were left for later: a note sits on a word, not yet
+on a single letter or mark (that is step 3's question); the phone has no way to add a note yet,
+though a pin loaded from a file opens with a tap (step 5); and notes do not sync anywhere yet.
+
 ### 3. The mistake tool
 
 Tap a word to mark it. It turns a quiet red, like Tarteel, and is recorded in the revision

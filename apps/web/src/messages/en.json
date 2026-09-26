@@ -265,5 +265,15 @@
   "toolHighlight": "Highlight",
   "toolBookmark": "Bookmark",
   "toolOn": "{name} tool",
-  "toolBookmarkHint": "Tap a page to drop a bookmark"
+  "toolBookmarkHint": "Tap a page to drop a bookmark",
+  "toolNote": "Note",
+  "toolNoteHint": "Tap a word to pin a note",
+  "notePin": "Note on {label}",
+  "noteBox": "Your note on {label}",
+  "noteDone": "Done",
+  "noteDelete": "Delete note",
+  "noteSaved": "Note saved",
+  "noteDeleted": "Note deleted",
+  "noteRestored": "Note put back",
+  "noteLoaded": "{n, plural, one{{nText} note added from the file} other{{nText} notes added from the file}}"
 }

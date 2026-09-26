@@ -23,6 +23,8 @@ import {
   lerpView,
   marqueeRect,
   nextIntent,
+  notesOnPage,
+  TAP_SLOP_PX,
   nextWheelTurn,
   retainPages,
   MOUNTED_PAGE_CAP,
@@ -34,6 +36,7 @@ import {
   DEFAULT_HOP_ZOOM,
   WHEEL_TURN_REST,
   type Fold,
+  type Note,
   type PointerIntent,
   type Resolver,
   type SkinId,
@@ -229,10 +232,58 @@ interface PageStageProps {
    * still arrives through `onSelect`.
    */
   tool?: PageTool;
+  /**
+   * The reader's notes (step 2 of the toolbar plan). Each one on a mounted page
+   * is drawn as a pin at its spot, a button named by `noteLabel`.
+   */
+  notes?: readonly Note[];
+  noteLabel?: (note: Note) => string;
+  /** Under the note tool, a tap on a verse asks for a pin at the word under it. */
+  onPlaceNote?: (at: { page: number; key: string; word: number | null; x: number; y: number }) => void;
+  /** A pin was pressed (click, Enter or Space): open its note. */
+  onOpenNote?: (id: string) => void;
 }
 
 /** The page toolbar's tools. "select" is the app as it has always behaved. */
-export type PageTool = "select" | "highlight" | "bookmark";
+export type PageTool = "select" | "highlight" | "bookmark" | "note";
+
+const SVG_NS = "http://www.w3.org/2000/svg";
+
+/**
+ * Draw a page's note pins, replacing whatever pins it had. The pin's tip sits on
+ * the spot the reader tapped; its head stands above, in the page's own units, so
+ * it grows and shrinks with the paper like everything else drawn on it.
+ */
+function drawNotePins(
+  svg: SVGSVGElement,
+  page: number,
+  notes: readonly Note[],
+  labelOf: (note: Note) => string,
+): void {
+  svg.querySelector("g[data-note-pins]")?.remove();
+  const mine = notesOnPage(notes, page);
+  if (mine.length === 0) return;
+  const g = document.createElementNS(SVG_NS, "g");
+  g.setAttribute("data-note-pins", "");
+  for (const n of mine) {
+    const pin = document.createElementNS(SVG_NS, "g");
+    pin.setAttribute("data-note-pin", "");
+    pin.setAttribute("data-note-id", n.id);
+    pin.setAttribute("role", "button");
+    pin.setAttribute("tabindex", "0");
+    pin.setAttribute("aria-label", labelOf(n));
+    pin.setAttribute("transform", `translate(${n.x} ${n.y}) scale(1.4)`);
+    const body = document.createElementNS(SVG_NS, "path");
+    body.setAttribute("d", "M0 0C-1.2-3.2-4.4-5.2-4.4-8.6a4.4 4.4 0 0 1 8.8 0C4.4-5.2 1.2-3.2 0 0z");
+    const dot = document.createElementNS(SVG_NS, "circle");
+    dot.setAttribute("cx", "0");
+    dot.setAttribute("cy", "-8.6");
+    dot.setAttribute("r", "1.6");
+    pin.append(body, dot);
+    g.append(pin);
+  }
+  svg.append(g);
+}
 
 /**
  * Which point a button-driven zoom holds still as the paper grows.
@@ -453,6 +504,10 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
     foldTarget = null,
     bound = false,
     tool = "select",
+    notes,
+    noteLabel,
+    onPlaceNote,
+    onOpenNote,
   },
   ref,
 ): JSX.Element {
@@ -509,6 +564,18 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
   dragToTurnRef.current = dragToTurn;
   const toolRef = useRef(tool);
   toolRef.current = tool;
+  // Read by mountPage after its await, so a page that lands late still gets
+  // its pins, and by the pin listeners it wires.
+  const notesRef = useRef<readonly Note[]>(notes ?? []);
+  notesRef.current = notes ?? [];
+  const noteLabelRef = useRef(noteLabel);
+  noteLabelRef.current = noteLabel;
+  const onPlaceNoteRef = useRef(onPlaceNote);
+  onPlaceNoteRef.current = onPlaceNote;
+  const onOpenNoteRef = useRef(onOpenNote);
+  onOpenNoteRef.current = onOpenNote;
+  /** Set once the word shards can be fetched; mountPage's tap listener calls it. */
+  const placeNoteRef = useRef<(page: number, key: string, x: number, y: number) => void>(() => {});
   const onJuzTurnRef = useRef(onJuzTurn);
   onJuzTurnRef.current = onJuzTurn;
   // The wheel's two accumulators — core owns the rule, this is just where the
@@ -936,6 +1003,44 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
   }, []);
 
   /** The one-shot mount `ensurePage` de-duplicates. Never call it directly. */
+  /**
+   * The note tool's two listeners on one page. A tap under the note tool asks
+   * for a pin (a tap, not a drag: the same slop the highlighter uses), and a
+   * pin under any tool opens its note. Pins are not verses, so the
+   * highlighter's own tap finds no verse on them and selects nothing.
+   */
+  const wireNotes = useCallback((svg: SVGSVGElement, targetPage: number, hl: Highlighter) => {
+    let press: { x: number; y: number } | null = null;
+    svg.addEventListener("pointerdown", (e) => {
+      press = { x: e.clientX, y: e.clientY };
+    });
+    svg.addEventListener("pointerup", (e) => {
+      const from = press;
+      press = null;
+      if (toolRef.current !== "note" || !from) return;
+      if (Math.hypot(e.clientX - from.x, e.clientY - from.y) > TAP_SLOP_PX) return;
+      if ((e.target as Element | null)?.closest("[data-note-pin]")) return;
+      const key = hl.pressedKey;
+      const at = hl.svgPointFromClient(e.clientX, e.clientY);
+      if (!key || !at) return;
+      placeNoteRef.current(targetPage, key, at.x, at.y);
+    });
+    const pinOf = (e: Event) => (e.target as Element | null)?.closest("[data-note-pin]")?.getAttribute("data-note-id");
+    svg.addEventListener("click", (e) => {
+      const id = pinOf(e);
+      if (!id) return;
+      e.stopPropagation();
+      onOpenNoteRef.current?.(id);
+    });
+    svg.addEventListener("keydown", (e) => {
+      const id = pinOf(e);
+      if (!id || (e.key !== "Enter" && e.key !== " ")) return;
+      e.preventDefault();
+      e.stopPropagation();
+      onOpenNoteRef.current?.(id);
+    });
+  }, []);
+
   const mountPage = useCallback(
     async (targetPage: number): Promise<MountedPage | null> => {
       const layer = layerRef.current;
@@ -994,9 +1099,14 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
       if (crumb && resolver.resolve(crumb)?.page === targetPage) {
         hl.highlight(crumb, "crumb", "breadcrumb");
       }
+      // Pins, for the same reason as the crumb: the effect that redraws them
+      // runs on a change of notes, not on a page arriving.
+      const svg = svgEl as unknown as SVGSVGElement;
+      drawNotePins(svg, targetPage, notesRef.current, (n) => noteLabelRef.current?.(n) ?? n.key);
+      wireNotes(svg, targetPage, hl);
       return mp;
     },
-    [resolver],
+    [resolver, wireNotes],
   );
 
   /** Fetch + mount a page's SVG, returning its Highlighter (or null if unvendored). */
@@ -1804,6 +1914,24 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
     },
     [],
   );
+
+  // The note tool's tap, now that word shards can be fetched: the word of the
+  // tapped verse nearest the point — the one under it, or its neighbour when the
+  // tap fell in the gap between two. A page with no word shard still takes a pin, on its verse.
+  placeNoteRef.current = (targetPage, key, x, y) => {
+    void ensureWords(resolver.edition, targetPage).then((idx) => {
+      const word = idx?.wordAt(key, x, y) ?? null;
+      onPlaceNoteRef.current?.({ page: targetPage, key, word, x, y });
+    });
+  };
+
+  // Redraw the pins on every mounted page when the notes change; a page that
+  // mounts later draws its own in mountPage.
+  useEffect(() => {
+    for (const [p, mp] of pagesRef.current) {
+      drawNotePins(mp.svg, p, notes ?? [], (n) => noteLabelRef.current?.(n) ?? n.key);
+    }
+  }, [notes, status]);
 
   /**
    * Put the run's cursor on one named word, ink from the anchor to it, and — on

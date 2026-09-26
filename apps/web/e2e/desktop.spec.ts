@@ -1963,7 +1963,7 @@ test.describe("Hifth · the page tools bar", () => {
     await expect(toolBtn(page, "Highlight")).toBeFocused();
     await expect(toolBtn(page, "Highlight")).toHaveAttribute("aria-checked", "true");
     await page.keyboard.press("End");
-    await expect(toolBtn(page, "Bookmark")).toHaveAttribute("aria-checked", "true");
+    await expect(toolBtn(page, "Note")).toHaveAttribute("aria-checked", "true");
   });
 
   test("with the highlighter, a plain drag paints — no hold first", async ({ page }) => {

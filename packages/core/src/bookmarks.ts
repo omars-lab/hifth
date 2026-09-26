@@ -15,6 +15,7 @@
  */
 
 import { parseAyahKey } from "./keys.js";
+import { isNote, type Note } from "./notes.js";
 
 /** One thing that happened to a bookmark. Its timeline is a list of these. */
 export interface BookmarkEvent {
@@ -39,6 +40,11 @@ export interface BookmarkFile {
   readonly version: 1;
   readonly savedAt: number;
   readonly bookmarks: readonly Bookmark[];
+  /**
+   * The reader's notes, in the same file (note-export-shape = C: one file is
+   * the reader's whole state). Absent in files saved before notes existed.
+   */
+  readonly notes?: readonly Note[];
 }
 
 /** Longest name a ribbon carries; longer names are cut, not refused. */
@@ -185,8 +191,13 @@ export function groupBySurah(set: readonly Bookmark[]): SurahGroup[] {
 }
 
 /** The file a reader saves. */
-export function toBookmarkFile(set: readonly Bookmark[], now: number): BookmarkFile {
-  return { kind: "hifth.bookmarks", version: 1, savedAt: now, bookmarks: set };
+export function toBookmarkFile(
+  set: readonly Bookmark[],
+  now: number,
+  notes?: readonly Note[],
+): BookmarkFile {
+  const file: BookmarkFile = { kind: "hifth.bookmarks", version: 1, savedAt: now, bookmarks: set };
+  return notes && notes.length > 0 ? { ...file, notes } : file;
 }
 
 function isEvent(x: unknown): x is BookmarkEvent {
@@ -231,12 +242,14 @@ export function parseBookmarkFile(text: string): BookmarkFile | null {
   const f = raw as Record<string, unknown>;
   if (f.kind !== "hifth.bookmarks" || f.version !== 1 || !Array.isArray(f.bookmarks)) return null;
   if (!f.bookmarks.every(isBookmark)) return null;
-  return {
+  if (f.notes !== undefined && !(Array.isArray(f.notes) && f.notes.every(isNote))) return null;
+  const file: BookmarkFile = {
     kind: "hifth.bookmarks",
     version: 1,
     savedAt: typeof f.savedAt === "number" ? f.savedAt : 0,
     bookmarks: f.bookmarks.map((b) => ({ ...b, name: cleanName(b.name) })),
   };
+  return Array.isArray(f.notes) ? { ...file, notes: f.notes as Note[] } : file;
 }
 
 /**

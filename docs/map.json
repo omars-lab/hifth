@@ -1914,6 +1914,62 @@
         "validation",
         "golden-images"
       ]
+    },
+    {
+      "id": "page-notes",
+      "what": "The note tool: press N on a computer, tap a word, type a note; pins stay on the page, kept on the device and in the saved bookmark file.",
+      "layer": "L2 web",
+      "entry": [
+        {
+          "file": "packages/core/src/notes.ts",
+          "symbol": "addNote",
+          "note": "What a note is and every change to one, pure and clockless. A note sits on a word; the letter-or-mark field is there for step 3 of the toolbar plan and always false today."
+        },
+        {
+          "file": "packages/core/src/bookmarks.ts",
+          "symbol": "toBookmarkFile",
+          "note": "Notes ride in the bookmark file as an optional field, so one saved file is the reader's whole state; older files without notes still load."
+        },
+        {
+          "file": "apps/web/src/bookmark-store.ts",
+          "symbol": "writeNotes",
+          "note": "Kept on the device in the bookmarks store, written whole."
+        },
+        {
+          "file": "apps/web/src/useBookmarks.ts",
+          "symbol": "useNotes",
+          "note": "Says a note is saved only once the device has kept it."
+        },
+        {
+          "file": "apps/web/src/components/PageStage.tsx",
+          "symbol": "drawNotePins",
+          "note": "Draws the pins on the page and turns a tap under the note tool into the word under it."
+        },
+        {
+          "file": "apps/web/src/components/NoteBox.tsx",
+          "symbol": "NoteBox",
+          "note": "The box beside a pin. Keeps its own draft and hands it over once, on closing."
+        },
+        {
+          "file": "apps/web/src/App.tsx",
+          "symbol": "placeNote",
+          "note": "Ties it together: pin, open, close, delete with an Undo line."
+        }
+      ],
+      "extend": [
+        "Change what a note holds in packages/core/src/notes.ts and its isNote check together, with a test in notes.test.ts.",
+        "Change the pins or the box, then look at the real page before believing it.",
+        "Run the desktop e2e notes tests."
+      ],
+      "gates": [
+        "make ci",
+        "make e2e"
+      ],
+      "seeAlso": [
+        "select-an-ayah",
+        "word-selection",
+        "desktop-spread"
+      ]
     }
   ]
 }

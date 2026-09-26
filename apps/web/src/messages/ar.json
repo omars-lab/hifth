@@ -265,5 +265,15 @@
   "toolHighlight": "تظليل",
   "toolBookmark": "علامة",
   "toolOn": "أداة {name}",
-  "toolBookmarkHint": "انقر صفحة لتضع عليها علامة"
+  "toolBookmarkHint": "انقر صفحة لتضع عليها علامة",
+  "toolNote": "ملاحظة",
+  "toolNoteHint": "انقر كلمة لتثبّت عليها ملاحظة",
+  "notePin": "ملاحظة على {label}",
+  "noteBox": "ملاحظتك على {label}",
+  "noteDone": "تم",
+  "noteDelete": "احذف الملاحظة",
+  "noteSaved": "حُفظت الملاحظة",
+  "noteDeleted": "حُذفت الملاحظة",
+  "noteRestored": "أُعيدت الملاحظة",
+  "noteLoaded": "{n, plural, zero{لم تُضف ملاحظات} one{أُضيفت ملاحظة واحدة من الملف} two{أُضيفت ملاحظتان من الملف} few{أُضيفت {nText} ملاحظات من الملف} many{أُضيفت {nText} ملاحظة من الملف} other{أُضيفت {nText} ملاحظة من الملف}}"
 }

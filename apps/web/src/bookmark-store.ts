@@ -12,7 +12,7 @@
  * costs the reader a bookmark, never the page they are reading.
  */
 
-import type { Bookmark } from "@hifth/core";
+import type { Bookmark, Note } from "@hifth/core";
 
 const DB_NAME = "hifth.bookmarks.v1";
 const DB_VERSION = 1;
@@ -130,6 +130,59 @@ export async function writeSeam(seam: Seam): Promise<boolean> {
     db = await openDb();
     const tx = db.transaction(SETS, "readwrite");
     tx.objectStore(SETS).put({ id: SEAM_KEY, ...seam } satisfies SeamRecord);
+    await new Promise<void>((resolve, reject) => {
+      tx.oncomplete = () => resolve();
+      tx.onerror = () => reject(tx.error);
+      tx.onabort = () => reject(tx.error);
+    });
+    return true;
+  } catch {
+    return false;
+  } finally {
+    db?.close();
+  }
+}
+
+/*
+ * Notes — the reader's words pinned to the page (docs/design/page-toolbar-plan.md,
+ * step 2). Kept in the same database under their own key, written whole like
+ * the bookmarks, and carried in the same saved file.
+ */
+const NOTES_KEY = "notes";
+
+interface NotesRecord {
+  readonly id: typeof NOTES_KEY;
+  readonly notes: readonly Note[];
+}
+
+/** Every note the phone holds. Empty when there are none or no store. */
+export async function readNotes(): Promise<Note[]> {
+  if (!bookmarkStoreSupported()) return [];
+  let db: IDBDatabase | null = null;
+  try {
+    db = await openDb();
+    const tx = db.transaction(SETS, "readonly");
+    const rec = await new Promise<NotesRecord | undefined>((resolve, reject) => {
+      const req = tx.objectStore(SETS).get(NOTES_KEY);
+      req.onsuccess = () => resolve(req.result as NotesRecord | undefined);
+      req.onerror = () => reject(req.error);
+    });
+    return rec ? [...rec.notes] : [];
+  } catch {
+    return [];
+  } finally {
+    db?.close();
+  }
+}
+
+/** Replace every note at once. False when the phone refused the write. */
+export async function writeNotes(notes: readonly Note[]): Promise<boolean> {
+  if (!bookmarkStoreSupported()) return false;
+  let db: IDBDatabase | null = null;
+  try {
+    db = await openDb();
+    const tx = db.transaction(SETS, "readwrite");
+    tx.objectStore(SETS).put({ id: NOTES_KEY, notes } satisfies NotesRecord);
     await new Promise<void>((resolve, reject) => {
       tx.oncomplete = () => resolve();
       tx.onerror = () => reject(tx.error);
