@@ -633,6 +633,17 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
    * mount effect is a default, so the request wins regardless of timing.
    */
   const navigatedRef = useRef(false);
+  /**
+   * Which relocation is the latest. A hop and a deep link each wait for their
+   * page to mount before they arrive, and a page that is already mounted
+   * answers at once while one that is not waits for its fetch — so an older
+   * request for an unmounted page could land *after* a newer one and put the
+   * reader back where they had just left. That is what a cold-opened link did
+   * when a hop came in before its page had loaded: the chrome said 7 and the
+   * stage showed 1. Each relocation takes a number on the way in and gives up
+   * after its wait if a newer one has taken the next.
+   */
+  const relocateRef = useRef(0);
   const [status, setStatus] = useState<"loading" | "ready" | "error">("loading");
   /*
    * Which page the error banner is about, when that is not the `page` prop.
@@ -1758,7 +1769,9 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
         // A hop is not a turn (§4.5), so any band still crossing belongs to a
         // page relationship the reader has just left behind.
         abortTurn();
+        const ticket = ++relocateRef.current;
         const mp = await ensurePage(loc.page);
+        if (ticket !== relocateRef.current) return; // a newer move has the stage
         // A page that will not mount has to be *said*, not swallowed. Staying
         // silent leaves the previous page on the stage while the chrome and the
         // live region have already committed to the new number — the reader is
@@ -1800,6 +1813,7 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
             clampZoom(opts?.zoom ?? DEFAULT_HOP_ZOOM, MIN_ZOOM, MAX_ZOOM),
           );
           await tweenTo(target);
+          if (ticket !== relocateRef.current) return;
         }
         if (opts?.pulse !== false) {
           mp.hl.highlight(key, "sel", "selection");
@@ -1809,7 +1823,9 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
       },
       async showPage(next) {
         abortTurn(); // a deep link is a relocation, not a turn
+        const ticket = ++relocateRef.current;
         const mp = await ensurePage(next);
+        if (ticket !== relocateRef.current) return; // a newer move has the stage
         if (!mp) {
           setStatus("error"); // same contract as navigateTo above
           return;
@@ -1821,6 +1837,8 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
         arrive(next);
       },
       turnTo(next) {
+        // A turn is a move too: a hop still waiting on its page must not land on top of it.
+        relocateRef.current += 1;
         return runTurn(next);
       },
       beginEdgeTurn(step) {
