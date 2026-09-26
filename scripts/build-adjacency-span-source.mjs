@@ -575,6 +575,18 @@ ul.plain li b { color: var(--ink); }
 .vault { position: absolute; width: 0; height: 0; overflow: hidden; }
 
 @media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }
+
+  /* What a choice does for a hafiz, marked the way a reader marks a page: a highlighter stroke. */
+  .hafiz-box{margin:1.6em 0;padding:1em 1.15em;border:2px solid #e8c400;border-radius:12px;background:rgba(255,236,120,.14)}
+  .hafiz-box h2{margin-top:0}
+  .hafiz-box ul{margin:.5em 0 0;padding-left:1.1em}
+  .hafiz-box li{margin:.45em 0}
+  .hl{background-image:linear-gradient(100deg,rgba(255,221,0,0) 0%,rgba(255,221,0,.62) 1.2%,rgba(255,228,50,.48) 50%,rgba(255,221,0,.66) 98.8%,rgba(255,221,0,0) 100%);border-radius:.4em .2em .45em .25em;padding:.06em .28em;margin:0 -.08em;-webkit-box-decoration-break:clone;box-decoration-break:clone}
+  .for-hafiz{margin:.55em 0 0}
+  @media (prefers-color-scheme: dark){
+    .hafiz-box{background:rgba(250,204,21,.08);border-color:#b99a10}
+    .hl{background-image:linear-gradient(100deg,rgba(250,204,21,0) 0%,rgba(250,204,21,.34) 1.2%,rgba(250,204,21,.26) 50%,rgba(250,204,21,.36) 98.8%,rgba(250,204,21,0) 100%)}
+  }
 </style>
 ${defs}
 <div class="wrap">
@@ -615,6 +627,17 @@ ${defs}
     already read — do not. Counting the runs in the page's own words would take the whole
     look-alike feature out from under that licence and delete a conversion step besides. The
     catch is that it does not keep the same runs.</p>
+</section>
+
+<section class="hafiz-box">
+  <h2><span class="n">For the reader this is for</span>What does this change for a hafiz?</h2>
+  <p>A hafiz opens a look-alike pair to see the phrase the two verses share, which is where one slides
+  into the other. <span class="hl">In ${t.agreed.toLocaleString()} pairs nothing changes. In
+  ${t.corpusOnly} pairs the shared phrase would stop being coloured, and in ${t.printOnly} it would start.</span>
+  The licence half of this choice is one a hafiz never sees.</p>
+  <p><span class="hl">So for a hafiz the question is which ${t.corpusOnly} pairs would be lost, and
+  nobody has looked yet.</span> If they are pairs huffaz are known to confuse, that loss outweighs the
+  licence gain; if they are rarely confused, the swap costs a hafiz almost nothing.</p>
 </section>
 
 <section>
@@ -703,10 +726,12 @@ ${defs}
     <tr><th>#</th><th>Option</th><th>What it gets, what it costs</th></tr>
     <tr><td class="k">A</td><td class="lab">Keep counting in the reference's words</td>
       <td>The ${t.corpusKept.toLocaleString()} runs that ship today, the conversion step, and the
-        share-alike thread that comes with the reference. Zero work. <em>Doing nothing is A.</em></td></tr>
+        share-alike thread that comes with the reference. Zero work. <em>Doing nothing is A.</em>
+        <p class="for-hafiz"><span class="hl"><b>For a hafiz:</b> nothing changes; every pair you see coloured today stays coloured the same way.</span></p></td></tr>
     <tr><td class="k">B</td><td class="lab">Count in the printed page's own words</td>
       <td>${t.printKept.toLocaleString()} runs, no conversion step, no share-alike thread. Costs
-        ${t.corpusOnly} runs a reader can land on today to gain ${t.printOnly} new ones.</td></tr>
+        ${t.corpusOnly} runs a reader can land on today to gain ${t.printOnly} new ones.
+        <p class="for-hafiz"><span class="hl"><b>For a hafiz:</b> the coloured phrase is counted in the words of the page you memorised from, but ${t.corpusOnly} pairs you may rely on lose their colour. Worth it only if those are pairs huffaz rarely confuse.</span></p></td></tr>
   </table>
 </section>
 

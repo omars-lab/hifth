@@ -119,6 +119,18 @@
   .v-holds{color:var(--lean); background:var(--lean-soft)}
   .v-breaks{color:#9a5b2f; background:#f3e2d3}
   @media (prefers-reduced-motion: reduce){ .flap,.seam,.liftshadow{transition:none!important} .sk.settling i{animation:none} }
+
+  /* What a choice does for a hafiz, marked the way a reader marks a page: a highlighter stroke. */
+  .hafiz-box{margin:1.6em 0;padding:1em 1.15em;border:2px solid #e8c400;border-radius:12px;background:rgba(255,236,120,.14)}
+  .hafiz-box h2{margin-top:0}
+  .hafiz-box ul{margin:.5em 0 0;padding-left:1.1em}
+  .hafiz-box li{margin:.45em 0}
+  .hl{background-image:linear-gradient(100deg,rgba(255,221,0,0) 0%,rgba(255,221,0,.62) 1.2%,rgba(255,228,50,.48) 50%,rgba(255,221,0,.66) 98.8%,rgba(255,221,0,0) 100%);border-radius:.4em .2em .45em .25em;padding:.06em .28em;margin:0 -.08em;-webkit-box-decoration-break:clone;box-decoration-break:clone}
+  .for-hafiz{margin:.55em 0 0}
+  @media (prefers-color-scheme: dark){
+    .hafiz-box{background:rgba(250,204,21,.08);border-color:#b99a10}
+    .hl{background-image:linear-gradient(100deg,rgba(250,204,21,0) 0%,rgba(250,204,21,.34) 1.2%,rgba(250,204,21,.26) 50%,rgba(250,204,21,.36) 98.8%,rgba(250,204,21,0) 100%)}
+  }
 </style>
 </head>
 <body>
@@ -139,7 +151,20 @@
   <h2 class="q">What is being decided?</h2>
   <p>Should turning a page <strong>curl the leaf</strong> the way a paper book does &mdash; or keep sweeping a flat seam across the words, the way the app does today? And if it curls, what rides on the curling surface: the real words, or grey skeleton lines that become words only once the leaf is flat?</p>
 
-  <h2 class="q">Why is this being asked now?</h2>
+  <section class="hafiz-box">
+  <h2 class="q">What does this change for a hafiz?</h2>
+  <p><span class="hl">Barely. How a turn feels does not change what a hafiz keeps.</span> Many huffaz
+  remember a verse by where it sits on the page, but every option here leaves the resting page exactly
+  as printed, so none of them touches that memory. Decide it quickly, or leave it open at no cost.</p>
+  <ul>
+    <li><span class="hl"><b>A · Flat seam:</b> the words never move, so the page you memorised is never smeared mid-turn.</span></li>
+    <li><span class="hl"><b>B · Skeleton curl:</b> for a moment the page is grey bars, not the page you know. That is harmless in a quick turn, and odd if you glance at the page while it is still turning.</span></li>
+    <li><span class="hl"><b>C · Curl the real words:</b> the most like paper, and the heaviest for a phone. A stutter in the middle of a revision costs more than a plain turn does.</span></li>
+    <li><span class="hl"><b>D · Shadow lift:</b> the page stays whole; the only risk is a turn so quiet you are not sure it happened.</span></li>
+  </ul>
+</section>
+
+<h2 class="q">Why is this being asked now?</h2>
   <p>The app ships the flat seam, and the owner asked for a real corner-curl turn like a paper book. An earlier note had already considered the curl and rejected it, on three grounds worth quoting in full so this page is not pretending they don't exist:</p>
   <blockquote>A curl moves the words, and the one rule of a page turn here is that words never move. A curl also claims two pages are neighbours by the very act of curling &mdash; so it cannot tell the truth when the printed book has a leaf here that this build doesn't, or when the two pages simply face each other and nothing turns at all. And the thing the owner pointed at as a reference is a flat ribbon with a fold in it, not a curl.</blockquote>
   <p>The reason to reopen it: the skeleton-lines idea may answer the first ground (the curling surface carries grey bars, not words, so no word moves), and the four demos below are built to answer the second (each turn style is made to tell the truth in all four situations). Whether they succeed is what this page is for.</p>
