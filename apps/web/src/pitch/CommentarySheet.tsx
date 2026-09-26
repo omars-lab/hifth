@@ -13,10 +13,13 @@ export function CommentaryTrigger({
   has,
   open,
   onToggle,
+  caption,
 }: {
   has: boolean;
   open: boolean;
   onToggle: () => void;
+  /** A word under the glyph, shown when the button sits in the verse drawer. */
+  caption?: string;
 }): JSX.Element | null {
   if (!has) return null;
   return (
@@ -28,6 +31,7 @@ export function CommentaryTrigger({
       onClick={onToggle}
     >
       <span aria-hidden="true">✎</span>
+      {caption && <span data-caption="">{caption}</span>}
     </button>
   );
 }

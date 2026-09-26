@@ -1989,6 +1989,38 @@ test.describe("Hifth · the page tools bar", () => {
     await expect(page.locator("#hifth-overlay .hl-sel")).not.toHaveCount(0);
   });
 
+  // selection-drawer = D: a verse tap opens one drawer of the verse's tools,
+  // each named in words. 2:48 (#verse-55, counted from the book's start) is
+  // the last verse on the page, so a drawer that rose over the page would
+  // cover the very verse it is about.
+  test("a verse tap opens the verse's drawer below the page; Escape closes it", async ({ page }) => {
+    await page.goto("/#/hafs-kfqc/p7");
+    await expect(pageSvg(page, 7)).toBeVisible();
+    const at = await ayahTarget(page, "#verse-55");
+    await page.mouse.click(at.x, at.y);
+
+    const drawer = page.getByRole("region", { name: /2:48/ });
+    await expect(drawer).toBeVisible();
+    await expect(drawer.getByRole("button", { name: /^Play / })).toContainText("Listen");
+    await expect(drawer.getByRole("button", { name: /Share/ })).toBeVisible();
+    await expect(drawer.getByRole("button", { name: /Bookmark/ })).toBeVisible();
+    await expect(drawer.getByRole("link", { name: /on QUL/ })).toBeVisible();
+    // The tools live in the drawer, not also in the bar under the page.
+    await expect(page.locator("footer").getByRole("button", { name: /^Play / })).toHaveCount(0);
+
+    const box = (await drawer.boundingBox())!;
+    const lit = await page.locator("#hifth-overlay .hl-sel").evaluateAll((els) =>
+      els.map((el) => el.getBoundingClientRect().bottom),
+    );
+    expect(lit.length).toBeGreaterThan(0);
+    for (const bottom of lit) expect(bottom, "the drawer covers the verse").toBeLessThanOrEqual(box.y + 1);
+
+    await page.keyboard.press("Escape");
+    await expect(drawer).toHaveCount(0);
+    // Closing the drawer keeps the verse lit; only its tools step away.
+    await expect(page.locator("#hifth-overlay .hl-sel")).not.toHaveCount(0);
+  });
+
   test("one stop on the keyboard, and the arrows walk along it", async ({ page }) => {
     await page.goto("/#/hafs-kfqc/p8");
     await expect(pageSvg(page, 8)).toBeVisible();

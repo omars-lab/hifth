@@ -98,6 +98,7 @@ import { useBookmarks, useNotes, useSeam } from "./useBookmarks";
 import { LiveAnnouncer, useAnnouncer } from "./components/LiveAnnouncer";
 import { RootLens, RootLensTrigger } from "./components/RootLens";
 import { PlayTrigger } from "./components/PlayTrigger";
+import { DrawerTool, VerseDrawer } from "./components/VerseDrawer";
 import { QulTrigger } from "./components/QulTrigger";
 import { useVerseAudio } from "./audio";
 // The private pitch layer (see src/pitch/pitch.ts). `PITCH` is a build-time
@@ -177,6 +178,9 @@ export function App(): JSX.Element {
     new Map(),
   );
   const [rootsOpen, setRootsOpen] = useState(false);
+  // The verse drawer's ×: put away until another verse is lit (selection = D).
+  const [drawerAway, setDrawerAway] = useState(false);
+  const putDrawerAway = useCallback(() => setDrawerAway(true), []);
   // Loop 6a wayfinding sheets: "go to" (`/` or the ⌖ button) and the mushaf
   // picker. Both are modal, so at most one is up at a time in practice.
   const [jumperOpen, setJumperOpen] = useState(false);
@@ -436,6 +440,8 @@ export function App(): JSX.Element {
   // value) can read the current one without re-subscribing or an impure updater.
   const selectedKeyRef = useRef(selectedKey);
   selectedKeyRef.current = selectedKey;
+  // A newly lit verse brings its drawer back up, even after the last one's ×.
+  useEffect(() => setDrawerAway(false), [selectedKey]);
 
   /*
    * Where the reader is, and where they are *going*.
@@ -1718,6 +1724,9 @@ export function App(): JSX.Element {
       // ring on a thing the reader did not ask to select.
       if (action.kind === "release") {
         el?.blur?.();
+        // The same Escape puts the verse drawer away: it is marked handled
+        // here, so the drawer's own listener never sees it.
+        setDrawerAway(true);
         return;
       }
       stepPage(action.step);
@@ -2271,30 +2280,6 @@ export function App(): JSX.Element {
               : undefined
           }
         />
-        <PlayTrigger
-          selectedKey={selectedKey}
-          label={selectedKey ? (t.ayahLabel(selectedKey) ?? selectedKey) : null}
-          phase={audio.phaseFor(selectedKey)}
-          onToggle={audio.toggle}
-        />
-        <RootLensTrigger
-          count={rootCount}
-          curated={curatedRoots.length}
-          open={rootsOpen}
-          onToggle={() => setRootsOpen((o) => !o)}
-        />
-        <QulTrigger
-          selectedKey={selectedKey}
-          label={selectedKey ? (t.ayahLabel(selectedKey) ?? selectedKey) : null}
-        />
-        {PITCH && (
-          <CommentaryTrigger
-            has={hasCommentary}
-            open={commentaryOpen}
-            onToggle={() => setCommentaryOpen((o) => !o)}
-          />
-        )}
-        <ShareSheet state={selectedKey ? currentState : null} hasTrail={trail.length > 0} />
         {/* Screen-reader-only summary of what the rail is offering. It used to
             read «السورة 2 · 1 روابط» — the surah as a bare number a listener has
             no way to map back to a name, and Latin digits inside an Arabic
@@ -2306,6 +2291,62 @@ export function App(): JSX.Element {
           </span>
         )}
       </footer>
+
+      {/* The verse's tools, in one drawer over the bar and the slider (selection
+          = D). It steps aside while a sheet it opened is up, and comes back when
+          that sheet closes; its × or Escape puts it away until the next verse. */}
+      <VerseDrawer
+        label={selectedKey ? (t.ayahLabel(selectedKey) ?? selectedKey) : null}
+        open={
+          selectedKey !== null &&
+          !drawerAway &&
+          (tool === "select" || tool === "highlight") &&
+          !rootsOpen &&
+          !commentaryOpen &&
+          openDirection === null
+        }
+        onClose={putDrawerAway}
+      >
+        <PlayTrigger
+          selectedKey={selectedKey}
+          label={selectedKey ? (t.ayahLabel(selectedKey) ?? selectedKey) : null}
+          phase={audio.phaseFor(selectedKey)}
+          onToggle={audio.toggle}
+          caption={audio.phaseFor(selectedKey) === "playing" ? t.vdPause : t.vdListen}
+        />
+        {PITCH && (
+          <CommentaryTrigger
+            has={hasCommentary}
+            open={commentaryOpen}
+            onToggle={() => setCommentaryOpen((o) => !o)}
+            caption={t.vdCommentary}
+          />
+        )}
+        <RootLensTrigger
+          count={rootCount}
+          curated={curatedRoots.length}
+          open={rootsOpen}
+          onToggle={() => setRootsOpen((o) => !o)}
+          caption={t.vdRoots}
+        />
+        <ShareSheet state={selectedKey ? currentState : null} hasTrail={trail.length > 0} />
+        {selectedKey && (
+          <DrawerTool
+            glyph="⚑"
+            caption={t.vdBookmark}
+            label={t.vdBookmarkAria(t.ayahLabel(selectedKey) ?? selectedKey)}
+            onClick={() => {
+              const at = resolver?.resolve(selectedKey)?.page;
+              if (at !== undefined) dropOn(at, selectedKey);
+            }}
+          />
+        )}
+        <QulTrigger
+          selectedKey={selectedKey}
+          label={selectedKey ? (t.ayahLabel(selectedKey) ?? selectedKey) : null}
+          caption={t.vdQul}
+        />
+      </VerseDrawer>
 
       {/* The bottom-most chrome, and the second way through the book after the
           jumper: a track the length of the whole mus'haf with a page turn on

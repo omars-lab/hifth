@@ -14,6 +14,8 @@ interface RootLensTriggerProps {
   curated?: number;
   open: boolean;
   onToggle: () => void;
+  /** A word under the glyph, shown when the button sits in the verse drawer. */
+  caption?: string;
 }
 
 /**
@@ -37,6 +39,7 @@ export function RootLensTrigger({
   curated = 0,
   open,
   onToggle,
+  caption,
 }: RootLensTriggerProps): JSX.Element | null {
   const { t } = useT();
   if (count === 0 && curated === 0) return null;
@@ -55,6 +58,7 @@ export function RootLensTrigger({
       {curated > 0 && (
         <span className={styles.pickedDot} aria-hidden="true" />
       )}
+      {caption && <span data-caption="">{caption}</span>}
     </button>
   );
 }
