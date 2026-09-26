@@ -378,6 +378,7 @@ export {
   lastSeen,
   rollUp,
   scopesOf,
+  slipsIn,
   type DayStamp,
   type RevisionEvent,
   type RevisionScope,

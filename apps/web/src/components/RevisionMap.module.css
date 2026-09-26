@@ -301,6 +301,24 @@ button.cell {
   outline-offset: 1px;
 }
 
+/* Where a mistake was marked: a small dot in the mistake tool's red, in the
+   corner, so the warmth fill and the number both stay readable. A third fact
+   about the cell, like the ring, rather than a new colour for it. */
+.cell[data-slips] {
+  position: relative;
+}
+.cell[data-slips]::after {
+  content: "";
+  position: absolute;
+  inset-block-start: 2px;
+  inset-inline-end: 2px;
+  inline-size: max(4px, 22%);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: var(--danger);
+  box-shadow: 0 0 0 1px var(--paper);
+}
+
 .inventory {
   margin: var(--space-3) 0 0;
   font-size: var(--text-sm);

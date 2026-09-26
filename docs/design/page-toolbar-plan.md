@@ -182,8 +182,13 @@ two ways to do one thing.
 While either tool is on, the strip along the page's outer edge that turns the page steps
 aside, because the first word of every line sits under it; the arrows and keys still turn.
 
-Left for later: marks are not yet written into the revision record, so the calendar cannot
-show where you slip; both tools and the mistake tool work only on a computer (the phone has no
+**Slips on the calendar (2026-09-26).** Marking a word now also writes a slip into the
+revision record, so the calendar puts a small red dot on each page, hizb or juz where you
+marked one, and its key gains a line for the dot. Only the first tap counts: picking the sign
+afterwards is the same slip. Clearing the red mark off the page leaves the dot, because
+clearing says "I have it now", not "I never slipped".
+
+Left for later: both tools and the mistake tool work only on a computer (the phone has no
 tool bar yet, step 5); the word's parts are its signs, not yet its letters, because a letter's
 own shape exists today for one verse only; and a part is one sign, not a run of them.
 

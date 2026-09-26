@@ -5,6 +5,7 @@ import {
   daysBetween,
   lastSeen,
   scopesOf,
+  slipsIn,
   type DayStamp,
   type EditionId,
   type PageMeta,
@@ -432,7 +433,7 @@ export function RevisionMap({
     return range === "thisMonth" ? monthKey(asOf) : prevMonthKey(asOf);
   }, [range, asOf]);
 
-  const seen = useMemo(() => {
+  const { seen, slips } = useMemo(() => {
     const all = record?.events ?? [];
     // Filter by the calendar month first, then by edition through
     // `comparableEvents`: the month is a fact about the reader's clock and the
@@ -441,7 +442,10 @@ export function RevisionMap({
     // is cold unless another look inside the month warmed it.
     const within =
       rangeMonth === null ? all : all.filter((e) => dayOf(e).startsWith(rangeMonth));
-    return lastSeen(comparableEvents(within, scope, edition), scope);
+    const comparable = comparableEvents(within, scope, edition);
+    // Mistakes marked with the mistake tool, counted under the same month and
+    // the same paper as the warmth, so a dot never outlives its range.
+    return { seen: lastSeen(comparable, scope), slips: slipsIn(comparable, scope) };
   }, [record, scope, edition, rangeMonth]);
   // The division the stage is currently showing, so the reader can find
   // themselves on a grid of sixty identical squares.
@@ -641,6 +645,8 @@ export function RevisionMap({
                 const day = seen.get(id);
                 const days = day && asOf ? daysBetween(day, asOf) : null;
                 const state = at === undefined ? "absent" : day ? "seen" : "cold";
+                // A slip is also a look, so a cell with one is always "seen".
+                const slipped = slips.get(id) ?? 0;
                 // Every cell says the same four things, whether or not it can be
                 // pressed. Written once so the two branches below cannot drift
                 // into describing the same square differently.
@@ -651,12 +657,15 @@ export function RevisionMap({
                       ? warmth(days)
                       : undefined,
                   "data-here": here.includes(id) || undefined,
+                  "data-slips": slipped || undefined,
                   "aria-label":
                     at === undefined
                       ? t.mapCellAbsent(label(id))
-                      : days !== null && !Number.isNaN(days)
-                        ? t.mapCellSeen(label(id), days)
-                        : t.mapCellNever(label(id)),
+                      : slipped
+                        ? t.mapCellSlips(t.mapCellSeen(label(id), days ?? 0), slipped)
+                        : days !== null && !Number.isNaN(days)
+                          ? t.mapCellSeen(label(id), days)
+                          : t.mapCellNever(label(id)),
                 };
                 // The division's own number, drawn in the cell. A page number is
                 // Latin in both languages — it is read off the corner of the
@@ -722,6 +731,19 @@ export function RevisionMap({
                 <span className={styles.cell} data-state="seen" data-warmth={4} aria-hidden="true" />
                 {t.mapRecent}
               </li>
+              {/* Like the absent row: only when the picture holds a dot. */}
+              {slips.size > 0 && (
+                <li className={styles.legendRow}>
+                  <span
+                    className={styles.cell}
+                    data-state="seen"
+                    data-warmth={4}
+                    data-slips=""
+                    aria-hidden="true"
+                  />
+                  {t.mapSlips}
+                </li>
+              )}
             </ul>
 
             {/* Under "all time" this dates the record — the line that keeps an
