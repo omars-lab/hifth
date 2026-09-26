@@ -375,6 +375,126 @@
   border-right: 1px dashed var(--hairline);
 }
 
+/* The skeleton curl (turn style B, decided 2026-09-26). The element is a whole
+   leaf, not a band: it comes over the page curled, lies flat, and clears once
+   the real page is under it. Its face carries grey lines where words will be,
+   never a glyph — the drawn words do not move in any turn style. These rules
+   come after the three above so the leaf's own width and paper win. */
+.fold[data-style="curl"] {
+  width: 100%;
+  background: none;
+  border: 0;
+  perspective: 1400px;
+}
+
+.leafFace {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-evenly;
+  padding: 6% 7%;
+  background: var(--paper-raised, var(--paper));
+}
+
+.leaf {
+  position: absolute;
+  inset: 0;
+  box-shadow: 0 0 18px rgb(38 32 26 / 0.18);
+  transition: transform var(--dur-med) var(--ease-hop);
+}
+
+/* The shade lies over both faces, so it is drawn on top of them. */
+.leaf::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.leafFace[data-side="right"] {
+  left: 50%;
+  box-shadow: inset 12px 0 14px -10px var(--gutter-shadow-deep, rgb(38 32 26 / 0.25));
+}
+
+.leafFace[data-side="left"] {
+  right: 50%;
+  box-shadow: inset -12px 0 14px -10px var(--gutter-shadow-deep, rgb(38 32 26 / 0.25));
+}
+
+/* Curled while it travels: hinged on its trailing edge, so the leading edge
+   lifts; and shaded toward that edge, where a real leaf rolls. */
+.fold[data-dir="forward"] .leaf {
+  transform-origin: left center;
+  transform: rotateY(-24deg);
+}
+
+.fold[data-dir="forward"] .leaf::after {
+  background: linear-gradient(to left, rgb(38 32 26 / 0.16), transparent 30%);
+}
+
+.fold[data-dir="back"] .leaf {
+  transform-origin: right center;
+  transform: rotateY(24deg);
+}
+
+.fold[data-dir="back"] .leaf::after {
+  background: linear-gradient(to right, rgb(38 32 26 / 0.16), transparent 30%);
+}
+
+.fold[data-flat] .leaf {
+  transform: none;
+}
+
+.fold[data-flat] .leaf::after {
+  background: none;
+}
+
+.leafFace i {
+  display: block;
+  height: 0.9%;
+  border-radius: 2px;
+  background: var(--hairline);
+  opacity: 0.85;
+}
+
+.leafFace i:nth-child(3n) { width: 78%; }
+.leafFace i:nth-child(3n + 1) { width: 94%; }
+.leafFace i:nth-child(3n + 2) { width: 86%; }
+.leafFace i:nth-child(7n) { width: 62%; }
+
+/* Still coming: the flat leaf waits, its lines pulsing, rather than landing on nothing. */
+.fold[data-flat] .leafFace i {
+  animation: skeletonWait 1.1s ease-in-out infinite;
+}
+
+@keyframes skeletonWait {
+  0%, 100% { opacity: 0.55; }
+  50% { opacity: 0.95; }
+}
+
+/* A missing leaf curls over as sunk paper behind dashed edges — the app's word
+   for "not here" — instead of lines that promise words. */
+.fold[data-style="curl"][data-fold="hole"] .leafFace {
+  background: var(--paper-sunk);
+  border-inline: 1px dashed var(--hairline);
+}
+
+/* The shadow lift (turn style D). A soft shadow on the edge the turn starts
+   from; it never travels, only comes up and goes. */
+.fold[data-style="lift"] {
+  width: 46%;
+  opacity: 0;
+}
+
+.fold[data-style="lift"][data-dir="forward"] {
+  background: radial-gradient(120% 90% at 0% 50%, rgb(38 32 26 / 0.42), transparent 64%);
+}
+
+.fold[data-style="lift"][data-dir="back"] {
+  background: radial-gradient(120% 90% at 100% 50%, rgb(38 32 26 / 0.42), transparent 64%);
+}
+
 /* The only text in the app that ever sits on the field, which is why it reads
    `--ink-on-field` rather than a fixed ink: a field that changes the desk under
    this sentence has to change the sentence too. The fallback keeps it correct
