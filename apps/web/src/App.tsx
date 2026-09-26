@@ -2387,6 +2387,7 @@ export function App(): JSX.Element {
           label={t.ayahLabel(wordOpen.key) ?? wordOpen.key}
           anchor={() => wordOpen.rect}
           mode="note"
+          docked
           onPick={(mark, _name, at) => pickWordPart({ ...at, mark })}
           onPickMany={(marks, at) => pickWordPart({ ...at, marks })}
           onPickLetter={(letter, at) => pickWordPart({ ...at, letter })}
@@ -2460,6 +2461,7 @@ function WordPartsHost({
   label,
   anchor,
   mode,
+  docked,
   chosen,
   onPick,
   onPickMany,
@@ -2474,6 +2476,8 @@ function WordPartsHost({
   label: string;
   anchor: () => WordRect | null;
   mode: "note" | "mistake";
+  /** Open in the verse drawer's place, on the bottom of the window (the word tool). */
+  docked?: boolean;
   chosen?: number | null;
   /** The part picked, its name, and where on the page a note on it is pinned. */
   onPick: (mark: number | null, name: string | null, at: { x: number; y: number }) => void;
@@ -2507,6 +2511,7 @@ function WordPartsHost({
       pageSize={{ w: w || 345, h: h || 550 }}
       anchor={anchor}
       mode={mode}
+      docked={docked}
       chosen={chosen}
       onPick={(mark, name) => onPick(mark, name, pinOver(mark))}
       onPickMany={
