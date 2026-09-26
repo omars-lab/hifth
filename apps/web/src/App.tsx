@@ -1157,6 +1157,7 @@ export function App(): JSX.Element {
       onOpen={setDrawerId}
       freshId={freshId}
       seam={seamPage === p}
+      aside={tool === "sign" || tool === "word"}
     />
   );
 
