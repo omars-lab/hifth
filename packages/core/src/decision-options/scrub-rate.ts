@@ -1,5 +1,5 @@
 /**
- * phone-scrub (open, docs/decisions/page-bar-phone-scrub.md): a phone has no
+ * phone-scrub (settled on D, docs/decisions/page-bar-phone-scrub.md): a phone has no
  * hover, so the page bar's magnifier never appears there. While a reader drags
  * the knob with a thumb, how do they land on one exact page out of 604, on a bar
  * where each page is about half a pixel wide?
@@ -16,8 +16,9 @@
  *
  * As in detent-strategy.ts, every function here is standalone: it reads only its
  * arguments, so the page builder inlines the very same compiled source and the
- * page runs what the unit test checks. Nothing here is wired into the app yet;
- * the one the owner picks graduates into the page bar.
+ * page runs what the unit test checks. The owner picked D: the page bar imports
+ * its pieces (scrubRateSlowAway, scrubAdvance, stripPxPerPage and the bands) and
+ * nothing else. A to C stay here so the decision page can still be tried.
  */
 
 /** From this height above the bar (px), the knob moves at `rate` times the finger. */

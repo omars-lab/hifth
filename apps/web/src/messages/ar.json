@@ -29,6 +29,8 @@
   "firstPage": "أول صفحة متوفّرة · صفحة {page}",
   "lastPage": "آخر صفحة متوفّرة · صفحة {page}",
   "nearestPageN": "أقرب صفحة متوفّرة · صفحة {page}",
+  "scrubSpeed": "{speed, select, half{نصف السرعة} quarter{ربع السرعة} tenth{عُشر السرعة} other{السرعة الكاملة}}",
+  "scrubSlowHint": "اسحب إلى الأعلى للإبطاء",
   "selectionCleared": "أُلغي التحديد",
   "selected": "حُدّدت {label}",
   "highlighted": "ظُلّل {span}",

@@ -218,3 +218,72 @@ test.describe("Hifth · the page bar", () => {
     expect(dir).toBe("rtl");
   });
 });
+
+/*
+ * The phone's drag (docs/decisions/page-bar-phone-scrub.md, option D). Sliding the
+ * thumb up while dragging slows the knob — half, a quarter, a tenth — and a strip
+ * of page marks rides above the thumb for the length of the drag. The feel is for
+ * a real phone to judge; what a browser can hold is the arithmetic and the
+ * strip's coming and going.
+ */
+test.describe("Hifth · the page bar under a thumb", () => {
+  test.beforeEach(async ({ page }) => {
+    await page.goto("/");
+    await expect(page.locator("svg[role='group']").first()).toBeVisible();
+    const hover = await page.evaluate(() => matchMedia("(hover: hover) and (pointer: fine)").matches);
+    test.skip(hover, "a pointer that can hover gets the magnifier, not the thumb's drag");
+  });
+
+  test("sliding up slows the knob, and the strip comes and goes with the drag", async ({ page }) => {
+    const pad = page.getByTestId("scrub-pad");
+    const knob = page.getByTestId("page-handle");
+    const box = (await pad.boundingBox())!;
+    const knobX = async (): Promise<number> => {
+      const b = (await knob.boundingBox())!;
+      return b.x + b.width / 2;
+    };
+    // Under the juz buttons, so the touch is a drag and not a tap on a juz.
+    const x0 = box.x + box.width / 2;
+    const y0 = box.y + box.height - 4;
+    const pageBefore = await page.getByRole("slider").getAttribute("aria-valuetext");
+    await page.mouse.move(x0, y0);
+    await page.mouse.down();
+    await expect(page.getByTestId("scrub-strip")).toBeVisible();
+    await expect(page.getByTestId("scrub-strip")).toHaveAttribute("data-speed", "full");
+
+    // Straight up, past the tenth-speed line: the knob stays where it was.
+    const before = await knobX();
+    await page.mouse.move(x0, box.y - 170, { steps: 6 });
+    await expect(page.getByTestId("scrub-strip")).toHaveAttribute("data-speed", "tenth");
+    expect(Math.abs((await knobX()) - before)).toBeLessThan(1.5);
+
+    // A 100px slide at a tenth moves the knob about 10px, not 100.
+    await page.mouse.move(x0 - 100, box.y - 170, { steps: 10 });
+    const moved = before - (await knobX());
+    expect(moved, "the knob did not move at all").toBeGreaterThan(3);
+    expect(moved, "the knob kept pace with the thumb").toBeLessThan(25);
+    // At a tenth the strip shows single pages.
+    expect(await page.getByTestId("strip-tick").count()).toBeGreaterThan(10);
+
+    await page.mouse.up();
+    await expect(page.getByTestId("scrub-strip")).toHaveCount(0);
+    // Letting go turns to where the knob was, as any drag does.
+    await expect(page.getByRole("slider")).not.toHaveAttribute("aria-valuetext", pageBefore ?? "");
+  });
+
+  test("coming back down to the bar brings the knob back under the thumb", async ({ page }) => {
+    const pad = page.getByTestId("scrub-pad");
+    const knob = page.getByTestId("page-handle");
+    const box = (await pad.boundingBox())!;
+    const x0 = box.x + box.width / 2;
+    const y0 = box.y + box.height - 4;
+    await page.mouse.move(x0, y0);
+    await page.mouse.down();
+    await page.mouse.move(x0, box.y - 120, { steps: 5 });
+    await page.mouse.move(x0 - 80, box.y - 120, { steps: 8 });
+    await page.mouse.move(x0 - 80, y0, { steps: 8 });
+    const k = (await knob.boundingBox())!;
+    expect(Math.abs(k.x + k.width / 2 - (x0 - 80))).toBeLessThan(3);
+    await page.mouse.up();
+  });
+});
