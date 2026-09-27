@@ -239,6 +239,22 @@ test.describe("Hifth · the pitch commentary on a phone", () => {
     await expect(sheet(page)).not.toContainText("255 This verse is known as");
   });
 
+  test("a look-alike list takes the note's place, and closing it brings the note back", async ({ page }) => {
+    // One drawer for a verse at a time. Tapping a look-alike chip while the note
+    // was open used to stack the list's sheet on top of the note's, squeezing
+    // the page to a sliver with two of seven look-alikes in reach.
+    await page.goto("/#/hafs-kfqc/2:255");
+    const note = page.getByRole("dialog", { name: /2:255/ });
+    await expect(note).toBeVisible({ timeout: 20_000 });
+
+    await page.locator('button[data-direction="later"]').click();
+    await expect(page.getByRole("dialog")).toHaveCount(1);
+    await expect(note).toBeHidden();
+
+    await page.getByRole("dialog").getByRole("button", { name: "Close" }).first().click();
+    await expect(note).toBeVisible();
+  });
+
   test("a verse low on the page moves up clear of the note, every line of it", async ({ page }) => {
     // 6:157 closes page 149, so its note would open right over it. The page
     // moves up so the whole verse sits in the part of the screen still showing.
