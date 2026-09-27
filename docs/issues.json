@@ -2083,7 +2083,7 @@
       "status": "open",
       "severity": "risk",
       "owner": "agent",
-      "note": "Owner, 2026-09-25: the 'offline storage is not guaranteed' banner was a warning with no action for the reader, so it came out of the app and the underlying risk came here. The pages a browser will not promise to keep may be cleared under storage pressure; the fix is ours (ask for the promise at a moment the browser rewards, measure refusals, check the kept-juz recovery path on a phone)."
+      "note": "Owner, 2026-09-25: the 'offline storage is not guaranteed' banner was a warning with no action for the reader, so it came out of the app and the underlying risk came here. The pages a browser will not promise to keep may be cleared under storage pressure; the fix is ours (ask for the promise at a moment the browser rewards, measure refusals, check the kept-juz recovery path on a phone). 2026-09-27: the app now asks again at the two moments the browser rewards most, when a juz is kept and when the app is installed, each with a test; still open for counting refusals and the phone check of the recovery path."
     }
   ]
 }

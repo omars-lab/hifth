@@ -8,6 +8,7 @@
  * + persist() flow is Loop 6.
  */
 import { registerSW } from "virtual:pwa-register";
+import { requestPersistentStorage } from "./storage";
 
 type InstallPromptEvent = Event & {
   prompt: () => Promise<void>;
@@ -262,6 +263,10 @@ export function initPwa(): void {
   window.addEventListener("appinstalled", () => {
     deferredPrompt = null;
     emit(false);
+    // Installing is the strongest sign the browser weighs when it decides
+    // whether to promise the offline pages will stay: ask now, not only on the
+    // first tap, which came before there was anything to weigh.
+    void requestPersistentStorage();
   });
   // Prompt-type registration: the SW updates in the background; Loop 6 surfaces
   // an "update ready" affordance. For Loop 0 we just register.

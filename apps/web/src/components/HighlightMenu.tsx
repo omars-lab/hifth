@@ -79,9 +79,13 @@ export function HighlightMenu({
   // Capture the trigger and move focus into the menu on open; restore on close.
   useEffect(() => {
     if (!open) return;
-    restoreRef.current = (document.activeElement as HTMLElement | null) ?? null;
+    const opener = document.activeElement as HTMLElement | null;
+    restoreRef.current = opener;
     const sheet = sheetRef.current;
-    if (sheet) (focusables(sheet)[0] ?? sheet).focus();
+    // Opened by a link, nothing was pressed: focus the menu itself, so a screen
+    // reader still lands in it but no ring appears round a button nobody reached for.
+    const byLink = !opener || opener === document.body;
+    if (sheet) (byLink ? sheet : focusables(sheet)[0] ?? sheet).focus();
     return () => {
       restoreRef.current?.focus?.();
       setExpanded(null);

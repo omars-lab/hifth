@@ -111,6 +111,20 @@ describe("pinPack", () => {
     for (const url of URLS) expect(await packedResponse(url)).toBeDefined();
   });
 
+  it("asks the browser to keep its pages once a juz is saved, the moment it is likeliest to agree", async () => {
+    // A reader who just kept a juz for offline has shown the intent the
+    // browser's grant weighs; the first-tap ask may have been refused before
+    // there was any such signal.
+    let granted = false;
+    const persist = vi.fn(async () => (granted = true));
+    vi.stubGlobal("navigator", {
+      ...navigator,
+      storage: { persist, persisted: async () => granted, estimate: async () => ({ usage: 0, quota: 1 }) },
+    });
+    await pinPack(EDITION, 30, URLS, 0);
+    await vi.waitFor(() => expect(persist).toHaveBeenCalledTimes(1));
+  });
+
   it("survives being read back from the register in another session", async () => {
     await pinPack(EDITION, 30, URLS, 0);
     const [record] = await listPacks();
