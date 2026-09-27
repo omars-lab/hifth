@@ -444,7 +444,7 @@
         {
           "file": "scripts/gate-i18n.mjs",
           "symbol": "gate:i18n",
-          "note": "The four holes tsc cannot see: generated code left stale after a catalog edit, a key the reference locale has and a translation does not, a plural that writes four of Arabic's six categories, and a translation that drops a placeholder. Plural completeness is checked against Intl.PluralRules(locale) — the same CLDR the runtime will use, not a table in this repo. Registered in package.json, the Makefile and ci.yml; a gate in one of the three does not run."
+          "note": "The four holes tsc cannot see: generated code left stale after a catalog edit, a key the reference locale has and a translation does not, a plural that writes four of Arabic's six categories, and a translation that drops a placeholder. Plural completeness is checked against Intl.PluralRules(locale) — the same CLDR the runtime will use, not a table in this repo. Registered in package.json and reached by the hook targets in the Makefile; a gate missing from either does not run."
         },
         {
           "file": "apps/web/src/format.ts",
@@ -1228,8 +1228,7 @@
       "gates": [
         "pnpm test",
         "make e2e",
-        "make golden",
-        "make golden-linux"
+        "make golden"
       ],
       "seeAlso": [
         "select-an-ayah",
@@ -1259,8 +1258,8 @@
         },
         {
           "file": "package.json",
-          "symbol": "\"gates\": \"pnpm gate:text-sources",
-          "note": "The 23, in the order `make ci` runs them. Diagram ③ overlays this list on the spine so it is visible which edge each gate guards — and that three of them (gate:edges, gate:gates, gate:ci-artifacts) exist because something shipped broken between two checks that both passed."
+          "symbol": "\"gates:fast\": \"pnpm gate:text-sources",
+          "note": "The gates, in the order the hook targets run them. Diagram ③ overlays this list on the spine so it is visible which edge each gate guards — and that three of them (gate:edges, gate:gates, gate:ci-artifacts) exist because something shipped broken between two checks that both passed."
         },
         {
           "file": "packages/etl/scripts/audit-corpus.mjs",
@@ -1546,11 +1545,6 @@
           "note": "Golden images are keyed by {platform} because they are rasterized geometry. The aria snapshots beside them are keyed by {projectName} because they are text — mixing the two axes is a bug in both directions."
         },
         {
-          "file": "Makefile",
-          "symbol": "GOLDEN_IMAGE",
-          "note": "The pinned container. The generator and the checker must be the same rasterizer or the gate is a coin flip; gate:golden-env enforces that the Makefile, the CI job, and the installed Playwright all agree."
-        },
-        {
           "file": "scripts/gate-golden-size.mjs",
           "symbol": "BUDGET",
           "note": "Why the baselines are committed to git rather than LFS, and the number at which that answer should be revisited."
@@ -1562,15 +1556,13 @@
         }
       ],
       "extend": [
-        "Adding a row means adding baselines for BOTH platforms: `make golden-update` for darwin, `make golden-linux UPDATE=1` for linux.",
+        "Adding a row means adding a darwin baseline with `make golden-update`. Since 2026-09-27 that is the only committed set: the pre-push hook checks it on the Mac, and the linux set the GitHub job used to check is retired.",
         "Pick a page for a geometry class, not for variety: say in the SHOTS docblock what this page can fail at that no existing shot can see. If that sentence cannot be written, the shot is cost without coverage.",
         "Open the changed PNGs before committing. An accepted baseline is the gate agreeing with you, which is worth nothing unless you looked.",
-        "Never bump Playwright without bumping GOLDEN_IMAGE and re-rendering — the failure mode is ten red diffs that look exactly like a UI regression."
+        "Never bump Playwright without re-rendering the baselines in the same change — the failure mode is ten red diffs that look exactly like a UI regression."
       ],
       "gates": [
         "make golden",
-        "make golden-linux",
-        "pnpm gate:golden-env",
         "pnpm gate:golden-size"
       ],
       "seeAlso": [
@@ -1736,14 +1728,9 @@
           "note": "Renders docs/decisions/README.md, open first. Every title is read out of the record at build time and none is stored — the register holds the question, the record owns the answer, and a title living in two files is right for a while and then quietly stops being right. Stamped with a hash the gate compares, the same rule as issues.md and the validation guide."
         },
         {
-          "file": ".githooks/pre-commit",
-          "symbol": "gate-decisions.mjs",
-          "note": "Scoped to the staged files, silent when a commit touches none of them. This pairing breaks on exactly one kind of commit — the one that adds the artifact link before committing the page, or renames the page and leaves the link — and that is the commit where the information is free, because you are moving the thing right now."
-        },
-        {
-          "file": ".githooks/pre-commit",
-          "symbol": "render-docs",
-          "note": "The unscoped half: the use-cases, issues and tasks gates run whole on every commit, because a rendered page's hash is a function of the register and of the documents it reads titles from, so staleness cannot be predicted from the staged paths. Added 2026-09-01 after a commit edited docs/use-cases.json, passed the scoped check, and shipped with the page stale. Three hash comparisons, under a second; the message names `make render-docs`."
+          "file": "Makefile",
+          "symbol": "checks-fast:",
+          "note": "Every commit runs the decisions gate whole, with the map, use-cases, issues, tasks and etl-scripts gates beside it (all in `gates:fast`). This pairing breaks on exactly one kind of commit — the one that adds the artifact link before committing the page, or renames the page and leaves the link — and that is the commit where the information is free, because you are moving the thing right now. The rendered pages are checked on every commit too, because a page's hash is a function of the register and of the documents it reads titles from, so staleness cannot be predicted from the staged paths; added 2026-09-01 after a commit edited docs/use-cases.json and shipped with the page stale. The fix each names is `make render-docs`. Until 2026-09-27 the hook file ran these itself, scoped to the staged files; now it only calls `make -s pre-commit`."
         },
         {
           "file": ".claude/skills/decide/SKILL.md",
@@ -1906,18 +1893,18 @@
       "entry": [
         {
           "file": "Makefile",
-          "symbol": "ci:",
-          "note": "An exact mirror of the build-test-gate job, in CI order. If you add a step to one, add it to the other in the same commit — that promise is the whole value of the target."
+          "symbol": "pre-push:",
+          "note": "The checks live in two Makefile targets the git hooks call and nothing else: `pre-commit` (secrets in the staged change, lint, types, unit tests, the fast gates) and `pre-push` (secrets in history, the same fast checks, the ETL re-derivation, the corpus audit, the build and its budget, and every Playwright project including iPhone and the golden images). `make ci` is both. Since 2026-09-27 no GitHub job checks a pull request; the hooks are the only run there is. Lighthouse is `make lighthouse`, by hand before a demo or release."
         },
         {
-          "file": ".github/workflows/ci.yml",
-          "symbol": "build-test-gate",
-          "note": "Four jobs: secrets-scan, build-test-gate, e2e (containerised), lighthouse. Only the second is what `make ci` mirrors; the other three have their own make targets."
+          "file": ".github/workflows/deploy.yml",
+          "symbol": "make site",
+          "note": "The one workflow: the Pages deploy on a push to main, and a hand-started Cloudflare deploy. Each builds from a fresh clone and runs `make site` — the build, the bundle budget and the two held-text checks — before anything is uploaded, so a push that skipped the hooks still cannot publish held text."
         },
         {
           "file": "scripts/gate-gates.mjs",
           "symbol": "owned",
-          "note": "The `extend` rule below, enforced. Every gate:* script in package.json must be invoked by `pnpm gates`, by the Makefile ci target, and by a workflow job — and every gate named in those three must exist. Written after the rule was broken twice in prose-only form: gate:pages was merged wired to nothing at all, and gate:edges ran in `make ci` but in no job, which is the worse direction because the author sees a pass the branch protection never saw. Three places to remember is two too many; memory is not a mechanism. No exemption list, deliberately — a gate that genuinely cannot run in CI is a conversation, not an array entry."
+          "note": "The `extend` rule below, enforced. Every gate:* script in package.json must be invoked by `pnpm gates` and reached from the `pre-commit` or `pre-push` Makefile target, each hook file must be one `make -s <target>` line, and every gate named anywhere must exist. Written after the rule was broken twice in prose-only form: gate:pages was merged wired to nothing at all, and gate:edges ran in `make ci` but in no job, which is the worse direction because the author sees a pass the branch protection never saw. Three places to remember is two too many; memory is not a mechanism. No exemption list, deliberately — a gate that genuinely cannot run in the hooks is a conversation, not an array entry. (Until 2026-09-27 it checked the Makefile ci target and a workflow job; the hooks replaced both.)"
         },
         {
           "file": "scripts/gate-ci-artifacts.mjs",
@@ -1946,7 +1933,7 @@
         }
       ],
       "extend": [
-        "A new gate is a script in scripts/, a `gate:*` entry in package.json, a link in the `gates` composite, a line in `make ci`, and a step in build-test-gate. All five, or it does not run — and gate:gates now says so out loud instead of leaving it to this sentence, which was written first and then broken twice.",
+        "A new gate is a script in scripts/, a `gate:*` entry in package.json, a link in the `gates` composite (usually `gates:fast`), and a line in a hook target the `pre-commit` or `pre-push` Makefile target reaches. All four, or it does not run — and gate:gates now says so out loud instead of leaving it to this sentence, which was written first and then broken twice.",
         "Verify a new gate by breaking the thing it protects and watching it fail, then reverting. A gate that has never failed has never been tested.",
         "Gates fail with the fix in the message. 'X is wrong' costs someone an afternoon; 'X is wrong, run Y' costs them a minute.",
         "A gate that guards a number with headroom needs a committed baseline as well as a ceiling, or it only speaks on the change that runs out. gate:budget is the shape: measure, commit the measurement, fail on drift, and let the baseline's diff be the report — the same trade the golden images make."

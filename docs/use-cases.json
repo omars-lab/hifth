@@ -1263,9 +1263,6 @@
       ],
       "proof": [
         {
-          "gate": "gate:golden-env"
-        },
-        {
           "gate": "gate:golden-size"
         }
       ],
@@ -1356,8 +1353,8 @@
           "symbol": "BUDGET_GZ"
         },
         {
-          "file": ".github/workflows/ci.yml",
-          "symbol": "build-test-gate"
+          "file": "Makefile",
+          "symbol": "pre-push:"
         }
       ],
       "proof": [

@@ -1,7 +1,8 @@
 # Hifth — operational front door.
 #
 # Two kinds of targets:
-#   1. Everyday dev + the exact CI sequence (so `make ci` locally == green CI).
+#   1. Everyday dev, and the two hook targets (`make pre-commit`, `make pre-push`)
+#      that hold every check this repo runs; `make ci` is both.
 #   2. The loop workflow from docs/PLAN.md, made executable: start a loop, see
 #      the roadmap, verify a loop's gates, serve a phone preview, run the
 #      on-device perf capture. The plan feeds these — it is the source of truth;
@@ -73,7 +74,7 @@ clean: ## Remove all build output (the "clean-state" discipline — see loop-0.m
 	       apps/web/dev-dist apps/web/playwright-report apps/web/test-results
 
 # ---------------------------------------------------------------------------
-# Quality gates — each target is one CI step; `ci` runs them in CI order
+# Quality checks — one at a time; the hooks run them all (see pre-commit below)
 # ---------------------------------------------------------------------------
 
 .PHONY: lint typecheck test e2e pitch-e2e
@@ -163,39 +164,38 @@ gates: build ## The static gates: no <text> in SVG, license present, JS budget <
 	$(PNPM) gates
 
 .PHONY: lighthouse
-lighthouse: build ## Lighthouse CI gate (all four categories ≥90) against the built app
+lighthouse: build ## Lighthouse (all four categories ≥90) — by hand, before a demo or a release
+	@# Run by hand, not on every push. It is a score, not a catcher of specific
+	@# bugs: it rarely moves in one change and it costs about 1.5 minutes, so it
+	@# lives here rather than in pre-push. Run it before showing the demo or
+	@# cutting a release (`make loop-verify` runs it too). The ≥90 thresholds and
+	@# the TTI budget live in .lighthouserc.json.
+	@#
 	@# lhci is run via `dlx`, not a devDependency: it drags in Lighthouse and a
-	@# Chrome launcher that nothing else here needs, and it runs once per push.
-	@# On macOS it cannot find Chrome by itself; point it at the app bundle.
+	@# Chrome launcher that nothing else here needs. On macOS it cannot find
+	@# Chrome by itself; point it at the app bundle.
 	CHROME_PATH="$${CHROME_PATH:-/Applications/Google Chrome.app/Contents/MacOS/Google Chrome}" \
 	  $(PNPM) dlx @lhci/cli@0.14.x autorun
 
 # ---------------------------------------------------------------------------
 # Golden images — the visual gate (PLAN §Testing plan, "golden-image diff")
 #
-# Baselines are rasterized geometry, so they are per-platform: the committed set
-# under e2e/__screenshots__/darwin is what you diff against locally, and
-# .../linux is what CI diffs against. Regenerate BOTH when a highlight's
-# geometry legitimately changes, and eyeball the diff before committing it —
-# an accepted baseline is the only place a wrong wash can hide forever.
+# Baselines are rasterized geometry, so they are per-platform, and there is one
+# committed set: e2e/__screenshots__/darwin, checked on this Mac by the pre-push
+# hook. Regenerate it when a highlight's geometry legitimately changes, and
+# eyeball the diff before committing it — an accepted baseline is the only place
+# a wrong wash can hide forever.
 #
-# "Per-platform" is not strict enough, and the first CI run of this tier is the
-# proof: the linux baselines rendered by `make golden-linux` in the container
-# below failed against a bare ubuntu-latest at 5–11% of pixels, against a 0.5%
-# tolerance. Same OS, same Playwright — different fonts, and an Arabic app with
-# no Arabic fonts lays out every line at a different width. So the axis that
-# matters is the IMAGE, not the platform: GOLDEN_IMAGE is what renders the linux
-# baselines here and what CI's e2e job runs inside, and gate:golden-env fails the
-# build if those two, or the installed @playwright/test, ever disagree.
+# There used to be a second, linux set, rendered in a pinned Playwright
+# container and checked by the GitHub e2e job. The checks moved into the local
+# hooks on 2026-09-27 (the CI spend plan, items 5 and 6), GitHub stopped running
+# e2e, and the linux set lost its only reader, so it was retired with
+# `make golden-linux` and the gate that pinned the container.
 #
-# Which of the three tiers runs where:
-#   make golden        → golden project, this machine   → darwin baselines
-#   make golden-linux  → golden project, GOLDEN_IMAGE   → linux baselines
-#   make e2e           → iphone + android + golden, this machine
-#   CI job `e2e`       → iphone + android + golden, inside GOLDEN_IMAGE
+#   make golden        → golden project, this machine → darwin baselines
+#   make e2e           → every phone/desktop project + golden, this machine
+#   make pre-push      → the same projects, as the pre-push hook
 # ---------------------------------------------------------------------------
-
-GOLDEN_IMAGE := mcr.microsoft.com/playwright:v1.61.1-noble
 
 .PHONY: golden
 golden: core ## Run the golden-image diff on this machine (darwin baselines)
@@ -210,11 +210,6 @@ golden-update: core ## Accept new golden baselines for THIS platform — review 
 	@echo "  Baselines rewritten. Run 'git diff --stat -- apps/web/e2e/__screenshots__'"
 	@echo "  and open the changed PNGs before committing: this is the gate agreeing"
 	@echo "  with you, not the other way round."
-	@echo ""
-	@echo "  THIS PLATFORM ONLY. CI runs the linux set, which is a separate"
-	@echo "  committed tree ({platform} in snapshotPathTemplate). A change that"
-	@echo "  moves geometry moves both, so run 'make golden-linux UPDATE=1' too"
-	@echo "  or CI will fail on shots that pass here."
 
 .PHONY: budget-update
 budget-update: core ## Accept a new JS bundle baseline — review the diff first
@@ -225,83 +220,117 @@ budget-update: core ## Accept a new JS bundle baseline — review the diff first
 	@echo "  That diff is the point: it is where 'this PR adds 9 KB' becomes visible"
 	@echo "  to a reviewer. Accepting it without reading it makes the gate decorative."
 
-.PHONY: golden-linux
-golden-linux: core ## Run/refresh the CI-shaped (linux) baselines in the Playwright container
-	@# The preview server stays on the host — its node_modules are built for the
-	@# host arch. Only the browser runs in the container, reaching back over
-	@# host.docker.internal; HIFTH_BASE_URL is what stops Playwright from trying
-	@# to start a second server inside it. UPDATE=1 rewrites the linux baselines.
-	@#
-	@# --host 0.0.0.0 is required, not incidental: vite preview binds loopback by
-	@# default, so host.docker.internal resolves fine and then refuses the
-	@# connection. It does mean this build is reachable from the local network
-	@# for the seconds the run takes — it is a static preview of a public app,
-	@# and it dies with the trap below.
-	$(WEB) build
-	@set -e; \
-	  trap 'pkill -f "vite preview --port $(PORT)" 2>/dev/null || true' EXIT; \
-	  $(WEB) exec vite preview --port $(PORT) --strictPort --host 0.0.0.0 >/dev/null 2>&1 & \
-	  until curl -sf http://localhost:$(PORT)/ >/dev/null 2>&1; do sleep 1; done; \
-	  docker run --rm -v "$$PWD:/w" -w /w/apps/web \
-	    --add-host=host.docker.internal:host-gateway \
-	    -e HIFTH_BASE_URL=http://host.docker.internal:$(PORT) \
-	    $(GOLDEN_IMAGE) \
-	    npx playwright test --project=golden $(if $(UPDATE),--update-snapshots,)
-
 .PHONY: secrets
 secrets: ## Scan the working tree + history for committed secrets (gitleaks)
 	@command -v gitleaks >/dev/null 2>&1 || { echo "gitleaks not installed: brew install gitleaks"; exit 1; }
 	gitleaks git --redact --config .gitleaks.toml
 	gitleaks dir . --redact --config .gitleaks.toml
 
-.PHONY: ci
-ci: core ## Full local mirror of the CI build-test-gate job, IN CI ORDER
+# ---------------------------------------------------------------------------
+# The two hooks — every check this repo runs, and the only place it runs.
+#
+# We are the only developers and the local hooks always run, so a check the
+# laptop runs before a commit or a push does not run again on GitHub as a
+# backup. GitHub keeps only what the laptop cannot do: publishing the site, from
+# a fresh clone (.github/workflows/deploy.yml). See the CI spend plan, items 5
+# and 6 (2026-09-27).
+#
+# Each hook file is one line, `make -s <target>`, and gate:gates refuses
+# anything else in it. A new check goes into one of the targets below — never
+# into a hook file or a workflow — and gate:gates refuses a gate that neither
+# target reaches.
+#
+#   pre-commit  ~25 s   secrets in the staged change, lint, types, unit tests,
+#                       every quick gate; the two asset-weighing gates only
+#                       when the commit touches apps/web/public/assets.
+#   pre-push    ~2 min  the same quick checks again (a rebase or a merge of
+#                       main makes code no commit hook saw), then the secret
+#                       scan over history, the data rebuild, the asset gates,
+#                       the production build, its size, and the browser tests.
+#   ci          both, once each (make runs a shared prerequisite once).
+# ---------------------------------------------------------------------------
+
+# Missing gitleaks fails. The hook used to skip with a note that "the CI
+# secrets-scan job still gates every push"; that job is gone, so a skip here
+# would be the only scan quietly not running.
+.PHONY: gitleaks-ok
+gitleaks-ok:
+	@command -v gitleaks >/dev/null 2>&1 || { \
+	  echo "  ✗ gitleaks is not installed, and it is the only secret scan this repo has."; \
+	  echo "    install it:  brew install gitleaks"; \
+	  exit 1; \
+	}
+
+.PHONY: secrets-staged
+secrets-staged: gitleaks-ok ## Scan only what is staged for a commit (the pre-commit half of the secret scan)
+	@# `git --staged` (gitleaks 8.19+; the old `protect` subcommand is gone).
+	@# --redact keeps any match out of the terminal. A false positive gets an
+	@# allowlist entry in .gitleaks.toml, never a --no-verify.
+	@gitleaks git --staged --redact --no-banner --config .gitleaks.toml
+
+.PHONY: secrets-history
+secrets-history: gitleaks-ok ## Scan every commit in history (the pre-push half; what the CI job used to do)
+	@gitleaks git --redact --no-banner --config .gitleaks.toml
+
+.PHONY: checks-fast
+checks-fast: core ## Lint, types, unit tests and every quick gate (shared by both hooks)
+	$(PNPM) lint
+	$(PNPM) typecheck
+	$(PNPM) test
+	$(PNPM) gates:fast
+
+.PHONY: etl-check
+etl-check: core ## Rebuild the shipped data and fail if it differs from what is committed
+	@# Reads the working tree, so an uncommitted edit under public/assets fails
+	@# this too — commit or stash it before pushing.
 	$(ETL) extract:pages
 	$(ETL) build:adjacency
 	$(ETL) build:roots
 	$(ETL) build:tajweed
 	@git diff --quiet -- apps/web/public/assets \
-	  || { echo "::error:: ETL output differs from committed assets (run: make etl)"; exit 1; }
-	$(PNPM) lint
-	$(PNPM) typecheck
-	$(PNPM) test
+	  || { echo "  ✗ the data rebuild differs from the committed assets (run: make etl, then commit)"; exit 1; }
+
+.PHONY: pre-commit
+pre-commit: secrets-staged checks-fast ## Everything checked before each commit — the pre-commit hook runs exactly this
+	@# The two asset gates weigh all 604 pages (~9 s together), so a commit
+	@# pays for them only when it touches the assets. pre-push runs them always.
+	@if git diff --cached --name-only | grep -q '^apps/web/public/assets/'; then \
+	  $(PNPM) gate:assets && $(PNPM) gate:pages; \
+	fi
+
+.PHONY: pre-push
+pre-push: secrets-history checks-fast ## Everything checked before each push — the pre-push hook runs exactly this
+	$(MAKE) etl-check
 	$(PNPM) audit:corpus
-	$(PNPM) gate:notext
-	$(PNPM) gate:text-sources
-	$(PNPM) gate:scripture
-	$(PNPM) gate:license
-	$(PNPM) gate:license-copy
-	$(PNPM) gate:notices
-	$(PNPM) gate:license-tree
-	$(PNPM) gate:validation
-	$(PNPM) gate:verified-edges
-	$(PNPM) gate:edges
-	$(PNPM) gate:gates
-	$(PNPM) gate:ci-artifacts
-	$(PNPM) gate:golden-env
-	$(PNPM) gate:golden-size
 	$(PNPM) gate:assets
 	$(PNPM) gate:pages
-	$(PNPM) gate:boxes
-	$(PNPM) gate:words
-	$(PNPM) gate:mark-placements
-	$(PNPM) gate:align
-	$(PNPM) gate:map
-	$(PNPM) gate:use-cases
-	$(PNPM) gate:issues
-	$(PNPM) gate:tasks
-	$(PNPM) gate:decisions
-	$(PNPM) gate:etl-scripts
-	$(PNPM) gate:quran-meta
-	$(PNPM) gate:tajweed
-	$(PNPM) gate:revision-privacy
-	$(PNPM) gate:i18n
-	$(PNPM) gate:params
-	$(CORE) build && $(WEB) build
+	$(WEB) build
 	$(PNPM) gate:budget
+	@# All four browser projects, iPhone included: it runs on WebKit, which
+	@# needs a one-time `pnpm -C apps/web exec playwright install webkit`, and
+	@# it is the project that caught a jump bug the Android one missed.
+	$(WEB) exec playwright test --project=desktop --project=android --project=iphone --project=golden
+
+.PHONY: site
+site: build ## Build the public site and check it the way the deploy does (the deploy job runs this)
+	@# The deploy job runs this on a fresh clone, which is the one build that
+	@# proves the published site never held the private pitch folder (it is
+	@# gitignored, so a clone does not have it). The size gate also refuses any
+	@# public bundle that carries pitch code, and the two text gates refuse held
+	@# text, so the three run here as well as in the hooks.
+	$(PNPM) gate:budget
+	$(PNPM) gate:notext
+	$(PNPM) gate:scripture
+	@test -s apps/web/dist/index.html \
+	  || { echo "  ✗ the build has no index.html — refusing to publish an empty site"; exit 1; }
+	@test -s apps/web/dist/docs/index.html \
+	  || { echo "  ✗ the build has no docs/index.html — the design pages were not staged (scripts/stage-docs.mjs)"; exit 1; }
+
+.PHONY: ci
+ci: pre-commit pre-push ## Both hooks' checks, each once — what a commit and a push would run
 	@echo ""
-	@echo "  ✓ build-test-gate mirror passed."
-	@echo "    CI also runs two more jobs: make e2e, make lighthouse."
+	@echo "  ✓ pre-commit and pre-push checks passed."
+	@echo "    Lighthouse is by hand, before a demo or a release: make lighthouse"
 
 # ---------------------------------------------------------------------------
 # The loop workflow (docs/PLAN.md → executable)
@@ -330,11 +359,10 @@ loop: ## Print the kickoff prompt for a loop:  make loop N=2
 	@awk -v n="$(N)" '$$0 ~ ("^### Loop " n " ") {f=1} /^### Loop /{if(f && $$0 !~ ("^### Loop " n " ")) f=0} f' docs/PLAN.md | sed 's/^/    /'
 
 .PHONY: loop-verify
-loop-verify: ci ## Verify a loop is landable: CI mirror + e2e + Lighthouse (on-device check is manual)
-	@$(MAKE) e2e
+loop-verify: ci ## Verify a loop is landable: both hooks' checks + Lighthouse (on-device check is manual)
 	@$(MAKE) lighthouse
 	@echo ""
-	@echo "  ✓ CI mirror + e2e + Lighthouse green. Now do the on-device check in §Loop $(N) of PLAN.md,"
+	@echo "  ✓ hook checks + Lighthouse green. Now do the on-device check in §Loop $(N) of PLAN.md,"
 	@echo "    then write docs/decisions/loop-$(N).md and update the Status table."
 
 # ---------------------------------------------------------------------------
@@ -587,11 +615,11 @@ record: ## Bank a manual result:  make record CHECK=<id> RESULT='the verdict, in
 	  $(if $(STATUS),--status $(STATUS),) $(if $(ON),--on $(ON),)
 
 .PHONY: deploy-cloudflare
-deploy-cloudflare: ## Publish to Cloudflare Pages from this machine (GitHub Pages is the default; see .github/workflows/ci.yml)
-	@# Not how Hifth normally ships. A push to main that clears all four CI jobs
-	@# deploys to GitHub Pages by itself, and the same workflow will publish to
-	@# Cloudflare on request (Actions › CI › Run workflow › target: cloudflare) —
-	@# from the artifact the gates measured, which is the safer of the two.
+deploy-cloudflare: ## Publish to Cloudflare Pages from this machine (GitHub Pages is the default; see .github/workflows/deploy.yml)
+	@# Not how Hifth normally ships. A push to main deploys to GitHub Pages by
+	@# itself, and the same workflow will publish to Cloudflare on request
+	@# (Actions › Deploy › Run workflow › target: cloudflare) — from a fresh
+	@# clone, which is the safer of the two.
 	@#
 	@# This target is the third door: a laptop, wrangler's own login, no CI. It
 	@# exists because the day you need it is a day GitHub is the thing that is
@@ -756,7 +784,6 @@ help: ## List targets (this)
 	@echo "                  the full catalogue: .claude/skills/validate/SKILL.md"
 	@echo "  Golden images:  make golden        (diff against this platform's baselines)"
 	@echo "                  make golden-update (accept new ones — review the PNG diff!)"
-	@echo "                  make golden-linux UPDATE=1  (refresh the CI/linux set)"
 	@echo "  Registers:      make render-docs   (re-render the four generated pages the hook checks)"
 	@echo "  Bundle size:    make budget-update (accept a new JS baseline — read the diff!)"
 	@echo "  Parallel work:  make lock L=build CMD=\"pnpm -r test\" | make lock-status"

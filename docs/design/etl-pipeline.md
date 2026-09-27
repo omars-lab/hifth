@@ -209,7 +209,7 @@ flowchart TB
     g_i18n["gate:i18n"]:::gate
     g_params["gate:params"]:::gate
     g_priv["gate:revision-privacy<br/>the record never leaves the device"]:::gate
-    g_gold["gate:golden-env<br/>gate:golden-size"]:::gate
+    g_gold["gate:golden-size"]:::gate
   end
 
   subgraph D["the documents"]
