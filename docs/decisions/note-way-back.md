@@ -26,8 +26,9 @@ A: it still works, in two taps and with the note closed.
 
 ## What does the app do today?
 
-Before this change: close the note, then tap the previous verse on the trail. On a computer the trail
-stays in sight beside the note, so only a phone had the problem.
+Before this change: close the note, then tap the previous verse on the trail. On a phone the note
+always covers the trail. On a computer it covers it too whenever the note stands on the right-hand
+page, since the trail sits at the bottom right; only a note on the left-hand page leaves it in sight.
 
 ## What do others do?
 
@@ -42,10 +43,11 @@ We did not look.
 ## The options
 
 - **A · Leave it.** Close the note, then use the trail. Nothing to build; two taps and the note is gone.
-- **B · A back line inside the note (chosen).** One tap, and the note stays whole. On a computer it
-  repeats what the trail beside it already shows, which does no harm.
-- **C · Lift the trail above the note on a phone.** One way back on every screen, but it takes height
-  from a note that is already short on a small screen.
+- **B · A back line inside the note (chosen).** One tap, and the note stays whole, on a phone and on
+  a computer alike. When the trail happens to be in sight too, the line repeats it, which does no harm.
+- **C · Keep the trail in sight above the note.** One way back on every screen, but it takes height
+  from a note that is already short on a small screen, and on a computer the trail would have to move
+  out from under a note on the right-hand page.
 
 No picture is checked in: the renders carry The Study Quran's own text, which stays out of the public
 docs. The behaviour is held by a test in the demo build's tests: follow 1:6 to 6:153 on a phone, then back.
