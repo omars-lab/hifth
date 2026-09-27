@@ -327,6 +327,28 @@ function bareAyah(key: string): string {
 }
 
 /**
+ * The box of a verse's first line, so a verse too wide for the screen can be
+ * framed from its head. A verse's outline is one path with a rectangle per
+ * line, the first line first (`M0 220.7h345v35.8H0Zm130.7 35.8H345…`), so the
+ * first line is the path up to its first close, measured on its own.
+ */
+function firstLineOf(svg: SVGSVGElement, ids: readonly string[]) {
+  const el = ids.length ? svg.querySelector<SVGPathElement>(`[id="${ids[0]}"]`) : null;
+  const d = el?.getAttribute("d") ?? "";
+  const end = d.search(/z/i);
+  if (!el || !/^\s*M/.test(d) || end < 0) return undefined;
+  const probe = document.createElementNS(SVG_NS, "path");
+  probe.setAttribute("d", d.slice(0, end + 1));
+  el.parentNode?.appendChild(probe);
+  try {
+    const b = probe.getBBox();
+    return b.width > 0 ? { x: b.x, y: b.y, width: b.width, height: b.height } : undefined;
+  } finally {
+    probe.remove();
+  }
+}
+
+/**
  * Draw a page's marked mistakes, replacing whatever it had: a quiet red wash on
  * each marked word, and a ring round the one sign a mistake was narrowed to.
  * Laid first in the drawing, so the ink sits on top of the wash.
@@ -1438,7 +1460,7 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
         const shown = fit.stageHeight - (fit.coverBottom ?? 0);
         const at = bboxToScreen(bbox, target, ctx);
         if (at.y < 0 || at.y + at.height > shown) {
-          target = frameBboxToView(bbox, ctx, view.current.z);
+          target = frameBboxToView(bbox, ctx, view.current.z, firstLineOf(cur.svg, ids ?? []));
           // A verse taller than what shows starts at its first line.
           const framed = bboxToScreen(bbox, target, ctx);
           if (framed.height > shown) target = clampView({ ...target, y: target.y - framed.y }, fit);
@@ -2043,6 +2065,7 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
             bbox,
             { ...fit, viewBoxWidth: viewBoxWidthOf(mp.svg) },
             clampZoom(opts?.zoom ?? DEFAULT_HOP_ZOOM, MIN_ZOOM, MAX_ZOOM),
+            firstLineOf(mp.svg, loc.elementIds),
           );
           await tweenTo(target);
           if (ticket !== relocateRef.current) return;
