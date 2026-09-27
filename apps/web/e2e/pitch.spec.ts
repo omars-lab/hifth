@@ -122,6 +122,35 @@ test.describe("Hifth · the pitch build's Study Quran commentary", () => {
     for (const text of texts) expect(text).not.toContain("cross-references from here");
   });
 
+  test("a note on the right leaves the look-alike chips in sight and in reach", async ({ page }) => {
+    // 2:255 sits on the left leaf, so its note lands on the right — the same
+    // corner the look-alike chips live in. They used to peek out from under it.
+    await page.goto("/#/hafs-kfqc/2:255");
+    await expect(page.getByRole("dialog", { name: /2:255/ })).toBeVisible({ timeout: 20_000 });
+    expect(await sheet(page).getAttribute("data-side")).toBe("right");
+
+    // Measure the note at rest, not mid-way through its slide in.
+    await sheet(page).evaluate((el) => Promise.all(el.getAnimations().map((a) => a.finished)));
+    const note = (await sheet(page).boundingBox())!;
+    const chips = page.getByRole("group").getByRole("button", { name: /Similar verses/ });
+    expect(await chips.count()).toBeGreaterThan(0);
+    for (const box of await chips.evaluateAll((els) =>
+      els.map((e) => e.getBoundingClientRect().toJSON() as DOMRect),
+    )) {
+      const overlaps =
+        box.left < note.x + note.width && box.right > note.x &&
+        box.top < note.y + note.height && box.bottom > note.y;
+      expect(overlaps, "a look-alike chip is under the note").toBe(false);
+    }
+  });
+
+  test("a note ends on its words, not on the book's section-break stars", async ({ page }) => {
+    // 573 notes closed with the print's "* * *" divider, copied in as text.
+    await page.goto("/#/hafs-kfqc/1:1");
+    await expect(sheet(page)).toContainText("Related verses", { timeout: 20_000 });
+    await expect(sheet(page)).not.toContainText("* * *");
+  });
+
   test("a related verse in the note hops there and opens its own note", async ({ page }) => {
     // 1:6 — the straight-path verse — carries The Study Quran's own
     // cross-references, folded into the note as a "Related verses" list. This is

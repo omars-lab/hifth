@@ -77,6 +77,14 @@ const parseRef = (key) => {
 };
 
 /**
+ * The print closes a commentary section with a "* * *" divider. At the end of a
+ * note or a card it is only noise, so it is dropped wherever held text ends.
+ */
+function dropSectionBreak(text) {
+  return text.replace(/\s*\*\s*\*\s*\*\s*$/, "");
+}
+
+/**
  * Every captured commentary block opens with the verse label it covers — "3 …"
  * for a single ayah, "67–71 …" for a range the note is shared across. When the
  * label is exactly the ayah the reader tapped, it just repeats the verse the
@@ -241,7 +249,7 @@ const SNIPPET_MAX = 110;
 
 /** The opening words of a translation, cut on a word boundary with "…". */
 function snippet(text, max = SNIPPET_MAX) {
-  const flat = (text ?? "").replace(/\s+/g, " ").trim();
+  const flat = dropSectionBreak((text ?? "").replace(/\s+/g, " ").trim());
   if (!flat) return null;
   // A verse that runs on into the next ends mid-sentence; drop its dangling comma.
   if (flat.length <= max) return flat.replace(/[,;:—-]+$/, "");
@@ -288,7 +296,9 @@ function buildSurah(surah) {
     const [s, a] = ref;
     const blocks = (entry.commentary ?? [])
       .flatMap((c) => (c.blocks ?? []).map((b) => b.text).filter(Boolean))
-      .map((text) => trimSelfLabel(text, a));
+      .map((text) => trimSelfLabel(text, a))
+      .map(dropSectionBreak)
+      .filter(Boolean);
     verses[`${s}:${a}`] = {
       ref: `${s}:${a}`,
       key: canon(s, a),
