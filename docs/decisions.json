@@ -1465,7 +1465,8 @@
       "by": "omar",
       "date": "2026-09-19",
       "related": [
-        "selection-drawer"
+        "selection-drawer",
+        "note-way-back"
       ]
     },
     {
@@ -1547,6 +1548,32 @@
       "related": [
         "selection-drawer",
         "harakah-pick"
+      ]
+    },
+    {
+      "id": "note-way-back",
+      "question": "After following a related verse from inside The Study Quran's note, how does a reader get back?",
+      "status": "decided",
+      "options": [
+        {
+          "id": "A",
+          "label": "Close the note, then tap the previous verse on the trail"
+        },
+        {
+          "id": "B",
+          "label": "A small back line inside the note, naming the verse you came from"
+        },
+        {
+          "id": "C",
+          "label": "Keep the trail in sight above the note on a phone"
+        }
+      ],
+      "decided": "B",
+      "by": "claude (working assumption; omar may reopen)",
+      "date": "2026-09-27",
+      "doc": "docs/decisions/note-way-back.md",
+      "related": [
+        "ayah-drawer"
       ]
     }
   ]
