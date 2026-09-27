@@ -2196,6 +2196,14 @@ export function App(): JSX.Element {
                 onGo={hopTo}
                 onCover={setCoverTop}
                 onClose={() => setCommentaryOpen(false)}
+                back={
+                  breadcrumbKey
+                    ? {
+                        label: t.ayahLabel(breadcrumbKey) ?? breadcrumbKey,
+                        onBack: () => handleBeadBack(trail.length - 1),
+                      }
+                    : null
+                }
               />
             )}
           </>

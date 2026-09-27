@@ -73,6 +73,7 @@ export function CommentarySheet({
   onHop,
   onGo,
   onCover,
+  back = null,
 }: {
   entry: PitchCommentary | null;
   onClose: () => void;
@@ -101,6 +102,13 @@ export function CommentarySheet({
    * covered then anyway, and moving it would only be motion nobody sees.
    */
   onCover?: (top: number | null) => void;
+  /**
+   * The verse the reader came from, when they arrived by following a road — the
+   * last bead on the trail. On a phone the note covers the trail bar, so without
+   * this the only way back was to close the note first. Null where the reading
+   * started.
+   */
+  back?: { label: string; onBack: () => void } | null;
 }): JSX.Element | null {
   const { t } = useT();
   const sheetRef = useRef<HTMLDivElement>(null);
@@ -228,6 +236,13 @@ export function CommentarySheet({
             ✕
           </button>
         </header>
+
+        {back && (
+          <button type="button" className={styles.back} onClick={back.onBack}>
+            <span aria-hidden="true">↩ </span>
+            Back to {back.label}
+          </button>
+        )}
 
         <div className={styles.body}>
           {entry.showIntro && entry.intro.length > 0 && (
