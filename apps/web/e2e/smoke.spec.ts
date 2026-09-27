@@ -63,4 +63,14 @@ test.describe("Hifth shell", () => {
     await expect(swipes.locator("xpath=self::*[local-name()='line']")).toHaveCount(2);
     await expect(page.locator("#hifth-overlay .hl-sel.hl-ink")).toHaveCount(2);
   });
+
+  test("the opening pages' hand-drawn verses get the marker too, not a ring", async ({ page }) => {
+    // Pages 1 and 2 draw each ayah as one leaning outline, not a run of line
+    // boxes; until the pen learned to read them, 1:7 showed the faint fallback
+    // ring on the demo's first page. It runs across three lines there.
+    await page.goto("/#/hafs-kfqc/1:7");
+    const overlay = page.locator('svg[aria-labelledby="page-label-1"]:visible #hifth-overlay');
+    await expect(overlay.locator(".hl-sel.hl-ink")).toHaveCount(3, { timeout: 20_000 });
+    await expect(overlay.locator(".hl-sel:not(.hl-ink)")).toHaveCount(0);
+  });
 });
