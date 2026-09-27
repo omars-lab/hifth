@@ -1366,7 +1366,8 @@
         "selection-drawer",
         "diff-mark-tint",
         "phone-toolbar",
-        "letter-parts"
+        "letter-parts",
+        "word-drawer-placement"
       ]
     },
     {
@@ -1433,7 +1434,8 @@
         "mistake-note-anchor",
         "word-selection",
         "ayah-drawer",
-        "phone-toolbar"
+        "phone-toolbar",
+        "word-drawer-placement"
       ]
     },
     {
@@ -1515,6 +1517,36 @@
         "selection-drawer",
         "desktop-vs-mobile",
         "graduation-losers"
+      ]
+    },
+    {
+      "id": "word-drawer-placement",
+      "question": "When the word drawer would cover the word, where should it go?",
+      "status": "decided",
+      "options": [
+        {
+          "id": "A",
+          "label": "Keep it at the bottom, always"
+        },
+        {
+          "id": "B",
+          "label": "The same drawer at the top of the window when the word is low"
+        },
+        {
+          "id": "C",
+          "label": "One short row at the bottom, signs and letters behind two tabs"
+        }
+      ],
+      "decided": "B",
+      "by": "omar",
+      "date": "2026-09-26",
+      "artifact": "https://blog.bytesofpurpose.com/hifth/docs/design/word-drawer-placement-options.html",
+      "page": "docs/design/word-drawer-placement-options.html",
+      "builtBy": "scripts/build-word-drawer-placement.mjs",
+      "doc": "docs/decisions/word-drawer-placement.md",
+      "related": [
+        "selection-drawer",
+        "harakah-pick"
       ]
     }
   ]

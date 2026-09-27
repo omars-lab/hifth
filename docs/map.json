@@ -78,6 +78,11 @@
           "note": "What a verse tap opens (selection-drawer = D): one drawer of the verse's tools, each glyph with its word, where they used to be loose glyphs along the bar under the page. Not a dialog, so the page stays live and the drawer follows the light. It rises over the bar and the page slider only, never the page, so it cannot cover the verse it is about; the e2e test taps the page's last verse and checks exactly that. The tools are the same trigger components the bar held, given a `caption`; App steps the drawer aside while a sheet it opened is up."
         },
         {
+          "file": "apps/web/src/components/WordParts.tsx",
+          "symbol": "WordParts",
+          "note": "A Word-mode tap opens the word's parts here, `docked` into the verse drawer's place on the bottom of the window (selection-drawer = D); the slip picker still opens beside its word. Docked, each row runs on one line and the copies are drawn smaller, because wrapped rows at full size stood half a page tall. It is still taller than the verse drawer and can cover the page's last lines, which the decision record leaves open."
+        },
+        {
           "file": "apps/web/src/components/PageStage.tsx",
           "symbol": "PageStage",
           "note": "The React boundary. Binds @use-gesture to the surface, hands events to pointerIntent, and calls the Highlighter imperatively. The only file where the two worlds touch."
