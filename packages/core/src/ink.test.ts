@@ -94,7 +94,6 @@ describe("swipesFromPath", () => {
     ["a genuine polygon", "M0 0L10 5L20 0Z"],
     ["an arc", "M0 0A10 10 0 0 1 20 0Z"],
     ["a rect that does not close back to its left edge", "M0 0h100v38H40Z"],
-    ["a rect that misses its close by more than a rounding step", "M0 0h100v38h-99.5Z"],
     ["a zero-height run", "M0 0h100v0H0Z"],
     ["a curve", "M0 0C10 10 20 10 30 0Z"],
     ["empty", ""],
@@ -106,6 +105,50 @@ describe("swipesFromPath", () => {
     // Half marker and half box would read as a rendering bug, so recognition is
     // all-or-nothing per path.
     expect(swipesFromPath("M0 0h100v38H0ZM0 38L50 60L100 38Z")).toBeNull();
+  });
+});
+
+/**
+ * Pages 1 and 2 (al-Fātiḥah and the opening of al-Baqarah) are drawn by hand in
+ * the print's upstream: each ayah is one outline with edges that lean a unit or
+ * so, not a run of line boxes. Read as boxes they all fail, and the opening
+ * pages of the demo showed the faint fallback ring instead of the marker. Read
+ * as outlines, they cut into lines like every other page.
+ */
+describe("hand-drawn outlines (the opening pages)", () => {
+  // Page 1's 1:6 — the end of line 4 on the left, then the right of line 5.
+  const P1_VERSE_6 = "M56 103.2H8v26.6l221.5 1.5v29.3H114.2v-30.2l-58.4-.4Z";
+  // Page 1's 1:7 — the left of line 5, all of line 6, the middle of line 7.
+  const P1_VERSE_7 = "M113.7 130.4H13.8v32.4h23.3V189h36.4v25.8h98.4v-23.4h33v-30.8l-91.2-.4z";
+
+  it("cuts 1:6 into its two lines, each inside its own span", () => {
+    const swipes = swipesFromPath(P1_VERSE_6);
+    expect(swipes).toHaveLength(2);
+    const [a, b] = swipes!;
+    expect(a.y).toBeLessThan(130);
+    expect(a.x1).toBeGreaterThanOrEqual(8);
+    expect(a.x2).toBeLessThanOrEqual(56);
+    expect(b.y).toBeGreaterThan(131);
+    expect(b.x1).toBeGreaterThanOrEqual(114);
+    expect(b.x2).toBeLessThanOrEqual(229.5);
+  });
+
+  it("cuts 1:7 into three lines, top to bottom", () => {
+    const swipes = swipesFromPath(P1_VERSE_7)!;
+    expect(swipes).toHaveLength(3);
+    expect(swipes.map((s) => s.y)).toEqual([...swipes.map((s) => s.y)].sort((p, q) => p - q));
+    // The last line is the centred tail between 73.5 and 171.9.
+    expect(swipes[2].x1).toBeGreaterThanOrEqual(73.5);
+    expect(swipes[2].x2).toBeLessThanOrEqual(171.9);
+  });
+
+  it("reads a box whose closing edge leans half a unit as one line", () => {
+    // Half a unit over a 38-unit edge is how the print draws, not a diagonal.
+    expect(swipesFromPath("M0 0h100v38h-99.5Z")).toHaveLength(1);
+  });
+
+  it("counts the opening pages' lines when measuring line height", () => {
+    expect(pageLineHeight([P1_VERSE_6, P1_VERSE_7])).not.toBeNull();
   });
 });
 
