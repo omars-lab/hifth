@@ -109,6 +109,19 @@ test.describe("Hifth · the pitch build's Study Quran commentary", () => {
     await expect(sheet(page)).toHaveCount(1);
   });
 
+  test("outside al-Fātiḥah each related verse says what is there, not one line for all", async ({ page }) => {
+    // 6:153 takes The Study Quran's own cross-references, not hand-written roads.
+    await page.goto("/#/hafs-kfqc/6:153");
+    await expect(page.getByRole("dialog", { name: /6:153/ })).toBeVisible({ timeout: 20_000 });
+    const cards = sheet(page).getByRole("button", { name: /Hop to/ });
+    await expect(cards.first()).toBeVisible();
+    const texts = await cards.allInnerTexts();
+    expect(texts.length).toBeGreaterThan(1);
+    // Each card opens the target's own translation, so no two read the same.
+    expect(new Set(texts).size).toBe(texts.length);
+    for (const text of texts) expect(text).not.toContain("cross-references from here");
+  });
+
   test("a related verse in the note hops there and opens its own note", async ({ page }) => {
     // 1:6 — the straight-path verse — carries The Study Quran's own
     // cross-references, folded into the note as a "Related verses" list. This is
