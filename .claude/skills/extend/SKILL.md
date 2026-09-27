@@ -93,12 +93,13 @@ to read it as a newcomer would.
 - **Build core first.** `apps/web` and the ETL both resolve `@hifth/core` through
   its built `dist/`, so a core edit is invisible until `make core`. `make
   typecheck` / `test` / `e2e` / `ci` do it for you; a bare `pnpm vitest` does not.
-- **The ETL output is committed and CI re-runs it.** Any change under
+- **The ETL output is committed and the pre-push hook re-runs it.** Any change under
   `packages/etl` means `make etl` in the same commit, and the ETL must be
-  deterministic — CI diffs a fresh run against the committed assets.
+  deterministic — `make etl-check` diffs a fresh run against the committed assets.
 - **A new gate is three edits, not one**: `scripts/gate-*.mjs`, `pnpm gates` in
-  `package.json`, and *both* `make ci` and `.github/workflows/ci.yml`. A gate in
-  `pnpm gates` that no CI job runs is a comment.
+  `package.json` (usually via `gates:fast`), and a hook target in the `Makefile`
+  (`pre-commit` or `pre-push`) that reaches it. A gate no hook runs is a comment;
+  `gate:gates` fails on one.
 - **Several agents share this checkout.** Anything that builds, installs or stages
   takes the lock: `make lock L=build CMD="…"`. Protocol in
   `docs/PARALLEL-AGENTS.md`.

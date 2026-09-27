@@ -7,10 +7,10 @@
 # the build they are running. `docs/validation/ledger.json` tracks that as
 # `source-offer-resolves`, and it is the one thing gating publication.
 #
-# Why it is its own workflow, and not a step in ci.yml:
+# Why it is its own workflow, and not a step in the deploy:
 #
-#   - It reaches the public internet. `ci.yml` runs on every push and pull
-#     request, and a check that can go red because GitHub or corpus.quran.com
+#   - It reaches the public internet. The deploy runs on every push to main,
+#     and a check that can go red because GitHub or corpus.quran.com
 #     is having a bad morning teaches everyone to ignore red. The KFGQPC terms
 #     watcher was cancelled for the same reason (research ⑦).
 #   - It is red *today*, correctly: the repository is private, so the offer
