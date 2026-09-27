@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { orderForHifz, type Edge, type LeafSide } from "@hifth/core";
 import { useT } from "../i18n";
 import type { PitchCommentary } from "./pitch";
@@ -87,12 +87,22 @@ export function CommentarySheet({
   // it: no veil dims the page, and a tap on the next verse turns the note to it.
   // A phone has no facing leaf, so there it stays a sheet over the page.
   const beside = side !== null;
+  // A phone opens the note short, on the lower part of the screen, so the verse
+  // it is about stays in sight above it and nothing dims the page. Reading on —
+  // a scroll inside the note, or a tap on its handle — grows it to the full
+  // height, and only then does it cover the page like a sheet.
+  const [tall, setTall] = useState(false);
+  const verseKey = entry?.verse.key ?? null;
+  useEffect(() => setTall(false), [verseKey]);
+  const modal = !beside && tall;
 
   useEffect(() => {
     if (!open) return;
     restoreRef.current = (document.activeElement as HTMLElement | null) ?? null;
     const sheet = sheetRef.current;
-    if (sheet) (focusables(sheet)[0] ?? sheet).focus();
+    // First focus on the close button, as it always was — not the phone's
+    // handle, which comes first in the note but is not where a reader starts.
+    if (sheet) (sheet.querySelector<HTMLElement>(`.${styles.close}`) ?? focusables(sheet)[0] ?? sheet).focus();
     // Reading always starts at the top, even when the same sheet re-opens on a
     // different verse.
     if (sheet) sheet.scrollTop = 0;
@@ -108,7 +118,7 @@ export function CommentarySheet({
         onClose();
         return;
       }
-      if (e.key !== "Tab" || beside) return;
+      if (e.key !== "Tab" || !modal) return;
       const sheet = sheetRef.current;
       if (!sheet) return;
       const items = focusables(sheet);
@@ -124,7 +134,7 @@ export function CommentarySheet({
         first.focus();
       }
     },
-    [onClose, beside],
+    [onClose, modal],
   );
 
   if (!entry) return null;
@@ -132,21 +142,35 @@ export function CommentarySheet({
 
   return (
     <>
-      {!beside && <div className={styles.scrim} onClick={onClose} aria-hidden="true" />}
+      {modal && <div className={styles.scrim} onClick={onClose} aria-hidden="true" />}
       <div
         ref={sheetRef}
         className={styles.sheet}
         role="dialog"
-        aria-modal={!beside}
+        aria-modal={modal}
         aria-label={`Commentary on ${label}`}
         // The reading is English (The Study Quran), so this surface reads
         // left-to-right regardless of the app's chrome direction.
         dir="ltr"
         data-side={side ?? undefined}
+        data-tall={tall || undefined}
         tabIndex={-1}
         onKeyDown={onKeyDown}
+        onScroll={(e) => {
+          if (!beside && !tall && e.currentTarget.scrollTop > 0) setTall(true);
+        }}
       >
-        <div className={styles.grip} aria-hidden="true" />
+        {beside ? (
+          <div className={styles.grip} aria-hidden="true" />
+        ) : (
+          <button
+            type="button"
+            className={styles.grip}
+            aria-label={tall ? "Show less of the note" : "Show all of the note"}
+            aria-expanded={tall}
+            onClick={() => setTall((v) => !v)}
+          />
+        )}
         <header className={styles.head}>
           <span className={styles.glyph} aria-hidden="true">
             ✎

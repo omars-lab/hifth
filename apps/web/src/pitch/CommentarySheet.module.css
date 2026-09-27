@@ -50,6 +50,13 @@
   border-start-end-radius: var(--radius-lg);
   box-shadow: var(--shadow-2);
   animation: rise var(--dur-med) var(--ease-hop);
+  transition: max-block-size var(--dur-med) var(--ease-hop);
+}
+
+/* A phone opens the note short, so the verse stays in sight above it; reading
+   on grows it to the full height (CommentarySheet's `tall`). */
+.sheet:not([data-side]):not([data-tall]) {
+  max-block-size: 38vh;
 }
 
 .grip {
@@ -58,6 +65,18 @@
   margin: 0 auto var(--space-2);
   border-radius: var(--radius-pill);
   background: var(--hairline);
+}
+
+/* On a phone the handle is a button: a thumb-sized target around the bar. */
+button.grip {
+  display: block;
+  inline-size: 72px;
+  block-size: 20px;
+  margin-block: calc(-1 * var(--space-2)) 0;
+  padding: 0;
+  border: 0;
+  background: linear-gradient(var(--hairline), var(--hairline)) center / 40px 4px no-repeat;
+  cursor: pointer;
 }
 
 .head {
