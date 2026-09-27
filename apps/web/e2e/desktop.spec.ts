@@ -1573,6 +1573,46 @@ test.describe("Hifth · the ayah's sheets rise over the facing leaf", () => {
     expect(box.x, "the phone sheet is full-bleed").toBe(0);
     expect(box.width).toBe(390);
   });
+
+  /*
+   * A sheet on the facing leaf leaves the verse's own leaf clear and live — no
+   * dimming over the page it is about, and the same card size for every sheet.
+   * The note already stood this way; the look-alike list, the roots and the
+   * passage menu still dimmed the whole screen and stood narrower (380 against
+   * 460), so opening one after the other made the page flicker dark and the card
+   * jump size. Checked by what is actually on top at the middle of the verse's
+   * leaf, not by the absence of a class name.
+   */
+  test("a sheet on the facing leaf leaves the verse's leaf clear, at one card size", async ({
+    page,
+  }) => {
+    await page.goto("/#/hafs-kfqc/2:48");
+    await expect(pageSvg(page, 7)).toBeVisible({ timeout: 20_000 });
+    const leaf = await boxOf(pageSvg(page, 7));
+    const onTop = (): Promise<boolean> =>
+      page.evaluate(
+        (p) => !!document.elementFromPoint(p.x, p.y)?.closest('[data-testid="page-book"]'),
+        { x: leaf.x + leaf.width / 2, y: leaf.y + leaf.height / 2 },
+      );
+    const opens: Array<[string, () => Promise<void>]> = [
+      ["the look-alike list", () => chip(page).click()],
+      ["the roots", () => page.getByRole("button", { name: /الجذور · / }).click()],
+    ];
+    for (const [name, open] of opens) {
+      await open();
+      await expect(sheet(page)).toBeVisible();
+      expect(await onTop(), `${name} dims or covers the verse's own leaf`).toBe(true);
+      expect((await boxOf(sheet(page))).width, `${name} is not the note's width`).toBeCloseTo(460, 0);
+      await page.keyboard.press("Escape");
+      await expect(sheet(page)).toHaveCount(0);
+    }
+
+    // A range link opens the passage menu on arrival.
+    await page.goto("/#/hafs-kfqc/2:47-2:48");
+    await expect(sheet(page)).toBeVisible({ timeout: 20_000 });
+    expect(await onTop(), "the passage menu dims the passage's own leaf").toBe(true);
+    expect((await boxOf(sheet(page))).width, "the passage menu is not the note's width").toBeCloseTo(460, 0);
+  });
 });
 
 /*
