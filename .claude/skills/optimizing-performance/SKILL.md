@@ -14,11 +14,12 @@ is in [measuring.md](measuring.md). Read that first if "Lighthouse", "time to in
 
 | check | what it measures | where | fails when |
 | --- | --- | --- | --- |
-| **start-up check** (Lighthouse) | the real promise: time until the app is usable, on a modelled slow phone | `make lighthouse`, and the `lighthouse` job on each PR | the median of 5 runs is over 2500 ms |
-| **size cap** | how much code the phone downloads, compressed | `pnpm gate:budget`, part of `make gates` | the total is over the cap, **or** it moved more than 1 KB since the last accepted size |
+| **start-up check** (Lighthouse) | the real promise: time until the app is usable, on a modelled slow phone | `make lighthouse`, **by hand** before a demo or a release (also inside `make loop-verify`); since 2026-09-27 nothing runs it automatically | the median of 5 runs is over 2500 ms |
+| **size cap** | how much code the phone downloads, compressed | `pnpm gate:budget`: before every push (the pre-push hook) and every deploy (`make site`) | the total is over the cap, **or** it moved more than 1 KB since the last accepted size |
 
 **The size cap stands in for the promise; it is not the promise.** It exists because it is instant,
-exact and runs on every commit, while Lighthouse takes minutes and models a phone. So when the cap
+exact and runs before every push, while Lighthouse takes minutes, models a phone, and only runs
+when someone asks for it, which makes the cap the only automatic guard on start-up. So when the cap
 and the start-up check disagree, **the start-up check wins**, and the cap is what moves.
 
 ## When the size cap trips (or is about to)
@@ -51,7 +52,7 @@ Then read the three charts in order, and decide:
 | --- | --- | --- | --- |
 | **Trim** (load rarely used parts later) | keeps the promise with room to spare; start-up can get faster | effort; a short wait the first time a later-loaded screen opens | every later-loaded part is its own file, which the service worker must also cache for offline use |
 | **Raise the cap** | quick; unblocks the feature now | start-up slows a little at a time, and nobody notices because the checks keep passing | re-run the sweep before each future raise; the start-up check becomes the only real guard |
-| **Drop the cap, keep only the start-up check** | measures the real thing | slow and a little noisy; a big addition is only caught on the PR's Lighthouse job, not at commit | the start-up check has to run before commit, not only on GitHub |
+| **Drop the cap, keep only the start-up check** | measures the real thing | slow and a little noisy; with Lighthouse run only by hand, a big addition is not caught until someone runs it | Lighthouse would have to go back into the pre-push hook (minutes on every push) |
 
 **Default:** raise when the sweep shows at least twice the headroom you are asking for; trim when
 it does not; never raise just to make a red check go green without looking at the charts.
@@ -78,8 +79,11 @@ it does not; never raise just to make a red check go green without looking at th
 - **Lighthouse's own performance score ignores time to interactive** (it carries zero weight in
   Lighthouse 12), which is why the check asserts the 2500 ms directly. A score of 100 does not mean
   the promise is kept.
-- **A cold GitHub runner adds one slow run in five.** That is why 5 runs and the median are used;
-  a single red run is not a regression.
+- **A cold machine adds one slow run in five** (seen on GitHub's, when Lighthouse still ran there).
+  That is why 5 runs and the median are used; a single red run is not a regression.
+- **Lighthouse left GitHub on 2026-09-27** (#119 moved every check into local git hooks to save
+  GitHub Actions minutes, and left Lighthouse out as too slow for a hook). Run `make lighthouse`
+  before a demo, and whenever the size cap moves.
 
 ## Where the room goes today (2026-09-27, ~149 KB in all, 138 KB in the main script)
 

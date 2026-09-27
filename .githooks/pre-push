@@ -1,0 +1,4 @@
+#!/usr/bin/env sh
+# Every check lives in the Makefile target; this file is only the doorway.
+# Add a check to `make pre-push`, never here (gate:gates refuses it).
+exec make -s pre-push

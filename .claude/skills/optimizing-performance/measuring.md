@@ -27,11 +27,14 @@ stage of loading took, plus accessibility and best-practice scores.
 
 **Lighthouse CI** (`lhci`) is Google's command-line wrapper around it. It runs Lighthouse several
 times on the built app, takes the median, and fails if the numbers break the limits written in
-`.lighthouserc.json`. It is not a GitHub product. It runs on a laptop the same way it runs in a
+`.lighthouserc.json`. It is not a GitHub product. It runs on a laptop the same way it once ran in a
 GitHub Actions job.
 
 - **Added:** 2026-07-25 (commit `3b256d4`, the offline-caching work; the GitHub job came the same
   day in `f7f002b`).
+- **Runs by hand since 2026-09-27.** #119 moved every check into local git hooks and took
+  Lighthouse off GitHub. Minutes per run was too slow for a hook, so it was left out. Run
+  `make lighthouse` before a demo or a release; `make loop-verify` includes it.
 - **Never installed.** Each run downloads it fresh with `pnpm dlx @lhci/cli@0.14.x`. That is on
   purpose: it brings Lighthouse and a Chrome launcher, tens of MB nothing else in the repo needs,
   and keeping it out of the dependency list keeps the shared lockfile quiet.
@@ -88,8 +91,8 @@ top. The sweep (below) measures the real figure instead of trusting this arithme
 | performance score | Lighthouse's own 0–100 blend | yes, ≥ 90, but it **ignores** time to interactive (zero weight since Lighthouse 12), so it cannot keep the promise alone |
 | accessibility, best practices, SEO | other 0–100 scores | yes, each ≥ 90 |
 
-Five runs, median kept. A cold GitHub runner reliably produces one slow run in five (about
-2.8 s), and the median absorbs it.
+Five runs, median kept. A cold machine (seen on GitHub's, when Lighthouse ran there) reliably
+produces one slow run in five (about 2.8 s), and the median absorbs it.
 
 ## How is the size cap measured?
 

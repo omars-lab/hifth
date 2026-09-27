@@ -1,0 +1,116 @@
+# Publish the site. The only thing GitHub still does for this repo.
+#
+# Every check runs on the laptop, in the pre-commit and pre-push hooks (Makefile,
+# `make pre-commit` / `make pre-push`). We are the only developers and the hooks
+# always run, so nothing here repeats them as a backup: no PR checks, no e2e,
+# no Lighthouse (that is `make lighthouse`, by hand, before a demo or a
+# release). See the CI spend plan, items 5 and 6 (2026-09-27).
+#
+# What stays is what the laptop cannot do:
+#   - publishing to GitHub Pages, which has to happen from GitHub;
+#   - building from a fresh clone. The laptop holds the private pitch data in a
+#     gitignored folder; a clone does not, so this build is the one that proves
+#     the published site never had it. `make site` builds and runs the size and
+#     held-text gates on these exact bytes before they are uploaded.
+#
+# Cloudflare Pages stays a hand-started alternative (Run workflow › target:
+# cloudflare), built the same way, so the two cannot drift on anything but the
+# last step. `make deploy-cloudflare` is the laptop door to the same place.
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+    # Markdown and the agent folder are never part of the built site (stage-docs
+    # publishes docs/**/*.html only and links .md files to the repository).
+    paths-ignore: ["**.md", ".claude/**"]
+  workflow_dispatch:
+    inputs:
+      target:
+        description: "Where to publish"
+        type: choice
+        options: [pages, cloudflare]
+        default: pages
+
+concurrency:
+  group: deploy
+  cancel-in-progress: true
+
+jobs:
+  deploy-pages:
+    # Main only, in both cases: "what is deployed" should only ever be
+    # answerable by looking at main.
+    if: >-
+      github.ref == 'refs/heads/main' &&
+      (github.event_name == 'push' || inputs.target == 'pages')
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v7 # a fresh clone: no private folder exists here
+      - uses: pnpm/action-setup@v6
+        with:
+          version: 9.15.0
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Build and check the public site
+        run: make site
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: apps/web/dist
+      - id: deploy
+        uses: actions/deploy-pages@v5
+
+  deploy-cloudflare:
+    # Never automatic. Choosing it is the point.
+    if: >-
+      github.ref == 'refs/heads/main' &&
+      github.event_name == 'workflow_dispatch' && inputs.target == 'cloudflare'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+        with:
+          version: 9.15.0
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Build and check the public site
+        run: make site
+
+      # Read through env, never interpolated into the command line: `${{ secrets.X }}`
+      # in a `run:` is substituted into the script before the shell sees it, so a
+      # trace or an error message can echo the token back.
+      - name: Cloudflare credentials must be present
+        env:
+          TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          ACCOUNT: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          missing=""
+          [ -n "$TOKEN" ]   || missing="$missing CLOUDFLARE_API_TOKEN"
+          [ -n "$ACCOUNT" ] || missing="$missing CLOUDFLARE_ACCOUNT_ID"
+          [ -z "$missing" ] || {
+            echo "::error::this repo has no$missing — add them under Settings › Secrets › Actions"
+            exit 1
+          }
+
+      - uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: apps/web
+          command: pages deploy dist --project-name hifth
