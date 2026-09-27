@@ -286,7 +286,8 @@
     inset-inline-start: auto;
     inset-inline-end: var(--space-5);
     inset-block-end: var(--space-5);
-    inline-size: 380px;
+    inline-size: 460px; /* one card size for every sheet on the spread */
+    max-block-size: 80vh;
     border-radius: var(--radius-lg);
   }
 

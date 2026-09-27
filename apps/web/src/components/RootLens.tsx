@@ -130,6 +130,8 @@ export function RootLens({
   side = null,
 }: RootLensProps): JSX.Element | null {
   const { t, dir } = useT();
+  // Beside the verse on a spread: no dimming, no trapped Tab (see HopPopover).
+  const beside = side !== null;
   const sheetRef = useRef<HTMLDivElement>(null);
   // The element focused before the sheet opened, restored on close.
   const restoreRef = useRef<HTMLElement | null>(null);
@@ -162,7 +164,7 @@ export function RootLens({
         onClose();
         return;
       }
-      if (e.key !== "Tab") return;
+      if (e.key !== "Tab" || beside) return;
       const sheet = sheetRef.current;
       if (!sheet) return;
       const items = focusables(sheet);
@@ -178,7 +180,7 @@ export function RootLens({
         first.focus();
       }
     },
-    [onClose],
+    [onClose, beside],
   );
 
   if (!families) return null;
@@ -217,12 +219,12 @@ export function RootLens({
 
   return (
     <>
-      <div className={styles.scrim} onClick={onClose} aria-hidden="true" />
+      {!beside && <div className={styles.scrim} onClick={onClose} aria-hidden="true" />}
       <div
         ref={sheetRef}
         className={styles.sheet}
         role="dialog"
-        aria-modal="true"
+        aria-modal={!beside}
         aria-label={t.rootsAria(families.length)}
         dir={dir}
         data-side={side ?? undefined}
