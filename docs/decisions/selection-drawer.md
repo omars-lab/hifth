@@ -11,7 +11,8 @@ tap opens the word's parts in the same drawer, on the bottom of the window, each
 What building it showed: the word's drawer carries enlarged copies of the word, so it stands taller
 than the verse's and covers the page's last two or three lines on a desktop window — the tapped
 word too when it is on the bottom line, though the drawer shows that word large. Asked on its own as
-[word-drawer-placement](word-drawer-placement.md).
+[word-drawer-placement](word-drawer-placement.md), decided B: when the word is low, the same drawer
+hangs from under the tool bar instead.
 
 *Asked 2026-09-12. A reader looking at a verse of the print has two different
 reaches in mind at two different moments: sometimes they want to do something with a single word

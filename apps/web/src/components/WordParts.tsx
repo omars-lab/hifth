@@ -148,6 +148,29 @@ export function WordParts({
   const anchorRef = useRef(anchor);
   anchorRef.current = anchor;
 
+  // Docked: where its top edge stands when the word is low (undefined until
+  // measured, null for the bottom of the window).
+  const [dockTop, setDockTop] = useState<number | null | undefined>(undefined);
+
+  // Docked, it stands on the bottom of the window, unless that would cover the
+  // word: then at the top, just under the tool bar (word-drawer-placement = B).
+  useEffect(() => {
+    if (!docked) return;
+    const frame = requestAnimationFrame(() => {
+      const box = boxRef.current;
+      if (!box) return;
+      const r = anchorRef.current();
+      if (!r || r.bottom + MARGIN <= window.innerHeight - box.offsetHeight) {
+        setDockTop(null);
+        return;
+      }
+      const tools = document.querySelector<HTMLElement>('[role="toolbar"][data-tool]:not([data-phone-bar])');
+      const under = tools?.getBoundingClientRect().bottom ?? 0;
+      setDockTop(under < window.innerHeight / 2 ? under : 0);
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [data, docked]);
+
   // Stand below the word, or above it when there is no room; measured a frame
   // late so the row has its size.
   useEffect(() => {
@@ -167,7 +190,7 @@ export function WordParts({
     return () => cancelAnimationFrame(frame);
   }, [data, docked]);
 
-  const placed = docked || at !== null;
+  const placed = docked ? dockTop !== undefined : at !== null;
   useEffect(() => {
     if (placed) boxRef.current?.querySelector<HTMLButtonElement>("button")?.focus();
   }, [placed]);
@@ -202,11 +225,24 @@ export function WordParts({
   return (
     <div
       ref={boxRef}
-      className={docked ? `${styles.box} ${styles.docked}` : styles.box}
+      className={
+        docked ? `${styles.box} ${styles.docked} ${dockTop != null ? styles.dockedTop : styles.dockedBottom}` : styles.box
+      }
       role="dialog"
       aria-label={heading}
       data-word-parts={mode}
-      style={docked ? undefined : at ? { left: at.left, top: at.top } : { visibility: "hidden" }}
+      data-docked={docked ? (dockTop != null ? "top" : "bottom") : undefined}
+      style={
+        docked
+          ? dockTop === undefined
+            ? { visibility: "hidden" }
+            : dockTop !== null
+              ? { top: dockTop }
+              : undefined
+          : at
+            ? { left: at.left, top: at.top }
+            : { visibility: "hidden" }
+      }
       onKeyDown={(e) => {
         if (e.key === "Escape") {
           e.preventDefault();

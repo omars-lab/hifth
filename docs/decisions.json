@@ -1522,7 +1522,7 @@
     {
       "id": "word-drawer-placement",
       "question": "When the word drawer would cover the word, where should it go?",
-      "status": "open",
+      "status": "decided",
       "options": [
         {
           "id": "A",
@@ -1537,6 +1537,9 @@
           "label": "One short row at the bottom, signs and letters behind two tabs"
         }
       ],
+      "decided": "B",
+      "by": "omar",
+      "date": "2026-09-26",
       "artifact": "https://blog.bytesofpurpose.com/hifth/docs/design/word-drawer-placement-options.html",
       "page": "docs/design/word-drawer-placement-options.html",
       "builtBy": "scripts/build-word-drawer-placement.mjs",
