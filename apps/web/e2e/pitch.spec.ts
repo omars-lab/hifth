@@ -201,6 +201,26 @@ test.describe("Hifth · the pitch build's Study Quran commentary", () => {
   });
 });
 
+test.describe("Hifth · the way back from a note on a phone", () => {
+  test.use({ viewport: { width: 390, height: 844 } });
+
+  test("after following a related verse, the note offers the way back", async ({ page }) => {
+    // On a phone the note covers the trail bar, so the bead that leads back was
+    // out of reach until the note was closed. The note now carries it itself.
+    await page.goto("/#/hafs-kfqc/1:6");
+    await expect(sheet(page)).toBeVisible({ timeout: 20_000 });
+    // Nothing to go back to yet: this is where the reading started.
+    await expect(sheet(page).getByRole("button", { name: /^Back to/ })).toHaveCount(0);
+
+    await sheet(page).getByRole("button", { name: /Hop to .*6:153/ }).click();
+    await expect(page.getByRole("dialog", { name: /6:153/ })).toBeVisible();
+
+    await sheet(page).getByRole("button", { name: /^Back to .*1:6/ }).click();
+    await expect(page.getByRole("dialog", { name: /1:6/ })).toBeVisible();
+    await expect(sheet(page).getByRole("button", { name: /^Back to/ })).toHaveCount(0);
+  });
+});
+
 test.describe("Hifth · the pitch commentary on a phone", () => {
   // A phone is a single page with no facing leaf to place the note on, so the
   // note is a full-width bottom sheet, not a card pinned to one side. This is

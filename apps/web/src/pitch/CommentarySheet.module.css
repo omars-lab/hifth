@@ -128,6 +128,30 @@ button.grip {
   border-radius: var(--radius-sm);
 }
 
+/* The way back to the verse the reader came from. A quiet link under the
+   heading: navigation, not reading, so it stays small and out of the prose. */
+.back {
+  display: block;
+  margin-block-start: var(--space-2);
+  padding: 0;
+  min-block-size: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: var(--text-sm);
+  color: var(--accent-strong);
+  text-align: start;
+  cursor: pointer;
+}
+.back:hover {
+  text-decoration: underline;
+}
+.back:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
 /* The reading column: hold the measure near 60ch so long commentary stays easy
    on the eye even when the sheet is wide on a desktop spread. */
 .body {
