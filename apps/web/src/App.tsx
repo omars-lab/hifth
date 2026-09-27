@@ -159,6 +159,8 @@ export function App(): JSX.Element {
   );
   // Whether the commentary sheet is showing for the current selection.
   const [commentaryOpen, setCommentaryOpen] = useState(false);
+  // Where the phone's short note starts, so the page can lift the verse above it.
+  const [coverTop, setCoverTop] = useState<number | null>(null);
   const [page, setPage] = useState(START_PAGE);
   const [selectedKey, setSelectedKey] = useState<string | null>(null);
   // The drag-highlighted passage: its ayah keys in reading order (spec §3's
@@ -2068,6 +2070,7 @@ export function App(): JSX.Element {
             >
               <PageStage
                 ref={stageRef}
+                coverTop={coverTop}
                 resolver={resolver}
                 page={page}
                 total={totalPages}
@@ -2169,6 +2172,7 @@ export function App(): JSX.Element {
                 canHop={canHop}
                 onHop={handleHop}
                 onGo={hopTo}
+                onCover={setCoverTop}
                 onClose={() => setCommentaryOpen(false)}
               />
             )}
