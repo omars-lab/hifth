@@ -81,6 +81,26 @@ describe("frameBboxToView (mock focus() port)", () => {
     const screen = bboxToScreen(head, v, CTX);
     expect(screen.y).toBeGreaterThanOrEqual(0);
   });
+
+  it("with a note over the foot of the stage, lands the last line above the note", () => {
+    // A phone note covers the lower 300px. The last line of the page must still
+    // come to rest in the 340px left showing, even at fit, where without the
+    // note the page would not move at all.
+    const covered = { ...CTX, coverBottom: 300 };
+    const foot: Rect = { x: 40, y: 520, width: 265, height: 20 };
+    for (const z of [1, 2]) {
+      const screen = bboxToScreen(foot, frameBboxToView(foot, covered, z), covered);
+      expect(screen.y).toBeGreaterThanOrEqual(0);
+      expect(screen.y + screen.height).toBeLessThanOrEqual(640 - 300);
+    }
+  });
+
+  it("centres a mid-page line in the part the note leaves showing", () => {
+    const covered = { ...CTX, coverBottom: 300 };
+    const bbox: Rect = { x: 40, y: 260, width: 265, height: 30 };
+    const screen = bboxToScreen(bbox, frameBboxToView(bbox, covered, 2), covered);
+    expect(screen.y + screen.height / 2).toBeCloseTo((640 - 300) / 2, 6);
+  });
 });
 
 describe("clampView", () => {
@@ -132,6 +152,14 @@ describe("clampView", () => {
       y: -340,
       z: 1.55,
     });
+  });
+
+  it("lets the page's foot be scrolled up above a note, and no further", () => {
+    // At fit the page is shorter than the stage, but with 300px covered it is
+    // taller than what shows: it may roam so its last line clears the note.
+    const covered = { ...FIT, coverBottom: 300 };
+    expect(clampView({ x: 0, y: -1e6, z: 1 }, covered).y).toBeCloseTo(340 - CTX.contentHeight, 6);
+    expect(clampView({ x: 0, y: 1e6, z: 1 }, covered).y).toBeCloseTo(0, 6);
   });
 
   it("is idempotent — clamping a held view changes nothing", () => {
