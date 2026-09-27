@@ -2183,7 +2183,12 @@ export function App(): JSX.Element {
             />
             {PITCH && (
               <CommentarySheet
-                entry={commentaryOpen ? commentaryEntry : null}
+                // One drawer for a verse at a time: a chip's list or the root
+                // lens takes the note's place, and closing it brings the note
+                // back (commentaryOpen stays true underneath). Both used to
+                // stack, squeezing the page on a phone and hiding the list
+                // under the note on a spread.
+                entry={commentaryOpen && !openChip && !rootsOpen ? commentaryEntry : null}
                 side={sheetSide}
                 roads={commentaryRoads}
                 canHop={canHop}
