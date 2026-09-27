@@ -2121,6 +2121,9 @@ export function App(): JSX.Element {
               onOpenChip={(chip) =>
                 setOpenDirection((d) => (d === chip.direction ? null : chip.direction))
               }
+              // The pitch note for a left-leaf verse lands on the right, over
+              // the rail's corner; the chips cross to the left while it is up.
+              crossed={PITCH && commentaryOpen && hasCommentary && sheetSide === "right"}
             />
             <HopPopover
               chip={openChip}

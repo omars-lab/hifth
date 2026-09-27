@@ -9,6 +9,12 @@ interface HopRailProps {
   openDirection: RailChip["direction"] | null;
   /** Open/toggle a chip's popover. */
   onOpenChip: (chip: RailChip) => void;
+  /**
+   * A card is open on the rail's own corner (the right, where the mus'haf's
+   * reading starts), so the rail crosses to the other corner rather than sit
+   * half under it. False when nothing covers it.
+   */
+  crossed?: boolean;
 }
 
 /**
@@ -18,7 +24,7 @@ interface HopRailProps {
  * popover. The rail only exists while an ayah is selected and has hops; a
  * hop-less ayah renders nothing (quiet by default).
  */
-export function HopRail({ chips, openDirection, onOpenChip }: HopRailProps): JSX.Element | null {
+export function HopRail({ chips, openDirection, onOpenChip, crossed = false }: HopRailProps): JSX.Element | null {
   const { t } = useT();
   if (chips.length === 0) return null;
   return (
@@ -26,7 +32,12 @@ export function HopRail({ chips, openDirection, onOpenChip }: HopRailProps): JSX
     // edge by `inset-inline-start`, and `<main>` keeps that RTL in both
     // languages. A rail that jumped to the other side of the page because the
     // buttons are in English would be the app forgetting what it is.
-    <div className={styles.rail} role="group" aria-label={t.railGroup}>
+    <div
+      className={styles.rail}
+      role="group"
+      aria-label={t.railGroup}
+      data-crossed={crossed || undefined}
+    >
       {chips.map((chip) => (
         <button
           key={chip.direction}
