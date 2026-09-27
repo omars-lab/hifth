@@ -53,6 +53,14 @@ async function sideOf(page: Page, target: Locator): Promise<"left" | "right"> {
 test.use({ locale: "en-US", viewport: { width: 1440, height: 900 } });
 
 test.describe("Hifth · the pitch build's Study Quran commentary", () => {
+  test("the first screen says a tap opens The Study Quran's note", async ({ page }) => {
+    // The tips open only from settings, so this one line is the whole of what
+    // a first visit is told. The public build's hint says only "select it",
+    // which leaves a visitor to the demo not knowing the notes exist.
+    await page.goto("/");
+    await expect(page.getByText("Tap a verse to read its Study Quran note")).toBeVisible({ timeout: 20_000 });
+  });
+
   test("tapping an al-Fātiḥah verse opens its note on the facing leaf", async ({ page }) => {
     // The page-1 spread, nothing selected — the demo's opening screen.
     await page.goto("/#/hafs-kfqc/p1");
