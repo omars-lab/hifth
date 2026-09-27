@@ -2313,7 +2313,13 @@ export function App(): JSX.Element {
           hint={
             tool === "read" || (!desktop && phoneBar !== "c" && tool !== "select")
               ? toolHint(t, tool, true)
-              : undefined
+              : // The pitch build's tap opens a Study Quran note, and this line
+                // is all a first visit is told (the tips open only from
+                // settings), so it says so. English, like the pitch's other
+                // copy; dropped from the public build with PITCH.
+                PITCH
+                ? "Tap a verse to read its Study Quran note"
+                : undefined
           }
         />
         {/* Screen-reader-only summary of what the rail is offering. It used to
