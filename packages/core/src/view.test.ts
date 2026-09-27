@@ -42,6 +42,26 @@ describe("frameBboxToView (mock focus() port)", () => {
     expect(v.y).toBeCloseTo(320 - 1.55 * cy, 6);
   });
 
+  it("starts a verse wider than the stage at its first word, not its middle", () => {
+    // Two lines of one verse, shaped like 18:10: it starts at the head of the
+    // first line (the right, since the page reads right to left), runs the whole
+    // of it and part of the second. At the hop zoom it is wider than the stage,
+    // so centring it hid where it begins off the right edge. The first word must
+    // be on screen, near the right.
+    const verse: Rect = { x: 30, y: 250, width: 285, height: 50 };
+    const firstLine: Rect = { x: 30, y: 250, width: 285, height: 25 }; // head at 315
+    const v = frameBboxToView(verse, CTX, 1.55, firstLine);
+    const lead = bboxToScreen(firstLine, v, CTX);
+    expect(lead.x + lead.width).toBeLessThanOrEqual(CTX.stageWidth);
+    expect(lead.x + lead.width).toBeGreaterThan(CTX.stageWidth - 40);
+  });
+
+  it("still centres a verse that fits across, whatever its first line", () => {
+    const verse: Rect = { x: 145, y: 265, width: 55, height: 20 };
+    const withLead = frameBboxToView(verse, CTX, 1.55, verse);
+    expect(withLead).toEqual(frameBboxToView(verse, CTX, 1.55));
+  });
+
   it("defaults to the hop zoom", () => {
     const v = frameBboxToView({ x: 0, y: 0, width: 10, height: 10 }, CTX);
     expect(v.z).toBe(DEFAULT_HOP_ZOOM);
