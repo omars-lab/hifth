@@ -191,8 +191,27 @@ test.describe("Hifth · the pitch commentary on a phone", () => {
     // absent (App.tsx sheetSide returns null whenever it is not a desktop
     // two-page spread) and the sheet spans nearly the full window width.
     expect(await sheet(page).getAttribute("data-side")).toBeNull();
+    await sheet(page).evaluate((el) => Promise.all(el.getAnimations().map((a) => a.finished)));
     const box = (await sheet(page).boundingBox())!;
     expect(box.width).toBeGreaterThan(390 * 0.9);
+
+    // It opens short, so the verse it is about stays in sight above it, bright
+    // and not under a veil — it used to rise over five-sixths of the screen.
+    expect(box.y, "the note opens on the lower part of the screen").toBeGreaterThan(844 * 0.5);
+    const lit = page.locator("#hifth-overlay .hl-sel").first();
+    const verseTop = (await lit.boundingBox())!;
+    const onTop = await page.evaluate(
+      ([x, y]) => document.elementFromPoint(x!, y!)?.closest("svg") !== null,
+      [verseTop.x + verseTop.width / 2, verseTop.y + verseTop.height / 2],
+    );
+    expect(onTop, "the verse, not a veil, is under its first line").toBe(true);
+
+    // Reading on grows it: a scroll inside the note takes the whole screen.
+    await sheet(page).hover();
+    await page.mouse.wheel(0, 200);
+    await expect
+      .poll(async () => (await sheet(page).boundingBox())!.y, { message: "the note grows" })
+      .toBeLessThan(844 * 0.3);
 
     // The verse's own number was stripped from the front of its note.
     await expect(sheet(page)).toContainText("This verse is known as");
