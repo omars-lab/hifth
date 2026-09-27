@@ -87,6 +87,28 @@ test.describe("Hifth · the pitch build's Study Quran commentary", () => {
     expect(await sideOf(page, sheet(page))).toBe("right");
   });
 
+  test("the verse stays bright beside its note, and a tap on the next verse turns the note to it", async ({
+    page,
+  }) => {
+    await page.goto("/#/hafs-kfqc/p1");
+    await expect(pageSvg(page, 1)).toBeVisible({ timeout: 20_000 });
+    await verse(page, 1, 2).click();
+    await expect(page.getByRole("dialog", { name: /1:2/ })).toBeVisible();
+
+    // No veil over the page: what sits under the next verse's middle is the page itself.
+    const next = (await verse(page, 1, 3).boundingBox())!;
+    const onTop = await page.evaluate(
+      ([x, y]) => document.elementFromPoint(x!, y!)?.closest("svg") !== null,
+      [next.x + next.width / 2, next.y + next.height / 2],
+    );
+    expect(onTop, "the page, not a veil, is under the pointer").toBe(true);
+
+    // So reading on is one tap: the note follows the verse.
+    await verse(page, 1, 3).click();
+    await expect(page.getByRole("dialog", { name: /1:3/ })).toBeVisible();
+    await expect(sheet(page)).toHaveCount(1);
+  });
+
   test("a related verse in the note hops there and opens its own note", async ({ page }) => {
     // 1:6 — the straight-path verse — carries The Study Quran's own
     // cross-references, folded into the note as a "Related verses" list. This is
