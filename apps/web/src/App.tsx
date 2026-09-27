@@ -183,6 +183,8 @@ export function App(): JSX.Element {
   // The verse drawer's ×: put away until another verse is lit (selection = D).
   const [drawerAway, setDrawerAway] = useState(false);
   const putDrawerAway = useCallback(() => setDrawerAway(true), []);
+  const drawerAwayRef = useRef(drawerAway);
+  drawerAwayRef.current = drawerAway;
   // Loop 6a wayfinding sheets: "go to" (`/` or the ⌖ button) and the mushaf
   // picker. Both are modal, so at most one is up at a time in practice.
   const [jumperOpen, setJumperOpen] = useState(false);
@@ -442,8 +444,15 @@ export function App(): JSX.Element {
   // value) can read the current one without re-subscribing or an impure updater.
   const selectedKeyRef = useRef(selectedKey);
   selectedKeyRef.current = selectedKey;
-  // A newly lit verse brings its drawer back up, even after the last one's ×.
-  useEffect(() => setDrawerAway(false), [selectedKey]);
+  // A newly lit verse brings its drawer back up, even after the last one's ×,
+  // unless the reader arrived by a hop: on a phone the drawer rises over the bar
+  // the trail lives in, and the one thing a hafiz wants after a hop is the way
+  // back. A tap on the verse raises it as usual.
+  const arrivedByHop = useRef(false);
+  useEffect(() => {
+    setDrawerAway(arrivedByHop.current);
+    arrivedByHop.current = false;
+  }, [selectedKey]);
 
   /*
    * Where the reader is, and where they are *going*.
@@ -1381,6 +1390,12 @@ export function App(): JSX.Element {
       if (toolRef.current !== "select" && toolRef.current !== "highlight") return;
       setOpenDirection(null);
       setSelectedRange(null); // a tap replaces a highlight — never both at once
+      // A lit verse whose drawer is down (after a hop, or its ×) is asking for
+      // its tools, not to be put out: raise the drawer and keep the light.
+      if (selectedKeyRef.current === key && drawerAwayRef.current) {
+        setDrawerAway(false);
+        return;
+      }
       const toggledOff = selectedKeyRef.current === key;
       setSelectedKey(toggledOff ? null : key);
       announce(toggledOff ? t.selectionCleared : t.selected(t.ayahLabel(key) ?? key));
@@ -1463,6 +1478,7 @@ export function App(): JSX.Element {
       }
       setOpenDirection(null);
       setSelectedRange(null);
+      arrivedByHop.current = to !== selectedKey;
       setSelectedKey(to);
       setPage(toLoc.page);
       announce(t.hoppedTo(t.ayahLabel(to) ?? to, toLoc.page));
@@ -1482,12 +1498,13 @@ export function App(): JSX.Element {
       if (!target) return;
       setTrail((beads) => beads.slice(0, index));
       setOpenDirection(null);
+      arrivedByHop.current = target.key !== selectedKey;
       setSelectedKey(target.key);
       setPage(target.page);
       announce(t.backTo(t.ayahLabel(target.key) ?? target.key, target.page));
       void stage.navigateTo(target.key, { pulse: true });
     },
-    [trail, announce, t],
+    [trail, selectedKey, announce, t],
   );
 
   const handleClearCurrent = useCallback(() => {
