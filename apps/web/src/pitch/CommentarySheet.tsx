@@ -147,11 +147,15 @@ export function CommentarySheet({
 
   useEffect(() => {
     if (!open) return;
-    restoreRef.current = (document.activeElement as HTMLElement | null) ?? null;
+    const opener = document.activeElement as HTMLElement | null;
+    restoreRef.current = opener;
     const sheet = sheetRef.current;
-    // First focus on the close button, as it always was — not the phone's
+    // Opened by a link, nothing was pressed: focus the note itself, so a screen
+    // reader still lands in it but no ring appears round a button nobody reached
+    // for. Otherwise the close button, as it always was — not the phone's
     // handle, which comes first in the note but is not where a reader starts.
-    if (sheet) (sheet.querySelector<HTMLElement>(`.${styles.close}`) ?? focusables(sheet)[0] ?? sheet).focus();
+    const byLink = !opener || opener === document.body;
+    if (sheet) (byLink ? sheet : sheet.querySelector<HTMLElement>(`.${styles.close}`) ?? focusables(sheet)[0] ?? sheet).focus();
     // Reading always starts at the top, even when the same sheet re-opens on a
     // different verse.
     if (sheet) sheet.scrollTop = 0;
