@@ -39,9 +39,21 @@
   max-block-size: 50vh;
   padding-block-end: calc(var(--space-3) + env(safe-area-inset-bottom));
   border: none;
-  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
   background: var(--paper-raised, var(--paper));
+}
+
+.dockedBottom {
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
   animation: rise var(--dur-fast) ease-out;
+}
+
+/* When the word is low enough that the drawer would cover it, the same drawer
+   hangs from just under the tool bar instead (word-drawer-placement = B). */
+.dockedTop {
+  inset-block-end: auto;
+  padding-block-end: var(--space-3);
+  border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+  animation: drop var(--dur-fast) ease-out;
 }
 
 /* Each row on one line, scrolled sideways when the word has more parts than fit,
@@ -62,8 +74,15 @@
   }
 }
 
+@keyframes drop {
+  from {
+    transform: translateY(-100%);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .docked {
+  .dockedBottom,
+  .dockedTop {
     animation: none;
   }
 }

@@ -1,6 +1,12 @@
 # When the word drawer would cover the word, where should it go?
 
-**Open.** Asked 2026-09-26. The live page: [where the word drawer stands](https://blog.bytesofpurpose.com/hifth/docs/design/word-drawer-placement-options.html)
+**Decided: B**, by Omar, 2026-09-26. When the tapped word sits where the drawer would cover it, the
+drawer stands at the top of the window, just under the tool bar; otherwise it stays at the bottom.
+Chosen over the recommendation (C): keeping the tapped word and its full-size copies in sight was worth
+more than the lines at the top it hides. A stays as the drawer's usual place; C's short row was never
+built into the app, so there is nothing of it to delete.
+
+Asked 2026-09-26. The live page: [where the word drawer stands](https://blog.bytesofpurpose.com/hifth/docs/design/word-drawer-placement-options.html)
 ([checked-in copy](../design/word-drawer-placement-options.html), rebuilt by `node scripts/build-word-drawer-placement.mjs`).
 
 ## What is being decided?

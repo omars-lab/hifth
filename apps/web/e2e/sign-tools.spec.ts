@@ -158,6 +158,44 @@ test.describe("Hifth · the harakat and word tools", () => {
     await expect(toolBtn(page, "Word")).toHaveAttribute("aria-checked", "true");
   });
 
+  test("W: a word low on the page opens its drawer at the top, under the tool bar", async ({ page }) => {
+    await page.goto("/#/hafs-kfqc/p7");
+    await expect(pageSvg(page, 7)).toBeVisible();
+    await page.keyboard.press("KeyW");
+
+    // The widest word on page 7's last line, found on screen from the word data.
+    const low = await page.evaluate(async () => {
+      const res = await fetch(new URL("assets/words/hafs-kfqc/7.json", document.baseURI));
+      const shard = (await res.json()) as { words: Record<string, { boxes: number[][] }> };
+      const boxes = Object.values(shard.words).flatMap((w) => w.boxes);
+      const lastTop = Math.max(...boxes.map((b) => b[1]!));
+      const line = boxes.filter((b) => b[1]! > lastTop - 15);
+      const b = line.reduce((a, c) => (c[2]! > a[2]! ? c : a));
+      const svg = [...document.querySelectorAll<SVGSVGElement>('svg[aria-labelledby="page-label-7"]')].find(
+        (s) => s.getBoundingClientRect().width > 0,
+      )!;
+      const ctm = svg.getScreenCTM()!;
+      const at = (x: number, y: number) => {
+        const pt = svg.createSVGPoint();
+        pt.x = x;
+        pt.y = y;
+        return pt.matrixTransform(ctm);
+      };
+      const mid = at(b[0]! + b[2]! / 2, b[1]! + b[3]! / 2);
+      return { x: mid.x, y: mid.y, top: at(0, b[1]!).y, bottom: at(0, b[1]! + b[3]!).y };
+    });
+    await page.mouse.click(low.x, low.y);
+    await expect(parts(page)).toBeVisible();
+    await parts(page).evaluate((el) => Promise.all(el.getAnimations().map((a) => a.finished)));
+    const drawer = (await parts(page).boundingBox())!;
+    const tools = (await bar(page).boundingBox())!;
+    // Just under the tool bar, and clear of the word it is about.
+    expect(Math.abs(drawer.y - (tools.y + tools.height))).toBeLessThanOrEqual(1);
+    expect(drawer.y + drawer.height).toBeLessThan(low.top);
+    await page.keyboard.press("Escape");
+    await expect(parts(page)).toHaveCount(0);
+  });
+
   test("W: a word cut at its joins offers its letters, and a letter picked takes a note", async ({ page }) => {
     await page.goto("/#/hafs-kfqc/p7");
     await expect(pageSvg(page, 7)).toBeVisible();
