@@ -198,3 +198,23 @@ describe("repairShellCache", () => {
     expect(h.registered).toHaveLength(0);
   });
 });
+
+vi.mock("virtual:pwa-register", () => ({ registerSW: () => () => undefined }));
+
+describe("initPwa", () => {
+  it("asks the browser to keep the pages the moment the app is installed", async () => {
+    // Installing is the strongest sign the browser weighs when it decides
+    // whether to promise the offline pages will stay.
+    let granted = false;
+    const persist = vi.fn(async () => (granted = true));
+    Object.defineProperty(navigator, "storage", {
+      configurable: true,
+      value: { persist, persisted: async () => granted, estimate: async () => ({ usage: 0, quota: 1 }) },
+    });
+    const { initPwa } = await load();
+    initPwa();
+    expect(persist).not.toHaveBeenCalled();
+    window.dispatchEvent(new Event("appinstalled"));
+    await vi.waitFor(() => expect(persist).toHaveBeenCalledTimes(1));
+  });
+});
