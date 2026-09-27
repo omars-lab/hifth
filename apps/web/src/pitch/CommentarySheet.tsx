@@ -83,6 +83,10 @@ export function CommentarySheet({
   const restoreRef = useRef<HTMLElement | null>(null);
 
   const open = entry !== null;
+  // On a spread the note stands on the facing leaf, beside the verse, not over
+  // it: no veil dims the page, and a tap on the next verse turns the note to it.
+  // A phone has no facing leaf, so there it stays a sheet over the page.
+  const beside = side !== null;
 
   useEffect(() => {
     if (!open) return;
@@ -104,7 +108,7 @@ export function CommentarySheet({
         onClose();
         return;
       }
-      if (e.key !== "Tab") return;
+      if (e.key !== "Tab" || beside) return;
       const sheet = sheetRef.current;
       if (!sheet) return;
       const items = focusables(sheet);
@@ -120,7 +124,7 @@ export function CommentarySheet({
         first.focus();
       }
     },
-    [onClose],
+    [onClose, beside],
   );
 
   if (!entry) return null;
@@ -128,12 +132,12 @@ export function CommentarySheet({
 
   return (
     <>
-      <div className={styles.scrim} onClick={onClose} aria-hidden="true" />
+      {!beside && <div className={styles.scrim} onClick={onClose} aria-hidden="true" />}
       <div
         ref={sheetRef}
         className={styles.sheet}
         role="dialog"
-        aria-modal="true"
+        aria-modal={!beside}
         aria-label={`Commentary on ${label}`}
         // The reading is English (The Study Quran), so this surface reads
         // left-to-right regardless of the app's chrome direction.
