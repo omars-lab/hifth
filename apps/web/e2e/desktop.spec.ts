@@ -1611,6 +1611,14 @@ test.describe("Hifth · the ayah's sheets rise over the facing leaf", () => {
     await page.goto("/#/hafs-kfqc/2:47-2:48");
     await expect(sheet(page)).toBeVisible({ timeout: 20_000 });
     expect(await onTop(), "the passage menu dims the passage's own leaf").toBe(true);
+    // Opened by the link, nobody reached for a control: focus sits in the menu
+    // but no ring is drawn round its first button.
+    const ringed = await page.evaluate(() => {
+      const el = document.activeElement;
+      return el && getComputedStyle(el).outlineStyle !== "none" ? el.outerHTML.slice(0, 80) : null;
+    });
+    expect(ringed, "a menu opened by a link wears a focus ring").toBeNull();
+    expect(await sheet(page).evaluate((el) => el.contains(document.activeElement))).toBe(true);
     expect((await boxOf(sheet(page))).width, "the passage menu is not the note's width").toBeCloseTo(460, 0);
   });
 });

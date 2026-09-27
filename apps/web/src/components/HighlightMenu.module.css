@@ -28,6 +28,12 @@
   animation: rise var(--dur-med) var(--ease-hop);
 }
 
+/* Focus rests on the menu itself when a link opened it; the menu is the
+   dialog, not a control, so it wears no ring. */
+.sheet:focus {
+  outline: none;
+}
+
 .grip {
   inline-size: 40px;
   block-size: 4px;
