@@ -93,6 +93,24 @@ for (const f of jsFiles) {
 }
 rows.sort((a, b) => b[1] - a[1]);
 
+// The private pitch code must not ride along in a public build. It did once:
+// read through `import.meta.env`, the pitch switch was not a constant the
+// bundler could fold, and the whole commentary sheet shipped unused, pushing
+// the app over this budget. These strings exist only in `src/pitch/`.
+const PITCH_ONLY = ["Surah introduction", "private/study-quran"];
+const leaked = jsFiles.flatMap((f) => {
+  const src = readFileSync(f, "utf8");
+  return PITCH_ONLY.filter((s) => src.includes(s)).map((s) => `${f.replace(DIST + "/", "")}: "${s}"`);
+});
+if (leaked.length && !process.env.VITE_PITCH) {
+  console.error(
+    "gate:budget — FAIL: pitch-only code is in the public build.\n" +
+      leaked.map((l) => `  ${l}`).join("\n") +
+      "\n  Check that PITCH in src/pitch/pitch.ts still reads the __PITCH__ literal.",
+  );
+  process.exit(1);
+}
+
 const kb = (b) => (b / 1024).toFixed(1);
 const signed = (b) => `${b >= 0 ? "+" : "−"}${kb(Math.abs(b))}`;
 

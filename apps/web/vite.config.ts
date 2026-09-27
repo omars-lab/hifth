@@ -70,6 +70,11 @@ export default defineConfig({
   base: "./",
   define: {
     __SOURCE_COMMIT__: JSON.stringify(sourceCommit()),
+    // The pitch switch as a literal, so a public build can drop every pitch
+    // branch and the components only they reach. Read through `import.meta.env`
+    // it stayed a property lookup the bundler could not fold, and the whole
+    // commentary sheet shipped in the public app, unused.
+    __PITCH__: JSON.stringify(Boolean(process.env.VITE_PITCH)),
   },
   plugins: [
     dropPrivateUnlessPitch(),

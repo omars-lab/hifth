@@ -39,6 +39,10 @@ test.describe("Hifth · the hop", () => {
     ).toBeVisible();
     // the origin 2:48 kept its breadcrumb (still on the mounted page 7).
     await expect(page.locator("#hifth-overlay .hl-crumb")).not.toHaveCount(0);
+    // Arriving by a hop leaves the verse's tool drawer down: on a phone it rises
+    // over the bar the way back lives in, and hid the bead below (main was red
+    // on iPhone from the drawer's first day until this).
+    await expect(page.getByRole("region", { name: /البقرة · ٢:١٢٣/ })).toHaveCount(0);
 
     // 5. A trail bead for the origin (2:48) is threaded; tap it to rewind.
     const bead = page.getByRole("button", { name: /ارجع إلى البقرة · ٢:٤٨/ });
@@ -50,6 +54,11 @@ test.describe("Hifth · the hop", () => {
     await expect(
       page.getByRole("button", { name: /الآية الحالية البقرة · ٢:٤٨/ }),
     ).toBeVisible();
+    // Coming back is a hop too, so the drawer stays down; a tap still raises it.
+    const tools = page.getByRole("region", { name: /البقرة · ٢:٤٨/ });
+    await expect(tools).toHaveCount(0);
+    await ayah.tap();
+    await expect(tools).toBeVisible();
   });
 
   test("un-vendored hop targets are surfaced but disabled (no ghost pages)", async ({ browser }) => {
