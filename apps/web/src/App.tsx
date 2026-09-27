@@ -1447,10 +1447,12 @@ export function App(): JSX.Element {
   // Forward hop: push the origin onto the trail, move to the target, pulse.
   // `origin` overrides the breadcrumb source — a merged range hop leaves from the
   // range member that actually produced the edge, not from the whole highlight.
-  const handleHop = useCallback(
-    (edge: Edge, origin?: string) => {
+  // Go to a verse, leaving a bead on the trail to come back by. A hop along an
+  // edge is this; so is a tap on a verse the pitch note's prose cites.
+  const hopTo = useCallback(
+    (to: string, origin?: string) => {
       if (!resolver) return;
-      const toLoc = resolver.resolve(edge.to);
+      const toLoc = resolver.resolve(to);
       if (!toLoc) return; // unvendored — the button is disabled, defensive here
       const fromKey = origin ?? selectedKey;
       const fromLoc = fromKey ? resolver.resolve(fromKey) : null;
@@ -1459,12 +1461,16 @@ export function App(): JSX.Element {
       }
       setOpenDirection(null);
       setSelectedRange(null);
-      setSelectedKey(edge.to);
+      setSelectedKey(to);
       setPage(toLoc.page);
-      announce(t.hoppedTo(t.ayahLabel(edge.to) ?? edge.to, toLoc.page));
-      void stage.navigateTo(edge.to, { pulse: true });
+      announce(t.hoppedTo(t.ayahLabel(to) ?? to, toLoc.page));
+      void stage.navigateTo(to, { pulse: true });
     },
     [resolver, selectedKey, announce, t],
+  );
+  const handleHop = useCallback(
+    (edge: Edge, origin?: string) => hopTo(edge.to, origin),
+    [hopTo],
   );
 
   // Bead-back: rewind to a trail origin (pops everything after it) — same path.
@@ -2162,6 +2168,7 @@ export function App(): JSX.Element {
                 roads={commentaryRoads}
                 canHop={canHop}
                 onHop={handleHop}
+                onGo={hopTo}
                 onClose={() => setCommentaryOpen(false)}
               />
             )}
