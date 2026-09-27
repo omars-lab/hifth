@@ -56,7 +56,7 @@
 /* A phone opens the note short, so the verse stays in sight above it; reading
    on grows it to the full height (CommentarySheet's `tall`). */
 .sheet:not([data-side]):not([data-tall]) {
-  max-block-size: 38vh;
+  max-block-size: 38vh; /* SHORT_SHARE in CommentarySheet.tsx */
 }
 
 .grip {

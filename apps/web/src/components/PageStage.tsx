@@ -11,6 +11,7 @@ import {
 import { createPortal } from "react-dom";
 import { useGesture } from "@use-gesture/react";
 import {
+  bboxToScreen,
   clampView,
   clampZoom,
   easeInOutCubic,
@@ -222,6 +223,13 @@ interface PageStageProps {
    * `docs/design/page-transition.md` §3.5, decision row 21.
    */
   foldTarget?: RefObject<HTMLElement | null> | null;
+  /**
+   * Where something risen from the bottom of the window starts, in window px —
+   * a phone's short note — or null when nothing covers the page. The page then
+   * treats only the part above it as showing: the selected verse is moved up
+   * into it, and the page's last lines can be scrolled up clear of it.
+   */
+  coverTop?: number | null;
   /**
    * How a turn looks — the reader's choice in settings (page-turn-curl, decided
    * 2026-09-26): the flat seam, the skeleton curl or the shadow lift. None of
@@ -638,6 +646,7 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
     tajweedLookup = null,
     overlay,
     foldTarget = null,
+    coverTop = null,
     turnStyle = "seam",
     bound = false,
     tool = "select",
@@ -798,6 +807,8 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
   const turnRef = useRef(0);
   const foldTargetRef = useRef(foldTarget);
   foldTargetRef.current = foldTarget;
+  const coverTopRef = useRef(coverTop);
+  coverTopRef.current = coverTop;
   /*
    * The step an edge grab latched, held between the grab going down and coming
    * up. The desktop edge grab is a trigger, not a tracked band (see the edge
@@ -903,6 +914,7 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
       contentHeight: cur.host.offsetHeight,
       stageWidth: box.width,
       stageHeight: box.height,
+      coverBottom: coverTopRef.current === null ? 0 : Math.max(0, box.bottom - coverTopRef.current),
     };
     fitRef.current = fit;
     return fit;
@@ -1393,6 +1405,50 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
     view.current = clampView(view.current, fit);
     applyTransform();
   }, [applyTransform, measureFit]);
+
+  /*
+   * A note risen over the foot of a phone's page moves the page, not the reader.
+   *
+   * When the cover arrives, the selected verse is brought up into the part still
+   * showing if any of it is under the note — at the same magnification, so only
+   * the page slides. When it goes, the page settles back inside the whole stage.
+   * A hop still in flight is let finish first: cutting its motion short would
+   * leave it never arriving, and it may have been the thing that selected the
+   * verse to begin with.
+   */
+  const coverSeen = useRef(coverTop);
+  useEffect(() => {
+    if (coverSeen.current === coverTop) return;
+    coverSeen.current = coverTop;
+    let raf = 0;
+    const bring = () => {
+      if (tweenRef.current !== null) {
+        raf = requestAnimationFrame(bring);
+        return;
+      }
+      const fit = measureFit();
+      const cur = pagesRef.current.get(currentPageRef.current);
+      if (!fit || !cur) return;
+      let target = clampView(view.current, fit);
+      const key = selectedKeyRef.current;
+      const ids = key ? cur.hl.resolve(key)?.elementIds : undefined;
+      const bbox = ids?.length ? cur.hl.bboxOf(ids) : null;
+      if (bbox) {
+        const ctx = { ...fit, viewBoxWidth: viewBoxWidthOf(cur.svg) };
+        const shown = fit.stageHeight - (fit.coverBottom ?? 0);
+        const at = bboxToScreen(bbox, target, ctx);
+        if (at.y < 0 || at.y + at.height > shown) {
+          target = frameBboxToView(bbox, ctx, view.current.z);
+          // A verse taller than what shows starts at its first line.
+          const framed = bboxToScreen(bbox, target, ctx);
+          if (framed.height > shown) target = clampView({ ...target, y: target.y - framed.y }, fit);
+        }
+      }
+      void tweenTo(target);
+    };
+    bring();
+    return () => cancelAnimationFrame(raf);
+  }, [coverTop, measureFit, tweenTo]);
 
   /**
    * The one settle step every road onto a page ends with.

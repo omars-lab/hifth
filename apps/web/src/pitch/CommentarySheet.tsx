@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import {
   formatAyahKey,
   orderForHifz,
@@ -43,6 +43,9 @@ export function CommentaryTrigger({
   );
 }
 
+/** How much of a phone's height the note opens at — `38vh` in the stylesheet. */
+const SHORT_SHARE = 0.38;
+
 /** Focusable descendants of `root`, in tab order (excludes disabled + hidden). */
 function focusables(root: HTMLElement): HTMLElement[] {
   const sel =
@@ -69,6 +72,7 @@ export function CommentarySheet({
   canHop,
   onHop,
   onGo,
+  onCover,
 }: {
   entry: PitchCommentary | null;
   onClose: () => void;
@@ -90,6 +94,13 @@ export function CommentarySheet({
    * book's own roads, inline, taking the same hop as the cards below.
    */
   onGo?: (key: string) => void;
+  /**
+   * Where the short phone note starts, in window px, or null when it is closed
+   * or standing beside the verse — so the page can move the verse up above it.
+   * Stays at the short height while the note is grown: the page underneath is
+   * covered then anyway, and moving it would only be motion nobody sees.
+   */
+  onCover?: (top: number | null) => void;
 }): JSX.Element | null {
   const { t } = useT();
   const sheetRef = useRef<HTMLDivElement>(null);
@@ -108,6 +119,23 @@ export function CommentarySheet({
   const verseKey = entry?.verse.key ?? null;
   useEffect(() => setTall(false), [verseKey]);
   const modal = !beside && tall;
+
+  useLayoutEffect(() => {
+    if (!onCover) return;
+    const sheet = sheetRef.current;
+    if (!open || beside || !sheet) {
+      onCover(null);
+      return;
+    }
+    // The short height is worked out, not read off the box: the box may still be
+    // easing down from the previous verse's grown note.
+    const report = () =>
+      onCover(window.innerHeight - Math.min(sheet.scrollHeight, window.innerHeight * SHORT_SHARE));
+    report();
+    window.addEventListener("resize", report);
+    return () => window.removeEventListener("resize", report);
+  }, [open, beside, verseKey, onCover]);
+  useEffect(() => () => onCover?.(null), [onCover]);
 
   useEffect(() => {
     if (!open) return;

@@ -46,6 +46,13 @@ export interface StageFit {
   stageWidth: number;
   /** Stage viewport height in CSS px. */
   stageHeight: number;
+  /**
+   * How much of the stage's foot something is standing over, in CSS px — a
+   * note risen from the bottom of a phone. The page is framed and held in the
+   * part still showing, so its last line can be brought up above the note.
+   * Absent or 0 when nothing covers the stage.
+   */
+  coverBottom?: number;
 }
 
 /** Geometry the framing math needs — all in CSS px except `viewBoxWidth`. */
@@ -77,6 +84,11 @@ function holdAxis(available: number, scaled: number, value: number): number {
   return Math.min(0, Math.max(available - scaled, value));
 }
 
+/** The stage height a reader can still see: all of it, less any note over its foot. */
+function shownHeight(fit: StageFit): number {
+  return fit.stageHeight - Math.max(0, fit.coverBottom ?? 0);
+}
+
 /**
  * Hold a view inside the stage, so no gesture and no hop can put blank stage
  * where the mus'haf should be.
@@ -90,7 +102,7 @@ export function clampView(v: View, fit: StageFit): View {
   return {
     z: v.z,
     x: holdAxis(fit.stageWidth, fit.contentWidth * v.z, v.x),
-    y: holdAxis(fit.stageHeight, fit.contentHeight * v.z, v.y),
+    y: holdAxis(shownHeight(fit), fit.contentHeight * v.z, v.y),
   };
 }
 
@@ -148,7 +160,7 @@ export function frameBboxToView(
     {
       z,
       x: ctx.stageWidth / 2 - z * cx,
-      y: ctx.stageHeight / 2 - z * cy,
+      y: shownHeight(ctx) / 2 - z * cy,
     },
     ctx,
   );

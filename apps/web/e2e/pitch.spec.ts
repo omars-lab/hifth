@@ -231,4 +231,24 @@ test.describe("Hifth · the pitch commentary on a phone", () => {
     await expect(sheet(page)).toContainText("This verse is known as");
     await expect(sheet(page)).not.toContainText("255 This verse is known as");
   });
+
+  test("a verse low on the page moves up clear of the note, every line of it", async ({ page }) => {
+    // 6:157 closes page 149, so its note would open right over it. The page
+    // moves up so the whole verse sits in the part of the screen still showing.
+    await page.goto("/#/hafs-kfqc/6:157");
+    await expect(sheet(page)).toBeVisible({ timeout: 20_000 });
+    await sheet(page).evaluate((el) => Promise.all(el.getAnimations().map((a) => a.finished)));
+    const noteTop = async () => (await sheet(page).boundingBox())!.y;
+    // The verse's own outline on the page: 6:157 is the 946th verse (al-Fātiḥah
+    // 7, al-Baqarah 286, Āl ʿImrān 200, al-Nisāʾ 176, al-Māʾidah 120, then 157).
+    const lowest = async () => {
+      const box = await verse(page, 149, 946).boundingBox();
+      return box ? box.y + box.height : Infinity;
+    };
+    await expect
+      .poll(async () => (await lowest()) <= (await noteTop()), {
+        message: "the verse's last line is above the note",
+      })
+      .toBe(true);
+  });
 });
