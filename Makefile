@@ -159,7 +159,7 @@ node-ok: ## Check the running node against .nvmrc + package.json engines
 	@scripts/require-node.sh
 
 .PHONY: gates
-gates: build ## The static gates: no <text> in SVG, license present, JS budget <150KB gz
+gates: build ## The static gates: no <text> in SVG, license present, JS budget <175KB gz
 	$(PNPM) gates
 
 .PHONY: lighthouse
@@ -224,6 +224,15 @@ budget-update: core ## Accept a new JS bundle baseline — review the diff first
 	@echo "  Run 'git diff -- scripts/budget-baseline.json' and read the numbers."
 	@echo "  That diff is the point: it is where 'this PR adds 9 KB' becomes visible"
 	@echo "  to a reviewer. Accepting it without reading it makes the gate decorative."
+
+.PHONY: perf-sweep
+perf-sweep: build ## Measure start-up time as code is added (slow: ~1 min per amount). ADD=0,25,50,100
+	CHROME_PATH="$${CHROME_PATH:-/Applications/Google Chrome.app/Contents/MacOS/Google Chrome}" \
+	  node scripts/perf-sweep.mjs --add "$${ADD:-0,25,50,100}"
+
+.PHONY: perf-report
+perf-report: build ## Draw the code-size charts into docs/performance/bundle-report.html
+	node scripts/perf-report.mjs
 
 .PHONY: golden-linux
 golden-linux: core ## Run/refresh the CI-shaped (linux) baselines in the Playwright container

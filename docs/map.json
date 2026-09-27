@@ -2016,6 +2016,44 @@
         "word-selection",
         "desktop-spread"
       ]
+    },
+    {
+      "id": "performance",
+      "what": "How fast the app opens on a slow phone, the code-size cap that stands in for it, and the charts that say whether the cap can move.",
+      "layer": "gate",
+      "entry": [
+        {
+          "file": "scripts/gate-budget.mjs",
+          "symbol": "BUDGET_GZ",
+          "note": "The code-size cap, compressed. A stand-in for the start-up promise: instant and exact, where Lighthouse is slow and modelled."
+        },
+        {
+          "file": ".lighthouserc.json",
+          "symbol": "interactive",
+          "note": "The promise itself: usable within 2500 ms, median of 5 runs, on a pinned slow phone. When it and the cap disagree, this wins."
+        },
+        {
+          "file": "scripts/perf-sweep.mjs",
+          "symbol": "padding",
+          "note": "Adds code that cannot be compressed to a copy of the built app and times start-up at each amount; writes docs/performance/sweep.json."
+        },
+        {
+          "file": "scripts/perf-report.mjs",
+          "symbol": "attribute",
+          "note": "Draws growth over time, what takes up the room (from the source map), and the sweep, into docs/performance/bundle-report.html."
+        }
+      ],
+      "extend": [
+        "Before raising the cap, run make perf-sweep then make perf-report and follow the optimizing-performance skill: raise only while the sweep shows at least twice the room asked for, and add a line to the skill's cap history."
+      ],
+      "gates": [
+        "pnpm gate:budget",
+        "make lighthouse"
+      ],
+      "seeAlso": [
+        "ci-and-gates",
+        "offline-pwa"
+      ]
     }
   ]
 }
