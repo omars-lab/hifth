@@ -1,6 +1,13 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { orderForHifz, type Edge, type LeafSide } from "@hifth/core";
+import {
+  formatAyahKey,
+  orderForHifz,
+  parseAyahKey,
+  type Edge,
+  type LeafSide,
+} from "@hifth/core";
 import { useT } from "../i18n";
+import { splitCitations } from "./citations";
 import type { PitchCommentary } from "./pitch";
 import styles from "./CommentarySheet.module.css";
 
@@ -61,6 +68,7 @@ export function CommentarySheet({
   roads = [],
   canHop,
   onHop,
+  onGo,
 }: {
   entry: PitchCommentary | null;
   onClose: () => void;
@@ -77,6 +85,11 @@ export function CommentarySheet({
   canHop?: (toKey: string) => boolean;
   /** Jump to a related verse — the same hop the rail uses, so it leaves a trail. */
   onHop?: (edge: Edge) => void;
+  /**
+   * Go to a verse the commentary cites in its prose ("see 5:15–16") — the
+   * book's own roads, inline, taking the same hop as the cards below.
+   */
+  onGo?: (key: string) => void;
 }): JSX.Element | null {
   const { t } = useT();
   const sheetRef = useRef<HTMLDivElement>(null);
@@ -139,6 +152,10 @@ export function CommentarySheet({
 
   if (!entry) return null;
   const label = t.ayahLabel(entry.verse.key) ?? entry.verse.ref;
+  // A citation in the prose names only surah:verse; it is in this note's edition.
+  const edition = parseAyahKey(entry.verse.key)?.edition;
+  const citedKey = (surah: number, ayah: number): string | null =>
+    edition ? formatAyahKey(edition, surah, ayah) : null;
 
   return (
     <>
@@ -201,7 +218,23 @@ export function CommentarySheet({
           <section className={styles.commentary} aria-label="Commentary">
             {entry.verse.commentary.map((para, i) => (
               <p key={i} className={styles.para}>
-                {para}
+                {splitCitations(para).map((part, j) => {
+                  if (typeof part === "string") return part;
+                  const key = citedKey(part.surah, part.ayah);
+                  if (!key) return part.text;
+                  return (
+                    <button
+                      key={j}
+                      type="button"
+                      className={styles.cite}
+                      disabled={!onGo || !(canHop?.(key) ?? true)}
+                      aria-label={`Go to ${t.ayahLabel(key) ?? part.text}`}
+                      onClick={() => onGo?.(key)}
+                    >
+                      {part.text}
+                    </button>
+                  );
+                })}
               </p>
             ))}
           </section>
