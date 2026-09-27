@@ -156,6 +156,13 @@ test.describe("Hifth · the pitch build's Study Quran commentary", () => {
     await expect(cited).toBeVisible();
     await cited.click();
     await expect(page.getByRole("dialog", { name: /5:15/ })).toBeVisible();
+
+    // 5:15's note lists "2:42, 140, …" — the bare 140 is 2:140, and a link too.
+    await page
+      .getByRole("region", { name: "Commentary" })
+      .getByRole("button", { name: /2:140\b/ })
+      .click();
+    await expect(page.getByRole("dialog", { name: /2:140/ })).toBeVisible();
   });
 
   test("a note ends on its words, not on the book's section-break stars", async ({ page }) => {

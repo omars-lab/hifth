@@ -25,6 +25,30 @@ describe("verse citations in the commentary prose", () => {
     expect(cited("at 0:3, 115:2 and 1:8")).toEqual([]);
   });
 
+  it("reads a bare number after a citation as another verse of the same surah", () => {
+    expect(cited("see 2:42, 140, 146–47, and 159c; 3:71, 187; 6:91.")).toEqual([
+      { text: "2:42", surah: 2, ayah: 42 },
+      { text: "140", surah: 2, ayah: 140 },
+      { text: "146–47", surah: 2, ayah: 146 },
+      { text: "159c", surah: 2, ayah: 159 },
+      { text: "3:71", surah: 3, ayah: 71 },
+      { text: "187", surah: 3, ayah: 187 },
+      { text: "6:91", surah: 6, ayah: 91 },
+    ]);
+  });
+
+  it("does not take a number that is not part of the list", () => {
+    // A count after the list, a number beyond the surah, and a list broken by prose.
+    expect(cited("see 1:5, 40 days later")).toEqual([{ text: "1:5", surah: 1, ayah: 5 }]);
+    expect(cited("see 1:5, 12")).toEqual([{ text: "1:5", surah: 1, ayah: 5 }]);
+    expect(cited("see 2:42. In 140 years")).toEqual([{ text: "2:42", surah: 2, ayah: 42 }]);
+  });
+
+  it("keeps every word of a list, in order", () => {
+    const text = "see 2:42, 140, and 146; then";
+    expect(splitCitations(text).map((p) => (typeof p === "string" ? p : p.text)).join("")).toBe(text);
+  });
+
   it("returns the text whole when nothing is cited", () => {
     expect(splitCitations("no verses here")).toEqual(["no verses here"]);
   });
