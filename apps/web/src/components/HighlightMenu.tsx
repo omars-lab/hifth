@@ -67,6 +67,8 @@ export function HighlightMenu({
   side = null,
 }: HighlightMenuProps): JSX.Element | null {
   const { t, dir } = useT();
+  // Beside the passage on a spread: no dimming, no trapped Tab (see HopPopover).
+  const beside = side !== null;
   const sheetRef = useRef<HTMLDivElement>(null);
   // The element focused before the menu opened, restored on close.
   const restoreRef = useRef<HTMLElement | null>(null);
@@ -94,7 +96,7 @@ export function HighlightMenu({
         onClose();
         return;
       }
-      if (e.key !== "Tab") return;
+      if (e.key !== "Tab" || beside) return;
       const sheet = sheetRef.current;
       if (!sheet) return;
       const items = focusables(sheet);
@@ -110,7 +112,7 @@ export function HighlightMenu({
         first.focus();
       }
     },
-    [onClose],
+    [onClose, beside],
   );
 
   if (!open) return null;
@@ -120,12 +122,12 @@ export function HighlightMenu({
 
   return (
     <>
-      <div className={styles.scrim} onClick={onClose} aria-hidden="true" />
+      {!beside && <div className={styles.scrim} onClick={onClose} aria-hidden="true" />}
       <div
         ref={sheetRef}
         className={styles.sheet}
         role="dialog"
-        aria-modal="true"
+        aria-modal={!beside}
         aria-label={t.rangeAria(title, hops.length)}
         dir={dir}
         data-side={side ?? undefined}
