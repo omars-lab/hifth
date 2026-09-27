@@ -6,15 +6,18 @@
  * cross-references, live inside the mus'haf, on al-Fātiḥah done beautifully.
  *
  * It is guarded end to end by `PITCH`, a build-time constant. In every public
- * build `import.meta.env.VITE_PITCH` is undefined, so `PITCH` is `false`, every
- * call below sits in dead code, and the bundler drops this module — and the
- * held-copy JSON it would fetch is gitignored and never deployed anyway. The
- * public site and its held-copy gates never see any of it.
+ * build VITE_PITCH is unset, so `PITCH` is the literal `false`, every call below
+ * sits in dead code, and the bundler drops this module — and the held-copy JSON
+ * it would fetch is gitignored and never deployed anyway. The public site and
+ * its held-copy gates never see any of it.
  */
 import type { AdjacencyShard, AyahAdjacency } from "@hifth/core";
 
-/** True only in the private pitch build. Statically replaced by Vite. */
-export const PITCH = Boolean(import.meta.env.VITE_PITCH);
+/** Injected by Vite as a literal — see `define` in `vite.config.ts`. */
+declare const __PITCH__: boolean;
+
+/** True only in the private pitch build. A literal, so a public build drops the rest. */
+export const PITCH: boolean = typeof __PITCH__ === "boolean" && __PITCH__;
 
 /** One verse's held content, as captured from The Study Quran. */
 export interface PitchVerse {
