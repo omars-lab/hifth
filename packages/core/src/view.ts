@@ -147,24 +147,32 @@ export function viewFitsAcross(v: View, fit: StageFit): boolean {
  * translate so that center sits at the stage center — followed by `clampView`,
  * which the mock had no equivalent of and which is the difference between a hop
  * that lands on scripture and one that lands on the margin.
+ *
+ * `lead` is the box of the verse's first line. A verse wider than the stage at
+ * `z` cannot be seen whole across, and centring it hid where it begins: a
+ * verse that opens at the head of a line lost its first words off the right
+ * edge. So such a verse is placed with the head of its first line just inside
+ * the right edge — the mus'haf reads right to left — and the reader pans on
+ * from there, the way a verse taller than the stage starts at its first line.
  */
 export function frameBboxToView(
   bbox: Rect,
   ctx: FrameContext,
   z: number = DEFAULT_HOP_ZOOM,
+  lead?: Rect,
 ): View {
   const s = ctx.contentWidth / ctx.viewBoxWidth;
   const cx = (bbox.x + bbox.width / 2) * s;
   const cy = (bbox.y + bbox.height / 2) * s;
-  return clampView(
-    {
-      z,
-      x: ctx.stageWidth / 2 - z * cx,
-      y: shownHeight(ctx) / 2 - z * cy,
-    },
-    ctx,
-  );
+  let x = ctx.stageWidth / 2 - z * cx;
+  if (lead && bbox.width * s * z > ctx.stageWidth) {
+    x = ctx.stageWidth - LEAD_INSET - z * (lead.x + lead.width) * s;
+  }
+  return clampView({ z, x, y: shownHeight(ctx) / 2 - z * cy }, ctx);
 }
+
+/** How far inside the right edge a too-wide verse's first word is placed, in CSS px. */
+const LEAD_INSET = 16;
 
 /**
  * Where a bbox (SVG user units) lands in stage-local px under a given view —

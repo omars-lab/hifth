@@ -48,3 +48,29 @@ test.describe("Hifth · cold deep links", () => {
     await expect(headerPage(page)).toHaveText("19");
   });
 });
+
+test.describe("Hifth · a verse wider than a phone", () => {
+  test.use({ viewport: { width: 390, height: 844 } });
+
+  test("a link to it opens with its first words on screen", async ({ page }) => {
+    // 18:10 runs the whole of one line and part of the next, so at the jump's
+    // magnification it is wider than the screen. Centred, its head (the right
+    // edge, the page reading right to left) sat off-screen and the reader met
+    // the verse in its middle. Its outline's right edge is where it starts.
+    await page.goto("/#/hafs-kfqc/18:10");
+    const outline = page.locator('svg[aria-labelledby="page-label-294"]:visible #verse-2150');
+    await expect(outline).toHaveCount(1, { timeout: 20_000 });
+    await expect
+      .poll(
+        async () => {
+          // Only once the jump has magnified it: at the page's resting size it
+          // fits, and a check made then would pass on the bug.
+          const box = await outline.boundingBox();
+          if (!box || box.width <= 390) return "not magnified yet";
+          return box.x + box.width <= 390 ? "head on screen" : "head off screen";
+        },
+        { message: "the magnified verse's first word is inside the screen's right edge" },
+      )
+      .toBe("head on screen");
+  });
+});
