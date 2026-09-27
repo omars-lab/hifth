@@ -175,8 +175,147 @@ export function rectsFromPath(d: string): InkRect[] | null {
  * dot of exactly the band's diameter. That is what a pen does when you tap it.
  */
 export function swipesFromPath(d: string, lineHeight?: number): Swipe[] | null {
-  const rects = rectsFromPath(d);
+  const rects = rectsOf(d);
   return rects ? swipesFromRects(rects, lineHeight) : null;
+}
+
+/** An ayah's line rectangles, read as a box run first and a drawn outline second. */
+function rectsOf(d: string): InkRect[] | null {
+  return rectsFromPath(d) ?? rectsFromOutline(d);
+}
+
+/**
+ * How far an edge may lean and still count as level or upright: 5% of its run.
+ * The opening pages lean by a unit or so over an edge tens of units long (1.5
+ * over 221.5, 0.4 over 27); a real diagonal leans by as much as it runs.
+ */
+const LEAN = 0.05;
+
+/**
+ * Edges that start within this many units of each other in height are one
+ * edge drawn unevenly. A line is about 27 units tall on the opening pages, and
+ * their level edges wander by up to ~2.6, so 3 joins the wander and never two
+ * lines.
+ */
+const SNAP = 3;
+
+/**
+ * The second reader: an ayah drawn as one outline, the way the print's upstream
+ * drew pages 1 and 2, cut into one rectangle per line it covers.
+ *
+ * It takes straight edges only (`M L H V Z`, either case), and every edge must
+ * be level or upright to within {@link LEAN} — so a hand-drawn box that wobbles
+ * is read, and a real slanted shape still returns null and keeps the clone
+ * fallback. The outline's heights are grouped into its line boundaries, and
+ * across each band between two boundaries the outline's own edges are crossed
+ * at the band's middle, which gives that line's span however the edges lean.
+ * Bands that cover the same span one after another are joined back, so a run of
+ * full lines reaches the pen as one tall box, exactly like a box run's does, and
+ * the line-height split takes it apart the same way.
+ */
+export function rectsFromOutline(d: string): InkRect[] | null {
+  const tokens = d.match(/[MmLlHhVvZz]|-?(?:\d+\.?\d*|\.\d+)/g);
+  if (!tokens || d.replace(/[MmLlHhVvZz\d.\-\s,]/g, "") !== "") return null;
+
+  const rings: Array<Array<[number, number]>> = [];
+  let ring: Array<[number, number]> = [];
+  let x = 0;
+  let y = 0;
+  let startX = 0;
+  let startY = 0;
+  let cmd = "";
+  const num = (i: number) => Number(tokens[i]);
+  for (let i = 0; i < tokens.length; ) {
+    if (/[A-Za-z]/.test(tokens[i]!)) cmd = tokens[i++]!;
+    else if (cmd === "M") cmd = "L"; // coordinates after a move are line-tos
+    else if (cmd === "m") cmd = "l";
+    if (cmd === "Z" || cmd === "z") {
+      if (ring.length) rings.push(ring);
+      ring = [];
+      x = startX;
+      y = startY;
+      continue;
+    }
+    const needs = cmd === "H" || cmd === "h" || cmd === "V" || cmd === "v" ? 1 : 2;
+    if (i + needs > tokens.length || !cmd) return null;
+    const a = num(i);
+    const b = needs === 2 ? num(i + 1) : 0;
+    if (!Number.isFinite(a) || !Number.isFinite(b)) return null;
+    i += needs;
+    switch (cmd) {
+      case "M":
+      case "m":
+        if (ring.length) rings.push(ring);
+        x = cmd === "M" ? a : x + a;
+        y = cmd === "M" ? b : y + b;
+        startX = x;
+        startY = y;
+        ring = [[x, y]];
+        continue;
+      case "L": x = a; y = b; break;
+      case "l": x += a; y += b; break;
+      case "H": x = a; break;
+      case "h": x += a; break;
+      case "V": y = a; break;
+      case "v": y += a; break;
+      default: return null;
+    }
+    ring.push([x, y]);
+  }
+  if (ring.length) rings.push(ring);
+
+  const edges: Array<[number, number, number, number]> = [];
+  for (const r of rings) {
+    if (r.length < 3) return null;
+    for (let k = 0; k < r.length; k++) {
+      const [x1, y1] = r[k]!;
+      const [x2, y2] = r[(k + 1) % r.length]!;
+      const dx = Math.abs(x2 - x1);
+      const dy = Math.abs(y2 - y1);
+      if (dx === 0 && dy === 0) continue;
+      if (dy > LEAN * dx && dx > LEAN * dy) return null; // a real diagonal
+      edges.push([x1, y1, x2, y2]);
+    }
+  }
+
+  // The line boundaries: every corner's height, with an unevenly drawn edge's
+  // heights grouped into one.
+  const ys = rings.flat().map(([, py]) => py).sort((p, q) => p - q);
+  const levels: number[] = [];
+  let group: number[] = [];
+  for (const py of ys) {
+    if (group.length && py - group[0]! > SNAP) {
+      levels.push(group.reduce((s, v) => s + v, 0) / group.length);
+      group = [];
+    }
+    group.push(py);
+  }
+  if (group.length) levels.push(group.reduce((s, v) => s + v, 0) / group.length);
+
+  const rects: InkRect[] = [];
+  for (let k = 0; k + 1 < levels.length; k++) {
+    const top = levels[k]!;
+    const bottom = levels[k + 1]!;
+    const mid = (top + bottom) / 2;
+    const xs = edges
+      .filter(([, y1, , y2]) => y1 <= mid !== y2 <= mid)
+      .map(([x1, y1, x2, y2]) => x1 + ((mid - y1) / (y2 - y1)) * (x2 - x1))
+      .sort((p, q) => p - q);
+    for (let j = 0; j + 1 < xs.length; j += 2) {
+      const left = xs[j]!;
+      const width = xs[j + 1]! - left;
+      if (width <= 0) continue;
+      const above = rects.find(
+        (r) =>
+          Math.abs(r.y + r.height - top) < 1e-6 &&
+          Math.abs(r.x - left) <= SNAP &&
+          Math.abs(r.x + r.width - (left + width)) <= SNAP,
+      );
+      if (above) above.height = bottom - above.y;
+      else rects.push({ x: left, y: top, width, height: bottom - top });
+    }
+  }
+  return rects.length ? rects : null;
 }
 
 /** One marker stroke down the centre of one rectangle. */
@@ -231,7 +370,7 @@ export function swipesFromRects(rects: readonly InkRect[], lineHeight?: number):
 export function pageLineHeight(paths: Iterable<string>): number | null {
   const counts = new Map<number, number>();
   for (const d of paths) {
-    const rects = rectsFromPath(d);
+    const rects = rectsOf(d);
     if (!rects) continue;
     for (const r of rects) {
       const k = Math.round(r.height);
