@@ -15,6 +15,12 @@
   pointer-events: none; /* rail is chrome over the stage; chips re-enable */
 }
 
+/* A card is open over the rail's corner: take the other one instead. */
+.rail[data-crossed] {
+  inset-inline-start: auto;
+  inset-inline-end: var(--space-3);
+}
+
 .chip {
   pointer-events: auto;
   display: flex;
