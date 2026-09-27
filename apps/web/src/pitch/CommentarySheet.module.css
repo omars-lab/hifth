@@ -53,6 +53,12 @@
   transition: max-block-size var(--dur-med) var(--ease-hop);
 }
 
+/* Focus rests on the sheet itself when a link opened it; the sheet is the
+   dialog, not a control, so it wears no ring. */
+.sheet:focus {
+  outline: none;
+}
+
 /* A phone opens the note short, so the verse stays in sight above it; reading
    on grows it to the full height (CommentarySheet's `tall`). */
 .sheet:not([data-side]):not([data-tall]) {
@@ -129,12 +135,13 @@ button.grip {
 }
 
 /* The way back to the verse the reader came from. A quiet link under the
-   heading: navigation, not reading, so it stays small and out of the prose. */
+   heading: navigation, not reading, so its words stay small and out of the
+   prose — but its target is a full thumb tall, like every other control. */
 .back {
-  display: block;
-  margin-block-start: var(--space-2);
+  display: inline-flex;
+  align-items: center;
   padding: 0;
-  min-block-size: 0;
+  min-block-size: var(--touch-min);
   border: 0;
   background: none;
   font: inherit;

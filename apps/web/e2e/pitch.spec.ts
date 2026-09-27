@@ -215,9 +215,28 @@ test.describe("Hifth · the way back from a note on a phone", () => {
     await sheet(page).getByRole("button", { name: /Hop to .*6:153/ }).click();
     await expect(page.getByRole("dialog", { name: /6:153/ })).toBeVisible();
 
-    await sheet(page).getByRole("button", { name: /^Back to .*1:6/ }).click();
+    // A thumb has to be able to hit it: as tall as every other control.
+    const back = sheet(page).getByRole("button", { name: /^Back to .*1:6/ });
+    expect((await back.boundingBox())!.height, "the way back is smaller than a thumb").toBeGreaterThanOrEqual(44);
+    await back.click();
     await expect(page.getByRole("dialog", { name: /1:6/ })).toBeVisible();
     await expect(sheet(page).getByRole("button", { name: /^Back to/ })).toHaveCount(0);
+  });
+
+  test("a note opened by a link wears no focus box", async ({ page }) => {
+    // Nobody pressed a key, so there is no keyboard user to show where focus
+    // went; a ring round the close button only reads as a stray box on the demo.
+    await page.goto("/#/hafs-kfqc/1:6");
+    await expect(sheet(page)).toBeVisible({ timeout: 20_000 });
+    // What is drawn, not the browser's own flag: the focused element's outline.
+    const ringed = await page.evaluate(() => {
+      const el = document.activeElement;
+      return el && getComputedStyle(el).outlineStyle !== "none" ? el.outerHTML.slice(0, 80) : null;
+    });
+    expect(ringed, "something wears a focus ring on arrival").toBeNull();
+    // Focus is still inside the note, so a screen reader lands there and Tab
+    // starts from it.
+    expect(await sheet(page).evaluate((el) => el.contains(document.activeElement))).toBe(true);
   });
 });
 

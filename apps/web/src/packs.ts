@@ -47,6 +47,8 @@
  * caller gets `null` or a status saying so, and the reader gets told in words.
  */
 
+import { requestPersistentStorage } from "./storage.js";
+
 /** Where pinned bytes live. Never given an expiration plugin — see the header. */
 export const PACK_CACHE = "hifth-pack-v1";
 
@@ -236,6 +238,10 @@ export async function pinPack(
     const tx = db.transaction([PACKS], "readwrite");
     tx.objectStore(PACKS).put(record);
     await done(tx);
+    // Keeping a juz is the plainest sign a reader means to come back offline,
+    // and the browser weighs such signs when it decides whether to promise the
+    // pages will stay. The first-tap ask came before any of them; ask again now.
+    void requestPersistentStorage();
     return record;
   } catch {
     return null;
