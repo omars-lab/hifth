@@ -10,8 +10,8 @@ only on the options page, so the app had nothing of them to delete. Done 2026-09
 tap opens the word's parts in the same drawer, on the bottom of the window, each row on one line.
 What building it showed: the word's drawer carries enlarged copies of the word, so it stands taller
 than the verse's and covers the page's last two or three lines on a desktop window — the tapped
-word too when it is on the bottom line, though the drawer shows that word large. Open: whether that
-cost is kept, or the drawer moves to the top of the window when the word is low.
+word too when it is on the bottom line, though the drawer shows that word large. Asked on its own as
+[word-drawer-placement](word-drawer-placement.md).
 
 *Asked 2026-09-12. A reader looking at a verse of the print has two different
 reaches in mind at two different moments: sometimes they want to do something with a single word
