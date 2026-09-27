@@ -1,18 +1,18 @@
 #!/usr/bin/env node
 /**
- * CI gate: the committed golden baselines stay small enough to stay committed.
+ * Gate: the committed golden baselines stay small enough to stay committed.
  *
  * The recurring question is "shouldn't these be Git LFS?", and the answer today
  * is a clear no — for reasons that are about this repo specifically, not about
  * binaries in general. Writing them down once, here, next to the number that
  * would change the answer:
  *
- *   - CI could not check them. The e2e job runs inside
- *     mcr.microsoft.com/playwright:v1.61.1-noble, which ships git 2.43 and no
- *     git-lfs. An LFS checkout there leaves ~130-byte pointer files on disk, and
- *     every golden diff would compare a mushaf page against a line of text. The
- *     image is pinned by gate:golden-env precisely so it cannot drift, so this
- *     is not a one-line fix.
+ *   - A checkout without git-lfs would silently check nothing. An LFS
+ *     checkout on a machine that lacks it leaves ~130-byte pointer files on
+ *     disk, and every golden diff would compare a mushaf page against a line
+ *     of text. (This was first written about the pinned Playwright container
+ *     the GitHub e2e job ran in, which had no git-lfs; that job is gone, but
+ *     the failure mode is the same on any fresh clone.)
  *   - It would put the GPL offer behind a quota. This repo is the corresponding
  *     source for a GPL work (SOURCES.md, Colophon). LFS bandwidth on GitHub is
  *     metered; when the quota is out, `git clone` hands the recipient pointer
@@ -32,10 +32,10 @@
  * conversation rather than a reflex. This gate is what makes that conversation
  * happen on the commit that crosses the line instead of two years later.
  *
- * The cheapest lever if it ever trips: the darwin set is checked by no CI job.
- * It exists so `make golden` gives a local signal without Docker. Dropping it
- * halves the footprint and the refresh burden at the cost of making
- * `make golden-linux` the only way to run the visual gate.
+ * The cheapest lever was dropping a platform, and it has been pulled: since
+ * 2026-09-27 only the darwin set is committed, checked by the pre-push hook on
+ * the Mac, and the linux set the GitHub e2e job used to check is retired. The
+ * lever left is fewer or smaller shots.
  */
 import { readdirSync, statSync } from "node:fs";
 import { join } from "node:path";
@@ -75,9 +75,9 @@ if (total > BUDGET) {
     `gate:golden-size — FAIL: ${mb(total)} of baselines over a ${mb(BUDGET)} budget.\n` +
       "  Every refresh of this set costs its full size in permanent history — PNGs do not\n" +
       "  delta-compress. Before raising the number, read the docblock in this file: the\n" +
-      "  cheap fix is dropping the darwin set (checked by no CI job), and the expensive\n" +
-      "  one is Git LFS, which the pinned Playwright container cannot read and which puts\n" +
-      "  the GPL source offer behind a bandwidth quota.",
+      "  cheap fix is fewer or smaller shots, and the expensive one is Git LFS, which a\n" +
+      "  clone without git-lfs cannot read and which puts the GPL source offer behind a\n" +
+      "  bandwidth quota.",
   );
   process.exit(1);
 }

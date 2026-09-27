@@ -12,11 +12,8 @@
 #
 # Two numbers, both read from files rather than written here:
 #   - the floor comes from package.json `engines.node` — below it, hard fail;
-#   - the reference comes from .nvmrc, which is also what CI's setup-node steps
-#     read (node-version-file), so the version is named once rather than three
-#     times. The e2e job is the exception and deliberately so: it runs inside
-#     the pinned Playwright image and uses that image's node, which
-#     gate:golden-env pins by its own argument.
+#   - the reference comes from .nvmrc, which is also what the deploy job's
+#     setup-node step reads (node-version-file), so the version is named once.
 # A major above the floor but different from CI's only warns: it will probably
 # work, and blocking it would make .nvmrc a lockstep requirement rather than the
 # version we actually test against.

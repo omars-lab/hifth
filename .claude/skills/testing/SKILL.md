@@ -106,9 +106,9 @@ Recorded here so the plan is not lost while the projects are dark:
 - **`android`** — Chromium, Pixel viewport. The second mobile engine.
 - **`golden`** — chromium at the phone viewport with `deviceScaleFactor: 2`,
   `isMobile`, photographing one SVG per shot. Platform-split baselines under
-  `__screenshots__/{platform}/` (`make golden` for darwin, `make golden-linux` for the
-  CI-shaped linux set); `gate:golden-env` fails the build if the local Playwright and
-  the CI image disagree.
+  `__screenshots__/{platform}/`; only the darwin set is committed (`make golden`),
+  checked by the pre-push hook. The linux set the GitHub job used was retired on
+  2026-09-27.
 - **Bringing them back**: install the matching browsers (`pnpm -C apps/web exec
   playwright install`), stand up the mobile layout the specs assert against, then run
   `make e2e` (iphone + android + golden) and reconcile. At that point the deferred

@@ -17,13 +17,13 @@ push to `main` that clears all four CI jobs publishes there.
 
 ## Quick start
 
-The `Makefile` is the front door — it wraps everyday dev, the exact CI sequence, and the
+The `Makefile` is the front door — it wraps everyday dev, the checks the git hooks run, and the
 loop workflow. `make help` lists everything.
 
 ```bash
 make install        # deps + gitleaks pre-commit hook (Node 20+, pnpm 9)
 make dev            # dev server (apps/web) with HMR
-make ci             # full local mirror of the CI build-test-gate job, in order
+make ci             # every check the git hooks run (pre-commit + pre-push)
 make status         # the roadmap: Status & tracking table + open follow-ups
 make loop N=2       # print a loop's kickoff prompt + its plan section
 make phone          # build + serve on your LAN; prints the URL to open on a phone

@@ -70,7 +70,7 @@ pnpm gate:license            # every bundled edition has a SOURCES.md entry
 pnpm gate:text-sources       # no NUL byte in a tracked source file
 pnpm gate:validation         # the manual-validation ledger is honest
 pnpm gate:verified-edges     # human verdicts about edges still hold
-pnpm gate:ci-artifacts       # CI still uploads things that exist
+pnpm gate:ci-artifacts       # the deploy still uploads things that exist
 pnpm gates                   # all of the above + the budget (needs a build)
 ```
 
@@ -100,9 +100,12 @@ What each one is actually defending:
 make ci
 ```
 
-Runs tiers 0–1 plus the build and the JS budget, **in CI order**, so a green
-`make ci` locally means a green `build-test-gate` job. Ends by reminding you CI
-also runs `make e2e` and `make lighthouse` as separate jobs.
+Runs both git-hook targets: `make pre-commit` (secrets in the staged change, lint,
+types, unit tests, the fast gates) and `make pre-push` (secrets in history, the ETL
+re-derivation, the corpus audit, the build and its budget, and every Playwright
+project including iPhone and the golden images). Since 2026-09-27 no GitHub job
+checks a pull request — the hooks are the only run. Lighthouse is not in it: run
+`make lighthouse` by hand before a demo or a release.
 
 Budget: **150 KB gz** total JS. Currently ~93 KB.
 
@@ -151,7 +154,6 @@ never fails a build.
 ```bash
 make golden                    # diff against this platform's baselines
 make golden-update             # accept new ones — REVIEW THE PNG DIFF FIRST
-make golden-linux UPDATE=1     # refresh the CI-shaped (linux) set in Docker
 ```
 
 Baselines are rasterized geometry and therefore per-platform: `darwin` locally,
@@ -618,7 +620,7 @@ The suite is meant to grow as results arrive. Where a new check goes:
 | a new user-facing flow | an e2e spec, run on both `iphone` and `android` |
 | a new highlight or wash | a golden case, and both platforms' baselines |
 | a new vendored data source | a `SOURCES.md` entry + a `PROVENANCE.md` with a SHA-256 |
-| a new invariant about committed data | a `scripts/gate-*.mjs`, wired into `pnpm gates`, `make ci` and `.github/workflows/ci.yml` |
+| a new invariant about committed data | a `scripts/gate-*.mjs`, wired into `pnpm gates` and reached by a hook target in the `Makefile` |
 | a check only a human can do | a `docs/validation/ledger.json` entry — non-empty `tunes`, and a `runbook` whose every step has an `expect` |
 | a claim about the world outside this repo | a `probe-*` / `check-*` script, opt-in and **never** in `pnpm gates`, whose measurement lands in the relevant `PROVENANCE.md` — but first run "Before you write a new probe" above: an outside-witness check is usually a new reference inside `probe-reference`, not a new script |
 
