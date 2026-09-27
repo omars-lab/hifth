@@ -93,7 +93,7 @@ function trimSelfLabel(text, ayah) {
  * Al-Fātiḥah's hand-written roads — the demo's centrepiece, kept by hand because
  * every `note` is our own plain-language line about WHY the two verses connect,
  * never a quote of the held translation. The rest of the Qur'an takes its roads
- * from the source's own cross-references instead (see `refEdges`).
+ * from the source's own cross-references instead (see `refShard`).
  */
 const CURATION = {
   "1:1": [
@@ -191,7 +191,10 @@ function curatedShard(surah) {
  * The source's own cross-references, as a shard. Each `refs` entry is a verse
  * the Study Quran points to from this one; we keep the ones that also carry
  * commentary first (so a hop leads somewhere with something to read), cap the
- * count, and give each our own short provenance line — never a quote.
+ * count, and label each with the opening words of the target verse's own
+ * translation, so a card says what is there. That is a quote of the held
+ * translation, which is why this output stays in the private, gitignored pitch
+ * data and never ships; a target with no translation keeps a plain line.
  */
 function refShard(surah, entries) {
   const shard = {};
@@ -224,13 +227,41 @@ function refShard(surah, entries) {
         sourceAyah,
         to[0],
         to[1],
-        "A verse the Study Quran cross-references from here.",
+        snippet(translationOf(to[0], to[1])) ?? "A verse the Study Quran cross-references from here.",
         "xref",
       ),
     );
     if (edges.length) shard[String(sourceAyah)] = { edges, ext: [] };
   }
   return shard;
+}
+
+/** The longest a related verse's card label runs before it is cut. */
+const SNIPPET_MAX = 110;
+
+/** The opening words of a translation, cut on a word boundary with "…". */
+function snippet(text, max = SNIPPET_MAX) {
+  const flat = (text ?? "").replace(/\s+/g, " ").trim();
+  if (!flat) return null;
+  // A verse that runs on into the next ends mid-sentence; drop its dangling comma.
+  if (flat.length <= max) return flat.replace(/[,;:—-]+$/, "");
+  const cut = flat.slice(0, max);
+  const space = cut.lastIndexOf(" ");
+  return `${(space > max / 2 ? cut.slice(0, space) : cut).replace(/[\s,;:.—-]+$/, "")}…`;
+}
+
+/** One verse's held translation, reading each surah's file once. */
+const translations = new Map();
+function translationOf(surah, ayah) {
+  if (!translations.has(surah)) {
+    const bySurah = new Map();
+    for (const entry of readSurah(surah)?.entries ?? []) {
+      const ref = parseRef(entry.key);
+      if (ref && ref[0] === surah) bySurah.set(ref[1], entry.translation?.text ?? "");
+    }
+    translations.set(surah, bySurah);
+  }
+  return translations.get(surah).get(ayah) ?? "";
 }
 
 /** Read one captured surah file (zero-padded, three digits). */
