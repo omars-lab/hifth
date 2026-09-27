@@ -35,7 +35,9 @@ function log(ev, fields = {}) {
       .map(([k, v]) => `${k}=${String(v).replace(/\s+/g, "_")}`)
       .join(" ");
     appendFileSync(join(dir, "merge-nudges.log"), `${new Date().toISOString()} pid=${process.pid} ev=${ev} ${kv}\n`);
-  } catch {}
+  } catch {
+    // A log that cannot be written must not stop the hook.
+  }
 }
 
 /** The last thing the assistant said: from the payload, or else from the transcript. */
@@ -71,7 +73,9 @@ try {
     let state = { count: 0, lastPr: null };
     try {
       state = JSON.parse(readFileSync(stateFile, "utf8"));
-    } catch {}
+    } catch {
+      // First nudge of this session: no state yet.
+    }
     if (state.lastPr === pr) {
       log("let_through", { repo, pr, why: "asked_again_after_nudge" });
     } else if (state.count >= MAX_NUDGES) {
