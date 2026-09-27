@@ -57,6 +57,9 @@ export function HopPopover({
   side = null,
 }: HopPopoverProps): JSX.Element | null {
   const { t, dir } = useT();
+  // On a spread the card stands on the facing leaf, beside the verse, so the
+  // page stays clear and live: no dimming, no trapped Tab — as the note does.
+  const beside = side !== null;
   const sheetRef = useRef<HTMLDivElement>(null);
   // The element focused before the sheet opened, restored on close.
   const restoreRef = useRef<HTMLElement | null>(null);
@@ -85,7 +88,7 @@ export function HopPopover({
         onClose();
         return;
       }
-      if (e.key !== "Tab") return;
+      if (e.key !== "Tab" || beside) return;
       const sheet = sheetRef.current;
       if (!sheet) return;
       const items = focusables(sheet);
@@ -101,7 +104,7 @@ export function HopPopover({
         first.focus();
       }
     },
-    [onClose],
+    [onClose, beside],
   );
 
   if (!chip) return null;
@@ -110,12 +113,12 @@ export function HopPopover({
 
   return (
     <>
-      <div className={styles.scrim} onClick={onClose} aria-hidden="true" />
+      {!beside && <div className={styles.scrim} onClick={onClose} aria-hidden="true" />}
       <div
         ref={sheetRef}
         className={styles.sheet}
         role="dialog"
-        aria-modal="true"
+        aria-modal={!beside}
         aria-label={t.hopSheetAria(title, chip.count)}
         // The sheet is chrome, so it reads in the chrome's direction — unlike
         // the rail that opened it, which stays on the mus'haf's side. Its
