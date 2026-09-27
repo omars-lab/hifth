@@ -144,6 +144,20 @@ test.describe("Hifth · the pitch build's Study Quran commentary", () => {
     }
   });
 
+  test("a verse the commentary cites is a link that goes there", async ({ page }) => {
+    // 6:153's note says "See also 5:15–16" in its running prose. That citation
+    // is the book's own road; a tap on it goes to 5:15 and opens its note.
+    await page.goto("/#/hafs-kfqc/6:153");
+    const note = page.getByRole("dialog", { name: /6:153/ });
+    await expect(note).toBeVisible({ timeout: 20_000 });
+    const cited = page
+      .getByRole("region", { name: "Commentary" })
+      .getByRole("button", { name: /5:15/ });
+    await expect(cited).toBeVisible();
+    await cited.click();
+    await expect(page.getByRole("dialog", { name: /5:15/ })).toBeVisible();
+  });
+
   test("a note ends on its words, not on the book's section-break stars", async ({ page }) => {
     // 573 notes closed with the print's "* * *" divider, copied in as text.
     await page.goto("/#/hafs-kfqc/1:1");
