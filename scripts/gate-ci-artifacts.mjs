@@ -28,6 +28,10 @@
  *      but "can the uploader read it". Invariant 2 turned it from a silent loss
  *      into a red job; this turns it into a red gate, before the push.
  *
+ * Since 2026-09-27 GitHub runs only the deploy (the checks moved into the
+ * local hooks), so the one upload left is the site going to GitHub Pages, and
+ * invariants 2 and 3 apply to any `upload-artifact` step added later.
+ *
  * Adding an upload step to CI means adding its producer here. That is the
  * point — the registry is the list of things we claim to keep.
  */
@@ -46,23 +50,11 @@ const WORKFLOWS = join(ROOT, ".github", "workflows");
  */
 const PRODUCERS = [
   {
-    path: "apps/web/playwright-report",
-    producer: "the Playwright html reporter",
-    proof: {
-      file: "apps/web/playwright.config.ts",
-      pattern: /\[\s*"html"/,
-      missing:
-        'apps/web/playwright.config.ts no longer declares an ["html", …] reporter, ' +
-        "so nothing writes apps/web/playwright-report and the upload preserves nothing",
-    },
-  },
-  {
-    // The one uploaded artifact that is not evidence about a run — it is the
-    // run's output, and both deploy jobs publish it rather than rebuilding.
-    // That makes this registry's question sharper here than anywhere else:
-    // "does anything still write this" is also "does anything still write the
-    // thing we serve to readers". An upload that silently preserved nothing
-    // would, one job later, be a successful deploy of an empty site.
+    // The site itself: the deploy job uploads it to GitHub Pages. That makes
+    // this registry's question sharper here than anywhere else: "does anything
+    // still write this" is also "does anything still write the thing we serve
+    // to readers". An upload that silently preserved nothing would be a
+    // successful deploy of an empty site.
     path: "apps/web/dist",
     producer: "vite build, via apps/web's own build script",
     proof: {
@@ -71,15 +63,6 @@ const PRODUCERS = [
       missing:
         "apps/web/package.json no longer runs `vite build`, so nothing writes " +
         "apps/web/dist and the deploy jobs would publish an empty directory over a live site",
-    },
-  },
-  {
-    path: ".lighthouseci",
-    producer: "lhci autorun (@lhci/cli)",
-    proof: {
-      file: ".lighthouserc.json",
-      pattern: /./,
-      missing: ".lighthouserc.json is gone, so lhci writes no .lighthouseci directory",
     },
   },
 ];
@@ -96,7 +79,8 @@ for (const name of readdirSync(WORKFLOWS).filter((f) => /\.ya?ml$/.test(f))) {
   // a repo that has deliberately stayed free of one.
   const steps = text.split(/^\s*-\s+/m);
   for (const step of steps) {
-    if (!/uses:\s*actions\/upload-artifact/.test(step)) continue;
+    const pages = /uses:\s*actions\/upload-pages-artifact/.test(step);
+    if (!pages && !/uses:\s*actions\/upload-artifact/.test(step)) continue;
     uploads++;
 
     const label = (step.match(/^\s*name:\s*(.+)$/m)?.[1] ?? "unnamed step").trim();
@@ -121,6 +105,11 @@ for (const name of readdirSync(WORKFLOWS).filter((f) => /\.ya?ml$/.test(f))) {
     } else if (!known.proof.pattern.test(readFileSync(join(ROOT, known.proof.file), "utf8"))) {
       problems.push(`${where}: ${known.proof.missing}`);
     }
+
+    // upload-pages-artifact takes neither setting below: it tars the path and
+    // fails on its own when the path is missing, and the deploy job checks the
+    // build has an index.html (`make site`) before it gets here.
+    if (pages) continue;
 
     const ifNone = step.match(/^\s*if-no-files-found:\s*(\S+)/m)?.[1];
     if (ifNone !== "error") {

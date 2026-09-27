@@ -43,16 +43,11 @@ copies one in.
 
 ## From CI
 
-```
-gh run list --branch <branch> --limit 5
-gh run download <run-id> -n playwright-report && open playwright-report/index.html
-gh run download <run-id> -n lighthouse-reports
-```
-
-The report is self-contained — the trace viewer ships inside it, so a downloaded
-folder opens offline with no server and no network. It uploads on **every** run,
-not just failures, because that is the only way a retry-flake is visible after the
-fact.
+There is none to download since 2026-09-27: no GitHub job runs the tests or
+Lighthouse any more. The Playwright report of the last pre-push run is the local
+one above (`make report`), and Lighthouse's is `.lighthouseci/` after a hand run of
+`make lighthouse`. The only workflow is the deploy; `gh run list --workflow Deploy`
+shows whether a push to main built and published.
 
 ## Traps
 
@@ -67,9 +62,9 @@ Each of these has produced a wrong conclusion at least once.
 - **A retry that passes is still a finding.** Playwright scores it green overall
   and flags it flaky in the report. `retries: 1` exists for WebKit launch
   starvation; anything else passing only on retry is a bug that hides.
-- **Golden baselines are per-platform.** `e2e/__screenshots__/darwin` is what you
-  diff against, `.../linux` is what CI does. A local pass proving nothing about CI
-  is expected, not a mystery — reproduce with `make golden-linux`.
+- **Golden baselines are per-platform, and only darwin is committed.** A run on
+  Linux finds no baselines and writes new ones instead of comparing — that is not a
+  pass. The linux set was retired on 2026-09-27 along with the GitHub e2e job.
 - **Never accept a baseline to make a diff go away.** `make golden-update` rewrites
   what "correct" means, permanently and silently. Look at all three images first:
   the gate is agreeing with you, not the other way round.

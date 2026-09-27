@@ -1,16 +1,17 @@
 # Cloudflare Pages config for the Hifth web app — the ALTERNATIVE host.
 #
-# Hifth deploys to GitHub Pages by default: every push to main that clears all
-# four CI jobs is published at https://blog.bytesofpurpose.com/hifth/ by the
-# deploy-pages job in .github/workflows/ci.yml. Nothing here runs unless someone
+# Hifth deploys to GitHub Pages by default: every push to main is published at
+# https://blog.bytesofpurpose.com/hifth/ by the deploy-pages job in
+# .github/workflows/deploy.yml, after the local pre-push hook has checked it. Nothing here runs unless someone
 # chooses it. This file is kept live, not commented out, because the host is a
 # decision that gets revisited and the worst time to work out how to publish is
 # the moment you need to.
 #
 # Three ways to use it, best first:
 #
-#   A) The same CI workflow, target: cloudflare — Actions › CI › Run workflow.
-#      Runs every gate, then publishes the artifact those gates measured. Needs
+#   A) The same deploy workflow, target: cloudflare — Actions › Deploy › Run
+#      workflow. Builds from a fresh clone and runs `make site` (size and
+#      held-text gates) before publishing. Needs
 #      CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID in the repo's secrets.
 #
 #   B) `make deploy-cloudflare` — a laptop, wrangler's own login, no CI. Runs

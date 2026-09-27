@@ -4,9 +4,7 @@ import { defineConfig, devices } from "@playwright/test";
 // iPhone and an Android viewport against the production build served locally.
 //
 // HIFTH_BASE_URL points the run at an already-served build instead of starting
-// one. That is what makes `make golden-linux` possible: the preview server runs
-// on the host (its node_modules are built for the host), while the browser runs
-// in the Playwright Linux container that produces CI-shaped baselines.
+// one (a server you are already watching, or one on another machine).
 const externalBase = process.env.HIFTH_BASE_URL;
 
 // The guide's screenshots (e2e/shots.spec.ts → docs/validation/shots/) are a
@@ -85,8 +83,10 @@ export default defineConfig({
   },
   // Golden images are geometry, and geometry is rasterized per platform — the
   // same build differs by a few anti-aliased pixels between macOS and Linux. The
-  // path carries the platform so a Linux baseline set can be added beside the
-  // committed macOS one (see `make golden-linux`) rather than fighting it.
+  // path carries the platform so a run on another OS fails loudly for want of
+  // baselines instead of diffing against the Mac's. Only the darwin set is
+  // committed: the pre-push hook checks it on the Mac (the linux set, which the
+  // GitHub e2e job used to check, was retired on 2026-09-27).
   snapshotPathTemplate: "{testDir}/__screenshots__/{platform}/{arg}{ext}",
   expect: {
     // Aria snapshots are text, not geometry — they must NOT inherit the golden
