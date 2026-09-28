@@ -111,7 +111,7 @@ Ranked by how many test lines and guide steps each would replace:
 | # | Link | Opens | Serves |
 | --- | --- | --- | --- |
 | 1 | `?open=jump\|about\|record\|key\|editions\|tips\|shelf` — **built 2026-09-28** | one panel open on arrival | 93 test lines in at least 6 files; 2 guide steps (record, shelf) |
-| 2 | `?tool=read\|select\|highlight\|bookmark\|note\|sign\|word\|slip\|crop` | that tool in hand | 31 test lines in at least 6 files |
+| 2 | `?tool=read\|select\|highlight\|bookmark\|note\|harakat\|word\|mistake\|crop` — **built 2026-09-28** | that tool in hand | 31 test lines in at least 6 files |
 | 3 | `?open=lookalikes\|roots` (needs a verse in the place) — **built 2026-09-28**, as two more values of `open` rather than a new `sheet` key: one key for "what is open on arrival". The verse's drawer needed nothing, since a verse link already raises it | the selected verse's look-alike list or roots | 24 lines in 5+ files; the screen reader step |
 | 4 | `?view=one\|two` and `?bar=page\|juz` | page layout and page-bar scale | 5+ lines in 4 files |
 | 5 | `?lang=en\|ar` | the chrome language for this visit only, not saved | 6 lines in 2 files |
@@ -120,7 +120,10 @@ Notes on each:
 
 - **`open`** takes one value: two panels open at once is not a state the app has. `open=shelf`
   with `#/hafs-kfqc/p1` shows juz 1's row, which is what the offline check asks for.
-- **`tool`** names match the buttons, and "mistake" is spelled `slip`, the word the reader sees.
+- **`tool`** names are the English words on the tool buttons: `harakat` (the code calls it
+  `sign`) and `mistake` (the button says Mistake, so not `slip`). The app lets go of `tool`
+  once the tool is in hand, as it does of `open`. The first test for each tool still presses its
+  key or button; the tests after it start from the link.
 - **`sheet`** is separate from `open` because it belongs to a verse; without a verse it falls
   back to nothing.
 - **`lang`** must not overwrite the saved choice, or opening a test link would silently change

@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   keyToRef,
   OPEN_PANELS,
+  LINK_TOOLS,
   parseHash,
   refToKey,
   serializeState,
@@ -164,6 +165,37 @@ describe("router · a panel open on arrival (?open=)", () => {
   });
 });
 
+describe("router · a tool in hand on arrival (?tool=)", () => {
+  // Named by the word on the tool's button, as `open` is: a reader who sees
+  // "Harakat" and "Mistake" on the bar can write the link without our names.
+  it("reads and writes each tool", () => {
+    for (const t of LINK_TOOLS) {
+      const s = parseHash(`#/hafs-kfqc/p1?tool=${t}`);
+      expect(s?.tool, t).toBe(t);
+      expect(serializeState(s!)).toBe(`#/hafs-kfqc/p1?tool=${t}`);
+    }
+  });
+
+  it("the words on the buttons, not the code's names for them", () => {
+    expect([...LINK_TOOLS]).toEqual([
+      "read", "select", "highlight", "bookmark", "note", "harakat", "word", "mistake", "crop",
+    ]);
+    expect(parseHash("#/hafs-kfqc/p1?tool=sign")?.tool).toBeUndefined();
+  });
+
+  it("an unknown tool still opens the verse", () => {
+    const s = parseHash("#/hafs-kfqc/2:48?tool=pen&w=3-7");
+    expect(s?.select).toEqual({ surah: 2, ayah: 48 });
+    expect(s?.word).toEqual([3, 7]);
+    expect(s?.tool).toBeUndefined();
+  });
+
+  it("sits between the view's keys and the panel", () => {
+    const s = parseHash("#/hafs-kfqc/2:48?open=record&tool=note&field=tan");
+    expect(serializeState(s!)).toBe("#/hafs-kfqc/2:48?field=tan&tool=note&open=record");
+  });
+});
+
 describe("router · key helpers", () => {
   it("refToKey builds the canonical spec-§1 key", () => {
     expect(refToKey(ED, { surah: 2, ayah: 48 })).toBe("quran/hafs-kfqc/2:48");
@@ -200,8 +232,10 @@ describe("router · round-trip (generative sweep)", () => {
     ];
 
     const opens: (AppState["open"])[] = [undefined, "shelf"];
+    const tools: (AppState["tool"])[] = [undefined, "harakat"];
 
     let count = 0;
+    for (const tool of tools)
     for (const open of opens)
     for (const select of selects)
       for (const word of words)
@@ -217,6 +251,7 @@ describe("router · round-trip (generative sweep)", () => {
                   ...(field ? { field } : {}),
                   ...(via ? { via } : {}),
                   ...(trail ? { trail } : {}),
+                  ...(tool ? { tool } : {}),
                   ...(open ? { open } : {}),
                 };
                 const round = parseHash(serializeState(state));
@@ -224,7 +259,7 @@ describe("router · round-trip (generative sweep)", () => {
                 count++;
               }
     expect(count).toBe(
-      opens.length * selects.length * words.length * skins.length * fields.length * vias.length * trails.length,
+      tools.length * opens.length * selects.length * words.length * skins.length * fields.length * vias.length * trails.length,
     );
   });
 

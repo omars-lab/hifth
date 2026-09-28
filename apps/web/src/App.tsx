@@ -1646,6 +1646,9 @@ export function App(): JSX.Element {
           setRevisionOpen(true);
         }
       }
+      // A tool the link puts in hand (`?tool=`), named by its button's word;
+      // the harakat button is the code's `sign` tool.
+      if (origin === "link" && state.tool) chooseTool(state.tool === "harakat" ? "sign" : state.tool);
       // Rebuild the trail beads from the link's trail + via (oldest → newest).
       const chain = [...(state.trail ?? []), ...(state.via ? [state.via] : [])];
       const beads: TrailBead[] = [];
@@ -1708,7 +1711,7 @@ export function App(): JSX.Element {
       announce(t.arrivedAyah(origin, t.ayahLabel(key) ?? key, loc.page));
       void stage.navigateTo(key, { pulse: true });
     },
-    [resolver, announce, t],
+    [resolver, announce, t, chooseTool],
   );
 
   // Gate cold-open restore on the resolver: a deep link parsed before the
