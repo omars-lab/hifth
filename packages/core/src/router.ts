@@ -18,6 +18,7 @@
  *   #/<edition>/p7                              a bare page (no selection)
  *   #/<edition>/p1?open=shelf                   with one panel open on arrival
  *   #/<edition>/2:48?tool=note                  with a page tool in hand
+ *   #/<edition>/p7?view=one                     one page, not two, on a computer
  *
  * DOM-free by construction: it speaks in canonical keys and plain records, never
  * touches `location`. L3 owns reading/writing `location.hash`; this owns the
@@ -65,6 +66,11 @@ export interface AppState {
    * is how you meet the page, not which page it is.
    */
   readonly tool?: LinkTool;
+  /**
+   * One page or two side by side on arrival (`?view=`), on a screen wide
+   * enough for two. Lenient: a phone always shows one and ignores it.
+   */
+  readonly view?: "one" | "two";
 }
 
 /**
@@ -150,7 +156,7 @@ function refToString(ref: AyahRef): string {
 /**
  * Encode an app view to its anchor hash (leading `#/…`). The inverse of
  * `parseHash`: `parseHash(serializeState(s))` deep-equals `s` for any valid `s`.
- * Query params are emitted in a fixed order (w, skin, field, via, trail, tool, open) so a given
+ * Query params are emitted in a fixed order (w, skin, field, via, trail, view, tool, open) so a given
  * state has exactly one serialization — links are stable and diff-friendly.
  */
 export function serializeState(state: AppState): string {
@@ -175,6 +181,7 @@ export function serializeState(state: AppState): string {
   if (state.trail && state.trail.length > 0) {
     q.push(`trail=${state.trail.map(refToString).join(",")}`);
   }
+  if (state.view) q.push(`view=${state.view}`);
   if (state.tool) q.push(`tool=${state.tool}`);
   if (state.open) q.push(`open=${state.open}`);
 
@@ -258,6 +265,7 @@ export function parseHash(hash: string): AppState | null {
     trail?: readonly AyahRef[];
     open?: OpenPanel;
     tool?: LinkTool;
+    view?: "one" | "two";
   } = { edition, select };
   if (page !== undefined) out.page = page;
 
@@ -294,6 +302,11 @@ export function parseHash(hash: string): AppState | null {
       refs.push(r);
     }
     out.trail = refs;
+  }
+  // Lenient: how many pages sit side by side is the screen's business too.
+  if (params.has("view")) {
+    const raw = params.get("view")!;
+    if (raw === "one" || raw === "two") out.view = raw;
   }
   // Lenient, as `open` below: the tool is not the view.
   if (params.has("tool")) {

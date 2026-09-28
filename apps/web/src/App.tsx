@@ -392,9 +392,13 @@ export function App(): JSX.Element {
   const handlePageMode = useCallback(
     (mode: "one" | "two") => {
       setPageMode(mode);
+      // The mirror moves now, not at the next render: a link that closes the
+      // book (`?view=one`) lands its verse in the same step, and that landing
+      // must already see one page, or it withholds the magnification.
+      bookOpenRef.current = desktop && mode === "two";
       if (mode === "two") stage.setZoom(1);
     },
-    [stage],
+    [stage, desktop],
   );
   /*
    * Crossing the desktop breakpoint puts the paper back at fit, so the readout
@@ -1648,6 +1652,9 @@ export function App(): JSX.Element {
       }
       // A tool the link puts in hand (`?tool=`), named by its button's word;
       // the harakat button is the code's `sign` tool.
+      // One page or two (`?view=`), as the chrome's switch sets it; a phone has
+      // one page whatever it is set to.
+      if (origin === "link" && state.view) handlePageMode(state.view);
       if (origin === "link" && state.tool) chooseTool(state.tool === "harakat" ? "sign" : state.tool);
       // Rebuild the trail beads from the link's trail + via (oldest → newest).
       const chain = [...(state.trail ?? []), ...(state.via ? [state.via] : [])];
@@ -1711,7 +1718,7 @@ export function App(): JSX.Element {
       announce(t.arrivedAyah(origin, t.ayahLabel(key) ?? key, loc.page));
       void stage.navigateTo(key, { pulse: true });
     },
-    [resolver, announce, t, chooseTool],
+    [resolver, announce, t, chooseTool, handlePageMode],
   );
 
   // Gate cold-open restore on the resolver: a deep link parsed before the
