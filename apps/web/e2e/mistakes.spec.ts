@@ -78,9 +78,10 @@ test.describe("Hifth · the mistake tool", () => {
   });
 
   test("a marked slip shows on the calendar, and stays there once the mark is cleared", async ({ page }) => {
-    await page.goto("/#/hafs-kfqc/p7");
+    // Opened with the tool in hand; the first test here presses the key.
+    await page.goto("/#/hafs-kfqc/p7?tool=mistake");
     await expect(pageSvg(page, 7)).toBeVisible();
-    await page.keyboard.press("KeyM");
+    await expect(toolBtn(page, "Mistake")).toHaveAttribute("aria-checked", "true");
     const at = await ayahTarget(page, "#verse-46");
     await page.mouse.click(at.x, at.y);
     await expect(washes(page)).toHaveCount(1);
@@ -115,9 +116,10 @@ test.describe("Hifth · the mistake tool", () => {
   });
 
   test("clearing a mark asks nothing, and Undo puts it back", async ({ page }) => {
-    await page.goto("/#/hafs-kfqc/p7");
+    // Opened with the tool in hand; the first test here presses the key.
+    await page.goto("/#/hafs-kfqc/p7?tool=mistake");
     await expect(pageSvg(page, 7)).toBeVisible();
-    await page.keyboard.press("KeyM");
+    await expect(toolBtn(page, "Mistake")).toHaveAttribute("aria-checked", "true");
     const at = await ayahTarget(page, "#verse-47");
     await page.mouse.click(at.x, at.y);
     await expect(washes(page)).toHaveCount(1);

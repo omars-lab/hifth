@@ -17,6 +17,7 @@
  *   #/<edition>/2:123?trail=2:40,2:47,2:122      full hop chain
  *   #/<edition>/p7                              a bare page (no selection)
  *   #/<edition>/p1?open=shelf                   with one panel open on arrival
+ *   #/<edition>/2:48?tool=note                  with a page tool in hand
  *
  * DOM-free by construction: it speaks in canonical keys and plain records, never
  * touches `location`. L3 owns reading/writing `location.hash`; this owns the
@@ -59,6 +60,11 @@ export interface AppState {
    * what the link is for and the panel is a convenience on top of it.
    */
   readonly open?: OpenPanel;
+  /**
+   * A page tool in hand on arrival (`?tool=`). Lenient like `open`: the tool
+   * is how you meet the page, not which page it is.
+   */
+  readonly tool?: LinkTool;
 }
 
 /**
@@ -79,6 +85,25 @@ export const OPEN_PANELS = [
 ] as const;
 export type OpenPanel = (typeof OPEN_PANELS)[number];
 const isOpenPanel = (v: string): v is OpenPanel => (OPEN_PANELS as readonly string[]).includes(v);
+
+/**
+ * The tools a link can put in hand, named by the English word on each tool's
+ * button — `harakat` and `mistake`, not the code's `sign` and `mistake`. In the
+ * order every tool bar shows them.
+ */
+export const LINK_TOOLS = [
+  "read",
+  "select",
+  "highlight",
+  "bookmark",
+  "note",
+  "harakat",
+  "word",
+  "mistake",
+  "crop",
+] as const;
+export type LinkTool = (typeof LINK_TOOLS)[number];
+const isLinkTool = (v: string): v is LinkTool => (LINK_TOOLS as readonly string[]).includes(v);
 
 export interface AyahRef {
   readonly surah: number;
@@ -125,7 +150,7 @@ function refToString(ref: AyahRef): string {
 /**
  * Encode an app view to its anchor hash (leading `#/…`). The inverse of
  * `parseHash`: `parseHash(serializeState(s))` deep-equals `s` for any valid `s`.
- * Query params are emitted in a fixed order (w, skin, field, via, trail, open) so a given
+ * Query params are emitted in a fixed order (w, skin, field, via, trail, tool, open) so a given
  * state has exactly one serialization — links are stable and diff-friendly.
  */
 export function serializeState(state: AppState): string {
@@ -150,6 +175,7 @@ export function serializeState(state: AppState): string {
   if (state.trail && state.trail.length > 0) {
     q.push(`trail=${state.trail.map(refToString).join(",")}`);
   }
+  if (state.tool) q.push(`tool=${state.tool}`);
   if (state.open) q.push(`open=${state.open}`);
 
   return q.length ? `${path}?${q.join("&")}` : path;
@@ -231,6 +257,7 @@ export function parseHash(hash: string): AppState | null {
     via?: AyahRef;
     trail?: readonly AyahRef[];
     open?: OpenPanel;
+    tool?: LinkTool;
   } = { edition, select };
   if (page !== undefined) out.page = page;
 
@@ -267,6 +294,11 @@ export function parseHash(hash: string): AppState | null {
       refs.push(r);
     }
     out.trail = refs;
+  }
+  // Lenient, as `open` below: the tool is not the view.
+  if (params.has("tool")) {
+    const raw = params.get("tool")!;
+    if (isLinkTool(raw)) out.tool = raw;
   }
   // Lenient, for the same reason as `field`: a panel is not the view.
   if (params.has("open")) {
