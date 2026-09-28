@@ -70,7 +70,7 @@ normalises to the literal form on the way out. Ranges never cross surahs.
 | `field` | one of the ids below | Paints the desk the mus'haf lies on | The value is dropped; the link opens on the default field | fall back |
 | `via` | `2:48` | The breadcrumb origin — the single ayah this hop came from | The whole link is refused | reject |
 | `trail` | `2:40,2:47,2:122` | The full hop chain, oldest → newest, excluding the selection | The whole link is refused | reject |
-| `open` | `jump`, `about`, `record`, `shelf`, `key`, `editions` or `tips` | Opens one panel on arrival: go-to, about, the revision record, the record at juz scope (the saved-offline shelf), the tajweed colour key, the mus'haf picker, or the tips strip. The view underneath is the rest of the link | The value is dropped; the link opens without a panel | fall back |
+| `open` | `jump`, `about`, `record`, `shelf`, `key`, `editions`, `tips`, `lookalikes` or `roots` | Opens one panel on arrival: go-to, about, the revision record, the record at juz scope (the saved-offline shelf), the tajweed colour key, the mus'haf picker, the tips strip, or — for a selected verse, once its data has loaded — its look-alike list or its roots. The view underneath is the rest of the link | The value is dropped; the link opens without a panel | fall back |
 
 Unknown keys are ignored, always. A link that has picked up an analytics
 parameter on its way through a chat client still opens the ayah.
@@ -99,6 +99,9 @@ or `http://localhost:5173/` (a laptop running it).
 | `#/hafs-kfqc/2:123?trail=2:40,2:47,2:122` | opens | 2:123, with the three hops that led there |
 | `#/hafs-kfqc/p1?open=record` | opens | page 1 with the revision record open |
 | `#/hafs-kfqc/p1?open=shelf` | opens | the record at juz scope, where juz are saved for offline |
+| `#/hafs-kfqc/2:48?open=lookalikes` | opens | 2:48 with its look-alike list open |
+| `#/hafs-kfqc/2:48?open=roots` | opens | 2:48 with its roots open |
+| `#/hafs-kfqc/p19?open=lookalikes` | opens | page 19; no verse is named, so no list |
 | `#/hafs-kfqc/2:48?open=nope` | opens as `#/hafs-kfqc/2:48` | 2:48, no panel |
 
 `open` is the one key the app reads and then lets go of: once the panel is up,
