@@ -32,6 +32,14 @@ export interface PeelPages {
   back: string;
 }
 
+/** A box in the book's own pixels. */
+interface Box {
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+}
+
 /** The corner in the hand, in the book's own pixels. */
 interface Held {
   side: PeelSide;
@@ -40,6 +48,19 @@ interface Held {
   pointer: Pt;
   leafW: number;
   bookH: number;
+  /**
+   * Where each side's page drawing sits inside its leaf, measured as the grab
+   * begins. A picture of a page is put exactly there, so when the drawing takes
+   * over it lands on the same spot at the same size (owner, 2026-09-28: a turn
+   * that ended in a jump in size).
+   */
+  drawings: Record<PeelSide, Box>;
+  /**
+   * The pages this leaf shows, fixed as the grab begins. Read live, they would
+   * change to the next opening's the moment the turn lands, and the laid-down
+   * leaf would show pictures still loading — a blank page (owner, 2026-09-28).
+   */
+  pages: PeelPages;
   /** Carried over and waiting for the page to change underneath. */
   landed?: boolean;
 }
@@ -49,6 +70,39 @@ const CARRY_MS = 220;
 const FALL_MS = 160;
 /** Longest the laid-down leaf waits for the new opening before it gets out of the way. */
 const LANDED_HOLD_MS = 1500;
+
+/**
+ * Where each side's page drawing sits in the book. A leaf whose drawing is not
+ * on screen yet falls back to the whole leaf.
+ */
+function measureDrawings(book: HTMLElement): Record<PeelSide, Box> {
+  const b = book.getBoundingClientRect();
+  const half = b.width / 2;
+  const out: Record<PeelSide, Box> = {
+    left: { x: 0, y: 0, w: half, h: b.height },
+    right: { x: half, y: 0, w: half, h: b.height },
+  };
+  for (const svg of book.querySelectorAll("[data-live] svg[aria-labelledby]")) {
+    const r = svg.getBoundingClientRect();
+    if (r.width === 0) continue;
+    const side: PeelSide = r.left + r.width / 2 - b.left < half ? "left" : "right";
+    out[side] = { x: r.left - b.left, y: r.top - b.top, w: r.width, h: r.height };
+  }
+  return out;
+}
+
+/** Every leaf of the book has its page drawn: a picture over it can go. */
+function openingDrawn(book: HTMLElement): boolean {
+  const leaves = [...book.querySelectorAll(":scope > [data-live]")];
+  return (
+    leaves.length > 0 &&
+    leaves.every((leaf) =>
+      [...leaf.querySelectorAll("svg[aria-labelledby]")].some(
+        (s) => s.getBoundingClientRect().width > 0 && s.querySelector("path"),
+      ),
+    )
+  );
+}
 
 /** The live drag, kept off React state so a move does not re-render the book. */
 interface Grab {
@@ -132,16 +186,41 @@ export function EdgeGrabRails({
   const [lifted, setLifted] = useState<Held | null>(null);
   const liftedRef = useRef<Held | null>(null);
   const anim = useRef(0);
+  const bookEl = useRef<HTMLElement | null>(null);
   const put = (h: Held | null): void => {
     liftedRef.current = h;
     setLifted(h);
   };
 
-  // The new opening is on the page: the laid-down leaf has nothing left to
-  // cover. A timer backs it up so a turn that never lands cannot leave it up.
+  // The new opening has turned: the laid-down leaf stays until both of its pages
+  // are drawn, then goes, so no frame shows an empty leaf between the picture
+  // and the drawing (owner, 2026-09-28: a blank page after the turn). Two drawn
+  // frames in a row, so the drawing has been painted before the picture lifts.
+  // A timer backs it up so a turn that never lands cannot leave it up.
   useEffect(() => {
-    if (liftedRef.current?.landed) put(null);
+    if (!liftedRef.current?.landed) return;
+    let seen = 0;
+    let raf = 0;
+    const check = (): void => {
+      const book = bookEl.current;
+      seen = book && openingDrawn(book) ? seen + 1 : 0;
+      if (seen >= 2) put(null);
+      else raf = requestAnimationFrame(check);
+    };
+    raf = requestAnimationFrame(check);
+    return () => cancelAnimationFrame(raf);
   }, [opening]);
+  // Fetch and decode the pages either edge would show before a hand arrives,
+  // so a lifted corner never uncovers a page still loading.
+  const urls = peel ? [peel.left, peel.right].flatMap((p) => (p ? [p.under, p.back] : [])) : [];
+  useEffect(() => {
+    for (const u of urls) {
+      const img = new Image();
+      img.src = u;
+      img.decode?.().catch(() => undefined);
+    }
+    // Keyed on the addresses, not the array, which is new every render.
+  }, [urls.join(" ")]);
   useEffect(() => {
     if (!lifted?.landed) return;
     const t = window.setTimeout(() => put(null), LANDED_HOLD_MS);
@@ -208,12 +287,16 @@ export function EdgeGrabRails({
           driver.begin(g.step);
           g.begun = true;
           // Lift the corner nearest the press, if this edge has pages to show.
-          const book = e.currentTarget.parentElement?.getBoundingClientRect();
-          if (peel?.[side] && book && book.width > 0 && !reduced()) {
+          const el = e.currentTarget.parentElement;
+          const book = el?.getBoundingClientRect();
+          const pages = peel?.[side];
+          if (el && pages && book && book.width > 0 && !reduced()) {
             cancelAnimationFrame(anim.current);
+            bookEl.current = el;
             const leafW = book.width / 2;
             const corner = cornerOf(side, leafW, book.height, g.startY - book.top);
-            put({ side, step: g.step, corner, pointer: corner, leafW, bookH: book.height });
+            const drawings = measureDrawings(el);
+            put({ side, step: g.step, corner, pointer: corner, leafW, bookH: book.height, drawings, pages });
           }
         }
         const h = liftedRef.current;
@@ -265,18 +348,16 @@ export function EdgeGrabRails({
     />
   );
 
-  const pages = lifted ? peel?.[lifted.side] : null;
-  const shape =
-    lifted && pages
-      ? peelShape(lifted.side, lifted.leafW, lifted.bookH, lifted.corner, lifted.pointer)
-      : null;
+  const shape = lifted
+    ? peelShape(lifted.side, lifted.leafW, lifted.bookH, lifted.corner, lifted.pointer)
+    : null;
 
   return (
     <>
       {rail("left", 1)}
       {rail("right", -1)}
-      {lifted && pages && shape && (
-        <PeelOverlay held={lifted} pages={pages} shape={shape} turnStyle={turnStyle ?? "seam"} />
+      {lifted && shape && (
+        <PeelOverlay held={lifted} pages={lifted.pages} shape={shape} turnStyle={turnStyle ?? "seam"} />
       )}
     </>
   );
@@ -315,9 +396,14 @@ function PeelOverlay({
   shape: NonNullable<ReturnType<typeof peelShape>>;
   turnStyle: TurnStyle;
 }): JSX.Element {
-  const { leafW, bookH, side, landed = false } = held;
+  const { leafW, bookH, side, drawings, landed = false } = held;
   const leafAt = (x: number): CSSProperties => ({ left: x, top: 0, width: leafW, height: bookH });
-  const liftedX = side === "left" ? 0 : leafW;
+  // A page picture stands exactly on the drawing it stands in for.
+  const drawingOf = (s: PeelSide): CSSProperties => {
+    const d = drawings[s];
+    return { left: d.x, top: d.y, width: d.w, height: d.h };
+  };
+  const landsSide: PeelSide = side === "left" ? "right" : "left";
   const landsX = side === "left" ? leafW : 0;
   const flap = turnStyle !== "lift" && !landed;
   return (
@@ -337,7 +423,7 @@ function PeelOverlay({
           src={pages.under}
           alt=""
           draggable={false}
-          style={leafAt(liftedX)}
+          style={drawingOf(side)}
         />
         {!landed && (
           <div
@@ -372,16 +458,16 @@ function PeelOverlay({
           </div>
         </div>
       )}
-      {landed && (
-        <img
-          className={styles.page}
-          data-testid="edge-peel-back"
-          src={pages.back}
-          alt=""
-          draggable={false}
-          style={leafAt(landsX)}
-        />
-      )}
+      {/* In the page from the first frame, hidden until the leaf lies flat, so
+          it is loaded and decoded by then rather than blank for a frame. */}
+      <img
+        className={styles.page}
+        data-testid="edge-peel-back"
+        src={pages.back}
+        alt=""
+        draggable={false}
+        style={{ ...drawingOf(landsSide), visibility: landed ? "visible" : "hidden" }}
+      />
     </div>
   );
 }
