@@ -66,7 +66,17 @@ export interface AppState {
  * where the saved-offline shelf lives; `record` leaves it at the reader's last
  * scope. Names are the words on the buttons, not our component names.
  */
-export const OPEN_PANELS = ["jump", "about", "record", "shelf", "key", "editions", "tips"] as const;
+export const OPEN_PANELS = [
+  "jump",
+  "about",
+  "record",
+  "shelf",
+  "key",
+  "editions",
+  "tips",
+  "lookalikes",
+  "roots",
+] as const;
 export type OpenPanel = (typeof OPEN_PANELS)[number];
 const isOpenPanel = (v: string): v is OpenPanel => (OPEN_PANELS as readonly string[]).includes(v);
 

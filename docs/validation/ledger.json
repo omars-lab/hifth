@@ -226,9 +226,9 @@
             "shot": "hop-popover",
             "id": "escape-the-sheet",
             "short": "Open a verse's look-alike list and swipe past both ends: you stay inside it. Jump, then swipe once: you land on the new page.",
-            "noLink": {
-              "why": "the app cannot yet be opened with a verse's look-alike list already showing.",
-              "add": "A link that opens the list already showing (see the app links design)."
+            "open": {
+              "path": "#/hafs-kfqc/2:48?open=lookalikes",
+              "look": "The look-alike list for 2:48 is open; swipe past its last item and its first."
             }
           },
           {
