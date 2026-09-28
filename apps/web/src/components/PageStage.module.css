@@ -656,8 +656,9 @@
 }
 /* selection-drawer = D: every mode wears its own pointer. The word tool: a
    small box with cross-hairs, one word's worth; the default tool, which takes
-   the whole verse, a pair of brackets round it — on the verses only, so the
-   fore-edge keeps its page-turning hand. */
+   the whole verse, the plain pointing hand — on the verses only, so the
+   fore-edge keeps its page-turning hand. (A pair of brackets with a dot read
+   as a target sight; the owner asked for the ordinary hand, 2026-09-28.) */
 .stage[data-tool="word"],
 .stage[data-tool="word"] .host :global(svg) :global(.ayahPolygon),
 .stage[data-tool="word"] .host :global(svg) :global([id^="verse-"]) {
@@ -670,7 +671,7 @@
 }
 .stage[data-tool="select"] .host :global(svg) :global(.ayahPolygon),
 .stage[data-tool="select"] .host :global(svg) :global([id^="verse-"]) {
-  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath d='M7 4H4v16h3M17 4h3v16h-3' fill='none' stroke='%23b45309' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3Ccircle cx='12' cy='12' r='1.6' fill='%23b45309'/%3E%3C/svg%3E") 12 12, pointer;
+  cursor: pointer;
 }
 
 /* The harakat tool's magnifier: a round window on the print above the

@@ -12,7 +12,9 @@ What building it showed: the word's drawer carries enlarged copies of the word, 
 than the verse's and covers the page's last two or three lines on a desktop window — the tapped
 word too when it is on the bottom line, though the drawer shows that word large. Asked on its own as
 [word-drawer-placement](word-drawer-placement.md), decided B: when the word is low, the same drawer
-hangs from under the tool bar instead.
+hangs from under the tool bar instead. Changed 2026-09-28 by Omar, walking the demo: Verse mode's
+cursor, a pair of brackets with a dot, read as a gun sight, so Verse mode now shows the ordinary
+pointing hand. Word mode keeps its own cursor, and Read mode keeps the plain arrow.
 
 *Asked 2026-09-12. A reader looking at a verse of the print has two different
 reaches in mind at two different moments: sometimes they want to do something with a single word
