@@ -110,7 +110,7 @@ Ranked by how many test lines and guide steps each would replace:
 
 | # | Link | Opens | Serves |
 | --- | --- | --- | --- |
-| 1 | `?open=jump\|about\|record\|key\|editions\|tips\|shelf` | one panel open on arrival | 93 test lines in at least 6 files; 2 guide steps (record, shelf) |
+| 1 | `?open=jump\|about\|record\|key\|editions\|tips\|shelf` — **built 2026-09-28** | one panel open on arrival | 93 test lines in at least 6 files; 2 guide steps (record, shelf) |
 | 2 | `?tool=read\|select\|highlight\|bookmark\|note\|sign\|word\|slip\|crop` | that tool in hand | 31 test lines in at least 6 files |
 | 3 | `?sheet=verse\|lookalikes` (needs a verse in the place) | the selected verse's drawer or look-alike list | 24 lines in 5+ files; the screen reader step |
 | 4 | `?view=one\|two` and `?bar=page\|juz` | page layout and page-bar scale | 5+ lines in 4 files |
@@ -167,7 +167,7 @@ server part.
 | | A. Full OpenAPI file | B. One list of link forms (JSON, with a JSON Schema) | C. Keep the prose page only |
 | --- | --- | --- | --- |
 | **Pros** | Familiar; tools draw a reference page for free | Says exactly what we have: place, keys, refuse or fall back, examples; the router's tests, the guide and the reference page all read it | No new file |
-| **Cons** | Each `#` form becomes a pretend endpoint; "falls back" has no slot; tooling mostly unused | We write a small page renderer ourselves (short, like the other registers) | Nothing checks it; `docs/query-params.md` already missed `phonebar` |
+| **Cons** | Each `#` form becomes a pretend endpoint; "falls back" has no slot; tooling mostly unused | We write a small page renderer ourselves (short, like the other registers) | Its table is already checked against the link reader (every key read, written and documented, and whether a bad value refuses or falls back), but no examples are checked, and settings read outside the link reader — `phonebar` — slip past it |
 | **Implications** | Two sources of truth unless the router is generated from it — a rewrite of working code | `docs/query-params.md` becomes a page rendered from it; `docs/links.json` names examples from it | The guide and tests would still need a list, so it becomes B later anyway |
 | **How the hook keeps it in step** | Same round-trip check as B, plus a translation layer | See below | None possible |
 

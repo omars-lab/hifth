@@ -166,6 +166,8 @@ export {
   parseHash,
   refToKey,
   keyToRef,
+  OPEN_PANELS,
+  type OpenPanel,
   type AppState,
   type AyahRef,
   type AyahRange,

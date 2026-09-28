@@ -70,11 +70,16 @@ normalises to the literal form on the way out. Ranges never cross surahs.
 | `field` | one of the ids below | Paints the desk the mus'haf lies on | The value is dropped; the link opens on the default field | fall back |
 | `via` | `2:48` | The breadcrumb origin — the single ayah this hop came from | The whole link is refused | reject |
 | `trail` | `2:40,2:47,2:122` | The full hop chain, oldest → newest, excluding the selection | The whole link is refused | reject |
+| `open` | `jump`, `about`, `record`, `shelf`, `key`, `editions` or `tips` | Opens one panel on arrival: go-to, about, the revision record, the record at juz scope (the saved-offline shelf), the tajweed colour key, the mus'haf picker, or the tips strip. The view underneath is the rest of the link | The value is dropped; the link opens without a panel | fall back |
 
 Unknown keys are ignored, always. A link that has picked up an analytics
 parameter on its way through a chat client still opens the ayah.
 
-All five are read by `parseHash` and written by `serializeState`, both in
+`open` is the one key the app reads and then lets go of: once the panel is up,
+the address goes back to naming the view, so closing the panel and sharing the
+page does not send the next person a panel they did not ask for.
+
+All six are read by `parseHash` and written by `serializeState`, both in
 `packages/core/src/router.ts`. That module is framework-free and never touches
 `location`; `apps/web/src/useHashRouter.ts` owns the actual reading and writing
 of `location.hash`.
