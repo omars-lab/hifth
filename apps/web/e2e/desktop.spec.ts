@@ -546,11 +546,11 @@ test.describe("Hifth · the desktop spread", () => {
    * pans and selects through the text), and the page turns by its outer edge
    * instead. Three claims, and they are exactly the sentence the reader wrote:
    * hovering the edge shows a hand; a drag that begins on it turns the page; a
-   * drag that begins anywhere else does not. The band is the same one every
-   * other turn draws, so its behaviour is not re-asserted here — only that the
-   * grab reaches it. The left edge pulls forward into the book, so it is driven
-   * from page 8, where forward (8 → 9) leaves the opening and a band exists to
-   * catch; a turn inside the opening draws none, which the rows above own.
+   * drag that begins anywhere else does not. While held, the corner lifts with
+   * the hand and the next opening shows beneath (#189); let go past the
+   * threshold and it goes over, short of it and it falls back. The left edge
+   * pulls forward into the book, so it is driven from page 8, where forward
+   * (8 → 9) leaves the opening.
    */
   const grabRail = (page: Page, side: "left" | "right"): Locator =>
     page.getByTestId(`edge-grab-${side}`);
@@ -584,19 +584,18 @@ test.describe("Hifth · the desktop spread", () => {
     await page.mouse.move(rail.x + 6, y);
     await page.mouse.down();
     // Past a quarter of the leaf, so the commit rule keeps the turn. Several
-    // steps because it is a drag, not a teleport — but the grab is a trigger,
-    // not a tracked band: nothing is drawn while the hand moves, and the turn
-    // plays on release.
+    // steps because it is a drag, not a teleport; the corner follows the hand
+    // the whole way (the test below owns what it shows).
     for (let i = 1; i <= 8; i += 1) await page.mouse.move(rail.x + 6 + i * 45, y);
     await page.mouse.up();
 
-    // It turned, and on release it drew the same book-wide band a keyed turn
-    // does — proof the grab reached the one stage that owns turning and played
-    // the ordinary animated turn, rather than turning some second way of its own.
+    // It turned — through the one stage that owns turning — and no band swept
+    // the book after it: the reader has just watched the leaf go over by hand,
+    // and a second sweep would play the same turn twice. The lifted leaf is
+    // gone once the new opening is down.
     await expect(page.locator(NUM)).toHaveText("9");
-    const seen = await foldsSeen(page);
-    expect(seen.length, "the grab turned the page without drawing a fold").toBeGreaterThan(0);
-    expect(seen[0]!.host, "the grabbed turn's band was not the shared one").toBe("page-book");
+    expect(await foldsSeen(page), "a band played the turn again after the peel").toEqual([]);
+    await expect(page.getByTestId("edge-peel")).toHaveCount(0);
   });
 
   test("a grab that stops short of the threshold turns nothing, and creeps no band", async ({
@@ -617,14 +616,17 @@ test.describe("Hifth · the desktop spread", () => {
     await page.mouse.down();
     for (let i = 1; i <= 6; i += 1) await page.mouse.move(rail.x + 6 + i * 12, y);
 
-    // Mid-drag, the whole point of the trigger: no band creeps across the book.
-    // A tracked band would sit here, part-way over a spread whose pages have not
-    // changed — the "vertical bar on the same page" this replaced.
+    // Mid-drag, the corner is up a little — and no band creeps across the book.
+    // A band here would sit part-way over a spread whose pages have not changed,
+    // the "vertical bar on the same page" the peel replaced.
+    await expect(page.getByTestId("edge-peel")).toBeVisible();
     expect(await foldsSeen(page), "a band crept across the book during the drag").toEqual([]);
 
     await page.mouse.up();
 
-    // And releasing short commits nothing: still on 8, and no band ever drawn.
+    // And releasing short commits nothing: the corner falls back, still on 8,
+    // and no band ever drawn.
+    await expect(page.getByTestId("edge-peel")).toHaveCount(0);
     await expect(page.locator(NUM)).toHaveText("8");
     expect(await foldsSeen(page), "a short grab still turned the page").toEqual([]);
   });
