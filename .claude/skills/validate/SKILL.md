@@ -380,6 +380,16 @@ check (`gate:validation`) refuses a pending check that is missing any of this.
 - **`short`**, on every step: one line of 140 characters or fewer, in the
   words you would say out loud. The step's `do`, `expect` and `why` stay as the
   full version, folded.
+- **A step done in the app carries its link** — `open: { path, look }`, where
+  `path` is the part after the app's root (`#/hafs-kfqc/2:48`) and `look` is
+  what to check once it opens. The guide prints it twice, on the live site and
+  on this laptop (swapped to the laptop's own address when a phone reads the
+  guide from `make guide`). A step that only makes sense on one adds
+  `only: "live"|"laptop"` and `onlyWhy`. A step with no link yet carries
+  `noLink: { why, add }` — why not, and what would add one ("None needed" is an
+  answer). The build check reads each `path` with the app's own router, so a
+  link the app would refuse fails it. The link forms and the missing ones are
+  in `docs/design/app-links.md`.
 - **Draw it when the order or the branches matter.** A process with a fork
   (Safari tab vs Home Screen app) or a choice between answers (which button to
   press) is a Mermaid `flowchart`. A straight list of steps is not; the numbered

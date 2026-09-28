@@ -14,6 +14,7 @@
 import { readFileSync, existsSync } from "node:fs";
 import { createHash } from "node:crypto";
 import { join } from "node:path";
+import { parseHash } from "../packages/core/dist/index.js";
 
 export const ROOT = new URL("..", import.meta.url).pathname;
 export const LEDGER_PATH = join(ROOT, "docs", "validation", "ledger.json");
@@ -159,6 +160,47 @@ export function briefProblems(check) {
     else if (step.short.length > SHORT_MAX) {
       out.push(`${where}: runbook.steps[${i}].short is ${step.short.length} characters; keep it under ${SHORT_MAX}.`);
     }
+    out.push(...linkProblems(step, `${where}: runbook.steps[${i}]`));
+  }
+  return out;
+}
+
+/* ── links into the app ─────────────────────────────────────────────────── */
+//
+// Owner, 2026-09-28: "visit this anchor, look for abc … if an anchor doesn't
+// exist, why not, how can we add", with "a hosted anchor and a local host
+// anchor". A step done in the app carries `open` — the address after the
+// app's root, and what to look for once there — and the guide shows it twice:
+// on the live site and on this laptop. A step with no link yet says so in
+// `noLink`: why not, and what would add one. The address is read by the app's
+// own router here, so a link the app would refuse fails the build check
+// instead of quietly misleading a person.
+
+export const LIVE_APP = "https://blog.bytesofpurpose.com/hifth/";
+export const LAPTOP_APP = "http://localhost:5173/";
+const ONLY = new Set(["live", "laptop"]);
+
+/** Does the app open this address? `?a=b#/…` — the part after `#` is the router's. */
+export function appOpens(path) {
+  const hash = path.includes("#") ? path.slice(path.indexOf("#")) : "";
+  if (hash === "" || hash === "#" || hash === "#/") return true; // the app's front page
+  return parseHash(hash) !== null;
+}
+
+function linkProblems(step, where) {
+  const out = [];
+  if (step.open && step.noLink) out.push(`${where} has both "open" and "noLink"; keep the one that is true.`);
+  if (step.open) {
+    const { path, look, only, onlyWhy } = step.open;
+    if (typeof path !== "string") out.push(`${where}: open.path is missing.`);
+    else if (!appOpens(path)) out.push(`${where}: open.path "${path}" is an address the app would not open.`);
+    if (!look) out.push(`${where}: open.look is missing — say what to look for once the link opens.`);
+    if (only !== undefined && !ONLY.has(only)) out.push(`${where}: open.only must be "live" or "laptop".`);
+    if (only && !onlyWhy) out.push(`${where}: open.onlyWhy is missing — say why only the ${only} link applies.`);
+  }
+  if (step.noLink) {
+    if (!step.noLink.why) out.push(`${where}: noLink.why is missing — say why there is no link.`);
+    if (!step.noLink.add) out.push(`${where}: noLink.add is missing — say what would add one, or that none is needed.`);
   }
   return out;
 }

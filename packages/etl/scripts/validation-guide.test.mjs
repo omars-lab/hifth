@@ -86,6 +86,75 @@ describe("what a check for a person must carry", () => {
   });
 });
 
+describe("a step that happens in the app carries its link", () => {
+  // Owner, 2026-09-28: "visit this anchor, look for abc … if an anchor doesn't
+  // exist, why not, how can we add" — and "a hosted anchor and a local host anchor".
+  const withStep = (extra) => {
+    const c = pending();
+    Object.assign(c.runbook.steps[0], extra);
+    return c;
+  };
+
+  it("accepts a link the app would open, with what to look for", () => {
+    expect(briefProblems(withStep({ open: { path: "#/hafs-kfqc/2:48", look: "The verse is lit." } }))).toEqual([]);
+  });
+
+  it("refuses a link the app would refuse", () => {
+    const problems = briefProblems(withStep({ open: { path: "#/hafs-kfqc/2:48?w=abc", look: "x" } })).join("\n");
+    expect(problems).toMatch(/steps\[0\].*open\.path.*the app would not open/);
+  });
+
+  it("refuses a link with nothing to look for", () => {
+    expect(briefProblems(withStep({ open: { path: "#/hafs-kfqc/p7" } })).join("\n")).toMatch(/open\.look/);
+  });
+
+  it("refuses a missing link that does not say why, or how one would be added", () => {
+    const problems = briefProblems(withStep({ noLink: { why: "No link opens that panel." } })).join("\n");
+    expect(problems).toMatch(/noLink\.add/);
+  });
+
+  it("refuses a step that is one-site-only without saying why", () => {
+    const problems = briefProblems(withStep({ open: { path: "#/hafs-kfqc/p1", look: "x", only: "live" } })).join("\n");
+    expect(problems).toMatch(/open\.onlyWhy/);
+  });
+
+  it("shows the live-site link and the laptop link, and what to look for", () => {
+    const html = card(withStep({ open: { path: "#/hafs-kfqc/2:48", look: "The verse is lit." } }), { diagrams: {} });
+    const visible = html.split("<details")[0];
+    expect(visible).toContain('href="https://blog.bytesofpurpose.com/hifth/#/hafs-kfqc/2:48"');
+    expect(visible).toContain('href="http://localhost:5173/#/hafs-kfqc/2:48"');
+    expect(visible).toContain("The verse is lit.");
+  });
+
+  it("shows only the one site a one-site step can use, and says why", () => {
+    const html = card(
+      withStep({ open: { path: "#/hafs-kfqc/p1", look: "x", only: "live", onlyWhy: "Safari clears the real site." } }),
+      { diagrams: {} },
+    );
+    expect(html).toContain('href="https://blog.bytesofpurpose.com/hifth/#/hafs-kfqc/p1"');
+    expect(html).not.toContain("localhost:5173/#/hafs-kfqc/p1");
+    expect(html).toContain("Safari clears the real site.");
+  });
+
+  it("on a phone reading the guide from this laptop, points the laptop link at the laptop", () => {
+    // "localhost" on the phone is the phone. The page script swaps in the host
+    // the guide itself came from; run it against a stand-in page to prove it.
+    const script = guidePage([pending()], "h", {}).match(/<script>([\s\S]*)<\/script>/)[1];
+    const link = { attr: "http://localhost:5173/#/hafs-kfqc/2:48", href: "", getAttribute() { return this.attr; } };
+    const document = { querySelectorAll: (sel) => (sel === "a.laptop" ? [link] : []) };
+    const location = { protocol: "http:", hostname: "192.168.1.20" };
+    new Function("document", "location", "localStorage", script)(document, location, {});
+    expect(link.href).toBe("http://192.168.1.20:5173/#/hafs-kfqc/2:48");
+  });
+
+  it("says plainly when there is no link yet, why, and what would add one", () => {
+    const html = card(withStep({ noLink: { why: "No link opens that panel.", add: "A link that opens it." } }), { diagrams: {} });
+    expect(html).toMatch(/No link yet/);
+    expect(html).toContain("No link opens that panel.");
+    expect(html).toContain("A link that opens it.");
+  });
+});
+
 describe("a check's card", () => {
   const html = card(pending(), { diagrams: {} });
   const [visible, folded] = html.split("<details");
