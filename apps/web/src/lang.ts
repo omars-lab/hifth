@@ -112,13 +112,19 @@ export function isLang(value: unknown): value is Lang {
 /**
  * The language to open in.
  *
- * A stored choice wins outright — it is the only signal that is a *decision*.
+ * A link can name one before the `#` (`?lang=en`), and that wins for this visit
+ * only: it is never saved, so a link someone sends does not change the reader's
+ * own app for good. An unknown value is ignored. See docs/query-params.md.
+ *
+ * Otherwise a stored choice wins outright — it is the only signal that is a *decision*.
  * Failing that, the device's own language decides, so a reader whose phone is
  * in English is not asked to find a control they cannot read in order to read
  * the controls. Anything else (including a device set to a language Hifth does
  * not have) gets Arabic, because that is what this app is.
  */
 export function detectLang(): Lang {
+  const asked = typeof location === "undefined" ? null : new URLSearchParams(location.search).get("lang");
+  if (isLang(asked)) return asked;
   try {
     const stored = localStorage.getItem(LANG_STORAGE_KEY);
     if (isLang(stored)) return stored;

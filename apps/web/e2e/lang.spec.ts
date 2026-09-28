@@ -125,6 +125,39 @@ test.describe("Hifth · language", () => {
     await expect(page.getByRole("button", { name: /عن حِفظ/ })).toBeVisible();
   });
 
+  // `?lang=` before the `#` sets the chrome for this visit and never touches
+  // the saved choice: a reader who opens a link a teacher sent in Arabic must
+  // not find their own app in Arabic tomorrow. Owner, 2026-09-28: links that
+  // enter the app in a certain mode.
+  test("?lang= sets the chrome for this visit only, and keeps the saved choice", async ({ page }) => {
+    await page.addInitScript((k) => {
+      if (!sessionStorage.getItem("seeded")) {
+        localStorage.setItem(k, "en");
+        sessionStorage.setItem("seeded", "1");
+      }
+    }, LANG_STORAGE_KEY);
+    await page.goto("/?lang=ar#/hafs-kfqc/p7");
+    await expect(page.locator("svg[role='group']").first()).toBeVisible();
+    await expect(page.locator("html")).toHaveAttribute("lang", "ar");
+    await expect(page.getByRole("button", { name: /عن حِفظ/ })).toBeVisible();
+
+    // Moving through the book keeps the visit's language.
+    await page.keyboard.press("ArrowLeft");
+    await expect(page.locator("html")).toHaveAttribute("lang", "ar");
+
+    // The saved choice is untouched, and the next plain visit is English again.
+    expect(await page.evaluate((k) => localStorage.getItem(k), LANG_STORAGE_KEY)).toBe("en");
+    await page.goto("/#/hafs-kfqc/p7");
+    await expect(page.locator("svg[role='group']").first()).toBeVisible();
+    await expect(page.locator("html")).toHaveAttribute("lang", "en");
+  });
+
+  test("an unknown ?lang= is ignored, and the device's language stands", async ({ page }) => {
+    await page.goto("/?lang=fr#/hafs-kfqc/p7");
+    await expect(page.locator("svg[role='group']").first()).toBeVisible();
+    await expect(page.locator("html")).toHaveAttribute("lang", "en");
+  });
+
   test("the licence credits are not translated", async ({ page }) => {
     await page.goto("/");
     await page.getByRole("button", { name: /About Hifth/ }).tap();
