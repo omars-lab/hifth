@@ -589,6 +589,9 @@ guide: ## Render the runbooks to docs/validation/guide.html and serve them to yo
 	@# The checks happen with a phone in one hand; the instructions have always
 	@# lived in a terminal the phone cannot see. Same source as `make validate`
 	@# CHECK=<id> — docs/validation/ledger.json — rendered for the device.
+	@# Diagrams are drawn to SVG first (only new ones), so the page stays one
+	@# file that opens offline on a phone.
+	@node scripts/render-diagrams.mjs
 	@LAN_IP="$(LAN_IP)" node scripts/build-validation-guide.mjs --serve
 
 .PHONY: session

@@ -55,6 +55,12 @@ never opened this repository.** Concretely:
 - **Show it, do not only argue it.** An options page draws each option on a real page of the
   mus'haf, at the size it would actually be used. A wash you cannot see at that size is an
   answer, and it is one no paragraph would have given you.
+- **Short first, the rest folded; a process is a diagram.** A page someone works from leads
+  with the short version — the question, what you need, how long, one line per step — and
+  keeps the full detail folded under it, so nothing is lost and nothing is in the way. Where
+  the order or the branches matter, draw a Mermaid diagram instead of paragraphs describing
+  it. (Omar, 2026-09-28: the checks guide was "a huge wall of text"; "a simple guide … where
+  we still cover everything but with minimalistic, proper explanation".)
 
 - **If the difference is felt, it is built, not drawn.** Some options differ in something a
   still picture cannot carry — a snap when you let go of a control, a printed line that tilts
