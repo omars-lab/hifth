@@ -77,6 +77,11 @@
  *     nothing about layout and must not: a key that moves a different distance
  *     after a resize is the reader's keyboard changing under them.
  *
+ * **Reversed by the owner on 2026-09-28** (desktop.md §8 ①): with two pages
+ * open, the app reads one step as one *opening* — pressing from 7 to 8, the page
+ * already open beside it, felt like a dead key. This map is unchanged; the app
+ * applies it through `openingAfter` when the book is open.
+ *
  * Hence `step: 1 | -1` rather than a number — ±2 does not typecheck, which is
  * the cheapest possible guard on a decision whose behaviour is *unchanged* and
  * therefore invisible to anyone who reverses it. What a spread does with the

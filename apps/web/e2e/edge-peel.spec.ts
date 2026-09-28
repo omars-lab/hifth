@@ -167,6 +167,32 @@ test.describe("Hifth · lifting a page by its corner", () => {
     await expect(page.locator(NUM)).toHaveText("9");
   });
 
+  // Owner, 2026-09-28 (Firefox): with two pages open an arrow had to be pressed
+  // twice, and every second press flashed and did nothing. A turn stepped one
+  // page — from 7, that is 8, already open beside it. A turn moves an opening.
+  test("each arrow press and each corner pull turns a whole opening", async ({ page }) => {
+    await page.goto("/#/hafs-kfqc/p7");
+    await expect(pageSvg(page, 8)).toBeVisible();
+    await expect(page.locator(NUM)).toHaveText("7");
+
+    await page.keyboard.press("ArrowLeft");
+    await expect(page.locator(NUM)).toHaveText("9");
+    await expect(pageSvg(page, 10)).toBeVisible();
+    await page.keyboard.press("ArrowRight");
+    await expect(page.locator(NUM)).toHaveText("7");
+    await expect(pageSvg(page, 8)).toBeVisible();
+
+    // The corner pulled from the right-hand page's opening lands on the next one too.
+    const rail = await railBox(page, "left");
+    const y = rail.y + rail.height * 0.15;
+    await page.mouse.move(rail.x + 6, y);
+    await page.mouse.down();
+    for (let i = 1; i <= 5; i += 1) await page.mouse.move(rail.x + 6 + i * 40, y + i * 4);
+    await expect(peel(page).getByTestId("edge-peel-under")).toHaveAttribute("src", /\/10\.svg$/);
+    await page.mouse.up();
+    await expect(page.locator(NUM)).toHaveText("9");
+  });
+
   test("the right edge lifts toward the earlier pages", async ({ page }) => {
     await openAt8(page);
 

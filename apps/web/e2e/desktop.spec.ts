@@ -370,29 +370,21 @@ test.describe("Hifth · the desktop spread", () => {
     // The hint is a promise. ← is drawn first, on the right of the RTL row, and
     // it turns forward — the next page of a mus'haf is the one to the left.
     //
-    // 7 → 8 stays inside one opening, which is the turn this project could not
-    // make until 4b: the book does not move, and the only thing that changes is
-    // which of the two leaves the reader is on. So the assertion is the
-    // relationship — the earlier page is still the one on the right — which has
-    // to hold from either leaf and is exactly what a `row-reverse` "fix" would
-    // invert.
-    //
-    // It is also the pin on `desktop.md` §8 ①, settled at 4b: **a step is one
-    // page, at every width.** The header reading `8` and not `9` after one press
-    // is the whole of that decision, and this is the only row in the repo where
-    // ±2 would fail — core's `step: 1 | -1` stops it typechecking, but a
-    // component that decided to double the step on a spread would sail past the
-    // type and land here. The reasoning lives in `packages/core/src/keymap.ts`.
+    // With two pages open one press turns the opening: 7 → 9, never 8, which
+    // is already open beside it (owner, 2026-09-28 — the press that moved to 8
+    // looked dead; `desktop.md` §8 ①, reversed). The earlier page of the new
+    // opening is still the one on the right, which is exactly what a
+    // `row-reverse` "fix" would invert.
     await page.goto("/#/hafs-kfqc/p7");
     await expect(spread(page)).toBeVisible();
     const before = await boxOf(pageSvg(page, 7));
 
     await page.keyboard.press("ArrowLeft");
-    await expect(page.locator(NUM)).toHaveText("8");
+    await expect(page.locator(NUM)).toHaveText("9");
     await expect(spread(page)).toBeVisible();
 
-    const after = await restingBox(page, 8);
-    const earlier = await restingBox(page, 7);
+    const after = await restingBox(page, 10);
+    const earlier = await restingBox(page, 9);
     expect(earlier.x, "the earlier page stopped being on the right").toBeGreaterThan(
       after.x + after.width,
     );
@@ -418,33 +410,11 @@ test.describe("Hifth · the desktop spread", () => {
     await expect.poll(() => new URL(page.url()).hash).toBe("#/hafs-kfqc/2:48");
 
     await page.keyboard.press("ArrowLeft");
-    await expect(page.locator(NUM)).toHaveText("8");
+    await expect(page.locator(NUM)).toHaveText("9");
 
     // The leaf landed, so the place let go: no bead, and the address is the page.
     await expect(page.getByRole("button", { name: /الآية الحالية/ })).toHaveCount(0);
-    await expect.poll(() => new URL(page.url()).hash).toBe("#/hafs-kfqc/p8");
-  });
-
-  test("a turn inside one opening draws no band", async ({ page }) => {
-    // §3.5, and the row 4b made reachable. Both leaves of (7,8) are already on
-    // screen and the crease between them is already drawn — permanently, by the
-    // gutter — so sweeping a second crease across the book would be an
-    // animation of something the reader is looking at. `PageStage` suppresses
-    // it, and only on a spread: the same turn on a phone *must* draw the band,
-    // which is what `page-turn.spec.ts` asserts from the other side.
-    await watchFolds(page);
-    await page.goto("/#/hafs-kfqc/p7");
-    await expect(spread(page)).toBeVisible();
-    await expect(pageSvg(page, 7)).toBeVisible();
-
-    await page.keyboard.press("ArrowLeft");
-    await expect(page.locator(NUM)).toHaveText("8");
-    expect(await foldsSeen(page), "a crease was swept across an open book").toEqual([]);
-
-    // And it still committed. "No band" is a claim about the animation, not
-    // about the turn — a spread that quietly stopped turning would satisfy the
-    // line above and be a far worse bug.
-    await expect(pageSvg(page, 8)).toBeVisible();
+    await expect.poll(() => new URL(page.url()).hash).toBe("#/hafs-kfqc/p9");
   });
 
   test("the fold crosses the whole open book, not the leaf that turned", async ({ page }) => {
@@ -939,8 +909,9 @@ test.describe("Hifth · the wheel", () => {
     // other surface. Note this is *not* the RTL question the arrow keys had to
     // settle: down is down in both directions of script, which is much of why
     // the vertical axis is the one bound here.
+    // With the book open a turn is a whole opening, 7 → 9.
     await page.mouse.wheel(0, 120);
-    await expect(page.locator(NUM)).toHaveText("8");
+    await expect(page.locator(NUM)).toHaveText("9");
 
     // A pause, then the other way. The pause is the gesture boundary — 100 ms of
     // quiet is what tells a mouse's second notch from a trackpad's next frame,
@@ -988,10 +959,10 @@ test.describe("Hifth · the wheel", () => {
       }
     });
 
-    await expect(page.locator(NUM)).toHaveText("8");
-    // …and it stays there. A tail that spent a second turn would land on 9.
+    await expect(page.locator(NUM)).toHaveText("9");
+    // …and it stays there. A tail that spent a second turn would land on 11.
     await page.waitForTimeout(400);
-    await expect(page.locator(NUM)).toHaveText("8");
+    await expect(page.locator(NUM)).toHaveText("9");
   });
 
   test("ctrl+wheel does nothing at all — it is somebody else's pinch", async ({ page }) => {

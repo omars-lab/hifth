@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { EDITIONS } from "./concordance.js";
-import { foldBetween, leafSideOf, nearestPage, pageFraction, pageRuns, spreadOf } from "./pages.js";
+import { foldBetween, leafSideOf, nearestPage, openingAfter, pageFraction, pageRuns, spreadOf } from "./pages.js";
 
 describe("nearestPage", () => {
   const vendored = [7, 9, 19];
@@ -127,6 +127,37 @@ describe("pageRuns", () => {
     for (let i = 1; i < runs.length; i += 1) {
       expect(runs[i]!.from).toBeGreaterThan(runs[i - 1]!.to + 1);
     }
+  });
+});
+
+describe("openingAfter", () => {
+  const all = Array.from({ length: 604 }, (_, i) => i + 1);
+
+  it("turns a whole opening from either of its pages", () => {
+    // Owner, 2026-09-28: with two pages open, every second arrow press flashed
+    // and moved nothing — it went 5 → 6, the page already open on the left.
+    expect(openingAfter(5, 1, all)).toBe(7);
+    expect(openingAfter(6, 1, all)).toBe(7);
+    expect(openingAfter(7, -1, all)).toBe(5);
+    expect(openingAfter(8, -1, all)).toBe(5);
+  });
+
+  it("stops at the ends of the book", () => {
+    expect(openingAfter(1, -1, all)).toBeNull();
+    expect(openingAfter(2, -1, all)).toBeNull();
+    expect(openingAfter(603, 1, all)).toBeNull();
+    expect(openingAfter(604, 1, all)).toBeNull();
+  });
+
+  it("walks past openings the build does not hold", () => {
+    // A trimmed build: from (1, 2) forward, 3–8 are missing, so the next page
+    // held is 9, the right of (9, 10); back from 9 reaches 2, and 1 before it.
+    const some = [1, 2, 9, 10, 12];
+    expect(openingAfter(1, 1, some)).toBe(9);
+    expect(openingAfter(9, -1, some)).toBe(1);
+    // Only the left page of (11, 12) is held: land on it.
+    expect(openingAfter(10, 1, some)).toBe(12);
+    expect(openingAfter(12, -1, some)).toBe(9);
   });
 });
 
