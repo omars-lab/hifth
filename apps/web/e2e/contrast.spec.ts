@@ -4,7 +4,7 @@ import { tapAyah } from "./ayah";
 import { COACH_STORAGE_KEY } from "../src/coach";
 import { formatFailures, measureContrast } from "./contrast";
 import { contextWithout } from "./inventory";
-import { openTips } from "./tips";
+import { gotoLink } from "./links";
 
 /*
  * Contrast, on every surface — PLAN follow-up ⑥.
@@ -190,11 +190,10 @@ const SURFACES: readonly Surface[] = [
   {
     name: "the tips strip, opened from settings",
     open: async (page) => {
-      // It used to be the first text a reader ever saw here; since 2026-09-25 it
-      // opens only from the button in settings, so that is how it is reached.
+      // Opened by its link: the button in settings that opens it is
+      // wayfinding.spec.ts's subject, not this scan's.
       await settled(page);
-      await page.goto("/");
-      await openTips(page);
+      await gotoLink(page, "tips");
     },
   },
   {
