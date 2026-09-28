@@ -55,6 +55,10 @@ interface Held {
    * that ended in a jump in size).
    */
   drawings: Record<PeelSide, Box>;
+  /** Where the paper's top sits in the book; `corner`, `pointer` and `bookH` are the paper's. */
+  paperTop: number;
+  /** Each leaf's paper outline — rounded on the fore-edge — for the pieces of paper drawn. */
+  look: Partial<Record<PeelSide, PaperLook>>;
   /**
    * The pages this leaf shows, fixed as the grab begins. Read live, they would
    * change to the next opening's the moment the turn lands, and the laid-down
@@ -71,24 +75,49 @@ const FALL_MS = 160;
 /** Longest the laid-down leaf waits for the new opening before it gets out of the way. */
 const LANDED_HOLD_MS = 1500;
 
+/** The paper of a leaf as the page draws it: its outline, for a lifted piece of it. */
+interface PaperLook {
+  borderRadius: string;
+  border: string;
+}
+
 /**
- * Where each side's page drawing sits in the book. A leaf whose drawing is not
+ * Where the paper and each side's page drawing sit in the book. The paper
+ * stands a little inside the book, top and foot, so the peel is drawn on it and
+ * the corner in the hand is the paper's (owner, 2026-09-28: a corner that
+ * poked out above the page). The drawings are in the paper's pixels. A leaf not
  * on screen yet falls back to the whole leaf.
  */
-function measureDrawings(book: HTMLElement): Record<PeelSide, Box> {
+function measurePaper(book: HTMLElement): {
+  top: number;
+  h: number;
+  drawings: Record<PeelSide, Box>;
+  look: Partial<Record<PeelSide, PaperLook>>;
+} {
   const b = book.getBoundingClientRect();
   const half = b.width / 2;
-  const out: Record<PeelSide, Box> = {
+  let top = 0;
+  let h = b.height;
+  const drawings: Record<PeelSide, Box> = {
     left: { x: 0, y: 0, w: half, h: b.height },
     right: { x: half, y: 0, w: half, h: b.height },
   };
+  const look: Partial<Record<PeelSide, PaperLook>> = {};
+  const found: { side: PeelSide; r: DOMRect }[] = [];
   for (const svg of book.querySelectorAll("[data-live] svg[aria-labelledby]")) {
     const r = svg.getBoundingClientRect();
-    if (r.width === 0) continue;
+    const paper = svg.parentElement;
+    if (r.width === 0 || !paper) continue;
     const side: PeelSide = r.left + r.width / 2 - b.left < half ? "left" : "right";
-    out[side] = { x: r.left - b.left, y: r.top - b.top, w: r.width, h: r.height };
+    const p = paper.getBoundingClientRect();
+    top = p.top - b.top;
+    h = p.height;
+    const cs = getComputedStyle(paper);
+    look[side] = { borderRadius: cs.borderRadius, border: `${cs.borderTopWidth} ${cs.borderTopStyle} ${cs.borderTopColor}` };
+    found.push({ side, r });
   }
-  return out;
+  for (const { side, r } of found) drawings[side] = { x: r.left - b.left, y: r.top - b.top - top, w: r.width, h: r.height };
+  return { top, h, drawings, look };
 }
 
 /** Every leaf of the book has its page drawn: a picture over it can go. */
@@ -294,9 +323,20 @@ export function EdgeGrabRails({
             cancelAnimationFrame(anim.current);
             bookEl.current = el;
             const leafW = book.width / 2;
-            const corner = cornerOf(side, leafW, book.height, g.startY - book.top);
-            const drawings = measureDrawings(el);
-            put({ side, step: g.step, corner, pointer: corner, leafW, bookH: book.height, drawings, pages });
+            const paper = measurePaper(el);
+            const corner = cornerOf(side, leafW, paper.h, g.startY - book.top - paper.top);
+            put({
+              side,
+              step: g.step,
+              corner,
+              pointer: corner,
+              leafW,
+              bookH: paper.h,
+              drawings: paper.drawings,
+              paperTop: paper.top,
+              look: paper.look,
+              pages,
+            });
           }
         }
         const h = liftedRef.current;
@@ -363,6 +403,13 @@ export function EdgeGrabRails({
   );
 }
 
+/** A leaf's corner rounding seen from the facing leaf: left and right swapped. */
+function mirrorRadius(r: string | undefined): string | undefined {
+  if (!r) return undefined;
+  const [tl = "0", tr = tl, br = tl, bl = tr] = r.split(" ");
+  return `${tr} ${tl} ${bl} ${br}`;
+}
+
 const poly = (pts: Pt[]): string =>
   `polygon(${pts.map((p) => `${p.x.toFixed(2)}px ${p.y.toFixed(2)}px`).join(", ")})`;
 
@@ -396,19 +443,34 @@ function PeelOverlay({
   shape: NonNullable<ReturnType<typeof peelShape>>;
   turnStyle: TurnStyle;
 }): JSX.Element {
-  const { leafW, bookH, side, drawings, landed = false } = held;
-  const leafAt = (x: number): CSSProperties => ({ left: x, top: 0, width: leafW, height: bookH });
+  const { leafW, bookH, side, drawings, paperTop, look, landed = false } = held;
+  const landsSide: PeelSide = side === "left" ? "right" : "left";
+  // A piece of paper: the leaf's box, with that leaf's frame and rounded
+  // fore-edge. A leaf not on screen borrows the other's frame, mirrored.
+  const leafAt = (s: PeelSide): CSSProperties => {
+    const own = look[s];
+    const other = look[s === "left" ? "right" : "left"];
+    const radius = own?.borderRadius ?? mirrorRadius(other?.borderRadius);
+    return {
+      left: s === "left" ? 0 : leafW,
+      top: 0,
+      width: leafW,
+      height: bookH,
+      boxSizing: "border-box",
+      borderRadius: radius,
+      border: own?.border ?? other?.border,
+    };
+  };
   // A page picture stands exactly on the drawing it stands in for.
   const drawingOf = (s: PeelSide): CSSProperties => {
     const d = drawings[s];
     return { left: d.x, top: d.y, width: d.w, height: d.h };
   };
-  const landsSide: PeelSide = side === "left" ? "right" : "left";
-  const landsX = side === "left" ? leafW : 0;
   const flap = turnStyle !== "lift" && !landed;
   return (
     <div
       className={styles.peel}
+      style={{ top: paperTop, height: bookH, bottom: "auto" }}
       data-testid="edge-peel"
       data-side={side}
       data-style={turnStyle}
@@ -417,6 +479,9 @@ function PeelOverlay({
       aria-hidden="true"
     >
       <div className={styles.beneath} style={{ clipPath: poly(shape.revealed) }}>
+        {/* The next leaf's paper, so its margins are that page's and not the
+            one being lifted showing through. */}
+        <div className={styles.face} style={leafAt(side)} />
         <img
           className={styles.page}
           data-testid="edge-peel-under"
@@ -442,7 +507,7 @@ function PeelOverlay({
               transform: `matrix(${shape.matrix.map((v) => v.toFixed(5)).join(", ")})`,
             }}
           >
-            <div className={styles.face} style={leafAt(landsX)}>
+            <div className={styles.face} style={leafAt(landsSide)}>
               {turnStyle === "curl" && (
                 <div className={styles.skeleton} data-skeleton="">
                   {Array.from({ length: SKELETON_LINES }, (_, k) => (

@@ -145,6 +145,28 @@ test.describe("Hifth · lifting a page by its corner", () => {
     expect(bad, "a frame after the release showed a blank or misplaced page").toEqual([]);
   });
 
+  // Owner, 2026-09-28 (Firefox): the lifted corner poked out above the page and
+  // hung below it. The paper stands a little inside the book, top and foot; the
+  // corner in the hand is the paper's corner, so the peel is drawn on the paper.
+  test("the lifted corner is the paper's corner, not the book's box", async ({ page }) => {
+    await openAt8(page);
+    const paper = (await pageSvg(page, 8).locator("..").boundingBox())!;
+    const book = (await page.getByTestId("page-book").boundingBox())!;
+    expect(paper.y - book.y, "the paper no longer stands inside the book").toBeGreaterThan(2);
+
+    const rail = await railBox(page, "left");
+    const y = rail.y + rail.height * 0.05;
+    await page.mouse.move(rail.x + 6, y);
+    await page.mouse.down();
+    for (let i = 1; i <= 5; i += 1) await page.mouse.move(rail.x + 6 + i * 40, y + i * 8);
+
+    const layer = (await peel(page).boundingBox())!;
+    expect(Math.round(layer.y), "the peel starts above the paper").toBe(Math.round(paper.y));
+    expect(Math.round(layer.height), "the peel is not the paper's height").toBe(Math.round(paper.height));
+    await page.mouse.up();
+    await expect(page.locator(NUM)).toHaveText("9");
+  });
+
   test("the right edge lifts toward the earlier pages", async ({ page }) => {
     await openAt8(page);
 
