@@ -85,6 +85,17 @@ test.describe("Hifth · a link that opens a panel", () => {
     });
   });
 
+  test("?view=one closes the book to one page on a computer", async ({ page, isMobile }) => {
+    test.skip(isMobile, "a phone always shows one page; there is nothing to choose");
+    await page.goto("/#/hafs-kfqc/p7?view=one");
+    await expect(page.getByRole("radio", { name: "صفحة واحدة" })).toHaveAttribute("aria-checked", "true", {
+      timeout: 20_000,
+    });
+    await expect(page.locator('svg[aria-labelledby="page-label-7"]:visible')).toBeVisible();
+    await expect(page.locator('svg[aria-labelledby="page-label-6"]:visible')).toHaveCount(0);
+    await expect(page).toHaveURL(/#\/hafs-kfqc\/p7$/);
+  });
+
   test("a panel the app does not have still opens the verse", async ({ page }) => {
     await page.goto("/#/hafs-kfqc/p19?open=nope");
     await expect(page.locator('svg[aria-labelledby="page-label-19"]:visible')).toBeVisible({
