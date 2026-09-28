@@ -77,7 +77,7 @@ import { NoteBox } from "./components/NoteBox";
 import { WordParts, useWordParts } from "./components/WordParts";
 import { CropSheet, type CropBox } from "./components/CropSheet";
 import { PageSpread } from "./components/PageSpread";
-import { EdgeGrabRails, type EdgeTurnDriver } from "./components/EdgeGrabRails";
+import { EdgeGrabRails, type EdgeTurnDriver, type PeelPages } from "./components/EdgeGrabRails";
 import { DesktopChrome } from "./components/DesktopChrome";
 import { HopRail } from "./components/HopRail";
 import { HopPopover } from "./components/HopPopover";
@@ -145,6 +145,28 @@ function rangeSelect(keys: readonly string[]): AyahRef | AyahRange | null {
   const from = Math.min(...ayahs);
   const to = Math.max(...ayahs);
   return to > from ? { surah, ayah: from, toAyah: to } : { surah, ayah: from };
+}
+
+/**
+ * What each fore-edge shows as its corner lifts (#189): beneath the lifted leaf,
+ * the same side of the next opening; on its back, the page that will lie on the
+ * far side. The left edge pulls forward, so from (7, 8) it shows 10 beneath and
+ * 9 on the back; the right edge pulls back, showing 5 beneath and 6 on the back.
+ * Null where either page is not in the edition — that edge turns the old way.
+ */
+function peelPagesOf(
+  edition: string,
+  page: number,
+  total: number,
+  available: readonly number[],
+): { left: PeelPages | null; right: PeelPages | null } {
+  const { right } = spreadOf(page, total);
+  if (right === null) return { left: null, right: null };
+  const pair = (under: number, back: number): PeelPages | null =>
+    available.includes(under) && available.includes(back)
+      ? { under: pageUrl(edition, under), back: pageUrl(edition, back) }
+      : null;
+  return { left: pair(right + 3, right + 2), right: pair(right - 2, right - 1) };
 }
 
 export function App(): JSX.Element {
@@ -297,7 +319,8 @@ export function App(): JSX.Element {
     () => ({
       begin: (step) => stageRef.current?.beginEdgeTurn(step),
       track: (dx) => stageRef.current?.trackEdgeTurn(dx),
-      release: (dx, velocityX) => stageRef.current?.releaseEdgeTurn(dx, velocityX),
+      release: (dx, velocityX, held) => stageRef.current?.releaseEdgeTurn(dx, velocityX, held) ?? false,
+      finish: (step) => stageRef.current?.finishEdgeTurn(step),
     }),
     [],
   );
@@ -2078,7 +2101,17 @@ export function App(): JSX.Element {
                  book with two outer edges to grab; the phone still turns by
                  swiping the leaf itself, so it gets no rails and keeps its
                  gesture. */
-              edgeRails={desktop ? <EdgeGrabRails driver={edgeTurn} aside={tool === "sign" || tool === "word"} /> : undefined}
+              edgeRails={
+                desktop ? (
+                  <EdgeGrabRails
+                    driver={edgeTurn}
+                    aside={tool === "sign" || tool === "word"}
+                    peel={manifest ? peelPagesOf(manifest.edition, page, totalPages, pageTurns.pages) : undefined}
+                    turnStyle={turnStyle}
+                    opening={page}
+                  />
+                ) : undefined
+              }
               renderFacing={(facing) => (
                 /* The facing leaf gets its own stage rather than a second
                    visible host inside the current one: PageStage's whole
