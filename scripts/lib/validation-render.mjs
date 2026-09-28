@@ -15,7 +15,7 @@
  * index and its checkbox persistence, the session's capture bar — never a
  * second copy of a step.
  */
-import { readEvidence } from "../validation-ledger.mjs";
+import { readEvidence, diagramKey, overviewDiagram, needsRunbook } from "../validation-ledger.mjs";
 
 /* ── text ──────────────────────────────────────────────────────────────── */
 
@@ -119,11 +119,65 @@ export function struckSteps(check) {
  * transcript that recorded positions would silently re-point itself the day
  * somebody reorders a runbook. Same rule `evidence.covers` already lives under.
  */
-export function card(check, { capture = false } = {}) {
+export function card(check, { capture = false, diagrams = {} } = {}) {
+  if (capture || !check.brief) return fullCard(check, { capture });
+  return briefCard(check, diagrams);
+}
+
+/**
+ * A drawn diagram, or a loud note that it has not been drawn. Loud for the
+ * same reason a missing screenshot is: a picture that silently vanishes reads
+ * as a page with nothing to show.
+ */
+export function diagram(source, diagrams, caption = "") {
+  if (!source) return "";
+  const svg = diagrams[diagramKey(source)];
+  return `<figure class="diagram">${
+    svg ?? `<p class="expect">Diagram not drawn yet — run <code>make guide</code> on the laptop.</p>`
+  }${caption ? `<figcaption>${rich(caption)}</figcaption>` : ""}</figure>`;
+}
+
+/**
+ * The short version first — the plain question, why it matters, what you need,
+ * how long, when it is done, one line per step — and the full runbook folded
+ * under it, so nothing is lost and nothing is in the way.
+ */
+function briefCard(check, diagrams) {
+  const b = check.brief;
+  const rb = check.runbook ?? {};
+  const { struck } = struckSteps(check);
+  return `<article class="card" id="${attr(check.id)}">
+  <div class="head">
+    <h2>${rich(b.ask)}</h2>
+    <p class="what">${rich(b.what)}</p>
+  </div>
+  <dl class="facts">
+    <dt>You need</dt><dd>${rich(b.need)}</dd>
+    <dt>Time</dt><dd>${rich(b.time)}</dd>
+    <dt>Done when</dt><dd>${rich(b.done)}</dd>
+    ${b.unlocks ? `<dt>Unlocks</dt><dd>${rich(b.unlocks)}</dd>` : ""}
+  </dl>
+  ${diagram(b.diagram, diagrams)}
+  <ol class="short">
+    ${(rb.steps ?? [])
+      .map((s, i) =>
+        s.id && struck.has(s.id)
+          ? `<li class="struck"><s>${rich(s.short ?? s.do)}</s> <span class="machine-done">done by the machine</span></li>`
+          : `<li><label class="do"><input type="checkbox" data-step="${attr(check.id)}:${i}"><span>${rich(s.short ?? s.do)}</span></label></li>`,
+      )
+      .join("\n    ")}
+  </ol>
+  <details class="more">
+    <summary>Full instructions — setup, what you should see at each step, and why</summary>
+    ${fullBody(check, { capture: false, checkboxes: false })}
+  </details>
+</article>`;
+}
+
+function fullCard(check, { capture = false } = {}) {
   const rb = check.runbook ?? {};
   const done = check.status === "done";
   const blocked = (rb.needs ?? []).some((n) => /not runnable yet/i.test(n));
-  const { ran, struck } = struckSteps(check);
 
   return `<article class="card${done ? " is-done" : ""}" id="${attr(check.id)}">
   <div class="head">
@@ -136,7 +190,15 @@ export function card(check, { capture = false } = {}) {
     }${check.staleAfterDays ? ` · repeats every ${check.staleAfterDays} days` : ""}</p>
   </div>
 
-  <p class="why">${rich(check.why)}</p>
+  ${fullBody(check, { capture, checkboxes: true })}
+</article>`;
+}
+
+function fullBody(check, { capture = false, checkboxes = true } = {}) {
+  const rb = check.runbook ?? {};
+  const done = check.status === "done";
+  const { ran, struck } = struckSteps(check);
+  return `  <p class="why">${rich(check.why)}</p>
   ${
     done
       ? `<p class="verdict"><b>Verdict ${attr(check.verifiedOn ?? "")}:</b> ${rich(check.result ?? "")}</p>`
@@ -175,9 +237,13 @@ export function card(check, { capture = false } = {}) {
         <p class="expect">Done by <code>${attr(check.evidence.run)}</code> on ${attr(ran.ranAt.slice(0, 10))}. Skip it.</p>
       </li>`
             : `<li${capture ? ` data-step-li="${attr(s.id ?? i)}"` : ""}>
-        <label class="do"><input type="checkbox" data-step="${attr(check.id)}:${i}"${
-          capture ? ` data-step-id="${attr(s.id ?? "")}" data-step-index="${i}" data-step-do="${attr(s.do)}"` : ""
-        }><span>${rich(s.do)}</span></label>
+        ${
+          checkboxes
+            ? `<label class="do"><input type="checkbox" data-step="${attr(check.id)}:${i}"${
+                capture ? ` data-step-id="${attr(s.id ?? "")}" data-step-index="${i}" data-step-do="${attr(s.do)}"` : ""
+              }><span>${rich(s.do)}</span></label>`
+            : `<p class="do">${rich(s.do)}</p>`
+        }
         <p class="expect">${rich(s.expect)}</p>
         ${shot(s.shot)}
         ${s.why ? `<p class="why">${rich(s.why)}</p>` : ""}
@@ -199,7 +265,7 @@ export function card(check, { capture = false } = {}) {
     <ul class="tunes">${(check.tunes ?? []).map((t) => `<li>${rich(t)}</li>`).join("")}</ul>
     ${check.record ? `<p class="expect">Written up in ${rich(check.record)}</p>` : ""}
   </section>
-</article>`;
+`;
 }
 
 /**
@@ -218,6 +284,96 @@ function note(checkId, stepKey) {
             placeholder="what actually happened, in your words"></textarea>
         </div>`;
 }
+
+/* ── the whole guide ───────────────────────────────────────────────────── */
+
+/**
+ * What is left, as a short list and one picture; then a card per check; then
+ * the finished ones, folded into a single list at the end. The finished checks
+ * used to be full cards between the open ones, which is most of how the page
+ * reached 166 KB.
+ */
+export function guidePage(checks, hash, diagrams) {
+  const left = checks.filter(needsRunbook);
+  const rest = checks.filter((c) => c.status === "pending" && !needsRunbook(c));
+  const finished = checks.filter((c) => c.status === "done");
+  const short = (c) => c.brief ?? { ask: c.title, time: "", need: "" };
+  return `<!doctype html>
+<html lang="en" data-ledger-hash="${hash}">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="dark">
+<title>Hifth — checks only a person can do</title>
+<style>${CSS}</style>
+</head>
+<body>
+<header class="top">
+  <p class="kicker">Hifth · field guide</p>
+  <h1>What only a person can check</h1>
+  <p class="lede">${left.length} left. Tap one to see what to do; each has its full instructions folded underneath.</p>
+  <ol class="index">
+    ${left
+      .map(
+        (c) => `<li><a href="#${attr(c.id)}">${rich(short(c).ask)}</a><span>${rich(
+          [short(c).time, short(c).need].filter(Boolean).join(" · "),
+        )}</span></li>`,
+      )
+      .join("\n    ")}
+  </ol>
+  ${diagram(overviewDiagram(checks), diagrams, "What each check unlocks, and which comes first.")}
+</header>
+
+<main>
+${left.map((c) => card(c, { diagrams })).join("\n")}
+${rest.map((c) => card(c, { diagrams })).join("\n")}
+<details class="finished">
+  <summary>Already done (${finished.length})</summary>
+  <ul>
+    ${finished
+      .map(
+        (c) =>
+          `<li><b>${rich(c.brief?.ask ?? c.title)}</b> <span class="when">${attr(c.verifiedOn ?? "")}</span><br>${rich(
+            c.result ?? "",
+          )}</li>`,
+      )
+      .join("\n    ")}
+  </ul>
+</details>
+</main>
+
+<footer class="foot">
+  <p>Finished one? On the laptop: <code>make record CHECK=&lt;id&gt; RESULT='…'</code>. To save your answers as you
+  go instead: <code>make session CHECK=&lt;id&gt;</code>.</p>
+  <p class="src">Built from <code>docs/validation/ledger.json</code> · <code>${hash}</code> · do not edit — run
+  <code>make guide</code></p>
+</footer>
+
+<script>${GUIDE_JS}</script>
+</body>
+</html>
+`;
+}
+
+// Progress survives a screen lock, which a fifteen-minute walkthrough on a
+// phone will hit at least once. Keyed by check + index only, so regenerating
+// the guide does not wipe a session in progress. A tick here is a bookmark, not
+// evidence; evidence is what `make session` writes, to a file, with a time.
+const GUIDE_JS = `
+(function () {
+  var KEY = "hifth-guide:";
+  document.querySelectorAll("input[data-step]").forEach(function (box) {
+    var k = KEY + box.dataset.step;
+    try { if (localStorage.getItem(k) === "1") box.checked = true; } catch (e) {}
+    box.addEventListener("change", function () {
+      try {
+        if (box.checked) localStorage.setItem(k, "1");
+        else localStorage.removeItem(k);
+      } catch (e) {}
+    });
+  });
+})();
+`;
 
 /* ── the look ──────────────────────────────────────────────────────────── */
 //
@@ -336,6 +492,37 @@ li.struck s { text-decoration-color: var(--green); }
 li.struck .expect::before { content: "machine "; color: var(--green); }
 
 .record { border-top: 1px solid var(--line); padding-top: 18px; }
+
+/* The short version: what a reader sees first. */
+ol.index { margin: 18px 0 0; padding-left: 1.3em; }
+ol.index li { margin: 0 0 10px; }
+ol.index li::marker { color: var(--amber); font-family: var(--mono); font-size: 14px; }
+ol.index a { color: var(--text); text-decoration-color: var(--line); text-underline-offset: 3px; }
+ol.index span { display: block; color: var(--dim); font-size: 14px; }
+.what { margin: 8px 0 0; color: var(--dim); font-size: 16px; }
+dl.facts { display: grid; grid-template-columns: max-content 1fr; gap: 6px 14px; margin: 16px 0; font-size: 15px; }
+dl.facts dt { font: 600 11px/1.9 var(--mono); letter-spacing: .12em; text-transform: uppercase; color: var(--amber); }
+dl.facts dd { margin: 0; }
+ol.short { margin: 0 0 8px; padding-left: 1.4em; }
+ol.short > li { margin: 0 0 4px; }
+ol.short > li::marker { color: var(--amber); font-family: var(--mono); font-size: 14px; }
+.machine-done { font: 600 11px/1 var(--mono); color: var(--green); text-transform: uppercase; letter-spacing: .1em; }
+p.do { margin: 0; }
+details.more, details.finished { margin: 14px 0 18px; }
+details.more > summary, details.finished > summary { cursor: pointer; min-height: 44px; display: flex;
+  align-items: center; gap: 10px; color: var(--dim); font-size: 15px; list-style: none; }
+details.more > summary { border: 1px solid var(--line); border-radius: 8px; padding: 8px 12px; }
+details.more > summary::-webkit-details-marker, details.finished > summary::-webkit-details-marker { display: none; }
+details.more > summary::before, details.finished > summary::before { content: "▸"; color: var(--amber);
+  transition: transform .15s; }
+details[open].more > summary::before, details[open].finished > summary::before { transform: rotate(90deg); }
+details.finished { max-width: 44rem; padding: 6px 18px; background: var(--raised);
+  border: 1px solid var(--line); border-radius: 14px; }
+details.finished li { margin: 0 0 14px; font-size: 15px; color: var(--dim); }
+details.finished .when { font: 12px var(--mono); }
+figure.diagram { margin: 18px 0; }
+figure.diagram svg { display: block; max-width: 100%; height: auto; margin: 0 auto; }
+figure.diagram figcaption { margin-top: 6px; font-size: 13px; color: var(--dim); text-align: center; }
 .foot { max-width: 44rem; margin: 0 auto; padding: 8px 0 48px; color: var(--dim); font-size: 15px; }
 
 @media (min-width: 46rem) { body { padding: 0 24px; } .card { padding: 26px 26px 10px; } }
