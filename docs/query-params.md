@@ -75,6 +75,32 @@ normalises to the literal form on the way out. Ranges never cross surahs.
 Unknown keys are ignored, always. A link that has picked up an analytics
 parameter on its way through a chat client still opens the ayah.
 
+## Examples — links you can copy
+
+Each of these is run through the app's own link reader on every commit, so the
+middle column is what the app actually does, not what we hope it does. *opens*
+means the app opens it and writes the same address back; *opens as* shows the
+address it settles on; *refuses* means it opens on its own default view instead.
+Put any of them after `https://blog.bytesofpurpose.com/hifth/` (the live app)
+or `http://localhost:5173/` (a laptop running it).
+
+| Link | The app | What you see |
+| --- | --- | --- |
+| `#/hafs-kfqc/2:48` | opens | Al-Baqarah 2:48, selected |
+| `#/hafs-kfqc/2:47-2:48` | opens | 2:47 to 2:48 highlighted |
+| `#/hafs-kfqc/2:47-48` | opens as `#/hafs-kfqc/2:47-2:48` | the same range, from an older link |
+| `#/hafs-kfqc/p7` | opens | page 7, nothing selected |
+| `#/hafs-kfqc/2:255?w=3-7` | opens | 2:255 with words 3 to 7 pulsing |
+| `#/hafs-kfqc/2:255?w=abc` | refuses | the app's default view |
+| `#/hafs-kfqc/2:255?w=3-7&skin=tajweed` | opens | the same, in tajweed colours |
+| `#/hafs-kfqc/p7?field=dark` | opens | page 7 on the night desk |
+| `#/hafs-kfqc/2:48?field=neon` | opens as `#/hafs-kfqc/2:48` | 2:48 on the default desk |
+| `#/hafs-kfqc/2:123?via=2:48` | opens | 2:123, with a way back to 2:48 |
+| `#/hafs-kfqc/2:123?trail=2:40,2:47,2:122` | opens | 2:123, with the three hops that led there |
+| `#/hafs-kfqc/p1?open=record` | opens | page 1 with the revision record open |
+| `#/hafs-kfqc/p1?open=shelf` | opens | the record at juz scope, where juz are saved for offline |
+| `#/hafs-kfqc/2:48?open=nope` | opens as `#/hafs-kfqc/2:48` | 2:48, no panel |
+
 `open` is the one key the app reads and then lets go of: once the panel is up,
 the address goes back to naming the view, so closing the panel and sharing the
 page does not send the next person a panel they did not ask for.
@@ -97,6 +123,20 @@ background colour has the trade exactly backwards, so an unreadable `field=`
 is dropped and the rest of the link stands. The reasoning is written at length in
 `packages/core/src/field.ts`, and both halves of the rule are tested in
 `router.test.ts` — that a bad `w` refuses, and that a bad `field` does not.
+
+## Settings before the `#`
+
+One setting sits before the `#`, in the part of the address a server does see.
+It is about the device, not the verse, which is why it is not in the link a
+reader shares: it changes how the app is laid out while someone tries two
+layouts side by side, and says nothing about what they are reading.
+
+| Setting | Shape | What it does | If the value is wrong |
+| --- | --- | --- | --- |
+| `phonebar` | `a` or `b` | Picks which of the two phone toolbars to show, for comparing them | Ignored; the usual toolbar shows |
+
+Example: `http://localhost:5173/?phonebar=b#/hafs-kfqc/p1`. `gate:params` finds
+every setting the app reads this way and refuses one that is not listed here.
 
 ## The fields
 
