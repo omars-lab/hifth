@@ -525,18 +525,16 @@ export interface PageStageHandle {
    * drives the one stage that owns turning through these three verbs, one per
    * phase of the drag.
    *
-   * The grab is a **trigger, not a track**. It deliberately does not run the
-   * swipe path's finger-locked band across the spread: that band is a thin
-   * fore-edge strip built to *sweep* a leaf in a couple of hundred milliseconds,
-   * and dragging it slowly instead — 1:1 with a hand at the book's edge — draws
-   * a bar creeping over a spread whose two pages have not changed yet, which
-   * reads as a stuck line on one page rather than a page turning (see the
-   * desktop-turn decision, and #11: a faithful drag-to-peel that reveals the
-   * destination *opening* has to drive both leaves at once, which is a larger
-   * rework). Until that lands, the grab measures the drag and, on release, hands
-   * a committed turn to the ordinary animated turn — the same flip a wheel or an
-   * arrow key plays — so what the reader sees is a real transition, never a
-   * half-dragged band.
+   * The stage does not draw the drag. It deliberately does not run the swipe
+   * path's finger-locked band across the spread: that band is a thin fore-edge
+   * strip built to *sweep* a leaf in a couple of hundred milliseconds, and
+   * dragged slowly it reads as a stuck line on a spread whose pages have not
+   * changed. The rails draw a lifted corner instead (#189, `peel.ts`): the next
+   * opening shows beneath it and the drawn words never move. On release the
+   * stage only rules whether the drag committed; the rails carry the corner over
+   * and call {@link PageStageHandle.finishEdgeTurn}, which lands without a
+   * band. Where no peel is drawn (reduced motion, no page to show beneath), a
+   * committed grab plays the ordinary animated turn, as a wheel or arrow does.
    *
    * `step` is +1 forward / −1 back, and it is fixed by *which edge* was grabbed,
    * not by the drag: the outer edge of the later leaf pulls forward, the outer
@@ -547,15 +545,18 @@ export interface PageStageHandle {
    */
   beginEdgeTurn: (step: 1 | -1) => void;
   /**
-   * A frame of the grab moved. The drag's distance is what the commit rule reads
-   * on release, so nothing has to be done per-frame yet — the method is kept so
-   * the rails have one verb per phase and so a later peel can hang tracking here
-   * without the rails changing. The cursor's grabbing state is the drag's only
-   * feedback for now.
+   * A frame of the grab moved. The rails draw the peel themselves, so the stage
+   * does nothing per-frame; the verb keeps one call per phase of the drag.
    */
   trackEdgeTurn: (dx: number) => void;
-  /** The grab came up: if the drag committed, play the turn; otherwise nothing. */
-  releaseEdgeTurn: (dx: number, velocityX: number) => void;
+  /**
+   * The grab came up. Returns whether the drag committed. When `held` — the
+   * rails are drawing a peel and will carry it over — a committed drag plays
+   * nothing here; otherwise it plays the ordinary animated turn.
+   */
+  releaseEdgeTurn: (dx: number, velocityX: number, held?: boolean) => boolean;
+  /** The peel has laid the leaf down: turn to the new opening without a band. */
+  finishEdgeTurn: (step: 1 | -1) => void;
 }
 
 /** The three states of a fold that is actually drawn; `"none"` draws nothing. */
@@ -833,12 +834,18 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
   coverTopRef.current = coverTop;
   /*
    * The step an edge grab latched, held between the grab going down and coming
-   * up. The desktop edge grab is a trigger, not a tracked band (see the edge
-   * verbs on the handle): begin latches which way the grabbed edge turns, and
-   * release asks the commit rule whether the drag earned it. Null whenever no
+   * up (see the edge verbs on the handle): begin latches which way the grabbed
+   * edge turns, and release asks the commit rule whether the drag earned it. Null whenever no
    * edge is being held.
    */
   const edgeStepRef = useRef<1 | -1 | null>(null);
+  /*
+   * The next turn was already shown by hand: the peel carried the corner all
+   * the way over (EdgeGrabRails), so the pages underneath are on screen and a
+   * band sweeping across them now would play the turn a second time. Read and
+   * cleared by the one turn that follows.
+   */
+  const quietTurnRef = useRef(false);
   /*
    * The turn the finger is currently holding open (`page-transition.md` §3.2,
    * `tracking`). Null whenever no drag has latched `"turn"`.
@@ -1711,9 +1718,11 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
       const fadeMs = durationMs("--dur-fast", 120);
       const gen = (turnRef.current += 1);
       const mine = (): boolean => turnRef.current === gen;
+      const quiet = quietTurnRef.current;
+      quietTurnRef.current = false;
 
       /*
-       * When nothing is drawn at all, and the three reasons are different:
+       * When nothing is drawn at all, and the four reasons are different:
        *
        *  - `"none"` — not a turn. The caller got the pair wrong; land plainly.
        *  - a zero duration — `prefers-reduced-motion`. §5.1: not inserted-and-
@@ -1725,9 +1734,12 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
        *    on screen and neither changed; the only thing that moves is which
        *    leaf is live. Animating a leaf that did not turn is the failure, and
        *    the crease between them is already drawn, permanently, by the gutter.
+       *  - a quiet turn — the reader has just carried the corner over by hand
+       *    (the peel), so the new opening is already showing; a band now would
+       *    play the same turn twice.
        */
       const drawn =
-        kind !== "none" && sweepMs > 0 && !(kind === "crease" && foldTargetRef.current?.current);
+        !quiet && kind !== "none" && sweepMs > 0 && !(kind === "crease" && foldTargetRef.current?.current);
       if (!drawn) {
         const mp = await ensurePage(next);
         if (!mine()) return false;
@@ -2105,14 +2117,13 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
         edgeStepRef.current = step;
       },
       trackEdgeTurn() {
-        // Nothing per-frame: release reads the drag distance, and the grabbing
-        // cursor is the only feedback the trigger owes a slow pull. A future
-        // peel (#11) hangs here.
+        // Nothing per-frame here: the peel is drawn by the rails, which hold the
+        // pointer, and the commit rule only needs the distance at release.
       },
-      releaseEdgeTurn(dx, velocityX) {
+      releaseEdgeTurn(dx, velocityX, held = false) {
         const step = edgeStepRef.current;
         edgeStepRef.current = null;
-        if (step === null) return;
+        if (step === null) return false;
         // The same commit rule the swipe and the wheel use, so a grab, a flick
         // and a spun wheel all agree on what counts as a turn. A drag that did
         // not reach the threshold — or reversed past it — leaves `verdict` off
@@ -2120,11 +2131,22 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
         // nothing animates, the reader stays where they were.
         const stageWidth = fitRef.current?.stageWidth ?? stageRef.current?.clientWidth ?? 0;
         const verdict = turnCommit({ dx, velocityX, stageWidth });
-        if (verdict !== step) return;
-        // Hand the committed turn to the ordinary animated turn — the same flip
+        if (verdict !== step) return false;
+        // The peel is showing the turn: it carries the corner over itself and
+        // then calls `finishEdgeTurn`, so nothing is played from here.
+        if (held) return true;
+        // No peel (reduced motion, or no page beneath to show): hand the
+        // committed turn to the ordinary animated turn — the same flip
         // a wheel or arrow key plays (App → turnTo → runTurn). No band was ever
         // drawn during the drag, so this is the reader's first and only sight of
         // the turn, and it is a real one.
+        onTurnRef.current?.(step);
+        return true;
+      },
+      finishEdgeTurn(step) {
+        // The peel has laid the leaf down; land on the new opening without a
+        // band, since the reader has just watched the turn happen by hand.
+        quietTurnRef.current = true;
         onTurnRef.current?.(step);
       },
     }),
