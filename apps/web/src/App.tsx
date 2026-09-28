@@ -53,6 +53,7 @@ import {
   type RootIndexShard,
   type SkinId,
   spreadOf,
+  openingAfter,
   type TajweedShard,
   type TajweedVocabulary,
 } from "@hifth/core";
@@ -1279,6 +1280,9 @@ export function App(): JSX.Element {
       // From the destination, so a held arrow walks the book rather than
       // bouncing off the page that has not finished turning yet.
       const here = pendingPageRef.current;
+      // With two pages open a turn moves a whole opening: one page from 5 is 6,
+      // already open beside it, so the turn would play and change nothing.
+      if (bookOpenRef.current) return openingAfter(here, step, pages);
       const at = pages.indexOf(here);
       const i = at === -1 ? 0 : Math.min(pages.length - 1, Math.max(0, at + step));
       const next = pages[i]!;
@@ -1302,7 +1306,8 @@ export function App(): JSX.Element {
         announce(step > 0 ? t.lastPage(here) : t.firstPage(here));
         return;
       }
-      goToPage(next, next === here + step ? undefined : t.nearestPageN(next), true);
+      const nextDoor = bookOpenRef.current ? (here % 2 === 0 ? here - 1 : here) + 2 * step : here + step;
+      goToPage(next, next === nextDoor ? undefined : t.nearestPageN(next), true);
     },
     [pageAfter, pageTurns, announce, t, goToPage],
   );

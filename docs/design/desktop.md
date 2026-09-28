@@ -485,7 +485,8 @@ level the stage says it applied rather than the one that was asked for.
   panel would compete with the mus'haf (§1).
 - **A second column of ayah metadata.** Hifth has no reader features by design (PLAN,
   app identity). Room is not a reason to acquire them.
-- **A "turn the leaf" two-page step.** Decided against at Loop 4b — §8 ①. It is a
+- **A "turn the leaf" two-page step.** Decided against at Loop 4b — §8 ① — and reversed
+  by the owner on 2026-09-28; see there. The paragraph below is kept as the record. It is a
   refusal now, not an omission and no longer a question: both pages of an opening are
   already in front of the reader, so a ±2 step would turn a leaf to reveal something they
   can already see.
@@ -678,6 +679,23 @@ header advertises"* presses ArrowLeft on page 7 and requires the header to read 
 holds the other half: the step commits and no fold is swept for it. Both rows exist already;
 naming them here is the point of a `closedBy` — a decision whose only evidence is prose is a
 decision that gets quietly reversed.
+
+**Reversed by the owner, 2026-09-28: with two pages open, a turn moves a whole opening.** In
+their demo walk in Firefox the arrows "need to be clicked twice, and every second click
+flashes without doing anything". The "paper is right to sit still" reasoning above is what
+a reader actually felt as a dead key: from page 7 the press made 8 current, and 8 was already
+open beside it. So the arrow, the wheel, the ◂ ▸ buttons and the corner pull all go to the
+next opening's right-hand page (7 → 9, 8 → 9, back to 5). The four grounds, answered:
+① the "not the page next door" line compares against the next opening, so it still speaks
+only when a page is missing; ② the reader still reaches any page by the jumper or a tap, and
+on an open book both pages are in view anyway; ③ all inputs move the same distance, and a
+single leaf turning *is* one opening's move; ④ the key map is unchanged at ±1 — the app
+decides what one step means when the book is open. One page at a time is unchanged on a
+phone. The helper is `openingAfter` in core's pages module; the rows are *"each arrow press
+and each corner pull turns a whole opening"* (edge-peel spec, both browsers) and the
+reworked desktop rows. The row *"a turn inside one opening draws no band"* is gone: no turn
+stays inside an opening any more, and a link to the facing page plays no turn at all, so it
+could only pass.
 
 ### ② Should the two leaves pan and zoom together? · **fixed**
 

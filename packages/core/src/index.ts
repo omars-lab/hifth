@@ -356,6 +356,7 @@ export {
   pageFraction,
   pageRuns,
   spreadOf,
+  openingAfter,
   leafSideOf,
   foldBetween,
   type PageRun,
