@@ -196,6 +196,27 @@ describe("router · a tool in hand on arrival (?tool=)", () => {
   });
 });
 
+describe("router · one page or two on arrival (?view=)", () => {
+  it("reads and writes both layouts", () => {
+    for (const v of ["one", "two"] as const) {
+      const s = parseHash(`#/hafs-kfqc/2:47?view=${v}`);
+      expect(s?.view, v).toBe(v);
+      expect(serializeState(s!)).toBe(`#/hafs-kfqc/2:47?view=${v}`);
+    }
+  });
+
+  it("an unknown layout still opens the verse", () => {
+    const s = parseHash("#/hafs-kfqc/2:47?view=three");
+    expect(s?.select).toEqual({ surah: 2, ayah: 47 });
+    expect(s?.view).toBeUndefined();
+  });
+
+  it("sits before the tool and the panel", () => {
+    const s = parseHash("#/hafs-kfqc/p7?open=jump&tool=note&view=one");
+    expect(serializeState(s!)).toBe("#/hafs-kfqc/p7?view=one&tool=note&open=jump");
+  });
+});
+
 describe("router · key helpers", () => {
   it("refToKey builds the canonical spec-§1 key", () => {
     expect(refToKey(ED, { surah: 2, ayah: 48 })).toBe("quran/hafs-kfqc/2:48");
@@ -233,8 +254,10 @@ describe("router · round-trip (generative sweep)", () => {
 
     const opens: (AppState["open"])[] = [undefined, "shelf"];
     const tools: (AppState["tool"])[] = [undefined, "harakat"];
+    const views: (AppState["view"])[] = [undefined, "one"];
 
     let count = 0;
+    for (const view of views)
     for (const tool of tools)
     for (const open of opens)
     for (const select of selects)
@@ -251,6 +274,7 @@ describe("router · round-trip (generative sweep)", () => {
                   ...(field ? { field } : {}),
                   ...(via ? { via } : {}),
                   ...(trail ? { trail } : {}),
+                  ...(view ? { view } : {}),
                   ...(tool ? { tool } : {}),
                   ...(open ? { open } : {}),
                 };
@@ -259,7 +283,7 @@ describe("router · round-trip (generative sweep)", () => {
                 count++;
               }
     expect(count).toBe(
-      tools.length * opens.length * selects.length * words.length * skins.length * fields.length * vias.length * trails.length,
+      views.length * tools.length * opens.length * selects.length * words.length * skins.length * fields.length * vias.length * trails.length,
     );
   });
 

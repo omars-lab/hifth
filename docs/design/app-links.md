@@ -113,7 +113,7 @@ Ranked by how many test lines and guide steps each would replace:
 | 1 | `?open=jump\|about\|record\|key\|editions\|tips\|shelf` — **built 2026-09-28** | one panel open on arrival | 93 test lines in at least 6 files; 2 guide steps (record, shelf) |
 | 2 | `?tool=read\|select\|highlight\|bookmark\|note\|harakat\|word\|mistake\|crop` — **built 2026-09-28** | that tool in hand | 31 test lines in at least 6 files |
 | 3 | `?open=lookalikes\|roots` (needs a verse in the place) — **built 2026-09-28**, as two more values of `open` rather than a new `sheet` key: one key for "what is open on arrival". The verse's drawer needed nothing, since a verse link already raises it | the selected verse's look-alike list or roots | 24 lines in 5+ files; the screen reader step |
-| 4 | `?view=one\|two` and `?bar=page\|juz` | page layout and page-bar scale | 5+ lines in 4 files |
+| 4 | `?view=one\|two` — **built 2026-09-28**. `?bar=` was dropped: the page bar has no juz scale; the juz / hizb / page switch belongs to the revision record, which `open=record` and `open=shelf` already reach | one page or the two-page spread on a computer | 5+ lines in 4 files |
 | 5 | `?lang=en\|ar` | the chrome language for this visit only, not saved | 6 lines in 2 files |
 
 Notes on each:
