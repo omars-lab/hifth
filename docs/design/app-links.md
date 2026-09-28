@@ -184,6 +184,18 @@ checks both — checks 1 and 2 below, in `gate:params`, not a new `links-check`.
 would have been a second place to keep in step. Check 3 waits for `docs/links.json`, which comes
 with the tests that open the app by name.
 
+**And the tests' list (2026-09-28): in the tests, not in `docs/`.** A link the tests use needs
+more than an address: it needs the thing on screen that proves it opened, and that is a test
+locator, not data. So the named list is `apps/web/e2e/links.ts` — each name, its address, and
+what it shows — and `gotoLink(page, name)` opens it and waits for that. A browser test,
+`guide-links.spec.ts`, reads every link the checks guide gives and fails if one is not in the
+list or does not open what the list says; so a guide link and a test link cannot drift apart.
+Tests about a button (the chip that opens the look-alike list, the settings button that shows
+the tips) still click it; tests that only need the panel open start from its link. Opens that
+happen partway through a reader's flow (after a reload, a pin, going offline) stay clicks,
+because a link would reload the page and change what the test checks. `docs/links.json` is not
+needed.
+
 ### How does it stay in step with the code?
 
 The router stays the code that reads links; the list does not generate it (a working reader
