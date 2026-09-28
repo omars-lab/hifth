@@ -158,6 +158,21 @@ setting we can toggle".
 of the three. What changes is only how the turn feels under the thumb, and that is now the
 reader's choice rather than ours.
 
+### What happens when a reader holds a page by its corner? (added 2026-09-28)
+
+On a computer, a reader can now pick a page up by its outer corner and hold it: the
+corner follows the mouse, and the next two pages show underneath while it is still held.
+Let go far enough and the page goes over; let go early and it falls back. (Owner, in the
+2026-09-28 demo walk: dragging the corner did nothing until the mouse came up.)
+
+The held corner keeps this decision. The page underneath is uncovered, not moved. The
+paper in the hand follows the reader's turn style: plain paper under the flat seam, grey
+lines where the words will be under the skeleton curl, and no paper at all under the shadow
+lift, only a shadow where the corner comes up. The real words on the back of the page
+appear only once it lies flat. So no drawn letter moves while the page is held, in any of
+the three. A reader who has asked their device for less motion gets no held corner, only
+the ordinary turn when they let go.
+
 ## When it is decided (as written before the choice)
 
 

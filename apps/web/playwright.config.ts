@@ -208,7 +208,7 @@ export default defineConfig({
           // and word tools, which live on the desktop-only tools bar. `crop`
           // runs here and on the phones: it is the one tool test for both. So does
           // `open-link`: a link that opens a panel is opened on both.
-          testMatch: /(desktop|stage-fit|spread-fit|detent-live|pagebar-detents|pagebar-fisheye|notes|mistakes|sign-tools|crop|open-link)\.spec\.ts/,
+          testMatch: /(desktop|edge-peel|stage-fit|spread-fit|detent-live|pagebar-detents|pagebar-fisheye|notes|mistakes|sign-tools|crop|open-link)\.spec\.ts/,
           use: {
             browserName: "chromium",
             viewport: { width: 1440, height: 900 },
@@ -221,7 +221,7 @@ export default defineConfig({
           // pages shrunk inside it or not drawn at all (2026-09-28). One small
           // file, so the whole desktop suite does not have to pass twice.
           name: "desktop-firefox",
-          testMatch: /spread-fit\.spec\.ts/,
+          testMatch: /(spread-fit|edge-peel)\.spec\.ts/,
           use: {
             browserName: "firefox",
             viewport: { width: 1440, height: 900 },
@@ -230,12 +230,12 @@ export default defineConfig({
         {
           name: "iphone",
           use: { ...devices["iPhone 13"] },
-          testIgnore: /(golden|shots|desktop|spread-fit|detent-live|pagebar-detents|pagebar-fisheye|notes|mistakes|sign-tools|pitch)\.spec\.ts/,
+          testIgnore: /(golden|shots|desktop|edge-peel|spread-fit|detent-live|pagebar-detents|pagebar-fisheye|notes|mistakes|sign-tools|pitch)\.spec\.ts/,
         },
         {
           name: "android",
           use: { ...devices["Pixel 7"] },
-          testIgnore: /(golden|shots|desktop|spread-fit|detent-live|pagebar-detents|pagebar-fisheye|notes|mistakes|sign-tools|pitch)\.spec\.ts/,
+          testIgnore: /(golden|shots|desktop|edge-peel|spread-fit|detent-live|pagebar-detents|pagebar-fisheye|notes|mistakes|sign-tools|pitch)\.spec\.ts/,
         },
         {
           // The golden-image project. Its viewport is spelled out rather than

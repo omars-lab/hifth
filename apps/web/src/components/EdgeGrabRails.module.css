@@ -58,6 +58,81 @@
   opacity: 0;
 }
 
+/*
+ * The lifted corner (#189). A layer the size of the book, over both leaves and
+ * under nothing a hand touches. Every drawn piece is cut by a clip-path the
+ * component computes (peel.ts); the pages are pictures, so the live page
+ * drawing underneath is never moved.
+ */
+.peel {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+  --peel-fold: rgba(60, 40, 10, 0.2);
+  --peel-cast: rgba(40, 25, 0, 0.2);
+  --peel-shadow: drop-shadow(0 0 6px rgba(40, 25, 0, 0.22));
+}
+
+.peel[data-style="curl"] {
+  --peel-fold: rgba(60, 40, 10, 0.3);
+}
+
+/* The shadow lift has no flap: the shadow is the whole of what comes up. */
+.peel[data-style="lift"] {
+  --peel-cast: rgba(40, 25, 0, 0.42);
+}
+
+.beneath,
+.cast,
+.flapShadow,
+.flap,
+.sheen {
+  position: absolute;
+  inset: 0;
+}
+
+.flapShadow {
+  filter: var(--peel-shadow);
+}
+
+.flap {
+  transform-origin: 0 0;
+}
+
+/* The page as the leaf draws it: the art has no background of its own, so the
+   paper is laid under it here, the same paper the stage uses. */
+.page,
+.face {
+  position: absolute;
+  display: block;
+  background: var(--paper-raised);
+}
+
+/* The skeleton curl's face — the same grey lines its full turn carries
+   (PageStage.module.css, `.leafFace`), where words will be, never a glyph. */
+.skeleton {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-evenly;
+  padding: 6% 7%;
+}
+
+.skeleton i {
+  display: block;
+  height: 0.9%;
+  border-radius: 2px;
+  background: var(--hairline);
+  opacity: 0.85;
+}
+
+.skeleton i:nth-child(3n) { width: 78%; }
+.skeleton i:nth-child(3n + 1) { width: 94%; }
+.skeleton i:nth-child(3n + 2) { width: 86%; }
+.skeleton i:nth-child(7n) { width: 62%; }
+
 /* A reader who has turned off motion still gets the hand and the turn; the only
    thing dropped is the fade-in, which appears at once instead. */
 @media (prefers-reduced-motion: reduce) {
