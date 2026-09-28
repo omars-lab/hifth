@@ -514,7 +514,7 @@ attribution and no technological-measures clause. The current source is CC BY 3.
 register with its options drawn — the numbers agree, so the choice is about trusting a
 compiler's dedication versus a named project's licence.
 
-### ⑦ Whether to compute the adjacency word ranges from the print instead · **open**
+### ⑦ Whether to compute the adjacency word ranges from the print instead · **fixed**
 
 If the shared runs were computed over the print's own words rather than the morphology's,
 the adjacency tree would stop being a copyleft derivative and the index-conversion step
@@ -555,6 +555,14 @@ both grammars agree the join is the grammatical reading, and the print's separat
 its own long-standing typographic convention. Adopting it for the neighbour rail is a licence
 choice made knowing the print is the measured outlier, which is the honest frame for the owner's
 decision — not "the print is right and the corpus is wrong".
+
+*Closed 2026-09-26, by the decision `adjacency-span-source` = D.* The runs are now counted in the
+print's own words, with each lone "and" glued back onto the word after it — which gives the same
+phrases the corpus gave, without its licence. The corpus no longer feeds the look-alike data at
+all. The test that would fail if it came back is `packages/etl/scripts/lib/print-words.test.mjs`;
+the reasons are in [the decision record](../decisions/adjacency-span-source.md). This row still
+said *open* for two days after the ruling, so the issue check now refuses an open item that is
+waiting on a decision already made.
 
 ### ⑧ Whether the tajweed spans should move to a pause-aware engine · **open**
 
