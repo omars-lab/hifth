@@ -113,7 +113,11 @@
             "expect": "The mushaf page as normal, plus a dark slab pinned across the top reading «قياس الأداء على هذا الجهاز — ١٥ ثانية» with an ابدأ button. No slab means you are on an ordinary build — something else is already serving port 4173; stop it and re-run make phone-perf.",
             "why": "Confirms you are measuring the build that has the probe in it. An ordinary build looks completely normal, which is exactly how you would not notice — and every number below would then be a measurement of the wrong thing.",
             "shot": "probe-idle",
-            "short": "Open the link the laptop prints. A dark bar with a start button sits across the top."
+            "short": "Open the link the laptop prints. A dark bar with a start button sits across the top.",
+            "noLink": {
+              "why": "The speed test is a separate build that only this laptop serves, kept off the live site on purpose; make phone-perf prints its address.",
+              "add": "None needed — the laptop prints the address."
+            }
           },
           {
             "do": "Tap ابدأ.",
@@ -209,7 +213,11 @@
             "why": "The one thing no linter can check. axe proves a label exists and the snapshot proves it has not changed; only an ear can tell you the phrase is one a person would use, and only a real voice engine tells you how Arabic-Indic digits actually come out.",
             "shot": "ayah-selected",
             "id": "judge-the-phrasing",
-            "short": "Listen to three or four verse names read aloud. Do they sound like something you would say, with the numbers read properly?"
+            "short": "Listen to three or four verse names read aloud. Do they sound like something you would say, with the numbers read properly?",
+            "open": {
+              "path": "#/hafs-kfqc/2:48",
+              "look": "Swipe into the page; each verse name is read aloud."
+            }
           },
           {
             "do": "Double-tap an ayah with hops, open a rail chip, and try to escape the sheet: swipe past the last item, and swipe backwards past the first. Then hop to a target and immediately swipe once.",
@@ -217,7 +225,11 @@
             "why": "Focus containment and focus survival across a page change are the two failures that make hopping unusable without sight, and neither is visible to a runner: the tree is correct in both the working and the broken case. The sheet's own contents — «إغلاق», «انتقل إلى …» — are pinned in e2e/__aria__/*/hop-popover.aria.yml and are not what you are checking here.",
             "shot": "hop-popover",
             "id": "escape-the-sheet",
-            "short": "Open a verse's look-alike list and swipe past both ends: you stay inside it. Jump, then swipe once: you land on the new page."
+            "short": "Open a verse's look-alike list and swipe past both ends: you stay inside it. Jump, then swipe once: you land on the new page.",
+            "noLink": {
+              "why": "the app cannot yet be opened with a verse's look-alike list already showing.",
+              "add": "A link that opens the list already showing (see the app links design)."
+            }
           },
           {
             "do": "Now do the whole tour with the screen off or your eyes closed: find an ayah, hop, come back along the trail.",
@@ -574,7 +586,11 @@
             "why": "Catches a correct edge with a wrong presentation. A real mutashabih filed under the wrong direction chip sends the reader looking in the wrong surah, which reads as bad data even though the data is fine.",
             "shot": "hop-rail",
             "id": "see-it-in-the-app",
-            "short": "Optional: open the pair in the app to see what a reader sees."
+            "short": "Optional: open the pair in the app to see what a reader sees.",
+            "noLink": {
+              "why": "The twenty pairs are drawn fresh each time, so no fixed link fits.",
+              "add": "Have the tool that prints the pairs print each verse of a pair as a link."
+            }
           },
           {
             "do": "Paste the printed JSON block into packages/etl/data/qa/verified-edges.json under `entries`, setting each `verdict` to `correct` or `wrong`, `verifiedBy` to your name, and `note` where a future reader needs the reason.",
@@ -649,7 +665,13 @@
             "do": "On the phone, open the deployed site in a Safari tab, tap the page chip in the header, choose «جزء», and press «احفظ الجزء ١ هنا».",
             "expect": "The button becomes a count («جارٍ حفظ الجزء ١ — ن من ٢٤») with «إيقاف» beside it, and settles into a row reading «الجزء ١ · ٣٫١ م.ب» or thereabouts — the offer disappears, because the juz is now kept. If the row instead says «ناقص» the pin did not finish; press «احفظه من جديد» before starting the clock.",
             "why": "The tab is the case we expect to lose. Proving it worked on day 0 is what makes a day-8 failure evidence rather than a guess.",
-            "short": "In a Safari tab, save juz 1."
+            "short": "In a Safari tab, save juz 1.",
+            "open": {
+              "path": "#/hafs-kfqc/p1",
+              "only": "live",
+              "onlyWhy": "The check is about Safari clearing the real site, so only the live site counts.",
+              "look": "Tap the page number, then the juz, then save juz 1."
+            }
           },
           {
             "do": "Add the site to the Home Screen, open it from there, and pin the same juz again inside the installed app.",
@@ -724,7 +746,13 @@
             "do": "Open the deployed site on the phone. Before tapping anything, look at `meta` → `since` in the storage inspector.",
             "expect": "A row already exists, stamped with today's local date — written by opening the store, not by any tap.",
             "why": "This is the entire defence against the seven-day sweep. A record that has existed for a month and holds nothing means the reader did not tap; one that has existed since this morning and holds nothing means we lost it. If `since` only appeared after the first tap, those two are indistinguishable forever after.",
-            "short": "Open the site. Before tapping anything, the record's start date reads today."
+            "short": "Open the site. Before tapping anything, the record's start date reads today.",
+            "open": {
+              "path": "#/hafs-kfqc/p1",
+              "only": "live",
+              "onlyWhy": "The record has to land on the real site on a phone.",
+              "look": "Open the revision record; its start date reads today."
+            }
           },
           {
             "do": "Tap five or six ayahs on a page, then drag a marquee across a short passage. Tap one of those ayahs a second time to dismiss it.",
@@ -825,7 +853,11 @@
             "expect": "A first trial: one mark, drawn twice side by side, a rectangle on each, and two keys.",
             "why": "The trials are built so that nothing on the screen says which rectangle is ours, and the answers exist nowhere until the scorer runs. Reading the builder first is the one way to spoil that, and there is no way to unspoil it — the session would have to be thrown away and rebuilt under a seed you had not seen.",
             "id": "start-cold",
-            "short": "Read the five short answers at the top, then start."
+            "short": "Read the five short answers at the top, then start.",
+            "noLink": {
+              "why": "This is a sitting tool on this laptop, not the app; make session opens it.",
+              "add": "None needed."
+            }
           },
           {
             "do": "For each trial pick the panel whose rectangle sits on the mark — A or B — or press space when you honestly cannot tell.",
@@ -1071,7 +1103,11 @@
             "expect": "A line naming one mark, a small piece of print with that mark's letters under a soft blue wash, one red rectangle sitting obviously off it, and a button that will not do anything yet.",
             "why": "The builder knows where we think each rectangle goes and the page deliberately does not. Reading it first is the one way to spoil that, and the sitting would have to be thrown away and rebuilt under a seed you had not seen.",
             "id": "start-cold-here",
-            "short": "Open the first page and read its short answers."
+            "short": "Open the first page and read its short answers.",
+            "noLink": {
+              "why": "This is a sitting tool on this laptop, not the app; make session opens it.",
+              "add": "None needed."
+            }
           },
           {
             "do": "Read the line above the picture, find the mark it names, drag the rectangle onto that mark and press enter. Arrow keys nudge it; hold shift for a bigger step. Press S if the rectangle is plainly the wrong size for its mark, and place it as well as you can anyway.",
@@ -1224,7 +1260,11 @@
             "expect": "Above the picture: the mark's name, the word it sits in, and — when the crop holds more than one mark of that name — a sentence saying which of them is meant, counted from the right. The picture itself opens wide enough to show the neighbouring letters, and the button swaps between that and a close view of the rectangle alone. The answers you have already given stay put either way.",
             "why": "The first sitting of this page was stopped after one screen because the crop was tight enough to judge a placement and too tight to say which letter was being talked about — and a reader who cannot name the letter cannot tell a rectangle on the wrong mark from a rectangle on no mark. The wide view is for identifying, the close one for judging, and doing them in that order is the whole reason there are two. The line above them took two further goes. A reader looking at a crop with several of the same mark in it asked, reasonably, which one — so the sentence that picks one out was added. Then it turned out the card already knew the containing word on ninety-one cards in a hundred and fifteen and was throwing it away, that the mark's own name reached only one of the three ways that sentence can be written, and that the whole line was set in the dimmest type on the screen. It is the question, not a footnote, and it is set like one now.",
             "id": "know-what-you-are-looking-at",
-            "short": "Read the line above the picture and find the letter the box is on."
+            "short": "Read the line above the picture and find the letter the box is on.",
+            "noLink": {
+              "why": "This is a sitting tool on this laptop, not the app; make session opens it.",
+              "add": "None needed."
+            }
           },
           {
             "do": "When nothing is wrong with a mark, say so. It is a real answer, and it is the one you should expect to give most often.",

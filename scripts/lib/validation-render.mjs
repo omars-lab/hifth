@@ -15,7 +15,7 @@
  * index and its checkbox persistence, the session's capture bar — never a
  * second copy of a step.
  */
-import { readEvidence, diagramKey, overviewDiagram, needsRunbook } from "../validation-ledger.mjs";
+import { readEvidence, diagramKey, overviewDiagram, needsRunbook, LIVE_APP, LAPTOP_APP } from "../validation-ledger.mjs";
 
 /* ── text ──────────────────────────────────────────────────────────────── */
 
@@ -142,6 +142,28 @@ export function diagram(source, diagrams, caption = "") {
  * how long, when it is done, one line per step — and the full runbook folded
  * under it, so nothing is lost and nothing is in the way.
  */
+/**
+ * Where a step happens in the app: the link on the live site and on this
+ * laptop, and what to look for once it opens — or, when there is no link yet,
+ * why not and what would add one.
+ */
+function stepLink(step) {
+  if (step.open) {
+    const { path, look, only, onlyWhy } = step.open;
+    const sites = [
+      only !== "laptop" && `<a href="${attr(LIVE_APP + path)}">Live site</a>`,
+      only !== "live" && `<a class="laptop" href="${attr(LAPTOP_APP + path)}">This laptop</a>`,
+    ].filter(Boolean);
+    return `<p class="link">Open: ${sites.join(" · ")} — look for: ${rich(look)}${
+      only ? ` <span class="only">(${rich(onlyWhy)})</span>` : ""
+    }</p>`;
+  }
+  if (step.noLink) {
+    return `<p class="link none">No link yet: ${rich(step.noLink.why)} <span class="add">To add one: ${rich(step.noLink.add)}</span></p>`;
+  }
+  return "";
+}
+
 function briefCard(check, diagrams) {
   const b = check.brief;
   const rb = check.runbook ?? {};
@@ -163,7 +185,7 @@ function briefCard(check, diagrams) {
       .map((s, i) =>
         s.id && struck.has(s.id)
           ? `<li class="struck"><s>${rich(s.short ?? s.do)}</s> <span class="machine-done">done by the machine</span></li>`
-          : `<li><label class="do"><input type="checkbox" data-step="${attr(check.id)}:${i}"><span>${rich(s.short ?? s.do)}</span></label></li>`,
+          : `<li><label class="do"><input type="checkbox" data-step="${attr(check.id)}:${i}"><span>${rich(s.short ?? s.do)}</span></label>${stepLink(s)}</li>`,
       )
       .join("\n    ")}
   </ol>
@@ -372,6 +394,14 @@ const GUIDE_JS = `
       } catch (e) {}
     });
   });
+  // Served from this laptop to a phone, "localhost" would mean the phone
+  // itself: point the laptop links at the address this page came from.
+  var host = location.hostname;
+  if (location.protocol === "http:" && host && host !== "localhost" && host !== "127.0.0.1") {
+    document.querySelectorAll("a.laptop").forEach(function (a) {
+      a.href = a.getAttribute("href").replace("//localhost:", "//" + host + ":");
+    });
+  }
 })();
 `;
 
@@ -506,6 +536,9 @@ dl.facts dd { margin: 0; }
 ol.short { margin: 0 0 8px; padding-left: 1.4em; }
 ol.short > li { margin: 0 0 4px; }
 ol.short > li::marker { color: var(--amber); font-family: var(--mono); font-size: 14px; }
+ol.short p.link { margin: 4px 0 0 34px; font-size: 14px; color: var(--dim); }
+ol.short p.link a { color: var(--amber); }
+ol.short p.link.none .add, ol.short p.link .only { display: block; font-size: 13px; }
 .machine-done { font: 600 11px/1 var(--mono); color: var(--green); text-transform: uppercase; letter-spacing: .1em; }
 p.do { margin: 0; }
 details.more, details.finished { margin: 14px 0 18px; }
