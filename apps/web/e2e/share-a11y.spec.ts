@@ -1,5 +1,6 @@
 import { test, expect, type Page } from "@playwright/test";
 import { tapAyah } from "./ayah";
+import { gotoLink } from "./links";
 import AxeBuilder from "@axe-core/playwright";
 import { COACH_STORAGE_KEY } from "../src/coach";
 
@@ -99,14 +100,7 @@ test.describe("Hifth · diff view (spec §3)", () => {
   test("expanding a hop row draws both ayahs from the page, with the leftover washed", async ({
     page,
   }) => {
-    await page.goto("/");
-    await tapAyah(page, "#verse-55");
-    const loopChip = page
-      .getByRole("group", { name: "روابط الآية" })
-      .getByRole("button", { name: /متشابهات في السورة/ });
-    await loopChip.tap();
-    const sheet = page.getByRole("dialog");
-    await expect(sheet).toBeVisible();
+    const sheet = await gotoLink(page, "verse-2-48-lookalikes");
 
     // The 2:123 row's expander (the labelled text button, not the hop button)
     // opens the comparison. The row's own label carries the hand-written note.
@@ -164,6 +158,8 @@ test.describe("Hifth · keyboard a11y", () => {
     await expect(sheet).toBeHidden();
   });
 
+  // The one test here that opens the list the way a reader does, by the chip;
+  // the others start from the list's link, so this is what covers the chip.
   test("Escape closes the popover", async ({ page }) => {
     await page.goto("/");
     await tapAyah(page, "#verse-55");
@@ -228,15 +224,6 @@ test.describe("Hifth · aria snapshots (the tour the ledger describes)", () => {
       });
     }, COACH_STORAGE_KEY);
 
-  /** Select 2:48 and open its in-surah hop popover — the state `escape-the-sheet` starts from. */
-  async function openHopPopover(page: Page): Promise<void> {
-    await tapAyah(page, "#verse-55");
-    await page
-      .getByRole("group", { name: "روابط الآية" })
-      .getByRole("button", { name: /متشابهات في السورة/ })
-      .tap();
-    await expect(page.getByRole("dialog")).toBeVisible();
-  }
 
   // Was a runbook step of its own until this snapshot replaced it — hence no
   // step id to name. The chrome is where glyph-only controls live: ⌖ and ▤ carry
@@ -280,8 +267,9 @@ test.describe("Hifth · aria snapshots (the tour the ledger describes)", () => {
   // and named as residue in the ledger rather than quietly assumed covered.
   test("the open hop popover names its close control and every target", async ({ page }) => {
     await settled(page);
-    await page.goto("/");
-    await openHopPopover(page);
+    // The same link the checks guide gives for this step, so the two cannot
+    // start from different states.
+    await gotoLink(page, "verse-2-48-lookalikes");
     await expect(page.getByRole("dialog")).toMatchAriaSnapshot({ name: "hop-popover.aria.yml" });
   });
 
@@ -329,13 +317,7 @@ test.describe("Hifth · axe automated a11y", () => {
   });
 
   test("the open hop popover has no serious/critical axe violations", async ({ page }) => {
-    await page.goto("/");
-    await tapAyah(page, "#verse-55");
-    await page
-      .getByRole("group", { name: "روابط الآية" })
-      .getByRole("button", { name: /متشابهات في السورة/ })
-      .tap();
-    await expect(page.getByRole("dialog")).toBeVisible();
+    await gotoLink(page, "verse-2-48-lookalikes");
     const results = await new AxeBuilder({ page })
       .withTags(["wcag2a", "wcag2aa"])
       .analyze();
