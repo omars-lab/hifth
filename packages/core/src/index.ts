@@ -168,6 +168,8 @@ export {
   keyToRef,
   OPEN_PANELS,
   type OpenPanel,
+  LINK_TOOLS,
+  type LinkTool,
   type AppState,
   type AyahRef,
   type AyahRange,

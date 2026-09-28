@@ -76,9 +76,10 @@ test.describe("Hifth · the harakat and word tools", () => {
   });
 
   test("K: the bookmark corner steps aside, so a sign under it can be reached", async ({ page }) => {
-    await page.goto("/#/hafs-kfqc/p7");
+    // Opened with the tool in hand; the first test here presses the key.
+    await page.goto("/#/hafs-kfqc/p7?tool=harakat");
     await expect(pageSvg(page, 7)).toBeVisible();
-    await page.keyboard.press("KeyK");
+    await expect(toolBtn(page, "Harakat")).toHaveAttribute("aria-checked", "true");
 
     // A sign whose middle lies under the corner, found on screen.
     const under = await page.evaluate(async () => {
@@ -159,9 +160,10 @@ test.describe("Hifth · the harakat and word tools", () => {
   });
 
   test("W: a word low on the page opens its drawer at the top, under the tool bar", async ({ page }) => {
-    await page.goto("/#/hafs-kfqc/p7");
+    // Opened with the tool in hand; the first test here presses the key.
+    await page.goto("/#/hafs-kfqc/p7?tool=word");
     await expect(pageSvg(page, 7)).toBeVisible();
-    await page.keyboard.press("KeyW");
+    await expect(toolBtn(page, "Word")).toHaveAttribute("aria-checked", "true");
 
     // The widest word on page 7's last line, found on screen from the word data.
     const low = await page.evaluate(async () => {
@@ -197,9 +199,10 @@ test.describe("Hifth · the harakat and word tools", () => {
   });
 
   test("W: a word cut at its joins offers its letters, and a letter picked takes a note", async ({ page }) => {
-    await page.goto("/#/hafs-kfqc/p7");
+    // Opened with the tool in hand; the first test here presses the key.
+    await page.goto("/#/hafs-kfqc/p7?tool=word");
     await expect(pageSvg(page, 7)).toBeVisible();
-    await page.keyboard.press("KeyW");
+    await expect(toolBtn(page, "Word")).toHaveAttribute("aria-checked", "true");
     // Every word of this verse is in page 7's letter data.
     const at = await ayahTarget(page, "#verse-46");
     await page.mouse.click(at.x, at.y);
@@ -220,9 +223,10 @@ test.describe("Hifth · the harakat and word tools", () => {
   });
 
   test("W: Shift-click gathers several signs, and one note is written on all of them", async ({ page }) => {
-    await page.goto("/#/hafs-kfqc/p7");
+    // Opened with the tool in hand; the first test here presses the key.
+    await page.goto("/#/hafs-kfqc/p7?tool=word");
     await expect(pageSvg(page, 7)).toBeVisible();
-    await page.keyboard.press("KeyW");
+    await expect(toolBtn(page, "Word")).toHaveAttribute("aria-checked", "true");
     const at = await ayahTarget(page, "#verse-46");
     await page.mouse.click(at.x, at.y);
     const signs = parts(page).locator('[data-part="sign"]');
