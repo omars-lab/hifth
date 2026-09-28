@@ -31,6 +31,10 @@ import {
   needsRunbook,
   shotPath,
   readEvidence,
+  briefProblems,
+  guideDiagrams,
+  diagramPath,
+  diagramKey,
 } from "./validation-ledger.mjs";
 
 const ledger = readLedger();
@@ -91,6 +95,10 @@ for (const check of checks) {
         `docs/validation/guide.html, and into the validate skill.`,
     );
   }
+  // The short version the guide leads with. Without it the guide falls back to
+  // the full runbook, which is the wall of text it was rebuilt to stop being.
+  errors.push(...briefProblems(check));
+
   const stepIds = new Set();
   for (const [i, step] of (check.runbook?.steps ?? []).entries()) {
     if (step.id) {
@@ -173,6 +181,15 @@ for (const check of checks) {
 
   if (check.status === "pending") {
     pending.push(check);
+  }
+}
+
+// A diagram written in the ledger but never drawn shows as a gap on the phone.
+for (const src of guideDiagrams(checks)) {
+  if (!existsSync(diagramPath(src))) {
+    errors.push(
+      `docs/validation/diagrams/${diagramKey(src)}.svg is not drawn — run: make guide`,
+    );
   }
 }
 

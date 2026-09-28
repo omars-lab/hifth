@@ -360,6 +360,39 @@ UI that drifts silently, which is the failure this whole shape exists to
 prevent. A step's `shot` naming a file that is not there fails `gate:validation`,
 and the fix it names is that one command.
 
+### How a check for a person is written — short first, the rest folded
+
+The owner opened the guide on 2026-09-28 and called it "a huge wall of text":
+every check printed every reason, path and follow-up, the finished ones too. The
+ask was a simple guide that still covers everything. So a pending check leads
+with its short version and keeps the full runbook folded under it. The build
+check (`gate:validation`) refuses a pending check that is missing any of this.
+
+- **`brief`**, on the check. Everything a person reads before starting:
+  - `label` — two to four words for the overview diagram ("8 days offline").
+  - `ask` — the plain question the check answers, as the card's heading.
+  - `what` — one or two sentences: why only a person can answer it.
+  - `need` — what to have in hand. `time` — how long, honestly.
+  - `done` — what "finished" looks like.
+  - `unlocks` — the plain goal it clears ("The first public version"). Optional.
+  - `after` — ids of checks that must come first. Optional; draws an arrow.
+  - `diagram` — Mermaid source. Optional; see below.
+- **`short`**, on every step: one line of 140 characters or fewer, in the
+  words you would say out loud. The step's `do`, `expect` and `why` stay as the
+  full version, folded.
+- **Draw it when the order or the branches matter.** A process with a fork
+  (Safari tab vs Home Screen app) or a choice between answers (which button to
+  press) is a Mermaid `flowchart`. A straight list of steps is not; the numbered
+  steps already are that picture.
+- **Diagrams are drawn at build time, not in the page.** `make guide` runs
+  `scripts/render-diagrams.mjs`, which draws each new diagram to
+  `docs/validation/diagrams/<hash>.svg` in a headless browser, and the guide
+  inlines it, so the page stays one file that opens offline. Commit the SVGs. A
+  missing one fails the build check, and the fix it names is `make guide`.
+- **The overview diagram is built from the briefs** (every check → what it
+  unlocks, with `after` arrows), never written by hand.
+- **Finished checks fold into one list** at the end: question, date, result.
+
 ### Driving a session
 
 1. `make validate` — what is outstanding, what each one blocks.
