@@ -31,6 +31,28 @@ test.describe("Hifth · a link that opens a panel", () => {
     await expect(sheet.getByRole("radio", { name: "جزء" })).toBeChecked();
   });
 
+  // The verse's own sheets wait for the verse: its look-alikes and roots load
+  // after it is selected, and selecting a verse closes whatever roots sheet was
+  // up. The screen-reader check in the guide opens its look-alike list this way.
+  test("?open=lookalikes opens the verse's look-alike list once it has loaded", async ({ page }) => {
+    await page.goto("/#/hafs-kfqc/2:48?open=lookalikes");
+    await expect(page.getByRole("dialog", { name: /^متشابهات/ })).toBeVisible({ timeout: 20_000 });
+    await expect(page).toHaveURL(/#\/hafs-kfqc\/2:48$/);
+  });
+
+  test("?open=roots opens the verse's roots", async ({ page }) => {
+    await page.goto("/#/hafs-kfqc/2:48?open=roots");
+    await expect(page.getByRole("dialog", { name: /^الجذور · / })).toBeVisible({ timeout: 20_000 });
+  });
+
+  test("a verse sheet on a link with no verse opens nothing", async ({ page }) => {
+    await page.goto("/#/hafs-kfqc/p19?open=lookalikes");
+    await expect(page.locator('svg[aria-labelledby="page-label-19"]:visible')).toBeVisible({
+      timeout: 20_000,
+    });
+    await expect(page.getByRole("dialog")).toHaveCount(0);
+  });
+
   test("the address lets go of the panel once it is open", async ({ page }) => {
     // Sharing the page after closing the panel must not send the next person
     // a panel they did not ask for.

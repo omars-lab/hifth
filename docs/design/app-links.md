@@ -112,7 +112,7 @@ Ranked by how many test lines and guide steps each would replace:
 | --- | --- | --- | --- |
 | 1 | `?open=jump\|about\|record\|key\|editions\|tips\|shelf` — **built 2026-09-28** | one panel open on arrival | 93 test lines in at least 6 files; 2 guide steps (record, shelf) |
 | 2 | `?tool=read\|select\|highlight\|bookmark\|note\|sign\|word\|slip\|crop` | that tool in hand | 31 test lines in at least 6 files |
-| 3 | `?sheet=verse\|lookalikes` (needs a verse in the place) | the selected verse's drawer or look-alike list | 24 lines in 5+ files; the screen reader step |
+| 3 | `?open=lookalikes\|roots` (needs a verse in the place) — **built 2026-09-28**, as two more values of `open` rather than a new `sheet` key: one key for "what is open on arrival". The verse's drawer needed nothing, since a verse link already raises it | the selected verse's look-alike list or roots | 24 lines in 5+ files; the screen reader step |
 | 4 | `?view=one\|two` and `?bar=page\|juz` | page layout and page-bar scale | 5+ lines in 4 files |
 | 5 | `?lang=en\|ar` | the chrome language for this visit only, not saved | 6 lines in 2 files |
 
@@ -142,7 +142,7 @@ One file, `docs/links.json`, hand-edited like the other registers. One entry per
 
 ```json
 { "verse-lookalikes": {
-    "path": "#/hafs-kfqc/2:48?sheet=lookalikes",
+    "path": "#/hafs-kfqc/2:48?open=lookalikes",
     "opens": "Verse 2:48 selected, its look-alike list open",
     "lookFor": "A list titled with the verse, each row a verse that reads like it" } }
 ```

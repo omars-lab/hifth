@@ -645,6 +645,33 @@ export function App(): JSX.Element {
   // the curated edges are pinned above the corpus families, marked as
   // hand-verified. One glyph, one place, one count. (See `RootLensTrigger`.)
   const railChips = useMemo(() => chips.filter((c) => c.direction !== "root"), [chips]);
+  // A link's `?open=lookalikes` or `?open=roots`, held until the verse it names
+  // is selected and its data has arrived. It is placed after the effect above
+  // that closes the roots on every new selection, so on the render that
+  // selects the verse, the close runs first and this opens it after. A link
+  // for a verse with no look-alikes simply opens the verse; the reader moving
+  // to another verse drops the request.
+  const [pendingSheet, setPendingSheet] = useState<{
+    panel: "lookalikes" | "roots";
+    key: string;
+  } | null>(null);
+  useEffect(() => {
+    if (!pendingSheet || !selectedKey) return;
+    if (selectedKey !== pendingSheet.key) return setPendingSheet(null);
+    // Both lookups exist before the verse's surah has loaded, so "ready" is
+    // that surah's own file having arrived. One that never arrives leaves the
+    // request waiting, harmlessly, until the reader moves.
+    const surah = parseAyahKey(selectedKey)?.surah ?? 0;
+    if (pendingSheet.panel === "roots") {
+      if (!rootAyahShards.has(surah)) return;
+      setRootsOpen(true);
+    } else {
+      if (!shards.has(surah) && !(PITCH && pitchSurahs.has(surah))) return;
+      const first = railChips[0];
+      if (first) setOpenDirection(first.direction);
+    }
+    setPendingSheet(null);
+  }, [pendingSheet, selectedKey, rootAyahShards, shards, pitchSurahs, railChips]);
   const curatedRoots = useMemo(
     () => chips.find((c) => c.direction === "root")?.edges ?? [],
     [chips],
@@ -1611,7 +1638,10 @@ export function App(): JSX.Element {
         else if (panel === "key") setLegendOpen(true);
         else if (panel === "editions") setEditionOpen(true);
         else if (panel === "tips") setCoachUp(true);
-        else {
+        else if (panel === "lookalikes" || panel === "roots") {
+          // The verse's own sheets wait for the verse: see `pendingSheet`.
+          if (state.select) setPendingSheet({ panel, key: refToKey(edition, state.select) });
+        } else {
           setRevisionAt(panel === "shelf" ? "juz" : undefined);
           setRevisionOpen(true);
         }
