@@ -667,10 +667,10 @@
             "why": "The tab is the case we expect to lose. Proving it worked on day 0 is what makes a day-8 failure evidence rather than a guess.",
             "short": "In a Safari tab, save juz 1.",
             "open": {
-              "path": "#/hafs-kfqc/p1",
+              "path": "#/hafs-kfqc/p1?open=shelf",
               "only": "live",
               "onlyWhy": "The check is about Safari clearing the real site, so only the live site counts.",
-              "look": "Tap the page number, then the juz, then save juz 1."
+              "look": "The record opens at juz scope; tap Save juz 1."
             }
           },
           {
@@ -748,10 +748,10 @@
             "why": "This is the entire defence against the seven-day sweep. A record that has existed for a month and holds nothing means the reader did not tap; one that has existed since this morning and holds nothing means we lost it. If `since` only appeared after the first tap, those two are indistinguishable forever after.",
             "short": "Open the site. Before tapping anything, the record's start date reads today.",
             "open": {
-              "path": "#/hafs-kfqc/p1",
+              "path": "#/hafs-kfqc/p1?open=record",
               "only": "live",
               "onlyWhy": "The record has to land on the real site on a phone.",
-              "look": "Open the revision record; its start date reads today."
+              "look": "The revision record is open; its start date reads today."
             }
           },
           {

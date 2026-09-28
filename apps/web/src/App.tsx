@@ -1601,6 +1601,21 @@ export function App(): JSX.Element {
       // is a move inside the session and inherits the desk it was made from —
       // which is also why `handleJump` need not thread the field through.
       if (origin === "link") setField(state.field ?? DEFAULT_FIELD);
+      // A panel the link asks for (`?open=`), opened as its own button opens
+      // it. The address then goes back to naming only the view, because
+      // `currentState` never carries a panel.
+      if (origin === "link" && state.open) {
+        const panel = state.open;
+        if (panel === "jump") setJumperOpen(true);
+        else if (panel === "about") setColophonOpen(true);
+        else if (panel === "key") setLegendOpen(true);
+        else if (panel === "editions") setEditionOpen(true);
+        else if (panel === "tips") setCoachUp(true);
+        else {
+          setRevisionAt(panel === "shelf" ? "juz" : undefined);
+          setRevisionOpen(true);
+        }
+      }
       // Rebuild the trail beads from the link's trail + via (oldest → newest).
       const chain = [...(state.trail ?? []), ...(state.via ? [state.via] : [])];
       const beads: TrailBead[] = [];

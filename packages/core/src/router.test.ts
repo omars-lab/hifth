@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   keyToRef,
+  OPEN_PANELS,
   parseHash,
   refToKey,
   serializeState,
@@ -139,6 +140,30 @@ describe("router · tolerance & rejection", () => {
   });
 });
 
+describe("router · a panel open on arrival (?open=)", () => {
+  // Owner, 2026-09-28: links "to enter app in certain mode, on certain page", and
+  // tests and the checks guide should use them instead of clicking their way in.
+  it("reads and writes each panel", () => {
+    for (const p of OPEN_PANELS) {
+      const s = parseHash(`#/hafs-kfqc/p1?open=${p}`);
+      expect(s?.open, p).toBe(p);
+      expect(serializeState(s!)).toBe(`#/hafs-kfqc/p1?open=${p}`);
+    }
+  });
+
+  it("an unknown panel still opens the page — the link is not refused for it", () => {
+    const s = parseHash("#/hafs-kfqc/2:48?open=nope&w=3-7");
+    expect(s?.select).toEqual({ surah: 2, ayah: 48 });
+    expect(s?.word).toEqual([3, 7]);
+    expect(s?.open).toBeUndefined();
+  });
+
+  it("comes after every other key, so older links keep their one spelling", () => {
+    const s = parseHash("#/hafs-kfqc/2:48?open=record&w=3-7&field=tan");
+    expect(serializeState(s!)).toBe("#/hafs-kfqc/2:48?w=3-7&field=tan&open=record");
+  });
+});
+
 describe("router · key helpers", () => {
   it("refToKey builds the canonical spec-§1 key", () => {
     expect(refToKey(ED, { surah: 2, ayah: 48 })).toBe("quran/hafs-kfqc/2:48");
@@ -174,7 +199,10 @@ describe("router · round-trip (generative sweep)", () => {
       ],
     ];
 
+    const opens: (AppState["open"])[] = [undefined, "shelf"];
+
     let count = 0;
+    for (const open of opens)
     for (const select of selects)
       for (const word of words)
         for (const skin of skins)
@@ -189,13 +217,14 @@ describe("router · round-trip (generative sweep)", () => {
                   ...(field ? { field } : {}),
                   ...(via ? { via } : {}),
                   ...(trail ? { trail } : {}),
+                  ...(open ? { open } : {}),
                 };
                 const round = parseHash(serializeState(state));
                 expect(round, serializeState(state)).toEqual(state);
                 count++;
               }
     expect(count).toBe(
-      selects.length * words.length * skins.length * fields.length * vias.length * trails.length,
+      opens.length * selects.length * words.length * skins.length * fields.length * vias.length * trails.length,
     );
   });
 
