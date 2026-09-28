@@ -16,6 +16,7 @@
  *   #/<edition>/2:123?via=2:48                   hop context (breadcrumb)
  *   #/<edition>/2:123?trail=2:40,2:47,2:122      full hop chain
  *   #/<edition>/p7                              a bare page (no selection)
+ *   #/<edition>/p1?open=shelf                   with one panel open on arrival
  *
  * DOM-free by construction: it speaks in canonical keys and plain records, never
  * touches `location`. L3 owns reading/writing `location.hash`; this owns the
@@ -52,7 +53,22 @@ export interface AppState {
   readonly via?: AyahRef;
   /** Full hop chain (spec §7 `?trail=`). Oldest → newest, excludes `select`. */
   readonly trail?: readonly AyahRef[];
+  /**
+   * A panel open on arrival (`?open=`). Lenient like `field`: a panel the app
+   * does not have is dropped and the view still opens, because the view is
+   * what the link is for and the panel is a convenience on top of it.
+   */
+  readonly open?: OpenPanel;
 }
+
+/**
+ * The panels a link can open. `shelf` is the revision record at juz scope,
+ * where the saved-offline shelf lives; `record` leaves it at the reader's last
+ * scope. Names are the words on the buttons, not our component names.
+ */
+export const OPEN_PANELS = ["jump", "about", "record", "shelf", "key", "editions", "tips"] as const;
+export type OpenPanel = (typeof OPEN_PANELS)[number];
+const isOpenPanel = (v: string): v is OpenPanel => (OPEN_PANELS as readonly string[]).includes(v);
 
 export interface AyahRef {
   readonly surah: number;
@@ -99,7 +115,7 @@ function refToString(ref: AyahRef): string {
 /**
  * Encode an app view to its anchor hash (leading `#/…`). The inverse of
  * `parseHash`: `parseHash(serializeState(s))` deep-equals `s` for any valid `s`.
- * Query params are emitted in a fixed order (w, skin, field, via, trail) so a given
+ * Query params are emitted in a fixed order (w, skin, field, via, trail, open) so a given
  * state has exactly one serialization — links are stable and diff-friendly.
  */
 export function serializeState(state: AppState): string {
@@ -124,6 +140,7 @@ export function serializeState(state: AppState): string {
   if (state.trail && state.trail.length > 0) {
     q.push(`trail=${state.trail.map(refToString).join(",")}`);
   }
+  if (state.open) q.push(`open=${state.open}`);
 
   return q.length ? `${path}?${q.join("&")}` : path;
 }
@@ -203,6 +220,7 @@ export function parseHash(hash: string): AppState | null {
     field?: FieldId;
     via?: AyahRef;
     trail?: readonly AyahRef[];
+    open?: OpenPanel;
   } = { edition, select };
   if (page !== undefined) out.page = page;
 
@@ -239,6 +257,11 @@ export function parseHash(hash: string): AppState | null {
       refs.push(r);
     }
     out.trail = refs;
+  }
+  // Lenient, for the same reason as `field`: a panel is not the view.
+  if (params.has("open")) {
+    const raw = params.get("open")!;
+    if (isOpenPanel(raw)) out.open = raw;
   }
 
   return out;
