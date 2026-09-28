@@ -53,7 +53,7 @@ test.describe("Hifth · lifting a page by its corner", () => {
     // drawn letter rides a moving surface (turn-style decision, 2026-09-26 —
     // curling the real words was the option left out).
     await expect(peel(page).getByTestId("edge-peel-flap")).toBeVisible();
-    await expect(peel(page).getByTestId("edge-peel-back")).toHaveCount(0);
+    await expect(peel(page).getByTestId("edge-peel-back")).toBeHidden();
     // The corner has moved with the pointer.
     const lift = Number(await peel(page).getAttribute("data-lift"));
     expect(lift, "the corner did not follow the hand").toBeGreaterThan(150);
@@ -69,6 +69,82 @@ test.describe("Hifth · lifting a page by its corner", () => {
     expect(await foldsSeen(page), "a band played the turn again after the peel").toEqual([]);
   });
 
+  // Owner, 2026-09-28 (Firefox): the turn did not land on the finished page —
+  // a blank page, then a jump in size. The picture of a page in the peel must
+  // stand exactly where its drawing will, and from the moment the leaf lies
+  // flat until the drawings take over, every frame must show both pages.
+  test("the lifted pages stand where their drawings land, and nothing goes blank", async ({
+    page,
+  }) => {
+    await openAt8(page);
+    // Both pages of the opening drawn, so the facing leaf's box is known.
+    await expect(pageSvg(page, 7)).toBeVisible();
+    const box = async (loc: Locator) => {
+      const b = (await loc.boundingBox())!;
+      return [b.x, b.y, b.width, b.height].map(Math.round);
+    };
+    const leftDrawing = await box(pageSvg(page, 8));
+    const rightDrawing = await box(pageSvg(page, 7));
+
+    // Every frame from the release on: is each page of the new opening shown,
+    // and where? A picture counts once it has loaded; a drawing once it has ink.
+    await page.evaluate(() => {
+      const w = window as unknown as { __frames: string[] };
+      w.__frames = [];
+      const r = (el: Element) => {
+        const b = el.getBoundingClientRect();
+        return [b.x, b.y, b.width, b.height].map(Math.round).join(",");
+      };
+      const drawn = (n: number) => {
+        const s = [...document.querySelectorAll(`svg[aria-labelledby="page-label-${n}"]`)].find(
+          (e) => e.getBoundingClientRect().width > 0 && e.querySelector("path"),
+        );
+        return s ? `svg@${r(s)}` : null;
+      };
+      const pic = (id: string) => {
+        const i = document.querySelector(`[data-testid="${id}"]`) as HTMLImageElement | null;
+        if (!i) return null;
+        return i.complete && i.naturalWidth > 0 ? `img@${r(i)}` : "img-unloaded";
+      };
+      const t0 = performance.now();
+      const tick = () => {
+        const landed = document.querySelector('[data-testid="edge-peel"][data-landed]');
+        if (landed) w.__frames.push(`landed 10=${pic("edge-peel-under")} 9=${pic("edge-peel-back")}`);
+        else if (w.__frames.length > 0 || document.querySelector("header .numeric")?.textContent === "9")
+          w.__frames.push(`live 10=${drawn(10)} 9=${drawn(9)}`);
+        if (performance.now() - t0 < 4000) requestAnimationFrame(tick);
+      };
+      requestAnimationFrame(tick);
+    });
+
+    const rail = await railBox(page, "left");
+    const y = rail.y + rail.height * 0.15;
+    await page.mouse.move(rail.x + 6, y);
+    await page.mouse.down();
+    for (let i = 1; i <= 5; i += 1) await page.mouse.move(rail.x + 6 + i * 40, y + i * 4);
+
+    // Held: page 10 beneath sits exactly on the left page's drawing.
+    const under = peel(page).getByTestId("edge-peel-under");
+    await expect(under).toBeVisible();
+    expect(await box(under), "the page beneath is not where its drawing will be").toEqual(leftDrawing);
+
+    await page.mouse.up();
+    await expect(page.locator(NUM)).toHaveText("9");
+    await expect(peel(page)).toHaveCount(0);
+    await expect(pageSvg(page, 10)).toBeVisible();
+    await page.waitForTimeout(300);
+
+    const frames = await page.evaluate(() => (window as unknown as { __frames: string[] }).__frames);
+    expect(frames.some((f) => f.startsWith("landed")), "the leaf was never laid flat").toBe(true);
+    const at = (b: number[]) => b.join(",");
+    const bad = frames.filter((f) => {
+      if (f.startsWith("landed"))
+        return f !== `landed 10=img@${at(leftDrawing)} 9=img@${at(rightDrawing)}`;
+      return f !== `live 10=svg@${at(leftDrawing)} 9=svg@${at(rightDrawing)}`;
+    });
+    expect(bad, "a frame after the release showed a blank or misplaced page").toEqual([]);
+  });
+
   test("the right edge lifts toward the earlier pages", async ({ page }) => {
     await openAt8(page);
 
@@ -82,7 +158,7 @@ test.describe("Hifth · lifting a page by its corner", () => {
     // From the opening (7, 8), pulling back shows 5 beneath and 6 on the back.
     await expect(peel(page)).toHaveAttribute("data-side", "right");
     await expect(peel(page).getByTestId("edge-peel-under")).toHaveAttribute("src", /\/5\.svg$/);
-    await expect(peel(page).getByTestId("edge-peel-back")).toHaveCount(0);
+    await expect(peel(page).getByTestId("edge-peel-back")).toBeHidden();
 
     // Carried back the way it came, the corner falls back and nothing turns.
     for (let i = 4; i >= 0; i -= 1) await page.mouse.move(x - i * 40, y - i * 4);
@@ -112,7 +188,7 @@ test.describe("Hifth · lifting a page by its corner", () => {
 
       await expect(peel(page)).toHaveAttribute("data-style", style);
       await expect(peel(page).getByTestId("edge-peel-flap")).toHaveCount(flap);
-      await expect(peel(page).getByTestId("edge-peel-back")).toHaveCount(0);
+      await expect(peel(page).getByTestId("edge-peel-back")).toBeHidden();
       expect(await peel(page).locator("[data-skeleton] i").count() > 0).toBe(lines);
       await page.mouse.up();
       await expect(page.locator(NUM)).toHaveText("9");
