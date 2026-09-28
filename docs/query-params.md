@@ -70,6 +70,7 @@ normalises to the literal form on the way out. Ranges never cross surahs.
 | `field` | one of the ids below | Paints the desk the mus'haf lies on | The value is dropped; the link opens on the default field | fall back |
 | `via` | `2:48` | The breadcrumb origin — the single ayah this hop came from | The whole link is refused | reject |
 | `trail` | `2:40,2:47,2:122` | The full hop chain, oldest → newest, excluding the selection | The whole link is refused | reject |
+| `view` | `one` or `two` | On a computer, opens the book to one page or to the two-page spread, as if that switch had been pressed. A phone always shows one page | The value is dropped; the book opens as it would have | fall back |
 | `tool` | `read`, `select`, `highlight`, `bookmark`, `note`, `harakat`, `word`, `mistake` or `crop` — the word on each tool's button | Puts that page tool in hand on arrival, as if its button had been pressed | The value is dropped; Select stays in hand | fall back |
 | `open` | `jump`, `about`, `record`, `shelf`, `key`, `editions`, `tips`, `lookalikes` or `roots` | Opens one panel on arrival: go-to, about, the revision record, the record at juz scope (the saved-offline shelf), the tajweed colour key, the mus'haf picker, the tips strip, or — for a selected verse, once its data has loaded — its look-alike list or its roots. The view underneath is the rest of the link | The value is dropped; the link opens without a panel | fall back |
 
@@ -104,16 +105,18 @@ or `http://localhost:5173/` (a laptop running it).
 | `#/hafs-kfqc/2:48?open=roots` | opens | 2:48 with its roots open |
 | `#/hafs-kfqc/p19?open=lookalikes` | opens | page 19; no verse is named, so no list |
 | `#/hafs-kfqc/2:48?open=nope` | opens as `#/hafs-kfqc/2:48` | 2:48, no panel |
+| `#/hafs-kfqc/p7?view=one` | opens | page 7 alone on a computer, the book closed to one page |
+| `#/hafs-kfqc/p7?view=three` | opens as `#/hafs-kfqc/p7` | page 7, the book as it would have opened |
 | `#/hafs-kfqc/2:48?tool=note` | opens | 2:48 with the note tool in hand |
 | `#/hafs-kfqc/p7?tool=harakat` | opens | page 7 with the harakat magnifier in hand |
 | `#/hafs-kfqc/p7?tool=sign` | opens as `#/hafs-kfqc/p7` | page 7, Select in hand — `sign` is the code's name, not the button's |
 
-`open` and `tool` are the two keys the app reads and then lets go of: once the
-panel is up or the tool is in hand, the address goes back to naming the view, so
-sharing the page later does not hand the next person a panel or a tool they did
-not ask for.
+`open`, `tool` and `view` are the three keys the app reads and then lets go of:
+once the panel is up, the tool is in hand or the book is laid out, the address
+goes back to naming the verse or page, so sharing it later does not hand the
+next person a panel, a tool or a layout they did not ask for.
 
-All seven are read by `parseHash` and written by `serializeState`, both in
+All eight are read by `parseHash` and written by `serializeState`, both in
 `packages/core/src/router.ts`. That module is framework-free and never touches
 `location`; `apps/web/src/useHashRouter.ts` owns the actual reading and writing
 of `location.hash`.
