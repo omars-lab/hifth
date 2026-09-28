@@ -112,39 +112,46 @@
             "do": "Open that URL on the phone.",
             "expect": "The mushaf page as normal, plus a dark slab pinned across the top reading «قياس الأداء على هذا الجهاز — ١٥ ثانية» with an ابدأ button. No slab means you are on an ordinary build — something else is already serving port 4173; stop it and re-run make phone-perf.",
             "why": "Confirms you are measuring the build that has the probe in it. An ordinary build looks completely normal, which is exactly how you would not notice — and every number below would then be a measurement of the wrong thing.",
-            "shot": "probe-idle"
+            "shot": "probe-idle",
+            "short": "Open the link the laptop prints. A dark bar with a start button sits across the top."
           },
           {
             "do": "Tap ابدأ.",
             "expect": "«استعد / get ready» for one second before each segment, then the segment's instruction and a countdown. The slab ignores taps while recording, so you cannot accidentally drive it instead of the page.",
             "why": "The one-second «استعد» beat is there so the tail of one gesture does not land in the head of the next segment. Rush it and the three numbers blur into each other, which is the one way this check can fail without looking like it failed.",
-            "shot": "probe-running"
+            "shot": "probe-running",
+            "short": "Tap start. Each part gives you a second to get ready."
           },
           {
             "do": "Segment 1 — «مرّر الصفحة بإصبع واحد»: pan the page with one finger, continuously, for the whole 5-second countdown.",
             "expect": "The page moves under your finger and the counter runs 5→1. Keep moving: a still finger produces no frames and the segment will report «too few frames — not driven».",
-            "why": "Pan is the cheap case: no re-raster, just compositing a layer that already exists. If pan is over budget then nothing further matters — the page is too heavy as DOM and the verdict is raster-fallback."
+            "why": "Pan is the cheap case: no re-raster, just compositing a layer that already exists. If pan is over budget then nothing further matters — the page is too heavy as DOM and the verdict is raster-fallback.",
+            "short": "Pan the page with one finger for the whole 5 seconds."
           },
           {
             "do": "Segment 2 — «قرّب وباعد بإصبعين»: pinch in and out, going far enough that glyph edges visibly re-sharpen.",
             "expect": "Zoom follows the pinch. The re-sharpen moment is the one being measured — it is the layer being re-rastered.",
-            "why": "This is the whole check. Zooming past the layer's backing store makes the browser re-rasterize ~170 KB of glyph paths, and that cost is structurally invisible to the emulated desktop baseline. The rendering decision for all 604 pages turns on this one number."
+            "why": "This is the whole check. Zooming past the layer's backing store makes the browser re-rasterize ~170 KB of glyph paths, and that cost is structurally invisible to the emulated desktop baseline. The rendering decision for all 604 pages turns on this one number.",
+            "short": "Pinch in and out until the letters visibly sharpen."
           },
           {
             "do": "Segment 3 — «اضغط آيات مختلفة»: tap a different ayah roughly once a second.",
             "expect": "Amber marker swipes land on each ayah you tap — one along the middle of every line it occupies, with the scripture still readable through them. Different ayahs, not the same one twice — you are measuring overlay churn.",
-            "why": "Separates rendering cost from interaction cost. If only this segment is bad the problem is overlay churn in the highlighter — a real bug, but not one that changes which rendering strategy Loop 4b builds."
+            "why": "Separates rendering cost from interaction cost. If only this segment is bad the problem is overlay churn in the highlighter — a real bug, but not one that changes which rendering strategy Loop 4b builds.",
+            "short": "Tap a different verse about once a second."
           },
           {
             "do": "Read the results table, then long-press the JSON box → Select All → Copy.",
             "expect": "«النتيجة — الصقها في ledger.json», a row per segment with mean / fps / p95 / worst / jank (over-budget cells in salmon), and a read-only JSON blob stamped with the device, dpr, cores, standalone flag, build commit, and FCP/LCP. There is no copy button on purpose: a LAN preview is plain http, so the Clipboard API does not exist here.",
             "why": "The table gives you the verdict; the JSON is what makes it re-checkable a year from now. It stamps device, dpr, cores, standalone flag and build commit, so a later reader can tell whether the number still describes the phone in their hand.",
-            "shot": "probe-results"
+            "shot": "probe-results",
+            "short": "Copy the results box: long-press, Select All, Copy."
           },
           {
             "do": "If you can, add the site to the Home Screen and run the whole thing again from there.",
             "expect": "`\"standalone\": true` in the second JSON. Standalone gets its own compositor path on iOS, so the two runs can legitimately disagree — that difference is a result, not noise.",
-            "why": "iOS gives standalone its own compositor path. If the two runs disagree, the install prompt is doing load-bearing work rather than convenience work — and that changes what Loop 6b has to guarantee."
+            "why": "iOS gives standalone its own compositor path. If the two runs disagree, the install prompt is doing load-bearing work rather than convenience work — and that changes what Loop 6b has to guarantee.",
+            "short": "If you can, add it to the Home Screen and run it again from there."
           }
         ],
         "reading": [
@@ -161,7 +168,16 @@
         "apps/web/perf/pan-zoom-trace.mjs — the frame budget asserted in CI becomes the measured number, not the emulated one",
         "docs/PLAN.md §Loop 4b — which of the three rendering strategies gets built"
       ],
-      "record": "docs/decisions/loop-1.md → a new docs/decisions/loop-4b.md"
+      "record": "docs/decisions/loop-1.md → a new docs/decisions/loop-4b.md",
+      "brief": {
+        "label": "Smoothness on a phone",
+        "ask": "Does the page stay smooth on a real phone when you pan, zoom and tap?",
+        "what": "Our speed numbers come from a laptop pretending to be a phone. Three minutes on a real phone is the only true answer, and how all 604 pages are drawn depends on it.",
+        "need": "A phone on the same Wi-Fi as the laptop — an older iPhone and a cheap Android if you have both.",
+        "time": "3 minutes per phone",
+        "done": "The results box from each phone is pasted into the record.",
+        "unlocks": "The first public version"
+      }
     },
     {
       "id": "screen-reader-walkthrough",
@@ -192,21 +208,24 @@
             "expect": "«الآية البقرة · ٢:٤٨» — that the label exists and reads exactly this is already asserted by e2e/__aria__/*/page-group.aria.yml. What you are judging is whether it sounds like something you would say, and whether your voice speaks ٢:٤٨ correctly rather than as \"two colon four eight\" or as a year.",
             "why": "The one thing no linter can check. axe proves a label exists and the snapshot proves it has not changed; only an ear can tell you the phrase is one a person would use, and only a real voice engine tells you how Arabic-Indic digits actually come out.",
             "shot": "ayah-selected",
-            "id": "judge-the-phrasing"
+            "id": "judge-the-phrasing",
+            "short": "Listen to three or four verse names read aloud. Do they sound like something you would say, with the numbers read properly?"
           },
           {
             "do": "Double-tap an ayah with hops, open a rail chip, and try to escape the sheet: swipe past the last item, and swipe backwards past the first. Then hop to a target and immediately swipe once.",
             "expect": "Both swipes stay inside the sheet — neither walks you into the page behind it. After the hop, the next swipe lands on something real on the new page, not on a node from the sheet that no longer exists.",
             "why": "Focus containment and focus survival across a page change are the two failures that make hopping unusable without sight, and neither is visible to a runner: the tree is correct in both the working and the broken case. The sheet's own contents — «إغلاق», «انتقل إلى …» — are pinned in e2e/__aria__/*/hop-popover.aria.yml and are not what you are checking here.",
             "shot": "hop-popover",
-            "id": "escape-the-sheet"
+            "id": "escape-the-sheet",
+            "short": "Open a verse's look-alike list and swipe past both ends: you stay inside it. Jump, then swipe once: you land on the new page."
           },
           {
             "do": "Now do the whole tour with the screen off or your eyes closed: find an ayah, hop, come back along the trail.",
             "expect": "You can do it. Whatever you could not do — or could only do because you already knew where things were — is the result of this check.",
             "why": "Every label can be correct and the app still unusable, because you knew where to swipe. This is the actual verdict; the two steps before it are how you find out why it failed.",
             "shot": "trail-beads",
-            "id": "eyes-closed"
+            "id": "eyes-closed",
+            "short": "Do the whole round with your eyes closed: find a verse, jump, come back."
           }
         ],
         "reading": [
@@ -223,7 +242,16 @@
         "apps/web/e2e/share-a11y.spec.ts — a surface with no snapshot yet, or a focus behaviour you could break, becomes a test there",
         "packages/core/src/highlighter.ts — the aria-label shape, if the labels read badly"
       ],
-      "record": "docs/decisions/loop-3.md §a11y"
+      "record": "docs/decisions/loop-3.md §a11y",
+      "brief": {
+        "label": "Screen reader round",
+        "ask": "Can someone who cannot see the screen find a verse and jump to its look-alike?",
+        "what": "The tests prove every button has a name. Only a person listening can tell whether the names sound natural, and whether you can find your way without looking.",
+        "need": "A phone with VoiceOver (iPhone) or TalkBack (Android) switched on.",
+        "time": "8 minutes",
+        "done": "You did a full round with your eyes closed, or wrote down where you got stuck.",
+        "unlocks": "The first public version"
+      }
     },
     {
       "id": "kfgqpc-terms-primary-source",
@@ -317,19 +345,22 @@
             "id": "read-each-licence",
             "do": "For each ruler the probe names — the QCF V2 page layout, the juz metadata, and the two similarity corpora — open its page on qul.tarteel.ai and read the licence and attribution it states.",
             "expect": "Each page states a licence that permits measuring against it and linking back (ruler + deep-link, no redistribution of its bytes), and names the attribution it wants. None of them is what we are relying on if it forbids reuse outright.",
-            "why": "The licence is per-resource; there is no blanket grant to lean on. A ruler whose page forbids the use we are making of it is one the probe should stop reading, and that judgement is only on its own page."
+            "why": "The licence is per-resource; there is no blanket grant to lean on. A ruler whose page forbids the use we are making of it is one the probe should stop reading, and that judgement is only on its own page.",
+            "short": "Open each source the probe names and read its licence and the credit it asks for."
           },
           {
             "id": "attribution-matches",
             "do": "Confirm the attribution string we record for each ruler in SOURCES.md says what that resource's page asks for.",
             "expect": "Each borrowed ruler has a SOURCES.md entry whose attribution matches its page, even though we ship none of its bytes.",
-            "why": "Attribution is owed for ruler use as much as for shipped bytes. An attribution we wrote from memory is a claim on the library's behalf, and it drifts the same way the mushaf licence line did."
+            "why": "Attribution is owed for ruler use as much as for shipped bytes. An attribution we wrote from memory is a claim on the library's behalf, and it drifts the same way the mushaf licence line did.",
+            "short": "Check our credit line for each one in the sources list says the same."
           },
           {
             "id": "eyeball-the-exports",
             "do": "Open two or three of the cached export files the probe pin lists under `reads` and look at what they actually contain.",
             "expect": "Verse keys, word indices, page and line numbers, ids — and no Arabic script, no glyph blobs, no per-word text. The pin's schema notes say numbers only; confirm the bytes agree.",
-            "why": "The text-free claim is the load-bearing half of the boundary, and it is about files the tree does not carry, so no gate here can see them. If a future export quietly starts shipping a text column, this is the only place it is caught before the probe starts reading it."
+            "why": "The text-free claim is the load-bearing half of the boundary, and it is about files the tree does not carry, so no gate here can see them. If a future export quietly starts shipping a text column, this is the only place it is caught before the probe starts reading it.",
+            "short": "Open two or three of the saved files: only numbers, no Arabic text."
           }
         ],
         "reading": [
@@ -344,7 +375,15 @@
         "SOURCES.md — the per-resource QUL licence + attribution entries this check keeps faithful",
         ".claude/skills/leverage-qul/ — the rubric that marks which resources are text-bearing and off-limits to the probe"
       ],
-      "record": "docs/decisions/qul-reliance.md"
+      "record": "docs/decisions/qul-reliance.md",
+      "brief": {
+        "label": "Outside sources licences",
+        "ask": "Do the outside sources we check ourselves against allow that use, and do our saved copies hold no Qur'an text?",
+        "what": "We compare our numbers with QUL (qul.tarteel.ai) but ship none of its files. Each of its resources has its own licence, so someone has to read each one.",
+        "need": "A browser signed in to qul.tarteel.ai, and the laptop that holds the QUL downloads.",
+        "time": "10 minutes",
+        "done": "Every source's licence is read and our credit line for it matches what it asks for."
+      }
     },
     {
       "id": "qul-held-copy-licensed-and-offbundle",
@@ -512,38 +551,44 @@
             "do": "Work through the twenty pairs in the print, one at a time.",
             "expect": "Each `from` and `to` is findable at the page printed beside it. A pair you cannot locate is itself a finding — record it as wrong with a note.",
             "why": "This is the only check in the project that can say the data is true. Every other tier verifies that the app faithfully renders whatever the ETL produced — including when what it produced is wrong.",
-            "id": "read-the-pairs"
+            "id": "read-the-pairs",
+            "short": "Find each of the twenty pairs in the print."
           },
           {
             "do": "Read `words` and `roots` beside each pair as hints, and distrust them.",
             "expect": "`words` is the longest run of words the two ayahs share — the same score gate:edges enforces a floor on, computed by the same reader (packages/etl/scripts/morphology.mjs), so a number here can never disagree with CI. `roots` is how many of the shorter ayah's roots appear in both, in order.",
             "why": "They point at the pairs worth slowing down on from both ends: a high `words` with a wrong verdict is a plausible-looking false edge, and a low one that is nonetheless right is the case the product exists for — 2:48 → 2:123 swaps شفاعة and عدل, scores 1, and is genuinely confused by huffaz every day.",
-            "id": "distrust-the-hints"
+            "id": "distrust-the-hints",
+            "short": "Treat the shared-word counts as hints, not answers."
           },
           {
             "do": "For each, answer the question the tool prints — not «are these similar?» but «**would a hafiz confuse these two while reciting?**»",
             "expect": "Most edges are obvious either way in a few seconds. The slow ones are the informative ones; note why.",
             "why": "\"Similar\" is not the standard; a hafiz's confusion is. An edge that is textually close but never actually confused is noise in the rail, and noise is what makes a reader stop trusting the hop.",
-            "id": "answer-the-question"
+            "id": "answer-the-question",
+            "short": "For each pair ask: would a hafiz confuse these two while reciting?"
           },
           {
             "do": "Optionally open a pair in the app to see what a reader actually sees: make phone, then navigate to the ayah and open its rail.",
             "expect": "The edge appears as a hop under the direction chip its `type` implies.",
             "why": "Catches a correct edge with a wrong presentation. A real mutashabih filed under the wrong direction chip sends the reader looking in the wrong surah, which reads as bad data even though the data is fine.",
             "shot": "hop-rail",
-            "id": "see-it-in-the-app"
+            "id": "see-it-in-the-app",
+            "short": "Optional: open the pair in the app to see what a reader sees."
           },
           {
             "do": "Paste the printed JSON block into packages/etl/data/qa/verified-edges.json under `entries`, setting each `verdict` to `correct` or `wrong`, `verifiedBy` to your name, and `note` where a future reader needs the reason.",
             "expect": "Forty entries for twenty pairs — the block writes out both directions of each pair, because every edge in the corpus is generated in both and one reading settles both.",
             "why": "Recording the `correct` verdicts matters as much as the failures: they are what turns half an hour of reading into a permanent regression fixture instead of an anecdote.",
-            "id": "bank-the-verdicts"
+            "id": "bank-the-verdicts",
+            "short": "Paste the verdicts into the checked-pairs file."
           },
           {
             "do": "Run pnpm gate:verified-edges.",
             "expect": "OK. Those verdicts are now enforced in both directions, forever — a `correct` edge that disappears and a `wrong` edge that returns both fail the build.",
             "why": "This is the step where manual work becomes automated. Once it is green, a `correct` edge that disappears and a `wrong` edge that returns both fail the build — forever, without anyone re-reading twenty pairs.",
-            "id": "run-the-gate"
+            "id": "run-the-gate",
+            "short": "Run the check. It passes."
           }
         ],
         "reading": [
@@ -570,6 +615,15 @@
           "Every pair. The gate re-checks verdicts that are already banked against the shipped corpus; it cannot look at a mushaf, and no verdict exists until someone has. This is the one check in the register that can establish the data is true, and it is human by construction.",
           "Choosing what to look at. `make validate` prints which strata have never been audited — a class with no verdict in it is a class where a wrong pair survives every check this repo has — but pointing at the gap is not closing it."
         ]
+      },
+      "brief": {
+        "label": "20 look-alike pairs",
+        "ask": "Would a hafiz really mix up the verse pairs the app calls look-alikes?",
+        "what": "Every look-alike link is scripture data, and no machine can prove one is true. Twenty pairs checked against a printed mus'haf is the most valuable half hour on this list.",
+        "need": "A printed mus'haf (the King Fahd Complex Hafs print), and a hafiz if you can get one.",
+        "time": "30–45 minutes",
+        "done": "Twenty verdicts are saved and the check that enforces them passes.",
+        "unlocks": "The first public version"
       }
     },
     {
@@ -594,27 +648,32 @@
           {
             "do": "On the phone, open the deployed site in a Safari tab, tap the page chip in the header, choose «جزء», and press «احفظ الجزء ١ هنا».",
             "expect": "The button becomes a count («جارٍ حفظ الجزء ١ — ن من ٢٤») with «إيقاف» beside it, and settles into a row reading «الجزء ١ · ٣٫١ م.ب» or thereabouts — the offer disappears, because the juz is now kept. If the row instead says «ناقص» the pin did not finish; press «احفظه من جديد» before starting the clock.",
-            "why": "The tab is the case we expect to lose. Proving it worked on day 0 is what makes a day-8 failure evidence rather than a guess."
+            "why": "The tab is the case we expect to lose. Proving it worked on day 0 is what makes a day-8 failure evidence rather than a guess.",
+            "short": "In a Safari tab, save juz 1."
           },
           {
             "do": "Add the site to the Home Screen, open it from there, and pin the same juz again inside the installed app.",
             "expect": "Two independent storage buckets now hold the same pack. That is the experiment.",
-            "why": "Two buckets, same pack, same phone, same eight days. It is the only arrangement that lets you attribute a loss to the storage sweep rather than to the network, the build, or the device."
+            "why": "Two buckets, same pack, same phone, same eight days. It is the only arrangement that lets you attribute a loss to the storage sweep rather than to the network, the build, or the device.",
+            "short": "Add the site to the Home Screen and save juz 1 there too."
           },
           {
             "do": "Write down today's date, then use the phone normally for 8+ days. Do not open Hifth in either place.",
             "expect": "Nothing. This step is the check.",
-            "why": "ITP counts seven days of browser use, not seven days of wall clock, and it cannot be fast-forwarded. The waiting is the instrument."
+            "why": "ITP counts seven days of browser use, not seven days of wall clock, and it cannot be fast-forwarded. The waiting is the instrument.",
+            "short": "Note the date. Do not open Hifth anywhere for 8 days or more."
           },
           {
             "do": "On day 8 or later, turn on airplane mode and open the Safari tab: try to revise the pinned juz — open pages, hop, turn pages.",
             "expect": "The tab may have lost everything (ITP clears script storage for origins untouched for 7 days of browser use). If it has, the notice «الصفحات التي حفظتها لم تعد في هذا الجهاز» should be on screen with «اعرض المحفوظ» beside it, and under «المحفوظ في هذا الجهاز» the row for juz 1 should read «لم يعد في هذا الجهاز» or «ناقص» — not a broken page, and not a row still claiming megabytes it no longer has.",
-            "why": "Airplane mode is what makes this a storage test rather than a cache test: whatever still works is genuinely resident on the device."
+            "why": "Airplane mode is what makes this a storage test rather than a cache test: whatever still works is genuinely resident on the device.",
+            "short": "Day 8, airplane mode on, open the Safari tab. The juz may be gone — if so, the app should say so."
           },
           {
             "do": "Still in airplane mode, open the installed app and do the same.",
             "expect": "The juz is still there. Installed apps are exempt from that sweep — this asymmetry is the whole reason the install prompt is first-class.",
-            "why": "If the installed app survives and the tab does not, the install prompt stops being a nicety and becomes the feature that makes offline revision real — which is what Loop 6b has to be designed around."
+            "why": "If the installed app survives and the tab does not, the install prompt stops being a nicety and becomes the feature that makes offline revision real — which is what Loop 6b has to be designed around.",
+            "short": "Still offline, open the installed app. The juz is still there."
           }
         ],
         "reading": [
@@ -630,7 +689,17 @@
         "apps/web/src/pwa.ts — `repairShellCache()` re-registers `sw.js` under a query-suffixed URL, because a script URL the registration has never seen is the only thing observed to force the install that refills an evicted precache. If iOS evicts differently — registration gone too, or storage back but stale — that trigger is what changes.",
         "apps/web/src/storage.ts — the re-pin offer's trigger, if eviction looks different than assumed"
       ],
-      "record": "docs/decisions/loop-6b.md"
+      "record": "docs/decisions/loop-6b.md",
+      "brief": {
+        "label": "8 days offline",
+        "ask": "After 8 days untouched, does a saved juz still open with no signal?",
+        "what": "Safari wipes a website's saved data after 7 days without a visit, but leaves Home Screen apps alone. That is why the app asks to be installed — and nobody has ever watched it happen.",
+        "need": "An iPhone and the live site.",
+        "time": "5 minutes, then 8 days of ordinary phone use",
+        "done": "You noted what the Safari tab and the installed app each did on day 8.",
+        "unlocks": "The first public version",
+        "diagram": "flowchart TD\n  S[Save juz 1] --> T[in a Safari tab]\n  S --> H[in the Home Screen app]\n  T --> W[8 days, not opened]\n  H --> W\n  W --> O{Airplane mode on}\n  O --> T2[Safari tab: juz may be gone,<br/>and the app should say so]\n  O --> H2[Home Screen app:<br/>juz still there]"
+      }
     },
     {
       "id": "revision-record-lands-on-a-phone",
@@ -654,32 +723,38 @@
           {
             "do": "Open the deployed site on the phone. Before tapping anything, look at `meta` → `since` in the storage inspector.",
             "expect": "A row already exists, stamped with today's local date — written by opening the store, not by any tap.",
-            "why": "This is the entire defence against the seven-day sweep. A record that has existed for a month and holds nothing means the reader did not tap; one that has existed since this morning and holds nothing means we lost it. If `since` only appeared after the first tap, those two are indistinguishable forever after."
+            "why": "This is the entire defence against the seven-day sweep. A record that has existed for a month and holds nothing means the reader did not tap; one that has existed since this morning and holds nothing means we lost it. If `since` only appeared after the first tap, those two are indistinguishable forever after.",
+            "short": "Open the site. Before tapping anything, the record's start date reads today."
           },
           {
             "do": "Tap five or six ayahs on a page, then drag a marquee across a short passage. Tap one of those ayahs a second time to dismiss it.",
             "expect": "Under `days` → today's date: one entry per ayah you selected, exactly one entry for the whole marquee (carrying both a `key` and an `endKey`), and nothing at all for the tap that dismissed.",
-            "why": "The three exclusions are asserted in App.test.tsx, but against a synthetic pointerup on a fixture page. This is the same claim against a finger on the real gesture stack — where a marquee release and a tap are told apart by @use-gesture, not by the test calling one or the other."
+            "why": "The three exclusions are asserted in App.test.tsx, but against a synthetic pointerup on a fixture page. This is the same claim against a finger on the real gesture stack — where a marquee release and a tap are told apart by @use-gesture, not by the test calling one or the other.",
+            "short": "Tap five or six verses and drag across a short passage: one entry per verse, one for the passage."
           },
           {
             "do": "Tap two or three more ayahs, then immediately swipe the app away from the app switcher — within a second or two, before anything could plausibly flush.",
             "expect": "Reopen and inspect: those last taps are all present.",
-            "why": "The store writes on every tap instead of batching, which costs a rewrite of the day's array per tap. This step is what that cost is buying. A batched writer loses exactly the taps made just before the app is killed, which on a phone is most of them — and it would have looked perfect in every test in this repo."
+            "why": "The store writes on every tap instead of batching, which costs a rewrite of the day's array per tap. This step is what that cost is buying. A batched writer loses exactly the taps made just before the app is killed, which on a phone is most of them — and it would have looked perfect in every test in this repo.",
+            "short": "Tap a few more, then swipe the app away at once. Reopen: those taps are still there."
           },
           {
             "do": "If you can, do one short session within half an hour either side of local midnight, and note the wall-clock time.",
             "expect": "Looks before midnight file under the earlier date and looks after it under the later one — by the phone's own clock, not UTC.",
-            "why": "Every clock in CI is UTC, so `dayOf` reading the offset from the event has never once been exercised against a real one. Someone revising at 23:40 in a UTC+3 city and again at 00:20 has revised on two days; if the record shows one, the offset is not riding on the event and every evening session east or west of Greenwich is mis-filed."
+            "why": "Every clock in CI is UTC, so `dayOf` reading the offset from the event has never once been exercised against a real one. Someone revising at 23:40 in a UTC+3 city and again at 00:20 has revised on two days; if the record shows one, the offset is not riding on the event and every evening session east or west of Greenwich is mis-filed.",
+            "short": "Optional: revise a little around midnight. Each tap lands under the right day."
           },
           {
             "do": "On a later calendar day, open the app again and revise for a few minutes.",
             "expect": "`days` now holds two keys, the earlier one unchanged, and `meta` → `since` still shows the first day — it must not have moved forward.",
-            "why": "`since` moving with the record would make the log look freshly created every time it was read, which is precisely the wipe's signature. This is the cheapest way to catch that, and it cannot be caught at all in a suite that creates a new database per test."
+            "why": "`since` moving with the record would make the log look freshly created every time it was read, which is precisely the wipe's signature. This is the cheapest way to catch that, and it cannot be caught at all in a suite that creates a new database per test.",
+            "short": "Revise again on another day: two days now, and the start date has not moved."
           },
           {
             "do": "Now leave the app alone for eight or more days of ordinary phone use, then open it and look at `days` and `since`.",
             "expect": "Either the record is intact, or it is empty **and** `since` reads as today — never empty with an old `since`.",
-            "why": "This is the failure the feature is designed around and the one no harness can produce: iOS sweeping an origin nobody has touched. The two acceptable outcomes are 'the history is there' and 'the history is gone and the record admits it is one day old'. The third — empty, with a `since` from weeks ago — is the app telling someone they have not revised in a month. Note whether the phone had the site installed to the Home Screen or open as a tab; that is the same asymmetry offline-survival-8-day measures for the page cache, and this is the IndexedDB half of it."
+            "why": "This is the failure the feature is designed around and the one no harness can produce: iOS sweeping an origin nobody has touched. The two acceptable outcomes are 'the history is there' and 'the history is gone and the record admits it is one day old'. The third — empty, with a `since` from weeks ago — is the app telling someone they have not revised in a month. Note whether the phone had the site installed to the Home Screen or open as a tab; that is the same asymmetry offline-survival-8-day measures for the page cache, and this is the IndexedDB half of it.",
+            "short": "Leave it 8 days or more, then look: all there, or empty with today as the start date."
           }
         ],
         "reading": [
@@ -698,7 +773,16 @@
         "apps/web/src/revision-store.ts — if a swipe-away loses taps, the per-tap write is not sufficient and the durability comment at the top of the file is currently a claim rather than a fact.",
         "docs/map.json → revision-record — the `extend` steps for task #91 depend on which of the two acceptable outcomes actually happens at day eight."
       ],
-      "record": "docs/decisions/loop-7.md"
+      "record": "docs/decisions/loop-7.md",
+      "brief": {
+        "label": "Two days of revision",
+        "ask": "Does a phone keep an honest record of the days you revised?",
+        "what": "The revision record has only been tested on a laptop, where nothing is ever wiped. A phone closes apps and clears data; only two real days on one show whether the record survives.",
+        "need": "A phone (an iPhone if you can) with the live site, two different days, and a Mac to look at what it saved.",
+        "time": "10 minutes on each of two days, then one look 8 days later",
+        "done": "Two days show in the record — or it is empty and says it started today. Never empty with an old start date.",
+        "unlocks": "The first public version"
+      }
     },
     {
       "id": "placement-correction-by-eye",
@@ -733,49 +817,57 @@
             "do": "If you are also going to sit the placing session, sit this one first.",
             "expect": "Nothing to run. It is an order, not a command.",
             "why": "The placing session shows the same rectangles and invites you to drag them onto the mark, which is the most effective possible way to learn where our correction tends to sit. Come to these hundred trials afterwards and you are answering from that lesson rather than from the ink, and the count that comes out is a measure of how well you learned it. The reverse order costs nothing: knowing which of two rectangles you preferred does not tell you where to drag anything.",
-            "id": "this-one-first"
+            "id": "this-one-first",
+            "short": "If you are also doing the placing check, do this one first."
           },
           {
             "do": "Read the five short answers the page opens with, then start. Do not read the code that built it first.",
             "expect": "A first trial: one mark, drawn twice side by side, a rectangle on each, and two keys.",
             "why": "The trials are built so that nothing on the screen says which rectangle is ours, and the answers exist nowhere until the scorer runs. Reading the builder first is the one way to spoil that, and there is no way to unspoil it — the session would have to be thrown away and rebuilt under a seed you had not seen.",
-            "id": "start-cold"
+            "id": "start-cold",
+            "short": "Read the five short answers at the top, then start."
           },
           {
             "do": "For each trial pick the panel whose rectangle sits on the mark — A or B — or press space when you honestly cannot tell.",
             "expect": "No feedback, ever: the next trial, and a bar creeping along. Some pairs are obvious. Most are not, and a few are the same rectangle twice, where space is the only honest answer.",
             "why": "Feedback would turn this into training. Within twenty trials a person who is told they were right learns which way the corrected box tends to sit and answers from that rule rather than from the ink, and the count that comes out measures how well they learned it. Space is not a wasted trial: it is left out of the arithmetic rather than counted as a miss, so guessing to keep the tally up is the one thing that would cost you.",
-            "id": "work-the-trials"
+            "id": "work-the-trials",
+            "short": "For each mark press A or B for the box that sits on it, or space if you cannot tell."
           },
           {
             "do": "When the mark pokes out of both rectangles, press N to say neither closes around it — and then still pick whichever of the two is closer.",
             "expect": "The tick lights up and clears itself on the next trial. It changes nothing else on the screen, and it never skips the trial.",
             "why": "A rectangle can be in the right place and still be the wrong size, and this whole session is about where they sit. Those are two faults with two different repairs, so a fourth button meaning 'wrong somehow' would blend them into one count nobody could act on — and it would eat the trials that still carry a usable answer, because which of two wrong rectangles is closer is a question you can answer. The tick is counted on its own line and the marks you tick are named, so somebody can go and look at those boxes rather than argue about whether they exist.",
-            "id": "flag-the-misfits"
+            "id": "flag-the-misfits",
+            "short": "If the mark sticks out of both boxes, press N — then still pick the closer one."
           },
           {
             "do": "Stop whenever you are tiring. Close the tab and come back to the same file later.",
             "expect": "It resumes on the trial you left, with the answers you already gave. Nothing reshuffles.",
             "why": "Pushing through a hundred trials tired means the last thirty are answered from fatigue, and in the numbers fatigue is indistinguishable from 'the correction does not help' — it would read as a finding about our data rather than about the hour.",
-            "id": "stop-when-tired"
+            "id": "stop-when-tired",
+            "short": "Stop when you are tired; it picks up where you left off."
           },
           {
             "do": "At the end, press the button that saves the ruling, and keep the file somewhere you can name on a command line.",
             "expect": "mark-ruling-11.28042a4d.json in your downloads. It holds your answers, the seed, and both fingerprints — and no key, because there still isn't one. The second half of the name is the page list: two sittings under this seed that asked about different pages are different sittings, and without it they arrive in the same folder as the same file.",
             "why": "The ruling is deliberately worthless on its own. That is what makes it evidence: it could not have been edited towards an answer, because at the moment it was written nothing on the machine knew what the answers were.",
-            "id": "save-the-ruling"
+            "id": "save-the-ruling",
+            "short": "At the end, save the file."
           },
           {
             "do": "Score it: pnpm adjudicate:score ~/Downloads/mark-ruling-11.28042a4d.json --shift docs/validation/rulings/mark-shift.604pages.c849e72d.json",
             "expect": "Four lines with intervals — as shipped, the decoy, the catches, twins — then, if you ticked any, how many marks poked out of both rectangles and the headline again without them. One sentence of verdict at the end. It exits 0 only when the session was valid and the corrected rectangle actually won.",
             "why": "This is the first moment anyone knows what the right answers were, you included. The corrections have to be named because the ones sitting loose in the build directory are whatever was measured last, and this sitting was built from a particular committed file. If it refuses outright, that is the two of them disagreeing: score against the file it was built from, or build a fresh session and work it again. A ruling scored against corrections it was not worked against comes out looking clean and means nothing.",
-            "id": "score-it"
+            "id": "score-it",
+            "short": "Score it."
           },
           {
             "do": "Bank the verdict with the record command below, whichever way it went.",
             "expect": "The ledger gains the four numbers and the date, and this check stops being pending.",
             "why": "A refusal is worth as much here as a confirmation and is far more likely to be dropped on the floor. 'A person looked and did not prefer our correction' is the single most valuable sentence this project could learn about the mark layer, and it is unrecoverable a week later if nobody wrote the numbers down.",
-            "id": "bank-the-verdict"
+            "id": "bank-the-verdict",
+            "short": "Record the result."
           }
         ],
         "reading": [
@@ -799,7 +891,16 @@
       ],
       "record": "docs/design/mark-registration.md",
       "verifiedOn": "2026-08-12",
-      "result": "Not sat, and recorded so the ledger stops reading as untried. Two sittings were opened on 2026-08-12 and both were abandoned — 5 of 100 trials on the first, 9 of 100 on the second — with no verdict written and no answers file handed back, so nothing here measures whether the corrected rectangle beats the shipped one. The fourteen trials do say two things, neither of them a result. On three of the first five the reader ticked that NEITHER rectangle closed around the mark at all: a forced choice between two boxes only informs when at least one is on the thing, and at that rate what is wrong is the mix of trials rather than the correction. The fallback sittings later found the same thing at scale — 100 of 101 gradable marks faulted — so expect it again and deal the trials accordingly. Second, the nine trials of the later sitting were answered in nine seconds, a median of 893 milliseconds on a judgement that needs the eye to travel between two rectangles, which reads as clicking through rather than looking; a sitting that fast is not evidence whichever way it falls. Also on the record as a process failure: two half-transcripts for one check is the outcome the transcript register names as the worst available here, and this is it — the second sitting started fresh on a different commit instead of resuming the first."
+      "result": "Not sat, and recorded so the ledger stops reading as untried. Two sittings were opened on 2026-08-12 and both were abandoned — 5 of 100 trials on the first, 9 of 100 on the second — with no verdict written and no answers file handed back, so nothing here measures whether the corrected rectangle beats the shipped one. The fourteen trials do say two things, neither of them a result. On three of the first five the reader ticked that NEITHER rectangle closed around the mark at all: a forced choice between two boxes only informs when at least one is on the thing, and at that rate what is wrong is the mix of trials rather than the correction. The fallback sittings later found the same thing at scale — 100 of 101 gradable marks faulted — so expect it again and deal the trials accordingly. Second, the nine trials of the later sitting were answered in nine seconds, a median of 893 milliseconds on a judgement that needs the eye to travel between two rectangles, which reads as clicking through rather than looking; a sitting that fast is not evidence whichever way it falls. Also on the record as a process failure: two half-transcripts for one check is the outcome the transcript register names as the worst available here, and this is it — the second sitting started fresh on a different commit instead of resuming the first.",
+      "brief": {
+        "label": "Pick the better box",
+        "ask": "Of two boxes drawn around a vowel-sign mark, can you pick the one that sits on it?",
+        "what": "Our measurements say a small shift puts each mark's box where it belongs, but only a program has checked that, and it graded its own work. A hundred quick picks by eye decide whether the fix ships.",
+        "need": "This laptop and a comfortable screen. You do not need to be a hafiz.",
+        "time": "20 minutes, can be split",
+        "done": "Your picks are saved, scored and recorded.",
+        "unlocks": "The vowel-sign placement fix"
+      }
     },
     {
       "id": "placement-residual-by-hand",
@@ -955,73 +1056,85 @@
             "do": "Before opening anything, read the four predictions in the reading notes below and satisfy yourself they were written down first.",
             "expect": "Four statements about numbers that do not exist yet, each one saying what it would mean if it came back wrong.",
             "why": "The last sitting was read after the fact, and reading a result after the fact is how a session that measured nothing comes to look like a session that confirmed something. A prediction written before anybody places a rectangle can fail. One written afterwards cannot, whatever it says.",
-            "id": "read-the-prediction-first"
+            "id": "read-the-prediction-first",
+            "short": "First read the four predictions that were written down in advance."
           },
           {
             "do": "Do this on a different day from the forced-choice session, or before it — not straight after. The same goes for the previous placing session if you were the one who did it.",
             "expect": "Nothing on the screen tells you either way. This one is on you.",
             "why": "Placing sixty rectangles teaches a hand which way the correction tends to go, and a hand that has learned the rule answers from the rule rather than from the ink. That is the one fault none of these sessions can detect afterwards, because somebody answering from a learned rule looks exactly like somebody who can see very well. It matters more here than last time: these pages were picked because they want unusual moves, and a hand carrying last time's habit would place them all as though they wanted the usual one.",
-            "id": "keep-them-apart"
+            "id": "keep-them-apart",
+            "short": "Use a different day from the pick-A-or-B check, not straight after it."
           },
           {
             "do": "Open the first page. Read the short answers it opens with, then start. Do not read the code that built it first.",
             "expect": "A line naming one mark, a small piece of print with that mark's letters under a soft blue wash, one red rectangle sitting obviously off it, and a button that will not do anything yet.",
             "why": "The builder knows where we think each rectangle goes and the page deliberately does not. Reading it first is the one way to spoil that, and the sitting would have to be thrown away and rebuilt under a seed you had not seen.",
-            "id": "start-cold-here"
+            "id": "start-cold-here",
+            "short": "Open the first page and read its short answers."
           },
           {
             "do": "Read the line above the picture, find the mark it names, drag the rectangle onto that mark and press enter. Arrow keys nudge it; hold shift for a bigger step. Press S if the rectangle is plainly the wrong size for its mark, and place it as well as you can anyway.",
             "expect": "The button wakes as soon as you move it, and nothing happens when you place it except the next trial. No target, no snapping, no 'close'. Some rectangles start further out than you may remember from last time.",
             "why": "The rectangle always starts wrong, so leaving it alone is never an answer. A crop this size holds several marks and often two of the same name, so the line names one and the wash points at the letters it belongs to — a placement on the neighbour is a whole letter out and would be recorded as though the boxes were a whole letter out. And where a box sits and how big it is are two faults with two repairs; the tick keeps them apart, and never costs the placement.",
-            "id": "place-them"
+            "id": "place-them",
+            "short": "Drag each box onto the mark named above the picture and press Enter. Press S if its size is plainly wrong."
           },
           {
             "do": "Place each one honestly and move on. Do not labour over any single rectangle, and do not try to be consistent with what you did the last time you saw a mark.",
             "expect": "Some marks come round a second time, starting somewhere else. You may or may not notice.",
             "why": "The pair is the scale for everything else. Two independent goes at the same mark differ by however far your hand wanders, and that spread is what separates a real offset from noise. Reproducing your earlier answer replaces a measurement of your hand with a measurement of your memory, and then nothing below has a scale. The existing mechanism measured a hand to a fiftieth of a unit last time, which is why it is unchanged here.",
-            "id": "let-the-repeats-be-repeats"
+            "id": "let-the-repeats-be-repeats",
+            "short": "Do not agonise over any one box."
           },
           {
             "do": "Stop whenever you are tiring. Close the tab and come back to the same file later. Save and move the first sitting before you open the second.",
             "expect": "It resumes on the placement you left, with the ones you already made, and nothing reshuffles. The saved file lands in your downloads; it becomes docs/validation/rulings/<when>-placement-holds-off-its-own-pages.seed31.json.",
             "why": "A tired hand wanders, and a wandering hand does not read as fatigue in the output — it reads as a wide precision estimate, which quietly makes every real finding undetectable. And the two sittings are stored under different seeds because they answer different questions; scoring one against the other's answers is the mistake the fingerprints exist to catch, but only if the files are named apart in the first place.",
-            "id": "stop-when-tiring"
+            "id": "stop-when-tiring",
+            "short": "Stop when you like. Save the first sitting before opening the second."
           },
           {
             "do": "Do the second sitting the same way, and save it as docs/validation/rulings/<when>-placement-holds-off-its-own-pages.seed37.json.",
             "expect": "Twenty-three placements, four or five on each of five pages. The same five pages come round repeatedly and you will start to recognise them. That is fine and it is the point.",
             "why": "Four rectangles on one page is the only arrangement that can say how much of the leftover distance is a property of the page and how much is the hand. The previous sitting had roughly one and a half per page, which is why its clustered interval had to assume the worst and crossed nought. Recognising a page does not spoil this one, because you are still not being told where the box goes.",
-            "id": "do-the-structure-block"
+            "id": "do-the-structure-block",
+            "short": "Do the second sitting the same way and save it."
           },
           {
             "do": "Optional, and the only part somebody else has to do: sit a second person at the third page, ask them for twenty or so placements, and let them stop whenever they like. Save it as docs/validation/rulings/<when>-placement-holds-off-its-own-pages.seed31.readerB.json. Tell them nothing about the first sitting beyond how to work the page.",
             "expect": "The same forty-seven rectangles in the same order from the same starting positions, because it is deliberately the same build. They will not get through all of them and they do not need to — only the ones both of you placed are compared.",
             "why": "Everything else here measures one hand against the print and cannot say which of the two it is reading: 'the print is out by a tenth' and 'this reader places rectangles a tenth low' come out as the same number. Two hands separate them, and nothing else does. It has to be the identical build or there is nothing to compare mark for mark, and it has to be somebody who has not seen your answers or you are measuring how persuasive you are.",
-            "id": "ask-a-second-hand"
+            "id": "ask-a-second-hand",
+            "short": "Optional: have a second person place about twenty on the third page."
           },
           {
             "do": "Read each one: pnpm nudge:score docs/validation/rulings/<the file you just moved>",
             "expect": "It opens by saying how many pages the sitting can speak for and that they were held out of the measurement, which the previous sitting could not say. Then the headline in the same currency as before, the residual with a naive and a clustered interval, your own precision from the repeats, and — this is the new part — whether the pages varied enough for the size of the correction to be readable. It should now say decidable rather than undecidable.",
             "why": "This is the first moment anybody knows what the correction was, you included. If it refuses outright, the displacements or the page selection moved between building the sitting and reading it: read it against the files it was built from, or build a fresh sitting and place them again. It refuses on either fingerprint, and it refuses again if the displacements file has no entry for a page the sitting used — because a file can carry the right fingerprint and still be the wrong file for these pages.",
-            "id": "read-the-residual"
+            "id": "read-the-residual",
+            "short": "Score each file."
           },
           {
             "do": "If a second person sat the third page, read the two together by adding --against and the second person's file to the command above.",
             "expect": "A new block saying how far the two hands are from each other on each axis, and how that compares with how far each hand is from itself. If it refuses, the two sittings were not built the same way and it says which part differs — that is not something to work around; rebuild and place again.",
             "why": "This is the one reading that can say a further correction may be applied to all 604 pages rather than to nobody. Agreement inside the two hands' own wobble means the leftover belongs to the print. A wider gap means it belongs to whoever was sitting there, and the leftover must not be applied to anything — which is a finding, and a more valuable one than the number it would have replaced.",
-            "id": "read-the-two-hands"
+            "id": "read-the-two-hands",
+            "short": "If a second person took part, score the two together."
           },
           {
             "do": "Compare what came back against the four predictions, and write down which of them failed.",
             "expect": "Some of them will not hold. That is what they are for.",
             "why": "A prediction that survives is worth a sentence; a prediction that fails is worth the whole sitting, because it is the only thing that can tell us we were reasoning about the wrong quantity. The reading notes say what each failure would mean before anyone has seen a number.",
-            "id": "score-the-predictions"
+            "id": "score-the-predictions",
+            "short": "Write down which predictions failed."
           },
           {
             "do": "Bank the numbers with the record command below, whichever way it went.",
             "expect": "The ledger gains the headline, the residual, the size estimate, the page-versus-hand split and the date, and this check stops being pending.",
             "why": "Everything the mark boxes do next turns on these numbers, and a number nobody wrote down is one somebody has to buy again at half an hour of a person's attention.",
-            "id": "bank-the-numbers"
+            "id": "bank-the-numbers",
+            "short": "Record the numbers."
           }
         ],
         "reading": [
@@ -1047,7 +1160,19 @@
         "docs/design/mark-registration.md §⑦ — its recommendation is still provisional pending a magnitude, and this is the sitting that either supplies one or says the magnitude was never there.",
         "packages/etl/scripts/score-mark-nudge.mjs — the second reader's block prints a comparison and no threshold. What two hands on this screen actually manage is the number that belongs there, and until this sitting happens nobody has one."
       ],
-      "record": "docs/design/mark-registration.md"
+      "record": "docs/design/mark-registration.md",
+      "brief": {
+        "label": "Place boxes on new pages",
+        "ask": "Does the fix still land on pages it was never tuned on?",
+        "what": "The last test only used the 40 pages the fix was worked out from. This one uses pages it has never seen, and also asks whether each box is the right size and whether what is left over comes from the print or from the hand placing it.",
+        "need": "The laptop with a mouse or trackpad, not a phone. A second person helps for the last part.",
+        "time": "25 minutes, then 12 minutes on another day",
+        "done": "Both sittings are saved, scored and recorded.",
+        "unlocks": "The vowel-sign placement fix",
+        "after": [
+          "placement-correction-by-eye"
+        ]
+      }
     },
     {
       "id": "placement-what-kind-of-wrong",
@@ -1091,91 +1216,106 @@
             "do": "Read the explanation at the top once, then press the button under it to shorten it. It stays short for the rest of the sitting, and the long version is one press away whenever you want it back.",
             "expect": "A single line in its place, and a button offering the long one back. The answer buttons sit in a strip pinned to the bottom of the screen and stay there while the picture scrolls behind them, so they are in the same place on every card whatever size that card's picture is.",
             "why": "The explanation is about 275 px of text and it sat above every card, every time, which put the button meaning nothing-is-wrong below the fold on a phone — so the commonest answer was the one you had to scroll to reach. Shortening it after the first read takes some 230 px off that. What was deliberately not done is putting the fault buttons behind a disclosure to save the same space: that would add a tap to reporting a fault while saying nothing-is-wrong stayed free, and the ratio between those two is the entire thing this sitting measures. The weight of the controls changed; what any answer costs did not.",
-            "id": "read-it-once-then-shorten-it"
+            "id": "read-it-once-then-shorten-it",
+            "short": "Read the explanation once, then shorten it."
           },
           {
             "do": "Before answering anything, read the line above the picture, then look at the whole word. Press the button under the picture only once you know which letter the rectangle is sitting on.",
             "expect": "Above the picture: the mark's name, the word it sits in, and — when the crop holds more than one mark of that name — a sentence saying which of them is meant, counted from the right. The picture itself opens wide enough to show the neighbouring letters, and the button swaps between that and a close view of the rectangle alone. The answers you have already given stay put either way.",
             "why": "The first sitting of this page was stopped after one screen because the crop was tight enough to judge a placement and too tight to say which letter was being talked about — and a reader who cannot name the letter cannot tell a rectangle on the wrong mark from a rectangle on no mark. The wide view is for identifying, the close one for judging, and doing them in that order is the whole reason there are two. The line above them took two further goes. A reader looking at a crop with several of the same mark in it asked, reasonably, which one — so the sentence that picks one out was added. Then it turned out the card already knew the containing word on ninety-one cards in a hundred and fifteen and was throwing it away, that the mark's own name reached only one of the three ways that sentence can be written, and that the whole line was set in the dimmest type on the screen. It is the question, not a footnote, and it is set like one now.",
-            "id": "know-what-you-are-looking-at"
+            "id": "know-what-you-are-looking-at",
+            "short": "Read the line above the picture and find the letter the box is on."
           },
           {
             "do": "When nothing is wrong with a mark, say so. It is a real answer, and it is the one you should expect to give most often.",
             "expect": "The button fills in solid with a tick, and the sitting moves on. It joins the list under the picture like any other answer and can be taken back the same way.",
             "why": "The marks are drawn at random, so most of them are fine and most answers here are this one. For a long time it could not be given at all: passing a mark silently was the verdict, which made the common case free but left the file unable to tell somebody who looked and was satisfied from somebody who had not got there yet. Sixty marks were sat that way, every one of them fine, and the transcript could only report that nobody had complained. Both are kept now — how far you got is still the denominator, and what you explicitly vouched for is reported against it.",
-            "id": "nothing-wrong-is-an-answer"
+            "id": "nothing-wrong-is-an-answer",
+            "short": "If nothing is wrong, say so — it will be the most common answer."
           },
           {
             "do": "Say every answer that is true about the mark, not the truest one. A mark can be in the wrong place and the wrong size and sitting on a page that is itself odd.",
             "expect": "Each answer appears in a short list under the buttons as you give it. Nothing is exclusive and nothing advances the page except moving on yourself.",
             "why": "The single-verdict shape is what every earlier sitting had, and it is what made the residual unreadable: forced to pick one, a reader picks the most obvious, and the second fault is never recorded by anybody. These five are not a ranking, they are five different repairs in five different files, and one mark can need two of them.",
-            "id": "say-everything-true"
+            "id": "say-everything-true",
+            "short": "Give every answer that is true, not just one."
           },
           {
             "do": "When the rectangle is the right size and simply on the wrong mark, tap the mark it should be on. Tap it again to take that back, and tap the other half as well when the mark is printed in two pieces. Dragging it there by hand still works and so does the pad of arrows — grab the rectangle itself, because a drag that starts anywhere else scrolls the page.",
             "expect": "A tap lights the ink you chose and puts the rectangle round it, at the size of that ink. A tap that lands on blank paper moves nothing and says so in the line under the picture — the marks are small, so aim at the stroke itself or look closer first. Resting a finger on the rectangle without moving it is a tap however long you rest there, and never a nudge. A drag follows your finger and stops where you let go. Either way the answer records where the rectangle ended up relative to the box that ships, there is a button that puts it back where it started if you would rather begin again, and it does not matter how many times you change your mind: only where it finally rests is read.",
             "why": "This is the one answer that is a distance, and it is the only one that can be applied to anything arithmetically — so it has to mean exactly one thing. A rectangle dragged because it was too small records a displacement that is really a size complaint, and that number would then be averaged in with real ones. It grabs only on the rectangle for a plainer reason: on a phone the picture is most of the screen, and a page where scrolling past it silently records a placement nobody made is worse than a page that records nothing. Tapping was added after the first sitting measured what the by-hand loop costs: 127 of the 128 rectangles were moved, over 226 separate goes, a median of two units of travel each. Choosing which mark is meant is the judgement only you can give; how far across and how far down is something the print already knows, so pointing hands that half back. What is recorded is which way you answered — and a press of the arrows on top of a tap makes it a hand-placed answer again — because the two are read apart and never averaged together.",
-            "id": "move-it-means-move-it"
+            "id": "move-it-means-move-it",
+            "short": "Right size but on the wrong mark: tap the right mark."
           },
           {
             "do": "Press the wrong-shape answer when the rectangle is the wrong size or the wrong proportions for its mark, and do not drag it as well unless it is also in the wrong place.",
             "expect": "It records that and nothing else. No distance is attached to it and none is asked for.",
             "why": "Where a box sits and how big it is are two faults with two repairs, and the whole line of work behind this sitting turns on keeping them apart — a size fault expressed as a distance is a wrong number that looks like a right one. The boxes come from one printing and the ink from another, so a rectangle can be exactly where it belongs and still not close around its mark; that is a re-measurement, not a shift.",
-            "id": "wrong-shape-is-never-a-distance"
+            "id": "wrong-shape-is-never-a-distance",
+            "short": "Wrong size or shape: press that answer."
           },
           {
             "do": "When you can see the ink this mark should have been boxing, press the draw answer and drag a rectangle around it from scratch.",
             "expect": "The picture switches to a crosshair and takes the whole gesture, and the rectangle you draw is recorded with its own position and its own size. The mode ends when you move on.",
             "why": "This is the only positive answer on the page. Everything else says what is wrong; this one says where the right answer is, and it is the only thing that can settle whether a mark that matched nothing was in the wrong neighbourhood or was in the right neighbourhood with nothing there. A handful of these is worth more than any number of complaints, because they can be measured against what the search found.",
-            "id": "point-at-the-right-ink"
+            "id": "point-at-the-right-ink",
+            "short": "If you can see the ink it should box, draw a new box around it."
           },
           {
             "do": "Use the answer about the print when what is strange is the mus'haf page rather than our rectangle — a letter that looks doubled, a mark that is not where that word should carry one, ink that does not belong. Write a sentence about what you are seeing.",
             "expect": "A box asking what looks wrong, and the sentence is kept with the answer.",
             "why": "This is the only answer on the page that is not about us, and mixing it in with the others would corrupt both: a defect in somebody else's file counted as a placement failure makes our correction look worse than it is, and a placement failure filed as a printing defect makes it look better. It goes to the issue catalog rather than into any ruling that grades a correction, which is why it is asked for in words — a count of odd pages is not something anybody can act on, and a sentence naming what was odd is.",
-            "id": "the-print-is-not-us"
+            "id": "the-print-is-not-us",
+            "short": "If the printed page itself looks odd, say so in a sentence."
           },
           {
             "do": "Use the bank-it answer whenever none of the four fits, and do not force one that nearly does. A sentence is welcome and is not required.",
             "expect": "It records and moves you on to the next mark.",
             "why": "A vocabulary is a guess about what the residual is made of, and this is the one answer that can prove the guess wrong. If a reader has to force a fifth of these marks into a category that nearly fits, the categories are what needs fixing, and there is no way to learn that from a page whose only options are the four we thought of.",
-            "id": "banking-it-is-an-answer"
+            "id": "banking-it-is-an-answer",
+            "short": "If nothing fits, use the catch-all answer."
           },
           {
             "do": "Take back anything you change your mind about, using the button beside it in the list.",
             "expect": "It leaves the list and the ones after it renumber. If you are working through a session, the transcript keeps a line saying you took it back.",
             "why": "A reader who says a thing and then unsays it has told us the mark is a hard one, and that is a fact worth more than the tidiness of pretending the first answer never happened. Erasing it would also make the transcript disagree with the saved file, and then neither could be trusted.",
-            "id": "changing-your-mind-is-data"
+            "id": "changing-your-mind-is-data",
+            "short": "Take back anything you change your mind about."
           },
           {
             "do": "Stop whenever you are tiring and come back to the same file later.",
             "expect": "It opens on the mark you left, with everything you have already said. Nothing reshuffles.",
             "why": "Unlike the placing sittings, tiredness here does not widen an error bar — it collapses the vocabulary. A tired reader stops distinguishing and reaches for whichever answer is nearest the thumb, and sixty marks answered that way look exactly like forty marks that genuinely all had the same fault.",
-            "id": "stop-when-tiring"
+            "id": "stop-when-tiring",
+            "short": "Stop when you like; it picks up where you left off."
           },
           {
             "do": "At the end of each sitting press the save button, and if you were not working through a session move the downloaded file into docs/validation/rulings/ named for this sitting and the set it was drawn from. Two sittings, two files, and never one file for both.",
             "expect": "Through a session it says where it was banked and needs no download. On its own it lands in your downloads, and in the repo it becomes docs/validation/rulings/<when>-placement-what-kind-of-wrong.placed.json and a second one ending .fallback.json. Each carries the seed, the fingerprint, which set it drew from, how far you got, and every answer with the mark it was about.",
             "why": "Same property as the other rulings: nothing on the machine that wrote it knows which answer was wanted, so it could not have been edited toward one. And it does not stay in a downloads folder, because everything read below is derived from it. The two files stay two because the whole reason for sitting both is to get a rate for each: the marks placed from their own ink are almost the entire book and the ones that fell back are six in a thousand, so a single rate over the pile would be a fact about how many of each the sampler happened to draw. docs/validation/rulings/README.md says what else belongs there.",
-            "id": "save-what-you-said"
+            "id": "save-what-you-said",
+            "short": "Save each sitting as its own file."
           },
           {
             "do": "Read each file with the scoring command, one at a time, and read the interval rather than the percentage.",
             "expect": "Per sitting: how many marks you looked at, what was said by word with an interval on each, and one figure for how often our placement was wrong — moved, wrong shape, or boxed elsewhere. The marks you called odd in the print are named and taken out of the denominator, with the rate printed both ways underneath so you can see what that choice was worth. How much of what you looked at you explicitly vouched for is printed beside the fault rate, never in place of it. And where you corrected a rectangle it prints two distances under two separately worded sentences — how far your own hand moved the rectangle we drew, and where the rectangles ended up measured from the box before any correction — with one row per mark however many goes it took to settle. It refuses to read a file whose displacements have moved, and it refuses to read one whose answers disagree with the measurement about which set a mark came from.",
             "why": "Every share in the list below is a proportion out of sixty, and sixty cannot tell one in fifty from one in seven. Doing this by hand invites reading the point estimate, which is the number that is almost certainly wrong; the interval is the finding. The scorer also does the two pieces of bookkeeping nobody does reliably by eye — it never mixes the two sittings, and it never lets a fault in somebody else's printing be counted as a fault in our placement.",
-            "id": "read-it-with-the-scorer"
+            "id": "read-it-with-the-scorer",
+            "short": "Score each file."
           },
           {
             "do": "Open a row in the issue catalog for each mark the scorer named as odd in the print, quoting the sentence you wrote about it.",
             "expect": "A handful at most, each printed with its page, its line and the mark's name. They are the only answers here that are about a file we did not write.",
             "why": "They are a different repair on a different timescale — a vendored corpus is re-fetched, not shifted — and they are already out of the rate you just read, which means that if they never become rows they simply disappear. That is the failure worth guarding against: an answer that was counted as not-our-fault and then filed nowhere has been used once to make our number look better and never again for anything.",
-            "id": "route-the-print-defects"
+            "id": "route-the-print-defects",
+            "short": "Log each oddity in the print as an issue."
           },
           {
             "do": "Bank the shares with the record command below, whichever way they went.",
             "expect": "The ledger gains what the residual is actually made of and the date, and this check stops being pending.",
             "why": "The share of the residual that is a placement problem is the number that decides whether the mark boxes are finished. Six in a thousand landing badly out is a shipping decision if most of them are marks with no ink under them, and is not one if most of them are rectangles that could have been dragged onto their marks by anybody looking.",
-            "id": "bank-the-shares"
+            "id": "bank-the-shares",
+            "short": "Record the result."
           }
         ],
         "reading": [
@@ -1203,7 +1343,17 @@
       ],
       "record": "docs/design/mark-registration.md",
       "verifiedOn": "2026-08-17",
-      "result": "Two populations, read apart, and the check stays open because only 190 of 1,877 fallback marks have been sat. THE MARKS PLACED FROM THEIR OWN INK: sixty of them, every one explicitly affirmed, no faults. That bounds visible placement error at about 5 percent rather than at zero — sixty clean answers cannot say less than that — and the caveat has to travel with the number: that population is defined by a match of 0.55 or better and a displacement under 3 units on a mark 5.6 by 3.6, so a gross error was structurally impossible on those cards. It says the rule does not fail loudly where it fits; it does not say the rule is right. THE MARKS THAT FELL BACK TO THE PRINTED LINE: 160 answered so far across five sittings, 158 of them carrying a complaint. Scored on the largest single sitting, 100 of 101 gradable marks are faulted — 99.0 percent, 95 percent interval 94.6 to 99.8 — with fourteen marks held out of that denominator because the print itself was called into question. The reader moved 158 rectangles over 350 separate goes, a median of 2.105 units by hand and a worst of 12.229; reshaped 37 over 197 goes. Where those rectangles ended up, measured from the box before any correction, runs across -3.3 and down -2.6 in medians — the same direction and roughly the same size as the ink measurement, which is the corroboration worth keeping. READ IT AS A MEASUREMENT OF THE POPULATION, NOT OF THE PRINT: this set is by construction the marks the machine could not place from ink, so a near-total fault rate is what it was selected to produce. The finding is not the rate, it is that the fallback rule places almost nothing acceptably and the residual is ours rather than the printers: only 15 of 160 were called odd in the print, and those are routed to the issue catalog as a defect in vendored data. TWO DEFECTS IN THE INSTRUMENT WERE FOUND AND FIXED WHILE READING THIS: a sitting that reported how many marks were left rather than how many had been seen, and a settler that read only handed-over transcripts and so lost 25 marks that were answered on the served page and banked but never handed over. THE BOTTOM OF THE PLACED SET, SAT ON 2026-08-17 IN TWO SITTINGS OF THIRTY: drawn not at random from the placed population but from the worst of it — the band where our rectangle and the ink it settled on overlap between 0.55 and 0.65, which begins exactly at the floor below which the search gives up, and the band immediately above it, 0.65 to 0.75. All sixty faulted, sixty of sixty seen. Set beside the sixty random ones above, that is the first finding: the placed population is not uniform, the earlier sixty were drawn across the whole of it, and the bound of about 5 percent was a bound over a mix. Sampling the bottom of the same population finds everything wrong with it. BEING TWO BANDS RATHER THAN ONE IS WHAT MAKES THE REST WORTH ANYTHING, because every finding can be read twice on marks differing only in how sure the search was. EVERY HAMZA IN BOTH WAS MOVED SIDEWAYS IN THE SAME DIRECTION, eleven of eleven, width left exactly as drawn: median 1.077 page units in the weaker band, 0.573 in the better one, against 0.002 for every other mark in the sitting. Fatha and kasra came back too short in both, grown 0.600 and 0.500 in the weaker band and 0.065 and 0.215 in the better, on boxes about 3.9 tall with width untouched. And the whole sitting moves the same way: median hand distance 0.363 falling to 0.276, worst 5.877 falling to 2.053, that worst being a kasra that ended with essentially no overlap with where we drew it. SO THE OVERLAP SCORE IS DOING ITS JOB. It does not predict whether a reader complains — pointing at ink files a complaint either way, see below — but it predicts how far out we were, and the halving of the hamza error across one band step is the strongest evidence here, because it ties the error to the search rather than to a fixed per-class offset. TWO MARKS WERE CALLED ODD IN THE PRINT, 86:23 superscript alef and 463:130 wasla, and they matter out of proportion to two: the fifteen before them all came from marks the correction could not place at all, which left standing the cheap explanation that oddness and unplaceability are the same thing seen twice. These two were placed from their own ink and matched well enough to clear the bar, so whatever the reader is seeing survives a successful match. A THIRD INSTRUMENT DEFECT FOUND WHILE READING THIS, and it bounds what the rate can be read as: nearly every answer was given by pointing at ink, which is one gesture setting position and size together, and the page files a complaint for each whenever the change is anything other than exactly zero — so a point always files both words, and sixty of sixty carry both with none carrying one alone. The mark-level rate stands and is confirmed by the reader as corrections they meant. The split between the two words does not: in the weaker band four of thirty were filed the wrong size while their size changed by under 0.05 units, and four were filed misplaced while moving under 0.05. Word-level counts from a sitting worked by pointing are not quoted; the mark-level rate is. Deliberately not repaired with a threshold, because a reader who points has made one statement and the vocabulary has no word for it — which is the fifth tune on this check coming true as written. THE FIRST FULL PART, SAT 2026-08-17 ON THE REBUILT DEAL: 106 marks, one whole part of sixteen, every one from the fallback population — 274 of 1,877 now sat, 1,603 left. 91 of 91 gradable marks faulted, 100 percent, 95 percent interval 95.9 to 100, with 15 held out because the print itself was called into question. That rate is again what the population was selected to produce and is again not the finding. THE FINDING IS THAT THE TWO KINDS OF WRONG ARE NOT ON THE SAME MARKS. Median hand movement 1.479 units against a median size change of 0.130, on a box about 6.3 by 3.4 — the line-inherited rule gets the size nearly right and the position badly wrong. Sorted by the name of the mark it splits three ways: the single marks (fatha, kasra, damma, shadda, hamza — 78 of 106) moved about a unit sideways with size untouched; the marks that sit above the letter moved downward as well and far more, sukun 2.151 down and the rounded zeros 3.043 against under half a unit for every other class, so the printed line says nothing about how high above a letter a non-vowel sits; and the ten doubled marks barely moved but were grown 0.5 to 1.4 units in both directions, a box drawn for one of something that is two. That third one is the most actionable and needs no reader, because extent is something the print can be asked about directly. THE INSTRUMENT IS NOW MEASURABLY BETTER AND IT MOVED THE NUMBERS. 98 of 106 marks settled in one go, 145 goes for 106 moves against 350 goes for 158 in the sitting before it; median hand distance fell from 2.105 to 1.479 and the worst from 12.229 to 6.619. THE WHOLE CORRECTION THE ANSWERS IMPLY IS THE CORROBORATION WORTH KEEPING: across -3.170 and down -2.255, against -3.3 and -2.6 from the earlier sitting — two independent draws from the same population agreeing on direction and size, which is what a real displacement looks like and what reader noise does not. AND THE BOTH-WORDS ARTEFACT TURNS OUT TO BE A PROPERTY OF HOW CLOSE THE BOX ALREADY WAS: 1 of 106 filed misplaced while moving under 0.05 units and 7 of 104 filed the wrong size while their size changed by under 0.05, against 4 of 30 for each in the bands, with two marks carrying moved and not wrong-size — the first anywhere to carry one word without the other. So word-level counts are least trustworthy exactly where the correction was already working, which is the opposite of the guess and matters because that is most of the book. TWO THINGS DID NOT MOVE. The affirm button is still never pressed: 0 said nothing was wrong and 0 passed in silence, across every sitting so far. And the odd-in-the-print rate rose rather than fell as the page improved — 15 in 106 here against 15 in 160 before, 30 across the fallback population and 32 in all — so whatever a reader is seeing there is not something the page was doing to them, and at 14 in a hundred a full pass would set aside some 240 marks nobody can say anything about. THREE MORE BANDS OF THE PLACED SET, SAT 2026-08-19 AND 2026-08-20, CARRYING THE OVERLAP SCALE TO ITS TOP: 0.75 to 0.85 (a band of 13,935), 0.85 to 0.95 (300,028, the bulk of the whole placed population), and 0.95 to 1.01 (8,637, as tight a match as this rule ever reports), thirty marks apiece. Ninety of ninety faulted — the placed set has now failed on every mark in five bands running from the search floor to a near-exact match, so overlap with the ink is not predicting whether a reader complains, at any point on the scale tried so far. WHAT IT DOES PREDICT IS SIZE. Median hand distance across the five bands, floor to ceiling: 0.363, 0.276, 0.092, 0.081, 0.06; worst case 5.877, 2.053, 0.626, 0.441, 0.154. The steepest drop is between the second and third band, not spread evenly across all five, so whatever separates a rectangle that is merely near the ink from one that is close to identical to it happens somewhere around 0.75, not gradually. ONE MARK WAS CALLED ODD IN THE PRINT, in the 0.75-0.85 band only — 128:85, a shadda; the bands above and below it carried none between them, so the odd-in-the-print rate still tracks nothing about how well the search matched. Measured in docs/validation/rulings/2026-08-20-placement-what-kind-of-wrong-placed.b0.75_0.85.seed23.settled.json, .b0.85_0.95.seed23.settled.json, and .b0.95_1.01.seed23.settled.json. THE THIRD OF THE THREE WRONG-SIZE PARTS, SAT 2026-08-19 AND 2026-08-20, closing the deck part one was dealt from: 91 marks of the 329 with a weak ink match, 301 answers over 147 goes, ninety-one of ninety-one faulted. Median hand distance 0.633, worst 5.482; 89 reshaped over 129 goes — the same rough size as part one, so unlike the placed bands this population does not get better-behaved the more of it is read, which is consistent with a weak match being close to the definition of a bad correction rather than a graded one. 17 more were called odd in the print, on 17 pages between 76 and 598; see the print-oddities-called-out-by-eye issue row for the running total and the pages. Part two of three, the remaining roughly 90 marks of the 271-mark deck, is not yet sat; 58 marks of the 329 were answered before the three-way split and are not part of any numbered part. Measured in docs/validation/rulings/2026-08-20-placement-weak-size-part3.seed23.settled.json."
+      "result": "Two populations, read apart, and the check stays open because only 190 of 1,877 fallback marks have been sat. THE MARKS PLACED FROM THEIR OWN INK: sixty of them, every one explicitly affirmed, no faults. That bounds visible placement error at about 5 percent rather than at zero — sixty clean answers cannot say less than that — and the caveat has to travel with the number: that population is defined by a match of 0.55 or better and a displacement under 3 units on a mark 5.6 by 3.6, so a gross error was structurally impossible on those cards. It says the rule does not fail loudly where it fits; it does not say the rule is right. THE MARKS THAT FELL BACK TO THE PRINTED LINE: 160 answered so far across five sittings, 158 of them carrying a complaint. Scored on the largest single sitting, 100 of 101 gradable marks are faulted — 99.0 percent, 95 percent interval 94.6 to 99.8 — with fourteen marks held out of that denominator because the print itself was called into question. The reader moved 158 rectangles over 350 separate goes, a median of 2.105 units by hand and a worst of 12.229; reshaped 37 over 197 goes. Where those rectangles ended up, measured from the box before any correction, runs across -3.3 and down -2.6 in medians — the same direction and roughly the same size as the ink measurement, which is the corroboration worth keeping. READ IT AS A MEASUREMENT OF THE POPULATION, NOT OF THE PRINT: this set is by construction the marks the machine could not place from ink, so a near-total fault rate is what it was selected to produce. The finding is not the rate, it is that the fallback rule places almost nothing acceptably and the residual is ours rather than the printers: only 15 of 160 were called odd in the print, and those are routed to the issue catalog as a defect in vendored data. TWO DEFECTS IN THE INSTRUMENT WERE FOUND AND FIXED WHILE READING THIS: a sitting that reported how many marks were left rather than how many had been seen, and a settler that read only handed-over transcripts and so lost 25 marks that were answered on the served page and banked but never handed over. THE BOTTOM OF THE PLACED SET, SAT ON 2026-08-17 IN TWO SITTINGS OF THIRTY: drawn not at random from the placed population but from the worst of it — the band where our rectangle and the ink it settled on overlap between 0.55 and 0.65, which begins exactly at the floor below which the search gives up, and the band immediately above it, 0.65 to 0.75. All sixty faulted, sixty of sixty seen. Set beside the sixty random ones above, that is the first finding: the placed population is not uniform, the earlier sixty were drawn across the whole of it, and the bound of about 5 percent was a bound over a mix. Sampling the bottom of the same population finds everything wrong with it. BEING TWO BANDS RATHER THAN ONE IS WHAT MAKES THE REST WORTH ANYTHING, because every finding can be read twice on marks differing only in how sure the search was. EVERY HAMZA IN BOTH WAS MOVED SIDEWAYS IN THE SAME DIRECTION, eleven of eleven, width left exactly as drawn: median 1.077 page units in the weaker band, 0.573 in the better one, against 0.002 for every other mark in the sitting. Fatha and kasra came back too short in both, grown 0.600 and 0.500 in the weaker band and 0.065 and 0.215 in the better, on boxes about 3.9 tall with width untouched. And the whole sitting moves the same way: median hand distance 0.363 falling to 0.276, worst 5.877 falling to 2.053, that worst being a kasra that ended with essentially no overlap with where we drew it. SO THE OVERLAP SCORE IS DOING ITS JOB. It does not predict whether a reader complains — pointing at ink files a complaint either way, see below — but it predicts how far out we were, and the halving of the hamza error across one band step is the strongest evidence here, because it ties the error to the search rather than to a fixed per-class offset. TWO MARKS WERE CALLED ODD IN THE PRINT, 86:23 superscript alef and 463:130 wasla, and they matter out of proportion to two: the fifteen before them all came from marks the correction could not place at all, which left standing the cheap explanation that oddness and unplaceability are the same thing seen twice. These two were placed from their own ink and matched well enough to clear the bar, so whatever the reader is seeing survives a successful match. A THIRD INSTRUMENT DEFECT FOUND WHILE READING THIS, and it bounds what the rate can be read as: nearly every answer was given by pointing at ink, which is one gesture setting position and size together, and the page files a complaint for each whenever the change is anything other than exactly zero — so a point always files both words, and sixty of sixty carry both with none carrying one alone. The mark-level rate stands and is confirmed by the reader as corrections they meant. The split between the two words does not: in the weaker band four of thirty were filed the wrong size while their size changed by under 0.05 units, and four were filed misplaced while moving under 0.05. Word-level counts from a sitting worked by pointing are not quoted; the mark-level rate is. Deliberately not repaired with a threshold, because a reader who points has made one statement and the vocabulary has no word for it — which is the fifth tune on this check coming true as written. THE FIRST FULL PART, SAT 2026-08-17 ON THE REBUILT DEAL: 106 marks, one whole part of sixteen, every one from the fallback population — 274 of 1,877 now sat, 1,603 left. 91 of 91 gradable marks faulted, 100 percent, 95 percent interval 95.9 to 100, with 15 held out because the print itself was called into question. That rate is again what the population was selected to produce and is again not the finding. THE FINDING IS THAT THE TWO KINDS OF WRONG ARE NOT ON THE SAME MARKS. Median hand movement 1.479 units against a median size change of 0.130, on a box about 6.3 by 3.4 — the line-inherited rule gets the size nearly right and the position badly wrong. Sorted by the name of the mark it splits three ways: the single marks (fatha, kasra, damma, shadda, hamza — 78 of 106) moved about a unit sideways with size untouched; the marks that sit above the letter moved downward as well and far more, sukun 2.151 down and the rounded zeros 3.043 against under half a unit for every other class, so the printed line says nothing about how high above a letter a non-vowel sits; and the ten doubled marks barely moved but were grown 0.5 to 1.4 units in both directions, a box drawn for one of something that is two. That third one is the most actionable and needs no reader, because extent is something the print can be asked about directly. THE INSTRUMENT IS NOW MEASURABLY BETTER AND IT MOVED THE NUMBERS. 98 of 106 marks settled in one go, 145 goes for 106 moves against 350 goes for 158 in the sitting before it; median hand distance fell from 2.105 to 1.479 and the worst from 12.229 to 6.619. THE WHOLE CORRECTION THE ANSWERS IMPLY IS THE CORROBORATION WORTH KEEPING: across -3.170 and down -2.255, against -3.3 and -2.6 from the earlier sitting — two independent draws from the same population agreeing on direction and size, which is what a real displacement looks like and what reader noise does not. AND THE BOTH-WORDS ARTEFACT TURNS OUT TO BE A PROPERTY OF HOW CLOSE THE BOX ALREADY WAS: 1 of 106 filed misplaced while moving under 0.05 units and 7 of 104 filed the wrong size while their size changed by under 0.05, against 4 of 30 for each in the bands, with two marks carrying moved and not wrong-size — the first anywhere to carry one word without the other. So word-level counts are least trustworthy exactly where the correction was already working, which is the opposite of the guess and matters because that is most of the book. TWO THINGS DID NOT MOVE. The affirm button is still never pressed: 0 said nothing was wrong and 0 passed in silence, across every sitting so far. And the odd-in-the-print rate rose rather than fell as the page improved — 15 in 106 here against 15 in 160 before, 30 across the fallback population and 32 in all — so whatever a reader is seeing there is not something the page was doing to them, and at 14 in a hundred a full pass would set aside some 240 marks nobody can say anything about. THREE MORE BANDS OF THE PLACED SET, SAT 2026-08-19 AND 2026-08-20, CARRYING THE OVERLAP SCALE TO ITS TOP: 0.75 to 0.85 (a band of 13,935), 0.85 to 0.95 (300,028, the bulk of the whole placed population), and 0.95 to 1.01 (8,637, as tight a match as this rule ever reports), thirty marks apiece. Ninety of ninety faulted — the placed set has now failed on every mark in five bands running from the search floor to a near-exact match, so overlap with the ink is not predicting whether a reader complains, at any point on the scale tried so far. WHAT IT DOES PREDICT IS SIZE. Median hand distance across the five bands, floor to ceiling: 0.363, 0.276, 0.092, 0.081, 0.06; worst case 5.877, 2.053, 0.626, 0.441, 0.154. The steepest drop is between the second and third band, not spread evenly across all five, so whatever separates a rectangle that is merely near the ink from one that is close to identical to it happens somewhere around 0.75, not gradually. ONE MARK WAS CALLED ODD IN THE PRINT, in the 0.75-0.85 band only — 128:85, a shadda; the bands above and below it carried none between them, so the odd-in-the-print rate still tracks nothing about how well the search matched. Measured in docs/validation/rulings/2026-08-20-placement-what-kind-of-wrong-placed.b0.75_0.85.seed23.settled.json, .b0.85_0.95.seed23.settled.json, and .b0.95_1.01.seed23.settled.json. THE THIRD OF THE THREE WRONG-SIZE PARTS, SAT 2026-08-19 AND 2026-08-20, closing the deck part one was dealt from: 91 marks of the 329 with a weak ink match, 301 answers over 147 goes, ninety-one of ninety-one faulted. Median hand distance 0.633, worst 5.482; 89 reshaped over 129 goes — the same rough size as part one, so unlike the placed bands this population does not get better-behaved the more of it is read, which is consistent with a weak match being close to the definition of a bad correction rather than a graded one. 17 more were called odd in the print, on 17 pages between 76 and 598; see the print-oddities-called-out-by-eye issue row for the running total and the pages. Part two of three, the remaining roughly 90 marks of the 271-mark deck, is not yet sat; 58 marks of the 329 were answered before the three-way split and are not part of any numbered part. Measured in docs/validation/rulings/2026-08-20-placement-weak-size-part3.seed23.settled.json.",
+      "brief": {
+        "label": "Name what is wrong",
+        "ask": "For the marks nothing can place, what exactly is wrong with each one?",
+        "what": "The other checks measure how far off a box is. This one names the kind of problem — nothing, wrong mark, wrong size, a box that needs drawing, or something odd in the printed page itself.",
+        "need": "A phone or the laptop. You do not need to be a hafiz.",
+        "time": "About 30 minutes a sitting, two sittings",
+        "done": "Both sittings are saved, scored and recorded, with an issue logged for each oddity in the print.",
+        "unlocks": "The vowel-sign placement fix",
+        "diagram": "flowchart TD\n  M[Look at the mark and its box] --> Q{Anything wrong?}\n  Q -- No --> N[Nothing wrong]\n  Q -- Yes --> K{What kind?}\n  K --> P[On the wrong mark:<br/>tap the right one]\n  K --> Z[Wrong size or shape]\n  K --> D[Ink with no box:<br/>draw one]\n  K --> R[The print itself looks odd:<br/>say what you see]\n  K --> B[None of these:<br/>catch-all]"
+      }
     }
   ]
 }
