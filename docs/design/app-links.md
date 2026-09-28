@@ -175,6 +175,15 @@ server part.
 editors check its shape. It gives the owner the "every URL we support" page without pretending
 the app has a server.
 
+**What was built (2026-09-28): B, without the new file.** Once C's gaps were written down, they
+turned out to be the only things B added: checked examples, and the setting read before the
+`#`. So the existing parameter page, `docs/query-params.md`, became the one list: it gained an
+Examples table (every key has at least one, and each is run through the app's own link reader)
+and a Settings table (`phonebar`). The same parameter check that already ran on every commit now
+checks both — checks 1 and 2 below, in `gate:params`, not a new `links-check`. A second file
+would have been a second place to keep in step. Check 3 waits for `docs/links.json`, which comes
+with the tests that open the app by name.
+
 ### How does it stay in step with the code?
 
 The router stays the code that reads links; the list does not generate it (a working reader

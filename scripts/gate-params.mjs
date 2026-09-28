@@ -24,6 +24,8 @@
  *      drift between the two is a desk that changes colour during load — and it
  *      would show on exactly one frame, which is to say in no test anyone runs
  *      by hand.
+ *   5. Every example link on the page does what its row says, every key has
+ *      one, and every setting read before the `#` is listed (lib/link-catalog.mjs).
  *
  * This reads the sources as text on purpose. Importing them would prove the
  * modules load, not that the doc describes them, and the CSS is not importable
@@ -31,7 +33,9 @@
  *
  * Run: `pnpm gate:params` (also in `pnpm gates`, `make ci` and CI).
  */
-import { readFileSync } from "node:fs";
+import { readdirSync, readFileSync } from "node:fs";
+import { exampleProblems, searchSettingProblems, table, unbacktick } from "./lib/link-catalog.mjs";
+import { parseHash, serializeState } from "../packages/core/dist/index.js";
 
 const ROUTER = "packages/core/src/router.ts";
 const FIELD_TS = "packages/core/src/field.ts";
@@ -79,29 +83,6 @@ if (parsed.size === 0) {
 
 /* ---- 2. what the catalog says -------------------------------------------- */
 
-/** Rows of the first markdown table whose header cell 0 is `head`. */
-function table(md, head) {
-  const rows = [];
-  let inside = false;
-  for (const line of md.split("\n")) {
-    const cells = line.trim().startsWith("|")
-      ? line.trim().replace(/^\||\|$/g, "").split("|").map((c) => c.trim())
-      : null;
-    if (!cells) {
-      if (inside) break;
-      continue;
-    }
-    if (!inside) {
-      if (cells[0] === head) inside = true;
-      continue;
-    }
-    if (/^-+$/.test(cells[0].replace(/[:\s]/g, "") || "-")) continue;
-    rows.push(cells);
-  }
-  return rows;
-}
-
-const unbacktick = (s) => s.replace(/^`|`$/g, "");
 const paramRows = table(doc, "Key").filter((r) => r[0].startsWith("`"));
 const documented = new Map(paramRows.map((r) => [unbacktick(r[0]), r[4]]));
 
@@ -149,6 +130,20 @@ for (const [key, mode] of documented) {
     );
   }
 }
+
+/* ---- 2b. the examples, and the settings read before the # ----------------- */
+
+// Every example on the page is run through the app's own link reader (the
+// built core — `pnpm --filter @hifth/core build` if it is stale), so a link a
+// teacher copies from the page is one the app is known to open.
+problems.push(...exampleProblems(doc, { parseHash, serializeState }).map((p) => `${DOC} — ${p}`));
+
+const WEB_SRC = "apps/web/src";
+const sources = {};
+for (const f of readdirSync(new URL(`../${WEB_SRC}`, import.meta.url), { recursive: true })) {
+  if (/\.(ts|tsx)$/.test(f) && !/\.test\./.test(f)) sources[`${WEB_SRC}/${f}`] = read(`${WEB_SRC}/${f}`);
+}
+problems.push(...searchSettingProblems(doc, sources).map((p) => `${DOC} — ${p}`));
 
 /* ---- 3. the fields: one list, three renderings --------------------------- */
 
