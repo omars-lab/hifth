@@ -27,6 +27,8 @@
  *     claims it did, so it is the word that has to prove it.
  *   - A `blockedBy` id that looks like an id and matches nothing. A blocker
  *     nobody can look up is a shrug with a citation format.
+ *   - An item still open whose blocker names a decision that has been made.
+ *     The ruling is in docs/decisions.json; the item never heard about it.
  *   - A stale docs/issues.md. Same rule as the validation guide, use-cases.md
  *     and the ETL output: a committed generated artifact is only trustworthy
  *     if a gate proves it was regenerated.
@@ -45,6 +47,7 @@ import { existsSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 import { ROOT } from "./code-pointers.mjs";
 import { readLedger } from "./validation-ledger.mjs";
+import { readDecisions } from "./decisions.mjs";
 import {
   readIssues,
   sectionItems,
@@ -68,6 +71,9 @@ const flag = (name) => {
 const checks = readLedger().checks ?? [];
 const ledgerById = new Map(checks.map((c) => [c.id, c]));
 const byId = new Map(issues.map((i) => [i.id, i]));
+
+/** Decisions by id: a blocker may name one, and must stop once it is made. */
+const decisionsById = new Map(readDecisions().map((d) => [d.id, d]));
 
 /** Milestones a blocker may name — the ones the ledger already blocks on. */
 const milestones = new Set(checks.flatMap((c) => c.blocks ?? []));
@@ -218,7 +224,24 @@ for (const i of issues) {
 
   // ---- blockers are lookup-able, or plainly prose
   for (const b of i.blockedBy ?? []) {
+    // An item still open, waiting on a decision already made, is a line nobody
+    // went back to: the adjacency-ranges row said "waiting on the owner's
+    // ruling" for two days after the ruling was recorded (2026-09-28). The
+    // decision's id may sit alone or inside prose, so both are read.
+    if (!["answered", "fixed", "done"].includes(st)) {
+      for (const word of b.split(/[^a-z0-9-]+/)) {
+        const d = decisionsById.get(word);
+        if (d && d.status !== "open") {
+          problems.push(
+            `${where}: still ${st}, waiting on the decision "${d.id}", which was ${d.status}` +
+              `${d.date ? ` on ${d.date}` : ""}.\n` +
+              `      Carry the outcome into the item: close it, or say what it waits on now.`,
+          );
+        }
+      }
+    }
     if (b.includes(" ")) continue; // "a hafiz", "an Android phone" — prose, on purpose
+    if (decisionsById.has(b)) continue;
     if (byId.has(b) || ledgerById.has(b) || milestones.has(b)) continue;
     problems.push(
       `${where}: blockedBy "${b}" matches no issue, ledger check or milestone.\n` +
