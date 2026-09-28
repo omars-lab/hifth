@@ -104,6 +104,12 @@
 .book {
   position: relative;
   display: flex;
+  /* Said outright, though stretching already gives the book the desk's height.
+     A leaf's width is its height times the page's shape, and Firefox will only
+     work that out when this height is stated; otherwise it sizes each leaf to
+     what it holds, a third narrower, with the page shrunk inside it or not
+     drawn at all (2026-09-28; e2e/spread-fit.spec.ts runs in both browsers). */
+  block-size: 100%;
   min-inline-size: 0;
   min-block-size: 0;
   overflow: hidden;

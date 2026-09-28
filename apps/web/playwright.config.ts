@@ -207,21 +207,34 @@ export default defineConfig({
           // `notes`, `mistakes` and `sign-tools` are the note, mistake, harakat
           // and word tools, which live on the desktop-only tools bar. `crop`
           // runs here and on the phones: it is the one tool test for both.
-          testMatch: /(desktop|stage-fit|detent-live|pagebar-detents|pagebar-fisheye|notes|mistakes|sign-tools|crop)\.spec\.ts/,
+          testMatch: /(desktop|stage-fit|spread-fit|detent-live|pagebar-detents|pagebar-fisheye|notes|mistakes|sign-tools|crop)\.spec\.ts/,
           use: {
             browserName: "chromium",
             viewport: { width: 1440, height: 900 },
           },
         },
         {
+          // The spread in Firefox. Only the layout check runs here: the leaf's
+          // width comes from its height and the page's shape, and Firefox once
+          // worked that out differently from Chrome — a third narrower, the
+          // pages shrunk inside it or not drawn at all (2026-09-28). One small
+          // file, so the whole desktop suite does not have to pass twice.
+          name: "desktop-firefox",
+          testMatch: /spread-fit\.spec\.ts/,
+          use: {
+            browserName: "firefox",
+            viewport: { width: 1440, height: 900 },
+          },
+        },
+        {
           name: "iphone",
           use: { ...devices["iPhone 13"] },
-          testIgnore: /(golden|shots|desktop|detent-live|pagebar-detents|pagebar-fisheye|notes|mistakes|sign-tools|pitch)\.spec\.ts/,
+          testIgnore: /(golden|shots|desktop|spread-fit|detent-live|pagebar-detents|pagebar-fisheye|notes|mistakes|sign-tools|pitch)\.spec\.ts/,
         },
         {
           name: "android",
           use: { ...devices["Pixel 7"] },
-          testIgnore: /(golden|shots|desktop|detent-live|pagebar-detents|pagebar-fisheye|notes|mistakes|sign-tools|pitch)\.spec\.ts/,
+          testIgnore: /(golden|shots|desktop|spread-fit|detent-live|pagebar-detents|pagebar-fisheye|notes|mistakes|sign-tools|pitch)\.spec\.ts/,
         },
         {
           // The golden-image project. Its viewport is spelled out rather than
