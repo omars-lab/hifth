@@ -555,6 +555,14 @@ test.describe("Hifth · the desktop spread", () => {
   const grabRail = (page: Page, side: "left" | "right"): Locator =>
     page.getByTestId(`edge-grab-${side}`);
 
+  test("a verse wears the plain pointing hand, not a target", async ({ page }) => {
+    // Owner, 2026-09-28: the brackets-and-dot pointer read as a target sight.
+    await page.goto("/#/hafs-kfqc/p8");
+    await expect(pageSvg(page, 8)).toBeVisible();
+    const verse = pageSvg(page, 8).locator('[id^="verse-"]').first();
+    expect(await verse.evaluate((el) => getComputedStyle(el).cursor)).toBe("pointer");
+  });
+
   test("the fore-edge wears a hand, and a grab from it turns the page", async ({ page }) => {
     await watchFolds(page);
     await page.goto("/#/hafs-kfqc/p8");
@@ -2030,9 +2038,9 @@ test.describe("Hifth · the page tools bar", () => {
     expect(await cursorOn("read")).toBe("default");
     await page.keyboard.press("KeyW");
     expect(await cursorOn("word")).toContain("data:image/svg+xml");
-    // The default tool is the verse tool: its own pointer, and a tap selects the verse.
+    // The default tool is the verse tool: the plain pointing hand, and a tap selects the verse.
     await page.keyboard.press("Escape");
-    expect(await cursorOn("select")).toContain("data:image/svg+xml");
+    expect(await cursorOn("select")).toBe("pointer");
     await page.mouse.click(at.x, at.y);
     await expect(page.locator("#hifth-overlay .hl-sel")).not.toHaveCount(0);
   });
