@@ -177,6 +177,26 @@ export function spreadOf(page: number, total: number): Spread {
   return { right, left: left > total ? null : left };
 }
 
+/**
+ * Where a turn goes with the book open: the first page held of the next opening
+ * (`step` +1) or the previous one (−1), from either page of this one. `pages` is
+ * what the build holds, ascending; null at either end.
+ *
+ * A turn of one page would move 5 → 6, the page already open beside it — the
+ * turn plays and nothing changes, so every second press seemed dead (owner,
+ * 2026-09-28). An opening is lowest-page-first, so both directions land on its
+ * right-hand page when it is held, and on its other page when only that is.
+ */
+export function openingAfter(page: number, step: 1 | -1, pages: readonly number[]): number | null {
+  const right = page % 2 === 0 ? page - 1 : page;
+  if (step > 0) return pages.find((p) => p >= right + 2) ?? null;
+  const before = pages.filter((p) => p <= right - 1);
+  const last = before[before.length - 1];
+  if (last === undefined) return null;
+  const opens = last % 2 === 0 ? last - 1 : last;
+  return pages.includes(opens) ? opens : last;
+}
+
 /** Which half of its opening a leaf is, or `null` for a page outside the print. */
 export type LeafSide = "right" | "left";
 
