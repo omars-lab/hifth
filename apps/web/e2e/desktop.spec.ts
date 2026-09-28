@@ -1474,8 +1474,6 @@ test.describe("Hifth · the trail bar holds its height", () => {
  * about where the stylesheet will put the card.
  */
 test.describe("Hifth · the ayah's sheets rise over the facing leaf", () => {
-  /** `LANG_STORAGE_KEY` in src/i18n.ts — set before the app boots. */
-  const LANG_KEY = "hifth.lang.v1";
   /** Any rail chip; the hop list it opens is the sheet under test. */
   const chip = (page: Page): Locator => page.locator("button[data-direction]").first();
   const sheet = (page: Page): Locator => page.getByRole("dialog");
@@ -1489,9 +1487,9 @@ test.describe("Hifth · the ayah's sheets rise over the facing leaf", () => {
 
   for (const lang of ["ar", "en"] as const) {
     test(`the hop list lands opposite the ayah, with the chrome in ${lang}`, async ({ page }) => {
-      await page.addInitScript((a) => localStorage.setItem(a.key, a.lang), { key: LANG_KEY, lang });
       // 2:48 is the last ayah of page 7 — the right-hand leaf of the opening (7, 8).
-      await page.goto("/#/hafs-kfqc/2:48");
+      // `?lang=` sets the chrome for this visit; the test is about the sheet, not the switch.
+      await page.goto(`/?lang=${lang}#/hafs-kfqc/2:48`);
       await expect(pageSvg(page, 7)).toBeVisible({ timeout: 20_000 });
       await chip(page).click();
       await expect(sheet(page)).toBeVisible();
@@ -1519,9 +1517,8 @@ test.describe("Hifth · the ayah's sheets rise over the facing leaf", () => {
     test(`the passage's menu lands opposite the passage, with the chrome in ${lang}`, async ({
       page,
     }) => {
-      await page.addInitScript((a) => localStorage.setItem(a.key, a.lang), { key: LANG_KEY, lang });
       // A range link opens the menu on arrival (range.spec.ts), so no drag is needed.
-      await page.goto("/#/hafs-kfqc/2:47-2:48");
+      await page.goto(`/?lang=${lang}#/hafs-kfqc/2:47-2:48`);
       await expect(pageSvg(page, 7)).toBeVisible({ timeout: 20_000 });
       await expect(sheet(page)).toBeVisible();
       expect(await sideOf(page, sheet(page)), "a passage on the right leaf").toBe("left");
