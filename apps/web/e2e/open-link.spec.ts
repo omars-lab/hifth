@@ -61,6 +61,30 @@ test.describe("Hifth · a link that opens a panel", () => {
     await expect(page).toHaveURL(/#\/hafs-kfqc\/2:48$/);
   });
 
+  test.describe("?tool=", () => {
+    test.use({ locale: "en-US" });
+
+    // The tool that is on, said where each layout says it: the computer's bar
+    // checks its radio, the phone's closed bar names it on its button.
+    const toolOn = (page: Page, isMobile: boolean, name: string): Locator =>
+      isMobile
+        ? page.locator('[data-phone-bar="c"]').getByRole("button", { name: `Page tools · ${name} is on` })
+        : page.getByRole("toolbar", { name: "Page tools" }).getByRole("radio", { name, exact: true, checked: true });
+
+    test("puts the tool in hand on arrival, named by its button's word", async ({ page, isMobile }) => {
+      await page.goto("/#/hafs-kfqc/2:48?tool=harakat");
+      await expect(toolOn(page, isMobile, "Harakat")).toBeVisible({ timeout: 20_000 });
+      // The address lets go of it, as it does of a panel.
+      await expect(page).toHaveURL(/#\/hafs-kfqc\/2:48$/);
+    });
+
+    test("a tool the app does not have leaves Select in hand", async ({ page, isMobile }) => {
+      await page.goto("/#/hafs-kfqc/p7?tool=sign");
+      await expect(page.locator('svg[aria-labelledby="page-label-7"]:visible')).toBeVisible({ timeout: 20_000 });
+      await expect(toolOn(page, isMobile, "Select")).toBeVisible();
+    });
+  });
+
   test("a panel the app does not have still opens the verse", async ({ page }) => {
     await page.goto("/#/hafs-kfqc/p19?open=nope");
     await expect(page.locator('svg[aria-labelledby="page-label-19"]:visible')).toBeVisible({

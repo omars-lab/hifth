@@ -50,10 +50,10 @@ test.describe("Hifth · the crop tool", () => {
     await expect(sheet(page)).toHaveCount(0);
   });
 
-  test("a tap with the crop tool cuts nothing", async ({ page, isMobile }) => {
-    await page.goto("/#/hafs-kfqc/p7");
+  test("a tap with the crop tool cuts nothing", async ({ page }) => {
+    // Opened with the tool in hand; the test above picks it from the bar.
+    await page.goto("/#/hafs-kfqc/p7?tool=crop");
     await expect(pageSvg(page)).toBeVisible();
-    await pickCrop(page, isMobile);
     const r = (await pageSvg(page).boundingBox())!;
     await page.mouse.click(r.x + r.width / 2, r.y + r.height / 2);
     await expect(sheet(page)).toHaveCount(0);
