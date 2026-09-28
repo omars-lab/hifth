@@ -137,16 +137,18 @@ is dropped and the rest of the link stands. The reasoning is written at length i
 
 ## Settings before the `#`
 
-One setting sits before the `#`, in the part of the address a server does see.
-It is about the device, not the verse, which is why it is not in the link a
-reader shares: it changes how the app is laid out while someone tries two
-layouts side by side, and says nothing about what they are reading.
+Two settings sit before the `#`, in the part of the address a server does see.
+They are about the reader or the device, not the verse, which is why they are
+not in the link a reader shares, and they stay for the whole visit as the reader
+moves through the book: one changes the language of the app's own words, the
+other how the app is laid out while someone tries two layouts side by side.
 
 | Setting | Shape | What it does | If the value is wrong |
 | --- | --- | --- | --- |
+| `lang` | `en` or `ar` | The language of the app's own words (menus, buttons, labels) for this visit only; never saved, so the reader's own choice is untouched. The mus'haf is the same in both | Ignored; the saved choice, or else the device's language, stands |
 | `phonebar` | `a` or `b` | Picks which of the two phone toolbars to show, for comparing them | Ignored; the usual toolbar shows |
 
-Example: `http://localhost:5173/?phonebar=b#/hafs-kfqc/p1`. `gate:params` finds
+Examples: `http://localhost:5173/?lang=en#/hafs-kfqc/2:48`, `http://localhost:5173/?phonebar=b#/hafs-kfqc/p1`. `gate:params` finds
 every setting the app reads this way and refuses one that is not listed here.
 
 ## The fields
