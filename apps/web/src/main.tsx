@@ -38,18 +38,22 @@ applyFieldToDocument(fieldFromHash(window.location.hash));
  * `preloadReaderLanguage` in vite.config.ts), so this wait is normally the tail
  * of a download already under way, not a new round trip. Rendering first and
  * swapping the words in later would flash the wrong language.
+ *
+ * A promise, not a top-level `await`: each language file uses a helper that
+ * ships inside this script, so it imports this script back. Were this script
+ * still paused on its own top-level wait, the two would wait on each other and
+ * the page would never paint.
  */
-await loadStrings(lang);
-
-createRoot(root).render(
-  <StrictMode>
-    <LangProvider>
-      <App />
-    </LangProvider>
-  </StrictMode>,
-);
-
-initPwa();
+void loadStrings(lang).then(() => {
+  createRoot(root).render(
+    <StrictMode>
+      <LangProvider>
+        <App />
+      </LangProvider>
+    </StrictMode>,
+  );
+  initPwa();
+});
 
 /*
  * The on-device perf probe (`make phone-perf`), and nothing else, mounts here.
