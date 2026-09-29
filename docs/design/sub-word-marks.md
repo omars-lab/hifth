@@ -478,3 +478,16 @@ vocabulary they were written against — cheap once shards exist, meaningless be
 decision that the test is enough because the ETL rebuilds every shard from source in one
 pass and a stale shard cannot survive a build. Deferred to mark-C on purpose: the risk does
 not exist until something is shipped that an id can be stale *in*.
+
+### ⑤ Does this document's own name reach a reader who has not already found it · **open**
+
+This is a design-of-record with two other open questions above it, and it is cited from
+[`mark-granularity.html`](mark-granularity.html)'s decision row and from
+[`mark-labels.md`](mark-labels.md). But this file itself carries no row in
+[`docs/decisions.json`](../decisions.json) — it settles nothing on its own, ①②④ above are
+still open — so nothing in that register points a stranger at it, and until this paragraph
+nothing in [`docs/issues.json`](../issues.json) did either.
+
+**What would answer it:** a person deciding whether a design-of-record with open questions
+belongs in the decision register once ① or ② resolves, or is better reached only through the
+documents that already cite it. Not a judgement this document can make about itself.
