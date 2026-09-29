@@ -943,3 +943,46 @@ fed ([`docs/decisions/README.md`](../decisions/README.md)) and in those PRs.
 - #161 — Fix CI on #101, commit the decide skill, merge #101
 - #162 — Bring over similar-ayah-enrichment = D (look-alike twins from our own corpus)
 - #163 — Consolidate checkouts, branches and worktrees into one
+
+## #164–#205 — Archived 2026-09-29: the pitch demo walks, links into the app, page corners and bookmarks
+
+**Done:** 2026-09-26 to 2026-09-29, shipped through PRs #104 to #146. The reasoning lives in the
+decisions each fed ([`docs/decisions/README.md`](../decisions/README.md)) and in those PRs.
+
+- #164 — Switch the shipped look-alike phrases to the page's words with "and" glued back (decision D)
+- #165 — Build the mode bar (Read, Word, Verse, Slip, with cursors) into the app's tool bar
+- #166 — Build the verse drawer: a Verse-mode tap opens one bottom sheet of the verse's tools
+- #167 — Word tools open in the same bottom drawer as the verse's
+- #168 — Build the word-drawer placement options page
+- #169 — Run the page-speed audit before the Study Quran pitch
+- #173 — Demo walk: drive the pitch build as a scholar would and fix the roughest edge
+- #174 — Demo build's first screen invites a tap for The Study Quran's note
+- #175 — Decide: a way back from inside an open note after following a related verse
+- #176 — Demo walk 2: desktop reading flow — look-alike chips, inline citations, surah intro
+- #177 — On a computer, the look-alike list dims the page like the note does
+- #178 — On a computer, the look-alike list stands in the same place and width as the note
+- #179 — The note's "Back to" line is thumb-sized on a phone
+- #180 — A note opened from a link no longer shows a heavy focus box on its close button
+- #181 — Check: on a phone the page is cut at both sides at first open — intended or not?
+- #182 — Ask the browser to keep offline pages at a moment it rewards
+- #188 — Fix a stale open-work entry that said adjacency ranges await a ruling
+- #189 — Desktop corner drag: the leaf follows the hand, revealing the next pages beneath
+- #190 — In Firefox the spread's leaves came out too narrow
+- #191 — Simple checks guide: short summary per check, one line per step, diagrams, detail folded
+- #192 — Design doc: every link into the app, what's missing
+- #193 — Guide steps carry app links, or say why there is no link yet
+- #194 — Add the missing app links the design ranks highest
+- #195 — Tests open the app through the shared list of links
+- #196 — One spec of every link form, kept in sync by a hook
+- #197 — A corner turn lands straight on the finished page: no flash, no size jump
+- #198 — Lifted corner looked wrong in Firefox
+- #199 — Arrow buttons in two-page mode needed two clicks; every second click flashed
+- #200 — An arrow turn on the open book: one clean turn, both pages land together
+- #201 — The resting corner fold looked wrong in Firefox
+- #202 — Bookmarked corner: ribbon off the page, fold read as a flat square
+- #203 — Write the manual-testing skill (by-hand checks parked, then turned into tests)
+- #204 — Remember: the owner parks by-hand reviews for later
+- #205 — Commit, PR and merge the manual-testing skill
+
+By-hand checks that were open tasks (#131, #183–#187, and the second reader in #128) moved to the
+parked list in `.claude/skills/manual-testing/checklist.md` the same day, not here: they are not done.
