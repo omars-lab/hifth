@@ -555,8 +555,12 @@ decisions: ## What has been decided and what is still open:  make decisions  · 
 decisions-doc: ## Re-render docs/decisions/README.md from docs/decisions.json
 	@node scripts/build-decisions-doc.mjs
 
+.PHONY: app-links-doc
+app-links-doc: ## Re-render docs/design/app-url-scheme.html from the app's URL contract (the OpenAPI file)
+	@node scripts/build-app-url-scheme.mjs
+
 .PHONY: render-docs
-render-docs: use-cases-doc issues-doc tasks-doc decisions-doc etl-scripts-doc ## Re-render every generated register page (the pre-commit hook refuses a stale one)
+render-docs: use-cases-doc issues-doc tasks-doc decisions-doc etl-scripts-doc app-links-doc ## Re-render every generated register page (the pre-commit hook refuses a stale one)
 
 .PHONY: validate
 validate: ## Outstanding manual checks — or one check's full runbook:  make validate CHECK=<id>

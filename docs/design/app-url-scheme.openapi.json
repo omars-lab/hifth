@@ -1,0 +1,582 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Hifth app links",
+    "version": "1.0.0",
+    "summary": "Every address the Mac and iPad app answers to: plain links that turn the page, and x-callback-url requests that also answer the caller.",
+    "description": "The app is not a web server. These are `hifth://` links the operating system hands to the installed app: from a tapped link, from Shortcuts, from a script (`open`, `xcrun simctl openurl`). OpenAPI is used here as a way to write the contract down in one place that both people and tests read: `native/HifthTests/XCallbackTests.swift` runs every example under `x-examples` through the real parser, and `docs/design/app-url-scheme.html` is rendered from this file by `scripts/build-app-url-scheme.mjs`.\n\nTwo kinds of address. A **plain link** (`hifth:///hafs-kfqc/2:255`) turns the page and says nothing back; a bad one is ignored. An **x-callback-url request** (`hifth://x-callback-url/open?route=…&x-success=…`) does one action and then opens the caller's own address with the result, following the x-callback-url convention (x-callback-url.com): `x-success`, `x-error` and `x-cancel` name where to answer, and an error answer carries `errorCode` and `errorMessage`.\n\nThe route grammar is the web app's own hash, unchanged: `/<edition>/<target>[?query]`. The app only checks its shape; the web app decides what it means (`docs/query-params.md` lists the query keys)."
+  },
+  "servers": [
+    {
+      "url": "hifth://",
+      "description": "The installed Mac or iPad app. The scheme is registered by the app; nothing is sent over a network."
+    }
+  ],
+  "paths": {
+    "/{edition}/{target}": {
+      "get": {
+        "operationId": "openLink",
+        "summary": "Plain link: open the app at a verse, a page or a run of verses",
+        "description": "The same string as the public site's `#/…` link, after `hifth://`. Three spellings are accepted because people paste all three: `hifth:///hafs-kfqc/2:255`, `hifth://hafs-kfqc/2:255`, and `hifth://open/#/hafs-kfqc/2:255` (a site link's tail). If the app is not running it launches there; if it is, it turns the page. Nothing is sent back, and a link that is not a route is ignored. Use `/x-callback-url/open` when you need to know it worked.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/edition"
+          },
+          {
+            "$ref": "#/components/parameters/target"
+          },
+          {
+            "$ref": "#/components/parameters/routeQuery"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "The page turns. No answer is sent to anyone."
+          }
+        }
+      }
+    },
+    "/x-callback-url/open": {
+      "get": {
+        "operationId": "xOpen",
+        "summary": "Open the app at a route, then tell the caller",
+        "description": "Turns the page to the place named and, once the page is showing it, opens `x-success` with the `route` and the same place's public `url` added. Name the place plainly: `page=45`; `verse=2:255` (a run: `verse=2:47-48`) with `words=3-7` to pulse some of its words; or `surah=36` for a surah's context (its first verse, introduction first). `edition` defaults to `hafs-kfqc`. Say how to open it: `mode=note` (or `tool=note`) for the tool in hand, `open=commentary` for the verse's commentary or `open=context` for the commentary led by the surah's introduction, `view=one` or `view=two` for the layout. These three names are checked against the app's lists and a misspelt one is refused, so a caller learns about a typo instead of a page that quietly opened without it. Any other key the web app's links understand (`skin`, `field`, `via`, `trail`; see `docs/query-params.md`) is passed through as given, so `page=7&field=dark` opens page 7 on the night desk. `route` is the same thing as one string, for a caller that already holds a link; when both are given, `route` wins. If nothing names a place, or the place is not in the grammar, `x-error` is opened at once. If the page never shows it (a verse that does not exist, for instance), `x-error` is opened after about eight seconds with `route-not-shown`. With neither address given the page still turns, quietly.",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "description": "A page of the mus'haf, from 1. Give a page or a verse, not both.",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "examples": [
+                45
+              ]
+            }
+          },
+          {
+            "name": "verse",
+            "in": "query",
+            "required": false,
+            "description": "One verse as `surah:ayah`, or a run within one surah as `2:47-48` or `2:47-2:48`. The verse is selected on its page; a run is highlighted.",
+            "schema": {
+              "type": "string",
+              "pattern": "^[1-9][0-9]*:[1-9][0-9]*(-([1-9][0-9]*:)?[1-9][0-9]*)?$",
+              "examples": [
+                "2:255",
+                "2:47-48"
+              ]
+            }
+          },
+          {
+            "name": "surah",
+            "in": "query",
+            "required": false,
+            "description": "A surah's context: opens its first verse with the commentary sheet led by the surah's introduction, as `verse=N:1&open=context` would. 1 to 114. Give one of page, verse or surah.",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 114
+            },
+            "example": 36
+          },
+          {
+            "name": "words",
+            "in": "query",
+            "required": false,
+            "description": "Which words of the verse to pulse: `3-7`, or `5` for one word. Needs `verse`.",
+            "schema": {
+              "type": "string",
+              "pattern": "^[1-9][0-9]*(-[1-9][0-9]*)?$",
+              "examples": [
+                "3-7"
+              ]
+            }
+          },
+          {
+            "name": "edition",
+            "in": "query",
+            "required": false,
+            "description": "Which mus'haf. Defaults to `hafs-kfqc`, the only one shipped today.",
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-z0-9-]+$",
+              "default": "hafs-kfqc"
+            }
+          },
+          {
+            "name": "route",
+            "in": "query",
+            "required": false,
+            "description": "The place as one string in the web app's link grammar, `/<edition>/<target>[?query]`, for a caller that already holds a link. Percent-encode it, or a `&` inside its query is read as the end of this parameter. Wins over `page`/`verse` when both are given.",
+            "schema": {
+              "$ref": "#/components/schemas/Route"
+            },
+            "examples": {
+              "verse": {
+                "value": "/hafs-kfqc/2:255"
+              },
+              "words": {
+                "value": "/hafs-kfqc/2:255?w=3-7",
+                "summary": "encoded on the wire as %2Fhafs-kfqc%2F2%3A255%3Fw%3D3-7"
+              }
+            }
+          },
+          {
+            "name": "mode",
+            "in": "query",
+            "required": false,
+            "description": "The mode the app opens in: the page tool put in hand on arrival, named by the word on its button. The same thing as `tool`; give one or the other. A name not in the list is refused with `bad-route`.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "read",
+                "select",
+                "highlight",
+                "bookmark",
+                "note",
+                "harakat",
+                "word",
+                "mistake",
+                "crop"
+              ]
+            },
+            "example": "note"
+          },
+          {
+            "name": "tool",
+            "in": "query",
+            "required": false,
+            "description": "The web app's own name for `mode`. Passed through as `tool=` in the route.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "read",
+                "select",
+                "highlight",
+                "bookmark",
+                "note",
+                "harakat",
+                "word",
+                "mistake",
+                "crop"
+              ]
+            }
+          },
+          {
+            "name": "open",
+            "in": "query",
+            "required": false,
+            "description": "A panel open on arrival. `commentary` opens the named verse's commentary (tafsir); `context` opens it led by the surah's introduction. Both need a verse, and exist only in a build that holds commentary (the private pitch build) — the public app opens the verse and drops the panel. The rest are the app's own panels: go-to, about, the revision record, the record at juz scope, the tajweed colour key, the mus'haf picker, the tips strip, a verse's look-alikes, a verse's roots. A name not in the list is refused with `bad-route`.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "jump",
+                "about",
+                "record",
+                "shelf",
+                "key",
+                "editions",
+                "tips",
+                "lookalikes",
+                "roots",
+                "commentary",
+                "context"
+              ]
+            },
+            "example": "commentary"
+          },
+          {
+            "name": "view",
+            "in": "query",
+            "required": false,
+            "description": "One page or two side by side on arrival, on a screen wide enough for two. A phone always shows one.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "one",
+                "two"
+              ]
+            },
+            "example": "two"
+          },
+          {
+            "name": "skin",
+            "in": "query",
+            "required": false,
+            "description": "`tajweed` turns the tajweed colours on. One of the web app's own keys, passed through; the others in `docs/query-params.md` pass the same way.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "tajweed"
+              ]
+            }
+          },
+          {
+            "name": "field",
+            "in": "query",
+            "required": false,
+            "description": "The desk colour the mus'haf lies on, e.g. `dark` or `tan`. Passed through; an unknown value falls back to the default desk.",
+            "schema": {
+              "type": "string",
+              "examples": [
+                "dark",
+                "tan"
+              ]
+            }
+          },
+          {
+            "$ref": "#/components/parameters/xSuccess"
+          },
+          {
+            "$ref": "#/components/parameters/xError"
+          },
+          {
+            "$ref": "#/components/parameters/xCancel"
+          },
+          {
+            "$ref": "#/components/parameters/xSource"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "Nothing comes back on this address. The answer is one of the callbacks below."
+          }
+        },
+        "callbacks": {
+          "success": {
+            "$ref": "#/components/callbacks/success"
+          },
+          "error": {
+            "$ref": "#/components/callbacks/error"
+          }
+        }
+      }
+    },
+    "/x-callback-url/current": {
+      "get": {
+        "operationId": "xCurrent",
+        "summary": "Ask what the app is showing",
+        "description": "Opens `x-success` with the `route` on screen and its public `url`. If nothing is on screen yet (the app was just launched by this request), the answer waits for the first page to show. There is no error case beyond a missing `x-success`, which means no answer.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/xSuccess"
+          },
+          {
+            "$ref": "#/components/parameters/xError"
+          },
+          {
+            "$ref": "#/components/parameters/xCancel"
+          },
+          {
+            "$ref": "#/components/parameters/xSource"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "Nothing comes back on this address. The answer is the success callback below."
+          }
+        },
+        "callbacks": {
+          "success": {
+            "$ref": "#/components/callbacks/success"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "parameters": {
+      "edition": {
+        "name": "edition",
+        "in": "path",
+        "required": true,
+        "description": "Which mus'haf. Lower-case letters, digits and dashes.",
+        "schema": {
+          "type": "string",
+          "pattern": "^[a-z0-9-]+$",
+          "examples": [
+            "hafs-kfqc"
+          ]
+        }
+      },
+      "target": {
+        "name": "target",
+        "in": "path",
+        "required": true,
+        "description": "A page (`p45`), a verse (`2:255`), a run of verses (`2:47-2:48` or `2:47-48`). Every number starts from 1.",
+        "schema": {
+          "type": "string",
+          "pattern": "^(p[1-9][0-9]*|[1-9][0-9]*:[1-9][0-9]*(-([1-9][0-9]*:)?[1-9][0-9]*)?)$",
+          "examples": [
+            "p45",
+            "2:255",
+            "2:47-48"
+          ]
+        }
+      },
+      "routeQuery": {
+        "name": "query",
+        "in": "query",
+        "required": false,
+        "description": "Any of the web app's own keys, e.g. `w=3-7` (some words of the verse), `skin=tajweed`, `field=dark`. The full list and what a bad value does is `docs/query-params.md`.",
+        "schema": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9\\-_.~%:,=&+]*$"
+        }
+      },
+      "xSuccess": {
+        "name": "x-success",
+        "in": "query",
+        "required": false,
+        "description": "Where to answer when the action worked. Any app's address (`shortcuts://…`, `drafts://…`, `https://…`). The answer's parameters are added to its query. Ignored if it points back into this app, or at a file or a script.",
+        "schema": {
+          "type": "string",
+          "format": "uri"
+        }
+      },
+      "xError": {
+        "name": "x-error",
+        "in": "query",
+        "required": false,
+        "description": "Where to answer when the action failed. Opened with `errorCode` and `errorMessage` added, as the x-callback-url convention names them. Same safety rule as x-success.",
+        "schema": {
+          "type": "string",
+          "format": "uri"
+        }
+      },
+      "xCancel": {
+        "name": "x-cancel",
+        "in": "query",
+        "required": false,
+        "description": "Accepted for completeness and never opened: neither action here can be cancelled by the reader.",
+        "schema": {
+          "type": "string",
+          "format": "uri"
+        }
+      },
+      "xSource": {
+        "name": "x-source",
+        "in": "query",
+        "required": false,
+        "description": "The calling app's name, per the convention. Accepted and not used; the app shows no 'back to' button.",
+        "schema": {
+          "type": "string"
+        }
+      }
+    },
+    "schemas": {
+      "Route": {
+        "type": "string",
+        "description": "`/<edition>/<target>[?query]` — the web app's own link, without the `#`.",
+        "pattern": "^/[a-z0-9-]+/(p[1-9][0-9]*|[1-9][0-9]*:[1-9][0-9]*(-([1-9][0-9]*:)?[1-9][0-9]*)?)(\\?[A-Za-z0-9\\-_.~%:,=&+]*)?$",
+        "examples": [
+          "/hafs-kfqc/2:255",
+          "/hafs-kfqc/p45",
+          "/hafs-kfqc/2:47-48?skin=tajweed"
+        ]
+      },
+      "ErrorCode": {
+        "type": "string",
+        "enum": [
+          "missing-route",
+          "bad-route",
+          "unknown-action",
+          "route-not-shown"
+        ],
+        "description": "`missing-route`: open named no page, verse, surah or route. `bad-route`: the place is not in the grammar (a page of 0, two places at once, words without a verse, a surah past 114), or a mode, panel or view name not in the app's lists. `unknown-action`: the path after x-callback-url is not open or current. `route-not-shown`: the place was accepted but the page never showed it."
+      }
+    },
+    "callbacks": {
+      "success": {
+        "{$request.query.x-success}": {
+          "get": {
+            "summary": "Opened by the app when the action worked",
+            "description": "The caller's own address, with two parameters added to whatever query it already had. Values are percent-encoded so a route's own `?w=3-7` cannot be mistaken for a parameter of the answer.",
+            "parameters": [
+              {
+                "name": "route",
+                "in": "query",
+                "required": true,
+                "description": "What is on screen, in the same shape the caller sends (no `#`).",
+                "schema": {
+                  "$ref": "#/components/schemas/Route"
+                }
+              },
+              {
+                "name": "url",
+                "in": "query",
+                "required": true,
+                "description": "The same place on the public site, ready to share.",
+                "schema": {
+                  "type": "string",
+                  "format": "uri",
+                  "examples": [
+                    "https://blog.bytesofpurpose.com/hifth/#/hafs-kfqc/2:255"
+                  ]
+                }
+              }
+            ],
+            "responses": {
+              "default": {
+                "description": "Whatever the caller does with it."
+              }
+            }
+          }
+        }
+      },
+      "error": {
+        "{$request.query.x-error}": {
+          "get": {
+            "summary": "Opened by the app when the action failed",
+            "parameters": [
+              {
+                "name": "errorCode",
+                "in": "query",
+                "required": true,
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorCode"
+                }
+              },
+              {
+                "name": "errorMessage",
+                "in": "query",
+                "required": true,
+                "description": "One plain sentence for a person, e.g. `not a route: chapter-2`.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            ],
+            "responses": {
+              "default": {
+                "description": "Whatever the caller does with it."
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "x-examples": [
+    {
+      "url": "hifth:///hafs-kfqc/2:255",
+      "result": "open #/hafs-kfqc/2:255",
+      "note": "A plain link with three slashes: the route is the path."
+    },
+    {
+      "url": "hifth://hafs-kfqc/p45",
+      "result": "open #/hafs-kfqc/p45",
+      "note": "Two slashes: the edition lands where a host would be. Still a route."
+    },
+    {
+      "url": "hifth://open/#/hafs-kfqc/2:47-48?w=1-2",
+      "result": "open #/hafs-kfqc/2:47-48?w=1-2",
+      "note": "A site link's tail pasted after hifth://open/, fragment and all."
+    },
+    {
+      "url": "hifth:///hafs-kfqc/p0",
+      "result": "refused",
+      "note": "Page numbers start at 1. A plain link that is not a route is ignored, silently."
+    },
+    {
+      "url": "hifth://x-callback-url/open?page=45&x-success=shortcuts://x-callback-url/run-shortcut?name=Next",
+      "result": "open #/hafs-kfqc/p45",
+      "note": "Open page 45, said plainly. No encoding needed."
+    },
+    {
+      "url": "hifth://x-callback-url/open?verse=2:255&words=3-7&x-success=shortcuts://x-callback-url/run-shortcut?name=Next",
+      "result": "open #/hafs-kfqc/2:255?w=3-7",
+      "note": "Select Al-Baqarah 2:255 and pulse its words 3 to 7."
+    },
+    {
+      "url": "hifth://x-callback-url/open?verse=2:47-48&skin=tajweed&field=dark",
+      "result": "open #/hafs-kfqc/2:47-48?skin=tajweed&field=dark",
+      "note": "Highlight a run of verses in tajweed colours on the night desk. skin and field pass through to the web app."
+    },
+    {
+      "url": "hifth://x-callback-url/open?verse=2:255&open=commentary&x-success=shortcuts://x-callback-url/run-shortcut?name=Next",
+      "result": "open #/hafs-kfqc/2:255?open=commentary",
+      "note": "Straight into a verse's commentary (tafsir), in a build that holds it."
+    },
+    {
+      "url": "hifth://x-callback-url/open?verse=2:255&open=context&x-success=shortcuts://x-callback-url/run-shortcut?name=Next",
+      "result": "open #/hafs-kfqc/2:255?open=context",
+      "note": "The same note, led by al-Baqarah's introduction."
+    },
+    {
+      "url": "hifth://x-callback-url/open?surah=36&x-success=shortcuts://x-callback-url/run-shortcut?name=Next",
+      "result": "open #/hafs-kfqc/36:1?open=context",
+      "note": "A surah's context: its first verse, introduction first."
+    },
+    {
+      "url": "hifth://x-callback-url/open?page=7&mode=note&x-success=shortcuts://x-callback-url/run-shortcut?name=Next",
+      "result": "open #/hafs-kfqc/p7?tool=note",
+      "note": "Open in note mode: the note tool is in hand on arrival."
+    },
+    {
+      "url": "hifth://x-callback-url/open?verse=2:255&mode=highlight&view=one&x-success=shortcuts://x-callback-url/run-shortcut?name=Next",
+      "result": "open #/hafs-kfqc/2:255?tool=highlight&view=one"
+    },
+    {
+      "url": "hifth://x-callback-url/open?page=7&mode=notes&x-error=shortcuts://x-callback-url/run-shortcut?name=Log%20failure",
+      "result": "error bad-route",
+      "note": "A mode that is not in the list is refused, not quietly dropped."
+    },
+    {
+      "url": "hifth://x-callback-url/open?verse=2:255&open=tafsir&x-error=shortcuts://x-callback-url/run-shortcut?name=Log%20failure",
+      "result": "error bad-route",
+      "note": "The panel is called commentary, not tafsir."
+    },
+    {
+      "url": "hifth://x-callback-url/open?surah=115&x-error=shortcuts://x-callback-url/run-shortcut?name=Log%20failure",
+      "result": "error bad-route"
+    },
+    {
+      "url": "hifth://x-callback-url/open?page=45&verse=2:255&x-error=shortcuts://x-callback-url/run-shortcut?name=Log%20failure",
+      "result": "error bad-route",
+      "note": "A page and a verse at once: the app cannot know which you meant."
+    },
+    {
+      "url": "hifth://x-callback-url/open?words=3-7&x-error=shortcuts://x-callback-url/run-shortcut?name=Log%20failure",
+      "result": "error bad-route",
+      "note": "Words without a verse."
+    },
+    {
+      "url": "hifth://x-callback-url/open?route=/hafs-kfqc/2:255&x-success=shortcuts://x-callback-url/run-shortcut?name=Log%20verse&x-error=shortcuts://x-callback-url/run-shortcut?name=Log%20failure",
+      "result": "open #/hafs-kfqc/2:255",
+      "note": "Open a verse from Shortcuts; the answer runs one shortcut on success and another on failure."
+    },
+    {
+      "url": "hifth://x-callback-url/open?route=%2Fhafs-kfqc%2F2%3A255%3Fw%3D3-7%26skin%3Dtajweed&x-success=drafts://x-callback-url/create",
+      "result": "open #/hafs-kfqc/2:255?w=3-7&skin=tajweed",
+      "note": "A route with its own query, percent-encoded so its & is not read as the end of the route."
+    },
+    {
+      "url": "hifth://x-callback-url/open?x-error=shortcuts://x-callback-url/run-shortcut?name=Log%20failure",
+      "result": "error missing-route",
+      "note": "No route given: x-error is opened at once with errorCode=missing-route."
+    },
+    {
+      "url": "hifth://x-callback-url/open?route=chapter-2&x-error=shortcuts://x-callback-url/run-shortcut?name=Log%20failure",
+      "result": "error bad-route",
+      "note": "Not in the grammar: errorCode=bad-route, errorMessage=not a route: chapter-2."
+    },
+    {
+      "url": "hifth://x-callback-url/current?x-success=drafts://x-callback-url/create",
+      "result": "current",
+      "note": "Ask what is on screen; Drafts gets a new draft with route=… and url=… in its query."
+    },
+    {
+      "url": "hifth://x-callback-url/bookmark?route=/hafs-kfqc/p1&x-error=shortcuts://x-callback-url/run-shortcut?name=Log%20failure",
+      "result": "error unknown-action",
+      "note": "Only open and current exist. Anything else answers errorCode=unknown-action."
+    },
+    {
+      "url": "hifth://x-callback-url/current?x-success=hifth://x-callback-url/current",
+      "result": "current",
+      "note": "An answer address that points back into this app is dropped, so a request cannot answer itself for ever."
+    }
+  ]
+}

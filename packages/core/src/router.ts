@@ -76,7 +76,11 @@ export interface AppState {
 /**
  * The panels a link can open. `shelf` is the revision record at juz scope,
  * where the saved-offline shelf lives; `record` leaves it at the reader's last
- * scope. Names are the words on the buttons, not our component names.
+ * scope. `commentary` is the selected verse's note and `context` that note
+ * led by its surah's introduction — both only where a build holds notes at all
+ * (the private pitch build); elsewhere they are dropped like any panel the
+ * build does not have. Names are the words on the buttons, not our component
+ * names.
  */
 export const OPEN_PANELS = [
   "jump",
@@ -88,6 +92,8 @@ export const OPEN_PANELS = [
   "tips",
   "lookalikes",
   "roots",
+  "commentary",
+  "context",
 ] as const;
 export type OpenPanel = (typeof OPEN_PANELS)[number];
 const isOpenPanel = (v: string): v is OpenPanel => (OPEN_PANELS as readonly string[]).includes(v);

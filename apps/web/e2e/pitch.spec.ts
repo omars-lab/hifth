@@ -322,3 +322,26 @@ test.describe("Hifth · the pitch commentary on a phone", () => {
       .toBe(true);
   });
 });
+
+test.describe("Hifth · links straight into the commentary", () => {
+  // Owner, 2026-09-29: another app should be able to open the note of a verse,
+  // or a surah's context, from a link — the same link the native shell's
+  // x-callback-url `open` composes from `verse=` and `open=`.
+  test("?open=commentary opens the verse's note", async ({ page }) => {
+    await page.goto("/#/hafs-kfqc/2:255?open=commentary");
+    await expect(page.getByRole("dialog", { name: /2:255/ })).toBeVisible({ timeout: 20_000 });
+    await expect(sheet(page)).toContainText("Study Quran");
+    // The introduction belongs to the opening verse; a middle verse's note does not carry it.
+    await expect(sheet(page).getByRole("region", { name: "Surah introduction" })).toHaveCount(0);
+  });
+
+  test("?open=context leads the note with the surah's introduction, on any verse", async ({
+    page,
+  }) => {
+    await page.goto("/#/hafs-kfqc/2:255?open=context");
+    await expect(page.getByRole("dialog", { name: /2:255/ })).toBeVisible({ timeout: 20_000 });
+    await expect(sheet(page).getByRole("region", { name: "Surah introduction" })).toBeVisible();
+    // The address settles on the verse alone: the panel was a way in, not a view.
+    await expect.poll(() => page.evaluate(() => location.hash)).toBe("#/hafs-kfqc/2:255");
+  });
+});
