@@ -142,7 +142,7 @@ report: ## Open the last e2e run's report — traces, image diffs, the failing s
 #   make drive BASE=http://localhost:5173 VIEWPORT=1440x900   # the pitch server, desktop spread
 #   make drive HASH='#/hafs-kfqc/p8' VIEWPORT=1280x800 MOUSE=1 \
 #     ACT='settle=400; press=ArrowLeft; settle=800' VIDEO=test-results/drive/turn.gif
-#     # a moving picture: .gif (needs ffmpeg) or .webm; made fresh, never committed
+#     # a moving picture: .gif (needs ffmpeg) or .webm — the record-demo skill
 #
 # Flags map 1:1 to the driver (apps/web/e2e/tools/drive.mjs). OUT is relative to
 # apps/web; the run prints the path to open. --expect makes a silently-wrong

@@ -1,6 +1,6 @@
 ---
 name: run-app
-description: Launch the actual Hifth app and open it in a browser — the real navigation instrument, not a picture of it. Use when asked to run, start, open, screenshot, record, or make a video or GIF of "the app", "Hifth", or "the desktop/mobile UI" (a page turn, a drawer opening), or to confirm a change works in the running app. The project's answer to the built-in `run` skill.
+description: Launch the actual Hifth app and open it in a browser — the real navigation instrument, not a picture of it. Use when asked to run, start, open, or screenshot "the app", "Hifth", or "the desktop/mobile UI", or to confirm a change works in the running app. For a GIF or video, use record-demo. The project's answer to the built-in `run` skill.
 ---
 
 # Running Hifth
@@ -79,22 +79,7 @@ make drive BASE=http://localhost:5173 VIEWPORT=1440x900   # pitch server, deskto
 - `MOUSE=1` drives a desktop with a real pointer (hover styles, the page-edge grab);
   `drag=x,y>x,y` in `ACT` presses, glides and lets go — a page turn by its edge.
 
-### A moving picture — `VIDEO=`
-
-When a still cannot carry it (a page turn, a drawer rising, a wash following a
-thumb), record the run. `.gif` needs ffmpeg (installed here); `.webm` does not.
-
-```
-make drive HASH='#/hafs-kfqc/p8' VIEWPORT=1280x800 MOUSE=1 \
-  ACT='settle=400; press=ArrowLeft; settle=800' VIDEO=test-results/drive/turn.gif
-```
-
-A recording is **made fresh, never committed**: it is a few MB, it goes stale the
-moment the app changes, and the command above remakes it in seconds. Keep the
-command (in a runbook, an issue, a PR description), not the file. To look at one
-yourself, pull a contact sheet from it and read the PNG:
-`ffmpeg -i turn.gif -vf "select=not(mod(n\,8)),scale=320:-1,tile=4x2" -frames:v 1 sheet.png`.
-`e2e/drive-video.spec.ts` holds the recording path still.
+For a GIF or video of a run — something that moves — use the `record-demo` skill.
 
 This is the mechanism behind this skill's promise to "screenshot the app". It is
 **not a test** — it asserts nothing on its own and holds no baselines. The `testing`
