@@ -50,7 +50,9 @@
 }
 
 /* The page beneath, where the corner was: the same paper with its own top
-   edge, and none of the top page's ink. Its outer tip follows the leaf's
+   edge, and none of the top page's ink, lying in the flap's shadow — darkest
+   at the crease. Drawn the same colour as the page, the fold read as a flat
+   square pasted on (#202). Its outer tip follows the leaf's
    rounded corner, so it never shows past the paper onto the desk: the curve
    is 20px round (--radius-leaf) and starts 12px outside the fold (the page
    edges and their border), which puts it 1.67px down at the fold's outer side
@@ -72,11 +74,13 @@
     100% 0,
     0 100%
   );
-  background: linear-gradient(
-    to bottom,
-    var(--leaf-edge) 0 calc(var(--leaf-edge-width) * var(--leaf-z, 1)),
-    var(--paper-raised) 0
-  );
+  background:
+    linear-gradient(
+      to bottom,
+      var(--leaf-edge) 0 calc(var(--leaf-edge-width) * var(--leaf-z, 1)),
+      transparent 0
+    ),
+    linear-gradient(to top left, var(--fold-shade) 50%, var(--fold-shade-mid) 62%, var(--fold-shade-far) 100%);
   transition: inline-size var(--dur-fast) ease, block-size var(--dur-fast) ease;
 }
 
@@ -92,6 +96,13 @@
     0 0,
     100% 100%
   );
+  background:
+    linear-gradient(
+      to bottom,
+      var(--leaf-edge) 0 calc(var(--leaf-edge-width) * var(--leaf-z, 1)),
+      transparent 0
+    ),
+    linear-gradient(to top right, var(--fold-shade) 50%, var(--fold-shade-mid) 62%, var(--fold-shade-far) 100%);
 }
 
 /* The flap casts its shadow onto the page. A filter on the parent, because the
@@ -100,13 +111,13 @@
   position: absolute;
   top: 0;
   left: 0;
-  filter: drop-shadow(1px 2px 1.5px rgba(0, 0, 0, 0.22));
+  filter: drop-shadow(1.5px 2.5px 2px rgba(60, 40, 20, 0.28));
 }
 
 :global([data-free-side="right"]) .foldShadow {
   left: auto;
   right: 0;
-  filter: drop-shadow(-1px 2px 1.5px rgba(0, 0, 0, 0.22));
+  filter: drop-shadow(-1.5px 2.5px 2px rgba(60, 40, 20, 0.28));
 }
 
 /* The back of the paper, folded over: the triangle on the page's side of the
@@ -166,18 +177,28 @@
   left: calc(var(--leaf-x, 0px) - var(--seam-w) / 2);
 }
 
+/* The ribbons hang from their own page, a little in from the spine and so
+   well clear of the folded corner on the other side. Measured against the
+   stage, they hung out on the desk when one page sat alone in a wide window,
+   and across the fold when the page was zoomed (#202). Held inside the field
+   when the page is panned partly out of view. */
 .ribbons {
   position: absolute;
   /* From the head of the paper, not the top of the field; and pinned to the
      top of the field once the page's head is panned out of view. */
   inset-block-start: max(0px, var(--leaf-y, 0px));
-  inset-inline-end: 14%;
+  right: clamp(8px, calc(100% - var(--leaf-x, 0px) - var(--leaf-w, 100%) * 0.86), calc(100% - 40px));
   display: flex;
   flex-direction: row-reverse;
   gap: 8px;
   margin: 0;
   padding: 0;
   list-style: none;
+}
+
+:global([data-free-side="right"]) .ribbons {
+  right: auto;
+  left: clamp(8px, calc(var(--leaf-x, 0px) + var(--leaf-w, 100%) * 0.14), calc(100% - 40px));
 }
 
 .slot {
