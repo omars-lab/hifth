@@ -65,12 +65,12 @@ statuses, gates and open follow-ups live there and are deliberately not restated
 
 - **Implementation plan:** [`docs/PLAN.md`](docs/PLAN.md) — built in vertical loops, each ending on a phone
 - **Loop records:** [`docs/decisions/`](docs/decisions/) — what each loop decided, measured, deferred
-- **Open items:** [`docs/issues.md`](docs/issues.md) — everything unfinished, indexed from the four
-  registers that hold it (the plan's follow-ups, the backlog, each design doc's open questions,
-  the manual-check ledger); `make issues` prints it worst-first
-- **Whose turn is it:** [`docs/tasks.md`](docs/tasks.md) — the same items ordered by who has to move
-  them, and the only page that names the open decisions and the human-only checks rather than
-  pointing at them by identifier; `make tasks` prints the counts
+- **Backlog:** [`docs/backlog.md`](docs/backlog.md) — every open item and question in full, on
+  one page that reads on its own, ordered by whose turn it is. Start a session here.
+- **Open items, worst first:** [`docs/issues.md`](docs/issues.md) — the same items as a short
+  index, from the pages that own them (the plan's follow-ups, the speed notes in
+  [`docs/performance.md`](docs/performance.md), each design doc's open questions, the
+  manual-check ledger); `make issues` prints it
 - **Manual-check register:** [`docs/validation/ledger.json`](docs/validation/ledger.json) — the
   checks no CI job can make (a phone, a screen reader, a printed mushaf), each with a runbook
   and a recorded verdict; `make validate` in the terminal, `make guide` on the phone

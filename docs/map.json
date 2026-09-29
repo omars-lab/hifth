@@ -594,7 +594,7 @@
         {
           "file": "apps/web/src/packs.ts",
           "symbol": "PIN_HEADER",
-          "note": "The one thing a pin tells the service worker: this fetch is not a read for display. Both runtimeCaching routes in vite.config.ts decline anything carrying it, so a pinned file is written once instead of also landing in hifth-pages and evicting the trail it was meant to preserve (backlog ⑮). The literal is deliberately duplicated into vite.config.ts and must stay in step: workbox generateSW stringifies a route matcher, so an imported constant reaches the worker as undefined and the route silently declines nothing. Static provenance is the whole contract — the worker never learns PACK_CACHE's name, the pack's URL list, or that a register exists, so planPack can change shape without sw.js moving. See docs/decisions/pin-marker.md."
+          "note": "The one thing a pin tells the service worker: this fetch is not a read for display. Both runtimeCaching routes in vite.config.ts decline anything carrying it, so a pinned file is written once instead of also landing in hifth-pages and evicting the trail it was meant to preserve (performance.md ⑮). The literal is deliberately duplicated into vite.config.ts and must stay in step: workbox generateSW stringifies a route matcher, so an imported constant reaches the worker as undefined and the route silently declines nothing. Static provenance is the whole contract — the worker never learns PACK_CACHE's name, the pack's URL list, or that a register exists, so planPack can change shape without sw.js moving. See docs/decisions/pin-marker.md."
         },
         {
           "file": "apps/web/src/components/PackShelf.tsx",
@@ -643,7 +643,7 @@
         {
           "file": "packages/core/src/mounted-set.ts",
           "symbol": "retainPages",
-          "note": "The ceiling on how many page SVGs stay in the DOM (backlog ③), and the reason vendoring 604 pages did not turn a long reading session into a leak: `MOUNTED_PAGE_CAP` mounted nodes, evicted least-recently-used, with the pages a turn is animating between pinned so the leaf being turned cannot be collected mid-flight. A spread mounts two leaves at once, so `spreadBudget` splits the same cap rather than doubling it — App.tsx passes each stage its share."
+          "note": "The ceiling on how many page SVGs stay in the DOM (performance.md ③), and the reason vendoring 604 pages did not turn a long reading session into a leak: `MOUNTED_PAGE_CAP` mounted nodes, evicted least-recently-used, with the pages a turn is animating between pinned so the leaf being turned cannot be collected mid-flight. A spread mounts two leaves at once, so `spreadBudget` splits the same cap rather than doubling it — App.tsx passes each stage its share."
         },
         {
           "file": "packages/etl/scripts/vendor-pages.mjs",

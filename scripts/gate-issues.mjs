@@ -83,7 +83,7 @@ const milestones = new Set(checks.flatMap((c) => c.blocks ?? []));
  * next month gets gated the day it grows an open section, with no edit here.
  */
 const registers = [
-  "docs/backlog.md",
+  "docs/performance.md",
   ...readdirSync(join(ROOT, "docs", "design"))
     .filter((f) => f.endsWith(".md"))
     .map((f) => `docs/design/${f}`),

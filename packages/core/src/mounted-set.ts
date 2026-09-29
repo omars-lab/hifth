@@ -7,7 +7,7 @@
  * current selection, and with three pages vendored that set could never exceed
  * three. Loop 4b vendored all 604, so the same expression now returns the
  * selection's entire hop fan-out — for a densely connected ayah, dozens of
- * ~150 KB inline SVGs mounted for one tap (`docs/backlog.md` ③).
+ * ~150 KB inline SVGs mounted for one tap (`docs/performance.md` ③).
  *
  * Two jobs, one function:
  *
@@ -35,7 +35,7 @@
 export const MOUNTED_PAGE_CAP = 6;
 
 /**
- * Split the cap between the two leaves of an open spread (`docs/backlog.md` ④).
+ * Split the cap between the two leaves of an open spread (`docs/performance.md` ④).
  *
  * The desktop spread mounts both leaves as real stages, so an unsplit cap is a
  * cap per *leaf* and the book silently holds twice what a phone does. The split

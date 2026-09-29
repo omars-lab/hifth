@@ -986,3 +986,14 @@ decisions each fed ([`docs/decisions/README.md`](../decisions/README.md)) and in
 
 By-hand checks that were open tasks (#131, #183–#187, and the second reader in #128) moved to the
 parked list in `.claude/skills/manual-testing/checklist.md` the same day, not here: they are not done.
+
+## Confusion-points backlog folded into the one backlog
+
+**Done:** 2026-09-29. `docs/tasks/backlog.md` held the open questions on the confusion-points
+feature, what was already built for it (the design in `docs/design/confusion-points.md`, the
+*Where You Slip* walkthrough, the export decision, the sharper privacy wording in
+`docs/design/revision-record.md` ④; commits `a5d41af` and `6dc0b81`), and four items parked
+before the refactor. Every open item in it is now written in full in `docs/backlog.md`: the eight
+confusion-map questions were already indexed, the Preact swap became `docs/performance.md` ⑱, and
+the library command-line tool became PLAN.md follow-up 22. The file was removed so there is one
+backlog, not two.

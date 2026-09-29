@@ -128,7 +128,7 @@ of that cache's 32 entries go to duplicates — so the act of *keeping* a juz fo
 away most of what the reader was reading last week.
 
 Not a correctness bug: `packedFetch` reads the pack first, and every test passes either way.
-It is filed as [backlog ⑮](../backlog.md) rather than patched, because both candidate fixes
+It is filed as [performance.md ⑮](../performance.md) rather than patched, because both candidate fixes
 are worse than the waste today — teaching the worker to recognise a pin puts pack knowledge in
 the worker, and sweeping the runtime caches on unpin only tidies up afterwards. The trigger to
 act is a second pinned juz.

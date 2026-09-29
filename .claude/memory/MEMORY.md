@@ -41,3 +41,4 @@
 - [Owner uses Firefox](owner-uses-firefox.md) — reports that don't reproduce in Chrome: try Firefox; pinned Playwright Firefox installed, desktop-firefox project runs on push
 - [Short-first guides, Mermaid for processes](short-first-guides-mermaid.md) — working pages lead with the short version, detail folded; order/branches drawn as Mermaid (owner 2026-09-28)
 - [Park manual reviews](park-manual-reviews.md) — never push by-hand checks at the owner; add to manual-testing checklist, turn each verdict into a test
+- [Backlog is the only record](backlog-is-the-only-record.md) — docs/backlog.md is the one self-contained open-work page; register every open item before a session ends (owner 2026-09-29)
