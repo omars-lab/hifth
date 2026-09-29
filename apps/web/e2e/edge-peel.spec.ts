@@ -358,11 +358,22 @@ test.describe("Hifth · the folded bookmark corner on the open book", () => {
       const px = side === "right" ? host.r.right - (border + edge / 2) * z : host.r.left + (border + edge / 2) * z;
       const py = f.top + f.height / 2;
       const hit = document.elementsFromPoint(px, py).includes(host.h);
-      return { side, f: { l: f.left, r: f.right, w: f.width }, paperL, paperR, hit };
+      // The page beneath the fold is drawn where the corner was, and the paper's
+      // outer corner is rounded: nowhere may it paint past the leaf onto the desk.
+      const under = btn.querySelector(":scope > span:first-child") as HTMLElement;
+      const u = under.getBoundingClientRect();
+      let outside = 0;
+      for (let y = u.top + 0.125; y < u.bottom; y += 0.25)
+        for (let x = u.left + 0.125; x < u.right; x += 0.25) {
+          const at = document.elementsFromPoint(x, y);
+          if (at.includes(under) && !at.includes(host.h)) outside++;
+        }
+      return { side, f: { l: f.left, r: f.right, w: f.width }, paperL, paperR, hit, outside };
     });
     expect(m.f.w).toBeGreaterThan(10);
     if (m.side === "right") expect(m.f.r).toBeLessThanOrEqual(m.paperR + 0.5);
     else expect(m.f.l).toBeGreaterThanOrEqual(m.paperL - 0.5);
     expect(m.hit, "the page edges beside the fold are cut away").toBe(true);
+    expect(m.outside, "the page under the fold pokes past the rounded corner").toBe(0);
   });
 });

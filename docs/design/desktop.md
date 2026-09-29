@@ -722,9 +722,10 @@ turn's curl over the fold. A reader dog-ears a book at the top and turns it from
 the grab strip now starts just below the fold's button. The foot corner and the rest of the
 edge still turn the page. Held by *"a folded corner lies on the paper, and the page edges
 beside it stay whole"* (edge-peel spec, both browsers). It could not even click the fold
-before the change, and with the click fixed it measured the flap 11 px past the paper. One
-thing is left on purpose: at the rounded outer corner, the square corner of the page beneath
-stands about 2 px proud of the curve.
+before the change, and with the click fixed it measured the flap 11 px past the paper. The
+page beneath the fold once had a square tip that stood about 2 px past the paper's rounded
+corner; its tip now follows the curve, and the same test scans the whole fold for any point
+drawn outside the leaf (it found 8 in Chromium and 54 in Firefox before the change).
 
 ### ② Should the two leaves pan and zoom together? · **fixed**
 
