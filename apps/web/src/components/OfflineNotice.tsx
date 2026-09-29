@@ -7,9 +7,15 @@ import {
   storageSupported,
   type Durability,
 } from "../storage";
-import { isIosDevice, isStandalone, onInstallAvailability, promptInstall } from "../pwa";
+import {
+  isIosDevice,
+  isStandalone,
+  onInstallAvailability,
+  promptInstall,
+} from "../pwa";
 import { packStatuses } from "../packs";
 import { useT } from "../i18n";
+import { isNative } from "../native-bridge";
 import styles from "./OfflineNotice.module.css";
 
 /**
@@ -177,13 +183,22 @@ export function OfflineNotice({
     };
   }, []);
 
-  const kind = pickNotice(swept, durability, installable, isStandalone(), isIosDevice());
+  // The Mac / iPad shell is an installed app already: nothing to install, and
+  // its storage is the shell's own, so it sits in the same silent tier.
+  const kind = pickNotice(
+    swept,
+    durability,
+    installable,
+    isStandalone() || isNative(),
+    isIosDevice(),
+  );
   // `pack-gone` is an event, not a standing condition, so it is never written to
   // the durable dismissal store: a reader who hid it in March would otherwise
   // never be told about the sweep that takes the next juz. Hiding it lasts for
   // this session, and the shelf keeps the answer for anyone who goes looking.
   const dismissed =
-    kind !== null && (hidden.has(kind) || (kind !== "pack-gone" && isNoticeDismissed(kind)));
+    kind !== null &&
+    (hidden.has(kind) || (kind !== "pack-gone" && isNoticeDismissed(kind)));
 
   const handleDismiss = useCallback(() => {
     if (!kind) return;
@@ -197,7 +212,8 @@ export function OfflineNotice({
       // but `display-mode: standalone` only becomes true in the *installed*
       // window — so hide the banner here for this session too. A dismissed
       // prompt leaves it in hand, and the banner stays, honestly.
-      if (outcome === "accepted") setHidden((s) => new Set(s).add("install-prompt"));
+      if (outcome === "accepted")
+        setHidden((s) => new Set(s).add("install-prompt"));
     });
   }, []);
 

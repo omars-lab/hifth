@@ -1,6 +1,7 @@
 import { useCallback, useState } from "react";
 import { serializeState, type AppState } from "@hifth/core";
 import { useT } from "../i18n";
+import { nativeShare, shareBase } from "../native-bridge";
 import styles from "./ShareSheet.module.css";
 
 interface ShareSheetProps {
@@ -35,17 +36,30 @@ export function ShareSheet({
 
   const onShare = useCallback(async () => {
     if (!state) return;
-    const url = window.location.origin + window.location.pathname + serializeState(state);
+    // `shareBase` is this page in a browser and the public site inside the
+    // native shell, where the page's own origin is a private scheme nobody
+    // else could open.
+    const url = shareBase() + serializeState(state);
     // The share payload speaks the sender's UI language: it is a sentence in
     // the sender's own share sheet before it is anything to the recipient, and
     // the link itself carries the view regardless of either side's language.
     const shareData: ShareData = {
       title: t.shareTitle,
-      text: hasTrail ? t.shareTextTrail : isRange ? t.shareTextRange : t.shareTextAyah,
+      text: hasTrail
+        ? t.shareTextTrail
+        : isRange
+          ? t.shareTextRange
+          : t.shareTextAyah,
       url,
     };
+    // Inside the shell, its own share sheet: the page there has neither
+    // `navigator.share` nor a clipboard, and the shell says the outcome.
+    if (nativeShare(shareData as { url: string; title: string; text: string }))
+      return;
     // Prefer the native share sheet; fall back to clipboard.
-    const nav = navigator as Navigator & { share?: (d: ShareData) => Promise<void> };
+    const nav = navigator as Navigator & {
+      share?: (d: ShareData) => Promise<void>;
+    };
     if (typeof nav.share === "function") {
       try {
         await nav.share(shareData);
@@ -74,16 +88,26 @@ export function ShareSheet({
         className={styles.share}
         onClick={() => void onShare()}
         aria-label={
-          hasTrail ? t.shareAriaTrail : isRange ? t.shareAriaRange : t.shareAriaAyah
+          hasTrail
+            ? t.shareAriaTrail
+            : isRange
+              ? t.shareAriaRange
+              : t.shareAriaAyah
         }
       >
         <span className={styles.glyph} aria-hidden="true">
           ⇪
         </span>
-        <span className={styles.label}>{hasTrail ? t.shareLabelTrail : t.shareLabel}</span>
+        <span className={styles.label}>
+          {hasTrail ? t.shareLabelTrail : t.shareLabel}
+        </span>
       </button>
       {feedback && (
-        <span className={styles.feedback} role="status" data-kind={feedback.kind}>
+        <span
+          className={styles.feedback}
+          role="status"
+          data-kind={feedback.kind}
+        >
           {feedback.text}
         </span>
       )}
