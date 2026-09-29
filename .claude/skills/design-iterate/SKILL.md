@@ -56,7 +56,8 @@ Look at the running thing, not the source. Two ways in:
 
 - **The app itself** (a change already wired into the app): the `run-app` skill's driver,
   `make drive HASH=… ACT=… EXPECT=… OUT=…` (`apps/web/e2e/tools/drive.mjs`) — deep-link a state,
-  run a short action list, write a PNG.
+  run a short action list, write a PNG. When the difference is in how it moves, record
+  it instead (the `record-demo` skill) and read a strip of its frames.
 - **A static options page** (`docs/design/<slug>-options.html`): a short headless screenshot
   script. Playwright resolves `@playwright/test` only from inside the workspace, so put the temp
   script where the driver lives (`apps/web/e2e/tools/`), point it at `file://…/<slug>-options.html`,
