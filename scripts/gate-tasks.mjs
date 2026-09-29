@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * CI gate: docs/tasks.md was built from the registers as they stand today.
+ * CI gate: docs/backlog.md was built from the registers as they stand today.
  *
  * Same rule as docs/issues.md, docs/use-cases.md, the decisions README and the
  * validation guide, and it exists for the reason all of those do: a generated
@@ -29,7 +29,7 @@ const summary =
 
 if (process.argv.includes("--list")) {
   console.log(summary);
-  console.log("  docs/tasks.md — re-render with `make tasks-doc`");
+  console.log("  docs/backlog.md — re-render with `make tasks-doc`");
   process.exit(0);
 }
 
@@ -39,8 +39,8 @@ if (have !== want) {
   console.error("gate:tasks — FAIL:");
   console.error(
     have === null
-      ? "  - docs/tasks.md is missing or unstamped. Run `make tasks-doc`."
-      : `  - docs/tasks.md was built from ${have}, the source is now ${want}. Run \`make tasks-doc\`.`,
+      ? "  - docs/backlog.md is missing or unstamped. Run `make tasks-doc`."
+      : `  - docs/backlog.md was built from ${have}, the source is now ${want}. Run \`make tasks-doc\`.`,
   );
   process.exit(1);
 }

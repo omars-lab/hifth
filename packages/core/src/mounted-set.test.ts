@@ -7,7 +7,7 @@ describe("retainPages", () => {
   });
 
   /*
-   * The reason this function exists (docs/backlog.md ③). Before Loop 4b a hop
+   * The reason this function exists (docs/performance.md ③). Before Loop 4b a hop
    * target on an unvendored page resolved to null and never reached the stage;
    * after it, every target resolves, and a densely connected ayah asks for its
    * entire fan-out at once.
@@ -57,7 +57,7 @@ describe("retainPages", () => {
 });
 
 /*
- * `docs/backlog.md` ④ — the desktop spread mounts two real leaves, so the cap
+ * `docs/performance.md` ④ — the desktop spread mounts two real leaves, so the cap
  * has to be a budget for the *book* or a desktop reader holds twice what a
  * phone reader does without anything saying so.
  */

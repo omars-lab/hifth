@@ -12,4 +12,4 @@ A notice that only reports a risk the reader cannot act on does not belong in th
 
 **Why:** Hifth is a POC being pitched ([[poc-for-study-quran-team]]). A banner about our own plumbing makes the app look broken and asks the reader to worry about something only we can fix.
 
-**How to apply:** before adding any warning, ask "what can the reader do about this?" If nothing, leave it out of the app and record it in docs/backlog.md plus docs/issues.json. Warnings with a real action (storage cap they set, install offer, kept juz cleared) stay. Done in commit 3bdda28, issue `storage-not-kept`.
+**How to apply:** before adding any warning, ask "what can the reader do about this?" If nothing, leave it out of the app and record it in docs/performance.md plus docs/issues.json. Warnings with a real action (storage cap they set, install offer, kept juz cleared) stay. Done in commit 3bdda28, issue `storage-not-kept`.

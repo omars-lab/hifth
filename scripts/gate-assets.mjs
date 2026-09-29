@@ -7,7 +7,7 @@
  * `apps/web/public/assets`, which was 850 KB gzipped when this was written and,
  * once Loop 4b vendored the rest of the mus'haf, became **twenty-eight
  * megabytes** — two orders of magnitude past the bundle, and the actual weight
- * of Hifth. The defect this gate closes (backlog ⑥) is not that the number is
+ * of Hifth. The defect this gate closes (performance.md ⑥) is not that the number is
  * too big; it is that nobody was going to notice which commit made it bigger.
  *
  * ── Why the ceilings are shaped differently per kind ────────────────────────
@@ -28,13 +28,13 @@
  * begins. Written against three pages and already speaking about 604, which is
  * the point of measuring before rather than after: when the 601 arrived the gate
  * had an opinion about them already, and the projection it had been printing all
- * along came in 15% high (`docs/backlog.md` ⑥).
+ * along came in 15% high (`docs/performance.md` ⑥).
  *
  * `manifest.json` is the one file fetched **whole** before anything can be drawn,
  * so its ceiling is about latency, not bytes. When this gate was written it
  * carried a polygon list per page — 184 bytes gz per page, nothing until
  * multiplied by 604 — and the projection said 109 KB gz in front of first paint
- * (backlog ⑪). Loop 4b made the projection moot rather than affordable: the
+ * (performance.md ⑪). Loop 4b made the projection moot rather than affordable: the
  * compact manifest is an ayah→page table, 1.3 KB gz for all 604 pages, and the
  * check below is a flat one because there is no longer anything to project.
  *

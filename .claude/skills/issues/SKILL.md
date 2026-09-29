@@ -11,9 +11,15 @@ registers**, each of which was already disciplined before the catalog existed:
 | register | holds | when a new item goes here |
 |---|---|---|
 | `docs/PLAN.md` §Open follow-ups | the roadmap of record | it changes what a loop must do, or it is a story that will need retelling |
-| `docs/backlog.md` | performance and optimization only | it is a cost, not a defect — scheduled by evidence, not by loop |
+| `docs/performance.md` | performance and optimization only | it is a cost, not a defect — scheduled by evidence, not by loop |
 | a design doc's §*Open questions, and what would answer each* | what that document knows it has not settled | it belongs to one document's subject matter |
 | `docs/validation/ledger.json` | checks a machine cannot run | answering it needs a human, a phone, or a printed mushaf |
+
+**`docs/backlog.md` is where a reader starts.** It is rebuilt from all of these
+(`make tasks-doc`) and carries every open item's full text, so it reads on its own after a
+session is cleared. Never edit it; edit the item where it lives, then rebuild. Anything a
+session learns that is still open — a question, a follow-up, a problem nobody has fixed —
+must reach one of these registers before the session ends, or it is lost.
 
 `docs/issues.json` **indexes** those four. It holds no titles, no descriptions and
 no reproductions — those live in the register that owns the item, and a copy here

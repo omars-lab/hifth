@@ -199,7 +199,7 @@ ${list.map((p) => `  <li><a href="${esc(fromIndex(p))}">${esc(titles.get(p))}</a
 const registers = [
   ["Every decision, and its status", "docs/decisions/README.md"],
   ["What is still open, worst first", "docs/issues.md"],
-  ["What is being worked on", "docs/tasks.md"],
+  ["Everything still open, in full", "docs/backlog.md"],
   ["The plan of record", "docs/PLAN.md"],
   ["Where each feature lives", "docs/map.json"],
 ];

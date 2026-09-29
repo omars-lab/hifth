@@ -32,12 +32,13 @@ This section is the **roadmap of record** — it replaces the retired external t
 statuses, gates, and open follow-ups live here and nowhere else. Convention: **every loop
 ends by updating this section and writing `docs/decisions/loop-<N>.md`.**
 
-One deliberate exception, and it is a narrow one: [`backlog.md`](backlog.md) holds
+One deliberate exception, and it is a narrow one: [`performance.md`](performance.md) holds
 optimization work that is **not yet scheduled into a loop** — the on-device perf verdict and
 what it decides, the mounting and prefetch bounds Loop 4b will need, the asset weight nothing
 currently gates. Nothing there has a loop or a gate; the moment an item acquires one it moves
-into this section and the backlog row is deleted rather than mirrored, so no item is ever
-described in both files.
+into this section and the row there is deleted rather than mirrored, so no item is ever
+described in both files. (Both, and every other open item, are copied in full into
+[`backlog.md`](backlog.md) when it is rebuilt; that page is read, never edited.)
 
 | Loop | Status | Exit criterion (short) | Record |
 |---|---|---|---|
@@ -68,7 +69,8 @@ with a guard, and the *class* of defect behind it gets a tool, so the next one o
 caught before a reader meets it. The thread is done when the open list below is empty or
 every remaining item is waiting on a decision the owner has been asked for. Its state lives
 in three places: this section (the record), the session task list (the working copy) and
-`docs/tasks.md` (the rendered page, which the gate keeps current).
+`docs/backlog.md` (the rendered page, which the gate keeps current; it was `docs/tasks.md`
+until 2026-09-29).
 
 **Done, each with its guard** (all 2026-09-01):
 
@@ -262,7 +264,7 @@ skill, the map and artifact-register notes); this section and the tasks page it 
 ### Open follow-ups
 
 Each of these is indexed in [`issues.json`](issues.json) alongside the design docs' open
-questions, `backlog.md` and the validation ledger, and `make issues` prints all four
+questions, `performance.md` and the validation ledger, and `make issues` prints all four
 registers in one list. They are indexed by *number only*: unlike every other register, a
 follow-up here carries no status marker, because these are compound narratives whose job is
 to record how a thing was believed over time — ② keeps its own retracted licence claim beside
@@ -518,7 +520,7 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     [`docs/design/page-turning.md` §7](design/page-turning.md); the presentation and gesture
     proposals in §3–§4 of that document are **not** scheduled here — they wait on
     follow-up ① and on a ceiling for the mounted set
-    ([`docs/backlog.md`](backlog.md) §2). The hardening is independent of both.
+    ([`docs/performance.md`](performance.md) §2). The hardening is independent of both.
     **The hardening is done.** Ten of the eleven are closed — ①② in `88cce9f`, ⑨ in
     `21f6380`, ③④⑤⑧ in `b1c24c2`, and ⑥⑦⑪ not by work aimed at them but as consequences of
     [`page-transition.md`](design/page-transition.md): the resting-edge system took the drop
@@ -908,8 +910,8 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     standard pages fits 1.3333 in both. The decorated frames are not the fifteen-line block at
     a different offset; they are a different geometry, which is a property of the print and not
     a defect in anything. What did need correcting is the probe result's own `$residue`, which
-    still carried (b) as fact and claimed both defects were "filed in docs/backlog.md and
-    docs/issues.json" — backlog.md never carried either. It now records the withdrawal beside
+    still carried (b) as fact and claimed both defects were "filed in docs/performance.md and
+    docs/issues.json" — performance.md never carried either. It now records the withdrawal beside
     the original, including the detail that makes it worth recording: the false positive was
     produced **twice, by two independently written parsers** — one assuming the axis-aligned
     `M…h…v…H…Z` rect form, one reading svgo's relative commands as absolute pairs — and two
@@ -1192,6 +1194,25 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     tajweed lesson, a comparison against the print's own marks — decides whether the cheap
     filter is enough or the expensive drawing is needed, and whether either earns holding two
     more files. Nothing is fetched until that is said. Blocks nothing shipped.
+22. **Should the outside library get its own command-line tool?** Parked 2026-09-29 when the
+    session task list was cleared before the large refactor. The idea: one tool that signs in to
+    the library, runs our checks against it, and pulls a page's HTML and its audio, instead of
+    today's scattered scripts and hand steps in a signed-in browser. It is a new project rather
+    than tidying up, and its shape is the owner's to set.
+    **What is open:** whether it is wanted at all, and if so which of those four jobs it does
+    first. Anything it downloads stays in the held store, never the repository, under the same
+    licence reads as the rest of the library. Blocks nothing shipped.
+23. **The commentary sources are merged but not on screen: how do they and the pitch's own
+    drawer become one?** Found 2026-09-29 when every branch was brought back to main. The
+    shared shape for a commentary source (a book the reader loads into their own browser, or a
+    live public tafsir service) is in main with its tests, but not joined to the main screen,
+    because the private pitch build already has its own commentary drawer on the same ✎ button,
+    and the two would undo each other on every verse. The full story and the command that shows
+    the left-out joining-up are in [`issues/tafsir-seam-not-wired.md`](issues/tafsir-seam-not-wired.md).
+    **What is open:** the likely answer is that the pitch's notes become one more source behind
+    the same shape, so there is one drawer and one ✎, not two. That is part of the coming
+    refactor. Until then, readers of the public app see nothing new, and it still ships no
+    commentary text.
 
 **The half of these a machine cannot run now has a register — and a runbook.** Follow-ups
 ① (the phone), ② (the browser glance) and ④ (VoiceOver/TalkBack) still wait on a human, and
@@ -1640,10 +1661,10 @@ visited juz.
 **Shipped 2026-08-03.** The asset decision point came out **NO for now, on evidence** — the
 vendored corpus is ayah-granular and the candidate does not state its print; follow-up 13
 carries the test that decides it. The manifest went the other way from the projection
-(1,333 B gz for the whole print, not ~109 KB), which deleted `backlog.md` ⑪ instead of
+(1,333 B gz for the whole print, not ~109 KB), which deleted `performance.md` ⑪ instead of
 sharding it. Streaming landed as specified plus a rule the spec did not name: the LRU keeps
 recency as well as a ceiling, and the desktop spread splits one budget between its two
-leaves rather than taking it twice (`backlog.md` ③ ④).
+leaves rather than taking it twice (`performance.md` ③ ④).
 
 ### Loop 5 — Highlight gesture + root lens (medium)
 `gestures.ts` marquee/pan split (touch-action zones + intent thresholds); amber wash;
@@ -1701,7 +1722,7 @@ golden-image tests on 5 pages; perf pass (shard prefetch on selection).
 **All four engineering items are in** (2026-08-07): popover ordering is `orderForHifz` /
 `hifzRank` in [adjacency.ts](../packages/core/src/adjacency.ts); the keyboard map is
 [keymap.ts](../apps/web/src/keymap.ts); the shard prefetch reaches hop *targets*, not only
-mounted pages (backlog ⑧); and the golden sweep is five pages. The last of those was the
+mounted pages (performance.md ⑧); and the golden sweep is five pages. The last of those was the
 only one still short — the harness had photographed 7, 9 and 19 since Loop 6a, which was
 the whole print at the time it was written and became a sample only when 4b vendored 604
 pages. Choosing the other two was therefore a decision nobody had had to make, and it was

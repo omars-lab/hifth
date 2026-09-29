@@ -525,7 +525,7 @@ preference:
 
 | Alternative | What it would cost |
 | --- | --- |
-| **Page curl** | A 3D transform per frame on a layer whose backing store is a rasterized 170 KB SVG, forcing re-raster at every curl angle — the exact risk backlog ① exists to measure, and the measurement has not been taken. No mushaf app in the survey ships one (§2.3). It also encodes a spine on a fixed side, and this build's spread has a hole where the facing leaf should be. Rejected on cost *and* on honesty. |
+| **Page curl** | A 3D transform per frame on a layer whose backing store is a rasterized 170 KB SVG, forcing re-raster at every curl angle — the exact risk performance.md ① exists to measure, and the measurement has not been taken. No mushaf app in the survey ships one (§2.3). It also encodes a spine on a fixed side, and this build's spread has a hole where the facing leaf should be. Rejected on cost *and* on honesty. |
 | **Full horizontal slide** | Requires a wrapper anyway, moves the page image across the reader's field (§1.5), and — the specific problem — **cannot honour `loop-1.md`'s convention.** Loop 1 pinned *both* "drag left→right = next" *and* "the next page enters from the right". Those are book-physics (the current leaf peels rightward off a right-hand spine, revealing what is beneath). A slide carousel that moves rightward brings content in from the **left**. A slide must break half of a pinned decision; a cross-fade contradicts neither half. |
 | **Vertical continuous scroll** | Would dissolve the page boundary, which §2.2 identifies as the load-bearing thing. It is also what quran.com's web reader does, so it is not eccentric — but this app's entire premise is the page as the addressable unit. Rejected on the evidence, not on taste. |
 | **No transition (the status quo)** | Free, and honestly close to acceptable: the hard cut is currently what ships and nobody has complained about it. Its cost is that a turn onto a page that looks similar to the last one (which, in a mushaf, is every turn) gives no signal that anything happened. It stays the correct behaviour under `prefers-reduced-motion`. |
@@ -553,7 +553,7 @@ already-existing behaviour made visible or made correct.
    (one turn per gesture, not per event) is the desktop equivalent of the swipe and costs no
    chrome. **It must be discrete, not scroll-snap** — a snap container in RTL requires
    reading `scrollLeft`, whose sign convention is not portable (§2.6), and a momentum scroll
-   over 604 pages would mount an unbounded number of them (backlog ③).
+   over 604 pages would mount an unbounded number of them (performance.md ③).
    **Shipped as specified** (§7 ③): discrete, one turn per gesture, no snap container. The
    part the proposal left open was how a gesture is bounded at all, since a `wheel` event
    carries no device identity — the answer is a 100 ms quiet gap, which puts a trackpad
@@ -566,7 +566,7 @@ already-existing behaviour made visible or made correct.
 | Alternative | Cost |
 | --- | --- |
 | **Spread-level pager (turn two leaves)** | Contradicts row 14, and with three non-adjacent vendored pages it would mean turning two holes at once. |
-| **Scroll-snap carousel** | RTL `scrollLeft` portability (§2.6) and unbounded mounting (backlog ③). |
+| **Scroll-snap carousel** | RTL `scrollLeft` portability (§2.6) and unbounded mounting (performance.md ③). |
 | **On-hover page-corner affordance** | A new feature. Fails desktop.md §1's test: no mobile constraint put it out of reach. |
 
 ---
@@ -758,22 +758,22 @@ is what now notices if the remount returns.
 ## 5. What it costs
 
 **Mounting.** A vendored page is ~47 KB gz / ~170 KB raw inline SVG, and mounting one builds
-a `Highlighter` (backlog ⑥; confirmed by measurement — `7.svg` transferSize 48,873,
+a `Highlighter` (performance.md ⑥; confirmed by measurement — `7.svg` transferSize 48,873,
 decodedBodySize 170,107). **Any turn animation requires both pages mounted simultaneously,
 and that is paying the mount cost twice.**
 
 The honest accounting is that this cost is **already being paid**: the mounted set has no
-ceiling (backlog ② ③, `App.tsx:288`), so both pages are already resident after the first
+ceiling (performance.md ② ③, `App.tsx:288`), so both pages are already resident after the first
 turn and stay resident forever. The cross-fade does not add a mount; it adds a **second
 simultaneously-painted layer for ~120 ms**. That is a compositing cost, not a raster cost,
 because both hosts are already rasterized.
 
-**But this is exactly the interaction backlog ② names as unbounded**, and a turn animation
+**But this is exactly the interaction performance.md ② names as unbounded**, and a turn animation
 makes the unbounded set *visible* — two painted layers instead of one. If the perf verdict
-(backlog ①) picks the `content-visibility` virtualization strategy, the outgoing page may be
+(performance.md ①) picks the `content-visibility` virtualization strategy, the outgoing page may be
 `content-visibility: hidden` at the moment the fade starts, and the fade would force it back
 into rendering for the duration. **This design does not presuppose which strategy wins.**
-What it requires is a ceiling on the mounted set, which is backlog ② and is a prerequisite.
+What it requires is a ceiling on the mounted set, which is performance.md ② and is a prerequisite.
 
 **Paint.** `filter: drop-shadow()` on the transformed host costs **~1.1 ms/frame more than
 an identical `box-shadow`**. Measured, 90 scale-writes, run twice, 1440 × 900:
@@ -791,14 +791,14 @@ survives review, it must be `box-shadow`.
 
 **Bundle.** Zero. No new dependency: `@use-gesture` already supplies the drag stream, the
 cross-fade is CSS, and the new core function is a comparison. Current budget position is
-106.6 KB gz of 150 (backlog ⑤).
+106.6 KB gz of 150 (performance.md ⑤).
 
 **Dependencies on open decisions:**
 
 | Depends on | Which | Why |
 | --- | --- | --- |
-| The on-device perf verdict | backlog ① | Decides whether a second painted layer is affordable on a mid-tier Android, and whether the outgoing page is even rendering. |
-| A ceiling on the mounted set | backlog ② ③ | The cross-fade is only cheap because both pages are already mounted; that is currently true by accident, not by design. |
+| The on-device perf verdict | performance.md ① | Decides whether a second painted layer is affordable on a mid-tier Android, and whether the outgoing page is even rendering. |
+| A ceiling on the mounted set | performance.md ② ③ | The cross-fade is only cheap because both pages are already mounted; that is currently true by accident, not by design. |
 | Vendoring the remaining 601 pages | Loop 4b | Every turn today crosses an absent page (§7 ④). The gesture model is testable with three pages; the *feel* is not. |
 
 Nothing in §7 depends on any of these. The hardening list is independently shippable.
@@ -1099,7 +1099,7 @@ composited primitive. §3.1 removes the shadow; if any elevation survives review
 `box-shadow`.
 
 **Caveat:** measured in headless Chromium on macOS. **The measurement that is missing** is
-the same one on a mid-tier Android (backlog ①/②), where the ratio could be worse.
+the same one on a mid-tier Android (performance.md ①/②), where the ratio could be worse.
 
 **Closed** by the resting-edge system (`page-transition.md` §2): the shadow is gone rather
 than converted, and `filter: drop-shadow` now appears nowhere under `apps/web/src`. The
@@ -1201,7 +1201,7 @@ there at all.
 
 `setCurrentPage` toggles `display` (`PageStage.tsx:275-283`) and nothing removes entries from
 `pagesRef`. Every page ever visited stays mounted, with its SVG and its `Highlighter`, for
-the session. This is backlog ② ③ and is not new — it is listed here because §5 shows the
+the session. This is performance.md ② ③ and is not new — it is listed here because §5 shows the
 turn animation depends on it and would make it worse. **Do not duplicate it into PLAN**; it
 is backlog's.
 
@@ -1220,7 +1220,7 @@ a bounded set is what the animation now runs over.
 **The measurement is still not taken, and it did not stop being worth taking.** What changed
 is what it decides. It was going to tell us how bad the unbounded case is; it now tunes one
 constant, `MOUNTED_PAGE_CAP`, whose value (6) is a guess from Loop 4b's spec and nothing else.
-That question is `backlog.md` ① and ②, which are `blocked` on hardware, and it does not belong
+That question is `performance.md` ① and ②, which are `blocked` on hardware, and it does not belong
 here — this document's part of the problem is finished.
 
 ### ⑪ There is no transition at all today, so reduced motion has nothing to remove · **fixed**
@@ -1247,7 +1247,7 @@ multiply by zero.
 - **A page curl, in any form — even as an option.** §2.3 shows the aesthetic constituency is
   real and the evidence against it is thin, so this is not a judgement that the curl is bad.
   It is a judgement about *this* codebase: a 3D transform per frame on a rasterized 170 KB
-  inline SVG is precisely the re-raster risk backlog ① exists to measure, that measurement
+  inline SVG is precisely the re-raster risk performance.md ① exists to measure, that measurement
   has not been taken, and a build with three non-adjacent pages cannot show a curl revealing
   the leaf beneath because there is no leaf beneath. Revisit after Loop 4b and the perf
   verdict, not before.
