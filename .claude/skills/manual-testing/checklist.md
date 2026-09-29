@@ -40,6 +40,8 @@ Two ways to open the app: this laptop, `make pitch` then `http://localhost:5173/
    the page it prints. Its ruling unlocks the per-line bend fix, and it becomes the answer key the
    automated scorer measures against from then on. Ledger: `placement-correction-by-eye`,
    `placement-holds-off-its-own-pages`, `placement-what-kind-of-wrong`.
+   Later, a **second person** sits the same trials, so we can see how often two readers agree —
+   that agreement is what tells us how far to trust one reader's answer key.
 
 6. **Cloudflare: Always Use HTTPS.** The site still answers on plain http, where the offline app
    does not work. Flip the setting in the Cloudflare dashboard. Once it is on, a check that plain

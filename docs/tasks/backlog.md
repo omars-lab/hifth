@@ -97,3 +97,18 @@ Ordered by what to look at first.
 - After any publish, `scripts/artifact-sweep.mjs` (a hook, not a gate) checks the page got a row
   in `docs/artifacts.json` — it only runs where the session log lives, so do not assume CI caught
   a missing row.
+
+## Other open work, parked until after the refactor (2026-09-29)
+
+Not the confusion-points feature: the rest of what was still open when the session task list was
+cleared ahead of a large refactor. Each was parked on purpose, not dropped.
+
+- **Swap the app's rendering library for a smaller one (Preact), about 38 KB saved.** Parked because
+  it replaces the thing every component runs on — do it after the refactor settles, not before.
+  The measurement and the reasoning are in the optimizing-performance skill.
+- **Ship the per-line bend correction for mark placement.** Waits on the owner's by-eye placement
+  sitting, which is parked in `.claude/skills/manual-testing/checklist.md` (item 5).
+- **A command-line tool for the QUL library: access, checks, pulling page HTML and audio.** A new
+  project, not wrap-up; its shape is still the owner's call.
+- **A second, genuinely separate page rasteriser**, so mark-ink measurements have an independent
+  second opinion. A new project; see `docs/design/robust-validation.md`.
