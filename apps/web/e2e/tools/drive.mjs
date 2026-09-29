@@ -36,11 +36,17 @@
  *   press=<Key>               keyboard press (e.g. Escape, Enter)
  *   scroll=<css>|<bottom|top|±px>  scroll a container so a shot catches what is below its fold
  *   settle=<ms>               pause (for an animation to finish before the shot)
+ *   move=<x>,<y>              move the mouse to a viewport point (hover states)
+ *   eval=<js expression>      evaluate in the page and log the JSON result (measure, don't guess)
+ *
+ * Other flags: --browser firefox (the owner's browser; default chromium),
+ * --mouse (a desktop with a real pointer, no touch — hover styles apply),
+ * --clip x,y,w,h (shoot only that part of the viewport, for a close look).
  *
  * A deep-link hash reaches most states with no clicks at all: `#/hafs-kfqc/2:48`
  * selects that verse, `#/hafs-kfqc/p19` opens page 19. See e2e/deeplink.spec.ts.
  */
-import { chromium } from "@playwright/test";
+import { chromium, firefox } from "@playwright/test";
 import { mkdirSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 
@@ -86,6 +92,11 @@ const settleMs = Number(args.settle ?? 300);
 const timeout = Number(args.timeout ?? 20000);
 const locale = args.locale ? String(args.locale) : undefined;
 const expectSel = args.expect ? String(args.expect) : undefined;
+const engine = args.browser === "firefox" ? firefox : chromium;
+const mouse = Boolean(args.mouse);
+const clip = args.clip
+  ? (([x, y, width, height]) => ({ x, y, width, height }))(String(args.clip).split(",").map(Number))
+  : undefined;
 
 /** Resolve a `role|name` pair to a Playwright locator (name is a substring). */
 function byRole(page, spec) {
@@ -136,6 +147,16 @@ async function runStep(page, step) {
       }, how);
       return;
     }
+    case "move": {
+      const [x, y] = arg.split(",").map(Number);
+      await page.mouse.move(x, y, { steps: 4 });
+      return;
+    }
+    case "eval": {
+      const result = await page.evaluate((src) => (0, eval)(src), arg);
+      log("eval", `result=${JSON.stringify(result)}`);
+      return;
+    }
     case "settle":
       await page.waitForTimeout(Number(arg));
       return;
@@ -147,11 +168,11 @@ async function runStep(page, step) {
 async function main() {
   mkdirSync(dirname(out), { recursive: true });
   log("launch", `base=${base} viewport=${vw}x${vh} dsf=${dsf}`);
-  const browser = await chromium.launch();
+  const browser = await engine.launch();
   const context = await browser.newContext({
     viewport: { width: vw, height: vh },
     deviceScaleFactor: dsf,
-    hasTouch: true,
+    hasTouch: !mouse,
     locale,
   });
   const page = await context.newPage();
@@ -196,7 +217,7 @@ async function main() {
       }
     }
 
-    await page.screenshot({ path: out, fullPage });
+    await page.screenshot({ path: out, fullPage, clip });
     log("shot", `out=${out}`);
   } catch (e) {
     failed = true;

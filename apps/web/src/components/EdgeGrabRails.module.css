@@ -28,14 +28,17 @@
 .rail[data-side="left"] {
   left: 0;
   background: linear-gradient(to left, transparent, var(--gutter-shadow, rgba(0, 0, 0, 0.08)));
-  /* Full reach at the top and bottom corners, pinched to ~30% at the midline. */
-  clip-path: polygon(0% 0%, 100% 0%, 30% 50%, 100% 100%, 0% 100%);
+  /* Full reach at the bottom corner, pinched to ~30% at the midline. The top
+     corner is the bookmark's: a reader dog-ears the top and turns from the
+     foot, so the strip starts below the fold's button (#201 — it used to sit
+     over it, and a mouse could not fold the corner at all). */
+  clip-path: polygon(0% var(--touch-min), 100% var(--touch-min), 30% 50%, 100% 100%, 0% 100%);
 }
 
 .rail[data-side="right"] {
   right: 0;
   background: linear-gradient(to right, transparent, var(--gutter-shadow, rgba(0, 0, 0, 0.08)));
-  clip-path: polygon(100% 0%, 0% 0%, 70% 50%, 0% 100%, 100% 100%);
+  clip-path: polygon(100% var(--touch-min), 0% var(--touch-min), 70% 50%, 0% 100%, 100% 100%);
 }
 
 .rail:hover {
