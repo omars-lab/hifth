@@ -9,6 +9,7 @@
  */
 import { registerSW } from "virtual:pwa-register";
 import { requestPersistentStorage } from "./storage";
+import { isNative } from "./native-bridge";
 
 type InstallPromptEvent = Event & {
   prompt: () => Promise<void>;
@@ -23,14 +24,18 @@ function emit(available: boolean): void {
 }
 
 /** Subscribe to install-availability changes. Returns an unsubscribe fn. */
-export function onInstallAvailability(fn: (available: boolean) => void): () => void {
+export function onInstallAvailability(
+  fn: (available: boolean) => void,
+): () => void {
   listeners.add(fn);
   fn(deferredPrompt !== null);
   return () => listeners.delete(fn);
 }
 
 /** Trigger the captured install prompt. No-op if none is available. */
-export async function promptInstall(): Promise<"accepted" | "dismissed" | "unavailable"> {
+export async function promptInstall(): Promise<
+  "accepted" | "dismissed" | "unavailable"
+> {
   if (!deferredPrompt) return "unavailable";
   await deferredPrompt.prompt();
   const { outcome } = await deferredPrompt.userChoice;
@@ -94,7 +99,9 @@ export function isStandalone(): boolean {
 export async function shellCached(): Promise<boolean> {
   if (!("caches" in globalThis)) return false;
   try {
-    return (await caches.match("index.html", { ignoreSearch: true })) !== undefined;
+    return (
+      (await caches.match("index.html", { ignoreSearch: true })) !== undefined
+    );
   } catch {
     // A browser that refuses to answer is not evidence of eviction, and
     // "repair" is the expensive branch. Say intact and leave it alone.
@@ -114,7 +121,10 @@ let repairsStarted = 0;
  * so any earlier answer is a half-filled cache: waiting on the shell alone
  * returns on the first of ten entries and leaves the app's own scripts out.
  */
-function awaitInstalled(worker: ServiceWorker, timeoutMs: number): Promise<boolean> {
+function awaitInstalled(
+  worker: ServiceWorker,
+  timeoutMs: number,
+): Promise<boolean> {
   const settled = (): boolean | null =>
     worker.state === "installing" ? null : worker.state !== "redundant";
   const now = settled();
@@ -241,7 +251,9 @@ export async function repairShellCache(): Promise<boolean> {
     // `register()` resolves when the job is accepted, not when the worker has
     // finished installing, and it is the install that does the refilling — so
     // what this waits on afterwards is the new worker, not the registration.
-    const next = await navigator.serviceWorker.register(url.href, { scope: reg.scope });
+    const next = await navigator.serviceWorker.register(url.href, {
+      scope: reg.scope,
+    });
     installing = next.installing ?? next.waiting ?? next.active;
   } catch {
     return false;
@@ -255,6 +267,10 @@ export async function repairShellCache(): Promise<boolean> {
 }
 
 export function initPwa(): void {
+  // Inside the Mac / iPad shell the app is served from its own bundle: there
+  // is nothing to cache, nothing to install into, and a custom-scheme origin
+  // is not a secure context, so a registration would only fail out loud.
+  if (isNative()) return;
   window.addEventListener("beforeinstallprompt", (e) => {
     e.preventDefault();
     deferredPrompt = e as InstallPromptEvent;

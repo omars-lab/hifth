@@ -31,7 +31,10 @@ function stubStorage(sm: Partial<StorageManager> | null): void {
 }
 
 function stubUserAgent(ua: string): void {
-  Object.defineProperty(navigator, "userAgent", { value: ua, configurable: true });
+  Object.defineProperty(navigator, "userAgent", {
+    value: ua,
+    configurable: true,
+  });
 }
 
 const IPHONE_UA =
@@ -121,7 +124,10 @@ describe("OfflineNotice", () => {
     expect(container.querySelector("[data-notice]")).toBeNull();
 
     rerender(<OfflineNotice hold={false} />);
-    expect(await screen.findByRole("status")).toHaveAttribute("data-notice", "capped");
+    expect(await screen.findByRole("status")).toHaveAttribute(
+      "data-notice",
+      "capped",
+    );
   });
 
   it("dismisses once and stays dismissed on the next visit", async () => {
@@ -154,7 +160,10 @@ describe("OfflineNotice", () => {
     });
     packs.statuses = [{ health: "gone" }];
     render(<OfflineNotice />);
-    expect(await screen.findByRole("status")).toHaveAttribute("data-notice", "pack-gone");
+    expect(await screen.findByRole("status")).toHaveAttribute(
+      "data-notice",
+      "pack-gone",
+    );
   });
 
   it("counts a torn pack as swept — most of a juz is not a juz", async () => {
@@ -165,7 +174,10 @@ describe("OfflineNotice", () => {
     });
     packs.statuses = [{ health: "torn" }];
     render(<OfflineNotice />);
-    expect(await screen.findByRole("status")).toHaveAttribute("data-notice", "pack-gone");
+    expect(await screen.findByRole("status")).toHaveAttribute(
+      "data-notice",
+      "pack-gone",
+    );
   });
 
   it("its action opens the shelf rather than starting a download", async () => {
@@ -202,6 +214,29 @@ describe("OfflineNotice", () => {
     // hid it in March must still be told about the sweep that takes the next
     // juz, so the dismissal lasts the session and no longer.
     render(<OfflineNotice />);
-    expect(await screen.findByRole("status")).toHaveAttribute("data-notice", "pack-gone");
+    expect(await screen.findByRole("status")).toHaveAttribute(
+      "data-notice",
+      "pack-gone",
+    );
+  });
+});
+
+describe("OfflineNotice in the native shell", () => {
+  it("says nothing: an installed app has nothing to install", async () => {
+    const w = window as Window & { __HIFTH_NATIVE__?: unknown };
+    w.__HIFTH_NATIVE__ = { platform: "ios", publicBase: "https://x/" };
+    try {
+      stubUserAgent(IPHONE_UA);
+      stubStorage({
+        persist: async () => false,
+        persisted: async () => false,
+        estimate: async () => ({ usage: 0, quota: 40 * GB }),
+      });
+      const { container } = render(<OfflineNotice />);
+      await waitFor(() => expect(navigator.storage).toBeDefined());
+      expect(container.querySelector("[data-notice]")).toBeNull();
+    } finally {
+      delete w.__HIFTH_NATIVE__;
+    }
   });
 });
