@@ -112,6 +112,27 @@ For a script the launch variable is the reliable door, not an `open` of the link
 link into a fresh simulator install shows an "open in Hifth?" prompt that a script cannot
 answer. `make app-run-ipad ROUTE=…` and `make app-shot ROUTE=…` both use the variable.
 
+## Can another app ask the shell to open something, and hear back?
+
+Yes, since 2026-09-29, by the x-callback-url convention other apps on the Mac and iPad
+already speak (Shortcuts, Drafts, a script). A plain `hifth://` link only turns the page and
+says nothing; a request under `hifth://x-callback-url/` names one action and where to
+answer, and the shell opens that address when it is done:
+
+- **open** — say the place plainly (`page=45`, `verse=2:255&words=3-7`, `surah=36` for a
+  surah's context), how to open it (`mode=note` for the tool in hand, `open=commentary` for
+  the verse's commentary or `open=context` for it led by the surah's introduction,
+  `view=one|two`), or hand over a whole route. Once the page shows it, `x-success` is opened
+  with the route and the same place's public link. A misspelt mode or panel, a page of 0, or a
+  place the page never shows is reported on `x-error` with a code and a plain message, so a
+  caller learns about a typo instead of a page that quietly opened without it.
+- **current** — answers with the route and public link on screen.
+
+The whole contract is one file, `docs/design/app-url-scheme.openapi.json`, rendered as
+[the app links page](app-url-scheme.html). It is held honest from three sides: the Swift tests
+run every example in it through the real parser, a vitest holds its lists of panels and
+tools to the web router, and a node test refuses a stale rendered page.
+
 ## How is it tested?
 
 | layer | proves | tool | how to run |
@@ -149,7 +170,7 @@ cost a hafiz.
 | choice | what we did | what it buys | what it costs | what it rules out |
 | --- | --- | --- | --- | --- |
 | how the files are served | the app's own scheme, `hifth-app://app` | the page works as on a website; storage stays put across updates | the address is frozen for ever, because moving it moves the reader's notes | never renaming the scheme or host |
-| what the shell knows about routes | nothing; it passes the web app's own link grammar through | one grammar, no drift; a shared link and a `hifth://` link are the same string | a bad link is dropped silently rather than explained | a native "go to" screen of its own |
+| what the shell knows about routes | nothing; it passes the web app's own link grammar through | one grammar, no drift; a shared link and a `hifth://` link are the same string | a bad plain link is dropped silently rather than explained (an x-callback-url request is explained, on the caller's error address) | a native "go to" screen of its own |
 | how big the Mac window opens | large enough for the two-page spread on first launch | a Mac user sees the open mus'haf, not a phone layout in a big window | a small laptop screen still gets the single page below the breakpoint | nothing; the reader can resize |
 | trackpad pinch | left to WebKit and the web app | one zoom behaviour everywhere | untested by a machine on a real trackpad | a native zoom control |
 | what the shell shows besides the page | a hidden route label and the window title | tests and screenshots have something native to wait on | nothing visible to a reader | nothing |
@@ -229,3 +250,17 @@ anything reading "the route at ready" is misled.
 resolved, or the shell should ignore route messages until the first one that is not page 1.
 Either way, a test that asserts the first `route` message after `ready` names the requested
 verse.
+
+### ⑨ No test drives an x-callback-url request through the real operating system · **open**
+
+The x-callback door is proven in unit tests only: the parser on every example in the
+contract, and the shell model played by hand (the page's `ready` and `route` messages fed
+in, the answer collected by a fake opener). Nobody has yet had the operating system hand the
+app a real `hifth://x-callback-url/open?…&x-success=…` and watched a second app receive the
+answer, on the Mac or the iPad. The plain `hifth://` link is covered by the XCUITest smoke;
+the request-and-answer path is not.
+
+**What would answer it:** an XCUITest that launches the app, opens a request whose
+`x-success` is a scheme the test can observe (a second tiny test app, or the shell's own
+`hifth://` refused on purpose so the error path fires), and asserts the answer arrived; or a
+Shortcuts shortcut run by hand once per release and recorded in the manual checklist.

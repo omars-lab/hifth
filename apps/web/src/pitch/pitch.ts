@@ -77,10 +77,15 @@ export function mergeShard(
   return out;
 }
 
-/** The commentary for one selected verse, or null. */
+/**
+ * The commentary for one selected verse, or null. `withContext` leads the note
+ * with the surah's introduction wherever the verse sits, as a link's
+ * `?open=context` asks; otherwise only the opening verse carries it.
+ */
 export function commentaryFor(
   surah: PitchSurah | null,
   selectedKey: string | null,
+  withContext = false,
 ): PitchCommentary | null {
   if (!surah || !selectedKey) return null;
   const ref = /(\d+):(\d+)$/.exec(selectedKey);
@@ -92,6 +97,6 @@ export function commentaryFor(
     title: surah.title,
     intro: surah.intro,
     verse,
-    showIntro: isFirst,
+    showIntro: isFirst || withContext,
   };
 }

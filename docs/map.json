@@ -2182,13 +2182,18 @@
     },
     {
       "id": "native-shell",
-      "what": "The Mac and iPad app: a thin native window around the web build, served from inside the app bundle at a private address, opened at a route from a hifth:// link or a launch variable, with the share sheet and outside links handed to the operating system. Nothing in it reaches the public site. What building it taught us is docs/design/native-shell.md; whether it may go to outside testers is the native-testflight-licence decision.",
+      "what": "The Mac and iPad app: a thin native window around the web build, served from inside the app bundle at a private address, opened at a route from a hifth:// link or a launch variable, answering other apps' x-callback-url requests (open a page, a verse, a surah's context, in a chosen mode; say what is on screen), with the share sheet and outside links handed to the operating system. Nothing in it reaches the public site. What building it taught us is docs/design/native-shell.md; whether it may go to outside testers is the native-testflight-licence decision.",
       "layer": "L4 shell",
       "entry": [
         {
           "file": "native/Hifth/Route/Route.swift",
           "symbol": "Route",
           "note": "The only route grammar the shell knows is the web app's own: /<edition>/<target>[?query], read verbatim from a hifth:// link, the HIFTH_ROUTE variable or a --route= argument. Anything else is dropped, so a bad link cannot open a page the web app would not."
+        },
+        {
+          "file": "native/Hifth/Route/XCallback.swift",
+          "symbol": "XCallback",
+          "note": "The x-callback-url door: hifth://x-callback-url/open (page=, verse=, surah=, words=, mode=, open=, view=, or a whole route=) and /current, each with the caller's x-success / x-error address; a misspelt mode or panel is refused with a reason. The contract, with the examples the tests run, is docs/design/app-url-scheme.openapi.json, rendered by scripts/build-app-url-scheme.mjs."
         },
         {
           "file": "native/Hifth/Web/LocalScheme.swift",
