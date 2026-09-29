@@ -1,6 +1,6 @@
 ---
 name: optimizing-performance
-description: How to keep Hifth opening fast, and how to decide whether the app's code-size cap should move. Use when the size check fails or is close to failing, when the Lighthouse start-up check goes red, before adding a large library or feature, when asked "is it worth raising the limit?", or when choosing what to trim. Draws the growth, breakdown and start-up-cost charts with make perf-report / make perf-sweep.
+description: How to keep Hifth opening fast, and how to decide whether the app's code-size cap should move. Use when the size check fails or is close to failing, when the Lighthouse start-up check goes red, before adding a large library or feature, when asked "is it worth raising the limit?", when choosing what to trim, or when the performance reminder hook says the app is near its size cap. Draws the growth, breakdown and start-up-cost charts with make perf-report / make perf-sweep.
 ---
 
 # Optimizing performance
@@ -85,18 +85,19 @@ it does not; never raise just to make a red check go green without looking at th
   GitHub Actions minutes, and left Lighthouse out as too slow for a hook). Run `make lighthouse`
   before a demo, and whenever the size cap moves.
 
-## Where the room goes today (2026-09-27, ~149 KB in all, 138 KB in the main script)
+## What to trim, and how
 
-From `make perf-report`. Re-run it rather than trusting this list; it is here so the first
-candidates are not rediscovered from scratch.
+**Read [trims.md](trims.md) now.** It holds where the room goes, each trim's status (in progress,
+parked, done), and the checklist for taking one on: measure, failing test first, the things that
+have bitten trims before (a flash on first open, offline, the pitch build, a saving too small to
+matter), measure again.
 
-| part | size | trim idea | catch |
-| --- | --- | --- | --- |
-| React's page-drawing library (`react-dom`) | ~42 KB | swap for Preact's compatibility layer (~4 KB) | every component and `@use-gesture` must still behave; needs a full e2e and golden run |
-| our components | ~39 KB | load rarely used tools (crop, diff view, settings) when first opened | a short wait the first time; the service worker must cache the extra files for offline |
-| English **and** Arabic interface text | ~10 KB | load only the reader's language | the language switch must fetch the other one, and offline must still have both |
-| shared logic (`packages/core`) | ~15 KB | little: it is what the first page needs | none |
-| gesture library | ~9 KB | none worth the risk | none |
+## The reminder
+
+A hook (`scripts/hook-perf-nudge.mjs`, run after every shell command) watches builds, pushes, the
+size check and the start-up check. When the code is within 15 KB of the cap, the size check fails,
+or the start-up check misses 2.5 s, it tells the session to run this skill, once per session for
+each finding. It only reads files and the command's own output; it never builds anything itself.
 
 ## Cap history
 
