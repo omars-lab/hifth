@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type CSSProperties } from "react";
+import { useEffect, useRef, useState, type CSSProperties, type MutableRefObject } from "react";
 import { cornerOf, landedCorner, peelShape, type PeelSide, type Pt } from "../peel";
 import type { TurnStyle } from "../turn-style";
 import styles from "./EdgeGrabRails.module.css";
@@ -74,6 +74,8 @@ const CARRY_MS = 220;
 const FALL_MS = 160;
 /** Longest the laid-down leaf waits for the new opening before it gets out of the way. */
 const LANDED_HOLD_MS = 1500;
+/** A turn played for a key, the wheel or a button: the whole sweep, corner to spine and over. */
+const PLAY_MS = 420;
 
 /** The paper of a leaf as the page draws it: its outline, for a lifted piece of it. */
 interface PaperLook {
@@ -186,6 +188,7 @@ export function EdgeGrabRails({
   peel,
   turnStyle,
   opening,
+  playRef,
 }: {
   driver?: EdgeTurnDriver;
   /**
@@ -205,6 +208,15 @@ export function EdgeGrabRails({
   turnStyle?: TurnStyle | undefined;
   /** Changes when the opening does; a laid-down leaf clears when it changes. */
   opening?: number;
+  /**
+   * Filled with a function that turns the leaf by itself — the arrow keys, the
+   * wheel and the slider's buttons, on an open book. It plays the same peel a
+   * hand makes and lands the same way, so both pages of the new opening arrive
+   * together (owner, 2026-09-28: an arrow turn that swapped one page, showed a
+   * mismatched pair, then swapped the other). False when it cannot — no page to
+   * show, less motion asked for — and the caller turns the old way.
+   */
+  playRef?: MutableRefObject<((step: 1 | -1) => boolean) | null>;
 }): JSX.Element | null {
   // Which side, if any, is being held right now — only to swap the cursor to a
   // closed hand. The drag's numbers live in the ref beside it.
@@ -256,11 +268,58 @@ export function EdgeGrabRails({
     return () => window.clearTimeout(t);
   }, [lifted?.landed]);
   useEffect(() => () => cancelAnimationFrame(anim.current), []);
-
-  if (!driver) return null;
+  const railsEl = useRef<HTMLDivElement | null>(null);
 
   const reduced = (): boolean =>
     typeof matchMedia === "function" && matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  // Turn the leaf with no hand on it: lift the foot corner of the edge that
+  // turns this way and carry it over the spine in one sweep along the foot,
+  // then land exactly as a released grab does. Along the foot and not in an
+  // arc: any rise or dip tilts the leaf, and a tilted leaf stands above or
+  // below the paper — what the owner asked the hand's corner never to do.
+  const play = (step: 1 | -1): boolean => {
+    const side: PeelSide = step > 0 ? "left" : "right";
+    const pages = peel?.[side];
+    const el = railsEl.current?.parentElement;
+    if (!driver || !pages || !el || reduced() || grab.current) return false;
+    const now = liftedRef.current;
+    // Already on its way over: the press is spent on that turn, not a second.
+    if (now && !now.landed) return true;
+    const book = el.getBoundingClientRect();
+    if (book.width === 0) return false;
+    cancelAnimationFrame(anim.current);
+    bookEl.current = el;
+    const leafW = book.width / 2;
+    const paper = measurePaper(el);
+    const corner = cornerOf(side, leafW, paper.h, paper.h);
+    const to = landedCorner(corner, leafW);
+    put({ side, step, corner, pointer: corner, leafW, bookH: paper.h, drawings: paper.drawings, paperTop: paper.top, look: paper.look, pages });
+    const t0 = performance.now();
+    const frame = (t: number): void => {
+      const cur = liftedRef.current;
+      if (!cur) return;
+      const k = Math.min(1, (t - t0) / PLAY_MS);
+      const e = k < 0.5 ? 4 * k * k * k : 1 - (-2 * k + 2) ** 3 / 2; // ease in and out
+      put({
+        ...cur,
+        pointer: { x: corner.x + (to.x - corner.x) * e, y: corner.y + (to.y - corner.y) * e },
+      });
+      if (k < 1) anim.current = requestAnimationFrame(frame);
+      else {
+        put({ ...cur, landed: true });
+        driver.finish(step);
+      }
+    };
+    anim.current = requestAnimationFrame(frame);
+    return true;
+  };
+  if (playRef) playRef.current = play;
+  useEffect(() => () => {
+    if (playRef) playRef.current = null;
+  }, [playRef]);
+
+  if (!driver) return null;
 
   /** Move the corner to `to` over `ms`, then `done`. */
   const travel = (to: Pt, ms: number, done: () => void): void => {
@@ -394,6 +453,7 @@ export function EdgeGrabRails({
 
   return (
     <>
+      <div ref={railsEl} hidden />
       {rail("left", 1)}
       {rail("right", -1)}
       {lifted && shape && (
