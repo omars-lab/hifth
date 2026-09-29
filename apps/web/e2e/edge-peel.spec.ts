@@ -155,7 +155,8 @@ test.describe("Hifth · lifting a page by its corner", () => {
     expect(paper.y - book.y, "the paper no longer stands inside the book").toBeGreaterThan(2);
 
     const rail = await railBox(page, "left");
-    const y = rail.y + rail.height * 0.05;
+    // Near the head, just below the bookmark corner, which the fold keeps (#201).
+    const y = rail.y + 56;
     await page.mouse.move(rail.x + 6, y);
     await page.mouse.down();
     for (let i = 1; i <= 5; i += 1) await page.mouse.move(rail.x + 6 + i * 40, y + i * 8);
@@ -309,5 +310,59 @@ test.describe("Hifth · lifting a page by its corner", () => {
     await expect(peel(page)).toHaveCount(0);
     await page.mouse.up();
     await expect(page.locator(NUM)).toHaveText("9");
+  });
+});
+
+// The bookmark corner lives on the same free corner the hand lifts, so it is
+// held still here, where the open book on a computer (and Firefox) is tested.
+test.describe("Hifth · the folded bookmark corner on the open book", () => {
+  test.use({ locale: "en-US" });
+
+  // Owner, Firefox, p7 (#201): the folded corner was laid across the strip of
+  // page edges beside the paper, and the paper's corner was cut away to the
+  // desk, so a flap stood outside the page with the edges running up past it.
+  // A fold turns down the top leaf only: the flap lies on the paper, and the
+  // pages beneath it — their edge strip included — stay whole.
+  test("a folded corner lies on the paper, and the page edges beside it stay whole", async ({ page }) => {
+    await page.goto("/#/hafs-kfqc/p7");
+    await expect(page.locator("svg[role='group']").first()).toBeVisible();
+    await page.getByRole("button", { name: "Drop a bookmark on this page" }).first().click();
+    const drawer = page.getByRole("dialog", { name: "Bookmark" });
+    await drawer.getByRole("button", { name: "Save name" }).click();
+    await expect(drawer).toBeHidden();
+    const unfold = page.getByRole("button", { name: /Unfold this corner/ });
+    await expect(unfold).toHaveAttribute("data-folded", "");
+    await page.mouse.move(5, 5);
+    await page.waitForTimeout(400); // the fold opens with a short ease
+
+    const m = await unfold.evaluate((btn) => {
+      const flap = btn.querySelector("span > span") as HTMLElement;
+      const f = flap.getBoundingClientRect();
+      // The leaf this corner belongs to: the visible page whose top corner it sits on.
+      const hosts = [...document.querySelectorAll<HTMLElement>("[data-leaf]")].filter(
+        (h) => h.getBoundingClientRect().width > 0 && getComputedStyle(h).visibility !== "hidden",
+      );
+      const host = hosts
+        .map((h) => ({ h, r: h.getBoundingClientRect() }))
+        .sort((a, b) => Math.abs(a.r.top - f.top) + Math.min(Math.abs(a.r.right - f.right), Math.abs(a.r.left - f.left))
+          - (Math.abs(b.r.top - f.top) + Math.min(Math.abs(b.r.right - f.right), Math.abs(b.r.left - f.left))))[0]!;
+      const side = host.h.dataset.leaf;
+      const cs = getComputedStyle(host.h);
+      const z = host.r.width / host.h.offsetWidth;
+      const edge = side === "right" ? parseFloat(cs.paddingRight) : parseFloat(cs.paddingLeft);
+      const border = parseFloat(cs.borderTopWidth);
+      const paperR = host.r.right - (edge + border) * z;
+      const paperL = host.r.left + (edge + border) * z;
+      // A point on the strip of page edges, below the rounded corner and level
+      // with the fold: it must still belong to the leaf, not to the desk.
+      const px = side === "right" ? host.r.right - (border + edge / 2) * z : host.r.left + (border + edge / 2) * z;
+      const py = f.top + f.height / 2;
+      const hit = document.elementsFromPoint(px, py).includes(host.h);
+      return { side, f: { l: f.left, r: f.right, w: f.width }, paperL, paperR, hit };
+    });
+    expect(m.f.w).toBeGreaterThan(10);
+    if (m.side === "right") expect(m.f.r).toBeLessThanOrEqual(m.paperR + 0.5);
+    else expect(m.f.l).toBeGreaterThanOrEqual(m.paperL - 0.5);
+    expect(m.hit, "the page edges beside the fold are cut away").toBe(true);
   });
 });
