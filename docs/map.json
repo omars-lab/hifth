@@ -2179,6 +2179,48 @@
         "select-an-ayah",
         "offline-pwa"
       ]
+    },
+    {
+      "id": "native-shell",
+      "what": "The Mac and iPad app: a thin native window around the web build, served from inside the app bundle at a private address, opened at a route from a hifth:// link or a launch variable, with the share sheet and outside links handed to the operating system. Nothing in it reaches the public site. What building it taught us is docs/design/native-shell.md; whether it may go to outside testers is the native-testflight-licence decision.",
+      "layer": "L4 shell",
+      "entry": [
+        {
+          "file": "native/Hifth/Route/Route.swift",
+          "symbol": "Route",
+          "note": "The only route grammar the shell knows is the web app's own: /<edition>/<target>[?query], read verbatim from a hifth:// link, the HIFTH_ROUTE variable or a --route= argument. Anything else is dropped, so a bad link cannot open a page the web app would not."
+        },
+        {
+          "file": "native/Hifth/Web/LocalScheme.swift",
+          "symbol": "LocalSchemeHandler",
+          "note": "Serves the copied web build at hifth-app://app/…, which is frozen for ever because it is also where the reader's notes are stored. Answers with the right content type per file, real 404s, and never a task the page has already stopped — that is an uncatchable crash on a fast page turn."
+        },
+        {
+          "file": "native/Hifth/Web/ShellModel.swift",
+          "symbol": "ShellModel",
+          "note": "Owns the one web view: cold-start routes go in the first address as the hash, later ones wait for the page's `ready` and are set with callAsyncJavaScript, never a string-built script. Also the snapshot-and-exit path screenshots and goldens run on."
+        },
+        {
+          "file": "native/Hifth/Web/Bridge.swift",
+          "symbol": "Bridge",
+          "note": "The three words the page says to the shell — ready, route, share — and nothing else. The route is mirrored into a hidden native label so a test has something native to wait on."
+        },
+        {
+          "file": "apps/web/src/native-bridge.ts",
+          "symbol": "nativeInfo",
+          "note": "The web side: reads the small object the shell injects at document start (platform, public site address), so shared links stay public links and the service worker and install prompt stay off in-shell. Does nothing in a browser."
+        },
+        {
+          "file": "native/Makefile.native",
+          "symbol": "app-test",
+          "note": "Every job is a make app-* target: build, run, open at a route, screenshot, unit tests, the XCUITest smoke on the iPad simulator, and the shell goldens against native/shots/baseline/. The Mac UI test is opt-in because it needs a permission no script can grant."
+        },
+        {
+          "file": "apps/web/e2e/ipad.spec.ts",
+          "symbol": "Hifth · on an iPad",
+          "note": "The web app at iPad size on WebKit, without the shell: one page upright, an open mus'haf on its side, place kept across rotation, a finger selects a verse. ipad-golden.spec.ts holds the two pictures."
+        }
+      ]
     }
   ]
 }

@@ -2161,7 +2161,9 @@
       "status": "blocked",
       "severity": "risk",
       "owner": "agent",
-      "blockedBy": ["the 2026-09 refactor settling"],
+      "blockedBy": [
+        "the 2026-09 refactor settling"
+      ],
       "note": "Parked 2026-09-29 when the session task list was cleared; until then it lived only in that list and a pointer in the trims list to a file that never existed."
     },
     {
@@ -2184,8 +2186,110 @@
       "status": "blocked",
       "severity": "question",
       "owner": "agent",
-      "blockedBy": ["the 2026-09 refactor"],
+      "blockedBy": [
+        "the 2026-09 refactor"
+      ],
       "note": "Related decision: tafsir-provider."
+    },
+    {
+      "id": "mac-ui-test-needs-permission",
+      "source": {
+        "file": "docs/design/native-shell.md",
+        "item": "①"
+      },
+      "status": "blocked",
+      "severity": "risk",
+      "owner": "user",
+      "blockedBy": [
+        "Accessibility permission for the terminal"
+      ],
+      "note": "Apple's UI test runner drives the Mac app through Accessibility; the terminal must be allowed once by hand. Until then make app-test-mac-ui stops with 'Timed out while enabling automation mode' and the Mac shell is covered by unit tests only."
+    },
+    {
+      "id": "mac-trackpad-pinch-unfelt",
+      "source": {
+        "file": "docs/design/native-shell.md",
+        "item": "②"
+      },
+      "status": "open",
+      "severity": "risk",
+      "owner": "user",
+      "blockedBy": [
+        "a Mac with a trackpad"
+      ],
+      "note": "WebKit forwards the pinch as gesture events the web app already handles, so no code was written and nothing has felt it. On the manual-testing checklist; any fault becomes a test."
+    },
+    {
+      "id": "iphone-shell-unseen",
+      "source": {
+        "file": "docs/design/native-shell.md",
+        "item": "③"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "agent",
+      "note": "The iOS target allows iPhone but nobody has opened the shell on one. Launch screen, safe areas and the phone toolbar may need a pass."
+    },
+    {
+      "id": "mac-menu-page-turn",
+      "source": {
+        "file": "docs/design/native-shell.md",
+        "item": "④"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "agent",
+      "note": "Cmd+←/→ work only because the web app listens for arrow keys; a Mac app is expected to show them in a menu."
+    },
+    {
+      "id": "universal-links-need-paid-team",
+      "source": {
+        "file": "docs/design/native-shell.md",
+        "item": "⑤"
+      },
+      "status": "blocked",
+      "severity": "question",
+      "owner": "user",
+      "blockedBy": [
+        "a paid Apple Developer membership"
+      ],
+      "note": "A tapped site link opens Safari, not the shell. Universal Links need the associated-domains entitlement, which needs a paid team. Same membership the TestFlight decision waits on."
+    },
+    {
+      "id": "swap-to-apple-webview",
+      "source": {
+        "file": "docs/design/native-shell.md",
+        "item": "⑥"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "agent",
+      "note": "iOS 26 / macOS 26 ship a SwiftUI web view; the shell wraps the older one because the new one hides the scroll view and raises the minimum OS. Try the swap when the deployment target moves."
+    },
+    {
+      "id": "app-store-not-a-target",
+      "source": {
+        "file": "docs/design/native-shell.md",
+        "item": "⑦"
+      },
+      "status": "blocked",
+      "severity": "risk",
+      "owner": "user",
+      "blockedBy": [
+        "gpl-and-the-app-store"
+      ],
+      "note": "The shell carries the same GPL-derived data as the site; a store listing waits on the licensing opinion. TestFlight for named testers is the narrower question the native-testflight-licence decision holds."
+    },
+    {
+      "id": "first-route-is-page-one",
+      "source": {
+        "file": "docs/design/native-shell.md",
+        "item": "⑧"
+      },
+      "status": "confirmed",
+      "severity": "defect",
+      "owner": "agent",
+      "note": "Cold start at /hafs-kfqc/2:255: the page's address at ready reads /hafs-kfqc/p1 and the verse arrives on the next route message. Nothing wrong on screen; the window title flickers and a probe that reads the route at ready is misled."
     }
   ]
 }
