@@ -11,14 +11,14 @@ import { LOCALE_IDS } from "./messages/locales.gen";
  * decides for itself), but it would quietly cost every such reader a round trip.
  */
 
-const FILES = Object.fromEntries(LOCALE_IDS.map((id) => [id, [`./assets/${id}.js`, "./assets/plural.js"]]));
+const FILES = Object.fromEntries(LOCALE_IDS.map((id) => [id, [`./assets/${id}.js`]]));
 
 /** What the script asked for, as the language whose file it named. */
 function guessed(): string | null {
   document.head.querySelectorAll("link[rel='modulepreload']").forEach((l) => l.remove());
   new Function(preloadScript(FILES))();
   const links = [...document.head.querySelectorAll<HTMLLinkElement>("link[rel='modulepreload']")];
-  expect(links.map((l) => l.getAttribute("href"))[1]).toBe("./assets/plural.js");
+  expect(links).toHaveLength(1);
   const first = links[0]?.getAttribute("href") ?? "";
   return /\.\/assets\/(\w+)\.js/.exec(first)?.[1] ?? null;
 }
