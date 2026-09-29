@@ -188,6 +188,9 @@ export function App(): JSX.Element {
   );
   // Whether the commentary sheet is showing for the current selection.
   const [commentaryOpen, setCommentaryOpen] = useState(false);
+  // The verse whose note a link asked to see led by its surah's introduction
+  // (`?open=context`); dropped the moment the reader moves to another verse.
+  const [contextFor, setContextFor] = useState<string | null>(null);
   // Where the phone's short note starts, so the page can lift the verse above it.
   const [coverTop, setCoverTop] = useState<number | null>(null);
   const [page, setPage] = useState(START_PAGE);
@@ -675,6 +678,10 @@ export function App(): JSX.Element {
     const ps = surah ? (pitchSurahs.get(surah) ?? null) : null;
     setCommentaryOpen(commentaryFor(ps, selectedKey) !== null);
   }, [selectedKey, pitchSurahs]);
+
+  useEffect(() => {
+    if (contextFor !== null && contextFor !== selectedKey) setContextFor(null);
+  }, [selectedKey, contextFor]);
 
   // Rail chips for the current selection (empty when nothing selected / no hops).
   const chips = useMemo(
@@ -1691,6 +1698,13 @@ export function App(): JSX.Element {
         else if (panel === "lookalikes" || panel === "roots") {
           // The verse's own sheets wait for the verse: see `pendingSheet`.
           if (state.select) setPendingSheet({ panel, key: refToKey(edition, state.select) });
+        } else if (panel === "commentary" || panel === "context") {
+          // The verse's note opens on the selection itself in the pitch build
+          // (see the effect on `selectedKey`); `context` also leads it with the
+          // surah's introduction, on whichever verse the link names.
+          if (PITCH && state.select && panel === "context") {
+            setContextFor(refToKey(edition, state.select));
+          }
         } else {
           setRevisionAt(panel === "shelf" ? "juz" : undefined);
           setRevisionOpen(true);
@@ -1931,7 +1945,9 @@ export function App(): JSX.Element {
   // The held commentary for the current selection, if the pitch build has it.
   const pitchSurah =
     PITCH && selectedSurah ? (pitchSurahs.get(selectedSurah) ?? null) : null;
-  const commentaryEntry = PITCH ? commentaryFor(pitchSurah, selectedKey) : null;
+  const commentaryEntry = PITCH
+    ? commentaryFor(pitchSurah, selectedKey, contextFor !== null && contextFor === selectedKey)
+    : null;
   const hasCommentary = commentaryEntry !== null;
   // The roads out of the open note: the same merged edges the rail would show
   // (Study Quran cross-references included), handed to the drawer so the reading

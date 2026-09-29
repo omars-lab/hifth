@@ -45,6 +45,16 @@ Three doors, all ending in the same hash:
 - `HIFTH_ROUTE=/hafs-kfqc/p45` env var — what the Makefile uses.
 - `--route=/hafs-kfqc/p45` launch argument — what XCUITest uses.
 
+**Another app can ask and hear back** through x-callback-url:
+`hifth://x-callback-url/open?verse=2:255&words=3-7&mode=note&x-success=…&x-error=…` turns
+the page and opens the caller's address with `route` and the public `url` once it is
+showing; `…/current?x-success=…` answers with what is on screen. `page=`, `verse=`,
+`surah=` (its context), `words=`, `edition=`, `mode=` (the tool in hand), `open=`
+(`commentary`, `context`, or any app panel), `view=`, or a whole `route=`. Errors come back
+as `errorCode` + `errorMessage`. The contract is `docs/design/app-url-scheme.openapi.json`
+(rendered by `make app-links-doc`); the parser is `native/Hifth/Route/XCallback.swift`,
+the answering is in `ShellModel`.
+
 Cold start puts the route into the first URL's fragment, so there is no race. A route that
 arrives while running is queued until the page says `ready`, then applied. Quote any route
 with `?` or `&` on the make line.
@@ -147,6 +157,13 @@ A new shape (say a range with a query) is pinned in three places, same change: a
 `hifth://` spelling, and a line in `refuses` for the near-miss), the web e2e deep-link test
 (`apps/web/e2e/deeplink.spec.ts`), and a smoke launch if the shell has to do anything new.
 The round trip to assert: `Route.parse(URL("hifth://" + route))` equals `Route.hash(from: route)`.
+
+A new x-callback parameter or action is pinned the same way: a case in
+`native/HifthTests/XCallbackTests.swift`, a parameter (with its `enum` if it has one) and an
+`x-examples` entry in `docs/design/app-url-scheme.openapi.json`, then `make app-links-doc`.
+The Swift test runs every example through the parser and holds the enum lists to the shell's;
+`packages/core/src/link-spec.test.ts` holds them to the web router; a name added in one place
+only fails the other.
 
 ## Troubleshooting
 

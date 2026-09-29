@@ -2290,6 +2290,17 @@
       "severity": "defect",
       "owner": "agent",
       "note": "Cold start at /hafs-kfqc/2:255: the page's address at ready reads /hafs-kfqc/p1 and the verse arrives on the next route message. Nothing wrong on screen; the window title flickers and a probe that reads the route at ready is misled."
+    },
+    {
+      "id": "x-callback-untested-end-to-end",
+      "source": {
+        "file": "docs/design/native-shell.md",
+        "item": "⑨"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "agent",
+      "note": "The x-callback-url door (open, current, the x-success / x-error answers) is proven by unit tests on the parser and the shell model only; no test has the operating system hand the app a real request and a second app receive the answer."
     }
   ]
 }

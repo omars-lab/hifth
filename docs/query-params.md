@@ -72,7 +72,7 @@ normalises to the literal form on the way out. Ranges never cross surahs.
 | `trail` | `2:40,2:47,2:122` | The full hop chain, oldest → newest, excluding the selection | The whole link is refused | reject |
 | `view` | `one` or `two` | On a computer, opens the book to one page or to the two-page spread, as if that switch had been pressed. A phone always shows one page | The value is dropped; the book opens as it would have | fall back |
 | `tool` | `read`, `select`, `highlight`, `bookmark`, `note`, `harakat`, `word`, `mistake` or `crop` — the word on each tool's button | Puts that page tool in hand on arrival, as if its button had been pressed | The value is dropped; Select stays in hand | fall back |
-| `open` | `jump`, `about`, `record`, `shelf`, `key`, `editions`, `tips`, `lookalikes` or `roots` | Opens one panel on arrival: go-to, about, the revision record, the record at juz scope (the saved-offline shelf), the tajweed colour key, the mus'haf picker, the tips strip, or — for a selected verse, once its data has loaded — its look-alike list or its roots. The view underneath is the rest of the link | The value is dropped; the link opens without a panel | fall back |
+| `open` | `jump`, `about`, `record`, `shelf`, `key`, `editions`, `tips`, `lookalikes`, `roots`, `commentary` or `context` | Opens one panel on arrival: go-to, about, the revision record, the record at juz scope (the saved-offline shelf), the tajweed colour key, the mus'haf picker, the tips strip, or — for a selected verse, once its data has loaded — its look-alike list, its roots, its commentary, or its commentary led by the surah's introduction (`context`). The last two exist only in a build that holds commentary (the private pitch build); the public app drops them. The view underneath is the rest of the link | The value is dropped; the link opens without a panel | fall back |
 
 Unknown keys are ignored, always. A link that has picked up an analytics
 parameter on its way through a chat client still opens the ayah.
@@ -104,6 +104,8 @@ or `http://localhost:5173/` (a laptop running it).
 | `#/hafs-kfqc/2:48?open=lookalikes` | opens | 2:48 with its look-alike list open |
 | `#/hafs-kfqc/2:48?open=roots` | opens | 2:48 with its roots open |
 | `#/hafs-kfqc/p19?open=lookalikes` | opens | page 19; no verse is named, so no list |
+| `#/hafs-kfqc/2:255?open=commentary` | opens | 2:255 with its commentary open, in a build that holds commentary |
+| `#/hafs-kfqc/2:255?open=context` | opens | 2:255 with its commentary open, led by al-Baqarah's introduction |
 | `#/hafs-kfqc/2:48?open=nope` | opens as `#/hafs-kfqc/2:48` | 2:48, no panel |
 | `#/hafs-kfqc/p7?view=one` | opens | page 7 alone on a computer, the book closed to one page |
 | `#/hafs-kfqc/p7?view=three` | opens as `#/hafs-kfqc/p7` | page 7, the book as it would have opened |

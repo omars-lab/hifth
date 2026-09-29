@@ -29,11 +29,32 @@ final class ShellModel {
     private var pendingHash: String?
     private var snapshotTaken = false
 
+    /// How an x-callback answer leaves the shell: the system opens the
+    /// caller's address. Replaced by the tests with a collector.
+    var openCallback: (URL) -> Void = { Sharing.openCallback($0) }
+    /// How long `open` waits for the page to show the route before telling
+    /// the caller it did not.
+    private let callbackTimeout: Duration
+    /// `open` requests answered once the page reports their route.
+    private var awaitingRoute: [AwaitingRoute] = []
+    /// `current` requests made before anything was on screen.
+    private var awaitingCurrent: [XCallback.Callbacks] = []
+
+    private struct AwaitingRoute {
+        let id = UUID()
+        let hash: String
+        let callbacks: XCallback.Callbacks
+    }
+
     var title: String {
         currentHash.isEmpty ? "Hifth" : "Hifth — \(currentHash.dropFirst())"
     }
 
-    init(launchRoute: String? = Route.fromEnvironment() ?? Route.fromArguments()) {
+    init(
+        launchRoute: String? = Route.fromEnvironment() ?? Route.fromArguments(),
+        callbackTimeout: Duration = .seconds(8)
+    ) {
+        self.callbackTimeout = callbackTimeout
         #if os(iOS)
         let platform = "ios"
         #else
@@ -91,10 +112,67 @@ final class ShellModel {
 
     // MARK: - Routes in
 
-    /// A `hifth://` link, from the system while running or at launch.
+    /// A `hifth://` link, from the system while running or at launch: an
+    /// x-callback-url request, which is answered, or a plain link, which only
+    /// turns the page.
     func open(_ url: URL) {
-        guard let hash = Route.parse(url) else { return }
-        show(hash)
+        switch XCallback.parse(url) {
+        case .request(let request)?:
+            perform(request)
+        case .failure(let failure, let callbacks)?:
+            answer(callbacks.errorURL(failure))
+        case nil:
+            guard let hash = Route.parse(url) else { return }
+            show(hash)
+        }
+    }
+
+    // MARK: - x-callback-url
+
+    private func perform(_ request: XCallback.Request) {
+        switch request.action {
+        case .open(let hash):
+            show(hash)
+            guard request.callbacks.wantsAnswer else { return }
+            let waiting = AwaitingRoute(hash: hash, callbacks: request.callbacks)
+            awaitingRoute.append(waiting)
+            Task { [weak self, timeout = callbackTimeout] in
+                try? await Task.sleep(for: timeout)
+                self?.expire(waiting.id)
+            }
+        case .current:
+            guard request.callbacks.wantsAnswer else { return }
+            if currentHash.isEmpty {
+                awaitingCurrent.append(request.callbacks)
+            } else {
+                answer(request.callbacks.successURL(route: currentHash, publicBase: Self.publicBase))
+            }
+        }
+    }
+
+    /// The page now shows `hash`: answer everyone who was waiting for it.
+    private func settle(_ hash: String) {
+        for callbacks in awaitingCurrent {
+            answer(callbacks.successURL(route: hash, publicBase: Self.publicBase))
+        }
+        awaitingCurrent.removeAll()
+        let shown = awaitingRoute.filter { $0.hash == hash }
+        awaitingRoute.removeAll { $0.hash == hash }
+        for waiting in shown {
+            answer(waiting.callbacks.successURL(route: hash, publicBase: Self.publicBase))
+        }
+    }
+
+    /// The page never showed the route: say so, once, and stop waiting.
+    private func expire(_ id: UUID) {
+        guard let index = awaitingRoute.firstIndex(where: { $0.id == id }) else { return }
+        let waiting = awaitingRoute.remove(at: index)
+        answer(waiting.callbacks.errorURL(.routeNotShown(waiting.hash)))
+    }
+
+    private func answer(_ url: URL?) {
+        guard let url else { return }
+        openCallback(url)
     }
 
     /// Turn the page to `hash` now if the app is ready, else as soon as it is.
@@ -114,7 +192,8 @@ final class ShellModel {
 
     // MARK: - Messages from the page
 
-    private func receive(_ message: BridgeMessage) {
+    /// Internal, not private, so the tests can play the page.
+    func receive(_ message: BridgeMessage) {
         switch message {
         case .ready:
             ready = true
@@ -123,6 +202,7 @@ final class ShellModel {
             scheduleSnapshotIfAsked()
         case .route(let hash):
             currentHash = hash
+            settle(hash)
         case .share(let url, let title, let text):
             Sharing.present(url: url, title: title, text: text, from: webView)
         }
@@ -279,6 +359,13 @@ final class NavigationPolicy: NSObject, WKNavigationDelegate, WKUIDelegate {
 enum Sharing {
     static func openExternally(_ url: URL) {
         guard let scheme = url.scheme, scheme == "http" || scheme == "https" || scheme == "mailto" else { return }
+        openCallback(url)
+    }
+
+    /// An x-callback answer: the caller's own address, in whatever app owns
+    /// its scheme. `XCallback` has already refused the schemes that must not
+    /// be opened from here.
+    static func openCallback(_ url: URL) {
         #if os(iOS)
         UIApplication.shared.open(url)
         #else
