@@ -6,7 +6,7 @@
  * it, the highlighter looks polygons up in it. That shape is right for memory
  * and wrong for a network. Written out for all 604 pages it is ~750 KB of JSON
  * (~109 KB gzipped), fetched whole before the first page can be drawn — which
- * is what `backlog.md` ⑪ was opened about.
+ * is what `performance.md` ⑪ was opened about.
  *
  * The fix is not to shard it. It is to notice that almost every byte of it is
  * derivable:

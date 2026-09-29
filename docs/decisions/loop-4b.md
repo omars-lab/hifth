@@ -43,13 +43,13 @@ the last structural reason the product was a demo.
   6236 entries, no diff. That is the JSON metadata and the shipped geometry agreeing — a page
   whose polygons were dropped or renumbered in vendoring could not have passed.
 - **The manifest's wire form is a compact ayah→page table, and it deleted a backlog item.**
-  `backlog.md` ⑪ projected ~109 KB gz for 604 pages of `AssetManifest` and proposed sharding
+  `performance.md` ⑪ projected ~109 KB gz for 604 pages of `AssetManifest` and proposed sharding
   by juz. The projection was right about the old shape and wrong about the remedy: the compact
   form is **24,471 bytes raw, 1,333 gz, for the whole print**, so sharding would add thirty
   requests to save nothing. `expandManifest` rebuilds the full shape at load, and
   `compactManifest` *refuses* a corpus where an ayah spans two pages or an id is not its own
   verse — the compaction is only sound because those invariants hold, so it asserts them.
-- **The mounted set got a ceiling and a cache in the same change** (`backlog.md` ③ ④). See
+- **The mounted set got a ceiling and a cache in the same change** (`performance.md` ③ ④). See
   those entries: capping without recency would have made the stage worse, and an unsplit cap
   would have let the desktop spread hold twice what a phone holds.
 - **Two upstream `id` defects are repaired, and the repair is pinned to exactly two.** 19:3 on
@@ -96,7 +96,7 @@ the last structural reason the product was a demo.
 | JS bundle | 109.9 KB gz (+1.2) | baseline accepted |
 
 **The exit criterion, and the surprise in it.** *< 2.5 s TTI on mid-Android* was the number
-this loop was gated on, and the honest expectation written in `backlog.md` ⑫ was that 604
+this loop was gated on, and the honest expectation written in `performance.md` ⑫ was that 604
 pages would eat into a margin already measured as thin as 71 ms. It went the other way: 236 ms
 of margin on the same laptop that produced the 71. More interesting than the median is the
 *shape*. Nine pre-corpus runs of one unchanged build came out bimodal — 2279–2284 or
@@ -115,7 +115,7 @@ architectural property.
   Loops 5 and 6a left as ayah-fallback.
 - **`MOUNTED_PAGE_CAP` is still a guess.** 6 came from the spec before anything was measured
   and this loop did not measure it either; what changed is that it is a named constant with a
-  test instead of an absence. `backlog.md` ① ② own the measurement, and they are blocked on
+  test instead of an absence. `performance.md` ① ② own the measurement, and they are blocked on
   hardware.
 - **Pin-a-juz packs** — Loop 6b, whose gate this loop was. It loses the "sharding the manifest
   is the same work" argument, since there is no manifest left to shard.

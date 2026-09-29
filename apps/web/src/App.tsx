@@ -757,7 +757,7 @@ export function App(): JSX.Element {
   }, [manifest, mountedPages, ensureShard]);
 
   // …and for the surahs the rail can send you to, which is a different set and
-  // the one that matters for the hop (`docs/backlog.md` ⑧). The loop above is
+  // the one that matters for the hop (`docs/performance.md` ⑧). The loop above is
   // keyed on *pages*, so it fetches what is on screen; a mutashabihat edge is
   // by nature a resemblance across the mus'haf and usually points into another
   // surah entirely. The shard for the place the reader is one tap from going
@@ -2168,7 +2168,7 @@ export function App(): JSX.Element {
                   /* Its share of the book's DOM budget, not a budget of its
                      own: two stages each holding the full cap is a desktop
                      reader holding twice what a phone reader does, silently
-                     (`docs/backlog.md` ④). It asks for one page and never
+                     (`docs/performance.md` ④). It asks for one page and never
                      receives hop targets, so its share is the smaller one. */
                   pageBudget={spreadBudget().facing}
                   label={t.pageN(facing)}

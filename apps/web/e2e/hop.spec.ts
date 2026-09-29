@@ -133,7 +133,7 @@ test.describe("Hifth · the hop", () => {
   });
 
   test("the shard for where the rail can send you is fetched before you go", async ({ page }) => {
-    // `docs/backlog.md` ⑧. Shards used to be prefetched by *mounted page* — the
+    // `docs/performance.md` ⑧. Shards used to be prefetched by *mounted page* — the
     // right eager step for the tap, and the wrong one for the hop. A
     // mutashabihat edge is a resemblance across the mus'haf, so it usually
     // lands in another surah, and the one shard nobody asked for was the one

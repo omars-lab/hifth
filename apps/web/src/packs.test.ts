@@ -145,7 +145,7 @@ describe("pinPack", () => {
   it("marks every fetch so the worker's routes stand aside", async () => {
     // Without the marker the service worker files each pinned page in
     // `hifth-pages` as well, and that 32-entry LRU spends two thirds of the
-    // reader's browsing trail on copies the pack already answers (backlog ⑮).
+    // reader's browsing trail on copies the pack already answers (performance.md ⑮).
     // `e2e/offline.spec.ts` proves the routes actually decline; this proves the
     // header is still being sent, on every change to this file, without a build.
     const spy = vi.fn(async () => new Response(BODY, { status: 200 }));

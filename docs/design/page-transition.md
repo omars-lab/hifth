@@ -539,7 +539,7 @@ A hafiz turning three pages does not wait 240 ms between presses. Four rules:
 3. **At most one host above `opacity: 0` besides the incoming one.** A new turn sets every
    other mounted host to `opacity: 0` with the transition suppressed. Held-down arrow repeat
    then costs one composited layer, not N. This matters because `pagesRef` is unbounded
-   today (`App.tsx:286-307`, backlog ③) and a fade that touched every mounted host would
+   today (`App.tsx:286-307`, performance.md ③) and a fade that touched every mounted host would
    make the unbounded set a per-frame cost.
 4. **Interrupting never leaves the page half-turned.** The current page is whatever the last
    commit named; the fold is decoration over a `setCurrentPage` that has already happened or
@@ -786,7 +786,7 @@ why it passes it.**
 
 ### 5.2 The unknown-performance path
 
-`perf-verdict-on-device` (`docs/validation/ledger.json`, `backlog.md` §0 ①) is **open**, and
+`perf-verdict-on-device` (`docs/validation/ledger.json`, `performance.md` §0 ①) is **open**, and
 it decides which of three rendering strategies ships. This design must not presuppose the
 answer. Three honest statements:
 
@@ -795,7 +795,7 @@ answer. Three honest statements:
    small composited layer. It is not the thing to worry about.
 2. **The cross-fade under it requires both pages painted simultaneously, and this design
    inherits that risk from `page-turning.md` §5 unchanged.** Both pages are already *mounted*
-   (the mounted set is unbounded, backlog ③), so this adds a second painted layer for 120 ms,
+   (the mounted set is unbounded, performance.md ③), so this adds a second painted layer for 120 ms,
    not a second raster. **But if the verdict picks `content-visibility` virtualization, the
    outgoing page may be `content-visibility: hidden` when the fade starts, and the fade would
    force it back into rendering.** That is a real risk and it is named, not solved.
@@ -1091,7 +1091,7 @@ read: it was an iPad-launch feature, Apple removed it in iOS 16 and restored it 
 in 16.4 after real objection, **there is no published research showing it harms reading**,
 and Google Play Books still ships the toggle — so the aesthetic constituency is genuine.
 §8 rejected it for this codebase on cost (a 3D transform per frame over a rasterized 170 KB
-inline SVG, precisely the re-raster risk backlog ① exists to measure) plus the observation
+inline SVG, precisely the re-raster risk performance.md ① exists to measure) plus the observation
 that a build with three non-adjacent pages has no leaf beneath to reveal.
 
 **Those reasons are correct and they are contingent.** The perf verdict could come back fine;
@@ -1143,7 +1143,7 @@ exactly the two bars it names.
 | **A bare cross-fade with no fold** (`page-turning.md` §3.1's recommendation) | **Not rejected — adopted as the substrate.** The fold is an addition on top, and if §7 ② goes against it the cross-fade alone remains correct and shippable. What the fold adds is (a) covering the double-exposure at t = 0.5, which is the cross-fade's one weakness on a mushaf specifically, (b) a direction cue that moves no glyph, and (c) the constrained-budget fallback of §5.2, which a bare cross-fade does not have. |
 | **`page-turning.md` §4.3's `.leaf` wrapper** | A per-page element carrying `translateX` is a second transform on an ancestor of a 170 KB SVG, it promotes N layers for N mounted pages, and it cannot express §3.4's one-fold-ever rule. One element that contains no page does the same job. |
 | **The `≤16 px translateX` direction cue** (`page-turning.md` §3.1 (a)) | Same root. It moves glyphs — a little — to say something the fold says beside them for free. 16 px is small, and the axiom does not have a small-print exemption. |
-| **Mounting a real second leaf and sliding it** | The true skeuomorphic turn, and it needs two full pages composited and translating simultaneously. That is backlog ① and ③ at once, and today it would slide a leaf that does not exist. |
+| **Mounting a real second leaf and sliding it** | The true skeuomorphic turn, and it needs two full pages composited and translating simultaneously. That is performance.md ① and ③ at once, and today it would slide a leaf that does not exist. |
 | **A fake gutter down one side of a phone's single leaf** | It asserts a facing page that is not on screen. §2.4. |
 | **Gap width proportional to page distance** | Invents a metric. §4.6. |
 | **A settings surface for turn style** (Curl / Fold / None) | `page-turning.md` §8: the header fits 320 px with seventeen pixels of slack and there is nowhere to put it. With one transition and one reduced-motion substitute there is nothing to choose between. |
@@ -1167,7 +1167,7 @@ because one half is shippable now and the other is not:
 - **§3–§4 — the fold.** Gated. It needs `foldBetween` in core (small), the fold element and
   its state machine in `apps/web` (medium), and it depends on two open things: the perf
   verdict (`PLAN.md` follow-up ①) for whether the cross-fade under it is affordable, and a
-  ceiling on the mounted set (backlog ③) for whether §3.4 rule 3 is cheap. Neither is this
+  ceiling on the mounted set (performance.md ③) for whether §3.4 rule 3 is cheap. Neither is this
   work's to close.
 
 **And the whole of §4 is worth more after Loop 4b than before.** Today every turn is a hole
@@ -1194,7 +1194,7 @@ leaves (§1.6, §7 ①).
 > free side, the bound side bled off the screen, and a field the page is not. It is
 > independent of every open gate and belongs with follow-up ⑩'s hardening list. The **fold**
 > (§3–§4) is gated on follow-up ① and on a ceiling for the mounted set
-> ([`backlog.md`](backlog.md) §2 ③). Its rule is the part worth reading: **a crease means the
+> ([`performance.md`](performance.md) §2 ③). Its rule is the part worth reading: **a crease means the
 > two pages face each other in the print, a gap means a leaf turned, sunk paper behind a
 > dashed edge means the print has a leaf here and this build does not, and nothing at all
 > means it was not a turn** — resolved by `foldBetween` in `packages/core` from `spreadOf`
@@ -1223,7 +1223,7 @@ together to know why the rows say what they say.
 | §2 resting edge system | **nothing** | CSS + one attribute. Wants `page-turning.md` §7 ①②'s geometry fixes first only because they touch the same files. |
 | `foldBetween` + unit tests | **nothing** | Pure core. Buildable today; its output is unreachable today, which is fine. |
 | The fold element and its sweep | `PLAN.md` follow-up ① (perf verdict) | Decides whether the cross-fade under it is affordable, and whether an outgoing page is even rendering. §5.2 gives the constrained fallback so the answer is a configuration, not a redesign. |
-| §3.4's one-fold-ever + one-visible-host rules | `backlog.md` §2 ③ (mounted-set ceiling) | Cheap today only because the set can never exceed three. |
+| §3.4's one-fold-ever + one-visible-host rules | `performance.md` §2 ③ (mounted-set ceiling) | Cheap today only because the set can never exceed three. |
 | Drawing a crease or a gap at all | **Loop 4b** | No two vendored pages are adjacent, so `"crease"` and `"gap"` have no reachable input. |
 | The golden shot of a left-hand leaf | **Loop 4b** | All three vendored pages are right-hand leaves (§2.3). |
 | §7 ①'s phase check | ~~a human and a physical mushaf~~ — **done** | Answered: odd is the right-hand leaf. `spreadOf` was one leaf off and has been corrected; see §7 ①. |

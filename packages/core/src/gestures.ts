@@ -362,7 +362,7 @@ export function turnCommit(stroke: TurnStroke): 1 | -1 | 0 {
  * not per event*, and it rules out the obvious implementation: a scroll-snap
  * container needs `scrollLeft`, whose sign convention under RTL is not portable
  * (§2.6), and a momentum scroll over 604 pages would mount an unbounded number
- * of leaves (`backlog.md` ③).
+ * of leaves (`performance.md` ③).
  *
  * So the wheel is classified the same way the hand is, and for the same reason
  * the rest of this file exists: the rule is time and distance only, it is pure,

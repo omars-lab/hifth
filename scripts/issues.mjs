@@ -9,7 +9,7 @@
  *
  * The interesting work in this file is `sectionItems`, which is the only place
  * that knows how an open item is written down in prose. Every design doc ends
- * with a section headed exactly SECTION_HEADING, and backlog.md's whole body is
+ * with a section headed exactly SECTION_HEADING, and performance.md's whole body is
  * one such register; under both, an item is
  *
  *     ### OEn <title> · **status**
@@ -22,7 +22,7 @@
  */
 import { readFileSync, existsSync } from "node:fs";
 import { createHash } from "node:crypto";
-import { join } from "node:path";
+import { join, posix } from "node:path";
 import { ROOT } from "./code-pointers.mjs";
 
 export const ISSUES_PATH = join(ROOT, "docs", "issues.json");
@@ -43,7 +43,7 @@ export const STATUS_ORDER = ["confirmed", "suspected", "open", "blocked", "answe
 // rather than built from a code-point range so that a marker nobody can type is
 // never silently legal — and it runs past whatever the largest register
 // currently uses, because the failure when it does not is a gate saying
-// "docs/backlog.md has no ⑯ row" about a row that is plainly there, which reads
+// "docs/performance.md has no ⑯ row" about a row that is plainly there, which reads
 // as a doc bug and is not one. Extended to ㉟ on 2026-08-17, when the mark
 // registration document reached ⑳ and hit exactly that wall: the twenty circled
 // digits are one Unicode block and the next fifteen are a different one, so the
@@ -76,10 +76,10 @@ export function sectionItems(file) {
   if (!existsSync(path)) return null;
   const lines = readFileSync(path, "utf8").split("\n");
 
-  // backlog.md is itself the register; a design doc holds one section of many.
+  // performance.md is itself the register; a design doc holds one section of many.
   let from = 0;
   let to = lines.length;
-  if (!file.endsWith("backlog.md")) {
+  if (!file.endsWith("performance.md")) {
     const start = lines.findIndex((l) => l.startsWith("## ") && l.includes(SECTION_HEADING));
     if (start === -1) return null;
     from = start + 1;
@@ -115,21 +115,97 @@ export function planItems() {
   for (let i = start + 1; i < to; i++) {
     const m = lines[i].match(/^(\d+)\.\s+(.*)$/);
     if (!m) continue;
-    // These are paragraphs, not headings, so the title has to be recovered.
-    // Most follow-ups open with a bolded name — sometimes struck through, which
-    // is how this file says "closed" — and that name is the title. The three
-    // that do not get their first clause instead, cut at the first em-dash,
-    // parenthesis or full stop, whichever the prose reaches first.
-    const bold = m[2].match(/\*\*(.+?)\*\*/);
-    const raw = bold ? bold[1] : m[2].replace(/\s*[—(].*$/, "");
-    const title = raw
-      .replace(/~~|\*\*/g, "")
-      .replace(/\.\s.*$/, "")
-      .replace(/\.$/, "")
-      .trim();
-    items.set(m[1], { title, line: i + 1 });
+    items.set(m[1], { title: planTitleAt(lines, i), line: i + 1 });
   }
   return items;
+}
+
+/**
+ * The title of the follow-up that starts at `lines[at]`. These are paragraphs,
+ * not headings, so the title has to be recovered. Most follow-ups open with a
+ * bolded name — sometimes struck through, which is how PLAN.md says "closed" —
+ * and that name is the title. The three that do not get their first clause
+ * instead, cut at the first em-dash, parenthesis or full stop, whichever the
+ * prose reaches first.
+ */
+export function planTitleAt(lines, at) {
+  let text = lines[at].replace(/^\d+\.\s+/, "");
+  // A bolded name that wraps onto the item's next, indented lines is still one name.
+  for (let i = at + 1; (text.match(/\*\*/g) ?? []).length % 2 === 1; i++) {
+    if (i >= lines.length || !/^\s+\S/.test(lines[i])) break;
+    text += ` ${lines[i].trim()}`;
+  }
+  const bold = text.match(/\*\*(.+?)\*\*/);
+  const raw = bold ? bold[1] : text.replace(/\s*[—(].*$/, "");
+  return raw
+    .replace(/~~|\*\*/g, "")
+    .replace(/\.\s.*$/, "")
+    .replace(/\.$/, "")
+    .trim();
+}
+
+/**
+ * The text of the item whose heading is `lines[at]`: everything up to the next
+ * heading of the same level or higher, with the section's closing rule and the
+ * blank lines around it dropped. Deeper headings stay, since they belong to it.
+ *
+ * docs/backlog.md copies this text in full so the page reads on its own; see
+ * scripts/backlog.test.mjs for where it must stop.
+ */
+export function bodyAfter(lines, at) {
+  const out = [];
+  for (let i = at + 1; i < lines.length; i++) {
+    if (/^#{1,3} /.test(lines[i])) break;
+    out.push(lines[i]);
+  }
+  while (out.length && /^(\s*|---+)$/.test(out.at(-1))) out.pop();
+  while (out.length && out[0].trim() === "") out.shift();
+  return out.join("\n");
+}
+
+/**
+ * The text of the PLAN.md follow-up that starts at `lines[at]`: its numbered
+ * line without the number, and every indented or blank line after it, stopping
+ * at the next number or heading. The list indent is taken off so the text reads
+ * as paragraphs wherever it is copied.
+ */
+export function planBodyAt(lines, at) {
+  const out = [lines[at].replace(/^\d+\.\s+/, "")];
+  for (let i = at + 1; i < lines.length; i++) {
+    const l = lines[i];
+    if (/^\d+\.\s/.test(l) || /^#{1,3} /.test(l)) break;
+    if (l.trim() !== "" && !/^\s/.test(l)) break;
+    out.push(l.replace(/^ {1,3}/, ""));
+  }
+  while (out.length && out.at(-1).trim() === "") out.pop();
+  return out.join("\n");
+}
+
+/**
+ * Rewrites the relative links in `md`, written in `fromFile`, so they resolve
+ * from a page in docs/. Addresses with a scheme and site-absolute paths are left
+ * alone; a bare `#anchor` becomes an anchor on the page it came from.
+ */
+export function rebaseLinks(md, fromFile) {
+  const dir = posix.dirname(fromFile);
+  return md.replace(/(!?\[[^\]]*\]\()([^)\s]+)(\))/g, (all, open, target, close) => {
+    if (/^[a-z][a-z0-9+.-]*:/i.test(target) || target.startsWith("/")) return all;
+    if (target.startsWith("#")) return `${open}${posix.relative("docs", fromFile)}${target}${close}`;
+    return `${open}${posix.relative("docs", posix.join(dir, target))}${close}`;
+  });
+}
+
+/** An item's full text, read from the page that owns it. */
+export function itemText(issue) {
+  const s = issue.source;
+  if (!s?.file) return "";
+  const lines = readFileSync(join(ROOT, s.file), "utf8").split("\n");
+  if (s.file.endsWith("PLAN.md")) {
+    const it = planItems()?.get(s.item);
+    return it ? rebaseLinks(planBodyAt(lines, it.line - 1), s.file) : "";
+  }
+  const it = sectionItems(s.file)?.get(s.item);
+  return it ? rebaseLinks(bodyAfter(lines, it.line - 1), s.file) : "";
 }
 
 /**

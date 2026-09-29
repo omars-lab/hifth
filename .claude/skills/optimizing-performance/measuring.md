@@ -58,7 +58,7 @@ cannot quietly change which phone the promise is about:
 
 The "simulate" method (Google calls its model *Lantern*) is why the numbers are steady across
 machines. 15 runs on two very different laptops landed within 2266–2437 ms. The flip side is that
-it is a model, and a real-phone check (backlog ②) is still open.
+it is a model, and a real-phone check (performance.md ②) is still open.
 
 ## What happens between tapping the icon and being able to use the app?
 

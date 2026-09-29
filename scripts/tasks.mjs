@@ -1,6 +1,13 @@
 /**
- * Shared reader for docs/tasks.md — the one page that answers "whose turn is
- * it?" across all four registers at once.
+ * Shared reader for docs/backlog.md — the one page that holds every open item in
+ * the project, in full, ordered by whose turn it is.
+ *
+ * It was docs/tasks.md until 2026-09-29, a list of links. It carries each item's
+ * whole text now because once a working session ends, the repository is the only
+ * thing left that remembers what is open, and a page of links cannot be read on
+ * its own. The text is still owned by the page it comes from and copied in at
+ * build time; the hash below covers it, so an edit at the source leaves this page
+ * stale until it is rebuilt, and the gate says so.
  *
  * The builder and the gate both read this, for the same reason issues.mjs
  * exists: a page that says one thing when it is built and another when it is
@@ -15,7 +22,7 @@
  * the cut is the whole product:
  *
  *   issues.md sorts worst-first, and answers "what is most wrong?"
- *   tasks.md  sorts by owner, and answers "what is waiting on me?"
+ *   backlog.md sorts by owner, and answers "what is waiting on me?"
  *
  * Someone deciding what to fix next reads the first. Someone with an hour and a
  * phone reads the second, and until this page existed they had to know that
@@ -27,11 +34,11 @@ import { readFileSync } from "node:fs";
 import { createHash } from "node:crypto";
 import { join } from "node:path";
 import { ROOT } from "./code-pointers.mjs";
-import { readIssues, PLAN_PATH } from "./issues.mjs";
+import { readIssues, itemText, PLAN_PATH } from "./issues.mjs";
 import { readDecisions } from "./decisions.mjs";
 import { readLedger } from "./validation-ledger.mjs";
 
-export const DOC_PATH = join(ROOT, "docs", "tasks.md");
+export const DOC_PATH = join(ROOT, "docs", "backlog.md");
 
 /** Closed in the issue catalog's vocabulary — the three words that owe nothing. */
 const CLOSED = ["answered", "fixed", "done"];
@@ -85,14 +92,22 @@ export function payload() {
       .map((d) => ({
         id: d.id,
         question: d.question,
-        options: (d.options ?? []).length,
+        options: (d.options ?? []).map((o) => ({ id: o.id, label: o.label })),
         page: d.page,
         artifact: d.artifact,
         doc: d.doc,
       })),
     checks: (readLedger().checks ?? [])
       .filter((c) => c.status === "pending")
-      .map((c) => ({ id: c.id, title: c.title, owner: c.owner, blocks: c.blocks ?? [] })),
+      .map((c) => ({
+        id: c.id,
+        title: c.title,
+        owner: c.owner,
+        blocks: c.blocks ?? [],
+        why: c.why ?? "",
+        needs: c.runbook?.needs ?? [],
+        steps: (c.runbook?.steps ?? []).map((s) => s.short ?? s.do),
+      })),
     // Ledger-backed rows are dropped above rather than here: they are the same
     // nine checks the section before already lists, by their real titles, with
     // the command that runs them. Listing them twice would make the page look
@@ -104,17 +119,19 @@ export function payload() {
       severity: i.severity,
       owner: i.owner,
       blockedBy: i.blockedBy ?? [],
+      note: i.note ?? "",
+      text: itemText(i),
     })),
     loops: loops(),
   };
 }
 
-/** Stable short hash of the rendered slice; stamped into tasks.md. */
+/** Stable short hash of the rendered slice; stamped into backlog.md. */
 export function tasksHash() {
   return createHash("sha256").update(JSON.stringify(payload())).digest("hex").slice(0, 12);
 }
 
-/** The hash tasks.md was built from, or null if there is no doc (or no stamp). */
+/** The hash backlog.md was built from, or null if there is no doc (or no stamp). */
 export function docHash() {
   try {
     const m = readFileSync(DOC_PATH, "utf8").match(/<!-- tasks-hash: ([0-9a-f]+) -->/);

@@ -86,7 +86,7 @@ interface PageStageProps {
    * How many pages this stage may hold at once. Defaults to the whole DOM
    * budget; a leaf of an open spread is given its share of it (`spreadBudget`),
    * because two stages each holding the full cap is a book holding twice what a
-   * phone does. `docs/backlog.md` ③ ④.
+   * phone does. `docs/performance.md` ③ ④.
    */
   pageBudget?: number;
   /** Human label for the a11y region, e.g. "Page 7". */
@@ -1537,7 +1537,7 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
    *
    * Every other mounted host is put to `opacity: 0` with its transition
    * suppressed, so a held-down arrow costs one composited layer rather than one
-   * per mounted page. `pagesRef` is capped at MOUNTED_PAGE_CAP now (backlog ③),
+   * per mounted page. `pagesRef` is capped at MOUNTED_PAGE_CAP now (performance.md ③),
    * but a fade touching every host would still make the whole held set a
    * per-frame cost, and the cap is a number the perf verdict may raise
    * (§3.4 rule 3).
@@ -2226,7 +2226,7 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
     };
   }, [cancelTween]);
 
-  // The DOM budget (spec §3.4, `docs/backlog.md` ③). `retainPages` decides it:
+  // The DOM budget (spec §3.4, `docs/performance.md` ③). `retainPages` decides it:
   // the page being read, then the requested hop targets in rail order, then —
   // in whatever slots are left — pages already mounted, newest first, so that
   // turning back or returning from a hop costs nothing. Everything past

@@ -315,7 +315,7 @@ test.describe("Hifth · a pinned juz", () => {
    * Leave `url` in the pack and nowhere else.
    *
    * Pinning no longer writes a second copy — `PIN_HEADER` marks the pin's
-   * fetches and both runtime routes stand aside (backlog ⑮). This helper stays
+   * fetches and both runtime routes stand aside (performance.md ⑮). This helper stays
    * because the *reader* still puts pages in `hifth-pages`: the app opens inside
    * juz 1, so some of the very juz being pinned is legitimately in the browsing
    * cache from having been looked at. That copy is what would let the offline
@@ -423,7 +423,7 @@ test.describe("Hifth · a pinned juz", () => {
   }
 
   /*
-   * The regression guard on backlog ⑮, asserting the *harm* rather than the
+   * The regression guard on performance.md ⑮, asserting the *harm* rather than the
    * symptom.
    *
    * The symptom was one file in two buckets, and the assertion above catches
@@ -472,7 +472,7 @@ test.describe("Hifth · a pinned juz", () => {
     await pinJuzHere(page);
 
     // In the pack, and nowhere else. This line used to read `[PACK_CACHE,
-    // "hifth-pages"]` and was the tripwire on backlog ⑮; it is now the positive
+    // "hifth-pages"]` and was the tripwire on performance.md ⑮; it is now the positive
     // claim the fix makes — the pin's fetches carry `PIN_HEADER`, both runtime
     // routes declined them, so exactly one copy was ever written. Asserted as an
     // exact set rather than waved at with `toContain`, because the whole point
