@@ -102,7 +102,7 @@ Someone memorising the Qur'an, holding a phone, usually mid-revision. Every gest
 | | |
 |---|---|
 | happens in | [`packages/core/src/gestures.ts:64`](../packages/core/src/gestures.ts#L64) — `LONG_PRESS_MS` |
-| happens in | [`apps/web/src/components/PageStage.tsx:648`](../apps/web/src/components/PageStage.tsx#L648) — `PageStage` |
+| happens in | [`apps/web/src/components/PageStage.tsx:649`](../apps/web/src/components/PageStage.tsx#L649) — `PageStage` |
 | proven by | [`apps/web/e2e/marquee.spec.ts:68`](../apps/web/e2e/marquee.spec.ts#L68) — “long-press then drag inks the ayahs the marquee crossed” |
 | proven by | [`apps/web/e2e/marquee.spec.ts:96`](../apps/web/e2e/marquee.spec.ts#L96) — “an immediate drag is a pan, and a pan paints nothing” |
 
@@ -114,9 +114,9 @@ Someone memorising the Qur'an, holding a phone, usually mid-revision. Every gest
 |---|---|
 | happens in | [`packages/core/src/words.ts:120`](../packages/core/src/words.ts#L120) — `class WordIndex` |
 | happens in | [`packages/core/src/gestures.ts:216`](../packages/core/src/gestures.ts#L216) — `heldIntent` |
-| happens in | [`apps/web/src/components/PageStage.tsx:2467`](../apps/web/src/components/PageStage.tsx#L2467) — `applyWords` |
+| happens in | [`apps/web/src/components/PageStage.tsx:2492`](../apps/web/src/components/PageStage.tsx#L2492) — `applyWords` |
 | happens in | [`packages/core/src/adjacency.ts:384`](../packages/core/src/adjacency.ts#L384) — `refineByWords` |
-| happens in | [`apps/web/src/App.tsx:1452`](../apps/web/src/App.tsx#L1452) — `const handleSelectWords` |
+| happens in | [`apps/web/src/App.tsx:1529`](../apps/web/src/App.tsx#L1529) — `const handleSelectWords` |
 | proven by | [`apps/web/e2e/word.spec.ts:109`](../apps/web/e2e/word.spec.ts#L109) — “a hold inside the selected ayah drops to words; a drag extends the run” |
 | proven by | [`apps/web/e2e/word.spec.ts:151`](../apps/web/e2e/word.spec.ts#L151) — “Escape climbs back to the whole ayah, not out of the selection” |
 | proven by | [`apps/web/e2e/word.spec.ts:177`](../apps/web/e2e/word.spec.ts#L177) — “Enter again descends to words; ← carries the run and Shift+← grows it” |
@@ -135,7 +135,7 @@ Someone memorising the Qur'an, holding a phone, usually mid-revision. Every gest
 |---|---|
 | happens in | [`packages/core/src/adjacency.ts:420`](../packages/core/src/adjacency.ts#L420) — `class Adjacency` |
 | happens in | [`packages/core/src/adjacency.ts:155`](../packages/core/src/adjacency.ts#L155) — `bucketEdges` |
-| happens in | [`apps/web/src/components/PageStage.tsx:2020`](../apps/web/src/components/PageStage.tsx#L2020) — `async navigateTo` |
+| happens in | [`apps/web/src/components/PageStage.tsx:2035`](../apps/web/src/components/PageStage.tsx#L2035) — `async navigateTo` |
 | proven by | [`apps/web/e2e/hop.spec.ts:8`](../apps/web/e2e/hop.spec.ts#L8) — “tap 2:48 → rail → popover → cross-page hop to 2:123 → bead back” |
 | proven by | [`apps/web/e2e/hop.spec.ts:64`](../apps/web/e2e/hop.spec.ts#L64) — “un-vendored hop targets are surfaced but disabled (no ghost pages)” |
 
@@ -146,7 +146,7 @@ Someone memorising the Qur'an, holding a phone, usually mid-revision. Every gest
 | | |
 |---|---|
 | happens in | [`packages/core/src/adjacency.ts:300`](../packages/core/src/adjacency.ts#L300) — `mergeRangeEdges` |
-| happens in | [`apps/web/src/components/HighlightMenu.tsx:59`](../apps/web/src/components/HighlightMenu.tsx#L59) — `HighlightMenu` |
+| happens in | [`apps/web/src/components/HighlightMenu.tsx:60`](../apps/web/src/components/HighlightMenu.tsx#L60) — `HighlightMenu` |
 | proven by | [`apps/web/e2e/range.spec.ts:25`](../apps/web/e2e/range.spec.ts#L25) — “a range surfaces the merged menu, and the URL keeps the range form” |
 | proven by | [`apps/web/e2e/range.spec.ts:82`](../apps/web/e2e/range.spec.ts#L82) — “a merged row hops from the range member that produced it” |
 
@@ -159,7 +159,7 @@ Someone memorising the Qur'an, holding a phone, usually mid-revision. Every gest
 | happens in | [`packages/core/src/verse-diff.ts:70`](../packages/core/src/verse-diff.ts#L70) — `wordDiff` |
 | happens in | [`packages/core/src/verse-diff.ts:94`](../packages/core/src/verse-diff.ts#L94) — `divergentRuns` |
 | happens in | [`apps/web/src/components/DiffView.tsx:196`](../apps/web/src/components/DiffView.tsx#L196) — `DiffView` |
-| proven by | [`apps/web/e2e/share-a11y.spec.ts:99`](../apps/web/e2e/share-a11y.spec.ts#L99) — “expanding a hop row draws both ayahs from the page, with the leftover washed” |
+| proven by | [`apps/web/e2e/share-a11y.spec.ts:100`](../apps/web/e2e/share-a11y.spec.ts#L100) — “expanding a hop row draws both ayahs from the page, with the leftover washed” |
 | proven by | [`apps/web/src/components/DiffView.test.tsx:81`](../apps/web/src/components/DiffView.test.tsx#L81) — “washes the divergent tail ochre on both sides — the same colour, not one each” |
 
 ### Show me every ayah built on the same Arabic root — the other way ayahs rhyme.
@@ -170,7 +170,7 @@ Someone memorising the Qur'an, holding a phone, usually mid-revision. Every gest
 |---|---|
 | happens in | [`packages/core/src/roots.ts:205`](../packages/core/src/roots.ts#L205) — `class Roots` |
 | happens in | [`packages/core/src/roots.ts:161`](../packages/core/src/roots.ts#L161) — `orderByPageDistance` |
-| happens in | [`apps/web/src/components/RootLens.tsx:122`](../apps/web/src/components/RootLens.tsx#L122) — `RootLens` |
+| happens in | [`apps/web/src/components/RootLens.tsx:66`](../apps/web/src/components/RootLens.tsx#L66) — `RootLens` |
 | proven by | [`packages/core/src/roots.test.ts:154`](../packages/core/src/roots.test.ts#L154) — “orders families nearest page first, then by rarity” |
 | proven by | [`packages/core/src/roots.test.ts:175`](../packages/core/src/roots.test.ts#L175) — “sub-groups the kept hops by lemma, most-used first” |
 
@@ -183,8 +183,8 @@ Someone memorising the Qur'an, holding a phone, usually mid-revision. Every gest
 | | |
 |---|---|
 | happens in | [`apps/web/src/components/TrailBeads.tsx:29`](../apps/web/src/components/TrailBeads.tsx#L29) — `TrailBeads` |
-| happens in | [`packages/core/src/router.ts:105`](../packages/core/src/router.ts#L105) — `serializeState` |
-| proven by | [`apps/web/e2e/share-a11y.spec.ts:71`](../apps/web/e2e/share-a11y.spec.ts#L71) — “a full trail link restores the whole chain of beads” |
+| happens in | [`packages/core/src/router.ts:162`](../packages/core/src/router.ts#L162) — `serializeState` |
+| proven by | [`apps/web/e2e/share-a11y.spec.ts:72`](../apps/web/e2e/share-a11y.spec.ts#L72) — “a full trail link restores the whole chain of beads” |
 
 ### Send this exact view to someone else, and have them see what I see.
 
@@ -192,9 +192,9 @@ Someone memorising the Qur'an, holding a phone, usually mid-revision. Every gest
 
 | | |
 |---|---|
-| happens in | [`packages/core/src/router.ts:105`](../packages/core/src/router.ts#L105) — `serializeState` |
+| happens in | [`packages/core/src/router.ts:162`](../packages/core/src/router.ts#L162) — `serializeState` |
 | happens in | [`apps/web/src/components/ShareSheet.tsx:27`](../apps/web/src/components/ShareSheet.tsx#L27) — `ShareSheet` |
-| proven by | [`apps/web/e2e/share-a11y.spec.ts:85`](../apps/web/e2e/share-a11y.spec.ts#L85) — “selecting an ayah writes a shareable hash to the address bar” |
+| proven by | [`apps/web/e2e/share-a11y.spec.ts:86`](../apps/web/e2e/share-a11y.spec.ts#L86) — “selecting an ayah writes a shareable hash to the address bar” |
 
 ### Open their link cold and land on the ayah, the page and the trail they had.
 
@@ -202,9 +202,9 @@ Someone memorising the Qur'an, holding a phone, usually mid-revision. Every gest
 
 | | |
 |---|---|
-| happens in | [`packages/core/src/router.ts:138`](../packages/core/src/router.ts#L138) — `parseHash` |
+| happens in | [`packages/core/src/router.ts:198`](../packages/core/src/router.ts#L198) — `parseHash` |
 | happens in | [`apps/web/src/useHashRouter.ts:19`](../apps/web/src/useHashRouter.ts#L19) — `useHashRouter` |
-| proven by | [`apps/web/e2e/share-a11y.spec.ts:16`](../apps/web/e2e/share-a11y.spec.ts#L16) — “cold-opening a hop link restores the exact view (select + page + breadcrumb)” |
+| proven by | [`apps/web/e2e/share-a11y.spec.ts:17`](../apps/web/e2e/share-a11y.spec.ts#L17) — “cold-opening a hop link restores the exact view (select + page + breadcrumb)” |
 | proven by | [`apps/web/e2e/deeplink.spec.ts:39`](../apps/web/e2e/deeplink.spec.ts#L39) — “a bare page link moves the stage, not just the header” |
 
 ### I know where I want to be — البقرة ٢٥٥ — take me there without turning pages.
@@ -224,7 +224,7 @@ Someone memorising the Qur'an, holding a phone, usually mid-revision. Every gest
 
 | | |
 |---|---|
-| happens in | [`packages/core/src/keymap.ts:121`](../packages/core/src/keymap.ts#L121) — `appKeyAction` |
+| happens in | [`packages/core/src/keymap.ts:126`](../packages/core/src/keymap.ts#L126) — `appKeyAction` |
 | happens in | [`packages/core/src/gestures.ts:346`](../packages/core/src/gestures.ts#L346) — `turnCommit` |
 | happens in | [`apps/web/src/assets.ts:115`](../apps/web/src/assets.ts#L115) — `loadPage` |
 | proven by | [`apps/web/e2e/wayfinding.spec.ts:119`](../apps/web/e2e/wayfinding.spec.ts#L119) — “arrows turn pages, and stop honestly at the ends of the book” |
@@ -254,7 +254,7 @@ Someone memorising the Qur'an, holding a phone, usually mid-revision. Every gest
 | happens in | [`apps/web/src/useMediaQuery.ts:43`](../apps/web/src/useMediaQuery.ts#L43) — `DESKTOP_QUERY` |
 | proven by | [`apps/web/e2e/desktop.spec.ts:177`](../apps/web/e2e/desktop.spec.ts#L177) — “puts the lower page number on the right” |
 | proven by | [`apps/web/e2e/desktop.spec.ts:107`](../apps/web/e2e/desktop.spec.ts#L107) — “appears above the breakpoint and does not exist below it” |
-| proven by | [`packages/core/src/pages.test.ts:136`](../packages/core/src/pages.test.ts#L136) — “puts the lower page number on the right” |
+| proven by | [`packages/core/src/pages.test.ts:167`](../packages/core/src/pages.test.ts#L167) — “puts the lower page number on the right” |
 | proven by | [`apps/web/e2e/desktop.spec.ts:369`](../apps/web/e2e/desktop.spec.ts#L369) — “still turns pages with the arrow keys the header advertises” |
 
 > **Not proven:** Only the desktop project ever renders a spread, and it runs one file. The rest of the suite — every aria snapshot, every golden image, the axe pass — is recorded on a phone, so a regression that only shows at desktop width has exactly these four assertions standing between it and a release. Zoom on a spread is now covered — see choose-one-page-or-two — but the frame budget is not: two mounted pages share a budget that was measured with one, which is desktop.md ④ and still blocked.
@@ -266,10 +266,10 @@ Someone memorising the Qur'an, holding a phone, usually mid-revision. Every gest
 | | |
 |---|---|
 | happens in | [`apps/web/src/components/DesktopChrome.tsx:58`](../apps/web/src/components/DesktopChrome.tsx#L58) — `DesktopChrome` |
-| happens in | [`apps/web/src/components/PageStage.tsx:607`](../apps/web/src/components/PageStage.tsx#L607) — `ZOOM_STEPS` |
-| proven by | [`apps/web/e2e/desktop.spec.ts:1104`](../apps/web/e2e/desktop.spec.ts#L1104) — “the toggle closes the book and opens it again” |
-| proven by | [`apps/web/e2e/desktop.spec.ts:1135`](../apps/web/e2e/desktop.spec.ts#L1135) — “the stepper magnifies one leaf alone, and both leaves of a spread together” |
-| proven by | [`apps/web/e2e/desktop.spec.ts:1279`](../apps/web/e2e/desktop.spec.ts#L1279) — “crossing the breakpoint leaves the two leaves agreeing” |
+| happens in | [`apps/web/src/components/PageStage.tsx:608`](../apps/web/src/components/PageStage.tsx#L608) — `ZOOM_STEPS` |
+| proven by | [`apps/web/e2e/desktop.spec.ts:1022`](../apps/web/e2e/desktop.spec.ts#L1022) — “the toggle closes the book and opens it again” |
+| proven by | [`apps/web/e2e/desktop.spec.ts:1053`](../apps/web/e2e/desktop.spec.ts#L1053) — “the stepper magnifies one leaf alone, and both leaves of a spread together” |
+| proven by | [`apps/web/e2e/desktop.spec.ts:1197`](../apps/web/e2e/desktop.spec.ts#L1197) — “crossing the breakpoint leaves the two leaves agreeing” |
 | proven by | [`apps/web/src/components/DesktopChrome.test.tsx:209`](../apps/web/src/components/DesktopChrome.test.tsx#L209) — “is a radiogroup, not a checkbox labelled 'two pages'” |
 | proven by | [`apps/web/src/components/DesktopChrome.test.tsx:243`](../apps/web/src/components/DesktopChrome.test.tsx#L243) — “gets a reader back onto the ladder from wherever a hop left them” |
 
@@ -283,9 +283,9 @@ Someone memorising the Qur'an, holding a phone, usually mid-revision. Every gest
 |---|---|
 | happens in | [`packages/core/src/packs.ts:170`](../packages/core/src/packs.ts#L170) — `juzPageIndex` |
 | happens in | [`packages/core/src/gestures.ts:455`](../packages/core/src/gestures.ts#L455) — `nextWheelTurn` |
-| proven by | [`apps/web/e2e/desktop.spec.ts:1014`](../apps/web/e2e/desktop.spec.ts#L1014) — “shift+wheel jumps a juz, and says which one” |
-| proven by | [`apps/web/e2e/desktop.spec.ts:987`](../apps/web/e2e/desktop.spec.ts#L987) — “ctrl+wheel does nothing at all — it is somebody else's pinch” |
-| proven by | [`apps/web/e2e/desktop.spec.ts:1042`](../apps/web/e2e/desktop.spec.ts#L1042) — “the juz axis and the page axis do not spend each other's travel” |
+| proven by | [`apps/web/e2e/desktop.spec.ts:932`](../apps/web/e2e/desktop.spec.ts#L932) — “shift+wheel jumps a juz, and says which one” |
+| proven by | [`apps/web/e2e/desktop.spec.ts:905`](../apps/web/e2e/desktop.spec.ts#L905) — “ctrl+wheel does nothing at all — it is somebody else's pinch” |
+| proven by | [`apps/web/e2e/desktop.spec.ts:960`](../apps/web/e2e/desktop.spec.ts#L960) — “the juz axis and the page axis do not spend each other's travel” |
 | proven by | [`packages/core/src/packs.test.ts:164`](../packages/core/src/packs.test.ts#L164) — “opens a juz on the leaf where it begins, not where the one before it ends” |
 
 > **Not proven:** A wheel is the only way in, so this affordance does not exist on a phone or for a keyboard user — the jumper (jump-to-a-place-i-can-name) is the equivalent path and reaches the same pages by name. The ctrl branch is a deliberate dead end rather than a binding: on macOS a trackpad pinch arrives as ctrl+wheel and the browser cannot tell it apart.
@@ -297,7 +297,7 @@ Someone memorising the Qur'an, holding a phone, usually mid-revision. Every gest
 | | |
 |---|---|
 | happens in | [`apps/web/src/components/PageSpread.tsx:152`](../apps/web/src/components/PageSpread.tsx#L152) — `PageSpread` |
-| happens in | [`apps/web/src/i18n.tsx:538`](../apps/web/src/i18n.tsx#L538) — `facingAbsent` |
+| happens in | [`apps/web/src/i18n.tsx:566`](../apps/web/src/i18n.tsx#L566) — `facingAbsent` |
 | proven by | [`apps/web/e2e/desktop.spec.ts:283`](../apps/web/e2e/desktop.spec.ts#L283) — “announces the missing facing page instead of showing blank paper” |
 | proven by | [`apps/web/src/components/PageSpread.test.tsx:82`](../apps/web/src/components/PageSpread.test.tsx#L82) — “draws the missing facing page as absent, not as blank paper” |
 | proven by | [`apps/web/src/components/PageSpread.test.tsx:133`](../apps/web/src/components/PageSpread.test.tsx#L133) — “leaves the far side blank and unlabelled at the end of an odd-length print” |
@@ -352,8 +352,8 @@ Someone memorising the Qur'an, holding a phone, usually mid-revision. Every gest
 
 | | |
 |---|---|
-| happens in | [`apps/web/src/pwa.ts:256`](../apps/web/src/pwa.ts#L256) — `initPwa` |
-| happens in | [`apps/web/src/pwa.ts:216`](../apps/web/src/pwa.ts#L216) — `repairShellCache` |
+| happens in | [`apps/web/src/pwa.ts:257`](../apps/web/src/pwa.ts#L257) — `initPwa` |
+| happens in | [`apps/web/src/pwa.ts:217`](../apps/web/src/pwa.ts#L217) — `repairShellCache` |
 | happens in | [`apps/web/src/storage.ts:115`](../apps/web/src/storage.ts#L115) — `requestPersistentStorage` |
 | proven by | [`apps/web/e2e/offline.spec.ts:79`](../apps/web/e2e/offline.spec.ts#L79) — “a visited page still opens with the network offline” |
 | proven by | [`apps/web/e2e/offline.spec.ts:113`](../apps/web/e2e/offline.spec.ts#L113) — “an offline hop lands on a page whose SVG was cached alongside it” |
@@ -368,8 +368,8 @@ Someone memorising the Qur'an, holding a phone, usually mid-revision. Every gest
 | | |
 |---|---|
 | happens in | [`packages/core/src/packs.ts:95`](../packages/core/src/packs.ts#L95) — `planPack` |
-| happens in | [`apps/web/src/packs.ts:181`](../apps/web/src/packs.ts#L181) — `pinPack` |
-| happens in | [`apps/web/src/packs.ts:338`](../apps/web/src/packs.ts#L338) — `checkPack` |
+| happens in | [`apps/web/src/packs.ts:183`](../apps/web/src/packs.ts#L183) — `pinPack` |
+| happens in | [`apps/web/src/packs.ts:344`](../apps/web/src/packs.ts#L344) — `checkPack` |
 | happens in | [`apps/web/src/components/PackShelf.tsx:79`](../apps/web/src/components/PackShelf.tsx#L79) — `PackShelf` |
 | proven by | [`apps/web/e2e/offline.spec.ts:458`](../apps/web/e2e/offline.spec.ts#L458) — “opens a page the reader has never visited, with the network gone” |
 | proven by | [`apps/web/e2e/offline.spec.ts:513`](../apps/web/e2e/offline.spec.ts#L513) — “a sweep is said out loud, and the juz can be put back” |
@@ -411,9 +411,9 @@ Someone memorising the Qur'an, holding a phone, usually mid-revision. Every gest
 | happens in | [`packages/core/src/highlighter.ts:232`](../packages/core/src/highlighter.ts#L232) — `enhancePolygons` |
 | happens in | [`apps/web/src/components/LiveAnnouncer.tsx:28`](../apps/web/src/components/LiveAnnouncer.tsx#L28) — `LiveAnnouncer` |
 | happens in | [`apps/web/src/format.ts:115`](../apps/web/src/format.ts#L115) — `export function digits` |
-| proven by | [`apps/web/e2e/share-a11y.spec.ts:133`](../apps/web/e2e/share-a11y.spec.ts#L133) — “keyboard-only: focus an ayah, select with Enter, open rail, hop, land” |
-| proven by | [`apps/web/e2e/share-a11y.spec.ts:257`](../apps/web/e2e/share-a11y.spec.ts#L257) — “the mushaf page is a labelled group of ayah buttons” |
-| proven by | [`apps/web/e2e/share-a11y.spec.ts:245`](../apps/web/e2e/share-a11y.spec.ts#L245) — “the chrome announces every control by word, never by glyph” |
+| proven by | [`apps/web/e2e/share-a11y.spec.ts:127`](../apps/web/e2e/share-a11y.spec.ts#L127) — “keyboard-only: focus an ayah, select with Enter, open rail, hop, land” |
+| proven by | [`apps/web/e2e/share-a11y.spec.ts:244`](../apps/web/e2e/share-a11y.spec.ts#L244) — “the mushaf page is a labelled group of ayah buttons” |
+| proven by | [`apps/web/e2e/share-a11y.spec.ts:232`](../apps/web/e2e/share-a11y.spec.ts#L232) — “the chrome announces every control by word, never by glyph” |
 | proven by | `pnpm gate:notext` |
 
 > **Not proven:** axe and aria snapshots check the tree, not the experience. Whether VoiceOver's rotor actually gets a hafiz through a hop is ledger check screen-reader-walkthrough.
@@ -424,13 +424,13 @@ Someone memorising the Qur'an, holding a phone, usually mid-revision. Every gest
 
 | | |
 |---|---|
-| happens in | [`apps/web/src/lang.ts:121`](../apps/web/src/lang.ts#L121) — `detectLang` |
-| happens in | [`apps/web/src/i18n.tsx:1212`](../apps/web/src/i18n.tsx#L1212) — `LangProvider` |
+| happens in | [`apps/web/src/lang.ts:125`](../apps/web/src/lang.ts#L125) — `detectLang` |
+| happens in | [`apps/web/src/i18n.tsx:1273`](../apps/web/src/i18n.tsx#L1273) — `LangProvider` |
 | happens in | [`apps/web/src/components/Colophon.tsx:244`](../apps/web/src/components/Colophon.tsx#L244) — `langRow` |
 | proven by | [`apps/web/e2e/lang.spec.ts:28`](../apps/web/e2e/lang.spec.ts#L28) — “an English phone opens an English chrome” |
 | proven by | [`apps/web/e2e/lang.spec.ts:102`](../apps/web/e2e/lang.spec.ts#L102) — “the switch is in the colophon, and the choice survives a reload” |
 | proven by | [`apps/web/e2e/lang.spec.ts:57`](../apps/web/e2e/lang.spec.ts#L57) — “the mus'haf, the rail, the trail and the page bar stay right-to-left” |
-| proven by | [`apps/web/src/i18n.test.tsx:71`](../apps/web/src/i18n.test.tsx#L71) — “leaves no Arabic in the English chrome” |
+| proven by | [`apps/web/src/i18n.test.tsx:75`](../apps/web/src/i18n.test.tsx#L75) — “leaves no Arabic in the English chrome” |
 
 > **Not proven:** Two languages, and the second one is the author's second language. Nothing here judges whether the English reads well to a hafiz who uses it — only that it is English, complete, and has not leaked into the places that must stay Arabic.
 
@@ -440,11 +440,11 @@ Someone memorising the Qur'an, holding a phone, usually mid-revision. Every gest
 
 | | |
 |---|---|
-| happens in | [`apps/web/src/messages/ar.json:151`](../apps/web/src/messages/ar.json#L151) — `distancePages` |
+| happens in | [`apps/web/src/messages/ar.json:169`](../apps/web/src/messages/ar.json#L169) — `distancePages` |
 | happens in | [`apps/web/src/messages/plural.ts:39`](../apps/web/src/messages/plural.ts#L39) — `export function plural` |
-| happens in | [`apps/web/src/i18n.tsx:711`](../apps/web/src/i18n.tsx#L711) — `buildStrings` |
-| proven by | [`apps/web/src/i18n.test.tsx:121`](../apps/web/src/i18n.test.tsx#L121) — “agrees with the plural rules of the language, not with a ternary” |
-| proven by | [`apps/web/src/i18n.test.tsx:99`](../apps/web/src/i18n.test.tsx#L99) — “writes counts inside aria-labels in the language's own digits” |
+| happens in | [`apps/web/src/i18n.tsx:739`](../apps/web/src/i18n.tsx#L739) — `buildStrings` |
+| proven by | [`apps/web/src/i18n.test.tsx:125`](../apps/web/src/i18n.test.tsx#L125) — “agrees with the plural rules of the language, not with a ternary” |
+| proven by | [`apps/web/src/i18n.test.tsx:103`](../apps/web/src/i18n.test.tsx#L103) — “writes counts inside aria-labels in the language's own digits” |
 
 > **Not proven:** Only `distance` is stated as a plural. Seven other Arabic messages still write one fixed form for every count — «٣ روابط» is right, «١١ روابط» is not. They are one JSON edit each now, and each wants a hafiz's eye. docs/design/i18n.md §⑨.
 
@@ -471,7 +471,7 @@ The person doing what a machine cannot — a phone in one hand, a printed mushaf
 | | |
 |---|---|
 | happens in | [`docs/validation/ledger.json:25`](../docs/validation/ledger.json#L25) — `runbook` |
-| happens in | [`scripts/build-validation-guide.mjs:137`](../scripts/build-validation-guide.mjs#L137) — `GUIDE_PATH` |
+| happens in | [`scripts/build-validation-guide.mjs:75`](../scripts/build-validation-guide.mjs#L75) — `GUIDE_PATH` |
 | proven by | `pnpm gate:validation` |
 
 > **Not proven:** The gate proves every outstanding check has a followable runbook and that the phone guide was regenerated. It cannot prove the runbook's Expect lines match what the phone shows — only walking it does, which is the point of walking it.
@@ -496,12 +496,12 @@ Whoever is changing the app next, including this project's own future self. Arri
 
 | | |
 |---|---|
-| happens in | [`scripts/messages-compile.mjs:378`](../scripts/messages-compile.mjs#L378) — `export function compileAll` |
+| happens in | [`scripts/messages-compile.mjs:382`](../scripts/messages-compile.mjs#L382) — `export function compileAll` |
 | happens in | [`apps/web/src/lang.ts:80`](../apps/web/src/lang.ts#L80) — `LOCALES` |
-| happens in | [`apps/web/src/i18n.tsx:711`](../apps/web/src/i18n.tsx#L711) — `buildStrings` |
-| proven by | [`apps/web/src/i18n.test.tsx:53`](../apps/web/src/i18n.test.tsx#L53) — “builds a bundle for every locale that has a catalog” |
-| proven by | [`apps/web/src/i18n.test.tsx:62`](../apps/web/src/i18n.test.tsx#L62) — “carries the same keys in every language” |
-| proven by | [`apps/web/src/i18n.test.tsx:88`](../apps/web/src/i18n.test.tsx#L88) — “gives each language the digits it declared” |
+| happens in | [`apps/web/src/i18n.tsx:739`](../apps/web/src/i18n.tsx#L739) — `buildStrings` |
+| proven by | [`apps/web/src/i18n.test.tsx:57`](../apps/web/src/i18n.test.tsx#L57) — “builds a bundle for every locale that has a catalog” |
+| proven by | [`apps/web/src/i18n.test.tsx:66`](../apps/web/src/i18n.test.tsx#L66) — “carries the same keys in every language” |
+| proven by | [`apps/web/src/i18n.test.tsx:92`](../apps/web/src/i18n.test.tsx#L92) — “gives each language the digits it declared” |
 
 > **Not proven:** Proven at two locales. The checklist in docs/design/i18n.md §⑦ is written for someone who has not read the conversation, but nobody has walked it end to end for a third language yet.
 
@@ -574,7 +574,7 @@ The automated judge. An actor rather than scenery: several promises here are kep
 |---|---|
 | happens in | [`scripts/gate-i18n.mjs:138`](../scripts/gate-i18n.mjs#L138) — `gate:i18n` |
 | happens in | [`scripts/messages-compile.mjs:282`](../scripts/messages-compile.mjs#L282) — `export function emitCatalogType` |
-| proven by | [`apps/web/src/i18n.test.tsx:62`](../apps/web/src/i18n.test.tsx#L62) — “carries the same keys in every language” |
+| proven by | [`apps/web/src/i18n.test.tsx:66`](../apps/web/src/i18n.test.tsx#L66) — “carries the same keys in every language” |
 | proven by | `pnpm gate:i18n` |
 
 > **Not proven:** The gate checks that every category is handled, not that the words inside each category are right. «صفحتان» in the `few` slot would pass. Only a reader of the language catches that.
@@ -585,7 +585,7 @@ The automated judge. An actor rather than scenery: several promises here are kep
 
 | | |
 |---|---|
-| happens in | [`apps/web/playwright.config.ts:90`](../apps/web/playwright.config.ts#L90) — `snapshotPathTemplate` |
+| happens in | [`apps/web/playwright.config.ts:98`](../apps/web/playwright.config.ts#L98) — `snapshotPathTemplate` |
 | happens in | [`scripts/gate-golden-size.mjs:47`](../scripts/gate-golden-size.mjs#L47) — `BUDGET` |
 | proven by | `pnpm gate:golden-size` |
 
@@ -619,10 +619,10 @@ The automated judge. An actor rather than scenery: several promises here are kep
 
 | | |
 |---|---|
-| happens in | [`scripts/gate-params.mjs:54`](../scripts/gate-params.mjs#L54) — `parseBranches` |
+| happens in | [`scripts/gate-params.mjs:58`](../scripts/gate-params.mjs#L58) — `parseBranches` |
 | happens in | [`packages/core/src/field.ts:86`](../packages/core/src/field.ts#L86) — `FIELDS` |
 | proven by | `pnpm gate:params` |
-| proven by | [`packages/core/src/router.test.ts:108`](../packages/core/src/router.test.ts#L108) — “does NOT reject an unreadable field= — the link still names the ayah” |
+| proven by | [`packages/core/src/router.test.ts:110`](../packages/core/src/router.test.ts#L110) — “does NOT reject an unreadable field= — the link still names the ayah” |
 
 > **Not proven:** It checks that the three renderings of the grammar agree — parsed, emitted, documented, and the documented failure mode matching what the parse branch actually does. It cannot check that the prose in the 'what it does' column is true, only that a row exists.
 
@@ -632,8 +632,8 @@ The automated judge. An actor rather than scenery: several promises here are kep
 
 | | |
 |---|---|
-| happens in | [`scripts/gate-budget.mjs:52`](../scripts/gate-budget.mjs#L52) — `BUDGET_GZ` |
-| happens in | [`Makefile:302`](../Makefile#L302) — `pre-push:` |
+| happens in | [`scripts/gate-budget.mjs:53`](../scripts/gate-budget.mjs#L53) — `BUDGET_GZ` |
+| happens in | [`Makefile:319`](../Makefile#L319) — `pre-push:` |
 | proven by | `pnpm gate:budget` |
 
 ## What is promised more than it is proven
