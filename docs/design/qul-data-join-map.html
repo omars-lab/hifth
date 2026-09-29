@@ -201,7 +201,7 @@
       <tr><td>quran-metadata-juz.json</td><td>Juz ranges</td><td class="num">30</td><td>verse-key range</td><td>no</td><td>Quran metadata</td><td class="tag-warn">none shown</td></tr>
       <tr><td>quran-metadata-ruku.json</td><td>Ruku ranges</td><td class="num">~558</td><td>verse-key range</td><td>no</td><td>Quran metadata</td><td class="tag-warn">none shown</td></tr>
       <tr><td>surah-name-v4.ttf</td><td>Surah-name font</td><td class="num">116 glyphs</td><td>draws layout surah lines</td><td>asset</td><td>Font id 457</td><td class="tag-warn">none shown</td></tr>
-      <tr><td>KFGQPCNastaleeq-Regular.ttf</td><td>Nastaleeq text font</td><td class="num">—</td><td>draws word glyphs</td><td>asset</td><td>Font id 462</td><td class="tag-warn">none shown</td></tr>
+      <tr><td>qpc-v4-tajweed/p1.ttf … p604.ttf</td><td>Page-by-page word font (one file per page; a general text face draws the wrong shape for every word)</td><td class="num">604 files</td><td>page number → file; word character → glyph</td><td>asset</td><td>Font id 240</td><td class="tag-warn">none shown</td></tr>
     </tbody>
   </table>
   </div>
@@ -221,7 +221,7 @@
   <table>
     <thead><tr><th>Goal</th><th>Verdict</th><th>Evidence</th></tr></thead>
     <tbody>
-      <tr><td>Draw our own word-by-word page to check the printed one</td><td class="tag-ok">YES</td><td>The page plan's ranges match the text's word ids exactly, 1..83,668; 604 pages; both fonts present. Licence is now cleared and both pieces are loaded and verified in the store, so nothing is missing.</td></tr>
+      <tr><td>Draw our own word-by-word page to check the printed one</td><td class="tag-ok">YES</td><td>The page plan's ranges match the text's word ids exactly, 1..83,668; 604 pages; the page-by-page word font fetched (604 files, 8 September 2026) and the development diff view already draws pages 1 and 300 in it, line for line with the print. Licence is cleared and both held pieces are loaded and verified in the store, so nothing is missing.</td></tr>
       <tr><td>Per-word linguistics (root / lemma / stem)</td><td class="tag-part">PARTIAL</td><td>Cleanly joinable, 0 broken links, but coverage is 60% / 87% / 93% by nature — not every word has a root.</td></tr>
       <tr><td>Verse themes and topics</td><td class="tag-ok">YES*</td><td>2,098 theme ranges + 2,512 topics cover the book; needs light parsing (themes are ranges, topic verses are lists).</td></tr>
       <tr><td>An independent second opinion on verse similarity</td><td class="tag-ok">YES</td><td>The scored-pair set (3,552 pairs) comes from a different method than the app's phrase-based set — a real cross-check.</td></tr>

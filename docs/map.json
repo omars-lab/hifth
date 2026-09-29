@@ -1327,10 +1327,18 @@
         "A source whose output ships is `default: true` and its output must stay byte-identical under gate:notext / gate:scripture / make ci. A source that holds outside bytes ships nothing and keeps its own gates inside the script it forwards to — the runner does not second-guess them.",
         "Do not restate the decision here. qul-etl-plugins (docs/decisions/qul-etl-plugins.md) owns why the two sources are complementary; qul-store-purpose owns what the held copy is for; qul-reliance owns why a copy may be held at all. This feature owns the SHAPE — one registry, one runner, one descriptor per source."
       ],
-      "gates": ["pnpm gate:map", "pnpm gate:notext", "pnpm gate:scripture", "make ci"],
-      "seeAlso": ["etl-pipeline", "edge-data-etl", "provenance"]
+      "gates": [
+        "pnpm gate:map",
+        "pnpm gate:notext",
+        "pnpm gate:scripture",
+        "make ci"
+      ],
+      "seeAlso": [
+        "etl-pipeline",
+        "edge-data-etl",
+        "provenance"
+      ]
     },
-
     {
       "id": "edge-data-etl",
       "what": "Turning the mutashabihat dataset into the per-surah shards the app hops through.",
@@ -1661,6 +1669,69 @@
       ]
     },
     {
+      "id": "qul-page-diff",
+      "what": "The development-only comparison of the held library's page against the page the app ships: a side-by-side workbench page that is not a build input, and an in-app overlay that lays the store's words over the print at the print's own geometry, behind a build-time flag. Both mount one drawing. Nothing here reaches the public build; the words and the per-page font it draws with come from gitignored files over a dev-server-only route.",
+      "layer": "L2 web",
+      "entry": [
+        {
+          "file": "apps/web/src/qul-diff/storePage.ts",
+          "symbol": "lineGeometry",
+          "note": "Where the store's lines land on the print. The app's own word boxes for the page are clustered into rows (boxes not a word tall — gutter signs, stretched boxes — set aside first, since they bridge rows); the rows are paired top-to-bottom with the store's ayah lines and each paired line takes its row's centre and its row's own width; surah-name and basmala lines take the y a straight-line fit predicts. `rows !== ayahLines` in the result means the pairing is a guess and the drawing says so."
+        },
+        {
+          "file": "apps/web/src/qul-diff/storePage.ts",
+          "symbol": "calibrateFontSize",
+          "note": "The letters' size is measured, not tuned: with the face loaded and the drawing in the document, each justified line proposes the size at which its natural width is the measure it was given, and the median wins. The per-page font is cut so every full line fills one measure at one size, which is what makes a single number right for the page."
+        },
+        {
+          "file": "apps/web/src/qul-diff/overlay.ts",
+          "symbol": "mountQulOverlay",
+          "note": "The in-app toggle. Watches the page stage for hosts stamped data-page, dresses each once with two drawings (blue over the print; the store's own ink alone), and a pill flips print / store / both by a data attribute on the document — a mode change is CSS, never a rebuild. Reached only from main.tsx behind import.meta.env.VITE_QUL_OVERLAY, so every normal build drops the module whole."
+        },
+        {
+          "file": "apps/web/vite.config.ts",
+          "symbol": "qulFixturesDev",
+          "note": "The dev-server-only route that serves a page's fixture and the per-page font file from gitignored places. `apply: \"serve\"` — it does not exist in a build, so there is no path a build could carry."
+        },
+        {
+          "file": "scripts/gate-bundle-notext.mjs",
+          "symbol": "HELD_LETTERS",
+          "note": "The held-copy tenet, enforced on the *built* bundle rather than the tree. The app ships an Arabic interface, so this does not fail on Arabic; it fails on the two things that can only be the store — a presentation-form or private-use code point (how the per-page font encodes each printed word) and the overlay loader's own words (the dev-fixture route, the module, the dev font, the build-time flag). Verified by planting a fake glyph and route and watching it fail."
+        },
+        {
+          "file": "apps/web/scripts/qul-tap-sweep.mjs",
+          "symbol": "onePage",
+          "note": "The whole-book tappable-area sweep (follow-up ⑳). Reuses the workbench module inside a headless browser to measure every store word box at the print's geometry, lays the app's tap shapes over it, and classifies each word box centre as own-shape / neighbour / outside. Output is text-free (page numbers, s:a addresses, counts) and committed as evidence in docs/issues/qul-tap-sweep.json; the finding is docs/issues/qul-tap-sweep.md."
+        },
+        {
+          "file": "apps/web/scripts/qul-print-tap-sweep.mjs",
+          "symbol": "onePage",
+          "note": "The tighter companion to the store sweep: lays the app's OWN print word boxes (assets/words) over the app's own tap shapes and classifies each box centre the same way. Removes the store entirely — no held copy, no font, no fixtures — so both its generator and its output (docs/issues/qul-print-tap-sweep.json) reproduce on a clean clone. Confirms the store residue is a boundary artifact: with one justification removed the residue drops ~8x (99.56% own-ayah), stays at ayah boundaries, and is directional (345 of 379 into the preceding ayah, never the wrong line)."
+        }
+      ],
+      "extend": [
+        "Pull a page first: dotenvx run -- node packages/etl/scripts/qul-page-fixture.mjs --page N writes the gitignored fixture; then make dev-qul for the app with the overlay, or open qul-diff.html?page=N on the plain dev server for the workbench (view=side or view=overlay).",
+        "The drawing is plain DOM on purpose — the page stage builds its print hosts by hand, outside React, and the overlay has to sit inside one. StorePageSvg.tsx is the one-effect React wrapper the workbench uses; add nothing to it that the overlay would then lack.",
+        "A page that reports 'placed by fit' is a finding, not a bug to paper over: either the print's boxes really do have a different number of rows from the store's ayah lines (look at the page) or a class of box the clustering does not yet set aside has bridged two rows (look at the box heights, as page 300's gutter signs were found).",
+        "Keep every word out of the tracked tree. The fixture and the font are gitignored and gate:scripture reads the tree; the bundle gate (follow-up ⑲) reads dist/. Do not add an import of the fixture, a copy of a word, or the font family's code points anywhere a build can see.",
+        "For a whole-book sweep, pull every page at once: dotenvx run -- node packages/etl/scripts/qul-page-fixtures-all.mjs writes all 604 gitignored fixtures over one database connection (it carries no Qur'an text itself). Then apps/web/scripts/qul-tap-sweep.mjs runs the tappable-area check across them against the running dev server.",
+        "qul-print-tap-sweep.mjs is the store-free companion: it needs no fixtures and no font (only the app's own committed word boxes and tap shapes), so it runs against a bare dev server and both its generator and its JSON reproduce on a clean clone. Use it, not the store sweep, whenever the question is about the app's own tap registration rather than the store."
+      ],
+      "gates": [
+        "pnpm gate:scripture",
+        "pnpm gate:notext",
+        "pnpm gate:bundle-notext",
+        "make ci"
+      ],
+      "seeAlso": [
+        "qul-store",
+        "etl-plugins",
+        "desktop-spread",
+        "word-geometry",
+        "docs/issues/qul-tap-sweep.md — the tappable-area sweep finding (follow-up ⑳): 96.3% of store words tap their own ayah; the residue is ayah boundaries, not misplacement."
+      ]
+    },
+    {
       "id": "qul-store",
       "what": "Holding a copy of QUL's page layout — and, once its licence is read, its word text — in a database we run, off the repository and off the shipped bundle.",
       "layer": "L3 etl",
@@ -1688,10 +1759,17 @@
         "Connection keys (SUPABASE_DB_URL and any service key) are the owner's to supply at run time. No key is committed, and this script enters none — the same reason the leverage-qul login is the owner's to perform.",
         "The picture that argues option D — the page drawn on real artwork — lives in the qul-page-source design doc on the graduate-page-bar-winners lineage; it reconciles into this store's story at merge. A decided decision needs no artifact of its own, which is why none is minted on this branch."
       ],
-      "gates": ["pnpm gate:notext", "pnpm gate:scripture", "make ci"],
-      "seeAlso": ["validation", "decisions", "provenance"]
+      "gates": [
+        "pnpm gate:notext",
+        "pnpm gate:scripture",
+        "make ci"
+      ],
+      "seeAlso": [
+        "validation",
+        "decisions",
+        "provenance"
+      ]
     },
-
     {
       "id": "decisions",
       "what": "Every question this project has had to answer, in words a person outside the repo can act on.",
