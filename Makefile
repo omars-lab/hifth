@@ -51,6 +51,14 @@ pitch: ## Serve the PRIVATE pitch build (Study Quran commentary across the whole
 	@#   node packages/etl/tools/pitch/extract.mjs
 	VITE_PITCH=1 $(WEB) dev
 
+.PHONY: dev-qul
+dev-qul: ## Dev server with the store-over-print overlay mounted (print / store / both pill)
+	@# VITE_QUL_OVERLAY is read at build time only (src/main.tsx); it is never set
+	@# for `make build`, so the overlay and the store's words stay out of dist/.
+	@# The words and the per-page font come from gitignored files served by a
+	@# dev-only route — pull a page first: dotenvx run -- node packages/etl/scripts/qul-page-fixture.mjs --page N
+	VITE_QUL_OVERLAY=1 $(WEB) dev
+
 .PHONY: build
 build: node-ok ## Production build (core first — package exports resolve to its dist/)
 	$(CORE) build
@@ -315,6 +323,7 @@ pre-push: secrets-history checks-fast ## Everything checked before each push —
 	$(PNPM) gate:pages
 	$(WEB) build
 	$(PNPM) gate:budget
+	$(PNPM) gate:bundle-notext
 	@# All four browser projects, iPhone included: it runs on WebKit, which
 	@# needs a one-time `pnpm -C apps/web exec playwright install webkit`, and
 	@# it is the project that caught a jump bug the Android one missed.
@@ -326,8 +335,10 @@ site: build ## Build the public site and check it the way the deploy does (the d
 	@# proves the published site never held the private pitch folder (it is
 	@# gitignored, so a clone does not have it). The size gate also refuses any
 	@# public bundle that carries pitch code, and the two text gates refuse held
-	@# text, so the three run here as well as in the hooks.
+	@# text, so the three run here as well as in the hooks. The fourth refuses
+	@# a bundle carrying the outside library's letters or the developer overlay.
 	$(PNPM) gate:budget
+	$(PNPM) gate:bundle-notext
 	$(PNPM) gate:notext
 	$(PNPM) gate:scripture
 	@test -s apps/web/dist/index.html \

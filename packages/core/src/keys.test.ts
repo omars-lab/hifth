@@ -3,8 +3,10 @@ import {
   ayahKeyOf,
   decodeAyahNumber,
   formatAyahKey,
+  formatTafsirKey,
   formatWordKey,
   parseAyahKey,
+  parseTafsirKey,
   parseWordKey,
 } from "./keys.js";
 
@@ -84,5 +86,33 @@ describe("word keys", () => {
     expect(ayahKeyOf("quran/hafs-kfqc/2:48")).toBe("quran/hafs-kfqc/2:48");
     expect(ayahKeyOf("root/ktb")).toBeNull();
     expect(ayahKeyOf("")).toBeNull();
+  });
+});
+
+describe("tafsir keys", () => {
+  it("formats the reserved namespace", () => {
+    expect(formatTafsirKey("study-quran", 2, 30)).toBe("tafsir/study-quran/2:30");
+  });
+
+  it("round-trips format → parse", () => {
+    expect(parseTafsirKey(formatTafsirKey("study-quran", 114, 6))).toEqual({
+      kind: "tafsir",
+      name: "study-quran",
+      surah: 114,
+      ayah: 6,
+    });
+  });
+
+  it("keeps its parser out of the quran namespace and vice versa", () => {
+    expect(parseTafsirKey("quran/hafs-kfqc/2:48")).toBeNull();
+    expect(parseTafsirKey("garbage")).toBeNull();
+    expect(parseAyahKey("tafsir/study-quran/2:30")).toBeNull();
+  });
+
+  it("rejects a name with a slash and out-of-range surah/ayah", () => {
+    expect(() => formatTafsirKey("a/b", 2, 30)).toThrow(RangeError);
+    expect(() => formatTafsirKey("study-quran", 0, 1)).toThrow(RangeError);
+    expect(() => formatTafsirKey("study-quran", 115, 1)).toThrow(RangeError);
+    expect(() => formatTafsirKey("study-quran", 2, 0)).toThrow(RangeError);
   });
 });
