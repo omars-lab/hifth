@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { Suspense, useCallback, useEffect, useRef, useState } from "react";
 import {
   orderForHifz,
   qulVerseUrlFromKey,
@@ -7,7 +7,8 @@ import {
   type RailChip,
 } from "@hifth/core";
 import { useT } from "../i18n";
-import { DiffView } from "./DiffView";
+// Loaded the first time a look-alike is opened out (see ./later.tsx).
+import { DiffView } from "./later";
 import styles from "./HopPopover.module.css";
 
 interface HopPopoverProps {
@@ -199,7 +200,9 @@ export function HopPopover({
                 </div>
                 {isOpen && fromKey && (
                   <div id={diffId}>
-                    <DiffView edge={edge} fromKey={fromKey} />
+                    <Suspense fallback={null}>
+                      <DiffView edge={edge} fromKey={fromKey} />
+                    </Suspense>
                   </div>
                 )}
               </li>
