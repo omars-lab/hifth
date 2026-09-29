@@ -2,7 +2,7 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { App } from "./App";
 import { applyFieldToDocument, fieldFromHash } from "./field";
-import { LangProvider } from "./i18n";
+import { LangProvider, loadStrings } from "./i18n";
 import { applyLangToDocument, detectLang } from "./lang";
 import { initPwa } from "./pwa";
 import "./styles/global.css";
@@ -24,22 +24,36 @@ if (!root) throw new Error("missing #root");
  * effect would flip the whole document one frame after it is on screen. So it
  * happens here, synchronously, and the provider below only has to keep it true.
  */
-applyLangToDocument(detectLang());
+const lang = detectLang();
+applyLangToDocument(lang);
 
 // The desk, for the same reason and one frame earlier than React could manage:
 // a link that opens on a dark field must not flash a light one first. `App`
 // takes ownership from here and keeps it true across hash changes.
 applyFieldToDocument(fieldFromHash(window.location.hash));
 
-createRoot(root).render(
-  <StrictMode>
-    <LangProvider>
-      <App />
-    </LangProvider>
-  </StrictMode>,
-);
-
-initPwa();
+/*
+ * The interface text, before the first render. Each language is its own file
+ * so a reader downloads only theirs; index.html has already asked for it (see
+ * `preloadReaderLanguage` in vite.config.ts), so this wait is normally the tail
+ * of a download already under way, not a new round trip. Rendering first and
+ * swapping the words in later would flash the wrong language.
+ *
+ * A promise, not a top-level `await`: each language file uses a helper that
+ * ships inside this script, so it imports this script back. Were this script
+ * still paused on its own top-level wait, the two would wait on each other and
+ * the page would never paint.
+ */
+void loadStrings(lang).then(() => {
+  createRoot(root).render(
+    <StrictMode>
+      <LangProvider>
+        <App />
+      </LangProvider>
+    </StrictMode>,
+  );
+  initPwa();
+});
 
 /*
  * The on-device perf probe (`make phone-perf`), and nothing else, mounts here.

@@ -351,7 +351,7 @@ export function emitLocaleIds(ids) {
  * The id → catalog map, generated so that nothing hand-written imports a locale
  * by name.
  *
- * Without this, `i18n.tsx` would carry `import ar from "./messages/ar.gen"` once
+ * Without this, `i18n.tsx` would carry `import("./messages/ar.gen")` once
  * per language, and adding Urdu would mean remembering to add a line to a file
  * that has nothing to do with Urdu. Forgetting it would not be a compile error —
  * `Record<Lang, …>` would catch a missing *row*, but only if somebody wrote the
@@ -360,16 +360,20 @@ export function emitLocaleIds(ids) {
  */
 export function emitRegistry(ids) {
   return (
-    BANNER("Every locale's compiled catalog, keyed by id.") +
+    BANNER("Every locale's compiled catalog, keyed by id, each loaded on demand.") +
     "\n" +
     'import type { Catalog } from "./catalog.gen";\n' +
     'import type { LocaleId } from "./locales.gen";\n' +
-    ids.map((i) => `import ${i} from "./${i}.gen";`).join("\n") +
-    "\n\n" +
-    "/** Static imports, not dynamic: the chrome is a few KB and must be on screen\n" +
-    " *  at first paint, offline, with no request to wait on. */\n" +
-    "export const CATALOGS: Readonly<Record<LocaleId, Catalog>> = {\n" +
-    ids.map((i) => `  ${i},`).join("\n") +
+    "\n" +
+    "/** Dynamic imports, not static: each language is its own file, so a reader\n" +
+    " *  downloads only the one they read in (the two together were ~10 KB gz of\n" +
+    " *  start-up code). The one they open in is fetched before the first paint:\n" +
+    " *  index.html asks for it up front and main.tsx waits for it. The service\n" +
+    " *  worker precaches every one, so switching works offline. */\n" +
+    "export const CATALOG_LOADERS: Readonly<\n" +
+    "  Record<LocaleId, () => Promise<{ default: Catalog }>>\n" +
+    "> = {\n" +
+    ids.map((i) => `  ${i}: () => import("./${i}.gen"),`).join("\n") +
     "\n};\n"
   );
 }
