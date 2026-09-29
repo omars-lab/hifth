@@ -25,15 +25,17 @@
 /* The corner a reader folds: the leaf's free top corner — the right one on a
    right-hand page, the left one on a left-hand page — never the corner bound
    into the spine. The stage tells us where the leaf is (--leaf-x/-y/-w, and its
-   zoom as --leaf-z) and trims the paper off along the diagonal (--dog-ear, in
-   paper units, see PageStage.module.css); this lays the folded-over flap on the
-   paper next to the trim, so the two together read as one turned-down corner.
-   Physical left/right on purpose: the leaf's sides are physical, the page's
-   reading direction has nothing to do with which corner is free. */
+   zoom as --leaf-z) and how deep the fold is (--dog-ear, in paper units, see
+   PageStage.module.css). The corner is the top page's own, inside the strip of
+   page edges drawn beside it: only the top leaf folds, so the edges of the
+   pages beneath run whole up past it (#201). Physical left/right on purpose:
+   the leaf's sides are physical, the page's reading direction has nothing to
+   do with which corner is free. */
 .fold {
+  --fold-inset: calc((var(--fore-edge-stack) + var(--leaf-edge-width)) * var(--leaf-z, 1));
   position: absolute;
   inset-block-start: var(--leaf-y, 0px);
-  left: var(--leaf-x, 0px);
+  left: calc(var(--leaf-x, 0px) + var(--fold-inset));
   inline-size: var(--touch-min);
   block-size: var(--touch-min);
   padding: 0;
@@ -44,7 +46,30 @@
 }
 
 :global([data-free-side="right"]) .fold {
-  left: calc(var(--leaf-x, 0px) + var(--leaf-w, 100%) - var(--touch-min));
+  left: calc(var(--leaf-x, 0px) + var(--leaf-w, 100%) - var(--touch-min) - var(--fold-inset));
+}
+
+/* The page beneath, where the corner was: the same paper with its own top
+   edge, and none of the top page's ink. */
+.foldUnder {
+  position: absolute;
+  top: 0;
+  left: 0;
+  inline-size: calc(var(--dog-ear, 16px) * var(--leaf-z, 1));
+  block-size: calc(var(--dog-ear, 16px) * var(--leaf-z, 1));
+  clip-path: polygon(0 0, 100% 0, 0 100%);
+  background: linear-gradient(
+    to bottom,
+    var(--leaf-edge) 0 calc(var(--leaf-edge-width) * var(--leaf-z, 1)),
+    var(--paper-raised) 0
+  );
+  transition: inline-size var(--dur-fast) ease, block-size var(--dur-fast) ease;
+}
+
+:global([data-free-side="right"]) .foldUnder {
+  left: auto;
+  right: 0;
+  clip-path: polygon(0 0, 100% 0, 100% 100%);
 }
 
 /* The flap casts its shadow onto the page. A filter on the parent, because the
@@ -208,7 +233,8 @@
   .ribbon[data-fresh] {
     animation: none;
   }
-  .foldFlap {
+  .foldFlap,
+  .foldUnder {
     transition: none;
   }
 }

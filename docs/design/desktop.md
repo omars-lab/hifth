@@ -710,6 +710,22 @@ no page to show beneath, or the reader asked for less motion, the old turn stays
 The row that measured the band crossing the whole book was removed with it: on a complete
 mus'haf the open book no longer plays that band for any key, so the row could not be reached.
 
+**The top outer corner is the bookmark's; the page is turned from the rest of the edge.** In
+the same walk the folded corner still looked "weird", and there were two causes. First, the
+fold cut the whole leaf's corner away, the strip of page edges drawn beside the paper
+included, and laid the flap across that strip: a flap stood out past the paper with the
+desk showing through behind it. Now only the top page folds. The flap lies on the paper, the
+page beneath shows where the corner was, and the page edges run whole up past it. Second,
+the strip you grab to turn a page reached right up into that corner and sat on top of the
+fold's button, so a mouse could not fold the corner at all, and hovering there drew the
+turn's curl over the fold. A reader dog-ears a book at the top and turns it from the foot, so
+the grab strip now starts just below the fold's button. The foot corner and the rest of the
+edge still turn the page. Held by *"a folded corner lies on the paper, and the page edges
+beside it stay whole"* (edge-peel spec, both browsers). It could not even click the fold
+before the change, and with the click fixed it measured the flap 11 px past the paper. One
+thing is left on purpose: at the rounded outer corner, the square corner of the page beneath
+stands about 2 px proud of the curve.
+
 ### ② Should the two leaves pan and zoom together? · **fixed**
 
 Unanswerable and untestable until a facing pair is vendored. A shared `View` across two

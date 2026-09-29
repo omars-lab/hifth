@@ -527,9 +527,9 @@
 }
 
 /* The folded corner. When the page carries a corner to fold (the bookmark
-   overlay's button), the paper's free top corner is trimmed off along the
-   diagonal so the desk shows through, and the overlay lays the folded-over
-   flap on the paper beside it. Sized in paper units, so it scales with the
+   overlay's button), the overlay draws the paper's free top corner turned
+   down: the page beneath where the corner was, and the folded-over flap on
+   the paper beside it. Sized in paper units, so it scales with the
    page like the ink does. It opens a little further under the pointer. */
 .stage {
   --dog-ear: 16px;
@@ -557,20 +557,11 @@
 .stage:has([data-bookmark-fold][data-folded]:focus-visible) {
   --dog-ear: 32px;
 }
-.stage:has([data-bookmark-fold]) .host[data-leaf="right"] {
-  clip-path: polygon(0 0, calc(100% - var(--dog-ear)) 0, 100% var(--dog-ear), 100% 100%, 0 100%);
-}
-.stage:has([data-bookmark-fold]) .host[data-leaf="left"] {
-  clip-path: polygon(var(--dog-ear) 0, 100% 0, 100% 100%, 0 100%, 0 var(--dog-ear));
-}
-.stage:has([data-bookmark-fold]) .host[data-leaf] {
-  transition: clip-path var(--dur-fast) ease;
-}
-@media (prefers-reduced-motion: reduce) {
-  .stage:has([data-bookmark-fold]) .host[data-leaf] {
-    transition: none;
-  }
-}
+/* The paper itself is not cut. A fold turns down the top leaf only, so the
+   pages beneath it — and the strip of their edges beside it — stay whole; the
+   overlay lays the page beneath and the folded-over flap on the corner (#201:
+   cutting the whole leaf let the desk show and left the edges standing past
+   the fold). */
 
 .hint {
   position: absolute;
