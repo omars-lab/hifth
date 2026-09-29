@@ -15,6 +15,9 @@ export default tseslint.config(
   {
     ignores: [
       "**/dist/**",
+      "**/dist-native/**",
+      "native/WebBundle/**",
+      "native/build/**",
       "**/dev-dist/**",
       "**/build/**",
       "**/node_modules/**",

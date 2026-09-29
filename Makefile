@@ -819,3 +819,7 @@ help: ## List targets (this)
 	@echo "  Bundle size:    make budget-update (accept a new JS baseline — read the diff!)"
 	@echo "  Parallel work:  make lock L=build CMD=\"pnpm -r test\" | make lock-status"
 	@echo "                  the protocol: docs/PARALLEL-AGENTS.md"
+
+# The Mac / iPad shell: every `app-*` target. Kept in its own file so this one
+# stays about the web app; `make help` lists both.
+include native/Makefile.native
