@@ -10,6 +10,8 @@ one list, and picked up when the owner chooses to. So:
 
 - **Never end a turn by asking the owner to go and test something.** Add it to the list instead,
   in one line, and say it was parked.
+- **Not in the session task list.** A by-hand check is an entry here, never an open task; the
+  task list is for work Claude does. Finished tasks are archived in `docs/tasks/done.md`.
 - **When the owner asks what is parked**, read `checklist.md` (next to this file) and show the
   short version: the items in order, one line each. Nothing else.
 
