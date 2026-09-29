@@ -106,6 +106,7 @@ export function BookmarkRibbons({
         data-bookmark-fold=""
         data-folded={folded ? "" : undefined}
       >
+        <span className={styles.foldUnder} aria-hidden="true" />
         <span className={styles.foldShadow} aria-hidden="true">
           <span className={styles.foldFlap} />
         </span>
