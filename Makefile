@@ -211,14 +211,14 @@ lighthouse: build ## Lighthouse (all four categories ≥90) — by hand, before 
 # ---------------------------------------------------------------------------
 
 .PHONY: golden
-golden: core ## Run the golden-image diff on this machine (darwin baselines)
+golden: core ## Run the golden-image diff on this machine (darwin baselines) — phone geometry and the iPad screen
 	$(WEB) build
-	$(WEB) exec playwright test --project=golden
+	$(WEB) exec playwright test --project=golden --project=ipad-golden
 
 .PHONY: golden-update
 golden-update: core ## Accept new golden baselines for THIS platform — review the diff first
 	$(WEB) build
-	$(WEB) exec playwright test --project=golden --update-snapshots
+	$(WEB) exec playwright test --project=golden --project=ipad-golden --update-snapshots
 	@echo ""
 	@echo "  Baselines rewritten. Run 'git diff --stat -- apps/web/e2e/__screenshots__'"
 	@echo "  and open the changed PNGs before committing: this is the gate agreeing"
@@ -332,7 +332,7 @@ pre-push: secrets-history checks-fast ## Everything checked before each push —
 	@# All four browser projects, iPhone included: it runs on WebKit, which
 	@# needs a one-time `pnpm -C apps/web exec playwright install webkit`, and
 	@# it is the project that caught a jump bug the Android one missed.
-	$(WEB) exec playwright test --project=desktop --project=android --project=iphone --project=golden
+	$(WEB) exec playwright test --project=desktop --project=android --project=iphone --project=ipad --project=golden --project=ipad-golden
 
 .PHONY: site
 site: build ## Build the public site and check it the way the deploy does (the deploy job runs this)
@@ -819,3 +819,7 @@ help: ## List targets (this)
 	@echo "  Bundle size:    make budget-update (accept a new JS baseline — read the diff!)"
 	@echo "  Parallel work:  make lock L=build CMD=\"pnpm -r test\" | make lock-status"
 	@echo "                  the protocol: docs/PARALLEL-AGENTS.md"
+
+# The Mac / iPad shell: every `app-*` target. Kept in its own file so this one
+# stays about the web app; `make help` lists both.
+include native/Makefile.native

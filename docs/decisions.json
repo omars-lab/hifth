@@ -1587,6 +1587,30 @@
       "related": [
         "ayah-drawer"
       ]
+    },
+    {
+      "id": "native-testflight-licence",
+      "question": "May a build of the app that carries The Study Quran's commentary go to a few named outside testers through TestFlight?",
+      "status": "open",
+      "options": [
+        {
+          "id": "A",
+          "label": "Send the whole build to named testers through TestFlight"
+        },
+        {
+          "id": "B",
+          "label": "Send a build with the GPL-derived data left out"
+        },
+        {
+          "id": "C",
+          "label": "Own devices only; show it in the room"
+        }
+      ],
+      "doc": "docs/decisions/native-testflight-licence.md",
+      "page": "docs/design/native-testflight-options.html",
+      "builtBy": "scripts/build-native-testflight-options.mjs",
+      "artifact": "https://blog.bytesofpurpose.com/hifth/docs/design/native-testflight-options.html",
+      "related": []
     }
   ]
 }

@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
 import { parseHash, serializeState, type AppState } from "@hifth/core";
+import { postReady, postRoute } from "./native-bridge";
 
 /**
  * Hash router (spec §7) — the app's view ↔ URL bridge. It does two things:
@@ -45,6 +46,8 @@ export function useHashRouter(
     if (ready && !coldOpened.current) {
       coldOpened.current = true;
       apply(); // cold open, now that restore can actually resolve the link
+      // The native shell holds any early `hifth://` link until it hears this.
+      postReady();
     }
     window.addEventListener("hashchange", apply);
     return () => window.removeEventListener("hashchange", apply);
@@ -57,6 +60,8 @@ export function useHashRouter(
     if (!state || !coldOpened.current) return;
     const hash = serializeState(state);
     showing.current = hash;
+    // The shell has no address bar; this is how it learns what is on screen.
+    postRoute(hash);
     if (hash === window.location.hash) return;
     window.history.replaceState(null, "", hash);
   }, [state]);

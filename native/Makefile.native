@@ -1,0 +1,197 @@
+# ---------------------------------------------------------------------------
+# The Mac / iPad shell (native/). Included by the root Makefile; every target
+# here starts with `app-` and is documented with `##` so `make help` lists it.
+#
+#   make app-web            copy the PRIVATE pitch web build into the app
+#   make app-web FLAVOUR=public   copy the public build (refuses held data)
+#   make app-run-mac        build and open the Mac app
+#   make app-run-ipad       build, install and launch on the iPad simulator
+#   make app-shot ROUTE=/hafs-kfqc/p45 TARGET=ipad|mac [APPEARANCE=dark]
+#   make app-open ROUTE=/hafs-kfqc/2:255   turn the running app to a route
+#   make app-test           route/bundle unit tests + the XCUITest smoke
+#   make app-golden         the real app's screenshots against native/shots/baseline/
+#   make app-device-install build for a plugged-in iPad, install and launch (DEVICE=…)
+# ---------------------------------------------------------------------------
+
+# A stale CPATH from Homebrew breaks Xcode's clang module search.
+unexport CPATH
+
+NATIVE       := native
+XCPROJ       := $(NATIVE)/Hifth.xcodeproj
+DERIVED      := $(NATIVE)/build
+WEB_BUNDLE   := $(NATIVE)/WebBundle
+SHOTS        := $(NATIVE)/shots
+BUNDLE_ID    := com.bytesofpurpose.hifth
+XCB          := xcodebuild -project $(XCPROJ) -derivedDataPath $(DERIVED)
+XCPRETTY     := $(shell command -v xcbeautify >/dev/null 2>&1 && echo "xcbeautify" || echo "cat")
+MAC_APP      := $(DERIVED)/Build/Products/Debug/Hifth.app
+IPAD_APP     := $(DERIVED)/Build/Products/Debug-iphonesimulator/Hifth.app
+# Which web build goes in: `pitch` (private, with the held commentary) or
+# `public` (what the site ships).
+FLAVOUR      ?= pitch
+# The simulator the iPad targets use. Any name from `xcrun simctl list devices`.
+IPAD         ?= iPad Pro 13-inch (M5)
+IPAD_UDID     = $(shell $(NATIVE)/scripts/simulator-udid.sh "$(IPAD)")
+ROUTE        ?= /hafs-kfqc/2:255
+TARGET       ?= ipad
+APPEARANCE   ?= light
+# `/hafs-kfqc/p45?field=dark` → `ipad-hafs-kfqc_p45_field-dark.png`
+# Where `app-shot` writes; `app-golden` points it at native/shots/current/.
+SHOT_OUT     ?= $(SHOTS)/$(SHOT_NAME)
+# The routes the shell goldens cover: a verse, a page, and the dark desk.
+GOLDEN_ROUTES ?= /hafs-kfqc/2:255 /hafs-kfqc/p45 /hafs-kfqc/p45?field=dark
+# The Apple Development team, read from the signing identity in the keychain.
+# Only device builds and archives need it; simulator and Mac builds do not.
+TEAM         ?= $(shell security find-identity -v -p codesigning 2>/dev/null | sed -n 's/.*Apple Development: .*(\([A-Z0-9]\{10\}\)).*/\1/p' | head -1)
+# The plugged-in iPad, by the name `xcrun devicectl list devices` prints.
+DEVICE       ?=
+SHOT_NAME     = $(TARGET)-$(subst /,_,$(subst ?,_,$(subst =,-,$(subst :,-,$(patsubst /%,%,$(ROUTE))))))$(if $(filter-out light,$(APPEARANCE)),-$(APPEARANCE),).png
+
+.PHONY: app-icon app-generate app-web app-build-mac app-build-ipad app-run-mac app-run-mac-stdout \
+        app-run-ipad app-shot app-probe app-open app-test app-test-mac-ui app-unit-test app-logs app-clean \
+        app-golden app-golden-update app-device-install app-archive app-testflight
+
+app-icon: ## Cut every Mac and iPad icon size from the web app's own icon (apps/web/public/icons)
+	python3 $(NATIVE)/scripts/make-appicon.py
+
+app-generate: ## Regenerate native/Hifth.xcodeproj from native/project.yml
+	@mkdir -p $(WEB_BUNDLE)
+	cd $(NATIVE) && xcodegen generate --quiet
+
+app-web: core ## Build the web app and copy it into the shell (FLAVOUR=pitch|public, pitch by default)
+	@# The pitch build keeps assets/private (the held commentary); the public
+	@# build is copied without it and then checked, so a public shell can never
+	@# carry held copy even on a laptop that has it.
+ifeq ($(FLAVOUR),pitch)
+	@test -e apps/web/public/assets/private/study-quran/1.json || { \
+	  echo ""; echo "  No private pitch data at apps/web/public/assets/private/study-quran/"; \
+	  echo "  Build it first (node packages/etl/tools/pitch/extract.mjs) or use FLAVOUR=public"; echo ""; exit 1; }
+	VITE_PITCH=1 $(WEB) exec vite build --outDir dist-native --emptyOutDir
+	rsync -a --delete apps/web/dist-native/ $(WEB_BUNDLE)/
+else
+	$(WEB) exec vite build --outDir dist-native --emptyOutDir
+	rsync -a --delete --exclude 'assets/private' apps/web/dist-native/ $(WEB_BUNDLE)/
+	@test ! -e $(WEB_BUNDLE)/assets/private || { echo "held data reached the public shell bundle"; exit 1; }
+endif
+	@echo "$(FLAVOUR)" > $(WEB_BUNDLE)/.hifth-web-flavour
+	@echo "  ✓ $(FLAVOUR) web build in $(WEB_BUNDLE) ($$(find $(WEB_BUNDLE) -type f | wc -l | tr -d ' ') files)"
+
+app-build-mac: app-generate ## Build the Mac app (Debug, ad-hoc signed)
+	set -o pipefail; $(XCB) -scheme Hifth-macOS -configuration Debug -destination 'platform=macOS' build | $(XCPRETTY)
+
+app-build-ipad: app-generate ## Build the iPad app for the simulator
+	set -o pipefail; $(XCB) -scheme Hifth-iOS -configuration Debug -sdk iphonesimulator \
+	  -destination 'platform=iOS Simulator,id=$(IPAD_UDID)' CODE_SIGNING_ALLOWED=NO build | $(XCPRETTY)
+
+app-run-mac: app-build-mac ## Build and open the Mac app (ROUTE=… to open at a route)
+	@# Registering the build with Launch Services makes `open hifth://…` land
+	@# on this copy and not on an older one lying in DerivedData.
+	/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister -f $(MAC_APP)
+	HIFTH_ROUTE=$(ROUTE) open -a $(MAC_APP)
+
+app-run-mac-stdout: app-build-mac ## Run the Mac binary in the foreground so its console output shows here
+	HIFTH_ROUTE=$(ROUTE) HIFTH_APPEARANCE=$(APPEARANCE) $(MAC_APP)/Contents/MacOS/Hifth
+
+app-run-ipad: app-build-ipad ## Boot the simulator, install and launch at ROUTE
+	@test -n "$(IPAD_UDID)" || { echo "no simulator named '$(IPAD)'; see xcrun simctl list devices"; exit 1; }
+	xcrun simctl bootstatus $(IPAD_UDID) -b
+	open -a Simulator
+	xcrun simctl install $(IPAD_UDID) $(IPAD_APP)
+	-xcrun simctl terminate $(IPAD_UDID) $(BUNDLE_ID) 2>/dev/null
+	SIMCTL_CHILD_HIFTH_ROUTE=$(ROUTE) SIMCTL_CHILD_HIFTH_APPEARANCE=$(APPEARANCE) xcrun simctl launch $(IPAD_UDID) $(BUNDLE_ID)
+
+app-shot: ## Screenshot the app at ROUTE on TARGET=ipad|mac (APPEARANCE=light|dark) into native/shots/
+	@mkdir -p $(SHOTS)
+ifeq ($(TARGET),mac)
+	$(MAKE) app-build-mac
+	HIFTH_ROUTE=$(ROUTE) HIFTH_APPEARANCE=$(APPEARANCE) HIFTH_SNAPSHOT_PATH=$(abspath $(SHOT_OUT)) \
+	  $(MAC_APP)/Contents/MacOS/Hifth
+else
+	$(MAKE) app-build-ipad
+	xcrun simctl bootstatus $(IPAD_UDID) -b
+	xcrun simctl install $(IPAD_UDID) $(IPAD_APP)
+	-xcrun simctl terminate $(IPAD_UDID) $(BUNDLE_ID) 2>/dev/null
+	@rm -f $(SHOT_OUT)
+	SIMCTL_CHILD_HIFTH_ROUTE=$(ROUTE) SIMCTL_CHILD_HIFTH_APPEARANCE=$(APPEARANCE) \
+	  SIMCTL_CHILD_HIFTH_SNAPSHOT_PATH=$(abspath $(SHOT_OUT)) \
+	  xcrun simctl launch $(IPAD_UDID) $(BUNDLE_ID)
+	@for i in $$(seq 1 60); do test -s $(SHOT_OUT) && break; sleep 0.5; done
+	@test -s $(SHOT_OUT) || { echo "no screenshot after 30 s"; exit 1; }
+endif
+	@echo "  ✓ $(SHOT_OUT)"
+
+app-probe: app-build-mac ## Print what the page can see inside the Mac shell (secure context, caches, share…)
+	HIFTH_PROBE=1 HIFTH_ROUTE=$(ROUTE) $(MAC_APP)/Contents/MacOS/Hifth | grep '^probe' | sed 's/^probe //' | python3 -m json.tool
+
+app-open: ## Turn the running app to ROUTE (TARGET=ipad|mac)
+ifeq ($(TARGET),mac)
+	open "hifth://$(ROUTE)"
+else
+	xcrun simctl openurl $(IPAD_UDID) "hifth://$(ROUTE)"
+endif
+
+app-unit-test: app-generate ## Route, bundle-path and bridge unit tests (Mac, seconds)
+	set -o pipefail; $(XCB) -scheme Hifth-macOS -destination 'platform=macOS' -only-testing:HifthTests test | $(XCPRETTY)
+
+app-test: app-unit-test ## Unit tests plus the XCUITest smoke on the iPad simulator
+	@rm -rf $(SHOTS)/ipad-smoke.xcresult
+	set -o pipefail; $(XCB) -scheme Hifth-iOS -destination 'platform=iOS Simulator,id=$(IPAD_UDID)' \
+	  CODE_SIGNING_ALLOWED=NO -resultBundlePath $(SHOTS)/ipad-smoke.xcresult test | $(XCPRETTY)
+
+app-test-mac-ui: app-generate ## The XCUITest smoke on the Mac (needs Accessibility permission for your terminal — see docs/design/native-shell.md)
+	@rm -rf $(SHOTS)/mac-smoke.xcresult
+	set -o pipefail; $(XCB) -scheme Hifth-macOS -destination 'platform=macOS' -only-testing:HifthUITests-macOS \
+	  -resultBundlePath $(SHOTS)/mac-smoke.xcresult test | $(XCPRETTY)
+
+# ---- the real app's look: one screenshot per route, against a committed baseline
+# Same recipe as the web goldens: `app-golden` fails on a change, you LOOK at
+# native/shots/diff/, and only then `app-golden-update` accepts the new look.
+app-golden: app-golden-shots ## Screenshot GOLDEN_ROUTES on the iPad simulator and diff against native/shots/baseline/
+	$(NATIVE)/scripts/golden-diff.sh $(SHOTS)/current $(SHOTS)/baseline $(SHOTS)/diff
+
+app-golden-update: app-golden-shots ## Accept the current shell screenshots as the new baseline — look at the diff first
+	@mkdir -p $(SHOTS)/baseline
+	cp $(SHOTS)/current/*.png $(SHOTS)/baseline/
+	@echo "  baseline updated: $$(ls $(SHOTS)/baseline | wc -l | tr -d ' ') screenshots"
+
+.PHONY: app-golden-shots
+# Shots are halved (the simulator draws at 2x) so a baseline is a few hundred KB, not 2 MB.
+app-golden-shots:
+	@rm -rf $(SHOTS)/current && mkdir -p $(SHOTS)/current
+	@for r in $(GOLDEN_ROUTES); do \
+	  name=$$(printf '%s' "$$r" | sed 's#^/##; s#[/:?=]#_#g'); \
+	  $(MAKE) --no-print-directory app-shot TARGET=ipad ROUTE="$$r" SHOT_OUT=$(SHOTS)/current/ipad-$$name.png || exit 1; \
+	  magick mogrify -resize 50% $(SHOTS)/current/ipad-$$name.png; \
+	done
+
+# ---- a real iPad over USB
+app-device-install: app-generate ## Build for a plugged-in iPad, install and launch at ROUTE (DEVICE=<name from `xcrun devicectl list devices`>)
+	@test -n "$(DEVICE)" || { echo ""; echo "  DEVICE= is empty. Pick a name from:"; xcrun devicectl list devices; echo ""; exit 1; }
+	@test -n "$(TEAM)" || { echo "  no Apple Development identity in the keychain (TEAM= to override)"; exit 1; }
+	set -o pipefail; $(XCB) -scheme Hifth-iOS -destination 'generic/platform=iOS' -allowProvisioningUpdates \
+	  DEVELOPMENT_TEAM=$(TEAM) build | $(XCPRETTY)
+	xcrun devicectl device install app --device "$(DEVICE)" $(DERIVED)/Build/Products/Debug-iphoneos/Hifth.app
+	DEVICECTL_CHILD_HIFTH_ROUTE=$(ROUTE) xcrun devicectl device process launch --device "$(DEVICE)" $(BUNDLE_ID)
+
+# ---- TestFlight: gated on the licence decision, not on the build
+# Both refuse while docs/decisions.json still holds `native-testflight-licence`
+# open. The record says why in plain words; settle it there first.
+TESTFLIGHT_SETTLED = $(shell python3 -c "import json; r=[d for d in json.load(open('docs/decisions.json'))['decisions'] if d['id']=='native-testflight-licence']; print('yes' if r and r[0]['status']!='open' else 'no')" 2>/dev/null)
+define TESTFLIGHT_GATE
+	@test "$(TESTFLIGHT_SETTLED)" = yes || { echo ""; \
+	  echo "  Not yet. Whether a build with the held commentary may go to outside testers is"; \
+	  echo "  still open: docs/decisions/native-testflight-licence.md. Settle it there first."; echo ""; exit 1; }
+endef
+
+app-archive: app-generate ## Archive the iPad app for upload (refuses until the TestFlight decision is settled)
+	$(TESTFLIGHT_GATE)
+	@echo "  archive: not built yet — the export options, privacy manifest and signing come with the decision (docs/backlog.md)"; exit 1
+
+app-testflight: app-archive ## Upload the archive to TestFlight with an App Store Connect API key from the environment
+	@echo "  upload: not built yet"; exit 1
+
+app-logs: ## Stream the app's console output (Mac or simulator)
+	log stream --predicate 'process == "Hifth"' --level debug
+
+app-clean: ## Remove the shell's build output and generated project
+	rm -rf $(DERIVED) $(XCPROJ)

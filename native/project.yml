@@ -1,0 +1,179 @@
+# The Mac / iPad shell around the web app. `make app-generate` turns this into
+# Hifth.xcodeproj (gitignored); never edit the project by hand.
+#
+# One source folder, two app targets. WebBundle/ is the copied web build
+# (`make app-web`), added as a folder reference so every file ships as-is.
+name: Hifth
+options:
+  bundleIdPrefix: com.bytesofpurpose
+  deploymentTarget:
+    iOS: "17.0"
+    macOS: "14.0"
+  xcodeVersion: "26.0"
+  generateEmptyDirectories: true
+  groupSortPosition: top
+  createIntermediateGroups: true
+
+settings:
+  base:
+    SWIFT_VERSION: "6.0"
+    SWIFT_STRICT_CONCURRENCY: complete
+    # A shell that only ever touches UI: everything is main-actor unless it
+    # says otherwise, which is what makes the WebKit delegates compile cleanly.
+    SWIFT_DEFAULT_ACTOR_ISOLATION: MainActor
+    SWIFT_APPROACHABLE_CONCURRENCY: YES
+    ENABLE_USER_SCRIPT_SANDBOXING: YES
+    MARKETING_VERSION: "0.1.0"
+    CURRENT_PROJECT_VERSION: "1"
+    ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+    ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
+  configs:
+    Debug:
+      SWIFT_OPTIMIZATION_LEVEL: "-Onone"
+      SWIFT_ACTIVE_COMPILATION_CONDITIONS: "DEBUG"
+    Release:
+      SWIFT_OPTIMIZATION_LEVEL: "-O"
+
+targetTemplates:
+  HifthApp:
+    type: application
+    sources:
+      - path: Hifth
+        excludes:
+          - "**/*.xcassets"
+          - "Resources/*.plist"
+          - "Resources/*.entitlements"
+      - path: Hifth/Resources/Assets.xcassets
+        buildPhase: resources
+      # The web build, as a folder reference: nothing inside it is compiled or
+      # renamed, and the scheme handler reads it by path at run time.
+      - path: WebBundle
+        type: folder
+        buildPhase: resources
+    settings:
+      base:
+        # Both platforms build one "Hifth.app"; the test bundles keep their
+        # own names, or all three would write the same Swift module.
+        PRODUCT_NAME: Hifth
+        PRODUCT_BUNDLE_IDENTIFIER: com.bytesofpurpose.hifth
+        GENERATE_INFOPLIST_FILE: NO
+
+targets:
+  Hifth-iOS:
+    templates: [HifthApp]
+    platform: iOS
+    settings:
+      base:
+        INFOPLIST_FILE: Hifth/Resources/Info-iOS.plist
+        TARGETED_DEVICE_FAMILY: "1,2"
+        SUPPORTED_PLATFORMS: "iphonesimulator iphoneos"
+        SUPPORTS_MACCATALYST: NO
+        # Signing is decided on the command line: none for the simulator,
+        # the developer certificate for a plugged-in iPad (make app-device-install).
+        DEVELOPMENT_TEAM: ""
+        CODE_SIGN_STYLE: Automatic
+
+  Hifth-macOS:
+    templates: [HifthApp]
+    platform: macOS
+    settings:
+      base:
+        INFOPLIST_FILE: Hifth/Resources/Info-macOS.plist
+        CODE_SIGN_ENTITLEMENTS: Hifth/Resources/Hifth-macOS.entitlements
+        # Ad-hoc signed: enough to run here. A copy handed to another Mac hits
+        # Gatekeeper (right-click → Open); notarising needs a paid Developer ID.
+        # Ad-hoc signed: Gatekeeper refuses an unsigned bundle it has to
+        # launch (the UI test runner), and an ad-hoc signature costs nothing.
+        CODE_SIGN_IDENTITY: "-"
+        CODE_SIGN_STYLE: Manual
+        DEVELOPMENT_TEAM: ""
+
+  # Pure-logic tests (route grammar, bundle paths, MIME table) run on the Mac:
+  # no simulator to boot, seconds not minutes.
+  HifthTests:
+    type: bundle.unit-test
+    platform: macOS
+    sources:
+      - HifthTests
+    dependencies:
+      - target: Hifth-macOS
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.bytesofpurpose.hifth.tests
+        GENERATE_INFOPLIST_FILE: YES
+        TEST_HOST: "$(BUILT_PRODUCTS_DIR)/Hifth.app/Contents/MacOS/Hifth"
+        BUNDLE_LOADER: "$(TEST_HOST)"
+        # Ad-hoc signed: Gatekeeper refuses an unsigned bundle it has to
+        # launch (the UI test runner), and an ad-hoc signature costs nothing.
+        CODE_SIGN_IDENTITY: "-"
+        CODE_SIGN_STYLE: Manual
+        DEVELOPMENT_TEAM: ""
+
+  HifthUITests-iOS:
+    type: bundle.ui-testing
+    platform: iOS
+    sources:
+      - HifthUITests
+    dependencies:
+      - target: Hifth-iOS
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.bytesofpurpose.hifth.uitests
+        GENERATE_INFOPLIST_FILE: YES
+        TEST_TARGET_NAME: Hifth-iOS
+        # XCUITest predates strict concurrency and fights it at every call;
+        # the test drivers stay in Swift 5 mode. The app itself is strict.
+        SWIFT_VERSION: "5.0"
+        SWIFT_STRICT_CONCURRENCY: minimal
+        SWIFT_DEFAULT_ACTOR_ISOLATION: nonisolated
+        TARGETED_DEVICE_FAMILY: "1,2"
+        SUPPORTED_PLATFORMS: "iphonesimulator iphoneos"
+
+  HifthUITests-macOS:
+    type: bundle.ui-testing
+    platform: macOS
+    sources:
+      - HifthUITests
+    dependencies:
+      - target: Hifth-macOS
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.bytesofpurpose.hifth.uitests
+        GENERATE_INFOPLIST_FILE: YES
+        TEST_TARGET_NAME: Hifth-macOS
+        SWIFT_VERSION: "5.0"
+        SWIFT_STRICT_CONCURRENCY: minimal
+        SWIFT_DEFAULT_ACTOR_ISOLATION: nonisolated
+        # Ad-hoc signed: Gatekeeper refuses an unsigned bundle it has to
+        # launch (the UI test runner), and an ad-hoc signature costs nothing.
+        CODE_SIGN_IDENTITY: "-"
+        CODE_SIGN_STYLE: Manual
+        DEVELOPMENT_TEAM: ""
+
+schemes:
+  Hifth-iOS:
+    build:
+      targets:
+        Hifth-iOS: all
+    run:
+      config: Debug
+    test:
+      config: Debug
+      targets:
+        - HifthUITests-iOS
+    archive:
+      config: Release
+
+  Hifth-macOS:
+    build:
+      targets:
+        Hifth-macOS: all
+    run:
+      config: Debug
+    test:
+      config: Debug
+      targets:
+        - HifthTests
+        - HifthUITests-macOS
+    archive:
+      config: Release
