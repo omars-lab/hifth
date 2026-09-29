@@ -217,7 +217,7 @@ export default defineConfig({
           // runs here and on the phones: it is the one tool test for both. So does
           // `open-link`: a link that opens a panel is opened on both. `lazy-tools`
           // checks the sheets that load on first open stay out of the first script.
-          testMatch: /(desktop|edge-peel|stage-fit|spread-fit|detent-live|pagebar-detents|pagebar-fisheye|notes|mistakes|sign-tools|crop|open-link|lazy-tools)\.spec\.ts/,
+          testMatch: /(desktop|edge-peel|stage-fit|spread-fit|detent-live|pagebar-detents|pagebar-fisheye|notes|mistakes|sign-tools|crop|open-link|lazy-tools|drive-video)\.spec\.ts/,
           use: {
             browserName: "chromium",
             viewport: { width: 1440, height: 900 },
@@ -240,12 +240,12 @@ export default defineConfig({
         {
           name: "iphone",
           use: { ...devices["iPhone 13"] },
-          testIgnore: /(golden|shots|desktop|edge-peel|spread-fit|detent-live|pagebar-detents|pagebar-fisheye|notes|mistakes|sign-tools|lazy-tools|pitch)\.spec\.ts/,
+          testIgnore: /(golden|shots|desktop|edge-peel|spread-fit|detent-live|pagebar-detents|pagebar-fisheye|notes|mistakes|sign-tools|lazy-tools|pitch|drive-video)\.spec\.ts/,
         },
         {
           name: "android",
           use: { ...devices["Pixel 7"] },
-          testIgnore: /(golden|shots|desktop|edge-peel|spread-fit|detent-live|pagebar-detents|pagebar-fisheye|notes|mistakes|sign-tools|lazy-tools|pitch)\.spec\.ts/,
+          testIgnore: /(golden|shots|desktop|edge-peel|spread-fit|detent-live|pagebar-detents|pagebar-fisheye|notes|mistakes|sign-tools|lazy-tools|pitch|drive-video)\.spec\.ts/,
         },
         {
           // The golden-image project. Its viewport is spelled out rather than
