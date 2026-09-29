@@ -376,4 +376,66 @@ test.describe("Hifth · the folded bookmark corner on the open book", () => {
     expect(m.hit, "the page edges beside the fold are cut away").toBe(true);
     expect(m.outside, "the page under the fold pokes past the rounded corner").toBe(0);
   });
+
+  // Owner, Firefox (#202): with one page on the desk the ribbon hung out on the
+  // desk beside the book, and zoomed in it lay across the folded corner. A
+  // ribbon hangs from its own page, toward the spine, clear of the fold.
+  for (const view of ["one", "two"]) {
+    test(`a bookmark's ribbon hangs from its own page, clear of the folded corner (${view} page view)`, async ({ page }) => {
+      await page.goto(`/#/hafs-kfqc/p6?view=${view}`);
+      await expect(page.locator('svg[aria-labelledby="page-label-6"]')).toBeVisible();
+      await page.getByRole("button", { name: "Drop a bookmark on this page" }).first().click();
+      const drawer = page.getByRole("dialog", { name: "Bookmark" });
+      await drawer.getByRole("button", { name: "Save name" }).click();
+      await expect(drawer).toBeHidden();
+      await page.mouse.move(5, 5);
+      await page.waitForTimeout(400);
+      const unfold = page.getByRole("button", { name: /Unfold this corner/ });
+      const ribbon = page.getByRole("button", { name: /^Bookmark:/ });
+      const r = (await ribbon.boundingBox())!;
+      const f = (await unfold.boundingBox())!;
+      const leaf = await unfold.evaluate((btn) => {
+        const b = btn.getBoundingClientRect();
+        const hosts = [...document.querySelectorAll<HTMLElement>("[data-leaf]")]
+          .map((h) => h.getBoundingClientRect())
+          .filter((h) => h.width > 0 && b.left >= h.left - 1 && b.right <= h.right + 1 && Math.abs(b.top - h.top) < 4);
+        const h = hosts[0]!;
+        return { left: h.left, right: h.right };
+      });
+      expect(r.x, "the ribbon hangs off the page").toBeGreaterThanOrEqual(leaf.left);
+      expect(r.x + r.width, "the ribbon hangs off the page").toBeLessThanOrEqual(leaf.right);
+      const apart = r.x >= f.x + f.width || r.x + r.width <= f.x;
+      expect(apart, "the ribbon lies across the folded corner").toBe(true);
+    });
+  }
+
+  // The same report: the page showing under the fold was the same paper as the
+  // page itself, so the fold read as a flat square pasted on. The page beneath
+  // sits in the flap's shadow, darker than the page, as a real dog-ear does.
+  test("the page under a folded corner is shaded darker than the page", async ({ page }) => {
+    await page.goto("/#/hafs-kfqc/p6?view=one");
+    await expect(page.locator('svg[aria-labelledby="page-label-6"]')).toBeVisible();
+    await page.getByRole("button", { name: "Drop a bookmark on this page" }).first().click();
+    const drawer = page.getByRole("dialog", { name: "Bookmark" });
+    await drawer.getByRole("button", { name: "Save name" }).click();
+    await expect(drawer).toBeHidden();
+    const unfold = page.getByRole("button", { name: /Unfold this corner/ });
+    const shades = await unfold.evaluate((btn) => {
+      const lum = (c: string) => {
+        const [r, g, b] = c.match(/[\d.]+/g)!.map(Number);
+        return 0.2126 * r! + 0.7152 * g! + 0.0722 * b!;
+      };
+      const under = getComputedStyle(btn.querySelector(":scope > span:first-child")!).backgroundImage;
+      // Every colour stop but the thin top edge line, which is darker on purpose.
+      const stops = [...under.matchAll(/rgba?\([^)]*\)/g)].map((m) => m[0]);
+      const b = btn.getBoundingClientRect();
+      const host = [...document.querySelectorAll<HTMLElement>("[data-leaf]")].find((h) => {
+        const r = h.getBoundingClientRect();
+        return r.width > 0 && b.left >= r.left - 1 && b.right <= r.right + 1 && Math.abs(b.top - r.top) < 4;
+      })!;
+      return { paper: lum(getComputedStyle(host).backgroundColor), under: stops.map(lum) };
+    });
+    const brightest = Math.max(...shades.under);
+    expect(brightest, "the page under the fold is as light as the page").toBeLessThan(shades.paper - 8);
+  });
 });

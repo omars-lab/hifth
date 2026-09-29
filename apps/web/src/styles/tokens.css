@@ -16,6 +16,11 @@
   --paper: #f4efe6;
   --paper-raised: #fbf8f2;
   --paper-sunk: #ece4d6;
+  /* The page showing under a folded corner, in the flap's shadow: deepest
+     at the crease, lighter toward the corner. */
+  --fold-shade: #c9bea9;
+  --fold-shade-mid: #ddd3c1;
+  --fold-shade-far: #e6dece;
   --ink: #26201a;
   --ink-soft: #5c5347;
   /* The quietest ink that is still ink. It shipped at #9c9284 for six loops —
