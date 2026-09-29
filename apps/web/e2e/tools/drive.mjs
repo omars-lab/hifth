@@ -37,18 +37,28 @@
  *   scroll=<css>|<bottom|top|±px>  scroll a container so a shot catches what is below its fold
  *   settle=<ms>               pause (for an animation to finish before the shot)
  *   move=<x>,<y>              move the mouse to a viewport point (hover states)
+ *   drag=<x>,<y>><x>,<y>      press at one point, glide to the other, let go (a page turn by its edge)
  *   eval=<js expression>      evaluate in the page and log the JSON result (measure, don't guess)
  *
  * Other flags: --browser firefox (the owner's browser; default chromium),
  * --mouse (a desktop with a real pointer, no touch — hover styles apply),
  * --clip x,y,w,h (shoot only that part of the viewport, for a close look).
  *
+ * A moving picture, when a still cannot carry it (a page turn, a drawer rising):
+ * --video <path>.webm records the whole run; --video <path>.gif records it and
+ * turns it into a GIF with ffmpeg (--gif-width, default 720; --gif-fps, default
+ * 15). A recording is made fresh whenever it is wanted, so it is not committed;
+ * the command that makes it is what is kept (e2e/drive-video.spec.ts runs one).
+ *
  * A deep-link hash reaches most states with no clicks at all: `#/hafs-kfqc/2:48`
  * selects that verse, `#/hafs-kfqc/p19` opens page 19. See e2e/deeplink.spec.ts.
  */
 import { chromium, firefox } from "@playwright/test";
-import { mkdirSync } from "node:fs";
-import { dirname, resolve } from "node:path";
+import { execFileSync } from "node:child_process";
+import { mkdirSync, mkdtempSync, rmSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { dirname, join, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 
 const log = (ev, extra = "") =>
   console.log(`[drive] ev=${ev}${extra ? " " + extra : ""}`);
@@ -80,9 +90,11 @@ const args = parseArgs(process.argv.slice(2));
 const base = String(args.base ?? "http://localhost:5173").replace(/\/$/, "");
 const hash = args.hash ? String(args.hash) : "";
 const url = base + "/" + (hash.startsWith("#") ? hash : hash ? "#" + hash : "");
-const out = resolve(
-  String(args.out ?? "apps/web/test-results/drive/shot.png"),
-);
+// The default lands in the app's own test-results wherever the tool is run
+// from; a relative default once nested a stray apps/web/apps/web/ folder.
+const out = args.out
+  ? resolve(String(args.out))
+  : fileURLToPath(new URL("../../test-results/drive/shot.png", import.meta.url));
 const [vw, vh] = String(args.viewport ?? "390x844")
   .split("x")
   .map((n) => Number(n));
@@ -97,6 +109,9 @@ const mouse = Boolean(args.mouse);
 const clip = args.clip
   ? (([x, y, width, height]) => ({ x, y, width, height }))(String(args.clip).split(",").map(Number))
   : undefined;
+const video = args.video ? resolve(String(args.video)) : undefined;
+const gifWidth = Number(args["gif-width"] ?? 720);
+const gifFps = Number(args["gif-fps"] ?? 15);
 
 /** Resolve a `role|name` pair to a Playwright locator (name is a substring). */
 function byRole(page, spec) {
@@ -152,6 +167,14 @@ async function runStep(page, step) {
       await page.mouse.move(x, y, { steps: 4 });
       return;
     }
+    case "drag": {
+      const [from, to] = arg.split(">").map((p) => p.split(",").map(Number));
+      await page.mouse.move(from[0], from[1]);
+      await page.mouse.down();
+      await page.mouse.move(to[0], to[1], { steps: 20 });
+      await page.mouse.up();
+      return;
+    }
     case "eval": {
       const result = await page.evaluate((src) => (0, eval)(src), arg);
       log("eval", `result=${JSON.stringify(result)}`);
@@ -167,6 +190,7 @@ async function runStep(page, step) {
 
 async function main() {
   mkdirSync(dirname(out), { recursive: true });
+  const videoDir = video ? mkdtempSync(join(tmpdir(), "drive-video-")) : undefined;
   log("launch", `base=${base} viewport=${vw}x${vh} dsf=${dsf}`);
   const browser = await engine.launch();
   const context = await browser.newContext({
@@ -174,6 +198,7 @@ async function main() {
     deviceScaleFactor: dsf,
     hasTouch: !mouse,
     locale,
+    ...(videoDir ? { recordVideo: { dir: videoDir, size: { width: vw, height: vh } } } : {}),
   });
   const page = await context.newPage();
 
@@ -225,12 +250,49 @@ async function main() {
     // Still try to capture what was on screen when it broke.
     await page.screenshot({ path: out, fullPage }).catch(() => {});
   } finally {
+    // The recording is finished by closing the page's context and can only be
+    // saved while the browser is still up, so it goes between the two.
     await context.close();
+    if (video && videoDir) {
+      try {
+        await saveVideo(page, video, videoDir);
+      } catch (e) {
+        failed = true;
+        log("video_error", `msg=${JSON.stringify(String(e && e.message ? e.message : e))}`);
+      } finally {
+        rmSync(videoDir, { recursive: true, force: true });
+      }
+    }
     await browser.close();
   }
 
   if (failed) process.exit(1);
   console.log(`\n  wrote ${out}\n`);
+}
+
+/**
+ * Keep the run's recording: as it is for .webm, or as a GIF for .gif. The GIF
+ * draws its colours from the video itself, so the page's paper and ink stay
+ * true instead of banding. ffmpeg gets a timeout so a stuck conversion ends the
+ * run instead of hanging it.
+ */
+async function saveVideo(page, target, dir) {
+  mkdirSync(dirname(target), { recursive: true });
+  const asGif = target.endsWith(".gif");
+  const webm = asGif ? join(dir, "run.webm") : target;
+  await page.video().saveAs(webm);
+  if (!asGif) {
+    log("video", `out=${target}`);
+  } else {
+    log("gif_start", `out=${target} width=${gifWidth} fps=${gifFps}`);
+    const vf = `fps=${gifFps},scale=${gifWidth}:-1:flags=lanczos,split[a][b];[a]palettegen[p];[b][p]paletteuse`;
+    execFileSync("ffmpeg", ["-loglevel", "error", "-y", "-i", webm, "-vf", vf, target], {
+      stdio: "inherit",
+      timeout: 120000,
+    });
+    log("gif_done", `out=${target}`);
+  }
+  console.log(`\n  wrote ${target}\n`);
 }
 
 main().catch((e) => {
