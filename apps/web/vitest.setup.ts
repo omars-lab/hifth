@@ -1,5 +1,15 @@
 /// <reference types="@testing-library/jest-dom" />
 import "@testing-library/jest-dom/vitest";
+import { loadStrings } from "./src/i18n";
+import { LOCALE_IDS } from "./src/messages/locales.gen";
+
+/**
+ * Every interface language, loaded before any test runs. The app loads only the
+ * reader's language, before its first render (main.tsx); a unit test renders
+ * components directly, with no such step, and many of them read the Arabic
+ * default outside any provider. So they are loaded here once, for every file.
+ */
+await Promise.all(LOCALE_IDS.map((id) => loadStrings(id)));
 
 /**
  * A unit test that reaches the network is always a bug, but it is a bug that

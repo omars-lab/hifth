@@ -4,6 +4,8 @@ import { resolve } from "node:path";
 import { defineConfig, type Plugin } from "vite";
 import react from "@vitejs/plugin-react";
 import { VitePWA } from "vite-plugin-pwa";
+import { preloadScript } from "./src/lang-preload";
+import { LOCALE_IDS } from "./src/messages/locales.gen";
 
 /**
  * The commit this bundle was built from.
@@ -66,6 +68,37 @@ function dropPrivateUnlessPitch(): Plugin {
   };
 }
 
+/**
+ * Start the reader's interface language downloading as soon as index.html is
+ * read, in parallel with the app's main script. Each language is its own file
+ * (see `messages/catalogs.gen.ts`), and without this the app would only ask for
+ * it once its own code had arrived and run: one extra round trip before the
+ * first paint. The script that picks the language is in `src/lang-preload.ts`.
+ */
+function preloadReaderLanguage(): Plugin {
+  return {
+    name: "hifth-preload-reader-language",
+    apply: "build",
+    transformIndexHtml: {
+      order: "post",
+      handler(_html, ctx) {
+        if (!ctx.bundle) return;
+        const chunks = Object.values(ctx.bundle).filter((c) => c.type === "chunk");
+        const files: Record<string, string[]> = {};
+        for (const c of chunks) {
+          const id = /\/messages\/(\w+)\.gen\.ts$/.exec(c.facadeModuleId ?? "")?.[1];
+          if (id && id !== "catalog") files[id] = [c.fileName, ...c.imports].map((f) => `./${f}`);
+        }
+        const missing = LOCALE_IDS.filter((id) => !files[id]);
+        if (missing.length) {
+          throw new Error(`preloadReaderLanguage: no separate file for ${missing.join(", ")}`);
+        }
+        return [{ tag: "script", children: preloadScript(files), injectTo: "head" }];
+      },
+    },
+  };
+}
+
 export default defineConfig({
   base: "./",
   define: {
@@ -78,6 +111,7 @@ export default defineConfig({
   },
   plugins: [
     dropPrivateUnlessPitch(),
+    preloadReaderLanguage(),
     react(),
     VitePWA({
       registerType: "prompt",

@@ -1,9 +1,13 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it } from "vitest";
 import { Colophon } from "./components/Colophon";
-import { AR, EN, LangProvider, stringsFor, useT } from "./i18n";
+import { LangProvider, stringsFor, useT } from "./i18n";
 import { LANG_STORAGE_KEY, LOCALES, detectLang, dirOf } from "./lang";
 import { LOCALE_IDS } from "./messages/locales.gen";
+
+/** Arabic and English by name. Both are loaded by the unit tests' setup file. */
+const AR = stringsFor("ar");
+const EN = stringsFor("en");
 
 /** Any Arabic letter — the range that must not appear in an English string. */
 const ARABIC = /[؀-ۿ]/;
