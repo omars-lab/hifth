@@ -1,5 +1,7 @@
 # Memory index
 
+- [Heading-questions answerable cold](heading-questions-answerable-cold.md) — a heading can be jargon-free, be a question, and still be opaque if it's abstract/analogy-shaped; test: could a stranger answer it without decoding a metaphor?
+
 - [Hifth app identity](hifth-app-identity.md) — Quran navigation app for huffaz, renamed from "Linker", loops plan in docs/PLAN.md
 - [Artifacts in English by default](artifacts-english-by-default.md) — mocks/walkthroughs use English chrome, only scripture stays Arabic; watch published artifacts for feedback
 - [Desktop edge-grab page turn](desktop-edge-grab-turn.md) — desktop spread turns by grabbing the outer fore-edge (hand cursor); mid-page drags never turn
@@ -11,3 +13,31 @@
 - [Golden re-baseline recipe](golden-rebaseline-recipe.md) — show the owner the diff and ask first; then `make golden-update`; only the darwin set exists since 2026-09-27
 - [QUL verse→URL mapping](qul-verse-url-mapping.md) — /cms/verses/N where N is the global 1-based ayah ordinal (1:1→1, 2:1→8); derivable from AYAH_COUNTS
 - [Decisions must be recorded at the source](decisions-must-be-recorded-at-the-source.md) — a verbal choice that never reaches docs/decisions.json does not stick; owner picked H for mark-placement many times because the row stayed "open"; write it the same turn
+- [QUL licensing & downloads](qul-licensing.md) — QUL /download is login-gated but 302-redirects to a public Wasabi S3 object (curl-able once resolved); licence is per-resource (FAQ #3/#9), attribute even for zero-byte ruler use
+- [QUL gap: derive first, import last](qul-gap-record-dont-import.md) — a ruler gap is often derivable from our OWN vendored build-time data (QAC), closing it WITHOUT reopening copy-nothing; that's what decided similar-ayah-enrichment=D on 2026-09-03 (twins 635→3 gap). Only if underivable, record an OPEN decision framed as reopening the boundary; always draw + eye-check
+- [Plain language covers conversation](plain-language-covers-conversation.md) — no-jargon rule applies to how I talk to the owner too, not only checked-in pages; project CLAUDE.md
+- [Segmentation witness technique](segmentation-witness-technique.md) — corroborate a split/join disagreement with a third corpus: count the tag-independent split signature (bare stemless particle token = 0 → categorical join), prove independence by measuring divergence, frame as convention-not-error
+- [hifth Supabase via CLI](hifth-supabase-via-cli.md) — provision/manage hifth Supabase with the CLI on a separate account, not the connected MCP (earlbear is at its 2-project free cap)
+- [QUL ETL plugin tenet](qul-etl-plugin-tenet.md) — two complementary Qur'an-data ETLs (derive-and-measure + held-copy) as plugins behind one interface; distinct licence checks; decision qul-etl-plugins=B
+- [QUL signed-in download permission](qul-signed-in-download-permission.md) — standing yes (2026-09-08) to download gated QUL resources via the owner's signed-in Chrome; if signed out, ask them to sign in
+- [QPC V4 font is per page](qpc-v4-font-is-per-page.md) — pN.ttf per page (FC41+ codepoints); QUL 240 = per-page pack (cached, gitignored), 462 Nastaleeq = wrong text face; black cut on static.qurancdn.com
+- [perl \x{NNNN} corrupts the whole file](perl-unicode-codepoint-corrupts-file.md) — a Unicode escape in a perl -pi/-0777 replacement re-encodes the ENTIRE file to UTF-8, mangling every pre-existing multibyte char (incl. the Arabic held-copy guards); use the Edit tool or literal bytes \xe2\x80\x94, never \x{2014}
+- [Chrome JS tool query-string block](chrome-js-tool-query-string-block.md) — javascript_tool returns "[BLOCKED: Cookie/query string data]" when the page URL has a ?query; return void 0 instead of a string
+- [POC for Study Quran team](poc-for-study-quran-team.md) — Hifth is a personal POC, not a release; rush a qualitative demo to pitch The Study Quran team for collaboration buy-in
+- [Bias to demos over upfront pros/cons](bias-to-demos-over-reading.md) — build a rough POC to discover nuances no upfront analysis lists; tenet added to project CLAUDE.md
+- [QUL page-preview witness decision](qul-page-preview-witness-decision.md) — owner said GO (2026-09-20, #66) on wiring QUL's login-gated page-preview as a redundant 4th page-registration witness (positions only, zero bytes); blocked on gated access; decision record + attribution owed
+- [make guide serves and blocks](make-guide-serves-and-blocks.md) — `make guide` renders guide.html THEN starts a blocking server on :4174; background it, confirm line 1 wrote the file, then TaskStop — never wait for it to return
+- [Validation docs & script-integrity gap](validation-docs-and-script-integrity-gap.md) — the 3 validation docs (how-we-earned-your-trust = corpus/witnesses, mark-registration = placement, robust-validation = by-eye rebuild + script integrity); biggest gap: data is pinned, code isn't; 5 proposed closers
+- [Present options with pros/cons/implications](present-options-with-pros-cons-implications.md) — every option in a decision/AskUserQuestion carries pros, cons AND implications side by side, not a bare label+cost; codified in global CLAUDE.md
+- [offsetLeft ignores transforms](offsetleft-ignores-transforms.md) — read an element's REST position mid-warp via offsetLeft/offsetWidth (layout, transform-free), never getBoundingClientRect or a hand-derived RTL formula (drifted ~21px, mis-centred the page-bar grow)
+- [Delegate independent work to commit on branch](delegate-independent-work-to-commit-on-branch.md) — owner (2026-09-22): once main work is committed, carve out disjoint backlog items for subagents that commit straight to the branch; carve by file-set (one worktree), fresh agent + full git discipline in the brief
+- [No unactionable warnings in the UI](no-unactionable-warnings-in-ui.md) — a warning the reader cannot act on goes to the backlog, not a banner (owner, 2026-09-25)
+- [Hafiz impact in every decision](hafiz-impact-in-every-decision.md) — each option says what it changes for a hafiz mid-revision; rank features by that (look-alikes first), text correctness is a separate track
+- [Fundamentals first, minimal](fundamentals-first-minimal.md) — find the cause, say what is the same, one real example, then options; short; owner 2026-09-26
+- [No held text in PR bodies](no-held-text-in-pr-bodies.md) — commit/PR text is public; describe the change, never quote Study Quran translation or commentary
+- [Standing merge approval](standing-merge-approval.md) — hifth/bikar/qiyas (not 3d-print repos): merge my green PRs and continue; never end on "shall I merge?" (Stop hook installed in all three; check CI is actually green first)
+- [Nothing too small to fix](nothing-too-small-to-fix.md) — every noticed issue/inconsistency gets fixed with a test; never waved off as too small (owner 2026-09-27)
+- [Checks local, not CI](checks-local-not-ci.md) — Actions spend runs out fast; checks go in local hooks (always run, sole dev); CI only for what can't run locally
+- [Owner uses Firefox](owner-uses-firefox.md) — reports that don't reproduce in Chrome: try Firefox; pinned Playwright Firefox installed, desktop-firefox project runs on push
+- [Short-first guides, Mermaid for processes](short-first-guides-mermaid.md) — working pages lead with the short version, detail folded; order/branches drawn as Mermaid (owner 2026-09-28)
+- [Park manual reviews](park-manual-reviews.md) — never push by-hand checks at the owner; add to manual-testing checklist, turn each verdict into a test
