@@ -321,10 +321,20 @@ export function App(): JSX.Element {
       begin: (step) => stageRef.current?.beginEdgeTurn(step),
       track: (dx) => stageRef.current?.trackEdgeTurn(dx),
       release: (dx, velocityX, held) => stageRef.current?.releaseEdgeTurn(dx, velocityX, held) ?? false,
-      finish: (step) => stageRef.current?.finishEdgeTurn(step),
+      finish: (step) => {
+        // The leaf is already over: this step lands, it does not play again.
+        peelLandingRef.current = true;
+        stageRef.current?.finishEdgeTurn(step);
+      },
     }),
     [],
   );
+  // On an open book an arrow, the wheel or a slider button turns the leaf the
+  // way a hand does — the corner-pull's peel, played — so both pages of the new
+  // opening land together (owner, 2026-09-28: the old turn swapped one page, showed
+  // a mismatched pair, then swapped the other). The rails fill this in.
+  const playTurnRef = useRef<((step: 1 | -1) => boolean) | null>(null);
+  const peelLandingRef = useRef(false);
   /*
    * The stage's four imperative verbs, wrapped once, so that the readout above
    * cannot drift from the paper below it.
@@ -1300,6 +1310,8 @@ export function App(): JSX.Element {
       if (pageTurns.pages.length === 0) return;
       const here = pendingPageRef.current;
       const next = pageAfter(step);
+      if (peelLandingRef.current) peelLandingRef.current = false;
+      else if (bookOpenRef.current && next !== null && playTurnRef.current?.(step)) return;
       if (next === null) {
         // Naming the page matters most here, where nothing moved: without it
         // the reader has a gesture that did nothing and no idea where they are.
@@ -2114,6 +2126,7 @@ export function App(): JSX.Element {
                     peel={manifest ? peelPagesOf(manifest.edition, page, totalPages, pageTurns.pages) : undefined}
                     turnStyle={turnStyle}
                     opening={page}
+                    playRef={playTurnRef}
                   />
                 ) : undefined
               }

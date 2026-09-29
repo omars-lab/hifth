@@ -193,6 +193,60 @@ test.describe("Hifth · lifting a page by its corner", () => {
     await expect(page.locator(NUM)).toHaveText("9");
   });
 
+  // Owner, 2026-09-28 (Firefox): "transition into new pages is weird with
+  // arrows". The arrow turn swapped the right page first, cross-faded it, and
+  // for a moment showed the new right page beside the old left one. An arrow on
+  // an open book now plays the same peel a hand does: every frame shows the old
+  // opening, the leaf going over, or the new opening — never half of each.
+  test("an arrow turn goes over like a hand's and never shows a mismatched pair", async ({ page }) => {
+    await page.goto("/#/hafs-kfqc/p7");
+    await expect(pageSvg(page, 8)).toBeVisible();
+    await expect(pageSvg(page, 7)).toBeVisible();
+    await page.evaluate(() => {
+      const w = window as unknown as { __frames: string[]; __out: number[] };
+      w.__frames = [];
+      w.__out = [];
+      const t0 = performance.now();
+      const tick = () => {
+        const drawn = [...document.querySelectorAll('[data-testid="page-book"] svg[aria-labelledby^="page-label-"]')]
+          .filter((e) => e.getBoundingClientRect().width > 0 && e.querySelector("path"))
+          .map((e) => Number(e.getAttribute("aria-labelledby")!.slice("page-label-".length)))
+          .sort((a, b) => a - b)
+          .join(",");
+        const peeled = document.querySelector('[data-testid="edge-peel"]') ? "peel" : "flat";
+        w.__frames.push(`${peeled} ${drawn}`);
+        // How far the visible flap stands outside the paper: its clip outline,
+        // carried through its transform (origin 0 0), against the peel layer,
+        // which is the paper's own box.
+        const layer = document.querySelector<HTMLElement>('[data-testid="edge-peel"]');
+        const flap = document.querySelector<HTMLElement>('[data-testid="edge-peel-flap"]');
+        if (layer && flap) {
+          const m = (flap.style.transform.match(/-?[\d.]+/g) ?? []).map(Number);
+          const pts = (flap.style.clipPath.match(/-?[\d.]+px -?[\d.]+px/g) ?? []).map((q) => q.split(" ").map(parseFloat));
+          const ys = pts.map(([x, y]) => m[1]! * x! + m[3]! * y! + m[5]!);
+          w.__out.push(Math.max(0, -Math.min(...ys), Math.max(...ys) - layer.clientHeight));
+        }
+        if (performance.now() - t0 < 2500) requestAnimationFrame(tick);
+      };
+      requestAnimationFrame(tick);
+    });
+
+    await page.keyboard.press("ArrowLeft");
+    await expect(page.locator(NUM)).toHaveText("9");
+    await expect(pageSvg(page, 10)).toBeVisible();
+    await page.waitForTimeout(2600);
+
+    const frames = await page.evaluate(() => (window as unknown as { __frames: string[] }).__frames);
+    const bad = frames.filter((f) => f.startsWith("flat") && f !== "flat 7,8" && f !== "flat 9,10");
+    expect(bad, "a frame showed half of one opening and half of the other").toEqual([]);
+    expect(frames.some((f) => f.startsWith("peel")), "the leaf never went over").toBe(true);
+    // And, as the owner asked of the hand's corner (#198), the leaf never stands
+    // above or below the paper on its way over.
+    const out = await page.evaluate(() => (window as unknown as { __out: number[] }).__out);
+    expect(out.length, "the flap was never measured").toBeGreaterThan(3);
+    expect(Math.max(...out), "the turning leaf stood outside the paper").toBeLessThan(1);
+  });
+
   test("the right edge lifts toward the earlier pages", async ({ page }) => {
     await openAt8(page);
 
