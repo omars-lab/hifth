@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hifth app links</title>
+<style>
+:root { color-scheme: light; }
+body { margin: 0; padding: 24px 16px 64px; background: #f4efe6; color: #26201a; font: 16px/1.5 -apple-system, "Segoe UI", system-ui, sans-serif; }
+main { max-width: 900px; margin: 0 auto; }
+h1 { font-size: 1.8rem; margin: 0 0 4px; }
+h2 { font-size: 1.3rem; margin: 40px 0 4px; color: #17544d; }
+h3 { font-size: 1rem; margin: 20px 0 6px; }
+h4 { font-size: 0.95rem; margin: 14px 0 4px; }
+p { margin: 8px 0; }
+code { font: 0.9em ui-monospace, SFMono-Regular, Menlo, monospace; background: #ece4d6; padding: 1px 4px; border-radius: 4px; }
+code.url { word-break: break-all; }
+.path code { font-size: 1.05rem; background: #d7e7e3; color: #17544d; }
+.faint { color: #6b6255; font-size: 0.9em; }
+.req { color: #b3402f; font-size: 0.8em; }
+table { border-collapse: collapse; width: 100%; background: #fbf8f2; font-size: 0.93rem; }
+th, td { text-align: left; vertical-align: top; padding: 6px 8px; border-bottom: 1px solid #ece4d6; }
+th { font-weight: 600; color: #5c5347; }
+td p { margin: 0 0 4px; }
+nav a { margin-right: 14px; color: #1f6f66; }
+.meta { color: #5c5347; font-size: 0.9rem; }
+@media (max-width: 640px) { table, thead, tbody, tr { display: block; } th { display: none; } td { display: block; border: 0; } tr { border-bottom: 1px solid #ece4d6; padding: 6px 0; } }
+</style>
+</head>
+<body>
+<main>
+<h1>Hifth app links</h1>
+<p class="meta">Version 1.0.0 · rendered from <code>docs/design/app-url-scheme.openapi.json</code> by <code>scripts/build-app-url-scheme.mjs</code>. Every example below is run through the app's own parser by its tests, so the table says what the app does, not what it was meant to do.</p>
+<p>The app is not a web server. These are <code>hifth://</code> links the operating system hands to the installed app: from a tapped link, from Shortcuts, from a script (<code>open</code>, <code>xcrun simctl openurl</code>). OpenAPI is used here as a way to write the contract down in one place that both people and tests read: <code>native/HifthTests/XCallbackTests.swift</code> runs every example under <code>x-examples</code> through the real parser, and <code>docs/design/app-url-scheme.html</code> is rendered from this file by <code>scripts/build-app-url-scheme.mjs</code>.</p>
+<p>Two kinds of address. A <strong>plain link</strong> (<code>hifth:///hafs-kfqc/2:255</code>) turns the page and says nothing back; a bad one is ignored. An <strong>x-callback-url request</strong> (<code>hifth://x-callback-url/open?route=…&amp;x-success=…</code>) does one action and then opens the caller's own address with the result, following the x-callback-url convention (x-callback-url.com): <code>x-success</code>, <code>x-error</code> and <code>x-cancel</code> name where to answer, and an error answer carries <code>errorCode</code> and <code>errorMessage</code>.</p>
+<p>The route grammar is the web app's own hash, unchanged: <code>/&lt;edition&gt;/&lt;target&gt;[?query]</code>. The app only checks its shape; the web app decides what it means (<code>docs/query-params.md</code> lists the query keys).</p>
+<nav><a href="#openLink">Plain link</a><a href="#xOpen">Open the app at a route, then tell the caller</a><a href="#xCurrent">Ask what the app is showing</a><a href="#errors">Error codes</a></nav>
+<section id="openLink">
+<h2>Plain link: open the app at a verse, a page or a run of verses</h2>
+<p class="path"><code>hifth://{edition}/{target}</code></p>
+<p>The same string as the public site's <code>#/…</code> link, after <code>hifth://</code>. Three spellings are accepted because people paste all three: <code>hifth:///hafs-kfqc/2:255</code>, <code>hifth://hafs-kfqc/2:255</code>, and <code>hifth://open/#/hafs-kfqc/2:255</code> (a site link's tail). If the app is not running it launches there; if it is, it turns the page. Nothing is sent back, and a link that is not a route is ignored. Use <code>/x-callback-url/open</code> when you need to know it worked.</p>
+<h3>Parameters</h3>
+<table><thead><tr><th>key</th><th>where</th><th>values</th><th>what it does</th></tr></thead><tbody>
+<tr><td><code>edition</code> <span class="req">required</span></td><td>path</td><td>string, matching <code>^[a-z0-9-]+$</code></td><td><p>Which mus'haf. Lower-case letters, digits and dashes.</p></td></tr>
+<tr><td><code>target</code> <span class="req">required</span></td><td>path</td><td>string, matching <code>^(p[1-9][0-9]*|[1-9][0-9]*:[1-9][0-9]*(-([1-9][0-9]*:)?[1-9][0-9]*)?)$</code></td><td><p>A page (<code>p45</code>), a verse (<code>2:255</code>), a run of verses (<code>2:47-2:48</code> or <code>2:47-48</code>). Every number starts from 1.</p></td></tr>
+<tr><td><code>query</code></td><td>query</td><td>string, matching <code>^[A-Za-z0-9\-_.~%:,=&amp;+]*$</code></td><td><p>Any of the web app's own keys, e.g. <code>w=3-7</code> (some words of the verse), <code>skin=tajweed</code>, <code>field=dark</code>. The full list and what a bad value does is <code>docs/query-params.md</code>.</p></td></tr>
+</tbody></table>
+
+<h3>Examples</h3>
+<table><thead><tr><th>link</th><th>the app does</th></tr></thead><tbody>
+<tr><td><code class="url">hifth:///hafs-kfqc/2:255</code><div class="faint"><p>A plain link with three slashes: the route is the path.</p></div></td><td><code>open #/hafs-kfqc/2:255</code></td></tr>
+<tr><td><code class="url">hifth://hafs-kfqc/p45</code><div class="faint"><p>Two slashes: the edition lands where a host would be. Still a route.</p></div></td><td><code>open #/hafs-kfqc/p45</code></td></tr>
+<tr><td><code class="url">hifth://open/#/hafs-kfqc/2:47-48?w=1-2</code><div class="faint"><p>A site link's tail pasted after hifth://open/, fragment and all.</p></div></td><td><code>open #/hafs-kfqc/2:47-48?w=1-2</code></td></tr>
+<tr><td><code class="url">hifth:///hafs-kfqc/p0</code><div class="faint"><p>Page numbers start at 1. A plain link that is not a route is ignored, silently.</p></div></td><td><code>refused</code></td></tr>
+</tbody></table>
+</section>
+<section id="xOpen">
+<h2>Open the app at a route, then tell the caller</h2>
+<p class="path"><code>hifth://x-callback-url/open</code></p>
+<p>Turns the page to the place named and, once the page is showing it, opens <code>x-success</code> with the <code>route</code> and the same place's public <code>url</code> added. Name the place plainly: <code>page=45</code>; <code>verse=2:255</code> (a run: <code>verse=2:47-48</code>) with <code>words=3-7</code> to pulse some of its words; or <code>surah=36</code> for a surah's context (its first verse, introduction first). <code>edition</code> defaults to <code>hafs-kfqc</code>. Say how to open it: <code>mode=note</code> (or <code>tool=note</code>) for the tool in hand, <code>open=commentary</code> for the verse's commentary or <code>open=context</code> for the commentary led by the surah's introduction, <code>view=one</code> or <code>view=two</code> for the layout. These three names are checked against the app's lists and a misspelt one is refused, so a caller learns about a typo instead of a page that quietly opened without it. Any other key the web app's links understand (<code>skin</code>, <code>field</code>, <code>via</code>, <code>trail</code>; see <code>docs/query-params.md</code>) is passed through as given, so <code>page=7&amp;field=dark</code> opens page 7 on the night desk. <code>route</code> is the same thing as one string, for a caller that already holds a link; when both are given, <code>route</code> wins. If nothing names a place, or the place is not in the grammar, <code>x-error</code> is opened at once. If the page never shows it (a verse that does not exist, for instance), <code>x-error</code> is opened after about eight seconds with <code>route-not-shown</code>. With neither address given the page still turns, quietly.</p>
+<h3>Parameters</h3>
+<table><thead><tr><th>key</th><th>where</th><th>values</th><th>what it does</th></tr></thead><tbody>
+<tr><td><code>page</code></td><td>query</td><td>integer</td><td><p>A page of the mus'haf, from 1. Give a page or a verse, not both.</p></td></tr>
+<tr><td><code>verse</code></td><td>query</td><td>string, matching <code>^[1-9][0-9]*:[1-9][0-9]*(-([1-9][0-9]*:)?[1-9][0-9]*)?$</code></td><td><p>One verse as <code>surah:ayah</code>, or a run within one surah as <code>2:47-48</code> or <code>2:47-2:48</code>. The verse is selected on its page; a run is highlighted.</p></td></tr>
+<tr><td><code>surah</code></td><td>query</td><td>integer, 1 to 114<div class="faint">e.g. <code>36</code></div></td><td><p>A surah's context: opens its first verse with the commentary sheet led by the surah's introduction, as <code>verse=N:1&amp;open=context</code> would. 1 to 114. Give one of page, verse or surah.</p></td></tr>
+<tr><td><code>words</code></td><td>query</td><td>string, matching <code>^[1-9][0-9]*(-[1-9][0-9]*)?$</code></td><td><p>Which words of the verse to pulse: <code>3-7</code>, or <code>5</code> for one word. Needs <code>verse</code>.</p></td></tr>
+<tr><td><code>edition</code></td><td>query</td><td>string, matching <code>^[a-z0-9-]+$</code></td><td><p>Which mus'haf. Defaults to <code>hafs-kfqc</code>, the only one shipped today.</p></td></tr>
+<tr><td><code>route</code></td><td>query</td><td></td><td><p>The place as one string in the web app's link grammar, <code>/&lt;edition&gt;/&lt;target&gt;[?query]</code>, for a caller that already holds a link. Percent-encode it, or a <code>&amp;</code> inside its query is read as the end of this parameter. Wins over <code>page</code>/<code>verse</code> when both are given.</p></td></tr>
+<tr><td><code>mode</code></td><td>query</td><td><code>read</code>, <code>select</code>, <code>highlight</code>, <code>bookmark</code>, <code>note</code>, <code>harakat</code>, <code>word</code>, <code>mistake</code>, <code>crop</code><div class="faint">e.g. <code>note</code></div></td><td><p>The mode the app opens in: the page tool put in hand on arrival, named by the word on its button. The same thing as <code>tool</code>; give one or the other. A name not in the list is refused with <code>bad-route</code>.</p></td></tr>
+<tr><td><code>tool</code></td><td>query</td><td><code>read</code>, <code>select</code>, <code>highlight</code>, <code>bookmark</code>, <code>note</code>, <code>harakat</code>, <code>word</code>, <code>mistake</code>, <code>crop</code></td><td><p>The web app's own name for <code>mode</code>. Passed through as <code>tool=</code> in the route.</p></td></tr>
+<tr><td><code>open</code></td><td>query</td><td><code>jump</code>, <code>about</code>, <code>record</code>, <code>shelf</code>, <code>key</code>, <code>editions</code>, <code>tips</code>, <code>lookalikes</code>, <code>roots</code>, <code>commentary</code>, <code>context</code><div class="faint">e.g. <code>commentary</code></div></td><td><p>A panel open on arrival. <code>commentary</code> opens the named verse's commentary (tafsir); <code>context</code> opens it led by the surah's introduction. Both need a verse, and exist only in a build that holds commentary (the private pitch build) — the public app opens the verse and drops the panel. The rest are the app's own panels: go-to, about, the revision record, the record at juz scope, the tajweed colour key, the mus'haf picker, the tips strip, a verse's look-alikes, a verse's roots. A name not in the list is refused with <code>bad-route</code>.</p></td></tr>
+<tr><td><code>view</code></td><td>query</td><td><code>one</code>, <code>two</code><div class="faint">e.g. <code>two</code></div></td><td><p>One page or two side by side on arrival, on a screen wide enough for two. A phone always shows one.</p></td></tr>
+<tr><td><code>skin</code></td><td>query</td><td><code>tajweed</code></td><td><p><code>tajweed</code> turns the tajweed colours on. One of the web app's own keys, passed through; the others in <code>docs/query-params.md</code> pass the same way.</p></td></tr>
+<tr><td><code>field</code></td><td>query</td><td>string</td><td><p>The desk colour the mus'haf lies on, e.g. <code>dark</code> or <code>tan</code>. Passed through; an unknown value falls back to the default desk.</p></td></tr>
+<tr><td><code>x-success</code></td><td>query</td><td>string, uri</td><td><p>Where to answer when the action worked. Any app's address (<code>shortcuts://…</code>, <code>drafts://…</code>, <code>https://…</code>). The answer's parameters are added to its query. Ignored if it points back into this app, or at a file or a script.</p></td></tr>
+<tr><td><code>x-error</code></td><td>query</td><td>string, uri</td><td><p>Where to answer when the action failed. Opened with <code>errorCode</code> and <code>errorMessage</code> added, as the x-callback-url convention names them. Same safety rule as x-success.</p></td></tr>
+<tr><td><code>x-cancel</code></td><td>query</td><td>string, uri</td><td><p>Accepted for completeness and never opened: neither action here can be cancelled by the reader.</p></td></tr>
+<tr><td><code>x-source</code></td><td>query</td><td>string</td><td><p>The calling app's name, per the convention. Accepted and not used; the app shows no 'back to' button.</p></td></tr>
+</tbody></table>
+<h3>What comes back</h3>
+<h4>success <span class="faint">— opens <code>{$request.query.x-success}</code></span></h4>
+<p>Opened by the app when the action worked</p>
+<table><thead><tr><th>key</th><th>where</th><th>values</th><th>what it does</th></tr></thead><tbody>
+<tr><td><code>route</code> <span class="req">required</span></td><td>query</td><td></td><td><p>What is on screen, in the same shape the caller sends (no <code>#</code>).</p></td></tr>
+<tr><td><code>url</code> <span class="req">required</span></td><td>query</td><td>string, uri</td><td><p>The same place on the public site, ready to share.</p></td></tr>
+</tbody></table>
+<h4>error <span class="faint">— opens <code>{$request.query.x-error}</code></span></h4>
+<p>Opened by the app when the action failed</p>
+<table><thead><tr><th>key</th><th>where</th><th>values</th><th>what it does</th></tr></thead><tbody>
+<tr><td><code>errorCode</code> <span class="req">required</span></td><td>query</td><td></td><td><p></p></td></tr>
+<tr><td><code>errorMessage</code> <span class="req">required</span></td><td>query</td><td>string</td><td><p>One plain sentence for a person, e.g. <code>not a route: chapter-2</code>.</p></td></tr>
+</tbody></table>
+<h3>Examples</h3>
+<table><thead><tr><th>link</th><th>the app does</th></tr></thead><tbody>
+<tr><td><code class="url">hifth://x-callback-url/open?page=45&amp;x-success=shortcuts://x-callback-url/run-shortcut?name=Next</code><div class="faint"><p>Open page 45, said plainly. No encoding needed.</p></div></td><td><code>open #/hafs-kfqc/p45</code></td></tr>
+<tr><td><code class="url">hifth://x-callback-url/open?verse=2:255&amp;words=3-7&amp;x-success=shortcuts://x-callback-url/run-shortcut?name=Next</code><div class="faint"><p>Select Al-Baqarah 2:255 and pulse its words 3 to 7.</p></div></td><td><code>open #/hafs-kfqc/2:255?w=3-7</code></td></tr>
+<tr><td><code class="url">hifth://x-callback-url/open?verse=2:47-48&amp;skin=tajweed&amp;field=dark</code><div class="faint"><p>Highlight a run of verses in tajweed colours on the night desk. skin and field pass through to the web app.</p></div></td><td><code>open #/hafs-kfqc/2:47-48?skin=tajweed&amp;field=dark</code></td></tr>
+<tr><td><code class="url">hifth://x-callback-url/open?verse=2:255&amp;open=commentary&amp;x-success=shortcuts://x-callback-url/run-shortcut?name=Next</code><div class="faint"><p>Straight into a verse's commentary (tafsir), in a build that holds it.</p></div></td><td><code>open #/hafs-kfqc/2:255?open=commentary</code></td></tr>
+<tr><td><code class="url">hifth://x-callback-url/open?verse=2:255&amp;open=context&amp;x-success=shortcuts://x-callback-url/run-shortcut?name=Next</code><div class="faint"><p>The same note, led by al-Baqarah's introduction.</p></div></td><td><code>open #/hafs-kfqc/2:255?open=context</code></td></tr>
+<tr><td><code class="url">hifth://x-callback-url/open?surah=36&amp;x-success=shortcuts://x-callback-url/run-shortcut?name=Next</code><div class="faint"><p>A surah's context: its first verse, introduction first.</p></div></td><td><code>open #/hafs-kfqc/36:1?open=context</code></td></tr>
+<tr><td><code class="url">hifth://x-callback-url/open?page=7&amp;mode=note&amp;x-success=shortcuts://x-callback-url/run-shortcut?name=Next</code><div class="faint"><p>Open in note mode: the note tool is in hand on arrival.</p></div></td><td><code>open #/hafs-kfqc/p7?tool=note</code></td></tr>
+<tr><td><code class="url">hifth://x-callback-url/open?verse=2:255&amp;mode=highlight&amp;view=one&amp;x-success=shortcuts://x-callback-url/run-shortcut?name=Next</code></td><td><code>open #/hafs-kfqc/2:255?tool=highlight&amp;view=one</code></td></tr>
+<tr><td><code class="url">hifth://x-callback-url/open?page=7&amp;mode=notes&amp;x-error=shortcuts://x-callback-url/run-shortcut?name=Log%20failure</code><div class="faint"><p>A mode that is not in the list is refused, not quietly dropped.</p></div></td><td><code>error bad-route</code></td></tr>
+<tr><td><code class="url">hifth://x-callback-url/open?verse=2:255&amp;open=tafsir&amp;x-error=shortcuts://x-callback-url/run-shortcut?name=Log%20failure</code><div class="faint"><p>The panel is called commentary, not tafsir.</p></div></td><td><code>error bad-route</code></td></tr>
+<tr><td><code class="url">hifth://x-callback-url/open?surah=115&amp;x-error=shortcuts://x-callback-url/run-shortcut?name=Log%20failure</code></td><td><code>error bad-route</code></td></tr>
+<tr><td><code class="url">hifth://x-callback-url/open?page=45&amp;verse=2:255&amp;x-error=shortcuts://x-callback-url/run-shortcut?name=Log%20failure</code><div class="faint"><p>A page and a verse at once: the app cannot know which you meant.</p></div></td><td><code>error bad-route</code></td></tr>
+<tr><td><code class="url">hifth://x-callback-url/open?words=3-7&amp;x-error=shortcuts://x-callback-url/run-shortcut?name=Log%20failure</code><div class="faint"><p>Words without a verse.</p></div></td><td><code>error bad-route</code></td></tr>
+<tr><td><code class="url">hifth://x-callback-url/open?route=/hafs-kfqc/2:255&amp;x-success=shortcuts://x-callback-url/run-shortcut?name=Log%20verse&amp;x-error=shortcuts://x-callback-url/run-shortcut?name=Log%20failure</code><div class="faint"><p>Open a verse from Shortcuts; the answer runs one shortcut on success and another on failure.</p></div></td><td><code>open #/hafs-kfqc/2:255</code></td></tr>
+<tr><td><code class="url">hifth://x-callback-url/open?route=%2Fhafs-kfqc%2F2%3A255%3Fw%3D3-7%26skin%3Dtajweed&amp;x-success=drafts://x-callback-url/create</code><div class="faint"><p>A route with its own query, percent-encoded so its &amp; is not read as the end of the route.</p></div></td><td><code>open #/hafs-kfqc/2:255?w=3-7&amp;skin=tajweed</code></td></tr>
+<tr><td><code class="url">hifth://x-callback-url/open?x-error=shortcuts://x-callback-url/run-shortcut?name=Log%20failure</code><div class="faint"><p>No route given: x-error is opened at once with errorCode=missing-route.</p></div></td><td><code>error missing-route</code></td></tr>
+<tr><td><code class="url">hifth://x-callback-url/open?route=chapter-2&amp;x-error=shortcuts://x-callback-url/run-shortcut?name=Log%20failure</code><div class="faint"><p>Not in the grammar: errorCode=bad-route, errorMessage=not a route: chapter-2.</p></div></td><td><code>error bad-route</code></td></tr>
+</tbody></table>
+</section>
+<section id="xCurrent">
+<h2>Ask what the app is showing</h2>
+<p class="path"><code>hifth://x-callback-url/current</code></p>
+<p>Opens <code>x-success</code> with the <code>route</code> on screen and its public <code>url</code>. If nothing is on screen yet (the app was just launched by this request), the answer waits for the first page to show. There is no error case beyond a missing <code>x-success</code>, which means no answer.</p>
+<h3>Parameters</h3>
+<table><thead><tr><th>key</th><th>where</th><th>values</th><th>what it does</th></tr></thead><tbody>
+<tr><td><code>x-success</code></td><td>query</td><td>string, uri</td><td><p>Where to answer when the action worked. Any app's address (<code>shortcuts://…</code>, <code>drafts://…</code>, <code>https://…</code>). The answer's parameters are added to its query. Ignored if it points back into this app, or at a file or a script.</p></td></tr>
+<tr><td><code>x-error</code></td><td>query</td><td>string, uri</td><td><p>Where to answer when the action failed. Opened with <code>errorCode</code> and <code>errorMessage</code> added, as the x-callback-url convention names them. Same safety rule as x-success.</p></td></tr>
+<tr><td><code>x-cancel</code></td><td>query</td><td>string, uri</td><td><p>Accepted for completeness and never opened: neither action here can be cancelled by the reader.</p></td></tr>
+<tr><td><code>x-source</code></td><td>query</td><td>string</td><td><p>The calling app's name, per the convention. Accepted and not used; the app shows no 'back to' button.</p></td></tr>
+</tbody></table>
+<h3>What comes back</h3>
+<h4>success <span class="faint">— opens <code>{$request.query.x-success}</code></span></h4>
+<p>Opened by the app when the action worked</p>
+<table><thead><tr><th>key</th><th>where</th><th>values</th><th>what it does</th></tr></thead><tbody>
+<tr><td><code>route</code> <span class="req">required</span></td><td>query</td><td></td><td><p>What is on screen, in the same shape the caller sends (no <code>#</code>).</p></td></tr>
+<tr><td><code>url</code> <span class="req">required</span></td><td>query</td><td>string, uri</td><td><p>The same place on the public site, ready to share.</p></td></tr>
+</tbody></table>
+<h3>Examples</h3>
+<table><thead><tr><th>link</th><th>the app does</th></tr></thead><tbody>
+<tr><td><code class="url">hifth://x-callback-url/current?x-success=drafts://x-callback-url/create</code><div class="faint"><p>Ask what is on screen; Drafts gets a new draft with route=… and url=… in its query.</p></div></td><td><code>current</code></td></tr>
+<tr><td><code class="url">hifth://x-callback-url/current?x-success=hifth://x-callback-url/current</code><div class="faint"><p>An answer address that points back into this app is dropped, so a request cannot answer itself for ever.</p></div></td><td><code>current</code></td></tr>
+</tbody></table>
+</section>
+<section id="errors">
+<h2>Error codes</h2>
+<p>An <code>x-error</code> answer carries <code>errorCode</code>, one of <code>missing-route</code>, <code>bad-route</code>, <code>unknown-action</code>, <code>route-not-shown</code>, and a plain <code>errorMessage</code>.</p>
+<p><code>missing-route</code>: open named no page, verse, surah or route. <code>bad-route</code>: the place is not in the grammar (a page of 0, two places at once, words without a verse, a surah past 114), or a mode, panel or view name not in the app's lists. <code>unknown-action</code>: the path after x-callback-url is not open or current. <code>route-not-shown</code>: the place was accepted but the page never showed it.</p>
+</section>
+<section id="more"><h2>Other examples</h2><table><tbody><tr><td><code class="url">hifth://x-callback-url/bookmark?route=/hafs-kfqc/p1&amp;x-error=shortcuts://x-callback-url/run-shortcut?name=Log%20failure</code><div class="faint"><p>Only open and current exist. Anything else answers errorCode=unknown-action.</p></div></td><td><code>error unknown-action</code></td></tr></tbody></table></section>
+</main>
+</body>
+</html>
