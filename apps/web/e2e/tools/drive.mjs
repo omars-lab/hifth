@@ -48,7 +48,8 @@
  * --video <path>.webm records the whole run; --video <path>.gif records it and
  * turns it into a GIF with ffmpeg (--gif-width, default 720; --gif-fps, default
  * 15). A recording is made fresh whenever it is wanted, so it is not committed;
- * the command that makes it is what is kept (e2e/drive-video.spec.ts runs one).
+ * the command that makes it is what is kept. The record-demo skill is the guide;
+ * e2e/drive-video.spec.ts runs one.
  *
  * A deep-link hash reaches most states with no clicks at all: `#/hafs-kfqc/2:48`
  * selects that verse, `#/hafs-kfqc/p19` opens page 19. See e2e/deeplink.spec.ts.
