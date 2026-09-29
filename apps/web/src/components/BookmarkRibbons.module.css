@@ -50,14 +50,28 @@
 }
 
 /* The page beneath, where the corner was: the same paper with its own top
-   edge, and none of the top page's ink. */
+   edge, and none of the top page's ink. Its outer tip follows the leaf's
+   rounded corner, so it never shows past the paper onto the desk: the curve
+   is 20px round (--radius-leaf) and starts 12px outside the fold (the page
+   edges and their border), which puts it 1.67px down at the fold's outer side
+   and back at the top 8px in. Four straight steps along it, each just inside
+   the curve. The numbers follow those three tokens; change them together. */
 .foldUnder {
+  --u: calc(var(--leaf-z, 1) * 1px);
   position: absolute;
   top: 0;
   left: 0;
   inline-size: calc(var(--dog-ear, 16px) * var(--leaf-z, 1));
   block-size: calc(var(--dog-ear, 16px) * var(--leaf-z, 1));
-  clip-path: polygon(0 0, 100% 0, 0 100%);
+  clip-path: polygon(
+    0 calc(1.8 * var(--u)),
+    calc(2 * var(--u)) calc(1 * var(--u)),
+    calc(4 * var(--u)) calc(0.5 * var(--u)),
+    calc(6 * var(--u)) calc(0.2 * var(--u)),
+    calc(8 * var(--u)) 0,
+    100% 0,
+    0 100%
+  );
   background: linear-gradient(
     to bottom,
     var(--leaf-edge) 0 calc(var(--leaf-edge-width) * var(--leaf-z, 1)),
@@ -69,7 +83,15 @@
 :global([data-free-side="right"]) .foldUnder {
   left: auto;
   right: 0;
-  clip-path: polygon(0 0, 100% 0, 100% 100%);
+  clip-path: polygon(
+    100% calc(1.8 * var(--u)),
+    calc(100% - 2 * var(--u)) calc(1 * var(--u)),
+    calc(100% - 4 * var(--u)) calc(0.5 * var(--u)),
+    calc(100% - 6 * var(--u)) calc(0.2 * var(--u)),
+    calc(100% - 8 * var(--u)) 0,
+    0 0,
+    100% 100%
+  );
 }
 
 /* The flap casts its shadow onto the page. A filter on the parent, because the
