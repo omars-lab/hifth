@@ -1,7 +1,8 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { Suspense, useCallback, useEffect, useRef, useState } from "react";
 import { wordDiff, type AppState, type LeafSide, type MergedEdge } from "@hifth/core";
 import { useT } from "../i18n";
-import { DiffView } from "./DiffView";
+// Loaded the first time a look-alike is opened out (see ./later.tsx).
+import { DiffView } from "./later";
 import { ShareSheet } from "./ShareSheet";
 import styles from "./HighlightMenu.module.css";
 
@@ -225,7 +226,9 @@ export function HighlightMenu({
                   </div>
                   {isOpen && diffable && (
                     <div id={diffId}>
-                      <DiffView edge={edge} fromKey={fromKey} />
+                      <Suspense fallback={null}>
+                        <DiffView edge={edge} fromKey={fromKey} />
+                      </Suspense>
                     </div>
                   )}
                 </li>

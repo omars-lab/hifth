@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   Adjacency,
   Concordance,
@@ -74,9 +74,20 @@ import { DESKTOP_QUERY, useMediaQuery } from "./useMediaQuery";
 import { PageStage, type PageStageHandle, type PageTool, type WordRect } from "./components/PageStage";
 import { PageToolbar, TOOL_KEYS, toolHint, toolName } from "./components/PageToolbar";
 import { PhoneToolbarA, PhoneToolbarB, PhoneToolbarC, phoneBarFromUrl } from "./components/PhoneToolbar";
-import { NoteBox } from "./components/NoteBox";
-import { WordParts, useWordParts } from "./components/WordParts";
-import { CropSheet, type CropBox } from "./components/CropSheet";
+// Opened by few readers and never before the page is up: loaded on first open.
+import {
+  useOpenedOnce,
+  BookmarkDrawer,
+  BookmarkShelf,
+  Colophon,
+  CropSheet,
+  EditionPicker,
+  NoteBox,
+  RevisionMap,
+  RootLens,
+  WordPartsHost,
+} from "./components/later";
+import type { CropBox } from "./components/CropSheet";
 import { PageSpread } from "./components/PageSpread";
 import { EdgeGrabRails, type EdgeTurnDriver, type PeelPages } from "./components/EdgeGrabRails";
 import { DesktopChrome } from "./components/DesktopChrome";
@@ -87,17 +98,12 @@ import { TrailBeads, type TrailBead } from "./components/TrailBeads";
 import { ShareSheet } from "./components/ShareSheet";
 import { OfflineNotice } from "./components/OfflineNotice";
 import { Jumper } from "./components/Jumper";
-import { EditionPicker } from "./components/EditionPicker";
 import { CoachMarks } from "./components/CoachMarks";
-import { Colophon } from "./components/Colophon";
-import { RevisionMap } from "./components/RevisionMap";
 import { BookmarkRibbons } from "./components/BookmarkRibbons";
 import { UndoBar } from "./components/UndoBar";
-import { BookmarkDrawer } from "./components/BookmarkDrawer";
-import { BookmarkShelf } from "./components/BookmarkShelf";
 import { useBookmarks, useNotes, useSeam } from "./useBookmarks";
 import { LiveAnnouncer, useAnnouncer } from "./components/LiveAnnouncer";
-import { RootLens, RootLensTrigger } from "./components/RootLens";
+import { RootLensTrigger } from "./components/RootLensTrigger";
 import { PlayTrigger } from "./components/PlayTrigger";
 import { DrawerTool, VerseDrawer } from "./components/VerseDrawer";
 import { QulTrigger } from "./components/QulTrigger";
@@ -1938,6 +1944,15 @@ export function App(): JSX.Element {
     [adjacency, commentaryOpen, selectedKey],
   );
 
+  // The sheets that load on first open are mounted from their first opening on,
+  // so their files are not fetched before anyone asks and a sheet that keeps
+  // state between openings still does (see components/later.tsx).
+  const rootsMounted = useOpenedOnce(rootFamilies !== null);
+  const editionMounted = useOpenedOnce(editionOpen);
+  const colophonMounted = useOpenedOnce(colophonOpen);
+  const revisionMounted = useOpenedOnce(revisionOpen);
+  const drawerMounted = useOpenedOnce(drawerBookmark !== null);
+
   return (
     // The chrome reads in the UI language's direction — every offset in the
     // stylesheet is a logical property, so the flip is the whole change. What
@@ -2277,16 +2292,20 @@ export function App(): JSX.Element {
               // menu would be a dead end (nothing re-opens it but a fresh drag).
               onClose={() => setSelectedRange(null)}
             />
-            <RootLens
-              families={rootFamilies}
-              loading={rootsLoading}
-              side={sheetSide}
-              curated={curatedRoots}
-              canHop={canHop}
-              onHop={handleRootHop}
-              onHopEdge={handleHop}
-              onClose={() => setRootsOpen(false)}
-            />
+            {rootsMounted && (
+              <Suspense fallback={null}>
+                <RootLens
+                  families={rootFamilies}
+                  loading={rootsLoading}
+                  side={sheetSide}
+                  curated={curatedRoots}
+                  canHop={canHop}
+                  onHop={handleRootHop}
+                  onHopEdge={handleHop}
+                  onClose={() => setRootsOpen(false)}
+                />
+              </Suspense>
+            )}
             {PITCH && (
               <CommentarySheet
                 // One drawer for a verse at a time: a chip's list or the root
@@ -2335,83 +2354,99 @@ export function App(): JSX.Element {
         }}
         onClose={() => setLegendOpen(false)}
       />
-      <EditionPicker
-        open={editionOpen}
-        current={manifest?.edition ?? ""}
-        currentKey={selectedKey}
-        concordance={concordance}
-        onSelect={handleEditionSelect}
-        onClose={() => setEditionOpen(false)}
-      />
-      <Colophon
-        open={colophonOpen}
-        onClose={() => setColophonOpen(false)}
-        fisheye={fisheye}
-        onToggleFisheye={toggleFisheye}
-        turnStyle={turnStyle}
-        onTurnStyle={chooseTurnStyle}
-        onShowTips={() => {
-          setColophonOpen(false);
-          setCoachUp(true);
-        }}
-      />
+      {editionMounted && (
+        <Suspense fallback={null}>
+          <EditionPicker
+            open={editionOpen}
+            current={manifest?.edition ?? ""}
+            currentKey={selectedKey}
+            concordance={concordance}
+            onSelect={handleEditionSelect}
+            onClose={() => setEditionOpen(false)}
+          />
+        </Suspense>
+      )}
+      {colophonMounted && (
+        <Suspense fallback={null}>
+          <Colophon
+            open={colophonOpen}
+            onClose={() => setColophonOpen(false)}
+            fisheye={fisheye}
+            onToggleFisheye={toggleFisheye}
+            turnStyle={turnStyle}
+            onTurnStyle={chooseTurnStyle}
+            onShowTips={() => {
+              setColophonOpen(false);
+              setCoachUp(true);
+            }}
+          />
+        </Suspense>
+      )}
       {/* `onGoToPage` is the app's own page-turner, handed over unchanged: a
           press on a map cell is a jump, and everything a jump owes — refusing an
           unvendored page, cancelling one in flight, saying where it landed —
           already lives in `goToPage`. A second route to a page would be a second
           announcer, and the two would drift. */}
-      <RevisionMap
-        open={revisionOpen}
-        onClose={() => setRevisionOpen(false)}
-        pages={manifest?.pages ?? []}
-        edition={manifest?.edition ?? ""}
-        totalPages={totalPages}
-        page={page}
-        onGoToPage={goToPage}
-        openAt={revisionAt}
-      >
-        <BookmarkShelf
-          bookmarks={bookmarks}
-          onOpen={openFromShelf}
-          onClearSurah={(surah) => {
-            const next = clearSurah(bookmarks, surah);
-            commitBookmarks(next, t.bmCleared(bookmarks.length - next.length));
-          }}
-          onClearAll={() => commitBookmarks([], t.bmCleared(bookmarks.length))}
-          onSave={saveBookmarkFile}
-          onLoad={loadBookmarkFile}
-        />
-      </RevisionMap>
+      {revisionMounted && (
+        <Suspense fallback={null}>
+          <RevisionMap
+            open={revisionOpen}
+            onClose={() => setRevisionOpen(false)}
+            pages={manifest?.pages ?? []}
+            edition={manifest?.edition ?? ""}
+            totalPages={totalPages}
+            page={page}
+            onGoToPage={goToPage}
+            openAt={revisionAt}
+          >
+            <BookmarkShelf
+              bookmarks={bookmarks}
+              onOpen={openFromShelf}
+              onClearSurah={(surah) => {
+                const next = clearSurah(bookmarks, surah);
+                commitBookmarks(next, t.bmCleared(bookmarks.length - next.length));
+              }}
+              onClearAll={() => commitBookmarks([], t.bmCleared(bookmarks.length))}
+              onSave={saveBookmarkFile}
+              onLoad={loadBookmarkFile}
+            />
+          </RevisionMap>
+        </Suspense>
+      )}
 
-      <BookmarkDrawer
-        bookmark={drawerBookmark}
-        moveLabel={moveTarget ? (t.ayahLabel(moveTarget.key) ?? t.pageN(moveTarget.page)) : null}
-        onRename={(name) => {
-          if (!drawerBookmark) return;
-          const next = renameBookmark(bookmarks, drawerBookmark.id, name, Date.now());
-          const renamed = next.find((b) => b.id === drawerBookmark.id);
-          if (renamed && renamed.name !== drawerBookmark.name)
-            commitBookmarks(next, t.bmRenamed(renamed.name));
-          setDrawerId(null);
-        }}
-        onMoveHere={() => {
-          if (!drawerBookmark || !moveTarget) return;
-          commitBookmarks(
-            moveBookmark(bookmarks, drawerBookmark.id, moveTarget, Date.now()),
-            t.bmMoved(drawerBookmark.name, moveTarget.page),
-          );
-          setDrawerId(null);
-        }}
-        onLift={() => {
-          if (!drawerBookmark) return;
-          commitBookmarks(liftBookmark(bookmarks, drawerBookmark.id), t.bmLifted(drawerBookmark.name));
-          setDrawerId(null);
-        }}
-        onAddAnother={() => {
-          if (drawerBookmark) dropOn(drawerBookmark.page);
-        }}
-        onClose={() => setDrawerId(null)}
-      />
+      {drawerMounted && (
+        <Suspense fallback={null}>
+          <BookmarkDrawer
+            bookmark={drawerBookmark}
+            moveLabel={moveTarget ? (t.ayahLabel(moveTarget.key) ?? t.pageN(moveTarget.page)) : null}
+            onRename={(name) => {
+              if (!drawerBookmark) return;
+              const next = renameBookmark(bookmarks, drawerBookmark.id, name, Date.now());
+              const renamed = next.find((b) => b.id === drawerBookmark.id);
+              if (renamed && renamed.name !== drawerBookmark.name)
+                commitBookmarks(next, t.bmRenamed(renamed.name));
+              setDrawerId(null);
+            }}
+            onMoveHere={() => {
+              if (!drawerBookmark || !moveTarget) return;
+              commitBookmarks(
+                moveBookmark(bookmarks, drawerBookmark.id, moveTarget, Date.now()),
+                t.bmMoved(drawerBookmark.name, moveTarget.page),
+              );
+              setDrawerId(null);
+            }}
+            onLift={() => {
+              if (!drawerBookmark) return;
+              commitBookmarks(liftBookmark(bookmarks, drawerBookmark.id), t.bmLifted(drawerBookmark.name));
+              setDrawerId(null);
+            }}
+            onAddAnother={() => {
+              if (drawerBookmark) dropOn(drawerBookmark.page);
+            }}
+            onClose={() => setDrawerId(null)}
+          />
+        </Suspense>
+      )}
 
       {/* Pinned RTL with the stage, and for the same reason: the trail reads
           oldest-to-newest in the mus'haf's own direction, and its beads sit
@@ -2522,54 +2557,62 @@ export function App(): JSX.Element {
       />
 
       {openNote && (
-        <NoteBox
-          key={openNote.id}
-          note={openNote}
-          label={t.ayahLabel(openNote.key) ?? openNote.key}
-          onClose={closeNote}
-          onDelete={deleteNote}
-        />
+        <Suspense fallback={null}>
+          <NoteBox
+            key={openNote.id}
+            note={openNote}
+            label={t.ayahLabel(openNote.key) ?? openNote.key}
+            onClose={closeNote}
+            onDelete={deleteNote}
+          />
+        </Suspense>
       )}
       {crop && manifest && (
-        <CropHost key={`${crop.page}:${crop.x}:${crop.y}`} manifest={manifest} box={crop} onClose={() => setCrop(null)} />
+        <Suspense fallback={null}>
+          <CropHost key={`${crop.page}:${crop.x}:${crop.y}`} manifest={manifest} box={crop} onClose={() => setCrop(null)} />
+        </Suspense>
       )}
       {wordOpen && manifest && (
-        <WordPartsHost
-          key={`${wordOpen.key}#${wordOpen.word}`}
-          manifest={manifest}
-          page={wordOpen.page}
-          verseKey={wordOpen.key}
-          word={wordOpen.word}
-          label={t.ayahLabel(wordOpen.key) ?? wordOpen.key}
-          anchor={() => wordOpen.rect}
-          mode="note"
-          docked
-          onPick={(mark, _name, at) => pickWordPart({ ...at, mark })}
-          onPickMany={(marks, at) => pickWordPart({ ...at, marks })}
-          onPickLetter={(letter, at) => pickWordPart({ ...at, letter })}
-          onClose={() => setWordOpen(null)}
-        />
+        <Suspense fallback={null}>
+          <WordPartsHost
+            key={`${wordOpen.key}#${wordOpen.word}`}
+            manifest={manifest}
+            page={wordOpen.page}
+            verseKey={wordOpen.key}
+            word={wordOpen.word}
+            label={t.ayahLabel(wordOpen.key) ?? wordOpen.key}
+            anchor={() => wordOpen.rect}
+            mode="note"
+            docked
+            onPick={(mark, _name, at) => pickWordPart({ ...at, mark })}
+            onPickMany={(marks, at) => pickWordPart({ ...at, marks })}
+            onPickLetter={(letter, at) => pickWordPart({ ...at, letter })}
+            onClose={() => setWordOpen(null)}
+          />
+        </Suspense>
       )}
       {picking && manifest && picking.word !== null && (
-        <WordPartsHost
-          key={picking.id}
-          manifest={manifest}
-          page={picking.page}
-          verseKey={picking.key}
-          word={picking.word}
-          label={t.ayahLabel(picking.key) ?? picking.key}
-          anchor={() => {
-            const r = [...document.querySelectorAll(`[data-mistake-word="${CSS.escape(picking.id)}"]`)]
-              .map((el) => el.getBoundingClientRect())
-              .find((b) => b.width > 0);
-            return r ? { left: r.left, top: r.top, right: r.right, bottom: r.bottom } : null;
-          }}
-          mode="mistake"
-          chosen={picking.mark ?? null}
-          onPick={(mark, name) => pickSign(mark, name)}
-          onClear={clearMistake}
-          onClose={() => setPickingId(null)}
-        />
+        <Suspense fallback={null}>
+          <WordPartsHost
+            key={picking.id}
+            manifest={manifest}
+            page={picking.page}
+            verseKey={picking.key}
+            word={picking.word}
+            label={t.ayahLabel(picking.key) ?? picking.key}
+            anchor={() => {
+              const r = [...document.querySelectorAll(`[data-mistake-word="${CSS.escape(picking.id)}"]`)]
+                .map((el) => el.getBoundingClientRect())
+                .find((b) => b.width > 0);
+              return r ? { left: r.left, top: r.top, right: r.right, bottom: r.bottom } : null;
+            }}
+            mode="mistake"
+            chosen={picking.mark ?? null}
+            onPick={(mark, name) => pickSign(mark, name)}
+            onClear={clearMistake}
+            onClose={() => setPickingId(null)}
+          />
+        </Suspense>
       )}
       {unfolded ? (
         <UndoBar said={unfolded.said} onUndo={undoUnfold} onDone={endUndo} />
@@ -2599,82 +2642,6 @@ function CropHost({
       box={box}
       pageSrc={pageUrl(manifest.edition, box.page)}
       pageSize={{ w: w || 345, h: h || 550 }}
-      onClose={onClose}
-    />
-  );
-}
-
-/**
- * One word opened into its parts (harakah-pick = D): loads the word's box and
- * signs, then mounts the row. The word tool drops a note on the part picked;
- * the mistake tool's second tap says which part the slip was on.
- */
-function WordPartsHost({
-  manifest,
-  page,
-  verseKey,
-  word,
-  label,
-  anchor,
-  mode,
-  docked,
-  chosen,
-  onPick,
-  onPickMany,
-  onPickLetter,
-  onClear,
-  onClose,
-}: {
-  manifest: AssetManifest;
-  page: number;
-  verseKey: string;
-  word: number;
-  label: string;
-  anchor: () => WordRect | null;
-  mode: "note" | "mistake";
-  /** Open in the verse drawer's place, on the bottom of the window (the word tool). */
-  docked?: boolean;
-  chosen?: number | null;
-  /** The part picked, its name, and where on the page a note on it is pinned. */
-  onPick: (mark: number | null, name: string | null, at: { x: number; y: number }) => void;
-  /** Several signs picked for one note; it is pinned over the first of them. */
-  onPickMany?: (marks: number[], at: { x: number; y: number }) => void;
-  /** One letter picked, by its place from the right; the note is pinned over its top. */
-  onPickLetter?: (letter: number, at: { x: number; y: number }) => void;
-  onClear?: () => void;
-  onClose: () => void;
-}): JSX.Element | null {
-  const data = useWordParts(manifest.edition, page, verseKey, word);
-  if (!data) return null;
-  const pinOver = (mark: number | null) => {
-    const s = mark === null ? null : data.signs.find((x) => x.index === mark);
-    return s ? { x: s.r[0] + s.r[2] / 2, y: s.r[1] } : { x: data.box.x + data.box.width / 2, y: data.box.y };
-  };
-  /** Over the middle of a letter, at the top of the word. */
-  const pinOverLetter = (letter: number) => {
-    const xs = (data.letters[letter] ?? []).map(([x]) => x);
-    const mid = xs.length ? (Math.min(...xs) + Math.max(...xs)) / 2 : data.box.x + data.box.width / 2;
-    return { x: Math.min(Math.max(mid, data.box.x), data.box.x + data.box.width), y: data.box.y };
-  };
-  const [, , w, h] = (manifest.pages.find((p) => p.page === page)?.viewBox ?? "0 0 345 550")
-    .split(/\s+/)
-    .map(Number);
-  return (
-    <WordParts
-      label={label}
-      data={data}
-      pageSrc={pageUrl(manifest.edition, page)}
-      pageSize={{ w: w || 345, h: h || 550 }}
-      anchor={anchor}
-      mode={mode}
-      docked={docked}
-      chosen={chosen}
-      onPick={(mark, name) => onPick(mark, name, pinOver(mark))}
-      onPickMany={
-        onPickMany && ((marks) => onPickMany(marks, pinOver(Math.min(...marks))))
-      }
-      onPickLetter={onPickLetter && ((letter) => onPickLetter(letter, pinOverLetter(letter)))}
-      onClear={onClear}
       onClose={onClose}
     />
   );

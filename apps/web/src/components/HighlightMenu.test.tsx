@@ -9,7 +9,8 @@ import { HighlightMenu } from "./HighlightMenu";
  * What the menu owns is *which ayah the panel is told it is standing on*, so the
  * stub reports exactly that and `DiffView.test.tsx` covers the drawing.
  */
-vi.mock("./DiffView", () => ({
+// The menu reaches the panel through the load-on-first-open wrapper.
+vi.mock("./later", () => ({
   DiffView: ({ fromKey }: { fromKey: string }) => <div data-here={fromKey} />,
 }));
 
