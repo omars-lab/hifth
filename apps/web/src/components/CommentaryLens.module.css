@@ -1,0 +1,290 @@
+/*
+ * CommentaryLens — the ✎ commentary sheet. Same geometry as RootLens/HopPopover
+ * (bottom sheet <900px, floating card above), but its body is prose, not a hop
+ * list: a source line, the translation, the commentary runs, then the note's
+ * cross-references as leap rows. The helpers and the sheet chrome are duplicated
+ * from RootLens on purpose — the two are diverging surfaces (see RootLens.tsx).
+ */
+
+/* The ✎ trigger in the trail bar — quiet until tapped, like ⬡ and share. */
+.trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  min-block-size: var(--touch-min);
+  padding-inline: var(--space-2);
+  border: none;
+  background: none;
+  color: var(--ink-soft);
+  font-size: var(--text-md);
+  cursor: pointer;
+}
+
+.trigger[aria-expanded="true"] {
+  color: var(--accent-strong);
+}
+
+.trigger:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+.scrim {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-sheet);
+  background: rgba(38, 32, 26, 0.28);
+  animation: fade var(--dur-fast) ease;
+}
+
+.sheet {
+  position: fixed;
+  inset-inline: 0;
+  inset-block-end: 0;
+  z-index: var(--z-sheet);
+  max-block-size: 70vh;
+  overflow-y: auto;
+  padding: var(--space-3) var(--space-4) calc(var(--space-5) + env(safe-area-inset-bottom));
+  background: var(--paper-raised);
+  border-start-start-radius: var(--radius-lg);
+  border-start-end-radius: var(--radius-lg);
+  box-shadow: var(--shadow-2);
+  animation: rise var(--dur-med) var(--ease-hop);
+}
+
+.grip {
+  inline-size: 40px;
+  block-size: 4px;
+  margin: 0 auto var(--space-2);
+  border-radius: var(--radius-pill);
+  background: var(--hairline);
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding-block-end: var(--space-2);
+  border-block-end: 1px solid var(--hairline);
+}
+
+.glyph {
+  font-size: var(--text-lg);
+  color: var(--accent-strong);
+}
+
+.title {
+  flex: 1;
+  margin: 0;
+  font-size: var(--text-md);
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.close {
+  min-inline-size: var(--touch-min);
+  min-block-size: var(--touch-min);
+  border: none;
+  background: none;
+  color: var(--ink-soft);
+  font-size: var(--text-md);
+  cursor: pointer;
+}
+
+.close:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+/* Who the note is from — a commentary is never anonymous (tafsir.ts contract). */
+.source {
+  margin: var(--space-2) 0 0;
+  color: var(--ink-soft);
+  font-size: var(--text-xs);
+}
+
+.empty {
+  margin: var(--space-3) 0 0;
+  color: var(--ink-faint);
+  font-size: var(--text-sm);
+}
+
+.translation {
+  margin: var(--space-3) 0 0;
+  color: var(--ink);
+  font-size: var(--text-md);
+  line-height: 1.6;
+}
+
+.blocks {
+  margin: var(--space-2) 0 0;
+}
+
+.block {
+  margin-block-start: var(--space-2);
+  padding-block-start: var(--space-2);
+  border-block-start: 1px solid var(--hairline);
+}
+
+.blockMeta {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  margin-block-end: var(--space-1);
+}
+
+/* The ayah span a note attaches to — faint, so the prose leads. */
+.lemma {
+  color: var(--ink-faint);
+  font-size: var(--text-xs);
+}
+
+/* OCR-recovered prose — marked because its diacritics are lossy (channel
+   contract): honest provenance, never dressed up as the faithful AX channel. */
+.ocr {
+  padding-inline: var(--space-2);
+  border-radius: var(--radius-pill);
+  background: var(--paper-sunk);
+  color: var(--ink-soft);
+  font-size: var(--text-xs);
+  letter-spacing: 0.04em;
+}
+
+.blockText {
+  margin: 0;
+  color: var(--ink);
+  font-size: var(--text-md);
+  line-height: 1.6;
+}
+
+.refs {
+  margin-block-start: var(--space-3);
+  padding-block-start: var(--space-2);
+  border-block-start: 1px solid var(--hairline);
+}
+
+.refsTitle {
+  margin: 0 0 var(--space-1);
+  color: var(--ink-soft);
+  font-size: var(--text-sm);
+  font-weight: 600;
+}
+
+.hops {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.hopRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding-block: var(--space-2);
+}
+
+.hopText {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-inline-size: 0;
+}
+
+.hopLabel {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--text-md);
+  color: var(--ink);
+}
+
+.distance {
+  color: var(--ink-soft);
+  font-size: var(--text-sm);
+}
+
+.distance[data-near] {
+  color: var(--accent-strong);
+}
+
+.unavailable {
+  color: var(--ink-faint);
+  font-size: var(--text-xs);
+}
+
+.hop {
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  min-inline-size: var(--touch-min);
+  min-block-size: var(--touch-min);
+  border: none;
+  border-radius: var(--radius-md);
+  background: var(--accent);
+  color: var(--paper-raised);
+  font-size: var(--text-lg);
+  cursor: pointer;
+  transition: transform var(--dur-fast) var(--ease-hop);
+}
+
+.hop:hover {
+  transform: scale(1.06);
+}
+
+.hop:active {
+  transform: scale(0.94);
+}
+
+.hop:disabled {
+  background: var(--paper-sunk);
+  color: var(--ink-faint);
+  cursor: not-allowed;
+}
+
+.hop:focus-visible {
+  outline: 2px solid var(--accent-strong);
+  outline-offset: 2px;
+}
+
+@media (min-width: 900px) {
+  .sheet {
+    inset-inline-start: auto;
+    inset-inline-end: var(--space-5);
+    inset-block-end: var(--space-5);
+    inline-size: 380px;
+    border-radius: var(--radius-lg);
+  }
+
+  .sheet[data-side="left"] {
+    left: var(--space-5);
+    right: auto;
+  }
+
+  .sheet[data-side="right"] {
+    left: auto;
+    right: var(--space-5);
+  }
+}
+
+@keyframes rise {
+  from {
+    transform: translateY(100%);
+  }
+}
+
+@keyframes fade {
+  from {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sheet,
+  .scrim {
+    animation: none;
+    transition: none;
+  }
+}
