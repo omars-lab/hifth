@@ -1331,6 +1331,11 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
       // get the attribute, and the rounded/fore-edge rules never match.
       const side = leafSideOf(targetPage, totalRef.current);
       if (side) host.dataset.leaf = side;
+      // Which page this host carries. Nothing in the app reads it; the dev-only
+      // store overlay (`qul-diff/overlay.ts`) finds hosts by it. Not `data-page`:
+      // the leaf around the host already carries that, and a second element with
+      // it made the page-shape check count every page twice.
+      host.dataset.hostPage = String(targetPage);
       host.style.display = "none";
       host.innerHTML = markup;
       const svgEl = host.querySelector("svg");

@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex" />
+    <!--
+      DEV-ONLY. The second-draughtsman check from `qul-store-purpose`: stand the
+      store's word-by-word page beside the print the app ships, to see our pages
+      are registered right. This entry is not a build input (it is not in
+      rollupOptions.input), so `vite build` never emits it and it cannot ship.
+    -->
+    <title>QUL page diff · dev</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/qul-diff/main.tsx"></script>
+  </body>
+</html>

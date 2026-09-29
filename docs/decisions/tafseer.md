@@ -237,3 +237,42 @@ the lookup fails are settled when the section is built, not here. And "line by l
 service returns commentary segmented to the verse's lines, which the Quran Foundation's does not
 promise — if it returns one block, the section falls back to one block under the verse, and the
 line-by-line layout waits for a source that segments.
+
+## How a commentary source plugs in
+
+*A living rule that holds both decisions above together, written 2026-09-09 as the section began
+to be built. The two decisions settled **where** a commentary sits (a section in the sheet) and
+**which** one to start with (a live public service). This settles the shape between them: how a
+source connects, so that the "start live, import our own only if needed" plan does not become a
+rewrite the day a second source arrives.*
+
+The rule is that the app never names a source directly. A commentary source is a **provider**: a
+small thing that, asked about a surah, says whether it has anything and hands back one note per
+verse in a single agreed shape. The section in the sheet asks the app for the provider that is
+switched on and renders whatever comes back; it never learns whether the words arrived from a
+live service over the network or from a book sitting in the reader's own browser. Swapping one
+source for another, or offering a choice between them, is then adding or removing a provider — not
+touching the part of the app that draws the meaning.
+
+Two kinds of source meet at that one contract, and the split is the whole point:
+
+- **A live public source** — the Quran Foundation's service the second decision chose — is a
+  provider that looks each verse up over the network. It ships with the app, because it holds no
+  text of its own: it only knows how to ask.
+- **A private book the reader owns** — the first being *The Study Quran*, a copyrighted book
+  captured page by page — is a provider too, but its words are the reader's, not ours. So the app
+  ships none of them. The reader loads the book in from a folder on their own device; it is kept
+  in their browser and served from there. This keeps the standing rule that the app distributes no
+  scripture and no copyrighted text: a private edition is side-loaded at the reader's hand, never
+  committed, never in the app's own files.
+
+Each note is addressed by the verse it explains and the source it came from, so two sources can
+both have a note on the same verse without colliding, and a note always remembers which source it
+is from. What a provider must answer, and the exact shape of a note, live in the app's shared core
+so both kinds are built against the same definition; the data and the network or storage behind
+each one live in the app, never in the core, so the core carries no text and no addresses.
+
+**What this does not settle:** the wording of the panel, how a reader picks between two loaded
+sources, or how the live service's failures and terms are shown — those belong to the two
+decisions above and to the building of the section. This only fixes that every source, live or
+private, reaches the panel the same way.

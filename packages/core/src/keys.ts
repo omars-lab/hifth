@@ -123,3 +123,45 @@ export function ayahKeyOf(key: string): string | null {
 export function decodeAyahNumber(number: number): { surah: number; ayah: number } {
   return { surah: Math.floor(number / 1000), ayah: number % 1000 };
 }
+
+/**
+ * A commentary key, in the reserved `tafsir/<name>/S:A` namespace: which
+ * provider's note is attached to which ayah, e.g. `tafsir/study-quran/2:30`.
+ * The `<name>` is a provider id, not an edition — commentary is keyed to the
+ * ayah, and any edition of that ayah shares the same note. It is deliberately a
+ * sibling of the `quran/` grammar rather than a fragment of it: a note is its
+ * own node with its own provider, refs and provenance, not a decoration on a
+ * verse key. The referent lives behind a `TafsirProvider` (see `tafsir.ts`),
+ * side-loaded or fetched live; the key nobody-can-point-at caution from the ayah
+ * grammar holds here too, which is why this lands with the provider seam, not before.
+ */
+export interface TafsirKey {
+  readonly kind: "tafsir";
+  readonly name: string;
+  readonly surah: number;
+  readonly ayah: number;
+}
+
+/** Build a commentary key, e.g. `tafsir/study-quran/2:30`. */
+export function formatTafsirKey(name: string, surah: number, ayah: number): string {
+  if (!name || name.includes("/")) {
+    throw new RangeError(`tafsir name out of range: ${name}`);
+  }
+  if (!Number.isInteger(surah) || surah < 1 || surah > 114) {
+    throw new RangeError(`surah out of range: ${surah}`);
+  }
+  if (!Number.isInteger(ayah) || ayah < 1) {
+    throw new RangeError(`ayah out of range: ${ayah}`);
+  }
+  return `tafsir/${name}/${surah}:${ayah}`;
+}
+
+const TAFSIR_KEY_RE = /^tafsir\/([^/]+)\/(\d+):(\d+)$/;
+
+/** Parse a commentary key; returns null if it is not a tafsir key. */
+export function parseTafsirKey(key: string): TafsirKey | null {
+  const m = TAFSIR_KEY_RE.exec(key);
+  if (!m) return null;
+  const [, name, surahStr, ayahStr] = m;
+  return { kind: "tafsir", name: name as string, surah: Number(surahStr), ayah: Number(ayahStr) };
+}

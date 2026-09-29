@@ -2082,6 +2082,64 @@
       "severity": "risk",
       "owner": "agent",
       "note": "Owner, 2026-09-25: the 'offline storage is not guaranteed' banner was a warning with no action for the reader, so it came out of the app and the underlying risk came here. The pages a browser will not promise to keep may be cleared under storage pressure; the fix is ours (ask for the promise at a moment the browser rewards, measure refusals, check the kept-juz recovery path on a phone). 2026-09-27: the app now asks again at the two moments the browser rewards most, when a juz is kept and when the app is installed, each with a test; still open for counting refusals and the phone check of the recovery path."
+    },
+    {
+      "id": "plan-qul-dev-toggle",
+      "source": {
+        "file": "docs/PLAN.md",
+        "item": "19"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "agent",
+      "note": "The development-only comparison of a page powered by the outside library against the page the app ships. Built 2026-09-08: the fixture reader, the side-by-side dev page (qul-diff.html, not a build input), the structure layer eye-checked on pages 1 and 300, and the library's page-by-page word font (one file per page; a general text face drew every word wrong) served in dev from a gitignored cache; the data diagram and join map now show that font in place of the text face. Shape decided: the in-app toggle is an OVERLAY on the print, not a swap, so the ayah shapes, highlighter and marks keep working while a developer flips print/store/both. Built 2026-09-08 as well: one shared drawing the workbench and the app both mount, and the in-app overlay behind a build-time flag (make dev-qul), the store's lines placed from the app's own word boxes and its letters sized by measurement; eye-checked on pages 1, 2, 3, 300 and 604. Gated 2026-09-09: a check weighs the built bundle and fails on the store's held letters (a presentation-form or private-use code point, which the app's own Arabic interface never uses) or on the loader's own words (the dev-fixture route, the overlay module, the dev font, the build-time flag) — none present in a real build, and it fails when one is planted. Follow-ups 20 (tappable-area comparison) and 21 (the harakat question) build on it. Sibling branch graduate-page-bar-winners holds the open rows qul-dev-draw-toggle and qul-page-cross-check; stamp the first decided B at merge and point it here."
+    },
+    {
+      "id": "plan-qul-selectable-area",
+      "source": {
+        "file": "docs/PLAN.md",
+        "item": "20"
+      },
+      "status": "answered",
+      "severity": "question",
+      "owner": "agent",
+      "note": "Answered 2026-09-09 by a whole-book tool sweep (docs/issues/qul-tap-sweep.md). Of 83,196 store words, 96.3% tap their own ayah shape; the 3.6% that do not concentrate at ayah-split boundaries on shared lines (two independent justifications disagreeing by about one word), not misplaced shapes; no word lands on the wrong line. 47 words fall outside every shape — 15 the store justifies past the column edge, 32 in the hairline between two shapes — none a reader being told the wrong ayah. Verified against the browser hit-test (zero disagreements on 738 words), by structure, and by eye on three rendered pages. 18 pages placed by fit are marked lower-confidence in the evidence. The sweep tool is apps/web/scripts/qul-tap-sweep.mjs; nothing owed in code."
+    },
+    {
+      "id": "plan-qul-harakat",
+      "source": {
+        "file": "docs/PLAN.md",
+        "item": "21"
+      },
+      "status": "blocked",
+      "severity": "question",
+      "owner": "agent",
+      "note": "CORRECTED 2026-09-09 after checking the mark-work branch directly. The earlier note here said the per-mark geometry was 'not yet shipped as an asset' and told a reader not to touch the 'sibling branch'. Both are wrong. There is one operator, not two; and the geometry IS shipped: the app's own ink-derived per-mark rectangles ride as a static asset, one file per page for all 604 pages, each mark carrying its word, its name (kasra, sukun, fatha, shadda, wasla, superscript alef and the rest), a rectangle, and whether it was placed on its own ink or by hand. That is exactly the granularity a single harakah needs, and it settles the feasibility this row asks about: per-harakah marking is reachable on our OWN print, with NO held Qur'an text and NO outside font — so this row's title, which assumed the library's Unicode word text and Unicode Hafs face were required, had the wrong route. That is route 1, and the placement is already decided (option H) and corrected (the marks sit on their ink, not on the raw displaced rectangles the mark-placement finding measured). Owner intent, unchanged: reader interaction at one mark — a hafiz pinning a personal recitation slip finer than a word, and flagging where the printed mus'haf or our drawing of it is off at one mark. What is genuinely left is a product step, not data: extend the existing mistake-marking so its anchor can be a single mark, and bring the shipped geometry and this feature onto one branch to do it. The only still-open refinement is the per-line bend correction (a finer, line-by-line tilt on top of the per-mark placement), which waits on the owner's own eye before it ships — polish, not a blocker for a first per-harakah anchor. Related: mistake-marking, mark-granularity, mark-registration. Fetch nothing held.",
+      "blockedBy": [
+        "bringing the app's own per-mark ink geometry (already shipped on the mark-work branch) onto this feature's branch, then giving the existing mistake-marking a single-mark anchor — a product step plus a branch-convergence the owner steers"
+      ]
+    },
+    {
+      "id": "mark-labels-no-register-home",
+      "source": {
+        "file": "docs/design/mark-labels.md",
+        "item": "③"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "user",
+      "note": "A finished measurement that decided nothing and changed no code has no row in docs/decisions.json and, until now, none here either — the only way to find it was to already know it existed. Whether a completed measurement like this needs a home in a register, or is fine reachable only by opening the file, is a call about the registers themselves, not about the measurement."
+    },
+    {
+      "id": "sub-word-marks-no-register-home",
+      "source": {
+        "file": "docs/design/sub-word-marks.md",
+        "item": "⑤"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "user",
+      "note": "A design-of-record cited from mark-granularity.html's decision row and from mark-labels.md, but carrying no row of its own in docs/decisions.json — it settles nothing on its own while its own §⑧ ①②④ stay open. Whether it belongs in the decision register once one of those resolves, or is better left reachable only through the documents that already cite it, is a call about the registers, not one this document can make about itself."
     }
   ]
 }
