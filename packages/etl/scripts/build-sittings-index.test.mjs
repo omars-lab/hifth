@@ -140,7 +140,12 @@ describe("counting out of the sittings rather than out of somebody's memory", ()
     deal();
     const html = build().html;
     expect(html).not.toContain("data-ids");
-    expect(html).not.toContain("1:1");
+    // Not the build stamp: its clock time reads "21:13" at a quarter past nine
+    // in the evening, and a check that fails for ten minutes in every few hours
+    // is one nobody believes.
+    const body = html.replace(/<p class="stamp">[\s\S]*?<\/p>/, "");
+    expect(body).not.toBe(html);
+    expect(body).not.toContain("1:1");
   });
 });
 

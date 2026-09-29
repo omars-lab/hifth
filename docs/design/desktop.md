@@ -727,6 +727,15 @@ page beneath the fold once had a square tip that stood about 2 px past the paper
 corner; its tip now follows the curve, and the same test scans the whole fold for any point
 drawn outside the leaf (it found 8 in Chromium and 54 in Firefox before the change).
 
+A second report on the same corner (#202, pages 6 and 8 in Firefox) found two more things.
+The page showing under the fold was the same colour as the page, so the fold read as a flat
+square pasted on; it is now shaded, deepest at the crease, the way the page beneath a real
+dog-ear sits in the flap's shadow. And the ribbon was placed against the whole window rather
+than the page: with one page alone in a wide window it hung out on the desk, and zoomed in it
+lay across the fold. It now hangs from its own page, a little in from the spine, clear of the
+fold. Held by *"a bookmark's ribbon hangs from its own page, clear of the folded corner"* (one
+page and two) and *"the page under a folded corner is shaded darker than the page"*.
+
 ### ② Should the two leaves pan and zoom together? · **fixed**
 
 Unanswerable and untestable until a facing pair is vendored. A shared `View` across two
