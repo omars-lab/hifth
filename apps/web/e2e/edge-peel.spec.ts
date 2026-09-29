@@ -222,10 +222,22 @@ test.describe("Hifth · lifting a page by its corner", () => {
         const layer = document.querySelector<HTMLElement>('[data-testid="edge-peel"]');
         const flap = document.querySelector<HTMLElement>('[data-testid="edge-peel-flap"]');
         if (layer && flap) {
-          const m = (flap.style.transform.match(/-?[\d.]+/g) ?? []).map(Number);
-          const pts = (flap.style.clipPath.match(/-?[\d.]+px -?[\d.]+px/g) ?? []).map((q) => q.split(" ").map(parseFloat));
-          const ys = pts.map(([x, y]) => m[1]! * x! + m[3]! * y! + m[5]!);
-          w.__out.push(Math.max(0, -Math.min(...ys), Math.max(...ys) - layer.clientHeight));
+          // The browser reads its own matrix: it writes a near-zero shift as
+          // "-6e-05", which a digits-only pattern split into -6 and -05 and read
+          // as the leaf standing 5 px above the paper (the flake, 2026-09-29).
+          const m = new DOMMatrixReadOnly(flap.style.transform);
+          const num = String.raw`-?[\d.]+(?:e[-+]?\d+)?`;
+          const pts = (flap.style.clipPath.match(new RegExp(`${num}px ${num}px`, "g")) ?? []).map((q) =>
+            q.split(" ").map(parseFloat),
+          );
+          const ys = pts.map(([x, y]) => m.b * x! + m.d * y! + m.f);
+          const o = Math.max(0, -Math.min(...ys), Math.max(...ys) - layer.clientHeight);
+          w.__out.push(o);
+          // The worst frame, whole, so a failure says why and not only how much.
+          if (o >= Math.max(1, ...w.__out.slice(0, -1)))
+            (w as unknown as { __worst: string }).__worst =
+              `out=${o.toFixed(2)} frame=${w.__frames.length} layerH=${layer.clientHeight} style=${layer.style.cssText} ` +
+              `ys=[${ys.map((y) => y.toFixed(1)).join(",")}] transform=${flap.style.transform} clip=${flap.style.clipPath}`;
         }
         if (performance.now() - t0 < 2500) requestAnimationFrame(tick);
       };
@@ -245,7 +257,8 @@ test.describe("Hifth · lifting a page by its corner", () => {
     // above or below the paper on its way over.
     const out = await page.evaluate(() => (window as unknown as { __out: number[] }).__out);
     expect(out.length, "the flap was never measured").toBeGreaterThan(3);
-    expect(Math.max(...out), "the turning leaf stood outside the paper").toBeLessThan(1);
+    const worst = await page.evaluate(() => (window as unknown as { __worst?: string }).__worst ?? "");
+    expect(Math.max(...out), `the turning leaf stood outside the paper: ${worst}`).toBeLessThan(1);
   });
 
   test("the right edge lifts toward the earlier pages", async ({ page }) => {
