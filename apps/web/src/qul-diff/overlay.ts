@@ -16,7 +16,7 @@
  * box and a viewBox. See `storePage.ts` for how the lines are placed.
  *
  * WHY IT WATCHES THE DOM. The stage mounts and evicts page hosts itself, by hand,
- * outside React; a host is stamped `data-page` as it is built. This module is
+ * outside React; a host is stamped `data-host-page` as it is built. This module is
  * told nothing — it watches for hosts and dresses each one once. Three lines in
  * the app were touched for it: the stamp, the flag, and the env type.
  */
@@ -61,7 +61,7 @@ const CSS = `
 [${ATTR}] .${OVERLAY_CLASS} { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
 [${ATTR}="print"] .${OVERLAY_CLASS} { display: none; }
 [${ATTR}="both"] .${OVERLAY_CLASS} { opacity: 0.72; }
-[${ATTR}="store"] [data-page] > svg[role="group"] { opacity: 0; }
+[${ATTR}="store"] [data-host-page] > svg[role="group"] { opacity: 0; }
 .qul-pill { position: fixed; left: 12px; bottom: 12px; z-index: 9999; display: inline-flex; align-items: center; gap: 2px;
   padding: 3px; border-radius: 999px; background: #1b1815; color: #f4ede0; font: 12px/1 ui-sans-serif, system-ui, sans-serif;
   box-shadow: 0 2px 10px rgba(0,0,0,.25); }
@@ -73,7 +73,7 @@ const CSS = `
 
 /** Dress one page host: fetch its fixture and boxes, draw the store's page inside it. */
 async function dress(host: HTMLElement, note: (s: string) => void): Promise<void> {
-  const page = Number(host.dataset.page);
+  const page = Number(host.dataset.hostPage);
   const print = host.querySelector<SVGSVGElement>('svg[role="group"]');
   if (!Number.isFinite(page) || !print) return;
   if (host.querySelector(`.${OVERLAY_CLASS}`)) return;
@@ -165,7 +165,7 @@ export function mountQulOverlay(): void {
   };
 
   const sweep = () => {
-    for (const host of document.querySelectorAll<HTMLElement>("[data-page]:not([data-qul-dressed])")) {
+    for (const host of document.querySelectorAll<HTMLElement>("[data-host-page]:not([data-qul-dressed])")) {
       void dress(host, note);
     }
   };
