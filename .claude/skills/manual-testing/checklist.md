@@ -51,6 +51,11 @@ Two ways to open the app: this laptop, `make pitch` then `http://localhost:5173/
    Needs someone qualified to read licences; not needed for the pitch. Answers go into the
    decision records, not tests.
 
+8. **Pinch on a Mac trackpad, inside the Mac app.** `make app-run-mac ROUTE=/hafs-kfqc/p45`,
+   then pinch on the page and on the two-page spread. Right: the page zooms under your
+   fingers, smoothly, and nothing else on the window zooms with it. Anything wrong becomes an
+   XCUITest or Playwright case (issue `mac-trackpad-pinch-unfelt`, design/native-shell.md §⑧ ②).
+
 ## Done
 
 (Items move here with the date and where their test or ledger record is.)
