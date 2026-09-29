@@ -35,7 +35,7 @@ const statusOf = (i) =>
   i.source.ledger ? (ledgerById.get(i.source.ledger)?.status ?? "?") : i.status;
 
 // Titles and hrefs are read out of the owning document — see `linker`, which
-// docs/tasks.md shares so the two pages cannot link the same item differently.
+// docs/backlog.md shares so the two pages cannot link the same item differently.
 const link = linker(ledgerById);
 
 const cell = (s) => (s ?? "").replace(/\|/g, "\\|");
@@ -77,7 +77,7 @@ w();
 w("| register | holds |");
 w("| --- | --- |");
 w("| [`PLAN.md` §Open follow-ups](PLAN.md#open-follow-ups) | the roadmap of record; compound narratives, each keeping its own history |");
-w("| [`backlog.md`](backlog.md) | performance and optimization, scheduled by evidence rather than by loop |");
+w("| [`performance.md`](performance.md) | performance and optimization, scheduled by evidence rather than by loop |");
 w(`| the design docs' §${SECTION_HEADING} | what a document knows it has not settled |`);
 w("| [`validation/ledger.json`](validation/ledger.json) | the checks a machine cannot run |");
 w();

@@ -1,5 +1,5 @@
 /**
- * The DOM budget (`docs/backlog.md` ③, spec §3.4).
+ * The DOM budget (`docs/performance.md` ③, spec §3.4).
  *
  * This is the test the backlog asked for: "selects a high-degree ayah and
  * asserts the mounted count stays at the cap". It is a component test rather
@@ -117,7 +117,7 @@ describe("the stage's DOM budget", () => {
   });
 
   /*
-   * `docs/backlog.md` ④. On the desktop spread `App` mounts two of these, so it
+   * `docs/performance.md` ④. On the desktop spread `App` mounts two of these, so it
    * hands each leaf a share of one budget (`spreadBudget`) rather than letting
    * both take the whole cap. That only works if the stage obeys the share it is
    * given — this is the half of ④ that lives here; the arithmetic of the split

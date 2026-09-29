@@ -494,7 +494,7 @@ use-cases-doc: ## Re-render docs/use-cases.md (the mermaid map) from docs/use-ca
 issues: ## What is still open, worst first:  make issues  ·  make issues ID=<id>
 	@# docs/issues.json is the source, and it is an index: no titles, no
 	@# descriptions, no reproductions. Those live in PLAN.md's follow-ups,
-	@# backlog.md, a design doc's open-questions section, or the validation
+	@# performance.md, a design doc's open-questions section, or the validation
 	@# ledger — whichever owns the item. What this adds is what none of those can
 	@# hold: severity, owner, what blocks it, and the fact that two registers are
 	@# describing the same thing. Everything printed below is read out of the
@@ -527,8 +527,11 @@ tasks: ## What is still open, by whose turn it is:  make tasks
 	@# identifiers, so this is the only page that shows them by name.
 	@node scripts/gate-tasks.mjs --list
 
+.PHONY: backlog
+backlog: tasks-doc ## Rebuild docs/backlog.md — every open item in full, on one page
+
 .PHONY: tasks-doc
-tasks-doc: ## Re-render docs/tasks.md from the decisions, ledger, issues and PLAN registers
+tasks-doc: ## Re-render docs/backlog.md, every open item in full, from the pages that own them
 	@node scripts/build-tasks-doc.mjs
 
 .PHONY: etl-scripts-doc

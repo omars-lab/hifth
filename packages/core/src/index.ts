@@ -141,7 +141,7 @@ export {
 
 // Loop 4b — the DOM budget. With the whole print vendored, "the current page
 // plus every vendored hop target" is no longer bounded by what we happen to
-// hold (`docs/backlog.md` ③); this is the ceiling and the recency rule.
+// hold (`docs/performance.md` ③); this is the ceiling and the recency rule.
 export { MOUNTED_PAGE_CAP, retainPages, spreadBudget } from "./mounted-set.js";
 
 export {

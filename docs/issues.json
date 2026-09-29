@@ -5,7 +5,7 @@
     "",
     "WHY THIS EXISTS. Open work was tracked in four registers that had never been",
     "counted together: PLAN.md's numbered follow-ups (the roadmap of record),",
-    "backlog.md (unscheduled optimization), each design doc's open-questions",
+    "performance.md (unscheduled optimization), each design doc's open-questions",
     "section, and validation/ledger.json (the checks a machine cannot run). Each",
     "register was internally disciplined and none could see the others. The cost",
     "was not theoretical: page-turning.md OE9 was found only because somebody",
@@ -21,7 +21,7 @@
     "it, and the fact that two registers are describing one item.",
     "",
     "HOW A SOURCE IS READ. Every design doc under docs/design/ ends with a section",
-    "headed exactly `Open questions, and what would answer each`, and backlog.md's",
+    "headed exactly `Open questions, and what would answer each`, and performance.md's",
     "body is one such register. Under both, an item is a heading of the form",
     "",
     "    ### OEn <title> · **status**",
@@ -134,7 +134,7 @@
       "severity": "risk",
       "owner": "agent",
       "closedBy": "apps/web/src/components/PageStage.budget.test.tsx",
-      "note": "The one item in that document never reproduced — it carried `suspected` for six loops rather than borrowing a confidence it had not earned, and it was closed by a test rather than by the profile it asked for. Its own measurement was still never taken; what changed is that the heading's claim is now false. That measurement did not stop being worth taking, and it now tunes MOUNTED_PAGE_CAP rather than deciding whether a cap exists — which is backlog ① ②, blocked on hardware. Owned by backlog ③; indexed twice here on purpose, because two registers describing one item is exactly what this catalog exists to make visible."
+      "note": "The one item in that document never reproduced — it carried `suspected` for six loops rather than borrowing a confidence it had not earned, and it was closed by a test rather than by the profile it asked for. Its own measurement was still never taken; what changed is that the heading's claim is now false. That measurement did not stop being worth taking, and it now tunes MOUNTED_PAGE_CAP rather than deciding whether a cap exists — which is performance.md ① ②, blocked on hardware. Owned by performance.md ③; indexed twice here on purpose, because two registers describing one item is exactly what this catalog exists to make visible."
     },
     {
       "id": "double-centring",
@@ -714,7 +714,7 @@
     {
       "id": "perf-verdict",
       "source": {
-        "file": "docs/backlog.md",
+        "file": "docs/performance.md",
         "item": "①"
       },
       "status": "blocked",
@@ -728,7 +728,7 @@
     {
       "id": "perf-on-real-mid-tier-android",
       "source": {
-        "file": "docs/backlog.md",
+        "file": "docs/performance.md",
         "item": "②"
       },
       "status": "blocked",
@@ -742,7 +742,7 @@
     {
       "id": "mounted-set-ceiling",
       "source": {
-        "file": "docs/backlog.md",
+        "file": "docs/performance.md",
         "item": "③"
       },
       "status": "fixed",
@@ -754,7 +754,7 @@
     {
       "id": "spread-mounts-two-leaves",
       "source": {
-        "file": "docs/backlog.md",
+        "file": "docs/performance.md",
         "item": "④"
       },
       "status": "fixed",
@@ -766,7 +766,7 @@
     {
       "id": "bundle-headroom",
       "source": {
-        "file": "docs/backlog.md",
+        "file": "docs/performance.md",
         "item": "⑤"
       },
       "status": "fixed",
@@ -778,7 +778,7 @@
     {
       "id": "nothing-watches-the-vendored-corpus",
       "source": {
-        "file": "docs/backlog.md",
+        "file": "docs/performance.md",
         "item": "⑥"
       },
       "status": "fixed",
@@ -790,7 +790,7 @@
     {
       "id": "shard-prefetch-misses-the-hop",
       "source": {
-        "file": "docs/backlog.md",
+        "file": "docs/performance.md",
         "item": "⑧"
       },
       "status": "fixed",
@@ -802,7 +802,7 @@
     {
       "id": "tti-criterion-has-no-instrument",
       "source": {
-        "file": "docs/backlog.md",
+        "file": "docs/performance.md",
         "item": "⑨"
       },
       "status": "fixed",
@@ -814,7 +814,7 @@
     {
       "id": "tti-margin-is-half-an-rtt",
       "source": {
-        "file": "docs/backlog.md",
+        "file": "docs/performance.md",
         "item": "⑫"
       },
       "status": "fixed",
@@ -826,7 +826,7 @@
     {
       "id": "ci-frame-budget-is-emulated",
       "source": {
-        "file": "docs/backlog.md",
+        "file": "docs/performance.md",
         "item": "⑩"
       },
       "status": "blocked",
@@ -840,7 +840,7 @@
     {
       "id": "both-locales-at-first-paint",
       "source": {
-        "file": "docs/backlog.md",
+        "file": "docs/performance.md",
         "item": "⑦"
       },
       "status": "answered",
@@ -851,7 +851,7 @@
     {
       "id": "manifest-is-one-whole-fetch",
       "source": {
-        "file": "docs/backlog.md",
+        "file": "docs/performance.md",
         "item": "⑪"
       },
       "status": "fixed",
@@ -863,7 +863,7 @@
     {
       "id": "corpus-is-outlines-and-repeats",
       "source": {
-        "file": "docs/backlog.md",
+        "file": "docs/performance.md",
         "item": "⑬"
       },
       "status": "answered",
@@ -874,7 +874,7 @@
     {
       "id": "page-bar-draws-one-node-per-page",
       "source": {
-        "file": "docs/backlog.md",
+        "file": "docs/performance.md",
         "item": "⑭"
       },
       "status": "fixed",
@@ -886,7 +886,7 @@
     {
       "id": "pinning-writes-every-file-twice",
       "source": {
-        "file": "docs/backlog.md",
+        "file": "docs/performance.md",
         "item": "⑮"
       },
       "status": "fixed",
@@ -898,7 +898,7 @@
     {
       "id": "site-answers-on-plain-http",
       "source": {
-        "file": "docs/backlog.md",
+        "file": "docs/performance.md",
         "item": "⑯"
       },
       "status": "blocked",
@@ -2086,7 +2086,7 @@
     {
       "id": "storage-not-kept",
       "source": {
-        "file": "docs/backlog.md",
+        "file": "docs/performance.md",
         "item": "⑰"
       },
       "status": "open",
@@ -2151,6 +2151,41 @@
       "severity": "question",
       "owner": "user",
       "note": "A design-of-record cited from mark-granularity.html's decision row and from mark-labels.md, but carrying no row of its own in docs/decisions.json — it settles nothing on its own while its own §⑧ ①②④ stay open. Whether it belongs in the decision register once one of those resolves, or is better left reachable only through the documents that already cite it, is a call about the registers, not one this document can make about itself."
+    },
+    {
+      "id": "swap-react-dom-for-preact",
+      "source": {
+        "file": "docs/performance.md",
+        "item": "⑱"
+      },
+      "status": "blocked",
+      "severity": "risk",
+      "owner": "agent",
+      "blockedBy": ["the 2026-09 refactor settling"],
+      "note": "Parked 2026-09-29 when the session task list was cleared; until then it lived only in that list and a pointer in the trims list to a file that never existed."
+    },
+    {
+      "id": "qul-command-line-tool",
+      "source": {
+        "file": "docs/PLAN.md",
+        "item": "22"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "user",
+      "note": "Parked 2026-09-29 when the session task list was cleared; until then it was written down only in that list and the old confusion-points backlog's parked section."
+    },
+    {
+      "id": "one-commentary-drawer",
+      "source": {
+        "file": "docs/PLAN.md",
+        "item": "23"
+      },
+      "status": "blocked",
+      "severity": "question",
+      "owner": "agent",
+      "blockedBy": ["the 2026-09 refactor"],
+      "note": "Related decision: tafsir-provider."
     }
   ]
 }

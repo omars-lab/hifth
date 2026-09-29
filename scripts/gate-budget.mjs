@@ -4,7 +4,7 @@
  * 175 KB (PLAN §6 set 150; raised 2026-09-27 on a measured start-up sweep —
  * see the optimizing-performance skill). Runs after `pnpm build`.
  *
- * The budget alone was not enough, and backlog ⑤ named why: **it notices at the
+ * The budget alone was not enough, and performance.md ⑤ named why: **it notices at the
  * cliff rather than on the slope.** At 108 KB against 150 there are forty
  * kilobytes of headroom, and nothing distinguishes a PR that spends nine of them
  * from a PR that spends none — both print "OK". Loop 6b's pack manager and Loop
