@@ -4,6 +4,8 @@ import { resolve } from "node:path";
 import { defineConfig, type Plugin } from "vite";
 import react from "@vitejs/plugin-react";
 import { VitePWA } from "vite-plugin-pwa";
+import { preloadScript } from "./src/lang-preload";
+import { LOCALE_IDS } from "./src/messages/locales.gen";
 
 /**
  * The commit this bundle was built from.
@@ -66,6 +68,49 @@ function dropPrivateUnlessPitch(): Plugin {
   };
 }
 
+/**
+ * Start the reader's interface language downloading as soon as index.html is
+ * read, in parallel with the app's main script. Each language is its own file
+ * (see `messages/catalogs.gen.ts`), and without this the app would only ask for
+ * it once its own code had arrived and run: one extra round trip before the
+ * first paint. The script that picks the language is in `src/lang-preload.ts`.
+ */
+function preloadReaderLanguage(): Plugin {
+  return {
+    name: "hifth-preload-reader-language",
+    apply: "build",
+    transformIndexHtml: {
+      order: "post",
+      handler(_html, ctx) {
+        if (!ctx.bundle) return;
+        const chunks = Object.values(ctx.bundle).filter((c) => c.type === "chunk");
+        const entry = new Set(chunks.filter((c) => c.isEntry).map((c) => c.fileName));
+        const files: Record<string, string[]> = {};
+        for (const c of chunks) {
+          const id = /\/messages\/(\w+)\.gen\.ts$/.exec(c.facadeModuleId ?? "")?.[1];
+          if (!id || id === "catalog") continue;
+          // A language may lean on the main script, which is loading anyway,
+          // but never on a file of its own: that is one more request on the
+          // way to the first paint. A 266-byte helper split out this way cost
+          // the start-up check 450 ms on its simulated slow phone (2026-09-29).
+          const extra = c.imports.filter((f) => !entry.has(f));
+          if (extra.length) {
+            throw new Error(
+              `preloadReaderLanguage: ${id} needs ${extra.join(", ")} as a separate file; raise experimentalMinChunkSize below so it folds into the main script`,
+            );
+          }
+          files[id] = [`./${c.fileName}`];
+        }
+        const missing = LOCALE_IDS.filter((id) => !files[id]);
+        if (missing.length) {
+          throw new Error(`preloadReaderLanguage: no separate file for ${missing.join(", ")}`);
+        }
+        return [{ tag: "script", children: preloadScript(files), injectTo: "head" }];
+      },
+    },
+  };
+}
+
 export default defineConfig({
   base: "./",
   define: {
@@ -78,6 +123,7 @@ export default defineConfig({
   },
   plugins: [
     dropPrivateUnlessPitch(),
+    preloadReaderLanguage(),
     react(),
     VitePWA({
       registerType: "prompt",
@@ -215,5 +261,14 @@ export default defineConfig({
   build: {
     target: "es2022",
     sourcemap: true,
+    rollupOptions: {
+      output: {
+        // Fold a tiny shared file (the plural helper every language file
+        // uses) into one that is always loaded first, rather than ship it on
+        // its own: each separate file is a round trip before the first paint.
+        // `preloadReaderLanguage` refuses the build if one slips through.
+        experimentalMinChunkSize: 2048,
+      },
+    },
   },
 });

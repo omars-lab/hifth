@@ -1,4 +1,7 @@
+import { fileURLToPath } from "node:url";
 import { defineConfig, devices } from "@playwright/test";
+// @ts-expect-error — a plain .mjs helper shared with the repo's scripts, untyped.
+import { e2ePorts } from "../../scripts/lib/e2e-port.mjs";
 
 // Mobile is the acceptance device (PLAN §8). Loop 0 runs the smoke tour on an
 // iPhone and an Android viewport against the production build served locally.
@@ -21,6 +24,11 @@ const shots = process.env.HIFTH_SHOTS === "1";
 // swaps the whole run for one chromium project that builds and serves the pitch
 // bundle on its own port — nothing here can rebuild or reserve the public one.
 const pitch = process.env.HIFTH_PITCH === "1";
+
+// Each checkout serves on its own port, so two worktrees' runs cannot collide
+// (scripts/lib/e2e-port.mjs). The main checkout keeps 4173 and 4273.
+const ports = e2ePorts({ root: fileURLToPath(new URL("../..", import.meta.url)) });
+const port = pitch ? ports.pitch : ports.app;
 
 export default defineConfig({
   testDir: "./e2e",
@@ -63,7 +71,7 @@ export default defineConfig({
     ["json", { outputFile: "test-results/results.json" }],
   ],
   use: {
-    baseURL: externalBase ?? (pitch ? "http://localhost:4273" : "http://localhost:4173"),
+    baseURL: externalBase ?? `http://localhost:${port}`,
     // Arabic is the suite's default because it is the app's, and because every
     // committed aria snapshot and golden image was recorded in it. Without this
     // the chrome's language would be the *runner's* locale: a laptop set to
@@ -262,9 +270,9 @@ export default defineConfig({
           // serve it on its own port, so a pitch run never touches — or is
           // fooled by — whatever public build is sitting in dist/.
           command: pitch
-            ? "VITE_PITCH=1 pnpm exec vite build --outDir dist/pitch && pnpm exec vite preview --outDir dist/pitch --port 4273 --strictPort"
-            : "pnpm exec vite preview --port 4173 --strictPort",
-          url: pitch ? "http://localhost:4273" : "http://localhost:4173",
+            ? `VITE_PITCH=1 pnpm exec vite build --outDir dist/pitch && pnpm exec vite preview --outDir dist/pitch --port ${port} --strictPort`
+            : `pnpm exec vite preview --port ${port} --strictPort`,
+          url: `http://localhost:${port}`,
           // Never reuse, unless someone asks for it by name.
           //
           // `reuseExistingServer: !CI` looks like a local convenience and is
