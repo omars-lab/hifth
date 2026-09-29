@@ -1,0 +1,54 @@
+# Parked by-hand checks
+
+Saved for later — nothing here is waiting on the owner today. Highest priority first. Each item
+says what to look at, what right looks like, and what test it becomes once it has been checked.
+The phone-and-device checks keep their full steps in the validation ledger
+(`make validate CHECK=<id>`, or `make guide` to open them on the phone); this list only names them.
+
+Two ways to open the app: this laptop, `make pitch` then `http://localhost:5173/#/hafs-kfqc/...`
+(the private demo build, with the Study Quran notes); or the public site,
+`https://blog.bytesofpurpose.com/hifth/#/hafs-kfqc/...` (no notes).
+
+## Parked
+
+1. **The bookmarked corner, in Firefox.** Bookmark a page on a computer, one page and two-page
+   (`#/hafs-kfqc/p6?view=one`, `?view=two`). Right: the ribbon hangs from the top of its own page
+   near the spine, the folded corner is clear of it and a little darker than the page.
+   Already a test (edge-peel spec); by eye only because the look was the complaint.
+
+2. **Walk the demo as a scholar would**, on a phone and on a computer (private build). Open The
+   Study Quran's note on a verse, follow a related verse, come back. Right: every step lands where
+   you expect and nothing looks unfinished. Each rough edge found becomes its own Playwright test
+   of that flow.
+
+3. **Arabic number wording.** Open `docs/design/arabic-number-agreement-review.html` and read the
+   counts as they appear in the Arabic interface (best with a hafiz). Right: each count agrees
+   with its noun the way a reader would say it. Corrections become unit tests on the wording.
+
+4. **Four phone checks** (steps in the ledger):
+   - smooth enough on a real phone — `perf-verdict-on-device`
+   - usable with the screen reader — `screen-reader-walkthrough`
+   - still works offline after 8 days — `offline-survival-8-day`
+   - a two-day revision record lands on the phone — `revision-record-lands-on-a-phone`
+
+   These need a real phone and time, so they stay by hand; each verdict is saved with
+   `make record CHECK=<id> RESULT='…'`, and any part a machine can repeat goes into that check's
+   `evidence` block.
+
+5. **By-eye placement sitting** (about 60 quick taps: each shows one mark with two boxes; tap the
+   box that sits where the print has it). Run `pnpm sit:serve` in the harakat worktree and open
+   the page it prints. Its ruling unlocks the per-line bend fix, and it becomes the answer key the
+   automated scorer measures against from then on. Ledger: `placement-correction-by-eye`,
+   `placement-holds-off-its-own-pages`, `placement-what-kind-of-wrong`.
+
+6. **Cloudflare: Always Use HTTPS.** The site still answers on plain http, where the offline app
+   does not work. Flip the setting in the Cloudflare dashboard. Once it is on, a check that plain
+   http redirects to https replaces this item.
+
+7. **Licensing questions** — the App Store, the page layout's licence, the third upstream source.
+   Needs someone qualified to read licences; not needed for the pitch. Answers go into the
+   decision records, not tests.
+
+## Done
+
+(Items move here with the date and where their test or ledger record is.)
