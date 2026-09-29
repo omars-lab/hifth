@@ -80,7 +80,7 @@
  * The long form, and the checklist for adding a language: docs/design/i18n.md.
  */
 
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import {
   LOCALES,
   applyLangToDocument,
@@ -103,7 +103,7 @@ import {
   tenths,
 } from "./format";
 import type { Catalog } from "./messages/catalog.gen";
-import { CATALOGS } from "./messages/catalogs.gen";
+import { CATALOG_LOADERS } from "./messages/catalogs.gen";
 
 export type { EditionCopy };
 
@@ -1160,28 +1160,35 @@ export function buildStrings(lang: Lang, m: Catalog): Strings {
 }
 
 /**
- * Every language's bundle, built once at module load.
+ * The languages loaded so far, each built once when its catalog arrives.
  *
- * Eager, not lazy: the constant strings are read out of the catalog here rather
- * than on every render, and there are two of them. `CATALOGS` is generated from
- * the files in `messages/`, so this map gains a language the moment a catalog
- * appears — nothing here is edited to add one.
+ * Loaded, not bundled: each catalog is its own file (`CATALOG_LOADERS`, generated
+ * from the files in `messages/`), so a reader downloads only the language they
+ * read in. Both together were ~10 KB gz of start-up code, half of it a language
+ * the reader never sees. `main.tsx` waits for the reader's language before the
+ * first render, so no component ever reads a language that is not here yet.
  */
-const BUNDLES: Readonly<Record<Lang, Strings>> = Object.fromEntries(
-  Object.entries(CATALOGS).map(([id, catalog]) => [id, buildStrings(id as Lang, catalog)]),
-) as Readonly<Record<Lang, Strings>>;
+const BUNDLES: Partial<Record<Lang, Strings>> = {};
+const PENDING: Partial<Record<Lang, Promise<Strings>>> = {};
+
+/** Fetch (once) and build a language's strings. Offline, the service worker has it. */
+export function loadStrings(lang: Lang): Promise<Strings> {
+  const ready = BUNDLES[lang];
+  if (ready) return Promise.resolve(ready);
+  return (PENDING[lang] ??= CATALOG_LOADERS[lang]()
+    .then(({ default: catalog }) => (BUNDLES[lang] = buildStrings(lang, catalog)))
+    .finally(() => delete PENDING[lang]));
+}
 
 /**
- * Arabic and English by name, for `i18n.test.tsx`, which walks the bundles
- * looking for a string that was never translated. Nothing else imports these —
- * components read the one the provider chose, never a bundle by name.
+ * A loaded language's strings. Throws for one that was never loaded, because
+ * that is a start-up ordering bug, and quietly showing another language's words
+ * is exactly what this module exists to prevent.
  */
-export const AR: Strings = BUNDLES.ar;
-export const EN: Strings = BUNDLES.en;
-
-/** Every language's bundle, for tests and for the language switch. */
 export function stringsFor(lang: Lang): Strings {
-  return BUNDLES[lang];
+  const t = BUNDLES[lang];
+  if (!t) throw new Error(`i18n: "${lang}" read before loadStrings("${lang}") finished`);
+  return t;
 }
 
 /** What every component reads: the language, its strings, and the way to move. */
@@ -1202,30 +1209,47 @@ export interface I18n {
  * `main.tsx`, one level above `<App />`, because it also owns the document's
  * `lang`/`dir`, which is not App's to set.
  */
+//
+// `t` is read lazily because Arabic is loaded, not bundled: the unit tests'
+// setup file loads it before any test runs, and nothing in the app renders
+// outside the provider.
 const LangContext = createContext<I18n>({
   lang: "ar",
   dir: "rtl",
-  t: AR,
+  get t() {
+    return stringsFor("ar");
+  },
   setLang: () => {},
 });
 
 export function LangProvider({ children }: { children: React.ReactNode }): JSX.Element {
   const [lang, setLangState] = useState<Lang>(detectLang);
+  // The language asked for last, so a slow load cannot overrule a later tap.
+  const wanted = useRef<Lang>(lang);
 
   // Keep the document in step. `lang` is the load-bearing half — it decides
   // which voice a screen reader reads the chrome in.
   useEffect(() => applyLangToDocument(lang), [lang]);
 
+  // A language already loaded switches at once; the other is fetched first, so
+  // the chrome never shows a half-switched sheet. A failed fetch leaves the
+  // reader where they were.
   const setLang = useCallback((next: Lang) => {
-    rememberLang(next);
-    setLangState(next);
+    wanted.current = next;
+    const apply = () => {
+      if (wanted.current !== next) return;
+      rememberLang(next);
+      setLangState(next);
+    };
+    if (BUNDLES[next]) apply();
+    else loadStrings(next).then(apply, () => {});
   }, []);
 
   const value = useMemo<I18n>(
     () => ({
       lang,
       dir: dirOf(lang),
-      t: BUNDLES[lang],
+      t: stringsFor(lang),
       setLang,
     }),
     [lang, setLang],
