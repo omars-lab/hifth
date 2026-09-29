@@ -240,19 +240,34 @@ export default defineConfig({
         {
           name: "iphone",
           use: { ...devices["iPhone 13"] },
-          testIgnore: /(golden|shots|desktop|edge-peel|spread-fit|detent-live|pagebar-detents|pagebar-fisheye|notes|mistakes|sign-tools|lazy-tools|pitch|drive-video)\.spec\.ts/,
+          testIgnore: /(golden|ipad|shots|desktop|edge-peel|spread-fit|detent-live|pagebar-detents|pagebar-fisheye|notes|mistakes|sign-tools|lazy-tools|pitch|drive-video)\.spec\.ts/,
         },
         {
           name: "android",
           use: { ...devices["Pixel 7"] },
-          testIgnore: /(golden|shots|desktop|edge-peel|spread-fit|detent-live|pagebar-detents|pagebar-fisheye|notes|mistakes|sign-tools|lazy-tools|pitch|drive-video)\.spec\.ts/,
+          testIgnore: /(golden|ipad|shots|desktop|edge-peel|spread-fit|detent-live|pagebar-detents|pagebar-fisheye|notes|mistakes|sign-tools|lazy-tools|pitch|drive-video)\.spec\.ts/,
+        },
+        {
+          // The iPad, the same WebKit the native shell hosts (native/). One
+          // project drives the app at iPad sizes both ways up; the shell's own
+          // tests only prove the window opens at the right route.
+          name: "ipad",
+          testMatch: /ipad\.spec\.ts/,
+          use: { ...devices["iPad Pro 11"] },
+        },
+        {
+          name: "ipad-golden",
+          testMatch: /ipad-golden\.spec\.ts/,
+          // Scale 1: the picture is of the layout, and a 2× baseline of a
+          // whole iPad screen is four times the bytes for the same answer.
+          use: { ...devices["iPad Pro 11"], deviceScaleFactor: 1 },
         },
         {
           // The golden-image project. Its viewport is spelled out rather than
           // taken from `devices` on purpose: a Playwright upgrade that retunes a
           // device descriptor would silently invalidate every committed baseline.
           name: "golden",
-          testMatch: /golden\.spec\.ts/,
+          testMatch: /^(?!.*ipad).*golden\.spec\.ts/,
           use: {
             browserName: "chromium",
             viewport: { width: 390, height: 844 },

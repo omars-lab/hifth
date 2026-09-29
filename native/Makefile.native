@@ -9,6 +9,8 @@
 #   make app-shot ROUTE=/hafs-kfqc/p45 TARGET=ipad|mac [APPEARANCE=dark]
 #   make app-open ROUTE=/hafs-kfqc/2:255   turn the running app to a route
 #   make app-test           route/bundle unit tests + the XCUITest smoke
+#   make app-golden         the real app's screenshots against native/shots/baseline/
+#   make app-device-install build for a plugged-in iPad, install and launch (DEVICE=…)
 # ---------------------------------------------------------------------------
 
 # A stale CPATH from Homebrew breaks Xcode's clang module search.
@@ -34,10 +36,23 @@ ROUTE        ?= /hafs-kfqc/2:255
 TARGET       ?= ipad
 APPEARANCE   ?= light
 # `/hafs-kfqc/p45?field=dark` → `ipad-hafs-kfqc_p45_field-dark.png`
+# Where `app-shot` writes; `app-golden` points it at native/shots/current/.
+SHOT_OUT     ?= $(SHOTS)/$(SHOT_NAME)
+# The routes the shell goldens cover: a verse, a page, and the dark desk.
+GOLDEN_ROUTES ?= /hafs-kfqc/2:255 /hafs-kfqc/p45 /hafs-kfqc/p45?field=dark
+# The Apple Development team, read from the signing identity in the keychain.
+# Only device builds and archives need it; simulator and Mac builds do not.
+TEAM         ?= $(shell security find-identity -v -p codesigning 2>/dev/null | sed -n 's/.*Apple Development: .*(\([A-Z0-9]\{10\}\)).*/\1/p' | head -1)
+# The plugged-in iPad, by the name `xcrun devicectl list devices` prints.
+DEVICE       ?=
 SHOT_NAME     = $(TARGET)-$(subst /,_,$(subst ?,_,$(subst =,-,$(subst :,-,$(patsubst /%,%,$(ROUTE))))))$(if $(filter-out light,$(APPEARANCE)),-$(APPEARANCE),).png
 
-.PHONY: app-generate app-web app-build-mac app-build-ipad app-run-mac app-run-mac-stdout \
-        app-run-ipad app-shot app-probe app-open app-test app-test-mac-ui app-unit-test app-logs app-clean
+.PHONY: app-icon app-generate app-web app-build-mac app-build-ipad app-run-mac app-run-mac-stdout \
+        app-run-ipad app-shot app-probe app-open app-test app-test-mac-ui app-unit-test app-logs app-clean \
+        app-golden app-golden-update app-device-install app-archive app-testflight
+
+app-icon: ## Cut every Mac and iPad icon size from the web app's own icon (apps/web/public/icons)
+	python3 $(NATIVE)/scripts/make-appicon.py
 
 app-generate: ## Regenerate native/Hifth.xcodeproj from native/project.yml
 	@mkdir -p $(WEB_BUNDLE)
@@ -89,21 +104,21 @@ app-shot: ## Screenshot the app at ROUTE on TARGET=ipad|mac (APPEARANCE=light|da
 	@mkdir -p $(SHOTS)
 ifeq ($(TARGET),mac)
 	$(MAKE) app-build-mac
-	HIFTH_ROUTE=$(ROUTE) HIFTH_APPEARANCE=$(APPEARANCE) HIFTH_SNAPSHOT_PATH=$(abspath $(SHOTS)/$(SHOT_NAME)) \
+	HIFTH_ROUTE=$(ROUTE) HIFTH_APPEARANCE=$(APPEARANCE) HIFTH_SNAPSHOT_PATH=$(abspath $(SHOT_OUT)) \
 	  $(MAC_APP)/Contents/MacOS/Hifth
 else
 	$(MAKE) app-build-ipad
 	xcrun simctl bootstatus $(IPAD_UDID) -b
 	xcrun simctl install $(IPAD_UDID) $(IPAD_APP)
 	-xcrun simctl terminate $(IPAD_UDID) $(BUNDLE_ID) 2>/dev/null
-	@rm -f $(SHOTS)/$(SHOT_NAME)
+	@rm -f $(SHOT_OUT)
 	SIMCTL_CHILD_HIFTH_ROUTE=$(ROUTE) SIMCTL_CHILD_HIFTH_APPEARANCE=$(APPEARANCE) \
-	  SIMCTL_CHILD_HIFTH_SNAPSHOT_PATH=$(abspath $(SHOTS)/$(SHOT_NAME)) \
+	  SIMCTL_CHILD_HIFTH_SNAPSHOT_PATH=$(abspath $(SHOT_OUT)) \
 	  xcrun simctl launch $(IPAD_UDID) $(BUNDLE_ID)
-	@for i in $$(seq 1 60); do test -s $(SHOTS)/$(SHOT_NAME) && break; sleep 0.5; done
-	@test -s $(SHOTS)/$(SHOT_NAME) || { echo "no screenshot after 30 s"; exit 1; }
+	@for i in $$(seq 1 60); do test -s $(SHOT_OUT) && break; sleep 0.5; done
+	@test -s $(SHOT_OUT) || { echo "no screenshot after 30 s"; exit 1; }
 endif
-	@echo "  ✓ $(SHOTS)/$(SHOT_NAME)"
+	@echo "  ✓ $(SHOT_OUT)"
 
 app-probe: app-build-mac ## Print what the page can see inside the Mac shell (secure context, caches, share…)
 	HIFTH_PROBE=1 HIFTH_ROUTE=$(ROUTE) $(MAC_APP)/Contents/MacOS/Hifth | grep '^probe' | sed 's/^probe //' | python3 -m json.tool
@@ -127,6 +142,53 @@ app-test-mac-ui: app-generate ## The XCUITest smoke on the Mac (needs Accessibil
 	@rm -rf $(SHOTS)/mac-smoke.xcresult
 	set -o pipefail; $(XCB) -scheme Hifth-macOS -destination 'platform=macOS' -only-testing:HifthUITests-macOS \
 	  -resultBundlePath $(SHOTS)/mac-smoke.xcresult test | $(XCPRETTY)
+
+# ---- the real app's look: one screenshot per route, against a committed baseline
+# Same recipe as the web goldens: `app-golden` fails on a change, you LOOK at
+# native/shots/diff/, and only then `app-golden-update` accepts the new look.
+app-golden: app-golden-shots ## Screenshot GOLDEN_ROUTES on the iPad simulator and diff against native/shots/baseline/
+	$(NATIVE)/scripts/golden-diff.sh $(SHOTS)/current $(SHOTS)/baseline $(SHOTS)/diff
+
+app-golden-update: app-golden-shots ## Accept the current shell screenshots as the new baseline — look at the diff first
+	@mkdir -p $(SHOTS)/baseline
+	cp $(SHOTS)/current/*.png $(SHOTS)/baseline/
+	@echo "  baseline updated: $$(ls $(SHOTS)/baseline | wc -l | tr -d ' ') screenshots"
+
+.PHONY: app-golden-shots
+# Shots are halved (the simulator draws at 2x) so a baseline is a few hundred KB, not 2 MB.
+app-golden-shots:
+	@rm -rf $(SHOTS)/current && mkdir -p $(SHOTS)/current
+	@for r in $(GOLDEN_ROUTES); do \
+	  name=$$(printf '%s' "$$r" | sed 's#^/##; s#[/:?=]#_#g'); \
+	  $(MAKE) --no-print-directory app-shot TARGET=ipad ROUTE="$$r" SHOT_OUT=$(SHOTS)/current/ipad-$$name.png || exit 1; \
+	  magick mogrify -resize 50% $(SHOTS)/current/ipad-$$name.png; \
+	done
+
+# ---- a real iPad over USB
+app-device-install: app-generate ## Build for a plugged-in iPad, install and launch at ROUTE (DEVICE=<name from `xcrun devicectl list devices`>)
+	@test -n "$(DEVICE)" || { echo ""; echo "  DEVICE= is empty. Pick a name from:"; xcrun devicectl list devices; echo ""; exit 1; }
+	@test -n "$(TEAM)" || { echo "  no Apple Development identity in the keychain (TEAM= to override)"; exit 1; }
+	set -o pipefail; $(XCB) -scheme Hifth-iOS -destination 'generic/platform=iOS' -allowProvisioningUpdates \
+	  DEVELOPMENT_TEAM=$(TEAM) build | $(XCPRETTY)
+	xcrun devicectl device install app --device "$(DEVICE)" $(DERIVED)/Build/Products/Debug-iphoneos/Hifth.app
+	DEVICECTL_CHILD_HIFTH_ROUTE=$(ROUTE) xcrun devicectl device process launch --device "$(DEVICE)" $(BUNDLE_ID)
+
+# ---- TestFlight: gated on the licence decision, not on the build
+# Both refuse while docs/decisions.json still holds `native-testflight-licence`
+# open. The record says why in plain words; settle it there first.
+TESTFLIGHT_SETTLED = $(shell python3 -c "import json; r=[d for d in json.load(open('docs/decisions.json'))['decisions'] if d['id']=='native-testflight-licence']; print('yes' if r and r[0]['status']!='open' else 'no')" 2>/dev/null)
+define TESTFLIGHT_GATE
+	@test "$(TESTFLIGHT_SETTLED)" = yes || { echo ""; \
+	  echo "  Not yet. Whether a build with the held commentary may go to outside testers is"; \
+	  echo "  still open: docs/decisions/native-testflight-licence.md. Settle it there first."; echo ""; exit 1; }
+endef
+
+app-archive: app-generate ## Archive the iPad app for upload (refuses until the TestFlight decision is settled)
+	$(TESTFLIGHT_GATE)
+	@echo "  archive: not built yet — the export options, privacy manifest and signing come with the decision (docs/backlog.md)"; exit 1
+
+app-testflight: app-archive ## Upload the archive to TestFlight with an App Store Connect API key from the environment
+	@echo "  upload: not built yet"; exit 1
 
 app-logs: ## Stream the app's console output (Mac or simulator)
 	log stream --predicate 'process == "Hifth"' --level debug
