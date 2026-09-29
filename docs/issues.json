@@ -2073,6 +2073,17 @@
       "note": "Subtask of rigor-stack-pins-the-checking-code (①), and the deepest hole: the one error no fingerprint can catch is the measuring code agreeing with itself, because the instrument that grades a placement is the same family of code that measured the ink in the first place. The fix is a genuinely DIFFERENT measurement — a second, independently written way of finding where each mark's ink is — used to grade the first, producing its own verdict on the marks the first is least sure of. The by-eye sitting is a human instance of this; this subtask is the machine one. Most expensive of the five, so last by value-for-effort. Task #129."
     },
     {
+      "id": "repo-checks-have-no-tests",
+      "source": {
+        "file": "docs/design/robust-validation.md",
+        "item": "⑦"
+      },
+      "status": "open",
+      "severity": "risk",
+      "owner": "agent",
+      "note": "Sibling of ①, one layer out: the ~33 repository checks in the top-level scripts/ folder (gate-*.mjs, run by make pre-commit and the pre-push hook) have no unit tests, while packages/etl/scripts keeps a .test.mjs beside its tools. A check edited so it stops refusing anything would pass every change green. Found 2026-09-29 during the branch consolidation (PR #152): two rules were dropped from gate-artifacts and the only proof the rest still worked was the gate registry check plus one real run. Fix shape: one must-refuse and one must-pass fixture per check, run under pnpm test; start with the public-safety checks (published pages, Arabic codepoints, held text). Write-up: docs/issues/consolidation-2026-09-29.md."
+    },
+    {
       "id": "storage-not-kept",
       "source": {
         "file": "docs/backlog.md",

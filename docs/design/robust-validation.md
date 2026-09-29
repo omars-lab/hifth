@@ -376,6 +376,19 @@ used to grade the first. **What would answer it:** a separate instrument produce
 the marks the first is least sure of, and the two either agree or hand us a named list of where they
 do not.
 
+### ⑦ If one of our own checks broke and started passing everything, would anything tell us? · **open**
+
+The steps above cover the scripts that *grade* the marks. There is a second set: the thirty-odd
+checks that run before every change is saved and pushed — that each published page still has its
+copy, that no Arabic slips onto a public page, that every open decision names its page. Each one
+tests the repository, but none has a test of its own. So if one of them were edited and quietly
+stopped refusing anything, every change would go through green and nobody would notice. This came up
+on 2026-09-29, when two rules were dropped from the published-pages check while branches were being
+merged: the only proof that what was left still worked was running it once by hand. The build
+scripts already have a test beside each one; these checks do not. **What would answer it:** a small
+test beside each check that feeds it one thing it must refuse and one it must pass, run with the
+other tests — starting with the checks that guard what goes public.
+
 ---
 
 ## What this page is not settling
