@@ -46,9 +46,9 @@ import { readFileSync, existsSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { ROOT } from "./code-pointers.mjs";
 import { readDecisions, titleOf, splitDoc } from "./decisions.mjs";
+import { readArtifacts } from "./artifacts.mjs";
 
 const OUT = join(ROOT, "docs/design/decision-board.html");
-const ARTIFACTS = join(ROOT, "docs/artifacts.json");
 
 const esc = (s) =>
   String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
@@ -261,7 +261,7 @@ const card = (r, big) => `
  * first, because they are the only rows on the shelf that anybody has to do
  * something about.
  */
-const shelf = JSON.parse(readFileSync(ARTIFACTS, "utf8")).artifacts.map((a) => {
+const shelf = readArtifacts().map((a) => {
   const d = a.decision ? byId.get(a.decision) : null;
   return { ...a, d, kept: Boolean(d?.page ?? a.page), page: a.page ?? d?.page ?? null };
 });
