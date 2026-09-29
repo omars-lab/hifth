@@ -697,6 +697,19 @@ reworked desktop rows. The row *"a turn inside one opening draws no band"* is go
 stays inside an opening any more, and a link to the facing page plays no turn at all, so it
 could only pass.
 
+**And the turn itself is the hand's turn.** Played by an arrow, the old band crossed one
+leaf, cross-faded it, then showed the new right-hand page beside the old left one before the
+left caught up — "weird", in the owner's word. On an open book the arrow, the wheel and the
+slider's buttons now play the corner-pull's peel by themselves: the foot corner travels
+along the foot, over the spine, and lies down, and both pages of the new opening land
+together. It first rode up in an arc, as a hand's corner does, but any rise tilts the leaf
+above the paper — up to 48 px mid-turn — which is what the owner had just asked the hand's
+corner never to do; the same row now measures that on every frame. Where there is
+no page to show beneath, or the reader asked for less motion, the old turn stays. Held by
+*"an arrow turn goes over like a hand's and never shows a mismatched pair"* (edge-peel spec).
+The row that measured the band crossing the whole book was removed with it: on a complete
+mus'haf the open book no longer plays that band for any key, so the row could not be reached.
+
 ### ② Should the two leaves pan and zoom together? · **fixed**
 
 Unanswerable and untestable until a facing pair is vendored. A shared `View` across two

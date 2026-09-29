@@ -417,74 +417,11 @@ test.describe("Hifth · the desktop spread", () => {
     await expect.poll(() => new URL(page.url()).hash).toBe("#/hafs-kfqc/p9");
   });
 
-  test("the fold crosses the whole open book, not the leaf that turned", async ({ page }) => {
-    await watchFolds(page);
-    // From 8, not 7 — the turn has to leave the opening for a band to exist at
-    // all (the row above is the other half of that). 8 → 9 is a `gap`: the two
-    // leaves are adjacent in the print and belong to different openings, so the
-    // whole book is replaced and the band has the full width to cross.
-    await page.goto("/#/hafs-kfqc/p8");
-    await expect(spread(page)).toBeVisible();
-    await expect(pageSvg(page, 8)).toBeVisible();
-
-    const open = await boxOf(book(page));
-    const leaf = await boxOf(pageSvg(page, 8));
-
-    // Sample the band on every frame for the length of a sweep, armed before the
-    // key rather than after: a band that never leaves the leaf is wrong from its
-    // first frame, and by the time an `expect` resolves it has already landed.
-    await page.evaluate(() => {
-      const w = window as unknown as { __band: Array<[number, number]> };
-      w.__band = [];
-      const t0 = performance.now();
-      const tick = (): void => {
-        const el = document.querySelector("[data-fold]");
-        if (el) {
-          const r = el.getBoundingClientRect();
-          w.__band.push([r.x, r.x + r.width]);
-        }
-        if (performance.now() - t0 < 600) requestAnimationFrame(tick);
-      };
-      requestAnimationFrame(tick);
-    });
-
-    await page.keyboard.press("ArrowLeft");
-    await expect(page.locator(NUM)).toHaveText("9");
-
-    // It was put in the open book, not in the stage that owns the turn. The
-    // stage carries `data-leaf` and no testid, so a band that failed to portal
-    // reports `host: null` here instead of quietly measuring the same.
-    const seen = await foldsSeen(page);
-    expect(seen).toHaveLength(1);
-    expect(seen[0]!.host, "the band was not portalled into the open book").toBe("page-book");
-    expect(seen[0]!.hostWidth, "the band's box is not the open book").toBeCloseTo(open.width, 0);
-
-    // And it went the whole way across. The far end is the assertion that a leaf
-    // -sized sweep fails: the live page is the right-hand leaf, so a band that
-    // stopped at its own leaf's edge would never reach the left of the book.
-    const band = await page.evaluate(
-      () => (window as unknown as { __band: Array<[number, number]> }).__band,
-    );
-    expect(band.length, "the band was never sampled mid-sweep").toBeGreaterThan(3);
-    const near = Math.min(...band.map((f) => f[0]));
-    const far = Math.max(...band.map((f) => f[1]));
-    expect(near, "the band never reached the near edge").toBeLessThan(open.x + 2);
-    // Not the exact far edge. The band is removed the moment the turn ends, so
-    // the last frame a sampler can catch is a frame or two inside the sweep, and
-    // an eased transition spends its slowest frames there — pinning the final
-    // pixel would be pinning frame timing, which is a flake, not a claim. 0.8 of
-    // the book is far past the gutter and roughly twice as far as the failure
-    // this row exists for: a band confined to the live leaf stops at 0.5.
-    expect(far, "the band stopped short of the far leaf").toBeGreaterThan(
-      open.x + open.width * 0.8,
-    );
-    expect(far - near, "the band swept one leaf, not the spread").toBeGreaterThan(leaf.width * 1.5);
-  });
-
   test("no band is left resting beside the book", async ({ page }) => {
     await watchFolds(page);
-    // From 8 again: this row is about where a band ends up once it has finished,
-    // so it needs a turn that inserts one. 8 → 9 crosses openings.
+    // From 8: this row is about what is left once a turn has finished. An arrow
+    // on the open book now plays the corner peel; the band plays only where no
+    // page can be shown beneath, and the clip below still keeps it in.
     await page.goto("/#/hafs-kfqc/p8");
     await expect(spread(page)).toBeVisible();
     // The wrapper is in the document before the leaf inside it has finished
@@ -1688,8 +1625,8 @@ test("a juz jump keeps the two leaves level through every frame", async ({ page 
 test("a page turn keeps the two leaves level through every frame", async ({ page }) => {
   await watchFolds(page);
   // Start one opening back, so the forward turn crosses *into* At-Takwir facing
-  // Abasa (the opening the report pictured) — a within-opening step would remount
-  // nothing and draw no fold, exercising neither half of the claim.
+  // Abasa (the opening the report pictured). The arrow plays the corner peel
+  // over the open book, and both leaves must sit level once it lands.
   await page.goto("/#/hafs-kfqc/p584");
   await expect(pageSvg(page, 584)).toBeVisible({ timeout: 20_000 });
   await expect(spread(page)).toBeVisible();
@@ -1697,10 +1634,10 @@ test("a page turn keeps the two leaves level through every frame", async ({ page
   // does not need it, but it keeps the rig identical to the jump's above.
   await page.mouse.move(400, 450);
 
-  const poll = page.evaluate<{ pair: boolean; gap: number }[]>(
+  const poll = page.evaluate<{ pair: boolean; gap: number; peel: boolean }[]>(
     () =>
       new Promise((resolve) => {
-        const frames: { pair: boolean; gap: number }[] = [];
+        const frames: { pair: boolean; gap: number; peel: boolean }[] = [];
         const start = performance.now();
         const tick = () => {
           const ys = Array.from(
@@ -1711,6 +1648,7 @@ test("a page turn keeps the two leaves level through every frame", async ({ page
           frames.push({
             pair: ys.length === 2,
             gap: ys.length === 2 ? Math.abs(ys[0]! - ys[1]!) : 0,
+            peel: document.querySelector('[data-testid="edge-peel"]') !== null,
           });
           if (performance.now() - start < 700) requestAnimationFrame(tick);
           else resolve(frames);
@@ -1726,8 +1664,8 @@ test("a page turn keeps the two leaves level through every frame", async ({ page
   expect(frames.some((f) => f.pair), "the turn never drew a second leaf").toBe(true);
   const worst = Math.max(...frames.filter((f) => f.pair).map((f) => f.gap));
   expect(worst, "the two leaves flashed misaligned during the page turn").toBeLessThan(1.5);
-  // And this one *is* a turn: a fold band crossed the book.
-  expect((await foldsSeen(page)).length, "a page turn drew no fold band").toBeGreaterThan(0);
+  // And this one *is* a turn: the leaf went over.
+  expect(frames.some((f) => f.peel), "the arrow turn never lifted the leaf").toBe(true);
 });
 
 /*
