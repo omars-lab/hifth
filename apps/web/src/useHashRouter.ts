@@ -32,6 +32,13 @@ export function useHashRouter(
   // Guard the cold-open restore so it runs exactly once, when we first become
   // ready — a teacher's link parsed before the resolver loads must not be lost.
   const coldOpened = useRef(false);
+  // Where the cold-open link points, held until the view has moved there. The
+  // app's first view (page 1, nothing selected) exists in the same moment the
+  // link is read, and used to be reported — and written over the link in the
+  // address bar — before the restore had landed: the shell heard "page 1" then
+  // the verse, its window title flickered, and a `current` request queued
+  // before the first route was answered with page 1 (native-shell.md ⑧).
+  const landing = useRef<string | null>(null);
 
   // Restore on `ready` (cold open, once the resolver exists) and on user-driven
   // hash changes (paste, back/forward). The resolver loads async, so the mount
@@ -42,10 +49,12 @@ export function useHashRouter(
       if (hash === showing.current) return;
       const parsed = parseHash(hash);
       if (parsed) onRestoreRef.current(parsed);
+      return parsed;
     };
     if (ready && !coldOpened.current) {
       coldOpened.current = true;
-      apply(); // cold open, now that restore can actually resolve the link
+      const parsed = apply(); // cold open, now that restore can actually resolve the link
+      if (parsed) landing.current = place(parsed);
       // The native shell holds any early `hifth://` link until it hears this.
       postReady();
     }
@@ -58,6 +67,15 @@ export function useHashRouter(
   // overwrite an incoming teacher's link before we've read it.
   useEffect(() => {
     if (!state || !coldOpened.current) return;
+    // The view the link is restoring into is not yet the link's: say nothing
+    // until it is. Only the *place* is compared — a link's `?w=`, `?open=` or
+    // `?tool=` never comes back out of the view, so a link to the page already
+    // showing is reported at once, as nothing will move the view for it.
+    if (landing.current !== null) {
+      const arrived = place(state) === landing.current;
+      landing.current = null;
+      if (!arrived) return;
+    }
     const hash = serializeState(state);
     showing.current = hash;
     // The shell has no address bar; this is how it learns what is on screen.
@@ -65,4 +83,10 @@ export function useHashRouter(
     if (hash === window.location.hash) return;
     window.history.replaceState(null, "", hash);
   }, [state]);
+}
+
+/** The page or verse a view is on, with nothing else: what a restore moves. */
+function place(state: AppState): string {
+  const { edition, select, page } = state;
+  return serializeState(page === undefined ? { edition, select } : { edition, select, page });
 }
