@@ -2321,10 +2321,11 @@
         "file": "docs/design/app-links-editions-and-builder.md",
         "item": "②"
       },
-      "status": "open",
+      "status": "fixed",
       "severity": "question",
       "owner": "agent",
-      "note": "The Mac and iPad app refuses a link naming a mus'haf it does not ship; the website opens the Hafs pages under whatever name the link gives, so the address lies. Decide refuse-and-say-so or fall back and rewrite the address, then test it."
+      "note": "The website falls back to the mus'haf it ships and rewrites the address to say so, with no notice (a person following a link has nobody to answer, unlike the app's caller). The name is replaced as the link is read; core, the address code and the site each hold it.",
+      "closedBy": "apps/web/e2e/open-link.spec.ts"
     }
   ]
 }

@@ -245,7 +245,7 @@
         {
           "file": "apps/web/src/useHashRouter.ts",
           "symbol": "useHashRouter",
-          "note": "The React binding. Hash routing, not history routing, because this ships as static files with no server to rewrite paths."
+          "note": "The React binding. Hash routing, not history routing, because this ships as static files with no server to rewrite paths. A link naming a mus'haf the site does not have is read as the one it ships, so the address is rewritten to say what is on screen."
         },
         {
           "file": "apps/web/src/components/ShareSheet.tsx",
@@ -356,6 +356,11 @@
           "file": "packages/core/src/concordance.ts",
           "symbol": "EDITIONS",
           "note": "The registry. `EditionStatus` is what keeps an edition whose provenance is still PROVISIONAL out of the picker."
+        },
+        {
+          "file": "packages/core/src/concordance.ts",
+          "symbol": "shippedEdition",
+          "note": "What the site shows for a mus'haf name a link gives: the name when it ships, otherwise the one that does. The app refuses instead, because a caller waits for an answer; the site has nobody to answer."
         },
         {
           "file": "packages/core/src/concordance.ts",
