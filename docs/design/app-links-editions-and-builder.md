@@ -239,7 +239,7 @@ no Swift and can be checked on any machine.
 
 ## Open questions, and what would answer each
 
-### ① Building an app link from inside the app's share sheet · **open**
+### ① Building an app link from inside the app's share sheet · **fixed**
 
 The owner chose to have the builder in the share sheet as well as on the contract page. The
 page's builder shipped; the share sheet still has one button that writes a site link for the
@@ -248,9 +248,14 @@ page's form shrunk: which of the four questions it asks (probably only "how to s
 "tell nobody / tell this app"), and how the answer is handed over, need drawing at phone size
 first. The composing code is already in the core package for both callers to share.
 
-**What would answer it:** a short decision page with the sheet drawn at phone size, two or
-three shapes side by side, then the winner built on the existing share button with a
-Playwright test on a phone project.
+**What answered it (2026-09-29):** three shapes were built into the share sheet and mounted
+live at phone size on a decision page (`docs/design/share-sheet-options.html`, record
+`docs/decisions/share-sheet-builder.md`): one tap as before (A), a tray with the website link
+and the app link (B), and the same tray with one question first, what the link opens on
+arrival (C, what the app shows). Of the page's four questions the sheet asks only "what to
+open"; "tell nobody / tell this app" stays here on purpose, since a sheet handing a link to a
+person cannot know which app would want telling. Each link the sheet writes is held to this
+contract by a unit test, and a phone test sends one from each shape.
 
 ### ② The website shows the Hafs pages under any mus'haf name a link gives · **fixed**
 
