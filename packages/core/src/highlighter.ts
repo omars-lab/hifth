@@ -29,7 +29,17 @@
  */
 
 import { TAP_SLOP_PX } from "./gestures.js";
-import { joinSwipesByLine, pageLineHeight, swipesFromPath, swipesFromRects, type Swipe } from "./ink.js";
+import {
+  fitSwipesToText,
+  joinSwipesByLine,
+  pageLineHeight,
+  swipesFromPath,
+  swipesFromRects,
+  textSpanOf,
+  type Matrix2D,
+  type Swipe,
+  type TextSpan,
+} from "./ink.js";
 import { bandSeed, roughBandPath } from "./rough.js";
 import type { Resolver } from "./resolver.js";
 import {
@@ -77,6 +87,8 @@ const INKED: ReadonlySet<StyleToken> = new Set<StyleToken>(["sel", "hlt", "run"]
  * and finds nothing there.
  */
 export const FIBRE_ID = "hifth-fibre";
+/** The one shape this print draws a page's words as; see `textSpan`. */
+const TEXT_ID = "content";
 export const FIBRE_FLOOR = 0.7;
 const FIBRE_TABLE = Array.from({ length: 11 }, (_, i) => Math.max(FIBRE_FLOOR, i / 10).toFixed(1)).join(" ");
 
@@ -191,6 +203,21 @@ export class Highlighter {
    * itself may land on `null` (nothing parsed), which is a valid, cached answer.
    */
   private lineHeightCache: number | null | undefined;
+  /**
+   * Where the page's words start and end across the line, measured once the
+   * page is laid out — the pen stops every band just past them (see
+   * `fitSwipesToText`). `null` means this page has no shape to measure.
+   */
+  private textSpanCache: TextSpan | null | undefined;
+  /**
+   * Bands drawn before their page was laid out, with the ends they were drawn
+   * at: a link straight to a page draws its verse while the page is still off
+   * screen, where its words cannot be measured. Once the page takes up room,
+   * `fitWaitingBands` pulls these in, so how soon the page appeared never
+   * decides how long a band is.
+   */
+  private readonly unfitted = new Map<SVGElement, Swipe>();
+  private layoutWatch: ResizeObserver | null = null;
 
   constructor(svg: SVGSVGElement, resolver: Resolver, page: number, opts?: { labelFor?: LabelFor }) {
     this.svg = svg;
@@ -291,6 +318,33 @@ export class Highlighter {
       this.lineHeightCache = pageLineHeight(ds);
     }
     return this.lineHeightCache ?? undefined;
+  }
+
+  /**
+   * Where the page's words start and end, in the page's units: the box of the
+   * one shape the print draws them all as, `#content`. Kept once measured. A
+   * page that is not laid out yet (a leaf not on screen) has an empty box, and
+   * gets asked again next time rather than remembered as having no words; a
+   * print without that shape, or a browser that cannot measure it, gets bands
+   * as long as its verse boxes, as before.
+   */
+  private textSpan(): TextSpan | undefined {
+    if (this.textSpanCache !== undefined) return this.textSpanCache ?? undefined;
+    const words = this.svg.querySelector<SVGGraphicsElement>(`#${TEXT_ID}`);
+    if (!words || typeof words.getBBox !== "function" || typeof words.getCTM !== "function") {
+      this.textSpanCache = null;
+      return undefined;
+    }
+    try {
+      const wordsCtm = words.getCTM() as Matrix2D | null;
+      const pageCtm = this.svg.getCTM() as Matrix2D | null;
+      if (!wordsCtm || !pageCtm) return undefined;
+      const span = textSpanOf(words.getBBox(), wordsCtm, pageCtm);
+      if (span) this.textSpanCache = span;
+      return span;
+    } catch {
+      return undefined;
+    }
   }
 
   /**
@@ -438,12 +492,11 @@ export class Highlighter {
     // heights differ between lines, and each band is as thick as its own line.
     // One node per line the ayah occupies — usually a handful, more for the
     // long ayahs the print fuses into one tall box and the pen splits back.
-    return swipes.map((s, i) => {
+    const span = this.textSpan();
+    const waiting = !span && this.textSpanCache === undefined;
+    if (waiting) this.watchForLayout();
+    return swipes.map((raw, i) => {
       const g = document.createElementNS(SVG_NS, "g");
-      g.setAttribute("data-x1", String(Math.max(s.x1, s.x2)));
-      g.setAttribute("data-x2", String(Math.min(s.x1, s.x2)));
-      g.setAttribute("data-y", String(s.y));
-      g.setAttribute("data-width", String(s.width));
       // Which line of the ayah this is, so line 2 starts after line 1 — a
       // marker crosses one line before the next, it does not paint a paragraph
       // at once. A custom property, not a duration: the stylesheet owns timing
@@ -451,11 +504,40 @@ export class Highlighter {
       g.style.setProperty("--hl-i", String(i));
       const band = document.createElementNS(SVG_NS, "path");
       band.setAttribute("class", "hl-band");
-      band.setAttribute("d", roughBandPath(s, bandSeed(this.page, s)));
       band.setAttribute("filter", `url(#${FIBRE_ID})`);
       g.appendChild(band);
+      this.shapeBand(g, fitSwipesToText([raw], span)[0]!);
+      if (waiting) this.unfitted.set(g, raw);
       return this.tag(g, style, group, true);
     });
+  }
+
+  /** Give a drawn band its ends and its outline. */
+  private shapeBand(g: SVGElement, s: Swipe): void {
+    g.setAttribute("data-x1", String(Math.max(s.x1, s.x2)));
+    g.setAttribute("data-x2", String(Math.min(s.x1, s.x2)));
+    g.setAttribute("data-y", String(s.y));
+    g.setAttribute("data-width", String(s.width));
+    g.querySelector(".hl-band")?.setAttribute("d", roughBandPath(s, bandSeed(this.page, s)));
+  }
+
+  /**
+   * Wait for this page to take up room, then fit the bands drawn while it could
+   * not be measured. A browser with no way to watch keeps them as drawn.
+   */
+  private watchForLayout(): void {
+    if (this.layoutWatch || typeof ResizeObserver === "undefined") return;
+    this.layoutWatch = new ResizeObserver(() => this.fitWaitingBands());
+    this.layoutWatch.observe(this.svg);
+  }
+
+  private fitWaitingBands(): void {
+    const span = this.textSpan();
+    if (!span) return;
+    for (const [g, raw] of this.unfitted) if (g.isConnected) this.shapeBand(g, fitSwipesToText([raw], span)[0]!);
+    this.unfitted.clear();
+    this.layoutWatch?.disconnect();
+    this.layoutWatch = null;
   }
 
   /**
@@ -483,7 +565,11 @@ export class Highlighter {
   /** Remove every highlight drawn for a group. */
   clear(group: GroupId): void {
     const els = this.drawn.get(group);
-    if (els) for (const el of els) el.remove();
+    if (els)
+      for (const el of els) {
+        el.remove();
+        this.unfitted.delete(el);
+      }
     this.drawn.set(group, []);
   }
 
@@ -719,6 +805,8 @@ export class Highlighter {
     this.svg.removeEventListener("pointerup", this.onPolygonPointerUp);
     this.svg.removeEventListener("keydown", this.onPolygonKeyDown);
     for (const group of this.drawn.keys()) this.clear(group as GroupId);
+    this.layoutWatch?.disconnect();
+    this.layoutWatch = null;
     this.selectCbs.length = 0;
   }
 }
