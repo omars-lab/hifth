@@ -26,7 +26,7 @@
  */
 
 import { TAP_SLOP_PX } from "./gestures.js";
-import { pageLineHeight, swipesFromPath, swipesFromRects, type Swipe } from "./ink.js";
+import { joinSwipesByLine, pageLineHeight, swipesFromPath, swipesFromRects, type Swipe } from "./ink.js";
 import type { Resolver } from "./resolver.js";
 import {
   TAJWEED_CLASS_PREFIX,
@@ -357,14 +357,19 @@ export class Highlighter {
     const src = this.svg.querySelector<SVGElement>(`#${cssEscape(id)}`);
     if (!src) return [];
 
-    const swipes = INKED.has(style)
-      ? swipesFromPath(src.getAttribute("d") ?? "", this.inkLineHeight())
-      : null;
+    const swipes = this.swipesOf(src, style);
     if (swipes) return this.drawSwipes(swipes, style, group);
 
     const clone = src.cloneNode(true) as SVGElement;
     clone.removeAttribute("id");
     return [this.tag(clone, style, group, false)];
+  }
+
+  /** The marker swipes for a source element, or null when it is not ink (or not recognised). */
+  private swipesOf(src: SVGElement, style: StyleToken): Swipe[] | null {
+    return INKED.has(style)
+      ? swipesFromPath(src.getAttribute("d") ?? "", this.inkLineHeight())
+      : null;
   }
 
   /**
@@ -456,13 +461,25 @@ export class Highlighter {
   highlightRange(keys: readonly string[], style: StyleToken, group: GroupId): void {
     this.clear(group);
     const drawn: SVGElement[] = [];
+    // The inked verses are gathered first and joined line by line before the
+    // pen goes down, so a passage is one band per line: painted verse by verse,
+    // the two bands on a line two verses share would each stop half a stroke
+    // short and leave a notch of paper around the verse number (see
+    // `joinSwipesByLine`). Anything the pen does not recognise is still cloned,
+    // as `highlight` would.
+    const swipes: Swipe[] = [];
     for (const key of keys) {
       const loc = this.resolver.resolve(key);
       if (!loc || loc.page !== this.page) continue;
       for (const id of loc.elementIds) {
-        drawn.push(...this.paint(id, style, group));
+        const src = this.svg.querySelector<SVGElement>(`#${cssEscape(id)}`);
+        if (!src) continue;
+        const s = this.swipesOf(src, style);
+        if (s) swipes.push(...s);
+        else drawn.push(...this.paint(id, style, group));
       }
     }
+    if (swipes.length) drawn.push(...this.drawSwipes(joinSwipesByLine(swipes), style, group));
     this.drawn.set(group, drawn);
   }
 
