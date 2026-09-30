@@ -152,6 +152,7 @@ mus'haf names a link may use, and where a person builds one, is
 | the shell itself | opens at a route, the route label matches, a `hifth://` link turns the page, rotation keeps the place | XCUITest on the iPad simulator | `make app-test` |
 | the shell on the Mac | same smoke, on the Mac | XCUITest, opt-in | `make app-test-mac-ui` (permission needed, see below) |
 | the real app's look | a screenshot per route matches its baseline, on the iPad and one on an iPhone | `make app-golden` against `native/shots/baseline/` | `make app-golden`, then `make app-golden-update` after looking |
+| an x-callback request through macOS | the operating system carries a request in and the answer out to another process, on the success and the refusal path | a shell script and a one-request receiver | `make app-callback-check` (opens a browser tab per leg) |
 | route parsing, file paths, the bridge | pure logic, seconds | Swift Testing | `make app-unit-test` |
 
 **The Mac permission, once.** Open System Settings → Privacy & Security → Accessibility and
@@ -305,7 +306,7 @@ open only. Held by `apps/web/src/useHashRouter.native.test.tsx`: the first route
 is the verse the link named, the address bar is never rewritten to page 1, a link to the page
 already showing and no link at all are both reported as before.
 
-### ⑨ No test drives an x-callback-url request through the real operating system · **open**
+### ⑨ No test drives an x-callback-url request through the real operating system · **fixed**
 
 The x-callback door is proven in unit tests only: the parser on every example in the
 contract, and the shell model played by hand (the page's `ready` and `route` messages fed
@@ -318,3 +319,17 @@ the request-and-answer path is not.
 `x-success` is a scheme the test can observe (a second tiny test app, or the shell's own
 `hifth://` refused on purpose so the error path fires), and asserts the answer arrived; or a
 Shortcuts shortcut run by hand once per release and recorded in the manual checklist.
+
+**What was done (2026-09-29):** `make app-callback-check` does it on the Mac, with no
+permission and no second app: a small receiver (`native/scripts/callback-receiver.py`) opens
+a free port and waits for one request; the built app is registered and opened; the script
+hands macOS a real request whose `x-success` and `x-error` point at the receiver; the app
+turns the page and answers by asking macOS to open the address, and the default browser
+fetches it from the receiver, which writes the answer down. Two legs, both green on this Mac:
+a page request answered on `x-success` with the route and the public link, and a page of 0
+answered on `x-error` with `bad-route` and its message. The one moment worth proving is the
+answer leaving the app and reaching another process, and the receiver is that process. It
+opens a browser tab per leg, so it is its own target, not part of pre-push. The iPad is not
+covered: a request sent to the simulator with `simctl openurl` stops at an "Open in Hifth?"
+alert (the same trap that keeps the smoke test on the launch variable), and the plain link is
+already covered there by the XCUITest smoke.

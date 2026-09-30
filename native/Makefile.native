@@ -8,6 +8,7 @@
 #   make app-run-ipad       build, install and launch on the iPad simulator
 #   make app-shot ROUTE=/hafs-kfqc/p45 TARGET=ipad|mac [APPEARANCE=dark]
 #   make app-open ROUTE=/hafs-kfqc/2:255   turn the running app to a route
+#   make app-callback-check an x-callback request through macOS, answer received by a second process
 #   make app-test           route/bundle unit tests + the XCUITest smoke
 #   make app-golden         the real app's screenshots against native/shots/baseline/
 #   make app-device-install build for a plugged-in iPad, install and launch (DEVICE=…)
@@ -51,7 +52,7 @@ TEAM         ?= $(shell security find-identity -v -p codesigning 2>/dev/null | s
 DEVICE       ?=
 SHOT_NAME     = $(TARGET)-$(subst /,_,$(subst ?,_,$(subst =,-,$(subst :,-,$(patsubst /%,%,$(ROUTE))))))$(if $(filter-out light,$(APPEARANCE)),-$(APPEARANCE),).png
 
-.PHONY: app-icon app-generate app-web app-build-mac app-build-ipad app-run-mac app-run-mac-stdout \
+.PHONY: app-icon app-generate app-web app-build-mac app-build-ipad app-run-mac app-run-mac-stdout app-callback-check \
         app-run-ipad app-shot app-probe app-open app-test app-test-mac-ui app-unit-test app-logs app-clean \
         app-golden app-golden-update app-device-install app-archive app-testflight
 
@@ -92,6 +93,9 @@ app-run-mac: app-build-mac ## Build and open the Mac app (ROUTE=… to open at a
 	@# on this copy and not on an older one lying in DerivedData.
 	/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister -f $(MAC_APP)
 	HIFTH_ROUTE=$(ROUTE) open -a $(MAC_APP)
+
+app-callback-check: app-build-mac ## Send one x-callback-url request through macOS to the app and check a second process gets the answer (opens one browser tab)
+	$(NATIVE)/scripts/callback-check.sh $(MAC_APP) $(BUNDLE_ID)
 
 app-run-mac-stdout: app-build-mac ## Run the Mac binary in the foreground so its console output shows here
 	HIFTH_ROUTE=$(ROUTE) HIFTH_APPEARANCE=$(APPEARANCE) $(MAC_APP)/Contents/MacOS/Hifth

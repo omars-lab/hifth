@@ -145,6 +145,20 @@ image in `native/shots/diff/`; look at it before updating. Same recipe as the we
 show the diff, ask, then update. Never run this at the same time as `make app-test` — both
 drive the one simulator.
 
+## An x-callback request through the real operating system
+
+```
+make app-callback-check    # Mac: open hifth://x-callback-url/open?page=45&x-success=http://127.0.0.1:PORT/answer…
+```
+
+`native/scripts/callback-receiver.py` binds a free port and waits for one request;
+`native/scripts/callback-check.sh` opens the built app, hands macOS the request, and reads the
+answer the default browser fetched from the receiver. Two legs: a page answered on
+`x-success` with `route=` and `url=`, and `page=0` answered on `x-error` with `bad-route`. It
+opens one browser tab per leg, so it is not in pre-push; run it after touching the answering
+code in `ShellModel` or the parser. Not for the simulator: `simctl openurl` stops at the
+"Open in Hifth?" alert.
+
 ## The XCUITest smoke
 
 `native/HifthUITests/SmokeTests.swift` launches the real app with `--route=…`, waits for the
