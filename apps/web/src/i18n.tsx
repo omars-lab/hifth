@@ -325,6 +325,15 @@ export interface Strings {
   shared: string;
   copied: string;
   copyFailed: string;
+  shareOpenWith: string;
+  shareAsIs: string;
+  shareLookalikes: string;
+  shareRoots: string;
+  shareCommentary: string;
+  shareSite: string;
+  shareSiteAria: string;
+  shareApp: string;
+  shareAppAria: string;
 
   /* ---- coach marks -------------------------------------------------------- */
   coachRegion: string;
@@ -872,6 +881,15 @@ export function buildStrings(lang: Lang, m: Catalog): Strings {
     shared: m.shared,
     copied: m.copied,
     copyFailed: m.copyFailed,
+    shareOpenWith: m.shareOpenWith,
+    shareAsIs: m.shareAsIs,
+    shareLookalikes: m.shareLookalikes,
+    shareRoots: m.shareRoots,
+    shareCommentary: m.shareCommentary,
+    shareSite: m.shareSite,
+    shareSiteAria: m.shareSiteAria,
+    shareApp: m.shareApp,
+    shareAppAria: m.shareAppAria,
 
     coachRegion: m.coachRegion,
     // Numbered rather than an array in the catalog: a translator editing JSON

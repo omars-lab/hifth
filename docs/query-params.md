@@ -156,6 +156,7 @@ that only runs on a laptop, and are listed so the check can see every one.
 | --- | --- | --- | --- |
 | `lang` | `en` or `ar` | The language of the app's own words (menus, buttons, labels) for this visit only; never saved, so the reader's own choice is untouched. The mus'haf is the same in both | Ignored; the saved choice, or else the device's language, stands |
 | `phonebar` | `a` or `b` | Picks which of the two phone toolbars to show, for comparing them | Ignored; the usual toolbar shows |
+| `share` | `a`, `b` or `c` | Picks which of the three share sheets to show, for comparing them: one tap (a), two links (b), or two links with a question of what the link opens (c) | Ignored; c, the usual sheet, shows |
 | `page` | `1` to `604` | Developer workbench only (the page that lays the outside library's page beside ours, run on a laptop with `make dev-qul`; never built into the app): which page to compare | Page 1; a number out of range is pulled back to 1 or 604 |
 | `view` | `side` or `overlay` | Developer workbench only: the two pages side by side, or one laid over the other | Side by side |
 

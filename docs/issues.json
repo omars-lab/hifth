@@ -2323,10 +2323,11 @@
         "file": "docs/design/app-links-editions-and-builder.md",
         "item": "①"
       },
-      "status": "open",
+      "status": "fixed",
       "severity": "question",
       "owner": "agent",
-      "note": "The owner chose the link builder for the app's share sheet as well as the contract page (2026-09-29). The page's builder shipped; the sheet still has one button. Its form has to be drawn at phone size before it is built; the composing code already sits in the core package for it."
+      "note": "The owner chose the link builder for the app's share sheet as well as the contract page (2026-09-29). Closed the same day: three shapes were built into the sheet and mounted live at phone size on docs/design/share-sheet-options.html (decision share-sheet-builder, open, C shown by default): one tap as before, a tray with the website link and the app link, and the same tray with one question first, what the link opens on arrival. The sheet asks only that; \"tell nobody / tell this app\" stays on the contract page, because a sheet handing a link to a person cannot know which app would want telling. apps/web/src/share-links.test.ts holds every link the sheet writes to the contract's own rules; the phone test sends one from each shape.",
+      "closedBy": "apps/web/e2e/share-sheet.spec.ts"
     },
     {
       "id": "site-accepts-unknown-edition",
