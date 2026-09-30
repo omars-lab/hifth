@@ -64,12 +64,27 @@ test.describe("Hifth · the highlighted range", () => {
     // alone — a shared passage arrived looking like a shared verse.
     await page.goto(RANGE_LINK);
     await expect(page.getByRole("dialog")).toBeVisible();
-    // A swipe is an SVG line with no box of its own, so it is counted, not
-    // looked at. Both verses are inked: 2:47 wraps two lines and 2:48 one, so
-    // there are at least three swipes, never the one or two a single verse gives.
+    // Counted, one band per line: 2:47 wraps two lines and 2:48 one, so there
+    // are at least three bands, never the one or two a single verse gives.
     const ink = page.locator("#hifth-overlay .hl-hlt");
     await expect.poll(() => ink.count()).toBeGreaterThanOrEqual(3);
     await expect(page.locator("#hifth-overlay .hl-sel")).toHaveCount(0);
+    // A passage is its own colour, not the verse's amber (highlight-texture
+    // decision, 2026-09-30): the amber belongs to the verse you are on.
+    const fill = await ink.first().evaluate((el) => getComputedStyle(el).fill);
+    // The token resolved the way the browser writes a computed colour, so the
+    // two strings compare like for like.
+    const token = (name: string) =>
+      page.evaluate((n) => {
+        const probe = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+        probe.style.fill = `var(${n})`;
+        document.querySelector("#hifth-overlay")!.appendChild(probe);
+        const c = getComputedStyle(probe).fill;
+        probe.remove();
+        return c;
+      }, name);
+    expect(fill, "the passage is filled with the passage's own ink").toBe(await token("--ink-range"));
+    expect(fill, "the passage ink is not the verse's amber").not.toMatch(/232, 161, 58/);
 
     // Closing the passage's menu drops its ink with it (a wash with no menu
     // would be a dead end), and the next tap paints a verse, not a passage.

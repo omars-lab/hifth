@@ -46,7 +46,8 @@ function wordInk(page: Page) {
 /**
  * How much word ink is down, in viewBox units.
  *
- * Summing `--hl-len` rather than counting bands, because a run that grows along
+ * Summing each band's length (its two ends, which the pen records on it)
+ * rather than counting bands, because a run that grows along
  * one line stays one band: the count would sit at 1 while the ink doubled, and
  * "the drag extended the run" would pass on a run that never moved.
  */
@@ -54,7 +55,7 @@ async function wordInkLength(page: Page): Promise<number> {
   return page.evaluate(() => {
     let total = 0;
     for (const el of document.querySelectorAll("#hifth-overlay [data-hl-group='word']")) {
-      total += Number((el as SVGElement).style.getPropertyValue("--hl-len")) || 0;
+      total += Number(el.getAttribute("data-x1")) - Number(el.getAttribute("data-x2")) || 0;
     }
     return total;
   });
@@ -72,8 +73,7 @@ async function wordInkRight(page: Page): Promise<number> {
   return page.evaluate(() => {
     let right = -Infinity;
     for (const el of document.querySelectorAll("#hifth-overlay [data-hl-group='word']")) {
-      const line = el as SVGLineElement;
-      right = Math.max(right, line.x1.baseVal.value, line.x2.baseVal.value);
+      right = Math.max(right, Number(el.getAttribute("data-x1")));
     }
     return right;
   });
@@ -83,9 +83,8 @@ async function wordInkRight(page: Page): Promise<number> {
 async function wordBands(page: Page): Promise<string[]> {
   return page.evaluate(() =>
     [...document.querySelectorAll("#hifth-overlay [data-hl-group='word']")].map((el) => {
-      const line = el as SVGLineElement;
-      const r = (n: number) => Math.round(n * 10) / 10;
-      return `${r(line.x1.baseVal.value)}>${r(line.x2.baseVal.value)}@${r(line.y1.baseVal.value)}`;
+      const r = (a: string) => Math.round(Number(el.getAttribute(a)) * 10) / 10;
+      return `${r("data-x1")}>${r("data-x2")}@${r("data-y")}`;
     }),
   );
 }
@@ -153,10 +152,21 @@ test.describe("Hifth · word selection", () => {
     await expect(wordInk(page)).not.toHaveCount(0);
     await expect(page.locator("#hifth-overlay [data-hl-group='selection']")).not.toHaveCount(0);
 
-    // The band is marker ink, on the same pen as everything else on this page.
+    // The band is marker ink, on the same pen as everything else on this page:
+    // a rough band, streaked by the page's filter.
     const first = wordInk(page).first();
     await expect(first).toHaveClass(/hl-ink/);
-    expect(await first.evaluate((el) => el.tagName.toLowerCase())).toBe("line");
+    await expect(first.locator("path.hl-band")).toHaveAttribute("filter", /url\(#hifth-fibre\)/);
+
+    // In its own colour, not the verse's amber: a run of words and the verse it
+    // sits in are two marks, and the two colours mix where they cross
+    // (highlight-texture decision, 2026-09-30).
+    await expect(first).toHaveClass(/hl-run/);
+    const fillOf = (sel: string) =>
+      page.locator(sel).first().evaluate((el) => getComputedStyle(el).fill);
+    const run = await fillOf("#hifth-overlay [data-hl-group='word']");
+    const verse = await fillOf("#hifth-overlay [data-hl-group='selection']");
+    expect(run, "a word run is not drawn in the verse's amber").not.toBe(verse);
   });
 
   test("the same drag paints the same run, however late the word data arrives", async ({

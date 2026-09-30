@@ -65,7 +65,7 @@ function main() {
   }
   console.log(
     `Review comments waiting on claude: ${count} thread${count === 1 ? "" : "s"} (from Obsidian, via review-md).\n` +
-      `Act on each (change the doc or answer), then \`reviews reply <doc> <id> "<what you did>" --author claude\`; \`make reviews\` lists them again.\n` +
+      `Act on each (change the doc or answer), then \`reviews reply <doc> <id> "<what you did>" --author claude --vault hifth0docs0vault01\` (the vault's ID, since another project's vault is also named "docs"); \`make reviews\` lists them again.\n` +
       lines.join("\n"),
   );
 }

@@ -86,11 +86,12 @@ function onField(field: FieldId): Surface["open"] {
     await settled(page);
     await page.route("**/assets/pages/**", (route) => route.abort());
     await page.goto(`/#/hafs-kfqc/p7?field=${field}`);
-    // The abort is instant; what takes time is the app booting to the point
-    // where it asks for the page at all. Under the full parallel suite that
-    // can pass the 5s default (seen 2026-09-29: the tan field failed once,
-    // then passed on retry), so give it the same room the config gives page
-    // setup rather than spending a retry on a machine that is merely busy.
+    // The abort only works because the file blocks the service worker (see
+    // the test.use below): a worker that installs in time answers the page
+    // request itself, the abort never fires, and no alert ever comes. That was
+    // the real cause of the tan field failing now and then under the full
+    // suite (2026-09-29, again 2026-09-30); the long wait stays for a busy
+    // machine booting slowly, which is a different thing.
     await expect(page.getByRole("alert").first()).toBeVisible({ timeout: 20_000 });
   };
 }
@@ -269,6 +270,10 @@ const SURFACES: readonly Surface[] = [
     },
   },
 ];
+
+// No service worker in this file: the field surfaces fail the page request to
+// reach the one sentence written on the desk, and a worker would answer it.
+test.use({ serviceWorkers: "block" });
 
 test.describe("Hifth · contrast on every surface", () => {
   for (const surface of SURFACES) {

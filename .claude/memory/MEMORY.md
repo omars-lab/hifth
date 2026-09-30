@@ -46,3 +46,5 @@
 - [e2e serves dist; SW blocks page.route](e2e-serves-dist-and-sw-blocks-route.md) — rebuild dist before e2e; slow a shard only in a context with serviceWorkers "block"
 - [Two researchers then a checker worked](two-researchers-then-checker-worked.md) — ran 2026-09-30 for highlighter texture (#171/#172→#173); checker merges both branches, reopens sources, draws real disagreements live
 - [review-md vault and hook](review-md-vault-and-hook.md) — docs/ is an Obsidian vault with BRAT+review-md; review-md plugin installed; SessionStart hook / `make reviews` prints threads waiting on claude
+- [Obsidian callouts and folds worked](obsidian-callouts-and-folds-worked.md) — owner liked tip-callout recommendation + folded picture callouts in waiting-on-you.md; skill /note-manager:write-obsidian-note (oeid marketplace)
+- [review-md vault by ID](review-md-vault-by-id.md) — reply with `--vault hifth0docs0vault01`; "docs" also names the 3d-models vault, so replies miss

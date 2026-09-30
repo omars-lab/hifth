@@ -19,7 +19,7 @@
  * runs.
  */
 import { docHash, tasksHash, payload } from "./tasks.mjs";
-import { docWaitingHash, readRecommendations, readShots, waitingHash } from "./waiting.mjs";
+import { docWaitingHash, leftoverShots, readRecommendations, readShots, shotFiles, waitingHash } from "./waiting.mjs";
 
 const p = payload();
 const mine = p.issues.filter((i) => i.owner === "user").length;
@@ -42,8 +42,12 @@ const pages = [
   ["docs/waiting-on-you.md", docWaitingHash(), waitingHash(p, readShots(), readRecommendations(p.decisions))],
 ];
 const stale = pages.filter(([, have, want]) => have !== want);
-if (stale.length) {
+// A settled decision drops out of the note but its pictures stay in the folder,
+// checked in and served, until the camera runs again. Say so.
+const leftover = leftoverShots(readShots(), p.decisions.map((d) => d.id), shotFiles());
+if (stale.length || leftover.length) {
   console.error("gate:tasks — FAIL:");
+  for (const l of leftover) console.error(`  - docs/waiting-on-you/: ${l}. Run \`make waiting-shots\`.`);
   for (const [path, have, want] of stale) {
     console.error(
       have === null

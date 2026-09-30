@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { TAP_SLOP_PX } from "./gestures.js";
-import { Highlighter, MARQUEE_MIN_SIZE, rectsIntersect } from "./highlighter.js";
+import { FIBRE_FLOOR, FIBRE_ID, Highlighter, MARQUEE_MIN_SIZE, rectsIntersect } from "./highlighter.js";
 import { Resolver } from "./resolver.js";
 import type { AssetManifest } from "./types.js";
 
@@ -95,7 +95,7 @@ describe("Highlighter", () => {
 
   it("ignores highlight requests for a key not on this page", () => {
     hl.highlight("quran/hafs-kfqc/2:255", "sel", "selection");
-    expect(svg.querySelector("#hifth-overlay")!.children).toHaveLength(0);
+    expect(svg.querySelectorAll("#hifth-overlay .hl")).toHaveLength(0);
   });
 
   it("fires onSelect with the tapped polygon's ayah key", () => {
@@ -510,9 +510,12 @@ describe("Highlighter marker swipes", () => {
     hl.highlight("quran/hafs-kfqc/2:38", "sel", "selection");
     const marks = [...svg.querySelectorAll("#hifth-overlay .hl-sel")];
     expect(marks).toHaveLength(2);
-    expect(marks.every((m) => m.tagName === "line")).toBe(true);
-    // Horizontal: a swipe is a band along a line, so both ends share a y.
-    for (const m of marks) expect(m.getAttribute("y1")).toBe(m.getAttribute("y2"));
+    // Each band is a group holding one filled shape: the rough band.
+    expect(marks.every((m) => m.tagName === "g")).toBe(true);
+    for (const m of marks) {
+      const band = m.querySelector("path.hl-band")!;
+      expect(band.getAttribute("d")).toMatch(/^M.*Z$/);
+    }
   });
 
   it("splits a long ayah's fused middle box into one line per line (#4, #12)", () => {
@@ -532,7 +535,7 @@ describe("Highlighter marker swipes", () => {
     // No band is a blob: every stroke is about one line thick, never the whole
     // box. The old bug drew one stroke 218 × 0.72 ≈ 157 units wide.
     for (const m of marks) {
-      expect(Number(m.getAttribute("stroke-width"))).toBeLessThan(36 * 1.5);
+      expect(Number(m.getAttribute("data-width"))).toBeLessThan(36 * 1.5);
     }
     // The stagger runs unbroken across all eight lines, so the wipe still reads
     // as one pen crossing the ayah top to bottom.
@@ -554,8 +557,8 @@ describe("Highlighter marker swipes", () => {
 
     const marks = [...svg.querySelectorAll<SVGElement>("#hifth-overlay .hl-hlt")];
     expect(marks).toHaveLength(3);
-    const shared = marks.find((m) => Number(m.getAttribute("y1")) > 60 && Number(m.getAttribute("y1")) < 70)!;
-    const xs = [Number(shared.getAttribute("x1")), Number(shared.getAttribute("x2"))];
+    const shared = marks.find((m) => Number(m.getAttribute("data-y")) > 60 && Number(m.getAttribute("data-y")) < 70)!;
+    const xs = [Number(shared.getAttribute("data-x1")), Number(shared.getAttribute("data-x2"))];
     const half = (38.2 * 0.72) / 2;
     expect(Math.min(...xs)).toBeCloseTo(half);
     expect(Math.max(...xs)).toBeCloseTo(345 - half);
@@ -567,47 +570,49 @@ describe("Highlighter marker swipes", () => {
     hl.highlight("quran/hafs-kfqc/2:38", "sel", "selection");
     const marks = [...svg.querySelectorAll("#hifth-overlay .hl-sel")];
     expect(marks.every((m) => m.classList.contains("hl-ink"))).toBe(true);
-    // Stroke width is per element precisely because line heights differ; a
-    // single shape for the whole ayah would have to pick one and be wrong.
-    expect(marks.map((m) => m.getAttribute("stroke-width"))).toEqual([
+    // Thickness is per band precisely because line heights differ; a single
+    // shape for the whole ayah would have to pick one and be wrong.
+    expect(marks.map((m) => m.getAttribute("data-width"))).toEqual([
       String(38 * 0.72),
       String(38.2 * 0.72),
     ]);
   });
 
-  // The wipe (highlight.css) draws a stroke by sliding a dash in from the path's
-  // START point, so the only thing deciding which way the ink travels is which
-  // end the highlighter wrote first. A `<line>` renders identically either way,
-  // which means nothing on screen and no other test can catch this being
-  // backwards — a left-to-right wipe across Arabic would just look subtly wrong
-  // to a reader and correct to everyone else.
-  it("starts each swipe at its RIGHT end, because that is where a pen meets Arabic", () => {
+  it("draws the same hand for the same verse on every visit", () => {
     hl.highlight("quran/hafs-kfqc/2:38", "sel", "selection");
-    const marks = [...svg.querySelectorAll("#hifth-overlay .hl-sel")];
-    for (const m of marks) {
-      expect(Number(m.getAttribute("x1"))).toBeGreaterThan(Number(m.getAttribute("x2")));
-    }
+    const first = [...svg.querySelectorAll("#hifth-overlay .hl-band")].map((b) => b.getAttribute("d"));
+    hl.clear("selection");
+    hl.highlight("quran/hafs-kfqc/2:38", "sel", "selection");
+    const again = [...svg.querySelectorAll("#hifth-overlay .hl-band")].map((b) => b.getAttribute("d"));
+    expect(again).toEqual(first);
+    // Two lines of one verse are two hands, not one outline copied.
+    expect(first[0]).not.toBe(first[1]);
   });
 
-  it("hands the wipe the two numbers CSS cannot work out for itself", () => {
+  it("streaks every band with the page's one filter, which floors the ink at 70%", () => {
+    hl.highlight("quran/hafs-kfqc/2:38", "sel", "selection");
+    const bands = [...svg.querySelectorAll("#hifth-overlay .hl-band")];
+    expect(bands.every((b) => b.getAttribute("filter") === `url(#${FIBRE_ID})`)).toBe(true);
+    const filters = svg.querySelectorAll(`#${FIBRE_ID}`);
+    expect(filters).toHaveLength(1);
+    const table = filters[0]!.querySelector("feFuncA")!.getAttribute("tableValues")!.split(" ").map(Number);
+    expect(Math.min(...table)).toBe(FIBRE_FLOOR);
+    expect(Math.max(...table)).toBe(1);
+    // A second pen on the same page reuses the filter rather than adding one.
+    new Highlighter(svg, resolver, 7);
+    expect(svg.querySelectorAll(`#${FIBRE_ID}`)).toHaveLength(1);
+  });
+
+  it("hands the wipe which line of the ayah each band is", () => {
     hl.highlight("quran/hafs-kfqc/2:38", "sel", "selection");
     const marks = [...svg.querySelectorAll<SVGElement>("#hifth-overlay .hl-sel")];
-
-    // How long each stroke runs. `stroke-dasharray: 100%` on a <line> resolves
-    // against the viewport, not the line, so the length has to be measured here
-    // or the dash is the wrong size on every ayah.
-    for (const m of marks) {
-      const len = Number(m.style.getPropertyValue("--hl-len"));
-      expect(len).toBeCloseTo(
-        Math.abs(Number(m.getAttribute("x2")) - Number(m.getAttribute("x1"))),
-        6,
-      );
-      expect(len).toBeGreaterThan(0);
-    }
-
-    // Which line of the ayah this is, in reading order — the stagger that makes
-    // a two-line ayah read as one pen crossing two lines rather than two pens.
+    // The stagger that makes a two-line ayah read as one pen crossing two
+    // lines rather than two pens.
     expect(marks.map((m) => m.style.getPropertyValue("--hl-i"))).toEqual(["0", "1"]);
+    // The band's ends, right first: the pen meets Arabic at the right.
+    for (const m of marks) {
+      expect(Number(m.getAttribute("data-x1"))).toBeGreaterThan(Number(m.getAttribute("data-x2")));
+    }
   });
 
   it("clones the source and withholds `hl-ink` when the geometry is not a rect run", () => {
@@ -681,11 +686,11 @@ describe("Highlighter.highlightRects", () => {
     hl.highlightRects(BANDS, "sel", "word");
     const marks = [...svg.querySelectorAll("#hifth-overlay .hl-sel")];
     expect(marks).toHaveLength(2);
-    expect(marks.every((m) => m.tagName === "line")).toBe(true);
+    expect(marks.every((m) => m.tagName === "g" && m.querySelector("path.hl-band"))).toBe(true);
     expect(marks.every((m) => m.classList.contains("hl-ink"))).toBe(true);
     expect(marks.map((m) => m.getAttribute("data-hl-group"))).toEqual(["word", "word"]);
     // Band height is the pen's, not the box's — the same 0.72 an ayah gets.
-    expect(marks.map((m) => m.getAttribute("stroke-width"))).toEqual([
+    expect(marks.map((m) => m.getAttribute("data-width"))).toEqual([
       String(30 * 0.72),
       String(30 * 0.72),
     ]);
@@ -695,16 +700,17 @@ describe("Highlighter.highlightRects", () => {
     hl.highlightRects(BANDS, "sel", "word");
     const marks = [...svg.querySelectorAll<SVGElement>("#hifth-overlay .hl-sel")];
     for (const m of marks) {
-      expect(Number(m.getAttribute("x1"))).toBeGreaterThan(Number(m.getAttribute("x2")));
-      expect(m.getAttribute("y1")).toBe(m.getAttribute("y2"));
-      const len = Number(m.style.getPropertyValue("--hl-len"));
-      expect(len).toBeCloseTo(
-        Math.abs(Number(m.getAttribute("x2")) - Number(m.getAttribute("x1"))),
-        6,
-      );
+      expect(Number(m.getAttribute("data-x1"))).toBeGreaterThan(Number(m.getAttribute("data-x2")));
     }
     // The stagger, so two lines of one word run read as one pen crossing both.
     expect(marks.map((m) => m.style.getPropertyValue("--hl-i"))).toEqual(["0", "1"]);
+  });
+
+  it("gives a word run its own ink, so the stylesheet can colour it apart from the verse", () => {
+    hl.highlightRects(BANDS, "run", "word");
+    const marks = [...svg.querySelectorAll("#hifth-overlay .hl-run")];
+    expect(marks).toHaveLength(2);
+    expect(marks.every((m) => m.classList.contains("hl-ink"))).toBe(true);
   });
 
   it("insets the caps so a band stops inside its own box", () => {
@@ -712,9 +718,9 @@ describe("Highlighter.highlightRects", () => {
     const m = svg.querySelector<SVGElement>("#hifth-overlay .hl-sel")!;
     const half = (30 * 0.72) / 2;
     // Written right-to-left, so x1 is the band's right end.
-    expect(Number(m.getAttribute("x1"))).toBeCloseTo(10 + 200 - half, 6);
-    expect(Number(m.getAttribute("x2"))).toBeCloseTo(10 + half, 6);
-    expect(Number(m.getAttribute("y1"))).toBeCloseTo(115, 6);
+    expect(Number(m.getAttribute("data-x1"))).toBeCloseTo(10 + 200 - half, 6);
+    expect(Number(m.getAttribute("data-x2"))).toBeCloseTo(10 + half, 6);
+    expect(Number(m.getAttribute("data-y"))).toBeCloseTo(115, 6);
   });
 
   it("draws a single word as a dot when it is narrower than the pen", () => {
@@ -723,9 +729,10 @@ describe("Highlighter.highlightRects", () => {
     // a zero-length line the renderer drops.
     hl.highlightRects([{ x: 0, y: 0, width: 5, height: 30 }], "sel", "word");
     const m = svg.querySelector<SVGElement>("#hifth-overlay .hl-sel")!;
-    expect(Number(m.getAttribute("x1"))).toBeCloseTo(2.5, 6);
-    expect(Number(m.getAttribute("x2"))).toBeCloseTo(2.5, 6);
-    expect(m.getAttribute("stroke-width")).toBe(String(30 * 0.72));
+    expect(Number(m.getAttribute("data-x1"))).toBeCloseTo(2.5, 6);
+    expect(Number(m.getAttribute("data-x2"))).toBeCloseTo(2.5, 6);
+    expect(m.getAttribute("data-width")).toBe(String(30 * 0.72));
+    expect(m.querySelector("path.hl-band")!.getAttribute("d")).toMatch(/^M.*Z$/);
   });
 
   it("replaces its group rather than stacking on it", () => {

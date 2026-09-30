@@ -54,33 +54,5 @@
         "caption": "The approaches: how it is done and how it behaves"
       }
     ]
-  },
-  "highlight-texture": {
-    "shots": [
-      {
-        "file": "highlight-texture-0.png",
-        "caption": "The top of the page"
-      },
-      {
-        "file": "highlight-texture-1.png",
-        "caption": "What does the app do today?"
-      },
-      {
-        "file": "highlight-texture-2.png",
-        "caption": "What shape does the pen leave?"
-      },
-      {
-        "file": "highlight-texture-3.png",
-        "caption": "What does the ink do inside the shape?"
-      },
-      {
-        "file": "highlight-texture-4.png",
-        "caption": "What happens where two marks overlap?"
-      },
-      {
-        "file": "highlight-texture-5.png",
-        "caption": "What does it feel like when the mark goes down?"
-      }
-    ]
   }
 }
