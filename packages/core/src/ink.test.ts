@@ -1,5 +1,13 @@
 import { describe, expect, it } from "vitest";
-import { joinSwipesByLine, pageLineHeight, swipesFromPath, swipesFromRects } from "./ink.js";
+import {
+  OVERHANG,
+  fitSwipesToText,
+  textSpanOf,
+  joinSwipesByLine,
+  pageLineHeight,
+  swipesFromPath,
+  swipesFromRects,
+} from "./ink.js";
 
 /**
  * The real thing, from apps/web/public/assets/pages/hafs-kfqc/7.svg — a
@@ -253,5 +261,68 @@ describe("joining the swipes of a passage line by line", () => {
 
   it("leaves a single verse's swipes as they are", () => {
     expect(joinSwipesByLine(a)).toEqual(a);
+  });
+});
+
+describe("keeping a band to the words on its line", () => {
+  // Page 7's block of text runs from about 18 to 327; its verse boxes run the
+  // page's full width, 0 to 345. The band's ends are its centreline plus half
+  // its thickness.
+  const text = { left: 18, right: 327 };
+  const ends = (s: { x1: number; x2: number; width: number }) => [
+    Math.min(s.x1, s.x2) - s.width / 2,
+    Math.max(s.x1, s.x2) + s.width / 2,
+  ];
+
+  it("pulls a full-width band in to just past the words at both ends", () => {
+    const [full] = swipesFromRects([{ x: 0, y: 441, width: 345, height: 37 }]);
+    const [fit] = fitSwipesToText([full!], text);
+    expect(ends(fit!)).toEqual([text.left - OVERHANG, text.right + OVERHANG]);
+    expect(fit!.y).toBe(full!.y);
+    expect(fit!.width).toBe(full!.width);
+  });
+
+  it("leaves an end that already sits inside the words where it is", () => {
+    // The tail of 2:47 stops mid-line, where 2:48 begins.
+    const [tail] = swipesFromRects([{ x: 237.4, y: 478, width: 107.6, height: 36.9 }]);
+    const [fit] = fitSwipesToText([tail!], text);
+    const [left, right] = ends(fit!);
+    expect(left).toBeCloseTo(237.4, 6);
+    expect(right).toBe(text.right + OVERHANG);
+  });
+
+  it("turns a sliver past the words into a dot centred on what is left", () => {
+    // A band cannot be shorter than it is thick: the pen's rule for a two-word
+    // tail (see swipesFromPath) is a dot of the band's own diameter, and a
+    // band cut down below that length gets the same.
+    const [edge] = swipesFromRects([{ x: 320, y: 0, width: 25, height: 36 }]);
+    const [fit] = fitSwipesToText([edge!], text);
+    const [left] = ends(edge!);
+    expect(fit!.x1).toBe(fit!.x2);
+    expect(fit!.x1).toBeCloseTo((left! + text.right + OVERHANG) / 2, 6);
+  });
+
+  it("changes nothing when the page's words were not measured", () => {
+    const swipes = swipesFromRects([{ x: 0, y: 441, width: 345, height: 37 }]);
+    expect(fitSwipesToText(swipes, undefined)).toEqual(swipes);
+  });
+});
+
+describe("measuring where a page's words start and end", () => {
+  // Read off page 7 in a phone-sized Chromium, 2026-09-30: the words' own box,
+  // the words' matrix to the screen, and the page's.
+  const box = { x: 45.445, y: 0, width: 245.455, height: 400 };
+  const words = { a: 1.476, b: 0, c: 0, d: -1.476, e: -60.898, f: 708.636 };
+  const page = { a: 1.107, b: 0, c: 0, d: 1.107, e: 0, f: 0 };
+
+  it("brings the words' box into the page's own units", () => {
+    const span = textSpanOf(box, words, page)!;
+    expect(span.left).toBeCloseTo(5.59, 1);
+    expect(span.right).toBeCloseTo(332.86, 1);
+  });
+
+  it("gives nothing for a page that has not been laid out yet", () => {
+    expect(textSpanOf({ x: 0, y: 0, width: 0, height: 0 }, words, page)).toBeUndefined();
+    expect(textSpanOf(box, words, { ...page, a: 0, d: 0 })).toBeUndefined();
   });
 });

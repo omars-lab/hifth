@@ -1,5 +1,6 @@
 import { test, expect } from "@playwright/test";
 import { tapAyah } from "./ayah";
+import { inkToken } from "./ink";
 import { contextWithout } from "./inventory";
 
 // Loop 5, the range half of the exit criterion (PLAN §Loop 5):
@@ -72,18 +73,7 @@ test.describe("Hifth · the highlighted range", () => {
     // A passage is its own colour, not the verse's amber (highlight-texture
     // decision, 2026-09-30): the amber belongs to the verse you are on.
     const fill = await ink.first().evaluate((el) => getComputedStyle(el).fill);
-    // The token resolved the way the browser writes a computed colour, so the
-    // two strings compare like for like.
-    const token = (name: string) =>
-      page.evaluate((n) => {
-        const probe = document.createElementNS("http://www.w3.org/2000/svg", "rect");
-        probe.style.fill = `var(${n})`;
-        document.querySelector("#hifth-overlay")!.appendChild(probe);
-        const c = getComputedStyle(probe).fill;
-        probe.remove();
-        return c;
-      }, name);
-    expect(fill, "the passage is filled with the passage's own ink").toBe(await token("--ink-range"));
+    expect(fill, "the passage is filled with the passage's own ink").toBe(await inkToken(page, "--ink-range"));
     expect(fill, "the passage ink is not the verse's amber").not.toMatch(/232, 161, 58/);
 
     // Closing the passage's menu drops its ink with it (a wash with no menu

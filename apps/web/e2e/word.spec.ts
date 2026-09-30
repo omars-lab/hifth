@@ -1,6 +1,7 @@
 import { test, expect, type Page } from "@playwright/test";
 import { ayahTarget, tapAyah } from "./ayah";
 import { COACH_STORAGE_KEY } from "../src/coach";
+import { inkLightness, inkToken, pixelsOf } from "./ink";
 
 /*
  * word-C — the long-press that drops into word granularity (PLAN 13, task #65).
@@ -167,6 +168,15 @@ test.describe("Hifth · word selection", () => {
     const run = await fillOf("#hifth-overlay [data-hl-group='word']");
     const verse = await fillOf("#hifth-overlay [data-hl-group='selection']");
     expect(run, "a word run is not drawn in the verse's amber").not.toBe(verse);
+    expect(run, "a word run is drawn in the word run's own ink").toBe(await inkToken(page, "--ink-run"));
+    expect(verse, "the verse keeps its amber under the run").toBe(await inkToken(page, "--ink-sel"));
+
+    // Where the run crosses the verse, both inks show: the crossing is darker
+    // than the verse's amber alone, the way two highlighters over each other
+    // are. A run that hid under the verse, or covered it, would not be.
+    const crossing = inkLightness(await pixelsOf(page, "#hifth-overlay [data-hl-group='word'] .hl-band"));
+    const verseAlone = inkLightness(await pixelsOf(page, "#hifth-overlay [data-hl-group='selection'] .hl-band"));
+    expect(crossing, "the crossing shows both inks").toBeLessThan(verseAlone - 10);
   });
 
   test("the same drag paints the same run, however late the word data arrives", async ({
