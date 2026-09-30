@@ -194,6 +194,9 @@ export function App(): JSX.Element {
   const [contextFor, setContextFor] = useState<string | null>(null);
   // Where the phone's short note starts, so the page can lift the verse above it.
   const [coverTop, setCoverTop] = useState<number | null>(null);
+  // Where the hop chips floating over the page's top corner end, so the lift
+  // above a phone note stops the verse's first line beneath them.
+  const [railBottom, setRailBottom] = useState<number | null>(null);
   const [page, setPage] = useState(START_PAGE);
   const [selectedKey, setSelectedKey] = useState<string | null>(null);
   // The drag-highlighted passage: its ayah keys in reading order (spec §3's
@@ -2229,6 +2232,7 @@ export function App(): JSX.Element {
               <PageStage
                 ref={stageRef}
                 coverTop={coverTop}
+                railBottom={railBottom}
                 resolver={resolver}
                 page={page}
                 total={totalPages}
@@ -2291,6 +2295,7 @@ export function App(): JSX.Element {
               // The pitch note for a left-leaf verse lands on the right, over
               // the rail's corner; the chips cross to the left while it is up.
               crossed={PITCH && commentaryOpen && hasCommentary && sheetSide === "right"}
+              onBand={setRailBottom}
             />
             <HopPopover
               chip={openChip}
@@ -2540,7 +2545,7 @@ export function App(): JSX.Element {
           onToggle={() => setRootsOpen((o) => !o)}
           caption={t.vdRoots}
         />
-        <ShareSheet state={selectedKey ? currentState : null} hasTrail={trail.length > 0} />
+        <ShareSheet state={selectedKey ? currentState : null} hasTrail={trail.length > 0} pitch={PITCH} />
         {selectedKey && (
           <DrawerTool
             glyph="⚑"

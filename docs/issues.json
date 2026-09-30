@@ -2236,10 +2236,11 @@
         "file": "docs/design/native-shell.md",
         "item": "⑩"
       },
-      "status": "open",
+      "status": "fixed",
       "severity": "defect",
       "owner": "agent",
-      "note": "On a phone, with a verse that has hops open, the two floating chips sit in the stage's top corner and the verse's first line, lifted above the bottom sheet, runs under them. On iPad and Mac the chips sit on the desk beside the page. A placement choice to be made with a hand on it: lift the verse only to the band beneath the chips, or move the chips into the sheet header. Ships with a phone test that the chips and the first highlighted word do not overlap."
+      "note": "On a phone, with a verse that has hops open, the floating chips sat in the stage's top corner and the lifted verse's lines ran up to them. Fixed 2026-09-29: the chips report where they end and the lift stops the verse's first line beneath them; the phone pitch test checks no highlighted line meets the chips.",
+      "closedBy": "apps/web/e2e/pitch.spec.ts"
     },
     {
       "id": "mac-menu-page-turn",
@@ -2322,10 +2323,11 @@
         "file": "docs/design/app-links-editions-and-builder.md",
         "item": "①"
       },
-      "status": "open",
+      "status": "fixed",
       "severity": "question",
       "owner": "agent",
-      "note": "The owner chose the link builder for the app's share sheet as well as the contract page (2026-09-29). The page's builder shipped; the sheet still has one button. Its form has to be drawn at phone size before it is built; the composing code already sits in the core package for it."
+      "note": "The owner chose the link builder for the app's share sheet as well as the contract page (2026-09-29). Closed the same day: three shapes were built into the sheet and mounted live at phone size on docs/design/share-sheet-options.html (decision share-sheet-builder, open, C shown by default): one tap as before, a tray with the website link and the app link, and the same tray with one question first, what the link opens on arrival. The sheet asks only that; \"tell nobody / tell this app\" stays on the contract page, because a sheet handing a link to a person cannot know which app would want telling. apps/web/src/share-links.test.ts holds every link the sheet writes to the contract's own rules; the phone test sends one from each shape.",
+      "closedBy": "apps/web/e2e/share-sheet.spec.ts"
     },
     {
       "id": "site-accepts-unknown-edition",
