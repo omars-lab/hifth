@@ -32,6 +32,15 @@ PORT   := 4173
 # Everyday development
 # ---------------------------------------------------------------------------
 
+.PHONY: reviews
+reviews: ## Review comments left on docs/ in Obsidian (review-md) that are waiting on claude
+	@node scripts/hook-reviews.mjs
+	@echo "(nothing above = no thread is waiting on claude; \`make reviews-all\` shows every open one)"
+
+.PHONY: reviews-all
+reviews-all: ## Every open review thread on docs/, with obsidian:// links to open or answer each
+	@node "$$(ls -d $$HOME/.claude/plugins/cache/review-md/review-md/*/bin/reviews.mjs | sort -V | tail -1)" list docs --open --vault docs
+
 .PHONY: install
 install: ## Install deps + wire the gitleaks pre-commit hook (runs "prepare")
 	$(PNPM) install
