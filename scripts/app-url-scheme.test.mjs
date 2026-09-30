@@ -21,3 +21,25 @@ test("every path has at least one example the tests can run", () => {
 test("the page carries no held text and no Arabic", () => {
   assert.doesNotMatch(render(spec), /[؀-ۿ]/);
 });
+
+// The Swagger UI view (make app-links-ui) is a hand-written page beside the
+// spec, so the same JSON can be browsed in the viewer most API readers know.
+const SWAGGER = OUT.replace(/\.html$/, ".swagger.html");
+const swagger = () => readFileSync(SWAGGER, "utf8");
+
+test("the Swagger UI page reads the checked-in spec from beside itself", () => {
+  const html = swagger();
+  assert.match(html, /url:\s*"app-url-scheme\.openapi\.json"/, "Swagger UI must load the spec by its relative name");
+  // An href to the JSON is what makes the site build copy it beside the page.
+  assert.match(html, /href="app-url-scheme\.openapi\.json"/, "the page must link the raw JSON so the site serves it");
+  assert.match(html, /cdnjs\.cloudflare\.com\/ajax\/libs\/swagger-ui\/\d+\.\d+\.\d+\//, "Swagger UI must be pinned to one version");
+  // Whole-address examples are the spec's own x-examples; the page draws them, it does not copy them.
+  assert.match(html, /get\("x-examples"\)/, "the page must draw the spec's x-examples, not carry its own");
+  assert.doesNotMatch(html, /hifth:\/\/x-callback-url\/open\?/, "no example address is written into the page by hand");
+  assert.doesNotMatch(html, /[؀-ۿ]/);
+});
+
+test("the readable page and the Swagger UI page link each other", () => {
+  assert.match(render(spec), /href="app-url-scheme\.swagger\.html"/);
+  assert.match(swagger(), /href="app-url-scheme\.html"/);
+});
