@@ -18,6 +18,9 @@ export default tseslint.config(
       "**/dist-native/**",
       "native/WebBundle/**",
       "native/build/**",
+      // Obsidian keeps community-plugin code (BRAT, review-md) inside the docs/ vault;
+      // it is gitignored there and not ours to lint.
+      "docs/.obsidian/**",
       "**/dev-dist/**",
       "**/build/**",
       "**/node_modules/**",
