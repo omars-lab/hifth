@@ -1,6 +1,9 @@
 # Links into the app: what opens today, what is missing, and one list for the guide and the tests
 
-**Status:** proposal, 2026-09-28. Nothing here is built yet.
+**Status:** proposal, 2026-09-28. Nothing here is built yet. The Mac and iPad app's own links
+(`hifth://…`, and the requests another app can make) are a separate contract with its own
+[readable page and link builder](app-url-scheme.html); which mus'haf names those links may use
+is settled on [its own page](app-links-editions-and-builder.md).
 
 **What is being decided:** which parts of the app a link can open, in what shape, and
 where the one list of those links lives, so the checks guide and the automated tests use the

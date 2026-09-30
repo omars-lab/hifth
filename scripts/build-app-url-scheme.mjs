@@ -25,6 +25,13 @@ import { dirname, extname, join, normalize, resolve } from "node:path";
 const __dirname = dirname(fileURLToPath(import.meta.url));
 export const SPEC = resolve(__dirname, "../docs/design/app-url-scheme.openapi.json");
 export const OUT = resolve(__dirname, "../docs/design/app-url-scheme.html");
+/** Core's compiled link builder — the shell's rules in JavaScript, inlined into the page. */
+export const RULES = resolve(__dirname, "../packages/core/dist/link-builder.js");
+
+const rules = () => {
+  if (!existsSync(RULES)) throw new Error(`build @hifth/core first (make core): ${RULES} is missing`);
+  return readFileSync(RULES, "utf8").trim();
+};
 
 const C = {
   paper: "#f4efe6", raised: "#fbf8f2", sunk: "#ece4d6", ink: "#26201a", inkSoft: "#5c5347",
@@ -50,7 +57,11 @@ const deref = (spec, p) => {
   return spec.components[kind][name];
 };
 
-const values = (schema) => {
+/** A schema, with a `$ref` followed and the keys beside it (`default`) kept. */
+const schemaOf = (spec, schema) => (schema?.$ref ? { ...deref(spec, schema), ...schema } : schema);
+
+const values = (spec, schema) => {
+  schema = schemaOf(spec, schema);
   if (!schema) return "";
   if (schema.enum) return schema.enum.map((v) => `<code>${esc(v)}</code>`).join(", ");
   const bits = [schema.type ?? ""];
@@ -68,7 +79,7 @@ ${params
   .map(deref.bind(null, spec))
   .map(
     (p) =>
-      `<tr><td><code>${esc(p.name)}</code>${p.required ? ' <span class="req">required</span>' : ""}</td><td>${esc(p.in)}</td><td>${values(p.schema)}${p.example != null ? `<div class="faint">e.g. <code>${esc(p.example)}</code></div>` : ""}</td><td>${md(p.description ?? "")}</td></tr>`,
+      `<tr><td><code>${esc(p.name)}</code>${p.required ? ' <span class="req">required</span>' : ""}</td><td>${esc(p.in)}</td><td>${values(spec, p.schema)}${p.example != null ? `<div class="faint">e.g. <code>${esc(p.example)}</code></div>` : ""}</td><td>${md(p.description ?? "")}</td></tr>`,
   )
   .join("\n")}
 </tbody></table>`;
@@ -111,6 +122,103 @@ const unplacedExamples = (spec) => {
   return (spec["x-examples"] ?? []).filter((e) => !placed.has(e.url));
 };
 
+/**
+ * The link builder: one form, and under it the three links it makes and what
+ * the app will do with the request, updating as you pick. The rules are
+ * core's `link-builder` (a copy of the shell's, held to it by the contract's
+ * examples), inlined as a module so the page stays one self-contained file;
+ * the lists and the site address come from the spec, never from here.
+ */
+const builderSection = (spec) => {
+  const edition = spec.components?.schemas?.Edition;
+  const editions = edition?.["x-editions"] ?? [];
+  const params = spec.paths["/x-callback-url/open"].get.parameters.map(deref.bind(null, spec));
+  const enumOf = (name) => params.find((p) => p.name === name)?.schema?.enum ?? [];
+  const options = (values, none) =>
+    [`<option value="">${esc(none)}</option>`, ...values.map((v) => `<option value="${esc(v)}">${esc(v)}</option>`)].join("");
+  const editionOptions = editions
+    .map((e) => `<option value="${esc(e.id)}">${esc(e.id)}${e.shipped ? "" : " — not in the app yet"}</option>`)
+    .join("");
+  const place = (value, label, checked) =>
+    `<label class="place"><input type="radio" name="place" value="${value}"${checked ? " checked" : ""}> ${esc(label)}</label>`;
+  return `<section id="builder">
+<h2>Build a link</h2>
+<p>Pick what to open and the page writes the link three ways, and says what the app will do with it — in the same words as the examples above, from the same rules the app uses.</p>
+<form id="link-builder" autocomplete="off" onsubmit="return false">
+<fieldset>
+<legend>What to open</legend>
+<div class="row">${place("page", "Page", true)} <input name="page" inputmode="numeric" placeholder="45" size="6"></div>
+<div class="row">${place("verse", "Verse", false)} <input name="verse" placeholder="2:255 or 2:47-48" size="14"> <label>words <input name="words" placeholder="3-7" size="6"></label></div>
+<div class="row">${place("surah", "Surah", false)} <input name="surah" inputmode="numeric" placeholder="1 to 114" size="8"></div>
+</fieldset>
+<fieldset>
+<legend>Which mus'haf</legend>
+<label>edition <select name="edition">${editionOptions}</select></label>
+</fieldset>
+<fieldset>
+<legend>How to show it</legend>
+<label>mode <select name="mode">${options(enumOf("mode"), "as it is")}</select></label>
+<label>open <select name="open">${options(enumOf("open"), "nothing")}</select></label>
+<label>view <select name="view">${options(enumOf("view"), "as it is")}</select></label>
+</fieldset>
+<fieldset>
+<legend>Who to tell <span class="faint">(app requests only; a plain link tells nobody)</span></legend>
+<label class="wide">x-success <input name="x-success" placeholder="shortcuts://x-callback-url/run-shortcut?name=Next"></label>
+<label class="wide">x-error <input name="x-error" placeholder="shortcuts://x-callback-url/run-shortcut?name=Log%20failure"></label>
+</fieldset>
+</form>
+<table class="outputs"><tbody>
+<tr><th>plain app link</th><td><code class="url" id="out-plain"></code> <button type="button" data-copy="out-plain">copy</button> <a id="open-in-app" href="#" hidden>open in the app</a></td></tr>
+<tr><th>app request</th><td><code class="url" id="out-request"></code> <button type="button" data-copy="out-request">copy</button></td></tr>
+<tr><th>site link</th><td><code class="url" id="out-site"></code> <button type="button" data-copy="out-site">copy</button></td></tr>
+<tr><th>the app will</th><td><code id="out-outcome"></code></td></tr>
+</tbody></table>
+<script type="module">
+${rules()}
+
+const LISTS = listsFromSpec(${JSON.stringify({
+    paths: { "/x-callback-url/open": { get: { parameters: params.map((p) => ({ name: p.name, schema: schemaOf(spec, p.schema) })) } } },
+    components: { schemas: { Edition: { "x-editions": editions } } },
+  })});
+const SITE = ${JSON.stringify(spec["x-public-site"] ?? "")};
+const form = document.getElementById("link-builder");
+const out = (id) => document.getElementById(id);
+const value = (name) => form.elements[name]?.value ?? "";
+
+function update() {
+  const place = form.elements["place"].value;
+  for (const name of ["page", "verse", "surah"]) form.elements[name].disabled = name !== place;
+  form.elements["words"].disabled = place !== "verse";
+  const links = composeLinks({
+    place, page: value("page"), verse: value("verse"), words: value("words"), surah: value("surah"),
+    edition: value("edition"), mode: value("mode"), open: value("open"), view: value("view"),
+    xSuccess: value("x-success"), xError: value("x-error"),
+  }, LISTS, SITE);
+  out("out-plain").textContent = links.plain;
+  out("out-request").textContent = links.request;
+  out("out-site").textContent = links.site;
+  const o = links.outcome;
+  out("out-outcome").textContent = describeOutcome(o) + (o.kind === "error" ? " — " + o.message : "");
+  const open = out("open-in-app");
+  open.hidden = !links.plain;
+  open.href = links.plain || "#";
+}
+form.addEventListener("input", update);
+form.addEventListener("change", update);
+for (const button of document.querySelectorAll("[data-copy]")) {
+  button.addEventListener("click", async () => {
+    const text = out(button.dataset.copy).textContent;
+    if (!text || !navigator.clipboard) return;
+    await navigator.clipboard.writeText(text);
+    button.textContent = "copied";
+    setTimeout(() => { button.textContent = "copy"; }, 1200);
+  });
+}
+update();
+</script>
+</section>`;
+};
+
 export function render(spec) {
   const paths = Object.entries(spec.paths).map(([path, ops]) => {
     const op = ops.get;
@@ -130,6 +238,8 @@ ${exampleRows(examples)}
   });
   const leftovers = unplacedExamples(spec);
   const errors = spec.components?.schemas?.ErrorCode;
+  const edition = spec.components?.schemas?.Edition;
+  const editions = edition?.["x-editions"] ?? [];
   return `<!doctype html>
 <html lang="en">
 <head>
@@ -156,7 +266,19 @@ th { font-weight: 600; color: ${C.inkSoft}; }
 td p { margin: 0 0 4px; }
 nav a { margin-right: 14px; color: ${C.accent}; }
 .meta { color: ${C.inkSoft}; font-size: 0.9rem; }
-@media (max-width: 640px) { table, thead, tbody, tr { display: block; } th { display: none; } td { display: block; border: 0; } tr { border-bottom: 1px solid ${C.sunk}; padding: 6px 0; } }
+fieldset { border: 1px solid ${C.sunk}; border-radius: 6px; margin: 10px 0; padding: 8px 12px; background: ${C.raised}; min-width: 0; }
+label.wide { display: block; margin-right: 0; }
+label.wide input { width: 100%; box-sizing: border-box; margin-top: 2px; }
+legend { font-weight: 600; color: ${C.inkSoft}; font-size: 0.9rem; }
+fieldset label { margin-right: 14px; display: inline-block; margin-bottom: 4px; }
+.row { margin: 4px 0; }
+.place { min-width: 5.5em; }
+input, select { font: inherit; padding: 3px 6px; border: 1px solid ${C.sunk}; border-radius: 4px; background: #fff; color: ${C.ink}; max-width: 100%; }
+input:disabled { background: ${C.sunk}; color: ${C.inkFaint}; }
+button { font: inherit; font-size: 0.85em; padding: 2px 8px; border: 1px solid ${C.accent}; border-radius: 4px; background: ${C.accentTint}; color: ${C.accentStrong}; cursor: pointer; }
+.outputs th { width: 8em; white-space: nowrap; }
+#open-in-app { color: ${C.accent}; margin-left: 6px; }
+@media (max-width: 640px) { table, thead, tbody, tr { display: block; } th { display: none; } td { display: block; border: 0; } tr { border-bottom: 1px solid ${C.sunk}; padding: 6px 0; } .outputs th { display: block; padding-bottom: 0; } }
 </style>
 </head>
 <body>
@@ -166,8 +288,21 @@ nav a { margin-right: 14px; color: ${C.accent}; }
 ${md(spec.info.description ?? "")}
 <nav>${Object.values(spec.paths)
     .map((ops) => `<a href="#${esc(ops.get.operationId)}">${esc(ops.get.summary.split(":")[0])}</a>`)
-    .join("")}<a href="#errors">Error codes</a></nav>
+    .join("")}<a href="#builder">Build a link</a><a href="#editions">Editions</a><a href="#errors">Error codes</a></nav>
 ${paths.join("\n")}
+${builderSection(spec)}
+<section id="editions">
+<h2>Which mus'haf may a link name?</h2>
+${md(edition?.description ?? "")}
+<table><thead><tr><th>id</th><th>mus'haf</th><th>in the app?</th></tr></thead><tbody>
+${editions
+    .map(
+      (e) =>
+        `<tr><td><code>${esc(e.id)}</code></td><td>${esc(e.name)}${e.riwayah ? `<div class="faint">${esc(e.riwayah)}</div>` : ""}</td><td>${e.shipped ? "<strong>yes</strong>" : `not yet${e.reason ? `<div class="faint">${esc(e.reason)}</div>` : ""}`}</td></tr>`,
+    )
+    .join("\n")}
+</tbody></table>
+</section>
 <section id="errors">
 <h2>Error codes</h2>
 <p>An <code>x-error</code> answer carries <code>errorCode</code>, one of ${(errors?.enum ?? []).map((v) => `<code>${esc(v)}</code>`).join(", ")}, and a plain <code>errorMessage</code>.</p>

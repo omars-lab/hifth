@@ -391,6 +391,24 @@ export {
   type ConcordanceTable,
 } from "./concordance.js";
 
+// The link builder: what the Mac and iPad shell will do with a `hifth://` link,
+// and the three links a filled-in form makes. A JavaScript copy of the shell's
+// rules, held to it by the contract's examples; the contract page inlines its
+// compiled form, so it imports nothing.
+export {
+  composeLinks,
+  describeOutcome,
+  editionProblem,
+  listsFromSpec,
+  predictLink,
+  routeHash,
+  type ComposedLinks,
+  type LinkEdition,
+  type LinkForm,
+  type LinkLists,
+  type LinkOutcome,
+} from "./link-builder.js";
+
 // The revision record: deliberate looks, rolled up by day and by scope. Pure and
 // clockless — the time and the reader's UTC offset ride on each event.
 export {

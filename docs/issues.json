@@ -2301,6 +2301,28 @@
       "severity": "question",
       "owner": "agent",
       "note": "The x-callback-url door (open, current, the x-success / x-error answers) is proven by unit tests on the parser and the shell model only; no test has the operating system hand the app a real request and a second app receive the answer."
+    },
+    {
+      "id": "share-sheet-link-builder",
+      "source": {
+        "file": "docs/design/app-links-editions-and-builder.md",
+        "item": "①"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "agent",
+      "note": "The owner chose the link builder for the app's share sheet as well as the contract page (2026-09-29). The page's builder shipped; the sheet still has one button. Its form has to be drawn at phone size before it is built; the composing code already sits in the core package for it."
+    },
+    {
+      "id": "site-accepts-unknown-edition",
+      "source": {
+        "file": "docs/design/app-links-editions-and-builder.md",
+        "item": "②"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "agent",
+      "note": "The Mac and iPad app refuses a link naming a mus'haf it does not ship; the website opens the Hafs pages under whatever name the link gives, so the address lies. Decide refuse-and-say-so or fall back and rewrite the address, then test it."
     }
   ]
 }

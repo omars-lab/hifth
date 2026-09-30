@@ -51,9 +51,12 @@ the page and opens the caller's address with `route` and the public `url` once i
 showing; `…/current?x-success=…` answers with what is on screen. `page=`, `verse=`,
 `surah=` (its context), `words=`, `edition=`, `mode=` (the tool in hand), `open=`
 (`commentary`, `context`, or any app panel), `view=`, or a whole `route=`. Errors come back
-as `errorCode` + `errorMessage`. The contract is `docs/design/app-url-scheme.openapi.json`
-(rendered by `make app-links-doc`; `make app-links-ui` opens the same JSON in Swagger UI on :4175); the parser is `native/Hifth/Route/XCallback.swift`,
-the answering is in `ShellModel`.
+as `errorCode` + `errorMessage`. Only a shipped mus'haf opens (`Route.editions`, `hafs-kfqc`
+today); an unknown or unshipped `edition=` is refused with the shipped ids named. The contract
+is `docs/design/app-url-scheme.openapi.json` (rendered by `make app-links-doc`, which builds core
+first and inlines `packages/core/dist/link-builder.js` as the page's live link builder;
+`make app-links-ui` opens the same JSON in Swagger UI on :4175); the parser is
+`native/Hifth/Route/XCallback.swift`, the answering is in `ShellModel`.
 
 Cold start puts the route into the first URL's fragment, so there is no race. A route that
 arrives while running is queued until the page says `ready`, then applied. Quote any route
@@ -163,7 +166,11 @@ A new x-callback parameter or action is pinned the same way: a case in
 `x-examples` entry in `docs/design/app-url-scheme.openapi.json`, then `make app-links-doc`.
 The Swift test runs every example through the parser and holds the enum lists to the shell's;
 `packages/core/src/link-spec.test.ts` holds them to the web router; a name added in one place
-only fails the other.
+only fails the other. A new key also goes in `packages/core/src/link-builder.ts`, the
+JavaScript copy of the parser the contract page's builder runs: `link-builder.test.ts` runs the
+same examples through it, so a rule changed in Swift and not there fails on the example. A new
+edition goes in `Route.editions` and the contract's `Edition` schema (`x-editions`), with
+`shipped` true only once its pages are in the build.
 
 ## Troubleshooting
 
