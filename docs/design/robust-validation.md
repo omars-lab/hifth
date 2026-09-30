@@ -389,6 +389,13 @@ scripts already have a test beside each one; these checks do not. **What would a
 test beside each check that feeds it one thing it must refuse and one it must pass, run with the
 other tests — starting with the checks that guard what goes public.
 
+**Where it stands (2026-09-30):** the four checks that guard what goes public — no passage of
+scripture in source, no text element in a page drawing, no held letters in the built bundle, the
+revision record never imported by anything that could send it — each now have that test beside
+them. Each test builds a small made-up tree, points the check at it, and reads the exit code, so
+the check runs exactly as the hooks run it. The other twenty-nine checks are still untested; the
+same shape fits each, and the item stays open until they have it.
+
 ---
 
 ## What this page is not settling

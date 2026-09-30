@@ -47,7 +47,11 @@ import { execSync } from "node:child_process";
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 
-const ROOT = new URL("..", import.meta.url).pathname;
+// HIFTH_GATE_ROOT points the check at a made-up tree, so a test can feed it one
+// thing it must refuse and one it must pass (scripts/gate-fixture.mjs).
+const ROOT = process.env.HIFTH_GATE_ROOT
+  ? process.env.HIFTH_GATE_ROOT.replace(/\/?$/, "/")
+  : new URL("..", import.meta.url).pathname;
 
 /* ------------------------------------------------------------------ */
 /* The two rules                                                       */
@@ -200,7 +204,10 @@ for (const rel of files) {
 
 // A list that names files which no longer hold specimens is a list nobody has
 // read. Same insistence the other registers make.
-const stale = Object.keys(SPECIMENS).filter((rel) => !listed.has(rel));
+const stale =
+  process.env.HIFTH_GATE_ROOT && process.env.HIFTH_GATE_SPECIMENS === "none"
+    ? [] // a made-up tree (see gate-fixture.mjs) never holds the real specimen files
+    : Object.keys(SPECIMENS).filter((rel) => !listed.has(rel));
 
 const problems = [];
 
