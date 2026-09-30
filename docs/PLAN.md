@@ -1071,8 +1071,10 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     device-bound check rather than something drawn here. Blocks nothing shipped; the bar works
     today.
 
-19. **A developer can now lay the outside library's page beside ours — and a toggle that lays
-    it *over* ours, in the running app, is what comes next.** Opened 2026-09-08, from the
+19. ~~**A developer can now lay the outside library's page beside ours — and a toggle that lays
+    it *over* ours, in the running app, is what comes next.**~~ — **closed 2026-09-30**: the
+    toggle is built, gated and eye-checked as recorded below, and the two sibling decision rows
+    it waited on have merged decided; follow-ups 20 and 21 carry what comes next. Opened 2026-09-08, from the
     direction given the same day: a development-only switch that compares a page powered by
     the outside library with the page this app has always shipped.
     **Why:** our shipped pages are outline drawings, and until now nothing in the building

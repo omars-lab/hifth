@@ -56,6 +56,12 @@ Two ways to open the app: this laptop, `make pitch` then `http://localhost:5173/
    fingers, smoothly, and nothing else on the window zooms with it. Anything wrong becomes an
    XCUITest or Playwright case (issue `mac-trackpad-pinch-unfelt`, design/native-shell.md §⑧ ②).
 
+9. **A kept juz on a phone that would not promise to keep it.** On a phone, keep a juz from the
+   packs sheet, then use the phone normally for a week without opening the app. Right: the juz
+   is still there offline, or the app says it was cleared and fetches it back on the next visit
+   with a connection, without you doing anything. Anything else becomes a Playwright test of
+   the "kept juz is gone" notice and its refetch (issue `storage-not-kept`, performance.md ⑰).
+
 ## Done
 
 (Items move here with the date and where their test or ledger record is.)
