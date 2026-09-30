@@ -556,7 +556,7 @@ decisions-doc: ## Re-render docs/decisions/README.md from docs/decisions.json
 	@node scripts/build-decisions-doc.mjs
 
 .PHONY: app-links-doc
-app-links-doc: ## Re-render docs/design/app-url-scheme.html from the app's URL contract (the OpenAPI file)
+app-links-doc: core ## Re-render docs/design/app-url-scheme.html from the app's URL contract (the OpenAPI file); inlines core's link builder
 	@node scripts/build-app-url-scheme.mjs
 
 .PHONY: app-links-ui

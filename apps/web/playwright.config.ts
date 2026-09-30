@@ -217,7 +217,9 @@ export default defineConfig({
           // runs here and on the phones: it is the one tool test for both. So does
           // `open-link`: a link that opens a panel is opened on both. `lazy-tools`
           // checks the sheets that load on first open stay out of the first script.
-          testMatch: /(desktop|edge-peel|stage-fit|spread-fit|detent-live|pagebar-detents|pagebar-fisheye|notes|mistakes|sign-tools|crop|open-link|lazy-tools|drive-video)\.spec\.ts/,
+          // `link-builder` drives the form on the app-links contract page, a
+          // docs page the build stages beside the app.
+          testMatch: /(desktop|edge-peel|stage-fit|spread-fit|detent-live|pagebar-detents|pagebar-fisheye|notes|mistakes|sign-tools|crop|open-link|lazy-tools|drive-video|link-builder)\.spec\.ts/,
           use: {
             browserName: "chromium",
             viewport: { width: 1440, height: 900 },

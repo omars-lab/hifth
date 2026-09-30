@@ -30,7 +30,8 @@ import Foundation
 /// this parser, is `docs/design/app-url-scheme.openapi.json`.
 nonisolated enum XCallback {
     static let host = "x-callback-url"
-    /// The mus'haf an `open` request means when it names none.
+    /// The mus'haf an `open` request means when it names none; the only one
+    /// shipped today. The others `Route.editions` knows are refused by name.
     static let defaultEdition = "hafs-kfqc"
     /// The keys `open` reads itself; every other non-`x-` key passes through
     /// to the web app's link query untouched (`mode` as `tool`).
@@ -60,6 +61,10 @@ nonisolated enum XCallback {
         static let missingRoute = Failure(code: "missing-route", message: "open needs a page (page=45), a verse (verse=2:255), a surah (surah=2), or a route (route=/hafs-kfqc/2:255)")
         static func badRoute(_ raw: String) -> Failure {
             Failure(code: "bad-route", message: "not a route: \(raw)")
+        }
+        /// A route whose only fault is its mus'haf: say which one, and what the app ships.
+        static func badEdition(_ id: String) -> Failure? {
+            Route.editionProblem(id).map { Failure(code: "bad-route", message: $0) }
         }
         static func unknownAction(_ raw: String) -> Failure {
             Failure(code: "unknown-action", message: "no action named \"\(raw)\"; try open or current")
@@ -172,6 +177,7 @@ nonisolated enum XCallback {
     /// three named keys (`tool`, `open`, `view`) checked against their lists.
     private static func route(from query: [String: String], order: [String]) -> Result<String, Failure> {
         if let raw = query["route"], !raw.isEmpty {
+            if let id = Route.editionSegment(of: raw), let failure = Failure.badEdition(id) { return .failure(failure) }
             guard let hash = Route.hash(from: raw) else { return .failure(.badRoute(raw)) }
             return .success(hash)
         }
@@ -207,6 +213,7 @@ nonisolated enum XCallback {
             target = "\(n):1"
         }
         let edition = given("edition") ?? defaultEdition
+        if let failure = Failure.badEdition(edition) { return .failure(failure) }
         var route = "/" + edition + "/" + target
         var pairs: [String] = []
         if let words { pairs.append("w=" + encode(words)) }

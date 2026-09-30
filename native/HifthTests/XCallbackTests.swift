@@ -114,6 +114,32 @@ struct XCallbackTests {
         #expect(enumOf("mode") == XCallback.tools)
         #expect(enumOf("open") == XCallback.panels)
         #expect(enumOf("view") == XCallback.views)
+        // The editions live in one schema both edition parameters point at.
+        let components = try #require(root["components"] as? [String: Any])
+        let schemas = try #require(components["schemas"] as? [String: Any])
+        let edition = try #require(schemas["Edition"] as? [String: Any])
+        #expect(edition["enum"] as? [String] == Route.editions.map(\.id))
+        let listed = try #require(edition["x-editions"] as? [[String: Any]])
+        #expect(listed.map { $0["id"] as? String } == Route.editions.map(\.id))
+        #expect(listed.map { $0["shipped"] as? Bool } == Route.editions.map(\.shipped))
+        #expect(listed.map { $0["reason"] as? String } == Route.editions.map(\.reason))
+        let openEdition = try #require(params.first { $0["name"] as? String == "edition" }?["schema"] as? [String: Any])
+        #expect(openEdition["$ref"] as? String == "#/components/schemas/Edition")
+        #expect(openEdition["default"] as? String == XCallback.defaultEdition)
+    }
+
+    @Test("an edition the app does not ship is refused with the shipped ids named", arguments: [
+        "page=1&edition=nope", "page=1&edition=warsh-libya",
+        "route=/nope/2:255", "route=/warsh-libya/2:255", "route=%2Fwarsh-libya%2Fp1%3Fw%3D1",
+    ])
+    func editionRefused(_ q: String) throws {
+        guard case .failure(let f, _)? = XCallback.parse(try url("hifth://x-callback-url/open?" + q)) else {
+            Issue.record("expected a failure for \(q)")
+            return
+        }
+        #expect(f.code == "bad-route", Comment(rawValue: q))
+        #expect(f.message.contains("hafs-kfqc"), "the message names what the app ships: \(f.message)")
+        #expect(!f.message.hasPrefix("not a route"), "a specific reason, not the generic one: \(f.message)")
     }
 
     static let specURL = URL(fileURLWithPath: #filePath)
@@ -127,6 +153,8 @@ struct XCallbackTests {
         ("verse=2", "bad-route"),
         ("edition=Hafs&page=1", "bad-route"),
         ("page=1&edition=hafs/kfqc", "bad-route"),
+        ("page=1&edition=nope", "bad-route"),
+        ("page=1&edition=warsh-libya", "bad-route"),
         ("edition=hafs-kfqc", "missing-route"),
         ("mode=note", "missing-route"),
     ])

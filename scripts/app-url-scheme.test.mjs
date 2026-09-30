@@ -18,6 +18,43 @@ test("every path has at least one example the tests can run", () => {
   }
 });
 
+test("the page lists every edition the contract knows, and says which ones ship", () => {
+  const html = render(spec);
+  const section = html.split('<section id="editions">')[1]?.split("</section>")[0];
+  assert.ok(section, "no editions section");
+  for (const e of spec.components.schemas.Edition["x-editions"]) {
+    assert.match(section, new RegExp(`<code>${e.id}</code>`), `edition ${e.id} missing`);
+    if (!e.shipped) assert.ok(section.includes(e.reason), `${e.id} does not say why it is not shipped`);
+  }
+  // A parameter whose schema is a $ref still shows its values, not a blank cell.
+  const open = html.split('<section id="openLink">')[1].split("</section>")[0];
+  assert.match(open, /<td><code>edition<\/code>[^]*?<td>[^]*?<code>hafs-kfqc<\/code>/, "the edition row must list the ids");
+});
+
+// The link builder: a form on the page that composes a link and says what the
+// app will do with it, using the same rules the shell does. The rules are
+// core's compiled link-builder, inlined so the page stays one file.
+test("the page carries the link builder, running core's own copy of the shell's rules", () => {
+  const html = render(spec);
+  const builder = html.split('<section id="builder">')[1]?.split("</section>")[0];
+  assert.ok(builder, "no builder section");
+  for (const id of ["place", "page", "verse", "words", "surah", "edition", "mode", "open", "view", "x-success", "x-error"]) {
+    assert.match(builder, new RegExp(`name="${id}"`), `no field named ${id}`);
+  }
+  for (const id of ["plain", "request", "site", "outcome"]) {
+    assert.match(builder, new RegExp(`id="out-${id}"`), `no output for ${id}`);
+  }
+  assert.match(builder, /id="open-in-app"/, "no open-in-app link");
+  const rules = readFileSync(new URL("../packages/core/dist/link-builder.js", import.meta.url), "utf8");
+  assert.ok(html.includes(rules.trim()), "the page must inline packages/core/dist/link-builder.js as it is (make core)");
+  // The lists and the site come from the spec, not from the renderer.
+  assert.ok(html.includes(JSON.stringify(spec["x-public-site"])), "the public site address comes from the spec");
+  for (const e of spec.components.schemas.Edition["x-editions"]) {
+    assert.match(builder, new RegExp(`<option value="${e.id}"`), `edition ${e.id} not offered`);
+  }
+  assert.doesNotMatch(html, /<script[^>]*src=/, "no outside script: the page is self-contained");
+});
+
 test("the page carries no held text and no Arabic", () => {
   assert.doesNotMatch(render(spec), /[؀-ۿ]/);
 });
