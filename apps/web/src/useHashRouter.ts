@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { parseHash, serializeState, type AppState } from "@hifth/core";
+import { parseHash, serializeState, shippedEdition, type AppState } from "@hifth/core";
 import { postReady, postRoute } from "./native-bridge";
 
 /**
@@ -47,7 +47,10 @@ export function useHashRouter(
     const apply = () => {
       const hash = window.location.hash;
       if (hash === showing.current) return;
-      const parsed = parseHash(hash);
+      const raw = parseHash(hash);
+      // A link naming a mus'haf the site does not have lands on the one it
+      // ships, and the address is rewritten to say so once the view is there.
+      const parsed = raw && { ...raw, edition: shippedEdition(raw.edition) };
       if (parsed) onRestoreRef.current(parsed);
       return parsed;
     };

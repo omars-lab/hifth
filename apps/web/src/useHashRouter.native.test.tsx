@@ -118,6 +118,25 @@ describe("useHashRouter in the native shell", () => {
       expect(window.location.hash).toBe("#/hafs-kfqc/p1");
     });
 
+    // Design page app-links-editions-and-builder.md ②: the app refuses a link
+    // naming a mus'haf it does not ship, but the website has no caller to
+    // answer, so it shows the mus'haf it ships and puts that in the address.
+    it("a link naming a mus'haf the site does not have lands on the one it ships, address rewritten", () => {
+      const sent = shell();
+      window.history.replaceState(null, "", "#/warsh-libya/2:255");
+      const restored: AppState[] = [];
+      const { rerender } = renderHook(
+        ({ state, ready }: { state: AppState | null; ready: boolean }) =>
+          useHashRouter(state, (s) => restored.push(s), ready),
+        { initialProps: { state: null as AppState | null, ready: false } },
+      );
+      rerender({ state: pageOne, ready: true });
+      expect(restored).toEqual([verse]);
+      rerender({ state: verse, ready: true });
+      expect(sent).toEqual([{ type: "ready" }, { type: "route", hash: "#/hafs-kfqc/2:255" }]);
+      expect(window.location.hash).toBe("#/hafs-kfqc/2:255");
+    });
+
     it("the skip is spent on the cold open only: a later link is reflected as it lands", () => {
       const sent = shell();
       window.history.replaceState(null, "", "#/hafs-kfqc/2:255");

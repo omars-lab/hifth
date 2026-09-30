@@ -102,6 +102,22 @@ export function editionMeta(id: EditionId): EditionMeta | null {
 }
 
 /**
+ * The mus'haf the site will show for a name a link gives: the name itself
+ * when the site ships that mus'haf, otherwise the one it does ship. A link
+ * can name a mus'haf the picker lists but cannot show, or a name nobody
+ * knows; the Mac and iPad app refuses those, because a caller is waiting for
+ * an answer, but the website has no one to answer and a hafiz who followed
+ * the link wants the verse. Showing it under an honest address is the least
+ * surprising thing the site can do (app-links-editions-and-builder.md ②).
+ */
+export function shippedEdition(id: EditionId): EditionId {
+  if (editionMeta(id)?.status === "vendored") return id;
+  const shipped = EDITIONS.find((e) => e.status === "vendored");
+  if (!shipped) throw new Error("no edition ships");
+  return shipped.id;
+}
+
+/**
  * One direction of a concordance: `from` → `to`.
  *
  * `deltas` is keyed by the source ayah's bare `surah:ayah` ref; a value is the

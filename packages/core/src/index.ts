@@ -386,6 +386,7 @@ export {
   EDITIONS,
   Concordance,
   editionMeta,
+  shippedEdition,
   type EditionMeta,
   type EditionStatus,
   type ConcordanceTable,

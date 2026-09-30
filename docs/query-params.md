@@ -61,6 +61,11 @@ path is not a link, and `parseHash` returns `null` for it (which the app reads a
 The compact range tail `2:47-48` is still parsed — older links use it — and
 normalises to the literal form on the way out. Ranges never cross surahs.
 
+The mus'haf segment names a print the site ships. A name it does not have — one the picker
+lists but cannot show yet, or one nobody knows — opens the mus'haf it does ship, and the
+address is rewritten to say so. The Mac and iPad app refuses such a link instead, because a
+caller is waiting for an answer it can act on; the site has nobody to answer.
+
 ## The parameters
 
 | Key | Shape | What it does | If the value is wrong | Failure mode |

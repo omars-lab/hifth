@@ -3,6 +3,7 @@ import {
   Concordance,
   EDITIONS,
   editionMeta,
+  shippedEdition,
   type ConcordanceTable,
 } from "./concordance.js";
 
@@ -53,6 +54,16 @@ describe("edition registry", () => {
   it("looks an edition up by id", () => {
     expect(editionMeta("hafs-kfqc")?.status).toBe("vendored");
     expect(editionMeta("nope")).toBeNull();
+  });
+
+  // A link may name a mus'haf the site does not have: one the picker lists
+  // but cannot show, or a name nobody here knows. The site shows the mus'haf
+  // it ships and says so in the address, rather than leaving the address to
+  // claim a print that is not on screen.
+  it("a mus'haf the site ships is kept; any other name falls back to the one it ships", () => {
+    expect(shippedEdition("hafs-kfqc")).toBe("hafs-kfqc");
+    expect(shippedEdition("warsh-libya")).toBe("hafs-kfqc");
+    expect(shippedEdition("nope")).toBe("hafs-kfqc");
   });
 });
 
