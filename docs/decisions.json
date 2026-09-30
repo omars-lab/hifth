@@ -576,7 +576,8 @@
         "highlight-shape",
         "adjacency-span-source",
         "similar-ayah-enrichment",
-        "diff-mark-tint"
+        "diff-mark-tint",
+        "highlight-options"
       ]
     },
     {
@@ -640,7 +641,8 @@
       "related": [
         "mark-granularity",
         "loop-6a",
-        "highlight-strength"
+        "highlight-strength",
+        "highlight-options"
       ]
     },
     {
@@ -1094,7 +1096,8 @@
       "date": "2026-09-02",
       "related": [
         "highlight-strength",
-        "comparison-crop"
+        "comparison-crop",
+        "highlight-options"
       ]
     },
     {
@@ -1124,7 +1127,8 @@
       "date": "2026-09-02",
       "related": [
         "highlight-shape",
-        "tajweed-colours"
+        "tajweed-colours",
+        "highlight-options"
       ]
     },
     {
@@ -1641,6 +1645,67 @@
         "ayah-drawer",
         "phone-toolbar",
         "graduation-losers"
+      ]
+    },
+    {
+      "id": "highlight-options",
+      "question": "How should the app mark the verse you are on, and how should a swept passage look different from it?",
+      "status": "open",
+      "options": [
+        {
+          "id": "A",
+          "label": "The amber marker stroke along each line, as today"
+        },
+        {
+          "id": "B",
+          "label": "One see-through wash over the verse's own shape"
+        },
+        {
+          "id": "C",
+          "label": "A rule under each line of the verse"
+        },
+        {
+          "id": "D",
+          "label": "A dashed rule under each line"
+        },
+        {
+          "id": "E",
+          "label": "An outline around the verse"
+        },
+        {
+          "id": "F",
+          "label": "A bar in the margin beside the verse's lines"
+        },
+        {
+          "id": "G",
+          "label": "Only the verse number, tinted"
+        },
+        {
+          "id": "H",
+          "label": "Each word its own pill"
+        },
+        {
+          "id": "I",
+          "label": "A hand-drawn swipe"
+        },
+        {
+          "id": "J",
+          "label": "The swipe in verdigris or grey instead of amber"
+        },
+        {
+          "id": "K",
+          "label": "The mark laid over the tajweed colours"
+        }
+      ],
+      "doc": "docs/design/highlight-options.md",
+      "page": "docs/design/highlight-options.html",
+      "builtBy": "scripts/build-highlight-options.mjs",
+      "artifact": "https://blog.bytesofpurpose.com/hifth/docs/design/highlight-options.html",
+      "related": [
+        "highlight-shape",
+        "highlight-strength",
+        "comparison-crop",
+        "tajweed-colours"
       ]
     }
   ]
