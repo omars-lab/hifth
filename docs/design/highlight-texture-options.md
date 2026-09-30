@@ -175,20 +175,20 @@ because the verse alone is where the two researchers' rules part company.
 
 ### What shape does the pen leave?
 
-| | what it is | for a hafiz |
-| --- | --- | --- |
-| ![](highlight-texture-options/S1.png) **S1 Today's swipe** | The app's pen: a round-ended band per line, straight edges. | Nothing changes. |
-| ![](highlight-texture-options/S2.png) **S2 A rough band, the same hand for the same verse** | A filled shape whose edges drift a little, with a slight sag and tilt, a slanted start where the tip lands and a soft lift at the far end; seeded from the verse and its line. Both researchers built this independently and both recommend it. | The mark reads as drawn by a hand — and it is the same hand every visit, so it can be learned like a landmark. |
+|                                                                                             | what it is                                                                                                                                                                                                                                      | for a hafiz                                                                                                    |         |
+| ------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- | ------- |
+| ![](highlight-texture-options/S1.png) **S1 Today's swipe**                                  | The app's pen: a round-ended band per line, straight edges.                                                                                                                                                                                     | Nothing changes.                                                                                               |         |
+| ![](highlight-texture-options/S2.png) **S2 A rough band, the same hand for the same verse** | A filled shape whose edges drift a little, with a slight sag and tilt, a slanted start where the tip lands and a soft lift at the far end; seeded from the verse and its line. Both researchers built this independently and both recommend it. | The mark reads as drawn by a hand — and it is the same hand every visit, so it can be learned like a landmark. | ^1c4lpn |
 
 ![The rough band at three times the pixels, over the rows where the passage's first verse ends and the verse begins](highlight-texture-options/zoom-S2.png)
 
 ### What does the ink do inside the shape?
 
-| | what it is | for a hafiz |
-| --- | --- | --- |
-| ![](highlight-texture-options/T1.png) **T1 Flat** | One even amber, as today. | The cleanest read of the letters. |
-| ![](highlight-texture-options/T2.png) **T2 Two passes of a 60% pen, laid a little apart** | The verse is always drawn twice, one pass a little high and one a little low, each with its own hand; the edges where they do not overlap are the texture. No filter. | Looks like a hand that went over the line twice. Letters 7.5:1 where the passes overlap, 10.4:1 where only one lies. |
-| ![](highlight-texture-options/T3.png) **T3 Streaks along the line, by a filter** | A fixed noise pattern stretched along the line thins the ink in long streaks, never below 70% of a pass. | The most felt-tip of the three on a desk screen. A browser filter, which both researchers' sources say is slow on a phone; nobody has seen it drawn on a real iPhone. |
+|                                                                                           | what it is                                                                                                                                                            | for a hafiz                                                                                                                                                           |         |
+| ----------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------- |
+| ![](highlight-texture-options/T1.png) **T1 Flat**                                         | One even amber, as today.                                                                                                                                             | The cleanest read of the letters.                                                                                                                                     |         |
+| ![](highlight-texture-options/T2.png) **T2 Two passes of a 60% pen, laid a little apart** | The verse is always drawn twice, one pass a little high and one a little low, each with its own hand; the edges where they do not overlap are the texture. No filter. | Looks like a hand that went over the line twice. Letters 7.5:1 where the passes overlap, 10.4:1 where only one lies.                                                  |         |
+| ![](highlight-texture-options/T3.png) **T3 Streaks along the line, by a filter**          | A fixed noise pattern stretched along the line thins the ink in long streaks, never below 70% of a pass.                                                              | The most felt-tip of the three on a desk screen. A browser filter, which both researchers' sources say is slow on a phone; nobody has seen it drawn on a real iPhone. | ^562lz9 |
 
 ![T2 at three times the pixels: two rough passes a little apart, darker where they overlap](highlight-texture-options/zoom-T2.png)
 
@@ -215,11 +215,11 @@ the verse begins:
 
 ### What does it feel like when the mark goes down? (live on the page)
 
-| | what it is | what a hand finds |
-| --- | --- | --- |
-| ![](highlight-texture-options/L1.png) **L1 The wipe** | Today's swipe and the rough band, wiped in at the same speed; a switch between "the same hand" and "a new hand each time". | With a new hand each press the mark shimmers between visits — the thing both researchers said a reader must never see, felt rather than argued. |
-| ![](highlight-texture-options/L2.png) **L2 Another pass, counted against uncounted** | Each press lays one more pass; the counted side stops at the verse's depth of two, the uncounted side keeps going; the pen switches between 50% and 60%. | Where the letters stop reading easily: at four passes of 60% they are at 4.5:1, the floor itself. |
-| ![](highlight-texture-options/L3.png) **L3 Another colour, blended or cut out** | The two scenes of O4 and O5 swapped in place by one button. | The blended crossing turns brown-green; the cut-out keeps both colours honest. |
+|                                                                                      | what it is                                                                                                                                               | what a hand finds                                                                                                                               |         |
+| ------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- | ------- |
+| ![](highlight-texture-options/L1.png) **L1 The wipe**                                | Today's swipe and the rough band, wiped in at the same speed; a switch between "the same hand" and "a new hand each time".                               | With a new hand each press the mark shimmers between visits — the thing both researchers said a reader must never see, felt rather than argued. |         |
+| ![](highlight-texture-options/L2.png) **L2 Another pass, counted against uncounted** | Each press lays one more pass; the counted side stops at the verse's depth of two, the uncounted side keeps going; the pen switches between 50% and 60%. | Where the letters stop reading easily: at four passes of 60% they are at 4.5:1, the floor itself.                                               |         |
+| ![](highlight-texture-options/L3.png) **L3 Another colour, blended or cut out**      | The two scenes of O4 and O5 swapped in place by one button.                                                                                              | The blended crossing turns brown-green; the cut-out keeps both colours honest.                                                                  | ^0vhzys |
 
 The same cards in WebKit (Safari's engine), for the combinations that one engine or the other
 has got wrong: `webkit-S2.png`, `webkit-T3.png`, `webkit-O1.png`, `webkit-O4.png`,
@@ -322,6 +322,28 @@ ends and where 2:255 ends. It shows at reading size on a phone. The fix is to pa
 one band per line, joining the verses that share a line before the pen goes down, whichever
 shape and overlap rule is chosen; the test that would catch it coming back reads the passage's
 bands and expects one per line where two verses share one.
+
+### ② Which two colours should a passage and a run of words take? · **open**
+
+The owner chose a colour per meaning, blended where the marks cross (2026-09-30). The green and
+blue in the app are stand-ins from this page, and where either crosses the amber verse the
+letters fall to about 4.0 to 1, under the 4.5 to 1 floor. What would answer it: a few real
+pairs drawn on page 42 at phone size, each measured where it crosses the amber, and the owner
+picking one from the picture.
+
+### ③ Does the streak filter slow a page turn on a real iPhone? · **blocked**
+
+The streaks are drawn by one filter shared by every mark on the page. A laptop does not notice
+it; a phone might, on the frame a page turns. What would answer it: turn twenty pages with a
+verse and a passage marked on a real iPhone and watch for a stutter. If it stutters, the flat
+ink the app already falls back to is the fix.
+
+### ④ Does Safari draw the mark going down, or show it whole? · **blocked**
+
+The mark is revealed from right to left as it goes down, by clipping the whole group. Chromium
+and Firefox draw it; whether Safari clips a group that way was not checked on a device. If it
+does not, the mark simply appears whole, which is what a reader who asked for less motion
+already sees. What would answer it: select a verse in Safari on an iPhone and watch.
 
 ---
 

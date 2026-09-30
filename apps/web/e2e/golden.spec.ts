@@ -165,14 +165,14 @@ const MARQUEES = [{ page: 7, from: "#verse-46", to: "#verse-47" }] as const;
 /**
  * Word runs to photograph (word-C, PLAN 13).
  *
- * This is the one paint in the app that is *the same ink laid down twice*. A
- * word band is drawn with the `"sel"` style, in its own `word` group, on top of
+ * This is the one paint in the app where two inks cross. A word band is drawn
+ * with the `"run"` style, in its own colour and its own `word` group, on top of
  * an ayah wash that is still lit underneath — and `mix-blend-mode: multiply` is
- * what turns that overlap into a darker, readable emphasis instead of a second
- * opaque slab hiding the first. Every DOM assertion in `word.spec.ts` passes
- * identically in the world where the blend is wrong: same `line` elements, same
- * `hl hl-sel hl-ink` classes, same `--hl-len`. Only a picture can tell whether
- * the reader can still see which words they picked.
+ * what mixes the two colours where they cross instead of laying a second
+ * opaque slab over the first. Every DOM assertion in `word.spec.ts` passes
+ * identically in the world where the blend is wrong: same band shapes, same
+ * `hl hl-run hl-ink` classes, same recorded ends. Only a picture can tell
+ * whether the reader can still see which words they picked.
  *
  * It is also the only shot here whose frame is a *gesture's* result rather than
  * a link's, so unlike the marquee it is taken after the release: a settled

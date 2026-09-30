@@ -1714,7 +1714,7 @@
     {
       "id": "highlight-texture",
       "question": "Could the mark look like a real highlighter: rough at the edges, and darker where two marks stack?",
-      "status": "open",
+      "status": "decided",
       "options": [
         {
           "id": "A",
@@ -1743,8 +1743,15 @@
         {
           "id": "G",
           "label": "A mark of another colour cuts itself out"
+        },
+        {
+          "id": "BEF",
+          "label": "The rough band with nearly upright ends, streaked by a filter, and a passage and a word run each in their own colour, blended with the verse where they cross"
         }
       ],
+      "decided": "BEF",
+      "by": "omar",
+      "date": "2026-09-30",
       "doc": "docs/decisions/highlight-texture.md",
       "page": "docs/design/highlight-texture-options.html",
       "builtBy": "scripts/build-highlight-texture-options.mjs",

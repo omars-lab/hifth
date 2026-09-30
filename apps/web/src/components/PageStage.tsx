@@ -2546,7 +2546,7 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
     run.cursor = at;
     const from = Math.min(run.anchor, at);
     const to = Math.max(run.anchor, at);
-    cur.hl.highlightRects(idx.bandsFor(run.key, from, to), "sel", "word");
+    cur.hl.highlightRects(idx.bandsFor(run.key, from, to), "run", "word");
     if (!commit) return;
     const parsed = parseAyahKey(run.key);
     if (!parsed) return;

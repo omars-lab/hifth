@@ -20,13 +20,17 @@
  * `drawMarquee` paint the range and the live rect — both additive, both in
  * their own groups, both leaving source geometry untouched like everything else.
  *
- * The amber marks are marker swipes rather than filled shapes: `paint` derives
- * them from the polygon via ink.ts, and falls back to a filled clone on any
- * geometry ink.ts does not recognise.
+ * The marks are hand-drawn bands, one per line an ayah crosses: `paint` finds
+ * the lines via ink.ts, rough.ts draws each band's outline from a seed so the
+ * same verse always gets the same hand, and one page-wide filter streaks the
+ * ink along the line. Each meaning has its own ink — the verse, a passage, a
+ * word run — and they blend where they cross. Any geometry ink.ts does not
+ * recognise falls back to a filled clone.
  */
 
 import { TAP_SLOP_PX } from "./gestures.js";
 import { joinSwipesByLine, pageLineHeight, swipesFromPath, swipesFromRects, type Swipe } from "./ink.js";
+import { bandSeed, roughBandPath } from "./rough.js";
 import type { Resolver } from "./resolver.js";
 import {
   TAJWEED_CLASS_PREFIX,
@@ -41,7 +45,14 @@ const SVG_NS = "http://www.w3.org/2000/svg";
 const OVERLAY_ID = "hifth-overlay";
 
 export type GroupId = "selection" | "phrase" | "breadcrumb" | "preview" | "word";
-export type StyleToken = "sel" | "crumb" | "hlt" | "preview" | "marquee";
+/**
+ * What a mark means, which is what decides its colour (highlight.css): `sel`
+ * the verse you are on, `hlt` a passage you swept, `run` a run of words you
+ * held, `crumb` where you came from. Three inks since the highlight-texture
+ * decision (2026-09-30): a passage and a word run each take their own colour,
+ * blended with the amber verse where they cross.
+ */
+export type StyleToken = "sel" | "crumb" | "hlt" | "run" | "preview" | "marquee";
 
 /**
  * The styles that are ink, and so get marker swipes instead of a filled clone
@@ -49,7 +60,25 @@ export type StyleToken = "sel" | "crumb" | "hlt" | "preview" | "marquee";
  * "you came from here", and drawing it as ink would make provenance and
  * selection look like the same kind of thing.
  */
-const INKED: ReadonlySet<StyleToken> = new Set<StyleToken>(["sel", "hlt"]);
+const INKED: ReadonlySet<StyleToken> = new Set<StyleToken>(["sel", "hlt", "run"]);
+
+/**
+ * The streaks along the line (highlight-texture, option E): a fixed noise
+ * pattern, stretched along the line, thins the ink in long streaks. One filter
+ * per page's overlay, the same on every page.
+ *
+ * The noise is in page units (the filter's default for its primitives), so a
+ * streak belongs to the page, not to the mark: a verse is streaked the same
+ * way on every visit. The last step floors the ink at 70% of a pass — the
+ * table is max(0.7, a) — so a streak thins the mark and never breaks it.
+ *
+ * It is referenced by an attribute on each band, never from the stylesheet: a
+ * `url(#…)` in a built CSS file resolves against the CSS file's own address,
+ * and finds nothing there.
+ */
+export const FIBRE_ID = "hifth-fibre";
+export const FIBRE_FLOOR = 0.7;
+const FIBRE_TABLE = Array.from({ length: 11 }, (_, i) => Math.max(FIBRE_FLOOR, i / 10).toFixed(1)).join(" ");
 
 /**
  * A marquee that resolved to ayahs. `keys` is the contiguous run in page reading
@@ -389,37 +418,43 @@ export class Highlighter {
     return el;
   }
 
-  /** Lay down one `<line>` per marker swipe, whatever produced the swipes. */
+  /**
+   * Lay down one rough band per marker swipe, whatever produced the swipes.
+   *
+   * Each band is a group holding one filled shape. The group carries what the
+   * mark means (its class, so the stylesheet can colour it), the multiply blend
+   * and the wipe; the shape inside carries the outline and the streaks. Blend
+   * and wipe sit on the outer element and the filter on the inner one because
+   * that is the arrangement both browser engines draw right: a blend nested
+   * inside a clipped or filtered element blends with nothing and paints solid
+   * over the letters (found drawing the options page for this decision).
+   *
+   * The band's geometry is kept on the group as data — right end, left end,
+   * centreline, thickness — so what the pen was asked to draw can be read back
+   * without parsing a curve.
+   */
   private drawSwipes(swipes: readonly Swipe[], style: StyleToken, group: GroupId): SVGElement[] {
-    // One element per swipe rather than one path for the whole ayah: line
-    // heights differ between lines, and stroke-width is per element, so a
-    // single path would have to pick one thickness and be wrong on the rest.
+    // One element per swipe rather than one shape for the whole ayah: line
+    // heights differ between lines, and each band is as thick as its own line.
     // One node per line the ayah occupies — usually a handful, more for the
     // long ayahs the print fuses into one tall box and the pen splits back.
     return swipes.map((s, i) => {
-      const line = document.createElementNS(SVG_NS, "line");
-      // Drawn from the RIGHT end to the left — x1 takes the larger x. A line
-      // renders identically either way, so this is not a geometry choice; it
-      // is the only thing that decides which way the stroke-dashoffset wipe
-      // in highlight.css travels, and a pen crossing Arabic starts at the
-      // right. Reversing it here rather than in CSS is deliberate: the
-      // direction is a fact about the script, and `swipesFromRects` normalises
-      // x1 ≤ x2 for geometry's sake, so something has to put it back.
-      line.setAttribute("x1", String(s.x2));
-      line.setAttribute("x2", String(s.x1));
-      line.setAttribute("y1", String(s.y));
-      line.setAttribute("y2", String(s.y));
-      line.setAttribute("stroke-width", String(s.width));
-      // The two numbers the wipe needs and CSS cannot compute: how far this
-      // stroke runs (a dash pattern has to be told, `100%` on a <line> is the
-      // viewport's width, not the line's), and which line of the ayah this is
-      // (so line 2 starts after line 1 — a marker crosses one line before the
-      // next, it does not paint a paragraph at once). Custom properties, not
-      // attributes, so nothing here picks a duration; the stylesheet owns
-      // that and reduced-motion can zero it.
-      line.style.setProperty("--hl-len", String(Math.abs(s.x2 - s.x1)));
-      line.style.setProperty("--hl-i", String(i));
-      return this.tag(line, style, group, true);
+      const g = document.createElementNS(SVG_NS, "g");
+      g.setAttribute("data-x1", String(Math.max(s.x1, s.x2)));
+      g.setAttribute("data-x2", String(Math.min(s.x1, s.x2)));
+      g.setAttribute("data-y", String(s.y));
+      g.setAttribute("data-width", String(s.width));
+      // Which line of the ayah this is, so line 2 starts after line 1 — a
+      // marker crosses one line before the next, it does not paint a paragraph
+      // at once. A custom property, not a duration: the stylesheet owns timing
+      // and reduced-motion can zero it.
+      g.style.setProperty("--hl-i", String(i));
+      const band = document.createElementNS(SVG_NS, "path");
+      band.setAttribute("class", "hl-band");
+      band.setAttribute("d", roughBandPath(s, bandSeed(this.page, s)));
+      band.setAttribute("filter", `url(#${FIBRE_ID})`);
+      g.appendChild(band);
+      return this.tag(g, style, group, true);
     });
   }
 
@@ -720,7 +755,46 @@ function ensureOverlay(svg: SVGSVGElement): SVGGElement {
     overlay.setAttribute("id", OVERLAY_ID);
     svg.appendChild(overlay);
   }
+  if (!overlay.querySelector(`#${FIBRE_ID}`)) overlay.appendChild(fibreFilter());
   return overlay;
+}
+
+/**
+ * The streak filter ({@link FIBRE_ID}), in a `<defs>` of its own. Noise
+ * stretched along the line (a low frequency across it, a high one down it),
+ * turned into how much ink stays, floored, and cut to the band's own shape.
+ * The region is the band's box and a little more, so a failure to filter can
+ * only ever draw the band itself.
+ */
+function fibreFilter(): SVGDefsElement {
+  const el = (tag: string, attrs: Record<string, string>) => {
+    const e = document.createElementNS(SVG_NS, tag);
+    for (const [k, v] of Object.entries(attrs)) e.setAttribute(k, v);
+    return e;
+  };
+  const defs = el("defs", {}) as SVGDefsElement;
+  const filter = el("filter", {
+    id: FIBRE_ID,
+    x: "-5%",
+    y: "-20%",
+    width: "110%",
+    height: "140%",
+    "color-interpolation-filters": "sRGB",
+  });
+  filter.append(
+    el("feTurbulence", { type: "fractalNoise", baseFrequency: "0.018 0.42", numOctaves: "2", seed: "17", result: "noise" }),
+    el("feColorMatrix", {
+      in: "noise",
+      type: "matrix",
+      values: "0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  1.4 0 0 0 0.2",
+      result: "streaks",
+    }),
+  );
+  const floor = el("feComponentTransfer", { in: "streaks", result: "kept" });
+  floor.append(el("feFuncA", { type: "table", tableValues: FIBRE_TABLE }));
+  filter.append(floor, el("feComposite", { in: "SourceGraphic", in2: "kept", operator: "in" }));
+  defs.append(filter);
+  return defs;
 }
 
 /** CSS.escape when available (browser), else a minimal fallback for ids. */
