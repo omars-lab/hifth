@@ -2364,6 +2364,17 @@
       "owner": "agent",
       "note": "A hold-and-drag inside a verse took the run's first word from wherever the finger was when the page's word boxes arrived, not from where the hold began, so the same drag on a cold page selected a different run depending on the network. The stroke now keeps the hold's own point and anchors on it.",
       "closedBy": "apps/web/e2e/word.spec.ts"
+    },
+    {
+      "id": "passage-ink-notch-at-verse-number",
+      "source": {
+        "file": "docs/design/highlight-texture-options.md",
+        "item": "①"
+      },
+      "status": "open",
+      "severity": "defect",
+      "owner": "agent",
+      "note": "A swept passage is painted one verse at a time, one round-ended band per verse per line, so where a verse ends and the next begins on the same line the two ends leave a notch of paper around the verse number. Confirmed in the real built app on a phone (page 42, 2:254 to 2:256; screenshots on the page). Fix: join the verses that share a line into one band before the pen goes down, whichever shape and overlap rule wins."
     }
   ]
 }
