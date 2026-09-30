@@ -2182,18 +2182,18 @@
     },
     {
       "id": "native-shell",
-      "what": "The Mac and iPad app: a thin native window around the web build, served from inside the app bundle at a private address, opened at a route from a hifth:// link or a launch variable, answering other apps' x-callback-url requests (open a page, a verse, a surah's context, in a chosen mode; say what is on screen), with the share sheet and outside links handed to the operating system. Nothing in it reaches the public site. What building it taught us is docs/design/native-shell.md; whether it may go to outside testers is the native-testflight-licence decision.",
+      "what": "The Mac and iPad app: a thin native window around the web build, served from inside the app bundle at a private address, opened at a route from a hifth:// link or a launch variable, answering other apps' x-callback-url requests (open a page, a verse, a surah's context, in a chosen mode; say what is on screen), with the share sheet and outside links handed to the operating system. A link may name only a mus'haf the app ships; the others it knows are refused by name. The contract page carries a live link builder run by a JavaScript copy of the shell's rules. Nothing in it reaches the public site. What building it taught us is docs/design/native-shell.md; which mus'haf names a link may use and where a person builds one is docs/design/app-links-editions-and-builder.md; whether it may go to outside testers is the native-testflight-licence decision.",
       "layer": "L4 shell",
       "entry": [
         {
           "file": "native/Hifth/Route/Route.swift",
           "symbol": "Route",
-          "note": "The only route grammar the shell knows is the web app's own: /<edition>/<target>[?query], read verbatim from a hifth:// link, the HIFTH_ROUTE variable or a --route= argument. Anything else is dropped, so a bad link cannot open a page the web app would not."
+          "note": "The only route grammar the shell knows is the web app's own: /<edition>/<target>[?query], read verbatim from a hifth:// link, the HIFTH_ROUTE variable or a --route= argument. Anything else is dropped, so a bad link cannot open a page the web app would not. Also holds the app's edition list with which ones ship: a plain link naming any other is dropped like a bad link, and editionProblem gives the x-callback door its reason (unknown, or known but not shipped yet, and what is)."
         },
         {
           "file": "native/Hifth/Route/XCallback.swift",
           "symbol": "XCallback",
-          "note": "The x-callback-url door: hifth://x-callback-url/open (page=, verse=, surah=, words=, mode=, open=, view=, or a whole route=) and /current, each with the caller's x-success / x-error address; a misspelt mode or panel is refused with a reason. The contract, with the examples the tests run, is docs/design/app-url-scheme.openapi.json, rendered by scripts/build-app-url-scheme.mjs."
+          "note": "The x-callback-url door: hifth://x-callback-url/open (page=, verse=, surah=, words=, mode=, open=, view=, or a whole route=) and /current, each with the caller's x-success / x-error address; a misspelt mode or panel, or a mus'haf the app does not ship, is refused with a reason. The contract, with the examples the tests run, is docs/design/app-url-scheme.openapi.json, rendered by scripts/build-app-url-scheme.mjs, which also inlines core's link-builder as the page's live form."
         },
         {
           "file": "native/Hifth/Web/LocalScheme.swift",
@@ -2209,6 +2209,11 @@
           "file": "native/Hifth/Web/Bridge.swift",
           "symbol": "Bridge",
           "note": "The three words the page says to the shell — ready, route, share — and nothing else. The route is mirrored into a hidden native label so a test has something native to wait on."
+        },
+        {
+          "file": "packages/core/src/link-builder.ts",
+          "symbol": "predictLink",
+          "note": "The shell's link rules copied into JavaScript, so the contract page can say what the app will do with a link before anyone sends it, and compose the plain link, the app request and the site link from a form. Imports nothing, so the renderer inlines its compiled form and the page stays one file. Held to the shell by the contract's examples: the Swift tests run each through the real parser, link-builder.test.ts runs each through this, and a difference names the link."
         },
         {
           "file": "apps/web/src/native-bridge.ts",
