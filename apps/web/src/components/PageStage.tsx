@@ -231,6 +231,14 @@ interface PageStageProps {
    */
   coverTop?: number | null;
   /**
+   * Where the hop chips floating over the stage's top corner end, in window px,
+   * or null when there are none. Read by the lift above a phone note only: the
+   * verse it moves up is stopped with its first line beneath the chips rather
+   * than under them. A pan or a hop may still carry the page under the chips;
+   * they are chrome over the page, not a wall.
+   */
+  railBottom?: number | null;
+  /**
    * How a turn looks — the reader's choice in settings (page-turn-curl, decided
    * 2026-09-26): the flat seam, the skeleton curl or the shadow lift. None of
    * them moves a drawn word; see `drawnStyle` for which situations each draws.
@@ -332,6 +340,9 @@ function bareAyah(key: string): string {
  * line, the first line first (`M0 220.7h345v35.8H0Zm130.7 35.8H345…`), so the
  * first line is the path up to its first close, measured on its own.
  */
+/** Air between the lowest hop chip and the first line a lift puts beneath it, in CSS px. */
+const RAIL_CLEARANCE = 8;
+
 function firstLineOf(svg: SVGSVGElement, ids: readonly string[]) {
   const el = ids.length ? svg.querySelector<SVGPathElement>(`[id="${ids[0]}"]`) : null;
   const d = el?.getAttribute("d") ?? "";
@@ -670,6 +681,7 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
     overlay,
     foldTarget = null,
     coverTop = null,
+    railBottom = null,
     turnStyle = "seam",
     bound = false,
     tool = "select",
@@ -832,6 +844,8 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
   foldTargetRef.current = foldTarget;
   const coverTopRef = useRef(coverTop);
   coverTopRef.current = coverTop;
+  const railBottomRef = useRef(railBottom);
+  railBottomRef.current = railBottom;
   /*
    * The step an edge grab latched, held between the grab going down and coming
    * up (see the edge verbs on the handle): begin latches which way the grabbed
@@ -1470,12 +1484,22 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
       if (bbox) {
         const ctx = { ...fit, viewBoxWidth: viewBoxWidthOf(cur.svg) };
         const shown = fit.stageHeight - (fit.coverBottom ?? 0);
+        // The band the hop chips float in, from the stage's top: a verse moved
+        // up to the top of the screen stops beneath it, or its first line is
+        // shown with the chips sitting on it (native-shell ⑩).
+        const layerTop = layerRef.current?.getBoundingClientRect().top ?? 0;
+        const head =
+          railBottomRef.current === null ? 0 : Math.max(0, railBottomRef.current - layerTop + RAIL_CLEARANCE);
         const at = bboxToScreen(bbox, target, ctx);
-        if (at.y < 0 || at.y + at.height > shown) {
+        if (at.y < head || at.y + at.height > shown) {
           target = frameBboxToView(bbox, ctx, view.current.z, firstLineOf(cur.svg, ids ?? []));
-          // A verse taller than what shows starts at its first line.
+          // A verse taller than what shows beneath the chips starts at its
+          // first line, just under them; one that fits is kept out from under
+          // them too.
           const framed = bboxToScreen(bbox, target, ctx);
-          if (framed.height > shown) target = clampView({ ...target, y: target.y - framed.y }, fit);
+          if (framed.height > shown - head || framed.y < head) {
+            target = clampView({ ...target, y: target.y - framed.y + head }, fit);
+          }
         }
       }
       void tweenTo(target);

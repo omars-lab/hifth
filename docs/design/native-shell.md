@@ -233,7 +233,7 @@ own phone layout rather than the shell:
 An `iphone` row now sits in the shell goldens (`GOLDEN_IPHONE_ROUTES`, the verse route on an
 iPhone 17), so the phone look is checked every time the iPad's is.
 
-### ⑩ On a phone, the hop chips cover the first line of the open verse · **open**
+### ⑩ On a phone, the hop chips cover the first line of the open verse · **fixed**
 
 Found by ③. When a verse with hops is open on a phone, the two floating chips (the loop and
 the later-in-the-mus'haf counts) sit in the top corner of the stage, and the verse's first
@@ -247,6 +247,18 @@ lift the verse only as far as the band beneath them; or move the chips into the 
 header row, beside the close button, so nothing floats over the page at all. Whichever wins
 ships with a phone test that opens a verse with hops and checks the chips and the first
 highlighted word do not overlap.
+
+**What was done (2026-09-29):** measured before choosing. On a phone with Āyat al-Kursī open,
+the chips sat on the last words of the verse *before* it, and the open verse's second line ran
+up to the chips' bottom edge — the highlighted verse touched the chips rather than lay under
+them, but the eye reads it as covered. The first placement was built: the chips now report
+where they end, and the lift above the note stops the verse's first line a little beneath
+them instead of at the very top of the screen. The whole verse still fits above the note, and
+the chips sit over the earlier verse's lines, over nothing a reader is holding. The second
+placement (chips in the note's own header) was not built: it would move the chips off the page
+on every phone, note or no note, which is a wider change than the defect asked for. The test
+opens the verse on a phone, waits for the page to stop moving, and checks that no highlighted
+line, at its drawn thickness, meets the chips, and that the first line is still above the note.
 
 ### ④ The Mac has no menu items for turning the page · **fixed**
 

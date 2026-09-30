@@ -48,6 +48,44 @@ async function sideOf(page: Page, target: Locator): Promise<"left" | "right"> {
   return box.x + box.width / 2 < open.x + open.width / 2 ? "left" : "right";
 }
 
+/** Wait until a thing on the page stops moving: two consecutive identical boxes. */
+async function settle(target: Locator): Promise<void> {
+  let last = "";
+  await expect
+    .poll(
+      async () => {
+        const now = JSON.stringify(await target.boundingBox());
+        const stable = now === last;
+        last = now;
+        return stable;
+      },
+      { intervals: [100, 100, 100, 150, 200, 300], timeout: 10_000 },
+    )
+    .toBe(true);
+}
+
+type Box = { x: number; y: number; width: number; height: number };
+
+/**
+ * The boxes of a highlighted verse's lines, in window px, topmost first. The
+ * wash is one stroke per line of the verse, and a stroke's own box has no
+ * height, so each is widened by its drawn thickness.
+ */
+async function litLineBoxes(page: Page): Promise<Box[]> {
+  return page.evaluate(() =>
+    [...document.querySelectorAll<SVGGraphicsElement>("#hifth-overlay .hl-sel")]
+      .map((el) => {
+        const r = el.getBoundingClientRect();
+        const pad = (parseFloat(getComputedStyle(el).strokeWidth) * (el.getScreenCTM()?.a ?? 1)) / 2;
+        return { x: r.x - pad, y: r.y - pad, width: r.width + 2 * pad, height: r.height + 2 * pad };
+      })
+      .sort((a, b) => a.y - b.y),
+  );
+}
+
+const overlaps = (a: Box, b: Box): boolean =>
+  a.x < b.x + b.width && b.x < a.x + a.width && a.y < b.y + b.height && b.y < a.y + a.height;
+
 // A pointer and a window whose width crosses the spread breakpoint: the note is
 // a floating card here, not a phone bottom sheet, so it can land on a side.
 test.use({ locale: "en-US", viewport: { width: 1440, height: 900 } });
@@ -300,6 +338,29 @@ test.describe("Hifth · the pitch commentary on a phone", () => {
 
     await page.getByRole("dialog").getByRole("button", { name: "Close" }).first().click();
     await expect(note).toBeVisible();
+  });
+
+  test("the hop chips do not sit on the first line of the verse the note lifted", async ({ page }) => {
+    // The note lifts the verse into the part of the screen still showing, and
+    // used to put its first line right at the top — under the hop chips that
+    // float in the top corner. The reader was shown the verse with its opening
+    // words covered by the very buttons that lead away from it (native-shell ⑩).
+    await page.goto("/#/hafs-kfqc/2:255");
+    await expect(sheet(page)).toBeVisible({ timeout: 20_000 });
+    await sheet(page).evaluate((el) => Promise.all(el.getAnimations().map((a) => a.finished)));
+    const rail = page.getByRole("group", { name: "Links from this ayah" });
+    await expect(rail).toBeVisible();
+    // The lift is a movement, so the claim is about where it ends: wait for
+    // the verse's outline to stop moving before measuring anything against it.
+    const lit = page.locator("#hifth-overlay .hl-sel").first();
+    await settle(lit);
+    const chips = (await rail.boundingBox())!;
+    const lines = await litLineBoxes(page);
+    expect(lines.length).toBeGreaterThan(1);
+    const covered = lines.filter((line) => overlaps(line, chips));
+    expect(covered, `the chips ${JSON.stringify(chips)} sit on ${JSON.stringify(covered)}`).toEqual([]);
+    // And the lift still holds: the verse's first line is above the note.
+    expect(lines[0]!.y + lines[0]!.height).toBeLessThanOrEqual((await sheet(page).boundingBox())!.y);
   });
 
   test("a verse low on the page moves up clear of the note, every line of it", async ({ page }) => {
