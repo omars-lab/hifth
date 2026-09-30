@@ -368,7 +368,8 @@
         "juz-detents",
         "boundary-juz",
         "page-bar-numberline",
-        "phone-toolbar"
+        "phone-toolbar",
+        "share-sheet-builder"
       ],
       "decided": "A",
       "by": "omar",
@@ -1478,7 +1479,8 @@
       "date": "2026-09-19",
       "related": [
         "selection-drawer",
-        "note-way-back"
+        "note-way-back",
+        "share-sheet-builder"
       ]
     },
     {
@@ -1529,7 +1531,8 @@
         "harakah-pick",
         "selection-drawer",
         "desktop-vs-mobile",
-        "graduation-losers"
+        "graduation-losers",
+        "share-sheet-builder"
       ]
     },
     {
@@ -1611,6 +1614,34 @@
       "builtBy": "scripts/build-native-testflight-options.mjs",
       "artifact": "https://blog.bytesofpurpose.com/hifth/docs/design/native-testflight-options.html",
       "related": []
+    },
+    {
+      "id": "share-sheet-builder",
+      "question": "When you share a verse from a phone, what should the app ask, and which links should it hand you?",
+      "status": "open",
+      "options": [
+        {
+          "id": "A",
+          "label": "One tap, the website link, as before"
+        },
+        {
+          "id": "B",
+          "label": "A small tray with two links, the website's and the app's, and no questions"
+        },
+        {
+          "id": "C",
+          "label": "The same tray, with one question first: open the verse as it is, its look-alikes, or its roots"
+        }
+      ],
+      "artifact": "https://blog.bytesofpurpose.com/hifth/docs/design/share-sheet-options.html",
+      "page": "docs/design/share-sheet-options.html",
+      "builtBy": "scripts/build-share-sheet-options.mjs",
+      "doc": "docs/decisions/share-sheet-builder.md",
+      "related": [
+        "ayah-drawer",
+        "phone-toolbar",
+        "graduation-losers"
+      ]
     }
   ]
 }

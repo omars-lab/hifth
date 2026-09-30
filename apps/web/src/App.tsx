@@ -2545,7 +2545,7 @@ export function App(): JSX.Element {
           onToggle={() => setRootsOpen((o) => !o)}
           caption={t.vdRoots}
         />
-        <ShareSheet state={selectedKey ? currentState : null} hasTrail={trail.length > 0} />
+        <ShareSheet state={selectedKey ? currentState : null} hasTrail={trail.length > 0} pitch={PITCH} />
         {selectedKey && (
           <DrawerTool
             glyph="⚑"
