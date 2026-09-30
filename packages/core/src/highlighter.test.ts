@@ -2,6 +2,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { TAP_SLOP_PX } from "./gestures.js";
 import { FIBRE_FLOOR, FIBRE_ID, Highlighter, MARQUEE_MIN_SIZE, rectsIntersect } from "./highlighter.js";
+import { OVERHANG } from "./ink.js";
 import { Resolver } from "./resolver.js";
 import type { AssetManifest } from "./types.js";
 
@@ -576,6 +577,88 @@ describe("Highlighter marker swipes", () => {
       String(38 * 0.72),
       String(38.2 * 0.72),
     ]);
+  });
+
+  /**
+   * The page's words, as the print nests them: one shape inside a group that
+   * flips and scales it. jsdom lays nothing out, so the words' box and both
+   * matrices are the ones page 7 reports in a real browser. `laidOut(false)`
+   * gives the empty box a page reports while it is not on screen yet.
+   */
+  function addWords(): { laidOut(on: boolean): void } {
+    const NS = "http://www.w3.org/2000/svg";
+    const flip = document.createElementNS(NS, "g");
+    const words = document.createElementNS(NS, "g");
+    words.setAttribute("id", "content");
+    flip.appendChild(words);
+    svg.insertBefore(flip, svg.firstChild);
+    let on = true;
+    Object.assign(words, {
+      getBBox: () => (on ? { x: 45.445, y: 0, width: 245.455, height: 400 } : { x: 0, y: 0, width: 0, height: 0 }),
+      getCTM: () => ({ a: 1.476, b: 0, c: 0, d: -1.476, e: -60.898, f: 708.636 }),
+    });
+    Object.assign(svg, { getCTM: () => ({ a: 1.107, b: 0, c: 0, d: 1.107, e: 0, f: 0 }) });
+    return { laidOut: (v) => (on = v) };
+  }
+
+  /** Each mark's left and right end, in page units. */
+  const bandEnds = () =>
+    [...svg.querySelectorAll<SVGElement>("#hifth-overlay .hl-sel")].map((m) => {
+      const half = Number(m.getAttribute("data-width")) / 2;
+      return [Number(m.getAttribute("data-x2")) - half, Number(m.getAttribute("data-x1")) + half] as const;
+    });
+
+  /** The words run from about 5.6 to 332.9; the verse's boxes from 0 to 345. */
+  function expectFitted(ends: ReturnType<typeof bandEnds>): void {
+    for (const [left, right] of ends) {
+      expect(right).toBeCloseTo(332.86 + OVERHANG, 1);
+      expect(left).toBeGreaterThanOrEqual(5.59 - OVERHANG - 0.01);
+    }
+    // The first line is full, so its far end stops just past the last word too.
+    expect(ends[0]![0]).toBeCloseTo(5.59 - OVERHANG, 1);
+    // The second line starts mid-line, where the verse does: left alone.
+    expect(ends[1]![0]).toBeCloseTo(79.5, 6);
+  }
+
+  it("stops each band just past the page's words, not at the paper's edge", () => {
+    addWords();
+    hl.highlight("quran/hafs-kfqc/2:38", "sel", "selection");
+    expectFitted(bandEnds());
+  });
+
+  it("pulls the bands in once a page opened off screen is laid out", () => {
+    // A link to a page other than the first one draws its verse before the page
+    // is on screen, when its words cannot be measured yet. The pen waits for the
+    // page to take up room, then fits the bands it already drew.
+    const watched: Array<() => void> = [];
+    vi.stubGlobal(
+      "ResizeObserver",
+      class {
+        constructor(cb: () => void) {
+          watched.push(cb);
+        }
+        observe(): void {}
+        disconnect(): void {}
+      },
+    );
+    try {
+      const words = addWords();
+      words.laidOut(false);
+      hl.highlight("quran/hafs-kfqc/2:38", "sel", "selection");
+      expect(bandEnds()[0]![1], "drawn before layout: the verse box's own end").toBeCloseTo(345, 6);
+
+      words.laidOut(true);
+      for (const cb of watched) cb();
+      expectFitted(bandEnds());
+      const d = [...svg.querySelectorAll("#hifth-overlay .hl-band")].map((b) => b.getAttribute("d"));
+
+      // The same hand as a verse drawn on a page already on screen.
+      hl.clear("selection");
+      hl.highlight("quran/hafs-kfqc/2:38", "sel", "selection");
+      expect([...svg.querySelectorAll("#hifth-overlay .hl-band")].map((b) => b.getAttribute("d"))).toEqual(d);
+    } finally {
+      vi.unstubAllGlobals();
+    }
   });
 
   it("draws the same hand for the same verse on every visit", () => {
