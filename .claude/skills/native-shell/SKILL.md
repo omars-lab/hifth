@@ -135,11 +135,12 @@ send to TestFlight. Do not guess a team id; ask the owner.
 ## The shell goldens
 
 ```
-make app-golden            # screenshot each route on the iPad simulator, diff against native/shots/baseline/
+make app-golden            # screenshot each route on the iPad simulator (and one on an iPhone), diff against native/shots/baseline/
 make app-golden-update     # after the owner has seen the diff: accept the current shots
 ```
 
-Routes come from `GOLDEN_ROUTES` in `native/Makefile.native`. A failing route leaves a diff
+Routes come from `GOLDEN_ROUTES` (iPad) and `GOLDEN_IPHONE_ROUTES` (iPhone, `IPHONE=` names
+the simulator) in `native/Makefile.native`. A failing route leaves a diff
 image in `native/shots/diff/`; look at it before updating. Same recipe as the web goldens:
 show the diff, ask, then update. Never run this at the same time as `make app-test` — both
 drive the one simulator.

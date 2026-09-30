@@ -2225,10 +2225,21 @@
         "file": "docs/design/native-shell.md",
         "item": "③"
       },
-      "status": "open",
+      "status": "answered",
       "severity": "question",
       "owner": "agent",
-      "note": "The iOS target allows iPhone but nobody has opened the shell on one. Launch screen, safe areas and the phone toolbar may need a pass."
+      "note": "Looked at on an iPhone 17 simulator on 2026-09-29, beside the same build in a phone-sized browser: identical to the pixel. Launch screen, safe areas and the bottom sheet are all right; the shell adds nothing. The one thing seen (the hop chips over the open verse) is the web app's phone layout and is its own item. An iphone row now sits in the shell goldens."
+    },
+    {
+      "id": "phone-rail-covers-verse",
+      "source": {
+        "file": "docs/design/native-shell.md",
+        "item": "⑩"
+      },
+      "status": "open",
+      "severity": "defect",
+      "owner": "agent",
+      "note": "On a phone, with a verse that has hops open, the two floating chips sit in the stage's top corner and the verse's first line, lifted above the bottom sheet, runs under them. On iPad and Mac the chips sit on the desk beside the page. A placement choice to be made with a hand on it: lift the verse only to the band beneath the chips, or move the chips into the sheet header. Ships with a phone test that the chips and the first highlighted word do not overlap."
     },
     {
       "id": "mac-menu-page-turn",

@@ -151,7 +151,7 @@ mus'haf names a link may use, and where a person builds one, is
 | the web app's look at iPad size | two golden images, landscape and portrait, with a selection | Playwright, `ipad-golden` | `make golden` (the web goldens now include these) |
 | the shell itself | opens at a route, the route label matches, a `hifth://` link turns the page, rotation keeps the place | XCUITest on the iPad simulator | `make app-test` |
 | the shell on the Mac | same smoke, on the Mac | XCUITest, opt-in | `make app-test-mac-ui` (permission needed, see below) |
-| the real app's look | a screenshot per route matches its baseline | `make app-golden` against `native/shots/baseline/` | `make app-golden`, then `make app-golden-update` after looking |
+| the real app's look | a screenshot per route matches its baseline, on the iPad and one on an iPhone | `make app-golden` against `native/shots/baseline/` | `make app-golden`, then `make app-golden-update` after looking |
 | route parsing, file paths, the bridge | pure logic, seconds | Swift Testing | `make app-unit-test` |
 
 **The Mac permission, once.** Open System Settings → Privacy & Security → Accessibility and
@@ -208,13 +208,44 @@ manual-testing checklist.
 **What would answer it:** one sitting on a Mac with a trackpad, pinching on a page and on the
 spread; anything wrong becomes a Playwright or XCUITest case.
 
-### ③ The iPhone layout has not been looked at · **open**
+### ③ The iPhone layout has not been looked at · **answered**
 
 The iOS target allows iPhone, and the web app has an iPhone layout, but nobody has opened the
 shell on one. The launch screen, safe areas and the phone toolbar may all need a pass.
 
-**What would answer it:** `make app-run-ipad IPAD="iPhone 17"` (any iPhone simulator name), a
-look, and an `iphone` row in the shell goldens.
+**What was seen (2026-09-29):** the shell was opened on an iPhone 17 simulator at a verse, at a
+page, and at the page with the dark desk in dark appearance, and the same pitch build was opened
+in a phone-sized browser beside it. The two match to the pixel: the launch screen is not
+letterboxed, the header clears the notch and the page bar clears the home indicator, the
+commentary sheet rises from the bottom, and nothing the shell adds (safe areas, insets, the
+launch screen) changes the phone layout. Two things looked wrong, and both are the web app's
+own phone layout rather than the shell:
+
+- **The dark desk is invisible on a phone.** The page fills the width, so the desk it sits on
+  is a strip a few pixels wide either side. That is not a defect: the night desk was made for
+  a table the page does not cover, and a phone has no such table.
+- **The hop chips sit on the verse they are about.** With a verse open, the page is lifted so
+  the verse sits above the bottom sheet, which puts its first line in the corner the chips
+  float in. On an iPad the chips sit on the desk beside the page; on a phone there is no desk,
+  so they sit on the words. Item ⑩ carries it.
+
+An `iphone` row now sits in the shell goldens (`GOLDEN_IPHONE_ROUTES`, the verse route on an
+iPhone 17), so the phone look is checked every time the iPad's is.
+
+### ⑩ On a phone, the hop chips cover the first line of the open verse · **open**
+
+Found by ③. When a verse with hops is open on a phone, the two floating chips (the loop and
+the later-in-the-mus'haf counts) sit in the top corner of the stage, and the verse's first
+line, lifted above the bottom sheet, runs under them. On an iPad and on the Mac the same
+chips sit on the desk beside the page, over nothing. It is the web app's phone layout, in
+the public build as much as the pitch build; the shell only shows it.
+
+**What would answer it:** a choice about where the chips live on a phone, made with a hand on
+it rather than from a picture, since the difference is felt: keep the chips where they are but
+lift the verse only as far as the band beneath them; or move the chips into the sheet's own
+header row, beside the close button, so nothing floats over the page at all. Whichever wins
+ships with a phone test that opens a verse with hops and checks the chips and the first
+highlighted word do not overlap.
 
 ### ④ The Mac has no menu items for turning the page · **fixed**
 
