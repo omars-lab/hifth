@@ -6,7 +6,10 @@ drew and measured their answer without seeing the other's; a third checked both 
 sources and the browsers, re-measured everything one way, and drew this one page from them.
 This record is the decision that page asks for.
 
-*Status: open. The recommendation below is the checker's; the owner has not chosen. The two
+*Status: decided 2026-09-30 by Omar: the rough band (B) with its ends made nearly upright,
+streaks by a filter (E), and a passage and a word run each in their own colour, blended where
+they cross the verse (F). The checker's counted passes and cut-out were not taken. See
+[What was decided?](#what-was-decided). The two
 researcher pages it was built from stay as the record: [researcher A's](../design/highlight-texture-options-a.md)
 and [researcher B's](../design/highlight-texture-options-b.md). What they agreed on, where they
 differed and which side the evidence took is laid out claim by claim in
@@ -196,3 +199,29 @@ Shape, ink and overlap, each with its options above. The checker recommends **B 
 and D for the ink and the overlap, with G for a mark of another colour** — the rough band, the
 counted passes with the second pass a little apart, and the cut-out — and, whichever wins, the
 passage painted as one band per line. The owner decides; the page is the place to decide on.
+
+## What was decided?
+
+On 2026-09-30 the owner chose from the options page, leaving a note on each choice:
+
+- **Shape: the rough band (B)**, with one change. On the page its ends were slanted like the
+  sides of a rhombus, and the owner asked for them "straightened vertically more, just slight
+  slants". Each end now leans by a fifth of the line's height at most, where the page drew
+  over half. The same verse still gets the same hand on every visit.
+- **Ink: streaks along the line, by a filter (E).** The ink never thins below 70% of a single
+  pass, so the letters under it keep their contrast. Where the reader has asked the phone for
+  more contrast, or uses a high-contrast mode, the streaks turn off and the ink is flat.
+- **Overlap: a mark of another colour, blended in (F).** The verse stays amber. A passage is
+  painted in a second colour and a run of words in a third, and where they cross the verse
+  the two mix. The counted-passes idea (D) goes with it: each meaning has its own colour, not
+  its own depth.
+
+What this costs, said plainly at the time: where two colours cross, the letters fall to about
+4.0 to 1 against the ink, under the 4.5 to 1 this project holds text to. The colours on the
+page (a green and a blue) are stand-ins, and choosing the real two, measured where they cross
+the amber, is the next small question; it is on the backlog.
+
+Two things only a person can check are on the manual list: that the filter does not slow a
+page turn on a real iPhone, and that Safari draws the mark's left-to-right reveal rather than
+showing it whole.
+

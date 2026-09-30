@@ -89,15 +89,17 @@
      Under multiply the scripture stays black however saturated the amber gets,
      so "quieter" is expressed as less ink rather than as a paler colour.
      --ink-sel is --highlight at full strength: the ayah you are on wins.
-     --ink-range is the same pen held lighter, and a selection inside a range
-     carries both — multiply darkens the overlap, which is exactly what a second
-     pass of a highlighter looks like.
 
      The marquee is the rectangle in flight, and is NOT ink: nearly no fill
      (scripture stays legible while the finger crosses it) and a dashed ring,
      the universal "this is a lasso, not a result". */
   --ink-sel: #e8a13a;
-  --ink-range: rgba(232, 161, 58, 0.5);
+  /* A passage and a word run each take their own colour, blended with the
+     amber verse where they cross (highlight-texture decision, 2026-09-30).
+     Stand-ins: the verdigris and indigo the options page was drawn with, thinned
+     so the letters survive, until the real colours are chosen. */
+  --ink-range: rgba(31, 111, 102, 0.45);
+  --ink-run: rgba(59, 95, 168, 0.45);
   --marquee-fill: rgba(232, 161, 58, 0.07);
   --marquee-ring: rgba(232, 161, 58, 0.75);
 

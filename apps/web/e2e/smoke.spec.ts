@@ -53,14 +53,14 @@ test.describe("Hifth shell", () => {
     await expect(
       page.getByRole("button", { name: /الآية الحالية البقرة · ٢:٣٨/ }),
     ).toBeVisible();
-    // One marker swipe per line the ayah occupies — 2:38 runs across two on
+    // One marker band per line the ayah occupies — 2:38 runs across two on
     // page 7. Not asserted as a bare count: `toHaveCount(1)` passed here for
     // six loops and would pass again on a single hairline outline, which is
-    // what a mis-styled fallback renders as. The `line.hl-ink` shape is the
-    // claim worth making.
+    // what a mis-styled fallback renders as. A rough band inside each inked
+    // group is the claim worth making.
     const swipes = page.locator("#hifth-overlay .hl-sel");
     await expect(swipes).toHaveCount(2);
-    await expect(swipes.locator("xpath=self::*[local-name()='line']")).toHaveCount(2);
+    await expect(swipes.locator("path.hl-band")).toHaveCount(2);
     await expect(page.locator("#hifth-overlay .hl-sel.hl-ink")).toHaveCount(2);
   });
 

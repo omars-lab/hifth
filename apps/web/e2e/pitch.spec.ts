@@ -68,16 +68,15 @@ type Box = { x: number; y: number; width: number; height: number };
 
 /**
  * The boxes of a highlighted verse's lines, in window px, topmost first. The
- * wash is one stroke per line of the verse, and a stroke's own box has no
- * height, so each is widened by its drawn thickness.
+ * wash is one filled band per line of the verse, so each band's own box is the
+ * ink it lays down.
  */
 async function litLineBoxes(page: Page): Promise<Box[]> {
   return page.evaluate(() =>
     [...document.querySelectorAll<SVGGraphicsElement>("#hifth-overlay .hl-sel")]
       .map((el) => {
         const r = el.getBoundingClientRect();
-        const pad = (parseFloat(getComputedStyle(el).strokeWidth) * (el.getScreenCTM()?.a ?? 1)) / 2;
-        return { x: r.x - pad, y: r.y - pad, width: r.width + 2 * pad, height: r.height + 2 * pad };
+        return { x: r.x, y: r.y, width: r.width, height: r.height };
       })
       .sort((a, b) => a.y - b.y),
   );

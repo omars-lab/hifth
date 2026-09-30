@@ -2376,6 +2376,45 @@
       "owner": "agent",
       "note": "A swept passage is painted one verse at a time, one round-ended band per verse per line, so where a verse ends and the next begins on the same line the two ends leave a notch of paper around the verse number. Confirmed in the real built app on a phone (page 42, 2:254 to 2:256; screenshots on the page). Fix: join the verses that share a line into one band before the pen goes down, whichever shape and overlap rule wins. Fixed 2026-09-30: the pen now gathers the passage's bands and joins the ones on a shared line into one before drawing (joinSwipesByLine in ink.ts, used by highlightRange).",
       "closedBy": "packages/core/src/highlighter.test.ts"
+    },
+    {
+      "id": "passage-and-run-colours",
+      "source": {
+        "file": "docs/design/highlight-texture-options.md",
+        "item": "②"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "agent",
+      "note": "Draw real colour pairs for a passage and a word run on page 42, measure each where it crosses the amber verse (floor 4.5:1; the stand-ins give about 4.0:1), and put the pick to the owner. Stand-ins are the --ink-range and --ink-run tokens."
+    },
+    {
+      "id": "streak-filter-iphone-speed",
+      "source": {
+        "file": "docs/design/highlight-texture-options.md",
+        "item": "③"
+      },
+      "status": "blocked",
+      "severity": "risk",
+      "owner": "user",
+      "blockedBy": [
+        "a real iPhone"
+      ],
+      "note": "The page-wide streak filter has not been timed on a phone. If page turns stutter with marks on the page, turn the filter off on that device class; the flat-ink fallback already exists for the contrast settings."
+    },
+    {
+      "id": "mark-reveal-in-safari",
+      "source": {
+        "file": "docs/design/highlight-texture-options.md",
+        "item": "④"
+      },
+      "status": "blocked",
+      "severity": "risk",
+      "owner": "user",
+      "blockedBy": [
+        "a real iPhone"
+      ],
+      "note": "The wipe animates a clip on the band's group. Unchecked in Safari on a device; failing safe means the mark shows whole."
     }
   ]
 }

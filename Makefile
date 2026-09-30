@@ -39,7 +39,7 @@ reviews: ## Review comments left on docs/ in Obsidian (review-md) that are waiti
 
 .PHONY: reviews-all
 reviews-all: ## Every open review thread on docs/, with obsidian:// links to open or answer each
-	@node "$$(ls -d $$HOME/.claude/plugins/cache/review-md/review-md/*/bin/reviews.mjs | sort -V | tail -1)" list docs --open --vault docs
+	@node "$$(ls -d $$HOME/.claude/plugins/cache/review-md/review-md/*/bin/reviews.mjs | sort -V | tail -1)" list docs --open --vault hifth0docs0vault01
 
 .PHONY: install
 install: ## Install deps + wire the gitleaks pre-commit hook (runs "prepare")
