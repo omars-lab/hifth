@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { pageLineHeight, swipesFromPath, swipesFromRects } from "./ink.js";
+import { joinSwipesByLine, pageLineHeight, swipesFromPath, swipesFromRects } from "./ink.js";
 
 /**
  * The real thing, from apps/web/public/assets/pages/hafs-kfqc/7.svg — a
@@ -224,5 +224,34 @@ describe("pageLineHeight", () => {
 
   it("is null when nothing parses, so the pen keeps its one-swipe fallback", () => {
     expect(pageLineHeight(["M0 0L10 5L20 0Z", ""])).toBeNull();
+  });
+});
+
+describe("joining the swipes of a passage line by line", () => {
+  // Two verses that share a line: the first ends at x=79.5 on the second line,
+  // the second begins there. Painted one verse at a time, each band stops half a
+  // stroke inside its own rectangle, so the two round caps leave a notch of paper
+  // around the verse number (issue passage-ink-notch-at-verse-number).
+  const a = swipesFromPath("M0 8.5h345v38H0Zm79.5 38H345v38.2H79.5Z")!;
+  const b = swipesFromPath("M0 46.5h79.5v38.2H0Zm0 84.7h345v38H0Z")!;
+
+  it("merges the two bands on the shared line into one that spans both", () => {
+    const joined = joinSwipesByLine([...a, ...b]);
+    expect(joined).toHaveLength(3);
+    const shared = joined[1]!;
+    const half = (38.2 * 0.72) / 2;
+    expect(shared.x1).toBeCloseTo(0 + half);
+    expect(shared.x2).toBeCloseTo(345 - half);
+    expect(shared.y).toBeCloseTo(46.5 + 38.2 / 2);
+  });
+
+  it("keeps bands on different lines apart, top to bottom, whatever order they came in", () => {
+    const joined = joinSwipesByLine([...b, ...a]);
+    expect(joined.map((s) => s.y)).toEqual([...joined.map((s) => s.y)].sort((p, q) => p - q));
+    expect(joined).toHaveLength(3);
+  });
+
+  it("leaves a single verse's swipes as they are", () => {
+    expect(joinSwipesByLine(a)).toEqual(a);
   });
 });

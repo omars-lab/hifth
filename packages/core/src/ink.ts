@@ -387,3 +387,38 @@ export function pageLineHeight(paths: Iterable<string>): number | null {
   }
   return best;
 }
+
+/**
+ * Join the swipes of a passage line by line, so a passage is one pass of the
+ * pen per line and not one per verse per line.
+ *
+ * Each band stops half a stroke inside its own rectangle (see `bandOf`), which
+ * is right for one verse on its own — the round cap sits inside the line box —
+ * and wrong the moment two verses share a line: where the first ends and the
+ * second begins, the two caps leave a notch of paper around the verse number
+ * (issue passage-ink-notch-at-verse-number, page 42, 2:254 to 2:256). So before
+ * the pen goes down, swipes whose centrelines sit on the same line are merged
+ * into one that runs from the leftmost start to the rightmost end, as thick as
+ * the thicker of the two. "Same line" is a centreline within half a stroke of
+ * the other's — lines are a stroke apart at least, so nothing across lines can
+ * qualify. The result is sorted top to bottom, so the wipe still crosses the
+ * passage one line after another whatever order the verses arrived in.
+ */
+export function joinSwipesByLine(swipes: readonly Swipe[]): Swipe[] {
+  const sorted = [...swipes].sort((a, b) => a.y - b.y || a.x1 - b.x1);
+  const out: Swipe[] = [];
+  for (const s of sorted) {
+    const last = out[out.length - 1];
+    if (last && Math.abs(s.y - last.y) <= Math.min(s.width, last.width) / 2) {
+      out[out.length - 1] = {
+        x1: Math.min(last.x1, s.x1),
+        x2: Math.max(last.x2, s.x2),
+        y: last.y,
+        width: Math.max(last.width, s.width),
+      };
+    } else {
+      out.push({ ...s });
+    }
+  }
+  return out;
+}

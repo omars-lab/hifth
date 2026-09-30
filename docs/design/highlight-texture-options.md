@@ -302,7 +302,16 @@ the numbers on this page do not match A's page to the decimal.
 
 ## Open questions, and what would answer each
 
-### ① The passage's ink breaks at every verse number · **open**
+### ① The passage's ink breaks at every verse number · **fixed**
+
+**Fixed the same day:** the pen now gathers every band of the passage and joins the ones that
+sit on one line into a single band before it goes down, so a passage is one pass per line
+whatever the shape and overlap rule chosen. The tests that would catch it coming back are in
+`packages/core/src/ink.test.ts` (the joining itself) and `packages/core/src/highlighter.test.ts`
+(two verses sharing a line paint as one band); the phrase golden on page 604 re-baselined with
+the notch closed.
+
+![The same passage on page 42 after the fix: on the row with the verse number the band runs straight through it, one piece](highlight-texture-options/app-fixed.png)
 
 Found 2026-09-30 by researcher B on the drawn page, confirmed the same day by the checker in the
 real built app on a phone (page 42, the passage 2:254 to 2:256 opened from a link; the two
