@@ -1,4 +1,5 @@
 import type { RailChip } from "@hifth/core";
+import { useEffect, useLayoutEffect, useRef } from "react";
 import { useT } from "../i18n";
 import styles from "./HopRail.module.css";
 
@@ -15,6 +16,15 @@ interface HopRailProps {
    * half under it. False when nothing covers it.
    */
   crossed?: boolean;
+  /**
+   * Where the rail ends, in window px from the top — its lowest chip's bottom
+   * edge — or null while it has no chips. The rail floats over the page's top
+   * corner, so a page that moves a verse up to the top of the screen needs to
+   * know how far down the chips reach, or it puts the verse's first line under
+   * them (native-shell ⑩). Reported after every layout, not only on mount: a
+   * new selection can change how many chips there are.
+   */
+  onBand?: (bottom: number | null) => void;
 }
 
 /**
@@ -24,15 +34,24 @@ interface HopRailProps {
  * popover. The rail only exists while an ayah is selected and has hops; a
  * hop-less ayah renders nothing (quiet by default).
  */
-export function HopRail({ chips, openDirection, onOpenChip, crossed = false }: HopRailProps): JSX.Element | null {
+export function HopRail({ chips, openDirection, onOpenChip, crossed = false, onBand }: HopRailProps): JSX.Element | null {
   const { t } = useT();
-  if (chips.length === 0) return null;
+  const railRef = useRef<HTMLDivElement>(null);
+  const count = chips.length;
+  useLayoutEffect(() => {
+    if (!onBand) return;
+    const rail = railRef.current;
+    onBand(count === 0 || !rail ? null : rail.getBoundingClientRect().bottom);
+  }, [count, crossed, onBand]);
+  useEffect(() => () => onBand?.(null), [onBand]);
+  if (count === 0) return null;
   return (
     // No `dir` of its own: the rail is pinned to the mus'haf's reading-start
     // edge by `inset-inline-start`, and `<main>` keeps that RTL in both
     // languages. A rail that jumped to the other side of the page because the
     // buttons are in English would be the app forgetting what it is.
     <div
+      ref={railRef}
       className={styles.rail}
       role="group"
       aria-label={t.railGroup}

@@ -2236,10 +2236,11 @@
         "file": "docs/design/native-shell.md",
         "item": "⑩"
       },
-      "status": "open",
+      "status": "fixed",
       "severity": "defect",
       "owner": "agent",
-      "note": "On a phone, with a verse that has hops open, the two floating chips sit in the stage's top corner and the verse's first line, lifted above the bottom sheet, runs under them. On iPad and Mac the chips sit on the desk beside the page. A placement choice to be made with a hand on it: lift the verse only to the band beneath the chips, or move the chips into the sheet header. Ships with a phone test that the chips and the first highlighted word do not overlap."
+      "note": "On a phone, with a verse that has hops open, the floating chips sat in the stage's top corner and the lifted verse's lines ran up to them. Fixed 2026-09-29: the chips report where they end and the lift stops the verse's first line beneath them; the phone pitch test checks no highlighted line meets the chips.",
+      "closedBy": "apps/web/e2e/pitch.spec.ts"
     },
     {
       "id": "mac-menu-page-turn",
