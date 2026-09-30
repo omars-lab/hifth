@@ -389,6 +389,97 @@ export function pageLineHeight(paths: Iterable<string>): number | null {
 }
 
 /**
+ * How far a band may run past the page's words at either end, in page units —
+ * a little under a letter. A pen overshoots the first and last word slightly;
+ * it does not carry on to the edge of the paper.
+ */
+export const OVERHANG = 2;
+
+/** Where a page's block of words starts and ends across the line. */
+export interface TextSpan {
+  readonly left: number;
+  readonly right: number;
+}
+
+/** A 2D matrix as the browser reports one (`getCTM`): x' = a·x + c·y + e. */
+export interface Matrix2D {
+  readonly a: number;
+  readonly b: number;
+  readonly c: number;
+  readonly d: number;
+  readonly e: number;
+  readonly f: number;
+}
+
+/**
+ * Where a page's words start and end, in the page's own units.
+ *
+ * The print draws every word on a page as one shape, inside a group that flips
+ * and scales it, so its box is in units of its own. `words` and `page` are the
+ * matrices the browser gives for that shape and for the page (each to the same
+ * screen), and going up one and back down the other lands the box in the page's
+ * units — the same ones the verse boxes and the bands are drawn in. Kept as
+ * plain numbers so it can be checked without a browser.
+ *
+ * Undefined for a page not laid out yet (an empty box, or a page with no size),
+ * which the caller takes as "measure again later".
+ */
+export function textSpanOf(
+  box: { x: number; y: number; width: number; height: number },
+  words: Matrix2D,
+  page: Matrix2D,
+): TextSpan | undefined {
+  const det = page.a * page.d - page.b * page.c;
+  if (!(box.width > 0) || !det) return undefined;
+  // page⁻¹ · words, first row only: that row alone decides x.
+  const ia = page.d / det;
+  const ic = -page.c / det;
+  const ie = (page.c * page.f - page.d * page.e) / det;
+  const a = ia * words.a + ic * words.b;
+  const c = ia * words.c + ic * words.d;
+  const e = ia * words.e + ic * words.f + ie;
+  const xs = [box.x, box.x + box.width].flatMap((x) =>
+    [box.y, box.y + box.height].map((y) => a * x + c * y + e),
+  );
+  return { left: Math.min(...xs), right: Math.max(...xs) };
+}
+
+/**
+ * Keep each band to the words on its line.
+ *
+ * The print's verse boxes run the page's full width, so a verse that fills a
+ * line has a box reaching the paper's edge on both sides, well past its first
+ * and last word, and the band used to fill it end to end (the owner,
+ * 2026-09-30: it "shouldn't go to end of page"). Every full line is set edge to
+ * edge across the page's block of words, so capping both ends at that block,
+ * plus {@link OVERHANG}, stops the band just past the words. An end already
+ * inside the block — where one verse gives way to the next mid-line — is left
+ * where it is.
+ *
+ * A band capped below its own thickness becomes a dot centred on what is left,
+ * the same rule `bandOf` follows for a two-word tail. Without a measured block
+ * (`text` undefined) nothing changes.
+ */
+export function fitSwipesToText(swipes: readonly Swipe[], text: TextSpan | undefined): Swipe[] {
+  if (!text) return [...swipes];
+  const lo = text.left - OVERHANG;
+  const hi = text.right + OVERHANG;
+  return swipes.map((s) => {
+    const half = s.width / 2;
+    const left = Math.max(Math.min(s.x1, s.x2) - half, lo);
+    const right = Math.min(Math.max(s.x1, s.x2) + half, hi);
+    if (right <= left) return { ...s };
+    const x1 = left + half;
+    const x2 = right - half;
+    if (x2 < x1) {
+      const mid = (left + right) / 2;
+      return { ...s, x1: mid, x2: mid };
+    }
+    return { ...s, x1, x2 };
+  });
+}
+
+/**
  * Join the swipes of a passage line by line, so a passage is one pass of the
  * pen per line and not one per verse per line.
  *
