@@ -14,6 +14,19 @@ struct HifthApp: App {
         // desktop layout begins at 1024×740.
         .defaultSize(width: 1280, height: 860)
         .windowResizability(.contentSize)
+        // A Mac app shows its page turns in a menu with the shortcut beside
+        // each. ⌘← is the next page because the mus'haf reads to the left; the
+        // plain arrows keep working inside the page as before.
+        .commands {
+            CommandMenu("Page") {
+                Button("Next Page") { model.stepPage(1) }
+                    .keyboardShortcut(.leftArrow, modifiers: .command)
+                    .disabled(!model.ready)
+                Button("Previous Page") { model.stepPage(-1) }
+                    .keyboardShortcut(.rightArrow, modifiers: .command)
+                    .disabled(!model.ready)
+            }
+        }
         #endif
     }
 }

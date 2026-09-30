@@ -2203,7 +2203,7 @@
         {
           "file": "native/Hifth/Web/ShellModel.swift",
           "symbol": "ShellModel",
-          "note": "Owns the one web view: cold-start routes go in the first address as the hash, later ones wait for the page's `ready` and are set with callAsyncJavaScript, never a string-built script. Also the snapshot-and-exit path screenshots and goldens run on."
+          "note": "Owns the one web view: cold-start routes go in the first address as the hash, later ones wait for the page's `ready` and are set with callAsyncJavaScript, never a string-built script. `stepPage` is what the Mac's Page menu calls; it runs the page's lent `window.__HIFTH_PAGE__.stepPage`. Also the snapshot-and-exit path screenshots and goldens run on."
         },
         {
           "file": "native/Hifth/Web/Bridge.swift",
@@ -2218,7 +2218,7 @@
         {
           "file": "apps/web/src/native-bridge.ts",
           "symbol": "nativeInfo",
-          "note": "The web side: reads the small object the shell injects at document start (platform, public site address), so shared links stay public links and the service worker and install prompt stay off in-shell. Does nothing in a browser."
+          "note": "The web side: reads the small object the shell injects at document start (platform, public site address), so shared links stay public links and the service worker and install prompt stay off in-shell. `exposeToShell` lends the page's turn to the Mac's Page menu. Does nothing in a browser."
         },
         {
           "file": "native/Makefile.native",

@@ -32,6 +32,13 @@ final class ShellModel {
     /// How an x-callback answer leaves the shell: the system opens the
     /// caller's address. Replaced by the tests with a collector.
     var openCallback: (URL) -> Void = { Sharing.openCallback($0) }
+    /// How a line of JavaScript reaches the page, with its named arguments.
+    /// Replaced by the tests with a collector, so what the shell asks of the
+    /// page can be read without a web view.
+    @ObservationIgnored var runScript: (_ source: String, _ arguments: [String: Any]) -> Void = { _, _ in }
+    /// The one line the Page menu runs: the page's own turn, exposed under
+    /// `window.__HIFTH_PAGE__` by `apps/web/src/native-bridge.ts`.
+    static let stepPageScript = "window.__HIFTH_PAGE__?.stepPage(step);"
     /// How long `open` waits for the page to show the route before telling
     /// the caller it did not.
     private let callbackTimeout: Duration
@@ -95,6 +102,9 @@ final class ShellModel {
 
         bridge.onMessage = { [weak self] message in self?.receive(message) }
         navigation.onLoaded = { [weak self] in self?.loaded() }
+        runScript = { [weak self] source, arguments in
+            self?.webView.callAsyncJavaScript(source, arguments: arguments, in: nil, in: .page) { _ in }
+        }
 
         applyAppearanceOverride()
 
@@ -182,12 +192,17 @@ final class ShellModel {
             return
         }
         pendingHash = nil
-        webView.callAsyncJavaScript(
-            "location.hash = route;",
-            arguments: ["route": hash],
-            in: nil,
-            in: .page
-        ) { _ in }
+        runScript("location.hash = route;", ["route": hash])
+    }
+
+    /// Turn one page for the Mac's Page menu: `1` is the next page (to the
+    /// left, as the mus'haf reads), `-1` the previous. Before the page is
+    /// ready there is nothing to turn, and a press then is dropped rather than
+    /// saved up: a menu item that fires later, on a page the reader has since
+    /// moved, would be a turn nobody asked for.
+    func stepPage(_ step: Int) {
+        guard ready else { return }
+        runScript(Self.stepPageScript, ["step": step])
     }
 
     // MARK: - Messages from the page

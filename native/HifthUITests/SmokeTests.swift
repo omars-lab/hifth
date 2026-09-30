@@ -30,6 +30,20 @@ final class SmokeTests: XCTestCase {
         add(shot)
     }
 
+    #if os(macOS)
+    /// The Page menu's shortcuts reach the page through the shell, not as
+    /// keys the page would ignore. Runs under `make app-test-mac-ui`, which
+    /// needs Accessibility permission to press keys.
+    func testPageMenuTurnsThePage() {
+        let app = launch(route: "/hafs-kfqc/p45")
+        waitForRoute("#/hafs-kfqc/p45", in: app)
+        app.typeKey(.leftArrow, modifierFlags: .command)
+        waitForRoute("#/hafs-kfqc/p47", in: app)
+        app.menuBars.menuItems["Previous Page"].click()
+        waitForRoute("#/hafs-kfqc/p45", in: app)
+    }
+    #endif
+
     func testOpensAtAVerse() {
         let app = launch(route: "/hafs-kfqc/2:255")
         waitForRoute("#/hafs-kfqc/2:255", in: app)
