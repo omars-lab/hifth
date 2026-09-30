@@ -279,6 +279,25 @@ every case lands the same way, and three tests hold it: the fallback itself in c
 address code with a link to a mus'haf it does not have, and the site opened at such a link
 (`apps/web/e2e/open-link.spec.ts`).
 
+### ③ A link to a passage arrived looking like a link to one verse · **fixed**
+
+A link that names a passage (`2:47-2:48`) is meant to land where a drag over those two
+verses lands: the passage's menu open, and the passage wash over every verse in it. It
+landed with the menu open and only the first verse marked, in the dark single-verse colour,
+because the wash was painted by the drag alone and a link never dragged. A hafiz sent a
+passage and saw a verse.
+
+**What was fixed (2026-09-29):** the page now paints the passage from the same state the
+menu reads, so a link and a drag look the same, and closing the passage's menu takes the wash
+with it either way. The test opens the link on a phone, counts the swipes over the two
+verses and checks there is no single-verse mark (`apps/web/e2e/range.spec.ts`).
+
+**What was found:** the golden shots of exactly these four links had been passing with the
+wrong picture for a month. The dark mark and the lighter wash differ in colour more than in
+brightness, and the shot comparison only counted a pixel as changed past a colour distance
+of 0.25; at 0.05 every unchanged shot still passes and only these four fail, so that is
+the tolerance now, and the four baselines are re-taken with the passage in them.
+
 ## What this is not settling
 
 The share sheet's design (open question ①). Whether links carry the app's language. And the still-open question on the native-shell page of driving one app request

@@ -113,8 +113,16 @@ export default defineConfig({
       // differ meaningfully to count. A wash that moved, a clone that landed in
       // the wrong coordinate space, or a skin that shifted geometry are all
       // orders of magnitude larger than this.
+      //
+      // `threshold` is how far one pixel's colour must move to count, and 0.25
+      // was blind to a wash changing *colour*: the dark single-verse mark and
+      // the lighter passage wash differ mostly in hue, not brightness, so the
+      // four passage shots passed with the wrong one for a month (2026-09-29,
+      // the range-link fix). Measured on this Mac: at 0.05 every unchanged
+      // shot still passes and only the four changed passage shots fail; at 0.1
+      // they fail too, so 0.05 is not on the edge of the anti-aliasing noise.
       maxDiffPixelRatio: 0.005,
-      threshold: 0.25,
+      threshold: 0.05,
       animations: "disabled",
       caret: "hide",
     },
