@@ -1,0 +1,16 @@
+# docs/ is an Obsidian vault. It commits only what makes the vault the same
+# from any checkout: which community plugins are on, BRAT's list (so BRAT
+# installs review-md on a fresh clone) and review-md's reviewer name. Plugin
+# code, window layout and caches stay local. Same layout as 3d-models/docs.
+#
+# BRAT's data.json has a token field. It is empty: BRAT 2.x keeps tokens in
+# Obsidian's secret store instead. Never paste a token there; gitleaks would
+# block the commit.
+/*
+!/.gitignore
+!/app.json
+!/community-plugins.json
+!/plugins/
+/plugins/*/*
+!/plugins/obsidian42-brat/data.json
+!/plugins/review-md/data.json
