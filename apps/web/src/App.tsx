@@ -70,6 +70,7 @@ import { applyFieldToDocument, fieldFromHash } from "./field";
 import { recordLook } from "./revision-store";
 import { useT } from "./i18n";
 import { useHashRouter } from "./useHashRouter";
+import { exposeToShell } from "./native-bridge";
 import { DESKTOP_QUERY, useMediaQuery } from "./useMediaQuery";
 import { PageStage, type PageStageHandle, type PageTool, type WordRect } from "./components/PageStage";
 import { PageToolbar, TOOL_KEYS, toolHint, toolName } from "./components/PageToolbar";
@@ -1784,6 +1785,9 @@ export function App(): JSX.Element {
   // Gate cold-open restore on the resolver: a deep link parsed before the
   // manifest loads must not be dropped (restoreState no-ops without a resolver).
   useHashRouter(currentState, restoreState, resolver !== null);
+  // The Mac shell's Page menu turns the page through this; nothing outside
+  // the shell can see it.
+  useEffect(() => exposeToShell({ stepPage }), [stepPage]);
 
   // A jump lands through `restoreState` — the same path a live hop and a
   // cold-opened link take (spec §7; Loop 3's record says why a second navigation

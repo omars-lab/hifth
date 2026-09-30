@@ -51,7 +51,8 @@ Three pieces, and each one is small on purpose:
    nothing else; a bad link is dropped, not opened.
 3. **A three-word bridge.** The page tells the shell `ready`, `route` and `share`. The shell
    tells the page one thing at start, in a small object: that it is inside a shell, which
-   platform, and the public site's address for links.
+   platform, and the public site's address for links. Since 2026-09-29 the page also lends the
+   shell one action, turning the page, for the Mac's Page menu (see ④).
 
 ## What did the rough build find that a list would not have?
 
@@ -215,13 +216,20 @@ shell on one. The launch screen, safe areas and the phone toolbar may all need a
 **What would answer it:** `make app-run-ipad IPAD="iPhone 17"` (any iPhone simulator name), a
 look, and an `iphone` row in the shell goldens.
 
-### ④ The Mac has no menu items for turning the page · **open**
+### ④ The Mac has no menu items for turning the page · **fixed**
 
-Cmd+← and Cmd+→ reach the page only because the web app already listens for arrow keys in the
-window. A Mac app is expected to show them in a menu, with the shortcut beside each.
+A Mac app is expected to show its page turns in a menu, with the shortcut beside each. The
+plain arrow keys turned the page inside the web view, but the Mac had no menu for it.
 
-**What would answer it:** a small `CommandMenu` that forwards to the page through the bridge,
-and a unit test on the message it sends.
+**What it was (2026-09-29):** the note above said ⌘← and ⌘→ already reached the page. They
+did not: the web app drops any key held with ⌘, ctrl or alt on purpose, so the browser's own
+shortcuts keep working. A menu that sent a key would have done nothing. Instead the page lends
+the shell its own turn, inside the shell only, and the Page menu (Next Page ⌘←, Previous Page
+⌘→) calls it by name; a press before the page is ready is dropped, not saved up. Checked on
+the running Mac app: ⌘← took page 45 to 47 on the spread, ⌘→ brought it back, and the menu
+item did the same. `native/HifthTests/ShellMenuTests.swift` holds the shell to the one line it
+runs; `apps/web/src/native-bridge.test.ts` holds the page to lending the turn only inside the
+shell; the Mac smoke test presses the real shortcut.
 
 ### ⑤ A web link cannot open the app on iPad without a paid membership · **blocked**
 

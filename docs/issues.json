@@ -2236,10 +2236,11 @@
         "file": "docs/design/native-shell.md",
         "item": "④"
       },
-      "status": "open",
+      "status": "fixed",
       "severity": "question",
       "owner": "agent",
-      "note": "Cmd+←/→ work only because the web app listens for arrow keys; a Mac app is expected to show them in a menu."
+      "note": "A Page menu (Next Page ⌘←, Previous Page ⌘→) calls the page's own turn through the bridge; a modified key would have been dropped by the web app on purpose. Pressed on the real Mac app and in the Mac smoke test.",
+      "closedBy": "native/HifthTests/ShellMenuTests.swift"
     },
     {
       "id": "universal-links-need-paid-team",
