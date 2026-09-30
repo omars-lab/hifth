@@ -40,6 +40,10 @@ APPEARANCE   ?= light
 SHOT_OUT     ?= $(SHOTS)/$(SHOT_NAME)
 # The routes the shell goldens cover: a verse, a page, and the dark desk.
 GOLDEN_ROUTES ?= /hafs-kfqc/2:255 /hafs-kfqc/p45 /hafs-kfqc/p45?field=dark
+# The same app on a phone, one route: the shell was first looked at there on
+# 2026-09-29 (native-shell.md ③) and this row is what notices if it changes.
+IPHONE        ?= iPhone 17
+GOLDEN_IPHONE_ROUTES ?= /hafs-kfqc/2:255
 # The Apple Development team, read from the signing identity in the keychain.
 # Only device builds and archives need it; simulator and Mac builds do not.
 TEAM         ?= $(shell security find-identity -v -p codesigning 2>/dev/null | sed -n 's/.*Apple Development: .*(\([A-Z0-9]\{10\}\)).*/\1/p' | head -1)
@@ -146,7 +150,7 @@ app-test-mac-ui: app-generate ## The XCUITest smoke on the Mac (needs Accessibil
 # ---- the real app's look: one screenshot per route, against a committed baseline
 # Same recipe as the web goldens: `app-golden` fails on a change, you LOOK at
 # native/shots/diff/, and only then `app-golden-update` accepts the new look.
-app-golden: app-golden-shots ## Screenshot GOLDEN_ROUTES on the iPad simulator and diff against native/shots/baseline/
+app-golden: app-golden-shots ## Screenshot GOLDEN_ROUTES on the iPad (and GOLDEN_IPHONE_ROUTES on the iPhone) simulator and diff against native/shots/baseline/
 	$(NATIVE)/scripts/golden-diff.sh $(SHOTS)/current $(SHOTS)/baseline $(SHOTS)/diff
 
 app-golden-update: app-golden-shots ## Accept the current shell screenshots as the new baseline — look at the diff first
@@ -162,6 +166,11 @@ app-golden-shots:
 	  name=$$(printf '%s' "$$r" | sed 's#^/##; s#[/:?=]#_#g'); \
 	  $(MAKE) --no-print-directory app-shot TARGET=ipad ROUTE="$$r" SHOT_OUT=$(SHOTS)/current/ipad-$$name.png || exit 1; \
 	  magick mogrify -resize 50% $(SHOTS)/current/ipad-$$name.png; \
+	done
+	@for r in $(GOLDEN_IPHONE_ROUTES); do \
+	  name=$$(printf '%s' "$$r" | sed 's#^/##; s#[/:?=]#_#g'); \
+	  $(MAKE) --no-print-directory app-shot TARGET=ipad IPAD="$(IPHONE)" ROUTE="$$r" SHOT_OUT=$(SHOTS)/current/iphone-$$name.png || exit 1; \
+	  magick mogrify -resize 50% $(SHOTS)/current/iphone-$$name.png; \
 	done
 
 # ---- a real iPad over USB
