@@ -480,13 +480,13 @@ describe("Highlighter marker swipes", () => {
   let svg: SVGSVGElement;
   let hl: Highlighter;
 
-  function makeInkSvg(d45: string): SVGSVGElement {
+  function makeInkSvg(d45: string, d46: string = ONE_LINE): SVGSVGElement {
     const NS = "http://www.w3.org/2000/svg";
     const el = document.createElementNS(NS, "svg");
     el.setAttribute("viewBox", "0 0 345 550");
     for (const [id, d] of [
       ["verse-45", d45],
-      ["verse-46", ONE_LINE],
+      ["verse-46", d46],
     ]) {
       const path = document.createElementNS(NS, "path");
       path.setAttribute("id", id);
@@ -539,6 +539,28 @@ describe("Highlighter marker swipes", () => {
     expect(marks.map((m) => m.style.getPropertyValue("--hl-i"))).toEqual([
       "0", "1", "2", "3", "4", "5", "6", "7",
     ]);
+  });
+
+  it("paints a passage as one band per line where two verses share a line", () => {
+    // verse-45 ends part-way along line 2 (x 79.5 to 345); verse-46 begins on
+    // that same line (x 0 to 79.5) and runs on to line 3. Painted one verse at a
+    // time this is four bands, and the two on line 2 each stop half a stroke
+    // inside their own rectangle, leaving a notch of paper around the verse
+    // number — the defect seen on page 42 (issue passage-ink-notch-at-verse-number).
+    document.body.innerHTML = "";
+    svg = makeInkSvg(TWO_LINE, "M0 46.5h79.5v38.2H0Zm0 84.7h345v38H0Z");
+    hl = new Highlighter(svg, resolver, 7);
+    hl.highlightRange(["quran/hafs-kfqc/2:38", "quran/hafs-kfqc/2:39"], "hlt", "phrase");
+
+    const marks = [...svg.querySelectorAll<SVGElement>("#hifth-overlay .hl-hlt")];
+    expect(marks).toHaveLength(3);
+    const shared = marks.find((m) => Number(m.getAttribute("y1")) > 60 && Number(m.getAttribute("y1")) < 70)!;
+    const xs = [Number(shared.getAttribute("x1")), Number(shared.getAttribute("x2"))];
+    const half = (38.2 * 0.72) / 2;
+    expect(Math.min(...xs)).toBeCloseTo(half);
+    expect(Math.max(...xs)).toBeCloseTo(345 - half);
+    // The wipe still runs top to bottom, one line after another.
+    expect(marks.map((m) => m.style.getPropertyValue("--hl-i"))).toEqual(["0", "1", "2"]);
   });
 
   it("tags swipes `hl-ink`, which is what the stylesheet keys the pen off", () => {

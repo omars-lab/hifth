@@ -2371,10 +2371,11 @@
         "file": "docs/design/highlight-texture-options.md",
         "item": "①"
       },
-      "status": "open",
+      "status": "fixed",
       "severity": "defect",
       "owner": "agent",
-      "note": "A swept passage is painted one verse at a time, one round-ended band per verse per line, so where a verse ends and the next begins on the same line the two ends leave a notch of paper around the verse number. Confirmed in the real built app on a phone (page 42, 2:254 to 2:256; screenshots on the page). Fix: join the verses that share a line into one band before the pen goes down, whichever shape and overlap rule wins."
+      "note": "A swept passage is painted one verse at a time, one round-ended band per verse per line, so where a verse ends and the next begins on the same line the two ends leave a notch of paper around the verse number. Confirmed in the real built app on a phone (page 42, 2:254 to 2:256; screenshots on the page). Fix: join the verses that share a line into one band before the pen goes down, whichever shape and overlap rule wins. Fixed 2026-09-30: the pen now gathers the passage's bands and joins the ones on a shared line into one before drawing (joinSwipesByLine in ink.ts, used by highlightRange).",
+      "closedBy": "packages/core/src/highlighter.test.ts"
     }
   ]
 }
