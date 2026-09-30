@@ -19,6 +19,7 @@
  * runs.
  */
 import { docHash, tasksHash, payload } from "./tasks.mjs";
+import { docWaitingHash, readRecommendations, readShots, waitingHash } from "./waiting.mjs";
 
 const p = payload();
 const mine = p.issues.filter((i) => i.owner === "user").length;
@@ -29,19 +30,27 @@ const summary =
 
 if (process.argv.includes("--list")) {
   console.log(summary);
-  console.log("  docs/backlog.md — re-render with `make tasks-doc`");
+  console.log("  docs/backlog.md and docs/waiting-on-you.md — re-render with `make tasks-doc`");
   process.exit(0);
 }
 
-const want = tasksHash();
-const have = docHash();
-if (have !== want) {
+// Two pages are built from the same registers: the backlog, and the note of
+// what is waiting on the owner (which also reads each record's recommendation
+// and the pictures of each options page). Either one falling behind fails.
+const pages = [
+  ["docs/backlog.md", docHash(), tasksHash()],
+  ["docs/waiting-on-you.md", docWaitingHash(), waitingHash(p, readShots(), readRecommendations(p.decisions))],
+];
+const stale = pages.filter(([, have, want]) => have !== want);
+if (stale.length) {
   console.error("gate:tasks — FAIL:");
-  console.error(
-    have === null
-      ? "  - docs/backlog.md is missing or unstamped. Run `make tasks-doc`."
-      : `  - docs/backlog.md was built from ${have}, the source is now ${want}. Run \`make tasks-doc\`.`,
-  );
+  for (const [path, have, want] of stale) {
+    console.error(
+      have === null
+        ? `  - ${path} is missing or unstamped. Run \`make tasks-doc\`.`
+        : `  - ${path} was built from ${have}, the source is now ${want}. Run \`make tasks-doc\`.`,
+    );
+  }
   process.exit(1);
 }
 
