@@ -18,6 +18,19 @@ test("every path has at least one example the tests can run", () => {
   }
 });
 
+test("the page lists every edition the contract knows, and says which ones ship", () => {
+  const html = render(spec);
+  const section = html.split('<section id="editions">')[1]?.split("</section>")[0];
+  assert.ok(section, "no editions section");
+  for (const e of spec.components.schemas.Edition["x-editions"]) {
+    assert.match(section, new RegExp(`<code>${e.id}</code>`), `edition ${e.id} missing`);
+    if (!e.shipped) assert.ok(section.includes(e.reason), `${e.id} does not say why it is not shipped`);
+  }
+  // A parameter whose schema is a $ref still shows its values, not a blank cell.
+  const open = html.split('<section id="openLink">')[1].split("</section>")[0];
+  assert.match(open, /<td><code>edition<\/code>[^]*?<td>[^]*?<code>hafs-kfqc<\/code>/, "the edition row must list the ids");
+});
+
 test("the page carries no held text and no Arabic", () => {
   assert.doesNotMatch(render(spec), /[؀-ۿ]/);
 });
