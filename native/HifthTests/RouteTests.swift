@@ -24,9 +24,24 @@ struct RouteTests {
         "/hafs-kfqc/p0", "/hafs-kfqc/0:1", "/hafs-kfqc/2:", "/hafs-kfqc/x", "/HAFS/2:1",
         "/hafs-kfqc/2:1?w=3 7", "/hafs-kfqc/2:1?q=\"x\"", "/hafs-kfqc/2:1#x",
         "javascript:alert(1)", "/../index.html",
+        // A mus'haf the app does not know, and one it knows but does not ship yet.
+        "/hafs/2:255", "/warsh-libya/2:255",
     ])
     func refuses(_ raw: String) {
         #expect(Route.hash(from: raw) == nil)
+    }
+
+    @Test("only a shipped mus'haf opens; the others are named so a request can say why")
+    func editions() {
+        #expect(Route.shippedEditions == ["hafs-kfqc"])
+        #expect(Route.editions.map(\.id).contains("warsh-libya"))
+        #expect(Route.editionProblem("hafs-kfqc") == nil)
+        let unknown = Route.editionProblem("hafs")
+        #expect(unknown?.contains("hafs-kfqc") == true, "names the shipped ids")
+        let unshipped = Route.editionProblem("warsh-libya")
+        #expect(unshipped?.contains("warsh-libya") == true)
+        #expect(unshipped?.contains("hafs-kfqc") == true, "names the shipped ids")
+        #expect(unshipped != unknown, "not shipped yet is a different answer from never heard of")
     }
 
     @Test("a hifth:// link in each shape people will paste")

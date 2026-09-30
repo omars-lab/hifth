@@ -16,6 +16,50 @@ nonisolated enum Route {
     static let environmentKey = "HIFTH_ROUTE"
     static let argumentPrefix = "--route="
 
+    /// One mus'haf the app knows by id. `shipped` is whether its pages are in
+    /// the build; an unshipped one carries the reason, in plain words.
+    struct Edition: Equatable {
+        let id: String
+        let shipped: Bool
+        let reason: String?
+    }
+
+    /// The mus'hafs the app knows, in the app's own order — the web app's list,
+    /// copied here so a link naming another is refused with a reason. The
+    /// OpenAPI file carries the same copy for readers; the tests hold this one
+    /// to it, and a core test holds that one to the web app.
+    static let editions: [Edition] = [
+        Edition(id: "hafs-kfqc", shipped: true, reason: nil),
+        Edition(id: "warsh-libya", shipped: false, reason: "licensed for non-commercial use only; needs permission before it can be added"),
+        Edition(id: "qalun-libya", shipped: false, reason: "licensed for non-commercial use only; needs permission before it can be added"),
+        Edition(id: "hafs-indopak", shipped: false, reason: "no licensed page source yet"),
+    ]
+
+    /// The ids a link may actually name today.
+    static var shippedEditions: [String] { editions.filter(\.shipped).map(\.id) }
+
+    /// Why this edition id cannot open, in a sentence that names what can; `nil`
+    /// when it is one the app ships.
+    static func editionProblem(_ id: String) -> String? {
+        let shipped = "the app ships " + shippedEditions.joined(separator: ", ")
+        guard let edition = editions.first(where: { $0.id == id }) else {
+            return "no mus'haf named \"\(id)\"; \(shipped)"
+        }
+        if edition.shipped { return nil }
+        let why = edition.reason.map { " (\($0))" } ?? ""
+        return "\(id) is not in the app yet\(why); \(shipped)"
+    }
+
+    /// The edition segment of a raw route (`/hafs-kfqc/2:255?…` → `hafs-kfqc`),
+    /// before any grammar check, so a caller can say which part was wrong.
+    static func editionSegment(of raw: String) -> String? {
+        var route = raw.trimmingCharacters(in: .whitespacesAndNewlines)
+        if route.hasPrefix("#") { route.removeFirst() }
+        guard route.hasPrefix("/") else { return nil }
+        let segment = route.dropFirst().split(separator: "/", maxSplits: 1, omittingEmptySubsequences: false).first ?? ""
+        return segment.isEmpty ? nil : String(segment.split(separator: "?", maxSplits: 1)[0])
+    }
+
     /// `/hafs-kfqc/2:255?w=3-7` (with or without a leading `#`) → the hash the
     /// web app shows, or `nil` when it is not something the web app would open.
     static func hash(from raw: String) -> String? {
@@ -67,10 +111,12 @@ nonisolated enum Route {
             .flatMap(hash(from:))
     }
 
-    // MARK: - Grammar (mirrors parseHash in the web router)
+    // MARK: - Grammar (mirrors parseHash in the web router, then narrows the
+    // edition to what the app ships — the web router takes any name, and would
+    // show the Hafs pages under a lying address)
 
     private static func isEdition(_ s: String) -> Bool {
-        !s.isEmpty && s.allSatisfy { $0.isASCII && ($0.isLowercase || $0.isNumber || $0 == "-") }
+        shippedEditions.contains(s)
     }
 
     /// `p<N>`, `s:a`, `s:a-s:a` or `s:a-a`, every number ≥ 1.
