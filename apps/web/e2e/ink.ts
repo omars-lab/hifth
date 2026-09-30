@@ -1,4 +1,4 @@
-import type { Page } from "@playwright/test";
+import { expect, type Page } from "@playwright/test";
 
 /*
  * Reading the highlighter's ink back off the page: what colour a token
@@ -25,12 +25,48 @@ export function inkToken(page: Page, name: string): Promise<string> {
 export type Rgb = [number, number, number];
 
 /**
- * The pixels inside an element's box on screen. Playwright's screenshot is
+ * The pixels inside an element's box on screen, or the middle of it. Playwright's screenshot is
  * handed to the page's own canvas to decode, so no image library is needed.
  */
-export async function pixelsOf(page: Page, selector: string): Promise<Rgb[]> {
-  const box = (await page.locator(selector).first().boundingBox())!;
-  const png = await page.screenshot({ clip: box, animations: "disabled" });
+export async function pixelsOf(page: Page, selector: string, opts: { middle?: number } = {}): Promise<Rgb[]> {
+  // Trimmed to the screen: a band's box takes in the streak filter's margin and
+  // can start off the edge, which WebKit refuses as a cut-out where Chromium
+  // quietly trims it.
+  // And taken once the page has settled: on a phone the verse is still sliding
+  // into place for a moment after it is drawn, and can sit below the screen.
+  const mark = page.locator(selector).first();
+  let last = "";
+  await expect
+    .poll(
+      async () => {
+        const now = JSON.stringify(await mark.boundingBox());
+        const still = now === last;
+        last = now;
+        return still;
+      },
+      { intervals: [100, 100, 150, 200, 300] },
+    )
+    .toBe(true);
+  const box = (await mark.boundingBox())!;
+  // `middle` keeps only that share of the box around its centre, both ways: the
+  // box takes in the filter's margin, where letters sit outside the ink.
+  const m = opts.middle ?? 1;
+  const b = {
+    x: box.x + (box.width * (1 - m)) / 2,
+    y: box.y + (box.height * (1 - m)) / 2,
+    width: box.width * m,
+    height: box.height * m,
+  };
+  const view = page.viewportSize()!;
+  const x = Math.max(0, b.x);
+  const y = Math.max(0, b.y);
+  const clip = {
+    x,
+    y,
+    width: Math.min(view.width, b.x + b.width) - x,
+    height: Math.min(view.height, b.y + b.height) - y,
+  };
+  const png = await page.screenshot({ clip, animations: "disabled" });
   return page.evaluate(async (b64) => {
     const img = new Image();
     img.src = `data:image/png;base64,${b64}`;

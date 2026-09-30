@@ -111,8 +111,9 @@ test.describe("Hifth · the highlighter on the page", () => {
     expect(blends.length).toBeGreaterThan(0);
     for (const b of blends) expect(b).toBe("multiply");
 
-    const px = await pixelsOf(page, `${OVERLAY} .hl-sel.hl-ink`);
-    const darkest = Math.min(...px.map(lum));
+    // The middle of the band, where the ink always covers the letters.
+    const px = await pixelsOf(page, `${OVERLAY} .hl-sel.hl-ink`, { middle: 0.4 });
+    const darkest = px.reduce((m, p) => Math.min(m, lum(p)), 255);
     expect(darkest, "a letter under the amber is still near-black").toBeLessThan(70);
   });
 
