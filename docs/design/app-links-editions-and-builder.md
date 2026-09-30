@@ -252,19 +252,29 @@ first. The composing code is already in the core package for both callers to sha
 three shapes side by side, then the winner built on the existing share button with a
 Playwright test on a phone project.
 
-### ② The website shows the Hafs pages under any mus'haf name a link gives · **open**
+### ② The website shows the Hafs pages under any mus'haf name a link gives · **fixed**
 
-The app now refuses a link naming a mus'haf it does not ship. The website does not: a site
-link with `warsh-libya` in it opens the Hafs pages under that address, so the address lies
-about what is on screen, and a link a person types by hand cannot tell them so. Nothing
-breaks; the page still turns.
+The app refuses a link naming a mus'haf it does not ship. The website did not: a site link
+with `warsh-libya` in it opened the Hafs pages, and the question was whether the address
+should then keep the name the link gave, or say what is on screen.
 
-**What would answer it:** decide whether the website should do what the app does (refuse, and
-say so on screen) or fall back to the shipped mus'haf and rewrite the address; then a router
-test and a Playwright test for the chosen one.
+**What was decided (2026-09-29):** the website falls back to the mus'haf it ships and
+rewrites the address to say so, with no notice on screen. The app refuses because a caller
+is waiting for an answer it can act on; a person who followed a website link has nobody to
+answer and wants the verse, and a notice they can do nothing about would only be in the way.
+The picker, one tap away, already says which mus'hafs are listed but not yet shown, and why.
+The other way, refusing on the site, was not taken: it would turn a link with one wrong word
+into a dead end for the hafiz holding it.
+
+**What was found:** in the browser the address was already being rewritten, because the view
+settles in several steps after a link is read and each step writes the honest address. Only
+the address code on its own could leave the wrong name, when the link pointed at the page
+already showing and nothing moved. Now the name is replaced the moment the link is read, so
+every case lands the same way, and three tests hold it: the fallback itself in core, the
+address code with a link to a mus'haf it does not have, and the site opened at such a link
+(`apps/web/e2e/open-link.spec.ts`).
 
 ## What this is not settling
 
-The share sheet's design (open question ①). Whether the web app should refuse unknown
-editions on the site (open question ②). Whether links carry the app's language. And the still-open question on the native-shell page of driving one app request
+The share sheet's design (open question ①). Whether links carry the app's language. And the still-open question on the native-shell page of driving one app request
 through the real operating system end to end.

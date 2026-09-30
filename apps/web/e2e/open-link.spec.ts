@@ -104,3 +104,27 @@ test.describe("Hifth · a link that opens a panel", () => {
     await expect(page.getByRole("dialog")).toHaveCount(0);
   });
 });
+
+// The picker lists mus'hafs the site cannot show yet, and a link can name one
+// of them, or a name nobody knows. The site has no caller to answer with a
+// refusal, as the Mac and iPad app does, so it shows the mus'haf it ships and
+// makes the address say so: a link passed on from here stops lying.
+test.describe("Hifth · a link naming a mus'haf the site does not have", () => {
+  // Page 1 on purpose: it is the page the app opens on, so nothing moves the
+  // view for this link, and the address used to keep the name the link gave.
+  test("a page opens in the mus'haf the site ships, and the address says which", async ({ page }) => {
+    await page.goto("/#/warsh-libya/p1");
+    await expect(page.locator('svg[aria-labelledby="page-label-1"]:visible')).toBeVisible({
+      timeout: 20_000,
+    });
+    await expect(page).toHaveURL(/#\/hafs-kfqc\/p1$/);
+  });
+
+  test("a verse in an unknown mus'haf is selected in the one it ships", async ({ page }) => {
+    await page.goto("/#/nope/2:255");
+    await expect(page.locator('svg[aria-labelledby="page-label-42"]:visible')).toBeVisible({
+      timeout: 20_000,
+    });
+    await expect(page).toHaveURL(/#\/hafs-kfqc\/2:255$/);
+  });
+});
