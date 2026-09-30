@@ -761,6 +761,11 @@ they set themselves, an install offer, and a kept juz that has already been clea
 **How we'd know:** on a phone where the promise was refused, a kept juz survives a
 week of normal use, or the app fetches it back without the reader noticing.
 
+**Narrowed 2026-09-30.** Counting how often the promise is refused, per browser, would
+need the app to send something home, and it sends nothing on purpose; that line is
+dropped rather than left looking pending. What remains is the phone check of the
+recovery path, item 9 on the by-hand checklist (`.claude/skills/manual-testing/checklist.md`).
+
 ---
 
 ## Considered and deliberately not doing

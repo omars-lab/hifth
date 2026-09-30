@@ -41,7 +41,11 @@
 import { readdirSync, readFileSync, statSync, existsSync } from "node:fs";
 import { join, relative } from "node:path";
 
-const ROOT = new URL("..", import.meta.url).pathname;
+// HIFTH_GATE_ROOT points the check at a made-up tree, so a test can feed it one
+// thing it must refuse and one it must pass (scripts/gate-fixture.mjs).
+const ROOT = process.env.HIFTH_GATE_ROOT
+  ? process.env.HIFTH_GATE_ROOT.replace(/\/?$/, "/")
+  : new URL("..", import.meta.url).pathname;
 const DIST = join(ROOT, "apps", "web", "dist");
 const DOCS = join(DIST, "docs");
 
