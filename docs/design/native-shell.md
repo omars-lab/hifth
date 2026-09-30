@@ -129,7 +129,8 @@ answer, and the shell opens that address when it is done:
 - **current** — answers with the route and public link on screen.
 
 The whole contract is one file, `docs/design/app-url-scheme.openapi.json`, rendered as
-[the app links page](app-url-scheme.html). It is held honest from three sides: the Swift tests
+[the app links page](app-url-scheme.html) and browsable in [Swagger UI](app-url-scheme.swagger.html)
+(`make app-links-ui` serves it locally). It is held honest from three sides: the Swift tests
 run every example in it through the real parser, a vitest holds its lists of panels and
 tools to the web router, and a node test refuses a stale rendered page.
 

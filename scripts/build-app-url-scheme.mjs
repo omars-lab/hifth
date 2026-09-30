@@ -11,11 +11,16 @@
  *   node scripts/build-app-url-scheme.mjs        (make app-links-doc)
  * Check it is current:
  *   node --test scripts/app-url-scheme.test.mjs
+ * Browse the same JSON in Swagger UI (docs/design/app-url-scheme.swagger.html,
+ * a hand-written page beside it) from a local server, opened in the browser:
+ *   node scripts/build-app-url-scheme.mjs --serve  (make app-links-ui)
  */
 
-import { readFileSync, writeFileSync } from "node:fs";
+import { existsSync, readFileSync, statSync, writeFileSync } from "node:fs";
+import { createServer } from "node:http";
+import { spawn } from "node:child_process";
 import { fileURLToPath } from "node:url";
-import { dirname, resolve } from "node:path";
+import { dirname, extname, join, normalize, resolve } from "node:path";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 export const SPEC = resolve(__dirname, "../docs/design/app-url-scheme.openapi.json");
@@ -157,7 +162,7 @@ nav a { margin-right: 14px; color: ${C.accent}; }
 <body>
 <main>
 <h1>${esc(spec.info.title)}</h1>
-<p class="meta">Version ${esc(spec.info.version)} · rendered from <code>docs/design/app-url-scheme.openapi.json</code> by <code>scripts/build-app-url-scheme.mjs</code>. Every example below is run through the app's own parser by its tests, so the table says what the app does, not what it was meant to do.</p>
+<p class="meta">Version ${esc(spec.info.version)} · rendered from <code>docs/design/app-url-scheme.openapi.json</code> by <code>scripts/build-app-url-scheme.mjs</code>. The same contract in <a href="app-url-scheme.swagger.html">Swagger UI</a>, or as <a href="app-url-scheme.openapi.json">raw JSON</a>. Every example below is run through the app's own parser by its tests, so the table says what the app does, not what it was meant to do.</p>
 ${md(spec.info.description ?? "")}
 <nav>${Object.values(spec.paths)
     .map((ops) => `<a href="#${esc(ops.get.operationId)}">${esc(ops.get.summary.split(":")[0])}</a>`)
@@ -175,8 +180,48 @@ ${leftovers.length ? `<section id="more"><h2>Other examples</h2><table><tbody>${
 `;
 }
 
+/* ── serving ───────────────────────────────────────────────────────────── */
+
+export const SWAGGER = OUT.replace(/\.html$/, ".swagger.html");
+
+/**
+ * Serves docs/design/ so the Swagger UI page can fetch the JSON beside it
+ * (a file:// page may not), with the Swagger page at the root. Same shape as
+ * the guide's server: one folder, a short MIME map, nothing outside it.
+ */
+export function serve({ port = Number(process.env.APP_LINKS_PORT || 4175), open = true } = {}) {
+  const dir = dirname(OUT);
+  const TYPES = {
+    ".html": "text/html; charset=utf-8",
+    ".json": "application/json; charset=utf-8",
+    ".png": "image/png",
+    ".svg": "image/svg+xml",
+    ".css": "text/css; charset=utf-8",
+    ".js": "text/javascript; charset=utf-8",
+  };
+  const server = createServer((req, res) => {
+    const rel = normalize(decodeURIComponent((req.url ?? "/").split("?")[0])).replace(/^(\.\.[/\\])+/, "");
+    const file = rel === "/" || rel === "\\" ? SWAGGER : join(dir, rel);
+    if (!file.startsWith(dir) || !existsSync(file) || !statSync(file).isFile()) {
+      res.writeHead(404, { "content-type": "text/plain" }).end("not here");
+      return;
+    }
+    res.writeHead(200, { "content-type": TYPES[extname(file)] ?? "text/plain; charset=utf-8" });
+    res.end(readFileSync(file));
+  });
+  server.listen(port, "127.0.0.1", () => {
+    const url = `http://127.0.0.1:${port}/`;
+    console.log(`\n  App links in Swagger UI:  ${url}`);
+    console.log(`  The readable page:        ${url}app-url-scheme.html`);
+    console.log(`  Edit the JSON and reload. Ctrl-C to stop.\n`);
+    if (open && process.platform === "darwin") spawn("open", [url], { stdio: "ignore" }).unref();
+  });
+  return server;
+}
+
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   const spec = JSON.parse(readFileSync(SPEC, "utf8"));
   writeFileSync(OUT, render(spec));
   console.log(`wrote ${OUT}`);
+  if (process.argv.includes("--serve")) serve({ open: !process.argv.includes("--no-open") });
 }
