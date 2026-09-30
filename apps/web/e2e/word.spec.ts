@@ -79,6 +79,17 @@ async function wordInkRight(page: Page): Promise<number> {
   });
 }
 
+/** Every band of word ink, as its two ends and its line — the run's shape. */
+async function wordBands(page: Page): Promise<string[]> {
+  return page.evaluate(() =>
+    [...document.querySelectorAll("#hifth-overlay [data-hl-group='word']")].map((el) => {
+      const line = el as SVGLineElement;
+      const r = (n: number) => Math.round(n * 10) / 10;
+      return `${r(line.x1.baseVal.value)}>${r(line.x2.baseVal.value)}@${r(line.y1.baseVal.value)}`;
+    }),
+  );
+}
+
 /**
  * Press at `from`, hold past LONG_PRESS_MS (350 in @hifth/core), nudge, then run
  * `move` with the button still down.
@@ -146,6 +157,56 @@ test.describe("Hifth · word selection", () => {
     const first = wordInk(page).first();
     await expect(first).toHaveClass(/hl-ink/);
     expect(await first.evaluate((el) => el.tagName.toLowerCase())).toBe("line");
+  });
+
+  test("the same drag paints the same run, however late the word data arrives", async ({
+    browser,
+  }) => {
+    // Own the context: the service worker answers the shard's fetch itself,
+    // where `page.route` cannot slow it, so the worker is kept out of this one.
+    const context = await browser.newContext({ serviceWorkers: "block" });
+    const page = await context.newPage();
+    await openApp(page);
+    await tapAyah(page, "#verse-46");
+    await expect(page.locator("#hifth-overlay [data-hl-group='selection']")).not.toHaveCount(0);
+
+    const at = await ayahTarget(page, "#verse-46");
+    const drag = async () => {
+      await page.mouse.move(at.x - 70, at.y, { steps: 10 });
+    };
+
+    // A slow network: the page's word data lands well after the finger has
+    // finished moving. That is the ordinary case on a cold page — the ~3.6 KB
+    // shard is fetched on the first frame of the hold — and it is where the run
+    // used to start from wherever the finger *ended up* rather than from the
+    // word the hold landed on, so the same drag selected one word or seven
+    // depending on how fast the numbers came back.
+    await page.route("**/assets/words/**", async (route) => {
+      await new Promise((r) => setTimeout(r, 700));
+      await route.continue();
+    });
+    await holdThen(page, at, async () => {
+      await drag();
+      await expect(wordInk(page)).toHaveCount(0);
+      await expect(wordInk(page)).not.toHaveCount(0);
+    });
+    await page.mouse.up();
+    const slow = await wordBands(page);
+    await page.unroute("**/assets/words/**");
+
+    // The same hold and the same drag with the data already in hand.
+    await page.keyboard.press("Escape");
+    await expect(wordInk(page)).toHaveCount(0);
+    await holdThen(page, at, async () => {
+      await expect(wordInk(page)).not.toHaveCount(0);
+      await drag();
+    });
+    await page.mouse.up();
+    const fast = await wordBands(page);
+
+    expect(fast.length, "the drag swept more than one word").toBeGreaterThan(0);
+    expect(slow, "the run begins at the word the hold landed on").toEqual(fast);
+    await context.close();
   });
 
   test("Escape climbs back to the whole ayah, not out of the selection", async ({ page }) => {

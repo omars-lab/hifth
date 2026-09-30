@@ -621,3 +621,21 @@ on both halves. Two tokens carry the green and the ochre. The scrim's own test p
 even-odd path to the padded crop with the line as its hole, so a return to the un-veiled crop
 — no scrim, or a scrim that does not punch the ayah out — fails it. The fallback is untouched:
 no edge, no shard or no page still renders nothing and the row keeps its plain note.
+
+### ⑦ A slow page made the same hold-and-drag start the run at a different word · **fixed**
+
+Found 2026-09-30, by the golden picture of page 7's word run: the same test drew a run that
+began one word further along on some runs than on others, once the picture check was made
+sensitive enough to see colour (the passage-link fix tightened it). The cause was in the
+stroke, not the picture. A hold inside the selected ayah asks the network for the page's word
+boxes on its first frame, and until they arrive the finger keeps moving. The run's first word
+was taken from wherever the finger *was* when the boxes landed, not from where the hold began
+— so on a cold page a quick drag selected one word or seven depending on how fast the numbers
+came back, and a hafiz would have seen the run start somewhere they never pressed.
+
+**What was fixed.** The stroke now remembers where the hold began, separately from where the
+finger is, and takes the run's first word from that point the moment the boxes arrive; the
+finger's current position only ever moves the run's far end. **Closed by** the test in
+`apps/web/e2e/word.spec.ts` that slows the word boxes down, drags the same distance twice —
+once before the numbers land, once with them in hand — and requires the two runs to be the
+same bands.
