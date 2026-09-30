@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
+  exposeToShell,
   isNative,
   nativeShare,
   postReady,
@@ -109,5 +110,49 @@ describe("ready and route", () => {
       { type: "route", hash: "#/hafs-kfqc/2:255" },
       { type: "route", hash: "#/hafs-kfqc/p45" },
     ]);
+  });
+});
+
+/**
+ * The one thing the shell asks of the page: turn it. The Mac's Page menu
+ * (Next Page ⌘←, Previous Page ⌘→) has no keyboard event to send — the web
+ * app ignores modified keys on purpose — so the page hands the shell a
+ * function instead, and only inside the shell.
+ */
+describe("exposeToShell", () => {
+  type Paged = Window & { __HIFTH_PAGE__?: { stepPage: (step: 1 | -1) => void } };
+  const pw = window as Paged;
+  afterEach(() => {
+    delete pw.__HIFTH_PAGE__;
+  });
+
+  it("hands the page nothing outside the shell", () => {
+    const stepPage = vi.fn();
+    const away = exposeToShell({ stepPage });
+    expect(pw.__HIFTH_PAGE__).toBeUndefined();
+    away();
+  });
+
+  it("in the shell, the page's turn is reachable by name, and taken away again", () => {
+    inShell();
+    const stepPage = vi.fn();
+    const away = exposeToShell({ stepPage });
+    pw.__HIFTH_PAGE__?.stepPage(1);
+    pw.__HIFTH_PAGE__?.stepPage(-1);
+    expect(stepPage.mock.calls).toEqual([[1], [-1]]);
+    away();
+    expect(pw.__HIFTH_PAGE__).toBeUndefined();
+  });
+
+  it("a later exposure replaces the earlier one; the earlier teardown does not remove it", () => {
+    inShell();
+    const first = vi.fn();
+    const second = vi.fn();
+    const awayFirst = exposeToShell({ stepPage: first });
+    exposeToShell({ stepPage: second });
+    awayFirst();
+    pw.__HIFTH_PAGE__?.stepPage(1);
+    expect(first).not.toHaveBeenCalled();
+    expect(second).toHaveBeenCalledWith(1);
   });
 });
