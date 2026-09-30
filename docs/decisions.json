@@ -1097,7 +1097,8 @@
       "related": [
         "highlight-strength",
         "comparison-crop",
-        "highlight-options"
+        "highlight-options",
+        "highlight-texture"
       ]
     },
     {
@@ -1128,7 +1129,8 @@
       "related": [
         "highlight-shape",
         "tajweed-colours",
-        "highlight-options"
+        "highlight-options",
+        "highlight-texture"
       ]
     },
     {
@@ -1705,7 +1707,52 @@
         "highlight-shape",
         "highlight-strength",
         "comparison-crop",
-        "tajweed-colours"
+        "tajweed-colours",
+        "highlight-texture"
+      ]
+    },
+    {
+      "id": "highlight-texture",
+      "question": "Could the mark look like a real highlighter: rough at the edges, and darker where two marks stack?",
+      "status": "open",
+      "options": [
+        {
+          "id": "A",
+          "label": "Keep today: the clean swipe, flat ink, two pens"
+        },
+        {
+          "id": "B",
+          "label": "A rough band, the same hand for the same verse, flat ink"
+        },
+        {
+          "id": "C",
+          "label": "One pen at half strength; every mark is one more pass, uncounted"
+        },
+        {
+          "id": "D",
+          "label": "Counted passes at 60%: a passage is one, a verse always two, a run of words three, never four"
+        },
+        {
+          "id": "E",
+          "label": "Streaks along the line, made by a filter"
+        },
+        {
+          "id": "F",
+          "label": "A mark of another colour, blended in"
+        },
+        {
+          "id": "G",
+          "label": "A mark of another colour cuts itself out"
+        }
+      ],
+      "doc": "docs/decisions/highlight-texture.md",
+      "page": "docs/design/highlight-texture-options.html",
+      "builtBy": "scripts/build-highlight-texture-options.mjs",
+      "artifact": "https://blog.bytesofpurpose.com/hifth/docs/design/highlight-texture-options.html",
+      "related": [
+        "highlight-shape",
+        "highlight-strength",
+        "highlight-options"
       ]
     }
   ]
