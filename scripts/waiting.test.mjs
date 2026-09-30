@@ -7,7 +7,7 @@
  */
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { firstSentence, recommendationFrom, renderWaiting } from "./waiting.mjs";
+import { firstSentence, leftoverShots, recommendationFrom, renderWaiting } from "./waiting.mjs";
 
 test("recommendationFrom reads a bold lead and its continuation lines", () => {
   const md = ["# A record", "", "**Recommendation, for now:** C. It is the", "only one that works.", "", "More."].join("\n");
@@ -101,4 +101,18 @@ test("renderWaiting folds a check's steps and lists each question in one line", 
   assert.match(out, /> Run it with `make validate CHECK=hold`\./);
   assert.match(out, /^- \*\*\[Q1\]\(issues\.md#q1\)\*\* — Should it snap\?$/m);
   assert.match(out, /stuck until something outside the code happens\? — 1\n[\s\S]*^- \*\*\[Q2\]\(issues\.md#q2\)\*\* — Waiting on a licence\.$/m);
+});
+
+test("leftoverShots names pictures of a decision that is no longer open", () => {
+  const shots = { a: { shots: [{ file: "a-0.png", caption: "top" }] }, gone: { shots: [{ file: "gone-0.png", caption: "top" }] } };
+  const files = ["a-0.png", "gone-0.png", "stray-3.png"];
+  assert.deepEqual(leftoverShots(shots, ["a"], files), [
+    "gone — pictured, but no longer an open decision",
+    "stray-3.png — on disk, but not in the picture list",
+  ]);
+});
+
+test("leftoverShots is quiet when the pictures match the open decisions", () => {
+  const shots = { a: { shots: [{ file: "a-0.png", caption: "top" }, { file: "a-1.png", caption: "s" }] } };
+  assert.deepEqual(leftoverShots(shots, ["a", "b"], ["a-0.png", "a-1.png"]), []);
 });

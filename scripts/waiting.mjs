@@ -17,7 +17,7 @@
  * Shared by the builder (build-waiting-doc.mjs), the camera (shoot-waiting.mjs)
  * and the check (gate-tasks.mjs).
  */
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { createHash } from "node:crypto";
 import { join } from "node:path";
 import { ROOT } from "./code-pointers.mjs";
@@ -33,6 +33,29 @@ export const WAITING_SHOTS_INDEX = join(WAITING_SHOTS_DIR, "shots.json");
 export function readShots() {
   if (!existsSync(WAITING_SHOTS_INDEX)) return {};
   return JSON.parse(readFileSync(WAITING_SHOTS_INDEX, "utf8"));
+}
+
+/**
+ * Pictures that should not be there: a decision in the picture list that is no
+ * longer open (it was settled, and the note stopped showing it, but its pictures
+ * stayed), and a file in the folder the list does not name. Pure, so a test can
+ * hand it a made-up folder; `files` is the folder's .png names.
+ */
+export function leftoverShots(shots, openIds, files) {
+  const open = new Set(openIds);
+  const named = new Set(Object.values(shots).flatMap((d) => d.shots.map((s) => s.file)));
+  return [
+    ...Object.keys(shots)
+      .filter((id) => !open.has(id))
+      .map((id) => `${id} — pictured, but no longer an open decision`),
+    ...files.filter((f) => !named.has(f)).map((f) => `${f} — on disk, but not in the picture list`),
+  ];
+}
+
+/** The .png files in the pictures folder, or none before the first shoot. */
+export function shotFiles() {
+  if (!existsSync(WAITING_SHOTS_DIR)) return [];
+  return readdirSync(WAITING_SHOTS_DIR).filter((f) => f.endsWith(".png"));
 }
 
 /**
