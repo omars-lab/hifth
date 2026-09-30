@@ -22,6 +22,12 @@
  * What the page needs from the shell: `publicBase`, the site's real address.
  * A link built from `location.origin` inside the shell would read
  * `hifth-app://app/…` and be dead for everyone it was sent to.
+ *
+ * And the one thing the shell asks of the page: turn it. The Mac's Page menu
+ * (Next Page ⌘←, Previous Page ⌘→) cannot send a key the app would take —
+ * modified keys are ignored on purpose, see core's keymap — so the page hands
+ * the shell its own `stepPage` under `window.__HIFTH_PAGE__`, inside the
+ * shell only, and the shell calls it by name (`ShellModel.stepPage`).
  */
 
 export interface NativeInfo {
@@ -38,8 +44,15 @@ export type NativeMessage =
 type Handler = { postMessage: (m: unknown) => void };
 type Shelled = Window & {
   __HIFTH_NATIVE__?: unknown;
+  __HIFTH_PAGE__?: PageApi;
   webkit?: { messageHandlers?: Record<string, Handler | undefined> };
 };
+
+/** What the page lets the shell do to it. */
+export interface PageApi {
+  /** Turn one page: `1` is the next page (to the left), `-1` the previous. */
+  readonly stepPage: (step: 1 | -1) => void;
+}
 
 /** The shell's marker, if it is well-formed; `null` in a browser. */
 export function nativeInfo(): NativeInfo | null {
@@ -98,4 +111,20 @@ export function postReady(): void {
 /** The hash the app is showing, every time it changes. */
 export function postRoute(hash: string): void {
   post({ type: "route", hash });
+}
+
+/**
+ * Let the shell turn the page. Returns the teardown; outside the shell it
+ * exposes nothing and the teardown does nothing. A later exposure replaces an
+ * earlier one, and only its own teardown removes it, so a re-render that
+ * exposes fresh handlers before the old effect cleans up never leaves the
+ * menu pointing at nothing.
+ */
+export function exposeToShell(api: PageApi): () => void {
+  if (!isNative()) return () => {};
+  const w = window as Shelled;
+  w.__HIFTH_PAGE__ = api;
+  return () => {
+    if (w.__HIFTH_PAGE__ === api) delete w.__HIFTH_PAGE__;
+  };
 }

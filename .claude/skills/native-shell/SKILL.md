@@ -62,6 +62,14 @@ Cold start puts the route into the first URL's fragment, so there is no race. A 
 arrives while running is queued until the page says `ready`, then applied. Quote any route
 with `?` or `&` on the make line.
 
+**The shell asks the page for one thing: a page turn.** The Mac's Page menu (Next Page ⌘←,
+Previous Page ⌘→) calls `ShellModel.stepPage`, which runs the page's own turn lent under
+`window.__HIFTH_PAGE__` (`exposeToShell` in `apps/web/src/native-bridge.ts`, in-shell only).
+It cannot send a key: the web app drops any key held with ⌘, ctrl or alt on purpose. A press
+before `ready` is dropped. Everything the shell runs in the page goes through `model.runScript`,
+which the unit tests replace with a collector (`ShellMenuTests.swift`). After changing the web
+side, `make app-web` before `make app-run-mac`, or the shell runs a bundle without the hook.
+
 **Automation uses the env var, not `simctl openurl`.** `openurl` shows a "open in Hifth?"
 alert once per install; the env var (`SIMCTL_CHILD_HIFTH_ROUTE`) does not. `make app-open`
 is for a human turning a running app, not for scripts. `simctl launch` on an already-running
