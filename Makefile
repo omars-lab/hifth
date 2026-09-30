@@ -540,8 +540,16 @@ tasks: ## What is still open, by whose turn it is:  make tasks
 backlog: tasks-doc ## Rebuild docs/backlog.md — every open item in full, on one page
 
 .PHONY: tasks-doc
-tasks-doc: ## Re-render docs/backlog.md, every open item in full, from the pages that own them
+tasks-doc: ## Re-render docs/backlog.md, every open item in full, and docs/waiting-on-you.md, what only you can move
 	@node scripts/build-tasks-doc.mjs
+	@node scripts/build-waiting-doc.mjs
+
+.PHONY: waiting-shots
+waiting-shots: build ## Photograph each open decision's options page for docs/waiting-on-you.md, then rebuild the note
+	@# The public build, never the pitch one: the pictures are checked in and
+	@# served from the site like every other page under docs/.
+	@node scripts/shoot-waiting.mjs
+	@node scripts/build-waiting-doc.mjs
 
 .PHONY: etl-scripts-doc
 etl-scripts-doc: ## Re-render docs/design/etl-scripts.md from the scripts on disk and the code map
