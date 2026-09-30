@@ -21,77 +21,86 @@
 /* The marker rules. Everything about ink reading as ink rather than as a box
    lives in this one block.
 
+   Each band is a group (`.hl-ink`) holding one filled shape (`.hl-band`): the
+   rough band the highlighter draws, with edges that drift, both ends nearly
+   upright, and streaks along the line from a filter the highlighter attaches
+   (highlight-texture decision, settled 2026-09-30). The group carries the
+   colour, which the shape inherits, and the blend and the wipe.
+
    `mix-blend-mode: multiply` is the one that matters. An amber at 24% alpha is
    composited *over* the glyphs, so it greys the black text — a film laid on top
    of the page, which is the opposite of what a highlighter does. Multiply
    darkens the paper and leaves the ink under it alone, so the scripture stays
    black and legible at a much more confident colour than alpha ever allowed.
-   It also darkens where two swipes overlap, for free, exactly as a second pass
-   of a pen does — which is what a selection inside a range now looks like.
+   Where two marks cross, the two colours mix, as two inks do on paper.
 
    The stacking context that scopes the blend is `isolation: isolate` on the SVG
    *root*, in components/PageStage.module.css — not here, on the overlay group,
    which is where it looks like it belongs and is exactly wrong. See that rule
    for why.
 
-   No stroke ring, and no `fill`. A ring around a region is the grammar of
-   selection UI; the round caps are the pen's edge, and that is the only edge
-   ink has. */
+   The blend is on the group and the filter on the shape inside it: a blend on
+   an element nested inside a filtered or clipped one blends with nothing and
+   paints solid over the letters. No stroke: the shape's own edge is the only
+   edge ink has. */
 #hifth-overlay .hl-ink {
-  fill: none;
-  stroke-linecap: round;
   mix-blend-mode: multiply;
+}
+#hifth-overlay .hl-band {
+  stroke: none;
 }
 
 /* The wipe: the ink lays down right to left, one line after the next.
  *
- * A dash the exact length of the stroke, offset by that same length, is a
- * stroke that is entirely gap — invisible. Animating the offset to zero slides
- * the dash in from the path's start point, and because `stroke-linecap: round`
- * is already on, the leading edge is a round cap travelling across the line:
- * a pen tip, for free, from the property that was there to shape the ends.
+ * A clip that starts covering the whole band and shrinks away to its left
+ * edge, so the ink appears from the right — where a pen crossing Arabic
+ * starts — and follows it to the left. The leading edge is upright, like the
+ * band's own ends.
  *
- * Which end it starts at is not decided here. It is decided by which end the
- * highlighter put first when it wrote x1/x2 (@hifth/core highlighter.ts) — the
- * right one, because that is where a pen crossing Arabic starts. The CSS cannot
- * know that; a `<line>` is symmetric and the script is not.
- *
- * `--hl-len` and `--hl-i` come from the highlighter, per element. The fallback
- * values are what makes this rule safe on an element that has neither: length 0
- * means the dash covers nothing and the gap covers nothing, so the stroke draws
- * solid and unanimated rather than vanishing. A highlight that fails to appear
- * is the one outcome this whole feature must never produce.
+ * `--hl-i` comes from the highlighter, per band: which line of the mark this
+ * is, so line 2 starts after line 1. A browser that cannot clip an SVG group
+ * this way ignores the animation and shows the band whole — a highlight that
+ * fails to appear is the one outcome this whole feature must never produce.
  *
  * `backwards` fill matters for the stagger: without it, line 2 is fully drawn
  * during line 1's stroke and then blinks out when its own delay expires. */
 #hifth-overlay .hl-ink {
-  stroke-dasharray: var(--hl-len, 0) var(--hl-len, 0);
   animation: hifth-ink var(--dur-ink) var(--ease-ink) backwards;
   animation-delay: calc(var(--hl-i, 0) * var(--stagger-ink));
 }
 @keyframes hifth-ink {
   from {
-    stroke-dashoffset: var(--hl-len, 0);
+    clip-path: inset(-20% -5% -20% 100%);
   }
   to {
-    stroke-dashoffset: 0;
+    clip-path: inset(-20% -5% -20% -5%);
   }
 }
 @media (prefers-reduced-motion: reduce) {
-  /* Not just a zero duration — `animation: none` leaves stroke-dashoffset at
-     its initial 0, which is the fully-drawn stroke. The ink is simply there. */
+  /* Not just a zero duration: with no animation there is no clip at all, and
+     the ink is simply there. */
   #hifth-overlay .hl-ink {
     animation: none;
   }
 }
 
-/* Selection — the amber swipe. One selection at a time.
+/* Flat ink for a reader who has asked the system for more contrast: the
+   streaks thin the mark, and a reader who wants the page as clear as it can
+   be should get the pen at full strength. `none` here outranks the
+   highlighter's filter attribute. */
+@media (prefers-contrast: more), (forced-colors: active) {
+  #hifth-overlay .hl-band {
+    filter: none;
+  }
+}
+
+/* Selection — the amber band. One selection at a time.
 
    Opaque, not a wash: under multiply the paper does the lightening, so the
    token is the colour of the ink in the pen rather than the colour it happens
    to land as. */
 #hifth-overlay .hl-sel.hl-ink {
-  stroke: var(--ink-sel);
+  fill: var(--ink-sel);
 }
 
 /* Selection, fallback rendering: the pre-ink wash and ring, unchanged. This is
@@ -115,20 +124,17 @@
   opacity: 0.8;
 }
 
-/* Range — the passage a drag painted (Loop 5). The same pen, held lighter: a
-   selection inside a range still has to read as "you are here", and under
-   multiply the way to say "one step quieter" is less ink, not a different
-   colour.
-
-   The old value here was --range-wash at 0.15 alpha, which was tuned for
-   compositing *over* the glyphs. Under multiply it is a rounding error — 0.15
-   amber multiplied into cream is very nearly cream. Halved rather than
-   quartered, because the two now stack correctly: a selected ayah inside a
-   range carries both marks, and multiply darkens where they overlap, which is
-   exactly the second pass of a pen that "you are here, inside this passage"
-   should look like. */
+/* Range — the passage a drag painted (Loop 5) — and the word run a hold
+   painted. Each in its own colour since the highlight-texture decision
+   (settled 2026-09-30, option F): a passage in a second colour under the amber
+   verse, a run of words in a third over it, and where they cross the colours
+   mix under multiply, as two inks do on paper. The colours are stand-ins until
+   the owner picks the real ones (docs/backlog.md). */
 #hifth-overlay .hl-hlt.hl-ink {
-  stroke: var(--ink-range);
+  fill: var(--ink-range);
+}
+#hifth-overlay .hl-run.hl-ink {
+  fill: var(--ink-run);
 }
 
 /* Range, fallback rendering — the pre-ink wash and ring, for the same reason
