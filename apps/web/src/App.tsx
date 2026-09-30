@@ -1763,7 +1763,10 @@ export function App(): JSX.Element {
         setSelectedRange(keys);
         setPage(head.page);
         announce(t.arrivedRange(origin, `${surah}:${ayah}-${toAyah}`, head.page));
-        void stage.navigateTo(keys[0]!, { pulse: true });
+        // No pulse: the stage paints the passage from `rangeKeys`, and a drag
+        // leaves no single-verse mark on the first verse, so a link must not
+        // either — the two roads land on one look.
+        void stage.navigateTo(keys[0]!, { pulse: false });
         return;
       }
 
@@ -2197,6 +2200,7 @@ export function App(): JSX.Element {
                   label={t.pageN(facing)}
                   selectedKey={selectedKey}
                   breadcrumbKey={breadcrumbKey}
+                  rangeKeys={selectedRange}
                   onSelect={handleSelect}
                   onSelectRange={handleSelectRange}
                   /* Both leaves, unlike `dragToTurn`: a word run is a question
@@ -2244,6 +2248,7 @@ export function App(): JSX.Element {
                 label={t.pageN(page)}
                 selectedKey={selectedKey}
                 breadcrumbKey={breadcrumbKey}
+                rangeKeys={selectedRange}
                 onSelect={handleSelect}
                 onSelectRange={handleSelectRange}
                 onSelectWords={handleSelectWords}

@@ -55,6 +55,28 @@ test.describe("Hifth · the highlighted range", () => {
     expect(page.url()).toContain("#/hafs-kfqc/2:47-2:48");
   });
 
+  test("a range link paints the whole passage, the way a drag does", async ({ page }) => {
+    // Opening `2:47-2:48` from a link and releasing a drag over the same two
+    // verses land on the same state, so they must look the same: the amber
+    // passage ink over every verse in the range, and no single-verse selection
+    // mark on top of the first one. Before this test the link painted only the
+    // first verse (as a selection), and the passage ink was drawn on a drag
+    // alone — a shared passage arrived looking like a shared verse.
+    await page.goto(RANGE_LINK);
+    await expect(page.getByRole("dialog")).toBeVisible();
+    // A swipe is an SVG line with no box of its own, so it is counted, not
+    // looked at. Both verses are inked: 2:47 wraps two lines and 2:48 one, so
+    // there are at least three swipes, never the one or two a single verse gives.
+    const ink = page.locator("#hifth-overlay .hl-hlt");
+    await expect.poll(() => ink.count()).toBeGreaterThanOrEqual(3);
+    await expect(page.locator("#hifth-overlay .hl-sel")).toHaveCount(0);
+
+    // Closing the passage's menu drops its ink with it (a wash with no menu
+    // would be a dead end), and the next tap paints a verse, not a passage.
+    await page.getByRole("dialog").getByRole("button", { name: "إغلاق" }).tap();
+    await expect(ink).toHaveCount(0);
+  });
+
   test("un-vendored targets stay visible but disabled, with an honest reason", async ({
     browser,
   }) => {
