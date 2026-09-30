@@ -646,6 +646,12 @@ export interface Strings {
   toolbarLabel: string;
   toolSelect: string;
   toolHighlight: string;
+  /** The highlighter's pens, offered in the tools bar while it is on. */
+  penLabel: string;
+  penGreen: string;
+  penBlue: string;
+  penYellow: string;
+  penPink: string;
   toolBookmark: string;
   /** The tool that is on, named: printed on the bar and announced. */
   toolOn(name: string): string;
@@ -1167,6 +1173,11 @@ export function buildStrings(lang: Lang, m: Catalog): Strings {
     toolbarLabel: m.toolbarLabel,
     toolSelect: m.toolSelect,
     toolHighlight: m.toolHighlight,
+    penLabel: m.penLabel,
+    penGreen: m.penGreen,
+    penBlue: m.penBlue,
+    penYellow: m.penYellow,
+    penPink: m.penPink,
     toolBookmark: m.toolBookmark,
     toolOn: (name) => m.toolOn({ name }),
     toolBookmarkHint: m.toolBookmarkHint,

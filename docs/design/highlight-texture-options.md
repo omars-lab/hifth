@@ -323,7 +323,7 @@ one band per line, joining the verses that share a line before the pen goes down
 shape and overlap rule is chosen; the test that would catch it coming back reads the passage's
 bands and expects one per line where two verses share one.
 
-### ② Which two colours should a passage and a run of words take? · **open**
+### ② Which two colours should a passage and a run of words take? · **fixed**
 
 The owner chose a colour per meaning, blended where the marks cross (2026-09-30). The green and
 blue in the app are stand-ins from this page, and where either crosses the amber verse the
@@ -359,6 +359,29 @@ What the pictures taught that the numbers did not:
 
 Drawn by `node scripts/shoot-ink-colours.mjs` after `make build`, which also prints the figures.
 
+**Settled 2026-09-30 by the owner:** "pastel green and blue", "and yellow", "and pink", "should
+be defaults", "there should be settings to update them", "selectable from the toolbar for the
+highlighter". So the highlighter now carries four pastel pens (green, blue, yellow and pink),
+each as strong as it can be while the letters still clear 4.5 to 1 where it crosses the amber
+verse:
+
+| pen | letters where it crosses the verse | how plainly it shows on paper |
+| --- | --- | --- |
+| green | 4.6 to 1 | 1.6 to 1 |
+| blue | 4.7 to 1 | 1.6 to 1 |
+| yellow | 5.9 to 1 | 1.4 to 1 |
+| pink | 4.6 to 1 | 2.1 to 1 |
+
+- **A passage is green** until the reader picks another pen. While the highlighter is on, the
+  four pens sit beside it in the tools bar, on a computer and on a phone; the pen picked colours
+  the passage and is remembered on that device.
+- **A run of words is blue**, over the amber verse, whichever pen is picked for passages.
+- **The verse stays amber.**
+
+Left for later, on the backlog: whether the reader should also be able to change the run's
+colour, or mix a pen of their own. The pens are held to the floor by a test that works out
+each one's contrast over the amber, so a new pen that fails it cannot be added by accident.
+
 ### ③ Does the streak filter slow a page turn on a real iPhone? · **blocked**
 
 The streaks are drawn by one filter shared by every mark on the page. A laptop does not notice
@@ -372,6 +395,15 @@ The mark is revealed from right to left as it goes down, by clipping the whole g
 and Firefox draw it; whether Safari clips a group that way was not checked on a device. If it
 does not, the mark simply appears whole, which is what a reader who asked for less motion
 already sees. What would answer it: select a verse in Safari on an iPhone and watch.
+
+### ⑤ Should a reader also choose the colour of a run of words, or mix a pen of their own? · **open**
+
+The highlighter's pen is picked from four pastels in the tools bar, and a run of words is
+always blue. The owner asked for "settings to update them"; the four pens answer that for a
+passage. What is still open: whether a run of words gets a choice too, and whether a reader may
+mix a colour of their own. A free colour picker cannot promise the letters stay readable where
+the colour crosses the amber verse, so a pen of the reader's own would have to be checked, and
+pulled paler, before it is used. Nothing is lost by waiting: the four pens already pass.
 
 ---
 

@@ -1,8 +1,10 @@
 import { useEffect, useRef, useState } from "react";
 import { useT } from "../i18n";
+import type { Pen } from "../pen";
 import type { PageTool } from "./PageStage";
 import { TOOLS, ToolIcon, toolHint, toolName } from "./PageToolbar";
 import styles from "./PhoneToolbar.module.css";
+import { PenPicker } from "./PenPicker";
 
 /**
  * The page tools on a phone — step 5 of docs/design/page-toolbar-plan.md, and
@@ -120,7 +122,12 @@ export function PhoneToolbarB({ tool, onTool }: PhoneToolbarProps): JSX.Element 
  * tool on is for — until the tray is closed. Closing it puts the page back to
  * plain reading.
  */
-export function PhoneToolbarC({ tool, onTool }: PhoneToolbarProps): JSX.Element {
+export function PhoneToolbarC({
+  tool,
+  onTool,
+  pen,
+  onPen,
+}: PhoneToolbarProps & { pen: Pen; onPen: (pen: Pen) => void }): JSX.Element {
   const { t, dir } = useT();
   const [open, setOpen] = useState(false);
   return (
@@ -145,6 +152,9 @@ export function PhoneToolbarC({ tool, onTool }: PhoneToolbarProps): JSX.Element 
           {/* The close sits on the line under the tools, not beside them: eight
               tools at thumb size are the whole width of a 390px phone. */}
           <div className={styles.trayRow}>
+            {/* The highlighter's pens share the line with its hint, where the
+                thumb already is. */}
+            {tool === "highlight" && <PenPicker pen={pen} onPen={onPen} />}
             <span className={styles.trayHint}>{toolHint(t, tool, true)}</span>
             <button
               type="button"
