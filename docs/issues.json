@@ -2310,10 +2310,11 @@
         "file": "docs/design/native-shell.md",
         "item": "⑨"
       },
-      "status": "open",
+      "status": "fixed",
       "severity": "question",
       "owner": "agent",
-      "note": "The x-callback-url door (open, current, the x-success / x-error answers) is proven by unit tests on the parser and the shell model only; no test has the operating system hand the app a real request and a second app receive the answer."
+      "note": "The x-callback-url door was proven by unit tests on the parser and the shell model only. Since 2026-09-29 `make app-callback-check` hands macOS a real request whose answer address is a one-request receiver on localhost: the app answers through the operating system, the browser fetches the receiver, and the script checks the route and public link (x-success) and the bad-route refusal (x-error). Mac only; simctl openurl stops at an alert on the simulator.",
+      "closedBy": "native/scripts/callback-check.sh"
     },
     {
       "id": "share-sheet-link-builder",
