@@ -255,7 +255,12 @@
         {
           "file": "apps/web/src/components/ShareSheet.tsx",
           "symbol": "ShareSheet",
-          "note": "Where a link leaves the app. Do not reach for the Clipboard API without a fallback — a LAN preview is plain http, so it is not a secure context and the API is simply absent."
+          "note": "Where a link leaves the app, and since decision share-sheet-builder where a link to the app is built on a phone: three shapes picked by `?share=a|b|c`, C shown by default, the app link always copied because a phone's share sheet may refuse `hifth://`. Do not reach for the Clipboard API without a fallback — a LAN preview is plain http, so it is not a secure context and the API is simply absent."
+        },
+        {
+          "file": "apps/web/src/share-links.ts",
+          "symbol": "linksFor",
+          "note": "The two links for one view — the site's `#/…` and the app's `hifth://…` — from the same `serializeState`, with the panel the sheet was asked to open written into both. Nothing here knows a route of its own; its unit test runs every link through the contract page's own rules (`predictLink`), so a link the sheet writes is one the shell accepts."
         },
         {
           "file": "packages/core/src/field.ts",
