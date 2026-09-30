@@ -68,6 +68,9 @@ function renderMenu(overrides: Partial<Props> = {}) {
   return { props, ...render(<HighlightMenu {...props} />) };
 }
 
+/** The share button also expands (into the link sheet); a row is any other expandable button. */
+const notShare = (name: string): boolean => !name.startsWith("شارك");
+
 describe("HighlightMenu (spec §9 — the drag-highlight menu)", () => {
   it("renders nothing until a range is highlighted", () => {
     const { container } = renderMenu({ rangeKeys: null });
@@ -93,7 +96,7 @@ describe("HighlightMenu (spec §9 — the drag-highlight menu)", () => {
 
   it("expands a row into the comparison, standing on that row's source ayah", () => {
     renderMenu();
-    const row = screen.getByRole("button", { expanded: false });
+    const row = screen.getByRole("button", { expanded: false, name: notShare });
     fireEvent.click(row);
     expect(row).toHaveAttribute("aria-expanded", "true");
     // The panel's "here" side is 2:47 — the member that produced this edge.
@@ -118,7 +121,7 @@ describe("HighlightMenu (spec §9 — the drag-highlight menu)", () => {
       ],
     });
     expect(screen.getByText("من ٢:٤٧، ٢:٤٨")).toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { expanded: false }));
+    fireEvent.click(screen.getByRole("button", { expanded: false, name: notShare }));
     expect(document.querySelector(`[data-here="${k("2:48")}"]`)).toBeInTheDocument();
   });
 
@@ -129,6 +132,8 @@ describe("HighlightMenu (spec §9 — the drag-highlight menu)", () => {
   });
 
   it("shares the range through the §7 range form", async () => {
+    // The share button opens the link sheet (decision share-sheet-builder); a
+    // passage asks no question, so the website link is the next tap.
     // jsdom exposes no clipboard; define one (navigator itself is not stubbable).
     const writeText = vi.fn().mockResolvedValue(undefined);
     Object.defineProperty(navigator, "clipboard", {
@@ -137,6 +142,7 @@ describe("HighlightMenu (spec §9 — the drag-highlight menu)", () => {
     });
     renderMenu();
     fireEvent.click(screen.getByRole("button", { name: /شارك هذا المقطع كرابط/ }));
+    fireEvent.click(screen.getByRole("button", { name: "شارك رابط الموقع" }));
     await waitFor(() => {
       expect(writeText).toHaveBeenCalledWith(expect.stringContaining(`#/${ED}/2:47-2:48`));
     });
