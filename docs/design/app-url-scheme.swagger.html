@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hifth app links · Swagger UI</title>
+<!--
+  The same contract as app-url-scheme.html, in the viewer most API readers
+  already know. Hand-written; it holds nothing of its own — Swagger UI reads
+  docs/design/app-url-scheme.openapi.json from beside this file, so a change
+  to the JSON shows here on reload. Open it with `make app-links-ui`, or on the
+  site once merged. Swagger UI comes from a pinned copy on cdnjs, so this page
+  needs the network once; the readable page next door does not.
+-->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.29.1/swagger-ui.min.css">
+<style>
+  body { margin: 0; background: #f4efe6; }
+  .hifth-bar { font: 14px/1.5 -apple-system, "Segoe UI", sans-serif; color: #26201a; background: #ece4d6; padding: 10px 20px; display: flex; gap: 18px; flex-wrap: wrap; align-items: baseline; }
+  .hifth-bar strong { font-size: 16px; }
+  .hifth-bar a { color: #1f6f66; }
+  /* "Try it out" is off: the server is an installed app, not a network. */
+  .swagger-ui .try-out, .swagger-ui .auth-wrapper, .swagger-ui .scheme-container { display: none; }
+  .swagger-ui .topbar { display: none; }
+  .swagger-ui .hifth-examples table { width: 100%; border-collapse: collapse; font-family: sans-serif; }
+  .swagger-ui .hifth-examples th, .swagger-ui .hifth-examples td { padding: 8px 20px; text-align: left; vertical-align: top; font-size: 13px; color: #3b4151; }
+  .swagger-ui .hifth-examples th { font-weight: 700; border-bottom: 1px solid rgba(59,65,81,.2); }
+  .swagger-ui .hifth-examples td:first-child { width: 46%; }
+  .swagger-ui .hifth-examples code { font-family: monospace; font-size: 13px; word-break: break-all; color: #3b4151; }
+  .swagger-ui .hifth-examples td p { margin: 4px 0 0; }
+</style>
+</head>
+<body>
+<div class="hifth-bar">
+  <strong>Hifth app links</strong>
+  <a href="app-url-scheme.html">The readable page</a>
+  <a href="app-url-scheme.openapi.json">The raw JSON</a>
+  <span>Every example in the JSON is run through the app's own parser by its tests.</span>
+</div>
+<div id="swagger-ui"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.29.1/swagger-ui-bundle.min.js" crossorigin="anonymous"></script>
+<script>
+  // OpenAPI has examples for a parameter and for a response, not for a whole
+  // address. The whole addresses live in the spec's own `x-examples` list (the
+  // ones the Swift tests run through the parser), so this draws that list
+  // under each operation, split by path the same way the readable page does.
+  const examplesFor = (all, path) => {
+    const isX = (u) => /^hifth:\/\/x-callback-url\//i.test(u);
+    if (path.startsWith("/x-callback-url/")) {
+      const action = path.slice("/x-callback-url/".length);
+      return all.filter((e) => new RegExp(`^hifth://x-callback-url/${action}(\\?|/|$)`, "i").test(e.url));
+    }
+    return all.filter((e) => !isX(e.url));
+  };
+  const WorkedExamples = (system) => ({
+    wrapComponents: {
+      parameters: (Original, sys) => (props) => {
+        const h = sys.React.createElement;
+        const all = sys.specSelectors.specJson().get("x-examples");
+        const path = props.pathMethod && props.pathMethod[0];
+        const rows = all && path ? examplesFor(all.toJS(), path) : [];
+        const table = rows.length
+          ? h("div", { className: "opblock-section hifth-examples" },
+              h("div", { className: "opblock-section-header" }, h("h4", { className: "opblock-title" }, "Worked examples")),
+              h("table", null,
+                h("thead", null, h("tr", null, h("th", null, "link"), h("th", null, "the app does"))),
+                h("tbody", null, ...rows.map((e) =>
+                  h("tr", { key: e.url },
+                    h("td", null, h("code", null, e.url)),
+                    h("td", null, h("code", null, e.result), e.note ? h("p", null, e.note) : null))))))
+          : null;
+        return h("div", null, table, h(Original, props));
+      },
+    },
+  });
+  window.addEventListener("load", () => {
+    window.ui = SwaggerUIBundle({
+      plugins: [WorkedExamples],
+      url: "app-url-scheme.openapi.json",
+      dom_id: "#swagger-ui",
+      deepLinking: true,
+      docExpansion: "list",
+      defaultModelsExpandDepth: 1,
+      // Nothing here answers over a network: the server is the installed app.
+      supportedSubmitMethods: [],
+      tryItOutEnabled: false,
+      presets: [SwaggerUIBundle.presets.apis],
+      layout: "BaseLayout",
+    });
+  });
+</script>
+</body>
+</html>

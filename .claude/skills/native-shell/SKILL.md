@@ -52,7 +52,7 @@ showing; `…/current?x-success=…` answers with what is on screen. `page=`, `v
 `surah=` (its context), `words=`, `edition=`, `mode=` (the tool in hand), `open=`
 (`commentary`, `context`, or any app panel), `view=`, or a whole `route=`. Errors come back
 as `errorCode` + `errorMessage`. The contract is `docs/design/app-url-scheme.openapi.json`
-(rendered by `make app-links-doc`); the parser is `native/Hifth/Route/XCallback.swift`,
+(rendered by `make app-links-doc`; `make app-links-ui` opens the same JSON in Swagger UI on :4175); the parser is `native/Hifth/Route/XCallback.swift`,
 the answering is in `ShellModel`.
 
 Cold start puts the route into the first URL's fragment, so there is no race. A route that
