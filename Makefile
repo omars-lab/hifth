@@ -559,6 +559,13 @@ decisions-doc: ## Re-render docs/decisions/README.md from docs/decisions.json
 app-links-doc: ## Re-render docs/design/app-url-scheme.html from the app's URL contract (the OpenAPI file)
 	@node scripts/build-app-url-scheme.mjs
 
+.PHONY: app-links-ui
+app-links-ui: app-links-doc ## Browse the app's URL contract in Swagger UI (serves docs/design on :4175 and opens it)
+	@# The readable page is the one that ships; this is the same JSON in the
+	@# viewer API readers already know, for checking a change to the contract
+	@# by eye. Holds the terminal until Ctrl-C. APP_LINKS_PORT=… to move it.
+	@node scripts/build-app-url-scheme.mjs --serve
+
 .PHONY: render-docs
 render-docs: use-cases-doc issues-doc tasks-doc decisions-doc etl-scripts-doc app-links-doc ## Re-render every generated register page (the pre-commit hook refuses a stale one)
 

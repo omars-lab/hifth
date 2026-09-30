@@ -12,10 +12,23 @@
       "description": "The installed Mac or iPad app. The scheme is registered by the app; nothing is sent over a network."
     }
   ],
+  "tags": [
+    {
+      "name": "Plain links",
+      "description": "Turn the page and say nothing back."
+    },
+    {
+      "name": "x-callback-url",
+      "description": "Do one thing, then open the caller's x-success or x-error address with the result."
+    }
+  ],
   "paths": {
     "/{edition}/{target}": {
       "get": {
         "operationId": "openLink",
+        "tags": [
+          "Plain links"
+        ],
         "summary": "Plain link: open the app at a verse, a page or a run of verses",
         "description": "The same string as the public site's `#/…` link, after `hifth://`. Three spellings are accepted because people paste all three: `hifth:///hafs-kfqc/2:255`, `hifth://hafs-kfqc/2:255`, and `hifth://open/#/hafs-kfqc/2:255` (a site link's tail). If the app is not running it launches there; if it is, it turns the page. Nothing is sent back, and a link that is not a route is ignored. Use `/x-callback-url/open` when you need to know it worked.",
         "parameters": [
@@ -39,6 +52,9 @@
     "/x-callback-url/open": {
       "get": {
         "operationId": "xOpen",
+        "tags": [
+          "x-callback-url"
+        ],
         "summary": "Open the app at a route, then tell the caller",
         "description": "Turns the page to the place named and, once the page is showing it, opens `x-success` with the `route` and the same place's public `url` added. Name the place plainly: `page=45`; `verse=2:255` (a run: `verse=2:47-48`) with `words=3-7` to pulse some of its words; or `surah=36` for a surah's context (its first verse, introduction first). `edition` defaults to `hafs-kfqc`. Say how to open it: `mode=note` (or `tool=note`) for the tool in hand, `open=commentary` for the verse's commentary or `open=context` for the commentary led by the surah's introduction, `view=one` or `view=two` for the layout. These three names are checked against the app's lists and a misspelt one is refused, so a caller learns about a typo instead of a page that quietly opened without it. Any other key the web app's links understand (`skin`, `field`, `via`, `trail`; see `docs/query-params.md`) is passed through as given, so `page=7&field=dark` opens page 7 on the night desk. `route` is the same thing as one string, for a caller that already holds a link; when both are given, `route` wins. If nothing names a place, or the place is not in the grammar, `x-error` is opened at once. If the page never shows it (a verse that does not exist, for instance), `x-error` is opened after about eight seconds with `route-not-shown`. With neither address given the page still turns, quietly.",
         "parameters": [
@@ -257,6 +273,9 @@
     "/x-callback-url/current": {
       "get": {
         "operationId": "xCurrent",
+        "tags": [
+          "x-callback-url"
+        ],
         "summary": "Ask what the app is showing",
         "description": "Opens `x-success` with the `route` on screen and its public `url`. If nothing is on screen yet (the app was just launched by this request), the answer waits for the first page to show. There is no error case beyond a missing `x-success`, which means no answer.",
         "parameters": [
