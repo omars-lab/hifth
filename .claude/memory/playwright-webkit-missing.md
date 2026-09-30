@@ -1,20 +1,18 @@
 ---
 name: playwright-webkit-missing
-description: "The e2e \"iphone\" project runs on WebKit, which is not installed on this laptop — every iphone test fails at browser launch, not in the app; run desktop/android/golden (Chromium) and ask before installing"
-metadata: 
-  node_type: memory
+description: "WebKit IS installed now (was missing until ~2026-09-29): the e2e iphone project runs locally and in pre-push, and catches WebKit-only test bugs Chromium hides"
+metadata:
   type: project
-  originSessionId: c8c77742-fa0c-48ea-9c25-4e720245832a
-  modified: 2026-09-02T00:04:00.172Z
 ---
 
-On 2026-09-01 the full `npx playwright test` run failed every `[iphone]` test with
-`browserType.launch: Executable doesn't exist at ~/Library/Caches/ms-playwright/webkit-2311/pw_run.sh`.
-The `desktop`, `android` (Pixel 7) and `golden` projects are Chromium and run fine.
+Until about 2026-09-29 the `[iphone]` e2e project could not launch here (Playwright's WebKit was not
+installed). It is installed now, and `make pre-push` runs the iphone project along with the Chromium ones.
 
-**Why:** WebKit was never installed via `npx playwright install webkit` on this machine. Installing it
-is a download from Playwright's CDN, which needs the user's explicit go-ahead first.
+**Why it matters:** on 2026-09-30 the iphone run caught two test bugs the Chromium projects passed:
+WebKit refuses a screenshot cut-out that starts off screen (Chromium quietly trims it), and a phone
+page is still sliding into place right after a verse is drawn.
 
-**How to apply:** Verify a change with `--project desktop --project android --project golden`. Report
-the iphone project as *not run*, never as failing. Offer the install as a one-line ask rather than
-starting it. See [[spa-hash-nav-no-reload]] for the rest of the verification recipe.
+**How to apply:** verify with the iphone project too; a failure there is real, not a missing
+browser. When reading pixels, trim the cut-out to the screen and wait for the mark to stop moving
+(apps/web/e2e/ink.ts `pixelsOf` does both). See [[spa-hash-nav-no-reload]] for the rest of the
+verification recipe.
