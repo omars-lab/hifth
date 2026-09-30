@@ -3,8 +3,10 @@
 **Status:** decided by the owner, 2026-09-29: the builder lives on the readable contract page
 **and** in the app's share sheet (question 2, option B); editions are listed in full and unknown
 names refused (question 1, option A); the contract pages get no customising of their own
-(question 3). The docs-page builder and the edition list ship first; the share sheet follows in
-its own change once its form has been drawn on a phone.
+(question 3). The docs-page builder and the edition list shipped on 2026-09-29 (the
+[readable contract](app-url-scheme.html#builder) has the form; the app refuses an unshipped
+mus'haf by name); the share sheet follows in its own change once its form has been drawn on a
+phone — open question ① below.
 
 **What is being decided:** three things that came up one after the other once the app's link
 contract was written down and drawn (the [readable contract](app-url-scheme.html) and the
@@ -235,9 +237,34 @@ no Swift and can be checked on any machine.
 - A server ever answering these addresses. Then Swagger's try-it-out stops being the wrong
   tool.
 
+## Open questions, and what would answer each
+
+### ① Building an app link from inside the app's share sheet · **open**
+
+The owner chose to have the builder in the share sheet as well as on the contract page. The
+page's builder shipped; the share sheet still has one button that writes a site link for the
+place on screen. The sheet is small and lives on a phone, so its form cannot be the docs
+page's form shrunk: which of the four questions it asks (probably only "how to show it" and
+"tell nobody / tell this app"), and how the answer is handed over, need drawing at phone size
+first. The composing code is already in the core package for both callers to share.
+
+**What would answer it:** a short decision page with the sheet drawn at phone size, two or
+three shapes side by side, then the winner built on the existing share button with a
+Playwright test on a phone project.
+
+### ② The website shows the Hafs pages under any mus'haf name a link gives · **open**
+
+The app now refuses a link naming a mus'haf it does not ship. The website does not: a site
+link with `warsh-libya` in it opens the Hafs pages under that address, so the address lies
+about what is on screen, and a link a person types by hand cannot tell them so. Nothing
+breaks; the page still turns.
+
+**What would answer it:** decide whether the website should do what the app does (refuse, and
+say so on screen) or fall back to the shipped mus'haf and rewrite the address; then a router
+test and a Playwright test for the chosen one.
+
 ## What this is not settling
 
-The share sheet's design if B is wanted (its own page, drawn on a phone). Whether the web app
-should refuse unknown editions on the site (a backlog note). Whether links carry the app's
-language. And the still-open question on the native-shell page of driving one app request
+The share sheet's design (open question ①). Whether the web app should refuse unknown
+editions on the site (open question ②). Whether links carry the app's language. And the still-open question on the native-shell page of driving one app request
 through the real operating system end to end.

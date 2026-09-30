@@ -125,14 +125,22 @@ answer, and the shell opens that address when it is done:
   `view=one|two`), or hand over a whole route. Once the page shows it, `x-success` is opened
   with the route and the same place's public link. A misspelt mode or panel, a page of 0, or a
   place the page never shows is reported on `x-error` with a code and a plain message, so a
-  caller learns about a typo instead of a page that quietly opened without it.
+  caller learns about a typo instead of a page that quietly opened without it. A link may
+  name only a mus'haf the app ships (`hafs-kfqc` today); the three others the app knows are
+  refused by name with the reason and the shipped ids in the message, and a name it has never
+  heard of the same way, since 2026-09-29.
 - **current** — answers with the route and public link on screen.
 
 The whole contract is one file, `docs/design/app-url-scheme.openapi.json`, rendered as
 [the app links page](app-url-scheme.html) and browsable in [Swagger UI](app-url-scheme.swagger.html)
-(`make app-links-ui` serves it locally). It is held honest from three sides: the Swift tests
-run every example in it through the real parser, a vitest holds its lists of panels and
-tools to the web router, and a node test refuses a stale rendered page.
+(`make app-links-ui` serves it locally). The rendered page carries a live link builder: a form
+that composes the plain link, the request and the site link, and says what the app will do with
+them, run by a JavaScript copy of the shell's rules kept in the core package. It is held honest
+from four sides: the Swift tests run every example in it through the real parser, a vitest
+holds its lists of panels, tools and editions to the web router, another runs the same
+examples through the JavaScript copy, and a node test refuses a stale rendered page. Which
+mus'haf names a link may use, and where a person builds one, is
+[its own page](app-links-editions-and-builder.md).
 
 ## How is it tested?
 
