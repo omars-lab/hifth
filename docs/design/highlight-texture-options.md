@@ -323,13 +323,64 @@ one band per line, joining the verses that share a line before the pen goes down
 shape and overlap rule is chosen; the test that would catch it coming back reads the passage's
 bands and expects one per line where two verses share one.
 
-### ② Which two colours should a passage and a run of words take? · **open**
+### ② Which two colours should a passage and a run of words take? · **fixed**
 
 The owner chose a colour per meaning, blended where the marks cross (2026-09-30). The green and
 blue in the app are stand-ins from this page, and where either crosses the amber verse the
 letters fall to about 4.0 to 1, under the 4.5 to 1 floor. What would answer it: a few real
 pairs drawn on page 42 at phone size, each measured where it crosses the amber, and the owner
 picking one from the picture.
+
+**Drawn 2026-09-30.** Four pairs, each the strongest its two colours can be while the letters
+still clear 4.5 to 1 where they cross the amber, put on the real app on page 42 at phone size:
+
+![Each pair on page 42: a passage on its own, and a run of words over its verse](highlight-texture-options/colours.png)
+
+| pair | passage | run of words | letters where the run crosses the verse | how plainly the passage shows on paper | how plainly the run shows on paper |
+| --- | --- | --- | --- | --- | --- |
+| today | thinned green | thinned blue | 4.0 to 1 ✗ | 2.0 to 1 | 2.0 to 1 |
+| A | pastel green | pastel blue | 4.7 to 1 | 1.6 to 1 | 1.6 to 1 |
+| B | teal | violet | 4.7 to 1 | 1.5 to 1 | 1.7 to 1 |
+| C | sky blue | pink | 4.6 to 1 | 1.6 to 1 | 2.1 to 1 |
+| D | green | pink | 4.6 to 1 | 1.5 to 1 | 2.1 to 1 |
+
+What the pictures taught that the numbers did not:
+
+- **Only one crossing happens in the app today.** Tapping a verse clears a passage, and a run
+  of words lives only inside its verse, so a reader never sees a passage and a verse at once.
+  The one place two colours meet is a run of words over its amber verse. Every pair's passage
+  would also clear 4.5 to 1 over the verse (4.6), so none of them closes a door if passages and
+  verses are ever shown together.
+- **A light blue over amber turns a muddy olive.** Pair A's run reads as a dull, dirty patch on
+  the verse rather than a second colour. The pinks (C, D) turn the amber a clear coral, and the
+  violet (B) a dusky mauve: both read as *a different mark*, which is the point of a run.
+- **Every passable passage colour is paler than today's.** The floor is paid for in strength.
+  On its own on the paper each still reads as a wash of colour at phone size.
+
+Drawn by `node scripts/shoot-ink-colours.mjs` after `make build`, which also prints the figures.
+
+**Settled 2026-09-30 by the owner:** "pastel green and blue", "and yellow", "and pink", "should
+be defaults", "there should be settings to update them", "selectable from the toolbar for the
+highlighter". So the highlighter now carries four pastel pens (green, blue, yellow and pink),
+each as strong as it can be while the letters still clear 4.5 to 1 where it crosses the amber
+verse:
+
+| pen | letters where it crosses the verse | how plainly it shows on paper |
+| --- | --- | --- |
+| green | 4.6 to 1 | 1.6 to 1 |
+| blue | 4.7 to 1 | 1.6 to 1 |
+| yellow | 5.9 to 1 | 1.4 to 1 |
+| pink | 4.6 to 1 | 2.1 to 1 |
+
+- **A passage is green** until the reader picks another pen. While the highlighter is on, the
+  four pens sit beside it in the tools bar, on a computer and on a phone; the pen picked colours
+  the passage and is remembered on that device.
+- **A run of words is blue**, over the amber verse, whichever pen is picked for passages.
+- **The verse stays amber.**
+
+Left for later, on the backlog: whether the reader should also be able to change the run's
+colour, or mix a pen of their own. The pens are held to the floor by a test that works out
+each one's contrast over the amber, so a new pen that fails it cannot be added by accident.
 
 ### ③ Does the streak filter slow a page turn on a real iPhone? · **blocked**
 
@@ -344,6 +395,15 @@ The mark is revealed from right to left as it goes down, by clipping the whole g
 and Firefox draw it; whether Safari clips a group that way was not checked on a device. If it
 does not, the mark simply appears whole, which is what a reader who asked for less motion
 already sees. What would answer it: select a verse in Safari on an iPhone and watch.
+
+### ⑤ Should a reader also choose the colour of a run of words, or mix a pen of their own? · **open**
+
+The highlighter's pen is picked from four pastels in the tools bar, and a run of words is
+always blue. The owner asked for "settings to update them"; the four pens answer that for a
+passage. What is still open: whether a run of words gets a choice too, and whether a reader may
+mix a colour of their own. A free colour picker cannot promise the letters stay readable where
+the colour crosses the amber verse, so a pen of the reader's own would have to be checked, and
+pulled paler, before it is used. Nothing is lost by waiting: the four pens already pass.
 
 ---
 

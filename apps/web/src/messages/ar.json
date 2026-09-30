@@ -351,5 +351,10 @@
   "cropClose": "إغلاق",
   "cropShared": "تمّت المشاركة",
   "phoneTools": "أدوات الصفحة · أداة {name} مفعّلة",
-  "phoneToolsClose": "أغلق الأدوات"
+  "phoneToolsClose": "أغلق الأدوات",
+  "penLabel": "لون قلم التظليل",
+  "penGreen": "أخضر",
+  "penBlue": "أزرق",
+  "penYellow": "أصفر",
+  "penPink": "وردي"
 }

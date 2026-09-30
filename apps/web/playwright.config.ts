@@ -227,7 +227,9 @@ export default defineConfig({
           // checks the sheets that load on first open stay out of the first script.
           // `link-builder` drives the form on the app-links contract page, a
           // docs page the build stages beside the app.
-          testMatch: /(desktop|edge-peel|stage-fit|spread-fit|detent-live|pagebar-detents|pagebar-fisheye|notes|mistakes|sign-tools|crop|open-link|lazy-tools|drive-video|link-builder)\.spec\.ts/,
+          // `pen-colours` is the highlighter's colours, picked from the tools
+          // bar; it runs on the phones too, from their own bar.
+          testMatch: /(desktop|edge-peel|stage-fit|spread-fit|detent-live|pagebar-detents|pagebar-fisheye|notes|mistakes|sign-tools|crop|open-link|lazy-tools|drive-video|link-builder|pen-colours)\.spec\.ts/,
           use: {
             browserName: "chromium",
             viewport: { width: 1440, height: 900 },

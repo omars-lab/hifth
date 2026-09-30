@@ -125,6 +125,7 @@ import { SkinToggle, TajweedLegend } from "./components/SkinToggle";
 import { PageSlider } from "./components/PageSlider";
 import { fisheyeEnabled, rememberFisheye } from "./pagebar-fisheye";
 import { rememberTurnStyle, savedTurnStyle, type TurnStyle } from "./turn-style";
+import { applyPen, rememberPen, savedPen, type Pen } from "./pen";
 import styles from "./App.module.css";
 
 // The app opens on page 7 (the mock's first curated page). Full page routing is
@@ -819,6 +820,15 @@ export function App(): JSX.Element {
   const chooseTurnStyle = useCallback((style: TurnStyle) => {
     rememberTurnStyle(style);
     setTurnStyle(style);
+  }, []);
+  // The highlighter's pen (docs/design/highlight-texture-options.md ②, settled
+  // 2026-09-30): green until this device picks another in the tools bar. It
+  // colours the passage the highlighter paints.
+  const [pen, setPen] = useState<Pen>(() => savedPen());
+  useEffect(() => applyPen(pen), [pen]);
+  const choosePen = useCallback((next: Pen) => {
+    rememberPen(next);
+    setPen(next);
   }, []);
   const [legendOpen, setLegendOpen] = useState(false);
   const [tajweedShards, setTajweedShards] = useState<ReadonlyMap<number, TajweedShard>>(
@@ -2118,7 +2128,7 @@ export function App(): JSX.Element {
           argue with the page. */}
       {/* Its own row above the book, not floated over it: floated, it sat on
           the page's first line. */}
-      {resolver && desktop && <PageToolbar tool={tool} onTool={chooseTool} />}
+      {resolver && desktop && <PageToolbar tool={tool} onTool={chooseTool} pen={pen} onPen={choosePen} />}
       {resolver && !desktop && phoneBar === "a" && <PhoneToolbarA tool={tool} onTool={chooseTool} />}
       <main
         className={styles.main}
@@ -2483,7 +2493,7 @@ export function App(): JSX.Element {
           under the rail they came from. */}
       <footer className={styles.trail} aria-label={t.trail} dir="rtl">
         {resolver && !desktop && phoneBar === "b" && <PhoneToolbarB tool={tool} onTool={chooseTool} />}
-        {resolver && !desktop && phoneBar === "c" && <PhoneToolbarC tool={tool} onTool={chooseTool} />}
+        {resolver && !desktop && phoneBar === "c" && <PhoneToolbarC tool={tool} onTool={chooseTool} pen={pen} onPen={choosePen} />}
         <TrailBeads
           trail={trail}
           currentKey={selectedKey}

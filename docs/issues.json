@@ -2383,10 +2383,22 @@
         "file": "docs/design/highlight-texture-options.md",
         "item": "②"
       },
-      "status": "open",
+      "status": "fixed",
       "severity": "question",
       "owner": "agent",
-      "note": "Draw real colour pairs for a passage and a word run on page 42, measure each where it crosses the amber verse (floor 4.5:1; the stand-ins give about 4.0:1), and put the pick to the owner. Stand-ins are the --ink-range and --ink-run tokens."
+      "note": "Four pairs drawn on page 42 at phone size and measured where they cross the amber verse. Settled 2026-09-30 by the owner: four pastel pens (green, blue, yellow, pink), each clearing 4.5:1 over the amber; a passage is green unless the reader picks another pen from the tools bar while the highlighter is on (remembered on the device); a run of words is blue. The pens are the --pen-* tokens; pen.test.ts works out each one's contrast over the amber, and e2e/pen-colours.spec.ts picks one in a browser on a computer and on a phone.",
+      "closedBy": "apps/web/src/pen.test.ts"
+    },
+    {
+      "id": "run-colour-and-own-pen",
+      "source": {
+        "file": "docs/design/highlight-texture-options.md",
+        "item": "⑤"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "user",
+      "note": "Whether a reader should also pick the run of words' colour, or mix a pen of their own; a free colour must be checked (and pulled paler) to keep the letters at 4.5:1 over the amber verse."
     },
     {
       "id": "streak-filter-iphone-speed",

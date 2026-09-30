@@ -40,6 +40,47 @@ test.describe("Hifth · the page tools on a phone", () => {
     await expect(bar(page, "c").getByRole("button", { name: /Select is on$/ })).toBeVisible();
   });
 
+  test("every tool, and the highlighter's pens, fit across the phone without pushing the page sideways", async ({
+    page,
+  }) => {
+    // Nine tools at a thumb's width each, with their gaps, came to about 428
+    // points: wider than a 390-point phone. Opening the tray widened the whole
+    // page, and picking the highlighter slid it sideways under the reader.
+    const fits = async (what: string) => {
+      const m = await page.evaluate(() => ({
+        page: document.documentElement.scrollWidth,
+        screen: innerWidth,
+        scrolled: scrollX,
+        radios: [...document.querySelectorAll<HTMLElement>('[role="radio"]')]
+          .filter((el) => el.offsetParent)
+          .map((el) => el.getBoundingClientRect())
+          .map((r) => [Math.round(r.left), Math.round(r.right)]),
+      }));
+      expect(m.page, `${what}: the page is no wider than the screen`).toBeLessThanOrEqual(m.screen);
+      expect(m.scrolled, `${what}: the page has not slid sideways`).toBe(0);
+      for (const [left, right] of m.radios) {
+        expect(left, `${what}: every button starts on the screen`).toBeGreaterThanOrEqual(0);
+        expect(right, `${what}: every button ends on the screen`).toBeLessThanOrEqual(m.screen);
+      }
+      // Still a thumb's height, even where the row is tight across.
+      for (const h of await page.locator('[role="radio"]:visible').evaluateAll((els) =>
+        els.map((el) => el.getBoundingClientRect().height),
+      ))
+        expect(h, `${what}: every button is a thumb's height`).toBeGreaterThanOrEqual(44);
+    };
+
+    await page.goto("/#/hafs-kfqc/p7");
+    await bar(page, "c").getByRole("button", { name: /^Page tools · / }).click();
+    await fits("C, the tray open");
+    await radio(page, "Highlight").click();
+    await expect(page.getByRole("radiogroup", { name: "Highlighter colour" })).toBeVisible();
+    await fits("C, the highlighter on");
+
+    await page.goto("/?phonebar=a#/hafs-kfqc/p7");
+    await expect(bar(page, "a").getByRole("radio")).toHaveCount(9);
+    await fits("A, the strip");
+  });
+
   test("A: a strip under the top bar, one tap to a tool", async ({ page }) => {
     await page.goto("/?phonebar=a#/hafs-kfqc/p7");
     await expect(bar(page, "a").getByRole("radio")).toHaveCount(9);
