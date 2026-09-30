@@ -189,7 +189,7 @@ one or both researchers and set aside, one line each, in the design record.
 
 ## What is this not settling?
 
-Which colours a passage or a run would be if not amber (stand-ins here); whether the rough band
+Which colours a passage or a run would be if not amber (settled afterwards, below); whether the rough band
 is the default or one more choice on the reader's menu; whether a run is drawn inside a verse
 you are not on; anything about notes, crumbs or the look-alike outline.
 
@@ -220,6 +220,13 @@ What this costs, said plainly at the time: where two colours cross, the letters 
 4.0 to 1 against the ink, under the 4.5 to 1 this project holds text to. The colours on the
 page (a green and a blue) are stand-ins, and choosing the real two, measured where they cross
 the amber, is the next small question; it is on the backlog.
+
+**The colours, settled later the same day.** Four pairs were drawn on page 42 at phone size and
+measured where they cross the amber (the options page, item ②). The owner chose four pastel
+pens, green, blue, yellow and pink, each strong as it can be while the letters still clear
+4.5 to 1 over the amber, so the cost above no longer holds. A passage is green unless the reader
+picks another pen from the tools bar while the highlighter is on; a run of words is blue; the
+verse stays amber.
 
 Two things only a person can check are on the manual list: that the filter does not slow a
 page turn on a real iPhone, and that Safari draws the mark's left-to-right reveal rather than

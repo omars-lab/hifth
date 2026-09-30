@@ -226,6 +226,11 @@ export interface Catalog {
   readonly pagebarSectionTitle: string;
   readonly pagesVendored: (d: { readonly haveText: string | number; readonly totalText: string | number }) => string;
   readonly pauseAyah: (d: { readonly label: string | number }) => string;
+  readonly penBlue: string;
+  readonly penGreen: string;
+  readonly penLabel: string;
+  readonly penPink: string;
+  readonly penYellow: string;
   readonly phoneTools: (d: { readonly name: string | number }) => string;
   readonly phoneToolsClose: string;
   readonly playAyah: (d: { readonly label: string | number }) => string;

@@ -37,6 +37,22 @@ test("an item's text stops at the next item, and at the end of its section", () 
   assert.equal(bodyAfter(lines, 10), "The second one.");
 });
 
+test("the last item stops at the page's closing rule, not at the page's footer after it", () => {
+  // highlight-texture-options.md ends its last item with a rule and then an
+  // italic line on how the page is rebuilt; the backlog was copying that line
+  // in as if it were part of the item.
+  const lines = [
+    "### ⑤ Last? · **open**",
+    "",
+    "The last one.",
+    "",
+    "---",
+    "",
+    "*The page is rebuilt by a script.*",
+  ];
+  assert.equal(bodyAfter(lines, 0), "The last one.");
+});
+
 test("a roadmap follow-up is its whole numbered paragraph, and no more", () => {
   const lines = [
     "### Open follow-ups",

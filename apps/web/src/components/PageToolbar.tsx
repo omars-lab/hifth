@@ -1,7 +1,9 @@
 import { useRef } from "react";
 import { useT } from "../i18n";
+import type { Pen } from "../pen";
 import type { PageTool } from "./PageStage";
 import styles from "./PageToolbar.module.css";
+import { PenPicker } from "./PenPicker";
 
 /**
  * The key for each tool, by its place on the keyboard rather than the letter it
@@ -38,6 +40,9 @@ interface PageToolbarProps {
   tool: PageTool;
   /** Asked for a tool. Clicking the one already on asks for "select". */
   onTool: (tool: PageTool) => void;
+  /** The highlighter's pen, offered beside the tools while the highlighter is on. */
+  pen: Pen;
+  onPen: (pen: Pen) => void;
 }
 
 /**
@@ -58,7 +63,7 @@ interface PageToolbarProps {
  * Hidden below the desktop breakpoint by CSS, like `DesktopChrome`: a phone
  * layout for the bar is the plan's step 5 and a decision of its own.
  */
-export function PageToolbar({ tool, onTool }: PageToolbarProps): JSX.Element {
+export function PageToolbar({ tool, onTool, pen, onPen }: PageToolbarProps): JSX.Element {
   const { t } = useT();
   const buttons = useRef<Array<HTMLButtonElement | null>>([]);
   const nameOf = (x: PageTool) => toolName(t, x);
@@ -110,6 +115,7 @@ export function PageToolbar({ tool, onTool }: PageToolbarProps): JSX.Element {
           </button>
         ))}
       </div>
+      {tool === "highlight" && <PenPicker pen={pen} onPen={onPen} />}
       {/* For the eye. The change is announced once, by App, through the one
           polite announcer the app has — a second live region here would talk
           over it. */}

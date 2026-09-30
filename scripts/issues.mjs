@@ -146,8 +146,10 @@ export function planTitleAt(lines, at) {
 
 /**
  * The text of the item whose heading is `lines[at]`: everything up to the next
- * heading of the same level or higher, with the section's closing rule and the
- * blank lines around it dropped. Deeper headings stay, since they belong to it.
+ * heading of the same level or higher, or up to a rule on a line of its own,
+ * which closes a section (whatever a page puts after it, such as a note on how
+ * the page is rebuilt, is not the item's). Deeper headings stay, since they
+ * belong to it.
  *
  * docs/backlog.md copies this text in full so the page reads on its own; see
  * scripts/backlog.test.mjs for where it must stop.
@@ -155,10 +157,10 @@ export function planTitleAt(lines, at) {
 export function bodyAfter(lines, at) {
   const out = [];
   for (let i = at + 1; i < lines.length; i++) {
-    if (/^#{1,3} /.test(lines[i])) break;
+    if (/^#{1,3} /.test(lines[i]) || /^---+\s*$/.test(lines[i])) break;
     out.push(lines[i]);
   }
-  while (out.length && /^(\s*|---+)$/.test(out.at(-1))) out.pop();
+  while (out.length && out.at(-1).trim() === "") out.pop();
   while (out.length && out[0].trim() === "") out.shift();
   return out.join("\n");
 }
