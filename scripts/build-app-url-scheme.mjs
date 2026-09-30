@@ -50,7 +50,11 @@ const deref = (spec, p) => {
   return spec.components[kind][name];
 };
 
-const values = (schema) => {
+/** A schema, with a `$ref` followed and the keys beside it (`default`) kept. */
+const schemaOf = (spec, schema) => (schema?.$ref ? { ...deref(spec, schema), ...schema } : schema);
+
+const values = (spec, schema) => {
+  schema = schemaOf(spec, schema);
   if (!schema) return "";
   if (schema.enum) return schema.enum.map((v) => `<code>${esc(v)}</code>`).join(", ");
   const bits = [schema.type ?? ""];
@@ -68,7 +72,7 @@ ${params
   .map(deref.bind(null, spec))
   .map(
     (p) =>
-      `<tr><td><code>${esc(p.name)}</code>${p.required ? ' <span class="req">required</span>' : ""}</td><td>${esc(p.in)}</td><td>${values(p.schema)}${p.example != null ? `<div class="faint">e.g. <code>${esc(p.example)}</code></div>` : ""}</td><td>${md(p.description ?? "")}</td></tr>`,
+      `<tr><td><code>${esc(p.name)}</code>${p.required ? ' <span class="req">required</span>' : ""}</td><td>${esc(p.in)}</td><td>${values(spec, p.schema)}${p.example != null ? `<div class="faint">e.g. <code>${esc(p.example)}</code></div>` : ""}</td><td>${md(p.description ?? "")}</td></tr>`,
   )
   .join("\n")}
 </tbody></table>`;
@@ -130,6 +134,8 @@ ${exampleRows(examples)}
   });
   const leftovers = unplacedExamples(spec);
   const errors = spec.components?.schemas?.ErrorCode;
+  const edition = spec.components?.schemas?.Edition;
+  const editions = edition?.["x-editions"] ?? [];
   return `<!doctype html>
 <html lang="en">
 <head>
@@ -166,8 +172,20 @@ nav a { margin-right: 14px; color: ${C.accent}; }
 ${md(spec.info.description ?? "")}
 <nav>${Object.values(spec.paths)
     .map((ops) => `<a href="#${esc(ops.get.operationId)}">${esc(ops.get.summary.split(":")[0])}</a>`)
-    .join("")}<a href="#errors">Error codes</a></nav>
+    .join("")}<a href="#editions">Editions</a><a href="#errors">Error codes</a></nav>
 ${paths.join("\n")}
+<section id="editions">
+<h2>Which mus'haf may a link name?</h2>
+${md(edition?.description ?? "")}
+<table><thead><tr><th>id</th><th>mus'haf</th><th>in the app?</th></tr></thead><tbody>
+${editions
+    .map(
+      (e) =>
+        `<tr><td><code>${esc(e.id)}</code></td><td>${esc(e.name)}${e.riwayah ? `<div class="faint">${esc(e.riwayah)}</div>` : ""}</td><td>${e.shipped ? "<strong>yes</strong>" : `not yet${e.reason ? `<div class="faint">${esc(e.reason)}</div>` : ""}`}</td></tr>`,
+    )
+    .join("\n")}
+</tbody></table>
+</section>
 <section id="errors">
 <h2>Error codes</h2>
 <p>An <code>x-error</code> answer carries <code>errorCode</code>, one of ${(errors?.enum ?? []).map((v) => `<code>${esc(v)}</code>`).join(", ")}, and a plain <code>errorMessage</code>.</p>

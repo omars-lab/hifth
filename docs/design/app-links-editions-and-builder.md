@@ -1,8 +1,10 @@
 # Writing a link by hand: which mus'haf names may a link use, and where does a person build one?
 
-**Status:** proposal, 2026-09-29. Nothing here is built yet. The one question still open for
-the owner is where the link builder lives (question 2 below); the rest is recommended and ready
-to build in the order under "What gets built, in what order?".
+**Status:** decided by the owner, 2026-09-29: the builder lives on the readable contract page
+**and** in the app's share sheet (question 2, option B); editions are listed in full and unknown
+names refused (question 1, option A); the contract pages get no customising of their own
+(question 3). The docs-page builder and the edition list ship first; the share sheet follows in
+its own change once its form has been drawn on a phone.
 
 **What is being decided:** three things that came up one after the other once the app's link
 contract was written down and drawn (the [readable contract](app-url-scheme.html) and the
@@ -55,7 +57,7 @@ simplest form keeps typing it from the reference and testing by trial.
 | question | recommendation | what it gives a person |
 | --- | --- | --- |
 | 1 · Which mus'haf may a link name? | List all four editions in the contract, shipped or not, in English, and refuse any other name with a reason that lists them | A link naming a mus'haf we know but do not ship is refused with "not shipped yet", not opened on the wrong pages |
-| 2 · Where is the builder? | On the readable contract page, as a live form (**open: also inside the app's share sheet?**) | Pick a place, a mus'haf, a tool, a panel, a layout; read the address, copy it, open it in the app |
+| 2 · Where is the builder? | On the readable contract page as a live form, and inside the app's share sheet (decided 2026-09-29) | Pick a place, a mus'haf, a tool, a panel, a layout; read the address, copy it, open it in the app |
 | 3 · Customise the pages? | No. Improve the contract; both pages redraw from it | One place to edit, two views for free |
 
 ## 1 · How does a person find out which mus'haf a link may name?
@@ -166,11 +168,12 @@ ours for site links).
 | **Cons** | A person must know the page exists; the link is composed away from the place it points at | Two builders (the docs page and the share sheet) or one shared piece of code the web app and the docs page both use; the share sheet grows from one button to a small form; more strings to translate | Wrong tool: an http client for addresses that never reach a server |
 | **Implications** | Ships this week with the edition list; the page is already reachable from the app's colophon through the docs front door, so nothing in the app changes | The builder logic moves into the core package so both callers share it, which is the right home anyway; the share sheet design becomes its own small decision page with the form drawn on a phone; the hafiz-facing part waits on that | Would have to be turned on and pointed at a fake server; not pursued |
 
-**Recommendation: A now, B as a follow-up only if wanted.** A is the whole builder for the
-people who write links today. B is the same builder in a second place, for a person who does
-not exist yet (nobody shares app links from a phone until the app is on someone else's phone).
-The one thing A should do to keep B cheap is put the composing logic in the core package
-rather than in the page's script, so the share sheet can call it later without a rewrite.
+**Recommended A now, B as a follow-up; the owner chose B (2026-09-29).** A is the whole
+builder for the people who write links today, and it ships first. B puts the same builder
+where the place already is, and it follows in its own change: the share sheet's form is drawn
+on a phone on its own small page before it is built, because its difference is felt, not read.
+To keep B cheap, A puts the composing logic in the core package rather than in the page's
+script, so the share sheet calls the same code.
 
 ### What does the builder show?
 

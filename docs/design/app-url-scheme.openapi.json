@@ -12,6 +12,7 @@
       "description": "The installed Mac or iPad app. The scheme is registered by the app; nothing is sent over a network."
     }
   ],
+  "x-public-site": "https://blog.bytesofpurpose.com/hifth/",
   "tags": [
     {
       "name": "Plain links",
@@ -30,7 +31,7 @@
           "Plain links"
         ],
         "summary": "Plain link: open the app at a verse, a page or a run of verses",
-        "description": "The same string as the public site's `#/…` link, after `hifth://`. Three spellings are accepted because people paste all three: `hifth:///hafs-kfqc/2:255`, `hifth://hafs-kfqc/2:255`, and `hifth://open/#/hafs-kfqc/2:255` (a site link's tail). If the app is not running it launches there; if it is, it turns the page. Nothing is sent back, and a link that is not a route is ignored. Use `/x-callback-url/open` when you need to know it worked.",
+        "description": "The same string as the public site's `#/…` link, after `hifth://`. Three spellings are accepted because people paste all three: `hifth:///hafs-kfqc/2:255`, `hifth://hafs-kfqc/2:255`, and `hifth://open/#/hafs-kfqc/2:255` (a site link's tail). If the app is not running it launches there; if it is, it turns the page. Nothing is sent back, and a link that is not a route is ignored. Use `/x-callback-url/open` when you need to know it worked. The edition must be one the app ships; the others in the `Edition` list are refused the same way.",
         "parameters": [
           {
             "$ref": "#/components/parameters/edition"
@@ -114,10 +115,9 @@
             "name": "edition",
             "in": "query",
             "required": false,
-            "description": "Which mus'haf. Defaults to `hafs-kfqc`, the only one shipped today.",
+            "description": "Which mus'haf, by its id. Defaults to `hafs-kfqc`, the only one shipped today. A name not in the `Edition` list, or one not shipped yet, is refused with `bad-route` and a message naming the shipped ids.",
             "schema": {
-              "type": "string",
-              "pattern": "^[a-z0-9-]+$",
+              "$ref": "#/components/schemas/Edition",
               "default": "hafs-kfqc"
             }
           },
@@ -311,13 +311,9 @@
         "name": "edition",
         "in": "path",
         "required": true,
-        "description": "Which mus'haf. Lower-case letters, digits and dashes.",
+        "description": "Which mus'haf, by its id. Only a shipped one opens; the list is `Edition` below.",
         "schema": {
-          "type": "string",
-          "pattern": "^[a-z0-9-]+$",
-          "examples": [
-            "hafs-kfqc"
-          ]
+          "$ref": "#/components/schemas/Edition"
         }
       },
       "target": {
@@ -386,9 +382,48 @@
       }
     },
     "schemas": {
+      "Edition": {
+        "type": "string",
+        "description": "Which mus'haf, by its id. The app's own list, copied here with an English name and whether the mus'haf is actually in the build. A name not in the list, or one not shipped yet, is refused: a plain link is ignored, a request is answered with `bad-route` and a message that names the shipped ids. The shipped one is the default when a request names none.",
+        "enum": [
+          "hafs-kfqc",
+          "warsh-libya",
+          "qalun-libya",
+          "hafs-indopak"
+        ],
+        "x-editions": [
+          {
+            "id": "hafs-kfqc",
+            "name": "Hafs · King Fahd Complex print (Madinah)",
+            "riwayah": "Hafs from Asim",
+            "shipped": true
+          },
+          {
+            "id": "warsh-libya",
+            "name": "Warsh · Libyan Endowments print",
+            "riwayah": "Warsh from Nafi",
+            "shipped": false,
+            "reason": "licensed for non-commercial use only; needs permission before it can be added"
+          },
+          {
+            "id": "qalun-libya",
+            "name": "Qalun · Libyan Endowments print",
+            "riwayah": "Qalun from Nafi",
+            "shipped": false,
+            "reason": "licensed for non-commercial use only; needs permission before it can be added"
+          },
+          {
+            "id": "hafs-indopak",
+            "name": "Hafs · IndoPak script",
+            "riwayah": "Hafs from Asim",
+            "shipped": false,
+            "reason": "no licensed page source yet"
+          }
+        ]
+      },
       "Route": {
         "type": "string",
-        "description": "`/<edition>/<target>[?query]` — the web app's own link, without the `#`.",
+        "description": "`/<edition>/<target>[?query]` — the web app's own link, without the `#`. The edition must be one the app ships (see `Edition`).",
         "pattern": "^/[a-z0-9-]+/(p[1-9][0-9]*|[1-9][0-9]*:[1-9][0-9]*(-([1-9][0-9]*:)?[1-9][0-9]*)?)(\\?[A-Za-z0-9\\-_.~%:,=&+]*)?$",
         "examples": [
           "/hafs-kfqc/2:255",
@@ -404,7 +439,7 @@
           "unknown-action",
           "route-not-shown"
         ],
-        "description": "`missing-route`: open named no page, verse, surah or route. `bad-route`: the place is not in the grammar (a page of 0, two places at once, words without a verse, a surah past 114), or a mode, panel or view name not in the app's lists. `unknown-action`: the path after x-callback-url is not open or current. `route-not-shown`: the place was accepted but the page never showed it."
+        "description": "`missing-route`: open named no page, verse, surah or route. `bad-route`: the place is not in the grammar (a page of 0, two places at once, words without a verse, a surah past 114), or a mode, panel or view name not in the app's lists, or an edition not in the list or not shipped yet. `unknown-action`: the path after x-callback-url is not open or current. `route-not-shown`: the place was accepted but the page never showed it."
       }
     },
     "callbacks": {
@@ -500,6 +535,11 @@
       "note": "Page numbers start at 1. A plain link that is not a route is ignored, silently."
     },
     {
+      "url": "hifth:///warsh-libya/2:255",
+      "result": "refused",
+      "note": "A mus'haf we know but do not ship yet. A plain link is ignored, like any link that is not a route; a request says why."
+    },
+    {
       "url": "hifth://x-callback-url/open?page=45&x-success=shortcuts://x-callback-url/run-shortcut?name=Next",
       "result": "open #/hafs-kfqc/p45",
       "note": "Open page 45, said plainly. No encoding needed."
@@ -551,6 +591,16 @@
     {
       "url": "hifth://x-callback-url/open?surah=115&x-error=shortcuts://x-callback-url/run-shortcut?name=Log%20failure",
       "result": "error bad-route"
+    },
+    {
+      "url": "hifth://x-callback-url/open?page=1&edition=warsh-libya&x-error=shortcuts://x-callback-url/run-shortcut?name=Log%20failure",
+      "result": "error bad-route",
+      "note": "A mus'haf we know but do not ship yet: refused as not shipped, with the shipped ids named."
+    },
+    {
+      "url": "hifth://x-callback-url/open?route=/hafs/2:255&x-error=shortcuts://x-callback-url/run-shortcut?name=Log%20failure",
+      "result": "error bad-route",
+      "note": "A name not in the edition list, inside a whole route: refused with the list."
     },
     {
       "url": "hifth://x-callback-url/open?page=45&verse=2:255&x-error=shortcuts://x-callback-url/run-shortcut?name=Log%20failure",

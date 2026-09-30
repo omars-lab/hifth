@@ -34,14 +34,14 @@ nav a { margin-right: 14px; color: #1f6f66; }
 <p>The app is not a web server. These are <code>hifth://</code> links the operating system hands to the installed app: from a tapped link, from Shortcuts, from a script (<code>open</code>, <code>xcrun simctl openurl</code>). OpenAPI is used here as a way to write the contract down in one place that both people and tests read: <code>native/HifthTests/XCallbackTests.swift</code> runs every example under <code>x-examples</code> through the real parser, and <code>docs/design/app-url-scheme.html</code> is rendered from this file by <code>scripts/build-app-url-scheme.mjs</code>.</p>
 <p>Two kinds of address. A <strong>plain link</strong> (<code>hifth:///hafs-kfqc/2:255</code>) turns the page and says nothing back; a bad one is ignored. An <strong>x-callback-url request</strong> (<code>hifth://x-callback-url/open?route=…&amp;x-success=…</code>) does one action and then opens the caller's own address with the result, following the x-callback-url convention (x-callback-url.com): <code>x-success</code>, <code>x-error</code> and <code>x-cancel</code> name where to answer, and an error answer carries <code>errorCode</code> and <code>errorMessage</code>.</p>
 <p>The route grammar is the web app's own hash, unchanged: <code>/&lt;edition&gt;/&lt;target&gt;[?query]</code>. The app only checks its shape; the web app decides what it means (<code>docs/query-params.md</code> lists the query keys).</p>
-<nav><a href="#openLink">Plain link</a><a href="#xOpen">Open the app at a route, then tell the caller</a><a href="#xCurrent">Ask what the app is showing</a><a href="#errors">Error codes</a></nav>
+<nav><a href="#openLink">Plain link</a><a href="#xOpen">Open the app at a route, then tell the caller</a><a href="#xCurrent">Ask what the app is showing</a><a href="#editions">Editions</a><a href="#errors">Error codes</a></nav>
 <section id="openLink">
 <h2>Plain link: open the app at a verse, a page or a run of verses</h2>
 <p class="path"><code>hifth://{edition}/{target}</code></p>
-<p>The same string as the public site's <code>#/…</code> link, after <code>hifth://</code>. Three spellings are accepted because people paste all three: <code>hifth:///hafs-kfqc/2:255</code>, <code>hifth://hafs-kfqc/2:255</code>, and <code>hifth://open/#/hafs-kfqc/2:255</code> (a site link's tail). If the app is not running it launches there; if it is, it turns the page. Nothing is sent back, and a link that is not a route is ignored. Use <code>/x-callback-url/open</code> when you need to know it worked.</p>
+<p>The same string as the public site's <code>#/…</code> link, after <code>hifth://</code>. Three spellings are accepted because people paste all three: <code>hifth:///hafs-kfqc/2:255</code>, <code>hifth://hafs-kfqc/2:255</code>, and <code>hifth://open/#/hafs-kfqc/2:255</code> (a site link's tail). If the app is not running it launches there; if it is, it turns the page. Nothing is sent back, and a link that is not a route is ignored. Use <code>/x-callback-url/open</code> when you need to know it worked. The edition must be one the app ships; the others in the <code>Edition</code> list are refused the same way.</p>
 <h3>Parameters</h3>
 <table><thead><tr><th>key</th><th>where</th><th>values</th><th>what it does</th></tr></thead><tbody>
-<tr><td><code>edition</code> <span class="req">required</span></td><td>path</td><td>string, matching <code>^[a-z0-9-]+$</code></td><td><p>Which mus'haf. Lower-case letters, digits and dashes.</p></td></tr>
+<tr><td><code>edition</code> <span class="req">required</span></td><td>path</td><td><code>hafs-kfqc</code>, <code>warsh-libya</code>, <code>qalun-libya</code>, <code>hafs-indopak</code></td><td><p>Which mus'haf, by its id. Only a shipped one opens; the list is <code>Edition</code> below.</p></td></tr>
 <tr><td><code>target</code> <span class="req">required</span></td><td>path</td><td>string, matching <code>^(p[1-9][0-9]*|[1-9][0-9]*:[1-9][0-9]*(-([1-9][0-9]*:)?[1-9][0-9]*)?)$</code></td><td><p>A page (<code>p45</code>), a verse (<code>2:255</code>), a run of verses (<code>2:47-2:48</code> or <code>2:47-48</code>). Every number starts from 1.</p></td></tr>
 <tr><td><code>query</code></td><td>query</td><td>string, matching <code>^[A-Za-z0-9\-_.~%:,=&amp;+]*$</code></td><td><p>Any of the web app's own keys, e.g. <code>w=3-7</code> (some words of the verse), <code>skin=tajweed</code>, <code>field=dark</code>. The full list and what a bad value does is <code>docs/query-params.md</code>.</p></td></tr>
 </tbody></table>
@@ -52,6 +52,7 @@ nav a { margin-right: 14px; color: #1f6f66; }
 <tr><td><code class="url">hifth://hafs-kfqc/p45</code><div class="faint"><p>Two slashes: the edition lands where a host would be. Still a route.</p></div></td><td><code>open #/hafs-kfqc/p45</code></td></tr>
 <tr><td><code class="url">hifth://open/#/hafs-kfqc/2:47-48?w=1-2</code><div class="faint"><p>A site link's tail pasted after hifth://open/, fragment and all.</p></div></td><td><code>open #/hafs-kfqc/2:47-48?w=1-2</code></td></tr>
 <tr><td><code class="url">hifth:///hafs-kfqc/p0</code><div class="faint"><p>Page numbers start at 1. A plain link that is not a route is ignored, silently.</p></div></td><td><code>refused</code></td></tr>
+<tr><td><code class="url">hifth:///warsh-libya/2:255</code><div class="faint"><p>A mus'haf we know but do not ship yet. A plain link is ignored, like any link that is not a route; a request says why.</p></div></td><td><code>refused</code></td></tr>
 </tbody></table>
 </section>
 <section id="xOpen">
@@ -64,8 +65,8 @@ nav a { margin-right: 14px; color: #1f6f66; }
 <tr><td><code>verse</code></td><td>query</td><td>string, matching <code>^[1-9][0-9]*:[1-9][0-9]*(-([1-9][0-9]*:)?[1-9][0-9]*)?$</code></td><td><p>One verse as <code>surah:ayah</code>, or a run within one surah as <code>2:47-48</code> or <code>2:47-2:48</code>. The verse is selected on its page; a run is highlighted.</p></td></tr>
 <tr><td><code>surah</code></td><td>query</td><td>integer, 1 to 114<div class="faint">e.g. <code>36</code></div></td><td><p>A surah's context: opens its first verse with the commentary sheet led by the surah's introduction, as <code>verse=N:1&amp;open=context</code> would. 1 to 114. Give one of page, verse or surah.</p></td></tr>
 <tr><td><code>words</code></td><td>query</td><td>string, matching <code>^[1-9][0-9]*(-[1-9][0-9]*)?$</code></td><td><p>Which words of the verse to pulse: <code>3-7</code>, or <code>5</code> for one word. Needs <code>verse</code>.</p></td></tr>
-<tr><td><code>edition</code></td><td>query</td><td>string, matching <code>^[a-z0-9-]+$</code></td><td><p>Which mus'haf. Defaults to <code>hafs-kfqc</code>, the only one shipped today.</p></td></tr>
-<tr><td><code>route</code></td><td>query</td><td></td><td><p>The place as one string in the web app's link grammar, <code>/&lt;edition&gt;/&lt;target&gt;[?query]</code>, for a caller that already holds a link. Percent-encode it, or a <code>&amp;</code> inside its query is read as the end of this parameter. Wins over <code>page</code>/<code>verse</code> when both are given.</p></td></tr>
+<tr><td><code>edition</code></td><td>query</td><td><code>hafs-kfqc</code>, <code>warsh-libya</code>, <code>qalun-libya</code>, <code>hafs-indopak</code></td><td><p>Which mus'haf, by its id. Defaults to <code>hafs-kfqc</code>, the only one shipped today. A name not in the <code>Edition</code> list, or one not shipped yet, is refused with <code>bad-route</code> and a message naming the shipped ids.</p></td></tr>
+<tr><td><code>route</code></td><td>query</td><td>string, matching <code>^/[a-z0-9-]+/(p[1-9][0-9]*|[1-9][0-9]*:[1-9][0-9]*(-([1-9][0-9]*:)?[1-9][0-9]*)?)(\?[A-Za-z0-9\-_.~%:,=&amp;+]*)?$</code></td><td><p>The place as one string in the web app's link grammar, <code>/&lt;edition&gt;/&lt;target&gt;[?query]</code>, for a caller that already holds a link. Percent-encode it, or a <code>&amp;</code> inside its query is read as the end of this parameter. Wins over <code>page</code>/<code>verse</code> when both are given.</p></td></tr>
 <tr><td><code>mode</code></td><td>query</td><td><code>read</code>, <code>select</code>, <code>highlight</code>, <code>bookmark</code>, <code>note</code>, <code>harakat</code>, <code>word</code>, <code>mistake</code>, <code>crop</code><div class="faint">e.g. <code>note</code></div></td><td><p>The mode the app opens in: the page tool put in hand on arrival, named by the word on its button. The same thing as <code>tool</code>; give one or the other. A name not in the list is refused with <code>bad-route</code>.</p></td></tr>
 <tr><td><code>tool</code></td><td>query</td><td><code>read</code>, <code>select</code>, <code>highlight</code>, <code>bookmark</code>, <code>note</code>, <code>harakat</code>, <code>word</code>, <code>mistake</code>, <code>crop</code></td><td><p>The web app's own name for <code>mode</code>. Passed through as <code>tool=</code> in the route.</p></td></tr>
 <tr><td><code>open</code></td><td>query</td><td><code>jump</code>, <code>about</code>, <code>record</code>, <code>shelf</code>, <code>key</code>, <code>editions</code>, <code>tips</code>, <code>lookalikes</code>, <code>roots</code>, <code>commentary</code>, <code>context</code><div class="faint">e.g. <code>commentary</code></div></td><td><p>A panel open on arrival. <code>commentary</code> opens the named verse's commentary (tafsir); <code>context</code> opens it led by the surah's introduction. Both need a verse, and exist only in a build that holds commentary (the private pitch build) — the public app opens the verse and drops the panel. The rest are the app's own panels: go-to, about, the revision record, the record at juz scope, the tajweed colour key, the mus'haf picker, the tips strip, a verse's look-alikes, a verse's roots. A name not in the list is refused with <code>bad-route</code>.</p></td></tr>
@@ -81,13 +82,13 @@ nav a { margin-right: 14px; color: #1f6f66; }
 <h4>success <span class="faint">— opens <code>{$request.query.x-success}</code></span></h4>
 <p>Opened by the app when the action worked</p>
 <table><thead><tr><th>key</th><th>where</th><th>values</th><th>what it does</th></tr></thead><tbody>
-<tr><td><code>route</code> <span class="req">required</span></td><td>query</td><td></td><td><p>What is on screen, in the same shape the caller sends (no <code>#</code>).</p></td></tr>
+<tr><td><code>route</code> <span class="req">required</span></td><td>query</td><td>string, matching <code>^/[a-z0-9-]+/(p[1-9][0-9]*|[1-9][0-9]*:[1-9][0-9]*(-([1-9][0-9]*:)?[1-9][0-9]*)?)(\?[A-Za-z0-9\-_.~%:,=&amp;+]*)?$</code></td><td><p>What is on screen, in the same shape the caller sends (no <code>#</code>).</p></td></tr>
 <tr><td><code>url</code> <span class="req">required</span></td><td>query</td><td>string, uri</td><td><p>The same place on the public site, ready to share.</p></td></tr>
 </tbody></table>
 <h4>error <span class="faint">— opens <code>{$request.query.x-error}</code></span></h4>
 <p>Opened by the app when the action failed</p>
 <table><thead><tr><th>key</th><th>where</th><th>values</th><th>what it does</th></tr></thead><tbody>
-<tr><td><code>errorCode</code> <span class="req">required</span></td><td>query</td><td></td><td><p></p></td></tr>
+<tr><td><code>errorCode</code> <span class="req">required</span></td><td>query</td><td><code>missing-route</code>, <code>bad-route</code>, <code>unknown-action</code>, <code>route-not-shown</code></td><td><p></p></td></tr>
 <tr><td><code>errorMessage</code> <span class="req">required</span></td><td>query</td><td>string</td><td><p>One plain sentence for a person, e.g. <code>not a route: chapter-2</code>.</p></td></tr>
 </tbody></table>
 <h3>Examples</h3>
@@ -103,6 +104,8 @@ nav a { margin-right: 14px; color: #1f6f66; }
 <tr><td><code class="url">hifth://x-callback-url/open?page=7&amp;mode=notes&amp;x-error=shortcuts://x-callback-url/run-shortcut?name=Log%20failure</code><div class="faint"><p>A mode that is not in the list is refused, not quietly dropped.</p></div></td><td><code>error bad-route</code></td></tr>
 <tr><td><code class="url">hifth://x-callback-url/open?verse=2:255&amp;open=tafsir&amp;x-error=shortcuts://x-callback-url/run-shortcut?name=Log%20failure</code><div class="faint"><p>The panel is called commentary, not tafsir.</p></div></td><td><code>error bad-route</code></td></tr>
 <tr><td><code class="url">hifth://x-callback-url/open?surah=115&amp;x-error=shortcuts://x-callback-url/run-shortcut?name=Log%20failure</code></td><td><code>error bad-route</code></td></tr>
+<tr><td><code class="url">hifth://x-callback-url/open?page=1&amp;edition=warsh-libya&amp;x-error=shortcuts://x-callback-url/run-shortcut?name=Log%20failure</code><div class="faint"><p>A mus'haf we know but do not ship yet: refused as not shipped, with the shipped ids named.</p></div></td><td><code>error bad-route</code></td></tr>
+<tr><td><code class="url">hifth://x-callback-url/open?route=/hafs/2:255&amp;x-error=shortcuts://x-callback-url/run-shortcut?name=Log%20failure</code><div class="faint"><p>A name not in the edition list, inside a whole route: refused with the list.</p></div></td><td><code>error bad-route</code></td></tr>
 <tr><td><code class="url">hifth://x-callback-url/open?page=45&amp;verse=2:255&amp;x-error=shortcuts://x-callback-url/run-shortcut?name=Log%20failure</code><div class="faint"><p>A page and a verse at once: the app cannot know which you meant.</p></div></td><td><code>error bad-route</code></td></tr>
 <tr><td><code class="url">hifth://x-callback-url/open?words=3-7&amp;x-error=shortcuts://x-callback-url/run-shortcut?name=Log%20failure</code><div class="faint"><p>Words without a verse.</p></div></td><td><code>error bad-route</code></td></tr>
 <tr><td><code class="url">hifth://x-callback-url/open?route=/hafs-kfqc/2:255&amp;x-success=shortcuts://x-callback-url/run-shortcut?name=Log%20verse&amp;x-error=shortcuts://x-callback-url/run-shortcut?name=Log%20failure</code><div class="faint"><p>Open a verse from Shortcuts; the answer runs one shortcut on success and another on failure.</p></div></td><td><code>open #/hafs-kfqc/2:255</code></td></tr>
@@ -126,7 +129,7 @@ nav a { margin-right: 14px; color: #1f6f66; }
 <h4>success <span class="faint">— opens <code>{$request.query.x-success}</code></span></h4>
 <p>Opened by the app when the action worked</p>
 <table><thead><tr><th>key</th><th>where</th><th>values</th><th>what it does</th></tr></thead><tbody>
-<tr><td><code>route</code> <span class="req">required</span></td><td>query</td><td></td><td><p>What is on screen, in the same shape the caller sends (no <code>#</code>).</p></td></tr>
+<tr><td><code>route</code> <span class="req">required</span></td><td>query</td><td>string, matching <code>^/[a-z0-9-]+/(p[1-9][0-9]*|[1-9][0-9]*:[1-9][0-9]*(-([1-9][0-9]*:)?[1-9][0-9]*)?)(\?[A-Za-z0-9\-_.~%:,=&amp;+]*)?$</code></td><td><p>What is on screen, in the same shape the caller sends (no <code>#</code>).</p></td></tr>
 <tr><td><code>url</code> <span class="req">required</span></td><td>query</td><td>string, uri</td><td><p>The same place on the public site, ready to share.</p></td></tr>
 </tbody></table>
 <h3>Examples</h3>
@@ -135,10 +138,20 @@ nav a { margin-right: 14px; color: #1f6f66; }
 <tr><td><code class="url">hifth://x-callback-url/current?x-success=hifth://x-callback-url/current</code><div class="faint"><p>An answer address that points back into this app is dropped, so a request cannot answer itself for ever.</p></div></td><td><code>current</code></td></tr>
 </tbody></table>
 </section>
+<section id="editions">
+<h2>Which mus'haf may a link name?</h2>
+<p>Which mus'haf, by its id. The app's own list, copied here with an English name and whether the mus'haf is actually in the build. A name not in the list, or one not shipped yet, is refused: a plain link is ignored, a request is answered with <code>bad-route</code> and a message that names the shipped ids. The shipped one is the default when a request names none.</p>
+<table><thead><tr><th>id</th><th>mus'haf</th><th>in the app?</th></tr></thead><tbody>
+<tr><td><code>hafs-kfqc</code></td><td>Hafs · King Fahd Complex print (Madinah)<div class="faint">Hafs from Asim</div></td><td><strong>yes</strong></td></tr>
+<tr><td><code>warsh-libya</code></td><td>Warsh · Libyan Endowments print<div class="faint">Warsh from Nafi</div></td><td>not yet<div class="faint">licensed for non-commercial use only; needs permission before it can be added</div></td></tr>
+<tr><td><code>qalun-libya</code></td><td>Qalun · Libyan Endowments print<div class="faint">Qalun from Nafi</div></td><td>not yet<div class="faint">licensed for non-commercial use only; needs permission before it can be added</div></td></tr>
+<tr><td><code>hafs-indopak</code></td><td>Hafs · IndoPak script<div class="faint">Hafs from Asim</div></td><td>not yet<div class="faint">no licensed page source yet</div></td></tr>
+</tbody></table>
+</section>
 <section id="errors">
 <h2>Error codes</h2>
 <p>An <code>x-error</code> answer carries <code>errorCode</code>, one of <code>missing-route</code>, <code>bad-route</code>, <code>unknown-action</code>, <code>route-not-shown</code>, and a plain <code>errorMessage</code>.</p>
-<p><code>missing-route</code>: open named no page, verse, surah or route. <code>bad-route</code>: the place is not in the grammar (a page of 0, two places at once, words without a verse, a surah past 114), or a mode, panel or view name not in the app's lists. <code>unknown-action</code>: the path after x-callback-url is not open or current. <code>route-not-shown</code>: the place was accepted but the page never showed it.</p>
+<p><code>missing-route</code>: open named no page, verse, surah or route. <code>bad-route</code>: the place is not in the grammar (a page of 0, two places at once, words without a verse, a surah past 114), or a mode, panel or view name not in the app's lists, or an edition not in the list or not shipped yet. <code>unknown-action</code>: the path after x-callback-url is not open or current. <code>route-not-shown</code>: the place was accepted but the page never showed it.</p>
 </section>
 <section id="more"><h2>Other examples</h2><table><tbody><tr><td><code class="url">hifth://x-callback-url/bookmark?route=/hafs-kfqc/p1&amp;x-error=shortcuts://x-callback-url/run-shortcut?name=Log%20failure</code><div class="faint"><p>Only open and current exist. Anything else answers errorCode=unknown-action.</p></div></td><td><code>error unknown-action</code></td></tr></tbody></table></section>
 </main>
