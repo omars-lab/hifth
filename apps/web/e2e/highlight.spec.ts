@@ -94,6 +94,37 @@ test.describe("Hifth · the highlighter on the page", () => {
     });
   }
 
+  test("both ends of a band stand nearly upright, not slanted like a rhombus", async ({ page }) => {
+    // The owner, on the first drawing of the rough band: "too diagonal —
+    // straighten vertically more, just slight slants". Measured on the curve
+    // the browser actually draws, sampled along its length: at each end, how
+    // far across the line the top corner sits from the bottom corner.
+    await openVerse(page);
+    const ends = await page.locator(`${OVERLAY} .hl-band`).evaluateAll((els) =>
+      els.map((el) => {
+        const path = el as SVGPathElement;
+        const g = path.closest<SVGGElement>("[data-y]")!;
+        const mid = Number(g.dataset.y);
+        const half = Number(g.dataset.width) / 2;
+        const len = path.getTotalLength();
+        const pts = Array.from({ length: 400 }, (_, i) => path.getPointAtLength((len * i) / 400));
+        // Only the edges, not the rounding where an end meets its corner.
+        const top = pts.filter((p) => p.y < mid - half / 2).map((p) => p.x);
+        const bottom = pts.filter((p) => p.y > mid + half / 2).map((p) => p.x);
+        return {
+          half,
+          start: Math.max(...top) - Math.max(...bottom),
+          end: Math.min(...bottom) - Math.min(...top),
+        };
+      }),
+    );
+    expect(ends.length).toBeGreaterThan(0);
+    for (const e of ends) {
+      expect(Math.abs(e.start), "the end where the pen lands leans only slightly").toBeLessThan(e.half * 0.4);
+      expect(Math.abs(e.end), "the far end leans only slightly").toBeLessThan(e.half * 0.4);
+    }
+  });
+
   test("the verse is marked in the verse's own amber", async ({ page }) => {
     await openVerse(page);
     const fill = await page.locator(`${OVERLAY} .hl-sel.hl-ink`).first().evaluate((el) => getComputedStyle(el).fill);
