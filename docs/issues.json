@@ -2339,6 +2339,18 @@
       "owner": "agent",
       "note": "The website falls back to the mus'haf it ships and rewrites the address to say so, with no notice (a person following a link has nobody to answer, unlike the app's caller). The name is replaced as the link is read; core, the address code and the site each hold it.",
       "closedBy": "apps/web/e2e/open-link.spec.ts"
+    },
+    {
+      "id": "range-link-paints-one-verse",
+      "source": {
+        "file": "docs/design/app-links-editions-and-builder.md",
+        "item": "③"
+      },
+      "status": "fixed",
+      "severity": "defect",
+      "owner": "agent",
+      "note": "A link naming a passage marked only its first verse, in the single-verse colour, because the passage wash was painted by a drag alone. The page now paints it from the same state the menu reads, so a link and a drag look the same; the golden colour tolerance that let the wrong picture pass for a month is tightened from 0.25 to 0.05.",
+      "closedBy": "apps/web/e2e/range.spec.ts"
     }
   ]
 }
