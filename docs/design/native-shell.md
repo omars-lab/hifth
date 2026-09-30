@@ -248,17 +248,23 @@ narrower question and has its own decision; a store listing waits on the licensi
 
 **What would answer it:** the same opinion `gpl-and-the-app-store` waits on.
 
-### ⑧ The first route the page reports is page 1, not the verse it opened at · **confirmed**
+### ⑧ The first route the page reports is page 1, not the verse it opened at · **fixed**
 
 Seen in the Mac probe: opened at `/hafs-kfqc/2:255`, the page's address at `ready` still read
 `/hafs-kfqc/p1`, and the verse arrived on the next route message. Every test waits for the
 route it asked for, so nothing is wrong on screen, but the shell's window title flickers and
-anything reading "the route at ready" is misled.
+anything reading "the route at ready" is misled — a `current` request queued before the first
+route was answered with page 1.
 
-**What would answer it:** the web app should send `ready` after the cold-open restore has
-resolved, or the shell should ignore route messages until the first one that is not page 1.
-Either way, a test that asserts the first `route` message after `ready` names the requested
-verse.
+**What it was (2026-09-29):** the app's first view (page 1, nothing selected) comes into being
+in the same moment the link is read, and the hash router reported that view — and wrote it over
+the link in the address bar — before the restore had moved the view to the verse. Fixed in the
+router itself: it now remembers where the link points and says nothing until the view is there,
+comparing only the page or verse (a link's word span, panel or tool never comes back out of the
+view, so a link to the page already showing is reported at once). The skip is spent on the cold
+open only. Held by `apps/web/src/useHashRouter.native.test.tsx`: the first route after `ready`
+is the verse the link named, the address bar is never rewritten to page 1, a link to the page
+already showing and no link at all are both reported as before.
 
 ### ⑨ No test drives an x-callback-url request through the real operating system · **open**
 

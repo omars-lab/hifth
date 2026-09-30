@@ -2286,10 +2286,11 @@
         "file": "docs/design/native-shell.md",
         "item": "⑧"
       },
-      "status": "confirmed",
+      "status": "fixed",
       "severity": "defect",
       "owner": "agent",
-      "note": "Cold start at /hafs-kfqc/2:255: the page's address at ready reads /hafs-kfqc/p1 and the verse arrives on the next route message. Nothing wrong on screen; the window title flickers and a probe that reads the route at ready is misled."
+      "note": "Cold start at /hafs-kfqc/2:255: the shell heard page 1 then the verse, and the address bar was rewritten to page 1 for a moment, because the app's first view was reported before the restore had landed. Fixed 2026-09-29 in the hash router: it holds the route report until the view is at the place the link named.",
+      "closedBy": "apps/web/src/useHashRouter.native.test.tsx"
     },
     {
       "id": "x-callback-untested-end-to-end",
