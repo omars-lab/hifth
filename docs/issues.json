@@ -2352,6 +2352,18 @@
       "owner": "agent",
       "note": "A link naming a passage marked only its first verse, in the single-verse colour, because the passage wash was painted by a drag alone. The page now paints it from the same state the menu reads, so a link and a drag look the same; the golden colour tolerance that let the wrong picture pass for a month is tightened from 0.25 to 0.05.",
       "closedBy": "apps/web/e2e/range.spec.ts"
+    },
+    {
+      "id": "word-run-anchor-follows-finger",
+      "source": {
+        "file": "docs/design/word-indexing.md",
+        "item": "⑦"
+      },
+      "status": "fixed",
+      "severity": "defect",
+      "owner": "agent",
+      "note": "A hold-and-drag inside a verse took the run's first word from wherever the finger was when the page's word boxes arrived, not from where the hold began, so the same drag on a cold page selected a different run depending on the network. The stroke now keeps the hold's own point and anchors on it.",
+      "closedBy": "apps/web/e2e/word.spec.ts"
     }
   ]
 }

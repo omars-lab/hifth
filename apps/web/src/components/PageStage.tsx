@@ -645,6 +645,14 @@ interface WordRun {
   readonly key: string;
   readonly edition: string;
   readonly page: number;
+  /**
+   * Where the hold began, in SVG user units. Kept apart from `point` because
+   * the finger keeps moving while the shard is on its way, and the anchor must
+   * be the word under *this*, not under wherever the finger is when the
+   * numbers land — or the same drag would select a different run depending on
+   * how fast the network answered.
+   */
+  readonly origin: { x: number; y: number };
   /** Where the finger is now, in SVG user units. */
   point: { x: number; y: number };
   /** The word the hold landed on. Fixed once set; the drag moves `cursor`. */
@@ -2557,6 +2565,10 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
    */
   const applyWords = useCallback(
     (idx: WordIndex, run: WordRun, commit: boolean) => {
+      // The anchor is the word under where the hold *began*. Set here, on the
+      // first frame the shard is in hand, so a shard that lands mid-drag still
+      // starts the run where the finger went down.
+      if (run.anchor === null) run.anchor = idx.wordAt(run.key, run.origin.x, run.origin.y);
       const at = idx.wordAt(run.key, run.point.x, run.point.y);
       // Null only if this ayah has no words on this page at all — a shard that
       // disagrees with the manifest. Leave the ayah highlight alone and say
@@ -2588,7 +2600,16 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
       // the same ayah would inherit the previous run's anchor and extend a
       // selection the reader thinks they just started over.
       if (fresh || !run || run.key !== key || run.page !== page) {
-        run = { key, edition: parsed.edition, page, point, anchor: null, cursor: null, done: commit };
+        run = {
+          key,
+          edition: parsed.edition,
+          page,
+          origin: point,
+          point,
+          anchor: null,
+          cursor: null,
+          done: commit,
+        };
         wordRunRef.current = run;
       } else {
         run.point = point;
@@ -2681,6 +2702,7 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
           key,
           edition: parsed.edition,
           page,
+          origin: { x: 0, y: 0 },
           point: { x: 0, y: 0 },
           anchor: null,
           cursor: null,
