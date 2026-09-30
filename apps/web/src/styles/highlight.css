@@ -128,8 +128,9 @@
    painted. Each in its own colour since the highlight-texture decision
    (settled 2026-09-30, option F): a passage in a second colour under the amber
    verse, a run of words in a third over it, and where they cross the colours
-   mix under multiply, as two inks do on paper. The colours are stand-ins until
-   the owner picks the real ones (docs/backlog.md). */
+   mix under multiply, as two inks do on paper. The passage takes the pen the
+   reader picked in the tools bar (green by default) and a run is blue; the
+   pens themselves are in tokens.css and pen.ts. */
 #hifth-overlay .hl-hlt.hl-ink {
   fill: var(--ink-range);
 }

@@ -96,10 +96,18 @@
   --ink-sel: #e8a13a;
   /* A passage and a word run each take their own colour, blended with the
      amber verse where they cross (highlight-texture decision, 2026-09-30).
-     Stand-ins: the verdigris and indigo the options page was drawn with, thinned
-     so the letters survive, until the real colours are chosen. */
-  --ink-range: rgba(31, 111, 102, 0.45);
-  --ink-run: rgba(59, 95, 168, 0.45);
+     The highlighter's four pens, pastels the owner chose on 2026-09-30 from
+     pairs drawn on page 42 (docs/design/highlight-texture-options.md ②). Each
+     is opaque, like the amber, and as strong as it can be while the letters
+     stay 4.5 to 1 off the paper where it crosses the amber verse; pen.test.ts
+     holds every one to that. A passage takes the pen the reader picked in the
+     tools bar (green until they pick), a run of words is always blue. */
+  --pen-green: #9bd9b5;
+  --pen-blue: #bacbf3;
+  --pen-yellow: #f0d860;
+  --pen-pink: #ed9bc4;
+  --ink-range: var(--pen-green);
+  --ink-run: var(--pen-blue);
   --marquee-fill: rgba(232, 161, 58, 0.07);
   --marquee-ring: rgba(232, 161, 58, 0.75);
 
@@ -248,6 +256,18 @@
   --z-toast: 30;
 
   color-scheme: light;
+}
+
+/* The pen the reader picked in the tools bar colours the passage (pen.ts puts
+   it on the page). Green needs no rule: it is the default above. */
+:root[data-pen="blue"] {
+  --ink-range: var(--pen-blue);
+}
+:root[data-pen="yellow"] {
+  --ink-range: var(--pen-yellow);
+}
+:root[data-pen="pink"] {
+  --ink-range: var(--pen-pink);
 }
 
 @media (prefers-reduced-motion: reduce) {
