@@ -20,6 +20,12 @@ repo's own `.claude/settings.json` as a Stop hook (hifth #116, qiyas #33, bikar 
 **Check CI before merging, every time.** Main in hifth was merged red for ~10 PRs (#106–#115: an
 iPhone-only hop test and the 150 KB size check) because "green" was assumed, not looked at; fixed in #117.
 
+**What "green" means in hifth (2026-09-29):** the repo runs no checks on pull requests on purpose
+(see [[checks-local-not-ci]]); `gh pr checks` says "no checks reported" and that is normal. The
+check is the local pre-push hook (every gate, vitest, all six Playwright projects, the public
+build), which must have passed on the push. After the merge, watch the "Deploy" run on main —
+that is the only remote check, and it must succeed for the merge commit.
+
 **How to apply:** still stop, and say why in plain words, when tests fail, a golden re-baseline
 would be needed, or the PR needs the owner's call (a one-way door, held text, spend). Those are
 real judgment calls; a green PR is not. Commit/branch rules in [[delegate-independent-work-to-commit-on-branch]] still hold.

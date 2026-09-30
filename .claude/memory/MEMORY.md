@@ -42,3 +42,7 @@
 - [Short-first guides, Mermaid for processes](short-first-guides-mermaid.md) — working pages lead with the short version, detail folded; order/branches drawn as Mermaid (owner 2026-09-28)
 - [Park manual reviews](park-manual-reviews.md) — never push by-hand checks at the owner; add to manual-testing checklist, turn each verdict into a test
 - [Backlog is the only record](backlog-is-the-only-record.md) — docs/backlog.md is the one self-contained open-work page; register every open item before a session ends (owner 2026-09-29)
+- [x-callback-url contract](x-callback-url-contract.md) — shell answers x-callback-url since 2026-09-29; one OpenAPI JSON (Edition schema, x-public-site) held honest by Swift + vitest (incl. JS link-builder port) + node tests; add a key/edition in all four places; page has a live builder
+- [e2e serves dist; SW blocks page.route](e2e-serves-dist-and-sw-blocks-route.md) — rebuild dist before e2e; slow a shard only in a context with serviceWorkers "block"
+- [Two researchers then a checker worked](two-researchers-then-checker-worked.md) — ran 2026-09-30 for highlighter texture (#171/#172→#173); checker merges both branches, reopens sources, draws real disagreements live
+- [review-md vault and hook](review-md-vault-and-hook.md) — docs/ is an Obsidian vault with BRAT+review-md; review-md plugin installed; SessionStart hook / `make reviews` prints threads waiting on claude
