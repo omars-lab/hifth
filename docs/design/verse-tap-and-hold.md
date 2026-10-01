@@ -1,6 +1,6 @@
 # What should a tap on a verse do, and what should holding your finger on it do?
 
-*Open, 2026-09-30. Two features are waiting on this one answer: a menu that opens when you hold your finger on a verse, and full-screen reading, where a tap on the page hides the bars. Both want the plain tap, and today the tap already has a job. Pictures are from the real app on a phone; the full-screen ones were made by hiding the bars in the real page.*
+*Open, 2026-09-30. Two features are waiting on this one answer: a menu that opens when you hold your finger on a verse, and full-screen reading, where a tap on the page hides the bars. Both want the plain tap, and today the tap already has a job. Pictures are from the real app on a phone; where an option adds something new, a short script added it to the live page for the picture.*
 
 > [!tip] Recommended
 > **A — holding a verse opens its menu, and a tap hides or shows the bars.** The page becomes something you read, not something a stray tap paints orange, and on a smaller phone a tap gives you back the last four lines the bars cover today.
@@ -53,57 +53,30 @@ This is the part the pictures taught us, and no list of pros and cons would have
 >
 > **The tall phone, bars hidden: same size page, more paper around it**
 >
-> ![The tall phone with the bars hidden](verse-tap-and-hold/mock-fullscreen.png)
+> ![The tall phone with the bars hidden](verse-tap-and-hold/a-tap.png)
 
 So full-screen is worth most to people on smaller phones, and to anyone who wants a bare page while reciting. It is not a way to make the text bigger on a big phone.
 
 ## What are the options? — 3
 
-### A — Hold opens the verse menu; a tap hides or shows the bars *(recommended)*
+Each picture is the real app on a phone, with the option's new parts added to the live page by a short script kept beside this note, so every picture can be taken again.
 
-```
- tap anywhere on the page          hold a verse, let go
- ┌──────────────────────┐          ┌──────────────────────┐
- │                      │          │ ░░ verse painted ░░░ │
- │      the page,       │          │                      │
- │     nothing else     │          ├──────────────────────┤
- │                      │          │ Al-Baqarah · 2:48  × │
- │                      │          │ Listen  Play to  Mark│
- │                      │          │ Note  Share  Copy  … │
- └──────────────────────┘          └──────────────────────┘
- tap again: bars come back          the one verse menu, with more in it
-```
+| | **A** *(recommended)* | **B** | **C** |
+| --- | --- | --- | --- |
+| **Tap a verse** | ![A, tap: the bars are gone and nothing is painted\|190](verse-tap-and-hold/a-tap.png)<br>The bars hide and nothing is painted. Tap again and they come back. | ![B, tap: the verse menu with four more buttons\|190](verse-tap-and-hold/menu-fuller.png)<br>The verse is painted and the menu opens, now with **Play to, Mark, Note, Copy**. | ![C, tap: the verse menu as it is today\|190](verse-tap-and-hold/today-tap.png)<br>Exactly as today. |
+| **Hold a verse** | ![A, hold: the verse menu with four more buttons\|190](verse-tap-and-hold/menu-fuller.png)<br>The menu opens, now with **Play to, Mark, Note, Copy**. | The same menu as a tap. | ![C, hold: a second, small menu beside the verse\|190](verse-tap-and-hold/c-hold.png)<br>A second, small menu beside the verse. |
+| **Full screen** | A tap, as above. No button needed. | ![B: a full-screen button in the bottom line\|190](verse-tap-and-hold/b-button.png)<br>A button. The top bar is already full on a phone, so it goes in the bottom line. | The same button as B. |
+| **Getting the bars back** | Another tap. | ![B, full screen: a small button left to bring the bars back\|190](verse-tap-and-hold/b-full.png)<br>A small button has to stay on the page. | The same as B. |
+
+### A — Hold opens the verse menu; a tap hides or shows the bars *(recommended)*
 
 The verse menu you have today stays the one and only menu. It gains **Play to** (play from here to a verse you pick), **Mark**, **Note** and **Copy**. Holding and *dragging* still paints a run of verses, as it does now; the menu opens only if you let go without moving.
 
 ### B — Keep the tap as it is; a hold opens the same menu; full-screen gets a button
 
-```
- tap or hold a verse               full-screen
- ┌──────────────────────┐          ┌───────────────── ⤢ ─┐
- │ ░░ verse painted ░░░ │          │                      │
- │                      │          │   a button in the    │
- ├──────────────────────┤          │   top bar hides the  │
- │ Al-Baqarah · 2:48  × │          │   bars; how do you   │
- │ Listen  Play to  Mark│          │   get them back?     │
- │ Note  Share  Copy  … │          │                      │
- └──────────────────────┘          └──────────────────────┘
-```
-
-Nothing anyone has learned changes. Full-screen needs its own button, and once the bars are gone so is the button, so getting them back needs a second idea: a tap in the page's margin (on a phone the margin is a strip about as wide as a fingernail) or a swipe from the edge.
+Nothing anyone has learned changes. Full-screen needs its own button, and the pictures showed that the top bar has no room left on a phone (its six buttons already reach the right edge), so the button sits in the bottom line instead. Once the bars are gone, so is the button, so a second small button has to stay on the page to bring them back. That button sits over the page you are reciting from.
 
 ### C — A tap opens today's menu; a hold opens a second, separate menu
-
-```
- tap a verse                       hold a verse
- ┌──────────────────────┐          ┌──────────────────────┐
- │ ░░ verse painted ░░░ │          │ ░░ verse ░░┌────────┐│
- │                      │          │            │Play to ││
- ├──────────────────────┤          │            │Mark    ││
- │ Al-Baqarah · 2:48  × │          │            │Note    ││
- │ Listen  Roots  Share │          │            │Copy    ││
- └──────────────────────┘          └────────────┴────────┘┘
-```
 
 A quick tap for the everyday buttons, a hold for the rest. Full-screen still needs a button, as in B.
 

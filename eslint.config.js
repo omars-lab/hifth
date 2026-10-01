@@ -100,6 +100,12 @@ export default tseslint.config(
     files: ["packages/etl/scripts/lib/*.client.mjs"],
     languageOptions: { globals: { ...globals.browser } },
   },
+  // An options note's mock-ups: scripts the page-driving tool runs inside the live
+  // app to add what an option would add, so the option can be photographed.
+  {
+    files: ["docs/design/**/mocks/*.js"],
+    languageOptions: { globals: { ...globals.browser } },
+  },
   // Browser globals for the web app.
   {
     files: ["apps/web/**/*.{ts,tsx}"],

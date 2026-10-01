@@ -39,6 +39,7 @@
  *   move=<x>,<y>              move the mouse to a viewport point (hover states)
  *   drag=<x>,<y>><x>,<y>      press at one point, glide to the other, let go (a page turn by its edge)
  *   eval=<js expression>      evaluate in the page and log the JSON result (measure, don't guess)
+ *   evalfile=<path>           the same, with the script read from a file (an option mocked into the real app)
  *
  * Other flags: --browser firefox (the owner's browser; default chromium),
  * --mouse (a desktop with a real pointer, no touch — hover styles apply),
@@ -56,7 +57,7 @@
  */
 import { chromium, firefox } from "@playwright/test";
 import { execFileSync } from "node:child_process";
-import { mkdirSync, mkdtempSync, rmSync } from "node:fs";
+import { mkdirSync, mkdtempSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -178,6 +179,13 @@ async function runStep(page, step) {
     }
     case "eval": {
       const result = await page.evaluate((src) => (0, eval)(src), arg);
+      log("eval", `result=${JSON.stringify(result)}`);
+      return;
+    }
+    case "evalfile": {
+      // A mock kept beside an options note: too long for the command line, and
+      // kept so the picture can be taken again.
+      const result = await page.evaluate((src) => (0, eval)(src), readFileSync(resolve(arg), "utf8"));
       log("eval", `result=${JSON.stringify(result)}`);
       return;
     }
