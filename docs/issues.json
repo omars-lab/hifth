@@ -2165,9 +2165,9 @@
       "severity": "risk",
       "owner": "agent",
       "blockedBy": [
-        "the 2026-09 refactor settling"
+        "under ~5 KB of room under the size cap, or the Study Quran demo shown"
       ],
-      "note": "Parked 2026-09-29 when the session task list was cleared; until then it lived only in that list and a pointer in the trims list to a file that never existed."
+      "note": "Parked 2026-09-29 when the session task list was cleared; until then it lived only in that list and a pointer in the trims list to a file that never existed. 2026-09-30: the refactor it waited on was never planned; it now waits on a real trigger (performance.md ⑱)."
     },
     {
       "id": "qul-command-line-tool",
