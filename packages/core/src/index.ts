@@ -69,6 +69,27 @@ export {
   type Note,
   type NoteKind,
 } from "./notes.js";
+export {
+  addScopedNote,
+  addVerse,
+  canTake,
+  changeScope,
+  editScopedNote,
+  isScopedNote,
+  mergeScopedNotes,
+  migrateV1Notes,
+  outsideScope,
+  removeVerse,
+  scopeContains,
+  scopeSize,
+  suggestNotes,
+  type NoteScope,
+  type NoteSpot,
+  type NoteVerse,
+  type PageOf,
+  type ScopedNote,
+  type ScopedNoteKind,
+} from "./scoped-notes.js";
 // tafsir seam — commentary is its own node in the reserved `tafsir/<name>/S:A`
 // namespace, behind a provider contract so a live open source and a side-loaded
 // private edition are swapped without the UI knowing which (decision

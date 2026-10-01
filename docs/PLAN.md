@@ -1248,6 +1248,15 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     without, the bare page. **What is open:** a tap on a verse already selects it here, so
     which gesture does which has to be settled by trying both in the hand before building.
     Built test first.
+29. **Notes that gather verses from one part of the Qur'an.** Asked 2026-09-30: a note is
+    given a scope when it is made (a surah, a juz, a hizb, a page, or the whole Qur'an), can
+    take any verse inside it, and when a verse is added the app offers the notes that can take
+    it, the one used last first. The design is [scoped-notes.md](design/scoped-notes.md),
+    seven build steps; its first three questions are answered. **Done 2026-10-01:** step 1,
+    the rules and their tests, with nothing on screen yet. **What is open:** step 2, moving
+    today's notes across on the device; then the note tool offering existing notes (waits on
+    how that should feel, the design's question 4), the list of notes and stepping through
+    one (question 6), and the long-press ways in, which land with 25 and 27.
 
 **The half of these a machine cannot run now has a register — and a runbook.** Follow-ups
 ① (the phone), ② (the browser glance) and ④ (VoiceOver/TalkBack) still wait on a human, and
