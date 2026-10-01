@@ -1221,6 +1221,28 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     words go into both languages, its reading direction follows the source's language, and a
     browser test opens the drawer on a live source. Nothing a reader sees today is affected:
     no public build has a commentary source switched on.
+25. **Long-press a verse for a small menu of what you can do with it.** Asked 2026-09-30, from
+    another reading app the owner uses. Holding a finger on a verse opens a small menu headed
+    with the surah and verse ("Al-Baqara: 174"): play it, play from it to a later verse, its
+    translation, mark it, a note on it, share it, copy it.
+    **What is open:** how this sits beside what a tap already does here (select the verse and
+    open its drawer), and which of those actions this app has or wants. Share in it is the
+    tray settled in the share-sheet-builder decision. Built test first.
+26. **Print the surah name, the juz and the page number on the page itself.** Asked 2026-09-30,
+    from the same app: the surah's name in one top corner, the juz in the other, the page
+    number centred at the bottom, all in the print's brown, as part of the page rather than
+    the app's bars. **What is open:** where they sit on our page without crowding the first
+    line, and in which language each is written. Built test first.
+27. **Long-pressing the page number, the surah name or the juz gives each its own menu.** Asked
+    2026-09-30. Holding the page number acts on the page (share the page, and so on), the
+    surah name on the surah, the juz on the juz, and a verse on the verse (25), so each shares
+    and offers what fits what was held. Waits on 26, which puts those three on the page.
+28. **A plain tap on the text hides the app's bars for reading full screen; another brings
+    them back.** Asked 2026-09-30, from a pair of pictures: with the bars, a top bar (the page
+    number, translation, contrast, bookmark) and a bottom bar (play, the reciter, the layout);
+    without, the bare page. **What is open:** a tap on a verse already selects it here, so
+    which gesture does which has to be settled by trying both in the hand before building.
+    Built test first.
 
 **The half of these a machine cannot run now has a register — and a runbook.** Follow-ups
 ① (the phone), ② (the browser glance) and ④ (VoiceOver/TalkBack) still wait on a human, and

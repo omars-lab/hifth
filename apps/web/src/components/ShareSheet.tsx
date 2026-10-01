@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useId, useRef, useState } from "react";
+import { useCallback, useEffect, useId, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { type AppState } from "@hifth/core";
 import { useT } from "../i18n";
@@ -21,7 +21,15 @@ interface ShareSheetProps {
   shape?: ShareShape;
   /** The pitch build has a commentary panel to send someone to; the public one does not. */
   pitch?: boolean;
+  /**
+   * Where the open tray starts on a phone (window px), or null when it covers
+   * nothing — so the page can lift the verse being shared above it.
+   */
+  onCover?: (top: number | null) => void;
 }
+
+/** Wider than this, the tray is a small card in the corner, not a band across the page. */
+const WIDE = "(min-width: 40rem)";
 
 type Feedback = { kind: "copied" | "shared" | "error"; text: string } | null;
 
@@ -50,6 +58,7 @@ export function ShareSheet({
   variant = "ayah",
   shape = SHAPE,
   pitch = false,
+  onCover,
 }: ShareSheetProps): JSX.Element | null {
   const { t } = useT();
   const [feedback, setFeedback] = useState<Feedback>(null);
@@ -120,6 +129,24 @@ export function ShareSheet({
     setOpen(false);
     triggerRef.current?.focus();
   }, []);
+
+  // On a phone the tray is a band across the bottom of the screen, and the
+  // verse being shared often sits right there: the page is told where the band
+  // starts so it moves the verse up clear of it (owner, 2026-09-30, choosing C:
+  // "keep the verse visible"). The same path the commentary note uses.
+  useLayoutEffect(() => {
+    if (!onCover) return;
+    const sheet = sheetRef.current;
+    if (!open || !sheet) {
+      onCover(null);
+      return;
+    }
+    const report = () => onCover(window.matchMedia(WIDE).matches ? null : sheet.getBoundingClientRect().top);
+    report();
+    window.addEventListener("resize", report);
+    return () => window.removeEventListener("resize", report);
+  }, [open, onCover]);
+  useEffect(() => () => onCover?.(null), [onCover]);
 
   // A sheet that is open takes the focus, and Escape gives it back.
   useEffect(() => {
