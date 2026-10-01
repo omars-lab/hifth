@@ -20,3 +20,13 @@ The test helper that runs a check against a made-up tree now strips git's own va
 the test's own git calls do the same. A new test sets the index variable to point at a second
 made-up repository holding 3 files, as a commit hook would, and checks the count is still 2. It
 failed with 5 before the fix and passes after.
+
+## What else it did
+
+The same leak had a second, quieter effect. The helper sets up its made-up repository with
+`git init`, and with git's directory variable inherited from the hook that `init` ran against the
+**real** repository and marked it bare — as if it had no working files. The main checkout's next
+git command failed with "this operation must be run in a work tree", and the one wrong line was
+`bare = true` in the repository's own settings (found and set back by hand the same evening,
+nothing lost). Stripping git's variables before any git call in a made-up tree closes this too:
+the `init` can no longer reach the real repository.
