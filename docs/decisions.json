@@ -874,7 +874,8 @@
         "mark-granularity",
         "mistake-note-kinds",
         "harakah-pick",
-        "selection-drawer"
+        "selection-drawer",
+        "scoped-notes-old-notes"
       ]
     },
     {
@@ -943,7 +944,8 @@
         "note-export-shape",
         "mistake-note-kinds",
         "bookmark-store",
-        "storage-model"
+        "storage-model",
+        "scoped-notes-old-notes"
       ]
     },
     {
@@ -974,7 +976,8 @@
       "related": [
         "note-persistence",
         "confusion-map-export",
-        "comparison-crop"
+        "comparison-crop",
+        "scoped-notes-text"
       ]
     },
     {
@@ -1767,6 +1770,86 @@
         "highlight-strength",
         "highlight-options"
       ]
+    },
+    {
+      "id": "scoped-notes-scopes",
+      "question": "Which parts of the Qur'an can a note be about: a surah, a juz, a hizb, a page, the whole Qur'an?",
+      "options": [
+        {
+          "id": "A",
+          "label": "Surah, juz, hizb and page"
+        },
+        {
+          "id": "B",
+          "label": "Those four, plus the whole Qur'an"
+        },
+        {
+          "id": "C",
+          "label": "Those five, plus a quarter-hizb and a run of verses you pick"
+        }
+      ],
+      "doc": "docs/decisions/scoped-notes.md#which-parts-of-the-quran-can-a-note-be-about",
+      "decided": "B",
+      "related": [
+        "scoped-notes-old-notes",
+        "scoped-notes-text"
+      ],
+      "status": "decided",
+      "by": "omar",
+      "date": "2026-09-30"
+    },
+    {
+      "id": "scoped-notes-old-notes",
+      "question": "When notes become lists of verses, which part of the Qur'an is a note saved today about?",
+      "options": [
+        {
+          "id": "A",
+          "label": "The page it is pinned on"
+        },
+        {
+          "id": "B",
+          "label": "Its surah"
+        },
+        {
+          "id": "C",
+          "label": "The whole Qur'an"
+        }
+      ],
+      "doc": "docs/decisions/scoped-notes.md#what-scope-does-a-note-saved-today-get-when-notes-become-lists",
+      "decided": "A",
+      "related": [
+        "scoped-notes-scopes",
+        "scoped-notes-text",
+        "note-persistence",
+        "mistake-note-anchor"
+      ],
+      "status": "decided",
+      "by": "omar",
+      "date": "2026-09-30"
+    },
+    {
+      "id": "scoped-notes-text",
+      "question": "Does each verse in a note get its own line of text, or does the note have one text?",
+      "options": [
+        {
+          "id": "A",
+          "label": "One text per note, for now"
+        },
+        {
+          "id": "B",
+          "label": "One text, plus a line per verse"
+        }
+      ],
+      "doc": "docs/decisions/scoped-notes.md#does-each-verse-in-a-note-get-its-own-line-of-text",
+      "decided": "A",
+      "related": [
+        "scoped-notes-scopes",
+        "scoped-notes-old-notes",
+        "note-export-shape"
+      ],
+      "status": "decided",
+      "by": "omar",
+      "date": "2026-09-30"
     }
   ]
 }
