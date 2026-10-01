@@ -38,21 +38,5 @@
         "caption": "What does each one cost, and what does it lead to?"
       }
     ]
-  },
-  "highlight-options": {
-    "shots": [
-      {
-        "file": "highlight-options-0.png",
-        "caption": "The top of the page"
-      },
-      {
-        "file": "highlight-options-1.png",
-        "caption": "The strokes: how the mark looks"
-      },
-      {
-        "file": "highlight-options-2.png",
-        "caption": "The approaches: how it is done and how it behaves"
-      }
-    ]
   }
 }
