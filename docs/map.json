@@ -2082,7 +2082,7 @@
         {
           "file": "packages/core/src/scoped-notes.ts",
           "symbol": "suggestNotes",
-          "note": "Notes that gather verses from one part of the Qur'an (docs/design/scoped-notes.md, step 1 of 7): what a surah, juz, hizb, page or whole-Qur'an note can hold, adding and removing verses, which notes to offer, and moving today's notes across. Rules only; nothing on screen uses them yet."
+          "note": "Notes that gather verses from one part of the Qur'an (docs/design/scoped-notes.md, step 1 of 7): what a surah, juz, hizb, page or whole-Qur'an note can hold, adding and removing verses, which notes to offer, and moving today's notes across. The device keeps notes this way since step 2; the screen still shows one pin per verse."
         },
         {
           "file": "packages/core/src/bookmarks.ts",
@@ -2091,13 +2091,13 @@
         },
         {
           "file": "apps/web/src/bookmark-store.ts",
-          "symbol": "writeNotes",
-          "note": "Kept on the device in the bookmarks store, written whole."
+          "symbol": "loadNotes",
+          "note": "Kept on the device in the bookmarks store, written whole. The first open moves today's notes across to the kind that gathers verses in one write, leaving the old record as a backup that only the marked mistakes still change."
         },
         {
           "file": "apps/web/src/useBookmarks.ts",
           "symbol": "useNotes",
-          "note": "Says a note is saved only once the device has kept it."
+          "note": "Says a note is saved only once the device has kept it. Until the note tool knows notes that gather verses, it hands the app one pin per pinned verse and takes changed pins back into notes (pinsOf, fromPins in scoped-notes.ts)."
         },
         {
           "file": "apps/web/src/components/PageStage.tsx",

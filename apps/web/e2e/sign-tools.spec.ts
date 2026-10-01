@@ -257,8 +257,14 @@ test.describe("Hifth · the harakat and word tools", () => {
         new Promise<{ mark?: number; marks?: number[] }[]>((resolve) => {
           const open = indexedDB.open("hifth.bookmarks.v1");
           open.onsuccess = () => {
-            const get = open.result.transaction("sets").objectStore("sets").get("notes");
-            get.onsuccess = () => resolve((get.result?.notes ?? []) as { mark?: number; marks?: number[] }[]);
+            // Kept as the new kind of note: the signs ride on the verse's spot.
+            const get = open.result.transaction("sets").objectStore("sets").get("scoped-notes");
+            get.onsuccess = () =>
+              resolve(
+                ((get.result?.notes ?? []) as { verses: { spot?: { mark?: number; marks?: number[] } }[] }[]).map(
+                  (n) => n.verses[0]?.spot ?? {},
+                ),
+              );
           };
         }),
     );

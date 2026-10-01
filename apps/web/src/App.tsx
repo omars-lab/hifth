@@ -7,7 +7,7 @@ import {
   dropBookmark,
   liftBookmark,
   mergeBookmarks,
-  mergeNotes,
+  isMistake,
   addNote,
   editNote,
   markMistake,
@@ -1159,7 +1159,7 @@ export function App(): JSX.Element {
   // pin at a word and opens a box beside it; the pin stays and reopens the box.
   // Kept on the device beside the bookmarks, and carried in the same saved file
   // (note-persistence = B, note-export-shape = C).
-  const { notes, commit: commitNotes } = useNotes(announce, t.bmNotSaved);
+  const { notes, scoped, commit: commitNotes, loadFile: loadNotesFile } = useNotes(announce, t.bmNotSaved);
   const [noteOpenId, setNoteOpenId] = useState<string | null>(null);
   const openNote = notes.find((n) => n.id === noteOpenId) ?? null;
   // A deleted note (or a cleared mistake) waits here for a few seconds so
@@ -1167,7 +1167,10 @@ export function App(): JSX.Element {
   const [deletedNote, setDeletedNote] = useState<{ note: Note; said: string; restored: string } | null>(null);
 
   const saveBookmarkFile = useCallback(() => {
-    const blob = new Blob([JSON.stringify(toBookmarkFile(bookmarks, Date.now(), notes), null, 2)], {
+    // The file carries the notes that gather verses and, apart from them, the
+    // marked mistakes, which are still the old kind of note.
+    const mistakes = notes.filter(isMistake);
+    const blob = new Blob([JSON.stringify(toBookmarkFile(bookmarks, Date.now(), mistakes, [...scoped]), null, 2)], {
       type: "application/json",
     });
     const url = URL.createObjectURL(blob);
@@ -1176,7 +1179,7 @@ export function App(): JSX.Element {
     a.download = "hifth-bookmarks.json";
     a.click();
     setTimeout(() => URL.revokeObjectURL(url), 1000);
-  }, [bookmarks, notes]);
+  }, [bookmarks, notes, scoped]);
 
   const loadBookmarkFile = useCallback(
     (text: string) => {
@@ -1187,12 +1190,10 @@ export function App(): JSX.Element {
       }
       const merged = mergeBookmarks(bookmarks, file.bookmarks);
       const said = t.bmLoaded(merged.length - bookmarks.length);
-      const mergedNotes = file.notes ? mergeNotes(notes, file.notes) : null;
-      const newNotes = mergedNotes ? mergedNotes.length - notes.length : 0;
+      const newNotes = file.notes || file.scopedNotes ? loadNotesFile(file.notes ?? [], file.scopedNotes ?? []) : 0;
       commitBookmarks(merged, newNotes > 0 ? `${said} · ${t.noteLoaded(newNotes)}` : said);
-      if (mergedNotes) commitNotes(mergedNotes, "");
     },
-    [announce, bookmarks, commitBookmarks, notes, commitNotes, t],
+    [announce, bookmarks, commitBookmarks, loadNotesFile, t],
   );
 
   // Unfolding a corner lifts every bookmark on the page at once, with no
@@ -2501,6 +2502,7 @@ export function App(): JSX.Element {
               }}
               onClearAll={() => commitBookmarks([], t.bmCleared(bookmarks.length))}
               onSave={saveBookmarkFile}
+              hasNotes={notes.length > 0}
               onLoad={loadBookmarkFile}
             />
           </RevisionMap>

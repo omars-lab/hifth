@@ -9,8 +9,10 @@ interface BookmarkShelfProps {
   onOpen: (id: string) => void;
   onClearSurah: (surah: number) => void;
   onClearAll: () => void;
-  /** Hand the reader a file of every bookmark they hold. */
+  /** Hand the reader a file of every bookmark and note they hold. */
   onSave: () => void;
+  /** Whether the reader holds any note, so a file is worth saving with no bookmark. */
+  hasNotes?: boolean;
   /** Read a chosen file; the caller says what came of it. */
   onLoad: (text: string) => void;
 }
@@ -35,6 +37,7 @@ export function BookmarkShelf({
   onClearSurah,
   onClearAll,
   onSave,
+  hasNotes = false,
   onLoad,
 }: BookmarkShelfProps): JSX.Element {
   const { t } = useT();
@@ -112,7 +115,7 @@ export function BookmarkShelf({
             {t.bmClearAll}
           </button>
         )}
-        {bookmarks.length > 0 && (
+        {(bookmarks.length > 0 || hasNotes) && (
           <button type="button" className={styles.button} onClick={onSave}>
             {t.bmSave}
           </button>
