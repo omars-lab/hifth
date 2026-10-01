@@ -163,7 +163,7 @@ test.describe("Hifth · the desktop spread", () => {
     // The tightest window the spread will claim. Nothing between here and the
     // breakpoint is worth testing — every larger window gives a taller stage and
     // therefore a wider leaf, so the corner is the whole of the risk.
-    await page.setViewportSize({ width: 1024, height: 740 });
+    await page.setViewportSize({ width: 1024, height: 775 });
     await expect(spread(page)).toBeVisible();
     const corner = await boxOf(pageSvg(page, 7));
 
@@ -769,7 +769,7 @@ test.describe("Hifth · the page bar at desktop", () => {
  * The question that opened this was whether `min-width` is the right gate for
  * the keyboard hints, and it said to revisit "if anyone reports the hints on a
  * device that cannot use them". No report was needed. iPad Pro 11 landscape is
- * 1194×834 and iPad gen 7 landscape is 1080×810; both clear the 1024×740
+ * 1194×834 and iPad gen 7 landscape is 1080×810; both clear the 1024×775
  * breakpoint on *both* axes, so both were being shown a legend for keys they do
  * not have. This block is that device.
  *
