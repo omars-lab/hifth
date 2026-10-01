@@ -33,6 +33,10 @@ import {
   juzPageIndex,
   keyToRef,
   parseAyahKey,
+  listTafsirProviders,
+  registerTafsirProvider,
+  type TafsirEntry,
+  type TafsirProvider,
   refToKey,
   spreadBudget,
   type AdjacencyShard,
@@ -117,10 +121,23 @@ import {
   PITCH,
   loadPitchSurah,
   mergeShard,
-  commentaryFor,
+  introFor,
+  makePitchProvider,
   type PitchSurah,
 } from "./pitch/pitch";
-import { CommentarySheet, CommentaryTrigger } from "./pitch/CommentarySheet";
+// The one commentary drawer and its sources (decision `tafsir-provider`): the
+// pitch's book is one source, a live public service another, and the drawer
+// draws whichever is on without knowing which.
+import { CommentarySheet, CommentaryTrigger } from "./components/CommentarySheet";
+import { entryForAyah, indexEntries, noteFor } from "./tafsir/commentary";
+import { LIVE_TAFSIR, LIVE_TAFSIR_ID, registerLiveTafsirProvider } from "./tafsir/quran-foundation";
+
+/**
+ * Whether this build has any commentary to show: the pitch's book, or a live
+ * source the build was configured for. Both are fixed when the app is built, so
+ * a public build with neither drops the drawer and everything only it reaches.
+ */
+const COMMENTARY = PITCH || LIVE_TAFSIR;
 import { SkinToggle, TajweedLegend } from "./components/SkinToggle";
 import { PageSlider } from "./components/PageSlider";
 import { fisheyeEnabled, rememberFisheye } from "./pagebar-fisheye";
@@ -190,6 +207,20 @@ export function App(): JSX.Element {
   );
   // Whether the commentary sheet is showing for the current selection.
   const [commentaryOpen, setCommentaryOpen] = useState(false);
+  // The commentary source the drawer reads, registered once. A held or loaded
+  // book takes precedence over the open live service, until readers are offered
+  // a choice between them. Null in a build with no commentary.
+  const [commentarySource] = useState<TafsirProvider | null>(() => {
+    if (!COMMENTARY) return null;
+    if (PITCH) registerTafsirProvider(makePitchProvider());
+    if (LIVE_TAFSIR) registerLiveTafsirProvider();
+    const all = listTafsirProviders();
+    return all.find((p) => p.source.id !== LIVE_TAFSIR_ID) ?? all[0] ?? null;
+  });
+  // Each surah's notes from that source, fetched on demand like the shards.
+  const [commentaryBySurah, setCommentaryBySurah] = useState<ReadonlyMap<number, readonly TafsirEntry[]>>(
+    new Map(),
+  );
   // The verse whose note a link asked to see led by its surah's introduction
   // (`?open=context`); dropped the moment the reader moves to another verse.
   const [contextFor, setContextFor] = useState<string | null>(null);
@@ -584,6 +615,19 @@ export function App(): JSX.Element {
     });
   }, []);
 
+  // A surah's notes from the commentary source, asked for at most once.
+  const requestedNotes = useRef(new Set<number>());
+  const ensureNotes = useCallback(
+    (surah: number) => {
+      if (!COMMENTARY || !commentarySource?.has(surah) || requestedNotes.current.has(surah)) return;
+      requestedNotes.current.add(surah);
+      void commentarySource.load(surah).then((entries) => {
+        setCommentaryBySurah((m) => new Map(m).set(surah, entries));
+      });
+    },
+    [commentarySource],
+  );
+
   // On-demand load for the selection's surah (covers taps AND deep-link
   // restores — both go through setSelectedKey)…
   useEffect(() => {
@@ -592,8 +636,9 @@ export function App(): JSX.Element {
     if (surah) {
       ensureShard(surah);
       ensurePitch(surah);
+      ensureNotes(surah);
     }
-  }, [selectedKey, ensureShard, ensurePitch]);
+  }, [selectedKey, ensureShard, ensurePitch, ensureNotes]);
 
   // …and for every surah the highlighted range touches (a range never spans
   // surahs today, but the loop costs nothing and is honest about the shape).
@@ -669,20 +714,29 @@ export function App(): JSX.Element {
   useEffect(() => {
     stopAudio();
   }, [selectedKey, stopAudio]);
+  // The note for the current selection, from whichever source is on; in the
+  // pitch build led by the surah's introduction on its opening verse, or on any
+  // verse a link asked to see in context.
+  const commentaryEntry = useMemo(() => {
+    if (!COMMENTARY || !commentarySource || !selectedKey) return null;
+    const surah = parseAyahKey(selectedKey)?.surah;
+    const entries = surah ? commentaryBySurah.get(surah) : undefined;
+    if (!surah || !entries) return null;
+    const intro = PITCH
+      ? introFor(pitchSurahs.get(surah) ?? null, selectedKey, contextFor !== null && contextFor === selectedKey)
+      : null;
+    return noteFor(entryForAyah(indexEntries(entries), selectedKey), commentarySource.source, selectedKey, intro);
+  }, [commentarySource, selectedKey, commentaryBySurah, pitchSurahs, contextFor]);
+  const hasCommentary = commentaryEntry !== null;
+
   // Moving the selection closes the commentary — except in the pitch build,
   // where a verse that carries a Study Quran note opens it on the tap itself.
   // The demo's whole point is «tap a verse, read the note»; making that a
   // second click on a footer button buried the moment. A verse with no note
   // (everything outside al-Fātiḥah, in this build) still just closes it.
   useEffect(() => {
-    if (!PITCH) {
-      setCommentaryOpen(false);
-      return;
-    }
-    const surah = selectedKey ? parseAyahKey(selectedKey)?.surah : null;
-    const ps = surah ? (pitchSurahs.get(surah) ?? null) : null;
-    setCommentaryOpen(commentaryFor(ps, selectedKey) !== null);
-  }, [selectedKey, pitchSurahs]);
+    setCommentaryOpen(PITCH && hasCommentary);
+  }, [selectedKey, hasCommentary]);
 
   useEffect(() => {
     if (contextFor !== null && contextFor !== selectedKey) setContextFor(null);
@@ -1962,13 +2016,6 @@ export function App(): JSX.Element {
     return null;
   }, [desktop, pageMode, resolver, selectedRange, selectedKey, page, totalPages]);
   const selectedSurah = selectedKey ? parseAyahKey(selectedKey)?.surah : null;
-  // The held commentary for the current selection, if the pitch build has it.
-  const pitchSurah =
-    PITCH && selectedSurah ? (pitchSurahs.get(selectedSurah) ?? null) : null;
-  const commentaryEntry = PITCH
-    ? commentaryFor(pitchSurah, selectedKey, contextFor !== null && contextFor === selectedKey)
-    : null;
-  const hasCommentary = commentaryEntry !== null;
   // The roads out of the open note: the same merged edges the rail would show
   // (Study Quran cross-references included), handed to the drawer so the reading
   // and the navigation live on one surface instead of the note covering a rail.
@@ -2309,7 +2356,7 @@ export function App(): JSX.Element {
               }
               // The pitch note for a left-leaf verse lands on the right, over
               // the rail's corner; the chips cross to the left while it is up.
-              crossed={PITCH && commentaryOpen && hasCommentary && sheetSide === "right"}
+              crossed={COMMENTARY && commentaryOpen && hasCommentary && sheetSide === "right"}
               onBand={setRailBottom}
             />
             <HopPopover
@@ -2346,7 +2393,7 @@ export function App(): JSX.Element {
                 />
               </Suspense>
             )}
-            {PITCH && (
+            {COMMENTARY && (
               <CommentarySheet
                 // One drawer for a verse at a time: a chip's list or the root
                 // lens takes the note's place, and closing it brings the note
@@ -2361,6 +2408,9 @@ export function App(): JSX.Element {
                 onGo={hopTo}
                 onCover={setCoverTop}
                 onClose={() => setCommentaryOpen(false)}
+                creditNote={
+                  PITCH ? "Shown privately, with the rights-holders, for a collaboration." : undefined
+                }
                 back={
                   breadcrumbKey
                     ? {
@@ -2545,8 +2595,9 @@ export function App(): JSX.Element {
           onToggle={audio.toggle}
           caption={audio.phaseFor(selectedKey) === "playing" ? t.vdPause : t.vdListen}
         />
-        {PITCH && (
+        {COMMENTARY && (
           <CommentaryTrigger
+            source={commentarySource?.source.label ?? ""}
             has={hasCommentary}
             open={commentaryOpen}
             onToggle={() => setCommentaryOpen((o) => !o)}

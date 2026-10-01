@@ -1205,16 +1205,22 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     first. Anything it downloads stays in the held store, never the repository, under the same
     licence reads as the rest of the library. Blocks nothing shipped.
 23. **The commentary sources are merged but not on screen: how do they and the pitch's own
-    drawer become one?** Found 2026-09-29 when every branch was brought back to main. The
-    shared shape for a commentary source (a book the reader loads into their own browser, or a
-    live public tafsir service) is in main with its tests, but not joined to the main screen,
-    because the private pitch build already has its own commentary drawer on the same ✎ button,
-    and the two would undo each other on every verse. The full story and the command that shows
-    the left-out joining-up are in [`issues/tafsir-seam-not-wired.md`](issues/tafsir-seam-not-wired.md).
-    **What is open:** the likely answer is that the pitch's notes become one more source behind
-    the same shape, so there is one drawer and one ✎, not two. That is part of the coming
-    refactor. Until then, readers of the public app see nothing new, and it still ships no
-    commentary text.
+    drawer become one?** Found 2026-09-29 when every branch was brought back to main.
+    **Done 2026-09-30.** The pitch's Study Quran notes are now one more commentary source
+    behind the same shape as the others, so there is one drawer and one ✎. The drawer names
+    whichever source it is reading, in its heading, its credit line and its button. The
+    branch's second panel, which was never on screen, was deleted. The public app still shows
+    no commentary: the drawer is only built into an app that has a source, which today means
+    only the private pitch build. The story is in
+    [`issues/tafsir-seam-not-wired.md`](issues/tafsir-seam-not-wired.md).
+24. **The commentary drawer can only read English, left to right.** Left over from 23, found
+    2026-09-30. The drawer's own words ("Surah introduction", "Hop to", the credit line) are
+    English only, and it is set to read left to right, because the only source on screen is
+    The Study Quran. The live tafsir service and a reader's own book can be Arabic.
+    **What is open:** before any of those sources is switched on for readers, the drawer's
+    words go into both languages, its reading direction follows the source's language, and a
+    browser test opens the drawer on a live source. Nothing a reader sees today is affected:
+    no public build has a commentary source switched on.
 
 **The half of these a machine cannot run now has a register — and a runbook.** Follow-ups
 ① (the phone), ② (the browser glance) and ④ (VoiceOver/TalkBack) still wait on a human, and

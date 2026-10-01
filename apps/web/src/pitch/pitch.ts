@@ -11,7 +11,15 @@
  * it would fetch is gitignored and never deployed anyway. The public site and
  * its held-copy gates never see any of it.
  */
-import type { AdjacencyShard, AyahAdjacency } from "@hifth/core";
+import {
+  tafsirKeyFor,
+  type AdjacencyShard,
+  type AyahAdjacency,
+  type TafsirEntry,
+  type TafsirProvider,
+  type TafsirSource,
+} from "@hifth/core";
+import type { CommentaryIntro } from "../tafsir/commentary";
 
 /** Injected by Vite as a literal — see `define` in `vite.config.ts`. */
 declare const __PITCH__: boolean;
@@ -36,26 +44,70 @@ export interface PitchSurah {
   readonly shard: AdjacencyShard;
 }
 
-/** What the commentary sheet needs for one selected verse. */
-export interface PitchCommentary {
-  readonly title: string; // surah title, shown once (on the surah's first verse)
-  readonly intro: readonly string[]; // surah intro, likewise
-  readonly verse: PitchVerse;
-  readonly showIntro: boolean; // true on the surah's opening verse
-}
+/**
+ * The book, as a commentary source. Its notes reach the drawer through the same
+ * shape every other source does (decision `tafsir-provider`), so the pitch has
+ * one drawer and one ✎, and a second source is a second provider, not a second
+ * drawer.
+ */
+export const STUDY_QURAN: TafsirSource = {
+  id: "study-quran",
+  label: "The Study Quran",
+  license: "Seyyed Hossein Nasr, editor-in-chief (HarperOne, 2015)",
+  edition: "hafs-kfqc",
+};
 
 const BASE = import.meta.env.BASE_URL;
 
-/** Fetch a surah's private pitch payload, or null if there is none / not pitch. */
-export async function loadPitchSurah(surah: number): Promise<PitchSurah | null> {
-  if (!PITCH) return null;
-  try {
-    const res = await fetch(`${BASE}assets/private/study-quran/${surah}.json`);
-    if (!res.ok) return null;
-    return (await res.json()) as PitchSurah;
-  } catch {
-    return null; // quiet on miss, like every other loader
+const fetched = new Map<number, Promise<PitchSurah | null>>();
+
+/**
+ * Fetch a surah's private pitch payload, or null if there is none / not pitch.
+ * Each surah is asked for once: the roads and the notes both come from the same
+ * file, and the two callers share the one request.
+ */
+export function loadPitchSurah(surah: number): Promise<PitchSurah | null> {
+  if (!PITCH) return Promise.resolve(null);
+  let pending = fetched.get(surah);
+  if (!pending) {
+    pending = fetch(`${BASE}assets/private/study-quran/${surah}.json`)
+      .then((res) => (res.ok ? (res.json() as Promise<PitchSurah>) : null))
+      .catch(() => null); // quiet on miss, like every other loader
+    fetched.set(surah, pending);
   }
+  return pending;
+}
+
+/** A surah's notes as the shared shape: one entry per verse, under the book's name. */
+export function pitchEntries(surah: PitchSurah): TafsirEntry[] {
+  return Object.values(surah.verses).flatMap((v) => {
+    const ref = /^(\d+):(\d+)$/.exec(v.ref);
+    if (!ref) return [];
+    return [
+      {
+        key: tafsirKeyFor(STUDY_QURAN, Number(ref[1]), Number(ref[2])),
+        translation: v.translation,
+        commentary: v.commentary.map((text) => ({ text })),
+        // The book's cross-references reach the drawer as roads, through the
+        // surah's merged edges (`mergeShard`), not through the note.
+        refs: [],
+      },
+    ];
+  });
+}
+
+/** The book as a commentary source; `load` is the file loader, swapped in tests. */
+export function makePitchProvider(
+  load: (surah: number) => Promise<PitchSurah | null> = loadPitchSurah,
+): TafsirProvider {
+  return {
+    source: STUDY_QURAN,
+    has: (surah) => surah >= 1 && surah <= 114,
+    load: async (surah) => {
+      const s = await load(surah);
+      return s ? pitchEntries(s) : [];
+    },
+  };
 }
 
 /**
@@ -78,25 +130,18 @@ export function mergeShard(
 }
 
 /**
- * The commentary for one selected verse, or null. `withContext` leads the note
- * with the surah's introduction wherever the verse sits, as a link's
- * `?open=context` asks; otherwise only the opening verse carries it.
+ * The surah's introduction to lead a verse's note with, or null. `withContext`
+ * leads with it wherever the verse sits, as a link's `?open=context` asks;
+ * otherwise only the opening verse carries it.
  */
-export function commentaryFor(
+export function introFor(
   surah: PitchSurah | null,
   selectedKey: string | null,
   withContext = false,
-): PitchCommentary | null {
-  if (!surah || !selectedKey) return null;
-  const ref = /(\d+):(\d+)$/.exec(selectedKey);
+): CommentaryIntro | null {
+  if (!surah || !selectedKey || surah.intro.length === 0) return null;
+  const ref = /:(\d+)$/.exec(selectedKey);
   if (!ref) return null;
-  const verse = surah.verses[`${ref[1]}:${ref[2]}`];
-  if (!verse) return null;
-  const isFirst = Number(ref[2]) === 1;
-  return {
-    title: surah.title,
-    intro: surah.intro,
-    verse,
-    showIntro: isFirst || withContext,
-  };
+  if (!withContext && Number(ref[1]) !== 1) return null;
+  return { title: surah.title, paragraphs: surah.intro };
 }

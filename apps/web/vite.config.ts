@@ -182,6 +182,11 @@ export default defineConfig({
     // it stayed a property lookup the bundler could not fold, and the whole
     // commentary sheet shipped in the public app, unused.
     __PITCH__: JSON.stringify(Boolean(process.env.VITE_PITCH)),
+    // The live commentary service's switch, the same way: on only when the build
+    // names both the service and which of its tafsirs to show.
+    __LIVE_TAFSIR__: JSON.stringify(
+      Boolean(process.env.VITE_TAFSIR_QF_BASE && process.env.VITE_TAFSIR_QF_ID),
+    ),
   },
   plugins: [
     dropPrivateUnlessPitch(),
