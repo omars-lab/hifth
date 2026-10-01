@@ -59,6 +59,28 @@ export interface StageFit {
 export interface FrameContext extends StageFit {
   /** The page's viewBox width in SVG user units (345 for the Madani asset). */
   viewBoxWidth: number;
+  /**
+   * Where the drawing sits inside the leaf, in unscaled CSS px: how far in from
+   * the leaf's left and top edges it starts, and how wide it is drawn. The leaf
+   * is more than the text — a border, the stacked fore-edge on its free side,
+   * and the printed bands above and below with the surah, juz and page number —
+   * so the text's corner is not the leaf's. Left out, the text is taken to fill
+   * the leaf from its corner, which is what every caller assumed before the
+   * bands were printed (and was a border and a fore-edge off even then).
+   */
+  text?: { x: number; y: number; width: number };
+}
+
+/** The drawing's offset and scale inside the leaf; see `FrameContext.text`. */
+function textOf(ctx: Pick<FrameContext, "contentWidth" | "viewBoxWidth" | "text">): {
+  x: number;
+  y: number;
+  s: number;
+} {
+  const t = ctx.text;
+  return t
+    ? { x: t.x, y: t.y, s: t.width / ctx.viewBoxWidth }
+    : { x: 0, y: 0, s: ctx.contentWidth / ctx.viewBoxWidth };
 }
 
 /** Default hop zoom — matches the mock's `focus(b, 1.55)`. */
@@ -161,12 +183,13 @@ export function frameBboxToView(
   z: number = DEFAULT_HOP_ZOOM,
   lead?: Rect,
 ): View {
-  const s = ctx.contentWidth / ctx.viewBoxWidth;
-  const cx = (bbox.x + bbox.width / 2) * s;
-  const cy = (bbox.y + bbox.height / 2) * s;
+  const t = textOf(ctx);
+  const s = t.s;
+  const cx = t.x + (bbox.x + bbox.width / 2) * s;
+  const cy = t.y + (bbox.y + bbox.height / 2) * s;
   let x = ctx.stageWidth / 2 - z * cx;
   if (lead && bbox.width * s * z > ctx.stageWidth) {
-    x = ctx.stageWidth - LEAD_INSET - z * (lead.x + lead.width) * s;
+    x = ctx.stageWidth - LEAD_INSET - z * (t.x + (lead.x + lead.width) * s);
   }
   return clampView({ z, x, y: shownHeight(ctx) / 2 - z * cy }, ctx);
 }
@@ -181,12 +204,13 @@ const LEAD_INSET = 16;
 export function bboxToScreen(
   bbox: Rect,
   view: View,
-  ctx: Pick<FrameContext, "contentWidth" | "viewBoxWidth">,
+  ctx: Pick<FrameContext, "contentWidth" | "viewBoxWidth" | "text">,
 ): Rect {
-  const s = (ctx.contentWidth / ctx.viewBoxWidth) * view.z;
+  const t = textOf(ctx);
+  const s = t.s * view.z;
   return {
-    x: view.x + bbox.x * s,
-    y: view.y + bbox.y * s,
+    x: view.x + t.x * view.z + bbox.x * s,
+    y: view.y + t.y * view.z + bbox.y * s,
     width: bbox.width * s,
     height: bbox.height * s,
   };

@@ -659,7 +659,8 @@
         "page-turn-curl",
         "page-bar-numberline",
         "page-bar-phone-scrub",
-        "phone-toolbar"
+        "phone-toolbar",
+        "page-labels-desktop-size"
       ]
     },
     {
@@ -1766,6 +1767,32 @@
         "highlight-shape",
         "highlight-strength",
         "highlight-options"
+      ]
+    },
+    {
+      "id": "page-labels-desktop-size",
+      "question": "The page now prints its surah, juz and number: on a computer, should that cost verse size, two-page windows, or neither?",
+      "status": "decided",
+      "options": [
+        {
+          "id": "A",
+          "label": "Labels on the paper; two pages start at a taller window"
+        },
+        {
+          "id": "B",
+          "label": "On a computer, the labels sit above the book instead"
+        },
+        {
+          "id": "C",
+          "label": "Keep it as built and let a two-page page be smaller than a phone's"
+        }
+      ],
+      "doc": "docs/decisions/page-labels-desktop-size.md",
+      "decided": "A",
+      "by": "omar",
+      "date": "2026-09-30",
+      "related": [
+        "desktop-vs-mobile"
       ]
     }
   ]

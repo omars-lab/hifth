@@ -290,3 +290,32 @@ describe("lerpView", () => {
     expect(lerpView(from, to, 0.5)).toEqual({ x: 50, y: -25, z: 1.5 });
   });
 });
+
+describe("the text's offset inside the leaf", () => {
+  // The drawing does not start at the leaf's corner. The paper carries a border,
+  // the stacked fore-edge on its free side, and a printed band above the text
+  // with the surah and juz in it (and one below with the page number). So the
+  // leaf is 320 wide but the text is drawn 300 wide, 14 px in and 24 px down.
+  const INSET: FrameContext = {
+    ...CTX,
+    contentHeight: (300 * 550) / 345 + 24 + 20,
+    text: { x: 14, y: 24, width: 300 },
+  };
+
+  it("places a verse by where the text really is, not the leaf's corner", () => {
+    const view: View = { x: 10, y: 20, z: 2 };
+    const bbox: Rect = { x: 0, y: 0, width: 345, height: 550 };
+    const screen = bboxToScreen(bbox, view, INSET);
+    expect(screen.x).toBeCloseTo(10 + 14 * 2, 6);
+    expect(screen.y).toBeCloseTo(20 + 24 * 2, 6);
+    expect(screen.width).toBeCloseTo(300 * 2, 6);
+    expect(screen.height).toBeCloseTo(550 * (300 / 345) * 2, 6);
+  });
+
+  it("still centres a hop's verse exactly", () => {
+    const bbox: Rect = { x: 40, y: 260, width: 265, height: 30 };
+    const screen = bboxToScreen(bbox, frameBboxToView(bbox, INSET, 2), INSET);
+    expect(screen.x + screen.width / 2).toBeCloseTo(INSET.stageWidth / 2, 6);
+    expect(screen.y + screen.height / 2).toBeCloseTo(INSET.stageHeight / 2, 6);
+  });
+});

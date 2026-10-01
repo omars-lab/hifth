@@ -390,8 +390,20 @@ async function expectMarksBesideThePaper(svg: Locator, leaf: Box, paper: Box): P
     bound / scale,
     "the bound edge grew a fore-edge it has no business having",
   ).toBeCloseTo(LEAF_EDGE, 0);
-  // No stack on the block axis — a leaf's head and foot are cut, not bound.
-  expect((paper.y - leaf.y) / scale, "the head of the leaf grew a stack").toBeCloseTo(LEAF_EDGE, 0);
+  // No stack on the block axis — a leaf's head and foot are cut, not bound. What
+  // sits there instead is printed: the running head above the text and the page
+  // number below it (page-labels.spec.ts), each read at its laid-out height.
+  const [head = 0, foot = 0] = await host.evaluate((el) =>
+    ["[data-running-head='surah']", "[data-running-head='page']"].map(
+      (q) => (el.querySelector(q)?.parentElement as HTMLElement | null)?.offsetHeight ?? 0,
+    ),
+  );
+  expect(head, "the leaf lost its running head").toBeGreaterThan(0);
+  expect((paper.y - leaf.y) / scale, "the head of the leaf grew a stack").toBeCloseTo(LEAF_EDGE + head, 0);
+  expect(
+    (leaf.y + leaf.height - (paper.y + paper.height)) / scale,
+    "the foot of the leaf grew a stack",
+  ).toBeCloseTo(LEAF_EDGE + foot, 0);
 }
 
 test.describe("Hifth · the stage holds page, not paper", () => {
