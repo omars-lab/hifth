@@ -59,11 +59,11 @@ So full-screen is worth most to people on smaller phones, and to anyone who want
 
 ## What are the options? — 3
 
-Each picture is the real app on a phone, with the option's new parts added to the live page by a short script kept beside this note, so every picture can be taken again.
+Each picture is the real app on a phone, with the option's new parts added to the live page by a short script kept beside this note, so every picture can be taken again. The menu pictures are cropped to the lower part of the screen so the buttons can be read.
 
 | | **A** *(recommended)* | **B** | **C** |
 | --- | --- | --- | --- |
-| **Tap a verse** | ![A, tap: the bars are gone and nothing is painted\|190](verse-tap-and-hold/a-tap.png)<br>The bars hide and nothing is painted. Tap again and they come back. | ![B, tap: the verse menu with four more buttons\|190](verse-tap-and-hold/menu-fuller.png)<br>The verse is painted and the menu opens, now with **Play to, Mark, Note, Copy**. | ![C, tap: the verse menu as it is today\|190](verse-tap-and-hold/today-tap.png)<br>Exactly as today. |
+| **Tap a verse** | ![A, tap: the bars are gone and nothing is painted\|190](verse-tap-and-hold/a-tap.png)<br>The bars hide and nothing is painted. Tap again and they come back. | ![B, tap: the verse menu with four more buttons\|190](verse-tap-and-hold/menu-fuller.png)<br>The verse is painted and the menu opens, now with **Play to, Mark, Note, Copy**. | ![C, tap: the verse menu as it is today\|190](verse-tap-and-hold/c-tap.png)<br>Exactly as today. |
 | **Hold a verse** | ![A, hold: the verse menu with four more buttons\|190](verse-tap-and-hold/menu-fuller.png)<br>The menu opens, now with **Play to, Mark, Note, Copy**. | The same menu as a tap. | ![C, hold: a second, small menu beside the verse\|190](verse-tap-and-hold/c-hold.png)<br>A second, small menu beside the verse. |
 | **Full screen** | A tap, as above. No button needed. | ![B: a full-screen button in the bottom line\|190](verse-tap-and-hold/b-button.png)<br>A button. The top bar is already full on a phone, so it goes in the bottom line. | The same button as B. |
 | **Getting the bars back** | Another tap. | ![B, full screen: a small button left to bring the bars back\|190](verse-tap-and-hold/b-full.png)<br>A small button has to stay on the page. | The same as B. |
