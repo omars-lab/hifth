@@ -106,6 +106,12 @@ export default tseslint.config(
     files: ["docs/design/**/mocks/*.js"],
     languageOptions: { globals: { ...globals.browser } },
   },
+  // The record-demo skill's page scripts (the finger marks a recording shows) run
+  // inside the app the same way; its shell scripts are not linted.
+  {
+    files: [".claude/skills/**/scripts/*.js"],
+    languageOptions: { globals: { ...globals.browser } },
+  },
   // Browser globals for the web app.
   {
     files: ["apps/web/**/*.{ts,tsx}"],
