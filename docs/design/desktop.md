@@ -126,7 +126,7 @@ pure helper rather than a library.
 
 ## 3. The breakpoint, and why it sits where it does
 
-**`(min-width: 1024px) and (min-height: 740px)`** — one query string, exported once from
+**`(min-width: 1024px) and (min-height: 775px)`** — one query string, exported once from
 `apps/web/src/useMediaQuery.ts` as `DESKTOP_QUERY` and repeated as a literal in
 `DesktopChrome.module.css`, because a CSS custom property cannot appear inside a media query.
 
@@ -147,7 +147,7 @@ first version of this section estimated 220 px, and being 32 px light is what pu
 breakpoint below where the criterion below actually requires it.
 
 ```
-leaf box  =  0.627 × (viewport height − 252)
+leaf box  =  0.580 × (viewport height − 252)     (345/594.85: the page plus its printed head and foot)
 ```
 
 There is no `min()` with a half-width term any more, and that absence is the point: a leaf
@@ -176,24 +176,33 @@ Solving for the two axes:
 
 | Axis | Requirement | Chosen |
 |---|---|---|
-| height | `0.627 × (H − 252) − 14 ≥ 290` ⟹ `H ≥ 737` | **740 px** |
+| height | `0.580 × (H − 252) − 14 ≥ 290` ⟹ `H ≥ 772` | **775 px** |
 | width | `2 × 290 + 14 + 14 = 608` | **1024 px** |
 
 Measured at the corner and at a typical window:
 
 | window | leaf box | scripture (the SVG) |
 |---|---|---|
-| 1024×740 (the corner) | ~306 px | ~**292 px** |
-| 1024×900 | 407 px | 393 px |
-| 1440×900 | 407 px | 393 px |
+| 1024×775 (the corner) | ~307 px | **293 px** |
+| 1024×900 | 379 px | 365 px |
+| 1440×900 | 379 px | 365 px |
 | 320×568 phone | — | **290 px** — the floor |
 | 390×844 phone | — | 360 px |
 
-At the corner a leaf gives 292 px — two above the floor, below what a 390 px phone gives,
+At the corner a leaf gives 293 px — three above the floor, below what a 390 px phone gives,
 which is the honest trade at the very edge. Width is set well above its own 608 px
 requirement because that axis is nearly free and buys room for the chrome desktop *adds* in
 §5; height is set only 3 px above its requirement because that axis is the scarce one and
 every step up excludes real laptops.
+
+**Height was 740 until the page carried its own surah, juz and page number.** The owner
+asked for them printed on the page (2026-09-30), and a band above and below the text makes a
+leaf 345 wide by 594.85 tall instead of 550 — so in a spread, where height sets the size,
+every page got about 7% smaller (1440×900: 393 px → 365 px), and the 1024×740 corner fell to
+273 px, under the floor. Three ways out were put to the owner: raise this height, move the
+labels off the paper on a computer, or drop the floor. They chose to keep the labels on the
+paper and raise the height, so windows 740–774 px tall now get one page. The page's shape
+above (`0.580` where it was `0.627`) is that change.
 
 **Height was 720 until the leaf was sized to the page it holds.** Under the old estimate the
 corner gave 280 px — ten px *under* the floor this criterion exists to hold, unnoticed
@@ -890,7 +899,7 @@ satisfies both. Revisit if anyone reports the hints on a device that cannot use 
 **No, and it did not need a report — it needed the arithmetic.** The last sentence above was
 the mistake. It set the trigger to a bug report from a reader who would have no idea the row
 was wrong, when the counter-example is a device sitting on a lot of desks: **iPad Pro 11
-landscape is 1194×834 and iPad gen 7 landscape is 1080×810**, so both clear the 1024×740
+landscape is 1194×834 and iPad gen 7 landscape is 1080×810**, so both clear the 1024×775
 breakpoint *on both axes* and were being shown a legend for keys they do not have. That is the
 same shape as the height derivation in §3 — a number nobody had multiplied out — and it is
 worth noticing that a question phrased as "wait for a complaint" is a question that stops being

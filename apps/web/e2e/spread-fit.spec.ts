@@ -4,7 +4,7 @@ import { expect, test, type Page } from "@playwright/test";
  * The open book is the same size in every browser.
  *
  * A leaf's width is not written anywhere: it is the height the desk leaves,
- * times the page's own shape (345 wide to 550 tall). Chrome worked that out;
+ * times the page's own shape (345 wide to 550 tall, plus its printed head and foot). Chrome worked that out;
  * Firefox did not, and fell back to the width of whatever the leaf held — so a
  * spread in Firefox came out a third narrower, each page shrunk and floating in
  * a tall empty leaf, and on some windows not drawn at all (owner, 2026-09-28:
@@ -36,8 +36,10 @@ for (const [w, h] of [
     const found = await leaves(page);
     expect(found.map((l) => l.page).sort()).toEqual(["7", "8"]);
     for (const l of found) {
-      // Page-shaped: width is the height times 345/550, to the pixel.
-      expect(Math.abs(l.w - (l.h * 345) / 550), `leaf ${l.page} width`).toBeLessThan(2);
+      // Page-shaped: width is the height times 345/594.85 — the text's 345 × 550
+      // plus the running head and page number printed above and below it
+      // (PageSpread.module.css) — to the pixel.
+      expect(Math.abs(l.w - (l.h * 345) / 594.85), `leaf ${l.page} width`).toBeLessThan(2);
       // And the drawing reaches across it, rather than shrinking to fit a
       // narrower box and leaving the leaf mostly paper.
       expect(l.artW, `page ${l.page} drawing width`).toBeGreaterThan(l.w * 0.95);
