@@ -2457,10 +2457,11 @@
         "file": "docs/PLAN.md",
         "item": "26"
       },
-      "status": "open",
+      "status": "fixed",
       "severity": "question",
       "owner": "agent",
-      "note": "Print the surah name and juz in the page's top corners and the page number at the bottom, on the page itself. Owner ask 2026-09-30."
+      "note": "Printed on the page itself since 2026-09-30: the surah the page opens in at the top left, its juz at the top right, the page number at the foot, in the print's brown and the reader's language. The bands take height, so in the two-page view every page is about 7% smaller; the owner chose to keep them on the paper and raise the smallest two-page window from 740 to 775 px tall so a page there still beats the narrowest phone (docs/design/desktop.md §3). e2e/page-labels.spec.ts reads all three in both languages and checks they sit beside the text, not over it; view.test.ts checks a hop still lands where the text really is.",
+      "closedBy": "apps/web/e2e/page-labels.spec.ts"
     },
     {
       "id": "corner-label-long-press",

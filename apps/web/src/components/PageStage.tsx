@@ -13,6 +13,7 @@ import { useGesture } from "@use-gesture/react";
 import {
   bboxToScreen,
   clampView,
+  juzOf,
   clampZoom,
   easeInOutCubic,
   foldBetween,
@@ -54,7 +55,7 @@ import {
   type WheelTurnState,
 } from "@hifth/core";
 import { loadMarkShard, loadPageSvg, loadWordShard, pageUrl } from "../assets";
-import { useT } from "../i18n";
+import { useT, type Strings } from "../i18n";
 import type { TurnStyle } from "../turn-style";
 import styles from "./PageStage.module.css";
 
@@ -765,6 +766,12 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
   const selectedKeyRef = useRef(selectedKey);
   selectedKeyRef.current = selectedKey;
   const labelForRef = useRef(labelFor);
+  /** The words the running heads are printed in; a change of language reprints them. */
+  const tRef = useRef(t);
+  useEffect(() => {
+    tRef.current = t;
+    for (const [n, mp] of pagesRef.current) printRunningHeads(mp.host, mp.svg, n, resolver, t);
+  }, [t, resolver]);
   labelForRef.current = labelFor;
   const onSelectionRectRef = useRef(onSelectionRect);
   onSelectionRectRef.current = onSelectionRect;
@@ -1380,6 +1387,7 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
       svgEl.setAttribute("role", "group");
       svgEl.setAttribute("aria-labelledby", `page-label-${targetPage}`);
       svgEl.classList.add(styles.svg ?? "");
+      printRunningHeads(host, svgEl, targetPage, resolver, tRef.current);
       layer.appendChild(host);
 
       const hl = new Highlighter(svgEl as unknown as SVGSVGElement, resolver, targetPage, {
@@ -1509,7 +1517,7 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
       const ids = key ? cur.hl.resolve(key)?.elementIds : undefined;
       const bbox = ids?.length ? cur.hl.bboxOf(ids) : null;
       if (bbox) {
-        const ctx = { ...fit, viewBoxWidth: viewBoxWidthOf(cur.svg) };
+        const ctx = { ...fit, viewBoxWidth: viewBoxWidthOf(cur.svg), text: textBoxOf(cur.host, cur.svg) };
         const shown = fit.stageHeight - (fit.coverBottom ?? 0);
         // The band the hop chips float in, from the stage's top: a verse moved
         // up to the top of the screen stops beneath it, or its first line is
@@ -2131,7 +2139,7 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
         if (bbox && fit) {
           const target = frameBboxToView(
             bbox,
-            { ...fit, viewBoxWidth: viewBoxWidthOf(mp.svg) },
+            { ...fit, viewBoxWidth: viewBoxWidthOf(mp.svg), text: textBoxOf(mp.host, mp.svg) },
             clampZoom(opts?.zoom ?? DEFAULT_HOP_ZOOM, MIN_ZOOM, MAX_ZOOM),
             firstLineOf(mp.svg, loc.elementIds),
           );
@@ -3303,6 +3311,82 @@ function nextFrame(): Promise<void> {
       resolve();
     });
   });
+}
+
+/**
+ * Print the running heads onto a freshly mounted leaf: a band above the text
+ * with the surah's name and the juz, and one below with the page number. Both
+ * are the leaf's own children, so they turn and magnify with it. A second call
+ * reprints the words in place (a change of language).
+ *
+ * The surah and juz are the ones the page *opens* in, as a printed mus'haf
+ * heads it: the earliest verse on the page, not the first in the drawing's
+ * order, which is not promised to be reading order.
+ */
+function printRunningHeads(
+  host: HTMLElement,
+  svg: Element,
+  page: number,
+  resolver: Resolver,
+  t: Strings,
+): void {
+  let head = host.querySelector<HTMLElement>(`.${styles.runningHead}`);
+  let foot = host.querySelector<HTMLElement>(`.${styles.folio}`);
+  if (!head || !foot) {
+    // Hidden from a screen reader: the page's own label already says where it
+    // is, and three more fragments read before the first verse would be noise.
+    head = document.createElement("div");
+    head.className = styles.runningHead ?? "";
+    head.setAttribute("aria-hidden", "true");
+    for (const which of ["surah", "juz"]) {
+      const span = document.createElement("span");
+      span.dataset.runningHead = which;
+      head.appendChild(span);
+    }
+    foot = document.createElement("div");
+    foot.className = styles.folio ?? "";
+    foot.setAttribute("aria-hidden", "true");
+    const span = document.createElement("span");
+    span.dataset.runningHead = "page";
+    foot.appendChild(span);
+    svg.before(head);
+    svg.after(foot);
+  }
+  let opens: { surah: number; ayah: number } | null = null;
+  for (const key of resolver.keysOnPage(page)) {
+    const at = resolver.resolve(key);
+    if (at && (!opens || at.surah < opens.surah || (at.surah === opens.surah && at.ayah < opens.ayah))) {
+      opens = { surah: at.surah, ayah: at.ayah };
+    }
+  }
+  const set = (which: string, text: string) => {
+    const el = host.querySelector<HTMLElement>(`[data-running-head="${which}"]`);
+    if (el) el.textContent = text;
+  };
+  set("surah", opens ? t.surahName(opens.surah) : "");
+  set("juz", opens ? t.juzN(juzOf(opens.surah, opens.ayah)) : "");
+  set("page", t.num(page));
+}
+
+/**
+ * Where the drawing sits inside its leaf, in the leaf's own unscaled pixels —
+ * the leaf's border, the fore-edge padding on its free side and the running
+ * head above the text all push it in from the corner. Read from layout, never
+ * from a bounding box, so a magnified or mid-turn leaf reads the same as one at
+ * rest (`offsetTop` and the computed padding ignore transforms; an SVG element
+ * has no `offsetTop` of its own, so the band above it is measured instead).
+ */
+function textBoxOf(host: HTMLElement, svg: SVGSVGElement): { x: number; y: number; width: number } {
+  const cs = getComputedStyle(host);
+  const padLeft = parseFloat(cs.paddingLeft) || 0;
+  const padRight = parseFloat(cs.paddingRight) || 0;
+  const padTop = parseFloat(cs.paddingTop) || 0;
+  const head = svg.previousElementSibling as HTMLElement | null;
+  return {
+    x: host.clientLeft + padLeft,
+    y: host.clientTop + padTop + (head?.offsetHeight ?? 0),
+    width: host.clientWidth - padLeft - padRight,
+  };
 }
 
 /** Read a page's viewBox width (defaults to the Madani 345). */

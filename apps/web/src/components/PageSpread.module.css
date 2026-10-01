@@ -148,7 +148,10 @@
   position: relative;
   flex: 0 1 auto;
   block-size: 100%;
-  aspect-ratio: 345 / 550;
+  /* The text's 345 × 550, plus the two printed bands — the running head and
+     the page number, 6.5% of the page's width each (PageStage.module.css):
+     550 + 2 × 0.065 × 345 = 594.85. Change one, change the other. */
+  aspect-ratio: 345 / 594.85;
   max-inline-size: 50%;
   min-inline-size: 0;
   display: flex;
@@ -232,9 +235,10 @@
   inline-size: 100%;
   block-size: 100%;
   container-type: size;
-  /* 345/550 of the book's height — the page's own shape, kept while its box
-     loses it. `cqh` resolves at `.host`, against this element. */
-  --stage-page-cap: 62.7273cqh;
+  /* 345/594.85 of the book's height — the page's own shape, bands and all
+     (see `.leaf`), kept while its box loses it. `cqh` resolves at `.host`,
+     against this element. */
+  --stage-page-cap: 57.998cqh;
 }
 
 .book[data-solo="true"] > .leaf {
