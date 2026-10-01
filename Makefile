@@ -152,6 +152,10 @@ report: ## Open the last e2e run's report — traces, image diffs, the failing s
 #   make drive HASH='#/hafs-kfqc/p8' VIEWPORT=1280x800 MOUSE=1 \
 #     ACT='settle=400; press=ArrowLeft; settle=800' VIDEO=test-results/drive/turn.gif
 #     # a moving picture: .gif (needs ffmpeg) or .webm — the record-demo skill
+#   make drive HASH='#/hafs-kfqc/p7' MARKS=1 FRAMES=test-results/drive/frames \
+#     ACT='step=1|Hold a verse; hold=#verse-52|900; step=2|Let go; settle=800'
+#     # a finger mark and step labels, saved as sharp screenshots; the record-demo
+#     # skill's make-gif.sh turns FRAMES/frames.txt into the GIF a note embeds
 #
 # Flags map 1:1 to the driver (apps/web/e2e/tools/drive.mjs). OUT is relative to
 # apps/web; the run prints the path to open. --expect makes a silently-wrong
@@ -168,8 +172,11 @@ drive: node-ok ## Open the running app at a deep link, do a few steps, save a PN
 	  $(if $(VIEWPORT),--viewport '$(VIEWPORT)',) \
 	  $(if $(FULL),--full,) \
 	  $(if $(MOUSE),--mouse,) \
-	  $(if $(VIDEO),--video '$(VIDEO)',)
-	@echo "  → open apps/web/$(if $(VIDEO),$(VIDEO),$(DRIVE_OUT))"
+	  $(if $(VIDEO),--video '$(VIDEO)',) \
+	  $(if $(MARKS),--marks,) \
+	  $(if $(MARK_HOLD),--mark-hold '$(MARK_HOLD)',) \
+	  $(if $(FRAMES),--frames '$(FRAMES)',)
+	@echo "  → open apps/web/$(or $(VIDEO),$(if $(FRAMES),$(FRAMES)/frames.txt,),$(DRIVE_OUT))"
 
 .PHONY: core
 core: node-ok ## Build @hifth/core only (needed before typecheck/test — the Loop 0 lesson)
