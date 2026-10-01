@@ -63,6 +63,43 @@ test.describe("Hifth · the share sheet builds a link", () => {
     await expect(share).toBeVisible();
   });
 
+  test("the tray lifts the verse it shares clear of itself, every line of it", async ({ page }) => {
+    // Owner, 2026-09-30, choosing C: "keep the verse visible". 2:48 sits low on
+    // page 7, and C's tray — the question and the two links — rose over most of
+    // it: the reader was asked what to send with the verse hidden behind the
+    // asking. The page moves up, as it does for the commentary note.
+    //
+    // The iPhone's install notice is put away first, as a reader does once:
+    // with it showing too, the room left between the hop chips and the tray is
+    // shorter than the verse, and the page then keeps its first line in sight
+    // under the chips rather than its last line clear of the tray.
+    await page.addInitScript(() => localStorage.setItem("hifth.notice.install-ios", "1"));
+    await page.goto("/?lang=en#/hafs-kfqc/2:48");
+    await page.getByRole("button", { name: "Share this ayah as a link" }).click();
+    const sheet = page.getByRole("dialog", { name: "Share this ayah as a link" });
+    await expect(sheet).toBeVisible();
+    await expect(sheet.getByRole("radio")).not.toHaveCount(0);
+    const trayTop = async () => (await sheet.boundingBox())!.y;
+    const lowestLine = async () =>
+      page.evaluate(() =>
+        Math.max(
+          ...[...document.querySelectorAll<SVGGraphicsElement>("#hifth-overlay .hl-sel")].map(
+            (el) => el.getBoundingClientRect().bottom,
+          ),
+        ),
+      );
+    await expect
+      .poll(async () => (await lowestLine()) <= (await trayTop()), {
+        message: "the verse's last line is above the tray",
+        timeout: 5_000,
+      })
+      .toBe(true);
+
+    // Put away, the tray gives the room back: the lift goes with it.
+    await page.keyboard.press("Escape");
+    await expect(sheet).toBeHidden();
+  });
+
   test("shape B: the two links and no questions", async ({ page }) => {
     await catchClipboard(page);
     await page.goto("/?share=b&lang=en#/hafs-kfqc/2:48");

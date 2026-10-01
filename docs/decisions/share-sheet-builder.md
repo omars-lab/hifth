@@ -1,8 +1,12 @@
 # When you share a verse from a phone, what should the app ask, and which links should it hand you?
 
-*Status: open, since 2026-09-29. The app shows C, the recommended shape, until the owner
-says otherwise; A and B are built too and open by their address from the decision page, so
-the choice can still be felt. Nothing waits on this row.*
+*Status: decided 30 September 2026 by the owner: **C**, the tray with one question first.
+The owner chose it from pictures of all three trays open on a phone, with one condition: **the
+verse being shared stays in sight.** In those pictures C's tray rose over most of a verse low
+on its page, so the reader was asked what to send with the verse hidden behind the asking. The
+page now moves the verse up clear of the tray, the way it does for the commentary note, and a
+browser test holds it there. C is what the app shows; A and B stay on the decision page, still
+tryable by their address, as the rule on losing options asks.*
 
 **The page:** <https://blog.bytesofpurpose.com/hifth/docs/design/share-sheet-options.html> —
 `share-sheet-options.html`, checked in and rebuilt by `scripts/build-share-sheet-options.mjs`.
