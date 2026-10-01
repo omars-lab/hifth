@@ -11,6 +11,7 @@
 }
 
 .tool {
+  position: relative;
   display: inline-grid;
   place-items: center;
   gap: 2px;

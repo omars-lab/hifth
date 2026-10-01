@@ -40,6 +40,59 @@ test.describe("Hifth · the page tools on a phone", () => {
     await expect(bar(page, "c").getByRole("button", { name: /Select is on$/ })).toBeVisible();
   });
 
+  test("holding a tool locks it on, so a run of notes is one tap each", async ({ page }) => {
+    await page.goto("/#/hafs-kfqc/p7");
+    await bar(page, "c").getByRole("button", { name: /^Page tools · Select is on$/ }).click();
+    const note = radio(page, "Note");
+    // The tray slides up; a press made while it moves slides off the button.
+    await note.evaluate((el) =>
+      Promise.all(el.closest('[role="toolbar"]')!.getAnimations({ subtree: true }).map((x) => x.finished)),
+    );
+    const r = (await note.boundingBox())!;
+    await page.mouse.move(r.x + r.width / 2, r.y + r.height / 2);
+    await page.mouse.down();
+    await page.waitForTimeout(700);
+    await page.mouse.up();
+    await expect(note).toHaveAttribute("aria-checked", "true");
+    await expect(note).toHaveAttribute("data-locked", "true");
+    await expect(page.getByText("Note stays on: tap it again to put it down")).toBeVisible();
+
+    const pins = page.locator("[data-note-pin]:visible");
+    const box = page.locator("[data-note-box]");
+    let at = await ayahTarget(page, "#verse-46");
+    await page.mouse.click(at.x, at.y);
+    await box.getByRole("textbox").fill("First slip");
+    at = await ayahTarget(page, "#verse-51");
+    await page.mouse.click(at.x, at.y);
+    await expect(pins).toHaveCount(2);
+    await expect(note).toHaveAttribute("aria-checked", "true");
+
+    // A tap on the locked tool puts it down.
+    await box.getByRole("button", { name: "Done" }).click();
+    await note.click();
+    await expect(radio(page, "Select")).toHaveAttribute("aria-checked", "true");
+    await expect(page.locator("[data-locked]")).toHaveCount(0);
+  });
+
+  test("a note opened low on the page stands above the open tools, not under them", async ({ page }) => {
+    // The tray stays up while a tool is on, and the note box only kept clear of
+    // the window's edge: a note on the last lines opened under the tray, with
+    // its Done button out of reach.
+    await page.goto("/#/hafs-kfqc/p7");
+    await bar(page, "c").getByRole("button", { name: /^Page tools · Select is on$/ }).click();
+    await radio(page, "Note").click();
+    const at = await ayahTarget(page, "#verse-46");
+    await page.mouse.click(at.x, at.y);
+    const box = page.locator("[data-note-box]");
+    await expect(box).toBeVisible();
+    await expect(box.getByRole("textbox")).toBeFocused();
+    const tray = (await page.getByRole("toolbar", { name: "Page tools" }).boundingBox())!;
+    const card = (await box.boundingBox())!;
+    expect(card.y + card.height).toBeLessThanOrEqual(tray.y);
+    await box.getByRole("button", { name: "Done" }).click();
+    await expect(box).toHaveCount(0);
+  });
+
   test("every tool, and the highlighter's pens, fit across the phone without pushing the page sideways", async ({
     page,
   }) => {

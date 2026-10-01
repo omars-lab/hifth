@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import { useT } from "../i18n";
 import type { Pen } from "../pen";
 import type { PageTool } from "./PageStage";
@@ -36,10 +36,75 @@ export const TOOLS: ReadonlyArray<{ tool: PageTool; letter: string }> = [
   { tool: "crop", letter: "C" },
 ];
 
+/** How long a finger rests on a tool before it locks on. */
+const HOLD_MS = 500;
+
+/**
+ * What a press on a tool button does, on every bar: a click picks the tool, or
+ * puts down the one already on; a double-click, or a long press, locks it on so
+ * it is not put down after one use (docs/design/page-toolbar-plan.md, "Double-
+ * click locks any tool on, as in tldraw"). One timer for the whole bar, since a
+ * hand presses one button at a time.
+ */
+export function useToolPress(
+  tool: PageTool,
+  onTool: (tool: PageTool, lock?: boolean) => void,
+): (x: PageTool) => React.ButtonHTMLAttributes<HTMLButtonElement> {
+  const timer = useRef<number | null>(null);
+  // A long press that locked a tool is followed by its own click on release,
+  // which must not put the tool straight back down.
+  const held = useRef(false);
+  const clear = () => {
+    if (timer.current !== null) window.clearTimeout(timer.current);
+    timer.current = null;
+  };
+  useEffect(() => clear, []);
+  return (x) => ({
+    onClick: (e) => {
+      if (held.current) {
+        held.current = false;
+        return;
+      }
+      if (e.detail === 2 && x !== "select") onTool(x, true);
+      else onTool(tool === x && x !== "select" ? "select" : x);
+    },
+    onPointerDown: (e) => {
+      held.current = false;
+      clear();
+      if (x === "select" || e.button !== 0) return;
+      timer.current = window.setTimeout(() => {
+        timer.current = null;
+        held.current = true;
+        onTool(x, true);
+      }, HOLD_MS);
+    },
+    onPointerUp: clear,
+    onPointerLeave: clear,
+    onPointerCancel: clear,
+    // A held finger would otherwise open the phone's own copy menu.
+    onContextMenu: (e) => e.preventDefault(),
+  });
+}
+
+/** The small lock drawn on a tool that is locked on. */
+export function LockMark(): JSX.Element {
+  return (
+    <svg className={styles.lock} width="9" height="9" viewBox="0 0 10 10" aria-hidden="true" data-lock-mark="">
+      <rect x="1.5" y="4.5" width="7" height="5" rx="1" fill="currentColor" />
+      <path d="M3 4.5V3a2 2 0 0 1 4 0v1.5" fill="none" stroke="currentColor" strokeWidth="1.3" />
+    </svg>
+  );
+}
+
 interface PageToolbarProps {
   tool: PageTool;
-  /** Asked for a tool. Clicking the one already on asks for "select". */
-  onTool: (tool: PageTool) => void;
+  /** The tool on is locked on, and stays after it is used. */
+  locked: boolean;
+  /**
+   * Asked for a tool. Clicking the one already on asks for "select"; a
+   * double-click asks for it locked on.
+   */
+  onTool: (tool: PageTool, lock?: boolean) => void;
   /** The highlighter's pen, offered beside the tools while the highlighter is on. */
   pen: Pen;
   onPen: (pen: Pen) => void;
@@ -63,8 +128,9 @@ interface PageToolbarProps {
  * Hidden below the desktop breakpoint by CSS, like `DesktopChrome`: a phone
  * layout for the bar is the plan's step 5 and a decision of its own.
  */
-export function PageToolbar({ tool, onTool, pen, onPen }: PageToolbarProps): JSX.Element {
+export function PageToolbar({ tool, locked, onTool, pen, onPen }: PageToolbarProps): JSX.Element {
   const { t } = useT();
+  const press = useToolPress(tool, onTool);
   const buttons = useRef<Array<HTMLButtonElement | null>>([]);
   const nameOf = (x: PageTool) => toolName(t, x);
 
@@ -104,9 +170,11 @@ export function PageToolbar({ tool, onTool, pen, onPen }: PageToolbarProps): JSX
             aria-keyshortcuts={letter}
             title={`${nameOf(x)} (${letter})`}
             tabIndex={tool === x ? 0 : -1}
-            onClick={() => onTool(tool === x && x !== "select" ? "select" : x)}
+            data-locked={(locked && tool === x) || undefined}
+            {...press(x)}
           >
             <ToolIcon tool={x} />
+            {locked && tool === x && <LockMark />}
             {/* A span, not a kbd: the header's key legend is the one list of
                 keys, and this is a printed reminder on a button. */}
             <span className={styles.letter} dir="ltr" aria-hidden="true">
@@ -115,11 +183,19 @@ export function PageToolbar({ tool, onTool, pen, onPen }: PageToolbarProps): JSX
           </button>
         ))}
       </div>
-      {tool === "highlight" && <PenPicker pen={pen} onPen={onPen} />}
-      {/* For the eye. The change is announced once, by App, through the one
-          polite announcer the app has — a second live region here would talk
-          over it. */}
-      <span className={styles.name}>{toolHint(t, tool)}</span>
+      {/* The pens on the side the highlighter's button is on, the hint on the
+          other: at the narrowest window neither side has room for both. */}
+      {tool === "highlight" && (
+        <div className={styles.start}>
+          <PenPicker pen={pen} onPen={onPen} />
+        </div>
+      )}
+      <div className={styles.side}>
+        {/* For the eye. The change is announced once, by App, through the one
+            polite announcer the app has — a second live region here would talk
+            over it. */}
+        <span className={styles.name}>{locked ? t.toolLockedHint(nameOf(tool)) : toolHint(t, tool)}</span>
+      </div>
     </div>
   );
 }
