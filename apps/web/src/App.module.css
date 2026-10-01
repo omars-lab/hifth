@@ -242,9 +242,9 @@
  * own answer coming — the ayah's controls move onto the opposite leaf rather
  * than into this bar. So the reservation is scoped to the layout that has no
  * facing page: everything below the spread's `(min-width: 1024px) and
- * (min-height: 740px)` gate, which is also where the bug was reported.
+ * (min-height: 775px)` gate, which is also where the bug was reported.
  */
-@media not all and (min-width: 1024px) and (min-height: 740px) {
+@media not all and (min-width: 1024px) and (min-height: 775px) {
   .trail {
     min-height: calc(var(--touch-min) + 2 * var(--space-2) + 1px);
   }

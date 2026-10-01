@@ -1231,8 +1231,10 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
 26. **Print the surah name, the juz and the page number on the page itself.** Asked 2026-09-30,
     from the same app: the surah's name in one top corner, the juz in the other, the page
     number centred at the bottom, all in the print's brown, as part of the page rather than
-    the app's bars. **What is open:** where they sit on our page without crowding the first
-    line, and in which language each is written. Built test first.
+    the app's bars. **Done 2026-09-30:** a thin band above the text and one below it, in the
+    reader's language. They make a page taller, so in the two-page view every page is about 7%
+    smaller; the owner kept them on the paper and the two-page view now starts at 775 px tall
+    rather than 740.
 27. **Long-pressing the page number, the surah name or the juz gives each its own menu.** Asked
     2026-09-30. Holding the page number acts on the page (share the page, and so on), the
     surah name on the surah, the juz on the juz, and a verse on the verse (25), so each shares
