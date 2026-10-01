@@ -40,10 +40,30 @@
  *   drag=<x>,<y>><x>,<y>      press at one point, glide to the other, let go (a page turn by its edge)
  *   eval=<js expression>      evaluate in the page and log the JSON result (measure, don't guess)
  *   evalfile=<path>           the same, with the script read from a file (an option mocked into the real app)
+ *   tap=<css | x,y>           a real finger, down and up at once (aimed at a point that is really on the element)
+ *   hold=<css | x,y>|<ms>     a real finger, kept down that long (default 800), then lifted
+ *   step=<n>|<text>           the numbered step label a recording shows (needs --marks)
+ *
+ * tap= and hold= go through Chromium's own touch input, so the app reacts as it
+ * would to a finger; with --mouse they press the mouse instead. A CSS target is
+ * aimed the way e2e/ayah.ts aims a tap: a verse that wraps a line has a gap at
+ * its centre that belongs to its neighbour, so the point is searched for.
  *
  * Other flags: --browser firefox (the owner's browser; default chromium),
  * --mouse (a desktop with a real pointer, no touch — hover styles apply),
  * --clip x,y,w,h (shoot only that part of the viewport, for a close look).
+ *
+ * Showing a finger in a moving picture: --marks loads the record-demo skill's
+ * touch-marks.js before the first step, which draws a grey fingertip under every
+ * touch, a ring that fills while it is held (--mark-hold <ms>, default 500: match
+ * the app's hold) and a ripple for a tap; --mark-fade <ms> (default 300; 0 = gone
+ * at once) is how fast the mark fades on lift.
+ *
+ * --frames <dir> takes screenshots instead of a video, as fast as they come, at
+ * the phone's full sharpness, from the first step to the end, and writes
+ * frames.txt beside them: each frame and how long it shows. The record-demo
+ * skill's make-gif.sh turns that into the GIF a note embeds. Frames beat --video
+ * for a clip you commit: the browser's video is half as sharp and flickers.
  *
  * A moving picture, when a still cannot carry it (a page turn, a drawer rising):
  * --video <path>.webm records the whole run; --video <path>.gif records it and
@@ -57,7 +77,7 @@
  */
 import { chromium, firefox } from "@playwright/test";
 import { execFileSync } from "node:child_process";
-import { mkdirSync, mkdtempSync, readFileSync, rmSync } from "node:fs";
+import { mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -114,6 +134,103 @@ const clip = args.clip
 const video = args.video ? resolve(String(args.video)) : undefined;
 const gifWidth = Number(args["gif-width"] ?? 720);
 const gifFps = Number(args["gif-fps"] ?? 15);
+const marks = Boolean(args.marks);
+const markHold = Number(args["mark-hold"] ?? 500);
+const markFade = Number(args["mark-fade"] ?? 300);
+const framesDir = args.frames ? resolve(String(args.frames)) : undefined;
+const MARKS_JS = fileURLToPath(new URL("../../../../.claude/skills/record-demo/scripts/touch-marks.js", import.meta.url));
+
+/**
+ * Where a finger should land for `css | x,y`. A CSS target is brought on screen
+ * and searched for a point the browser itself says is on it (see e2e/ayah.ts).
+ */
+async function pointFor(page, target) {
+  const xy = /^\s*(-?[\d.]+)\s*,\s*(-?[\d.]+)\s*$/.exec(target);
+  if (xy) return { x: Number(xy[1]), y: Number(xy[2]) };
+  const el = page.locator(target).filter({ visible: true }).first();
+  await el.waitFor({ timeout });
+  await el.scrollIntoViewIfNeeded({ timeout });
+  const at = await el.evaluate((node) => {
+    const r = node.getBoundingClientRect();
+    const steps = [0.5, 0.35, 0.65, 0.2, 0.8, 0.1, 0.9];
+    for (const fy of steps) {
+      for (const fx of steps) {
+        const x = r.x + r.width * fx;
+        const y = r.y + r.height * fy;
+        if (x < 0 || y < 0 || x > globalThis.innerWidth || y > globalThis.innerHeight) continue;
+        const hit = globalThis.document.elementFromPoint(x, y);
+        if (hit && (hit === node || node.contains(hit))) return { x, y };
+      }
+    }
+    return null;
+  });
+  if (!at) throw new Error(`no point a finger can hit on ${target}`);
+  return at;
+}
+
+const cdpSessions = new WeakMap();
+/** Put a real finger down on `target`, keep it there `ms`, lift it. */
+async function touch(page, kind, target, ms) {
+  const { x, y } = await pointFor(page, target);
+  log("touch_down", `kind=${kind} x=${Math.round(x)} y=${Math.round(y)}`);
+  const downAt = Date.now();
+  if (mouse) {
+    await page.mouse.move(x, y);
+    await page.mouse.down();
+    await page.waitForTimeout(ms);
+    await page.mouse.up();
+  } else {
+    if (engine !== chromium) throw new Error(`${kind}= sends touches through Chromium's own input; drop --browser firefox`);
+    if (!cdpSessions.has(page)) cdpSessions.set(page, await page.context().newCDPSession(page));
+    const cdp = cdpSessions.get(page);
+    await cdp.send("Input.dispatchTouchEvent", { type: "touchStart", touchPoints: [{ x, y, id: 1 }] });
+    await page.waitForTimeout(ms);
+    await cdp.send("Input.dispatchTouchEvent", { type: "touchEnd", touchPoints: [] });
+  }
+  log("touch_up", `kind=${kind} held_ms=${Date.now() - downAt}`);
+}
+
+/**
+ * Screenshots as fast as they come until stopped, each stamped with the time it
+ * was taken. stop() writes frames.txt for ffmpeg's concat reader: every frame
+ * shows until the next was taken, and the last for one frame's length (the
+ * record-demo skill's make-gif.sh adds the rest at the end).
+ */
+function startFrames(page, dir) {
+  mkdirSync(dir, { recursive: true });
+  for (const f of readdirSync(dir)) if (/^f\d{4}\.png$|^frames\.txt$/.test(f)) rmSync(join(dir, f));
+  const stamps = [];
+  let filming = true;
+  const loop = (async () => {
+    while (filming) {
+      const t = Date.now();
+      const f = `f${String(stamps.length).padStart(4, "0")}.png`;
+      try {
+        writeFileSync(join(dir, f), await page.screenshot({ type: "png" }));
+      } catch (e) {
+        log("frame_error", `msg=${JSON.stringify(String(e && e.message ? e.message : e))}`);
+        break;
+      }
+      stamps.push([f, t]);
+    }
+  })();
+  log("frames_start", `dir=${dir}`);
+  return async () => {
+    filming = false;
+    await loop;
+    if (stamps.length === 0) throw new Error("no frames were taken");
+    const gaps = stamps.slice(1).map(([, t], i) => t - stamps[i][1]);
+    const each = gaps.length ? gaps.reduce((a, b) => a + b, 0) / gaps.length : 100;
+    const lines = stamps.flatMap(([f, t], i) => [
+      `file '${f}'`,
+      `duration ${(((i + 1 < stamps.length ? stamps[i + 1][1] : t + each) - t) / 1000).toFixed(3)}`,
+    ]);
+    lines.push(`file '${stamps.at(-1)[0]}'`); // concat counts the last duration only if the file is named again
+    writeFileSync(join(dir, "frames.txt"), lines.join("\n") + "\n");
+    const secs = (stamps.at(-1)[1] - stamps[0][1]) / 1000;
+    log("frames", `n=${stamps.length} secs=${secs.toFixed(2)} fps=${(stamps.length / Math.max(secs, 0.001)).toFixed(1)} out=${join(dir, "frames.txt")}`);
+  };
+}
 
 /** Resolve a `role|name` pair to a Playwright locator (name is a substring). */
 function byRole(page, spec) {
@@ -192,6 +309,24 @@ async function runStep(page, step) {
     case "settle":
       await page.waitForTimeout(Number(arg));
       return;
+    case "tap":
+      await touch(page, "tap", arg, 60);
+      return;
+    case "hold": {
+      const [target, ms] = arg.split("|");
+      await touch(page, "hold", target.trim(), Number(ms ?? 800));
+      return;
+    }
+    case "step": {
+      const [n, ...text] = arg.split("|");
+      const said = await page.evaluate(
+        ([num, t]) => (globalThis.__step ? globalThis.__step(num, t) : null),
+        [Number(n), text.join("|").trim()],
+      );
+      if (said === null) throw new Error("step= needs the finger marks loaded: add --marks");
+      if (typeof said === "string") log("warn", `msg=${JSON.stringify(said)}`);
+      return;
+    }
     default:
       throw new Error(`unknown step verb: ${verb} (in "${step}")`);
   }
@@ -219,6 +354,7 @@ async function main() {
   );
 
   let failed = false;
+  let stopFrames;
   try {
     log("goto", `url=${url}`);
     await page.goto(url, { waitUntil: "load", timeout });
@@ -231,10 +367,19 @@ async function main() {
       .waitFor({ timeout })
       .catch(() => log("warn", "no visible mushaf svg — continuing anyway"));
 
+    if (marks) {
+      await page.evaluate(([h, f]) => Object.assign(globalThis, { TOUCH_HOLD_MS: h, TOUCH_FADE_MS: f }), [markHold, markFade]);
+      const said = await page.evaluate((src) => (0, eval)(src), readFileSync(MARKS_JS, "utf8"));
+      log("marks", `result=${JSON.stringify(said)} hold_ms=${markHold} fade_ms=${markFade}`);
+    }
+    stopFrames = framesDir ? startFrames(page, framesDir) : undefined;
+
     const acts = args.act ? String(args.act).split(";") : [];
     for (const step of acts) await runStep(page, step);
 
     if (settleMs > 0) await page.waitForTimeout(settleMs);
+    if (stopFrames) await stopFrames();
+    stopFrames = undefined;
 
     if (expectSel) {
       const ok = await page
@@ -259,6 +404,8 @@ async function main() {
     // Still try to capture what was on screen when it broke.
     await page.screenshot({ path: out, fullPage }).catch(() => {});
   } finally {
+    // A step that failed leaves the screenshots running; stop them before the page goes.
+    if (stopFrames) await stopFrames().catch(() => {});
     // The recording is finished by closing the page's context and can only be
     // saved while the browser is still up, so it goes between the two.
     await context.close();

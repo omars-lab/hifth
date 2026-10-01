@@ -124,6 +124,14 @@ that is where the surprise is (the tap-and-hold note found the top bar had no ro
 button only once the button was put in it). Owner, 2026-09-30: "Why don't we have tables
 with html and screenshots? instead of ascii art?"
 
+Where options differ in **timing or gesture** — a tap against a hold, what moves first, how a
+menu arrives — a still cannot show the order, so each cell gets a **looping clip** instead:
+the real app on a phone, a finger mark showing the tap or the held ring, numbered step labels,
+every option the same length, plus one clip under the table with all of them playing side by
+side, and each clip's still strip folded under it. The `record-demo` skill makes all of it,
+and the script that remakes the clips is kept beside the page. Owner, 2026-10-01: "The
+transition/timeline of this cx is unclear".
+
 **8 · What else could we consider, and why is it not here?** The options you thought about
 and left off, with the reason. This is where a reader adds the one you missed. A page whose
 option list arrives with no visible edge invites the reader to trust that the edge was
@@ -171,6 +179,9 @@ answerable by the person it is for.
 - [ ] Each option's picture is a **screenshot of the real app**, with anything new mocked into
       the live page by a kept script, and the options sit side by side in a table. No ASCII
       art, no boxes drawn in characters.
+- [ ] Options that differ in timing or gesture are **looping clips** of the same length, with
+      the finger shown and the steps numbered, a side-by-side clip under the table, and a
+      folded strip of stills under each (the `record-demo` skill).
 - [ ] An option whose difference is **felt, or seen in motion** — a snap when a control is
       released, a line that tilts as it corrects, a wash that only reads under a moving thumb —
       is **built live** as an interchangeable component (`OptionA` … `OptionN` behind one

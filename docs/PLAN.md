@@ -1227,7 +1227,10 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     translation, mark it, a note on it, share it, copy it.
     **What is open:** how this sits beside what a tap already does here (select the verse and
     open its drawer), and which of those actions this app has or wants. Share in it is the
-    tray settled in the share-sheet-builder decision. Built test first.
+    tray settled in the share-sheet-builder decision. Also open, found recording the options
+    on 2026-10-01: a finger's tap on a verse draws a thin blue box around it as well as the
+    orange (the outline that shows a keyboard user where they are), which on a phone looks like
+    a stray mark; whether a touch should show it is settled when this is built. Built test first.
 26. **Print the surah name, the juz and the page number on the page itself.** Asked 2026-09-30,
     from the same app: the surah's name in one top corner, the juz in the other, the page
     number centred at the bottom, all in the print's brown, as part of the page rather than
