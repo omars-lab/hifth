@@ -27,7 +27,7 @@ To answer: leave a comment on this note, or tell Claude the letter.
 
 1. **A tap on a verse** chooses it, paints it, and opens the verse menu.
 2. **Hold, then drag** paints a run of verses or words.
-3. **Hold and let go without moving** does nothing you would notice.
+3. **Hold and let go without moving** does the same as a tap: the verse is painted and the menu opens. (An earlier draft of this note said a hold did nothing; recording it showed otherwise.)
 
 ![A tapped verse on a phone today: painted orange, the verse menu open at the bottom](verse-tap-and-hold/today-tap.png)
 
@@ -59,7 +59,11 @@ So full-screen is worth most to people on smaller phones, and to anyone who want
 
 ## What are the options? — 3
 
-Each picture is the real app on a phone, with the option's new parts added to the live page by a short script kept beside this note, so every picture can be taken again. The menu pictures are cropped to the lower part of the screen so the buttons can be read.
+**Watch the three play side by side first.** The grey circle is a finger: a ripple is a tap, and a ring that fills is a hold. The numbered label at the top says what is happening.
+
+![The three options playing side by side, each under its letter: A's tap hides the bars, B and C open the menu](verse-tap-and-hold/clips.gif)
+
+Each picture and clip is the real app on a phone, with the option's new parts added to the live page by a short script kept beside this note, so every one can be taken again. The menu pictures are cropped to the lower part of the screen so the buttons can be read.
 
 | | **A** *(recommended)* | **B** | **C** |
 | --- | --- | --- | --- |
@@ -76,13 +80,28 @@ Each picture is the real app on a phone, with the option's new parts added to th
 
 The verse menu you have today stays the one and only menu. It gains **Play to** (play from here to a verse you pick), **Mark**, **Note** and **Copy**. Holding and *dragging* still paints a run of verses, as it does now; the menu opens only if you let go without moving.
 
+![A: tap, the bars hide; tap, they return; hold a verse, the menu opens](verse-tap-and-hold/clip-a.gif)
+
+> [!example]- A, step by step: 4 stills
+> ![A in four stills: the page, the bars hidden with nothing painted, the bars back, the menu](verse-tap-and-hold/clip-a-strip.png)
+
 ### B — Keep the tap as it is; a hold opens the same menu; full-screen gets a button
 
 Nothing anyone has learned changes. Full-screen needs its own button, and the pictures showed that the top bar has no room left on a phone (its six buttons already reach the right edge), so the button sits in the bottom line instead. Once the bars are gone, so is the button, so a second small button has to stay on the page to bring them back. That button sits over the page you are reciting from.
 
+![B: tap a verse, the menu opens; close it; tap the full-screen button, the bars go and a small button stays](verse-tap-and-hold/clip-b.gif)
+
+> [!example]- B, step by step: 4 stills
+> ![B in four stills: the page with a full-screen button, the menu, the menu closed, full screen with a way back](verse-tap-and-hold/clip-b-strip.png)
+
 ### C — A tap opens today's menu; a hold opens a second, separate menu
 
-A quick tap for the everyday buttons, a hold for the rest. Full-screen still needs a button, as in B.
+A quick tap for the everyday buttons, a hold for the rest. Full-screen still needs a button, as in B. The recording showed one thing the still did not: the small menu opens over the end of the verse you held, so it hides part of the verse it is about.
+
+![C: tap a verse, today's menu opens; close it; hold the verse, a second small menu opens beside it](verse-tap-and-hold/clip-c.gif)
+
+> [!example]- C, step by step: 4 stills
+> ![C in four stills: the page, today's menu, the menu closed, the second menu](verse-tap-and-hold/clip-c-strip.png)
 
 ## How do the three compare? — side by side
 
@@ -90,7 +109,7 @@ A quick tap for the everyday buttons, a hold for the rest. Full-screen still nee
 | --- | --- | --- | --- |
 | **For a hafiz reciting** | A stray tap never paints the page | A stray tap still paints it | A stray tap still paints it |
 | **Pros** | One menu, one gesture each. The page is for reading. Short phones get their last four lines back with one tap. Matches the app you shared. | Nothing to relearn. Smallest change. | The everyday buttons stay one tap away. |
-| **Cons** | Everyone who learned "tap a verse" must learn "hold". A hold is harder to discover, so the hint line and first-run tips must teach it. | Full-screen needs a button that disappears with the bars, then a second way back. A stray tap still paints. | Two menus for one verse: you have to remember which holds what. Full-screen still needs a button. |
+| **Cons** | Everyone who learned "tap a verse" must learn "hold". A hold is harder to discover, so the hint line and first-run tips must teach it. | Full-screen needs a button that disappears with the bars, then a second way back. A stray tap still paints. | Two menus for one verse: you have to remember which holds what. The small menu covers part of the verse it is about. Full-screen still needs a button. |
 | **What it commits you to** | Both features ship together. The hint line, the first-run tips and the tests that tap a verse are rewritten. | Full-screen becomes a small extra; the hold menu adds little, since a tap already opens the same thing. | Undoes the earlier choice of one verse menu, which would need reopening. |
 
 > [!note]- What stays the same whichever you pick
