@@ -493,8 +493,12 @@ compatibility layer does the same job in about 4 KB, which would cut roughly 38 
 what every first visit downloads.
 
 **Why it waits.** It replaces the thing every component runs on, and the gesture library
-has to keep working on top of it. It was parked on 2026-09-29 until the large refactor
-settles, so the two changes are not tangled together.
+has to keep working on top of it. It was parked on 2026-09-29 until "the large refactor"
+settled, but that refactor was never planned, so it was not a real reason. The real one,
+written 2026-09-30: the app has 13 KB of room under its size cap, the swap risks every
+gesture and screen, and it does nothing for the Study Quran demo that is the near-term
+goal. It is taken up when the room under the cap falls below about 5 KB, or once the demo
+has been shown, whichever comes first.
 
 **What would close it.** Swap it on its own branch, then run the whole Playwright suite
 (desktop and desktop-firefox) and the golden screenshots, plus `make lighthouse` against
