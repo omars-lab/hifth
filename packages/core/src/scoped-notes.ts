@@ -18,7 +18,7 @@
  */
 
 import { parseAyahKey } from "./keys.js";
-import { isMistake, NOTE_TEXT_MAX, type Note } from "./notes.js";
+import { isMistake, mergeNotes, NOTE_TEXT_MAX, type Note } from "./notes.js";
 import { AYAH_COUNTS, HIZB_STARTS, JUZ_STARTS, TOTAL_AYAHS, fromAbsoluteAyah, hizbOf, juzOf, toAbsoluteAyah } from "./quran-meta.js";
 import type { EditionId } from "./types.js";
 
@@ -374,4 +374,96 @@ export function mergeScopedNotes(held: readonly ScopedNote[], loaded: readonly S
     if (!mine || changed(x) > changed(mine)) byId.set(x.id, { ...x, verses: inOrder(x.verses) });
   }
   return [...byId.values()];
+}
+
+/**
+ * A saved file loaded into what the device holds. A file from before the
+ * upgrade carries only old notes: its notes move across as they load, and its
+ * mistakes stay mistakes. A newer file carries the new kind of note as well.
+ * Either way a note held in both places keeps the copy changed last, and
+ * `added` counts what the device did not have, for the line the reader is told.
+ */
+export function mergeNotesFile(
+  heldScoped: readonly ScopedNote[],
+  heldMistakes: readonly Note[],
+  fileNotes: readonly Note[],
+  fileScoped: readonly ScopedNote[],
+): { scoped: ScopedNote[]; mistakes: Note[]; added: number } {
+  const scoped = mergeScopedNotes(mergeScopedNotes(heldScoped, migrateV1Notes(fileNotes, [])), fileScoped);
+  const mistakes = mergeNotes(heldMistakes, fileNotes.filter(isMistake));
+  return { scoped, mistakes, added: scoped.length - heldScoped.length + mistakes.length - heldMistakes.length };
+}
+
+/*
+ * Until the note tool offers existing notes (step 3) and notes have a list of
+ * their own (step 4), the page still draws one pin per pinned verse and the
+ * app still changes notes through those pins. These two turn the notes into
+ * pins and a changed set of pins back into notes, so the screen is unchanged
+ * while what the device keeps is the new kind of note.
+ */
+
+/** A pin's id: the note's own id for its first pinned verse, then the note's id and the verse. */
+function pinId(note: ScopedNote, verse: NoteVerse, first: boolean): string {
+  if (first) return note.id;
+  const v = verseOf(verse.key);
+  return v ? `${note.id}~${v.surah}:${v.ayah}` : `${note.id}~${verse.key}`;
+}
+
+/** One pin per pinned verse, shaped as the page draws pins today. A verse with no pin draws none. */
+export function pinsOf(set: readonly ScopedNote[]): Note[] {
+  const out: Note[] = [];
+  for (const n of set) {
+    let first = true;
+    for (const v of n.verses) {
+      if (!v.spot) continue;
+      out.push({
+        id: pinId(n, v, first),
+        key: v.key,
+        ...v.spot,
+        kind: n.kind,
+        text: n.text,
+        createdAt: n.createdAt,
+        updatedAt: n.updatedAt,
+      });
+      first = false;
+    }
+  }
+  return out;
+}
+
+/**
+ * Carry a changed set of pins back into the notes. A pin gone takes its verse
+ * out, and a note whose last pin went is gone, as deleting a pin always was;
+ * a pin with new words gives the note those words; a pin the notes do not know
+ * (a fresh one, or one put back by Undo) becomes a page note of its one verse.
+ * A note with no pinned verse at all, which only a loaded file can bring, is
+ * left alone.
+ */
+export function fromPins(held: readonly ScopedNote[], pins: readonly Note[], now: number): ScopedNote[] {
+  const byId = new Map(pins.filter((p) => !isMistake(p)).map((p) => [p.id, p]));
+  const known = new Set<string>();
+  const next: ScopedNote[] = [];
+  for (const n of held) {
+    let first = true;
+    let pinned = 0;
+    let newest: Note | null = null;
+    const verses = n.verses.filter((v) => {
+      if (!v.spot) return true;
+      const id = pinId(n, v, first);
+      first = false;
+      pinned++;
+      known.add(id);
+      const p = byId.get(id);
+      if (p && p.text !== n.text && (!newest || p.updatedAt > newest.updatedAt)) newest = p;
+      return p !== undefined;
+    });
+    if (pinned > 0 && verses.length === 0) continue;
+    let note = n;
+    if (verses.length < n.verses.length) note = { ...note, verses, usedAt: now };
+    const edit = newest as Note | null;
+    if (edit) note = { ...note, text: edit.text, updatedAt: edit.updatedAt, usedAt: Math.max(note.usedAt, edit.updatedAt) };
+    next.push(note);
+  }
+  const fresh = [...byId.values()].filter((p) => !known.has(p.id));
+  return fresh.length === 0 ? next : migrateV1Notes(fresh, next);
 }

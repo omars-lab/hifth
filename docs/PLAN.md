@@ -1253,8 +1253,9 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     take any verse inside it, and when a verse is added the app offers the notes that can take
     it, the one used last first. The design is [scoped-notes.md](design/scoped-notes.md),
     seven build steps; its first three questions are answered. **Done 2026-10-01:** step 1,
-    the rules and their tests, with nothing on screen yet. **What is open:** step 2, moving
-    today's notes across on the device; then the note tool offering existing notes (waits on
+    the rules and their tests, and step 2: today's notes move across on the device the first
+    time the app opens, the old record is kept as a backup, the saved file carries the new
+    notes, and the pins look as before. **What is open:** the note tool offering existing notes (waits on
     how that should feel, the design's question 4), the list of notes and stepping through
     one (question 6), and the long-press ways in, which land with 25 and 27.
 

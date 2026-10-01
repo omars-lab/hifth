@@ -12,7 +12,7 @@
  * costs the reader a bookmark, never the page they are reading.
  */
 
-import type { Bookmark, Note } from "@hifth/core";
+import { isMistake, migrateV1Notes, type Bookmark, type Note, type ScopedNote } from "@hifth/core";
 
 const DB_NAME = "hifth.bookmarks.v1";
 const DB_VERSION = 1;
@@ -155,34 +155,81 @@ interface NotesRecord {
   readonly notes: readonly Note[];
 }
 
-/** Every note the phone holds. Empty when there are none or no store. */
-export async function readNotes(): Promise<Note[]> {
-  if (!bookmarkStoreSupported()) return [];
+/*
+ * Notes that gather verses (docs/design/scoped-notes.md, step 2). Kept under a
+ * key of their own beside the old notes, which now hold only the marked
+ * mistakes and, untouched, the notes as they were the day they were moved
+ * across: a backup an older version of the app can still read.
+ */
+const SCOPED_KEY = "scoped-notes";
+
+interface ScopedRecord {
+  readonly id: typeof SCOPED_KEY;
+  readonly notes: readonly ScopedNote[];
+}
+
+/** What the device holds: the new notes, the marked mistakes, and the backup. */
+export interface HeldNotes {
+  readonly scoped: ScopedNote[];
+  readonly mistakes: Note[];
+  /** The notes as they were the day they were moved across, kept untouched. */
+  readonly backup: Note[];
+}
+
+/**
+ * Every note the device holds, moving today's notes across the first time.
+ * The read and the move are one write, so two tabs opening at once cannot both
+ * move them, and a move is never half done. Null when there is no store or it
+ * could not be read: then nothing may be written either, or a failed read
+ * would overwrite the backup with an empty set.
+ */
+export async function loadNotes(): Promise<HeldNotes | null> {
+  if (!bookmarkStoreSupported()) return null;
   let db: IDBDatabase | null = null;
   try {
     db = await openDb();
-    const tx = db.transaction(SETS, "readonly");
-    const rec = await new Promise<NotesRecord | undefined>((resolve, reject) => {
-      const req = tx.objectStore(SETS).get(NOTES_KEY);
-      req.onsuccess = () => resolve(req.result as NotesRecord | undefined);
-      req.onerror = () => reject(req.error);
+    const tx = db.transaction(SETS, "readwrite");
+    const sets = tx.objectStore(SETS);
+    const get = <T>(key: string) =>
+      new Promise<T | undefined>((resolve, reject) => {
+        const req = sets.get(key);
+        req.onsuccess = () => resolve(req.result as T | undefined);
+        req.onerror = () => reject(req.error);
+      });
+    const done = new Promise<void>((resolve, reject) => {
+      tx.oncomplete = () => resolve();
+      tx.onerror = () => reject(tx.error);
+      tx.onabort = () => reject(tx.error);
     });
-    return rec ? [...rec.notes] : [];
+    const [old, held] = await Promise.all([get<NotesRecord>(NOTES_KEY), get<ScopedRecord>(SCOPED_KEY)]);
+    const notes = [...(old?.notes ?? [])];
+    let scoped = held ? [...held.notes] : null;
+    if (!scoped) {
+      scoped = migrateV1Notes(notes, []);
+      sets.put({ id: SCOPED_KEY, notes: scoped } satisfies ScopedRecord);
+    }
+    await done;
+    return { scoped, mistakes: notes.filter(isMistake), backup: notes.filter((n) => !isMistake(n)) };
   } catch {
-    return [];
+    return null;
   } finally {
     db?.close();
   }
 }
 
-/** Replace every note at once. False when the phone refused the write. */
-export async function writeNotes(notes: readonly Note[]): Promise<boolean> {
+/**
+ * Write the notes that gather verses and the old record together, in one
+ * write, so the two never disagree. False when the phone refused it.
+ */
+export async function writeAllNotes(old: readonly Note[], scoped: readonly ScopedNote[]): Promise<boolean> {
   if (!bookmarkStoreSupported()) return false;
   let db: IDBDatabase | null = null;
   try {
     db = await openDb();
     const tx = db.transaction(SETS, "readwrite");
-    tx.objectStore(SETS).put({ id: NOTES_KEY, notes } satisfies NotesRecord);
+    const sets = tx.objectStore(SETS);
+    sets.put({ id: NOTES_KEY, notes: old } satisfies NotesRecord);
+    sets.put({ id: SCOPED_KEY, notes: scoped } satisfies ScopedRecord);
     await new Promise<void>((resolve, reject) => {
       tx.oncomplete = () => resolve();
       tx.onerror = () => reject(tx.error);

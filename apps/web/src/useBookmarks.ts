@@ -1,6 +1,14 @@
-import { useCallback, useEffect, useRef, useState } from "react";
-import type { Bookmark, Note } from "@hifth/core";
-import { readBookmarks, readNotes, readSeam, writeBookmarks, writeNotes, writeSeam } from "./bookmark-store";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { fromPins, isMistake, mergeNotesFile, pinsOf, type Bookmark, type Note, type ScopedNote } from "@hifth/core";
+import {
+  loadNotes,
+  readBookmarks,
+  readSeam,
+  writeAllNotes,
+  writeBookmarks,
+  writeSeam,
+  type HeldNotes,
+} from "./bookmark-store";
 
 /**
  * The reader's bookmarks, held for the app: loaded from the phone once, and every
@@ -92,33 +100,64 @@ export function useSeam(page: number | null): number | null {
  * The reader's notes, held like the bookmarks: read once, every change written
  * back whole, one write after another. `said` may be empty, for a change that
  * needs no spoken line of its own (the box opening on a fresh pin).
+ *
+ * The device keeps notes that gather verses (docs/design/scoped-notes.md), but
+ * until the note tool and the note list know them, the page still draws one pin
+ * per pinned verse and the app still changes notes through those pins. So
+ * `notes` is the pins and the marked mistakes, and `commit` takes a changed set
+ * of them back into the notes the device keeps.
  */
 export function useNotes(
   announce: (line: string) => void,
   notSaved: string,
 ): {
   notes: readonly Note[];
+  scoped: readonly ScopedNote[];
   commit: (next: Note[], said: string) => void;
+  loadFile: (fileNotes: readonly Note[], fileScoped: readonly ScopedNote[]) => number;
 } {
-  const [notes, setNotes] = useState<readonly Note[]>([]);
+  const [held, setHeld] = useState<Held>(EMPTY);
+  // The latest notes, for the write: a write queued before the read landed
+  // must still write what the reader has now, not what they had then.
+  const latest = useRef<Held>(EMPTY);
+  // What the device held when it was read, or null when it could not be read
+  // (or not yet): nothing is written without it, so a failed read can never
+  // overwrite the backup with an empty set.
+  const stored = useRef<HeldNotes | null>(null);
+  const queue = useRef<Promise<unknown>>(Promise.resolve());
+
+  const hold = useCallback((next: Held) => {
+    latest.current = next;
+    setHeld(next);
+  }, []);
 
   useEffect(() => {
     let live = true;
-    void readNotes().then((set) => {
-      if (!live) return;
-      setNotes((now) => (now.length === 0 ? set : [...set, ...now.filter((n) => !set.some((s) => s.id === n.id))]));
+    const read = loadNotes().then((got) => {
+      if (!live || !got) return;
+      stored.current = got;
+      // Notes made before the read landed are kept beside what was read.
+      const now = latest.current;
+      hold({
+        scoped: [...got.scoped, ...now.scoped.filter((n) => !got.scoped.some((s) => s.id === n.id))],
+        mistakes: [...got.mistakes, ...now.mistakes.filter((n) => !got.mistakes.some((s) => s.id === n.id))],
+      });
     });
+    queue.current = read;
     return () => {
       live = false;
     };
-  }, []);
+  }, [hold]);
 
-  const queue = useRef<Promise<unknown>>(Promise.resolve());
-  const commit = useCallback(
-    (next: Note[], said: string) => {
-      setNotes(next);
+  const save = useCallback(
+    (said: string) => {
       queue.current = queue.current
-        .then(() => writeNotes(next))
+        .then(() => {
+          const from = stored.current;
+          if (!from) return false;
+          const now = latest.current;
+          return writeAllNotes([...from.backup, ...now.mistakes], now.scoped);
+        })
         .then((ok) => {
           if (!ok) announce(notSaved);
           else if (said) announce(said);
@@ -127,5 +166,39 @@ export function useNotes(
     [announce, notSaved],
   );
 
-  return { notes, commit };
+  const commit = useCallback(
+    (next: Note[], said: string) => {
+      hold({
+        scoped: fromPins(
+          latest.current.scoped,
+          next.filter((n) => !isMistake(n)),
+          Date.now(),
+        ),
+        mistakes: next.filter(isMistake),
+      });
+      save(said);
+    },
+    [hold, save],
+  );
+
+  const loadFile = useCallback(
+    (fileNotes: readonly Note[], fileScoped: readonly ScopedNote[]) => {
+      const now = latest.current;
+      const merged = mergeNotesFile(now.scoped, now.mistakes, fileNotes, fileScoped);
+      hold({ scoped: merged.scoped, mistakes: merged.mistakes });
+      save("");
+      return merged.added;
+    },
+    [hold, save],
+  );
+
+  const notes = useMemo(() => [...pinsOf(held.scoped), ...held.mistakes], [held]);
+  return { notes, scoped: held.scoped, commit, loadFile };
 }
+
+interface Held {
+  readonly scoped: ScopedNote[];
+  readonly mistakes: Note[];
+}
+
+const EMPTY: Held = { scoped: [], mistakes: [] };
