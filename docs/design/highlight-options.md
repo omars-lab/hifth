@@ -1,6 +1,6 @@
 # How should the app mark the verse you are on?
 
-*A decision record, open. Its options page — every stroke and every behaviour drawn on the same
+*A decision record, settled 2026-09-30 (see "What was decided?" below). Its options page — every stroke and every behaviour drawn on the same
 real page of the print, at the width a phone gives it, three of them mounted live — is
 `highlight-options.html` beside this file, and on the site at
 <https://blog.bytesofpurpose.com/hifth/docs/design/highlight-options.html>. This record is the
@@ -15,6 +15,23 @@ verse across two pages, next to the app's other marks, fading or staying, and th
 test a hafiz actually runs.
 
 ---
+
+## What was decided?
+
+The owner settled this on 2026-09-30, on a later page that took this one's recommendation further
+(the [highlighter's texture](../decisions/highlight-texture.md)), and then chose its colours:
+
+- **The verse you are on: a hand-drawn swipe in amber (I).** Each line gets a band with rough,
+  nearly upright ends and faint streaks along it, blended into the print so the letters stay
+  black. The wobble is fixed per verse, so the same verse looks the same on every visit, which
+  answers this page's worry that a fresh wobble would move under the reader.
+- **A swept passage looks different: its own colour.** It is a pastel pen the reader picks in
+  the tools bar while the highlighter is on (green, blue, yellow or pink, green by default), and
+  a run of words is pastel blue over its amber verse. Every pen keeps the letters at 4.5 to 1 or
+  better where it crosses the amber. That retires this page's worry about a passage inside a
+  passage going brown.
+
+The options below are kept as they were drawn; they are the evidence the choice was made on.
 
 ## The short version
 
