@@ -10,7 +10,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { execFileSync } from "node:child_process";
-import { makeFixture, dropFixture, runGate } from "./gate-fixture.mjs";
+import { makeFixture, dropFixture, runGate, fixtureEnv } from "./gate-fixture.mjs";
 
 // ba + fatha, twice: two letters, two marks — "fully vowelled" by the check's
 // ratio, and not a word of anything.
@@ -24,7 +24,7 @@ const NO_SPECIMENS = { HIFTH_GATE_SPECIMENS: "none" };
 /** The check lists files with git, so the made-up tree has to be a repository. */
 function repo(files) {
   const root = makeFixture(files);
-  execFileSync("git", ["init", "-q"], { cwd: root });
+  execFileSync("git", ["init", "-q"], { cwd: root, env: fixtureEnv() });
   return root;
 }
 
@@ -81,5 +81,36 @@ test("gate:scripture refuses a stale specimen list rather than passing quietly",
     assert.match(r.out, /SPECIMENS names files that no longer hold vowelled words/);
   } finally {
     dropFixture(root);
+  }
+});
+
+test("gate:scripture reads the made-up tree even when run from inside a commit", () => {
+  // A commit hook is handed the address of the real repository's index. In the
+  // main checkout that address is relative and happens to miss; in a worktree it
+  // is absolute, and a check run on a made-up tree then listed the real tree's
+  // 510 files instead of the made-up one's 2. A second made-up repository with
+  // three staged files stands in for the real one here.
+  const decoy = repo({
+    "packages/core/src/x.ts": "1",
+    "packages/core/src/y.ts": "2",
+    "packages/core/src/z.ts": "3",
+  });
+  execFileSync("git", ["add", "."], { cwd: decoy, env: fixtureEnv() });
+  const before = process.env.GIT_INDEX_FILE;
+  process.env.GIT_INDEX_FILE = `${decoy}/.git/index`;
+  let root;
+  try {
+    root = repo({
+      "packages/core/src/a.ts": "export const plain = 1;",
+      "apps/web/src/b.tsx": "export const plain = 2;",
+    });
+    const r = runGate("scripture", root, NO_SPECIMENS);
+    assert.equal(r.status, 0, r.out);
+    assert.match(r.out, /OK \(2 sources/);
+  } finally {
+    if (before === undefined) delete process.env.GIT_INDEX_FILE;
+    else process.env.GIT_INDEX_FILE = before;
+    if (root) dropFixture(root);
+    dropFixture(decoy);
   }
 });

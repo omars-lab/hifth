@@ -38,6 +38,17 @@ export function dropFixture(root) {
 }
 
 /**
+ * This process's environment without git's own variables. A commit hook is
+ * handed the real repository's index and directory in GIT_INDEX_FILE and
+ * friends; in a worktree those are absolute paths, so any git command run
+ * against a made-up tree read the real one instead (510 files where the test
+ * made 2). Anything a test runs against a made-up tree gets this instead.
+ */
+export function fixtureEnv() {
+  return Object.fromEntries(Object.entries(process.env).filter(([k]) => !k.startsWith("GIT_")));
+}
+
+/**
  * Run `scripts/gate-<name>.mjs` against `root`. Returns the exit status and
  * everything the check printed, on either stream, so a failing assertion can
  * show what the check actually said.
@@ -45,7 +56,7 @@ export function dropFixture(root) {
 export function runGate(name, root, extraEnv = {}) {
   const r = spawnSync(process.execPath, [join(SCRIPTS, `gate-${name}.mjs`)], {
     encoding: "utf8",
-    env: { ...process.env, HIFTH_GATE_ROOT: root, ...extraEnv },
+    env: { ...fixtureEnv(), HIFTH_GATE_ROOT: root, ...extraEnv },
   });
   return { status: r.status, out: `${r.stdout}${r.stderr}` };
 }
