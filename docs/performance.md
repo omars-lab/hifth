@@ -737,7 +737,7 @@ never in `pnpm gates`.
 
 ---
 
-### ⑰ Saved pages can be cleared when a browser will not promise to keep them · **open**
+### ⑰ Saved pages can be cleared when a browser will not promise to keep them · **blocked**
 
 **What happens.** A browser decides by itself whether to promise this site's saved
 pages will be kept. When it will not, and there is no install offer to make, the
@@ -757,6 +757,11 @@ they set themselves, an install offer, and a kept juz that has already been clea
 - Measure how often it is refused in practice, per browser, before building more.
 - If a kept juz is cleared anyway, the "kept juz is gone" notice already says so and
   offers to fetch it again; check that path on a real phone.
+
+**Where it stands (30 September 2026).** The first is done: the app asks again when a
+juz is kept and when it is installed, each with a test. The second is dropped: the
+app sends nothing home, on purpose, so refusals across readers cannot be counted. The
+third waits on a person with a phone; it is item 9 on the by-hand checklist.
 
 **How we'd know:** on a phone where the promise was refused, a kept juz survives a
 week of normal use, or the app fetches it back without the reader noticing.
