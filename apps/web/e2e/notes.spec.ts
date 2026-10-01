@@ -107,4 +107,87 @@ test.describe("Hifth · the note tool", () => {
     await expect(pageSvg(page, 7)).toBeVisible();
     await expect(pins(page)).toHaveCount(1);
   });
+
+  // The hint beside the tools changes length with the tool. The buttons must not
+  // slide with it, or the second click of a double-click, or the click that puts
+  // a tool down, lands on a different button (they moved up to 100px).
+  test("the tool buttons hold still whatever tool is on", async ({ page }) => {
+    await page.goto("/#/hafs-kfqc/p7");
+    await expect(pageSvg(page, 7)).toBeVisible();
+    const where = async () => Math.round((await toolBtn(page, "Bookmark").boundingBox())!.x);
+    const at = await where();
+    for (const name of ["Bookmark", "Note", "Highlight", "Crop", "Read", "Select"]) {
+      await toolBtn(page, name).click();
+      await expect(toolBtn(page, name)).toHaveAttribute("aria-checked", "true");
+      expect(await where(), `after picking ${name}`).toBe(at);
+    }
+  });
+
+  test("at the narrowest computer window the pens and the longest hint fit beside the tools", async ({ page }) => {
+    await page.setViewportSize({ width: 1024, height: 800 });
+    await page.goto("/#/hafs-kfqc/p7");
+    await expect(pageSvg(page, 7)).toBeVisible();
+    for (const name of ["Read", "Highlight"]) {
+      await toolBtn(page, name).dblclick();
+      await expect(toolBtn(page, name)).toHaveAttribute("data-locked", "true");
+      const box = (await bar(page).boundingBox())!;
+      expect(box.x + box.width, name).toBeLessThanOrEqual(1024);
+      // Two short lines at most, so the row does not eat the page.
+      expect(box.height, name).toBeLessThanOrEqual(56);
+      expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(1024);
+      await page.screenshot({ path: test.info().outputPath(`bar-${name}.png`), clip: { x: 0, y: box.y - 4, width: 1024, height: box.height + 8 } });
+    }
+  });
+
+  // Locking a tool on (docs/design/page-toolbar-plan.md, "Double-click locks any
+  // tool on"): a hafiz recording a run of slips pays one tap a slip, not two.
+  test("a double-click locks the note tool on, so each slip is one tap; a click puts it down", async ({ page }) => {
+    await page.goto("/#/hafs-kfqc/p7");
+    await expect(pageSvg(page, 7)).toBeVisible();
+
+    await toolBtn(page, "Note").dblclick();
+    await expect(toolBtn(page, "Note")).toHaveAttribute("aria-checked", "true");
+    await expect(toolBtn(page, "Note")).toHaveAttribute("data-locked", "true");
+    await expect(bar(page)).toContainText("Note stays on: click it again to put it down");
+
+    let at = await ayahTarget(page, "#verse-46");
+    await page.mouse.click(at.x, at.y);
+    await box(page).getByRole("textbox").fill("First slip");
+    await page.keyboard.press("Escape");
+    await expect(box(page)).toHaveCount(0);
+    // Still on after the note is closed.
+    await expect(toolBtn(page, "Note")).toHaveAttribute("aria-checked", "true");
+
+    at = await ayahTarget(page, "#verse-51");
+    await page.mouse.click(at.x, at.y);
+    await expect(box(page)).toBeVisible();
+    await box(page).getByRole("textbox").fill("Second slip");
+    // A tap on the next verse closes this box and pins there, in one tap.
+    at = await ayahTarget(page, "#verse-54");
+    await page.mouse.click(at.x, at.y);
+    await expect(pins(page)).toHaveCount(3);
+    await expect(toolBtn(page, "Note")).toHaveAttribute("aria-checked", "true");
+    await box(page).getByRole("button", { name: "Done" }).click();
+    await expect(pins(page)).toHaveCount(2);
+
+    // A click on the locked tool puts it down, and the lock goes with it.
+    await toolBtn(page, "Note").click();
+    await expect(toolBtn(page, "Select")).toHaveAttribute("aria-checked", "true");
+    await expect(page.locator("[data-locked]")).toHaveCount(0);
+    // Picked again by one click, it is used once, as before.
+    await toolBtn(page, "Note").click();
+    at = await ayahTarget(page, "#verse-47");
+    await page.mouse.click(at.x, at.y);
+    await expect(toolBtn(page, "Select")).toHaveAttribute("aria-checked", "true");
+  });
+
+  test("Escape puts a locked tool down", async ({ page }) => {
+    await page.goto("/#/hafs-kfqc/p7");
+    await expect(pageSvg(page, 7)).toBeVisible();
+    await toolBtn(page, "Bookmark").dblclick();
+    await expect(toolBtn(page, "Bookmark")).toHaveAttribute("data-locked", "true");
+    await page.keyboard.press("Escape");
+    await expect(toolBtn(page, "Select")).toHaveAttribute("aria-checked", "true");
+    await expect(page.locator("[data-locked]")).toHaveCount(0);
+  });
 });

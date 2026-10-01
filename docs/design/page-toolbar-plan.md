@@ -127,10 +127,17 @@ lands on the page, so it is safe, and it shows the idea to the people we pitch i
 first try.
 
 **Built 2026-09-25.** The bar sits in its own row above the book, not floating over it, because
-over the page it covered the first line. Two parts of this step were left for later: the
-setting that turns the letters off, and locking a tool on with a double-click. For now the
-highlighter stays on until you put it down, and the bookmark tool goes back to Select after one
-bookmark.
+over the page it covered the first line. One part of this step was left for later: the
+setting that turns the letters off. The highlighter stays on until you put it down, and the
+bookmark and note tools go back to Select after one use.
+
+**Locking built 2026-10-01.** A double-click on a tool, or holding it for half a second on a
+phone, keeps it on: a small padlock shows on its button, the hint says how to put it down, and
+a run of bookmarks or notes is one tap each. A click on the tool, or Escape, puts it down.
+Building it found two things wrong with the bar itself, both fixed with a test: the buttons
+slid sideways when the hint beside them changed length, so the second click of a double-click
+landed on the wrong tool; and on a phone a note opened on the last lines stood under the open
+tools tray, with its Done button out of reach.
 
 ### 2. The note tool, like Figma's comment mode
 

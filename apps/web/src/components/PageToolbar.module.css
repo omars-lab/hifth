@@ -11,18 +11,27 @@
   display: none;
 }
 
+/* The tools sit in the middle column, so they hold still: the pens and the
+   hint beside them change width with the tool, and a bar centred as one piece
+   slid every button by up to 100px when a tool was picked, so the second click
+   of a double-click, or the click that puts a tool down, missed. */
 @media (min-width: 1024px) and (min-height: 775px) {
   .bar {
-    align-self: center;
+    align-self: stretch;
     /* Kept thin: at the smallest desktop window every pixel of this row comes
        out of the page, and a page there must never be smaller than the
        narrowest phone's (the desktop spread tests hold that line). */
     margin-block: 4px 2px;
-    display: flex;
+    padding-inline: var(--space-3);
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
     align-items: center;
     gap: var(--space-3);
-    padding-block: 2px;
-    padding-inline: 2px var(--space-3);
+  }
+
+  .tools {
+    grid-column: 2;
+    padding: 2px;
     border: 1px solid var(--hairline);
     border-radius: var(--radius-md);
     background: var(--paper-raised, var(--paper));
@@ -33,6 +42,22 @@
 .tools {
   display: flex;
   gap: 2px;
+}
+
+.start {
+  grid-column: 1;
+  grid-row: 1;
+  justify-self: end;
+}
+
+.side {
+  grid-column: 3;
+  grid-row: 1;
+  justify-self: start;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-inline-size: 0;
 }
 
 .tool {
@@ -64,6 +89,19 @@
   outline-offset: -2px;
 }
 
+/* A tool locked on wears a small lock in the corner opposite its key, and a
+   ring, so the lock is said by shape as well as by the hint beside the bar. */
+.tool[data-locked] {
+  box-shadow: inset 0 0 0 1.5px var(--accent);
+}
+
+.lock {
+  position: absolute;
+  inset-block-start: 3px;
+  inset-inline-end: 3px;
+  color: var(--accent-strong);
+}
+
 /* The key, small in the corner, as Figma and tldraw print it. */
 .letter {
   position: absolute;
@@ -84,8 +122,7 @@
 }
 
 .name {
-  min-inline-size: 7em;
   color: var(--ink-soft);
   font-size: var(--text-sm);
-  white-space: nowrap;
+  line-height: 1.25;
 }

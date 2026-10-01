@@ -320,6 +320,9 @@ export interface Catalog {
   readonly toolCrop: string;
   readonly toolCropHint: string;
   readonly toolHighlight: string;
+  readonly toolLocked: (d: { readonly name: string | number }) => string;
+  readonly toolLockedHint: (d: { readonly name: string | number }) => string;
+  readonly toolLockedHintTouch: (d: { readonly name: string | number }) => string;
   readonly toolMistake: string;
   readonly toolMistakeHint: string;
   readonly toolNote: string;

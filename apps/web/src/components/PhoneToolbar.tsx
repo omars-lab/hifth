@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useT } from "../i18n";
 import type { Pen } from "../pen";
 import type { PageTool } from "./PageStage";
-import { TOOLS, ToolIcon, toolHint, toolName } from "./PageToolbar";
+import { LockMark, TOOLS, ToolIcon, toolHint, toolName, useToolPress } from "./PageToolbar";
 import styles from "./PhoneToolbar.module.css";
 import { PenPicker } from "./PenPicker";
 
@@ -22,8 +22,13 @@ import { PenPicker } from "./PenPicker";
  */
 export interface PhoneToolbarProps {
   tool: PageTool;
-  /** Asked for a tool. Tapping the one already on asks for "select". */
-  onTool: (tool: PageTool) => void;
+  /** The tool on is locked on, and stays after it is used. */
+  locked: boolean;
+  /**
+   * Asked for a tool. Tapping the one already on asks for "select"; a long
+   * press asks for it locked on.
+   */
+  onTool: (tool: PageTool, lock?: boolean) => void;
 }
 
 export type PhoneBarId = "a" | "b" | "c";
@@ -34,8 +39,9 @@ export function phoneBarFromUrl(search: string): PhoneBarId {
   return asked === "a" || asked === "b" ? asked : "c";
 }
 
-function ToolButtons({ tool, onTool, labelled }: PhoneToolbarProps & { labelled?: boolean }): JSX.Element {
+function ToolButtons({ tool, locked, onTool, labelled }: PhoneToolbarProps & { labelled?: boolean }): JSX.Element {
   const { t } = useT();
+  const press = useToolPress(tool, onTool);
   return (
     <>
       {TOOLS.map(({ tool: x }) => (
@@ -46,9 +52,11 @@ function ToolButtons({ tool, onTool, labelled }: PhoneToolbarProps & { labelled?
           className={styles.tool}
           aria-checked={tool === x}
           aria-label={toolName(t, x)}
-          onClick={() => onTool(tool === x && x !== "select" ? "select" : x)}
+          data-locked={(locked && tool === x) || undefined}
+          {...press(x)}
         >
           <ToolIcon tool={x} />
+          {locked && tool === x && <LockMark />}
           {labelled && (
             <span className={styles.label} aria-hidden="true">
               {toolName(t, x)}
@@ -61,12 +69,12 @@ function ToolButtons({ tool, onTool, labelled }: PhoneToolbarProps & { labelled?
 }
 
 /** A · the slim row under the top bar. One tap switches; it costs a row of the page, always. */
-export function PhoneToolbarA({ tool, onTool }: PhoneToolbarProps): JSX.Element {
+export function PhoneToolbarA({ tool, locked, onTool }: PhoneToolbarProps): JSX.Element {
   const { t } = useT();
   return (
     <div className={styles.strip} role="toolbar" aria-label={t.toolbarLabel} data-phone-bar="a" data-tool={tool}>
       <div className={styles.row} role="radiogroup" aria-label={t.toolbarLabel}>
-        <ToolButtons tool={tool} onTool={onTool} />
+        <ToolButtons tool={tool} locked={locked} onTool={onTool} />
       </div>
     </div>
   );
@@ -76,7 +84,7 @@ export function PhoneToolbarA({ tool, onTool }: PhoneToolbarProps): JSX.Element 
  * B · the pen case. One button, showing the tool that is on; a tap fans the
  * tools out above it, and picking one closes the fan again.
  */
-export function PhoneToolbarB({ tool, onTool }: PhoneToolbarProps): JSX.Element {
+export function PhoneToolbarB({ tool, locked, onTool }: PhoneToolbarProps): JSX.Element {
   const { t } = useT();
   const [open, setOpen] = useState(false);
   const boxRef = useRef<HTMLDivElement>(null);
@@ -104,9 +112,10 @@ export function PhoneToolbarB({ tool, onTool }: PhoneToolbarProps): JSX.Element 
         <div className={styles.fan} role="radiogroup" aria-label={t.toolbarLabel}>
           <ToolButtons
             tool={tool}
+            locked={locked}
             labelled
-            onTool={(x) => {
-              onTool(x);
+            onTool={(x, lock) => {
+              onTool(x, lock);
               setOpen(false);
             }}
           />
@@ -124,6 +133,7 @@ export function PhoneToolbarB({ tool, onTool }: PhoneToolbarProps): JSX.Element 
  */
 export function PhoneToolbarC({
   tool,
+  locked,
   onTool,
   pen,
   onPen,
@@ -145,9 +155,9 @@ export function PhoneToolbarC({
       {open && (
         // In the chrome's own direction, like the desktop bar: the bottom row
         // it covers is pinned right to left for the mus'haf, the tools are not.
-        <div className={styles.tray} role="toolbar" aria-label={t.toolbarLabel} dir={dir}>
+        <div className={styles.tray} role="toolbar" aria-label={t.toolbarLabel} dir={dir} data-keep-clear="">
           <div className={styles.row} role="radiogroup" aria-label={t.toolbarLabel}>
-            <ToolButtons tool={tool} onTool={onTool} />
+            <ToolButtons tool={tool} locked={locked} onTool={onTool} />
           </div>
           {/* The close sits on the line under the tools, not beside them: eight
               tools at thumb size are the whole width of a 390px phone. */}
@@ -155,7 +165,9 @@ export function PhoneToolbarC({
             {/* The highlighter's pens share the line with its hint, where the
                 thumb already is. */}
             {tool === "highlight" && <PenPicker pen={pen} onPen={onPen} />}
-            <span className={styles.trayHint}>{toolHint(t, tool, true)}</span>
+            <span className={styles.trayHint}>
+              {locked ? t.toolLockedHintTouch(toolName(t, tool)) : toolHint(t, tool, true)}
+            </span>
             <button
               type="button"
               className={styles.close}
