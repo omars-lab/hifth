@@ -23,10 +23,15 @@ failed with 5 before the fix and passes after.
 
 ## What else it did
 
-The same leak had a second, quieter effect. The helper sets up its made-up repository with
-`git init`, and with git's directory variable inherited from the hook that `init` ran against the
-**real** repository and marked it bare — as if it had no working files. The main checkout's next
-git command failed with "this operation must be run in a work tree", and the one wrong line was
-`bare = true` in the repository's own settings (found and set back by hand the same evening,
-nothing lost). Stripping git's variables before any git call in a made-up tree closes this too:
-the `init` can no longer reach the real repository.
+The same leak had a second, quieter effect, from a second test. The test that checks the pitch's
+held copy can never be committed sets up its throwaway repository with `git init`. Run from a
+push in a worktree, git's directory variable was inherited, so that `init` re-initialised the
+**real** repository instead and marked it bare, as if it had no working files. The main
+checkout's next git command failed with "this operation must be run in a work tree", and one push
+failed half-way through its checks for the same reason. Nothing was lost; the one wrong line,
+`bare = true` in the repository's own settings, was set back by hand (twice, 2026-09-30).
+
+That test now runs every git command, its own setup included, without git's variables, and a new
+case stands up a second working copy, points the variable at it the way a hook would, and checks
+the real repository is not marked bare. It failed before the fix and passes after. No other test
+builds a throwaway repository; the scripts that run git against the real one are meant to.
