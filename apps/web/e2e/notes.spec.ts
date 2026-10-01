@@ -191,3 +191,25 @@ test.describe("Hifth · the note tool", () => {
     await expect(page.locator("[data-locked]")).toHaveCount(0);
   });
 });
+
+test.describe("Hifth · the page tools in Arabic", () => {
+  test.use({ locale: "ar" });
+
+  test("at the narrowest computer window the Arabic hint fits beside the tools too", async ({ page }) => {
+    await page.setViewportSize({ width: 1024, height: 800 });
+    await page.goto("/#/hafs-kfqc/p7");
+    await expect(pageSvg(page, 7)).toBeVisible();
+    const tools = page.getByRole("toolbar").first().getByRole("radio");
+    // In the bar's order: Read first, the highlighter third.
+    for (const [at, name] of [[0, "read"], [2, "highlight"]] as const) {
+      await tools.nth(at).dblclick();
+      await expect(tools.nth(at)).toHaveAttribute("data-locked", "true");
+      const box = (await page.getByRole("toolbar").first().boundingBox())!;
+      expect(box.x, name).toBeGreaterThanOrEqual(0);
+      expect(box.x + box.width, name).toBeLessThanOrEqual(1024);
+      expect(box.height, name).toBeLessThanOrEqual(56);
+      expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(1024);
+      await page.screenshot({ path: test.info().outputPath(`bar-ar-${name}.png`), clip: { x: 0, y: box.y - 4, width: 1024, height: box.height + 8 } });
+    }
+  });
+});
