@@ -10,6 +10,9 @@ import {
   mergeScopedNotes,
   migrateV1Notes,
   outsideScope,
+  pinsOf,
+  fromPins,
+  mergeNotesFile,
   removeVerse,
   scopeContains,
   scopeSize,
@@ -265,5 +268,145 @@ describe("the saved file, version 2", () => {
     expect(parseBookmarkFile(JSON.stringify(file))).toBeNull();
     const twice = { ...toBookmarkFile([], T, [], scoped), scopedNotes: [{ ...scoped[0], verses: [{ key: k(2, 40), addedAt: T }, { key: k(2, 40), addedAt: T }] }] };
     expect(parseBookmarkFile(JSON.stringify(twice))).toBeNull();
+  });
+});
+
+describe("pins on the page while the app still draws one pin per note", () => {
+  const spot = (x: number) => ({ page: 7, word: 1, x, y: 10, onHarakah: false });
+  const oneVerse = (id: string, v: number, text: string, at = 5): ScopedNote => ({
+    id,
+    kind: "comment",
+    scope: { type: "page", edition: "hafs-kfqc", page: 7 },
+    text,
+    verses: [{ key: k(2, v), addedAt: at, spot: spot(v) }],
+    createdAt: at,
+    updatedAt: at,
+    usedAt: at,
+  });
+
+  it("a note of one pinned verse is one pin with the note's id, words and times", () => {
+    const pinned = pinsOf([oneVerse("a", 40, "hello", 7)]);
+    expect(pinned).toEqual([
+      {
+        id: "a",
+        key: k(2, 40),
+        page: 7,
+        word: 1,
+        x: 40,
+        y: 10,
+        onHarakah: false,
+        kind: "comment",
+        text: "hello",
+        createdAt: 7,
+        updatedAt: 7,
+      },
+    ]);
+  });
+
+  it("a note of several pinned verses is one pin per verse, the later ones named by their verse; a verse with no pin draws none", () => {
+    const many: ScopedNote = {
+      ...oneVerse("m", 40, "both"),
+      verses: [
+        { key: k(2, 40), addedAt: 1, spot: spot(40) },
+        { key: k(2, 41), addedAt: 2 },
+        { key: k(2, 42), addedAt: 3, spot: spot(42) },
+      ],
+    };
+    expect(pinsOf([many]).map((p) => [p.id, p.key, p.text])).toEqual([
+      ["m", k(2, 40), "both"],
+      ["m~2:42", k(2, 42), "both"],
+    ]);
+  });
+
+  it("an unchanged set of pins changes nothing", () => {
+    const set = [oneVerse("a", 40, "x"), oneVerse("b", 41, "y")];
+    expect(fromPins(set, pinsOf(set), 99)).toEqual(set);
+  });
+
+  it("a new pin becomes a page note of its one verse", () => {
+    const set = [oneVerse("a", 40, "x")];
+    const pin = { ...pinsOf([oneVerse("fresh", 45, "new", 50)])[0]! };
+    const next = fromPins(set, [...pinsOf(set), pin], 99);
+    expect(next).toHaveLength(2);
+    expect(next[1]).toEqual({ ...oneVerse("fresh", 45, "new", 50), usedAt: 50 });
+  });
+
+  it("a pin whose words changed changes the note's words and times", () => {
+    const set = [oneVerse("a", 40, "x")];
+    const edited = pinsOf(set).map((p) => ({ ...p, text: "changed", updatedAt: 60 }));
+    const next = fromPins(set, edited, 99);
+    expect(next[0]).toMatchObject({ text: "changed", updatedAt: 60, usedAt: 60 });
+  });
+
+  it("removing the only pin of a note removes the note, as deleting a pin always has", () => {
+    const set = [oneVerse("a", 40, "x"), oneVerse("b", 41, "y")];
+    expect(fromPins(set, pinsOf(set).filter((p) => p.id !== "a"), 99).map((n) => n.id)).toEqual(["b"]);
+  });
+
+  it("removing one pin of several takes that verse out and keeps the note", () => {
+    const many: ScopedNote = {
+      ...oneVerse("m", 40, "both"),
+      verses: [
+        { key: k(2, 40), addedAt: 1, spot: spot(40) },
+        { key: k(2, 42), addedAt: 3, spot: spot(42) },
+      ],
+    };
+    const next = fromPins([many], pinsOf([many]).filter((p) => p.id !== "m~2:42"), 99);
+    expect(next[0]!.verses.map((v) => v.key)).toEqual([k(2, 40)]);
+    expect(next[0]!.usedAt).toBe(99);
+  });
+
+  it("a note with no pinned verse, which only a loaded file can bring, is left alone", () => {
+    const bare: ScopedNote = { ...oneVerse("bare", 40, "words only"), verses: [] };
+    expect(fromPins([bare], [], 99)).toEqual([bare]);
+  });
+
+  it("a deleted note put back by Undo comes back with its id", () => {
+    const set = [oneVerse("a", 40, "x")];
+    const gone = fromPins(set, [], 99);
+    expect(gone).toEqual([]);
+    expect(fromPins(gone, pinsOf(set), 100).map((n) => n.id)).toEqual(["a"]);
+  });
+});
+
+describe("loading a saved file into what the device holds", () => {
+  const old = (id: string, kind: Note["kind"], updatedAt: number): Note => ({
+    id,
+    key: k(2, 40),
+    page: 7,
+    word: 1,
+    x: 1,
+    y: 2,
+    onHarakah: false,
+    kind,
+    text: id,
+    createdAt: 1,
+    updatedAt,
+  });
+
+  it("an old file's notes move across, its mistakes stay mistakes, and the count says what is new", () => {
+    const r = mergeNotesFile([], [], [old("c", "comment", 5), old("m", "correction", 5)], []);
+    expect(r.scoped.map((n) => n.id)).toEqual(["c"]);
+    expect(r.mistakes.map((n) => n.id)).toEqual(["m"]);
+    expect(r.added).toBe(2);
+  });
+
+  it("a new file's notes merge by id, the copy changed last winning", () => {
+    const mine = note("a", { type: "whole" }, 10);
+    const theirs = { ...note("a", { type: "whole" }, 20), text: "theirs" };
+    const r = mergeNotesFile([mine], [], [], [theirs, note("b", { type: "whole" }, 1)]);
+    expect(r.scoped.map((n) => [n.id, n.text])).toEqual([
+      ["a", "theirs"],
+      ["b", "b"],
+    ]);
+    expect(r.added).toBe(1);
+  });
+
+  it("an old note already moved and changed since on the device is not taken back", () => {
+    const moved = migrateV1Notes([old("c", "comment", 5)], []);
+    const edited = [{ ...moved[0]!, text: "newer", updatedAt: 50, usedAt: 50 }];
+    const r = mergeNotesFile(edited, [], [old("c", "comment", 5)], []);
+    expect(r.scoped[0]!.text).toBe("newer");
+    expect(r.added).toBe(0);
   });
 });
