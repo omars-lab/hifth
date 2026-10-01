@@ -48,3 +48,4 @@
 - [review-md vault and hook](review-md-vault-and-hook.md) — docs/ is an Obsidian vault with BRAT+review-md; review-md plugin installed; SessionStart hook / `make reviews` prints threads waiting on claude
 - [Obsidian callouts and folds worked](obsidian-callouts-and-folds-worked.md) — owner liked tip-callout recommendation + folded picture callouts in waiting-on-you.md; skill /note-manager:write-obsidian-note (oeid marketplace)
 - [review-md vault by ID](review-md-vault-by-id.md) — reply with `--vault hifth0docs0vault01`; "docs" also names the 3d-models vault, so replies miss
+- [Options as Obsidian notes](options-as-obsidian-notes.md) — owner wants options as Markdown notes in the docs vault, not HTML; one line per paragraph; merge + ff main checkout so the vault sees it; timing differences get a looping GIF per option (record-demo scripts)
