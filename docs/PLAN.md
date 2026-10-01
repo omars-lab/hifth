@@ -1255,7 +1255,9 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     seven build steps; its first three questions are answered. **Done 2026-10-01:** step 1,
     the rules and their tests, and step 2: today's notes move across on the device the first
     time the app opens, the old record is kept as a backup, the saved file carries the new
-    notes, and the pins look as before. **What is open:** the note tool offering existing notes (waits on
+    notes, and the pins look as before. **What is open:** the owner's pick on
+    [how adding a verse should feel](design/scoped-notes-feel.md) (questions 4 and 6, recorded
+    on a phone 2026-10-01); then the note tool offering existing notes (waits on
     how that should feel, the design's question 4), the list of notes and stepping through
     one (question 6), and the long-press ways in, which land with 25 and 27.
 
