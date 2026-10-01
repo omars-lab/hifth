@@ -55,6 +55,16 @@ import {
  * source chooser (deferred in the `tafsir-provider` decision) is built. */
 export const LIVE_TAFSIR_ID = "quran-foundation";
 
+/** Injected by Vite as a literal — see `define` in `vite.config.ts`. */
+declare const __LIVE_TAFSIR__: boolean;
+
+/**
+ * True only in a build configured for the live service. A literal, so a build
+ * without it drops the commentary drawer instead of shipping it unused; the
+ * build's env is read through `import.meta.env`, which the bundler cannot fold.
+ */
+export const LIVE_TAFSIR: boolean = typeof __LIVE_TAFSIR__ === "boolean" && __LIVE_TAFSIR__;
+
 const SURAH_MIN = 1;
 const SURAH_MAX = 114;
 

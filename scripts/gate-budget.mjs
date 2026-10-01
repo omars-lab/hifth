@@ -47,7 +47,8 @@ import { readdirSync, readFileSync, writeFileSync, statSync, existsSync } from "
 import { join } from "node:path";
 import { gzipSync } from "node:zlib";
 
-const ROOT = new URL("..", import.meta.url).pathname;
+// HIFTH_GATE_ROOT points the check at a made-up build in its own tests.
+const ROOT = process.env.HIFTH_GATE_ROOT ?? new URL("..", import.meta.url).pathname;
 const DIST = join(ROOT, "apps", "web", "dist");
 const BASELINE = join(ROOT, "scripts", "budget-baseline.json");
 const BUDGET_GZ = 175 * 1024;
@@ -94,20 +95,28 @@ for (const f of jsFiles) {
 }
 rows.sort((a, b) => b[1] - a[1]);
 
-// The private pitch code must not ride along in a public build. It did once:
-// read through `import.meta.env`, the pitch switch was not a constant the
-// bundler could fold, and the whole commentary sheet shipped unused, pushing
-// the app over this budget. These strings exist only in `src/pitch/`.
-const PITCH_ONLY = ["Surah introduction", "private/study-quran"];
+// The commentary drawer must not ride along in a build with nothing to show in
+// it. It did once: read through `import.meta.env`, the pitch switch was not a
+// constant the bundler could fold, and the whole commentary sheet shipped
+// unused, pushing the app over this budget. The drawer is drawn only when a
+// build has a commentary source (the pitch, or a live service it was built
+// for); the pitch's held book only in the pitch.
+const PITCH = Boolean(process.env.VITE_PITCH);
+const LIVE = Boolean(process.env.VITE_TAFSIR_QF_BASE && process.env.VITE_TAFSIR_QF_ID);
+const MUST_BE_ABSENT = [
+  ...(PITCH || LIVE ? [] : ["Surah introduction"]),
+  ...(PITCH ? [] : ["private/study-quran"]),
+];
 const leaked = jsFiles.flatMap((f) => {
   const src = readFileSync(f, "utf8");
-  return PITCH_ONLY.filter((s) => src.includes(s)).map((s) => `${f.replace(DIST + "/", "")}: "${s}"`);
+  return MUST_BE_ABSENT.filter((s) => src.includes(s)).map((s) => `${f.replace(DIST + "/", "")}: "${s}"`);
 });
-if (leaked.length && !process.env.VITE_PITCH) {
+if (leaked.length) {
   console.error(
-    "gate:budget — FAIL: pitch-only code is in the public build.\n" +
+    "gate:budget — FAIL: commentary code is in a build with no commentary source.\n" +
       leaked.map((l) => `  ${l}`).join("\n") +
-      "\n  Check that PITCH in src/pitch/pitch.ts still reads the __PITCH__ literal.",
+      "\n  Check that PITCH (src/pitch/pitch.ts) and LIVE_TAFSIR (src/tafsir/quran-foundation.ts)" +
+      "\n  still read their build-time literals.",
   );
   process.exit(1);
 }
