@@ -2081,7 +2081,7 @@
       "status": "open",
       "severity": "risk",
       "owner": "agent",
-      "note": "Sibling of ①, one layer out: the ~33 repository checks in the top-level scripts/ folder (gate-*.mjs, run by make pre-commit and the pre-push hook) have no unit tests, while packages/etl/scripts keeps a .test.mjs beside its tools. A check edited so it stops refusing anything would pass every change green. Found 2026-09-29 during the branch consolidation (PR #152): two rules were dropped from gate-artifacts and the only proof the rest still worked was the gate registry check plus one real run. Fix shape: one must-refuse and one must-pass fixture per check, run under pnpm test; start with the public-safety checks (published pages, Arabic codepoints, held text). Write-up: docs/issues/consolidation-2026-09-29.md. 2026-09-30: the four checks that guard what goes public now each have a test beside them that feeds the check a made-up tree it must refuse and one it must pass, run as a separate process the way the hooks run it (scripts/gate-fixture.mjs; gate-scripture, gate-notext, gate-bundle-notext, gate-revision-privacy .test.mjs, under pnpm test). A check takes the made-up tree from HIFTH_GATE_ROOT. The other 29 checks still have none; the same shape applies to each."
+      "note": "Sibling of ①, one layer out: the ~33 repository checks in the top-level scripts/ folder (gate-*.mjs, run by make pre-commit and the pre-push hook) have no unit tests, while packages/etl/scripts keeps a .test.mjs beside its tools. A check edited so it stops refusing anything would pass every change green. Found 2026-09-29 during the branch consolidation (PR #152): two rules were dropped from gate-artifacts and the only proof the rest still worked was the gate registry check plus one real run. Fix shape: one must-refuse and one must-pass fixture per check, run under pnpm test; start with the public-safety checks (published pages, Arabic codepoints, held text). Write-up: docs/issues/consolidation-2026-09-29.md. 2026-09-30: the four checks that guard what goes public now each have a test beside them that feeds the check a made-up tree it must refuse and one it must pass, run as a separate process the way the hooks run it (scripts/gate-fixture.mjs; gate-scripture, gate-notext, gate-bundle-notext, gate-revision-privacy .test.mjs, under pnpm test). A check takes the made-up tree from HIFTH_GATE_ROOT. The size check (gate-budget) joined them the same day, when its commentary rule changed. The other 28 checks still have none; the same shape applies to each."
     },
     {
       "id": "storage-not-kept",
@@ -2089,10 +2089,13 @@
         "file": "docs/performance.md",
         "item": "⑰"
       },
-      "status": "open",
+      "status": "blocked",
       "severity": "risk",
-      "owner": "agent",
-      "note": "Owner, 2026-09-25: the 'offline storage is not guaranteed' banner was a warning with no action for the reader, so it came out of the app and the underlying risk came here. The pages a browser will not promise to keep may be cleared under storage pressure; the fix is ours (ask for the promise at a moment the browser rewards, measure refusals, check the kept-juz recovery path on a phone). 2026-09-27: the app now asks again at the two moments the browser rewards most, when a juz is kept and when the app is installed, each with a test; still open for counting refusals and the phone check of the recovery path. 2026-09-30: counting refusals across readers is not possible here — the app sends nothing home, on purpose — so that line is dropped rather than left looking pending. What remains is the phone check of the kept-juz recovery path, now item 9 on the by-hand checklist."
+      "owner": "user",
+      "note": "Owner, 2026-09-25: the 'offline storage is not guaranteed' banner was a warning with no action for the reader, so it came out of the app and the underlying risk came here. The pages a browser will not promise to keep may be cleared under storage pressure; the fix is ours (ask for the promise at a moment the browser rewards, measure refusals, check the kept-juz recovery path on a phone). 2026-09-27: the app now asks again at the two moments the browser rewards most, when a juz is kept and when the app is installed, each with a test; still open for counting refusals and the phone check of the recovery path. 2026-09-30: counting refusals across readers is not possible here — the app sends nothing home, on purpose — so that line is dropped rather than left looking pending. What remains is the phone check of the kept-juz recovery path, now item 9 on the by-hand checklist. 2026-09-30: the code side is done; only the phone check is left, so it waits on a person.",
+      "blockedBy": [
+        "a phone (by-hand checklist item 9)"
+      ]
     },
     {
       "id": "plan-qul-dev-toggle",
