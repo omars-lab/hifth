@@ -2494,7 +2494,7 @@
       "status": "open",
       "severity": "question",
       "owner": "agent",
-      "note": "Notes that gather verses from a surah, juz, hizb, page or the whole Qur'an, offered last-used first when a verse is added. Steps 1 (the rules) and 2 (notes moved across on the device, and in the saved file) done 2026-10-01; step 3 waits on how offering a note should feel. Owner ask 2026-09-30."
+      "note": "Notes that gather verses from a surah, juz, hizb, page or the whole Qur'an, offered last-used first when a verse is added. Steps 1 (the rules) and 2 (notes moved across on the device, and in the saved file) done 2026-10-01; step 3 waits on how offering a note should feel, and step 4 on how the page shows a verse in a note: both recorded as options on a phone in docs/design/scoped-notes-feel.md (2026-10-01), waiting on the owner. Owner ask 2026-09-30."
     }
   ]
 }
