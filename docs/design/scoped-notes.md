@@ -5,9 +5,8 @@
 > can have many ayahs added to it. Based on scope, we can suggest a note to add an ayah to,
 > especially recent notes in the same scope."*
 
-**Status:** a design, not yet built. Nothing here changes the app until the owner answers the
-seven questions near the end; each has a recommended answer, so the build can start on those
-and be corrected by trying it.
+**Status:** a design, not yet built. Three of the seven questions near the end were answered by
+the owner on 2026-09-30; the two about feel will be built as live options and tried.
 
 ## The short version
 
@@ -429,6 +428,11 @@ than one note (question 6). Tapping either lists that verse's notes.
 | 5 | Does each verse in a note get its own line of text? | Not in the first build |
 | 6 | How does the page show that a verse is in a note? | A small marker by the verse number, with a count |
 | 7 | Which scope is ready-picked when making a new note? | The kind you picked last time; the surah the first time |
+
+**Answered by the owner, 2026-09-30:** 1 (the page it is pinned on), 2 (the four plus the
+whole Qur'an) and 5 (one text per note, for now), each as recommended; the reasons are in
+[the decision record](../decisions/scoped-notes.md). 3 and 7 are being built as recommended,
+since they are easy to change.
 
 Questions 4 and 6 are about how something feels in the hand. Under the project's own rule they
 should be built as interchangeable live options and tried before being settled; the
