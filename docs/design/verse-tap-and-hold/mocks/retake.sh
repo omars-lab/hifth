@@ -21,3 +21,8 @@ shot b-full '#/hafs-kfqc/p7' "settle=1000; eval=window.MOCK_WAY_BACK=1; evalfile
 shot menu-fuller '#/hafs-kfqc/2:48' "settle=1000; evalfile=$HERE/fuller-menu.js; settle=300" && menu menu-fuller
 shot c-tap '#/hafs-kfqc/2:48' "settle=1300" && menu c-tap
 shot c-hold '#/hafs-kfqc/2:48' "settle=1000; evalfile=$HERE/separate-menu.js; settle=300" && menu c-hold
+
+# The three menus side by side, large enough to read across the note's width.
+magick montage -label "A hold, B tap" "$PICS/menu-fuller.png" -label "C tap (today)" "$PICS/c-tap.png" -label "C hold" "$PICS/c-hold.png" \
+  -tile 3x1 -geometry +12+0 -pointsize 28 -background "#faf7f0" "$PICS/menus.png"
+magick "$PICS/menus.png" -resize 1500x -depth 8 "$PICS/menus.png"
