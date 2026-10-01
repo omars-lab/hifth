@@ -16,6 +16,7 @@
 
 import { parseAyahKey } from "./keys.js";
 import { isNote, type Note } from "./notes.js";
+import { isScopedNote, type ScopedNote } from "./scoped-notes.js";
 
 /** One thing that happened to a bookmark. Its timeline is a list of these. */
 export interface BookmarkEvent {
@@ -37,7 +38,11 @@ export interface Bookmark {
 /** The file a reader saves and loads. Versioned so a later shape can read it. */
 export interface BookmarkFile {
   readonly kind: "hifth.bookmarks";
-  readonly version: 1;
+  /**
+   * 1 until the reader has notes that gather verses; 2 once the file carries
+   * them, so an older app refuses it out loud instead of quietly losing them.
+   */
+  readonly version: 1 | 2;
   readonly savedAt: number;
   readonly bookmarks: readonly Bookmark[];
   /**
@@ -45,6 +50,8 @@ export interface BookmarkFile {
    * the reader's whole state). Absent in files saved before notes existed.
    */
   readonly notes?: readonly Note[];
+  /** Notes that gather verses (docs/design/scoped-notes.md). Only in a version 2 file. */
+  readonly scopedNotes?: readonly ScopedNote[];
 }
 
 /** Longest name a ribbon carries; longer names are cut, not refused. */
@@ -195,9 +202,11 @@ export function toBookmarkFile(
   set: readonly Bookmark[],
   now: number,
   notes?: readonly Note[],
+  scopedNotes?: readonly ScopedNote[],
 ): BookmarkFile {
   const file: BookmarkFile = { kind: "hifth.bookmarks", version: 1, savedAt: now, bookmarks: set };
-  return notes && notes.length > 0 ? { ...file, notes } : file;
+  const withNotes = notes && notes.length > 0 ? { ...file, notes } : file;
+  return scopedNotes ? { ...withNotes, version: 2, scopedNotes } : withNotes;
 }
 
 function isEvent(x: unknown): x is BookmarkEvent {
@@ -240,16 +249,19 @@ export function parseBookmarkFile(text: string): BookmarkFile | null {
   }
   if (!raw || typeof raw !== "object") return null;
   const f = raw as Record<string, unknown>;
-  if (f.kind !== "hifth.bookmarks" || f.version !== 1 || !Array.isArray(f.bookmarks)) return null;
+  if (f.kind !== "hifth.bookmarks" || (f.version !== 1 && f.version !== 2) || !Array.isArray(f.bookmarks)) return null;
   if (!f.bookmarks.every(isBookmark)) return null;
   if (f.notes !== undefined && !(Array.isArray(f.notes) && f.notes.every(isNote))) return null;
+  if (f.scopedNotes !== undefined && !(f.version === 2 && Array.isArray(f.scopedNotes) && f.scopedNotes.every(isScopedNote)))
+    return null;
   const file: BookmarkFile = {
     kind: "hifth.bookmarks",
-    version: 1,
+    version: f.version,
     savedAt: typeof f.savedAt === "number" ? f.savedAt : 0,
     bookmarks: f.bookmarks.map((b) => ({ ...b, name: cleanName(b.name) })),
   };
-  return Array.isArray(f.notes) ? { ...file, notes: f.notes as Note[] } : file;
+  const withNotes = Array.isArray(f.notes) ? { ...file, notes: f.notes as Note[] } : file;
+  return Array.isArray(f.scopedNotes) ? { ...withNotes, scopedNotes: f.scopedNotes as ScopedNote[] } : withNotes;
 }
 
 /**
