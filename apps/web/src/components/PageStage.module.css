@@ -289,6 +289,46 @@
   isolation: isolate;
 }
 
+/* The running heads: the surah's name top-left, the juz top-right, the page
+   number at the foot — printed on the paper in a band above and below the text,
+   the way a mus'haf prints them, so they turn and magnify with the page (owner,
+   2026-09-30). Sized in the leaf's own width (`cqw`, the host is the container),
+   so a band is the same share of the page on a phone and on a desk.
+
+   Physical left and right whatever the chrome's language: the corners are part
+   of the page, not of the interface around it.
+
+   The band moves the text down the leaf, and everything that places a verse on
+   the screen reads where the text actually is — `textBoxOf` in PageStage. */
+.host {
+  container-type: inline-size;
+}
+.runningHead,
+.folio {
+  display: flex;
+  align-items: center;
+  direction: ltr;
+  /* 6.5% each, above and below: PageSpread.module.css sizes a leaf by it. */
+  block-size: 6.5cqw;
+  /* Wide enough to clear the folded corner a page turn is grabbed by. */
+  padding-inline: 8cqw;
+  font-size: max(10px, 3.4cqw);
+  line-height: 1;
+  color: var(--leaf-edge);
+  white-space: nowrap;
+  /* Not yet a target: a tap in the band still reaches the leaf, which is what
+     the bookmark tool listens for. The press that opens each label's own menu
+     is the next item (PLAN #27). */
+  pointer-events: none;
+  user-select: none;
+}
+.runningHead {
+  justify-content: space-between;
+}
+.folio {
+  justify-content: center;
+}
+
 /*
  * The fold — one element, no children, and it is not either of the pages.
  *

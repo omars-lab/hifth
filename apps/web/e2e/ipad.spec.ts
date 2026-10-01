@@ -13,7 +13,7 @@ import { test, expect, type Page } from "@playwright/test";
  * Two facts these tests pin, both of which the shell depends on:
  *
  *   • Portrait is one page and landscape is the open mus'haf. The desktop
- *     breakpoint is 1024×740 (docs/design/desktop.md); an iPad Pro 11 is
+ *     breakpoint is 1024×775 (docs/design/desktop.md); an iPad Pro 11 is
  *     834×1194 upright and 1194×834 on its side, so one and the same route
  *     draws one leaf or two depending only on how the iPad is held.
  *   • Turning the iPad keeps the reader's place. The shell does nothing on
