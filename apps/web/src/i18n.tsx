@@ -655,6 +655,9 @@ export interface Strings {
   toolBookmark: string;
   /** The tool that is on, named: printed on the bar and announced. */
   toolOn(name: string): string;
+  toolLocked(name: string): string;
+  toolLockedHint(name: string): string;
+  toolLockedHintTouch(name: string): string;
   toolBookmarkHint: string;
   toolNote: string;
   toolNoteHint: string;
@@ -1180,6 +1183,9 @@ export function buildStrings(lang: Lang, m: Catalog): Strings {
     penPink: m.penPink,
     toolBookmark: m.toolBookmark,
     toolOn: (name) => m.toolOn({ name }),
+    toolLocked: (name) => m.toolLocked({ name }),
+    toolLockedHint: (name) => m.toolLockedHint({ name }),
+    toolLockedHintTouch: (name) => m.toolLockedHintTouch({ name }),
     toolBookmarkHint: m.toolBookmarkHint,
     toolNote: m.toolNote,
     toolNoteHint: m.toolNoteHint,

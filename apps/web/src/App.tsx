@@ -1125,23 +1125,35 @@ export function App(): JSX.Element {
   // and the click that follows the same tap must already see it down.
   const [tool, setToolState] = useState<PageTool>("select");
   const toolRef = useRef<PageTool>("select");
+  // A tool locked on (a double-click, or a long press on a phone) is not put
+  // down after one use, so a run of notes costs one tap each. Picking any tool,
+  // Escape, or a click on the locked one puts it down.
+  const [locked, setLocked] = useState(false);
+  const lockedRef = useRef(false);
   const chooseTool = useCallback(
-    (next: PageTool) => {
-      if (toolRef.current === next) return;
+    (next: PageTool, lock = false) => {
+      const keep = lock && next !== "select";
+      if (toolRef.current === next && lockedRef.current === keep) return;
       toolRef.current = next;
+      lockedRef.current = keep;
       setToolState(next);
-      announce(t.toolOn(toolName(t, next)));
+      setLocked(keep);
+      announce(keep ? t.toolLocked(toolName(t, next)) : t.toolOn(toolName(t, next)));
     },
     [announce, t],
   );
+  /** After a tool used once: back to Select, unless the reader locked it on. */
+  const putDownAfterUse = useCallback(() => {
+    if (!lockedRef.current) chooseTool("select");
+  }, [chooseTool]);
   // The bookmark tool is used once and put down: nobody drops five bookmarks in
   // a row (the plan's table, "after one use").
   const dropWithTool = useCallback(
     (p: number, key?: string) => {
-      chooseTool("select");
+      putDownAfterUse();
       dropOn(p, key);
     },
-    [chooseTool, dropOn],
+    [putDownAfterUse, dropOn],
   );
 
   const openFromShelf = useCallback(
@@ -1229,10 +1241,10 @@ export function App(): JSX.Element {
     (at: { page: number; key: string; word: number | null; x: number; y: number }) => {
       const next = addNote(notes, at, Date.now());
       commitNotes(next, "");
-      chooseTool("select");
+      putDownAfterUse();
       setNoteOpenId(next[next.length - 1]!.id);
     },
-    [notes, commitNotes, chooseTool],
+    [notes, commitNotes, putDownAfterUse],
   );
   // The harakat tool's click: pin a note on the sign the magnifier rings, and
   // open the box. The tool stays up, so the next sign is one more click.
@@ -1276,8 +1288,8 @@ export function App(): JSX.Element {
     const n = openNote;
     setNoteOpenId(null);
     // The harakat and word tools stay up for the next sign; the note tool is
-    // used once.
-    if (toolRef.current !== "sign" && toolRef.current !== "word") chooseTool("select");
+    // used once, unless it is locked on.
+    if (toolRef.current !== "sign" && toolRef.current !== "word") putDownAfterUse();
     if (!n) return;
     if (text.trim() === "") {
       commitNotes(removeNote(notes, n.id), "");
@@ -1976,7 +1988,8 @@ export function App(): JSX.Element {
       const next = TOOL_KEYS[e.code];
       if (!next) return;
       e.preventDefault();
-      chooseTool(next);
+      // The letter of a locked tool leaves it locked.
+      chooseTool(next, next === toolRef.current && lockedRef.current);
     };
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
@@ -2179,8 +2192,8 @@ export function App(): JSX.Element {
           argue with the page. */}
       {/* Its own row above the book, not floated over it: floated, it sat on
           the page's first line. */}
-      {resolver && desktop && <PageToolbar tool={tool} onTool={chooseTool} pen={pen} onPen={choosePen} />}
-      {resolver && !desktop && phoneBar === "a" && <PhoneToolbarA tool={tool} onTool={chooseTool} />}
+      {resolver && desktop && <PageToolbar tool={tool} locked={locked} onTool={chooseTool} pen={pen} onPen={choosePen} />}
+      {resolver && !desktop && phoneBar === "a" && <PhoneToolbarA tool={tool} locked={locked} onTool={chooseTool} />}
       <main
         className={styles.main}
         dir="rtl"
@@ -2546,9 +2559,9 @@ export function App(): JSX.Element {
       {/* Pinned RTL with the stage, and for the same reason: the trail reads
           oldest-to-newest in the mus'haf's own direction, and its beads sit
           under the rail they came from. */}
-      <footer className={styles.trail} aria-label={t.trail} dir="rtl">
-        {resolver && !desktop && phoneBar === "b" && <PhoneToolbarB tool={tool} onTool={chooseTool} />}
-        {resolver && !desktop && phoneBar === "c" && <PhoneToolbarC tool={tool} onTool={chooseTool} pen={pen} onPen={choosePen} />}
+      <footer className={styles.trail} aria-label={t.trail} dir="rtl" data-keep-clear="">
+        {resolver && !desktop && phoneBar === "b" && <PhoneToolbarB tool={tool} locked={locked} onTool={chooseTool} />}
+        {resolver && !desktop && phoneBar === "c" && <PhoneToolbarC tool={tool} locked={locked} onTool={chooseTool} pen={pen} onPen={choosePen} />}
         <TrailBeads
           trail={trail}
           currentKey={selectedKey}
