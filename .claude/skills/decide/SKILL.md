@@ -114,6 +114,16 @@ option to work, that option is not on this page; it is on a bigger one.
 be used — see the checklist below. Each with what it takes, what it gets, what it costs.
 Doing nothing is always on the list and is often right.
 
+*Drawn* means a **screenshot of the real app**, never ASCII art. Where an option adds
+something the app does not have yet, add it to the live page with a short HTML and CSS script
+kept beside the page (`make drive … ACT="evalfile=<script>"`), photograph it, and lay the
+options **side by side in a table**: one column per option, one row per thing a reader does
+(tap, hold, get back), a picture in each cell with a line under it. A box drawn in characters
+shows what you already imagined; a screenshot shows what the app actually does with it, and
+that is where the surprise is (the tap-and-hold note found the top bar had no room for a
+button only once the button was put in it). Owner, 2026-09-30: "Why don't we have tables
+with html and screenshots? instead of ascii art?"
+
 **8 · What else could we consider, and why is it not here?** The options you thought about
 and left off, with the reason. This is where a reader adds the one you missed. A page whose
 option list arrives with no visible edge invites the reader to trust that the edge was
@@ -158,6 +168,9 @@ answerable by the person it is for.
 **Evidence**
 
 - [ ] Each option is **drawn**, at the size it would really be used. Not described.
+- [ ] Each option's picture is a **screenshot of the real app**, with anything new mocked into
+      the live page by a kept script, and the options sit side by side in a table. No ASCII
+      art, no boxes drawn in characters.
 - [ ] An option whose difference is **felt, or seen in motion** — a snap when a control is
       released, a line that tilts as it corrects, a wash that only reads under a moving thumb —
       is **built live** as an interchangeable component (`OptionA` … `OptionN` behind one
