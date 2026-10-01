@@ -68,6 +68,10 @@ Each picture is the real app on a phone, with the option's new parts added to th
 | **Full screen** | A tap, as above. No button needed. | ![B: a full-screen button in the bottom line\|190](verse-tap-and-hold/b-button.png)<br>A button. The top bar is already full on a phone, so it goes in the bottom line. | The same button as B. |
 | **Getting the bars back** | Another tap. | ![B, full screen: a small button left to bring the bars back\|190](verse-tap-and-hold/b-full.png)<br>A small button has to stay on the page. | The same as B. |
 
+**The three menus, large enough to read:**
+
+![The three menus side by side: the fuller menu (A's hold, B's tap), today's menu (C's tap), and C's second menu beside the verse](verse-tap-and-hold/menus.png)
+
 ### A — Hold opens the verse menu; a tap hides or shows the bars *(recommended)*
 
 The verse menu you have today stays the one and only menu. It gains **Play to** (play from here to a verse you pick), **Mark**, **Note** and **Copy**. Holding and *dragging* still paints a run of verses, as it does now; the menu opens only if you let go without moving.
