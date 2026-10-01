@@ -291,7 +291,7 @@ declined geometries, or a neutral swipe fallback) or always clone — so a verse
 you pressed" look does not depend on whether `swipesFromPath` recognised its shape.
 
 **Reusing the sheet contract.** The drawer should reuse `CommentarySheet`'s dialog contract
-(`apps/web/src/pitch/CommentarySheet.tsx`): focus in on open, `Tab` trapped, `Escape` closes,
+(`apps/web/src/components/CommentarySheet.tsx`): focus in on open, `Tab` trapped, `Escape` closes,
 focus restored, scrim, grip; `data-side` for placement. The existing `side` prop values are
 `"left" | "right" | null` (null → phone/bottom).
 

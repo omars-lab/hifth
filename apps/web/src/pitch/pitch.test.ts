@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { commentaryFor, type PitchSurah } from "./pitch";
+import { introFor, makePitchProvider, pitchEntries, STUDY_QURAN, type PitchSurah } from "./pitch";
 
 // A made-up surah: the shape of the private file, none of its words.
 const surah: PitchSurah = {
@@ -8,27 +8,47 @@ const surah: PitchSurah = {
   intro: ["first paragraph", "second paragraph"],
   verses: {
     "2:1": { ref: "2:1", key: "quran/hafs-kfqc/2:1", translation: "t1", commentary: ["c1"] },
-    "2:255": { ref: "2:255", key: "quran/hafs-kfqc/2:255", translation: "t2", commentary: ["c2"] },
+    "2:255": { ref: "2:255", key: "quran/hafs-kfqc/2:255", translation: "t2", commentary: ["c2", "c3"] },
   },
   shard: {},
 };
 
-describe("pitch · commentaryFor", () => {
+describe("pitch · the book's notes as one more commentary source", () => {
+  it("each verse becomes one entry under the book's own name", () => {
+    const entries = pitchEntries(surah);
+    expect(entries.map((e) => e.key).sort()).toEqual(["tafsir/study-quran/2:1", "tafsir/study-quran/2:255"]);
+    const e = entries.find((x) => x.key.endsWith("2:255"))!;
+    expect(e.translation).toBe("t2");
+    expect(e.commentary?.map((b) => b.text)).toEqual(["c2", "c3"]);
+  });
+
+  it("the source answers for every surah and hands back that surah's entries", async () => {
+    const provider = makePitchProvider(async (n) => (n === 2 ? surah : null));
+    expect(provider.source).toBe(STUDY_QURAN);
+    expect(provider.has(1) && provider.has(114)).toBe(true);
+    expect(provider.has(0) || provider.has(115)).toBe(false);
+    expect(await provider.load(2)).toHaveLength(2);
+  });
+
+  it("a surah with no file is a quiet empty answer, never an error", async () => {
+    const provider = makePitchProvider(async () => null);
+    expect(await provider.load(3)).toEqual([]);
+  });
+});
+
+describe("pitch · introFor", () => {
   it("the surah's context leads only the opening verse's note", () => {
-    expect(commentaryFor(surah, "quran/hafs-kfqc/2:1")?.showIntro).toBe(true);
-    expect(commentaryFor(surah, "quran/hafs-kfqc/2:255")?.showIntro).toBe(false);
+    expect(introFor(surah, "quran/hafs-kfqc/2:1")).toEqual({ title: "Title", paragraphs: surah.intro });
+    expect(introFor(surah, "quran/hafs-kfqc/2:255")).toBeNull();
   });
 
   it("a link that asks for the context gets it on any verse (?open=context)", () => {
-    const entry = commentaryFor(surah, "quran/hafs-kfqc/2:255", true);
-    expect(entry?.showIntro).toBe(true);
-    expect(entry?.intro).toEqual(surah.intro);
-    expect(entry?.verse.ref).toBe("2:255");
+    expect(introFor(surah, "quran/hafs-kfqc/2:255", true)?.paragraphs).toEqual(surah.intro);
   });
 
-  it("nothing to show without a surah, a selection, or a note for the verse", () => {
-    expect(commentaryFor(null, "quran/hafs-kfqc/2:1", true)).toBeNull();
-    expect(commentaryFor(surah, null, true)).toBeNull();
-    expect(commentaryFor(surah, "quran/hafs-kfqc/2:2", true)).toBeNull();
+  it("nothing without a surah, a selection, or a surah that has an introduction", () => {
+    expect(introFor(null, "quran/hafs-kfqc/2:1", true)).toBeNull();
+    expect(introFor(surah, null, true)).toBeNull();
+    expect(introFor({ ...surah, intro: [] }, "quran/hafs-kfqc/2:1")).toBeNull();
   });
 });

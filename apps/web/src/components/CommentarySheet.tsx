@@ -7,24 +7,27 @@ import {
   type LeafSide,
 } from "@hifth/core";
 import { useT } from "../i18n";
-import { splitCitations } from "./citations";
-import type { PitchCommentary } from "./pitch";
+import { splitCitations } from "../tafsir/citations";
+import type { CommentaryNote } from "../tafsir/commentary";
 import styles from "./CommentarySheet.module.css";
 
 /**
- * The ✎ trigger — the door to The Study Quran's commentary on the selected
- * verse. Private pitch build only (see `pitch.ts`); it renders nothing when the
- * verse has no held commentary, exactly like the ⬡ root trigger.
+ * The ✎ trigger — the one door to a verse's commentary, whichever source it
+ * comes from. It renders nothing when the verse has no note, exactly like the ⬡
+ * root trigger, so a tap always lands on something.
  */
 export function CommentaryTrigger({
   has,
   open,
   onToggle,
   caption,
+  source,
 }: {
   has: boolean;
   open: boolean;
   onToggle: () => void;
+  /** Whose commentary it is, for the button's spoken name. */
+  source: string;
   /** A word under the glyph, shown when the button sits in the verse drawer. */
   caption?: string;
 }): JSX.Element | null {
@@ -34,7 +37,7 @@ export function CommentaryTrigger({
       type="button"
       className={styles.trigger}
       aria-expanded={open}
-      aria-label="Study Quran commentary"
+      aria-label={`${source} commentary`}
       onClick={onToggle}
     >
       <span aria-hidden="true">✎</span>
@@ -54,7 +57,10 @@ function focusables(root: HTMLElement): HTMLElement[] {
 }
 
 /**
- * CommentarySheet — the reading surface for the pitch.
+ * CommentarySheet — the one commentary drawer. It draws a `CommentaryNote` and
+ * never learns which source the note came from, only whose words they are: The
+ * Study Quran held for the pitch, a live public service, a book a reader loaded
+ * (decision `tafsir-provider`).
  *
  * Same bottom-sheet contract as HopPopover / RootLens (a real modal dialog:
  * focus in on open, Tab trapped, Escape closes, focus restored), but its body is
@@ -62,7 +68,7 @@ function focusables(root: HTMLElement): HTMLElement[] {
  * editors' translation set large, then the commentary prose. On the surah's
  * opening verse it leads with the surah introduction.
  *
- * Held copy lives only in the JSON this renders — never in these bytes.
+ * No source's words live in these bytes — only in the note this renders.
  */
 export function CommentarySheet({
   entry,
@@ -74,12 +80,13 @@ export function CommentarySheet({
   onGo,
   onCover,
   back = null,
+  creditNote,
 }: {
-  entry: PitchCommentary | null;
+  entry: CommentaryNote | null;
   onClose: () => void;
   side?: LeafSide | null;
   /**
-   * The verses this one connects to — The Study Quran's own cross-references,
+   * The verses this one connects to — the source's own cross-references,
    * merged into the app's adjacency and handed straight back here. Tapping one
    * jumps there (and, in the pitch build, opens that verse's note in turn), so
    * the reading and the roads live on one surface instead of the note burying a
@@ -109,6 +116,8 @@ export function CommentarySheet({
    * started.
    */
   back?: { label: string; onBack: () => void } | null;
+  /** A line under the credit about where this is shown (the pitch says it is private). */
+  creditNote?: string | undefined;
 }): JSX.Element | null {
   const { t } = useT();
   const sheetRef = useRef<HTMLDivElement>(null);
@@ -124,7 +133,7 @@ export function CommentarySheet({
   // a scroll inside the note, or a tap on its handle — grows it to the full
   // height, and only then does it cover the page like a sheet.
   const [tall, setTall] = useState(false);
-  const verseKey = entry?.verse.key ?? null;
+  const verseKey = entry?.ayahKey ?? null;
   useEffect(() => setTall(false), [verseKey]);
   const modal = !beside && tall;
 
@@ -191,9 +200,9 @@ export function CommentarySheet({
   );
 
   if (!entry) return null;
-  const label = t.ayahLabel(entry.verse.key) ?? entry.verse.ref;
+  const label = t.ayahLabel(entry.ayahKey) ?? entry.ayahKey;
   // A citation in the prose names only surah:verse; it is in this note's edition.
-  const edition = parseAyahKey(entry.verse.key)?.edition;
+  const edition = parseAyahKey(entry.ayahKey)?.edition;
   const citedKey = (surah: number, ayah: number): string | null =>
     edition ? formatAyahKey(edition, surah, ayah) : null;
 
@@ -206,8 +215,9 @@ export function CommentarySheet({
         role="dialog"
         aria-modal={modal}
         aria-label={`Commentary on ${label}`}
-        // The reading is English (The Study Quran), so this surface reads
-        // left-to-right regardless of the app's chrome direction.
+        // The only source on screen today is English (The Study Quran), so this
+        // surface reads left-to-right regardless of the app's chrome direction.
+        // An Arabic source needs its own direction first (see the backlog).
         dir="ltr"
         data-side={side ?? undefined}
         data-tall={tall || undefined}
@@ -233,7 +243,7 @@ export function CommentarySheet({
             ✎
           </span>
           <div className={styles.heading}>
-            <h2 className={styles.title}>The Study Quran</h2>
+            <h2 className={styles.title}>{entry.source.label}</h2>
             <span className={styles.ref}>{label}</span>
           </div>
           <button type="button" className={styles.close} onClick={onClose} aria-label={t.close}>
@@ -249,10 +259,10 @@ export function CommentarySheet({
         )}
 
         <div className={styles.body}>
-          {entry.showIntro && entry.intro.length > 0 && (
+          {entry.intro && (
             <section className={styles.intro} aria-label="Surah introduction">
-              <h3 className={styles.introTitle}>{entry.title}</h3>
-              {entry.intro.map((para, i) => (
+              <h3 className={styles.introTitle}>{entry.intro.title}</h3>
+              {entry.intro.paragraphs.map((para, i) => (
                 <p key={i} className={styles.introPara}>
                   {para}
                 </p>
@@ -260,10 +270,12 @@ export function CommentarySheet({
             </section>
           )}
 
-          <blockquote className={styles.translation}>{entry.verse.translation}</blockquote>
+          {entry.translation && (
+            <blockquote className={styles.translation}>{entry.translation}</blockquote>
+          )}
 
           <section className={styles.commentary} aria-label="Commentary">
-            {entry.verse.commentary.map((para, i) => (
+            {entry.paragraphs.map((para, i) => (
               <p key={i} className={styles.para}>
                 {splitCitations(para).map((part, j) => {
                   if (typeof part === "string") return part;
@@ -290,7 +302,7 @@ export function CommentarySheet({
             <section className={styles.related} aria-label="Related verses">
               <h3 className={styles.relatedTitle}>Related verses</h3>
               <p className={styles.relatedLede}>
-                Where The Study Quran connects this verse. Tap one to go there.
+                Where {entry.source.label} connects this verse. Tap one to go there.
               </p>
               <ul className={styles.roads}>
                 {orderForHifz(roads).map((edge) => {
@@ -326,10 +338,8 @@ export function CommentarySheet({
         </div>
 
         <footer className={styles.credit}>
-          The Study Quran — Seyyed Hossein Nasr, editor-in-chief (HarperOne, 2015).
-          <span className={styles.creditNote}>
-            Shown privately, with the rights-holders, for a collaboration.
-          </span>
+          {entry.source.label} — {entry.source.license}.
+          {creditNote && <span className={styles.creditNote}>{creditNote}</span>}
         </footer>
       </div>
     </>
