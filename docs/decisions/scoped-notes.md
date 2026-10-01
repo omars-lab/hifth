@@ -63,6 +63,7 @@ saved-notes file at once, and an older copy of the app would silently drop the p
 ## What is this not settling?
 
 How the note tool behaves on a tap (start a new note, or keep adding to the last one), and how
-the page shows that a verse is in a note. Both will be built as live options and tried. Which
+the page shows that a verse is in a note. Both were built on a phone and recorded on
+2026-10-01, four options each: [how adding a verse to a note should feel](../design/scoped-notes-feel.md). Which
 note is offered first (the most recently used) and which scope is ready-picked (the kind used
 last time) are being built as the design recommends and are easy to change.

@@ -434,9 +434,10 @@ whole Qur'an) and 5 (one text per note, for now), each as recommended; the reaso
 [the decision record](../decisions/scoped-notes.md). 3 and 7 are being built as recommended,
 since they are easy to change.
 
-Questions 4 and 6 are about how something feels in the hand. Under the project's own rule they
-should be built as interchangeable live options and tried before being settled; the
-recommendations are what to build first.
+Questions 4 and 6 are about how something feels in the hand, so each option was built on the
+real app on a phone and recorded: **[how adding a verse to a note should feel, and how the page
+shows it](scoped-notes-feel.md)** has the clips, what building them taught us, and the
+recommendations (C and A).
 
 ### 1 · What scope does each of today's notes get when it moves across?
 
@@ -492,7 +493,7 @@ Recommended A, with the narrower scope breaking ties.
 | **C · A new note at once, its box showing the suggestions as one-tap choices** *(recommended)* | Today's one tap is kept; adding to a note is one more tap, not a detour | A busier box | The box needs room for three choices without hiding the text field |
 | **D · "Keep adding" mode: pins go to the last note used until you stop** | Quickest for a run of slips in one sitting | A pin can land in the wrong note without the reader noticing | Needs a visible "adding to …" state on the bar |
 
-Recommended C. This is a felt choice; build C and D live and try both.
+Recommended C. All four were built and recorded: [the clips](scoped-notes-feel.md#question-1-when-you-tap-a-verse-with-the-note-tool-what-opens--4-options).
 
 ### 5 · Does each verse in a note get its own line of text?
 
@@ -519,7 +520,7 @@ Recommended A now, B as soon as the first look-alike note is written and feels c
 | **C · Nothing on the page; only in the verse's menu** | The cleanest page | The reminder is gone unless you hold the verse | The page no longer tells you anything about your notes |
 | **D · A faint wash over the verse** | Unmissable | Competes with the highlighter and look-alike colours | Takes a colour the page may need for something else |
 
-Recommended A. A felt and seen choice: draw it on a real page at phone size before settling.
+Recommended A. All four were drawn on page 7 at phone size: [the pictures](scoped-notes-feel.md#question-2-how-does-the-page-show-that-a-verse-is-in-a-note--4-options).
 
 ### 7 · Which scope is ready-picked when making a new note?
 
