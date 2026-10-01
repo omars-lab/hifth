@@ -5,7 +5,7 @@
 > can have many ayahs added to it. Based on scope, we can suggest a note to add an ayah to,
 > especially recent notes in the same scope."*
 
-**Status:** a design, not yet built. Three of the seven questions near the end were answered by
+**Status:** step 1 of 7 built on 2026-10-01: the rules (what each scope holds, adding and removing verses, which notes are offered, moving today's notes across, the saved file's version 2), with their tests. Nothing on screen uses them yet; step 2 moves today's notes across on the device. Three of the seven questions near the end were answered by
 the owner on 2026-09-30; the two about feel will be built as live options and tried.
 
 ## The short version

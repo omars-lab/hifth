@@ -2484,6 +2484,17 @@
       "severity": "question",
       "owner": "agent",
       "note": "A plain tap on the text hides the bars for full-screen reading; another brings them back. Must be squared with tap-to-select first. Owner ask 2026-09-30."
+    },
+    {
+      "id": "scoped-notes",
+      "source": {
+        "file": "docs/PLAN.md",
+        "item": "29"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "agent",
+      "note": "Notes that gather verses from a surah, juz, hizb, page or the whole Qur'an, offered last-used first when a verse is added. Step 1 (the rules) done 2026-10-01; step 2 moves today's notes across on the device. Owner ask 2026-09-30."
     }
   ]
 }
