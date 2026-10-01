@@ -36,7 +36,8 @@ export function NoteBox({ note, label, onClose, onDelete }: NoteBoxProps): JSX.E
   onCloseRef.current = onClose;
 
   // Stand beside the pin: below it when there is room, above it when not, and
-  // always inside the window. Measured a frame late, because the pin of a note
+  // always inside the window, whose bottom is the top of the bars there (a
+  // phone's tools tray stays up while a tool is on). Measured a frame late, because the pin of a note
   // just made is drawn by the page after this box mounts; and only a pin with a
   // size counts, since a page kept mounted out of sight holds a copy too.
   useEffect(() => {
@@ -49,9 +50,15 @@ export function NoteBox({ note, label, onClose, onDelete }: NoteBoxProps): JSX.E
       const w = box.offsetWidth;
       const h = box.offsetHeight;
       const cx = pin ? pin.left + pin.width / 2 : window.innerWidth / 2;
-      const below = pin ? pin.bottom + MARGIN : window.innerHeight / 2 - h / 2;
-      const top =
-        !pin || below + h + MARGIN <= window.innerHeight ? below : Math.max(MARGIN, pin.top - h - MARGIN);
+      const floor = Math.min(
+        window.innerHeight,
+        ...[...document.querySelectorAll("[data-keep-clear]")]
+          .map((el) => el.getBoundingClientRect())
+          .filter((r) => r.height > 0)
+          .map((r) => r.top),
+      );
+      const below = pin ? pin.bottom + MARGIN : floor / 2 - h / 2;
+      const top = !pin || below + h + MARGIN <= floor ? below : Math.max(MARGIN, pin.top - h - MARGIN);
       const left = Math.min(Math.max(MARGIN, cx - w / 2), window.innerWidth - w - MARGIN);
       setAt({ left, top });
     });
