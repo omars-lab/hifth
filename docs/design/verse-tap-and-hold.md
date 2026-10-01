@@ -1,4 +1,4 @@
-# What should a tap on a verse do, and what should holding your finger on it do?
+# What should a tap on a verse do, and what should holding your finger on it do? ^95t7gc
 
 *Open, 2026-09-30. Two features are waiting on this one answer: a menu that opens when you hold your finger on a verse, and full-screen reading, where a tap on the page hides the bars. Both want the plain tap, and today the tap already has a job. Pictures are from the real app on a phone; where an option adds something new, a short script added it to the live page for the picture.*
 
@@ -63,7 +63,7 @@ So full-screen is worth most to people on smaller phones, and to anyone who want
 
 ![The three options playing side by side, each under its letter: A's tap hides the bars, B and C open the menu](verse-tap-and-hold/clips.gif)
 
-Each picture and clip is the real app on a phone, with the option's new parts added to the live page by a short script kept beside this note, so every one can be taken again. The menu pictures are cropped to the lower part of the screen so the buttons can be read.
+Each picture and clip is the real app on a phone, with the option's new parts added to the live page by a short script kept beside this note, so every one can be taken again. The menu pictures are cropped to the lower part of the screen so the buttons can be read. ^3nlqga
 
 | | **A** *(recommended)* | **B** | **C** |
 | --- | --- | --- | --- |

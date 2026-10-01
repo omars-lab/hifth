@@ -5,7 +5,7 @@ metadata:
   node_type: memory
   type: feedback
   originSessionId: e85ea537-5f5b-46cb-add4-971a01406e5a
-  modified: 2026-09-30T14:26:47.836Z
+  modified: 2026-10-01T13:10:00.000Z
 ---
 
 Ran the global "two researchers, then a checker" pattern end to end on 2026-09-30 for the
@@ -24,3 +24,5 @@ Brief: the checker merges both branches (so the research records ship with the p
 sources, draws both sides of a real disagreement live, registers the decision row + defects, opens
 its own PR; the researcher PRs then auto-close as merged. Related:
 [[bias-to-demos-over-reading]], [[present-options-with-pros-cons-implications]].
+
+**Second run, 2026-10-01** (moving option pictures, #194/#195 → #196, `docs/design/moving-option-pictures.md`): the checker settled the GIF settings (390 wide, 10 a second, 64 colours, under 1 MB, stills folded under), screenshots over browser video, and a real touch through Chromium's own input. Its verdicts were built straight into the record-demo scripts with no rework, so the pattern held a second time.
