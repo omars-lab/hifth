@@ -1,7 +1,7 @@
 /**
  * Runtime glue between a `TafsirProvider`'s entries and the commentary sheet.
  *
- * Two jobs, both pure (no DOM, no I/O, no React):
+ * Three jobs, all pure (no DOM, no I/O, no React):
  *
  *   - **index** a surah's entries by their `"S:A"` so the sheet can find the one
  *     for the focused ayah in O(1);
@@ -9,9 +9,17 @@
  *     a leap to a referenced ayah rides the same hop path as every other edge.
  *     These edges are never written to a shipped shard (the shards carry
  *     `ext: []` for the reserved `tafsir-ref` type — decision `tafsir-provider`);
- *     they exist only while a provider is loaded and an ayah is focused.
+ *     they exist only while a provider is loaded and an ayah is focused;
+ *   - **shape one note for the drawer**, the same whichever source it came from.
  */
-import { type Edge, type Resolver, type TafsirEntry, parseAyahKey, parseTafsirKey } from "@hifth/core";
+import {
+  type Edge,
+  type Resolver,
+  type TafsirEntry,
+  type TafsirSource,
+  parseAyahKey,
+  parseTafsirKey,
+} from "@hifth/core";
 
 /** `"2:255"` — the surah:ayah a commentary sheet looks an entry up by. */
 function surahAyah(surah: number, ayah: number): string {
@@ -79,4 +87,43 @@ export function commentaryEdges(
     });
   }
   return edges;
+}
+
+/** A surah's introduction, led into a note on the surah's opening verse. */
+export interface CommentaryIntro {
+  readonly title: string;
+  readonly paragraphs: readonly string[];
+}
+
+/**
+ * Everything the one commentary drawer draws for a verse. It never learns where
+ * the words came from — a book held for the pitch, a live public service, a book
+ * the reader loaded — only whose they are (`source`), so the heading and the
+ * credit line can say so.
+ */
+export interface CommentaryNote {
+  readonly source: TafsirSource;
+  /** The verse the note is about (`quran/<edition>/S:A`). */
+  readonly ayahKey: string;
+  readonly translation?: string;
+  readonly paragraphs: readonly string[];
+  readonly intro: CommentaryIntro | null;
+}
+
+/**
+ * The note for a verse out of its source's entry, or null when there is nothing
+ * to draw: no entry, or one whose translation and commentary are both empty (a
+ * ✎ that opened onto a blank drawer would be a dead end).
+ */
+export function noteFor(
+  entry: TafsirEntry | undefined,
+  source: TafsirSource,
+  ayahKey: string,
+  intro: CommentaryIntro | null = null,
+): CommentaryNote | null {
+  if (!entry) return null;
+  const paragraphs = (entry.commentary ?? []).map((b) => b.text).filter((t) => t.trim().length > 0);
+  const translation = entry.translation?.trim() ? entry.translation : undefined;
+  if (!translation && paragraphs.length === 0) return null;
+  return { source, ayahKey, ...(translation ? { translation } : {}), paragraphs, intro };
 }

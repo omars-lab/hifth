@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { Resolver, type AssetManifest, type TafsirEntry } from "@hifth/core";
-import { commentaryEdges, entryForAyah, indexEntries } from "./commentary";
+import { Resolver, type AssetManifest, type TafsirEntry, type TafsirSource } from "@hifth/core";
+import { commentaryEdges, entryForAyah, indexEntries, noteFor } from "./commentary";
 
 /** A tiny edition: 2:38 on page 7, 2:53 on page 9; 2:255 is not vendored. */
 const manifest: AssetManifest = {
@@ -93,5 +93,39 @@ describe("commentaryEdges", () => {
     expect(commentaryEdges(undefined, "quran/hafs-kfqc/2:38", resolver)).toEqual([]);
     const e = entry("tafsir/study-quran/2:38", ["quran/hafs-kfqc/2:53"]);
     expect(commentaryEdges(e, "not-a-key", resolver)).toEqual([]);
+  });
+});
+
+describe("tafsir · noteFor (what the one commentary drawer reads)", () => {
+  const source: TafsirSource = { id: "a-book", label: "A Book", license: "Its terms", edition: "hafs-kfqc" };
+  const full: TafsirEntry = {
+    key: "tafsir/a-book/2:38",
+    translation: "the verse in English",
+    commentary: [{ text: "first" }, { text: "second", channel: "ocr" }],
+    refs: [],
+  };
+
+  it("carries the source, so the drawer names whose words these are", () => {
+    const note = noteFor(full, source, "quran/hafs-kfqc/2:38");
+    expect(note?.source).toBe(source);
+    expect(note?.ayahKey).toBe("quran/hafs-kfqc/2:38");
+    expect(note?.translation).toBe("the verse in English");
+    expect(note?.paragraphs).toEqual(["first", "second"]);
+    expect(note?.intro).toBeNull();
+  });
+
+  it("leads with a surah's introduction only when one is handed in", () => {
+    const intro = { title: "The Cow", paragraphs: ["about the surah"] };
+    expect(noteFor(full, source, "quran/hafs-kfqc/2:38", intro)?.intro).toEqual(intro);
+  });
+
+  it("a source that sends only a translation, or only commentary, still makes a note", () => {
+    expect(noteFor({ key: full.key, translation: "t", refs: [] }, source, "quran/hafs-kfqc/2:38")?.paragraphs).toEqual([]);
+    expect(noteFor({ key: full.key, commentary: [{ text: "c" }], refs: [] }, source, "quran/hafs-kfqc/2:38")?.translation).toBeUndefined();
+  });
+
+  it("nothing to draw without an entry, or with an entry that says nothing", () => {
+    expect(noteFor(undefined, source, "quran/hafs-kfqc/2:38")).toBeNull();
+    expect(noteFor({ key: full.key, commentary: [{ text: "  " }], refs: [] }, source, "quran/hafs-kfqc/2:38")).toBeNull();
   });
 });
