@@ -2439,6 +2439,50 @@
         "a real iPhone"
       ],
       "note": "The wipe animates a clip on the band's group. Unchecked in Safari on a device; failing safe means the mark shows whole."
+    },
+    {
+      "id": "verse-long-press-menu",
+      "source": {
+        "file": "docs/PLAN.md",
+        "item": "25"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "agent",
+      "note": "Long-press a verse for a small menu headed with its surah and verse: play, play to, translation, mark, note, share, copy. Owner ask 2026-09-30, from another app."
+    },
+    {
+      "id": "page-corner-labels",
+      "source": {
+        "file": "docs/PLAN.md",
+        "item": "26"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "agent",
+      "note": "Print the surah name and juz in the page's top corners and the page number at the bottom, on the page itself. Owner ask 2026-09-30."
+    },
+    {
+      "id": "corner-label-long-press",
+      "source": {
+        "file": "docs/PLAN.md",
+        "item": "27"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "agent",
+      "note": "Long-pressing the page number, surah name or juz opens its own menu and share, different from a verse's. Waits on page-corner-labels. Owner ask 2026-09-30."
+    },
+    {
+      "id": "tap-to-hide-bars",
+      "source": {
+        "file": "docs/PLAN.md",
+        "item": "28"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "agent",
+      "note": "A plain tap on the text hides the bars for full-screen reading; another brings them back. Must be squared with tap-to-select first. Owner ask 2026-09-30."
     }
   ]
 }

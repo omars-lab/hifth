@@ -226,6 +226,9 @@ export function App(): JSX.Element {
   const [contextFor, setContextFor] = useState<string | null>(null);
   // Where the phone's short note starts, so the page can lift the verse above it.
   const [coverTop, setCoverTop] = useState<number | null>(null);
+  // Where the open share tray starts on a phone; the page lifts the verse above
+  // whichever of the two reaches higher.
+  const [shareTop, setShareTop] = useState<number | null>(null);
   // Where the hop chips floating over the page's top corner end, so the lift
   // above a phone note stops the verse's first line beneath them.
   const [railBottom, setRailBottom] = useState<number | null>(null);
@@ -2292,7 +2295,7 @@ export function App(): JSX.Element {
             >
               <PageStage
                 ref={stageRef}
-                coverTop={coverTop}
+                coverTop={coverTop === null ? shareTop : shareTop === null ? coverTop : Math.min(coverTop, shareTop)}
                 railBottom={railBottom}
                 resolver={resolver}
                 page={page}
@@ -2611,7 +2614,12 @@ export function App(): JSX.Element {
           onToggle={() => setRootsOpen((o) => !o)}
           caption={t.vdRoots}
         />
-        <ShareSheet state={selectedKey ? currentState : null} hasTrail={trail.length > 0} pitch={PITCH} />
+        <ShareSheet
+          state={selectedKey ? currentState : null}
+          hasTrail={trail.length > 0}
+          pitch={PITCH}
+          onCover={setShareTop}
+        />
         {selectedKey && (
           <DrawerTool
             glyph="⚑"

@@ -1624,7 +1624,7 @@
     {
       "id": "share-sheet-builder",
       "question": "When you share a verse from a phone, what should the app ask, and which links should it hand you?",
-      "status": "open",
+      "status": "decided",
       "options": [
         {
           "id": "A",
@@ -1643,6 +1643,9 @@
       "page": "docs/design/share-sheet-options.html",
       "builtBy": "scripts/build-share-sheet-options.mjs",
       "doc": "docs/decisions/share-sheet-builder.md",
+      "decided": "C",
+      "by": "omar",
+      "date": "2026-09-30",
       "related": [
         "ayah-drawer",
         "phone-toolbar",

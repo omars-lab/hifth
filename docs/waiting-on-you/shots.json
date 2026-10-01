@@ -22,21 +22,5 @@
         "caption": "What is this not settling?"
       }
     ]
-  },
-  "share-sheet-builder": {
-    "shots": [
-      {
-        "file": "share-sheet-builder-0.png",
-        "caption": "The top of the page"
-      },
-      {
-        "file": "share-sheet-builder-1.png",
-        "caption": "What should you try in each?"
-      },
-      {
-        "file": "share-sheet-builder-2.png",
-        "caption": "What does each one cost, and what does it lead to?"
-      }
-    ]
   }
 }
