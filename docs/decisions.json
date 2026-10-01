@@ -1652,7 +1652,7 @@
     {
       "id": "highlight-options",
       "question": "How should the app mark the verse you are on, and how should a swept passage look different from it?",
-      "status": "open",
+      "status": "decided",
       "options": [
         {
           "id": "A",
@@ -1703,6 +1703,9 @@
       "page": "docs/design/highlight-options.html",
       "builtBy": "scripts/build-highlight-options.mjs",
       "artifact": "https://blog.bytesofpurpose.com/hifth/docs/design/highlight-options.html",
+      "decided": "I",
+      "by": "omar",
+      "date": "2026-09-30",
       "related": [
         "highlight-shape",
         "highlight-strength",
