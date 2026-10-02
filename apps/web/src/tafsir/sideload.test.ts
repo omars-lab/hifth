@@ -135,6 +135,14 @@ describe("importTafsirBundle", () => {
     expect(await provider!.load(3)).toEqual([]);
   });
 
+  it("keeps the language a book says it is written in, and leaves it unsaid when it says nothing", async () => {
+    const said = bundle();
+    await importTafsirBundle({ ...said, manifest: { ...said.manifest, lang: "ar" } });
+    expect(getTafsirProvider(SOURCE_ID)?.source.lang).toBe("ar");
+    await importTafsirBundle(bundle());
+    expect(getTafsirProvider(SOURCE_ID)?.source.lang).toBeUndefined();
+  });
+
   it("rejects a manifest whose source id carries a slash", async () => {
     const b = bundle();
     const bad: ParsedBundle = { ...b, manifest: { ...b.manifest, source: "a/b" } };

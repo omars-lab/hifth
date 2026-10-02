@@ -84,6 +84,8 @@ export interface LiveTafsirConfig {
   readonly edition?: string;
   /** Optional bearer token for the keyed tier (never logged, never committed). */
   readonly token?: string;
+  /** The language the edition is written in; the service has both scripts. */
+  readonly lang?: string;
 }
 
 /** One tafsir item as the service returns it (only the fields we read). The
@@ -111,6 +113,7 @@ export function liveTafsirConfigFromEnv(env: ImportMetaEnv): LiveTafsirConfig | 
     ...(env.VITE_TAFSIR_QF_LICENSE ? { license: env.VITE_TAFSIR_QF_LICENSE } : {}),
     ...(env.VITE_TAFSIR_QF_EDITION ? { edition: env.VITE_TAFSIR_QF_EDITION } : {}),
     ...(env.VITE_TAFSIR_QF_TOKEN ? { token: env.VITE_TAFSIR_QF_TOKEN } : {}),
+    ...(env.VITE_TAFSIR_QF_LANG ? { lang: env.VITE_TAFSIR_QF_LANG } : {}),
   };
 }
 
@@ -120,6 +123,7 @@ function sourceOf(config: LiveTafsirConfig): TafsirSource {
     label: config.label && config.label.length > 0 ? config.label : config.tafsirId,
     license: config.license && config.license.length > 0 ? config.license : "live lookup",
     edition: config.edition && config.edition.length > 0 ? config.edition : "hafs-kfqc",
+    ...(config.lang ? { lang: config.lang } : {}),
   };
 }
 
