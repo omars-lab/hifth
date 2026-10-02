@@ -30,6 +30,7 @@ import {
   nearestSignOnPage,
   nextIntent,
   notesOnPage,
+  LONG_PRESS_MS,
   TAP_SLOP_PX,
   nextWheelTurn,
   retainPages,
@@ -304,7 +305,16 @@ interface PageStageProps {
    * and size in page units, on the page shown. What becomes of it is App's.
    */
   onCrop?: (at: { page: number; x: number; y: number; width: number; height: number }) => void;
+  /**
+   * A still hold on one of the page's printed corners: the surah's name, the
+   * juz, or the page number (PLAN 27). Which one, the page it is printed on,
+   * and where it is on screen, so its menu can stand beside it.
+   */
+  onCornerHold?: (at: { which: Corner; page: number; around: DOMRect }) => void;
 }
+
+/** The three labels printed in a page's corners. */
+export type Corner = "surah" | "juz" | "page";
 
 /** A word's box on screen, in window pixels. */
 export interface WordRect {
@@ -714,6 +724,7 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
     onPickSign,
     onOpenWord,
     onCrop,
+    onCornerHold,
   },
   ref,
 ): JSX.Element {
@@ -808,6 +819,41 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
   onOpenWordRef.current = onOpenWord;
   const onCropRef = useRef(onCrop);
   onCropRef.current = onCrop;
+  const onCornerHoldRef = useRef(onCornerHold);
+  onCornerHoldRef.current = onCornerHold;
+
+  // A hold on a printed corner, timed the way a hold on a verse is: pressed,
+  // kept still past the hold time, let go. A quick tap passes through to the
+  // leaf, so the bookmark tool still takes a tap anywhere on the page.
+  useEffect(() => {
+    const stage = stageRef.current;
+    if (!stage) return;
+    let press: { which: Corner; page: number; el: HTMLElement; x: number; y: number; t: number } | null = null;
+    const onDown = (e: PointerEvent) => {
+      const el = (e.target as Element | null)?.closest<HTMLElement>("[data-running-head]");
+      const host = el?.closest<HTMLElement>("[data-host-page]");
+      const which = el?.dataset.runningHead as Corner | undefined;
+      press = el && host && which ? { which, page: Number(host.dataset.hostPage), el, x: e.clientX, y: e.clientY, t: e.timeStamp } : null;
+    };
+    const onUp = (e: PointerEvent) => {
+      const from = press;
+      press = null;
+      if (!from || e.timeStamp - from.t < LONG_PRESS_MS) return;
+      if (Math.hypot(e.clientX - from.x, e.clientY - from.y) > TAP_SLOP_PX) return;
+      onCornerHoldRef.current?.({ which: from.which, page: from.page, around: from.el.getBoundingClientRect() });
+    };
+    const onCancel = () => {
+      press = null;
+    };
+    stage.addEventListener("pointerdown", onDown);
+    stage.addEventListener("pointerup", onUp);
+    stage.addEventListener("pointercancel", onCancel);
+    return () => {
+      stage.removeEventListener("pointerdown", onDown);
+      stage.removeEventListener("pointerup", onUp);
+      stage.removeEventListener("pointercancel", onCancel);
+    };
+  }, []);
   /** The harakat tool's pointer: ring the nearest sign, or (on a click) take it. Set below, beside the sign data. */
   const reachSignRef = useRef<(page: number, svg: SVGSVGElement, x: number, y: number, e: PointerEvent, take: boolean) => void>(
     () => {},
@@ -3330,6 +3376,28 @@ function nextFrame(): Promise<void> {
 }
 
 /**
+ * The first and last verse on a page, in reading order: not the first and last
+ * in the drawing's order, which is not promised to be reading order. The first
+ * is the one a printed mus'haf heads the page with.
+ */
+export function pageSpan(
+  resolver: Resolver,
+  page: number,
+): { first: { surah: number; ayah: number }; last: { surah: number; ayah: number } } | null {
+  let first: { surah: number; ayah: number } | null = null;
+  let last: { surah: number; ayah: number } | null = null;
+  const before = (a: { surah: number; ayah: number }, b: { surah: number; ayah: number }) =>
+    a.surah < b.surah || (a.surah === b.surah && a.ayah < b.ayah);
+  for (const key of resolver.keysOnPage(page)) {
+    const at = resolver.resolve(key);
+    if (!at) continue;
+    if (!first || before(at, first)) first = { surah: at.surah, ayah: at.ayah };
+    if (!last || before(last, at)) last = { surah: at.surah, ayah: at.ayah };
+  }
+  return first && last ? { first, last } : null;
+}
+
+/**
  * Print the running heads onto a freshly mounted leaf: a band above the text
  * with the surah's name and the juz, and one below with the page number. Both
  * are the leaf's own children, so they turn and magnify with it. A second call
@@ -3368,13 +3436,7 @@ function printRunningHeads(
     svg.before(head);
     svg.after(foot);
   }
-  let opens: { surah: number; ayah: number } | null = null;
-  for (const key of resolver.keysOnPage(page)) {
-    const at = resolver.resolve(key);
-    if (at && (!opens || at.surah < opens.surah || (at.surah === opens.surah && at.ayah < opens.ayah))) {
-      opens = { surah: at.surah, ayah: at.ayah };
-    }
-  }
+  const opens = pageSpan(resolver, page)?.first ?? null;
   const set = (which: string, text: string) => {
     const el = host.querySelector<HTMLElement>(`[data-running-head="${which}"]`);
     if (el) el.textContent = text;

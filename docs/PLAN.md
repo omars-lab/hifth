@@ -1246,10 +1246,16 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     reader's language. They make a page taller, so in the two-page view every page is about 7%
     smaller; the owner kept them on the paper and the two-page view now starts at 775 px tall
     rather than 740.
-27. **Long-pressing the page number, the surah name or the juz gives each its own menu.** Asked
+27. ~~**Long-pressing the page number, the surah name or the juz gives each its own menu.**~~ Asked
     2026-09-30. Holding the page number acts on the page (share the page, and so on), the
     surah name on the surah, the juz on the juz, and a verse on the verse (25), so each shares
     and offers what fits what was held. Waits on 26, which puts those three on the page.
+    **Done 2026-10-02**, test first. Each menu is titled with what was held. The page's: play
+    the page, bookmark it, copy or share its link. The surah's and the juz's: play all of it,
+    go to where it starts, copy or share a link to its first verse. A quick tap opens nothing.
+    Two things the build found: the folded corner that drops a bookmark lay over half the juz
+    on a right-hand page, so the top labels now keep a touch's width clear of it; and on a
+    phone the bottom bar covers the page number, so it is held in full screen.
 28. ~~**A plain tap on the text hides the app's bars for reading full screen; another brings
     them back.**~~ Asked 2026-09-30, from a pair of pictures: with the bars, a top bar (the page
     number, translation, contrast, bookmark) and a bottom bar (play, the reciter, the layout);

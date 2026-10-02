@@ -2470,10 +2470,11 @@
         "file": "docs/PLAN.md",
         "item": "27"
       },
-      "status": "open",
+      "status": "fixed",
       "severity": "question",
       "owner": "agent",
-      "note": "Long-pressing the page number, surah name or juz opens its own menu and share, different from a verse's. Waits on page-corner-labels. Owner ask 2026-09-30."
+      "note": "Long-pressing the page number, surah name or juz opens its own menu and share, different from a verse's. Owner ask 2026-09-30. Done 2026-10-02: each menu plays, shares and copies what was held; the page's bookmarks it, the surah's and juz's go to where they start.",
+      "closedBy": "apps/web/e2e/verse-gestures.spec.ts"
     },
     {
       "id": "tap-to-hide-bars",

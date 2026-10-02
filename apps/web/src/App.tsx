@@ -29,6 +29,9 @@ import {
   editionMeta,
   hizbPageIndex,
   juzOf,
+  AYAH_COUNTS,
+  JUZ_STARTS,
+  fromAbsoluteAyah,
   juzOfPage,
   juzPageIndex,
   keyToRef,
@@ -76,10 +79,10 @@ import { applyFieldToDocument, fieldFromHash } from "./field";
 import { recordLook } from "./revision-store";
 import { useT } from "./i18n";
 import { useHashRouter } from "./useHashRouter";
-import { exposeToShell, shareBase } from "./native-bridge";
+import { exposeToShell, nativeShare, shareBase } from "./native-bridge";
 import { linksFor } from "./share-links";
 import { DESKTOP_QUERY, useMediaQuery } from "./useMediaQuery";
-import { PageStage, type PageStageHandle, type PageTool, type WordRect } from "./components/PageStage";
+import { PageStage, pageSpan, type Corner, type PageStageHandle, type PageTool, type WordRect } from "./components/PageStage";
 import { PageToolbar, TOOL_KEYS, toolHint, toolName } from "./components/PageToolbar";
 import { PhoneToolbarA, PhoneToolbarB, PhoneToolbarC, phoneBarFromUrl } from "./components/PhoneToolbar";
 // Opened by few readers and never before the page is up: loaded on first open.
@@ -114,7 +117,7 @@ import { LiveAnnouncer, useAnnouncer } from "./components/LiveAnnouncer";
 import { RootLensTrigger } from "./components/RootLensTrigger";
 import { PlayTrigger } from "./components/PlayTrigger";
 import { DrawerTool, VerseDrawer } from "./components/VerseDrawer";
-import { VerseMenu } from "./components/VerseMenu";
+import { VerseMenu, type VerseMenuItem } from "./components/VerseMenu";
 import { QulTrigger } from "./components/QulTrigger";
 import { useVerseAudio, versesBetween } from "./audio";
 // The private pitch layer (see src/pitch/pitch.ts). `PITCH` is a build-time
@@ -895,6 +898,9 @@ export function App(): JSX.Element {
   // The verse a hold opened the small menu on (option C), and where it is.
   const [verseMenu, setVerseMenu] = useState<{ key: string; around: DOMRect } | null>(null);
   const closeVerseMenu = useCallback(() => setVerseMenu(null), []);
+  // The same small menu, for a hold on a printed corner (PLAN 27).
+  const [cornerMenu, setCornerMenu] = useState<{ which: Corner; page: number; around: DOMRect } | null>(null);
+  const closeCornerMenu = useCallback(() => setCornerMenu(null), []);
   // "Play to" is waiting for the verse to stop at: the verse it starts from.
   const playFromRef = useRef<string | null>(null);
   // The highlighter's pen (docs/design/highlight-texture-options.md ②, settled
@@ -1801,6 +1807,20 @@ export function App(): JSX.Element {
     },
     [announce, resolver, t],
   );
+  // Recite a run of verses and say which: "Playing Al-Baqarah · 2:1 to 2:286".
+  const playBetween = useCallback(
+    (from: string, to: string) => {
+      const run = versesBetween(from, to);
+      if (run.length === 0) return;
+      audio.playRun(run);
+      const first = run[0]!;
+      const last = run[run.length - 1]!;
+      const lastName = t.ayahLabel(last) ?? last;
+      const sameSurah = parseAyahKey(first)?.surah === parseAyahKey(last)?.surah;
+      announce(t.playingRun(t.ayahLabel(first) ?? first, sameSurah ? lastName.split(" · ").pop()! : lastName));
+    },
+    [announce, audio, t],
+  );
   const handleVerse = useCallback(
     (key: string, how: PressKind) => {
       const tooled = toolRef.current !== "select" && toolRef.current !== "highlight";
@@ -1808,14 +1828,7 @@ export function App(): JSX.Element {
       const from = playFromRef.current;
       if (from && !tooled) {
         playFromRef.current = null;
-        const run = versesBetween(from, key);
-        if (run.length === 0) return;
-        audio.playRun(run);
-        const first = run[0]!;
-        const last = run[run.length - 1]!;
-        const lastName = t.ayahLabel(last) ?? last;
-        const sameSurah = parseAyahKey(first)?.surah === parseAyahKey(last)?.surah;
-        announce(t.playingRun(t.ayahLabel(first) ?? first, sameSurah ? lastName.split(" · ").pop()! : lastName));
+        playBetween(from, key);
         return;
       }
       if (tooled || how === "key") {
@@ -1844,7 +1857,7 @@ export function App(): JSX.Element {
       }
       handleSelect(key);
     },
-    [announce, audio, desktop, handleSelect, lightVerse, t, verseGestures],
+    [announce, desktop, handleSelect, lightVerse, playBetween, verseGestures],
   );
 
   // The four things the fuller drawer (A, B) and the small menu (C) add.
@@ -2005,6 +2018,74 @@ export function App(): JSX.Element {
     },
     [resolver, announce, t, chooseTool, handlePageMode],
   );
+
+  // What a held corner offers: the page, the surah or the juz it names, each
+  // played whole, its link copied or shared, and the page bookmarked or the
+  // surah and juz opened where they start. A link to a surah or a juz is a link
+  // to its first verse; a link never carries the words.
+  const cornerItems = useCallback(
+    (which: Corner, page: number): { name: string; items: VerseMenuItem[] } | null => {
+      if (!resolver) return null;
+      const edition = resolver.edition;
+      const span = pageSpan(resolver, page);
+      if (!span) return null;
+      const key = (surah: number, ayah: number) => refToKey(edition, { surah, ayah });
+      let name: string;
+      let first: { surah: number; ayah: number };
+      let last: { surah: number; ayah: number };
+      if (which === "page") {
+        name = t.pageN(page);
+        ({ first, last } = span);
+      } else if (which === "surah") {
+        const s = span.first.surah;
+        name = t.surahName(s);
+        first = { surah: s, ayah: 1 };
+        last = { surah: s, ayah: AYAH_COUNTS[s - 1]! };
+      } else {
+        const j = juzOf(span.first.surah, span.first.ayah);
+        name = t.juzN(j);
+        const [s, a] = JUZ_STARTS[j - 1]!;
+        first = { surah: s, ayah: a };
+        const next = JUZ_STARTS[j];
+        last = next
+          ? fromAbsoluteAyah(toAbsoluteAyah(next[0], next[1]) - 1)
+          : { surah: 114, ayah: AYAH_COUNTS[113]! };
+      }
+      const state: AppState =
+        which === "page" ? { edition, select: null, page } : { edition, select: first };
+      const url = linksFor(state, "", shareBase()).site;
+      const copy = () =>
+        void navigator.clipboard?.writeText(`${name} — ${url}`).then(
+          () => announce(t.copiedLink(name)),
+          () => undefined,
+        );
+      const share = async () => {
+        const data = { title: t.shareTitle, text: name, url };
+        if (nativeShare(data)) return;
+        const nav = navigator as Navigator & { share?: (d: ShareData) => Promise<void> };
+        if (typeof nav.share === "function") {
+          try {
+            await nav.share(data);
+            return;
+          } catch (err) {
+            if (err instanceof DOMException && err.name === "AbortError") return;
+          }
+        }
+        copy();
+      };
+      const items: VerseMenuItem[] = [
+        { caption: t.cornerPlay, onPick: () => playBetween(key(first.surah, first.ayah), key(last.surah, last.ayah)) },
+        which === "page"
+          ? { caption: t.vdBookmark, onPick: () => dropOn(page) }
+          : { caption: t.cornerStart, onPick: () => restoreState({ edition, select: first }, "jump") },
+        { caption: t.vdCopy, onPick: copy },
+        { caption: t.vdShare, onPick: () => void share() },
+      ];
+      return { name, items };
+    },
+    [announce, dropOn, playBetween, resolver, restoreState, t],
+  );
+  const cornerMenuOf = cornerMenu ? cornerItems(cornerMenu.which, cornerMenu.page) : null;
 
   // Gate cold-open restore on the resolver: a deep link parsed before the
   // manifest loads must not be dropped (restoreState no-ops without a resolver).
@@ -2443,6 +2524,7 @@ export function App(): JSX.Element {
                   breadcrumbKey={breadcrumbKey}
                   rangeKeys={selectedRange}
                   onSelect={handleVerse}
+                  onCornerHold={setCornerMenu}
                   onSelectRange={handleSelectRange}
                   /* Both leaves, unlike `dragToTurn`: a word run is a question
                      about the ayah that is selected, and on a spread that ayah
@@ -2491,6 +2573,7 @@ export function App(): JSX.Element {
                 breadcrumbKey={breadcrumbKey}
                 rangeKeys={selectedRange}
                 onSelect={handleVerse}
+                onCornerHold={setCornerMenu}
                 onSelectRange={handleSelectRange}
                 onSelectWords={handleSelectWords}
                 /* Every turn ends where the arrow keys end — one `stepPage`, so
@@ -2848,6 +2931,14 @@ export function App(): JSX.Element {
             { caption: t.vdNote, onPick: () => noteOnVerse(verseMenu.key) },
             { caption: t.vdCopy, onPick: () => copyVerse(verseMenu.key) },
           ]}
+        />
+      )}
+      {cornerMenu && cornerMenuOf && (
+        <VerseMenu
+          name={t.verseMore(cornerMenuOf.name)}
+          around={cornerMenu.around}
+          onClose={closeCornerMenu}
+          items={cornerMenuOf.items}
         />
       )}
       {/* The way back from full screen, for B and C; A's way back is a tap. */}
