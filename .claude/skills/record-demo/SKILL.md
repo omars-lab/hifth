@@ -77,7 +77,7 @@ All in `scripts/` next to this file; each one's header says the rest.
 | script | what it does |
 | --- | --- |
 | `touch-marks.js` | the finger, the ring, the ripple and the step labels (loaded by `MARKS=1`) |
-| `make-gif.sh` | frames or a video → the looping GIF: 390 wide, 10 a second, 64 colours, the last frame held 1.5 s; refuses anything over 1 MB and says what to try. `--start <s>` skips the first moments, while a mock script is still setting the page up |
+| `make-gif.sh` | frames or a video → the looping GIF: 390 wide, 10 a second, 64 colours, the last frame held 1.5 s; refuses anything over 1 MB and says what to try. `--start <s>` skips the first moments, while a mock script is still setting the page up. Plays at half the recorded speed by default (`--slow 2`; the owner found real speed too quick to follow); pass a finished `.gif` as `--in` to slow one already made |
 | `frame-strip.sh` | chosen moments, numbered and labelled in a row — the folded picture under a clip, and the way to check it |
 | `side-by-side.sh` | two to four option clips in one GIF under their letters, playing in step; `--width 300` brings three phones under 1 MB |
 
