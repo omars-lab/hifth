@@ -716,6 +716,8 @@ export interface Strings {
   playToPick: string;
   playingRun(from: string, to: string): string;
   copiedLink(label: string): string;
+  cornerPlay: string;
+  cornerStart: string;
   fullScreen: string;
   showBars: string;
   fullScreenOn: string;
@@ -1259,6 +1261,8 @@ export function buildStrings(lang: Lang, m: Catalog): Strings {
     playToPick: m.playToPick,
     playingRun: (from, to) => m.playingRun({ from, to }),
     copiedLink: (label) => m.copiedLink({ label }),
+    cornerPlay: m.cornerPlay,
+    cornerStart: m.cornerStart,
     fullScreen: m.fullScreen,
     showBars: m.showBars,
     fullScreenOn: m.fullScreenOn,
