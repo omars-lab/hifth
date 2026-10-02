@@ -4,6 +4,7 @@ import { LOCALES } from "../lang";
 import { LOCALE_IDS } from "../messages/locales.gen";
 import { SOURCE_REPO, hasCommit, shortCommit, sourceUrl } from "../provenance";
 import { TURN_STYLES, type TurnStyle } from "../turn-style";
+import { VERSE_GESTURES, type VerseGestures } from "../verse-gestures";
 import styles from "./Colophon.module.css";
 
 interface ColophonProps {
@@ -18,6 +19,9 @@ interface ColophonProps {
   /** How a page turn looks — the reader's pick of three; remembered on this device. */
   turnStyle?: TurnStyle;
   onTurnStyle?: (style: TurnStyle) => void;
+  /** What a tap and a hold on a verse do; remembered on this device. */
+  verseGestures?: VerseGestures;
+  onVerseGestures?: (choice: VerseGestures) => void;
   /** Open the three tips strip. It no longer opens by itself (owner, 2026-09-25). */
   onShowTips?: () => void;
 }
@@ -161,6 +165,8 @@ export function Colophon({
   onToggleFisheye,
   turnStyle,
   onTurnStyle,
+  verseGestures,
+  onVerseGestures,
   onShowTips,
 }: ColophonProps): JSX.Element | null {
   const { t, dir, lang, setLang } = useT();
@@ -314,6 +320,32 @@ export function Colophon({
               ))}
             </div>
             <p className={styles.note}>{t.turnStyleNote}</p>
+          </section>
+        )}
+
+        {/* What a tap and a hold on a verse do (docs/design/verse-tap-and-hold.md):
+            three ways, so a radio group like the page turn's. */}
+        {verseGestures && onVerseGestures && (
+          <section className={styles.block} aria-labelledby="colophon-gestures">
+            <h3 className={styles.subhead} id="colophon-gestures">
+              {t.verseGesturesTitle}
+            </h3>
+            <div className={styles.langRow} role="radiogroup" aria-labelledby="colophon-gestures">
+              {VERSE_GESTURES.map((choice) => (
+                <button
+                  key={choice}
+                  type="button"
+                  role="radio"
+                  className={styles.lang}
+                  aria-checked={verseGestures === choice}
+                  data-verse-gestures={choice}
+                  onClick={() => onVerseGestures(choice)}
+                >
+                  {choice === "a" ? t.verseGesturesA : choice === "b" ? t.verseGesturesB : t.verseGesturesC}
+                </button>
+              ))}
+            </div>
+            <p className={styles.note}>{t.verseGesturesNote}</p>
           </section>
         )}
 
