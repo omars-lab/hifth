@@ -405,3 +405,42 @@ test.describe("Hifth · links straight into the commentary", () => {
     await expect.poll(() => page.evaluate(() => location.hash)).toBe("#/hafs-kfqc/2:255");
   });
 });
+
+test.describe("Hifth · the commentary drawer with the app in Arabic", () => {
+  // The drawer was pinned left to right and spoke only English. In Arabic its
+  // own words and layout now follow the app, while The Study Quran's English
+  // stays left to right inside it.
+  test.use({ locale: "ar" });
+  test.beforeEach(async ({ page }) => {
+    await page.addInitScript(() => localStorage.setItem("hifth.lang.v1", "ar"));
+  });
+
+  test("the drawer is laid out right to left and speaks Arabic; the book's English still reads left to right", async ({
+    page,
+  }) => {
+    await page.goto("/#/hafs-kfqc/2:255?open=commentary");
+    const note = sheet(page);
+    await expect(note).toBeVisible({ timeout: 20_000 });
+    await expect(note).toHaveAccessibleName(/^تفسير /);
+    expect(await note.evaluate((el) => getComputedStyle(el).direction)).toBe("rtl");
+
+    // Its own controls are laid out from the right: close sits at the left end.
+    const close = (await note.getByRole("button", { name: "إغلاق" }).boundingBox())!;
+    const title = (await note.getByRole("heading", { level: 2 }).boundingBox())!;
+    expect(close.x).toBeLessThan(title.x);
+
+    // The book's words: English, left to right, starting at the left edge.
+    const prose = note.getByRole("region", { name: "التفسير" });
+    await expect(prose).toHaveAttribute("lang", "en");
+    expect(await prose.evaluate((el) => getComputedStyle(el).direction)).toBe("ltr");
+    // Where the first line's words actually start, not the paragraph's box
+    // (which spans the column either way).
+    const gap = await prose.locator("p").first().evaluate((p) => {
+      const range = document.createRange();
+      range.selectNodeContents(p);
+      return range.getClientRects()[0]!.left - p.getBoundingClientRect().left;
+    });
+    expect(gap).toBeLessThan(2);
+    await page.screenshot({ path: test.info().outputPath("drawer-ar.png") });
+  });
+});

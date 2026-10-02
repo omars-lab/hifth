@@ -64,6 +64,8 @@ interface RawManifest {
   readonly license: string;
   readonly edition: string;
   readonly title?: string;
+  /** The language the book is written in (`ar`, `en`). */
+  readonly lang?: string;
   readonly surahs: Record<string, { readonly file: string }>;
 }
 
@@ -243,6 +245,7 @@ function sourceOf(manifest: RawManifest): TafsirSource | null {
     label: typeof manifest.title === "string" && manifest.title.length > 0 ? manifest.title : id,
     license: typeof manifest.license === "string" ? manifest.license : "private",
     edition: manifest.edition,
+    ...(typeof manifest.lang === "string" && manifest.lang.length > 0 ? { lang: manifest.lang } : {}),
   };
 }
 

@@ -72,15 +72,9 @@ export interface Catalog {
   readonly "coachSteps.2.title": string;
   readonly "coachSteps.3.body": string;
   readonly "coachSteps.3.title": string;
-  readonly commentaryEmpty: string;
-  readonly commentaryLemma: (d: { readonly range: "yes" | "other"; readonly aText: string | number; readonly zText: string | number }) => string;
-  readonly commentaryOcr: string;
-  readonly commentaryOcrNote: string;
-  readonly commentaryRefs: string;
-  readonly commentarySource: (d: { readonly label: string | number; readonly license: string | number }) => string;
+  readonly commentaryBy: (d: { readonly source: string | number }) => string;
+  readonly commentaryOn: (d: { readonly label: string | number }) => string;
   readonly commentaryTitle: string;
-  readonly commentaryTrigger: string;
-  readonly commentaryUnavailable: string;
   readonly copied: string;
   readonly copiedLink: (d: { readonly label: string | number }) => string;
   readonly copyFailed: string;
@@ -113,6 +107,7 @@ export interface Catalog {
   readonly fullScreenOn: string;
   readonly goTo: string;
   readonly goToLong: string;
+  readonly goToVerse: (d: { readonly label: string | number }) => string;
   readonly hereTag: string;
   readonly highlighted: (d: { readonly span: string | number }) => string;
   readonly hizbN: (d: { readonly hizbText: string | number }) => string;
@@ -194,6 +189,8 @@ export interface Catalog {
   readonly notePin: (d: { readonly label: string | number }) => string;
   readonly noteRestored: string;
   readonly noteSaved: string;
+  readonly noteShowAll: string;
+  readonly noteShowLess: string;
   readonly "notices.capped.body": string;
   readonly "notices.capped.title": string;
   readonly "notices.install-ios.body": string;
@@ -255,6 +252,8 @@ export interface Catalog {
   readonly rangeFrom: (d: { readonly refs: string | number }) => string;
   readonly rangeUnavailable: string;
   readonly refJoin: string;
+  readonly relatedLede: (d: { readonly source: string | number }) => string;
+  readonly relatedVerses: string;
   readonly rootsAria: (d: { readonly countText: string | number }) => string;
   readonly rootsCredit: string;
   readonly rootsEmpty: string;
@@ -307,6 +306,7 @@ export interface Catalog {
   readonly stageLoading: string;
   readonly stateOff: string;
   readonly stateOn: string;
+  readonly surahIntro: string;
   readonly surahN: (d: { readonly surahText: string | number }) => string;
   readonly tafsirImportBody: string;
   readonly tafsirImportBusy: string;

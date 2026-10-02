@@ -8,7 +8,7 @@ import {
 } from "@hifth/core";
 import { useT } from "../i18n";
 import { splitCitations } from "../tafsir/citations";
-import type { CommentaryNote } from "../tafsir/commentary";
+import { textDir, type CommentaryNote } from "../tafsir/commentary";
 import styles from "./CommentarySheet.module.css";
 
 /**
@@ -31,13 +31,14 @@ export function CommentaryTrigger({
   /** A word under the glyph, shown when the button sits in the verse drawer. */
   caption?: string;
 }): JSX.Element | null {
+  const { t } = useT();
   if (!has) return null;
   return (
     <button
       type="button"
       className={styles.trigger}
       aria-expanded={open}
-      aria-label={`${source} commentary`}
+      aria-label={t.commentaryBy(source)}
       onClick={onToggle}
     >
       <span aria-hidden="true">✎</span>
@@ -205,6 +206,13 @@ export function CommentarySheet({
   const edition = parseAyahKey(entry.ayahKey)?.edition;
   const citedKey = (surah: number, ayah: number): string | null =>
     edition ? formatAyahKey(edition, surah, ayah) : null;
+  // The drawer's own words follow the app's language; the source's words follow
+  // the source's, so an Arabic tafsir reads right to left in an English app and
+  // The Study Quran reads left to right in an Arabic one.
+  const own = {
+    dir: textDir(entry.source.lang),
+    ...(entry.source.lang ? { lang: entry.source.lang } : {}),
+  };
 
   return (
     <>
@@ -214,11 +222,7 @@ export function CommentarySheet({
         className={styles.sheet}
         role="dialog"
         aria-modal={modal}
-        aria-label={`Commentary on ${label}`}
-        // The only source on screen today is English (The Study Quran), so this
-        // surface reads left-to-right regardless of the app's chrome direction.
-        // An Arabic source needs its own direction first (see the backlog).
-        dir="ltr"
+        aria-label={t.commentaryOn(label)}
         data-side={side ?? undefined}
         data-tall={tall || undefined}
         tabIndex={-1}
@@ -233,7 +237,7 @@ export function CommentarySheet({
           <button
             type="button"
             className={styles.grip}
-            aria-label={tall ? "Show less of the note" : "Show all of the note"}
+            aria-label={tall ? t.noteShowLess : t.noteShowAll}
             aria-expanded={tall}
             onClick={() => setTall((v) => !v)}
           />
@@ -243,7 +247,9 @@ export function CommentarySheet({
             ✎
           </span>
           <div className={styles.heading}>
-            <h2 className={styles.title}>{entry.source.label}</h2>
+            <h2 className={styles.title} {...own}>
+              {entry.source.label}
+            </h2>
             <span className={styles.ref}>{label}</span>
           </div>
           <button type="button" className={styles.close} onClick={onClose} aria-label={t.close}>
@@ -254,13 +260,13 @@ export function CommentarySheet({
         {back && (
           <button type="button" className={styles.back} onClick={back.onBack}>
             <span aria-hidden="true">↩ </span>
-            Back to {back.label}
+            {t.beadBack(back.label)}
           </button>
         )}
 
         <div className={styles.body}>
           {entry.intro && (
-            <section className={styles.intro} aria-label="Surah introduction">
+            <section className={styles.intro} aria-label={t.surahIntro} {...own}>
               <h3 className={styles.introTitle}>{entry.intro.title}</h3>
               {entry.intro.paragraphs.map((para, i) => (
                 <p key={i} className={styles.introPara}>
@@ -271,10 +277,12 @@ export function CommentarySheet({
           )}
 
           {entry.translation && (
-            <blockquote className={styles.translation}>{entry.translation}</blockquote>
+            <blockquote className={styles.translation} {...own}>
+              {entry.translation}
+            </blockquote>
           )}
 
-          <section className={styles.commentary} aria-label="Commentary">
+          <section className={styles.commentary} aria-label={t.commentaryTitle} {...own}>
             {entry.paragraphs.map((para, i) => (
               <p key={i} className={styles.para}>
                 {splitCitations(para).map((part, j) => {
@@ -287,7 +295,7 @@ export function CommentarySheet({
                       type="button"
                       className={styles.cite}
                       disabled={!onGo || !(canHop?.(key) ?? true)}
-                      aria-label={`Go to ${t.ayahLabel(key) ?? part.text}`}
+                      aria-label={t.goToVerse(t.ayahLabel(key) ?? part.text)}
                       onClick={() => onGo?.(key)}
                     >
                       {part.text}
@@ -299,11 +307,9 @@ export function CommentarySheet({
           </section>
 
           {roads.length > 0 && (
-            <section className={styles.related} aria-label="Related verses">
-              <h3 className={styles.relatedTitle}>Related verses</h3>
-              <p className={styles.relatedLede}>
-                Where {entry.source.label} connects this verse. Tap one to go there.
-              </p>
+            <section className={styles.related} aria-label={t.relatedVerses}>
+              <h3 className={styles.relatedTitle}>{t.relatedVerses}</h3>
+              <p className={styles.relatedLede}>{t.relatedLede(entry.source.label)}</p>
               <ul className={styles.roads}>
                 {orderForHifz(roads).map((edge) => {
                   const enabled = canHop ? canHop(edge.to) : true;
@@ -321,7 +327,11 @@ export function CommentarySheet({
                           {label}
                           {edge.twin && <span className={styles.badge}>{t.twin}</span>}
                         </span>
-                        {edge.note && <span className={styles.roadNote}>{edge.note}</span>}
+                        {edge.note && (
+                          <span className={styles.roadNote} {...own}>
+                            {edge.note}
+                          </span>
+                        )}
                         {!enabled && (
                           <span className={styles.roadUnavailable}>{t.pageUnavailable}</span>
                         )}
@@ -338,7 +348,9 @@ export function CommentarySheet({
         </div>
 
         <footer className={styles.credit}>
-          {entry.source.label} — {entry.source.license}.
+          <span {...own}>
+            {entry.source.label} — {entry.source.license}.
+          </span>
           {creditNote && <span className={styles.creditNote}>{creditNote}</span>}
         </footer>
       </div>

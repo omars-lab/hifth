@@ -89,6 +89,20 @@ export function commentaryEdges(
   return edges;
 }
 
+/** Languages written right to left, by their first part (`ar` of `ar-EG`). */
+const RIGHT_TO_LEFT = new Set(["ar", "fa", "ur", "he", "ps", "sd", "ug", "yi", "ckb", "dv"]);
+
+/**
+ * Which way a source's words read. A source that never said its language gets
+ * `auto`, so the browser judges each paragraph by its first letters: right for
+ * an Arabic one even in an English app, which a guess either way would get wrong
+ * half the time.
+ */
+export function textDir(lang: string | undefined): "ltr" | "rtl" | "auto" {
+  if (!lang) return "auto";
+  return RIGHT_TO_LEFT.has(lang.toLowerCase().split("-")[0]!) ? "rtl" : "ltr";
+}
+
 /** A surah's introduction, led into a note on the surah's opening verse. */
 export interface CommentaryIntro {
   readonly title: string;

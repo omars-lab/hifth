@@ -33,6 +33,8 @@ interface ImportMetaEnv {
   readonly VITE_TAFSIR_QF_LICENSE?: string;
   readonly VITE_TAFSIR_QF_EDITION?: string;
   readonly VITE_TAFSIR_QF_TOKEN?: string;
+  /** The language the chosen edition is written in (`ar`, `en`), for its direction. */
+  readonly VITE_TAFSIR_QF_LANG?: string;
   /**
    * Set only by `make dev-qul`, which runs the dev server with the store-over-print
    * overlay mounted (`src/qul-diff/overlay.ts`). Absent everywhere else, so the
