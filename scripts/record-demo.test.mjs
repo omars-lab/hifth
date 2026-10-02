@@ -8,6 +8,7 @@ import { execFileSync, spawnSync } from "node:child_process";
 import { mkdtempSync, readFileSync, rmSync, statSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { makeFixture, dropFixture, runGate } from "./gate-fixture.mjs";
 
 const S = ".claude/skills/record-demo/scripts";
 const have = (cmd, arg) => spawnSync(cmd, [arg]).status === 0;
@@ -74,6 +75,40 @@ test("make-gif --start skips the opening of a frames recording, so the clip open
 
 const total = (gif) => gifDelays(readFileSync(gif)).reduce((a, d) => a + d, 0);
 
+const packer = spawnSync("which", ["gifsicle"]).status === 0;
+
+test("make-gif's clips all come out at the one standard pace, packed, so the docs check passes them", { skip: skip || (!packer && "needs gifsicle") }, () => {
+  // Owner, 2026-10-02: "slow all gifs … standardize the speed", and "does our hook also make
+  // sure the gif is as efficient/small as possible?"
+  const dir = mkdtempSync(join(tmpdir(), "make-gif-pace-"));
+  try {
+    const list = frames(dir, ["#faf7f0", "#e0a030", "#14181c", "#3070c0", "#faf7f0", "#e0a030"], 0.1);
+    const fromFrames = join(dir, "from-frames.gif");
+    execFileSync("bash", [`${S}/make-gif.sh`, "--in", list, "--out", fromFrames], { stdio: "pipe" });
+    // A clip made at real speed by some other tool, at its own odd pace (12 a second).
+    const real = join(dir, "real.gif");
+    execFileSync("magick", ["-delay", "8", "-size", "200x120", "xc:#faf7f0", "xc:#e0a030", "xc:#14181c", "xc:#3070c0", "xc:#faf7f0", "xc:#e0a030", "-loop", "0", real]);
+    const retimed = join(dir, "retimed.gif");
+    execFileSync("bash", [`${S}/make-gif.sh`, "--in", real, "--out", retimed], { stdio: "pipe" });
+    for (const gif of [fromFrames, retimed]) {
+      const delays = gifDelays(readFileSync(gif)).slice(0, -1);
+      assert.deepEqual([...new Set(delays)], [20], `${gif}: every frame but the last shown 0.2 s, got ${delays}`);
+    }
+    const root = makeFixture({
+      "docs/a.gif": readFileSync(fromFrames),
+      "docs/b.gif": readFileSync(retimed),
+    });
+    try {
+      const r = runGate("gifs", root);
+      assert.equal(r.status, 0, r.out);
+    } finally {
+      dropFixture(root);
+    }
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
 test("make-gif plays a recording twice as slow as it happened, so a reader can follow each tap", { skip }, () => {
   // Owner, 2026-10-02: at the app's real speed the option clips were too quick to follow.
   const dir = mkdtempSync(join(tmpdir(), "make-gif-slow-"));
@@ -102,8 +137,11 @@ test("make-gif slows a GIF that is already made, keeping its width", { skip }, (
     execFileSync("bash", [`${S}/make-gif.sh`, "--in", made, "--out", slower], { stdio: "pipe" });
     const buf = readFileSync(slower);
     assert.equal(buf.readUInt16LE(6), 240, "kept at the width it was made");
-    const ratio = total(slower) / total(made);
-    assert.ok(ratio > 1.9 && ratio < 2.1, `expected twice as long, got ${ratio.toFixed(2)}×`);
+    // The moving part doubles; the end hold stays the standard 1.5 s rather than doubling too.
+    const moving = (gif) => total(gif) - gifDelays(readFileSync(gif)).at(-1);
+    const ratio = moving(slower) / moving(made);
+    assert.ok(ratio > 1.9 && ratio < 2.1, `expected the moving part twice as long, got ${ratio.toFixed(2)}×`);
+    assert.equal(gifDelays(buf).at(-1), 150, "the end held 1.5 s");
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }
@@ -157,6 +195,16 @@ test("side-by-side joins option clips into one GIF, each under its letter, the s
     // As long as the longer clip: B is 2 s plus its 1.5 s rest.
     const secs = gifDelays(buf).reduce((x, d) => x + d, 0) / 100;
     assert.ok(secs >= 3.2, `expected at least 3.2 s, got ${secs}`);
+    // The joined clip keeps the clips' own pace and is packed, like any clip in the docs.
+    if (packer) {
+      const root = makeFixture({ "docs/ab.gif": buf });
+      try {
+        const r = runGate("gifs", root);
+        assert.equal(r.status, 0, r.out);
+      } finally {
+        dropFixture(root);
+      }
+    }
     // --width narrows each clip, the way to bring three phones under the size limit.
     const narrow = join(dir, "narrow.gif");
     execFileSync("bash", [`${S}/side-by-side.sh`, "--out", narrow, "--width", "200", `A=${join(dir, "a.gif")}`, `B=${join(dir, "b.gif")}`], { stdio: "pipe" });
