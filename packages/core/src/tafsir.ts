@@ -28,6 +28,10 @@ export interface TafsirSource {
   readonly label: string;
   readonly license: string;
   readonly edition: string;
+  /** The language its words are written in (`en`, `ar`), so they are read in the
+   * right direction whatever language the app is in. Absent when the source
+   * never said; the reader's browser then judges each paragraph by its letters. */
+  readonly lang?: string;
 }
 
 /**

@@ -280,6 +280,14 @@ export interface Strings {
   /** The hop sheet's own accessible name: its title and how many rows. */
   hopSheetAria(title: string, count: number): string;
   hopTo(label: string): string;
+  commentaryOn(label: string): string;
+  commentaryBy(source: string): string;
+  noteShowAll: string;
+  noteShowLess: string;
+  surahIntro: string;
+  relatedVerses: string;
+  relatedLede(source: string): string;
+  goToVerse(label: string): string;
   twin: string;
   pageUnavailable: string;
   /** The outbound-link label on a hop row whose page we do not carry. */
@@ -403,17 +411,9 @@ export interface Strings {
   /* ---- commentary (tafsir) sheet ------------------------------------------ */
   commentaryTitle: string;
   /** aria label for the ✎ trigger. */
-  commentaryTrigger: string;
   /** "{source} · {licence}" — a note is never anonymous. */
-  commentarySource(label: string, license: string): string;
-  commentaryEmpty: string;
   /** "Ayah 30" / "Ayahs 30–39" — the span a note attaches to. */
-  commentaryLemma(a: number, z: number): string;
   /** Badge on an OCR-recovered run; `…Note` is its longer tooltip. */
-  commentaryOcr: string;
-  commentaryOcrNote: string;
-  commentaryRefs: string;
-  commentaryUnavailable: string;
 
   /* ---- side-loading a commentary edition (Colophon) ----------------------- */
   tafsirImportTitle: string;
@@ -880,6 +880,14 @@ export function buildStrings(lang: Lang, m: Catalog): Strings {
     chipAria: (direction, count) => m.chipAria({ direction, countText: n(count) }),
     hopSheetAria: (title, count) => m.hopSheetAria({ title, count }),
     hopTo: (label) => m.hopTo({ label }),
+    commentaryOn: (label) => m.commentaryOn({ label }),
+    commentaryBy: (source) => m.commentaryBy({ source }),
+    noteShowAll: m.noteShowAll,
+    noteShowLess: m.noteShowLess,
+    surahIntro: m.surahIntro,
+    relatedVerses: m.relatedVerses,
+    relatedLede: (source) => m.relatedLede({ source }),
+    goToVerse: (label) => m.goToVerse({ label }),
     twin: m.twin,
     pageUnavailable: m.pageUnavailable,
     openOnQul: m.openOnQul,
@@ -1002,15 +1010,6 @@ export function buildStrings(lang: Lang, m: Catalog): Strings {
     rootsUnavailable: m.rootsUnavailable,
     rootsCredit: m.rootsCredit,
     commentaryTitle: m.commentaryTitle,
-    commentaryTrigger: m.commentaryTrigger,
-    commentarySource: (label, license) => m.commentarySource({ label, license }),
-    commentaryEmpty: m.commentaryEmpty,
-    commentaryLemma: (a, z) =>
-      m.commentaryLemma({ range: z > a ? "yes" : "other", aText: n(a), zText: n(z) }),
-    commentaryOcr: m.commentaryOcr,
-    commentaryOcrNote: m.commentaryOcrNote,
-    commentaryRefs: m.commentaryRefs,
-    commentaryUnavailable: m.commentaryUnavailable,
     tafsirImportTitle: m.tafsirImportTitle,
     tafsirImportBody: m.tafsirImportBody,
     tafsirImportButton: m.tafsirImportButton,

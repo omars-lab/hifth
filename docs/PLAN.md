@@ -1213,7 +1213,7 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     no commentary: the drawer is only built into an app that has a source, which today means
     only the private pitch build. The story is in
     [`issues/tafsir-seam-not-wired.md`](issues/tafsir-seam-not-wired.md).
-24. **The commentary drawer can only read English, left to right.** Left over from 23, found
+24. ~~**The commentary drawer can only read English, left to right.**~~ Left over from 23, found
     2026-09-30. The drawer's own words ("Surah introduction", "Hop to", the credit line) are
     English only, and it is set to read left to right, because the only source on screen is
     The Study Quran. The live tafsir service and a reader's own book can be Arabic.
@@ -1221,6 +1221,13 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     words go into both languages, its reading direction follows the source's language, and a
     browser test opens the drawer on a live source. Nothing a reader sees today is affected:
     no public build has a commentary source switched on.
+    **Done 2026-10-02**, test first. The drawer's own words are in both languages and its
+    frame follows the app's direction; each source says the language it is written in (the
+    live service through its build setting, a loaded book through its header, The Study
+    Quran as English), and its words read in that direction whatever the app's language. A
+    source that never says lets the browser judge each paragraph by its letters. The browser
+    test is in the private pitch suite, the only build where the drawer exists: the app in
+    Arabic, the drawer laid out right to left, the book's English still left to right.
 25. ~~**Long-press a verse for a small menu of what you can do with it.**~~ Asked 2026-09-30, from
     another reading app the owner uses. Holding a finger on a verse opens a small menu headed
     with the surah and verse ("Al-Baqara: 174"): play it, play from it to a later verse, its
