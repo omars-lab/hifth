@@ -72,6 +72,43 @@ test("make-gif --start skips the opening of a frames recording, so the clip open
   }
 });
 
+const total = (gif) => gifDelays(readFileSync(gif)).reduce((a, d) => a + d, 0);
+
+test("make-gif plays a recording twice as slow as it happened, so a reader can follow each tap", { skip }, () => {
+  // Owner, 2026-10-02: at the app's real speed the option clips were too quick to follow.
+  const dir = mkdtempSync(join(tmpdir(), "make-gif-slow-"));
+  try {
+    const list = frames(dir, ["#faf7f0", "#e0a030", "#14181c", "#3070c0"], 0.5);
+    const real = join(dir, "real.gif");
+    const slowed = join(dir, "slowed.gif");
+    execFileSync("bash", [`${S}/make-gif.sh`, "--in", list, "--out", real, "--slow", "1"], { stdio: "pipe" });
+    execFileSync("bash", [`${S}/make-gif.sh`, "--in", list, "--out", slowed], { stdio: "pipe" });
+    // Twice as slow adds the recording's own length again; the 1.5 s end hold is the same in both.
+    const recorded = total(real) - 150;
+    const added = total(slowed) - total(real);
+    assert.ok(Math.abs(added - recorded) <= 20, `expected ~${recorded} cs more, got ${added}`);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test("make-gif slows a GIF that is already made, keeping its width", { skip }, () => {
+  const dir = mkdtempSync(join(tmpdir(), "make-gif-reslow-"));
+  try {
+    const list = frames(dir, ["#faf7f0", "#e0a030", "#14181c", "#3070c0"], 0.5);
+    const made = join(dir, "made.gif");
+    const slower = join(dir, "slower.gif");
+    execFileSync("bash", [`${S}/make-gif.sh`, "--in", list, "--out", made, "--width", "240", "--slow", "1"], { stdio: "pipe" });
+    execFileSync("bash", [`${S}/make-gif.sh`, "--in", made, "--out", slower], { stdio: "pipe" });
+    const buf = readFileSync(slower);
+    assert.equal(buf.readUInt16LE(6), 240, "kept at the width it was made");
+    const ratio = total(slower) / total(made);
+    assert.ok(ratio > 1.9 && ratio < 2.1, `expected twice as long, got ${ratio.toFixed(2)}×`);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
 test("make-gif refuses a GIF over its size limit and says what to try next", { skip }, () => {
   const dir = mkdtempSync(join(tmpdir(), "make-gif-"));
   try {
