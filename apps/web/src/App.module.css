@@ -286,3 +286,44 @@
   color: var(--ink-soft);
   font-size: var(--text-sm);
 }
+
+/* Full screen (docs/design/verse-tap-and-hold.md): every bar goes, and the
+   page takes the room they leave. */
+.app[data-full] > :is(header, footer, nav, [role="toolbar"]) {
+  display: none;
+}
+
+/* The bottom line's way into full screen, for options B and C. It fills the
+   whole height of the line, padding included, rather than asking for a touch
+   size of its own: the line is already that tall, and a taller one would take
+   the room from the page. */
+.fullBtn {
+  align-self: stretch;
+  min-height: 0;
+  margin-block: calc(-1 * var(--space-2));
+  margin-inline-start: auto;
+  padding: 0 var(--space-3);
+  border: 0;
+  background: transparent;
+  color: var(--ink-soft);
+  font: inherit;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+/* The way back, small and in a corner the text does not reach. */
+.showBars {
+  position: fixed;
+  inset-block-end: calc(var(--space-2) + env(safe-area-inset-bottom));
+  inset-inline-end: var(--space-2);
+  z-index: 30;
+  min-height: var(--touch-min);
+  padding: 0 var(--space-3);
+  border: 1px solid var(--hairline);
+  border-radius: 999px;
+  background: var(--paper-raised);
+  color: inherit;
+  font: inherit;
+  opacity: 0.85;
+  cursor: pointer;
+}

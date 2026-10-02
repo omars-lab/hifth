@@ -173,6 +173,7 @@ export {
   type GroupId,
   type StyleToken,
   type LabelFor,
+  type PressKind,
   type Rect,
   type Resolved,
 } from "./highlighter.js";
