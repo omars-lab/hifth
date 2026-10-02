@@ -265,6 +265,15 @@
   cursor: pointer;
 }
 
+/* A pressed verse takes focus, so the arrows carry on from it, and Chrome then
+   draws its own blue ring on the shape even though the press was not the
+   keyboard's: beside the orange, on a phone, it read as a stray mark. The ring
+   is for someone moving with the keys, who still gets the app's own
+   (global.css, `:focus-visible`). */
+.host :global(svg) :global(.ayahPolygon):focus:not(:focus-visible) {
+  outline: none;
+}
+
 /* A `.host[data-status]` cross-fade lived here and drew nothing: no code has
    ever written that attribute (`page-turning.md` §7 ⑧). It was left in place
    because §3.1 of `page-transition.md` was about to need exactly this mechanism
