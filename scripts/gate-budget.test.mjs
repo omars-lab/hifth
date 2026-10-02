@@ -14,7 +14,7 @@ import { makeFixture, dropFixture, runGate } from "./gate-fixture.mjs";
 
 const DIST = "apps/web/dist";
 const PLAIN = 'console.log("hifth");';
-const DRAWER = 'const label = "Surah introduction";';
+const DRAWER = 'h("div", { "data-tall": tall });';
 const HELD = 'fetch("assets/private/study-quran/2.json");';
 
 /** A built app of one script, with a baseline that matches it so only the leak check can fail. */
@@ -50,7 +50,7 @@ test("gate:budget refuses the drawer in a build with no commentary source", () =
   const r = check(DRAWER);
   assert.equal(r.status, 1, r.out);
   assert.match(r.out, /commentary code is in a build with no commentary source/);
-  assert.match(r.out, /"Surah introduction"/);
+  assert.match(r.out, /"data-tall"/);
 });
 
 test("gate:budget passes the drawer in a public build set up for the live service", () => {
@@ -66,5 +66,11 @@ test("gate:budget still refuses the pitch's held book in a live-service build", 
 
 test("gate:budget passes the drawer and the held book in the pitch build", () => {
   const r = check(`${DRAWER}${HELD}`, { VITE_PITCH: "1" });
+  assert.equal(r.status, 0, r.out);
+});
+
+test("gate:budget does not mistake the drawer's words for its code", () => {
+  // Its words sit in the shared word list, which every build carries.
+  const r = check('const words = { surahIntro: "Surah introduction" };');
   assert.equal(r.status, 0, r.out);
 });

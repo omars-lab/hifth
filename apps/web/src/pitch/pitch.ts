@@ -55,6 +55,7 @@ export const STUDY_QURAN: TafsirSource = {
   label: "The Study Quran",
   license: "Seyyed Hossein Nasr, editor-in-chief (HarperOne, 2015)",
   edition: "hafs-kfqc",
+  lang: "en",
 };
 
 const BASE = import.meta.env.BASE_URL;

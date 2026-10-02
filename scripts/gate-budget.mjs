@@ -100,11 +100,13 @@ rows.sort((a, b) => b[1] - a[1]);
 // constant the bundler could fold, and the whole commentary sheet shipped
 // unused, pushing the app over this budget. The drawer is drawn only when a
 // build has a commentary source (the pitch, or a live service it was built
-// for); the pitch's held book only in the pitch.
+// for); the pitch's held book only in the pitch. The marker is a name only the
+// drawer's own code writes, not one of its words: those live in the shared word
+// list with every other screen's, so they are in every build.
 const PITCH = Boolean(process.env.VITE_PITCH);
 const LIVE = Boolean(process.env.VITE_TAFSIR_QF_BASE && process.env.VITE_TAFSIR_QF_ID);
 const MUST_BE_ABSENT = [
-  ...(PITCH || LIVE ? [] : ["Surah introduction"]),
+  ...(PITCH || LIVE ? [] : ["data-tall"]),
   ...(PITCH ? [] : ["private/study-quran"]),
 ];
 const leaked = jsFiles.flatMap((f) => {

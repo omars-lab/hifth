@@ -2198,10 +2198,11 @@
         "file": "docs/PLAN.md",
         "item": "24"
       },
-      "status": "open",
+      "status": "fixed",
       "severity": "risk",
       "owner": "agent",
-      "note": "The drawer's words are English only and it reads left to right; owed before the live tafsir service or a reader's own book is switched on for readers. Related decision: tafsir-provider."
+      "note": "The drawer's words were English only and it read left to right; owed before the live tafsir service or a reader's own book is switched on for readers. Related decision: tafsir-provider. Fixed 2026-10-02: its words are in both languages, its frame follows the app, and each source's words read in the source's own direction.",
+      "closedBy": "apps/web/src/components/CommentarySheet.test.tsx"
     },
     {
       "id": "mac-ui-test-needs-permission",

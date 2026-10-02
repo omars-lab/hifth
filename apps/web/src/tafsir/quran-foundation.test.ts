@@ -72,6 +72,15 @@ describe("liveTafsirConfigFromEnv", () => {
       label: "al-Muyassar",
     });
   });
+
+  it("carries the edition's language through to its source, so the drawer reads it the right way", () => {
+    const env = { VITE_TAFSIR_QF_BASE: "https://x.test", VITE_TAFSIR_QF_ID: "16", VITE_TAFSIR_QF_LANG: "ar" } as ImportMetaEnv;
+    const config = liveTafsirConfigFromEnv(env)!;
+    expect(config.lang).toBe("ar");
+    expect(makeLiveTafsirProvider(config, fakeFetch(chapterReply([]))).source.lang).toBe("ar");
+    const unsaid = liveTafsirConfigFromEnv({ VITE_TAFSIR_QF_BASE: "https://x.test", VITE_TAFSIR_QF_ID: "16" } as ImportMetaEnv)!;
+    expect("lang" in makeLiveTafsirProvider(unsaid, fakeFetch(chapterReply([]))).source).toBe(false);
+  });
 });
 
 describe("makeLiveTafsirProvider", () => {
