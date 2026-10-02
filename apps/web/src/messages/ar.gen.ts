@@ -90,6 +90,8 @@ const messages: Catalog = {
   copied: "نُسخ الرابط",
   copiedLink: (d) => "نُسخ رابط " + d.label,
   copyFailed: "تعذّر النسخ",
+  cornerPlay: "تلاوة",
+  cornerStart: "اذهب إلى البداية",
   cropCaption: (d) => "الصفحة " + d.page + " · طبعة مجمع الملك فهد",
   cropClose: "إغلاق",
   cropSave: "حفظ الصورة",

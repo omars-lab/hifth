@@ -324,6 +324,8 @@
   "playToPick": "Tap the verse to stop at",
   "playingRun": "Playing {from} to {to}",
   "copiedLink": "Copied a link to {label}",
+  "cornerPlay": "Play",
+  "cornerStart": "Go to the start",
   "fullScreen": "Full screen",
   "showBars": "Show the bars",
   "fullScreenOn": "Full screen",

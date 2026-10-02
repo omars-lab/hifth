@@ -175,6 +175,145 @@ test.describe("Hifth · tap and hold on a verse", () => {
   });
 });
 
+/*
+ * The page's corners answer a hold too (PLAN 27, owner 2026-09-30): the page
+ * number acts on the page, the surah's name on the surah, the juz on the juz,
+ * each with its own small menu, the way a hold on a verse acts on the verse.
+ */
+test.describe("Hifth · holding the page's corners", () => {
+  const corner = (page: Page, which: "page" | "surah" | "juz"): Locator =>
+    page.locator(`[data-host-page="7"] [data-running-head="${which}"]`);
+  const menu = (page: Page): Locator => page.getByRole("menu", { name: /^More for / });
+  const said = (page: Page): Locator => page.locator('[role="status"][aria-live="polite"]');
+
+  async function holdCorner(page: Page, which: "page" | "surah" | "juz"): Promise<void> {
+    const b = (await corner(page, which).boundingBox())!;
+    await page.mouse.move(b.x + b.width / 2, b.y + b.height / 2);
+    await page.mouse.down();
+    await page.waitForTimeout(600);
+    await page.mouse.up();
+  }
+
+  async function open(page: Page): Promise<void> {
+    await page.addInitScript(() => {
+      const w = window as unknown as { copied: string[]; shared: string[] };
+      w.copied = [];
+      w.shared = [];
+      Object.defineProperty(navigator, "clipboard", {
+        configurable: true,
+        value: { writeText: async (s: string) => void w.copied.push(s) },
+      });
+      Object.defineProperty(navigator, "share", {
+        configurable: true,
+        value: async (d: { url: string }) => void w.shared.push(d.url),
+      });
+      HTMLMediaElement.prototype.play = () => Promise.resolve();
+    });
+    await openWith(page, null);
+  }
+
+  test("each corner opens its own menu, named for what was held", async ({ page }) => {
+    await open(page);
+    // Nothing lies over a label: what a press there reaches is the label.
+    for (const which of ["surah", "juz"] as const) {
+      const b = (await corner(page, which).boundingBox())!;
+      for (const fx of [0.1, 0.5, 0.9]) {
+        const hit = await page.evaluate(
+          ([x, y]) => (document.elementFromPoint(x!, y!) as HTMLElement | null)?.dataset.runningHead ?? "something else",
+          [b.x + b.width * fx, b.y + b.height / 2],
+        );
+        expect(hit, `${which} at ${fx} of its width`).toBe(which);
+      }
+    }
+
+    await holdCorner(page, "surah");
+    await expect(menu(page)).toHaveAccessibleName("More for Al-Baqarah");
+    await expect(menu(page).getByRole("menuitem")).toHaveText(["Play", "Go to the start", "Copy", "Share"]);
+    await page.keyboard.press("Escape");
+
+    await holdCorner(page, "juz");
+    await expect(menu(page)).toHaveAccessibleName("More for Juz 1");
+    await expect(menu(page).getByRole("menuitem")).toHaveText(["Play", "Go to the start", "Copy", "Share"]);
+    await page.keyboard.press("Escape");
+
+    // On a phone the bottom bar lies over the foot of the page, so the page
+    // number is reached the way a reader would reach it: full screen first.
+    if (test.info().project.name !== "desktop") {
+      await page.getByRole("button", { name: "Full screen" }).click();
+      await expect(page.getByRole("button", { name: "Show the bars" })).toBeVisible();
+    }
+    // The bars slide away, and the page settles into the room they leave.
+    await expect
+      .poll(async () => {
+        const b = (await corner(page, "page").boundingBox())!;
+        return page.evaluate(
+          ([x, y]) => (document.elementFromPoint(x!, y!) as HTMLElement | null)?.dataset.runningHead ?? "something else",
+          [b.x + b.width / 2, b.y + b.height / 2],
+        );
+      }, { message: "nothing lies over the page number" })
+      .toBe("page");
+    await page.waitForTimeout(400);
+    await holdCorner(page, "page");
+    await expect(menu(page)).toHaveAccessibleName("More for Page 7");
+    await expect(menu(page).getByRole("menuitem")).toHaveText(["Play", "Bookmark", "Copy", "Share"]);
+  });
+
+  test("a quick tap on a corner opens nothing", async ({ page, isMobile }) => {
+    await open(page);
+    const b = (await corner(page, "surah").boundingBox())!;
+    if (isMobile) await page.touchscreen.tap(b.x + b.width / 2, b.y + b.height / 2);
+    else await page.mouse.click(b.x + b.width / 2, b.y + b.height / 2);
+    await page.waitForTimeout(300);
+    await expect(menu(page)).toHaveCount(0);
+  });
+
+  test("the page's menu plays the page, bookmarks it, copies and shares its link", async ({ page }) => {
+    test.skip(test.info().project.name !== "desktop", "what each item does is the same on every device");
+    await open(page);
+    await holdCorner(page, "page");
+    await menu(page).getByRole("menuitem", { name: "Play" }).click();
+    await expect(said(page)).toHaveText("Playing Al-Baqarah · 2:38 to 2:48");
+
+    await holdCorner(page, "page");
+    await menu(page).getByRole("menuitem", { name: "Copy" }).click();
+    await expect(said(page)).toHaveText("Copied a link to Page 7");
+    const copied = await page.evaluate(() => (window as unknown as { copied: string[] }).copied);
+    expect(copied).toHaveLength(1);
+    expect(copied[0]).toMatch(/^Page 7 — http.*#\/hafs-kfqc\/p7$/);
+
+    await holdCorner(page, "page");
+    await menu(page).getByRole("menuitem", { name: "Share" }).click();
+    await expect.poll(() => page.evaluate(() => (window as unknown as { shared: string[] }).shared)).toEqual([
+      expect.stringMatching(/#\/hafs-kfqc\/p7$/),
+    ]);
+
+    await holdCorner(page, "page");
+    await menu(page).getByRole("menuitem", { name: "Bookmark" }).click();
+    await expect(said(page)).toContainText("Bookmark dropped");
+  });
+
+  test("the surah's and the juz's menus play all of it and go to where it starts", async ({ page }) => {
+    test.skip(test.info().project.name !== "desktop", "what each item does is the same on every device");
+    await open(page);
+    await holdCorner(page, "surah");
+    await menu(page).getByRole("menuitem", { name: "Play" }).click();
+    await expect(said(page)).toHaveText("Playing Al-Baqarah · 2:1 to 2:286");
+
+    await holdCorner(page, "juz");
+    await menu(page).getByRole("menuitem", { name: "Play" }).click();
+    await expect(said(page)).toHaveText("Playing Al-Fatihah · 1:1 to Al-Baqarah · 2:141");
+
+    await holdCorner(page, "juz");
+    await menu(page).getByRole("menuitem", { name: "Copy" }).click();
+    const copied = await page.evaluate(() => (window as unknown as { copied: string[] }).copied);
+    expect(copied[0]).toMatch(/^Juz 1 — http.*#\/hafs-kfqc\/1:1$/);
+
+    await holdCorner(page, "surah");
+    await menu(page).getByRole("menuitem", { name: "Go to the start" }).click();
+    await expect(page).toHaveURL(/#\/hafs-kfqc\/2:1(\?|$)/);
+  });
+});
+
 test.describe("Hifth · the four new verse buttons", () => {
   test.skip(({ isMobile }) => isMobile, "the buttons are the same on every device; one run is enough");
 

@@ -90,6 +90,8 @@ const messages: Catalog = {
   copied: "Link copied",
   copiedLink: (d) => "Copied a link to " + d.label,
   copyFailed: "Could not copy",
+  cornerPlay: "Play",
+  cornerStart: "Go to the start",
   cropCaption: (d) => "Page " + d.page + " · King Fahd Complex print",
   cropClose: "Close",
   cropSave: "Save image",
