@@ -9,6 +9,11 @@
 #
 # A shorter clip rests on its last frame until the longest one ends. --width
 # narrows every clip to that many pixels, to bring three or four under the limit.
+#
+# The clips are make-gif clips, already at the docs' one pace (each frame 0.2 s),
+# so the joined clip keeps it: an exact repeat is kept as one longer frame rather
+# than doubled at 0.1 s, the file is packed with gifsicle, and the end is held
+# 1.5 s like a single clip's.
 set -euo pipefail
 
 OUT="" MAX_BYTES=1000000 WIDTH="" letters=() clips=()
@@ -49,10 +54,11 @@ for i in "${!clips[@]}"; do
   graph+="[h$i][g$i]vstack=shortest=1,pad=iw+${gap}:ih:0:0:color=#faf7f0[c$i];"
   stacked+="[c$i]"
 done
-graph+="${stacked}hstack=inputs=${n},split[a][b];[a]palettegen=max_colors=96[p];[b][p]paletteuse=dither=none"
+graph+="${stacked}hstack=inputs=${n},mpdecimate=hi=1:lo=1:frac=0,split[a][b];[a]palettegen=max_colors=96[p];[b][p]paletteuse=dither=none"
 
 mkdir -p "$(dirname "$OUT")"
-ffmpeg -loglevel error -y "${inputs[@]}" -filter_complex "$graph" -loop 0 "$OUT"
+ffmpeg -loglevel error -y "${inputs[@]}" -filter_complex "$graph" -fps_mode vfr -loop 0 "$work/joined.gif"
+gifsicle -O3 "$work/joined.gif" "#0--2" -d150 "#-1" -o "$OUT"
 bytes=$(wc -c < "$OUT" | tr -d ' ')
 echo "ev=side_by_side out=$OUT bytes=$bytes clips=$n secs=$longest"
 if [ "$bytes" -gt "$MAX_BYTES" ]; then
