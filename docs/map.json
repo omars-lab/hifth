@@ -1899,6 +1899,11 @@
           "file": "scripts/gate-artifacts.mjs",
           "symbol": "ARTIFACT_HOST",
           "note": "The half of the shelf that can be checked from the tree, run on every commit with the other quick checks: every row's link is on the one other host pages went to and no two rows share one, every row says what it shows and when, a row naming a decision points at a real one, and any `page`/`builtBy` it keeps is exactly the decision's — left null is the usual case, repeated with a `note` is allowed (sitting-hosting does). A checked-in page names the script that rebuilds it, or says in its note that it is written by hand. Whether every publish was written down at all is the other half, and only artifact-sweep can look, where the session logs are. Drafted on the experience-atlas branch in August; two of its rules were dropped when it came onto main on 2026-09-29 — a row's link matching its decision's address (a decision's address is its page on the site now) and every design page needing a row (the site's generated front door lists them all)."
+        },
+        {
+          "file": "scripts/gate-gifs.mjs",
+          "symbol": "PACE",
+          "note": "The moving pictures on options pages all play at one pace and are packed small. Real speed was too quick to follow (owner, 2026-10-02), so every clip is half speed: each frame shown 0.2 s, or whole steps of it where a still moment is kept as one frame, the quickest exactly 0.2 s. Each must also be one gifsicle cannot shrink by more than 1% without changing a pixel, and under 1 MB. The record-demo make-gif script makes clips that way; a GIF already made is re-timed by passing it as --in."
         }
       ],
       "extend": [
@@ -1919,7 +1924,8 @@
       "gates": [
         "pnpm gate:decisions",
         "pnpm gate:artifacts",
-        "make ci"
+        "make ci",
+        "pnpm gate:gifs"
       ],
       "seeAlso": [
         "ci-and-gates",
