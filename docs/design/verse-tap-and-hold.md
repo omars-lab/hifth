@@ -1,6 +1,11 @@
 # What should a tap on a verse do, and what should holding your finger on it do? ^95t7gc
 
-*Open, 2026-09-30. Two features are waiting on this one answer: a menu that opens when you hold your finger on a verse, and full-screen reading, where a tap on the page hides the bars. Both want the plain tap, and today the tap already has a job. Pictures are from the real app on a phone; where an option adds something new, a short script added it to the live page for the picture.*
+> [!success] Answered 2026-10-01: all three, as a setting
+> The owner asked for this to be the reader's choice, in the info panel under *Tap and hold on a verse*, with **C as the default**. This note still recommends A; making A the default later is a one-line change. On a computer a click always opens the verse menu, and **F** switches full screen in every option.
+>
+> What was assumed while building, to correct if wrong: **Mark** paints the one verse as a highlight. **Play to** waits for the next verse you tap and recites from the held verse to that one. **Copy** puts the verse's name and a link on the clipboard, never its words. A hold is a finger kept still for about a third of a second.
+
+*Asked 2026-09-30. Two features are waiting on this one answer: a menu that opens when you hold your finger on a verse, and full-screen reading, where a tap on the page hides the bars. Both want the plain tap, and today the tap already has a job. Pictures are from the real app on a phone; where an option adds something new, a short script added it to the live page for the picture.*
 
 > [!tip] Recommended
 > **A — holding a verse opens its menu, and a tap hides or shows the bars.** The page becomes something you read, not something a stray tap paints orange, and on a smaller phone a tap gives you back the last four lines the bars cover today.

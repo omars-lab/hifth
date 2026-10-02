@@ -10,7 +10,7 @@
  * SOURCES.md; the CDN itself is open access (see the QUL licensing note).
  */
 import { useCallback, useEffect, useRef, useState } from "react";
-import { parseAyahKey } from "@hifth/core";
+import { fromAbsoluteAyah, parseAyahKey, toAbsoluteAyah } from "@hifth/core";
 
 /** Who is reciting, for the credit line — the app never guesses this from a URL. */
 export const RECITER = "Mohamed Siddiq al-Minshawi";
@@ -28,6 +28,27 @@ export function verseAudioUrl(key: string): string | null {
   return `https://verses.quran.com/Minshawi/Murattal/mp3/${surah}${ayah}.mp3`;
 }
 
+/**
+ * Every verse from one key to another, both ends kept, in reading order
+ * whichever came first — the run "Play to" recites. Empty when either key is
+ * not a whole verse.
+ */
+export function versesBetween(a: string, b: string): string[] {
+  const pa = parseAyahKey(a);
+  const pb = parseAyahKey(b);
+  if (!pa || !pb) return [];
+  const prefix = a.slice(0, a.lastIndexOf("/") + 1);
+  let from = toAbsoluteAyah(pa.surah, pa.ayah);
+  let to = toAbsoluteAyah(pb.surah, pb.ayah);
+  if (to < from) [from, to] = [to, from];
+  const out: string[] = [];
+  for (let n = from; n <= to; n++) {
+    const { surah, ayah } = fromAbsoluteAyah(n);
+    out.push(`${prefix}${surah}:${ayah}`);
+  }
+  return out;
+}
+
 /** What the play control is doing right now. */
 export type AudioPhase = "idle" | "loading" | "playing" | "error";
 
@@ -38,6 +59,8 @@ export interface VerseAudio {
   toggle(key: string): void;
   /** Stop and reset — called when the selection moves off the playing verse. */
   stop(): void;
+  /** Recite a run of verses one after another ("Play to"). */
+  playRun(keys: readonly string[]): void;
 }
 
 /**
@@ -55,11 +78,29 @@ export function useVerseAudio(onError?: (key: string) => void): VerseAudio {
   const keyRef = useRef<string | null>(null);
   const [key, setKey] = useState<string | null>(null);
   const [phase, setPhase] = useState<AudioPhase>("idle");
+  // The verses still to come in a "Play to" run, in order.
+  const queueRef = useRef<string[]>([]);
 
   // The element's `error` listener is added once, so it must not close over a
   // stale `onError`; keep the latest in a ref the listener reads at fire time.
   const onErrorRef = useRef(onError);
   onErrorRef.current = onError;
+
+  // Point the element at one verse's file and start it. Only refs and state
+  // setters, so it never changes and the listeners below may keep it.
+  const start = useCallback((el: HTMLAudioElement, next: string): void => {
+    const url = verseAudioUrl(next);
+    if (!url) return;
+    keyRef.current = next;
+    setKey(next);
+    setPhase("loading");
+    el.src = url;
+    el.currentTime = 0;
+    el.play().catch(() => {
+      setPhase("error");
+      onErrorRef.current?.(next);
+    });
+  }, []);
 
   // Lazily build the element the first time it is needed, on the client only.
   const element = useCallback((): HTMLAudioElement => {
@@ -70,7 +111,11 @@ export function useVerseAudio(onError?: (key: string) => void): VerseAudio {
       el.addEventListener("playing", () => setPhase("playing"));
       el.addEventListener("waiting", () => setPhase("loading"));
       el.addEventListener("pause", () => setPhase((p) => (p === "error" ? p : "idle")));
-      el.addEventListener("ended", () => setPhase("idle"));
+      el.addEventListener("ended", () => {
+        const next = queueRef.current.shift();
+        if (next) start(elRef.current!, next);
+        else setPhase("idle");
+      });
       el.addEventListener("error", () => {
         setPhase("error");
         const k = keyRef.current;
@@ -79,9 +124,10 @@ export function useVerseAudio(onError?: (key: string) => void): VerseAudio {
       elRef.current = el;
     }
     return el;
-  }, []);
+  }, [start]);
 
   const stop = useCallback(() => {
+    queueRef.current = [];
     const el = elRef.current;
     if (el) {
       el.pause();
@@ -98,6 +144,8 @@ export function useVerseAudio(onError?: (key: string) => void): VerseAudio {
       const url = verseAudioUrl(next);
       if (!url) return;
       const el = element();
+      // A tap on any one verse ends a run that was playing.
+      queueRef.current = [];
       // A second tap on the verse already playing pauses it.
       if (keyRef.current === next && !el.paused) {
         el.pause();
@@ -113,17 +161,20 @@ export function useVerseAudio(onError?: (key: string) => void): VerseAudio {
         return;
       }
       // Otherwise it is a new verse: point the element at its file and start.
-      keyRef.current = next;
-      setKey(next);
-      setPhase("loading");
-      el.src = url;
-      el.currentTime = 0;
-      el.play().catch(() => {
-        setPhase("error");
-        onErrorRef.current?.(next);
-      });
+      start(el, next);
     },
-    [element],
+    [element, start],
+  );
+
+  const playRun = useCallback(
+    (keys: readonly string[]) => {
+      const run = keys.filter((k) => verseAudioUrl(k) !== null);
+      const first = run.shift();
+      if (!first) return;
+      queueRef.current = run;
+      start(element(), first);
+    },
+    [element, start],
   );
 
   // Tear the element down when the app unmounts, so no audio outlives the page.
@@ -143,5 +194,5 @@ export function useVerseAudio(onError?: (key: string) => void): VerseAudio {
     [key, phase],
   );
 
-  return { phaseFor, toggle, stop };
+  return { phaseFor, toggle, stop, playRun };
 }

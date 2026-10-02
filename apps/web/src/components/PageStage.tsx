@@ -47,6 +47,7 @@ import {
   type Note,
   type ReachedSign,
   type PointerIntent,
+  type PressKind,
   type Resolver,
   type SkinId,
   type StageFit,
@@ -103,8 +104,11 @@ interface PageStageProps {
    * the same state, the same look, whichever road brought it (spec §7).
    */
   rangeKeys?: readonly string[] | null;
-  /** Fired when the user taps an ayah polygon. */
-  onSelect: (key: string) => void;
+  /**
+   * Fired when the user taps an ayah polygon, with how: a quick tap, a still
+   * hold, or the keyboard (docs/design/verse-tap-and-hold.md).
+   */
+  onSelect: (key: string, how: PressKind) => void;
   /**
    * Fired when a marquee drag releases over ayahs (spec §3 `onRangeSelect`).
    * `keys` is the contiguous run the highlighter resolved, in reading order;
@@ -1393,7 +1397,7 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
       const hl = new Highlighter(svgEl as unknown as SVGSVGElement, resolver, targetPage, {
         labelFor: (key) => labelForRef.current(key),
       });
-      hl.onSelect((key) => onSelectRef.current(key));
+      hl.onSelect((key, _granularity, how) => onSelectRef.current(key, how));
       // A page mounted while the skin is on must arrive wearing it, or turning a
       // page would flash plain until the effect below caught up.
       hl.setSkin(skinRef.current, tajweedRef.current);
@@ -2788,6 +2792,7 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
         memo,
         first,
         last,
+        tap,
       }) => {
         if (pinching) {
           cancel();
@@ -2815,6 +2820,17 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
         // and exactly what the intent split must not see (it would shrink the
         // slop radius by 3px behind our backs).
         const dx = cx - ix;
+        // A press that never left @use-gesture's tap threshold arrives once, on
+        // release, as a `tap` (with no `first` or `last`). Held or not, it is
+        // the verse's own press: the highlighter has already lit the verse on
+        // the same release and reported a hold, which opens the verse menu.
+        // Classified here it would read as a hold inside the verse just lit and
+        // pick a word under the menu. A hold that then drags is not a tap, so
+        // it still picks words or sweeps verses.
+        if (tap) {
+          intentRef.current = "none";
+          return base;
+        }
         const wasTurn = intentRef.current === "turn";
         const wasWord = intentRef.current === "word";
         const intent = nextIntent(intentRef.current, {

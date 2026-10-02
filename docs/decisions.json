@@ -1877,6 +1877,33 @@
       "status": "decided",
       "by": "omar",
       "date": "2026-09-30"
+    },
+    {
+      "id": "verse-tap-and-hold",
+      "question": "What should a tap on a verse do, and what should holding your finger on it do?",
+      "status": "decided",
+      "options": [
+        {
+          "id": "A",
+          "label": "A tap hides the bars; a hold opens the menu"
+        },
+        {
+          "id": "B",
+          "label": "A tap or a hold opens the fuller menu"
+        },
+        {
+          "id": "C",
+          "label": "A tap opens the menu; a hold opens a small one"
+        },
+        {
+          "id": "setting",
+          "label": "Let the reader pick, C first"
+        }
+      ],
+      "doc": "docs/decisions/verse-tap-and-hold.md#so-what-was-decided",
+      "decided": "setting",
+      "by": "omar",
+      "date": "2026-10-01"
     }
   ]
 }

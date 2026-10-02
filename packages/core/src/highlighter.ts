@@ -28,7 +28,7 @@
  * recognise falls back to a filled clone.
  */
 
-import { TAP_SLOP_PX } from "./gestures.js";
+import { LONG_PRESS_MS, TAP_SLOP_PX } from "./gestures.js";
 import {
   fitSwipesToText,
   joinSwipesByLine,
@@ -130,7 +130,15 @@ export interface Resolved {
   bbox: Rect;
 }
 
-type SelectCb = (key: string, granularity: "ayah" | "word") => void;
+/**
+ * How a verse was chosen: a press let go at once (`tap`), a press kept still
+ * past {@link LONG_PRESS_MS} and let go without moving (`hold`), or the
+ * keyboard's Enter or Space (`key`). The app decides what each one opens
+ * (docs/design/verse-tap-and-hold.md); the page only says which it was.
+ */
+export type PressKind = "tap" | "hold" | "key";
+
+type SelectCb = (key: string, granularity: "ayah" | "word", how: PressKind) => void;
 
 /** Union of a list of rects into one bounding rect. */
 function unionRects(rects: readonly Rect[]): Rect | null {
@@ -191,6 +199,8 @@ export class Highlighter {
   private pressAt: { x: number; y: number } | null = null;
   /** Which ayah the current press landed on — see {@link pressedKey}. */
   private pressKey: string | null = null;
+  /** When the current press went down, so a release can tell a tap from a hold. */
+  private pressT = 0;
   /** Whether the current press has been spent — see {@link consumePress}. */
   private pressSpent = false;
   /** The applied skin, and L3's rule lookup for it (spec §8; see `setSkin`). */
@@ -242,6 +252,7 @@ export class Highlighter {
           ? { x: e.clientX, y: e.clientY }
           : null;
       this.pressSpent = false;
+      this.pressT = e.timeStamp;
       // Which ayah was under the finger, decided by the browser's own hit test
       // against the polygon's fill — see `pressedKey` for why it is recorded
       // here and not measured later.
@@ -260,7 +271,9 @@ export class Highlighter {
       }
       const key = this.keyForEventTarget(e.target);
       if (!key) return;
-      for (const cb of this.selectCbs) cb(key, "ayah");
+      const how: PressKind = this.pressT && e.timeStamp - this.pressT >= LONG_PRESS_MS ? "hold" : "tap";
+      this.pressT = 0;
+      for (const cb of this.selectCbs) cb(key, "ayah", how);
     };
     svg.addEventListener("pointerup", this.onPolygonPointerUp);
 
@@ -275,7 +288,7 @@ export class Highlighter {
       if (e.key === "Enter" || e.key === " " || e.key === "Spacebar") {
         e.preventDefault();
         const key = this.keyForElement(poly);
-        if (key) for (const cb of this.selectCbs) cb(key, "ayah");
+        if (key) for (const cb of this.selectCbs) cb(key, "ayah", "key");
         return;
       }
       const step = arrowStep(e.key);
