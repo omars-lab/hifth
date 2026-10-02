@@ -325,14 +325,25 @@
   line-height: 1;
   color: var(--leaf-edge);
   white-space: nowrap;
-  /* Not yet a target: a tap in the band still reaches the leaf, which is what
-     the bookmark tool listens for. The press that opens each label's own menu
-     is the next item (PLAN #27). */
+  /* The band itself is not a target: a tap beside a label still reaches the
+     leaf, which is what the bookmark tool listens for. The labels are (below). */
   pointer-events: none;
   user-select: none;
 }
+/* A hold on a label opens its own menu (PLAN #27); the phone's own long-press
+   callout would cover it. */
+.runningHead > span,
+.folio > span {
+  pointer-events: auto;
+  -webkit-touch-callout: none;
+}
 .runningHead {
   justify-content: space-between;
+  /* The folded corner that drops a bookmark is a full touch target whatever
+     the page's size, and it sits on the free top corner: kept clear of it, or
+     it covers half the juz on a right-hand page and a hold there drops a
+     bookmark instead of opening the juz's menu. */
+  padding-inline: max(8cqw, calc(var(--touch-min) + 4px));
 }
 .folio {
   justify-content: center;
