@@ -1269,10 +1269,13 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     on a phone 2026-10-01); then the note tool offering existing notes (waits on
     how that should feel, the design's question 4), the list of notes and stepping through
     one (question 6), and the long-press ways in, which land with 25 and 27.
-30. **A finger's tap on a verse draws a thin blue box around it.** Found recording the
+30. ~~**A finger's tap on a verse draws a thin blue box around it.**~~ Found recording the
     tap-and-hold options, 2026-10-01: besides the orange, a tapped verse gets the outline that
     shows a keyboard user where they are, which on a phone looks like a stray mark.
-    **What is open:** whether a touch should show it at all, or only the keyboard. Built test first.
+    **Done 2026-10-01:** only the keyboard shows it, the way every other control in the app
+    already worked. A tap or a click still puts focus on the verse, so the arrows carry on from
+    it, but Chrome's own blue ring no longer draws; a verse reached with the arrows keeps the
+    app's ring. Safari never drew it on a tap. Tested on the computer and both phones.
 
 **The half of these a machine cannot run now has a register — and a runbook.** Follow-ups
 ① (the phone), ② (the browser glance) and ④ (VoiceOver/TalkBack) still wait on a human, and
