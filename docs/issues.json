@@ -2504,10 +2504,11 @@
         "file": "docs/PLAN.md",
         "item": "30"
       },
-      "status": "open",
+      "status": "fixed",
       "severity": "question",
       "owner": "agent",
-      "note": "A finger's tap on a verse also draws the thin blue keyboard outline around it, which on a phone looks like a stray mark. Found 2026-10-01 recording the tap-and-hold options."
+      "note": "A finger's tap on a verse also drew the thin blue keyboard outline around it, which on a phone looked like a stray mark. Found 2026-10-01 recording the tap-and-hold options. Fixed the same day: only keyboard focus shows a ring on a verse.",
+      "closedBy": "apps/web/e2e/verse-gestures.spec.ts"
     }
   ]
 }

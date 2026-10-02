@@ -146,6 +146,26 @@ test.describe("Hifth · tap and hold on a verse", () => {
     }
   });
 
+  // The ring that shows a keyboard user where they are is for the keyboard: a
+  // finger or a mouse already knows which verse it pressed, and on a phone the
+  // browser's blue box read as a stray mark beside the orange.
+  test("a tapped verse shows no focus ring; one reached by the keyboard does", async ({ page, isMobile }) => {
+    const ring = (): Promise<{ id: string; style: string }> =>
+      page.evaluate(() => {
+        const a = document.activeElement as Element;
+        return { id: a.id, style: getComputedStyle(a).outlineStyle };
+      });
+    await openWith(page, null);
+    await tap(page, isMobile, "#verse-46");
+    await expect(drawer(page)).toBeVisible();
+    expect(await ring()).toEqual({ id: "verse-46", style: "none" });
+
+    await page.keyboard.press("ArrowDown");
+    const next = await ring();
+    expect(next.id).toBe("verse-47");
+    expect(next.style).not.toBe("none");
+  });
+
   test("B: a tap opens the fuller menu, and full screen is a button", async ({ page, isMobile }) => {
     await openWith(page, "b");
     await tap(page, isMobile, "#verse-46");
