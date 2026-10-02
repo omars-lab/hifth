@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { TAP_SLOP_PX } from "./gestures.js";
+import { LONG_PRESS_MS, TAP_SLOP_PX } from "./gestures.js";
 import { FIBRE_FLOOR, FIBRE_ID, Highlighter, MARQUEE_MIN_SIZE, rectsIntersect } from "./highlighter.js";
 import { OVERHANG } from "./ink.js";
 import { Resolver } from "./resolver.js";
@@ -104,7 +104,7 @@ describe("Highlighter", () => {
     hl.onSelect(cb);
     const poly = svg.querySelector("#verse-46")!;
     poly.dispatchEvent(new Event("pointerup", { bubbles: true }));
-    expect(cb).toHaveBeenCalledWith("quran/hafs-kfqc/2:39", "ayah");
+    expect(cb).toHaveBeenCalledWith("quran/hafs-kfqc/2:39", "ayah", "tap");
   });
 
   it("does not fire onSelect when a non-polygon (glyph) is tapped", () => {
@@ -174,10 +174,10 @@ describe("Highlighter · keyboard a11y (Loop 3)", () => {
     hl.onSelect(cb);
     const poly = svg.querySelector("#verse-46")!;
     poly.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true }));
-    expect(cb).toHaveBeenCalledWith("quran/hafs-kfqc/2:39", "ayah");
+    expect(cb).toHaveBeenCalledWith("quran/hafs-kfqc/2:39", "ayah", "key");
     cb.mockClear();
     poly.dispatchEvent(new KeyboardEvent("keydown", { key: " ", bubbles: true }));
-    expect(cb).toHaveBeenCalledWith("quran/hafs-kfqc/2:39", "ayah");
+    expect(cb).toHaveBeenCalledWith("quran/hafs-kfqc/2:39", "ayah", "key");
   });
 
   it("Arrow keys move focus to the next / previous ayah (document order)", () => {
@@ -397,7 +397,26 @@ describe("Highlighter · a drag release is not a tap (Loop 5)", () => {
     const poly = svg.querySelector("#verse-2")!;
     press(poly, "pointerdown", 100, 100);
     press(poly, "pointerup", 100 + TAP_SLOP_PX, 100);
-    expect(cb).toHaveBeenCalledWith("quran/hafs-kfqc/2:42", "ayah");
+    expect(cb).toHaveBeenCalledWith("quran/hafs-kfqc/2:42", "ayah", "tap");
+  });
+
+  it("says a press kept still past the hold time was a hold, and a quick one a tap", () => {
+    vi.useFakeTimers();
+    try {
+      const cb = vi.fn();
+      hl.onSelect(cb);
+      const poly = svg.querySelector("#verse-2")!;
+      press(poly, "pointerdown", 100, 100);
+      vi.advanceTimersByTime(LONG_PRESS_MS);
+      press(poly, "pointerup", 100, 100);
+      expect(cb).toHaveBeenLastCalledWith("quran/hafs-kfqc/2:42", "ayah", "hold");
+      press(poly, "pointerdown", 100, 100);
+      vi.advanceTimersByTime(LONG_PRESS_MS - 50);
+      press(poly, "pointerup", 100, 100);
+      expect(cb).toHaveBeenLastCalledWith("quran/hafs-kfqc/2:42", "ayah", "tap");
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   it("does not select when the release ends a pan or a marquee", () => {
@@ -417,7 +436,7 @@ describe("Highlighter · a drag release is not a tap (Loop 5)", () => {
     press(poly, "pointerup", 400, 400); // a pan — no select
     press(poly, "pointerup", 100, 100); // a stray release with no press
     expect(cb).toHaveBeenCalledTimes(1);
-    expect(cb).toHaveBeenCalledWith("quran/hafs-kfqc/2:42", "ayah");
+    expect(cb).toHaveBeenCalledWith("quran/hafs-kfqc/2:42", "ayah", "tap");
   });
 
   /*
@@ -453,7 +472,7 @@ describe("Highlighter · a drag release is not a tap (Loop 5)", () => {
     press(poly, "pointerdown", 100, 100);
     press(poly, "pointerup", 100, 100);
     expect(cb).toHaveBeenCalledTimes(1);
-    expect(cb).toHaveBeenCalledWith("quran/hafs-kfqc/2:42", "ayah");
+    expect(cb).toHaveBeenCalledWith("quran/hafs-kfqc/2:42", "ayah", "tap");
   });
 
   it("leaves pressedKey standing, because it answers a different question", () => {

@@ -1221,7 +1221,7 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     words go into both languages, its reading direction follows the source's language, and a
     browser test opens the drawer on a live source. Nothing a reader sees today is affected:
     no public build has a commentary source switched on.
-25. **Long-press a verse for a small menu of what you can do with it.** Asked 2026-09-30, from
+25. ~~**Long-press a verse for a small menu of what you can do with it.**~~ Asked 2026-09-30, from
     another reading app the owner uses. Holding a finger on a verse opens a small menu headed
     with the surah and verse ("Al-Baqara: 174"): play it, play from it to a later verse, its
     translation, mark it, a note on it, share it, copy it.
@@ -1231,6 +1231,14 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     on 2026-10-01: a finger's tap on a verse draws a thin blue box around it as well as the
     orange (the outline that shows a keyboard user where they are), which on a phone looks like
     a stray mark; whether a touch should show it is settled when this is built. Built test first.
+    **Done 2026-10-01, as a setting:** the owner asked for what a tap and a hold do to be a
+    reader's choice in the info panel, with C as the default ([the options](design/verse-tap-and-hold.md)).
+    A: a tap hides or shows the bars, a hold opens the verse menu with four more buttons. B: a
+    tap opens that fuller menu, and full screen is a button. C: a tap opens the menu as before,
+    and a hold opens a small menu beside the verse (never over it) with Play to, Mark, Note and
+    Copy. On a computer a click always opens the menu, and F switches full screen.
+    Translation and Share stay in the menu a tap opens. Still open, as item 30: the thin blue
+    box a finger's tap draws.
 26. **Print the surah name, the juz and the page number on the page itself.** Asked 2026-09-30,
     from the same app: the surah's name in one top corner, the juz in the other, the page
     number centred at the bottom, all in the print's brown, as part of the page rather than
@@ -1242,12 +1250,13 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     2026-09-30. Holding the page number acts on the page (share the page, and so on), the
     surah name on the surah, the juz on the juz, and a verse on the verse (25), so each shares
     and offers what fits what was held. Waits on 26, which puts those three on the page.
-28. **A plain tap on the text hides the app's bars for reading full screen; another brings
-    them back.** Asked 2026-09-30, from a pair of pictures: with the bars, a top bar (the page
+28. ~~**A plain tap on the text hides the app's bars for reading full screen; another brings
+    them back.**~~ Asked 2026-09-30, from a pair of pictures: with the bars, a top bar (the page
     number, translation, contrast, bookmark) and a bottom bar (play, the reciter, the layout);
     without, the bare page. **What is open:** a tap on a verse already selects it here, so
     which gesture does which has to be settled by trying both in the hand before building.
-    Built test first.
+    Built test first. **Done 2026-10-01** with 25: under A a tap hides the bars; under B and C
+    full screen is a button in the bottom line, and a small "Show the bars" button brings them back.
 29. **Notes that gather verses from one part of the Qur'an.** Asked 2026-09-30: a note is
     given a scope when it is made (a surah, a juz, a hizb, a page, or the whole Qur'an), can
     take any verse inside it, and when a verse is added the app offers the notes that can take
@@ -1260,6 +1269,10 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     on a phone 2026-10-01); then the note tool offering existing notes (waits on
     how that should feel, the design's question 4), the list of notes and stepping through
     one (question 6), and the long-press ways in, which land with 25 and 27.
+30. **A finger's tap on a verse draws a thin blue box around it.** Found recording the
+    tap-and-hold options, 2026-10-01: besides the orange, a tapped verse gets the outline that
+    shows a keyboard user where they are, which on a phone looks like a stray mark.
+    **What is open:** whether a touch should show it at all, or only the keyboard. Built test first.
 
 **The half of these a machine cannot run now has a register — and a runbook.** Follow-ups
 ① (the phone), ② (the browser glance) and ④ (VoiceOver/TalkBack) still wait on a human, and

@@ -699,6 +699,27 @@ export interface Strings {
   vdShare: string;
   vdBookmark: string;
   vdBookmarkAria(label: string): string;
+  verseGesturesTitle: string;
+  verseGesturesA: string;
+  verseGesturesB: string;
+  verseGesturesC: string;
+  verseGesturesNote: string;
+  vdPlayTo: string;
+  vdPlayToAria(label: string): string;
+  vdMark: string;
+  vdMarkAria(label: string): string;
+  vdNote: string;
+  vdNoteAria(label: string): string;
+  vdCopy: string;
+  vdCopyAria(label: string): string;
+  verseMore(label: string): string;
+  playToPick: string;
+  playingRun(from: string, to: string): string;
+  copiedLink(label: string): string;
+  fullScreen: string;
+  showBars: string;
+  fullScreenOn: string;
+  fullScreenOff: string;
   toolWord: string;
   toolWordHint: string;
   /** The word tool's row of parts, named by its verse. */
@@ -1221,6 +1242,27 @@ export function buildStrings(lang: Lang, m: Catalog): Strings {
     vdShare: m.vdShare,
     vdBookmark: m.vdBookmark,
     vdBookmarkAria: (label) => m.vdBookmarkAria({ label }),
+    verseGesturesTitle: m.verseGesturesTitle,
+    verseGesturesA: m.verseGesturesA,
+    verseGesturesB: m.verseGesturesB,
+    verseGesturesC: m.verseGesturesC,
+    verseGesturesNote: m.verseGesturesNote,
+    vdPlayTo: m.vdPlayTo,
+    vdPlayToAria: (label) => m.vdPlayToAria({ label }),
+    vdMark: m.vdMark,
+    vdMarkAria: (label) => m.vdMarkAria({ label }),
+    vdNote: m.vdNote,
+    vdNoteAria: (label) => m.vdNoteAria({ label }),
+    vdCopy: m.vdCopy,
+    vdCopyAria: (label) => m.vdCopyAria({ label }),
+    verseMore: (label) => m.verseMore({ label }),
+    playToPick: m.playToPick,
+    playingRun: (from, to) => m.playingRun({ from, to }),
+    copiedLink: (label) => m.copiedLink({ label }),
+    fullScreen: m.fullScreen,
+    showBars: m.showBars,
+    fullScreenOn: m.fullScreenOn,
+    fullScreenOff: m.fullScreenOff,
     toolWord: m.toolWord,
     toolWordHint: m.toolWordHint,
     wordParts: (label) => m.wordParts({ label }),

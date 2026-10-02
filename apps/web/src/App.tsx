@@ -33,6 +33,8 @@ import {
   juzPageIndex,
   keyToRef,
   parseAyahKey,
+  toAbsoluteAyah,
+  type PressKind,
   listTafsirProviders,
   registerTafsirProvider,
   type TafsirEntry,
@@ -74,7 +76,8 @@ import { applyFieldToDocument, fieldFromHash } from "./field";
 import { recordLook } from "./revision-store";
 import { useT } from "./i18n";
 import { useHashRouter } from "./useHashRouter";
-import { exposeToShell } from "./native-bridge";
+import { exposeToShell, shareBase } from "./native-bridge";
+import { linksFor } from "./share-links";
 import { DESKTOP_QUERY, useMediaQuery } from "./useMediaQuery";
 import { PageStage, type PageStageHandle, type PageTool, type WordRect } from "./components/PageStage";
 import { PageToolbar, TOOL_KEYS, toolHint, toolName } from "./components/PageToolbar";
@@ -111,8 +114,9 @@ import { LiveAnnouncer, useAnnouncer } from "./components/LiveAnnouncer";
 import { RootLensTrigger } from "./components/RootLensTrigger";
 import { PlayTrigger } from "./components/PlayTrigger";
 import { DrawerTool, VerseDrawer } from "./components/VerseDrawer";
+import { VerseMenu } from "./components/VerseMenu";
 import { QulTrigger } from "./components/QulTrigger";
-import { useVerseAudio } from "./audio";
+import { useVerseAudio, versesBetween } from "./audio";
 // The private pitch layer (see src/pitch/pitch.ts). `PITCH` is a build-time
 // constant that is false in every public build, so every guarded branch below is
 // dead code the bundler drops, and the held-copy JSON those branches would load
@@ -142,6 +146,7 @@ import { SkinToggle, TajweedLegend } from "./components/SkinToggle";
 import { PageSlider } from "./components/PageSlider";
 import { fisheyeEnabled, rememberFisheye } from "./pagebar-fisheye";
 import { rememberTurnStyle, savedTurnStyle, type TurnStyle } from "./turn-style";
+import { rememberVerseGestures, savedVerseGestures, type VerseGestures } from "./verse-gestures";
 import { applyPen, rememberPen, savedPen, type Pen } from "./pen";
 import styles from "./App.module.css";
 
@@ -878,6 +883,20 @@ export function App(): JSX.Element {
     rememberTurnStyle(style);
     setTurnStyle(style);
   }, []);
+  // What a tap and a hold on a verse do (docs/design/verse-tap-and-hold.md; a
+  // setting since 2026-10-01, C unless this device picked another).
+  const [verseGestures, setVerseGestures] = useState<VerseGestures>(() => savedVerseGestures());
+  const chooseVerseGestures = useCallback((choice: VerseGestures) => {
+    rememberVerseGestures(choice);
+    setVerseGestures(choice);
+  }, []);
+  // Full screen: every bar hidden, the page alone (the same note, all options).
+  const [full, setFull] = useState(false);
+  // The verse a hold opened the small menu on (option C), and where it is.
+  const [verseMenu, setVerseMenu] = useState<{ key: string; around: DOMRect } | null>(null);
+  const closeVerseMenu = useCallback(() => setVerseMenu(null), []);
+  // "Play to" is waiting for the verse to stop at: the verse it starts from.
+  const playFromRef = useRef<string | null>(null);
   // The highlighter's pen (docs/design/highlight-texture-options.md ②, settled
   // 2026-09-30): green until this device picks another in the tools bar. It
   // colours the passage the highlighter paints.
@@ -1754,6 +1773,125 @@ export function App(): JSX.Element {
     };
   }, [resolver, selectedKey, selectedRange, page, trail, field]);
 
+  /*
+   * What a tap and a hold on a verse do (docs/design/verse-tap-and-hold.md),
+   * by the reader's setting:
+   *
+   *   A  a tap hides or shows the bars; a hold opens the fuller drawer.
+   *   B  a tap or a hold opens the fuller drawer.
+   *   C  a tap opens the drawer as before; a hold opens the small menu.
+   *
+   * On a computer a click always opens the drawer, so A's tap does not hide the
+   * bars there: the bars cover nothing on a wide screen, and F switches full
+   * screen instead. A held mouse button still does what a hold does.
+   */
+  const lightVerse = useCallback(
+    (key: string, drawerUp: boolean) => {
+      setOpenDirection(null);
+      setSelectedRange(null);
+      setDrawerAway(!drawerUp);
+      if (selectedKeyRef.current !== key) {
+        // A new verse raises its drawer; the small menu wants it down.
+        arrivedByHop.current = !drawerUp;
+        setSelectedKey(key);
+        announce(t.selected(t.ayahLabel(key) ?? key));
+        const loc = resolver?.resolve(key);
+        if (loc) void recordLook({ key, page: loc.page });
+      }
+    },
+    [announce, resolver, t],
+  );
+  const handleVerse = useCallback(
+    (key: string, how: PressKind) => {
+      const tooled = toolRef.current !== "select" && toolRef.current !== "highlight";
+      // "Play to" is waiting: this verse is where the run stops.
+      const from = playFromRef.current;
+      if (from && !tooled) {
+        playFromRef.current = null;
+        const run = versesBetween(from, key);
+        if (run.length === 0) return;
+        audio.playRun(run);
+        const first = run[0]!;
+        const last = run[run.length - 1]!;
+        const lastName = t.ayahLabel(last) ?? last;
+        const sameSurah = parseAyahKey(first)?.surah === parseAyahKey(last)?.surah;
+        announce(t.playingRun(t.ayahLabel(first) ?? first, sameSurah ? lastName.split(" · ").pop()! : lastName));
+        return;
+      }
+      if (tooled || how === "key") {
+        handleSelect(key);
+        return;
+      }
+      if (how === "hold") {
+        if (verseGestures === "c") {
+          lightVerse(key, false);
+          const id = (() => {
+            const p = parseAyahKey(key);
+            return p ? `verse-${toAbsoluteAyah(p.surah, p.ayah)}` : null;
+          })();
+          const shape = id
+            ? Array.from(document.querySelectorAll<SVGGraphicsElement>(`[id="${id}"]`))
+                .map((el) => el.getBoundingClientRect())
+                .find((r) => r.width > 0 && r.height > 0)
+            : undefined;
+          if (shape) setVerseMenu({ key, around: shape });
+        } else lightVerse(key, true);
+        return;
+      }
+      if (verseGestures === "a" && !desktop) {
+        setFull((f) => !f);
+        return;
+      }
+      handleSelect(key);
+    },
+    [announce, audio, desktop, handleSelect, lightVerse, t, verseGestures],
+  );
+
+  // The four things the fuller drawer (A, B) and the small menu (C) add.
+  const startPlayTo = useCallback(
+    (key: string) => {
+      playFromRef.current = key;
+      setDrawerAway(true);
+      announce(t.playToPick);
+    },
+    [announce, t],
+  );
+  const markVerse = useCallback((key: string) => handleSelectRange(key, key, [key]), [handleSelectRange]);
+  const noteOnVerse = useCallback(
+    (key: string) => {
+      const loc = resolver?.resolve(key);
+      const p = parseAyahKey(key);
+      if (!loc || !p) return;
+      // The pin goes at the middle of the verse, in the page's own units.
+      const shape = Array.from(
+        document.querySelectorAll<SVGGraphicsElement>(`[id="verse-${toAbsoluteAyah(p.surah, p.ayah)}"]`),
+      ).find((el) => el.getBoundingClientRect().width > 0);
+      const box = shape?.getBBox();
+      setDrawerAway(true);
+      placeNote({
+        page: loc.page,
+        key,
+        word: null,
+        x: box ? box.x + box.width / 2 : 0,
+        y: box ? box.y + box.height / 2 : 0,
+      });
+    },
+    [placeNote, resolver],
+  );
+  // The verse's name and its link; never its words.
+  const copyVerse = useCallback(
+    (key: string) => {
+      if (!currentState) return;
+      const name = t.ayahLabel(key) ?? key;
+      const text = `${name} — ${linksFor(currentState, "", shareBase()).site}`;
+      void navigator.clipboard?.writeText(text).then(
+        () => announce(t.copiedLink(name)),
+        () => undefined,
+      );
+    },
+    [announce, currentState, t],
+  );
+
   // Restore a parsed deep link through the SAME select/navigateTo path a live
   // hop uses (spec §7: no separate deep-link logic to drift). Rebuilds the trail
   // from `trail`+`via`, sets the selection, and pans to it.
@@ -1995,6 +2133,35 @@ export function App(): JSX.Element {
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [desktop, chooseTool]);
 
+  // F switches full screen and Escape leaves it, on any keyboard, with the same
+  // fences as the maps above.
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.defaultPrevented || e.altKey || e.ctrlKey || e.metaKey || e.shiftKey) return;
+      const el = document.activeElement as HTMLElement | null;
+      if (
+        el instanceof HTMLInputElement ||
+        el instanceof HTMLTextAreaElement ||
+        el instanceof HTMLSelectElement ||
+        el?.isContentEditable === true ||
+        document.querySelector('[role="dialog"]') !== null
+      )
+        return;
+      if (e.code === "KeyF") {
+        e.preventDefault();
+        setFull((f) => !f);
+      } else if (e.key === "Escape") setFull(false);
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, []);
+  const fullSaid = useRef(false);
+  useEffect(() => {
+    if (full === fullSaid.current) return;
+    fullSaid.current = full;
+    announce(full ? t.fullScreenOn : t.fullScreenOff);
+  }, [full, announce, t]);
+
   const openChip = railChips.find((c) => c.direction === openDirection) ?? null;
   /*
    * Which side of the desk the ayah's sheets land on, when the book is open.
@@ -2058,7 +2225,7 @@ export function App(): JSX.Element {
     // stylesheet is a logical property, so the flip is the whole change. What
     // does *not* flip is below: the stage, the rail and the trail are pinned
     // RTL because they are furniture around a mus'haf, not around a sentence.
-    <div className={styles.app} dir={dir}>
+    <div className={styles.app} dir={dir} data-full={full || undefined}>
       <header className={styles.chrome}>
         {/* The wordmark is the colophon's opener. Publishing this app conveys
             it (GPL §6), so the source offer and the four source credits have to
@@ -2275,7 +2442,7 @@ export function App(): JSX.Element {
                   selectedKey={selectedKey}
                   breadcrumbKey={breadcrumbKey}
                   rangeKeys={selectedRange}
-                  onSelect={handleSelect}
+                  onSelect={handleVerse}
                   onSelectRange={handleSelectRange}
                   /* Both leaves, unlike `dragToTurn`: a word run is a question
                      about the ayah that is selected, and on a spread that ayah
@@ -2323,7 +2490,7 @@ export function App(): JSX.Element {
                 selectedKey={selectedKey}
                 breadcrumbKey={breadcrumbKey}
                 rangeKeys={selectedRange}
-                onSelect={handleSelect}
+                onSelect={handleVerse}
                 onSelectRange={handleSelectRange}
                 onSelectWords={handleSelectWords}
                 /* Every turn ends where the arrow keys end — one `stepPage`, so
@@ -2482,6 +2649,8 @@ export function App(): JSX.Element {
             onToggleFisheye={toggleFisheye}
             turnStyle={turnStyle}
             onTurnStyle={chooseTurnStyle}
+            verseGestures={verseGestures}
+            onVerseGestures={chooseVerseGestures}
             onShowTips={() => {
               setColophonOpen(false);
               setCoachUp(true);
@@ -2579,6 +2748,11 @@ export function App(): JSX.Element {
                 : undefined
           }
         />
+        {verseGestures !== "a" && (
+          <button type="button" className={styles.fullBtn} onClick={() => setFull(true)}>
+            {t.fullScreen}
+          </button>
+        )}
         {/* Screen-reader-only summary of what the rail is offering. It used to
             read «السورة 2 · 1 روابط» — the surah as a bare number a listener has
             no way to map back to a name, and Latin digits inside an Arabic
@@ -2599,6 +2773,7 @@ export function App(): JSX.Element {
         open={
           selectedKey !== null &&
           !drawerAway &&
+          !full &&
           (tool === "select" || tool === "highlight") &&
           !rootsOpen &&
           !commentaryOpen &&
@@ -2651,7 +2826,36 @@ export function App(): JSX.Element {
           label={selectedKey ? (t.ayahLabel(selectedKey) ?? selectedKey) : null}
           caption={t.vdQul}
         />
+        {/* The fuller drawer of options A and B: what C keeps for its hold. */}
+        {selectedKey && verseGestures !== "c" && (
+          <>
+            <DrawerTool glyph="⏭" caption={t.vdPlayTo} label={t.vdPlayToAria(t.ayahLabel(selectedKey) ?? selectedKey)} onClick={() => startPlayTo(selectedKey)} />
+            <DrawerTool glyph="✎" caption={t.vdMark} label={t.vdMarkAria(t.ayahLabel(selectedKey) ?? selectedKey)} onClick={() => markVerse(selectedKey)} />
+            <DrawerTool glyph="✍" caption={t.vdNote} label={t.vdNoteAria(t.ayahLabel(selectedKey) ?? selectedKey)} onClick={() => noteOnVerse(selectedKey)} />
+            <DrawerTool glyph="⧉" caption={t.vdCopy} label={t.vdCopyAria(t.ayahLabel(selectedKey) ?? selectedKey)} onClick={() => copyVerse(selectedKey)} />
+          </>
+        )}
       </VerseDrawer>
+
+      {verseMenu && (
+        <VerseMenu
+          name={t.verseMore(t.ayahLabel(verseMenu.key) ?? verseMenu.key)}
+          around={verseMenu.around}
+          onClose={closeVerseMenu}
+          items={[
+            { caption: t.vdPlayTo, onPick: () => startPlayTo(verseMenu.key) },
+            { caption: t.vdMark, onPick: () => markVerse(verseMenu.key) },
+            { caption: t.vdNote, onPick: () => noteOnVerse(verseMenu.key) },
+            { caption: t.vdCopy, onPick: () => copyVerse(verseMenu.key) },
+          ]}
+        />
+      )}
+      {/* The way back from full screen, for B and C; A's way back is a tap. */}
+      {full && verseGestures !== "a" && (
+        <button type="button" className={styles.showBars} onClick={() => setFull(false)}>
+          {t.showBars}
+        </button>
+      )}
 
       {/* The bottom-most chrome, and the second way through the book after the
           jumper: a track the length of the whole mus'haf with a page turn on
