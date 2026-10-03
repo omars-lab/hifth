@@ -630,7 +630,12 @@ export function RevisionMap({
         {!revisionStoreSupported() ? (
           <p className={styles.body}>{t.mapNoStore}</p>
         ) : record === undefined ? (
-          <p className={styles.body}>{t.mapLoading}</p>
+          // A fragment, like the branch it gives way to. A bare line here made
+          // the swap to the map take the lists below out of the sheet and put
+          // them back, and on a phone a tap in that moment landed on nothing.
+          <>
+            <p className={styles.body}>{t.mapLoading}</p>
+          </>
         ) : (
           <>
             {/* The grid is mus'haf furniture — division 1 sits at the right and

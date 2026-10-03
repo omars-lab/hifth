@@ -1330,7 +1330,9 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     verse gone to; the other way, arrows only while the list is open or the tool is on, is on
     trial behind the page address, and both are recorded in
     [jump-arrows-options.md](design/jump-arrows-options.md) for the owner's call.
-    **Still open:** showing dismissed jumps somewhere.
+    **Dismissed jumps:** Dismiss in a verse's list takes a jump off the page, with Undo, and
+    a folded "Dismissed" group under "Your jumps" keeps it, each with Bring back. Nothing is
+    deleted unless you press Delete. **Still open:** the owner's call on the saved arrows.
 
 **The half of these a machine cannot run now has a register — and a runbook.** Follow-ups
 ① (the phone), ② (the browser glance) and ④ (VoiceOver/TalkBack) still wait on a human, and

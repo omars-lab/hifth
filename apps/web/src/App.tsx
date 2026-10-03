@@ -38,6 +38,7 @@ import {
   restoreConfusion,
   setDestination,
   allConfusions,
+  dismissedConfusions,
   waslMarks,
   jumpArrows,
   arrowsShown,
@@ -1324,7 +1325,12 @@ export function App(): JSX.Element {
   // a record deleted, a destination said.
   const [jumpAsking, setJumpAsking] = useState<{ from: JumpEnd; at: { top: number; bottom: number; x: number } } | null>(null);
   const [jumpNaming, setJumpNaming] = useState<JumpEnd | null>(null);
-  const [jumpUndo, setJumpUndo] = useState<{ said: string; undo: (set: readonly Confusion[]) => Confusion[] } | null>(null);
+  // `kept` marks a dismissal, which the page map's Bring back can also take back.
+  const [jumpUndo, setJumpUndo] = useState<{
+    said: string;
+    undo: (set: readonly Confusion[]) => Confusion[];
+    kept?: boolean;
+  } | null>(null);
   // A "not sure yet" jump being named from its row in the list: the next
   // destination picked fills it in rather than marking a new jump.
   const [jumpRenaming, setJumpRenaming] = useState<string | null>(null);
@@ -1362,6 +1368,12 @@ export function App(): JSX.Element {
     setJumpUndo(null);
   };
   const endJumpUndo = useCallback(() => setJumpUndo(null), []);
+  // The page map lists a dismissed jump with its own Bring back, so once it
+  // opens the Undo bar for that dismissal steps aside instead of sitting over
+  // the very list it points to.
+  useEffect(() => {
+    if (revisionOpen) setJumpUndo((u) => (u?.kept ? null : u));
+  }, [revisionOpen]);
   const onJump = useCallback(
     (jump: { from: JumpEnd; to: string | null; at: { top: number; bottom: number; x: number } }) => {
       if (jump.to) saveJump(jump.from, jump.to);
@@ -1404,19 +1416,19 @@ export function App(): JSX.Element {
     () => arrowsShown(allArrows, arrowShowing, { toolOn: tool === "jump", open: jumpsAt?.key ?? null }),
     [allArrows, arrowShowing, tool, jumpsAt],
   );
-  // A dismissed jump leaves no mark, so it is not listed either.
-  const jumpShelf = useMemo(
-    () =>
-      allConfusions(confusions).map((c) => ({
-        id: c.id,
-        from: c.from.key,
-        to: c.to?.key ?? null,
-        times: c.times.length,
-        lastAt: c.times[c.times.length - 1]!.at,
-        beaten: c.state === "beaten",
-      })),
-    [confusions],
-  );
+  // A dismissed jump leaves no mark, so it is listed apart, folded, with a
+  // way to bring it back.
+  const [jumpShelf, jumpsDismissed] = useMemo(() => {
+    const item = (c: Confusion) => ({
+      id: c.id,
+      from: c.from.key,
+      to: c.to?.key ?? null,
+      times: c.times.length,
+      lastAt: c.times[c.times.length - 1]!.at,
+      beaten: c.state === "beaten",
+    });
+    return [allConfusions(confusions).map(item), dismissedConfusions(confusions).map(item)];
+  }, [confusions]);
   const jumpRows = useMemo(
     () =>
       jumpsAt
@@ -1450,6 +1462,16 @@ export function App(): JSX.Element {
   };
   const beatJump = (id: string, beaten: boolean) =>
     commitConfusions(setConfusionState(confusions, id, beaten ? "beaten" : "sometimes", Date.now()), "");
+  const dismissJump = (id: string) => {
+    const c = confusions.find((x) => x.id === id);
+    if (!c) return;
+    const said = c.to ? t.jumpDismissed(c.from.key, c.to.key) : t.jumpDismissedUnsure(c.from.key);
+    commitConfusions(setConfusionState(confusions, id, "dismissed", Date.now()), said);
+    if (jumpRows.length <= 1) closeJumps();
+    setJumpUndo({ said, undo: (s) => setConfusionState(s, id, c.state, Date.now()), kept: true });
+  };
+  const bringBackJump = (id: string) =>
+    commitConfusions(setConfusionState(confusions, id, "sometimes", Date.now()), "");
   const deleteJump = (id: string) => {
     const c = confusions.find((x) => x.id === id);
     if (!c) return;
@@ -3333,7 +3355,7 @@ export function App(): JSX.Element {
               onLoad={loadBookmarkFile}
             />
             <NoteShelf notes={noteShelf} onFollow={openNoteOf} />
-            <JumpShelf jumps={jumpShelf} onGo={goToJumpFrom} />
+            <JumpShelf jumps={jumpShelf} dismissed={jumpsDismissed} onGo={goToJumpFrom} onBringBack={bringBackJump} />
           </RevisionMap>
         </Suspense>
       )}
@@ -3575,6 +3597,7 @@ export function App(): JSX.Element {
             }}
             onAgain={againJump}
             onBeaten={beatJump}
+            onDismiss={dismissJump}
             onDelete={deleteJump}
             onSayWhere={(id) => {
               const from = jumpsAt.key;

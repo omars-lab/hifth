@@ -2250,7 +2250,7 @@
         {
           "file": "apps/web/src/components/JumpShelf.tsx",
           "symbol": "JumpShelf",
-          "note": "\"Your jumps\" in the page map, under your notes: every jump from every verse (allConfusions), the most often first, then the latest, beaten ones greyed, dismissed ones left out. A tap closes the map and goes to the verse you left, where the mark's own list has Go, Compare and the rest."
+          "note": "\"Your jumps\" in the page map, under your notes: every jump from every verse (allConfusions), the most often first, then the latest, beaten ones greyed, dismissed ones left out. A tap closes the map and goes to the verse you left, where the mark's own list has Go, Compare and the rest. Under it, a folded \"Dismissed\" group (dismissedConfusions, latest first) holds the jumps Dismiss took off the page, each with Bring back; Dismiss is in the mark's list (JumpList), with Undo."
         }
       ],
       "extend": [
