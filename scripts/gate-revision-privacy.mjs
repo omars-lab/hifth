@@ -89,6 +89,7 @@ const RECORDS = [
       "confusionMarks",
       "confusionsFrom",
       "allConfusions",
+      "dismissedConfusions",
       "waslMarks",
       "jumpArrows",
       "arrowsShown",

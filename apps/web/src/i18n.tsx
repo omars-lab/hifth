@@ -815,6 +815,11 @@ export interface Strings {
   jumpSayWhere: string;
   jumpDeleted(from: string, to: string): string;
   jumpDeletedUnsure(from: string): string;
+  jumpDismiss: string;
+  jumpDismissed(from: string, to: string): string;
+  jumpDismissedUnsure(from: string): string;
+  jumpShelfDismissed(n: number): string;
+  jumpBringBack: string;
   /** How many jumps a loaded file added. */
   jumpLoaded(n: number): string;
   /** The page map's list of jumps. */
@@ -1434,6 +1439,11 @@ export function buildStrings(lang: Lang, m: Catalog): Strings {
     jumpSayWhere: m.jumpSayWhere,
     jumpDeleted: (from, to) => m.jumpDeleted({ fromText: fmtAyahRef(from, lang) ?? from, toText: fmtAyahRef(to, lang) ?? to }),
     jumpDeletedUnsure: (from) => m.jumpDeletedUnsure({ fromText: fmtAyahRef(from, lang) ?? from }),
+    jumpDismiss: m.jumpDismiss,
+    jumpDismissed: (from, to) => m.jumpDismissed({ fromText: fmtAyahRef(from, lang) ?? from, toText: fmtAyahRef(to, lang) ?? to }),
+    jumpDismissedUnsure: (from) => m.jumpDismissedUnsure({ fromText: fmtAyahRef(from, lang) ?? from }),
+    jumpShelfDismissed: (count) => m.jumpShelfDismissed({ nText: n(count) }),
+    jumpBringBack: m.jumpBringBack,
     jumpLoaded: (count) => m.jumpLoaded({ n: count, nText: n(count) }),
     jumpShelfHead: m.jumpShelfHead,
     jumpShelfEmpty: m.jumpShelfEmpty,

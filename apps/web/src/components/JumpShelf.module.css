@@ -6,3 +6,91 @@
 .beaten > button > :first-child {
   color: var(--ink-soft);
 }
+
+/* The jumps dismissed from the page, folded under the list, each with a way
+   back. Quieter than the list above: these are the ones asked to go away. */
+.dismissed {
+  margin-block-start: var(--space-2);
+}
+
+.summary {
+  min-block-size: var(--touch-min);
+  display: flex;
+  align-items: center;
+  padding: 0 var(--space-3);
+  color: var(--ink-soft);
+  font-size: var(--text-sm);
+  cursor: pointer;
+  list-style: none;
+  gap: var(--space-2);
+}
+
+.summary::-webkit-details-marker {
+  display: none;
+}
+
+/* Laid out as a row, the summary loses the browser's own triangle, so it
+   draws one: pointing along the line while folded, down once open. */
+.summary::before {
+  content: "";
+  inline-size: 6px;
+  block-size: 6px;
+  border-inline-end: 1.5px solid currentColor;
+  border-block-end: 1.5px solid currentColor;
+  transform: rotate(-45deg);
+}
+
+:dir(rtl) .summary::before {
+  transform: rotate(135deg);
+}
+
+.dismissed[open] > .summary::before {
+  transform: rotate(45deg);
+}
+
+.summary:focus-visible {
+  outline: 2px solid var(--accent-strong);
+  outline-offset: -2px;
+}
+
+.kept {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-block-size: var(--touch-min);
+  padding: var(--space-1) var(--space-3);
+}
+
+.keptText {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-inline-size: 0;
+  flex: 1;
+}
+
+.keptText > :first-child {
+  color: var(--ink-soft);
+}
+
+.bringBack {
+  flex: none;
+  min-block-size: var(--touch-min);
+  padding: 0 var(--space-3);
+  border: 1px solid var(--hairline);
+  border-radius: 999px;
+  background: none;
+  color: var(--accent-strong);
+  font: inherit;
+  font-size: var(--text-sm);
+  cursor: pointer;
+}
+
+.bringBack:hover {
+  background: var(--accent-tint);
+}
+
+.bringBack:focus-visible {
+  outline: 2px solid var(--accent-strong);
+  outline-offset: 1px;
+}
