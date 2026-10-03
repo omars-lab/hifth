@@ -353,6 +353,7 @@
   "noteVerses": "{n, plural, one{{nText} verse} other{{nText} verses}}",
   "noteWhole": "The whole Qur'an",
   "noteUntitled": "A note with no words yet",
+  "verseInNotes": "{keyText} is in {n, plural, one{{nText} note} other{{nText} notes}}",
   "noteVerseOut": "Take this verse out",
   "noteVerseTakenOut": "Verse taken out of the note",
   "noteShelfHead": "Your notes",

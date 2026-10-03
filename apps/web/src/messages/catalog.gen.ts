@@ -389,6 +389,7 @@ export interface Catalog {
   readonly verseGesturesC: string;
   readonly verseGesturesNote: string;
   readonly verseGesturesTitle: string;
+  readonly verseInNotes: (d: { readonly keyText: string | number; readonly n: number; readonly nText: string | number }) => string;
   readonly verseMore: (d: { readonly label: string | number }) => string;
   readonly verseTools: (d: { readonly label: string | number }) => string;
   readonly wordHops: (d: { readonly n: number; readonly nText: string | number; readonly u: number; readonly uText: string | number }) => string;

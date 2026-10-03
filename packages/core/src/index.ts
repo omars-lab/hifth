@@ -88,6 +88,8 @@ export {
   scopeContains,
   scopeSize,
   suggestNotes,
+  notesOfVerse,
+  verseDots,
   type NoteScope,
   type NoteSpot,
   type NoteVerse,
@@ -113,9 +115,11 @@ export {
   type TafsirProvider,
 } from "./tafsir.js";
 
+export { rectsOf } from "./ink.js";
 export {
   WordIndex,
   isWordShard,
+  verseNumberSpot,
   type WireBox,
   type WireAyahWords,
   type WordShard,

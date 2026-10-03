@@ -353,3 +353,23 @@ export class WordIndex {
     return at === index ? null : at;
   }
 }
+
+/**
+ * Where the dot for a verse in a note goes: on the upper shoulder of the
+ * verse's number. The print sets the number at the left end of the verse's
+ * last line, in the gap between its last word and where its outline stops,
+ * so that gap is the number. `lines` is the verse's outline on this page, one
+ * box per line; `words` its word boxes here. Null when the gap is too narrow
+ * to hold a number: the verse runs on to the next page, and its number is
+ * there.
+ */
+export function verseNumberSpot(lines: readonly Rect[], words: readonly Rect[]): { x: number; y: number } | null {
+  if (lines.length === 0 || words.length === 0) return null;
+  const last = lines.reduce((a, b) => (b.y > a.y ? b : a));
+  const onLast = words.filter((w) => w.y < last.y + last.height && w.y + w.height > last.y);
+  if (onLast.length === 0) return null;
+  const wordsLeft = Math.min(...onLast.map((w) => w.x));
+  const gap = wordsLeft - last.x;
+  if (gap < last.height * 0.4) return null;
+  return { x: last.x + gap * 0.8, y: last.y + last.height * 0.2 };
+}
