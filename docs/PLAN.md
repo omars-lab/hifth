@@ -1322,7 +1322,9 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     Beaten, Delete (with Undo), and Say where for a jump not named yet. **The saved file:**
     jumps go into it, as version 3 (a file with no jumps keeps its old number, so an older
     copy of the app still reads it); loading joins each pair's times, never doubles them.
-    **Still open:** jumps in the page map, the next-wasl icon, showing dismissed jumps
+    **The page map:** "Your jumps" lists every jump from every verse, the most often first,
+    beaten ones greyed, and a tap goes to the verse you left.
+    **Still open:** the next-wasl icon, showing dismissed jumps
     somewhere, and the rough build of the arrow staying against showing on request.
 
 **The half of these a machine cannot run now has a register — and a runbook.** Follow-ups

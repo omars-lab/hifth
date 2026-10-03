@@ -37,6 +37,7 @@ import {
   removeConfusion,
   restoreConfusion,
   setDestination,
+  allConfusions,
   confusionsFrom,
   wordDiff,
   type Confusion,
@@ -126,6 +127,7 @@ import {
   NoteShelf,
   VerseNotes,
   JumpList,
+  JumpShelf,
   RevisionMap,
   RootLens,
   WordPartsHost,
@@ -1385,6 +1387,18 @@ export function App(): JSX.Element {
   );
   const closeJumps = useCallback(() => setJumpsAt(null), []);
   // A dismissed jump leaves no mark, so it is not listed either.
+  const jumpShelf = useMemo(
+    () =>
+      allConfusions(confusions).map((c) => ({
+        id: c.id,
+        from: c.from.key,
+        to: c.to?.key ?? null,
+        times: c.times.length,
+        lastAt: c.times[c.times.length - 1]!.at,
+        beaten: c.state === "beaten",
+      })),
+    [confusions],
+  );
   const jumpRows = useMemo(
     () =>
       jumpsAt
@@ -2134,6 +2148,14 @@ export function App(): JSX.Element {
       followNote(id);
     },
     [followNote, scoped],
+  );
+  // A row in the page map's list of jumps goes to the verse the jump left from.
+  const goToJumpFrom = useCallback(
+    (from: string) => {
+      setRevisionOpen(false);
+      showVerse(from);
+    },
+    [showVerse],
   );
   const stopFollowing = useCallback(() => setFollowing(null), []);
   const followed = following ? scoped.find((n) => n.id === following.id) : undefined;
@@ -3283,6 +3305,7 @@ export function App(): JSX.Element {
               onLoad={loadBookmarkFile}
             />
             <NoteShelf notes={noteShelf} onFollow={openNoteOf} />
+            <JumpShelf jumps={jumpShelf} onGo={goToJumpFrom} />
           </RevisionMap>
         </Suspense>
       )}

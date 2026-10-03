@@ -1,0 +1,8 @@
+/*
+ * JumpShelf — the page map's list of jumps, drawn like the notes above it.
+ * A jump marked beaten is greyed, as its mark on the page is.
+ */
+
+.beaten > button > :first-child {
+  color: var(--ink-soft);
+}
