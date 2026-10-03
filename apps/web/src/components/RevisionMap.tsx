@@ -339,7 +339,8 @@ export function RevisionMap({
     setCursor(null);
   }, [open, openAt]);
 
-  useEffect(() => {
+  // Takes the keyboard in the step that draws it, so a key pressed as it appears lands here, not on the page.
+  useLayoutEffect(() => {
     if (!open) return;
     restoreRef.current = (document.activeElement as HTMLElement | null) ?? null;
     const sheet = sheetRef.current;

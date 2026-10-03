@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { MAX_JUMP_RESULTS, juzOf, parseJump, type JumpTarget } from "@hifth/core";
 import { SURAH_NAMES_AR, SURAH_NAMES_EN } from "../format";
 import { useT, type Strings } from "../i18n";
@@ -107,7 +107,8 @@ export function Jumper({ open, onJump, onClose }: JumperProps): JSX.Element | nu
   // Capture the trigger, focus the field, and reset the query on open; restore
   // focus on close (a jumper that reopens holding the last query would make the
   // second jump start by deleting the first one).
-  useEffect(() => {
+  // Takes the keyboard in the step that draws it, so a key pressed as it appears lands here, not on the page.
+  useLayoutEffect(() => {
     if (!open) return;
     restoreRef.current = (document.activeElement as HTMLElement | null) ?? null;
     inputRef.current?.focus();
