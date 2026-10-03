@@ -246,6 +246,50 @@ export function suggestNotes(
   return { offered: fit.slice(0, limit), more: fit.slice(limit), alreadyIn };
 }
 
+/** How long a note's title may run before it is cut short, in characters. */
+const TITLE_MAX = 40;
+
+/**
+ * A note's title, as a choice names it: its first line, cut short with an
+ * ellipsis when that line is a paragraph. The box trims it further to fit.
+ */
+export function noteTitle(note: ScopedNote): string {
+  const line = note.text.split("\n")[0]!.trim();
+  return line.length > TITLE_MAX ? `${line.slice(0, TITLE_MAX).trimEnd()}…` : line;
+}
+
+/**
+ * Put a pin just made into a note you already have, as the note tool's box
+ * offers (docs/decisions/scoped-notes.md, option C): the verse and its pin
+ * move into that note and the fresh note is gone. Only a fresh note moves:
+ * one verse, pinned, nothing typed yet; and only into a note whose scope holds
+ * the verse. Anything else is refused with null, so nothing is ever lost.
+ * Returns the notes and the id of the pin the page now draws for that verse.
+ */
+export function joinNote(
+  set: readonly ScopedNote[],
+  freshId: string,
+  intoId: string,
+  now: number,
+  pageOf?: PageOf,
+): { notes: ScopedNote[]; pin: string } | null {
+  const fresh = set.find((n) => n.id === freshId);
+  const into = set.find((n) => n.id === intoId);
+  const verse = fresh?.verses[0];
+  if (!fresh || !into || fresh === into || fresh.text !== "" || fresh.verses.length !== 1 || !verse?.spot) return null;
+  if (!canTake(into, verse.key, pageOf)) return null;
+  const notes = addVerse(
+    set.filter((n) => n !== fresh),
+    intoId,
+    { key: verse.key, spot: verse.spot },
+    now,
+    pageOf,
+  );
+  const joined = notes.find((n) => n.id === intoId)!;
+  const pin = pinsOf([joined]).find((p) => sameVerse(p.key, verse.key))!;
+  return { notes, pin: pin.id };
+}
+
 /**
  * Move today's notes across: each comment, question and developer note becomes
  * a note of its one verse, scoped to the page it was pinned on, with its id,

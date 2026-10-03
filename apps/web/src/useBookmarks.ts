@@ -114,6 +114,8 @@ export function useNotes(
   notes: readonly Note[];
   scoped: readonly ScopedNote[];
   commit: (next: Note[], said: string) => void;
+  /** Replace the notes that gather verses outright, as joining a note and its Undo do. */
+  commitScoped: (next: readonly ScopedNote[], said: string) => void;
   loadFile: (fileNotes: readonly Note[], fileScoped: readonly ScopedNote[]) => number;
 } {
   const [held, setHeld] = useState<Held>(EMPTY);
@@ -181,6 +183,14 @@ export function useNotes(
     [hold, save],
   );
 
+  const commitScoped = useCallback(
+    (next: readonly ScopedNote[], said: string) => {
+      hold({ scoped: [...next], mistakes: latest.current.mistakes });
+      save(said);
+    },
+    [hold, save],
+  );
+
   const loadFile = useCallback(
     (fileNotes: readonly Note[], fileScoped: readonly ScopedNote[]) => {
       const now = latest.current;
@@ -193,7 +203,7 @@ export function useNotes(
   );
 
   const notes = useMemo(() => [...pinsOf(held.scoped), ...held.mistakes], [held]);
-  return { notes, scoped: held.scoped, commit, loadFile };
+  return { notes, scoped: held.scoped, commit, commitScoped, loadFile };
 }
 
 interface Held {

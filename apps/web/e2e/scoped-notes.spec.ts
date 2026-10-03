@@ -16,6 +16,7 @@ const pageSvg = (page: Page, pageNo: number): Locator =>
 const pins = (page: Page): Locator => page.locator("[data-note-pin]:visible");
 const washes = (page: Page): Locator => page.locator("[data-mistake-word]:visible");
 const box = (page: Page): Locator => page.getByRole("dialog", { name: /^Your note on / });
+const choices = (page: Page): Locator => box(page).getByRole("group", { name: "Or add this verse to" });
 
 const KEY = (v: number) => `quran/hafs-kfqc/2:${v}`;
 /** Two notes and one marked mistake, written the way the app before the upgrade wrote them. */
@@ -181,6 +182,9 @@ test.describe("Hifth · notes moved across on upgrade", () => {
     await page.keyboard.press("KeyN");
     const at = await ayahTarget(page, "#verse-46");
     await page.mouse.click(at.x, at.y);
+    // With no note yet, there is nothing to add the verse to, so the box offers nothing.
+    await expect(box(page).getByRole("textbox")).toBeFocused();
+    await expect(choices(page)).toHaveCount(0);
     await box(page).getByRole("textbox").fill("A fresh one");
     await page.keyboard.press("Escape");
     await expect(pins(page)).toHaveCount(1);
@@ -248,5 +252,74 @@ test.describe("Hifth · notes moved across on upgrade", () => {
     await expect.poll(async () => (await readRecord(page, "scoped-notes"))?.notes.length ?? 0).toBe(2);
     const ids = (await readRecord(page, "scoped-notes"))!.notes.map((n) => n.id);
     expect(ids).toContain("nold2");
+  });
+
+  test("a fresh pin offers the notes it could join, and one tap adds the verse to that note", async ({ page }) => {
+    // Two notes on page 7, moved across from before the upgrade.
+    await page.goto("/#/hafs-kfqc/p7");
+    await expect(pageSvg(page, 7)).toBeVisible();
+    await seedOldNotes(page);
+    await page.reload();
+    await expect(pins(page)).toHaveCount(2);
+
+    // A tap with the note tool still makes a new note at once, ready to type in…
+    await page.keyboard.press("KeyN");
+    // A verse's mark is named by its number counted through the whole Qur'an: 53 is 2:46.
+    const at = await ayahTarget(page, "#verse-53");
+    await page.mouse.click(at.x, at.y);
+    await expect(box(page).getByRole("textbox")).toBeFocused();
+    await expect(pins(page)).toHaveCount(3);
+    // …and offers the notes on this page, the last used first. (A verse already
+    // in a note is never offered that note: tapping 2:39 would offer only one.)
+    await expect(choices(page).getByRole("button")).toHaveText(["Which way is the waqf here?", "Keep the two halves apart"]);
+
+    // One tap: the verse joins that note, the box shows the note, and the fresh note is gone.
+    await choices(page).getByRole("button", { name: "Keep the two halves apart" }).click();
+    await expect(box(page).getByRole("textbox")).toHaveValue("Keep the two halves apart");
+    await expect(box(page)).toContainText("Page 7 · 2 verses");
+    await expect(box(page)).toContainText("added to this note");
+    await expect(choices(page)).toHaveCount(0);
+    await expect(pins(page)).toHaveCount(3);
+    await expect.poll(async () => (await readRecord(page, "scoped-notes"))?.notes.length ?? 0).toBe(2);
+    const joined = (await readRecord(page, "scoped-notes"))!.notes.find((n) => n.id === "nold1")!;
+    expect((joined.verses as { key: string }[]).map((v) => v.key)).toEqual([KEY(39), KEY(46)]);
+
+    // Undo puts it back as it was: a new note of its own, with the choices again.
+    await box(page).getByRole("button", { name: "Undo" }).click();
+    await expect(box(page).getByRole("textbox")).toHaveValue("");
+    await expect(choices(page).getByRole("button")).toHaveCount(2);
+    await expect.poll(async () => (await readRecord(page, "scoped-notes"))?.notes.length ?? 0).toBe(3);
+    const back = (await readRecord(page, "scoped-notes"))!.notes.find((n) => n.id === "nold1")!;
+    expect((back.verses as { key: string }[]).map((v) => v.key)).toEqual([KEY(39)]);
+
+    // Join again and write in the note: the words are the note's, on both its pins.
+    await choices(page).getByRole("button", { name: "Keep the two halves apart" }).click();
+    const text = box(page).getByRole("textbox");
+    await expect(text).toHaveValue("Keep the two halves apart");
+    await text.fill("Keep the two halves apart, in both");
+    await page.keyboard.press("Escape");
+    await expect(page.locator('[role="status"][aria-live="polite"]')).toHaveText("Note saved");
+    await page.reload();
+    await expect(pins(page)).toHaveCount(3);
+    await page.locator('[data-note-id="nold1"]').click();
+    await expect(box(page).getByRole("textbox")).toHaveValue("Keep the two halves apart, in both");
+    // An opened note is not fresh: it offers nothing to join.
+    await expect(choices(page)).toHaveCount(0);
+    await page.keyboard.press("Escape");
+
+    // On a note of several verses, the box takes out only this verse, and Undo puts it back in the same note.
+    await page.locator('[data-note-id="nold1~2:46"]').click();
+    await box(page).getByRole("button", { name: "Take this verse out" }).click();
+    await expect(pins(page)).toHaveCount(2);
+    await expect(page.locator('[role="status"][aria-live="polite"]')).toHaveText("Verse taken out of the note");
+    await expect
+      .poll(async () => ((await readRecord(page, "scoped-notes"))!.notes.find((n) => n.id === "nold1")!.verses as unknown[]).length)
+      .toBe(1);
+    await page.getByRole("button", { name: "Undo" }).click();
+    await expect(pins(page)).toHaveCount(3);
+    await expect
+      .poll(async () => ((await readRecord(page, "scoped-notes"))!.notes.find((n) => n.id === "nold1")!.verses as unknown[]).length)
+      .toBe(2);
+    expect((await readRecord(page, "scoped-notes"))!.notes).toHaveLength(2);
   });
 });

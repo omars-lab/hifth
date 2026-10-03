@@ -1277,11 +1277,11 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     seven build steps; its first three questions are answered. **Done 2026-10-01:** step 1,
     the rules and their tests, and step 2: today's notes move across on the device the first
     time the app opens, the old record is kept as a backup, the saved file carries the new
-    notes, and the pins look as before. **What is open:** the owner's pick on
-    [how adding a verse should feel](design/scoped-notes-feel.md) (questions 4 and 6, recorded
-    on a phone 2026-10-01); then the note tool offering existing notes (waits on
-    how that should feel, the design's question 4), the list of notes and stepping through
-    one (question 6), and the long-press ways in, which land with 25 and 27.
+    notes, and the pins look as before. **Answered 2026-10-02:** [how adding a verse should feel](design/scoped-notes-feel.md),
+    C and A (a new note with your three likeliest notes as choices in its box; a dot by the
+    verse number). **Done 2026-10-02:** step 3, the note tool's box offering those notes, with
+    an Undo. **What is open:** step 4, the dot, the list of notes and stepping through one;
+    and the long-press ways in.
 30. ~~**A finger's tap on a verse draws a thin blue box around it.**~~ Found recording the
     tap-and-hold options, 2026-10-01: besides the orange, a tapped verse gets the outline that
     shows a keyboard user where they are, which on a phone looks like a stray mark.
