@@ -59,6 +59,14 @@ pressed as the sheet appeared fell on the page. All three now set those up in th
 draws them. Each has a browser test that presses Escape inside that step, before any frame; all
 three tests failed before the change, and so did the drawer's cursor check.
 
+A fourth the same day: the panel that opens a word into its parts (and the mistake tool's sign
+picker, which is the same panel) is drawn hidden, placed a frame later, and only then takes the
+keyboard. It heard Escape only while it held the keyboard, and every other Escape in the app
+steps aside while a panel is open, so an Escape pressed in that gap did nothing at all. It failed
+1 run in 24 alone and both tries under a full push. The panel now hears Escape across the whole
+window from the step that draws it; a browser test presses Escape as the panel is added, before
+any frame, and failed before the change. After it, 40 of 40 repeats passed.
+
 ## What did not change
 
 The components: they still import from "react", and the build points those imports at Preact. Going back is the two plugin lines in the build and test settings, plus the dependencies.

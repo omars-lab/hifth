@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import {
   isLetterShard,
   isMarkShard,
@@ -194,6 +194,21 @@ export function WordParts({
   useEffect(() => {
     if (placed) boxRef.current?.querySelector<HTMLButtonElement>("button")?.focus();
   }, [placed]);
+
+  // Escape closes it from the moment it is drawn, not only once it holds the
+  // keyboard: it is placed a frame late and focused after that, and an Escape
+  // pressed in between fell on the page, where every other Escape steps aside
+  // for an open panel. Set up in the step that draws it, as the bookmark
+  // drawer's is. The box's own handler marks the ones it already took.
+  useLayoutEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== "Escape" || e.defaultPrevented) return;
+      e.preventDefault();
+      onCloseRef.current();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
 
   // A press anywhere else closes it, as the note box does.
   useEffect(() => {
