@@ -165,12 +165,22 @@ export function confusionMarks(set: readonly Confusion[]): Map<string, Confusion
   return marks;
 }
 
+const lastAt = (c: Confusion) => c.times[c.times.length - 1]?.at ?? 0;
+const oftenFirst = (a: Confusion, b: Confusion) =>
+  b.times.length - a.times.length || lastAt(b) - lastAt(a) || (a.id < b.id ? -1 : 1);
+
 /** The jumps from one verse, the most often first, then the latest. */
 export function confusionsFrom(set: readonly Confusion[], key: string): Confusion[] {
-  const last = (c: Confusion) => c.times[c.times.length - 1]?.at ?? 0;
-  return set
-    .filter((c) => c.from.key === key)
-    .sort((a, b) => b.times.length - a.times.length || last(b) - last(a) || (a.id < b.id ? -1 : 1));
+  return set.filter((c) => c.from.key === key).sort(oftenFirst);
+}
+
+/**
+ * Every jump the reader holds, in the same order, for the page map's list:
+ * the "before I start, what do I keep getting wrong?" glance. A dismissed
+ * jump is one the reader asked to stop seeing, so it is left out.
+ */
+export function allConfusions(set: readonly Confusion[]): Confusion[] {
+  return set.filter((c) => c.state !== "dismissed").sort(oftenFirst);
 }
 
 /**

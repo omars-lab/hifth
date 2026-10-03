@@ -137,9 +137,13 @@ export interface Catalog {
   readonly jumpMarkedUnsure: (d: { readonly fromText: string | number }) => string;
   readonly jumpNotSure: string;
   readonly jumpOnDay: (d: { readonly dayText: string | number }) => string;
+  readonly jumpPair: (d: { readonly fromText: string | number; readonly toText: string | number }) => string;
+  readonly jumpPairUnsure: (d: { readonly fromText: string | number }) => string;
   readonly jumpPlaceholder: string;
   readonly jumpResults: string;
   readonly jumpSayWhere: string;
+  readonly jumpShelfEmpty: string;
+  readonly jumpShelfHead: string;
   readonly jumpStartsAt: (d: { readonly label: string | number }) => string;
   readonly jumpTimes: (d: { readonly n: number; readonly nText: string | number; readonly whenText: string | number }) => string;
   readonly jumpToday: string;

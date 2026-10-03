@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   againConfusion,
+  allConfusions,
   confusionsFrom,
   confusionMarks,
   isConfusion,
@@ -158,6 +159,19 @@ describe("loading jumps from a saved file", () => {
     expect(isConfusion({ ...set[0], from: { key: 7 } })).toBe(false);
     const unsure: Confusion = { ...set[0]!, to: null };
     expect(isConfusion(unsure)).toBe(true);
+  });
+});
+
+describe("all your jumps, for the page map", () => {
+  it("lists every jump the most often first, then the latest, and leaves out the dismissed", () => {
+    let set = markConfusion([], { key: K("3:7") }, { key: K("3:8") }, 1_000, PHONE);
+    set = markConfusion(set, { key: K("2:58") }, { key: K("7:161") }, 2_000, PHONE);
+    set = markConfusion(set, { key: K("2:58") }, { key: K("7:161") }, 3_000, PHONE);
+    set = markConfusion(set, { key: K("2:59") }, null, 4_000, PHONE);
+    set = markConfusion(set, { key: K("2:60") }, { key: K("7:160") }, 5_000, PHONE);
+    const gone = set.find((c) => c.from.key === K("2:60"))!;
+    set = setConfusionState(set, gone.id, "dismissed", 6_000);
+    expect(allConfusions(set).map((c) => c.from.key)).toEqual([K("2:58"), K("2:59"), K("3:7")]);
   });
 });
 

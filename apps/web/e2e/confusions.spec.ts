@@ -394,3 +394,40 @@ test.describe("Hifth · jumps in the saved file", () => {
     await expect(page.getByRole("dialog", { name: /^Jumps from 2:58/ }).getByText(/^3 times/)).toBeVisible();
   });
 });
+
+test.describe("Hifth · all your jumps, in the page map", () => {
+  test("the page map lists every jump, the most often first, and a row goes to the verse you left", async ({ page }) => {
+    await page.goto("/#/hafs-kfqc/p1");
+    // Seeded only once the app has started: a write made while it is still
+    // starting can lose the page under it (it moved on, once in a full run).
+    await expect(pageSvg(page, 1)).toBeVisible();
+    await seed(page, JUMPS);
+    await page.reload();
+    await page.getByRole("button", { name: /what you have opened/ }).click();
+    const sheet = page.getByRole("dialog", { name: "What you have opened" });
+    const shelf = sheet.getByRole("region", { name: "Your jumps" });
+    const rows = shelf.getByRole("button");
+    // Three times first; then by the latest; the dismissed one is not listed.
+    await expect(rows).toHaveText([
+      /^From 2:58 to 7:161.*3 times/,
+      /^From 2:60 to 7:160.*1 time.*Beaten/,
+      /^From 2:59 · not sure where yet.*1 time/,
+      /^From 2:58 to 2:35.*1 time/,
+    ]);
+    if (SHOTS) {
+      await shelf.scrollIntoViewIfNeeded();
+      await page.screenshot({ path: `${SHOTS}/jump-shelf-${test.info().project.name}.png` });
+    }
+    await rows.first().click();
+    await expect(sheet).toBeHidden();
+    await expect(page).toHaveURL(/2:58/);
+    await expect(mark(page, "2:58")).toBeVisible();
+  });
+
+  test("with no jumps, the list says how to mark one", async ({ page }) => {
+    await page.goto("/#/hafs-kfqc/p1");
+    await page.getByRole("button", { name: /what you have opened/ }).click();
+    const shelf = page.getByRole("dialog", { name: "What you have opened" }).getByRole("region", { name: "Your jumps" });
+    await expect(shelf.getByText(/^No jumps yet\./)).toBeVisible();
+  });
+});

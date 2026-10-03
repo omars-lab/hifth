@@ -2236,6 +2236,11 @@
           "file": "packages/core/src/bookmarks.ts",
           "symbol": "toBookmarkFile",
           "note": "Jumps travel in the one saved file beside the bookmarks and notes. A file carrying jumps is version 3; one without keeps its old number so an older copy of the app still reads it, and an older copy refuses a version 3 file rather than dropping the jumps. Loading merges by pair (mergeConfusions), so the same file twice adds nothing."
+        },
+        {
+          "file": "apps/web/src/components/JumpShelf.tsx",
+          "symbol": "JumpShelf",
+          "note": "\"Your jumps\" in the page map, under your notes: every jump from every verse (allConfusions), the most often first, then the latest, beaten ones greyed, dismissed ones left out. A tap closes the map and goes to the verse you left, where the mark's own list has Go, Compare and the rest."
         }
       ],
       "extend": [
