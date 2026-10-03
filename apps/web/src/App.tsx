@@ -1241,7 +1241,13 @@ export function App(): JSX.Element {
   const noteOfPin = (pin: string) => scoped.find((s) => s.id === pin || pin.startsWith(`${s.id}~`)) ?? null;
   const scopeName = useCallback(
     (scope: NoteScope): string =>
-      scope.type === "page"
+      scope.type === "ayah"
+      ? (t.ayahLabel(scope.key) ?? scope.key)
+      : scope.type === "word"
+      ? t.noteWordOf(t.ayahLabel(scope.key) ?? scope.key)
+      : scope.type === "harakah"
+      ? t.noteHarakahOf(t.ayahLabel(scope.key) ?? scope.key)
+      : scope.type === "page"
       ? t.pageN(scope.page)
       : scope.type === "juz"
         ? t.juzN(scope.juz)
@@ -1316,6 +1322,7 @@ export function App(): JSX.Element {
     if (!here || scopeContains(of.scope, here, pageOfKey)) return here;
     const edition = parseAyahKey(here)?.edition;
     const s = of.scope;
+    if (s.type === "ayah" || s.type === "word" || s.type === "harakah") return s.key;
     if (s.type === "page") return resolver?.keysOnPage(s.page)[0] ?? null;
     const [surah, ayah] =
       s.type === "juz" ? JUZ_STARTS[s.juz - 1]! : s.type === "hizb" ? HIZB_STARTS[s.hizb - 1]! : s.type === "surah" ? [s.surah, 1] : [1, 1];
@@ -1326,21 +1333,41 @@ export function App(): JSX.Element {
     const ref = key ? parseAyahKey(key) : null;
     if (!of || !key || !ref) return null;
     const page = pageOfKey(key);
-    const parts: NoteScope[] = [
-      ...(page !== null ? [{ type: "page", edition: ref.edition, page } as const] : []),
-      { type: "hizb", hizb: hizbOf(ref.surah, ref.ayah) },
-      { type: "juz", juz: juzOf(ref.surah, ref.ayah) },
-      { type: "surah", surah: ref.surah },
-      { type: "whole" },
+    // The three narrowest need a verse to be part of, and a word or a harakah
+    // needs the pin to be on one; without that they stand greyed in the pyramid.
+    const s = of.scope;
+    const spot = of.verses[0]?.spot;
+    const verse = of.verses[0]?.key ?? (s.type === "ayah" || s.type === "word" || s.type === "harakah" ? s.key : null);
+    const word = s.type === "word" || s.type === "harakah" ? s.word : (spot?.word ?? null);
+    const mark = s.type === "harakah" ? s.mark : spot?.onHarakah && typeof spot.mark === "number" ? spot.mark : null;
+    const tiers: [NoteScope | null, string, string][] = [
+      [verse && word !== null && mark !== null ? { type: "harakah", key: verse, word, mark } : null, "H", t.noteTierHarakah],
+      [verse && word !== null ? { type: "word", key: verse, word } : null, "W", t.noteTierWord],
+      [verse ? { type: "ayah", key: verse } : null, "A", t.noteTierAyah],
+      [page !== null ? { type: "page", edition: ref.edition, page } : null, "P", ""],
+      [{ type: "hizb", hizb: hizbOf(ref.surah, ref.ayah) }, "Z", ""],
+      [{ type: "juz", juz: juzOf(ref.surah, ref.ayah) }, "J", ""],
+      [{ type: "surah", surah: ref.surah }, "S", ""],
+      [{ type: "whole" }, "Q", t.noteTierWhole],
     ];
-    const idOf = (s: NoteScope) => JSON.stringify(s);
+    // The same part has one id however its fields were ordered when it was saved.
+    const idOf = (x: NoteScope) => JSON.stringify(Object.entries(x).sort(([a], [b]) => (a < b ? -1 : 1)));
+    const parts = tiers.flatMap(([x]) => (x ? [x] : []));
+    const narrow = s.type === "ayah" || s.type === "word" || s.type === "harakah";
     return {
-      name: scopeName(of.scope),
+      name: scopeName(s),
+      ...(narrow ? { short: tiers.find(([x]) => x?.type === s.type)?.[2] ?? scopeName(s) } : {}),
       count: of.verses.length,
-      current: idOf(of.scope),
-      options: parts.map((s) => ({ id: idOf(s), name: scopeName(s) })),
+      current: idOf(s),
+      options: tiers.flatMap(([x, letter, short], i) =>
+        x
+          ? [{ id: idOf(x), name: scopeName(x), short: short || scopeName(x), letter }]
+          : i < 3
+            ? [{ id: `none-${letter}`, name: short, short, letter, disabled: true }]
+            : [],
+      ),
       onPick: (id) => {
-        const scope = parts.find((s) => idOf(s) === id);
+        const scope = parts.find((x) => idOf(x) === id);
         if (!scope || id === idOf(of.scope)) return null;
         const got = changeScope(scoped, of.id, scope, Date.now(), pageOfKey);
         if (!got.ok) {

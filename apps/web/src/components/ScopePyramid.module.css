@@ -1,0 +1,92 @@
+/* The parts a note could be about, as one slope: narrow at the top, the whole Qur'an at the base. */
+.pyramid {
+  display: grid;
+  gap: 3px;
+  inline-size: 100%;
+  max-inline-size: 18rem;
+  margin-inline: auto;
+}
+
+.tier {
+  position: relative;
+  display: grid;
+  place-items: center;
+  min-block-size: 28px;
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--ink, inherit);
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+/* The slice of the slope: deeper toward the narrow top, paler toward the base. */
+.shape {
+  position: absolute;
+  inset: 0;
+  background: color-mix(in srgb, var(--accent) calc(30% - var(--tier) * 20%), var(--paper-raised, var(--paper)));
+  transition: background-color 120ms ease;
+}
+
+.text {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  white-space: nowrap;
+}
+
+.key {
+  display: inline-grid;
+  place-items: center;
+  min-inline-size: 15px;
+  block-size: 15px;
+  padding: 0 2px;
+  border: 1px solid color-mix(in srgb, currentColor 40%, transparent);
+  border-radius: 3px;
+  font: inherit;
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 1;
+  opacity: 0.8;
+}
+
+.tier:hover:not(:disabled) .shape {
+  background: color-mix(in srgb, var(--accent) 38%, var(--paper-raised, var(--paper)));
+}
+
+.tier[aria-pressed="true"] {
+  color: var(--paper, #fff);
+  font-weight: 600;
+}
+
+.tier[aria-pressed="true"] .shape {
+  background: var(--accent);
+}
+
+/* The clipped slice would cut a ring in half, so focus shows on the words instead. */
+.tier:focus-visible {
+  outline: none;
+}
+
+.tier:focus-visible .text {
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
+}
+
+.tier:focus-visible:not([aria-pressed="true"]) .shape {
+  background: color-mix(in srgb, var(--accent) 45%, var(--paper-raised, var(--paper)));
+}
+
+.tier:disabled {
+  cursor: default;
+  opacity: 0.4;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .shape {
+    transition: none;
+  }
+}

@@ -77,6 +77,18 @@ describe("what a scope holds", () => {
     expect(scopeContains({ type: "whole" }, k(114, 6))).toBe(true);
   });
 
+  it("an ayah, a word or a harakah holds its one verse, in any print, and nothing else", () => {
+    const ayah: NoteScope = { type: "ayah", key: k(2, 50) };
+    const word: NoteScope = { type: "word", key: k(2, 50), word: 3 };
+    const harakah: NoteScope = { type: "harakah", key: k(2, 50), word: 3, mark: 1 };
+    for (const scope of [ayah, word, harakah]) {
+      expect(scopeContains(scope, k(2, 50))).toBe(true);
+      expect(scopeContains(scope, "quran/hafs-madani/2:50")).toBe(true);
+      expect(scopeContains(scope, k(2, 51))).toBe(false);
+      expect(scopeSize(scope)).toBe(1);
+    }
+  });
+
   it("a verse number past the end of its surah is held by nothing", () => {
     for (const scope of [{ type: "surah", surah: 2 }, { type: "juz", juz: 3 }, { type: "whole" }] as NoteScope[]) {
       expect(scopeContains(scope, k(2, 287), pageOf)).toBe(false);
@@ -147,6 +159,22 @@ describe("changing a note's scope", () => {
     const wide = addVerse([note("a", { type: "juz", juz: 1 }, T)], "a", { key: k(2, 100) }, T);
     const r = changeScope(wide, "a", page7, T + 9, pageOf);
     expect(r).toEqual({ ok: false, outside: [k(2, 100)] });
+  });
+
+  it("narrows down to the one word or harakah of a note of one verse, and back out", () => {
+    const one = addVerse([note("a", page7, T)], "a", { key: k(2, 40) }, T, pageOf);
+    const r = changeScope(one, "a", { type: "harakah", key: k(2, 40), word: 2, mark: 0 }, T + 9, pageOf);
+    expect(r.ok).toBe(true);
+    if (!r.ok) return;
+    expect(isScopedNote(r.notes[0])).toBe(true);
+    expect(changeScope(r.notes, "a", { type: "ayah", key: k(2, 41) }, T + 10, pageOf)).toEqual({ ok: false, outside: [k(2, 40)] });
+    expect(changeScope(r.notes, "a", page7, T + 10, pageOf).ok).toBe(true);
+  });
+
+  it("a saved word or harakah scope with no verse key, or no word, is refused", () => {
+    expect(isScopedNote(note("a", { type: "word", key: "nope", word: 3 } as NoteScope, T))).toBe(false);
+    expect(isScopedNote(note("a", { type: "harakah", key: k(2, 40), word: 2 } as unknown as NoteScope, T))).toBe(false);
+    expect(isScopedNote(note("a", { type: "ayah", key: k(2, 40) }, T))).toBe(true);
   });
 });
 
