@@ -123,6 +123,9 @@ export interface Catalog {
   readonly hoppedTo: (d: { readonly label: string | number; readonly page: string | number }) => string;
   readonly jumpAgain: string;
   readonly jumpAnother: string;
+  readonly jumpArrowEnd: (d: { readonly n: number; readonly keyText: string | number; readonly nText: string | number }) => string;
+  readonly jumpArrowLabel: (d: { readonly keyText: string | number }) => string;
+  readonly jumpArrowUnnamed: string;
   readonly jumpBeaten: string;
   readonly jumpCompare: string;
   readonly jumpDelete: string;

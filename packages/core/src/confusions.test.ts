@@ -4,7 +4,9 @@ import {
   allConfusions,
   confusionsFrom,
   confusionMarks,
+  arrowsShown,
   isConfusion,
+  jumpArrows,
   markConfusion,
   mergeConfusions,
   nextWasl,
@@ -209,6 +211,59 @@ describe("the next wasl: the pause sign after where you left", () => {
     set = setConfusionState(set, set[1]!.id, "dismissed", 3_000);
     set = setConfusionState(set, set[0]!.id, "beaten", 3_000);
     expect(waslMarks(set, at)).toEqual([{ key: K("2:58"), index: 6, count: 1, unsure: 0, beaten: true }]);
+  });
+});
+
+describe("the saved arrows on the page", () => {
+  it("draws one arrow from each place you left, naming every verse gone to from there, the most often first", () => {
+    let set = markConfusion([], { key: K("2:58"), word: 15 }, { key: K("7:161") }, 1_000, PHONE);
+    set = markConfusion(set, { key: K("2:58"), word: 15 }, { key: K("2:35") }, 2_000, PHONE);
+    set = markConfusion(set, { key: K("2:58"), word: 15 }, { key: K("2:35") }, 3_000, LAPTOP);
+    set = markConfusion(set, { key: K("2:58"), word: 4 }, { key: K("7:162") }, 4_000, PHONE);
+    expect(jumpArrows(set)).toEqual([
+      { key: K("2:58"), word: 4, ends: [{ to: K("7:162"), times: 1 }], beaten: false },
+      {
+        key: K("2:58"),
+        word: 15,
+        ends: [
+          { to: K("2:35"), times: 2 },
+          { to: K("7:161"), times: 1 },
+        ],
+        beaten: false,
+      },
+    ]);
+  });
+
+  it("starts a jump marked with no word at the verse's first word, and joins the not-named-yet into one end", () => {
+    let set = markConfusion([], { key: K("2:60") }, { key: K("7:160") }, 1_000, PHONE);
+    set = markConfusion(set, { key: K("2:61"), word: 9 }, null, 2_000, PHONE);
+    set = markConfusion(set, { key: K("2:61"), word: 9 }, null, 3_000, PHONE);
+    expect(jumpArrows(set)).toEqual([
+      { key: K("2:60"), word: null, ends: [{ to: K("7:160"), times: 1 }], beaten: false },
+      { key: K("2:61"), word: 9, ends: [{ to: null, times: 2 }], beaten: false },
+    ]);
+  });
+
+  it("greys an arrow only once every jump from that place is beaten, and leaves dismissed jumps out", () => {
+    let set = markConfusion([], { key: K("2:58"), word: 15 }, { key: K("7:161") }, 1_000, PHONE);
+    set = markConfusion(set, { key: K("2:58"), word: 15 }, { key: K("2:35") }, 2_000, PHONE);
+    set = setConfusionState(set, set[0]!.id, "beaten", 3_000);
+    expect(jumpArrows(set)[0]!.beaten).toBe(false);
+    set = setConfusionState(set, set[1]!.id, "dismissed", 4_000);
+    expect(jumpArrows(set)).toEqual([
+      { key: K("2:58"), word: 15, ends: [{ to: K("7:161"), times: 1 }], beaten: true },
+    ]);
+  });
+
+  it("stays on the page, or shows only while you are asking: with the Jump tool on, or that verse's list open", () => {
+    let set = markConfusion([], { key: K("2:58"), word: 15 }, { key: K("7:161") }, 1_000, PHONE);
+    set = markConfusion(set, { key: K("2:60"), word: 3 }, { key: K("7:160") }, 2_000, PHONE);
+    const all = jumpArrows(set);
+    const keys = (a: readonly { key: string }[]) => a.map((x) => x.key);
+    expect(keys(arrowsShown(all, "stays", { toolOn: false, open: null }))).toEqual([K("2:58"), K("2:60")]);
+    expect(arrowsShown(all, "asked", { toolOn: false, open: null })).toEqual([]);
+    expect(keys(arrowsShown(all, "asked", { toolOn: true, open: null }))).toEqual([K("2:58"), K("2:60")]);
+    expect(keys(arrowsShown(all, "asked", { toolOn: false, open: K("2:60") }))).toEqual([K("2:60")]);
   });
 });
 

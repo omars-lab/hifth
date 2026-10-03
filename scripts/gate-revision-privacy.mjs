@@ -90,6 +90,8 @@ const RECORDS = [
       "confusionsFrom",
       "allConfusions",
       "waslMarks",
+      "jumpArrows",
+      "arrowsShown",
       "mergeConfusions",
       "isConfusion",
       "Confusion",

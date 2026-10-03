@@ -1326,8 +1326,11 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     beaten ones greyed, and a tap goes to the verse you left. **The next wasl:** a smaller
     copy of the mark sits by the first pause sign after the word you left at, the place you
     would next stop and start again, with a count of the verses gone to from there.
-    **Still open:** showing dismissed jumps
-    somewhere, and the rough build of the arrow staying against showing on request.
+    **The saved arrows:** a faint wavy arrow under the word you left at, with a label for each
+    verse gone to; the other way, arrows only while the list is open or the tool is on, is on
+    trial behind the page address, and both are recorded in
+    [jump-arrows-options.md](design/jump-arrows-options.md) for the owner's call.
+    **Still open:** showing dismissed jumps somewhere.
 
 **The half of these a machine cannot run now has a register — and a runbook.** Follow-ups
 ① (the phone), ② (the browser glance) and ④ (VoiceOver/TalkBack) still wait on a human, and

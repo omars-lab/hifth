@@ -316,6 +316,84 @@ test.describe("Hifth · the mark at the next pause sign", () => {
   });
 });
 
+test.describe("Hifth · the saved arrows on the page", () => {
+  // Two ways on trial (question 4 of the design): the arrow stays on the
+  // page, faint, or shows only while you ask. Every seeded jump leaves from
+  // word 3; in 2:58 that is the third word of the first line.
+  const arrow = (page: Page, verse: string): Locator => pageSvg(page, 9).locator(`[data-jump-arrow="${verse}"]`);
+  const arrows = (page: Page): Locator => pageSvg(page, 9).locator("[data-jump-arrow]");
+  const wordBox = (verse: string, word: number) => {
+    const shard = JSON.parse(readFileSync(new URL("../public/assets/words/hafs-kfqc/9.json", import.meta.url), "utf8"));
+    const w = shard.words[verse];
+    const [x, y, width, height] = w.boxes[word - w.from];
+    return { x, y, width, height };
+  };
+
+  test("stays, faint: one arrow from where you left, labelled with every verse you went to", async ({ page }) => {
+    await page.goto("/#/hafs-kfqc/p9");
+    await expect(pageSvg(page, 9)).toBeVisible();
+    await seed(page, JUMPS);
+    await page.reload();
+    await expect(arrow(page, "2:58")).toBeVisible();
+    // 2:58, 2:59 and 2:60 (beaten, grey); 2:61's jump is dismissed.
+    await expect(arrows(page)).toHaveCount(3);
+    await expect(arrow(page, "2:58")).toHaveAttribute("data-word", "3");
+    await expect(arrow(page, "2:58").locator("[data-end]")).toHaveText(["7:161 ×3", "2:35"]);
+    await expect(arrow(page, "2:59").locator("[data-end]")).toHaveText(["?"]);
+    await expect(arrow(page, "2:60")).toHaveAttribute("data-beaten", "");
+    await expect(arrow(page, "2:58")).toHaveAttribute("aria-label", "Where you went from here in 2:58");
+
+    // It leaves from under the word you left at, and runs on in reading
+    // order, to the left, under the line.
+    const word = wordBox("2:58", 3);
+    const line = await arrow(page, "2:58")
+      .locator("[data-line]")
+      .evaluate((el) => {
+        const b = (el as SVGGraphicsElement).getBBox();
+        return { x: b.x, y: b.y, width: b.width, height: b.height };
+      });
+    expect(Math.abs(line.x + line.width - (word.x + word.width / 2))).toBeLessThan(3);
+    expect(line.width).toBeGreaterThan(30);
+    expect(line.y).toBeGreaterThan(word.y + word.height * 0.6);
+    if (SHOTS) {
+      await arrow(page, "2:58").scrollIntoViewIfNeeded();
+      await page.screenshot({ path: `${SHOTS}/jump-arrows-stays-${test.info().project.name}.png` });
+    }
+
+    // A tap on it opens the same list as the marks.
+    await arrow(page, "2:58").locator("[data-end]").first().click();
+    await expect(page.getByRole("dialog", { name: "Jumps from 2:58" })).toBeVisible();
+  });
+
+  test("on request: no arrows until the Jump tool is on, or a verse's list is open", async ({ page, isMobile }) => {
+    await page.goto("/?jumparrows=asked#/hafs-kfqc/p9");
+    await expect(pageSvg(page, 9)).toBeVisible();
+    await seed(page, JUMPS);
+    await page.reload();
+    await expect(mark(page, "2:58")).toBeVisible();
+    await expect(arrows(page)).toHaveCount(0);
+
+    // Opening one verse's list shows that verse's arrow, and closing it hides it.
+    await mark(page, "2:58").click();
+    await expect(page.getByRole("dialog", { name: "Jumps from 2:58" })).toBeVisible();
+    await expect(arrows(page)).toHaveCount(1);
+    await expect(arrow(page, "2:58")).toBeVisible();
+    if (SHOTS) await page.screenshot({ path: `${SHOTS}/jump-arrows-asked-${test.info().project.name}.png` });
+    await page.keyboard.press("Escape");
+    await expect(arrows(page)).toHaveCount(0);
+
+    // With the Jump tool on, every arrow shows, so you see what you have marked.
+    if (!isMobile) {
+      await page.keyboard.press("j");
+      await expect(arrows(page)).toHaveCount(3);
+      if (SHOTS) await page.screenshot({ path: `${SHOTS}/jump-arrows-asked-tool-${test.info().project.name}.png` });
+      // Escape puts the tool down, and the arrows go with it.
+      await page.keyboard.press("Escape");
+      await expect(arrows(page)).toHaveCount(0);
+    }
+  });
+});
+
 test.describe("Hifth · the list behind a jump mark", () => {
   const jumps = (page: Page, from: string): Locator => page.getByRole("dialog", { name: `Jumps from ${from}` });
   const row = (list: Locator, text: string | RegExp): Locator => list.getByRole("listitem").filter({ hasText: text });
