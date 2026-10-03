@@ -158,6 +158,6 @@ And for question 2: **D's tint covered about a third of page 7** with only four 
 
 ## What happens next?
 
-Once you pick, step 3 builds the winner of question 1 into the note tool and step 4 the winner of question 2 onto the page, each with its browser tests, and the losing mocks are deleted. Step 3 is built (2026-10-02). The mocks stay until step 4 is built too, because one script records both questions from them; the pictures and clips on this page stay as the record of the choice.
+Once you pick, step 3 builds the winner of question 1 into the note tool and step 4 the winner of question 2 onto the page, each with its browser tests, and the losing mocks are deleted. Step 3 is built (2026-10-02), and so are step 4's list of notes and following one; the dot is next. The mocks stay until the dot is built too, because one script records both questions from them; the pictures and clips on this page stay as the record of the choice.
 
 **To answer:** comment on this note, or tell Claude two letters, for example "C and A".

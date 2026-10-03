@@ -2119,6 +2119,16 @@
           "file": "apps/web/src/App.tsx",
           "symbol": "placeNote",
           "note": "Ties it together: pin, open, close, delete with an Undo line."
+        },
+        {
+          "file": "apps/web/src/components/NoteShelf.tsx",
+          "symbol": "NoteShelf",
+          "note": "Your notes in the page map, under the bookmarks, the one used last first; a tap follows one (followNote in App.tsx)."
+        },
+        {
+          "file": "apps/web/src/components/NoteFollow.tsx",
+          "symbol": "NoteFollow",
+          "note": "The bar while following a note: its name (a tap shows its words), where you are, a step either way, stop. A row above the bottom line, not floating, so it covers no tool (tested in e2e/scoped-notes.spec.ts)."
         }
       ],
       "extend": [

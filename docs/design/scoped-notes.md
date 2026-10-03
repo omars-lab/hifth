@@ -656,4 +656,4 @@ flowchart LR
 7. **Changing a note's scope**, and per-verse lines if question 5 goes that way.
 
 Steps 1 and 2 can start before any question is answered, using the recommended answers to
-questions 1 and 2. Step 3 waited on question 4 and is built; step 4 waits on nothing now that question 6 is answered.
+questions 1 and 2. Step 3 waited on question 4 and is built. Step 4's list of notes and following one are built (2026-10-02): the list sits under the bookmarks in the page map, newest first, and following a note shows a dark bar of its own above the bottom line — floating over the page it covered the tools, so it takes a row instead. The dot by the verse number (question 6) is next.
