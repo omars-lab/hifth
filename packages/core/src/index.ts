@@ -108,17 +108,20 @@ export {
   isConfusion,
   markConfusion,
   mergeConfusions,
+  nextWasl,
   removeConfusion,
   removeLastTime,
   restoreConfusion,
   setConfusionState,
   setDestination,
   squiggle,
+  waslMarks,
   type Confusion,
   type ConfusionMark,
   type ConfusionState,
   type JumpEnd,
   type JumpTime,
+  type WaslMark,
 } from "./confusions.js";
 // tafsir seam — commentary is its own node in the reserved `tafsir/<name>/S:A`
 // namespace, behind a provider contract so a live open source and a side-loaded

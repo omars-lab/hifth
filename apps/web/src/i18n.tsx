@@ -696,6 +696,8 @@ export interface Strings {
   verseInNotes(key: string, count: number): string;
   /** The mark by a verse you jumped away from: "From 2:58 you have jumped to 2 other verses". */
   jumpsFrom(key: string, count: number): string;
+  /** The smaller mark at the next pause sign after where you left, the same count. */
+  jumpsAtWasl(key: string, count: number): string;
   /** On a pin of a note with several verses, Delete takes only that verse out. */
   noteVerseOut: string;
   noteVerseTakenOut: string;
@@ -1319,6 +1321,7 @@ export function buildStrings(lang: Lang, m: Catalog): Strings {
       return m.verseInNotes({ keyText: fmtAyahRef(key, lang) ?? key, n: count, nText: n(count) });
     },
     jumpsFrom: (key, count) => m.jumpsFrom({ keyText: fmtAyahRef(key, lang) ?? key, n: count, nText: n(count) }),
+    jumpsAtWasl: (key, count) => m.jumpsAtWasl({ keyText: fmtAyahRef(key, lang) ?? key, n: count, nText: n(count) }),
     noteVerseOut: m.noteVerseOut,
     noteVerseTakenOut: m.noteVerseTakenOut,
     noteShelfHead: m.noteShelfHead,
