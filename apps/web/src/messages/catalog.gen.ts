@@ -132,6 +132,7 @@ export interface Catalog {
   readonly jumpGo: string;
   readonly jumpInput: string;
   readonly jumpList: (d: { readonly fromText: string | number }) => string;
+  readonly jumpLoaded: (d: { readonly n: number; readonly nText: string | number }) => string;
   readonly jumpMarked: (d: { readonly fromText: string | number; readonly toText: string | number; readonly n: number; readonly nText: string | number }) => string;
   readonly jumpMarkedUnsure: (d: { readonly fromText: string | number }) => string;
   readonly jumpNotSure: string;
