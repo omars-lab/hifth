@@ -2221,6 +2221,16 @@
           "file": "apps/web/src/App.tsx",
           "symbol": "askJumpFrom",
           "note": "The way in with no arrow to draw: \"Jump…\" in a verse's hold menu (and in the fuller drawer of options A and B) opens the same list straight away, by the verse. On a phone the Jump tool is also in the Tools tray, drawn on with the tray open like every phone tool."
+        },
+        {
+          "file": "apps/web/src/components/JumpList.tsx",
+          "symbol": "JumpList",
+          "note": "The list a tap on a jump mark opens: one row per verse your memory went to from here, the most often first, with how many times and when last (today, yesterday, the weekday, then the date). Go turns there and leaves a trail bead; Compare shows the two verses as printed, offered only when they share a run of words to line up (2:58 and 7:161 say theirs in a swapped order, so they have none); Again adds a time; Beaten greys the mark; Delete has Undo. A jump not named yet offers Say where, which fills it in and joins it to the same pair if that already has a record. Dismissed jumps are not listed. Loaded with the other rarely used panels."
+        },
+        {
+          "file": "apps/web/src/components/PageStage.tsx",
+          "symbol": "onOpenJumps",
+          "note": "A tap or Enter on a jump mark opens the list rather than picking the verse under it, the same way a note dot opens its notes."
         }
       ],
       "extend": [

@@ -261,3 +261,89 @@ test.describe("Hifth · jumps on a phone, and from a held verse", () => {
     await expect(mark(page, "2:58")).toHaveAttribute("aria-label", "From 2:58 you have jumped to 1 other verse");
   });
 });
+
+/*
+ * Confusion jumps, step 6: the list behind the mark. A tap on the red mark by
+ * a verse's number lists where your memory went from it, one row a verse, and
+ * each row can turn there, show the two side by side, count one more time,
+ * be marked beaten, or be deleted with Undo.
+ */
+test.describe("Hifth · the list behind a jump mark", () => {
+  const jumps = (page: Page, from: string): Locator => page.getByRole("dialog", { name: `Jumps from ${from}` });
+  const row = (list: Locator, text: string | RegExp): Locator => list.getByRole("listitem").filter({ hasText: text });
+
+  /** Mark a jump the quickest way there is: hold the verse, Jump…, pick. */
+  async function jumpFrom(page: Page, ordinal: number, from: string, pick: (list: Locator) => Promise<void>): Promise<void> {
+    const at = await ayahTarget(page, verse(ordinal));
+    await page.mouse.move(at.x, at.y);
+    await page.mouse.down();
+    await page.waitForTimeout(600);
+    await page.mouse.up();
+    await page.getByRole("menu", { name: /^More for / }).getByRole("menuitem", { name: "Jump…" }).click();
+    await pick(picker(page, from));
+  }
+
+  test.beforeEach(async ({ page }) => {
+    await page.goto("/#/hafs-kfqc/p9");
+    await expect(pageSvg(page, 9)).toBeVisible();
+  });
+
+  test("a tap on the mark lists where you went; Again, Beaten, Delete and Undo work from it", async ({ page }) => {
+    await jumpFrom(page, 65, "2:58", (l) => l.getByRole("button", { name: /7:161/ }).click());
+    await mark(page, "2:58").click();
+    const list = jumps(page, "2:58");
+    await expect(list).toBeVisible();
+    const r = row(list, "7:161");
+    await expect(r).toContainText("1 time · last today");
+    if (SHOTS) await page.screenshot({ path: `${SHOTS}/jump-list-${test.info().project.name}.png` });
+
+    await r.getByRole("button", { name: "Again" }).click();
+    await expect(r).toContainText("2 times · last today");
+    await expect(undoBar(page)).toContainText("2 times now");
+
+    await r.getByRole("button", { name: "Beaten" }).click();
+    await expect(r.getByRole("button", { name: "Beaten" })).toHaveAttribute("aria-pressed", "true");
+    await expect(mark(page, "2:58")).toHaveAttribute("data-beaten", "");
+
+    await r.getByRole("button", { name: "Delete" }).click();
+    // The last row gone, the list has nothing left to say and closes.
+    await expect(list).toHaveCount(0);
+    await expect(mark(page, "2:58")).toHaveCount(0);
+    await expect(undoBar(page)).toContainText("Jump from 2:58 to 7:161 deleted");
+    await undoBar(page).getByRole("button", { name: "Undo" }).click();
+    await expect(mark(page, "2:58")).toHaveAttribute("aria-label", "From 2:58 you have jumped to 1 other verse");
+  });
+
+  test("Go turns to the verse you went to, and Compare shows the two side by side", async ({ page }) => {
+    // 2:58 and 7:161 say the same words in a swapped order, so there is no one
+    // shared run to line up: no Compare is offered that would open on nothing.
+    await jumpFrom(page, 65, "2:58", (l) => l.getByRole("button", { name: /7:161/ }).click());
+    await mark(page, "2:58").click();
+    await expect(row(jumps(page, "2:58"), "7:161").getByRole("button", { name: "Compare" })).toHaveCount(0);
+    await page.keyboard.press("Escape");
+
+    await jumpFrom(page, 67, "2:60", (l) => l.getByRole("button", { name: /7:160/ }).click());
+    await mark(page, "2:60").click();
+    const r = row(jumps(page, "2:60"), "7:160");
+    await r.getByRole("button", { name: "Compare" }).click();
+    await expect(r.getByRole("button", { name: "Compare" })).toHaveAttribute("aria-expanded", "true");
+    // Both verses, as the mus'haf prints them, here first.
+    await expect(r.locator("[data-jump-compare]")).toBeVisible();
+    await expect(r.locator("[data-jump-compare]")).toContainText("2:60");
+    await expect(r.locator("[data-jump-compare]")).toContainText("7:160");
+    if (SHOTS) await page.screenshot({ path: `${SHOTS}/jump-compare-${test.info().project.name}.png` });
+    await r.getByRole("button", { name: "Go" }).click();
+    await expect(jumps(page, "2:60")).toHaveCount(0);
+    await expect(page).toHaveURL(/7:160/);
+  });
+
+  test("a jump not named yet is named from its row", async ({ page }) => {
+    await jumpFrom(page, 66, "2:59", (l) => l.getByRole("button", { name: "Not sure yet" }).click());
+    await expect(mark(page, "2:59")).toContainText("?");
+    await mark(page, "2:59").click();
+    const r = row(jumps(page, "2:59"), "Not sure yet");
+    await r.getByRole("button", { name: "Say where" }).click();
+    await picker(page, "2:59").getByRole("button").first().click();
+    await expect(mark(page, "2:59")).toHaveAttribute("aria-label", "From 2:59 you have jumped to 1 other verse");
+  });
+});
