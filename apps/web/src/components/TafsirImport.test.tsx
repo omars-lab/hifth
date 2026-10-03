@@ -1,6 +1,6 @@
 import "fake-indexeddb/auto";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/preact";
 import { getTafsirProvider, listTafsirProviders, unregisterTafsirProvider } from "@hifth/core";
 import { TafsirImport } from "./TafsirImport";
 
@@ -33,7 +33,9 @@ function bundleFiles(): File[] {
 function pick(input: HTMLElement, files: File[]): void {
   // jsdom lets us define a read-only FileList-ish on the input.
   Object.defineProperty(input, "files", { value: files, configurable: true });
-  fireEvent.change(input);
+  // The browser's own "change", fired by hand: the testing helper renames a
+  // "change" to "input" once it has seen a redraw, and a folder picker has none.
+  fireEvent(input, new Event("change", { bubbles: true }));
 }
 
 beforeEach(() => {

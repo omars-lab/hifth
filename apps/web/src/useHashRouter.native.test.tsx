@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it } from "vitest";
-import { renderHook } from "@testing-library/react";
+import { renderHook } from "@testing-library/preact";
 import type { AppState } from "@hifth/core";
 import { useHashRouter } from "./useHashRouter";
 

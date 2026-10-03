@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { render, screen } from "@testing-library/preact";
 import type { Edge, TafsirSource } from "@hifth/core";
 import { LANG_STORAGE_KEY } from "../lang";
 import { LangProvider } from "../i18n";

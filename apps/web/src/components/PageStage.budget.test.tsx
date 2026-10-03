@@ -13,7 +13,7 @@
  */
 import { StrictMode } from "react";
 import { describe, it, expect, vi, beforeAll, afterAll } from "vitest";
-import { render, waitFor } from "@testing-library/react";
+import { render, waitFor } from "@testing-library/preact";
 import { MOUNTED_PAGE_CAP, Resolver, spreadBudget, type AssetManifest } from "@hifth/core";
 import { PageStage } from "./PageStage";
 
@@ -56,7 +56,7 @@ beforeAll(() => {
 });
 afterAll(() => vi.unstubAllGlobals());
 
-function mountedIn(container: HTMLElement): number[] {
+function mountedIn(container: Element): number[] {
   return [...container.querySelectorAll('svg[aria-labelledby^="page-label-"]')].map((el) =>
     Number(el.getAttribute("aria-labelledby")!.replace("page-label-", "")),
   );

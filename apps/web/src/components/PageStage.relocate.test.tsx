@@ -11,7 +11,7 @@
  */
 import { createRef } from "react";
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { render, waitFor, act } from "@testing-library/react";
+import { render, waitFor, act } from "@testing-library/preact";
 import { Resolver, type AssetManifest } from "@hifth/core";
 import { PageStage, type PageStageHandle } from "./PageStage";
 
@@ -62,7 +62,7 @@ beforeEach(() => {
 afterEach(() => vi.unstubAllGlobals());
 
 /** The page whose host is showing — the one the reader is looking at. */
-function showing(container: HTMLElement): number[] {
+function showing(container: Element): number[] {
   return [...container.querySelectorAll<SVGElement>('svg[aria-labelledby^="page-label-"]')]
     .filter((svg) => (svg.parentElement as HTMLElement).style.display === "block")
     .map((svg) => Number(svg.getAttribute("aria-labelledby")!.replace("page-label-", "")));
