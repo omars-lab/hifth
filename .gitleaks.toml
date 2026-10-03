@@ -23,3 +23,9 @@ paths = [
   # Lockfile integrity hashes are not secrets.
   '''pnpm-lock\.yaml''',
 ]
+# The names the app keeps a reader's choices under on the device
+# ("hifth.jump.arrows.v1") sit after a constant called *_KEY, which the generic
+# key rule reads as a secret. A name of that exact shape never is one.
+regexes = [
+  '''^hifth\.[a-z0-9.-]+\.v[0-9]+$''',
+]

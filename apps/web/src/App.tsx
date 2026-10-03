@@ -44,6 +44,7 @@ import {
   arrowsShown,
   confusionsFrom,
   wordDiff,
+  type ArrowShowing,
   type Confusion,
   type JumpEnd,
   type NoteScope,
@@ -119,7 +120,7 @@ import { DESKTOP_QUERY, useMediaQuery } from "./useMediaQuery";
 import { PageStage, pageSpan, type Corner, type PageStageHandle, type PageTool, type WordRect } from "./components/PageStage";
 import { PageToolbar, TOOL_KEYS, toolHint, toolName } from "./components/PageToolbar";
 import { PhoneToolbarA, PhoneToolbarB, PhoneToolbarC, phoneBarFromUrl } from "./components/PhoneToolbar";
-import { arrowShowingFromUrl } from "./jump-arrows";
+import { rememberArrowShowing, savedArrowShowing } from "./jump-arrows";
 // Opened by few readers and never before the page is up: loaded on first open.
 import {
   useOpenedOnce,
@@ -1408,9 +1409,13 @@ export function App(): JSX.Element {
     [],
   );
   const closeJumps = useCallback(() => setJumpsAt(null), []);
-  // The saved arrows on the page (step 10), two ways on trial picked by the
-  // address: they stay, faint, or show only while you ask for them.
-  const [arrowShowing] = useState(() => arrowShowingFromUrl(window.location.search));
+  // The saved arrows on the page (step 10): they stay, faint, or show only
+  // while you ask for them, as this device chose in settings.
+  const [arrowShowing, setArrowShowing] = useState<ArrowShowing>(() => savedArrowShowing());
+  const chooseArrowShowing = useCallback((choice: ArrowShowing) => {
+    rememberArrowShowing(choice);
+    setArrowShowing(choice);
+  }, []);
   const allArrows = useMemo(() => jumpArrows(confusions), [confusions]);
   const shownArrows = useMemo(
     () => arrowsShown(allArrows, arrowShowing, { toolOn: tool === "jump", open: jumpsAt?.key ?? null }),
@@ -3316,6 +3321,8 @@ export function App(): JSX.Element {
             onTurnStyle={chooseTurnStyle}
             verseGestures={verseGestures}
             onVerseGestures={chooseVerseGestures}
+            arrowShowing={arrowShowing}
+            onArrowShowing={chooseArrowShowing}
             scopeLook={scopeLook}
             onScopeLook={chooseScopeLook}
             onShowTips={() => {

@@ -1,12 +1,20 @@
-import { describe, expect, it } from "vitest";
-import { arrowShowingFromUrl } from "./jump-arrows";
+import { afterEach, describe, expect, it } from "vitest";
+import { JUMP_ARROWS_KEY, rememberArrowShowing, savedArrowShowing } from "./jump-arrows";
 
-describe("which way the saved arrows show, on trial", () => {
-  it("the page address picks the way, and stays is the default", () => {
-    expect(arrowShowingFromUrl("")).toBe("stays");
-    expect(arrowShowingFromUrl("?jumparrows=asked")).toBe("asked");
-    expect(arrowShowingFromUrl("?phonebar=a&jumparrows=ASKED")).toBe("asked");
-    expect(arrowShowingFromUrl("?jumparrows=stays")).toBe("stays");
-    expect(arrowShowingFromUrl("?jumparrows=nonsense")).toBe("stays");
+describe("how the saved arrows show, as the reader set it", () => {
+  afterEach(() => localStorage.clear());
+
+  it("stays when nobody chose, and keeps the choice made", () => {
+    expect(savedArrowShowing()).toBe("stays");
+    rememberArrowShowing("asked");
+    expect(localStorage.getItem(JUMP_ARROWS_KEY)).toBe("asked");
+    expect(savedArrowShowing()).toBe("asked");
+    rememberArrowShowing("stays");
+    expect(savedArrowShowing()).toBe("stays");
+  });
+
+  it("a value it does not know falls back to staying", () => {
+    localStorage.setItem(JUMP_ARROWS_KEY, "nonsense");
+    expect(savedArrowShowing()).toBe("stays");
   });
 });

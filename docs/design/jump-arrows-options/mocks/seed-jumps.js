@@ -1,6 +1,6 @@
 // Put a few made-up jumps on page 9 (the same ones the browser tests use),
-// hide the install notices, and reopen the page with the way on trial that
-// window.ARROWS names ("stays" or "asked"). Run by record.sh through the
+// hide the install notices, set the "Saved jump arrows" setting to the way
+// window.ARROWS names ("stays" or "asked"), and reopen the page. Run by record.sh through the
 // recorder's evalfile step; nothing here is part of the app.
 (() => {
   const KEY = (v) => `quran/hafs-kfqc/${v}`;
@@ -21,6 +21,7 @@
     jump("j4", "2:60", "7:160", [day + 5], "beaten"),
   ];
   for (const kind of ["install-ios", "install", "storage", "persist"]) localStorage.setItem(`hifth.notice.${kind}`, "1");
+  localStorage.setItem("hifth.jump.arrows.v1", window.ARROWS ?? "stays");
   return new Promise((resolve, reject) => {
     const open = indexedDB.open("hifth.bookmarks.v1");
     open.onerror = () => reject(open.error);
@@ -30,7 +31,7 @@
       tx.oncomplete = () => {
         open.result.close();
         // After the recorder has its answer, so the reload does not cut it off.
-        setTimeout(() => location.replace(`/?jumparrows=${window.ARROWS ?? "stays"}${location.hash}`), 50);
+        setTimeout(() => location.reload(), 50);
         resolve(`seeded, reopening as ${window.ARROWS ?? "stays"}`);
       };
     };
