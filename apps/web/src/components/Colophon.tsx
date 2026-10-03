@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useLayoutEffect, useRef } from "react";
 import { useT } from "../i18n";
 import { LOCALES } from "../lang";
 import { LOCALE_IDS } from "../messages/locales.gen";
@@ -188,7 +188,8 @@ export function Colophon({
   const sheetRef = useRef<HTMLDivElement>(null);
   const restoreRef = useRef<HTMLElement | null>(null);
 
-  useEffect(() => {
+  // Takes the keyboard in the step that draws it, so a key pressed as it appears lands here, not on the page.
+  useLayoutEffect(() => {
     if (!open) return;
     restoreRef.current = (document.activeElement as HTMLElement | null) ?? null;
     const sheet = sheetRef.current;

@@ -1,4 +1,4 @@
-import { Suspense, useCallback, useEffect, useRef, useState } from "react";
+import { Suspense, useCallback, useLayoutEffect, useRef, useState } from "react";
 import {
   orderForHifz,
   qulVerseUrlFromKey,
@@ -69,7 +69,8 @@ export function HopPopover({
   const open = chip !== null;
 
   // Capture the trigger and move focus into the sheet on open; restore on close.
-  useEffect(() => {
+  // Takes the keyboard in the step that draws it, so a key pressed as it appears lands here, not on the page.
+  useLayoutEffect(() => {
     if (!open) return;
     restoreRef.current = (document.activeElement as HTMLElement | null) ?? null;
     // Focus the first actionable control (or the sheet itself as a fallback).

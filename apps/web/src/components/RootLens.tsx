@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import type { Edge, LeafSide, RootFamily, RootHop } from "@hifth/core";
 import { useT } from "../i18n";
 import styles from "./RootLens.module.css";
@@ -83,7 +83,8 @@ export function RootLens({
 
   const open = families !== null;
 
-  useEffect(() => {
+  // Takes the keyboard in the step that draws it, so a key pressed as it appears lands here, not on the page.
+  useLayoutEffect(() => {
     if (!open) return;
     restoreRef.current = (document.activeElement as HTMLElement | null) ?? null;
     const sheet = sheetRef.current;
