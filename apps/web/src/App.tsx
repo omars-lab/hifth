@@ -18,6 +18,9 @@ import {
   addVerse,
   joinNote,
   noteTitle,
+  addScopedNote,
+  editScopedNote,
+  notesAbout,
   notesOfVerse,
   suggestNotes,
   verseDots as countVerseDots,
@@ -911,6 +914,11 @@ export function App(): JSX.Element {
   const closeVerseMenu = useCallback(() => setVerseMenu(null), []);
   // The same small menu, for a hold on a printed corner (PLAN 27).
   const [cornerMenu, setCornerMenu] = useState<{ which: Corner; page: number; around: DOMRect } | null>(null);
+  // A label's list of notes, opened from its menu, and the box of a note that
+  // holds no verse (one made from a label), which has no pin to open it by.
+  const [labelNotes, setLabelNotes] = useState<{ head: string; scope: NoteScope; around: DOMRect } | null>(null);
+  const [labelNoteId, setLabelNoteId] = useState<string | null>(null);
+  const [labelNoteFresh, setLabelNoteFresh] = useState(false);
   const closeCornerMenu = useCallback(() => setCornerMenu(null), []);
   // "Play to" is waiting for the verse to stop at: the verse it starts from.
   const playFromRef = useRef<string | null>(null);
@@ -1239,16 +1247,17 @@ export function App(): JSX.Element {
     [t],
   );
   // The page map's list of notes, the one worked on last first.
+  const shelfItem = useCallback(
+    (n: ScopedNote) => ({
+      id: n.id,
+      title: noteTitle(n) || t.noteUntitled,
+      about: `${scopeName(n.scope)} · ${t.noteVerses(n.verses.length)}`,
+    }),
+    [t, scopeName],
+  );
   const noteShelf = useMemo(
-    () =>
-      [...scoped]
-        .sort((a, b) => b.usedAt - a.usedAt || a.id.localeCompare(b.id))
-        .map((n) => ({
-          id: n.id,
-          title: noteTitle(n) || t.noteUntitled,
-          about: `${scopeName(n.scope)} · ${t.noteVerses(n.verses.length)}`,
-        })),
-    [scoped, t, scopeName],
+    () => [...scoped].sort((a, b) => b.usedAt - a.usedAt || a.id.localeCompare(b.id)).map(shelfItem),
+    [scoped, shelfItem],
   );
   // The dot by a verse's number, for a verse in a note with no pin on it
   // (scoped-notes-verse-mark = A), and the list of its notes a tap on it opens.
@@ -1299,10 +1308,13 @@ export function App(): JSX.Element {
   // A verse taken out of a note of several keeps `owner`, the note as it was, so
   // Undo puts the verse back in that note rather than making it a note of its own.
   const [deletedNote, setDeletedNote] = useState<{
-    note: Note;
+    /** The pin taken out; none when the note deleted held no verse. */
+    note?: Note;
     said: string;
     restored: string;
     owner?: ScopedNote;
+    /** A note with no verse, deleted whole: Undo puts it back as it was. */
+    whole?: ScopedNote;
   } | null>(null);
 
   const saveBookmarkFile = useCallback(() => {
@@ -1428,6 +1440,39 @@ export function App(): JSX.Element {
     if (next.some((x, i) => x !== notes[i])) commitNotes(next, t.noteSaved);
     focusPin(n.id);
   };
+  // A new note about a juz, surah or page starts empty and with no verse; it is
+  // kept only once something is typed in it.
+  const closeLabelNotes = useCallback(() => setLabelNotes(null), []);
+  const newNoteAbout = useCallback(
+    (scope: NoteScope) => {
+      const next = addScopedNote(scoped, scope, Date.now());
+      commitScoped(next, "");
+      setLabelNoteId(next[next.length - 1]!.id);
+      setLabelNoteFresh(true);
+    },
+    [commitScoped, scoped],
+  );
+  const labelNote = scoped.find((s) => s.id === labelNoteId) ?? null;
+  const closeLabelNote = (text: string) => {
+    const n = labelNote;
+    setLabelNoteId(null);
+    setLabelNoteFresh(false);
+    if (!n) return;
+    if (text.trim() === "" && labelNoteFresh) {
+      commitScoped(scoped.filter((s) => s.id !== n.id), "");
+      return;
+    }
+    const next = editScopedNote(scoped, n.id, text, Date.now());
+    if (next.some((x, i) => x !== scoped[i])) commitScoped(next, t.noteSaved);
+  };
+  const deleteLabelNote = () => {
+    const n = labelNote;
+    setLabelNoteId(null);
+    setLabelNoteFresh(false);
+    if (!n) return;
+    commitScoped(scoped.filter((s) => s.id !== n.id), t.noteDeleted);
+    if (!labelNoteFresh) setDeletedNote({ said: t.noteDeleted, restored: t.noteRestored, whole: n });
+  };
   const deleteNote = () => {
     const n = openNote;
     setNoteOpenId(null);
@@ -1445,7 +1490,13 @@ export function App(): JSX.Element {
   };
   const undoDelete = () => {
     if (!deletedNote) return;
+    if (deletedNote.whole) {
+      commitScoped([...scoped, deletedNote.whole], deletedNote.restored);
+      setDeletedNote(null);
+      return;
+    }
     const { owner, note } = deletedNote;
+    if (!note) return;
     const verse = owner?.verses.find((v) => v.key === note.key);
     if (owner && verse) {
       // Back into the same note; or, if the note has gone since, the note as it was.
@@ -1457,7 +1508,7 @@ export function App(): JSX.Element {
       setDeletedNote(null);
       return;
     }
-    commitNotes(restoreNote(notes, deletedNote.note), deletedNote.restored);
+    commitNotes(restoreNote(notes, note), deletedNote.restored);
     setDeletedNote(null);
   };
   const endNoteUndo = useCallback(() => setDeletedNote(null), []);
@@ -1830,6 +1881,19 @@ export function App(): JSX.Element {
     },
     [scoped, showVerse],
   );
+  // A note with a verse is followed; one with none (made from a label) opens its words.
+  const openNoteOf = useCallback(
+    (id: string) => {
+      if (scoped.find((n) => n.id === id)?.verses.length === 0) {
+        setRevisionOpen(false);
+        setLabelNoteId(id);
+        setLabelNoteFresh(false);
+        return;
+      }
+      followNote(id);
+    },
+    [followNote, scoped],
+  );
   const stopFollowing = useCallback(() => setFollowing(null), []);
   const followed = following ? scoped.find((n) => n.id === following.id) : undefined;
 
@@ -2178,7 +2242,7 @@ export function App(): JSX.Element {
   // surah and juz opened where they start. A link to a surah or a juz is a link
   // to its first verse; a link never carries the words.
   const cornerItems = useCallback(
-    (which: Corner, page: number): { name: string; items: VerseMenuItem[] } | null => {
+    (which: Corner, page: number, around: DOMRect): { name: string; items: VerseMenuItem[] } | null => {
       if (!resolver) return null;
       const edition = resolver.edition;
       const span = pageSpan(resolver, page);
@@ -2227,19 +2291,32 @@ export function App(): JSX.Element {
         }
         copy();
       };
+      // The notes about this part (docs/design/scoped-notes.md, step 6): those
+      // about it or a part inside it, and those holding one of its verses.
+      const scope: NoteScope =
+        which === "page"
+          ? { type: "page", edition, page }
+          : which === "surah"
+            ? { type: "surah", surah: first.surah }
+            : { type: "juz", juz: juzOf(first.surah, first.ayah) };
+      const about = notesAbout(scoped, scope, pageOfKey);
       const items: VerseMenuItem[] = [
         { caption: t.cornerPlay, onPick: () => playBetween(key(first.surah, first.ayah), key(last.surah, last.ayah)) },
         which === "page"
           ? { caption: t.vdBookmark, onPick: () => dropOn(page) }
           : { caption: t.cornerStart, onPick: () => restoreState({ edition, select: first }, "jump") },
+        ...(about.length > 0
+          ? [{ caption: t.cornerNotes(about.length), onPick: () => setLabelNotes({ head: t.cornerNotesHead(which, name), scope, around }) }]
+          : []),
+        { caption: t.cornerNewNote, onPick: () => newNoteAbout(scope) },
         { caption: t.vdCopy, onPick: copy },
         { caption: t.vdShare, onPick: () => void share() },
       ];
       return { name, items };
     },
-    [announce, dropOn, playBetween, resolver, restoreState, t],
+    [announce, dropOn, newNoteAbout, pageOfKey, playBetween, resolver, restoreState, scoped, t],
   );
-  const cornerMenuOf = cornerMenu ? cornerItems(cornerMenu.which, cornerMenu.page) : null;
+  const cornerMenuOf = cornerMenu ? cornerItems(cornerMenu.which, cornerMenu.page, cornerMenu.around) : null;
 
   // Gate cold-open restore on the resolver: a deep link parsed before the
   // manifest loads must not be dropped (restoreState no-ops without a resolver).
@@ -2930,7 +3007,7 @@ export function App(): JSX.Element {
               hasNotes={notes.length > 0}
               onLoad={loadBookmarkFile}
             />
-            <NoteShelf notes={noteShelf} onFollow={followNote} />
+            <NoteShelf notes={noteShelf} onFollow={openNoteOf} />
           </RevisionMap>
         </Suspense>
       )}
@@ -3154,6 +3231,31 @@ export function App(): JSX.Element {
         </Suspense>
       )}
 
+      {labelNotes && (
+        <Suspense fallback={null}>
+          <VerseNotes
+            head={labelNotes.head}
+            notes={notesAbout(scoped, labelNotes.scope, pageOfKey).map(shelfItem)}
+            anchor={{ top: labelNotes.around.top, bottom: labelNotes.around.bottom, x: labelNotes.around.left + labelNotes.around.width / 2 }}
+            onFollow={(id) => {
+              setLabelNotes(null);
+              openNoteOf(id);
+            }}
+            onClose={closeLabelNotes}
+          />
+        </Suspense>
+      )}
+      {labelNote && (
+        <Suspense fallback={null}>
+          <NoteBox
+            key={labelNote.id}
+            note={labelNote}
+            label={scopeName(labelNote.scope)}
+            onClose={closeLabelNote}
+            onDelete={deleteLabelNote}
+          />
+        </Suspense>
+      )}
       {openNote && (
         <Suspense fallback={null}>
           <NoteBox

@@ -1284,9 +1284,12 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     one follows it verse by verse in a bar above the bottom line (its words a tap on its name
     away). Step 4's second half: a **small dot by the verse number** of each verse in a note
     with no pin on it, with a count when it is in more than one; a tap on it lists those notes
-    beside it, and a tap on one follows that note from this verse. **What is open:** the
-    long-press ways in; and the four older note tests, which pick the tool with the desktop's
-    keys and so skip on phones.
+    beside it, and a tap on one follows that note from this verse. **Done 2026-10-03:** step 6,
+    holding the juz name, the surah name or the page number offers the notes about that part
+    and a new note about it, which starts with no verse. **What is open:** step 5 (the verse
+    menu's Note, which works but has no test of its own), step 7 (changing a note's scope), and
+    the four older note tests, which pick the tool with the desktop's keys and so skip on
+    phones.
 30. ~~**A finger's tap on a verse draws a thin blue box around it.**~~ Found recording the
     tap-and-hold options, 2026-10-01: besides the orange, a tapped verse gets the outline that
     shows a keyboard user where they are, which on a phone looks like a stray mark.

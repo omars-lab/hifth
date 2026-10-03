@@ -19,6 +19,7 @@ import {
   scopeContains,
   scopeSize,
   suggestNotes,
+  notesAbout,
   notesOfVerse,
   verseDots,
   type NoteScope,
@@ -483,5 +484,33 @@ describe("the dot by a verse's number", () => {
   it("lists a verse's notes, the one used last first", () => {
     expect(notesOfVerse(set, k(2, 39)).map((n) => n.id)).toEqual(["b", "a"]);
     expect(notesOfVerse(set, k(2, 41))).toEqual([]);
+  });
+});
+
+describe("the notes a juz, surah or page label lists", () => {
+  const juz1: NoteScope = { type: "juz", juz: 1 };
+  const set = [
+    note("juz", juz1, T + 1),
+    note("hizb", { type: "hizb", hizb: 2 }, T + 5),
+    note("page", page7, T + 2),
+    note("surah", { type: "surah", surah: 2 }, T + 3),
+    note("whole", { type: "whole" }, T + 4, { verses: [{ key: k(2, 40), addedAt: T }] }),
+    note("elsewhere", { type: "whole" }, T + 6, { verses: [{ key: k(3, 1), addedAt: T }] }),
+    note("juz2", { type: "juz", juz: 2 }, T + 7),
+  ];
+  const ids = (scope: NoteScope) => notesAbout(set, scope, pageOf).map((n) => n.id);
+
+  it("a juz lists the notes about it or about a part inside it, and those holding one of its verses", () => {
+    expect(ids(juz1)).toEqual(["hizb", "whole", "page", "juz"]);
+  });
+
+  it("a surah lists what lies inside it; a juz that runs past its end is not inside it", () => {
+    // Juz 1 starts in Al-Fatihah, so it is not inside Al-Baqarah.
+    expect(ids({ type: "surah", surah: 2 })).toEqual(["juz2", "hizb", "whole", "surah", "page"]);
+  });
+
+  it("a page lists its own notes and those holding one of its verses", () => {
+    expect(ids(page7)).toEqual(["whole", "page"]);
+    expect(ids({ type: "page", edition: "hafs-kfqc", page: 9 })).toEqual([]);
   });
 });

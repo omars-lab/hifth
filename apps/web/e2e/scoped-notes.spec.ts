@@ -574,3 +574,157 @@ test.describe("Hifth · a dot by the verse number for a verse in a note", () => 
     expect(card!.x + card!.width).toBeLessThanOrEqual(fold.x + fold.width + 24);
   });
 });
+
+/*
+ * Step 6 (docs/design/scoped-notes.md): a hold on the juz or surah name at the
+ * top of the page, or on the page number, offers the notes about that part and
+ * a new note about it. A note about a juz is reached from the juz's own label,
+ * not from a mark squeezed onto the text, and it may hold no verse yet.
+ */
+test.describe("Hifth · notes from the juz, surah and page labels", () => {
+  const corner = (page: Page, which: "page" | "surah" | "juz"): Locator =>
+    page.locator(`[data-host-page="7"] [data-running-head="${which}"]`);
+  const menu = (page: Page): Locator => page.getByRole("menu", { name: /^More for / });
+  async function holdCorner(page: Page, which: "page" | "surah" | "juz"): Promise<void> {
+    const b = (await corner(page, which).boundingBox())!;
+    await page.mouse.move(b.x + b.width / 2, b.y + b.height / 2);
+    await page.mouse.down();
+    await page.waitForTimeout(600);
+    await page.mouse.up();
+  }
+  const SURAH3 = {
+    id: "ns3",
+    kind: "comment",
+    scope: { type: "surah", surah: 3 },
+    text: "Al Imran openings",
+    verses: [],
+    createdAt: 6_000,
+    updatedAt: 6_000,
+    usedAt: 6_000,
+  };
+
+  test("the juz label lists the notes about it, and a row follows one", async ({ page }) => {
+    await page.goto("/#/hafs-kfqc/p7");
+    await expect(pageSvg(page, 7)).toBeVisible();
+    await seedHeld(page, [...HELD, LOOKALIKES, SURAH3]);
+    await page.reload();
+    await expect(pageSvg(page, 7)).toBeVisible();
+
+    await holdCorner(page, "juz");
+    await expect(menu(page).getByRole("menuitem")).toHaveText([
+      "Play",
+      "Go to the start",
+      "Notes (3)",
+      "New note",
+      "Copy",
+      "Share",
+    ]);
+    await menu(page).getByRole("menuitem", { name: "Notes (3)" }).click();
+    const list = page.getByRole("dialog", { name: "Notes in Juz 1" });
+    // A note about Al Imran is not about juz 1, and holds none of its verses.
+    await expect(list.getByRole("button")).toHaveText([
+      /^Juz 1 weak spots\s*Juz 1 · 3 verses$/,
+      /^Page 7 look-alikes\s*Page 7 · 2 verses$/,
+      /^Which way is the waqf here\?\s*Page 7 · 1 verse$/,
+    ]);
+    await list.getByRole("button", { name: /Juz 1 weak spots/ }).click();
+    await expect(list).toBeHidden();
+    await expect(page.getByRole("group", { name: "Following a note" })).toContainText("1 of 3");
+  });
+
+  test("a new note about a juz holds no verse, keeps its words, and opens again from the list", async ({ page }) => {
+    await page.goto("/#/hafs-kfqc/p7");
+    await expect(pageSvg(page, 7)).toBeVisible();
+    await seedHeld(page, []);
+    await page.reload();
+    await expect(pageSvg(page, 7)).toBeVisible();
+
+    // No notes yet: nothing to list, so the menu does not offer a list.
+    await holdCorner(page, "juz");
+    await expect(menu(page).getByRole("menuitem")).toHaveText(["Play", "Go to the start", "New note", "Copy", "Share"]);
+
+    // Closed with nothing typed, the new note is not kept.
+    await menu(page).getByRole("menuitem", { name: "New note" }).click();
+    await expect(box(page)).toHaveAccessibleName("Your note on Juz 1");
+    await expect(box(page).getByRole("textbox")).toBeFocused();
+    await page.keyboard.press("Escape");
+    await expect(box(page)).toBeHidden();
+    await holdCorner(page, "juz");
+    await expect(menu(page).getByRole("menuitem", { name: /^Notes/ })).toHaveCount(0);
+
+    await menu(page).getByRole("menuitem", { name: "New note" }).click();
+    await expect(box(page).getByRole("textbox")).toBeFocused();
+    await page.keyboard.type("Juz 1 openings\nThe first word of each quarter.");
+    await box(page).getByRole("button", { name: "Done" }).click();
+    await expect(box(page)).toBeHidden();
+    // It draws nothing on the page: it is about the juz, not a verse.
+    await expect(pins(page)).toHaveCount(0);
+    await expect(pageSvg(page, 7).locator("[data-verse-dot]")).toHaveCount(0);
+
+    // The surah's label does not list it; the juz's does, and a tap opens its words.
+    await holdCorner(page, "surah");
+    await expect(menu(page).getByRole("menuitem", { name: /^Notes/ })).toHaveCount(0);
+    await page.keyboard.press("Escape");
+    await holdCorner(page, "juz");
+    await menu(page).getByRole("menuitem", { name: "Notes (1)" }).click();
+    const list = page.getByRole("dialog", { name: "Notes in Juz 1" });
+    await expect(list.getByRole("button")).toHaveText([/^Juz 1 openings\s*Juz 1 · no verses yet$/]);
+    await list.getByRole("button").click();
+    await expect(box(page).getByRole("textbox")).toHaveValue("Juz 1 openings\nThe first word of each quarter.");
+    await page.keyboard.press("Escape");
+
+    // It is kept across a reload, as a note about juz 1 with no verse.
+    await page.reload();
+    await expect(pageSvg(page, 7)).toBeVisible();
+    const held = await readRecord(page, "scoped-notes");
+    expect(held?.notes).toEqual([
+      expect.objectContaining({ scope: { type: "juz", juz: 1 }, verses: [], text: "Juz 1 openings\nThe first word of each quarter." }),
+    ]);
+  });
+
+  test("a note about a juz can be deleted from its box, and Undo brings it back", async ({ page }) => {
+    await page.goto("/#/hafs-kfqc/p7");
+    await expect(pageSvg(page, 7)).toBeVisible();
+    await seedHeld(page, [{ ...SURAH3, id: "nj9", scope: { type: "juz", juz: 1 }, text: "Juz 1 openings" }]);
+    await page.reload();
+    await expect(pageSvg(page, 7)).toBeVisible();
+    await holdCorner(page, "juz");
+    await menu(page).getByRole("menuitem", { name: "Notes (1)" }).click();
+    await page.getByRole("dialog", { name: "Notes in Juz 1" }).getByRole("button").click();
+    await box(page).getByRole("button", { name: "Delete note" }).click();
+    await expect(box(page)).toBeHidden();
+    await expect.poll(async () => (await readRecord(page, "scoped-notes"))?.notes.length).toBe(0);
+    await page.getByRole("button", { name: "Undo" }).click();
+    await expect
+      .poll(async () => (await readRecord(page, "scoped-notes"))?.notes)
+      .toEqual([expect.objectContaining({ id: "nj9", scope: { type: "juz", juz: 1 }, text: "Juz 1 openings" })]);
+  });
+
+  test("the surah's and the page's labels make notes about the surah and the page", async ({ page }) => {
+    test.skip(test.info().project.name !== "desktop", "the page number sits under the phone's bottom bar; the juz test covers phones");
+    await page.goto("/#/hafs-kfqc/p7");
+    await expect(pageSvg(page, 7)).toBeVisible();
+    await seedHeld(page, []);
+    await page.reload();
+    await expect(pageSvg(page, 7)).toBeVisible();
+    for (const [which, name] of [["surah", "Al-Baqarah"], ["page", "Page 7"]] as const) {
+      await holdCorner(page, which);
+      await menu(page).getByRole("menuitem", { name: "New note" }).click();
+      await expect(box(page)).toHaveAccessibleName(`Your note on ${name}`);
+      await expect(box(page).getByRole("textbox")).toBeFocused();
+      await page.keyboard.type(`About ${name}`);
+      await box(page).getByRole("button", { name: "Done" }).click();
+    }
+    await holdCorner(page, "page");
+    await menu(page).getByRole("menuitem", { name: "Notes (1)" }).click();
+    await expect(page.getByRole("dialog", { name: "Notes on Page 7" }).getByRole("button")).toHaveText([/^About Page 7/]);
+    await page.keyboard.press("Escape");
+    // The page is inside the surah, so the surah lists both.
+    await holdCorner(page, "surah");
+    await menu(page).getByRole("menuitem", { name: "Notes (2)" }).click();
+    await expect(page.getByRole("dialog", { name: "Notes in Al-Baqarah" }).getByRole("button")).toHaveText([
+      /^About Page 7/,
+      /^About Al-Baqarah/,
+    ]);
+  });
+});
