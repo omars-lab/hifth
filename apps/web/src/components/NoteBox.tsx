@@ -10,6 +10,28 @@ interface NoteBoxProps {
   /** Closed with Done, Escape or a press outside; carries what was typed. */
   onClose: (text: string) => void;
   onDelete: () => void;
+  /** The head line, when it says more than the verse: the note's scope and size. */
+  head?: string | undefined;
+  /** What Delete says, when it does less than delete the note: take one verse out of it. */
+  deleteLabel?: string | undefined;
+  /**
+   * The notes a pin just made could join instead of being a note of its own
+   * (docs/decisions/scoped-notes.md, option C), the likeliest first and the
+   * rest behind "More notes". Shown only until something is typed, so a tap
+   * can never throw words away.
+   */
+  choices?: {
+    readonly offered: readonly NoteChoice[];
+    readonly more: readonly NoteChoice[];
+  } | null;
+  onJoin?: (id: string) => void;
+  /** Set once the verse has just joined this note: what to say, and the way back. */
+  joined?: { readonly said: string; readonly onUndo: () => void } | null;
+}
+
+export interface NoteChoice {
+  readonly id: string;
+  readonly title: string;
 }
 
 /** Room kept between the box and the edge of the window, and above the pin. */
@@ -24,9 +46,21 @@ const MARGIN = 12;
  * Delete asks nothing first; App offers the note back with an Undo line, as the
  * corner unfold does.
  */
-export function NoteBox({ note, label, onClose, onDelete }: NoteBoxProps): JSX.Element {
+export function NoteBox({
+  note,
+  label,
+  onClose,
+  onDelete,
+  head,
+  deleteLabel,
+  choices,
+  onJoin,
+  joined,
+}: NoteBoxProps): JSX.Element {
   const { t } = useT();
   const [draft, setDraft] = useState(note.text);
+  const [showMore, setShowMore] = useState(false);
+  const offer = choices && draft.trim() === "" ? [...choices.offered, ...(showMore ? choices.more : [])] : [];
   const boxRef = useRef<HTMLDivElement>(null);
   const areaRef = useRef<HTMLTextAreaElement>(null);
   const [at, setAt] = useState<{ left: number; top: number } | null>(null);
@@ -98,7 +132,7 @@ export function NoteBox({ note, label, onClose, onDelete }: NoteBoxProps): JSX.E
         }
       }}
     >
-      <div className={styles.head}>{label}</div>
+      <div className={styles.head}>{head ?? label}</div>
       <textarea
         ref={areaRef}
         className={styles.text}
@@ -107,9 +141,36 @@ export function NoteBox({ note, label, onClose, onDelete }: NoteBoxProps): JSX.E
         rows={3}
         onChange={(e) => setDraft(e.target.value)}
       />
+      {joined && (
+        <div className={styles.joined}>
+          <span>{joined.said}</span>
+          <button type="button" className={styles.undo} onClick={joined.onUndo}>
+            {t.bmUndo}
+          </button>
+        </div>
+      )}
+      {offer.length > 0 && (
+        <div className={styles.choices} role="group" aria-label={t.noteAddTo}>
+          <div className={styles.choicesHead} aria-hidden="true">
+            {t.noteAddTo}
+          </div>
+          <div className={styles.pills}>
+            {offer.map((c) => (
+              <button key={c.id} type="button" className={styles.pill} title={c.title} onClick={() => onJoin?.(c.id)}>
+                {c.title}
+              </button>
+            ))}
+            {choices!.more.length > 0 && !showMore && (
+              <button type="button" className={styles.more} aria-expanded={false} onClick={() => setShowMore(true)}>
+                {t.noteMore}
+              </button>
+            )}
+          </div>
+        </div>
+      )}
       <div className={styles.actions}>
         <button type="button" className={styles.delete} onClick={onDelete}>
-          {t.noteDelete}
+          {deleteLabel ?? t.noteDelete}
         </button>
         <button type="button" className={styles.done} onClick={() => onClose(draft)}>
           {t.noteDone}

@@ -7,7 +7,9 @@ import {
   addVerse,
   changeScope,
   isScopedNote,
+  joinNote,
   mergeScopedNotes,
+  noteTitle,
   migrateV1Notes,
   outsideScope,
   pinsOf,
@@ -186,6 +188,43 @@ describe("which notes are offered when a verse is added", () => {
     expect(suggestNotes(noWhole, k(114, 1), pageOf)).toEqual({ offered: [], more: [], alreadyIn: [] });
     // A whole-Qur'an note can take any verse, so it is offered even at the far end of the book.
     expect(suggestNotes(set, k(114, 1), pageOf).offered.map((n) => n.id)).toEqual(["alike"]);
+  });
+});
+
+describe("adding a fresh pin's verse to a note you already have", () => {
+  // A pin just made on 2:46 is a page note of that one verse, with no words yet.
+  const fresh = migrateV1Notes(addNote([], { key: k(2, 46), page: 7, word: 4, x: 30, y: 40 }, T + 10), [])[0]!;
+  const slips = note("slips", page7, T + 5, {
+    text: "Page 7 slips\nthe madd in each",
+    verses: [{ key: k(2, 40), addedAt: T, spot: { page: 7, word: 1, x: 1, y: 2, onHarakah: false } }],
+  });
+  const set = [slips, note("juz30", { type: "juz", juz: 30 }, T + 6), fresh];
+
+  it("moves the verse and its pin into the note, and the fresh note is gone", () => {
+    const got = joinNote(set, fresh.id, "slips", T + 20, pageOf)!;
+    expect(got.notes.map((n) => n.id)).toEqual(["slips", "juz30"]);
+    const joined = got.notes[0]!;
+    expect(joined.verses.map((v) => v.key)).toEqual([k(2, 40), k(2, 46)]);
+    expect(joined.verses[1]!.spot).toEqual(fresh.verses[0]!.spot);
+    expect(joined.usedAt).toBe(T + 20);
+    // The pin the page now draws for it carries the note's words, and its id is the one returned.
+    const pin = pinsOf(got.notes).find((p) => p.id === got.pin)!;
+    expect(pin.key).toBe(k(2, 46));
+    expect(pin.text).toBe("Page 7 slips\nthe madd in each");
+  });
+
+  it("refuses a note that cannot take the verse, and a fresh note that is not fresh", () => {
+    expect(joinNote(set, fresh.id, "juz30", T + 20, pageOf)).toBeNull();
+    expect(joinNote(set, fresh.id, "gone", T + 20, pageOf)).toBeNull();
+    const typed = set.map((n) => (n.id === fresh.id ? { ...n, text: "already typed" } : n));
+    expect(joinNote(typed, fresh.id, "slips", T + 20, pageOf)).toBeNull();
+  });
+
+  it("a note's title is its first line, cut short with an ellipsis when it runs on", () => {
+    expect(noteTitle(slips)).toBe("Page 7 slips");
+    expect(noteTitle({ ...slips, text: "Verses that look alike and differ by a single word" })).toBe(
+      "Verses that look alike and differ by a s…",
+    );
   });
 });
 
