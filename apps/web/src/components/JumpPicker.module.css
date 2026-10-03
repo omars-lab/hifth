@@ -1,0 +1,4 @@
+/* The Jump list's rows are mostly one line: centre it in the row's height. */
+.choice {
+  justify-content: center;
+}

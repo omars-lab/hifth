@@ -1,7 +1,19 @@
 import "fake-indexeddb/auto";
 import { beforeEach, describe, expect, it } from "vitest";
-import { dropBookmark, editScopedNote, liftBookmark, type Note } from "@hifth/core";
-import { loadNotes, readBookmarks, readSeam, writeAllNotes, writeBookmarks, writeSeam } from "./bookmark-store.js";
+import { dropBookmark, editScopedNote, liftBookmark, markConfusion, type Note } from "@hifth/core";
+import {
+  deviceNameOf,
+  loadNotes,
+  readBookmarks,
+  readConfusions,
+  readDevice,
+  readSeam,
+  renameDevice,
+  writeAllNotes,
+  writeBookmarks,
+  writeConfusions,
+  writeSeam,
+} from "./bookmark-store.js";
 
 /*
  * Against a real IndexedDB implementation, as the page-history store is: this is
@@ -115,5 +127,43 @@ describe("notes moved across to the kind that gathers verses", () => {
 
   it("starts with nothing on a device that never had notes", async () => {
     expect(await loadNotes()).toEqual({ scoped: [], mistakes: [], backup: [] });
+  });
+});
+
+describe("confusion jumps kept on the device", () => {
+  it("keeps what was written beside the notes, and a later write replaces the whole set", async () => {
+    const one = markConfusion([], { key: "quran/hafs-kfqc/2:58", word: 14 }, { key: "quran/hafs-kfqc/7:161" }, T, "d1");
+    expect(await writeConfusions(one)).toBe(true);
+    expect(await readConfusions()).toEqual(one);
+    expect(await writeConfusions([])).toBe(true);
+    expect(await readConfusions()).toEqual([]);
+  });
+
+  it("drops a stored record it cannot read, rather than the whole set", async () => {
+    const one = markConfusion([], { key: "quran/hafs-kfqc/2:58" }, null, T, "d1");
+    await writeConfusions([...one, { id: "bad" } as never]);
+    expect(await readConfusions()).toEqual(one);
+  });
+
+  it("names this device once, with a random id that stays, and a name that can change", async () => {
+    const first = await readDevice("Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) Safari/604.1");
+    expect(first?.id).toMatch(/^d-[0-9a-f-]{8,}$/);
+    expect(first?.name).toBe("iPhone");
+    expect((await readDevice("anything else"))?.id).toBe(first!.id);
+    expect(await renameDevice("Omar's phone")).toBe(true);
+    expect(await readDevice("")).toEqual({ id: first!.id, name: "Omar's phone" });
+  });
+});
+
+describe("the plain name a new device is given", () => {
+  it.each([
+    ["Mozilla/5.0 (iPad; CPU OS 17_0 like Mac OS X) Safari/604.1", "iPad"],
+    ["Mozilla/5.0 (Linux; Android 14; Pixel 8) Chrome/126 Mobile Safari/537.36", "Android phone"],
+    ["Mozilla/5.0 (Macintosh; Intel Mac OS X 14_5; rv:131.0) Gecko/20100101 Firefox/131.0", "Mac, Firefox"],
+    ["Mozilla/5.0 (Macintosh; Intel Mac OS X 14_5) AppleWebKit/605.1.15 Version/18.0 Safari/605.1.15", "Mac, Safari"],
+    ["Mozilla/5.0 (Windows NT 10.0; Win64) AppleWebKit/537.36 Chrome/126 Safari/537.36", "Windows, Chrome"],
+    ["", "This device"],
+  ])("%s → %s", (ua, name) => {
+    expect(deviceNameOf(ua)).toBe(name);
   });
 });

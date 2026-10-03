@@ -29,6 +29,10 @@ import {
   notesOfVerse,
   suggestNotes,
   verseDots as countVerseDots,
+  confusionMarks as countConfusionMarks,
+  markConfusion,
+  removeLastTime,
+  type JumpEnd,
   type NoteScope,
   type ScopedNote,
   moveBookmark,
@@ -93,7 +97,8 @@ import {
 } from "./assets";
 import { applyFieldToDocument, fieldFromHash } from "./field";
 import { recordLook } from "./revision-store";
-import { useT } from "./i18n";
+import { useT, type Strings } from "./i18n";
+import { JumpPicker, type JumpChoice } from "./components/JumpPicker";
 import { useHashRouter } from "./useHashRouter";
 import { exposeToShell, nativeShare, shareBase } from "./native-bridge";
 import { linksFor } from "./share-links";
@@ -132,7 +137,7 @@ import { CoachMarks } from "./components/CoachMarks";
 import { BookmarkRibbons } from "./components/BookmarkRibbons";
 import { UndoBar } from "./components/UndoBar";
 import { NoteFollow } from "./components/NoteFollow";
-import { useBookmarks, useNotes, useSeam } from "./useBookmarks";
+import { useBookmarks, useConfusions, useNotes, useSeam } from "./useBookmarks";
 import { LiveAnnouncer, useAnnouncer } from "./components/LiveAnnouncer";
 import { RootLensTrigger } from "./components/RootLensTrigger";
 import { PlayTrigger } from "./components/PlayTrigger";
@@ -1282,6 +1287,47 @@ export function App(): JSX.Element {
   // The dot by a verse's number, for a verse in a note with no pin on it
   // (scoped-notes-verse-mark = A), and the list of its notes a tap on it opens.
   const verseDots = useMemo(() => countVerseDots(scoped), [scoped]);
+  // The red mark by a verse the reader's memory jumped away from
+  // (confusion-jumps, step 3): how many different verses it went to.
+  const { confusions, device, commit: commitConfusions } = useConfusions(announce, t.bmNotSaved);
+  const confusionMarks = useMemo(() => countConfusionMarks(confusions), [confusions]);
+  // The Jump tool (confusion-jumps, step 4). A drag let go away from any verse
+  // asks where it went (`jumpAsking`), and "Another verse…" in that list hands
+  // the question to the go-to box (`jumpNaming`). A jump just marked waits in
+  // `jumpUndo` for its Undo, which takes back only the time it added.
+  const [jumpAsking, setJumpAsking] = useState<{ from: JumpEnd; at: { top: number; bottom: number; x: number } } | null>(null);
+  const [jumpNaming, setJumpNaming] = useState<JumpEnd | null>(null);
+  const [jumpUndo, setJumpUndo] = useState<{ id: string; said: string } | null>(null);
+  const saveJump = useCallback(
+    (from: JumpEnd, to: string | null) => {
+      setJumpAsking(null);
+      setJumpNaming(null);
+      const now = Date.now();
+      const next = markConfusion(confusions, from, to ? { key: to } : null, now, device?.id ?? "");
+      const mine = to
+        ? next.find((c) => c.from.key === from.key && c.to?.key === to)
+        : next.find((c) => !confusions.some((x) => x.id === c.id));
+      if (!mine) return;
+      const said = to ? t.jumpMarked(from.key, to, mine.times.length) : t.jumpMarkedUnsure(from.key);
+      commitConfusions(next, said);
+      setJumpUndo({ id: mine.id, said });
+    },
+    [confusions, device, commitConfusions, t],
+  );
+  const undoJump = () => {
+    if (!jumpUndo) return;
+    commitConfusions(removeLastTime(confusions, jumpUndo.id, Date.now()), "");
+    setJumpUndo(null);
+  };
+  const endJumpUndo = useCallback(() => setJumpUndo(null), []);
+  const onJump = useCallback(
+    (jump: { from: JumpEnd; to: string | null; at: { top: number; bottom: number; x: number } }) => {
+      if (jump.to) saveJump(jump.from, jump.to);
+      else setJumpAsking({ from: jump.from, at: jump.at });
+    },
+    [saveJump],
+  );
+  const closeJumpAsking = useCallback(() => setJumpAsking(null), []);
   const [verseNotesAt, setVerseNotesAt] = useState<{ key: string; anchor: { top: number; bottom: number; x: number } } | null>(null);
   const openVerseNotes = useCallback(
     (key: string, anchor: { top: number; bottom: number; x: number }) => setVerseNotesAt({ key, anchor }),
@@ -2866,6 +2912,9 @@ export function App(): JSX.Element {
                   noteLabel={noteLabel}
                   verseDots={verseDots}
                   verseDotLabel={t.verseInNotes}
+                  confusionMarks={confusionMarks}
+                  confusionMarkLabel={t.jumpsFrom}
+                  onJump={onJump}
                   onOpenVerseNotes={openVerseNotes}
                   onPlaceNote={placeNote}
                   onOpenNote={setNoteOpenId}
@@ -2933,6 +2982,9 @@ export function App(): JSX.Element {
                 noteLabel={noteLabel}
                 verseDots={verseDots}
                 verseDotLabel={t.verseInNotes}
+                confusionMarks={confusionMarks}
+                confusionMarkLabel={t.jumpsFrom}
+                onJump={onJump}
                 onOpenVerseNotes={openVerseNotes}
                 onPlaceNote={placeNote}
                 onOpenNote={setNoteOpenId}
@@ -3020,10 +3072,33 @@ export function App(): JSX.Element {
       </main>
 
       <Jumper
-        open={jumperOpen}
-        onJump={handleJump}
-        onClose={() => setJumperOpen(false)}
+        open={jumperOpen || jumpNaming !== null}
+        onJump={(target) => {
+          if (!jumpNaming) return handleJump(target);
+          if (!resolver) return;
+          saveJump(jumpNaming, formatAyahKey(resolver.edition, target.surah, target.ayah));
+        }}
+        onClose={() => {
+          setJumperOpen(false);
+          setJumpNaming(null);
+        }}
       />
+      {jumpAsking && (
+        <JumpPicker
+          head={t.jumpWhere(jumpAsking.from.key)}
+          anchor={jumpAsking.at}
+          choices={jumpChoices(adjacency?.hopsForKey(jumpAsking.from.key) ?? [], jumpAsking.from.key, t)}
+          notSure={t.jumpNotSure}
+          another={t.jumpAnother}
+          onPick={(to) => saveJump(jumpAsking.from, to)}
+          onNotSure={() => saveJump(jumpAsking.from, null)}
+          onAnother={() => {
+            setJumpNaming(jumpAsking.from);
+            setJumpAsking(null);
+          }}
+          onClose={closeJumpAsking}
+        />
+      )}
       {/* CC BY 4.0's condition, discharged where a reader can see it — the
           licence the rule spans ship under requires the credit to travel with
           the work, not just with the repo. */}
@@ -3420,12 +3495,31 @@ export function App(): JSX.Element {
       )}
       {unfolded ? (
         <UndoBar said={unfolded.said} onUndo={undoUnfold} onDone={endUndo} />
+      ) : jumpUndo ? (
+        <UndoBar key={jumpUndo.said} said={jumpUndo.said} onUndo={undoJump} onDone={endJumpUndo} />
       ) : (
         deletedNote && <UndoBar said={deletedNote.said} onUndo={undoDelete} onDone={endNoteUndo} />
       )}
       <LiveAnnouncer message={message} />
     </div>
   );
+}
+
+/**
+ * The verses a jump from `from` most likely went to, for the list that asks:
+ * its look-alikes, once each, the word-for-word twins first.
+ */
+function jumpChoices(hops: readonly Edge[], from: string, t: Strings): JumpChoice[] {
+  const seen = new Set<string>([from]);
+  const twins: JumpChoice[] = [];
+  const rest: JumpChoice[] = [];
+  for (const h of hops) {
+    if (seen.has(h.to) || !parseAyahKey(h.to)) continue;
+    seen.add(h.to);
+    const choice = { key: h.to, label: t.ayahLabel(h.to) ?? h.to, ...(h.twin ? { about: t.jumpTwin } : {}) };
+    (h.twin ? twins : rest).push(choice);
+  }
+  return [...twins, ...rest];
 }
 
 /** The crop tool's sheet, given the page's drawing and its size. */

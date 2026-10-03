@@ -1477,8 +1477,8 @@
         },
         {
           "file": "scripts/gate-revision-privacy.mjs",
-          "symbol": "ALLOWED_IMPORTERS",
-          "note": "A log of when someone was reading Qur'an is not a preference. This is a closed allow-list of modules permitted to import the record, plus a grep for escape hatches inside the record's own files. Deliberately not `import/no-restricted-paths`, which expresses the inverse rule and would leave every new URL-building file unguarded by default."
+          "symbol": "RECORDS",
+          "note": "A log of when someone was reading Qur'an is not a preference. Each record it guards has a closed allow-list of modules permitted to import it, plus a grep for escape hatches inside the record's own files. The confusion-jump record is the second one, the same kind of thing. Deliberately not `import/no-restricted-paths`, which expresses the inverse rule and would leave every new URL-building file unguarded by default."
         },
         {
           "file": "apps/web/src/components/RevisionMap.tsx",
@@ -1507,7 +1507,7 @@
         }
       ],
       "extend": [
-        "Anything that reads the record is a new importer: add it to ALLOWED_IMPORTERS in the gate with a one-line reason. If it cannot state a reason it cannot see the record.",
+        "Anything that reads the record is a new importer: add it to that record's `allowed` list in RECORDS in the gate with a one-line reason. If it cannot state a reason it cannot see the record.",
         "Adding a scope means adding real boundary data first. `hizb` was the standing example and is now the worked one: the arithmetic derivation is wrong, so the sixty starts are vendored from the Tanzil metadata and `gate:quran-meta` re-derives them on every run. A scope whose boundaries are guessed is a heatmap that lies about which ayahs it is colouring, and no other test here would notice.",
         "New callers of `recordLook` must justify themselves against the `RevisionEvent` doc comment. The default answer is no: the record is only worth drawing because it is not a log of everything that happened.",
         "The warmth bands (2/7/30 days in RevisionMap.tsx) are a developer's guess and are named as one in docs/design/revision-record.md. Changing them wants a hafiz, not an argument. What is not negotiable is the axis: recency, which is why `lastSeen` exists apart from `rollUp`.",
@@ -2160,6 +2160,79 @@
         "select-an-ayah",
         "word-selection",
         "desktop-spread"
+      ]
+    },
+    {
+      "id": "confusion-jumps",
+      "what": "Where the reader's memory jumped from one verse to another while reciting: one record per pair, every time it happened and on which device, kept on the device. Design: docs/design/confusion-jumps.md.",
+      "layer": "L1 core",
+      "entry": [
+        {
+          "file": "packages/core/src/confusions.ts",
+          "symbol": "markConfusion",
+          "note": "Start here. One record per pair of verses (from, to): marking the pair again adds a time and keeps the latest seam word, never a second record. A jump not yet given a destination (`to` null) is a record of its own until setDestination fills it in, and then it joins the pair's record if there is one. Not `jump.ts`: that name is the go-to box's query parser."
+        },
+        {
+          "file": "packages/core/src/confusions.ts",
+          "symbol": "confusionMarks",
+          "note": "What the mark by a verse's number shows: how many different verses you jumped to from there (the design's question 2, answer A), with the not-sure ones left out of the count but still marked. Times are never added up into a score."
+        },
+        {
+          "file": "packages/core/src/confusions.ts",
+          "symbol": "mergeConfusions",
+          "note": "Loading never deletes, and records are matched by their verses, not their ids: two devices can mark two different jumps in the same millisecond and make the same id. A test caught that the first version folded them into one."
+        },
+        {
+          "file": "packages/core/src/confusions.ts",
+          "symbol": "squiggle",
+          "note": "The wavy arrow's line, as SVG path data, the same for the same seam every time. Pure drawing, not the record, so the privacy gate does not list it."
+        },
+        {
+          "file": "apps/web/src/bookmark-store.ts",
+          "symbol": "readDevice",
+          "note": "Which device a jump was marked on (question 5, answer A): a random id made once per install, never derived from the device, and a plain name from the browser that the reader can change."
+        },
+        {
+          "file": "apps/web/src/useBookmarks.ts",
+          "symbol": "useConfusions",
+          "note": "The app's hold on the jumps, the same shape as the notes': read once, every change written back whole, one write after another, nothing written until the read has landed."
+        },
+        {
+          "file": "apps/web/src/components/PageStage.tsx",
+          "symbol": "drawConfusionMarks",
+          "note": "The mark by a verse you jumped away from: a red disc with the count, on the lower shoulder of the verse number under the note dot's place, with a short wavy tail. A question mark when no verse is named yet; grey once every jump from it is beaten. Pictures: run the confusions browser test with HIFTH_SHOTS set to a folder."
+        },
+        {
+          "file": "apps/web/src/components/PageStage.tsx",
+          "symbol": "JumpLayer",
+          "note": "The Jump tool (J) on the computer: a layer over the page while the tool is on, like the crop tool's, so a drag draws the wavy arrow instead of moving the page. A press must start on a verse; letting go on the same verse, after a tiny drag, or after Escape marks nothing. The verse under a point is found by looking past the layer (verseAt), since the layer itself is on top."
+        },
+        {
+          "file": "apps/web/src/components/JumpPicker.tsx",
+          "symbol": "JumpPicker",
+          "note": "The question an arrow asks when it is let go where no verse is: the verse's look-alikes (word-for-word twins first), then another verse named in the go-to box, then \"not sure yet\". Built and closed like the list a note dot opens."
+        },
+        {
+          "file": "apps/web/src/App.tsx",
+          "symbol": "saveJump",
+          "note": "Where a finished jump is saved, from all three ways of naming its end. Its Undo takes back only the time it added (removeLastTime), not the whole set as it was, so a jump marked again keeps its earlier times."
+        },
+        {
+          "file": "apps/web/src/components/PhoneToolbar.tsx",
+          "symbol": "PHONE_TOOLS",
+          "note": "Phones leave the Jump tool out until its phone design (step 5) lands."
+        }
+      ],
+      "extend": [
+        "Change the record in confusions.ts and its isConfusion check together, with a test in confusions.test.ts. Anything new that imports the record must be added to the jump record's allowed list in the revision-privacy gate with a reason."
+      ],
+      "gates": [
+        "make ci",
+        "pnpm gate:revision-privacy"
+      ],
+      "seeAlso": [
+        "page-notes",
+        "revision-record"
       ]
     },
     {
