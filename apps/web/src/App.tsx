@@ -32,6 +32,14 @@ import {
   confusionMarks as countConfusionMarks,
   markConfusion,
   removeLastTime,
+  againConfusion,
+  setConfusionState,
+  removeConfusion,
+  restoreConfusion,
+  setDestination,
+  confusionsFrom,
+  wordDiff,
+  type Confusion,
   type JumpEnd,
   type NoteScope,
   type ScopedNote,
@@ -117,6 +125,7 @@ import {
   NoteBox,
   NoteShelf,
   VerseNotes,
+  JumpList,
   RevisionMap,
   RootLens,
   WordPartsHost,
@@ -1294,15 +1303,31 @@ export function App(): JSX.Element {
   // The Jump tool (confusion-jumps, step 4). A drag let go away from any verse
   // asks where it went (`jumpAsking`), and "Another verse…" in that list hands
   // the question to the go-to box (`jumpNaming`). A jump just marked waits in
-  // `jumpUndo` for its Undo, which takes back only the time it added.
+  // `jumpUndo` for its Undo, which takes back only that change: a time added,
+  // a record deleted, a destination said.
   const [jumpAsking, setJumpAsking] = useState<{ from: JumpEnd; at: { top: number; bottom: number; x: number } } | null>(null);
   const [jumpNaming, setJumpNaming] = useState<JumpEnd | null>(null);
-  const [jumpUndo, setJumpUndo] = useState<{ id: string; said: string } | null>(null);
+  const [jumpUndo, setJumpUndo] = useState<{ said: string; undo: (set: readonly Confusion[]) => Confusion[] } | null>(null);
+  // A "not sure yet" jump being named from its row in the list: the next
+  // destination picked fills it in rather than marking a new jump.
+  const [jumpRenaming, setJumpRenaming] = useState<string | null>(null);
   const saveJump = useCallback(
     (from: JumpEnd, to: string | null) => {
       setJumpAsking(null);
       setJumpNaming(null);
+      setJumpRenaming(null);
       const now = Date.now();
+      const unsure = jumpRenaming ? confusions.find((c) => c.id === jumpRenaming) : undefined;
+      if (unsure && to) {
+        // The records it touches, as they were, to put back on Undo.
+        const before = confusions.filter((c) => c.from.key === unsure.from.key);
+        const next = setDestination(confusions, unsure.id, { key: to }, now);
+        const mine = next.find((c) => c.from.key === unsure.from.key && c.to?.key === to);
+        const said = t.jumpMarked(unsure.from.key, to, mine?.times.length ?? 1);
+        commitConfusions(next, said);
+        setJumpUndo({ said, undo: (s) => [...s.filter((c) => !before.some((b) => b.id === c.id)), ...before] });
+        return;
+      }
       const next = markConfusion(confusions, from, to ? { key: to } : null, now, device?.id ?? "");
       const mine = to
         ? next.find((c) => c.from.key === from.key && c.to?.key === to)
@@ -1310,13 +1335,13 @@ export function App(): JSX.Element {
       if (!mine) return;
       const said = to ? t.jumpMarked(from.key, to, mine.times.length) : t.jumpMarkedUnsure(from.key);
       commitConfusions(next, said);
-      setJumpUndo({ id: mine.id, said });
+      setJumpUndo({ said, undo: (s) => removeLastTime(s, mine.id, Date.now()) });
     },
-    [confusions, device, commitConfusions, t],
+    [confusions, device, commitConfusions, t, jumpRenaming],
   );
   const undoJump = () => {
     if (!jumpUndo) return;
-    commitConfusions(removeLastTime(confusions, jumpUndo.id, Date.now()), "");
+    commitConfusions(jumpUndo.undo(confusions), "");
     setJumpUndo(null);
   };
   const endJumpUndo = useCallback(() => setJumpUndo(null), []);
@@ -1327,7 +1352,10 @@ export function App(): JSX.Element {
     },
     [saveJump],
   );
-  const closeJumpAsking = useCallback(() => setJumpAsking(null), []);
+  const closeJumpAsking = useCallback(() => {
+    setJumpAsking(null);
+    setJumpRenaming(null);
+  }, []);
   // A jump said from a verse's menu rather than drawn: the list opens by the
   // verse (or by the menu that was round it), with no seam word to keep.
   const askJumpFrom = useCallback((key: string, around?: DOMRect) => {
@@ -1344,6 +1372,56 @@ export function App(): JSX.Element {
       : { top: window.innerHeight / 3, bottom: window.innerHeight / 3, x: window.innerWidth / 2 };
     setJumpAsking({ from: { key }, at });
   }, []);
+  // The list a tap on a jump mark opens (confusion-jumps, step 6).
+  const [jumpsAt, setJumpsAt] = useState<{ key: string; anchor: { top: number; bottom: number; x: number } } | null>(null);
+  const openJumps = useCallback(
+    (key: string, anchor: { top: number; bottom: number; x: number }) => setJumpsAt({ key, anchor }),
+    [],
+  );
+  const closeJumps = useCallback(() => setJumpsAt(null), []);
+  // A dismissed jump leaves no mark, so it is not listed either.
+  const jumpRows = useMemo(
+    () =>
+      jumpsAt
+        ? confusionsFrom(confusions, jumpsAt.key)
+            .filter((c) => c.state !== "dismissed")
+            .map((c) => {
+              // Compare is offered only where the two verses share a run of
+              // words to line up; a swapped order has none.
+              const found = c.to ? adjacency?.hopsForKey(jumpsAt.key).find((h) => h.to === c.to!.key) : undefined;
+              const edge = found && wordDiff(found, jumpsAt.key) ? found : undefined;
+              return {
+                id: c.id,
+                to: c.to?.key ?? null,
+                label: c.to ? (t.ayahLabel(c.to.key) ?? c.to.key) : t.jumpNotSure,
+                times: c.times.length,
+                lastAt: c.times[c.times.length - 1]!.at,
+                beaten: c.state === "beaten",
+                ...(edge ? { edge } : {}),
+              };
+            })
+        : [],
+    [jumpsAt, confusions, adjacency, t],
+  );
+  const againJump = (id: string) => {
+    const c = confusions.find((x) => x.id === id);
+    if (!c?.to) return;
+    const next = againConfusion(confusions, id, Date.now(), device?.id ?? "");
+    const said = t.jumpMarked(c.from.key, c.to.key, c.times.length + 1);
+    commitConfusions(next, said);
+    setJumpUndo({ said, undo: (s) => removeLastTime(s, id, Date.now()) });
+  };
+  const beatJump = (id: string, beaten: boolean) =>
+    commitConfusions(setConfusionState(confusions, id, beaten ? "beaten" : "sometimes", Date.now()), "");
+  const deleteJump = (id: string) => {
+    const c = confusions.find((x) => x.id === id);
+    if (!c) return;
+    const said = c.to ? t.jumpDeleted(c.from.key, c.to.key) : t.jumpDeletedUnsure(c.from.key);
+    commitConfusions(removeConfusion(confusions, id), said);
+    // The last row gone, the list has nothing left to say.
+    if (jumpRows.length <= 1) closeJumps();
+    setJumpUndo({ said, undo: (s) => restoreConfusion(s, c) });
+  };
   const [verseNotesAt, setVerseNotesAt] = useState<{ key: string; anchor: { top: number; bottom: number; x: number } } | null>(null);
   const openVerseNotes = useCallback(
     (key: string, anchor: { top: number; bottom: number; x: number }) => setVerseNotesAt({ key, anchor }),
@@ -2932,6 +3010,7 @@ export function App(): JSX.Element {
                   confusionMarkLabel={t.jumpsFrom}
                   onJump={onJump}
                   onOpenVerseNotes={openVerseNotes}
+                  onOpenJumps={openJumps}
                   onPlaceNote={placeNote}
                   onOpenNote={setNoteOpenId}
                   onMarkWord={markWord}
@@ -3002,6 +3081,7 @@ export function App(): JSX.Element {
                 confusionMarkLabel={t.jumpsFrom}
                 onJump={onJump}
                 onOpenVerseNotes={openVerseNotes}
+                onOpenJumps={openJumps}
                 onPlaceNote={placeNote}
                 onOpenNote={setNoteOpenId}
                 onMarkWord={markWord}
@@ -3097,6 +3177,7 @@ export function App(): JSX.Element {
         onClose={() => {
           setJumperOpen(false);
           setJumpNaming(null);
+          setJumpRenaming(null);
         }}
       />
       {jumpAsking && (
@@ -3414,6 +3495,32 @@ export function App(): JSX.Element {
               followNote(id, Math.max(0, scoped.find((n) => n.id === id)?.verses.findIndex((v) => v.key === key) ?? 0));
             }}
             onClose={closeVerseNotes}
+          />
+        </Suspense>
+      )}
+
+      {jumpsAt && jumpRows.length > 0 && (
+        <Suspense fallback={null}>
+          <JumpList
+            head={t.jumpList(jumpsAt.key)}
+            fromKey={jumpsAt.key}
+            rows={jumpRows}
+            anchor={jumpsAt.anchor}
+            onGo={(to) => {
+              const from = jumpsAt.key;
+              closeJumps();
+              hopTo(to, from);
+            }}
+            onAgain={againJump}
+            onBeaten={beatJump}
+            onDelete={deleteJump}
+            onSayWhere={(id) => {
+              const from = jumpsAt.key;
+              closeJumps();
+              askJumpFrom(from);
+              setJumpRenaming(id);
+            }}
+            onClose={closeJumps}
           />
         </Suspense>
       )}
