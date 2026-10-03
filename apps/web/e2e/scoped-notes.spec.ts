@@ -800,9 +800,14 @@ test.describe("Hifth · a dot by the verse number for a verse in a note", () => 
     await seedHeld(page, [{ ...LOOKALIKES, scope: { type: "juz", edition: "hafs-kfqc", juz: 1 }, verses: [{ key: KEY(51), addedAt: 2_000 }] }]);
     await page.reload();
     const dot = pageSvg(page, 8).locator('[data-verse-dot="2:51"]');
+    // Measured only once each is there: the list's code arrives on first open,
+    // and a box read before then is nothing (it failed 1 push in many).
+    await expect(dot).toBeVisible();
     const at = await dot.boundingBox();
     await dot.click();
-    const card = await page.getByRole("dialog", { name: "2:51 is in 1 note" }).boundingBox();
+    const list = page.getByRole("dialog", { name: "2:51 is in 1 note" });
+    await expect(list).toBeVisible();
+    const card = await list.boundingBox();
     expect(at && card).toBeTruthy();
     const dotX = at!.x + at!.width / 2;
     expect(card!.x).toBeLessThanOrEqual(dotX);
