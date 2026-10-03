@@ -1298,7 +1298,12 @@ export function App(): JSX.Element {
   const verseDots = useMemo(() => countVerseDots(scoped), [scoped]);
   // The red mark by a verse the reader's memory jumped away from
   // (confusion-jumps, step 3): how many different verses it went to.
-  const { confusions, device, commit: commitConfusions } = useConfusions(announce, t.bmNotSaved);
+  const {
+    confusions,
+    device,
+    commit: commitConfusions,
+    loadFile: loadConfusionsFile,
+  } = useConfusions(announce, t.bmNotSaved);
   const confusionMarks = useMemo(() => countConfusionMarks(confusions), [confusions]);
   // The Jump tool (confusion-jumps, step 4). A drag let go away from any verse
   // asks where it went (`jumpAsking`), and "Another verse…" in that list hands
@@ -1549,18 +1554,17 @@ export function App(): JSX.Element {
 
   const saveBookmarkFile = useCallback(() => {
     // The file carries the notes that gather verses and, apart from them, the
-    // marked mistakes, which are still the old kind of note.
+    // marked mistakes, which are still the old kind of note, and the jumps.
     const mistakes = notes.filter(isMistake);
-    const blob = new Blob([JSON.stringify(toBookmarkFile(bookmarks, Date.now(), mistakes, [...scoped]), null, 2)], {
-      type: "application/json",
-    });
+    const file = toBookmarkFile(bookmarks, Date.now(), mistakes, [...scoped], confusions);
+    const blob = new Blob([JSON.stringify(file, null, 2)], { type: "application/json" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
     a.download = "hifth-bookmarks.json";
     a.click();
     setTimeout(() => URL.revokeObjectURL(url), 1000);
-  }, [bookmarks, notes, scoped]);
+  }, [bookmarks, notes, scoped, confusions]);
 
   const loadBookmarkFile = useCallback(
     (text: string) => {
@@ -1570,11 +1574,18 @@ export function App(): JSX.Element {
         return;
       }
       const merged = mergeBookmarks(bookmarks, file.bookmarks);
-      const said = t.bmLoaded(merged.length - bookmarks.length);
+      const newBookmarks = merged.length - bookmarks.length;
       const newNotes = file.notes || file.scopedNotes ? loadNotesFile(file.notes ?? [], file.scopedNotes ?? []) : 0;
-      commitBookmarks(merged, newNotes > 0 ? `${said} · ${t.noteLoaded(newNotes)}` : said);
+      const newJumps = file.confusions ? loadConfusionsFile(file.confusions) : 0;
+      // Say what the file brought; "nothing new" only when it brought nothing at all.
+      const parts = [
+        ...(newBookmarks > 0 ? [t.bmLoaded(newBookmarks)] : []),
+        ...(newNotes > 0 ? [t.noteLoaded(newNotes)] : []),
+        ...(newJumps > 0 ? [t.jumpLoaded(newJumps)] : []),
+      ];
+      commitBookmarks(merged, parts.length > 0 ? parts.join(" · ") : t.bmLoaded(0));
     },
-    [announce, bookmarks, commitBookmarks, loadNotesFile, t],
+    [announce, bookmarks, commitBookmarks, loadNotesFile, loadConfusionsFile, t],
   );
 
   // Unfolding a corner lifts every bookmark on the page at once, with no
@@ -3268,7 +3279,7 @@ export function App(): JSX.Element {
               }}
               onClearAll={() => commitBookmarks([], t.bmCleared(bookmarks.length))}
               onSave={saveBookmarkFile}
-              hasNotes={notes.length > 0}
+              hasNotes={notes.length > 0 || confusions.length > 0}
               onLoad={loadBookmarkFile}
             />
             <NoteShelf notes={noteShelf} onFollow={openNoteOf} />

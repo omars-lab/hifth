@@ -1319,8 +1319,10 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     you went, with Undo. **Phones (step 5):** the Jump tool is in the Tools tray, and holding a
     verse offers "Jump…", which asks where you went with no arrow to draw. **The list (step
     6):** a tap on the icon lists where you went, most often first, with Go, Compare, Again,
-    Beaten, Delete (with Undo), and Say where for a jump not named yet. **Still open:** the
-    saved file's version 3, jumps in the page map, the next-wasl icon, showing dismissed jumps
+    Beaten, Delete (with Undo), and Say where for a jump not named yet. **The saved file:**
+    jumps go into it, as version 3 (a file with no jumps keeps its old number, so an older
+    copy of the app still reads it); loading joins each pair's times, never doubles them.
+    **Still open:** jumps in the page map, the next-wasl icon, showing dismissed jumps
     somewhere, and the rough build of the arrow staying against showing on request.
 
 **The half of these a machine cannot run now has a register — and a runbook.** Follow-ups

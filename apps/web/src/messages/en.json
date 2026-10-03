@@ -431,6 +431,7 @@
   "jumpSayWhere": "Say where",
   "jumpDeleted": "Jump from {fromText} to {toText} deleted",
   "jumpDeletedUnsure": "Jump from {fromText} deleted",
+  "jumpLoaded": "{n, plural, one{{nText} jump added from the file} other{{nText} jumps added from the file}}",
   "cropTitle": "A cut-out of page {page}",
   "cropCaption": "Page {page} · King Fahd Complex print",
   "cropShare": "Share",
