@@ -3,6 +3,7 @@ import type { Note } from "@hifth/core";
 import { useT } from "../i18n";
 import styles from "./NoteBox.module.css";
 import { ScopePyramid, type ScopeTier } from "./ScopePyramid";
+import type { ScopeLook } from "../scope-look";
 
 interface NoteBoxProps {
   /** Only its id and words: a note about a juz or a surah has no verse to sit by. */
@@ -35,6 +36,8 @@ interface NoteBoxProps {
    * the way to change it.
    */
   about?: NoteAbout | null;
+  /** How the parts are drawn: the reader's choice in the about sheet. */
+  scopeLook?: ScopeLook;
 }
 
 export interface NoteAbout {
@@ -79,6 +82,7 @@ export function NoteBox({
   onJoin,
   joined,
   about,
+  scopeLook = "side",
 }: NoteBoxProps): JSX.Element {
   const { t } = useT();
   const [draft, setDraft] = useState(note.text);
@@ -193,6 +197,7 @@ export function NoteBox({
             tiers={about.options}
             current={about.current}
             label={t.noteAboutAsk}
+            look={scopeLook}
             onPick={(id) => {
               const said = about.onPick(id);
               setAboutSaid(said);

@@ -1,5 +1,6 @@
-import { useEffect, useRef, type CSSProperties } from "react";
+import { useEffect, useRef, useState, type CSSProperties } from "react";
 import styles from "./ScopePyramid.module.css";
+import type { ScopeLook } from "../scope-look";
 
 export interface ScopeTier {
   readonly id: string;
@@ -19,6 +20,8 @@ interface ScopePyramidProps {
   current: string;
   label: string;
   onPick: (id: string) => void;
+  /** How it is drawn: the reader's choice in settings (scope-look.ts). */
+  look: ScopeLook;
 }
 
 /** How wide the top of the pyramid is, as a share of its base. */
@@ -32,15 +35,22 @@ const APEX = 0.26;
  * above it. Its letter picks it while the pyramid has focus, and the arrows
  * climb it; the current part takes focus when it opens.
  */
-export function ScopePyramid({ tiers, current, label, onPick }: ScopePyramidProps): JSX.Element {
+export function ScopePyramid({ tiers, current, label, onPick, look }: ScopePyramidProps): JSX.Element {
   const currentRef = useRef<HTMLButtonElement>(null);
+  const [shown, setShown] = useState<string | null>(null);
+  const caption = tiers.find((t) => t.id === (shown ?? current));
   const groupRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     currentRef.current?.focus();
   }, []);
   const n = tiers.length;
   const edge = (i: number) => ((1 - (APEX + ((1 - APEX) * i) / n)) / 2) * 100;
+  // A row is climbed with the side arrows. Turned on its side the pyramid
+  // stands widest first, so there the arrow toward its start widens.
+  const row = look === "steps" || look === "trail" || look === "side";
+  const startward = look === "side" ? 1 : -1;
   return (
+    <div className={styles.wrap} data-look={look}>
     <div
       ref={groupRef}
       className={styles.pyramid}
@@ -49,10 +59,14 @@ export function ScopePyramid({ tiers, current, label, onPick }: ScopePyramidProp
       onKeyDown={(e) => {
         if (e.altKey || e.ctrlKey || e.metaKey) return;
         const buttons = [...(groupRef.current?.querySelectorAll<HTMLButtonElement>("button:not(:disabled)") ?? [])];
-        if (e.key === "ArrowUp" || e.key === "ArrowDown") {
+        const rtl = getComputedStyle(e.currentTarget).direction === "rtl";
+        const toStart = row ? (rtl ? "ArrowRight" : "ArrowLeft") : "ArrowUp";
+        const toEnd = row ? (rtl ? "ArrowLeft" : "ArrowRight") : "ArrowDown";
+        if (e.key === toStart || e.key === toEnd) {
           e.preventDefault();
           const at = buttons.indexOf(document.activeElement as HTMLButtonElement);
-          const next = buttons[Math.min(buttons.length - 1, Math.max(0, at + (e.key === "ArrowUp" ? -1 : 1)))];
+          const step = row ? (e.key === toStart ? startward : -startward) : e.key === toStart ? -1 : 1;
+          const next = buttons[Math.min(buttons.length - 1, Math.max(0, at + step))];
           next?.focus();
           return;
         }
@@ -77,24 +91,36 @@ export function ScopePyramid({ tiers, current, label, onPick }: ScopePyramidProp
             aria-pressed={t.id === current}
             aria-keyshortcuts={t.letter}
             disabled={t.disabled}
-            style={{ "--tier": i / Math.max(1, n - 1) } as CSSProperties}
+            style={{ "--tier": i / Math.max(1, n - 1), "--edge": `${top}%` } as CSSProperties}
             onClick={() => onPick(t.id)}
+            onFocus={() => setShown(t.id)}
+            onBlur={() => setShown(null)}
+            onPointerEnter={() => setShown(t.id)}
+            onPointerLeave={() => setShown(null)}
           >
             <span
               className={styles.shape}
               data-tier-shape=""
               aria-hidden="true"
-              style={{
-                clipPath: `polygon(${top}% 0%, ${100 - top}% 0%, ${100 - bottom}% 100%, ${bottom}% 100%)`,
-              }}
+              style={
+                look === "tall" || look === "slim"
+                  ? { clipPath: `polygon(${top}% 0%, ${100 - top}% 0%, ${100 - bottom}% 100%, ${bottom}% 100%)` }
+                  : undefined
+              }
             />
             <span className={styles.text} aria-hidden="true">
               <kbd className={styles.key}>{t.letter}</kbd>
-              {t.short}
+              {look === "tall" || (look === "trail" && t.id === current) ? <span>{t.short}</span> : null}
             </span>
           </button>
         );
       })}
+    </div>
+    {look !== "tall" && look !== "trail" && caption ? (
+      <div className={styles.caption} aria-hidden="true">
+        {caption.short}
+      </div>
+    ) : null}
     </div>
   );
 }

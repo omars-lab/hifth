@@ -1270,7 +1270,7 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     which gesture does which has to be settled by trying both in the hand before building.
     Built test first. **Done 2026-10-01** with 25: under A a tap hides the bars; under B and C
     full screen is a button in the bottom line, and a small "Show the bars" button brings them back.
-29. **Notes that gather verses from one part of the Qur'an.** Asked 2026-09-30: a note is
+29. ~~**Notes that gather verses from one part of the Qur'an.**~~ Asked 2026-09-30: a note is
     given a scope when it is made (a surah, a juz, a hizb, a page, or the whole Qur'an), can
     take any verse inside it, and when a verse is added the app offers the notes that can take
     it, the one used last first. The design is [scoped-notes.md](design/scoped-notes.md),
@@ -1286,10 +1286,16 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     with no pin on it, with a count when it is in more than one; a tap on it lists those notes
     beside it, and a tap on one follows that note from this verse. **Done 2026-10-03:** step 6,
     holding the juz name, the surah name or the page number offers the notes about that part
-    and a new note about it, which starts with no verse. **What is open:** step 5 (the verse
-    menu's Note, which works but has no test of its own), step 7 (changing a note's scope), and
-    the four older note tests, which pick the tool with the desktop's keys and so skip on
-    phones.
+    and a new note about it, which starts with no verse. **Done 2026-10-03, which finishes it:**
+    step 5's test (the verse menu's Note, on the computer and both phones); step 7, the part a
+    note is about is a button in its box that widens it, or narrows it unless a verse would be
+    left outside, and a note with no verse has it too, its choices drawn around the page open
+    now; and the older note tests run on phones too, starting their notes with a hold and
+    "Note". The parts are picked from their own small drawing (owner, 2026-10-03), from one
+    harakah, a word and an ayah up to the whole Qur'an, each with a letter key; it has six
+    looks chosen in the about sheet, the default a row of short lines, the whole Qur'an the
+    longest on the left. A line of text per verse stays out, as the owner answered (question 5, one text per
+    note for now); it comes back the day a real look-alike note feels cramped.
 30. ~~**A finger's tap on a verse draws a thin blue box around it.**~~ Found recording the
     tap-and-hold options, 2026-10-01: besides the orange, a tapped verse gets the outline that
     shows a keyboard user where they are, which on a phone looks like a stray mark.

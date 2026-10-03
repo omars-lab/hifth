@@ -90,3 +90,221 @@
     transition: none;
   }
 }
+
+/* Trial looks: shorter shapes, compared before one is kept. */
+.wrap {
+  display: grid;
+  gap: 6px;
+}
+
+.caption {
+  text-align: center;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--accent);
+  min-block-size: 1.2em;
+}
+
+/* Slim: the same slope in thin slices, the letter alone; the name sits under it. */
+.wrap[data-look="slim"] .pyramid {
+  gap: 2px;
+  max-inline-size: 12rem;
+}
+
+.wrap[data-look="slim"] .tier {
+  min-block-size: 15px;
+  font-size: 9px;
+}
+
+.wrap[data-look="slim"] .key {
+  border: none;
+  min-inline-size: 0;
+  block-size: auto;
+  font-size: 9px;
+}
+
+/* Steps: one row, each part a step taller than the one before it, the whole Qur'an the tallest. */
+.wrap[data-look="steps"] .pyramid {
+  grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
+  grid-auto-flow: column;
+  align-items: end;
+  gap: 3px;
+  inline-size: min(100%, 15rem);
+}
+
+.wrap[data-look="steps"] .tier {
+  min-block-size: 0;
+  block-size: 54px;
+  align-items: end;
+  font-size: 10px;
+}
+
+.wrap[data-look="steps"] .shape {
+  inset: auto 0 16px;
+  block-size: calc(6px + var(--tier) * 32px);
+  border-radius: 2px 2px 0 0;
+}
+
+.wrap[data-look="steps"] .text {
+  block-size: 14px;
+}
+
+.wrap[data-look="steps"] .key {
+  border: none;
+  font-size: 10px;
+}
+
+.wrap[data-look="steps"] .tier[aria-pressed="true"] {
+  color: var(--accent);
+}
+
+/* Trail: one line of letters, the current part spelled out, as a path from narrow to wide. */
+.wrap[data-look="trail"] .pyramid {
+  grid-auto-flow: column;
+  justify-content: center;
+  gap: 2px;
+  max-inline-size: none;
+}
+
+.wrap[data-look="trail"] .tier {
+  min-block-size: 28px;
+  min-inline-size: 26px;
+  padding-inline: 4px;
+  border-radius: 999px;
+}
+
+.wrap[data-look="trail"] .shape {
+  border-radius: 999px;
+  background: transparent;
+}
+
+.wrap[data-look="trail"] .tier[aria-pressed="true"] .shape {
+  background: var(--accent);
+}
+
+.wrap[data-look="trail"] .tier[aria-pressed="true"] .key {
+  opacity: 0.75;
+}
+
+.wrap[data-look="trail"] .key {
+  border: none;
+  font-size: 11px;
+}
+
+/* Lines: short strokes stacked as a pyramid, nothing written on them; the one
+   pointed at shows its letter in its middle, and its name sits under the stack. */
+.wrap[data-look="lines"] .pyramid {
+  gap: 0;
+  max-inline-size: 11rem;
+}
+
+.wrap[data-look="lines"] .tier {
+  min-block-size: 15px;
+  font-size: 10px;
+}
+
+.wrap[data-look="lines"] .shape {
+  inset: calc(50% - 1.5px) var(--edge);
+  border-radius: 2px;
+  background: color-mix(in srgb, var(--accent) calc(55% - var(--tier) * 25%), var(--paper-raised, var(--paper)));
+}
+
+.wrap[data-look="lines"] .tier[aria-pressed="true"] .shape {
+  inset-block: calc(50% - 2.5px);
+  background: var(--accent);
+}
+
+.wrap[data-look="lines"] .tier:hover:not(:disabled) .shape {
+  background: color-mix(in srgb, var(--accent) 70%, var(--paper-raised, var(--paper)));
+}
+
+.wrap[data-look="lines"] .key {
+  border: none;
+  min-inline-size: 16px;
+  padding: 0 3px;
+  border-radius: 999px;
+  background: var(--paper-raised, var(--paper));
+  color: var(--accent);
+  font-size: 10px;
+  opacity: 0;
+  transition: opacity 100ms ease;
+}
+
+.wrap[data-look="lines"] .tier:hover .key,
+.wrap[data-look="lines"] .tier:focus-visible .key {
+  opacity: 1;
+}
+
+.wrap[data-look="lines"] .tier:focus-visible .text {
+  text-decoration: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wrap[data-look="lines"] .key {
+    transition: none;
+  }
+}
+
+/* Side: the stacked lines turned on their side, standing in a row from the
+   whole Qur'an, the longest, at the start to one harakah at the end. The parts
+   keep their narrowest-first order for screen readers; the row only shows them
+   the other way round, and left to right in Arabic too, as the owner asked. */
+.wrap[data-look="side"] .pyramid {
+  direction: ltr;
+  display: flex;
+  flex-direction: row-reverse;
+  justify-content: center;
+  gap: 0;
+  max-inline-size: none;
+}
+
+.wrap[data-look="side"] .tier {
+  flex: 0 0 22px;
+  min-inline-size: 0;
+  inline-size: 22px;
+  block-size: 64px;
+  min-block-size: 0;
+  font-size: 10px;
+}
+
+.wrap[data-look="side"] .shape {
+  inset: var(--edge) calc(50% - 1.5px);
+  border-radius: 2px;
+  background: color-mix(in srgb, var(--accent) calc(55% - var(--tier) * 25%), var(--paper-raised, var(--paper)));
+}
+
+.wrap[data-look="side"] .tier[aria-pressed="true"] .shape {
+  inset-inline: calc(50% - 2.5px);
+  background: var(--accent);
+}
+
+.wrap[data-look="side"] .tier:hover:not(:disabled) .shape {
+  background: color-mix(in srgb, var(--accent) 70%, var(--paper-raised, var(--paper)));
+}
+
+.wrap[data-look="side"] .key {
+  border: none;
+  min-inline-size: 16px;
+  padding: 1px 2px;
+  border-radius: 999px;
+  background: var(--paper-raised, var(--paper));
+  color: var(--accent);
+  font-size: 10px;
+  opacity: 0;
+  transition: opacity 100ms ease;
+}
+
+.wrap[data-look="side"] .tier:hover .key,
+.wrap[data-look="side"] .tier:focus-visible .key {
+  opacity: 1;
+}
+
+.wrap[data-look="side"] .tier:focus-visible .text {
+  text-decoration: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wrap[data-look="side"] .key {
+    transition: none;
+  }
+}
