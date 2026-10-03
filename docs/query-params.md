@@ -144,11 +144,11 @@ is dropped and the rest of the link stands. The reasoning is written at length i
 
 ## Settings before the `#`
 
-Two of the app's settings sit before the `#`, in the part of the address a server does see.
+A few of the app's settings sit before the `#`, in the part of the address a server does see.
 They are about the reader or the device, not the verse, which is why they are
 not in the link a reader shares, and they stay for the whole visit as the reader
 moves through the book: one changes the language of the app's own words, the
-other how the app is laid out while someone tries two layouts side by side. The
+others how the app looks while someone tries two or three ways side by side. The
 last two rows are not the app's at all: they belong to a developer's workbench
 that only runs on a laptop, and are listed so the check can see every one.
 
@@ -157,6 +157,7 @@ that only runs on a laptop, and are listed so the check can see every one.
 | `lang` | `en` or `ar` | The language of the app's own words (menus, buttons, labels) for this visit only; never saved, so the reader's own choice is untouched. The mus'haf is the same in both | Ignored; the saved choice, or else the device's language, stands |
 | `phonebar` | `a` or `b` | Picks which of the two phone toolbars to show, for comparing them | Ignored; the usual toolbar shows |
 | `share` | `a`, `b` or `c` | Picks which of the three share sheets to show, for comparing them: one tap (a), two links (b), or two links with a question of what the link opens (c) | Ignored; c, the usual sheet, shows |
+| `jumparrows` | `stays` or `asked` | Picks how the saved jump arrows show, for comparing them: always on the page, faint (stays), or only while the Jump tool is on or that verse's list is open (asked) | Ignored; stays, the usual way, shows |
 | `page` | `1` to `604` | Developer workbench only (the page that lays the outside library's page beside ours, run on a laptop with `make dev-qul`; never built into the app): which page to compare | Page 1; a number out of range is pulled back to 1 or 604 |
 | `view` | `side` or `overlay` | Developer workbench only: the two pages side by side, or one laid over the other | Side by side |
 

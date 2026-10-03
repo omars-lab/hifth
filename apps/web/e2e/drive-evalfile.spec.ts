@@ -42,3 +42,29 @@ test("a drive run can run a page script kept in a file", async ({ baseURL }) => 
     rmSync(dir, { recursive: true, force: true });
   }
 });
+
+// A mock that sets up saved data has to reopen the page for the app to read
+// it, and the finger marks were loaded only once, before the first step: the
+// first step label after the reload stopped the recording.
+test("the finger marks come back after a page script reopens the page", async ({ baseURL }) => {
+  test.setTimeout(60_000);
+  const dir = mkdtempSync(join(tmpdir(), "drive-reload-"));
+  try {
+    const log = execFileSync(
+      process.execPath,
+      [
+        DRIVE,
+        "--base", String(baseURL),
+        "--hash", "#/hafs-kfqc/p8",
+        "--marks",
+        "--act", "settle=200; eval=setTimeout(() => location.reload(), 20), 1; settle=2500; step=1|After the reload",
+        "--out", join(dir, "shot.png"),
+      ],
+      { stdio: "pipe", timeout: 50_000 },
+    ).toString();
+    expect(log).not.toMatch(/ev=error/);
+    expect(log).toMatch(/ev=marks .*reloaded/);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
