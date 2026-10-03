@@ -572,6 +572,34 @@
   touch-action: none;
 }
 
+/* The Jump tool's layer and the wavy arrow it draws while you drag. */
+.jumpLayer {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  cursor: crosshair;
+  touch-action: none;
+}
+.jumpArrow {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+  color: var(--danger);
+}
+.jumpArrow path {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.jumpArrow circle {
+  fill: currentColor;
+}
+
 .cropBox {
   position: absolute;
   border: 2px dashed var(--accent);

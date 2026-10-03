@@ -21,6 +21,7 @@ export const TOOL_KEYS: Readonly<Record<string, PageTool>> = {
   KeyW: "word",
   KeyM: "mistake",
   KeyC: "crop",
+  KeyJ: "jump",
 };
 
 /** The tools in the order every bar shows them, desktop and phone alike. */
@@ -34,6 +35,7 @@ export const TOOLS: ReadonlyArray<{ tool: PageTool; letter: string }> = [
   { tool: "word", letter: "W" },
   { tool: "mistake", letter: "M" },
   { tool: "crop", letter: "C" },
+  { tool: "jump", letter: "J" },
 ];
 
 /** How long a finger rests on a tool before it locks on. */
@@ -219,7 +221,9 @@ export function toolHint(t: ReturnType<typeof useT>["t"], x: PageTool, touch = f
             ? t.toolWordHint
             : x === "crop"
               ? t.toolCropHint
-              : t.toolOn(toolName(t, x));
+              : x === "jump"
+                ? t.toolJumpHint
+                : t.toolOn(toolName(t, x));
 }
 
 /** A tool's spoken name. App says the same name when a tool is switched on. */
@@ -240,7 +244,9 @@ export function toolName(t: ReturnType<typeof useT>["t"], x: PageTool): string {
               ? t.toolWord
               : x === "crop"
                 ? t.toolCrop
-                : t.toolMistake;
+                : x === "jump"
+                  ? t.toolJump
+                  : t.toolMistake;
 }
 
 export function ToolIcon({ tool }: { tool: PageTool }): JSX.Element {
@@ -299,6 +305,14 @@ export function ToolIcon({ tool }: { tool: PageTool }): JSX.Element {
     return (
       <svg {...common}>
         <path d="M6 2v16h16M2 6h16v16" />
+      </svg>
+    );
+  if (tool === "jump")
+    return (
+      <svg {...common}>
+        <path d="M3 17c2-3 3.5-3 5 0s3 3 5 0 3-3 5 0" />
+        <path d="M16 13.5l3 3.5-4 1" />
+        <circle cx="5" cy="7" r="1.6" />
       </svg>
     );
   if (tool === "note")

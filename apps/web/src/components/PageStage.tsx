@@ -306,6 +306,13 @@ interface PageStageProps {
   confusionMarks?: ReadonlyMap<string, ConfusionMark>;
   confusionMarkLabel?: (key: string, count: number) => string;
   /**
+   * Under the Jump tool (confusion-jumps, step 4), a drag from one verse ended:
+   * `from` is the verse pressed and the word under the press, `to` the verse
+   * let go over, or null when it was let go where no verse is, so App asks.
+   * `at` is where it was let go, for that question to open beside.
+   */
+  onJump?: (jump: { from: { key: string; word?: number }; to: string | null; at: { top: number; bottom: number; x: number } }) => void;
+  /**
    * Under the mistake tool (step 3), a tap on a word. Whether that marks it or
    * opens its signs is App's business; the stage only says which word.
    */
@@ -349,7 +356,17 @@ export interface WordRect {
  * takes the whole verse; "read" is the mode where a tap opens nothing
  * (selection-drawer = D).
  */
-export type PageTool = "read" | "select" | "highlight" | "bookmark" | "note" | "sign" | "word" | "mistake" | "crop";
+export type PageTool =
+  | "read"
+  | "select"
+  | "highlight"
+  | "bookmark"
+  | "note"
+  | "sign"
+  | "word"
+  | "mistake"
+  | "crop"
+  | "jump";
 
 /**
  * How far, in page units, the harakat tool's magnifier reaches for a sign. A
@@ -844,6 +861,7 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
     onOpenVerseNotes,
     confusionMarks,
     confusionMarkLabel,
+    onJump,
     onPlaceNote,
     onOpenNote,
     onMarkWord,
@@ -946,6 +964,8 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
   const confusionMarkLabelRef = useRef(confusionMarkLabel);
   confusionMarkLabelRef.current = confusionMarkLabel;
   const paintJumpsRef = useRef<(page: number, svg: SVGSVGElement) => void>(() => {});
+  const onJumpRef = useRef(onJump);
+  onJumpRef.current = onJump;
   /** Set once the word shards can be fetched; mountPage's tap listener calls it. */
   const placeNoteRef = useRef<(page: number, key: string, x: number, y: number) => void>(() => {});
   const onMarkWordRef = useRef(onMarkWord);
@@ -1492,7 +1512,16 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
       const from = press;
       press = null;
       const using = toolRef.current;
-      if (using === "read" || using === "select" || using === "highlight" || using === "bookmark" || using === "crop" || !from) return;
+      if (
+        using === "read" ||
+        using === "select" ||
+        using === "highlight" ||
+        using === "bookmark" ||
+        using === "crop" ||
+        using === "jump" ||
+        !from
+      )
+        return;
       if (Math.hypot(e.clientX - from.x, e.clientY - from.y) > TAP_SLOP_PX) return;
       if ((e.target as Element | null)?.closest("[data-note-pin], [data-verse-dot]")) return;
       const at = hl.svgPointFromClient(e.clientX, e.clientY);
@@ -2742,6 +2771,24 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
     for (const [p, mp] of pagesRef.current) paintDotsRef.current(p, mp.svg);
   }, [verseDots, status]);
 
+  // The verse under a point on screen, and the page it is on, for the Jump
+  // tool: its layer lies over the page, so the question goes past it.
+  const verseAt = useCallback(
+    (x: number, y: number): { key: string; page: number } | null => {
+      for (const el of document.elementsFromPoint(x, y)) {
+        if (!el.matches("path.ayahPolygon")) continue;
+        const svg = el.closest("svg[aria-labelledby^='page-label-']");
+        const page = Number(svg?.getAttribute("aria-labelledby")?.slice("page-label-".length));
+        const surah = Number(el.getAttribute("surah"));
+        const ayah = Number(el.getAttribute("ayah"));
+        if (!page || !surah || !ayah) continue;
+        return { key: formatAyahKey(resolver.edition, surah, ayah), page };
+      }
+      return null;
+    },
+    [resolver],
+  );
+
   // The jump marks, the same way: a page with no jump from any of its verses
   // fetches nothing.
   paintJumpsRef.current = (p, svg) => {
@@ -3389,6 +3436,28 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
           }}
         />
       )}
+      {tool === "jump" && (
+        <JumpLayer
+          verseAt={verseAt}
+          onJump={(a, b) => {
+            const from = verseAt(a.x, a.y);
+            if (!from) return;
+            const to = verseAt(b.x, b.y);
+            if (to && to.key === from.key) return;
+            const at = { top: b.y - 12, bottom: b.y + 12, x: b.x };
+            const mp = pagesRef.current.get(from.page);
+            const p = mp?.hl.svgPointFromClient(a.x, a.y);
+            const send = (word?: number) =>
+              onJumpRef.current?.({ from: word === undefined ? { key: from.key } : { key: from.key, word }, to: to?.key ?? null, at });
+            if (!p) return send();
+            void ensureWords(resolver.edition, from.page).then((idx) => {
+              // A press on the verse but not on a word starts from its first word.
+              const word = idx?.wordAt(from.key, p.x, p.y) ?? idx?.span(from.key)?.from;
+              send(word ?? undefined);
+            });
+          }}
+        />
+      )}
       {band && (target ? createPortal(band, target) : band)}
       {loupe && createPortal(<SignLoupe loupe={loupe} src={pageUrl(resolver.edition, loupe.page)} />, document.body)}
       {status === "loading" && <div className={styles.hint}>{t.stageLoading}</div>}
@@ -3406,6 +3475,104 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
     </div>
   );
 });
+
+/** How far a press must travel before it draws a jump's arrow, in screen pixels. */
+const JUMP_MIN_PX = 12;
+
+/**
+ * The Jump tool's layer (confusion-jumps, step 4), laid over the page while
+ * the tool is on, like the crop tool's, so a drag draws the arrow instead of
+ * moving the page. A press on a verse starts it; the wavy arrow follows the
+ * pointer, its shape fixed by the verse it starts from; letting go hands both
+ * ends up. Escape, or a press that never left the start, draws nothing.
+ */
+function JumpLayer({
+  verseAt,
+  onJump,
+}: {
+  verseAt: (x: number, y: number) => { key: string; page: number } | null;
+  onJump: (a: { x: number; y: number }, b: { x: number; y: number }) => void;
+}): JSX.Element {
+  const ref = useRef<HTMLDivElement>(null);
+  const [arrow, setArrow] = useState<{ a: { x: number; y: number }; b: { x: number; y: number }; seed: string } | null>(null);
+  const verseAtRef = useRef(verseAt);
+  verseAtRef.current = verseAt;
+  const onJumpRef = useRef(onJump);
+  onJumpRef.current = onJump;
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    let from: { x: number; y: number; id: number; key: string } | null = null;
+    const local = (x: number, y: number) => {
+      const r = el.getBoundingClientRect();
+      return { x: x - r.left, y: y - r.top };
+    };
+    const down = (e: PointerEvent) => {
+      e.stopPropagation();
+      if (from) return;
+      const v = verseAtRef.current(e.clientX, e.clientY);
+      if (!v) return;
+      from = { x: e.clientX, y: e.clientY, id: e.pointerId, key: v.key };
+      el.setPointerCapture(e.pointerId);
+    };
+    const move = (e: PointerEvent) => {
+      e.stopPropagation();
+      if (!from || e.pointerId !== from.id) return;
+      if (Math.hypot(e.clientX - from.x, e.clientY - from.y) < JUMP_MIN_PX) return setArrow(null);
+      setArrow({ a: local(from.x, from.y), b: local(e.clientX, e.clientY), seed: from.key });
+    };
+    const up = (e: PointerEvent) => {
+      e.stopPropagation();
+      if (!from || e.pointerId !== from.id) return;
+      const start = from;
+      from = null;
+      setArrow(null);
+      if (e.type === "pointercancel") return;
+      if (Math.hypot(e.clientX - start.x, e.clientY - start.y) < JUMP_MIN_PX) return;
+      onJumpRef.current(start, { x: e.clientX, y: e.clientY });
+    };
+    const key = (e: KeyboardEvent) => {
+      if (e.key !== "Escape" || !from) return;
+      e.preventDefault();
+      e.stopPropagation();
+      from = null;
+      setArrow(null);
+    };
+    el.addEventListener("pointerdown", down);
+    el.addEventListener("pointermove", move);
+    el.addEventListener("pointerup", up);
+    el.addEventListener("pointercancel", up);
+    document.addEventListener("keydown", key, true);
+    return () => {
+      el.removeEventListener("pointerdown", down);
+      el.removeEventListener("pointermove", move);
+      el.removeEventListener("pointerup", up);
+      el.removeEventListener("pointercancel", up);
+      document.removeEventListener("keydown", key, true);
+    };
+  }, []);
+  return (
+    <div ref={ref} className={styles.jumpLayer} data-jump-layer>
+      {arrow && (
+        <svg className={styles.jumpArrow} data-jump-arrow aria-hidden="true">
+          {/* Wider waves than on the page's own marks: this one is drawn at screen size. */}
+          <path d={`${squiggle(arrow.a, arrow.b, arrow.seed, 26, 3.5)} ${arrowHead(arrow.a, arrow.b)}`} />
+          <circle cx={arrow.a.x} cy={arrow.a.y} r={3} />
+        </svg>
+      )}
+    </div>
+  );
+}
+
+/** The two short strokes of an arrowhead at `b`, pointing away from `a`. */
+function arrowHead(a: { x: number; y: number }, b: { x: number; y: number }, size = 13): string {
+  const angle = Math.atan2(b.y - a.y, b.x - a.x);
+  const wing = (turn: number) => {
+    const t = angle + Math.PI + turn;
+    return `${(b.x + Math.cos(t) * size).toFixed(1)} ${(b.y + Math.sin(t) * size).toFixed(1)}`;
+  };
+  return `M ${wing(0.45)} L ${b.x.toFixed(1)} ${b.y.toFixed(1)} L ${wing(-0.45)}`;
+}
 
 /** The least a crop box may be, in screen pixels on each side, so a stray tap cuts nothing. */
 const CROP_MIN_PX = 16;
