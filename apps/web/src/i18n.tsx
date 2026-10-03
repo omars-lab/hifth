@@ -678,6 +678,12 @@ export interface Strings {
   noteJoined(label: string): string;
   noteVerses(n: number): string;
   noteWhole: string;
+  noteWordOf(label: string): string;
+  noteHarakahOf(label: string): string;
+  noteTierHarakah: string;
+  noteTierWord: string;
+  noteTierAyah: string;
+  noteTierWhole: string;
   /** Changing what a note is about: the question over the parts, and the head line's button. */
   noteAboutAsk: string;
   noteAboutChange(scope: string): string;
@@ -732,6 +738,14 @@ export interface Strings {
   verseGesturesB: string;
   verseGesturesC: string;
   verseGesturesNote: string;
+  scopeLookTitle: string;
+  scopeLookSide: string;
+  scopeLookLines: string;
+  scopeLookTall: string;
+  scopeLookSlim: string;
+  scopeLookSteps: string;
+  scopeLookTrail: string;
+  scopeLookNote: string;
   vdPlayTo: string;
   vdPlayToAria(label: string): string;
   vdMark: string;
@@ -1256,6 +1270,12 @@ export function buildStrings(lang: Lang, m: Catalog): Strings {
     noteJoined: (label) => m.noteJoined({ label }),
     noteVerses: (count) => m.noteVerses({ n: count, nText: n(count) }),
     noteWhole: m.noteWhole,
+    noteWordOf: (label) => m.noteWordOf({ label }),
+    noteHarakahOf: (label) => m.noteHarakahOf({ label }),
+    noteTierHarakah: m.noteTierHarakah,
+    noteTierWord: m.noteTierWord,
+    noteTierAyah: m.noteTierAyah,
+    noteTierWhole: m.noteTierWhole,
     noteAboutAsk: m.noteAboutAsk,
     noteAboutChange: (scope) => m.noteAboutChange({ scope }),
     noteOutside: (label, count, scope) => m.noteOutside({ n: count, nText: n(count), label, scope }),
@@ -1302,6 +1322,14 @@ export function buildStrings(lang: Lang, m: Catalog): Strings {
     verseGesturesB: m.verseGesturesB,
     verseGesturesC: m.verseGesturesC,
     verseGesturesNote: m.verseGesturesNote,
+    scopeLookTitle: m.scopeLookTitle,
+    scopeLookSide: m.scopeLookSide,
+    scopeLookLines: m.scopeLookLines,
+    scopeLookTall: m.scopeLookTall,
+    scopeLookSlim: m.scopeLookSlim,
+    scopeLookSteps: m.scopeLookSteps,
+    scopeLookTrail: m.scopeLookTrail,
+    scopeLookNote: m.scopeLookNote,
     vdPlayTo: m.vdPlayTo,
     vdPlayToAria: (label) => m.vdPlayToAria({ label }),
     vdMark: m.vdMark,
