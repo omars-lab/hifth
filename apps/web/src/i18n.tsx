@@ -694,6 +694,8 @@ export interface Strings {
   noteUntitled: string;
   /** The dot by a verse's number, and the list it opens: "2:39 is in 2 notes". */
   verseInNotes(key: string, count: number): string;
+  /** The mark by a verse you jumped away from: "From 2:58 you have jumped to 2 other verses". */
+  jumpsFrom(key: string, count: number): string;
   /** On a pin of a note with several verses, Delete takes only that verse out. */
   noteVerseOut: string;
   noteVerseTakenOut: string;
@@ -782,6 +784,16 @@ export interface Strings {
   /** The phone's tools button, naming the tool that is on. */
   toolCrop: string;
   toolCropHint: string;
+  /** The Jump tool (confusion-jumps, step 4), and the list of where you went. */
+  toolJump: string;
+  toolJumpHint: string;
+  jumpWhere(from: string): string;
+  jumpNotSure: string;
+  jumpAnother: string;
+  jumpTwin: string;
+  /** "Jump from 2:58 to 7:161 marked", with ", 2 times now" once it has happened before. */
+  jumpMarked(from: string, to: string, times: number): string;
+  jumpMarkedUnsure(from: string): string;
   cropTitle(page: number): string;
   cropCaption(page: number): string;
   cropShare: string;
@@ -1284,6 +1296,7 @@ export function buildStrings(lang: Lang, m: Catalog): Strings {
     verseInNotes: (key, count) => {
       return m.verseInNotes({ keyText: fmtAyahRef(key, lang) ?? key, n: count, nText: n(count) });
     },
+    jumpsFrom: (key, count) => m.jumpsFrom({ keyText: fmtAyahRef(key, lang) ?? key, n: count, nText: n(count) }),
     noteVerseOut: m.noteVerseOut,
     noteVerseTakenOut: m.noteVerseTakenOut,
     noteShelfHead: m.noteShelfHead,
@@ -1360,6 +1373,20 @@ export function buildStrings(lang: Lang, m: Catalog): Strings {
     toolSignHintTouch: m.toolSignHintTouch,
     toolCrop: m.toolCrop,
     toolCropHint: m.toolCropHint,
+    toolJump: m.toolJump,
+    toolJumpHint: m.toolJumpHint,
+    jumpWhere: (from) => m.jumpWhere({ fromText: fmtAyahRef(from, lang) ?? from }),
+    jumpNotSure: m.jumpNotSure,
+    jumpAnother: m.jumpAnother,
+    jumpTwin: m.jumpTwin,
+    jumpMarked: (from, to, times) =>
+      m.jumpMarked({
+        fromText: fmtAyahRef(from, lang) ?? from,
+        toText: fmtAyahRef(to, lang) ?? to,
+        n: times,
+        nText: n(times),
+      }),
+    jumpMarkedUnsure: (from) => m.jumpMarkedUnsure({ fromText: fmtAyahRef(from, lang) ?? from }),
     cropTitle: (page) => m.cropTitle({ page }),
     cropCaption: (page) => m.cropCaption({ page }),
     cropShare: m.cropShare,

@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 /**
- * CI gate: the revision record never leaves the device.
+ * CI gate: the revision record never leaves the device, and neither does the
+ * confusion-jump record, which is the same kind of thing (see RECORDS below).
  *
  * Every other thing this app stores is a preference — a language, a skin, a
  * dismissed notice. The revision record is different in kind: it is a log of
@@ -41,22 +42,67 @@ const ROOT = process.env.HIFTH_GATE_ROOT
   ? process.env.HIFTH_GATE_ROOT.replace(/\/?$/, "/")
   : new URL("..", import.meta.url).pathname;
 
-/** The modules that hold the record. */
-const RECORD_MODULES = ["packages/core/src/revision.ts", "apps/web/src/revision-store.ts"];
-
 /**
- * Who may import them, and why each one is allowed to.
+ * The records this check guards, each with the modules that hold it and the
+ * closed list of who may import them, and why each one is allowed to.
  *
- * `App.tsx` is where a tap lands; `RevisionMap.tsx` is the picture the record
- * exists for — it reads the record and draws it, with no route and no link, and
- * it is the module a "share your progress" button would be added to first.
+ * The revision record: `App.tsx` is where a tap lands; `RevisionMap.tsx` is the
+ * picture the record exists for — it reads the record and draws it, with no
+ * route and no link, and it is the module a "share your progress" button would
+ * be added to first.
+ *
+ * The confusion-jump record (docs/design/confusion-jumps.md) is the same kind
+ * of thing: a list of where one person's memory of the Qur'an slips, and how
+ * often. It leaves the device only in a saved file the reader chooses to make
+ * (docs/decisions/confusion-map-export.md), which is why the saved file's
+ * module is on its list. Its store is the device's notes store, so that is
+ * held to the same rule. The wavy arrow's drawing rule is not the record and is
+ * not listed.
  */
-const ALLOWED_IMPORTERS = new Map([
-  ["apps/web/src/App.tsx", "where a deliberate tap becomes a recorded look"],
-  ["apps/web/src/components/RevisionMap.tsx", "the picture; reads the record, sends nothing"],
-  ["apps/web/src/revision-store.ts", "the store is built on the pure module"],
-  ["packages/core/src/index.ts", "the barrel that exports it"],
-]);
+const RECORDS = [
+  {
+    name: "the revision record",
+    why: "The record is a log of when someone was reading Qur'an",
+    modules: ["packages/core/src/revision.ts", "apps/web/src/revision-store.ts"],
+    files: ["revision", "revision-store"],
+    symbols: ["rollUp", "lastSeen", "scopesOf", "dayOf", "daysBetween", "editionOf", "RevisionEvent", "RevisionScope", "DayStamp"],
+    allowed: new Map([
+      ["apps/web/src/App.tsx", "where a deliberate tap becomes a recorded look"],
+      ["apps/web/src/components/RevisionMap.tsx", "the picture; reads the record, sends nothing"],
+      ["apps/web/src/revision-store.ts", "the store is built on the pure module"],
+      ["packages/core/src/index.ts", "the barrel that exports it"],
+    ]),
+  },
+  {
+    name: "the confusion-jump record",
+    why: "The record is a list of where someone's memory of the Qur'an slips",
+    modules: ["packages/core/src/confusions.ts", "apps/web/src/bookmark-store.ts"],
+    files: ["confusions", "bookmark-store"],
+    symbols: [
+      "markConfusion",
+      "againConfusion",
+      "setDestination",
+      "setConfusionState",
+      "removeConfusion",
+      "restoreConfusion",
+      "removeLastTime",
+      "confusionMarks",
+      "confusionsFrom",
+      "mergeConfusions",
+      "isConfusion",
+      "Confusion",
+      "readConfusions",
+      "writeConfusions",
+    ],
+    allowed: new Map([
+      ["apps/web/src/App.tsx", "where a marked jump is made and drawn"],
+      ["apps/web/src/useBookmarks.ts", "holds the device's notes and jumps for the app"],
+      ["apps/web/src/bookmark-store.ts", "the store is built on the pure module"],
+      ["packages/core/src/bookmarks.ts", "the saved file the reader chooses to make"],
+      ["packages/core/src/index.ts", "the barrel that exports it"],
+    ]),
+  },
+];
 
 /** Ways out of the device. Matched as plain substrings — a grep, not a parse. */
 const ESCAPE_HATCHES = [
@@ -102,27 +148,34 @@ const failures = [];
 // past the pattern meant to catch it. The gate still passed, because it passes
 // when it finds nothing. (This comment may not spell an import out: invariant 1
 // reads the file as text, and prose is text.)
-const IMPORTS_RECORD = /\bfrom\s+["'][^"']*\/(revision|revision-store)(\.(js|ts|tsx))?["']/;
-const IMPORTS_BARREL_SYMBOL =
-  /\bimport\s*\{[^}]*\b(rollUp|lastSeen|scopesOf|dayOf|daysBetween|editionOf|RevisionEvent|RevisionScope|DayStamp)\b[^}]*\}\s*from\s*["']@hifth\/core["']/s;
+const importsOf = (record) => ({
+  file: new RegExp(`\\bfrom\\s+["'][^"']*\\/(${record.files.join("|")})(\\.(js|ts|tsx))?["']`),
+  barrel: new RegExp(
+    `\\bimport\\s*(?:type\\s*)?\\{[^}]*\\b(${record.symbols.join("|")})\\b[^}]*\\}\\s*from\\s*["']@hifth\\/core["']`,
+    "s",
+  ),
+});
 
-for (const file of sources()) {
-  const rel = relative(ROOT, file);
-  // A test proving the record stays put has to be able to see it.
-  if (rel.endsWith(".test.ts") || rel.endsWith(".test.tsx")) continue;
-  const text = readFileSync(file, "utf8");
-  if (!IMPORTS_RECORD.test(text) && !IMPORTS_BARREL_SYMBOL.test(text)) continue;
-  if (ALLOWED_IMPORTERS.has(rel)) continue;
-  failures.push(
-    `${rel} imports the revision record.\n` +
-      `    The record is a log of when someone was reading Qur'an, and it does not\n` +
-      `    leave the device. If this module genuinely needs it and cannot send it\n` +
-      `    anywhere, add it to ALLOWED_IMPORTERS in this file with the reason.`,
-  );
+for (const record of RECORDS) {
+  const imports = importsOf(record);
+  for (const file of sources()) {
+    const rel = relative(ROOT, file);
+    // A test proving the record stays put has to be able to see it.
+    if (rel.endsWith(".test.ts") || rel.endsWith(".test.tsx")) continue;
+    const text = readFileSync(file, "utf8");
+    if (!imports.file.test(text) && !imports.barrel.test(text)) continue;
+    if (record.allowed.has(rel)) continue;
+    failures.push(
+      `${rel} imports ${record.name}.\n` +
+        `    ${record.why}, and it does not\n` +
+        `    leave the device. If this module genuinely needs it and cannot send it\n` +
+        `    anywhere, add it to that record's allowed list in this file with the reason.`,
+    );
+  }
 }
 
 // ── Invariant 2: no way out inside the record's own modules ──────────────────
-for (const rel of RECORD_MODULES) {
+for (const rel of RECORDS.flatMap((r) => r.modules)) {
   const text = readFileSync(join(ROOT, rel), "utf8");
   // Strip block comments: this very file's prose names every hatch it forbids,
   // and so does the store's header. A gate that cannot survive being explained
@@ -139,11 +192,11 @@ for (const rel of RECORD_MODULES) {
 }
 
 // A gate whose allow-list points at deleted files silently guards nothing.
-for (const [rel] of ALLOWED_IMPORTERS) {
+for (const [rel] of RECORDS.flatMap((r) => [...r.allowed])) {
   try {
     statSync(join(ROOT, rel));
   } catch {
-    failures.push(`ALLOWED_IMPORTERS names ${rel}, which no longer exists — prune it.`);
+    failures.push(`The allowed list names ${rel}, which no longer exists — prune it.`);
   }
 }
 
@@ -154,6 +207,6 @@ if (failures.length > 0) {
 }
 
 console.error(
-  `gate:revision-privacy — OK (${RECORD_MODULES.length} record modules, ` +
-    `${ALLOWED_IMPORTERS.size} permitted importers, ${ESCAPE_HATCHES.length} hatches checked)`,
+  `gate:revision-privacy — OK (${RECORDS.flatMap((r) => r.modules).length} record modules, ` +
+    `${RECORDS.reduce((n, r) => n + r.allowed.size, 0)} permitted importers, ${ESCAPE_HATCHES.length} hatches checked)`,
 );

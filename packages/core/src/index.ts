@@ -98,6 +98,27 @@ export {
   type ScopedNote,
   type ScopedNoteKind,
 } from "./scoped-notes.js";
+// confusion jumps — where your memory jumped from one verse to another, kept
+// as one record per pair with every time it happened (docs/design/confusion-jumps.md)
+export {
+  againConfusion,
+  confusionMarks,
+  confusionsFrom,
+  isConfusion,
+  markConfusion,
+  mergeConfusions,
+  removeConfusion,
+  removeLastTime,
+  restoreConfusion,
+  setConfusionState,
+  setDestination,
+  squiggle,
+  type Confusion,
+  type ConfusionMark,
+  type ConfusionState,
+  type JumpEnd,
+  type JumpTime,
+} from "./confusions.js";
 // tafsir seam — commentary is its own node in the reserved `tafsir/<name>/S:A`
 // namespace, behind a provider contract so a live open source and a side-loaded
 // private edition are swapped without the UI knowing which (decision

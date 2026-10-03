@@ -1310,9 +1310,15 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     [confusion-jumps.md](design/confusion-jumps.md): what is saved (from, to, and every time
     it happened, with the day and the device), the icon beside the note dot, the phone way in,
     the list behind the icon, the saved file's version 3, and nine build steps starting with a
-    rough build. **What is open:** five questions for the owner (how the icon shares the verse
-    number with the note dot, what its number counts, what "next wasl" means, whether the arrow
-    stays on the page, how a device is named); nothing is built.
+    rough build. The owner answered the five questions on 2026-10-03 (the icon below the
+    verse number, the note dot above; it counts different verses; next wasl is the next pause
+    sign in the verse; the arrow stays faintly, to be tried by hand against "on request"; a
+    device is a random id with a name you can change). **Built on the computer (steps 1-4):**
+    the record and its rules, keeping jumps on the device, the red count by the verse number,
+    and the Jump tool (J): drag from a verse to another, or let go anywhere to be asked where
+    you went, with Undo. **Still open:** phones (the Tools tray and "Jump…" in the hold menu),
+    the list behind the icon, the saved file's version 3, jumps in the page map, and the rough
+    build of the arrow staying against showing on request.
 
 **The half of these a machine cannot run now has a register — and a runbook.** Follow-ups
 ① (the phone), ② (the browser glance) and ④ (VoiceOver/TalkBack) still wait on a human, and

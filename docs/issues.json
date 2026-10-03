@@ -2520,7 +2520,7 @@
       "status": "open",
       "severity": "question",
       "owner": "agent",
-      "note": "A new Jump tool: press on the word where your recitation left a verse, drag, and a wavy red arrow is drawn; a small list (twins first, then look-alikes) asks where you went. Each jump keeps from, to, and every time it happened with the day and the device, and the verse number gets a red icon counting the different verses you jumped to from it, with a list behind it to go there, compare, add a time or delete. Designed 2026-10-03 in docs/design/confusion-jumps.md, nothing built; five questions wait on the owner (the icon beside the note dot, what its number counts, what \"next wasl\" means, whether the arrow stays on the page, how a device is named), and the first step is a rough build to try two of them by hand. Owner ask 2026-10-03."
+      "note": "A new Jump tool: press on the word where your recitation left a verse, drag, and a wavy red arrow is drawn; a small list (twins first, then look-alikes) asks where you went. Each jump keeps from, to, and every time it happened with the day and the device, and the verse number gets a red icon counting the different verses you jumped to from it. Designed 2026-10-03 in docs/design/confusion-jumps.md; the owner answered its five questions the same day. Built on the computer 2026-10-03 (steps 1-4): the record, keeping it on the device, the red count, and the J tool with Undo, tested in apps/web/e2e/confusions.spec.ts. Still to build: phones (Tools tray, hold menu), the list behind the icon (go, compare, again, delete), the saved file's version 3, jumps in the page map, and a rough build of the arrow staying against showing on request. Owner ask 2026-10-03."
     }
   ]
 }

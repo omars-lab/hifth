@@ -361,9 +361,14 @@ export class WordIndex {
  * so that gap is the number. `lines` is the verse's outline on this page, one
  * box per line; `words` its word boxes here. Null when the gap is too narrow
  * to hold a number: the verse runs on to the next page, and its number is
- * there.
+ * there. A jump's mark goes on the `lower` shoulder, under the note dot
+ * (confusion-jumps, question 1).
  */
-export function verseNumberSpot(lines: readonly Rect[], words: readonly Rect[]): { x: number; y: number } | null {
+export function verseNumberSpot(
+  lines: readonly Rect[],
+  words: readonly Rect[],
+  shoulder: "upper" | "lower" = "upper",
+): { x: number; y: number } | null {
   if (lines.length === 0 || words.length === 0) return null;
   const last = lines.reduce((a, b) => (b.y > a.y ? b : a));
   const onLast = words.filter((w) => w.y < last.y + last.height && w.y + w.height > last.y);
@@ -371,5 +376,5 @@ export function verseNumberSpot(lines: readonly Rect[], words: readonly Rect[]):
   const wordsLeft = Math.min(...onLast.map((w) => w.x));
   const gap = wordsLeft - last.x;
   if (gap < last.height * 0.4) return null;
-  return { x: last.x + gap * 0.8, y: last.y + last.height * 0.2 };
+  return { x: last.x + gap * 0.8, y: last.y + last.height * (shoulder === "upper" ? 0.2 : 0.8) };
 }

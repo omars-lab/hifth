@@ -572,6 +572,34 @@
   touch-action: none;
 }
 
+/* The Jump tool's layer and the wavy arrow it draws while you drag. */
+.jumpLayer {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  cursor: crosshair;
+  touch-action: none;
+}
+.jumpArrow {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+  color: var(--danger);
+}
+.jumpArrow path {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.jumpArrow circle {
+  fill: currentColor;
+}
+
 .cropBox {
   position: absolute;
   border: 2px dashed var(--accent);
@@ -696,6 +724,41 @@
 .host :global(svg) :global([data-verse-dot]:focus-visible) :global(circle:not([data-hit])) {
   stroke: var(--focus-ring, #111);
   stroke-width: 1.4;
+}
+
+/* The mark by a verse the reader jumped away from (confusion-jumps, step 3):
+   a short red wavy arrow and the count of verses gone to, grey once beaten. */
+.host :global(svg) :global([data-confusion-mark]) {
+  cursor: pointer;
+  outline: none;
+  color: var(--danger);
+}
+.host :global(svg) :global([data-confusion-mark][data-beaten]) {
+  color: var(--ink-soft);
+}
+.host :global(svg) :global([data-confusion-mark]) :global(circle[data-hit]) {
+  pointer-events: auto;
+  fill: transparent;
+}
+.host :global(svg) :global([data-confusion-mark]) :global(circle[data-glyph]) {
+  fill: currentColor;
+  stroke: #fff;
+  stroke-width: 0.8;
+}
+.host :global(svg) :global([data-confusion-mark]) :global(path[data-tail]) {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.1;
+  stroke-linecap: round;
+}
+.host :global(svg) :global([data-confusion-mark]) :global(text) {
+  fill: #fff;
+  font: 600 6.5px/1 system-ui, sans-serif;
+  pointer-events: none;
+}
+.host :global(svg) :global([data-confusion-mark]:focus-visible) :global(circle[data-hit]) {
+  stroke: var(--focus-ring, #111);
+  stroke-width: 1.2;
 }
 
 /* The mistake tool (step 3): a pencil-tick pointer in the --danger red (a data

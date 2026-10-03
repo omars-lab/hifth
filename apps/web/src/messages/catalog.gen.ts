@@ -121,11 +121,18 @@ export interface Catalog {
   readonly "hopTitle.root": string;
   readonly hopTo: (d: { readonly label: string | number }) => string;
   readonly hoppedTo: (d: { readonly label: string | number; readonly page: string | number }) => string;
+  readonly jumpAnother: string;
   readonly jumpEmpty: string;
   readonly jumpInput: string;
+  readonly jumpMarked: (d: { readonly fromText: string | number; readonly toText: string | number; readonly n: number; readonly nText: string | number }) => string;
+  readonly jumpMarkedUnsure: (d: { readonly fromText: string | number }) => string;
+  readonly jumpNotSure: string;
   readonly jumpPlaceholder: string;
   readonly jumpResults: string;
   readonly jumpStartsAt: (d: { readonly label: string | number }) => string;
+  readonly jumpTwin: string;
+  readonly jumpWhere: (d: { readonly fromText: string | number }) => string;
+  readonly jumpsFrom: (d: { readonly keyText: string | number; readonly n: number; readonly nText: string | number }) => string;
   readonly juzBoth: (d: { readonly aText: string | number; readonly bText: string | number }) => string;
   readonly juzEdge: (d: { readonly juzText: string | number }) => string;
   readonly juzGroup: string;
@@ -365,6 +372,8 @@ export interface Catalog {
   readonly toolCrop: string;
   readonly toolCropHint: string;
   readonly toolHighlight: string;
+  readonly toolJump: string;
+  readonly toolJumpHint: string;
   readonly toolLocked: (d: { readonly name: string | number }) => string;
   readonly toolLockedHint: (d: { readonly name: string | number }) => string;
   readonly toolLockedHintTouch: (d: { readonly name: string | number }) => string;
