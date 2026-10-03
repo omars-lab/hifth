@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useLayoutEffect, useRef } from "react";
 import { EDITIONS, type Concordance, type EditionMeta } from "@hifth/core";
 import { useT, type Strings } from "../i18n";
 import styles from "./EditionPicker.module.css";
@@ -104,7 +104,8 @@ export function EditionPicker({
   const sheetRef = useRef<HTMLDivElement>(null);
   const restoreRef = useRef<HTMLElement | null>(null);
 
-  useEffect(() => {
+  // Takes the keyboard in the step that draws it, so a key pressed as it appears lands here, not on the page.
+  useLayoutEffect(() => {
     if (!open) return;
     restoreRef.current = (document.activeElement as HTMLElement | null) ?? null;
     const sheet = sheetRef.current;
