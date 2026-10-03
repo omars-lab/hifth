@@ -537,3 +537,51 @@ export function notesOfVerse(set: readonly ScopedNote[], key: string): ScopedNot
     .filter((n) => n.verses.some((v) => v.key === key))
     .sort((a, b) => b.usedAt - a.usedAt || (a.id < b.id ? -1 : 1));
 }
+
+/** The first and last verse a scope holds, counted from 1:1; null when a page cannot be looked up or holds none. */
+function scopeSpan(scope: NoteScope, pageOf?: PageOf): readonly [number, number] | null {
+  const division = (starts: readonly (readonly [number, number])[], n: number): [number, number] => {
+    const from = toAbsoluteAyah(...starts[n - 1]!);
+    return [from, from + divisionSize(starts, n) - 1];
+  };
+  switch (scope.type) {
+    case "whole":
+      return [1, TOTAL_AYAHS];
+    case "surah":
+      return [toAbsoluteAyah(scope.surah, 1), toAbsoluteAyah(scope.surah, AYAH_COUNTS[scope.surah - 1] ?? 1)];
+    case "juz":
+      return division(JUZ_STARTS, scope.juz);
+    case "hizb":
+      return division(HIZB_STARTS, scope.hizb);
+    case "page": {
+      if (!pageOf) return null;
+      let lo = 0;
+      let hi = 0;
+      for (let abs = 1; abs <= TOTAL_AYAHS; abs++) {
+        const { surah, ayah } = fromAbsoluteAyah(abs);
+        if (pageOf(`quran/${scope.edition}/${surah}:${ayah}`) !== scope.page) continue;
+        if (!lo) lo = abs;
+        hi = abs;
+      }
+      return lo ? [lo, hi] : null;
+    }
+  }
+}
+
+/**
+ * The notes a hold on the juz, surah or page label lists
+ * (docs/design/scoped-notes.md, step 6): those about that part or about a
+ * smaller part inside it, and any other note holding one of its verses, the one
+ * used last first. A juz that starts before a surah does is not inside it.
+ */
+export function notesAbout(set: readonly ScopedNote[], scope: NoteScope, pageOf?: PageOf): ScopedNote[] {
+  const outer = scopeSpan(scope, pageOf);
+  if (!outer) return [];
+  const inside = (n: ScopedNote) => {
+    const span = scopeSpan(n.scope, pageOf);
+    return span !== null && span[0] >= outer[0] && span[1] <= outer[1];
+  };
+  return set
+    .filter((n) => inside(n) || n.verses.some((v) => scopeContains(scope, v.key, pageOf)))
+    .sort((a, b) => b.usedAt - a.usedAt || a.id.localeCompare(b.id));
+}

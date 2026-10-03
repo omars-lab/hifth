@@ -740,6 +740,10 @@ export interface Strings {
   copiedLink(label: string): string;
   cornerPlay: string;
   cornerStart: string;
+  cornerNotes(count: number): string;
+  cornerNewNote: string;
+  /** The head of a label's list of notes: "Notes in Juz 1", "Notes on Page 7". */
+  cornerNotesHead(which: "page" | "surah" | "juz", name: string): string;
   fullScreen: string;
   showBars: string;
   fullScreenOn: string;
@@ -1302,6 +1306,9 @@ export function buildStrings(lang: Lang, m: Catalog): Strings {
     copiedLink: (label) => m.copiedLink({ label }),
     cornerPlay: m.cornerPlay,
     cornerStart: m.cornerStart,
+    cornerNotes: (count) => m.cornerNotes({ nText: n(count) }),
+    cornerNewNote: m.cornerNewNote,
+    cornerNotesHead: (which, name) => m.cornerNotesHead({ which: which === "page" ? "page" : "other", name }),
     fullScreen: m.fullScreen,
     showBars: m.showBars,
     fullScreenOn: m.fullScreenOn,

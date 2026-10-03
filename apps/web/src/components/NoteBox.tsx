@@ -4,7 +4,8 @@ import { useT } from "../i18n";
 import styles from "./NoteBox.module.css";
 
 interface NoteBoxProps {
-  note: Note;
+  /** Only its id and words: a note about a juz or a surah has no verse to sit by. */
+  note: Pick<Note, "id" | "text">;
   /** The verse it is on, as the reader reads it ("Al-Baqarah 5"). */
   label: string;
   /** Closed with Done, Escape or a press outside; carries what was typed. */

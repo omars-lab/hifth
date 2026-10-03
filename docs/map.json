@@ -2138,7 +2138,12 @@
         {
           "file": "apps/web/src/components/VerseNotes.tsx",
           "symbol": "VerseNotes",
-          "note": "The list a dot opens: the verse's notes (notesOfVerse), under or over its line so it never covers the verse, beside the dot on a wide screen; a row follows that note from this verse."
+          "note": "The list a dot opens: the verse's notes (notesOfVerse), under or over its line so it never covers the verse, beside the dot on a wide screen; a row follows that note from this verse. Holding a juz, surah or page label opens the same list for that part (notesAbout)."
+        },
+        {
+          "file": "packages/core/src/scoped-notes.ts",
+          "symbol": "notesAbout",
+          "note": "The notes a juz, surah or page label lists: those about it or a smaller part inside it, and those holding one of its verses. The menu items are in cornerItems in App.tsx; a note with no verse opens its box there (openNoteOf, closeLabelNote)."
         }
       ],
       "extend": [
