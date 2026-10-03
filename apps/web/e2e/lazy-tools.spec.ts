@@ -1,4 +1,5 @@
 import { test, expect, type Locator, type Page } from "@playwright/test";
+import { ayahTarget } from "./ayah";
 
 /*
  * Rarely used tools load when they are first opened, not with the first page.
@@ -104,4 +105,50 @@ test.describe("Hifth · rarely used tools load when first opened", () => {
       expect(errors).toEqual([]);
     });
   }
+});
+
+/**
+ * Press Escape inside the same step the named sheet is added to the page,
+ * before any frame is drawn. A sheet whose code has only just arrived is drawn
+ * by no tap of the reader's, so it must listen from the moment it shows, or the
+ * Escape falls on the page behind it.
+ */
+async function escapeAsItAppears(page: Page, name: string): Promise<void> {
+  await page.evaluate((name) => {
+    const w = window as Window & { focusAsItAppeared?: string };
+    const named = (d: Element) => {
+      const by = d.getAttribute("aria-labelledby");
+      return (d.getAttribute("aria-label") ?? (by ? document.getElementById(by)?.textContent : null)) === name;
+    };
+    new MutationObserver((_, watch) => {
+      if (![...document.querySelectorAll('[role="dialog"]')].some(named)) return;
+      watch.disconnect();
+      w.focusAsItAppeared = document.activeElement?.tagName ?? "";
+      document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
+    }).observe(document.body, { childList: true, subtree: true });
+  }, name);
+}
+
+test.describe("Hifth · a sheet that has just loaded hears an Escape at once", () => {
+  test("the bookmark drawer", async ({ page }) => {
+    await page.goto("/#/hafs-kfqc/p7");
+    await expect(pageSvg(page, 7)).toBeVisible();
+    await escapeAsItAppears(page, "علامة");
+    await page.keyboard.press("KeyB");
+    const at = await ayahTarget(page, "#verse-46");
+    await page.mouse.click(at.x, at.y);
+    await page.waitForTimeout(400);
+    await expect(page.getByRole("dialog", { name: "علامة" })).toHaveCount(0);
+    // The name field was ready the moment the drawer showed, so the first letters typed land in it.
+    expect(await page.evaluate(() => (window as Window & { focusAsItAppeared?: string }).focusAsItAppeared)).toBe("INPUT");
+  });
+
+  test("the map of what you have opened", async ({ page }) => {
+    await page.goto("/#/hafs-kfqc/p7");
+    await expect(pageSvg(page, 7)).toBeVisible();
+    await escapeAsItAppears(page, "ما فتحتَه من المصحف");
+    await page.getByRole("button", { name: /ما فتحتَه من المصحف/ }).click();
+    await page.waitForTimeout(400);
+    await expect(page.getByRole("dialog", { name: "ما فتحتَه من المصحف" })).toHaveCount(0);
+  });
 });

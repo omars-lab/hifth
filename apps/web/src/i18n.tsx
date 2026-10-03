@@ -678,6 +678,12 @@ export interface Strings {
   noteJoined(label: string): string;
   noteVerses(n: number): string;
   noteWhole: string;
+  /** Changing what a note is about: the question over the parts, and the head line's button. */
+  noteAboutAsk: string;
+  noteAboutChange(scope: string): string;
+  /** Narrowing that would leave verses outside: counts them and names the first. */
+  noteOutside(label: string, count: number, scope: string): string;
+  noteAboutNow(scope: string): string;
   /** A note's title when it has no words yet. */
   noteUntitled: string;
   /** The dot by a verse's number, and the list it opens: "2:39 is in 2 notes". */
@@ -1250,6 +1256,10 @@ export function buildStrings(lang: Lang, m: Catalog): Strings {
     noteJoined: (label) => m.noteJoined({ label }),
     noteVerses: (count) => m.noteVerses({ n: count, nText: n(count) }),
     noteWhole: m.noteWhole,
+    noteAboutAsk: m.noteAboutAsk,
+    noteAboutChange: (scope) => m.noteAboutChange({ scope }),
+    noteOutside: (label, count, scope) => m.noteOutside({ n: count, nText: n(count), label, scope }),
+    noteAboutNow: (scope) => m.noteAboutNow({ scope }),
     noteUntitled: m.noteUntitled,
     verseInNotes: (key, count) => {
       return m.verseInNotes({ keyText: fmtAyahRef(key, lang) ?? key, n: count, nText: n(count) });

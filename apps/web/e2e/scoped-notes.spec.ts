@@ -377,6 +377,97 @@ async function seedHeld(page: Page, held: readonly unknown[] = HELD): Promise<vo
   );
 }
 
+/*
+ * Step 5: "Note" in the menu a hold on a verse opens. It is the phone's quick
+ * way in, so it runs on phones too, and does what a pin does: a new note at
+ * once, with the notes this verse could join as one-tap choices.
+ */
+test.describe("Hifth · Note from the verse menu", () => {
+  test("Note in a verse's menu starts a note with the notes it could join, and one tap joins", async ({ page }) => {
+    await page.goto("/#/hafs-kfqc/p7");
+    await expect(pageSvg(page, 7)).toBeVisible();
+    await seedOldNotes(page);
+    await page.reload();
+    await expect(pins(page)).toHaveCount(2);
+
+    // Hold 2:46 (its mark is 53, counted through the whole Qur'an) still past the hold time.
+    const at = await ayahTarget(page, "#verse-53");
+    await page.mouse.move(at.x, at.y);
+    await page.mouse.down();
+    await page.waitForTimeout(600);
+    await page.mouse.up();
+    const menu = page.getByRole("menu", { name: /^More for / });
+    await menu.getByRole("menuitem", { name: "Note" }).click();
+    await expect(menu).toHaveCount(0);
+
+    await expect(box(page).getByRole("textbox")).toBeFocused();
+    await expect(pins(page)).toHaveCount(3);
+    await expect(choices(page).getByRole("button")).toHaveText(["Which way is the waqf here?", "Keep the two halves apart"]);
+
+    await choices(page).getByRole("button", { name: "Keep the two halves apart" }).click();
+    await expect(box(page).getByRole("textbox")).toHaveValue("Keep the two halves apart");
+    await expect(box(page)).toContainText("Page 7 · 2 verses");
+    await expect(choices(page)).toHaveCount(0);
+    await expect
+      .poll(async () => ((await readRecord(page, "scoped-notes"))?.notes.find((n) => n.id === "nold1")?.verses as { key: string }[] | undefined)?.map((v) => v.key))
+      .toEqual([KEY(39), KEY(46)]);
+    expect((await readRecord(page, "scoped-notes"))!.notes).toHaveLength(2);
+  });
+});
+
+/*
+ * Step 7: changing what a note is about. Widening always works, and lets the
+ * note be offered on more pages; narrowing works only if every verse still
+ * fits, and otherwise names the verse that would fall out and changes nothing.
+ */
+test.describe("Hifth · changing what a note is about", () => {
+  test.skip(({ isMobile }) => isMobile, "pins with the note tool from the desktop's keys");
+  test("a note widened to its juz is offered on the next page, and cannot be narrowed back past a verse it holds", async ({
+    page,
+  }) => {
+    await page.goto("/#/hafs-kfqc/p7");
+    await expect(pageSvg(page, 7)).toBeVisible();
+    await seedOldNotes(page);
+    await page.reload();
+    await expect(pins(page)).toHaveCount(2);
+
+    // The box names what the note is about, and that name is the way to change it.
+    await page.locator('[data-note-id="nold1"]').click();
+    const about = box(page).getByRole("button", { name: "Page 7: change what this note is about" });
+    await about.click();
+    const parts = box(page).getByRole("group", { name: "What is this note about?" });
+    await expect(parts.getByRole("button")).toHaveText(["Page 7", "Hizb 1", "Juz 1", "Al-Baqarah", "The whole Qur'an"]);
+    await expect(parts.getByRole("button", { pressed: true })).toHaveText("Page 7");
+    await parts.getByRole("button", { name: "Juz 1" }).click();
+    await expect(parts).toHaveCount(0);
+    // The picked button went with the list, so focus comes back to the line it opened from, and Escape still closes the box.
+    await expect(box(page).getByRole("button", { name: "Juz 1: change what this note is about" })).toBeFocused();
+    await expect
+      .poll(async () => (await readRecord(page, "scoped-notes"))?.notes.find((n) => n.id === "nold1")?.scope)
+      .toEqual({ type: "juz", juz: 1 });
+    await page.keyboard.press("Escape");
+    await expect(box(page)).toHaveCount(0);
+
+    // On the next page, a fresh pin is offered the widened note, and not the one still about page 7.
+    await page.goto("/#/hafs-kfqc/p8");
+    await expect(pageSvg(page, 8)).toBeVisible();
+    await page.keyboard.press("KeyN");
+    const at = await ayahTarget(page, "#verse-57"); // 2:50
+    await page.mouse.click(at.x, at.y);
+    await expect(choices(page).getByRole("button")).toHaveText(["Keep the two halves apart"]);
+    await choices(page).getByRole("button", { name: "Keep the two halves apart" }).click();
+    await expect(box(page)).toContainText("2 verses");
+
+    // Back to page 7 would leave 2:50 outside: the box says so and changes nothing.
+    await box(page).getByRole("button", { name: "Juz 1: change what this note is about" }).click();
+    await box(page).getByRole("group", { name: "What is this note about?" }).getByRole("button", { name: "Page 7" }).click();
+    await expect(box(page)).toContainText("Al-Baqarah · 2:50 is not in Page 7. Take it out of the note first.");
+    await expect
+      .poll(async () => (await readRecord(page, "scoped-notes"))?.notes.find((n) => n.id === "nold1")?.scope)
+      .toEqual({ type: "juz", juz: 1 });
+  });
+});
+
 test.describe("Hifth · the list of notes, and following one", () => {
   test("the page map lists your notes, the last used first, and one can be followed verse by verse", async ({
     page,
@@ -496,6 +587,28 @@ const LOOKALIKES = {
 };
 
 test.describe("Hifth · a dot by the verse number for a verse in a note", () => {
+  test("an Escape pressed the moment the list of a verse's notes appears closes it", async ({ page }) => {
+    // The list's code arrives on first open, so it is drawn by no tap of the
+    // reader's; a quick Escape must still reach it, not fall on the page.
+    await page.goto("/#/hafs-kfqc/p7");
+    await expect(pageSvg(page, 7)).toBeVisible();
+    await seedHeld(page, [...HELD, LOOKALIKES]);
+    await page.reload();
+    const dot = pageSvg(page, 7).locator('[data-verse-dot="2:39"]');
+    await expect(dot).toBeVisible();
+    await page.evaluate(() => {
+      // Press Escape inside the same task the list is added to the page, before any frame is drawn.
+      new MutationObserver((_, watch) => {
+        if (!document.querySelector('[role="dialog"][aria-label="2:39 is in 2 notes"]')) return;
+        watch.disconnect();
+        document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
+      }).observe(document.body, { childList: true, subtree: true });
+    });
+    await dot.click();
+    await page.waitForTimeout(400);
+    await expect(page.getByRole("dialog", { name: "2:39 is in 2 notes" })).toHaveCount(0);
+  });
+
   test("a dot sits on the number of each verse in a note, counts the notes, and lists them on a tap", async ({ page }) => {
     await page.goto("/#/hafs-kfqc/p7");
     await expect(pageSvg(page, 7)).toBeVisible();

@@ -184,6 +184,9 @@ export interface Catalog {
   readonly nearestPageN: (d: { readonly page: string | number }) => string;
   readonly nextPage: string;
   readonly noConcordance: string;
+  readonly noteAboutAsk: string;
+  readonly noteAboutChange: (d: { readonly scope: string | number }) => string;
+  readonly noteAboutNow: (d: { readonly scope: string | number }) => string;
   readonly noteAddTo: string;
   readonly noteBox: (d: { readonly label: string | number }) => string;
   readonly noteDelete: string;
@@ -197,6 +200,7 @@ export interface Catalog {
   readonly noteJoined: (d: { readonly label: string | number }) => string;
   readonly noteLoaded: (d: { readonly n: number; readonly nText: string | number }) => string;
   readonly noteMore: string;
+  readonly noteOutside: (d: { readonly n: number; readonly scope: string | number; readonly label: string | number; readonly nText: string | number }) => string;
   readonly notePin: (d: { readonly label: string | number }) => string;
   readonly noteRestored: string;
   readonly noteSaved: string;

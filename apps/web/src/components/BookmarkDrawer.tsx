@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useLayoutEffect, useRef, useState } from "react";
 import type { Bookmark } from "@hifth/core";
 import { useT } from "../i18n";
 import styles from "./BookmarkDrawer.module.css";
@@ -39,15 +39,18 @@ export function BookmarkDrawer({
   const id = bookmark?.id ?? null;
 
   // A fresh draft for each bookmark opened, and the name field ready to type
-  // into — a new ribbon's first job is to be named.
-  useEffect(() => {
+  // into — a new ribbon's first job is to be named. Both of these run in the
+  // step that draws the drawer, not a frame later: its code arrives on first
+  // open, so nothing hurries that work, and the first letters typed or an
+  // Escape pressed as it appears would otherwise land on the page behind it.
+  useLayoutEffect(() => {
     if (!bookmark) return;
     setDraft(bookmark.name);
     inputRef.current?.focus();
     inputRef.current?.select();
   }, [id]); // only on a new bookmark, not on each edit to the one open
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!id) return;
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose();

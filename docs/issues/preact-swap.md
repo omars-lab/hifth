@@ -50,6 +50,15 @@ the page (the browser's capture phase), which always comes before the app's on t
 the order is a rule and not luck. Main passed that test 16 times in 16; the branch failed it 3 in 16
 before the change and passed 224 of 224 runs of the word tests after it.
 
+A third gap showed a day later (2026-10-03), as a phone test that failed once under load. The fix
+above hurries the after-drawing work only when a tap or a key caused the drawing. Three sheets load
+their code the first time they open: the list of a verse's notes, the bookmark drawer, and the map
+of what you have opened. Each is drawn when its code arrives, which is no tap's doing, so its
+listening for Escape (and the drawer's cursor in its name field) waited a frame, and an Escape
+pressed as the sheet appeared fell on the page. All three now set those up in the same step that
+draws them. Each has a browser test that presses Escape inside that step, before any frame; all
+three tests failed before the change, and so did the drawer's cursor check.
+
 ## What did not change
 
 The components: they still import from "react", and the build points those imports at Preact. Going back is the two plugin lines in the build and test settings, plus the dependencies.
