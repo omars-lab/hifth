@@ -11,7 +11,7 @@ interface BookmarkShelfProps {
   onClearAll: () => void;
   /** Hand the reader a file of every bookmark and note they hold. */
   onSave: () => void;
-  /** Whether the reader holds any note, so a file is worth saving with no bookmark. */
+  /** Whether the reader holds any note or jump, so a file is worth saving with no bookmark. */
   hasNotes?: boolean;
   /** Read a chosen file; the caller says what came of it. */
   onLoad: (text: string) => void;

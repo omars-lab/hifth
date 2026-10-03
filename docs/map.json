@@ -2231,6 +2231,11 @@
           "file": "apps/web/src/components/PageStage.tsx",
           "symbol": "onOpenJumps",
           "note": "A tap or Enter on a jump mark opens the list rather than picking the verse under it, the same way a note dot opens its notes."
+        },
+        {
+          "file": "packages/core/src/bookmarks.ts",
+          "symbol": "toBookmarkFile",
+          "note": "Jumps travel in the one saved file beside the bookmarks and notes. A file carrying jumps is version 3; one without keeps its old number so an older copy of the app still reads it, and an older copy refuses a version 3 file rather than dropping the jumps. Loading merges by pair (mergeConfusions), so the same file twice adds nothing."
         }
       ],
       "extend": [

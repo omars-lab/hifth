@@ -138,6 +138,7 @@ const messages: Catalog = {
   jumpGo: "انتقل",
   jumpInput: "اسم السورة أو رقمها، أو ٢:٢٥٥، أو جزء ٩",
   jumpList: (d) => "الانتقالات من " + d.fromText,
+  jumpLoaded: (d) => plural(LC, d.n, { zero: "لم تُضف انتقالات", one: "أُضيف انتقال واحد من الملف", two: "أُضيف انتقالان من الملف", few: "أُضيفت " + d.nText + " انتقالات من الملف", many: "أُضيف " + d.nText + " انتقالًا من الملف", other: "أُضيف " + d.nText + " انتقال من الملف" }),
   jumpMarked: (d) => "عُلّم الانتقال من " + d.fromText + " إلى " + d.toText + plural(LC, d.n, { zero: "", one: "", two: "، مرتين حتى الآن", few: "، " + d.nText + " مرات حتى الآن", many: "، " + d.nText + " مرة حتى الآن", other: "، " + d.nText + " مرة حتى الآن" }),
   jumpMarkedUnsure: (d) => "عُلّم الانتقال من " + d.fromText + "؛ يمكنك أن تحدّد وجهته لاحقًا",
   jumpNotSure: "لست متأكدًا بعد",

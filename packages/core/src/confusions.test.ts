@@ -14,6 +14,7 @@ import {
   squiggle,
   type Confusion,
 } from "./confusions.js";
+import { parseBookmarkFile, toBookmarkFile } from "./bookmarks.js";
 
 const K = (v: string) => `quran/hafs-kfqc/${v}`;
 const PHONE = "d-phone";
@@ -157,6 +158,38 @@ describe("loading jumps from a saved file", () => {
     expect(isConfusion({ ...set[0], from: { key: 7 } })).toBe(false);
     const unsure: Confusion = { ...set[0]!, to: null };
     expect(isConfusion(unsure)).toBe(true);
+  });
+});
+
+describe("the saved file, version 3", () => {
+  const jumps = markConfusion([], { key: K("2:58"), word: 14 }, { key: K("7:161") }, 1_000, PHONE);
+
+  it("carries the jumps, and comes back with them", () => {
+    const file = toBookmarkFile([], 5_000, [], [], jumps);
+    expect(file.version).toBe(3);
+    expect(parseBookmarkFile(JSON.stringify(file))?.confusions).toEqual(jumps);
+  });
+
+  it("a file with no jumps keeps its old number, so an older copy of the app still reads it", () => {
+    expect(toBookmarkFile([], 5_000, [], []).version).toBe(2);
+    expect(toBookmarkFile([], 5_000, [], [], []).version).toBe(2);
+    expect(toBookmarkFile([], 5_000).version).toBe(1);
+  });
+
+  it("versions 1 and 2 still load, with no jumps", () => {
+    const one = parseBookmarkFile(JSON.stringify(toBookmarkFile([], 5_000)));
+    const two = parseBookmarkFile(JSON.stringify(toBookmarkFile([], 5_000, [], [])));
+    expect(one?.version).toBe(1);
+    expect(two?.version).toBe(2);
+    expect(one?.confusions).toBeUndefined();
+    expect(two?.confusions).toBeUndefined();
+  });
+
+  it("a broken jump refuses the whole file, and so do jumps in a file that says it is older", () => {
+    const file = toBookmarkFile([], 5_000, [], [], jumps);
+    expect(parseBookmarkFile(JSON.stringify({ ...file, confusions: [{ ...jumps[0], times: [] }] }))).toBeNull();
+    expect(parseBookmarkFile(JSON.stringify({ ...file, version: 2 }))).toBeNull();
+    expect(parseBookmarkFile(JSON.stringify({ ...file, version: 4 }))).toBeNull();
   });
 });
 
