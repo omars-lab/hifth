@@ -19,6 +19,9 @@ import {
   joinNote,
   changeScope,
   hizbOf,
+  scopeContains,
+  formatAyahKey,
+  HIZB_STARTS,
   noteTitle,
   addScopedNote,
   editScopedNote,
@@ -1305,12 +1308,24 @@ export function App(): JSX.Element {
   // (scoped-notes step 7): every part that holds its first verse, narrowest
   // first. Widening always works; narrowing past a verse it holds names that
   // verse and changes nothing, since the app never drops a verse to make a fit.
-  const openAbout = ((): NoteAbout | null => {
-    const of = openNote ? noteOfPin(openNote.id) : null;
-    const first = of?.verses[0];
-    const ref = first ? parseAyahKey(first.key) : null;
-    if (!of || !first || !ref) return null;
-    const page = pageOfKey(first.key);
+  // The verse the choices are drawn around: the note's first, or for a note
+  // with no verse yet, the page open now when it lies inside, else where its part starts.
+  const aboutAnchor = (of: (typeof scoped)[number]): string | null => {
+    if (of.verses[0]) return of.verses[0].key;
+    const here = resolver?.keysOnPage(page)[0] ?? null;
+    if (!here || scopeContains(of.scope, here, pageOfKey)) return here;
+    const edition = parseAyahKey(here)?.edition;
+    const s = of.scope;
+    if (s.type === "page") return resolver?.keysOnPage(s.page)[0] ?? null;
+    const [surah, ayah] =
+      s.type === "juz" ? JUZ_STARTS[s.juz - 1]! : s.type === "hizb" ? HIZB_STARTS[s.hizb - 1]! : s.type === "surah" ? [s.surah, 1] : [1, 1];
+    return edition ? formatAyahKey(edition, surah, ayah) : null;
+  };
+  const aboutOf = (of: (typeof scoped)[number] | null): NoteAbout | null => {
+    const key = of ? aboutAnchor(of) : null;
+    const ref = key ? parseAyahKey(key) : null;
+    if (!of || !key || !ref) return null;
+    const page = pageOfKey(key);
     const parts: NoteScope[] = [
       ...(page !== null ? [{ type: "page", edition: ref.edition, page } as const] : []),
       { type: "hizb", hizb: hizbOf(ref.surah, ref.ayah) },
@@ -1336,7 +1351,8 @@ export function App(): JSX.Element {
         return null;
       },
     };
-  })();
+  };
+  const openAbout = aboutOf(openNote ? noteOfPin(openNote.id) : null);
   const undoJoin = () => {
     if (!joined) return;
     commitScoped(joined.before, "");
@@ -3290,6 +3306,7 @@ export function App(): JSX.Element {
             key={labelNote.id}
             note={labelNote}
             label={scopeName(labelNote.scope)}
+            about={aboutOf(labelNote)}
             onClose={closeLabelNote}
             onDelete={deleteLabelNote}
           />

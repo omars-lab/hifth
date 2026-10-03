@@ -39,7 +39,7 @@ interface NoteBoxProps {
 export interface NoteAbout {
   /** The part it is about now, as the reader reads it: "Page 7", "Juz 1". */
   readonly name: string;
-  /** How many verses it holds; past one, the head line counts them instead of naming the verse. */
+  /** How many verses it holds: with one the head line names the verse too, past one it counts them, with none it is the part alone. */
   readonly count: number;
   readonly options: readonly { readonly id: string; readonly name: string }[];
   readonly current: string;
@@ -157,7 +157,7 @@ export function NoteBox({
       <div className={styles.head}>
         {about ? (
           <>
-            {about.count > 1 ? null : <>{label} · </>}
+            {about.count === 1 ? <>{label} · </> : null}
             <button
               type="button"
               ref={aboutRef}
