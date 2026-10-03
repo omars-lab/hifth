@@ -32,6 +32,7 @@ export const EditionPicker = later(() => tools().then((m) => m.EditionPicker));
 export const RootLens = later(() => tools().then((m) => m.RootLens));
 export const VerseNotes = later(() => tools().then((m) => m.VerseNotes));
 export const JumpList = later(() => tools().then((m) => m.JumpList));
+export const JumpShelf = later(() => tools().then((m) => m.JumpShelf));
 export const NoteBox = later(() => tools().then((m) => m.NoteBox));
 export const CropSheet = later(() => tools().then((m) => m.CropSheet));
 export const WordPartsHost = later(() => tools().then((m) => m.WordPartsHost));

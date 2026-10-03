@@ -811,6 +811,11 @@ export interface Strings {
   jumpDeletedUnsure(from: string): string;
   /** How many jumps a loaded file added. */
   jumpLoaded(n: number): string;
+  /** The page map's list of jumps. */
+  jumpShelfHead: string;
+  jumpShelfEmpty: string;
+  jumpPair(from: string, to: string): string;
+  jumpPairUnsure(from: string): string;
   cropTitle(page: number): string;
   cropCaption(page: number): string;
   cropShare: string;
@@ -1420,6 +1425,10 @@ export function buildStrings(lang: Lang, m: Catalog): Strings {
     jumpDeleted: (from, to) => m.jumpDeleted({ fromText: fmtAyahRef(from, lang) ?? from, toText: fmtAyahRef(to, lang) ?? to }),
     jumpDeletedUnsure: (from) => m.jumpDeletedUnsure({ fromText: fmtAyahRef(from, lang) ?? from }),
     jumpLoaded: (count) => m.jumpLoaded({ n: count, nText: n(count) }),
+    jumpShelfHead: m.jumpShelfHead,
+    jumpShelfEmpty: m.jumpShelfEmpty,
+    jumpPair: (from, to) => m.jumpPair({ fromText: fmtAyahRef(from, lang) ?? from, toText: fmtAyahRef(to, lang) ?? to }),
+    jumpPairUnsure: (from) => m.jumpPairUnsure({ fromText: fmtAyahRef(from, lang) ?? from }),
     cropTitle: (page) => m.cropTitle({ page }),
     cropCaption: (page) => m.cropCaption({ page }),
     cropShare: m.cropShare,
