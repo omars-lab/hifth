@@ -150,6 +150,7 @@ async function offVerse(page: Page): Promise<{ x: number; y: number }> {
 }
 
 test.describe("Hifth · the Jump tool on the computer", () => {
+  test.skip(({ isMobile }) => isMobile, "phones get the Jump tool in step 5, through the Tools tray and the hold menu");
   test.beforeEach(async ({ page }) => {
     await page.goto("/#/hafs-kfqc/p9");
     await expect(pageSvg(page, 9)).toBeVisible();
