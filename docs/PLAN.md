@@ -1297,6 +1297,16 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     already worked. A tap or a click still puts focus on the verse, so the arrows carry on from
     it, but Chrome's own blue ring no longer draws; a verse reached with the arrows keeps the
     app's ring. Safari never drew it on a tap. Tested on the computer and both phones.
+31. **A wavy arrow for the places your memory jumps.** Asked 2026-10-03: a new tool that
+    draws a wavy arrow from the word where your recitation left a verse to the verse it went
+    to, and puts a small icon by the verse number counting the different verses you have
+    jumped to from it, the icon also showing at "the next wasl". The design is
+    [confusion-jumps.md](design/confusion-jumps.md): what is saved (from, to, and every time
+    it happened, with the day and the device), the icon beside the note dot, the phone way in,
+    the list behind the icon, the saved file's version 3, and nine build steps starting with a
+    rough build. **What is open:** five questions for the owner (how the icon shares the verse
+    number with the note dot, what its number counts, what "next wasl" means, whether the arrow
+    stays on the page, how a device is named); nothing is built.
 
 **The half of these a machine cannot run now has a register — and a runbook.** Follow-ups
 ① (the phone), ② (the browser glance) and ④ (VoiceOver/TalkBack) still wait on a human, and
