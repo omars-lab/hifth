@@ -808,6 +808,45 @@ test.describe("Hifth · notes from the juz, surah and page labels", () => {
     ]);
   });
 
+  test("a note with no verse can change what it is about, to any part around the page you are on", async ({
+    page,
+  }) => {
+    await page.goto("/#/hafs-kfqc/p7");
+    await expect(pageSvg(page, 7)).toBeVisible();
+    await seedHeld(page, [{ ...SURAH3, id: "nj9", scope: { type: "juz", juz: 1 }, text: "Juz 1 openings" }]);
+    await page.reload();
+    await expect(pageSvg(page, 7)).toBeVisible();
+    await holdCorner(page, "juz");
+    await menu(page).getByRole("menuitem", { name: "Notes (1)" }).click();
+    await page.getByRole("dialog", { name: "Notes in Juz 1" }).getByRole("button").click();
+
+    // The top line is the part it is about, and that is the way to change it.
+    const about = box(page).getByRole("button", { name: "Juz 1: change what this note is about" });
+    await expect(box(page)).toContainText(/^Juz 1/);
+    await about.click();
+    const parts = box(page).getByRole("group", { name: "What is this note about?" }).getByRole("button");
+    // With no verse to start from, the parts are the ones around the page open now.
+    await expect(parts).toHaveText(["Page 7", "Hizb 1", "Juz 1", "Al-Baqarah", "The whole Qur'an"]);
+
+    // Holding no verse, it can be widened or narrowed freely.
+    await parts.filter({ hasText: "The whole Qur'an" }).click();
+    await expect(box(page).getByRole("button", { name: "The whole Qur'an: change what this note is about" })).toBeFocused();
+    await expect
+      .poll(async () => (await readRecord(page, "scoped-notes"))?.notes.find((n) => n.id === "nj9")?.scope)
+      .toEqual({ type: "whole" });
+    await box(page).getByRole("button", { name: "The whole Qur'an: change what this note is about" }).click();
+    await parts.filter({ hasText: "Page 7" }).click();
+    await expect
+      .poll(async () => (await readRecord(page, "scoped-notes"))?.notes.find((n) => n.id === "nj9")?.scope)
+      .toEqual({ type: "page", edition: "hafs-kfqc", page: 7 });
+    await page.keyboard.press("Escape");
+    await expect(box(page)).toBeHidden();
+
+    // About a page of Al-Baqarah now, it is listed from the surah's label, which a juz note is not.
+    await holdCorner(page, "surah");
+    await expect(menu(page).getByRole("menuitem", { name: "Notes (1)" })).toBeVisible();
+  });
+
   test("a note about a juz can be deleted from its box, and Undo brings it back", async ({ page }) => {
     await page.goto("/#/hafs-kfqc/p7");
     await expect(pageSvg(page, 7)).toBeVisible();
