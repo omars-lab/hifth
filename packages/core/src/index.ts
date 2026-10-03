@@ -103,6 +103,7 @@ export {
 export {
   againConfusion,
   confusionMarks,
+  allConfusions,
   confusionsFrom,
   isConfusion,
   markConfusion,
