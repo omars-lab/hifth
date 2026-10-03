@@ -3,7 +3,9 @@ import { readFileSync, rmSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { defineConfig, type Plugin } from "vite";
-import react from "@vitejs/plugin-react";
+// Preact draws the screens in place of React's own library: the same components
+// through its React-shaped layer, about 38 KB less to download (docs/performance.md, item 18).
+import preact from "@preact/preset-vite";
 import { VitePWA } from "vite-plugin-pwa";
 import { preloadScript } from "./src/lang-preload";
 import { LOCALE_IDS } from "./src/messages/locales.gen";
@@ -192,7 +194,7 @@ export default defineConfig({
     dropPrivateUnlessPitch(),
     preloadReaderLanguage(),
     qulFixturesDev(),
-    react(),
+    preact(),
     VitePWA({
       registerType: "prompt",
       injectRegister: null, // registration handled in src/pwa.ts (install-prompt flow)

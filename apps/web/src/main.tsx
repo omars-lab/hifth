@@ -4,6 +4,7 @@ import { App } from "./App";
 import { applyFieldToDocument, fieldFromHash } from "./field";
 import { LangProvider, loadStrings } from "./i18n";
 import { applyLangToDocument, detectLang } from "./lang";
+import { installInputTiming } from "./input-timing";
 import { initPwa } from "./pwa";
 import "./styles/global.css";
 // Global for the same reason: it dresses `:root`, which React does not render.
@@ -12,6 +13,9 @@ import "./styles/highlight.css";
 // Global, not a CSS module: its selectors target elements inside the mushaf SVG
 // document, which React never renders (same reason as highlight.css).
 import "./styles/tajweed.css";
+
+// Before anything is drawn: a tap or a key finishes its work before the next one.
+installInputTiming(window);
 
 const root = document.getElementById("root");
 if (!root) throw new Error("missing #root");

@@ -2161,13 +2161,11 @@
         "file": "docs/performance.md",
         "item": "⑱"
       },
-      "status": "blocked",
+      "status": "fixed",
       "severity": "risk",
       "owner": "agent",
-      "blockedBy": [
-        "under ~5 KB of room under the size cap, or the Study Quran demo shown"
-      ],
-      "note": "Parked 2026-09-29 when the session task list was cleared; until then it lived only in that list and a pointer in the trims list to a file that never existed. 2026-09-30: the refactor it waited on was never planned; it now waits on a real trigger (performance.md ⑱)."
+      "closedBy": "apps/web/e2e/page-library.spec.ts",
+      "note": "Parked 2026-09-29 when the session task list was cleared; until then it lived only in that list and a pointer in the trims list to a file that never existed. 2026-09-30: the refactor it waited on was never planned; it now waits on a real trigger (performance.md ⑱). 2026-10-03: taken up and kept. The start-up script fell from 132.4 to 96.4 KB and the page answers a tap about 600 ms sooner on a mid-range phone (2554 to 1956 ms). Preact runs effects a frame later than React, which the full browser suite caught; the fix and the evidence are in docs/issues/preact-swap.md. The browser test fails if React's library comes back into the start-up script."
     },
     {
       "id": "qul-command-line-tool",

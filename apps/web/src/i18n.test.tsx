@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/preact";
 import { afterEach, describe, expect, it } from "vitest";
 import { Colophon } from "./components/Colophon";
 import { LangProvider, stringsFor, useT } from "./i18n";

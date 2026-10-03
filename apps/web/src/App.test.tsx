@@ -2,7 +2,7 @@
 // unsupported and every wiring assertion below would pass by recording nothing.
 import "fake-indexeddb/auto";
 import { describe, it, expect, vi, beforeAll, beforeEach, afterAll, afterEach } from "vitest";
-import { render, screen, waitFor, act, within } from "@testing-library/react";
+import { render, screen, waitFor, act, within } from "@testing-library/preact";
 import { App } from "./App";
 import { LangProvider } from "./i18n";
 import { forgetRecord, readRecord } from "./revision-store";
@@ -208,7 +208,7 @@ describe("the revision record — which taps become a look", () => {
   });
 
   /** Fire the highlighter's pointerup on a polygon, letting React flush. */
-  const tap = async (container: HTMLElement, id: string) => {
+  const tap = async (container: Element, id: string) => {
     const poly = await waitFor(() => {
       const p = container.querySelector<SVGElement>(`#${id}`);
       expect(p).not.toBeNull();

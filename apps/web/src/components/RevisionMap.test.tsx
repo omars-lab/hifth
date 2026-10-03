@@ -1,6 +1,6 @@
 import "fake-indexeddb/auto";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/preact";
 import type { PageMeta } from "@hifth/core";
 import { forgetRecord, recordLook } from "../revision-store";
 import { RevisionMap, holdings } from "./RevisionMap";

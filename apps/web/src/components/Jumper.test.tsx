@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from "vitest";
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen, fireEvent } from "@testing-library/preact";
 import { Jumper } from "./Jumper";
 
 /** Render an open jumper and hand back its field + the jump spy. */
@@ -40,21 +40,21 @@ describe("Jumper", () => {
 
   it("finds a surah by name and lands on its first ayah", () => {
     const { onJump, input } = open();
-    fireEvent.change(input, { target: { value: "البقرة" } });
+    fireEvent.input(input, { target: { value: "البقرة" } });
     fireEvent.click(screen.getAllByRole("option")[0]!);
     expect(onJump).toHaveBeenCalledWith({ kind: "surah", surah: 2, ayah: 1 });
   });
 
   it("takes the active option on Enter", () => {
     const { onJump, input } = open();
-    fireEvent.change(input, { target: { value: "2:255" } });
+    fireEvent.input(input, { target: { value: "2:255" } });
     fireEvent.keyDown(input, { key: "Enter" });
     expect(onJump).toHaveBeenCalledWith({ kind: "ayah", surah: 2, ayah: 255 });
   });
 
   it("moves the active option with the arrows", () => {
     const { onJump, input } = open();
-    fireEvent.change(input, { target: { value: "نس" } });
+    fireEvent.input(input, { target: { value: "نس" } });
     const options = screen.getAllByRole("option");
     expect(options.length).toBeGreaterThan(1);
     expect(options[0]).toHaveAttribute("aria-selected", "true");
@@ -66,7 +66,7 @@ describe("Jumper", () => {
 
   it("says so when nothing matches, instead of guessing", () => {
     const { input, onJump } = open();
-    fireEvent.change(input, { target: { value: "زقزق" } });
+    fireEvent.input(input, { target: { value: "زقزق" } });
     expect(screen.getByText("لا مكان بهذا الاسم أو الرقم")).toBeInTheDocument();
     expect(onJump).not.toHaveBeenCalled();
   });
