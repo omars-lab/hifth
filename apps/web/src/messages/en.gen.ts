@@ -156,6 +156,7 @@ const messages: Catalog = {
   jumpTwin: "word for word",
   jumpWhere: (d) => "Where did " + d.fromText + " take you?",
   jumpYesterday: "yesterday",
+  jumpsAtWasl: (d) => "At the pause sign in " + d.keyText + " you have jumped to " + plural(LC, d.n, { "0": "a verse not named yet", one: d.nText + " other verse", other: d.nText + " other verses" }),
   jumpsFrom: (d) => "From " + d.keyText + " you have jumped to " + plural(LC, d.n, { "0": "a verse not named yet", one: d.nText + " other verse", other: d.nText + " other verses" }),
   juzBoth: (d) => "Juz " + d.aText + " → " + d.bText,
   juzEdge: (d) => "No juz that way · juz " + d.juzText,

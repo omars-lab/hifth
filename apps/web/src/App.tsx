@@ -38,6 +38,7 @@ import {
   restoreConfusion,
   setDestination,
   allConfusions,
+  waslMarks,
   confusionsFrom,
   wordDiff,
   type Confusion,
@@ -1307,6 +1308,12 @@ export function App(): JSX.Element {
     loadFile: loadConfusionsFile,
   } = useConfusions(announce, t.bmNotSaved);
   const confusionMarks = useMemo(() => countConfusionMarks(confusions), [confusions]);
+  // And the smaller one at the next pause sign after where each jump left
+  // (step 8). The page knows where its pause signs are; the jumps stay here.
+  const waslMarksOf = useCallback(
+    (waslOf: (key: string, seam: number) => number | null) => waslMarks(confusions, waslOf),
+    [confusions],
+  );
   // The Jump tool (confusion-jumps, step 4). A drag let go away from any verse
   // asks where it went (`jumpAsking`), and "Another verse…" in that list hands
   // the question to the go-to box (`jumpNaming`). A jump just marked waits in
@@ -3041,6 +3048,8 @@ export function App(): JSX.Element {
                   verseDotLabel={t.verseInNotes}
                   confusionMarks={confusionMarks}
                   confusionMarkLabel={t.jumpsFrom}
+                  waslMarksOf={waslMarksOf}
+                  waslMarkLabel={t.jumpsAtWasl}
                   onJump={onJump}
                   onOpenVerseNotes={openVerseNotes}
                   onOpenJumps={openJumps}
@@ -3112,6 +3121,8 @@ export function App(): JSX.Element {
                 verseDotLabel={t.verseInNotes}
                 confusionMarks={confusionMarks}
                 confusionMarkLabel={t.jumpsFrom}
+                waslMarksOf={waslMarksOf}
+                waslMarkLabel={t.jumpsAtWasl}
                 onJump={onJump}
                 onOpenVerseNotes={openVerseNotes}
                 onOpenJumps={openJumps}

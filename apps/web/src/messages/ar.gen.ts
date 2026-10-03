@@ -156,6 +156,7 @@ const messages: Catalog = {
   jumpTwin: "مطابقة لفظًا",
   jumpWhere: (d) => "إلى أين أخذتك " + d.fromText + "؟",
   jumpYesterday: "أمس",
+  jumpsAtWasl: (d) => "عند علامة الوقف في " + d.keyText + " انتقل حفظك إلى " + plural(LC, d.n, { zero: "آية لم تُسمَّ بعد", one: "آية أخرى", two: "آيتين أخريين", few: d.nText + " آيات أخرى", many: d.nText + " آية أخرى", other: d.nText + " آية أخرى" }),
   jumpsFrom: (d) => "من " + d.keyText + " انتقل حفظك إلى " + plural(LC, d.n, { zero: "آية لم تُسمَّ بعد", one: "آية أخرى", two: "آيتين أخريين", few: d.nText + " آيات أخرى", many: d.nText + " آية أخرى", other: d.nText + " آية أخرى" }),
   juzBoth: (d) => "الجزء " + d.aText + " ← " + d.bText,
   juzEdge: (d) => "لا جزء في هذا الاتجاه · الجزء " + d.juzText,

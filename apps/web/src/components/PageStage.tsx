@@ -29,6 +29,7 @@ import {
   marqueeRect,
   nearestSignOnPage,
   nextIntent,
+  nextWasl,
   notesOnPage,
   LONG_PRESS_MS,
   TAP_SLOP_PX,
@@ -47,6 +48,7 @@ import {
   WHEEL_TURN_REST,
   type ConfusionMark,
   type EditionId,
+  type WaslMark,
   type Fold,
   type MarkShard,
   type Note,
@@ -308,6 +310,14 @@ interface PageStageProps {
   confusionMarks?: ReadonlyMap<string, ConfusionMark>;
   confusionMarkLabel?: (key: string, count: number) => string;
   /**
+   * The smaller marks at the next pause sign after the word each jump left
+   * from (step 8), given where a verse's next wasl is; `waslMarkLabel` names
+   * them. A function rather than the jumps, so this module, which loads files
+   * and moves the address, never holds the record itself: App does.
+   */
+  waslMarksOf?: (waslOf: (key: string, seam: number) => number | null) => readonly WaslMark[];
+  waslMarkLabel?: (key: string, count: number) => string;
+  /**
    * Under the Jump tool (confusion-jumps, step 4), a drag from one verse ended:
    * `from` is the verse pressed and the word under the press, `to` the verse
    * let go over, or null when it was let go where no verse is, so App asks.
@@ -567,6 +577,60 @@ function drawConfusionMarks(
     n.textContent = m.count > 0 ? String(m.count) : "?";
     if (m.count === 0) n.setAttribute("data-unsure", "");
     mark.append(n);
+    g.append(mark);
+  }
+  svg.append(g);
+}
+
+/**
+ * Draw a page's marks at the next wasl (confusion-jumps, step 8): the same
+ * red disc and count, smaller, just after the first pause sign that follows
+ * the word each jump left from, since that is where you stop, start again,
+ * and carry on into the wrong verse. A jump whose verse ends before any sign
+ * has only the mark at its number. A tap opens the same list.
+ */
+function drawWaslMarks(
+  svg: SVGSVGElement,
+  marksOf: NonNullable<PageStageProps["waslMarksOf"]> | undefined,
+  words: WordIndex | null,
+  labelOf: (key: string, count: number) => string,
+): void {
+  svg.querySelector("g[data-wasl-marks]")?.remove();
+  if (!marksOf || !words) return;
+  const marks = marksOf((key, seam) => {
+    const span = words.span(key);
+    return span ? nextWasl(seam, span.to, (i) => words.isMark(key, i)) : null;
+  });
+  if (marks.length === 0) return;
+  const g = document.createElementNS(SVG_NS, "g");
+  g.setAttribute("data-wasl-marks", "");
+  for (const m of marks) {
+    const at = parseAyahKey(m.key);
+    const sign = words.boxOf(m.key, m.index);
+    if (!at || !sign) continue;
+    const mark = document.createElementNS(SVG_NS, "g");
+    mark.setAttribute("data-wasl-mark", `${at.surah}:${at.ayah}`);
+    mark.setAttribute("data-wasl-index", String(m.index));
+    mark.setAttribute("data-verse-key", m.key);
+    if (m.beaten) mark.setAttribute("data-beaten", "");
+    mark.setAttribute("role", "button");
+    mark.setAttribute("tabindex", "0");
+    mark.setAttribute("aria-label", labelOf(m.key, m.count));
+    // After the sign in reading order, which on this right-to-left page is to
+    // its left, level with it.
+    mark.setAttribute("transform", `translate(${sign.x - 4.5} ${sign.y + sign.height / 2}) scale(0.8)`);
+    const hit = document.createElementNS(SVG_NS, "circle");
+    hit.setAttribute("data-hit", "");
+    hit.setAttribute("r", "11");
+    const glyph = document.createElementNS(SVG_NS, "circle");
+    glyph.setAttribute("data-glyph", "");
+    glyph.setAttribute("r", "4.6");
+    const n = document.createElementNS(SVG_NS, "text");
+    n.setAttribute("text-anchor", "middle");
+    n.setAttribute("dominant-baseline", "central");
+    n.textContent = m.count > 0 ? String(m.count) : "?";
+    if (m.count === 0) n.setAttribute("data-unsure", "");
+    mark.append(hit, glyph, n);
     g.append(mark);
   }
   svg.append(g);
@@ -864,6 +928,8 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
     onOpenJumps,
     confusionMarks,
     confusionMarkLabel,
+    waslMarksOf,
+    waslMarkLabel,
     onJump,
     onPlaceNote,
     onOpenNote,
@@ -968,6 +1034,10 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
   confusionMarksRef.current = confusionMarks;
   const confusionMarkLabelRef = useRef(confusionMarkLabel);
   confusionMarkLabelRef.current = confusionMarkLabel;
+  const waslMarksOfRef = useRef(waslMarksOf);
+  waslMarksOfRef.current = waslMarksOf;
+  const waslMarkLabelRef = useRef(waslMarkLabel);
+  waslMarkLabelRef.current = waslMarkLabel;
   const paintJumpsRef = useRef<(page: number, svg: SVGSVGElement) => void>(() => {});
   const onJumpRef = useRef(onJump);
   onJumpRef.current = onJump;
@@ -1528,7 +1598,8 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
       )
         return;
       if (Math.hypot(e.clientX - from.x, e.clientY - from.y) > TAP_SLOP_PX) return;
-      if ((e.target as Element | null)?.closest("[data-note-pin], [data-verse-dot], [data-confusion-mark]")) return;
+      if ((e.target as Element | null)?.closest("[data-note-pin], [data-verse-dot], [data-confusion-mark], [data-wasl-mark]"))
+        return;
       const at = hl.svgPointFromClient(e.clientX, e.clientY);
       if (!at) return;
       // The harakat tool takes the sign its magnifier rings, whichever verse
@@ -1554,10 +1625,12 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
     });
     const pinOf = (e: Event) => (e.target as Element | null)?.closest("[data-note-pin]")?.getAttribute("data-note-id");
     // A note dot and a jump mark both open a list about their verse beside them.
-    const dotOf = (e: Event) => (e.target as Element | null)?.closest("[data-verse-dot], [data-confusion-mark]");
+    const dotOf = (e: Event) =>
+      (e.target as Element | null)?.closest("[data-verse-dot], [data-confusion-mark], [data-wasl-mark]");
     const openDot = (dot: Element) => {
       const r = dot.getBoundingClientRect();
-      const open = dot.hasAttribute("data-confusion-mark") ? onOpenJumpsRef.current : onOpenVerseNotesRef.current;
+      const jump = dot.hasAttribute("data-confusion-mark") || dot.hasAttribute("data-wasl-mark");
+      const open = jump ? onOpenJumpsRef.current : onOpenVerseNotesRef.current;
       open?.(dot.getAttribute("data-verse-key") ?? "", { top: r.top, bottom: r.bottom, x: r.left + r.width / 2 });
     };
     svg.addEventListener("click", (e) => {
@@ -2803,15 +2876,18 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
     const label = (key: string, count: number) => confusionMarkLabelRef.current?.(key, count) ?? key;
     if (!marks || ![...marks.keys()].some((k) => resolver.resolve(k)?.page === p)) {
       svg.querySelector("g[data-confusion-marks]")?.remove();
+      svg.querySelector("g[data-wasl-marks]")?.remove();
       return;
     }
-    void ensureWords(resolver.edition, p).then((idx) =>
-      drawConfusionMarks(svg, confusionMarksRef.current ?? new Map(), idx, label),
-    );
+    const waslLabel = (key: string, count: number) => waslMarkLabelRef.current?.(key, count) ?? key;
+    void ensureWords(resolver.edition, p).then((idx) => {
+      drawConfusionMarks(svg, confusionMarksRef.current ?? new Map(), idx, label);
+      drawWaslMarks(svg, waslMarksOfRef.current, idx, waslLabel);
+    });
   };
   useEffect(() => {
     for (const [p, mp] of pagesRef.current) paintJumpsRef.current(p, mp.svg);
-  }, [confusionMarks, status]);
+  }, [confusionMarks, waslMarksOf, status]);
 
   // Redraw the pins and the mistakes on every mounted page when the notes
   // change; a page that mounts later draws its own in mountPage.

@@ -150,6 +150,7 @@ export interface Catalog {
   readonly jumpTwin: string;
   readonly jumpWhere: (d: { readonly fromText: string | number }) => string;
   readonly jumpYesterday: string;
+  readonly jumpsAtWasl: (d: { readonly keyText: string | number; readonly n: number; readonly nText: string | number }) => string;
   readonly jumpsFrom: (d: { readonly keyText: string | number; readonly n: number; readonly nText: string | number }) => string;
   readonly juzBoth: (d: { readonly aText: string | number; readonly bText: string | number }) => string;
   readonly juzEdge: (d: { readonly juzText: string | number }) => string;
