@@ -269,6 +269,53 @@ test.describe("Hifth · jumps on a phone, and from a held verse", () => {
  * each row can turn there, show the two side by side, count one more time,
  * be marked beaten, or be deleted with Undo.
  */
+test.describe("Hifth · the mark at the next pause sign", () => {
+  // Every seeded jump leaves from word 3. In 2:58 the next pause sign after it
+  // is word 22, the small sign on the third line; 2:59 has none, so only its
+  // number is marked; 2:60's first sign is the hizb star before its first
+  // word, so its mark is at 11; 2:61's jump is dismissed.
+  const wasl = (page: Page, verse: string): Locator => pageSvg(page, 9).locator(`[data-wasl-mark="${verse}"]`);
+  const signBox = (verse: string, index: number) => {
+    const shard = JSON.parse(readFileSync(new URL("../public/assets/words/hafs-kfqc/9.json", import.meta.url), "utf8"));
+    const w = shard.words[verse];
+    const [x, y, width, height] = w.boxes[index - w.from];
+    return { x, y, width, height };
+  };
+
+  test("sits beside the first pause sign after where you left, counted like the verse number's", async ({ page }) => {
+    await page.goto("/#/hafs-kfqc/p9");
+    await expect(pageSvg(page, 9)).toBeVisible();
+    await seed(page, JUMPS);
+    await page.reload();
+    await expect(wasl(page, "2:58")).toBeVisible();
+    await expect(pageSvg(page, 9).locator("[data-wasl-mark]")).toHaveCount(2);
+    await expect(wasl(page, "2:58")).toHaveAttribute("data-wasl-index", "22");
+    await expect(wasl(page, "2:58").locator("text")).toHaveText("2");
+    await expect(wasl(page, "2:58")).toHaveAttribute(
+      "aria-label",
+      "At the pause sign in 2:58 you have jumped to 2 other verses",
+    );
+    await expect(wasl(page, "2:59")).toHaveCount(0);
+    await expect(wasl(page, "2:60")).toHaveAttribute("data-wasl-index", "11");
+    await expect(wasl(page, "2:60")).toHaveAttribute("data-beaten", "");
+
+    // Beside the sign, after it in reading order (to its left), on its line.
+    const sign = signBox("2:58", 22);
+    const [x, y] = ((await wasl(page, "2:58").getAttribute("transform")) ?? "").match(/[-\d.]+/g)!.map(Number);
+    expect(x).toBeLessThan(sign.x);
+    expect(x).toBeGreaterThan(sign.x - 12);
+    expect(Math.abs(y! - (sign.y + sign.height / 2))).toBeLessThan(6);
+    if (SHOTS) {
+      await wasl(page, "2:58").scrollIntoViewIfNeeded();
+      await page.screenshot({ path: `${SHOTS}/jump-wasl-${test.info().project.name}.png` });
+    }
+
+    // A tap opens the same list the verse number's mark opens.
+    await wasl(page, "2:58").click();
+    await expect(page.getByRole("dialog", { name: "Jumps from 2:58" })).toBeVisible();
+  });
+});
+
 test.describe("Hifth · the list behind a jump mark", () => {
   const jumps = (page: Page, from: string): Locator => page.getByRole("dialog", { name: `Jumps from ${from}` });
   const row = (list: Locator, text: string | RegExp): Locator => list.getByRole("listitem").filter({ hasText: text });

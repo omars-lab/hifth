@@ -88,6 +88,8 @@ const RECORDS = [
       "removeLastTime",
       "confusionMarks",
       "confusionsFrom",
+      "allConfusions",
+      "waslMarks",
       "mergeConfusions",
       "isConfusion",
       "Confusion",
