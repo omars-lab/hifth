@@ -28,6 +28,23 @@ interface NoteBoxProps {
   onJoin?: (id: string) => void;
   /** Set once the verse has just joined this note: what to say, and the way back. */
   joined?: { readonly said: string; readonly onUndo: () => void } | null;
+  /**
+   * What the note is about, and the parts it could be about instead, narrowest
+   * first (docs/design/scoped-notes.md, step 7). Its name in the head line is
+   * the way to change it.
+   */
+  about?: NoteAbout | null;
+}
+
+export interface NoteAbout {
+  /** The part it is about now, as the reader reads it: "Page 7", "Juz 1". */
+  readonly name: string;
+  /** How many verses it holds; past one, the head line counts them instead of naming the verse. */
+  readonly count: number;
+  readonly options: readonly { readonly id: string; readonly name: string }[];
+  readonly current: string;
+  /** Null once the note is about that part; otherwise what to say about the verses that would fall out. */
+  readonly onPick: (id: string) => string | null;
 }
 
 export interface NoteChoice {
@@ -57,13 +74,17 @@ export function NoteBox({
   choices,
   onJoin,
   joined,
+  about,
 }: NoteBoxProps): JSX.Element {
   const { t } = useT();
   const [draft, setDraft] = useState(note.text);
   const [showMore, setShowMore] = useState(false);
+  const [aboutOpen, setAboutOpen] = useState(false);
+  const [aboutSaid, setAboutSaid] = useState<string | null>(null);
   const offer = choices && draft.trim() === "" ? [...choices.offered, ...(showMore ? choices.more : [])] : [];
   const boxRef = useRef<HTMLDivElement>(null);
   const areaRef = useRef<HTMLTextAreaElement>(null);
+  const aboutRef = useRef<HTMLButtonElement>(null);
   const [at, setAt] = useState<{ left: number; top: number } | null>(null);
   const draftRef = useRef(draft);
   draftRef.current = draft;
@@ -133,7 +154,62 @@ export function NoteBox({
         }
       }}
     >
-      <div className={styles.head}>{head ?? label}</div>
+      <div className={styles.head}>
+        {about ? (
+          <>
+            {about.count > 1 ? null : <>{label} · </>}
+            <button
+              type="button"
+              ref={aboutRef}
+              className={styles.about}
+              aria-expanded={aboutOpen}
+              aria-label={t.noteAboutChange(about.name)}
+              onClick={() => {
+                setAboutOpen((o) => !o);
+                setAboutSaid(null);
+              }}
+            >
+              {about.name}
+            </button>
+            {about.count > 1 ? <> · {t.noteVerses(about.count)}</> : null}
+          </>
+        ) : (
+          (head ?? label)
+        )}
+      </div>
+      {about && aboutOpen && (
+        <div className={styles.choices} role="group" aria-label={t.noteAboutAsk}>
+          <div className={styles.choicesHead} aria-hidden="true">
+            {t.noteAboutAsk}
+          </div>
+          <div className={styles.pills}>
+            {about.options.map((o) => (
+              <button
+                key={o.id}
+                type="button"
+                className={styles.pill}
+                aria-pressed={o.id === about.current}
+                onClick={() => {
+                  const said = about.onPick(o.id);
+                  setAboutSaid(said);
+                  if (said !== null) return;
+                  // The picked button goes with the list; focus stays in the
+                  // box, so Escape still closes it.
+                  setAboutOpen(false);
+                  aboutRef.current?.focus();
+                }}
+              >
+                {o.name}
+              </button>
+            ))}
+          </div>
+          {aboutSaid && (
+            <div className={styles.outside} role="status">
+              {aboutSaid}
+            </div>
+          )}
+        </div>
+      )}
       <textarea
         ref={areaRef}
         className={styles.text}

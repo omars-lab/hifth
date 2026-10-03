@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import {
   comparableEvents,
   dayOf,
@@ -386,8 +386,12 @@ export function RevisionMap({
    * stands down whenever a `[role="dialog"]` is in the DOM, so the sheet does
    * not need to silence it — and a sheet that silenced it would be relying on
    * the same "focus is where I think it is" reasoning that failed here.
+   *
+   * And from the step that draws the sheet, not a frame later: its code
+   * arrives on first open, so no tap hurries that work, and an Escape pressed
+   * as it appears would otherwise fall on the page behind it.
    */
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!open) return;
     const onEscape = (e: KeyboardEvent): void => {
       if (e.key === "Escape") onClose();
