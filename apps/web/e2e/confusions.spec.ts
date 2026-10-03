@@ -217,3 +217,47 @@ test.describe("Hifth · the Jump tool on the computer", () => {
     await expect(mark(page, "2:58")).toHaveCount(0);
   });
 });
+
+/*
+ * Confusion jumps, step 5: phones. The Jump tool is in the phone's Tools tray,
+ * and holding a verse offers "Jump…", which asks where you went straight away
+ * with no drawing: the fastest way when your hand is already on the verse.
+ */
+test.describe("Hifth · jumps on a phone, and from a held verse", () => {
+  test("holding a verse and picking Jump… asks where you went, with no arrow to draw", async ({ page }) => {
+    await page.goto("/#/hafs-kfqc/p9");
+    await expect(pageSvg(page, 9)).toBeVisible();
+    const at = await ayahTarget(page, verse(65)); // 2:58
+    await page.mouse.move(at.x, at.y);
+    await page.mouse.down();
+    await page.waitForTimeout(600);
+    await page.mouse.up();
+    const menu = page.getByRole("menu", { name: /^More for / });
+    await expect(menu).toBeVisible();
+    if (SHOTS) await page.screenshot({ path: `${SHOTS}/jump-hold-menu-${test.info().project.name}.png` });
+    await menu.getByRole("menuitem", { name: "Jump…" }).click();
+    await expect(menu).toHaveCount(0);
+    const list = picker(page, "2:58");
+    await expect(list).toBeVisible();
+    if (SHOTS) await page.screenshot({ path: `${SHOTS}/jump-hold-where-${test.info().project.name}.png` });
+    await list.getByRole("button", { name: /7:161/ }).click();
+    await expect(mark(page, "2:58")).toHaveAttribute("aria-label", "From 2:58 you have jumped to 1 other verse");
+    await expect(undoBar(page)).toContainText("Jump from 2:58 to 7:161 marked");
+  });
+
+  test("on a phone, Tools → Jump draws the arrow with a finger's drag", async ({ page, isMobile }) => {
+    test.skip(!isMobile, "the phone's own Tools tray");
+    await page.goto("/#/hafs-kfqc/p9");
+    await expect(pageSvg(page, 9)).toBeVisible();
+    const a = await ayahTarget(page, verse(65)); // 2:58
+    const b = await ayahTarget(page, verse(66)); // 2:59
+    await page.locator('[data-phone-bar="c"]').getByRole("button", { name: /^Page tools · / }).click();
+    await page.getByRole("radio", { name: "Jump", exact: true }).click();
+    await expect(page.getByText("Press where you left the verse, and drag to where your memory went")).toBeVisible();
+    if (SHOTS) await page.screenshot({ path: `${SHOTS}/jump-phone-tray-${test.info().project.name}.png` });
+    // Drawn with the tray still open, as every phone tool is: closing it puts
+    // the page back to plain reading.
+    await drag(page, a, b);
+    await expect(mark(page, "2:58")).toHaveAttribute("aria-label", "From 2:58 you have jumped to 1 other verse");
+  });
+});

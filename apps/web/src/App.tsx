@@ -1328,6 +1328,22 @@ export function App(): JSX.Element {
     [saveJump],
   );
   const closeJumpAsking = useCallback(() => setJumpAsking(null), []);
+  // A jump said from a verse's menu rather than drawn: the list opens by the
+  // verse (or by the menu that was round it), with no seam word to keep.
+  const askJumpFrom = useCallback((key: string, around?: DOMRect) => {
+    const p = parseAyahKey(key);
+    const box =
+      around ??
+      (p
+        ? Array.from(document.querySelectorAll<SVGGraphicsElement>(`[id="verse-${toAbsoluteAyah(p.surah, p.ayah)}"]`))
+            .map((el) => el.getBoundingClientRect())
+            .find((r) => r.width > 0 && r.height > 0)
+        : undefined);
+    const at = box
+      ? { top: box.top, bottom: box.bottom, x: box.left + box.width / 2 }
+      : { top: window.innerHeight / 3, bottom: window.innerHeight / 3, x: window.innerWidth / 2 };
+    setJumpAsking({ from: { key }, at });
+  }, []);
   const [verseNotesAt, setVerseNotesAt] = useState<{ key: string; anchor: { top: number; bottom: number; x: number } } | null>(null);
   const openVerseNotes = useCallback(
     (key: string, anchor: { top: number; bottom: number; x: number }) => setVerseNotesAt({ key, anchor }),
@@ -3333,6 +3349,7 @@ export function App(): JSX.Element {
             <DrawerTool glyph="✎" caption={t.vdMark} label={t.vdMarkAria(t.ayahLabel(selectedKey) ?? selectedKey)} onClick={() => markVerse(selectedKey)} />
             <DrawerTool glyph="✍" caption={t.vdNote} label={t.vdNoteAria(t.ayahLabel(selectedKey) ?? selectedKey)} onClick={() => noteOnVerse(selectedKey)} />
             <DrawerTool glyph="⧉" caption={t.vdCopy} label={t.vdCopyAria(t.ayahLabel(selectedKey) ?? selectedKey)} onClick={() => copyVerse(selectedKey)} />
+            <DrawerTool glyph="↝" caption={t.vdJump} label={t.vdJumpAria(t.ayahLabel(selectedKey) ?? selectedKey)} onClick={() => askJumpFrom(selectedKey)} />
           </>
         )}
       </VerseDrawer>
@@ -3347,6 +3364,9 @@ export function App(): JSX.Element {
             { caption: t.vdMark, onPick: () => markVerse(verseMenu.key) },
             { caption: t.vdNote, onPick: () => noteOnVerse(verseMenu.key) },
             { caption: t.vdCopy, onPick: () => copyVerse(verseMenu.key) },
+            // Straight to "where did it take you?", with no arrow to draw: the
+            // phone's way in, where a finger is already resting on the verse.
+            { caption: t.vdJump, onPick: () => askJumpFrom(verseMenu.key, verseMenu.around) },
           ]}
         />
       )}

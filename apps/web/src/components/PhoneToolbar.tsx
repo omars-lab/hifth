@@ -39,19 +39,12 @@ export function phoneBarFromUrl(search: string): PhoneBarId {
   return asked === "a" || asked === "b" ? asked : "c";
 }
 
-/**
- * The tools a phone shows. The Jump tool waits for its phone design (a place
- * in the Tools tray, and "Jump…" in a verse's hold menu: confusion-jumps,
- * step 5), so it is the computer's alone for now.
- */
-const PHONE_TOOLS = TOOLS.filter(({ tool }) => tool !== "jump");
-
 function ToolButtons({ tool, locked, onTool, labelled }: PhoneToolbarProps & { labelled?: boolean }): JSX.Element {
   const { t } = useT();
   const press = useToolPress(tool, onTool);
   return (
     <>
-      {PHONE_TOOLS.map(({ tool: x }) => (
+      {TOOLS.map(({ tool: x }) => (
         <button
           key={x}
           type="button"
