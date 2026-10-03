@@ -430,6 +430,14 @@ test.describe("Hifth · Note from the verse menu", () => {
   });
 });
 
+/** The parts after the three narrowest, around page 7. */
+const WIDE_PARTS = ["Page 7", "Hizb 1", "Juz 1", "Al-Baqarah", "The whole Qur'an"];
+
+/** Each tier's name as a screen reader says it, top of the pyramid first. */
+async function tierNames(group: Locator): Promise<string[]> {
+  return group.getByRole("button").evaluateAll((bs) => bs.map((b) => b.getAttribute("aria-label") ?? ""));
+}
+
 /*
  * Step 7: changing what a note is about. Widening always works, and lets the
  * note be offered on more pages; narrowing works only if every verse still
@@ -451,8 +459,14 @@ test.describe("Hifth · changing what a note is about", () => {
     const about = box(page).getByRole("button", { name: "Page 7: change what this note is about" });
     await about.click();
     const parts = box(page).getByRole("group", { name: "What is this note about?" });
-    await expect(parts.getByRole("button")).toHaveText(["Page 7", "Hizb 1", "Juz 1", "Al-Baqarah", "The whole Qur'an"]);
-    await expect(parts.getByRole("button", { pressed: true })).toHaveText("Page 7");
+    // Its pin is on a whole word, so there is no harakah for it to be about.
+    await expect(tierNames(parts)).resolves.toEqual([
+      "Harakah",
+      "A word of Al-Baqarah · 2:39",
+      "Al-Baqarah · 2:39",
+      ...WIDE_PARTS,
+    ]);
+    await expect(parts.getByRole("button", { pressed: true })).toHaveAccessibleName("Page 7");
     await parts.getByRole("button", { name: "Juz 1" }).click();
     await expect(parts).toHaveCount(0);
     // The picked button went with the list, so focus comes back to the line it opened from, and Escape still closes the box.
@@ -478,6 +492,75 @@ test.describe("Hifth · changing what a note is about", () => {
     await expect
       .poll(async () => (await readRecord(page, "scoped-notes"))?.notes.find((n) => n.id === "nold1")?.scope)
       .toEqual({ type: "juz", juz: 1 });
+  });
+
+  test("the parts stand as a pyramid, the narrowest on top, and each one's letter picks it", async ({ page }) => {
+    await page.goto("/#/hafs-kfqc/p7");
+    await expect(pageSvg(page, 7)).toBeVisible();
+    await seedOldNotes(page);
+    await page.reload();
+    await expect(pins(page)).toHaveCount(2);
+    const scopeOf = async (id: string) => (await readRecord(page, "scoped-notes"))?.notes.find((n) => n.id === id)?.scope;
+    const group = box(page).getByRole("group", { name: "What is this note about?" });
+
+    // A pin on a harakah: every tier can be picked, harakah at the top, the whole Qur'an at the base.
+    await page.locator('[data-note-id="nold2"]').click();
+    await box(page).getByRole("button", { name: "Page 7: change what this note is about" }).click();
+    const tiers = group.getByRole("button");
+    await expect(tiers).toHaveCount(8);
+    // The box grew by the pyramid's height; it moves so all of it, Done too, stays in the window.
+    await expect
+      .poll(async () => {
+        const r = (await box(page).boundingBox())!;
+        return r.y >= 0 && r.y + r.height <= page.viewportSize()!.height;
+      })
+      .toBe(true);
+    expect(await tiers.evaluateAll((bs) => bs.map((b) => b.getAttribute("aria-keyshortcuts")))).toEqual(["H", "W", "A", "P", "Z", "J", "S", "Q"]);
+    await expect(group.getByRole("button", { disabled: true })).toHaveCount(0);
+    // Each tier is drawn wider than the one above it, so together they make one slope.
+    const widths = await tiers.evaluateAll((bs) =>
+      bs.map((b) => {
+        const shape = b.querySelector("[data-tier-shape]")!;
+        const r = shape.getBoundingClientRect();
+        const clip = getComputedStyle(shape).clipPath;
+        const [left, right] = /polygon\(([\d.]+)% 0%, ([\d.]+)% 0%/.exec(clip)!.slice(1).map(Number);
+        return (r.width * (right! - left!)) / 100;
+      }),
+    );
+    for (let i = 1; i < widths.length; i++) expect(widths[i]!).toBeGreaterThan(widths[i - 1]!);
+    // The current part has focus, so the letters work straight away; W is not the word tool here.
+    await expect(group.getByRole("button", { pressed: true })).toBeFocused();
+    await page.keyboard.press("w");
+    await expect(group).toHaveCount(0);
+    await expect.poll(() => scopeOf("nold2")).toEqual({ type: "word", key: KEY(40), word: 3 });
+    const head = box(page).getByRole("button", { name: "A word of Al-Baqarah · 2:40: change what this note is about" });
+    await expect(head).toBeFocused();
+    await expect(box(page)).toContainText(/^Al-Baqarah · 2:40 · Word/);
+    await expect(page.getByRole("toolbar").getByRole("button", { pressed: true })).toHaveCount(0);
+
+    await head.click();
+    await page.keyboard.press("h");
+    await expect.poll(() => scopeOf("nold2")).toEqual({ type: "harakah", key: KEY(40), word: 3, mark: 1 });
+    await box(page).getByRole("button", { name: "A harakah of Al-Baqarah · 2:40: change what this note is about" }).click();
+    await page.keyboard.press("Q");
+    await expect.poll(() => scopeOf("nold2")).toEqual({ type: "whole" });
+    await page.keyboard.press("Escape");
+    await expect(box(page)).toHaveCount(0);
+
+    // A pin on a whole word has no harakah to be about: that tier stands greyed, and its letter does nothing.
+    await page.locator('[data-note-id="nold1"]').click();
+    await box(page).getByRole("button", { name: "Page 7: change what this note is about" }).click();
+    await expect(group.getByRole("button", { disabled: true })).toHaveAccessibleName("Harakah");
+    await expect
+      .poll(async () => {
+        const r = (await box(page).boundingBox())!;
+        return r.y >= 0 && r.y + r.height <= page.viewportSize()!.height;
+      })
+      .toBe(true);
+    await page.keyboard.press("h");
+    await expect(group).toBeVisible();
+    await page.keyboard.press("a");
+    await expect.poll(() => scopeOf("nold1")).toEqual({ type: "ayah", key: KEY(39) });
   });
 });
 
@@ -824,18 +907,21 @@ test.describe("Hifth · notes from the juz, surah and page labels", () => {
     const about = box(page).getByRole("button", { name: "Juz 1: change what this note is about" });
     await expect(box(page)).toContainText(/^Juz 1/);
     await about.click();
-    const parts = box(page).getByRole("group", { name: "What is this note about?" }).getByRole("button");
-    // With no verse to start from, the parts are the ones around the page open now.
-    await expect(parts).toHaveText(["Page 7", "Hizb 1", "Juz 1", "Al-Baqarah", "The whole Qur'an"]);
+    const group = box(page).getByRole("group", { name: "What is this note about?" });
+    const parts = group.getByRole("button");
+    // With no verse to start from, the parts are the ones around the page open now,
+    // and the three that need a verse stand greyed at the top.
+    await expect(tierNames(group)).resolves.toEqual(["Harakah", "Word", "Ayah", ...WIDE_PARTS]);
+    await expect(group.getByRole("button", { disabled: true })).toHaveCount(3);
 
     // Holding no verse, it can be widened or narrowed freely.
-    await parts.filter({ hasText: "The whole Qur'an" }).click();
+    await group.getByRole("button", { name: "The whole Qur'an" }).click();
     await expect(box(page).getByRole("button", { name: "The whole Qur'an: change what this note is about" })).toBeFocused();
     await expect
       .poll(async () => (await readRecord(page, "scoped-notes"))?.notes.find((n) => n.id === "nj9")?.scope)
       .toEqual({ type: "whole" });
     await box(page).getByRole("button", { name: "The whole Qur'an: change what this note is about" }).click();
-    await parts.filter({ hasText: "Page 7" }).click();
+    await group.getByRole("button", { name: "Page 7" }).click();
     await expect
       .poll(async () => (await readRecord(page, "scoped-notes"))?.notes.find((n) => n.id === "nj9")?.scope)
       .toEqual({ type: "page", edition: "hafs-kfqc", page: 7 });

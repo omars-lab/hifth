@@ -197,6 +197,7 @@ export interface Catalog {
   readonly noteFollowPrev: string;
   readonly noteFollowStop: string;
   readonly noteFollowing: string;
+  readonly noteHarakahOf: (d: { readonly label: string | number }) => string;
   readonly noteJoined: (d: { readonly label: string | number }) => string;
   readonly noteLoaded: (d: { readonly n: number; readonly nText: string | number }) => string;
   readonly noteMore: string;
@@ -208,11 +209,16 @@ export interface Catalog {
   readonly noteShelfHead: string;
   readonly noteShowAll: string;
   readonly noteShowLess: string;
+  readonly noteTierAyah: string;
+  readonly noteTierHarakah: string;
+  readonly noteTierWhole: string;
+  readonly noteTierWord: string;
   readonly noteUntitled: string;
   readonly noteVerseOut: string;
   readonly noteVerseTakenOut: string;
   readonly noteVerses: (d: { readonly n: number; readonly nText: string | number }) => string;
   readonly noteWhole: string;
+  readonly noteWordOf: (d: { readonly label: string | number }) => string;
   readonly "notices.capped.body": string;
   readonly "notices.capped.title": string;
   readonly "notices.install-ios.body": string;

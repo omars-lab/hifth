@@ -6,7 +6,8 @@
  * Today a note is a few words pinned to one word of one verse (notes.ts).
  * Here a note is the reader's words plus a list of verses, and it has a scope
  * picked when it is made: a surah, a juz, a hizb, a page of one print, or the
- * whole Qur'an (scoped-notes-scopes). The scope decides which verses the note
+ * whole Qur'an (scoped-notes-scopes), or, narrowest, one ayah, one word of it
+ * or one harakah on that word. The scope decides which verses the note
  * can take. Each note has one text (scoped-notes-text), and every note saved
  * today moves across as a note of its one verse, scoped to the page it was
  * pinned on (scoped-notes-old-notes). Marked mistakes are not notes of this
@@ -23,6 +24,11 @@ import { AYAH_COUNTS, HIZB_STARTS, JUZ_STARTS, TOTAL_AYAHS, fromAbsoluteAyah, hi
 import type { EditionId } from "./types.js";
 
 export type NoteScope =
+  // The three narrowest each hold one verse; a word or a harakah says which
+  // part of it the note is about (word and mark count from 0, as a pin's do).
+  | { readonly type: "harakah"; readonly key: string; readonly word: number; readonly mark: number }
+  | { readonly type: "word"; readonly key: string; readonly word: number }
+  | { readonly type: "ayah"; readonly key: string }
   | { readonly type: "surah"; readonly surah: number }
   | { readonly type: "juz"; readonly juz: number }
   | { readonly type: "hizb"; readonly hizb: number }
@@ -85,6 +91,10 @@ export function scopeContains(scope: NoteScope, key: string, pageOf?: PageOf): b
   const v = verseOf(key);
   if (!v) return false;
   switch (scope.type) {
+    case "harakah":
+    case "word":
+    case "ayah":
+      return verseOf(scope.key)?.abs === v.abs;
     case "whole":
       return true;
     case "surah":
@@ -108,6 +118,10 @@ function divisionSize(starts: readonly (readonly [number, number])[], n: number)
 /** How many verses the scope holds. Used to put the smaller scope first when two notes tie. */
 export function scopeSize(scope: NoteScope, pageOf?: PageOf): number {
   switch (scope.type) {
+    case "harakah":
+    case "word":
+    case "ayah":
+      return 1;
     case "whole":
       return TOTAL_AYAHS;
     case "surah":
@@ -335,6 +349,12 @@ function isScope(x: unknown): x is NoteScope {
   if (!x || typeof x !== "object") return false;
   const s = x as Record<string, unknown>;
   switch (s.type) {
+    case "harakah":
+      return typeof s.key === "string" && verseOf(s.key) !== null && whole(s.word, 0, Number.MAX_SAFE_INTEGER) && whole(s.mark, 0, Number.MAX_SAFE_INTEGER);
+    case "word":
+      return typeof s.key === "string" && verseOf(s.key) !== null && whole(s.word, 0, Number.MAX_SAFE_INTEGER);
+    case "ayah":
+      return typeof s.key === "string" && verseOf(s.key) !== null;
     case "whole":
       return true;
     case "surah":
@@ -545,6 +565,12 @@ function scopeSpan(scope: NoteScope, pageOf?: PageOf): readonly [number, number]
     return [from, from + divisionSize(starts, n) - 1];
   };
   switch (scope.type) {
+    case "harakah":
+    case "word":
+    case "ayah": {
+      const v = verseOf(scope.key);
+      return v ? [v.abs, v.abs] : null;
+    }
     case "whole":
       return [1, TOTAL_AYAHS];
     case "surah":
