@@ -2,6 +2,8 @@ import { useEffect, useRef, useState } from "react";
 import type { Note } from "@hifth/core";
 import { useT } from "../i18n";
 import styles from "./NoteBox.module.css";
+import { ScopePyramid, type ScopeTier } from "./ScopePyramid";
+import type { ScopeLook } from "../scope-look";
 
 interface NoteBoxProps {
   /** Only its id and words: a note about a juz or a surah has no verse to sit by. */
@@ -34,14 +36,19 @@ interface NoteBoxProps {
    * the way to change it.
    */
   about?: NoteAbout | null;
+  /** How the parts are drawn: the reader's choice in the about sheet. */
+  scopeLook?: ScopeLook;
 }
 
 export interface NoteAbout {
-  /** The part it is about now, as the reader reads it: "Page 7", "Juz 1". */
+  /** The part it is about now, as the reader reads it: "Page 7", "Juz 1", "A word of Al-Baqarah · 2:40". */
   readonly name: string;
+  /** How the head line says it, after the verse when the note is about part of that verse: "Word". */
+  readonly short?: string;
   /** How many verses it holds: with one the head line names the verse too, past one it counts them, with none it is the part alone. */
   readonly count: number;
-  readonly options: readonly { readonly id: string; readonly name: string }[];
+  /** Narrowest first: the pyramid's top. */
+  readonly options: readonly ScopeTier[];
   readonly current: string;
   /** Null once the note is about that part; otherwise what to say about the verses that would fall out. */
   readonly onPick: (id: string) => string | null;
@@ -75,6 +82,7 @@ export function NoteBox({
   onJoin,
   joined,
   about,
+  scopeLook = "side",
 }: NoteBoxProps): JSX.Element {
   const { t } = useT();
   const [draft, setDraft] = useState(note.text);
@@ -96,6 +104,8 @@ export function NoteBox({
   // phone's tools tray stays up while a tool is on). Measured a frame late, because the pin of a note
   // just made is drawn by the page after this box mounts; and only a pin with a
   // size counts, since a page kept mounted out of sight holds a copy too.
+  // Placed again when the parts open or close, since the box grows by them,
+  // and never past the window's bottom, so Done stays in reach.
   useEffect(() => {
     const frame = requestAnimationFrame(() => {
       const box = boxRef.current;
@@ -114,12 +124,13 @@ export function NoteBox({
           .map((r) => r.top),
       );
       const below = pin ? pin.bottom + MARGIN : floor / 2 - h / 2;
-      const top = !pin || below + h + MARGIN <= floor ? below : Math.max(MARGIN, pin.top - h - MARGIN);
+      const fits = !pin || below + h + MARGIN <= floor ? below : pin.top - h - MARGIN;
+      const top = Math.max(MARGIN, Math.min(fits, floor - h - MARGIN));
       const left = Math.min(Math.max(MARGIN, cx - w / 2), window.innerWidth - w - MARGIN);
       setAt({ left, top });
     });
     return () => cancelAnimationFrame(frame);
-  }, [note.id]);
+  }, [note.id, aboutOpen, aboutSaid]);
 
   // Focus once the box stands where it belongs: until then it is hidden, and a
   // hidden text box cannot take focus.
@@ -169,7 +180,7 @@ export function NoteBox({
                 setAboutSaid(null);
               }}
             >
-              {about.name}
+              {about.short ?? about.name}
             </button>
             {about.count > 1 ? <> · {t.noteVerses(about.count)}</> : null}
           </>
@@ -178,31 +189,25 @@ export function NoteBox({
         )}
       </div>
       {about && aboutOpen && (
-        <div className={styles.choices} role="group" aria-label={t.noteAboutAsk}>
+        <div className={styles.choices}>
           <div className={styles.choicesHead} aria-hidden="true">
             {t.noteAboutAsk}
           </div>
-          <div className={styles.pills}>
-            {about.options.map((o) => (
-              <button
-                key={o.id}
-                type="button"
-                className={styles.pill}
-                aria-pressed={o.id === about.current}
-                onClick={() => {
-                  const said = about.onPick(o.id);
-                  setAboutSaid(said);
-                  if (said !== null) return;
-                  // The picked button goes with the list; focus stays in the
-                  // box, so Escape still closes it.
-                  setAboutOpen(false);
-                  aboutRef.current?.focus();
-                }}
-              >
-                {o.name}
-              </button>
-            ))}
-          </div>
+          <ScopePyramid
+            tiers={about.options}
+            current={about.current}
+            label={t.noteAboutAsk}
+            look={scopeLook}
+            onPick={(id) => {
+              const said = about.onPick(id);
+              setAboutSaid(said);
+              if (said !== null) return;
+              // The picked tier goes with the pyramid; focus stays in the
+              // box, so Escape still closes it.
+              setAboutOpen(false);
+              aboutRef.current?.focus();
+            }}
+          />
           {aboutSaid && (
             <div className={styles.outside} role="status">
               {aboutSaid}

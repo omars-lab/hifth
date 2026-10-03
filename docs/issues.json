@@ -2493,10 +2493,11 @@
         "file": "docs/PLAN.md",
         "item": "29"
       },
-      "status": "open",
+      "status": "fixed",
       "severity": "question",
       "owner": "agent",
-      "note": "Notes that gather verses from a surah, juz, hizb, page or the whole Qur'an, offered last-used first when a verse is added. Steps 1 (the rules) and 2 (notes moved across on the device, and in the saved file) done 2026-10-01; how offering a note should feel and how the page shows a verse in a note were recorded as options on a phone in docs/design/scoped-notes-feel.md and answered C and A by the owner 2026-10-02 (decisions scoped-notes-note-tool, scoped-notes-on-page); step 3 (the note tool's box offering your notes) built 2026-10-02; step 4 (the list of notes in the page map, following one verse by verse, and the dot by the verse number that lists a verse's notes) built 2026-10-02 to 2026-10-03; step 6 (notes from the juz, surah and page labels) built 2026-10-03; step 5's test and step 7 (changing a note's scope) next. The four older note browser tests pick the tool with the desktop's keys and skip on phones; they want a phone way to pick it. Owner ask 2026-09-30."
+      "note": "Notes that gather verses from a surah, juz, hizb, page or the whole Qur'an, offered last-used first when a verse is added. Built in seven steps, 2026-10-01 to 2026-10-03, with the owner's answers to how offering a note should feel and how the page shows a verse in a note (C and A, decisions scoped-notes-note-tool, scoped-notes-on-page): the rules; notes moved across on the device and in the saved file; the note tool's box offering your notes; the list of notes, following one, and the dot by the verse number; the verse menu's Note; notes from the juz, surah and page labels; and changing what a note is about, a note with no verse included, picked from a small drawing of the parts from one harakah to the whole Qur'an, with a letter for each and six looks chosen in the about sheet. Every note browser test runs on the computer and both phones. A line of text per verse stays out until a real look-alike note feels cramped (question 5, answered one text per note). Owner ask 2026-09-30.",
+      "closedBy": "apps/web/e2e/scoped-notes.spec.ts"
     },
     {
       "id": "touch-focus-box",

@@ -159,6 +159,27 @@ test.describe("Hifth · the harakat and word tools", () => {
     await expect(toolBtn(page, "Word")).toHaveAttribute("aria-checked", "true");
   });
 
+  test("an Escape pressed the moment a word's parts appear closes them", async ({ page }) => {
+    // The panel is drawn hidden, placed a frame later, and takes the keyboard
+    // after that; an Escape pressed in between used to fall on the page, where
+    // every other Escape steps aside for an open panel, and so did nothing.
+    await page.goto("/#/hafs-kfqc/p7");
+    await expect(pageSvg(page, 7)).toBeVisible();
+    await page.keyboard.press("KeyW");
+    const at = await ayahTarget(page, "#verse-46");
+    await page.evaluate(() => {
+      // Press Escape inside the same task the panel is added to the page, before any frame is drawn.
+      new MutationObserver((_, watch) => {
+        if (!document.querySelector('[role="dialog"][data-word-parts]')) return;
+        watch.disconnect();
+        document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
+      }).observe(document.body, { childList: true, subtree: true });
+    });
+    await page.mouse.click(at.x, at.y);
+    await page.waitForTimeout(400);
+    await expect(parts(page)).toHaveCount(0);
+  });
+
   test("W: a word low on the page opens its drawer at the top, under the tool bar", async ({ page }) => {
     // Opened with the tool in hand; the first test here presses the key.
     await page.goto("/#/hafs-kfqc/p7?tool=word");
