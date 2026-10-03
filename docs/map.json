@@ -2201,6 +2201,26 @@
           "file": "apps/web/src/components/PageStage.tsx",
           "symbol": "drawConfusionMarks",
           "note": "The mark by a verse you jumped away from: a red disc with the count, on the lower shoulder of the verse number under the note dot's place, with a short wavy tail. A question mark when no verse is named yet; grey once every jump from it is beaten. Pictures: run the confusions browser test with HIFTH_SHOTS set to a folder."
+        },
+        {
+          "file": "apps/web/src/components/PageStage.tsx",
+          "symbol": "JumpLayer",
+          "note": "The Jump tool (J) on the computer: a layer over the page while the tool is on, like the crop tool's, so a drag draws the wavy arrow instead of moving the page. A press must start on a verse; letting go on the same verse, after a tiny drag, or after Escape marks nothing. The verse under a point is found by looking past the layer (verseAt), since the layer itself is on top."
+        },
+        {
+          "file": "apps/web/src/components/JumpPicker.tsx",
+          "symbol": "JumpPicker",
+          "note": "The question an arrow asks when it is let go where no verse is: the verse's look-alikes (word-for-word twins first), then another verse named in the go-to box, then \"not sure yet\". Built and closed like the list a note dot opens."
+        },
+        {
+          "file": "apps/web/src/App.tsx",
+          "symbol": "saveJump",
+          "note": "Where a finished jump is saved, from all three ways of naming its end. Its Undo takes back only the time it added (removeLastTime), not the whole set as it was, so a jump marked again keeps its earlier times."
+        },
+        {
+          "file": "apps/web/src/components/PhoneToolbar.tsx",
+          "symbol": "PHONE_TOOLS",
+          "note": "Phones leave the Jump tool out until its phone design (step 5) lands."
         }
       ],
       "extend": [

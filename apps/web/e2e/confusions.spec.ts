@@ -1,4 +1,5 @@
 import { test, expect, type Locator, type Page } from "@playwright/test";
+import { ayahTarget } from "./ayah";
 
 /*
  * Confusion jumps, step 3 (docs/design/confusion-jumps.md): a verse you have
@@ -117,5 +118,101 @@ test.describe("Hifth · the mark by a verse you jumped away from", () => {
         });
       }
     }
+  });
+});
+
+/*
+ * Confusion jumps, step 4: the Jump tool on the computer. J picks it; a press
+ * on the verse you left and a drag draw a wavy arrow; letting go over another
+ * verse marks the jump, and letting go anywhere else asks where you went.
+ */
+const verse = (ordinal: number) => `svg[aria-labelledby="page-label-9"]:visible #verse-${ordinal}`;
+const undoBar = (page: Page) => page.locator("[data-undo-bar]");
+const picker = (page: Page, from: string) => page.getByRole("dialog", { name: `Where did ${from} take you?` });
+
+async function drag(page: Page, a: { x: number; y: number }, b: { x: number; y: number }, release = true): Promise<void> {
+  await page.mouse.move(a.x, a.y);
+  await page.mouse.down();
+  for (let i = 1; i <= 8; i++) await page.mouse.move(a.x + ((b.x - a.x) * i) / 8, a.y + ((b.y - a.y) * i) / 8);
+  if (release) await page.mouse.up();
+}
+
+/** Turn the Jump tool on. Its layer covers the page, so find verses' points first. */
+async function jumpTool(page: Page): Promise<void> {
+  await page.keyboard.press("j");
+  await expect(page.getByRole("radio", { name: "Jump" })).toHaveAttribute("aria-checked", "true");
+}
+
+/** A point above the page's text, where no verse is. */
+async function offVerse(page: Page): Promise<{ x: number; y: number }> {
+  const box = (await pageSvg(page, 9).boundingBox())!;
+  return { x: box.x + box.width / 2, y: box.y - 6 };
+}
+
+test.describe("Hifth · the Jump tool on the computer", () => {
+  test.beforeEach(async ({ page }) => {
+    await page.goto("/#/hafs-kfqc/p9");
+    await expect(pageSvg(page, 9)).toBeVisible();
+  });
+
+  test("a drag from one verse to another on the page marks the jump, with a way to undo it", async ({ page }) => {
+    const a = await ayahTarget(page, verse(65)); // 2:58
+    const b = await ayahTarget(page, verse(68)); // 2:61
+    await jumpTool(page);
+    await drag(page, a, b, false);
+    await expect(page.locator("[data-jump-arrow]")).toBeVisible();
+    if (SHOTS) await page.screenshot({ path: `${SHOTS}/jump-dragging.png` });
+    await page.mouse.up();
+    if (SHOTS) await page.screenshot({ path: `${SHOTS}/jump-marked.png` });
+    await expect(page.locator("[data-jump-arrow]")).toHaveCount(0);
+    await expect(mark(page, "2:58")).toHaveAttribute("aria-label", "From 2:58 you have jumped to 1 other verse");
+    await expect(undoBar(page)).toContainText("Jump from 2:58 to 2:61 marked");
+    await undoBar(page).getByRole("button", { name: "Undo" }).click();
+    await expect(mark(page, "2:58")).toHaveCount(0);
+  });
+
+  test("letting go away from a verse asks where you went: its look-alikes, or not sure yet", async ({ page }) => {
+    const a = await ayahTarget(page, verse(65));
+    const c = await ayahTarget(page, verse(66)); // 2:59
+    await jumpTool(page);
+    await drag(page, a, await offVerse(page));
+    const list = picker(page, "2:58");
+    await expect(list).toBeVisible();
+    if (SHOTS) await page.screenshot({ path: `${SHOTS}/jump-where.png` });
+    await list.getByRole("button", { name: /7:161/ }).click();
+    await expect(list).toHaveCount(0);
+    await expect(mark(page, "2:58")).toHaveAttribute("aria-label", "From 2:58 you have jumped to 1 other verse");
+    await expect(undoBar(page)).toContainText("Jump from 2:58 to 7:161 marked");
+
+    // The same jump again adds a time, not a second verse.
+    await drag(page, a, await offVerse(page));
+    await picker(page, "2:58").getByRole("button", { name: /7:161/ }).click();
+    await expect(mark(page, "2:58").locator("text")).toHaveText("1");
+    await expect(undoBar(page)).toContainText("2 times now");
+
+    await drag(page, c, await offVerse(page));
+    await picker(page, "2:59").getByRole("button", { name: "Not sure yet" }).click();
+    await expect(mark(page, "2:59").locator("text")).toHaveText("?");
+  });
+
+  test("Escape, or letting go on the verse you started from, marks nothing", async ({ page }) => {
+    const a = await ayahTarget(page, verse(65));
+    await jumpTool(page);
+    await drag(page, a, await offVerse(page), false);
+    await page.keyboard.press("Escape");
+    await expect(page.locator("[data-jump-arrow]")).toHaveCount(0);
+    await page.mouse.up();
+    await expect(picker(page, "2:58")).toHaveCount(0);
+
+    await drag(page, a, { x: a.x + 30, y: a.y });
+    await expect(picker(page, "2:58")).toHaveCount(0);
+    await expect(mark(page, "2:58")).toHaveCount(0);
+
+    // Escape in the list closes it, and nothing is saved.
+    await drag(page, a, await offVerse(page));
+    await expect(picker(page, "2:58")).toBeVisible();
+    await page.keyboard.press("Escape");
+    await expect(picker(page, "2:58")).toHaveCount(0);
+    await expect(mark(page, "2:58")).toHaveCount(0);
   });
 });
