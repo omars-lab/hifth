@@ -2787,9 +2787,13 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
    * Escape climbs one level rather than releasing everything (the ladder the
    * design settled on: tap selects the ayah, a hold inside it drops to words).
    *
-   * It runs *before* App's own Escape — this component's effect is registered
-   * first because children mount first — and marks the event handled, so the
-   * first Escape leaves the word run and the second releases the ayah's focus.
+   * It runs *before* App's own Escape, and marks the event handled, so the first
+   * Escape leaves the word run and the second releases the ayah's focus. Before,
+   * not by luck: it listens on the way down (capture), and App on the way up.
+   * It used to rely on registering first, because children mount first, but an
+   * effect that runs again registers again, at the back of the line; under
+   * Preact that happened often enough that one Escape in five went straight
+   * past the words and let go of the ayah (docs/issues/preact-swap.md).
    * Without a run in hand it does nothing at all, so the ordinary Escape is
    * untouched. A sheet up owns the keyboard outright, same rule as the wheel.
    */
@@ -2801,8 +2805,8 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
       e.preventDefault();
       clearWords();
     };
-    window.addEventListener("keydown", onKeyDown);
-    return () => window.removeEventListener("keydown", onKeyDown);
+    window.addEventListener("keydown", onKeyDown, true);
+    return () => window.removeEventListener("keydown", onKeyDown, true);
   }, [clearWords]);
 
   /*

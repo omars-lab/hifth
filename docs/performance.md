@@ -485,25 +485,46 @@ One thing this does not cover: whether WebKit and Gecko surface a custom header 
 does not is exactly the old behaviour — a duplicate, not a broken pack. It belongs on the
 iPhone, in the `offline-survival-8-day` runbook.
 
-### ⑱ The library that draws every component is the biggest single part of the start-up script · **blocked**
+### ⑱ The library that draws every component is the biggest single part of the start-up script · **fixed**
 
-**What it costs.** React's page-drawing library is about 42 KB of the start-up script
+**What it cost.** React's page-drawing library was about 42 KB of the start-up script
 (measured 2026-09-27, the table in the optimizing-performance skill's trims list). Preact's
-compatibility layer does the same job in about 4 KB, which would cut roughly 38 KB from
-what every first visit downloads.
+compatibility layer does the same job in a few kilobytes.
 
-**Why it waits.** It replaces the thing every component runs on, and the gesture library
-has to keep working on top of it. It was parked on 2026-09-29 until "the large refactor"
-settled, but that refactor was never planned, so it was not a real reason. The real one,
-written 2026-09-30: the app has 13 KB of room under its size cap, the swap risks every
-gesture and screen, and it does nothing for the Study Quran demo that is the near-term
-goal. It is taken up when the room under the cap falls below about 5 KB, or once the demo
-has been shown, whichever comes first.
+**What changed (2026-10-03).** The build now hands every component Preact instead of React.
+The components themselves did not change: they still say "react", and the build points that
+name at Preact. Measured on this Mac, five Lighthouse runs each on a simulated mid-range
+Android phone, main against the branch the same way:
 
-**What would close it.** Swap it on its own branch, then run the whole Playwright suite
-(desktop and desktop-firefox) and the golden screenshots, plus `make lighthouse` against
-main measured the same way. Keep it only if every test passes and the start-up time drops
-by at least one step.
+| | before (main) | after |
+| --- | --- | --- |
+| start-up script, compressed | 132.4 KB | 96.4 KB |
+| everything the size check counts | 172.7 KB | 137.7 KB |
+| time until the page answers a tap (median) | 2554 ms | 1956 ms |
+| Lighthouse performance score | 0.96 | 0.99 |
+| first paint | 1803 ms | 1578 ms |
+
+That is about 600 ms sooner to answer a tap, four steps of the 150 ms the keep rule asked
+for. It also put the app back under its own 2.5 s limit, which main had quietly drifted past.
+
+**What it took.** Two things React did for free had to be put back by hand, and the full
+browser suite is what found both:
+
+- React finishes what a tap or a key set off before the next one arrives; Preact waits for
+  the next frame. So a sheet opened by a key did not yet have focus when the next key came,
+  and seven tests went red. A small file now gives Preact React's timing after input and
+  keeps its own after anything else, with a unit test that fails without it.
+- Two Escape handlers on the window ran in the order they happened to be added, and under
+  Preact that order flipped. The word-run one now listens on the way down, so it runs first
+  by design. It was failing 3 runs in 16 on the iPhone; it passed 224 of 224 after.
+
+The tests' own helper changed with it, from React's testing library to Preact's, and four
+unit tests needed small fixes for how Preact's helper names a slider release. All of it,
+with the evidence, is in [the Preact swap write-up](issues/preact-swap.md); a browser test
+checks that the start-up script carries Preact and not React, so the swap cannot quietly
+revert.
+
+---
 
 ---
 

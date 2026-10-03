@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from "vitest";
-import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor, within } from "@testing-library/preact";
 import type { AppState, MergedEdge } from "@hifth/core";
 import { HighlightMenu } from "./HighlightMenu";
 

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { render, screen } from "@testing-library/preact";
 import { PageSpread } from "./PageSpread";
 
 /**
@@ -31,7 +31,7 @@ function spread(over: Partial<React.ComponentProps<typeof PageSpread>> = {}) {
 }
 
 /** The two leaves, in DOM order: right leaf first (see PageSpread's geometry note). */
-function leaves(container: HTMLElement): HTMLElement[] {
+function leaves(container: Element): HTMLElement[] {
   // The book, not the desk around it: `page-spread` runs the width of the window
   // and holds one child, and the leaves are inside that.
   const root = container.querySelector("[data-testid='page-book']");
