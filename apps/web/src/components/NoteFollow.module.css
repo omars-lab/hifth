@@ -1,0 +1,87 @@
+/*
+ * NoteFollow — the bar shown while following a note: a dark row of its own
+ * just above the bottom line. Floating over the page it covered the tools on
+ * a desktop and the tools button, the verse chip and full screen on a phone;
+ * as a row it takes its height from the page and covers nothing.
+ */
+
+.follow {
+  flex: none;
+  background: #2a241d;
+  color: #fdf8ee;
+  font-family: var(--font-chrome);
+}
+
+.bar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-1) var(--space-2) var(--space-1) var(--space-4);
+  font-size: 14px;
+}
+
+.title {
+  flex: 1;
+  min-inline-size: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: start;
+}
+
+button.title {
+  cursor: pointer;
+  text-decoration: underline dotted #d9cdb8;
+  text-underline-offset: 3px;
+}
+
+button.title:focus-visible {
+  outline: 2px solid #f0b54a;
+  outline-offset: 2px;
+}
+
+/* The note's own words, a tap on its name away. Capped so a long note never
+   takes the page: past that it scrolls inside itself. */
+.words {
+  margin: 0;
+  padding: 0 var(--space-4) var(--space-2);
+  max-block-size: 30vh;
+  overflow-y: auto;
+  white-space: pre-wrap;
+  font-size: 14px;
+  line-height: 1.5;
+  color: #efe6d6;
+}
+
+.where {
+  flex: none;
+  color: #d9cdb8;
+}
+
+.step {
+  flex: none;
+  min-inline-size: var(--touch-min);
+  min-block-size: var(--touch-min);
+  border: none;
+  border-radius: 8px;
+  background: none;
+  color: #f2c572;
+  font: inherit;
+  font-size: 18px;
+  cursor: pointer;
+}
+
+.step:disabled {
+  color: #6f6455;
+  cursor: default;
+}
+
+.step:focus-visible {
+  outline: 2px solid #f2c572;
+  outline-offset: 2px;
+}

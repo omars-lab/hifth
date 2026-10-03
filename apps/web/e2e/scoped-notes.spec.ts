@@ -126,6 +126,9 @@ async function clearNotes(page: Page): Promise<void> {
 }
 
 test.describe("Hifth · notes moved across on upgrade", () => {
+  // These pick the note tool from the desktop's tool keys. The list of notes
+  // and following one, below, run on the phones too.
+  test.skip(({ isMobile }) => isMobile, "picks the note tool from the desktop's keys");
   test("today's pins survive the upgrade, look the same, and a second open adds nothing", async ({ page }) => {
     // Open once so the device's store exists, then put the old notes in it as
     // the app before the upgrade would have left them.
@@ -323,3 +326,156 @@ test.describe("Hifth · notes moved across on upgrade", () => {
     expect((await readRecord(page, "scoped-notes"))!.notes).toHaveLength(2);
   });
 });
+
+/** A note of three verses on three pages, held without pins, and a page note with one. */
+const HELD = [
+  {
+    id: "nj1",
+    kind: "comment",
+    scope: { type: "juz", juz: 1 },
+    text: "Juz 1 weak spots\nWatch the madd before the pause in each.",
+    verses: [
+      { key: KEY(39), addedAt: 1_000 },
+      { key: KEY(58), addedAt: 1_000 },
+      { key: KEY(124), addedAt: 1_000 },
+    ],
+    createdAt: 1_000,
+    updatedAt: 1_000,
+    usedAt: 5_000,
+  },
+  {
+    id: "np7",
+    kind: "question",
+    scope: { type: "page", edition: "hafs-kfqc", page: 7 },
+    text: "Which way is the waqf here?",
+    verses: [{ key: KEY(40), addedAt: 3_000, spot: { page: 7, word: 3, x: 140, y: 260, onHarakah: false } }],
+    createdAt: 3_000,
+    updatedAt: 3_000,
+    usedAt: 3_000,
+  },
+];
+
+async function seedHeld(page: Page): Promise<void> {
+  await page.evaluate(
+    (notes) =>
+      new Promise<void>((resolve, reject) => {
+        const open = indexedDB.open("hifth.bookmarks.v1");
+        open.onerror = () => reject(open.error);
+        open.onsuccess = () => {
+          const tx = open.result.transaction("sets", "readwrite");
+          const sets = tx.objectStore("sets");
+          sets.delete("notes");
+          sets.put({ id: "scoped-notes", notes });
+          tx.oncomplete = () => {
+            open.result.close();
+            resolve();
+          };
+          tx.onerror = () => reject(tx.error);
+        };
+      }),
+    HELD,
+  );
+}
+
+test.describe("Hifth · the list of notes, and following one", () => {
+  test("the page map lists your notes, the last used first, and one can be followed verse by verse", async ({
+    page,
+  }) => {
+    await page.goto("/#/hafs-kfqc/p7");
+    await expect(pageSvg(page, 7)).toBeVisible();
+    await seedHeld(page);
+    await page.reload();
+    await expect(pageSvg(page, 7)).toBeVisible();
+
+    await page.getByRole("button", { name: /what you have opened/ }).click();
+    const sheet = page.getByRole("dialog", { name: "What you have opened" });
+    const list = sheet.getByRole("region", { name: "Your notes" });
+    await expect(list.getByRole("button")).toHaveText([
+      /^Juz 1 weak spots\s*Juz 1 · 3 verses$/,
+      /^Which way is the waqf here\?\s*Page 7 · 1 verse$/,
+    ]);
+
+    await list.getByRole("button", { name: /Juz 1 weak spots/ }).click();
+    await expect(sheet).toBeHidden();
+    const bar = page.getByRole("group", { name: "Following a note" });
+    await expect(bar).toContainText("Juz 1 weak spots");
+    await expect(bar).toContainText("1 of 3");
+    await expect(page.locator("header .numeric")).toHaveText("7");
+    await expect(page.getByRole("button", { name: /Current ayah Al-Baqarah · 2:39/ })).toBeVisible();
+    await expect(bar.getByRole("button", { name: "Previous verse in this note" })).toBeDisabled();
+    // The note's own words are a tap away, and fold back.
+    const words = bar.getByText("Watch the madd before the pause in each.");
+    await expect(words).toHaveCount(0);
+    const title = bar.getByRole("button", { name: "Juz 1 weak spots" });
+    await expect(title).toHaveAttribute("aria-expanded", "false");
+    await title.click();
+    await expect(words).toBeVisible();
+    await expect(title).toHaveAttribute("aria-expanded", "true");
+    await title.click();
+    await expect(words).toHaveCount(0);
+    // The bar stays clear of the tools, and of the undo line when one shows.
+    expect(await buttonsUnder(page, '[aria-label="Following a note"]')).toEqual([]);
+    await page.locator('[data-note-id="np7"]').click();
+    await box(page).getByRole("button", { name: "Delete note" }).click();
+    const undoLine = page.locator("[data-undo-bar]");
+    await expect(undoLine).toBeVisible();
+    expect(apart(await bar.boundingBox(), await undoLine.boundingBox())).toBe(true);
+    await undoLine.getByRole("button", { name: "Undo" }).click();
+    await expect(undoLine).toHaveCount(0);
+    await expect(bar).toContainText("1 of 3");
+
+    const next = bar.getByRole("button", { name: "Next verse in this note" });
+    await next.click();
+    await expect(bar).toContainText("2 of 3");
+    await expect(page.locator("header .numeric")).toHaveText("9");
+    await expect(page.getByRole("button", { name: /Current ayah Al-Baqarah · 2:58/ })).toBeVisible();
+
+    await next.click();
+    await expect(bar).toContainText("3 of 3");
+    await expect(page.locator("header .numeric")).toHaveText("19");
+    await expect(next).toBeDisabled();
+
+    await bar.getByRole("button", { name: "Previous verse in this note" }).click();
+    await expect(bar).toContainText("2 of 3");
+    await expect(page.locator("header .numeric")).toHaveText("9");
+
+    // Leaving: the bar goes, and the reader stays where they are.
+    await bar.getByRole("button", { name: "Stop following this note" }).click();
+    await expect(bar).toHaveCount(0);
+    await expect(page.locator("header .numeric")).toHaveText("9");
+  });
+
+  test("with no notes, the list says how to make one", async ({ page }) => {
+    await page.goto("/#/hafs-kfqc/p7");
+    await expect(pageSvg(page, 7)).toBeVisible();
+    await clearNotes(page);
+    await page.reload();
+    await page.getByRole("button", { name: /what you have opened/ }).click();
+    const list = page.getByRole("dialog", { name: "What you have opened" }).getByRole("region", { name: "Your notes" });
+    await expect(list).toContainText("No notes yet. Pick the note tool and tap a word to start one.");
+  });
+});
+
+type Box = { x: number; y: number; width: number; height: number } | null;
+/** Two boxes on screen that do not overlap. */
+function apart(a: Box, b: Box): boolean {
+  if (!a || !b) return false;
+  return a.x + a.width <= b.x || b.x + b.width <= a.x || a.y + a.height <= b.y || b.y + b.height <= a.y;
+}
+
+/** The buttons outside `sel` that it sits on top of, by their names: none, for a bar that covers nothing. */
+function buttonsUnder(page: Page, sel: string): Promise<string[]> {
+  return page.evaluate((sel) => {
+    const bar = document.querySelector(sel);
+    if (!bar) return ["(no bar)"];
+    return [...document.querySelectorAll("button")]
+      .filter((b) => !bar.contains(b))
+      .filter((b) => {
+        const r = b.getBoundingClientRect();
+        if (r.width === 0 || r.height === 0) return false;
+        const top = document.elementFromPoint(r.x + r.width / 2, r.y + r.height / 2);
+        return top !== null && bar.contains(top);
+      })
+      .map((b) => b.getAttribute("aria-label") ?? b.textContent ?? "");
+  }, sel);
+}

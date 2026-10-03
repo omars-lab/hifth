@@ -2498,7 +2498,7 @@
       "status": "open",
       "severity": "question",
       "owner": "agent",
-      "note": "Notes that gather verses from a surah, juz, hizb, page or the whole Qur'an, offered last-used first when a verse is added. Steps 1 (the rules) and 2 (notes moved across on the device, and in the saved file) done 2026-10-01; how offering a note should feel and how the page shows a verse in a note were recorded as options on a phone in docs/design/scoped-notes-feel.md and answered C and A by the owner 2026-10-02 (decisions scoped-notes-note-tool, scoped-notes-on-page); step 3 (the note tool's box offering your notes) built 2026-10-02; step 4 (the dot by the verse number) next. Owner ask 2026-09-30."
+      "note": "Notes that gather verses from a surah, juz, hizb, page or the whole Qur'an, offered last-used first when a verse is added. Steps 1 (the rules) and 2 (notes moved across on the device, and in the saved file) done 2026-10-01; how offering a note should feel and how the page shows a verse in a note were recorded as options on a phone in docs/design/scoped-notes-feel.md and answered C and A by the owner 2026-10-02 (decisions scoped-notes-note-tool, scoped-notes-on-page); step 3 (the note tool's box offering your notes) built 2026-10-02; step 4's first half (the list of notes in the page map, and following one verse by verse) built 2026-10-02; the dot by the verse number next. The four older note browser tests pick the tool with the desktop's keys and skip on phones; they want a phone way to pick it. Owner ask 2026-09-30."
     },
     {
       "id": "touch-focus-box",

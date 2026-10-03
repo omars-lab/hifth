@@ -100,6 +100,7 @@ import {
   CropSheet,
   EditionPicker,
   NoteBox,
+  NoteShelf,
   RevisionMap,
   RootLens,
   WordPartsHost,
@@ -118,6 +119,7 @@ import { Jumper } from "./components/Jumper";
 import { CoachMarks } from "./components/CoachMarks";
 import { BookmarkRibbons } from "./components/BookmarkRibbons";
 import { UndoBar } from "./components/UndoBar";
+import { NoteFollow } from "./components/NoteFollow";
 import { useBookmarks, useNotes, useSeam } from "./useBookmarks";
 import { LiveAnnouncer, useAnnouncer } from "./components/LiveAnnouncer";
 import { RootLensTrigger } from "./components/RootLensTrigger";
@@ -1220,8 +1222,9 @@ export function App(): JSX.Element {
   const pageOfKey = useCallback((key: string) => resolver?.resolve(key)?.page ?? null, [resolver]);
   /** The note a pin belongs to: its first pin carries the note's own id, the rest the id and the verse. */
   const noteOfPin = (pin: string) => scoped.find((s) => s.id === pin || pin.startsWith(`${s.id}~`)) ?? null;
-  const scopeName = (scope: NoteScope): string =>
-    scope.type === "page"
+  const scopeName = useCallback(
+    (scope: NoteScope): string =>
+      scope.type === "page"
       ? t.pageN(scope.page)
       : scope.type === "juz"
         ? t.juzN(scope.juz)
@@ -1229,7 +1232,21 @@ export function App(): JSX.Element {
           ? t.hizbN(scope.hizb)
           : scope.type === "surah"
             ? t.surahName(scope.surah)
-            : t.noteWhole;
+            : t.noteWhole,
+    [t],
+  );
+  // The page map's list of notes, the one worked on last first.
+  const noteShelf = useMemo(
+    () =>
+      [...scoped]
+        .sort((a, b) => b.usedAt - a.usedAt || a.id.localeCompare(b.id))
+        .map((n) => ({
+          id: n.id,
+          title: noteTitle(n) || t.noteUntitled,
+          about: `${scopeName(n.scope)} · ${t.noteVerses(n.verses.length)}`,
+        })),
+    [scoped, t, scopeName],
+  );
   const noteChoices = useMemo(() => {
     if (!openNote || openNote.id !== freshNoteId || joined) return null;
     const s = suggestNotes(
@@ -1769,6 +1786,36 @@ export function App(): JSX.Element {
     },
     [resolver, selectedKey, announce, t],
   );
+  // Following a note: its verses one at a time, in mus'haf order. Going to one
+  // is a hop without the bead: the bar is the way back, not the trail.
+  const [following, setFollowing] = useState<{ id: string; at: number } | null>(null);
+  const showVerse = useCallback(
+    (key: string) => {
+      const loc = resolver?.resolve(key);
+      if (!loc) return;
+      setOpenDirection(null);
+      setSelectedRange(null);
+      arrivedByHop.current = key !== selectedKey;
+      setSelectedKey(key);
+      setPage(loc.page);
+      announce(t.hoppedTo(t.ayahLabel(key) ?? key, loc.page));
+      void stage.navigateTo(key, { pulse: true });
+    },
+    [resolver, selectedKey, announce, t],
+  );
+  const followNote = useCallback(
+    (id: string, at = 0) => {
+      const key = scoped.find((n) => n.id === id)?.verses[at]?.key;
+      if (!key) return;
+      setRevisionOpen(false);
+      setFollowing({ id, at });
+      showVerse(key);
+    },
+    [scoped, showVerse],
+  );
+  const stopFollowing = useCallback(() => setFollowing(null), []);
+  const followed = following ? scoped.find((n) => n.id === following.id) : undefined;
+
   const handleHop = useCallback(
     (edge: Edge, origin?: string) => hopTo(edge.to, origin),
     [hopTo],
@@ -2860,6 +2907,7 @@ export function App(): JSX.Element {
               hasNotes={notes.length > 0}
               onLoad={loadBookmarkFile}
             />
+            <NoteShelf notes={noteShelf} onFollow={followNote} />
           </RevisionMap>
         </Suspense>
       )}
@@ -2901,6 +2949,18 @@ export function App(): JSX.Element {
       {/* Pinned RTL with the stage, and for the same reason: the trail reads
           oldest-to-newest in the mus'haf's own direction, and its beads sit
           under the rail they came from. */}
+      {/* A row of its own above the bottom line while following a note: it
+          takes its height from the page, so it covers no tool and no verse. */}
+      {following && followed && (
+        <NoteFollow
+          title={noteTitle(followed) || t.noteUntitled}
+          words={followed.text.split("\n").slice(1).join("\n").trim()}
+          at={Math.min(following.at, followed.verses.length - 1)}
+          count={followed.verses.length}
+          onStep={(at) => followNote(followed.id, at)}
+          onStop={stopFollowing}
+        />
+      )}
       <footer className={styles.trail} aria-label={t.trail} dir="rtl" data-keep-clear="">
         {resolver && !desktop && phoneBar === "b" && <PhoneToolbarB tool={tool} locked={locked} onTool={chooseTool} />}
         {resolver && !desktop && phoneBar === "c" && <PhoneToolbarC tool={tool} locked={locked} onTool={chooseTool} pen={pen} onPen={choosePen} />}
