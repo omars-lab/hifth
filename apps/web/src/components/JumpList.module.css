@@ -1,0 +1,65 @@
+/* The list behind a jump mark: room for the compare view, and no taller than
+   the screen, scrolling inside itself if a verse has many jumps. */
+.card {
+  max-block-size: min(70vh, 560px);
+  overflow-y: auto;
+}
+
+.row {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: var(--space-2) var(--space-3);
+  border-block-start: 1px solid var(--hairline);
+}
+
+.row:first-child {
+  border-block-start: none;
+}
+
+.row[data-beaten] > :first-child {
+  color: var(--ink-soft);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+  margin-block-start: var(--space-1);
+}
+
+.action {
+  min-block-size: var(--touch-min);
+  padding: 0 var(--space-3);
+  border: 1px solid var(--hairline);
+  border-radius: 999px;
+  background: none;
+  color: var(--accent-strong);
+  font: inherit;
+  font-size: var(--text-sm);
+  cursor: pointer;
+}
+
+.action:hover {
+  background: var(--accent-tint);
+}
+
+.action:focus-visible {
+  outline: 2px solid var(--accent-strong);
+  outline-offset: 1px;
+}
+
+.action[aria-pressed="true"],
+.action[aria-expanded="true"] {
+  border-color: var(--accent-strong);
+  background: var(--accent-tint);
+}
+
+.delete {
+  margin-inline-start: auto;
+  color: var(--danger);
+}
+
+.compare {
+  margin-block-start: var(--space-2);
+}

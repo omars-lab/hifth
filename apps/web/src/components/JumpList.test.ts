@@ -1,0 +1,23 @@
+import { describe, expect, it } from "vitest";
+import { stringsFor } from "../i18n";
+import { lastWhen } from "./JumpList";
+
+describe("lastWhen: when a jump last happened, in words", () => {
+  const t = stringsFor("en");
+  // A Wednesday afternoon, local time.
+  const now = new Date(2026, 9, 7, 15, 0).getTime();
+  const at = (y: number, m: number, d: number, h = 9) => new Date(y, m, d, h).getTime();
+
+  it("says today for earlier the same day, even just after midnight", () => {
+    expect(lastWhen(at(2026, 9, 7, 0), now, "en", t)).toBe("today");
+  });
+  it("says yesterday for the day before, even late at night", () => {
+    expect(lastWhen(at(2026, 9, 6, 23), now, "en", t)).toBe("yesterday");
+  });
+  it("names the weekday within the last week", () => {
+    expect(lastWhen(at(2026, 9, 2), now, "en", t)).toBe("on Friday");
+  });
+  it("gives the date once it is a week or more ago", () => {
+    expect(lastWhen(at(2026, 8, 30), now, "en", t)).toBe("on 30 Sept");
+  });
+});
