@@ -12,7 +12,7 @@
  * costs the reader a bookmark, never the page they are reading.
  */
 
-import { isMistake, migrateV1Notes, type Bookmark, type Note, type ScopedNote } from "@hifth/core";
+import { isConfusion, isMistake, migrateV1Notes, type Bookmark, type Confusion, type Note, type ScopedNote } from "@hifth/core";
 
 const DB_NAME = "hifth.bookmarks.v1";
 const DB_VERSION = 1;
@@ -240,5 +240,142 @@ export async function writeAllNotes(old: readonly Note[], scoped: readonly Scope
     return false;
   } finally {
     db?.close();
+  }
+}
+
+/*
+ * Confusion jumps (docs/design/confusion-jumps.md, step 2): where the reader's
+ * memory jumped from one verse to another. Kept in the same database under a
+ * key of their own, written whole like the notes, never sent anywhere.
+ */
+const CONFUSIONS_KEY = "confusions";
+
+interface ConfusionsRecord {
+  readonly id: typeof CONFUSIONS_KEY;
+  readonly confusions: readonly Confusion[];
+}
+
+async function getRecord<T>(key: string): Promise<T | undefined> {
+  const db = await openDb();
+  try {
+    const tx = db.transaction(SETS, "readonly");
+    return await new Promise<T | undefined>((resolve, reject) => {
+      const req = tx.objectStore(SETS).get(key);
+      req.onsuccess = () => resolve(req.result as T | undefined);
+      req.onerror = () => reject(req.error);
+    });
+  } finally {
+    db.close();
+  }
+}
+
+async function putRecord<T extends { readonly id: string }>(rec: T): Promise<boolean> {
+  if (!bookmarkStoreSupported()) return false;
+  let db: IDBDatabase | null = null;
+  try {
+    db = await openDb();
+    const tx = db.transaction(SETS, "readwrite");
+    tx.objectStore(SETS).put(rec);
+    await new Promise<void>((resolve, reject) => {
+      tx.oncomplete = () => resolve();
+      tx.onerror = () => reject(tx.error);
+      tx.onabort = () => reject(tx.error);
+    });
+    return true;
+  } catch {
+    return false;
+  } finally {
+    db?.close();
+  }
+}
+
+/**
+ * Every jump the device holds; a stored record that is not one is left out.
+ * Null when there is no store or it could not be read, so nothing is written
+ * over what is there.
+ */
+export async function readConfusions(): Promise<Confusion[] | null> {
+  if (!bookmarkStoreSupported()) return null;
+  try {
+    const rec = await getRecord<ConfusionsRecord>(CONFUSIONS_KEY);
+    return (rec?.confusions ?? []).filter(isConfusion);
+  } catch {
+    return null;
+  }
+}
+
+/** Replace every jump at once. False when the device refused it. */
+export function writeConfusions(set: readonly Confusion[]): Promise<boolean> {
+  return putRecord({ id: CONFUSIONS_KEY, confusions: set } satisfies ConfusionsRecord);
+}
+
+/*
+ * Which device a jump was marked on (the design's question 5, answer A): a
+ * random id made the first time it is asked for, and a plain name the reader
+ * can change. The id is never derived from anything about the device.
+ */
+const DEVICE_KEY = "device";
+
+export interface Device {
+  readonly id: string;
+  readonly name: string;
+}
+
+// Stored under the shared key `id`, so the device's own id is `deviceId`.
+interface DeviceRecord {
+  readonly id: typeof DEVICE_KEY;
+  readonly deviceId: string;
+  readonly name: string;
+}
+
+/** The name a new device starts with, from what the browser says it is. */
+export function deviceNameOf(ua: string): string {
+  if (/iPad/.test(ua)) return "iPad";
+  if (/iPhone/.test(ua)) return "iPhone";
+  if (/Android/.test(ua)) return "Android phone";
+  const os = /Macintosh|Mac OS X/.test(ua) ? "Mac" : /Windows/.test(ua) ? "Windows" : /Linux|CrOS/.test(ua) ? "Linux" : null;
+  if (!os) return "This device";
+  const browser = /Firefox\//.test(ua)
+    ? "Firefox"
+    : /Edg\//.test(ua)
+      ? "Edge"
+      : /Chrome\//.test(ua)
+        ? "Chrome"
+        : /Safari\//.test(ua)
+          ? "Safari"
+          : null;
+  return browser ? `${os}, ${browser}` : os;
+}
+
+function randomId(): string {
+  const c = globalThis.crypto;
+  if (c && typeof c.randomUUID === "function") return `d-${c.randomUUID()}`;
+  return `d-${Math.random().toString(16).slice(2)}-${Date.now().toString(16)}`;
+}
+
+/**
+ * This device, made and kept the first time it is asked for. Null when there
+ * is no store: then a jump is still marked, under no device.
+ */
+export async function readDevice(ua: string): Promise<Device | null> {
+  if (!bookmarkStoreSupported()) return null;
+  try {
+    const rec = await getRecord<DeviceRecord>(DEVICE_KEY);
+    if (rec && typeof rec.deviceId === "string") return { id: rec.deviceId, name: rec.name };
+    const made: Device = { id: randomId(), name: deviceNameOf(ua) };
+    return (await putRecord({ id: DEVICE_KEY, deviceId: made.id, name: made.name } satisfies DeviceRecord)) ? made : null;
+  } catch {
+    return null;
+  }
+}
+
+/** Give this device a name of the reader's own. */
+export async function renameDevice(name: string): Promise<boolean> {
+  try {
+    const rec = await getRecord<DeviceRecord>(DEVICE_KEY);
+    if (!rec?.deviceId) return false;
+    return await putRecord({ id: DEVICE_KEY, deviceId: rec.deviceId, name } satisfies DeviceRecord);
+  } catch {
+    return false;
   }
 }

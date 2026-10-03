@@ -15,6 +15,9 @@ const RECORD = "packages/core/src/revision.ts";
 const STORE = "apps/web/src/revision-store.ts";
 const importStore = "import { x } " + "from " + '"../revision-store";';
 const importBarrel = "import { rollUp } " + "from " + '"@hifth/core";';
+const JUMPS = "packages/core/src/confusions.ts";
+const JUMP_STORE = "apps/web/src/bookmark-store.ts";
+const importJumps = "import {\n  markConfusion,\n} " + "from " + '"@hifth/core";';
 
 /** The record, its store, and every module the check already permits. */
 const clean = {
@@ -24,6 +27,10 @@ const clean = {
   "apps/web/src/components/RevisionMap.tsx": importBarrel,
   "packages/core/src/index.ts": "export * " + "from " + '"./revision.js";',
   "scripts/build-thing.mjs": "export const nothing = 0;",
+  [JUMPS]: "export function markConfusion() { return []; }",
+  [JUMP_STORE]: importJumps,
+  "apps/web/src/useBookmarks.ts": "import { x } " + "from " + '"./bookmark-store";',
+  "packages/core/src/bookmarks.ts": "import { isConfusion } " + "from " + '"./confusions.js";',
 };
 
 function withFixture(files, fn) {
@@ -39,7 +46,7 @@ test("gate:revision-privacy passes when only the allowed modules reach the recor
   withFixture(clean, (root) => {
     const r = runGate("revision-privacy", root);
     assert.equal(r.status, 0, r.out);
-    assert.match(r.out, /OK \(2 record modules/);
+    assert.match(r.out, /OK \(4 record modules/);
   });
 });
 
@@ -81,5 +88,22 @@ test("gate:revision-privacy refuses an allow-list that names a file which is gon
     const r = runGate("revision-privacy", root);
     assert.equal(r.status, 1, r.out);
     assert.match(r.out, /RevisionMap\.tsx, which no longer exists/);
+  });
+});
+
+test("gate:revision-privacy refuses a new importer of the confusion-jump record", () => {
+  withFixture({ ...clean, "apps/web/src/components/ShareSheet.tsx": importJumps }, (root) => {
+    const r = runGate("revision-privacy", root);
+    assert.equal(r.status, 1, r.out);
+    assert.match(r.out, /ShareSheet\.tsx imports the confusion-jump record/);
+  });
+});
+
+test("gate:revision-privacy refuses a way off the device inside the jump store", () => {
+  const hatch = "navigator.send" + "Beacon(";
+  withFixture({ ...clean, [JUMP_STORE]: `${importJumps}\n${hatch}"/x");` }, (root) => {
+    const r = runGate("revision-privacy", root);
+    assert.equal(r.status, 1, r.out);
+    assert.match(r.out, /bookmark-store\.ts contains `sendBeacon`/);
   });
 });
