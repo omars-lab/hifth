@@ -49,6 +49,7 @@ import {
   type ConfusionMark,
   type EditionId,
   type WaslMark,
+  type JumpArrow,
   type Fold,
   type MarkShard,
   type Note,
@@ -317,6 +318,15 @@ interface PageStageProps {
    */
   waslMarksOf?: (waslOf: (key: string, seam: number) => number | null) => readonly WaslMark[];
   waslMarkLabel?: (key: string, count: number) => string;
+  /**
+   * The saved arrows to draw (step 10): from the word each jump left, under
+   * its line, ending in a label for every verse gone to. App picks which,
+   * by the way on trial; `jumpArrowEnd` writes a label, `jumpArrowLabel`
+   * names the arrow.
+   */
+  jumpArrows?: readonly JumpArrow[];
+  jumpArrowLabel?: (key: string) => string;
+  jumpArrowEnd?: (to: string | null, times: number) => string;
   /**
    * Under the Jump tool (confusion-jumps, step 4), a drag from one verse ended:
    * `from` is the verse pressed and the word under the press, `to` the verse
@@ -636,6 +646,107 @@ function drawWaslMarks(
   svg.append(g);
 }
 
+/** How far a saved arrow runs, in the page's units: about a word and a half. */
+const ARROW_RUN = 50;
+/** The labels at its end: the type's size and how tall each chip stands. */
+const CHIP_FONT = 6.2;
+const CHIP_HEIGHT = 8.5;
+
+/**
+ * Draw a page's saved arrows (confusion-jumps, step 10), replacing whatever
+ * it had: a short wavy line leaving from under the word you were at when
+ * your memory went elsewhere, running on in reading order, which on this
+ * page is to the left, just under that word's line, and ending in a small
+ * chip for each verse it went to, "7:161 ×3", or "?" while none is named.
+ * Never drawn across pages. Beaten arrows are grey; dismissed ones are not
+ * here at all. A tap anywhere on one opens the same list as the marks.
+ */
+function drawJumpArrows(
+  svg: SVGSVGElement,
+  arrows: readonly JumpArrow[],
+  words: WordIndex | null,
+  endOf: (to: string | null, times: number) => string,
+  labelOf: (key: string) => string,
+): void {
+  svg.querySelector("g[data-jump-arrows]")?.remove();
+  if (arrows.length === 0 || !words) return;
+  const g = document.createElementNS(SVG_NS, "g");
+  g.setAttribute("data-jump-arrows", "");
+  for (const arrow of arrows) {
+    const at = parseAyahKey(arrow.key);
+    const span = words.span(arrow.key);
+    if (!at || !span) continue;
+    const box = words.boxOf(arrow.key, arrow.word ?? span.from);
+    if (!box) continue;
+    // Under the line the word sits on: the verse's own outline knows where
+    // that line ends, and the word's box stands in when it does not.
+    const outline = svg.querySelector(`path.ayahPolygon[surah="${at.surah}"][ayah="${at.ayah}"]`);
+    const mid = box.y + box.height / 2;
+    const line = ((outline && rectsOf(outline.getAttribute("d") ?? "")) || []).find(
+      (r) => mid >= r.y && mid <= r.y + r.height,
+    );
+    const y = (line ? line.y + line.height : box.y + box.height) + 1.2;
+    const a = { x: box.x + box.width / 2, y };
+    const b = { x: Math.max(a.x - ARROW_RUN, 6), y };
+    const el = document.createElementNS(SVG_NS, "g");
+    el.setAttribute("data-jump-arrow", `${at.surah}:${at.ayah}`);
+    el.setAttribute("data-verse-key", arrow.key);
+    el.setAttribute("data-word", String(arrow.word ?? span.from));
+    if (arrow.beaten) el.setAttribute("data-beaten", "");
+    el.setAttribute("role", "button");
+    el.setAttribute("tabindex", "0");
+    el.setAttribute("aria-label", labelOf(arrow.key));
+    const path = document.createElementNS(SVG_NS, "path");
+    path.setAttribute("data-line", "");
+    path.setAttribute("d", squiggle(a, b, `${arrow.key}@${arrow.word ?? ""}`, 9, 0.9));
+    const head = document.createElementNS(SVG_NS, "path");
+    head.setAttribute("data-head", "");
+    head.setAttribute("d", arrowHead(a, b, 3));
+    el.append(path, head);
+    // The chips run on past the head, one after another in reading order.
+    let x = b.x - 1.5;
+    const chips: SVGGElement[] = [];
+    for (const end of arrow.ends) {
+      const text = endOf(end.to, end.times);
+      const w = text.length * CHIP_FONT * 0.58 + 4;
+      const chip = document.createElementNS(SVG_NS, "g");
+      chip.setAttribute("data-end", "");
+      const rect = document.createElementNS(SVG_NS, "rect");
+      rect.setAttribute("x", (x - w).toFixed(1));
+      rect.setAttribute("y", (y - CHIP_HEIGHT / 2).toFixed(1));
+      rect.setAttribute("width", w.toFixed(1));
+      rect.setAttribute("height", String(CHIP_HEIGHT));
+      rect.setAttribute("rx", String(CHIP_HEIGHT / 2));
+      const label = document.createElementNS(SVG_NS, "text");
+      label.setAttribute("x", (x - w / 2).toFixed(1));
+      label.setAttribute("y", y.toFixed(1));
+      label.setAttribute("text-anchor", "middle");
+      label.setAttribute("dominant-baseline", "central");
+      label.setAttribute("direction", "ltr");
+      label.textContent = text;
+      chip.append(rect, label);
+      chips.push(chip);
+      x -= w + 1.5;
+    }
+    // Out of room before the margin: the chips stand under the arrow instead.
+    if (x < 2) {
+      for (const chip of chips) chip.setAttribute("transform", `translate(${(2 - x).toFixed(1)} ${CHIP_HEIGHT + 1})`);
+    }
+    // The finger's target: the arrow's own strip, kept thin so the next
+    // line's words stay tappable.
+    const hit = document.createElementNS(SVG_NS, "rect");
+    hit.setAttribute("data-hit", "");
+    hit.setAttribute("x", b.x.toFixed(1));
+    hit.setAttribute("y", (y - 3).toFixed(1));
+    hit.setAttribute("width", (a.x - b.x).toFixed(1));
+    hit.setAttribute("height", "6");
+    el.prepend(hit);
+    el.append(...chips);
+    g.append(el);
+  }
+  svg.append(g);
+}
+
 function drawNotePins(
   svg: SVGSVGElement,
   page: number,
@@ -930,6 +1041,9 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
     confusionMarkLabel,
     waslMarksOf,
     waslMarkLabel,
+    jumpArrows,
+    jumpArrowLabel,
+    jumpArrowEnd,
     onJump,
     onPlaceNote,
     onOpenNote,
@@ -1038,6 +1152,12 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
   waslMarksOfRef.current = waslMarksOf;
   const waslMarkLabelRef = useRef(waslMarkLabel);
   waslMarkLabelRef.current = waslMarkLabel;
+  const jumpArrowsRef = useRef(jumpArrows);
+  jumpArrowsRef.current = jumpArrows;
+  const jumpArrowLabelRef = useRef(jumpArrowLabel);
+  jumpArrowLabelRef.current = jumpArrowLabel;
+  const jumpArrowEndRef = useRef(jumpArrowEnd);
+  jumpArrowEndRef.current = jumpArrowEnd;
   const paintJumpsRef = useRef<(page: number, svg: SVGSVGElement) => void>(() => {});
   const onJumpRef = useRef(onJump);
   onJumpRef.current = onJump;
@@ -1598,7 +1718,11 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
       )
         return;
       if (Math.hypot(e.clientX - from.x, e.clientY - from.y) > TAP_SLOP_PX) return;
-      if ((e.target as Element | null)?.closest("[data-note-pin], [data-verse-dot], [data-confusion-mark], [data-wasl-mark]"))
+      if (
+        (e.target as Element | null)?.closest(
+          "[data-note-pin], [data-verse-dot], [data-confusion-mark], [data-wasl-mark], [data-jump-arrow]",
+        )
+      )
         return;
       const at = hl.svgPointFromClient(e.clientX, e.clientY);
       if (!at) return;
@@ -1626,10 +1750,10 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
     const pinOf = (e: Event) => (e.target as Element | null)?.closest("[data-note-pin]")?.getAttribute("data-note-id");
     // A note dot and a jump mark both open a list about their verse beside them.
     const dotOf = (e: Event) =>
-      (e.target as Element | null)?.closest("[data-verse-dot], [data-confusion-mark], [data-wasl-mark]");
+      (e.target as Element | null)?.closest("[data-verse-dot], [data-confusion-mark], [data-wasl-mark], [data-jump-arrow]");
     const openDot = (dot: Element) => {
       const r = dot.getBoundingClientRect();
-      const jump = dot.hasAttribute("data-confusion-mark") || dot.hasAttribute("data-wasl-mark");
+      const jump = !dot.hasAttribute("data-verse-dot");
       const open = jump ? onOpenJumpsRef.current : onOpenVerseNotesRef.current;
       open?.(dot.getAttribute("data-verse-key") ?? "", { top: r.top, bottom: r.bottom, x: r.left + r.width / 2 });
     };
@@ -2877,17 +3001,22 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
     if (!marks || ![...marks.keys()].some((k) => resolver.resolve(k)?.page === p)) {
       svg.querySelector("g[data-confusion-marks]")?.remove();
       svg.querySelector("g[data-wasl-marks]")?.remove();
+      svg.querySelector("g[data-jump-arrows]")?.remove();
       return;
     }
+    const arrowEnd = (to: string | null, times: number) =>
+      jumpArrowEndRef.current?.(to, times) ?? (to === null ? "?" : to);
+    const arrowLabel = (key: string) => jumpArrowLabelRef.current?.(key) ?? key;
     const waslLabel = (key: string, count: number) => waslMarkLabelRef.current?.(key, count) ?? key;
     void ensureWords(resolver.edition, p).then((idx) => {
       drawConfusionMarks(svg, confusionMarksRef.current ?? new Map(), idx, label);
       drawWaslMarks(svg, waslMarksOfRef.current, idx, waslLabel);
+      drawJumpArrows(svg, jumpArrowsRef.current ?? [], idx, arrowEnd, arrowLabel);
     });
   };
   useEffect(() => {
     for (const [p, mp] of pagesRef.current) paintJumpsRef.current(p, mp.svg);
-  }, [confusionMarks, waslMarksOf, status]);
+  }, [confusionMarks, waslMarksOf, jumpArrows, status]);
 
   // Redraw the pins and the mistakes on every mounted page when the notes
   // change; a page that mounts later draws its own in mountPage.

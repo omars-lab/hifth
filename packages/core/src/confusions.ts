@@ -224,6 +224,66 @@ export function waslMarks(
     .sort((a, b) => (a.key < b.key ? -1 : a.key > b.key ? 1 : a.index - b.index));
 }
 
+/** A saved arrow on the page: from one place in a verse, to every verse gone to from there. */
+export interface JumpArrow {
+  readonly key: string;
+  /** The word you left at, or null when the jump was marked without one: the page starts it at the verse's first word. */
+  readonly word: number | null;
+  /** Where you went, the most often first; `to` is null for the jumps not named yet, joined into one. */
+  readonly ends: readonly { readonly to: string | null; readonly times: number }[];
+  /** Every jump from here is beaten, so the arrow is drawn grey. */
+  readonly beaten: boolean;
+}
+
+/**
+ * The arrows a page draws for the saved jumps (confusion-jumps, "The arrow
+ * itself"): one from each place you left, carrying a label for each verse you
+ * went to from there and, past once, how many times. Jumps from the same word
+ * share one arrow, so marking a jump again never draws a second one.
+ * Dismissed jumps are left out, as everywhere.
+ */
+export function jumpArrows(set: readonly Confusion[]): JumpArrow[] {
+  const by = new Map<string, { key: string; word: number | null; list: Confusion[] }>();
+  for (const c of set) {
+    if (c.state === "dismissed") continue;
+    const word = c.from.word ?? null;
+    const id = `${c.from.key}@${word ?? ""}`;
+    const at = by.get(id) ?? { key: c.from.key, word, list: [] };
+    at.list.push(c);
+    by.set(id, at);
+  }
+  return [...by.values()]
+    .map(({ key, word, list }) => {
+      const times = new Map<string | null, number>();
+      for (const c of list) {
+        const to = c.to?.key ?? null;
+        times.set(to, (times.get(to) ?? 0) + c.times.length);
+      }
+      const ends = [...times]
+        .map(([to, n]) => ({ to, times: n }))
+        // The named before the not-named-yet, then the most often first.
+        .sort((a, b) => Number(a.to === null) - Number(b.to === null) || b.times - a.times || ((a.to ?? "") < (b.to ?? "") ? -1 : 1));
+      return { key, word, ends, beaten: list.every((c) => c.state === "beaten") };
+    })
+    .sort((a, b) => (a.key < b.key ? -1 : a.key > b.key ? 1 : (a.word ?? 0) - (b.word ?? 0)));
+}
+
+/**
+ * How saved arrows are shown, on trial (confusion-jumps, question 4): they
+ * stay on the page, faint, or show only while you are asking for them, which
+ * is while the Jump tool is on, or for the one verse whose list is open.
+ */
+export type ArrowShowing = "stays" | "asked";
+
+export function arrowsShown(
+  arrows: readonly JumpArrow[],
+  showing: ArrowShowing,
+  now: { toolOn: boolean; open: string | null },
+): readonly JumpArrow[] {
+  if (showing === "stays" || now.toolOn) return arrows;
+  return now.open === null ? [] : arrows.filter((a) => a.key === now.open);
+}
+
 const lastAt = (c: Confusion) => c.times[c.times.length - 1]?.at ?? 0;
 const oftenFirst = (a: Confusion, b: Confusion) =>
   b.times.length - a.times.length || lastAt(b) - lastAt(a) || (a.id < b.id ? -1 : 1);
