@@ -353,6 +353,7 @@
   "noteVerses": "{n, plural, zero{لا آيات} one{آية واحدة} two{آيتان} few{{nText} آيات} many{{nText} آية} other{{nText} آية}}",
   "noteWhole": "القرآن كله",
   "noteUntitled": "ملاحظة بلا كلمات بعد",
+  "verseInNotes": "{keyText} في {n, plural, zero{لا ملاحظات} one{ملاحظة واحدة} two{ملاحظتين} few{{nText} ملاحظات} many{{nText} ملاحظة} other{{nText} ملاحظة}}",
   "noteVerseOut": "أخرج هذه الآية",
   "noteVerseTakenOut": "أُخرجت الآية من الملاحظة",
   "noteShelfHead": "ملاحظاتك",

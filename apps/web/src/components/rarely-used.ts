@@ -14,6 +14,7 @@ export { NoteShelf } from "./NoteShelf";
 export { EditionPicker } from "./EditionPicker";
 export { RootLens } from "./RootLens";
 export { NoteBox } from "./NoteBox";
+export { VerseNotes } from "./VerseNotes";
 export { CropSheet } from "./CropSheet";
 export { WordPartsHost } from "./WordPartsHost";
 export { BookmarkDrawer } from "./BookmarkDrawer";

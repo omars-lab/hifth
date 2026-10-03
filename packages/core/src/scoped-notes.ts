@@ -511,3 +511,29 @@ export function fromPins(held: readonly ScopedNote[], pins: readonly Note[], now
   const fresh = [...byId.values()].filter((p) => !known.has(p.id));
   return fresh.length === 0 ? next : migrateV1Notes(fresh, next);
 }
+
+/**
+ * Which verses the page marks with a dot by their number, and how many notes
+ * each is in (docs/decisions/scoped-notes.md, the page question, answer A).
+ * Keys are the verse keys as the notes hold them. A verse whose every note
+ * pinned it gets no dot: its pins already stand on the page.
+ */
+export function verseDots(set: readonly ScopedNote[]): Map<string, number> {
+  const count = new Map<string, number>();
+  const unpinned = new Set<string>();
+  for (const note of set) {
+    for (const v of note.verses) {
+      count.set(v.key, (count.get(v.key) ?? 0) + 1);
+      if (!v.spot) unpinned.add(v.key);
+    }
+  }
+  for (const key of [...count.keys()]) if (!unpinned.has(key)) count.delete(key);
+  return count;
+}
+
+/** The notes a verse is in, the one used last first. */
+export function notesOfVerse(set: readonly ScopedNote[], key: string): ScopedNote[] {
+  return set
+    .filter((n) => n.verses.some((v) => v.key === key))
+    .sort((a, b) => b.usedAt - a.usedAt || (a.id < b.id ? -1 : 1));
+}
