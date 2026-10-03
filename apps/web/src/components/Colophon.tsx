@@ -5,6 +5,7 @@ import { LOCALE_IDS } from "../messages/locales.gen";
 import { SOURCE_REPO, hasCommit, shortCommit, sourceUrl } from "../provenance";
 import { TURN_STYLES, type TurnStyle } from "../turn-style";
 import { VERSE_GESTURES, type VerseGestures } from "../verse-gestures";
+import { SCOPE_LOOKS, type ScopeLook } from "../scope-look";
 import styles from "./Colophon.module.css";
 
 interface ColophonProps {
@@ -22,6 +23,9 @@ interface ColophonProps {
   /** What a tap and a hold on a verse do; remembered on this device. */
   verseGestures?: VerseGestures;
   onVerseGestures?: (choice: VerseGestures) => void;
+  /** How a note draws the parts it can be about; remembered on this device. */
+  scopeLook?: ScopeLook;
+  onScopeLook?: (look: ScopeLook) => void;
   /** Open the three tips strip. It no longer opens by itself (owner, 2026-09-25). */
   onShowTips?: () => void;
 }
@@ -158,6 +162,15 @@ const CREDITS: readonly Credit[] = [
  * A11y: EditionPicker's contract — modal dialog, focus in, Tab trapped, Escape
  * closes, focus restored to the wordmark.
  */
+const SCOPE_LOOK_NAME: Record<ScopeLook, (t: ReturnType<typeof useT>["t"]) => string> = {
+  side: (t) => t.scopeLookSide,
+  lines: (t) => t.scopeLookLines,
+  tall: (t) => t.scopeLookTall,
+  slim: (t) => t.scopeLookSlim,
+  steps: (t) => t.scopeLookSteps,
+  trail: (t) => t.scopeLookTrail,
+};
+
 export function Colophon({
   open,
   onClose,
@@ -167,6 +180,8 @@ export function Colophon({
   onTurnStyle,
   verseGestures,
   onVerseGestures,
+  scopeLook,
+  onScopeLook,
   onShowTips,
 }: ColophonProps): JSX.Element | null {
   const { t, dir, lang, setLang } = useT();
@@ -346,6 +361,32 @@ export function Colophon({
               ))}
             </div>
             <p className={styles.note}>{t.verseGesturesNote}</p>
+          </section>
+        )}
+
+        {/* How a note draws the parts it can be about (docs/design/scoped-notes.md,
+            step 7): every look kept while they are tried, so a radio group too. */}
+        {scopeLook && onScopeLook && (
+          <section className={styles.block} aria-labelledby="colophon-scope-look">
+            <h3 className={styles.subhead} id="colophon-scope-look">
+              {t.scopeLookTitle}
+            </h3>
+            <div className={styles.langRow} role="radiogroup" aria-labelledby="colophon-scope-look">
+              {SCOPE_LOOKS.map((look) => (
+                <button
+                  key={look}
+                  type="button"
+                  role="radio"
+                  className={styles.lang}
+                  aria-checked={scopeLook === look}
+                  data-scope-look={look}
+                  onClick={() => onScopeLook(look)}
+                >
+                  {SCOPE_LOOK_NAME[look](t)}
+                </button>
+              ))}
+            </div>
+            <p className={styles.note}>{t.scopeLookNote}</p>
           </section>
         )}
 

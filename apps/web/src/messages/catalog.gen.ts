@@ -297,6 +297,14 @@ export interface Catalog {
   readonly rootsUnavailable: string;
   readonly scopeHizb: string;
   readonly scopeJuz: string;
+  readonly scopeLookLines: string;
+  readonly scopeLookNote: string;
+  readonly scopeLookSide: string;
+  readonly scopeLookSlim: string;
+  readonly scopeLookSteps: string;
+  readonly scopeLookTall: string;
+  readonly scopeLookTitle: string;
+  readonly scopeLookTrail: string;
   readonly scopePage: string;
   readonly scrubSlowHint: string;
   readonly scrubSpeed: (d: { readonly speed: "half" | "quarter" | "tenth" | "other" }) => string;

@@ -170,6 +170,7 @@ import { PageSlider } from "./components/PageSlider";
 import { fisheyeEnabled, rememberFisheye } from "./pagebar-fisheye";
 import { rememberTurnStyle, savedTurnStyle, type TurnStyle } from "./turn-style";
 import { rememberVerseGestures, savedVerseGestures, type VerseGestures } from "./verse-gestures";
+import { rememberScopeLook, savedScopeLook, type ScopeLook } from "./scope-look";
 import { applyPen, rememberPen, savedPen, type Pen } from "./pen";
 import styles from "./App.module.css";
 
@@ -912,6 +913,13 @@ export function App(): JSX.Element {
   const chooseVerseGestures = useCallback((choice: VerseGestures) => {
     rememberVerseGestures(choice);
     setVerseGestures(choice);
+  }, []);
+  // How a note draws the parts it can be about (docs/design/scoped-notes.md,
+  // step 7; a setting since 2026-10-03, the lines on their side by default).
+  const [scopeLook, setScopeLook] = useState<ScopeLook>(() => savedScopeLook());
+  const chooseScopeLook = useCallback((look: ScopeLook) => {
+    rememberScopeLook(look);
+    setScopeLook(look);
   }, []);
   // Full screen: every bar hidden, the page alone (the same note, all options).
   const [full, setFull] = useState(false);
@@ -3053,6 +3061,8 @@ export function App(): JSX.Element {
             onTurnStyle={chooseTurnStyle}
             verseGestures={verseGestures}
             onVerseGestures={chooseVerseGestures}
+            scopeLook={scopeLook}
+            onScopeLook={chooseScopeLook}
             onShowTips={() => {
               setColophonOpen(false);
               setCoachUp(true);
@@ -3334,6 +3344,7 @@ export function App(): JSX.Element {
             note={labelNote}
             label={scopeName(labelNote.scope)}
             about={aboutOf(labelNote)}
+            scopeLook={scopeLook}
             onClose={closeLabelNote}
             onDelete={deleteLabelNote}
           />
@@ -3346,6 +3357,7 @@ export function App(): JSX.Element {
             note={openNote}
             label={t.ayahLabel(openNote.key) ?? openNote.key}
             about={openAbout}
+            scopeLook={scopeLook}
             deleteLabel={(noteOfPin(openNote.id)?.verses.length ?? 0) > 1 ? t.noteVerseOut : undefined}
             onClose={closeNote}
             onDelete={deleteNote}

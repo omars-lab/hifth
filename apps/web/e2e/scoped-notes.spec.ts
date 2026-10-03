@@ -1,6 +1,7 @@
 import { test, expect, type Locator, type Page } from "@playwright/test";
 import { readFileSync, writeFileSync } from "node:fs";
 import { ayahTarget } from "./ayah";
+import { SCOPE_LOOK_KEY } from "../src/scope-look";
 
 /*
  * Scoped notes, step 2 (docs/design/scoped-notes.md): the first time the app
@@ -433,6 +434,31 @@ test.describe("Hifth · Note from the verse menu", () => {
 /** The parts after the three narrowest, around page 7. */
 const WIDE_PARTS = ["Page 7", "Hizb 1", "Juz 1", "Al-Baqarah", "The whole Qur'an"];
 
+/** Whether the whole note box, Done included, is inside the window. */
+async function insideWindow(page: Page): Promise<boolean> {
+  const r = (await box(page).boundingBox())!;
+  return r.y >= 0 && r.y + r.height <= page.viewportSize()!.height;
+}
+
+/** Which of the looks the parts are drawn in. */
+function drawnAs(group: Locator): Promise<string | null> {
+  return group.evaluate((g) => g.closest("[data-look]")?.getAttribute("data-look") ?? null);
+}
+
+/** Each part's drawn shape as it shows on screen: the part of it a slice's clip leaves. */
+function shapes(tiers: Locator): Promise<{ width: number; height: number; top: number; left: number }[]> {
+  return tiers.evaluateAll((bs) =>
+    bs.map((b) => {
+      const shape = b.querySelector("[data-tier-shape]")!;
+      const r = shape.getBoundingClientRect();
+      const clip = /polygon\(([\d.]+)% 0%, ([\d.]+)% 0%/.exec(getComputedStyle(shape).clipPath);
+      const share = clip ? (Number(clip[2]) - Number(clip[1])) / 100 : 1;
+      const at = b.getBoundingClientRect();
+      return { width: r.width * share, height: r.height, top: at.top, left: at.left };
+    }),
+  );
+}
+
 /** Each tier's name as a screen reader says it, top of the pyramid first. */
 async function tierNames(group: Locator): Promise<string[]> {
   return group.getByRole("button").evaluateAll((bs) => bs.map((b) => b.getAttribute("aria-label") ?? ""));
@@ -494,7 +520,7 @@ test.describe("Hifth · changing what a note is about", () => {
       .toEqual({ type: "juz", juz: 1 });
   });
 
-  test("the parts stand as a pyramid, the narrowest on top, and each one's letter picks it", async ({ page }) => {
+  test("the parts stand as a pyramid, the narrowest on top, and each one's letter picks it", async ({ page, isMobile }) => {
     await page.goto("/#/hafs-kfqc/p7");
     await expect(pageSvg(page, 7)).toBeVisible();
     await seedOldNotes(page);
@@ -508,26 +534,34 @@ test.describe("Hifth · changing what a note is about", () => {
     await box(page).getByRole("button", { name: "Page 7: change what this note is about" }).click();
     const tiers = group.getByRole("button");
     await expect(tiers).toHaveCount(8);
-    // The box grew by the pyramid's height; it moves so all of it, Done too, stays in the window.
-    await expect
-      .poll(async () => {
-        const r = (await box(page).boundingBox())!;
-        return r.y >= 0 && r.y + r.height <= page.viewportSize()!.height;
-      })
-      .toBe(true);
+    // The box grew by the parts' height; it moves so all of it, Done too, stays in the window.
+    await expect.poll(() => insideWindow(page)).toBe(true);
     expect(await tiers.evaluateAll((bs) => bs.map((b) => b.getAttribute("aria-keyshortcuts")))).toEqual(["H", "W", "A", "P", "Z", "J", "S", "Q"]);
     await expect(group.getByRole("button", { disabled: true })).toHaveCount(0);
-    // Each tier is drawn wider than the one above it, so together they make one slope.
-    const widths = await tiers.evaluateAll((bs) =>
-      bs.map((b) => {
-        const shape = b.querySelector("[data-tier-shape]")!;
-        const r = shape.getBoundingClientRect();
-        const clip = getComputedStyle(shape).clipPath;
-        const [left, right] = /polygon\(([\d.]+)% 0%, ([\d.]+)% 0%/.exec(clip)!.slice(1).map(Number);
-        return (r.width * (right! - left!)) / 100;
-      }),
-    );
-    for (let i = 1; i < widths.length; i++) expect(widths[i]!).toBeGreaterThan(widths[i - 1]!);
+    // Unless the reader chose another look, the parts are short lines with nothing written on
+    // them, a pyramid on its side: the whole Qur'an the longest, on the left, down to one harakah
+    // on the right.
+    expect(await drawnAs(group)).toBe("side");
+    const shown = await shapes(tiers);
+    for (let i = 1; i < shown.length; i++) {
+      expect(shown[i]!.height).toBeGreaterThan(shown[i - 1]!.height);
+      expect(shown[i]!.left).toBeLessThan(shown[i - 1]!.left);
+    }
+    // All eight in the box, the shortest too: a row too wide once pushed two off its edge.
+    const card = (await box(page).boundingBox())!;
+    for (const b of await tiers.all()) {
+      const r = (await b.boundingBox())!;
+      expect(r.x).toBeGreaterThanOrEqual(card.x);
+      expect(r.x + r.width).toBeLessThanOrEqual(card.x + card.width);
+    }
+    const letter = (name: string) => group.getByRole("button", { name }).locator("kbd");
+    await expect(letter("Juz 1")).toHaveCSS("opacity", "0");
+    // Pointing at a line shows its letter in its middle, and its name under the stack.
+    if (!isMobile) {
+      await group.getByRole("button", { name: "Juz 1" }).hover();
+      await expect(letter("Juz 1")).toHaveCSS("opacity", "1");
+      await expect(group.locator("xpath=..")).toContainText("Juz 1");
+    }
     // The current part has focus, so the letters work straight away; W is not the word tool here.
     await expect(group.getByRole("button", { pressed: true })).toBeFocused();
     await page.keyboard.press("w");
@@ -551,12 +585,7 @@ test.describe("Hifth · changing what a note is about", () => {
     await page.locator('[data-note-id="nold1"]').click();
     await box(page).getByRole("button", { name: "Page 7: change what this note is about" }).click();
     await expect(group.getByRole("button", { disabled: true })).toHaveAccessibleName("Harakah");
-    await expect
-      .poll(async () => {
-        const r = (await box(page).boundingBox())!;
-        return r.y >= 0 && r.y + r.height <= page.viewportSize()!.height;
-      })
-      .toBe(true);
+    await expect.poll(() => insideWindow(page)).toBe(true);
     await page.keyboard.press("h");
     await expect(group).toBeVisible();
     await page.keyboard.press("a");
@@ -908,7 +937,6 @@ test.describe("Hifth · notes from the juz, surah and page labels", () => {
     await expect(box(page)).toContainText(/^Juz 1/);
     await about.click();
     const group = box(page).getByRole("group", { name: "What is this note about?" });
-    const parts = group.getByRole("button");
     // With no verse to start from, the parts are the ones around the page open now,
     // and the three that need a verse stand greyed at the top.
     await expect(tierNames(group)).resolves.toEqual(["Harakah", "Word", "Ayah", ...WIDE_PARTS]);
@@ -977,5 +1005,53 @@ test.describe("Hifth · notes from the juz, surah and page labels", () => {
       /^About Page 7/,
       /^About Al-Baqarah/,
     ]);
+  });
+
+  test("the look of the parts is picked in the about sheet, remembered, and each one is drawn its own way", async ({ page }) => {
+    await page.goto("/#/hafs-kfqc/p7");
+    await expect(pageSvg(page, 7)).toBeVisible();
+    await seedOldNotes(page);
+    await page.reload();
+    await expect(pins(page)).toHaveCount(2);
+    const group = box(page).getByRole("group", { name: "What is this note about?" });
+    const looks = [
+      ["Sideways", "side"],
+      ["Lines", "lines"],
+      ["Pyramid", "tall"],
+      ["Slim", "slim"],
+      ["Steps", "steps"],
+      ["One line", "trail"],
+    ] as const;
+    for (const [name, look] of looks) {
+      await page.getByRole("button", { name: /About Hifth/ }).click();
+      const sheet = page.getByRole("dialog", { name: "About Hifth" });
+      const choice = sheet.getByRole("radiogroup", { name: "Picking what a note is about" });
+      await choice.getByRole("radio", { name }).click();
+      await expect(choice.getByRole("radio", { checked: true })).toHaveText(name);
+      expect(await page.evaluate((k) => localStorage.getItem(k), SCOPE_LOOK_KEY)).toBe(look);
+      await page.keyboard.press("Escape");
+      await expect(sheet).toHaveCount(0);
+
+      await page.locator('[data-note-id="nold2"]').click();
+      await box(page).getByRole("button", { name: "Page 7: change what this note is about" }).click();
+      expect(await drawnAs(group)).toBe(look);
+      await expect.poll(() => insideWindow(page)).toBe(true);
+      const shown = await shapes(group.getByRole("button"));
+      expect(shown).toHaveLength(8);
+      for (let i = 1; i < shown.length; i++) {
+        // A pyramid of any build grows wider going down; on its side, or as steps, it grows taller
+        // part by part; one line stays level.
+        if (look === "steps" || look === "side") expect(shown[i]!.height).toBeGreaterThan(shown[i - 1]!.height);
+        else if (look === "trail") expect(Math.abs(shown[i]!.top - shown[0]!.top)).toBeLessThan(2);
+        else expect(shown[i]!.width).toBeGreaterThan(shown[i - 1]!.width);
+      }
+      await page.keyboard.press("Escape");
+      await expect(box(page)).toHaveCount(0);
+    }
+    // Remembered on this device after a reload.
+    await page.reload();
+    await page.locator('[data-note-id="nold2"]').click();
+    await box(page).getByRole("button", { name: "Page 7: change what this note is about" }).click();
+    expect(await drawnAs(group)).toBe("trail");
   });
 });

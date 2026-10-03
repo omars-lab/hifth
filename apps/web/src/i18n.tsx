@@ -738,6 +738,14 @@ export interface Strings {
   verseGesturesB: string;
   verseGesturesC: string;
   verseGesturesNote: string;
+  scopeLookTitle: string;
+  scopeLookSide: string;
+  scopeLookLines: string;
+  scopeLookTall: string;
+  scopeLookSlim: string;
+  scopeLookSteps: string;
+  scopeLookTrail: string;
+  scopeLookNote: string;
   vdPlayTo: string;
   vdPlayToAria(label: string): string;
   vdMark: string;
@@ -1314,6 +1322,14 @@ export function buildStrings(lang: Lang, m: Catalog): Strings {
     verseGesturesB: m.verseGesturesB,
     verseGesturesC: m.verseGesturesC,
     verseGesturesNote: m.verseGesturesNote,
+    scopeLookTitle: m.scopeLookTitle,
+    scopeLookSide: m.scopeLookSide,
+    scopeLookLines: m.scopeLookLines,
+    scopeLookTall: m.scopeLookTall,
+    scopeLookSlim: m.scopeLookSlim,
+    scopeLookSteps: m.scopeLookSteps,
+    scopeLookTrail: m.scopeLookTrail,
+    scopeLookNote: m.scopeLookNote,
     vdPlayTo: m.vdPlayTo,
     vdPlayToAria: (label) => m.vdPlayToAria({ label }),
     vdMark: m.vdMark,
