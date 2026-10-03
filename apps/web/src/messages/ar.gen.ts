@@ -409,6 +409,8 @@ const messages: Catalog = {
   vdCommentary: "التفسير",
   vdCopy: "نسخ",
   vdCopyAria: (d) => "نسخ رابط " + d.label,
+  vdJump: "انتقال…",
+  vdJumpAria: (d) => "انتقال: إلى أين أخذتك " + d.label,
   vdListen: "استمع",
   vdMark: "تظليل",
   vdMarkAria: (d) => "تظليل " + d.label,

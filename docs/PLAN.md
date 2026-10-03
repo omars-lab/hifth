@@ -1316,8 +1316,9 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     device is a random id with a name you can change). **Built on the computer (steps 1-4):**
     the record and its rules, keeping jumps on the device, the red count by the verse number,
     and the Jump tool (J): drag from a verse to another, or let go anywhere to be asked where
-    you went, with Undo. **Still open:** phones (the Tools tray and "Jump…" in the hold menu),
-    the list behind the icon, the saved file's version 3, jumps in the page map, and the rough
+    you went, with Undo. **Phones (step 5):** the Jump tool is in the Tools tray, and holding a
+    verse offers "Jump…", which asks where you went with no arrow to draw. **Still open:** the
+    list behind the icon, the saved file's version 3, jumps in the page map, and the rough
     build of the arrow staying against showing on request.
 
 **The half of these a machine cannot run now has a register — and a runbook.** Follow-ups
