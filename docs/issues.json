@@ -2510,6 +2510,17 @@
       "owner": "agent",
       "note": "A finger's tap on a verse also drew the thin blue keyboard outline around it, which on a phone looked like a stray mark. Found 2026-10-01 recording the tap-and-hold options. Fixed the same day: only keyboard focus shows a ring on a verse.",
       "closedBy": "apps/web/e2e/verse-gestures.spec.ts"
+    },
+    {
+      "id": "confusion-jumps",
+      "source": {
+        "file": "docs/PLAN.md",
+        "item": "31"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "agent",
+      "note": "A new Jump tool: press on the word where your recitation left a verse, drag, and a wavy red arrow is drawn; a small list (twins first, then look-alikes) asks where you went. Each jump keeps from, to, and every time it happened with the day and the device, and the verse number gets a red icon counting the different verses you jumped to from it, with a list behind it to go there, compare, add a time or delete. Designed 2026-10-03 in docs/design/confusion-jumps.md, nothing built; five questions wait on the owner (the icon beside the note dot, what its number counts, what \"next wasl\" means, whether the arrow stays on the page, how a device is named), and the first step is a rough build to try two of them by hand. Owner ask 2026-10-03."
     }
   ]
 }
