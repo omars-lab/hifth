@@ -328,6 +328,8 @@
   "vdNoteAria": "Note: write one on {label}",
   "vdCopy": "Copy",
   "vdCopyAria": "Copy a link to {label}",
+  "vdJump": "Jump…",
+  "vdJumpAria": "Jump: say where {label} took you",
   "verseMore": "More for {label}",
   "playToPick": "Tap the verse to stop at",
   "playingRun": "Playing {from} to {to}",

@@ -328,6 +328,8 @@
   "vdNoteAria": "تثبيت ملاحظة على {label}",
   "vdCopy": "نسخ",
   "vdCopyAria": "نسخ رابط {label}",
+  "vdJump": "انتقال…",
+  "vdJumpAria": "انتقال: إلى أين أخذتك {label}",
   "verseMore": "المزيد لـ{label}",
   "playToPick": "انقر الآية التي تقف عندها",
   "playingRun": "تلاوة {from} إلى {to}",

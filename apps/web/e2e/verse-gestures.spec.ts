@@ -61,7 +61,7 @@ async function hold(page: Page, sel: string): Promise<void> {
 const drawer = (page: Page): Locator => page.getByRole("region", { name: /^Tools for / });
 const small = (page: Page): Locator => page.getByRole("menu", { name: /^More for / });
 const topBar = (page: Page): Locator => page.getByRole("banner");
-const FOUR = ["Play to", "Mark", "Note", "Copy"];
+const FIVE = ["Play to", "Mark", "Note", "Copy", "Jump…"];
 const words = (page: Page): Locator => page.locator("#hifth-overlay [data-hl-group='word']");
 
 test.describe("Hifth · tap and hold on a verse", () => {
@@ -86,7 +86,7 @@ test.describe("Hifth · tap and hold on a verse", () => {
 
     await hold(page, "#verse-47");
     await expect(small(page)).toBeVisible();
-    await expect(small(page).getByRole("menuitem")).toHaveText(FOUR);
+    await expect(small(page).getByRole("menuitem")).toHaveText(FIVE);
     await expect(drawer(page)).toHaveCount(0);
     // A still hold is the menu, not also the older "hold to pick words": no
     // word is lit under it, and so one Escape is enough to close it.
@@ -127,7 +127,7 @@ test.describe("Hifth · tap and hold on a verse", () => {
     await openWith(page, "a");
     await hold(page, "#verse-46");
     await expect(drawer(page)).toBeVisible();
-    for (const name of FOUR) await expect(drawer(page).getByRole("button", { name: new RegExp(`^${name}`) })).toBeVisible();
+    for (const name of FIVE) await expect(drawer(page).getByRole("button", { name: new RegExp(`^${name.replace(/…$/, "")}`) })).toBeVisible();
     await expect(words(page)).toHaveCount(0);
     await page.keyboard.press("Escape");
     await expect(drawer(page)).toHaveCount(0);
