@@ -27,6 +27,7 @@ function later<T extends ComponentType<any>>(load: () => Promise<T>) {
 export const Colophon = later(() => tools().then((m) => m.Colophon));
 export const RevisionMap = later(() => tools().then((m) => m.RevisionMap));
 export const BookmarkShelf = later(() => tools().then((m) => m.BookmarkShelf));
+export const NoteShelf = later(() => tools().then((m) => m.NoteShelf));
 export const EditionPicker = later(() => tools().then((m) => m.EditionPicker));
 export const RootLens = later(() => tools().then((m) => m.RootLens));
 export const NoteBox = later(() => tools().then((m) => m.NoteBox));

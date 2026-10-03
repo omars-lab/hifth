@@ -10,6 +10,7 @@
 export { Colophon } from "./Colophon";
 export { RevisionMap } from "./RevisionMap";
 export { BookmarkShelf } from "./BookmarkShelf";
+export { NoteShelf } from "./NoteShelf";
 export { EditionPicker } from "./EditionPicker";
 export { RootLens } from "./RootLens";
 export { NoteBox } from "./NoteBox";

@@ -683,6 +683,14 @@ export interface Strings {
   /** On a pin of a note with several verses, Delete takes only that verse out. */
   noteVerseOut: string;
   noteVerseTakenOut: string;
+  /** The page map's list of notes, and the bar shown while following one. */
+  noteShelfHead: string;
+  noteShelfEmpty: string;
+  noteFollowing: string;
+  noteFollowAt(at: number, count: number): string;
+  noteFollowPrev: string;
+  noteFollowNext: string;
+  noteFollowStop: string;
   toolMistake: string;
   toolMistakeHint: string;
   /** Said when a word is marked, named by its verse. */
@@ -1239,6 +1247,13 @@ export function buildStrings(lang: Lang, m: Catalog): Strings {
     noteUntitled: m.noteUntitled,
     noteVerseOut: m.noteVerseOut,
     noteVerseTakenOut: m.noteVerseTakenOut,
+    noteShelfHead: m.noteShelfHead,
+    noteShelfEmpty: m.noteShelfEmpty,
+    noteFollowing: m.noteFollowing,
+    noteFollowAt: (at, count) => m.noteFollowAt({ atText: n(at), nText: n(count) }),
+    noteFollowPrev: m.noteFollowPrev,
+    noteFollowNext: m.noteFollowNext,
+    noteFollowStop: m.noteFollowStop,
     toolMistake: m.toolMistake,
     toolMistakeHint: m.toolMistakeHint,
     mistakeMarked: (label) => m.mistakeMarked({ label }),

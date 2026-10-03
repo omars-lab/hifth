@@ -252,12 +252,12 @@ export default defineConfig({
         {
           name: "iphone",
           use: { ...devices["iPhone 13"] },
-          testIgnore: /(golden|ipad|shots|desktop|edge-peel|spread-fit|detent-live|pagebar-detents|pagebar-fisheye|notes|mistakes|sign-tools|lazy-tools|pitch|drive-video|drive-touch)\.spec\.ts/,
+          testIgnore: /(golden|ipad|shots|desktop|edge-peel|spread-fit|detent-live|pagebar-detents|pagebar-fisheye|(?<!scoped-)notes|mistakes|sign-tools|lazy-tools|pitch|drive-video|drive-touch)\.spec\.ts/,
         },
         {
           name: "android",
           use: { ...devices["Pixel 7"] },
-          testIgnore: /(golden|ipad|shots|desktop|edge-peel|spread-fit|detent-live|pagebar-detents|pagebar-fisheye|notes|mistakes|sign-tools|lazy-tools|pitch|drive-video|drive-touch)\.spec\.ts/,
+          testIgnore: /(golden|ipad|shots|desktop|edge-peel|spread-fit|detent-live|pagebar-detents|pagebar-fisheye|(?<!scoped-)notes|mistakes|sign-tools|lazy-tools|pitch|drive-video|drive-touch)\.spec\.ts/,
         },
         {
           // The iPad, the same WebKit the native shell hosts (native/). One
