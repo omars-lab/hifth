@@ -1317,9 +1317,11 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     the record and its rules, keeping jumps on the device, the red count by the verse number,
     and the Jump tool (J): drag from a verse to another, or let go anywhere to be asked where
     you went, with Undo. **Phones (step 5):** the Jump tool is in the Tools tray, and holding a
-    verse offers "Jump…", which asks where you went with no arrow to draw. **Still open:** the
-    list behind the icon, the saved file's version 3, jumps in the page map, and the rough
-    build of the arrow staying against showing on request.
+    verse offers "Jump…", which asks where you went with no arrow to draw. **The list (step
+    6):** a tap on the icon lists where you went, most often first, with Go, Compare, Again,
+    Beaten, Delete (with Undo), and Say where for a jump not named yet. **Still open:** the
+    saved file's version 3, jumps in the page map, the next-wasl icon, showing dismissed jumps
+    somewhere, and the rough build of the arrow staying against showing on request.
 
 **The half of these a machine cannot run now has a register — and a runbook.** Follow-ups
 ① (the phone), ② (the browser glance) and ④ (VoiceOver/TalkBack) still wait on a human, and

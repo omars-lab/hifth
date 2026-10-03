@@ -796,6 +796,19 @@ export interface Strings {
   /** "Jump from 2:58 to 7:161 marked", with ", 2 times now" once it has happened before. */
   jumpMarked(from: string, to: string, times: number): string;
   jumpMarkedUnsure(from: string): string;
+  jumpList(from: string): string;
+  jumpTimes(times: number, when: string): string;
+  jumpToday: string;
+  jumpYesterday: string;
+  jumpOnDay(day: string): string;
+  jumpGo: string;
+  jumpCompare: string;
+  jumpAgain: string;
+  jumpBeaten: string;
+  jumpDelete: string;
+  jumpSayWhere: string;
+  jumpDeleted(from: string, to: string): string;
+  jumpDeletedUnsure(from: string): string;
   cropTitle(page: number): string;
   cropCaption(page: number): string;
   cropShare: string;
@@ -1391,6 +1404,19 @@ export function buildStrings(lang: Lang, m: Catalog): Strings {
         nText: n(times),
       }),
     jumpMarkedUnsure: (from) => m.jumpMarkedUnsure({ fromText: fmtAyahRef(from, lang) ?? from }),
+    jumpList: (from) => m.jumpList({ fromText: fmtAyahRef(from, lang) ?? from }),
+    jumpTimes: (times, when) => m.jumpTimes({ n: times, nText: n(times), whenText: when }),
+    jumpToday: m.jumpToday,
+    jumpYesterday: m.jumpYesterday,
+    jumpOnDay: (day) => m.jumpOnDay({ dayText: day }),
+    jumpGo: m.jumpGo,
+    jumpCompare: m.jumpCompare,
+    jumpAgain: m.jumpAgain,
+    jumpBeaten: m.jumpBeaten,
+    jumpDelete: m.jumpDelete,
+    jumpSayWhere: m.jumpSayWhere,
+    jumpDeleted: (from, to) => m.jumpDeleted({ fromText: fmtAyahRef(from, lang) ?? from, toText: fmtAyahRef(to, lang) ?? to }),
+    jumpDeletedUnsure: (from) => m.jumpDeletedUnsure({ fromText: fmtAyahRef(from, lang) ?? from }),
     cropTitle: (page) => m.cropTitle({ page }),
     cropCaption: (page) => m.cropCaption({ page }),
     cropShare: m.cropShare,

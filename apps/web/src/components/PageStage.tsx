@@ -298,6 +298,8 @@ interface PageStageProps {
   verseDotLabel?: (key: string, count: number) => string;
   /** A dot was pressed: list the verse's notes beside it. */
   onOpenVerseNotes?: (key: string, at: { top: number; bottom: number; x: number }) => void;
+  /** A jump mark was pressed: list where the reader's memory went from that verse. */
+  onOpenJumps?: (key: string, at: { top: number; bottom: number; x: number }) => void;
   /**
    * The reader's jumps, by the verse they jumped away from, for the red mark
    * on the lower shoulder of its number (confusion-jumps, step 3).
@@ -859,6 +861,7 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
     verseDots,
     verseDotLabel,
     onOpenVerseNotes,
+    onOpenJumps,
     confusionMarks,
     confusionMarkLabel,
     onJump,
@@ -958,6 +961,8 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
   verseDotLabelRef.current = verseDotLabel;
   const onOpenVerseNotesRef = useRef(onOpenVerseNotes);
   onOpenVerseNotesRef.current = onOpenVerseNotes;
+  const onOpenJumpsRef = useRef(onOpenJumps);
+  onOpenJumpsRef.current = onOpenJumps;
   const paintDotsRef = useRef<(page: number, svg: SVGSVGElement) => void>(() => {});
   const confusionMarksRef = useRef(confusionMarks);
   confusionMarksRef.current = confusionMarks;
@@ -1523,7 +1528,7 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
       )
         return;
       if (Math.hypot(e.clientX - from.x, e.clientY - from.y) > TAP_SLOP_PX) return;
-      if ((e.target as Element | null)?.closest("[data-note-pin], [data-verse-dot]")) return;
+      if ((e.target as Element | null)?.closest("[data-note-pin], [data-verse-dot], [data-confusion-mark]")) return;
       const at = hl.svgPointFromClient(e.clientX, e.clientY);
       if (!at) return;
       // The harakat tool takes the sign its magnifier rings, whichever verse
@@ -1548,10 +1553,12 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
       if (toolRef.current === "sign") setLoupe(null);
     });
     const pinOf = (e: Event) => (e.target as Element | null)?.closest("[data-note-pin]")?.getAttribute("data-note-id");
-    const dotOf = (e: Event) => (e.target as Element | null)?.closest("[data-verse-dot]");
+    // A note dot and a jump mark both open a list about their verse beside them.
+    const dotOf = (e: Event) => (e.target as Element | null)?.closest("[data-verse-dot], [data-confusion-mark]");
     const openDot = (dot: Element) => {
       const r = dot.getBoundingClientRect();
-      onOpenVerseNotesRef.current?.(dot.getAttribute("data-verse-key") ?? "", { top: r.top, bottom: r.bottom, x: r.left + r.width / 2 });
+      const open = dot.hasAttribute("data-confusion-mark") ? onOpenJumpsRef.current : onOpenVerseNotesRef.current;
+      open?.(dot.getAttribute("data-verse-key") ?? "", { top: r.top, bottom: r.bottom, x: r.left + r.width / 2 });
     };
     svg.addEventListener("click", (e) => {
       const dot = dotOf(e);
