@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
 import { test, expect, type Locator, type Page } from "@playwright/test";
 import { ayahTarget } from "./ayah";
+import { JUMP_ARROWS_KEY } from "../src/jump-arrows";
 
 /*
  * Confusion jumps, step 3 (docs/design/confusion-jumps.md): a verse you have
@@ -365,10 +366,39 @@ test.describe("Hifth · the saved arrows on the page", () => {
     await expect(page.getByRole("dialog", { name: "Jumps from 2:58" })).toBeVisible();
   });
 
-  test("on request: no arrows until the Jump tool is on, or a verse's list is open", async ({ page, isMobile }) => {
-    await page.goto("/?jumparrows=asked#/hafs-kfqc/p9");
+  test("the setting is in the info panel, stays when nobody chose, and takes effect at once", async ({ page, isMobile }) => {
+    await page.goto("/#/hafs-kfqc/p9");
     await expect(pageSvg(page, 9)).toBeVisible();
     await seed(page, JUMPS);
+    await page.reload();
+    await expect(arrows(page)).toHaveCount(3);
+
+    const about = page.getByRole("button", { name: /About Hifth/ });
+    if (isMobile) await about.tap();
+    else await about.click();
+    const group = page.getByRole("dialog", { name: /About Hifth/ }).getByRole("radiogroup", { name: "Saved jump arrows" });
+    await expect(group.getByRole("radio", { checked: true })).toHaveText("Stay on the page, faint");
+    await group.getByRole("radio", { name: "Only when you ask" }).click();
+    await expect(group.getByRole("radio", { checked: true })).toHaveText("Only when you ask");
+    if (SHOTS) {
+      await group.scrollIntoViewIfNeeded();
+      await page.screenshot({ path: `${SHOTS}/jump-arrows-setting-${test.info().project.name}.png` });
+    }
+    expect(await page.evaluate((k) => localStorage.getItem(k), JUMP_ARROWS_KEY)).toBe("asked");
+    await page.keyboard.press("Escape");
+    await expect(arrows(page)).toHaveCount(0);
+
+    // Kept on this device: the page opens the same way next time.
+    await page.reload();
+    await expect(mark(page, "2:58")).toBeVisible();
+    await expect(arrows(page)).toHaveCount(0);
+  });
+
+  test("on request: no arrows until the Jump tool is on, or a verse's list is open", async ({ page, isMobile }) => {
+    await page.goto("/#/hafs-kfqc/p9");
+    await expect(pageSvg(page, 9)).toBeVisible();
+    await seed(page, JUMPS);
+    await page.evaluate((k) => localStorage.setItem(k, "asked"), JUMP_ARROWS_KEY);
     await page.reload();
     await expect(mark(page, "2:58")).toBeVisible();
     await expect(arrows(page)).toHaveCount(0);

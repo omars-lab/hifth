@@ -245,7 +245,7 @@ The owner asked that the icon "can also appear on the next wasl too". We read *w
 > [!tip] Recommended
 > A, but this is felt, not seen: build A and B in the rough build and decide with a finger on a real page.
 
-Both are built, recorded and compared in [the saved-arrows options note](jump-arrows-options.md) (2026-10-03).
+Both are built, recorded and compared in [the saved-arrows options note](jump-arrows-options.md) (2026-10-03). **Decided the same day by the owner:** A by default, with B kept as a setting in the info panel.
 
 ### 5 · How does the app know which device a jump was marked on?
 

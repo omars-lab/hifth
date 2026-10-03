@@ -1,13 +1,15 @@
 # Should the saved arrows stay on the page, or show only when you ask?
 
-*Open, 2026-10-03. This is question 4 of [the wavy arrow for the places your memory jumps](confusion-jumps.md#4--does-the-arrow-stay-on-the-page-or-only-show-when-you-ask). The owner's answer was "it stays, faintly", with both ways built and tried by hand. Both are now built into the real app. The app shows A unless the page address ends in `?jumparrows=asked`. This page holds what the build taught us.*
+*Decided 2026-10-03 by the owner: **A**, the arrows stay, faint, and B is kept as a setting ("Saved jump arrows" in the info panel) for a reader who wants a clean page. This is question 4 of [the wavy arrow for the places your memory jumps](confusion-jumps.md#4--does-the-arrow-stay-on-the-page-or-only-show-when-you-ask). This page holds what building both taught us.*
+
+> [!success] Decided
+> **A by default, B as a setting.** Every device starts with the arrows on the page, faint. Picking "Only when you ask" in the info panel switches that device to B, and it is remembered. Findings 3 and 4 below (small labels, labels near the edge) are the next work, because the labels are always visible. Finding 1 (on a phone, B's list covering its own arrow) still matters for anyone who picks B.
 
 > [!tip] Recommended
 > **A: the arrows stay on the page, faint.** The arrow is the only thing that shows *where* in the verse your memory left it, and on a phone the list that B relies on can open right over the arrow it is meant to reveal. Two things are worth fixing whichever way you choose (below): the labels are small, and near the edge of the page they land on letters.
 
 **2 options**, both recorded on page 9 of a phone, with four made-up jumps. **4 things came up while building** that no list made beforehand had in it; see *What did building them teach us?*
 
-To answer: leave a comment on this note, or tell Claude "A" or "B".
 
 ---
 
@@ -90,4 +92,4 @@ No arrows on the page. A verse's arrow shows while its list is open, and every a
 ## What this is not settling
 
 - What the arrow looks like (its colour, wave and head). That was settled in [the design](confusion-jumps.md).
-- A place to see dismissed jumps. That is the next build step, whichever answer is chosen here.
+- A place to see dismissed jumps. Built the same day: a folded "Dismissed" group in the page map's list of jumps, each with Bring back.

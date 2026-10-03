@@ -2205,7 +2205,7 @@
         {
           "file": "apps/web/src/components/PageStage.tsx",
           "symbol": "drawJumpArrows",
-          "note": "The saved arrows: a faint wavy line under the word you left at, running leftwards, with a label per verse gone to (\"7:161 ×3\", \"?\" when not named yet), grey once beaten. A tap on one opens that verse's list. Which arrows reach it is arrowsShown in confusions.ts: all of them (A, the default), or with ?jumparrows=asked (read by apps/web/src/jump-arrows.ts, outside the record's own files) only while the list is open or the Jump tool is on (B). The two are compared in docs/design/jump-arrows-options.md; the loser is deleted once the owner chooses."
+          "note": "The saved arrows: a faint wavy line under the word you left at, running leftwards, with a label per verse gone to (\"7:161 ×3\", \"?\" when not named yet), grey once beaten. A tap on one opens that verse's list. Which arrows reach it is arrowsShown in confusions.ts: all of them (A, the default the owner chose 2026-10-03), or only while the list is open or the Jump tool is on (B), as the reader set it under \"Saved jump arrows\" in the info panel (Colophon.tsx); the choice is kept on the device by apps/web/src/jump-arrows.ts, outside the record's own files. Compared in docs/design/jump-arrows-options.md."
         },
         {
           "file": "apps/web/src/components/PageStage.tsx",
