@@ -73,3 +73,76 @@
   outline: 2px solid var(--accent);
   outline-offset: 2px;
 }
+
+/* The notes a pin just made could join: small and side by side, so the box
+   grows by a line or two and not one row per note (option C's recording). */
+.choices {
+  margin-block-start: var(--space-2);
+}
+
+.choicesHead {
+  margin-block-end: 4px;
+  color: var(--ink-soft, #57534e);
+  font-size: 12px;
+}
+
+.pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.pill,
+.more {
+  max-inline-size: 100%;
+  min-block-size: 32px;
+  padding: 0 10px;
+  overflow: hidden;
+  border-radius: 999px;
+  font: inherit;
+  font-size: 13px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  cursor: pointer;
+}
+
+.pill {
+  max-inline-size: 11rem;
+  border: 1px solid rgba(0, 0, 0, 0.18);
+  background: var(--paper-raised, var(--paper));
+  color: inherit;
+}
+
+.more {
+  border: none;
+  background: none;
+  color: var(--accent);
+}
+
+.joined {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-2);
+  margin-block-start: var(--space-2);
+  color: var(--ink-soft, #57534e);
+  font-size: 13px;
+}
+
+.undo {
+  min-block-size: 32px;
+  padding: 0 var(--space-2);
+  border: none;
+  background: none;
+  color: var(--accent);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.pill:focus-visible,
+.more:focus-visible,
+.undo:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}

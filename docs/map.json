@@ -2113,7 +2113,7 @@
         {
           "file": "apps/web/src/components/NoteBox.tsx",
           "symbol": "NoteBox",
-          "note": "The box beside a pin. Keeps its own draft and hands it over once, on closing."
+          "note": "The box beside a pin. Keeps its own draft and hands it over once, on closing. A pin just made offers the notes it could join (joinNote in scoped-notes.ts; scoped-notes-note-tool = C) until something is typed."
         },
         {
           "file": "apps/web/src/App.tsx",

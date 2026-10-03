@@ -1,6 +1,6 @@
 # How should adding a verse to a note feel, and how should the page show a verse that is in one? ^sn4q6f
 
-*Open, 2026-10-01. These are questions 4 and 6 of [notes that gather verses](scoped-notes.md#what-needs-the-owners-call). Steps 1 and 2 of that feature are built; step 3 (the note tool offering your notes) waits on the first answer here, and step 4 (seeing your notes from the page) on the second. Both are about how something feels in the hand, so each option was built on the real app on a phone and recorded, rather than described.*
+*Answered 2026-10-02: **C and A**, the recommended pair ([the record](../decisions/scoped-notes.md#when-you-tap-a-verse-with-the-note-tool-what-opens)). These are questions 4 and 6 of [notes that gather verses](scoped-notes.md#what-needs-the-owners-call). Steps 1 and 2 of that feature are built; step 3 (the note tool offering your notes) builds the first answer, and step 4 (seeing your notes from the page) the second. Both are about how something feels in the hand, so each option was built on the real app on a phone and recorded, rather than described.*
 
 > [!tip] Recommended
 > **Question 1 — C: tapping a verse with the note tool still opens a new note at once, and its box offers your three likeliest notes as one-tap choices.** Today's one tap for a new thought is kept, and adding to a note you already have is one more tap, never a detour.
@@ -158,6 +158,6 @@ And for question 2: **D's tint covered about a third of page 7** with only four 
 
 ## What happens next?
 
-Once you pick, step 3 builds the winner of question 1 into the note tool and step 4 the winner of question 2 onto the page, each with its browser tests, and the losing mocks are deleted.
+Once you pick, step 3 builds the winner of question 1 into the note tool and step 4 the winner of question 2 onto the page, each with its browser tests, and the losing mocks are deleted. Step 3 is built (2026-10-02). The mocks stay until step 4 is built too, because one script records both questions from them; the pictures and clips on this page stay as the record of the choice.
 
 **To answer:** comment on this note, or tell Claude two letters, for example "C and A".

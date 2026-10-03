@@ -1819,7 +1819,8 @@
       "decided": "B",
       "related": [
         "scoped-notes-old-notes",
-        "scoped-notes-text"
+        "scoped-notes-text",
+        "scoped-notes-note-tool"
       ],
       "status": "decided",
       "by": "omar",
@@ -1848,7 +1849,8 @@
         "scoped-notes-scopes",
         "scoped-notes-text",
         "note-persistence",
-        "mistake-note-anchor"
+        "mistake-note-anchor",
+        "scoped-notes-on-page"
       ],
       "status": "decided",
       "by": "omar",
@@ -1877,6 +1879,68 @@
       "status": "decided",
       "by": "omar",
       "date": "2026-09-30"
+    },
+    {
+      "id": "scoped-notes-note-tool",
+      "question": "When you tap a verse with the note tool, does it start a new note, offer the notes you already have, or keep adding to the last one?",
+      "options": [
+        {
+          "id": "A",
+          "label": "A new note at once, as today"
+        },
+        {
+          "id": "B",
+          "label": "Offer your notes first, with a new note as one choice"
+        },
+        {
+          "id": "C",
+          "label": "A new note at once, with your three likeliest notes as one-tap choices in its box"
+        },
+        {
+          "id": "D",
+          "label": "Keep adding every tap to the last note used, until you stop"
+        }
+      ],
+      "doc": "docs/decisions/scoped-notes.md#when-you-tap-a-verse-with-the-note-tool-what-opens",
+      "decided": "C",
+      "related": [
+        "scoped-notes-scopes",
+        "scoped-notes-on-page"
+      ],
+      "status": "decided",
+      "by": "omar",
+      "date": "2026-10-02"
+    },
+    {
+      "id": "scoped-notes-on-page",
+      "question": "How does the page show that a verse is in one of your notes?",
+      "options": [
+        {
+          "id": "A",
+          "label": "A small dot by the verse number, with a count when it is in more than one"
+        },
+        {
+          "id": "B",
+          "label": "A thin mark at the page's outer edge"
+        },
+        {
+          "id": "C",
+          "label": "Nothing on the page; the verse menu names the notes"
+        },
+        {
+          "id": "D",
+          "label": "A faint tint over the whole verse"
+        }
+      ],
+      "doc": "docs/decisions/scoped-notes.md#how-does-the-page-show-that-a-verse-is-in-a-note",
+      "decided": "A",
+      "related": [
+        "scoped-notes-note-tool",
+        "scoped-notes-old-notes"
+      ],
+      "status": "decided",
+      "by": "omar",
+      "date": "2026-10-02"
     },
     {
       "id": "verse-tap-and-hold",
