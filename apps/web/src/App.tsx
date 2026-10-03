@@ -17,6 +17,8 @@ import {
   restoreNote,
   addVerse,
   joinNote,
+  changeScope,
+  hizbOf,
   noteTitle,
   addScopedNote,
   editScopedNote,
@@ -112,6 +114,7 @@ import {
   WordPartsHost,
 } from "./components/later";
 import type { CropBox } from "./components/CropSheet";
+import type { NoteAbout } from "./components/NoteBox";
 import { PageSpread } from "./components/PageSpread";
 import { EdgeGrabRails, type EdgeTurnDriver, type PeelPages } from "./components/EdgeGrabRails";
 import { DesktopChrome } from "./components/DesktopChrome";
@@ -1298,6 +1301,42 @@ export function App(): JSX.Element {
     setJoined({ before: scoped, freshId: n.id, pin: got.pin });
     setNoteOpenId(got.pin);
   };
+  // What the open pin's note is about, and the parts it could be about instead
+  // (scoped-notes step 7): every part that holds its first verse, narrowest
+  // first. Widening always works; narrowing past a verse it holds names that
+  // verse and changes nothing, since the app never drops a verse to make a fit.
+  const openAbout = ((): NoteAbout | null => {
+    const of = openNote ? noteOfPin(openNote.id) : null;
+    const first = of?.verses[0];
+    const ref = first ? parseAyahKey(first.key) : null;
+    if (!of || !first || !ref) return null;
+    const page = pageOfKey(first.key);
+    const parts: NoteScope[] = [
+      ...(page !== null ? [{ type: "page", edition: ref.edition, page } as const] : []),
+      { type: "hizb", hizb: hizbOf(ref.surah, ref.ayah) },
+      { type: "juz", juz: juzOf(ref.surah, ref.ayah) },
+      { type: "surah", surah: ref.surah },
+      { type: "whole" },
+    ];
+    const idOf = (s: NoteScope) => JSON.stringify(s);
+    return {
+      name: scopeName(of.scope),
+      count: of.verses.length,
+      current: idOf(of.scope),
+      options: parts.map((s) => ({ id: idOf(s), name: scopeName(s) })),
+      onPick: (id) => {
+        const scope = parts.find((s) => idOf(s) === id);
+        if (!scope || id === idOf(of.scope)) return null;
+        const got = changeScope(scoped, of.id, scope, Date.now(), pageOfKey);
+        if (!got.ok) {
+          const [one] = got.outside;
+          return t.noteOutside(t.ayahLabel(one!) ?? one!, got.outside.length, scopeName(scope));
+        }
+        commitScoped(got.notes, t.noteAboutNow(scopeName(scope)));
+        return null;
+      },
+    };
+  })();
   const undoJoin = () => {
     if (!joined) return;
     commitScoped(joined.before, "");
@@ -3262,10 +3301,7 @@ export function App(): JSX.Element {
             key={openNote.id}
             note={openNote}
             label={t.ayahLabel(openNote.key) ?? openNote.key}
-            head={(() => {
-              const of = noteOfPin(openNote.id);
-              return of && of.verses.length > 1 ? `${scopeName(of.scope)} · ${t.noteVerses(of.verses.length)}` : undefined;
-            })()}
+            about={openAbout}
             deleteLabel={(noteOfPin(openNote.id)?.verses.length ?? 0) > 1 ? t.noteVerseOut : undefined}
             onClose={closeNote}
             onDelete={deleteNote}

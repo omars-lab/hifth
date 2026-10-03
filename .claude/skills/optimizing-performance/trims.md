@@ -8,7 +8,7 @@ first candidates are not rediscovered from scratch.
 
 | part | size | trim | catch | status |
 | --- | --- | --- | --- | --- |
-| React's page-drawing library (`react-dom`) | ~42 KB | swap for Preact's compatibility layer (~4 KB) | every component and `@use-gesture` must still behave; needs a full e2e and golden run | **done** 2026-10-03, #PR: start-up script 132.4 → 96.4 KB, time to answer a tap 2554 → 1956 ms; Preact needed React's after-input timing put back (`docs/issues/preact-swap.md`) |
+| React's page-drawing library (`react-dom`) | ~42 KB | swap for Preact's compatibility layer (~4 KB) | every component and `@use-gesture` must still behave; needs a full e2e and golden run | **done** 2026-10-03, #215: start-up script 132.4 → 96.4 KB, time to answer a tap 2554 → 1956 ms; Preact needed React's after-input timing put back (`docs/issues/preact-swap.md`) |
 | our components | ~39 KB | load rarely used tools (crop, diff view, settings) when first opened | a short wait the first time; the service worker must cache the extra files for offline | **done** 2026-09-29, #149: start-up script 134.3 → 121.6 KB; the tools come as one 14.6 KB file on first open |
 | English **and** Arabic interface text | ~10 KB | load only the reader's language | the language switch must fetch the other one, and offline must still have both | **done** 2026-09-29, #148: start-up script −11 KB; each reader downloads 3.9–5.1 KB less |
 | shared logic (`packages/core`) | ~15 KB | little: it is what the first page needs | none | — |
