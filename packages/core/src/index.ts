@@ -104,6 +104,7 @@ export {
   againConfusion,
   confusionMarks,
   allConfusions,
+  dismissedConfusions,
   confusionsFrom,
   isConfusion,
   markConfusion,
