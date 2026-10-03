@@ -19,6 +19,8 @@ import {
   scopeContains,
   scopeSize,
   suggestNotes,
+  notesOfVerse,
+  verseDots,
   type NoteScope,
   type PageOf,
   type ScopedNote,
@@ -447,5 +449,39 @@ describe("loading a saved file into what the device holds", () => {
     const r = mergeNotesFile(edited, [], [old("c", "comment", 5)], []);
     expect(r.scoped[0]!.text).toBe("newer");
     expect(r.added).toBe(0);
+  });
+});
+
+describe("the dot by a verse's number", () => {
+  const note = (id: string, usedAt: number, verses: ScopedNote["verses"]): ScopedNote => ({
+    id,
+    kind: "comment",
+    scope: page7,
+    text: id,
+    verses,
+    createdAt: T,
+    updatedAt: T,
+    usedAt,
+  });
+  const spot = { page: 7, word: 3, x: 140, y: 260, onHarakah: false };
+  const set = [
+    note("a", T + 1, [{ key: k(2, 39), addedAt: T }, { key: k(2, 44), addedAt: T }]),
+    note("b", T + 3, [{ key: k(2, 39), addedAt: T }]),
+    note("c", T + 2, [{ key: k(2, 40), addedAt: T, spot }]),
+  ];
+
+  it("counts the notes each verse is in", () => {
+    expect(verseDots(set)).toEqual(new Map([[k(2, 39), 2], [k(2, 44), 1]]));
+  });
+
+  it("leaves out a verse whose every note pinned it, since its pins already show", () => {
+    expect(verseDots(set).has(k(2, 40))).toBe(false);
+    const alsoWhole = [...set, note("d", T, [{ key: k(2, 40), addedAt: T }])];
+    expect(verseDots(alsoWhole).get(k(2, 40))).toBe(2);
+  });
+
+  it("lists a verse's notes, the one used last first", () => {
+    expect(notesOfVerse(set, k(2, 39)).map((n) => n.id)).toEqual(["b", "a"]);
+    expect(notesOfVerse(set, k(2, 41))).toEqual([]);
   });
 });

@@ -355,7 +355,7 @@ const HELD = [
   },
 ];
 
-async function seedHeld(page: Page): Promise<void> {
+async function seedHeld(page: Page, held: readonly unknown[] = HELD): Promise<void> {
   await page.evaluate(
     (notes) =>
       new Promise<void>((resolve, reject) => {
@@ -373,7 +373,7 @@ async function seedHeld(page: Page): Promise<void> {
           tx.onerror = () => reject(tx.error);
         };
       }),
-    HELD,
+    held,
   );
 }
 
@@ -479,3 +479,98 @@ function buttonsUnder(page: Page, sel: string): Promise<string[]> {
       .map((b) => b.getAttribute("aria-label") ?? b.textContent ?? "");
   }, sel);
 }
+
+/** Page 7's look-alikes, held without pins: 2:39 is then in two notes, 2:44 in one. */
+const LOOKALIKES = {
+  id: "nq7",
+  kind: "comment",
+  scope: { type: "page", edition: "hafs-kfqc", page: 7 },
+  text: "Page 7 look-alikes",
+  verses: [
+    { key: KEY(44), addedAt: 2_000 },
+    { key: KEY(39), addedAt: 2_000 },
+  ],
+  createdAt: 2_000,
+  updatedAt: 2_000,
+  usedAt: 4_000,
+};
+
+test.describe("Hifth · a dot by the verse number for a verse in a note", () => {
+  test("a dot sits on the number of each verse in a note, counts the notes, and lists them on a tap", async ({ page }) => {
+    await page.goto("/#/hafs-kfqc/p7");
+    await expect(pageSvg(page, 7)).toBeVisible();
+    await seedHeld(page, [...HELD, LOOKALIKES]);
+    await page.reload();
+    await expect(pageSvg(page, 7)).toBeVisible();
+
+    const dot = (verse: number) => pageSvg(page, 7).locator(`[data-verse-dot="2:${verse}"]`);
+    await expect(pageSvg(page, 7).locator("[data-verse-dot]")).toHaveCount(2);
+    await expect(dot(39)).toHaveText("2");
+    await expect(dot(39)).toHaveAttribute("aria-label", "2:39 is in 2 notes");
+    await expect(dot(44)).toHaveText("");
+    await expect(dot(44)).toHaveAttribute("aria-label", "2:44 is in 1 note");
+    // 2:40 is only in a note pinned on one of its words: the pin already shows it.
+    await expect(dot(40)).toHaveCount(0);
+
+    // On the verse's number: the left end of its last line.
+    const verse = await pageSvg(page, 7).locator('path.ayahPolygon[surah="2"][ayah="39"]').boundingBox();
+    const at = await dot(39).boundingBox();
+    expect(verse && at).toBeTruthy();
+    const cx = at!.x + at!.width / 2;
+    const cy = at!.y + at!.height / 2;
+    expect(cx - verse!.x).toBeLessThan(verse!.width * 0.15);
+    expect(cy - verse!.y).toBeGreaterThan(verse!.height * 0.5);
+    // Big enough to hit with a thumb, though it is drawn small.
+    expect(Math.min(at!.width, at!.height)).toBeGreaterThanOrEqual(24);
+
+    await dot(39).click();
+    const list = page.getByRole("dialog", { name: "2:39 is in 2 notes" });
+    await expect(list.getByRole("button")).toHaveText([
+      /^Juz 1 weak spots\s*Juz 1 · 3 verses$/,
+      /^Page 7 look-alikes\s*Page 7 · 2 verses$/,
+    ]);
+    await page.keyboard.press("Escape");
+    await expect(list).toBeHidden();
+
+    // A row follows that note from this verse.
+    await dot(39).click();
+    await list.getByRole("button", { name: /Page 7 look-alikes/ }).click();
+    await expect(list).toBeHidden();
+    const bar = page.getByRole("group", { name: "Following a note" });
+    await expect(bar).toContainText("Page 7 look-alikes");
+    await expect(bar).toContainText("2 of 2");
+  });
+
+  test("each page draws its own dots as it arrives", async ({ page }) => {
+    await page.goto("/#/hafs-kfqc/p7");
+    await expect(pageSvg(page, 7)).toBeVisible();
+    await seedHeld(page, [...HELD, LOOKALIKES]);
+    await page.reload();
+    await expect(pageSvg(page, 7)).toBeVisible();
+    const dot = (verse: number) => pageSvg(page, 7).locator(`[data-verse-dot="2:${verse}"]`);
+    await expect(dot(44)).toHaveCount(1);
+    await page.goto("/#/hafs-kfqc/p9");
+    await expect(pageSvg(page, 9)).toBeVisible();
+    await expect(pageSvg(page, 9).locator('[data-verse-dot="2:58"]')).toHaveCount(1);
+  });
+
+  test("on a two-page spread the list opens beside its dot, not across both pages", async ({ page, isMobile }) => {
+    test.skip(isMobile, "a phone shows one page, and the list takes its width");
+    await page.goto("/#/hafs-kfqc/p7");
+    await expect(pageSvg(page, 8)).toBeVisible();
+    // 2:51 ends at the outer edge of the left-hand page, far from the fold.
+    await seedHeld(page, [{ ...LOOKALIKES, scope: { type: "juz", edition: "hafs-kfqc", juz: 1 }, verses: [{ key: KEY(51), addedAt: 2_000 }] }]);
+    await page.reload();
+    const dot = pageSvg(page, 8).locator('[data-verse-dot="2:51"]');
+    const at = await dot.boundingBox();
+    await dot.click();
+    const card = await page.getByRole("dialog", { name: "2:51 is in 1 note" }).boundingBox();
+    expect(at && card).toBeTruthy();
+    const dotX = at!.x + at!.width / 2;
+    expect(card!.x).toBeLessThanOrEqual(dotX);
+    expect(card!.x + card!.width).toBeGreaterThanOrEqual(dotX);
+    // And it stays on the page the dot is on: it does not reach past the fold.
+    const fold = (await pageSvg(page, 8).boundingBox())!;
+    expect(card!.x + card!.width).toBeLessThanOrEqual(fold.x + fold.width + 24);
+  });
+});

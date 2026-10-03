@@ -680,6 +680,8 @@ export interface Strings {
   noteWhole: string;
   /** A note's title when it has no words yet. */
   noteUntitled: string;
+  /** The dot by a verse's number, and the list it opens: "2:39 is in 2 notes". */
+  verseInNotes(key: string, count: number): string;
   /** On a pin of a note with several verses, Delete takes only that verse out. */
   noteVerseOut: string;
   noteVerseTakenOut: string;
@@ -1245,6 +1247,9 @@ export function buildStrings(lang: Lang, m: Catalog): Strings {
     noteVerses: (count) => m.noteVerses({ n: count, nText: n(count) }),
     noteWhole: m.noteWhole,
     noteUntitled: m.noteUntitled,
+    verseInNotes: (key, count) => {
+      return m.verseInNotes({ keyText: fmtAyahRef(key, lang) ?? key, n: count, nText: n(count) });
+    },
     noteVerseOut: m.noteVerseOut,
     noteVerseTakenOut: m.noteVerseTakenOut,
     noteShelfHead: m.noteShelfHead,

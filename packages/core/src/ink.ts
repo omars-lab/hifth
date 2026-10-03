@@ -180,7 +180,7 @@ export function swipesFromPath(d: string, lineHeight?: number): Swipe[] | null {
 }
 
 /** An ayah's line rectangles, read as a box run first and a drawn outline second. */
-function rectsOf(d: string): InkRect[] | null {
+export function rectsOf(d: string): InkRect[] | null {
   return rectsFromPath(d) ?? rectsFromOutline(d);
 }
 

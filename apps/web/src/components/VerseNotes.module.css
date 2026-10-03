@@ -1,0 +1,26 @@
+/*
+ * VerseNotes — the small card a verse's dot opens: the notes the verse is in,
+ * drawn with the page map's own note rows. Fixed to the screen, beside the
+ * dot's line, inset from both sides so it reads the same in either direction.
+ */
+
+.list {
+  position: fixed;
+  z-index: 40;
+  inset-inline: var(--space-3);
+  max-inline-size: 420px;
+  margin-inline: auto;
+  padding: var(--space-3) var(--space-2) var(--space-2);
+  border: 1px solid var(--hairline);
+  border-radius: 12px;
+  background: var(--paper-raised);
+  box-shadow: var(--shadow-2);
+  font-family: var(--font-chrome);
+}
+
+.head {
+  margin: 0 var(--space-3) var(--space-1);
+  font-size: var(--text-sm);
+  font-weight: 400;
+  color: var(--ink-soft);
+}

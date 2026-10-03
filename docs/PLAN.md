@@ -1282,8 +1282,11 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     verse number). **Done 2026-10-02:** step 3, the note tool's box offering those notes, with
     an Undo. Step 4's first half: **your notes** in the page map, newest first, and a tap on
     one follows it verse by verse in a bar above the bottom line (its words a tap on its name
-    away). **What is open:** the dot by the verse number; the long-press ways in; and the four
-    older note tests, which pick the tool with the desktop's keys and so skip on phones.
+    away). Step 4's second half: a **small dot by the verse number** of each verse in a note
+    with no pin on it, with a count when it is in more than one; a tap on it lists those notes
+    beside it, and a tap on one follows that note from this verse. **What is open:** the
+    long-press ways in; and the four older note tests, which pick the tool with the desktop's
+    keys and so skip on phones.
 30. ~~**A finger's tap on a verse draws a thin blue box around it.**~~ Found recording the
     tap-and-hold options, 2026-10-01: besides the orange, a tapped verse gets the outline that
     shows a keyboard user where they are, which on a phone looks like a stray mark.
