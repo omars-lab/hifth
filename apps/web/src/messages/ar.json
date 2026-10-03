@@ -431,6 +431,7 @@
   "jumpSayWhere": "حدّد الوجهة",
   "jumpDeleted": "حُذف الانتقال من {fromText} إلى {toText}",
   "jumpDeletedUnsure": "حُذف الانتقال من {fromText}",
+  "jumpLoaded": "{n, plural, zero{لم تُضف انتقالات} one{أُضيف انتقال واحد من الملف} two{أُضيف انتقالان من الملف} few{أُضيفت {nText} انتقالات من الملف} many{أُضيف {nText} انتقالًا من الملف} other{أُضيف {nText} انتقال من الملف}}",
   "cropTitle": "مقطع من الصفحة {page}",
   "cropCaption": "الصفحة {page} · طبعة مجمع الملك فهد",
   "cropShare": "مشاركة",

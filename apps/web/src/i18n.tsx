@@ -809,6 +809,8 @@ export interface Strings {
   jumpSayWhere: string;
   jumpDeleted(from: string, to: string): string;
   jumpDeletedUnsure(from: string): string;
+  /** How many jumps a loaded file added. */
+  jumpLoaded(n: number): string;
   cropTitle(page: number): string;
   cropCaption(page: number): string;
   cropShare: string;
@@ -1417,6 +1419,7 @@ export function buildStrings(lang: Lang, m: Catalog): Strings {
     jumpSayWhere: m.jumpSayWhere,
     jumpDeleted: (from, to) => m.jumpDeleted({ fromText: fmtAyahRef(from, lang) ?? from, toText: fmtAyahRef(to, lang) ?? to }),
     jumpDeletedUnsure: (from) => m.jumpDeletedUnsure({ fromText: fmtAyahRef(from, lang) ?? from }),
+    jumpLoaded: (count) => m.jumpLoaded({ n: count, nText: n(count) }),
     cropTitle: (page) => m.cropTitle({ page }),
     cropCaption: (page) => m.cropCaption({ page }),
     cropShare: m.cropShare,

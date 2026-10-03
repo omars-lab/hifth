@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs";
 import { test, expect, type Locator, type Page } from "@playwright/test";
 import { ayahTarget } from "./ayah";
 
@@ -345,5 +346,51 @@ test.describe("Hifth · the list behind a jump mark", () => {
     await r.getByRole("button", { name: "Say where" }).click();
     await picker(page, "2:59").getByRole("button").first().click();
     await expect(mark(page, "2:59")).toHaveAttribute("aria-label", "From 2:59 you have jumped to 1 other verse");
+  });
+});
+
+test.describe("Hifth · jumps in the saved file", () => {
+  test("jumps alone are worth a file; they save as version 3 and come back into a cleared device", async ({
+    page,
+  }, info) => {
+    await page.goto("/#/hafs-kfqc/p9");
+    await expect(pageSvg(page, 9)).toBeVisible();
+    await seed(page, JUMPS);
+    await page.reload();
+    await expect(mark(page, "2:58")).toBeVisible();
+
+    // No bookmark and no note on the device, and still a way to save the jumps.
+    await page.getByRole("button", { name: /what you have opened/ }).click();
+    const sheet = page.getByRole("dialog", { name: "What you have opened" });
+    const [download] = await Promise.all([
+      page.waitForEvent("download"),
+      sheet.getByRole("button", { name: "Save to a file" }).click(),
+    ]);
+    const saved = info.outputPath("saved.json");
+    await download.saveAs(saved);
+    const file = JSON.parse(readFileSync(saved, "utf8")) as { version: number; confusions: { id: string }[] };
+    expect(file.version).toBe(3);
+    expect(file.confusions.map((c) => c.id).sort()).toEqual(["j1", "j2", "j3", "j4", "j5"]);
+
+    // Clear the device, then load the file back.
+    await seed(page, []);
+    await page.reload();
+    await expect(pageSvg(page, 9)).toBeVisible();
+    await expect(mark(page, "2:58")).toHaveCount(0);
+    await page.getByRole("button", { name: /what you have opened/ }).click();
+    await page.getByTestId("bm-load-file").setInputFiles(saved);
+    await expect(page.getByText("5 jumps added from the file")).toBeAttached();
+    // A file that brought only jumps does not also say it brought nothing.
+    await expect(page.getByText(/Nothing new in that file/)).toHaveCount(0);
+    await page.keyboard.press("Escape");
+    await expect(mark(page, "2:58")).toBeVisible();
+    await expect(mark(page, "2:58").locator("text")).toHaveText("2");
+
+    // Loading the same file again adds nothing: the times are joined, not doubled.
+    await page.getByRole("button", { name: /what you have opened/ }).click();
+    await page.getByTestId("bm-load-file").setInputFiles(saved);
+    await page.keyboard.press("Escape");
+    await mark(page, "2:58").click();
+    await expect(page.getByRole("dialog", { name: /^Jumps from 2:58/ }).getByText(/^3 times/)).toBeVisible();
   });
 });

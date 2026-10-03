@@ -138,6 +138,7 @@ const messages: Catalog = {
   jumpGo: "Go",
   jumpInput: "Surah name or number, or 2:255, or juz 9",
   jumpList: (d) => "Jumps from " + d.fromText,
+  jumpLoaded: (d) => plural(LC, d.n, { one: d.nText + " jump added from the file", other: d.nText + " jumps added from the file" }),
   jumpMarked: (d) => "Jump from " + d.fromText + " to " + d.toText + " marked" + plural(LC, d.n, { one: "", other: ", " + d.nText + " times now" }),
   jumpMarkedUnsure: (d) => "Jump from " + d.fromText + " marked; you can say where it went later",
   jumpNotSure: "Not sure yet",
