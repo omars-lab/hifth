@@ -398,6 +398,9 @@ test.describe("Hifth · jumps in the saved file", () => {
 test.describe("Hifth · all your jumps, in the page map", () => {
   test("the page map lists every jump, the most often first, and a row goes to the verse you left", async ({ page }) => {
     await page.goto("/#/hafs-kfqc/p1");
+    // Seeded only once the app has started: a write made while it is still
+    // starting can lose the page under it (it moved on, once in a full run).
+    await expect(pageSvg(page, 1)).toBeVisible();
     await seed(page, JUMPS);
     await page.reload();
     await page.getByRole("button", { name: /what you have opened/ }).click();
