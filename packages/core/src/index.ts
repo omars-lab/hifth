@@ -88,6 +88,7 @@ export {
   scopeContains,
   scopeSize,
   suggestNotes,
+  notesAbout,
   notesOfVerse,
   verseDots,
   type NoteScope,

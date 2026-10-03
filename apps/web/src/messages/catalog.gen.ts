@@ -78,6 +78,9 @@ export interface Catalog {
   readonly copied: string;
   readonly copiedLink: (d: { readonly label: string | number }) => string;
   readonly copyFailed: string;
+  readonly cornerNewNote: string;
+  readonly cornerNotes: (d: { readonly nText: string | number }) => string;
+  readonly cornerNotesHead: (d: { readonly which: "page" | "other"; readonly name: string | number }) => string;
   readonly cornerPlay: string;
   readonly cornerStart: string;
   readonly cropCaption: (d: { readonly page: string | number }) => string;

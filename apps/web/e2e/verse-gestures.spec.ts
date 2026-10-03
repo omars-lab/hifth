@@ -228,12 +228,12 @@ test.describe("Hifth · holding the page's corners", () => {
 
     await holdCorner(page, "surah");
     await expect(menu(page)).toHaveAccessibleName("More for Al-Baqarah");
-    await expect(menu(page).getByRole("menuitem")).toHaveText(["Play", "Go to the start", "Copy", "Share"]);
+    await expect(menu(page).getByRole("menuitem")).toHaveText(["Play", "Go to the start", "New note", "Copy", "Share"]);
     await page.keyboard.press("Escape");
 
     await holdCorner(page, "juz");
     await expect(menu(page)).toHaveAccessibleName("More for Juz 1");
-    await expect(menu(page).getByRole("menuitem")).toHaveText(["Play", "Go to the start", "Copy", "Share"]);
+    await expect(menu(page).getByRole("menuitem")).toHaveText(["Play", "Go to the start", "New note", "Copy", "Share"]);
     await page.keyboard.press("Escape");
 
     // On a phone the bottom bar lies over the foot of the page, so the page
@@ -255,7 +255,7 @@ test.describe("Hifth · holding the page's corners", () => {
     await page.waitForTimeout(400);
     await holdCorner(page, "page");
     await expect(menu(page)).toHaveAccessibleName("More for Page 7");
-    await expect(menu(page).getByRole("menuitem")).toHaveText(["Play", "Bookmark", "Copy", "Share"]);
+    await expect(menu(page).getByRole("menuitem")).toHaveText(["Play", "Bookmark", "New note", "Copy", "Share"]);
   });
 
   test("a quick tap on a corner opens nothing", async ({ page, isMobile }) => {

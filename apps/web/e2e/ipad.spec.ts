@@ -26,42 +26,53 @@ const LANDSCAPE = { width: 1194, height: 834 } as const;
 const leaf = (page: Page, n: number) =>
   page.locator(`svg[aria-labelledby="page-label-${n}"]:visible`);
 
+/**
+ * Wait for page n to be on screen once. While a spread is first laid out, the
+ * app can for a moment hold a second copy of a leaf with a size, out of sight;
+ * a check that page n is visible then finds two and fails at once instead of
+ * waiting, which made the spread test fail about one run in a few.
+ */
+async function shown(page: Page, n: number): Promise<void> {
+  await expect(leaf(page, n)).toHaveCount(1, { timeout: 20_000 });
+  await expect(leaf(page, n)).toBeVisible();
+}
+
 test.describe("Hifth · on an iPad", () => {
   test("upright, a page is one page", async ({ page }) => {
     await page.setViewportSize(PORTRAIT);
     await page.goto("/#/hafs-kfqc/p8");
-    await expect(leaf(page, 8)).toBeVisible({ timeout: 20_000 });
+    await shown(page, 8);
     await expect(leaf(page, 7)).toHaveCount(0);
   });
 
   test("on its side, the same page is an open mus'haf", async ({ page }) => {
     await page.setViewportSize(LANDSCAPE);
     await page.goto("/#/hafs-kfqc/p8");
-    await expect(leaf(page, 8)).toBeVisible({ timeout: 20_000 });
-    await expect(leaf(page, 7)).toBeVisible();
+    await shown(page, 8);
+    await shown(page, 7);
   });
 
   test("turning the iPad keeps the reader's place", async ({ page }) => {
     await page.setViewportSize(LANDSCAPE);
     await page.goto("/#/hafs-kfqc/2:255");
     // 2:255 is on page 42; landscape opens 41|42.
-    await expect(leaf(page, 42)).toBeVisible({ timeout: 20_000 });
-    await expect(leaf(page, 41)).toBeVisible();
+    await shown(page, 42);
+    await shown(page, 41);
 
     await page.setViewportSize(PORTRAIT);
-    await expect(leaf(page, 42)).toBeVisible();
+    await shown(page, 42);
     await expect(leaf(page, 41)).toHaveCount(0);
     expect(new URL(page.url()).hash).toBe("#/hafs-kfqc/2:255");
 
     await page.setViewportSize(LANDSCAPE);
-    await expect(leaf(page, 41)).toBeVisible();
+    await shown(page, 41);
     expect(new URL(page.url()).hash).toBe("#/hafs-kfqc/2:255");
   });
 
   test("a finger on a verse selects it, on either leaf of the spread", async ({ page }) => {
     await page.setViewportSize(LANDSCAPE);
     await page.goto("/#/hafs-kfqc/p8");
-    await expect(leaf(page, 7)).toBeVisible({ timeout: 20_000 });
+    await shown(page, 7);
     // Page 7 is the left-hand leaf of the 7|8 opening; verse-45 is 2:38.
     const poly = leaf(page, 7).locator("#verse-45");
     await expect(poly).toHaveCount(1);
