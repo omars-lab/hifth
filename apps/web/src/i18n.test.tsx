@@ -306,3 +306,22 @@ describe("what the English UI must not translate", () => {
     }
   });
 });
+
+describe("a note that cannot be narrowed names what is in the way", () => {
+  it("names the one verse outside, or counts them and names the first", () => {
+    expect(EN.noteOutside("Al-Baqarah · 2:50", 1, "Page 7")).toBe(
+      "Al-Baqarah · 2:50 is not in Page 7. Take it out of the note first.",
+    );
+    expect(EN.noteOutside("Al-Baqarah · 2:50", 3, "Page 7")).toBe(
+      "3 verses are not in Page 7, the first is Al-Baqarah · 2:50. Take them out of the note first.",
+    );
+  });
+
+  it("puts the Arabic word for verse in the form its number takes", () => {
+    // One, two, three to ten, and eleven on: each count takes its own form.
+    expect(AR.noteOutside("البقرة ٥٠", 1, "صفحة ٧")).toBe("البقرة ٥٠ ليست في صفحة ٧. أخرجها من الملاحظة أولًا.");
+    expect(AR.noteOutside("البقرة ٥٠", 2, "صفحة ٧")).toMatch(/^آيتان ليستا في صفحة ٧، أولاهما البقرة ٥٠\./);
+    expect(AR.noteOutside("البقرة ٥٠", 3, "صفحة ٧")).toMatch(/^٣ آيات ليست/);
+    expect(AR.noteOutside("البقرة ٥٠", 11, "صفحة ٧")).toMatch(/^١١ آية ليست/);
+  });
+});

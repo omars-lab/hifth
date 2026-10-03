@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useLayoutEffect, useRef } from "react";
 import type { NoteShelfItem } from "./NoteShelf";
 import rows from "./NoteShelf.module.css";
 import styles from "./VerseNotes.module.css";
@@ -28,7 +28,10 @@ interface VerseNotesProps {
  */
 export function VerseNotes({ head, notes, anchor, onFollow, onClose }: VerseNotesProps): JSX.Element {
   const ref = useRef<HTMLDivElement>(null);
-  useEffect(() => {
+  // Listening starts in the same step the list is drawn, not a frame later: its
+  // code arrives on first open, so no tap hurries the after-drawing work, and an
+  // Escape pressed as it appears would otherwise fall on the page behind it.
+  useLayoutEffect(() => {
     ref.current?.querySelector("button")?.focus();
     const onKey = (e: KeyboardEvent) => {
       if (e.key !== "Escape") return;
