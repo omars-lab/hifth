@@ -154,15 +154,74 @@ export function confusionMarks(set: readonly Confusion[]): Map<string, Confusion
     by.set(c.from.key, list);
   }
   const marks = new Map<string, ConfusionMark>();
-  for (const [key, list] of by) {
-    const to = new Set(list.flatMap((c) => (c.to ? [c.to.key] : [])));
-    marks.set(key, {
-      count: to.size,
-      unsure: list.filter((c) => c.to === null).length,
-      beaten: list.every((c) => c.state === "beaten"),
-    });
-  }
+  for (const [key, list] of by) marks.set(key, markOf(list));
   return marks;
+}
+
+function markOf(list: readonly Confusion[]): ConfusionMark {
+  const to = new Set(list.flatMap((c) => (c.to ? [c.to.key] : [])));
+  return {
+    count: to.size,
+    unsure: list.filter((c) => c.to === null).length,
+    beaten: list.every((c) => c.state === "beaten"),
+  };
+}
+
+/**
+ * The next wasl after the word you left from (design question 3, answer A):
+ * the first pause sign after it, inside the same verse, with a real word
+ * after it, since that is where you stop, start again, and carry on into the
+ * wrong verse. `last` is the verse's last index on the page and `isSign` says
+ * which indices are signs rather than words.
+ *
+ * "A word after it" is what leaves out the two signs that are not pauses. In
+ * this print the hizb star stands before a verse's first word, so it is never
+ * after a seam, and the prostration sign after its last word, so nothing
+ * follows it; measured over the mus'haf on 2026-10-03, those are 199 and the
+ * 15 prostration verses, against 4,272 signs between words. No verse runs
+ * across a page break, so the page's words are the whole verse.
+ *
+ * Null when the verse ends first: then the verse number is the place, and it
+ * already has its mark.
+ */
+export function nextWasl(seam: number, last: number, isSign: (index: number) => boolean): number | null {
+  for (let i = seam + 1; i < last; i++) {
+    if (!isSign(i)) continue;
+    for (let j = i + 1; j <= last; j++) if (!isSign(j)) return i;
+    return null;
+  }
+  return null;
+}
+
+/** A mark at a pause sign: the verse it is in, the sign's index, and what it shows. */
+export interface WaslMark extends ConfusionMark {
+  readonly key: string;
+  readonly index: number;
+}
+
+/**
+ * The marks at the next wasl, one per sign that some jump's seam reaches,
+ * counted the way the verse number's mark is. A jump with no seam word (marked
+ * from a verse's menu) has no wasl; `waslOf` finds the sign for a seam, or
+ * null when there is none.
+ */
+export function waslMarks(
+  set: readonly Confusion[],
+  waslOf: (key: string, seam: number) => number | null,
+): WaslMark[] {
+  const by = new Map<string, { key: string; index: number; list: Confusion[] }>();
+  for (const c of set) {
+    if (c.state === "dismissed" || c.from.word === undefined) continue;
+    const index = waslOf(c.from.key, c.from.word);
+    if (index === null) continue;
+    const id = `${c.from.key}@${index}`;
+    const at = by.get(id) ?? { key: c.from.key, index, list: [] };
+    at.list.push(c);
+    by.set(id, at);
+  }
+  return [...by.values()]
+    .map(({ key, index, list }) => ({ key, index, ...markOf(list) }))
+    .sort((a, b) => (a.key < b.key ? -1 : a.key > b.key ? 1 : a.index - b.index));
 }
 
 const lastAt = (c: Confusion) => c.times[c.times.length - 1]?.at ?? 0;

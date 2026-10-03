@@ -727,36 +727,37 @@
 }
 
 /* The mark by a verse the reader jumped away from (confusion-jumps, step 3):
-   a short red wavy arrow and the count of verses gone to, grey once beaten. */
-.host :global(svg) :global([data-confusion-mark]) {
+   a short red wavy arrow and the count of verses gone to, grey once beaten.
+   The mark at the next pause sign (step 8) is the same disc, smaller. */
+.host :global(svg) :global(:is([data-confusion-mark], [data-wasl-mark])) {
   cursor: pointer;
   outline: none;
   color: var(--danger);
 }
-.host :global(svg) :global([data-confusion-mark][data-beaten]) {
+.host :global(svg) :global(:is([data-confusion-mark], [data-wasl-mark])[data-beaten]) {
   color: var(--ink-soft);
 }
-.host :global(svg) :global([data-confusion-mark]) :global(circle[data-hit]) {
+.host :global(svg) :global(:is([data-confusion-mark], [data-wasl-mark])) :global(circle[data-hit]) {
   pointer-events: auto;
   fill: transparent;
 }
-.host :global(svg) :global([data-confusion-mark]) :global(circle[data-glyph]) {
+.host :global(svg) :global(:is([data-confusion-mark], [data-wasl-mark])) :global(circle[data-glyph]) {
   fill: currentColor;
   stroke: #fff;
   stroke-width: 0.8;
 }
-.host :global(svg) :global([data-confusion-mark]) :global(path[data-tail]) {
+.host :global(svg) :global(:is([data-confusion-mark], [data-wasl-mark])) :global(path[data-tail]) {
   fill: none;
   stroke: currentColor;
   stroke-width: 1.1;
   stroke-linecap: round;
 }
-.host :global(svg) :global([data-confusion-mark]) :global(text) {
+.host :global(svg) :global(:is([data-confusion-mark], [data-wasl-mark])) :global(text) {
   fill: #fff;
   font: 600 6.5px/1 system-ui, sans-serif;
   pointer-events: none;
 }
-.host :global(svg) :global([data-confusion-mark]:focus-visible) :global(circle[data-hit]) {
+.host :global(svg) :global(:is([data-confusion-mark], [data-wasl-mark]):focus-visible) :global(circle[data-hit]) {
   stroke: var(--focus-ring, #111);
   stroke-width: 1.2;
 }

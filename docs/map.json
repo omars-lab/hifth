@@ -2204,6 +2204,11 @@
         },
         {
           "file": "apps/web/src/components/PageStage.tsx",
+          "symbol": "drawWaslMarks",
+          "note": "The smaller mark at the next wasl: beside the first pause sign after the word you left at (nextWasl in confusions.ts), with the count of verses gone to from there. None when the verse ends before another sign. The word data flags pause signs, the prostration sign and the hizb star alike, so the star is ruled out by sitting before the first word and the prostration sign by sitting after the last."
+        },
+        {
+          "file": "apps/web/src/components/PageStage.tsx",
           "symbol": "JumpLayer",
           "note": "The Jump tool (J) on the computer: a layer over the page while the tool is on, like the crop tool's, so a drag draws the wavy arrow instead of moving the page. A press must start on a verse; letting go on the same verse, after a tiny drag, or after Escape marks nothing. The verse under a point is found by looking past the layer (verseAt), since the layer itself is on top."
         },

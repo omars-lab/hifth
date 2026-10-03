@@ -1323,8 +1323,10 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     jumps go into it, as version 3 (a file with no jumps keeps its old number, so an older
     copy of the app still reads it); loading joins each pair's times, never doubles them.
     **The page map:** "Your jumps" lists every jump from every verse, the most often first,
-    beaten ones greyed, and a tap goes to the verse you left.
-    **Still open:** the next-wasl icon, showing dismissed jumps
+    beaten ones greyed, and a tap goes to the verse you left. **The next wasl:** a smaller
+    copy of the mark sits by the first pause sign after the word you left at, the place you
+    would next stop and start again, with a count of the verses gone to from there.
+    **Still open:** showing dismissed jumps
     somewhere, and the rough build of the arrow staying against showing on request.
 
 **The half of these a machine cannot run now has a register — and a runbook.** Follow-ups

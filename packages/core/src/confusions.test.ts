@@ -7,12 +7,14 @@ import {
   isConfusion,
   markConfusion,
   mergeConfusions,
+  nextWasl,
   removeConfusion,
   removeLastTime,
   restoreConfusion,
   setConfusionState,
   setDestination,
   squiggle,
+  waslMarks,
   type Confusion,
 } from "./confusions.js";
 import { parseBookmarkFile, toBookmarkFile } from "./bookmarks.js";
@@ -159,6 +161,54 @@ describe("loading jumps from a saved file", () => {
     expect(isConfusion({ ...set[0], from: { key: 7 } })).toBe(false);
     const unsure: Confusion = { ...set[0]!, to: null };
     expect(isConfusion(unsure)).toBe(true);
+  });
+});
+
+describe("the next wasl: the pause sign after where you left", () => {
+  // A verse of words 1..12: the hizb star at 1 (before the first word), pause
+  // signs at 6 and 9, and the prostration sign at 12 (after the last word).
+  const signs = new Set([1, 6, 9, 12]);
+  const isSign = (i: number) => signs.has(i);
+
+  it("is the first pause sign after the word you left from", () => {
+    expect(nextWasl(3, 12, isSign)).toBe(6);
+    expect(nextWasl(6, 12, isSign)).toBe(9);
+    expect(nextWasl(7, 12, isSign)).toBe(9);
+  });
+
+  it("is nothing when the verse ends first: the prostration sign after the last word is not a pause", () => {
+    expect(nextWasl(10, 12, isSign)).toBeNull();
+    expect(nextWasl(11, 12, isSign)).toBeNull();
+  });
+
+  it("is never a sign with no word after it, even one just before the prostration sign", () => {
+    const end = new Set([5, 10, 11]);
+    expect(nextWasl(6, 11, (i) => end.has(i))).toBeNull();
+  });
+
+  it("collects the jumps by the sign they reach, counting different verses gone to", () => {
+    const at = (key: string, seam: number) => (key === K("2:58") ? nextWasl(seam, 12, isSign) : null);
+    let set = markConfusion([], { key: K("2:58"), word: 3 }, { key: K("7:161") }, 1_000, PHONE);
+    set = markConfusion(set, { key: K("2:58"), word: 4 }, { key: K("2:35") }, 2_000, PHONE);
+    // A seam word past the last sign: only the verse number is marked.
+    set = markConfusion(set, { key: K("2:59"), word: 11 }, { key: K("7:162") }, 3_000, PHONE);
+    // Marked from a verse's menu, with no word: no seam, so no wasl.
+    set = markConfusion(set, { key: K("2:60") }, { key: K("7:160") }, 4_000, PHONE);
+    set = markConfusion(set, { key: K("2:58"), word: 7 }, null, 5_000, PHONE);
+    expect(waslMarks(set, at)).toEqual([
+      // Words 3 and 4 both run on to the sign at 6: two verses gone to from there.
+      { key: K("2:58"), index: 6, count: 2, unsure: 0, beaten: false },
+      { key: K("2:58"), index: 9, count: 0, unsure: 1, beaten: false },
+    ]);
+  });
+
+  it("follows the seam the record keeps, and leaves dismissed jumps out", () => {
+    const at = (_key: string, seam: number) => nextWasl(seam, 12, isSign);
+    let set = markConfusion([], { key: K("2:58"), word: 3 }, { key: K("7:161") }, 1_000, PHONE);
+    set = markConfusion(set, { key: K("2:58"), word: 3 }, { key: K("2:35") }, 2_000, PHONE);
+    set = setConfusionState(set, set[1]!.id, "dismissed", 3_000);
+    set = setConfusionState(set, set[0]!.id, "beaten", 3_000);
+    expect(waslMarks(set, at)).toEqual([{ key: K("2:58"), index: 6, count: 1, unsure: 0, beaten: true }]);
   });
 });
 
