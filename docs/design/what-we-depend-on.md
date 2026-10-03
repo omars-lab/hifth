@@ -35,7 +35,8 @@ test and build toolchain and never reach a browser.
 What actually ships, traced three independent ways — the production filter, React's own
 copyright banners in the emitted bundle, and the bundle's sourcemap: `react`,
 `react/jsx-runtime`, `scheduler`, `react-dom`, `@use-gesture/core`, `@use-gesture/react`.
-MIT throughout.
+MIT throughout. Since 2026-10-03 the first four are replaced by `preact` and its
+compatibility layer, also MIT ([the Preact swap](../issues/preact-swap.md)).
 
 Two things worth keeping even though the licence answer was "fine":
 

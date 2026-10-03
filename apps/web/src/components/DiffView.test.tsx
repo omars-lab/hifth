@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from "vitest";
-import { render, waitFor } from "@testing-library/react";
+import { render, waitFor } from "@testing-library/preact";
 import type { Edge, MarkShard, WordShard } from "@hifth/core";
 import { DiffView } from "./DiffView";
 import styles from "./DiffView.module.css";

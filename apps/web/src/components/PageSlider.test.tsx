@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen } from "@testing-library/preact";
 import { PageSlider } from "./PageSlider";
 
 /**
@@ -15,6 +15,17 @@ const VENDORED = [7, 9, 19];
 const TOTAL = 604;
 
 const noop = () => {};
+
+/**
+ * Let go of the thumb at a value: the browser's own "change" event, which is
+ * the one the bar commits on. Fired by hand, because the testing helper renames
+ * a "change" to the every-value "input" event once it has seen a redraw, the way
+ * React's handlers name it, and the bar listens for the real one.
+ */
+function release(input: HTMLElement, value: string): void {
+  (input as HTMLInputElement).value = value;
+  fireEvent(input, new Event("change", { bubbles: true }));
+}
 
 function slider(over: Partial<React.ComponentProps<typeof PageSlider>> = {}) {
   const props = {
@@ -105,7 +116,7 @@ describe("PageSlider", () => {
     fireEvent.input(input, { target: { value: "300" } });
     fireEvent.input(input, { target: { value: "301" } });
     expect(onGoTo).not.toHaveBeenCalled();
-    fireEvent.change(input, { target: { value: "301" } });
+    release(input, "301");
     expect(onGoTo).toHaveBeenCalledTimes(1);
   });
 
@@ -114,7 +125,7 @@ describe("PageSlider", () => {
     // two is exactly what has to be said out loud.
     const onGoTo = vi.fn();
     const input = slider({ onGoTo });
-    fireEvent.change(input, { target: { value: "300" } });
+    release(input, "300");
     expect(onGoTo).toHaveBeenCalledWith(19, 300);
   });
 
@@ -166,7 +177,7 @@ describe("PageSlider", () => {
     const onGoTo = vi.fn();
     const input = slider({ available: [], total: 1, onGoTo });
     expect(input).toBeDisabled();
-    fireEvent.change(input, { target: { value: "1" } });
+    release(input, "1");
     expect(onGoTo).not.toHaveBeenCalled();
     for (const button of screen.getAllByRole("button")) expect(button).toBeDisabled();
   });

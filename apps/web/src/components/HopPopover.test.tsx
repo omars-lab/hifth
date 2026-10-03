@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { render, screen } from "@testing-library/preact";
 import type { Edge, RailChip } from "@hifth/core";
 import { HopPopover } from "./HopPopover";
 

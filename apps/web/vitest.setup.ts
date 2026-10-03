@@ -1,6 +1,7 @@
 /// <reference types="@testing-library/jest-dom" />
 import "@testing-library/jest-dom/vitest";
 import { loadStrings } from "./src/i18n";
+import { installInputTiming } from "./src/input-timing";
 import { LOCALE_IDS } from "./src/messages/locales.gen";
 
 /**
@@ -10,6 +11,9 @@ import { LOCALE_IDS } from "./src/messages/locales.gen";
  * default outside any provider. So they are loaded here once, for every file.
  */
 await Promise.all(LOCALE_IDS.map((id) => loadStrings(id)));
+
+// The same timing the app runs on: a tap or a key finishes its work before the next.
+installInputTiming(window);
 
 /**
  * A unit test that reaches the network is always a bug, but it is a bug that

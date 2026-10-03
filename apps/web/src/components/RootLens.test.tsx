@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from "vitest";
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen, fireEvent } from "@testing-library/preact";
 import type { Edge, RootFamily, RootHop } from "@hifth/core";
 import { RootLens, RootLensTrigger } from "./RootLens";
 

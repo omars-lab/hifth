@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { fireEvent, render, screen, within } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "@testing-library/preact";
 import { appKeyAction } from "@hifth/core";
 import { LANG_STORAGE_KEY, LOCALES } from "../lang";
 import { digits } from "../format";
