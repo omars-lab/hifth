@@ -39,6 +39,8 @@ import {
   setDestination,
   allConfusions,
   waslMarks,
+  jumpArrows,
+  arrowsShown,
   confusionsFrom,
   wordDiff,
   type Confusion,
@@ -116,6 +118,7 @@ import { DESKTOP_QUERY, useMediaQuery } from "./useMediaQuery";
 import { PageStage, pageSpan, type Corner, type PageStageHandle, type PageTool, type WordRect } from "./components/PageStage";
 import { PageToolbar, TOOL_KEYS, toolHint, toolName } from "./components/PageToolbar";
 import { PhoneToolbarA, PhoneToolbarB, PhoneToolbarC, phoneBarFromUrl } from "./components/PhoneToolbar";
+import { arrowShowingFromUrl } from "./jump-arrows";
 // Opened by few readers and never before the page is up: loaded on first open.
 import {
   useOpenedOnce,
@@ -1393,6 +1396,14 @@ export function App(): JSX.Element {
     [],
   );
   const closeJumps = useCallback(() => setJumpsAt(null), []);
+  // The saved arrows on the page (step 10), two ways on trial picked by the
+  // address: they stay, faint, or show only while you ask for them.
+  const [arrowShowing] = useState(() => arrowShowingFromUrl(window.location.search));
+  const allArrows = useMemo(() => jumpArrows(confusions), [confusions]);
+  const shownArrows = useMemo(
+    () => arrowsShown(allArrows, arrowShowing, { toolOn: tool === "jump", open: jumpsAt?.key ?? null }),
+    [allArrows, arrowShowing, tool, jumpsAt],
+  );
   // A dismissed jump leaves no mark, so it is not listed either.
   const jumpShelf = useMemo(
     () =>
@@ -3050,6 +3061,9 @@ export function App(): JSX.Element {
                   confusionMarkLabel={t.jumpsFrom}
                   waslMarksOf={waslMarksOf}
                   waslMarkLabel={t.jumpsAtWasl}
+                  jumpArrows={shownArrows}
+                  jumpArrowLabel={t.jumpArrowLabel}
+                  jumpArrowEnd={t.jumpArrowEnd}
                   onJump={onJump}
                   onOpenVerseNotes={openVerseNotes}
                   onOpenJumps={openJumps}
@@ -3123,6 +3137,9 @@ export function App(): JSX.Element {
                 confusionMarkLabel={t.jumpsFrom}
                 waslMarksOf={waslMarksOf}
                 waslMarkLabel={t.jumpsAtWasl}
+                jumpArrows={shownArrows}
+                jumpArrowLabel={t.jumpArrowLabel}
+                jumpArrowEnd={t.jumpArrowEnd}
                 onJump={onJump}
                 onOpenVerseNotes={openVerseNotes}
                 onOpenJumps={openJumps}

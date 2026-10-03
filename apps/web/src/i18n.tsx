@@ -698,6 +698,10 @@ export interface Strings {
   jumpsFrom(key: string, count: number): string;
   /** The smaller mark at the next pause sign after where you left, the same count. */
   jumpsAtWasl(key: string, count: number): string;
+  /** A saved arrow on the page, for a screen reader: "Where you went from here in 2:58". */
+  jumpArrowLabel(key: string): string;
+  /** The label at an arrow's end: "7:161 ×3", or "?" while not named yet. */
+  jumpArrowEnd(to: string | null, times: number): string;
   /** On a pin of a note with several verses, Delete takes only that verse out. */
   noteVerseOut: string;
   noteVerseTakenOut: string;
@@ -1322,6 +1326,9 @@ export function buildStrings(lang: Lang, m: Catalog): Strings {
     },
     jumpsFrom: (key, count) => m.jumpsFrom({ keyText: fmtAyahRef(key, lang) ?? key, n: count, nText: n(count) }),
     jumpsAtWasl: (key, count) => m.jumpsAtWasl({ keyText: fmtAyahRef(key, lang) ?? key, n: count, nText: n(count) }),
+    jumpArrowLabel: (key) => m.jumpArrowLabel({ keyText: fmtAyahRef(key, lang) ?? key }),
+    jumpArrowEnd: (to, times) =>
+      to === null ? m.jumpArrowUnnamed : m.jumpArrowEnd({ keyText: fmtAyahRef(to, lang) ?? to, n: times, nText: n(times) }),
     noteVerseOut: m.noteVerseOut,
     noteVerseTakenOut: m.noteVerseTakenOut,
     noteShelfHead: m.noteShelfHead,

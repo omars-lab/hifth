@@ -762,6 +762,48 @@
   stroke-width: 1.2;
 }
 
+/* The saved arrows (step 10): a faint red wavy line under the word you left
+   at, and a chip for each verse gone to. Faint so the page still reads as
+   the page; full strength under a pointer or a focus. Grey once beaten. */
+.host :global(svg) :global([data-jump-arrow]) {
+  cursor: pointer;
+  outline: none;
+  color: var(--danger);
+  opacity: 0.55;
+}
+.host :global(svg) :global([data-jump-arrow]:is(:hover, :focus-visible)) {
+  opacity: 1;
+}
+.host :global(svg) :global([data-jump-arrow][data-beaten]) {
+  color: var(--ink-soft);
+}
+.host :global(svg) :global([data-jump-arrow]) :global(rect[data-hit]) {
+  pointer-events: auto;
+  fill: transparent;
+}
+.host :global(svg) :global([data-jump-arrow]) :global(path) {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 0.9;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.host :global(svg) :global([data-jump-arrow]) :global([data-end] rect) {
+  pointer-events: auto;
+  fill: var(--paper, #fff);
+  stroke: currentColor;
+  stroke-width: 0.6;
+}
+.host :global(svg) :global([data-jump-arrow]) :global([data-end] text) {
+  fill: currentColor;
+  font: 600 6.2px/1 system-ui, sans-serif;
+  pointer-events: none;
+}
+.host :global(svg) :global([data-jump-arrow]:focus-visible) :global(rect[data-hit]) {
+  stroke: var(--focus-ring, #111);
+  stroke-width: 0.8;
+}
+
 /* The mistake tool (step 3): a pencil-tick pointer in the --danger red (a data
    URI cannot read a token, so the hex is the token's). */
 .stage[data-tool="mistake"],

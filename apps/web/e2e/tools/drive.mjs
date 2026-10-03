@@ -319,10 +319,18 @@ async function runStep(page, step) {
     }
     case "step": {
       const [n, ...text] = arg.split("|");
-      const said = await page.evaluate(
-        ([num, t]) => (globalThis.__step ? globalThis.__step(num, t) : null),
-        [Number(n), text.join("|").trim()],
-      );
+      const say = () =>
+        page.evaluate(([num, t]) => (globalThis.__step ? globalThis.__step(num, t) : null), [
+          Number(n),
+          text.join("|").trim(),
+        ]);
+      let said = await say();
+      // A page script that reopened the page took the marks with it; the load
+      // handler puts them back, but may not have finished yet.
+      if (said === null && marks) {
+        await installMarks(page, "reloaded");
+        said = await say();
+      }
       if (said === null) throw new Error("step= needs the finger marks loaded: add --marks");
       if (typeof said === "string") log("warn", `msg=${JSON.stringify(said)}`);
       return;
@@ -330,6 +338,17 @@ async function runStep(page, step) {
     default:
       throw new Error(`unknown step verb: ${verb} (in "${step}")`);
   }
+}
+
+/**
+ * The finger marks live in the page, so a reload loses them: put in once after
+ * the first load, and again after every later one (a mock that seeds saved
+ * data reopens the page so the app reads it).
+ */
+async function installMarks(page, why) {
+  await page.evaluate(([h, f]) => Object.assign(globalThis, { TOUCH_HOLD_MS: h, TOUCH_FADE_MS: f }), [markHold, markFade]);
+  const said = await page.evaluate((src) => (0, eval)(src), readFileSync(MARKS_JS, "utf8"));
+  log("marks", `result=${JSON.stringify(said)} ${why} hold_ms=${markHold} fade_ms=${markFade}`);
 }
 
 async function main() {
@@ -368,9 +387,10 @@ async function main() {
       .catch(() => log("warn", "no visible mushaf svg — continuing anyway"));
 
     if (marks) {
-      await page.evaluate(([h, f]) => Object.assign(globalThis, { TOUCH_HOLD_MS: h, TOUCH_FADE_MS: f }), [markHold, markFade]);
-      const said = await page.evaluate((src) => (0, eval)(src), readFileSync(MARKS_JS, "utf8"));
-      log("marks", `result=${JSON.stringify(said)} hold_ms=${markHold} fade_ms=${markFade}`);
+      await installMarks(page, "first");
+      page.on("load", () =>
+        installMarks(page, "reloaded").catch((e) => log("warn", `msg=${JSON.stringify("marks: " + e.message)}`)),
+      );
     }
     stopFrames = framesDir ? startFrames(page, framesDir) : undefined;
 

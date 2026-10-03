@@ -245,6 +245,8 @@ The owner asked that the icon "can also appear on the next wasl too". We read *w
 > [!tip] Recommended
 > A, but this is felt, not seen: build A and B in the rough build and decide with a finger on a real page.
 
+Both are built, recorded and compared in [the saved-arrows options note](jump-arrows-options.md) (2026-10-03).
+
 ### 5 · How does the app know which device a jump was marked on?
 
 > **For a hafiz:** tells you whether a jump happens on the phone you revise with on the go or the laptop at your desk, which can say something about how you revise.
