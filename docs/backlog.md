@@ -2098,14 +2098,16 @@ The umbrella. Every safeguard the validation story has pins the DATA — a stron
  with no pin on it, with a count when it is in more than one; a tap on it lists those notes
  beside it, and a tap on one follows that note from this verse. **Done 2026-10-03:** step 6,
  holding the juz name, the surah name or the page number offers the notes about that part
- and a new note about it, which starts with no verse. **What is open:** step 5 (the verse
- menu's Note, which works but has no test of its own), step 7 (changing a note's scope), and
- the four older note tests, which pick the tool with the desktop's keys and so skip on
- phones.
+ and a new note about it, which starts with no verse. **Done 2026-10-03:** step 5's test
+ (the verse menu's Note, on the computer and both phones); step 7, the part a pinned note is
+ about is a button in its box that widens it, or narrows it unless a verse would be left
+ outside; and the older note tests now run on phones too, starting their notes with a hold
+ and "Note". **What is open:** a note with no verse (one started from a juz, surah or page
+ label) has no button to change what it is about yet.
 
 <details><summary>Our notes on it</summary>
 
-Notes that gather verses from a surah, juz, hizb, page or the whole Qur'an, offered last-used first when a verse is added. Steps 1 (the rules) and 2 (notes moved across on the device, and in the saved file) done 2026-10-01; how offering a note should feel and how the page shows a verse in a note were recorded as options on a phone in docs/design/scoped-notes-feel.md and answered C and A by the owner 2026-10-02 (decisions scoped-notes-note-tool, scoped-notes-on-page); step 3 (the note tool's box offering your notes) built 2026-10-02; step 4 (the list of notes in the page map, following one verse by verse, and the dot by the verse number that lists a verse's notes) built 2026-10-02 to 2026-10-03; step 6 (notes from the juz, surah and page labels) built 2026-10-03; step 5's test and step 7 (changing a note's scope) next. The four older note browser tests pick the tool with the desktop's keys and skip on phones; they want a phone way to pick it. Owner ask 2026-09-30.
+Notes that gather verses from a surah, juz, hizb, page or the whole Qur'an, offered last-used first when a verse is added. Steps 1 (the rules) and 2 (notes moved across on the device, and in the saved file) done 2026-10-01; how offering a note should feel and how the page shows a verse in a note were recorded as options on a phone in docs/design/scoped-notes-feel.md and answered C and A by the owner 2026-10-02 (decisions scoped-notes-note-tool, scoped-notes-on-page); step 3 (the note tool's box offering your notes) built 2026-10-02; step 4 (the list of notes in the page map, following one verse by verse, and the dot by the verse number that lists a verse's notes) built 2026-10-02 to 2026-10-03; step 6 (notes from the juz, surah and page labels) built 2026-10-03; step 5's test, step 7 (changing a note's scope) and the older note tests on phones done 2026-10-03; a note with no verse cannot change its scope yet. Owner ask 2026-09-30.
 
 </details>
 

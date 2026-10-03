@@ -18,6 +18,25 @@ const washes = (page: Page): Locator => page.locator("[data-mistake-word]:visibl
 const box = (page: Page): Locator => page.getByRole("dialog", { name: /^Your note on / });
 const choices = (page: Page): Locator => box(page).getByRole("group", { name: "Or add this verse to" });
 
+/**
+ * Start a note on a verse the way each device does: the note tool's key and a
+ * tap on the computer, and on a phone (which has no tool keys) a hold on the
+ * verse and "Note" from its menu. Both open the same fresh note.
+ */
+async function startNote(page: Page, selector: string, isMobile: boolean): Promise<void> {
+  const at = await ayahTarget(page, selector);
+  if (!isMobile) {
+    await page.keyboard.press("KeyN");
+    await page.mouse.click(at.x, at.y);
+    return;
+  }
+  await page.mouse.move(at.x, at.y);
+  await page.mouse.down();
+  await page.waitForTimeout(600);
+  await page.mouse.up();
+  await page.getByRole("menu", { name: /^More for / }).getByRole("menuitem", { name: "Note" }).click();
+}
+
 const KEY = (v: number) => `quran/hafs-kfqc/2:${v}`;
 /** Two notes and one marked mistake, written the way the app before the upgrade wrote them. */
 const OLD_NOTES = [
@@ -126,9 +145,6 @@ async function clearNotes(page: Page): Promise<void> {
 }
 
 test.describe("Hifth · notes moved across on upgrade", () => {
-  // These pick the note tool from the desktop's tool keys. The list of notes
-  // and following one, below, run on the phones too.
-  test.skip(({ isMobile }) => isMobile, "picks the note tool from the desktop's keys");
   test("today's pins survive the upgrade, look the same, and a second open adds nothing", async ({ page }) => {
     // Open once so the device's store exists, then put the old notes in it as
     // the app before the upgrade would have left them.
@@ -179,12 +195,11 @@ test.describe("Hifth · notes moved across on upgrade", () => {
 
   test("a note pinned after the upgrade is kept as a note of one verse, and deleting it removes it", async ({
     page,
+    isMobile,
   }) => {
     await page.goto("/#/hafs-kfqc/p7");
     await expect(pageSvg(page, 7)).toBeVisible();
-    await page.keyboard.press("KeyN");
-    const at = await ayahTarget(page, "#verse-46");
-    await page.mouse.click(at.x, at.y);
+    await startNote(page, "#verse-46", isMobile);
     // With no note yet, there is nothing to add the verse to, so the box offers nothing.
     await expect(box(page).getByRole("textbox")).toBeFocused();
     await expect(choices(page)).toHaveCount(0);
@@ -211,12 +226,11 @@ test.describe("Hifth · notes moved across on upgrade", () => {
 
   test("notes save to a file without any bookmark, and come back from it; an old file's notes come too", async ({
     page,
+    isMobile,
   }, info) => {
     await page.goto("/#/hafs-kfqc/p7");
     await expect(pageSvg(page, 7)).toBeVisible();
-    await page.keyboard.press("KeyN");
-    const at = await ayahTarget(page, "#verse-46");
-    await page.mouse.click(at.x, at.y);
+    await startNote(page, "#verse-46", isMobile);
     await box(page).getByRole("textbox").fill("Carried in the file");
     await page.keyboard.press("Escape");
     await expect(pins(page)).toHaveCount(1);
@@ -257,7 +271,7 @@ test.describe("Hifth · notes moved across on upgrade", () => {
     expect(ids).toContain("nold2");
   });
 
-  test("a fresh pin offers the notes it could join, and one tap adds the verse to that note", async ({ page }) => {
+  test("a fresh pin offers the notes it could join, and one tap adds the verse to that note", async ({ page, isMobile }) => {
     // Two notes on page 7, moved across from before the upgrade.
     await page.goto("/#/hafs-kfqc/p7");
     await expect(pageSvg(page, 7)).toBeVisible();
@@ -266,10 +280,8 @@ test.describe("Hifth · notes moved across on upgrade", () => {
     await expect(pins(page)).toHaveCount(2);
 
     // A tap with the note tool still makes a new note at once, ready to type in…
-    await page.keyboard.press("KeyN");
     // A verse's mark is named by its number counted through the whole Qur'an: 53 is 2:46.
-    const at = await ayahTarget(page, "#verse-53");
-    await page.mouse.click(at.x, at.y);
+    await startNote(page, "#verse-53", isMobile);
     await expect(box(page).getByRole("textbox")).toBeFocused();
     await expect(pins(page)).toHaveCount(3);
     // …and offers the notes on this page, the last used first. (A verse already
@@ -302,6 +314,9 @@ test.describe("Hifth · notes moved across on upgrade", () => {
     await text.fill("Keep the two halves apart, in both");
     await page.keyboard.press("Escape");
     await expect(page.locator('[role="status"][aria-live="polite"]')).toHaveText("Note saved");
+    // Open the page afresh. (A phone's address still names the held verse, and
+    // reopening that would scroll the first pin up under the top bar.)
+    await page.goto("/#/hafs-kfqc/p7");
     await page.reload();
     await expect(pins(page)).toHaveCount(3);
     await page.locator('[data-note-id="nold1"]').click();
@@ -421,9 +436,9 @@ test.describe("Hifth · Note from the verse menu", () => {
  * fits, and otherwise names the verse that would fall out and changes nothing.
  */
 test.describe("Hifth · changing what a note is about", () => {
-  test.skip(({ isMobile }) => isMobile, "pins with the note tool from the desktop's keys");
   test("a note widened to its juz is offered on the next page, and cannot be narrowed back past a verse it holds", async ({
     page,
+    isMobile,
   }) => {
     await page.goto("/#/hafs-kfqc/p7");
     await expect(pageSvg(page, 7)).toBeVisible();
@@ -451,9 +466,7 @@ test.describe("Hifth · changing what a note is about", () => {
     // On the next page, a fresh pin is offered the widened note, and not the one still about page 7.
     await page.goto("/#/hafs-kfqc/p8");
     await expect(pageSvg(page, 8)).toBeVisible();
-    await page.keyboard.press("KeyN");
-    const at = await ayahTarget(page, "#verse-57"); // 2:50
-    await page.mouse.click(at.x, at.y);
+    await startNote(page, "#verse-57", isMobile); // 2:50
     await expect(choices(page).getByRole("button")).toHaveText(["Keep the two halves apart"]);
     await choices(page).getByRole("button", { name: "Keep the two halves apart" }).click();
     await expect(box(page)).toContainText("2 verses");
