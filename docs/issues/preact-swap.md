@@ -67,6 +67,13 @@ steps aside while a panel is open, so an Escape pressed in that gap did nothing 
 window from the step that draws it; a browser test presses Escape as the panel is added, before
 any frame, and failed before the change. After it, 40 of 40 repeats passed.
 
+That made the kind plain, so it was fixed as a kind. Six more sheets (the about box, the go-to box,
+the mushaf picker, the similar-verses list, the roots list and the colour picker, plus the map of
+what you have opened) moved the keyboard into themselves one step after they were drawn. The about
+box lost an Escape 1 run in 50 on a phone. All seven now take the keyboard in the step that draws
+them. A browser test presses Escape as three of them appear, before any frame; it failed on both
+phones for the about box and the mushaf picker before the change, and passed 120 of 120 runs after.
+
 ## What did not change
 
 The components: they still import from "react", and the build points those imports at Preact. Going back is the two plugin lines in the build and test settings, plus the dependencies.
