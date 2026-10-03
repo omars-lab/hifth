@@ -2129,6 +2129,16 @@
           "file": "apps/web/src/components/NoteFollow.tsx",
           "symbol": "NoteFollow",
           "note": "The bar while following a note: its name (a tap shows its words), where you are, a step either way, stop. A row above the bottom line, not floating, so it covers no tool (tested in e2e/scoped-notes.spec.ts)."
+        },
+        {
+          "file": "apps/web/src/components/PageStage.tsx",
+          "symbol": "drawVerseDots",
+          "note": "The dot by the number of a verse in a note with no pin on it, a count inside when there are several (scoped-notes-on-page = A). Which verses and how many is verseDots in scoped-notes.ts; where on the line is verseNumberSpot in words.ts."
+        },
+        {
+          "file": "apps/web/src/components/VerseNotes.tsx",
+          "symbol": "VerseNotes",
+          "note": "The list a dot opens: the verse's notes (notesOfVerse), under or over its line so it never covers the verse, beside the dot on a wide screen; a row follows that note from this verse."
         }
       ],
       "extend": [

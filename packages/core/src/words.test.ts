@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { Rect } from "./highlighter.js";
-import { WordIndex, isWordShard, type WordShard } from "./words.js";
+import { WordIndex, isWordShard, verseNumberSpot, type WordShard } from "./words.js";
 
 /**
  * The real thing, lifted verbatim from
@@ -271,5 +271,38 @@ describe("isWordShard", () => {
     expect(isWordShard("<!doctype html>")).toBe(false);
     expect(isWordShard({ page: 7 })).toBe(false);
     expect(isWordShard({ words: {} })).toBe(false);
+  });
+});
+
+describe("verseNumberSpot — where the dot for a verse in a note goes", () => {
+  // Page 7's 2:40 as the print has it: two lines, the second stopping at 144.7
+  // where 2:41 begins, its last word starting at 168.1.
+  const lines = [
+    { x: 0, y: 119.4, width: 345, height: 36.5 },
+    { x: 144.7, y: 155.9, width: 200.3, height: 36.5 },
+  ];
+  const words = [
+    { x: 300, y: 125, width: 40, height: 25 },
+    { x: 246.7, y: 162.9, width: 10.3, height: 18.7 },
+    { x: 168.1, y: 156.7, width: 53.4, height: 26.3 },
+  ];
+
+  it("sits on the upper shoulder of the number, in the gap after the last word", () => {
+    const at = verseNumberSpot(lines, words)!;
+    expect(at.x).toBeGreaterThan(144.7);
+    expect(at.x).toBeLessThan(168.1);
+    expect(at.y).toBeGreaterThan(155.9);
+    expect(at.y).toBeLessThan(155.9 + 36.5 / 2);
+  });
+
+  it("finds the last line however the outline lists its lines", () => {
+    expect(verseNumberSpot([...lines].reverse(), words)).toEqual(verseNumberSpot(lines, words));
+  });
+
+  it("gives nothing when the words reach the line's end: the number is on another page", () => {
+    const full = [{ x: 0, y: 155.9, width: 345, height: 36.5 }];
+    expect(verseNumberSpot(full, [{ x: 2, y: 160, width: 50, height: 25 }])).toBeNull();
+    expect(verseNumberSpot([], words)).toBeNull();
+    expect(verseNumberSpot(lines, [])).toBeNull();
   });
 });

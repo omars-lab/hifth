@@ -41,7 +41,7 @@ A verse in a note shows nothing on the page today unless it carries a pin.
 
 ![The four options playing side by side: A today, B a list of notes first, C a new note with choices in its box, D keep adding](scoped-notes-feel/taps.gif)
 
-Each clip is the real app on a phone, with the option's new parts added to the live page by a short script kept beside this note, so every one can be recorded again.
+Each clip is the real app on a phone, with the option's new parts added to the live page by a short script. The scripts were deleted once both winners were built (2026-10-03), so the pictures and clips here are the record; the winners live in the app.
 
 ### A — A new note at once, as today
 
@@ -158,6 +158,6 @@ And for question 2: **D's tint covered about a third of page 7** with only four 
 
 ## What happens next?
 
-Once you pick, step 3 builds the winner of question 1 into the note tool and step 4 the winner of question 2 onto the page, each with its browser tests, and the losing mocks are deleted. Step 3 is built (2026-10-02), and so are step 4's list of notes and following one; the dot is next. The mocks stay until the dot is built too, because one script records both questions from them; the pictures and clips on this page stay as the record of the choice.
+Once you pick, step 3 builds the winner of question 1 into the note tool and step 4 the winner of question 2 onto the page, each with its browser tests, and the losing mocks are deleted. Step 3 is built (2026-10-02), and step 4 — the list of notes, following one, and the dot by the verse number — by 2026-10-03. The losing mocks are deleted; the pictures and clips on this page stay as the record of the choice.
 
 **To answer:** comment on this note, or tell Claude two letters, for example "C and A".

@@ -36,6 +36,8 @@ import {
   retainPages,
   MOUNTED_PAGE_CAP,
   parseAyahKey,
+  rectsOf,
+  verseNumberSpot,
   turnCommit,
   viewFitsAcross,
   Highlighter,
@@ -286,6 +288,15 @@ interface PageStageProps {
   /** A pin was pressed (click, Enter or Space): open its note. */
   onOpenNote?: (id: string) => void;
   /**
+   * How many notes hold each verse, by its key, for the dot by its number
+   * (scoped-notes-verse-mark = A). A verse whose notes all pinned it is left
+   * out, since its pins already show. `verseDotLabel` names the dot.
+   */
+  verseDots?: ReadonlyMap<string, number>;
+  verseDotLabel?: (key: string, count: number) => string;
+  /** A dot was pressed: list the verse's notes beside it. */
+  onOpenVerseNotes?: (key: string, at: { top: number; bottom: number; x: number }) => void;
+  /**
    * Under the mistake tool (step 3), a tap on a word. Whether that marks it or
    * opens its signs is App's business; the stage only says which word.
    */
@@ -432,6 +443,50 @@ const SVG_NS = "http://www.w3.org/2000/svg";
  * the spot the reader tapped; its head stands above, in the page's own units, so
  * it grows and shrinks with the paper like everything else drawn on it.
  */
+function drawVerseDots(
+  svg: SVGSVGElement,
+  dots: ReadonlyMap<string, number>,
+  words: WordIndex | null,
+  labelOf: (key: string, count: number) => string,
+): void {
+  svg.querySelector("g[data-verse-dots]")?.remove();
+  if (dots.size === 0 || !words) return;
+  const g = document.createElementNS(SVG_NS, "g");
+  g.setAttribute("data-verse-dots", "");
+  for (const [key, count] of dots) {
+    const at = parseAyahKey(key);
+    const outline = at && svg.querySelector(`path.ayahPolygon[surah="${at.surah}"][ayah="${at.ayah}"]`);
+    const lines = outline ? rectsOf(outline.getAttribute("d") ?? "") : null;
+    const span = words.span(key);
+    if (!at || !lines || !span) continue;
+    const spot = verseNumberSpot(lines, words.boxesFor(key, span.from, span.to));
+    if (!spot) continue;
+    const dot = document.createElementNS(SVG_NS, "g");
+    dot.setAttribute("data-verse-dot", `${at.surah}:${at.ayah}`);
+    dot.setAttribute("data-verse-key", key);
+    dot.setAttribute("role", "button");
+    dot.setAttribute("tabindex", "0");
+    dot.setAttribute("aria-label", labelOf(key, count));
+    dot.setAttribute("transform", `translate(${spot.x} ${spot.y})`);
+    // The finger's target, larger than the mark it finds.
+    const hit = document.createElementNS(SVG_NS, "circle");
+    hit.setAttribute("data-hit", "");
+    hit.setAttribute("r", "12");
+    const mark = document.createElementNS(SVG_NS, "circle");
+    mark.setAttribute("r", count > 1 ? "5" : "3.2");
+    dot.append(hit, mark);
+    if (count > 1) {
+      const n = document.createElementNS(SVG_NS, "text");
+      n.setAttribute("text-anchor", "middle");
+      n.setAttribute("dominant-baseline", "central");
+      n.textContent = String(count);
+      dot.append(n);
+    }
+    g.append(dot);
+  }
+  svg.append(g);
+}
+
 function drawNotePins(
   svg: SVGSVGElement,
   page: number,
@@ -718,6 +773,9 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
     tool = "select",
     notes,
     noteLabel,
+    verseDots,
+    verseDotLabel,
+    onOpenVerseNotes,
     onPlaceNote,
     onOpenNote,
     onMarkWord,
@@ -808,6 +866,13 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
   onPlaceNoteRef.current = onPlaceNote;
   const onOpenNoteRef = useRef(onOpenNote);
   onOpenNoteRef.current = onOpenNote;
+  const verseDotsRef = useRef(verseDots);
+  verseDotsRef.current = verseDots;
+  const verseDotLabelRef = useRef(verseDotLabel);
+  verseDotLabelRef.current = verseDotLabel;
+  const onOpenVerseNotesRef = useRef(onOpenVerseNotes);
+  onOpenVerseNotesRef.current = onOpenVerseNotes;
+  const paintDotsRef = useRef<(page: number, svg: SVGSVGElement) => void>(() => {});
   /** Set once the word shards can be fetched; mountPage's tap listener calls it. */
   const placeNoteRef = useRef<(page: number, key: string, x: number, y: number) => void>(() => {});
   const onMarkWordRef = useRef(onMarkWord);
@@ -1356,7 +1421,7 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
       const using = toolRef.current;
       if (using === "read" || using === "select" || using === "highlight" || using === "bookmark" || using === "crop" || !from) return;
       if (Math.hypot(e.clientX - from.x, e.clientY - from.y) > TAP_SLOP_PX) return;
-      if ((e.target as Element | null)?.closest("[data-note-pin]")) return;
+      if ((e.target as Element | null)?.closest("[data-note-pin], [data-verse-dot]")) return;
       const at = hl.svgPointFromClient(e.clientX, e.clientY);
       if (!at) return;
       // The harakat tool takes the sign its magnifier rings, whichever verse
@@ -1381,18 +1446,32 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
       if (toolRef.current === "sign") setLoupe(null);
     });
     const pinOf = (e: Event) => (e.target as Element | null)?.closest("[data-note-pin]")?.getAttribute("data-note-id");
+    const dotOf = (e: Event) => (e.target as Element | null)?.closest("[data-verse-dot]");
+    const openDot = (dot: Element) => {
+      const r = dot.getBoundingClientRect();
+      onOpenVerseNotesRef.current?.(dot.getAttribute("data-verse-key") ?? "", { top: r.top, bottom: r.bottom, x: r.left + r.width / 2 });
+    };
     svg.addEventListener("click", (e) => {
+      const dot = dotOf(e);
+      if (dot) {
+        e.stopPropagation();
+        openDot(dot);
+        return;
+      }
       const id = pinOf(e);
       if (!id) return;
       e.stopPropagation();
       onOpenNoteRef.current?.(id);
     });
     svg.addEventListener("keydown", (e) => {
+      if (e.key !== "Enter" && e.key !== " ") return;
+      const dot = dotOf(e);
       const id = pinOf(e);
-      if (!id || (e.key !== "Enter" && e.key !== " ")) return;
+      if (!dot && !id) return;
       e.preventDefault();
       e.stopPropagation();
-      onOpenNoteRef.current?.(id);
+      if (dot) openDot(dot);
+      else if (id) onOpenNoteRef.current?.(id);
     });
   }, []);
 
@@ -1471,6 +1550,7 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
       const svg = svgEl as unknown as SVGSVGElement;
       drawNotePins(svg, targetPage, notesRef.current, (n) => noteLabelRef.current?.(n) ?? n.key);
       paintMistakesRef.current(targetPage, svg);
+      paintDotsRef.current(targetPage, svg);
       wireNotes(svg, targetPage, hl);
       return mp;
     },
@@ -2572,6 +2652,21 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
       drawMistakes(svg, p, notesRef.current, idx, marks),
     );
   };
+
+  // The dots by verse numbers wait for the page's words, which say where each
+  // verse's last word ends; only a page holding a verse in a note fetches them.
+  paintDotsRef.current = (p, svg) => {
+    const dots = verseDotsRef.current;
+    const label = (key: string, count: number) => verseDotLabelRef.current?.(key, count) ?? key;
+    if (!dots || ![...dots.keys()].some((k) => resolver.resolve(k)?.page === p)) {
+      svg.querySelector("g[data-verse-dots]")?.remove();
+      return;
+    }
+    void ensureWords(resolver.edition, p).then((idx) => drawVerseDots(svg, verseDotsRef.current ?? new Map(), idx, label));
+  };
+  useEffect(() => {
+    for (const [p, mp] of pagesRef.current) paintDotsRef.current(p, mp.svg);
+  }, [verseDots, status]);
 
   // Redraw the pins and the mistakes on every mounted page when the notes
   // change; a page that mounts later draws its own in mountPage.

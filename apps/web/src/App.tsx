@@ -18,7 +18,9 @@ import {
   addVerse,
   joinNote,
   noteTitle,
+  notesOfVerse,
   suggestNotes,
+  verseDots as countVerseDots,
   type NoteScope,
   type ScopedNote,
   moveBookmark,
@@ -101,6 +103,7 @@ import {
   EditionPicker,
   NoteBox,
   NoteShelf,
+  VerseNotes,
   RevisionMap,
   RootLens,
   WordPartsHost,
@@ -1247,6 +1250,20 @@ export function App(): JSX.Element {
         })),
     [scoped, t, scopeName],
   );
+  // The dot by a verse's number, for a verse in a note with no pin on it
+  // (scoped-notes-verse-mark = A), and the list of its notes a tap on it opens.
+  const verseDots = useMemo(() => countVerseDots(scoped), [scoped]);
+  const [verseNotesAt, setVerseNotesAt] = useState<{ key: string; anchor: { top: number; bottom: number; x: number } } | null>(null);
+  const openVerseNotes = useCallback(
+    (key: string, anchor: { top: number; bottom: number; x: number }) => setVerseNotesAt({ key, anchor }),
+    [],
+  );
+  const closeVerseNotes = useCallback(() => setVerseNotesAt(null), []);
+  const verseNotes = useMemo(() => {
+    if (!verseNotesAt) return [];
+    const byId = new Map(noteShelf.map((s) => [s.id, s]));
+    return notesOfVerse(scoped, verseNotesAt.key).flatMap((n) => byId.get(n.id) ?? []);
+  }, [verseNotesAt, scoped, noteShelf]);
   const noteChoices = useMemo(() => {
     if (!openNote || openNote.id !== freshNoteId || joined) return null;
     const s = suggestNotes(
@@ -2680,6 +2697,9 @@ export function App(): JSX.Element {
                   tool={tool}
                   notes={notes}
                   noteLabel={noteLabel}
+                  verseDots={verseDots}
+                  verseDotLabel={t.verseInNotes}
+                  onOpenVerseNotes={openVerseNotes}
                   onPlaceNote={placeNote}
                   onOpenNote={setNoteOpenId}
                   onMarkWord={markWord}
@@ -2744,6 +2764,9 @@ export function App(): JSX.Element {
                 tool={tool}
                 notes={notes}
                 noteLabel={noteLabel}
+                verseDots={verseDots}
+                verseDotLabel={t.verseInNotes}
+                onOpenVerseNotes={openVerseNotes}
                 onPlaceNote={placeNote}
                 onOpenNote={setNoteOpenId}
                 onMarkWord={markWord}
@@ -3114,6 +3137,22 @@ export function App(): JSX.Element {
         pageContext={pageContext}
         fisheye={fisheye}
       />
+
+      {verseNotesAt && verseNotes.length > 0 && (
+        <Suspense fallback={null}>
+          <VerseNotes
+            head={t.verseInNotes(verseNotesAt.key, verseNotes.length)}
+            notes={verseNotes}
+            anchor={verseNotesAt.anchor}
+            onFollow={(id) => {
+              const key = verseNotesAt.key;
+              closeVerseNotes();
+              followNote(id, Math.max(0, scoped.find((n) => n.id === id)?.verses.findIndex((v) => v.key === key) ?? 0));
+            }}
+            onClose={closeVerseNotes}
+          />
+        </Suspense>
+      )}
 
       {openNote && (
         <Suspense fallback={null}>
