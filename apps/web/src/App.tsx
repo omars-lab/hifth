@@ -29,6 +29,7 @@ import {
   notesOfVerse,
   suggestNotes,
   verseDots as countVerseDots,
+  confusionMarks as countConfusionMarks,
   type NoteScope,
   type ScopedNote,
   moveBookmark,
@@ -132,7 +133,7 @@ import { CoachMarks } from "./components/CoachMarks";
 import { BookmarkRibbons } from "./components/BookmarkRibbons";
 import { UndoBar } from "./components/UndoBar";
 import { NoteFollow } from "./components/NoteFollow";
-import { useBookmarks, useNotes, useSeam } from "./useBookmarks";
+import { useBookmarks, useConfusions, useNotes, useSeam } from "./useBookmarks";
 import { LiveAnnouncer, useAnnouncer } from "./components/LiveAnnouncer";
 import { RootLensTrigger } from "./components/RootLensTrigger";
 import { PlayTrigger } from "./components/PlayTrigger";
@@ -1282,6 +1283,10 @@ export function App(): JSX.Element {
   // The dot by a verse's number, for a verse in a note with no pin on it
   // (scoped-notes-verse-mark = A), and the list of its notes a tap on it opens.
   const verseDots = useMemo(() => countVerseDots(scoped), [scoped]);
+  // The red mark by a verse the reader's memory jumped away from
+  // (confusion-jumps, step 3): how many different verses it went to.
+  const { confusions } = useConfusions(announce, t.bmNotSaved);
+  const confusionMarks = useMemo(() => countConfusionMarks(confusions), [confusions]);
   const [verseNotesAt, setVerseNotesAt] = useState<{ key: string; anchor: { top: number; bottom: number; x: number } } | null>(null);
   const openVerseNotes = useCallback(
     (key: string, anchor: { top: number; bottom: number; x: number }) => setVerseNotesAt({ key, anchor }),
@@ -2866,6 +2871,8 @@ export function App(): JSX.Element {
                   noteLabel={noteLabel}
                   verseDots={verseDots}
                   verseDotLabel={t.verseInNotes}
+                  confusionMarks={confusionMarks}
+                  confusionMarkLabel={t.jumpsFrom}
                   onOpenVerseNotes={openVerseNotes}
                   onPlaceNote={placeNote}
                   onOpenNote={setNoteOpenId}
@@ -2933,6 +2940,8 @@ export function App(): JSX.Element {
                 noteLabel={noteLabel}
                 verseDots={verseDots}
                 verseDotLabel={t.verseInNotes}
+                confusionMarks={confusionMarks}
+                confusionMarkLabel={t.jumpsFrom}
                 onOpenVerseNotes={openVerseNotes}
                 onPlaceNote={placeNote}
                 onOpenNote={setNoteOpenId}

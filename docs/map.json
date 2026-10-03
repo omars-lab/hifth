@@ -2191,6 +2191,16 @@
           "file": "apps/web/src/bookmark-store.ts",
           "symbol": "readDevice",
           "note": "Which device a jump was marked on (question 5, answer A): a random id made once per install, never derived from the device, and a plain name from the browser that the reader can change."
+        },
+        {
+          "file": "apps/web/src/useBookmarks.ts",
+          "symbol": "useConfusions",
+          "note": "The app's hold on the jumps, the same shape as the notes': read once, every change written back whole, one write after another, nothing written until the read has landed."
+        },
+        {
+          "file": "apps/web/src/components/PageStage.tsx",
+          "symbol": "drawConfusionMarks",
+          "note": "The mark by a verse you jumped away from: a red disc with the count, on the lower shoulder of the verse number under the note dot's place, with a short wavy tail. A question mark when no verse is named yet; grey once every jump from it is beaten. Pictures: run the confusions browser test with HIFTH_SHOTS set to a folder."
         }
       ],
       "extend": [

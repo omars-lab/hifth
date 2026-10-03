@@ -132,6 +132,7 @@ const messages: Catalog = {
   jumpPlaceholder: "البقرة · ٢:٢٥٥ · جزء ٩",
   jumpResults: "النتائج",
   jumpStartsAt: (d) => "يبدأ من " + d.label,
+  jumpsFrom: (d) => "من " + d.keyText + " انتقل حفظك إلى " + plural(LC, d.n, { zero: "آية لم تُسمَّ بعد", one: "آية أخرى", two: "آيتين أخريين", few: d.nText + " آيات أخرى", many: d.nText + " آية أخرى", other: d.nText + " آية أخرى" }),
   juzBoth: (d) => "الجزء " + d.aText + " ← " + d.bText,
   juzEdge: (d) => "لا جزء في هذا الاتجاه · الجزء " + d.juzText,
   juzGroup: "الأجزاء",

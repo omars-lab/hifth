@@ -375,6 +375,7 @@
   "noteAboutNow": "This note is now about {scope}",
   "noteUntitled": "A note with no words yet",
   "verseInNotes": "{keyText} is in {n, plural, one{{nText} note} other{{nText} notes}}",
+  "jumpsFrom": "From {keyText} you have jumped to {n, plural, =0{a verse not named yet} one{{nText} other verse} other{{nText} other verses}}",
   "noteVerseOut": "Take this verse out",
   "noteVerseTakenOut": "Verse taken out of the note",
   "noteShelfHead": "Your notes",

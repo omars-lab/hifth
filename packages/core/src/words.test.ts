@@ -295,6 +295,15 @@ describe("verseNumberSpot — where the dot for a verse in a note goes", () => {
     expect(at.y).toBeLessThan(155.9 + 36.5 / 2);
   });
 
+  it("sits on the lower shoulder for a jump's mark, under the note dot and clear of it", () => {
+    const up = verseNumberSpot(lines, words)!;
+    const low = verseNumberSpot(lines, words, "lower")!;
+    expect(low.x).toBe(up.x);
+    expect(low.y).toBeGreaterThan(155.9 + 36.5 / 2);
+    expect(low.y).toBeLessThan(155.9 + 36.5);
+    expect(low.y - up.y).toBeGreaterThan(12);
+  });
+
   it("finds the last line however the outline lists its lines", () => {
     expect(verseNumberSpot([...lines].reverse(), words)).toEqual(verseNumberSpot(lines, words));
   });
