@@ -403,6 +403,8 @@ export interface Catalog {
   readonly vdCommentary: string;
   readonly vdCopy: string;
   readonly vdCopyAria: (d: { readonly label: string | number }) => string;
+  readonly vdJump: string;
+  readonly vdJumpAria: (d: { readonly label: string | number }) => string;
   readonly vdListen: string;
   readonly vdMark: string;
   readonly vdMarkAria: (d: { readonly label: string | number }) => string;

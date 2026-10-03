@@ -756,6 +756,8 @@ export interface Strings {
   vdNoteAria(label: string): string;
   vdCopy: string;
   vdCopyAria(label: string): string;
+  vdJump: string;
+  vdJumpAria(label: string): string;
   verseMore(label: string): string;
   playToPick: string;
   playingRun(from: string, to: string): string;
@@ -1351,6 +1353,8 @@ export function buildStrings(lang: Lang, m: Catalog): Strings {
     vdNoteAria: (label) => m.vdNoteAria({ label }),
     vdCopy: m.vdCopy,
     vdCopyAria: (label) => m.vdCopyAria({ label }),
+    vdJump: m.vdJump,
+    vdJumpAria: (label) => m.vdJumpAria({ label }),
     verseMore: (label) => m.verseMore({ label }),
     playToPick: m.playToPick,
     playingRun: (from, to) => m.playingRun({ from, to }),

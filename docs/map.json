@@ -2218,9 +2218,9 @@
           "note": "Where a finished jump is saved, from all three ways of naming its end. Its Undo takes back only the time it added (removeLastTime), not the whole set as it was, so a jump marked again keeps its earlier times."
         },
         {
-          "file": "apps/web/src/components/PhoneToolbar.tsx",
-          "symbol": "PHONE_TOOLS",
-          "note": "Phones leave the Jump tool out until its phone design (step 5) lands."
+          "file": "apps/web/src/App.tsx",
+          "symbol": "askJumpFrom",
+          "note": "The way in with no arrow to draw: \"Jump…\" in a verse's hold menu (and in the fuller drawer of options A and B) opens the same list straight away, by the verse. On a phone the Jump tool is also in the Tools tray, drawn on with the tray open like every phone tool."
         }
       ],
       "extend": [
