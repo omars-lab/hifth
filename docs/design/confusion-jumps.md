@@ -174,7 +174,7 @@ The owner asked that the icon "can also appear on the next wasl too". We read *w
 - **Tap the icon** on a verse: a small list opens beside it (never over the verse), one row per destination: "7:161 · 3 times · last on Tuesday". Each row has **Go** (turn to that verse), **Compare** (the side-by-side view of the two verses the app already has for look-alikes), **Again** (one more time, without drawing), and **Delete** (with Undo).
 - **Tap the arrow's label** on the page: the same list, opened at that row.
 - **All your jumps**: a list in the page map beside the bookmarks and notes, the jumps you hit most often first, each row going to its *from* verse. This is the "before I start, what do I keep getting wrong?" glance.
-- **Beaten or dismissed** (from the confusion-points design): a row can be marked beaten; the arrow and icon then turn grey, or go away entirely if you choose dismissed. Nothing is deleted unless you press Delete.
+- **Beaten or dismissed** (from the confusion-points design): a row can be marked beaten; the arrow and icon then turn grey, or go away entirely if you choose dismissed. Nothing is deleted unless you press Delete. *(Built 2026-10-03: a dismissed jump waits in a folded "Dismissed" group under "All your jumps", latest first, each with Bring back.)*
 
 ## How do jumps go into the saved file?
 

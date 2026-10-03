@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   againConfusion,
   allConfusions,
+  dismissedConfusions,
   confusionsFrom,
   confusionMarks,
   arrowsShown,
@@ -277,6 +278,20 @@ describe("all your jumps, for the page map", () => {
     const gone = set.find((c) => c.from.key === K("2:60"))!;
     set = setConfusionState(set, gone.id, "dismissed", 6_000);
     expect(allConfusions(set).map((c) => c.from.key)).toEqual([K("2:58"), K("2:59"), K("3:7")]);
+  });
+
+  it("keeps the dismissed ones apart, the latest dismissed first, to bring back", () => {
+    let set = markConfusion([], { key: K("3:7") }, { key: K("3:8") }, 1_000, PHONE);
+    set = markConfusion(set, { key: K("2:58") }, { key: K("7:161") }, 2_000, PHONE);
+    set = markConfusion(set, { key: K("2:60") }, { key: K("7:160") }, 3_000, PHONE);
+    const [a, b] = [set.find((c) => c.from.key === K("2:58"))!, set.find((c) => c.from.key === K("2:60"))!];
+    set = setConfusionState(set, b.id, "dismissed", 4_000);
+    set = setConfusionState(set, a.id, "dismissed", 5_000);
+    expect(dismissedConfusions(set).map((c) => c.from.key)).toEqual([K("2:58"), K("2:60")]);
+    // Brought back, a jump is listed with the others again.
+    set = setConfusionState(set, a.id, "sometimes", 6_000);
+    expect(dismissedConfusions(set).map((c) => c.from.key)).toEqual([K("2:60")]);
+    expect(allConfusions(set).map((c) => c.from.key)).toContain(K("2:58"));
   });
 });
 

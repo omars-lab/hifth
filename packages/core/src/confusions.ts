@@ -303,6 +303,15 @@ export function allConfusions(set: readonly Confusion[]): Confusion[] {
 }
 
 /**
+ * The jumps the reader dismissed, kept apart in the page map so one can be
+ * brought back: dismissing hides a jump, it never deletes it. The latest
+ * dismissed first, since that is the one most likely to be a slip.
+ */
+export function dismissedConfusions(set: readonly Confusion[]): Confusion[] {
+  return set.filter((c) => c.state === "dismissed").sort((a, b) => b.updatedAt - a.updatedAt);
+}
+
+/**
  * Load jumps from a saved file into what the device holds. Loading never
  * deletes. The same pair from two devices is one record whose times are both
  * lists joined (the same time on the same device once); the state, and the

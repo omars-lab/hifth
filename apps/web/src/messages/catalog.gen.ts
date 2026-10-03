@@ -127,10 +127,14 @@ export interface Catalog {
   readonly jumpArrowLabel: (d: { readonly keyText: string | number }) => string;
   readonly jumpArrowUnnamed: string;
   readonly jumpBeaten: string;
+  readonly jumpBringBack: string;
   readonly jumpCompare: string;
   readonly jumpDelete: string;
   readonly jumpDeleted: (d: { readonly fromText: string | number; readonly toText: string | number }) => string;
   readonly jumpDeletedUnsure: (d: { readonly fromText: string | number }) => string;
+  readonly jumpDismiss: string;
+  readonly jumpDismissed: (d: { readonly fromText: string | number; readonly toText: string | number }) => string;
+  readonly jumpDismissedUnsure: (d: { readonly fromText: string | number }) => string;
   readonly jumpEmpty: string;
   readonly jumpGo: string;
   readonly jumpInput: string;
@@ -145,6 +149,7 @@ export interface Catalog {
   readonly jumpPlaceholder: string;
   readonly jumpResults: string;
   readonly jumpSayWhere: string;
+  readonly jumpShelfDismissed: (d: { readonly nText: string | number }) => string;
   readonly jumpShelfEmpty: string;
   readonly jumpShelfHead: string;
   readonly jumpStartsAt: (d: { readonly label: string | number }) => string;

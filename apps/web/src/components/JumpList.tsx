@@ -57,6 +57,8 @@ interface JumpListProps {
   onGo: (to: string) => void;
   onAgain: (id: string) => void;
   onBeaten: (id: string, beaten: boolean) => void;
+  /** Hide it from the page; the page map keeps it, to bring back. */
+  onDismiss: (id: string) => void;
   onDelete: (id: string) => void;
   onSayWhere: (id: string) => void;
   onClose: () => void;
@@ -67,7 +69,8 @@ interface JumpListProps {
  * "How do you list, follow and delete jumps?"): one row for each verse your
  * memory went to from here, the most often first, each with Go, Compare
  * (the two verses side by side, as the look-alike list shows them), Again
- * (one more time, without drawing), Beaten, and Delete. A jump not named yet
+ * (one more time, without drawing), Beaten, Dismiss (off the page, kept in
+ * the page map's list to bring back), and Delete. A jump not named yet
  * offers Say where instead. Built and closed like the list a note dot opens.
  */
 export function JumpList({
@@ -78,6 +81,7 @@ export function JumpList({
   onGo,
   onAgain,
   onBeaten,
+  onDismiss,
   onDelete,
   onSayWhere,
   onClose,
@@ -163,6 +167,9 @@ export function JumpList({
                     {t.jumpSayWhere}
                   </button>
                 )}
+                <button type="button" className={own.action} onClick={() => onDismiss(r.id)}>
+                  {t.jumpDismiss}
+                </button>
                 <button type="button" className={`${own.action} ${own.delete}`} onClick={() => onDelete(r.id)}>
                   {t.jumpDelete}
                 </button>
