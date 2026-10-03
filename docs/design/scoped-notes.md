@@ -5,7 +5,7 @@
 > can have many ayahs added to it. Based on scope, we can suggest a note to add an ayah to,
 > especially recent notes in the same scope."*
 
-**Status:** steps 1 and 2 of 7 built on 2026-10-01. Step 1 is the rules (what each scope holds, adding and removing verses, which notes are offered, moving today's notes across, the saved file's version 2), with their tests. Step 2 moves today's notes across on the device the first time the app opens, keeps the old record untouched as a backup, and saves and loads the new kind of note in the file; the pins on the page look exactly as before. Step 3, the note tool offering existing notes, waits on question 4. Three of the seven questions near the end were answered by
+**Status:** steps 1 and 2 of 7 built on 2026-10-01, step 3 on 2026-10-02. Step 1 is the rules (what each scope holds, adding and removing verses, which notes are offered, moving today's notes across, the saved file's version 2), with their tests. Step 2 moves today's notes across on the device the first time the app opens, keeps the old record untouched as a backup, and saves and loads the new kind of note in the file; the pins on the page look exactly as before. Step 3 is the note tool offering existing notes, as question 4 was answered: a tap still makes a new note, its box offers up to three notes that can take the verse (the last used first, the rest behind *More notes…*), and one tap moves the verse into that note, with an Undo. The choices go away once you start typing, so a tap never throws words away; and on a note of several verses, the box's Delete takes only that verse out. Three of the seven questions near the end were answered by
 the owner on 2026-09-30; the two about feel will be built as live options and tried.
 
 ## The short version
@@ -436,8 +436,8 @@ since they are easy to change.
 
 Questions 4 and 6 are about how something feels in the hand, so each option was built on the
 real app on a phone and recorded: **[how adding a verse to a note should feel, and how the page
-shows it](scoped-notes-feel.md)** has the clips, what building them taught us, and the
-recommendations (C and A).
+shows it](scoped-notes-feel.md)** has the clips and what building them taught us. **Answered by
+the owner, 2026-10-02:** 4 is C and 6 is A, each as recommended.
 
 ### 1 · What scope does each of today's notes get when it moves across?
 
@@ -493,7 +493,7 @@ Recommended A, with the narrower scope breaking ties.
 | **C · A new note at once, its box showing the suggestions as one-tap choices** *(recommended)* | Today's one tap is kept; adding to a note is one more tap, not a detour | A busier box | The box needs room for three choices without hiding the text field |
 | **D · "Keep adding" mode: pins go to the last note used until you stop** | Quickest for a run of slips in one sitting | A pin can land in the wrong note without the reader noticing | Needs a visible "adding to …" state on the bar |
 
-Recommended C. All four were built and recorded: [the clips](scoped-notes-feel.md#question-1-when-you-tap-a-verse-with-the-note-tool-what-opens--4-options).
+**Decided C** (owner, 2026-10-02; [the record](../decisions/scoped-notes.md#when-you-tap-a-verse-with-the-note-tool-what-opens)). All four were built and recorded: [the clips](scoped-notes-feel.md#question-1-when-you-tap-a-verse-with-the-note-tool-what-opens--4-options).
 
 ### 5 · Does each verse in a note get its own line of text?
 
@@ -520,7 +520,7 @@ Recommended A now, B as soon as the first look-alike note is written and feels c
 | **C · Nothing on the page; only in the verse's menu** | The cleanest page | The reminder is gone unless you hold the verse | The page no longer tells you anything about your notes |
 | **D · A faint wash over the verse** | Unmissable | Competes with the highlighter and look-alike colours | Takes a colour the page may need for something else |
 
-Recommended A. All four were drawn on page 7 at phone size: [the pictures](scoped-notes-feel.md#question-2-how-does-the-page-show-that-a-verse-is-in-a-note--4-options).
+**Decided A** (owner, 2026-10-02; [the record](../decisions/scoped-notes.md#how-does-the-page-show-that-a-verse-is-in-a-note)). All four were drawn on page 7 at phone size: [the pictures](scoped-notes-feel.md#question-2-how-does-the-page-show-that-a-verse-is-in-a-note--4-options).
 
 ### 7 · Which scope is ready-picked when making a new note?
 
@@ -656,4 +656,4 @@ flowchart LR
 7. **Changing a note's scope**, and per-verse lines if question 5 goes that way.
 
 Steps 1 and 2 can start before any question is answered, using the recommended answers to
-questions 1 and 2. Step 3 waits on question 4, step 4 on question 6.
+questions 1 and 2. Step 3 waited on question 4 and is built; step 4 waits on nothing now that question 6 is answered.

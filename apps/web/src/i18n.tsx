@@ -671,6 +671,18 @@ export interface Strings {
   noteDeleted: string;
   noteRestored: string;
   noteLoaded(n: number): string;
+  /** Over the notes a fresh pin could join instead of being a note of its own. */
+  noteAddTo: string;
+  noteMore: string;
+  /** Said in the box once a verse has joined a note, named by its verse. */
+  noteJoined(label: string): string;
+  noteVerses(n: number): string;
+  noteWhole: string;
+  /** A note's title when it has no words yet. */
+  noteUntitled: string;
+  /** On a pin of a note with several verses, Delete takes only that verse out. */
+  noteVerseOut: string;
+  noteVerseTakenOut: string;
   toolMistake: string;
   toolMistakeHint: string;
   /** Said when a word is marked, named by its verse. */
@@ -1219,6 +1231,14 @@ export function buildStrings(lang: Lang, m: Catalog): Strings {
     noteDeleted: m.noteDeleted,
     noteRestored: m.noteRestored,
     noteLoaded: (count) => m.noteLoaded({ n: count, nText: n(count) }),
+    noteAddTo: m.noteAddTo,
+    noteMore: m.noteMore,
+    noteJoined: (label) => m.noteJoined({ label }),
+    noteVerses: (count) => m.noteVerses({ n: count, nText: n(count) }),
+    noteWhole: m.noteWhole,
+    noteUntitled: m.noteUntitled,
+    noteVerseOut: m.noteVerseOut,
+    noteVerseTakenOut: m.noteVerseTakenOut,
     toolMistake: m.toolMistake,
     toolMistakeHint: m.toolMistakeHint,
     mistakeMarked: (label) => m.mistakeMarked({ label }),

@@ -15,6 +15,12 @@ import {
   pickMistakeSign,
   removeNote,
   restoreNote,
+  addVerse,
+  joinNote,
+  noteTitle,
+  suggestNotes,
+  type NoteScope,
+  type ScopedNote,
   moveBookmark,
   openBookmark,
   parseBookmarkFile,
@@ -1196,12 +1202,74 @@ export function App(): JSX.Element {
   // pin at a word and opens a box beside it; the pin stays and reopens the box.
   // Kept on the device beside the bookmarks, and carried in the same saved file
   // (note-persistence = B, note-export-shape = C).
-  const { notes, scoped, commit: commitNotes, loadFile: loadNotesFile } = useNotes(announce, t.bmNotSaved);
+  const {
+    notes,
+    scoped,
+    commit: commitNotes,
+    commitScoped,
+    loadFile: loadNotesFile,
+  } = useNotes(announce, t.bmNotSaved);
   const [noteOpenId, setNoteOpenId] = useState<string | null>(null);
   const openNote = notes.find((n) => n.id === noteOpenId) ?? null;
+  // A pin just made by the note, harakat or word tool: its box offers the
+  // notes it could join instead (scoped-notes-note-tool = C). Once it has
+  // joined one, `joined` holds the notes as they were, for its Undo.
+  const [freshNoteId, setFreshNoteId] = useState<string | null>(null);
+  const [joined, setJoined] = useState<{ before: readonly ScopedNote[]; freshId: string; pin: string } | null>(null);
+  // Which page of this print a verse is on, so a note scoped to a page is offered only there.
+  const pageOfKey = useCallback((key: string) => resolver?.resolve(key)?.page ?? null, [resolver]);
+  /** The note a pin belongs to: its first pin carries the note's own id, the rest the id and the verse. */
+  const noteOfPin = (pin: string) => scoped.find((s) => s.id === pin || pin.startsWith(`${s.id}~`)) ?? null;
+  const scopeName = (scope: NoteScope): string =>
+    scope.type === "page"
+      ? t.pageN(scope.page)
+      : scope.type === "juz"
+        ? t.juzN(scope.juz)
+        : scope.type === "hizb"
+          ? t.hizbN(scope.hizb)
+          : scope.type === "surah"
+            ? t.surahName(scope.surah)
+            : t.noteWhole;
+  const noteChoices = useMemo(() => {
+    if (!openNote || openNote.id !== freshNoteId || joined) return null;
+    const s = suggestNotes(
+      scoped.filter((n) => n.id !== freshNoteId),
+      openNote.key,
+      pageOfKey,
+    );
+    if (s.offered.length === 0) return null;
+    const named = (n: ScopedNote) => ({ id: n.id, title: noteTitle(n) || t.noteUntitled });
+    return { offered: s.offered.map(named), more: s.more.map(named) };
+  }, [openNote, freshNoteId, joined, scoped, pageOfKey, t]);
+  const openFresh = useCallback((id: string) => {
+    setJoined(null);
+    setFreshNoteId(id);
+    setNoteOpenId(id);
+  }, []);
+  const joinOpenNote = (intoId: string) => {
+    const n = openNote;
+    if (!n) return;
+    const got = joinNote(scoped, n.id, intoId, Date.now(), pageOfKey);
+    if (!got) return;
+    commitScoped(got.notes, "");
+    setJoined({ before: scoped, freshId: n.id, pin: got.pin });
+    setNoteOpenId(got.pin);
+  };
+  const undoJoin = () => {
+    if (!joined) return;
+    commitScoped(joined.before, "");
+    openFresh(joined.freshId);
+  };
   // A deleted note (or a cleared mistake) waits here for a few seconds so
   // "Undo" can put it back; `said` and `restored` are what the bar and the undo say.
-  const [deletedNote, setDeletedNote] = useState<{ note: Note; said: string; restored: string } | null>(null);
+  // A verse taken out of a note of several keeps `owner`, the note as it was, so
+  // Undo puts the verse back in that note rather than making it a note of its own.
+  const [deletedNote, setDeletedNote] = useState<{
+    note: Note;
+    said: string;
+    restored: string;
+    owner?: ScopedNote;
+  } | null>(null);
 
   const saveBookmarkFile = useCallback(() => {
     // The file carries the notes that gather verses and, apart from them, the
@@ -1267,9 +1335,9 @@ export function App(): JSX.Element {
       const next = addNote(notes, at, Date.now());
       commitNotes(next, "");
       putDownAfterUse();
-      setNoteOpenId(next[next.length - 1]!.id);
+      openFresh(next[next.length - 1]!.id);
     },
-    [notes, commitNotes, putDownAfterUse],
+    [notes, commitNotes, putDownAfterUse, openFresh],
   );
   // The harakat tool's click: pin a note on the sign the magnifier rings, and
   // open the box. The tool stays up, so the next sign is one more click.
@@ -1277,9 +1345,9 @@ export function App(): JSX.Element {
     (at: { page: number; key: string; word: number; mark: number; x: number; y: number }) => {
       const next = addNote(notes, at, Date.now());
       commitNotes(next, "");
-      setNoteOpenId(next[next.length - 1]!.id);
+      openFresh(next[next.length - 1]!.id);
     },
-    [notes, commitNotes],
+    [notes, commitNotes, openFresh],
   );
   // The word tool's tap opens the word into its parts; a part picked drops a
   // note on it (a sign, or the whole word).
@@ -1300,7 +1368,7 @@ export function App(): JSX.Element {
     if (!w) return;
     const next = addNote(notes, { page: w.page, key: w.key, word: w.word, ...at }, Date.now());
     commitNotes(next, "");
-    setNoteOpenId(next[next.length - 1]!.id);
+    openFresh(next[next.length - 1]!.id);
   };
   /** Put focus back on a pin after its box closes, so the keyboard is not lost. */
   const focusPin = (id: string) =>
@@ -1312,6 +1380,8 @@ export function App(): JSX.Element {
   const closeNote = (text: string) => {
     const n = openNote;
     setNoteOpenId(null);
+    setFreshNoteId(null);
+    setJoined(null);
     // The harakat and word tools stay up for the next sign; the note tool is
     // used once, unless it is locked on.
     if (toolRef.current !== "sign" && toolRef.current !== "word") putDownAfterUse();
@@ -1327,12 +1397,32 @@ export function App(): JSX.Element {
   const deleteNote = () => {
     const n = openNote;
     setNoteOpenId(null);
+    setFreshNoteId(null);
+    setJoined(null);
     if (!n) return;
+    const owner = noteOfPin(n.id);
+    if (owner && owner.verses.length > 1) {
+      commitNotes(removeNote(notes, n.id), t.noteVerseTakenOut);
+      setDeletedNote({ note: n, said: t.noteVerseTakenOut, restored: t.noteRestored, owner });
+      return;
+    }
     commitNotes(removeNote(notes, n.id), t.noteDeleted);
     setDeletedNote({ note: n, said: t.noteDeleted, restored: t.noteRestored });
   };
   const undoDelete = () => {
     if (!deletedNote) return;
+    const { owner, note } = deletedNote;
+    const verse = owner?.verses.find((v) => v.key === note.key);
+    if (owner && verse) {
+      // Back into the same note; or, if the note has gone since, the note as it was.
+      const kept = scoped.some((s) => s.id === owner.id);
+      commitScoped(
+        kept ? addVerse(scoped, owner.id, verse, Date.now(), pageOfKey) : [...scoped, owner],
+        deletedNote.restored,
+      );
+      setDeletedNote(null);
+      return;
+    }
     commitNotes(restoreNote(notes, deletedNote.note), deletedNote.restored);
     setDeletedNote(null);
   };
@@ -2971,8 +3061,20 @@ export function App(): JSX.Element {
             key={openNote.id}
             note={openNote}
             label={t.ayahLabel(openNote.key) ?? openNote.key}
+            head={(() => {
+              const of = noteOfPin(openNote.id);
+              return of && of.verses.length > 1 ? `${scopeName(of.scope)} · ${t.noteVerses(of.verses.length)}` : undefined;
+            })()}
+            deleteLabel={(noteOfPin(openNote.id)?.verses.length ?? 0) > 1 ? t.noteVerseOut : undefined}
             onClose={closeNote}
             onDelete={deleteNote}
+            choices={noteChoices}
+            onJoin={joinOpenNote}
+            joined={
+              joined && joined.pin === openNote.id
+                ? { said: t.noteJoined(t.ayahLabel(openNote.key) ?? openNote.key), onUndo: undoJoin }
+                : null
+            }
           />
         </Suspense>
       )}

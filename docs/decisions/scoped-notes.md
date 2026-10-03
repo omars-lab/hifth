@@ -1,10 +1,9 @@
-# Notes that gather verses: what were the first three answers?
+# Notes that gather verses: what did the owner answer?
 
 The full design, with every option, what other apps do and the build order, is
 [the scoped-notes design](../design/scoped-notes.md). This record holds the three answers the
-owner gave on 2026-09-30, and why. Four more questions are still open in the design; two of them
-are about how something feels in the hand, so they will be built and tried, not chosen from a
-picture.
+owner gave on 2026-09-30, and the two given on 2026-10-02 after each option was built on a phone
+and recorded, and why.
 
 **Words used here.** A *verse* (ayah) is one numbered verse, written surah:verse. A *surah* is
 one of the 114 chapters. A *juz* is one of the 30 equal parts used to plan revision; a *hizb* is
@@ -60,10 +59,43 @@ saved-notes file at once, and an older copy of the app would silently drop the p
 | **A** | **One text per note** | **Simplest; old notes move as they are** | **Differences are written in prose** | **Per-verse lines can come later** |
 | B | One text plus a line per verse | A look-alike note says beside each verse what differs | Bigger box, bigger build | The saved file changes now |
 
+## When you tap a verse with the note tool, what opens?
+
+**Decided: a new note at once, with your three likeliest notes as one-tap choices in its box**
+(option C). Owner, 2026-10-02.
+
+Most slips start a new thought, so the one tap that does that today is kept. Adding the verse to
+a note you already have is one more tap, never a detour through a list. The recording showed the
+cost: the box grows about three lines, and with a full row per note it covered nine lines of the
+page, so the choices are small and side by side, with *More notes…* for the rest. Each option is
+drawn and recorded in [how adding a verse to a note should feel](../design/scoped-notes-feel.md).
+
+| | Option | Pros | Cons | Implications |
+| --- | --- | --- | --- | --- |
+| A | A new note, as today | Nothing to learn; smallest box | No way to add to a note from the tool | Adding only from the verse menu |
+| B | Your notes first | Adding is the natural path | One more tap for every new note | The tool feels slower than today |
+| **C** | **A new note, with three choices in its box** | **Today's one tap kept; your notes in reach** | **A taller box covers more of the page** | **Choices stay small; *More notes…* opens the rest** |
+| D | Keep adding to the last note | Fastest for a run of slips | Filed a slip in the wrong note without a word | A bar on screen until you stop |
+
+## How does the page show that a verse is in a note?
+
+**Decided: a small dot by the verse number, with a count when the verse is in more than one
+note** (option A). Owner, 2026-10-02.
+
+It covers none of the words, reads at phone size, and a tap on it lists the verse's notes. The
+tint covered a third of the page with four verses in notes and looked like the highlighter; the
+edge mark was hard to see and sat where the thumb turns the page; showing nothing left the page
+silent about your notes.
+
+| | Option | Pros | Cons | Implications |
+| --- | --- | --- | --- | --- |
+| **A** | **Dot by the number** | **Covers no words; one mark however many notes** | **At the verse's end; needs room to tap** | **Moves off any pin on that number** |
+| B | Mark at the edge | Away from the text | Hard to see; where the thumb turns the page | Shares the edge with the page turn |
+| C | Nothing | The cleanest page | No reminder | Notes found only through menus and lists |
+| D | Tint over the verse | Unmissable | A third of the page; looks like the highlighter | Uses up a colour |
+
 ## What is this not settling?
 
-How the note tool behaves on a tap (start a new note, or keep adding to the last one), and how
-the page shows that a verse is in a note. Both were built on a phone and recorded on
-2026-10-01, four options each: [how adding a verse to a note should feel](../design/scoped-notes-feel.md). Which
-note is offered first (the most recently used) and which scope is ready-picked (the kind used
-last time) are being built as the design recommends and are easy to change.
+Which note is offered first (the most recently used) and which scope is ready-picked (the kind
+used last time) are built as the design recommends and are easy to change. The dot's exact size
+and colour are tuned on a real phone once it is built.
