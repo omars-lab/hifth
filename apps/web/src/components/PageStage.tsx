@@ -38,12 +38,14 @@ import {
   parseAyahKey,
   rectsOf,
   verseNumberSpot,
+  squiggle,
   turnCommit,
   viewFitsAcross,
   Highlighter,
   WordIndex,
   DEFAULT_HOP_ZOOM,
   WHEEL_TURN_REST,
+  type ConfusionMark,
   type EditionId,
   type Fold,
   type MarkShard,
@@ -297,6 +299,13 @@ interface PageStageProps {
   /** A dot was pressed: list the verse's notes beside it. */
   onOpenVerseNotes?: (key: string, at: { top: number; bottom: number; x: number }) => void;
   /**
+   * The reader's jumps, by the verse they jumped away from, for the red mark
+   * on the lower shoulder of its number (confusion-jumps, step 3).
+   * `confusionMarkLabel` names it.
+   */
+  confusionMarks?: ReadonlyMap<string, ConfusionMark>;
+  confusionMarkLabel?: (key: string, count: number) => string;
+  /**
    * Under the mistake tool (step 3), a tap on a word. Whether that marks it or
    * opens its signs is App's business; the stage only says which word.
    */
@@ -483,6 +492,63 @@ function drawVerseDots(
       dot.append(n);
     }
     g.append(dot);
+  }
+  svg.append(g);
+}
+
+/**
+ * Draw a page's jump marks (confusion-jumps, step 3), replacing whatever it
+ * had: a short red wavy line with an arrowhead on the lower shoulder of the
+ * verse's number, under the note dot's place, and beside it how many
+ * different verses the reader's memory went to from here. A verse whose
+ * every jump is beaten keeps its mark, greyed, so the work shows.
+ */
+function drawConfusionMarks(
+  svg: SVGSVGElement,
+  marks: ReadonlyMap<string, ConfusionMark>,
+  words: WordIndex | null,
+  labelOf: (key: string, count: number) => string,
+): void {
+  svg.querySelector("g[data-confusion-marks]")?.remove();
+  if (marks.size === 0 || !words) return;
+  const g = document.createElementNS(SVG_NS, "g");
+  g.setAttribute("data-confusion-marks", "");
+  for (const [key, m] of marks) {
+    const at = parseAyahKey(key);
+    const outline = at && svg.querySelector(`path.ayahPolygon[surah="${at.surah}"][ayah="${at.ayah}"]`);
+    const lines = outline ? rectsOf(outline.getAttribute("d") ?? "") : null;
+    const span = words.span(key);
+    if (!at || !lines || !span) continue;
+    const spot = verseNumberSpot(lines, words.boxesFor(key, span.from, span.to), "lower");
+    if (!spot) continue;
+    const mark = document.createElementNS(SVG_NS, "g");
+    mark.setAttribute("data-confusion-mark", `${at.surah}:${at.ayah}`);
+    mark.setAttribute("data-verse-key", key);
+    if (m.beaten) mark.setAttribute("data-beaten", "");
+    mark.setAttribute("role", "button");
+    mark.setAttribute("tabindex", "0");
+    mark.setAttribute("aria-label", labelOf(key, m.count));
+    mark.setAttribute("transform", `translate(${spot.x} ${spot.y})`);
+    const hit = document.createElementNS(SVG_NS, "circle");
+    hit.setAttribute("data-hit", "");
+    hit.setAttribute("r", "12");
+    // A red disc like the note dot's, so the two read as one family, with a
+    // short wavy tail trailing off it: the arrow the reader drew, in small.
+    const tail = document.createElementNS(SVG_NS, "path");
+    tail.setAttribute("data-tail", "");
+    tail.setAttribute("d", squiggle({ x: 3.5, y: 2.5 }, { x: 11, y: 5.5 }, key, 2.6, 1.1));
+    const glyph = document.createElementNS(SVG_NS, "circle");
+    glyph.setAttribute("data-glyph", "");
+    glyph.setAttribute("r", "4.6");
+    mark.append(hit, tail, glyph);
+    const n = document.createElementNS(SVG_NS, "text");
+    n.setAttribute("text-anchor", "middle");
+    n.setAttribute("dominant-baseline", "central");
+    // No verse named yet: a question mark, so the disc never reads as empty.
+    n.textContent = m.count > 0 ? String(m.count) : "?";
+    if (m.count === 0) n.setAttribute("data-unsure", "");
+    mark.append(n);
+    g.append(mark);
   }
   svg.append(g);
 }
@@ -776,6 +842,8 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
     verseDots,
     verseDotLabel,
     onOpenVerseNotes,
+    confusionMarks,
+    confusionMarkLabel,
     onPlaceNote,
     onOpenNote,
     onMarkWord,
@@ -873,6 +941,11 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
   const onOpenVerseNotesRef = useRef(onOpenVerseNotes);
   onOpenVerseNotesRef.current = onOpenVerseNotes;
   const paintDotsRef = useRef<(page: number, svg: SVGSVGElement) => void>(() => {});
+  const confusionMarksRef = useRef(confusionMarks);
+  confusionMarksRef.current = confusionMarks;
+  const confusionMarkLabelRef = useRef(confusionMarkLabel);
+  confusionMarkLabelRef.current = confusionMarkLabel;
+  const paintJumpsRef = useRef<(page: number, svg: SVGSVGElement) => void>(() => {});
   /** Set once the word shards can be fetched; mountPage's tap listener calls it. */
   const placeNoteRef = useRef<(page: number, key: string, x: number, y: number) => void>(() => {});
   const onMarkWordRef = useRef(onMarkWord);
@@ -1551,6 +1624,7 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
       drawNotePins(svg, targetPage, notesRef.current, (n) => noteLabelRef.current?.(n) ?? n.key);
       paintMistakesRef.current(targetPage, svg);
       paintDotsRef.current(targetPage, svg);
+      paintJumpsRef.current(targetPage, svg);
       wireNotes(svg, targetPage, hl);
       return mp;
     },
@@ -2667,6 +2741,23 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
   useEffect(() => {
     for (const [p, mp] of pagesRef.current) paintDotsRef.current(p, mp.svg);
   }, [verseDots, status]);
+
+  // The jump marks, the same way: a page with no jump from any of its verses
+  // fetches nothing.
+  paintJumpsRef.current = (p, svg) => {
+    const marks = confusionMarksRef.current;
+    const label = (key: string, count: number) => confusionMarkLabelRef.current?.(key, count) ?? key;
+    if (!marks || ![...marks.keys()].some((k) => resolver.resolve(k)?.page === p)) {
+      svg.querySelector("g[data-confusion-marks]")?.remove();
+      return;
+    }
+    void ensureWords(resolver.edition, p).then((idx) =>
+      drawConfusionMarks(svg, confusionMarksRef.current ?? new Map(), idx, label),
+    );
+  };
+  useEffect(() => {
+    for (const [p, mp] of pagesRef.current) paintJumpsRef.current(p, mp.svg);
+  }, [confusionMarks, status]);
 
   // Redraw the pins and the mistakes on every mounted page when the notes
   // change; a page that mounts later draws its own in mountPage.

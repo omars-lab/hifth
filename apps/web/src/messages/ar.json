@@ -375,6 +375,7 @@
   "noteAboutNow": "صارت هذه الملاحظة عن {scope}",
   "noteUntitled": "ملاحظة بلا كلمات بعد",
   "verseInNotes": "{keyText} في {n, plural, zero{لا ملاحظات} one{ملاحظة واحدة} two{ملاحظتين} few{{nText} ملاحظات} many{{nText} ملاحظة} other{{nText} ملاحظة}}",
+  "jumpsFrom": "من {keyText} انتقل حفظك إلى {n, plural, zero{آية لم تُسمَّ بعد} one{آية أخرى} two{آيتين أخريين} few{{nText} آيات أخرى} many{{nText} آية أخرى} other{{nText} آية أخرى}}",
   "noteVerseOut": "أخرج هذه الآية",
   "noteVerseTakenOut": "أُخرجت الآية من الملاحظة",
   "noteShelfHead": "ملاحظاتك",

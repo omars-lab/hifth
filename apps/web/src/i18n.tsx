@@ -694,6 +694,8 @@ export interface Strings {
   noteUntitled: string;
   /** The dot by a verse's number, and the list it opens: "2:39 is in 2 notes". */
   verseInNotes(key: string, count: number): string;
+  /** The mark by a verse you jumped away from: "From 2:58 you have jumped to 2 other verses". */
+  jumpsFrom(key: string, count: number): string;
   /** On a pin of a note with several verses, Delete takes only that verse out. */
   noteVerseOut: string;
   noteVerseTakenOut: string;
@@ -1284,6 +1286,7 @@ export function buildStrings(lang: Lang, m: Catalog): Strings {
     verseInNotes: (key, count) => {
       return m.verseInNotes({ keyText: fmtAyahRef(key, lang) ?? key, n: count, nText: n(count) });
     },
+    jumpsFrom: (key, count) => m.jumpsFrom({ keyText: fmtAyahRef(key, lang) ?? key, n: count, nText: n(count) }),
     noteVerseOut: m.noteVerseOut,
     noteVerseTakenOut: m.noteVerseTakenOut,
     noteShelfHead: m.noteShelfHead,

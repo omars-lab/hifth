@@ -1,12 +1,26 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { fromPins, isMistake, mergeNotesFile, pinsOf, type Bookmark, type Note, type ScopedNote } from "@hifth/core";
+import {
+  fromPins,
+  isMistake,
+  mergeConfusions,
+  mergeNotesFile,
+  pinsOf,
+  type Bookmark,
+  type Confusion,
+  type Note,
+  type ScopedNote,
+} from "@hifth/core";
 import {
   loadNotes,
   readBookmarks,
+  readConfusions,
+  readDevice,
   readSeam,
   writeAllNotes,
   writeBookmarks,
+  writeConfusions,
   writeSeam,
+  type Device,
   type HeldNotes,
 } from "./bookmark-store";
 
@@ -212,3 +226,79 @@ interface Held {
 }
 
 const EMPTY: Held = { scoped: [], mistakes: [] };
+
+/**
+ * The reader's confusion jumps (docs/design/confusion-jumps.md), held like the
+ * notes: read once, every change written back whole, one write after another,
+ * and nothing written until the read has landed, so a failed read never
+ * overwrites what the device holds. `device` is this install's id, for the
+ * time a jump is marked; null until it is read, or when there is no store.
+ */
+export function useConfusions(
+  announce: (line: string) => void,
+  notSaved: string,
+): {
+  confusions: readonly Confusion[];
+  device: Device | null;
+  commit: (next: readonly Confusion[], said: string) => void;
+  loadFile: (fileJumps: readonly Confusion[]) => number;
+} {
+  const [held, setHeld] = useState<readonly Confusion[]>([]);
+  const [device, setDevice] = useState<Device | null>(null);
+  const latest = useRef<readonly Confusion[]>([]);
+  const read = useRef(false);
+  const queue = useRef<Promise<unknown>>(Promise.resolve());
+
+  const hold = useCallback((next: readonly Confusion[]) => {
+    latest.current = next;
+    setHeld(next);
+  }, []);
+
+  useEffect(() => {
+    let live = true;
+    void readDevice(typeof navigator === "undefined" ? "" : navigator.userAgent).then((d) => {
+      if (live) setDevice(d);
+    });
+    queue.current = readConfusions().then((got) => {
+      if (!live || !got) return;
+      read.current = true;
+      // Jumps marked before the read landed are kept beside what was read.
+      hold(mergeConfusions(got, latest.current));
+    });
+    return () => {
+      live = false;
+    };
+  }, [hold]);
+
+  const save = useCallback(
+    (said: string) => {
+      queue.current = queue.current
+        .then(() => (read.current ? writeConfusions(latest.current) : false))
+        .then((ok) => {
+          if (!ok) announce(notSaved);
+          else if (said) announce(said);
+        });
+    },
+    [announce, notSaved],
+  );
+
+  const commit = useCallback(
+    (next: readonly Confusion[], said: string) => {
+      hold(next);
+      save(said);
+    },
+    [hold, save],
+  );
+
+  const loadFile = useCallback(
+    (fileJumps: readonly Confusion[]) => {
+      const before = latest.current.length;
+      hold(mergeConfusions(latest.current, fileJumps));
+      save("");
+      return latest.current.length - before;
+    },
+    [hold, save],
+  );
+
+  return { confusions: held, device, commit, loadFile };
+}
