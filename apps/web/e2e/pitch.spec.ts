@@ -431,6 +431,23 @@ test.describe("Hifth · links straight into the commentary", () => {
     // The address settles on the verse alone: the panel was a way in, not a view.
     await expect.poll(() => page.evaluate(() => location.hash)).toBe("#/hafs-kfqc/2:255");
   });
+
+  test("an introduction ends on its own words, and one the book's capture cut short says so", async ({ page }) => {
+    // Every introduction ended on the opening verse's translation, which the
+    // print sets under it as the surah's first line, and Al-Kahf's began on
+    // "Finally," with nothing to say its start was missing.
+    await page.goto("/#/hafs-kfqc/18:10?open=context");
+    const intro = sheet(page).getByRole("region", { name: "Surah introduction" });
+    await expect(intro).toBeVisible({ timeout: 20_000 });
+    const paras = (await intro.locator("p").allTextContents()).map((p) => p.trim());
+    const opening = await page.evaluate(async () => {
+      const book = await (await fetch("./assets/private/study-quran/1.json")).json();
+      return (book.verses["1:1"].translation as string).replace(/[.\s]+$/, "");
+    });
+    expect(opening.length).toBeGreaterThan(0);
+    expect(paras.map((p) => p.replace(/[.\s]+$/, ""))).not.toContain(opening);
+    expect(paras[0]).toMatch(/^… /);
+  });
 });
 
 test.describe("Hifth · the commentary drawer with the app in Arabic", () => {
