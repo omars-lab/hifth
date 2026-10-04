@@ -38,7 +38,12 @@
 import { readFileSync, readdirSync, existsSync } from "node:fs";
 import { join } from "node:path";
 
-const ROOT = new URL("..", import.meta.url).pathname;
+// HIFTH_GATE_ROOT points this check at a made-up tree, so a test can feed it one
+// thing it must refuse and one it must pass (scripts/gate-fixture.mjs). Unset,
+// it is the repository, as it always was.
+const ROOT = process.env.HIFTH_GATE_ROOT
+  ? process.env.HIFTH_GATE_ROOT.replace(/\/?$/, "/")
+  : new URL("..", import.meta.url).pathname;
 const WORKFLOWS = join(ROOT, ".github", "workflows");
 
 /**
@@ -87,7 +92,11 @@ for (const name of readdirSync(WORKFLOWS).filter((f) => /\.ya?ml$/.test(f))) {
     const where = `${name} › ${label}`;
 
     const path = step.match(/^\s*path:\s*(.+)$/m)?.[1]?.trim();
-    if (!path) {
+    // `path: |` (or `>`) opens a block of several paths on the lines below. Read
+    // as a single line it is a path named "|", which used to be reported as an
+    // upload nobody claims, so the refusal below never fired for the case it
+    // names.
+    if (!path || /^[|>]/.test(path)) {
       // A block scalar (`path: |`) uploads several paths; this gate would read
       // it as none and pass. Fail loudly rather than quietly stop checking.
       problems.push(`${where}: no single-line "path:" found — teach this gate before using a multi-path upload`);

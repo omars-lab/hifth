@@ -22,7 +22,12 @@
 import { readFileSync, existsSync } from "node:fs";
 import { join } from "node:path";
 
-export const ROOT = new URL("..", import.meta.url).pathname;
+// HIFTH_GATE_ROOT points every check that reads paths through here at a made-up
+// tree, so a test can feed it one thing it must refuse and one it must pass
+// (scripts/gate-fixture.mjs). Unset, it is the repository, as it always was.
+export const ROOT = process.env.HIFTH_GATE_ROOT
+  ? process.env.HIFTH_GATE_ROOT.replace(/\/?$/, "/")
+  : new URL("..", import.meta.url).pathname;
 
 /**
  * Prefer a line that looks like a definition. "First line containing it" is not
