@@ -694,6 +694,8 @@ export interface Strings {
   noteUntitled: string;
   /** The dot by a verse's number, and the list it opens: "2:39 is in 2 notes". */
   verseInNotes(key: string, count: number): string;
+  /** "What to read on 36:12": a verse number's button, and the menu it opens. */
+  verseMenu(key: string): string;
   /** The mark by a verse you jumped away from: "From 2:58 you have jumped to 2 other verses". */
   jumpsFrom(key: string, count: number): string;
   /** The smaller mark at the next pause sign after where you left, the same count. */
@@ -1331,6 +1333,7 @@ export function buildStrings(lang: Lang, m: Catalog): Strings {
     noteOutside: (label, count, scope) => m.noteOutside({ n: count, nText: n(count), label, scope }),
     noteAboutNow: (scope) => m.noteAboutNow({ scope }),
     noteUntitled: m.noteUntitled,
+    verseMenu: (key) => m.verseMenu({ keyText: fmtAyahRef(key, lang) ?? key }),
     verseInNotes: (key, count) => {
       return m.verseInNotes({ keyText: fmtAyahRef(key, lang) ?? key, n: count, nText: n(count) });
     },

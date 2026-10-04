@@ -2571,6 +2571,30 @@
       "owner": "agent",
       "note": "On a phone, opening a link to a long verse (Ayat al-Kursi) zoomed in so far that its lines were cut off at both edges of the screen. Fixed on 2026-10-04: a jump zooms in only as far as the verse fits across the screen, never past the whole page; a short verse keeps the full zoom.",
       "closedBy": "apps/web/e2e/deeplink.spec.ts"
+    },
+    {
+      "id": "turn-strip-covers-last-number",
+      "source": {
+        "file": "docs/PLAN.md",
+        "item": "36"
+      },
+      "status": "fixed",
+      "severity": "defect",
+      "owner": "agent",
+      "note": "On a two-page spread, the strip a reader grabs to turn the page lay over the number at the end of each page's bottom line, so that verse's number could not be pressed. Fixed on 2026-10-04: a click on the strip that does not become a drag now reaches the button under it.",
+      "closedBy": "apps/web/e2e/pitch.spec.ts"
+    },
+    {
+      "id": "verse-menu-loses-keyboard",
+      "source": {
+        "file": "docs/PLAN.md",
+        "item": "36"
+      },
+      "status": "fixed",
+      "severity": "defect",
+      "owner": "agent",
+      "note": "The small menu beside a verse tried to put the keyboard on its first line while it was still hidden, before it had been placed, so the keyboard was left on nothing. Fixed on 2026-10-04: it waits until it is placed, and follows the first line if lines arrive after it opens.",
+      "closedBy": "apps/web/e2e/pitch.spec.ts"
     }
   ]
 }
