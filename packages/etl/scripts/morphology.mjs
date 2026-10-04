@@ -34,13 +34,9 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
 const HERE = new URL(".", import.meta.url).pathname;
-export const MORPHOLOGY_PATH = join(
-  HERE,
-  "..",
-  "data",
-  "roots",
-  "quranic-corpus-morphology-0.4.txt",
-);
+/** Where the morphology sits, from the repository root. */
+export const MORPHOLOGY_FILE = "packages/etl/data/roots/quranic-corpus-morphology-0.4.txt";
+export const MORPHOLOGY_PATH = join(HERE, "..", "..", "..", MORPHOLOGY_FILE);
 
 /** Every ayah in the mushaf. A reader that finds fewer has an incomplete source. */
 export const TOTAL_AYAHS = 6236;
@@ -94,17 +90,18 @@ export function normalise(form) {
   return out;
 }
 
-/** Built once per process — the file is ~7 MB and both callers want all of it. */
-let cache = null;
+/** Built once per process and file — the file is ~7 MB and both callers want all of it. */
+const cache = new Map();
 
 /**
  * `"surah:ayah"` → the ayah's words, in order, as consonant skeletons.
  *
  * Segments are concatenated per word, so a word split across a prefix, a stem
- * and a suffix comes back whole.
+ * and a suffix comes back whole. `path` is the vendored file unless a check's
+ * test hands it a made-up one.
  */
-export function wordsByAyah() {
-  if (cache) return cache;
+export function wordsByAyah(path = MORPHOLOGY_PATH) {
+  if (cache.has(path)) return cache.get(path);
 
   const byAyah = new Map();
   let atKey = null;
@@ -116,7 +113,7 @@ export function wordsByAyah() {
     if (skeleton) byAyah.get(atKey).push(skeleton);
   };
 
-  for (const line of readFileSync(MORPHOLOGY_PATH, "utf8").split("\n")) {
+  for (const line of readFileSync(path, "utf8").split("\n")) {
     const at = LOCATION.exec(line);
     if (!at) continue;
     const key = `${Number(at[1])}:${Number(at[2])}`;
@@ -132,7 +129,7 @@ export function wordsByAyah() {
   }
   flush();
 
-  cache = byAyah;
+  cache.set(path, byAyah);
   return byAyah;
 }
 

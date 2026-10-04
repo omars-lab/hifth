@@ -35,12 +35,19 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
-const REPO = join(HERE, "..");
+// HIFTH_GATE_ROOT points the check at a made-up tree, so a test can feed it one
+// thing it must refuse and one it must pass (scripts/gate-fixture.mjs).
+const REPO = process.env.HIFTH_GATE_ROOT ?? join(HERE, "..");
 const PIN_FILE = join(REPO, "packages", "etl", "data", "pages", "quran-svg.pin.json");
 const PAGES_DIR = join(REPO, "apps", "web", "public", "assets", "pages", "hafs-kfqc");
 
 const failures = [];
 const fail = (msg) => failures.push(msg);
+
+if (!existsSync(PIN_FILE)) {
+  console.error("FAIL gate:pages — no page pin. Run `pnpm --filter @hifth/etl vendor:pages --repin`.");
+  process.exit(1);
+}
 
 const pin = JSON.parse(readFileSync(PIN_FILE, "utf8"));
 const expected = pin.pages.length;

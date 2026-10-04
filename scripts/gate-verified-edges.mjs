@@ -22,7 +22,11 @@
 import { readFileSync, existsSync } from "node:fs";
 import { join } from "node:path";
 
-const ROOT = new URL("..", import.meta.url).pathname;
+// HIFTH_GATE_ROOT points the check at a made-up tree, so a test can feed it one
+// thing it must refuse and one it must pass (scripts/gate-fixture.mjs).
+const ROOT = process.env.HIFTH_GATE_ROOT
+  ? process.env.HIFTH_GATE_ROOT.replace(/\/?$/, "/")
+  : new URL("..", import.meta.url).pathname;
 const FIXTURE = join(ROOT, "packages", "etl", "data", "qa", "verified-edges.json");
 const ADJ = join(ROOT, "apps", "web", "public", "assets", "adj");
 
@@ -37,6 +41,14 @@ const entries = fixture.entries ?? [];
 
 if (!edition) {
   console.error("gate:verified-edges — FAIL: fixture has no `edition`");
+  process.exit(1);
+}
+
+// An emptied list checks nothing, and emptying it is the one edit the fixture
+// forbids ("never delete an entry to make the gate pass"), so it is refused
+// rather than reported as all verdicts holding.
+if (entries.length === 0) {
+  console.error("gate:verified-edges — FAIL: the fixture holds no verdicts, so nothing is being checked");
   process.exit(1);
 }
 

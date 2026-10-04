@@ -65,7 +65,9 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
-const REPO = join(HERE, "..");
+// HIFTH_GATE_ROOT points the check at a made-up tree, so a test can feed it one
+// thing it must refuse and one it must pass (scripts/gate-fixture.mjs).
+const REPO = process.env.HIFTH_GATE_ROOT ?? join(HERE, "..");
 const PIN_FILE = join(REPO, "packages", "etl", "data", "pages", "mark-boxes.pin.json");
 const MARKS_DIR = join(REPO, "apps", "web", "public", "assets", "marks", "hafs-kfqc");
 const PAGES_DIR = join(REPO, "apps", "web", "public", "assets", "pages", "hafs-kfqc");
@@ -84,6 +86,13 @@ if (!existsSync(PIN_FILE)) {
   process.exit(1);
 }
 const pin = JSON.parse(readFileSync(PIN_FILE, "utf8"));
+
+// A pin that lists no shards would let an emptied marks directory pass as
+// "0 shard(s) match", checking nothing, so it is refused instead.
+if (!Array.isArray(pin.pages) || pin.pages.length === 0) {
+  console.error("FAIL gate:mark-placements — the pin lists no shards, so nothing is being checked.");
+  process.exit(1);
+}
 
 if (!existsSync(MARKS_DIR)) {
   console.error(`FAIL gate:mark-placements — ${MARKS_DIR} does not exist, but the pin lists ${pin.pages.length} shard(s).`);
