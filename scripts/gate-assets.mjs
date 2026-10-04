@@ -55,11 +55,15 @@
  *
  * Run: `pnpm gate:assets` (also in `pnpm gates`, `make ci` and CI).
  */
-import { readdirSync, readFileSync, statSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { gzipSync } from "node:zlib";
 
-const ROOT = new URL("..", import.meta.url).pathname;
+// HIFTH_GATE_ROOT points the check at a made-up tree, so a test can feed it one
+// thing it must refuse and one it must pass (scripts/gate-fixture.mjs).
+const ROOT = process.env.HIFTH_GATE_ROOT
+  ? process.env.HIFTH_GATE_ROOT.replace(/\/?$/, "/")
+  : new URL("..", import.meta.url).pathname;
 const ASSETS = join(ROOT, "apps", "web", "public", "assets");
 const CONCORDANCE = join(ROOT, "packages", "core", "src", "concordance.ts");
 
@@ -255,6 +259,10 @@ for (const row of rows) {
   if (row.kind !== "pages") continue;
 
   const svgs = readdirSync(row.dir).filter((f) => f.endsWith(".svg"));
+  if (svgs.length === 0) {
+    problems.push(`pages/${row.edition}/ holds no page SVGs, so there is no page to weigh.`);
+    continue;
+  }
   const weighed = svgs.map((f) => ({ name: f, gz: gzOf(join(row.dir, f)) }));
   const heaviest = weighed.reduce((a, b) => (b.gz > a.gz ? b : a));
   const mean = row.gz / weighed.length;
@@ -299,7 +307,9 @@ for (const row of rows) {
 
 // ── manifest.json: projected per page, because it is fetched whole ───────────
 
-{
+if (!existsSync(join(ASSETS, "manifest.json"))) {
+  problems.push("assets/manifest.json is missing, and the app fetches it before it can draw any page.");
+} else {
   const gz = gzOf(join(ASSETS, "manifest.json"));
   const manifest = JSON.parse(readFileSync(join(ASSETS, "manifest.json"), "utf8"));
   const full = editions.get(manifest.edition)?.pages ?? null;
